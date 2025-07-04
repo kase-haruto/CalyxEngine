@@ -23,10 +23,12 @@
 Player::Player(const std::string& modelName,
 			   std::optional<std::string> objectName)
 	:Actor::Actor(modelName, objectName) {
-	worldTransform_.translation = { 0.0f, 0.0f, 15.0f };
-
+	worldTransform_.translation = { 0.0f, 0.0f, 10.0f };
+	worldTransform_.scale = {1.5f,1.5f,1.5f};
 	collider_->SetTargetType(ColliderType::Type_Enemy);
 	collider_->SetType(ColliderType::Type_Player);
+
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -61,30 +63,6 @@ void Player::Update() {
 	//移動
 	Move();
 	UpdateReticlePosition();
-	if (rollSet_.isRolling_) {
-		rollSet_.rollTimer_ += ClockManager::GetInstance()->GetDeltaTime();
-		float t = rollSet_.rollTimer_ / rollSet_.rollDuration_;
-		t = std::clamp(t, 0.0f, 1.0f);
-
-		if (t >= 1.0f) {
-			rollSet_.isRolling_ = false;
-		}
-
-		// Z軸回転（2秒で1回転）
-		float angleOffset = rollSet_.rollDirection_ * std::numbers::pi_v<float> *2.0f;
-		worldTransform_.eulerRotation.z =
-			Lerp(rollSet_.rollStartAngle_, rollSet_.rollStartAngle_ + angleOffset, t);
-
-		// Z移動（前進→戻る）
-		float zRatio = EaseForwardThenReturn(t); // 0→1→0
-		float zOffset = rollSet_.rollOffset_.z * zRatio;
-		worldTransform_.translation =
-			rollSet_.rollStartPos_ + Vector3(0.0f, 0.0f, zOffset);
-	}
-
-	if (Input::GetInstance()->TriggerKey(DIK_LSHIFT)) {
-		BarrelRoll();
-	}
 
 	shootInterval_ -= ClockManager::GetInstance()->GetDeltaTime();
 	if (Input::GetInstance()->PushKey(DIK_SPACE) && shootInterval_ <= 0.0f
@@ -153,7 +131,6 @@ void Player::Move() {
 	// 移動加算
 	worldTransform_.translation += moveVector * ClockManager::GetInstance()->GetDeltaTime();
 
-	if (rollSet_.isRolling_) return;
 	UpdateTilt(moveVector);
 }
 
@@ -176,7 +153,7 @@ void Player::UpdateReticlePosition() {
 	constexpr float moveSpeed = 12.0f;
 	float dt = ClockManager::GetInstance()->GetDeltaTime();
 
-	Vector3 offset = Vector3::Zero;
+	Vector3 offset = Vector3::Zero();
 
 	// キーボード入力
 	if (Input::GetInstance()->PushKey(DIK_UP))    offset.y += 1.0f;
@@ -201,48 +178,40 @@ void Player::UpdateReticlePosition() {
 	}
 }
 
-void Player::UpdateTilt(const Vector3& moveVector) {
-	// 停止時は角度を戻す
-	if (moveVector.Length() <= 0.001f) {
-		worldTransform_.eulerRotation.z *= 0.9f; // 緩やかに戻す
+void Player::UpdateTilt(const Vector3& inputVector){
+	// 閾値以下なら傾きを戻す
+	if (inputVector.Length() <= 0.01f){
+		Quaternion identity = Quaternion::MakeIdentity();
+		worldTransform_.rotation = Quaternion::Slerp(worldTransform_.rotation, identity, 0.1f);
+		worldTransform_.rotationSource = RotationSource::Quaternion;
 		return;
 	}
 
-	const float maxTilt = 0.3f; // 最大30度まで
-	float normalizedX = moveVector.Normalize().x;
-	float targetTilt = -normalizedX * maxTilt;
+	Vector3 dir = inputVector.Normalize();
 
-	// 滑らかに傾ける
-	worldTransform_.eulerRotation.z =
-		LerpShortAngle(worldTransform_.eulerRotation.z, targetTilt, 0.2f);
-	lastMoveVector_ = moveVector; // 最後の移動ベクトルを保存
+	// 最大角度（ラジアン）
+	const float maxRoll = 0.5f;
+	const float maxPitch = 0.5f;
+
+	float targetRoll = -dir.x * maxRoll;
+	float targetPitch = -dir.y * maxPitch;
+
+	// ロールとピッチのクォータニオンを作成
+	Quaternion rollQ = Quaternion::MakeRotateZ(targetRoll);
+	Quaternion pitchQ = Quaternion::MakeRotateX(targetPitch);
+
+	// 合成クォータニオン（注意：回転順序によって見た目が変わる）
+	Quaternion targetRotation = Quaternion::Multiply(rollQ, pitchQ); // roll * pitch
+
+	// なめらかに補間
+	worldTransform_.rotation = Quaternion::Slerp(worldTransform_.rotation, targetRotation, 0.15f);
+	worldTransform_.rotationSource = RotationSource::Quaternion;
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////////
 //		バレルロール
 ///////////////////////////////////////////////////////////////////////////////////
-void Player::BarrelRoll() {
-	if (rollSet_.isRolling_) return;
-
-	// 現在の移動方向を取得（前回移動量などがあればそこから）
-	Vector3 moveVec = lastMoveVector_; // または別途保持しておく（Move() 内でセット）
-
-	// 左なら左回転、右なら右回転
-	rollSet_.rollDirection_ = (moveVec.x < 0.0f) ? 1.0f : -1.0f;
-
-	rollSet_.rollStartAngle_ = worldTransform_.eulerRotation.z;
-	rollSet_.rollStartPos_ = worldTransform_.translation;
-
-	// 前方へ飛ぶオフセット（例：Z方向へ +2.0f）
-	rollSet_.rollOffset_ = Vector3(0.0f, 0.0f, 7.0f); // 最大前進距離
-	rollSet_.rollDuration_ = 0.5f;
-
-	rollSet_.isRolling_ = true;
-	rollSet_.rollTimer_ = 0.0f;
-	rollSet_.rollStartAngle_ = worldTransform_.eulerRotation.z;
-
-}
-
 float Player::EaseForwardThenReturn(float t) {
 	if (t < 0.5f) {
 		float x = t / 0.5f;

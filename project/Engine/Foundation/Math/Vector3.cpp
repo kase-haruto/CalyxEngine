@@ -44,6 +44,14 @@ Vector3 Vector3::Forward() {
 	return Vector3(0.0f, 0.0f, 1.0f);
 }
 
+Vector3 Vector3::Right(){
+	return Vector3(1.0f, 0.0f, 0.0f);
+}
+
+const Vector3 Vector3::Zero(){
+	return Vector3(0.0f, 0.0f, 0.0f);
+}
+
 Vector3 Vector3::One() {
 	return Vector3(1.0f, 1.0f, 1.0f);
 }
@@ -60,7 +68,6 @@ float Vector3::Dot(const Vector3& v1, const Vector3& v2) {
 	return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 }
 
-const Vector3 Vector3::Zero(0.0f, 0.0f, 0.0f);
 
 Vector3 Vector3::Lerp(const Vector3& v1, const Vector3& v2, float t){
 

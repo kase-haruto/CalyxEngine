@@ -20,7 +20,8 @@ struct Vector3 final {
 	void Initialize(const Vector3& value = { 0.0f,0.0f,0.0f });
 	void Initialize(float v);
 	static Vector3 Forward();
-	static const Vector3 Zero;
+	Vector3 Right();
+	static const Vector3 Zero();
 	static Vector3 One();
 
 	float Length()const;
