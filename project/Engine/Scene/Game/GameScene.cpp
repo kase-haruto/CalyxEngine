@@ -13,6 +13,7 @@
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Objects/3D/Actor/SceneObjectManager.h>
 #include <Engine/Collision/CollisionManager.h>
+#include <Engine/Graphics/Pipeline/Service/PipelineService.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //	コンストラクタ/デストラクタ
@@ -100,6 +101,15 @@ void GameScene::Update(){
 			transitionRequestor_->RequestSceneChange(SceneType::TITLE);
 		}
 	}
+}
+
+void GameScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService){
+
+	for (auto& playerSprite:player_->GetAllSprites()){
+		spriteRenderer_->Register(playerSprite);
+	}
+
+	BaseScene::Draw(cmdList, psoService);
 }
 
 

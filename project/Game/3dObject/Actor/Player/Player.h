@@ -36,6 +36,8 @@ public:
 		bulletContainer_ = bulletContainer;
 	}
 
+	std::vector<Sprite*> GetAllSprites();
+
 private:
 	//===================================================================*/
 	//                   private methods
@@ -44,7 +46,6 @@ private:
 	void Shoot();
 	void UpdateReticlePosition();
 	void UpdateTilt(const Vector3& moveVector);
-	void BarrelRoll();
 	float EaseForwardThenReturn(float t);
 	void InitializeEffect();
 
@@ -58,6 +59,7 @@ private:
 	Vector3 lastMoveVector_;
 	// ローリング関連
 	WorldTransform reticleTransform_;
+	std::array<std::unique_ptr<Sprite>,4> reticleSprites_;
 	std::vector < std::unique_ptr<Sprite>> lifeSprite_;
 	std::unique_ptr<Sprite> attackSprite_;
 

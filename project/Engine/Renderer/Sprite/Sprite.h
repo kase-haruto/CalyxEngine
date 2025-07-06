@@ -27,7 +27,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(const Vector2& position,const Vector2& size);
+	void Initialize(const Vector2& position, const Vector2& size);
 
 	/// <summary>
 	/// 更新
@@ -78,6 +78,9 @@ public:
 	void SetRotation(float rotation){ this->rotate = rotation; }
 	float GetRotation()const{ return rotate; }
 
+	void SetUvRotate(const float uvRotate){ uvTransform.rotate.x = uvRotate; }
+	const float GetUvRotate()const{ return uvTransform.rotate.x; }
+
 	/// <summary>
 	/// 座標
 	/// </summary>
@@ -85,6 +88,8 @@ public:
 	void SetPosition(const Vector2& newPosition){ this->position = newPosition; }
 	const Vector2& GetPosition()const{ return position; }
 
+	void SetUvTranslate(const Vector2& uvOffset){ Vector2(uvTransform.translate.x = uvOffset.x, uvTransform.translate.y = uvOffset.y); }
+	const Vector2 GetUvTranslate()const{ return Vector2(uvTransform.translate.x, uvTransform.translate.y); }
 	/// <summary>
 	/// 色
 	/// </summary>
@@ -129,7 +134,7 @@ private:
 	//回転
 	float rotate = 0.0f;
 	//色
-	Vector4 color ={1.0f,1.0f,1.0f,1.0f};
+	Vector4 color = {1.0f,1.0f,1.0f,1.0f};
 	//size
 	Vector2 size = {640.0f,360.0f};
 	//アンカーポイント
@@ -155,7 +160,7 @@ private:
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSprite {};
 
 	//directX関連
-	
+
 	Matrix4x4* transformData = nullptr;
 
 	//マテリアル用のリソース

@@ -185,6 +185,7 @@ void Sprite::MaterialResourceMap() {
 	materialData_->uvTransform = Matrix4x4::MakeIdentity();
 }
 
+
 const void Sprite::SetTextureHandle(D3D12_GPU_DESCRIPTOR_HANDLE newHandle) {
 	handle = newHandle;
 }

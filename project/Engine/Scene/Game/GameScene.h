@@ -39,6 +39,7 @@ public:
 
 	void Initialize()override;
 	void Update()override;
+	void Draw(ID3D12GraphicsCommandList*,class PipelineService*)override;
 	void CleanUp()override;
 	void LoadAssets()override;
 
