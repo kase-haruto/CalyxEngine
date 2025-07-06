@@ -103,13 +103,13 @@ void GameScene::Update(){
 	}
 }
 
-void GameScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService){
+void GameScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService, RenderTargetType type){
 
 	for (auto& playerSprite:player_->GetAllSprites()){
 		spriteRenderer_->Register(playerSprite);
 	}
 
-	BaseScene::Draw(cmdList, psoService);
+	BaseScene::Draw(cmdList, psoService, type);
 }
 
 

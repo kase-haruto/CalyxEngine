@@ -6,7 +6,6 @@
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Objects/Transform/TransformationMatrix.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
-#include <Engine/Objects/LightObject/DirectionalLight.h>
 
 /* math */
 #include <Engine/Foundation/Utility/Func/MyFunc.h>

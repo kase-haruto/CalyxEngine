@@ -21,7 +21,9 @@ BaseScene::BaseScene(){
 	spriteRenderer_ = std::make_unique<SpriteRenderer>();
 }
 
-void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService){
+void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList,
+					 PipelineService* psoService,
+					 RenderTargetType renderTargetType){
 	//===================================================================*/
 	//						背景オブジェクト描画
 	//===================================================================*/
@@ -86,7 +88,7 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoSer
 	//===================================================================*/
 	//						sprite
 	//===================================================================*/
-	spriteRenderer_->Draw(cmdList, psoService);
+	spriteRenderer_->Draw(cmdList, psoService,renderTargetType);
 
 	//===================================================================*/
 	//                    プリミティブ描画
@@ -99,5 +101,4 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoSer
 	//                    particle描画
 	//===================================================================*/
 	sceneContext_->GetFxSystem()->Render(psoService, cmdList);
-
 }

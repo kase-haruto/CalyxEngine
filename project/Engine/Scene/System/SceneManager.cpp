@@ -105,7 +105,7 @@ void SceneManager::DrawForRenderTarget(IRenderTarget* target) {
 	target->SetRenderTarget(cmd);
 	target->Clear(cmd);
 
-	scenes_[currentSceneNo_]->Draw(cmd, pGraphicsSystem_->GetPipelineService());
+	scenes_[currentSceneNo_]->Draw(cmd, pGraphicsSystem_->GetPipelineService(),target->GetRenderTargetType());
 }
 
 void SceneManager::SetEngineUI([[maybe_unused]]EngineUICore* ui) {

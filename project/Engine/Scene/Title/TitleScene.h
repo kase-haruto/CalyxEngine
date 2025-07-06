@@ -41,7 +41,7 @@ public:
 	void Update()override;
 	void CleanUp()override;
 	void LoadAssets()override;
-	void Draw([[maybe_unused]] ID3D12GraphicsCommandList* cmdList, class PipelineService* psoService)override;
+	void Draw([[maybe_unused]] ID3D12GraphicsCommandList* cmdList, class PipelineService* psoService,RenderTargetType type)override;
 private:
 	/* objects ======================================================*/
 	BaseGameObject* modelField_ = nullptr;

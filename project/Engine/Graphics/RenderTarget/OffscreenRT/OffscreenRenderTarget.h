@@ -26,13 +26,16 @@ public:
 	void Clear(ID3D12GraphicsCommandList* cmdList) override;
 	void SetRenderTarget(ID3D12GraphicsCommandList* commandList)override;
 
+	void SetRenderTargetType(RenderTargetType type)override { rtType_ = type; }
+	RenderTargetType GetRenderTargetType()const { return rtType_; }
+
 	void TransitionTo(ID3D12GraphicsCommandList* cmdList, D3D12_RESOURCE_STATES newState);
 
 private:
 	//===================================================================*/
 	//		private variables
 	//===================================================================*/
-
+	RenderTargetType rtType_;
 	std::unique_ptr<DxGpuResource> resource_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer_;
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle_ {};

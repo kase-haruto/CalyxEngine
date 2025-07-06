@@ -27,7 +27,9 @@ public:
 
 	virtual void Initialize()override{}
 	virtual void Update()override{}
-	virtual void Draw([[maybe_unused]] ID3D12GraphicsCommandList* cmdList, class PipelineService* psoService)override;
+	virtual void Draw([[maybe_unused]] ID3D12GraphicsCommandList* cmdList,
+					  class PipelineService* psoService,
+					  RenderTargetType renderTargetType)override;
 	void CleanUp()override{};
 	virtual void LoadAssets()override{}
 public:

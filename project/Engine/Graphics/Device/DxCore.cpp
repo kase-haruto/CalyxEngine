@@ -81,6 +81,7 @@ void DxCore::RendererInitialize(uint32_t width, uint32_t height){
 
 	auto swapchainRT = std::make_unique<SwapChainRenderTarget>();
 	swapchainRT->Initialize(dxSwapChain_.get(), rtvHeap_.Get(), rtvDescriptorSize_);
+	swapchainRT->SetRenderTargetType(RenderTargetType::BackBuffer);
 	renderTargetCollection_->Add("BackBuffer", std::move(swapchainRT));
 
 	// Offscreen はスロット2を使用
@@ -89,12 +90,14 @@ void DxCore::RendererInitialize(uint32_t width, uint32_t height){
 
 	auto offscreenRT = std::make_unique<OffscreenRenderTarget>();
 	offscreenRT->Initialize(device.Get(), width, height, format_, offscreenRTVHandle, dsvHandle);
+	offscreenRT->SetRenderTargetType(RenderTargetType::Offscreen);
 	renderTargetCollection_->Add("Offscreen", std::move(offscreenRT));
 
 	D3D12_CPU_DESCRIPTOR_HANDLE postEffectRTVHandle = baseRTVHandle;
 	postEffectRTVHandle.ptr += rtvDescriptorSize_ * 3;
 	auto postEffectRT = std::make_unique<OffscreenRenderTarget>();
 	postEffectRT->Initialize(device.Get(), width, height, format_, /*RTV*/ postEffectRTVHandle, /*DSV*/ dsvHandle);
+	postEffectRT->SetRenderTargetType(RenderTargetType::PostEffectOutput);
 	renderTargetCollection_->Add("PostEffectOutput", std::move(postEffectRT));
 
 
@@ -104,7 +107,7 @@ void DxCore::RendererInitialize(uint32_t width, uint32_t height){
 
 	auto debugRT = std::make_unique<OffscreenRenderTarget>();
 	debugRT->Initialize(device.Get(), width, height, format_, debugRTVHandle, dsvHandle);
-
+	debugRT->SetRenderTargetType(RenderTargetType::DebugView);
 	renderTargetCollection_->Add("DebugView", std::move(debugRT));
 
 	// postEffect切り替え用
@@ -114,6 +117,7 @@ void DxCore::RendererInitialize(uint32_t width, uint32_t height){
 
 	auto postEffectBuffer1 = std::make_unique<OffscreenRenderTarget>();
 	postEffectBuffer1->Initialize(device.Get(), width, height, format_, postEffectBuffer1Handle, dsvHandle);
+	postEffectBuffer1->SetRenderTargetType(RenderTargetType::PostEffectBuffer1);
 	renderTargetCollection_->Add("PostEffectBuffer1", std::move(postEffectBuffer1));
 
 	// PostEffectBuffer2（スロット6として）
@@ -122,6 +126,7 @@ void DxCore::RendererInitialize(uint32_t width, uint32_t height){
 
 	auto postEffectBuffer2 = std::make_unique<OffscreenRenderTarget>();
 	postEffectBuffer2->Initialize(device.Get(), width, height, format_, postEffectBuffer2Handle, dsvHandle);
+	postEffectBuffer2->SetRenderTargetType(RenderTargetType::PostEffectBuffer2);
 	renderTargetCollection_->Add("PostEffectBuffer2", std::move(postEffectBuffer2));
 }
 

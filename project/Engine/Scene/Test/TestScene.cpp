@@ -68,7 +68,7 @@ void TestScene::Update(){
 	sceneContext_->Update();
 }
 
-void TestScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService){
+void TestScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService, RenderTargetType type){
 
 	//========================================================//
 	//	spriteの登録
@@ -76,7 +76,7 @@ void TestScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoSer
 	// 
 	// 
 	//シーン上のオブジェクトの描画
-	BaseScene::Draw(cmdList, psoService);
+	BaseScene::Draw(cmdList, psoService, type);
 
 }
 

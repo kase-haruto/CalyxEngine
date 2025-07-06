@@ -25,10 +25,14 @@ public:
 	D3D12_VIEWPORT GetViewport() const override{ return viewport_; }
 	D3D12_RECT GetScissorRect() const override{ return scissorRect_; }
 
+	void SetRenderTargetType(RenderTargetType type)override { rtType_ = type; }
+	RenderTargetType GetRenderTargetType()const { return rtType_; }
+
 private:
 	//===================================================================*/
 	//			private variables
 	//===================================================================*/
+	RenderTargetType rtType_;
 	DxSwapChain* swapChain_ = nullptr;
 	ID3D12DescriptorHeap* rtvHeap_ = nullptr;
 	UINT rtvDescriptorSize_ = 0;

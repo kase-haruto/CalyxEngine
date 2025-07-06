@@ -7,6 +7,7 @@
 #include <Engine/Foundation/Math/Vector4.h>
 #include <Engine/Graphics/Material.h>
 #include <Engine/Renderer/Mesh/VertexData.h>
+#include <Engine/Graphics/RenderTarget/Detail/RenderTargetDetail.h>
 
 /* c++ */
 #include <d3d12.h>
@@ -122,6 +123,8 @@ public:
 		return path;
 	}
 
+	void SetTargetRt(RenderTargetType targetRt) { targetRT_ = targetRt; }
+	RenderTargetType GetTargetRt()const { return targetRT_; }
 
 	// テクスチャハンドルを設定する関数
 	const void SetTextureHandle(D3D12_GPU_DESCRIPTOR_HANDLE newHandle);
@@ -167,7 +170,7 @@ private:
 	ComPtr<ID3D12Resource> materialResource_;
 	VertexData* vertexData = nullptr;
 	Material2D* materialData_;
-
+	RenderTargetType targetRT_ = RenderTargetType::Offscreen;
 #pragma endregion
 
 private:
