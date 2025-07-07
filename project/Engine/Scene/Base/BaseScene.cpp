@@ -57,10 +57,25 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList,
 		}
 	}
 
+	const Camera3d* camera = CameraManager::GetInstance()->GetCamera3d();
+
 	//===================================================================*/
-	//						静的モデル描画
+	// 静的モデル描画（視錐台カリング追加）
 	//===================================================================*/
 	for (const auto& [model, transform] : staticModels){
+		if (model->GetModelData() == std::nullopt) continue;
+
+		// ワールド行列取得
+		const Matrix4x4& worldMat = transform->matrix.world;
+
+		// ローカルAABBをワールド変換
+		AABB worldAABB = model->GetModelData()->localAABB.Transform(worldMat);
+
+		// 視錐台カリング判定
+		if (!camera->IsVisible(worldAABB)){
+			continue; // カリングされたので描画スキップ
+		}
+
 		BlendMode mode = model->GetBlendMode();
 		auto desc = PipelinePresets::MakeObject3D(mode);
 
@@ -72,9 +87,18 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList,
 	}
 
 	//===================================================================*/
-	//						アニメーションモデル描画
+	// アニメーションモデル描画（視錐台カリング追加）
 	//===================================================================*/
 	for (const auto& [model, transform] : skinnedModels){
+		if (model->GetModelData() == std::nullopt) continue;
+
+		const Matrix4x4& worldMat = transform->matrix.world;
+		AABB worldAABB = model->GetModelData()->localAABB.Transform(worldMat);
+
+		if (!camera->IsVisible(worldAABB)){
+			continue;
+		}
+
 		BlendMode mode = model->GetBlendMode();
 		auto desc = PipelinePresets::MakeSkinningObject3D(mode);
 
@@ -84,6 +108,7 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList,
 
 		model->Draw(*transform);
 	}
+
 
 	//===================================================================*/
 	//						sprite

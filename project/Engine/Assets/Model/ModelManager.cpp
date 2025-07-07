@@ -327,10 +327,12 @@ void ModelManager::CreateGpuResources([[maybe_unused]] const std::string& fileNa
 // メッシュ読み込み
 //----------------------------------------------------------------------------
 void ModelManager::LoadMesh(const aiMesh* mesh, ModelData& modelData){
-	// 今の時点での頂点数を取得しておく
 	uint32_t baseVertex = static_cast< uint32_t >(modelData.meshData.vertices.size());
 
-	// 頂点追加
+	// 初期AABBを極端な値に
+	Vector3 minPos = {FLT_MAX, FLT_MAX, FLT_MAX};
+	Vector3 maxPos = {-FLT_MAX, -FLT_MAX, -FLT_MAX};
+
 	for (unsigned int i = 0; i < mesh->mNumVertices; ++i){
 		VertexPosUvN vertex {};
 		vertex.position = {-mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z, 1.0f};
@@ -342,17 +344,30 @@ void ModelManager::LoadMesh(const aiMesh* mesh, ModelData& modelData){
 			vertex.texcoord.y = mesh->mTextureCoords[0][i].y;
 		}
 		modelData.meshData.vertices.push_back(vertex);
+
+		// AABB更新用の min/max 反映
+		Vector3 pos = {vertex.position.x, vertex.position.y, vertex.position.z};
+		minPos = Vector3::Min(minPos, pos);
+		maxPos = Vector3::Max(maxPos, pos);
 	}
 
-	// インデックス追加（baseVertexオフセットを加算）
 	for (unsigned int i = 0; i < mesh->mNumFaces; ++i){
 		const aiFace& face = mesh->mFaces[i];
 		modelData.meshData.indices.push_back(baseVertex + face.mIndices[0]);
 		modelData.meshData.indices.push_back(baseVertex + face.mIndices[2]);
 		modelData.meshData.indices.push_back(baseVertex + face.mIndices[1]);
 	}
-}
 
+	// ローカルAABBを格納
+	if (modelData.localAABB.min_ == Vector3 {} && modelData.localAABB.max_ == Vector3 {}){
+		modelData.localAABB.Initialize(minPos, maxPos);
+	} else{
+		// モデル全体の AABB を統合（複数メッシュ時）
+		Vector3 mergedMin = Vector3::Min(modelData.localAABB.min_, minPos);
+		Vector3 mergedMax = Vector3::Max(modelData.localAABB.max_, maxPos);
+		modelData.localAABB.Initialize(mergedMin, mergedMax);
+	}
+}
 
 //----------------------------------------------------------------------------
 // マテリアル読み込み

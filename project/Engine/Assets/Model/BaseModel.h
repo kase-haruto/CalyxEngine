@@ -47,6 +47,7 @@ public:
 
 	//--------- accessor -----------------------------------------------------
 	BlendMode GetBlendMode() const  { return blendMode_; }
+	std::optional<ModelData> GetModelData()const;
 	const Vector4& GetColor() const { return materialData_.color; }
 	void SetColor(const Vector4& color) { materialData_.color = color; }
 	void SetIsDrawEnable(bool drawEnable){ isDrawEnable_ = drawEnable; }

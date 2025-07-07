@@ -36,11 +36,11 @@ Vector3 Vector3::Normalize()const{
 	return Vector3(x / length, y / length, z / length);
 }
 
-float Vector3::LengthSquared() const {
+float Vector3::LengthSquared() const{
 	return x * x + y * y + z * z;
 }
 
-Vector3 Vector3::Forward() {
+Vector3 Vector3::Forward(){
 	return Vector3(0.0f, 0.0f, 1.0f);
 }
 
@@ -52,7 +52,7 @@ const Vector3 Vector3::Zero(){
 	return Vector3(0.0f, 0.0f, 0.0f);
 }
 
-Vector3 Vector3::One() {
+Vector3 Vector3::One(){
 	return Vector3(1.0f, 1.0f, 1.0f);
 }
 
@@ -64,7 +64,7 @@ Vector3 Vector3::Cross(const Vector3& v0, const Vector3& v1){
 	};
 }
 
-float Vector3::Dot(const Vector3& v1, const Vector3& v2) {
+float Vector3::Dot(const Vector3& v1, const Vector3& v2){
 	return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 }
 
@@ -78,8 +78,8 @@ Vector3 Vector3::Lerp(const Vector3& v1, const Vector3& v2, float t){
 	);
 }
 
-Vector3 Vector3::Transform(const Vector3& vector, const Matrix4x4& matrix) {
-	Vector3 result = { 0, 0, 0 };
+Vector3 Vector3::Transform(const Vector3& vector, const Matrix4x4& matrix){
+	Vector3 result = {0, 0, 0};
 
 	// 同次座標系への変換
 	// 変換行列を適用
@@ -98,7 +98,7 @@ Vector3 Vector3::Transform(const Vector3& vector, const Matrix4x4& matrix) {
 	return result;
 }
 
-Vector3 Vector3::Transform(const Vector3& v, const Quaternion& q) {
+Vector3 Vector3::Transform(const Vector3& v, const Quaternion& q){
 	Quaternion normQ = Quaternion::Normalize(q); // 安全
 	Vector3 u(normQ.x, normQ.y, normQ.z);
 	float s = normQ.w;
@@ -107,6 +107,22 @@ Vector3 Vector3::Transform(const Vector3& v, const Quaternion& q) {
 		u * (2.0f * Vector3::Dot(u, v)) +
 		v * (s * s - Vector3::Dot(u, u)) +
 		Vector3::Cross(u, v) * (2.0f * s);
+}
+
+Vector3 Vector3::Min(const Vector3& a, const Vector3& b){
+	return {
+		std::min(a.x, b.x),
+		std::min(a.y, b.y),
+		std::min(a.z, b.z)
+	};
+}
+
+Vector3 Vector3::Max(const Vector3& a, const Vector3& b){
+	return {
+		(std::max)(a.x, b.x),
+		(std::max)(a.y, b.y),
+		(std::max)(a.z, b.z)
+	};
 }
 
 //乗算
@@ -240,18 +256,18 @@ Vector3 Vector3::operator-=(const Vector3& other){
 	return Vector3(x, y, z);
 }
 
-float& Vector3::operator[](int index) {
+float& Vector3::operator[](int index){
 	assert(index >= 0 && index < 3);
 	return *(&x + index);
 }
 
-const float& Vector3::operator[](int index) const {
+const float& Vector3::operator[](int index) const{
 	assert(index >= 0 && index < 3);
 	return *(&x + index);
 }
 
 
-Vector3 operator-(float scalar, const Vector3& vec) {
+Vector3 operator-(float scalar, const Vector3& vec){
 	return Vector3(vec.x - scalar, vec.y - scalar, vec.z - scalar);
 }
 

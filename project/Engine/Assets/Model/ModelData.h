@@ -8,6 +8,7 @@
 #include <Engine/Renderer/Mesh/VertexData.h>
 #include <Engine/Graphics/Pipeline/PipelineDesc/Input/VertexLayout.h>
 #include <Engine/Objects/3D/Mesh/MeshData.h>
+#include <Engine/Objects/3D/Geometory/AABB.h>
 
 /* c++ */
 #include <d3d12.h>
@@ -17,6 +18,7 @@
 
 struct ModelData{
 	MeshData meshData; // メッシュデータ
+	AABB localAABB;		//カリング判定用
 
 	//-----------------------------------------------------------
 	// アニメーション情報

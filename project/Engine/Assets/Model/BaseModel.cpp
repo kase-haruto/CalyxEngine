@@ -189,3 +189,6 @@ void BaseModel::ShowImGui(BaseModelConfig& config){
 	}
 }
 
+std::optional<ModelData> BaseModel::GetModelData() const{
+	return modelData_;
+}
