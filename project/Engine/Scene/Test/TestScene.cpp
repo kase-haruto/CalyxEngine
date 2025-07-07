@@ -45,8 +45,8 @@ void TestScene::Initialize(){
 	// グラフィック関連
 	//=========================
 
-	skyBox_ = std::make_unique<SkyBox>("sky.dds", "skyBox");
-	skyBox_->Initialize();
+	//skyBox_ = std::make_unique<SkyBox>("sky.dds", "skyBox");
+	//skyBox_->Initialize();
 
 	//=========================
 	// オブジェクト生成
@@ -60,7 +60,7 @@ void TestScene::Update(){
 
 	CameraManager::Update();
 
-	skyBox_->Update();
+//	skyBox_->Update();
 
 	//衝突判定
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();

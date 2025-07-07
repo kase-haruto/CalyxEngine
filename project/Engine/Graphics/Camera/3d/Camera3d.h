@@ -12,6 +12,9 @@ public:
 	Camera3d();
 	~Camera3d() = default;
 
+	// 視錐台を描画（デバッグ用）
+	void DrawFrustum();
+
 	void Update() override;  //< 更新
 	void ShowGui() override; //< ImGuiによるGUI表示
 
