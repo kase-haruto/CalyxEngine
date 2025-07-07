@@ -9,6 +9,7 @@
 #include <Engine/Scene/Transitioner/SceneTransitionRequestor.h>
 
 #include <Engine/Renderer/Sprite/SpriteRenderer.h>
+#include <Engine/Renderer/Model/ModelRenderer.h>
 
 // c++
 #include <string>
@@ -52,6 +53,7 @@ protected:
 	//			renderers
 	//===================================================================*/
 	std::unique_ptr<SpriteRenderer> spriteRenderer_ = nullptr;
+	std::unique_ptr<ModelRenderer> modelRenderer_ = nullptr;
 
 protected:
 	SceneTransitionRequestor* transitionRequestor_ = nullptr;

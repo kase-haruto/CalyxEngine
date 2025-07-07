@@ -19,6 +19,7 @@ BaseScene::BaseScene(){
 	skyBox_->Initialize();
 
 	spriteRenderer_ = std::make_unique<SpriteRenderer>();
+	modelRenderer_ = std::make_unique<ModelRenderer>();
 }
 
 void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList,
@@ -34,8 +35,7 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList,
 	//===================================================================*/
 	//						シーンオブジェクトの描画
 	//===================================================================*/
-	std::vector<std::pair<Model*, WorldTransform*>> staticModels;
-	std::vector<std::pair<AnimationModel*, WorldTransform*>> skinnedModels;
+	modelRenderer_->Clear();
 
 	for (auto* entry : sceneContext_->GetObjectLibrary()->GetAllObjects()){
 		auto* gameObj = dynamic_cast< BaseGameObject* >(entry);
@@ -44,12 +44,12 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList,
 		switch (gameObj->GetModelType()){
 			case ObjectModelType::ModelType_Static:
 				if (auto* model = gameObj->GetStaticModel()){
-					staticModels.emplace_back(model, &gameObj->GetWorldTransform());
+					modelRenderer_->RegisterStatic(model, gameObj->GetWorldTransform());
 				}
 				break;
 			case ObjectModelType::ModelType_Animation:
 				if (auto* model = gameObj->GetAnimationModel()){
-					skinnedModels.emplace_back(model, &gameObj->GetWorldTransform());
+					modelRenderer_->RegisterSkinned(model, gameObj->GetWorldTransform());
 				}
 				break;
 			default:
@@ -57,63 +57,19 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList,
 		}
 	}
 
+	//======================== モデル描画 ========================//
 	const Camera3d* camera = CameraManager::GetInstance()->GetCamera3d();
-
-	//===================================================================*/
-	// 静的モデル描画（視錐台カリング追加）
-	//===================================================================*/
-	for (const auto& [model, transform] : staticModels){
-		if (model->GetModelData() == std::nullopt) continue;
-
-		// ワールド行列取得
-		const Matrix4x4& worldMat = transform->matrix.world;
-
-		// ローカルAABBをワールド変換
-		AABB worldAABB = model->GetModelData()->localAABB.Transform(worldMat);
-
-		// 視錐台カリング判定
-		if (!camera->IsVisible(worldAABB)){
-			continue; // カリングされたので描画スキップ
-		}
-
-		BlendMode mode = model->GetBlendMode();
-		auto desc = PipelinePresets::MakeObject3D(mode);
-
-		psoService->SetCommand(desc, cmdList);
-		CameraManager::SetCommand(cmdList, PipelineType::Object3D);
-		sceneContext_->GetLightLibrary()->SetCommand(cmdList, PipelineType::Object3D);
-
-		model->Draw(*transform);
-	}
-
-	//===================================================================*/
-	// アニメーションモデル描画（視錐台カリング追加）
-	//===================================================================*/
-	for (const auto& [model, transform] : skinnedModels){
-		if (model->GetModelData() == std::nullopt) continue;
-
-		const Matrix4x4& worldMat = transform->matrix.world;
-		AABB worldAABB = model->GetModelData()->localAABB.Transform(worldMat);
-
-		if (!camera->IsVisible(worldAABB)){
-			continue;
-		}
-
-		BlendMode mode = model->GetBlendMode();
-		auto desc = PipelinePresets::MakeSkinningObject3D(mode);
-
-		psoService->SetCommand(desc, cmdList);
-		CameraManager::SetCommand(cmdList, PipelineType::SkinningObject3D);
-		sceneContext_->GetLightLibrary()->SetCommand(cmdList, PipelineType::SkinningObject3D);
-
-		model->Draw(*transform);
-	}
+	modelRenderer_->DrawAll(cmdList,
+							GraphicsGroup::GetInstance()->GetDevice().Get(),
+							camera,
+							psoService,
+							sceneContext_->GetLightLibrary());
 
 
 	//===================================================================*/
 	//						sprite
 	//===================================================================*/
-	spriteRenderer_->Draw(cmdList, psoService,renderTargetType);
+	spriteRenderer_->Draw(cmdList, psoService, renderTargetType);
 
 	//===================================================================*/
 	//                    プリミティブ描画

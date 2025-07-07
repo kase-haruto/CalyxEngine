@@ -290,6 +290,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Application\Effects\Particle\Module\Uv\TextureSheetAnimModule.cpp" />
     <ClCompile Include="Engine\Renderer\Sprite\SpriteRenderer.cpp" />
     <ClCompile Include="Data\Engine\Prefab\Serializer\PrefabSerializer.cpp" />
+    <ClCompile Include="Engine\Renderer\Model\ModelRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Particle\EmitterConfig.h" />
@@ -524,6 +525,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Application\Effects\Particle\Module\Uv\TextureSheetAnimModule.h" />
     <ClInclude Include="Engine\Renderer\Sprite\SpriteRenderer.h" />
     <ClInclude Include="Data\Engine\Prefab\Serializer\PrefabSerializer.h" />
+    <ClInclude Include="Engine\Renderer\Model\ModelRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">

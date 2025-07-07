@@ -51,6 +51,35 @@ void TestScene::Initialize(){
 	//=========================
 	// オブジェクト生成
 	//=========================
+
+	testObjects_.resize(80);
+	int count = 0;
+
+	const int gridX = 5;
+	const int gridY = 4;
+	const int gridZ = 4;
+	const float spacing = 2.0f;  // 間隔（単位：ユニット）
+
+	for (int z = 0; z < gridZ; ++z){
+		for (int y = 0; y < gridY; ++y){
+			for (int x = 0; x < gridX; ++x){
+				if (count >= static_cast< int >(testObjects_.size())) break;
+
+				auto* obj = sceneContext_->GetObjectLibrary()->CreateAndAddObject<BaseGameObject>("debugCube.obj", "cube");
+				obj->GetCollider()->SetIsDrawCollider(false);
+				testObjects_[count++] = obj;
+				// 原点中心に配置したい場合は中央に寄せる
+				Vector3 position = {
+					(x - gridX / 2.0f) * spacing,
+					(y - gridY / 2.0f) * spacing,
+					(z - gridZ / 2.0f) * spacing
+				};
+
+				obj->SetTranslate(position);
+			}
+		}
+	}
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -60,9 +89,12 @@ void TestScene::Update(){
 
 	CameraManager::Update();
 
-//	skyBox_->Update();
+	//	skyBox_->Update();
+	for (auto& obj : testObjects_){
+		obj->Update();
+	}
 
-	//衝突判定
+		//衝突判定
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
 
 	sceneContext_->Update();

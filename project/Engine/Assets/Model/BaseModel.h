@@ -9,6 +9,7 @@
 #include <engine/graphics/Material.h>
 #include <Engine/Graphics/Pipeline/BlendMode/BlendMode.h>
 #include <Engine/Objects/Transform/Transform.h>
+#include <Engine/Graphics/Buffer/DxStructuredBuffer.h>
 
 /*data*/
 #include <Data/Engine/Configs/Scene/Objects/Model/BaseModelConfig.h>
@@ -39,6 +40,8 @@ public:
 	virtual void Map() = 0;
 	virtual void ShowImGuiInterface();
 	virtual void Draw(const WorldTransform& transform);
+
+	void DrawInstanced(const std::vector<WorldTransform>& transforms, ID3D12GraphicsCommandList* cmdList);
 
 	//--------- config -----------------------------------------------------
 	void ApplyConfig(const BaseModelConfig& config);
@@ -83,4 +86,9 @@ protected:
 
 	virtual void CreateMaterialBuffer() = 0;
 	virtual void MaterialBufferMap() = 0;
+
+protected:
+	DxStructuredBuffer<TransformationMatrix> instanceBuffer_;
+	bool instanceBufferCreated_ = false;
+	UINT instanceBufferCapacity_ = 0;
 };

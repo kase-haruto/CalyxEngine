@@ -41,6 +41,7 @@ private:
 	/* objects ====================================================*/
 	std::unique_ptr<BaseGameObject> testObject;
 	std::unique_ptr<Sprite> testSprite_;
+	std::vector<BaseGameObject*> testObjects_;
 
 };
 
