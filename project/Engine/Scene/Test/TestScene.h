@@ -31,7 +31,7 @@ public:
 
 	void Initialize()override;
 	void Update()override;
-	void Draw(ID3D12GraphicsCommandList* cmdLst, class PipelineService* psoService)override;
+	void Draw(ID3D12GraphicsCommandList* cmdLst, class PipelineService* psoService, RenderTargetType type)override;
 	void CleanUp()override;
 	void LoadAssets()override;
 private:
@@ -41,6 +41,7 @@ private:
 	/* objects ====================================================*/
 	std::unique_ptr<BaseGameObject> testObject;
 	std::unique_ptr<Sprite> testSprite_;
+	std::vector<BaseGameObject*> testObjects_;
 
 };
 

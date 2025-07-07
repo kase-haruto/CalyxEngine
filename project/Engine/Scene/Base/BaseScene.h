@@ -9,6 +9,7 @@
 #include <Engine/Scene/Transitioner/SceneTransitionRequestor.h>
 
 #include <Engine/Renderer/Sprite/SpriteRenderer.h>
+#include <Engine/Renderer/Model/ModelRenderer.h>
 
 // c++
 #include <string>
@@ -27,7 +28,9 @@ public:
 
 	virtual void Initialize()override{}
 	virtual void Update()override{}
-	virtual void Draw([[maybe_unused]] ID3D12GraphicsCommandList* cmdList, class PipelineService* psoService)override;
+	virtual void Draw([[maybe_unused]] ID3D12GraphicsCommandList* cmdList,
+					  class PipelineService* psoService,
+					  RenderTargetType renderTargetType)override;
 	void CleanUp()override{};
 	virtual void LoadAssets()override{}
 public:
@@ -50,6 +53,7 @@ protected:
 	//			renderers
 	//===================================================================*/
 	std::unique_ptr<SpriteRenderer> spriteRenderer_ = nullptr;
+	std::unique_ptr<ModelRenderer> modelRenderer_ = nullptr;
 
 protected:
 	SceneTransitionRequestor* transitionRequestor_ = nullptr;

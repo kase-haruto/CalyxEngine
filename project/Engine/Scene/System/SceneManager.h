@@ -5,6 +5,7 @@
 // engine
 #include <Engine/scene/Base/BaseScene.h>
 #include <Engine/Application/UI/EngineUI/Core/EngineUICore.h>
+#include <Engine/Graphics/RenderTarget/Detail/RenderTargetDetail.h>
 #include <Engine/Graphics/Device/DxCore.h>
 
 // c++

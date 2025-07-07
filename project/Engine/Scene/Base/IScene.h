@@ -5,7 +5,7 @@
 // engine
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 #include <Engine/Scene/Details/SceneType.h>
-
+#include <Engine/Graphics/RenderTarget/Detail/RenderTargetDetail.h>
 // lib
 #include <vector>
 
@@ -28,7 +28,9 @@ public:
 
 	virtual void Initialize() = 0;
 	virtual void Update() = 0;
-	virtual void Draw([[maybe_unused]]ID3D12GraphicsCommandList* cmdList,class PipelineService*){}
+	virtual void Draw([[maybe_unused]]ID3D12GraphicsCommandList* cmdList,
+					  class PipelineService*,
+					  RenderTargetType){}
 	virtual void CleanUp() = 0;
 	virtual void LoadAssets() = 0;
 	virtual void SetTransitionRequestor(class SceneTransitionRequestor* requestor) = 0;

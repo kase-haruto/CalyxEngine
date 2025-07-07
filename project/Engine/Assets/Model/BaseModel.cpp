@@ -59,6 +59,13 @@ void BaseModel::OnModelLoaded() {
 		handle_ = TextureManager::GetInstance()->LoadTexture("Textures/" + modelData_->meshData.material.textureFilePath);
 	}
 
+	// -------- インスタンシングバッファの初期確保 --------
+	if (!instanceBufferCreated_){
+		instanceBufferCapacity_ = 1024; // 初期インスタンス数（適宜調整）
+		instanceBuffer_.Initialize(device, instanceBufferCapacity_);
+		instanceBuffer_.CreateSrv(device);
+		instanceBufferCreated_ = true;
+	}
 }
 
 void BaseModel::UpdateTexture() {
@@ -130,6 +137,40 @@ void BaseModel::Draw(const WorldTransform& transform) {
 	cmdList->DrawIndexedInstanced(UINT(modelData_->meshData.indices.size()), 1, 0, 0, 0);
 }
 
+void BaseModel::DrawInstanced(const std::vector<WorldTransform>& transforms,
+							  ID3D12GraphicsCommandList* cmdList){
+	if (!isDrawEnable_ || !modelData_ || transforms.empty()) return;
+
+	// 転送
+	std::vector<TransformationMatrix> matrices;
+	matrices.reserve(transforms.size());
+	for (const auto& tf : transforms){
+		TransformationMatrix mat;
+		mat.world = tf.matrix.world;
+		mat.WorldInverseTranspose = Matrix4x4::Transpose(Matrix4x4::Inverse(tf.matrix.world));
+		matrices.push_back(mat);
+	}
+	instanceBuffer_.TransferVectorData(matrices);
+
+	cmdList->SetGraphicsRootDescriptorTable(1, instanceBuffer_.GetGpuHandle());
+
+	// マテリアル・テクスチャ等
+	materialBuffer_.SetCommand(cmdList, 0);
+	cmdList->SetGraphicsRootDescriptorTable(2, handle_.value());
+
+	auto envMapHandle = TextureManager::GetInstance()->GetEnvironmentTextureSrvHandle();
+	cmdList->SetGraphicsRootDescriptorTable(6, envMapHandle);
+
+	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	modelData_->vertexBuffer.SetCommand(cmdList);
+	modelData_->indexBuffer.SetCommand(cmdList);
+
+	cmdList->DrawIndexedInstanced(
+		static_cast< UINT >(modelData_->meshData.indices.size()),
+		static_cast< UINT >(transforms.size()), 0, 0, 0);
+}
+
+
 void BaseModel::ApplyConfig(const BaseModelConfig& config){
 	materialData_.ApplyConfig(config.materialConfig);
 	uvTransform.ApplyConfig(config.uvTransConfig);
@@ -189,3 +230,6 @@ void BaseModel::ShowImGui(BaseModelConfig& config){
 	}
 }
 
+std::optional<ModelData> BaseModel::GetModelData() const{
+	return modelData_;
+}

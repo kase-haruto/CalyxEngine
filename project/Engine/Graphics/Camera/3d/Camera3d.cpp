@@ -3,6 +3,7 @@
 /* include space
 /* ===================================================================== */
 #include <Engine/Graphics/Context/GraphicsGroup.h>
+#include <Engine/Objects/3D/Geometory/AABB.h>
 
 // lib
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
@@ -19,6 +20,9 @@ Camera3d::Camera3d()
 
 void Camera3d::Update(){
     BaseCamera::Update();
+
+	frustum_.ExtractFromMatrix(viewProjectionMatrix_);
+	frustum_.Draw();
 }
 
 void Camera3d::ShowGui(){
@@ -27,5 +31,9 @@ void Camera3d::ShowGui(){
 
 	// アクティブかどうか
 	BaseCamera::ShowGui();
+}
+
+bool Camera3d::IsVisible(const AABB& aabb) const{
+	return frustum_.IsAABBInside(aabb.min_, aabb.max_);
 }
 

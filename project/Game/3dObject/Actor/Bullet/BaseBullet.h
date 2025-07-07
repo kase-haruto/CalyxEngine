@@ -42,9 +42,6 @@ protected:
 	float lifeTime_ = 3.0f;      // 弾の寿命（秒）
 	float currentTime_ = 0.0f;   // 経過時間
 
-	std::unique_ptr<FxEmitter> trailFx_;       // 弾の軌跡
-	std::unique_ptr<FxEmitter> explosionFx_;   // 死亡時の爆発
-	bool isExploding_ = false;   // 爆発中フラグ
 
 };
 

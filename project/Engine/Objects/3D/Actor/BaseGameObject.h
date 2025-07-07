@@ -43,9 +43,9 @@ public:
 	virtual void DerivativeGui();
 
 	//--------- Collision -----------------------------------------------
-	virtual void OnCollisionEnter([[maybe_unused]]Collider* other) {};
-	virtual void OnCollisionStay([[maybe_unused]] Collider* other) {};
-	virtual void OnCollisionExit([[maybe_unused]] Collider* other){};
+	virtual void OnCollisionEnter([[maybe_unused]]Collider* other) {}
+	virtual void OnCollisionStay([[maybe_unused]] Collider* other) {}
+	virtual void OnCollisionExit([[maybe_unused]] Collider* other){}
 
 	//--------- config ------------------------------------------------
 	virtual void ApplyConfig()override;

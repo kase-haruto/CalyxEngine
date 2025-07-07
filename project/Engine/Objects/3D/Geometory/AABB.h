@@ -9,11 +9,11 @@
 
 struct Vector3;
 
-class AABB {
+class AABB{
 
 public:
 	AABB(const Vector3& min, const Vector3& max, uint32_t color = 0xFFFFFFFF)
-		: min_(min), max_(max), color(color) {}
+		: min_(min), max_(max), color(color){}
 	AABB() = default;
 	~AABB() = default;
 
@@ -24,11 +24,7 @@ public:
 	Vector3 GetMin()const;
 	Vector3 GetMax()const;
 
-	void SetMin(const Vector3 min);
-	void SetMax(const Vector3 max);
-
-	uint32_t GetColor()const;
-	void SetColor(const uint32_t color);
+	AABB Transform(const Matrix4x4& mat) const;
 
 public:
 	Vector3 min_;

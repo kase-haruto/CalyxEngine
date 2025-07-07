@@ -13,6 +13,7 @@
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Objects/3D/Actor/SceneObjectManager.h>
 #include <Engine/Collision/CollisionManager.h>
+#include <Engine/Graphics/Pipeline/Service/PipelineService.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //	コンストラクタ/デストラクタ
@@ -55,7 +56,7 @@ void GameScene::Initialize(){
 	modelFieldBack_->SetTranslate({ 0.0f, -50.0f, 1000.0f });
 
 	//player
-	player_ = sceneContext_->GetObjectLibrary()->CreateAndAddObject<Player>("player.obj", "player");
+	player_ = sceneContext_->GetObjectLibrary()->CreateAndAddObject<Player>("player.gltf", "player");
 	player_->Initialize();
 	player_->SetParent(&railCamera_->GetWorldTransform());
 
@@ -100,6 +101,15 @@ void GameScene::Update(){
 			transitionRequestor_->RequestSceneChange(SceneType::TITLE);
 		}
 	}
+}
+
+void GameScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService, RenderTargetType type){
+
+	for (auto& playerSprite:player_->GetAllSprites()){
+		spriteRenderer_->Register(playerSprite);
+	}
+
+	BaseScene::Draw(cmdList, psoService, type);
 }
 
 

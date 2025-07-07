@@ -19,9 +19,12 @@ BaseScene::BaseScene(){
 	skyBox_->Initialize();
 
 	spriteRenderer_ = std::make_unique<SpriteRenderer>();
+	modelRenderer_ = std::make_unique<ModelRenderer>();
 }
 
-void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService){
+void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList,
+					 PipelineService* psoService,
+					 RenderTargetType renderTargetType){
 	//===================================================================*/
 	//						背景オブジェクト描画
 	//===================================================================*/
@@ -32,8 +35,7 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoSer
 	//===================================================================*/
 	//						シーンオブジェクトの描画
 	//===================================================================*/
-	std::vector<std::pair<Model*, WorldTransform*>> staticModels;
-	std::vector<std::pair<AnimationModel*, WorldTransform*>> skinnedModels;
+	modelRenderer_->Clear();
 
 	for (auto* entry : sceneContext_->GetObjectLibrary()->GetAllObjects()){
 		auto* gameObj = dynamic_cast< BaseGameObject* >(entry);
@@ -42,12 +44,12 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoSer
 		switch (gameObj->GetModelType()){
 			case ObjectModelType::ModelType_Static:
 				if (auto* model = gameObj->GetStaticModel()){
-					staticModels.emplace_back(model, &gameObj->GetWorldTransform());
+					modelRenderer_->RegisterStatic(model, gameObj->GetWorldTransform());
 				}
 				break;
 			case ObjectModelType::ModelType_Animation:
 				if (auto* model = gameObj->GetAnimationModel()){
-					skinnedModels.emplace_back(model, &gameObj->GetWorldTransform());
+					modelRenderer_->RegisterSkinned(model, gameObj->GetWorldTransform());
 				}
 				break;
 			default:
@@ -55,38 +57,19 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoSer
 		}
 	}
 
-	//===================================================================*/
-	//						静的モデル描画
-	//===================================================================*/
-	for (const auto& [model, transform] : staticModels){
-		BlendMode mode = model->GetBlendMode();
-		auto desc = PipelinePresets::MakeObject3D(mode);
+	//======================== モデル描画 ========================//
+	const Camera3d* camera = CameraManager::GetInstance()->GetCamera3d();
+	modelRenderer_->DrawAll(cmdList,
+							GraphicsGroup::GetInstance()->GetDevice().Get(),
+							camera,
+							psoService,
+							sceneContext_->GetLightLibrary());
 
-		psoService->SetCommand(desc, cmdList);
-		CameraManager::SetCommand(cmdList, PipelineType::Object3D);
-		sceneContext_->GetLightLibrary()->SetCommand(cmdList, PipelineType::Object3D);
-
-		model->Draw(*transform);
-	}
-
-	//===================================================================*/
-	//						アニメーションモデル描画
-	//===================================================================*/
-	for (const auto& [model, transform] : skinnedModels){
-		BlendMode mode = model->GetBlendMode();
-		auto desc = PipelinePresets::MakeSkinningObject3D(mode);
-
-		psoService->SetCommand(desc, cmdList);
-		CameraManager::SetCommand(cmdList, PipelineType::SkinningObject3D);
-		sceneContext_->GetLightLibrary()->SetCommand(cmdList, PipelineType::SkinningObject3D);
-
-		model->Draw(*transform);
-	}
 
 	//===================================================================*/
 	//						sprite
 	//===================================================================*/
-	spriteRenderer_->Draw(cmdList, psoService);
+	spriteRenderer_->Draw(cmdList, psoService, renderTargetType);
 
 	//===================================================================*/
 	//                    プリミティブ描画
@@ -99,5 +82,4 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoSer
 	//                    particle描画
 	//===================================================================*/
 	sceneContext_->GetFxSystem()->Render(psoService, cmdList);
-
 }

@@ -10,7 +10,10 @@ struct Vector2{
 
 	//--------- operator -----------------------------------------------------
 	Vector2 operator+(const Vector2& v) const;
+	Vector2 operator+(const float v)const;
 	Vector2 operator-(const Vector2& v) const;
+	Vector2 operator*(const Vector2& v)const;
+	Vector2 operator*(const float v)const;
 };
 
 //--------- serializer ---------------------------------------------------

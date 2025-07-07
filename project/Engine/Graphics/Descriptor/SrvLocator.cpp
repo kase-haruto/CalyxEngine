@@ -6,17 +6,21 @@ uint32_t SrvLocator::currentOffset_ = 0;
 std::mutex SrvLocator::mutex_;
 std::stack<uint32_t> SrvLocator::freeList_;
 
-void SrvLocator::Provide(const ComPtr<ID3D12DescriptorHeap>& srvHeap, const ComPtr<ID3D12Device>& device) {
+void SrvLocator::Provide(const ComPtr<ID3D12DescriptorHeap>& srvHeap, const ComPtr<ID3D12Device>& device){
 	std::lock_guard<std::mutex> lock(mutex_);
 
-	if (srvHeap_ != nullptr) {
-		// 既に提供された場合、再設定を防ぐ
+	if (srvHeap_ != nullptr){
 		throw std::runtime_error("SrvLocator already initialized.");
+	}
+
+	D3D12_DESCRIPTOR_HEAP_DESC desc = srvHeap->GetDesc();
+	if (desc.Type != D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV){
+		throw std::runtime_error("SrvLocator: Provided heap is not CBV/SRV/UAV type.");
 	}
 
 	srvHeap_ = srvHeap;
 	descriptorSizeSrv_ = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	currentOffset_ = 1; // ImGui用の最初のスロットを予約
+	currentOffset_ = 1; // ImGuiが0番を使用済みと仮定
 }
 
 std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE> SrvLocator::AllocateSrv() {
@@ -31,7 +35,7 @@ std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE> SrvLocator::
 		offset = freeList_.top();
 		freeList_.pop();
 	} else {
-		CheckHeapAvailable(1); // ← 忘れずに
+		CheckHeapAvailable(1);
 		offset = currentOffset_++;
 	}
 

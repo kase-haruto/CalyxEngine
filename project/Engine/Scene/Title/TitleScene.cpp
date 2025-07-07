@@ -86,8 +86,8 @@ void TitleScene::CleanUp() {
 	CollisionManager::GetInstance()->ClearColliders();
 }
 
-void TitleScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService) {
-	BaseScene::Draw(cmdList, psoService);
+void TitleScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService, RenderTargetType type) {
+	BaseScene::Draw(cmdList, psoService, type);
 
 	title_->Draw(cmdList);
 }

@@ -20,7 +20,8 @@ struct Vector3 final {
 	void Initialize(const Vector3& value = { 0.0f,0.0f,0.0f });
 	void Initialize(float v);
 	static Vector3 Forward();
-	static const Vector3 Zero;
+	Vector3 Right();
+	static const Vector3 Zero();
 	static Vector3 One();
 
 	float Length()const;
@@ -31,6 +32,10 @@ struct Vector3 final {
 	static Vector3 Lerp(const Vector3& v1, const Vector3& v2, float t);
 	static Vector3 Transform(const Vector3& vector, const Matrix4x4& matrix);
 	static Vector3 Transform(const Vector3& v, const Quaternion& q);
+
+	static Vector3 Min(const Vector3& a, const Vector3& b);
+
+	static Vector3 Max(const Vector3& a, const Vector3& b);
 #pragma endregion
 
 	//--------- operator ---------------------------------------------------
