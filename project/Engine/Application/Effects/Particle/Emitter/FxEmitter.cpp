@@ -15,7 +15,7 @@
 
 // externals
 #include <externals/imgui/imgui.h>
-
+#include <externals/imgui/ImGuiFileDialog.h>
 
 FxEmitter::FxEmitter(){
 	ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
@@ -172,9 +172,44 @@ void FxEmitter::ResetFxUnit(FxUnit& fx){
 /////////////////////////////////////////////////////////////////////////////////////////
 //			gui表示
 /////////////////////////////////////////////////////////////////////////////////////////
-void FxEmitter::ShowGui(){
+void FxEmitter::ShowGui() {
 	ImGui::PushID(this);
-	// 状態表示
+
+	// =============================
+	// マテリアルセクション
+	// =============================
+	ImGui::SeparatorText("Material");
+	ImGui::ColorEdit4("Color", &material_.color.x);
+
+	// 現在のパスを表示
+	ImGui::Text("Texture: %s", material_.texturePath.c_str());
+
+	// ファイル選択ボタン
+	if (ImGui::Button("Select Texture")) {
+		IGFD::FileDialogConfig config;
+		config.path = "Resources/Assets/Textures/";
+		ImGuiFileDialog::Instance()->OpenDialog(
+			"ChooseTex",
+			"Select Texture",
+			".png",
+			config
+		);
+	}
+
+	// ダイアログの描画と選択結果処理
+	if (ImGuiFileDialog::Instance()->Display("ChooseTex")) {
+		if (ImGuiFileDialog::Instance()->IsOk()) {
+			// ファイル名だけを取得
+			std::string fileNameOnly = ImGuiFileDialog::Instance()->GetCurrentFileName();
+			material_.texturePath = fileNameOnly;
+		}
+		ImGuiFileDialog::Instance()->Close();
+	}
+
+	// =============================
+	// Emit設定
+	// =============================
+	ImGui::SeparatorText("Emit");
 	ImGui::Text("emitCount: %d", units_.size());
 	GuiCmd::DragFloat3("position", position_);
 	GuiCmd::DragFloat("emitRate", emitRate_, 0.01f, 0.0f, 10.0f);
@@ -186,33 +221,35 @@ void FxEmitter::ShowGui(){
 	ImGuiHelpers::DrawFxParamGui("Velocity", velocity_);
 	ImGuiHelpers::DrawFxParamGui("Lifetime", lifetime_);
 
-	// 再生制御 GUI
+	// =============================
+	// 再生制御
+	// =============================
 	ImGui::Spacing();
 	ImGui::SeparatorText("Emitter Controls");
-	if (ImGui::Button("Play")){ Play(); }
+	if (ImGui::Button("Play")) { Play(); }
 	ImGui::SameLine();
-	if (ImGui::Button("Stop")){ Stop(); }
+	if (ImGui::Button("Stop")) { Stop(); }
 	ImGui::SameLine();
-	if (ImGui::Button("Reset")){ Reset(); }
+	if (ImGui::Button("Reset")) { Reset(); }
 
-	// OneShot 関連 GUI
+	// =============================
+	// OneShot
+	// =============================
 	ImGui::Spacing();
 	ImGui::SeparatorText("OneShot Settings");
 	GuiCmd::CheckBox("OneShot", isOneShot_);
-	if (isOneShot_){
+	if (isOneShot_) {
 		ImGui::DragInt("Emit Count", &emitCount_, 1, 1, kMaxUnits_);
 		GuiCmd::CheckBox("Auto Destroy", autoDestroy_);
 		GuiCmd::DragFloat("Emit Delay", emitDelay_, 0.01f, 0.0f, 10.0f);
-		material_.texturePath = "Effect.png";
-	} else{
+	} else {
 		GuiCmd::DragFloat("Emit Duration", emitDuration_, 0.01f, -1.0f, 60.0f);
-		material_.texturePath = "particle.png";
 	}
 
-	//=============================
-	// モジュール関連 GUI はコンテナに一任
-	//=============================
-	if (moduleContainer_){
+	// =============================
+	// モジュール
+	// =============================
+	if (moduleContainer_) {
 		moduleContainer_->ShowModulesGui();
 		moduleContainer_->ShowAvailableModulesGui();
 	}

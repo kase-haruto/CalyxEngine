@@ -147,7 +147,6 @@ void Player::Draw([[maybe_unused]] ID3D12GraphicsCommandList* cmdList){
 /////////////////////////////////////////////////////////////////////////////////////////
 void Player::DerivativeGui(){
 	ImGui::DragFloat("moveSpeed", &moveSpeed_, 0.01f, 0.0f, 10.0f);
-
 }
 
 
@@ -219,10 +218,10 @@ void Player::UpdateReticlePosition(){
 	Vector3 offset = Vector3::Zero();
 
 	// キーボード入力
-	if (Input::GetInstance()->PushKey(DIK_UP))    offset.y += 1.0f;
-	if (Input::GetInstance()->PushKey(DIK_DOWN))  offset.y -= 1.0f;
-	if (Input::GetInstance()->PushKey(DIK_LEFT))  offset.x -= 1.0f;
-	if (Input::GetInstance()->PushKey(DIK_RIGHT)) offset.x += 1.0f;
+	if (Input::GetInstance()->PushKey(DIK_UP))    offset.y += 3.0f;
+	if (Input::GetInstance()->PushKey(DIK_DOWN))  offset.y -= 3.0f;
+	if (Input::GetInstance()->PushKey(DIK_LEFT))  offset.x -= 3.0f;
+	if (Input::GetInstance()->PushKey(DIK_RIGHT)) offset.x += 3.0f;
 
 	// ゲームパッドの右スティック入力を加算
 	Vector2 rightStick = Input::GetInstance()->GetRightStick();

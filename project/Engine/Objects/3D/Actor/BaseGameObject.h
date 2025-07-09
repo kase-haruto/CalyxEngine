@@ -62,6 +62,7 @@ public:
 	BaseModel* GetModel() const { return model_.get(); }
 	void SetCollider(std::unique_ptr<Collider> collider);
 	Collider* GetCollider();
+	void SetUvScale(const Vector2& scale) { model_->uvTransform.scale = scale; }
 
 	ObjectModelType GetModelType() const{ return objectModelType_; }
 

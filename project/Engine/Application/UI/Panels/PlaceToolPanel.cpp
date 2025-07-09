@@ -79,24 +79,48 @@ void PlaceToolPanel::Render(){
 	ImGui::End();
 }
 
-void PlaceToolPanel::RenderCategoryItems(){
-	for (auto& [category, items] : categoryItems_){
-		ImGui::SeparatorText(("Category: " + std::to_string(( int ) category)).c_str());
-		for (size_t i = 0; i < items.size(); ++i){
-			const auto& item = items[i];
-			ImGui::PushID(static_cast< int >(i));
-			if (ImGui::ImageButton(( ImTextureID ) item.texture.ptr, ImVec2(item.iconSize.x, item.iconSize.y))){
-				item.createFunc();
-			}
-			if (ImGui::IsItemHovered()){
-				ImGui::SetTooltip("%s", item.name.c_str());
-			}
-			ImGui::SameLine();
-			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + item.iconSize.y * 0.25f);
-			ImGui::Text("%s", item.name.c_str());
-			ImGui::PopID();
+void PlaceToolPanel::RenderCategoryItems() {
+	constexpr int columns = 4; // 1カテゴリあたりの列数
+
+	for (auto& [category, items] : categoryItems_) {
+
+		// カテゴリ名をわかりやすく
+		const char* categoryName = "";
+		switch (category) {
+			case PlaceItemCategory::Shape:    categoryName = "Shape"; break;
+			case PlaceItemCategory::Particle: categoryName = "Particle"; break;
+			case PlaceItemCategory::Model:    categoryName = "Model"; break;
+			default:                          categoryName = "Unknown"; break;
 		}
-		ImGui::Spacing();
+
+		// UE風に: カテゴリを折りたたみ
+		if (ImGui::CollapsingHeader(categoryName, ImGuiTreeNodeFlags_DefaultOpen)) {
+
+			ImGui::Columns(columns, nullptr, false);
+
+			for (size_t i = 0; i < items.size(); ++i) {
+				const auto& item = items[i];
+
+				ImGui::PushID(static_cast<int>(i));
+
+				if (ImGui::ImageButton((ImTextureID)item.texture.ptr, ImVec2(item.iconSize.x, item.iconSize.y))) {
+					item.createFunc();
+				}
+
+				if (ImGui::IsItemHovered()) {
+					ImGui::SetTooltip("%s", item.name.c_str());
+				}
+
+				ImGui::TextWrapped("%s", item.name.c_str());
+
+				ImGui::NextColumn();
+
+				ImGui::PopID();
+			}
+
+			ImGui::Columns(1);
+			ImGui::Spacing();
+		}
 	}
 }
 
