@@ -24,6 +24,9 @@ Enemy::Enemy(const std::string& modelName, const std::string objName) :
 	collider_->SetIsDrawCollider(false);
 
 	life_ = 3;
+
+	waveAmplitude_ = 2.0f; // 必要ならランダム化
+	waveSpeed_ = Random::Generate<float>(1.0f, 3.0f);
 }
 
 
@@ -36,15 +39,25 @@ void Enemy::Initialize() {}
 //		更新
 /////////////////////////////////////////////////////////////////////////////////////////
 void Enemy::Update() {
+    // 経過時間を増加
+    float dt = ClockManager::GetInstance()->GetDeltaTime();
+    waveTime_ += dt * waveSpeed_;
 
-	worldTransform_.Update();
+    // 上下サイン波
+    float offsetY = std::sin(waveTime_) * waveAmplitude_;
 
-	BaseGameObject::Update();
+    // 基本位置 + オフセット
+    worldTransform_.translation = basePosition_ + Vector3(0.0f, offsetY, 0.0f);
 
-	if (life_<= 0) {
-		isAlive_ = false;
-	}
+    worldTransform_.Update();
+
+    BaseGameObject::Update();
+
+    if (life_ <= 0) {
+        isAlive_ = false;
+    }
 }
+
 
 void Enemy::OnCollisionEnter([[maybe_unused]]Collider* other) {
 	life_--;
@@ -58,6 +71,7 @@ const Vector3 Enemy::GetCenterPos() const {
 
 void Enemy::SetParent(WorldTransform* parent) {
 	worldTransform_.parent = parent;
+	basePosition_ = worldTransform_.translation;
 }
 
 void Enemy::SetParent(SceneObject* newParent) {

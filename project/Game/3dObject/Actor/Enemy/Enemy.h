@@ -46,5 +46,10 @@ private:
 	//===================================================================*/
 	bool isHit_ = false;		// 衝突フラグ
 
+	Vector3 basePosition_{};   // サイン波の基準位置
+	float waveTime_ = 0.0f;     // 経過時間
+	float waveAmplitude_ = 1.0f; // 振れ幅
+	float waveSpeed_ = 2.0f;     // サイン波の速さ
+
 };
 

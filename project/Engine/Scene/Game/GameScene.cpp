@@ -56,8 +56,8 @@ void GameScene::Initialize(){
 
 	//player
 	player_ = sceneContext_->GetObjectLibrary()->CreateAndAddObject<Player>("player.gltf", "player");
-	player_->Initialize();
 	player_->SetParent(&railCamera_->GetWorldTransform());
+	player_->Initialize();
 
 	playerBulletContainer_ = sceneContext_->AddEditorObject(std::make_unique<BulletContainer>("playerBulletContainer"));
 	playerBulletContainer_->SetSceneContext(sceneContext_.get());
@@ -65,11 +65,10 @@ void GameScene::Initialize(){
 
 	enemyCollection_ = sceneContext_->AddEditorObject(std::make_unique<EnemyCollection>("enemyContainer"));
 	enemyCollection_->SetSceneContext(sceneContext_.get());
-
 	enemyCollection_->SetPlayerTransform(&player_->GetWorldTransform());
-
 	enemyCollection_->CreateSpawners();
 
+	player_->SetEnemyList(enemyCollection_->GetEnemies());
 
 	//===================================================================*/
 	//                    editor

@@ -1,0 +1,21 @@
+{
+    "maxSpawnCount": 5,
+    "name": "leftSpawner",
+    "rotationDir": {
+        "x": 0.0,
+        "y": 1.0,
+        "z": 0.0
+    },
+    "rotationSpeed": 2.200000047683716,
+    "spawnAreaMax": {
+        "x": 10.0,
+        "y": 5.0,
+        "z": -20.0
+    },
+    "spawnAreaMin": {
+        "x": -10.0,
+        "y": 0.0,
+        "z": -15.0
+    },
+    "spawnInterval": 5.0
+}

@@ -41,8 +41,13 @@ void EnemyCollection::Update() {
 void EnemyCollection::ShowGui() {
 	ImGui::Text("Enemy Count : %d", static_cast<int>(enemies_.size()));
 	ImGui::SeparatorText("Spawners");
+
+	int idx = 0;
 	for (auto* spawner : spawners_) {
+		ImGui::PushID(idx);  // or PushID(spawner) if pointer is unique
 		spawner->ShowGui();
+		ImGui::PopID();
+		++idx;
 	}
 }
 

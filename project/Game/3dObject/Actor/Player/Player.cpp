@@ -37,6 +37,7 @@ void Player::Initialize(){
 	moveSpeed_ = 15.0f;
 	InitializeEffect();
 	reticleTransform_.Initialize();
+	reticleTransform_.parent = GetWorldTransform().parent;
 	reticleTransform_.translation = Vector3(0.0f, 0.0f, 50.0f);
 
 	life_ = 10;
@@ -211,8 +212,9 @@ void Player::Shoot(){
 
 }
 
-void Player::UpdateReticlePosition(){
-	constexpr float moveSpeed = 12.0f;
+void Player::UpdateReticlePosition() {
+	constexpr float moveSpeed = 6.0f;
+	constexpr float stickSensitivity = 300.0f;  // スティック感度を大きめに
 	float dt = ClockManager::GetInstance()->GetDeltaTime();
 
 	Vector3 offset = Vector3::Zero();
@@ -223,22 +225,33 @@ void Player::UpdateReticlePosition(){
 	if (Input::GetInstance()->PushKey(DIK_LEFT))  offset.x -= 3.0f;
 	if (Input::GetInstance()->PushKey(DIK_RIGHT)) offset.x += 3.0f;
 
-	// ゲームパッドの右スティック入力を加算
+	// ゲームパッド右スティック
 	Vector2 rightStick = Input::GetInstance()->GetRightStick();
-	offset.x += rightStick.x;  // 右スティック横方向
-	offset.y += rightStick.y;  // 右スティック縦方向
 
-	if (offset.Length() > 0.0f){
-		offset.Normalize();
-		offset *= moveSpeed * dt;
-		reticleTransform_.translation += offset;
+	// スティック感度を別で調整
+	offset.x += rightStick.x * stickSensitivity * dt;
+	offset.y += rightStick.y * stickSensitivity * dt;
 
-		//// 制限
-		//reticleTransform_.translation.x = std::clamp(reticleTransform_.translation.x, -6.0f, 6.0f);
-		//reticleTransform_.translation.y = std::clamp(reticleTransform_.translation.y, -3.0f, 4.0f);
-		//reticleTransform_.translation.z = std::clamp(reticleTransform_.translation.z, 1.0f, 20.0f);
+	// キーボードだけ正規化
+	Vector3 keyboardOffset = offset;
+	keyboardOffset.x -= rightStick.x * stickSensitivity * dt;
+	keyboardOffset.y -= rightStick.y * stickSensitivity * dt;
+
+	if (keyboardOffset.Length() > 0.0f) {
+		keyboardOffset.Normalize();
+		keyboardOffset *= moveSpeed * dt;
+		offset.x = keyboardOffset.x + rightStick.x * stickSensitivity * dt;
+		offset.y = keyboardOffset.y + rightStick.y * stickSensitivity * dt;
 	}
+
+	reticleTransform_.translation += offset;
+
+	// 制限
+	//reticleTransform_.translation.x = std::clamp(reticleTransform_.translation.x, -6.0f, 6.0f);
+	//reticleTransform_.translation.y = std::clamp(reticleTransform_.translation.y, -3.0f, 4.0f);
+	//reticleTransform_.translation.z = std::clamp(reticleTransform_.translation.z, 1.0f, 20.0f);
 }
+
 
 void Player::UpdateTilt(const Vector3& inputVector){
 	// 閾値以下なら傾きを戻す

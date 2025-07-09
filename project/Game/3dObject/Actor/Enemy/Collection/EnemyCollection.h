@@ -23,10 +23,10 @@ public:
 
 	void AddEnemy(Enemy* enemy);
 	void AddSpawner(class EnemySpawner* spawner);
-
 	void CreateSpawners();
-
 	void Clear();
+
+	const std::list<Enemy*>& GetEnemies()const { return enemies_; }
 
 	int GetDeadEnemyCount()const { return deadEnemyCount; }
 private:
