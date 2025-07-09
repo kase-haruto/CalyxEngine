@@ -21,7 +21,7 @@ void ImGuiManager::Initialize(WinApp* winApp, const DxCore* dxCore){
 
 	srvHeap_ = CreateDescriptorHeap(pDxCore_->GetDevice().Get(),
 									D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-									128,
+									12800,
 									true
 	);
 
