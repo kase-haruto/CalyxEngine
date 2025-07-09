@@ -50,10 +50,11 @@ void GameScene::Initialize(){
 	modelField_ = sceneContext_->GetObjectLibrary()->CreateAndAddObject<BaseGameObject>("terrain.obj", "field");
 	modelField_->SetScale({300.0f,300.0f,300.0f});
 	modelField_->SetTranslate({ 0.0f, -50.0f, 0.0f });
-
+	modelField_->SetEnableRaycast(false);
 	modelFieldBack_ = sceneContext_->GetObjectLibrary()->CreateAndAddObject<BaseGameObject>("terrain.obj", "field_back");
 	modelFieldBack_->SetScale({ 300.0f, 300.0f, 300.0f });
 	modelFieldBack_->SetTranslate({ 0.0f, -50.0f, 1000.0f });
+	modelFieldBack_->SetEnableRaycast(false);
 
 	//player
 	player_ = sceneContext_->GetObjectLibrary()->CreateAndAddObject<Player>("player.gltf", "player");
