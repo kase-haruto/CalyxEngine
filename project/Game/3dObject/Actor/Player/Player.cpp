@@ -29,6 +29,7 @@ Player::Player(const std::string& modelName,
 	collider_->SetType(ColliderType::Type_Player);
 }
 
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //		初期化
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -55,7 +56,7 @@ void Player::Initialize(){
 	//spriteの初期化
 	size_t spriteCount = reticleSprites_.size();
 	for (size_t i = 0; i < spriteCount; ++i){
-		reticleSprites_[i] = std::make_unique<Sprite>("Textures/uvChecker.png");
+		reticleSprites_[i] = std::make_unique<Sprite>("Textures/reticle.png");
 
 		// t = 0.0（プレイヤー側）～ 1.0（レティクル側）
 		float t = static_cast< float >(i) / (spriteCount - 1);
@@ -208,6 +209,7 @@ void Player::Shoot(){
 	}
 
 	bulletContainer_->AddBullet(BulletType::Player, playerPos, dir);
+
 }
 
 void Player::UpdateReticlePosition(){
@@ -283,5 +285,6 @@ float Player::EaseForwardThenReturn(float t){
 	}
 }
 
-void Player::InitializeEffect(){}
+void Player::InitializeEffect(){
+}
 

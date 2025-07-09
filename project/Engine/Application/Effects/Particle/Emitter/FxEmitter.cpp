@@ -293,7 +293,14 @@ void FxEmitter::ExtractConfigTo(EmitterConfig& config) const{
 void FxEmitter::Play() {
 	isPlaying_ = true;
 	isFirstFrame_ = true;
+
+	if (isOneShot_) {
+		// OneShot 時は状態も初期化しておく
+		hasEmitted_ = false;
+		elapsedTime_ = 0.0f;
+	}
 }
+
 
 void FxEmitter::Stop() {
 	isPlaying_ = false;

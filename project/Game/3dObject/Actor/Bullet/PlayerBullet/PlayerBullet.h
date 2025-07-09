@@ -10,12 +10,13 @@ public:
 	//===================================================================*/
 	PlayerBullet() = default;
 	PlayerBullet(const std::string& modelName,const std::string& name);
-	~PlayerBullet()override = default;
+	~PlayerBullet()override;
 
 	void Update() override;
 	//--------- accessor ---------------------------------------------------
 	
 private:
 	std::unique_ptr<ParticleSystemObject> trailFx_;
+	std::unique_ptr<ParticleSystemObject> shootFx_;
 };
 

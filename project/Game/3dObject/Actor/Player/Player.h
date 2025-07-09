@@ -5,6 +5,7 @@
 #include <Engine/Objects/3D/Actor/Actor.h>
 #include <Game/3dObject/Actor/Bullet/Container/BulletContainer.h>
 #include <Engine/Application/Effects/Particle/Emitter/FxEmitter.h>
+#include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 #include <Engine/Renderer/Sprite/Sprite.h>
 
 /* ========================================================================
@@ -62,5 +63,7 @@ private:
 	std::array<std::unique_ptr<Sprite>,4> reticleSprites_;
 	std::vector < std::unique_ptr<Sprite>> lifeSprite_;
 	std::unique_ptr<Sprite> attackSprite_;
+
+	//fx
 
 };
