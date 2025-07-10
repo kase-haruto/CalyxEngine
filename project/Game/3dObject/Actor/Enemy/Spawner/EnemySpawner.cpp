@@ -15,7 +15,6 @@ EnemySpawner::EnemySpawner(const std::string& name) {
 void EnemySpawner::Update() {
 	float dt = ClockManager::GetInstance()->GetDeltaTime();
 
-	// 回転（rotationDir_ に従って回転）
 	Vector3 rot = rotationDir_ * rotationSpeed_ * dt;
 	worldTransform_.eulerRotation += rot;
 
