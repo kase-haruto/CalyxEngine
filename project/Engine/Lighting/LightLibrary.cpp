@@ -23,11 +23,11 @@ void LightLibrary::Clear(){
 	pointLight_ = nullptr;
 }
 
-void LightLibrary::SetDirectionalLight(DirectionalLight* light){
+void LightLibrary::SetDirectionalLight(const std::shared_ptr<DirectionalLight>& light){
 	directionalLight_ = light;
 }
 
-void LightLibrary::SetPointLight(PointLight* light){
+void LightLibrary::SetPointLight(const std::shared_ptr<PointLight>& light){
 	pointLight_ = light;
 }
 

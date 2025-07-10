@@ -10,63 +10,46 @@ BulletContainer::BulletContainer(const std::string& name) {
 }
 
 
-void BulletContainer::Update() {
-	auto* sceneLibrary = sceneContext_->GetObjectLibrary();
-	for (auto& [type, bullets] : typedBullets_) {
-		for (auto it = bullets.begin(); it != bullets.end(); ) {
-			BaseBullet* bullet = *it;
+void BulletContainer::Update(){
+	auto* lib = sceneContext_->GetObjectLibrary();
+
+	for (auto& [type, bullets] : typedBullets_){
+		for (auto it = bullets.begin(); it != bullets.end();){
+			auto bullet = *it;
 			bullet->Update();
 
-			if (!bullet->GetIsAlive()) {
-				sceneLibrary->RemoveObject(bullet);
+			if (!bullet->GetIsAlive()){
+				lib->RemoveObject(bullet);
 				it = bullets.erase(it);
-			} else {
+			} else{
 				++it;
 			}
 		}
 	}
 }
 
-void BulletContainer::AddBullet(BulletType type,
-								const Vector3& position,
-								const Vector3& velocity) {
-	BaseBullet* bullet = nullptr;
+void BulletContainer::AddBullet(BulletType type, const Vector3& pos, const Vector3& vel){
+	auto* lib = sceneContext_->GetObjectLibrary();
+	std::shared_ptr<BaseBullet> bullet;
 
-	if (!sceneContext_) return;
-	auto* library = sceneContext_->GetObjectLibrary();
-
-	switch (type) {
-		case BulletType::Player:
-			bullet = library->CreateAndAddObject<PlayerBullet>("debugCube.obj", "playerBullet");
-			break;
-		case BulletType::Enemy:
-			//bullet = library->CreateAndAddObject<EnemyBullet>("enemyBullet.obj", "enemyBullet");
-			break;
-		default:
-			return;
+	if (type == BulletType::Player){
+		bullet = lib->CreateAndAddObject<PlayerBullet>("debugCube.obj", "playerBullet");
 	}
 
-	if (!bullet) return;
-
-	bullet->ShootInitialize(position, velocity);
-	bullet->SetMoveSpeed(bulletSpeed_);
-	bullet->SetScale(bulletScale_);
+	bullet->ShootInitialize(pos, vel);
 	typedBullets_[type].push_back(bullet);
 }
 
-void BulletContainer::RemoveBullet(BaseBullet* bullet) {
-	for (auto& [type, bullets] : typedBullets_) {
-		bullets.remove(bullet);
-	}
+void BulletContainer::RemoveBullet(const std::shared_ptr<BaseBullet>& bullet) {
+    for (auto& [type, bullets] : typedBullets_) {
+        bullets.remove(bullet);
+    }
 }
 
-const std::list<BaseBullet*>& BulletContainer::GetBullets(BulletType type) const {
-	static const std::list<BaseBullet*> empty;
-	auto it = typedBullets_.find(type);
-	if (it != typedBullets_.end()) {
-		return it->second;
-	}
-	return empty;
+const std::list<std::shared_ptr<BaseBullet>>& BulletContainer::GetBullets(BulletType type) const {
+    static const std::list<std::shared_ptr<BaseBullet>> empty;
+    auto it = typedBullets_.find(type);
+    return (it != typedBullets_.end()) ? it->second : empty;
 }
 
 void BulletContainer::ShowGui() {
@@ -79,6 +62,4 @@ void BulletContainer::ShowGui() {
 }
 
 void BulletContainer::DerivativeGui() {
-	ImGui::DragFloat("bulletSpeed", &bulletSpeed_, 0.01f, 0.0f, 100.0f);
-	ImGui::DragFloat3("bulletScale", &bulletScale_.x, 0.01f, 0.0f, 10.0f);
 }

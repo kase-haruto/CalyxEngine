@@ -15,8 +15,8 @@ FxIntermediary* FxIntermediary::GetInstance() {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		リストに登録
 /////////////////////////////////////////////////////////////////////////////////////////
-void FxIntermediary::Attach(FxEmitter* fxEmitter) {
-	if (pSceneContext_) {
+void FxIntermediary::Attach(const std::shared_ptr<FxEmitter>& fxEmitter){
+	if (pSceneContext_){
 		pSceneContext_->GetFxSystem()->AddEmitter(fxEmitter);
 	}
 }
@@ -24,12 +24,11 @@ void FxIntermediary::Attach(FxEmitter* fxEmitter) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		リストから削除
 /////////////////////////////////////////////////////////////////////////////////////////
-void FxIntermediary::Detach(FxEmitter* emitter) {
-	if (!emitter || !pSceneContext_) return;
-
+void FxIntermediary::Detach(const std::shared_ptr<FxEmitter>& fxEmitter){
+	if (!fxEmitter || !pSceneContext_) return;
 	auto fxSystem = pSceneContext_->GetFxSystem();
-	if (fxSystem) {
-		fxSystem->RemoveEmitter(emitter);
+	if (fxSystem){
+		fxSystem->RemoveEmitter(fxEmitter);
 	}
 }
 

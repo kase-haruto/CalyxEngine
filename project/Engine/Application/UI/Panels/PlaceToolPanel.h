@@ -35,6 +35,7 @@ public:
 		Shape,
 		Light,
 		Particle,
+		Model,
 		Count
 	};
 

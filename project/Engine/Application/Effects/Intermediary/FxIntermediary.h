@@ -4,6 +4,8 @@
 /* ===================================================================== */
 #include <Engine/Application/Effects/Particle/Emitter/FxEmitter.h>
 
+#include <memory>
+
 class SceneContext;
 
 /* ========================================================================
@@ -20,8 +22,8 @@ public:
 	//===================================================================*/
 	//						public methods
 	//===================================================================*/
-	void Attach(class FxEmitter*);
-	void Detach(class FxEmitter*);
+	void Attach(const std::shared_ptr<FxEmitter>& fxEmitter);
+	void Detach(const std::shared_ptr<FxEmitter>& fxEmitter);
 
 	//--------- accessor -----------------------------------------------------
 	void SetSceneContext(SceneContext*);

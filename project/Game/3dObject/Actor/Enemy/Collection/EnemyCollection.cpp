@@ -14,62 +14,64 @@ EnemyCollection::EnemyCollection(const std::string& name) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		更新
 /////////////////////////////////////////////////////////////////////////////////////////
-void EnemyCollection::Update() {
+void EnemyCollection::Update(){
 	// スポナー更新
-	for (auto* spawner : spawners_) {
+	for (auto& spawner : spawners_){
 		spawner->Update();
 	}
 
 	auto* sceneLibrary = sceneContext_ ? sceneContext_->GetObjectLibrary() : nullptr;
-
 	if (!sceneLibrary) return;
 
-	for (auto it = enemies_.begin(); it != enemies_.end(); ) {
-		auto* enemy = *it;
+	for (auto it = enemies_.begin(); it != enemies_.end(); ){
+		auto& enemy = *it;
 		enemy->Update();
 
-		if (!enemy->GetIsAlive()) {
-			sceneLibrary->RemoveObject(enemy);
+		if (!enemy->GetIsAlive()){
+			sceneLibrary->RemoveObject(enemy);  // ✅ shared_ptr で参照カウント一致
 			it = enemies_.erase(it);
 			deadEnemyCount++;
-		} else {
+		} else{
 			++it;
 		}
 	}
 }
 
-void EnemyCollection::ShowGui() {
-	ImGui::Text("Enemy Count : %d", static_cast<int>(enemies_.size()));
+void EnemyCollection::ShowGui(){
+	ImGui::Text("Enemy Count : %d", static_cast< int >(enemies_.size()));
 	ImGui::SeparatorText("Spawners");
-	for (auto* spawner : spawners_) {
+
+	int idx = 0;
+	for (auto& spawner : spawners_){
+		ImGui::PushID(idx);
 		spawner->ShowGui();
+		ImGui::PopID();
+		++idx;
 	}
 }
 
-void EnemyCollection::SetSceneContext(SceneContext* context) {
+
+void EnemyCollection::SetSceneContext(SceneContext* context){
 	sceneContext_ = context;
-	// スポナーにもシーンコンテキストを伝搬
-	for (auto* spawner : spawners_) {
+	for (auto& spawner : spawners_){
 		spawner->SetSceneContext(context);
 	}
-
 }
+
 
 void EnemyCollection::SetPlayerTransform(WorldTransform* pTransform) {
 		playerTransform_ = pTransform;
 }
 
+void EnemyCollection::AddEnemy(const std::shared_ptr<Enemy>& enemy){
+	enemies_.push_back(enemy);
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 //		追加
 ///////////////////////////////////////////////////////////////////////////////////////////
-void EnemyCollection::AddEnemy(Enemy* enemy) {
-	if (enemy) {
-		enemies_.emplace_back(enemy);
-	}
-}
-
-void EnemyCollection::AddSpawner(EnemySpawner* spawner) {
-	if (spawner) {
+void EnemyCollection::AddSpawner(const std::shared_ptr<EnemySpawner>& spawner){
+	if (spawner){
 		spawner->SetSceneContext(sceneContext_);
 		spawner->SetPlayerTransform(playerTransform_);
 		spawner->SetOwner(this);
@@ -77,21 +79,27 @@ void EnemyCollection::AddSpawner(EnemySpawner* spawner) {
 	}
 }
 
-void EnemyCollection::CreateSpawners() {
-	// 左回りスポナー
-	auto* leftSpawner = sceneContext_->AddEditorObject(std::make_unique<EnemySpawner>("leftSpawner"));
-	leftSpawner->SetRotationSpeed(0.4f); // 左回り（正回転）
-	leftSpawner->SetRotationDir({ 0, 1, 0 }); // Y軸回転
-	leftSpawner->SetSpawnArea({ -10, 0, -15 }, { 10, 5, -20 });
+void EnemyCollection::CreateSpawners(){
+	// 左回り
+	auto leftSpawner = std::make_shared<EnemySpawner>("leftSpawner");
+	sceneContext_->AddEditorObject(leftSpawner);
+
+	leftSpawner->SetRotationSpeed(0.4f);
+	leftSpawner->SetRotationDir({0, 1, 0});
+	leftSpawner->SetSpawnArea({-10, 0, -15}, {10, 5, -20});
 	AddSpawner(leftSpawner);
 
-	// 右回りスポナー
-	auto* rightSpawner = sceneContext_->AddEditorObject(std::make_unique<EnemySpawner>("rightSpawner"));
-	rightSpawner->SetRotationSpeed(-0.6f); // 右回り（負回転）
-	rightSpawner->SetRotationDir({ 0, 1, 0 }); // Y軸回転
-	rightSpawner->SetSpawnArea({ -15, 0, -30 }, { 15, 7, -20 });
+	// 右回り
+	auto rightSpawner = std::make_shared<EnemySpawner>("rightSpawner");
+	sceneContext_->AddEditorObject(rightSpawner);
+
+	rightSpawner->SetRotationSpeed(-0.6f);
+	rightSpawner->SetRotationDir({0, 1, 0});
+	rightSpawner->SetSpawnArea({-15, 0, -30}, {15, 7, -20});
 	AddSpawner(rightSpawner);
 }
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		クリア

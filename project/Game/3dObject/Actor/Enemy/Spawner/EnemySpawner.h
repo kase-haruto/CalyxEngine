@@ -8,16 +8,23 @@
 #include <Engine/Scene/Context/SceneContext.h>
 #include <externals/imgui/imgui.h>
 #include <Game/3dObject/Actor/Enemy/Enemy.h>
+#include <Engine/Objects/ConfigurableObject/ConfigurableObject.h>
+#include <Data/Game/Config/Enemy/EnemySpawnerConfig.h>
 
 class EnemyCollection; // 前方宣言
 class SceneContext;
 
 class EnemySpawner
-	: public SceneObject {
+	: public SceneObject,
+	public ConfigurableObject<EnemySpawnerConfig> {
 public:
 	EnemySpawner(const std::string& name = "EnemySpawner");
 
 	void Update() override;
+
+	void ApplyConfig() override;
+
+	void ExtractConfig() override;
 
 	void ShowGui() override;
 	void SetSceneContext(SceneContext* context);
@@ -37,8 +44,8 @@ private:
 private:
 	SceneContext* sceneContext_ = nullptr;
 	EnemyCollection* ownerCollection_ = nullptr;
-	std::list<Enemy*> spawnedEnemies_;
-	size_t maxSpawnCount_ = 7;
+	std::list<std::shared_ptr<Enemy>> spawnedEnemies_;
+	size_t maxSpawnCount_ = 5;
 	WorldTransform worldTransform_;
 	WorldTransform* playerTransform_ = nullptr;
 

@@ -1,15 +1,15 @@
 #pragma once
-/* ========================================================================
-/* include space
-/* ===================================================================== */
 
-#include <Game/3dObject/Actor/Bullet/BaseBullet.h>
 #include <Engine/Objects/3D/Actor/SceneObject.h>
+#include <Game/3dObject/Actor/Bullet/BaseBullet.h>
+#include <Engine/Scene/Context/SceneContext.h>
+#include <Engine/Foundation/Math/Vector3.h>
 
+#include <unordered_map>
+#include <list>
+#include <memory>
 
-class SceneContext;
-
-enum class BulletType {
+enum class BulletType{
 	Player,
 	Enemy,
 	Count
@@ -19,32 +19,26 @@ enum class BulletType {
 /* bullet コンテナ
 /* ===================================================================== */
 class BulletContainer
-	: public SceneObject {
+	: public SceneObject{
 public:
 	BulletContainer(const std::string& name);
-	~BulletContainer() = default;
+
+	void ShowGui();
+	void DerivativeGui();
 
 	void Update();
 
-	void AddBullet(BulletType type,
-				   const Vector3& position,
-				   const Vector3& velocity);
-	void RemoveBullet(BaseBullet* bullet);
+	void AddBullet(BulletType type, const Vector3& pos, const Vector3& vel);
+	void RemoveBullet(const std::shared_ptr<BaseBullet>& bullet);
 
-	/* ui =========================================*/
-	void ShowGui() override;
-	virtual void DerivativeGui();
+	const std::list<std::shared_ptr<BaseBullet>>& GetBullets(BulletType type) const;
 
-	/* config =========================================*/
-
-	/* accessor =========================================*/
-	const std::list<BaseBullet*>& GetBullets(BulletType type) const;
-	void SetSceneContext(SceneContext* context) { sceneContext_ = context; }
+	void SetSceneContext(SceneContext* context){ sceneContext_ = context; }
 
 private:
-	std::unordered_map<BulletType, std::list<BaseBullet*>> typedBullets_;
+	std::unordered_map<BulletType, std::list<std::shared_ptr<BaseBullet>>> typedBullets_;
 	SceneContext* sceneContext_ = nullptr;
 
 	float bulletSpeed_ = 60.0f; // 弾速
-	Vector3 bulletScale_{ 0.3f, 0.3f, 0.3f }; // 弾のスケール
+	Vector3 bulletScale_ {0.3f, 0.3f, 0.3f}; // 弾のスケール
 };

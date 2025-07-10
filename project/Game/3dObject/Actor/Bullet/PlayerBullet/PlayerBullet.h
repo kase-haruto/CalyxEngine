@@ -16,6 +16,7 @@ public:
 	//--------- accessor ---------------------------------------------------
 	
 private:
-	std::unique_ptr<ParticleSystemObject> trailFx_;
+	std::shared_ptr<ParticleSystemObject> trailFx_;
+	std::shared_ptr<ParticleSystemObject> shootFx_;
 };
 

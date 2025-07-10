@@ -18,6 +18,10 @@ Camera3d::Camera3d()
 	transform_.translate = {0.0f, 2.0f, -10.0f};
 }
 
+void Camera3d::Initialize() {
+	transform_.translate = { 0.0f, 2.0f, -10.0f };
+}
+
 void Camera3d::Update(){
     BaseCamera::Update();
 

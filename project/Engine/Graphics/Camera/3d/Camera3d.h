@@ -13,6 +13,7 @@ public:
 	Camera3d();
 	~Camera3d() = default;
 
+	void Initialize();
 	void Update() override;  //< 更新
 	void ShowGui() override; //< ImGuiによるGUI表示
 	bool IsVisible(const class AABB& aabb) const;

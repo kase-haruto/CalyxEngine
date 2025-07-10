@@ -1,20 +1,19 @@
 #include "CreateShapeObjectCommand.h"
-
-// engine
 #include <Engine/Scene/Context/SceneContext.h>
 
 CreateShapeObjectCommand::CreateShapeObjectCommand(SceneContext* context, ObjectFactory factory)
 	: context_(context), factory_(std::move(factory)){}
 
 void CreateShapeObjectCommand::Execute(){
-	auto obj = factory_();
-	object_ = obj.get();
-	context_->AddEditorObject(std::move(obj));
+	object_ = factory_();
+	context_->AddEditorObject(object_);
 }
 
-void CreateShapeObjectCommand::Undo() {
-	context_->RemoveEditorObject(object_);
-	object_ = nullptr;
+void CreateShapeObjectCommand::Undo(){
+	if (object_){
+		context_->RemoveEditorObject(object_);
+		object_.reset();
+	}
 }
 
 const char* CreateShapeObjectCommand::GetName() const{

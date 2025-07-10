@@ -18,13 +18,15 @@ public:
 	void SetCommand(ComPtr<ID3D12GraphicsCommandList> cmdList, UINT rootParameterIndex)const override{
 		cmdList->SetGraphicsRootConstantBufferView(rootParameterIndex, this->resource_->GetGPUVirtualAddress());
 	}
-
-
 };
 
 template<typename T>
-inline void DxConstantBuffer<T>::Initialize(ComPtr<ID3D12Device> device, UINT elementCount){
+inline void DxConstantBuffer<T>::Initialize(ComPtr<ID3D12Device> device, UINT elementCount) {
 	this->elementCount_ = elementCount;
 	size_t byteSize = sizeof(T) * elementCount;
+
+	// 256バイト境界にアライメントする！
+	byteSize = (byteSize + 255) & ~255;
+
 	this->CreateUploadResource(device, byteSize);
 }

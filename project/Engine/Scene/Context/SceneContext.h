@@ -24,13 +24,14 @@ public:
 	void Update();
 	void Clear();
 
+	void RemoveEditorObject(const std::shared_ptr<SceneObject>& obj);
+
 	SceneObjectLibrary* GetObjectLibrary() const{ return objectLibrary_.get(); }
 
 	template<typename TObject>
-	TObject* AddEditorObject(std::unique_ptr<TObject> object);
+	TObject* AddEditorObject(std::shared_ptr<TObject> object);
 
-	void RemoveEditorObject(SceneObject* obj);
-	std::vector<SceneObject*>& GetEditorObjects();
+	std::vector<std::shared_ptr<SceneObject>> GetEditorObjects();
 
 	void AddOnObjectRemovedListener(std::function<void(SceneObject*)> cb){
 		objectRemovedCallbacks_.push_back(std::move(cb));
@@ -44,6 +45,7 @@ public:
 	}
 
 	FxSystem* GetFxSystem() const{ return fxSystem_.get(); }
+	std::shared_ptr<SceneObject> FindSharedObject(SceneObject* raw);
 
 private:
 	ObjectRemovedCallback onEditorObjectRemoved_;
@@ -51,24 +53,26 @@ private:
 	std::unique_ptr<LightLibrary> lightLibrary_;
 	std::unique_ptr<FxSystem> fxSystem_;
 
-	std::vector<SceneObject*> editorObjects_; // 所有権なし
+private:
+	std::vector<std::weak_ptr<SceneObject>> editorObjects_;
 	std::vector<std::function<void(SceneObject*)>> objectRemovedCallbacks_;
 
-	std::string sceneName_ = "scene"; // シーン名
+	std::string sceneName_ = "scene";
+	// シーン名
 };
 
 // ----------------------------------------------
 // Template Implementation
 // ----------------------------------------------
 template<typename TObject>
-TObject* SceneContext::AddEditorObject(std::unique_ptr<TObject> object){
+TObject* SceneContext::AddEditorObject(std::shared_ptr<TObject> object){
 	static_assert(std::is_base_of_v<SceneObject, TObject>, "TObject must derive from SceneObject");
 	assert(object && "object must be a SceneObject");
 
 	TObject* rawPtr = object.get();
 
-	objectLibrary_->AddObject(std::move(object)); // 所有権はLibrary側に渡す
-	editorObjects_.push_back(rawPtr);             // SceneContextでは参照のみ保持
+	objectLibrary_->AddObject(object);
+	editorObjects_.push_back(object);
 
 	return rawPtr;
 }

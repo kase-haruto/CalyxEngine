@@ -169,7 +169,9 @@ void ModelManager::SetOnModelLoadedCallback(std::function<void(const std::string
 //----------------------------------------------------------------------------
 void ModelManager::StartUpLoad(){
 	LoadModel("suzanne.obj");
+	LoadModel("run.gltf");
 	LoadModel("player.gltf");
+	LoadModel("ghost.obj");
 	LoadModel("debugSphere.obj");
 	LoadModel("debugCube.obj");
 	LoadModel("cylinder.obj");
@@ -182,11 +184,6 @@ void ModelManager::StartUpLoad(){
 	LoadModel("plane.obj");
 	LoadModel("teapot.obj");
 	LoadModel("terrain.obj");
-	LoadModel("AnimatedCube.gltf");
-	LoadModel("walk.gltf");
-	LoadModel("sneakWalk.gltf");
-	LoadModel("simpleSkin.gltf");
-	LoadModel("bunny.obj");
 }
 
 //----------------------------------------------------------------------------

@@ -5,7 +5,10 @@
 #include <Engine/Objects/3D/Actor/Actor.h>
 #include <Game/3dObject/Actor/Bullet/Container/BulletContainer.h>
 #include <Engine/Application/Effects/Particle/Emitter/FxEmitter.h>
+#include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 #include <Engine/Renderer/Sprite/Sprite.h>
+
+class Enemy;
 
 /* ========================================================================
 /* Player
@@ -37,7 +40,10 @@ public:
 	}
 
 	std::vector<Sprite*> GetAllSprites();
-
+	void SetEnemyList(const std::list<std::shared_ptr<Enemy>>& targets){
+		targets_ = targets;
+	}
+	const Vector3 GetCenterPos()const override;
 private:
 	//===================================================================*/
 	//                   private methods
@@ -48,6 +54,8 @@ private:
 	void UpdateTilt(const Vector3& moveVector);
 	float EaseForwardThenReturn(float t);
 	void InitializeEffect();
+
+
 
 private:
 	//===================================================================*/
@@ -62,5 +70,7 @@ private:
 	std::array<std::unique_ptr<Sprite>,4> reticleSprites_;
 	std::vector < std::unique_ptr<Sprite>> lifeSprite_;
 	std::unique_ptr<Sprite> attackSprite_;
+
+	std::list<std::shared_ptr<Enemy>> targets_;
 
 };

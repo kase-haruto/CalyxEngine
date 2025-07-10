@@ -72,6 +72,8 @@ void BaseGameObject::Update() {
 	}
 	//ApplyConfig();
 
+	model_->SetIsDrawEnable(isDrawEnable_);
+
 }
 
 //===================================================================*/
