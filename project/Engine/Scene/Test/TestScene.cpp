@@ -53,8 +53,7 @@ void TestScene::Initialize(){
 	//=========================
 	// オブジェクト生成
 	//=========================
-
-
+	animationHuman_ = sceneContext_->GetObjectLibrary()->CreateAndAddObject<BaseGameObject>("run.gltf","runHuman");
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -65,6 +64,8 @@ void TestScene::Update(){
 	CameraManager::Update();
 
 	skyBox_->Update();
+
+	animationHuman_->Update();
 
 		//衝突判定
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();

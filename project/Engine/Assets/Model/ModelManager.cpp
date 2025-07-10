@@ -169,6 +169,7 @@ void ModelManager::SetOnModelLoadedCallback(std::function<void(const std::string
 //----------------------------------------------------------------------------
 void ModelManager::StartUpLoad(){
 	LoadModel("suzanne.obj");
+	LoadModel("run.gltf");
 	LoadModel("player.gltf");
 	LoadModel("ghost.obj");
 	LoadModel("debugSphere.obj");
