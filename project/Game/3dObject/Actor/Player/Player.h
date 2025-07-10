@@ -40,7 +40,9 @@ public:
 	}
 
 	std::vector<Sprite*> GetAllSprites();
-	void SetEnemyList(std::list<Enemy*> targets) { targets_ = targets; }
+	void SetEnemyList(const std::list<std::shared_ptr<Enemy>>& targets){
+		targets_ = targets;
+	}
 	const Vector3 GetCenterPos()const override;
 private:
 	//===================================================================*/
@@ -69,6 +71,6 @@ private:
 	std::vector < std::unique_ptr<Sprite>> lifeSprite_;
 	std::unique_ptr<Sprite> attackSprite_;
 
-	std::list<Enemy*> targets_;
+	std::list<std::shared_ptr<Enemy>> targets_;
 
 };

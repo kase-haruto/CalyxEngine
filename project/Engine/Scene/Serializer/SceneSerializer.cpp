@@ -52,33 +52,40 @@ bool SceneSerializer::Load(SceneContext& context, const std::string& path){
 			case ObjectType::GameObject:
 			{
 				std::string modelName = j.value("modelName", "debugCube.obj");
-				auto ptr = std::make_unique<BaseGameObject>(modelName, name);
+
+				auto ptr = std::make_shared<BaseGameObject>(modelName, name);
 				ptr->ConfigurableObject<BaseGameObjectConfig>::ApplyConfigFromJson(j);
+
+				context.AddEditorObject(ptr);
+
 				createdObj = ptr.get();
-				context.AddEditorObject(std::move(ptr));
 				break;
 			}
 			case ObjectType::Light:
 			{
 				if (j.contains("direction")){
-					auto* dirLight = CreateAndAddObject<DirectionalLight>(&context, "DirectionalLightName");
-					dirLight->ApplyConfigFromJson(j);
-					context.GetLightLibrary()->SetDirectionalLight(dirLight);
-					createdObj = dirLight;
+					auto ptr = CreateAndAddObject<DirectionalLight>(&context, "DirectionalLightName");
+					ptr->ApplyConfigFromJson(j);
+
+					context.GetLightLibrary()->SetDirectionalLight(ptr);
+					createdObj = ptr.get();
 				} else{
-					auto* pointLight = CreateAndAddObject<PointLight>(&context, "PointLightName");
-					pointLight->ApplyConfigFromJson(j);
-					context.GetLightLibrary()->SetPointLight(pointLight);
-					createdObj = pointLight;
+					auto ptr = CreateAndAddObject<PointLight>(&context, "PointLightName");
+					ptr->ApplyConfigFromJson(j);
+
+					context.GetLightLibrary()->SetPointLight(ptr); 
+					createdObj = ptr.get();
 				}
 				break;
 			}
 			case ObjectType::ParticleSystem:
 			{
-				auto* rawPtr = CreateAndAddObject<ParticleSystemObject>(&context, "ParticleSystem");
-				rawPtr->ApplyConfigFromJson(j);
-				context.GetFxSystem()->AddEmitter(rawPtr);
-				createdObj = rawPtr;
+				auto ptr = CreateAndAddObject<ParticleSystemObject>(&context, "ParticleSystem");
+				ptr->ApplyConfigFromJson(j);
+
+				context.GetFxSystem()->AddEmitter(ptr);
+
+				createdObj = ptr.get();
 				break;
 			}
 			default:

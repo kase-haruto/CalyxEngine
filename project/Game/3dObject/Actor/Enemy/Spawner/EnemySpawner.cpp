@@ -118,25 +118,24 @@ void EnemySpawner::SetPlayerTransform(WorldTransform* playerTransform) {
 	worldTransform_.parent = playerTransform->parent;
 }
 
-void EnemySpawner::Spawn() {
+void EnemySpawner::Spawn(){
 	if (!sceneContext_ || !ownerCollection_) return;
 
-	// 現在の有効な敵の数を数える
+	// 有効な敵だけ残す
 	size_t aliveCount = 0;
-	for (auto it = spawnedEnemies_.begin(); it != spawnedEnemies_.end();) {
-		if (!(*it) || !(*it)->GetIsAlive()) {
+	for (auto it = spawnedEnemies_.begin(); it != spawnedEnemies_.end();){
+		if (!(*it) || !(*it)->GetIsAlive()){
 			it = spawnedEnemies_.erase(it);
-		} else {
+		} else{
 			++it;
 			++aliveCount;
 		}
 	}
 
-	// 最大数に達していたらスポーンしない
 	if (aliveCount >= maxSpawnCount_) return;
 
 	// 新規スポーン
-	Enemy* enemy = sceneContext_->GetObjectLibrary()->CreateAndAddObject<Enemy>("ghost.obj", "enemy");
+	auto enemy = sceneContext_->GetObjectLibrary()->CreateAndAddObject<Enemy>("ghost.obj", "enemy");
 	if (!enemy) return;
 
 	Vector3 localOffset = Random::GenerateVector3(spawnAreaMin_, spawnAreaMax_);

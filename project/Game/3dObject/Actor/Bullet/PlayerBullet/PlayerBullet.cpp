@@ -8,22 +8,17 @@ PlayerBullet::PlayerBullet(const std::string& modelName, const std::string& name
 	collider_->SetType(ColliderType::Type_PlayerAttack);
 	collider_->SetTargetType(ColliderType::Type_Enemy);
 
-	trailFx_ = std::make_unique<ParticleSystemObject>("playerBulletTrail");
+	trailFx_ = std::make_shared<ParticleSystemObject>("playerBulletTrail");
 	trailFx_->SetParent(this);
 	trailFx_->LoadConfig("Resources/Assets/Configs/Effect/playerBulletTrail.json");
-	FxIntermediary::GetInstance()->Attach(trailFx_.get());
+	FxIntermediary::GetInstance()->Attach(trailFx_);
 
-	shootFx_ = std::make_unique<ParticleSystemObject>("shootFx");
+	shootFx_ = std::make_shared<ParticleSystemObject>("shootFx");
 	shootFx_->LoadConfig("Resources/Assets/Configs/Effect/ShootFx.json");
 	shootFx_->SetParent(this);
-	FxIntermediary::GetInstance()->Attach(shootFx_.get());
+	FxIntermediary::GetInstance()->Attach(shootFx_);
 
 	shootFx_->Play();
-}
-
-PlayerBullet::~PlayerBullet() {
-	FxIntermediary::GetInstance()->Detach(trailFx_.get());
-	FxIntermediary::GetInstance()->Detach(shootFx_.get());
 }
 
 void PlayerBullet::Update(){

@@ -44,7 +44,7 @@ private:
 private:
 	SceneContext* sceneContext_ = nullptr;
 	EnemyCollection* ownerCollection_ = nullptr;
-	std::list<Enemy*> spawnedEnemies_;
+	std::list<std::shared_ptr<Enemy>> spawnedEnemies_;
 	size_t maxSpawnCount_ = 5;
 	WorldTransform worldTransform_;
 	WorldTransform* playerTransform_ = nullptr;

@@ -1,18 +1,16 @@
 #pragma once
 
-// engine
 #include <Engine/System/Command/Interface/ICommand.h>
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
 
-// c++
 #include <memory>
+#include <functional>
 
 class SceneContext;
 
-class CreateShapeObjectCommand 
-	: public ICommand {
+class CreateShapeObjectCommand : public ICommand{
 public:
-	using ObjectFactory = std::function<std::unique_ptr<BaseGameObject>()>;
+	using ObjectFactory = std::function<std::shared_ptr<BaseGameObject>()>;
 
 	CreateShapeObjectCommand(SceneContext* context, ObjectFactory factory);
 
@@ -23,6 +21,6 @@ public:
 private:
 	SceneContext* context_ = nullptr;
 	ObjectFactory factory_;
-	BaseGameObject* object_ = nullptr;
-	std::string name_; // ログ用の名前
+	std::shared_ptr<BaseGameObject> object_;
+	std::string name_;
 };

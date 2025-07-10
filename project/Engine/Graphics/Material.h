@@ -34,7 +34,7 @@ struct Material{
 struct ParticleMaterial{
 	Vector4 color = {1, 1, 1, 1};  // 基本色（tint）
 	Matrix4x4 uvTransform = Matrix4x4::MakeIdentity(); // UVアニメ用
-	std::string texturePath = "particle.png"; // テクスチャパス（将来用）
+	std::string texturePath = "particle.png"; // テクスチャパス
 };
 
 struct Material2D{

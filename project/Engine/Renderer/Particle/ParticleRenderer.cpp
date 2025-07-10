@@ -7,9 +7,11 @@
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 
 
-void ParticleRenderer::Render(const std::vector<FxEmitter*>& emitters,
-							  PipelineService* pipelineService,
-							  ID3D12GraphicsCommandList* cmdList){
+void ParticleRenderer::Render(
+	const std::vector<std::shared_ptr<FxEmitter>>& emitters,
+	PipelineService* pipelineService,
+	ID3D12GraphicsCommandList* cmdList
+){
 	auto psoSet = pipelineService->GetPipelineSet(PipelineTag::Object::Particle, BlendMode::ADD);
 	psoSet.SetCommand(cmdList);
 
@@ -17,7 +19,7 @@ void ParticleRenderer::Render(const std::vector<FxEmitter*>& emitters,
 
 	auto device = GraphicsGroup::GetInstance()->GetDevice().Get();
 
-	for (auto* emitter : emitters){
+	for (const auto& emitter : emitters){
 		if (!emitter || !emitter->IsDrawEnable() || emitter->GetUnits().empty()) continue;
 
 		// マテリアル・テクスチャ設定
@@ -25,7 +27,7 @@ void ParticleRenderer::Render(const std::vector<FxEmitter*>& emitters,
 		auto textureHandle = TextureManager::GetInstance()->LoadTexture("Textures/" + emitter->GetTexturePath());
 		cmdList->SetGraphicsRootDescriptorTable(3, textureHandle);
 
-		// パーティクルデータを GPU に転送（SRV を emitter 側が保持）
+		// パーティクルデータを GPU に転送
 		emitter->TransferParticleDataToGPU();
 
 		// モデル取得＆初期化
@@ -34,10 +36,11 @@ void ParticleRenderer::Render(const std::vector<FxEmitter*>& emitters,
 
 		EnsureModelIsReady(model, device);
 
-		// モデルバインド・描画
-		DrawModelInstanced(model, cmdList,
-						   static_cast< UINT >(emitter->GetUnits().size()),
-						   emitter->GetInstanceBuffer().GetGpuHandle());
+		DrawModelInstanced(
+			model, cmdList,
+			static_cast< UINT >(emitter->GetUnits().size()),
+			emitter->GetInstanceBuffer().GetGpuHandle()
+		);
 	}
 }
 

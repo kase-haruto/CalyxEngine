@@ -147,32 +147,40 @@ void LevelEditor::SetSelectedObject(SceneObject* object){
 	inspector_->SetSelectedObject(object);
 }
 
-void LevelEditor::CreateObject(std::unique_ptr<SceneObject> obj){
+void LevelEditor::CreateObject(std::shared_ptr<SceneObject> obj){
 
 	if (obj->GetObjectType() == ObjectType::ParticleSystem){
-		auto* particleSystem = dynamic_cast< ParticleSystemObject* >(obj.get());
-		pSceneContext_->GetFxSystem()->AddEmitter(particleSystem);
+		auto particleSystem = std::dynamic_pointer_cast< ParticleSystemObject >(obj);
+		if (particleSystem){
+			pSceneContext_->GetFxSystem()->AddEmitter(particleSystem);
+		}
 	}
 
-	pSceneContext_->AddEditorObject(std::move(obj));
+	pSceneContext_->AddEditorObject(obj);
 }
+
 
 void LevelEditor::DeleteObject(SceneObject* object){
 	if (!object) return;
 
-	// 選択中のオブジェクトだったら解除
 	if (selectedObject_ == object){
 		selectedObject_ = nullptr;
 		inspector_->SetSelectedObject(nullptr);
 	}
 
-	// シーンオブジェクトの削除
 	if (object->GetObjectType() == ObjectType::ParticleSystem){
-		auto* obj = dynamic_cast< ParticleSystemObject* >(object);
-		pSceneContext_->GetFxSystem()->RemoveEmitter(obj);
+		auto sharedObj = pSceneContext_->FindSharedObject(object);
+		auto fxEmitter = std::dynamic_pointer_cast< FxEmitter >(sharedObj);
+		if (fxEmitter){
+			pSceneContext_->GetFxSystem()->RemoveEmitter(fxEmitter);
+		}
 	}
-	pSceneContext_->RemoveEditorObject(object);
-	pSceneContext_->GetObjectLibrary()->RemoveObject(object);
+
+	auto sharedObj = pSceneContext_->FindSharedObject(object);
+	if (sharedObj){
+		pSceneContext_->RemoveEditorObject(sharedObj);
+		pSceneContext_->GetObjectLibrary()->RemoveObject(sharedObj);
+	}
 }
 
 void LevelEditor::RenderViewport(ViewportType type, const ImTextureID& tex){

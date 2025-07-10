@@ -41,6 +41,6 @@ private:
 	/* objects ====================================================*/
 	std::unique_ptr<BaseGameObject> testObject;
 	std::unique_ptr<Sprite> testSprite_;
-	BaseGameObject* animationHuman_;
+	std::shared_ptr<BaseGameObject> animationHuman_;
 };
 

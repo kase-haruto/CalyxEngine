@@ -20,16 +20,15 @@ public:
 	//===================================================================*/
 	FxSystem();
 	~FxSystem() ;
-	void AddEmitter(FxEmitter* emitter);
-	void RemoveEmitter(FxEmitter* emitter);
+	void AddEmitter(const std::shared_ptr<FxEmitter>& emitter);
+	void RemoveEmitter(const std::shared_ptr<FxEmitter>& emitter);
 	void Update();
 	void Render(class PipelineService*, ID3D12GraphicsCommandList*);
 	void Clear();
-	const std::vector<FxEmitter*>& GetEmitters() const{ return emitters_; }
 private:
 	//===================================================================*/
 	//					private variable
 	//===================================================================*/
-	std::vector<FxEmitter*> emitters_;
-	std::unique_ptr<ParticleRenderer> particleRenderer_ ;
+	std::vector<std::weak_ptr<FxEmitter>> emitters_;
+	std::unique_ptr<ParticleRenderer> particleRenderer_;
 };

@@ -25,7 +25,7 @@ public:
 	// 編集対象
 	void SetSelectedEditor(BaseEditor* editor);
 	void SetSelectedObject(SceneObject* object);
-	void CreateObject(std::unique_ptr<SceneObject> obj);
+	void CreateObject(std::shared_ptr<SceneObject> obj);
 	void DeleteObject(SceneObject* object);
 	void RenderViewport(ViewportType type, const ImTextureID& tex);
 

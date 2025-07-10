@@ -19,8 +19,10 @@ void SceneContext::Initialize(){
 }
 
 void SceneContext::Update(){
-	for (auto& obj : editorObjects_){
-		obj->Update();
+	for (auto& weakObj : editorObjects_){
+		if (auto obj = weakObj.lock()){
+			obj->Update();
+		}
 	}
 
 	lightLibrary_->Update();
@@ -45,17 +47,42 @@ void SceneContext::Clear(){
 	PrimitiveDrawer::GetInstance()->ClearMesh();
 }
 
-void SceneContext::RemoveEditorObject(SceneObject* obj){
+void SceneContext::RemoveEditorObject(const std::shared_ptr<SceneObject>& obj){
 	objectLibrary_->RemoveObject(obj);
 
-	auto& vec = editorObjects_;
-	vec.erase(std::remove(vec.begin(), vec.end(), obj), vec.end());
+	editorObjects_.erase(
+		std::remove_if(
+		editorObjects_.begin(), editorObjects_.end(),
+		[&obj] (const std::weak_ptr<SceneObject>& w){
+			return !w.owner_before(obj) && !obj.owner_before(w.lock());
+		}
+	),
+		editorObjects_.end()
+	);
 
 	for (auto& cb : objectRemovedCallbacks_){
-		cb(obj);
+		cb(obj.get());
 	}
 }
 
-std::vector<SceneObject*>& SceneContext::GetEditorObjects(){
-	return editorObjects_;
+
+std::vector<std::shared_ptr<SceneObject>> SceneContext::GetEditorObjects(){
+	std::vector<std::shared_ptr<SceneObject>> validObjects;
+
+	for (const auto& w : editorObjects_){
+		if (auto locked = w.lock()){
+			validObjects.push_back(locked);
+		}
+	}
+
+	return validObjects;
+}
+
+std::shared_ptr<SceneObject> SceneContext::FindSharedObject(SceneObject* ptr){
+	for (const auto& s : objectLibrary_->GetAllObjectsShared()){
+		if (s.get() == ptr){
+			return s;
+		}
+	}
+	return nullptr;
 }

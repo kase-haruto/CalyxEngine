@@ -47,7 +47,7 @@ void GameScene::Initialize(){
 	railCamera_ = std::make_unique<RailCamera>();
 	railCamera_->Initialize();
 
-	modelField_ = sceneContext_->GetObjectLibrary()->CreateAndAddObject<BaseGameObject>("terrain.obj", "field");
+	modelField_ = sceneContext_->GetObjectLibrary()->CreateAndAddObject<BaseGameObject>("terrain.obj", "field").get();
 	modelField_->SetScale({300.0f,300.0f,300.0f});
 	modelField_->SetTranslate({ -150.0f, -150.0f, 0.0f });
 	modelField_->SetUvScale(Vector2(10.0f,10.0f));
@@ -55,15 +55,19 @@ void GameScene::Initialize(){
 
 
 	//player
-	player_ = sceneContext_->GetObjectLibrary()->CreateAndAddObject<Player>("player.gltf", "player");
+	player_ = sceneContext_->GetObjectLibrary()->CreateAndAddObject<Player>("player.gltf", "player").get();
 	player_->SetParent(&railCamera_->GetWorldTransform());
 	player_->Initialize();
 
-	playerBulletContainer_ = sceneContext_->AddEditorObject(std::make_unique<BulletContainer>("playerBulletContainer"));
+	playerBulletContainer_ = sceneContext_->AddEditorObject(
+		std::make_shared<BulletContainer>("playerBulletContainer")
+	);
 	playerBulletContainer_->SetSceneContext(sceneContext_.get());
 	player_->SetBulletContainer(playerBulletContainer_);
 
-	enemyCollection_ = sceneContext_->AddEditorObject(std::make_unique<EnemyCollection>("enemyContainer"));
+	enemyCollection_ = sceneContext_->AddEditorObject(
+		std::make_shared<EnemyCollection>("enemyContainer")
+	);
 	enemyCollection_->SetSceneContext(sceneContext_.get());
 	enemyCollection_->SetPlayerTransform(&player_->GetWorldTransform());
 	enemyCollection_->CreateSpawners();

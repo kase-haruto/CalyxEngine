@@ -17,7 +17,7 @@ public:
 	Enemy() = default;
 	Enemy(const std::string& modelName,const std::string objName);
 
-	virtual ~Enemy();
+	virtual ~Enemy() = default;
 
 	void InitializeEffect();
 	void Initialize()override;
@@ -55,7 +55,7 @@ private:
 	float waveAmplitude_ = 1.0f; // 振れ幅
 	float waveSpeed_ = 2.0f;     // サイン波の速さ
 
-	std::unique_ptr<ParticleSystemObject> hitFx_;
-	std::unique_ptr<ParticleSystemObject> explosionFx_;
+	std::shared_ptr<ParticleSystemObject> hitFx_;
+	std::shared_ptr<ParticleSystemObject> explosionFx_;
 };
 

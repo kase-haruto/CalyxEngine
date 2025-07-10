@@ -21,21 +21,22 @@ public:
 	void SetSceneContext(SceneContext* context);
 	void SetPlayerTransform(WorldTransform* pTransform);
 
-	void AddEnemy(Enemy* enemy);
-	void AddSpawner(class EnemySpawner* spawner);
+	void AddEnemy(const std::shared_ptr<Enemy>& enemy);
+	void AddSpawner(const std::shared_ptr<class EnemySpawner>& spawner);
 	void CreateSpawners();
 	void Clear();
 
-	const std::list<Enemy*>& GetEnemies()const { return enemies_; }
+	const std::list<std::shared_ptr<Enemy>>& GetEnemies() const{ return enemies_; }
 
-	int GetDeadEnemyCount()const { return deadEnemyCount; }
+	int GetDeadEnemyCount() const{ return deadEnemyCount; }
 private:
 	//===================================================================*/
 	//                      Private variables
 	//===================================================================*/
-	std::list<Enemy*> enemies_;
-	std::vector<class EnemySpawner*> spawners_;
+	std::list<std::shared_ptr<Enemy>> enemies_;
+	std::vector<std::shared_ptr<class EnemySpawner>> spawners_;
 	int deadEnemyCount = 0;
+
 	SceneContext* sceneContext_ = nullptr;
 	WorldTransform* playerTransform_ = nullptr;
 };

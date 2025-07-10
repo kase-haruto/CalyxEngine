@@ -10,7 +10,7 @@ CreateParticleSystemObjectCommand::CreateParticleSystemObjectCommand(SceneContex
 
 void CreateParticleSystemObjectCommand::Execute(){
 	auto obj = factory_();
-	particleSystem_ = obj.get();
+	particleSystem_ = obj;
 
 	// 所有権をEditorObjectとして登録
 	context_->AddEditorObject<ParticleSystemObject>(std::move(obj));

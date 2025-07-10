@@ -33,22 +33,17 @@ Enemy::Enemy(const std::string& modelName, const std::string objName) :
 	waveAmplitude_ = 2.0f;
 	waveSpeed_ = Random::Generate<float>(1.0f, 3.0f);
 
-	hitFx_ = std::make_unique<ParticleSystemObject>("hitFx");
+	hitFx_ = std::make_shared<ParticleSystemObject>("hitFx");
 	hitFx_->LoadConfig("Resources/Assets/Configs/Effect/HitFx.json");
 	hitFx_->SetParent(this);
 	hitFx_->Stop();
-	FxIntermediary::GetInstance()->Attach(hitFx_.get());
+	FxIntermediary::GetInstance()->Attach(hitFx_);
 
-	explosionFx_ = std::make_unique<ParticleSystemObject>("explosionFx");
+	explosionFx_ = std::make_shared<ParticleSystemObject>("explosionFx");
 	explosionFx_->LoadConfig("Resources/Assets/Configs/Effect/Explosion.json");
 	explosionFx_->SetParent(this);
 	explosionFx_->Stop();
-	FxIntermediary::GetInstance()->Attach(explosionFx_.get());
-}
-
-Enemy::~Enemy(){
-	FxIntermediary::GetInstance()->Detach(hitFx_.get());
-	FxIntermediary::GetInstance()->Detach(explosionFx_.get());
+	FxIntermediary::GetInstance()->Attach(explosionFx_);
 }
 
 
