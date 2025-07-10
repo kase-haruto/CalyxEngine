@@ -2,11 +2,11 @@
     "autoDestroy": false,
     "color": {
         "w": 1.0,
-        "x": 0.5607843399047852,
-        "y": 0.05882352963089943,
-        "z": 0.007843137718737125
+        "x": 0.5921568870544434,
+        "y": 0.38823530077934265,
+        "z": 0.9333333373069763
     },
-    "emitCount": 1,
+    "emitCount": 9,
     "emitDelay": 0.0,
     "emitDuration": -1.0,
     "emitRate": 0.10000000149011612,
@@ -14,17 +14,17 @@
     "isComplement": true,
     "isDrawEnable": true,
     "isOneShot": true,
-    "isStatic": true,
+    "isStatic": false,
     "lifetime": {
-        "constant": 1.0,
-        "max": 3.0,
-        "min": 1.0,
-        "mode": 0
+        "constant": 1.059999942779541,
+        "max": 0.9399999976158142,
+        "min": 0.029999999329447746,
+        "mode": 1
     },
     "modelPath": "plane.obj",
     "modules": [
         {
-            "animationSpeed": 17.059999465942383,
+            "animationSpeed": 15.260000228881836,
             "cols": 4,
             "enabled": true,
             "loop": true,
@@ -33,9 +33,9 @@
             "useCustomFrames": false
         },
         {
-            "easeType": 8,
+            "easeType": 6,
             "enabled": true,
-            "isGrowing": true,
+            "isGrowing": false,
             "name": "SizeOverLifetimeModule"
         }
     ],
@@ -49,8 +49,8 @@
     },
     "scale": {
         "constant": {
-            "x": 5.319999933242798,
-            "y": 5.2699999809265137,
+            "x": 2.869999885559082,
+            "y": 2.890000104904175,
             "z": 1.0
         },
         "max": {
@@ -65,7 +65,7 @@
         },
         "mode": 0
     },
-    "texturePath": "explosionEffect.png",
+    "texturePath": "hitEffect.png",
     "transform": {
         "rotation": {
             "w": 1.0,
@@ -91,14 +91,14 @@
             "z": 0.0
         },
         "max": {
-            "x": 1.0,
-            "y": 0.0,
-            "z": 1.0
+            "x": 5.710000038146973,
+            "y": 3.8399999141693115,
+            "z": 1.9199999570846558
         },
         "min": {
-            "x": -1.0,
-            "y": 0.0,
-            "z": -1.0
+            "x": -6.340000152587891,
+            "y": -3.2699999809265137,
+            "z": -1.940000057220459
         },
         "mode": 1
     }

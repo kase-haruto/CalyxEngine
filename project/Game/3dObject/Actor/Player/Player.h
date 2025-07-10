@@ -41,6 +41,7 @@ public:
 
 	std::vector<Sprite*> GetAllSprites();
 	void SetEnemyList(std::list<Enemy*> targets) { targets_ = targets; }
+	const Vector3 GetCenterPos()const override;
 private:
 	//===================================================================*/
 	//                   private methods

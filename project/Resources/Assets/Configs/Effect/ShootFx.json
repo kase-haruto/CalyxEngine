@@ -59,7 +59,7 @@
         },
         "mode": 0
     },
-    "texturePath": "Effect.png",
+    "texturePath": "shootEffect.png",
     "transform": {
         "rotation": {
             "w": 1.0,

@@ -12,7 +12,7 @@
 #include <Engine/Foundation/Utility/Ease/Ease.h>
 #include <Engine/Foundation/Utility/Random/Random.h>
 #include <Engine/Application/Effects/Intermediary/FxIntermediary.h>
-
+#include <Engine/Objects/Collider/BoxCollider.h>
 // externals
 #include <externals/imgui/imgui.h>
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
@@ -27,6 +27,8 @@ Player::Player(const std::string& modelName,
 	worldTransform_.scale = {1.5f,1.5f,1.5f};
 	collider_->SetTargetType(ColliderType::Type_Enemy);
 	collider_->SetType(ColliderType::Type_Player);
+	auto* boxCollider = dynamic_cast< BoxCollider* >(collider_.get());
+	boxCollider->SetSize(Vector3(3.0f, 3.0f, 3.0f));
 }
 
 
@@ -59,17 +61,12 @@ void Player::Initialize(){
 	for (size_t i = 0; i < spriteCount; ++i){
 		reticleSprites_[i] = std::make_unique<Sprite>("Textures/reticle.png");
 
-		// t = 0.0（プレイヤー側）～ 1.0（レティクル側）
-		float t = static_cast< float >(i) / (spriteCount - 1);
-
 		// eased = プレイヤー側（t=0）: 大きい、照準側（t=1）: 小さい
-		float eased = std::cos(t * 3.1415f * 0.5f); // ease-out
-		float size = 16.0f + eased * (64.0f - 16.0f);
+		float t = static_cast< float >(i) / (spriteCount - 1); // 0 ~ 1
+		float size = std::lerp(128.0f, 16.0f, t); // t=0:128, t=1:64
 		Vector2 spriteSize(size, size);
 
-		// 仮の座標（中央など）
 		Vector2 initPos = kGameSize * 0.5f;
-
 		reticleSprites_[i]->Initialize(initPos, spriteSize);
 		reticleSprites_[i]->SetAnchorPoint(Vector2(0.5f, 0.5f));
 	}
@@ -103,7 +100,7 @@ void Player::Update(){
 	size_t spriteCount = reticleSprites_.size();
 	if (spriteCount < 2) return;
 
-	Vector3 diff = reticlePos - playerPos; // ← player → reticle の順に変更
+	Vector3 diff = (reticlePos - playerPos)*0.5f;
 
 	for (size_t i = 0; i < spriteCount; ++i){
 		float t = static_cast< float >(i) / (spriteCount - 1);
@@ -111,8 +108,8 @@ void Player::Update(){
 		Vector3 worldPos = playerPos + diff * t;
 
 		// 偶奇で回転方向を変える
-		float rotateSpeed = (i % 2 == 0) ? 0.02f : -0.02f; // frameごとにちょっとずつ
-		float uvRotateSpeed = (i % 2 == 0) ? 0.2f : -0.2f; // frameごとにちょっとずつ
+		float rotateSpeed = (i % 2 == 0) ? 0.02f : -0.02f;
+		float uvRotateSpeed = (i % 2 == 0) ? 0.2f : -0.2f;
 
 		// スプライトの回転を更新
 		float currentRotate = reticleSprites_[i]->GetRotation();
@@ -158,6 +155,12 @@ std::vector<Sprite*> Player::GetAllSprites(){
 	for (auto& s : lifeSprite_) sprites.push_back(s.get());
 	sprites.push_back(attackSprite_.get());
 	return sprites;
+}
+
+const Vector3 Player::GetCenterPos() const{
+	const Vector3 offset = {0.0f, 1.5f, 0.0f};
+	Vector3 worldPos = Vector3::Transform(offset, worldTransform_.matrix.world);
+	return worldPos;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -212,7 +215,7 @@ void Player::Shoot(){
 
 }
 
-void Player::UpdateReticlePosition() {
+void Player::UpdateReticlePosition(){
 	constexpr float moveSpeed = 6.0f;
 	constexpr float stickSensitivity = 300.0f;  // スティック感度を大きめに
 	float dt = ClockManager::GetInstance()->GetDeltaTime();
@@ -237,7 +240,7 @@ void Player::UpdateReticlePosition() {
 	keyboardOffset.x -= rightStick.x * stickSensitivity * dt;
 	keyboardOffset.y -= rightStick.y * stickSensitivity * dt;
 
-	if (keyboardOffset.Length() > 0.0f) {
+	if (keyboardOffset.Length() > 0.0f){
 		keyboardOffset.Normalize();
 		keyboardOffset *= moveSpeed * dt;
 		offset.x = keyboardOffset.x + rightStick.x * stickSensitivity * dt;
@@ -297,6 +300,5 @@ float Player::EaseForwardThenReturn(float t){
 	}
 }
 
-void Player::InitializeEffect(){
-}
+void Player::InitializeEffect(){}
 

@@ -6,7 +6,7 @@
             "isDraw": true,
             "targetType": 0
         },
-        "guid": "5021f484-d4bc-4ea6-b781-b9b8ae3e9561",
+        "guid": "2879150b-d20b-4ca9-a454-13a12932116c",
         "modelConfig": {
             "blendMode": 5,
             "materialConfig": {
@@ -22,7 +22,7 @@
                 "isReflect": false,
                 "shininess": 20.0
             },
-            "modelName": "debugCube.obj",
+            "modelName": "cone.obj",
             "textureName": "textures/white1x1.png",
             "uvTransConfig": {
                 "rotation": 0.0,
@@ -32,7 +32,7 @@
                 }
             }
         },
-        "name": "cube",
+        "name": "cone",
         "objectType": 2,
         "parentGuid": "00000000-0000-0000-0000-000000000000",
         "transform": {
@@ -48,9 +48,9 @@
                 "z": 1.0
             },
             "translation": {
-                "x": 1.5791575908660889,
-                "y": 0.0,
-                "z": 0.0
+                "x": -5.855641841888428,
+                "y": 0.12339401245117188,
+                "z": 0.02797222137451172
             }
         }
     },
@@ -66,7 +66,7 @@
         "emitDelay": 0.0,
         "emitDuration": -1.0,
         "emitRate": 0.10000000149011612,
-        "guid": "ab906393-9341-4bd3-b3a6-a3c1498825c0",
+        "guid": "6bb8ba65-d2ff-44f6-83fe-fc20f6220e29",
         "isComplement": true,
         "isDrawEnable": true,
         "isOneShot": false,
@@ -81,11 +81,11 @@
         "modules": [],
         "name": "ParticleSystem",
         "objectType": 3,
-        "parentGuid": "5021f484-d4bc-4ea6-b781-b9b8ae3e9561",
+        "parentGuid": "2879150b-d20b-4ca9-a454-13a12932116c",
         "position": {
-            "x": 1.5791575908660889,
-            "y": 0.0,
-            "z": 0.0
+            "x": -4.955873489379883,
+            "y": 1.4394280910491943,
+            "z": 0.5699281692504883
         },
         "scale": {
             "constant": {
