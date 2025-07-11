@@ -21,6 +21,8 @@ void CalyxHuman::Update(){
 
 	TransitionAnimation();
 
+	collider_->SetCollisionEnabled(false);
+
 	BaseGameObject::Update();
 }
 

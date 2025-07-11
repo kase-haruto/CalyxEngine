@@ -254,132 +254,11 @@ int System::ProcessMessage() { return winApp_->ProcessMessage() ? 1 : 0; }
 //=============================================================================================================
 void System::CreatePipelines() {
 	shaderManager_->InitializeDXC();
-	//Object2DPipelines();
 	LinePipeline();
 	EffectPipeline();
 	SkyBoxPipeline();
 }
 
-void System::Object2DPipelines() {
-	// InputLayoutの設定 (2D用: POSITIONとTEXCOORDのみ)
-	D3D12_INPUT_ELEMENT_DESC inputElementDescs[2] = {};
-	inputElementDescs[0].SemanticName = "POSITION";
-	inputElementDescs[0].SemanticIndex = 0;
-	inputElementDescs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	inputElementDescs[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-	inputElementDescs[1].SemanticName = "TEXCOORD";
-	inputElementDescs[1].SemanticIndex = 0;
-	inputElementDescs[1].Format = DXGI_FORMAT_R32G32_FLOAT;
-	inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-
-	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
-	inputLayoutDesc.pInputElementDescs = inputElementDescs;
-	inputLayoutDesc.NumElements = _countof(inputElementDescs);
-
-	// BlendStateの設定 (アルファブレンド有効)
-	BlendMode blendMode = BlendMode::ALPHA;
-
-	// RasterizerStateの設定 (カリングなし)
-	D3D12_RASTERIZER_DESC rasterizeDesc{};
-	rasterizeDesc.CullMode = D3D12_CULL_MODE_NONE;
-	rasterizeDesc.FillMode = D3D12_FILL_MODE_SOLID;
-
-	// DepthStencilStateの設定 (深度ステンシルは無効化)
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
-	depthStencilDesc.DepthEnable = false;
-	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
-	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_ALWAYS;
-
-	// シェーダの読み込み
-	if (!shaderManager_->LoadShader(Object2D, L"Object2d.VS.hlsl", L"Object2d.PS.hlsl")) {
-		// シェーダの読み込みに失敗した場合のエラーハンドリング
-		return;
-	}
-
-	// RootSignatureの設定
-	D3D12_ROOT_PARAMETER rootParameters[3] = {};
-
-	// マテリアル
-	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[0].Descriptor.ShaderRegister = 0;
-
-	// wvp行列
-	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-	rootParameters[1].Descriptor.ShaderRegister = 0;
-
-	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
-	descriptorRange[0].BaseShaderRegister = 0;
-	descriptorRange[0].NumDescriptors = 1;
-	descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-
-	// テクスチャ
-	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange;
-	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);
-
-	D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
-	rootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-	rootSignatureDesc.pParameters = rootParameters;
-	rootSignatureDesc.NumParameters = _countof(rootParameters);
-
-	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
-	staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
-	staticSamplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	staticSamplers[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	staticSamplers[0].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
-	staticSamplers[0].MaxLOD = D3D12_FLOAT32_MAX;
-	staticSamplers[0].ShaderRegister = 0;
-	staticSamplers[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-
-	rootSignatureDesc.pStaticSamplers = staticSamplers;
-	rootSignatureDesc.NumStaticSamplers = _countof(staticSamplers);
-
-	// RootSignatureの作成
-	ComPtr<ID3DBlob> signatureBlob;
-	ComPtr<ID3DBlob> errorBlob;
-	HRESULT hr = D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
-	if (FAILED(hr)) {
-		// RootSignatureのシリアライズに失敗した場合のエラーハンドリング
-		if (errorBlob) {
-			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-		}
-		return;
-	}
-
-	ComPtr<ID3D12RootSignature> rootSignature;
-	ComPtr<ID3D12Device> device = dxCore_->GetDevice();
-	hr = device->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
-	if (FAILED(hr)) {
-		// RootSignatureの作成に失敗した場合のエラーハンドリング
-		return;
-	}
-
-	// PSOの設定
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
-	psoDesc.pRootSignature = rootSignature.Get();
-	psoDesc.InputLayout = inputLayoutDesc;
-	psoDesc.VS = { shaderManager_->GetVertexShader(Object2D)->GetBufferPointer(), shaderManager_->GetVertexShader(Object2D)->GetBufferSize() };
-	psoDesc.PS = { shaderManager_->GetPixelShader(Object2D)->GetBufferPointer(), shaderManager_->GetPixelShader(Object2D)->GetBufferSize() };
-	psoDesc.RasterizerState = rasterizeDesc;
-	psoDesc.DepthStencilState = depthStencilDesc;
-	psoDesc.NumRenderTargets = 1;
-	psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
-	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	psoDesc.SampleDesc.Count = 1;
-	psoDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
-	psoDesc.DSVFormat = DXGI_FORMAT_UNKNOWN; // 深度ステンシル不要なのでDSVFormatは設定しない
-
-	// パイプラインステートオブジェクトの作成
-	if (!pipelineStateManager_->CreatePipelineState(Object2D, L"Object2d.VS.hlsl", L"Object2d.PS.hlsl", rootSignatureDesc, psoDesc, blendMode)) {
-		// エラーハンドリング
-		return;
-	}
-}
 
 void System::LinePipeline() {
 	// InputLayoutの設定
@@ -410,9 +289,21 @@ void System::LinePipeline() {
 
 	// DepthStencilStateの設定
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
-	depthStencilDesc.DepthEnable = true;
+	/*depthStencilDesc.DepthEnable = true;
 	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;*/
+
+	depthStencilDesc.DepthEnable = false;
+	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO; // 書き込みを無効にする
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	depthStencilDesc.StencilEnable = FALSE;
+
+
+	D3D12_DEPTH_STENCIL_DESC depthDesc = {};
+	depthDesc.DepthEnable = TRUE;
+	depthDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO; // 書き込みを無効にする
+	depthDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	depthDesc.StencilEnable = FALSE;
 
 	// シェーダの読み込み
 	if (!shaderManager_->LoadShader(Line, L"Fragment.VS.hlsl", L"Fragment.PS.hlsl")) {

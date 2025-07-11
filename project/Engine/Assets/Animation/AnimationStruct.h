@@ -59,14 +59,15 @@ struct Node{
 /////////////////////////////////////////////////////////////////////////////////////////
 struct Animation{
 	float duration = 0.0f;  // アニメーション全体の尺(秒)
-	// ※本来は TicksPerSecond など、時間単位の情報もあると便利
 	std::map<std::string, NodeAnimation> nodeAnimations;
+	std::vector<const NodeAnimation*> fastChannels;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //          skelton
 /////////////////////////////////////////////////////////////////////////////////////////
 struct Joint{
+	QuaternionTransform restTransform;	//< バインドポーズ
 	QuaternionTransform transform;	//< transform情報
 	Matrix4x4 localMatrix;			//< ローカル行列
 	Matrix4x4 skeletonSpaceMatrix;	//< スケルトン空間行列
@@ -81,9 +82,11 @@ struct Skeleton{
 	std::map<std::string, int32_t> jointMap;
 	std::vector<Joint> joints;
 
-	void JointDraw(const Matrix4x4& m);
+	void JointDraw(const Matrix4x4& m, const Vector4& color);
 
-	void Draw();
+	void Draw(const Matrix4x4& world = Matrix4x4::MakeIdentity(),
+			  int highlightIndex = -1,
+			  const Vector4& colorHi = { 1,0.2f,0.2f,1 });
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////
