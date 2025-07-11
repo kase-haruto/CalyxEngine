@@ -168,22 +168,15 @@ void ModelManager::SetOnModelLoadedCallback(std::function<void(const std::string
 // 複数ファイルをまとめてロード (サンプル)
 //----------------------------------------------------------------------------
 void ModelManager::StartUpLoad(){
-	LoadModel("suzanne.obj");
 	LoadModel("run.gltf");
 	LoadModel("player.gltf");
 	LoadModel("ghost.obj");
-	LoadModel("debugSphere.obj");
 	LoadModel("debugCube.obj");
 	LoadModel("cylinder.obj");
 	LoadModel("cone.obj");
 	LoadModel("torus.obj");
-	LoadModel("fence.obj");
 	LoadModel("ground.obj");
-	LoadModel("multiMaterial.obj");
-	LoadModel("multiMesh.obj");
 	LoadModel("plane.obj");
-	LoadModel("teapot.obj");
-	LoadModel("terrain.obj");
 }
 
 //----------------------------------------------------------------------------
@@ -199,7 +192,7 @@ std::vector<std::string> ModelManager::GetLoadedModelNames() const{
 }
 
 //=============================================================================
-//  下記はファイル読み込みやGPUリソース作成の実装詳細
+//  
 //=============================================================================
 ModelData ModelManager::LoadModelFile(const std::string& directoryPath, const std::string& fileNameWithExt){
 	Assimp::Importer importer;

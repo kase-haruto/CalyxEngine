@@ -111,6 +111,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Assets\Animation\AnimationStruct.cpp" />
     <ClCompile Include="Engine\Scene\Title\TitleScene.cpp" />
     <ClCompile Include="Engine\Graphics\Camera\Frustum\Frustum.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Enemy\Spawner\EnemySpawner.cpp" />

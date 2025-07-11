@@ -22,6 +22,11 @@ public:
 	void SkinClusterUpdate();
 	void DrawSkeleton();
 
+	// アニメーションを追加
+	void AddAnimation(const std::string& animName, const std::string& fileName);
+	// アニメーションを再生（遷移）
+	void PlayAnimation(const std::string& animName, float blendDuration);
+
 	//============= 
 	// Transform関連
 	//=============
@@ -44,6 +49,10 @@ private:
 	// アニメーションを再生する
 	void PlayAnimation();
 
+	void UpdateAnimationTime();
+	void LoadAnimations(const std::string& directoryPath, const std::string& filename);
+	void ApplyAnimationToSkeleton();
+
 	Quaternion CalculateValue(const AnimationCurve<Quaternion>& curve, float time);
 	Vector3 CalculateValue(const AnimationCurve<Vector3>& curve, float time);
 
@@ -61,4 +70,12 @@ private:
 public:
 	float animationSpeed_ = 1.0f;		//< アニメーションの再生速度
 	bool isDrawSkeleton_ = false;		//< スケルトンを描画するかどうか
+
+private:
+	std::unordered_map<std::string, AnimationState> animationStates_;
+	AnimationState* currentAnimation_ = nullptr;
+	AnimationState* nextAnimation_ = nullptr;
+	float blendTime_ = 0.0f;
+	float blendDuration_ = 0.2f; // ブレンド時間（秒）
+
 };

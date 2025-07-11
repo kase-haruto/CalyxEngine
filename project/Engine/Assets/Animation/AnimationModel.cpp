@@ -18,9 +18,6 @@
 
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 
-// 追加: アニメーション読み込み関数
-extern Animation LoadAnimationFile(const std::string& directoryPath, const std::string& filename);
-
 //-----------------------------------------------------------------------------
 // コンストラクタ
 //-----------------------------------------------------------------------------
