@@ -100,7 +100,6 @@ void AnimationModel::PlayAnimation(){
 		currentAnimation_->weight = 1.0f;
 	}
 
-	// 適用
 	ApplyAnimationToSkeleton();
 }
 
@@ -169,6 +168,16 @@ void AnimationModel::AddAnimation(const std::string& animName, const std::string
 }
 
 void AnimationModel::PlayAnimation(const std::string& animName, float blendDuration){
+	// 同じアニメに切り替えるなら何もしない
+	if (currentAnimation_ && currentAnimation_->name == animName){
+		return;
+	}
+
+	// 既にブレンド先が同じなら何もしない
+	if (nextAnimation_ && nextAnimation_->name == animName){
+		return;
+	}
+
 	auto it = animationStates_.find(animName);
 	if (it == animationStates_.end()) return;
 
@@ -254,6 +263,14 @@ void AnimationModel::SkinClusterUpdate(){
 
 void AnimationModel::DrawSkeleton(){
 	modelData_->skeleton.Draw();
+}
+
+std::string AnimationModel::GetCurrentAnimationName() const{
+	if (currentAnimation_){
+		return currentAnimation_->name;
+	} else{
+		return "";
+	}
 }
 
 void AnimationModel::Update(){

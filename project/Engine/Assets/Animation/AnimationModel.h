@@ -22,6 +22,8 @@ public:
 	void SkinClusterUpdate();
 	void DrawSkeleton();
 
+	std::string GetCurrentAnimationName() const;
+
 	// アニメーションを追加
 	void AddAnimation(const std::string& animName, const std::string& fileName);
 	// アニメーションを再生（遷移）
@@ -77,5 +79,4 @@ private:
 	AnimationState* nextAnimation_ = nullptr;
 	float blendTime_ = 0.0f;
 	float blendDuration_ = 0.2f; // ブレンド時間（秒）
-
 };

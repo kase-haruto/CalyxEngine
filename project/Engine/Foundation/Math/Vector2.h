@@ -6,7 +6,7 @@ struct Vector2{
 	float x;
 	float y;
 
-
+	float Length()const;
 
 	//--------- operator -----------------------------------------------------
 	Vector2 operator+(const Vector2& v) const;

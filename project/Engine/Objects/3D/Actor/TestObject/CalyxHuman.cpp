@@ -7,8 +7,8 @@ CalyxHuman::CalyxHuman(const std::string& modelName,
 					   std::optional<std::string> objectName) :
 	Actor::Actor(modelName, objectName){
 	moveSpeed_ = 10.0f;
-
 	//animationを追加
+	GetAnimationModel()->AddAnimation("idle", "idle.gltf");
 }
 
 void CalyxHuman::Initialize(){}
@@ -24,7 +24,21 @@ void CalyxHuman::Update(){
 	BaseGameObject::Update();
 }
 
-void CalyxHuman::TransitionAnimation(){}
+void CalyxHuman::TransitionAnimation(){
+	Vector2 stickInput = Input::GetInstance()->GetLeftStick();
+	bool isMoving = stickInput.Length() > 0.1f;
+	auto* model = GetAnimationModel();
+
+	if (isMoving){
+		if (model->GetCurrentAnimationName() != "run"){
+			model->PlayAnimation("run", 0.2f);
+		}
+	} else{
+		if (model->GetCurrentAnimationName() != "idle"){
+			model->PlayAnimation("idle", 0.2f);
+		}
+	}
+}
 
 void CalyxHuman::Move(float dt){
 	velocity_ = {0.0f, 0.0f, 0.0f};
