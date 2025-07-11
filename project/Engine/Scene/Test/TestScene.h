@@ -6,7 +6,7 @@
 #include <Engine/Extensions/Fog/FogEffect.h>
 #include <Engine/scene/Base/BaseScene.h>
 #include <Engine/Renderer/Sprite/Sprite.h>
-#include <Engine/Objects/3D/Actor/BaseGameObject.h>
+#include <Engine/Objects/3D/Actor/TestObject/CalyxHuman.h>
 /* c++ */
 #include <memory>
 #include <vector>
@@ -41,6 +41,6 @@ private:
 	/* objects ====================================================*/
 	std::unique_ptr<BaseGameObject> testObject;
 	std::unique_ptr<Sprite> testSprite_;
-	std::shared_ptr<BaseGameObject> animationHuman_;
+	std::shared_ptr<CalyxHuman> animationHuman_;
 };
 

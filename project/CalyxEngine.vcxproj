@@ -111,6 +111,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Objects\3D\Actor\TestObject\CalyxHuman.cpp" />
     <ClCompile Include="Engine\Assets\Animation\AnimationStruct.cpp" />
     <ClCompile Include="Engine\Scene\Title\TitleScene.cpp" />
     <ClCompile Include="Engine\Graphics\Camera\Frustum\Frustum.cpp" />
@@ -294,6 +295,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Renderer\Model\ModelRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Objects\3D\Actor\TestObject\CalyxHuman.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Particle\EmitterConfig.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Particle\FxParmConfig.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Particle\Module\ModuleConfig.h" />
