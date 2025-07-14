@@ -29,6 +29,7 @@ public:
 	const std::list<std::shared_ptr<Enemy>>& GetEnemies() const{ return enemies_; }
 
 	int GetDeadEnemyCount() const{ return deadEnemyCount; }
+	std::string_view GetTypeName() const override{ return "EnemyCollection"; }
 private:
 	//===================================================================*/
 	//                      Private variables

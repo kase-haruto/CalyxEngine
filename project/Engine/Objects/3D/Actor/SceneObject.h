@@ -1,13 +1,18 @@
 #pragma once
 
-#include <string>
-#include <vector>
-#include <externals/nlohmann/json.hpp>
-
+// engine
 #include <Engine/objects/Transform/Transform.h>
 #include <Engine/objects/Collider/Collider.h>
 #include <Engine/Objects/3D/Geometory/AABB.h>
 #include <Engine/Foundation/Utility/Guid/Guid.h>
+
+// c++
+#include <string>
+#include <vector>
+#include <memory>
+
+// externals
+#include <externals/nlohmann/json.hpp>
 
 enum class ObjectType{
 	Camera,         // カメラ
@@ -19,7 +24,8 @@ enum class ObjectType{
 
 class IConfigurable; // 前方宣言
 
-class SceneObject{
+class SceneObject 
+	: public std::enable_shared_from_this<SceneObject>{
 public:
 	// =======================
 	// Constructors & Destructor
@@ -61,6 +67,7 @@ public:
 
 	virtual bool HasConfigInterface() const;
 
+
 	// =======================
 	// Accessors
 	// =======================
@@ -78,13 +85,15 @@ public:
 	bool IsDrawEnable() const{ return isDrawEnable_; }
 	virtual void SetDrawEnable(bool enable){ isDrawEnable_ = enable; }
 
-	SceneObject* GetParent() const{ return parent_; }
-	const std::vector<SceneObject*>& GetChildren() const{ return children_; }
+	std::shared_ptr<SceneObject> GetParent()  const{ return parent_.lock(); }
+	const std::vector<std::shared_ptr<SceneObject>>& GetChildren() const{ return children_; }
 
-	virtual void SetParent(SceneObject* newParent);
+	void SetParent(const std::shared_ptr<SceneObject>& newParentSp);
 
 	const Guid& GetGuid() const{ return id_; }
 	void SetGuid(const Guid& g){ id_ = g; }
+
+	virtual std::string_view GetTypeName() const = 0;
 
 	void UpdateWorldTransformRecursive();
 
@@ -92,22 +101,22 @@ protected:
 	// =======================
 	// Identification
 	// =======================
-	std::string name_ = "";				// オブジェクト名
-	std::string configPath_ = "";		// コンフィグファイルパス
-	Guid id_;							// 識別子
-	Guid parentId_;
+	std::string name_ = "";			//< オブジェクト名
+	std::string configPath_ = "";	//< コンフィグファイルパス
+	Guid id_;						//< 識別子
+	Guid parentId_;					//< 親識別子
 	ObjectType objectType_ = ObjectType::None;
 
 	// =======================
 	// Transform & Hierarchy
 	// =======================
-	WorldTransform worldTransform_;			// ワールドトランスフォーム
-	SceneObject* parent_ = nullptr;			// 親オブジェクト
-	std::vector<SceneObject*> children_;	// 子オブジェクトリスト
+	WorldTransform worldTransform_;							//< ワールドトランスフォーム
+	std::weak_ptr<SceneObject> parent_;						//< 親オブジェクト
+	std::vector<std::shared_ptr<SceneObject>> children_;	//< 子オブジェクトリスト
 
 	// =======================
 	// State Flags
 	// =======================
-	bool isEnableRaycast_ = true;   // レイキャスト有効/無効
-	bool isDrawEnable_ = true;      // 描画有効/無効
+	bool isEnableRaycast_ = true;		// レイキャスト有効/無効
+	bool isDrawEnable_ = true;			// 描画有効/無効
 };

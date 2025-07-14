@@ -24,8 +24,6 @@ Enemy::Enemy(const std::string& modelName, const std::string objName) :
 	auto* boxCollider = dynamic_cast< BoxCollider* >(collider_.get());
 	boxCollider->SetSize(Vector3(3.0f, 3.0f, 3.0f));
 
-	auto collider = dynamic_cast< BoxCollider* >(collider_.get());
-	collider->SetSize(worldTransform_.scale + 1);
 	collider_->SetIsDrawCollider(false);
 
 	life_ = 2;
@@ -35,22 +33,28 @@ Enemy::Enemy(const std::string& modelName, const std::string objName) :
 
 	hitFx_ = std::make_shared<ParticleSystemObject>("hitFx");
 	hitFx_->LoadConfig("Resources/Assets/Configs/Effect/HitFx.json");
-	hitFx_->SetParent(this);
-	hitFx_->Stop();
-	FxIntermediary::GetInstance()->Attach(hitFx_);
+	
 
 	explosionFx_ = std::make_shared<ParticleSystemObject>("explosionFx");
 	explosionFx_->LoadConfig("Resources/Assets/Configs/Effect/Explosion.json");
-	explosionFx_->SetParent(this);
-	explosionFx_->Stop();
-	FxIntermediary::GetInstance()->Attach(explosionFx_);
+	
 }
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		初期化
 /////////////////////////////////////////////////////////////////////////////////////////
-void Enemy::Initialize(){}
+void Enemy::Initialize(){
+	auto self = shared_from_this();
+
+	hitFx_->SetParent(self);
+	hitFx_->Stop();
+	FxIntermediary::GetInstance()->Attach(hitFx_);
+
+	explosionFx_->SetParent(self);
+	explosionFx_->Stop();
+	FxIntermediary::GetInstance()->Attach(explosionFx_);
+}
 
 
 float DegreesToRadians(float degrees){
@@ -120,10 +124,6 @@ const Vector3 Enemy::GetCenterPos() const{
 void Enemy::SetParent(WorldTransform* parent){
 	worldTransform_.parent = parent;
 	basePosition_ = worldTransform_.translation;
-}
-
-void Enemy::SetParent(SceneObject* newParent){
-	parent_ = newParent;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

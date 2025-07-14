@@ -25,6 +25,8 @@ public:
 	void ShowGui() override;
 	void SetDrawEnable(bool isDrawEnable) override;
 
+	std::string_view GetTypeName() const override{ return "ParticleSystemObject"; }
+
 	// コンフィグ適用・抽出
 	void ApplyConfig() override;
 	void ExtractConfig() override;

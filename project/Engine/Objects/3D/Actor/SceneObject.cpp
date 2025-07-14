@@ -45,36 +45,25 @@ bool SceneObject::HasConfigInterface() const{
 	return dynamic_cast< const IConfigurable* >(this) != nullptr;
 }
 
-void SceneObject::SetParent(SceneObject* newParent){
-	if (parent_ == newParent) return;
+void SceneObject::SetParent(const std::shared_ptr<SceneObject>& newParentSp){
+	if (parent_.lock() == newParentSp || newParentSp.get() == this){ return; }
 
-	// 現在の親からこのオブジェクトを削除
-	if (parent_){
-		auto& siblings = parent_->children_;
-		siblings.erase(std::remove(siblings.begin(), siblings.end(), this), siblings.end());
+	if (auto oldParent = parent_.lock()){
+		auto& siblings = oldParent->children_;
+		siblings.erase(std::remove(siblings.begin(), siblings.end(), shared_from_this()),
+					   siblings.end());
 	}
 
-	// 新しい親を設定
-	parent_ = newParent;
-	worldTransform_.parent = newParent ? &newParent->worldTransform_ : nullptr;
-	parentId_ = newParent->GetGuid();
-
-	// 新しい親の子リストに追加
-	if (newParent){
-		newParent->children_.push_back(this);
+	if (newParentSp){
+		newParentSp->children_.push_back(shared_from_this());
+		// ローカルから親空間へ
+		worldTransform_.parent = &newParentSp->worldTransform_;
+	} else{
+		worldTransform_.parent = nullptr;
 	}
 
-	//// ローカル行列を再計算
-	//if (newParent){
-	//	Matrix4x4 parentWorldInv = Matrix4x4::Inverse(newParent->worldTransform_.matrix.world);
-	//	Matrix4x4 newLocal = parentWorldInv * worldBefore;
-
-	//	worldTransform_.translation = Matrix4x4::Translation(newLocal);
-	//	worldTransform_.rotation = Quaternion::FromMatrix(newLocal);
-	//}
-
-	//// 子孫のワールド行列を再計算
-	//UpdateWorldTransformRecursive();
+	// 参照を更新
+	parent_ = newParentSp;
 }
 
 void SceneObject::UpdateWorldTransformRecursive(){
@@ -82,7 +71,7 @@ void SceneObject::UpdateWorldTransformRecursive(){
 	worldTransform_.Update();
 
 	// 子供たちのワールド行列を再帰的に更新
-	for (SceneObject* child : children_){
+	for (auto& child : children_){
 		child->UpdateWorldTransformRecursive();
 	}
 }

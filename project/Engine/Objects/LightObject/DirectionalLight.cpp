@@ -38,6 +38,10 @@ DirectionalLight::~DirectionalLight(){}
 void DirectionalLight::Initialize() {}
 
 void DirectionalLight::Update(){
+	
+}
+
+void DirectionalLight::UploadToGpu(){
 	constantBuffer_.TransferData(lightData_);
 }
 

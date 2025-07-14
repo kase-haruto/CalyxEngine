@@ -12,9 +12,9 @@ LightLibrary::LightLibrary(SceneObjectLibrary* library){
 	pointLight_ = CreateAndAddObject<PointLight>(library, "PointLight");
 }
 
-void LightLibrary::Update(){
-	if (directionalLight_) directionalLight_->Update();
-	if (pointLight_) pointLight_->Update();
+void LightLibrary::CyncGpu(){
+	if (directionalLight_){ directionalLight_->UploadToGpu(); }
+	if (pointLight_){ pointLight_->UploadToGpu(); }
 }
 
 void LightLibrary::Clear(){

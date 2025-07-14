@@ -19,7 +19,7 @@ public:
 	void Update()override;
 	void ShowGui()override;
 
-
+	std::string_view GetTypeName() const override{ return "FollowCamera"; }
 private:
 	//===================================================================*/
 	//							private Methods

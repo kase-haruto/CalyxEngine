@@ -8,12 +8,6 @@
 struct Vector3;
 struct Vector2;
 
-/// <summary>
-/// Blenderライクな操作のデバッグカメラ
-/// - MMB: 回転(Orbit)
-/// - Shift + MMB: パン
-/// - Ctrl + MMB or マウスホイール: ズーム
-/// </summary>
 class DebugCamera 
 	: public BaseCamera{
 public:
@@ -35,6 +29,7 @@ public:
 	//* カメラとターゲットとの初期距離を設定
 	void SetDistance(float dist){ distance_ = dist; }
 
+	std::string_view GetTypeName() const override{ return "DebugCamera"; }
 private:
 	//===================================================================//
 	//							private メソッド

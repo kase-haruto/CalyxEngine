@@ -93,6 +93,8 @@ void SceneManager::Draw() {
 	auto* debugRT = pDxCore_->GetRenderTargetCollection().Get("DebugView");
 	DrawForRenderTarget(debugRT);
 #endif // _DEBUG
+
+	//プリミティブ描画
 	auto* cmd = pGraphicsSystem_->GetCommandList();
 	GraphicsGroup::GetInstance()->SetCommand(cmd, PipelineType::Line, BlendMode::NORMAL);
 	CameraManager::SetCommand(cmd, PipelineType::Line);

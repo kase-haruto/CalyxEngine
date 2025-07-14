@@ -17,6 +17,8 @@ public:
 	const Vector3& GetRotation() const { return transform_.rotate; }
 	const WorldTransform& GetWorldTransform() const { return worldTransform_; }
 
+	std::string_view GetTypeName() const override{ return "RailCamera"; }
+
 private:
 	float t_ = 0.0f;
 	float speed_ = 20.0f;         // 速度

@@ -24,9 +24,9 @@ public:
 
 	// 編集対象
 	void SetSelectedEditor(BaseEditor* editor);
-	void SetSelectedObject(SceneObject* object);
+	void SetSelectedObject(const std::shared_ptr<SceneObject>& sp);
 	void CreateObject(std::shared_ptr<SceneObject> obj);
-	void DeleteObject(SceneObject* object);
+	void DeleteObject(const std::shared_ptr<SceneObject>& sp);
 	void RenderViewport(ViewportType type, const ImTextureID& tex);
 
 	HierarchyPanel* GetHierarchyPanel() const{ return hierarchy_.get(); }
@@ -66,6 +66,6 @@ private:
 
 	// 状態
 	BaseEditor* selectedEditor_ = nullptr;
-	SceneObject* selectedObject_ = nullptr;
+	std::shared_ptr<SceneObject> selectedObject_;
 	SceneContext* pSceneContext_ = nullptr;	//< 現在のシーンコンテキスト
 };

@@ -72,14 +72,9 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList,
 	spriteRenderer_->Draw(cmdList, psoService, renderTargetType);
 
 	//===================================================================*/
-	//                    プリミティブ描画
-	//===================================================================*/
-	//GraphicsGroup::GetInstance()->SetCommand(cmdList, PipelineType::Line, BlendMode::NORMAL);
-	//CameraManager::SetCommand(cmdList, PipelineType::Line);
-	//PrimitiveDrawer::GetInstance()->Render();
-
-	//===================================================================*/
 	//                    particle描画
 	//===================================================================*/
+	CameraManager::GetInstance()->SetCommand(cmdList, PipelineType::StructuredObject);
+
 	sceneContext_->GetFxSystem()->Render(psoService, cmdList);
 }

@@ -37,7 +37,7 @@ PointLight::~PointLight(){}
 void PointLight::Initialize(){}
 
 void PointLight::Update(){
-	constantBuffer_.TransferData(lightData_);
+	
 }
 
 void PointLight::ShowGui(){
@@ -59,6 +59,10 @@ void PointLight::ShowGui(){
 	GuiCmd::DragFloat("radius", lightData_.radius);
 	GuiCmd::DragFloat("decay", lightData_.decay);
 #endif // _DEBUG
+}
+
+void PointLight::UploadToGpu(){
+	constantBuffer_.TransferData(lightData_);
 }
 
 void PointLight::SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList, PipelineType type){

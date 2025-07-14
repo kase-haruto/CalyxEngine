@@ -17,6 +17,7 @@ public:
 	void Update() override;  //< 更新
 	void ShowGui() override; //< ImGuiによるGUI表示
 	bool IsVisible(const class AABB& aabb) const;
+	std::string_view GetTypeName() const override{ return "Camera3d"; }
 private:
 	//==================================================================*//
 	//			private functions

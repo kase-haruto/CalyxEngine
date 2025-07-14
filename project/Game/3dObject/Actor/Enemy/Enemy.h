@@ -33,7 +33,6 @@ public:
 	};
 
 	void SetParent(WorldTransform* parent);
-	void SetParent(SceneObject* newParent)override;
 private:
 	//===================================================================*/
 	//					private methods

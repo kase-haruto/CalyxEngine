@@ -15,8 +15,6 @@ void ParticleRenderer::Render(
 	auto psoSet = pipelineService->GetPipelineSet(PipelineTag::Object::Particle, BlendMode::ADD);
 	psoSet.SetCommand(cmdList);
 
-	CameraManager::GetInstance()->SetCommand(cmdList, PipelineType::StructuredObject);
-
 	auto device = GraphicsGroup::GetInstance()->GetDevice().Get();
 
 	for (const auto& emitter : emitters){
@@ -27,8 +25,7 @@ void ParticleRenderer::Render(
 		auto textureHandle = TextureManager::GetInstance()->LoadTexture("Textures/" + emitter->GetTexturePath());
 		cmdList->SetGraphicsRootDescriptorTable(3, textureHandle);
 
-		// パーティクルデータを GPU に転送
-		emitter->TransferParticleDataToGPU();
+
 
 		// モデル取得＆初期化
 		ModelData& model = ModelManager::GetInstance()->GetModelData(emitter->GetModelPath());

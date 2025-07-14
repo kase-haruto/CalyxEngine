@@ -10,5 +10,5 @@ class PrefabSerializer{
 public:
 	static bool Save(const std::vector<SceneObject*>& roots, const std::string& path);
 
-	static std::vector<std::unique_ptr<SceneObject>> Load(const std::string& path);
+	static std::vector<std::shared_ptr<SceneObject>> Load(const std::string& path);
 };

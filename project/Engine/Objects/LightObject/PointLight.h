@@ -40,9 +40,9 @@ public:
 	void Initialize();
 	void Update()override;
 	void ShowGui()override;
-
+	void UploadToGpu();
 	void SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList, PipelineType type);
-
+	std::string_view GetTypeName() const override{ return "PointLight"; }
 	// config ============================================================
 	void ApplyConfig()override;
 	void ExtractConfig()override;

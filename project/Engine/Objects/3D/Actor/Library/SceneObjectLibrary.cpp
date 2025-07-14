@@ -1,5 +1,5 @@
 #include "SceneObjectLibrary.h"
-
+#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 void SceneObjectLibrary::AddObject(const std::shared_ptr<SceneObject>& object){
 	if (object){
 		allSceneObjects_.push_back(object);
@@ -25,4 +25,13 @@ std::vector<SceneObject*> SceneObjectLibrary::GetAllObjects() const{
 		if (obj) rawPtrs.push_back(obj.get());
 	}
 	return rawPtrs;
+}
+
+const std::vector<std::shared_ptr<SceneObject>>&
+SceneObjectLibrary::GetAllObjectsShared() const{
+	return allSceneObjects_;
+}
+
+std::shared_ptr<SceneObject> SceneObjectLibrary::CreateByTypeName(std::string_view n){
+	return SceneObjectRegistry::Get().Create(n);
 }

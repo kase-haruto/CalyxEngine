@@ -31,7 +31,7 @@ public:
 	const WorldTransform& GetWorldTransform()const;
 
 	//* config ================================================================*/
-
+	std::string_view GetTypeName() const override{return "SkyBox";}
 private:
 	std::array<VertexData, 24> vertices_;
 	std::array<uint16_t, 36> indices_;

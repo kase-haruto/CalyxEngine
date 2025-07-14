@@ -45,7 +45,7 @@ public:
 	//--------- Collision -----------------------------------------------
 	virtual void OnCollisionEnter([[maybe_unused]]Collider* other) {}
 	virtual void OnCollisionStay([[maybe_unused]] Collider* other) {}
-	virtual void OnCollisionExit([[maybe_unused]] Collider* other){}
+	virtual void OnCollisionExit([[maybe_unused]] Collider* other) {}
 
 	//--------- config ------------------------------------------------
 	virtual void ApplyConfig()override;
@@ -53,6 +53,7 @@ public:
 
 	//--------- accessor ------------------------------------------------
 	void SetName(const std::string& name);
+	std::string_view GetTypeName() const override{ return "BaseGameObject"; }
 	void SetTranslate(const Vector3& pos);
 	void SetScale(const Vector3& scale);
 	void SetDrawEnable(bool isDrawEnable)override;

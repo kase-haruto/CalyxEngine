@@ -136,6 +136,7 @@ void EnemySpawner::Spawn(){
 
 	// 新規スポーン
 	auto enemy = sceneContext_->GetObjectLibrary()->CreateAndAddObject<Enemy>("ghost.obj", "enemy");
+	enemy->Initialize();
 	if (!enemy) return;
 
 	Vector3 localOffset = Random::GenerateVector3(spawnAreaMin_, spawnAreaMax_);

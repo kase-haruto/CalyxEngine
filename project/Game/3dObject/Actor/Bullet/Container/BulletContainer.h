@@ -35,6 +35,7 @@ public:
 
 	void SetSceneContext(SceneContext* context){ sceneContext_ = context; }
 
+	std::string_view GetTypeName() const override{ return "BulletContainer"; }
 private:
 	std::unordered_map<BulletType, std::list<std::shared_ptr<BaseBullet>>> typedBullets_;
 	SceneContext* sceneContext_ = nullptr;

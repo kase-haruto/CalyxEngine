@@ -38,6 +38,8 @@ public:
 	void SetPlayerTransform(WorldTransform* playerTransform);
 	void SetRotationDir(const Vector3& dir) { rotationDir_ = dir; }
 
+	std::string_view GetTypeName() const override{ return "EnemySpawner"; }
+
 private:
 	void Spawn();
 
