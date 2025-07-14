@@ -74,9 +74,9 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList,
 	//===================================================================*/
 	//                    プリミティブ描画
 	//===================================================================*/
-	GraphicsGroup::GetInstance()->SetCommand(cmdList, PipelineType::Line, BlendMode::NORMAL);
-	CameraManager::SetCommand(cmdList, PipelineType::Line);
-	PrimitiveDrawer::GetInstance()->Render();
+	//GraphicsGroup::GetInstance()->SetCommand(cmdList, PipelineType::Line, BlendMode::NORMAL);
+	//CameraManager::SetCommand(cmdList, PipelineType::Line);
+	//PrimitiveDrawer::GetInstance()->Render();
 
 	//===================================================================*/
 	//                    particle描画

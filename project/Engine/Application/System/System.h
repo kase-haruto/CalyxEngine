@@ -44,7 +44,6 @@ public:
 	//* パイプラインの作成 ==============================*/
 	void CreatePipelines();
 	void Object2DPipelines();
-	void StructuredObjectPipeline();
 	void LinePipeline();
 	void EffectPipeline();
 	void SkyBoxPipeline();

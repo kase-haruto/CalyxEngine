@@ -15,7 +15,7 @@ PsoFactory::Create(const GraphicsPipelineDesc& desc) {
 	auto psoObj = std::make_unique<PipelineStateObject>();
 
 	// ─────────────────────────────────────
-	// 1. Root Signature
+	//  Root Signature
 	// ─────────────────────────────────────
 	D3D12_ROOT_SIGNATURE_DESC rootDesc = desc.root_.Desc();
 
@@ -37,7 +37,7 @@ PsoFactory::Create(const GraphicsPipelineDesc& desc) {
 	psoObj->SetRootSignature(rootSig.Get());
 
 	// ─────────────────────────────────────
-	// 2. Input Layout (append-aligned)
+	//  Input Layout
 	// ─────────────────────────────────────
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC pso{};
 	pso.pRootSignature = rootSig.Get();
@@ -57,7 +57,7 @@ PsoFactory::Create(const GraphicsPipelineDesc& desc) {
 	pso.DSVFormat = desc.dsvFormat_;
 
 	// ─────────────────────────────────────
-	// 3. Compile Shaders  (BLOB を保持)
+	//  Compile Shaders
 	// ─────────────────────────────────────
 	ComPtr<IDxcBlob> vsBlob;
 	ComPtr<IDxcBlob> psBlob;
