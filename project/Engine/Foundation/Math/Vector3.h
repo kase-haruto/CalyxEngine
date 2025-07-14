@@ -23,6 +23,7 @@ struct Vector3 final {
 	Vector3 Right();
 	static const Vector3 Zero();
 	static Vector3 One();
+	static const Vector3 Up();
 
 	float Length()const;
 	Vector3 Normalize()const;

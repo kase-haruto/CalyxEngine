@@ -18,24 +18,42 @@
 
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 
-// 追加: アニメーション読み込み関数
-extern Animation LoadAnimationFile(const std::string& directoryPath, const std::string& filename);
-
 //-----------------------------------------------------------------------------
 // コンストラクタ
 //-----------------------------------------------------------------------------
 AnimationModel::AnimationModel(const std::string& fileName){
 	fileName_ = fileName;
-	// まずは初期化
+
+	// 初期化
 	Initialize();
+
 	try{
 		animationData_ = LoadAnimationFile("Resources/models", fileName_);
+
+		std::string baseName = fileName;
+		size_t pos = baseName.find_last_of('.');
+		if (pos != std::string::npos){
+			baseName = baseName.substr(0, pos);
+		}
+
+		//最初に読み込んだアニメーションファイルをアニメーションリストに追加
+		AnimationState initialState;
+		initialState.name = baseName;
+		initialState.animation = animationData_;
+		initialState.currentTime = 0.0f;
+		initialState.speed = 1.0f;
+		initialState.weight = 1.0f; // 最初なので 1.0
+		initialState.loop = true;
+
+		animationStates_[baseName] = initialState;
+		currentAnimation_ = &animationStates_[baseName];
+
 	} catch (...){
-		// 読み込み失敗時は何もしない or duration=0 のまま
+		// 失敗したら duration=0 にする
 		modelData_->animation.duration = 0.0f;
 	}
-
 }
+
 
 //-----------------------------------------------------------------------------
 // 初期化
@@ -50,30 +68,122 @@ void AnimationModel::Initialize(){
 // アニメーションの再生
 //-----------------------------------------------------------------------------
 void AnimationModel::PlayAnimation(){
-	if (modelData_->animation.duration <= 0.0f) return;
+	if (!currentAnimation_) return;
 
-	// 時間を進める
-	animationTime_ += ClockManager::GetInstance()->GetDeltaTime() * animationSpeed_;
-	animationTime_ = std::fmod(animationTime_, modelData_->animation.duration);
+	float dt = ClockManager::GetInstance()->GetDeltaTime();
 
-	// 全ての NodeAnimation を適用
-	for (const auto& [name, nodeAnimation] : modelData_->animation.nodeAnimations){
-		auto it = modelData_->skeleton.jointMap.find(name);
-		if (it == modelData_->skeleton.jointMap.end()) continue;
-
-		int jointIndex = it->second;
-		Joint& joint = modelData_->skeleton.joints[jointIndex];
-
-		// キーフレームから補間して transform に反映
-		if (!nodeAnimation.translate.keyframes.empty())
-			joint.transform.translate = CalculateValue(nodeAnimation.translate, animationTime_);
-
-		if (!nodeAnimation.rotate.keyframes.empty())
-			joint.transform.rotate = CalculateValue(nodeAnimation.rotate, animationTime_);
-
-		if (!nodeAnimation.scale.keyframes.empty())
-			joint.transform.scale = CalculateValue(nodeAnimation.scale, animationTime_);
+	// 現在アニメーション時間を進める
+	currentAnimation_->currentTime += dt * currentAnimation_->speed;
+	if (currentAnimation_->loop){
+		currentAnimation_->currentTime = std::fmod(currentAnimation_->currentTime, currentAnimation_->animation.duration);
 	}
+
+	// ブレンド先がある場合
+	if (nextAnimation_){
+		nextAnimation_->currentTime += dt * nextAnimation_->speed;
+		if (nextAnimation_->loop){
+			nextAnimation_->currentTime = std::fmod(nextAnimation_->currentTime, nextAnimation_->animation.duration);
+		}
+
+		blendTime_ += dt;
+		float blendFactor = std::clamp(blendTime_ / blendDuration_, 0.0f, 1.0f);
+
+		currentAnimation_->weight = 1.0f - blendFactor;
+		nextAnimation_->weight = blendFactor;
+
+		if (blendFactor >= 1.0f){
+			currentAnimation_ = nextAnimation_;
+			nextAnimation_ = nullptr;
+			currentAnimation_->weight = 1.0f;
+		}
+	} else{
+		currentAnimation_->weight = 1.0f;
+	}
+
+	ApplyAnimationToSkeleton();
+}
+
+void AnimationModel::ApplyAnimationToSkeleton(){
+	for (Joint& joint : modelData_->skeleton.joints){
+		auto jointName = joint.name;
+
+		QuaternionTransform blended {};
+		bool hasAny = false;
+
+		auto accumulate = [&] (AnimationState* state){
+			if (!state || state->weight <= 0.0f) return;
+
+			auto it = state->animation.nodeAnimations.find(jointName);
+			if (it == state->animation.nodeAnimations.end()) return;
+
+			const NodeAnimation& nodeAnim = it->second;
+
+			if (!nodeAnim.translate.keyframes.empty()){
+				Vector3 v = CalculateValue(nodeAnim.translate, state->currentTime);
+				blended.translate += v * state->weight;
+				hasAny = true;
+			}
+
+			if (!nodeAnim.rotate.keyframes.empty()){
+				Quaternion q = CalculateValue(nodeAnim.rotate, state->currentTime);
+				if (hasAny){
+					blended.rotate = Quaternion::Slerp(blended.rotate, q, state->weight);
+				} else{
+					blended.rotate = q;
+				}
+				hasAny = true;
+			}
+
+			if (!nodeAnim.scale.keyframes.empty()){
+				Vector3 s = CalculateValue(nodeAnim.scale, state->currentTime);
+				blended.scale += s * state->weight;
+				hasAny = true;
+			}
+			};
+
+		accumulate(currentAnimation_);
+		accumulate(nextAnimation_);
+
+		if (hasAny){
+			joint.transform = blended;
+		}
+	}
+}
+
+void AnimationModel::AddAnimation(const std::string& animName, const std::string& fileName){
+	AnimationState state;
+	state.name = animName;
+	state.animation = LoadAnimationFile("Resources/models", fileName);
+	state.currentTime = 0.0f;
+	state.speed = 1.0f;
+	state.weight = 0.0f;
+	state.loop = true;
+
+	animationStates_[animName] = state;
+
+	if (!currentAnimation_){
+		currentAnimation_ = &animationStates_[animName];
+		currentAnimation_->weight = 1.0f;
+	}
+}
+
+void AnimationModel::PlayAnimation(const std::string& animName, float blendDuration){
+	// 同じアニメに切り替えるなら何もしない
+	if (currentAnimation_ && currentAnimation_->name == animName){
+		return;
+	}
+
+	// 既にブレンド先が同じなら何もしない
+	if (nextAnimation_ && nextAnimation_->name == animName){
+		return;
+	}
+
+	auto it = animationStates_.find(animName);
+	if (it == animationStates_.end()) return;
+
+	nextAnimation_ = &it->second;
+	blendTime_ = 0.0f;
+	blendDuration_ = blendDuration;
 }
 
 
@@ -155,9 +265,16 @@ void AnimationModel::DrawSkeleton(){
 	modelData_->skeleton.Draw();
 }
 
+std::string AnimationModel::GetCurrentAnimationName() const{
+	if (currentAnimation_){
+		return currentAnimation_->name;
+	} else{
+		return "";
+	}
+}
+
 void AnimationModel::Update(){
 	if (modelData_){
-		// (1) アニメーションを再生
 		PlayAnimation();
 		SkeletonUpdate();
 		SkinClusterUpdate();

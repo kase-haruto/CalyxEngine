@@ -56,6 +56,10 @@ Vector3 Vector3::One(){
 	return Vector3(1.0f, 1.0f, 1.0f);
 }
 
+const Vector3 Vector3::Up(){
+	return Vector3(0.0f,1.0f,0.0f);
+}
+
 Vector3 Vector3::Cross(const Vector3& v0, const Vector3& v1){
 	return {
 	  v0.y * v1.z - v0.z * v1.y,
