@@ -1,0 +1,105 @@
+{
+    "autoDestroy": false,
+    "color": {
+        "w": 1.0,
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+    },
+    "emitCount": 10,
+    "emitDelay": 0.0,
+    "emitDuration": -1.0,
+    "emitRate": 0.10000000149011612,
+    "guid": "a0d50ff1-f355-4e7f-82cb-faf7679b4701",
+    "isComplement": true,
+    "isDrawEnable": true,
+    "isOneShot": false,
+    "isStatic": false,
+    "lifetime": {
+        "constant": 0.3799999952316284,
+        "max": 3.0,
+        "min": 1.0,
+        "mode": 0
+    },
+    "modelPath": "plane.obj",
+    "modules": [
+        {
+            "enabled": true,
+            "gravity": {
+                "x": 0.0,
+                "y": -9.800000190734863,
+                "z": 0.0
+            },
+            "name": "GravityModule"
+        },
+        {
+            "easeType": 12,
+            "enabled": true,
+            "isGrowing": false,
+            "name": "SizeOverLifetimeModule"
+        }
+    ],
+    "name": "ParticleSystem",
+    "objectType": 0,
+    "parentGuid": "00000000-0000-0000-0000-000000000000",
+    "position": {
+        "x": -0.20618009567260742,
+        "y": 1.0620992183685303,
+        "z": -4.746707916259766
+    },
+    "scale": {
+        "constant": {
+            "x": 0.36000001430511475,
+            "y": 0.3400000035762787,
+            "z": 1.0
+        },
+        "max": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "min": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "mode": 0
+    },
+    "texturePath": "particle.png",
+    "transform": {
+        "rotation": {
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+        },
+        "translation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        }
+    },
+    "velocity": {
+        "constant": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "max": {
+            "x": 1.0,
+            "y": 0.0,
+            "z": 1.0
+        },
+        "min": {
+            "x": -1.0,
+            "y": 0.0,
+            "z": -1.0
+        },
+        "mode": 1
+    }
+}

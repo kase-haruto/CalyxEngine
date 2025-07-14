@@ -73,6 +73,19 @@ void PrimitiveDrawer::DrawGrid(){
 	}
 }
 
+void PrimitiveDrawer::DrawAABB(const Vector3& minP, const Vector3& maxP,
+							   const Vector4& color) {
+	// 中心とサイズを計算
+	Vector3 center = (minP + maxP) * 0.5f;
+	Vector3 size = (maxP - minP);
+
+	// OBB は回転付きだが、Identity を渡せば AABB 扱いになる
+	Quaternion identity; // (0,0,0,1)
+	identity.MakeIdentity();
+
+	DrawBox(center, identity, size, color); // 既存 API を再利用
+}
+
 void PrimitiveDrawer::DrawOBB(const Vector3& center, const Quaternion& rotate, const Vector3& size, const Vector4& color){
 	const uint32_t vertexNum = 8;
 

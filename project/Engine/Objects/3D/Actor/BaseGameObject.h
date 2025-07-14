@@ -74,6 +74,10 @@ public:
 		return (objectModelType_ == ObjectModelType::ModelType_Animation)
 			? static_cast< AnimationModel* >(model_.get()) : nullptr;
 	}
+	const AnimationModel* GetAnimationModel() const {
+		return (objectModelType_ == ObjectModelType::ModelType_Animation)
+			? static_cast<AnimationModel*>(model_.get()) : nullptr;
+	}
 private:
 	//===================================================================*/
 	//                    private methods

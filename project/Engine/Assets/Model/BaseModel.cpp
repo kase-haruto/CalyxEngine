@@ -27,7 +27,7 @@ void BaseModel::Update() {
 			modelData_ = loaded;
 			OnModelLoaded();
 		}
-		// loaded が nullptr の場合、まだ読み込み中 → 次フレーム以降に再試行
+		// loaded が nullptr の場合、まだ読み込み中
 	} else {
 		// テクスチャの更新
 		UpdateTexture();
@@ -56,7 +56,11 @@ void BaseModel::OnModelLoaded() {
 
 	// テクスチャ設定
 	if (!handle_) {
-		handle_ = TextureManager::GetInstance()->LoadTexture("Textures/" + modelData_->meshData.material.textureFilePath);
+		handle_ = TextureManager::GetInstance()->LoadTexture(
+			"Textures/" + modelData_->meshData.material.textureFilePath);
+		if (!handle_) { // 読み込み失敗・空文字列など
+			handle_ = TextureManager::GetInstance()->LoadTexture("textures/white1x1.png");
+		}
 	}
 
 	// -------- インスタンシングバッファの初期確保 --------

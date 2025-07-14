@@ -39,7 +39,7 @@ private:
 	std::unique_ptr<FogEffect>fog_ = nullptr;
 
 	/* objects ====================================================*/
-	std::unique_ptr<BaseGameObject> testObject;
+	std::shared_ptr<BaseGameObject> modelField_;
 	std::unique_ptr<Sprite> testSprite_;
 	std::shared_ptr<CalyxHuman> animationHuman_;
 };

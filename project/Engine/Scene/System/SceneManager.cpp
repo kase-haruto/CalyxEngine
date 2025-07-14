@@ -24,7 +24,7 @@ SceneManager::SceneManager(DxCore* dxCore, GraphicsSystem* graphicsSystem)
 	}
 
 
-	currentSceneNo_ = static_cast<int>(SceneType::TITLE);
+	currentSceneNo_ = static_cast<int>(SceneType::TEST);
 #ifdef _DEBUG
 	currentSceneNo_ = static_cast<int>(SceneType::TEST);
 #endif // 

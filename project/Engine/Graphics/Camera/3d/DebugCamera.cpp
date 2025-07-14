@@ -23,7 +23,7 @@ DebugCamera::DebugCamera()
 	BaseCamera::SetName("DebugCamera");
 	fovAngleY_ = static_cast< float >(std::numbers::pi) * 0.25f; // 45度
 
-	transform_.translate = {0.0f, 2.0f, -10.0f};
+	transform_.translate = {0.0f, 4.0f, -10.0f};
 }
 
 //////////////////////////////////////////////////////////////////////////////
