@@ -37,7 +37,7 @@ public:
 	float GetAnimationSpeed() const{ return animationSpeed_; }
 
 	std::vector<std::string> GetAnimationNodeNames() const;
-
+	std::optional<Matrix4x4> GetJointMatrix(const std::string& name) const;
 private:
 	//===================================================================*/
 	//                   private func
@@ -57,6 +57,8 @@ private:
 	Quaternion CalculateValue(const AnimationCurve<Quaternion>& curve, float time);
 	Vector3 CalculateValue(const AnimationCurve<Vector3>& curve, float time);
 
+	void SkinningStep();
+
 private:
 	//===================================================================*/
 	//                    private variables
@@ -68,7 +70,6 @@ private:
 	ImVec4 jointHighlightCol_ = { 1.0f, 0.2f, 0.2f, 1.0f };
 	SkinCluster skinCluster_;			//< スキンクラスター
 	D3D12_VERTEX_BUFFER_VIEW vbvs_[2];	//< スキンクラスター用のバッファビュー
-
 public:
 	float animationSpeed_ = 1.0f;		//< アニメーションの再生速度
 	bool isDrawSkeleton_ = false;		//< スケルトンを描画するかどうか

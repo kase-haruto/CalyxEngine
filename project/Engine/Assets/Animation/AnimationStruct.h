@@ -23,7 +23,7 @@
 //          keyframe
 /////////////////////////////////////////////////////////////////////////////////////////
 template <typename tValue>
-struct Keyframe{
+struct Keyframe {
 	float time;     // アニメーション時間(秒)
 	tValue value;   // 補間対象の値 (Vector3 or Quaternion)
 };
@@ -34,20 +34,20 @@ using KeyframeVector3 = Keyframe<Vector3>;
 //          AnimationCurve
 /////////////////////////////////////////////////////////////////////////////////////////
 template<typename tValue>
-struct AnimationCurve{
+struct AnimationCurve {
 	std::vector<Keyframe<tValue>> keyframes;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //          NodeAnimation
 /////////////////////////////////////////////////////////////////////////////////////////
-struct NodeAnimation{
+struct NodeAnimation {
 	AnimationCurve<Vector3>     translate;	// 平行移動
 	AnimationCurve<Quaternion>  rotate;		// 回転
 	AnimationCurve<Vector3>     scale;		// スケーリング
 };
 
-struct Node{
+struct Node {
 	QuaternionTransform transform;
 	Matrix4x4 localMatrix;
 	std::string name;
@@ -57,7 +57,7 @@ struct Node{
 /////////////////////////////////////////////////////////////////////////////////////////
 //          Animation
 /////////////////////////////////////////////////////////////////////////////////////////
-struct Animation{
+struct Animation {
 	float duration = 0.0f;  // アニメーション全体の尺(秒)
 	std::map<std::string, NodeAnimation> nodeAnimations;
 	std::vector<const NodeAnimation*> fastChannels;
@@ -66,7 +66,7 @@ struct Animation{
 /////////////////////////////////////////////////////////////////////////////////////////
 //          skelton
 /////////////////////////////////////////////////////////////////////////////////////////
-struct Joint{
+struct Joint {
 	QuaternionTransform restTransform;	//< バインドポーズ
 	QuaternionTransform transform;	//< transform情報
 	Matrix4x4 localMatrix;			//< ローカル行列
@@ -77,7 +77,7 @@ struct Joint{
 	std::optional<int32_t> parent;	//< 親ボーンのインデックス
 };
 
-struct Skeleton{
+struct Skeleton {
 	int32_t root;
 	std::map<std::string, int32_t> jointMap;
 	std::vector<Joint> joints;
@@ -92,12 +92,12 @@ struct Skeleton{
 /////////////////////////////////////////////////////////////////////////////////////////
 //          skinning
 /////////////////////////////////////////////////////////////////////////////////////////
-struct VertexWeightData{
+struct VertexWeightData {
 	float weight;
 	uint32_t vertexIndex;
 };
 
-struct JointWeightData{
+struct JointWeightData {
 	Matrix4x4 inverseBindPoseMatrix;
 	std::vector<VertexWeightData> vertexWeights;
 };
@@ -109,17 +109,17 @@ struct JointWeightData{
 頂点に対して影響を与える(受ける)パラメータ群のこと
 ============================================================== */
 const uint32_t kNumMaxInfluence = 4; // 最大のジョイント影響数
-struct VertexInfluence{
+struct VertexInfluence {
 	std::array<float, kNumMaxInfluence> weights;			// ウェイト
 	std::array<int32_t, kNumMaxInfluence> jointIndices;		// ジョイントインデックス
 };
 
-struct WellForGPU{
+struct WellForGPU {
 	Matrix4x4 skeletonSpaceMatrix;							//位置用
 	Matrix4x4 skeletonSpaceInverseTransposeMatrix;			//法線用
 };
 
-struct SkinCluster{
+struct SkinCluster {
 	std::vector<Matrix4x4> inverseBindPoseMatrices;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource>influenceResource;
@@ -138,7 +138,7 @@ struct SkinCluster{
 	std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE> paletteSrvHandle;
 };
 
-struct AnimationState{
+struct AnimationState {
 	std::string name;
 	Animation animation;
 	float currentTime = 0.0f;
@@ -146,3 +146,4 @@ struct AnimationState{
 	float weight = 1.0f;   // blending weight
 	bool loop = true;
 };
+

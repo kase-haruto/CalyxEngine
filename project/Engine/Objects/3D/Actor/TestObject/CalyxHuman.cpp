@@ -2,6 +2,8 @@
 
 #include <Engine/Application/Input/Input.h>
 #include <Engine/Foundation/Clock/ClockManager.h>
+#include <Engine/Application/Effects/Intermediary/FxIntermediary.h>
+#include <Engine/Foundation/Utility/FileSystem/ConfigPathResolver/ConfigPathResolver.h>
 
 CalyxHuman::CalyxHuman(const std::string& modelName,
 					   std::optional<std::string> objectName) :
@@ -9,9 +11,17 @@ CalyxHuman::CalyxHuman(const std::string& modelName,
 	moveSpeed_ = 10.0f;
 	//animationを追加
 	GetAnimationModel()->AddAnimation("idle", "idle.gltf");
+
+	trailFx_ = std::make_shared<ParticleSystemObject>("playerBulletTrail");
+	trailFx_->SetParent(this);
+	trailFx_->LoadConfig("Resources/Assets/Configs/Effect/runFx.json");
+	FxIntermediary::GetInstance()->Attach(trailFx_);
+
 }
 
-void CalyxHuman::Initialize(){}
+void CalyxHuman::Initialize(){
+
+}
 
 void CalyxHuman::Update(){
 	float dt = ClockManager::GetInstance()->GetDeltaTime();
@@ -19,11 +29,36 @@ void CalyxHuman::Update(){
 	Move(dt);
 	Turn();
 
+	if (GetJointWorldPos("RightHandIndex1").has_value()) {
+		trailFx_->position_ = GetJointWorldPos("mixamorig:RightHandIndex1").value();
+	}
+
 	TransitionAnimation();
+
+	if (Input::GetInstance()->PushGamepadButton(PAD_BUTTON::A)) {
+		trailFx_->Play();
+	}
 
 	collider_->SetCollisionEnabled(false);
 
 	BaseGameObject::Update();
+}
+
+std::optional<Vector3> CalyxHuman::GetJointWorldPos(const std::string& name) const {
+	const AnimationModel* anim = GetAnimationModel();
+	if (!anim) return std::nullopt;
+
+	auto matOpt = anim->GetJointMatrix(name);
+	if (!matOpt) return std::nullopt;
+
+	Matrix4x4 worldM = (*matOpt) * worldTransform_.matrix.world;
+
+	Vector3 pos = {
+		worldM.m[3][0],
+		worldM.m[3][1],
+		worldM.m[3][2]
+	};
+	return pos;
 }
 
 void CalyxHuman::TransitionAnimation(){

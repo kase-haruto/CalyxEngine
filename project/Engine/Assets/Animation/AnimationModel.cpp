@@ -139,7 +139,7 @@ void AnimationModel::BuildFastChannels(Animation& anim) {
 }
 
 /* =====================================================================
-   公開 API：外部から追加でアニメをロード
+   公開 API：外部から追加でアニメをロード	
    ===================================================================*/
 void AnimationModel::AddAnimation(const std::string& name, const std::string& file) {
 	AnimationState st;
@@ -200,6 +200,76 @@ Vector3 AnimationModel::CalculateValue(const AnimationCurve<Vector3>& c, float t
 	return Vector3::Lerp(c.keyframes[i0].value, c.keyframes[i1].value, lT);
 }
 
+void AnimationModel::SkinningStep() {
+	if (!modelData_) return;
+
+	Skeleton& skel = modelData_->skeleton;
+	const size_t jointCount = skel.joints.size();
+
+	auto blendOne = [&](AnimationState* st,
+						size_t          j,
+						Quaternion& rot,
+						Vector3& pos,
+						Vector3& scl,
+						float& wSum) {
+		if (!st || st->weight <= 0.f) return;
+		const NodeAnimation* node = st->animation.fastChannels[j];
+		if (!node) return;
+
+		// translate
+		if (!node->translate.keyframes.empty()) {
+			Vector3 t = CalculateValue(node->translate, st->currentTime);
+			pos += (t - skel.joints[j].restTransform.translate) * st->weight;
+		}
+		// scale
+		if (!node->scale.keyframes.empty()) {
+			Vector3 s = CalculateValue(node->scale, st->currentTime);
+			scl += (s - skel.joints[j].restTransform.scale) * st->weight;
+		}
+		// rotate
+		if (!node->rotate.keyframes.empty()) {
+			Quaternion q = CalculateValue(node->rotate, st->currentTime);
+			rot = (wSum == 0.f) ? q : Quaternion::Slerp(
+				rot, q,
+				st->weight / (wSum + st->weight));
+			wSum += st->weight;
+		}
+	};
+
+	for (size_t j = 0; j < jointCount; ++j) {
+		Joint& joint = skel.joints[j];
+		const auto& rest = joint.restTransform;
+
+		Quaternion R = rest.rotate;
+		Vector3    P = rest.translate;
+		Vector3    S = rest.scale;
+		float      w = 0.f;
+
+		blendOne(currentAnimation_, j, R, P, S, w);
+		blendOne(nextAnimation_, j, R, P, S, w);
+
+		joint.transform.rotate = Quaternion::Normalize(R);
+		joint.transform.translate = P;
+		joint.transform.scale = S;
+
+		// local → skeleton space
+		joint.localMatrix = MakeAffineMatrix(S, R, P);
+		joint.skeletonSpaceMatrix =
+			joint.parent ?
+			(joint.localMatrix *
+			 skel.joints[*joint.parent].skeletonSpaceMatrix)
+			: joint.localMatrix;
+
+		// パレット計算
+		auto& dst = skinCluster_.mappedPalette[j];
+		dst.skeletonSpaceMatrix =
+			skinCluster_.inverseBindPoseMatrices[j] * joint.skeletonSpaceMatrix;
+		dst.skeletonSpaceInverseTransposeMatrix =
+			Matrix4x4::Transpose(
+				Matrix4x4::Inverse(dst.skeletonSpaceMatrix));
+	}
+}
+
 //-----------------------------------------------------------------------------
 // 毎フレームの更新
 //-----------------------------------------------------------------------------
@@ -243,9 +313,10 @@ std::string AnimationModel::GetCurrentAnimationName() const {
 void AnimationModel::Update() {
 	if (modelData_) {
 		PlayAnimation();
-		SkeletonUpdate();
-		SkinClusterUpdate();
+		SkinningStep();
 	}
+
+
 
 	BaseModel::Update();
 }
@@ -363,7 +434,7 @@ void AnimationModel::MaterialBufferMap() {
 }
 
 //-----------------------------------------------------------------------------
-// ノード名の取得例
+// ノード名の取得
 //-----------------------------------------------------------------------------
 std::vector<std::string> AnimationModel::GetAnimationNodeNames() const {
 	std::vector<std::string> names;
@@ -371,4 +442,17 @@ std::vector<std::string> AnimationModel::GetAnimationNodeNames() const {
 		names.push_back(pair.first);
 	}
 	return names;
+}
+
+//-----------------------------------------------------------------------------
+// ジョイントの行列取得
+//-----------------------------------------------------------------------------
+std::optional<Matrix4x4> AnimationModel::GetJointMatrix(const std::string& name) const {
+	if (!modelData_) return std::nullopt;
+
+	auto it = modelData_->skeleton.jointMap.find(name);
+	if (it == modelData_->skeleton.jointMap.end()) return std::nullopt;
+
+	const Joint& j = modelData_->skeleton.joints[it->second];
+	return j.skeletonSpaceMatrix;
 }
