@@ -62,7 +62,6 @@ void TestScene::Initialize(){
 	// オブジェクト生成
 	//=========================
 	animationHuman_ = sceneContext_->GetObjectLibrary()->CreateAndAddObject<CalyxHuman>("run.gltf","runHuman");
-	animationHuman_->GetAnimationModel()->isDrawSkeleton_ = true;
 
 	
 }

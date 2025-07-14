@@ -163,31 +163,31 @@ void Manipulator::RenderOverlay(const ImVec2& basePos){
 			ImGui::SetTooltip("%s Mode", isWorld ? "World" : "Local");
 	}
 
-	//{
-	//	static bool showGrid = false;
-	//	int i = IM_ARRAYSIZE(buttons);
-	//	spacing += 15.0f;
-	//	ImVec2 btnPos = ImVec2(basePos.x, basePos.y + i * (iconSize.y + spacing));
-	//	ImGui::SetCursorScreenPos(btnPos);
+	{
+		static bool showGrid = false;
+		int i = IM_ARRAYSIZE(buttons);
+		spacing += 15.0f;
+		ImVec2 btnPos = ImVec2(basePos.x, basePos.y + i * (iconSize.y + spacing));
+		ImGui::SetCursorScreenPos(btnPos);
 
-	//	bool pushStyle = false;
-	//	if (showGrid){
-	//		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.5f, 0.9f, 1.0f));
-	//		pushStyle = true;
-	//	}
+		bool pushStyle = false;
+		if (showGrid){
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.5f, 0.9f, 1.0f));
+			pushStyle = true;
+		}
 
-	//	if (ImGui::ImageButton(iconDrawGrid_.texture, iconSize)){
-	//		showGrid = !showGrid;
-	//	}
+		if (ImGui::ImageButton(iconDrawGrid_.texture, iconSize)){
+			showGrid = !showGrid;
+		}
 
-	//	if (pushStyle){
-	//		ImGui::PopStyleColor(); // Push したときだけ Pop する
-	//	}
+		if (pushStyle){
+			ImGui::PopStyleColor(); // Push したときだけ Pop する
+		}
 
-	//	if (showGrid){
-	//		PrimitiveDrawer::GetInstance()->DrawGrid();
-	//	}
-	//}
+		if (showGrid){
+			PrimitiveDrawer::GetInstance()->DrawGrid();
+		}
+	}
 }
 
 void Manipulator::RenderToolbar(){
