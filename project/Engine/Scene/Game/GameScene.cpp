@@ -11,7 +11,6 @@
 #include <Engine/Graphics/Context/GraphicsGroup.h>
 #include <Engine/Application/Input/Input.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
-#include <Engine/Objects/3D/Actor/SceneObjectManager.h>
 #include <Engine/Collision/CollisionManager.h>
 #include <Engine/Graphics/Pipeline/Service/PipelineService.h>
 

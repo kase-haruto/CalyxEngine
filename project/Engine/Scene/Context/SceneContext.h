@@ -7,9 +7,15 @@
 #include <Engine/objects/3D/Actor/Library/SceneObjectLibrary.h>
 #include <Engine/Lighting/LightLibrary.h>
 #include <Engine/Application/Effects/FxSystem.h>
+#include <Engine/Extensions/SkyBox/SkyBox.h>
+
+#include <Engine/Renderer/Sprite/SpriteRenderer.h>
+#include <Engine/Renderer/Model/ModelRenderer.h>
+#include <Engine/Graphics/RenderTarget/Detail/RenderTargetDetail.h>
 
 // c++
 #include <memory>
+#include <d3d12.h>
 
 class SceneObject;
 
@@ -22,6 +28,9 @@ public:
 
 	void Initialize();
 	void Update();
+	void Render(ID3D12GraphicsCommandList* cmd,
+				class PipelineService* pso,
+				RenderTargetType           rtType);
 	void Clear();
 
 	// object API ------------------------------------------------------------
@@ -49,6 +58,11 @@ private:
 	std::unique_ptr<SceneObjectLibrary> objectLibrary_;
 	std::unique_ptr<LightLibrary> lightLibrary_;
 	std::unique_ptr<FxSystem> fxSystem_;
+
+	// render -----------------------------------------------------------------
+	std::unique_ptr<SkyBox>         skyBox_;
+	std::unique_ptr<SpriteRenderer> spriteRenderer_;
+	std::unique_ptr<ModelRenderer>  modelRenderer_;
 
 	// event helpers ----------------------------------------------------------
 	ObjectRemovedCallback onEditorObjectRemoved_;

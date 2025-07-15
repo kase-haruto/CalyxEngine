@@ -1,5 +1,4 @@
 #include "SceneObject.h"
-#include "SceneObjectManager.h"
 #include <Engine/graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <Engine/Foundation/Json/JsonUtils.h>
