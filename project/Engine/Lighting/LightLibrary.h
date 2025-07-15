@@ -16,7 +16,7 @@ public:
 	LightLibrary() = default;
 	~LightLibrary() = default;
 
-	void Update();
+	void CyncGpu();
 	void Clear();
 	void SetDirectionalLight(const std::shared_ptr<DirectionalLight>& light);
 	void SetPointLight(const std::shared_ptr<PointLight>& light);

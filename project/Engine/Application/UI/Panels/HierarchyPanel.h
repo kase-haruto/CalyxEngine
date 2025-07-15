@@ -22,9 +22,13 @@ class SceneObjectLibrary;
 //===================================================================*//
 //					HierarchyPanel
 //===================================================================*//
-class HierarchyPanel 
-	: public IEngineUI {
-	using OnObjectSelectedCallback = std::function<void(SceneObject*)>;
+class HierarchyPanel
+	: public IEngineUI{
+private:
+	using SelectCB = std::function<void(std::shared_ptr<SceneObject>)>;
+	using DeleteCB = std::function<void(std::shared_ptr<SceneObject>)>;
+	using CreateCB = std::function<void(std::shared_ptr<SceneObject>)>;
+
 public:
 	//===================================================================*/
 	//					public methods
@@ -37,43 +41,37 @@ public:
 	bool IsDescendantOf(SceneObject* parent, SceneObject* child);
 	const std::string& GetPanelName() const override;
 
-	//--------- accessor -----------------------------------------------------
-	void SetSceneObjectLibrary(const SceneObjectLibrary* library);
-	void SetOnObjectSelected(OnObjectSelectedCallback cb) { onObjectSelected_ = std::move(cb); }
-	void SetOnObjectDelete(const std::function<void(SceneObject*)>& callback){onObjectDelete_ = callback;}
-	void SetOnObjectCreate(const std::function<void(std::unique_ptr<SceneObject>)>& callback){ onObjectCreate_ = callback; }
-	void SetSelectedObject(SceneObject* obj) { selected_ = obj; }
-	const SceneObjectLibrary* GetSceneObjectLibrary() const { return pSceneObjectLibrary_; }
-	SceneObject* GetSelectedObject() const { return selected_; }
+	// accessors -------------------------------------------------------
+	void SetSceneObjectLibrary(const SceneObjectLibrary* lib){ lib_ = lib; }
+	void SetOnObjectSelected(SelectCB cb){ onSelect_ = std::move(cb); }
+	void SetOnObjectDelete(DeleteCB cb){ onDelete_ = std::move(cb); }
+	void SetOnObjectCreate(CreateCB cb){ onCreate_ = std::move(cb); }
+	void SetSelectedObject(const std::shared_ptr<SceneObject>& sp){ selected_ = sp; }
+
+	const SceneObjectLibrary* GetSceneObjectLibrary() const{ return lib_; }
+	std::shared_ptr<SceneObject> GetSelectedObject() const{ return selected_; }
 
 	//===================================================================*/
 	//					private methods
 	//===================================================================*/
 private:
-	const SceneObjectLibrary* pSceneObjectLibrary_ = nullptr;
-	OnObjectSelectedCallback onObjectSelected_;
-	SceneObject* selected_ = nullptr;
-	std::function<void(SceneObject*)> onObjectDelete_;
+	// runtime state
+	const SceneObjectLibrary* lib_ = nullptr;
+	std::shared_ptr<SceneObject> selected_;
+	SelectCB onSelect_;
+	DeleteCB onDelete_;
+	CreateCB onCreate_;
 
-private:
-	std::function<void(std::unique_ptr<SceneObject>)> onObjectCreate_;
-	bool showSavePrefabDialog_ = false;
-	bool showLoadPrefabDialog_ = false;
-
+	// ぷれふぁbダイアログ
+	bool showSavePrefabDlg_ = false;
+	bool showLoadPrefabDlg_ = false;
 	SceneObject* prefabSaveTarget_ = nullptr;
 
-private:
-	// アイコン
-	struct Icon{
-		ImTextureID  tex = nullptr;
-		ImVec2 size {24.0f,24.0f};
-	};
-
+	// icons
+	struct Icon{ ImTextureID tex {}; ImVec2 size {24,24}; };
 public:
-	Icon iconEye_;
-	Icon iconEyeOff_;
-	Icon iconCamera_;
-	Icon iconLight_;
-	Icon iconGameObject_;
-	Icon iconParticleSystem_;
+	Icon iconEye_, iconEyeOff_, iconCamera_, iconLight_, iconGameObj_, iconFx_;
+
+private:
+	using IEngineUI::panelName_;
 };

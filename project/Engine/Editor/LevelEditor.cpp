@@ -26,17 +26,17 @@ void LevelEditor::Initialize(){
 	placeToolPanel_ = std::make_unique<PlaceToolPanel>();
 
 	// Panel に LevelEditor 自体を渡す（コールバック通知や setter）
-	editor_->SetOnEditorSelected([this] (BaseEditor* editor){
-		SetSelectedEditor(editor);
-								 });
-	hierarchy_->SetOnObjectSelected([this] (SceneObject* obj){
-		SetSelectedObject(obj);
+	editor_->SetOnEditorSelected([this] (BaseEditor* ed){ SetSelectedEditor(ed); });
+
+	// Hierarchy から来るコールバックは shared_ptr で受ける
+	hierarchy_->SetOnObjectSelected([this] (std::shared_ptr<SceneObject> sp){
+		SetSelectedObject(sp);
 									});
-	hierarchy_->SetOnObjectDelete([this] (SceneObject* obj){
-		this->DeleteObject(obj);
+	hierarchy_->SetOnObjectDelete([this] (std::shared_ptr<SceneObject> sp){
+		DeleteObject(std::move(sp));           // 参照カウント‐1
 								  });
-	hierarchy_->SetOnObjectCreate([this] (std::unique_ptr<SceneObject> obj){
-		this->CreateObject(std::move(obj));
+	hierarchy_->SetOnObjectCreate([this] (std::shared_ptr<SceneObject> sp){
+		CreateObject(std::move(sp));           // 受け取ってシーンに追加
 								  });
 
 	inspector_->SetSceneObjectEditor(sceneEditor_.get());
@@ -140,11 +140,12 @@ void LevelEditor::SetSelectedEditor(BaseEditor* editor){
 	inspector_->SetSelectedEditor(editor);
 }
 
-void LevelEditor::SetSelectedObject(SceneObject* object){
-	selectedObject_ = object;
+void LevelEditor::SetSelectedObject(const std::shared_ptr<SceneObject>& sp){
+	selectedObject_ = sp;
 	selectedEditor_ = nullptr;
-	hierarchy_->SetSelectedObject(object);
-	inspector_->SetSelectedObject(object);
+	hierarchy_->SetSelectedObject(sp);
+	inspector_->SetSelectedObject(sp);
+
 }
 
 void LevelEditor::CreateObject(std::shared_ptr<SceneObject> obj){
@@ -160,28 +161,27 @@ void LevelEditor::CreateObject(std::shared_ptr<SceneObject> obj){
 }
 
 
-void LevelEditor::DeleteObject(SceneObject* object){
-	if (!object) return;
+void LevelEditor::DeleteObject(const std::shared_ptr<SceneObject>& sp){
+	if (!sp) return;
 
-	if (selectedObject_ == object){
-		selectedObject_ = nullptr;
+	// ── 選択状態をクリア ───────────────────────────────
+	if (selectedObject_ == sp){
+		selectedObject_.reset();
 		inspector_->SetSelectedObject(nullptr);
 	}
 
-	if (object->GetObjectType() == ObjectType::ParticleSystem){
-		auto sharedObj = pSceneContext_->FindSharedObject(object);
-		auto fxEmitter = std::dynamic_pointer_cast< FxEmitter >(sharedObj);
-		if (fxEmitter){
+	// ── パーティクルシステムなら FxSystem からも削除 ──────────
+	if (sp->GetObjectType() == ObjectType::ParticleSystem){
+		if (auto fxEmitter = std::dynamic_pointer_cast< FxEmitter >(sp)){
 			pSceneContext_->GetFxSystem()->RemoveEmitter(fxEmitter);
 		}
 	}
 
-	auto sharedObj = pSceneContext_->FindSharedObject(object);
-	if (sharedObj){
-		pSceneContext_->RemoveEditorObject(sharedObj);
-		pSceneContext_->GetObjectLibrary()->RemoveObject(sharedObj);
-	}
+	// ── シーンから除去 ────────────────────────────────
+	pSceneContext_->RemoveEditorObject(sp);          // editorObjects_ から
+	pSceneContext_->GetObjectLibrary()->RemoveObject(sp); // ライブラリから
 }
+
 
 void LevelEditor::RenderViewport(ViewportType type, const ImTextureID& tex){
 	//タイプに応じて描画
@@ -196,13 +196,24 @@ void LevelEditor::RenderViewport(ViewportType type, const ImTextureID& tex){
 	}
 }
 
-void LevelEditor::TryPickObjectFromMouse(const Vector2& mouse, const Vector2& viewportSize, const Matrix4x4& view, const Matrix4x4& proj){
+void LevelEditor::TryPickObjectFromMouse(const Vector2& mouse,
+										 const Vector2& viewportSize,
+										 const Matrix4x4& view,
+										 const Matrix4x4& proj){
+	// ビューポート内ローカル座標へ変換
 	Vector2 mouseLocal = mouse - debugViewport_->GetPosition();
+
 	Ray ray = Raycastor::ConvertMouseToRay(mouseLocal, view, proj, viewportSize);
-	if (SceneObject* obj = PickSceneObjectByRay(ray)){
-		SetSelectedObject(obj);
+
+	// ヒット判定（raw ptr）
+	if (SceneObject* raw = PickSceneObjectByRay(ray)){
+		// 対応する shared_ptr をライブラリから取得
+		if (auto sp = pSceneContext_->FindSharedObject(raw)){
+			SetSelectedObject(sp);
+		}
 	}
 }
+
 
 SceneObject* LevelEditor::PickSceneObjectByRay(const Ray& ray){
 	const auto* lib = hierarchy_->GetSceneObjectLibrary();
@@ -227,15 +238,15 @@ void LevelEditor::NotifySceneContextChanged(SceneContext* newContext){
 	placeToolPanel_->OnSceneContextChanged(newContext);
 	pSceneContext_ = newContext;
 
-	SetSelectedObject(nullptr);
+	SetSelectedObject(std::shared_ptr<SceneObject>{});
 	ClearSelection();
 
 	if (newContext){
-		// HierarchyPanel: 削除されたら選択解除
 		newContext->AddOnObjectRemovedListener(
 			[editor = this] (SceneObject* removed){
-				if (editor->GetHierarchyPanel()->GetSelectedObject() == removed){
-					editor->SetSelectedObject(nullptr);
+				auto sel = editor->GetHierarchyPanel()->GetSelectedObject();
+				if (sel && sel.get() == removed){
+					editor->SetSelectedObject(std::shared_ptr<SceneObject>{});
 				}
 			}
 		);
@@ -268,6 +279,9 @@ void LevelEditor::TryPickUnderCursor(){
 
 	Ray ray = Raycastor::ConvertMouseToRay(mousePos, view, proj, size);
 	if (SceneObject* picked = PickSceneObjectByRay(ray)){
-		SetSelectedObject(picked);
+		if (auto sp = pSceneContext_->FindSharedObject(picked)){
+			// 共有ポインタを渡す
+			SetSelectedObject(sp);
+		}
 	}
 }

@@ -6,73 +6,63 @@
 // engine
 #include <Engine/objects/3D/Actor/Library/SceneObjectLibrary.h>
 #include <Engine/Lighting/LightLibrary.h>
+#include <Engine/Application/Effects/FxSystem.h>
 
 // c++
 #include <memory>
 
-using ObjectRemovedCallback = std::function<void(SceneObject*)>;
+class SceneObject;
 
-// forward declaration
-class FxSystem;
+using ObjectRemovedCallback = std::function<void(SceneObject*)>;
 
 class SceneContext{
 public:
-	SceneContext();
-	~SceneContext();
+	SceneContext() = default;
+	~SceneContext() = default;
 
 	void Initialize();
 	void Update();
 	void Clear();
 
-	void RemoveEditorObject(const std::shared_ptr<SceneObject>& obj);
-
-	SceneObjectLibrary* GetObjectLibrary() const{ return objectLibrary_.get(); }
-
-	template<typename TObject>
+	// object API ------------------------------------------------------------
+	template<class TObject>
 	TObject* AddEditorObject(std::shared_ptr<TObject> object);
+	void RemoveEditorObject(const std::shared_ptr<SceneObject>& object);
 
-	std::vector<std::shared_ptr<SceneObject>> GetEditorObjects();
-
-	void AddOnObjectRemovedListener(std::function<void(SceneObject*)> cb){
-		objectRemovedCallbacks_.push_back(std::move(cb));
-	}
+	// accessors --------------------------------------------------------------
+	SceneObjectLibrary* GetObjectLibrary() const{ return objectLibrary_.get(); }
+	LightLibrary* GetLightLibrary()  const{ return lightLibrary_.get(); }
+	FxSystem* GetFxSystem()      const{ return fxSystem_.get(); }
 
 	std::string GetSceneName() const{ return sceneName_; }
-	LightLibrary* GetLightLibrary() const{ return lightLibrary_.get(); }
-	void SetSceneName(const std::string& name){ sceneName_ = name; }
-	void SetOnEditorObjectRemoved(const ObjectRemovedCallback& callback){
-		onEditorObjectRemoved_ = callback;
-	}
+	void SetSceneName(const std::string& n){ sceneName_ = n; }
 
-	FxSystem* GetFxSystem() const{ return fxSystem_.get(); }
+	// callbacks --------------------------------------------------------------
+	void AddOnObjectRemovedListener(ObjectRemovedCallback cb){ objectRemovedCallbacks_.push_back(std::move(cb)); }
+	void SetOnEditorObjectRemoved(ObjectRemovedCallback cb){ onEditorObjectRemoved_ = std::move(cb); }
+
+	// utils ------------------------------------------------------------------
 	std::shared_ptr<SceneObject> FindSharedObject(SceneObject* raw);
 
 private:
-	ObjectRemovedCallback onEditorObjectRemoved_;
+	// subsystems -------------------------------------------------------------
 	std::unique_ptr<SceneObjectLibrary> objectLibrary_;
 	std::unique_ptr<LightLibrary> lightLibrary_;
 	std::unique_ptr<FxSystem> fxSystem_;
 
-private:
-	std::vector<std::weak_ptr<SceneObject>> editorObjects_;
-	std::vector<std::function<void(SceneObject*)>> objectRemovedCallbacks_;
+	// event helpers ----------------------------------------------------------
+	ObjectRemovedCallback onEditorObjectRemoved_;
+	std::vector<ObjectRemovedCallback> objectRemovedCallbacks_;
 
 	std::string sceneName_ = "scene";
-	// シーン名
 };
 
-// ----------------------------------------------
-// Template Implementation
-// ----------------------------------------------
-template<typename TObject>
+template<class TObject>
 TObject* SceneContext::AddEditorObject(std::shared_ptr<TObject> object){
 	static_assert(std::is_base_of_v<SceneObject, TObject>, "TObject must derive from SceneObject");
 	assert(object && "object must be a SceneObject");
 
-	TObject* rawPtr = object.get();
-
-	objectLibrary_->AddObject(object);
-	editorObjects_.push_back(object);
-
-	return rawPtr;
+	TObject* raw = object.get();
+	objectLibrary_->AddObject(std::move(object));
+	return raw;
 }

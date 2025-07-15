@@ -12,6 +12,7 @@ public:
 	PlayerBullet(const std::string& modelName,const std::string& name);
 	~PlayerBullet()override = default;
 
+	void Initialize()override;
 	void Update() override;
 	//--------- accessor ---------------------------------------------------
 	

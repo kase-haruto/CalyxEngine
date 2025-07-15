@@ -293,6 +293,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Renderer\Sprite\SpriteRenderer.cpp" />
     <ClCompile Include="Data\Engine\Prefab\Serializer\PrefabSerializer.cpp" />
     <ClCompile Include="Engine\Renderer\Model\ModelRenderer.cpp" />
+    <ClCompile Include="Engine\Objects\3D\Actor\Registry\SceneObjectRegistry.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Objects\3D\Actor\TestObject\CalyxHuman.h" />
@@ -530,6 +531,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Renderer\Sprite\SpriteRenderer.h" />
     <ClInclude Include="Data\Engine\Prefab\Serializer\PrefabSerializer.h" />
     <ClInclude Include="Engine\Renderer\Model\ModelRenderer.h" />
+    <ClInclude Include="Engine\Objects\3D\Actor\Registry\SceneObjectRegistry.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">

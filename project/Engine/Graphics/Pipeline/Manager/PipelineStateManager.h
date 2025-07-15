@@ -56,7 +56,6 @@ public:
 private:
 	ComPtr<ID3D12Device>device_;
 	std::shared_ptr<ShaderManager>shaderManager_;
-	// ★ キーを (pipelineType, blendMode) にした Map
 	std::unordered_map<PipelineKey, std::unique_ptr<PipelineState>> pipelineStates_;
 };
 

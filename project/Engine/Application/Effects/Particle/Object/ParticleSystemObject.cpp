@@ -8,20 +8,19 @@ ParticleSystemObject::ParticleSystemObject(const std::string& name){
 }
 
 void ParticleSystemObject::Initialize(){
-	// 必要に応じて初期化処理
 }
 
 void ParticleSystemObject::Update(){
-	// トランスフォームの更新
+	// ワールド行列を更新
 	worldTransform_.Update();
 	position_ = worldTransform_.GetWorldPosition();
 
-	// 自身の emitter を更新
+	// 自身（Emitter 部分）の更新
 	FxEmitter::Update();
 
-	// 子オブジェクトの再帰更新
-	for (const auto& child : children_){
-		if (auto* ps = dynamic_cast< ParticleSystemObject* >(child)){
+	// 子オブジェクトを再帰的に更新
+	for (const auto& childSp : children_){
+		if (auto ps = std::dynamic_pointer_cast< ParticleSystemObject >(childSp)){
 			ps->Update();
 		}
 	}
@@ -44,7 +43,7 @@ void ParticleSystemObject::SetDrawEnable(bool isDrawEnable){
 
 	// 子にも適用
 	for (const auto& child : children_){
-		if (auto* ps = dynamic_cast< ParticleSystemObject* >(child)){
+		if (auto ps = std::dynamic_pointer_cast< ParticleSystemObject >(child)){
 			ps->SetDrawEnable(isDrawEnable);
 		}
 	}
@@ -74,7 +73,7 @@ void ParticleSystemObject::ExtractConfig(){
 void ParticleSystemObject::PlayRecursive(){
 	Play();
 	for (const auto& child : children_){
-		if (auto* ps = dynamic_cast< ParticleSystemObject* >(child)){
+		if (auto ps = std::dynamic_pointer_cast< ParticleSystemObject >(child)){
 			ps->PlayRecursive();
 		}
 	}
@@ -83,7 +82,7 @@ void ParticleSystemObject::PlayRecursive(){
 void ParticleSystemObject::StopRecursive(){
 	Stop();
 	for (const auto& child : children_){
-		if (auto* ps = dynamic_cast< ParticleSystemObject* >(child)){
+		if (auto ps = std::dynamic_pointer_cast< ParticleSystemObject >(child)){
 			ps->StopRecursive();
 		}
 	}
@@ -92,7 +91,7 @@ void ParticleSystemObject::StopRecursive(){
 void ParticleSystemObject::ResetRecursive(){
 	Reset();
 	for (const auto& child : children_){
-		if (auto* ps = dynamic_cast< ParticleSystemObject* >(child)){
+		if (auto ps = std::dynamic_pointer_cast< ParticleSystemObject >(child)){
 			ps->ResetRecursive();
 		}
 	}

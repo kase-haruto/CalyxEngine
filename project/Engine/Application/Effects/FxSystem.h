@@ -22,7 +22,7 @@ public:
 	~FxSystem() ;
 	void AddEmitter(const std::shared_ptr<FxEmitter>& emitter);
 	void RemoveEmitter(const std::shared_ptr<FxEmitter>& emitter);
-	void Update();
+	void SyncEmitters();
 	void Render(class PipelineService*, ID3D12GraphicsCommandList*);
 	void Clear();
 private:

@@ -1,110 +1,89 @@
 #include "PrefabSerializer.h"
-#include <Engine/Objects/ConfigurableObject/IConfigurable.h>
-#include <Engine/Foundation/Json/JsonUtils.h>
-#include <Engine/Objects/3D/Actor/SceneObject.h>
-
-#include <Engine/Objects/3D/Actor/BaseGameObject.h>
-#include <Engine/Objects/LightObject/PointLight.h>
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
+#include <Engine/Foundation/Json/JsonUtils.h>
+#include <Engine/Objects/3D/Actor/BaseGameObject.h>
+#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
+#include <Engine/Objects/3D/Actor/SceneObject.h>
+#include <Engine/Objects/ConfigurableObject/IConfigurable.h>
+#include <Engine/Objects/LightObject/PointLight.h>
 
-#include <unordered_map>
 #include <functional>
+#include <unordered_map>
 
-bool PrefabSerializer::Save(const std::vector<SceneObject*>& roots, const std::string& path){
+bool PrefabSerializer::Save(const std::vector<SceneObject*>& roots,
+							const std::string& path){
 	nlohmann::json jArray = nlohmann::json::array();
 
-	std::function<void(SceneObject*)> serializeRecursive = [&] (SceneObject* obj){
+	std::function<void(SceneObject*)> serializeRec;
+	serializeRec = [&] (SceneObject* obj){
 		if (!obj || !obj->IsSerializable()) return;
 
-		if (auto* config = dynamic_cast< IConfigurable* >(obj)){
+		if (auto* cfg = dynamic_cast< IConfigurable* >(obj)){
 			nlohmann::json j;
-			config->ExtractConfigToJson(j);
-			j["objectType"] = static_cast< int >(obj->GetObjectType());
-			j["guid"] = obj->GetGuid(); // そのまま保存
+			cfg->ExtractConfigToJson(j);
+			j["type"] = obj->GetTypeName();  // 型名を保存
+			j["guid"] = obj->GetGuid();
 			if (auto parent = obj->GetParent()){
 				j["parentGuid"] = parent->GetGuid();
 			}
-
-			jArray.push_back(j);
+			jArray.push_back(std::move(j));
 		}
-
-		for (auto* child : obj->GetChildren()){
-			serializeRecursive(child);
+		for (auto& childSp : obj->GetChildren()){
+			if (childSp) serializeRec(childSp.get());
 		}
 		};
 
-	for (auto* root : roots){
-		serializeRecursive(root);
-	}
+	for (auto* root : roots) serializeRec(root);
 
 	return JsonUtils::Save(path, jArray);
 }
 
-
-
-std::vector<std::unique_ptr<SceneObject>> PrefabSerializer::Load(const std::string& path){
+std::vector<std::shared_ptr<SceneObject>> PrefabSerializer::Load(const std::string& path){
 	nlohmann::json jArray;
 	if (!JsonUtils::Load(path, jArray)) return {};
 
-	std::vector<std::unique_ptr<SceneObject>> createdObjects;
-	std::unordered_map<Guid, SceneObject*> guidToObjectMap;
+	std::vector<std::shared_ptr<SceneObject>> createdRoots;
+	std::unordered_map<Guid, std::shared_ptr<SceneObject>> guidMap;
 
-	// --- 1st pass: 各オブジェクト生成 ---
+	// インスタンス生成と設定適用
 	for (const auto& j : jArray){
-		int type = j.value("objectType", -1);
-		std::string name = j.value("name", "PrefabObject");
+		std::string typeName = j.value("type", "");
+		if (typeName.empty()) continue;
+
+		// Factory で生成
+		auto sp = SceneObjectRegistry::Get().Create(typeName);
+		if (!sp) continue;
+
+		// Config 適用
+		if (auto* cfg = dynamic_cast< IConfigurable* >(sp.get())){
+			cfg->ApplyConfigFromJson(j);
+		}
+
+		// GUID 上書き
 		Guid guid = j.value("guid", Guid {});
+		sp->SetGuid(guid);
 
-		std::unique_ptr<SceneObject> obj;
-
-		switch (static_cast< ObjectType >(type)){
-			case ObjectType::GameObject:
-			{
-				std::string modelName = j.value("modelName", "debugCube.obj");
-				auto go = std::make_unique<BaseGameObject>(modelName, name);
-				go->ApplyConfigFromJson(j);
-				obj = std::move(go);
-				break;
-			}
-			case ObjectType::Light:
-			{
-				auto light = std::make_unique<PointLight>(name);
-				light->ApplyConfigFromJson(j);
-				obj = std::move(light);
-				break;
-			}
-			case ObjectType::ParticleSystem:
-			{
-				auto fx = std::make_unique<ParticleSystemObject>(name);
-				fx->ApplyConfigFromJson(j);
-				obj = std::move(fx);
-				break;
-			}
-			default:
-				continue;
-		}
-
-		if (obj){
-			obj->SetGuid(guid);  // 同じ GUID を維持（または新しくしてもよい）
-			guidToObjectMap[guid] = obj.get();
-			createdObjects.push_back(std::move(obj));
-		}
+		guidMap[guid] = sp;
+		createdRoots.push_back(sp);
 	}
 
-	// --- 2nd pass: 親子関係の復元 ---
+	// 親子リンク復元
 	for (const auto& j : jArray){
-		Guid childGuid = j.value("guid", Guid {});
-		Guid parentGuid = j.value("parentGuid", Guid {});
+		Guid childG = j.value("guid", Guid {});
+		Guid parentG = j.value("parentGuid", Guid {});
+		if (!childG.isValid() || !parentG.isValid()) continue;
 
-		if (childGuid.isValid() && parentGuid.isValid()){
-			SceneObject* child = guidToObjectMap[childGuid];
-			SceneObject* parent = guidToObjectMap[parentGuid];
-			if (child && parent){
-				child->SetParent(parent);
-			}
+		auto childIt = guidMap.find(childG);
+		auto parentIt = guidMap.find(parentG);
+		if (childIt != guidMap.end() && parentIt != guidMap.end()){
+			childIt->second->SetParent(parentIt->second);
 		}
 	}
 
-	return createdObjects;
+	// ルートだけを返
+	std::vector<std::shared_ptr<SceneObject>> rootsOut;
+	for (auto& [g, sp] : guidMap){
+		if (!sp->GetParent()) rootsOut.push_back(sp);
+	}
+	return rootsOut;
 }
-

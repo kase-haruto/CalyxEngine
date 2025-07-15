@@ -10,6 +10,7 @@
 #include <Engine/Application/UI/Panels/SceneSwitcherPanel.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Graphics/RenderTarget/Interface/IRenderTarget.h>
+#include <Engine/Graphics/Context/GraphicsGroup.h>
 #include <Engine/Objects/3D/Actor/SceneObjectManager.h>
 #include <Engine/Application/Input/Input.h>
 #include <Engine/Graphics/Core/GraphicsSystem.h>
@@ -85,16 +86,19 @@ void SceneManager::Update() {
 void SceneManager::Draw() {
 	CameraManager::GetInstance()->SetType(Type_Default);
 	auto* gameRT = pDxCore_->GetRenderTargetCollection().Get("Offscreen");
-	// 現在のシーンを描画
 	DrawForRenderTarget(gameRT);
 
 #ifdef _DEBUG
-	// DebugCamera を明示的に描画
 	CameraManager::GetInstance()->SetType(Type_Debug);
 	auto* debugRT = pDxCore_->GetRenderTargetCollection().Get("DebugView");
 	DrawForRenderTarget(debugRT);
 #endif // _DEBUG
 
+	//プリミティブ描画
+	auto* cmd = pGraphicsSystem_->GetCommandList();
+	GraphicsGroup::GetInstance()->SetCommand(cmd, PipelineType::Line, BlendMode::NORMAL);
+	CameraManager::SetCommand(cmd, PipelineType::Line);
+	PrimitiveDrawer::GetInstance()->Render();
 	PrimitiveDrawer::GetInstance()->ClearMesh();
 }
 

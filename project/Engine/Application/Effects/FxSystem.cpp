@@ -26,13 +26,13 @@ void FxSystem::RemoveEmitter(const std::shared_ptr<FxEmitter>& emitter){
 	);
 }
 
-void FxSystem::Update(){
+void FxSystem::SyncEmitters(){
 	for (auto it = emitters_.begin(); it != emitters_.end(); ){
 		if (auto emitter = it->lock()){
-			emitter->Update();
+			emitter->TransferParticleDataToGPU();   // 計算済みデータを GPU へ
 			++it;
 		} else{
-			it = emitters_.erase(it);
+			it = emitters_.erase(it);           // 弱参照切れを削除
 		}
 	}
 }

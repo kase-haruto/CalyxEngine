@@ -38,9 +38,10 @@ public:
 
 	void Initialize();
 	void Update()override;
+	void UploadToGpu();
 	void SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList, PipelineType type);
 	void ShowGui()override;
-
+	std::string_view GetTypeName() const override{ return "DirectionalLight"; }
 	// config ============================================================
 	void ApplyConfig()override;
 	void ExtractConfig()override;
