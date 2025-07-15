@@ -14,7 +14,8 @@ public:
 };
 
 template<class T>
-class SceneCtor final : public ISceneCtor{
+class SceneCtor final 
+	: public ISceneCtor{
 public:
 	std::shared_ptr<SceneObject> New() const override{
 		return std::make_shared<T>();
@@ -27,7 +28,7 @@ public:
 
 	void Register(std::string_view typeName, std::unique_ptr<ISceneCtor>&& ctor);
 	std::shared_ptr<SceneObject> Create(std::string_view typeName) const;
-	std::vector<std::string>     ListTypes() const;
+	std::vector<std::string> ListTypes() const;
 
 private:
 	std::unordered_map<std::string, std::unique_ptr<ISceneCtor>> table_;

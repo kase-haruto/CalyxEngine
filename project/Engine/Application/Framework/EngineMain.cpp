@@ -7,22 +7,23 @@
 
 static std::unique_ptr<EngineController> engine;
 
-void Engine_Initialize(HINSTANCE hInstance) {
-    engine = std::make_unique<EngineController>();
-    engine->Initialize(hInstance);
+void Engine_Initialize(HINSTANCE hInstance){
+	engine = std::make_unique<EngineController>();
+	engine->Initialize(hInstance);
 }
 
-bool Engine_Update() {
-    return engine->Update(); // ここで false を返せば終了
+bool Engine_Update(){
+	// ここで false を返せば終了
+	return engine->Update();
 }
 
-void Engine_Render() {
-    engine->Render();
+void Engine_Render(){
+	engine->Render();
 }
 
-void Engine_Finalize() {
-    if (engine) {
-        engine->Finalize();
-        engine.reset();
-    }
+void Engine_Finalize(){
+	if (engine){
+		engine->Finalize();
+		engine.reset();
+	}
 }

@@ -41,7 +41,6 @@ void EngineController::Initialize(HINSTANCE hInstance){
 
 	// エディターパネルにエディターを追加
 #ifdef _DEBUG
-
 	engineUICore_->GetEditorPanel()->AddEditor(editorCollection_->GetEditor(EditorCollection::EditorType::PostProcess));
 #endif // _DEBUG
 
@@ -50,14 +49,6 @@ void EngineController::Initialize(HINSTANCE hInstance){
 	sceneManager_ = std::make_unique<SceneManager>(system_->GetDxCore(),graphicsSystem_.get());
 	sceneManager_->SetEngineUI(engineUICore_.get());
 	sceneManager_->Initialize();
-
-	postProcessCollection_ = system_->GetPostProcessCollection();
-	postEffectSlots_ = {
-		{ "RadialBlur", false, postProcessCollection_->GetEffectByName("RadialBlur") },
-		{ "GrayScale",  false,  postProcessCollection_->GetEffectByName("GrayScale")},
-		{ "CopyImage",  true,  postProcessCollection_->GetEffectByName("CopyImage")},
-		{ "ChromaticAberration", false, postProcessCollection_->GetEffectByName("ChromaticAberration")},
-	};
 
 }
 
@@ -114,66 +105,12 @@ void EngineController::BeginUpdate(){
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//		ポストエフェクト処理（疑似
-/////////////////////////////////////////////////////////////////////////////////////////
-void EngineController::UpdatePostEffectControl(float dt) {
-	postEffectGraph_ = system_->GetPostEffectGraph();
-
-	// 2つのエフェクト取得
-	auto chromaEffect = dynamic_cast<ChromaticAberrationEffect*>(
-		system_->GetPostProcessCollection()->GetEffectByName("ChromaticAberration"));
-	if (!chromaEffect) return;
-
-	auto radialBlurEffect = dynamic_cast<RadialBlurEffect*>(
-		system_->GetPostProcessCollection()->GetEffectByName("RadialBlur"));
-	if (!radialBlurEffect) return;
-
-	// LSHIFT で RadialBlur + ChromaticAberration を同時にON
-	if (Input::GetInstance()->TriggerKey(DIK_LSHIFT)) {
-		radialTimer_ = 0.0f;
-		isRadialActive_ = true;
-
-		for (auto& slot : postEffectSlots_) {
-			slot.enabled = (slot.name == "RadialBlur" || slot.name == "ChromaticAberration");
-		}
-
-		postEffectGraph_->SetPassesFromList(postEffectSlots_);
-	}
-
-	// 演出中ならタイマー進行
-	if (isRadialActive_) {
-		radialTimer_ += dt;
-
-		// フェードアウト: 1秒間で 1 → 0 に補間
-		float t = 1.0f - (radialTimer_ / kRadialDurationSec_);
-		t = std::clamp(t, 0.0f, 1.0f);
-
-		chromaEffect->SetIntensity(0.2f * t);
-
-		float blurWidth = 0.08f * t; // ブラー幅を0.08fから0.0fに補間
-		radialBlurEffect->SetWidth(blurWidth);
-
-		// 終了後はCopyImageのみに戻す
-		if (radialTimer_ >= kRadialDurationSec_) {
-			isRadialActive_ = false;
-
-			for (auto& slot : postEffectSlots_) {
-				slot.enabled = (slot.name == "CopyImage");
-			}
-
-			postEffectGraph_->SetPassesFromList(postEffectSlots_);
-		}
-	}
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////
 //		更新後処理
 /////////////////////////////////////////////////////////////////////////////////////////
 void EngineController::EndUpdate(){
 	// UI描画
 	engineUICore_->Render();	
 
-	//UpdatePostEffectControl(ClockManager::GetInstance()->GetDeltaTime());
 }
 
 

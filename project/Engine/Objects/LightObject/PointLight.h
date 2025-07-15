@@ -34,7 +34,7 @@ class PointLight
 	, public ConfigurableObject<PointLightConfig>{
 public:
 	PointLight(const std::string& name);
-	PointLight() = default;
+	PointLight();
 	~PointLight();
 
 	void Initialize();
