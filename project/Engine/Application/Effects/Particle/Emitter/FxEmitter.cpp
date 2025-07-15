@@ -18,7 +18,7 @@
 #include <externals/imgui/imgui.h>
 #include <externals/imgui/ImGuiFileDialog.h>
 
-FxEmitter::FxEmitter(){
+FxEmitter::FxEmitter() {
 	ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
 	// マテリアルの初期化
 	material_.color = Vector4(1, 1, 1, 1);
@@ -142,11 +142,11 @@ void FxEmitter::Update() {
 /////////////////////////////////////////////////////////////////////////////////////////
 //			発生
 /////////////////////////////////////////////////////////////////////////////////////////
-void FxEmitter::Emit(){
+void FxEmitter::Emit() {
 	Emit(position_);
 }
 
-void FxEmitter::Emit(const Vector3& pos){
+void FxEmitter::Emit(const Vector3& pos) {
 	if (units_.size() >= kMaxUnits_) return;
 
 	FxUnit fx;
@@ -158,7 +158,7 @@ void FxEmitter::Emit(const Vector3& pos){
 /////////////////////////////////////////////////////////////////////////////////////////
 //			リセット
 /////////////////////////////////////////////////////////////////////////////////////////
-void FxEmitter::ResetFxUnit(FxUnit& fx){
+void FxEmitter::ResetFxUnit(FxUnit& fx) {
 	fx.position = position_;
 	fx.scale = scale_.Get();
 	fx.velocity = velocity_.Get();
@@ -258,21 +258,24 @@ void FxEmitter::ShowGui() {
 	ImGui::PopID();
 }
 
-void FxEmitter::TransferParticleDataToGPU(){
+void FxEmitter::TransferParticleDataToGPU() {
 	std::vector<ParticleConstantData> gpuUnits;
 	gpuUnits.clear();
-	for (const auto& fx : units_){
-		if (fx.alive){
-			gpuUnits.push_back({fx.position, fx.scale, fx.color});
+	for (const auto& fx : units_) {
+		if (fx.alive) {
+			gpuUnits.push_back({ fx.position, fx.scale, fx.color });
 		}
 	}
-	instanceBuffer_.TransferVectorData(gpuUnits);
+	if (!gpuUnits.empty()) {
+
+		instanceBuffer_.TransferVectorData(gpuUnits);
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //			コンフィグの適用
 /////////////////////////////////////////////////////////////////////////////////////////
-void FxEmitter::ApplyConfigFrom(const EmitterConfig& config){
+void FxEmitter::ApplyConfigFrom(const EmitterConfig& config) {
 	position_ = config.position;
 	material_.color = config.color;
 	velocity_.FromConfig(config.velocity);
@@ -300,12 +303,12 @@ void FxEmitter::ApplyConfigFrom(const EmitterConfig& config){
 	isPlaying_ = true;
 }
 
-void FxEmitter::ExtractConfigTo(EmitterConfig& config) const{
+void FxEmitter::ExtractConfigTo(EmitterConfig& config) const {
 	config.position = position_;
 	config.color = material_.color;
-	config.velocity = FxVector3ParamConfig {velocity_.ToConfig()};
-	config.lifetime = FxFloatParamConfig {lifetime_.ToConfig()};
-	config.scale = FxVector3ParamConfig {scale_.ToConfig()};
+	config.velocity = FxVector3ParamConfig{ velocity_.ToConfig() };
+	config.lifetime = FxFloatParamConfig{ lifetime_.ToConfig() };
+	config.scale = FxVector3ParamConfig{ scale_.ToConfig() };
 	config.emitRate = emitRate_;
 	config.modelPath = modelPath;
 	config.texturePath = material_.texturePath;
@@ -314,9 +317,9 @@ void FxEmitter::ExtractConfigTo(EmitterConfig& config) const{
 	config.isStatic = isStatic_;
 
 	// モジュール情報を保存
-	if (moduleContainer_){
+	if (moduleContainer_) {
 		config.modules = moduleContainer_->ExtractConfigs();
-	} else{
+	} else {
 		config.modules.clear();
 	}
 

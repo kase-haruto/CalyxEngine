@@ -8,7 +8,6 @@ ParticleSystemObject::ParticleSystemObject(const std::string& name){
 }
 
 void ParticleSystemObject::Initialize(){
-	// 必要に応じて初期化処理
 }
 
 void ParticleSystemObject::Update(){

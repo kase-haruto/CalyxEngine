@@ -74,7 +74,6 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList,
 	//===================================================================*/
 	//                    particle描画
 	//===================================================================*/
-	CameraManager::GetInstance()->SetCommand(cmdList, PipelineType::StructuredObject);
 
 	sceneContext_->GetFxSystem()->Render(psoService, cmdList);
 }
