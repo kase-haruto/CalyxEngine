@@ -12,7 +12,7 @@
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <Engine/Graphics/Pipeline/Service/PipelineService.h>
-
+#include <Engine/Scene/Serializer/SceneSerializer.h>
 // lib
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -34,6 +34,8 @@ void TestScene::LoadAssets(){}
 /////////////////////////////////////////////////////////////////////////////////////////
 void TestScene::Initialize(){
 
+	//SceneSerializer::Load(*sceneContext_, filePath);
+
 	sceneContext_->Initialize();
 	sceneContext_->SetSceneName("TestScene");
 
@@ -50,10 +52,18 @@ void TestScene::Initialize(){
 	skyBox_ = std::make_unique<SkyBox>("sky.dds", "skyBox");
 	skyBox_->Initialize();
 
+	modelField_ = sceneContext_->GetObjectLibrary()->CreateAndAddObject<BaseGameObject>("terrain.obj", "field");
+	modelField_->SetScale({ 100.0f,100.0f,100.0f });
+	modelField_->SetTranslate({ 754.0f,5.9f, -589.0f });
+	modelField_->SetUvScale(Vector2(10.0f, 10.0f));
+	modelField_->SetEnableRaycast(false);
+
 	//=========================
 	// オブジェクト生成
 	//=========================
 	animationHuman_ = sceneContext_->GetObjectLibrary()->CreateAndAddObject<CalyxHuman>("run.gltf","runHuman");
+
+	
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -66,7 +76,7 @@ void TestScene::Update(){
 	skyBox_->Update();
 
 	animationHuman_->Update();
-
+	modelField_->Update();
 		//衝突判定
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
 

@@ -170,6 +170,7 @@ void ModelManager::SetOnModelLoadedCallback(std::function<void(const std::string
 void ModelManager::StartUpLoad(){
 	LoadModel("run.gltf");
 	LoadModel("idle.gltf");
+	LoadModel("terrain.obj");
 	LoadModel("player.gltf");
 	LoadModel("ghost.obj");
 	LoadModel("debugCube.obj");

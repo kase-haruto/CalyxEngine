@@ -164,7 +164,7 @@ void Manipulator::RenderOverlay(const ImVec2& basePos){
 	}
 
 	{
-		static bool showGrid = true;
+		static bool showGrid = false;
 		int i = IM_ARRAYSIZE(buttons);
 		spacing += 15.0f;
 		ImVec2 btnPos = ImVec2(basePos.x, basePos.y + i * (iconSize.y + spacing));
