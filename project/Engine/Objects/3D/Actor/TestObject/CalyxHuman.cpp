@@ -13,14 +13,16 @@ CalyxHuman::CalyxHuman(const std::string& modelName,
 	GetAnimationModel()->AddAnimation("idle", "idle.gltf");
 
 	trailFx_ = std::make_shared<ParticleSystemObject>("playerBulletTrail");
-	trailFx_->SetParent(this);
 	trailFx_->LoadConfig("Resources/Assets/Configs/Effect/runFx.json");
 	FxIntermediary::GetInstance()->Attach(trailFx_);
 
 }
 
 void CalyxHuman::Initialize(){
-
+	auto self = shared_from_this();
+	trailFx_->SetParent(self);
+	trailFx_->Stop();
+	FxIntermediary::GetInstance()->Attach(trailFx_);
 }
 
 void CalyxHuman::Update(){
