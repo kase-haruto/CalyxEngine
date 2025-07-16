@@ -7,6 +7,7 @@ class CalyxHuman :
 public:
 	CalyxHuman(const std::string& modelName,
 			   std::optional<std::string> objectName = std::nullopt);
+	CalyxHuman();
 	~CalyxHuman()override = default;
 
 	void Initialize()override;

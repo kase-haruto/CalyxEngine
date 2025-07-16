@@ -24,7 +24,6 @@ public:
 	void Initialize(HINSTANCE hInstance);
 	bool Update();
 	void BeginUpdate();
-	void UpdatePostEffectControl(float deltaTime);
 	void EndUpdate();
 	void Render();
 	void Run();
@@ -40,7 +39,6 @@ private:
 	//scene
 	std::unique_ptr<SceneManager> sceneManager_;
 	std::unique_ptr<EditorCollection> editorCollection_;
-
 
 	std::vector<PostEffectSlot> postEffectSlots_;
 

@@ -195,7 +195,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Graphics\Pipeline\Pso\PipelineState.cpp" />
     <ClCompile Include="Engine\Graphics\Pipeline\Manager\PipelineStateManager.cpp" />
     <ClCompile Include="Engine\Graphics\Pipeline\Pso\PipelineStateObject.cpp" />
-    <ClCompile Include="Engine\Graphics\Pipeline\RootSig\RootSignatureManager.cpp" />
     <ClCompile Include="Engine\Graphics\Pipeline\Shader\ShaderManager.cpp" />
     <ClCompile Include="Engine\Graphics\Pipeline\Shader\ShaderCompiler.cpp" />
     <ClCompile Include="Engine\Graphics\Descriptor\SrvLocator.cpp" />
@@ -344,9 +343,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Model\BaseModelConfig.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Transform\WorldTransformConfig.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Transform\UvTransformConfig.h" />
-    <ClInclude Include="Data\Engine\Macros\ConfigMacros\ConfigMacros.h" />
-    <ClInclude Include="Data\Engine\Macros\Objects\Transform\Transform2dMacros.h" />
-    <ClInclude Include="Data\Engine\Settings\EnviromentConfig.h" />
     <ClInclude Include="Engine\Application\UI\EngineUI\Context\EditorContext.h" />
     <ClInclude Include="Engine\API\EngineAPI.h" />
     <ClInclude Include="Engine\Application\Framework\EngineMain.h" />
@@ -425,7 +421,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Graphics\Pipeline\Pso\PipelineState.h" />
     <ClInclude Include="Engine\Graphics\Pipeline\Manager\PipelineStateManager.h" />
     <ClInclude Include="Engine\Graphics\Pipeline\Pso\PipelineStateObject.h" />
-    <ClInclude Include="Engine\Graphics\Pipeline\RootSig\RootSignatureManager.h" />
     <ClInclude Include="Engine\Graphics\Pipeline\Shader\ShaderManager.h" />
     <ClInclude Include="Engine\Graphics\Pipeline\Shader\ShaderCompiler.h" />
     <ClInclude Include="Engine\Graphics\Descriptor\SrvLocator.h" />

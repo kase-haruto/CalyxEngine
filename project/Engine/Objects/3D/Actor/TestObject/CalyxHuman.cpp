@@ -4,6 +4,7 @@
 #include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Application/Effects/Intermediary/FxIntermediary.h>
 #include <Engine/Foundation/Utility/FileSystem/ConfigPathResolver/ConfigPathResolver.h>
+#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 
 CalyxHuman::CalyxHuman(const std::string& modelName,
 					   std::optional<std::string> objectName) :
@@ -18,11 +19,20 @@ CalyxHuman::CalyxHuman(const std::string& modelName,
 
 }
 
+CalyxHuman::CalyxHuman(){
+	moveSpeed_ = 10.0f;
+	//animationを追加
+//	GetAnimationModel()->AddAnimation("idle", "idle.gltf");
+
+	trailFx_ = std::make_shared<ParticleSystemObject>("playerBulletTrail");
+	trailFx_->LoadConfig("Resources/Assets/Configs/Effect/runFx.json");
+	FxIntermediary::GetInstance()->Attach(trailFx_);
+}
+
+
 void CalyxHuman::Initialize(){
 	auto self = shared_from_this();
 	trailFx_->SetParent(self);
-	trailFx_->Stop();
-	FxIntermediary::GetInstance()->Attach(trailFx_);
 }
 
 void CalyxHuman::Update(){
@@ -105,3 +115,5 @@ void CalyxHuman::Turn(){
 		worldTransform_.rotation = rot;
 	}
 }
+
+REGISTER_SCENE_OBJECT(CalyxHuman)

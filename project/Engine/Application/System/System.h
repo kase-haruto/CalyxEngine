@@ -62,7 +62,6 @@ private:
 	//===================================================================*/
 	//                    private members
 	//===================================================================*/
-	LeakChecker leakChecker_;
 	std::unique_ptr<DxCore> dxCore_ = nullptr;
 
 	/*window*/

@@ -2,6 +2,7 @@
 
 #include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
+#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 
 ParticleSystemObject::ParticleSystemObject(const std::string& name){
 	SceneObject::SetName(name, ObjectType::ParticleSystem);
@@ -96,3 +97,5 @@ void ParticleSystemObject::ResetRecursive(){
 		}
 	}
 }
+
+REGISTER_SCENE_OBJECT(ParticleSystemObject)

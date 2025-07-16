@@ -4,34 +4,35 @@
 #include <Engine/objects/Collider/SphereCollider.h>
 #include <Engine/foundation/Utility/FileSystem/ConfigPathResolver/ConfigPathResolver.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
+#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 
 #include "externals/imgui/imgui.h"
 
 BaseGameObject::BaseGameObject(const std::string& modelName,
-							   std::optional<std::string> objectName) {
+							   std::optional<std::string> objectName){
 	auto dotPos = modelName.find_last_of('.');
-	if (dotPos != std::string::npos) {
+	if (dotPos != std::string::npos){
 		std::string extension = modelName.substr(dotPos);
 
 		// obj
-		if (extension == ".obj") {
+		if (extension == ".obj"){
 			objectModelType_ = ObjectModelType::ModelType_Static;
 			model_ = std::make_unique<Model>(modelName);
 		}
 		// gltf
-		else if (extension == ".gltf") {
+		else if (extension == ".gltf"){
 			objectModelType_ = ObjectModelType::ModelType_Animation;
 			model_ = std::make_unique<AnimationModel>(modelName);
-		} else {
+		} else{
 			objectModelType_ = ObjectModelType::ModelType_Unknown;
 		}
 
 	}
 
 	// 名前を設定
-	if (objectName.has_value()) {
+	if (objectName.has_value()){
 		SetName(objectName.value());
-	} else {
+	} else{
 		// 名前が指定されていない場合は、デフォルトの名前を設定
 		const std::string defaultName = modelName + "object";
 		SetName(defaultName);
@@ -50,12 +51,19 @@ BaseGameObject::BaseGameObject(const std::string& modelName,
 	worldTransform_.Update();
 }
 
-BaseGameObject::~BaseGameObject() {}
+BaseGameObject::BaseGameObject(){
+	objectModelType_ = ObjectModelType::ModelType_Unknown;    // まだ未定
+	SetName("GameObject");                                    // 仮の名前
+	SwitchCollider(ColliderKind::Box, false);                 // とりあえず Box
+	worldTransform_.Update();
+}
+
+BaseGameObject::~BaseGameObject(){}
 
 
-void BaseGameObject::Update() {
+void BaseGameObject::Update(){
 
-	if (objectModelType_ != ObjectModelType::ModelType_Unknown) {
+	if (objectModelType_ != ObjectModelType::ModelType_Unknown){
 
 		model_->Update();
 
@@ -64,7 +72,7 @@ void BaseGameObject::Update() {
 	worldTransform_.Update();
 
 	// collider の更新
-	if (collider_) {
+	if (collider_){
 		Vector3 worldPos = GetCenterPos();
 		Quaternion worldRot = worldTransform_.rotation;
 		collider_->Update(worldPos, worldRot);
@@ -79,26 +87,26 @@ void BaseGameObject::Update() {
 //===================================================================*/
 //                    コライダー形状の変更
 //===================================================================*/
-void BaseGameObject::SwitchCollider(ColliderKind kind, bool isCollisionEnubled) {
+void BaseGameObject::SwitchCollider(ColliderKind kind, bool isCollisionEnubled){
 	if (kind == currentColliderKind_) return;
 
-	switch (kind) {
+	switch (kind){
 		case ColliderKind::Box:
-			{
-				auto box = std::make_unique<BoxCollider>(isCollisionEnubled);
-				box->SetName(GetName() + "_BoxCollider");
-				box->Initialize(Vector3(1.0f, 1.0f, 1.0f)); // 適当な初期サイズ
-				collider_ = std::move(box);
-				break;
-			}
+		{
+			auto box = std::make_unique<BoxCollider>(isCollisionEnubled);
+			box->SetName(GetName() + "_BoxCollider");
+			box->Initialize(Vector3(1.0f, 1.0f, 1.0f)); // 適当な初期サイズ
+			collider_ = std::move(box);
+			break;
+		}
 		case ColliderKind::Sphere:
-			{
-				auto sphere = std::make_unique<SphereCollider>(isCollisionEnubled);
-				sphere->SetName(GetName() + "_SphereCollider");
-				sphere->Initialize(1.0f); // 適当な初期半径
-				collider_ = std::move(sphere);
-				break;
-			}
+		{
+			auto sphere = std::make_unique<SphereCollider>(isCollisionEnubled);
+			sphere->SetName(GetName() + "_SphereCollider");
+			sphere->Initialize(1.0f); // 適当な初期半径
+			collider_ = std::move(sphere);
+			break;
+		}
 	}
 	currentColliderKind_ = kind;
 }
@@ -107,7 +115,7 @@ void BaseGameObject::SwitchCollider(ColliderKind kind, bool isCollisionEnubled) 
 //===================================================================*/
 //                    imgui/ui
 //===================================================================*/
-void BaseGameObject::ShowGui() {
+void BaseGameObject::ShowGui(){
 	ImGui::Spacing();
 
 	ImGui::Dummy(ImVec2(0.0f, 5.0f));
@@ -126,11 +134,23 @@ void BaseGameObject::ShowGui() {
 	DerivativeGui();
 }
 
-void BaseGameObject::DerivativeGui() {
+void BaseGameObject::DerivativeGui(){
 	ImGui::SeparatorText("derivative");
 }
 
-void BaseGameObject::ApplyConfig() {
+void BaseGameObject::ApplyConfig(){
+	const std::string& modelPath = config_.modelConfig.modelName;
+	if (!modelPath.empty()){
+		auto dot = modelPath.find_last_of('.');
+		if (dot != std::string::npos && modelPath.substr(dot) == ".gltf"){
+			objectModelType_ = ObjectModelType::ModelType_Animation;
+			model_ = std::make_unique<AnimationModel>(modelPath);
+		} else{
+			objectModelType_ = ObjectModelType::ModelType_Static;
+			model_ = std::make_unique<Model>(modelPath);
+		}
+	}
+
 	model_->ApplyConfig(config_.modelConfig);
 	collider_->ApplyConfig(config_.colliderConfig);
 	worldTransform_.ApplyConfig(config_.transform);
@@ -139,11 +159,11 @@ void BaseGameObject::ApplyConfig() {
 	name_ = config_.name;
 }
 
-void BaseGameObject::ExtractConfig() {
+void BaseGameObject::ExtractConfig(){
 	config_.modelConfig = model_->ExtractConfig();
 	config_.colliderConfig = collider_->ExtractConfig();
 	config_.transform = worldTransform_.ExtractConfig();
-	config_.objectType = static_cast<int>(objectType_);
+	config_.objectType = static_cast< int >(objectType_);
 	config_.name = name_;
 	config_.guid = id_;
 	config_.parentGuid = parentId_;
@@ -153,18 +173,18 @@ void BaseGameObject::ExtractConfig() {
 //                   getter/setter
 //===================================================================*/
 
-void BaseGameObject::SetName(const std::string& name) {
+void BaseGameObject::SetName(const std::string& name){
 	SceneObject::SetName(name, ObjectType::GameObject);
 }
 
-void BaseGameObject::SetTranslate(const Vector3& pos) {
-	if (model_) {
+void BaseGameObject::SetTranslate(const Vector3& pos){
+	if (model_){
 		worldTransform_.translation = pos;
 	}
 }
 
-void BaseGameObject::SetScale(const Vector3& scale) {
-	if (model_) {
+void BaseGameObject::SetScale(const Vector3& scale){
+	if (model_){
 		worldTransform_.scale = scale;
 	}
 }
@@ -174,23 +194,23 @@ void BaseGameObject::SetDrawEnable(bool isDrawEnable){
 	model_->SetIsDrawEnable(isDrawEnable);
 }
 
-const Vector3 BaseGameObject::GetCenterPos()const {
-	const Vector3 offset = { 0.0f, 0.5f, 0.0f };
+const Vector3 BaseGameObject::GetCenterPos()const{
+	const Vector3 offset = {0.0f, 0.5f, 0.0f};
 	Vector3 worldPos = Vector3::Transform(offset, worldTransform_.matrix.world);
 	return worldPos;
 }
 
-void BaseGameObject::SetColor(const Vector4& color) {
-	if (model_) {
+void BaseGameObject::SetColor(const Vector4& color){
+	if (model_){
 		model_->SetColor(color);
 	}
 }
 
-void BaseGameObject::SetCollider(std::unique_ptr<Collider> collider) {
+void BaseGameObject::SetCollider(std::unique_ptr<Collider> collider){
 	collider_ = std::move(collider);
 }
 
-Collider* BaseGameObject::GetCollider() { return collider_.get(); }
+Collider* BaseGameObject::GetCollider(){ return collider_.get(); }
 
 
 
@@ -201,3 +221,5 @@ Collider* BaseGameObject::GetCollider() { return collider_.get(); }
 //void BaseGameObject::SaveToJson(const std::string& fileName) const{}
 //
 //void BaseGameObject::LoadFromJson(const std::string& fileName){}
+
+REGISTER_SCENE_OBJECT(BaseGameObject)

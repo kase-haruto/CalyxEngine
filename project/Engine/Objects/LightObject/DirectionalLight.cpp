@@ -7,6 +7,7 @@
 #include <Engine/Foundation/Json/JsonUtils.h>
 #include <Engine/foundation/Utility/FileSystem/ConfigPathResolver/ConfigPathResolver.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
+#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 
 /* externals */
 #ifdef _DEBUG
@@ -29,6 +30,18 @@ DirectionalLight::DirectionalLight(const std::string& name){
 	//SceneObject::SetConfigPath(ConfigPathResolver::ResolvePath(GetObjectTypeName(), GetName()));
 	////コンフィグの適用
 	//LoadConfig(configPath_);
+
+	isEnableRaycast_ = false;
+}
+
+DirectionalLight::DirectionalLight(){
+	ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
+	constantBuffer_.Initialize(device);
+
+	//初期化
+	lightData_.color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);	// ライトの色
+	lightData_.direction = Vector3(0.0f, -1.0f, 0.0f);	// ライトの向き
+	lightData_.intensity = 0.25f;						// 輝度
 
 	isEnableRaycast_ = false;
 }
@@ -94,3 +107,4 @@ void DirectionalLight::ExtractConfig(){
 	config_.parentGuid = parentId_;
 }
 
+REGISTER_SCENE_OBJECT(DirectionalLight)

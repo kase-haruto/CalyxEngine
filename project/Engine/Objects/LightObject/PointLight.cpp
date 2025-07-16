@@ -7,6 +7,7 @@
 #include <Engine/Graphics/Context/GraphicsGroup.h>
 #include <Engine/Graphics/Device/DxCore.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
+#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 
 #ifdef _DEBUG
 #include<externals/imgui/imgui.h>
@@ -28,6 +29,20 @@ PointLight::PointLight(const std::string& name){
 
 	//SceneObject::SetConfigPath(ConfigPathResolver::ResolvePath(GetObjectTypeName(), GetName()));
 	//LoadConfig(configPath_);
+
+	isEnableRaycast_ = false;
+}
+
+PointLight::PointLight(){
+	ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
+	constantBuffer_.Initialize(device);
+
+	//初期化
+	lightData_.color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);	// ライトの色
+	lightData_.position = Vector3(0.0f, 0.0f, 0.0f);		// ライトの位置
+	lightData_.intensity = 0.25f;						// 光度
+	lightData_.radius = 20.0f;							// 最大距離
+	lightData_.decay = 1.0f;							// 減衰率
 
 	isEnableRaycast_ = false;
 }
@@ -87,7 +102,6 @@ void PointLight::ApplyConfig() {
 	id_ = config_.guid;
 	parentId_ = config_.parentGuid;
 
-	constantBuffer_.TransferData(lightData_);
 }
 
 void PointLight::ExtractConfig(){
@@ -102,3 +116,4 @@ void PointLight::ExtractConfig(){
 }
 
 
+REGISTER_SCENE_OBJECT(PointLight)

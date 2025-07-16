@@ -31,7 +31,7 @@ public:
 	//===================================================================*/
 	BaseGameObject(const std::string& modelName,
 				   std::optional<std::string> objectName = std::nullopt);
-	BaseGameObject() = default;
+	BaseGameObject();
 	virtual ~BaseGameObject()override;
 
 	virtual void Initialize() {};

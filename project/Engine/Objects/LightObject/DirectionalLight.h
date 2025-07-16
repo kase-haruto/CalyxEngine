@@ -33,7 +33,7 @@ class DirectionalLight
 	, public ConfigurableObject<DirectionalLightConfig>{
 public:
 	DirectionalLight(const std::string& name);
-	DirectionalLight() = default;
+	DirectionalLight();
 	~DirectionalLight();
 
 	void Initialize();

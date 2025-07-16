@@ -11,10 +11,10 @@
             "y": -1.0,
             "z": 0.0
         },
-        "guid": "80ddd379-784d-43fe-a2ab-d30691c99b06",
+        "guid": "1ca76cc3-0354-4e5e-a391-834bcd85a5a5",
         "intensity": 0.25,
         "name": "DirectionalLight",
-        "objectType": 1,
+        "objectType": 4,
         "parentGuid": "00000000-0000-0000-0000-000000000000",
         "transform": {
             "rotation": {
@@ -33,7 +33,8 @@
                 "y": 0.0,
                 "z": 0.0
             }
-        }
+        },
+        "type": "DirectionalLight"
     },
     {
         "color": {
@@ -43,10 +44,10 @@
             "z": 1.0
         },
         "decay": 1.0,
-        "guid": "552c3286-832c-4ef3-a4f4-2e064d490f80",
+        "guid": "b7ffbed0-25c6-418d-becb-0bbfc1ae0480",
         "intensity": 0.25,
         "name": "PointLight",
-        "objectType": 1,
+        "objectType": 0,
         "parentGuid": "00000000-0000-0000-0000-000000000000",
         "position": {
             "x": 0.0,
@@ -71,7 +72,8 @@
                 "y": 0.0,
                 "z": 0.0
             }
-        }
+        },
+        "type": "PointLight"
     },
     {
         "colliderConfig": {
@@ -80,7 +82,7 @@
             "isDraw": true,
             "targetType": 0
         },
-        "guid": "138c6c31-49fc-446e-85b9-070feb47ef9b",
+        "guid": "5c638f12-15bd-4dca-827c-da679037b259",
         "modelConfig": {
             "blendMode": 5,
             "materialConfig": {
@@ -97,7 +99,7 @@
                 "shininess": 20.0
             },
             "modelName": "terrain.obj",
-            "textureName": "textures/white1x1.png",
+            "textureName": "Textures/uvChecker.png",
             "uvTransConfig": {
                 "rotation": 0.0,
                 "scale": {
@@ -117,25 +119,138 @@
                 "z": 0.0
             },
             "scale": {
-                "x": 300.0,
-                "y": 300.0,
-                "z": 300.0
+                "x": 100.0,
+                "y": 100.0,
+                "z": 100.0
             },
             "translation": {
-                "x": -150.0,
-                "y": -150.0,
-                "z": 0.0
+                "x": 754.0,
+                "y": 5.900000095367432,
+                "z": -589.0
             }
-        }
+        },
+        "type": "BaseGameObject"
     },
     {
         "colliderConfig": {
-            "colliderType": 2,
+            "colliderType": 0,
+            "isCollisionEnabled": false,
+            "isDraw": true,
+            "targetType": 0
+        },
+        "guid": "e86a0156-d553-46bb-936d-c2247fe8db17",
+        "modelConfig": {
+            "blendMode": 5,
+            "materialConfig": {
+                "color": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "currentLightingMode_": 0,
+                "enableLighting": 0,
+                "enviromentCoefficient": 0.5,
+                "isReflect": false,
+                "shininess": 20.0
+            },
+            "modelName": "run.gltf",
+            "textureName": "textures/grass.png",
+            "uvTransConfig": {
+                "rotation": 0.0,
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0
+                }
+            }
+        },
+        "name": "runHuman",
+        "objectType": 2,
+        "parentGuid": "00000000-0000-0000-0000-000000000000",
+        "transform": {
+            "rotation": {
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "scale": {
+                "x": 0.9999979138374329,
+                "y": 0.9999982118606567,
+                "z": 0.9999979138374329
+            },
+            "translation": {
+                "x": -0.03531002998352051,
+                "y": 1.5433814525604248,
+                "z": -8.214183807373047
+            }
+        },
+        "type": "BaseGameObject"
+    },
+    {
+        "colliderConfig": {
+            "colliderType": 0,
+            "isCollisionEnabled": false,
+            "isDraw": true,
+            "targetType": 0
+        },
+        "guid": "86a7c96e-abcc-4cad-b94c-04c0f899b940",
+        "modelConfig": {
+            "blendMode": 5,
+            "materialConfig": {
+                "color": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "currentLightingMode_": 0,
+                "enableLighting": 0,
+                "enviromentCoefficient": 0.5,
+                "isReflect": false,
+                "shininess": 20.0
+            },
+            "modelName": "debugCube.obj",
+            "textureName": "textures/white1x1.png",
+            "uvTransConfig": {
+                "rotation": 0.0,
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0
+                }
+            }
+        },
+        "name": "cube",
+        "objectType": 2,
+        "parentGuid": "00000000-0000-0000-0000-000000000000",
+        "transform": {
+            "rotation": {
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "translation": {
+                "x": 4.851504802703857,
+                "y": 0.0,
+                "z": 0.0
+            }
+        },
+        "type": "BaseGameObject"
+    },
+    {
+        "colliderConfig": {
+            "colliderType": 0,
             "isCollisionEnabled": true,
             "isDraw": true,
-            "targetType": 6
+            "targetType": 0
         },
-        "guid": "09d17e31-331a-4d4e-9d20-ca8cb1a73ed3",
+        "guid": "cfe7ac86-3a61-4e42-bb1b-1d498f16d9a8",
         "modelConfig": {
             "blendMode": 5,
             "materialConfig": {
@@ -151,7 +266,7 @@
                 "isReflect": false,
                 "shininess": 20.0
             },
-            "modelName": "player.gltf",
+            "modelName": "cone.obj",
             "textureName": "textures/white1x1.png",
             "uvTransConfig": {
                 "rotation": 0.0,
@@ -161,108 +276,237 @@
                 }
             }
         },
-        "name": "player",
+        "name": "cone",
         "objectType": 2,
         "parentGuid": "00000000-0000-0000-0000-000000000000",
         "transform": {
             "rotation": {
-                "w": 0.9999993443489075,
-                "x": 1.08101765386448e-11,
+                "w": 1.0,
+                "x": 0.0,
                 "y": 0.0,
-                "z": 4.884287418960298e-14
+                "z": 0.0
             },
             "scale": {
-                "x": 1.5,
-                "y": 1.5,
-                "z": 1.5
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
             },
             "translation": {
-                "x": -1.9818509817123413,
-                "y": -2.078742027282715,
-                "z": 10.0
+                "x": -8.818306922912598,
+                "y": 0.0,
+                "z": 1.397258996963501
             }
-        }
+        },
+        "type": "BaseGameObject"
     },
     {
-        "maxSpawnCount": 5,
-        "name": "leftSpawner",
-        "objectType": 2,
-        "rotationDir": {
-            "x": 0.0,
+        "autoDestroy": false,
+        "color": {
+            "w": 1.0,
+            "x": 1.0,
             "y": 1.0,
-            "z": 0.0
+            "z": 1.0
         },
-        "rotationSpeed": 0.4000000059604645,
-        "spawnAreaMax": {
-            "x": 10.0,
-            "y": 5.0,
-            "z": -20.0
+        "emitCount": 10,
+        "emitDelay": 0.0,
+        "emitDuration": -1.0,
+        "emitRate": 0.10000000149011612,
+        "guid": "0880b5af-f215-4acf-8251-b208104388f7",
+        "isComplement": true,
+        "isDrawEnable": true,
+        "isOneShot": false,
+        "isStatic": false,
+        "lifetime": {
+            "constant": 0.0,
+            "max": 3.0,
+            "min": 1.0,
+            "mode": 1
         },
-        "spawnAreaMin": {
-            "x": -10.0,
+        "modelPath": "plane.obj",
+        "modules": [
+            {
+                "enabled": true,
+                "gravity": {
+                    "x": 0.0,
+                    "y": -9.800000190734863,
+                    "z": 0.0
+                },
+                "name": "GravityModule"
+            }
+        ],
+        "name": "ParticleSystem",
+        "objectType": 0,
+        "parentGuid": "cfe7ac86-3a61-4e42-bb1b-1d498f16d9a8",
+        "position": {
+            "x": -8.818306922912598,
             "y": 0.0,
-            "z": -15.0
+            "z": 1.397258996963501
         },
-        "spawnInterval": 5.0
+        "scale": {
+            "constant": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "max": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "min": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "mode": 0
+        },
+        "texturePath": "particle.png",
+        "transform": {
+            "rotation": {
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "translation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            }
+        },
+        "type": "ParticleSystemObject",
+        "velocity": {
+            "constant": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "max": {
+                "x": 1.0,
+                "y": 7.210000038146973,
+                "z": 1.0
+            },
+            "min": {
+                "x": -1.0,
+                "y": 7.170000076293945,
+                "z": -1.0
+            },
+            "mode": 1
+        }
     },
     {
-        "maxSpawnCount": 5,
-        "name": "rightSpawner",
+        "colliderConfig": {
+            "colliderType": 0,
+            "isCollisionEnabled": true,
+            "isDraw": true,
+            "targetType": 0
+        },
+        "guid": "58226edc-e541-4b50-afbb-db163acf5b48",
+        "modelConfig": {
+            "blendMode": 5,
+            "materialConfig": {
+                "color": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "currentLightingMode_": 0,
+                "enableLighting": 0,
+                "enviromentCoefficient": 0.5,
+                "isReflect": false,
+                "shininess": 20.0
+            },
+            "modelName": "debugCube.obj",
+            "textureName": "textures/white1x1.png",
+            "uvTransConfig": {
+                "rotation": 0.0,
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0
+                }
+            }
+        },
+        "name": "cube",
         "objectType": 2,
-        "rotationDir": {
-            "x": 0.0,
+        "parentGuid": "5f341a8c-c08b-472a-9b3f-56428f3f42e4",
+        "transform": {
+            "rotation": {
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "translation": {
+                "x": -10.171978950500488,
+                "y": 0.0,
+                "z": 0.0
+            }
+        },
+        "type": "BaseGameObject"
+    },
+    {
+        "autoDestroy": false,
+        "color": {
+            "w": 1.0,
+            "x": 1.0,
             "y": 1.0,
-            "z": 0.0
+            "z": 1.0
         },
-        "rotationSpeed": -0.6000000238418579,
-        "spawnAreaMax": {
-            "x": 15.0,
-            "y": 7.0,
-            "z": -20.0
+        "emitCount": 10,
+        "emitDelay": 0.0,
+        "emitDuration": -1.0,
+        "emitRate": 0.10000000149011612,
+        "guid": "dc3011e3-037e-4847-bf4b-ee820e49eb53",
+        "isComplement": true,
+        "isDrawEnable": true,
+        "isOneShot": false,
+        "isStatic": false,
+        "lifetime": {
+            "constant": 0.0,
+            "max": 3.0,
+            "min": 1.0,
+            "mode": 1
         },
-        "spawnAreaMin": {
-            "x": -15.0,
-            "y": 0.0,
-            "z": -30.0
-        },
-        "spawnInterval": 5.0
-    },
-    {
-        "colliderConfig": {
-            "colliderType": 6,
-            "isCollisionEnabled": true,
-            "isDraw": false,
-            "targetType": 4
-        },
-        "guid": "ae3a3d1e-caad-4d32-9a9d-c09772e728c3",
-        "modelConfig": {
-            "blendMode": 5,
-            "materialConfig": {
-                "color": {
-                    "w": 1.0,
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "currentLightingMode_": 0,
-                "enableLighting": 0,
-                "enviromentCoefficient": 0.5,
-                "isReflect": false,
-                "shininess": 20.0
-            },
-            "modelName": "ghost.obj",
-            "textureName": "textures/white1x1.png",
-            "uvTransConfig": {
-                "rotation": 0.0,
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0
-                }
-            }
-        },
-        "name": "enemy",
-        "objectType": 2,
+        "modelPath": "plane.obj",
+        "modules": [],
+        "name": "ParticleSystem",
+        "objectType": 0,
         "parentGuid": "00000000-0000-0000-0000-000000000000",
+        "position": {
+            "x": 1.9338889122009277,
+            "y": -0.5790830850601196,
+            "z": -1.429410457611084
+        },
+        "scale": {
+            "constant": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "max": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "min": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "mode": 0
+        },
+        "texturePath": "ring.png",
         "transform": {
             "rotation": {
                 "w": 1.0,
@@ -271,510 +515,34 @@
                 "z": 0.0
             },
             "scale": {
-                "x": 2.0,
-                "y": 2.0,
-                "z": 2.0
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
             },
             "translation": {
-                "x": -6.28472900390625,
-                "y": 1.6449823379516602,
-                "z": -18.69419288635254
-            }
-        }
-    },
-    {
-        "colliderConfig": {
-            "colliderType": 6,
-            "isCollisionEnabled": true,
-            "isDraw": false,
-            "targetType": 4
-        },
-        "guid": "08f4d86f-75d1-41a6-bbca-0e797a464b27",
-        "modelConfig": {
-            "blendMode": 5,
-            "materialConfig": {
-                "color": {
-                    "w": 1.0,
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "currentLightingMode_": 0,
-                "enableLighting": 0,
-                "enviromentCoefficient": 0.5,
-                "isReflect": false,
-                "shininess": 20.0
-            },
-            "modelName": "ghost.obj",
-            "textureName": "textures/white1x1.png",
-            "uvTransConfig": {
-                "rotation": 0.0,
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0
-                }
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
             }
         },
-        "name": "enemy",
-        "objectType": 2,
-        "parentGuid": "00000000-0000-0000-0000-000000000000",
-        "transform": {
-            "rotation": {
-                "w": 1.0,
+        "type": "ParticleSystemObject",
+        "velocity": {
+            "constant": {
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
             },
-            "scale": {
-                "x": 2.0,
-                "y": 2.0,
-                "z": 2.0
-            },
-            "translation": {
-                "x": -11.329113006591797,
-                "y": -0.10120534896850586,
-                "z": -23.35835075378418
-            }
-        }
-    },
-    {
-        "colliderConfig": {
-            "colliderType": 6,
-            "isCollisionEnabled": true,
-            "isDraw": false,
-            "targetType": 4
-        },
-        "guid": "66aa7772-416d-4ff4-af85-73ba62118df0",
-        "modelConfig": {
-            "blendMode": 5,
-            "materialConfig": {
-                "color": {
-                    "w": 1.0,
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "currentLightingMode_": 0,
-                "enableLighting": 0,
-                "enviromentCoefficient": 0.5,
-                "isReflect": false,
-                "shininess": 20.0
-            },
-            "modelName": "ghost.obj",
-            "textureName": "textures/white1x1.png",
-            "uvTransConfig": {
-                "rotation": 0.0,
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0
-                }
-            }
-        },
-        "name": "enemy",
-        "objectType": 2,
-        "parentGuid": "00000000-0000-0000-0000-000000000000",
-        "transform": {
-            "rotation": {
-                "w": 1.0,
-                "x": 0.0,
+            "max": {
+                "x": 1.0,
                 "y": 0.0,
-                "z": 0.0
+                "z": 1.0
             },
-            "scale": {
-                "x": 2.0,
-                "y": 2.0,
-                "z": 2.0
-            },
-            "translation": {
-                "x": -0.6079912185668945,
-                "y": 4.181363105773926,
-                "z": -18.203598022460938
-            }
-        }
-    },
-    {
-        "colliderConfig": {
-            "colliderType": 6,
-            "isCollisionEnabled": true,
-            "isDraw": false,
-            "targetType": 4
-        },
-        "guid": "7f4ac646-ad32-4b88-aeee-c739dcab2b67",
-        "modelConfig": {
-            "blendMode": 5,
-            "materialConfig": {
-                "color": {
-                    "w": 1.0,
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "currentLightingMode_": 0,
-                "enableLighting": 0,
-                "enviromentCoefficient": 0.5,
-                "isReflect": false,
-                "shininess": 20.0
-            },
-            "modelName": "ghost.obj",
-            "textureName": "textures/white1x1.png",
-            "uvTransConfig": {
-                "rotation": 0.0,
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0
-                }
-            }
-        },
-        "name": "enemy",
-        "objectType": 2,
-        "parentGuid": "00000000-0000-0000-0000-000000000000",
-        "transform": {
-            "rotation": {
-                "w": 1.0,
-                "x": 0.0,
+            "min": {
+                "x": -1.0,
                 "y": 0.0,
-                "z": 0.0
+                "z": -1.0
             },
-            "scale": {
-                "x": 2.0,
-                "y": 2.0,
-                "z": 2.0
-            },
-            "translation": {
-                "x": 1.4720382690429688,
-                "y": 3.2816221714019775,
-                "z": -28.370742797851563
-            }
-        }
-    },
-    {
-        "colliderConfig": {
-            "colliderType": 6,
-            "isCollisionEnabled": true,
-            "isDraw": false,
-            "targetType": 4
-        },
-        "guid": "de86a683-3baa-40a2-8daf-8ef07d2d1755",
-        "modelConfig": {
-            "blendMode": 5,
-            "materialConfig": {
-                "color": {
-                    "w": 1.0,
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "currentLightingMode_": 0,
-                "enableLighting": 0,
-                "enviromentCoefficient": 0.5,
-                "isReflect": false,
-                "shininess": 20.0
-            },
-            "modelName": "ghost.obj",
-            "textureName": "textures/white1x1.png",
-            "uvTransConfig": {
-                "rotation": 0.0,
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0
-                }
-            }
-        },
-        "name": "enemy",
-        "objectType": 2,
-        "parentGuid": "00000000-0000-0000-0000-000000000000",
-        "transform": {
-            "rotation": {
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            },
-            "scale": {
-                "x": 2.0,
-                "y": 2.0,
-                "z": 2.0
-            },
-            "translation": {
-                "x": 8.389774322509766,
-                "y": 2.2344202995300293,
-                "z": -16.09943199157715
-            }
-        }
-    },
-    {
-        "colliderConfig": {
-            "colliderType": 6,
-            "isCollisionEnabled": true,
-            "isDraw": false,
-            "targetType": 4
-        },
-        "guid": "3d7ba82a-1a64-4a1e-a1d5-085e3a5fa830",
-        "modelConfig": {
-            "blendMode": 5,
-            "materialConfig": {
-                "color": {
-                    "w": 1.0,
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "currentLightingMode_": 0,
-                "enableLighting": 0,
-                "enviromentCoefficient": 0.5,
-                "isReflect": false,
-                "shininess": 20.0
-            },
-            "modelName": "ghost.obj",
-            "textureName": "textures/white1x1.png",
-            "uvTransConfig": {
-                "rotation": 0.0,
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0
-                }
-            }
-        },
-        "name": "enemy",
-        "objectType": 2,
-        "parentGuid": "00000000-0000-0000-0000-000000000000",
-        "transform": {
-            "rotation": {
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            },
-            "scale": {
-                "x": 2.0,
-                "y": 2.0,
-                "z": 2.0
-            },
-            "translation": {
-                "x": -13.140968322753906,
-                "y": 2.6061339378356934,
-                "z": -23.8148193359375
-            }
-        }
-    },
-    {
-        "colliderConfig": {
-            "colliderType": 6,
-            "isCollisionEnabled": true,
-            "isDraw": false,
-            "targetType": 4
-        },
-        "guid": "12ef3709-2c23-442a-b943-991f89c5e461",
-        "modelConfig": {
-            "blendMode": 5,
-            "materialConfig": {
-                "color": {
-                    "w": 1.0,
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "currentLightingMode_": 0,
-                "enableLighting": 0,
-                "enviromentCoefficient": 0.5,
-                "isReflect": false,
-                "shininess": 20.0
-            },
-            "modelName": "ghost.obj",
-            "textureName": "textures/white1x1.png",
-            "uvTransConfig": {
-                "rotation": 0.0,
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0
-                }
-            }
-        },
-        "name": "enemy",
-        "objectType": 2,
-        "parentGuid": "00000000-0000-0000-0000-000000000000",
-        "transform": {
-            "rotation": {
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            },
-            "scale": {
-                "x": 2.0,
-                "y": 2.0,
-                "z": 2.0
-            },
-            "translation": {
-                "x": -8.084040641784668,
-                "y": 3.0326590538024902,
-                "z": -18.129920959472656
-            }
-        }
-    },
-    {
-        "colliderConfig": {
-            "colliderType": 6,
-            "isCollisionEnabled": true,
-            "isDraw": false,
-            "targetType": 4
-        },
-        "guid": "e9de6c3e-edac-42a0-ac24-02f06ec41f74",
-        "modelConfig": {
-            "blendMode": 5,
-            "materialConfig": {
-                "color": {
-                    "w": 1.0,
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "currentLightingMode_": 0,
-                "enableLighting": 0,
-                "enviromentCoefficient": 0.5,
-                "isReflect": false,
-                "shininess": 20.0
-            },
-            "modelName": "ghost.obj",
-            "textureName": "textures/white1x1.png",
-            "uvTransConfig": {
-                "rotation": 0.0,
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0
-                }
-            }
-        },
-        "name": "enemy",
-        "objectType": 2,
-        "parentGuid": "00000000-0000-0000-0000-000000000000",
-        "transform": {
-            "rotation": {
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            },
-            "scale": {
-                "x": 2.0,
-                "y": 2.0,
-                "z": 2.0
-            },
-            "translation": {
-                "x": -6.484304428100586,
-                "y": -0.7089747190475464,
-                "z": -28.99327850341797
-            }
-        }
-    },
-    {
-        "colliderConfig": {
-            "colliderType": 6,
-            "isCollisionEnabled": true,
-            "isDraw": false,
-            "targetType": 4
-        },
-        "guid": "e34d96f0-445d-42ae-b372-b6f7224decb1",
-        "modelConfig": {
-            "blendMode": 5,
-            "materialConfig": {
-                "color": {
-                    "w": 1.0,
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "currentLightingMode_": 0,
-                "enableLighting": 0,
-                "enviromentCoefficient": 0.5,
-                "isReflect": false,
-                "shininess": 20.0
-            },
-            "modelName": "ghost.obj",
-            "textureName": "textures/white1x1.png",
-            "uvTransConfig": {
-                "rotation": 0.0,
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0
-                }
-            }
-        },
-        "name": "enemy",
-        "objectType": 2,
-        "parentGuid": "00000000-0000-0000-0000-000000000000",
-        "transform": {
-            "rotation": {
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            },
-            "scale": {
-                "x": 2.0,
-                "y": 2.0,
-                "z": 2.0
-            },
-            "translation": {
-                "x": -0.6313314437866211,
-                "y": 1.4706833362579346,
-                "z": -15.881237030029297
-            }
-        }
-    },
-    {
-        "colliderConfig": {
-            "colliderType": 6,
-            "isCollisionEnabled": true,
-            "isDraw": false,
-            "targetType": 4
-        },
-        "guid": "eda30bd9-3206-4b9b-88b0-a8b8279726b5",
-        "modelConfig": {
-            "blendMode": 5,
-            "materialConfig": {
-                "color": {
-                    "w": 1.0,
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "currentLightingMode_": 0,
-                "enableLighting": 0,
-                "enviromentCoefficient": 0.5,
-                "isReflect": false,
-                "shininess": 20.0
-            },
-            "modelName": "ghost.obj",
-            "textureName": "textures/white1x1.png",
-            "uvTransConfig": {
-                "rotation": 0.0,
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0
-                }
-            }
-        },
-        "name": "enemy",
-        "objectType": 2,
-        "parentGuid": "00000000-0000-0000-0000-000000000000",
-        "transform": {
-            "rotation": {
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            },
-            "scale": {
-                "x": 2.0,
-                "y": 2.0,
-                "z": 2.0
-            },
-            "translation": {
-                "x": -2.927353858947754,
-                "y": 2.8052406311035156,
-                "z": -27.1530818939209
-            }
+            "mode": 1
         }
     }
 ]

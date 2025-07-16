@@ -1,5 +1,81 @@
 [
     {
+        "color": {
+            "w": 1.0,
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+        },
+        "direction": {
+            "x": 0.0,
+            "y": -1.0,
+            "z": 0.0
+        },
+        "guid": "ae99417c-ab1f-46b7-938e-bb77228958a0",
+        "intensity": 0.25,
+        "name": "DirectionalLight",
+        "objectType": 1,
+        "parentGuid": "00000000-0000-0000-0000-000000000000",
+        "transform": {
+            "rotation": {
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "translation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            }
+        },
+        "type": "DirectionalLight"
+    },
+    {
+        "color": {
+            "w": 1.0,
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+        },
+        "decay": 1.0,
+        "guid": "fb5cf303-ebe0-415d-a9a0-62ddf0544c7a",
+        "intensity": 0.25,
+        "name": "PointLight",
+        "objectType": 0,
+        "parentGuid": "00000000-0000-0000-0000-000000000000",
+        "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "radius": 20.0,
+        "transform": {
+            "rotation": {
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "translation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            }
+        },
+        "type": "PointLight"
+    },
+    {
         "autoDestroy": false,
         "color": {
             "w": 1.0,
@@ -11,7 +87,7 @@
         "emitDelay": 0.0,
         "emitDuration": -1.0,
         "emitRate": 0.10000000149011612,
-        "guid": "dc3011e3-037e-4847-bf4b-ee820e49eb53",
+        "guid": "69554899-9fc7-4e71-bd75-2a0a0944eb55",
         "isComplement": true,
         "isDrawEnable": true,
         "isOneShot": false,
@@ -30,7 +106,7 @@
         "position": {
             "x": 0.0,
             "y": 0.0,
-            "z": -1.41310453414917
+            "z": 0.0
         },
         "scale": {
             "constant": {
@@ -50,7 +126,7 @@
             },
             "mode": 0
         },
-        "texturePath": "ring.png",
+        "texturePath": "particle.png",
         "transform": {
             "rotation": {
                 "w": 1.0,
