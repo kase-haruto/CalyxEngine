@@ -113,7 +113,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClCompile Include="Engine\Objects\3D\Actor\TestObject\CalyxHuman.cpp" />
     <ClCompile Include="Engine\Assets\Animation\AnimationStruct.cpp" />
-    <ClCompile Include="Engine\Scene\Controller\SceneControllerFactory.cpp" />
     <ClCompile Include="Engine\Scene\Title\TitleScene.cpp" />
     <ClCompile Include="Engine\Graphics\Camera\Frustum\Frustum.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Enemy\Spawner\EnemySpawner.cpp" />
@@ -252,6 +251,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Objects\Collider\SphereCollider.cpp" />
     <ClCompile Include="Engine\Graphics\ResourceStateTracker\ResourceStateTracker.cpp" />
     <ClCompile Include="Engine\Scene\System\SceneManager.cpp" />
+    <ClCompile Include="Engine\Objects\3D\Actor\SceneObjectManager.cpp" />
     <ClCompile Include="Engine\Application\UI\Panels\SceneSwitcherPanel.cpp" />
     <ClCompile Include="Engine\Foundation\Math\Quaternion.cpp" />
     <ClCompile Include="Engine\Scene\System\SceneFactory.cpp" />
@@ -303,10 +303,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Particle\ParticleSystemObjectConfig.h" />
     <ClInclude Include="Data\Game\Config\Enemy\EnemySpawnerConfig.h" />
     <ClInclude Include="Engine\Graphics\RenderTarget\Detail\RenderTargetDetail.h" />
-    <ClInclude Include="Engine\Scene\Asset\SceneAsset.h" />
-    <ClInclude Include="Engine\Scene\Asset\SceneAsset.h" />
-    <ClInclude Include="Engine\Scene\Controller\SceneController.h" />
-    <ClInclude Include="Engine\Scene\Controller\SceneControllerFactory.h" />
     <ClInclude Include="Engine\Scene\Title\TitleScene.h" />
     <ClInclude Include="Engine\Graphics\Camera\Frustum\Frustum.h" />
     <ClInclude Include="Game\3dObject\Actor\Enemy\Spawner\EnemySpawner.h" />
@@ -479,6 +475,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Objects\Collider\SphereCollider.h" />
     <ClInclude Include="Engine\Graphics\ResourceStateTracker\ResourceStateTracker.h" />
     <ClInclude Include="Engine\Scene\System\SceneManager.h" />
+    <ClInclude Include="Engine\Objects\3D\Actor\SceneObjectManager.h" />
     <ClInclude Include="Engine\Application\UI\Panels\SceneSwitcherPanel.h" />
     <ClInclude Include="Engine\Foundation\Math\Quaternion.h" />
     <ClInclude Include="Engine\Scene\System\SceneFactory.h" />
