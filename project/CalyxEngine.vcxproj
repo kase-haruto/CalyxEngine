@@ -305,6 +305,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Graphics\RenderTarget\Detail\RenderTargetDetail.h" />
     <ClInclude Include="Engine\Scene\Title\TitleScene.h" />
     <ClInclude Include="Engine\Graphics\Camera\Frustum\Frustum.h" />
+    <ClInclude Include="Engine\Scene\Utility\SceneUtility.h" />
     <ClInclude Include="Game\3dObject\Actor\Enemy\Spawner\EnemySpawner.h" />
     <ClInclude Include="Engine\Application\Effects\Intermediary\FxIntermediary.h" />
     <ClInclude Include="Engine\Foundation\Utility\Ease\EaseTypes.h" />

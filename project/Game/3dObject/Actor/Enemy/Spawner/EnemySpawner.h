@@ -27,7 +27,6 @@ public:
 	void ExtractConfig() override;
 
 	void ShowGui() override;
-	void SetSceneContext(SceneContext* context);
 	void SetOwner(EnemyCollection* owner) { ownerCollection_ = owner; }
 	void SetRotationSpeed(float speed) { rotationSpeed_ = speed; }
 	void SetSpawnInterval(float interval) { spawnInterval_ = interval; }
@@ -44,7 +43,6 @@ private:
 	void Spawn();
 
 private:
-	SceneContext* sceneContext_ = nullptr;
 	EnemyCollection* ownerCollection_ = nullptr;
 	std::list<std::shared_ptr<Enemy>> spawnedEnemies_;
 	size_t maxSpawnCount_ = 5;

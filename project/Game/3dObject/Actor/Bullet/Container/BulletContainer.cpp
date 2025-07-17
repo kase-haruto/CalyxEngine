@@ -1,7 +1,8 @@
 #include "BulletContainer.h"
 #include <Engine/Scene/Context/SceneContext.h>
+#include <Engine/Scene/Utility/SceneUtility.h>
 #include <Game/3dObject/Actor/Bullet/PlayerBullet/PlayerBullet.h>
-
+#include <Engine/Scene/Context/SceneContext.h>
 #include <externals/imgui/imgui.h>
 
 BulletContainer::BulletContainer(const std::string& name) {
@@ -10,7 +11,7 @@ BulletContainer::BulletContainer(const std::string& name) {
 
 
 void BulletContainer::Update(){
-	auto* lib = sceneContext_->GetObjectLibrary();
+	auto* lib = SceneContext::Current()->GetObjectLibrary();
 
 	for (auto& [type, bullets] : typedBullets_){
 		for (auto it = bullets.begin(); it != bullets.end();){
@@ -31,7 +32,8 @@ void BulletContainer::AddBullet(BulletType type, const Vector3& pos, const Vecto
 	std::shared_ptr<BaseBullet> bullet;
 
 	if (type == BulletType::Player){
-		bullet = sceneContext_->Instantiate<PlayerBullet>("debugCube.obj", "playerBullet");
+		bullet = SceneAPI::Instantiate<PlayerBullet>("debugCube.obj", "playerBullet");
+		bullet->Initialize();
 	}
 
 	bullet->ShootInitialize(pos, vel);

@@ -18,7 +18,6 @@ public:
 	void Update() override;
 	void ShowGui() override;
 
-	void SetSceneContext(SceneContext* context);
 	void SetPlayerTransform(WorldTransform* pTransform);
 
 	void AddEnemy(const std::shared_ptr<Enemy>& enemy);
@@ -38,7 +37,6 @@ private:
 	std::vector<std::shared_ptr<class EnemySpawner>> spawners_;
 	int deadEnemyCount = 0;
 
-	SceneContext* sceneContext_ = nullptr;
 	WorldTransform* playerTransform_ = nullptr;
 };
 

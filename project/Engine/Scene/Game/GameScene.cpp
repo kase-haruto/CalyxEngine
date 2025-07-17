@@ -13,6 +13,7 @@
 #include <Engine/Objects/3D/Actor/SceneObjectManager.h>
 #include <Engine/Collision/CollisionManager.h>
 #include <Engine/Graphics/Pipeline/Service/PipelineService.h>
+#include <Engine/Scene/Utility/SceneUtility.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //	コンストラクタ/デストラクタ
@@ -43,26 +44,24 @@ void GameScene::Initialize(){
 	CameraManager::GetInstance()->SetType(CameraType::Type_Default);
 
 	/* ----- Field ----- */
-	modelField_ = sceneContext_->Instantiate<BaseGameObject>("terrain.obj", "field");
+	modelField_ = SceneAPI::Instantiate<BaseGameObject>("terrain.obj", "field");
 	modelField_->SetScale({300,300,300});
 	modelField_->SetTranslate({-150,-150,0});
 	modelField_->SetUvScale({10,10});
 	modelField_->SetEnableRaycast(false);
 
 	/* ----- Player ----- */
-	player_ = sceneContext_->Instantiate<Player>("player.gltf", "player");
+	player_ = SceneAPI::Instantiate<Player>("player.gltf", "player");
 	player_->Initialize();
 	// カメラ‐>プレイヤーの追従は Transform 参照を直接渡す方が安全
 	player_->SetParent(&railCamera_->GetWorldTransform());
 
 	/* ----- Bullet Container ----- */
-	playerBulletContainer_ = sceneContext_->Instantiate<BulletContainer>("playerBulletContainer");
-	playerBulletContainer_->SetSceneContext(sceneContext_.get());
+	playerBulletContainer_ = SceneAPI::Instantiate<BulletContainer>("playerBulletContainer");
 	player_->SetBulletContainer(playerBulletContainer_.get());
 
 	/* ----- Enemy ----- */
-	enemyCollection_ = sceneContext_->Instantiate<EnemyCollection>("enemyContainer");
-	enemyCollection_->SetSceneContext(sceneContext_.get());
+	enemyCollection_ = SceneAPI::Instantiate<EnemyCollection>("enemyContainer");
 	enemyCollection_->SetPlayerTransform(&player_->GetWorldTransform());
 	enemyCollection_->CreateSpawners();
 

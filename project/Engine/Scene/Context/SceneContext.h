@@ -44,6 +44,11 @@ public:
 	// utils ------------------------------------------------------------------
 	std::shared_ptr<SceneObject> FindSharedObject(SceneObject* raw);
 
+	/* --- Current ---------------------------------------------------- */
+	static SceneContext* Current(){ return current_; }
+	/* シーンがアクティブになったら呼ぶ */
+	void MakeCurrent(){ current_ = this; }
+
 private:
 	// subsystems -------------------------------------------------------------
 	std::unique_ptr<SceneObjectLibrary> objectLibrary_;
@@ -55,6 +60,9 @@ private:
 	std::vector<ObjectRemovedCallback> objectRemovedCallbacks_;
 
 	std::string sceneName_ = "scene";
+
+private:
+	static SceneContext* current_;
 };
 
 // --------------------------- template implementations ------------------------

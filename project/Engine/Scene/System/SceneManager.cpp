@@ -17,29 +17,29 @@
 #include <Engine/Application/Effects/Intermediary/FxIntermediary.h>
 
 SceneManager::SceneManager(DxCore* dxCore, GraphicsSystem* graphicsSystem)
-	: pDxCore_(dxCore), pGraphicsSystem_(graphicsSystem) {
+	: pDxCore_(dxCore), pGraphicsSystem_(graphicsSystem){
 	// ここでシーンをすべて生成しておく
-	for (int i = 0; i < static_cast<int>(SceneType::count); ++i) {
-		scenes_[i] = SceneFactory::CreateScene(static_cast<SceneType>(i));
+	for (int i = 0; i < static_cast< int >(SceneType::count); ++i){
+		scenes_[i] = SceneFactory::CreateScene(static_cast< SceneType >(i));
 		scenes_[i]->SetTransitionRequestor(this);
 	}
 
 
-	currentSceneNo_ = static_cast<int>(SceneType::TEST);
+	currentSceneNo_ = static_cast< int >(SceneType::TEST);
 #ifdef _DEBUG
-	currentSceneNo_ = static_cast<int>(SceneType::TEST);
+	currentSceneNo_ = static_cast< int >(SceneType::TEST);
 #endif // 
 
 	nextSceneNo_ = currentSceneNo_;
 
 }
 
-SceneManager::~SceneManager() {}
+SceneManager::~SceneManager(){}
 
-void SceneManager::Initialize() {
+void SceneManager::Initialize(){
 #ifdef _DEBUG
 
-	if (pEngineUI_) {
+	if (pEngineUI_){
 		auto sceneSwitchPanel = std::make_unique<SceneSwitcherPanel>(this);
 
 		sceneSwitchPanel->AddSceneOption("Game Scene", SceneType::PLAY);
@@ -51,6 +51,7 @@ void SceneManager::Initialize() {
 
 	FxIntermediary::GetInstance()->SetSceneContext(scenes_[currentSceneNo_]->GetSceneContext());
 	scenes_[currentSceneNo_]->Initialize();
+	scenes_[currentSceneNo_]->GetSceneContext()->MakeCurrent();
 
 #ifdef _DEBUG
 	auto* SceneObjectLibrary = scenes_[currentSceneNo_]->GetSceneContext()->GetObjectLibrary();
@@ -58,8 +59,8 @@ void SceneManager::Initialize() {
 #endif // _DEBUG
 }
 
-void SceneManager::Update() {
-	if (currentSceneNo_ != nextSceneNo_) {
+void SceneManager::Update(){
+	if (currentSceneNo_ != nextSceneNo_){
 		// いったん現在シーンをクリーンアップ
 		scenes_[currentSceneNo_]->CleanUp();
 
@@ -67,23 +68,30 @@ void SceneManager::Update() {
 		// シーン番号を更新
 		currentSceneNo_ = nextSceneNo_;
 
-		//新しいsceneContextを設定
-		FxIntermediary::GetInstance()->SetSceneContext(scenes_[currentSceneNo_]->GetSceneContext());
+		// 新しい SceneContext を取得
+		auto* newCtx = scenes_[currentSceneNo_]->GetSceneContext();
+
+		// サブシステムに設定
+		FxIntermediary::GetInstance()->SetSceneContext(newCtx);
+
+		//ctx を更新
+		newCtx->MakeCurrent();
 
 		scenes_[currentSceneNo_]->Initialize();
-#ifdef _DEBUG
-		if (pEngineUI_) {
+
+	#ifdef _DEBUG
+		if (pEngineUI_){
 			auto* context = scenes_[currentSceneNo_]->GetSceneContext();
 			pEngineUI_->NotifySceneContextChanged(context);
 		}
-#endif // _DEBUG
-			}
+	#endif // _DEBUG
+	}
 
 	// 現在のシーンを更新
 	scenes_[currentSceneNo_]->Update();
 }
 
-void SceneManager::Draw() {
+void SceneManager::Draw(){
 	CameraManager::GetInstance()->SetType(Type_Default);
 	auto* gameRT = pDxCore_->GetRenderTargetCollection().Get("Offscreen");
 	DrawForRenderTarget(gameRT);
@@ -102,17 +110,17 @@ void SceneManager::Draw() {
 	PrimitiveDrawer::GetInstance()->ClearMesh();
 }
 
-void SceneManager::DrawForRenderTarget(IRenderTarget* target) {
+void SceneManager::DrawForRenderTarget(IRenderTarget* target){
 	auto* cmd = pGraphicsSystem_->GetCommandList();
 
 	// 出力先RT設定
 	target->SetRenderTarget(cmd);
 	target->Clear(cmd);
 
-	scenes_[currentSceneNo_]->Draw(cmd, pGraphicsSystem_->GetPipelineService(),target->GetRenderTargetType());
+	scenes_[currentSceneNo_]->Draw(cmd, pGraphicsSystem_->GetPipelineService(), target->GetRenderTargetType());
 }
 
-void SceneManager::SetEngineUI([[maybe_unused]]EngineUICore* ui) {
+void SceneManager::SetEngineUI([[maybe_unused]] EngineUICore* ui){
 #ifdef _DEBUG
 	pEngineUI_ = ui;
 	auto* context = scenes_[currentSceneNo_]->GetSceneContext();
@@ -120,8 +128,8 @@ void SceneManager::SetEngineUI([[maybe_unused]]EngineUICore* ui) {
 #endif // _DEBUG
 }
 
-void SceneManager::RequestSceneChange(SceneType nextScene) {
-	nextSceneNo_ = static_cast<int>(nextScene);
+void SceneManager::RequestSceneChange(SceneType nextScene){
+	nextSceneNo_ = static_cast< int >(nextScene);
 }
 
 SceneContext* SceneManager::GetCurrentSceneContext() const{

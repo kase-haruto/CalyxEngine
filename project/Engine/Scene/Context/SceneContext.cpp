@@ -5,6 +5,8 @@
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 
+SceneContext* SceneContext::current_ = nullptr;
+
 void SceneContext::Initialize(){
 	objectLibrary_ = std::make_unique<SceneObjectLibrary>();
 	lightLibrary_ = std::make_unique<LightLibrary>();

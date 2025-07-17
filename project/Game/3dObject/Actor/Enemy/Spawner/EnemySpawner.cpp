@@ -2,6 +2,7 @@
 
 #include <Game/3dObject/Actor/Enemy/Collection/EnemyCollection.h>
 #include <Engine/Scene/Context/SceneContext.h>
+#include <Engine/Scene/Utility/SceneUtility.h>
 
 #include <externals/imgui/ImGuiFileDialog.h>
 
@@ -110,16 +111,13 @@ void EnemySpawner::ShowGui() {
 }
 
 
-void EnemySpawner::SetSceneContext(SceneContext* context) { sceneContext_ = context; }
-
-
 void EnemySpawner::SetPlayerTransform(WorldTransform* playerTransform) {
 	playerTransform_ = playerTransform;
 	worldTransform_.parent = playerTransform->parent;
 }
 
 void EnemySpawner::Spawn(){
-	if (!sceneContext_ || !ownerCollection_) return;
+	if ( !ownerCollection_) return;
 
 	// 有効な敵だけ残す
 	size_t aliveCount = 0;
@@ -135,7 +133,7 @@ void EnemySpawner::Spawn(){
 	if (aliveCount >= maxSpawnCount_) return;
 
 	// 新規スポーン
-	auto enemy = sceneContext_->Instantiate<Enemy>("ghost.obj", "enemy");
+	auto enemy = SceneAPI::Instantiate<Enemy>("ghost.obj", "enemy");
 	enemy->Initialize();
 	if (!enemy) return;
 

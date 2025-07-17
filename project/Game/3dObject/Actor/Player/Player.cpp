@@ -100,7 +100,7 @@ void Player::Update(){
 	size_t spriteCount = reticleSprites_.size();
 	if (spriteCount < 2) return;
 
-	Vector3 diff = (reticlePos - playerPos)*0.5f;
+	Vector3 diff = (reticlePos - playerPos) * 0.5f;
 
 	for (size_t i = 0; i < spriteCount; ++i){
 		float t = static_cast< float >(i) / (spriteCount - 1);
