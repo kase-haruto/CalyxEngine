@@ -4,7 +4,6 @@
 /* ===================================================================== */
 // engine
 #include <Data/Engine/Configs/Scene/Objects/Particle/Module/ModuleConfigFactory.h>
-#include <Engine/Application/Effects/Intermediary/FxIntermediary.h>
 #include <Engine/Application/Effects/Particle/FxUnit.h>
 #include <Engine/Application/Effects/Particle/Module/Factory/ModuleFactory.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>

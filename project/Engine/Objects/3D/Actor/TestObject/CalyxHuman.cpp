@@ -2,7 +2,6 @@
 
 #include <Engine/Application/Input/Input.h>
 #include <Engine/Foundation/Clock/ClockManager.h>
-#include <Engine/Application/Effects/Intermediary/FxIntermediary.h>
 #include <Engine/Foundation/Utility/FileSystem/ConfigPathResolver/ConfigPathResolver.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 
@@ -15,7 +14,7 @@ CalyxHuman::CalyxHuman(const std::string& modelName,
 
 	trailFx_ = std::make_shared<ParticleSystemObject>("playerBulletTrail");
 	trailFx_->LoadConfig("Resources/Assets/Configs/Effect/runFx.json");
-	FxIntermediary::GetInstance()->Attach(trailFx_);
+	//FxIntermediary::GetInstance()->Attach(trailFx_);
 
 }
 
@@ -26,7 +25,7 @@ CalyxHuman::CalyxHuman(){
 
 	trailFx_ = std::make_shared<ParticleSystemObject>("playerBulletTrail");
 	trailFx_->LoadConfig("Resources/Assets/Configs/Effect/runFx.json");
-	FxIntermediary::GetInstance()->Attach(trailFx_);
+	//FxIntermediary::GetInstance()->Attach(trailFx_);
 }
 
 

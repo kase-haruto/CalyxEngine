@@ -28,7 +28,7 @@ void CreateParticleSystemObjectCommand::Undo(){
 	if (!particleSystem_) return;
 
 	// サブシステムから先に外す
-	context_->GetFxSystem()->RemoveEmitter(particleSystem_);
+	context_->GetFxSystem()->RemoveEmitter(particleSystem_.get());
 
 	// ライブラリから削除
 	context_->GetObjectLibrary()->RemoveObject(particleSystem_);

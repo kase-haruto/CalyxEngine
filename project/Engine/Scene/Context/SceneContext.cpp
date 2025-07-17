@@ -18,6 +18,7 @@ void SceneContext::Initialize(){
 
 	lightLibrary_->SetDirectionalLight(dirLight);
 	lightLibrary_->SetPointLight(pointLight);
+
 }
 
 // ---------------------------------------------------------------------------

@@ -6,6 +6,7 @@
 #include <Engine/Application/Effects/Particle/Emitter/FxEmitter.h>
 #include <Engine/Objects/ConfigurableObject/ConfigurableObject.h>
 #include <Engine/Renderer/Particle/ParticleRenderer.h>
+#include <Engine/System/Event/EventBus.h>
 
 // c++ 
 #include <memory>
@@ -21,7 +22,7 @@ public:
 	FxSystem();
 	~FxSystem() ;
 	void AddEmitter(const std::shared_ptr<FxEmitter>& emitter);
-	void RemoveEmitter(const std::shared_ptr<FxEmitter>& emitter);
+	void RemoveEmitter(FxEmitter* emitter);
 	void SyncEmitters();
 	void Render(class PipelineService*, ID3D12GraphicsCommandList*);
 	void Clear();
@@ -31,4 +32,7 @@ private:
 	//===================================================================*/
 	std::vector<std::weak_ptr<FxEmitter>> emitters_;
 	std::unique_ptr<ParticleRenderer> particleRenderer_;
+
+	EventBus::Connection connAdd_;
+	EventBus::Connection connRem_;
 };

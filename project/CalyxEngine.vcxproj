@@ -116,7 +116,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Scene\Title\TitleScene.cpp" />
     <ClCompile Include="Engine\Graphics\Camera\Frustum\Frustum.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Enemy\Spawner\EnemySpawner.cpp" />
-    <ClCompile Include="Engine\Application\Effects\Intermediary\FxIntermediary.cpp" />
     <ClCompile Include="Engine\Application\UI\EngineUI\IOnViewportTool.cpp" />
     <ClCompile Include="Engine\System\Command\EditorCommand\LevelEditorCommand\CreateObjectCommand\CreateParticleSystemCommand.cpp" />
     <ClCompile Include="Engine\Application\Effects\FxSystem.cpp" />
@@ -306,8 +305,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Scene\Title\TitleScene.h" />
     <ClInclude Include="Engine\Graphics\Camera\Frustum\Frustum.h" />
     <ClInclude Include="Engine\Scene\Utility\SceneUtility.h" />
+    <ClInclude Include="Engine\System\Event\EventBus.h" />
     <ClInclude Include="Game\3dObject\Actor\Enemy\Spawner\EnemySpawner.h" />
-    <ClInclude Include="Engine\Application\Effects\Intermediary\FxIntermediary.h" />
     <ClInclude Include="Engine\Foundation\Utility\Ease\EaseTypes.h" />
     <ClInclude Include="Engine\System\Command\EditorCommand\LevelEditorCommand\CreateObjectCommand\CreateParticleSystemCommand.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\SceneObject\SceneObjectConfig.h" />

@@ -1,22 +1,54 @@
 #include "SceneObjectLibrary.h"
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
+#include <Engine/System/Event/EventBus.h>
+#include <iostream>
 
 /* 追加 ------------------------------------------------------------------*/
 void SceneObjectLibrary::AddObject(const std::shared_ptr<SceneObject>& object){
 	if (!object) return;
+	std::cout << "[AddObject] GUID: " << object->GetGuid().ToString() << "\n";
 	objects_.emplace(object->GetGuid(), object);
+
+	EventBus::Publish(ObjectAdded {object});
 }
 
-/* 削除 (shared_ptr 版) --------------------------------------------------*/
-bool SceneObjectLibrary::RemoveObject(const std::shared_ptr<SceneObject>& object){
-	if (!object) return false;
-	return RemoveObject(object->GetGuid());
+/* 削除 ------------------------------------------------------------------*/
+bool SceneObjectLibrary::RemoveObject(const std::shared_ptr<SceneObject>& obj){
+	if (!obj) return false;
+
+	std::shared_ptr<SceneObject> target;
+	Guid guidToErase;
+
+	for (const auto& [id, sp] : objects_){
+		if (sp.get() == obj.get()){ //< ポインタ一致で探す
+			target = sp;
+			guidToErase = id;
+			break;
+		}
+	}
+
+	if (!target){
+		std::cout << "[RemoveObject] Not found by ptr: " << obj->GetName() << "\n";
+		return false;
+	}
+
+	std::cout << "[RemoveObject] Found: " << obj->GetName()
+		<< ", GUID: " << guidToErase.ToString() << "\n";
+
+	// 子も削除（省略）
+	objects_.erase(guidToErase);
+	return true;
 }
 
-/* 削除 (Guid 版) --------------------------------------------------------*/
+
+
 bool SceneObjectLibrary::RemoveObject(Guid id){
-	if (!id.isValid()) return false;
-	return objects_.erase(id) > 0;
+	auto it = objects_.find(id);
+	if (it == objects_.end()) return false;
+
+	EventBus::Publish(ObjectRemoved {it->second});
+	objects_.erase(it);
+	return true;
 }
 
 /* クリア ---------------------------------------------------------------*/

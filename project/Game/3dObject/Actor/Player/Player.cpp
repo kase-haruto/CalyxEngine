@@ -11,7 +11,6 @@
 #include <Engine/Application/System/Enviroment.h>
 #include <Engine/Foundation/Utility/Ease/Ease.h>
 #include <Engine/Foundation/Utility/Random/Random.h>
-#include <Engine/Application/Effects/Intermediary/FxIntermediary.h>
 #include <Engine/Objects/Collider/BoxCollider.h>
 // externals
 #include <externals/imgui/imgui.h>

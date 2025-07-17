@@ -14,7 +14,6 @@
 #include <Engine/Objects/3D/Actor/SceneObjectManager.h>
 #include <Engine/Application/Input/Input.h>
 #include <Engine/Graphics/Core/GraphicsSystem.h>
-#include <Engine/Application/Effects/Intermediary/FxIntermediary.h>
 
 SceneManager::SceneManager(DxCore* dxCore, GraphicsSystem* graphicsSystem)
 	: pDxCore_(dxCore), pGraphicsSystem_(graphicsSystem){
@@ -49,7 +48,6 @@ void SceneManager::Initialize(){
 	}
 #endif // _DEBUG
 
-	FxIntermediary::GetInstance()->SetSceneContext(scenes_[currentSceneNo_]->GetSceneContext());
 	scenes_[currentSceneNo_]->Initialize();
 	scenes_[currentSceneNo_]->GetSceneContext()->MakeCurrent();
 
@@ -70,9 +68,6 @@ void SceneManager::Update(){
 
 		// 新しい SceneContext を取得
 		auto* newCtx = scenes_[currentSceneNo_]->GetSceneContext();
-
-		// サブシステムに設定
-		FxIntermediary::GetInstance()->SetSceneContext(newCtx);
 
 		//ctx を更新
 		newCtx->MakeCurrent();

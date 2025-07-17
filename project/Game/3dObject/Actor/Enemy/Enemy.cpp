@@ -3,7 +3,6 @@
 #include <Engine/Foundation/Utility/Random/Random.h>
 #include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Objects/Collider/BoxCollider.h>
-#include <Engine/Application/Effects/Intermediary/FxIntermediary.h>
 
 #include <numbers>
 
@@ -49,11 +48,10 @@ void Enemy::Initialize(){
 
 	hitFx_->SetParent(self);
 	hitFx_->Stop();
-	FxIntermediary::GetInstance()->Attach(hitFx_);
 
 	explosionFx_->SetParent(self);
 	explosionFx_->Stop();
-	FxIntermediary::GetInstance()->Attach(explosionFx_);
+	//FxIntermediary::GetInstance()->Attach(explosionFx_);
 }
 
 

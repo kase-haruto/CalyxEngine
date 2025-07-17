@@ -173,7 +173,7 @@ void LevelEditor::DeleteObject(const std::shared_ptr<SceneObject>& sp){
 	// ── パーティクルシステムなら FxSystem からも削除 ──────────
 	if (sp->GetObjectType() == ObjectType::ParticleSystem){
 		if (auto fxEmitter = std::dynamic_pointer_cast< FxEmitter >(sp)){
-			pSceneContext_->GetFxSystem()->RemoveEmitter(fxEmitter);
+			pSceneContext_->GetFxSystem()->RemoveEmitter(fxEmitter.get());
 		}
 	}
 
