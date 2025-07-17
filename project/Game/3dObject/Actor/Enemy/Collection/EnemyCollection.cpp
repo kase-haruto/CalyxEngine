@@ -1,7 +1,6 @@
 #include "EnemyCollection.h"
 
 #include <Engine/Scene/Context/SceneContext.h>
-#include <Engine/Scene/Utirity/SceneUtility.h>
 #include <Engine/Foundation/Utility/Random/Random.h>
 #include <Game/3dObject/Actor/Enemy/Spawner/EnemySpawner.h>
 
@@ -81,8 +80,8 @@ void EnemyCollection::AddSpawner(const std::shared_ptr<EnemySpawner>& spawner){
 
 void EnemyCollection::CreateSpawners(){
 	// 左回り
-	auto leftSpawner = std::make_shared<EnemySpawner>("leftSpawner");
-	sceneContext_->AddEditorObject(leftSpawner);
+	std::shared_ptr<EnemySpawner> leftSpawner;
+	leftSpawner = sceneContext_->Instantiate<EnemySpawner>("leftSpawner");
 
 	leftSpawner->SetRotationSpeed(0.4f);
 	leftSpawner->SetRotationDir({0, 1, 0});
@@ -90,8 +89,8 @@ void EnemyCollection::CreateSpawners(){
 	AddSpawner(leftSpawner);
 
 	// 右回り
-	auto rightSpawner = std::make_shared<EnemySpawner>("rightSpawner");
-	sceneContext_->AddEditorObject(rightSpawner);
+	std::shared_ptr<EnemySpawner> rightSpawner;
+	rightSpawner = sceneContext_->Instantiate<EnemySpawner>("rightSpawner");
 
 	rightSpawner->SetRotationSpeed(-0.6f);
 	rightSpawner->SetRotationDir({0, 1, 0});

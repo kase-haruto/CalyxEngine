@@ -5,7 +5,6 @@
 
 // scene
 #include <Engine/Scene/System/SceneManager.h>
-#include <Engine/Scene/Utirity/SceneUtility.h>
 
 // engine
 #include <Engine/Graphics/Context/GraphicsGroup.h>
@@ -47,7 +46,7 @@ void TitleScene::Initialize() {
 	//=========================
 	// グラフィック関連
 	//=========================
-	modelField_ = sceneContext_->GetObjectLibrary()->CreateAndAddObject<BaseGameObject>("terrain.obj", "field");
+	modelField_ = sceneContext_->Instantiate<BaseGameObject>("terrain.obj", "field");
 	modelField_->SetScale({ 300.0f,300.0f,300.0f });
 
 	title_ = std::make_unique<Sprite>("Textures/title.png");

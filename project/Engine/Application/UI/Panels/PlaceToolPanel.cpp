@@ -8,7 +8,6 @@
 #include <Engine/System/Command/EditorCommand/LevelEditorCommand/CreateObjectCommand/CreateShapeObjectCommand.h>
 #include <Engine/System/Command/EditorCommand/LevelEditorCommand/CreateObjectCommand/CreateParticleSystemCommand.h>
 #include <Engine/System/Command/Manager/CommandManager.h>
-#include <Engine/Scene/Utirity/SceneUtility.h>
 
 // externals
 #include <externals/imgui/imgui.h>

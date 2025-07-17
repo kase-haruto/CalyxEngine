@@ -11,10 +11,10 @@
             "y": -1.0,
             "z": 0.0
         },
-        "guid": "ae99417c-ab1f-46b7-938e-bb77228958a0",
+        "guid": "1ca76cc3-0354-4e5e-a391-834bcd85a5a5",
         "intensity": 0.25,
         "name": "DirectionalLight",
-        "objectType": 1,
+        "objectType": 4,
         "parentGuid": "00000000-0000-0000-0000-000000000000",
         "transform": {
             "rotation": {
@@ -44,7 +44,7 @@
             "z": 1.0
         },
         "decay": 1.0,
-        "guid": "fb5cf303-ebe0-415d-a9a0-62ddf0544c7a",
+        "guid": "b7ffbed0-25c6-418d-becb-0bbfc1ae0480",
         "intensity": 0.25,
         "name": "PointLight",
         "objectType": 0,
@@ -76,57 +76,97 @@
         "type": "PointLight"
     },
     {
-        "autoDestroy": false,
-        "color": {
-            "w": 1.0,
-            "x": 1.0,
-            "y": 1.0,
-            "z": 1.0
+        "colliderConfig": {
+            "colliderType": 0,
+            "isCollisionEnabled": true,
+            "isDraw": true,
+            "targetType": 0
         },
-        "emitCount": 10,
-        "emitDelay": 0.0,
-        "emitDuration": -1.0,
-        "emitRate": 0.10000000149011612,
-        "guid": "69554899-9fc7-4e71-bd75-2a0a0944eb55",
-        "isComplement": true,
-        "isDrawEnable": true,
-        "isOneShot": false,
-        "isStatic": false,
-        "lifetime": {
-            "constant": 0.0,
-            "max": 3.0,
-            "min": 1.0,
-            "mode": 1
+        "guid": "5c638f12-15bd-4dca-827c-da679037b259",
+        "modelConfig": {
+            "blendMode": 5,
+            "materialConfig": {
+                "color": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "currentLightingMode_": 0,
+                "enableLighting": 0,
+                "enviromentCoefficient": 0.5,
+                "isReflect": false,
+                "shininess": 20.0
+            },
+            "modelName": "terrain.obj",
+            "textureName": "textures/grass.png",
+            "uvTransConfig": {
+                "rotation": 0.0,
+                "scale": {
+                    "x": 10.0,
+                    "y": 10.0
+                }
+            }
         },
-        "modelPath": "plane.obj",
-        "modules": [],
-        "name": "ParticleSystem",
-        "objectType": 0,
+        "name": "field",
+        "objectType": 2,
         "parentGuid": "00000000-0000-0000-0000-000000000000",
-        "position": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0
-        },
-        "scale": {
-            "constant": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-            },
-            "max": {
+        "transform": {
+            "rotation": {
+                "w": 1.0,
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
             },
-            "min": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
+            "scale": {
+                "x": 100.0,
+                "y": 100.0,
+                "z": 100.0
             },
-            "mode": 0
+            "translation": {
+                "x": 754.0,
+                "y": 5.900000095367432,
+                "z": -589.0
+            }
         },
-        "texturePath": "particle.png",
+        "type": "BaseGameObject"
+    },
+    {
+        "colliderConfig": {
+            "colliderType": 0,
+            "isCollisionEnabled": false,
+            "isDraw": true,
+            "targetType": 0
+        },
+        "guid": "e86a0156-d553-46bb-936d-c2247fe8db17",
+        "modelConfig": {
+            "blendMode": 5,
+            "materialConfig": {
+                "color": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "currentLightingMode_": 0,
+                "enableLighting": 0,
+                "enviromentCoefficient": 0.5,
+                "isReflect": false,
+                "shininess": 20.0
+            },
+            "modelName": "run.gltf",
+            "textureName": "textures/grass.png",
+            "uvTransConfig": {
+                "rotation": 0.0,
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0
+                }
+            }
+        },
+        "name": "runHuman",
+        "objectType": 2,
+        "parentGuid": "00000000-0000-0000-0000-000000000000",
         "transform": {
             "rotation": {
                 "w": 1.0,
@@ -140,29 +180,67 @@
                 "z": 1.0
             },
             "translation": {
-                "x": 0.0,
+                "x": -1.1417157649993896,
                 "y": 0.0,
-                "z": 0.0
+                "z": -2.6692135334014893
             }
         },
-        "type": "ParticleSystemObject",
-        "velocity": {
-            "constant": {
+        "type": "BaseGameObject"
+    },
+    {
+        "colliderConfig": {
+            "colliderType": 0,
+            "isCollisionEnabled": false,
+            "isDraw": true,
+            "targetType": 0
+        },
+        "guid": "e86a0156-d553-46bb-936d-c2247fe8db17",
+        "modelConfig": {
+            "blendMode": 5,
+            "materialConfig": {
+                "color": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "currentLightingMode_": 0,
+                "enableLighting": 0,
+                "enviromentCoefficient": 0.5,
+                "isReflect": false,
+                "shininess": 20.0
+            },
+            "modelName": "run.gltf",
+            "textureName": "textures/grass.png",
+            "uvTransConfig": {
+                "rotation": 0.0,
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0
+                }
+            }
+        },
+        "name": "runHuman",
+        "objectType": 2,
+        "parentGuid": "00000000-0000-0000-0000-000000000000",
+        "transform": {
+            "rotation": {
+                "w": 1.0,
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
             },
-            "max": {
+            "scale": {
                 "x": 1.0,
-                "y": 0.0,
+                "y": 1.0,
                 "z": 1.0
             },
-            "min": {
-                "x": -1.0,
+            "translation": {
+                "x": 1.9827078580856323,
                 "y": 0.0,
-                "z": -1.0
-            },
-            "mode": 1
-        }
+                "z": -2.740889310836792
+            }
+        },
+        "type": "BaseGameObject"
     }
 ]

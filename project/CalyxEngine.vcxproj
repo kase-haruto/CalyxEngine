@@ -372,7 +372,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Assets\Animation\AnimationModel.h" />
     <ClInclude Include="Engine\Assets\Animation\AnimationStruct.h" />
     <ClInclude Include="Engine\Scene\Details\SceneType.h" />
-    <ClInclude Include="Engine\Scene\Utirity\SceneUtility.h" />
     <ClInclude Include="externals\imgui\ImGuiFileDialog.h" />
     <ClInclude Include="externals\imgui\ImGuiFileDialogConfig.h" />
     <ClInclude Include="externals\imgui\ImGuizmo.h" />

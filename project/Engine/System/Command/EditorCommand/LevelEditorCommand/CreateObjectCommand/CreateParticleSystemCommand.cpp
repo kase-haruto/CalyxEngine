@@ -5,26 +5,35 @@
 #include <Engine/Application/Effects/FxSystem.h>
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 
-CreateParticleSystemObjectCommand::CreateParticleSystemObjectCommand(SceneContext* context, ObjectFactory factory, std::string name)
-	: context_(context), factory_(std::move(factory)), name_(std::move(name)){}
+CreateParticleSystemObjectCommand::CreateParticleSystemObjectCommand(
+	SceneContext* context,
+	ObjectFactory   factory,
+	std::string     name)
+	: context_(context),
+	factory_(std::move(factory)),
+	name_(std::move(name)){}
 
 void CreateParticleSystemObjectCommand::Execute(){
 	auto obj = factory_();
 	particleSystem_ = obj;
 
-	// 所有権をEditorObjectとして登録
-	context_->AddEditorObject<ParticleSystemObject>(std::move(obj));
+	// SceneObjectLibrary へ登録
+	context_->GetObjectLibrary()->AddObject(obj);
 
-	// FxSystemは参照だけ保持
+	// FxSystem は参照だけ保持
 	context_->GetFxSystem()->AddEmitter(particleSystem_);
 }
 
 void CreateParticleSystemObjectCommand::Undo(){
-	if (particleSystem_){
-		context_->GetFxSystem()->RemoveEmitter(particleSystem_);
-		context_->RemoveEditorObject(particleSystem_); // ここでdeleteされる
-		particleSystem_ = nullptr;
-	}
+	if (!particleSystem_) return;
+
+	// サブシステムから先に外す
+	context_->GetFxSystem()->RemoveEmitter(particleSystem_);
+
+	// ライブラリから削除
+	context_->GetObjectLibrary()->RemoveObject(particleSystem_);
+
+	particleSystem_.reset();
 }
 
 const char* CreateParticleSystemObjectCommand::GetName() const{

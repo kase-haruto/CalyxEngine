@@ -1,6 +1,5 @@
 #include "BulletContainer.h"
 #include <Engine/Scene/Context/SceneContext.h>
-#include <Engine/Scene/Utirity/SceneUtility.h>
 #include <Game/3dObject/Actor/Bullet/PlayerBullet/PlayerBullet.h>
 
 #include <externals/imgui/imgui.h>
@@ -29,11 +28,10 @@ void BulletContainer::Update(){
 }
 
 void BulletContainer::AddBullet(BulletType type, const Vector3& pos, const Vector3& vel){
-	auto* lib = sceneContext_->GetObjectLibrary();
 	std::shared_ptr<BaseBullet> bullet;
 
 	if (type == BulletType::Player){
-		bullet = lib->CreateAndAddObject<PlayerBullet>("debugCube.obj", "playerBullet");
+		bullet = sceneContext_->Instantiate<PlayerBullet>("debugCube.obj", "playerBullet");
 	}
 
 	bullet->ShootInitialize(pos, vel);

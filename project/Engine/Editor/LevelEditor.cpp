@@ -149,15 +149,15 @@ void LevelEditor::SetSelectedObject(const std::shared_ptr<SceneObject>& sp){
 }
 
 void LevelEditor::CreateObject(std::shared_ptr<SceneObject> obj){
+	if (!obj) return;
 
+	// パーティクルなら FxSystem 登録
 	if (obj->GetObjectType() == ObjectType::ParticleSystem){
-		auto particleSystem = std::dynamic_pointer_cast< ParticleSystemObject >(obj);
-		if (particleSystem){
-			pSceneContext_->GetFxSystem()->AddEmitter(particleSystem);
+		if (auto fx = std::dynamic_pointer_cast< ParticleSystemObject >(obj)){
+			pSceneContext_->GetFxSystem()->AddEmitter(fx);
 		}
 	}
-
-	pSceneContext_->AddEditorObject(obj);
+	pSceneContext_->GetObjectLibrary()->AddObject(obj);
 }
 
 
@@ -219,7 +219,7 @@ SceneObject* LevelEditor::PickSceneObjectByRay(const Ray& ray){
 	const auto* lib = hierarchy_->GetSceneObjectLibrary();
 	if (!lib) return nullptr;
 
-	const auto& allObjects = lib->GetAllObjects();
+	const auto& allObjects = lib->GetAllObjectsRaw();
 	auto hit = Raycastor::Raycast(ray, allObjects);
 	if (hit){
 		return static_cast< SceneObject* >(hit->hitObject);

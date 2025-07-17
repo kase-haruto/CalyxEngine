@@ -25,8 +25,8 @@ public:
 	void Clear();
 
 	// object API ------------------------------------------------------------
-	template<class TObject>
-	TObject* AddEditorObject(std::shared_ptr<TObject> object);
+	template<class TObject, class... Args>
+	std::shared_ptr<TObject> Instantiate(Args&&... args);
 	void RemoveEditorObject(const std::shared_ptr<SceneObject>& object);
 
 	// accessors --------------------------------------------------------------
@@ -57,12 +57,12 @@ private:
 	std::string sceneName_ = "scene";
 };
 
-template<class TObject>
-TObject* SceneContext::AddEditorObject(std::shared_ptr<TObject> object){
-	static_assert(std::is_base_of_v<SceneObject, TObject>, "TObject must derive from SceneObject");
-	assert(object && "object must be a SceneObject");
-
-	TObject* raw = object.get();
-	objectLibrary_->AddObject(std::move(object));
-	return raw;
+// --------------------------- template implementations ------------------------
+template<class TObject, class... Args>
+std::shared_ptr<TObject> SceneContext::Instantiate(Args&&... args){
+	static_assert(std::is_base_of_v<SceneObject, TObject>,
+				  "TObject must derive from SceneObject");
+	auto obj = std::make_shared<TObject>(std::forward<Args>(args)...);
+	objectLibrary_->AddObject(obj);
+	return obj;
 }

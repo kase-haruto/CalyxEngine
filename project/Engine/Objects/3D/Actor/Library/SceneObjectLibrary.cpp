@@ -1,37 +1,57 @@
 #include "SceneObjectLibrary.h"
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
+
+/* 追加 ------------------------------------------------------------------*/
 void SceneObjectLibrary::AddObject(const std::shared_ptr<SceneObject>& object){
-	if (object){
-		allSceneObjects_.push_back(object);
-	}
+	if (!object) return;
+	objects_.emplace(object->GetGuid(), object);
 }
 
-void SceneObjectLibrary::RemoveObject(const std::shared_ptr<SceneObject>& obj){
-	if (!obj) return;
-	allSceneObjects_.erase(
-		std::remove(allSceneObjects_.begin(), allSceneObjects_.end(), obj),
-		allSceneObjects_.end()
-	);
+/* 削除 (shared_ptr 版) --------------------------------------------------*/
+bool SceneObjectLibrary::RemoveObject(const std::shared_ptr<SceneObject>& object){
+	if (!object) return false;
+	return RemoveObject(object->GetGuid());
 }
 
+/* 削除 (Guid 版) --------------------------------------------------------*/
+bool SceneObjectLibrary::RemoveObject(Guid id){
+	if (!id.isValid()) return false;
+	return objects_.erase(id) > 0;
+}
+
+/* クリア ---------------------------------------------------------------*/
 void SceneObjectLibrary::Clear(){
-	allSceneObjects_.clear();
+	objects_.clear();
 }
 
-std::vector<SceneObject*> SceneObjectLibrary::GetAllObjects() const{
-	std::vector<SceneObject*> rawPtrs;
-	rawPtrs.reserve(allSceneObjects_.size());
-	for (const auto& obj : allSceneObjects_){
-		if (obj) rawPtrs.push_back(obj.get());
+/* 検索 ---------------------------------------------------------------*/
+std::shared_ptr<SceneObject> SceneObjectLibrary::Find(Guid id) const{
+	auto it = objects_.find(id);
+	return it != objects_.end() ? it->second : nullptr;
+}
+
+std::shared_ptr<SceneObject> SceneObjectLibrary::FindByName(const std::string& name) const{
+	for (const auto& [id, sp] : objects_){
+		if (sp && sp->GetName() == name) return sp;
 	}
-	return rawPtrs;
+	return nullptr;
 }
 
-const std::vector<std::shared_ptr<SceneObject>>&
-SceneObjectLibrary::GetAllObjectsShared() const{
-	return allSceneObjects_;
+/* 一覧取得 -------------------------------------------------------------*/
+std::vector<SceneObject*> SceneObjectLibrary::GetAllObjectsRaw() const{
+	std::vector<SceneObject*> result;
+	result.reserve(objects_.size());
+	for (const auto& [id, sp] : objects_){
+		if (sp) result.emplace_back(sp.get());
+	}
+	return result;
 }
 
-std::shared_ptr<SceneObject> SceneObjectLibrary::CreateByTypeName(std::string_view n){
-	return SceneObjectRegistry::Get().Create(n);
+std::vector<std::shared_ptr<SceneObject>> SceneObjectLibrary::GetAllObjectsShared() const{
+	std::vector<std::shared_ptr<SceneObject>> result;
+	result.reserve(objects_.size());
+	for (const auto& [id, sp] : objects_){
+		result.emplace_back(sp);
+	}
+	return result;
 }

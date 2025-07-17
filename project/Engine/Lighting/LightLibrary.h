@@ -1,7 +1,7 @@
 #pragma once
 /* ========================================================================
-/* include space
-/* ===================================================================== */
+   include space
+   ===================================================================== */
 #include <Engine/objects/LightObject/DirectionalLight.h>
 #include <Engine/objects/LightObject/PointLight.h>
 
@@ -9,31 +9,27 @@
 
 class LightLibrary{
 public:
-	//===================================================================*/
-	//			public methods
-	//===================================================================*/
-	LightLibrary(class SceneObjectLibrary* library);
 	LightLibrary() = default;
 	~LightLibrary() = default;
 
+	/* GPU 同期 ---------------------------------------------------------*/
 	void CyncGpu();
 	void Clear();
+
+	/* 登録／取得 --------------------------------------------------------*/
 	void SetDirectionalLight(const std::shared_ptr<DirectionalLight>& light);
 	void SetPointLight(const std::shared_ptr<PointLight>& light);
 
 	DirectionalLight* GetDirectionalLight() const{ return directionalLight_.get(); }
-	PointLight* GetPointLight() const{ return pointLight_.get(); }
+	PointLight* GetPointLight()       const{ return pointLight_.get(); }
 
+	/* 描画コマンド ------------------------------------------------------*/
 	void SetCommand(ID3D12GraphicsCommandList* cmdList, PipelineType pipelineType);
 	void SetCommand(ID3D12GraphicsCommandList* cmdList,
 					PipelineType pipelineType,
-					LightType lightType);
+					LightType    lightType);
+
 private:
-	//===================================================================*/
-	//			private methods
-	//===================================================================*/
-	std::shared_ptr<DirectionalLight> directionalLight_ = nullptr;
-	std::shared_ptr<PointLight> pointLight_ = nullptr;
-
+	std::shared_ptr<DirectionalLight> directionalLight_;
+	std::shared_ptr<PointLight>       pointLight_;
 };
-

@@ -1,35 +1,50 @@
 #pragma once
 
 #include <Engine/Objects/3D/Actor/SceneObject.h>
+#include <Engine/Foundation/Utility/Guid/Guid.h>
+
+#include <unordered_map>
 #include <vector>
 #include <memory>
-#include <algorithm>
+#include <string>
+#include <type_traits>
 
 class SceneObjectLibrary{
 public:
 	SceneObjectLibrary() = default;
 	~SceneObjectLibrary() = default;
 
+	/* 追加・削除・クリア --------------------------------------------------*/
 	void AddObject(const std::shared_ptr<SceneObject>& object);
-
-	void RemoveObject(const std::shared_ptr<SceneObject>& obj);
-
+	bool RemoveObject(const std::shared_ptr<SceneObject>& object);
+	bool RemoveObject(Guid id);
 	void Clear();
 
-	template<typename TObject, typename... Args>
-	std::shared_ptr<TObject> CreateAndAddObject(Args&&... args);
+	/* 検索 --------------------------------------------------------------*/
+	std::shared_ptr<SceneObject> Find(Guid id)                       const;
+	std::shared_ptr<SceneObject> FindByName(const std::string& name) const;
 
-	std::vector<SceneObject*> GetAllObjects() const;
-	const std::vector<std::shared_ptr<SceneObject>>& GetAllObjectsShared() const;
+	template<class TObject>
+	std::vector<std::shared_ptr<TObject>> FindByType() const;
 
-	std::shared_ptr<SceneObject> CreateByTypeName(std::string_view typeName);
+	/* 一覧取得 ----------------------------------------------------------*/
+	std::vector<SceneObject*>                        GetAllObjectsRaw()   const;
+	std::vector<std::shared_ptr<SceneObject>>        GetAllObjectsShared() const;
+
 private:
-	std::vector<std::shared_ptr<SceneObject>> allSceneObjects_;
+	std::unordered_map<Guid, std::shared_ptr<SceneObject>> objects_;
 };
 
-template<typename TObject, typename ...Args>
-inline std::shared_ptr<TObject> SceneObjectLibrary::CreateAndAddObject(Args && ...args){
-	auto obj = std::make_shared<TObject>(std::forward<Args>(args)...);
-	AddObject(obj);
-	return obj;
+/* ---------------- テンプレート実装 ---------------------------------------*/
+template<class TObject>
+std::vector<std::shared_ptr<TObject>> SceneObjectLibrary::FindByType() const{
+	static_assert(std::is_base_of_v<SceneObject, TObject>,
+				  "TObject must derive from SceneObject");
+	std::vector<std::shared_ptr<TObject>> result;
+	for (const auto& [id, sp] : objects_){
+		if (auto casted = std::dynamic_pointer_cast< TObject >(sp)){
+			result.emplace_back(std::move(casted));
+		}
+	}
+	return result;
 }

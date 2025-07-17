@@ -45,11 +45,11 @@ public:
 
 private:
 	/* objects ======================================================*/
-	BaseGameObject* modelField_ = nullptr;
-	BaseGameObject* modelFieldBack_ = nullptr;
-	Player* player_ = nullptr;
-	BulletContainer* playerBulletContainer_ = nullptr;
-	EnemyCollection* enemyCollection_ = nullptr;
+	std::shared_ptr<BaseGameObject>   modelField_;
+	std::shared_ptr<Player>           player_;
+	std::shared_ptr<BulletContainer>  playerBulletContainer_;
+	std::shared_ptr<EnemyCollection>  enemyCollection_;
+
 
 	std::unique_ptr<RailCamera> railCamera_ = nullptr;
 };
