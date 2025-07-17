@@ -1,9 +1,9 @@
 #include "EnemyCollection.h"
 
 #include <Engine/Scene/Context/SceneContext.h>
-#include <Engine/Scene/Utirity/SceneUtility.h>
 #include <Engine/Foundation/Utility/Random/Random.h>
 #include <Game/3dObject/Actor/Enemy/Spawner/EnemySpawner.h>
+#include <Engine/Scene/Utility/SceneUtility.h>
 
 #include <externals/imgui/imgui.h>
 
@@ -20,15 +20,15 @@ void EnemyCollection::Update(){
 		spawner->Update();
 	}
 
-	auto* sceneLibrary = sceneContext_ ? sceneContext_->GetObjectLibrary() : nullptr;
-	if (!sceneLibrary) return;
+	auto* lib = SceneContext::Current()->GetObjectLibrary();
+	if (!lib) return;
 
 	for (auto it = enemies_.begin(); it != enemies_.end(); ){
 		auto& enemy = *it;
 		enemy->Update();
 
 		if (!enemy->GetIsAlive()){
-			sceneLibrary->RemoveObject(enemy);  // ✅ shared_ptr で参照カウント一致
+			lib->RemoveObject(enemy);
 			it = enemies_.erase(it);
 			deadEnemyCount++;
 		} else{
@@ -51,13 +51,6 @@ void EnemyCollection::ShowGui(){
 }
 
 
-void EnemyCollection::SetSceneContext(SceneContext* context){
-	sceneContext_ = context;
-	for (auto& spawner : spawners_){
-		spawner->SetSceneContext(context);
-	}
-}
-
 
 void EnemyCollection::SetPlayerTransform(WorldTransform* pTransform) {
 		playerTransform_ = pTransform;
@@ -72,7 +65,6 @@ void EnemyCollection::AddEnemy(const std::shared_ptr<Enemy>& enemy){
 ///////////////////////////////////////////////////////////////////////////////////////////
 void EnemyCollection::AddSpawner(const std::shared_ptr<EnemySpawner>& spawner){
 	if (spawner){
-		spawner->SetSceneContext(sceneContext_);
 		spawner->SetPlayerTransform(playerTransform_);
 		spawner->SetOwner(this);
 		spawners_.emplace_back(spawner);
@@ -81,8 +73,8 @@ void EnemyCollection::AddSpawner(const std::shared_ptr<EnemySpawner>& spawner){
 
 void EnemyCollection::CreateSpawners(){
 	// 左回り
-	auto leftSpawner = std::make_shared<EnemySpawner>("leftSpawner");
-	sceneContext_->AddEditorObject(leftSpawner);
+	std::shared_ptr<EnemySpawner> leftSpawner;
+	leftSpawner = SceneAPI::Instantiate<EnemySpawner>("leftSpawner");
 
 	leftSpawner->SetRotationSpeed(0.4f);
 	leftSpawner->SetRotationDir({0, 1, 0});
@@ -90,8 +82,8 @@ void EnemyCollection::CreateSpawners(){
 	AddSpawner(leftSpawner);
 
 	// 右回り
-	auto rightSpawner = std::make_shared<EnemySpawner>("rightSpawner");
-	sceneContext_->AddEditorObject(rightSpawner);
+	std::shared_ptr<EnemySpawner> rightSpawner;
+	rightSpawner = SceneAPI::Instantiate<EnemySpawner>("rightSpawner");
 
 	rightSpawner->SetRotationSpeed(-0.6f);
 	rightSpawner->SetRotationDir({0, 1, 0});

@@ -5,10 +5,20 @@
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 
+SceneContext* SceneContext::current_ = nullptr;
+
 void SceneContext::Initialize(){
 	objectLibrary_ = std::make_unique<SceneObjectLibrary>();
-	lightLibrary_ = std::make_unique<LightLibrary>(objectLibrary_.get());
+	lightLibrary_ = std::make_unique<LightLibrary>();
 	fxSystem_ = std::make_unique<FxSystem>();
+
+	// ライトを生成して登録
+	auto dirLight = Instantiate<DirectionalLight>("DirectionalLight");
+	auto pointLight = Instantiate<PointLight>("PointLight");
+
+	lightLibrary_->SetDirectionalLight(dirLight);
+	lightLibrary_->SetPointLight(pointLight);
+
 }
 
 // ---------------------------------------------------------------------------

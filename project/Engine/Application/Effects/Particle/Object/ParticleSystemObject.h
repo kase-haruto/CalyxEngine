@@ -17,7 +17,7 @@ public:
 	// コンストラクタ
 	ParticleSystemObject() = default;
 	explicit ParticleSystemObject(const std::string& name);
-	~ParticleSystemObject() override = default;
+	~ParticleSystemObject() override;
 
 	// 更新
 	void Initialize();

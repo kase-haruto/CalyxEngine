@@ -6,7 +6,6 @@
 /* engine */
 #include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Objects/Collider/BoxCollider.h>
-#include <Engine/Application/Effects/Intermediary/FxIntermediary.h>
 /* external */
 #include <externals/imgui/imgui.h>
 

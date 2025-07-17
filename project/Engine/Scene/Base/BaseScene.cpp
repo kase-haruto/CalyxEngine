@@ -37,7 +37,7 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList,
 	//===================================================================*/
 	modelRenderer_->Clear();
 
-	for (auto* entry : sceneContext_->GetObjectLibrary()->GetAllObjects()){
+	for (auto* entry : sceneContext_->GetObjectLibrary()->GetAllObjectsRaw()){
 		auto* gameObj = dynamic_cast< BaseGameObject* >(entry);
 		if (!gameObj) continue;
 

@@ -33,12 +33,9 @@ public:
 
 	const std::list<std::shared_ptr<BaseBullet>>& GetBullets(BulletType type) const;
 
-	void SetSceneContext(SceneContext* context){ sceneContext_ = context; }
-
 	std::string_view GetTypeName() const override{ return "BulletContainer"; }
 private:
 	std::unordered_map<BulletType, std::list<std::shared_ptr<BaseBullet>>> typedBullets_;
-	SceneContext* sceneContext_ = nullptr;
 
 	float bulletSpeed_ = 60.0f; // 弾速
 	Vector3 bulletScale_ {0.3f, 0.3f, 0.3f}; // 弾のスケール

@@ -3,12 +3,18 @@
 #include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
+#include <Engine/Scene/Context/SceneContext.h>
+#include <Engine/System/Event/EventBus.h>
 
 ParticleSystemObject::ParticleSystemObject(const std::string& name){
 	SceneObject::SetName(name, ObjectType::ParticleSystem);
 }
 
+ParticleSystemObject::~ParticleSystemObject(){
+}
+
 void ParticleSystemObject::Initialize(){
+	
 }
 
 void ParticleSystemObject::Update(){

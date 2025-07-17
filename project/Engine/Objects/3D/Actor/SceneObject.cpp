@@ -20,7 +20,7 @@ static const char* ObjectTypeToString(ObjectType type){
 SceneObject::SceneObject(){
 	worldTransform_.Initialize();
 	id_ = Guid::New();
-}
+}	
 
 void SceneObject::ShowGui(){}
 

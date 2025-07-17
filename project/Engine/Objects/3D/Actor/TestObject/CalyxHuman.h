@@ -14,7 +14,7 @@ public:
 	void Update()override;
 
 	std::optional<Vector3> GetJointWorldPos(const std::string& name) const;
-
+	std::string_view GetTypeName() const override{ return "CalyxHuman"; }
 private:
 	void TransitionAnimation();
 	void Move(float dt);

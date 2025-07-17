@@ -1,22 +1,23 @@
 #include "SceneSerializer.h"
 
 /* ========================================================================
-/*  include space
-/* ===================================================================== */
+   include space
+   ===================================================================== */
 #include <Engine/Scene/Context/SceneContext.h>
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
+#include <Engine/objects/LightObject/DirectionalLight.h>
 #include <Engine/objects/LightObject/PointLight.h>
 #include <Engine/Foundation/Json/JsonUtils.h>
 #include <Engine/Objects/3D/Actor/Library/SceneObjectLibrary.h>
 #include <Engine/Application/Effects/FxSystem.h>
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
-#include <Engine/Scene/Utirity/SceneUtility.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <memory>
+#include <unordered_map>
 
-// -----------------------------------------------------------------------------
-// Save 
-// -----------------------------------------------------------------------------
+   // -----------------------------------------------------------------------------
+   // Save
+   // -----------------------------------------------------------------------------
 bool SceneSerializer::Save(const SceneContext& context, const std::string& path){
 	const auto& objects = context.GetObjectLibrary()->GetAllObjectsShared();
 	nlohmann::json jArray = nlohmann::json::array();
@@ -41,35 +42,34 @@ bool SceneSerializer::Save(const SceneContext& context, const std::string& path)
 }
 
 // -----------------------------------------------------------------------------
-// Load 
+// Load
 // -----------------------------------------------------------------------------
 bool SceneSerializer::Load(SceneContext& context, const std::string& path){
 	nlohmann::json jArray;
 	if (!JsonUtils::Load(path, jArray)) return false;
 
-	auto* lib = context.GetObjectLibrary();
+	// 既存オブジェクトとサブシステムを初期化
 	context.Clear();
-	lib->Clear();
 
 	std::unordered_map<Guid, std::shared_ptr<SceneObject>> guidMap;
 
 	for (const auto& j : jArray){
 		std::string typeName = j.value("type", "");
-		if (typeName.empty()) continue;               // 保険
+		if (typeName.empty()) continue; // 保険
 
-		// 工場でインスタンス生成
+		// レジストリ経由でインスタンス生成
 		auto sp = SceneObjectRegistry::Get().Create(typeName);
 		if (!sp) continue;
 
-		// 設定反映
+		// JSON 設定をオブジェクトへ適用
 		if (auto* cfg = dynamic_cast< IConfigurable* >(sp.get())){
 			cfg->ApplyConfigFromJson(j);
 		}
 
-		//  シーンへ登録
-		context.AddEditorObject(sp);
+		// ---- ライブラリへ登録 -------------------------------------------
+		context.GetObjectLibrary()->AddObject(sp);
 
-		// サブシステム登録
+		// ---- サブシステムへ登録 -----------------------------------------
 		if (auto d = std::dynamic_pointer_cast< DirectionalLight >(sp)){
 			context.GetLightLibrary()->SetDirectionalLight(d);
 		} else if (auto p = std::dynamic_pointer_cast< PointLight >(sp)){
@@ -78,16 +78,15 @@ bool SceneSerializer::Load(SceneContext& context, const std::string& path){
 			context.GetFxSystem()->AddEmitter(fx);
 		}
 
-		// GUID テーブル格納
+		// GUID → shared_ptr マップ保持（親子リンク後付け用）
 		Guid guid = j.value("guid", Guid {});
 		guidMap[guid] = sp;
 	}
 
-	// === 2nd pass: 親子リンク復元 ====================================================
+	// === 2nd pass: 親子リンク復元 ===========================================
 	for (const auto& j : jArray){
 		Guid childGuid = j.value("guid", Guid {});
 		Guid parentGuid = j.value("parentGuid", Guid {});
-
 		if (!childGuid.isValid() || !parentGuid.isValid()) continue;
 
 		auto childIt = guidMap.find(childGuid);
@@ -99,4 +98,3 @@ bool SceneSerializer::Load(SceneContext& context, const std::string& path){
 
 	return true;
 }
-

@@ -4,7 +4,6 @@
 
 // scene
 #include <Engine/Scene/Test/TestScene.h>
-#include <Engine/Scene/Utirity/SceneUtility.h>
 
 // engine
 #include <Engine/Application/Input/Input.h>

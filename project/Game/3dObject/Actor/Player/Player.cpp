@@ -11,7 +11,6 @@
 #include <Engine/Application/System/Enviroment.h>
 #include <Engine/Foundation/Utility/Ease/Ease.h>
 #include <Engine/Foundation/Utility/Random/Random.h>
-#include <Engine/Application/Effects/Intermediary/FxIntermediary.h>
 #include <Engine/Objects/Collider/BoxCollider.h>
 // externals
 #include <externals/imgui/imgui.h>
@@ -100,7 +99,7 @@ void Player::Update(){
 	size_t spriteCount = reticleSprites_.size();
 	if (spriteCount < 2) return;
 
-	Vector3 diff = (reticlePos - playerPos)*0.5f;
+	Vector3 diff = (reticlePos - playerPos) * 0.5f;
 
 	for (size_t i = 0; i < spriteCount; ++i){
 		float t = static_cast< float >(i) / (spriteCount - 1);

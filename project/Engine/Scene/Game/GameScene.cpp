@@ -5,7 +5,6 @@
 
 // scene
 #include <Engine/Scene/System/SceneManager.h>
-#include <Engine/Scene/Utirity/SceneUtility.h>
 
 // engine
 #include <Engine/Graphics/Context/GraphicsGroup.h>
@@ -14,11 +13,12 @@
 #include <Engine/Objects/3D/Actor/SceneObjectManager.h>
 #include <Engine/Collision/CollisionManager.h>
 #include <Engine/Graphics/Pipeline/Service/PipelineService.h>
+#include <Engine/Scene/Utility/SceneUtility.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //	コンストラクタ/デストラクタ
 /////////////////////////////////////////////////////////////////////////////////////////
-GameScene::GameScene() {
+GameScene::GameScene(){
 	// シーン名を設定
 	//IScene::SetSceneName("GameScene");
 	SetSceneName("GameScene");
@@ -28,8 +28,7 @@ GameScene::GameScene() {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	アセットのロード
 /////////////////////////////////////////////////////////////////////////////////////////
-void GameScene::LoadAssets() {
-}
+void GameScene::LoadAssets(){}
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -39,44 +38,34 @@ void GameScene::Initialize(){
 	sceneContext_->Initialize();
 	LoadAssets();
 
-	CameraManager::GetInstance()->SetType(CameraType::Type_Default);
-	
-	//=========================
-	// グラフィック関連
-	//=========================
+	/* ----- Camera ----- */
 	railCamera_ = std::make_unique<RailCamera>();
 	railCamera_->Initialize();
+	CameraManager::GetInstance()->SetType(CameraType::Type_Default);
 
-	modelField_ = sceneContext_->GetObjectLibrary()->CreateAndAddObject<BaseGameObject>("terrain.obj", "field").get();
-	modelField_->SetScale({300.0f,300.0f,300.0f});
-	modelField_->SetTranslate({ -150.0f, -150.0f, 0.0f });
-	modelField_->SetUvScale(Vector2(10.0f,10.0f));
+	/* ----- Field ----- */
+	modelField_ = SceneAPI::Instantiate<BaseGameObject>("terrain.obj", "field");
+	modelField_->SetScale({300,300,300});
+	modelField_->SetTranslate({-150,-150,0});
+	modelField_->SetUvScale({10,10});
 	modelField_->SetEnableRaycast(false);
 
-
-	//player
-	player_ = sceneContext_->GetObjectLibrary()->CreateAndAddObject<Player>("player.gltf", "player").get();
-	player_->SetParent(&railCamera_->GetWorldTransform());
+	/* ----- Player ----- */
+	player_ = SceneAPI::Instantiate<Player>("player.gltf", "player");
 	player_->Initialize();
+	// カメラ‐>プレイヤーの追従は Transform 参照を直接渡す方が安全
+	player_->SetParent(&railCamera_->GetWorldTransform());
 
-	playerBulletContainer_ = sceneContext_->AddEditorObject(
-		std::make_shared<BulletContainer>("playerBulletContainer")
-	);
-	playerBulletContainer_->SetSceneContext(sceneContext_.get());
-	player_->SetBulletContainer(playerBulletContainer_);
+	/* ----- Bullet Container ----- */
+	playerBulletContainer_ = SceneAPI::Instantiate<BulletContainer>("playerBulletContainer");
+	player_->SetBulletContainer(playerBulletContainer_.get());
 
-	enemyCollection_ = sceneContext_->AddEditorObject(
-		std::make_shared<EnemyCollection>("enemyContainer")
-	);
-	enemyCollection_->SetSceneContext(sceneContext_.get());
+	/* ----- Enemy ----- */
+	enemyCollection_ = SceneAPI::Instantiate<EnemyCollection>("enemyContainer");
 	enemyCollection_->SetPlayerTransform(&player_->GetWorldTransform());
 	enemyCollection_->CreateSpawners();
 
 	player_->SetEnemyList(enemyCollection_->GetEnemies());
-
-	//===================================================================*/
-	//                    editor
-	//===================================================================*/
 }
 
 void GameScene::Update(){
@@ -86,20 +75,18 @@ void GameScene::Update(){
 	CameraManager::Update();
 
 	skyBox_->Update();
-	
+
 	/* 3dObject ============================*/
 	//地面の更新
 	modelField_->Update();
-	//プレイヤーの更新
-	player_->Update();
 
 	/* その他 ============================*/
 	sceneContext_->Update();
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
 
 	if (Input::GetInstance()->TriggerKey(DIK_1)
-		||enemyCollection_->GetDeadEnemyCount()>=10) {//10タイ撃破
-		if (transitionRequestor_) {
+		|| enemyCollection_->GetDeadEnemyCount() >= 10){//10タイ撃破
+		if (transitionRequestor_){
 			transitionRequestor_->RequestSceneChange(SceneType::TITLE);
 		}
 	}
@@ -107,7 +94,7 @@ void GameScene::Update(){
 
 void GameScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService, RenderTargetType type){
 
-	for (auto& playerSprite:player_->GetAllSprites()){
+	for (auto& playerSprite : player_->GetAllSprites()){
 		spriteRenderer_->Register(playerSprite);
 	}
 
