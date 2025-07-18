@@ -83,13 +83,6 @@ void GameScene::Update(){
 	/* その他 ============================*/
 	sceneContext_->Update();
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
-
-	if (Input::GetInstance()->TriggerKey(DIK_1)
-		|| enemyCollection_->GetDeadEnemyCount() >= 10){//10タイ撃破
-		if (transitionRequestor_){
-			transitionRequestor_->RequestSceneChange(SceneType::TITLE);
-		}
-	}
 }
 
 void GameScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService, RenderTargetType type){

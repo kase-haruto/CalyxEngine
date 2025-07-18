@@ -34,10 +34,12 @@ void Camera3DBuffer::Update(const Matrix4x4& view, const Matrix4x4& proj, const 
 void Camera3DBuffer::SetCommand(ID3D12GraphicsCommandList* cmdList, PipelineType pipelineType) {
 	uint32_t rootParameterIndex = 0;
 
-	if (pipelineType == PipelineType::Object3D || pipelineType == PipelineType::SkinningObject3D) {
+	if (pipelineType == PipelineType::Object3D || pipelineType == PipelineType::SkinningObject3D){
 		rootParameterIndex = 4;
-	} else if (pipelineType == PipelineType::Line || pipelineType == PipelineType::Skybox) {
+	} else if (pipelineType == PipelineType::Line || pipelineType == PipelineType::Skybox){
 		rootParameterIndex = 1;
+	} else if (pipelineType == PipelineType::StructuredObject){
+		rootParameterIndex = 0;
 	}
 
 	buffer_.SetCommand(cmdList, rootParameterIndex);

@@ -3,6 +3,7 @@
 #include <Engine/Foundation/Utility/Random/Random.h>
 #include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Objects/Collider/BoxCollider.h>
+#include <Engine/Scene/Utility/SceneUtility.h>
 
 #include <numbers>
 
@@ -30,13 +31,18 @@ Enemy::Enemy(const std::string& modelName, const std::string objName) :
 	waveAmplitude_ = 2.0f;
 	waveSpeed_ = Random::Generate<float>(1.0f, 3.0f);
 
-	hitFx_ = std::make_shared<ParticleSystemObject>("hitFx");
+	hitFx_ = SceneAPI::Instantiate<ParticleSystemObject>("hitFx");
 	hitFx_->LoadConfig("Resources/Assets/Configs/Effect/HitFx.json");
 	
-
-	explosionFx_ = std::make_shared<ParticleSystemObject>("explosionFx");
+	explosionFx_ = SceneAPI::Instantiate<ParticleSystemObject>("explosionFx");
 	explosionFx_->LoadConfig("Resources/Assets/Configs/Effect/Explosion.json");
 	
+}
+
+Enemy::~Enemy(){
+	auto ctx = SceneContext::Current();
+	ctx->RemoveEditorObject(hitFx_);
+	ctx->RemoveEditorObject(explosionFx_);
 }
 
 
@@ -51,7 +57,6 @@ void Enemy::Initialize(){
 
 	explosionFx_->SetParent(self);
 	explosionFx_->Stop();
-	//FxIntermediary::GetInstance()->Attach(explosionFx_);
 }
 
 
@@ -68,7 +73,9 @@ void Enemy::Update(){
 	if (life_ <= 0){
 		if (!isDead_){
 			explosionFx_->Play();
+			isAlive_ = false;
 			isDead_ = true;
+			return;
 		}
 
 		if (isDead_){
@@ -109,7 +116,7 @@ void Enemy::OnCollisionEnter([[maybe_unused]] Collider* other){
 	if (collider_->GetTargetType() == other->GetType()){
 		// 相手がターゲットだった場合の処理
 		life_--;
-		hitFx_->Play();
+		//hitFx_->Play();
 	}
 }
 

@@ -24,8 +24,6 @@ PlayerBullet::PlayerBullet(const std::string& modelName, const std::string& name
 
 PlayerBullet::~PlayerBullet(){
 	auto ctx = SceneContext::Current();
-	std::cout << "[Destroy] trailFx_: " << trailFx_.get()
-		<< ", GUID: " << trailFx_->GetGuid().ToString() << "\n";
 	ctx->RemoveEditorObject(trailFx_);
 	ctx->RemoveEditorObject(shootFx_);
 }

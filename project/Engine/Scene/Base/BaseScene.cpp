@@ -24,7 +24,7 @@ BaseScene::BaseScene(){
 
 void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList,
 					 PipelineService* psoService,
-					 RenderTargetType renderTargetType){
+					 [[maybe_unused]]RenderTargetType renderTargetType){
 	//===================================================================*/
 	//						背景オブジェクト描画
 	//===================================================================*/
