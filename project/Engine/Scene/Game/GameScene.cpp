@@ -15,6 +15,9 @@
 #include <Engine/Graphics/Pipeline/Service/PipelineService.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
 
+// game
+#include <Game/3dObject/Actor/Bullet/Register/BulletRegistrar.h>
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //	コンストラクタ/デストラクタ
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -37,6 +40,9 @@ void GameScene::LoadAssets(){}
 void GameScene::Initialize(){
 	sceneContext_->Initialize();
 	LoadAssets();
+
+	//弾の登録
+	BulletRegistrar::RegisterAll();
 
 	/* ----- Camera ----- */
 	railCamera_ = std::make_unique<RailCamera>();

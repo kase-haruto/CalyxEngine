@@ -1,20 +1,34 @@
 #include "BulletContainer.h"
+/* ========================================================================
+/* include space
+/* ===================================================================== */
+
+// engine
 #include <Engine/Scene/Context/SceneContext.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
+
+// game
+#include <Game/3dObject/Actor/Bullet/Factory/BulletFactory.h>
 #include <Game/3dObject/Actor/Bullet/PlayerBullet/PlayerBullet.h>
-#include <Engine/Scene/Context/SceneContext.h>
+
+// externals
 #include <externals/imgui/imgui.h>
 
-BulletContainer::BulletContainer(const std::string& name) {
+/////////////////////////////////////////////////////////////////////////////////////////
+//		コンストラクタ
+/////////////////////////////////////////////////////////////////////////////////////////
+BulletContainer::BulletContainer(const std::string& name){
 	SceneObject::SetName(name, ObjectType::GameObject);
 }
 
-
+/////////////////////////////////////////////////////////////////////////////////////////
+//		更新
+/////////////////////////////////////////////////////////////////////////////////////////
 void BulletContainer::Update(){
 	auto* lib = SceneContext::Current()->GetObjectLibrary();
 
-	for (auto& [type, bullets] : typedBullets_){
-		for (auto it = bullets.begin(); it != bullets.end();){
+	for (auto& [id, bullets] : typedBullets_){
+		for (auto it = bullets.begin(); it != bullets.end(); ){
 			auto bullet = *it;
 			bullet->Update();
 
@@ -28,38 +42,46 @@ void BulletContainer::Update(){
 	}
 }
 
-void BulletContainer::AddBullet(BulletType type, const Vector3& pos, const Vector3& vel){
-	std::shared_ptr<BaseBullet> bullet;
-
-	if (type == BulletType::Player){
-		bullet = SceneAPI::Instantiate<PlayerBullet>("debugCube.obj", "playerBullet");
-		bullet->Initialize();
-	}
+/////////////////////////////////////////////////////////////////////////////////////////
+//		追加
+/////////////////////////////////////////////////////////////////////////////////////////
+void BulletContainer::AddBullet(BulletID id, const Vector3& pos, const Vector3& vel){
+	auto bullet = BulletFactory::Create(id);
+	if (!bullet) return;
 
 	bullet->ShootInitialize(pos, vel);
-	typedBullets_[type].push_back(bullet);
+	typedBullets_[id].push_back(bullet);
 }
 
-void BulletContainer::RemoveBullet(const std::shared_ptr<BaseBullet>& bullet) {
-    for (auto& [type, bullets] : typedBullets_) {
-        bullets.remove(bullet);
-    }
+/////////////////////////////////////////////////////////////////////////////////////////
+//		削除
+/////////////////////////////////////////////////////////////////////////////////////////
+void BulletContainer::RemoveBullet(const std::shared_ptr<BaseBullet>& bullet){
+	for (auto& [type, bullets] : typedBullets_){
+		bullets.remove(bullet);
+	}
 }
 
-const std::list<std::shared_ptr<BaseBullet>>& BulletContainer::GetBullets(BulletType type) const {
-    static const std::list<std::shared_ptr<BaseBullet>> empty;
-    auto it = typedBullets_.find(type);
-    return (it != typedBullets_.end()) ? it->second : empty;
+/////////////////////////////////////////////////////////////////////////////////////////
+//		弾の取得
+/////////////////////////////////////////////////////////////////////////////////////////
+const std::list<std::shared_ptr<BaseBullet>>& BulletContainer::GetBullets(BulletID id) const{
+	static const std::list<std::shared_ptr<BaseBullet>> empty;
+	auto it = typedBullets_.find(id);
+	return (it != typedBullets_.end()) ? it->second : empty;
 }
 
-void BulletContainer::ShowGui() {
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		ui
+/////////////////////////////////////////////////////////////////////////////////////////
+void BulletContainer::ShowGui(){
 	ImGui::SeparatorText("bullet container");
 	DerivativeGui();
 
-	for (const auto& [type, bullets] : typedBullets_) {
-		ImGui::Text("Type %d : %d bullets", static_cast<int>(type), static_cast<int>(bullets.size()));
+	for (const auto& [type, bullets] : typedBullets_){
+		ImGui::Text("Type %d : %d bullets", static_cast< int >(type), static_cast< int >(bullets.size()));
 	}
 }
 
-void BulletContainer::DerivativeGui() {
-}
+void BulletContainer::DerivativeGui(){}
