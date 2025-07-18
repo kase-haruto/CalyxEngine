@@ -24,9 +24,9 @@ SceneManager::SceneManager(DxCore* dxCore, GraphicsSystem* graphicsSystem)
 	}
 
 
-	currentSceneNo_ = static_cast< int >(SceneType::TEST);
+	currentSceneNo_ = static_cast< int >(SceneType::PLAY);
 #ifdef _DEBUG
-	currentSceneNo_ = static_cast< int >(SceneType::TEST);
+	currentSceneNo_ = static_cast< int >(SceneType::PLAY);
 #endif // 
 
 	nextSceneNo_ = currentSceneNo_;
@@ -48,8 +48,8 @@ void SceneManager::Initialize(){
 	}
 #endif // _DEBUG
 
-	scenes_[currentSceneNo_]->Initialize();
 	scenes_[currentSceneNo_]->GetSceneContext()->MakeCurrent();
+	scenes_[currentSceneNo_]->Initialize();
 
 #ifdef _DEBUG
 	auto* SceneObjectLibrary = scenes_[currentSceneNo_]->GetSceneContext()->GetObjectLibrary();

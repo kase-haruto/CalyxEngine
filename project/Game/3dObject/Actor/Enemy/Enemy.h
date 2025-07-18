@@ -17,7 +17,7 @@ public:
 	Enemy() = default;
 	Enemy(const std::string& modelName,const std::string objName);
 
-	virtual ~Enemy() = default;
+	virtual ~Enemy();
 
 	void InitializeEffect();
 	void Initialize()override;

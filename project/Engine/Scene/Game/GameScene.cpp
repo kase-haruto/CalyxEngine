@@ -52,9 +52,9 @@ void GameScene::Initialize(){
 
 	/* ----- Player ----- */
 	player_ = SceneAPI::Instantiate<Player>("player.gltf", "player");
-	player_->Initialize();
-	// カメラ‐>プレイヤーの追従は Transform 参照を直接渡す方が安全
+	// レールカメラをプレイヤーの親に設定
 	player_->SetParent(&railCamera_->GetWorldTransform());
+	player_->Initialize();
 
 	/* ----- Bullet Container ----- */
 	playerBulletContainer_ = SceneAPI::Instantiate<BulletContainer>("playerBulletContainer");
@@ -83,13 +83,6 @@ void GameScene::Update(){
 	/* その他 ============================*/
 	sceneContext_->Update();
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
-
-	if (Input::GetInstance()->TriggerKey(DIK_1)
-		|| enemyCollection_->GetDeadEnemyCount() >= 10){//10タイ撃破
-		if (transitionRequestor_){
-			transitionRequestor_->RequestSceneChange(SceneType::TITLE);
-		}
-	}
 }
 
 void GameScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService, RenderTargetType type){
