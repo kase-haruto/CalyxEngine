@@ -19,6 +19,9 @@
 // c++
 #include <numbers>
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//		コンストラクタ
+/////////////////////////////////////////////////////////////////////////////////////////
 Player::Player(const std::string& modelName,
 			   std::optional<std::string> objectName)
 	:Actor::Actor(modelName, objectName){
@@ -30,13 +33,15 @@ Player::Player(const std::string& modelName,
 	boxCollider->SetSize(Vector3(3.0f, 3.0f, 3.0f));
 }
 
+/* ======================================================================================
+/*		public functions
+/* ==================================================================================== */
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		初期化
 /////////////////////////////////////////////////////////////////////////////////////////
 void Player::Initialize(){
 	moveSpeed_ = 15.0f;
-	InitializeEffect();
 	reticleTransform_.Initialize();
 	reticleTransform_.parent = GetWorldTransform().parent;
 	reticleTransform_.translation = Vector3(0.0f, 0.0f, 50.0f);
@@ -127,6 +132,9 @@ void Player::Update(){
 	BaseGameObject::Update();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//		描画
+/////////////////////////////////////////////////////////////////////////////////////////
 void Player::Draw([[maybe_unused]] ID3D12GraphicsCommandList* cmdList){
 	for (auto& sprite : lifeSprite_){
 		sprite->Draw(cmdList);
@@ -146,20 +154,41 @@ void Player::DerivativeGui(){
 	ImGui::DragFloat("moveSpeed", &moveSpeed_, 0.01f, 0.0f, 10.0f);
 }
 
+/* ======================================================================================
+/*		private functions
+/* ==================================================================================== */
 
-std::vector<Sprite*> Player::GetAllSprites(){
-	std::vector<Sprite*> sprites;
+///////////////////////////////////////////////////////////////////////////////////
+//		playerの傾き
+///////////////////////////////////////////////////////////////////////////////////
+void Player::UpdateTilt(const Vector3& inputVector){
+	// 閾値以下なら傾きを戻す
+	if (inputVector.Length() <= 0.01f){
+		Quaternion identity = Quaternion::MakeIdentity();
+		worldTransform_.rotation = Quaternion::Slerp(worldTransform_.rotation, identity, 0.1f);
+		worldTransform_.rotationSource = RotationSource::Quaternion;
+		return;
+	}
 
-	for (auto& s : reticleSprites_)sprites.push_back(s.get());
-	for (auto& s : lifeSprite_) sprites.push_back(s.get());
-	sprites.push_back(attackSprite_.get());
-	return sprites;
-}
+	Vector3 dir = inputVector.Normalize();
 
-const Vector3 Player::GetCenterPos() const{
-	const Vector3 offset = {0.0f, 1.5f, 0.0f};
-	Vector3 worldPos = Vector3::Transform(offset, worldTransform_.matrix.world);
-	return worldPos;
+	// 最大角度（ラジアン）
+	const float maxRoll = 0.5f;
+	const float maxPitch = 0.5f;
+
+	float targetRoll = -dir.x * maxRoll;
+	float targetPitch = -dir.y * maxPitch;
+
+	// ロールとピッチのクォータニオンを作成
+	Quaternion rollQ = Quaternion::MakeRotateZ(targetRoll);
+	Quaternion pitchQ = Quaternion::MakeRotateX(targetPitch);
+
+	// 合成クォータニオン（注意：回転順序によって見た目が変わる）
+	Quaternion targetRotation = Quaternion::Multiply(rollQ, pitchQ); // roll * pitch
+
+	// なめらかに補間
+	worldTransform_.rotation = Quaternion::Slerp(worldTransform_.rotation, targetRotation, 0.15f);
+	worldTransform_.rotationSource = RotationSource::Quaternion;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -198,7 +227,9 @@ void Player::Move(){
 	UpdateTilt(moveVector);
 }
 
-
+///////////////////////////////////////////////////////////////////////////////////
+//		弾の発射
+///////////////////////////////////////////////////////////////////////////////////
 void Player::Shoot(){
 	Vector3 playerPos = worldTransform_.GetWorldPosition();
 	Vector3 reticlePos = reticleTransform_.GetWorldPosition();
@@ -210,10 +241,13 @@ void Player::Shoot(){
 		dir = Vector3(0.0f, 0.0f, 1.0f); // フォールバック方向
 	}
 
-	bulletContainer_->AddBullet(BulletType::Player, playerPos, dir);
+	bulletContainer_->AddBullet(BulletID::Player_Straight, playerPos, dir);
 
 }
 
+///////////////////////////////////////////////////////////////////////////////////
+//		レティクルの座標更新
+///////////////////////////////////////////////////////////////////////////////////
 void Player::UpdateReticlePosition(){
 	constexpr float moveSpeed = 6.0f;
 	constexpr float stickSensitivity = 300.0f;  // スティック感度を大きめに
@@ -254,50 +288,25 @@ void Player::UpdateReticlePosition(){
 	//reticleTransform_.translation.z = std::clamp(reticleTransform_.translation.z, 1.0f, 20.0f);
 }
 
+/* ======================================================================================
+/*		accessor
+/* ==================================================================================== */
+void Player::SetParent(const WorldTransform* parent){ worldTransform_.parent = parent; }
 
-void Player::UpdateTilt(const Vector3& inputVector){
-	// 閾値以下なら傾きを戻す
-	if (inputVector.Length() <= 0.01f){
-		Quaternion identity = Quaternion::MakeIdentity();
-		worldTransform_.rotation = Quaternion::Slerp(worldTransform_.rotation, identity, 0.1f);
-		worldTransform_.rotationSource = RotationSource::Quaternion;
-		return;
-	}
+void Player::SetBulletContainer(BulletContainer* bulletContainer){ bulletContainer_ = bulletContainer; }
 
-	Vector3 dir = inputVector.Normalize();
+void Player::SetEnemyList(const std::list<std::shared_ptr<Enemy>>& targets){targets_ = targets;}
 
-	// 最大角度（ラジアン）
-	const float maxRoll = 0.5f;
-	const float maxPitch = 0.5f;
-
-	float targetRoll = -dir.x * maxRoll;
-	float targetPitch = -dir.y * maxPitch;
-
-	// ロールとピッチのクォータニオンを作成
-	Quaternion rollQ = Quaternion::MakeRotateZ(targetRoll);
-	Quaternion pitchQ = Quaternion::MakeRotateX(targetPitch);
-
-	// 合成クォータニオン（注意：回転順序によって見た目が変わる）
-	Quaternion targetRotation = Quaternion::Multiply(rollQ, pitchQ); // roll * pitch
-
-	// なめらかに補間
-	worldTransform_.rotation = Quaternion::Slerp(worldTransform_.rotation, targetRotation, 0.15f);
-	worldTransform_.rotationSource = RotationSource::Quaternion;
+std::vector<Sprite*> Player::GetAllSprites(){
+	std::vector<Sprite*> sprites;
+	for (auto& s : reticleSprites_)sprites.push_back(s.get());
+	for (auto& s : lifeSprite_) sprites.push_back(s.get());
+	sprites.push_back(attackSprite_.get());
+	return sprites;
 }
 
-
-///////////////////////////////////////////////////////////////////////////////////
-//		バレルロール
-///////////////////////////////////////////////////////////////////////////////////
-float Player::EaseForwardThenReturn(float t){
-	if (t < 0.5f){
-		float x = t / 0.5f;
-		return x * (2 - x); // EaseOutQuad
-	} else{
-		float x = (t - 0.5f) / 0.5f;
-		return 1.0f - (x * x); // EaseInQuad (逆補間)
-	}
+const Vector3 Player::GetCenterPos() const{
+	const Vector3 offset = {0.0f, 1.5f, 0.0f};
+	Vector3 worldPos = Vector3::Transform(offset, worldTransform_.matrix.world);
+	return worldPos;
 }
-
-void Player::InitializeEffect(){}
-
