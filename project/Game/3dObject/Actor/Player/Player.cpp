@@ -12,6 +12,8 @@
 #include <Engine/Foundation/Utility/Ease/Ease.h>
 #include <Engine/Foundation/Utility/Random/Random.h>
 #include <Engine/Objects/Collider/BoxCollider.h>
+
+
 // externals
 #include <externals/imgui/imgui.h>
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
@@ -80,14 +82,14 @@ void Player::Initialize(){
 //		更新
 /////////////////////////////////////////////////////////////////////////////////////////
 void Player::Update(){
-	//移動
-	Move();
+	float dt = ClockManager::GetInstance()->GetDeltaTime();
 
-	shootInterval_ -= ClockManager::GetInstance()->GetDeltaTime();
-	if (Input::GetInstance()->PushKey(DIK_SPACE) && shootInterval_ <= 0.0f
-		|| Input::GetInstance()->PushGamepadButton(PAD_BUTTON::RB) && shootInterval_ <= 0.0f){
-		Shoot();
-		shootInterval_ = kMaxShootInterval_;
+	if (inputHandler_){
+		inputHandler_->Update(*this,dt);
+	}
+
+	if (shootingController_){
+		shootingController_->Update(dt);
 	}
 
 	for (auto& sprite : lifeSprite_){
@@ -95,7 +97,6 @@ void Player::Update(){
 	}
 	attackSprite_->Update();
 
-	UpdateReticlePosition();
 	reticleTransform_.Update();
 
 	Vector3 playerPos = GetWorldPosition();
@@ -128,7 +129,6 @@ void Player::Update(){
 		reticleSprites_[i]->Update();
 	}
 
-	bulletContainer_->Update();
 	BaseGameObject::Update();
 }
 
@@ -157,6 +157,39 @@ void Player::DerivativeGui(){
 /* ======================================================================================
 /*		private functions
 /* ==================================================================================== */
+
+///////////////////////////////////////////////////////////////////////////////////
+//		playerの移動
+///////////////////////////////////////////////////////////////////////////////////
+void Player::MoveBy(const Vector3& delta){
+	worldTransform_.translation += delta * ClockManager::GetInstance()->GetDeltaTime();
+	UpdateTilt(delta);
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+//		レティクルの移動
+///////////////////////////////////////////////////////////////////////////////////
+void Player::MoveReticle(const Vector3& offset){
+	reticleTransform_.translation += offset;
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+//		弾の発射をりくえすと
+///////////////////////////////////////////////////////////////////////////////////
+void Player::RequestShoot(){
+	Vector3 playerPos = worldTransform_.GetWorldPosition();
+	Vector3 reticlePos = reticleTransform_.GetWorldPosition();
+	Vector3 dir = reticlePos - playerPos;
+
+	if (dir.Length() > 0.001f)
+		dir = dir.Normalize();
+	else
+		dir = Vector3(0.0f, 0.0f, 1.0f);
+
+	if (shootingController_){
+		shootingController_->RequestShoot(playerPos, dir);
+	}
+}
 
 ///////////////////////////////////////////////////////////////////////////////////
 //		playerの傾き
@@ -241,8 +274,7 @@ void Player::Shoot(){
 		dir = Vector3(0.0f, 0.0f, 1.0f); // フォールバック方向
 	}
 
-	bulletContainer_->AddBullet(BulletID::Player_Straight, playerPos, dir);
-
+	shootingController_->RequestShoot(playerPos, dir);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -293,8 +325,6 @@ void Player::UpdateReticlePosition(){
 /* ==================================================================================== */
 void Player::SetParent(const WorldTransform* parent){ worldTransform_.parent = parent; }
 
-void Player::SetBulletContainer(BulletContainer* bulletContainer){ bulletContainer_ = bulletContainer; }
-
 void Player::SetEnemyList(const std::list<std::shared_ptr<Enemy>>& targets){targets_ = targets;}
 
 std::vector<Sprite*> Player::GetAllSprites(){
@@ -309,4 +339,28 @@ const Vector3 Player::GetCenterPos() const{
 	const Vector3 offset = {0.0f, 1.5f, 0.0f};
 	Vector3 worldPos = Vector3::Transform(offset, worldTransform_.matrix.world);
 	return worldPos;
+}
+
+std::optional<float> Player::GetShootCooldown(){
+	if (shootingController_){
+		return shootingController_->GetCooldown();
+	}
+
+	return std::nullopt;
+}
+
+std::optional<const float> Player::GetMaxShootInterval() const{
+	if (shootingController_){
+		return shootingController_->GetInterval();
+	}
+
+	return std::nullopt;
+}
+
+void Player::SetShootingController(std::unique_ptr<PlayerShootingController> sc){
+	shootingController_ = std::move(sc);
+}
+
+void Player::SetInputHandler(std::unique_ptr<PlayerInputHandler> ih){
+	inputHandler_ = std::move(ih);
 }

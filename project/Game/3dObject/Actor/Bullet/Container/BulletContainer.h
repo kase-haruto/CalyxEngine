@@ -40,9 +40,9 @@ public:
 	const std::list<std::shared_ptr<BaseBullet>>& GetBullets(BulletID id) const;
 	std::string_view GetTypeName() const override{ return "BulletContainer"; }
 
-private:
+protected:
 	//===================================================================*/
-	//					private variables
+	//					protected variables
 	//===================================================================*/
 	std::unordered_map<BulletID,
 		std::list<std::shared_ptr<BaseBullet>>> typedBullets_;

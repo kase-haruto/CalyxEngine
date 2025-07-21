@@ -12,14 +12,11 @@ public:
 	//						public functions
 	//===================================================================*/
 	PlayerBulletContainer(const std::string name);
+	PlayerBulletContainer() = default;
 	~PlayerBulletContainer() = default;
 
-
-
-private:
-	//===================================================================*/
-	//						private variable
-	//===================================================================*/
-
+	//--------- mainFunc -----------------------------------------------------
+	void AddBullet(BulletID id, const Vector3& pos, const Vector3& vel) override;
+	std::string_view GetTypeName() const override{ return "PlayerBulletContainer"; }
 };
 
