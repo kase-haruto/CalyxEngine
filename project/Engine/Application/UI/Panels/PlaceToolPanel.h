@@ -4,7 +4,6 @@
 /* ===================================================================== */
 // engine
 #include <Engine/Application/UI/EngineUI/IEngineUI.h>
-#include <Engine/Scene/Context/ISceneContextListener.h>
 #include <Engine/Foundation/Math/Vector2.h>
 
 // c++
@@ -19,7 +18,7 @@ class SceneContext;
 class SceneObject;
 
 class PlaceToolPanel
-	: public IEngineUI, public ISceneContextListener{
+	: public IEngineUI{
 public:
 	enum class ShapeObjType{
 		Plane,
@@ -53,7 +52,6 @@ public:
 	~PlaceToolPanel() override = default;
 
 	void Render() override;
-	void OnSceneContextChanged(SceneContext* newContext) override;
 
 	const std::string& GetPanelName() const override{ return panelName_; }
 
@@ -61,7 +59,6 @@ private:
 	void RegisterPlaceItems();
 	void RenderCategoryItems();
 
-	SceneContext* pSceneContext_ = nullptr;
 	std::unordered_map<PlaceItemCategory, std::vector<PlaceItem>> categoryItems_;
 	std::string panelName_ = "PlaceToolPanel";
 };

@@ -74,12 +74,6 @@ void SceneManager::Update(){
 
 		scenes_[currentSceneNo_]->Initialize();
 
-	#ifdef _DEBUG
-		if (pEngineUI_){
-			auto* context = scenes_[currentSceneNo_]->GetSceneContext();
-			pEngineUI_->NotifySceneContextChanged(context);
-		}
-	#endif // _DEBUG
 	}
 
 	// 現在のシーンを更新
@@ -118,8 +112,6 @@ void SceneManager::DrawForRenderTarget(IRenderTarget* target){
 void SceneManager::SetEngineUI([[maybe_unused]] EngineUICore* ui){
 #ifdef _DEBUG
 	pEngineUI_ = ui;
-	auto* context = scenes_[currentSceneNo_]->GetSceneContext();
-	pEngineUI_->NotifySceneContextChanged(context);
 #endif // _DEBUG
 }
 
