@@ -295,6 +295,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Data\Engine\Prefab\Serializer\PrefabSerializer.cpp" />
     <ClCompile Include="Engine\Renderer\Model\ModelRenderer.cpp" />
     <ClCompile Include="Engine\Objects\3D\Actor\Registry\SceneObjectRegistry.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Bullet\Container\PlayerBulletContainer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\3dObject\Actor\Bullet\Details\BulletDetails.h" />
@@ -533,6 +534,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Data\Engine\Prefab\Serializer\PrefabSerializer.h" />
     <ClInclude Include="Engine\Renderer\Model\ModelRenderer.h" />
     <ClInclude Include="Engine\Objects\3D\Actor\Registry\SceneObjectRegistry.h" />
+    <ClInclude Include="Game\3dObject\Actor\Bullet\Container\PlayerBulletContainer.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
