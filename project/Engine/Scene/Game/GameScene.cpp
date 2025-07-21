@@ -17,6 +17,7 @@
 
 // game
 #include <Game/3dObject/Actor/Bullet/Register/BulletRegistrar.h>
+#include <Game/Installer/Player/PlayerInstaller.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //	コンストラクタ/デストラクタ
@@ -57,14 +58,11 @@ void GameScene::Initialize(){
 	modelField_->SetEnableRaycast(false);
 
 	/* ----- Player ----- */
-	player_ = SceneAPI::Instantiate<Player>("player.gltf", "player");
+	PlayerInstaller playerInstaller;
+	player_ = playerInstaller.InstallPlayer();
 	// レールカメラをプレイヤーの親に設定
 	player_->SetParent(&railCamera_->GetWorldTransform());
 	player_->Initialize();
-
-	/* ----- Bullet Container ----- */
-	playerBulletContainer_ = SceneAPI::Instantiate<BulletContainer>("playerBulletContainer");
-	player_->SetBulletContainer(playerBulletContainer_.get());
 
 	/* ----- Enemy ----- */
 	enemyCollection_ = SceneAPI::Instantiate<EnemyCollection>("enemyContainer");
@@ -82,9 +80,7 @@ void GameScene::Update(){
 
 	skyBox_->Update();
 
-	/* 3dObject ============================*/
-	//地面の更新
-	modelField_->Update();
+
 
 	/* その他 ============================*/
 	sceneContext_->Update();

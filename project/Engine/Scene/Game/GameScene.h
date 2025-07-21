@@ -19,7 +19,8 @@
 
 /* object */
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
-#include <Game/3dObject/Actor/Bullet/Container/BulletContainer.h>
+#include <Game/3dObject/Actor/Bullet/Container/PlayerBulletContainer.h>
+#include <Game/Battle/Shooting/ShootingController/PlayerShootingController.h>
 
 /* c++ */
 #include <vector>
@@ -46,8 +47,7 @@ public:
 private:
 	/* objects ======================================================*/
 	std::shared_ptr<BaseGameObject>   modelField_;
-	std::shared_ptr<Player>           player_;
-	std::shared_ptr<BulletContainer>  playerBulletContainer_;
+	std::shared_ptr<Player> player_;
 	std::shared_ptr<EnemyCollection>  enemyCollection_;
 
 

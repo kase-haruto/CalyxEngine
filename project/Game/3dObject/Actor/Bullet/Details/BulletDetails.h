@@ -1,8 +1,7 @@
 #pragma once
 
 enum class BulletID{
-	Player_Straight,	//< 直線状に飛ぶ
-	Player_Homing,		//< ホーミングする
+	Player_Straight,
+	Player_Homing,
 	Enemy_Straight,
-	Count
 };

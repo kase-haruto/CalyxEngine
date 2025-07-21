@@ -1,0 +1,77 @@
+#include "PlayerInputHandler.h"
+
+#include <Game/3dObject/Actor/Player/Player.h>
+
+// engine
+#include <Engine/Application/Input/Input.h>
+
+void PlayerInputHandler::Update(Player& player, float dt){
+	HandleMove(player);
+	HandleReticle(player, dt);
+	HandleShoot(player);
+}
+
+void PlayerInputHandler::HandleMove(Player& player){
+	Vector3 moveVector = {0.0f, 0.0f, 0.0f};
+
+	if (Input::GetInstance()->PushKey(DIK_A)) moveVector.x -= 1.0f;
+	if (Input::GetInstance()->PushKey(DIK_D)) moveVector.x += 1.0f;
+	if (Input::GetInstance()->PushKey(DIK_W)) moveVector.y += 1.0f;
+	if (Input::GetInstance()->PushKey(DIK_S)) moveVector.y -= 1.0f;
+
+	Vector2 leftStick = Input::GetInstance()->GetLeftStick();
+	moveVector.x += leftStick.x;
+	moveVector.y += leftStick.y;
+
+	if (moveVector.Length() > 0.0f)
+		moveVector.Normalize();
+
+	moveVector *= player.GetMoveSpeed();
+
+	player.MoveBy(moveVector);
+}
+
+void PlayerInputHandler::HandleReticle(Player& player, float dt){
+	constexpr float moveSpeed = 6.0f;
+	constexpr float stickSensitivity = 300.0f;
+
+	Vector3 offset = Vector3::Zero();
+	if (Input::GetInstance()->PushKey(DIK_UP)) offset.y += 3.0f;
+	if (Input::GetInstance()->PushKey(DIK_DOWN)) offset.y -= 3.0f;
+	if (Input::GetInstance()->PushKey(DIK_LEFT)) offset.x -= 3.0f;
+	if (Input::GetInstance()->PushKey(DIK_RIGHT)) offset.x += 3.0f;
+
+	Vector2 rightStick = Input::GetInstance()->GetRightStick();
+	offset.x += rightStick.x * stickSensitivity * dt;
+	offset.y += rightStick.y * stickSensitivity * dt;
+
+	Vector3 keyboardOffset = offset;
+	keyboardOffset.x -= rightStick.x * stickSensitivity * dt;
+	keyboardOffset.y -= rightStick.y * stickSensitivity * dt;
+
+	if (keyboardOffset.Length() > 0.0f){
+		keyboardOffset.Normalize();
+		keyboardOffset *= moveSpeed * dt;
+		offset.x = keyboardOffset.x + rightStick.x * stickSensitivity * dt;
+		offset.y = keyboardOffset.y + rightStick.y * stickSensitivity * dt;
+	}
+
+	player.MoveReticle(offset);
+}
+
+void PlayerInputHandler::HandleShoot(Player& player){
+	if (!player.GetShootCooldown().has_value() 
+		|| !player.GetMaxShootInterval().has_value()){
+		return;
+	}
+
+	float cooldown = player.GetShootCooldown().value();
+	const float maxInterval = player.GetMaxShootInterval().value();
+
+	if ((Input::GetInstance()->PushKey(DIK_SPACE) 
+		|| Input::GetInstance()->PushGamepadButton(PAD_BUTTON::RB))
+		&& cooldown <= 0.0f){
+		player.RequestShoot();
+		cooldown = maxInterval;
+	}
+}

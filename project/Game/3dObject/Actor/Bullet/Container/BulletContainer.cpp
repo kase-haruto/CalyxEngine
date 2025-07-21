@@ -8,7 +8,6 @@
 #include <Engine/Scene/Utility/SceneUtility.h>
 
 // game
-#include <Game/3dObject/Actor/Bullet/Factory/BulletFactory.h>
 #include <Game/3dObject/Actor/Bullet/PlayerBullet/PlayerBullet.h>
 
 // externals
@@ -43,17 +42,6 @@ void BulletContainer::Update(){
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//		追加
-/////////////////////////////////////////////////////////////////////////////////////////
-void BulletContainer::AddBullet(BulletID id, const Vector3& pos, const Vector3& vel){
-	auto bullet = BulletFactory::Create(id);
-	if (!bullet) return;
-
-	bullet->ShootInitialize(pos, vel);
-	typedBullets_[id].push_back(bullet);
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////
 //		削除
 /////////////////////////////////////////////////////////////////////////////////////////
 void BulletContainer::RemoveBullet(const std::shared_ptr<BaseBullet>& bullet){
@@ -71,7 +59,6 @@ const std::list<std::shared_ptr<BaseBullet>>& BulletContainer::GetBullets(Bullet
 	return (it != typedBullets_.end()) ? it->second : empty;
 }
 
-
 /////////////////////////////////////////////////////////////////////////////////////////
 //		ui
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -83,5 +70,3 @@ void BulletContainer::ShowGui(){
 		ImGui::Text("Type %d : %d bullets", static_cast< int >(type), static_cast< int >(bullets.size()));
 	}
 }
-
-void BulletContainer::DerivativeGui(){}

@@ -9,12 +9,15 @@
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 #include <Engine/Renderer/Sprite/Sprite.h>
 
-class Enemy;
+// game
+#include <Game/3dObject/Actor/Enemy/Enemy.h>
+#include <Game/Battle/Shooting/ShootingController/PlayerShootingController.h>
+#include <Game/Input/PlayerInput/PlayerInputHandler.h>
 
 /* =========================================================================
    Player Class
    ========================================================================= */
-class Player 
+class Player
 	: public Actor{
 public:
 	//=====================================================================
@@ -31,15 +34,25 @@ public:
 	void Draw(ID3D12GraphicsCommandList* cmdList) override;
 	void DerivativeGui() override;
 
+	void MoveBy(const Vector3& delta);
+
+	void MoveReticle(const Vector3& offset);
+
+	void RequestShoot();
+
 	/* accessor =========================================================== */
 	//settter
 	void SetParent(const WorldTransform* parent);
-	void SetBulletContainer(BulletContainer* bulletContainer);
 	void SetEnemyList(const std::list<std::shared_ptr<Enemy>>& targets);
+	void SetShootingController(std::unique_ptr<PlayerShootingController> sc);
+	void SetInputHandler(std::unique_ptr<PlayerInputHandler> ih);
 
 	//getter
 	std::vector<Sprite*> GetAllSprites();
 	const Vector3 GetCenterPos() const override;
+	float GetMoveSpeed() const{ return moveSpeed_; }
+	std::optional<float> GetShootCooldown();
+	std::optional<const float> GetMaxShootInterval() const;
 
 private:
 	//=====================================================================
@@ -54,10 +67,9 @@ private:
 	//=====================================================================
 	// Private Variables
 	//=====================================================================
+	std::unique_ptr<PlayerShootingController>shootingController_;
+	std::unique_ptr<PlayerInputHandler> inputHandler_ = nullptr;
 
-	BulletContainer* bulletContainer_ = nullptr;	//< 弾コンテナへの参照
-	float shootInterval_ = 0.3f;					//< 発射間隔
-	const float kMaxShootInterval_ = 0.3f;			//< 最大発射間隔
 	Vector3 lastMoveVector_;						//< 最後の移動ベクトル
 
 	WorldTransform reticleTransform_;						//< レティクルのワールド変換
@@ -66,4 +78,5 @@ private:
 	std::unique_ptr<Sprite> attackSprite_;					//< 攻撃状態スプライト
 
 	std::list<std::shared_ptr<Enemy>> targets_;	// 敵の共有ポインタリスト
+
 };
