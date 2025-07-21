@@ -42,6 +42,7 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList* cmdList,
 							const Camera3d* camera,
 							PipelineService* psoService,
 							LightLibrary* lightLibrary){
+
 	// -------------------- 静的モデル描画 --------------------
 	for (auto& [model, transforms] : staticModels_){
 		std::vector<WorldTransform> visible;
