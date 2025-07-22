@@ -16,8 +16,8 @@
 #include <functional>
 
 class BaseGameObject
-	: public SceneObject
-	, public ConfigurableObject<BaseGameObjectConfig>{
+	: public SceneObject,
+	public IConfigurable{
 
 	enum class ColliderKind{
 		None,
@@ -34,22 +34,24 @@ public:
 	BaseGameObject();
 	virtual ~BaseGameObject()override;
 
-	virtual void Initialize() {};
+	virtual void Initialize(){};
 	virtual void Update()override;
-	virtual void Draw() {};
+	virtual void Draw(){};
 
 	//--------- ui/gui --------------------------------------------------
 	void ShowGui()override;
 	virtual void DerivativeGui();
 
 	//--------- Collision -----------------------------------------------
-	virtual void OnCollisionEnter([[maybe_unused]]Collider* other) {}
-	virtual void OnCollisionStay([[maybe_unused]] Collider* other) {}
-	virtual void OnCollisionExit([[maybe_unused]] Collider* other) {}
+	virtual void OnCollisionEnter([[maybe_unused]] Collider* other){}
+	virtual void OnCollisionStay([[maybe_unused]] Collider* other){}
+	virtual void OnCollisionExit([[maybe_unused]] Collider* other){}
 
 	//--------- config ------------------------------------------------
-	virtual void ApplyConfig()override;
-	virtual void ExtractConfig()override;
+	virtual void ApplyConfig();
+	virtual void ExtractConfig();
+	void ApplyConfigFromJson(const nlohmann::json& j) override;
+	void ExtractConfigToJson(nlohmann::json& j) const override;
 
 	//--------- accessor ------------------------------------------------
 	void SetName(const std::string& name);
@@ -60,30 +62,21 @@ public:
 	virtual const Vector3 GetCenterPos()const;
 	void SetColor(const Vector4& color);
 	Vector3 GetWorldPosition()const{ return worldTransform_.GetWorldPosition(); }
-	BaseModel* GetModel() const { return model_.get(); }
+	BaseModel* GetModel() const{ return model_.get(); }
 	void SetCollider(std::unique_ptr<Collider> collider);
 	Collider* GetCollider();
-	void SetUvScale(const Vector2& scale) { model_->uvTransform.scale = scale; }
+	void SetUvScale(const Vector2& scale){ model_->uvTransform.scale = scale; }
 
 	ObjectModelType GetModelType() const{ return objectModelType_; }
 
-	Model* GetStaticModel(){
-		return (objectModelType_ == ObjectModelType::ModelType_Static)
-			? static_cast< Model* >(model_.get()) : nullptr;
-	}
-	AnimationModel* GetAnimationModel(){
-		return (objectModelType_ == ObjectModelType::ModelType_Animation)
-			? static_cast< AnimationModel* >(model_.get()) : nullptr;
-	}
-	const AnimationModel* GetAnimationModel() const {
-		return (objectModelType_ == ObjectModelType::ModelType_Animation)
-			? static_cast<AnimationModel*>(model_.get()) : nullptr;
-	}
+	Model* GetStaticModel();
+	AnimationModel* GetAnimationModel();
+	const AnimationModel* GetAnimationModel() const;
 private:
 	//===================================================================*/
 	//                    private methods
 	//===================================================================*/
-	void SwitchCollider(ColliderKind kind,bool isCollisionEnubled = true);
+	void SwitchCollider(ColliderKind kind, bool isCollisionEnubled = true);
 
 protected:
 	//===================================================================*/
@@ -94,10 +87,16 @@ protected:
 
 protected:
 	//===================================================================*/
-	//                    private variables
+	//                    protected variables
 	//===================================================================*/
 	ObjectModelType objectModelType_ = ModelType_Static;
 
 	std::unique_ptr<Collider> collider_;
 	ColliderKind currentColliderKind_ = ColliderKind::None;	// コライダーの種類
+
+protected:
+	//===================================================================*/
+	//                    config
+	//===================================================================*/
+	ConfigurableObject<BaseGameObjectConfig> config_;
 };

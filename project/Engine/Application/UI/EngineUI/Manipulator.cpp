@@ -110,7 +110,7 @@ void Manipulator::Update(){
 
 void Manipulator::RenderOverlay(const ImVec2& basePos){
 	ImVec2 iconSize = iconTranslate_.size;
-	float spacing = 4.0f;
+	float spacing = 8.0f;
 
 	struct ButtonInfo{
 		ImGuizmo::OPERATION op;

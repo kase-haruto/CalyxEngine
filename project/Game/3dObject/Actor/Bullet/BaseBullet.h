@@ -24,11 +24,12 @@ public:
 	void Update()override;
 	void DerivativeGui()override;
 
+	//--------- collider -------------------------------------------------
 	void OnCollisionEnter(Collider* other)override;
 	void OnCollisionStay([[maybe_unused]] Collider* other)override {};
 	void OnCollisionExit([[maybe_unused]] Collider* other)override {};
 
-	//--------- accessor ---------------------------------------------------
+	//--------- accessor -------------------------------------------------
 private:
 	//===================================================================*/
 	//private methods

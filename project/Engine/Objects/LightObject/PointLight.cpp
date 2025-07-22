@@ -13,8 +13,6 @@
 #include<externals/imgui/imgui.h>
 #endif // _DEBUG
 
-
-
 PointLight::PointLight(const std::string& name){
 	SceneObject::SetName(name, ObjectType::Light);
 	ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
@@ -52,23 +50,18 @@ PointLight::~PointLight(){}
 void PointLight::Initialize(){}
 
 void PointLight::Update(){
-	
+
 }
 
 void PointLight::ShowGui(){
 #ifdef _DEBUG
 	ImGui::Dummy(ImVec2(0.0f, 5.0f));
-	if (ImGui::Button("SaveConfig")) {
-		SaveConfig(configPath_);
-	}
-	ImGui::SameLine();
-	if (ImGui::Button("LoadConfig")) {
-		LoadConfig(configPath_);
-	}
+	config_.ShowGui();
+
 	ImGui::Separator();
 
 	ImGui::Separator();
-	GuiCmd::DragFloat3("position", lightData_.position );
+	GuiCmd::DragFloat3("position", lightData_.position);
 	GuiCmd::ColorEdit4("color", lightData_.color);
 	ImGui::SliderFloat("Intensity", &lightData_.intensity, 0.0f, 1.0f);
 	GuiCmd::DragFloat("radius", lightData_.radius);
@@ -91,28 +84,42 @@ void PointLight::SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> co
 //===================================================================*/
  //                    config
  //===================================================================*/
-void PointLight::ApplyConfig() {
+void PointLight::ApplyConfig(){
+	const auto& cfg = config_.GetConfig();
+
 	// コンフィグの適用
-	lightData_.color = config_.color;
-	lightData_.position = config_.position;
-	lightData_.intensity = config_.intensity;
-	lightData_.radius = config_.radius;
-	lightData_.decay = config_.decay;
-	name_ = config_.name;
-	id_ = config_.guid;
-	parentId_ = config_.parentGuid;
+	lightData_.color = cfg.color;
+	lightData_.position = cfg.position;
+	lightData_.intensity = cfg.intensity;
+	lightData_.radius = cfg.radius;
+	lightData_.decay = cfg.decay;
+	name_ = cfg.name;
+	id_ = cfg.guid;
+	parentId_ = cfg.parentGuid;
 
 }
 
 void PointLight::ExtractConfig(){
-	config_.color = lightData_.color;
-	config_.position = lightData_.position;
-	config_.intensity = lightData_.intensity;
-	config_.radius = lightData_.radius;
-	config_.decay = lightData_.decay;
-	config_.name = name_;
-	config_.guid = id_;
-	config_.parentGuid = parentId_;
+	auto& cfg = config_.GetConfig();
+
+	cfg.color = lightData_.color;
+	cfg.position = lightData_.position;
+	cfg.intensity = lightData_.intensity;
+	cfg.radius = lightData_.radius;
+	cfg.decay = lightData_.decay;
+	cfg.name = name_;
+	cfg.guid = id_;
+	cfg.parentGuid = parentId_;
+}
+
+void PointLight::ApplyConfigFromJson(const nlohmann::json& j){
+	config_.ApplyConfigFromJson(j);
+	ApplyConfig();
+}
+
+void PointLight::ExtractConfigToJson(nlohmann::json& j) const{
+	const_cast< PointLight* >(this)->ExtractConfig();
+	config_.ExtractConfigToJson(j);
 }
 
 

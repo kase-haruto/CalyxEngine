@@ -70,3 +70,7 @@ void BulletContainer::ShowGui(){
 		ImGui::Text("Type %d : %d bullets", static_cast< int >(type), static_cast< int >(bullets.size()));
 	}
 }
+
+void BulletContainer::DerivativeGui(){
+	editBullet_->ShowGui();
+}

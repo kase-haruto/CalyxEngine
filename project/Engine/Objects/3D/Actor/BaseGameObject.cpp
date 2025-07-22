@@ -121,13 +121,11 @@ void BaseGameObject::ShowGui(){
 	ImGui::Dummy(ImVec2(0.0f, 5.0f));
 	ImGui::Separator();
 
-	ConfigurableObject::ShowGUi();
+	config_.ShowGui();
 
 	worldTransform_.ShowImGui("world");
 
 	model_->ShowImGuiInterface();
-
-	ImGui::Spacing();
 
 	collider_->ShowGui();
 
@@ -139,7 +137,9 @@ void BaseGameObject::DerivativeGui(){
 }
 
 void BaseGameObject::ApplyConfig(){
-	const std::string& modelPath = config_.modelConfig.modelName;
+	const BaseGameObjectConfig& cfg = config_.GetConfig();
+
+	const std::string& modelPath = cfg.modelConfig.modelName;
 	if (!modelPath.empty()){
 		auto dot = modelPath.find_last_of('.');
 		if (dot != std::string::npos && modelPath.substr(dot) == ".gltf"){
@@ -151,22 +151,34 @@ void BaseGameObject::ApplyConfig(){
 		}
 	}
 
-	model_->ApplyConfig(config_.modelConfig);
-	collider_->ApplyConfig(config_.colliderConfig);
-	worldTransform_.ApplyConfig(config_.transform);
-	id_ = config_.guid;
-	parentId_ = config_.parentGuid;
-	name_ = config_.name;
+	if (model_) model_->ApplyConfig(cfg.modelConfig);
+	if (collider_) collider_->ApplyConfig(cfg.colliderConfig);
+	worldTransform_.ApplyConfig(cfg.transform);
+	id_ = cfg.guid;
+	parentId_ = cfg.parentGuid;
+	name_ = cfg.name;
 }
 
 void BaseGameObject::ExtractConfig(){
-	config_.modelConfig = model_->ExtractConfig();
-	config_.colliderConfig = collider_->ExtractConfig();
-	config_.transform = worldTransform_.ExtractConfig();
-	config_.objectType = static_cast< int >(objectType_);
-	config_.name = name_;
-	config_.guid = id_;
-	config_.parentGuid = parentId_;
+	BaseGameObjectConfig& cfg = config_.GetConfig();
+
+	if (model_) cfg.modelConfig = model_->ExtractConfig();
+	if (collider_) cfg.colliderConfig = collider_->ExtractConfig();
+	cfg.transform = worldTransform_.ExtractConfig();
+	cfg.objectType = static_cast< int >(objectType_);
+	cfg.name = name_;
+	cfg.guid = id_;
+	cfg.parentGuid = parentId_;
+}
+
+void BaseGameObject::ApplyConfigFromJson(const nlohmann::json& j){
+	config_.ApplyConfigFromJson(j);
+	ApplyConfig();
+}
+
+void BaseGameObject::ExtractConfigToJson(nlohmann::json& j) const{
+	const_cast< BaseGameObject* >(this)->ExtractConfig();
+	config_.ExtractConfigToJson(j);
 }
 
 //===================================================================*/
@@ -212,9 +224,20 @@ void BaseGameObject::SetCollider(std::unique_ptr<Collider> collider){
 
 Collider* BaseGameObject::GetCollider(){ return collider_.get(); }
 
+Model* BaseGameObject::GetStaticModel(){
+	return (objectModelType_ == ObjectModelType::ModelType_Static)
+		? static_cast< Model* >(model_.get()) : nullptr;
+}
 
+AnimationModel* BaseGameObject::GetAnimationModel(){
+	return (objectModelType_ == ObjectModelType::ModelType_Animation)
+		? static_cast< AnimationModel* >(model_.get()) : nullptr;
+}
 
-
+const AnimationModel* BaseGameObject::GetAnimationModel() const{
+	return (objectModelType_ == ObjectModelType::ModelType_Animation)
+		? static_cast< AnimationModel* >(model_.get()) : nullptr;
+}
 //===================================================================*/
 //                    load/save
 //===================================================================*/

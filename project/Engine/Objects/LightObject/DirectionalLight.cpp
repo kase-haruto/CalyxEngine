@@ -48,20 +48,20 @@ DirectionalLight::DirectionalLight(){
 
 DirectionalLight::~DirectionalLight(){}
 
-void DirectionalLight::Initialize() {}
+void DirectionalLight::Initialize(){}
 
 void DirectionalLight::Update(){
-	
+
 }
 
 void DirectionalLight::UploadToGpu(){
 	constantBuffer_.TransferData(lightData_);
 }
 
-void DirectionalLight::SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList,PipelineType type){
-	
+void DirectionalLight::SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList, PipelineType type){
+
 	uint32_t index = 0;
-	if (type == PipelineType::Object3D||PipelineType::SkinningObject3D){
+	if (type == PipelineType::Object3D || PipelineType::SkinningObject3D){
 		index = 3;
 	}
 
@@ -72,13 +72,7 @@ void DirectionalLight::ShowGui(){
 #ifdef _DEBUG
 	ImGui::Dummy(ImVec2(0.0f, 5.0f));
 
-	if (ImGui::Button("Save Config")) {
-		SaveConfig(GetConfigPath());
-	}
-	ImGui::SameLine();
-	if (ImGui::Button("Load Config")) {
-		LoadConfig(GetConfigPath());
-	}
+	config_.ShowGui();
 
 	ImGui::Separator();
 
@@ -88,23 +82,35 @@ void DirectionalLight::ShowGui(){
 #endif // _DEBUG
 }
 
-void DirectionalLight::ApplyConfig() {
-	lightData_.color = config_.color;
-	lightData_.direction = config_.direction;
-	lightData_.intensity = config_.intensity;
-	name_ = config_.name;
-	id_ = config_.guid;
-	parentId_ = config_.parentGuid;
+void DirectionalLight::ApplyConfig(){
+	const auto& cfg = config_.GetConfig();
+	lightData_.color = cfg.color;
+	lightData_.direction = cfg.direction;
+	lightData_.intensity = cfg.intensity;
+	name_ = cfg.name;
+	id_ = cfg.guid;
+	parentId_ = cfg.parentGuid;
 }
 
 void DirectionalLight::ExtractConfig(){
-	config_.color = lightData_.color;
-	config_.direction = lightData_.direction;
-	config_.intensity = lightData_.intensity;
-	config_.objectType = static_cast<int>(objectType_);
-	config_.name = name_;
-	config_.guid = id_;
-	config_.parentGuid = parentId_;
+	auto& cfg = config_.GetConfig();
+	cfg.color = lightData_.color;
+	cfg.direction = lightData_.direction;
+	cfg.intensity = lightData_.intensity;
+	cfg.objectType = static_cast< int >(objectType_);
+	cfg.name = name_;
+	cfg.guid = id_;
+	cfg.parentGuid = parentId_;
+}
+
+void DirectionalLight::ApplyConfigFromJson(const nlohmann::json& j){
+	config_.ApplyConfigFromJson(j);
+	ApplyConfig();
+}
+
+void DirectionalLight::ExtractConfigToJson(nlohmann::json& j) const{
+	const_cast< DirectionalLight* >(this)->ExtractConfig();
+	config_.ExtractConfigToJson(j);
 }
 
 REGISTER_SCENE_OBJECT(DirectionalLight)
