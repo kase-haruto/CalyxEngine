@@ -43,7 +43,7 @@ void PlaceToolPanel::RegisterPlaceItems(){
 					return obj;
 				};
 				CommandManager::GetInstance()->Execute(
-					std::make_unique<CreateShapeObjectCommand>(pSceneContext_, factory));
+					std::make_unique<CreateShapeObjectCommand>(SceneContext::Current(), factory));
 			}
 							 });
 	}
@@ -62,14 +62,17 @@ void PlaceToolPanel::RegisterPlaceItems(){
 				return obj;
 			};
 			CommandManager::GetInstance()->Execute(
-				std::make_unique<CreateParticleSystemObjectCommand>(pSceneContext_, factory, name));
+				std::make_unique<CreateParticleSystemObjectCommand>(SceneContext::Current(), factory, name));
 		}
 							});
 }
 
 void PlaceToolPanel::Render(){
 	ImGui::Begin(panelName_.c_str());
-	if (!pSceneContext_){
+
+	SceneContext* ctx = SceneContext::Current();
+
+	if (!ctx){
 		ImGui::Text("sceneContext not set");
 		ImGui::End();
 		return;
@@ -123,6 +126,3 @@ void PlaceToolPanel::RenderCategoryItems() {
 	}
 }
 
-void PlaceToolPanel::OnSceneContextChanged(SceneContext* newContext){
-	pSceneContext_ = newContext;
-}

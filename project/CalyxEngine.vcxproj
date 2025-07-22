@@ -343,7 +343,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Graphics\Pipeline\PipelineDesc\Input\VertexLayout.h" />
     <ClInclude Include="Engine\Graphics\Pipeline\Presets\PipelinePresets.h" />
     <ClInclude Include="Engine\Graphics\Pipeline\Pso\PsoDetails.h" />
-    <ClInclude Include="Engine\Scene\Context\ISceneContextListener.h" />
     <ClInclude Include="Engine\System\Command\EditorCommand\GuiCommand\ImGuiHelper\GuiCmd.h" />
     <ClInclude Include="Engine\System\Command\Manager\CommandManager.h" />
     <ClInclude Include="Engine\Objects\ConfigurableObject\ConfigurableObject.h" />

@@ -32,7 +32,6 @@ public:
 	HierarchyPanel* GetHierarchyPanel() const{ return hierarchy_.get(); }
 	EditorPanel* GetEditorPanel() const{ return editor_.get(); }
 	PlaceToolPanel* GetPlaceToolPanel() const{ return placeToolPanel_.get(); }
-	void NotifySceneContextChanged(SceneContext* newContext);
 
 private:
 	void TryPickUnderCursor();
@@ -41,6 +40,7 @@ private:
 
 private:
 	void SaveScene();
+	void NotifySceneContextChanged();
 	void ClearSelection(){
 		selectedEditor_ = nullptr;
 		selectedObject_ = nullptr;
@@ -65,7 +65,7 @@ private:
 	std::unique_ptr<PerformanceOverlay> performanceOverlay_;	//< パフォーマンスオーバーレイ
 
 	// 状態
+	SceneContext* prevCtx_;
 	BaseEditor* selectedEditor_ = nullptr;
 	std::shared_ptr<SceneObject> selectedObject_;
-	SceneContext* pSceneContext_ = nullptr;	//< 現在のシーンコンテキスト
 };

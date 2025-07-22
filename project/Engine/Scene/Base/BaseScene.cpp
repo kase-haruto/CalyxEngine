@@ -74,6 +74,5 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList,
 	//===================================================================*/
 	//                    particle描画
 	//===================================================================*/
-
 	sceneContext_->GetFxSystem()->Render(psoService, cmdList);
 }
