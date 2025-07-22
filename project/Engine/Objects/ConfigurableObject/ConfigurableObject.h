@@ -9,7 +9,8 @@
 #endif // _DEBUG
 
 template<typename TConfig>
-class ConfigurableObject : public IConfigurable{
+class ConfigurableObject 
+	: public IConfigurable{
 public:
 	/*------------- JSON ⇄ Config --------------*/
 	void ApplyConfigFromJson(const nlohmann::json& j) override;
@@ -40,7 +41,7 @@ private:
 template<typename TConfig>
 inline void ConfigurableObject<TConfig>::ApplyConfigFromJson(const nlohmann::json& j){
 	config_ = j.get<TConfig>();
-	OnApplyConfig();               // 任意で派生が実装
+	OnApplyConfig();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

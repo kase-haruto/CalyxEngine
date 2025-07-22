@@ -18,14 +18,11 @@ void ParticleSystemObject::Initialize(){
 }
 
 void ParticleSystemObject::Update(){
-	// ワールド行列を更新
 	worldTransform_.Update();
 	position_ = worldTransform_.GetWorldPosition();
 
-	// 自身（Emitter 部分）の更新
 	FxEmitter::Update();
 
-	// 子オブジェクトを再帰的に更新
 	for (const auto& childSp : children_){
 		if (auto ps = std::dynamic_pointer_cast< ParticleSystemObject >(childSp)){
 			ps->Update();
@@ -36,13 +33,6 @@ void ParticleSystemObject::Update(){
 void ParticleSystemObject::ShowGui(){
 	config_.ShowGui();
 	FxEmitter::ShowGui();
-
-	// 子の GUI も展開
-	/*for (const auto& child : children_){
-		if (auto* ps = dynamic_cast< ParticleSystemObject* >(child)){
-			ps->ShowGui();
-		}
-	}*/
 }
 
 void ParticleSystemObject::SetDrawEnable(bool isDrawEnable){
