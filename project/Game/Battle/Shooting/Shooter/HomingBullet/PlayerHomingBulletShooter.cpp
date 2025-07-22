@@ -21,10 +21,16 @@ void PlayerHomingBulletShooter::Shoot(const Vector3& origin,
 		if (!bullet) continue;
 
 		bullet->SetScale(Vector3(0.3f, 0.3f, 0.3f));
-		bullet->ShootInitialize(origin, Vector3::Zero());
+		Vector3 toTarget = target->GetWorldPosition() - origin;
+		if (toTarget.Length() > 0.001f){
+			toTarget.Normalize();
+		} else{
+			toTarget = Vector3(0, 0, 1);
+		}
+		bullet->ShootInitialize(origin, toTarget);
 
 		if (auto* homing = dynamic_cast< HomingBullet* >(bullet.get())){
-			homing->SetTarget(&target->GetWorldTransform());
+			homing->SetTarget(target.get());
 		}
 		playerContainer->AddBullet(id_, bullet);
 	}

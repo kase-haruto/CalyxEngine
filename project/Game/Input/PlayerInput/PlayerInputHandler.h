@@ -10,4 +10,5 @@ private:
 	void HandleMove(Player& player);
 	void HandleReticle(Player& player, float dt);
 	void HandleShoot(Player& player);
+	void HandleLockOn(Player& player);
 };

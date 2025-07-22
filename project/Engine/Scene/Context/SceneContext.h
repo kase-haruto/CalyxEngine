@@ -31,8 +31,8 @@ public:
 
 	// accessors --------------------------------------------------------------
 	SceneObjectLibrary* GetObjectLibrary() const{ return objectLibrary_.get(); }
-	LightLibrary* GetLightLibrary()  const{ return lightLibrary_.get(); }
-	FxSystem* GetFxSystem()      const{ return fxSystem_.get(); }
+	LightLibrary* GetLightLibrary() const{ return lightLibrary_.get(); }
+	FxSystem* GetFxSystem() const{ return fxSystem_.get(); }
 
 	std::string GetSceneName() const{ return sceneName_; }
 	void SetSceneName(const std::string& n){ sceneName_ = n; }

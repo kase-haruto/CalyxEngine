@@ -36,6 +36,9 @@ public:
 	void MoveBy(const Vector3& delta);
 	void MoveReticle(const Vector3& offset);
 	void RequestShoot();
+	void RequestLockOn();
+
+	void RequestLockOnTargetClear();
 
 	/* accessor =========================================================== */
 	//settter
@@ -43,7 +46,6 @@ public:
 	void SetEnemyList(const std::list<std::shared_ptr<Enemy>>& targets);
 	void SetShootingController(std::unique_ptr<PlayerShootingController> sc);
 	void SetInputHandler(std::unique_ptr<PlayerInputHandler> ih);
-	void SetLockedOnTargets(const std::vector<std::shared_ptr<Enemy>>& targets){ lockedOnTargets_ = targets; }
 
 	//getter
 	std::vector<Sprite*> GetAllSprites();

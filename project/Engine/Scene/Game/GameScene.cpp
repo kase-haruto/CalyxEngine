@@ -69,7 +69,6 @@ void GameScene::Initialize(){
 	enemyCollection_->SetPlayerTransform(&player_->GetWorldTransform());
 	enemyCollection_->CreateSpawners();
 
-	player_->SetEnemyList(enemyCollection_->GetEnemies());
 }
 
 void GameScene::Update(){
@@ -79,6 +78,7 @@ void GameScene::Update(){
 	CameraManager::Update();
 
 	skyBox_->Update();
+	player_->SetEnemyList(enemyCollection_->GetEnemies());
 
 
 
