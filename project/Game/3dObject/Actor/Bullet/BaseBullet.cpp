@@ -6,26 +6,29 @@
 /* engine */
 #include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Objects/Collider/BoxCollider.h>
+
 /* external */
 #include <externals/imgui/imgui.h>
 
 BaseBullet::BaseBullet(const std::string& modelName, const std::string& name)
-	:Actor::Actor(modelName, name) {
+	:Actor::Actor(modelName, name){
 	collider_->SetType(ColliderType::Type_PlayerAttack);
 	collider_->SetTargetType(ColliderType::Type_Enemy);
 	collider_->SetOwner(this);
-	collider_->SetIsDrawCollider(false);
+	collider_->SetIsDrawCollider(true);
+	auto* boxCollider = dynamic_cast< BoxCollider* >(collider_.get());
+	boxCollider->SetSize(Vector3(3.0f, 3.0f, 3.0f));
 
 }
 
-BaseBullet::~BaseBullet() {
+BaseBullet::~BaseBullet(){
 
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		初期化
 /////////////////////////////////////////////////////////////////////////////////////////
-void BaseBullet::ShootInitialize(const Vector3 initPos, const Vector3 velocity) {
+void BaseBullet::ShootInitialize(const Vector3& initPos, const Vector3& velocity){
 	worldTransform_.translation = initPos;
 	velocity_ = velocity;
 	moveSpeed_ = 15.0f;
@@ -36,19 +39,19 @@ void BaseBullet::ShootInitialize(const Vector3 initPos, const Vector3 velocity) 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		更新
 /////////////////////////////////////////////////////////////////////////////////////////
-void BaseBullet::Update() {
+void BaseBullet::Update(){
 	float deltaTime = ClockManager::GetInstance()->GetDeltaTime();
 
-		// 通常移動とtrailFx_更新
-		worldTransform_.translation += velocity_ * moveSpeed_ * deltaTime;
+	// 通常移動とtrailFx_更新
+	worldTransform_.translation += velocity_ * moveSpeed_ * deltaTime;
 
-		BaseGameObject::Update();
+	BaseGameObject::Update();
 
-		// 寿命減少
-		lifeTime_ -= deltaTime;
+	// 寿命減少
+	lifeTime_ -= deltaTime;
 
-		if (lifeTime_ <= 0.0f) {
-				isAlive_ = false;
+	if (lifeTime_ <= 0.0f){
+		isAlive_ = false;
 
 	}
 }
@@ -56,10 +59,15 @@ void BaseBullet::Update() {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		imgui
 /////////////////////////////////////////////////////////////////////////////////////////
-void BaseBullet::DerivativeGui() {
+void BaseBullet::DerivativeGui(){
 
 }
 
-void BaseBullet::OnCollisionEnter([[maybe_unused]] Collider* other) {}
+void BaseBullet::OnCollisionEnter([[maybe_unused]] Collider* other){
 
-void BaseBullet::OnShot() {}
+	if (other->GetType() == collider_->GetTargetType()){
+		isAlive_ = false;
+	}
+}
+
+void BaseBullet::OnShot(){}

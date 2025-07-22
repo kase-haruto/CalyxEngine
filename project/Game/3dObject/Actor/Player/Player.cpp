@@ -67,9 +67,8 @@ void Player::Initialize(){
 	for (size_t i = 0; i < spriteCount; ++i){
 		reticleSprites_[i] = std::make_unique<Sprite>("Textures/reticle.png");
 
-		// eased = プレイヤー側（t=0）: 大きい、照準側（t=1）: 小さい
-		float t = static_cast< float >(i) / (spriteCount - 1); // 0 ~ 1
-		float size = std::lerp(128.0f, 16.0f, t); // t=0:128, t=1:64
+		float t = static_cast< float >(i) / (spriteCount - 1);
+		float size = std::lerp(128.0f, 16.0f, t);
 		Vector2 spriteSize(size, size);
 
 		Vector2 initPos = kGameSize * 0.5f;
@@ -85,7 +84,7 @@ void Player::Update(){
 	float dt = ClockManager::GetInstance()->GetDeltaTime();
 
 	if (inputHandler_){
-		inputHandler_->Update(*this,dt);
+		inputHandler_->Update(*this, dt);
 	}
 
 	if (shootingController_){
@@ -181,15 +180,61 @@ void Player::RequestShoot(){
 	Vector3 reticlePos = reticleTransform_.GetWorldPosition();
 	Vector3 dir = reticlePos - playerPos;
 
-	if (dir.Length() > 0.001f)
+	if (dir.Length() > 0.001f){
 		dir = dir.Normalize();
-	else
+	} else{
 		dir = Vector3(0.0f, 0.0f, 1.0f);
+	}
 
-	if (shootingController_){
-		shootingController_->RequestShoot(playerPos, dir);
+	if (!shootingController_) return;
+
+	// ロックオンしていればホーミングする弾を撃つ
+	shootingController_->SetTargets(lockedOnTargets_);
+	shootingController_->SetMode(lockedOnTargets_.empty()
+								 ? PlayerShoot::BulletMode::Straight
+								 : PlayerShoot::BulletMode::Homing);
+
+	shootingController_->RequestShoot(playerPos, dir);
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+//		ロックオン処理
+///////////////////////////////////////////////////////////////////////////////////
+void Player::RequestLockOn(){
+	constexpr size_t kMaxLockOn = 4;
+
+	if (lockedOnTargets_.size() >= kMaxLockOn){
+		return;
+	}
+
+	const Vector2 reticleScreen = WorldToScreen(reticleTransform_.GetWorldPosition());
+	const float radius = 30.0f;
+
+	for (const auto& enemy : targets_){
+		if (!enemy) continue;
+
+		// すでにロックオン済みはスキップ
+		if (std::find(lockedOnTargets_.begin(), lockedOnTargets_.end(), enemy) != lockedOnTargets_.end())
+			continue;
+
+		Vector2 enemyScreen = WorldToScreen(enemy->GetWorldPosition());
+
+		if ((enemyScreen - reticleScreen).Length() <= radius){
+			lockedOnTargets_.push_back(enemy);
+
+			// 上限に達したらそれ以上追加しない
+			if (lockedOnTargets_.size() >= kMaxLockOn){
+				break;
+			}
+		}
 	}
 }
+
+
+void Player::RequestLockOnTargetClear(){
+	lockedOnTargets_.clear();
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////////
 //		playerの傾き
@@ -325,7 +370,7 @@ void Player::UpdateReticlePosition(){
 /* ==================================================================================== */
 void Player::SetParent(const WorldTransform* parent){ worldTransform_.parent = parent; }
 
-void Player::SetEnemyList(const std::list<std::shared_ptr<Enemy>>& targets){targets_ = targets;}
+void Player::SetEnemyList(const std::list<std::shared_ptr<Enemy>>& targets){ targets_ = targets; }
 
 std::vector<Sprite*> Player::GetAllSprites(){
 	std::vector<Sprite*> sprites;

@@ -33,12 +33,12 @@ public:
 	void Update() override;
 	void Draw(ID3D12GraphicsCommandList* cmdList) override;
 	void DerivativeGui() override;
-
 	void MoveBy(const Vector3& delta);
-
 	void MoveReticle(const Vector3& offset);
-
 	void RequestShoot();
+	void RequestLockOn();
+
+	void RequestLockOnTargetClear();
 
 	/* accessor =========================================================== */
 	//settter
@@ -53,6 +53,7 @@ public:
 	float GetMoveSpeed() const{ return moveSpeed_; }
 	std::optional<float> GetShootCooldown();
 	std::optional<const float> GetMaxShootInterval() const;
+	const std::vector<std::shared_ptr<Enemy>>& GetLockedOnTargets() const{ return lockedOnTargets_; }
 
 private:
 	//=====================================================================
@@ -70,13 +71,14 @@ private:
 	std::unique_ptr<PlayerShootingController>shootingController_;
 	std::unique_ptr<PlayerInputHandler> inputHandler_ = nullptr;
 
-	Vector3 lastMoveVector_;						//< 最後の移動ベクトル
+	Vector3 lastMoveVector_;								//< 最後の移動ベクトル
 
 	WorldTransform reticleTransform_;						//< レティクルのワールド変換
 	std::array<std::unique_ptr<Sprite>, 4> reticleSprites_;	//< レティクルのスプライト
 	std::vector<std::unique_ptr<Sprite>> lifeSprite_;		//< ライフゲージスプライト
 	std::unique_ptr<Sprite> attackSprite_;					//< 攻撃状態スプライト
 
-	std::list<std::shared_ptr<Enemy>> targets_;	// 敵の共有ポインタリスト
+	std::list<std::shared_ptr<Enemy>> targets_;				//< 敵の共有ポインタリスト
+	std::vector<std::shared_ptr<Enemy>> lockedOnTargets_;
 
 };
