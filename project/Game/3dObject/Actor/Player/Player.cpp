@@ -85,7 +85,7 @@ void Player::Update(){
 	float dt = ClockManager::GetInstance()->GetDeltaTime();
 
 	if (inputHandler_){
-		inputHandler_->Update(*this,dt);
+		inputHandler_->Update(*this, dt);
 	}
 
 	if (shootingController_){
@@ -181,14 +181,21 @@ void Player::RequestShoot(){
 	Vector3 reticlePos = reticleTransform_.GetWorldPosition();
 	Vector3 dir = reticlePos - playerPos;
 
-	if (dir.Length() > 0.001f)
+	if (dir.Length() > 0.001f){
 		dir = dir.Normalize();
-	else
+	} else{
 		dir = Vector3(0.0f, 0.0f, 1.0f);
-
-	if (shootingController_){
-		shootingController_->RequestShoot(playerPos, dir);
 	}
+
+	if (!shootingController_) return;
+
+	// ――― ターゲット情報 & モードを毎回反映 ―――
+	shootingController_->SetTargets(lockedOnTargets_);
+	shootingController_->SetMode(lockedOnTargets_.empty()
+								 ? PlayerShoot::BulletMode::Straight
+								 : PlayerShoot::BulletMode::Homing);
+
+	shootingController_->RequestShoot(playerPos, dir);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -325,7 +332,7 @@ void Player::UpdateReticlePosition(){
 /* ==================================================================================== */
 void Player::SetParent(const WorldTransform* parent){ worldTransform_.parent = parent; }
 
-void Player::SetEnemyList(const std::list<std::shared_ptr<Enemy>>& targets){targets_ = targets;}
+void Player::SetEnemyList(const std::list<std::shared_ptr<Enemy>>& targets){ targets_ = targets; }
 
 std::vector<Sprite*> Player::GetAllSprites(){
 	std::vector<Sprite*> sprites;

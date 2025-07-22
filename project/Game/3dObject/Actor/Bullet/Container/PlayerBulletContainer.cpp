@@ -19,3 +19,9 @@ void PlayerBulletContainer::AddBullet(BulletID id, const Vector3& pos, const Vec
 	bullet->ShootInitialize(pos, vel);
 	typedBullets_[id].push_back(bullet);
 }
+
+void PlayerBulletContainer::AddBullet(BulletID id, const std::shared_ptr<BaseBullet>& bullet){
+	if (id != BulletID::Player_Straight && id != BulletID::Player_Homing) return;
+	if (!bullet) return;
+	typedBullets_[id].push_back(bullet);
+}

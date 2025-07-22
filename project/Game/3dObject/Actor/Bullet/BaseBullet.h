@@ -19,7 +19,7 @@ public:
 	BaseBullet(const std::string& modelName,const std::string& name);
 	virtual ~BaseBullet();
 
-	virtual void ShootInitialize(const Vector3 initPos, const Vector3 velocity);
+	virtual void ShootInitialize(const Vector3& initPos, const Vector3& velocity);
 	void Initialize() override {};
 	void Update()override;
 	void DerivativeGui()override;

@@ -25,7 +25,7 @@ BaseBullet::~BaseBullet() {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		初期化
 /////////////////////////////////////////////////////////////////////////////////////////
-void BaseBullet::ShootInitialize(const Vector3 initPos, const Vector3 velocity) {
+void BaseBullet::ShootInitialize(const Vector3& initPos, const Vector3& velocity) {
 	worldTransform_.translation = initPos;
 	velocity_ = velocity;
 	moveSpeed_ = 15.0f;
