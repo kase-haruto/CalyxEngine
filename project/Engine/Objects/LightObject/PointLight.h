@@ -30,8 +30,8 @@ struct PointLightData{
 class DxCore;
 
 class PointLight
-	: public SceneObject
-	, public ConfigurableObject<PointLightConfig>{
+	: public SceneObject,
+	public IConfigurable{
 public:
 	PointLight(const std::string& name);
 	PointLight();
@@ -43,14 +43,20 @@ public:
 	void UploadToGpu();
 	void SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList, PipelineType type);
 	std::string_view GetTypeName() const override{ return "PointLight"; }
-	// config ============================================================
-	void ApplyConfig()override;
-	void ExtractConfig()override;
+	std::string GetObjectTypeName()const override{ return name_; }
 
-	std::string GetObjectTypeName()const override { return name_; }
+	// config ============================================================
+	void ApplyConfig();
+	void ExtractConfig();
+	void ApplyConfigFromJson(const nlohmann::json& j) override;
+	void ExtractConfigToJson(nlohmann::json& j) const override;
+
 
 private:
 	DxConstantBuffer<PointLightData> constantBuffer_;
 	PointLightData lightData_ = {}; // ライトデータ
+
+private:
+	ConfigurableObject<PointLightConfig> config_;
 };
 

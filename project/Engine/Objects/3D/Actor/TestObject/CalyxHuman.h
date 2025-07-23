@@ -1,6 +1,5 @@
 #pragma once
 #include <Engine/Objects/3D/Actor/Actor.h>
-#include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 
 class CalyxHuman :
 	public Actor{
@@ -19,6 +18,4 @@ private:
 	void TransitionAnimation();
 	void Move(float dt);
 	void Turn();
-private:
-	std::shared_ptr<ParticleSystemObject> trailFx_;
 };

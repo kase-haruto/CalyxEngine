@@ -29,8 +29,8 @@ struct DirectionalLightData{
 class DxCore;
 
 class DirectionalLight
-	: public SceneObject
-	, public ConfigurableObject<DirectionalLightConfig>{
+	: public SceneObject,
+	  public IConfigurable{
 public:
 	DirectionalLight(const std::string& name);
 	DirectionalLight();
@@ -43,13 +43,18 @@ public:
 	void ShowGui()override;
 	std::string_view GetTypeName() const override{ return "DirectionalLight"; }
 	// config ============================================================
-	void ApplyConfig()override;
-	void ExtractConfig()override;
+	void ApplyConfig();
+	void ExtractConfig();
+	void ApplyConfigFromJson(const nlohmann::json& j) override;
+	void ExtractConfigToJson(nlohmann::json& j) const override;
 
 	std::string GetObjectTypeName()const override { return name_; }
 
 private:
 	DxConstantBuffer<DirectionalLightData> constantBuffer_;
 	DirectionalLightData lightData_ = {};	// ライトデータ
+
+private:
+	ConfigurableObject<DirectionalLightConfig> config_;
 };
 

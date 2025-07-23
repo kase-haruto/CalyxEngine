@@ -9,23 +9,29 @@
 #endif // _DEBUG
 
 template<typename TConfig>
-class ConfigurableObject
-	: public IConfigurable {
+class ConfigurableObject 
+	: public IConfigurable{
 public:
-	//* apply/extract ========================================//
+	/*------------- JSON ⇄ Config --------------*/
 	void ApplyConfigFromJson(const nlohmann::json& j) override;
 	void ExtractConfigToJson(nlohmann::json& j) const override;
 
-	//* save/load ============================================//
+	/*------------- ファイル入出力 --------------*/
 	void LoadConfig(const std::string& path);
 	void SaveConfig(const std::string& path) const;
 
-	void ShowGUi();
+	/*------------- ImGui GUI --------------*/
+	void ShowGui(const std::string& label = "");
 
-	virtual void ApplyConfig() = 0;   //< config_ → 実行状態へ反映
-	virtual void ExtractConfig() = 0; //< 実行状態 → config_ へ反映
+	/*------------- アクセサ --------------*/
+	TConfig& GetConfig(){ return config_; }
+	const TConfig& GetConfig() const{ return config_; }
 
 protected:
+	virtual void OnApplyConfig(){}
+	virtual void OnExtractConfig(){}
+
+private:
 	TConfig config_;
 };
 
@@ -33,17 +39,17 @@ protected:
 //      jsonからコンフィグを適用
 /////////////////////////////////////////////////////////////////////////////////////////
 template<typename TConfig>
-inline void ConfigurableObject<TConfig>::ApplyConfigFromJson(const nlohmann::json& j) {
+inline void ConfigurableObject<TConfig>::ApplyConfigFromJson(const nlohmann::json& j){
 	config_ = j.get<TConfig>();
-	ApplyConfig();
+	OnApplyConfig();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //      コンフィグをjsonに変換
 /////////////////////////////////////////////////////////////////////////////////////////
 template<typename TConfig>
-inline void ConfigurableObject<TConfig>::ExtractConfigToJson(nlohmann::json& j) const {
-	const_cast<ConfigurableObject*>(this)->ExtractConfig();  // 状態を config_ に反映
+inline void ConfigurableObject<TConfig>::ExtractConfigToJson(nlohmann::json& j) const{
+	const_cast< ConfigurableObject* >(this)->OnExtractConfig(); // 状態→config_
 	j = config_;
 }
 
@@ -51,7 +57,7 @@ inline void ConfigurableObject<TConfig>::ExtractConfigToJson(nlohmann::json& j) 
 //      コンフィグのロード
 /////////////////////////////////////////////////////////////////////////////////////////
 template<typename TConfig>
-inline void ConfigurableObject<TConfig>::LoadConfig(const std::string& path) {
+inline void ConfigurableObject<TConfig>::LoadConfig(const std::string& path){
 	nlohmann::json j;
 	if (JsonUtils::Load(path, j)) ApplyConfigFromJson(j);
 }
@@ -60,59 +66,39 @@ inline void ConfigurableObject<TConfig>::LoadConfig(const std::string& path) {
 //      コンフィグのセーブ
 /////////////////////////////////////////////////////////////////////////////////////////
 template<typename TConfig>
-inline void ConfigurableObject<TConfig>::SaveConfig(const std::string& path) const {
-	const_cast<ConfigurableObject*>(this)->ExtractConfig(); // mutable化して状態を config_ にコピー
-	nlohmann::json j;
-	j = config_;
-	JsonUtils::Save(path, j);
+inline void ConfigurableObject<TConfig>::SaveConfig(const std::string& path) const{
+	const_cast< ConfigurableObject* >(this)->OnExtractConfig();
+	JsonUtils::Save(path, config_);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //      コンフィグのgui
 /////////////////////////////////////////////////////////////////////////////////////////
 template<typename TConfig>
-inline void ConfigurableObject<TConfig>::ShowGUi() {
+inline void ConfigurableObject<TConfig>::ShowGui(const std::string& label){
 #ifdef _DEBUG
-	if (ImGui::Button("Load Config")) {
-		IGFD::FileDialogConfig config;
-		config.path = "Resources/Assets/Configs/";
-		ImGuiFileDialog::Instance()->OpenDialog(
-			"ConfigLoadDialog",
-			"Load Config File",
-			".json",
-			config
-		);
+	const std::string loadDlg = "ConfigLoadDialog##" + label;
+	const std::string saveDlg = "ConfigSaveDialog##" + label;
+
+	if (ImGui::Button(("Load##" + label).c_str())){
+		IGFD::FileDialogConfig cfg;  cfg.path = "Resources/Assets/Configs/";
+		ImGuiFileDialog::Instance()->OpenDialog(loadDlg, "Load Config", ".json", cfg);
 	}
 	ImGui::SameLine();
-	if (ImGui::Button("Save Config")) {
-		IGFD::FileDialogConfig config;
-		config.path = "Resources/Assets/Configs/";
-		ImGuiFileDialog::Instance()->OpenDialog(
-			"ConfigSaveDialog",
-			"Save Config File",
-			".json",
-			config
-		);
+	if (ImGui::Button(("Save##" + label).c_str())){
+		IGFD::FileDialogConfig cfg;  cfg.path = "Resources/Assets/Configs/";
+		ImGuiFileDialog::Instance()->OpenDialog(saveDlg, "Save Config", ".json", cfg);
 	}
 
-	// Load ダイアログ処理
-	if (ImGuiFileDialog::Instance()->Display("ConfigLoadDialog")) {
-		if (ImGuiFileDialog::Instance()->IsOk()) {
-			std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
-			LoadConfig(filePath);
-		}
+	if (ImGuiFileDialog::Instance()->Display(loadDlg)){
+		if (ImGuiFileDialog::Instance()->IsOk())
+			LoadConfig(ImGuiFileDialog::Instance()->GetFilePathName());
 		ImGuiFileDialog::Instance()->Close();
 	}
-
-	// Save ダイアログ処理
-	if (ImGuiFileDialog::Instance()->Display("ConfigSaveDialog")) {
-		if (ImGuiFileDialog::Instance()->IsOk()) {
-			std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
-			SaveConfig(filePath);
-		}
+	if (ImGuiFileDialog::Instance()->Display(saveDlg)){
+		if (ImGuiFileDialog::Instance()->IsOk())
+			SaveConfig(ImGuiFileDialog::Instance()->GetFilePathName());
 		ImGuiFileDialog::Instance()->Close();
 	}
-#endif // _DEBUG
-
-
+#endif
 }

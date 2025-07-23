@@ -10,6 +10,7 @@
 /* ===================================================================== */
 class Enemy :
     public Actor{
+	enum class DeathState{ Alive, Dying, Dead };
 public:
 	//===================================================================*/
 	//					public methods
@@ -21,7 +22,6 @@ public:
 
 	void Initialize()override;
 	void Update()override;
-
 
 	void OnCollisionEnter(Collider* other)override;
 	void OnCollisionStay([[maybe_unused]]Collider* other)override {};
@@ -52,6 +52,10 @@ private:
 	float waveTime_ = 0.0f;     // 経過時間
 	float waveAmplitude_ = 1.0f; // 振れ幅
 	float waveSpeed_ = 2.0f;     // サイン波の速さ
+
+	DeathState deathState_ = DeathState::Alive;
+	float      deathTimer_ = 0.0f;      // 死亡演出用
+	float      deathLength_ = 1.5f;      // 倒れ終わるまでの秒数
 
 	std::shared_ptr<ParticleSystemObject> hitFx_;
 	std::shared_ptr<ParticleSystemObject> explosionFx_;

@@ -15,16 +15,15 @@ class EnemyCollection; // 前方宣言
 class SceneContext;
 
 class EnemySpawner
-	: public SceneObject,
-	public ConfigurableObject<EnemySpawnerConfig> {
+	: public SceneObject{
 public:
 	EnemySpawner(const std::string& name = "EnemySpawner");
 
 	void Update() override;
 
-	void ApplyConfig() override;
+	void ApplyConfig() ;
 
-	void ExtractConfig() override;
+	void ExtractConfig() ;
 
 	void ShowGui() override;
 	void SetOwner(EnemyCollection* owner) { ownerCollection_ = owner; }
@@ -56,6 +55,9 @@ private:
 
 	Vector3 spawnAreaMin_ = { -10.0f, 0.0f, -30.0f };
 	Vector3 spawnAreaMax_ = { 10.0f, 5.0f, -30.0f };
+
+private:
+	ConfigurableObject<EnemySpawnerConfig> config_;
 };
 
 

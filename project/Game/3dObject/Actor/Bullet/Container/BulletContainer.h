@@ -34,7 +34,7 @@ public:
 	
 	//--------- ui / gui -----------------------------------------------------
 	void ShowGui();
-	virtual void DerivativeGui(){}
+	virtual void DerivativeGui();
 
 	//--------- accessor -----------------------------------------------------
 	const std::list<std::shared_ptr<BaseBullet>>& GetBullets(BulletID id) const;
@@ -46,4 +46,5 @@ protected:
 	//===================================================================*/
 	std::unordered_map<BulletID,
 		std::list<std::shared_ptr<BaseBullet>>> typedBullets_;
+	BaseBullet* editBullet_;
 };

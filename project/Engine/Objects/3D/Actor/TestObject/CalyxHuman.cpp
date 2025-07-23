@@ -12,10 +12,6 @@ CalyxHuman::CalyxHuman(const std::string& modelName,
 	//animationを追加
 	GetAnimationModel()->AddAnimation("idle", "idle.gltf");
 
-	trailFx_ = std::make_shared<ParticleSystemObject>("playerBulletTrail");
-	trailFx_->LoadConfig("Resources/Assets/Configs/Effect/runFx.json");
-	//FxIntermediary::GetInstance()->Attach(trailFx_);
-
 }
 
 CalyxHuman::CalyxHuman(){
@@ -23,15 +19,10 @@ CalyxHuman::CalyxHuman(){
 	//animationを追加
 //	GetAnimationModel()->AddAnimation("idle", "idle.gltf");
 
-	trailFx_ = std::make_shared<ParticleSystemObject>("playerBulletTrail");
-	trailFx_->LoadConfig("Resources/Assets/Configs/Effect/runFx.json");
-	//FxIntermediary::GetInstance()->Attach(trailFx_);
 }
 
 
 void CalyxHuman::Initialize(){
-	auto self = shared_from_this();
-	trailFx_->SetParent(self);
 }
 
 void CalyxHuman::Update(){
@@ -40,15 +31,7 @@ void CalyxHuman::Update(){
 	Move(dt);
 	Turn();
 
-	if (GetJointWorldPos("RightHandIndex1").has_value()) {
-		trailFx_->position_ = GetJointWorldPos("mixamorig:RightHandIndex1").value();
-	}
-
 	TransitionAnimation();
-
-	if (Input::GetInstance()->PushGamepadButton(PAD_BUTTON::A)) {
-		trailFx_->Play();
-	}
 
 	collider_->SetCollisionEnabled(false);
 

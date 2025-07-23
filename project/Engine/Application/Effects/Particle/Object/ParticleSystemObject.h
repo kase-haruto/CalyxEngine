@@ -12,7 +12,7 @@
 class ParticleSystemObject
 	: public SceneObject
 	, public FxEmitter
-	, public ConfigurableObject<ParticleSystemObjectConfig>{
+	, public IConfigurable{
 public:
 	// コンストラクタ
 	ParticleSystemObject() = default;
@@ -28,11 +28,21 @@ public:
 	std::string_view GetTypeName() const override{ return "ParticleSystemObject"; }
 
 	// コンフィグ適用・抽出
-	void ApplyConfig() override;
-	void ExtractConfig() override;
+	void ApplyConfig() ;
+	void ExtractConfig() ;
+	void ApplyConfigFromJson(const nlohmann::json& j) override;
+	void ExtractConfigToJson(nlohmann::json& j) const override;
+	void LoadConfig(const std::string& path){ config_.LoadConfig(path);  ApplyConfig(); }
+	void SaveConfig(const std::string& path) const{
+		const_cast< ParticleSystemObject* >(this)->ExtractConfig();
+		config_.SaveConfig(path);
+	}
 
 	// 再帰再生など
 	void PlayRecursive();
 	void StopRecursive();
 	void ResetRecursive();
+
+private:
+	ConfigurableObject<ParticleSystemObjectConfig> config_;
 };
