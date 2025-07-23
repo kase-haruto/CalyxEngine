@@ -14,16 +14,21 @@ void SpriteRenderer::Draw(ID3D12GraphicsCommandList* cmdList,
 						  RenderTargetType renderTarget){
 	if (sprites_.empty()) return;
 
+	sprites_.erase(
+		std::remove_if(sprites_.begin(), sprites_.end(),
+		[renderTarget] (Sprite* s){ return s->GetTargetRt() != renderTarget; }),
+		sprites_.end());
+
+	if (sprites_.empty()){ Clear(); return; }
+
 	auto desc = PipelinePresets::MakeObject2D();
 	psoService->SetCommand(desc, cmdList);
 
-	for (Sprite* sprite : sprites_){
-		if (sprite->GetTargetRt() != renderTarget)return;
-		sprite->Draw(cmdList);
-	}
+	for (Sprite* sprite : sprites_) sprite->Draw(cmdList);
 
 	Clear();
 }
+
 
 void SpriteRenderer::Clear(){
 	sprites_.clear();

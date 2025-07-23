@@ -10,41 +10,37 @@
 /* ========================================================================
 /* include space
 /* ===================================================================== */
-Enemy::Enemy(const std::string& modelName, const std::string objName) :
-	Actor::Actor(modelName, objName){
+Enemy::Enemy(const std::string& modelName, const std::string objName)
+	: Actor(modelName, objName){
 
+	// === 初期化（元コードを整理）=========================
 	worldTransform_.Initialize();
-	worldTransform_.scale = {2.0f, 2.0f, 2.0f};
+	worldTransform_.scale = {2,2,2};
+
 	moveSpeed_ = Random::Generate<float>(1.0f, 3.0f);
 	velocity_ = Random::GenerateVector3(-1.0f, 1.0f);
 
 	collider_->SetType(ColliderType::Type_Enemy);
 	collider_->SetTargetType(ColliderType::Type_PlayerAttack);
 	collider_->SetOwner(this);
-	auto* boxCollider = dynamic_cast< BoxCollider* >(collider_.get());
-	boxCollider->SetSize(Vector3(3.0f, 3.0f, 3.0f));
-
+	if (auto* box = dynamic_cast< BoxCollider* >(collider_.get())){
+		box->SetSize({3,3,3});
+	}
 	collider_->SetIsDrawCollider(false);
 
-	life_ = 2;
-
+	life_ = 1;
 	waveAmplitude_ = 2.0f;
 	waveSpeed_ = Random::Generate<float>(1.0f, 3.0f);
 
 	hitFx_ = SceneAPI::Instantiate<ParticleSystemObject>("hitFx");
 	hitFx_->LoadConfig("Resources/Assets/Configs/Effect/HitFx.json");
-	
+
 	explosionFx_ = SceneAPI::Instantiate<ParticleSystemObject>("explosionFx");
 	explosionFx_->LoadConfig("Resources/Assets/Configs/Effect/Explosion.json");
-	
 }
 
-Enemy::~Enemy(){
-}
+Enemy::~Enemy(){}
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//		初期化
-/////////////////////////////////////////////////////////////////////////////////////////
 void Enemy::Initialize(){
 	auto self = shared_from_this();
 
@@ -55,64 +51,80 @@ void Enemy::Initialize(){
 	explosionFx_->Stop();
 }
 
+static float Deg2Rad(float d){ return d * std::numbers::pi_v<float> / 180.0f; }
 
-float DegreesToRadians(float degrees){
-	return degrees * (std::numbers::pi_v<float> / 180.0f);
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////
-//		更新
-/////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+//  Update
+////////////////////////////////////////////////////////////////
 void Enemy::Update(){
-	float dt = ClockManager::GetInstance()->GetDeltaTime();
+	const float dt = ClockManager::GetInstance()->GetDeltaTime();
 
-	if (life_ <= 0){
-		if (!isDead_){
+	/* =============================================
+	   1. 生存中のロジック
+	   =============================================*/
+	if (deathState_ == DeathState::Alive){
+		if (life_ <= 0){
+			// ---- 死亡フラグ立った瞬間 ----
+			//親子付け解除
+			deathState_ = DeathState::Dying;
 			explosionFx_->Play();
-			isAlive_ = false;
-			isDead_ = true;
-			return;
+			deathTimer_ = 0.0f;
+			deathRotateAxis_ = {1,0,0};       // 前方に倒れる
+			return;                           // このフレームはここで終了
 		}
 
-		if (isDead_){
-			deathRotation_ += dt * 90.0f; // 秒間90度
-			float maxAngle = 90.0f;
-			if (deathRotation_ > maxAngle){
-				deathRotation_ = maxAngle;
-			}
-
-			// 【自作クォータニオン + 自作度→ラジアン変換】
-			float radian = DegreesToRadians(deathRotation_);
-			worldTransform_.rotation = Quaternion::MakeRotateAxisQuaternion(deathRotateAxis_, radian);
-		}
-
-		worldTransform_.translation = basePosition_; // 死亡時は波移動なし
+		// 波移動
+		waveTime_ += dt * waveSpeed_;
+		float offsetY = std::sin(waveTime_) * waveAmplitude_;
+		worldTransform_.translation = basePosition_ + Vector3 {0, offsetY, 0};
 		worldTransform_.Update();
-
-		if (!explosionFx_->isPlayng()){
-			isAlive_ = false;
-		}
-
+		BaseGameObject::Update();             // 子更新
 		return;
 	}
 
-	// 生存時
-	waveTime_ += dt * waveSpeed_;
-	float offsetY = std::sin(waveTime_) * waveAmplitude_;
-	worldTransform_.translation = basePosition_ + Vector3(0.0f, offsetY, 0.0f);
+	/* =============================================
+	   2. 倒れ演出中 (Dying)
+	   =============================================*/
+	if (deathState_ == DeathState::Dying){
+		deathTimer_ += dt;
+		float t = std::clamp(deathTimer_ / deathLength_, 0.0f, 1.0f);
 
-	worldTransform_.Update();
+		// 0→90° まで補間して倒れる
+		float rad = Deg2Rad(90.0f * t);
+		worldTransform_.rotation =
+			Quaternion::MakeRotateAxisQuaternion(deathRotateAxis_, rad);
 
-	BaseGameObject::Update();
+		worldTransform_.translation = basePosition_; // 移動しない
+		worldTransform_.Update();
+
+		// 演出が終わり、爆発も再生終了したら Dead へ
+		if (t >= 1.0f && !explosionFx_->isPlayng()){
+			deathState_ = DeathState::Dead;
+			deathTimer_ = 0.0f;
+		}
+		return;
+	}
+
+	/* =============================================
+	   3. 完全に死亡 (Dead)
+	   =============================================*/
+	if (deathState_ == DeathState::Dead){
+		// ここでフェードアウト等を入れるなら deathTimer_ を利用
+		isAlive_ = false;    // ← ついにシーンから除去OK
+		return;
+	}
 }
-void Enemy::OnCollisionEnter([[maybe_unused]] Collider* other){
-	if (!other) return;
 
-	// 自分のターゲットと相手のタイプが一致するか
-	if (collider_->GetTargetType() == other->GetType()){
-		// 相手がターゲットだった場合の処理
+////////////////////////////////////////////////////////////////
+//  衝突
+////////////////////////////////////////////////////////////////
+void Enemy::OnCollisionEnter(Collider* other){
+	if (!other) return;
+	if (collider_->GetTargetType() != other->GetType()) return;
+
+	if (life_ >= 1){
 		life_--;
-		//hitFx_->Play();
+		hitFx_->Play();
 	}
 }
 

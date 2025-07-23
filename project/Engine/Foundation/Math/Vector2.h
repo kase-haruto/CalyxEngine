@@ -2,9 +2,15 @@
 
 #include <externals/nlohmann/json.hpp>
 
+#include <optional>
+
 struct Vector2{
 	float x;
 	float y;
+
+	Vector2() = default;
+	Vector2(float vx, float vy);
+	Vector2(const Vector2& v);
 
 	float Length()const;
 
