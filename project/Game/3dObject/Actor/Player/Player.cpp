@@ -226,6 +226,10 @@ void Player::RequestLockOn(){
 	constexpr size_t kMaxLockOn = 4;
 	if (lockedOnTargets_.size() >= kMaxLockOn) return;
 
+	// 現在有効な 3D カメラ
+	Camera3d* camera = CameraManager::GetInstance()->GetCamera3d();
+	if (!camera) return;
+
 	const Vector2 reticleScreen = WorldToScreen(reticleTransform_.GetWorldPosition());
 	const float   radius = 30.0f;
 
@@ -233,20 +237,22 @@ void Player::RequestLockOn(){
 		if (!enemy) continue;
 		if (std::find(lockedOnTargets_.begin(), lockedOnTargets_.end(), enemy) != lockedOnTargets_.end()) continue;
 
+		// ① まず視錐台判定 -----------------------------
+		if (!camera->IsVisible(enemy->GetWorldAABB())) continue;
+
+		// ② スクリーン中心からの距離判定 ---------------
 		Vector2 enemyScreen = WorldToScreen(enemy->GetWorldPosition());
-		if ((enemyScreen - reticleScreen).Length() <= radius){
+		if ((enemyScreen - reticleScreen).Length() > radius) continue;
 
-			// ①ターゲット登録
-			lockedOnTargets_.push_back(enemy);
+		// ③ ロックオン登録 & マーカー生成 -------------
+		lockedOnTargets_.push_back(enemy);
 
-			// ②マーカー生成（ターゲットと同じ index に並ぶ）
-			auto marker = std::make_unique<Sprite>("Textures/lockOn.png");
-			marker->Initialize(enemyScreen, Vector2(64.0f,64.0f));
-			marker->SetAnchorPoint(Vector2(0.5f,0.5f));
-			lockOnSprites_.push_back(std::move(marker));
+		auto marker = std::make_unique<Sprite>("Textures/lockOn.png");
+		marker->Initialize(enemyScreen, Vector2(64.0f, 64.0f));
+		marker->SetAnchorPoint(Vector2(0.5f, 0.5f));
+		lockOnSprites_.push_back(std::move(marker));
 
-			if (lockedOnTargets_.size() >= kMaxLockOn) break;
-		}
+		if (lockedOnTargets_.size() >= kMaxLockOn) break;
 	}
 }
 

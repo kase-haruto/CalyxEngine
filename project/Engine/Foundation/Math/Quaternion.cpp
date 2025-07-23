@@ -20,7 +20,7 @@ void Quaternion::Initialize(){
 	*this = MakeIdentity();
 }
 
-bool Quaternion::NotIdentity() const {
+bool Quaternion::NotIdentity() const{
 	return (x != 0.0f || y != 0.0f || z != 0.0f || w != 1.0f);
 }
 
@@ -142,30 +142,30 @@ Matrix4x4 Quaternion::ToMatrix(const Quaternion& quaternion){
 
 }
 
-Quaternion Quaternion::FromMatrix(const Matrix4x4& m) {
+Quaternion Quaternion::FromMatrix(const Matrix4x4& m){
 	Quaternion q;
 
 	float trace = m.m[0][0] + m.m[1][1] + m.m[2][2];
 
-	if (trace > 0.0f) {
+	if (trace > 0.0f){
 		float s = std::sqrt(trace + 1.0f) * 2.0f; // s = 4 * qw
 		q.w = 0.25f * s;
 		q.x = (m.m[2][1] - m.m[1][2]) / s;
 		q.y = (m.m[0][2] - m.m[2][0]) / s;
 		q.z = (m.m[1][0] - m.m[0][1]) / s;
-	} else if (m.m[0][0] > m.m[1][1] && m.m[0][0] > m.m[2][2]) {
+	} else if (m.m[0][0] > m.m[1][1] && m.m[0][0] > m.m[2][2]){
 		float s = std::sqrt(1.0f + m.m[0][0] - m.m[1][1] - m.m[2][2]) * 2.0f; // s = 4 * qx
 		q.w = (m.m[2][1] - m.m[1][2]) / s;
 		q.x = 0.25f * s;
 		q.y = (m.m[0][1] + m.m[1][0]) / s;
 		q.z = (m.m[0][2] + m.m[2][0]) / s;
-	} else if (m.m[1][1] > m.m[2][2]) {
+	} else if (m.m[1][1] > m.m[2][2]){
 		float s = std::sqrt(1.0f + m.m[1][1] - m.m[0][0] - m.m[2][2]) * 2.0f; // s = 4 * qy
 		q.w = (m.m[0][2] - m.m[2][0]) / s;
 		q.x = (m.m[0][1] + m.m[1][0]) / s;
 		q.y = 0.25f * s;
 		q.z = (m.m[1][2] + m.m[2][1]) / s;
-	} else {
+	} else{
 		float s = std::sqrt(1.0f + m.m[2][2] - m.m[0][0] - m.m[1][1]) * 2.0f; // s = 4 * qz
 		q.w = (m.m[1][0] - m.m[0][1]) / s;
 		q.x = (m.m[0][2] + m.m[2][0]) / s;
@@ -275,6 +275,29 @@ Quaternion Quaternion::FromToQuaternion(const Vector3& from, const Vector3& to){
 	axis = Vector3::Cross(toNorm, fromNorm);
 	float angle = std::acos(dot);
 	return Quaternion::MakeRotateAxisQuaternion(axis, angle);
+}
+
+Quaternion Quaternion::LookAt(const Vector3& eye,
+							  const Vector3& target,
+							  const Vector3& worldUp){
+	Vector3 forward = (target - eye).Normalize();
+
+	Vector3 right = Vector3::Cross(worldUp, forward);
+	if (right.LengthSquared() < 1e-6f){
+		// forward が worldUp とほぼ平行なら、別の up を使う
+		right = Vector3::Cross({0.0f, 0.0f, 1.0f}, forward);
+	}
+	right = right.Normalize();
+
+	Vector3 up = Vector3::Cross(forward, right);
+
+	Matrix4x4 rot {};
+	rot.m[0][0] = right.x;   rot.m[0][1] = right.y;   rot.m[0][2] = right.z;   rot.m[0][3] = 0.0f;
+	rot.m[1][0] = up.x;      rot.m[1][1] = up.y;      rot.m[1][2] = up.z;      rot.m[1][3] = 0.0f;
+	rot.m[2][0] = forward.x; rot.m[2][1] = forward.y; rot.m[2][2] = forward.z; rot.m[2][3] = 0.0f;
+	rot.m[3][0] = 0.0f;      rot.m[3][1] = 0.0f;      rot.m[3][2] = 0.0f;      rot.m[3][3] = 1.0f;
+
+	return Quaternion::FromMatrix(rot);
 }
 
 
