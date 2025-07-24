@@ -237,14 +237,11 @@ void Player::RequestLockOn(){
 		if (!enemy) continue;
 		if (std::find(lockedOnTargets_.begin(), lockedOnTargets_.end(), enemy) != lockedOnTargets_.end()) continue;
 
-		// ① まず視錐台判定 -----------------------------
 		if (!camera->IsVisible(enemy->GetWorldAABB())) continue;
 
-		// ② スクリーン中心からの距離判定 ---------------
 		Vector2 enemyScreen = WorldToScreen(enemy->GetWorldPosition());
 		if ((enemyScreen - reticleScreen).Length() > radius) continue;
-
-		// ③ ロックオン登録 & マーカー生成 -------------
+		
 		lockedOnTargets_.push_back(enemy);
 
 		auto marker = std::make_unique<Sprite>("Textures/lockOn.png");
