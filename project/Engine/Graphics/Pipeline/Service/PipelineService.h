@@ -8,7 +8,7 @@
 #include <array>
 
 class PipelineService {
-private:
+public:
 	//===================================================================*/
 	//		structs
 	//===================================================================*/
@@ -42,6 +42,8 @@ public:
 		GetPipelineSet(desc).SetCommand(cmd);
 	}
 
+	void SetCommand(const PipelineSet& set, ID3D12GraphicsCommandList* cmd) const;
+
 	//--------- accessor -------------------------------------------------//
 	const PipelineSet GetPipelineSet(const GraphicsPipelineDesc& desc)const {
 		return {library_->GetOrCreate(desc),library_->GetRoot(desc)};
@@ -56,6 +58,11 @@ public:
 	PsoFactory* GetFactory()  const { return factory_.get(); }
 	PsoLibrary* GetLibrary()  const { return library_.get(); }
 
+	void ResetState(){
+		lastPipelineState_ = nullptr;
+		lastRootSignature_ = nullptr;
+	}
+
 private:
 	//===================================================================*/
 	//		private variables
@@ -63,6 +70,9 @@ private:
 	std::unique_ptr<ShaderCompiler>   compiler_;
 	std::unique_ptr<PsoFactory>  factory_;
 	std::unique_ptr<PsoLibrary>  library_;
+
+	mutable ID3D12PipelineState* lastPipelineState_ = nullptr;
+	mutable ID3D12RootSignature* lastRootSignature_ = nullptr;
 
 	std::unordered_map<PipelineKey, PipelineSet, PipelineKeyHasher> objCache_;
 	std::array<PipelineSet, static_cast< size_t >(PipelineTag::PostProcess::Count)> ppCache_ {};
