@@ -24,7 +24,7 @@ BaseScene::BaseScene(){
 
 void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList,
 					 PipelineService* psoService,
-					 [[maybe_unused]]RenderTargetType renderTargetType){
+					 [[maybe_unused]] RenderTargetType renderTargetType){
 	//===================================================================*/
 	//						背景オブジェクト描画
 	//===================================================================*/
@@ -35,8 +35,7 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList,
 	//===================================================================*/
 	//						シーンオブジェクトの描画
 	//===================================================================*/
-	modelRenderer_->Clear();
-
+	modelRenderer_->BeginFrame();	// 可視フラグと内部バッチをリセット
 	for (auto* entry : sceneContext_->GetObjectLibrary()->GetAllObjectsRaw()){
 		auto* gameObj = dynamic_cast< BaseGameObject* >(entry);
 		if (!gameObj) continue;
@@ -59,12 +58,12 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList,
 
 	//======================== モデル描画 ========================//
 	const Camera3d* camera = CameraManager::GetInstance()->GetCamera3d();
+	modelRenderer_->PreCullAndBatch(camera);
 	modelRenderer_->DrawAll(cmdList,
 							GraphicsGroup::GetInstance()->GetDevice().Get(),
 							camera,
 							psoService,
 							sceneContext_->GetLightLibrary());
-
 
 	//===================================================================*/
 	//						sprite
