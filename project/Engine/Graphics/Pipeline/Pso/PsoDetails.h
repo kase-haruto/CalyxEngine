@@ -31,6 +31,7 @@ namespace PipelineTag{
 		GrayScale,
 		RadialBlur,
 		ChromaticAberration,
+		Vignette,
 
 		Count
 	};

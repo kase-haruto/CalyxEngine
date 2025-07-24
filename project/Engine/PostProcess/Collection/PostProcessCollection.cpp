@@ -40,6 +40,17 @@ void PostProcessCollection::Initialize(PipelineService* service){
 	}
 
 	//===================================================================*/
+	//		ChromaticAberration
+	//===================================================================*/
+	{
+		PipelineSet set = service->GetPipelineSet(PipelineTag::PostProcess::Vignette);
+		auto effect = std::make_unique<ChromaticAberrationEffect>();
+		effect->Initialize(set);
+		effectNames_.push_back(effect->GetName());
+		effects_.push_back(std::move(effect));
+	}
+
+	//===================================================================*/
 	//		No Effects
 	//===================================================================*/
 	{
