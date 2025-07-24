@@ -77,6 +77,17 @@ void PipelineService::Register(const GraphicsPipelineDesc& desc) {
 	library_->GetOrCreate(desc);
 }
 
+void PipelineService::SetCommand(const PipelineSet& set, ID3D12GraphicsCommandList* cmd) const{
+	if (set.pipelineState != lastPipelineState_){
+		cmd->SetPipelineState(set.pipelineState);
+		lastPipelineState_ = set.pipelineState;
+	}
+	if (set.rootSignature != lastRootSignature_){
+		cmd->SetGraphicsRootSignature(set.rootSignature);
+		lastRootSignature_ = set.rootSignature;
+	}
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //		pso取得(グラフィックパイプライン)
 /////////////////////////////////////////////////////////////////////////////////////////
