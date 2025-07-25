@@ -58,10 +58,10 @@ void Player::Initialize(){
 	}
 
 	attackSprite_ = std::make_unique<Sprite>("Textures/attackUI.png");
-	Vector2 attackUiPos = Vector2(1280.0f - 200.0f, 720.0f - 200.0f);
-	Vector2 attackUiSize = Vector2(128.0f, 64.0f);
+	Vector2 attackUiPos = Vector2(1280.0f*0.5f, 720.0f - 100.0f);
+	Vector2 attackUiSize = Vector2(128.0f, 128.0f);
 	attackSprite_->Initialize(attackUiPos, attackUiSize);
-
+	attackSprite_->SetAnchorPoint(Vector2(0.5f, 0.5f));
 	//spriteの初期化
 	size_t spriteCount = reticleSprites_.size();
 	for (size_t i = 0; i < spriteCount; ++i){

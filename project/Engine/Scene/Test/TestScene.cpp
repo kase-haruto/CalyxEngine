@@ -33,11 +33,11 @@ void TestScene::LoadAssets(){}
 /////////////////////////////////////////////////////////////////////////////////////////
 void TestScene::Initialize(){
 
-	//SceneSerializer::Load(*sceneContext_, filePath);
 
 	sceneContext_->Initialize();
 	sceneContext_->SetSceneName("TestScene");
 
+	SceneSerializer::Load(*sceneContext_, "Resources/Assets/Scenes/TestScene.scene");
 
 	LoadAssets();
 

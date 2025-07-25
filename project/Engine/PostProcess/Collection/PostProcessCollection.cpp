@@ -11,12 +11,12 @@ void PostProcessCollection::Initialize(PipelineService* service){
 	//===================================================================*/
 	//		grayScale
 	//===================================================================*/
-	{
+	{/*
 		PipelineSet set = service->GetPipelineSet(PipelineTag::PostProcess::GrayScale);
 		auto effect = std::make_unique<GrayScaleEffect>();
 		effect->Initialize(set);
 		effectNames_.push_back(effect->GetName());
-		effects_.push_back(std::move(effect));
+		effects_.push_back(std::move(effect));*/
 	}
 
 	//===================================================================*/
@@ -53,7 +53,7 @@ void PostProcessCollection::Initialize(PipelineService* service){
 	}
 
 	//===================================================================*/
-	//		Vignette
+	//		CRT
 	//===================================================================*/
 	{
 		PipelineSet set = service->GetPipelineSet(PipelineTag::PostProcess::CRT);

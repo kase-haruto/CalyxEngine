@@ -100,7 +100,6 @@ void System::InitializePostProcess(PipelineService* service) {
 	//=========================================================
 	postProcessCollection_ = std::make_unique<PostProcessCollection>();
 	postProcessCollection_->Initialize(service);
-	postProcessCollection_->BuildInitialSlots();
 
 	//=========================================================
 	// PostEffectGraph の初期化

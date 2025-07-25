@@ -14,7 +14,7 @@
         "guid": "1ca76cc3-0354-4e5e-a391-834bcd85a5a5",
         "intensity": 0.25,
         "name": "DirectionalLight",
-        "objectType": 1,
+        "objectType": 4,
         "parentGuid": "00000000-0000-0000-0000-000000000000",
         "transform": {
             "rotation": {
@@ -35,6 +35,112 @@
             }
         },
         "type": "DirectionalLight"
+    },
+    {
+        "autoDestroy": false,
+        "color": {
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.11686168611049652,
+            "z": 0.5989159941673279
+        },
+        "emitCount": 10,
+        "emitDelay": 0.0,
+        "emitDuration": -1.0,
+        "emitRate": 0.10000000149011612,
+        "guid": "00dafb6a-4579-4fdf-8995-f4c4052e25be",
+        "isComplement": true,
+        "isDrawEnable": true,
+        "isOneShot": false,
+        "isStatic": false,
+        "lifetime": {
+            "constant": 0.0,
+            "max": 0.800000011920929,
+            "min": 0.800000011920929,
+            "mode": 1
+        },
+        "modelPath": "plane.obj",
+        "modules": [
+            {
+                "enabled": true,
+                "gravity": {
+                    "x": 0.0,
+                    "y": -9.800000190734863,
+                    "z": 0.0
+                },
+                "name": "GravityModule"
+            },
+            {
+                "easeType": 8,
+                "enabled": true,
+                "isGrowing": false,
+                "name": "SizeOverLifetimeModule"
+            }
+        ],
+        "name": "ParticleSystem",
+        "objectType": 0,
+        "parentGuid": "e86a0156-d553-46bb-936d-c2247fe8db17",
+        "position": {
+            "x": -1.4169366359710693,
+            "y": 0.0,
+            "z": -6.943066120147705
+        },
+        "scale": {
+            "constant": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "max": {
+                "x": 3.3399999141693115,
+                "y": 3.140000104904175,
+                "z": 2.9800000190734863
+            },
+            "min": {
+                "x": -3.940000057220459,
+                "y": -3.0999999046325684,
+                "z": -3.0199999809265137
+            },
+            "mode": 0
+        },
+        "texturePath": "life.png",
+        "transform": {
+            "rotation": {
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "translation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            }
+        },
+        "type": "ParticleSystemObject",
+        "velocity": {
+            "constant": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "max": {
+                "x": 3.759999990463257,
+                "y": 5.739999771118164,
+                "z": 3.4200000762939453
+            },
+            "min": {
+                "x": -3.2200000286102295,
+                "y": 5.539999961853027,
+                "z": -3.440000057220459
+            },
+            "mode": 1
+        }
     },
     {
         "color": {
@@ -140,7 +246,7 @@
         },
         "guid": "e86a0156-d553-46bb-936d-c2247fe8db17",
         "modelConfig": {
-            "blendMode": 5,
+            "blendMode": 0,
             "materialConfig": {
                 "color": {
                     "w": 1.0,
@@ -150,9 +256,9 @@
                 },
                 "currentLightingMode_": 0,
                 "enableLighting": 0,
-                "enviromentCoefficient": 0.5,
-                "isReflect": false,
-                "shininess": 20.0
+                "enviromentCoefficient": 1.0,
+                "isReflect": true,
+                "shininess": 14.0600004196167
             },
             "modelName": "run.gltf",
             "textureName": "textures/grass.png",
@@ -180,11 +286,117 @@
                 "z": 1.0
             },
             "translation": {
+                "x": -1.4169366359710693,
+                "y": 0.0,
+                "z": -6.943066120147705
+            }
+        },
+        "type": "CalyxHuman"
+    },
+    {
+        "autoDestroy": false,
+        "color": {
+            "w": 1.0,
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+        },
+        "emitCount": 10,
+        "emitDelay": 0.0,
+        "emitDuration": -1.0,
+        "emitRate": 0.10000000149011612,
+        "guid": "59f74adf-8ca4-4e13-ac07-1e6177f6c544",
+        "isComplement": true,
+        "isDrawEnable": true,
+        "isOneShot": false,
+        "isStatic": false,
+        "lifetime": {
+            "constant": 0.7599999904632568,
+            "max": 2.180000066757202,
+            "min": 0.5799999833106995,
+            "mode": 1
+        },
+        "modelPath": "plane.obj",
+        "modules": [
+            {
+                "enabled": true,
+                "gravity": {
+                    "x": 0.0,
+                    "y": -9.800000190734863,
+                    "z": 0.0
+                },
+                "name": "GravityModule"
+            },
+            {
+                "easeType": 11,
+                "enabled": true,
+                "isGrowing": false,
+                "name": "SizeOverLifetimeModule"
+            }
+        ],
+        "name": "ParticleSystem",
+        "objectType": 0,
+        "parentGuid": "e86a0156-d553-46bb-936d-c2247fe8db17",
+        "position": {
+            "x": -1.4169366359710693,
+            "y": 0.0,
+            "z": -6.943066120147705
+        },
+        "scale": {
+            "constant": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "max": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "min": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "mode": 0
+        },
+        "texturePath": "life.png",
+        "transform": {
+            "rotation": {
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "translation": {
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
             }
         },
-        "type": "CalyxHuman"
+        "type": "ParticleSystemObject",
+        "velocity": {
+            "constant": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "max": {
+                "x": 3.119999885559082,
+                "y": 6.300000190734863,
+                "z": 3.200000047683716
+            },
+            "min": {
+                "x": -3.5799999237060547,
+                "y": 5.679999828338623,
+                "z": -2.9600000381469727
+            },
+            "mode": 1
+        }
     }
 ]
