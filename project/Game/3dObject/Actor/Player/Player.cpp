@@ -241,7 +241,7 @@ void Player::RequestLockOn(){
 
 		Vector2 enemyScreen = WorldToScreen(enemy->GetWorldPosition());
 		if ((enemyScreen - reticleScreen).Length() > radius) continue;
-
+		
 		lockedOnTargets_.push_back(enemy);
 
 		auto marker = std::make_unique<Sprite>("Textures/lockOn.png");

@@ -154,35 +154,6 @@ void DxCore::PreDrawOffscreen(){
 	}
 }
 
-void DxCore::DrawOffscreenTexture(){
-	auto commandList = dxCommand_->GetCommandList();
-
-	// SwapChainRenderTarget の設定
-	auto* backBufferTarget = renderTargetCollection_->Get("BackBuffer");
-	if (auto* swapchainRT = dynamic_cast< SwapChainRenderTarget* >(backBufferTarget)){
-		UINT bufferIndex = dxSwapChain_->GetCurrentBackBufferIndex();
-		swapchainRT->SetBufferIndex(bufferIndex);
-		swapchainRT->TransitionTo(commandList.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET);
-		swapchainRT->SetRenderTarget(commandList.Get());
-	}
-
-	// Offscreen を PixelShaderResource に遷移
-	auto* offscreenTarget = renderTargetCollection_->Get("Offscreen");
-	if (offscreenTarget){
-		offscreenTarget->TransitionTo(commandList.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-
-		auto pipelineState = GraphicsGroup::GetInstance()->GetPipelineState(GrayScale, BlendMode::NONE);
-		auto rootSignature = GraphicsGroup::GetInstance()->GetRootSignature(GrayScale, BlendMode::NONE);
-
-		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		commandList->SetGraphicsRootSignature(rootSignature.Get());
-		commandList->SetPipelineState(pipelineState.Get());
-		commandList->SetGraphicsRootDescriptorTable(0, offscreenTarget->GetSRV());
-		commandList->DrawInstanced(3, 1, 0, 0);
-	}
-}
-
-
 void DxCore::PostDraw(){
 	UINT bufferIndex = dxSwapChain_->GetCurrentBackBufferIndex();
 	auto commandList = dxCommand_->GetCommandList();

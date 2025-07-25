@@ -6,75 +6,67 @@
 
 #include <externals/imgui/imgui.h>
 
+PostProcessEditor::PostProcessEditor(const std::string& name)
+	: BaseEditor(name) {}
 
-PostProcessEditor::PostProcessEditor(const std::string& name) :BaseEditor(name){}
+void PostProcessEditor::ShowImGuiInterface() {
+	if (!pCollection_) return;
 
-void PostProcessEditor::ShowImGuiInterface(){
-	// スロットの一覧を表示
-	for (int i = 0; i < slots_.size(); ++i){
-		auto& slot = slots_[i];
+	auto& slots = pCollection_->GetSlots();
 
-		ImGui::PushID(i); // 同じUIが複数ある場合の識別
+	for (int i = 0; i < slots.size(); ++i) {
+		auto& slot = slots[i];
 
-		// 有効化切り替え
+		ImGui::PushID(i);
 		ImGui::Checkbox("Enabled", &slot.enabled);
-
 		ImGui::SameLine();
-
-		// スロット名表示
 		ImGui::Text("%s", slot.name.c_str());
-
-		// 上下入れ替えボタン
 		ImGui::SameLine();
-		if (ImGui::ArrowButton("Up", ImGuiDir_Up) && i > 0){
-			std::swap(slots_[i], slots_[i - 1]);
+		if (ImGui::ArrowButton("Up", ImGuiDir_Up) && i > 0) {
+			std::swap(slots[i], slots[i - 1]);
 		}
 		ImGui::SameLine();
-		if (ImGui::ArrowButton("Down", ImGuiDir_Down) && i < slots_.size() - 1){
-			std::swap(slots_[i], slots_[i + 1]);
+		if (ImGui::ArrowButton("Down", ImGuiDir_Down) && i < slots.size() - 1) {
+			std::swap(slots[i], slots[i + 1]);
 		}
 
-		static int selectedEffect = 0; // 選択中のインデックス（例）
 		const auto& effectNames = pCollection_->GetEffectNames();
-
-		if (ImGui::BeginCombo("Effect Type", slot.name.c_str())){
-			for (int n = 0; n < effectNames.size(); ++n){
+		if (ImGui::BeginCombo("Effect Type", slot.name.c_str())) {
+			for (int n = 0; n < effectNames.size(); ++n) {
 				bool isSelected = (slot.name == effectNames[n]);
-				if (ImGui::Selectable(effectNames[n].c_str(), isSelected)){
+				if (ImGui::Selectable(effectNames[n].c_str(), isSelected)) {
 					slot.name = effectNames[n];
+					slot.pass = pCollection_->GetEffectByName(effectNames[n]); // pass 更新
 				}
-				if (isSelected)
-					ImGui::SetItemDefaultFocus();
+				if (isSelected) ImGui::SetItemDefaultFocus();
 			}
 			ImGui::EndCombo();
+		}
+
+		if (slot.pass) {
+			ImGui::Indent();
+			slot.pass->ShowImGui();
+			ImGui::Unindent();
 		}
 
 		ImGui::Separator();
 		ImGui::PopID();
 	}
-
 }
 
-void PostProcessEditor::SetPostEffectCollection(PostProcessCollection* postProcessCollection){
+void PostProcessEditor::SetPostEffectCollection(PostProcessCollection* postProcessCollection) {
 	pCollection_ = postProcessCollection;
-	if (pCollection_){
-		slots_.clear();
-		for (const auto& effectName : pCollection_->GetEffectNames()){
-			slots_.emplace_back(PostEffectSlot {effectName, false, pCollection_->GetEffectByName(effectName)});
-		}
+	if (pCollection_ && pCollection_->GetSlots().empty()) {
+		pCollection_->BuildInitialSlots(false); // 全スロット無効で初期化
 	}
 }
 
-void PostProcessEditor::ApplyToGraph(PostEffectGraph* graph){
+void PostProcessEditor::ApplyToGraph(PostEffectGraph* graph) {
 	if (!graph || !pCollection_) return;
 
-	// slots_ の pass を更新する
-	for (auto& slot : slots_){
-		// スロット名に対応するエフェクトパスを取得
+	// 名前とpassを再マッピング
+	for (auto& slot : pCollection_->GetSlots()) {
 		slot.pass = pCollection_->GetEffectByName(slot.name);
 	}
-
-	// Graph に反映
-	graph->SetPassesFromList(slots_);
+	graph->SetPassesFromList(pCollection_->GetSlots());
 }
-

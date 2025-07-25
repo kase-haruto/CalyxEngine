@@ -24,6 +24,6 @@ public:
 private:
 	PipelineSet psoSet_;
 	DxConstantBuffer<ChromaticAberrationSettings> settingsBuffer_;
-	float intensity_ = 0.2f; // 初期値
+	float intensity_ = 0.1f; // 初期値
 };
 

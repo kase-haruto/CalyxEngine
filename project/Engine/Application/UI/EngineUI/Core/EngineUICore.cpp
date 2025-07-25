@@ -43,6 +43,14 @@ void EngineUICore::Update() {
 ////////////////////////////////////////////////////////////////////////////////////////////
 void EngineUICore::Render() {
 #ifdef _DEBUG
+
+	levelEditor_->RenderMenu();
+
+	// === Gameモード中はUIなど表示しない ===
+	if (levelEditor_->GetMode() == EngineEdit::EditorMode::Game) {
+		return;
+	}
+
 	ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
 
 	levelEditor_->RenderViewport(ViewportType::VIEWPORT_MAIN,reinterpret_cast< ImTextureID >(mainViewportTextureID_));

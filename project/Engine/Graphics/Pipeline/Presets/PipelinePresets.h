@@ -19,4 +19,6 @@ namespace PipelinePresets {
 	GraphicsPipelineDesc MakeRadialBlur();
 	GraphicsPipelineDesc MakeGrayScale();
 	GraphicsPipelineDesc MakeChromaticAberration();
+	GraphicsPipelineDesc MakeVignette();
+	GraphicsPipelineDesc MakeCRT();
 }

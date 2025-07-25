@@ -16,11 +16,22 @@ class BaseEditor;
 class SceneContext;
 class SceneObject;
 
+namespace EngineEdit {
+	enum class EditorMode {
+		Edit,
+		Game
+	};
+}
+
 class LevelEditor{
+public:
+	
+
 public:
 	void Initialize();
 	void Update();
 	void Render();
+	void RenderMenu();
 
 	// 編集対象
 	void SetSelectedEditor(BaseEditor* editor);
@@ -32,6 +43,7 @@ public:
 	HierarchyPanel* GetHierarchyPanel() const{ return hierarchy_.get(); }
 	EditorPanel* GetEditorPanel() const{ return editor_.get(); }
 	PlaceToolPanel* GetPlaceToolPanel() const{ return placeToolPanel_.get(); }
+	EngineEdit::EditorMode GetMode() const { return mode_; }
 
 private:
 	void TryPickUnderCursor();
@@ -49,6 +61,8 @@ private:
 		sceneEditor_->ClearSelection();
 	}
 
+	void ToggleMode();
+
 private:
 	// 管理UI
 	std::unique_ptr<HierarchyPanel> hierarchy_;
@@ -58,6 +72,7 @@ private:
 	std::unique_ptr<PlaceToolPanel> placeToolPanel_;
 	// メニュー
 	std::unique_ptr<EditorMenu> menu_;				//< エディターメニュー
+	EngineEdit::EditorMode mode_ = EngineEdit::EditorMode::Edit;
 
 	// ビューポート
 	std::unique_ptr<Viewport> mainViewport_;				//< メインビューポート

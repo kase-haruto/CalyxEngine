@@ -18,5 +18,7 @@ public:
 					   D3D12_GPU_DESCRIPTOR_HANDLE inputSRV,
 					   IRenderTarget* outputRT) = 0;
 
+	virtual void ShowImGui() {}
+
 	virtual const std::string GetName() const = 0;
 };

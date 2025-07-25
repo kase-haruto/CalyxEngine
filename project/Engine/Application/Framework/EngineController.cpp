@@ -36,8 +36,8 @@ void EngineController::Initialize(HINSTANCE hInstance){
 	// engineEditorの初期化
 	editorCollection_ = std::make_unique<EditorCollection>();
 	editorCollection_->InitializeEditors();
-	auto ppCollection = dynamic_cast< PostProcessEditor* >(editorCollection_->GetEditor(EditorCollection::EditorType::PostProcess));
-	ppCollection->SetPostEffectCollection(system_->GetPostProcessCollection());
+	auto ppEditor = dynamic_cast< PostProcessEditor* >(editorCollection_->GetEditor(EditorCollection::EditorType::PostProcess));
+	ppEditor->SetPostEffectCollection(system_->GetPostProcessCollection());
 
 	// エディターパネルにエディターを追加
 #ifdef _DEBUG
@@ -109,8 +109,11 @@ void EngineController::BeginUpdate(){
 /////////////////////////////////////////////////////////////////////////////////////////
 void EngineController::EndUpdate(){
 	// UI描画
-	engineUICore_->Render();	
+	engineUICore_->Render();
 
+	auto ppEditor = dynamic_cast<PostProcessEditor*>(editorCollection_->GetEditor(EditorCollection::EditorType::PostProcess));
+
+	ppEditor->ApplyToGraph(system_->GetPostEffectGraph());
 }
 
 
@@ -121,7 +124,10 @@ void EngineController::Render() {
 	// シーンの描画
 	sceneManager_->Draw();
 
+	system_->ExecutePostEffect(graphicsSystem_->GetPipelineService());
+
+	sceneManager_->DrawNotAffectedFromPE();
 	// 描画後処理
-	system_->EndFrame(graphicsSystem_->GetPipelineService());
+	system_->EndFrame();
 }
 
