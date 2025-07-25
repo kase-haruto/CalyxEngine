@@ -169,13 +169,18 @@ void PrimitiveDrawer::DrawSphere(const Vector3& center, const float radius, int 
 }
 
 void PrimitiveDrawer::Render(){
-	if (lineDrawer_){
+#ifdef _DEBUG
+	if (lineDrawer_) {
 		lineDrawer_->Render();
 	}
 
 	if (boxDrawer_) {
 		boxDrawer_->Render();
 	}
+#endif // _DEBUG
+
+
+	
 }
 
 void PrimitiveDrawer::ClearMesh(){

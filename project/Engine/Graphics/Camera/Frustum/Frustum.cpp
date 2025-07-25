@@ -30,6 +30,7 @@ bool Frustum::IsAABBInside(const Vector3& min, const Vector3& max) const{
 }
 
 void Frustum::Draw(const Vector4& color) const{
+
 	Vector3 corners[8];
 	CalculateCorners(corners);
 

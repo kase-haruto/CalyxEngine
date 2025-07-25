@@ -10,10 +10,7 @@
 #include <Engine/Scene/Serializer/SceneSerializer.h>
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 
-#ifdef _DEBUG
 #include <externals/imgui/ImGuiFileDialog.h>
-
-#endif // _DEBUG
 
 using namespace EngineEdit;
 
@@ -98,6 +95,8 @@ void LevelEditor::Initialize(){
 }
 
 void LevelEditor::Update(){
+
+
 	SceneContext* ctx = SceneContext::Current();
 
 	// 入力チェックはここで行う

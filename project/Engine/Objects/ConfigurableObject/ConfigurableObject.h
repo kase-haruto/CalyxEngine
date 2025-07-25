@@ -75,7 +75,7 @@ inline void ConfigurableObject<TConfig>::SaveConfig(const std::string& path) con
 //      コンフィグのgui
 /////////////////////////////////////////////////////////////////////////////////////////
 template<typename TConfig>
-inline void ConfigurableObject<TConfig>::ShowGui(const std::string& label){
+inline void ConfigurableObject<TConfig>::ShowGui([[maybe_unused]]const std::string& label){
 #ifdef _DEBUG
 	const std::string loadDlg = "ConfigLoadDialog##" + label;
 	const std::string saveDlg = "ConfigSaveDialog##" + label;
