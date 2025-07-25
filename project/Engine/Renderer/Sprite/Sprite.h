@@ -170,7 +170,7 @@ private:
 	ComPtr<ID3D12Resource> materialResource_;
 	VertexData* vertexData = nullptr;
 	Material2D* materialData_;
-	RenderTargetType targetRT_ = RenderTargetType::Offscreen;
+	RenderTargetType targetRT_ = RenderTargetType::BackBuffer;
 #pragma endregion
 
 private:

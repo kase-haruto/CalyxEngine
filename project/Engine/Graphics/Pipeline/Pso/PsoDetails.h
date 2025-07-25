@@ -32,6 +32,7 @@ namespace PipelineTag{
 		RadialBlur,
 		ChromaticAberration,
 		Vignette,
+		CRT,
 
 		Count
 	};

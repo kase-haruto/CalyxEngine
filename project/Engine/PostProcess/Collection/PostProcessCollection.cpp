@@ -1,6 +1,8 @@
 #include "PostProcessCollection.h"
 
 #include <Engine/Graphics/Pipeline/Service/PipelineService.h>
+#include <Engine/PostProcess/Vignette/Vignette.h>
+#include <Engine/PostProcess/CRT/CRTEffect.h>
 
 void PostProcessCollection::Initialize(PipelineService* service){
 	effects_.clear();
@@ -40,11 +42,22 @@ void PostProcessCollection::Initialize(PipelineService* service){
 	}
 
 	//===================================================================*/
-	//		ChromaticAberration
+	//		Vignette
 	//===================================================================*/
 	{
 		PipelineSet set = service->GetPipelineSet(PipelineTag::PostProcess::Vignette);
-		auto effect = std::make_unique<ChromaticAberrationEffect>();
+		auto effect = std::make_unique<Vignette>();
+		effect->Initialize(set);
+		effectNames_.push_back(effect->GetName());
+		effects_.push_back(std::move(effect));
+	}
+
+	//===================================================================*/
+	//		Vignette
+	//===================================================================*/
+	{
+		PipelineSet set = service->GetPipelineSet(PipelineTag::PostProcess::CRT);
+		auto effect = std::make_unique<CRTEffect>();
 		effect->Initialize(set);
 		effectNames_.push_back(effect->GetName());
 		effects_.push_back(std::move(effect));

@@ -29,6 +29,8 @@ public:
 	void Run();
 	void Finalize();
 
+	std::vector<PostEffectSlot> CreateAllEffectSlots(bool enableAll = true) const;
+
 private:
 	std::unique_ptr<System> system_;
 	std::unique_ptr<GraphicsSystem> graphicsSystem_;

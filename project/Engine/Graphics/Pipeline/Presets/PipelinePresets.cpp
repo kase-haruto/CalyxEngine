@@ -234,6 +234,30 @@ GraphicsPipelineDesc PipelinePresets::MakeVignette(){
 	desc.root_
 		.AllowIA()
 		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)
+		.CBV(0, D3D12_SHADER_VISIBILITY_PIXEL)
+		.SampleClampLinear(0);
+	return desc;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		CRT
+/////////////////////////////////////////////////////////////////////////////////////////
+GraphicsPipelineDesc PipelinePresets::MakeCRT() {
+	GraphicsPipelineDesc desc;
+	desc.VS(L"CopyImage.VS.hlsl")
+		.PS(L"CRT.PS.hlsl")
+		.BlendNone()
+		.CullNone()
+		.DepthEnable(false)
+		.RTV(DXGI_FORMAT_R8G8B8A8_UNORM)
+		.Samples(1);
+
+	desc.inputElems_.clear();
+
+	desc.root_
+		.AllowIA()
+		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)
+		.CBV(0, D3D12_SHADER_VISIBILITY_PIXEL) // crt parameters
 		.SampleClampLinear(0);
 	return desc;
 }

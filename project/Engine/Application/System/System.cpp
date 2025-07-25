@@ -89,10 +89,9 @@ void System::Initialize(HINSTANCE hInstance, int32_t clientWidth, int32_t client
 	TextureManager::GetInstance()->StartUpLoad();
 
 	//パーティクルコンテナの初期化
-	//ParticleEffectCollection::GetInstance()->StartupLoad();
-	}
+}
 
-void System::InitializePostProcess(PipelineService* service){
+void System::InitializePostProcess(PipelineService* service) {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	/*                     postProcessの初期化                                             */
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -101,17 +100,16 @@ void System::InitializePostProcess(PipelineService* service){
 	//=========================================================
 	postProcessCollection_ = std::make_unique<PostProcessCollection>();
 	postProcessCollection_->Initialize(service);
+	postProcessCollection_->BuildInitialSlots();
 
 	//=========================================================
 	// PostEffectGraph の初期化
 	//=========================================================
 	postEffectGraph_ = std::make_unique<PostEffectGraph>(postProcessCollection_.get());
 
-	//=========================================================
-	// PostEffectSlot の初期化
-	//    - 「有効化は1つだけ」に合わせて最初は全部falseにするのが安全
-	//=========================================================
+
 }
+
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -130,37 +128,18 @@ void System::BeginFrame() {
 	dxCore_->PreDrawOffscreen();
 
 	EditorUpdate();
-	/////////////////////////////////////////////////////////////////
-	//float dt = ClockManager::GetInstance()->GetDeltaTime();
-
-	//// スペースキーでブラー発動
-	//if (Input::GetInstance()->TriggerKey(DIK_LSHIFT)) {
-	//	radialTimer_ = 0.0f;
-	//	isRadialActive_ = true;
-
-	//	// スロット切り替え
-	//	for (auto& slot : postEffectSlots_) {
-	//		slot.enabled = (slot.name == "RadialBlur");
-	//	}
-	//}
-
-	//// ブラー中の時間経過
-	//if (isRadialActive_) {
-	//	radialTimer_ += dt;
-	//	if (radialTimer_ >= kRadialDurationSec_) {
-	//		isRadialActive_ = false;
-
-	//		// CopyImage のみ有効に戻す
-	//		for (auto& slot : postEffectSlots_) {
-	//			slot.enabled = (slot.name == "CopyImage");
-	//		}
-	//	}
-	//}
 }
 /////////////////////////////////////////////////////////////////////////////////////////
 //  フレーム終了処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void System::EndFrame(const PipelineService* service) {
+void System::EndFrame() {
+	imguiManager_->End();
+	imguiManager_->Draw();
+
+	dxCore_->PostDraw();
+}
+
+void System::ExecutePostEffect(const PipelineService* service) {
 	auto* cmd = dxCore_->GetCommandList().Get();
 
 	auto* backBuffer = dxCore_->GetRenderTargetCollection().Get("BackBuffer");
@@ -174,23 +153,17 @@ void System::EndFrame(const PipelineService* service) {
 
 	postEffectGraph_->Execute(cmd, offscreenRes, postOutput, dxCore_.get());
 
-	//  ImGui 表示登録（Game View）
 	postOutput->GetResource()->Transition(cmd, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	pEngineUICore_->SetMainViewportTexture(postOutput->GetSRV().ptr);
 
-	//  ImGui 表示登録（Debug View）
 	debugRT->GetResource()->Transition(cmd, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	pEngineUICore_->SetDebugViewportTexture(debugRT->GetSRV().ptr);
 
 	PipelineSet pipelineSet = service->GetPipelineSet(PipelineTag::PostProcess::CopyImage);
-
-	DrawTextureToRenderTarget(cmd, postOutput->GetSRV(), backBuffer, pipelineSet.pipelineState, pipelineSet.rootSignature);
-
-	imguiManager_->End();
-	imguiManager_->Draw();
-
-	dxCore_->PostDraw();
+	DrawTextureToRenderTarget(cmd, postOutput->GetSRV(), backBuffer,
+							  pipelineSet.pipelineState, pipelineSet.rootSignature);
 }
+
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //  Editorの更新

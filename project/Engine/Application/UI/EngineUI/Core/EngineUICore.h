@@ -30,7 +30,6 @@ public:
 
 	void AddPanel(std::unique_ptr<IEngineUI> panel);	//< パネル追加
 
-	void NotifySceneContextChanged(class SceneContext* newContext);
 
 	//--------- accessor -----------------------------------------------------
 	void SetMainViewportTexture(UINT64 textureID);		//< メインビューポート用のテクスチャを設定

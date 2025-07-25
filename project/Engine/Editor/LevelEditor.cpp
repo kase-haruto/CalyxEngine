@@ -15,6 +15,7 @@
 
 #endif // _DEBUG
 
+using namespace EngineEdit;
 
 void LevelEditor::Initialize(){
 #ifdef _DEBUG
@@ -83,40 +84,31 @@ void LevelEditor::Initialize(){
 	}, true
 			   });
 
+	if (mode_ == EditorMode::Edit) {
+		menu_->Add(MenuCategory::View, {
+			"Enter Game Mode", "", [this]() { ToggleMode(); }, true
+				   });
+	} else {
+		menu_->Add(MenuCategory::View, {
+			"Exit Game Mode", "", [this]() { ToggleMode(); }, true
+				   });
+	}
+
 #endif // _DEBUG
 }
 
 void LevelEditor::Update(){
-#ifdef _DEBUG
+	SceneContext* ctx = SceneContext::Current();
+
 	// 入力チェックはここで行う
 	if (Input::GetInstance()->TriggerMouseButton(MouseButton::Left)){
 		TryPickUnderCursor(); // レイキャストして選択処理へ
 	}
-
-
-	//シーンが変わっていたら各パネルに通知する
-	NotifySceneContextChanged();
-	prevCtx_ = SceneContext::Current();
-#endif // _DEBUG
-}
-
-void LevelEditor::Render(){
-	SceneContext* ctx = SceneContext::Current();
-
-#ifdef _DEBUG
-	hierarchy_->Render();
-	editor_->Render();
-	placeToolPanel_->Render();
-	menu_->Render();
-
-	inspector_->SetSelectedEditor(selectedEditor_);
-	inspector_->SetSelectedObject(selectedObject_);
-
 	// ----------------------------
 	// Open Scene ダイアログ処理
 	// ----------------------------
-	if (ImGuiFileDialog::Instance()->Display("SceneOpenDialog")){
-		if (ImGuiFileDialog::Instance()->IsOk()){
+	if (ImGuiFileDialog::Instance()->Display("SceneOpenDialog")) {
+		if (ImGuiFileDialog::Instance()->IsOk()) {
 			std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
 			ClearSelection(); // 既存の選択をクリア
 			SceneSerializer::Load(*ctx, filePath);
@@ -127,18 +119,37 @@ void LevelEditor::Render(){
 	// ----------------------------
 	// Save Scene ダイアログ処理
 	// ----------------------------
-	if (ImGuiFileDialog::Instance()->Display("SceneSaveDialog")){
-		if (ImGuiFileDialog::Instance()->IsOk()){
+	if (ImGuiFileDialog::Instance()->Display("SceneSaveDialog")) {
+		if (ImGuiFileDialog::Instance()->IsOk()) {
 			std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
 			SceneSerializer::Save(*ctx, filePath);
 		}
 		ImGuiFileDialog::Instance()->Close();
 	}
 
+	//シーンが変わっていたら各パネルに通知する
+	NotifySceneContextChanged();
+	prevCtx_ = SceneContext::Current();
+}
+
+void LevelEditor::Render(){
+
+	hierarchy_->Render();
+	editor_->Render();
+	placeToolPanel_->Render();
+
+	inspector_->SetSelectedEditor(selectedEditor_);
+	inspector_->SetSelectedObject(selectedObject_);
+
+
+
 	inspector_->Render();
 
 	sceneEditor_->Update();
-#endif // _DEBUG
+}
+
+void LevelEditor::RenderMenu() {
+	menu_->Render();
 }
 
 void LevelEditor::SetSelectedEditor(BaseEditor* editor){
@@ -270,6 +281,15 @@ void LevelEditor::NotifySceneContextChanged(){
 		}
 	}
 }
+
+void LevelEditor::ToggleMode() {
+	if (mode_ == EditorMode::Edit) {
+		mode_ = EditorMode::Game;
+	} else {
+		mode_ = EditorMode::Edit;
+	}
+}
+
 
 void LevelEditor::TryPickUnderCursor(){
 	SceneContext* current = SceneContext::Current();

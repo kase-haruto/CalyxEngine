@@ -26,7 +26,7 @@ SceneManager::SceneManager(DxCore* dxCore, GraphicsSystem* graphicsSystem)
 
 	currentSceneNo_ = static_cast< int >(SceneType::PLAY);
 #ifdef _DEBUG
-	currentSceneNo_ = static_cast< int >(SceneType::PLAY);
+	currentSceneNo_ = static_cast< int >(SceneType::TEST);
 #endif // 
 
 	nextSceneNo_ = currentSceneNo_;
@@ -97,6 +97,18 @@ void SceneManager::Draw(){
 	CameraManager::SetCommand(cmd, PipelineType::Line);
 	PrimitiveDrawer::GetInstance()->Render();
 	PrimitiveDrawer::GetInstance()->ClearMesh();
+}
+
+void SceneManager::DrawNotAffectedFromPE() {
+	auto* cmd = pGraphicsSystem_->GetCommandList();
+	auto* backBuffer = pDxCore_->GetRenderTargetCollection().Get("BackBuffer");
+
+	backBuffer->SetRenderTarget(cmd);
+
+	// スプライト描画
+	if (auto* baseScene = scenes_[currentSceneNo_].get()) {
+		baseScene->DrawSpritesOnly(cmd, pGraphicsSystem_->GetPipelineService());
+	}
 }
 
 void SceneManager::DrawForRenderTarget(IRenderTarget* target){

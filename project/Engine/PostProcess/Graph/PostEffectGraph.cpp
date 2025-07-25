@@ -24,6 +24,10 @@ void PostEffectGraph::Execute(ID3D12GraphicsCommandList* cmd,
 							  DxGpuResource* input,
 							  IRenderTarget* finalTarget,
 							  DxCore* dxCore){
+
+
+
+
 	input->Transition(cmd, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 	// Ping-Pongバッファ

@@ -32,18 +32,17 @@ public:
 	void Finalize();
 	void InitializeEditor();
 	void BeginFrame();
-	void EndFrame(const class PipelineService* pipelineSet);
+	void EndFrame();
 
 	void EditorUpdate();	//engine内部Editorの更新
 
 	int ProcessMessage();
 
 	void InitializePostProcess(class PipelineService* service);
-
+	void ExecutePostEffect(const class  PipelineService* service);
 
 	//* パイプラインの作成 ==============================*/
 	void CreatePipelines();
-	void Object2DPipelines();
 	void LinePipeline();
 	void EffectPipeline();
 	void SkyBoxPipeline();

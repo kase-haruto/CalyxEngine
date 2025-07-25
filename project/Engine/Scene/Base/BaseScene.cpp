@@ -66,12 +66,12 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList,
 							sceneContext_->GetLightLibrary());
 
 	//===================================================================*/
-	//						sprite
-	//===================================================================*/
-	spriteRenderer_->Draw(cmdList, psoService, renderTargetType);
-
-	//===================================================================*/
 	//                    particle描画
 	//===================================================================*/
 	sceneContext_->GetFxSystem()->Render(psoService, cmdList);
+}
+
+void BaseScene::DrawSpritesOnly(ID3D12GraphicsCommandList* cmdList,
+								PipelineService* psoService) {
+	spriteRenderer_->Draw(cmdList, psoService, RenderTargetType::BackBuffer);
 }

@@ -25,6 +25,7 @@ public:
 	void Initialize();
 	void Update();
 	void Draw();
+	void DrawNotAffectedFromPE();
 	void DrawForRenderTarget(IRenderTarget* target);
 
 	void SetEngineUI(EngineUICore* ui);
