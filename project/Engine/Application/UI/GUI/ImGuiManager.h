@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #ifdef _DEBUG
 #include<externals/imgui/imgui.h>
@@ -52,9 +52,6 @@ public:
 private:
 	// DirectX基盤インスタンス（借りてくる）
 	const DxCore* pDxCore_ = nullptr;
-
-	// SRV用ヒープ
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvHeap_;
 
 
 };

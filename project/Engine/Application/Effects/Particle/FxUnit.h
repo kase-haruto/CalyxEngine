@@ -21,3 +21,12 @@ struct FxUnit{
 	//UVオフセット・スケール
 	Transform2D uvTransform;
 };
+
+struct ParticleCS {
+	Vector3 translate;
+	Vector3 scale;
+	float lifeTime;
+	Vector3 velocity;
+	float currentTIme;
+	Vector4 color;
+};

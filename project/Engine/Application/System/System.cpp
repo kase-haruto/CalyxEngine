@@ -10,12 +10,12 @@
 #include <Engine/Foundation/Audio/Audio.h>
 #include <Engine/Foundation/Utility/Func/DxFunc.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
-#include <Engine/Graphics/Descriptor/SrvLocator.h>
 #include <Engine/Graphics/Pipeline/BlendMode/BlendMode.h>
 #include <Engine/Graphics/RenderTarget/SwapChainRT/SwapChainRenderTarget.h>
 #include <Engine/PostProcess/FullscreenDrawer.h>
 #include <Engine/System/Command/Manager/CommandManager.h>
 #include <Engine/Graphics/Pipeline/Service/PipelineService.h>
+#include <Engine/Graphics/Descriptor/DescriptorAllocator.h>
 
 // manager
 #include <Engine/Assets/Model/ModelManager.h>
@@ -39,12 +39,12 @@ HWND System::hwnd_ = nullptr;
 /////////////////////////////////////////////////////////////////////////////////////////
 //  コンストラクタ
 /////////////////////////////////////////////////////////////////////////////////////////
-System::System() {}
+System::System(){}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //  初期化処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void System::Initialize(HINSTANCE hInstance, int32_t clientWidth, int32_t clientHeight, const std::string _windowTitle) {
+void System::Initialize(HINSTANCE hInstance, int32_t clientWidth, int32_t clientHeight, const std::string _windowTitle){
 	winApp_ = std::make_unique<WinApp>(clientWidth, clientHeight, _windowTitle);
 	hInstance_ = hInstance;
 	hwnd_ = winApp_->GetHWND();
@@ -60,6 +60,8 @@ void System::Initialize(HINSTANCE hInstance, int32_t clientWidth, int32_t client
 	//audioの初期化
 	Audio::Initialize();
 
+	DescriptorAllocator::Initialize(dxCore_->GetDevice().Get());
+	DescriptorAllocator::CreateHeap(DescriptorUsage::CbvSrvUav, {});
 
 	//管理クラスの初期化
 	shaderManager_ = std::make_shared<ShaderManager>();
@@ -91,7 +93,7 @@ void System::Initialize(HINSTANCE hInstance, int32_t clientWidth, int32_t client
 	//パーティクルコンテナの初期化
 }
 
-void System::InitializePostProcess(PipelineService* service) {
+void System::InitializePostProcess(PipelineService* service){
 	/////////////////////////////////////////////////////////////////////////////////////////
 	/*                     postProcessの初期化                                             */
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -114,7 +116,7 @@ void System::InitializePostProcess(PipelineService* service) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //  フレーム開始処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void System::BeginFrame() {
+void System::BeginFrame(){
 	ClockManager::GetInstance()->Update();
 
 
@@ -131,14 +133,14 @@ void System::BeginFrame() {
 /////////////////////////////////////////////////////////////////////////////////////////
 //  フレーム終了処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void System::EndFrame() {
+void System::EndFrame(){
 	imguiManager_->End();
 	imguiManager_->Draw();
 
 	dxCore_->PostDraw();
 }
 
-void System::ExecutePostEffect(const PipelineService* service) {
+void System::ExecutePostEffect(const PipelineService* service){
 	auto* cmd = dxCore_->GetCommandList().Get();
 
 	auto* backBuffer = dxCore_->GetRenderTargetCollection().Get("BackBuffer");
@@ -146,7 +148,7 @@ void System::ExecutePostEffect(const PipelineService* service) {
 	auto* postOutput = dxCore_->GetRenderTargetCollection().Get("PostEffectOutput");
 	auto* debugRT = dxCore_->GetRenderTargetCollection().Get("DebugView");
 
-	if (auto* scTarget = dynamic_cast<SwapChainRenderTarget*>(backBuffer)) {
+	if (auto* scTarget = dynamic_cast< SwapChainRenderTarget* >(backBuffer)){
 		scTarget->SetBufferIndex(dxCore_->GetSwapChain().GetCurrentBackBufferIndex());
 	}
 
@@ -167,11 +169,11 @@ void System::ExecutePostEffect(const PipelineService* service) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //  Editorの更新
 /////////////////////////////////////////////////////////////////////////////////////////
-void System::EditorUpdate() {
+void System::EditorUpdate(){
 	Input* input = Input::GetInstance();
 	CommandManager* cmdManager = CommandManager::GetInstance();
 	//コマンド
-	if (input->PushKey(DIK_LCONTROL) && input->TriggerKey(DIK_Z)) {
+	if (input->PushKey(DIK_LCONTROL) && input->TriggerKey(DIK_Z)){
 		if (input->PushKey(DIK_LSHIFT))
 			cmdManager->Redo();
 		else
@@ -187,7 +189,7 @@ void System::EditorUpdate() {
 /////////////////////////////////////////////////////////////////////////////////////////
 //  終了処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void System::Finalize() {
+void System::Finalize(){
 
 	//imgui終了処理
 	imguiManager_->Finalize();
@@ -200,7 +202,7 @@ void System::Finalize() {
 	CameraManager::Finalize();
 	//pipelineの終了処理
 	pipelineStateManager_->Finalize();
-	SrvLocator::Finalize();
+	DescriptorAllocator::Finalize();
 	Input::Finalize();
 	Audio::Finalize();
 
@@ -209,7 +211,7 @@ void System::Finalize() {
 	winApp_->TerminateGameWindow();
 }
 
-void System::InitializeEditor() {
+void System::InitializeEditor(){
 	/////////////////////////////////////////////////////////////////////////////////////////
 	/*                     editorの初期化と追加                                              */
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -218,13 +220,13 @@ void System::InitializeEditor() {
 /////////////////////////////////////////////////////////////////////////////////////////
 //プロセスメッセージ
 /////////////////////////////////////////////////////////////////////////////////////////
-int System::ProcessMessage() { return winApp_->ProcessMessage() ? 1 : 0; }
+int System::ProcessMessage(){ return winApp_->ProcessMessage() ? 1 : 0; }
 
 
 //=============================================================================================================
 //              Pipelineの作成
 //=============================================================================================================
-void System::CreatePipelines() {
+void System::CreatePipelines(){
 	shaderManager_->InitializeDXC();
 	LinePipeline();
 	EffectPipeline();
@@ -232,7 +234,7 @@ void System::CreatePipelines() {
 }
 
 
-void System::LinePipeline() {
+void System::LinePipeline(){
 	// InputLayoutの設定
 	D3D12_INPUT_ELEMENT_DESC inputElementDescs[2] = {};
 	inputElementDescs[0].SemanticName = "POSITION";
@@ -245,7 +247,7 @@ void System::LinePipeline() {
 	inputElementDescs[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 
-	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
+	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc {};
 	inputLayoutDesc.pInputElementDescs = inputElementDescs;
 	inputLayoutDesc.NumElements = _countof(inputElementDescs);
 
@@ -253,14 +255,14 @@ void System::LinePipeline() {
 	BlendMode blendMode = BlendMode::NORMAL;
 
 	// RasterizerStateの設定
-	D3D12_RASTERIZER_DESC rasterizeDesc{};
+	D3D12_RASTERIZER_DESC rasterizeDesc {};
 	rasterizeDesc.CullMode = D3D12_CULL_MODE_NONE; // カリングを無効化
 	rasterizeDesc.FillMode = D3D12_FILL_MODE_WIREFRAME; // 線描画の場合はこちら
 	rasterizeDesc.FrontCounterClockwise = FALSE;
 	rasterizeDesc.DepthClipEnable = TRUE;
 
 	// DepthStencilStateの設定
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc {};
 	depthStencilDesc.DepthEnable = true;
 	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
@@ -275,7 +277,7 @@ void System::LinePipeline() {
 	depthDesc.StencilEnable = FALSE;
 
 	// シェーダの読み込み
-	if (!shaderManager_->LoadShader(Line, L"Fragment.VS.hlsl", L"Fragment.PS.hlsl")) {
+	if (!shaderManager_->LoadShader(Line, L"Fragment.VS.hlsl", L"Fragment.PS.hlsl")){
 		return;
 	}
 
@@ -301,9 +303,9 @@ void System::LinePipeline() {
 	ComPtr<ID3DBlob> signatureBlob;
 	ComPtr<ID3DBlob> errorBlob;
 	HRESULT hr = D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
-	if (FAILED(hr)) {
-		if (errorBlob) {
-			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+	if (FAILED(hr)){
+		if (errorBlob){
+			OutputDebugStringA(( char* ) errorBlob->GetBufferPointer());
 		}
 		return;
 	}
@@ -311,7 +313,7 @@ void System::LinePipeline() {
 	ComPtr<ID3D12RootSignature> rootSignature;
 	ComPtr<ID3D12Device> device = dxCore_->GetDevice();
 	hr = device->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
-	if (FAILED(hr)) {
+	if (FAILED(hr)){
 		return;
 	}
 
@@ -319,8 +321,8 @@ void System::LinePipeline() {
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
 	psoDesc.pRootSignature = rootSignature.Get();
 	psoDesc.InputLayout = inputLayoutDesc;
-	psoDesc.VS = { shaderManager_->GetVertexShader(Line)->GetBufferPointer(), shaderManager_->GetVertexShader(Line)->GetBufferSize() };
-	psoDesc.PS = { shaderManager_->GetPixelShader(Line)->GetBufferPointer(), shaderManager_->GetPixelShader(Line)->GetBufferSize() };
+	psoDesc.VS = {shaderManager_->GetVertexShader(Line)->GetBufferPointer(), shaderManager_->GetVertexShader(Line)->GetBufferSize()};
+	psoDesc.PS = {shaderManager_->GetPixelShader(Line)->GetBufferPointer(), shaderManager_->GetPixelShader(Line)->GetBufferSize()};
 	psoDesc.RasterizerState = rasterizeDesc;
 	psoDesc.DepthStencilState = depthStencilDesc;
 	psoDesc.NumRenderTargets = 1;
@@ -331,13 +333,13 @@ void System::LinePipeline() {
 	psoDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
 	// パイプラインステートオブジェクトの作成
-	if (!pipelineStateManager_->CreatePipelineState(Line, L"Fragment.VS.hlsl", L"Fragment.PS.hlsl", rootSignatureDesc, psoDesc, blendMode)) {
+	if (!pipelineStateManager_->CreatePipelineState(Line, L"Fragment.VS.hlsl", L"Fragment.PS.hlsl", rootSignatureDesc, psoDesc, blendMode)){
 		return;
 	}
 }
 
 
-void System::EffectPipeline() {
+void System::EffectPipeline(){
 	//InputLayoutの設定
 	D3D12_INPUT_ELEMENT_DESC inputElementDescs[3] = {};
 	inputElementDescs[0].SemanticName = "POSITION";
@@ -369,7 +371,7 @@ void System::EffectPipeline() {
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 
 	// シェーダの読み込み
-	if (!shaderManager_->LoadShader(Effect, L"Effect.VS.hlsl", L"Effect.PS.hlsl")) {
+	if (!shaderManager_->LoadShader(Effect, L"Effect.VS.hlsl", L"Effect.PS.hlsl")){
 		return;
 	}
 
@@ -419,9 +421,9 @@ void System::EffectPipeline() {
 	ComPtr<ID3DBlob> signatureBlob;
 	ComPtr<ID3DBlob> errorBlob;
 	HRESULT hr = D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
-	if (FAILED(hr)) {
-		if (errorBlob) {
-			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+	if (FAILED(hr)){
+		if (errorBlob){
+			OutputDebugStringA(( char* ) errorBlob->GetBufferPointer());
 		}
 		return;
 	}
@@ -429,7 +431,7 @@ void System::EffectPipeline() {
 	ComPtr<ID3D12RootSignature> rootSignature;
 	ComPtr<ID3D12Device> device = dxCore_->GetDevice();
 	hr = device->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
-	if (FAILED(hr)) {
+	if (FAILED(hr)){
 		return;
 	}
 
@@ -437,8 +439,8 @@ void System::EffectPipeline() {
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
 	psoDesc.pRootSignature = rootSignature.Get();
 	psoDesc.InputLayout = inputLayoutDesc;
-	psoDesc.VS = { shaderManager_->GetVertexShader(Effect)->GetBufferPointer(), shaderManager_->GetVertexShader(Effect)->GetBufferSize() };
-	psoDesc.PS = { shaderManager_->GetPixelShader(Effect)->GetBufferPointer(), shaderManager_->GetPixelShader(Effect)->GetBufferSize() };
+	psoDesc.VS = {shaderManager_->GetVertexShader(Effect)->GetBufferPointer(), shaderManager_->GetVertexShader(Effect)->GetBufferSize()};
+	psoDesc.PS = {shaderManager_->GetPixelShader(Effect)->GetBufferPointer(), shaderManager_->GetPixelShader(Effect)->GetBufferSize()};
 	psoDesc.RasterizerState = rasterizeDesc;
 	psoDesc.DepthStencilState = depthStencilDesc;
 	psoDesc.NumRenderTargets = 1;
@@ -452,8 +454,8 @@ void System::EffectPipeline() {
 	std::wstring vsPath = L"Effect.VS.hlsl";
 	std::wstring psPath = L"Effect.PS.hlsl";
 
-	for (int i = 0; i < static_cast<int>(BlendMode::kBlendModeCount); i++) {
-		BlendMode mode = static_cast<BlendMode>(i);
+	for (int i = 0; i < static_cast< int >(BlendMode::kBlendModeCount); i++){
+		BlendMode mode = static_cast< BlendMode >(i);
 
 		// mode に対応する処理を行う
 		pipelineStateManager_->CreatePipelineState(
@@ -467,7 +469,7 @@ void System::EffectPipeline() {
 	}
 }
 
-void System::SkyBoxPipeline() {
+void System::SkyBoxPipeline(){
 	// InputLayoutの設定
 	D3D12_INPUT_ELEMENT_DESC inputElementDescs[2] = {};
 	inputElementDescs[0].SemanticName = "POSITION";
@@ -479,23 +481,23 @@ void System::SkyBoxPipeline() {
 	inputElementDescs[1].Format = DXGI_FORMAT_R32G32_FLOAT;
 	inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 
-	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
+	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc {};
 	inputLayoutDesc.pInputElementDescs = inputElementDescs;
 	inputLayoutDesc.NumElements = _countof(inputElementDescs);
 
 	// RasterizerStateの設定
-	D3D12_RASTERIZER_DESC rasterizeDesc{};
+	D3D12_RASTERIZER_DESC rasterizeDesc {};
 	rasterizeDesc.CullMode = D3D12_CULL_MODE_NONE;
 	rasterizeDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
 	// DepthStencilStateの設定
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc {};
 	depthStencilDesc.DepthEnable = true;
 	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 
 	// シェーダの読み込み
-	if (!shaderManager_->LoadShader(Skybox, L"Skybox.VS.hlsl", L"Skybox.PS.hlsl")) {
+	if (!shaderManager_->LoadShader(Skybox, L"Skybox.VS.hlsl", L"Skybox.PS.hlsl")){
 		// シェーダの読み込みに失敗した場合のエラーハンドリング
 		return;
 	}
@@ -547,10 +549,10 @@ void System::SkyBoxPipeline() {
 	ComPtr<ID3DBlob> signatureBlob;
 	ComPtr<ID3DBlob> errorBlob;
 	HRESULT hr = D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
-	if (FAILED(hr)) {
+	if (FAILED(hr)){
 		// RootSignatureのシリアライズに失敗した場合のエラーハンドリング
-		if (errorBlob) {
-			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+		if (errorBlob){
+			OutputDebugStringA(( char* ) errorBlob->GetBufferPointer());
 		}
 		return;
 	}
@@ -558,7 +560,7 @@ void System::SkyBoxPipeline() {
 	ComPtr<ID3D12RootSignature> rootSignature;
 	ComPtr<ID3D12Device> device = dxCore_->GetDevice();
 	hr = device->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
-	if (FAILED(hr)) {
+	if (FAILED(hr)){
 		// RootSignatureの作成に失敗した場合のエラーハンドリング
 		return;
 	}
@@ -567,8 +569,8 @@ void System::SkyBoxPipeline() {
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
 	psoDesc.pRootSignature = rootSignature.Get();
 	psoDesc.InputLayout = inputLayoutDesc;
-	psoDesc.VS = { shaderManager_->GetVertexShader(Skybox)->GetBufferPointer(), shaderManager_->GetVertexShader(Skybox)->GetBufferSize() };
-	psoDesc.PS = { shaderManager_->GetPixelShader(Skybox)->GetBufferPointer(), shaderManager_->GetPixelShader(Skybox)->GetBufferSize() };
+	psoDesc.VS = {shaderManager_->GetVertexShader(Skybox)->GetBufferPointer(), shaderManager_->GetVertexShader(Skybox)->GetBufferSize()};
+	psoDesc.PS = {shaderManager_->GetPixelShader(Skybox)->GetBufferPointer(), shaderManager_->GetPixelShader(Skybox)->GetBufferSize()};
 	psoDesc.RasterizerState = rasterizeDesc;
 	psoDesc.DepthStencilState = depthStencilDesc;
 	psoDesc.NumRenderTargets = 1;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "DxBuffer.h"
-#include <Engine/Graphics/Descriptor/SrvLocator.h>
+#include <Engine/Graphics/Descriptor/DescriptorAllocator.h>
 
 template<typename T>
 class DxStructuredBuffer
@@ -30,6 +30,7 @@ private:
 	D3D12_VERTEX_BUFFER_VIEW vbView_ = {};
 
 	// SRVハンドル
+	DescriptorHandle srvHandle_;
 	D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle_ {};
 	D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle_ {};
 };
@@ -52,15 +53,15 @@ void DxStructuredBuffer<T>::SetCommand(ComPtr<ID3D12GraphicsCommandList> cmdList
 }
 
 template<typename T>
-void DxStructuredBuffer<T>::CreateSrv(ComPtr<ID3D12Device> device) {
-	if (cpuHandle_.ptr != 0) {
+void DxStructuredBuffer<T>::CreateSrv(ComPtr<ID3D12Device> device){
+	if (cpuHandle_.ptr != 0){
 		// すでにSRVを作成済みなら再生成しない
 		return;
 	}
 
-	auto [cpu, gpu] = SrvLocator::AllocateSrv();
-	cpuHandle_ = cpu;
-	gpuHandle_ = gpu;
+	srvHandle_ = DescriptorAllocator::Allocate(DescriptorUsage::CbvSrvUav);
+	cpuHandle_ = srvHandle_.cpu;
+	gpuHandle_ = srvHandle_.gpu;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
@@ -75,9 +76,10 @@ void DxStructuredBuffer<T>::CreateSrv(ComPtr<ID3D12Device> device) {
 }
 
 template<typename T>
-void DxStructuredBuffer<T>::ReleaseSrv() {
-	if (cpuHandle_.ptr != 0) {
-		SrvLocator::FreeSrv(cpuHandle_);
+void DxStructuredBuffer<T>::ReleaseSrv(){
+	if (srvHandle_.cpu.ptr != 0){
+		DescriptorAllocator::Free(DescriptorUsage::CbvSrvUav, srvHandle_);
+		srvHandle_ = {};
 		cpuHandle_ = {};
 		gpuHandle_ = {};
 	}

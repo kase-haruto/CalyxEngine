@@ -64,7 +64,7 @@ PsoFactory::Create(const GraphicsPipelineDesc& desc) {
 
 	auto compile = [&](const std::wstring& path,
 					   const wchar_t* profile) -> ComPtr<IDxcBlob> {
-		return shaderCompiler_->CompileShader(L"Resources/shaders/" + path, profile); // ← IDxcBlob が返る
+		return shaderCompiler_->CompileShader(L"Resources/shaders/" + path, profile);
 	};
 
 	if (!desc.vs_.empty()) {

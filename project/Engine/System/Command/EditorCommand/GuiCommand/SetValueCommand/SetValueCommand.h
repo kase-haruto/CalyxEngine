@@ -5,9 +5,6 @@
 #include <functional>
 #include <string>
 
-struct  Vector2;
-struct Vector4;
-struct  vector3;
 
 template<typename T>
 class SetValueCommand 

@@ -4,6 +4,7 @@
 /* ===================================================================== */
 #include <Engine/Graphics/RenderTarget/Interface/IRenderTarget.h>
 #include <Engine/Graphics/SwapChain/DxSwapChain.h>
+#include <Engine/Graphics/Descriptor/DescriptorAllocator.h>
 
 class SwapChainRenderTarget 
 	: public IRenderTarget{
@@ -25,25 +26,24 @@ public:
 	D3D12_VIEWPORT GetViewport() const override{ return viewport_; }
 	D3D12_RECT GetScissorRect() const override{ return scissorRect_; }
 
-	void SetRenderTargetType(RenderTargetType type)override { rtType_ = type; }
-	RenderTargetType GetRenderTargetType()const { return rtType_; }
+	void SetRenderTargetType(RenderTargetType type) override{ rtType_ = type; }
+	RenderTargetType GetRenderTargetType() const{ return rtType_; }
+
+	void ReleaseSRVs();
 
 private:
 	//===================================================================*/
 	//			private variables
 	//===================================================================*/
-	RenderTargetType rtType_;
+	RenderTargetType rtType_ {};
 	DxSwapChain* swapChain_ = nullptr;
 	ID3D12DescriptorHeap* rtvHeap_ = nullptr;
 	UINT rtvDescriptorSize_ = 0;
 	UINT bufferIndex_ = 0;
 
-	D3D12_CPU_DESCRIPTOR_HANDLE srvCpuHandle_{};
-	D3D12_GPU_DESCRIPTOR_HANDLE srvGpuHandle_{};
-	bool hasSrv_ = false;
-
-	D3D12_VIEWPORT viewport_{};
-	D3D12_RECT scissorRect_{};
-
 	std::vector<D3D12_RESOURCE_STATES> currentStates_;
+	std::vector<DescriptorHandle> srvHandles_;
+
+	D3D12_VIEWPORT viewport_ {};
+	D3D12_RECT scissorRect_ {};
 };
