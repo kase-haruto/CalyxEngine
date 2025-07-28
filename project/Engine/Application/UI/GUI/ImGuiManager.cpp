@@ -20,14 +20,10 @@ void ImGuiManager::Initialize(WinApp* winApp, const DxCore* dxCore){
 	pDxCore_ = dxCore;
 
 	ID3D12DescriptorHeap* heap = DescriptorAllocator::GetHeap(DescriptorUsage::CbvSrvUav);
-
-
 	//srvの設定
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-
-
-	// Dockingのみ有効、Viewportsは無効
+	
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	ImGui_ImplWin32_Init(winApp->GetHWND());
