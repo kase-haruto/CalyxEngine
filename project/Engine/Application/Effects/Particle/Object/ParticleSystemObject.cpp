@@ -18,10 +18,11 @@ void ParticleSystemObject::Initialize(){
 }
 
 void ParticleSystemObject::Update(){
+	float dt = ClockManager::GetInstance()->GetDeltaTime();
 	worldTransform_.Update();
 	position_ = worldTransform_.GetWorldPosition();
 
-	FxEmitter::Update();
+	FxEmitter::Update(dt);
 
 	for (const auto& childSp : children_){
 		if (auto ps = std::dynamic_pointer_cast< ParticleSystemObject >(childSp)){

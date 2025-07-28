@@ -53,7 +53,9 @@ public:
 
 	PipelineSet GetPipelineSet(PipelineTag::Object tag, BlendMode blend = BlendMode::NORMAL) const;
 	PipelineSet GetPipelineSet(PipelineTag::PostProcess tag) const;
-
+	const PipelineSet& GetComputePipelineSet(PipelineTag::Compute tag) const {
+		return csCache_[static_cast<size_t>(tag)];
+	}
 	ShaderCompiler* GetCompiler()  const { return compiler_.get(); }
 	PsoFactory* GetFactory()  const { return factory_.get(); }
 	PsoLibrary* GetLibrary()  const { return library_.get(); }
@@ -76,5 +78,6 @@ private:
 
 	std::unordered_map<PipelineKey, PipelineSet, PipelineKeyHasher> objCache_;
 	std::array<PipelineSet, static_cast< size_t >(PipelineTag::PostProcess::Count)> ppCache_ {};
+	std::array<PipelineSet, static_cast<size_t>(PipelineTag::Compute::kComputeCount)>  csCache_{};
 
 };

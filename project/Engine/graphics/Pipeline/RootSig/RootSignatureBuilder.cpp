@@ -25,6 +25,20 @@ RootSignatureBuilder& RootSignatureBuilder::UAV(UINT reg, D3D12_SHADER_VISIBILIT
 	return *this;
 }
 
+RootSignatureBuilder& RootSignatureBuilder::UAVTable(UINT shaderRegister, UINT count, D3D12_SHADER_VISIBILITY visibility) {
+	descriptorTables_.emplace_back();
+	auto& entry = descriptorTables_.back();
+
+	entry.ranges.push_back({ D3D12_DESCRIPTOR_RANGE_TYPE_UAV, count, shaderRegister, 0, D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND });
+	entry.param.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	entry.param.ShaderVisibility = visibility;
+	entry.param.DescriptorTable.NumDescriptorRanges = static_cast<UINT>(entry.ranges.size());
+	entry.param.DescriptorTable.pDescriptorRanges = entry.ranges.data();
+
+	params_.push_back(entry.param);
+	return *this;
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //		samplerを作成
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -138,4 +152,5 @@ D3D12_STATIC_SAMPLER_DESC RootSignatureBuilder::MakeSampler(UINT reg, D3D12_SHAD
 void RootSignatureBuilder::AddParm(D3D12_ROOT_PARAMETER param){
 	params_.push_back(param);
 }
+
 

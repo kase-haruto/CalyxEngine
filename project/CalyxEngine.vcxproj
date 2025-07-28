@@ -111,6 +111,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Application\Effects\Particle\Emitter\BaseEmitter.cpp" />
     <ClCompile Include="Engine\Graphics\Descriptor\DescriptorAllocator.cpp" />
     <ClCompile Include="Engine\PostProcess\CRT\CRTEffect.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Bullet\Factory\BulletFactory.cpp" />
@@ -307,6 +308,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\PostProcess\Vignette\Vignette.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Application\Effects\Particle\Emitter\BaseEmitter.h" />
     <ClInclude Include="Engine\Graphics\Descriptor\DescriptorAllocator.h" />
     <ClInclude Include="Engine\PostProcess\CRT\CRTEffect.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\Details\BulletDetails.h" />

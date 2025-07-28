@@ -4,6 +4,7 @@
 #include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
+#include <Engine/Graphics/Pipeline/Service/PipelineService.h>
 
 SceneContext* SceneContext::current_ = nullptr;
 
@@ -39,7 +40,13 @@ void SceneContext::Update(){
 /////////////////////////////////////////////////////////////////////////////////////////
 //		更新後処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void SceneContext::PostUpdate(){
+void SceneContext::PostUpdate(PipelineService* psoService,ID3D12GraphicsCommandList* cmd){
+	
+	PipelineSet gpuParticlePipelineSet = psoService->GetComputePipelineSet(PipelineTag::Compute::GpuParticle);
+	
+	gpuParticlePipelineSet.SetCompute(cmd);
+	fxSystem_->DispatchEmitters(cmd);
+
 
 }
 

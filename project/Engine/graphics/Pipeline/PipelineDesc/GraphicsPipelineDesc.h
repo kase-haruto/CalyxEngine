@@ -60,6 +60,7 @@ public:
 	std::wstring vs_;		//< vertex		shader path
 	std::wstring ps_;		//< pixel		shader path
 	std::wstring cs_;		//< compute		shader path
+	bool isCompute_ = false;
 
 	// rootSignature ---------------------------------------------------//
 	RootSignatureBuilder root_;	//< root signature

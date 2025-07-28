@@ -22,7 +22,7 @@ public:
 
 	void Initialize();
 	void Update();
-	void PostUpdate();
+	void PostUpdate(class PipelineService*, ID3D12GraphicsCommandList*);
 	void Clear();
 
 	// object API ------------------------------------------------------------

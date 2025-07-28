@@ -98,7 +98,7 @@ void Enemy::Update(){
 		worldTransform_.Update();
 
 		// 演出が終わり、爆発も再生終了したら Dead へ
-		if (t >= 1.0f && !explosionFx_->isPlayng()){
+		if (t >= 1.0f && !explosionFx_->IsPlaying()){
 			deathState_ = DeathState::Dead;
 			deathTimer_ = 0.0f;
 		}

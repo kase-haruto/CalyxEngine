@@ -31,6 +31,8 @@ BaseScene::BaseScene(){
 void BaseScene::PostUpdate([[maybe_unused]]ID3D12GraphicsCommandList* cmdList,
 						   [[maybe_unused]] PipelineService* psoService){
 
+	sceneContext_->PostUpdate(psoService, cmdList);
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

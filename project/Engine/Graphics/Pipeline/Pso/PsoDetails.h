@@ -3,18 +3,23 @@
 #include <d3d12.h>
 #include <cstdint>
 
-struct PipelineSet{
+struct PipelineSet {
 	ID3D12PipelineState* pipelineState;
 	ID3D12RootSignature* rootSignature;
 
-	void SetCommand(ID3D12GraphicsCommandList* cmd) const{
+	void SetCommand(ID3D12GraphicsCommandList* cmd) const {
 		cmd->SetPipelineState(pipelineState);
 		cmd->SetGraphicsRootSignature(rootSignature);
 	}
+
+	void SetCompute(ID3D12GraphicsCommandList* cmd) const {
+		cmd->SetPipelineState(pipelineState);
+		cmd->SetComputeRootSignature(rootSignature);
+	}
 };
 
-namespace PipelineTag{
-	enum class Object :std::uint16_t{
+namespace PipelineTag {
+	enum class Object :std::uint16_t {
 		Object3d,
 		SkinningObject3D,
 		Object2d,
@@ -26,7 +31,7 @@ namespace PipelineTag{
 		count
 	};
 
-	enum class PostProcess :std::uint16_t{
+	enum class PostProcess :std::uint16_t {
 		CopyImage,
 		GrayScale,
 		RadialBlur,
@@ -37,4 +42,8 @@ namespace PipelineTag{
 		Count
 	};
 
+	enum class Compute : std::uint16_t {
+		GpuParticle = 0,
+		kComputeCount
+	};
 } // namespace PipelineTag

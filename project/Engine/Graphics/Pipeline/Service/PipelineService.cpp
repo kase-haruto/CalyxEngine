@@ -21,23 +21,27 @@ void PipelineService::RegisterAllPipelines() {
 	//					パイプラインの作成、登録
 	//===================================================================*/
 
-	auto regObj = [&] (PipelineTag::Object tag, BlendMode mode, auto makeFn){
-		// desc 作成
+	auto regObj = [&](PipelineTag::Object tag, BlendMode mode, auto makeFn) {
 		GraphicsPipelineDesc desc = makeFn(mode);
-		// PSO / RootSignature の取得
 		auto pso = library_->GetOrCreate(desc);
 		auto root = library_->GetRoot(desc);
-		// キャッシュに登録
-		PipelineKey key {tag, mode};
-		objCache_[key] = {pso, root};
-		};
+		PipelineKey key{ tag, mode };
+		objCache_[key] = { pso, root };
+	};
 
-	auto regPP = [&] (PipelineTag::PostProcess tag, auto makeFn){
+	auto regPP = [&](PipelineTag::PostProcess tag, auto makeFn) {
 		GraphicsPipelineDesc desc = makeFn();
 		auto pso = library_->GetOrCreate(desc);
 		auto root = library_->GetRoot(desc);
-		ppCache_[static_cast< size_t >(tag)] = {pso, root};
-		};
+		ppCache_[static_cast<size_t>(tag)] = { pso, root };
+	};
+
+	auto regCS = [&](PipelineTag::Compute tag, auto makeFn) {
+		GraphicsPipelineDesc desc = makeFn(); 
+		auto pso = library_->GetOrCreate(desc);
+		auto root = library_->GetRoot(desc);
+		csCache_[static_cast<size_t>(tag)] = { pso, root };
+	};
 
 
 	//=================== Object Pipelines ================================
@@ -61,6 +65,13 @@ void PipelineService::RegisterAllPipelines() {
 		//===================================================================*/
 		regObj(PipelineTag::Object::Particle, mode, PipelinePresets::MakeParticle);
 	}
+
+	//=================== cs Pipelines ===================================
+
+	//===================================================================*/
+	//						gpuParticle
+	//===================================================================*/
+	regCS(PipelineTag::Compute::GpuParticle, PipelinePresets::MakeGpuParticleCS);
 
 	//=================== PostProcess Pipelines ==========================
 	regPP(PipelineTag::PostProcess::GrayScale, PipelinePresets::MakeGrayScale);
