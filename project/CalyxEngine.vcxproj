@@ -111,6 +111,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Graphics\Descriptor\DescriptorAllocator.cpp" />
     <ClCompile Include="Engine\PostProcess\CRT\CRTEffect.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Bullet\Factory\BulletFactory.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Bullet\Register\BulletRegistrar.cpp" />
@@ -199,7 +200,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Graphics\Pipeline\Pso\PipelineStateObject.cpp" />
     <ClCompile Include="Engine\Graphics\Pipeline\Shader\ShaderManager.cpp" />
     <ClCompile Include="Engine\Graphics\Pipeline\Shader\ShaderCompiler.cpp" />
-    <ClCompile Include="Engine\Graphics\Descriptor\SrvLocator.cpp" />
     <ClCompile Include="Engine\Assets\Model\Model.cpp" />
     <ClCompile Include="Engine\Assets\Model\ModelBuilder.cpp" />
     <ClCompile Include="Engine\Assets\Model\ModelManager.cpp" />
@@ -306,6 +306,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\PostProcess\Vignette\Vignette.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Graphics\Descriptor\DescriptorAllocator.h" />
     <ClInclude Include="Engine\PostProcess\CRT\CRTEffect.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\Details\BulletDetails.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\Factory\BulletFactory.h" />
@@ -437,7 +438,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Graphics\Pipeline\Pso\PipelineStateObject.h" />
     <ClInclude Include="Engine\Graphics\Pipeline\Shader\ShaderManager.h" />
     <ClInclude Include="Engine\Graphics\Pipeline\Shader\ShaderCompiler.h" />
-    <ClInclude Include="Engine\Graphics\Descriptor\SrvLocator.h" />
     <ClInclude Include="Engine\Renderer\Mesh\VertexData.h" />
     <ClInclude Include="Engine\Assets\Model\Model.h" />
     <ClInclude Include="Engine\Assets\Model\ModelBuilder.h" />
@@ -686,6 +686,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Resources\shaders\Object2d.PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

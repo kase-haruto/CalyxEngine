@@ -4,7 +4,6 @@
 /* ===================================================================== */
 /* engine */
 #include <Engine/Graphics/Context/GraphicsGroup.h>
-#include <Engine/Graphics/Descriptor/SrvLocator.h>
 #include <Engine/Application/UI/GUI/ImGuiManager.h>
 
 /* c++ */

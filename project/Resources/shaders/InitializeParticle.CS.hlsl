@@ -25,7 +25,7 @@ static const uint kMaxParticles = 1024;
 //                            main
 ///////////////////////////////////////////////////////////////////////////////
 
-[numthreads(kMaxParticles, 1, 1)]
-void main(uint3 DTid : SV_DispatchThreadID) {
+//[numthreads(kMaxParticles, 1, 1)]
+//void main(uint3 DTid : SV_DispatchThreadID) {
 	
-}
+//}

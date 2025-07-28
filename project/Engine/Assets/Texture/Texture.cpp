@@ -4,7 +4,7 @@
 /* ===================================================================== */
 
 /* engine */
-#include <Engine/Graphics/Descriptor/SrvLocator.h>
+#include <Engine/Graphics/Descriptor/DescriptorAllocator.h>
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 
 /* lib */
@@ -94,7 +94,6 @@ void Texture::Upload(ID3D12Device* device) {
 	);
 	assert(SUCCEEDED(hr));
 
-	// ✅ mip + arraySize 両方に対応した書き込み
 	for (size_t item = 0; item < metadata_.arraySize; ++item) {
 		for (size_t mip = 0; mip < metadata_.mipLevels; ++mip) {
 			const DirectX::Image* img = image_.GetImage(mip, item, 0);
@@ -121,27 +120,33 @@ void Texture::Upload(ID3D12Device* device) {
 }
 
 
-void Texture::CreateShaderResourceView(ID3D12Device* device) {
-	auto srvHandle = SrvLocator::AllocateSrv();
-	srvHandleCPU_ = srvHandle.first;
-	srvHandleGPU_ = srvHandle.second;
+void Texture::CreateShaderResourceView(ID3D12Device* device){
+	DescriptorHandle handle = DescriptorAllocator::Allocate(DescriptorUsage::CbvSrvUav);
+	srvHandleCPU_ = handle.cpu;
+	srvHandleGPU_ = handle.gpu;
 
+	// SRV の設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Format = metadata_.format;
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
-	if (metadata_.IsCubemap()) {
+	if (metadata_.IsCubemap()){
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
 		srvDesc.TextureCube.MostDetailedMip = 0;
 		srvDesc.TextureCube.MipLevels = UINT_MAX;
 		srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
-	} else {
+	} else{
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		srvDesc.Texture2D.MipLevels = UINT(metadata_.mipLevels);
+		srvDesc.Texture2D.MostDetailedMip = 0;
+		srvDesc.Texture2D.MipLevels = static_cast< UINT >(metadata_.mipLevels);
+		srvDesc.Texture2D.PlaneSlice = 0;
+		srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 	}
 
+	// SRV を作成
 	device->CreateShaderResourceView(resource_.Get(), &srvDesc, srvHandleCPU_);
 }
+
 
 const DirectX::TexMetadata& Texture::GetMetaData() {
 	return metadata_;

@@ -19,7 +19,6 @@ public:
 								  DXGI_FORMAT format,
 								  std::optional<std::wstring> name = std::nullopt);
 
-	// SRV/RTV作成（SrvLocatorを使用）
 	void CreateSRV(ID3D12Device* device);
 	void CreateRTV(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE handle);
 
