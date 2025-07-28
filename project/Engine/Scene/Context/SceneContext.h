@@ -22,6 +22,7 @@ public:
 
 	void Initialize();
 	void Update();
+	void PostUpdate();
 	void Clear();
 
 	// object API ------------------------------------------------------------

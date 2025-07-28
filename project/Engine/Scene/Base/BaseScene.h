@@ -28,6 +28,8 @@ public:
 
 	virtual void Initialize()override{}
 	virtual void Update()override{}
+	virtual void PostUpdate(ID3D12GraphicsCommandList* cmdList,
+							class PipelineService* psoService)override;
 	virtual void Draw(ID3D12GraphicsCommandList* cmdList,
 					  class PipelineService* psoService,
 					  RenderTargetType renderTargetType)override;

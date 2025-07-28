@@ -28,6 +28,8 @@ public:
 
 	virtual void Initialize() = 0;
 	virtual void Update() = 0;
+	virtual void PostUpdate(ID3D12GraphicsCommandList* cmdList,
+							class PipelineService* psoService) = 0;
 	virtual void Draw([[maybe_unused]]ID3D12GraphicsCommandList* cmdList,
 					  [[maybe_unused]] class PipelineService*,
 					  [[maybe_unused]] RenderTargetType){}

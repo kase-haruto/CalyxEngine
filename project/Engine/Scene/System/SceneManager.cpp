@@ -15,8 +15,8 @@
 #include <Engine/Application/Input/Input.h>
 #include <Engine/Graphics/Core/GraphicsSystem.h>
 
-SceneManager::SceneManager(DxCore* dxCore, GraphicsSystem* graphicsSystem)
-	: pDxCore_(dxCore), pGraphicsSystem_(graphicsSystem){
+SceneManager::SceneManager(DxCore* dxCore)
+	: pDxCore_(dxCore){
 	// ここでシーンをすべて生成しておく
 	for (int i = 0; i < static_cast< int >(SceneType::count); ++i){
 		scenes_[i] = SceneFactory::CreateScene(static_cast< SceneType >(i));
@@ -78,47 +78,51 @@ void SceneManager::Update(){
 
 	// 現在のシーンを更新
 	scenes_[currentSceneNo_]->Update();
+
 }
 
-void SceneManager::Draw(){
+void SceneManager::PostUpdate(ID3D12GraphicsCommandList* cmdList,
+							  PipelineService* pipelineService){
+	scenes_[currentSceneNo_]->PostUpdate(cmdList,pipelineService);
+}
+
+void SceneManager::DrawNotAffectedFromPE(ID3D12GraphicsCommandList* cmdList, PipelineService* pipelineService){
+	auto* backBuffer = pDxCore_->GetRenderTargetCollection().Get("BackBuffer");
+
+	backBuffer->SetRenderTarget(cmdList);
+
+	// スプライト描画
+	if (auto* baseScene = scenes_[currentSceneNo_].get()){
+		baseScene->DrawSpritesOnly(cmdList,pipelineService);
+	}
+}
+
+void SceneManager::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService){
 	CameraManager::GetInstance()->SetType(Type_Default);
 	auto* gameRT = pDxCore_->GetRenderTargetCollection().Get("Offscreen");
-	DrawForRenderTarget(gameRT);
+	DrawForRenderTarget(gameRT, cmdList,psoService);
 
 #ifdef _DEBUG
 	CameraManager::GetInstance()->SetType(Type_Debug);
 	auto* debugRT = pDxCore_->GetRenderTargetCollection().Get("DebugView");
-	DrawForRenderTarget(debugRT);
+	DrawForRenderTarget(debugRT, cmdList, psoService);
 #endif // _DEBUG
 
 	//プリミティブ描画
-	auto* cmd = pGraphicsSystem_->GetCommandList();
-	GraphicsGroup::GetInstance()->SetCommand(cmd, PipelineType::Line, BlendMode::NORMAL);
-	CameraManager::SetCommand(cmd, PipelineType::Line);
+	GraphicsGroup::GetInstance()->SetCommand(cmdList, PipelineType::Line, BlendMode::NORMAL);
+	CameraManager::SetCommand(cmdList, PipelineType::Line);
 	PrimitiveDrawer::GetInstance()->Render();
 	PrimitiveDrawer::GetInstance()->ClearMesh();
 }
 
-void SceneManager::DrawNotAffectedFromPE() {
-	auto* cmd = pGraphicsSystem_->GetCommandList();
-	auto* backBuffer = pDxCore_->GetRenderTargetCollection().Get("BackBuffer");
-
-	backBuffer->SetRenderTarget(cmd);
-
-	// スプライト描画
-	if (auto* baseScene = scenes_[currentSceneNo_].get()) {
-		baseScene->DrawSpritesOnly(cmd, pGraphicsSystem_->GetPipelineService());
-	}
-}
-
-void SceneManager::DrawForRenderTarget(IRenderTarget* target){
-	auto* cmd = pGraphicsSystem_->GetCommandList();
-
+void SceneManager::DrawForRenderTarget(IRenderTarget* target, 
+									   ID3D12GraphicsCommandList* cmdList,
+									   PipelineService*psoService){
 	// 出力先RT設定
-	target->SetRenderTarget(cmd);
-	target->Clear(cmd);
+	target->SetRenderTarget(cmdList);
+	target->Clear(cmdList);
 
-	scenes_[currentSceneNo_]->Draw(cmd, pGraphicsSystem_->GetPipelineService(), target->GetRenderTargetType());
+	scenes_[currentSceneNo_]->Draw(cmdList, psoService, target->GetRenderTargetType());
 }
 
 void SceneManager::SetEngineUI([[maybe_unused]] EngineUICore* ui){

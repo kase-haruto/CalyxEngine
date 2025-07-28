@@ -46,7 +46,7 @@ void EngineController::Initialize(HINSTANCE hInstance){
 
 
 	// シーンマネージャ初期化
-	sceneManager_ = std::make_unique<SceneManager>(system_->GetDxCore(),graphicsSystem_.get());
+	sceneManager_ = std::make_unique<SceneManager>(system_->GetDxCore());
 	sceneManager_->SetEngineUI(engineUICore_.get());
 	sceneManager_->Initialize();
 
@@ -108,6 +108,9 @@ void EngineController::BeginUpdate(){
 //		更新後処理
 /////////////////////////////////////////////////////////////////////////////////////////
 void EngineController::EndUpdate(){
+	sceneManager_->PostUpdate(graphicsSystem_->GetCommandList(),
+							  graphicsSystem_->GetPipelineService());
+
 	// UI描画
 	engineUICore_->Render();
 
@@ -122,11 +125,11 @@ void EngineController::EndUpdate(){
 /////////////////////////////////////////////////////////////////////////////////////////
 void EngineController::Render() {
 	// シーンの描画
-	sceneManager_->Draw();
+	sceneManager_->Draw(graphicsSystem_->GetCommandList(), graphicsSystem_->GetPipelineService());
 
 	system_->ExecutePostEffect(graphicsSystem_->GetPipelineService());
 
-	sceneManager_->DrawNotAffectedFromPE();
+	sceneManager_->DrawNotAffectedFromPE(graphicsSystem_->GetCommandList(), graphicsSystem_->GetPipelineService());
 	// 描画後処理
 	system_->EndFrame();
 }

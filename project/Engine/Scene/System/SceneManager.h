@@ -19,19 +19,24 @@ class SceneManager
 	: public SceneTransitionRequestor{
 public:
 	SceneManager() = default;
-	SceneManager(DxCore* dxCore,GraphicsSystem* graphicsSystem);
+	SceneManager(DxCore* dxCore);
 	~SceneManager();
 
 	void Initialize();
 	void Update();
-	void Draw();
-	void DrawNotAffectedFromPE();
-	void DrawForRenderTarget(IRenderTarget* target);
+	void PostUpdate(ID3D12GraphicsCommandList* cmdList, PipelineService* pipelineService);
+
+	void Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService);
+	void DrawNotAffectedFromPE(ID3D12GraphicsCommandList* cmdList, PipelineService* pipelineService);
 
 	void SetEngineUI(EngineUICore* ui);
 	void RequestSceneChange(SceneType nextScene)override;
-	void SetGraphicsSystem(GraphicsSystem* graphicsSystem) { pGraphicsSystem_ = graphicsSystem; }
 	SceneContext* GetCurrentSceneContext() const;
+
+private:
+	void DrawForRenderTarget(IRenderTarget* target,
+							 ID3D12GraphicsCommandList* cmdList,
+							 PipelineService* psoService);
 
 
 private:
@@ -45,7 +50,6 @@ private:
 	// UIパネルなど
 	EngineUICore* pEngineUI_ = nullptr;
 	DxCore* pDxCore_ = nullptr;
-	GraphicsSystem* pGraphicsSystem_ = nullptr;
 
 public:
 	bool gameResult_ = false;
