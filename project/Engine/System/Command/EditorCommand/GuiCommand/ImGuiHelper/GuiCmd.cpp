@@ -10,6 +10,8 @@
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Foundation/Math/Vector4.h>
 
+// exterunal
+#include <externals/imgui/imgui_internal.h>
 
 /* ==========================================================================================================
 /*			DragInt
@@ -115,6 +117,66 @@ bool GuiCmd::DragFloat4(const char* label, Vector4& value, float speed, float mi
 	}
 	return changed;
 }
+
+
+bool GuiCmd::ColoredDragFloat3(const char* label,
+							   Vector3& value,
+							   float speed,
+							   float min,
+							   float max,
+							   const char* format,
+							   const char* suffix){
+	static GuiCmdInternal::GuiCmdSetValueComputer<Vector3> computer;
+	Vector3 temp = value;
+	bool changed = false;
+
+	const char* axisLabels[3] = {"X", "Y", "Z"};
+	const ImVec4 axisColors[3] = {
+		ImVec4(1.0f, 0.4f, 0.4f, 1.0f), // Red
+		ImVec4(0.5f, 1.0f, 0.5f, 1.0f), // Green
+		ImVec4(0.5f, 0.7f, 1.0f, 1.0f)  // Blue
+	};
+
+	ImGui::Text("%s", label);
+	ImGui::PushID(label);
+
+	for (int i = 0; i < 3; ++i){
+		ImGui::PushID(i);
+		ImGui::PushStyleColor(ImGuiCol_Text, axisColors[i]);
+		ImGui::Text("%s", axisLabels[i]);
+		ImGui::SameLine();
+		ImGui::PopStyleColor();
+
+		std::string fmt = format ? format : "%.3f";
+		if (suffix && suffix[0] != '\0'){
+			fmt += std::string(suffix);
+		}
+
+		ImGui::PushItemWidth(60.0f);
+		changed |= ImGui::DragFloat("##v", &(&temp.x)[i], speed, min, max, fmt.c_str());
+		ImGui::PopItemWidth();
+
+		if (i < 2) ImGui::SameLine();
+		ImGui::PopID();
+	}
+
+	ImGui::PopID();
+
+	if (changed)
+		value = temp;
+
+	if (ImGui::IsItemActivated()) computer.Begin(value);
+
+	if (ImGui::IsItemDeactivatedAfterEdit()){
+		std::string labelStr(label);
+		auto cmd = computer.End(value, [&value] (const Vector3& v){ value = v; }, labelStr);
+		if (cmd) CommandManager::GetInstance()->Execute(std::move(cmd));
+	}
+
+	return changed;
+}
+
+
 #pragma endregion
 
 /* ==========================================================================================================

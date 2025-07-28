@@ -41,17 +41,17 @@ void BaseTransform::Initialize() {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	imgui
 /////////////////////////////////////////////////////////////////////////////////////////
-void BaseTransform::ShowImGui(const std::string& label) {
-	if (ImGui::CollapsingHeader(label.c_str())) {
-		std::string scaleLabel = "scale";
-		std::string rotationLabel = "rotation";
-		std::string translationLabel = "translate";
-
-		GuiCmd::DragFloat3(scaleLabel.c_str(), scale);
-		if (GuiCmd::DragFloat3(rotationLabel.c_str(), eulerRotation)) {
-			rotationSource = RotationSource::Euler; 
+void BaseTransform::ShowImGui(const std::string& label){
+	if (ImGui::CollapsingHeader(label.c_str())){
+		if (GuiCmd::ColoredDragFloat3("Scale", scale, 0.01f)){
 		}
-		GuiCmd::DragFloat3(translationLabel.c_str(), translation);
+
+		if (GuiCmd::ColoredDragFloat3("Rotation", eulerRotation, 0.1f, -360.0f, 360.0f, "%.1f", "°")){
+			rotationSource = RotationSource::Euler;
+		}
+
+		if (GuiCmd::ColoredDragFloat3("Translation", translation, 0.01f)){
+		}
 	}
 }
 

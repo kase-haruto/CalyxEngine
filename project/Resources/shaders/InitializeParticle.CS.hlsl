@@ -7,7 +7,7 @@ struct Particle {
 	float3 scale;
 	float lifeTime;
 	float3 velocity;
-	float currentTIme;
+	float currentTime;
 	float4 color;
 };
 
@@ -16,6 +16,15 @@ static const uint kMaxParticles = 1024;
 ///////////////////////////////////////////////////////////////////////////////
 //                            cbuffers
 ///////////////////////////////////////////////////////////////////////////////
+cbuffer EmitterParams : register(b0) {
+	float deltaTime;
+	float3 acceleration;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//                            UAV
+///////////////////////////////////////////////////////////////////////////////
+RWStructuredBuffer<Particle> particles : register(u0);
 
 ///////////////////////////////////////////////////////////////////////////////
 //                            tables
@@ -25,7 +34,28 @@ static const uint kMaxParticles = 1024;
 //                            main
 ///////////////////////////////////////////////////////////////////////////////
 
-//[numthreads(kMaxParticles, 1, 1)]
-//void main(uint3 DTid : SV_DispatchThreadID) {
-	
-//}
+[numthreads(256, 1, 1)]
+void main(uint3 DTid : SV_DispatchThreadID) {
+	uint id = DTid.x;
+	if (id >= kMaxParticles)
+		return;
+
+	Particle p = particles[id];
+
+	// スキップ
+	if (p.currentTime < 0.0f)
+		return;
+
+	p.currentTime += deltaTime;
+
+	if (p.currentTime >= p.lifeTime) {
+		p.currentTime = -1.0f;
+		particles[id] = p;
+		return;
+	}
+
+	p.velocity += acceleration * deltaTime;
+	p.translate += p.velocity * deltaTime;
+
+	particles[id] = p;
+}

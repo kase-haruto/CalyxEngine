@@ -155,7 +155,7 @@ void BaseModel::DrawInstanced(const std::vector<WorldTransform>& transforms,
 	}
 	instanceBuffer_.TransferVectorData(matrices);
 
-	cmdList->SetGraphicsRootDescriptorTable(1, instanceBuffer_.GetGpuHandle());
+	cmdList->SetGraphicsRootDescriptorTable(1, instanceBuffer_.GetGpuSrvHandle());
 
 	// マテリアル・テクスチャ等
 	materialBuffer_.SetCommand(cmdList, 0);

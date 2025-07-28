@@ -22,6 +22,7 @@ public:
 	void End();
 	void Draw();
 
+private:
 	void CustomizeImGuiStyle();
 private:
 	const DxCore* pDxCore_ = nullptr;

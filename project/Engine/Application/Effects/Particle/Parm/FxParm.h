@@ -19,9 +19,6 @@ public:
 	void SetConstant(const T& value);
 	void SetRandom(const T& min, const T& max);
 	T Get() const;
-
-	
-
 	FxValueMode GetMode() const{ return mode_; }
 	const T& GetMin() const{ return min_; }
 	const T& GetMax() const{ return max_; }

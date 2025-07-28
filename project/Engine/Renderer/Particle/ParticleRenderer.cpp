@@ -38,7 +38,7 @@ void ParticleRenderer::Render(
 		DrawModelInstanced(
 			model, cmdList,
 			static_cast< UINT >(emitter->GetUnits().size()),
-			emitter->GetInstanceBuffer().GetGpuHandle()
+			emitter->GetInstanceBuffer().GetGpuSrvHandle()
 		);
 	}
 }
@@ -62,7 +62,7 @@ void ParticleRenderer::RenderGrouped(const std::string& modelPath,
 
 	DrawModelInstanced(model, cmdList,
 					   static_cast< UINT >(gpuUnits.size()),
-					   tempBuffer.GetGpuHandle());
+					   tempBuffer.GetGpuSrvHandle());
 }
 
 void ParticleRenderer::EnsureModelIsReady(ModelData& model, ID3D12Device* device){

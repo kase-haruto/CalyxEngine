@@ -19,7 +19,7 @@ private:
 
 public:
 	// ------------------------------------------------------------------
-	//  Connection : subscribe から返る RAII オブジェクト
+	//  subscribe から返る RAII オブジェクト
 	// ------------------------------------------------------------------
 	class Connection{
 	public:
@@ -53,7 +53,7 @@ public:
 	using Handler = std::function<void(const Event&)>;
 
 	// ------------------------------------------------------------------
-	// subscribe : ハンドラ登録 → Connection 返却
+	// ハンドラ登録 → Connection 返却
 	// ------------------------------------------------------------------
 	template<class Event>
 	static Connection Subscribe(Handler<Event> h){
@@ -64,7 +64,7 @@ public:
 	}
 
 	// ------------------------------------------------------------------
-	// publish : イベント発行
+	// イベント発行
 	// ------------------------------------------------------------------
 	template<class Event>
 	static void Publish(const Event& e){
@@ -92,7 +92,7 @@ private:
 };
 
 // ============================================================================
-// 代表的なイベント型サンプル
+// イベント型
 // ============================================================================
 struct ObjectAdded{ std::shared_ptr<class SceneObject> sp; };
 struct ObjectRemoved{ std::shared_ptr<class SceneObject> sp; };

@@ -4,6 +4,7 @@
 /* ===================================================================== */
 
 // engine
+#include <Data/Engine/Configs/Scene/Objects/Particle/EmitterConfig.h>
 #include <Engine/Application/Effects/Particle/Detail/ParticleDetail.h>
 #include <Engine/Application/Effects/Particle/FxUnit.h>
 #include <Engine/Application/Effects/Particle/Module/Container/FxModuleContainer.h>
@@ -12,11 +13,10 @@
 #include <Engine/Graphics/Buffer/DxStructuredBuffer.h>
 #include <Engine/Graphics/Material.h>
 #include <Engine/Objects/ConfigurableObject/ConfigurableObject.h>
-#include <Data/Engine/Configs/Scene/Objects/Particle/EmitterConfig.h>
 
 // c++
-#include <vector>
 #include <functional>
+#include <vector>
 
 // forward declaration
 struct Vector3;
@@ -114,7 +114,7 @@ private:
 
 private:
 	//resources
-	ParticleMaterial material_;							//< パーティクルのマテリアル
+	ParticleMaterial material_;	//< パーティクルのマテリアル
 	DxStructuredBuffer<ParticleConstantData> instanceBuffer_;
 	DxConstantBuffer<ParticleMaterial> materialBuffer_; // パーティクルマテリアルの定数バッファ
 };
