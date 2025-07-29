@@ -97,20 +97,31 @@ void SceneManager::DrawNotAffectedFromPE(ID3D12GraphicsCommandList* cmdList, Pip
 	}
 }
 
-void SceneManager::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService){
-	CameraManager::GetInstance()->SetType(Type_Default);
+void SceneManager::Draw(ID3D12GraphicsCommandList* cmdList,
+						PipelineService* psoService){
+	// ---------- Game (Default camera) ----------
+	CameraManager::SetTypeStatic(CameraType::Default);
+
 	auto* gameRT = pDxCore_->GetRenderTargetCollection().Get("Offscreen");
-	DrawForRenderTarget(gameRT, cmdList,psoService);
+	DrawForRenderTarget(gameRT, cmdList, psoService);
 
 #ifdef _DEBUG
-	CameraManager::GetInstance()->SetType(Type_Debug);
+	// ---------- Debug view ----------
+	CameraManager::SetTypeStatic(CameraType::Debug);
+
 	auto* debugRT = pDxCore_->GetRenderTargetCollection().Get("DebugView");
 	DrawForRenderTarget(debugRT, cmdList, psoService);
-#endif // _DEBUG
+#endif
 
-	//プリミティブ描画
-	GraphicsGroup::GetInstance()->SetCommand(cmdList, PipelineType::Line, BlendMode::NORMAL);
-	CameraManager::SetCommand(cmdList, PipelineType::Line);
+	// ---------- Primitive lines ----------
+	GraphicsGroup::GetInstance()->SetCommand(cmdList,
+											 PipelineType::Line,
+											 BlendMode::NORMAL);
+
+	// アクティブカメラの行列をルート定数へ
+	if (auto* cam = CameraManager::GetActive())
+		cam->SetCommand(cmdList, PipelineType::Line);
+
 	PrimitiveDrawer::GetInstance()->Render();
 	PrimitiveDrawer::GetInstance()->ClearMesh();
 }

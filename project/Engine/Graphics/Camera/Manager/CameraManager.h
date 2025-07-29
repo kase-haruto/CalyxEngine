@@ -16,42 +16,42 @@
 /* ========================================================================
 /*	enum
 /* ===================================================================== */
-enum class CameraType{
-	Default,
-	Debug,
-};
 class SceneContext; // fwd
+
+enum class CameraType{ Default, Debug };
 
 class CameraManager{
 public:
-	/* シーン所有側が呼ぶ */
+	//――― Scene‑side lifecycle ―――――――――――――――――――――――――――――
 	void Initialize(SceneContext* owner);
 	void Update(float dt);
 	void TransferToGPU();
-	void Finalize();
+	static void Finalize();
 
-	/* 非 static API */
-	Camera3d* GetCamera3d(){ return camera3d_.get(); }
-	DebugCamera* GetDebugCamera(){ return debugCamera_.get(); }
-	BaseCamera* GetActiveCamera(){ return cameras_[type_]; }
+	//――― Non‑static API ――――――――――――――――――――――――――――――――――
+	Camera3d* Main3D(){ return main_.get(); }
+	DebugCamera* DebugCam(){ return debug_.get(); }
+	BaseCamera* Active(){ return cameras_[active_]; }
 
-	void SetType(CameraType t);
-	void SetViewportSize(ViewportType, const Vector2&);
-	Vector2 GetViewportSize(ViewportType) const;
-	void SetAspectRatio(float w, float h);
-	void Shake(float dur, float inten){ cameras_[type_]->StartShake(dur, inten); }
+	void  SetType(CameraType t);
+	const Vector2& ViewportSize(ViewportType) const; // const ref (cheap & safe)
+	void  SetViewportSize(ViewportType, const Vector2&);
+	void  SetAspectRatio(float w, float h);
+	void  Shake(float d, float i){ Active()->StartShake(d, i); }
 
-	/* 旧互換: 現在の SceneContext から取得して返す */
+	//――― Thin static wrappers (legacy code support) ―――――――――
 	static Camera3d* GetMain3d();
 	static DebugCamera* GetDebug();
 	static BaseCamera* GetActive();
-	static void        SetTypeStatic(CameraType);
-	static void        SetViewportSizeStatic(ViewportType, const Vector2&);
+	static void SetTypeStatic(CameraType);
+	static const Vector2& GetViewportSizeStatic(ViewportType);
+	static void SetViewportSizeStatic(ViewportType, const Vector2&);
+
 private:
-	CameraType type_ = CameraType::Default;
-	Vector2 mainVp_ {1920,1080};
-	Vector2 debugVp_ {800,600};
-	std::shared_ptr<Camera3d>    camera3d_;
-	std::shared_ptr<DebugCamera> debugCamera_;
+	CameraType active_ = CameraType::Default;
+	Vector2 vpMain_ {1920,1080}, vpDebug_ {800,600};
+
+	std::shared_ptr<Camera3d>   main_;
+	std::shared_ptr<DebugCamera>debug_;
 	std::unordered_map<CameraType, BaseCamera*> cameras_;
 };

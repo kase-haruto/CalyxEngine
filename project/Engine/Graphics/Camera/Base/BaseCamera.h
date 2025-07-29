@@ -64,8 +64,6 @@ public:
 	void SetAspectRatio(float aspect)override;
 
 
-	Matrix4x4 GetViewProjection()const{ return viewProjectionMatrix_; }
-
 protected:
 	//==================================================================*//
 	//			protected variables

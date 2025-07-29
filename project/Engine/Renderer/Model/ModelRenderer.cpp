@@ -171,57 +171,65 @@ void ModelRenderer::BuildSkinnedBatches(){
 /////////////////////////////////////////////////////////////////////////////////////////
 void ModelRenderer::DrawAll(ID3D12GraphicsCommandList* cmdList,
 							[[maybe_unused]] ID3D12Device* device,
-							[[maybe_unused]] const Camera3d* camera,
+							[[maybe_unused]] const Camera3d* /*unused*/,
 							PipelineService* psoService,
 							LightLibrary* lightLibrary){
 	psoService->ResetState();
 
-	// -------------------- 静的モデル描画 --------------------
+	//------------------------------------------------------------
+	// 1) 静的モデル
+	//------------------------------------------------------------
 	{
 		PipelineKey lastKey {};
-		bool hasLast = false;
+		bool        hasLast = false;
 
 		for (auto& [key, batch] : staticBatches_){
 			if (batch.empty()) continue;
 
 			if (!hasLast || !(key == lastKey)){
-				auto pipelineSet = psoService->GetPipelineSet(key.tag, key.blend);
-				psoService->SetCommand(pipelineSet, cmdList);
-				CameraManager::SetCommand(cmdList, PipelineType::Object3D);
+				const auto ps = psoService->GetPipelineSet(key.tag, key.blend);
+				psoService->SetCommand(ps, cmdList);
+
+				if (auto* cam = CameraManager::GetActive())
+					cam->SetCommand(cmdList, PipelineType::Object3D);
+
 				lightLibrary->SetCommand(cmdList, PipelineType::Object3D);
+
 				lastKey = key;
 				hasLast = true;
 			}
 
 			for (auto& [model, visible] : batch){
-				if (!visible.empty()){
-					model->DrawInstanced(visible, cmdList);
-				}
+				if (!visible.empty()) model->DrawInstanced(visible, cmdList);
 			}
 		}
 	}
 
-	// -------------------- アニメーションモデル描画 --------------------
+	//------------------------------------------------------------
+	// 2) スキンメッシュ
+	//------------------------------------------------------------
 	{
 		PipelineKey lastKey {};
-		bool hasLast = false;
+		bool        hasLast = false;
 
 		for (auto& [key, batch] : skinnedBatches_){
 			if (batch.empty()) continue;
 
 			if (!hasLast || !(key == lastKey)){
-				auto pipelineSet = psoService->GetPipelineSet(key.tag, key.blend);
-				psoService->SetCommand(pipelineSet, cmdList);
-				CameraManager::SetCommand(cmdList, PipelineType::SkinningObject3D);
+				const auto ps = psoService->GetPipelineSet(key.tag, key.blend);
+				psoService->SetCommand(ps, cmdList);
+
+				if (auto* cam = CameraManager::GetActive())
+					cam->SetCommand(cmdList, PipelineType::SkinningObject3D);
+
 				lightLibrary->SetCommand(cmdList, PipelineType::SkinningObject3D);
+
 				lastKey = key;
 				hasLast = true;
 			}
 
 			for (auto& [model, visible] : batch){
-				for (const auto& tf : visible){
-					model->Draw(tf);
-				}
+				for (const auto& tf : visible) model->Draw(tf);
 			}
 		}
 	}

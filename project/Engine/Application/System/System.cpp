@@ -197,7 +197,6 @@ void System::Finalize(){
 	ModelManager::GetInstance()->Finalize();
 	PrimitiveDrawer::GetInstance()->Finalize();
 	//カメラの開放
-	CameraManager::Finalize();
 	//pipelineの終了処理
 	pipelineStateManager_->Finalize();
 	DescriptorAllocator::Finalize();

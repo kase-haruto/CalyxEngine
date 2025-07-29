@@ -41,9 +41,9 @@ void LevelEditor::Initialize(){
 
 	// ビューポートの初期化
 	mainViewport_ = std::make_unique<Viewport>(ViewportType::VIEWPORT_MAIN, "Game Viewport");
-	mainViewport_->SetCamera(CameraManager::GetInstance()->GetCamera3d());
+	mainViewport_->SetCamera(CameraManager::GetMain3d());
 	debugViewport_ = std::make_unique<Viewport>(ViewportType::VIEWPORT_DEBUG, "Debug Viewport");
-	debugViewport_->SetCamera(CameraManager::GetDebugCamera());
+	debugViewport_->SetCamera(CameraManager::GetDebug());
 
 	performanceOverlay_ = std::make_unique<PerformanceOverlay>();
 
@@ -310,8 +310,8 @@ void LevelEditor::TryPickUnderCursor(){
 	Vector2 mousePos = Vector2(relativeX, relativeY);
 
 	// Ray生成
-	Matrix4x4 view = CameraManager::GetDebugCamera()->GetViewMatrix();
-	Matrix4x4 proj = CameraManager::GetDebugCamera()->GetProjectionMatrix();
+	Matrix4x4 view = CameraManager::GetDebug()->GetViewMatrix();
+	Matrix4x4 proj = CameraManager::GetDebug()->GetProjectionMatrix();
 
 	Ray ray = Raycastor::ConvertMouseToRay(mousePos, view, proj, size);
 	if (SceneObject* picked = PickSceneObjectByRay(ray)){

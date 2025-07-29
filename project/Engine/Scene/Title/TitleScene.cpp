@@ -42,8 +42,6 @@ void TitleScene::Initialize() {
 	sceneContext_->Initialize();
 	LoadAssets();
 
-	CameraManager::GetInstance()->SetType(CameraType::Type_Default);
-
 	//=========================
 	// グラフィック関連
 	//=========================
@@ -59,9 +57,6 @@ void TitleScene::Initialize() {
 
 void TitleScene::Update(float dt) {
 	playSession_.Update(dt);
-
-	/* カメラ関連更新 ============================*/
-	CameraManager::Update(dt);
 
 	/* 3dObject ============================*/
 	//地面の更新

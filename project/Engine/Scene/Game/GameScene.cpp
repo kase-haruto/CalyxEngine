@@ -51,7 +51,7 @@ void GameScene::Initialize(){
 	/* ----- Camera ----- */
 	railCamera_ = SceneAPI::Instantiate<RailCamera>("railCamera");
 	railCamera_->Initialize();
-	CameraManager::GetInstance()->SetType(CameraType::Type_Default);
+	CameraManager::GetMain3d()->SetParent(railCamera_);
 
 	/* ----- Field ----- */
 	modelField_ = SceneAPI::Instantiate<BaseGameObject>("terrain.obj", "field");
@@ -78,9 +78,6 @@ void GameScene::Update(float dt){
 	playSession_.Update(dt);
 
 	/* カメラ関連更新 ============================*/
-	CameraManager::GetCamera3d()->SetCamera(railCamera_->GetPosition(), railCamera_->GetRotation());
-	CameraManager::Update(dt);
-
 	player_->SetEnemyList(enemyCollection_->GetEnemies());
 
 

@@ -27,8 +27,6 @@ BaseScene::BaseScene(){
 
 void BaseScene::Initialize(){
 	playSession_.Initialize(sceneContext_.get());
-
-	CameraManager::Initialize();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -79,7 +77,7 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmdList,
 	}
 
 	//======================== モデル描画 ========================//
-	const Camera3d* camera = CameraManager::GetInstance()->GetCamera3d();
+	const Camera3d* camera = CameraManager::GetMain3d();
 	modelRenderer_->PreCullAndBatch(camera);
 	modelRenderer_->DrawAll(cmdList,
 							GraphicsGroup::GetInstance()->GetDevice().Get(),

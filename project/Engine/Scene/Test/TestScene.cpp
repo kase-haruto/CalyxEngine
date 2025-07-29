@@ -42,9 +42,6 @@ void TestScene::Initialize(){
 
 	LoadAssets();
 
-	CameraManager::GetInstance()->SetType(CameraType::Type_Debug);
-	auto* cam = CameraManager::GetInstance()->GetCamera3d();
-	cam->Initialize();
 	//=========================
 	// グラフィック関連
 	//=========================
@@ -87,8 +84,6 @@ void TestScene::Update(float dt){
 	ImGui::End();
 
 	playSession_.Update(dt);
-
-	CameraManager::Update(dt);
 
 	//衝突判定
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();

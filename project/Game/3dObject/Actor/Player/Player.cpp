@@ -223,7 +223,7 @@ void Player::RequestLockOn(){
 	if (lockedOnTargets_.size() >= kMaxLockOn) return;
 
 	// 現在有効な 3D カメラ
-	Camera3d* camera = CameraManager::GetInstance()->GetCamera3d();
+	Camera3d* camera = CameraManager::GetMain3d();
 	if (!camera) return;
 
 	const Vector2 reticleScreen = WorldToScreen(reticleTransform_.GetWorldPosition());

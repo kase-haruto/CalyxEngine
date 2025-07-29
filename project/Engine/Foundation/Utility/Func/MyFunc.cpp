@@ -408,7 +408,7 @@ Vector3 ExtractEulerAnglesFromMatrix(const Matrix4x4& worldMatrix) {
 }
 
 Vector2 WorldToScreen(const Vector3& worldPos) {
-	const Matrix4x4& viewProj = CameraManager::GetCamera3d()->GetViewProjectionMatrix();
+	const Matrix4x4& viewProj = CameraManager::GetMain3d()->GetViewProjectionMatrix();
 
 	// ワールド座標を Vector4 にして変換
 	Vector4 clipPos = Vector4::TransformVector( viewProj, Vector4(worldPos, 1.0f));
@@ -434,8 +434,8 @@ Vector3 ScreenToWorld(const Vector2& screenPos, float depthZ) {
 	// ビューポートサイズ（例として固定値、必要に応じて動的に取得してください）
 	float viewportX = 0.0f;
 	float viewportY = 0.0f;
-	float viewportWidth = CameraManager::GetInstance()->GetViewportSize(ViewportType::VIEWPORT_MAIN).x;
-	float viewportHeight = CameraManager::GetInstance()->GetViewportSize(ViewportType::VIEWPORT_MAIN).y;
+	float viewportWidth = CameraManager::GetViewportSizeStatic(ViewportType::VIEWPORT_MAIN).x;
+	float viewportHeight = CameraManager::GetViewportSizeStatic(ViewportType::VIEWPORT_MAIN).y;
 	float minZ = 0.0f; // 通常0～1の範囲
 	float maxZ = 1.0f;
 
@@ -443,7 +443,7 @@ Vector3 ScreenToWorld(const Vector2& screenPos, float depthZ) {
 	Matrix4x4 matViewport = Matrix4x4::MakeViewportMatrix(viewportX, viewportY, viewportWidth, viewportHeight, minZ, maxZ);
 
 	// ビュー・プロジェクション行列を取得
-	Matrix4x4 matViewProj = CameraManager::GetViewProjectionMatrix();
+	Matrix4x4 matViewProj = CameraManager::GetMain3d()->GetViewProjectionMatrix();
 
 	// ビューポート行列とビュー投影行列の合成
 	Matrix4x4 matVPV = Matrix4x4::Multiply(matViewProj, matViewport);
@@ -487,7 +487,7 @@ bool WorldToScreen(const Vector3& worldPos, Vector2& outScreenPos) {
 	Matrix4x4 matViewport = Matrix4x4::MakeViewportMatrix(0, 0, 1280.0f, 720.0f, 0, 1);
 
 	// ビュー・プロジェクションの合成行列を計算
-	Matrix4x4 matVP = CameraManager::GetViewProjectionMatrix();
+	Matrix4x4 matVP = CameraManager::GetMain3d()->GetViewProjectionMatrix();
 
 	// ワールド空間の座標をビュー・プロジェクション行列で変換（クリップ座標）
 	Vector4 clipPos = MultiplyMatrixVector(matVP, Vector4(worldPos.x, worldPos.y, worldPos.z, 1));

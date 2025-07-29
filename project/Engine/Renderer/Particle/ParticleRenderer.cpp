@@ -12,13 +12,17 @@ void ParticleRenderer::Render(
 	PipelineService* pipelineService,
 	ID3D12GraphicsCommandList* cmdList
 ){
-	auto psoSet = pipelineService->GetPipelineSet(PipelineTag::Object::Particle, BlendMode::ADD);
-	psoSet.SetCommand(cmdList);
+	// パーティクル用 PSO をセット
+	auto psoSet = pipelineService->GetPipelineSet(PipelineTag::Object::Particle,
+											 BlendMode::ADD);
+	pipelineService->SetCommand(psoSet, cmdList);
 
-	CameraManager::GetInstance()->SetCommand(cmdList, PipelineType::StructuredObject);
+	// ── アクティブ カメラのビュー投影行列をルート定数へ
+	if (auto* cam = CameraManager::GetActive())
+		cam->SetCommand(cmdList, PipelineType::StructuredObject);
 
-
-	auto device = GraphicsGroup::GetInstance()->GetDevice().Get();
+	// デバイス取得はそのまま
+	auto* device = GraphicsGroup::GetInstance()->GetDevice().Get();
 
 	for (const auto& emitter : emitters){
 		if (!emitter || !emitter->IsDrawEnable() || emitter->GetUnits().empty()) continue;
