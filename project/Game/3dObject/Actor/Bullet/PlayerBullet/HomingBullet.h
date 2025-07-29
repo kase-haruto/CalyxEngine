@@ -17,7 +17,7 @@ public:
 	void ShootInitialize(const Vector3& initPos, const Vector3& velocity)override;
 	void Initialize()override;
 	void SetTarget(const Actor* target);
-	void Update() override;
+	void Update(float dt) override;
 
 	const Vector3 GetCenterPos() const override;
 

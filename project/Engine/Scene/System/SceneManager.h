@@ -23,7 +23,7 @@ public:
 	~SceneManager();
 
 	void Initialize();
-	void Update();
+	void Update(float dt);
 	void PostUpdate(ID3D12GraphicsCommandList* cmdList, PipelineService* pipelineService);
 
 	void Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService);

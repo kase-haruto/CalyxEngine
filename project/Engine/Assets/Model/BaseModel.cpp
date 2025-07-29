@@ -10,7 +10,6 @@
 
 // lib
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
-#include <Engine/Foundation/Clock/ClockManager.h>
 
 
 //external
@@ -18,7 +17,7 @@
 
 const std::string BaseModel::directoryPath_ = "Resource/models";
 
-void BaseModel::Update() {
+void BaseModel::Update(float deltaTime) {
 	// --- まだ modelData_ を取得していないなら、取得を試みる ---
 	if (!modelData_) {
 		if (ModelManager::GetInstance()->IsModelLoaded(fileName_)) {
@@ -29,7 +28,7 @@ void BaseModel::Update() {
 		// loaded が nullptr の場合、まだ読み込み中
 	} else {
 		// テクスチャの更新
-		UpdateTexture();
+		UpdateTexture(deltaTime);
 
 		// UV transform を行列化 
 		Matrix4x4 uvTransformMatrix = MakeScaleMatrix(Vector3(uvTransform.scale.x, uvTransform.scale.y, 1.0f));
@@ -71,9 +70,9 @@ void BaseModel::OnModelLoaded() {
 	}
 }
 
-void BaseModel::UpdateTexture() {
+void BaseModel::UpdateTexture(float deltaTime) {
 	if (textureHandles_.size() <= 1) return; // アニメーション不要
-	elapsedTime_ += ClockManager::GetInstance()->GetDeltaTime();
+	elapsedTime_ += deltaTime;
 	if (elapsedTime_ >= animationSpeed_) {
 		elapsedTime_ -= animationSpeed_;
 		currentFrameIndex_ = (currentFrameIndex_ + 1) % textureHandles_.size();

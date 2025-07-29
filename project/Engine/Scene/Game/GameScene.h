@@ -39,7 +39,7 @@ public:
 	~GameScene() override = default;
 
 	void Initialize()override;
-	void Update()override;
+	void Update(float dt)override;
 	void Draw(ID3D12GraphicsCommandList*, class PipelineService*, RenderTargetType)override;
 	void CleanUp()override;
 	void LoadAssets()override;
@@ -51,6 +51,6 @@ private:
 	std::shared_ptr<EnemyCollection>  enemyCollection_;
 
 
-	std::unique_ptr<RailCamera> railCamera_ = nullptr;
+	std::shared_ptr<RailCamera> railCamera_ = nullptr;
 };
 

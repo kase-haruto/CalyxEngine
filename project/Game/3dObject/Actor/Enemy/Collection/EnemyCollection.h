@@ -15,7 +15,7 @@ public:
 	EnemyCollection(const std::string& name = "EnemyCollection");
 	~EnemyCollection() = default;
 
-	void Update() override;
+	void Update(float dt) override;
 	void ShowGui() override;
 
 	void SetPlayerTransform(WorldTransform* pTransform);

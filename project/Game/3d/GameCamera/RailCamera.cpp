@@ -1,7 +1,6 @@
 #include "RailCamera.h"
 
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
-#include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Foundation/Utility/Func/MathFunc.h>
 #include <Engine/Application/Input/Input.h>
 
@@ -10,6 +9,10 @@
 #include <algorithm>
 
 RailCamera::RailCamera() {}
+
+RailCamera::RailCamera(const std::string& name){
+	SceneObject::SetName(name, ObjectType::Camera);
+}
 
 void RailCamera::Initialize() {
 	transform_.translate = { 0.0f, 10.0f, 0.0f };
@@ -31,8 +34,7 @@ void RailCamera::Initialize() {
 	zTiltOffset_ = 0.0f;
 }
 
-void RailCamera::Update() {
-	float deltaTime = ClockManager::GetInstance()->GetDeltaTime();
+void RailCamera::Update(float deltaTime){
 
 	// ロール角を滑らかに補間
 	zTiltOffset_ = std::lerp(zTiltOffset_, targetTilt_, tiltLerpSpeed_ * deltaTime);
@@ -58,7 +60,6 @@ void RailCamera::Update() {
 	worldTransform_.eulerRotation = transform_.rotate;
 	worldTransform_.translation = transform_.translate;
 
-	BaseCamera::Update();
 	worldTransform_.Update(viewProjectionMatrix_);
 }
 

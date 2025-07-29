@@ -22,10 +22,13 @@ public:
 	//			public functions
 	//==================================================================*//
 	BaseCamera();
+	BaseCamera(const std::string& name);
 	virtual ~BaseCamera() = default;
 
-	virtual void Update();  // 更新
-	void ShowImGui();		// ImGui表示
+	virtual void Update(float dt)override;  // 更新
+	virtual void AlwaysUpdate(float dt)override;
+
+	void ShowImGui();// ImGui表示
 	virtual void UpdateMatrix();  // 行列の更新
 
 	void SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> command,

@@ -36,7 +36,8 @@ public:
 	// =======================
 	// Main Interface
 	// =======================
-	virtual void Update() = 0;
+	virtual void AlwaysUpdate([[maybe_unused]] float dt){};	//< 常時更新
+	virtual void Update([[maybe_unused]] float dt){};			//< ランタイム時更新
 
 	// 描画コマンドリストは使わない場合もあるので maybe_unused 指定
 	virtual void Draw([[maybe_unused]] ID3D12GraphicsCommandList* cmdList){}

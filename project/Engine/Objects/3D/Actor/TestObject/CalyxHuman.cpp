@@ -25,17 +25,13 @@ CalyxHuman::CalyxHuman(){
 void CalyxHuman::Initialize(){
 }
 
-void CalyxHuman::Update(){
-	float dt = ClockManager::GetInstance()->GetDeltaTime();
+void CalyxHuman::Update(float dt){
 
 	Move(dt);
 	Turn();
 
 	TransitionAnimation();
 
-	collider_->SetCollisionEnabled(false);
-
-	BaseGameObject::Update();
 }
 
 std::optional<Vector3> CalyxHuman::GetJointWorldPos(const std::string& name) const {

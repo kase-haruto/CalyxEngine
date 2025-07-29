@@ -49,9 +49,9 @@ PointLight::~PointLight(){}
 
 void PointLight::Initialize(){}
 
-void PointLight::Update(){
+void PointLight::Update([[maybe_unused]]float dt){}
 
-}
+void PointLight::AlwaysUpdate([[maybe_unused]]float dt){}
 
 void PointLight::ShowGui(){
 #ifdef _DEBUG

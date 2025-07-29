@@ -19,7 +19,7 @@ class EnemySpawner
 public:
 	EnemySpawner(const std::string& name = "EnemySpawner");
 
-	void Update() override;
+	void Update(float dt)override;
 
 	void ApplyConfig() ;
 

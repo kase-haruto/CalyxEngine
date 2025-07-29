@@ -21,7 +21,8 @@ public:
 
 	// 更新
 	void Initialize();
-	void Update() override;
+	void Update(float dt)override;
+	void AlwaysUpdate(float dt)override;
 	void ShowGui() override;
 	void SetDrawEnable(bool isDrawEnable) override;
 

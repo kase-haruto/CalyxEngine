@@ -84,10 +84,12 @@ void EngineController::Finalize(){
 //		更新
 /////////////////////////////////////////////////////////////////////////////////////////
 bool EngineController::Update() {
+ float dt=	ClockManager::GetInstance()->GetDeltaTime();
+
 	BeginUpdate();
 
 	// シーンの更新
-	sceneManager_->Update();
+	sceneManager_->Update(dt);
 
 	EndUpdate();
 

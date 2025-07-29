@@ -16,12 +16,29 @@
 #include <unordered_map>
 
    // -----------------------------------------------------------------------------
-   // Save
+   // Save (to file)
    // -----------------------------------------------------------------------------
 bool SceneSerializer::Save(const SceneContext& context, const std::string& path){
-	const auto& objects = context.GetObjectLibrary()->GetAllObjectsShared();
-	nlohmann::json jArray = nlohmann::json::array();
+	auto root = DumpJson(context);
+	return JsonUtils::Save(path, root);
+}
 
+// -----------------------------------------------------------------------------
+// Load (from file)
+// -----------------------------------------------------------------------------
+bool SceneSerializer::Load(SceneContext& context, const std::string& path){
+	nlohmann::json root;
+	if (!JsonUtils::Load(path, root)) return false;
+	return LoadJson(context, root);
+}
+
+// -----------------------------------------------------------------------------
+// DumpJson (to memory)
+// -----------------------------------------------------------------------------
+nlohmann::json SceneSerializer::DumpJson(const SceneContext& context){
+	nlohmann::json jObjects = nlohmann::json::array();
+
+	const auto& objects = context.GetObjectLibrary()->GetAllObjectsShared();
 	for (const auto& sp : objects){
 		if (!sp || !sp->IsSerializable()) continue;
 
@@ -34,42 +51,62 @@ bool SceneSerializer::Save(const SceneContext& context, const std::string& path)
 			if (auto parent = sp->GetParent()){
 				j["parentGuid"] = parent->GetGuid();
 			}
-			jArray.push_back(std::move(j));
+			jObjects.push_back(std::move(j));
 		}
 	}
 
-	return JsonUtils::Save(path, jArray);
+	nlohmann::json root;
+	root["version"] = 1;
+	root["sceneName"] = context.GetSceneName();
+	root["objects"] = std::move(jObjects);
+	return root;
 }
 
 // -----------------------------------------------------------------------------
-// Load
+// LoadJson (from memory)
 // -----------------------------------------------------------------------------
-bool SceneSerializer::Load(SceneContext& context, const std::string& path){
+bool SceneSerializer::LoadJson(SceneContext& context, const nlohmann::json& root){
+	// objects配列を取得
 	nlohmann::json jArray;
-	if (!JsonUtils::Load(path, jArray)) return false;
+	if (root.is_array()){
+		// 互換: 旧フォーマット（配列のみ）
+		jArray = root;
+	} else{
+		jArray = root.value("objects", nlohmann::json::array());
+		if (root.contains("sceneName")){
+			context.SetSceneName(root.value("sceneName", std::string {"scene"}));
+		}
+	}
 
-	// 既存オブジェクトとサブシステムを初期化
+	// 既存オブジェクトとサブシステムを初期化（内部リソースは維持）
 	context.Clear();
+
+	// ライトの参照を一度クリア（存在すれば）
+	if (auto* ll = context.GetLightLibrary()){
+		std::shared_ptr<DirectionalLight> emptyDir;
+		std::shared_ptr<PointLight> emptyPoint;
+		ll->SetDirectionalLight(emptyDir);
+		ll->SetPointLight(emptyPoint);
+	}
 
 	std::unordered_map<Guid, std::shared_ptr<SceneObject>> guidMap;
 
+	// === 1st pass: 生成・登録 ==================================================
 	for (const auto& j : jArray){
 		std::string typeName = j.value("type", "");
-		if (typeName.empty()) continue; // 保険
+		if (typeName.empty()) continue;
 
-		// レジストリ経由でインスタンス生成
 		auto sp = SceneObjectRegistry::Get().Create(typeName);
 		if (!sp) continue;
 
-		// JSON 設定をオブジェクトへ適用
 		if (auto* cfg = dynamic_cast< IConfigurable* >(sp.get())){
 			cfg->ApplyConfigFromJson(j);
 		}
 
-		// ---- ライブラリへ登録 -------------------------------------------
+		// ライブラリへ登録
 		context.GetObjectLibrary()->AddObject(sp);
 
-		// ---- サブシステムへ登録 -----------------------------------------
+		// サブシステムへ登録
 		if (auto d = std::dynamic_pointer_cast< DirectionalLight >(sp)){
 			context.GetLightLibrary()->SetDirectionalLight(d);
 		} else if (auto p = std::dynamic_pointer_cast< PointLight >(sp)){
@@ -78,12 +115,11 @@ bool SceneSerializer::Load(SceneContext& context, const std::string& path){
 			context.GetFxSystem()->AddEmitter(fx);
 		}
 
-		// GUID → shared_ptr マップ保持（親子リンク後付け用）
 		Guid guid = j.value("guid", Guid {});
 		guidMap[guid] = sp;
 	}
 
-	// === 2nd pass: 親子リンク復元 ===========================================
+	// === 2nd pass: 親子リンク ===================================================
 	for (const auto& j : jArray){
 		Guid childGuid = j.value("guid", Guid {});
 		Guid parentGuid = j.value("parentGuid", Guid {});

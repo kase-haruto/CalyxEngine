@@ -16,91 +16,42 @@
 /* ========================================================================
 /*	enum
 /* ===================================================================== */
-enum CameraType{
-	Type_Default,
-	Type_Follow,
-	Type_Debug,
+enum class CameraType{
+	Default,
+	Debug,
 };
+class SceneContext; // fwd
 
 class CameraManager{
 public:
-	// インスタンスを取得する関数
-	static CameraManager* GetInstance();
+	/* シーン所有側が呼ぶ */
+	void Initialize(SceneContext* owner);
+	void Update(float dt);
+	void TransferToGPU();
+	void Finalize();
 
-	// コピーコンストラクタと代入演算子を削除して、複製を防止
-	CameraManager(const CameraManager&) = delete;
-	CameraManager& operator=(const CameraManager&) = delete;
+	/* 非 static API */
+	Camera3d* GetCamera3d(){ return camera3d_.get(); }
+	DebugCamera* GetDebugCamera(){ return debugCamera_.get(); }
+	BaseCamera* GetActiveCamera(){ return cameras_[type_]; }
 
-public:
-	//===================================================================*/
-	//					private member function
-	//===================================================================*/
-	static void Initialize();      // 初期化
-	static void Update();          // 更新
-	static void Finalize();        // 解放
+	void SetType(CameraType t);
+	void SetViewportSize(ViewportType, const Vector2&);
+	Vector2 GetViewportSize(ViewportType) const;
+	void SetAspectRatio(float w, float h);
+	void Shake(float dur, float inten){ cameras_[type_]->StartShake(dur, inten); }
 
-	static void TransfarToGPU();   // GPUへの転送
-
-	void SetAspectRatio(float width, float height);
-
-	static void SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> command, PipelineType pipelineType){
-		instance_->cameras_[instance_->type_]->SetCommand(command, pipelineType);
-	}
-
+	/* 旧互換: 現在の SceneContext から取得して返す */
+	static Camera3d* GetMain3d();
+	static DebugCamera* GetDebug();
+	static BaseCamera* GetActive();
+	static void        SetTypeStatic(CameraType);
+	static void        SetViewportSizeStatic(ViewportType, const Vector2&);
 private:
-	CameraManager();
-	~CameraManager() = default;
-
-private:
-	//===================================================================*/
-	//					private member variable
-	//===================================================================*/
-	static CameraManager* instance_;                 // クラスのインスタンス
-	CameraType type_ = Type_Default;
-
-	Vector2 mainViewportSize_{ 1920.0f, 1080.0f };
-	Vector2 debugViewportSize_{ 800.0f, 600.0f };
-
-	/* 管理しているカメラ =======================*/
-	std::unique_ptr<Camera3d> camera3d_ = nullptr;   // 3dオブジェクトのデフォルトカメラ
-	std::unique_ptr<FollowCamera> followCamera_ = nullptr;
-	std::unique_ptr<DebugCamera> debugCamera_ = nullptr;
-
-	// すべてのカメラ
+	CameraType type_ = CameraType::Default;
+	Vector2 mainVp_ {1920,1080};
+	Vector2 debugVp_ {800,600};
+	std::shared_ptr<Camera3d>    camera3d_;
+	std::shared_ptr<DebugCamera> debugCamera_;
 	std::unordered_map<CameraType, BaseCamera*> cameras_;
-
-	//===================================================================*/
-	//					getter/setter
-	//===================================================================*/
-public:
-	static Camera3d* GetCamera3d(){ return instance_->camera3d_.get(); }
-
-	static DebugCamera* GetDebugCamera(){ return instance_->debugCamera_.get(); }
-
-	static BaseCamera* GetActiveCamera(){ return instance_->cameras_[instance_->type_]; }
-
-	static Matrix4x4 GetViewProjectionMatrix(){ return instance_->cameras_[instance_->type_]->GetViewProjection(); }
-
-	static Matrix4x4 GetViewMatrix(){ return instance_->cameras_[instance_->type_]->GetViewMatrix(); }
-
-	static Matrix4x4 GetWorldMatrix(){ return instance_->cameras_[instance_->type_]->GetWorldMat(); }
-
-	void SetFollowTarget(const EulerTransform* target){
-		followCamera_->SetTarget(target);
-	}
-
-	const Vector3& GetFollowRotate()const{ return followCamera_->GetRotate(); }
-
-	void SetRotate(const Vector3& rotate){
-		followCamera_->SetRotate(rotate);
-	}
-
-	void SetType(const CameraType type);
-
-	void SetShake(float duration, float intensity){
-		instance_->cameras_[instance_->type_]->StartShake(duration, intensity);
-	}
-
-	void SetViewportSize(ViewportType type, const Vector2& size);
-	Vector2 GetViewportSize(ViewportType type) const;
 };

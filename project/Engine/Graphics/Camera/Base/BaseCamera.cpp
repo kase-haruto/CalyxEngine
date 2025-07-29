@@ -4,7 +4,6 @@
 /* ===================================================================== */
 // engine
 #include <Engine/Graphics/Context/GraphicsGroup.h>
-#include <Engine/Foundation/Clock/ClockManager.h>
 
 // lib
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
@@ -24,15 +23,23 @@ BaseCamera::BaseCamera()
 	cameraBuffer_.Initialize(GraphicsGroup::GetInstance()->GetDevice().Get());
 }
 
+BaseCamera::BaseCamera(const std::string& name)
+	:viewMatrix_(Matrix4x4::Inverse(worldMatrix_)),
+	projectionMatrix_(MakePerspectiveFovMatrix(fovAngleY_, aspectRatio_, nearZ_, farZ_)){
+	SceneObject::SetName(name, ObjectType::Camera);
+
+	viewProjectionMatrix_ = Matrix4x4::Multiply(viewMatrix_, projectionMatrix_);
+	/* バッファの生成とマッピング =======================*/
+	cameraBuffer_.Initialize(GraphicsGroup::GetInstance()->GetDevice().Get());
+}
+
 /////////////////////////////////////////////////////////////////////////
 //  更新
 /////////////////////////////////////////////////////////////////////////
-void BaseCamera::Update(){
-	//if (!isActive_){ return; }//アクティブでない場合は処理しない
-
+void BaseCamera::Update(float dt){
 	// シェイク処理
 	if (isShaking_){
-		shakeElapsed_ += ClockManager::GetInstance()->GetDeltaTime();  // シングルトンから時間取得
+		shakeElapsed_ += dt;
 		if (shakeElapsed_ < shakeDuration_){
 			// ランダムなオフセットを生成（例：-1〜1の範囲で乱数を取得）
 			float offsetX = ((rand() / ( float ) RAND_MAX) * 2.0f - 1.0f) * shakeIntensity_;
@@ -48,8 +55,10 @@ void BaseCamera::Update(){
 		}
 	}
 
-	UpdateMatrix();
+}
 
+void BaseCamera::AlwaysUpdate([[maybe_unused]]float dt){
+	UpdateMatrix();
 }
 
 /////////////////////////////////////////////////////////////////////////

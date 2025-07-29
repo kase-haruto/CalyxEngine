@@ -10,6 +10,7 @@
 
 #include <Engine/Renderer/Sprite/SpriteRenderer.h>
 #include <Engine/Renderer/Model/ModelRenderer.h>
+#include <Engine/Application/System/PlaySession.h>
 
 // c++
 #include <string>
@@ -26,8 +27,8 @@ public:
 	BaseScene();
 	~BaseScene() override = default;
 
-	virtual void Initialize()override{}
-	virtual void Update()override{}
+	virtual void Initialize()override;
+	virtual void Update([[maybe_unused]] float dt )override{}
 	virtual void PostUpdate(ID3D12GraphicsCommandList* cmdList,
 							class PipelineService* psoService)override;
 	virtual void Draw(ID3D12GraphicsCommandList* cmdList,
@@ -52,6 +53,7 @@ protected:
 	std::unique_ptr<SceneContext> sceneContext_ = nullptr;
 	std::unique_ptr<SkyBox> skyBox_ = nullptr;
 	std::string sceneName_ = "Scene";
+	PlaySession playSession_;
 
 	//===================================================================*/
 	//			renderers

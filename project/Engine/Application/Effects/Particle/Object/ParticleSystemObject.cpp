@@ -1,6 +1,5 @@
 #include "ParticleSystemObject.h"
 
-#include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/Scene/Context/SceneContext.h>
@@ -17,8 +16,10 @@ void ParticleSystemObject::Initialize(){
 	
 }
 
-void ParticleSystemObject::Update(){
-	float dt = ClockManager::GetInstance()->GetDeltaTime();
+void ParticleSystemObject::Update([[maybe_unused]]float dt){
+}
+
+void ParticleSystemObject::AlwaysUpdate(float dt){
 	worldTransform_.Update();
 	position_ = worldTransform_.GetWorldPosition();
 
@@ -26,7 +27,7 @@ void ParticleSystemObject::Update(){
 
 	for (const auto& childSp : children_){
 		if (auto ps = std::dynamic_pointer_cast< ParticleSystemObject >(childSp)){
-			ps->Update();
+			ps->Update(dt);
 		}
 	}
 }

@@ -14,10 +14,10 @@ EnemyCollection::EnemyCollection(const std::string& name) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		更新
 /////////////////////////////////////////////////////////////////////////////////////////
-void EnemyCollection::Update(){
+void EnemyCollection::Update(float dt){
 	// スポナー更新
 	for (auto& spawner : spawners_){
-		spawner->Update();
+		spawner->Update(dt);
 	}
 
 	auto* lib = SceneContext::Current()->GetObjectLibrary();
@@ -25,7 +25,7 @@ void EnemyCollection::Update(){
 
 	for (auto it = enemies_.begin(); it != enemies_.end(); ){
 		auto& enemy = *it;
-		enemy->Update();
+		enemy->Update(dt);
 
 		if (!enemy->GetIsAlive()){
 			lib->RemoveObject(enemy);

@@ -40,13 +40,16 @@ void GameScene::LoadAssets(){}
 /////////////////////////////////////////////////////////////////////////////////////////
 void GameScene::Initialize(){
 	sceneContext_->Initialize();
+
+	BaseScene::Initialize();
+
 	LoadAssets();
 
 	//弾の登録
 	BulletRegistrar::RegisterAll();
 
 	/* ----- Camera ----- */
-	railCamera_ = std::make_unique<RailCamera>();
+	railCamera_ = SceneAPI::Instantiate<RailCamera>("railCamera");
 	railCamera_->Initialize();
 	CameraManager::GetInstance()->SetType(CameraType::Type_Default);
 
@@ -71,19 +74,18 @@ void GameScene::Initialize(){
 
 }
 
-void GameScene::Update(){
-	/* カメラ関連更新 ============================*/
-	railCamera_->Update();
-	CameraManager::GetCamera3d()->SetCamera(railCamera_->GetPosition(), railCamera_->GetRotation());
-	CameraManager::Update();
+void GameScene::Update(float dt){
+	playSession_.Update(dt);
 
-	skyBox_->Update();
+	/* カメラ関連更新 ============================*/
+	CameraManager::GetCamera3d()->SetCamera(railCamera_->GetPosition(), railCamera_->GetRotation());
+	CameraManager::Update(dt);
+
 	player_->SetEnemyList(enemyCollection_->GetEnemies());
 
 
 
 	/* その他 ============================*/
-	sceneContext_->Update();
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
 }
 

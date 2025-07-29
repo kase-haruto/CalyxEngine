@@ -26,7 +26,8 @@ public:
 	~SkyBox()override = default;
 	void Initialize();
 	void ShowGui();
-	void Update();
+	void Update(float dt)override;
+	void AlwaysUpdate(float dt)override;
 	void Draw(ID3D12GraphicsCommandList* cmd);
 	const WorldTransform& GetWorldTransform()const;
 

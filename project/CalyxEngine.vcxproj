@@ -202,7 +202,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Graphics\Pipeline\Shader\ShaderManager.cpp" />
     <ClCompile Include="Engine\Graphics\Pipeline\Shader\ShaderCompiler.cpp" />
     <ClCompile Include="Engine\Assets\Model\Model.cpp" />
-    <ClCompile Include="Engine\Assets\Model\ModelBuilder.cpp" />
     <ClCompile Include="Engine\Assets\Model\ModelManager.cpp" />
     <ClCompile Include="Engine\Renderer\Sprite\Sprite.cpp" />
     <ClCompile Include="Engine\Assets\Texture\Texture.cpp" />
@@ -306,9 +305,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\Input\PlayerInput\PlayerInputHandler.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Bullet\PlayerBullet\HomingBullet.cpp" />
     <ClCompile Include="Engine\PostProcess\Vignette\Vignette.cpp" />
+    <ClCompile Include="Engine\Application\System\PlaySession.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Application\Effects\Particle\Emitter\BaseEmitter.h" />
+    <ClInclude Include="Engine\Application\System\EngineMode.h" />
     <ClInclude Include="Engine\Graphics\Descriptor\DescriptorAllocator.h" />
     <ClInclude Include="Engine\PostProcess\CRT\CRTEffect.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\Details\BulletDetails.h" />
@@ -443,7 +444,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Graphics\Pipeline\Shader\ShaderCompiler.h" />
     <ClInclude Include="Engine\Renderer\Mesh\VertexData.h" />
     <ClInclude Include="Engine\Assets\Model\Model.h" />
-    <ClInclude Include="Engine\Assets\Model\ModelBuilder.h" />
     <ClInclude Include="Engine\Assets\Model\ModelData.h" />
     <ClInclude Include="Engine\Assets\Model\ModelManager.h" />
     <ClInclude Include="Engine\Renderer\Sprite\Sprite.h" />
@@ -554,6 +554,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\3dObject\Actor\Bullet\PlayerBullet\HomingBullet.h" />
     <ClInclude Include="Engine\PostProcess\Vignette\Vignette.h" />
     <ClInclude Include="Engine\Application\Effects\Particle\Emitter\GpuFxEmitter.h" />
+    <ClInclude Include="Engine\Application\System\PlaySession.h" />
     <ClInclude Include="Resources\shaders\CRT.PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>

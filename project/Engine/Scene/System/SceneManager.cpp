@@ -57,7 +57,7 @@ void SceneManager::Initialize(){
 #endif // _DEBUG
 }
 
-void SceneManager::Update(){
+void SceneManager::Update(float dt){
 	if (currentSceneNo_ != nextSceneNo_){
 		// いったん現在シーンをクリーンアップ
 		scenes_[currentSceneNo_]->CleanUp();
@@ -77,7 +77,7 @@ void SceneManager::Update(){
 	}
 
 	// 現在のシーンを更新
-	scenes_[currentSceneNo_]->Update();
+	scenes_[currentSceneNo_]->Update(dt);
 
 }
 

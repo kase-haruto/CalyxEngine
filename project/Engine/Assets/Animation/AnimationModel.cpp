@@ -44,6 +44,15 @@ void AnimationModel::Initialize() {
 	Map();
 }
 
+void AnimationModel::Update(float dt){
+	if (modelData_){
+		PlayAnimation();
+		SkinningStep();
+	}
+
+	BaseModel::Update(dt);
+}
+
 /* =====================================================================
    毎フレーム呼び出し – 時間経過 & ブレンド
    ===================================================================*/
@@ -308,17 +317,6 @@ std::string AnimationModel::GetCurrentAnimationName() const {
 	} else {
 		return "";
 	}
-}
-
-void AnimationModel::Update() {
-	if (modelData_) {
-		PlayAnimation();
-		SkinningStep();
-	}
-
-
-
-	BaseModel::Update();
 }
 
 void AnimationModel::OnModelLoaded() {

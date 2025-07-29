@@ -56,9 +56,7 @@ static float Deg2Rad(float d){ return d * std::numbers::pi_v<float> / 180.0f; }
 ////////////////////////////////////////////////////////////////
 //  Update
 ////////////////////////////////////////////////////////////////
-void Enemy::Update(){
-	const float dt = ClockManager::GetInstance()->GetDeltaTime();
-
+void Enemy::Update(float dt){
 	/* =============================================
 	   1. 生存中のロジック
 	   =============================================*/
@@ -77,8 +75,6 @@ void Enemy::Update(){
 		waveTime_ += dt * waveSpeed_;
 		float offsetY = std::sin(waveTime_) * waveAmplitude_;
 		worldTransform_.translation = basePosition_ + Vector3 {0, offsetY, 0};
-		worldTransform_.Update();
-		BaseGameObject::Update();             // 子更新
 		return;
 	}
 
@@ -95,7 +91,6 @@ void Enemy::Update(){
 			Quaternion::MakeRotateAxisQuaternion(deathRotateAxis_, rad);
 
 		worldTransform_.translation = basePosition_; // 移動しない
-		worldTransform_.Update();
 
 		// 演出が終わり、爆発も再生終了したら Dead へ
 		if (t >= 1.0f && !explosionFx_->IsPlaying()){

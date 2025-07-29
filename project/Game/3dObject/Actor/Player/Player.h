@@ -30,7 +30,7 @@ public:
 
 	/* mainFunc =========================================================== */
 	void Initialize() override;
-	void Update() override;
+	void Update(float dt) override;
 	void Draw(ID3D12GraphicsCommandList* cmdList) override;
 	void DerivativeGui() override;
 	void MoveBy(const Vector3& delta);

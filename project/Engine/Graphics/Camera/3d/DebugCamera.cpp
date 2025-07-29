@@ -14,13 +14,13 @@
 #include <algorithm>  // std::clamp
 #include <numbers>    // std::numbers::pi
 
-DebugCamera::DebugCamera()
+DebugCamera::DebugCamera(const std::string& name)
 	: BaseCamera(),
 	lastMousePosRotate_ {0.0f, 0.0f},
 	isDraggingRotate_ {false},
 	lastMousePosMove_ {0.0f, 0.0f},
 	isDraggingMove_ {false}{
-	BaseCamera::SetName("DebugCamera");
+	BaseCamera::SetName(name);
 	fovAngleY_ = static_cast< float >(std::numbers::pi) * 0.25f; // 45度
 
 	transform_.translate = {0.0f, 4.0f, -10.0f};
@@ -29,7 +29,7 @@ DebugCamera::DebugCamera()
 //////////////////////////////////////////////////////////////////////////////
 //							メイン処理
 //////////////////////////////////////////////////////////////////////////////
-void DebugCamera::Update(){
+void DebugCamera::AlwaysUpdate(float dt){
 	if (!isActive_){ return; }
 
 	// 入力に基づいてカメラ操作
@@ -58,7 +58,7 @@ void DebugCamera::Update(){
 	}
 
 	// BaseCameraの更新処理を呼び出す
-	BaseCamera::Update();
+	BaseCamera::Update(dt);
 }
 
 void DebugCamera::ShowGui(){
@@ -172,6 +172,6 @@ void DebugCamera::Zoom(){
 	float wheel = Input::GetMouseWheel(); // 1フレーム当たりのホイール回転量
 	if (wheel != 0.0f){
 		distance_ -= wheel * (zoomSpeed_ * 5.0f);
-		distance_ = (std::max)(0.01f, distance_);
+		distance_ = ( std::max ) (0.01f, distance_);
 	}
 }

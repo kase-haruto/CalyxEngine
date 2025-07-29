@@ -27,7 +27,9 @@ void SkyBox::ShowGui(){
 	worldTransform_.ShowImGui();
 }
 
-void SkyBox::Update(){
+void SkyBox::Update([[maybe_unused]]float dt){}
+
+void SkyBox::AlwaysUpdate([[maybe_unused]] float dt){
 	Vector3 half = worldTransform_.scale * 0.5f;
 
 	// --- 頂点データ設定 ---

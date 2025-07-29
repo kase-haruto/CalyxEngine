@@ -57,18 +57,18 @@ void TitleScene::Initialize() {
 
 }
 
-void TitleScene::Update() {
-	/* カメラ関連更新 ============================*/
-	CameraManager::Update();
+void TitleScene::Update(float dt) {
+	playSession_.Update(dt);
 
-	skyBox_->Update();
+	/* カメラ関連更新 ============================*/
+	CameraManager::Update(dt);
 
 	/* 3dObject ============================*/
 	//地面の更新
-	modelField_->Update();
+	modelField_->Update(dt);
 	title_->Update();
 	/* その他 ============================*/
-	sceneContext_->Update();
+	
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
 
 	if (Input::GetInstance()->TriggerKey(DIK_2)||

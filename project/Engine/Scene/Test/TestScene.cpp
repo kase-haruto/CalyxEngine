@@ -32,10 +32,11 @@ void TestScene::LoadAssets(){}
 //	初期化処理
 /////////////////////////////////////////////////////////////////////////////////////////
 void TestScene::Initialize(){
-
-
 	sceneContext_->Initialize();
+
 	sceneContext_->SetSceneName("TestScene");
+
+	BaseScene::Initialize();
 
 	SceneSerializer::Load(*sceneContext_, "Resources/Assets/Scenes/TestScene.scene");
 
@@ -50,23 +51,47 @@ void TestScene::Initialize(){
 
 	skyBox_ = std::make_unique<SkyBox>("sky.dds", "skyBox");
 	skyBox_->Initialize();
-
-	
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //	更新処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void TestScene::Update(){
+void TestScene::Update(float dt){
 
-	CameraManager::Update();
+	ImGui::Begin("Play Control");
 
-	skyBox_->Update();
+	switch (playSession_.GetMode()){
+		case EngineMode::Editor:
+			if (ImGui::Button("▶ Play")) playSession_.Enter();
+			break;
+
+		case EngineMode::Playing:
+			if (ImGui::Button("■ Stop")) playSession_.Exit();
+			ImGui::SameLine();
+			if (ImGui::Button("⏸ Pause")) playSession_.TogglePause();
+			ImGui::SameLine();
+			if (ImGui::Button("🔁 Restart")) playSession_.Restart();
+			break;
+
+		case EngineMode::Paused:
+			if (ImGui::Button("■ Stop")) playSession_.Exit();
+			ImGui::SameLine();
+			if (ImGui::Button("▶ Resume")) playSession_.TogglePause();
+			ImGui::SameLine();
+			if (ImGui::Button("⏭ Step")) playSession_.StepOnce();
+			ImGui::SameLine();
+			if (ImGui::Button("🔁 Restart")) playSession_.Restart();
+			break;
+	}
+
+	ImGui::End();
+
+	playSession_.Update(dt);
+
+	CameraManager::Update(dt);
 
 	//衝突判定
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
-
-	sceneContext_->Update();
 }
 
 void TestScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService, RenderTargetType type){

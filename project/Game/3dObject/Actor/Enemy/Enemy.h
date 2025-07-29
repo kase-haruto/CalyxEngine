@@ -21,7 +21,7 @@ public:
 	virtual ~Enemy();
 
 	void Initialize()override;
-	void Update()override;
+	void Update(float dt)override;
 
 	void OnCollisionEnter(Collider* other)override;
 	void OnCollisionStay([[maybe_unused]]Collider* other)override {};

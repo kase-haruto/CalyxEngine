@@ -34,9 +34,9 @@ public:
 	virtual ~BaseModel() = default;
 
 	virtual void Initialize() = 0;
-	virtual void Update();
+	virtual void Update(float deltaTime);
 	virtual void OnModelLoaded();
-	void UpdateTexture();
+	void UpdateTexture(float deltaTime);
 	virtual void Map() = 0;
 	virtual void ShowImGuiInterface();
 	virtual void Draw(const WorldTransform& transform);

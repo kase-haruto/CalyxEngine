@@ -20,7 +20,7 @@ public:
 	virtual ~Character() override = default;
 
 	virtual void Initialize() override;
-	virtual void Update() override;
+	virtual void Update(float dt) override;
 
 	void KnockBack(const Vector3& direction, float force, float duration = 0.5f); // durationを追加
 

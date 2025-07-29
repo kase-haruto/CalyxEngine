@@ -7,7 +7,6 @@
 #include <Engine/Application/Input/Input.h>
 #include <Engine/Application/System/System.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
-#include <Engine/Foundation/Clock/ClockManager.h>
 
 // externals
 #include <externals/imgui/imgui.h>
@@ -21,15 +20,18 @@ FollowCamera::FollowCamera()
 	transform_.rotate.x = 0.4f;
 }
 
-void FollowCamera::Update(){
+void FollowCamera::Update(float dt){
 
 	//* 追従
 	Adulation();
 
 	//* 旋回
-	Turning();
+	Turning(dt);
 
-	BaseCamera::Update();
+}
+
+void FollowCamera::AlwaysUpdate(float dt){
+	BaseCamera::Update(dt);
 }
 
 Vector3 FollowCamera::CalculateOffset(){
@@ -43,26 +45,21 @@ Vector3 FollowCamera::CalculateOffset(){
 	return result;
 }
 
-void FollowCamera::Turning(){
+void FollowCamera::Turning(float dt){
 	if (!target_ || isShaking_){
 		return; // ターゲットが存在しない場合は処理しない
 	}
 
-	// 🔥 スティック入力を取得
-	float deltaX = Input::GetRightStick().x; // 左右
-	float deltaY = -Input::GetRightStick().y; // 上下 🔥 追加
+	float deltaX = Input::GetRightStick().x;
+	float deltaY = -Input::GetRightStick().y;
 
-	// 🔥 水平方向の回転 (Y軸)
-	destinationAngle_.y += deltaX * rotateSpeed * ClockManager::GetInstance()->GetDeltaTime();
+	destinationAngle_.y += deltaX * rotateSpeed * dt;
 
-	// 🔥 垂直方向の回転 (X軸)
-	destinationAngle_.x += deltaY * rotateSpeed * ClockManager::GetInstance()->GetDeltaTime();
+	destinationAngle_.x += deltaY * rotateSpeed * dt;
 
-	// 垂直方向の回転角度の制限
 	const float maxVerticalAngle = float(std::numbers::pi) / 4.0f - 0.1f;
 	destinationAngle_.x = std::clamp(destinationAngle_.x, -maxVerticalAngle, maxVerticalAngle);
 
-	// 🔥 スムーズに補間して適用
 	transform_.rotate.y = LerpShortAngle(transform_.rotate.y, destinationAngle_.y, 0.1f);
 	transform_.rotate.x = std::lerp(transform_.rotate.x, destinationAngle_.x, 0.1f); // 🔥 X軸も補間
 }
@@ -104,6 +101,8 @@ void FollowCamera::UpdateMatrix(){
 	viewProjectionMatrix_ = Matrix4x4::Multiply(viewMatrix, projectionMatrix_);
 
 }
+
+
 
 void FollowCamera::ShowGui(){
 
