@@ -51,7 +51,7 @@ protected:
 	//			protected methods
 	//===================================================================*/
 	std::unique_ptr<SceneContext> sceneContext_ = nullptr;
-	std::unique_ptr<SkyBox> skyBox_ = nullptr;
+	std::shared_ptr<SkyBox> skyBox_ = nullptr;
 	std::string sceneName_ = "Scene";
 	PlaySession playSession_;
 

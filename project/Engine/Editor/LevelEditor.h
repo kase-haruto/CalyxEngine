@@ -25,9 +25,6 @@ namespace EngineEdit {
 
 class LevelEditor{
 public:
-	
-
-public:
 	void Initialize();
 	void Update();
 	void Render();
@@ -39,7 +36,7 @@ public:
 	void CreateObject(std::shared_ptr<SceneObject> obj);
 	void DeleteObject(const std::shared_ptr<SceneObject>& sp);
 	void RenderViewport(ViewportType type, const ImTextureID& tex);
-
+	void SetCameraForViewport(BaseCamera* mainCamera,BaseCamera* debugCamera);
 	HierarchyPanel* GetHierarchyPanel() const{ return hierarchy_.get(); }
 	EditorPanel* GetEditorPanel() const{ return editor_.get(); }
 	PlaceToolPanel* GetPlaceToolPanel() const{ return placeToolPanel_.get(); }

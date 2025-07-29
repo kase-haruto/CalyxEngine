@@ -39,7 +39,7 @@ public:
 	HierarchyPanel* GetHierarchyPanel() const;
 	EditorPanel* GetEditorPanel() const;
 	PlaceToolPanel* GetPlaceToolPanel() const;
-
+	void SetCameraForViewport(BaseCamera* mainCamera, BaseCamera* debugCamera);
 private:
 	//===================================================================*/
 	//					private function

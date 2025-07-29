@@ -54,7 +54,7 @@ void GameScene::Initialize(){
 	CameraManager::GetMain3d()->SetParent(railCamera_);
 
 	/* ----- Field ----- */
-	modelField_ = SceneAPI::Instantiate<BaseGameObject>("terrain.obj", "field");
+	modelField_ = SceneAPI::Instantiate<BaseGameObject>("player.gltf", "field");
 	modelField_->SetScale({300,300,300});
 	modelField_->SetTranslate({-150,-150,0});
 	modelField_->SetUvScale({10,10});
@@ -75,12 +75,37 @@ void GameScene::Initialize(){
 }
 
 void GameScene::Update(float dt){
+	ImGui::Begin("Play Control");
+
+	switch (playSession_.GetMode()){
+		case EngineMode::Editor:
+			if (ImGui::Button("▶ Play")) playSession_.Enter();
+			break;
+
+		case EngineMode::Playing:
+			if (ImGui::Button("■ Stop")) playSession_.Exit();
+			ImGui::SameLine();
+			if (ImGui::Button("⏸ Pause")) playSession_.TogglePause();
+			ImGui::SameLine();
+			if (ImGui::Button("🔁 Restart")) playSession_.Restart();
+			break;
+
+		case EngineMode::Paused:
+			if (ImGui::Button("■ Stop")) playSession_.Exit();
+			ImGui::SameLine();
+			if (ImGui::Button("▶ Resume")) playSession_.TogglePause();
+			ImGui::SameLine();
+			if (ImGui::Button("⏭ Step")) playSession_.StepOnce();
+			ImGui::SameLine();
+			if (ImGui::Button("🔁 Restart")) playSession_.Restart();
+			break;
+	}
+
+	ImGui::End();
 	playSession_.Update(dt);
 
 	/* カメラ関連更新 ============================*/
 	player_->SetEnemyList(enemyCollection_->GetEnemies());
-
-
 
 	/* その他 ============================*/
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();

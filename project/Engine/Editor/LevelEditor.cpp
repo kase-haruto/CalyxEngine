@@ -41,9 +41,7 @@ void LevelEditor::Initialize(){
 
 	// ビューポートの初期化
 	mainViewport_ = std::make_unique<Viewport>(ViewportType::VIEWPORT_MAIN, "Game Viewport");
-	mainViewport_->SetCamera(CameraManager::GetMain3d());
 	debugViewport_ = std::make_unique<Viewport>(ViewportType::VIEWPORT_DEBUG, "Debug Viewport");
-	debugViewport_->SetCamera(CameraManager::GetDebug());
 
 	performanceOverlay_ = std::make_unique<PerformanceOverlay>();
 
@@ -214,6 +212,12 @@ void LevelEditor::RenderViewport(ViewportType type, const ImTextureID& tex){
 		}
 	}
 }
+
+void LevelEditor::SetCameraForViewport(BaseCamera* mainCamera, BaseCamera* debugCamera){
+	mainViewport_->SetCamera(mainCamera);
+	debugViewport_->SetCamera(debugCamera);
+}
+
 
 void LevelEditor::TryPickObjectFromMouse(const Vector2& mouse,
 										 const Vector2& viewportSize,

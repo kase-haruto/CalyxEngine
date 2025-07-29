@@ -27,7 +27,7 @@ void Camera3d::Initialize() {
 }
 
 void Camera3d::AlwaysUpdate(float dt){
-	BaseCamera::Update(dt);
+	BaseCamera::AlwaysUpdate(dt);
 
 	frustum_.ExtractFromMatrix(viewProjectionMatrix_);
 	frustum_.Draw();

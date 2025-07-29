@@ -79,6 +79,10 @@ PlaceToolPanel* EngineUICore::GetPlaceToolPanel() const {
 	return levelEditor_->GetPlaceToolPanel();
 }
 
+void EngineUICore::SetCameraForViewport(BaseCamera* mainCamera, BaseCamera* debugCamera){
+	levelEditor_->SetCameraForViewport(mainCamera, debugCamera);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 //						パネル追加
 ////////////////////////////////////////////////////////////////////////////////////////////

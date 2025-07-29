@@ -72,5 +72,5 @@ void BulletContainer::ShowGui(){
 }
 
 void BulletContainer::DerivativeGui(){
-	editBullet_->ShowGui();
+	//editBullet_->ShowGui();
 }

@@ -8,6 +8,7 @@
 #include <Engine/System/Command/EditorCommand/LevelEditorCommand/CreateObjectCommand/CreateShapeObjectCommand.h>
 #include <Engine/System/Command/EditorCommand/LevelEditorCommand/CreateObjectCommand/CreateParticleSystemCommand.h>
 #include <Engine/System/Command/Manager/CommandManager.h>
+#include <Engine/Scene/Utility/SceneUtility.h>
 
 // externals
 #include <externals/imgui/imgui.h>
@@ -38,7 +39,7 @@ void PlaceToolPanel::RegisterPlaceItems(){
 			{64, 64},
 			[this, objName, modelName] (){
 				auto factory = [objName, modelName] (){
-					auto obj = std::make_unique<BaseGameObject>(modelName, objName);
+					auto obj = SceneAPI::Instantiate<BaseGameObject>(modelName, objName);
 					obj->Initialize();
 					return obj;
 				};

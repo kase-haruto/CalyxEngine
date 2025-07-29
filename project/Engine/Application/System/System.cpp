@@ -202,8 +202,6 @@ void System::Finalize(){
 	DescriptorAllocator::Finalize();
 	Input::Finalize();
 	Audio::Finalize();
-
-
 	//ウィンドウの破棄
 	winApp_->TerminateGameWindow();
 }

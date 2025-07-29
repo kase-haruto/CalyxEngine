@@ -50,6 +50,7 @@ void EngineController::Initialize(HINSTANCE hInstance){
 	sceneManager_->SetEngineUI(engineUICore_.get());
 	sceneManager_->Initialize();
 
+	engineUICore_->SetCameraForViewport(CameraManager::GetMain3d(), CameraManager::GetDebug());
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
