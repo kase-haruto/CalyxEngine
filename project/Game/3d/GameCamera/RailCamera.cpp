@@ -60,7 +60,6 @@ void RailCamera::Update(float deltaTime){
 	worldTransform_.eulerRotation = transform_.rotate;
 	worldTransform_.translation = transform_.translate;
 
-	worldTransform_.Update(viewProjectionMatrix_);
 }
 
 Vector3 RailCamera::GetPosition() {

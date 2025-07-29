@@ -15,7 +15,9 @@ void SceneContext::Initialize(bool createDefaultLights){
 
 	if (createDefaultLights){
 		auto dirLight = Instantiate<DirectionalLight>("DirectionalLight");
+		dirLight->SetEnableRaycast(false);
 		auto pointLight = Instantiate<PointLight>("PointLight");
+		pointLight->SetEnableRaycast(false);
 		lightLibrary_->SetDirectionalLight(dirLight);
 		lightLibrary_->SetPointLight(pointLight);
 	}

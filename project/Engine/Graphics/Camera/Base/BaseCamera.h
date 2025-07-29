@@ -3,10 +3,11 @@
 
 #include "ICamera.h"
 #include <Engine/Objects/Transform/Transform.h>
+#include <Engine/Objects/ConfigurableObject/ConfigurableObject.h>
 #include <Engine/Graphics/Buffer/CameraBuffer.h>
 #include <Engine/Foundation/Math/Matrix4x4.h>
 #include <Engine/Foundation/Math/Vector3.h>
-
+#include <Data/Engine/Configs/Scene/Objects/SceneObject/SceneObjectConfig.h>
 /* lib */
 #include <numbers>
 
@@ -16,7 +17,8 @@
 using namespace Microsoft::WRL;
 
 class BaseCamera :
-	public ICamera{
+	public ICamera,
+	public IConfigurable {
 public:
 	//==================================================================*//
 	//			public functions
@@ -35,6 +37,15 @@ public:
 					PipelineType pipelineType);
 
 	void StartShake(float duration, float intensity)override;  // カメラシェイク開始
+
+	std::string_view GetTypeName() const override { return "BaseCamera"; }
+	// config ============================================================
+	void ApplyConfig();
+	void ExtractConfig();
+	void ApplyConfigFromJson(const nlohmann::json& j) override;
+	void ExtractConfigToJson(nlohmann::json& j) const override;
+
+	std::string GetObjectTypeName()const override { return name_; }
 
 
 protected:
@@ -104,4 +115,6 @@ private:
 	//			private variables
 	//==================================================================*//
 	Camera3DBuffer cameraBuffer_;		// カメラバッファ
+
+	ConfigurableObject<SceneObjectConfig> config_;
 };

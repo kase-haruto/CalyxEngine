@@ -6,7 +6,7 @@
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <Engine/Application/Input/Input.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
-
+#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 // externals
 #include <externals/imgui/imgui.h>
 
@@ -175,3 +175,4 @@ void DebugCamera::Zoom(){
 		distance_ = ( std::max ) (0.01f, distance_);
 	}
 }
+REGISTER_SCENE_OBJECT(DebugCamera)

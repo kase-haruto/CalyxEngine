@@ -4,6 +4,7 @@
 /* ===================================================================== */
 #include <Engine/Graphics/Context/GraphicsGroup.h>
 #include <Engine/Objects/3D/Geometory/AABB.h>
+#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 
 // lib
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
@@ -31,6 +32,7 @@ void Camera3d::AlwaysUpdate(float dt){
 
 	frustum_.ExtractFromMatrix(viewProjectionMatrix_);
 	frustum_.Draw();
+	worldTransform_.Update();
 }
 
 void Camera3d::ShowGui(){
@@ -45,3 +47,4 @@ bool Camera3d::IsVisible(const AABB& aabb) const{
 	return frustum_.IsAABBInside(aabb.min_, aabb.max_);
 }
 
+REGISTER_SCENE_OBJECT(Camera3d)

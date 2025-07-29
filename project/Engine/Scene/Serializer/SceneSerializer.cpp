@@ -65,72 +65,78 @@ nlohmann::json SceneSerializer::DumpJson(const SceneContext& context){
 // -----------------------------------------------------------------------------
 // LoadJson (from memory)
 // -----------------------------------------------------------------------------
-bool SceneSerializer::LoadJson(SceneContext& context, const nlohmann::json& root){
-	// objects配列を取得
-	nlohmann::json jArray;
-	if (root.is_array()){
-		// 互換: 旧フォーマット（配列のみ）
-		jArray = root;
-	} else{
-		jArray = root.value("objects", nlohmann::json::array());
-		if (root.contains("sceneName")){
-			context.SetSceneName(root.value("sceneName", std::string {"scene"}));
-		}
-	}
+bool SceneSerializer::LoadJson(SceneContext& context,
+                               const nlohmann::json& root) {
+    /* ---------- ① JSON 配列取得（変更なし） ---------- */
+    nlohmann::json jArray;
+    if (root.is_array())        jArray = root;                       // 旧形式
+    else                        jArray = root.value("objects", nlohmann::json::array());
 
-	// 既存オブジェクトとサブシステムを初期化（内部リソースは維持）
-	context.Clear();
+    if (root.contains("sceneName"))
+        context.SetSceneName(root.value("sceneName", "scene"));
 
-	// ライトの参照を一度クリア（存在すれば）
-	if (auto* ll = context.GetLightLibrary()){
-		std::shared_ptr<DirectionalLight> emptyDir;
-		std::shared_ptr<PointLight> emptyPoint;
-		ll->SetDirectionalLight(emptyDir);
-		ll->SetPointLight(emptyPoint);
-	}
+    /* ---------- ② 既存クリア ---------- */
+    context.Clear();
 
-	std::unordered_map<Guid, std::shared_ptr<SceneObject>> guidMap;
+    // ★ Light & Camera を一旦無効化
+    if (auto* ll = context.GetLightLibrary()) {
+        ll->SetDirectionalLight({});
+        ll->SetPointLight({});
+    }
+    if (auto* cm = context.GetCameraMgr()) {
+        cm->SetMainCamera({});   // 関数名は後述
+        cm->SetDebugCamera({});
+    }
 
-	// === 1st pass: 生成・登録 ==================================================
-	for (const auto& j : jArray){
-		std::string typeName = j.value("type", "");
-		if (typeName.empty()) continue;
+    std::unordered_map<Guid, std::shared_ptr<SceneObject>> guidMap;
 
-		auto sp = SceneObjectRegistry::Get().Create(typeName);
-		if (!sp) continue;
+    /* ---------- ③ 1st pass 生成 & サブシステム登録 ---------- */
+    for (const auto& j : jArray) {
+        std::string typeName = j.value("type", "");
+        if (typeName.empty()) continue;
 
-		if (auto* cfg = dynamic_cast< IConfigurable* >(sp.get())){
-			cfg->ApplyConfigFromJson(j);
-		}
+        auto sp = SceneObjectRegistry::Get().Create(typeName);
+        if (!sp) continue;
 
-		// ライブラリへ登録
-		context.GetObjectLibrary()->AddObject(sp);
+        // IConfigurable
+        if (auto* cfg = dynamic_cast<IConfigurable*>(sp.get()))
+            cfg->ApplyConfigFromJson(j);
 
-		// サブシステムへ登録
-		if (auto d = std::dynamic_pointer_cast< DirectionalLight >(sp)){
-			context.GetLightLibrary()->SetDirectionalLight(d);
-		} else if (auto p = std::dynamic_pointer_cast< PointLight >(sp)){
-			context.GetLightLibrary()->SetPointLight(p);
-		} else if (auto fx = std::dynamic_pointer_cast< ParticleSystemObject >(sp)){
-			context.GetFxSystem()->AddEmitter(fx);
-		}
+        // ライブラリへ
+        context.GetObjectLibrary()->AddObject(sp);
 
-		Guid guid = j.value("guid", Guid {});
-		guidMap[guid] = sp;
-	}
+        // ── サブシステム判定 ───────────────────────────
+        if (auto dir = std::dynamic_pointer_cast<DirectionalLight>(sp)) {
+            context.GetLightLibrary()->SetDirectionalLight(dir);
 
-	// === 2nd pass: 親子リンク ===================================================
-	for (const auto& j : jArray){
-		Guid childGuid = j.value("guid", Guid {});
-		Guid parentGuid = j.value("parentGuid", Guid {});
-		if (!childGuid.isValid() || !parentGuid.isValid()) continue;
+        } else if (auto pt = std::dynamic_pointer_cast<PointLight>(sp)) {
+            context.GetLightLibrary()->SetPointLight(pt);
 
-		auto childIt = guidMap.find(childGuid);
-		auto parentIt = guidMap.find(parentGuid);
-		if (childIt == guidMap.end() || parentIt == guidMap.end()) continue;
+        } else if (auto fx = std::dynamic_pointer_cast<ParticleSystemObject>(sp)) {
+            context.GetFxSystem()->AddEmitter(fx);
 
-		childIt->second->SetParent(parentIt->second);
-	}
+        } else if (auto camMain = std::dynamic_pointer_cast<Camera3d>(sp)) {
+            context.GetCameraMgr()->SetMainCamera(camMain);
 
-	return true;
+        } else if (auto camDbg = std::dynamic_pointer_cast<DebugCamera>(sp)) {
+            context.GetCameraMgr()->SetDebugCamera(camDbg);
+        }
+
+        // GUID
+        Guid guid = j.value("guid", Guid{});
+        guidMap[guid] = sp;
+    }
+
+    /* ---------- ④ 2nd pass 親子リンク ---------- */
+    for (const auto& j : jArray) {
+        Guid child = j.value("guid", Guid{});
+        Guid parent = j.value("parentGuid", Guid{});
+        if (!child.isValid() || !parent.isValid()) continue;
+
+        auto cIt = guidMap.find(child);
+        auto pIt = guidMap.find(parent);
+        if (cIt != guidMap.end() && pIt != guidMap.end())
+            cIt->second->SetParent(pIt->second);
+    }
+    return true;
 }

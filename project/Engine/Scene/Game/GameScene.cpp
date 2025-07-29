@@ -51,10 +51,9 @@ void GameScene::Initialize(){
 	/* ----- Camera ----- */
 	railCamera_ = SceneAPI::Instantiate<RailCamera>("railCamera");
 	railCamera_->Initialize();
-	CameraManager::GetMain3d()->SetParent(railCamera_);
 
 	/* ----- Field ----- */
-	modelField_ = SceneAPI::Instantiate<BaseGameObject>("player.gltf", "field");
+	modelField_ = SceneAPI::Instantiate<BaseGameObject>("terrain.obj", "field");
 	modelField_->SetScale({300,300,300});
 	modelField_->SetTranslate({-150,-150,0});
 	modelField_->SetUvScale({10,10});
@@ -64,7 +63,7 @@ void GameScene::Initialize(){
 	PlayerInstaller playerInstaller;
 	player_ = playerInstaller.InstallPlayer();
 	// レールカメラをプレイヤーの親に設定
-	player_->SetParent(&railCamera_->GetWorldTransform());
+	//player_->SetParent(&railCamera_->GetWorldTransform());
 	player_->Initialize();
 
 	/* ----- Enemy ----- */
@@ -105,6 +104,9 @@ void GameScene::Update(float dt){
 	playSession_.Update(dt);
 
 	/* カメラ関連更新 ============================*/
+	Camera3d* cam = CameraManager::GetMain3d();
+	cam->SetCamera(railCamera_->GetPosition(),railCamera_->GetRotation());
+
 	player_->SetEnemyList(enemyCollection_->GetEnemies());
 
 	/* その他 ============================*/

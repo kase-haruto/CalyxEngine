@@ -4,7 +4,7 @@
 /* ===================================================================== */
 // engine
 #include <Engine/Graphics/Context/GraphicsGroup.h>
-
+#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 // lib
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 
@@ -100,6 +100,32 @@ void BaseCamera::StartShake(float duration, float intensity){
 	shakeIntensity_ = intensity;
 }
 
+void BaseCamera::ApplyConfig() {
+	const auto& cfg = config_.GetConfig();
+
+	name_ = cfg.name;
+	id_ = cfg.guid;
+	parentId_ = cfg.parentGuid;
+}
+
+void BaseCamera::ExtractConfig() {
+	auto& cfg = config_.GetConfig();
+	cfg.objectType = static_cast<int>(objectType_);
+	cfg.name = name_;
+	cfg.guid = id_;
+	cfg.parentGuid = parentId_;
+}
+
+void BaseCamera::ApplyConfigFromJson([[maybe_unused]]const nlohmann::json& j) {
+	config_.ApplyConfigFromJson(j);
+	ApplyConfig();
+}
+
+void BaseCamera::ExtractConfigToJson([[maybe_unused]] nlohmann::json& j) const {
+	const_cast<BaseCamera*>(this)->ExtractConfig();
+	config_.ExtractConfigToJson(j);
+}
+
 /////////////////////////////////////////////////////////////////////////
 //  アクセッサ
 /////////////////////////////////////////////////////////////////////////
@@ -156,3 +182,5 @@ void BaseCamera::SetAspectRatio(float aspect){
 
 	projectionMatrix_ = Matrix4x4::PerspectiveFovRH(adjustedFov, aspect, nearZ_, farZ_);
 }
+
+REGISTER_SCENE_OBJECT(BaseCamera)

@@ -41,12 +41,15 @@ public:
 	void SetRuntime(bool flag){ isRuntime_ = flag; }
 	CameraManager* GetCameraMgr(){ return cameraMgr_.get(); }
 
+
 	// callbacks -------------------------------------------------------------
 	void AddOnObjectRemovedListener(ObjectRemovedCallback cb){ objectRemovedCallbacks_.push_back(std::move(cb)); }
 	void SetOnEditorObjectRemoved(ObjectRemovedCallback cb){ onEditorObjectRemoved_ = std::move(cb); }
 
 	// utils -----------------------------------------------------------------
 	std::shared_ptr<SceneObject> FindSharedObject(SceneObject* raw);
+
+
 
 	/* --- Current ---------------------------------------------------- */
 	static SceneContext* Current(){ return current_; }

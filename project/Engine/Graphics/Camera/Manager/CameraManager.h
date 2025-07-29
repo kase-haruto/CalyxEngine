@@ -47,6 +47,9 @@ public:
 	static const Vector2& GetViewportSizeStatic(ViewportType);
 	static void SetViewportSizeStatic(ViewportType, const Vector2&);
 
+	void SetMainCamera(const std::shared_ptr<Camera3d>& cam) { main_ = cam; cameras_[CameraType::Default] = cam.get(); }
+	void SetDebugCamera(const std::shared_ptr<DebugCamera>& cam) { debug_ = cam; cameras_[CameraType::Debug] = cam.get(); }
+
 private:
 	CameraType active_ = CameraType::Default;
 	Vector2 vpMain_ {1920,1080}, vpDebug_ {800,600};

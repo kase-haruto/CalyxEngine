@@ -59,10 +59,8 @@ BaseGameObject::BaseGameObject(){
 BaseGameObject::~BaseGameObject(){}
 
 void BaseGameObject::AlwaysUpdate(float dt){
-	if (objectModelType_ == ObjectModelType::ModelType_Static){
+	if (objectModelType_ != ObjectModelType::ModelType_Unknown){
 		model_->Update(dt);
-	} else if (objectModelType_ == ObjectModelType::ModelType_Static){
-		animationModel_->Update(dt);
 	}
 
 	worldTransform_.Update();
