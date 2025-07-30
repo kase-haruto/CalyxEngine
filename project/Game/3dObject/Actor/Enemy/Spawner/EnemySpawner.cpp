@@ -3,6 +3,7 @@
 #include <Engine/Scene/Context/SceneContext.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
 #include <Game/3dObject/Actor/Enemy/Collection/EnemyCollection.h>
+#include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 
 #include <externals/imgui/ImGuiFileDialog.h>
 
@@ -26,6 +27,8 @@ void EnemySpawner::Update(float dt) {
 	}
 
 	worldTransform_.Update();
+
+	PrimitiveDrawer::GetInstance()->DrawSphere(worldTransform_.GetWorldPosition());
 }
 
 void EnemySpawner::AlwaysUpdate([[maybe_unused]] float dt) {

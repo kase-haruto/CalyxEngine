@@ -124,7 +124,7 @@ void PrimitiveDrawer::DrawOBB(const Vector3& center, const Quaternion& rotate, c
 void PrimitiveDrawer::DrawSphere(const Vector3& center, const float radius, int subdivision, Vector4 color){
 
 	// 分割数
-	const uint32_t kSubdivision = subdivision; // 分割数を増やして滑らかに
+	const uint32_t kSubdivision = subdivision;
 	const float kLonEvery = 2 * float(std::numbers::pi) / kSubdivision;
 	const float kLatEvery = float(std::numbers::pi) / kSubdivision;
 	Vector3 a, b, c, d;
