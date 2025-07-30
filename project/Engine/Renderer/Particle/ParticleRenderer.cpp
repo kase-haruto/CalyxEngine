@@ -12,13 +12,17 @@ void ParticleRenderer::Render(
 	PipelineService* pipelineService,
 	ID3D12GraphicsCommandList* cmdList
 ){
-	auto psoSet = pipelineService->GetPipelineSet(PipelineTag::Object::Particle, BlendMode::ADD);
-	psoSet.SetCommand(cmdList);
+	// パーティクル用 PSO をセット
+	auto psoSet = pipelineService->GetPipelineSet(PipelineTag::Object::Particle,
+											 BlendMode::SUB);
+	pipelineService->SetCommand(psoSet, cmdList);
 
-	CameraManager::GetInstance()->SetCommand(cmdList, PipelineType::StructuredObject);
+	// ── アクティブ カメラのビュー投影行列をルート定数へ
+	if (auto* cam = CameraManager::GetActive())
+		cam->SetCommand(cmdList, PipelineType::StructuredObject);
 
-
-	auto device = GraphicsGroup::GetInstance()->GetDevice().Get();
+	// デバイス取得はそのまま
+	auto* device = GraphicsGroup::GetInstance()->GetDevice().Get();
 
 	for (const auto& emitter : emitters){
 		if (!emitter || !emitter->IsDrawEnable() || emitter->GetUnits().empty()) continue;
@@ -38,7 +42,7 @@ void ParticleRenderer::Render(
 		DrawModelInstanced(
 			model, cmdList,
 			static_cast< UINT >(emitter->GetUnits().size()),
-			emitter->GetInstanceBuffer().GetGpuHandle()
+			emitter->GetInstanceBuffer().GetGpuSrvHandle()
 		);
 	}
 }
@@ -62,7 +66,7 @@ void ParticleRenderer::RenderGrouped(const std::string& modelPath,
 
 	DrawModelInstanced(model, cmdList,
 					   static_cast< UINT >(gpuUnits.size()),
-					   tempBuffer.GetGpuHandle());
+					   tempBuffer.GetGpuSrvHandle());
 }
 
 void ParticleRenderer::EnsureModelIsReady(ModelData& model, ID3D12Device* device){

@@ -38,7 +38,8 @@ public:
 	~PointLight();
 
 	void Initialize();
-	void Update()override;
+	void Update(float dt)override;
+	void AlwaysUpdate(float dt)override;
 	void ShowGui()override;
 	void UploadToGpu();
 	void SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList, PipelineType type);

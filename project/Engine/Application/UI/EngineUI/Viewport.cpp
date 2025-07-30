@@ -14,6 +14,30 @@ Viewport::Viewport(ViewportType type, const std::string& windowName) :type_(type
 void Viewport::Update(){}
 
 void Viewport::Render(const ImTextureID& tex){
+	
+	switch (type_) {
+		case ViewportType::VIEWPORT_MAIN:
+			{
+				auto* mainCam = CameraManager::GetMain3d();
+				if (mainCam && camera_ != mainCam) {
+					camera_ = mainCam;
+				}
+				break;
+			}
+		case ViewportType::VIEWPORT_DEBUG:
+			{
+				auto* debugCam = CameraManager::GetDebug();
+				if (debugCam && camera_ != debugCam) {
+					camera_ = debugCam;
+				}
+				break;
+			}
+	}
+
+	if (!camera_){
+		return;
+	}
+
 	textureID_ = tex;
 	ImGui::Begin(windowName_.c_str(), nullptr,
 				 ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
@@ -26,7 +50,7 @@ void Viewport::Render(const ImTextureID& tex){
 	if (size_.y > 0.0f) {
 		camera_->SetAspectRatio(size_.x / size_.y);
 		// CameraManagerにviewportサイズを通知
-		CameraManager::GetInstance()->SetViewportSize(type_, size_);
+		CameraManager::SetViewportSizeStatic(type_, size_);
 	}
 
 	ImGui::SetCursorScreenPos(imagePos);

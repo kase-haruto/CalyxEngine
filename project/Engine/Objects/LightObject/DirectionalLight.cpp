@@ -50,9 +50,9 @@ DirectionalLight::~DirectionalLight(){}
 
 void DirectionalLight::Initialize(){}
 
-void DirectionalLight::Update(){
+void DirectionalLight::Update([[maybe_unused]] float dt){}
 
-}
+void DirectionalLight::AlwaysUpdate([[maybe_unused]]float dt){}
 
 void DirectionalLight::UploadToGpu(){
 	constantBuffer_.TransferData(lightData_);

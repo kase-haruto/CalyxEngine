@@ -9,6 +9,7 @@
 #include <Engine/Scene/Context/SceneContext.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
+#include <Engine/Application/System/PlaySession.h>
 
 #include <externals/imgui/ImGuiFileDialog.h>
 
@@ -41,9 +42,7 @@ void LevelEditor::Initialize(){
 
 	// ビューポートの初期化
 	mainViewport_ = std::make_unique<Viewport>(ViewportType::VIEWPORT_MAIN, "Game Viewport");
-	mainViewport_->SetCamera(CameraManager::GetInstance()->GetCamera3d());
 	debugViewport_ = std::make_unique<Viewport>(ViewportType::VIEWPORT_DEBUG, "Debug Viewport");
-	debugViewport_->SetCamera(CameraManager::GetDebugCamera());
 
 	performanceOverlay_ = std::make_unique<PerformanceOverlay>();
 
@@ -96,7 +95,7 @@ void LevelEditor::Initialize(){
 
 void LevelEditor::Update(){
 
-
+#ifdef _DEBUG
 	SceneContext* ctx = SceneContext::Current();
 
 	// 入力チェックはここで行う
@@ -106,8 +105,8 @@ void LevelEditor::Update(){
 	// ----------------------------
 	// Open Scene ダイアログ処理
 	// ----------------------------
-	if (ImGuiFileDialog::Instance()->Display("SceneOpenDialog")) {
-		if (ImGuiFileDialog::Instance()->IsOk()) {
+	if (ImGuiFileDialog::Instance()->Display("SceneOpenDialog")){
+		if (ImGuiFileDialog::Instance()->IsOk()){
 			std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
 			ClearSelection(); // 既存の選択をクリア
 			SceneSerializer::Load(*ctx, filePath);
@@ -118,8 +117,8 @@ void LevelEditor::Update(){
 	// ----------------------------
 	// Save Scene ダイアログ処理
 	// ----------------------------
-	if (ImGuiFileDialog::Instance()->Display("SceneSaveDialog")) {
-		if (ImGuiFileDialog::Instance()->IsOk()) {
+	if (ImGuiFileDialog::Instance()->Display("SceneSaveDialog")){
+		if (ImGuiFileDialog::Instance()->IsOk()){
 			std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
 			SceneSerializer::Save(*ctx, filePath);
 		}
@@ -129,6 +128,7 @@ void LevelEditor::Update(){
 	//シーンが変わっていたら各パネルに通知する
 	NotifySceneContextChanged();
 	prevCtx_ = SceneContext::Current();
+#endif // _DEBUG
 }
 
 void LevelEditor::Render(){
@@ -136,11 +136,12 @@ void LevelEditor::Render(){
 	hierarchy_->Render();
 	editor_->Render();
 	placeToolPanel_->Render();
+	if (pPlaySesseion_){
+		pPlaySesseion_->RenderToolbar();
+	}
 
 	inspector_->SetSelectedEditor(selectedEditor_);
 	inspector_->SetSelectedObject(selectedObject_);
-
-
 
 	inspector_->Render();
 
@@ -149,6 +150,16 @@ void LevelEditor::Render(){
 
 void LevelEditor::RenderMenu() {
 	menu_->Render();
+}
+
+void LevelEditor::EnterGameMode(){
+	//playSession_->Enter();
+	mode_ = EditorMode::Game;
+}
+
+void LevelEditor::ExitGameMode(){
+	//playSession_->Exit();
+	mode_ = EditorMode::Edit;
 }
 
 void LevelEditor::SetSelectedEditor(BaseEditor* editor){
@@ -164,18 +175,27 @@ void LevelEditor::SetSelectedObject(const std::shared_ptr<SceneObject>& sp){
 	inspector_->SetSelectedObject(sp);
 
 }
-
-void LevelEditor::CreateObject(std::shared_ptr<SceneObject> obj){
+void LevelEditor::CreateObject(const std::shared_ptr<SceneObject>& obj) {
 	if (!obj) return;
+
 	SceneContext* ctx = SceneContext::Current();
 
-	// パーティクルなら FxSystem 登録
-	if (obj->GetObjectType() == ObjectType::ParticleSystem){
-		if (auto fx = std::dynamic_pointer_cast< ParticleSystemObject >(obj)){
+	// パーティクルなら FxSystem にも登録
+	if (obj->GetObjectType() == ObjectType::ParticleSystem) {
+		if (auto fx = std::dynamic_pointer_cast<ParticleSystemObject>(obj)) {
 			ctx->GetFxSystem()->AddEmitter(fx);
 		}
 	}
+
+	// 自身を登録
 	ctx->GetObjectLibrary()->AddObject(obj);
+
+	// 子も再帰的に登録
+	for (const auto& child : obj->GetChildren()) {
+		if (child) {
+			CreateObject(child);
+		}
+	}
 }
 
 
@@ -214,6 +234,12 @@ void LevelEditor::RenderViewport(ViewportType type, const ImTextureID& tex){
 		}
 	}
 }
+
+void LevelEditor::SetCameraForViewport(BaseCamera* mainCamera, BaseCamera* debugCamera){
+	mainViewport_->SetCamera(mainCamera);
+	debugViewport_->SetCamera(debugCamera);
+}
+
 
 void LevelEditor::TryPickObjectFromMouse(const Vector2& mouse,
 										 const Vector2& viewportSize,
@@ -310,8 +336,8 @@ void LevelEditor::TryPickUnderCursor(){
 	Vector2 mousePos = Vector2(relativeX, relativeY);
 
 	// Ray生成
-	Matrix4x4 view = CameraManager::GetDebugCamera()->GetViewMatrix();
-	Matrix4x4 proj = CameraManager::GetDebugCamera()->GetProjectionMatrix();
+	Matrix4x4 view = CameraManager::GetDebug()->GetViewMatrix();
+	Matrix4x4 proj = CameraManager::GetDebug()->GetProjectionMatrix();
 
 	Ray ray = Raycastor::ConvertMouseToRay(mousePos, view, proj, size);
 	if (SceneObject* picked = PickSceneObjectByRay(ray)){

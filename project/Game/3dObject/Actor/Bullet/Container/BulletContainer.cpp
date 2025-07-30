@@ -23,13 +23,13 @@ BulletContainer::BulletContainer(const std::string& name){
 /////////////////////////////////////////////////////////////////////////////////////////
 //		更新
 /////////////////////////////////////////////////////////////////////////////////////////
-void BulletContainer::Update(){
+void BulletContainer::Update(float dt){
 	auto* lib = SceneContext::Current()->GetObjectLibrary();
 
 	for (auto& [id, bullets] : typedBullets_){
 		for (auto it = bullets.begin(); it != bullets.end(); ){
 			auto bullet = *it;
-			bullet->Update();
+			bullet->Update(dt);
 
 			if (!bullet->GetIsAlive()){
 				lib->RemoveObject(bullet);
@@ -72,5 +72,5 @@ void BulletContainer::ShowGui(){
 }
 
 void BulletContainer::DerivativeGui(){
-	editBullet_->ShowGui();
+	//editBullet_->ShowGui();
 }

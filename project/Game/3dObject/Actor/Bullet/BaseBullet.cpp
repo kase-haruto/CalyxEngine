@@ -4,7 +4,6 @@
 /* ===================================================================== */
 
 /* engine */
-#include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Objects/Collider/BoxCollider.h>
 
 /* external */
@@ -39,13 +38,9 @@ void BaseBullet::ShootInitialize(const Vector3& initPos, const Vector3& velocity
 /////////////////////////////////////////////////////////////////////////////////////////
 //		更新
 /////////////////////////////////////////////////////////////////////////////////////////
-void BaseBullet::Update(){
-	float deltaTime = ClockManager::GetInstance()->GetDeltaTime();
-
+void BaseBullet::Update(float deltaTime){
 	// 通常移動とtrailFx_更新
 	worldTransform_.translation += velocity_ * moveSpeed_ * deltaTime;
-
-	BaseGameObject::Update();
 
 	// 寿命減少
 	lifeTime_ -= deltaTime;

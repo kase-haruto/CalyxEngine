@@ -27,7 +27,9 @@ public:
 	virtual ~IScene() = default;
 
 	virtual void Initialize() = 0;
-	virtual void Update() = 0;
+	virtual void Update(float dt) = 0;
+	virtual void PostUpdate(ID3D12GraphicsCommandList* cmdList,
+							class PipelineService* psoService) = 0;
 	virtual void Draw([[maybe_unused]]ID3D12GraphicsCommandList* cmdList,
 					  [[maybe_unused]] class PipelineService*,
 					  [[maybe_unused]] RenderTargetType){}
@@ -38,7 +40,7 @@ public:
 	virtual void SetTransitionRequestor(class SceneTransitionRequestor* requestor) = 0;
 	//--------- accessor -----------------------------------------------------
 	virtual SceneContext* GetSceneContext() const = 0;
-
+	virtual void InjectContext([[maybe_unused]]SceneContext* ctx) {};
 protected:
 	//===================================================================*/
 	//			protected methods

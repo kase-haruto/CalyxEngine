@@ -16,7 +16,8 @@ public:
 	FollowCamera();
 	~FollowCamera() = default;
 
-	void Update()override;
+	void Update(float dt)override;
+	void AlwaysUpdate(float dt)override;
 	void ShowGui()override;
 
 	std::string_view GetTypeName() const override{ return "FollowCamera"; }
@@ -25,7 +26,7 @@ private:
 	//							private Methods
 	//===================================================================*/	
 	Vector3 CalculateOffset();			//* オフセットの計算
-	void Turning();						//* 旋回
+	void Turning(float dt);				//* 旋回
 	void Adulation();					//* 追従
 	void UpdateMatrix()override;		//* 行列の更新
 
@@ -39,8 +40,6 @@ public:
 	void SetTarget(const EulerTransform* target){ target_ = target; }
 
 	void SetViewpoint(const Vector3& viewpoint){ viewpoint_ = viewpoint; }
-
-	void SetRotate(const Vector3& rotate){ transform_.rotate = rotate; }
 
 #pragma endregion
 

@@ -13,6 +13,9 @@ namespace PipelinePresets {
 	// 2dObjects
 	GraphicsPipelineDesc MakeObject2D();
 
+	// cs
+	GraphicsPipelineDesc MakeGpuParticleCS();
+
 	// postprocess
 	GraphicsPipelineDesc MakeCopyImage();
 	GraphicsPipelineDesc MakeGrayScale();

@@ -12,7 +12,9 @@
 #include <Engine/Foundation/Utility/Ease/Ease.h>
 #include <Engine/Foundation/Utility/Random/Random.h>
 #include <Engine/Objects/Collider/BoxCollider.h>
-
+#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
+#include <Engine/Scene/Utility/SceneUtility.h>
+#include <Game/3dObject/Actor/Bullet/Container/PlayerBulletContainer.h>
 
 // externals
 #include <externals/imgui/imgui.h>
@@ -45,7 +47,7 @@ Player::Player(const std::string& modelName,
 void Player::Initialize(){
 	moveSpeed_ = 15.0f;
 	reticleTransform_.Initialize();
-	reticleTransform_.parent = GetWorldTransform().parent;
+	//reticleTransform_.parent = GetWorldTransform().parent;
 	reticleTransform_.translation = Vector3(0.0f, 0.0f, 50.0f);
 
 	life_ = 10;
@@ -80,9 +82,7 @@ void Player::Initialize(){
 /////////////////////////////////////////////////////////////////////////////////////////
 //		更新
 /////////////////////////////////////////////////////////////////////////////////////////
-void Player::Update(){
-	float dt = ClockManager::GetInstance()->GetDeltaTime();
-
+void Player::Update(float dt){
 	if (inputHandler_){
 		inputHandler_->Update(*this, dt);
 	}
@@ -155,8 +155,6 @@ void Player::Update(){
 		lockOnSprites_[i]->Update();
 		++i;
 	}
-
-	BaseGameObject::Update();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -227,7 +225,7 @@ void Player::RequestLockOn(){
 	if (lockedOnTargets_.size() >= kMaxLockOn) return;
 
 	// 現在有効な 3D カメラ
-	Camera3d* camera = CameraManager::GetInstance()->GetCamera3d();
+	Camera3d* camera = CameraManager::GetMain3d();
 	if (!camera) return;
 
 	const Vector2 reticleScreen = WorldToScreen(reticleTransform_.GetWorldPosition());
@@ -257,6 +255,15 @@ void Player::RequestLockOn(){
 void Player::RequestLockOnTargetClear(){
 	lockedOnTargets_.clear();
 	lockOnSprites_.clear();
+}
+
+void Player::Start() {
+	if (!inputHandler_)	inputHandler_ = std::make_unique<PlayerInputHandler>();
+
+	if (!shootingController_) {
+		auto bullets = SceneAPI::Instantiate<PlayerBulletContainer>("playerBulletController");
+		shootingController_ = std::make_unique<PlayerShootingController>(bullets.get());
+	}
 }
 
 
@@ -434,3 +441,5 @@ void Player::SetShootingController(std::unique_ptr<PlayerShootingController> sc)
 void Player::SetInputHandler(std::unique_ptr<PlayerInputHandler> ih){
 	inputHandler_ = std::move(ih);
 }
+
+REGISTER_SCENE_OBJECT(Player)

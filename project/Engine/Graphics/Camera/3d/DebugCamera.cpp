@@ -6,7 +6,7 @@
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <Engine/Application/Input/Input.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
-
+#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 // externals
 #include <externals/imgui/imgui.h>
 
@@ -14,22 +14,22 @@
 #include <algorithm>  // std::clamp
 #include <numbers>    // std::numbers::pi
 
-DebugCamera::DebugCamera()
+DebugCamera::DebugCamera(const std::string& name)
 	: BaseCamera(),
 	lastMousePosRotate_ {0.0f, 0.0f},
 	isDraggingRotate_ {false},
 	lastMousePosMove_ {0.0f, 0.0f},
 	isDraggingMove_ {false}{
-	BaseCamera::SetName("DebugCamera");
+	BaseCamera::SetName(name);
 	fovAngleY_ = static_cast< float >(std::numbers::pi) * 0.25f; // 45度
 
-	transform_.translate = {0.0f, 4.0f, -10.0f};
+	worldTransform_.translation = {0.0f, 4.0f, -10.0f};
 }
 
 //////////////////////////////////////////////////////////////////////////////
 //							メイン処理
 //////////////////////////////////////////////////////////////////////////////
-void DebugCamera::Update(){
+void DebugCamera::AlwaysUpdate(float dt){
 	if (!isActive_){ return; }
 
 	// 入力に基づいてカメラ操作
@@ -51,14 +51,14 @@ void DebugCamera::Update(){
 		offset = TransformNormal(offset, matRot);
 
 		// カメラの位置 = ターゲット + オフセット
-		transform_.translate = target_ + offset;
+		worldTransform_.translation = target_ + offset;
 
 		// カメラの回転は (Pitch, Yaw, 0)
-		transform_.rotate = Vector3(orbitAngle_.y, orbitAngle_.x, 0.0f);
+		worldTransform_.eulerRotation = Vector3(orbitAngle_.y, orbitAngle_.x, 0.0f);
 	}
 
 	// BaseCameraの更新処理を呼び出す
-	BaseCamera::Update();
+	BaseCamera::AlwaysUpdate(dt);
 }
 
 void DebugCamera::ShowGui(){
@@ -172,6 +172,7 @@ void DebugCamera::Zoom(){
 	float wheel = Input::GetMouseWheel(); // 1フレーム当たりのホイール回転量
 	if (wheel != 0.0f){
 		distance_ -= wheel * (zoomSpeed_ * 5.0f);
-		distance_ = (std::max)(0.01f, distance_);
+		distance_ = ( std::max ) (0.01f, distance_);
 	}
 }
+REGISTER_SCENE_OBJECT(DebugCamera)

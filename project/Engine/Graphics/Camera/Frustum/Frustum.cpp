@@ -29,28 +29,36 @@ bool Frustum::IsAABBInside(const Vector3& min, const Vector3& max) const{
 	return true;
 }
 
-void Frustum::Draw(const Vector4& color) const{
-
+void Frustum::Draw(const Vector4& color, float farPlaneRatio) const {
 	Vector3 corners[8];
 	CalculateCorners(corners);
 
+	// ---------- 🎯 ここで遠平面を手前に寄せる ----------
+	if (farPlaneRatio < 1.f) {
+		for (int i = 0; i < 4; ++i) {
+			// near[i] から far[i] 方向へのベクトル
+			Vector3 v = corners[i + 4] - corners[i];
+			corners[i + 4] = corners[i] + v * farPlaneRatio;   // 圧縮
+		}
+	}
+
+	// ---------- 以降は元の描画 ----------
+	auto draw = PrimitiveDrawer::GetInstance();
 	// near
-	PrimitiveDrawer::GetInstance()->DrawLine3d(corners[0], corners[1], color);
-	PrimitiveDrawer::GetInstance()->DrawLine3d(corners[1], corners[2], color);
-	PrimitiveDrawer::GetInstance()->DrawLine3d(corners[2], corners[3], color);
-	PrimitiveDrawer::GetInstance()->DrawLine3d(corners[3], corners[0], color);
-
+	draw->DrawLine3d(corners[0], corners[1], color);
+	draw->DrawLine3d(corners[1], corners[2], color);
+	draw->DrawLine3d(corners[2], corners[3], color);
+	draw->DrawLine3d(corners[3], corners[0], color);
 	// far
-	PrimitiveDrawer::GetInstance()->DrawLine3d(corners[4], corners[5], color);
-	PrimitiveDrawer::GetInstance()->DrawLine3d(corners[5], corners[6], color);
-	PrimitiveDrawer::GetInstance()->DrawLine3d(corners[6], corners[7], color);
-	PrimitiveDrawer::GetInstance()->DrawLine3d(corners[7], corners[4], color);
-
+	draw->DrawLine3d(corners[4], corners[5], color);
+	draw->DrawLine3d(corners[5], corners[6], color);
+	draw->DrawLine3d(corners[6], corners[7], color);
+	draw->DrawLine3d(corners[7], corners[4], color);
 	// sides
-	PrimitiveDrawer::GetInstance()->DrawLine3d(corners[0], corners[4], color);
-	PrimitiveDrawer::GetInstance()->DrawLine3d(corners[1], corners[5], color);
-	PrimitiveDrawer::GetInstance()->DrawLine3d(corners[2], corners[6], color);
-	PrimitiveDrawer::GetInstance()->DrawLine3d(corners[3], corners[7], color);
+	draw->DrawLine3d(corners[0], corners[4], color);
+	draw->DrawLine3d(corners[1], corners[5], color);
+	draw->DrawLine3d(corners[2], corners[6], color);
+	draw->DrawLine3d(corners[3], corners[7], color);
 }
 
 void Frustum::CalculateCorners(Vector3 outCorners[8]) const{

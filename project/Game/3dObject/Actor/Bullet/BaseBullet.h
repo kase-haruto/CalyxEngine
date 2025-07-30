@@ -21,7 +21,7 @@ public:
 
 	virtual void ShootInitialize(const Vector3& initPos, const Vector3& velocity);
 	void Initialize() override {};
-	void Update()override;
+	void Update(float dt)override;
 	void DerivativeGui()override;
 
 	//--------- collider -------------------------------------------------

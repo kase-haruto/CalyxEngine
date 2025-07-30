@@ -87,3 +87,8 @@ std::vector<std::shared_ptr<SceneObject>> SceneObjectLibrary::GetAllObjectsShare
 	}
 	return result;
 }
+
+bool SceneObjectLibrary::Contains(const std::shared_ptr<SceneObject>& obj) const {
+	if (!obj) return false;
+	return objects_.contains(obj->GetGuid());  // GUIDベースで判定
+}

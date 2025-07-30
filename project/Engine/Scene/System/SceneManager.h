@@ -11,42 +11,46 @@
 // c++
 #include <memory>
 #include <array>
+#include <d3d12.h>
+class BaseScene;
+class SceneContext;
+class DxCore;
+class PipelineService;
 
-class IRenderTarget;
-class GraphicsSystem;
-
-class SceneManager
-	: public SceneTransitionRequestor{
+class SceneManager{
 public:
-	SceneManager() = default;
-	SceneManager(DxCore* dxCore,GraphicsSystem* graphicsSystem);
+	explicit SceneManager(DxCore* dx);
 	~SceneManager();
 
+	// ---------------------------------------------------------------------
+	// Lifecycle
+	// ---------------------------------------------------------------------
 	void Initialize();
-	void Update();
-	void Draw();
-	void DrawNotAffectedFromPE();
-	void DrawForRenderTarget(IRenderTarget* target);
 
-	void SetEngineUI(EngineUICore* ui);
-	void RequestSceneChange(SceneType nextScene)override;
-	void SetGraphicsSystem(GraphicsSystem* graphicsSystem) { pGraphicsSystem_ = graphicsSystem; }
+	// Tick / Render --------------------------------------------------------
+	void Update(float dt);
+	void PostUpdate(ID3D12GraphicsCommandList* cmd, PipelineService* pso);
+	void Draw(ID3D12GraphicsCommandList* cmd, PipelineService* pso);
+	void DrawForRenderTarget(IRenderTarget* rt, ID3D12GraphicsCommandList* cmd, PipelineService* pso);
+	void DrawNotAffectedFromPE(ID3D12GraphicsCommandList* cmd, PipelineService* pso);
+
+	// ---------------------------------------------------------------------
+	// Scene & Context accessors
+	// ---------------------------------------------------------------------
 	SceneContext* GetCurrentSceneContext() const;
 
+	size_t AddScene(std::unique_ptr<BaseScene> scene);
+	void   SetCurrent(size_t index);
+	size_t GetCurrentIndex() const{ return currentIdx_; }
 
 private:
-	// シーンインスタンスの配列
-	std::array<std::unique_ptr<IScene>, static_cast< int >(SceneType::count)> scenes_;
+	struct SceneSlot{
+		std::unique_ptr<BaseScene>   scene;
+		std::unique_ptr<SceneContext> ctx;
+	};
 
-	// 現在シーン・次シーン
-	int currentSceneNo_ {static_cast< int >(SceneType::PLAY)};
-	int nextSceneNo_ {static_cast< int >(SceneType::PLAY)};
+	std::vector<SceneSlot> slots_;
+	size_t currentIdx_ = 0;
 
-	// UIパネルなど
-	EngineUICore* pEngineUI_ = nullptr;
-	DxCore* pDxCore_ = nullptr;
-	GraphicsSystem* pGraphicsSystem_ = nullptr;
-
-public:
-	bool gameResult_ = false;
+	DxCore* dx_ = nullptr;
 };

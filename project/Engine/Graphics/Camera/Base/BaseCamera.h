@@ -3,10 +3,11 @@
 
 #include "ICamera.h"
 #include <Engine/Objects/Transform/Transform.h>
+#include <Engine/Objects/ConfigurableObject/ConfigurableObject.h>
 #include <Engine/Graphics/Buffer/CameraBuffer.h>
 #include <Engine/Foundation/Math/Matrix4x4.h>
 #include <Engine/Foundation/Math/Vector3.h>
-
+#include <Data/Engine/Configs/Scene/Objects/SceneObject/SceneObjectConfig.h>
 /* lib */
 #include <numbers>
 
@@ -16,22 +17,35 @@
 using namespace Microsoft::WRL;
 
 class BaseCamera :
-	public ICamera{
+	public ICamera,
+	public IConfigurable {
 public:
 	//==================================================================*//
 	//			public functions
 	//==================================================================*//
 	BaseCamera();
+	BaseCamera(const std::string& name);
 	virtual ~BaseCamera() = default;
 
-	virtual void Update();  // 更新
-	void ShowImGui();		// ImGui表示
+	virtual void Update(float dt)override;  // 更新
+	virtual void AlwaysUpdate(float dt)override;
+
+	void ShowImGui();// ImGui表示
 	virtual void UpdateMatrix();  // 行列の更新
 
 	void SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> command,
 					PipelineType pipelineType);
 
 	void StartShake(float duration, float intensity)override;  // カメラシェイク開始
+
+	std::string_view GetTypeName() const override { return "BaseCamera"; }
+	// config ============================================================
+	void ApplyConfig();
+	void ExtractConfig();
+	void ApplyConfigFromJson(const nlohmann::json& j) override;
+	void ExtractConfigToJson(nlohmann::json& j) const override;
+
+	std::string GetObjectTypeName()const override { return name_; }
 
 
 protected:
@@ -50,7 +64,6 @@ public:
 	void SetCamera(const Vector3& pos, const Vector3& rotate);
 
 	// Getter
-	const Matrix4x4& GetWorldMat() const{ return worldMatrix_; }
 	const Matrix4x4& GetViewMatrix() const;
 	const Matrix4x4& GetProjectionMatrix() const;
 	const Matrix4x4& GetViewProjectionMatrix() const;
@@ -60,8 +73,6 @@ public:
 	void SetActive(bool isActive){ isActive_ = isActive; }
 	void SetAspectRatio(float aspect)override;
 
-
-	Matrix4x4 GetViewProjection()const{ return viewProjectionMatrix_; }
 
 protected:
 	//==================================================================*//
@@ -88,19 +99,14 @@ protected:
 	//==================================================================*//
 	//			protected variables
 	//==================================================================*//
-	EulerTransform transform_ = {
-		{1.0f, 1.0f, 1.0f},			// scale
-		{0.0f, 0.0f, 0.0f},			// rotate
-		{0.0f, 4.0f, -15.0f}		// translate
-	};
-
 	bool isActive_ = true;				//アクティブかどうか
 	Matrix4x4 viewProjectionMatrix_;	// ビュープロジェクション行列
-	Matrix4x4 worldMatrix_;				// ワールド行列
 
 private:
 	//==================================================================*//
 	//			private variables
 	//==================================================================*//
 	Camera3DBuffer cameraBuffer_;		// カメラバッファ
+
+	ConfigurableObject<SceneObjectConfig> config_;
 };

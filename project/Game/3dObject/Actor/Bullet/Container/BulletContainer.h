@@ -27,10 +27,11 @@ public:
 	//===================================================================*/
 	BulletContainer(const std::string& name);
 
+
 	//--------- mainfunc -----------------------------------------------------
 	virtual void AddBullet(BulletID id, const Vector3& pos, const Vector3& vel) = 0;
 	virtual void RemoveBullet(const std::shared_ptr<BaseBullet>& bullet);
-	virtual void Update() override;
+	void Update(float dt)override;
 	
 	//--------- ui / gui -----------------------------------------------------
 	void ShowGui();

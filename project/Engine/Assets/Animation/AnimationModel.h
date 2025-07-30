@@ -13,7 +13,7 @@ public:
 	~AnimationModel() override = default;
 
 	void Initialize() override;
-	void Update() override;
+	void Update(float dt) override;
 	void OnModelLoaded() override;
 	void Draw(const WorldTransform& transform)override;
 	void Map() override;

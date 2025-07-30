@@ -38,52 +38,61 @@ bool PrefabSerializer::Save(const std::vector<SceneObject*>& roots,
 	return JsonUtils::Save(path, jArray);
 }
 
-std::vector<std::shared_ptr<SceneObject>> PrefabSerializer::Load(const std::string& path){
+std::vector<std::shared_ptr<SceneObject>> PrefabSerializer::Load(const std::string& path) {
 	nlohmann::json jArray;
 	if (!JsonUtils::Load(path, jArray)) return {};
 
-	std::vector<std::shared_ptr<SceneObject>> createdRoots;
+	std::unordered_map<Guid, std::shared_ptr<SceneObject>> oldToObject;
+	std::unordered_map<Guid, Guid> oldToNewGuid;
 	std::unordered_map<Guid, std::shared_ptr<SceneObject>> guidMap;
 
-	// インスタンス生成と設定適用
-	for (const auto& j : jArray){
+	// 1. インスタンス生成と設定適用 + 新 GUID 割り当て
+	for (const auto& j : jArray) {
 		std::string typeName = j.value("type", "");
 		if (typeName.empty()) continue;
 
-		// Factory で生成
 		auto sp = SceneObjectRegistry::Get().Create(typeName);
 		if (!sp) continue;
 
-		// Config 適用
-		if (auto* cfg = dynamic_cast< IConfigurable* >(sp.get())){
+		if (auto* cfg = dynamic_cast<IConfigurable*>(sp.get())) {
 			cfg->ApplyConfigFromJson(j);
 		}
 
-		// GUID 上書き
-		Guid guid = j.value("guid", Guid {});
-		sp->SetGuid(guid);
+		Guid oldGuid = j.value("guid", Guid{});
+		Guid newGuid = Guid::New();
+		sp->SetGuid(newGuid);
 
-		guidMap[guid] = sp;
-		createdRoots.push_back(sp);
+		oldToNewGuid[oldGuid] = newGuid;
+		oldToObject[oldGuid] = sp;
+		guidMap[newGuid] = sp;
 	}
 
-	// 親子リンク復元
-	for (const auto& j : jArray){
-		Guid childG = j.value("guid", Guid {});
-		Guid parentG = j.value("parentGuid", Guid {});
-		if (!childG.isValid() || !parentG.isValid()) continue;
+	// 2. 親子リンク復元（旧 GUID → 新 GUID をマップで追う）
+	for (const auto& j : jArray) {
+		Guid oldChild = j.value("guid", Guid{});
+		Guid oldParent = j.value("parentGuid", Guid{});
 
-		auto childIt = guidMap.find(childG);
-		auto parentIt = guidMap.find(parentG);
-		if (childIt != guidMap.end() && parentIt != guidMap.end()){
-			childIt->second->SetParent(parentIt->second);
+		auto newChildIt = oldToNewGuid.find(oldChild);
+		auto newParentIt = oldToNewGuid.find(oldParent);
+		if (newChildIt == oldToNewGuid.end()) continue;
+
+		auto childSp = guidMap[newChildIt->second];
+		if (!childSp) continue;
+
+		if (newParentIt != oldToNewGuid.end()) {
+			auto parentSp = guidMap[newParentIt->second];
+			if (parentSp) {
+				// SetParent のみ（children_ は内部で処理される想定）
+				childSp->SetParent(parentSp);
+			}
 		}
 	}
 
-	// ルートだけを返
-	std::vector<std::shared_ptr<SceneObject>> rootsOut;
-	for (auto& [g, sp] : guidMap){
-		if (!sp->GetParent()) rootsOut.push_back(sp);
+	// ✅ ルートだけでなく、すべてのオブジェクトを返す
+	std::vector<std::shared_ptr<SceneObject>> allObjects;
+	allObjects.reserve(guidMap.size());
+	for (auto& [g, sp] : guidMap) {
+		allObjects.push_back(sp);
 	}
-	return rootsOut;
+	return allObjects;
 }

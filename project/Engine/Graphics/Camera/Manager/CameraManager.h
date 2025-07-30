@@ -16,91 +16,45 @@
 /* ========================================================================
 /*	enum
 /* ===================================================================== */
-enum CameraType{
-	Type_Default,
-	Type_Follow,
-	Type_Debug,
-};
+class SceneContext; // fwd
+
+enum class CameraType{ Default, Debug };
 
 class CameraManager{
 public:
-	// インスタンスを取得する関数
-	static CameraManager* GetInstance();
+	//――― Scene‑side lifecycle ―――――――――――――――――――――――――――――
+	void Initialize(SceneContext* owner);
+	void Update(float dt);
+	void TransferToGPU();
+	static void Finalize();
 
-	// コピーコンストラクタと代入演算子を削除して、複製を防止
-	CameraManager(const CameraManager&) = delete;
-	CameraManager& operator=(const CameraManager&) = delete;
+	//――― Non‑static API ――――――――――――――――――――――――――――――――――
+	Camera3d* Main3D(){ return main_.get(); }
+	DebugCamera* DebugCam(){ return debug_.get(); }
+	BaseCamera* Active(){ return cameras_[active_]; }
 
-public:
-	//===================================================================*/
-	//					private member function
-	//===================================================================*/
-	static void Initialize();      // 初期化
-	static void Update();          // 更新
-	static void Finalize();        // 解放
+	void  SetType(CameraType t);
+	const Vector2& ViewportSize(ViewportType) const; // const ref (cheap & safe)
+	void  SetViewportSize(ViewportType, const Vector2&);
+	void  SetAspectRatio(float w, float h);
+	void  Shake(float d, float i){ Active()->StartShake(d, i); }
 
-	static void TransfarToGPU();   // GPUへの転送
+	//――― Thin static wrappers (legacy code support) ―――――――――
+	static Camera3d* GetMain3d();
+	static DebugCamera* GetDebug();
+	static BaseCamera* GetActive();
+	static void SetTypeStatic(CameraType);
+	static const Vector2& GetViewportSizeStatic(ViewportType);
+	static void SetViewportSizeStatic(ViewportType, const Vector2&);
 
-	void SetAspectRatio(float width, float height);
-
-	static void SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> command, PipelineType pipelineType){
-		instance_->cameras_[instance_->type_]->SetCommand(command, pipelineType);
-	}
+	void SetMainCamera(const std::shared_ptr<Camera3d>& cam) { main_ = cam; cameras_[CameraType::Default] = cam.get(); }
+	void SetDebugCamera(const std::shared_ptr<DebugCamera>& cam) { debug_ = cam; cameras_[CameraType::Debug] = cam.get(); }
 
 private:
-	CameraManager();
-	~CameraManager() = default;
+	CameraType active_ = CameraType::Default;
+	Vector2 vpMain_ {1920,1080}, vpDebug_ {800,600};
 
-private:
-	//===================================================================*/
-	//					private member variable
-	//===================================================================*/
-	static CameraManager* instance_;                 // クラスのインスタンス
-	CameraType type_ = Type_Default;
-
-	Vector2 mainViewportSize_{ 1920.0f, 1080.0f };
-	Vector2 debugViewportSize_{ 800.0f, 600.0f };
-
-	/* 管理しているカメラ =======================*/
-	std::unique_ptr<Camera3d> camera3d_ = nullptr;   // 3dオブジェクトのデフォルトカメラ
-	std::unique_ptr<FollowCamera> followCamera_ = nullptr;
-	std::unique_ptr<DebugCamera> debugCamera_ = nullptr;
-
-	// すべてのカメラ
+	std::shared_ptr<Camera3d>   main_;
+	std::shared_ptr<DebugCamera>debug_;
 	std::unordered_map<CameraType, BaseCamera*> cameras_;
-
-	//===================================================================*/
-	//					getter/setter
-	//===================================================================*/
-public:
-	static Camera3d* GetCamera3d(){ return instance_->camera3d_.get(); }
-
-	static DebugCamera* GetDebugCamera(){ return instance_->debugCamera_.get(); }
-
-	static BaseCamera* GetActiveCamera(){ return instance_->cameras_[instance_->type_]; }
-
-	static Matrix4x4 GetViewProjectionMatrix(){ return instance_->cameras_[instance_->type_]->GetViewProjection(); }
-
-	static Matrix4x4 GetViewMatrix(){ return instance_->cameras_[instance_->type_]->GetViewMatrix(); }
-
-	static Matrix4x4 GetWorldMatrix(){ return instance_->cameras_[instance_->type_]->GetWorldMat(); }
-
-	void SetFollowTarget(const EulerTransform* target){
-		followCamera_->SetTarget(target);
-	}
-
-	const Vector3& GetFollowRotate()const{ return followCamera_->GetRotate(); }
-
-	void SetRotate(const Vector3& rotate){
-		followCamera_->SetRotate(rotate);
-	}
-
-	void SetType(const CameraType type);
-
-	void SetShake(float duration, float intensity){
-		instance_->cameras_[instance_->type_]->StartShake(duration, intensity);
-	}
-
-	void SetViewportSize(ViewportType type, const Vector2& size);
-	Vector2 GetViewportSize(ViewportType type) const;
 };

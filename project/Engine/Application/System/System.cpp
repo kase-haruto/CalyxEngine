@@ -24,7 +24,6 @@
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 
 // editor
-#include <Engine/Assets/Model/ModelBuilder.h>
 #include <Engine/Editor/UiEditor.h>
 
 // lib
@@ -78,7 +77,6 @@ void System::Initialize(HINSTANCE hInstance, int32_t clientWidth, int32_t client
 	//srvの先頭をimguiが使用するためそのあとに初期化
 	dxCore_->RendererInitialize(clientWidth, clientHeight);
 	// カメラの生成
-	CameraManager::Initialize();
 	PrimitiveDrawer::GetInstance()->Initialize();
 
 	//モデル管理クラスの初期化(インスタンス生成)
@@ -199,14 +197,11 @@ void System::Finalize(){
 	ModelManager::GetInstance()->Finalize();
 	PrimitiveDrawer::GetInstance()->Finalize();
 	//カメラの開放
-	CameraManager::Finalize();
 	//pipelineの終了処理
 	pipelineStateManager_->Finalize();
 	DescriptorAllocator::Finalize();
 	Input::Finalize();
 	Audio::Finalize();
-
-
 	//ウィンドウの破棄
 	winApp_->TerminateGameWindow();
 }

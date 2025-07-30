@@ -57,7 +57,7 @@ void PostProcessEditor::ShowImGuiInterface() {
 void PostProcessEditor::SetPostEffectCollection(PostProcessCollection* postProcessCollection) {
 	pCollection_ = postProcessCollection;
 	if (pCollection_ && pCollection_->GetSlots().empty()) {
-		pCollection_->BuildInitialSlots(true); // 全スロット無効で初期化
+		pCollection_->BuildInitialSlots(false); // 全スロット無効で初期化
 	}
 }
 

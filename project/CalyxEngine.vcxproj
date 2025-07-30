@@ -111,6 +111,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\System\Command\EditorCommand\LevelEditorCommand\CreateObjectCommand\CreateObjectCommand.cpp" />
+    <ClCompile Include="Engine\Application\Effects\Particle\Emitter\BaseEmitter.cpp" />
     <ClCompile Include="Engine\Graphics\Descriptor\DescriptorAllocator.cpp" />
     <ClCompile Include="Engine\PostProcess\CRT\CRTEffect.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Bullet\Factory\BulletFactory.cpp" />
@@ -201,7 +203,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Graphics\Pipeline\Shader\ShaderManager.cpp" />
     <ClCompile Include="Engine\Graphics\Pipeline\Shader\ShaderCompiler.cpp" />
     <ClCompile Include="Engine\Assets\Model\Model.cpp" />
-    <ClCompile Include="Engine\Assets\Model\ModelBuilder.cpp" />
     <ClCompile Include="Engine\Assets\Model\ModelManager.cpp" />
     <ClCompile Include="Engine\Renderer\Sprite\Sprite.cpp" />
     <ClCompile Include="Engine\Assets\Texture\Texture.cpp" />
@@ -247,6 +248,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Application\Effects\Particle\Module\Velocity\GravityModule.cpp" />
     <ClCompile Include="Game\Battle\Shooting\Shooter\Interface\IBulletShooter.cpp" />
     <ClCompile Include="Game\Battle\Shooting\Shooter\HomingBullet\PlayerHomingBulletShooter.cpp" />
+    <ClCompile Include="Engine\Application\Effects\Particle\Emitter\GpuFxEmitter.cpp" />
     <ClCompile Include="main.cpp">
       <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</MultiProcessorCompilation>
       <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</MultiProcessorCompilation>
@@ -256,7 +258,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Graphics\ResourceStateTracker\ResourceStateTracker.cpp" />
     <ClCompile Include="Engine\Scene\System\SceneManager.cpp" />
     <ClCompile Include="Engine\Objects\3D\Actor\SceneObjectManager.cpp" />
-    <ClCompile Include="Engine\Application\UI\Panels\SceneSwitcherPanel.cpp" />
     <ClCompile Include="Engine\Foundation\Math\Quaternion.cpp" />
     <ClCompile Include="Engine\Scene\System\SceneFactory.cpp" />
     <ClCompile Include="Engine\Scene\Context\SceneContext.cpp" />
@@ -304,10 +305,16 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\Input\PlayerInput\PlayerInputHandler.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Bullet\PlayerBullet\HomingBullet.cpp" />
     <ClCompile Include="Engine\PostProcess\Vignette\Vignette.cpp" />
+    <ClCompile Include="Engine\Application\System\PlaySession.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\System\Command\EditorCommand\BaseLevelEditorCommand.h" />
+    <ClInclude Include="Engine\System\Command\EditorCommand\LevelEditorCommand\CreateObjectCommand\CreateObjectCommand.h" />
+    <ClInclude Include="Engine\Application\Effects\Particle\Emitter\BaseEmitter.h" />
+    <ClInclude Include="Engine\Application\System\EngineMode.h" />
     <ClInclude Include="Engine\Graphics\Descriptor\DescriptorAllocator.h" />
     <ClInclude Include="Engine\PostProcess\CRT\CRTEffect.h" />
+    <ClInclude Include="Engine\Scene\Runtime\IRuntimeBehaviour.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\Details\BulletDetails.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\Factory\BulletFactory.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\Register\BulletRegistrar.h" />
@@ -440,7 +447,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Graphics\Pipeline\Shader\ShaderCompiler.h" />
     <ClInclude Include="Engine\Renderer\Mesh\VertexData.h" />
     <ClInclude Include="Engine\Assets\Model\Model.h" />
-    <ClInclude Include="Engine\Assets\Model\ModelBuilder.h" />
     <ClInclude Include="Engine\Assets\Model\ModelData.h" />
     <ClInclude Include="Engine\Assets\Model\ModelManager.h" />
     <ClInclude Include="Engine\Renderer\Sprite\Sprite.h" />
@@ -490,7 +496,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Graphics\ResourceStateTracker\ResourceStateTracker.h" />
     <ClInclude Include="Engine\Scene\System\SceneManager.h" />
     <ClInclude Include="Engine\Objects\3D\Actor\SceneObjectManager.h" />
-    <ClInclude Include="Engine\Application\UI\Panels\SceneSwitcherPanel.h" />
     <ClInclude Include="Engine\Foundation\Math\Quaternion.h" />
     <ClInclude Include="Engine\Scene\System\SceneFactory.h" />
     <ClInclude Include="Engine\Scene\Context\SceneContext.h" />
@@ -550,6 +555,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\Battle\Shooting\Shooter\HomingBullet\PlayerHomingBulletShooter.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\PlayerBullet\HomingBullet.h" />
     <ClInclude Include="Engine\PostProcess\Vignette\Vignette.h" />
+    <ClInclude Include="Engine\Application\Effects\Particle\Emitter\GpuFxEmitter.h" />
+    <ClInclude Include="Engine\Application\System\PlaySession.h" />
     <ClInclude Include="Resources\shaders\CRT.PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>

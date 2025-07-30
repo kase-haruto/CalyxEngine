@@ -39,7 +39,8 @@ public:
 	HierarchyPanel* GetHierarchyPanel() const;
 	EditorPanel* GetEditorPanel() const;
 	PlaceToolPanel* GetPlaceToolPanel() const;
-
+	LevelEditor* GetLevelEditor()const{ return levelEditor_.get(); }
+	void SetCameraForViewport(BaseCamera* mainCamera, BaseCamera* debugCamera);
 private:
 	//===================================================================*/
 	//					private function

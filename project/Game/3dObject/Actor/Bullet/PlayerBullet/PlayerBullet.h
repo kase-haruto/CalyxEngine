@@ -13,7 +13,6 @@ public:
 	~PlayerBullet()override;
 
 	void Initialize()override;
-	void Update() override;
 	//--------- accessor ---------------------------------------------------
 	
 private:

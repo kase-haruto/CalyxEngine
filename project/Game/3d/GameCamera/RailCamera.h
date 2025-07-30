@@ -5,16 +5,20 @@
 #include <Engine/Graphics/Camera/3d/Camera3d.h>
 #include <Engine/Objects/Transform/Transform.h>
 
-class RailCamera : public Camera3d {
+class RailCamera 
+	: public BaseCamera {
 public:
 	RailCamera();
+	RailCamera(const std::string& name);
 	~RailCamera() = default;
 
 	void Initialize();
-	void Update() override;
+	void Update(float dt) override;
+	void ShowGui()override;
+	void AlwaysUpdate(float dt)override;;
 
 	Vector3 GetPosition();
-	const Vector3& GetRotation() const { return transform_.rotate; }
+	const Vector3& GetRotation() const { return worldTransform_.eulerRotation; }
 	const WorldTransform& GetWorldTransform() const { return worldTransform_; }
 
 	std::string_view GetTypeName() const override{ return "RailCamera"; }

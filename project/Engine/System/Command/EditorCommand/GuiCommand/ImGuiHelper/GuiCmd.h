@@ -36,6 +36,13 @@ namespace GuiCmd{
 	bool DragFloat2(const char* label, Vector2& value, float speed = 0.01f, float min = 0.0f, float max = 0.0f);
 	bool DragFloat3(const char* label,Vector3& value,float speed = 0.01f,float min = 0.0f,float max = 0.0f);
 	bool DragFloat4(const char* label, Vector4& value, float speed = 0.01f, float min = 0.0f, float max = 0.0f);
+	bool ColoredDragFloat3(const char* label,
+						   Vector3& value,
+						   float speed = 0.1f,
+						   float min = 0.0f,
+						   float max = 0.0f,
+						   const char* format = "%.3f",
+						   const char* suffix = "");
 
 	//===================================================================*/
 	//		sliderFloat

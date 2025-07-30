@@ -1,8 +1,9 @@
 #include "EnemySpawner.h"
 
-#include <Game/3dObject/Actor/Enemy/Collection/EnemyCollection.h>
 #include <Engine/Scene/Context/SceneContext.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
+#include <Game/3dObject/Actor/Enemy/Collection/EnemyCollection.h>
+#include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 
 #include <externals/imgui/ImGuiFileDialog.h>
 
@@ -13,21 +14,23 @@ EnemySpawner::EnemySpawner(const std::string& name) {
 
 }
 
-void EnemySpawner::Update() {
-	float dt = ClockManager::GetInstance()->GetDeltaTime();
-
+void EnemySpawner::Update(float dt) {
 	Vector3 rot = rotationDir_ * rotationSpeed_ * dt;
 	worldTransform_.eulerRotation += rot;
 
 	worldTransform_.rotationSource = RotationSource::Euler;
-	worldTransform_.Update();
 
 	spawnTimer_ += dt;
-		if (spawnTimer_ >= spawnInterval_) {
-			Spawn();
-			spawnTimer_ = 0.0f;
-		}
+	if (spawnTimer_ >= spawnInterval_) {
+		Spawn();
+		spawnTimer_ = 0.0f;
+	}
+}
 
+void EnemySpawner::AlwaysUpdate([[maybe_unused]] float dt) {
+	worldTransform_.Update();
+
+	PrimitiveDrawer::GetInstance()->DrawSphere(worldTransform_.GetWorldPosition());
 }
 
 void EnemySpawner::ApplyConfig() {
@@ -80,15 +83,15 @@ void EnemySpawner::SetPlayerTransform(WorldTransform* playerTransform) {
 	worldTransform_.parent = playerTransform->parent;
 }
 
-void EnemySpawner::Spawn(){
-	if ( !ownerCollection_) return;
+void EnemySpawner::Spawn() {
+	if (!ownerCollection_) return;
 
 	// 有効な敵だけ残す
 	size_t aliveCount = 0;
-	for (auto it = spawnedEnemies_.begin(); it != spawnedEnemies_.end();){
-		if (!(*it) || !(*it)->GetIsAlive()){
+	for (auto it = spawnedEnemies_.begin(); it != spawnedEnemies_.end();) {
+		if (!(*it) || !(*it)->GetIsAlive()) {
 			it = spawnedEnemies_.erase(it);
-		} else{
+		} else {
 			++it;
 			++aliveCount;
 		}

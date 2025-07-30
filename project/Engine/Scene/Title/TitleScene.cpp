@@ -42,8 +42,6 @@ void TitleScene::Initialize() {
 	sceneContext_->Initialize();
 	LoadAssets();
 
-	CameraManager::GetInstance()->SetType(CameraType::Type_Default);
-
 	//=========================
 	// グラフィック関連
 	//=========================
@@ -57,18 +55,14 @@ void TitleScene::Initialize() {
 
 }
 
-void TitleScene::Update() {
-	/* カメラ関連更新 ============================*/
-	CameraManager::Update();
-
-	skyBox_->Update();
+void TitleScene::Update(float dt) {
 
 	/* 3dObject ============================*/
 	//地面の更新
-	modelField_->Update();
+	modelField_->Update(dt);
 	title_->Update();
 	/* その他 ============================*/
-	sceneContext_->Update();
+	
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
 
 	if (Input::GetInstance()->TriggerKey(DIK_2)||

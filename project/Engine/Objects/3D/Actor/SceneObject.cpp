@@ -4,7 +4,7 @@
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <Engine/Foundation/Json/JsonUtils.h>
 #include <Engine/Objects/ConfigurableObject/IConfigurable.h>
-
+#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <externals/imgui/imgui.h>
 
 static const char* ObjectTypeToString(ObjectType type){
@@ -76,3 +76,10 @@ void SceneObject::UpdateWorldTransformRecursive(){
 	}
 }
 
+void SceneObject::AddChild(const std::shared_ptr<SceneObject>& child) {
+	if (!child || child.get() == this) return;
+
+	child->SetParent(shared_from_this());
+}
+
+REGISTER_SCENE_OBJECT(SceneObject)

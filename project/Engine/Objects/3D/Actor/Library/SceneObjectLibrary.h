@@ -31,6 +31,8 @@ public:
 	std::vector<SceneObject*>                        GetAllObjectsRaw()   const;
 	std::vector<std::shared_ptr<SceneObject>>        GetAllObjectsShared() const;
 
+	bool Contains(const std::shared_ptr<SceneObject>& obj) const;
+
 private:
 	std::unordered_map<Guid, std::shared_ptr<SceneObject>> objects_;
 };

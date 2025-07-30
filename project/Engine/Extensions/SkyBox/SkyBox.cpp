@@ -27,7 +27,9 @@ void SkyBox::ShowGui(){
 	worldTransform_.ShowImGui();
 }
 
-void SkyBox::Update(){
+void SkyBox::Update([[maybe_unused]]float dt){}
+
+void SkyBox::AlwaysUpdate([[maybe_unused]] float dt){
 	Vector3 half = worldTransform_.scale * 0.5f;
 
 	// --- 頂点データ設定 ---
@@ -91,26 +93,41 @@ void SkyBox::Update(){
 }
 
 void SkyBox::Draw(ID3D12GraphicsCommandList* cmd){
-	CameraManager::SetCommand(cmd, PipelineType::Skybox);
+	// ── アクティブ カメラのビュー投影行列をルート定数へ
+	if (auto* cam = CameraManager::GetActive())
+		cam->SetCommand(cmd, PipelineType::Skybox);
 
-	D3D12_GPU_DESCRIPTOR_HANDLE handle = TextureManager::GetInstance()->GetEnvironmentTextureSrvHandle();
+	// 環境テクスチャ SRV
+	D3D12_GPU_DESCRIPTOR_HANDLE envSrv =
+		TextureManager::GetInstance()->GetEnvironmentTextureSrvHandle();
 
-	GraphicsGroup::GetInstance()->SetCommand(cmd, PipelineType::Skybox, BlendMode::NORMAL);
+	// PSO / ブレンド 設定
+	GraphicsGroup::GetInstance()->SetCommand(
+		cmd,
+		PipelineType::Skybox,
+		BlendMode::NORMAL);
+
+	// パイプライン前準備
 	cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	vertexBuffer_.SetCommand(cmd);
 	indexBuffer_.SetCommand(cmd);
-	worldTransform_.SetCommand(cmd, 0);
-	cmd->SetGraphicsRootDescriptorTable(2, handle);
 
+	// ワールド行列 (root parameter 0)
+	worldTransform_.SetCommand(cmd, /*rootIndex=*/0);
+
+	// SRV (root parameter 2)
+	cmd->SetGraphicsRootDescriptorTable(2, envSrv);
+
+	// 描画
 	cmd->DrawIndexedInstanced(
 		static_cast< UINT >(indices_.size()), // IndexCountPerInstance
-		1,                                   // InstanceCount
-		0,                                   // StartIndexLocation
-		0,                                   // BaseVertexLocation
-		0                                    // StartInstanceLocation
-	);
+		1,                                  // InstanceCount
+		0,                                  // StartIndexLocation
+		0,                                  // BaseVertexLocation
+		0);                                 // StartInstanceLocation
 }
+
 
 const WorldTransform& SkyBox::GetWorldTransform() const{
 	return worldTransform_;

@@ -14,10 +14,11 @@ public:
 	//===================================================================//
 	//							public メソッド
 	//===================================================================//
-	DebugCamera();
+	DebugCamera() = default;
+	DebugCamera(const std::string& name);
 	~DebugCamera() = default;
 
-	void Update() override;  //< 毎フレームの更新処理
+	void AlwaysUpdate(float dt)override;;
 	void ShowGui() override; //< ImGuiによるGUI表示
 
 	//===================================================================//

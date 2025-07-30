@@ -10,6 +10,7 @@
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Data/Engine/Prefab/Serializer/PrefabSerializer.h>
+#include <Engine/Scene/Context/SceneContext.h>
 // lib
 #include <externals/imgui/imgui.h>
 #include <externals/imgui/ImGuiFileDialog.h>
@@ -29,15 +30,21 @@ void HierarchyPanel::Render(){
 	ImGui::Begin(panelName_.c_str(), nullptr, ImGuiWindowFlags_NoDecoration);
 	ImGui::Text("Scene Hierarchy");
 
+	lib_ = SceneContext::Current()->GetObjectLibrary();
+
 	if (!lib_){
 		ImGui::Text("SceneObjectLibrary not set.");
 		ImGui::End(); return;
 	}
 
 	// ルート列挙
-	for (const auto& sp : lib_->GetAllObjectsShared()){
-		if (!sp || sp->GetParent()) continue;
-		ShowObjectRecursive(sp.get());
+	for (const auto& sp : lib_->GetAllObjectsShared()) {
+		if (!sp) continue;
+		// 親が存在しない、またはその親がシーンに存在していなければルート扱い
+		auto parent = sp->GetParent();
+		if (!parent || !lib_->Contains(parent)) {
+			ShowObjectRecursive(sp.get());
+		}
 	}
 
 	// 空白クリックで選択解除

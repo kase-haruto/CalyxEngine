@@ -36,7 +36,9 @@ public:
 	// =======================
 	// Main Interface
 	// =======================
-	virtual void Update() = 0;
+	virtual void Initialize() {}
+	virtual void AlwaysUpdate([[maybe_unused]] float dt){};	//< 常時更新
+	virtual void Update([[maybe_unused]] float dt){};			//< ランタイム時更新
 
 	// 描画コマンドリストは使わない場合もあるので maybe_unused 指定
 	virtual void Draw([[maybe_unused]] ID3D12GraphicsCommandList* cmdList){}
@@ -93,9 +95,11 @@ public:
 	const Guid& GetGuid() const{ return id_; }
 	void SetGuid(const Guid& g){ id_ = g; }
 
-	virtual std::string_view GetTypeName() const = 0;
+	virtual std::string_view GetTypeName() const { return "SceneObject"; }
 
 	void UpdateWorldTransformRecursive();
+
+	void AddChild(const std::shared_ptr<SceneObject>& child);
 
 protected:
 	// =======================

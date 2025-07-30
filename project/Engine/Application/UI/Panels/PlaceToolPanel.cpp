@@ -1,111 +1,164 @@
 #include "PlaceToolPanel.h"
 
-// engine
+// --- engine -----------------------------------------------------------------
 #include <Engine/Assets/Texture/TextureManager.h>
-#include <Engine/Objects/3D/Actor/BaseGameObject.h>
-#include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
+#include <Engine/Scene/Utility/SceneUtility.h>
 #include <Engine/Scene/Context/SceneContext.h>
-#include <Engine/System/Command/EditorCommand/LevelEditorCommand/CreateObjectCommand/CreateShapeObjectCommand.h>
-#include <Engine/System/Command/EditorCommand/LevelEditorCommand/CreateObjectCommand/CreateParticleSystemCommand.h>
 #include <Engine/System/Command/Manager/CommandManager.h>
+#include <Engine/System/Command/EditorCommand/LevelEditorCommand/CreateObjectCommand/CreateObjectCommand.h>
+#include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
+#include <Engine/Objects/3D/Actor/BaseGameObject.h>
 
-// externals
+// --- game objects -----------------------------------------------------------
+#include <Game/3dObject/Actor/Enemy/Spawner/EnemySpawner.h>
+
+// --- externals --------------------------------------------------------------
 #include <externals/imgui/imgui.h>
 
-PlaceToolPanel::PlaceToolPanel() : IEngineUI("PlaceToolPanel"){
+// ============================================================================
+//  ctor
+// ============================================================================
+PlaceToolPanel::PlaceToolPanel()
+	: IEngineUI("PlaceToolPanel") {
 	RegisterPlaceItems();
 }
 
-void PlaceToolPanel::RegisterPlaceItems(){
+// ============================================================================
+//  アイテム登録
+// ============================================================================
+void PlaceToolPanel::RegisterPlaceItems() {
+	// ----------------------------- Shape ------------------------------------
 	auto& shapeItems = categoryItems_[PlaceItemCategory::Shape];
 	const std::vector<std::pair<ShapeObjType, std::string>> shapes = {
-		{ShapeObjType::Plane, "plane"},
-		{ShapeObjType::Cube, "cube"},
-		{ShapeObjType::Sphere, "sphere"},
+		{ShapeObjType::Plane,    "plane"},
+		{ShapeObjType::Cube,     "cube"},
+		{ShapeObjType::Sphere,   "sphere"},
 		{ShapeObjType::Cylinder, "cylinder"},
-		{ShapeObjType::Cone, "cone"},
-		{ShapeObjType::Torus, "torus"}
+		{ShapeObjType::Cone,     "cone"},
+		{ShapeObjType::Torus,    "torus"}
 	};
-	for (auto& [type, name] : shapes){
+
+	for (auto& [type, name] : shapes) {
 		std::string objName = name;
-		std::string modelName = (name == "cube" ? "debugCube.obj" :
-								 name == "sphere" ? "debugSphere.obj" :
-								 name + ".obj");
+		std::string modelName = (name == "cube" ? "debugCube.obj"
+								 : name == "sphere" ? "debugSphere.obj"
+								 : name + ".obj");
+
 		shapeItems.push_back({
 			PlaceItemCategory::Shape,
-			name,
+			objName,
 			TextureManager::GetInstance()->LoadTexture("UI/Tool/" + name + ".png"),
 			{64, 64},
-			[this, objName, modelName] (){
-				auto factory = [objName, modelName] (){
-					auto obj = std::make_unique<BaseGameObject>(modelName, objName);
+			[modelName, objName]() {
+				auto factory = [modelName, objName]() {
+					auto obj = SceneAPI::Instantiate<BaseGameObject>(modelName, objName);
 					obj->Initialize();
 					return obj;
 				};
 				CommandManager::GetInstance()->Execute(
-					std::make_unique<CreateShapeObjectCommand>(SceneContext::Current(), factory));
+					std::make_unique<CreateObjectCommand<BaseGameObject>>(
+						SceneContext::Current(), factory, "Create Shape"));
 			}
 							 });
 	}
 
+	// ---------------------------- Particle ----------------------------------
 	auto& particleItems = categoryItems_[PlaceItemCategory::Particle];
 	particleItems.push_back({
 		PlaceItemCategory::Particle,
-		"Particle",
+		"ParticleSystem",
 		TextureManager::GetInstance()->LoadTexture("UI/Tool/particle.png"),
 		{64, 64},
-		[this] (){
-			std::string name = "ParticleSystem";
-			auto factory = [name] (){
-				auto obj = std::make_unique<ParticleSystemObject>(name);
+		[]() {
+			const std::string name = "ParticleSystem";
+			auto factory = [name]() {
+				auto obj = SceneAPI::Instantiate<ParticleSystemObject>(name);
 				obj->Initialize();
 				return obj;
 			};
 			CommandManager::GetInstance()->Execute(
-				std::make_unique<CreateParticleSystemObjectCommand>(SceneContext::Current(), factory, name));
+				std::make_unique<CreateObjectCommand<ParticleSystemObject>>(
+					SceneContext::Current(), factory, "Create ParticleSystem"));
 		}
 							});
+
+	// ---------------------------- Spawner -----------------------------------
+	auto& spawnerItems = categoryItems_[PlaceItemCategory::InGameObject];
+	spawnerItems.push_back({
+		PlaceItemCategory::InGameObject,
+		"EnemySpawner",
+		{},                 // アイコン無し
+		{64, 64},
+		[]() {
+			auto factory = []() {
+				auto obj = SceneAPI::Instantiate<EnemySpawner>("EnemySpawner");
+				obj->ApplyConfig();
+				obj->Initialize();
+				return obj;
+			};
+			CommandManager::GetInstance()->Execute(
+				std::make_unique<CreateObjectCommand<EnemySpawner>>(
+					SceneContext::Current(), factory, "Create EnemySpawner"));
+		}
+						   });
 }
 
-void PlaceToolPanel::Render(){
+// ============================================================================
+//  パネル描画
+// ============================================================================
+void PlaceToolPanel::Render() {
 	ImGui::Begin(panelName_.c_str());
 
-	SceneContext* ctx = SceneContext::Current();
-
-	if (!ctx){
+	if (!SceneContext::Current()) {
 		ImGui::Text("sceneContext not set");
 		ImGui::End();
 		return;
 	}
+
 	RenderCategoryItems();
 	ImGui::End();
 }
 
+// ============================================================================
+//  カテゴリ別アイテム描画
+// ============================================================================
 void PlaceToolPanel::RenderCategoryItems() {
-	constexpr int columns = 4; // 1カテゴリあたりの列数
+	constexpr int columns = 4;  // 1 カテゴリあたりの列数
 
 	for (auto& [category, items] : categoryItems_) {
 
-		// カテゴリ名をわかりやすく
+		// カテゴリ名
 		const char* categoryName = "";
 		switch (category) {
-			case PlaceItemCategory::Shape:    categoryName = "Shape"; break;
+			case PlaceItemCategory::Shape:    categoryName = "Shape";    break;
 			case PlaceItemCategory::Particle: categoryName = "Particle"; break;
-			case PlaceItemCategory::Model:    categoryName = "Model"; break;
-			default:                          categoryName = "Unknown"; break;
+			case PlaceItemCategory::InGameObject:  categoryName = "IngameObject";  break;
+			case PlaceItemCategory::Model:    categoryName = "Model";    break;
+			default:                          categoryName = "Unknown";  break;
 		}
 
-		// UE風に: カテゴリを折りたたみ
+		// 折りたたみヘッダ
 		if (ImGui::CollapsingHeader(categoryName, ImGuiTreeNodeFlags_DefaultOpen)) {
 
 			ImGui::Columns(columns, nullptr, false);
 
 			for (size_t i = 0; i < items.size(); ++i) {
 				const auto& item = items[i];
-
 				ImGui::PushID(static_cast<int>(i));
 
-				if (ImGui::ImageButton((ImTextureID)item.texture.ptr, ImVec2(item.iconSize.x, item.iconSize.y))) {
+				// アイコン有無で描画を切り替え
+				bool clicked = false;
+				if (item.texture.ptr) {
+					clicked = ImGui::ImageButton(
+						(ImTextureID)item.texture.ptr,
+						ImVec2(item.iconSize.x, item.iconSize.y));
+				} else {
+					clicked = ImGui::Button(
+						item.name.c_str(),
+						ImVec2(item.iconSize.x, item.iconSize.y));
+				}
+
+				if (clicked) {
 					item.createFunc();
 				}
 
@@ -113,10 +166,10 @@ void PlaceToolPanel::RenderCategoryItems() {
 					ImGui::SetTooltip("%s", item.name.c_str());
 				}
 
+				// ラベル
 				ImGui::TextWrapped("%s", item.name.c_str());
 
 				ImGui::NextColumn();
-
 				ImGui::PopID();
 			}
 
@@ -125,4 +178,3 @@ void PlaceToolPanel::RenderCategoryItems() {
 		}
 	}
 }
-

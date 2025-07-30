@@ -4,6 +4,7 @@
 /* ===================================================================== */
 #include <Engine/Graphics/Context/GraphicsGroup.h>
 #include <Engine/Objects/3D/Geometory/AABB.h>
+#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 
 // lib
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
@@ -15,15 +16,20 @@
 Camera3d::Camera3d()
     : BaseCamera(){
 	BaseCamera::SetName("MainCamera");
-	transform_.translate = {0.0f, 2.0f, -10.0f};
+	worldTransform_.translation = {0.0f, 2.0f, -10.0f};
+}
+
+Camera3d::Camera3d(const std::string& name){
+	SceneObject::SetName(name, ObjectType::Camera);
 }
 
 void Camera3d::Initialize() {
-	transform_.translate = { 0.0f, 2.0f, -10.0f };
+	worldTransform_.translation = { 0.0f, 2.0f, -10.0f };
 }
 
-void Camera3d::Update(){
-    BaseCamera::Update();
+void Camera3d::AlwaysUpdate(float dt){
+
+	BaseCamera::AlwaysUpdate(dt);
 
 	frustum_.ExtractFromMatrix(viewProjectionMatrix_);
 	frustum_.Draw();
@@ -31,13 +37,11 @@ void Camera3d::Update(){
 
 void Camera3d::ShowGui(){
 	//名前の表示
-	SceneObject::ShowGui();
-
-	// アクティブかどうか
-	BaseCamera::ShowGui();
+	worldTransform_.ShowImGui();
 }
 
 bool Camera3d::IsVisible(const AABB& aabb) const{
 	return frustum_.IsAABBInside(aabb.min_, aabb.max_);
 }
 
+REGISTER_SCENE_OBJECT(Camera3d)

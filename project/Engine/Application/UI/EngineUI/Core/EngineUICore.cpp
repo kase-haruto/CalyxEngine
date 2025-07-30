@@ -33,9 +33,7 @@ void EngineUICore::Initialize() {
 //						更新
 ////////////////////////////////////////////////////////////////////////////////////////////
 void EngineUICore::Update() {
-#ifdef _DEBUG
 	levelEditor_->Update();
-#endif 
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -77,6 +75,10 @@ EditorPanel* EngineUICore::GetEditorPanel() const{
 
 PlaceToolPanel* EngineUICore::GetPlaceToolPanel() const {
 	return levelEditor_->GetPlaceToolPanel();
+}
+
+void EngineUICore::SetCameraForViewport(BaseCamera* mainCamera, BaseCamera* debugCamera){
+	levelEditor_->SetCameraForViewport(mainCamera, debugCamera);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////

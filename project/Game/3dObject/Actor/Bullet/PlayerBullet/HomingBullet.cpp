@@ -35,7 +35,7 @@ void HomingBullet::SetTarget(const Actor* target){
 	target_ = target;
 }
 
-void HomingBullet::Update(){
+void HomingBullet::Update([[maybe_unused]]float dt){
 	if (target_ && target_->GetIsAlive()){
 		Vector3 objectOffset = {0.0f,1.0f,0.0f};
 		Matrix4x4 targetWorldMat = target_->GetWorldTransform().matrix.world;
@@ -48,7 +48,6 @@ void HomingBullet::Update(){
 			Vector3 currentDir = velocity_.Normalize();
 
 			Quaternion fromToQuat = Quaternion::FromToQuaternion(currentDir, desiredDir);
-			float dt = ClockManager::GetInstance()->GetDeltaTime();
 			float t = std::clamp(rotateSpeed_ * dt, 0.0f, 1.0f);
 
 			Quaternion slerpedRot = Quaternion::Slerp(Quaternion::MakeIdentity(), fromToQuat, t);
@@ -56,8 +55,6 @@ void HomingBullet::Update(){
 			velocity_ = newDir * homingSpeed_;
 		}
 	}
-
-	BaseBullet::Update(); // 移動は常に継続
 }
 
 const Vector3 HomingBullet::GetCenterPos()const{

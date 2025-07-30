@@ -408,68 +408,53 @@ Vector3 ExtractEulerAnglesFromMatrix(const Matrix4x4& worldMatrix) {
 }
 
 Vector2 WorldToScreen(const Vector3& worldPos) {
-	const Matrix4x4& viewProj = CameraManager::GetCamera3d()->GetViewProjectionMatrix();
+	const Matrix4x4& viewProj = CameraManager::GetMain3d()->GetViewProjectionMatrix();
 
-	// ワールド座標を Vector4 にして変換
-	Vector4 clipPos = Vector4::TransformVector( viewProj, Vector4(worldPos, 1.0f));
+	// ワールド→クリップ空間
+	Vector4 clipPos = Vector4::Transform(Vector4(worldPos, 1.0f),viewProj);
 
-	// w除算（透視除算）
-	if (clipPos.w == 0.0f) {
-		return Vector2(0.0f, 0.0f); // または無効値として扱う
+	if (fabs(clipPos.w) < 1e-5f) {
+		return Vector2(0.0f, 0.0f); // 無効値
 	}
-	clipPos.x /= clipPos.w;
-	clipPos.y /= clipPos.w;
-	clipPos.z /= clipPos.w;
+
+	// NDC座標へ
+	Vector3 ndcPos = {
+		clipPos.x / clipPos.w,
+		clipPos.y / clipPos.w,
+		clipPos.z / clipPos.w
+	};
 
 	// NDC → スクリーン座標
-	float screenWidth = 1280.0f;
-	float screenHeight = 720.0f;
-	float screenX = (clipPos.x * 0.5f + 0.5f) * screenWidth;
-	float screenY = (1.0f - (clipPos.y * 0.5f + 0.5f)) * screenHeight;
+	float screenWidth = CameraManager::GetViewportSizeStatic(ViewportType::VIEWPORT_MAIN).x;
+	float screenHeight = CameraManager::GetViewportSizeStatic(ViewportType::VIEWPORT_MAIN).y;
+
+	float screenX = (ndcPos.x * 0.5f + 0.5f) * screenWidth;
+	float screenY = (1.0f - (ndcPos.y * 0.5f + 0.5f)) * screenHeight;
 
 	return Vector2(screenX, screenY);
 }
 
 Vector3 ScreenToWorld(const Vector2& screenPos, float depthZ) {
-	// ビューポートサイズ（例として固定値、必要に応じて動的に取得してください）
-	float viewportX = 0.0f;
-	float viewportY = 0.0f;
-	float viewportWidth = CameraManager::GetInstance()->GetViewportSize(ViewportType::VIEWPORT_MAIN).x;
-	float viewportHeight = CameraManager::GetInstance()->GetViewportSize(ViewportType::VIEWPORT_MAIN).y;
-	float minZ = 0.0f; // 通常0～1の範囲
-	float maxZ = 1.0f;
+	float screenWidth = CameraManager::GetViewportSizeStatic(ViewportType::VIEWPORT_MAIN).x;
+	float screenHeight = CameraManager::GetViewportSizeStatic(ViewportType::VIEWPORT_MAIN).y;
 
-	// ビューポート行列を作成
-	Matrix4x4 matViewport = Matrix4x4::MakeViewportMatrix(viewportX, viewportY, viewportWidth, viewportHeight, minZ, maxZ);
+	// スクリーン座標 → NDC座標に変換
+	float ndcX = (screenPos.x / screenWidth) * 2.0f - 1.0f;
+	float ndcY = 1.0f - (screenPos.y / screenHeight) * 2.0f;
 
-	// ビュー・プロジェクション行列を取得
-	Matrix4x4 matViewProj = CameraManager::GetViewProjectionMatrix();
+	// NDC → ワールド座標（逆 ViewProjection 行列を使う）
+	Vector4 ndcPos(ndcX, ndcY, depthZ, 1.0f);
 
-	// ビューポート行列とビュー投影行列の合成
-	Matrix4x4 matVPV = Matrix4x4::Multiply(matViewProj, matViewport);
+	Matrix4x4 invViewProj = Matrix4x4::Inverse(CameraManager::GetMain3d()->GetViewProjectionMatrix());
+	Vector4 worldH = Vector4::Transform(ndcPos,invViewProj );
 
-	// matVPVの逆行列を計算
-	Matrix4x4 matVPVInv = Matrix4x4::Inverse(matVPV);
-
-	// スクリーン座標をクリップ空間に変換
-	Vector4 screenPosH; // ホモジニアス座標 (x, y, z, w)
-	screenPosH.x = screenPos.x;
-	// DirectX系の場合Y座標反転が必要ならここで反転してください
-	screenPosH.y = screenPos.y;
-	screenPosH.z = depthZ; // 0〜1の深度値
-	screenPosH.w = 1.0f;
-
-	// クリップ空間からワールド空間へ逆変換
-	Vector4 worldPosH = Vector4::TransformVector( matVPVInv, screenPosH);
-
-	// ホモジニアス除算
-	if (worldPosH.w != 0.0f) {
-		worldPosH.x /= worldPosH.w;
-		worldPosH.y /= worldPosH.w;
-		worldPosH.z /= worldPosH.w;
+	if (fabs(worldH.w) > 1e-5f) {
+		worldH.x /= worldH.w;
+		worldH.y /= worldH.w;
+		worldH.z /= worldH.w;
 	}
 
-	return Vector3(worldPosH.x, worldPosH.y, worldPosH.z);
+	return Vector3(worldH.x, worldH.y, worldH.z);
 }
 
 
@@ -487,7 +472,7 @@ bool WorldToScreen(const Vector3& worldPos, Vector2& outScreenPos) {
 	Matrix4x4 matViewport = Matrix4x4::MakeViewportMatrix(0, 0, 1280.0f, 720.0f, 0, 1);
 
 	// ビュー・プロジェクションの合成行列を計算
-	Matrix4x4 matVP = CameraManager::GetViewProjectionMatrix();
+	Matrix4x4 matVP = CameraManager::GetMain3d()->GetViewProjectionMatrix();
 
 	// ワールド空間の座標をビュー・プロジェクション行列で変換（クリップ座標）
 	Vector4 clipPos = MultiplyMatrixVector(matVP, Vector4(worldPos.x, worldPos.y, worldPos.z, 1));

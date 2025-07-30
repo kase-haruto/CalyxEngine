@@ -1,83 +1,33 @@
 #include "CameraManager.h"
+#include <Engine/Scene/Utility/SceneUtility.h>
 
-CameraManager* CameraManager::instance_ = nullptr;
+static CameraManager* Mgr(){ if (auto* ctx = SceneContext::Current()) return ctx->GetCameraMgr(); return nullptr; }
 
-CameraManager* CameraManager::GetInstance(){
-	if (!instance_){
-		instance_ = new CameraManager();
-	}
-	return instance_;
+void CameraManager::Initialize(SceneContext*){
+	main_ = SceneAPI::Instantiate<Camera3d>("MainCamera");
+	debug_ = SceneAPI::Instantiate<DebugCamera>("DebugCamera");
+	cameras_[CameraType::Default] = main_.get();
+	cameras_[CameraType::Debug] = debug_.get();
 }
+void CameraManager::Update(float){}
+void CameraManager::TransferToGPU(){ for (auto& kv : cameras_) kv.second->TransfarToGPU(); }
 
-CameraManager::CameraManager(){
-	camera3d_ = std::make_unique<Camera3d>();
-	followCamera_ = std::make_unique<FollowCamera>();
-	debugCamera_ = std::make_unique<DebugCamera>();
+void CameraManager::SetType(CameraType t){ active_ = t; for (auto& kv : cameras_) kv.second->SetActive(kv.first == t); }
 
-	cameras_[Type_Default] = camera3d_.get();
-	cameras_[Type_Follow] = followCamera_.get();
-	cameras_[Type_Debug] = debugCamera_.get();
+const Vector2& CameraManager::ViewportSize(ViewportType vt) const{
+	return (vt == ViewportType::VIEWPORT_MAIN) ? vpMain_ : vpDebug_;
 }
+void CameraManager::SetViewportSize(ViewportType vt, const Vector2& s){ (vt == ViewportType::VIEWPORT_MAIN ? vpMain_ : vpDebug_) = s; }
 
-void CameraManager::SetType(const CameraType type){
-	type_ = type;
-	for (auto& camera : cameras_){
-		camera.second->SetActive(camera.first == type_);
-	}
-}
+void CameraManager::SetAspectRatio(float w, float h){ if (h > 0){ float asp = w / h; for (auto& kv : cameras_) kv.second->SetAspectRatio(asp); } }
 
-void CameraManager::SetViewportSize(ViewportType type, const Vector2& size) {
-	switch (type) {
-		case ViewportType::VIEWPORT_MAIN:
-			mainViewportSize_ = size;
-			break;
-		case ViewportType::VIEWPORT_DEBUG:
-			debugViewportSize_ = size;
-			break;
-		default:
-			break;
-	}
-}
-
-Vector2 CameraManager::GetViewportSize(ViewportType type) const {
-	switch (type) {
-		case ViewportType::VIEWPORT_MAIN:
-			return mainViewportSize_;
-		case ViewportType::VIEWPORT_DEBUG:
-			return debugViewportSize_;
-		default:
-			return Vector2{ 0, 0 };
-	}
-}
-
-void CameraManager::Initialize(){
-	GetInstance();//インスタンスがない場合作成
-}
-
-void CameraManager::Update(){
-
-	for (auto& camera:instance_->cameras_){
-		camera.second->Update();
-	}
-
-}
-
-void CameraManager::Finalize(){
-	if (instance_){ delete instance_; }
-}
-
-void CameraManager::TransfarToGPU(){
-	for (auto& camera : instance_->cameras_){
-		camera.second->TransfarToGPU();
-	}
-}
-
-void CameraManager::SetAspectRatio(float width, float height){
-	if (height <= 0) return;
-	float aspect = width / height;
-
-	for (auto& camera : cameras_){
-		camera.second->SetAspectRatio(aspect);
-	}
-}
-
+//------------------------------------------------------------------
+// static wrappers
+Camera3d* CameraManager::GetMain3d(){ return Mgr() ? Mgr()->Main3D() : nullptr; }
+DebugCamera* CameraManager::GetDebug(){ return Mgr() ? Mgr()->DebugCam() : nullptr; }
+BaseCamera* CameraManager::GetActive(){ return Mgr() ? Mgr()->Active() : nullptr; }
+void CameraManager::SetTypeStatic(CameraType t){ if (Mgr()) Mgr()->SetType(t); }
+const Vector2& CameraManager::GetViewportSizeStatic(ViewportType vt){ static Vector2 dummy {0,0}; return Mgr() ? Mgr()->ViewportSize(vt) : dummy; }
+void CameraManager::SetViewportSizeStatic(ViewportType vt, const Vector2& s){ if (Mgr()) Mgr()->SetViewportSize(vt, s); }
+void CameraManager::Finalize(){ if (Mgr()) Mgr()->Finalize(); }
+//=============================================================

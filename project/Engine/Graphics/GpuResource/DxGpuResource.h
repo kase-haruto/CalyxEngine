@@ -5,8 +5,6 @@
 #include <string>
 #include <optional>
 
-using Microsoft::WRL::ComPtr;
-
 class DxGpuResource{
 public:
 	DxGpuResource() = default;
@@ -34,7 +32,7 @@ public:
 
 private:
 	D3D12_RESOURCE_STATES currentState_ = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	ComPtr<ID3D12Resource> resource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> resource_;
 	D3D12_CPU_DESCRIPTOR_HANDLE cpuSrvHandle_ {};
 	D3D12_GPU_DESCRIPTOR_HANDLE gpuSrvHandle_ {};
 	D3D12_CPU_DESCRIPTOR_HANDLE cpuRtvHandle_ {};

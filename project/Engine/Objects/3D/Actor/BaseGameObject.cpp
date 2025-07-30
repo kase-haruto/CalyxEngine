@@ -47,8 +47,6 @@ BaseGameObject::BaseGameObject(const std::string& modelName,
 	//SceneObject::SetConfigPath(ConfigPathResolver::ResolvePath(GetObjectTypeName(), GetName()));
 	////コンフィグの適用
 	//LoadConfig(configPath_);
-
-	worldTransform_.Update();
 }
 
 BaseGameObject::BaseGameObject(){
@@ -60,28 +58,23 @@ BaseGameObject::BaseGameObject(){
 
 BaseGameObject::~BaseGameObject(){}
 
-
-void BaseGameObject::Update(){
-
+void BaseGameObject::AlwaysUpdate(float dt){
 	if (objectModelType_ != ObjectModelType::ModelType_Unknown){
-
-		model_->Update();
-
+		model_->Update(dt);
 	}
 
 	worldTransform_.Update();
 
 	// collider の更新
 	if (collider_){
-		Vector3 worldPos = GetCenterPos();
-		Quaternion worldRot = worldTransform_.rotation;
-		collider_->Update(worldPos, worldRot);
-		collider_->Draw();
+		if (collider_->IsCollisionEnubled()){
+			Vector3 worldPos = GetCenterPos();
+			Quaternion worldRot = worldTransform_.rotation;
+			collider_->Update(worldPos, worldRot);
+			collider_->Draw();
+		}
 	}
-	//ApplyConfig();
-
 	model_->SetIsDrawEnable(isDrawEnable_);
-
 }
 
 //===================================================================*/

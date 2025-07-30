@@ -45,10 +45,9 @@ FxEmitter::~FxEmitter() {
 /////////////////////////////////////////////////////////////////////////////////////////
 //			更新
 /////////////////////////////////////////////////////////////////////////////////////////
-void FxEmitter::Update() {
+void FxEmitter::Update(float deltaTime) {
 	if (!isPlaying_) return;
 
-	float deltaTime = ClockManager::GetInstance()->GetDeltaTime();
 	elapsedTime_ += deltaTime;
 
 	// 遅延前は何もしない
@@ -255,20 +254,6 @@ void FxEmitter::ShowGui() {
 	}
 
 	ImGui::PopID();
-}
-
-void FxEmitter::TransferParticleDataToGPU() {
-	std::vector<ParticleConstantData> gpuUnits;
-	gpuUnits.clear();
-	for (const auto& fx : units_) {
-		if (fx.alive) {
-			gpuUnits.push_back({ fx.position, fx.scale, fx.color });
-		}
-	}
-	if (!gpuUnits.empty()) {
-
-		instanceBuffer_.TransferVectorData(gpuUnits);
-	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

@@ -4,8 +4,7 @@
 /* ===================================================================== */
 // engine
 #include <Engine/Graphics/Context/GraphicsGroup.h>
-#include <Engine/Foundation/Clock/ClockManager.h>
-
+#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 // lib
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 
@@ -16,23 +15,37 @@
 //  コンストラクタ
 /////////////////////////////////////////////////////////////////////////
 BaseCamera::BaseCamera()
-	:viewMatrix_(Matrix4x4::Inverse(worldMatrix_)),
+	:viewMatrix_(Matrix4x4::Inverse(worldTransform_.matrix.world)),
 	projectionMatrix_(MakePerspectiveFovMatrix(fovAngleY_, aspectRatio_, nearZ_, farZ_)){
 	viewProjectionMatrix_ = Matrix4x4::Multiply(viewMatrix_, projectionMatrix_);
 
 	/* バッファの生成とマッピング =======================*/
 	cameraBuffer_.Initialize(GraphicsGroup::GetInstance()->GetDevice().Get());
+	worldTransform_.rotationSource = RotationSource::Euler;
+
+	isEnableRaycast_ = false;
+}
+
+BaseCamera::BaseCamera(const std::string& name)
+	:viewMatrix_(Matrix4x4::Inverse(worldTransform_.matrix.world)),
+	projectionMatrix_(MakePerspectiveFovMatrix(fovAngleY_, aspectRatio_, nearZ_, farZ_)){
+	SceneObject::SetName(name, ObjectType::Camera);
+
+	viewProjectionMatrix_ = Matrix4x4::Multiply(viewMatrix_, projectionMatrix_);
+	/* バッファの生成とマッピング =======================*/
+	cameraBuffer_.Initialize(GraphicsGroup::GetInstance()->GetDevice().Get());
+	worldTransform_.rotationSource = RotationSource::Euler;
+
+	isEnableRaycast_=false;
 }
 
 /////////////////////////////////////////////////////////////////////////
 //  更新
 /////////////////////////////////////////////////////////////////////////
-void BaseCamera::Update(){
-	//if (!isActive_){ return; }//アクティブでない場合は処理しない
-
+void BaseCamera::Update(float dt){
 	// シェイク処理
 	if (isShaking_){
-		shakeElapsed_ += ClockManager::GetInstance()->GetDeltaTime();  // シングルトンから時間取得
+		shakeElapsed_ += dt;
 		if (shakeElapsed_ < shakeDuration_){
 			// ランダムなオフセットを生成（例：-1〜1の範囲で乱数を取得）
 			float offsetX = ((rand() / ( float ) RAND_MAX) * 2.0f - 1.0f) * shakeIntensity_;
@@ -40,16 +53,19 @@ void BaseCamera::Update(){
 			float offsetZ = ((rand() / ( float ) RAND_MAX) * 2.0f - 1.0f) * shakeIntensity_;
 
 			// 現在のカメラ位置にオフセットを加算
-			transform_.translate = originalPosition_ + Vector3(offsetX, offsetY, offsetZ);
+			worldTransform_.translation = originalPosition_ + Vector3(offsetX, offsetY, offsetZ);
 		} else{
 			// シェイク終了時に元の位置に戻す
 			isShaking_ = false;
-			transform_.translate = originalPosition_;
+			worldTransform_.translation = originalPosition_;
 		}
 	}
 
-	UpdateMatrix();
+}
 
+void BaseCamera::AlwaysUpdate([[maybe_unused]]float dt){
+	worldTransform_.Update();
+	UpdateMatrix();
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -57,12 +73,11 @@ void BaseCamera::Update(){
 /////////////////////////////////////////////////////////////////////////
 void BaseCamera::UpdateMatrix(){
 	// 行列の更新
-	worldMatrix_ = MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
-	viewMatrix_ = Matrix4x4::Inverse(worldMatrix_);
+	viewMatrix_ = Matrix4x4::Inverse(worldTransform_.matrix.world);
 	projectionMatrix_ = MakePerspectiveFovMatrix(fovAngleY_, aspectRatio_, nearZ_, farZ_);
 	viewProjectionMatrix_ = Matrix4x4::Multiply(viewMatrix_, projectionMatrix_);
 
-	cameraBuffer_.Update(viewMatrix_, projectionMatrix_, transform_.translate);
+	cameraBuffer_.Update(viewMatrix_, projectionMatrix_, worldTransform_.translation);
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -83,12 +98,38 @@ Matrix4x4 BaseCamera::MakePerspectiveFovMatrix(float fovY, float aspectRatio, fl
 /////////////////////////////////////////////////////////////////////////
 void BaseCamera::StartShake(float duration, float intensity){
 	if (!isShaking_){
-		originalPosition_ = transform_.translate;  // 現在の位置を記憶
+		originalPosition_ = worldTransform_.translation;  // 現在の位置を記憶
 	}
 	isShaking_ = true;
 	shakeDuration_ = duration;
 	shakeElapsed_ = 0.0f;
 	shakeIntensity_ = intensity;
+}
+
+void BaseCamera::ApplyConfig() {
+	const auto& cfg = config_.GetConfig();
+
+	name_ = cfg.name;
+	id_ = cfg.guid;
+	parentId_ = cfg.parentGuid;
+}
+
+void BaseCamera::ExtractConfig() {
+	auto& cfg = config_.GetConfig();
+	cfg.objectType = static_cast<int>(objectType_);
+	cfg.name = name_;
+	cfg.guid = id_;
+	cfg.parentGuid = parentId_;
+}
+
+void BaseCamera::ApplyConfigFromJson([[maybe_unused]]const nlohmann::json& j) {
+	config_.ApplyConfigFromJson(j);
+	ApplyConfig();
+}
+
+void BaseCamera::ExtractConfigToJson([[maybe_unused]] nlohmann::json& j) const {
+	const_cast<BaseCamera*>(this)->ExtractConfig();
+	config_.ExtractConfigToJson(j);
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -100,8 +141,8 @@ void BaseCamera::SetName(const std::string& name){
 }
 
 void BaseCamera::SetCamera(const Vector3& pos, const Vector3& rotate){
-	transform_.translate = pos;
-	transform_.rotate = rotate;
+	worldTransform_.translation = pos;
+	worldTransform_.eulerRotation = rotate;
 }
 
 const Matrix4x4& BaseCamera::GetViewMatrix() const{
@@ -117,11 +158,11 @@ const Matrix4x4& BaseCamera::GetViewProjectionMatrix() const{
 }
 
 const Vector3& BaseCamera::GetRotate() const{
-	return transform_.rotate;
+	return worldTransform_.eulerRotation;
 }
 
 const Vector3& BaseCamera::GetTranslate() const{
-	return transform_.translate;
+	return worldTransform_.translation;
 }
 
 #pragma endregion
@@ -147,3 +188,5 @@ void BaseCamera::SetAspectRatio(float aspect){
 
 	projectionMatrix_ = Matrix4x4::PerspectiveFovRH(adjustedFov, aspect, nearZ_, farZ_);
 }
+
+REGISTER_SCENE_OBJECT(BaseCamera)

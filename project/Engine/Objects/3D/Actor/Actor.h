@@ -18,10 +18,6 @@ public:
 		  std::optional<std::string> objectName);
 	virtual ~Actor() override = default;
 
-	virtual void Initialize() override;
-	virtual void Update() override;
-
-
 	void SetMoveSpeed(float moveSpeed) { moveSpeed_ = moveSpeed; }
 	/* ui =========================================*/
 

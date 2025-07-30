@@ -3,11 +3,13 @@
 /*	include space
 /* ===================================================================== */
 #include <Game/3dObject/Actor/Enemy/Enemy.h>
-
+#include <Engine/objects/ConfigurableObject/IConfigurable.h>
+#include <Data/Engine/Configs/Scene/Objects/SceneObject/SceneObjectConfig.h>
 class SceneContext;
 
 class EnemyCollection :
-	public SceneObject{
+	public SceneObject,
+	public IConfigurable{
 public:
 	//===================================================================*/
 	//                      Public Methods
@@ -15,7 +17,8 @@ public:
 	EnemyCollection(const std::string& name = "EnemyCollection");
 	~EnemyCollection() = default;
 
-	void Update() override;
+	void Initialize()override;
+	void Update(float dt) override;
 	void ShowGui() override;
 
 	void SetPlayerTransform(WorldTransform* pTransform);
@@ -24,6 +27,12 @@ public:
 	void AddSpawner(const std::shared_ptr<class EnemySpawner>& spawner);
 	void CreateSpawners();
 	void Clear();
+
+	//--------- config ------------------------------------------------
+	virtual void ApplyConfig();
+	virtual void ExtractConfig();
+	void ApplyConfigFromJson(const nlohmann::json& j) override;
+	void ExtractConfigToJson(nlohmann::json& j) const override;
 
 	const std::list<std::shared_ptr<Enemy>>& GetEnemies() const{ return enemies_; }
 
@@ -36,7 +45,10 @@ private:
 	std::list<std::shared_ptr<Enemy>> enemies_;
 	std::vector<std::shared_ptr<class EnemySpawner>> spawners_;
 	int deadEnemyCount = 0;
+	
 
 	WorldTransform* playerTransform_ = nullptr;
+
+	ConfigurableObject<SceneObjectConfig> config_;
 };
 

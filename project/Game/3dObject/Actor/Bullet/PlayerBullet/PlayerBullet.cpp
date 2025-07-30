@@ -35,8 +35,4 @@ void PlayerBullet::Initialize(){
 
 }
 
-void PlayerBullet::Update(){
-
-	BaseBullet::Update();
-}
 

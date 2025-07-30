@@ -9,6 +9,7 @@
 #include <Engine/Graphics/Camera/Base/BaseCamera.h>
 #include <Engine/Objects/Transform/Transform.h>
 #include <Engine/System/Command/Manager/CommandManager.h>
+#include <Engine/Scene/Context/SceneContext.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 #include <cmath>
 
@@ -39,6 +40,10 @@ void Manipulator::SetViewRect(const ImVec2& origin, const ImVec2& size){
 }
 
 void Manipulator::Update(){
+	if (camera_ != SceneContext::Current()->GetCameraMgr()->GetDebug()) {
+		camera_ = SceneContext::Current()->GetCameraMgr()->GetDebug();
+	}
+
 	if (!target_ || !camera_) return;
 
 	float view[16], proj[16], world[16], parent[16];
