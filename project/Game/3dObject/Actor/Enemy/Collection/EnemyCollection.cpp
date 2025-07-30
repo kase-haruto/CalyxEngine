@@ -4,11 +4,16 @@
 #include <Engine/Foundation/Utility/Random/Random.h>
 #include <Game/3dObject/Actor/Enemy/Spawner/EnemySpawner.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
+#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 
 #include <externals/imgui/imgui.h>
 
 EnemyCollection::EnemyCollection(const std::string& name) {
 	SetName(name, ObjectType::GameObject);
+}
+
+void EnemyCollection::Initialize() {
+	CreateSpawners();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -25,8 +30,6 @@ void EnemyCollection::Update(float dt){
 
 	for (auto it = enemies_.begin(); it != enemies_.end(); ){
 		auto& enemy = *it;
-		enemy->Update(dt);
-
 		if (!enemy->GetIsAlive()){
 			lib->RemoveObject(enemy);
 			it = enemies_.erase(it);
@@ -38,7 +41,7 @@ void EnemyCollection::Update(float dt){
 }
 
 void EnemyCollection::ShowGui(){
-	ImGui::Text("Enemy Count : %d", static_cast< int >(enemies_.size()));
+	/*ImGui::Text("Enemy Count : %d", static_cast< int >(enemies_.size()));
 	ImGui::SeparatorText("Spawners");
 
 	int idx = 0;
@@ -47,7 +50,7 @@ void EnemyCollection::ShowGui(){
 		spawner->ShowGui();
 		ImGui::PopID();
 		++idx;
-	}
+	}*/
 }
 
 
@@ -65,7 +68,7 @@ void EnemyCollection::AddEnemy(const std::shared_ptr<Enemy>& enemy){
 ///////////////////////////////////////////////////////////////////////////////////////////
 void EnemyCollection::AddSpawner(const std::shared_ptr<EnemySpawner>& spawner){
 	if (spawner){
-		spawner->SetPlayerTransform(playerTransform_);
+		//spawner->SetPlayerTransform(playerTransform_);
 		spawner->SetOwner(this);
 		spawners_.emplace_back(spawner);
 	}
@@ -100,3 +103,33 @@ void EnemyCollection::Clear() {
 	enemies_.clear();
 	spawners_.clear();
 }
+
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		
+/////////////////////////////////////////////////////////////////////////////////////////
+void EnemyCollection::ApplyConfig() {
+	const auto& cfg = config_.GetConfig();
+
+	name_ = cfg.name;
+	id_ = cfg.guid;
+	parentId_ = cfg.parentGuid;
+}
+void EnemyCollection::ExtractConfig() {
+	auto& cfg = config_.GetConfig();
+	cfg.objectType = static_cast<int>(objectType_);
+	cfg.name = name_;
+	cfg.guid = id_;
+	cfg.parentGuid = parentId_;
+}
+void EnemyCollection::ApplyConfigFromJson(const nlohmann::json& j) {
+	config_.ApplyConfigFromJson(j);
+	ApplyConfig();
+}
+void EnemyCollection::ExtractConfigToJson(nlohmann::json& j) const {
+	const_cast<EnemyCollection*>(this)->ExtractConfig();
+	config_.ExtractConfigToJson(j);
+}
+
+
+REGISTER_SCENE_OBJECT(EnemyCollection)

@@ -20,10 +20,16 @@ void EnemySpawner::Update(float dt) {
 	worldTransform_.rotationSource = RotationSource::Euler;
 
 	spawnTimer_ += dt;
-		if (spawnTimer_ >= spawnInterval_) {
-			Spawn();
-			spawnTimer_ = 0.0f;
-		}
+	if (spawnTimer_ >= spawnInterval_) {
+		Spawn();
+		spawnTimer_ = 0.0f;
+	}
+
+	worldTransform_.Update();
+}
+
+void EnemySpawner::AlwaysUpdate([[maybe_unused]] float dt) {
+
 }
 
 void EnemySpawner::ApplyConfig() {
@@ -76,15 +82,15 @@ void EnemySpawner::SetPlayerTransform(WorldTransform* playerTransform) {
 	worldTransform_.parent = playerTransform->parent;
 }
 
-void EnemySpawner::Spawn(){
-	if ( !ownerCollection_) return;
+void EnemySpawner::Spawn() {
+	if (!ownerCollection_) return;
 
 	// 有効な敵だけ残す
 	size_t aliveCount = 0;
-	for (auto it = spawnedEnemies_.begin(); it != spawnedEnemies_.end();){
-		if (!(*it) || !(*it)->GetIsAlive()){
+	for (auto it = spawnedEnemies_.begin(); it != spawnedEnemies_.end();) {
+		if (!(*it) || !(*it)->GetIsAlive()) {
 			it = spawnedEnemies_.erase(it);
-		} else{
+		} else {
 			++it;
 			++aliveCount;
 		}

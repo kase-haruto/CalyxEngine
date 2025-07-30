@@ -12,7 +12,9 @@
 #include <Engine/Foundation/Utility/Ease/Ease.h>
 #include <Engine/Foundation/Utility/Random/Random.h>
 #include <Engine/Objects/Collider/BoxCollider.h>
-
+#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
+#include <Engine/Scene/Utility/SceneUtility.h>
+#include <Game/3dObject/Actor/Bullet/Container/PlayerBulletContainer.h>
 
 // externals
 #include <externals/imgui/imgui.h>
@@ -45,7 +47,7 @@ Player::Player(const std::string& modelName,
 void Player::Initialize(){
 	moveSpeed_ = 15.0f;
 	reticleTransform_.Initialize();
-	reticleTransform_.parent = GetWorldTransform().parent;
+	//reticleTransform_.parent = GetWorldTransform().parent;
 	reticleTransform_.translation = Vector3(0.0f, 0.0f, 50.0f);
 
 	life_ = 10;
@@ -255,6 +257,15 @@ void Player::RequestLockOnTargetClear(){
 	lockOnSprites_.clear();
 }
 
+void Player::Start() {
+	if (!inputHandler_)	inputHandler_ = std::make_unique<PlayerInputHandler>();
+
+	if (!shootingController_) {
+		auto bullets = SceneAPI::Instantiate<PlayerBulletContainer>("playerBulletController");
+		shootingController_ = std::make_unique<PlayerShootingController>(bullets.get());
+	}
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////////
 //		playerの傾き
@@ -430,3 +441,5 @@ void Player::SetShootingController(std::unique_ptr<PlayerShootingController> sc)
 void Player::SetInputHandler(std::unique_ptr<PlayerInputHandler> ih){
 	inputHandler_ = std::move(ih);
 }
+
+REGISTER_SCENE_OBJECT(Player)

@@ -39,18 +39,18 @@ public:
 	void CleanUp()override{};
 	virtual void LoadAssets()override{}
 public:
-	SceneContext* GetSceneContext() const override{ return sceneContext_.get(); }
 	void SetSceneName(const std::string& name){ sceneName_ = name; }
-
+	void InjectContext(SceneContext* ctx) override { sceneContext_ = ctx; }
+	SceneContext* GetSceneContext() const { return sceneContext_; }
 	void SetTransitionRequestor(SceneTransitionRequestor* requestor)override{
 		transitionRequestor_ = requestor;
 	}
-
+	SceneContext* ActiveCtx() const { return playSession_.GetContext(); }
 protected:
 	//===================================================================*/
 	//			protected methods
 	//===================================================================*/
-	std::unique_ptr<SceneContext> sceneContext_ = nullptr;
+	SceneContext* sceneContext_ = nullptr;
 	std::shared_ptr<SkyBox> skyBox_ = nullptr;
 	std::string sceneName_ = "Scene";
 	PlaySession playSession_;

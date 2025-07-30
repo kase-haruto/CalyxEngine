@@ -40,7 +40,7 @@ public:
 	virtual void SetTransitionRequestor(class SceneTransitionRequestor* requestor) = 0;
 	//--------- accessor -----------------------------------------------------
 	virtual SceneContext* GetSceneContext() const = 0;
-
+	virtual void InjectContext([[maybe_unused]]SceneContext* ctx) {};
 protected:
 	//===================================================================*/
 	//			protected methods

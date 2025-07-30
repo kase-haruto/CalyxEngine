@@ -60,9 +60,7 @@ void GameScene::Initialize(){
 	modelField_->SetEnableRaycast(false);
 
 	/* ----- Player ----- */
-	PlayerInstaller playerInstaller;
-	player_ = playerInstaller.InstallPlayer();
-	// レールカメラをプレイヤーの親に設定
+	player_ = SceneAPI::Instantiate<Player>("player.gltf", "player");
 	//player_->SetParent(&railCamera_->GetWorldTransform());
 	player_->Initialize();
 
@@ -104,8 +102,6 @@ void GameScene::Update(float dt){
 	playSession_.Update(dt);
 
 	/* カメラ関連更新 ============================*/
-	Camera3d* cam = CameraManager::GetMain3d();
-	cam->SetCamera(railCamera_->GetPosition(),railCamera_->GetRotation());
 
 	player_->SetEnemyList(enemyCollection_->GetEnemies());
 

@@ -36,6 +36,7 @@ public:
 	// =======================
 	// Main Interface
 	// =======================
+	virtual void Initialize() {}
 	virtual void AlwaysUpdate([[maybe_unused]] float dt){};	//< 常時更新
 	virtual void Update([[maybe_unused]] float dt){};			//< ランタイム時更新
 

@@ -16,7 +16,7 @@
 Camera3d::Camera3d()
     : BaseCamera(){
 	BaseCamera::SetName("MainCamera");
-	transform_.translate = {0.0f, 2.0f, -10.0f};
+	worldTransform_.translation = {0.0f, 2.0f, -10.0f};
 }
 
 Camera3d::Camera3d(const std::string& name){
@@ -24,23 +24,20 @@ Camera3d::Camera3d(const std::string& name){
 }
 
 void Camera3d::Initialize() {
-	transform_.translate = { 0.0f, 2.0f, -10.0f };
+	worldTransform_.translation = { 0.0f, 2.0f, -10.0f };
 }
 
 void Camera3d::AlwaysUpdate(float dt){
+
 	BaseCamera::AlwaysUpdate(dt);
 
 	frustum_.ExtractFromMatrix(viewProjectionMatrix_);
 	frustum_.Draw();
-	worldTransform_.Update();
 }
 
 void Camera3d::ShowGui(){
 	//名前の表示
-	SceneObject::ShowGui();
-
-	// アクティブかどうか
-	BaseCamera::ShowGui();
+	worldTransform_.ShowImGui();
 }
 
 bool Camera3d::IsVisible(const AABB& aabb) const{

@@ -41,8 +41,6 @@ public:
 
 	void SetViewpoint(const Vector3& viewpoint){ viewpoint_ = viewpoint; }
 
-	void SetRotate(const Vector3& rotate){ transform_.rotate = rotate; }
-
 #pragma endregion
 
 private:

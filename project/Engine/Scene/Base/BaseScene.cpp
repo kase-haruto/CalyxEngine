@@ -16,14 +16,13 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 //コンストラクタ
 /////////////////////////////////////////////////////////////////////////////////////////
-BaseScene::BaseScene(){
-	sceneContext_ = std::make_unique<SceneContext>();
+BaseScene::BaseScene() {
 	spriteRenderer_ = std::make_unique<SpriteRenderer>();
 	modelRenderer_ = std::make_unique<ModelRenderer>();
 }
 
-void BaseScene::Initialize(){
-	playSession_.Initialize(sceneContext_.get());
+void BaseScene::Initialize() {
+	playSession_.Initialize(sceneContext_);
 	skyBox_ = SceneAPI::Instantiate<SkyBox>("sky.dds", "skyBox");
 	skyBox_->Initialize();
 }
@@ -32,9 +31,11 @@ void BaseScene::Initialize(){
 //		更新前処理
 /////////////////////////////////////////////////////////////////////////////////////////
 void BaseScene::PostUpdate([[maybe_unused]] ID3D12GraphicsCommandList* cmdList,
-						   [[maybe_unused]] PipelineService* psoService){
+						   [[maybe_unused]] PipelineService* psoService) {
 
-	sceneContext_->PostUpdate(psoService, cmdList);
+	SceneContext* ctx = ActiveCtx();
+	ctx->MakeCurrent();
+	ctx->PostUpdate(psoService, cmdList);
 
 }
 
@@ -43,18 +44,19 @@ void BaseScene::PostUpdate([[maybe_unused]] ID3D12GraphicsCommandList* cmdList,
 /////////////////////////////////////////////////////////////////////////////////////////
 void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 					 PipelineService* pso,
-					 [[maybe_unused]] RenderTargetType           type){
-	// 1) Skybox
+					 RenderTargetType) {
+	/* 1) Skybox */
 	cmd->SetGraphicsRootSignature(
 		GraphicsGroup::GetInstance()->GetRootSignature(PipelineType::Skybox).Get());
 	skyBox_->Draw(cmd);
 
-	// 2) Scene objects -------------------------------------------------
+	/* 2) Scene objects */
+	SceneContext* ctx = ActiveCtx();                 // ★
 	modelRenderer_->BeginFrame();
 
-	for (auto* e : sceneContext_->GetObjectLibrary()->GetAllObjectsRaw()){
-		if (auto* go = dynamic_cast< BaseGameObject* >(e)){
-			switch (go->GetModelType()){
+	for (auto* e : ctx->GetObjectLibrary()->GetAllObjectsRaw()) {   // ★
+		if (auto* go = dynamic_cast<BaseGameObject*>(e)) {
+			switch (go->GetModelType()) {
 				case ObjectModelType::ModelType_Static:
 					if (auto* m = go->GetStaticModel())
 						modelRenderer_->RegisterStatic(m, go->GetWorldTransform());
@@ -68,21 +70,19 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 		}
 	}
 
-	// ★ ここを GetActive() に変更
-	const Camera3d* cam = static_cast< Camera3d* >(CameraManager::GetActive());
-
+	const Camera3d* cam = static_cast<Camera3d*>(CameraManager::GetActive());
 	modelRenderer_->PreCullAndBatch(cam);
 	modelRenderer_->DrawAll(cmd,
 							GraphicsGroup::GetInstance()->GetDevice().Get(),
 							cam,
 							pso,
-							sceneContext_->GetLightLibrary());
+							ctx->GetLightLibrary());                  // ★
 
-	// 3) パーティクル
-	sceneContext_->GetFxSystem()->Render(pso, cmd);
+	/* 3) Particles */
+	ctx->GetFxSystem()->Render(pso, cmd);                            // ★
 }
 
 void BaseScene::DrawSpritesOnly(ID3D12GraphicsCommandList* cmdList,
-								PipelineService* psoService){
+								PipelineService* psoService) {
 	spriteRenderer_->Draw(cmdList, psoService, RenderTargetType::BackBuffer);
 }

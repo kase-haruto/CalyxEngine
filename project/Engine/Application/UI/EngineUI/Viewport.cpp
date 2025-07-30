@@ -14,6 +14,26 @@ Viewport::Viewport(ViewportType type, const std::string& windowName) :type_(type
 void Viewport::Update(){}
 
 void Viewport::Render(const ImTextureID& tex){
+	
+	switch (type_) {
+		case ViewportType::VIEWPORT_MAIN:
+			{
+				auto* mainCam = CameraManager::GetMain3d();
+				if (mainCam && camera_ != mainCam) {
+					camera_ = mainCam;
+				}
+				break;
+			}
+		case ViewportType::VIEWPORT_DEBUG:
+			{
+				auto* debugCam = CameraManager::GetDebug();
+				if (debugCam && camera_ != debugCam) {
+					camera_ = debugCam;
+				}
+				break;
+			}
+	}
+
 	if (!camera_){
 		return;
 	}

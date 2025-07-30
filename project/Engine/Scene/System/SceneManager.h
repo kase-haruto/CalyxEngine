@@ -15,42 +15,38 @@
 class IRenderTarget;
 class GraphicsSystem;
 
-class SceneManager
-	: public SceneTransitionRequestor{
+class SceneManager : public SceneTransitionRequestor {
 public:
-	SceneManager() = default;
-	SceneManager(DxCore* dxCore);
+	explicit SceneManager(DxCore* dxCore);
 	~SceneManager();
 
 	void Initialize();
 	void Update(float dt);
-	void PostUpdate(ID3D12GraphicsCommandList* cmdList, PipelineService* pipelineService);
+	void PostUpdate(ID3D12GraphicsCommandList* cmd, PipelineService* pso);
+	void Draw(ID3D12GraphicsCommandList* cmd, PipelineService* pso);
+	void DrawNotAffectedFromPE(ID3D12GraphicsCommandList* cmd, PipelineService* pso);
 
-	void Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService);
-	void DrawNotAffectedFromPE(ID3D12GraphicsCommandList* cmdList, PipelineService* pipelineService);
+	void SetEngineUI(EngineUICore* ui) { pEngineUI_ = ui; }
+	void RequestSceneChange(SceneType next) override;
 
-	void SetEngineUI(EngineUICore* ui);
-	void RequestSceneChange(SceneType nextScene)override;
 	SceneContext* GetCurrentSceneContext() const;
 
 private:
-	void DrawForRenderTarget(IRenderTarget* target,
-							 ID3D12GraphicsCommandList* cmdList,
-							 PipelineService* psoService);
+	struct SceneSlot {
+		std::unique_ptr<IScene>       scene;
+		std::unique_ptr<SceneContext> ctx;
+	};
+	std::array<SceneSlot, static_cast<int>(SceneType::count)> slots_{};
 
+	int currentSceneNo_{ static_cast<int>(SceneType::PLAY) };
+	int nextSceneNo_{ static_cast<int>(SceneType::PLAY) };
 
-private:
-	// シーンインスタンスの配列
-	std::array<std::unique_ptr<IScene>, static_cast< int >(SceneType::count)> scenes_;
-
-	// 現在シーン・次シーン
-	int currentSceneNo_ {static_cast< int >(SceneType::PLAY)};
-	int nextSceneNo_ {static_cast< int >(SceneType::PLAY)};
-
-	// UIパネルなど
 	EngineUICore* pEngineUI_ = nullptr;
 	DxCore* pDxCore_ = nullptr;
 
-public:
-	bool gameResult_ = false;
+	/* helpers */
+	void SwitchScene(int newNo);
+	void DrawForRenderTarget(IRenderTarget* rt,
+							 ID3D12GraphicsCommandList* cmd,
+							 PipelineService* pso);
 };

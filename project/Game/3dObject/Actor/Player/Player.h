@@ -8,7 +8,7 @@
 #include <Engine/Application/Effects/Particle/Emitter/FxEmitter.h>
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 #include <Engine/Renderer/Sprite/Sprite.h>
-
+#include <Engine/Scene/Runtime/IRuntimeBehaviour.h>
 // game
 #include <Game/3dObject/Actor/Enemy/Enemy.h>
 #include <Game/Battle/Shooting/ShootingController/PlayerShootingController.h>
@@ -17,8 +17,9 @@
 /* =========================================================================
    Player Class
    ========================================================================= */
-class Player
-	: public Actor{
+class Player :
+	public Actor,
+	public IRuntimeBehaviour {
 public:
 	//=====================================================================
 	// Public Methods
@@ -39,6 +40,11 @@ public:
 	void RequestLockOn();
 
 	void RequestLockOnTargetClear();
+	std::string_view GetTypeName() const override { return "Player"; }
+
+	/* runtime ==============================================================*/
+	void Start() override;
+
 
 	/* accessor =========================================================== */
 	//settter
@@ -50,10 +56,10 @@ public:
 	//getter
 	std::vector<Sprite*> GetAllSprites();
 	const Vector3 GetCenterPos() const override;
-	float GetMoveSpeed() const{ return moveSpeed_; }
+	float GetMoveSpeed() const { return moveSpeed_; }
 	std::optional<float> GetShootCooldown();
 	std::optional<const float> GetMaxShootInterval() const;
-	const std::vector<std::shared_ptr<Enemy>>& GetLockedOnTargets() const{ return lockedOnTargets_; }
+	const std::vector<std::shared_ptr<Enemy>>& GetLockedOnTargets() const { return lockedOnTargets_; }
 
 private:
 	//=====================================================================

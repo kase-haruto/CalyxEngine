@@ -18,9 +18,8 @@ class EnemySpawner
 	: public SceneObject{
 public:
 	EnemySpawner(const std::string& name = "EnemySpawner");
-
 	void Update(float dt)override;
-
+	void AlwaysUpdate(float dt)override;
 	void ApplyConfig() ;
 
 	void ExtractConfig() ;

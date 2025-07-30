@@ -138,8 +138,6 @@ void LevelEditor::Render(){
 	inspector_->SetSelectedEditor(selectedEditor_);
 	inspector_->SetSelectedObject(selectedObject_);
 
-
-
 	inspector_->Render();
 
 	sceneEditor_->Update();

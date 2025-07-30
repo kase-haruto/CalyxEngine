@@ -6,7 +6,7 @@
 #include <Engine/Objects/Transform/Transform.h>
 
 class RailCamera 
-	: public Camera3d {
+	: public BaseCamera {
 public:
 	RailCamera();
 	RailCamera(const std::string& name);
@@ -14,9 +14,11 @@ public:
 
 	void Initialize();
 	void Update(float dt) override;
+	void ShowGui()override;
+	void AlwaysUpdate(float dt)override;;
 
 	Vector3 GetPosition();
-	const Vector3& GetRotation() const { return transform_.rotate; }
+	const Vector3& GetRotation() const { return worldTransform_.eulerRotation; }
 	const WorldTransform& GetWorldTransform() const { return worldTransform_; }
 
 	std::string_view GetTypeName() const override{ return "RailCamera"; }

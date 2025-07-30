@@ -10,6 +10,7 @@
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Data/Engine/Prefab/Serializer/PrefabSerializer.h>
+#include <Engine/Scene/Context/SceneContext.h>
 // lib
 #include <externals/imgui/imgui.h>
 #include <externals/imgui/ImGuiFileDialog.h>
@@ -28,6 +29,8 @@ HierarchyPanel::HierarchyPanel() : IEngineUI("Hierarchy"){
 void HierarchyPanel::Render(){
 	ImGui::Begin(panelName_.c_str(), nullptr, ImGuiWindowFlags_NoDecoration);
 	ImGui::Text("Scene Hierarchy");
+
+	lib_ = SceneContext::Current()->GetObjectLibrary();
 
 	if (!lib_){
 		ImGui::Text("SceneObjectLibrary not set.");

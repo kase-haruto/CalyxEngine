@@ -23,7 +23,7 @@ DebugCamera::DebugCamera(const std::string& name)
 	BaseCamera::SetName(name);
 	fovAngleY_ = static_cast< float >(std::numbers::pi) * 0.25f; // 45度
 
-	transform_.translate = {0.0f, 4.0f, -10.0f};
+	worldTransform_.translation = {0.0f, 4.0f, -10.0f};
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -51,10 +51,10 @@ void DebugCamera::AlwaysUpdate(float dt){
 		offset = TransformNormal(offset, matRot);
 
 		// カメラの位置 = ターゲット + オフセット
-		transform_.translate = target_ + offset;
+		worldTransform_.translation = target_ + offset;
 
 		// カメラの回転は (Pitch, Yaw, 0)
-		transform_.rotate = Vector3(orbitAngle_.y, orbitAngle_.x, 0.0f);
+		worldTransform_.eulerRotation = Vector3(orbitAngle_.y, orbitAngle_.x, 0.0f);
 	}
 
 	// BaseCameraの更新処理を呼び出す

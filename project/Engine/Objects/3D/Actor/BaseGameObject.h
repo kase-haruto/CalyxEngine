@@ -34,7 +34,7 @@ public:
 	BaseGameObject();
 	virtual ~BaseGameObject()override;
 
-	virtual void Initialize(){};
+	virtual void Initialize()override{};
 	void AlwaysUpdate(float dt)override;
 	virtual void Draw(){};
 
