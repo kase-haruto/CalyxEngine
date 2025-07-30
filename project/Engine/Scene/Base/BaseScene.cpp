@@ -51,10 +51,10 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 	skyBox_->Draw(cmd);
 
 	/* 2) Scene objects */
-	SceneContext* ctx = ActiveCtx();                 // ★
+	SceneContext* ctx = ActiveCtx();
 	modelRenderer_->BeginFrame();
 
-	for (auto* e : ctx->GetObjectLibrary()->GetAllObjectsRaw()) {   // ★
+	for (auto* e : ctx->GetObjectLibrary()->GetAllObjectsRaw()) {
 		if (auto* go = dynamic_cast<BaseGameObject*>(e)) {
 			switch (go->GetModelType()) {
 				case ObjectModelType::ModelType_Static:
@@ -76,10 +76,10 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 							GraphicsGroup::GetInstance()->GetDevice().Get(),
 							cam,
 							pso,
-							ctx->GetLightLibrary());                  // ★
+							ctx->GetLightLibrary());
 
 	/* 3) Particles */
-	ctx->GetFxSystem()->Render(pso, cmd);                            // ★
+	ctx->GetFxSystem()->Render(pso, cmd);
 }
 
 void BaseScene::DrawSpritesOnly(ID3D12GraphicsCommandList* cmdList,

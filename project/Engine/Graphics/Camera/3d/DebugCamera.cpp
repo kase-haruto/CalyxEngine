@@ -58,7 +58,7 @@ void DebugCamera::AlwaysUpdate(float dt){
 	}
 
 	// BaseCameraの更新処理を呼び出す
-	BaseCamera::Update(dt);
+	BaseCamera::AlwaysUpdate(dt);
 }
 
 void DebugCamera::ShowGui(){

@@ -22,6 +22,8 @@ BaseCamera::BaseCamera()
 	/* バッファの生成とマッピング =======================*/
 	cameraBuffer_.Initialize(GraphicsGroup::GetInstance()->GetDevice().Get());
 	worldTransform_.rotationSource = RotationSource::Euler;
+
+	isEnableRaycast_ = false;
 }
 
 BaseCamera::BaseCamera(const std::string& name)
@@ -33,6 +35,8 @@ BaseCamera::BaseCamera(const std::string& name)
 	/* バッファの生成とマッピング =======================*/
 	cameraBuffer_.Initialize(GraphicsGroup::GetInstance()->GetDevice().Get());
 	worldTransform_.rotationSource = RotationSource::Euler;
+
+	isEnableRaycast_=false;
 }
 
 /////////////////////////////////////////////////////////////////////////

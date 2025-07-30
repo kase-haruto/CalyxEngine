@@ -13,12 +13,10 @@
 
 SceneObjectEditor::SceneObjectEditor(const std::string& name) :BaseEditor(name) {
 	manipulator_ = std::make_unique<Manipulator>();
-	manipulator_->SetCamera(CameraManager::GetDebug());
 }
 
 SceneObjectEditor::SceneObjectEditor() :BaseEditor("sceneObjectEditor") {
 	manipulator_ = std::make_unique<Manipulator>();
-	manipulator_->SetCamera(CameraManager::GetDebug());
 }
 
 
