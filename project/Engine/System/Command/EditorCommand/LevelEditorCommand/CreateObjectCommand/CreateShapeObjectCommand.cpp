@@ -1,5 +1,6 @@
 #include "CreateShapeObjectCommand.h"
 #include <Engine/Scene/Context/SceneContext.h>
+#include <Engine/Scene/Utility/SceneUtility.h>
 
 CreateShapeObjectCommand::CreateShapeObjectCommand(SceneContext* context,
 												   ObjectFactory  factory)

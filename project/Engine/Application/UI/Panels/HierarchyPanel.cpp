@@ -38,9 +38,13 @@ void HierarchyPanel::Render(){
 	}
 
 	// ルート列挙
-	for (const auto& sp : lib_->GetAllObjectsShared()){
-		if (!sp || sp->GetParent()) continue;
-		ShowObjectRecursive(sp.get());
+	for (const auto& sp : lib_->GetAllObjectsShared()) {
+		if (!sp) continue;
+		// 親が存在しない、またはその親がシーンに存在していなければルート扱い
+		auto parent = sp->GetParent();
+		if (!parent || !lib_->Contains(parent)) {
+			ShowObjectRecursive(sp.get());
+		}
 	}
 
 	// 空白クリックで選択解除

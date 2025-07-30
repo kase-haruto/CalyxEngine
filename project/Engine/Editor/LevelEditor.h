@@ -34,7 +34,7 @@ public:
 	// 編集対象
 	void SetSelectedEditor(BaseEditor* editor);
 	void SetSelectedObject(const std::shared_ptr<SceneObject>& sp);
-	void CreateObject(std::shared_ptr<SceneObject> obj);
+	void CreateObject(const std::shared_ptr<SceneObject>& obj);
 	void DeleteObject(const std::shared_ptr<SceneObject>& sp);
 	void RenderViewport(ViewportType type, const ImTextureID& tex);
 	void SetCameraForViewport(BaseCamera* mainCamera,BaseCamera* debugCamera);

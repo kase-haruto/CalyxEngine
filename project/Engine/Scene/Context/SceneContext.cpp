@@ -84,3 +84,10 @@ std::shared_ptr<SceneObject> SceneContext::FindSharedObject(SceneObject* raw){
 	}
 	return nullptr;
 }
+
+void SceneContext::AddObject(const std::shared_ptr<SceneObject>& obj) {
+	objectLibrary_->AddObject(obj);
+}
+void SceneContext::RemoveObject(const std::shared_ptr<SceneObject>& obj) {
+	objectLibrary_->RemoveObject(obj);
+}

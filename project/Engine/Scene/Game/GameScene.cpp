@@ -48,26 +48,26 @@ void GameScene::Initialize(){
 	//弾の登録
 	BulletRegistrar::RegisterAll();
 
-	/* ----- Camera ----- */
-	railCamera_ = SceneAPI::Instantiate<RailCamera>("railCamera");
-	railCamera_->Initialize();
+	///* ----- Camera ----- */
+	//railCamera_ = SceneAPI::Instantiate<RailCamera>("railCamera");
+	//railCamera_->Initialize();
 
-	/* ----- Field ----- */
-	modelField_ = SceneAPI::Instantiate<BaseGameObject>("terrain.obj", "field");
-	modelField_->SetScale({300,300,300});
-	modelField_->SetTranslate({-150,-150,0});
-	modelField_->SetUvScale({10,10});
-	modelField_->SetEnableRaycast(false);
+	///* ----- Field ----- */
+	//modelField_ = SceneAPI::Instantiate<BaseGameObject>("terrain.obj", "field");
+	//modelField_->SetScale({300,300,300});
+	//modelField_->SetTranslate({-150,-150,0});
+	//modelField_->SetUvScale({10,10});
+	//modelField_->SetEnableRaycast(false);
 
-	/* ----- Player ----- */
-	player_ = SceneAPI::Instantiate<Player>("player.gltf", "player");
-	//player_->SetParent(&railCamera_->GetWorldTransform());
-	player_->Initialize();
+	///* ----- Player ----- */
+	//player_ = SceneAPI::Instantiate<Player>("player.gltf", "player");
+	////player_->SetParent(&railCamera_->GetWorldTransform());
+	//player_->Initialize();
 
-	/* ----- Enemy ----- */
-	enemyCollection_ = SceneAPI::Instantiate<EnemyCollection>("enemyContainer");
-	enemyCollection_->SetPlayerTransform(&player_->GetWorldTransform());
-	enemyCollection_->CreateSpawners();
+	///* ----- Enemy ----- */
+	//enemyCollection_ = SceneAPI::Instantiate<EnemyCollection>("enemyContainer");
+	//enemyCollection_->SetPlayerTransform(&player_->GetWorldTransform());
+	//enemyCollection_->CreateSpawners();
 
 }
 
@@ -75,7 +75,7 @@ void GameScene::Update([[maybe_unused]]float dt){
 
 	/* カメラ関連更新 ============================*/
 
-	player_->SetEnemyList(enemyCollection_->GetEnemies());
+	//player_->SetEnemyList(enemyCollection_->GetEnemies());
 
 	/* その他 ============================*/
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
@@ -83,9 +83,9 @@ void GameScene::Update([[maybe_unused]]float dt){
 
 void GameScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService, RenderTargetType type){
 
-	for (auto& playerSprite : player_->GetAllSprites()){
-		spriteRenderer_->Register(playerSprite);
-	}
+	//for (auto& playerSprite : player_->GetAllSprites()){
+	//	spriteRenderer_->Register(playerSprite);
+	//}
 
 	BaseScene::Draw(cmdList, psoService, type);
 }

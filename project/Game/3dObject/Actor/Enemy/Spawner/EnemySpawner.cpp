@@ -25,14 +25,12 @@ void EnemySpawner::Update(float dt) {
 		Spawn();
 		spawnTimer_ = 0.0f;
 	}
-
-	worldTransform_.Update();
-
-	PrimitiveDrawer::GetInstance()->DrawSphere(worldTransform_.GetWorldPosition());
 }
 
 void EnemySpawner::AlwaysUpdate([[maybe_unused]] float dt) {
+	worldTransform_.Update();
 
+	PrimitiveDrawer::GetInstance()->DrawSphere(worldTransform_.GetWorldPosition());
 }
 
 void EnemySpawner::ApplyConfig() {

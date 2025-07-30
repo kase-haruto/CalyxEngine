@@ -34,6 +34,7 @@ public:
 		Shape,
 		Light,
 		Particle,
+		InGameObject,
 		Model,
 		Count
 	};

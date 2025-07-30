@@ -111,6 +111,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\System\Command\EditorCommand\LevelEditorCommand\CreateObjectCommand\CreateObjectCommand.cpp" />
     <ClCompile Include="Engine\Application\Effects\Particle\Emitter\BaseEmitter.cpp" />
     <ClCompile Include="Engine\Graphics\Descriptor\DescriptorAllocator.cpp" />
     <ClCompile Include="Engine\PostProcess\CRT\CRTEffect.cpp" />
@@ -307,6 +308,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Application\System\PlaySession.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\System\Command\EditorCommand\BaseLevelEditorCommand.h" />
+    <ClInclude Include="Engine\System\Command\EditorCommand\LevelEditorCommand\CreateObjectCommand\CreateObjectCommand.h" />
     <ClInclude Include="Engine\Application\Effects\Particle\Emitter\BaseEmitter.h" />
     <ClInclude Include="Engine\Application\System\EngineMode.h" />
     <ClInclude Include="Engine\Graphics\Descriptor\DescriptorAllocator.h" />

@@ -256,9 +256,9 @@
                     "z": 1.5
                 },
                 "translation": {
-                    "x": -1.4901161193847656e-08,
-                    "y": 0.0,
-                    "z": 10.0
+                    "x": 2.649256944656372,
+                    "y": -0.08470439910888672,
+                    "z": 28.400672912597656
                 }
             },
             "type": "Player"
@@ -292,9 +292,9 @@
             "autoDestroy": false,
             "color": {
                 "w": 1.0,
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
+                "x": 0.9073358774185181,
+                "y": 0.11560652405023575,
+                "z": 0.11560652405023575
             },
             "emitCount": 10,
             "emitDelay": 0.0,
@@ -306,20 +306,27 @@
             "isOneShot": false,
             "isStatic": false,
             "lifetime": {
-                "constant": 0.0,
+                "constant": 0.20000000298023224,
                 "max": 3.0,
                 "min": 1.0,
-                "mode": 1
+                "mode": 0
             },
             "modelPath": "plane.obj",
-            "modules": [],
+            "modules": [
+                {
+                    "easeType": 11,
+                    "enabled": true,
+                    "isGrowing": false,
+                    "name": "SizeOverLifetimeModule"
+                }
+            ],
             "name": "ParticleSystem",
             "objectType": 0,
             "parentGuid": "bc6ace27-7773-4bee-9b8d-0b02b65aa114",
             "position": {
-                "x": 4.6566128730773926e-09,
-                "y": 12.597189903259277,
-                "z": -4.470348358154297e-08
+                "x": 2.833543062210083,
+                "y": -0.3105001449584961,
+                "z": 6.671314716339111
             },
             "scale": {
                 "constant": {
@@ -339,7 +346,7 @@
                 },
                 "mode": 0
             },
-            "texturePath": "particle.png",
+            "texturePath": "life.png",
             "transform": {
                 "rotation": {
                     "w": 1.0,
@@ -366,14 +373,14 @@
                     "z": 0.0
                 },
                 "max": {
-                    "x": 1.0,
-                    "y": 0.0,
-                    "z": 1.0
+                    "x": 3.5,
+                    "y": 3.0799999237060547,
+                    "z": 3.180000066757202
                 },
                 "min": {
-                    "x": -1.0,
-                    "y": 0.0,
-                    "z": -1.0
+                    "x": -3.740000009536743,
+                    "y": -3.0999999046325684,
+                    "z": -3.0799999237060547
                 },
                 "mode": 1
             }

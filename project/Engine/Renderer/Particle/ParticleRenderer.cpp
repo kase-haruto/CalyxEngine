@@ -14,7 +14,7 @@ void ParticleRenderer::Render(
 ){
 	// パーティクル用 PSO をセット
 	auto psoSet = pipelineService->GetPipelineSet(PipelineTag::Object::Particle,
-											 BlendMode::ADD);
+											 BlendMode::SUB);
 	pipelineService->SetCommand(psoSet, cmdList);
 
 	// ── アクティブ カメラのビュー投影行列をルート定数へ

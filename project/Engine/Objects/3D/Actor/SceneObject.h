@@ -95,9 +95,11 @@ public:
 	const Guid& GetGuid() const{ return id_; }
 	void SetGuid(const Guid& g){ id_ = g; }
 
-	virtual std::string_view GetTypeName() const = 0;
+	virtual std::string_view GetTypeName() const { return "SceneObject"; }
 
 	void UpdateWorldTransformRecursive();
+
+	void AddChild(const std::shared_ptr<SceneObject>& child);
 
 protected:
 	// =======================

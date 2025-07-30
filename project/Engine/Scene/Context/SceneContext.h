@@ -49,6 +49,10 @@ public:
 	/* ---------- utils --------------- */
 	std::shared_ptr<SceneObject> FindSharedObject(SceneObject* raw);
 
+	void AddObject(const std::shared_ptr<SceneObject>& obj);
+
+	void RemoveObject(const std::shared_ptr<SceneObject>& obj);
+
 	/* ---------- Current ------------- */
 	static SceneContext* Current() { return current_; }
 	void MakeCurrent() { current_ = this; }

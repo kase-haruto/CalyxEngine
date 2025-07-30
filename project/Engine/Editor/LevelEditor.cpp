@@ -175,18 +175,27 @@ void LevelEditor::SetSelectedObject(const std::shared_ptr<SceneObject>& sp){
 	inspector_->SetSelectedObject(sp);
 
 }
-
-void LevelEditor::CreateObject(std::shared_ptr<SceneObject> obj){
+void LevelEditor::CreateObject(const std::shared_ptr<SceneObject>& obj) {
 	if (!obj) return;
+
 	SceneContext* ctx = SceneContext::Current();
 
-	// パーティクルなら FxSystem 登録
-	if (obj->GetObjectType() == ObjectType::ParticleSystem){
-		if (auto fx = std::dynamic_pointer_cast< ParticleSystemObject >(obj)){
+	// パーティクルなら FxSystem にも登録
+	if (obj->GetObjectType() == ObjectType::ParticleSystem) {
+		if (auto fx = std::dynamic_pointer_cast<ParticleSystemObject>(obj)) {
 			ctx->GetFxSystem()->AddEmitter(fx);
 		}
 	}
+
+	// 自身を登録
 	ctx->GetObjectLibrary()->AddObject(obj);
+
+	// 子も再帰的に登録
+	for (const auto& child : obj->GetChildren()) {
+		if (child) {
+			CreateObject(child);
+		}
+	}
 }
 
 
