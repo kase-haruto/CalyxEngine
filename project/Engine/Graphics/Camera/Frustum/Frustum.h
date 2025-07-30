@@ -22,7 +22,7 @@ public:
 
 	void ExtractFromMatrix(const Matrix4x4& viewProj);
 	bool IsAABBInside(const Vector3& min, const Vector3& max) const;
-	void Draw(const Vector4& color = Vector4(1, 1, 0, 1)) const;
+	void Draw(const Vector4& color = Vector4(1, 1, 0, 1), float farPlaneRatio = 0.005f) const;
 	void CalculateCorners(Vector3 outCorners[8]) const;
 
 private:

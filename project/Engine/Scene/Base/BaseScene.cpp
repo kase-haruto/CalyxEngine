@@ -70,7 +70,7 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 		}
 	}
 
-	const Camera3d* cam = static_cast<Camera3d*>(CameraManager::GetActive());
+	const Camera3d* cam = static_cast<Camera3d*>(CameraManager::GetMain3d());
 	modelRenderer_->PreCullAndBatch(cam);
 	modelRenderer_->DrawAll(cmd,
 							GraphicsGroup::GetInstance()->GetDevice().Get(),
