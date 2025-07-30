@@ -56,7 +56,6 @@ void TitleScene::Initialize() {
 }
 
 void TitleScene::Update(float dt) {
-	playSession_.Update(dt);
 
 	/* 3dObject ============================*/
 	//地面の更新

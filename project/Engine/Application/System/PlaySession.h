@@ -8,24 +8,30 @@
 class PlaySession{
 public:
 	void Initialize(SceneContext* editorContext);
-
-	// --- Play Control ---
 	void Enter();
+	void Restart();
 	void Exit();
 	void TogglePause();
 	void StepOnce();
-	void Restart();
-
-	// --- Update ---
 	void Update(float dt);
-
-	// --- Accessors ---
 	SceneContext* GetContext() const;
-	EngineMode GetMode() const{ return mode_; }
+
+	void RenderToolbar(); 
 
 private:
 	SceneContext* editorContext_ = nullptr;
 	std::unique_ptr<SceneContext> runtimeContext_;
 	EngineMode mode_ = EngineMode::Editor;
-	bool stepRequested_ = false;
+
+	struct IconData{
+		ImTextureID tex = nullptr;
+		ImVec2 size = ImVec2(28, 28);
+	};
+	IconData iconPlay_;
+	IconData iconPause_;
+	IconData iconStep_;
+	IconData iconStop_;
+	IconData iconRestart_;
+	// [New]
+	void LoadIcons();
 };

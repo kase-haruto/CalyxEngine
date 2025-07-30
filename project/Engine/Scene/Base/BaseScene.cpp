@@ -22,7 +22,6 @@ BaseScene::BaseScene() {
 }
 
 void BaseScene::Initialize() {
-	playSession_.Initialize(sceneContext_);
 	skyBox_ = SceneAPI::Instantiate<SkyBox>("sky.dds", "skyBox");
 	skyBox_->Initialize();
 }
@@ -33,7 +32,7 @@ void BaseScene::Initialize() {
 void BaseScene::PostUpdate([[maybe_unused]] ID3D12GraphicsCommandList* cmdList,
 						   [[maybe_unused]] PipelineService* psoService) {
 
-	SceneContext* ctx = ActiveCtx();
+	SceneContext* ctx = SceneContext::Current();
 	ctx->MakeCurrent();
 	ctx->PostUpdate(psoService, cmdList);
 
@@ -51,7 +50,7 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 	skyBox_->Draw(cmd);
 
 	/* 2) Scene objects */
-	SceneContext* ctx = ActiveCtx();
+	SceneContext* ctx = SceneContext::Current();
 	modelRenderer_->BeginFrame();
 
 	for (auto* e : ctx->GetObjectLibrary()->GetAllObjectsRaw()) {

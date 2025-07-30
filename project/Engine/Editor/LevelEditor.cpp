@@ -9,6 +9,7 @@
 #include <Engine/Scene/Context/SceneContext.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
+#include <Engine/Application/System/PlaySession.h>
 
 #include <externals/imgui/ImGuiFileDialog.h>
 
@@ -94,7 +95,7 @@ void LevelEditor::Initialize(){
 
 void LevelEditor::Update(){
 
-
+#ifdef _DEBUG
 	SceneContext* ctx = SceneContext::Current();
 
 	// 入力チェックはここで行う
@@ -104,8 +105,8 @@ void LevelEditor::Update(){
 	// ----------------------------
 	// Open Scene ダイアログ処理
 	// ----------------------------
-	if (ImGuiFileDialog::Instance()->Display("SceneOpenDialog")) {
-		if (ImGuiFileDialog::Instance()->IsOk()) {
+	if (ImGuiFileDialog::Instance()->Display("SceneOpenDialog")){
+		if (ImGuiFileDialog::Instance()->IsOk()){
 			std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
 			ClearSelection(); // 既存の選択をクリア
 			SceneSerializer::Load(*ctx, filePath);
@@ -116,8 +117,8 @@ void LevelEditor::Update(){
 	// ----------------------------
 	// Save Scene ダイアログ処理
 	// ----------------------------
-	if (ImGuiFileDialog::Instance()->Display("SceneSaveDialog")) {
-		if (ImGuiFileDialog::Instance()->IsOk()) {
+	if (ImGuiFileDialog::Instance()->Display("SceneSaveDialog")){
+		if (ImGuiFileDialog::Instance()->IsOk()){
 			std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
 			SceneSerializer::Save(*ctx, filePath);
 		}
@@ -127,6 +128,7 @@ void LevelEditor::Update(){
 	//シーンが変わっていたら各パネルに通知する
 	NotifySceneContextChanged();
 	prevCtx_ = SceneContext::Current();
+#endif // _DEBUG
 }
 
 void LevelEditor::Render(){
@@ -134,6 +136,9 @@ void LevelEditor::Render(){
 	hierarchy_->Render();
 	editor_->Render();
 	placeToolPanel_->Render();
+	if (pPlaySesseion_){
+		pPlaySesseion_->RenderToolbar();
+	}
 
 	inspector_->SetSelectedEditor(selectedEditor_);
 	inspector_->SetSelectedObject(selectedObject_);
@@ -145,6 +150,16 @@ void LevelEditor::Render(){
 
 void LevelEditor::RenderMenu() {
 	menu_->Render();
+}
+
+void LevelEditor::EnterGameMode(){
+	//playSession_->Enter();
+	mode_ = EditorMode::Game;
+}
+
+void LevelEditor::ExitGameMode(){
+	//playSession_->Exit();
+	mode_ = EditorMode::Edit;
 }
 
 void LevelEditor::SetSelectedEditor(BaseEditor* editor){

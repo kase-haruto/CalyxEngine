@@ -11,42 +11,46 @@
 // c++
 #include <memory>
 #include <array>
+#include <d3d12.h>
+class BaseScene;
+class SceneContext;
+class DxCore;
+class PipelineService;
 
-class IRenderTarget;
-class GraphicsSystem;
-
-class SceneManager : public SceneTransitionRequestor {
+class SceneManager{
 public:
-	explicit SceneManager(DxCore* dxCore);
+	explicit SceneManager(DxCore* dx);
 	~SceneManager();
 
+	// ---------------------------------------------------------------------
+	// Lifecycle
+	// ---------------------------------------------------------------------
 	void Initialize();
+
+	// Tick / Render --------------------------------------------------------
 	void Update(float dt);
 	void PostUpdate(ID3D12GraphicsCommandList* cmd, PipelineService* pso);
 	void Draw(ID3D12GraphicsCommandList* cmd, PipelineService* pso);
+	void DrawForRenderTarget(IRenderTarget* rt, ID3D12GraphicsCommandList* cmd, PipelineService* pso);
 	void DrawNotAffectedFromPE(ID3D12GraphicsCommandList* cmd, PipelineService* pso);
 
-	void SetEngineUI(EngineUICore* ui) { pEngineUI_ = ui; }
-	void RequestSceneChange(SceneType next) override;
-
+	// ---------------------------------------------------------------------
+	// Scene & Context accessors
+	// ---------------------------------------------------------------------
 	SceneContext* GetCurrentSceneContext() const;
 
+	size_t AddScene(std::unique_ptr<BaseScene> scene);
+	void   SetCurrent(size_t index);
+	size_t GetCurrentIndex() const{ return currentIdx_; }
+
 private:
-	struct SceneSlot {
-		std::unique_ptr<IScene>       scene;
+	struct SceneSlot{
+		std::unique_ptr<BaseScene>   scene;
 		std::unique_ptr<SceneContext> ctx;
 	};
-	std::array<SceneSlot, static_cast<int>(SceneType::count)> slots_{};
 
-	int currentSceneNo_{ static_cast<int>(SceneType::PLAY) };
-	int nextSceneNo_{ static_cast<int>(SceneType::PLAY) };
+	std::vector<SceneSlot> slots_;
+	size_t currentIdx_ = 0;
 
-	EngineUICore* pEngineUI_ = nullptr;
-	DxCore* pDxCore_ = nullptr;
-
-	/* helpers */
-	void SwitchScene(int newNo);
-	void DrawForRenderTarget(IRenderTarget* rt,
-							 ID3D12GraphicsCommandList* cmd,
-							 PipelineService* pso);
+	DxCore* dx_ = nullptr;
 };

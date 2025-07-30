@@ -50,37 +50,7 @@ void TestScene::Initialize(){
 /////////////////////////////////////////////////////////////////////////////////////////
 //	更新処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void TestScene::Update(float dt){
-
-	ImGui::Begin("Play Control");
-
-	switch (playSession_.GetMode()){
-		case EngineMode::Editor:
-			if (ImGui::Button("▶ Play")) playSession_.Enter();
-			break;
-
-		case EngineMode::Playing:
-			if (ImGui::Button("■ Stop")) playSession_.Exit();
-			ImGui::SameLine();
-			if (ImGui::Button("⏸ Pause")) playSession_.TogglePause();
-			ImGui::SameLine();
-			if (ImGui::Button("🔁 Restart")) playSession_.Restart();
-			break;
-
-		case EngineMode::Paused:
-			if (ImGui::Button("■ Stop")) playSession_.Exit();
-			ImGui::SameLine();
-			if (ImGui::Button("▶ Resume")) playSession_.TogglePause();
-			ImGui::SameLine();
-			if (ImGui::Button("⏭ Step")) playSession_.StepOnce();
-			ImGui::SameLine();
-			if (ImGui::Button("🔁 Restart")) playSession_.Restart();
-			break;
-	}
-
-	ImGui::End();
-
-	playSession_.Update(dt);
+void TestScene::Update([[maybe_unused]]float dt){
 
 	//衝突判定
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();

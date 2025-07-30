@@ -10,7 +10,6 @@
 
 #include <Engine/Renderer/Sprite/SpriteRenderer.h>
 #include <Engine/Renderer/Model/ModelRenderer.h>
-#include <Engine/Application/System/PlaySession.h>
 
 // c++
 #include <string>
@@ -45,7 +44,6 @@ public:
 	void SetTransitionRequestor(SceneTransitionRequestor* requestor)override{
 		transitionRequestor_ = requestor;
 	}
-	SceneContext* ActiveCtx() const { return playSession_.GetContext(); }
 protected:
 	//===================================================================*/
 	//			protected methods
@@ -53,7 +51,6 @@ protected:
 	SceneContext* sceneContext_ = nullptr;
 	std::shared_ptr<SkyBox> skyBox_ = nullptr;
 	std::string sceneName_ = "Scene";
-	PlaySession playSession_;
 
 	//===================================================================*/
 	//			renderers

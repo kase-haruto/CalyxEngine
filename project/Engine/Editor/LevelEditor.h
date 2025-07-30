@@ -1,13 +1,13 @@
 #pragma once
-#include <Engine/Editor/SceneObjectEditor.h>
+#include <Engine/Application/UI/EngineUI/EditorMenu.h>
+#include <Engine/Application/UI/EngineUI/Manipulator.h>
+#include <Engine/Application/UI/EngineUI/PerformanceOverlay.h>
+#include <Engine/Application/UI/EngineUI/Viewport.h>
 #include <Engine/Application/UI/Panels/EditorPanel.h>
 #include <Engine/Application/UI/Panels/HierarchyPanel.h>
 #include <Engine/Application/UI/Panels/InspectorPanel.h>
 #include <Engine/Application/UI/Panels/PlaceToolPanel.h>
-#include <Engine/Application/UI/EngineUI/Manipulator.h>
-#include <Engine/Application/UI/EngineUI/Viewport.h>
-#include <Engine/Application/UI/EngineUI/EditorMenu.h>
-#include <Engine/Application/UI/EngineUI/PerformanceOverlay.h>
+#include <Engine/Editor/SceneObjectEditor.h>
 
 //c++
 #include <memory>
@@ -15,6 +15,7 @@
 class BaseEditor;
 class SceneContext;
 class SceneObject;
+class PlaySession;
 
 namespace EngineEdit {
 	enum class EditorMode {
@@ -41,7 +42,7 @@ public:
 	EditorPanel* GetEditorPanel() const{ return editor_.get(); }
 	PlaceToolPanel* GetPlaceToolPanel() const{ return placeToolPanel_.get(); }
 	EngineEdit::EditorMode GetMode() const { return mode_; }
-
+	void SetPlaySession(PlaySession* session){ pPlaySesseion_ = session; }
 private:
 	void TryPickUnderCursor();
 	void TryPickObjectFromMouse(const Vector2& mouse, const Vector2& viewportSize, const Matrix4x4& view, const Matrix4x4& proj);
@@ -58,6 +59,9 @@ private:
 		sceneEditor_->ClearSelection();
 	}
 
+	void EnterGameMode();
+	void ExitGameMode();
+
 	void ToggleMode();
 
 private:
@@ -67,6 +71,8 @@ private:
 	std::unique_ptr<InspectorPanel> inspector_;
 	std::unique_ptr<SceneObjectEditor> sceneEditor_;
 	std::unique_ptr<PlaceToolPanel> placeToolPanel_;
+	PlaySession* pPlaySesseion_ = nullptr;
+
 	// メニュー
 	std::unique_ptr<EditorMenu> menu_;				//< エディターメニュー
 	EngineEdit::EditorMode mode_ = EngineEdit::EditorMode::Edit;
