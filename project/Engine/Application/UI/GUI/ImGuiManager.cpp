@@ -98,16 +98,19 @@ void ImGuiManager::CustomizeImGuiStyle() {
 	colors[ImGuiCol_WindowBg] = darkBg;
 	colors[ImGuiCol_ChildBg] = darkBg;
 	colors[ImGuiCol_PopupBg] = darkPanel;
-	colors[ImGuiCol_Border] = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
+	colors[ImGuiCol_Border] = darkBg;
 	colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
 
 	// === Frame / Controls ===
-	colors[ImGuiCol_FrameBg] = darkPanel;
-	colors[ImGuiCol_FrameBgHovered] = darkHover;
-	colors[ImGuiCol_FrameBgActive] = highlightLow;
-	colors[ImGuiCol_TitleBg] = darkPanel;
-	colors[ImGuiCol_TitleBgActive] = darkHover;
-	colors[ImGuiCol_TitleBgCollapsed] = darkBg;
+	colors[ImGuiCol_FrameBg] = darkBg;
+	colors[ImGuiCol_FrameBgHovered] = darkBg; // 少し明るめグレー
+	colors[ImGuiCol_FrameBgActive] = darkBg; // アクティブでも控えめなグレー
+
+	// ──────────── タイトルバー ────────────
+	colors[ImGuiCol_TitleBg] = darkBg;
+	colors[ImGuiCol_TitleBgActive] = darkBg; // 選択中ウィンドウでもグレーのまま
+	colors[ImGuiCol_TitleBgCollapsed] = darkBg; // 非アクティブ時に近い背景色
+
 
 	// === Scrollbar / Sliders / Buttons ===
 	colors[ImGuiCol_ScrollbarBg] = darkBg;
@@ -122,15 +125,18 @@ void ImGuiManager::CustomizeImGuiStyle() {
 	colors[ImGuiCol_ButtonHovered] = highlightLow;
 	colors[ImGuiCol_ButtonActive] = highlight;
 
-	// === Header / Tab ===
+	// ──────────── Header / Tree ────────────
 	colors[ImGuiCol_Header] = darkPanel;
-	colors[ImGuiCol_HeaderHovered] = darkHover;
-	colors[ImGuiCol_HeaderActive] = highlightLow;
+	colors[ImGuiCol_HeaderHovered] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
+	colors[ImGuiCol_HeaderActive] = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
+	colors[ImGuiCol_MenuBarBg] = darkBg;
+
+	// ──────────── Tabs ────────────
 	colors[ImGuiCol_Tab] = darkPanel;
-	colors[ImGuiCol_TabHovered] = highlightLow;
-	colors[ImGuiCol_TabActive] = highlight;
+	colors[ImGuiCol_TabHovered] = ImVec4(0.22f, 0.22f, 0.22f, 1.00f);
+	colors[ImGuiCol_TabActive] = ImVec4(0.28f, 0.28f, 0.28f, 1.00f);
 	colors[ImGuiCol_TabUnfocused] = darkPanel;
-	colors[ImGuiCol_TabUnfocusedActive] = highlightLow;
+	colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.24f, 0.24f, 0.24f, 1.00f);
 
 	// === その他 ===
 	colors[ImGuiCol_ResizeGrip] = darkPanel;
@@ -144,12 +150,12 @@ void ImGuiManager::CustomizeImGuiStyle() {
 	colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.20f, 0.20f, 0.20f, 0.60f);
 
 	// === スタイル設定 ===
-	style.WindowRounding = 5.0f;
-	style.FrameRounding = 4.0f;
-	style.GrabRounding = 3.0f;
+	style.WindowRounding = 2.0f;
+	style.FrameRounding = 2.0f;
+	style.GrabRounding = 2.0f;
 	style.ScrollbarSize = 12.0f;
 	style.GrabMinSize = 12.0f;
-	style.TabRounding = 4.0f;
+	style.TabRounding = 2.0f;
 	style.WindowMenuButtonPosition = ImGuiDir_Right;
 	style.SeparatorTextBorderSize = 2.0f;
 	style.DockingSeparatorSize = 1.0f;
