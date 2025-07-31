@@ -44,7 +44,7 @@ public:
 
 	//--------- accessor -----------------------------------------------//
 	const std::vector<FxUnit>& GetUnits()const { return units_; }
-	const std::string& GetModelPath() const { return modelPath; }
+	
 	bool IsDrawEnable() { return isDrawEnable_; }
 	void SetDrawEnable(bool isEnable) { isDrawEnable_ = isEnable; }
 	bool IsPlaying()const override { return isPlaying_; }
@@ -78,7 +78,6 @@ private:
 	//===================================================================*/
 	//					private variable
 	//===================================================================*/
-	std::string modelPath = "plane.obj";	//< モデルパス（デフォルトは平面
 
 	const int kMaxUnits_ = 2048;			//< 最大パーティクル数
 

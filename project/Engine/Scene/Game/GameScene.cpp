@@ -69,6 +69,7 @@ void GameScene::Initialize(){
 	//enemyCollection_->SetPlayerTransform(&player_->GetWorldTransform());
 	//enemyCollection_->CreateSpawners();
 
+
 }
 
 void GameScene::Update([[maybe_unused]]float dt){
@@ -76,6 +77,7 @@ void GameScene::Update([[maybe_unused]]float dt){
 	/* カメラ関連更新 ============================*/
 
 	//player_->SetEnemyList(enemyCollection_->GetEnemies());
+
 
 	/* その他 ============================*/
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();

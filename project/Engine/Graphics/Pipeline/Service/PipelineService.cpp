@@ -64,6 +64,7 @@ void PipelineService::RegisterAllPipelines() {
 		//						Particle Pipelines
 		//===================================================================*/
 		regObj(PipelineTag::Object::Particle, mode, PipelinePresets::MakeParticle);
+		regObj(PipelineTag::Object::GpuParticle, mode, PipelinePresets::MakeGpuParticle);
 	}
 
 	//=================== cs Pipelines ===================================

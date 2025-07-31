@@ -2,11 +2,7 @@
 
 #include "DxBuffer.h"
 #include <Engine/Graphics/Descriptor/DescriptorAllocator.h>
-
-#pragma once
-
-#include "DxBuffer.h"
-#include <Engine/Graphics/Descriptor/DescriptorAllocator.h>
+#include <d3dx12.h>
 
 template<typename T>
 class DxStructuredBuffer : public DxBuffer<T>{
@@ -14,8 +10,9 @@ public:
 	//===================================================================*/
 	//                   public functions
 	//===================================================================*/
-	void Initialize(ComPtr<ID3D12Device> device, UINT elementCount = 1) override;
-	void SetCommand(ComPtr<ID3D12GraphicsCommandList> cmdList, UINT slot = 0);
+	void Initialize(Microsoft::WRL::ComPtr<ID3D12Device> device, UINT elementCount = 1) override;
+	void InitializeAsRW(Microsoft::WRL::ComPtr<ID3D12Device> device, UINT elementCount);
+	void SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> cmdList, UINT slot = 0);
 
 	void CreateSrv(ID3D12Device* device);
 	void CreateUav(ID3D12Device* device);
@@ -43,7 +40,7 @@ private:
 };
 
 template<typename T>
-void DxStructuredBuffer<T>::Initialize(ComPtr<ID3D12Device> device, UINT elementCount){
+void DxStructuredBuffer<T>::Initialize(Microsoft::WRL::ComPtr<ID3D12Device> device, UINT elementCount){
 	this->elementCount_ = elementCount;
 	size_t byteSize = sizeof(T) * elementCount;
 
@@ -56,7 +53,7 @@ void DxStructuredBuffer<T>::Initialize(ComPtr<ID3D12Device> device, UINT element
 }
 
 template<typename T>
-void DxStructuredBuffer<T>::SetCommand(ComPtr<ID3D12GraphicsCommandList> cmdList, UINT slot){
+void DxStructuredBuffer<T>::SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> cmdList, UINT slot){
 	cmdList->IASetVertexBuffers(slot, 1, &vbView_);
 }
 
@@ -109,4 +106,30 @@ void DxStructuredBuffer<T>::ReleaseUav(){
 		DescriptorAllocator::Free(DescriptorUsage::CbvSrvUav, uavHandle_);
 		uavHandle_ = {};
 	}
+}
+
+template<typename T>
+void DxStructuredBuffer<T>::InitializeAsRW(
+	Microsoft::WRL::ComPtr<ID3D12Device> device,
+	UINT elementCount){
+	this->elementCount_ = elementCount;
+	const size_t byteSize = sizeof(T) * elementCount;
+
+	// DEFAULT Heap + UAV
+	CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_DEFAULT);
+	CD3DX12_RESOURCE_DESC   resDesc =
+		CD3DX12_RESOURCE_DESC::Buffer(byteSize,
+									  D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
+
+	HRESULT hr = device->CreateCommittedResource(
+		&heapProps,
+		D3D12_HEAP_FLAG_NONE,
+		&resDesc,
+		D3D12_RESOURCE_STATE_COMMON,
+		nullptr,
+		IID_PPV_ARGS(&this->resource_));
+	assert(SUCCEEDED(hr) && "StructuredBuffer (RW) creation failed.");
+
+	// ※ DEFAULT ヒープなので Map は行わず (mappedPtr_ は nullptr)
+	this->mappedPtr_ = nullptr;
 }
