@@ -11,8 +11,6 @@
 #include <vector>
 #include <cassert>
 
-// using
-using Microsoft::WRL::ComPtr;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //	汎用bufferクラス
@@ -26,8 +24,8 @@ public:
 	DxBuffer() = default;
 	virtual ~DxBuffer() = default;
 
-	virtual void Initialize(ComPtr<ID3D12Device> device, UINT elementCount = 1) = 0;
-	virtual void SetCommand(ComPtr<ID3D12GraphicsCommandList>cmdList, UINT rootParameterIndex)const;
+	virtual void Initialize(Microsoft::WRL::ComPtr<ID3D12Device> device, UINT elementCount = 1) = 0;
+	virtual void SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>cmdList, UINT rootParameterIndex)const;
 	virtual void TransferData(const T& data);
 	virtual void TransferData(const T* data, UINT count);
 	void TransferVectorData(const std::vector<T>& data);
@@ -37,27 +35,27 @@ public:
 	}
 
 	// リソースの取得 ===================================================================*/
-	ComPtr<ID3D12Resource> GetResource() const{ return resource_; }
+	Microsoft::WRL::ComPtr<ID3D12Resource> GetResource() const{ return resource_; }
 	UINT GetRootParameterIndex() const{ return rootParameterIndex_; }
 
 protected:
 	//===================================================================*/
 	//                   protected functions
 	//===================================================================*/
-	void CreateUploadResource(ComPtr<ID3D12Device> device, size_t byteSize);
+	void CreateUploadResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t byteSize);
 
 protected:
 	//===================================================================*/
 	//                   protected variables
 	//===================================================================*/
-	ComPtr<ID3D12Resource> resource_ = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> resource_ = nullptr;
 	UINT8* mappedPtr_ = nullptr;
 	UINT elementCount_ = 0;
 	UINT rootParameterIndex_ = 0;
 };
 
 template<typename T>
-inline void DxBuffer<T>::SetCommand(ComPtr<ID3D12GraphicsCommandList> cmdList, UINT rootParameterIndex)const{
+inline void DxBuffer<T>::SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> cmdList, UINT rootParameterIndex)const{
 	if (!resource_){
 		assert(false && "DxBuffer: resource is null.");
 		return;
@@ -90,7 +88,7 @@ inline void DxBuffer<T>::TransferVectorData(const std::vector<T>& data){
 //	bufferの作成
 /////////////////////////////////////////////////////////////////////////////////////////
 template<typename T>
-void DxBuffer<T>::CreateUploadResource(ComPtr<ID3D12Device> device, size_t byteSize){
+void DxBuffer<T>::CreateUploadResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t byteSize){
 	D3D12_HEAP_PROPERTIES heapProps = {};
 	heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
 

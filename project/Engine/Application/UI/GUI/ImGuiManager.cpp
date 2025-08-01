@@ -82,6 +82,7 @@ void ImGuiManager::Draw(){
 }
 
 void ImGuiManager::CustomizeImGuiStyle() {
+
 	ImGuiStyle& style = ImGui::GetStyle();
 	ImVec4* colors = style.Colors;
 

@@ -54,9 +54,8 @@ void SceneContext::RunRuntimeBootstrap() {
 }
 
 void SceneContext::PostUpdate(PipelineService* psoService, ID3D12GraphicsCommandList* cmd){
-	PipelineSet set = psoService->GetComputePipelineSet(PipelineTag::Compute::GpuParticle);
-	set.SetCompute(cmd);
-	fxSystem_->DispatchEmitters(cmd);
+
+	fxSystem_->DispatchEmitters(psoService,cmd);
 }
 
 void SceneContext::Clear(){

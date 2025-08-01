@@ -1,61 +1,28 @@
+#include "GpuParticle.hlsli"
+
 ///////////////////////////////////////////////////////////////////////////////
 //                            structs
 ///////////////////////////////////////////////////////////////////////////////
 
-struct Particle {
-	float3 translate;
-	float3 scale;
-	float lifeTime;
-	float3 velocity;
-	float currentTime;
-	float4 color;
-};
-
 static const uint kMaxParticles = 1024;
-
-///////////////////////////////////////////////////////////////////////////////
-//                            cbuffers
-///////////////////////////////////////////////////////////////////////////////
-cbuffer EmitterParams : register(b0) {
-	float deltaTime;
-	float3 acceleration;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-//                            UAV
-///////////////////////////////////////////////////////////////////////////////
-RWStructuredBuffer<Particle> particles : register(u0);
-
-///////////////////////////////////////////////////////////////////////////////
-//                            tables
-///////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
 //                            main
 ///////////////////////////////////////////////////////////////////////////////
+RWStructuredBuffer<Particle> gParticles : register(u0);
+RWStructuredBuffer<int> gFreeCounter : register(u1);
 
-[numthreads(256, 1, 1)]
+[numthreads(1024, 1, 1)]
 void main(uint3 DTid : SV_DispatchThreadID) {
 	uint id = DTid.x;
-	if (id >= kMaxParticles)
-		return;
 
-	Particle p = particles[id];
-
-	// スキップ
-	if (p.currentTime < 0.0f)
-		return;
-
-	p.currentTime += deltaTime;
-
-	if (p.currentTime >= p.lifeTime) {
-		p.currentTime = -1.0f;
-		particles[id] = p;
-		return;
+	if(id == 0) {
+		gFreeCounter[0] = 0; // カウンター初期化
 	}
 
-	p.velocity += acceleration * deltaTime;
-	p.translate += p.velocity * deltaTime;
-
-	particles[id] = p;
+	if(id < kMaxParticles) {
+		gParticles[id] = (Particle)0;
+		gParticles[id].scale = float3(0.5f, 0.5f, 0.5f);
+		gParticles[id].color = float4(1.0f, 1.0f, 1.0f, 0.0f);
+	}
 }

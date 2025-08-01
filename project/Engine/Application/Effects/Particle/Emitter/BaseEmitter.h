@@ -10,7 +10,7 @@
 /* ========================================================================
 /*	particle emitter
 /* ===================================================================== */
-class BaseEmitter {
+class BaseEmitter{
 public:
 	//===================================================================*/
 	//					public func
@@ -20,17 +20,19 @@ public:
 	virtual void Update(float deltaTime) = 0;
 	virtual void TransferParticleDataToGPU();
 
-	virtual void Play() {}
-	virtual void Stop() {}
-	virtual bool IsPlaying() const { return true; }
+	virtual void Play(){}
+	virtual void Stop(){}
+	virtual bool IsPlaying() const{ return true; }
 
 public:
-	const std::string& GetTexturePath() const { return material_.texturePath; }
-	const ParticleMaterial& GetMaterial() const { return material_; }
-	const DxConstantBuffer<ParticleMaterial>& GetMaterialBuffer() const { return materialBuffer_; }
-	const DxStructuredBuffer<ParticleConstantData>& GetInstanceBuffer() const { return instanceBuffer_; }
-
+	const std::string& GetTexturePath() const{ return material_.texturePath; }
+	const ParticleMaterial& GetMaterial() const{ return material_; }
+	const DxConstantBuffer<ParticleMaterial>& GetMaterialBuffer() const{ return materialBuffer_; }
+	const DxStructuredBuffer<ParticleConstantData>& GetInstanceBuffer() const{ return instanceBuffer_; }
+	const std::string& GetModelPath() const{ return modelPath; }
 protected:
+	std::string modelPath = "plane.obj";	//< モデルパス（デフォルトは平面
+
 	ParticleMaterial material_;				//< パーティクルのマテリアル
 	std::vector<FxUnit> units_;				//< パーティクルユニットの配列
 	DxStructuredBuffer<ParticleConstantData> instanceBuffer_;

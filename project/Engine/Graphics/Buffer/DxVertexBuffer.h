@@ -13,9 +13,9 @@ public:
 	//===================================================================*/
 	//                   public functions
 	//===================================================================*/
-	void Initialize(ComPtr<ID3D12Device> device, UINT elementCount = 1) override;
+	void Initialize(Microsoft::WRL::ComPtr<ID3D12Device> device, UINT elementCount = 1) override;
 
-	void SetCommand(ComPtr<ID3D12GraphicsCommandList> cmdList, [[maybe_unused]] UINT rootParameterIndex = 0)const override{
+	void SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> cmdList, [[maybe_unused]] UINT rootParameterIndex = 0)const override{
 		if (!this->resource_){
 			assert(false && "VertexBuffer resource is null. Initialize() might not have been called.");
 			return;
@@ -34,7 +34,7 @@ private:
 };
 
 template<typename T>
-inline void DxVertexBuffer<T>::Initialize(ComPtr<ID3D12Device> device, UINT elementCount){
+inline void DxVertexBuffer<T>::Initialize(Microsoft::WRL::ComPtr<ID3D12Device> device, UINT elementCount){
 	this->elementCount_ = elementCount;
 	size_t byteSize = sizeof(T) * elementCount;
 	this->CreateUploadResource(device, byteSize);

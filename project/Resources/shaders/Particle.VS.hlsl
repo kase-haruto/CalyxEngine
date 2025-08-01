@@ -4,24 +4,24 @@
 //                            structs
 ///////////////////////////////////////////////////////////////////////////////
 struct VertexShaderInput {
-    float4 position : POSITION0;
-    float2 texcoord : TEXCOORD0;
-    float3 normal : NORMAL0;
+	float4 position : POSITION0;
+	float2 texcoord : TEXCOORD0;
+	float3 normal : NORMAL0;
 };
 
 struct ParticleData {
-    float3 position;
-    float3 scale;
-    float4 color;
+	float3 position;
+	float3 scale;
+	float4 color;
 };
 
 struct Camera {
-    float4x4 view;
-    float4x4 projection;
-    float4x4 viewProjection;
-    float3 cameraPosition;
-    float3 camRight;    // ViewMatrixのX列
-    float3 camUp;       // ViewMatrixのY列
+	float4x4 view;
+	float4x4 projection;
+	float4x4 viewProjection;
+	float3 cameraPosition;
+	float3 camRight; // ViewMatrixのX列
+	float3 camUp; // ViewMatrixのY列
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -44,7 +44,7 @@ VertexShaderOutput main(uint vertexID : SV_VertexID,
     // 頂点の位置（TRIANGLESTRIP順: 左下, 左上, 右下, 右上）
 	float2 corner;
 	float2 texcoord;
-	switch(vertexID) {
+	switch (vertexID) {
 		case 0:
 			corner = float2(-0.5f, -0.5f);
 			texcoord = float2(0.0f, 1.0f);
@@ -63,9 +63,9 @@ VertexShaderOutput main(uint vertexID : SV_VertexID,
 			break;
 	}
 
-    float2 offset = float2(corner.x * p.scale.x, corner.y * p.scale.y);
+	float2 offset = float2(corner.x * p.scale.x, corner.y * p.scale.y);
 
-    float3 worldPos = p.position
+	float3 worldPos = p.position
                 + gCamera.camRight * offset.x
                 + gCamera.camUp * offset.y;
 

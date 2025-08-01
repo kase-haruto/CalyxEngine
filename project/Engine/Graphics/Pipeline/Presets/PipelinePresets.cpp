@@ -97,6 +97,34 @@ GraphicsPipelineDesc PipelinePresets::MakeParticle(BlendMode mode){
 	return desc;
 }
 
+GraphicsPipelineDesc PipelinePresets::MakeGpuParticle(BlendMode mode){
+	D3D12_DEPTH_STENCIL_DESC depthDesc = {};
+	depthDesc.DepthEnable = TRUE;
+	depthDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO; // 書き込みを無効にする
+	depthDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	depthDesc.StencilEnable = FALSE;
+
+	GraphicsPipelineDesc desc;
+	desc.VS(L"GpuParticle.VS.hlsl")
+		.PS(L"Particle.PS.hlsl")
+		.Input(VertexInputLayout<VertexPosUvN>::Get())
+		.Blend(mode)
+		.CullNone()
+		.DepthState(depthDesc)
+		.RTV(DXGI_FORMAT_R8G8B8A8_UNORM)
+		.Samples(1);
+
+	desc.root_
+		.AllowIA()
+		.CBV(0, D3D12_SHADER_VISIBILITY_VERTEX)  // gCamera (b0)
+		.CBV(1, D3D12_SHADER_VISIBILITY_PIXEL)   // gMaterial (b1)
+		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_VERTEX) // gParticle (t0)
+		.SRVTable(1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)  // gTexture  (t1)
+		.SamplerWrapLinear(0); // gSampler (s0)
+
+	return desc;
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //		2dObject
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -148,7 +176,23 @@ GraphicsPipelineDesc PipelinePresets::MakeGpuParticleCS() {
 		// b0: EmitterParams（deltaTime, acceleration）
 		.CBV(0, D3D12_SHADER_VISIBILITY_ALL)
 		// u0: RWStructuredBuffer<Particle>
-		.UAVTable(0, 1);
+		.UAVTable(0, 1)   // u0 : RWStructuredBuffer<Particle>
+		.UAVTable(1, 1);  // u1 : RWStructuredBuffer<uint> (freeCounter)
+
+	return desc;
+}
+
+GraphicsPipelineDesc PipelinePresets::MakeGpuEmit() {
+	GraphicsPipelineDesc desc;
+	desc.CS(L"EmitParticle.CS.hlsl");
+
+	desc.root_
+		// b0: EmitterParams
+		.CBV(0, D3D12_SHADER_VISIBILITY_ALL)
+		.CBV(1, D3D12_SHADER_VISIBILITY_ALL)
+		// u0: RWStructuredBuffer<Particle>
+		.UAVTable(0, 1)   // u0 : RWStructuredBuffer<Particle>
+		.UAVTable(1, 1);  // u1 : RWStructuredBuffer<uint> (freeCounter)
 
 	return desc;
 }

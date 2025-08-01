@@ -24,6 +24,7 @@ namespace PipelineTag {
 		SkinningObject3D,
 		Object2d,
 		Particle,
+		GpuParticle,
 		Line,
 		Effect,
 		Skybox,
@@ -43,7 +44,8 @@ namespace PipelineTag {
 	};
 
 	enum class Compute : std::uint16_t {
-		GpuParticle = 0,
+		ParticleInitializeCompute = 0,
+		ParticleEmitCompute,
 		kComputeCount
 	};
 } // namespace PipelineTag

@@ -64,6 +64,7 @@ void PipelineService::RegisterAllPipelines() {
 		//						Particle Pipelines
 		//===================================================================*/
 		regObj(PipelineTag::Object::Particle, mode, PipelinePresets::MakeParticle);
+		regObj(PipelineTag::Object::GpuParticle, mode, PipelinePresets::MakeGpuParticle);
 	}
 
 	//=================== cs Pipelines ===================================
@@ -71,7 +72,8 @@ void PipelineService::RegisterAllPipelines() {
 	//===================================================================*/
 	//						gpuParticle
 	//===================================================================*/
-	regCS(PipelineTag::Compute::GpuParticle, PipelinePresets::MakeGpuParticleCS);
+	regCS(PipelineTag::Compute::ParticleInitializeCompute, PipelinePresets::MakeGpuParticleCS);
+	regCS(PipelineTag::Compute::ParticleEmitCompute, PipelinePresets::MakeGpuEmit);
 
 	//=================== PostProcess Pipelines ==========================
 	regPP(PipelineTag::PostProcess::GrayScale, PipelinePresets::MakeGrayScale);

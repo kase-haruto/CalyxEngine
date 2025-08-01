@@ -42,5 +42,6 @@ private:
 	std::shared_ptr<BaseGameObject> modelField_;
 	std::unique_ptr<Sprite> testSprite_;
 	std::shared_ptr<CalyxHuman> animationHuman_;
+
 };
 

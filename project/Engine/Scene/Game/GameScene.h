@@ -16,6 +16,7 @@
 #include <Engine/Objects/LightObject/PointLight.h>
 #include <Game/3d/GameCamera/RailCamera.h>
 #include <Engine/Extensions/SkyBox/SkyBox.h>
+#include <Engine/Application/Effects/Particle/Emitter/GpuFxEmitter.h>
 
 /* object */
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
@@ -52,5 +53,8 @@ private:
 
 
 	std::shared_ptr<RailCamera> railCamera_ = nullptr;
+
+	std::shared_ptr<GpuFxEmitter> emitter_ = nullptr;
+	std::shared_ptr<FxEmitter> emitter2_ = nullptr;
 };
 

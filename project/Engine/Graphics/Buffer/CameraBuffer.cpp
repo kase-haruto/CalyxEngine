@@ -38,9 +38,7 @@ void Camera3DBuffer::SetCommand(ID3D12GraphicsCommandList* cmdList, PipelineType
 		rootParameterIndex = 4;
 	} else if (pipelineType == PipelineType::Line || pipelineType == PipelineType::Skybox){
 		rootParameterIndex = 1;
-	} else if (pipelineType == PipelineType::StructuredObject){
-		rootParameterIndex = 0;
-	}
+	} 
 
 	buffer_.SetCommand(cmdList, rootParameterIndex);
 }
