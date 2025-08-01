@@ -55,5 +55,6 @@ private:
 	std::shared_ptr<RailCamera> railCamera_ = nullptr;
 
 	std::shared_ptr<GpuFxEmitter> emitter_ = nullptr;
+	std::shared_ptr<FxEmitter> emitter2_ = nullptr;
 };
 

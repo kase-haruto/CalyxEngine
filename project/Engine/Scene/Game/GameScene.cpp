@@ -69,7 +69,10 @@ void GameScene::Initialize(){
 	//enemyCollection_->SetPlayerTransform(&player_->GetWorldTransform());
 	//enemyCollection_->CreateSpawners();
 
+	emitter_ = std::make_unique<GpuFxEmitter>();
+	emitter_->Initialize();
 
+	sceneContext_->GetFxSystem()->AddEmitter(emitter_);
 }
 
 void GameScene::Update([[maybe_unused]]float dt){
@@ -77,7 +80,7 @@ void GameScene::Update([[maybe_unused]]float dt){
 	/* カメラ関連更新 ============================*/
 
 	//player_->SetEnemyList(enemyCollection_->GetEnemies());
-
+	emitter_->Update(dt);
 
 	/* その他 ============================*/
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();

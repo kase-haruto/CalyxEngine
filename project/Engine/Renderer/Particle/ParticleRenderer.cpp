@@ -47,9 +47,9 @@ void ParticleRenderer::Render(
 	if (!gpuEmitters.empty()){
 		auto psoGpu = pipelineService->GetPipelineSet(
 			PipelineTag::Object::GpuParticle, BlendMode::ADD);
-		pipelineService->SetCommand(psoGpu, cmdList);          // ① 先に PSO
+		pipelineService->SetCommand(psoGpu, cmdList);
 
-		if (auto* cam = CameraManager::GetActive())            // ② 再セット
+		if (auto* cam = CameraManager::GetActive())
 			cam->SetCommand(cmdList, PipelineType::StructuredObject);
 
 		for (auto& em : gpuEmitters){

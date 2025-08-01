@@ -25,7 +25,7 @@ public:
 	void AddEmitter(const std::shared_ptr<BaseEmitter>& emitter);
 	void RemoveEmitter(BaseEmitter* emitter);
 	void SyncEmitters();
-	void DispatchEmitters(ID3D12GraphicsCommandList* cmdList);
+	void DispatchEmitters(class PipelineService* psoService, ID3D12GraphicsCommandList* cmdList);
 	void Render(class PipelineService*, ID3D12GraphicsCommandList*);
 	void Clear();
 private:

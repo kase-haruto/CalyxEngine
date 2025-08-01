@@ -77,10 +77,22 @@ void FxSystem::SyncEmitters(){
 	}
 }
 
-void FxSystem::DispatchEmitters(ID3D12GraphicsCommandList* cmd){
+void FxSystem::DispatchEmitters(PipelineService* psoService, ID3D12GraphicsCommandList* cmd){
 	for (auto it = gpuEmitters_.begin(); it != gpuEmitters_.end(); ){
 		if (auto sp = it->lock()){
-			sp->Dispatch(cmd);
+			// 初期化パイプライン
+			{
+				auto psoInit = psoService->GetComputePipelineSet(PipelineTag::Compute::ParticleInitializeCompute);
+				psoInit.SetCompute(cmd);
+				sp->DispatchInitialize(cmd);
+			}
+
+			// Emit パイプライン
+			{
+				auto psoEmit = psoService->GetComputePipelineSet(PipelineTag::Compute::ParticleEmitCompute);
+				psoEmit.SetCompute(cmd);
+				sp->DispatchEmit(cmd);
+			}
 			++it;
 		} else{
 			it = gpuEmitters_.erase(it);

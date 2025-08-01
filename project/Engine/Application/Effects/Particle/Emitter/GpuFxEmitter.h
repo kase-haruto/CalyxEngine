@@ -15,6 +15,20 @@ class GpuFxEmitter
 		Vector3 acceleration = Vector3(0, -9.8f, 0);
 	};
 
+	struct PerFrame {
+		float time;
+		float deltaTime;
+	};
+
+	struct EmitterSphere {
+		Vector3 translate;
+		float radius;
+		uint32_t count;
+		float frequency;
+		float frequencyTime;
+		uint32_t emit;
+	};
+
 public:
 	static constexpr uint32_t kMaxParticles = 1024;
 
@@ -25,27 +39,35 @@ public:
 
 	// 毎フレーム呼ぶ
 	void Update(float dt) override;
-	void Dispatch(ID3D12GraphicsCommandList* cmd);
+	void DispatchInitialize(ID3D12GraphicsCommandList* cmd);
+	void DispatchEmit(ID3D12GraphicsCommandList* cmd);
 
 	// 描画側で使う SRV
 	D3D12_GPU_DESCRIPTOR_HANDLE GetParticleSrv() const{
 		return particleBuffer_.GetGpuSrvHandle();
 	}
 
-	// 位置を変更したい場合
 	void SetPosition(const Vector3& pos){ position_ = pos; }
 
-	// ※ BaseEmitter::TransferParticleDataToGPU() は今回は不要
 	void TransferParticleDataToGPU() override{}
 
 private:
 	Vector3 position_ {0,0,0};
+	bool isInitialized = false;
 
 	FxParam<Vector3> scale_ = FxParam<Vector3>::MakeConstant();
 	FxParam<Vector3> velocity_ = FxParam<Vector3>::MakeRandom({-1,0,-1}, {1,0,1});
 	FxParam<float>   lifetime_ = FxParam<float>::MakeRandom(1.f, 3.f);
 
+	//buffer
 	DxStructuredBuffer<ParticleCS> particleBuffer_;  // UAV+SRV
-	DxConstantBuffer<EmitterParam> paramBuffer_;      // b0
-	EmitterParam                    emitParam_ {};
+	DxStructuredBuffer<int> freeCounterBuffer_;
+
+	DxConstantBuffer<EmitterParam> paramBuffer_;
+	DxConstantBuffer<EmitterSphere> emitterParamBuf_;
+	DxConstantBuffer<PerFrame> perFrameBuffer_;
+	
+	EmitterParam emitParam_ {};
+	EmitterSphere emitterData_;
+	PerFrame perFrame_;
 };

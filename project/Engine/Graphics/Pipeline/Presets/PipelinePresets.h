@@ -16,6 +16,7 @@ namespace PipelinePresets {
 
 	// cs
 	GraphicsPipelineDesc MakeGpuParticleCS();
+	GraphicsPipelineDesc MakeGpuEmit();
 
 	// postprocess
 	GraphicsPipelineDesc MakeCopyImage();

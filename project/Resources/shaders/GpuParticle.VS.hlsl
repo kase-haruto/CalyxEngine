@@ -1,17 +1,9 @@
 #include "Particle.hlsli"
+#include "GpuParticle.hlsli"
 
 struct VSIn {
 	float4 pos : POSITION0; // テンプレ用（クォッド）
 	float2 uv : TEXCOORD0;
-};
-
-struct Particle {
-	float3 translate;
-	float3 scale;
-	float lifeTime;
-	float3 velocity;
-	float currentTime;
-	float4 color;
 };
 
 struct Camera {
@@ -30,13 +22,13 @@ VertexShaderOutput main(uint vid : SV_VertexID, uint iid : SV_InstanceID) {
 	Particle p = gParticles[iid];
 
     // ── 無効パーティクルは即クリップ ───────────────
-	if (p.currentTime < 0.0f) {
-		VertexShaderOutput o;
-		o.position = float4(0, 0, 0, 0);
-		o.texcoord = 0;
-		o.color = 0;
-		return o;
-	}
+	//if (p.currentTime < 0.0f) {
+	//	VertexShaderOutput o;
+	//	o.position = float4(0, 0, 0, 0);
+	//	o.texcoord = 0;
+	//	o.color = 0;
+	//	return o;
+	//}
 
     // ── Billboard コーナー計算 (左下,左上,右下,右上) ──
 	float2 corner, uv;
