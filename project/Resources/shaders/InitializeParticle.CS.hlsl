@@ -4,25 +4,27 @@
 //                            structs
 ///////////////////////////////////////////////////////////////////////////////
 
-static const uint kMaxParticles = 1024;
+RWStructuredBuffer<Particle> gParticles : register(u0);
+RWStructuredBuffer<int> gFreeListIndex : register(u1);
+RWStructuredBuffer<int> gFreeList : register(u2);
 
 ///////////////////////////////////////////////////////////////////////////////
 //                            main
 ///////////////////////////////////////////////////////////////////////////////
-RWStructuredBuffer<Particle> gParticles : register(u0);
-RWStructuredBuffer<int> gFreeCounter : register(u1);
-
 [numthreads(1024, 1, 1)]
 void main(uint3 DTid : SV_DispatchThreadID) {
 	uint id = DTid.x;
 
 	if(id == 0) {
-		gFreeCounter[0] = 0; // カウンター初期化
+		gFreeListIndex[0] = 0; // カウンター初期化
 	}
 
 	if(id < kMaxParticles) {
 		gParticles[id] = (Particle)0;
+		gFreeList[id] = id;
 		gParticles[id].scale = float3(0.5f, 0.5f, 0.5f);
 		gParticles[id].color = float4(1.0f, 1.0f, 1.0f, 0.0f);
+		gParticles[id].lifeTime = 2.0f;
+		gParticles[id].velocity = float3(0.0f, 0.0f, 0.0f);
 	}
 }

@@ -9,18 +9,6 @@ struct EmitterData {
 	uint emit;
 };
 
-struct PerFrame {
-	float time;
-	float deltaTime;
-};
-
-static const uint kMaxParticles = 1024;
-
-RWStructuredBuffer<Particle> gParticles : register(u0);
-RWStructuredBuffer<int> gFreeCounter : register(u1);
-ConstantBuffer<EmitterData> gEmitter : register(b0);
-ConstantBuffer<PerFrame> gPerFrame : register(b1);
-
 float3 rand3dTo3d(float3 p) {
 	p = float3(dot(p, float3(127.1, 311.7, 74.7)),
                dot(p, float3(269.5, 183.3, 246.1)),
@@ -45,19 +33,26 @@ class RandomGenerator {
 	}
 };
 
+ConstantBuffer<EmitterData> gEmitter : register(b0);
+ConstantBuffer<PerFrame> gPerFrame : register(b1);
+
+RWStructuredBuffer<Particle> gParticles : register(u0);
+RWStructuredBuffer<int> gFreeListIndex : register(u1);
+RWStructuredBuffer<int> gFreeList : register(u2);
+
 [numthreads(1, 1, 1)]
 void main(uint3 DTid : SV_DispatchThreadID) {
-	if(gEmitter.emit == 0)
+	if (gEmitter.emit == 0)
 		return;
 
 	RandomGenerator generator;
 	generator.seed = (DTid + gPerFrame.time) * gPerFrame.time;
 
-	for(uint countIndex = 0; countIndex < gEmitter.count; ++countIndex) {
-		int particleIndex;
-		InterlockedAdd(gFreeCounter[0], 1, particleIndex);
+	for (uint countIndex = 0; countIndex < gEmitter.count; ++countIndex) {
+		int freeListIndex;
+		InterlockedAdd(gFreeListIndex[0], -1, freeListIndex);
 
-		if(particleIndex < kMaxParticles) {
+		if (0 <= freeListIndex && freeListIndex < kMaxParticles) {
 			Particle p;
 			p.scale = generator.Generate3d();
 			p.translate = generator.Generate3d();
@@ -65,8 +60,13 @@ void main(uint3 DTid : SV_DispatchThreadID) {
 			p.color.a = 1.0f;
 			p.lifeTime = 1.0f;
 			p.currentTime = 0.0f;
-			p.velocity = float3(0, 1, 0); // 適宜
+			p.velocity = float3(0, 0, 0);
+			
+			uint particleIndex = gFreeList[freeListIndex];
 			gParticles[particleIndex] = p;
+		} else {
+			InterlockedAdd(gFreeListIndex[0], 1);
+			break;
 		}
 	}
 }

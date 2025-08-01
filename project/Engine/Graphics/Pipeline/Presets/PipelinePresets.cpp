@@ -175,14 +175,14 @@ GraphicsPipelineDesc PipelinePresets::MakeGpuParticleCS() {
 	desc.root_
 		// b0: EmitterParams（deltaTime, acceleration）
 		.CBV(0, D3D12_SHADER_VISIBILITY_ALL)
-		// u0: RWStructuredBuffer<Particle>
-		.UAVTable(0, 1)   // u0 : RWStructuredBuffer<Particle>
-		.UAVTable(1, 1);  // u1 : RWStructuredBuffer<uint> (freeCounter)
+		.UAVTable(0, 1)	// u0 : RWStructuredBuffer<Particle>
+		.UAVTable(1, 1)   // u0 : RWStructuredBuffer<Particle>
+		.UAVTable(2, 1);  // u1 : RWStructuredBuffer<uint> (freeCounter)
 
 	return desc;
 }
 
-GraphicsPipelineDesc PipelinePresets::MakeGpuEmit() {
+GraphicsPipelineDesc PipelinePresets::MakeGpuParticleEmit() {
 	GraphicsPipelineDesc desc;
 	desc.CS(L"EmitParticle.CS.hlsl");
 
@@ -191,8 +191,22 @@ GraphicsPipelineDesc PipelinePresets::MakeGpuEmit() {
 		.CBV(0, D3D12_SHADER_VISIBILITY_ALL)
 		.CBV(1, D3D12_SHADER_VISIBILITY_ALL)
 		// u0: RWStructuredBuffer<Particle>
-		.UAVTable(0, 1)   // u0 : RWStructuredBuffer<Particle>
-		.UAVTable(1, 1);  // u1 : RWStructuredBuffer<uint> (freeCounter)
+		.UAVTable(0, 1)	// u0 : RWStructuredBuffer<Particle>
+		.UAVTable(1, 1)	// u1 : RWStructuredBuffer<uint> (freeListIndex)
+		.UAVTable(2, 1);// u2 : RWStructuredBuffer<uint> (freeList)
+
+	return desc;
+}
+
+GraphicsPipelineDesc PipelinePresets::MakeGpuParticleUpdate(){
+	GraphicsPipelineDesc desc;
+	desc.CS(L"UpdateParticle.CS.hlsl");
+
+	desc.root_
+		.CBV(0, D3D12_SHADER_VISIBILITY_ALL)// b0 frameTime
+		.UAVTable(0, 1)	// u0 : RWStructuredBuffer<Particle>
+		.UAVTable(1, 1)	// u1 : RWStructuredBuffer<uint> (freeListIndex)
+		.UAVTable(2, 1);// u2 : RWStructuredBuffer<uint> (freeList)
 
 	return desc;
 }
