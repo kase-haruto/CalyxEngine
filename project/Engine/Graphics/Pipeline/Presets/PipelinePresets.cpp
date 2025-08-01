@@ -176,7 +176,8 @@ GraphicsPipelineDesc PipelinePresets::MakeGpuParticleCS() {
 		// b0: EmitterParams（deltaTime, acceleration）
 		.CBV(0, D3D12_SHADER_VISIBILITY_ALL)
 		// u0: RWStructuredBuffer<Particle>
-		.UAVTable(0, 2);
+		.UAVTable(0, 1)   // u0 : RWStructuredBuffer<Particle>
+		.UAVTable(1, 1);  // u1 : RWStructuredBuffer<uint> (freeCounter)
 
 	return desc;
 }
@@ -190,7 +191,8 @@ GraphicsPipelineDesc PipelinePresets::MakeGpuEmit() {
 		.CBV(0, D3D12_SHADER_VISIBILITY_ALL)
 		.CBV(1, D3D12_SHADER_VISIBILITY_ALL)
 		// u0: RWStructuredBuffer<Particle>
-		.UAVTable(0, 2);
+		.UAVTable(0, 1)   // u0 : RWStructuredBuffer<Particle>
+		.UAVTable(1, 1);  // u1 : RWStructuredBuffer<uint> (freeCounter)
 
 	return desc;
 }
