@@ -6,3 +6,12 @@ struct Particle {
 	float currentTime;
 	float4 color;
 };
+
+struct PerFrame {
+	float time;
+	float deltaTime;
+};
+
+
+
+static const uint kMaxParticles = 1024;

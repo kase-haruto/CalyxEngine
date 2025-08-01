@@ -93,6 +93,14 @@ void FxSystem::DispatchEmitters(PipelineService* psoService, ID3D12GraphicsComma
 				psoEmit.SetCompute(cmd);
 				sp->DispatchEmit(cmd);
 			}
+
+			// 更新
+			{
+				auto psoEmit = psoService->GetComputePipelineSet(PipelineTag::Compute::ParticleUpdateCompute);
+				psoEmit.SetCompute(cmd);
+				sp->DispatchUpdate(cmd);
+			}
+
 			++it;
 		} else{
 			it = gpuEmitters_.erase(it);

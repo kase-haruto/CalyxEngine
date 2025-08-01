@@ -46,6 +46,7 @@ namespace PipelineTag {
 	enum class Compute : std::uint16_t {
 		ParticleInitializeCompute = 0,
 		ParticleEmitCompute,
+		ParticleUpdateCompute,
 		kComputeCount
 	};
 } // namespace PipelineTag
