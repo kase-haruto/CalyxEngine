@@ -19,7 +19,6 @@ PlayerBullet::PlayerBullet(const std::string& modelName, const std::string& name
 	shootFx_ = SceneAPI::Instantiate<ParticleSystemObject>("shootFx");
 	shootFx_->LoadConfig("Resources/Assets/Configs/Effect/ShootFx.json");
 
-	shootFx_->Play();
 }
 
 PlayerBullet::~PlayerBullet(){
@@ -32,7 +31,11 @@ void PlayerBullet::Initialize(){
 	auto self = shared_from_this();
 	trailFx_->SetParent(self);
 	shootFx_->SetParent(self);
+	shootFx_->Stop();
+}
 
+void PlayerBullet::OnShot() {
+	shootFx_->Play();
 }
 
 

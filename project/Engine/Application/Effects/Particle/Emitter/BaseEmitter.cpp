@@ -1,15 +1,17 @@
 #include "BaseEmitter.h"
 
+#include <iostream>
+
 void BaseEmitter::TransferParticleDataToGPU() {
 	std::vector<ParticleConstantData> gpuUnits;
-	gpuUnits.clear();
 	for (const auto& fx : units_) {
 		if (fx.alive) {
 			gpuUnits.push_back({ fx.position, fx.scale, fx.color });
 		}
 	}
-	if (!gpuUnits.empty()) {
+	std::cout << "[Transfer] count: " << gpuUnits.size() << std::endl;
 
+	if (!gpuUnits.empty()) {
 		instanceBuffer_.TransferVectorData(gpuUnits);
 	}
 }

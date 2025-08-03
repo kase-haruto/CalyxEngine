@@ -50,6 +50,7 @@ void Player::Initialize(){
 	auto ctx = SceneContext::Current();
 	reticleTransform_.parent = &ctx->GetCameraMgr()->GetMain3d()->GetWorldTransform();
 	reticleTransform_.translation = Vector3(0.0f, 0.0f, 50.0f);
+	
 
 	life_ = 10;
 
@@ -268,34 +269,45 @@ void Player::Start() {
 ///////////////////////////////////////////////////////////////////////////////////
 //		playerの傾き
 ///////////////////////////////////////////////////////////////////////////////////
-void Player::UpdateTilt(const Vector3& inputVector){
-	// 閾値以下なら傾きを戻す
-	if (inputVector.Length() <= 0.01f){
+void Player::UpdateTilt(const Vector3& inputVector) {
+	Camera3d* cam = CameraManager::GetMain3d();
+	if (!cam) return;
+
+	// 閾値以下で戻す
+	if (inputVector.Length() <= 0.01f) {
 		Quaternion identity = Quaternion::MakeIdentity();
 		worldTransform_.rotation = Quaternion::Slerp(worldTransform_.rotation, identity, 0.1f);
 		worldTransform_.rotationSource = RotationSource::Quaternion;
+
+		// カメラ傾きを戻す（オイラー角）
+		Vector3 currentRot = cam->GetRotate();
+		currentRot.x = Lerp(currentRot.x, 0.0f, 0.1f);  // pitch
+		currentRot.z = Lerp(currentRot.z, 0.0f, 0.1f);  // roll
+		cam->SetCamera(cam->GetTranslate(), currentRot);
 		return;
 	}
 
 	Vector3 dir = inputVector.Normalize();
 
-	// 最大角度（ラジアン）
-	const float maxRoll = 0.5f;
-	const float maxPitch = 0.5f;
+	const float maxRoll = 0.3f;
+	const float maxPitch = 0.3f;
 
 	float targetRoll = -dir.x * maxRoll;
 	float targetPitch = -dir.y * maxPitch;
 
-	// ロールとピッチのクォータニオンを作成
+	// プレイヤー回転（Quaternion）
 	Quaternion rollQ = Quaternion::MakeRotateZ(targetRoll);
 	Quaternion pitchQ = Quaternion::MakeRotateX(targetPitch);
+	Quaternion targetRotation = Quaternion::Multiply(rollQ, pitchQ);
 
-	// 合成クォータニオン（注意：回転順序によって見た目が変わる）
-	Quaternion targetRotation = Quaternion::Multiply(rollQ, pitchQ); // roll * pitch
-
-	// なめらかに補間
 	worldTransform_.rotation = Quaternion::Slerp(worldTransform_.rotation, targetRotation, 0.15f);
 	worldTransform_.rotationSource = RotationSource::Quaternion;
+
+	// カメラ回転（Euler）
+	Vector3 currentRot = cam->GetRotate();
+	currentRot.x = Lerp(currentRot.x, targetPitch * 0.3f, 0.15f); // pitch
+	currentRot.z = Lerp(currentRot.z, targetRoll * 0.3f, 0.15f); // roll
+	cam->SetCamera(cam->GetTranslate(), currentRot);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////

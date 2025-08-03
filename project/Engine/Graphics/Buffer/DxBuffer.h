@@ -67,9 +67,9 @@ inline void DxBuffer<T>::SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommand
 //	データ転送
 /////////////////////////////////////////////////////////////////////////////////////////
 template<typename T>
-void DxBuffer<T>::TransferData(const T& data){
+void DxBuffer<T>::TransferData(const T& data) {
 	assert(mappedPtr_ && "Resource is not mapped!");
-	std::memcpy(mappedPtr_, &data, sizeof(T) * elementCount_);
+	std::memcpy(mappedPtr_, &data, sizeof(T));
 }
 
 template<typename T>

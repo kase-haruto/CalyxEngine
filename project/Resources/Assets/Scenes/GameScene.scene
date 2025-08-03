@@ -202,7 +202,7 @@
                 "translation": {
                     "x": -150.0,
                     "y": -150.0,
-                    "z": 0.0
+                    "z": 200.0
                 }
             },
             "type": "BaseGameObject"
@@ -287,103 +287,6 @@
                 }
             },
             "type": "EnemyCollection"
-        },
-        {
-            "autoDestroy": false,
-            "color": {
-                "w": 1.0,
-                "x": 0.9073358774185181,
-                "y": 0.11560652405023575,
-                "z": 0.11560652405023575
-            },
-            "emitCount": 10,
-            "emitDelay": 0.0,
-            "emitDuration": -1.0,
-            "emitRate": 0.10000000149011612,
-            "guid": "09c031ea-b308-4915-9dc5-21912600e1c1",
-            "isComplement": true,
-            "isDrawEnable": true,
-            "isOneShot": false,
-            "isStatic": false,
-            "lifetime": {
-                "constant": 0.20000000298023224,
-                "max": 3.0,
-                "min": 1.0,
-                "mode": 0
-            },
-            "modelPath": "plane.obj",
-            "modules": [
-                {
-                    "easeType": 11,
-                    "enabled": true,
-                    "isGrowing": false,
-                    "name": "SizeOverLifetimeModule"
-                }
-            ],
-            "name": "ParticleSystem",
-            "objectType": 0,
-            "parentGuid": "bc6ace27-7773-4bee-9b8d-0b02b65aa114",
-            "position": {
-                "x": 2.833543062210083,
-                "y": 11.381254196166992,
-                "z": -0.6465392708778381
-            },
-            "scale": {
-                "constant": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "max": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "min": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "mode": 0
-            },
-            "texturePath": "life.png",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "ParticleSystemObject",
-            "velocity": {
-                "constant": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "max": {
-                    "x": 3.5,
-                    "y": 3.0799999237060547,
-                    "z": 3.180000066757202
-                },
-                "min": {
-                    "x": -3.740000009536743,
-                    "y": -3.0999999046325684,
-                    "z": -3.0799999237060547
-                },
-                "mode": 1
-            }
         }
     ],
     "sceneName": "scene",

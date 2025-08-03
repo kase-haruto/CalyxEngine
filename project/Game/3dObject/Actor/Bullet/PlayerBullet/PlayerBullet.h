@@ -13,6 +13,7 @@ public:
 	~PlayerBullet()override;
 
 	void Initialize()override;
+	void OnShot()override;
 	//--------- accessor ---------------------------------------------------
 	
 private:

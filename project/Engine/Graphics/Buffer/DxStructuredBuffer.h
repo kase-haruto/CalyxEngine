@@ -60,7 +60,7 @@ void DxStructuredBuffer<T>::SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsComm
 template<typename T>
 void DxStructuredBuffer<T>::CreateSrv(ID3D12Device* device){
 	if (srvHandle_.cpu.ptr != 0) return;
-
+	assert(this->resource_ && "resource_ is null before CreateSrv");
 	srvHandle_ = DescriptorAllocator::Allocate(DescriptorUsage::CbvSrvUav);
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};

@@ -19,10 +19,10 @@ void ParticleRenderer::Render(
 	// ───────────── CPU パーティクル ─────────────
 	if (!cpuEmitters.empty()){
 		auto psoCpu = pipelineService->GetPipelineSet(
-			PipelineTag::Object::Particle, BlendMode::SUB);
-		pipelineService->SetCommand(psoCpu, cmdList);          // ① 先に PSO
+			PipelineTag::Object::Particle, BlendMode::ADD);
+		pipelineService->SetCommand(psoCpu, cmdList);
 
-		if (auto* cam = CameraManager::GetActive())            // ② その後 CBV
+		if (auto* cam = CameraManager::GetActive()) 
 			cam->SetCommand(cmdList, PipelineType::StructuredObject);
 
 		for (auto& em : cpuEmitters){

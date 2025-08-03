@@ -49,6 +49,7 @@ void Viewport::Render(const ImTextureID& tex){
 	viewOrigin_ = Vector2(imagePos.x, imagePos.y);
 	if (size_.y > 0.0f) {
 		camera_->SetAspectRatio(size_.x / size_.y);
+		camera_->UpdateMatrix();
 		// CameraManagerにviewportサイズを通知
 		CameraManager::SetViewportSizeStatic(type_, size_);
 	}

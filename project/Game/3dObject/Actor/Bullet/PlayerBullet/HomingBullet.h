@@ -16,6 +16,7 @@ public:
 	~HomingBullet();
 	void ShootInitialize(const Vector3& initPos, const Vector3& velocity)override;
 	void Initialize()override;
+	void OnShot();
 	void SetTarget(const Actor* target);
 	void Update(float dt) override;
 
@@ -32,6 +33,6 @@ private:
 	float rotateSpeed_ = 100.0f;
 
 	std::shared_ptr<ParticleSystemObject> trailFx_;
-
+	std::shared_ptr<ParticleSystemObject> shootFx_;
 };
 
