@@ -14,7 +14,7 @@
 #include <Engine/Collision/CollisionManager.h>
 #include <Engine/Graphics/Pipeline/Service/PipelineService.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
-
+#include <Engine/Scene/Serializer/SceneSerializer.h>
 // game
 #include <Game/3dObject/Actor/Bullet/Register/BulletRegistrar.h>
 #include <Game/Installer/Player/PlayerInstaller.h>
@@ -41,64 +41,54 @@ void GameScene::LoadAssets(){}
 void GameScene::Initialize(){
 	sceneContext_->Initialize();
 
+	SceneSerializer::Load(*sceneContext_, "Resources/Assets/Scenes/GameScene.scene");
+
 	BaseScene::Initialize();
 
 	LoadAssets();
-
 	//弾の登録
 	BulletRegistrar::RegisterAll();
 
-	///* ----- Camera ----- */
-	//railCamera_ = SceneAPI::Instantiate<RailCamera>("railCamera");
-	//railCamera_->Initialize();
+	attackSprite_ = std::make_unique<Sprite>("Textures/attackUI.png");
+	Vector2 attackUiPos = Vector2(1280.0f * 0.5f, 720.0f - 100.0f);
+	Vector2 attackUiSize = Vector2(128.0f, 128.0f);
+	attackSprite_->Initialize(attackUiPos, attackUiSize);
+	attackSprite_->SetAnchorPoint(Vector2(0.5f, 0.5f));
 
-	///* ----- Field ----- */
-	//modelField_ = SceneAPI::Instantiate<BaseGameObject>("terrain.obj", "field");
-	//modelField_->SetScale({300,300,300});
-	//modelField_->SetTranslate({-150,-150,0});
-	//modelField_->SetUvScale({10,10});
-	//modelField_->SetEnableRaycast(false);
-
-	///* ----- Player ----- */
-	//player_ = SceneAPI::Instantiate<Player>("player.gltf", "player");
-	////player_->SetParent(&railCamera_->GetWorldTransform());
-	//player_->Initialize();
-
-	///* ----- Enemy ----- */
-	//enemyCollection_ = SceneAPI::Instantiate<EnemyCollection>("enemyContainer");
-	//enemyCollection_->SetPlayerTransform(&player_->GetWorldTransform());
-	//enemyCollection_->CreateSpawners();
-
-	emitter_ = std::make_unique<GpuFxEmitter>();
-	emitter_->Initialize();
-
-	sceneContext_->GetFxSystem()->AddEmitter(emitter_);
 }
 
 void GameScene::Update([[maybe_unused]]float dt){
+	auto ctx = SceneContext::Current();
+	auto player = ctx->FindFirst<Player>();
+	auto enemyCol = ctx->FindFirst<EnemyCollection>();
+	if (player && enemyCol) {
+		player->SetEnemyList(enemyCol->GetEnemies());
+	}
 
-	/* カメラ関連更新 ============================*/
+	attackSprite_->Update();
 
-	//player_->SetEnemyList(enemyCollection_->GetEnemies());
-	emitter_->Update(dt);
 
 	/* その他 ============================*/
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
 }
 
 void GameScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService, RenderTargetType type){
+	auto ctx = SceneContext::Current();
+	auto player = ctx->FindFirst<Player>();
+	for (auto& playerSprite : player->GetAllSprites()){
+		spriteRenderer_->Register(playerSprite);
+	}
 
-	//for (auto& playerSprite : player_->GetAllSprites()){
-	//	spriteRenderer_->Register(playerSprite);
-	//}
+	spriteRenderer_->Register(attackSprite_.get());
 
 	BaseScene::Draw(cmdList, psoService, type);
 }
 
 
 void GameScene::CleanUp(){
+	auto ctx = SceneContext::Current();
 	// 3Dオブジェクトの描画を終了
-	sceneContext_->GetObjectLibrary()->Clear();
+	ctx->GetObjectLibrary()->Clear();
 	CollisionManager::GetInstance()->ClearColliders();
 }
 

@@ -49,7 +49,9 @@ public:
 	/* accessor =========================================================== */
 	//settter
 	void SetParent(const WorldTransform* parent);
-	void SetEnemyList(const std::list<std::shared_ptr<Enemy>>& targets);
+	void SetEnemyList(const std::list<std::shared_ptr<Enemy>>& list) {
+		targets_.assign(list.begin(), list.end());
+	}
 	void SetShootingController(std::unique_ptr<PlayerShootingController> sc);
 	void SetInputHandler(std::unique_ptr<PlayerInputHandler> ih);
 
@@ -79,14 +81,13 @@ private:
 
 	Vector3 lastMoveVector_;								//< 最後の移動ベクトル
 	WorldTransform reticleTransform_;						//< レティクルのワールド変換
-	std::array<std::unique_ptr<Sprite>, 4> reticleSprites_;	//< レティクルのスプライト
 
 
-	std::list<std::shared_ptr<Enemy>> targets_;				//< 敵の共有ポインタリスト
+	std::vector<std::shared_ptr<Enemy>> targets_;
 	std::vector<std::shared_ptr<Enemy>> lockedOnTargets_;
 
 	// sprites
-	std::unique_ptr<Sprite> attackSprite_;					//< 攻撃状態スプライト
+	std::array<std::unique_ptr<Sprite>, 4> reticleSprites_;	//< レティクルのスプライト
 	std::vector<std::unique_ptr<Sprite>> lifeSprite_;		//< ライフゲージスプライト
 	std::vector<std::unique_ptr<Sprite>> lockOnSprites_;	//< ロックオンマーカー
 };

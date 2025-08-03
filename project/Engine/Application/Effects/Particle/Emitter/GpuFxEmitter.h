@@ -30,7 +30,7 @@ class GpuFxEmitter
 	};
 
 public:
-	static constexpr uint32_t kMaxParticles = 1024;
+	static constexpr uint32_t kMaxParticles = 1048576 * 4;
 
 	GpuFxEmitter() = default;
 	~GpuFxEmitter();
@@ -39,9 +39,13 @@ public:
 
 	// 毎フレーム呼ぶ
 	void Update(float dt) override;
+	void ShowGui();
 	void DispatchInitialize(ID3D12GraphicsCommandList* cmd);
 	void DispatchEmit(ID3D12GraphicsCommandList* cmd);
 	void DispatchUpdate(ID3D12GraphicsCommandList* cmd);
+
+	void ResetFreeListCounter();
+
 
 	// 描画側で使う SRV
 	D3D12_GPU_DESCRIPTOR_HANDLE GetParticleSrv() const{

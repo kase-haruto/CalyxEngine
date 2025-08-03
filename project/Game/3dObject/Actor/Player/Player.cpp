@@ -47,7 +47,8 @@ Player::Player(const std::string& modelName,
 void Player::Initialize(){
 	moveSpeed_ = 15.0f;
 	reticleTransform_.Initialize();
-	//reticleTransform_.parent = GetWorldTransform().parent;
+	auto ctx = SceneContext::Current();
+	reticleTransform_.parent = &ctx->GetCameraMgr()->GetMain3d()->GetWorldTransform();
 	reticleTransform_.translation = Vector3(0.0f, 0.0f, 50.0f);
 
 	life_ = 10;
@@ -59,11 +60,7 @@ void Player::Initialize(){
 		lifeSprite_[i]->Initialize(pos, {64.0f,64.0f});
 	}
 
-	attackSprite_ = std::make_unique<Sprite>("Textures/attackUI.png");
-	Vector2 attackUiPos = Vector2(1280.0f*0.5f, 720.0f - 100.0f);
-	Vector2 attackUiSize = Vector2(128.0f, 128.0f);
-	attackSprite_->Initialize(attackUiPos, attackUiSize);
-	attackSprite_->SetAnchorPoint(Vector2(0.5f, 0.5f));
+
 	//spriteの初期化
 	size_t spriteCount = reticleSprites_.size();
 	for (size_t i = 0; i < spriteCount; ++i){
@@ -94,7 +91,6 @@ void Player::Update(float dt){
 	for (auto& sprite : lifeSprite_){
 		sprite->Update();
 	}
-	attackSprite_->Update();
 
 	reticleTransform_.Update();
 
@@ -220,7 +216,7 @@ void Player::RequestShoot(){
 ///////////////////////////////////////////////////////////////////////////////////
 //		ロックオン処理
 ///////////////////////////////////////////////////////////////////////////////////
-void Player::RequestLockOn(){
+void Player::RequestLockOn() {
 	constexpr size_t kMaxLockOn = 4;
 	if (lockedOnTargets_.size() >= kMaxLockOn) return;
 
@@ -231,7 +227,7 @@ void Player::RequestLockOn(){
 	const Vector2 reticleScreen = WorldToScreen(reticleTransform_.GetWorldPosition());
 	const float   radius = 30.0f;
 
-	for (const auto& enemy : targets_){
+	for (const auto& enemy : targets_) {
 		if (!enemy) continue;
 		if (std::find(lockedOnTargets_.begin(), lockedOnTargets_.end(), enemy) != lockedOnTargets_.end()) continue;
 
@@ -239,9 +235,11 @@ void Player::RequestLockOn(){
 
 		Vector2 enemyScreen = WorldToScreen(enemy->GetWorldPosition());
 		if ((enemyScreen - reticleScreen).Length() > radius) continue;
-		
+
+		// ロックオン登録
 		lockedOnTargets_.push_back(enemy);
 
+		// ロックオンUI作成
 		auto marker = std::make_unique<Sprite>("Textures/lockOn.png");
 		marker->Initialize(enemyScreen, Vector2(64.0f, 64.0f));
 		marker->SetAnchorPoint(Vector2(0.5f, 0.5f));
@@ -401,13 +399,10 @@ void Player::UpdateReticlePosition(){
 /* ==================================================================================== */
 void Player::SetParent(const WorldTransform* parent){ worldTransform_.parent = parent; }
 
-void Player::SetEnemyList(const std::list<std::shared_ptr<Enemy>>& targets){ targets_ = targets; }
-
 std::vector<Sprite*> Player::GetAllSprites(){
 	std::vector<Sprite*> sprites;
 	for (auto& s : reticleSprites_)sprites.push_back(s.get());
 	for (auto& s : lifeSprite_) sprites.push_back(s.get());
-	sprites.push_back(attackSprite_.get());
 	for (auto& s : lockOnSprites_) sprites.push_back(s.get());
 	return sprites;
 }

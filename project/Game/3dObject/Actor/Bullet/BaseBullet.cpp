@@ -14,10 +14,9 @@ BaseBullet::BaseBullet(const std::string& modelName, const std::string& name)
 	collider_->SetType(ColliderType::Type_PlayerAttack);
 	collider_->SetTargetType(ColliderType::Type_Enemy);
 	collider_->SetOwner(this);
-	collider_->SetIsDrawCollider(true);
+	collider_->SetIsDrawCollider(false);
 	auto* boxCollider = dynamic_cast< BoxCollider* >(collider_.get());
 	boxCollider->SetSize(Vector3(3.0f, 3.0f, 3.0f));
-
 }
 
 BaseBullet::~BaseBullet(){

@@ -121,7 +121,7 @@ void DxStructuredBuffer<T>::InitializeAsRW(
 		CD3DX12_RESOURCE_DESC::Buffer(byteSize,
 									  D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
 
-	HRESULT hr = device->CreateCommittedResource(
+	[[maybe_unused]] HRESULT hr = device->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,

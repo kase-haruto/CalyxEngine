@@ -19,11 +19,11 @@
 BaseScene::BaseScene() {
 	spriteRenderer_ = std::make_unique<SpriteRenderer>();
 	modelRenderer_ = std::make_unique<ModelRenderer>();
+
 }
 
 void BaseScene::Initialize() {
-	skyBox_ = SceneAPI::Instantiate<SkyBox>("sky.dds", "skyBox");
-	skyBox_->Initialize();
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -44,12 +44,17 @@ void BaseScene::PostUpdate([[maybe_unused]] ID3D12GraphicsCommandList* cmdList,
 void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 					 PipelineService* pso,
 					 RenderTargetType) {
-	/* 1) Skybox */
+
+	if (!skyBox_) {
+
+		skyBox_ = SceneAPI::Instantiate<SkyBox>("sky.dds", "skyBox");
+		skyBox_->Initialize();
+	}
+
 	cmd->SetGraphicsRootSignature(
 		GraphicsGroup::GetInstance()->GetRootSignature(PipelineType::Skybox).Get());
 	skyBox_->Draw(cmd);
 
-	/* 2) Scene objects */
 	SceneContext* ctx = SceneContext::Current();
 	modelRenderer_->BeginFrame();
 

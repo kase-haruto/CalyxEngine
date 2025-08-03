@@ -6,7 +6,7 @@
             "isDraw": true,
             "targetType": 0
         },
-        "guid": "ddd41942-b5d7-484b-a0b2-ba2515e5b74a",
+        "guid": "d4e8ea14-05af-4b6a-bed9-e25c8b1d617d",
         "modelConfig": {
             "blendMode": 5,
             "materialConfig": {
@@ -18,11 +18,11 @@
                 },
                 "currentLightingMode_": 0,
                 "enableLighting": 0,
-                "enviromentCoefficient": 0.5,
-                "isReflect": false,
+                "enviromentCoefficient": 1.0,
+                "isReflect": true,
                 "shininess": 20.0
             },
-            "modelName": "torus.obj",
+            "modelName": "debugCube.obj",
             "textureName": "textures/white1x1.png",
             "uvTransConfig": {
                 "rotation": 0.0,
@@ -32,7 +32,7 @@
                 }
             }
         },
-        "name": "torus",
+        "name": "cube",
         "objectType": 2,
         "parentGuid": "00000000-0000-0000-0000-000000000000",
         "transform": {
@@ -43,178 +43,16 @@
                 "z": 0.0
             },
             "scale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
+                "x": 4.022726058959961,
+                "y": 8.63362979888916,
+                "z": 1.8399999141693115
             },
             "translation": {
-                "x": -0.019999999552965164,
-                "y": 0.0,
-                "z": 0.0
+                "x": -6.346832275390625,
+                "y": -0.11034536361694336,
+                "z": 7.804168224334717
             }
         },
         "type": "BaseGameObject"
-    },
-    {
-        "colliderConfig": {
-            "colliderType": 0,
-            "isCollisionEnabled": false,
-            "isDraw": true,
-            "targetType": 0
-        },
-        "guid": "a9bd89fd-ff2e-4399-a8ac-dcf8c95bd821",
-        "modelConfig": {
-            "blendMode": 5,
-            "materialConfig": {
-                "color": {
-                    "w": 1.0,
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "currentLightingMode_": 0,
-                "enableLighting": 0,
-                "enviromentCoefficient": 0.5,
-                "isReflect": true,
-                "shininess": 20.0
-            },
-            "modelName": "cone.obj",
-            "textureName": "textures/white1x1.png",
-            "uvTransConfig": {
-                "rotation": 0.0,
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0
-                }
-            }
-        },
-        "name": "cone",
-        "objectType": 2,
-        "parentGuid": "ddd41942-b5d7-484b-a0b2-ba2515e5b74a",
-        "transform": {
-            "rotation": {
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            },
-            "scale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-            },
-            "translation": {
-                "x": 0.0,
-                "y": 2.136655330657959,
-                "z": 0.0
-            }
-        },
-        "type": "BaseGameObject"
-    },
-    {
-        "autoDestroy": false,
-        "color": {
-            "w": 1.0,
-            "x": 1.0,
-            "y": 1.0,
-            "z": 1.0
-        },
-        "emitCount": 10,
-        "emitDelay": 0.0,
-        "emitDuration": -1.0,
-        "emitRate": 0.10000000149011612,
-        "guid": "d9d331b5-e04b-4594-8ab2-b7b131d6bcd3",
-        "isComplement": true,
-        "isDrawEnable": true,
-        "isOneShot": false,
-        "isStatic": false,
-        "lifetime": {
-            "constant": 0.0,
-            "max": 3.0,
-            "min": 1.0,
-            "mode": 1
-        },
-        "modelPath": "plane.obj",
-        "modules": [
-            {
-                "easeType": 6,
-                "enabled": true,
-                "isGrowing": false,
-                "name": "SizeOverLifetimeModule"
-            },
-            {
-                "enabled": true,
-                "gravity": {
-                    "x": 0.0,
-                    "y": -11.619999885559082,
-                    "z": 0.0
-                },
-                "name": "GravityModule"
-            }
-        ],
-        "name": "ParticleSystem",
-        "objectType": 0,
-        "parentGuid": "ddd41942-b5d7-484b-a0b2-ba2515e5b74a",
-        "position": {
-            "x": -0.019999999552965164,
-            "y": 0.0,
-            "z": 0.0
-        },
-        "scale": {
-            "constant": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-            },
-            "max": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            },
-            "min": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            },
-            "mode": 0
-        },
-        "texturePath": "particle.png",
-        "transform": {
-            "rotation": {
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            },
-            "scale": {
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-            },
-            "translation": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            }
-        },
-        "type": "ParticleSystemObject",
-        "velocity": {
-            "constant": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            },
-            "max": {
-                "x": 1.0,
-                "y": 0.0,
-                "z": 1.0
-            },
-            "min": {
-                "x": -1.0,
-                "y": 0.0,
-                "z": -1.0
-            },
-            "mode": 1
-        }
     }
 ]

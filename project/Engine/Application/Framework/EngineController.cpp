@@ -54,9 +54,9 @@ void EngineController::Initialize(HINSTANCE hInstance){
 
 #ifdef _DEBUG
 	engineUICore_->GetEditorPanel()->AddEditor(ppEditor);
+	engineUICore_->SetCameraForViewport(CameraManager::GetMain3d(), CameraManager::GetDebug());
 #endif
 
-	engineUICore_->SetCameraForViewport(CameraManager::GetMain3d(), CameraManager::GetDebug());
 }
 
 ////////////////////////////////////////////////////////////////////////////////

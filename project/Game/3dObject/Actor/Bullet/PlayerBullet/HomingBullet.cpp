@@ -55,6 +55,8 @@ void HomingBullet::Update([[maybe_unused]]float dt){
 			velocity_ = newDir * homingSpeed_;
 		}
 	}
+
+	BaseBullet::Update(dt);
 }
 
 const Vector3 HomingBullet::GetCenterPos()const{

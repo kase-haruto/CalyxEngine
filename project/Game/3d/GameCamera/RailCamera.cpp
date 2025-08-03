@@ -22,7 +22,7 @@ void RailCamera::Initialize() {
 	BaseCamera::SetName("RailCamera");
 
 	t_ = 0.0f;
-	speed_ = 0.0f;
+	speed_ = 10.0f;
 	tiltAngle_ = 0.3f;
 	tiltLerpSpeed_ = 10.0f;
 	targetTilt_ = 0.0f;

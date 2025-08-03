@@ -91,6 +91,7 @@ void FxSystem::DispatchEmitters(PipelineService* psoService, ID3D12GraphicsComma
 			{
 				auto psoEmit = psoService->GetComputePipelineSet(PipelineTag::Compute::ParticleEmitCompute);
 				psoEmit.SetCompute(cmd);
+
 				sp->DispatchEmit(cmd);
 			}
 
