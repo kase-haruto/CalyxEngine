@@ -36,6 +36,8 @@ void BaseTransform::Initialize() {
 
 	//バッファの作成
 	DxConstantBuffer::Initialize(GraphicsGroup::GetInstance()->GetDevice());
+
+	Update();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

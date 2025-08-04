@@ -49,8 +49,6 @@ void FxEmitter::Update(float deltaTime) {
 	if (!isPlaying_) return;
 
 	// ワールド座標に追従
-	position_ = GetWorldPosition();
-
 	elapsedTime_ += deltaTime;
 
 	if (elapsedTime_ < emitDelay_) return;
@@ -135,15 +133,15 @@ void FxEmitter::Update(float deltaTime) {
 //			発生
 /////////////////////////////////////////////////////////////////////////////////////////
 void FxEmitter::Emit() {
-	Emit(GetWorldPosition());
+	Emit(position_);
 }
 
 void FxEmitter::Emit(const Vector3& pos) {
 	if (units_.size() >= kMaxUnits_) return;
 
 	FxUnit fx;
+	fx.position = pos;
 	ResetFxUnit(fx);
-	fx.position = pos; // ← 引数位置で初期化
 	units_.push_back(fx);
 }
 
