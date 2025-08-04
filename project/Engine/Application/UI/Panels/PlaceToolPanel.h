@@ -45,7 +45,7 @@ private:
 		std::string name;
 		D3D12_GPU_DESCRIPTOR_HANDLE texture;
 		Vector2 iconSize {64.0f, 64.0f};
-		std::function<void()> createFunc; //< 直接作成コマンドを呼ぶ方式に変更
+		std::function<void()> createFunc;
 	};
 
 public:

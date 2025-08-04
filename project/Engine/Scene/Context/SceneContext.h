@@ -32,6 +32,9 @@ public:
 	template<typename T>
 	std::shared_ptr<T> FindFirst() const;
 
+	template<typename T>
+	std::shared_ptr<T> FindObjectByName(const std::string& name) const;
+
 	void RemoveEditorObject(const std::shared_ptr<SceneObject>& object);
 
 	/* ---------- accessors ----------- */
@@ -92,6 +95,23 @@ std::shared_ptr<T> SceneContext::FindFirst() const {
 	for (const auto& obj : objectLibrary_->GetAllObjectsShared()) {
 		if (auto casted = std::dynamic_pointer_cast<T>(obj)) {
 			return casted;
+		}
+	}
+	return nullptr;
+}
+
+
+template<typename T>
+std::shared_ptr<T> SceneContext::FindObjectByName(const std::string& name) const {
+	for (const auto& obj : objectLibrary_->GetAllObjectsShared()) {
+		if (obj && obj->GetName() == name) {
+			if constexpr (std::is_same_v<T, SceneObject>) {
+				return obj;
+			} else {
+				if (auto casted = std::dynamic_pointer_cast<T>(obj)) {
+					return casted;
+				}
+			}
 		}
 	}
 	return nullptr;

@@ -56,6 +56,7 @@ void BaseModel::OnModelLoaded() {
 	if (!handle_) {
 		handle_ = TextureManager::GetInstance()->LoadTexture(
 			"Textures/" + modelData_->meshData.material.textureFilePath);
+		textureName_ = "textures/"+ modelData_->meshData.material.textureFilePath;
 		if (!handle_) { // 読み込み失敗・空文字列など
 			handle_ = TextureManager::GetInstance()->LoadTexture("textures/white1x1.png");
 		}

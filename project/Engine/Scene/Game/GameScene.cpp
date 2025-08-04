@@ -49,6 +49,10 @@ void GameScene::Initialize(){
 	//弾の登録
 	BulletRegistrar::RegisterAll();
 
+	auto ctx = SceneContext::Current();
+	auto ground = ctx->FindObjectByName<BaseGameObject>("field");
+	ground->SetEnableRaycast(false);
+
 	attackSprite_ = std::make_unique<Sprite>("Textures/attackUI.png");
 	Vector2 attackUiPos = Vector2(1280.0f * 0.5f, 720.0f - 100.0f);
 	Vector2 attackUiSize = Vector2(128.0f, 128.0f);

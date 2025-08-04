@@ -6,7 +6,7 @@
             "isDraw": true,
             "targetType": 0
         },
-        "guid": "2d7309b5-70f2-4bed-902c-0f6b9ef1ca39",
+        "guid": "ad17d1b6-8e3f-45f5-b4ee-2d4e9a2ffcf8",
         "modelConfig": {
             "blendMode": 5,
             "materialConfig": {
@@ -23,7 +23,7 @@
                 "shininess": 20.0
             },
             "modelName": "smallBuilding_01.obj",
-            "textureName": "SmallBuilding01.png",
+            "textureName": "textures/SmallBuilding01.png",
             "uvTransConfig": {
                 "rotation": 0.0,
                 "scale": {
@@ -37,20 +37,20 @@
         "parentGuid": "00000000-0000-0000-0000-000000000000",
         "transform": {
             "rotation": {
-                "w": 0.935043454170227,
-                "x": 3.247984295740025e-06,
-                "y": -0.3545331358909607,
-                "z": 5.011008283872798e-07
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
             },
             "scale": {
-                "x": 0.9999989867210388,
-                "y": 0.999997615814209,
-                "z": 0.9999989867210388
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
             },
             "translation": {
-                "x": -1.4901161193847656e-08,
-                "y": 0.0,
-                "z": 9.968984603881836
+                "x": -4.629283905029297,
+                "y": -7.450580596923828e-09,
+                "z": 0.0
             }
         },
         "type": "BaseGameObject"
@@ -62,7 +62,7 @@
             "isDraw": true,
             "targetType": 0
         },
-        "guid": "58e683e6-bd66-43fe-9125-dabd7e862a66",
+        "guid": "a2c8182e-92c8-4e88-b6c7-5c5d8c9022e7",
         "modelConfig": {
             "blendMode": 5,
             "materialConfig": {
@@ -79,7 +79,7 @@
                 "shininess": 20.0
             },
             "modelName": "largeBuilding.obj",
-            "textureName": "LargeBuilding01.png",
+            "textureName": "textures/LargeBuilding01.png",
             "uvTransConfig": {
                 "rotation": 0.0,
                 "scale": {
@@ -90,7 +90,7 @@
         },
         "name": "largeBuilding",
         "objectType": 2,
-        "parentGuid": "2d7309b5-70f2-4bed-902c-0f6b9ef1ca39",
+        "parentGuid": "ad17d1b6-8e3f-45f5-b4ee-2d4e9a2ffcf8",
         "transform": {
             "rotation": {
                 "w": 1.0,
@@ -104,9 +104,9 @@
                 "z": 1.0
             },
             "translation": {
-                "x": -17.95159339904785,
+                "x": 1.5682387351989746,
                 "y": 0.0,
-                "z": 12.47956371307373
+                "z": 9.512956619262695
             }
         },
         "type": "BaseGameObject"
