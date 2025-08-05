@@ -5,8 +5,7 @@
 #include <d3dx12.h>
 
 template<typename T>
-class DxStructuredBuffer 
-	: public DxBuffer<T>{
+class DxStructuredBuffer : public DxBuffer<T>{
 public:
 	//===================================================================*/
 	//                   public functions
