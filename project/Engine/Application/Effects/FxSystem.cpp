@@ -69,7 +69,7 @@ void FxSystem::SyncEmitters(){
 	// ── GPU 側（必要なら追加の CB などを転送） ─────────────────
 	for (auto it = gpuEmitters_.begin(); it != gpuEmitters_.end(); ){
 		if (auto sp = it->lock()){
-			sp->TransferParticleDataToGPU();   // いまは空実装でも OK
+			sp->TransferParticleDataToGPU();
 			++it;
 		} else{
 			it = gpuEmitters_.erase(it);
@@ -91,6 +91,7 @@ void FxSystem::DispatchEmitters(PipelineService* psoService, ID3D12GraphicsComma
 			{
 				auto psoEmit = psoService->GetComputePipelineSet(PipelineTag::Compute::ParticleEmitCompute);
 				psoEmit.SetCompute(cmd);
+
 				sp->DispatchEmit(cmd);
 			}
 

@@ -27,6 +27,9 @@ public:
 	void SetDrawEnable(bool isDrawEnable) override;
 
 	std::string_view GetTypeName() const override{ return "ParticleSystemObject"; }
+	Vector3 GetWorldPosition() const {
+		return GetWorldTransform().GetWorldPosition();
+	}
 
 	// コンフィグ適用・抽出
 	void ApplyConfig() ;

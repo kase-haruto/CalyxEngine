@@ -47,7 +47,6 @@ void BaseCamera::Update(float dt){
 	if (isShaking_){
 		shakeElapsed_ += dt;
 		if (shakeElapsed_ < shakeDuration_){
-			// ランダムなオフセットを生成（例：-1〜1の範囲で乱数を取得）
 			float offsetX = ((rand() / ( float ) RAND_MAX) * 2.0f - 1.0f) * shakeIntensity_;
 			float offsetY = ((rand() / ( float ) RAND_MAX) * 2.0f - 1.0f) * shakeIntensity_;
 			float offsetZ = ((rand() / ( float ) RAND_MAX) * 2.0f - 1.0f) * shakeIntensity_;

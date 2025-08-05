@@ -5,7 +5,8 @@
 #include <d3dx12.h>
 
 template<typename T>
-class DxStructuredBuffer : public DxBuffer<T>{
+class DxStructuredBuffer 
+	: public DxBuffer<T>{
 public:
 	//===================================================================*/
 	//                   public functions
@@ -60,7 +61,7 @@ void DxStructuredBuffer<T>::SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsComm
 template<typename T>
 void DxStructuredBuffer<T>::CreateSrv(ID3D12Device* device){
 	if (srvHandle_.cpu.ptr != 0) return;
-
+	assert(this->resource_ && "resource_ is null before CreateSrv");
 	srvHandle_ = DescriptorAllocator::Allocate(DescriptorUsage::CbvSrvUav);
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -121,7 +122,7 @@ void DxStructuredBuffer<T>::InitializeAsRW(
 		CD3DX12_RESOURCE_DESC::Buffer(byteSize,
 									  D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
 
-	HRESULT hr = device->CreateCommittedResource(
+	[[maybe_unused]] HRESULT hr = device->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,

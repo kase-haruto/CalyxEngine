@@ -5,6 +5,7 @@
 #include <Engine/Foundation/Utility/ConvertString/ConvertString.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Graphics/Descriptor/DescriptorAllocator.h>
+#include <Engine/Application/System/Enviroment.h>
 
 // c++
 #include<cassert>
@@ -425,8 +426,8 @@ Vector2 WorldToScreen(const Vector3& worldPos) {
 	};
 
 	// NDC → スクリーン座標
-	float screenWidth = CameraManager::GetViewportSizeStatic(ViewportType::VIEWPORT_MAIN).x;
-	float screenHeight = CameraManager::GetViewportSizeStatic(ViewportType::VIEWPORT_MAIN).y;
+	float screenWidth = kGameWidth;
+	float screenHeight = kGameHeight;
 
 	float screenX = (ndcPos.x * 0.5f + 0.5f) * screenWidth;
 	float screenY = (1.0f - (ndcPos.y * 0.5f + 0.5f)) * screenHeight;
@@ -435,8 +436,8 @@ Vector2 WorldToScreen(const Vector3& worldPos) {
 }
 
 Vector3 ScreenToWorld(const Vector2& screenPos, float depthZ) {
-	float screenWidth = CameraManager::GetViewportSizeStatic(ViewportType::VIEWPORT_MAIN).x;
-	float screenHeight = CameraManager::GetViewportSizeStatic(ViewportType::VIEWPORT_MAIN).y;
+	float screenWidth = kGameWidth;
+	float screenHeight = kGameHeight;
 
 	// スクリーン座標 → NDC座標に変換
 	float ndcX = (screenPos.x / screenWidth) * 2.0f - 1.0f;

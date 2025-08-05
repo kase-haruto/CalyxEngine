@@ -40,33 +40,54 @@ RWStructuredBuffer<Particle> gParticles : register(u0);
 RWStructuredBuffer<int> gFreeListIndex : register(u1);
 RWStructuredBuffer<int> gFreeList : register(u2);
 
-[numthreads(1, 1, 1)]
+// 球面上のランダムな位置を得る関数
+float3 RandomOnSphere(RandomGenerator generator) {
+	float u = generator.Generate1d() * 2.0f - 1.0f;
+	float theta = generator.Generate1d() * 6.28318530718f; // 2π
+	float sqrtOneMinusUSquared = sqrt(1.0f - u * u);
+	return float3(
+		sqrtOneMinusUSquared * cos(theta),
+		sqrtOneMinusUSquared * sin(theta),
+		u
+	);
+}
+
+[numthreads(1024, 1, 1)]
 void main(uint3 DTid : SV_DispatchThreadID) {
-	if (gEmitter.emit == 0)
+	uint globalIndex = DTid.x;
+
+	if(gEmitter.emit == 0)
+		return;
+
+	if(globalIndex >= gEmitter.count)
 		return;
 
 	RandomGenerator generator;
 	generator.seed = (DTid + gPerFrame.time) * gPerFrame.time;
 
-	for (uint countIndex = 0; countIndex < gEmitter.count; ++countIndex) {
-		int freeListIndex;
-		InterlockedAdd(gFreeListIndex[0], -1, freeListIndex);
+	int freeListIndex;
+	InterlockedAdd(gFreeListIndex[0], -1, freeListIndex);
 
-		if (0 <= freeListIndex && freeListIndex < kMaxParticles) {
-			Particle p;
-			p.scale = generator.Generate3d();
-			p.translate = generator.Generate3d();
-			p.color.rgb = generator.Generate3d();
-			p.color.a = 1.0f;
-			p.lifeTime = 1.0f;
-			p.currentTime = 0.0f;
-			p.velocity = float3(0, 0, 0);
-			
-			uint particleIndex = gFreeList[freeListIndex];
-			gParticles[particleIndex] = p;
-		} else {
-			InterlockedAdd(gFreeListIndex[0], 1);
-			break;
-		}
+	if(0 <= freeListIndex && freeListIndex < kMaxParticles) {
+		Particle p;
+		p.scale = float3(0.1f, 0.1f, 0.1f);
+		
+		// 球面上のランダムな位置に設定
+		float3 sphereDir = RandomOnSphere(generator);
+		p.translate = gEmitter.translate + sphereDir * gEmitter.radius;
+
+		p.color.rgb = generator.Generate3d();
+		p.color.a = 1.0f;
+		p.lifeTime = 3.0;
+		p.currentTime = 0.0f;
+
+		// 上方向に移動する速度を設定
+		p.velocity = generator.Generate3d();
+        
+		uint particleIndex = gFreeList[freeListIndex];
+		gParticles[particleIndex] = p;
+	}
+	else {
+		InterlockedAdd(gFreeListIndex[0], 1);
 	}
 }

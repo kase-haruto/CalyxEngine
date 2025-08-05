@@ -48,27 +48,23 @@ FxEmitter::~FxEmitter() {
 void FxEmitter::Update(float deltaTime) {
 	if (!isPlaying_) return;
 
+	// ワールド座標に追従
 	elapsedTime_ += deltaTime;
 
-	// 遅延前は何もしない
 	if (elapsedTime_ < emitDelay_) return;
 
-	// duration制限ありで、超えていたら停止
 	if (emitDuration_ >= 0.0f && elapsedTime_ > emitDelay_ + emitDuration_) {
 		Stop();
 	}
 
-	// OneShotモードの発生処理（emitDuration == 0 or isOneShot_）
 	if (isOneShot_) {
 		if (!hasEmitted_) {
 			for (int i = 0; i < emitCount_ && units_.size() < kMaxUnits_; ++i) {
-				Emit();
+				Emit();  // 自動的に GetWorldPosition() 使用
 			}
 			hasEmitted_ = true;
 		}
-		// Emitは1回だけ。発生処理はスキップしても更新は続けるため return しない
 	} else {
-		// 通常の連続発生ロジック
 		if (isFirstFrame_) {
 			prevPostion_ = position_;
 			isFirstFrame_ = false;
@@ -84,20 +80,20 @@ void FxEmitter::Update(float deltaTime) {
 				float dist = i * spawnInterval;
 				float t = dist / distance;
 				Vector3 spawnPos = Vector3::Lerp(prevPostion_, position_, t);
-				Emit(spawnPos);
+				Emit(spawnPos);  // 明示的に座標指定
 			}
 		} else {
 			emitTimer_ += deltaTime;
 			const float interval = emitRate_;
 			if (emitTimer_ >= interval && units_.size() < kMaxUnits_) {
 				emitTimer_ -= interval;
-				Emit();
+				Emit();  // 自動でワールド座標
 			}
 		}
 		prevPostion_ = position_;
 	}
 
-	// パーティクルの更新処理
+	// パーティクル更新処理（省略なしで元のまま）
 	for (auto& fx : units_) {
 		if (!fx.alive) continue;
 
@@ -110,31 +106,27 @@ void FxEmitter::Update(float deltaTime) {
 		fx.age += deltaTime;
 		if (fx.age >= fx.lifetime) fx.alive = false;
 
-		//uv
 		Matrix4x4 uvTransformMatrix = MakeScaleMatrix(Vector3(fx.uvTransform.scale.x, fx.uvTransform.scale.y, 1.0f));
 		uvTransformMatrix = Matrix4x4::Multiply(uvTransformMatrix, MakeRotateZMatrix(fx.uvTransform.rotate));
 		uvTransformMatrix = Matrix4x4::Multiply(uvTransformMatrix, MakeTranslateMatrix(Vector3(fx.uvTransform.translate.x, fx.uvTransform.translate.y, 0.0f)));
-
 		material_.uvTransform = uvTransformMatrix;
 	}
 
 	materialBuffer_.TransferData(material_);
 	std::erase_if(units_, [](const FxUnit& fx) { return !fx.alive; });
 
-	// エフェクト終了検出 & コールバック呼び出し（1回だけ）
 	bool shouldNotify =
 		(isOneShot_ && hasEmitted_ && units_.empty()) ||
 		(emitDuration_ >= 0.0f && elapsedTime_ > emitDelay_ + emitDuration_ && units_.empty());
 
 	if (shouldNotify && !isFinishedNotified_) {
 		isFinishedNotified_ = true;
-		Stop();  // 明示的に止めておく
+		Stop();
 		if (onFinished_) {
-			onFinished_(); // 外部通知
+			onFinished_();
 		}
 	}
 }
-
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -148,8 +140,8 @@ void FxEmitter::Emit(const Vector3& pos) {
 	if (units_.size() >= kMaxUnits_) return;
 
 	FxUnit fx;
+	fx.position = pos;
 	ResetFxUnit(fx);
-	fx.position = pos; // ← 引数位置で初期化
 	units_.push_back(fx);
 }
 

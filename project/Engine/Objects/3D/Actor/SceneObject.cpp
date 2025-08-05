@@ -56,13 +56,16 @@ void SceneObject::SetParent(const std::shared_ptr<SceneObject>& newParentSp){
 
 	if (newParentSp){
 		newParentSp->children_.push_back(shared_from_this());
-		// ローカルから親空間へ
+
+		newParentSp->worldTransform_.Update();
+
 		worldTransform_.parent = &newParentSp->worldTransform_;
 	} else{
 		worldTransform_.parent = nullptr;
 	}
 
-	// 参照を更新
+	worldTransform_.Update();
+
 	parent_ = newParentSp;
 }
 

@@ -53,6 +53,7 @@ void PlaceToolPanel::RegisterPlaceItems() {
 				auto factory = [modelName, objName]() {
 					auto obj = SceneAPI::Instantiate<BaseGameObject>(modelName, objName);
 					obj->Initialize();
+					obj->GetCollider()->SetCollisionEnabled(false);
 					return obj;
 				};
 				CommandManager::GetInstance()->Execute(
@@ -101,6 +102,40 @@ void PlaceToolPanel::RegisterPlaceItems() {
 					SceneContext::Current(), factory, "Create EnemySpawner"));
 		}
 						   });
+
+	// ---------------------------- Models ------------------------------------
+	auto& modelItems = categoryItems_[PlaceItemCategory::Model];
+	const std::vector<std::string> modelNames = {
+		"largeBuilding.obj",
+		"tallBuilding_01.obj",
+		"tallBuilding_02.obj",
+		"smallBuilding_01.obj"
+	};
+
+	for (const auto& modelName : modelNames) {
+		std::string displayName = modelName;
+		if (const size_t dot = modelName.find('.'); dot != std::string::npos) {
+			displayName = modelName.substr(0, dot); // 拡張子を除いた名前を表示に使う
+		}
+
+		modelItems.push_back({
+			PlaceItemCategory::Model,
+			displayName,
+			{}, // テクスチャがあればここにアイコンを設定
+			{64, 64},
+			[modelName, displayName]() {
+				auto factory = [modelName, displayName]() {
+					auto obj = SceneAPI::Instantiate<BaseGameObject>(modelName, displayName);
+					obj->Initialize();
+					obj->GetCollider()->SetCollisionEnabled(false);
+					return obj;
+				};
+				CommandManager::GetInstance()->Execute(
+					std::make_unique<CreateObjectCommand<BaseGameObject>>(
+						SceneContext::Current(), factory, "Create Model"));
+			}
+							 });
+	}
 }
 
 // ============================================================================

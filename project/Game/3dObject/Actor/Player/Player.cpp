@@ -47,8 +47,10 @@ Player::Player(const std::string& modelName,
 void Player::Initialize(){
 	moveSpeed_ = 15.0f;
 	reticleTransform_.Initialize();
-	//reticleTransform_.parent = GetWorldTransform().parent;
+	auto ctx = SceneContext::Current();
+	reticleTransform_.parent = &ctx->GetCameraMgr()->GetMain3d()->GetWorldTransform();
 	reticleTransform_.translation = Vector3(0.0f, 0.0f, 50.0f);
+	
 
 	life_ = 10;
 
@@ -59,11 +61,7 @@ void Player::Initialize(){
 		lifeSprite_[i]->Initialize(pos, {64.0f,64.0f});
 	}
 
-	attackSprite_ = std::make_unique<Sprite>("Textures/attackUI.png");
-	Vector2 attackUiPos = Vector2(1280.0f*0.5f, 720.0f - 100.0f);
-	Vector2 attackUiSize = Vector2(128.0f, 128.0f);
-	attackSprite_->Initialize(attackUiPos, attackUiSize);
-	attackSprite_->SetAnchorPoint(Vector2(0.5f, 0.5f));
+
 	//spriteの初期化
 	size_t spriteCount = reticleSprites_.size();
 	for (size_t i = 0; i < spriteCount; ++i){
@@ -94,7 +92,6 @@ void Player::Update(float dt){
 	for (auto& sprite : lifeSprite_){
 		sprite->Update();
 	}
-	attackSprite_->Update();
 
 	reticleTransform_.Update();
 
@@ -220,7 +217,7 @@ void Player::RequestShoot(){
 ///////////////////////////////////////////////////////////////////////////////////
 //		ロックオン処理
 ///////////////////////////////////////////////////////////////////////////////////
-void Player::RequestLockOn(){
+void Player::RequestLockOn() {
 	constexpr size_t kMaxLockOn = 4;
 	if (lockedOnTargets_.size() >= kMaxLockOn) return;
 
@@ -231,7 +228,7 @@ void Player::RequestLockOn(){
 	const Vector2 reticleScreen = WorldToScreen(reticleTransform_.GetWorldPosition());
 	const float   radius = 30.0f;
 
-	for (const auto& enemy : targets_){
+	for (const auto& enemy : targets_) {
 		if (!enemy) continue;
 		if (std::find(lockedOnTargets_.begin(), lockedOnTargets_.end(), enemy) != lockedOnTargets_.end()) continue;
 
@@ -239,9 +236,11 @@ void Player::RequestLockOn(){
 
 		Vector2 enemyScreen = WorldToScreen(enemy->GetWorldPosition());
 		if ((enemyScreen - reticleScreen).Length() > radius) continue;
-		
+
+		// ロックオン登録
 		lockedOnTargets_.push_back(enemy);
 
+		// ロックオンUI作成
 		auto marker = std::make_unique<Sprite>("Textures/lockOn.png");
 		marker->Initialize(enemyScreen, Vector2(64.0f, 64.0f));
 		marker->SetAnchorPoint(Vector2(0.5f, 0.5f));
@@ -270,34 +269,45 @@ void Player::Start() {
 ///////////////////////////////////////////////////////////////////////////////////
 //		playerの傾き
 ///////////////////////////////////////////////////////////////////////////////////
-void Player::UpdateTilt(const Vector3& inputVector){
-	// 閾値以下なら傾きを戻す
-	if (inputVector.Length() <= 0.01f){
+void Player::UpdateTilt(const Vector3& inputVector) {
+	Camera3d* cam = CameraManager::GetMain3d();
+	if (!cam) return;
+
+	// 閾値以下で戻す
+	if (inputVector.Length() <= 0.01f) {
 		Quaternion identity = Quaternion::MakeIdentity();
 		worldTransform_.rotation = Quaternion::Slerp(worldTransform_.rotation, identity, 0.1f);
 		worldTransform_.rotationSource = RotationSource::Quaternion;
+
+		// カメラ傾きを戻す（オイラー角）
+		Vector3 currentRot = cam->GetRotate();
+		currentRot.x = Lerp(currentRot.x, 0.0f, 0.1f);  // pitch
+		currentRot.z = Lerp(currentRot.z, 0.0f, 0.1f);  // roll
+		cam->SetCamera(cam->GetTranslate(), currentRot);
 		return;
 	}
 
 	Vector3 dir = inputVector.Normalize();
 
-	// 最大角度（ラジアン）
-	const float maxRoll = 0.5f;
-	const float maxPitch = 0.5f;
+	const float maxRoll = 0.3f;
+	const float maxPitch = 0.3f;
 
 	float targetRoll = -dir.x * maxRoll;
 	float targetPitch = -dir.y * maxPitch;
 
-	// ロールとピッチのクォータニオンを作成
+	// プレイヤー回転（Quaternion）
 	Quaternion rollQ = Quaternion::MakeRotateZ(targetRoll);
 	Quaternion pitchQ = Quaternion::MakeRotateX(targetPitch);
+	Quaternion targetRotation = Quaternion::Multiply(rollQ, pitchQ);
 
-	// 合成クォータニオン（注意：回転順序によって見た目が変わる）
-	Quaternion targetRotation = Quaternion::Multiply(rollQ, pitchQ); // roll * pitch
-
-	// なめらかに補間
 	worldTransform_.rotation = Quaternion::Slerp(worldTransform_.rotation, targetRotation, 0.15f);
 	worldTransform_.rotationSource = RotationSource::Quaternion;
+
+	// カメラ回転（Euler）
+	Vector3 currentRot = cam->GetRotate();
+	currentRot.x = Lerp(currentRot.x, targetPitch * 0.3f, 0.15f); // pitch
+	currentRot.z = Lerp(currentRot.z, targetRoll * 0.3f, 0.15f); // roll
+	cam->SetCamera(cam->GetTranslate(), currentRot);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -399,15 +409,12 @@ void Player::UpdateReticlePosition(){
 /* ======================================================================================
 /*		accessor
 /* ==================================================================================== */
-void Player::SetParent(const WorldTransform* parent){ worldTransform_.parent = parent; }
-
-void Player::SetEnemyList(const std::list<std::shared_ptr<Enemy>>& targets){ targets_ = targets; }
+void Player::SetParent(WorldTransform* parent){ worldTransform_.parent = parent; }
 
 std::vector<Sprite*> Player::GetAllSprites(){
 	std::vector<Sprite*> sprites;
 	for (auto& s : reticleSprites_)sprites.push_back(s.get());
 	for (auto& s : lifeSprite_) sprites.push_back(s.get());
-	sprites.push_back(attackSprite_.get());
 	for (auto& s : lockOnSprites_) sprites.push_back(s.get());
 	return sprites;
 }

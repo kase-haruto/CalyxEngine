@@ -27,7 +27,8 @@ Camera3d* CameraManager::GetMain3d(){ return Mgr() ? Mgr()->Main3D() : nullptr; 
 DebugCamera* CameraManager::GetDebug(){ return Mgr() ? Mgr()->DebugCam() : nullptr; }
 BaseCamera* CameraManager::GetActive(){ return Mgr() ? Mgr()->Active() : nullptr; }
 void CameraManager::SetTypeStatic(CameraType t){ if (Mgr()) Mgr()->SetType(t); }
-const Vector2& CameraManager::GetViewportSizeStatic(ViewportType vt){ static Vector2 dummy {0,0}; return Mgr() ? Mgr()->ViewportSize(vt) : dummy; }
+const Vector2& CameraManager::GetViewportSizeStatic(ViewportType vt){ 
+	static Vector2 dummy {0,0}; return Mgr() ? Mgr()->ViewportSize(vt) : dummy; }
 void CameraManager::SetViewportSizeStatic(ViewportType vt, const Vector2& s){ if (Mgr()) Mgr()->SetViewportSize(vt, s); }
 void CameraManager::Finalize(){ if (Mgr()) Mgr()->Finalize(); }
 //=============================================================

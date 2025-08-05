@@ -56,5 +56,8 @@ private:
 
 	std::shared_ptr<GpuFxEmitter> emitter_ = nullptr;
 	std::shared_ptr<FxEmitter> emitter2_ = nullptr;
+
+	std::unique_ptr<Sprite> attackSprite_;					//< 攻撃状態スプライト
+
 };
 

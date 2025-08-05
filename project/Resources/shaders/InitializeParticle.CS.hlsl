@@ -11,12 +11,12 @@ RWStructuredBuffer<int> gFreeList : register(u2);
 ///////////////////////////////////////////////////////////////////////////////
 //                            main
 ///////////////////////////////////////////////////////////////////////////////
-[numthreads(1024, 1, 1)]
+[numthreads(256, 1, 1)]
 void main(uint3 DTid : SV_DispatchThreadID) {
 	uint id = DTid.x;
 
 	if(id == 0) {
-		gFreeListIndex[0] = 0; // カウンター初期化
+		gFreeListIndex[0] = kMaxParticles - 1;
 	}
 
 	if(id < kMaxParticles) {

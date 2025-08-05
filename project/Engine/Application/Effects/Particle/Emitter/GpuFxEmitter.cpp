@@ -27,19 +27,19 @@ void GpuFxEmitter::Initialize(){
 	instanceBuffer_.CreateSrv(dev);
 
 	emitterData_.translate = {0, 0, 0};
-	emitterData_.radius = 1.0f;
-	emitterData_.count = 32;
-	emitterData_.frequency = 0.5f;
+	emitterData_.radius = 6.0f;
+	emitterData_.count = 1000000;
+	emitterData_.frequency = 0.0f;
 	emitterData_.frequencyTime = 0.0f;
 	emitterData_.emit = 1;
 
 	emitterParamBuf_.Initialize(dev);
 	perFrameBuffer_.Initialize(dev);
 
-	freeListIndexBuffer_.InitializeAsRW(dev, 1);   // 1つだけのカウンタ
-	freeListIndexBuffer_.CreateUav(dev);           // u1
+	freeListIndexBuffer_.InitializeAsRW(dev, 1);        // u1
+	freeListIndexBuffer_.CreateUav(dev);
 
-	freeListBuffer_.InitializeAsRW(dev, kMaxParticles);
+	freeListBuffer_.InitializeAsRW(dev, kMaxParticles); // u2
 	freeListBuffer_.CreateUav(dev);
 }
 
@@ -59,9 +59,27 @@ void GpuFxEmitter::Update(float dt){
 		emitterData_.emit = 0;
 	}
 
+	if (perFrame_.time >= 50) {
+		perFrame_.time = 0;
+	}
+
 	perFrameBuffer_.TransferData(perFrame_);
 	emitterParamBuf_.TransferData(emitterData_);
 	materialBuffer_.TransferData(material_);
+}
+
+void GpuFxEmitter::ShowGui() {
+	ImGui::Begin("GPU FX Emitter");
+
+	if (ImGui::CollapsingHeader("Emitter Parameters", ImGuiTreeNodeFlags_DefaultOpen)) {
+		ImGui::DragFloat3("Position", &emitterData_.translate.x, 0.1f);
+		ImGui::DragFloat("Radius", &emitterData_.radius, 0.01f, 0.0f, 100.0f);
+		ImGui::DragInt("Emit Count", reinterpret_cast<int*>(&emitterData_.count), 1, 0, kMaxParticles);
+		ImGui::DragFloat("Frequency", &emitterData_.frequency, 0.01f, 0.01f, 100.0f);
+		ImGui::Checkbox("Emit Active", reinterpret_cast<bool*>(&emitterData_.emit));
+	}
+
+	ImGui::End();
 }
 
 
@@ -88,7 +106,7 @@ void GpuFxEmitter::DispatchInitialize(ID3D12GraphicsCommandList* cmd){
 	cmd->SetComputeRootDescriptorTable(2, freeListIndexBuffer_.GetGpuUavHandle()); // u1: Counter
 	cmd->SetComputeRootDescriptorTable(3, freeListBuffer_.GetGpuUavHandle()); // u1: Counter
 
-	cmd->Dispatch(kMaxParticles, 1, 1);
+	cmd->Dispatch(1024, 1, 1);
 
 	// 5) UAV → SRV (描画パス用)
 	CD3DX12_RESOURCE_BARRIER toSrv =
@@ -201,7 +219,7 @@ void GpuFxEmitter::DispatchUpdate(ID3D12GraphicsCommandList* cmd){
 	cmd->SetComputeRootDescriptorTable(3, freeListBuffer_.GetGpuUavHandle());		// u2: list
 
 	// ── Dispatch ────────────────────
-	cmd->Dispatch(kMaxParticles, 1, 1);
+	cmd->Dispatch(1024, 1, 1);
 
 	// ── UAV → SRV に戻す ─────────────────────────────
 	CD3DX12_RESOURCE_BARRIER toSrv[] = {
@@ -225,3 +243,5 @@ void GpuFxEmitter::DispatchUpdate(ID3D12GraphicsCommandList* cmd){
 	};
 	cmd->ResourceBarrier(_countof(toSrv), toSrv);
 }
+
+

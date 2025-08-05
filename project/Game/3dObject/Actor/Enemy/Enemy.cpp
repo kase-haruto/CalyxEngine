@@ -104,8 +104,7 @@ void Enemy::Update(float dt){
 	   3. 完全に死亡 (Dead)
 	   =============================================*/
 	if (deathState_ == DeathState::Dead){
-		// ここでフェードアウト等を入れるなら deathTimer_ を利用
-		isAlive_ = false;    // ← ついにシーンから除去OK
+		isAlive_ = false;
 		return;
 	}
 }

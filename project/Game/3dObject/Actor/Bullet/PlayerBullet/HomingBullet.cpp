@@ -11,11 +11,14 @@ HomingBullet::HomingBullet(const std::string& modelName, const std::string& name
 	trailFx_ = SceneAPI::Instantiate<ParticleSystemObject>("playerBulletTrail");
 	trailFx_->LoadConfig("Resources/Assets/Configs/Effect/HomingBulletTrail.json");
 
+	shootFx_ = SceneAPI::Instantiate<ParticleSystemObject>("shootFx");
+	shootFx_->LoadConfig("Resources/Assets/Configs/Effect/ShootFx.json");
 }
 
 HomingBullet::~HomingBullet(){
 	auto ctx = SceneContext::Current();
 	ctx->RemoveEditorObject(trailFx_);
+	ctx->RemoveEditorObject(shootFx_);
 }
 
 void HomingBullet::ShootInitialize(const Vector3& initPos, const Vector3& velocity){
@@ -29,6 +32,10 @@ void HomingBullet::ShootInitialize(const Vector3& initPos, const Vector3& veloci
 void HomingBullet::Initialize(){
 	auto self = shared_from_this();
 	trailFx_->SetParent(self);
+	shootFx_->SetParent(self);
+}
+
+void HomingBullet::OnShot() {
 }
 
 void HomingBullet::SetTarget(const Actor* target){
@@ -55,6 +62,8 @@ void HomingBullet::Update([[maybe_unused]]float dt){
 			velocity_ = newDir * homingSpeed_;
 		}
 	}
+
+	BaseBullet::Update(dt);
 }
 
 const Vector3 HomingBullet::GetCenterPos()const{

@@ -19,17 +19,13 @@ void ParticleSystemObject::Initialize(){
 void ParticleSystemObject::Update([[maybe_unused]]float dt){
 }
 
-void ParticleSystemObject::AlwaysUpdate(float dt){
-	worldTransform_.Update();
-	position_ = worldTransform_.GetWorldPosition();
+void ParticleSystemObject::AlwaysUpdate([[maybe_unused]]float dt){
+	if (FxEmitter::IsPlaying()){
+		worldTransform_.Update();
+		position_ = worldTransform_.GetWorldPosition();
+	}
 
 	FxEmitter::Update(dt);
-
-	for (const auto& childSp : children_){
-		if (auto ps = std::dynamic_pointer_cast< ParticleSystemObject >(childSp)){
-			ps->Update(dt);
-		}
-	}
 }
 
 void ParticleSystemObject::ShowGui(){

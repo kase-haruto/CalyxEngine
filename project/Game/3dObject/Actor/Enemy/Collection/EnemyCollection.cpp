@@ -13,6 +13,7 @@ EnemyCollection::EnemyCollection(const std::string& name) {
 }
 
 void EnemyCollection::Initialize() {
+	worldTransform_.Initialize();
 	CreateSpawners();
 }
 
@@ -40,6 +41,10 @@ void EnemyCollection::Update(float dt){
 	}
 }
 
+void EnemyCollection::AlwaysUpdate([[maybe_unused]]float dt) {
+	worldTransform_.Update();
+}
+
 void EnemyCollection::ShowGui(){
 	/*ImGui::Text("Enemy Count : %d", static_cast< int >(enemies_.size()));
 	ImGui::SeparatorText("Spawners");
@@ -53,12 +58,6 @@ void EnemyCollection::ShowGui(){
 	}*/
 }
 
-
-
-void EnemyCollection::SetPlayerTransform(WorldTransform* pTransform) {
-		playerTransform_ = pTransform;
-}
-
 void EnemyCollection::AddEnemy(const std::shared_ptr<Enemy>& enemy){
 	enemies_.push_back(enemy);
 }
@@ -68,13 +67,13 @@ void EnemyCollection::AddEnemy(const std::shared_ptr<Enemy>& enemy){
 ///////////////////////////////////////////////////////////////////////////////////////////
 void EnemyCollection::AddSpawner(const std::shared_ptr<EnemySpawner>& spawner){
 	if (spawner){
-		//spawner->SetPlayerTransform(playerTransform_);
 		spawner->SetOwner(this);
 		spawners_.emplace_back(spawner);
 	}
 }
 
 void EnemyCollection::CreateSpawners(){
+	auto self = shared_from_this();
 	// 左回り
 	std::shared_ptr<EnemySpawner> leftSpawner;
 	leftSpawner = SceneAPI::Instantiate<EnemySpawner>("leftSpawner");

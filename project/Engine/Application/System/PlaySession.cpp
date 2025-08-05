@@ -2,10 +2,18 @@
 #include <Engine/Scene/Serializer/SceneSerializer.h>
 #include <Engine/Assets/Texture/TextureManager.h>
 
-void PlaySession::Initialize(SceneContext* editorContext){
+void PlaySession::Initialize(SceneContext* editorContext) {
 	editorContext_ = editorContext;
 	editorContext_->SetRuntime(false);
 	LoadIcons();
+
+#ifndef NDEBUG
+	// DebugビルドではEditorモード
+	mode_ = EngineMode::Editor;
+#else
+	// Releaseビルドでは即実行
+	Enter();
+#endif
 }
 
 void PlaySession::LoadIcons(){

@@ -1,31 +1,6 @@
 {
     "objects": [
         {
-            "guid": "d8c8a0b4-ed1d-4814-acbf-0519f2dadffe",
-            "name": "MainCamera",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "Camera3d"
-        },
-        {
             "color": {
                 "w": 1.0,
                 "x": 1.0,
@@ -37,10 +12,10 @@
                 "y": -1.0,
                 "z": 0.0
             },
-            "guid": "18d20585-86db-45e5-bc22-2333f484acff",
+            "guid": "038928f9-3467-4141-a3d4-f0d1bfe10c7c",
             "intensity": 0.25,
             "name": "DirectionalLight",
-            "objectType": 1,
+            "objectType": 4,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
                 "rotation": {
@@ -70,7 +45,7 @@
                 "z": 1.0
             },
             "decay": 1.0,
-            "guid": "6c879ecf-b7e6-453f-83c0-4b4d53210462",
+            "guid": "3f5bcfd7-8f0a-45f0-b690-66fff025ed4c",
             "intensity": 0.25,
             "name": "PointLight",
             "objectType": 0,
@@ -102,8 +77,8 @@
             "type": "PointLight"
         },
         {
-            "guid": "150fe7cb-516b-467e-aa50-bb4a0656dd57",
-            "name": "DebugCamera",
+            "guid": "90ba3af6-cc36-4afd-9138-29e92d30fff9",
+            "name": "MainCamera",
             "objectType": 0,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
@@ -124,7 +99,88 @@
                     "z": 0.0
                 }
             },
+            "type": "Camera3d"
+        },
+        {
+            "guid": "02c3ee5a-5020-423f-b44f-0ca41241fdc5",
+            "name": "DebugCamera",
+            "objectType": 4,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
             "type": "DebugCamera"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": false,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "d4e8ea14-05af-4b6a-bed9-e25c8b1d617d",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 1.0,
+                    "isReflect": true,
+                    "shininess": 20.0
+                },
+                "modelName": "debugCube.obj",
+                "textureName": "textures/white1x1.png",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "cube",
+            "objectType": 2,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 4.022726058959961,
+                    "y": 8.63362979888916,
+                    "z": 1.8399999141693115
+                },
+                "translation": {
+                    "x": -6.346832275390625,
+                    "y": -0.11034536361694336,
+                    "z": -3.8559999465942383
+                }
+            },
+            "type": "BaseGameObject"
         }
     ],
     "sceneName": "scene",

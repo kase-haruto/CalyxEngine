@@ -19,6 +19,7 @@ public:
 
 	void Initialize()override;
 	void Update(float dt) override;
+	void AlwaysUpdate(float dt)override;
 	void ShowGui() override;
 
 	void SetPlayerTransform(WorldTransform* pTransform);
@@ -46,8 +47,6 @@ private:
 	std::vector<std::shared_ptr<class EnemySpawner>> spawners_;
 	int deadEnemyCount = 0;
 	
-
-	WorldTransform* playerTransform_ = nullptr;
 
 	ConfigurableObject<SceneObjectConfig> config_;
 };

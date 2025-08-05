@@ -5,6 +5,7 @@
 #include <Game/3dObject/Actor/Enemy/Collection/EnemyCollection.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 
+
 #include <externals/imgui/ImGuiFileDialog.h>
 
 EnemySpawner::EnemySpawner(const std::string& name) {
@@ -12,6 +13,8 @@ EnemySpawner::EnemySpawner(const std::string& name) {
 	worldTransform_.Initialize();
 	worldTransform_.translation = { 0.0f, 0.0f, 5.0f };
 
+	auto ctx = SceneContext::Current();
+	worldTransform_.parent = &ctx->GetCameraMgr()->GetMain3d()->GetWorldTransform();
 }
 
 void EnemySpawner::Update(float dt) {

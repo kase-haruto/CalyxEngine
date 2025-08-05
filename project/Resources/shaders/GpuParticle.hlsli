@@ -14,4 +14,4 @@ struct PerFrame {
 
 
 
-static const uint kMaxParticles = 1024;
+static const uint kMaxParticles = 1048576 * 4;

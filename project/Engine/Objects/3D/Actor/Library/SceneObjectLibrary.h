@@ -50,3 +50,4 @@ std::vector<std::shared_ptr<TObject>> SceneObjectLibrary::FindByType() const{
 	}
 	return result;
 }
+
