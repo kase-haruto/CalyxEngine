@@ -11,8 +11,8 @@ PlayerBullet::PlayerBullet(const std::string& modelName, const std::string& name
 	collider_->SetType(ColliderType::Type_PlayerAttack);
 	collider_->SetTargetType(ColliderType::Type_Enemy);
 
-	//trailFx_ = SceneAPI::Instantiate<ParticleSystemObject>("playerBulletTrail");
-	//trailFx_->LoadConfig("Resources/Assets/Configs/Effect/playerBulletTrail.json");
+	trailFx_ = SceneAPI::Instantiate<ParticleSystemObject>("playerBulletTrail");
+	trailFx_->LoadConfig("Resources/Assets/Configs/Effect/playerBulletTrail.json");
 
 	shootFx_ = SceneAPI::Instantiate<ParticleSystemObject>("shootFx");
 	shootFx_->LoadConfig("Resources/Assets/Configs/Effect/ShootFx.json");
@@ -22,13 +22,13 @@ PlayerBullet::PlayerBullet(const std::string& modelName, const std::string& name
 
 PlayerBullet::~PlayerBullet(){
 	auto ctx = SceneContext::Current();
-//	ctx->RemoveEditorObject(trailFx_);
+	ctx->RemoveEditorObject(trailFx_);
 	ctx->RemoveEditorObject(shootFx_);
 }
 
 void PlayerBullet::Initialize(){
 	auto self = shared_from_this();
-	//trailFx_->SetParent(self);
+	trailFx_->SetParent(self);
 	shootFx_->SetParent(self);
 	shootFx_->Play();
 

@@ -48,7 +48,7 @@ public:
 
 	/* accessor =========================================================== */
 	//settter
-	void SetParent(const WorldTransform* parent);
+	void SetParent(WorldTransform* parent);
 	void SetEnemyList(const std::list<std::shared_ptr<Enemy>>& list) {
 		targets_.assign(list.begin(), list.end());
 	}

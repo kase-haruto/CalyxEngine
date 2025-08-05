@@ -91,6 +91,7 @@ void WorldTransform::Update(const Matrix4x4& viewProjMatrix) {
 	Matrix4x4 localMat = scaleMat * rotateMat * translateMat;
 
 	if (parent) {
+		parent->Update();
 		matrix.world = localMat * parent->matrix.world;
 	} else {
 		matrix.world = localMat;
@@ -124,6 +125,7 @@ void WorldTransform::Update() {
 	Matrix4x4 localMat = scaleMat * rotateMat * translateMat;
 
 	if (parent) {
+		parent->Update();
 		matrix.world = localMat * parent->matrix.world;
 	} else {
 		matrix.world = localMat;

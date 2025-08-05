@@ -409,7 +409,7 @@ void Player::UpdateReticlePosition(){
 /* ======================================================================================
 /*		accessor
 /* ==================================================================================== */
-void Player::SetParent(const WorldTransform* parent){ worldTransform_.parent = parent; }
+void Player::SetParent(WorldTransform* parent){ worldTransform_.parent = parent; }
 
 std::vector<Sprite*> Player::GetAllSprites(){
 	std::vector<Sprite*> sprites;

@@ -97,7 +97,7 @@ public:
 	Vector3 eulerRotation;
 
 	TransformationMatrix matrix;
-	const BaseTransform* parent = nullptr;
+	BaseTransform* parent = nullptr;
 
 	RotationSource rotationSource = RotationSource::Quaternion;
 
