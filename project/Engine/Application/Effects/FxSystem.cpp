@@ -13,7 +13,6 @@
 /*===========================================================================*/
 FxSystem::FxSystem(){
 	particleRenderer_ = std::make_unique<ParticleRenderer>();
-
 	connAdd_ = EventBus::Subscribe<ObjectAdded>(
 		[this] (const ObjectAdded& e){
 			if (auto fx = std::dynamic_pointer_cast< ParticleSystemObject >(e.sp))

@@ -44,6 +44,9 @@ public:
 	void SetTransitionRequestor(SceneTransitionRequestor* requestor)override{
 		transitionRequestor_ = requestor;
 	}
+
+	virtual void OnExit()override{}
+	virtual void OnEnter()override{}
 protected:
 	//===================================================================*/
 	//			protected methods

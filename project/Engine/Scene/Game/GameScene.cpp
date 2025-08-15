@@ -7,12 +7,9 @@
 #include <Engine/Scene/System/SceneManager.h>
 
 // engine
-#include <Engine/Graphics/Context/GraphicsGroup.h>
 #include <Engine/Application/Input/Input.h>
-#include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Objects/3D/Actor/SceneObjectManager.h>
 #include <Engine/Collision/CollisionManager.h>
-#include <Engine/Graphics/Pipeline/Service/PipelineService.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
 // game
@@ -62,37 +59,34 @@ void GameScene::Initialize(){
 }
 
 void GameScene::Update([[maybe_unused]]float dt){
-	auto ctx = SceneContext::Current();
-	auto player = ctx->FindFirst<Player>();
-	auto enemyCol = ctx->FindFirst<EnemyCollection>();
+	auto player = sceneContext_->FindFirst<Player>();
+	auto enemyCol = sceneContext_->FindFirst<EnemyCollection>();
 	if (player && enemyCol) {
 		player->SetEnemyList(enemyCol->GetEnemies());
 	}
 
 	attackSprite_->Update();
-
-
 	/* その他 ============================*/
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
 }
 
 void GameScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService, RenderTargetType type){
-	auto ctx = SceneContext::Current();
-	auto player = ctx->FindFirst<Player>();
-	for (auto& playerSprite : player->GetAllSprites()){
-		spriteRenderer_->Register(playerSprite);
-	}
+	SceneContext* ctx = GetSceneContext();
+	if (!ctx) { BaseScene::Draw(cmdList, psoService, type); return; }
 
-	spriteRenderer_->Register(attackSprite_.get());
+	if (auto player = ctx->FindFirst<Player>()) {
+		for (auto& sp : player->GetAllSprites()) {
+			if (sp) spriteRenderer_->Register(sp);
+		}
+	}
+	if (attackSprite_) spriteRenderer_->Register(attackSprite_.get());
 
 	BaseScene::Draw(cmdList, psoService, type);
 }
 
-
 void GameScene::CleanUp(){
-	auto ctx = SceneContext::Current();
 	// 3Dオブジェクトの描画を終了
-	ctx->GetObjectLibrary()->Clear();
+	sceneContext_->GetObjectLibrary()->Clear();
 	CollisionManager::GetInstance()->ClearColliders();
 }
 

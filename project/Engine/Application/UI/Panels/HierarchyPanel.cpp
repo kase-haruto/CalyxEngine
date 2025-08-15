@@ -5,7 +5,6 @@
 // engine
 #include <Engine/Application/UI/Panels/HierarchyPanel.h>
 #include <Engine/Application/UI/Panels/InspectorPanel.h>
-#include <Engine/Application/UI/EngineUI/Context/EditorContext.h>
 #include <Engine/objects/3D/Actor/Library/SceneObjectLibrary.h>
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 #include <Engine/Assets/Texture/TextureManager.h>
@@ -14,7 +13,6 @@
 // lib
 #include <externals/imgui/imgui.h>
 #include <externals/imgui/ImGuiFileDialog.h>
-#include <map>
 
 HierarchyPanel::HierarchyPanel() : IEngineUI("Hierarchy"){
 	auto& tm = *TextureManager::GetInstance();

@@ -32,9 +32,6 @@ TitleScene::TitleScene() {
 void TitleScene::LoadAssets() {
 }
 
-
-
-
 /////////////////////////////////////////////////////////////////////////////////////////
 //	初期化処理
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -45,34 +42,21 @@ void TitleScene::Initialize() {
 	//=========================
 	// グラフィック関連
 	//=========================
-	modelField_ = SceneAPI::Instantiate<BaseGameObject>("terrain.obj", "field");
-	modelField_->SetScale({ 300.0f,300.0f,300.0f });
-
-	title_ = std::make_unique<Sprite>("Textures/title.png");
-	Vector2 pos = {1280.0f,720.0f};
-	Vector2 size = Vector2(540.0f*0.8f, 320.0f * 0.8f);
-	title_->Initialize(Vector2(pos.x * 0.5f, pos.y * 0.5f), size);
-
 }
 
-void TitleScene::Update(float dt) {
-
+void TitleScene::Update([[maybe_unused]]float dt) {
 	/* 3dObject ============================*/
-	//地面の更新
-	modelField_->Update(dt);
-	title_->Update();
 	/* その他 ============================*/
 	
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
 
-	if (Input::GetInstance()->TriggerKey(DIK_2)||
+	if (Input::GetInstance()->TriggerKey(DIK_SPACE)||
 		Input::GetInstance()->TriggerGamepadButton(PAD_BUTTON::A)) {
 		if (transitionRequestor_) {
 			transitionRequestor_->RequestSceneChange(SceneType::PLAY);
 		}
 	}
 }
-
 
 void TitleScene::CleanUp() {
 	// 3Dオブジェクトの描画を終了
@@ -82,6 +66,4 @@ void TitleScene::CleanUp() {
 
 void TitleScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService, RenderTargetType type) {
 	BaseScene::Draw(cmdList, psoService, type);
-
-	title_->Draw(cmdList);
 }
