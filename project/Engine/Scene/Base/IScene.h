@@ -41,6 +41,9 @@ public:
 	//--------- accessor -----------------------------------------------------
 	virtual SceneContext* GetSceneContext() const = 0;
 	virtual void InjectContext([[maybe_unused]]SceneContext* ctx) {};
+
+	virtual void OnExit(){}
+	virtual void OnEnter(){}
 protected:
 	//===================================================================*/
 	//			protected methods

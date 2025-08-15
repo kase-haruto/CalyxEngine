@@ -37,6 +37,8 @@ void EngineController::Initialize(HINSTANCE hInstance){
 	playSession_ = std::make_unique<PlaySession>();
 	playSession_->Initialize(sceneManager_->GetCurrentSceneContext());
 
+	sceneManager_->BindPlaySession(playSession_.get());
+
 	/* UI / Editor */
 	engineUICore_ = std::make_unique<EngineUICore>();
 	engineUICore_->Initialize();
@@ -82,7 +84,7 @@ bool EngineController::Update(){
 
 	BeginUpdate();
 
-	playSession_->Update(dt);
+	playSession_->Update();
 
 	sceneManager_->Update(dt);
 
