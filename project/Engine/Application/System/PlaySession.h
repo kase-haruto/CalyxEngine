@@ -40,7 +40,7 @@ private:
 
 	struct IconData{
 		ImTextureID tex = nullptr;
-		ImVec2 size = ImVec2(28, 28);
+		ImVec2 size = ImVec2(30, 30);
 	};
 	IconData iconPlay_;
 	IconData iconPause_;

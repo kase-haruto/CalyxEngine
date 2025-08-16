@@ -27,69 +27,95 @@ void PlaySession::LoadIcons(){
 
 
 void PlaySession::RenderToolbar(){
-	ImGui::Begin("Play Toolbar",nullptr,
+	ImGui::Begin("Play Toolbar", nullptr,
 	             ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize);
-	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding,{4, 4});
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {4, 4});
 
-	// --- decide which buttons to render ----------------------------------
-	struct Btn
-	{
+	// ボタン定義（常に5個すべて並べる）
+	struct Btn {
 		IconData* icon;
 		const char* id;
+		bool enabled;
 		std::function<void()> onClick;
 	};
 	std::vector<Btn> buttons;
 
-	switch (mode_){
+	// モードに応じて有効/無効のみ切り替える
+	switch (mode_) {
 	case EngineMode::Editor:
 		buttons = {
-					{&iconPlay_, "Play", [this]{ Enter(); }}
-				};
+			{ &iconPlay_,    "Play",    true,  [this]{ Enter(); } },
+			{ &iconPause_,   "Pause",   false, []{} },
+			{ &iconStep_,    "Step",    false, []{} },
+			{ &iconRestart_, "Restart", false, []{} },
+			{ &iconStop_,    "Stop",    false, []{} },
+		};
 		break;
 	case EngineMode::Playing:
 		buttons = {
-					{&iconPause_, "Pause", [this]{ TogglePause(); }},
-					{&iconRestart_, "Restart", [this]{ Restart(); }},
-					{&iconStop_, "Stop", [this]{ Exit(); }}
-				};
+			{ &iconPlay_,    "Play",    false, []{} },                    // 無効
+			{ &iconPause_,   "Pause",   true,  [this]{ TogglePause(); } },
+			{ &iconStep_,    "Step",    false, []{} },                    // 無効（ポーズ時のみ有効）
+			{ &iconRestart_, "Restart", true,  [this]{ Restart(); } },
+			{ &iconStop_,    "Stop",    true,  [this]{ Exit(); } },
+		};
 		break;
 	case EngineMode::Paused:
 		buttons = {
-					{&iconPlay_, "Resume", [this]{ TogglePause(); }},
-					{&iconStep_, "Step", [this]{ StepOnce(); }},
-					{&iconRestart_, "Restart", [this]{ Restart(); }},
-					{&iconStop_, "Stop", [this]{ Exit(); }}
-				};
+			{ &iconPlay_,    "Resume",  true,  [this]{ TogglePause(); } }, // 再生（ポーズ解除）
+			{ &iconPause_,   "Pause",   false, []{} },                     // すでにポーズ中
+			{ &iconStep_,    "Step",    true,  [this]{ StepOnce(); } },
+			{ &iconRestart_, "Restart", true,  [this]{ Restart(); } },
+			{ &iconStop_,    "Stop",    true,  [this]{ Exit(); } },
+		};
 		break;
 	case EngineMode::Step:
+		// Stepフレームは次のUpdateでPausedに戻るので、操作はStop/Restartのみ有効にしておく
 		buttons = {
-					{
-						&iconPause_, "Pause", [/*noop*/]{}
-					},
-					{&iconStop_, "Stop", [this]{ Exit(); }}
-				};
+			{ &iconPlay_,    "Play",    false, []{} },
+			{ &iconPause_,   "Pause",   false, []{} },
+			{ &iconStep_,    "Step",    false, []{} },
+			{ &iconRestart_, "Restart", true,  [this]{ Restart(); } },
+			{ &iconStop_,    "Stop",    true,  [this]{ Exit(); } },
+		};
 		break;
 	}
 
-	// --- centering --------------------------------------------------------
+	// センタリング
 	float spacing = ImGui::GetStyle().ItemSpacing.x;
 	float totalW = 0.0f;
-	for (size_t i = 0; i < buttons.size(); ++i) totalW += buttons[i].icon->size.x;
+	for (const auto& b : buttons) totalW += b.icon->size.x;
 	totalW += spacing * static_cast<float>(buttons.size() - 1);
-	float offset = (std::max)(0.0f,(ImGui::GetContentRegionAvail().x - totalW) * 0.5f);
+	float offset = (std::max)(0.0f, (ImGui::GetContentRegionAvail().x - totalW) * 0.5f);
 	ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
 
-	// --- render loop ------------------------------------------------------
-	for (size_t i = 0; i < buttons.size(); ++i){
-		if (ImGui::ImageButton(buttons[i].icon->tex,buttons[i].icon->size))
-			buttons[i].onClick();
+	// 描画ヘルパー：無効時は半透明 + Disable状態で押下不可に
+	auto drawButton = [&](const Btn& b) {
+		if (!b.enabled) ImGui::BeginDisabled(true);
+		// 無効時はアイコンを薄く
+		ImVec4 tint = b.enabled ? ImVec4(1,1,1,1) : ImVec4(1,1,1,0.4f);
+		bool clicked = ImGui::ImageButton(b.icon->tex, b.icon->size, ImVec2(0,0), ImVec2(1,1), 0,
+		                                  ImVec4(0,0,0,0), tint);
+		if (!b.enabled) ImGui::EndDisabled();
+		if (clicked && b.enabled && b.onClick) b.onClick();
+
+		// ツールチップ（任意）
+		if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
+			ImGui::BeginTooltip();
+			ImGui::TextUnformatted(b.id);
+			ImGui::EndTooltip();
+		}
+	};
+
+	// ボタン列描画
+	for (size_t i = 0; i < buttons.size(); ++i) {
+		drawButton(buttons[i]);
 		if (i + 1 < buttons.size()) ImGui::SameLine();
 	}
 
 	ImGui::PopStyleVar();
 	ImGui::End();
 }
-
 void PlaySession::BindEditorContext(SceneContext* ctx){
 	editorContext_ = ctx;
 	if (editorContext_) editorContext_->SetRuntime(false);
