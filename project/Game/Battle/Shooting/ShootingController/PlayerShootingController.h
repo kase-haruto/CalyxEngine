@@ -6,6 +6,7 @@
 #include <Game/Battle/Shooting/Shooter/StraightBullet/StraightBulletShooter.h>
 #include <Game/Battle/Shooting/Shooter/HomingBullet/PlayerHomingBulletShooter.h>
 #include <Game/3dObject/Actor/Enemy/Enemy.h>
+#include <Game/Battle/Shooting/ShootingController/BaseShootingController.h>
 
 // c++
 #include <memory>
@@ -15,28 +16,27 @@ struct Vector3;
 class BulletContainer;
 
 namespace PlayerShoot{
-	enum class BulletMode{
-		Straight,
-		Homing,
-	};
+enum class BulletMode{
+	Straight,
+	Homing,
+};
 }
 
-class PlayerShootingController{
+class PlayerShootingController final :
+		public BaseShootingController{
 public:
 	//===================================================================*/
 	//						public functions
 	//===================================================================*/
 	PlayerShootingController(BulletContainer* container);
-	void Update(float dt);
-	void RequestShoot(const Vector3& pos, const Vector3& dir);
-
+	~PlayerShootingController()override = default;
+	void RequestShoot(const Vector3& pos, const Vector3& dir)override;
 
 	//--------- accessor -------------------------------------------------
 	void SetMode(PlayerShoot::BulletMode bulletMode);
 	void SetTargets(const std::vector<std::shared_ptr<Enemy>>& targets);
 
-	float GetCooldown(){ return shootCooldown_; }
-	float GetInterval(){ return kShootInterval_; }
+	float GetInterval()const override{ return kShootInterval_; }
 
 private:
 	//===================================================================*/
@@ -50,10 +50,9 @@ private:
 	//						private variables
 	//===================================================================*/
 	std::unique_ptr<StraightBulletShooter> straightShooter_;
-	std::unique_ptr< PlayerHomingBulletShooter> homingShooter_;
+	std::unique_ptr<PlayerHomingBulletShooter> homingShooter_;
 	PlayerShoot::BulletMode bulletMode_;
 
 private:
-	float shootCooldown_ = 0.0f;			//< クールダウン
 	static constexpr float kShootInterval_ = 0.3f;
 };

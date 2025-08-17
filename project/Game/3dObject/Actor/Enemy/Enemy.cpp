@@ -13,7 +13,6 @@
 Enemy::Enemy(const std::string& modelName, const std::string objName)
 	: Actor(modelName, objName){
 
-	// === 初期化（元コードを整理）=========================
 	worldTransform_.Initialize();
 	worldTransform_.scale = {2,2,2};
 
