@@ -56,6 +56,9 @@ void GameScene::Initialize(){
 	attackSprite_->Initialize(attackUiPos, attackUiSize);
 	attackSprite_->SetAnchorPoint(Vector2(0.5f, 0.5f));
 
+	auto player = sceneContext_->FindFirst<Player>();
+	PlayerInstaller playerInstaller;
+	playerInstaller.InstallPlayer(player);
 }
 
 void GameScene::Update([[maybe_unused]]float dt){

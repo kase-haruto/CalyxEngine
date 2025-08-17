@@ -3,8 +3,12 @@
 /* ========================================================================
 /* include space
 /* ===================================================================== */
+// engine
 #include <Engine/objects/Collider/SphereCollider.h>
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
+// game
+#include <Game/Battle/Shooting/ShootingController/EnemyShootingController.h>
+
 /* ========================================================================
 /* enemy
 /* ===================================================================== */
@@ -46,7 +50,7 @@ private:
 	bool isHit_ = false;		// 衝突フラグ
 	bool isDead_ = false;
 	float deathRotation_ = 0.0f;       // 傾きの進行度
-	Vector3 deathRotateAxis_ = {0, 0, 1}; // 傾く軸（例: Z軸）
+	Vector3 deathRotateAxis_ = {0, 0, 1}; // 傾く軸
 
 	Vector3 basePosition_{};   // サイン波の基準位置
 	float waveTime_ = 0.0f;     // 経過時間
@@ -57,6 +61,7 @@ private:
 	float      deathTimer_ = 0.0f;      // 死亡演出用
 	float      deathLength_ = 1.5f;      // 倒れ終わるまでの秒数
 
+	std::unique_ptr<EnemyShootingController> shootingController_ = nullptr;
 	std::shared_ptr<ParticleSystemObject> hitFx_;
 	std::shared_ptr<ParticleSystemObject> explosionFx_;
 };

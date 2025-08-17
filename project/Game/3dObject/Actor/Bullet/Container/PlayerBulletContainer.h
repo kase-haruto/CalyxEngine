@@ -13,7 +13,7 @@ public:
 	//===================================================================*/
 	PlayerBulletContainer(const std::string name);
 	PlayerBulletContainer() = default;
-	~PlayerBulletContainer() = default;
+	~PlayerBulletContainer()override = default;
 
 	//--------- mainFunc -----------------------------------------------------
 	void AddBullet(BulletID id, const Vector3& pos, const Vector3& vel) override;

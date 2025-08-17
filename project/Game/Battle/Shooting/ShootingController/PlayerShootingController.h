@@ -31,13 +31,14 @@ public:
 	PlayerShootingController(BulletContainer* container);
 	~PlayerShootingController()override = default;
 	void RequestShoot(const Vector3& pos, const Vector3& dir)override;
-
+	void Update(float dt)override;
 	//--------- accessor -------------------------------------------------
 	void SetMode(PlayerShoot::BulletMode bulletMode);
 	void SetTargets(const std::vector<std::shared_ptr<Enemy>>& targets);
 
 	float GetInterval()const override{ return kShootInterval_; }
 
+	void SetBulletContainer(std::unique_ptr<BulletContainer> container);
 private:
 	//===================================================================*/
 	//						private functions
@@ -53,6 +54,7 @@ private:
 	std::unique_ptr<PlayerHomingBulletShooter> homingShooter_;
 	PlayerShoot::BulletMode bulletMode_;
 
+	std::unique_ptr<BulletContainer> bulletContainer_;
 private:
 	static constexpr float kShootInterval_ = 0.3f;
 };

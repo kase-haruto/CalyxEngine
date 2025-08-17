@@ -5,7 +5,8 @@
 
 class PlayerInstaller{
 public:
-	std::shared_ptr<Player> InstallPlayer();
+	PlayerInstaller() = default;
+	std::shared_ptr<Player> InstallPlayer(const std::shared_ptr<Player>& player);
 
 };
 

@@ -10,8 +10,6 @@ void BaseEmitter::TransferParticleDataToGPU(){
 			gpuUnits.push_back({fx.position, fx.scale, fx.color});
 		}
 	}
-	std::cout << "[Transfer] count: " << gpuUnits.size() << std::endl;
-
 	if (!gpuUnits.empty()){
 		instanceBuffer_.TransferVectorData(gpuUnits);
 	}

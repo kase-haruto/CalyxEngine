@@ -25,13 +25,18 @@ void PlayerShootingController::RequestShoot(const Vector3& pos, const Vector3& d
 	shootCooldown_ = kShootInterval_;
 }
 
+void PlayerShootingController::Update(float dt){
+	bulletContainer_->Update(dt);
+	BaseShootingController::Update(dt);
+}
+
 void PlayerShootingController::SetTargets(const std::vector<std::shared_ptr<Enemy>>& targets){
 	if (homingShooter_) homingShooter_->SetTargets(targets);
 }
 
-//=========================
-// Private
-//=========================
+void PlayerShootingController::SetBulletContainer(std::unique_ptr<BulletContainer> container){
+	bulletContainer_ = std::move(container);
+}
 
 void PlayerShootingController::RequestShootStraight(const Vector3& pos, const Vector3& dir){
 	if (straightShooter_) straightShooter_->Shoot(pos, dir);
