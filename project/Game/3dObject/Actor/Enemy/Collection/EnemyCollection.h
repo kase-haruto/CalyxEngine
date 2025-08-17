@@ -46,6 +46,7 @@ private:
 	std::list<std::shared_ptr<Enemy>> enemies_;
 	std::vector<std::shared_ptr<class EnemySpawner>> spawners_;
 	int deadEnemyCount = 0;
+	WorldTransform* playerTransform;
 	
 
 	ConfigurableObject<SceneObjectConfig> config_;

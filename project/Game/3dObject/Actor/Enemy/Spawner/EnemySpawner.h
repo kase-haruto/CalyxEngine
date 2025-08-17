@@ -1,8 +1,6 @@
 #pragma once
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 
-
-#include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Foundation/Utility/Random/Random.h>
 #include <Engine/Objects/Transform/Transform.h>
 #include <Engine/Scene/Context/SceneContext.h>
@@ -15,15 +13,14 @@ class EnemyCollection; // 前方宣言
 class SceneContext;
 
 class EnemySpawner
-	: public SceneObject{
+	: public SceneObject,
+	  public IConfigurable{
 public:
 	EnemySpawner(const std::string& name = "EnemySpawner");
 	void Update(float dt)override;
 	void AlwaysUpdate(float dt)override;
 	void ApplyConfig() ;
-
 	void ExtractConfig() ;
-
 	void ShowGui() override;
 	void SetOwner(EnemyCollection* owner) { ownerCollection_ = owner; }
 	void SetRotationSpeed(float speed) { rotationSpeed_ = speed; }
@@ -37,6 +34,9 @@ public:
 
 	std::string_view GetTypeName() const override{ return "EnemySpawner"; }
 
+	//--------- config ------------------------------------------------
+	void ApplyConfigFromJson(const nlohmann::json& j) override;
+	void ExtractConfigToJson(nlohmann::json& j) const override;
 private:
 	void Spawn();
 

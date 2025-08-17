@@ -56,11 +56,25 @@ void GameScene::Initialize(){
 	attackSprite_->Initialize(attackUiPos, attackUiSize);
 	attackSprite_->SetAnchorPoint(Vector2(0.5f, 0.5f));
 
+	// GameScene::OnEnter / OnLoaded など一度きりの場所
+	auto player = sceneContext_->FindFirst<Player>();
+	PlayerInstaller playerInstaller;
+	playerInstaller.InstallPlayer(player);
+	wPlayer_ = player;
+	wEnemyCol_ = sceneContext_->FindFirst<EnemyCollection>();
+	wEnemyCol_.lock()->SetPlayerTransform(&player->GetWorldTransform());
+	
 }
 
 void GameScene::Update([[maybe_unused]]float dt){
-	auto player = sceneContext_->FindFirst<Player>();
-	auto enemyCol = sceneContext_->FindFirst<EnemyCollection>();
+	auto player   = wPlayer_.lock();
+	auto enemyCol = wEnemyCol_.lock();
+	if (!player || !enemyCol) {          // 失効してる時だけ探索
+		if (!player)   wPlayer_   = sceneContext_->FindFirst<Player>();
+		if (!enemyCol) wEnemyCol_ = sceneContext_->FindFirst<EnemyCollection>();
+		player   = wPlayer_.lock();
+		enemyCol = wEnemyCol_.lock();
+	}
 	if (player && enemyCol) {
 		player->SetEnemyList(enemyCol->GetEnemies());
 	}

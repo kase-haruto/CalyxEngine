@@ -10,6 +10,7 @@
 #include <Game/3dObject/Actor/Bullet/Factory/BulletFactory.h>
 #include <Game/3dObject/Actor/Bullet/PlayerBullet/HomingBullet.h>
 #include <Game/3dObject/Actor/Bullet/PlayerBullet/PlayerBullet.h>
+#include <Game/3dObject/Actor/Bullet/EnemyBullet/EnemyBullet.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		使用する弾の登録
@@ -18,7 +19,7 @@ namespace BulletRegistrar{
 	void RegisterAll(){
 
 		//===================================================================*/
-		//						通常弾
+		//						player通常弾
 		//===================================================================*/
 		BulletFactory::Register(BulletID::Player_Straight, []{
 			auto bullet = SceneAPI::Instantiate<PlayerBullet>("debugCube.obj", "playerBullet");
@@ -26,6 +27,15 @@ namespace BulletRegistrar{
 			return bullet;
 								});
 
+		//===================================================================*/
+		//						enemy通常弾
+		//===================================================================*/
+		BulletFactory::Register(BulletID::Enemy_Straight, []{
+			auto bullet = SceneAPI::Instantiate<EnemyBullet>("debugCube.obj", "enemyBullet");
+			bullet->Initialize();
+			return bullet;
+								});
+		
 		//===================================================================*/
 		//						追尾弾
 		//===================================================================*/
