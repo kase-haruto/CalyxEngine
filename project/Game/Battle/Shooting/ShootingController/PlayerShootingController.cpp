@@ -14,10 +14,6 @@ PlayerShootingController::PlayerShootingController(BulletContainer* container){
 	homingShooter_ = std::make_unique<PlayerHomingBulletShooter>(container,BulletID::Player_Homing);
 }
 
-void PlayerShootingController::Update(float dt){
-	shootCooldown_ -= dt;
-}
-
 void PlayerShootingController::RequestShoot(const Vector3& pos, const Vector3& dir){
 	if (shootCooldown_ > 0.0f) return;
 
