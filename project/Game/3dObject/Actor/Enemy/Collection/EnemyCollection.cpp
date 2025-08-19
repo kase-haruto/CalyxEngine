@@ -60,7 +60,7 @@ void EnemyCollection::AddEnemy(const std::shared_ptr<Enemy>& enemy){ enemies_.pu
 ///////////////////////////////////////////////////////////////////////////////////////////
 void EnemyCollection::AddSpawner(const std::shared_ptr<EnemySpawner>& spawner){
 	if (spawner){
-		spawner->SetOwner(this);
+		//spawner->SetOwner(this);
 		spawner->SetPlayerTransform(playerTransform);
 		spawners_.emplace_back(spawner);
 	}

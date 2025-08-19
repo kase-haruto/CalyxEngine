@@ -89,49 +89,20 @@ void PlaceToolPanel::RegisterPlaceItems() {
 	spawnerItems.push_back({
 		PlaceItemCategory::InGameObject,
 		"EnemySpawner",
-		{},                 // アイコン無し
-		{64, 64},
+		{}, {64, 64},
 		[]() {
 			auto* ctx = SceneContext::Current();
-
-			// 1) EnemyCollection を確保（無ければコマンドで作成して Undo/Redo 対応）
-			std::shared_ptr<EnemyCollection> col = ctx->FindFirst<EnemyCollection>();
-			if (!col) {
-				CommandManager::GetInstance()->Execute(
-					std::make_unique<CreateObjectCommand<EnemyCollection>>(
-						ctx,
-						[]() {
-							auto c = SceneAPI::Instantiate<EnemyCollection>("EnemyCollection");
-							c->ApplyConfig();
-							c->Initialize();
-							return c;
-						},
-						"Create EnemyCollection"
-					)
-				);
-				// 作成後に取り直す
-				col = ctx->FindFirst<EnemyCollection>();
-			}
-
-			// 2) Spawner 作成コマンド（作成直後に Collection へ AddSpawner までやる）
-			auto factory = [col]() {
+			auto factory = []() {
 				auto obj = SceneAPI::Instantiate<EnemySpawner>("EnemySpawner");
 				obj->ApplyConfig();
 				obj->Initialize();
-				if (col) {
-					col->AddSpawner(obj);
-				}
 				return obj;
 			};
-
 			CommandManager::GetInstance()->Execute(
 				std::make_unique<CreateObjectCommand<EnemySpawner>>(
-					ctx, factory, "Create EnemySpawner"
-				)
-			);
+					ctx, factory, "Create EnemySpawner"));
 		}
 	});
-
 
 	// ---------------------------- Models ------------------------------------
 	auto& modelItems = categoryItems_[PlaceItemCategory::Model];
