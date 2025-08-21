@@ -36,10 +36,10 @@ void EnemySpawner::AlwaysUpdate([[maybe_unused]] float dt) {
 
 void EnemySpawner::ApplyConfig() {
 	auto cfg = config_.GetConfig();
-
 	if (!cfg.name.empty()) {
 		SetName(cfg.name, ObjectType::GameObject);
 	}
+	worldTransform_.ApplyConfig(cfg.transform);
 	rotationSpeed_ = cfg.rotationSpeed;
 	rotationDir_ = cfg.rotationDir;
 	spawnInterval_ = cfg.spawnInterval;
@@ -57,6 +57,7 @@ void EnemySpawner::ExtractConfig() {
 	cfg.spawnAreaMin = spawnAreaMin_;
 	cfg.spawnAreaMax = spawnAreaMax_;
 	cfg.maxSpawnCount = maxSpawnCount_;
+	cfg.transform = worldTransform_.ExtractConfig();
 }
 
 void EnemySpawner::ShowGui() {
