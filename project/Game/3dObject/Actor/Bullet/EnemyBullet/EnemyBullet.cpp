@@ -13,8 +13,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 EnemyBullet::EnemyBullet(const std::string& modelName, const std::string& name)
 	:BaseBullet::BaseBullet(modelName, name){
-	collider_->SetType(ColliderType::Type_PlayerAttack);
-	collider_->SetTargetType(ColliderType::Type_Enemy);
+	collider_->SetType(ColliderType::Type_EnemyAttack);
+	collider_->SetTargetType(ColliderType::Type_Player);
 
 	trailFx_ = SceneAPI::Instantiate<ParticleSystemObject>("playerBulletTrail");
 	trailFx_->LoadConfig("Resources/Assets/Configs/Effect/playerBulletTrail.json");

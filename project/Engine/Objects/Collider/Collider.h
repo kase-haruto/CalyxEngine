@@ -15,7 +15,8 @@ enum class ColliderType{
 	Type_Player				= 1 << 1,
 	Type_PlayerAttack		= 2 << 1,
 	Type_Enemy				= 3 << 1,
-	Type_EnemySpawner		= 4 << 1
+	Type_EnemySpawner		= 4 << 1,
+	Type_EnemyAttack		= 5 << 1,
 };
 
 // ビット演算のオーバーロード

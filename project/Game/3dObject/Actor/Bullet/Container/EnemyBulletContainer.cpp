@@ -4,6 +4,10 @@
 EnemyBulletContainer::EnemyBulletContainer(const std::string& name):
 	BulletContainer(name){}
 
+void EnemyBulletContainer::Update(float dt) {
+	BulletContainer::Update(dt);
+}
+
 void EnemyBulletContainer::AddBullet(BulletID id, const Vector3& pos, const Vector3& vel){
 	if (id != BulletID::Enemy_Straight){return;}
 

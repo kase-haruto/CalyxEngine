@@ -15,25 +15,25 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 //		コンストラクタ
 /////////////////////////////////////////////////////////////////////////////////////////
-BulletContainer::BulletContainer(const std::string& name){
+BulletContainer::BulletContainer(const std::string& name) {
 	SceneObject::SetName(name, ObjectType::GameObject);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		更新
 /////////////////////////////////////////////////////////////////////////////////////////
-void BulletContainer::Update(float dt){
+void BulletContainer::Update(float /*dt*/) {
 	auto* lib = SceneContext::Current()->GetObjectLibrary();
+	for (auto& [id, bullets] : typedBullets_) {
+		for (auto it = bullets.begin(); it != bullets.end(); ) {
+			const auto& bullet = *it;
 
-	for (auto& [id, bullets] : typedBullets_){
-		for (auto it = bullets.begin(); it != bullets.end(); ){
-			auto bullet = *it;
-			bullet->Update(dt);
-
-			if (!bullet->GetIsAlive()){
+			if (!bullet->GetIsAlive()) {
+				// Scene の管理から外す（描画/更新対象から除外）
 				lib->RemoveObject(bullet);
+				// コンテナからも除去
 				it = bullets.erase(it);
-			} else{
+			} else {
 				++it;
 			}
 		}
@@ -43,8 +43,8 @@ void BulletContainer::Update(float dt){
 /////////////////////////////////////////////////////////////////////////////////////////
 //		削除
 /////////////////////////////////////////////////////////////////////////////////////////
-void BulletContainer::RemoveBullet(const std::shared_ptr<BaseBullet>& bullet){
-	for (auto& [type, bullets] : typedBullets_){
+void BulletContainer::RemoveBullet(const std::shared_ptr<BaseBullet>& bullet) {
+	for (auto& [type, bullets] : typedBullets_) {
 		bullets.remove(bullet);
 	}
 }
@@ -52,7 +52,7 @@ void BulletContainer::RemoveBullet(const std::shared_ptr<BaseBullet>& bullet){
 /////////////////////////////////////////////////////////////////////////////////////////
 //		弾の取得
 /////////////////////////////////////////////////////////////////////////////////////////
-const std::list<std::shared_ptr<BaseBullet>>& BulletContainer::GetBullets(BulletID id) const{
+const std::list<std::shared_ptr<BaseBullet>>& BulletContainer::GetBullets(BulletID id) const {
 	static const std::list<std::shared_ptr<BaseBullet>> empty;
 	auto it = typedBullets_.find(id);
 	return (it != typedBullets_.end()) ? it->second : empty;
@@ -61,15 +61,15 @@ const std::list<std::shared_ptr<BaseBullet>>& BulletContainer::GetBullets(Bullet
 /////////////////////////////////////////////////////////////////////////////////////////
 //		ui
 /////////////////////////////////////////////////////////////////////////////////////////
-void BulletContainer::ShowGui(){
+void BulletContainer::ShowGui() {
 	ImGui::SeparatorText("bullet container");
 	DerivativeGui();
 
-	for (const auto& [type, bullets] : typedBullets_){
-		ImGui::Text("Type %d : %d bullets", static_cast< int >(type), static_cast< int >(bullets.size()));
+	for (const auto& [type, bullets] : typedBullets_) {
+		ImGui::Text("Type %d : %d bullets", static_cast<int>(type), static_cast<int>(bullets.size()));
 	}
 }
 
-void BulletContainer::DerivativeGui(){
+void BulletContainer::DerivativeGui() {
 	//editBullet_->ShowGui();
 }
