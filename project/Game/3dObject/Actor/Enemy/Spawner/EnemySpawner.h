@@ -50,7 +50,6 @@ private:
 	std::list<std::shared_ptr<Enemy>> spawnedEnemies_;
 	size_t        maxSpawnCount_ = 5;
 
-	WorldTransform  worldTransform_;
 	WorldTransform* playerTransform_ = nullptr; // 非所有
 	IEnemyDirectory* directory_ = nullptr; // 非所有（GameScene/サービスが所有）
 

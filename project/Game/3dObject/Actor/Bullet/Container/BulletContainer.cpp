@@ -29,9 +29,7 @@ void BulletContainer::Update(float /*dt*/) {
 			const auto& bullet = *it;
 
 			if (!bullet->GetIsAlive()) {
-				// Scene の管理から外す（描画/更新対象から除外）
 				lib->RemoveObject(bullet);
-				// コンテナからも除去
 				it = bullets.erase(it);
 			} else {
 				++it;

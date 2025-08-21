@@ -8,12 +8,8 @@
 #include <Game/Installer/Enemy/EnemyInstaller.h>
 #include <Game/3dObject/Actor/Enemy/Directory/IEnemyDirectory.h>
 
-EnemySpawner::EnemySpawner(const std::string& name) {
+EnemySpawner::EnemySpawner(const std::string& name) : SceneObject() {
 	SetName(name, ObjectType::GameObject);
-	worldTransform_.Initialize();
-	worldTransform_.translation = { 0.0f, 0.0f, 5.0f };
-
-	// ここでは親は設定しない（ランタイムで Player を注入してから親付け）
 }
 
 void EnemySpawner::Update(float dt) {
