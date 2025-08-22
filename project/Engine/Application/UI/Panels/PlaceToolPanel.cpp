@@ -11,6 +11,7 @@
 
 // --- game objects -----------------------------------------------------------
 #include <Game/3dObject/Actor/Enemy/Spawner/EnemySpawner.h>
+#include <Game/3dObject/Actor/Enemy/Collection/EnemyCollection.h>
 
 // --- externals --------------------------------------------------------------
 #include <externals/imgui/imgui.h>
@@ -88,9 +89,9 @@ void PlaceToolPanel::RegisterPlaceItems() {
 	spawnerItems.push_back({
 		PlaceItemCategory::InGameObject,
 		"EnemySpawner",
-		{},                 // アイコン無し
-		{64, 64},
+		{}, {64, 64},
 		[]() {
+			auto* ctx = SceneContext::Current();
 			auto factory = []() {
 				auto obj = SceneAPI::Instantiate<EnemySpawner>("EnemySpawner");
 				obj->ApplyConfig();
@@ -99,9 +100,9 @@ void PlaceToolPanel::RegisterPlaceItems() {
 			};
 			CommandManager::GetInstance()->Execute(
 				std::make_unique<CreateObjectCommand<EnemySpawner>>(
-					SceneContext::Current(), factory, "Create EnemySpawner"));
+					ctx, factory, "Create EnemySpawner"));
 		}
-						   });
+	});
 
 	// ---------------------------- Models ------------------------------------
 	auto& modelItems = categoryItems_[PlaceItemCategory::Model];

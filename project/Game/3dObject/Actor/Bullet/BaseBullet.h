@@ -17,18 +17,18 @@ public:
 	//===================================================================*/
 	BaseBullet() = default;
 	BaseBullet(const std::string& modelName,const std::string& name);
-	virtual ~BaseBullet();
+	virtual ~BaseBullet()override = default;
 
 	virtual void OnShot();
 	virtual void ShootInitialize(const Vector3& initPos, const Vector3& velocity);
-	void Initialize() override {};
+	void Initialize() override {}
 	void Update(float dt)override;
 	void DerivativeGui()override;
 
 	//--------- collider -------------------------------------------------
 	void OnCollisionEnter(Collider* other)override;
-	void OnCollisionStay([[maybe_unused]] Collider* other)override {};
-	void OnCollisionExit([[maybe_unused]] Collider* other)override {};
+	void OnCollisionStay([[maybe_unused]] Collider* other)override {}
+	void OnCollisionExit([[maybe_unused]] Collider* other)override {}
 
 	//--------- accessor -------------------------------------------------
 private:

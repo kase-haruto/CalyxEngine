@@ -115,12 +115,16 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Application\Effects\Particle\Emitter\BaseEmitter.cpp" />
     <ClCompile Include="Engine\Graphics\Descriptor\DescriptorAllocator.cpp" />
     <ClCompile Include="Engine\PostProcess\CRT\CRTEffect.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Bullet\Container\EnemyBulletContainer.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Bullet\EnemyBullet\EnemyBullet.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Bullet\Factory\BulletFactory.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Bullet\Register\BulletRegistrar.cpp" />
     <ClCompile Include="Engine\Objects\3D\Actor\TestObject\CalyxHuman.cpp" />
     <ClCompile Include="Engine\Assets\Animation\AnimationStruct.cpp" />
     <ClCompile Include="Engine\Scene\Title\TitleScene.cpp" />
     <ClCompile Include="Engine\Graphics\Camera\Frustum\Frustum.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Enemy\BindingService\EnemyRuntimeBindingService.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Enemy\Directory\EnemyDirectory.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Enemy\Spawner\EnemySpawner.cpp" />
     <ClCompile Include="Engine\Application\UI\EngineUI\IOnViewportTool.cpp" />
     <ClCompile Include="Engine\System\Command\EditorCommand\LevelEditorCommand\CreateObjectCommand\CreateParticleSystemCommand.cpp" />
@@ -251,6 +255,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Application\Effects\Particle\Emitter\GpuFxEmitter.cpp" />
     <ClCompile Include="Game\Battle\Shooting\ShootingController\BaseShootingController.cpp" />
     <ClCompile Include="Game\Battle\Shooting\ShootingController\EnemyShootingController.cpp" />
+    <ClCompile Include="Game\Installer\Enemy\EnemyInstaller.cpp" />
     <ClCompile Include="main.cpp">
       <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</MultiProcessorCompilation>
       <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</MultiProcessorCompilation>
@@ -317,7 +322,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Graphics\Descriptor\DescriptorAllocator.h" />
     <ClInclude Include="Engine\PostProcess\CRT\CRTEffect.h" />
     <ClInclude Include="Engine\Scene\Runtime\IRuntimeBehaviour.h" />
+    <ClInclude Include="Game\3dObject\Actor\Bullet\Container\EnemyBulletContainer.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\Details\BulletDetails.h" />
+    <ClInclude Include="Game\3dObject\Actor\Bullet\EnemyBullet\EnemyBullet.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\Factory\BulletFactory.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\Register\BulletRegistrar.h" />
     <ClInclude Include="Engine\Objects\3D\Actor\TestObject\CalyxHuman.h" />
@@ -332,6 +339,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Graphics\Camera\Frustum\Frustum.h" />
     <ClInclude Include="Engine\Scene\Utility\SceneUtility.h" />
     <ClInclude Include="Engine\System\Event\EventBus.h" />
+    <ClInclude Include="Game\3dObject\Actor\Enemy\BindingService\EnemyRuntimeBindingService.h" />
+    <ClInclude Include="Game\3dObject\Actor\Enemy\Directory\EnemyDirectory.h" />
+    <ClInclude Include="Game\3dObject\Actor\Enemy\Directory\IEnemyDirectory.h" />
     <ClInclude Include="Game\3dObject\Actor\Enemy\Spawner\EnemySpawner.h" />
     <ClInclude Include="Engine\Foundation\Utility\Ease\EaseTypes.h" />
     <ClInclude Include="Engine\System\Command\EditorCommand\LevelEditorCommand\CreateObjectCommand\CreateParticleSystemCommand.h" />
@@ -554,6 +564,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\Battle\Shooting\ShootingController\BaseShootingController.h" />
     <ClInclude Include="Game\Battle\Shooting\ShootingController\EnemyShootingController.h" />
     <ClInclude Include="Game\Battle\Shooting\ShootingController\PlayerShootingController.h" />
+    <ClInclude Include="Game\Installer\Enemy\EnemyInstaller.h" />
     <ClInclude Include="Game\Installer\Player\PlayerInstaller.h" />
     <ClInclude Include="Game\Input\PlayerInput\PlayerInputHandler.h" />
     <ClInclude Include="Game\Battle\Shooting\Shooter\HomingBullet\PlayerHomingBulletShooter.h" />

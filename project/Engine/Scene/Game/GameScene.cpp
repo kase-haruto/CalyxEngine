@@ -1,6 +1,7 @@
 #include "GameScene.h"
+
 /////////////////////////////////////////////////////////////////////////////////////////
-//	include
+//  include
 /////////////////////////////////////////////////////////////////////////////////////////
 
 // scene
@@ -12,84 +13,125 @@
 #include <Engine/Collision/CollisionManager.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
+
 // game
 #include <Game/3dObject/Actor/Bullet/Register/BulletRegistrar.h>
 #include <Game/Installer/Player/PlayerInstaller.h>
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//	コンストラクタ/デストラクタ
-/////////////////////////////////////////////////////////////////////////////////////////
-GameScene::GameScene(){
-	// シーン名を設定
-	//IScene::SetSceneName("GameScene");
-	SetSceneName("GameScene");
 
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//  ctor / dtor
+/////////////////////////////////////////////////////////////////////////////////////////
+GameScene::GameScene() {
+	SetSceneName("GameScene");
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//	アセットのロード
+//  アセットのロード
 /////////////////////////////////////////////////////////////////////////////////////////
-void GameScene::LoadAssets(){}
+void GameScene::LoadAssets() {
+	// 必要ならここでモデル/テクスチャ等をプリロード
+}
 
-
 /////////////////////////////////////////////////////////////////////////////////////////
-//	初期化処理
+//  初期化処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void GameScene::Initialize(){
+void GameScene::Initialize() {
+	// SceneContext 初期化
 	sceneContext_->Initialize();
 
+	// シーンデータ読み込み
 	SceneSerializer::Load(*sceneContext_, "Resources/Assets/Scenes/GameScene.scene");
 
+	// ベース初期化
 	BaseScene::Initialize();
 
+	// アセット読み込み
 	LoadAssets();
-	//弾の登録
+
+	// 弾の登録
 	BulletRegistrar::RegisterAll();
 
-	auto ctx = SceneContext::Current();
-	auto ground = ctx->FindObjectByName<BaseGameObject>("field");
-	ground->SetEnableRaycast(false);
-
-	attackSprite_ = std::make_unique<Sprite>("Textures/attackUI.png");
-	Vector2 attackUiPos = Vector2(1280.0f * 0.5f, 720.0f - 100.0f);
-	Vector2 attackUiSize = Vector2(128.0f, 128.0f);
-	attackSprite_->Initialize(attackUiPos, attackUiSize);
-	attackSprite_->SetAnchorPoint(Vector2(0.5f, 0.5f));
-
-	auto player = sceneContext_->FindFirst<Player>();
-	PlayerInstaller playerInstaller;
-	playerInstaller.InstallPlayer(player);
-}
-
-void GameScene::Update([[maybe_unused]]float dt){
-	auto player = sceneContext_->FindFirst<Player>();
-	auto enemyCol = sceneContext_->FindFirst<EnemyCollection>();
-	if (player && enemyCol) {
-		player->SetEnemyList(enemyCol->GetEnemies());
+	if (auto* ctx = SceneContext::Current()) {
+		if (auto ground = ctx->FindObjectByName<BaseGameObject>("field")) {
+			ground->SetEnableRaycast(false);
+		}
 	}
 
-	attackSprite_->Update();
-	/* その他 ============================*/
+	// UI（攻撃状態）
+	attackSprite_ = std::make_unique<Sprite>("Textures/attackUI.png");
+	{
+		Vector2 attackUiPos = Vector2(1280.0f * 0.5f, 720.0f - 100.0f);
+		Vector2 attackUiSize = Vector2(128.0f, 128.0f);
+		attackSprite_->Initialize(attackUiPos, attackUiSize);
+		attackSprite_->SetAnchorPoint(Vector2(0.5f, 0.5f));
+	}
+
+	// プレイヤー基本セットアップ（Move/Install など）
+	{
+		auto player = sceneContext_->FindFirst<Player>();
+		PlayerInstaller installer;
+		installer.InstallPlayer(player);
+		wPlayer_ = player; // Draw でスプライト拾うために持っておく
+	}
+
+	enemyBinding_ = std::make_unique<EnemyRuntimeBindingService>();
+	enemyBinding_->OnSceneLoaded(*sceneContext_);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//  更新
+/////////////////////////////////////////////////////////////////////////////////////////
+void GameScene::Update([[maybe_unused]] float dt) {
+	// ランタイム配線サービスの更新（Player へ最新の敵リスト供給等）
+	if (enemyBinding_) {
+		enemyBinding_->Update(*sceneContext_, dt);
+	}
+
+	// UI 更新など
+	if (attackSprite_) attackSprite_->Update();
+
+	// 衝突判定
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
 }
 
-void GameScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService, RenderTargetType type){
+/////////////////////////////////////////////////////////////////////////////////////////
+//  描画
+/////////////////////////////////////////////////////////////////////////////////////////
+void GameScene::Draw(ID3D12GraphicsCommandList* cmdList,
+					 PipelineService* psoService,
+					 RenderTargetType type) {
 	SceneContext* ctx = GetSceneContext();
-	if (!ctx) { BaseScene::Draw(cmdList, psoService, type); return; }
+	if (!ctx) {
+		BaseScene::Draw(cmdList, psoService, type);
+		return;
+	}
 
+	// プレイヤーが持つ追加スプライトを登録
 	if (auto player = ctx->FindFirst<Player>()) {
 		for (auto& sp : player->GetAllSprites()) {
 			if (sp) spriteRenderer_->Register(sp);
 		}
 	}
-	if (attackSprite_) spriteRenderer_->Register(attackSprite_.get());
+	if (attackSprite_) {
+		spriteRenderer_->Register(attackSprite_.get());
+	}
 
 	BaseScene::Draw(cmdList, psoService, type);
 }
 
-void GameScene::CleanUp(){
-	// 3Dオブジェクトの描画を終了
+/////////////////////////////////////////////////////////////////////////////////////////
+//  終了処理
+/////////////////////////////////////////////////////////////////////////////////////////
+void GameScene::CleanUp() {
+	// サービス側の後始末
+	if (enemyBinding_) {
+		enemyBinding_->OnSceneCleared(*sceneContext_);
+		enemyBinding_.reset();
+	}
+
+	// シーン内オブジェクト/コライダ掃除
 	sceneContext_->GetObjectLibrary()->Clear();
 	CollisionManager::GetInstance()->ClearColliders();
 }
-

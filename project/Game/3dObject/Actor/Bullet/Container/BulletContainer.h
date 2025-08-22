@@ -26,7 +26,7 @@ public:
 	//					public functions
 	//===================================================================*/
 	BulletContainer(const std::string& name);
-	~BulletContainer() = default;
+	virtual ~BulletContainer() = default;
 
 	//--------- mainfunc -----------------------------------------------------
 	virtual void AddBullet(BulletID id, const Vector3& pos, const Vector3& vel) = 0;
