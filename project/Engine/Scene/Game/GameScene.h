@@ -11,8 +11,8 @@
 #include <Game/3dObject/Actor/Player/Player.h>
 /* graphics */
 #include <Game/3d/GameCamera/RailCamera.h>
-// runtime 配線サービス
 #include <Game/3dObject/Actor/Enemy/BindingService/EnemyRuntimeBindingService.h>
+#include <Game/3dObject/Actor/Enemy/Collection/EnemyCollection.h>
 /* c++ */
 #include <memory>
 
@@ -40,4 +40,5 @@ private:
 
 	/* runtime services =============================================*/
 	std::unique_ptr<EnemyRuntimeBindingService> enemyBinding_; //< Player⇄Enemy 配線担当
+	std::shared_ptr<EnemyCollection>  enemyCollection_;
 };

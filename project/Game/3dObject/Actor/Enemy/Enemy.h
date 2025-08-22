@@ -50,7 +50,6 @@ private:
 	//					private variables
 	//===================================================================*/
 	DeathState deathState_ = DeathState::Alive;
-
 	Vector3 deathRotateAxis_ = {0, 0, 1}; // 傾く軸
 	Vector3 basePosition_{};		// サイン波の基準位置
 	const WorldTransform* playerTransform_;
