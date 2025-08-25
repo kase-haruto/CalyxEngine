@@ -25,7 +25,8 @@ HierarchyPanel::HierarchyPanel() : IEngineUI("Hierarchy"){
 }
 
 void HierarchyPanel::Render(){
-	ImGui::Begin(panelName_.c_str(), nullptr, ImGuiWindowFlags_NoDecoration);
+	bool open = true;
+	ImGui::Begin(panelName_.c_str(), &open, ImGuiWindowFlags_NoDecoration);
 	ImGui::Text("Scene Hierarchy");
 
 	lib_ = SceneContext::Current()->GetObjectLibrary();
@@ -94,6 +95,7 @@ void HierarchyPanel::Render(){
 	}
 
 	ImGui::End();
+	if (!open) SetShow(false);
 }
 
 void HierarchyPanel::ShowObjectRecursive(SceneObject* obj){

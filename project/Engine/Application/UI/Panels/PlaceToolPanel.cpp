@@ -22,6 +22,7 @@
 PlaceToolPanel::PlaceToolPanel()
 	: IEngineUI("PlaceToolPanel") {
 	RegisterPlaceItems();
+	IEngineUI::SetShow(false); //初期状態は閉じているようにする
 }
 
 // ============================================================================
@@ -122,7 +123,7 @@ void PlaceToolPanel::RegisterPlaceItems() {
 		modelItems.push_back({
 			PlaceItemCategory::Model,
 			displayName,
-			{}, // テクスチャがあればここにアイコンを設定
+			{},
 			{64, 64},
 			[modelName, displayName]() {
 				auto factory = [modelName, displayName]() {
@@ -143,16 +144,21 @@ void PlaceToolPanel::RegisterPlaceItems() {
 //  パネル描画
 // ============================================================================
 void PlaceToolPanel::Render() {
-	ImGui::Begin(panelName_.c_str());
+	if (!IsShow()) return; // ★メニューで非表示なら描かない
+
+	bool open = true;
+	ImGui::Begin(panelName_.c_str(), &open);
 
 	if (!SceneContext::Current()) {
 		ImGui::Text("sceneContext not set");
 		ImGui::End();
+		if (!open) SetShow(false);
 		return;
 	}
 
 	RenderCategoryItems();
 	ImGui::End();
+	if (!open) SetShow(false);
 }
 
 // ============================================================================
