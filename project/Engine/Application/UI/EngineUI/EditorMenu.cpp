@@ -34,7 +34,7 @@ void EditorMenu::Render() {
 	if (ImGui::BeginMainMenuBar()) {
 		RenderCategory("File(F)", MenuCategory::File);
 		RenderCategory("View(V)", MenuCategory::View);
-		//RenderCategory("Edit(E)", MenuCategory::Edit);
+		RenderCategory("Edit(E)", MenuCategory::Edit);
 		RenderCategory("Tools(T)", MenuCategory::Tools);
 		ImGui::EndMainMenuBar();
 	}

@@ -89,6 +89,7 @@ private:
 	std::unique_ptr<PerformanceOverlay> performanceOverlay_;	//< パフォーマンスオーバーレイ
 
 	// 状態
+	bool lastPlaying_ = false;
 	SceneContext* prevCtx_;
 	BaseEditor* selectedEditor_ = nullptr;
 	std::shared_ptr<SceneObject> selectedObject_;
