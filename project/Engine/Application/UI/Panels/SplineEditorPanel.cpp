@@ -205,53 +205,51 @@ void SplineEditorPanel::HandleGizmoUpdateAndDraw3D() {
 	auto expand = [&](const Vector3& v) { minP = Vector3::Min(minP, v); maxP = Vector3::Max(maxP, v); };
 	for (auto& pt : data_.points) expand(pt.pos);
 	const int steps = ((std::max))(2, data_.SegmentCount() * 16);
-	for (int i = 0;i <= steps;++i) expand(data_.Evaluate(i / (float)steps));
+	for (int i = 0; i <= steps; ++i) expand(data_.Evaluate(i / (float)steps));
 
 	Vector3 diag = maxP - minP;
 	float aabbHalf = ((std::max))({ diag.x, diag.y, diag.z }) * 0.01f;
 	if (aabbHalf <= 0.0f) aabbHalf = 0.05f;
 
-	// 入力 → レイ → ピック/ドラッグ
+	// === ポイントの選択（クリックのみ。移動は Manipulator に任せる） ===
 	if (gizmoEnabled_) {
 		Input* in = Input::GetInstance();
-		Ray ray = MakeMouseRay();
-
 		if (in->TriggerMouseButton(MouseButton::Left)) {
-			float t;
+			Ray ray = MakeMouseRay();
+			float t = 0.0f;
 			int idx = PickPointByRayAABB(ray, aabbHalf, t);
 			if (idx >= 0) {
 				SetSelectedIndex(idx);
-				Vector3 p = data_.points[idx].pos;
-				dragPlaneN_ = { 0,1,0 };                       // 水平平面（必要なら切替UIを追加）
-				dragPlaneD_ = -Vector3::Dot(dragPlaneN_, p);  // N·X + D = 0
-				dragging_ = true;
-			} else {
-				dragging_ = false;
-			}
-		} else if (in->ReleaseMouseButton(MouseButton::Left)) {
-			dragging_ = false;
-		}
-
-		if (dragging_ && GetSelectedIndex() >= 0) {
-			Vector3 hit{};
-			if (IntersectPlane(ray, dragPlaneN_, dragPlaneD_, hit)) {
-				data_.points[GetSelectedIndex()].pos = hit;
 			}
 		}
 	}
 
-	// 3Dプレビュー
+	// === Manipulator で選択点を移動 ===
+	if (gizmoEnabled_ && manipulator_ && selectedPoint_ >= 0 && selectedPoint_ < (int)data_.points.size()) {
+		Vector3& pos = data_.points[selectedPoint_].pos;
+		gizmoTf_.translation = pos;
+		gizmoTf_.scale = { 1,1,1 };
+		gizmoTf_.rotation = Quaternion::MakeIdentity();
+		gizmoTf_.Update(); // あなたの更新関数名に合わせて
+
+		manipulator_->SetTarget(&gizmoTf_);
+		manipulator_->Update();
+
+		pos = gizmoTf_.translation;
+	}
+
+	// === 3Dプレビュー ===
 	drawer->DrawAABB(minP, maxP, Vector4(0.0f, 0.8f, 0.9f, 1.0f)); // 全体AABB
 
 	Vector3 prev = data_.Evaluate(0.0f);
-	for (int i = 1;i <= steps;i++) {
+	for (int i = 1; i <= steps; i++) {
 		Vector3 cur = data_.Evaluate(i / (float)steps);
 		drawer->DrawLine3d(prev, cur, Vector4(0.0f, 0.8f, 0.9f, 1.0f)); // 曲線ライン
 		prev = cur;
 	}
 
 	int sel = GetSelectedIndex();
-	for (int i = 0;i < (int)data_.points.size();++i) {
+	for (int i = 0; i < (int)data_.points.size(); ++i) {
 		const Vector3& p = data_.points[i].pos;
 		Vector3 pmin = p - Vector3{ aabbHalf,aabbHalf,aabbHalf };
 		Vector3 pmax = p + Vector3{ aabbHalf,aabbHalf,aabbHalf };
@@ -260,9 +258,18 @@ void SplineEditorPanel::HandleGizmoUpdateAndDraw3D() {
 	}
 }
 
-// -------------------- Render 本体 --------------------
 void SplineEditorPanel::Render() {
 	if (!IsShow()) return;
+
+	static bool initialized = false;
+	if (!initialized) {
+		manipulator_ = std::make_unique<Manipulator>();
+		gizmoTf_.translation = { 0,0,0 };
+		gizmoTf_.scale = { 1,1,1 };
+		gizmoTf_.rotation = Quaternion::MakeIdentity();
+		gizmoTf_.Update();
+		initialized = true;
+	}
 
 	bool open = true;
 	ImGui::Begin(panelName_.c_str(), &open);

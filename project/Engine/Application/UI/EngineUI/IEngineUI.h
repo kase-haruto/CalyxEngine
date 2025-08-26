@@ -18,7 +18,7 @@ public:
 	virtual void Render() = 0;
 
 	//--------- accessor -----------------------------------------------------//
-	virtual const std::string& GetPanelName() const = 0;
+	virtual const std::string& GetPanelName() const { return panelName_; }
 	void SetShow(bool isShow){ isShow_ = isShow; }
 	bool IsShow() const{ return isShow_; }
 

@@ -14,7 +14,7 @@ public:
 	bool closed = false;
 
 	// 補間API（Catmull–Rom）
-	int  SegmentCount() const { int n = (int)points.size(); return closed ? n : std::max(0, n - 1); }
+	int  SegmentCount() const { int n = (int)points.size(); return closed ? n : (std::max)(0, n - 1); }
 	Vector3 Evaluate(float t) const;
 
 	// 編集ユーティリティ

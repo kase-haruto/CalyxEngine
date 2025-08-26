@@ -8,6 +8,7 @@
 #include <Engine/Application/UI/Panels/HierarchyPanel.h>
 #include <Engine/Application/UI/Panels/InspectorPanel.h>
 #include <Engine/Application/UI/Panels/PlaceToolPanel.h>
+#include <Engine/Application/UI/Panels/SplineEditorPanel.h>
 #include <Engine/Editor/SceneObjectEditor.h>
 
 //c++
@@ -75,6 +76,7 @@ private:
 	std::unique_ptr<InspectorPanel> inspector_;
 	std::unique_ptr<SceneObjectEditor> sceneEditor_;
 	std::unique_ptr<PlaceToolPanel> placeToolPanel_;
+	std::unique_ptr<SplineEditorPanel> splineEditor_;
 	PlaySession* pPlaySesseion_ = nullptr;
 
 	// メニュー
@@ -91,6 +93,6 @@ private:
 	BaseEditor* selectedEditor_ = nullptr;
 	std::shared_ptr<SceneObject> selectedObject_;
 
-	// ★ Editors メニューに並べるパネル群
+	// Editors メニューに並べるパネル群
 	std::vector<IEngineUI*> editorPanels_;
 };

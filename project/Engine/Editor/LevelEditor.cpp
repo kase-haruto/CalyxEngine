@@ -23,6 +23,7 @@ void LevelEditor::Initialize() {
 	inspector_ = std::make_unique<InspectorPanel>();
 	sceneEditor_ = std::make_unique<SceneObjectEditor>();
 	placeToolPanel_ = std::make_unique<PlaceToolPanel>();
+	splineEditor_ = std::make_unique<SplineEditorPanel>();
 
 	// Panel に LevelEditor 自体を渡す（コールバック通知や setter）
 	editor_->SetOnEditorSelected([this](BaseEditor* ed) { SetSelectedEditor(ed); });
@@ -95,6 +96,7 @@ void LevelEditor::Initialize() {
 	editorPanels_.push_back(editor_.get());
 	editorPanels_.push_back(inspector_.get());
 	editorPanels_.push_back(placeToolPanel_.get());
+	editorPanels_.push_back(splineEditor_.get());
 
 	// Editors メニュー（MenuCategory::Tools）に各パネルのトグルを追加
 	for (auto* p : editorPanels_) {
