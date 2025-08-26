@@ -6,7 +6,8 @@ ConsolePanel::ConsolePanel()
 	: IEngineUI("Console"){}
 
 void ConsolePanel::Render(){
-	ImGui::Begin(panelName_.c_str());
+	bool isOpen = true;
+	ImGui::Begin(panelName_.c_str(),&isOpen);
 
 	const char* logTypes[] = {"System Logs","Collision Logs"};
 
@@ -20,6 +21,7 @@ void ConsolePanel::Render(){
 	}
 
 	ImGui::End();
+	if (!isOpen) SetShow(false);
 }
 
 const std::string& ConsolePanel::GetPanelName() const{

@@ -15,7 +15,8 @@ InspectorPanel::InspectorPanel()
 	: IEngineUI("Inspector") {}
 
 void InspectorPanel::Render() {
-	ImGui::Begin(panelName_.c_str());
+	bool isOpen = true;
+	ImGui::Begin(panelName_.c_str(),&isOpen);
 
 	if (selectedEditor_) {
 		ImGui::Text("Editor: %s", selectedEditor_->GetEditorName().c_str());
@@ -30,6 +31,7 @@ void InspectorPanel::Render() {
 	}
 
 	ImGui::End();
+	if (!isOpen) SetShow(false);
 }
 
 void InspectorPanel::SetSelectedObject(const std::shared_ptr<SceneObject>&obj){

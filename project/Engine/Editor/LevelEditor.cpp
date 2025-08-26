@@ -15,7 +15,7 @@
 
 using namespace EngineEdit;
 
-void LevelEditor::Initialize(){
+void LevelEditor::Initialize() {
 #ifdef _DEBUG
 	// 各パネルの初期化
 	hierarchy_ = std::make_unique<HierarchyPanel>();
@@ -23,20 +23,21 @@ void LevelEditor::Initialize(){
 	inspector_ = std::make_unique<InspectorPanel>();
 	sceneEditor_ = std::make_unique<SceneObjectEditor>();
 	placeToolPanel_ = std::make_unique<PlaceToolPanel>();
+	splineEditor_ = std::make_unique<SplineEditorPanel>();
 
 	// Panel に LevelEditor 自体を渡す（コールバック通知や setter）
-	editor_->SetOnEditorSelected([this] (BaseEditor* ed){ SetSelectedEditor(ed); });
+	editor_->SetOnEditorSelected([this](BaseEditor* ed) { SetSelectedEditor(ed); });
 
 	// Hierarchy から来るコールバックは shared_ptr で受ける
-	hierarchy_->SetOnObjectSelected([this] (std::shared_ptr<SceneObject> sp){
+	hierarchy_->SetOnObjectSelected([this](std::shared_ptr<SceneObject> sp) {
 		SetSelectedObject(sp);
-									});
-	hierarchy_->SetOnObjectDelete([this] (std::shared_ptr<SceneObject> sp){
-		DeleteObject(std::move(sp));           // 参照カウント‐1
-								  });
-	hierarchy_->SetOnObjectCreate([this] (std::shared_ptr<SceneObject> sp){
-		CreateObject(std::move(sp));           // 受け取ってシーンに追加
-								  });
+	});
+	hierarchy_->SetOnObjectDelete([this](std::shared_ptr<SceneObject> sp) {
+		DeleteObject(std::move(sp));
+	});
+	hierarchy_->SetOnObjectCreate([this](std::shared_ptr<SceneObject> sp) {
+		CreateObject(std::move(sp));
+	});
 
 	inspector_->SetSceneObjectEditor(sceneEditor_.get());
 
@@ -47,7 +48,7 @@ void LevelEditor::Initialize(){
 	performanceOverlay_ = std::make_unique<PerformanceOverlay>();
 
 	// Manipulator をツールとして登録
-	if (auto* manipulator = sceneEditor_->GetManipulator()){
+	if (auto* manipulator = sceneEditor_->GetManipulator()) {
 		debugViewport_->AddTool(manipulator);
 		debugViewport_->AddTool(performanceOverlay_.get());
 	}
@@ -55,7 +56,7 @@ void LevelEditor::Initialize(){
 	// エディターメニューの初期化
 	menu_ = std::make_unique<EditorMenu>();
 	menu_->Add(MenuCategory::File, {
-		"Save Scene", "Ctrl+S", [this] (){
+		"Save Scene", "Ctrl+S", [this]() {
 			IGFD::FileDialogConfig config;
 			config.path = "Resources/Assets/Scenes/";
 			ImGuiFileDialog::Instance()->OpenDialog(
@@ -68,16 +69,16 @@ void LevelEditor::Initialize(){
 			   });
 
 	menu_->Add(MenuCategory::File, {
-	"Open Scene", "Ctrl+O", []{
-		IGFD::FileDialogConfig config;
-		config.path = "Resources/Assets/Scenes/";
-		ImGuiFileDialog::Instance()->OpenDialog(
-			"SceneOpenDialog",
-			"open scene",
-			".scene",
-			config
-		);
-	}, true
+		"Open Scene", "Ctrl+O", [] {
+			IGFD::FileDialogConfig config;
+			config.path = "Resources/Assets/Scenes/";
+			ImGuiFileDialog::Instance()->OpenDialog(
+				"SceneOpenDialog",
+				"open scene",
+				".scene",
+				config
+			);
+		}, true
 			   });
 
 	if (mode_ == EditorMode::Edit) {
@@ -90,23 +91,40 @@ void LevelEditor::Initialize(){
 				   });
 	}
 
+	// パネル群を登録（Editors メニューに並べる）
+	editorPanels_.push_back(hierarchy_.get());
+	editorPanels_.push_back(editor_.get());
+	editorPanels_.push_back(inspector_.get());
+	editorPanels_.push_back(placeToolPanel_.get());
+	editorPanels_.push_back(splineEditor_.get());
+
+	// Editors メニュー（MenuCategory::Tools）に各パネルのトグルを追加
+	for (auto* p : editorPanels_) {
+		menu_->Add(MenuCategory::Tools, {
+			p->GetPanelName(), "",
+			[p, this]() {
+				TogglePanel(p); // 表示/非表示トグル
+			},
+			true
+				   });
+	}
 #endif // _DEBUG
 }
 
-void LevelEditor::Update(){
+void LevelEditor::Update() {
 
 #ifdef _DEBUG
 	SceneContext* ctx = SceneContext::Current();
 
 	// 入力チェックはここで行う
-	if (Input::GetInstance()->TriggerMouseButton(MouseButton::Left)){
+	if (Input::GetInstance()->TriggerMouseButton(MouseButton::Left)) {
 		TryPickUnderCursor(); // レイキャストして選択処理へ
 	}
 	// ----------------------------
 	// Open Scene ダイアログ処理
 	// ----------------------------
-	if (ImGuiFileDialog::Instance()->Display("SceneOpenDialog")){
-		if (ImGuiFileDialog::Instance()->IsOk()){
+	if (ImGuiFileDialog::Instance()->Display("SceneOpenDialog")) {
+		if (ImGuiFileDialog::Instance()->IsOk()) {
 			std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
 			ClearSelection(); // 既存の選択をクリア
 			SceneSerializer::Load(*ctx, filePath);
@@ -117,8 +135,8 @@ void LevelEditor::Update(){
 	// ----------------------------
 	// Save Scene ダイアログ処理
 	// ----------------------------
-	if (ImGuiFileDialog::Instance()->Display("SceneSaveDialog")){
-		if (ImGuiFileDialog::Instance()->IsOk()){
+	if (ImGuiFileDialog::Instance()->Display("SceneSaveDialog")) {
+		if (ImGuiFileDialog::Instance()->IsOk()) {
 			std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
 			SceneSerializer::Save(*ctx, filePath);
 		}
@@ -131,19 +149,21 @@ void LevelEditor::Update(){
 #endif // _DEBUG
 }
 
-void LevelEditor::Render(){
+void LevelEditor::Render() {
 
-	hierarchy_->Render();
-	editor_->Render();
-	placeToolPanel_->Render();
-	if (pPlaySesseion_){
+	for (auto* p : editorPanels_) {
+		if (p->IsShow()) p->Render();
+	}
+
+	if (pPlaySesseion_) {
 		pPlaySesseion_->RenderToolbar();
 	}
 
 	inspector_->SetSelectedEditor(selectedEditor_);
 	inspector_->SetSelectedObject(selectedObject_);
 
-	inspector_->Render();
+	// inspector は editorPanels_ に含まれているので、ここで Render は呼ばない
+	// inspector_->Render();
 
 	sceneEditor_->Update();
 }
@@ -152,23 +172,23 @@ void LevelEditor::RenderMenu() {
 	menu_->Render();
 }
 
-void LevelEditor::EnterGameMode(){
+void LevelEditor::EnterGameMode() {
 	//playSession_->Enter();
 	mode_ = EditorMode::Game;
 }
 
-void LevelEditor::ExitGameMode(){
+void LevelEditor::ExitGameMode() {
 	//playSession_->Exit();
 	mode_ = EditorMode::Edit;
 }
 
-void LevelEditor::SetSelectedEditor(BaseEditor* editor){
+void LevelEditor::SetSelectedEditor(BaseEditor* editor) {
 	selectedEditor_ = editor;
 	selectedObject_ = nullptr;
 	inspector_->SetSelectedEditor(editor);
 }
 
-void LevelEditor::SetSelectedObject(const std::shared_ptr<SceneObject>& sp){
+void LevelEditor::SetSelectedObject(const std::shared_ptr<SceneObject>& sp) {
 	selectedObject_ = sp;
 	selectedEditor_ = nullptr;
 	hierarchy_->SetSelectedObject(sp);
@@ -199,19 +219,19 @@ void LevelEditor::CreateObject(const std::shared_ptr<SceneObject>& obj) {
 }
 
 
-void LevelEditor::DeleteObject(const std::shared_ptr<SceneObject>& sp){
+void LevelEditor::DeleteObject(const std::shared_ptr<SceneObject>& sp) {
 	if (!sp) return;
 	SceneContext* ctx = SceneContext::Current();
 
 	// ── 選択状態をクリア ───────────────────────────────
-	if (selectedObject_ == sp){
+	if (selectedObject_ == sp) {
 		selectedObject_.reset();
 		inspector_->SetSelectedObject(nullptr);
 	}
 
 	// ── パーティクルシステムなら FxSystem からも削除 ──────────
-	if (sp->GetObjectType() == ObjectType::ParticleSystem){
-		if (auto fxEmitter = std::dynamic_pointer_cast< FxEmitter >(sp)){
+	if (sp->GetObjectType() == ObjectType::ParticleSystem) {
+		if (auto fxEmitter = std::dynamic_pointer_cast<FxEmitter>(sp)) {
 			ctx->GetFxSystem()->RemoveEmitter(fxEmitter.get());
 		}
 	}
@@ -222,20 +242,20 @@ void LevelEditor::DeleteObject(const std::shared_ptr<SceneObject>& sp){
 }
 
 
-void LevelEditor::RenderViewport(ViewportType type, const ImTextureID& tex){
+void LevelEditor::RenderViewport(ViewportType type, const ImTextureID& tex) {
 	//タイプに応じて描画
-	if (type == ViewportType::VIEWPORT_MAIN){
-		if (mainViewport_){
+	if (type == ViewportType::VIEWPORT_MAIN) {
+		if (mainViewport_) {
 			mainViewport_->Render(tex);
 		}
-	} else if (type == ViewportType::VIEWPORT_DEBUG){
-		if (debugViewport_){
+	} else if (type == ViewportType::VIEWPORT_DEBUG) {
+		if (debugViewport_) {
 			debugViewport_->Render(tex);
 		}
 	}
 }
 
-void LevelEditor::SetCameraForViewport(BaseCamera* mainCamera, BaseCamera* debugCamera){
+void LevelEditor::SetCameraForViewport(BaseCamera* mainCamera, BaseCamera* debugCamera) {
 	mainViewport_->SetCamera(mainCamera);
 	debugViewport_->SetCamera(debugCamera);
 }
@@ -244,7 +264,7 @@ void LevelEditor::SetCameraForViewport(BaseCamera* mainCamera, BaseCamera* debug
 void LevelEditor::TryPickObjectFromMouse(const Vector2& mouse,
 										 const Vector2& viewportSize,
 										 const Matrix4x4& view,
-										 const Matrix4x4& proj){
+										 const Matrix4x4& proj) {
 	SceneContext* ctx = SceneContext::Current();
 
 	// ビューポート内ローカル座標へ変換
@@ -253,39 +273,39 @@ void LevelEditor::TryPickObjectFromMouse(const Vector2& mouse,
 	Ray ray = Raycastor::ConvertMouseToRay(mouseLocal, view, proj, viewportSize);
 
 	// ヒット判定（raw ptr）
-	if (SceneObject* raw = PickSceneObjectByRay(ray)){
+	if (SceneObject* raw = PickSceneObjectByRay(ray)) {
 		// 対応する shared_ptr をライブラリから取得
-		if (auto sp = ctx->FindSharedObject(raw)){
+		if (auto sp = ctx->FindSharedObject(raw)) {
 			SetSelectedObject(sp);
 		}
 	}
 }
 
 
-SceneObject* LevelEditor::PickSceneObjectByRay(const Ray& ray){
+SceneObject* LevelEditor::PickSceneObjectByRay(const Ray& ray) {
 	const auto* lib = hierarchy_->GetSceneObjectLibrary();
 	if (!lib) return nullptr;
 
 	const auto& allObjects = lib->GetAllObjectsRaw();
 	auto hit = Raycastor::Raycast(ray, allObjects);
-	if (hit){
-		return static_cast< SceneObject* >(hit->hitObject);
+	if (hit) {
+		return static_cast<SceneObject*>(hit->hitObject);
 	}
 	return nullptr;
 }
 
-void LevelEditor::SaveScene(){
+void LevelEditor::SaveScene() {
 	SceneContext* ctx = SceneContext::Current();
 
 	std::string scenePath = "Resources/Assets/Scenes/" + ctx->GetSceneName() + ".scene";
 	SceneSerializer::Save(*ctx, scenePath);
 }
 
-void LevelEditor::NotifySceneContextChanged(){
-	if (prevCtx_!=SceneContext::Current()) {
+void LevelEditor::NotifySceneContextChanged() {
+	if (prevCtx_ != SceneContext::Current()) {
 		SceneContext* current = SceneContext::Current();
 
-			// 新しい ObjectLibrary を各パネルに通知
+		// 新しい ObjectLibrary を各パネルに通知
 		hierarchy_->SetSceneObjectLibrary(current ? current->GetObjectLibrary() : nullptr);
 
 		SetSelectedObject(std::shared_ptr<SceneObject>{});
@@ -316,7 +336,7 @@ void LevelEditor::ToggleMode() {
 }
 
 
-void LevelEditor::TryPickUnderCursor(){
+void LevelEditor::TryPickUnderCursor() {
 	SceneContext* current = SceneContext::Current();
 
 	Vector2 origin = debugViewport_->GetPosition();	// ビューポート描画位置（スクリーン座標）
@@ -340,8 +360,8 @@ void LevelEditor::TryPickUnderCursor(){
 	Matrix4x4 proj = CameraManager::GetDebug()->GetProjectionMatrix();
 
 	Ray ray = Raycastor::ConvertMouseToRay(mousePos, view, proj, size);
-	if (SceneObject* picked = PickSceneObjectByRay(ray)){
-		if (auto sp = current->FindSharedObject(picked)){
+	if (SceneObject* picked = PickSceneObjectByRay(ray)) {
+		if (auto sp = current->FindSharedObject(picked)) {
 			// 共有ポインタを渡す
 			SetSelectedObject(sp);
 		}

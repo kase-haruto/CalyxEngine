@@ -3,14 +3,17 @@
 #include <Engine/Application/UI/EngineUI/Manipulator.h>
 #include <Engine/Application/UI/EngineUI/PerformanceOverlay.h>
 #include <Engine/Application/UI/EngineUI/Viewport.h>
+#include <Engine/Application/UI/EngineUI/IEngineUI.h>
 #include <Engine/Application/UI/Panels/EditorPanel.h>
 #include <Engine/Application/UI/Panels/HierarchyPanel.h>
 #include <Engine/Application/UI/Panels/InspectorPanel.h>
 #include <Engine/Application/UI/Panels/PlaceToolPanel.h>
+#include <Engine/Application/UI/Panels/SplineEditorPanel.h>
 #include <Engine/Editor/SceneObjectEditor.h>
 
 //c++
 #include <memory>
+#include <vector>
 
 class BaseEditor;
 class SceneContext;
@@ -24,7 +27,7 @@ namespace EngineEdit {
 	};
 }
 
-class LevelEditor{
+class LevelEditor {
 public:
 	void Initialize();
 	void Update();
@@ -37,12 +40,12 @@ public:
 	void CreateObject(const std::shared_ptr<SceneObject>& obj);
 	void DeleteObject(const std::shared_ptr<SceneObject>& sp);
 	void RenderViewport(ViewportType type, const ImTextureID& tex);
-	void SetCameraForViewport(BaseCamera* mainCamera,BaseCamera* debugCamera);
-	HierarchyPanel* GetHierarchyPanel() const{ return hierarchy_.get(); }
-	EditorPanel* GetEditorPanel() const{ return editor_.get(); }
-	PlaceToolPanel* GetPlaceToolPanel() const{ return placeToolPanel_.get(); }
+	void SetCameraForViewport(BaseCamera* mainCamera, BaseCamera* debugCamera);
+	HierarchyPanel* GetHierarchyPanel() const { return hierarchy_.get(); }
+	EditorPanel* GetEditorPanel() const { return editor_.get(); }
+	PlaceToolPanel* GetPlaceToolPanel() const { return placeToolPanel_.get(); }
 	EngineEdit::EditorMode GetMode() const { return mode_; }
-	void SetPlaySession(PlaySession* session){ pPlaySesseion_ = session; }
+	void SetPlaySession(PlaySession* session) { pPlaySesseion_ = session; }
 private:
 	void TryPickUnderCursor();
 	void TryPickObjectFromMouse(const Vector2& mouse, const Vector2& viewportSize, const Matrix4x4& view, const Matrix4x4& proj);
@@ -51,7 +54,7 @@ private:
 private:
 	void SaveScene();
 	void NotifySceneContextChanged();
-	void ClearSelection(){
+	void ClearSelection() {
 		selectedEditor_ = nullptr;
 		selectedObject_ = nullptr;
 		hierarchy_->SetSelectedObject(nullptr);
@@ -64,6 +67,8 @@ private:
 
 	void ToggleMode();
 
+	void TogglePanel(IEngineUI* p) { if (p) p->SetShow(!p->IsShow()); }
+
 private:
 	// 管理UI
 	std::unique_ptr<HierarchyPanel> hierarchy_;
@@ -71,6 +76,7 @@ private:
 	std::unique_ptr<InspectorPanel> inspector_;
 	std::unique_ptr<SceneObjectEditor> sceneEditor_;
 	std::unique_ptr<PlaceToolPanel> placeToolPanel_;
+	std::unique_ptr<SplineEditorPanel> splineEditor_;
 	PlaySession* pPlaySesseion_ = nullptr;
 
 	// メニュー
@@ -78,12 +84,15 @@ private:
 	EngineEdit::EditorMode mode_ = EngineEdit::EditorMode::Edit;
 
 	// ビューポート
-	std::unique_ptr<Viewport> mainViewport_;				//< メインビューポート
-	std::unique_ptr<Viewport> debugViewport_;				//< デバッグビューポート
+	std::unique_ptr<Viewport> mainViewport_;					//< メインビューポート
+	std::unique_ptr<Viewport> debugViewport_;					//< デバッグビューポート
 	std::unique_ptr<PerformanceOverlay> performanceOverlay_;	//< パフォーマンスオーバーレイ
 
 	// 状態
 	SceneContext* prevCtx_;
 	BaseEditor* selectedEditor_ = nullptr;
 	std::shared_ptr<SceneObject> selectedObject_;
+
+	// Editors メニューに並べるパネル群
+	std::vector<IEngineUI*> editorPanels_;
 };

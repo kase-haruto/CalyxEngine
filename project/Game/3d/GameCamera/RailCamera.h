@@ -4,8 +4,13 @@
 /* ===================================================================== */
 #include <Engine/Graphics/Camera/3d/Camera3d.h>
 #include <Engine/Objects/Transform/Transform.h>
+#include <Engine/Objects/3D/Geometory/Spline/SplineData.h>
+#include <Engine/Objects/3D/Geometory/Spline/SplineJson.h>
 
-class RailCamera 
+#include <string>
+#include <vector>
+
+class RailCamera
 	: public BaseCamera {
 public:
 	RailCamera();
@@ -15,19 +20,54 @@ public:
 	void Initialize();
 	void Update(float dt) override;
 	void ShowGui()override;
-	void AlwaysUpdate(float dt)override;;
+	void AlwaysUpdate(float dt)override;
 
+	// 位置/姿勢
 	Vector3 GetPosition();
 	const Vector3& GetRotation() const { return worldTransform_.eulerRotation; }
 	const WorldTransform& GetWorldTransform() const { return worldTransform_; }
 
-	std::string_view GetTypeName() const override{ return "RailCamera"; }
+	// スプライン設定API
+	void SetSpline(const SplineData& s);
+	bool LoadSplineFromJson(const std::string& path);
+	void ClearSpline();
+
+	// パラメータ
+	void SetSpeed(float s) { speed_ = s; }					// 単位: ユニット/秒（弧長）
+	void SetLookAhead(float d) { lookAhead_ = d; }			// 先読み距離（向き計算）
+	void SetBankScale(float rad) { tiltAngle_ = rad; }		// 最大ロール
+	void SetBankLerp(float spd) { tiltLerpSpeed_ = spd; }
+
+	std::string_view GetTypeName() const override { return "RailCamera"; }
 
 private:
-	float t_ = 0.0f;
-	float speed_ = 20.0f;         // 速度
-	float zTiltOffset_ = 0.0f;    // 現在の傾き
-	float targetTilt_ = 0.0f;     // 目標の傾き
-	float tiltAngle_ = 0.3f;      // 最大傾き（ラジアン）
-	float tiltLerpSpeed_ = 10.0f; // 傾き補間速度
+	// スプライン・等速移動用テーブル
+	struct ArcSample {
+		float t;			// [0,1]
+		float dist;			// 弧長（0 〜 totalLength_）
+		Vector3 pos;
+	};
+	void RebuildArcTable();				// スプライン変更時に作る
+	float DistanceToT(float s) const;	// 弧長→t の逆写像（二分探索）
+	Vector3 Eval(float t) const;		// t→位置
+
+	// 進行方向とロール
+	void UpdateOrientationFromPath(float dt);
+
+private:
+	// スプライン
+	SplineData spline_;
+	std::vector<ArcSample> arc_;	// 細分化サンプル
+	float totalLength_ = 0.0f;
+
+	// 状態
+	float traveled_ = 0.0f;			// 走行弧長（0〜totalLength）
+	float speed_ = 20.0f;			// 等速（弧長ベース）
+	float lookAhead_ = 2.0f;		// 先読み距離（向き用）
+
+	// ロール（左右傾き）
+	float zTiltOffset_ = 0.0f;		// 現在の傾き
+	float targetTilt_ = 0.0f;		// 目標の傾き（曲率由来）
+	float tiltAngle_ = 0.3f;		// 最大傾き（ラジアン）
+	float tiltLerpSpeed_ = 10.0f;	// 傾き補間速度
 };
