@@ -22,6 +22,7 @@
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
+#include <Engine/Assets/Database/AssetDatabase.h>
 
 // editor
 #include <Engine/Editor/UiEditor.h>
@@ -88,7 +89,11 @@ void System::Initialize(HINSTANCE hInstance, int32_t clientWidth, int32_t client
 	//スタート時に読み込み
 	TextureManager::GetInstance()->StartUpLoad();
 
-	//パーティクルコンテナの初期化
+	auto* db = AssetDatabase::GetInstance();
+	//実行ファイルの場所からプロジェクトルートを解決して Assets へ
+	const auto exe = std::filesystem::current_path();
+	const auto assetsRoot = exe / "Resources" / "Assets";
+	db->Initialize(assetsRoot);
 }
 
 void System::InitializePostProcess(PipelineService* service){

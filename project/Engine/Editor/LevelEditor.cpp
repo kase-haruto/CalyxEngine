@@ -10,6 +10,7 @@
 #include <Engine/Scene/Serializer/SceneSerializer.h>
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 #include <Engine/Application/System/PlaySession.h>
+#include <Engine/Assets/Database/AssetDatabase.h>
 
 #include <externals/imgui/ImGuiFileDialog.h>
 
@@ -24,6 +25,9 @@ void LevelEditor::Initialize() {
 	sceneEditor_ = std::make_unique<SceneObjectEditor>();
 	placeToolPanel_ = std::make_unique<PlaceToolPanel>();
 	splineEditor_ = std::make_unique<SplineEditorPanel>();
+	assetPanel_ = std::make_unique<AssetPanel>();
+	auto* db = AssetDatabase::GetInstance();
+	assetPanel_->Initialize(db->GetRoot());
 
 	// Panel に LevelEditor 自体を渡す（コールバック通知や setter）
 	editor_->SetOnEditorSelected([this](BaseEditor* ed) { SetSelectedEditor(ed); });
@@ -98,6 +102,7 @@ void LevelEditor::Initialize() {
 	editorPanels_.push_back(inspector_.get());
 	editorPanels_.push_back(placeToolPanel_.get());
 	editorPanels_.push_back(splineEditor_.get());
+	editorPanels_.push_back(assetPanel_.get());
 
 	// Editors メニュー（MenuCategory::Tools）に各パネルのトグルを追加
 	for (auto* p : editorPanels_) {
@@ -113,19 +118,19 @@ void LevelEditor::Initialize() {
 	menu_->Add(MenuCategory::View, { "Main Viewport",  "", [this] { mainViewport_->SetShow(!mainViewport_->IsShow());     }, true });
 	menu_->Add(MenuCategory::View, { "Debug Viewport", "", [this] { debugViewport_->SetShow(!debugViewport_->IsShow());   }, true });
 
-	menu_->Add(MenuCategory::Edit, { "Play (F5)", "", [this] {
+	menu_->Add(MenuCategory::Edit, { "Play ", "(F5)", [this] {
 	if (pPlaySesseion_ && !pPlaySesseion_->IsRuntime()) {
 		pPlaySesseion_->Enter();
 	}
 	}, true });
 
-	menu_->Add(MenuCategory::Edit, { "Pause (F6)", "", [this] {
+	menu_->Add(MenuCategory::Edit, { "Pause ", "(F6)", [this] {
 		if (pPlaySesseion_ && pPlaySesseion_->IsRuntime()) {
 			pPlaySesseion_->TogglePause();
 		}
 	}, true });
 
-	menu_->Add(MenuCategory::Edit, { "Exit (Shift+F5)", "", [this] {
+	menu_->Add(MenuCategory::Edit, { "Exit ", "(Shift+F5)", [this] {
 		if (pPlaySesseion_ && pPlaySesseion_->IsRuntime()) {
 			pPlaySesseion_->Exit();
 		}

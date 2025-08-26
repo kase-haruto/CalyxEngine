@@ -9,7 +9,7 @@
 class IEngineUI{
 public:
 	//===================================================================*/
-	//                   public methods
+	//						public methods
 	//===================================================================*/
 	IEngineUI(const std::string& name);
 	IEngineUI();
@@ -24,7 +24,7 @@ public:
 
 protected:
 	//===================================================================*/
-	//                   protected methods
+	//						protected methods
 	//===================================================================*/
 	std::string panelName_;
 	bool isShow_ = true;

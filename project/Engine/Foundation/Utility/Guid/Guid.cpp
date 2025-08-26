@@ -3,7 +3,7 @@
 Guid Guid::New(){
 	Guid g;
 	for (auto& b : g.bytes){
-		b = Random::Generate<std::uint8_t>(0, 255);  // ★ ← ここだけ置き換え
+		b = Random::Generate<std::uint8_t>(0, 255);
 	}
 	// RFC 4122 版数・バリアント
 	g.bytes[6] = (g.bytes[6] & 0x0F) | 0x40;         // version 4
