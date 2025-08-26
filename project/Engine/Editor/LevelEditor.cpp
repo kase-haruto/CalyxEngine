@@ -43,6 +43,7 @@ void LevelEditor::Initialize() {
 
 	// ビューポートの初期化
 	mainViewport_ = std::make_unique<Viewport>(ViewportType::VIEWPORT_MAIN, "Game Viewport");
+	mainViewport_->SetShow(false);
 	debugViewport_ = std::make_unique<Viewport>(ViewportType::VIEWPORT_DEBUG, "Debug Viewport");
 
 	performanceOverlay_ = std::make_unique<PerformanceOverlay>();
@@ -108,6 +109,27 @@ void LevelEditor::Initialize() {
 			true
 				   });
 	}
+
+	menu_->Add(MenuCategory::View, { "Main Viewport",  "", [this] { mainViewport_->SetShow(!mainViewport_->IsShow());     }, true });
+	menu_->Add(MenuCategory::View, { "Debug Viewport", "", [this] { debugViewport_->SetShow(!debugViewport_->IsShow());   }, true });
+
+	menu_->Add(MenuCategory::Edit, { "Play (F5)", "", [this] {
+	if (pPlaySesseion_ && !pPlaySesseion_->IsRuntime()) {
+		pPlaySesseion_->Enter();
+	}
+	}, true });
+
+	menu_->Add(MenuCategory::Edit, { "Pause (F6)", "", [this] {
+		if (pPlaySesseion_ && pPlaySesseion_->IsRuntime()) {
+			pPlaySesseion_->TogglePause();
+		}
+	}, true });
+
+	menu_->Add(MenuCategory::Edit, { "Exit (Shift+F5)", "", [this] {
+		if (pPlaySesseion_ && pPlaySesseion_->IsRuntime()) {
+			pPlaySesseion_->Exit();
+		}
+	}, true });
 #endif // _DEBUG
 }
 
@@ -116,9 +138,15 @@ void LevelEditor::Update() {
 #ifdef _DEBUG
 	SceneContext* ctx = SceneContext::Current();
 
-	// 入力チェックはここで行う
-	if (Input::GetInstance()->TriggerMouseButton(MouseButton::Left)) {
-		TryPickUnderCursor(); // レイキャストして選択処理へ
+	const ImGuiIO& io = ImGui::GetIO();
+	const bool uiActive = io.WantCaptureMouse;
+	const bool guizmoActive =
+		ImGuizmo::IsOver() || ImGuizmo::IsUsing();
+
+	if (!uiActive && !guizmoActive && debugViewport_ && debugViewport_->IsShow()) {
+		if (Input::GetInstance()->TriggerMouseButton(MouseButton::Left)) {
+			TryPickUnderCursor();
+		}
 	}
 	// ----------------------------
 	// Open Scene ダイアログ処理
@@ -146,6 +174,18 @@ void LevelEditor::Update() {
 	//シーンが変わっていたら各パネルに通知する
 	NotifySceneContextChanged();
 	prevCtx_ = SceneContext::Current();
+
+	//playSessionで実行したら自動でゲーム画面
+	if (pPlaySesseion_) {
+		const bool playing = pPlaySesseion_->IsRuntime();  // API名は実装に合わせて
+
+		if (playing && !lastPlaying_) {
+			EnterGameMode();
+		} else if (!playing && lastPlaying_) {
+			ExitGameMode();
+		}
+		lastPlaying_ = playing;
+	}
 #endif // _DEBUG
 }
 
@@ -173,13 +213,16 @@ void LevelEditor::RenderMenu() {
 }
 
 void LevelEditor::EnterGameMode() {
-	//playSession_->Enter();
 	mode_ = EditorMode::Game;
 }
 
 void LevelEditor::ExitGameMode() {
-	//playSession_->Exit();
 	mode_ = EditorMode::Edit;
+
+	if (pPlaySesseion_ && pPlaySesseion_->IsRuntime()) {
+		pPlaySesseion_->Exit();
+		lastPlaying_ = false;
+	}
 }
 
 void LevelEditor::SetSelectedEditor(BaseEditor* editor) {
@@ -241,15 +284,13 @@ void LevelEditor::DeleteObject(const std::shared_ptr<SceneObject>& sp) {
 	ctx->GetObjectLibrary()->RemoveObject(sp); // ライブラリから
 }
 
-
 void LevelEditor::RenderViewport(ViewportType type, const ImTextureID& tex) {
-	//タイプに応じて描画
 	if (type == ViewportType::VIEWPORT_MAIN) {
-		if (mainViewport_) {
+		if (mainViewport_ && mainViewport_->IsShow()) {   // ★ 追加
 			mainViewport_->Render(tex);
 		}
 	} else if (type == ViewportType::VIEWPORT_DEBUG) {
-		if (debugViewport_) {
+		if (debugViewport_ && debugViewport_->IsShow()) {  // ★ 追加
 			debugViewport_->Render(tex);
 		}
 	}
@@ -335,34 +376,27 @@ void LevelEditor::ToggleMode() {
 	}
 }
 
-
 void LevelEditor::TryPickUnderCursor() {
+	if (!debugViewport_ || !debugViewport_->IsShow()) return;
+
 	SceneContext* current = SceneContext::Current();
+	Vector2 origin = debugViewport_->GetPosition();
+	Vector2 size = debugViewport_->GetSize();
 
-	Vector2 origin = debugViewport_->GetPosition();	// ビューポート描画位置（スクリーン座標）
-	Vector2 size = debugViewport_->GetSize();		// ビューポートの実際のサイズ（ピクセル）
-
-	// ImGui上のマウス位置
 	ImVec2 mouse = ImGui::GetMousePos();
-
-	// ビューポート内のローカルマウス座標
 	float relativeX = mouse.x - origin.x;
 	float relativeY = mouse.y - origin.y;
 
-	// 範囲外なら無視
 	if (relativeX < 0 || relativeY < 0 || relativeX > size.x || relativeY > size.y) return;
 
-	// スクリーン→ビューポート空間（ピクセル）
 	Vector2 mousePos = Vector2(relativeX, relativeY);
 
-	// Ray生成
 	Matrix4x4 view = CameraManager::GetDebug()->GetViewMatrix();
 	Matrix4x4 proj = CameraManager::GetDebug()->GetProjectionMatrix();
 
 	Ray ray = Raycastor::ConvertMouseToRay(mousePos, view, proj, size);
 	if (SceneObject* picked = PickSceneObjectByRay(ray)) {
 		if (auto sp = current->FindSharedObject(picked)) {
-			// 共有ポインタを渡す
 			SetSelectedObject(sp);
 		}
 	}

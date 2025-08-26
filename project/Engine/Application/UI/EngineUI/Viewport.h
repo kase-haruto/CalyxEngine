@@ -8,6 +8,7 @@
 
 // engine
 #include <Engine/Application/UI/EngineUI/IOnViewportTool.h>
+#include <Engine/Application/UI/EngineUI/IEngineUI.h>
 
 // c++
 #include <string>
@@ -19,7 +20,8 @@
 struct Vector2;
 class BaseCamera;
 
-class Viewport{
+class Viewport:
+public IEngineUI{
 public:
 	//===================================================================*/
 	//                    methods
@@ -28,6 +30,7 @@ public:
 
 	void Update();								//< ビューポートの更新処理
 	void Render(const ImTextureID& tex);		//< ImGui上への描画処理
+	void Render() {}
 
 	void AddTool(IOnViewportTool* tool);		//< ビューポートツールの追加
 

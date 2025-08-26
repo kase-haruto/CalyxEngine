@@ -9,7 +9,8 @@
 
 #include <externals/imgui/ImGuizmo.h>
 
-Viewport::Viewport(ViewportType type, const std::string& windowName) :type_(type), windowName_(windowName){}
+Viewport::Viewport(ViewportType type, const std::string& windowName) 
+	:IEngineUI(windowName), type_(type), windowName_(windowName) {}
 
 void Viewport::Update(){}
 
@@ -39,7 +40,10 @@ void Viewport::Render(const ImTextureID& tex){
 	}
 
 	textureID_ = tex;
-	ImGui::Begin(windowName_.c_str(), nullptr,
+
+	bool open = true;
+
+	ImGui::Begin(windowName_.c_str(), &open,
 				 ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
 	ImVec2 contentSize = ImGui::GetContentRegionAvail();
@@ -72,7 +76,7 @@ void Viewport::Render(const ImTextureID& tex){
 			ImVec2 viewSize = ImVec2(size_.x, size_.y);
 
 			ImVec2 pos = base->CalcScreenPosition(imagePos, viewSize);
-			tool->RenderOverlay(pos); // ← 基準位置を引数で渡す
+			tool->RenderOverlay(pos);
 		}
 
 		ImGui::EndGroup();
@@ -82,6 +86,7 @@ void Viewport::Render(const ImTextureID& tex){
 	isClicked_ = ImGui::IsWindowFocused() && ImGui::IsMouseDown(0);
 
 	ImGui::End();
+	if (!open) { SetShow(false); }
 }
 
 ImVec2 Viewport::CalcToolPosition(IOnViewportTool* tool, const ImVec2& viewportPos, const ImVec2& viewportSize){
