@@ -111,6 +111,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Assets\Database\AssetDatabase.cpp" />
+    <ClCompile Include="Engine\Application\UI\Panels\AssetPanel.cpp" />
     <ClCompile Include="Engine\Objects\3D\Geometory\Spline\SplineData.cpp" />
     <ClCompile Include="Engine\Objects\3D\Geometory\Spline\SplineJson.cpp" />
     <ClCompile Include="Engine\System\Command\EditorCommand\LevelEditorCommand\CreateObjectCommand\CreateObjectCommand.cpp" />
@@ -318,6 +320,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Application\UI\Panels\SplineEditorPanel.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Assets\Database\AssetDatabase.h" />
+    <ClInclude Include="Engine\Application\UI\Panels\AssetPanel.h" />
+    <ClInclude Include="Engine\Assets\System\AssetDragPayload.h" />
+    <ClInclude Include="Engine\Assets\System\AssetRecord.h" />
+    <ClInclude Include="Engine\Assets\System\AssetType.h" />
     <ClInclude Include="Engine\Objects\3D\Geometory\Spline\SplineData.h" />
     <ClInclude Include="Engine\Objects\3D\Geometory\Spline\SplineJson.h" />
     <ClInclude Include="Engine\System\Command\EditorCommand\BaseLevelEditorCommand.h" />
