@@ -15,6 +15,7 @@
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Application/System/Enviroment.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
+#include <Engine/Scene/Serializer/SceneSerializer.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //	コンストラクタ/デストラクタ
@@ -37,6 +38,10 @@ void TitleScene::LoadAssets() {
 /////////////////////////////////////////////////////////////////////////////////////////
 void TitleScene::Initialize() {
 	sceneContext_->Initialize();
+
+		// シーンデータ読み込み
+	SceneSerializer::Load(*sceneContext_, "Resources/Assets/Scenes/TitleScene.scene");
+
 	LoadAssets();
 
 	//=========================

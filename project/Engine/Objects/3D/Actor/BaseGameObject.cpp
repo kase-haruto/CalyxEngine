@@ -118,7 +118,7 @@ void BaseGameObject::ShowGui(){
 
 	worldTransform_.ShowImGui("world");
 
-	model_->ShowImGuiInterface();
+	model_->ShowImGui(config_.GetConfig().modelConfig);
 
 	collider_->ShowGui();
 
