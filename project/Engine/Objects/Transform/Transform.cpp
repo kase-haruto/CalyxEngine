@@ -155,11 +155,16 @@ void WorldTransform::ApplyConfig(const WorldTransformConfig& config) {
 WorldTransformConfig WorldTransform::ExtractConfig() {
 	WorldTransformConfig config;
 	config.translation = translation;
-	config.rotation = rotation;
+
+	if (rotationSource == RotationSource::Euler) {
+		config.rotation = Quaternion::EulerToQuaternion(eulerRotation);
+	} else {
+		config.rotation = rotation;
+	}
+
 	config.scale = scale;
 	return config;
 }
-
 
 /* ========================================================================
 /* Transform2D class
