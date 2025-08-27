@@ -229,7 +229,7 @@ BaseModelConfig BaseModel::ExtractConfig() const {
 }
 
 void BaseModel::ShowImGui(BaseModelConfig& config) {
-	uvTransform.ShowImGui(config.uvTransConfig, "uvTransform");
+	uvTransform.ShowImGui("uvTransform");
 
 	if (ImGui::CollapsingHeader("Material")) {
 		materialData_.ShowImGui(config.materialConfig);
