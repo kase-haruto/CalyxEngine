@@ -239,7 +239,7 @@ void SplineEditorPanel::HandleGizmoUpdateAndDraw3D() {
 	}
 
 	// === 3Dプレビュー ===
-	drawer->DrawAABB(minP, maxP, Vector4(0.0f, 0.8f, 0.9f, 1.0f)); // 全体AABB
+	drawer->DrawAABB(minP, maxP, Vector4(1.0f, 0.0f, 0.498f, 1.0f)); // 全体AABB
 
 	Vector3 prev = data_.Evaluate(0.0f);
 	for (int i = 1; i <= steps; i++) {

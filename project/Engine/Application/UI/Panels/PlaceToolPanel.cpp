@@ -22,7 +22,6 @@
 PlaceToolPanel::PlaceToolPanel()
 	: IEngineUI("PlaceToolPanel") {
 	RegisterPlaceItems();
-	IEngineUI::SetShow(false); //初期状態は閉じているようにする
 }
 
 // ============================================================================
