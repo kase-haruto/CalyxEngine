@@ -7,6 +7,8 @@
 #include <Engine/Assets/Model/ModelManager.h>
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
+#include <Engine/Assets/Database/AssetDatabase.h>
+#include <Engine/Assets/System/AssetDragPayload.h>
 
 // lib
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
@@ -83,9 +85,6 @@ void BaseModel::UpdateTexture(float deltaTime) {
 
 void BaseModel::ShowImGuiInterface() {
 
-
-	ImGui::Separator();
-	ImGui::Text("Model: %s", fileName_.c_str());
 
 	uvTransform.ShowImGui("uvTransform");
 
@@ -174,63 +173,149 @@ void BaseModel::DrawInstanced(const std::vector<WorldTransform>& transforms,
 }
 
 
-void BaseModel::ApplyConfig(const BaseModelConfig& config){
+void BaseModel::ApplyConfig(const BaseModelConfig& config) {
 	materialData_.ApplyConfig(config.materialConfig);
 	uvTransform.ApplyConfig(config.uvTransConfig);
-	blendMode_ = static_cast< BlendMode >(config.blendMode);
+	blendMode_ = static_cast<BlendMode>(config.blendMode);
 	fileName_ = config.modelName;
 
-	if (config.textureName.empty()){
-		textureName_ = "textures/white1x1.png";
-		handle_ = TextureManager::GetInstance()->LoadTexture(textureName_);
-	} else{
-		textureName_ = config.textureName;
-		handle_ = TextureManager::GetInstance()->LoadTexture(textureName_);
+	bool ok = false;
+
+	// 1) GUID があれば最優先
+	if (config.textureGuid.isValid()) {
+		ok = LoadTextureByGuid(config.textureGuid);
+	}
+
+	// 2) 旧データ：legacyTextureName から GUID を引いて移行
+	if (!ok && config.legacyTextureName && !config.legacyTextureName->empty()) {
+		auto* db = AssetDatabase::GetInstance();
+		const auto& view = db->GetView();
+
+		// 旧フィールドは「Assets ルート相対パス」やファイル名の可能性があるので両方見る
+		const std::string want = *config.legacyTextureName;
+		for (auto* r : view) {
+			if (!r || r->type != AssetType::Texture) continue;
+
+			std::error_code ec;
+			auto rel = std::filesystem::relative(r->sourcePath, db->GetRoot(), ec);
+			const std::string key = (ec ? r->sourcePath : rel).generic_string();
+
+			if (key == want || r->sourcePath.filename().string() == want) {
+				ok = LoadTextureByGuid(r->guid);
+				break;
+			}
+		}
+	}
+
+	// 3) 最終フォールバック
+	if (!ok) {
+		handle_ = TextureManager::GetInstance()->LoadTexture("textures/white1x1.png");
+		textureGuid_ = Guid{}; // 未設定
 	}
 }
 
-BaseModelConfig BaseModel::ExtractConfig() const{
+BaseModelConfig BaseModel::ExtractConfig() const {
 	BaseModelConfig config;
 	config.materialConfig = materialData_.ExtractConfig();
 	config.uvTransConfig = uvTransform.ExtractConfig();
-	config.blendMode = static_cast< int >(blendMode_);
+	config.blendMode = static_cast<int>(blendMode_);
 	config.modelName = fileName_;
-	config.textureName = textureName_;
+
+	// 保存は GUID のみ
+	config.textureGuid = textureGuid_;
+	// config.legacyTextureName は保存しない（後方互換用の読取専用）
+
 	return config;
 }
 
-void BaseModel::ShowImGui(BaseModelConfig& config){
-	uvTransform.ShowImGui(config.uvTransConfig,"uvTransform");
+void BaseModel::ShowImGui(BaseModelConfig& config) {
+	uvTransform.ShowImGui(config.uvTransConfig, "uvTransform");
 
-	if (ImGui::CollapsingHeader("Material")){
+	if (ImGui::CollapsingHeader("Material")) {
 		materialData_.ShowImGui(config.materialConfig);
 
-		auto& textures = TextureManager::GetInstance()->GetLoadedTextures();
-		if (ImGui::BeginCombo("Texture", textureName_.c_str())){
-			for (const auto& texture : textures){
-				bool is_selected = (textureName_ == texture.first);
-				if (ImGui::Selectable(texture.first.c_str(), is_selected)){
-					textureName_ = texture.first;
-					handle_ = TextureManager::GetInstance()->LoadTexture(texture.first);
-				}
-				if (is_selected){
-					ImGui::SetItemDefaultFocus();
+		// ---- ドラッグ&ドロップでテクスチャ適用 ----
+		ImGui::Text("Texture (Drag & Drop from Assets)");
+		// ドロップ領域（InvisibleButton で有効アイテム化）
+		ImVec2 dropSize(ImGui::GetContentRegionAvail().x, 56.0f);
+		ImGui::InvisibleButton("##TextureDrop", dropSize);
+
+		// 見た目（枠とテキスト）
+		const bool hovered = ImGui::IsItemHovered();
+		const ImVec2 rmin = ImGui::GetItemRectMin();
+		const ImVec2 rmax = ImGui::GetItemRectMax();
+		ImGui::GetWindowDrawList()->AddRect(
+			rmin, rmax, hovered ? IM_COL32(120, 180, 255, 220) : IM_COL32(90, 90, 90, 160),
+			8.0f, 0, 2.0f);
+		ImGui::GetWindowDrawList()->AddText(
+			ImVec2(rmin.x + 8.0f, rmin.y + 8.0f),
+			IM_COL32(230, 230, 230, 255),
+			"Drop a Texture here");
+
+		// 受け取り
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload* p = ImGui::AcceptDragDropPayload("CALYX_ASSET")) {
+				const AssetDragPayload payload =
+					*reinterpret_cast<const AssetDragPayload*>(p->Data);
+				if (payload.type == AssetType::Texture) {
+					if (LoadTextureByGuid(payload.guid)) {
+						// コンフィグ（保存用）にも反映
+						config.textureGuid = payload.guid;
+					} else {
+						ImGui::OpenPopup("TextureDropError");
+					}
 				}
 			}
-			ImGui::EndCombo();
+			ImGui::EndDragDropTarget();
+		}
+
+		// 失敗メッセージ（2D 以外の SRV 等）
+		if (ImGui::BeginPopup("TextureDropError")) {
+			ImGui::TextUnformatted("このテクスチャは適用できません（2D以外/未対応形式）。");
+			ImGui::EndPopup();
+		}
+
+		// 現在のテクスチャ表示（GUID→ファイル名）
+		auto labelFromGuid = [](const Guid& g)->std::string {
+			if (!g.isValid()) return "(none)";
+			auto* db = AssetDatabase::GetInstance();
+			for (auto* r : db->GetView()) {
+				if (r && r->type == AssetType::Texture && r->guid == g) {
+					return r->sourcePath.filename().string();
+				}
+			}
+			return "(missing)";
+		};
+		ImGui::TextDisabled("Current: %s", labelFromGuid(textureGuid_).c_str());
+		ImGui::SameLine();
+		if (textureGuid_.isValid() && ImGui::SmallButton("Copy GUID")) {
+			ImGui::SetClipboardText(textureGuid_.ToString().c_str());
 		}
 	}
 
-	if (ImGui::CollapsingHeader("Draw")){
+	if (ImGui::CollapsingHeader("Draw")) {
 		static const char* blendModeNames[] = {
 			"NONE", "ALPHA", "ADD", "SUB", "MUL", "NORMAL", "SCREEN"
 		};
-
-		int currentBlendMode = static_cast< int >(blendMode_);
-		if (ImGui::Combo("Blend Mode", &currentBlendMode, blendModeNames, IM_ARRAYSIZE(blendModeNames))){
+		int currentBlendMode = static_cast<int>(blendMode_);
+		if (ImGui::Combo("Blend Mode", &currentBlendMode,
+						 blendModeNames, IM_ARRAYSIZE(blendModeNames))) {
 			config.blendMode = currentBlendMode;
 		}
 	}
+}
+
+
+bool BaseModel::LoadTextureByGuid(const Guid& g) {
+	if (!g.isValid()) return false;
+
+	// （必要なら .meta の viewDimension 等で 2D 以外を弾く処理を先に）
+	auto h = TextureManager::GetInstance()->LoadTexture(g);
+	if (!h.ptr) return false;
+
+	handle_ = h;
+	textureGuid_ = g;
+	return true;
 }
 
 const std::optional<ModelData>& BaseModel::GetModelData() const{

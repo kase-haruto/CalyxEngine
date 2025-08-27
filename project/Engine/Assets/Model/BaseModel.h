@@ -47,6 +47,7 @@ public:
 	void ApplyConfig(const BaseModelConfig& config);
 	BaseModelConfig ExtractConfig() const;
 	void ShowImGui(BaseModelConfig& config);
+	bool LoadTextureByGuid(const Guid& g);
 
 	//--------- accessor -----------------------------------------------------
 	BlendMode GetBlendMode() const  { return blendMode_; }
@@ -82,6 +83,7 @@ protected:
 	size_t currentFrameIndex_ = 0; // 現在のフレームインデックス
 
 protected:
+	Guid textureGuid_;
 	static const std::string directoryPath_;
 	bool isDrawEnable_ = true;
 
