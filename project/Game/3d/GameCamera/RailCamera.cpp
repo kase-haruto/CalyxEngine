@@ -215,7 +215,7 @@ void RailCamera::ShowGui() {
 		ImGui::Text("Spline: %zu pts, closed=%s, length=%.2f",
 					spline_.points.size(), spline_.closed ? "true" : "false", totalLength_);
 
-				// デバッグ：位置手動調整
+		// デバッグ：位置手動調整
 		float tNow = (totalLength_ > 1e-6f) ? DistanceToT(traveled_) : 0.0f;
 		if (ImGui::SliderFloat("t (debug)", &tNow, 0.0f, 1.0f)) {
 			traveled_ = totalLength_ * tNow;
@@ -234,4 +234,37 @@ void RailCamera::AlwaysUpdate(float dt) {
 
 Vector3 RailCamera::GetPosition() {
 	return worldTransform_.GetWorldPosition();
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//  Tの取得
+/////////////////////////////////////////////////////////////////////////////////////////
+float RailCamera::GetT() const {
+	if (totalLength_ <= 1e-6f) return 0.0f;
+
+	float s = traveled_;
+	if (spline_.closed && totalLength_ > 0.0f) {
+		float mod = std::fmod(s, totalLength_);
+		if (mod < 0.0f) mod += totalLength_;
+		s = mod;
+	}
+	s = std::clamp(s, 0.0f, totalLength_);
+	return DistanceToT(s);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//  進捗率
+/////////////////////////////////////////////////////////////////////////////////////////
+float RailCamera::GetProgress() const {
+	if (totalLength_ <= 1e-6f) return 0.0f;
+
+	float s = traveled_;
+	if (spline_.closed && totalLength_ > 0.0f) {
+		float mod = std::fmod(s, totalLength_);
+		if (mod < 0.0f) mod += totalLength_;
+		s = mod;
+	}
+	s = std::clamp(s, 0.0f, totalLength_);
+	return s / totalLength_;
 }

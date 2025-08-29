@@ -37,6 +37,9 @@ public:
 	void SetLookAhead(float d) { lookAhead_ = d; }			// 先読み距離（向き計算）
 	void SetBankScale(float rad) { tiltAngle_ = rad; }		// 最大ロール
 	void SetBankLerp(float spd) { tiltLerpSpeed_ = spd; }
+	
+	float GetT() const;
+	float GetProgress() const;
 
 	std::string_view GetTypeName() const override { return "RailCamera"; }
 

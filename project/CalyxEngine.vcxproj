@@ -326,6 +326,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Application\System\PlaySession.cpp" />
     <ClCompile Include="Engine\Application\UI\Panels\SplineEditorPanel.cpp" />
     <ClCompile Include="Game\UI\Controller\TitleMenuController.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Boss\Service\RailProgressBossSpawnService.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Battle\Shooting\ShootingController\BossShootingController.h" />
@@ -599,6 +600,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\PostProcess\Vignette\Vignette.h" />
     <ClInclude Include="Engine\Application\Effects\Particle\Emitter\GpuFxEmitter.h" />
     <ClInclude Include="Engine\Application\System\PlaySession.h" />
+    <ClInclude Include="Game\3dObject\Actor\Boss\Service\RailProgressBossSpawnService.h" />
     <ClInclude Include="Resources\shaders\CRT.PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
