@@ -111,6 +111,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game\UI\Button\Button.cpp" />
     <ClCompile Include="Engine\Assets\Database\AssetDatabase.cpp" />
     <ClCompile Include="Engine\Application\UI\Panels\AssetPanel.cpp" />
     <ClCompile Include="Engine\Objects\3D\Geometory\Spline\SplineData.cpp" />
@@ -318,8 +319,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\PostProcess\Vignette\Vignette.cpp" />
     <ClCompile Include="Engine\Application\System\PlaySession.cpp" />
     <ClCompile Include="Engine\Application\UI\Panels\SplineEditorPanel.cpp" />
+    <ClCompile Include="Game\UI\Controller\TitleMenuController.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\UI\Button\Button.h" />
     <ClInclude Include="Engine\Assets\Database\AssetDatabase.h" />
     <ClInclude Include="Engine\Application\UI\Panels\AssetPanel.h" />
     <ClInclude Include="Engine\Assets\System\AssetDragPayload.h" />
@@ -589,6 +592,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="Engine\Application\UI\Panels\SplineEditorPanel.h" />
+    <ClInclude Include="Game\UI\Controller\TitleMenuController.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">

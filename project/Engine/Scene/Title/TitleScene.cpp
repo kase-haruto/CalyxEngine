@@ -24,14 +24,12 @@ TitleScene::TitleScene() {
 	// シーン名を設定
 	//IScene::SetSceneName("TitleScene");
 	SetSceneName("TitleScene");
-
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //	アセットのロード
 /////////////////////////////////////////////////////////////////////////////////////////
-void TitleScene::LoadAssets() {
-}
+void TitleScene::LoadAssets() {}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //	初期化処理
@@ -45,22 +43,31 @@ void TitleScene::Initialize() {
 	LoadAssets();
 
 	//=========================
-	// グラフィック関連
+	// ボタンで発行される関数
 	//=========================
+	transitionForGameScene_ = [this] {
+		transitionRequestor_->RequestSceneChange(SceneType::PLAY);
+	};
+
+	//=========================
+	// menuボタン
+	//=========================
+	menu_ = std::make_unique<TitleMenuController>();
+	menu_->SetMenuEvent(transitionForGameScene_);
 }
 
-void TitleScene::Update([[maybe_unused]]float dt) {
+void TitleScene::Update([[maybe_unused]] float dt) {
 	/* 3dObject ============================*/
 	/* その他 ============================*/
-	
+
+#ifdef _DEBUG
+	menu_->ShowGui();
+#endif // _DEBUG
+
+	menu_->Update(dt);
+
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
 
-	if (Input::GetInstance()->TriggerKey(DIK_SPACE)||
-		Input::GetInstance()->TriggerGamepadButton(PAD_BUTTON::A)) {
-		if (transitionRequestor_) {
-			transitionRequestor_->RequestSceneChange(SceneType::PLAY);
-		}
-	}
 }
 
 void TitleScene::CleanUp() {
@@ -71,4 +78,9 @@ void TitleScene::CleanUp() {
 
 void TitleScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService, RenderTargetType type) {
 	BaseScene::Draw(cmdList, psoService, type);
+
+	for (auto& sprite : menu_->GetAllButtonImage()) {
+		spriteRenderer_->Register(sprite);
+	}
+
 }
