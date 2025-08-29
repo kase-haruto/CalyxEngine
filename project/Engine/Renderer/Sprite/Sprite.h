@@ -35,6 +35,8 @@ public:
 	/// </summary>
 	void Update();
 
+	void ShowGui();
+
 	void UpdateMatrix();
 
 	/// <summary>

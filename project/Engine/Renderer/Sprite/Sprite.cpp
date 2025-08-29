@@ -48,38 +48,32 @@ void Sprite::Initialize(const Vector2& newPosition, const Vector2& newSize) {
 }
 
 void Sprite::Update() {
-	//#ifdef DEBUG
-	//    ImGui::Begin("sprite");
-	//    ImGui::SliderFloat3("translate", &transform_.translate.x, 0.0f, 1280.0f);
-	//    ImGui::DragFloat3("rotate", &transform_.rotate.x, 0.01f);
-	//    ImGui::DragFloat3("scale", &transform_.scale.x, 0.01f);
-	//    ImGui::DragFloat2("UVTranslate", &uvTransform.translate.x, 0.01f, -10.0f, 10.0f);
-	//    ImGui::DragFloat2("UVScale", &uvTransform.scale.x, 0.01f, -10.0f, 10.0f);
-	//    ImGui::End();
-	//#endif // DEBUG
-
-
-
 	transform_.translate = { position.x, position.y, 0.0f };
 	transform_.rotate = { 0.0f, 0.0f, rotate };
 	transform_.scale = { size.x, size.y, 1.0f };
 
-	// アンカーポイントの反映
-	float left = 0.0f - anchorPoint.x;
-	float right = 1.0f - anchorPoint.x;
-	float top = 0.0f - anchorPoint.y;
-	float bottom = 1.0f - anchorPoint.y;
+	// アンカー反映（頂点は常時Map済みを前提）
+	const float left = 0.0f - anchorPoint.x;
+	const float right = 1.0f - anchorPoint.x;
+	const float top = 0.0f - anchorPoint.y;
+	const float bottom = 1.0f - anchorPoint.y;
 
-	vertexData[0].position = { left, bottom, 0.0f, 1.0f };   // 左下
-	vertexData[1].position = { left, top, 0.0f, 1.0f };      // 左上
-	vertexData[2].position = { right, bottom, 0.0f, 1.0f };  // 右下
-	vertexData[3].position = { right, top, 0.0f, 1.0f };     // 右上
-
-	//const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(path);
-
+	vertexData[0].position = { left,  bottom, 0.0f, 1.0f };
+	vertexData[1].position = { left,  top,    0.0f, 1.0f };
+	vertexData[2].position = { right, bottom, 0.0f, 1.0f };
+	vertexData[3].position = { right, top,    0.0f, 1.0f };
 
 	UpdateMatrix();
 	UpdateTransform();
+}
+
+void Sprite::ShowGui() {
+	ImGui::Text("%s", path.c_str());
+	ImGui::DragFloat2("Position", &position.x, 1.0f);
+	ImGui::DragFloat2("Size", &size.x, 1.0f);
+	ImGui::SliderFloat("RotateZ", &rotate, -180.0f, 180.0f);
+	ImGui::DragFloat2("Anchor", &anchorPoint.x, 0.01f, 0.0f, 1.0f);
+	uvTransform.ShowImGui("uvTransform");
 }
 
 void Sprite::UpdateMatrix() {
