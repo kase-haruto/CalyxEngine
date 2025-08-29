@@ -1,5 +1,8 @@
 #include "BossSpawner.h"
 
+// game
+#include <Game/Installer/Boss/BossInstaller.h>
+
 // engine
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 
@@ -31,7 +34,20 @@ void BossSpawner::AlwaysUpdate(float /*dt*/) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //  発生
 /////////////////////////////////////////////////////////////////////////////////////////
-void BossSpawner::Spawn() {}
+void BossSpawner::Spawn() {
+	if (!wBoss_.expired()) return;
+
+	BossInstaller installer;
+	auto boss = installer.InstallBoss();
+	if (!boss) return;
+
+	boss->Initialize();
+
+	auto self = shared_from_this();
+	boss->SetParent(self);
+
+	wBoss_ = boss;
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //  コンフィグの適用

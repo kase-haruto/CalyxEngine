@@ -119,7 +119,6 @@ void EnemySpawner::Spawn() {
 	// 自前リストに登録
 	spawnedEnemies_.push_back(enemy);
 
-	// ディレクトリにも登録（あれば）
 	if (directory_) { directory_->Register(enemy); }
 }
 

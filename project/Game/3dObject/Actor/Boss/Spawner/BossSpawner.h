@@ -30,7 +30,7 @@ public:
 	//--------- accessor ------------------------------------------------
 	std::string_view GetTypeName() const override { return "BossSpawner"; }
 
-
 private:
+	std::weak_ptr<Boss> wBoss_;
 	ConfigurableObject<SceneObjectConfig> config_;
 };
