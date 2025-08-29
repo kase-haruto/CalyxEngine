@@ -13,8 +13,8 @@
 #include <Engine/Collision/CollisionManager.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
-
 // game
+#include <Game/Installer/Enemy/EnemyEngagementInstaller.h>
 #include <Game/3dObject/Actor/Bullet/Register/BulletRegistrar.h>
 #include <Game/Installer/Player/PlayerInstaller.h>
 
@@ -24,7 +24,7 @@
 //  ctor / dtor
 /////////////////////////////////////////////////////////////////////////////////////////
 GameScene::GameScene() {
-	SetSceneName("GameScene");
+	SetSceneName("Game");
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -42,7 +42,7 @@ void GameScene::Initialize() {
 	sceneContext_->Initialize();
 
 	// シーンデータ読み込み
-	SceneSerializer::Load(*sceneContext_, "Resources/Assets/Scenes/GameScene.scene");
+	SceneSerializer::Load(*sceneContext_, "Resources/Assets/Scenes/Game.scene");
 
 	// ベース初期化
 	BaseScene::Initialize();
@@ -81,6 +81,18 @@ void GameScene::Initialize() {
 
 	occurrenceBoss_ = std::make_unique<RailProgressBossSpawnService>();
 	occurrenceBoss_->OnSceneLoaded(*sceneContext_);
+
+	EnemyEngagementParams params{};
+	params.ndcPad = 0.05f;			// 画面端の余白
+	params.minExposeSec = 0.20f;	// 0.2秒以上映ってから有効
+	params.maxEngageDist = 120.0f;	// 射程
+	params.useLOS = true;			// 遮蔽物チェックON
+
+	enemyEngagement_ = Installers::InstallEnemyEngagement(*sceneContext_, params);
+
+	if (enemyEngagement_) {
+		enemyEngagement_->SetDirectory(enemyBinding_->GetDirectory()); // ★ここが肝
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -88,9 +100,8 @@ void GameScene::Initialize() {
 /////////////////////////////////////////////////////////////////////////////////////////
 void GameScene::Update([[maybe_unused]] float dt) {
 	// ランタイム配線サービスの更新
-	if (enemyBinding_) {
-		enemyBinding_->Update(*sceneContext_, dt);
-	}
+	if (enemyBinding_)    enemyBinding_->Update(*sceneContext_, dt);
+	if (enemyEngagement_) enemyEngagement_->Update(dt);
 
 	//Railの進み具合でボスを発生させる
 	occurrenceBoss_->BossSpawnByRailProgress();

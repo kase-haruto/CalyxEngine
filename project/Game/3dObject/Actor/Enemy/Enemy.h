@@ -39,6 +39,8 @@ public:
 	void SetShootingController(std::unique_ptr<EnemyShootingController>);
 	void SetPlayerTransform(const WorldTransform* position);
 
+	void SetGameplayEngaged(bool v) { gameplayEngaged_ = v; }
+	bool IsGameplayEngaged() const { return gameplayEngaged_; }
 protected:
 	//===================================================================*/
 	//					private methods
@@ -54,14 +56,15 @@ private:
 	Vector3 deathRotateAxis_ = {0, 0, 1}; // 傾く軸
 	Vector3 basePosition_{};		// サイン波の基準位置
 	const WorldTransform* playerTransform_;
-	bool isHit_ = false;			// 衝突フラグ
-	bool isDead_ = false;			// 死んだフラグ
-	float deathRotation_ = 0.0f;	// 傾きの進行度
-	float waveTime_ = 0.0f;			// 経過時間
-	float waveAmplitude_ = 1.0f;	// 振れ幅
-	float waveSpeed_ = 2.0f;		// サイン波の速さ
-	float deathTimer_ = 0.0f;		// 死亡演出用
-	float deathLength_ = 1.5f;		// 倒れ終わるまでの秒数
+	bool isHit_ = false;			//< 衝突フラグ
+	bool isDead_ = false;			//< 死んだフラグ
+	bool gameplayEngaged_ = false;	//< 
+	float deathRotation_ = 0.0f;	//< 傾きの進行度
+	float waveTime_ = 0.0f;			//< 経過時間
+	float waveAmplitude_ = 1.0f;	//< 振れ幅
+	float waveSpeed_ = 2.0f;		//< サイン波の速さ
+	float deathTimer_ = 0.0f;		//< 死亡演出用
+	float deathLength_ = 1.5f;		//< 倒れ終わるまでの秒数
 
 	std::unique_ptr<EnemyShootingController> shootingController_ = nullptr;
 	std::shared_ptr<ParticleSystemObject> hitFx_;

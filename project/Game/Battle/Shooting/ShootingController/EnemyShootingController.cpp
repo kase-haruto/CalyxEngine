@@ -1,39 +1,49 @@
 #include "EnemyShootingController.h"
+
 /* ========================================================================
 /*  include space
 /* ===================================================================== */
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//		コンストラクタ
+//      コンストラクタ
 /////////////////////////////////////////////////////////////////////////////////////////
-EnemyShootingController::EnemyShootingController(std::unique_ptr<BulletContainer> container){
+EnemyShootingController::EnemyShootingController(std::unique_ptr<BulletContainer> container) {
 	bulletContainer_ = std::move(container);
-	straightShooter_ = std::make_unique<StraightBulletShooter>(bulletContainer_.get(),BulletID::Enemy_Straight);
+	straightShooter_ = std::make_unique<StraightBulletShooter>(bulletContainer_.get(), BulletID::Enemy_Straight);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//		更新
+//      更新
 /////////////////////////////////////////////////////////////////////////////////////////
-void EnemyShootingController::Update(float dt){
-	bulletContainer_->Update(dt);
+void EnemyShootingController::Update(float dt) {
+	if (bulletContainer_) bulletContainer_->Update(dt);
+
+	if (!gameplayEngaged_) {
+		shootCooldown_ = 0.0f;
+		return;
+	}
+
 	BaseShootingController::Update(dt);
 }
 
-
 /////////////////////////////////////////////////////////////////////////////////////////
-//		発射Request
+//      発射Request
 /////////////////////////////////////////////////////////////////////////////////////////
-void EnemyShootingController::RequestShoot([[maybe_unused]] const Vector3& pos, [[maybe_unused]] const Vector3& dir){
-	if (shootCooldown_ >= 0){ return; }
+void EnemyShootingController::RequestShoot([[maybe_unused]] const Vector3& pos,
+										   [[maybe_unused]] const Vector3& dir) {
+	if (!gameplayEngaged_) return;
 
-	straightShooter_->Shoot(pos,dir);
+	if (shootCooldown_ >= 0) { return; }
 
+	straightShooter_->Shoot(pos, dir);
 	shootCooldown_ = GetInterval();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//		インターバルを取得
+//      インターバルを取得
 /////////////////////////////////////////////////////////////////////////////////////////
-float EnemyShootingController::GetInterval() const{ return kInterval; }
+float EnemyShootingController::GetInterval() const { return kInterval; }
 
-void EnemyShootingController::SetBulletContainer(std::unique_ptr<BulletContainer> container){bulletContainer_ = std::move(container);}
+void EnemyShootingController::SetBulletContainer(std::unique_ptr<BulletContainer> container) {
+	bulletContainer_ = std::move(container);
+}
