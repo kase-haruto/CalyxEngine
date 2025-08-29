@@ -8,6 +8,9 @@
 #include <Game/Installer/Enemy/EnemyInstaller.h>
 #include <Game/3dObject/Actor/Enemy/Directory/IEnemyDirectory.h>
 
+#include <externals/imgui/imgui.h>
+
+
 EnemySpawner::EnemySpawner(const std::string& name) : SceneObject() {
 	SetName(name, ObjectType::GameObject);
 }
@@ -35,7 +38,7 @@ void EnemySpawner::AlwaysUpdate([[maybe_unused]] float dt) {
 }
 
 void EnemySpawner::ApplyConfig() {
-	auto cfg = config_.GetConfig();
+	const auto& cfg = config_.GetConfig();
 	if (!cfg.name.empty()) {
 		SetName(cfg.name, ObjectType::GameObject);
 	}
@@ -49,7 +52,7 @@ void EnemySpawner::ApplyConfig() {
 }
 
 void EnemySpawner::ExtractConfig() {
-	auto cfg = config_.GetConfig();
+	auto& cfg = config_.GetConfig();
 	cfg.name = GetName();
 	cfg.rotationSpeed = rotationSpeed_;
 	cfg.rotationDir = rotationDir_;
@@ -59,6 +62,7 @@ void EnemySpawner::ExtractConfig() {
 	cfg.maxSpawnCount = maxSpawnCount_;
 	cfg.transform = worldTransform_.ExtractConfig();
 }
+
 
 void EnemySpawner::ShowGui() {
 	// Transform情報
@@ -115,7 +119,6 @@ void EnemySpawner::Spawn() {
 	// 自前リストに登録
 	spawnedEnemies_.push_back(enemy);
 
-	// ディレクトリにも登録（あれば）
 	if (directory_) { directory_->Register(enemy); }
 }
 

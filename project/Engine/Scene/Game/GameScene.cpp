@@ -78,16 +78,22 @@ void GameScene::Initialize() {
 
 	enemyBinding_ = std::make_unique<EnemyRuntimeBindingService>();
 	enemyBinding_->OnSceneLoaded(*sceneContext_);
+
+	occurrenceBoss_ = std::make_unique<RailProgressBossSpawnService>();
+	occurrenceBoss_->OnSceneLoaded(*sceneContext_);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //  更新
 /////////////////////////////////////////////////////////////////////////////////////////
 void GameScene::Update([[maybe_unused]] float dt) {
-	// ランタイム配線サービスの更新（Player へ最新の敵リスト供給等）
+	// ランタイム配線サービスの更新
 	if (enemyBinding_) {
 		enemyBinding_->Update(*sceneContext_, dt);
 	}
+
+	//Railの進み具合でボスを発生させる
+	occurrenceBoss_->BossSpawnByRailProgress();
 
 	// UI 更新など
 	if (attackSprite_) attackSprite_->Update();
@@ -135,3 +141,4 @@ void GameScene::CleanUp() {
 	sceneContext_->GetObjectLibrary()->Clear();
 	CollisionManager::GetInstance()->ClearColliders();
 }
+

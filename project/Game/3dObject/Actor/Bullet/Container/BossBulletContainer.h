@@ -1,19 +1,19 @@
 #pragma once
-
 #include "BulletContainer.h"
 
-class EnemyBulletContainer
-	: public BulletContainer{
+class BossBulletContainer :
+    public BulletContainer {
 public:
 	//===================================================================*/
 	//		public method
 	//===================================================================*/
-	EnemyBulletContainer(const std::string& name);
-	EnemyBulletContainer() = delete;
-	~EnemyBulletContainer() override = default;
+	BossBulletContainer(const std::string& name);
+	BossBulletContainer() = delete;
+	~BossBulletContainer() override = default;
 
 public:
 	void Update(float dt);
 	void AddBullet(BulletID id, const Vector3& pos, const Vector3& vel) override;
-	std::string_view GetTypeName() const override{ return "EnemyBulletContainer"; }
+	std::string_view GetTypeName() const override { return "BossBulletContainer"; }
 };
+

@@ -96,10 +96,16 @@ inline void to_json(nlohmann::json& j, const Quaternion& q) {
 	j = nlohmann::json{ {"x", q.x}, {"y", q.y}, {"z", q.z}, {"w", q.w} };
 }
 
-inline void from_json(const nlohmann::json& j,Quaternion q) {
+inline void from_json(const nlohmann::json& j, Quaternion& q) {
 	j.at("x").get_to(q.x);
 	j.at("y").get_to(q.y);
 	j.at("z").get_to(q.z);
 	j.at("w").get_to(q.w);
-}
 
+	const float n = std::sqrt(q.w * q.w + q.x * q.x + q.y * q.y + q.z * q.z);
+	if (n > 0.0f) {
+		q.w /= n; q.x /= n; q.y /= n; q.z /= n;
+	} else {
+		q = Quaternion::MakeIdentity();
+	}
+}

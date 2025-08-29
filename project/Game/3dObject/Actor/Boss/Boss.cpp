@@ -1,21 +1,12 @@
-#include "Enemy.h"
+#include "Boss.h"
 
-#include <Engine/Foundation/Utility/Random/Random.h>
-#include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Objects/Collider/BoxCollider.h>
-#include <Engine/Scene/Utility/SceneUtility.h>
 
-#include <numbers>
-
-/* ========================================================================
-/* include space
-/* ===================================================================== */
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//		コンストラクタ
+//		ctor
 /////////////////////////////////////////////////////////////////////////////////////////
-Enemy::Enemy(const std::string& modelName, const std::string objName)
-	: Actor(modelName, objName) {
+Boss::Boss(const std::string& modelName, const std::string objName) : Actor(modelName, objName) {
 	worldTransform_.Initialize();
 	worldTransform_.scale = { 2, 2, 2 };
 
@@ -31,50 +22,36 @@ Enemy::Enemy(const std::string& modelName, const std::string objName)
 	life_ = 1;
 	waveAmplitude_ = 2.0f;
 	waveSpeed_ = Random::Generate<float>(1.0f, 3.0f);
-
-	hitFx_ = SceneAPI::Instantiate<ParticleSystemObject>("hitFx");
-	hitFx_->LoadConfig("Resources/Assets/Configs/Effect/HitFx.json");
-
-	explosionFx_ = SceneAPI::Instantiate<ParticleSystemObject>("explosionFx");
-	explosionFx_->LoadConfig("Resources/Assets/Configs/Effect/Explosion.json");
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		デストラクタ
 /////////////////////////////////////////////////////////////////////////////////////////
-Enemy::~Enemy() {}
+Boss::~Boss() {}
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//		初期化処理
+//		初期化
 /////////////////////////////////////////////////////////////////////////////////////////
-void Enemy::Initialize() {
-	auto self = shared_from_this();
+void Boss::Initialize() {}
 
-	hitFx_->SetParent(self);
-	hitFx_->Stop();
-
-	explosionFx_->SetParent(self);
-	explosionFx_->Stop();
-}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		変換
 /////////////////////////////////////////////////////////////////////////////////////////
 static float Deg2Rad(float d) { return d * std::numbers::pi_v<float> / 180.0f; }
 
-////////////////////////////////////////////////////////////////
-//  Update
-////////////////////////////////////////////////////////////////
-void Enemy::Update(float dt) {
+/////////////////////////////////////////////////////////////////////////////////////////
+//		更新処理
+/////////////////////////////////////////////////////////////////////////////////////////
+void Boss::Update(float dt) {
 	/* =============================================
-	   1. 生存中のロジック
-	   =============================================*/
+		1. 生存中のロジック
+	=============================================*/
 	if (deathState_ == DeathState::Alive) {
 		if (life_ <= 0) {
 			// ---- 死亡フラグ立った瞬間 ----
 			//親子付け解除
 			deathState_ = DeathState::Dying;
-			explosionFx_->Play();
 			deathTimer_ = 0.0f;
 			deathRotateAxis_ = { 1, 0, 0 }; // 前方に倒れる
 			return; // このフレームはここで終了
@@ -82,7 +59,6 @@ void Enemy::Update(float dt) {
 
 		// 弾発射管理クラスの更新
 		if (shootingController_) {
-			Shoot();
 			shootingController_->Update(dt);
 		}
 
@@ -108,7 +84,7 @@ void Enemy::Update(float dt) {
 		worldTransform_.translation = basePosition_; // 移動しない
 
 		// 演出が終わり、爆発も再生終了したら Dead へ
-		if (t >= 1.0f && !explosionFx_->IsPlaying()) {
+		if (t >= 1.0f ) {
 			deathState_ = DeathState::Dead;
 			deathTimer_ = 0.0f;
 		}
@@ -124,56 +100,30 @@ void Enemy::Update(float dt) {
 	}
 }
 
-////////////////////////////////////////////////////////////////
-//  衝突
-////////////////////////////////////////////////////////////////
-void Enemy::OnCollisionEnter(Collider* other) {
+/////////////////////////////////////////////////////////////////////////////////////////
+//		衝突時処理
+/////////////////////////////////////////////////////////////////////////////////////////
+void Boss::OnCollisionEnter(Collider* other) {
 	if (!other) return;
 	if (collider_->GetTargetType() != other->GetType()) return;
 
 	if (life_ >= 1) {
 		life_--;
-		hitFx_->Play();
 	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		中心座標取得
 /////////////////////////////////////////////////////////////////////////////////////////
-const Vector3 Enemy::GetCenterPos() const {
+const Vector3 Boss::GetCenterPos() const {
 	const Vector3 offset = { 0.0f, 1.5f, 0.0f };
 	Vector3 worldPos = Vector3::Transform(offset, worldTransform_.matrix.world);
 	return worldPos;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//		親の設定
+//		発射制御クラスの取得
 /////////////////////////////////////////////////////////////////////////////////////////
-void Enemy::SetParent(WorldTransform* parent) {
-	worldTransform_.parent = parent;
-	basePosition_ = worldTransform_.translation;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////
-//		弾コントロール
-/////////////////////////////////////////////////////////////////////////////////////////
-void Enemy::SetShootingController(std::unique_ptr<EnemyShootingController> controller) {
+void Boss::SetShootingController(std::unique_ptr<BossShootingController> controller) {
 	shootingController_ = std::move(controller);
-}
-
-void Enemy::SetPlayerTransform(const WorldTransform* tf) { playerTransform_ = tf; }
-
-/////////////////////////////////////////////////////////////////////////////////////////
-//		移動
-/////////////////////////////////////////////////////////////////////////////////////////
-void Enemy::Move() {}
-
-/////////////////////////////////////////////////////////////////////////////////////////
-//		弾発射
-/////////////////////////////////////////////////////////////////////////////////////////
-void Enemy::Shoot() {
-	//playerの方向に弾を撃つ
-	Vector3 myPos = GetCenterPos();
-	Vector3 dir = Vector3(playerTransform_->GetWorldPosition() - myPos).Normalize();
-	shootingController_->RequestShoot(GetCenterPos(), dir);
 }

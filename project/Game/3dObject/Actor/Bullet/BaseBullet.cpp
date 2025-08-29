@@ -18,6 +18,7 @@ BaseBullet::BaseBullet(const std::string& modelName, const std::string& name)
 	auto* boxCollider = dynamic_cast< BoxCollider* >(collider_.get());
 	boxCollider->SetSize(Vector3(3.0f, 3.0f, 3.0f));
 
+	moveSpeed_ = 50.0f;
 	SetDrawEnable(false);
 }
 
@@ -27,7 +28,6 @@ BaseBullet::BaseBullet(const std::string& modelName, const std::string& name)
 void BaseBullet::ShootInitialize(const Vector3& initPos, const Vector3& velocity){
 	worldTransform_.translation = initPos;
 	velocity_ = velocity;
-	moveSpeed_ = 22.0f;
 	isAlive_ = true;
 	OnShot();
 }
@@ -52,7 +52,7 @@ void BaseBullet::Update(float deltaTime){
 //		imgui
 /////////////////////////////////////////////////////////////////////////////////////////
 void BaseBullet::DerivativeGui(){
-
+	ImGui::Text("%.1f", moveSpeed_);
 }
 
 void BaseBullet::OnCollisionEnter([[maybe_unused]] Collider* other){

@@ -1,8 +1,8 @@
-#include "EnemyBullet.h"
+#include "BossBullet.h"
 /* ========================================================================
 /*   include space
 /* ===================================================================== */
-// engine
+// Engine
 #include <Engine/Scene/Utility/SceneUtility.h>
 
 // c++
@@ -11,8 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 //		コンストラクタ
 /////////////////////////////////////////////////////////////////////////////////////////
-EnemyBullet::EnemyBullet(const std::string& modelName, const std::string& name)
-	:BaseBullet::BaseBullet(modelName, name){
+BossBullet::BossBullet(const std::string& modelName, const std::string& name) :BaseBullet::BaseBullet(modelName, name) {
 	collider_->SetType(ColliderType::Type_EnemyAttack);
 	collider_->SetTargetType(ColliderType::Type_Player);
 
@@ -21,22 +20,21 @@ EnemyBullet::EnemyBullet(const std::string& modelName, const std::string& name)
 
 	shootFx_ = SceneAPI::Instantiate<ParticleSystemObject>("shootFx");
 	shootFx_->LoadConfig("Resources/Assets/Configs/Effect/ShootFx.json");
-
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		デストラクタ
 /////////////////////////////////////////////////////////////////////////////////////////
-EnemyBullet::~EnemyBullet(){
+BossBullet::~BossBullet() {
 	auto ctx = SceneContext::Current();
 	ctx->RemoveEditorObject(trailFx_);
 	ctx->RemoveEditorObject(shootFx_);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//		初期化
+//		初期化処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void EnemyBullet::Initialize(){
+void BossBullet::Initialize() {
 	auto self = shared_from_this();
 	trailFx_->SetParent(self);
 	shootFx_->SetParent(self);
@@ -46,6 +44,7 @@ void EnemyBullet::Initialize(){
 /////////////////////////////////////////////////////////////////////////////////////////
 //		発射時処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void EnemyBullet::OnShot() {
+void BossBullet::OnShot() {
 	shootFx_->Play();
 }
+

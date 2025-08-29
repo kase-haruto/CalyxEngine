@@ -19,14 +19,12 @@ void EnemyRuntimeBindingService::OnSceneLoaded(SceneContext& ctx) {
 	PlayerInstaller{}.InstallPlayer(player);
 	wPlayer_ = player;
 
-	// 既存スポナーへ一括配線
 	WireAllSpawners_(ctx);
 }
 
 void EnemyRuntimeBindingService::Update(SceneContext& ctx, float) {
 	auto player = wPlayer_.lock();
 	if (!player) {
-		// プレイヤーがまだなら再取得して配線
 		player = ctx.FindFirst<Player>();
 		wPlayer_ = player;
 		if (player) WireAllSpawners_(ctx);
@@ -41,7 +39,6 @@ void EnemyRuntimeBindingService::Update(SceneContext& ctx, float) {
 		WireAllSpawners_(ctx);
 	}
 
-	// 毎フレーム：最新の敵リストを Player に供給
 	if (player && dir_) {
 		player->SetEnemyList(dir_->SnapshotAlive());
 	}
@@ -60,8 +57,8 @@ void EnemyRuntimeBindingService::WireAllSpawners_(SceneContext& ctx) {
 	size_t wired = 0;
 	for (auto& obj : lib->GetAllObjectsShared()) {
 		if (auto sp = std::dynamic_pointer_cast<EnemySpawner>(obj)) {
-			if (player) sp->SetPlayerTransform(&player->GetWorldTransform()); // 親は Player 本人
-			sp->SetDirectory(dir_.get()); // ディレクトリを注入
+			if (player) sp->SetPlayerTransform(&player->GetWorldTransform());
+			sp->SetDirectory(dir_.get());
 			++wired;
 		}
 	}

@@ -14,7 +14,9 @@
 #include <externals/imgui/imgui.h>
 #include <Engine/Foundation/Json/JsonUtils.h>
 
-
+/////////////////////////////////////////////////////////////////////////////////////////
+//	コンストラクタ
+/////////////////////////////////////////////////////////////////////////////////////////
 void EulerTransform::ShowImGui(const std::string& label) {
 	ImGui::SeparatorText(label.c_str());
 	std::string scaleLabel = label + "_scale";
@@ -155,11 +157,16 @@ void WorldTransform::ApplyConfig(const WorldTransformConfig& config) {
 WorldTransformConfig WorldTransform::ExtractConfig() {
 	WorldTransformConfig config;
 	config.translation = translation;
-	config.rotation = rotation;
+
+	if (rotationSource == RotationSource::Euler) {
+		config.rotation = Quaternion::EulerToQuaternion(eulerRotation);
+	} else {
+		config.rotation = rotation;
+	}
+
 	config.scale = scale;
 	return config;
 }
-
 
 /* ========================================================================
 /* Transform2D class

@@ -351,62 +351,6 @@
                 "isDraw": true,
                 "targetType": 0
             },
-            "guid": "132bf502-69cc-4b34-ad8a-eb615cc5673c",
-            "modelConfig": {
-                "blendMode": 5,
-                "materialConfig": {
-                    "color": {
-                        "w": 1.0,
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    },
-                    "currentLightingMode_": 0,
-                    "enableLighting": 0,
-                    "enviromentCoefficient": 0.5,
-                    "isReflect": false,
-                    "shininess": 20.0
-                },
-                "modelName": "largeBuilding.obj",
-                "textureGuid": "84f22e1b-318a-4813-a065-e60099cc9dc7",
-                "uvTransConfig": {
-                    "rotation": 0.0,
-                    "scale": {
-                        "x": 1.0,
-                        "y": 1.0
-                    }
-                }
-            },
-            "name": "largeBuilding",
-            "objectType": 2,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 12.520000457763672,
-                    "y": 13.699999809265137,
-                    "z": 10.0
-                },
-                "translation": {
-                    "x": 26.275405883789063,
-                    "y": -58.536102294921875,
-                    "z": 364.015869140625
-                }
-            },
-            "type": "BaseGameObject"
-        },
-        {
-            "colliderConfig": {
-                "colliderType": 0,
-                "isCollisionEnabled": true,
-                "isDraw": true,
-                "targetType": 0
-            },
             "guid": "d5993d2c-8c49-48c4-a3c7-362bd9ca5816",
             "modelConfig": {
                 "blendMode": 5,
@@ -463,7 +407,7 @@
                 "isDraw": true,
                 "targetType": 0
             },
-            "guid": "b8c72844-628e-4c28-aa8d-6ca903fe057e",
+            "guid": "132bf502-69cc-4b34-ad8a-eb615cc5673c",
             "modelConfig": {
                 "blendMode": 5,
                 "materialConfig": {
@@ -479,7 +423,63 @@
                     "isReflect": false,
                     "shininess": 20.0
                 },
-                "modelName": "tallBuilding_01.obj",
+                "modelName": "largeBuilding.obj",
+                "textureGuid": "84f22e1b-318a-4813-a065-e60099cc9dc7",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "largeBuilding",
+            "objectType": 2,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 12.520000457763672,
+                    "y": 13.699999809265137,
+                    "z": 10.0
+                },
+                "translation": {
+                    "x": 26.275405883789063,
+                    "y": -58.536102294921875,
+                    "z": 364.015869140625
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "cc843f20-48fc-4874-8a73-76e96448020a",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "smallBuilding_01.obj",
                 "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
                 "uvTransConfig": {
                     "rotation": 0.0,
@@ -489,9 +489,9 @@
                     }
                 }
             },
-            "name": "tallBuilding_01",
+            "name": "smallBuilding_01",
             "objectType": 2,
-            "parentGuid": "3db6e95e-1e38-4758-939b-b0ad5fb8bcc8",
+            "parentGuid": "0c6dbd13-8006-4d21-aca4-2e25b7ae13c6",
             "transform": {
                 "rotation": {
                     "w": 1.0,
@@ -500,14 +500,14 @@
                     "z": 0.0
                 },
                 "scale": {
-                    "x": 0.9999662637710571,
-                    "y": 0.9999585747718811,
-                    "z": 0.9999352693557739
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
                 },
                 "translation": {
-                    "x": -52.94036102294922,
-                    "y": -5.418656826019287,
-                    "z": -3.8896408081054688
+                    "x": -11.651634216308594,
+                    "y": -2.7303266525268555,
+                    "z": 12.942985534667969
                 }
             },
             "type": "BaseGameObject"
@@ -575,7 +575,7 @@
                 "isDraw": true,
                 "targetType": 0
             },
-            "guid": "cc843f20-48fc-4874-8a73-76e96448020a",
+            "guid": "b8c72844-628e-4c28-aa8d-6ca903fe057e",
             "modelConfig": {
                 "blendMode": 5,
                 "materialConfig": {
@@ -591,7 +591,7 @@
                     "isReflect": false,
                     "shininess": 20.0
                 },
-                "modelName": "smallBuilding_01.obj",
+                "modelName": "tallBuilding_01.obj",
                 "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
                 "uvTransConfig": {
                     "rotation": 0.0,
@@ -601,9 +601,9 @@
                     }
                 }
             },
-            "name": "smallBuilding_01",
+            "name": "tallBuilding_01",
             "objectType": 2,
-            "parentGuid": "0c6dbd13-8006-4d21-aca4-2e25b7ae13c6",
+            "parentGuid": "3db6e95e-1e38-4758-939b-b0ad5fb8bcc8",
             "transform": {
                 "rotation": {
                     "w": 1.0,
@@ -612,14 +612,14 @@
                     "z": 0.0
                 },
                 "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
+                    "x": 0.9999662637710571,
+                    "y": 0.9999585747718811,
+                    "z": 0.9999352693557739
                 },
                 "translation": {
-                    "x": -11.651634216308594,
-                    "y": -2.7303266525268555,
-                    "z": 12.942985534667969
+                    "x": -52.94036102294922,
+                    "y": -5.418656826019287,
+                    "z": -3.8896408081054688
                 }
             },
             "type": "BaseGameObject"
@@ -849,6 +849,103 @@
             "type": "BaseGameObject"
         },
         {
+            "guid": "649f904f-36e2-4808-a08b-d1ccf1dfb9d3",
+            "maxSpawnCount": 5,
+            "name": "EnemySpawner",
+            "rotationDir": {
+                "x": 0.0,
+                "y": 1.0,
+                "z": 0.0
+            },
+            "rotationSpeed": 1.0,
+            "spawnAreaMax": {
+                "x": 10.0,
+                "y": 5.0,
+                "z": -30.0
+            },
+            "spawnAreaMin": {
+                "x": -10.0,
+                "y": 0.0,
+                "z": -30.0
+            },
+            "spawnInterval": 5.0,
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 100.0
+                }
+            },
+            "type": "EnemySpawner"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 6,
+                "isCollisionEnabled": true,
+                "isDraw": false,
+                "targetType": 4
+            },
+            "guid": "779b108d-40e4-4b5c-97c4-d47bd0e08674",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "ghost.obj",
+                "textureGuid": "00000000-0000-0000-0000-000000000000",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "boss",
+            "objectType": 2,
+            "parentGuid": "adc076df-de9d-443d-a3a0-2123aeb27f8b",
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 2.0,
+                    "y": 2.0,
+                    "z": 2.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
             "colliderConfig": {
                 "colliderType": 0,
                 "isCollisionEnabled": true,
@@ -961,26 +1058,10 @@
             "type": "BaseGameObject"
         },
         {
-            "guid": "688d0305-6e83-410a-8ad7-056608387381",
-            "maxSpawnCount": 5,
-            "name": "",
-            "rotationDir": {
-                "x": 0.0,
-                "y": 1.0,
-                "z": 0.0
-            },
-            "rotationSpeed": 1.0,
-            "spawnAreaMax": {
-                "x": 10.0,
-                "y": 5.0,
-                "z": -30.0
-            },
-            "spawnAreaMin": {
-                "x": -10.0,
-                "y": 0.0,
-                "z": -30.0
-            },
-            "spawnInterval": 5.0,
+            "guid": "adc076df-de9d-443d-a3a0-2123aeb27f8b",
+            "name": "BossSpawner",
+            "objectType": 0,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
                 "rotation": {
                     "w": 1.0,
@@ -994,12 +1075,12 @@
                     "z": 1.0
                 },
                 "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 100.0
+                    "x": -1856.3162841796875,
+                    "y": -76.56305694580078,
+                    "z": 1546.497314453125
                 }
             },
-            "type": "EnemySpawner"
+            "type": "BossSpawner"
         }
     ],
     "sceneName": "scene",
