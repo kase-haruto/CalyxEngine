@@ -205,6 +205,7 @@ void RailCamera::Update(float dt) {
 }
 
 void RailCamera::ShowGui() {
+#ifdef _DEBUG
 	worldTransform_.ShowImGui();
 	if (ImGui::CollapsingHeader("RailCamera")) {
 		ImGui::DragFloat("Speed (units/s)", &speed_, 0.1f, 0.0f, 1000.0f);
@@ -226,6 +227,7 @@ void RailCamera::ShowGui() {
 			RebuildArcTable();
 		}
 	}
+#endif // _DEBUG
 }
 
 void RailCamera::AlwaysUpdate(float dt) {
