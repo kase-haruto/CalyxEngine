@@ -849,6 +849,47 @@
             "type": "BaseGameObject"
         },
         {
+            "guid": "a4506b29-960d-4d71-b0c3-3c94ee12008f",
+            "maxSpawnCount": 5,
+            "name": "EnemySpawner",
+            "rotationDir": {
+                "x": 0.0,
+                "y": 1.0,
+                "z": 0.0
+            },
+            "rotationSpeed": 1.0,
+            "spawnAreaMax": {
+                "x": 10.0,
+                "y": 5.0,
+                "z": -30.0
+            },
+            "spawnAreaMin": {
+                "x": -10.0,
+                "y": 0.0,
+                "z": -30.0
+            },
+            "spawnInterval": 5.0,
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 100.0
+                }
+            },
+            "type": "EnemySpawner"
+        },
+        {
             "colliderConfig": {
                 "colliderType": 0,
                 "isCollisionEnabled": true,
@@ -961,26 +1002,10 @@
             "type": "BaseGameObject"
         },
         {
-            "guid": "688d0305-6e83-410a-8ad7-056608387381",
-            "maxSpawnCount": 5,
-            "name": "",
-            "rotationDir": {
-                "x": 0.0,
-                "y": 1.0,
-                "z": 0.0
-            },
-            "rotationSpeed": 1.0,
-            "spawnAreaMax": {
-                "x": 10.0,
-                "y": 5.0,
-                "z": -30.0
-            },
-            "spawnAreaMin": {
-                "x": -10.0,
-                "y": 0.0,
-                "z": -30.0
-            },
-            "spawnInterval": 5.0,
+            "guid": "5d55b354-59fb-45d7-a10c-e7f2179dd0ed",
+            "name": "BossSpawner",
+            "objectType": 0,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
                 "rotation": {
                     "w": 1.0,
@@ -994,12 +1019,12 @@
                     "z": 1.0
                 },
                 "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 100.0
+                    "x": -1925.4376220703125,
+                    "y": -173.80877685546875,
+                    "z": 1603.107421875
                 }
             },
-            "type": "EnemySpawner"
+            "type": "BossSpawner"
         }
     ],
     "sceneName": "scene",

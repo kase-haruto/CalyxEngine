@@ -1,8 +1,10 @@
 #pragma once
+#include <Data/Engine/Configs/Scene/Objects/SceneObject/SceneObjectConfig.h>
+#include <Engine/Foundation/Math/Vector3.h>
+
+#include <externals/nlohmann/json.hpp>
 
 #include <string>
-#include <Engine/Foundation/Math/Vector3.h>
-#include <externals/nlohmann/json.hpp>
 
 struct EnemySpawnerConfig
 		: public SceneObjectConfig{

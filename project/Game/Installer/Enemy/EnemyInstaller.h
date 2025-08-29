@@ -4,8 +4,6 @@
 
 #include <memory>
 
-class Enemy;
-
 class EnemyInstaller{
 public:
 	EnemyInstaller() = default;
