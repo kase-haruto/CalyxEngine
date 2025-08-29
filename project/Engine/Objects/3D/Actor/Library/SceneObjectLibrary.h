@@ -28,8 +28,8 @@ public:
 	std::vector<std::shared_ptr<TObject>> FindByType() const;
 
 	/* 一覧取得 ----------------------------------------------------------*/
-	std::vector<SceneObject*>                        GetAllObjectsRaw()   const;
-	std::vector<std::shared_ptr<SceneObject>>        GetAllObjectsShared() const;
+	std::vector<SceneObject*> GetAllObjectsRaw()   const;
+	std::vector<std::shared_ptr<SceneObject>> GetAllObjectsShared() const;
 
 	bool Contains(const std::shared_ptr<SceneObject>& obj) const;
 

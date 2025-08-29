@@ -111,6 +111,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game\Installer\Enemy\EnemyEngagementInstaller.cpp" />
+    <ClCompile Include="Game\Runtime\Engagement\EnemyEngagementService.cpp" />
     <ClCompile Include="Game\Battle\Shooting\ShootingController\BossShootingController.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Bullet\BossBullet\BossBullet.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Bullet\Container\BossBulletContainer.cpp" />
@@ -329,6 +331,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\3dObject\Actor\Boss\Service\RailProgressBossSpawnService.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\Installer\Enemy\EnemyEngagementInstaller.h" />
+    <ClInclude Include="Game\Runtime\Engagement\EnemyEngagementService.h" />
+    <ClInclude Include="Engine\Application\Gameplay\Combat\lineOfSight.h" />
+    <ClInclude Include="Engine\Application\Gameplay\Visibility\GameplayVisibility.h" />
     <ClInclude Include="Game\Battle\Shooting\ShootingController\BossShootingController.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\BossBullet\BossBullet.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\Container\BossBulletContainer.h" />

@@ -82,7 +82,13 @@ void Enemy::Update(float dt) {
 
 		// 弾発射管理クラスの更新
 		if (shootingController_) {
-			Shoot();
+			shootingController_->SetGameplayEngaged(this->IsGameplayEngaged());
+
+			if (this->IsGameplayEngaged()) {
+				Shoot();
+			}
+			// ★ 弾プール更新＆クールダウン更新（無許可時は中で早期 return 済み）
+
 			shootingController_->Update(dt);
 		}
 
