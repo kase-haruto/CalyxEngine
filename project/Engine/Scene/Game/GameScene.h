@@ -12,6 +12,7 @@
 /* graphics */
 #include <Game/3d/GameCamera/RailCamera.h>
 #include <Game/3dObject/Actor/Enemy/BindingService/EnemyRuntimeBindingService.h>
+#include <Game/3dObject/Actor/Boss/Service/RailProgressBossSpawnService.h>
 #include <Game/3dObject/Actor/Enemy/Collection/EnemyCollection.h>
 /* c++ */
 #include <memory>
@@ -39,6 +40,7 @@ private:
 	std::unique_ptr<Sprite>         attackSprite_;
 
 	/* runtime services =============================================*/
-	std::unique_ptr<EnemyRuntimeBindingService> enemyBinding_; //< Player⇄Enemy 配線担当
+	std::unique_ptr<EnemyRuntimeBindingService> enemyBinding_;		//< 配線
+	std::unique_ptr<RailProgressBossSpawnService> occurrenceBoss_;	//< カメラの進み具合でボスを発生	
 	std::shared_ptr<EnemyCollection>  enemyCollection_;
 };

@@ -10,7 +10,7 @@ void RailProgressBossSpawnService::BossSpawnByRailProgress() {
 	float railProgress = railCamera->GetProgress();
 
 	//Railの進捗が8割まで来たら、ボスをスポーンさせる。
-	if (railProgress >= 0.0f) {
+	if (railProgress >= 0.8f) {
 		spawner->Spawn();
 	}
 }

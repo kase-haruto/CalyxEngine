@@ -35,21 +35,18 @@ void BossSpawner::AlwaysUpdate(float /*dt*/) {
 //  発生
 /////////////////////////////////////////////////////////////////////////////////////////
 void BossSpawner::Spawn() {
-	auto boss = wBoss_.lock();
-	if (boss) return; //すでにスポーンしていた場合無視
+	if (!wBoss_.expired()) return;
 
 	BossInstaller installer;
-	boss = installer.InstallBoss();
-
+	auto boss = installer.InstallBoss();
 	if (!boss) return;
 
-	//初期化
 	boss->Initialize();
 
 	auto self = shared_from_this();
-
-	//スポナーを親として登録
 	boss->SetParent(self);
+
+	wBoss_ = boss;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
