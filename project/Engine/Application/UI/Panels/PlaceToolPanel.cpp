@@ -11,6 +11,7 @@
 
 // --- game objects -----------------------------------------------------------
 #include <Game/3dObject/Actor/Enemy/Spawner/EnemySpawner.h>
+#include <Game/3dObject/Actor/Boss/Spawner/BossSpawner.h>
 #include <Game/3dObject/Actor/Enemy/Collection/EnemyCollection.h>
 
 // --- externals --------------------------------------------------------------
@@ -85,24 +86,55 @@ void PlaceToolPanel::RegisterPlaceItems() {
 							});
 
 	// ---------------------------- Spawner -----------------------------------
-	auto& spawnerItems = categoryItems_[PlaceItemCategory::InGameObject];
-	spawnerItems.push_back({
-		PlaceItemCategory::InGameObject,
-		"EnemySpawner",
-		{}, {64, 64},
-		[]() {
-			auto* ctx = SceneContext::Current();
-			auto factory = []() {
-				auto obj = SceneAPI::Instantiate<EnemySpawner>("EnemySpawner");
-				obj->ApplyConfig();
-				obj->Initialize();
-				return obj;
-			};
-			CommandManager::GetInstance()->Execute(
-				std::make_unique<CreateObjectCommand<EnemySpawner>>(
-					ctx, factory, "Create EnemySpawner"));
-		}
-	});
+	{
+		auto& spawnerItems = categoryItems_[PlaceItemCategory::InGameObject];
+		spawnerItems.push_back({
+			PlaceItemCategory::InGameObject,
+			"EnemySpawner",
+			{}, {64, 64},
+			[]() {
+				auto* ctx = SceneContext::Current();
+				auto factory = []() {
+					auto obj = SceneAPI::Instantiate<EnemySpawner>("EnemySpawner");
+					obj->ApplyConfig();
+					obj->Initialize();
+					return obj;
+				};
+				CommandManager::GetInstance()->Execute(
+					std::make_unique<CreateObjectCommand<EnemySpawner>>(
+						ctx, factory, "Create EnemySpawner"));
+			}
+							   });
+	}
+
+	{
+		auto& spawnerItems = categoryItems_[PlaceItemCategory::InGameObject];
+		spawnerItems.push_back({
+			PlaceItemCategory::InGameObject,
+			"BossSpawner",
+			{}, {64, 64},
+			[]() {
+				auto* ctx = SceneContext::Current();
+
+				// 既にシーンに BossSpawner があるなら作成しない
+				if (ctx->FindFirst<BossSpawner>()) {
+					OutputDebugStringA("[PlaceTool] BossSpawner is limited to one per scene.\n");
+					return;
+				}
+
+				auto factory = []() {
+					auto obj = SceneAPI::Instantiate<BossSpawner>("BossSpawner");
+					obj->ApplyConfig();
+					obj->Initialize();
+					return obj;
+				};
+
+				CommandManager::GetInstance()->Execute(
+					std::make_unique<CreateObjectCommand<BossSpawner>>(
+						ctx, factory, "Create BossSpawner"));
+			}
+							   });
+	}
 
 	// ---------------------------- Models ------------------------------------
 	auto& modelItems = categoryItems_[PlaceItemCategory::Model];

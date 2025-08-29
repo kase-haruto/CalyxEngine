@@ -84,7 +84,7 @@ void GameScene::Initialize() {
 //  更新
 /////////////////////////////////////////////////////////////////////////////////////////
 void GameScene::Update([[maybe_unused]] float dt) {
-	// ランタイム配線サービスの更新（Player へ最新の敵リスト供給等）
+	// ランタイム配線サービスの更新
 	if (enemyBinding_) {
 		enemyBinding_->Update(*sceneContext_, dt);
 	}

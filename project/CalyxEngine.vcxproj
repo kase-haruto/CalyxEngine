@@ -111,6 +111,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Game\Battle\Shooting\ShootingController\BossShootingController.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Bullet\BossBullet\BossBullet.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Bullet\Container\BossBulletContainer.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Boss\Spawner\BossSpawner.cpp" />
+    <ClCompile Include="Game\Installer\Boss\BossInstaller.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Boss\Boss.cpp" />
     <ClCompile Include="Game\UI\Button\Button.cpp" />
     <ClCompile Include="Engine\Assets\Database\AssetDatabase.cpp" />
     <ClCompile Include="Engine\Application\UI\Panels\AssetPanel.cpp" />
@@ -322,6 +328,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\UI\Controller\TitleMenuController.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game\Battle\Shooting\ShootingController\BossShootingController.h" />
+    <ClInclude Include="Game\3dObject\Actor\Bullet\BossBullet\BossBullet.h" />
+    <ClInclude Include="Game\3dObject\Actor\Bullet\Container\BossBulletContainer.h" />
+    <ClInclude Include="Game\3dObject\Actor\Boss\Spawner\BossSpawner.h" />
+    <ClInclude Include="Game\Installer\Boss\BossInstaller.h" />
+    <ClInclude Include="Game\3dObject\Actor\Boss\Boss.h" />
     <ClInclude Include="Game\UI\Button\Button.h" />
     <ClInclude Include="Engine\Assets\Database\AssetDatabase.h" />
     <ClInclude Include="Engine\Application\UI\Panels\AssetPanel.h" />

@@ -1,17 +1,15 @@
 #pragma once
-#include <Engine/Objects/3D/Actor/SceneObject.h>
-
-#include <Engine/Foundation/Utility/Random/Random.h>
-#include <Engine/Objects/Transform/Transform.h>
-#include <Engine/Scene/Context/SceneContext.h>
-#include <externals/imgui/imgui.h>
-#include <Game/3dObject/Actor/Enemy/Enemy.h>
-#include <Engine/Objects/ConfigurableObject/ConfigurableObject.h>
+/* ========================================================================
+/* include space
+/* ===================================================================== */
 #include <Data/Game/Config/Enemy/EnemySpawnerConfig.h>
+#include <Engine/Foundation/Utility/Random/Random.h>
+#include <Engine/Objects/3D/Actor/SceneObject.h>
+#include <Engine/Objects/ConfigurableObject/ConfigurableObject.h>
+#include <Engine/Scene/Context/SceneContext.h>
+#include <Game/3dObject/Actor/Enemy/Enemy.h>
 
 struct IEnemyDirectory;
-
-class SceneContext;
 
 class EnemySpawner
 	: public SceneObject,
@@ -34,10 +32,7 @@ public:
 	void SetSpawnArea(const Vector3& min, const Vector3& max) { spawnAreaMin_ = min; spawnAreaMax_ = max; }
 	void SetRotationDir(const Vector3& dir) { rotationDir_ = dir; }
 
-	// プレイヤーの Transform を注入（親はプレイヤー本人に設定）
 	void SetPlayerTransform(WorldTransform* playerTransform);
-
-	// 敵ディレクトリを注入（シーン所有。ポインタは非所有）
 	void SetDirectory(IEnemyDirectory* dir) { directory_ = dir; }
 
 	std::string_view GetTypeName() const override { return "EnemySpawner"; }
@@ -48,10 +43,10 @@ private:
 
 private:
 	std::list<std::shared_ptr<Enemy>> spawnedEnemies_;
-	size_t        maxSpawnCount_ = 5;
+	size_t maxSpawnCount_ = 5;
 
 	WorldTransform* playerTransform_ = nullptr; // 非所有
-	IEnemyDirectory* directory_ = nullptr; // 非所有（GameScene/サービスが所有）
+	IEnemyDirectory* directory_ = nullptr;
 
 	Vector3 rotationDir_ = { 0,1,0 };
 	float   rotationSpeed_ = 1.0f;

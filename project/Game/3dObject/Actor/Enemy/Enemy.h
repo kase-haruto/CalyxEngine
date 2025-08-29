@@ -22,7 +22,7 @@ public:
 	Enemy() = default;
 	Enemy(const std::string& modelName,const std::string objName);
 
-	virtual ~Enemy();
+	virtual ~Enemy()override;
 
 	void Initialize()override;
 	void Update(float dt)override;
@@ -38,7 +38,8 @@ public:
 	void SetParent(WorldTransform* parent);
 	void SetShootingController(std::unique_ptr<EnemyShootingController>);
 	void SetPlayerTransform(const WorldTransform* position);
-private:
+
+protected:
 	//===================================================================*/
 	//					private methods
 	//===================================================================*/
