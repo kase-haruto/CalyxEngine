@@ -26,6 +26,7 @@ void PlayerShootingController::RequestShoot(const Vector3& pos, const Vector3& d
 }
 
 void PlayerShootingController::Update(float dt){
+	bulletContainer_->Update(dt);
 	BaseShootingController::Update(dt);
 }
 
