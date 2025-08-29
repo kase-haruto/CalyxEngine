@@ -31,5 +31,8 @@ private:
 	std::shared_ptr<BaseGameObject> modelField_ = nullptr;
 
 	std::unique_ptr<TitleMenuController> menu_ = nullptr;
+
+	/* func ======================================================*/
+	std::function<void()> transitionForGameScene_;
 };
 

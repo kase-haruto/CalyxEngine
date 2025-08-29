@@ -3,6 +3,7 @@
 // engine
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 #include <Engine/Foundation/Math/Vector2.h>
+#include <Engine/Application/Input/Input.h>
 
 // externals
 #include <externals/imgui/imgui.h>
@@ -28,17 +29,47 @@ TitleMenuController::TitleMenuController() :
 	//リストに追加
 	buttons_.push_back(std::move(startButton));
 	buttons_.push_back(std::move(exitButton));
+
+	for (size_t i = 0; i < buttons_.size(); ++i) {
+		buttons_[i]->SetSelected(i == 0);
+	}
 }
 
 void TitleMenuController::Update(float dt) {
-	for (auto& button : buttons_) {
-		button->Update(dt);
+	// --- 入力で選択移動 ---
+	auto* in = Input::GetInstance();
+	auto moveDown = in->TriggerKey(DIK_DOWN) || in->TriggerKey(DIK_S)
+		|| in->TriggerGamepadButton(PAD_BUTTON::DPAD_DOWN);
+	auto moveUp = in->TriggerKey(DIK_UP) || in->TriggerKey(DIK_W)
+		|| in->TriggerGamepadButton(PAD_BUTTON::DPAD_UP);
+
+	if (!buttons_.empty()) {
+		uint16_t prev = selectedIndex_;
+		if (moveDown) {
+			selectedIndex_ = static_cast<uint16_t>((selectedIndex_ + 1) % buttons_.size());
+		} else if (moveUp) {
+			selectedIndex_ = static_cast<uint16_t>((selectedIndex_ + buttons_.size() - 1) % buttons_.size());
+		}
+		if (prev != selectedIndex_) {
+			for (size_t i = 0; i < buttons_.size(); ++i) {
+				buttons_[i]->SetSelected(i == selectedIndex_);
+			}
+		}
+
+		if (in->TriggerKey(DIK_SPACE) || in->TriggerGamepadButton(PAD_BUTTON::A)) {
+			buttons_[selectedIndex_]->Execute();
+		}
+	}
+
+	// --- いつもの更新 ---
+	for (auto& b : buttons_) {
+		b->Update(dt);
 	}
 }
 
 void TitleMenuController::ShowGui() {
 	ImGui::Begin("menuController");
-
+	ImGui::Text("%d", selectedIndex_);
 	ImGui::SeparatorText("baseParm");
 	bool changed = false;
 	changed |= GuiCmd::DragFloat2("basePos", basePos_);
@@ -68,6 +99,10 @@ std::vector<Sprite*> TitleMenuController::GetAllButtonImage() const {
 		images.push_back(button->GetSprite());
 	}
 	return images;
+}
+
+void TitleMenuController::SetMenuEvent(std::function<void()> gameStart) {
+	buttons_[0]->SetOnExecute(gameStart);//ゲームスタートボタン
 }
 
 void TitleMenuController::AdaptationForSprite() {

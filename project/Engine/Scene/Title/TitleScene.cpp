@@ -24,7 +24,6 @@ TitleScene::TitleScene() {
 	// シーン名を設定
 	//IScene::SetSceneName("TitleScene");
 	SetSceneName("TitleScene");
-
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -44,10 +43,17 @@ void TitleScene::Initialize() {
 	LoadAssets();
 
 	//=========================
+	// ボタンで発行される関数
+	//=========================
+	transitionForGameScene_ = [this] {
+		transitionRequestor_->RequestSceneChange(SceneType::PLAY);
+	};
+
+	//=========================
 	// menuボタン
 	//=========================
 	menu_ = std::make_unique<TitleMenuController>();
-
+	menu_->SetMenuEvent(transitionForGameScene_);
 }
 
 void TitleScene::Update([[maybe_unused]] float dt) {
@@ -58,17 +64,10 @@ void TitleScene::Update([[maybe_unused]] float dt) {
 	menu_->ShowGui();
 #endif // _DEBUG
 
-
 	menu_->Update(dt);
 
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
 
-	if (Input::GetInstance()->TriggerKey(DIK_SPACE) ||
-		Input::GetInstance()->TriggerGamepadButton(PAD_BUTTON::A)) {
-		if (transitionRequestor_) {
-			transitionRequestor_->RequestSceneChange(SceneType::PLAY);
-		}
-	}
 }
 
 void TitleScene::CleanUp() {

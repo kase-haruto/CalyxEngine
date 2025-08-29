@@ -21,6 +21,8 @@ public:
 
 	//--------- accessor ---------------------------------------------------
 	std::vector<Sprite*> GetAllButtonImage()const;
+	void SetMenuEvent(std::function<void()> gameStart);
+
 
 private:
 	void AdaptationForSprite();
