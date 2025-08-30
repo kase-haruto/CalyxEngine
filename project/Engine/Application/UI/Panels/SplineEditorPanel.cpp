@@ -200,45 +200,70 @@ void SplineEditorPanel::HandleGizmoUpdateAndDraw3D() {
 	if (data_.points.empty()) return;
 	auto* drawer = PrimitiveDrawer::GetInstance();
 
-	// AABBスケールの基準（全体境界の1%）
+	// ---- AABBスケールの基準（全体境界の1%）----
 	Vector3 minP{ FLT_MAX, FLT_MAX, FLT_MAX }, maxP{ -FLT_MAX, -FLT_MAX, -FLT_MAX };
 	auto expand = [&](const Vector3& v) { minP = Vector3::Min(minP, v); maxP = Vector3::Max(maxP, v); };
 	for (auto& pt : data_.points) expand(pt.pos);
-	const int steps = ((std::max))(2, data_.SegmentCount() * 16);
+	const int steps = (std::max)(2, data_.SegmentCount() * 16);
 	for (int i = 0; i <= steps; ++i) expand(data_.Evaluate(i / (float)steps));
 
 	Vector3 diag = maxP - minP;
-	float aabbHalf = ((std::max))({ diag.x, diag.y, diag.z }) * 0.01f;
+	float aabbHalf = (std::max)({ diag.x, diag.y, diag.z }) * 0.01f;
 	if (aabbHalf <= 0.0f) aabbHalf = 0.05f;
 
-	// === ポイントの選択（クリックのみ。移動は Manipulator に任せる） ===
-	if (gizmoEnabled_) {
-		Input* in = Input::GetInstance();
-		if (in->TriggerMouseButton(MouseButton::Left)) {
+	// ---- 入力/状態 ----
+	Input* in = Input::GetInstance();
+	const bool gizmoOn = gizmoEnabled_ && (manipulator_ != nullptr);
+	const bool wantCapture = ImGui::GetIO().WantCaptureMouse; // ImGuiがマウスを使用中か
+
+	// gizmoが無効化された瞬間にもターゲットを離す
+	if (!gizmoOn && manipulator_) {
+		manipulator_->SetTarget(nullptr);
+	}
+
+	// ---- 選択/解除操作 ----
+	if (gizmoOn) {
+		if (in->TriggerMouseButton(MouseButton::Right)) {
+			SetSelectedIndex(-1);
+			manipulator_->SetTarget(nullptr);
+		}
+
+		// ImGuiがマウスを掴んでいない時だけピッキング
+		if (!wantCapture && in->TriggerMouseButton(MouseButton::Left)) {
 			Ray ray = MakeMouseRay();
 			float t = 0.0f;
 			int idx = PickPointByRayAABB(ray, aabbHalf, t);
 			if (idx >= 0) {
 				SetSelectedIndex(idx);
+			} else {
+				// 空所クリックで解除
+				SetSelectedIndex(-1);
+				manipulator_->SetTarget(nullptr);
 			}
 		}
 	}
 
-	// === Manipulator で選択点を移動 ===
-	if (gizmoEnabled_ && manipulator_ && selectedPoint_ >= 0 && selectedPoint_ < (int)data_.points.size()) {
+	// ---- Manipulator で選択点を移動（選択があるときだけターゲットを結び付ける）----
+	if (gizmoOn && manipulator_ && selectedPoint_ >= 0 && selectedPoint_ < (int)data_.points.size()) {
 		Vector3& pos = data_.points[selectedPoint_].pos;
+
 		gizmoTf_.translation = pos;
 		gizmoTf_.scale = { 1,1,1 };
 		gizmoTf_.rotation = Quaternion::MakeIdentity();
-		gizmoTf_.Update(); // あなたの更新関数名に合わせて
+		gizmoTf_.Update();
 
 		manipulator_->SetTarget(&gizmoTf_);
 		manipulator_->Update();
 
+		// 位置の反映
 		pos = gizmoTf_.translation;
+	} else {
+		if (manipulator_) {
+			manipulator_->SetTarget(nullptr);
+		}
 	}
 
-	// === 3Dプレビュー ===
+	// ---- 3Dプレビュー ----
 	drawer->DrawAABB(minP, maxP, Vector4(1.0f, 0.0f, 0.498f, 1.0f)); // 全体AABB
 
 	Vector3 prev = data_.Evaluate(0.0f);

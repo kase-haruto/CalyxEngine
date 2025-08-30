@@ -10,7 +10,8 @@
 struct Ray;
 struct Vector3;
 
-class SplineEditorPanel : public IEngineUI {
+class SplineEditorPanel 
+	: public IEngineUI {
 public:
 	SplineEditorPanel() : IEngineUI("SplineEditor") { IEngineUI::SetShow(false);gizmoTf_.Initialize(); }
 	~SplineEditorPanel() override = default;
