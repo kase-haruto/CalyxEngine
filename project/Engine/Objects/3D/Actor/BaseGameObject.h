@@ -72,6 +72,7 @@ public:
 	Model* GetStaticModel();
 	AnimationModel* GetAnimationModel();
 	const AnimationModel* GetAnimationModel() const;
+	AABB GetWorldAABB() const;
 private:
 	//===================================================================*/
 	//                    private methods
