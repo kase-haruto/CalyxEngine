@@ -26,5 +26,5 @@ private:
 
 
 private:
-	static constexpr size_t kMaxLines = 1024; // 最大描画数
+	static constexpr size_t kMaxLines = 4096; // 最大描画数
 };
