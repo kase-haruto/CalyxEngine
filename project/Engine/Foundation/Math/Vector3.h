@@ -26,6 +26,7 @@ struct Vector3 final {
 	static const Vector3 Up();
 
 	float Length()const;
+	Vector3 Abs();
 	Vector3 Normalize()const;
 	float LengthSquared() const;
 	static float Dot(const Vector3& v1, const Vector3& v2);

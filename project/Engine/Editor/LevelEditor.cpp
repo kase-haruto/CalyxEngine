@@ -139,27 +139,48 @@ void LevelEditor::Initialize() {
 }
 
 void LevelEditor::Update() {
-
 #ifdef _DEBUG
 	SceneContext* ctx = SceneContext::Current();
 
 	const ImGuiIO& io = ImGui::GetIO();
-	const bool uiActive = io.WantCaptureMouse;
-	const bool guizmoActive =
-		ImGuizmo::IsOver() || ImGuizmo::IsUsing();
+	const bool guizmoActive = ImGuizmo::IsOver() || ImGuizmo::IsUsing();
 
-	if (!uiActive && !guizmoActive && debugViewport_ && debugViewport_->IsShow()) {
-		if (Input::GetInstance()->TriggerMouseButton(MouseButton::Left)) {
+	// --- デバッグビューポート上にマウスがあるか？ ---
+	bool overDebugViewport = false;
+	if (debugViewport_ && debugViewport_->IsShow()) {
+		const Vector2 origin = debugViewport_->GetPosition(); // コンテンツ左上
+		const Vector2 size = debugViewport_->GetSize();     // コンテンツサイズ
+		const ImVec2  mouse = ImGui::GetMousePos();
+
+		overDebugViewport =
+			(mouse.x >= origin.x && mouse.y >= origin.y &&
+			 mouse.x <= origin.x + size.x && mouse.y <= origin.y + size.y);
+	}
+
+	// ImGui がマウスを掴んでいても、ビューポート上なら許可
+	const bool uiBlocksClick = io.WantCaptureMouse && !overDebugViewport;
+
+	if (debugViewport_ && debugViewport_->IsShow() && !guizmoActive && !uiBlocksClick) {
+		// ★ ImGui と DirectInput の両方で“立ち上がり”を検出（更新順の影響を低減）
+		const bool imguiEdge = ImGui::IsMouseClicked(ImGuiMouseButton_Left);
+
+		static bool prevDILeft = false;
+		const bool diNow = Input::GetInstance()->PushMouseButton(MouseButton::Left);
+		const bool diEdge = diNow && !prevDILeft;
+		prevDILeft = diNow;
+
+		if (imguiEdge || diEdge) {
 			TryPickUnderCursor();
 		}
 	}
+
 	// ----------------------------
 	// Open Scene ダイアログ処理
 	// ----------------------------
 	if (ImGuiFileDialog::Instance()->Display("SceneOpenDialog")) {
 		if (ImGuiFileDialog::Instance()->IsOk()) {
 			std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
-			ClearSelection(); // 既存の選択をクリア
+			ClearSelection();
 			SceneSerializer::Load(*ctx, filePath);
 		}
 		ImGuiFileDialog::Instance()->Close();
@@ -176,23 +197,18 @@ void LevelEditor::Update() {
 		ImGuiFileDialog::Instance()->Close();
 	}
 
-	//シーンが変わっていたら各パネルに通知する
 	NotifySceneContextChanged();
 	prevCtx_ = SceneContext::Current();
 
-	//playSessionで実行したら自動でゲーム画面
 	if (pPlaySesseion_) {
-		const bool playing = pPlaySesseion_->IsRuntime();  // API名は実装に合わせて
-
-		if (playing && !lastPlaying_) {
-			EnterGameMode();
-		} else if (!playing && lastPlaying_) {
-			ExitGameMode();
-		}
+		const bool playing = pPlaySesseion_->IsRuntime();
+		if (playing && !lastPlaying_) EnterGameMode();
+		else if (!playing && lastPlaying_) ExitGameMode();
 		lastPlaying_ = playing;
 	}
-#endif // _DEBUG
+#endif
 }
+
 
 void LevelEditor::Render() {
 

@@ -31,6 +31,12 @@ float Vector3::Length()const{
 	return sqrtf(x * x + y * y + z * z);
 }
 
+Vector3 Vector3::Abs() {
+	return Vector3(std::fabs(x),
+				   std::fabs(y),
+				   std::fabs(z));
+}
+
 Vector3 Vector3::Normalize()const{
 	float length = Length();
 	return Vector3(x / length, y / length, z / length);

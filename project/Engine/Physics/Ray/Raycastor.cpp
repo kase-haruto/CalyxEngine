@@ -1,70 +1,133 @@
 #include "Raycastor.h"
-
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
+#include <cmath>   // fabsf
+#include <limits>  // std::numeric_limits
 
-bool IntersectRayAABB(const Ray& ray, const AABB& aabb, float& tOut) {
+// 極薄AABBや数値誤差で抜けるのを防ぐため、ほんの少し膨らませる
+static inline AABB ExpandAabb(const AABB& b, float eps) {
+	AABB c = b;
+	c.min_ -= Vector3{ eps, eps, eps };
+	c.max_ += Vector3{ eps, eps, eps };
+	return c;
+}
+
+static inline int SignBit(float x) { return (x < 0.0f) ? -1 : 1; }
+
+// 0除算ガード・内点OK なレイ vs AABB
+bool IntersectRayAABB(const Ray& ray, const AABB& aabbRaw, float& tOut) {
+	const AABB aabb = ExpandAabb(aabbRaw, 1e-4f);
+
 	float tmin = 0.0f;
 	float tmax = tOut;
 
-	for (int i = 0; i < 3; ++i) {
-		float invD = 1.0f / ray.direction[i];
-		float t0 = (aabb.min_[i] - ray.origin[i]) * invD;
-		float t1 = (aabb.max_[i] - ray.origin[i]) * invD;
-		if (invD < 0.0f) std::swap(t0, t1);
+	for (int axis = 0; axis < 3; ++axis) {
+		const float orig = ray.origin[axis];
+		const float dir = ray.direction[axis];
+		const float bmin = aabb.min_[axis];
+		const float bmax = aabb.max_[axis];
+
+		// 平行：スラブ外なら交差なし
+		if (std::fabs(dir) < 1e-8f) {
+			if (orig < bmin || orig > bmax) return false;
+			continue; // 内側なのでこの軸は制約しない
+		}
+
+		const float invD = 1.0f / dir;
+		float t0 = (bmin - orig) * invD;
+		float t1 = (bmax - orig) * invD;
+		if (t0 > t1) std::swap(t0, t1);
 
 		tmin = (std::max)(tmin, t0);
 		tmax = (std::min)(tmax, t1);
-		if (tmax < tmin)
-			return false;
+		if (tmax < tmin) return false;
 	}
-	tOut = tmin;
+
+	tOut = tmin;  // 内点なら 0 に近い値が返る
 	return true;
 }
 
-std::optional<RaycastHit> Raycastor::Raycast(const Ray& ray, const std::vector<SceneObject*>& objects, float maxDistance) {
+// t に対応する当たり面の法線をざっくり算出（スラブ判定）
+static inline Vector3 ComputeAabbHitNormal(const Ray& ray, const AABB& aabb, float t) {
+	const Vector3 p = ray.origin + ray.direction * t;
+	const float eps = 1e-3f; // 近さ判定
+
+	// どの面から入ったか（近い面を優先）
+	if (std::fabs(p.x - aabb.min_.x) < eps) return Vector3{ -1, 0, 0 };
+	if (std::fabs(p.x - aabb.max_.x) < eps) return Vector3{ 1, 0, 0 };
+	if (std::fabs(p.y - aabb.min_.y) < eps) return Vector3{ 0,-1, 0 };
+	if (std::fabs(p.y - aabb.max_.y) < eps) return Vector3{ 0, 1, 0 };
+	if (std::fabs(p.z - aabb.min_.z) < eps) return Vector3{ 0, 0,-1 };
+	if (std::fabs(p.z - aabb.max_.z) < eps) return Vector3{ 0, 0, 1 };
+
+	// うまく取れない場合はレイの最も支配的な軸の反対向きにしておく
+	const float ax = std::fabs(ray.direction.x);
+	const float ay = std::fabs(ray.direction.y);
+	const float az = std::fabs(ray.direction.z);
+	if (ax >= ay && ax >= az) return Vector3{ (float)-SignBit(ray.direction.x), 0, 0 };
+	if (ay >= ax && ay >= az) return Vector3{ 0, (float)-SignBit(ray.direction.y), 0 };
+	return Vector3{ 0, 0, (float)-SignBit(ray.direction.z) };
+}
+
+std::optional<RaycastHit>
+Raycastor::Raycast(const Ray& ray,
+				   const std::vector<SceneObject*>& objects,
+				   float maxDistance) {
 	std::optional<RaycastHit> closestHit;
 
 	for (auto* obj : objects) {
 		if (!obj) continue;
 		if (!obj->IsEnableRaycast()) continue;
-		AABB box = obj->GetWorldAABB();
+
+		// ワールドAABBを少し膨らませてヒット漏れを防ぐ
+		AABB box = ExpandAabb(obj->GetWorldAABB(), 1e-4f);
 
 		float t = maxDistance;
-		if (IntersectRayAABB(ray, box, t) && t < maxDistance) {
-			closestHit = RaycastHit{
-				.distance = t,
-				.point = ray.origin + ray.direction * t,
-				.normal = Vector3(),
-				.hitObject = obj
-			};
-			maxDistance = t;
+		if (IntersectRayAABB(ray, box, t) && t <= maxDistance) {
+			// 内点（t が 0 に極めて近い）でスタートしているなら、表面までわずかに押し出す
+			if (t < 0.0f) t = 0.0f;
+
+			RaycastHit hit;
+			hit.distance = t;
+			hit.point = ray.origin + ray.direction * t;
+			hit.normal = ComputeAabbHitNormal(ray, box, t);
+			hit.hitObject = obj;
+
+			closestHit = hit;
+			maxDistance = t; // さらに近いものだけを受け付ける
 		}
 	}
 	return closestHit;
 }
 
-Ray Raycastor::ConvertMouseToRay(const Vector2& mousePos, const Matrix4x4& view, const Matrix4x4& proj, const Vector2& viewportSize){
-	// 1. NDC座標に変換
-	float ndcX = (2.0f * mousePos.x) / viewportSize.x - 1.0f;
-	float ndcY = 1.0f - (2.0f * mousePos.y) / viewportSize.y; // Y反転（DirectX準拠）
+Ray Raycastor::ConvertMouseToRay(const Vector2& mousePos,
+								 const Matrix4x4& view,
+								 const Matrix4x4& proj,
+								 const Vector2& viewportSize) {
+	// 1. NDC
+	const float ndcX = (2.0f * mousePos.x) / viewportSize.x - 1.0f;
+	const float ndcY = 1.0f - (2.0f * mousePos.y) / viewportSize.y; // DirectX: Y反転
 
-	// 2. 近接点 (z=0) と遠方点 (z=1) をクリップ空間で作成
-	Vector4 nearPoint = Vector4(ndcX, ndcY, 0.0f, 1.0f); // near plane
-	Vector4 farPoint = Vector4(ndcX, ndcY, 1.0f, 1.0f); // far plane
+	// 2. クリップ空間の near / far
+	const Vector4 nearPoint(ndcX, ndcY, 0.0f, 1.0f);
+	const Vector4 farPoint(ndcX, ndcY, 1.0f, 1.0f);
 
-	// 3. 逆射影行列でview空間に戻す
-	Matrix4x4 invProj = Matrix4x4::Inverse(proj);
+	// 3. View 空間へ
+	const Matrix4x4 invProj = Matrix4x4::Inverse(proj);
 	Vector4 nearView = invProj * nearPoint;
 	Vector4 farView = invProj * farPoint;
 
-	// 4. 視点空間からワールド空間へ変換
-	Matrix4x4 invView = Matrix4x4::Inverse(view);
-	Vector4 nearWorld = invView * (nearView / nearView.w);
-	Vector4 farWorld = invView * (farView / farView.w);
+	// 同次座標正規化
+	nearView /= nearView.w;
+	farView /= farView.w;
 
-	// 5. レイ作成
+	// 4. World 空間へ
+	const Matrix4x4 invView = Matrix4x4::Inverse(view);
+	const Vector4 nearWorld = invView * nearView;
+	const Vector4 farWorld = invView * farView;
+
+	// 5. レイ作成（正規化）
 	Vector3 origin = nearWorld.xyz();
 	Vector3 direction = (farWorld.xyz() - origin).Normalize();
 
-	return Ray {origin, direction};
+	return Ray{ origin, direction };
 }

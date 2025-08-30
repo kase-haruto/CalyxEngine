@@ -231,6 +231,43 @@ const AnimationModel* BaseGameObject::GetAnimationModel() const{
 	return (objectModelType_ == ObjectModelType::ModelType_Animation)
 		? static_cast< AnimationModel* >(model_.get()) : nullptr;
 }
+
+static inline AABB TransformAabb(const AABB& local, const Matrix4x4& W) {
+	const Vector3 lc = (local.min_ + local.max_) * 0.5f;
+	const Vector3 le0 = (local.max_ - local.min_) * 0.5f;
+
+	const Vector3 wc = (W * Vector4(lc, 1.0f)).xyz();
+
+	const float m00 = std::fabs(W.m[0][0]), m01 = std::fabs(W.m[0][1]), m02 = std::fabs(W.m[0][2]);
+	const float m10 = std::fabs(W.m[1][0]), m11 = std::fabs(W.m[1][1]), m12 = std::fabs(W.m[1][2]);
+	const float m20 = std::fabs(W.m[2][0]), m21 = std::fabs(W.m[2][1]), m22 = std::fabs(W.m[2][2]);
+
+	const Vector3 we = {
+		m00 * le0.x + m01 * le0.y + m02 * le0.z,
+		m10 * le0.x + m11 * le0.y + m12 * le0.z,
+		m20 * le0.x + m21 * le0.y + m22 * le0.z
+	};
+	return AABB(wc - we, wc + we);
+}
+
+AABB BaseGameObject::GetWorldAABB() const {
+	const Matrix4x4& W = worldTransform_.matrix.world;
+
+	if (objectModelType_ == ModelType_Static) {
+		if (model_ && model_->GetModelData().has_value()) {
+			const AABB& local = model_->GetModelData()->localAABB;
+			return TransformAabb(local, W);
+		}
+	} else { // スキン
+		if (animationModel_ && animationModel_->GetModelData().has_value()) {
+			const AABB& local = animationModel_->GetModelData()->localAABB;
+			return TransformAabb(local, W);
+		}
+	}
+
+	return SceneObject::FallbackAABBFromTransform();
+}
+
 //===================================================================*/
 //                    load/save
 //===================================================================*/
