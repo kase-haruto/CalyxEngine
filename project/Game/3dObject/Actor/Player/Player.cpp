@@ -28,10 +28,7 @@ Player::Player(const std::string& modelName,
 	: Actor::Actor(modelName,objectName){
 	worldTransform_.translation = {0.0f, 0.0f, 10.0f};
 	worldTransform_.scale = {1.5f, 1.5f, 1.5f};
-	collider_->SetTargetType(ColliderType::Type_Enemy);
-	collider_->SetType(ColliderType::Type_Player);
-	auto* boxCollider = dynamic_cast<BoxCollider*>(collider_.get());
-	boxCollider->SetSize(Vector3(3.0f,3.0f,3.0f));
+
 }
 
 /* ======================================================================================
@@ -72,6 +69,7 @@ void Player::Initialize(){
 		reticleSprites_[i]->Initialize(initPos,spriteSize);
 		reticleSprites_[i]->SetAnchorPoint(Vector2(0.5f,0.5f));
 	}
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -248,6 +246,17 @@ void Player::Start(){
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////////
+//		衝突
+///////////////////////////////////////////////////////////////////////////////////
+void Player::OnCollisionEnter(Collider* other) {
+	if (!other) return;
+	if (collider_->GetTargetType() != other->GetType()) return;
+
+	if (life_ >= 1) {
+		life_--;
+	}
+}
 
 ///////////////////////////////////////////////////////////////////////////////////
 //		playerの傾き

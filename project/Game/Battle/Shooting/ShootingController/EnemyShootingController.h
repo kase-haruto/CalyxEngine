@@ -7,14 +7,16 @@
 #include <Game/Battle/Shooting/Shooter/StraightBullet/StraightBulletShooter.h>
 
 class BulletContainer;
+class EnemyHomingBulletShooter;
 
-class EnemyShootingController final : public BaseShootingController {
+class EnemyShootingController final
+	: public BaseShootingController {
 public:
 	//===================================================================*/
 	//          public method
 	//===================================================================*/
 	EnemyShootingController(std::unique_ptr<BulletContainer> container);
-	~EnemyShootingController() override = default;
+	~EnemyShootingController() override ;
 
 	//--------- main ------------------------------------------------------
 	void Update(float dt) override;
@@ -29,7 +31,8 @@ public:
 
 private:
 	std::unique_ptr<StraightBulletShooter>  straightShooter_ = nullptr;
-	std::unique_ptr<BulletContainer>        bulletContainer_ = nullptr;
+	std::unique_ptr<EnemyHomingBulletShooter> homingShooter = nullptr;
+	std::unique_ptr<BulletContainer> bulletContainer_ = nullptr;
 
 	float kInterval = 1.5f;
 

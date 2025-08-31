@@ -1,6 +1,155 @@
 {
     "objects": [
         {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "0a0c43fc-291e-4770-aaca-e812bbd10788",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "tallBuilding_01.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "tallBuilding_01",
+            "objectType": 2,
+            "parentGuid": "95b8171f-bf1c-4e0e-85b2-83722a5f8c88",
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 1.4901663902833207e-08,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 0.9999663233757019,
+                    "y": 0.9999585747718811,
+                    "z": 0.9999353885650635
+                },
+                "translation": {
+                    "x": -56.55168914794922,
+                    "y": -5.418656826019287,
+                    "z": -5.274787902832031
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "color": {
+                "w": 1.0,
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "direction": {
+                "x": 0.0,
+                "y": -1.0,
+                "z": 0.0
+            },
+            "guid": "77beb688-44e1-4ddd-a804-e9bfa301ea6c",
+            "intensity": 0.25,
+            "name": "DirectionalLight",
+            "objectType": 4,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
+            "type": "DirectionalLight"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "baf03b0a-f7b8-4105-a6db-db5daeea946e",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "smallBuilding_01.obj",
+                "textureGuid": "84f22e1b-318a-4813-a065-e60099cc9dc7",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "smallBuilding_01",
+            "objectType": 2,
+            "parentGuid": "ddc62bb0-58e0-4e84-a14d-80483cb244c3",
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 9.536742595628311e-08,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 9.999999046325684,
+                    "y": 10.0,
+                    "z": 10.0
+                },
+                "translation": {
+                    "x": 70.06816101074219,
+                    "y": -27.092531204223633,
+                    "z": 149.28216552734375
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
             "color": {
                 "w": 1.0,
                 "x": 1.0,
@@ -8,7 +157,7 @@
                 "z": 1.0
             },
             "decay": 1.0,
-            "guid": "86c7476d-0ba8-4996-b14c-0fcdd2325afd",
+            "guid": "9798566e-c783-4614-a85a-a6778a6ac47f",
             "intensity": 0.25,
             "name": "PointLight",
             "objectType": 0,
@@ -40,47 +189,10 @@
             "type": "PointLight"
         },
         {
-            "color": {
-                "w": 1.0,
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-            },
-            "direction": {
-                "x": 0.0,
-                "y": -1.0,
-                "z": 0.0
-            },
-            "guid": "43e8874b-3ea5-4632-8301-cf3dc6071c2c",
-            "intensity": 0.25,
-            "name": "DirectionalLight",
-            "objectType": 4,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "DirectionalLight"
-        },
-        {
-            "guid": "2827ea64-3896-4ea8-8552-8eab6f8763d4",
+            "guid": "d5039106-120e-4ef0-a5a6-a0394c7e5570",
             "name": "MainCamera",
             "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "parentGuid": "6d62f428-68bd-4338-b144-609422c4230a",
             "transform": {
                 "rotation": {
                     "w": 1.0,
@@ -102,7 +214,119 @@
             "type": "Camera3d"
         },
         {
-            "guid": "a7e10eee-68e2-47a7-82ac-899331219003",
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "63302f80-c8d0-4b6e-b798-d3b94bb0cf8d",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "smallBuilding_01.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "smallBuilding_01",
+            "objectType": 2,
+            "parentGuid": "8900299e-57a9-481d-9e3c-d47a5d5d16b4",
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": -11.651634216308594,
+                    "y": -2.7303266525268555,
+                    "z": 12.942985534667969
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "1a089e7a-865a-4509-bf22-53b09148d36f",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "smallBuilding_01.obj",
+                "textureGuid": "84f22e1b-318a-4813-a065-e60099cc9dc7",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "smallBuilding_01",
+            "objectType": 2,
+            "parentGuid": "132bf502-69cc-4b34-ad8a-eb615cc5673c",
+            "transform": {
+                "rotation": {
+                    "w": 0.943667471408844,
+                    "x": 0.11960470676422119,
+                    "y": -0.30852237343788147,
+                    "z": 0.0006191767752170563
+                },
+                "scale": {
+                    "x": 1.07185959815979,
+                    "y": 2.865933895111084,
+                    "z": 0.9254425168037415
+                },
+                "translation": {
+                    "x": 14.327455520629883,
+                    "y": -1.3394017219543457,
+                    "z": 1.1729469299316406
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "guid": "a8319665-ec7e-4e52-b35b-dcd601d14845",
             "name": "DebugCamera",
             "objectType": 4,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
@@ -129,11 +353,11 @@
         {
             "colliderConfig": {
                 "colliderType": 0,
-                "isCollisionEnabled": false,
+                "isCollisionEnabled": true,
                 "isDraw": true,
                 "targetType": 0
             },
-            "guid": "77b55ed4-872e-481e-8f07-37fb158a1ddc",
+            "guid": "b9eb76d7-84c2-4e92-871e-b2bbf38ff786",
             "modelConfig": {
                 "blendMode": 5,
                 "materialConfig": {
@@ -149,8 +373,64 @@
                     "isReflect": false,
                     "shininess": 20.0
                 },
-                "modelName": "debugCube.obj",
-                "textureGuid": "93fea04f-9b49-444b-8b34-5783816add5d",
+                "modelName": "terrain.obj",
+                "textureGuid": "f9492258-06c4-4742-9707-39995c0592dc",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 10.0,
+                        "y": 10.0
+                    }
+                }
+            },
+            "name": "field",
+            "objectType": 2,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "rotation": {
+                    "w": 0.9987990856170654,
+                    "x": 0.03831224888563156,
+                    "y": -0.025777168571949005,
+                    "z": -0.016375401988625526
+                },
+                "scale": {
+                    "x": 300.0124206542969,
+                    "y": 300.0034484863281,
+                    "z": 300.01025390625
+                },
+                "translation": {
+                    "x": -262.09307861328125,
+                    "y": -138.90377807617188,
+                    "z": 548.0985717773438
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "950955e1-0346-4c9e-b8a4-441c41c60575",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "smallBuilding_01.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
                 "uvTransConfig": {
                     "rotation": 0.0,
                     "scale": {
@@ -159,7 +439,88 @@
                     }
                 }
             },
-            "name": "cube",
+            "name": "smallBuilding_01",
+            "objectType": 2,
+            "parentGuid": "91068202-082c-45db-a7e4-6b128a341420",
+            "transform": {
+                "rotation": {
+                    "w": 0.9592562317848206,
+                    "x": 0.0,
+                    "y": 0.2825377285480499,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 2.027453660964966,
+                    "y": 3.3204634189605713,
+                    "z": 3.493648052215576
+                },
+                "translation": {
+                    "x": 2.8807811737060547,
+                    "y": -3.790104389190674,
+                    "z": 12.890289306640625
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": false,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "ddc62bb0-58e0-4e84-a14d-80483cb244c3",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "smallBuilding_01.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "smallBuilding_01",
+            "objectType": 2,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "rotation": {
+                    "w": 0.9869514107704163,
+                    "x": 0.15149274468421936,
+                    "y": 0.053929075598716736,
+                    "z": -0.008277932181954384
+                },
+                "scale": {
+                    "x": 9.999646186828613,
+                    "y": 23.921899795532227,
+                    "z": 9.999971389770508
+                },
+                "translation": {
+                    "x": -335.6500244140625,
+                    "y": -93.65020751953125,
+                    "z": 886.1680908203125
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "guid": "3ab80609-6ceb-4ff2-969f-1cd4b6911787",
+            "name": "enemyContainer",
             "objectType": 2,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
@@ -175,21 +536,21 @@
                     "z": 1.0
                 },
                 "translation": {
-                    "x": -4.182680130004883,
-                    "y": 0.24894875288009644,
-                    "z": 3.4166340827941895
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
                 }
             },
-            "type": "BaseGameObject"
+            "type": "EnemyCollection"
         },
         {
             "colliderConfig": {
                 "colliderType": 0,
-                "isCollisionEnabled": false,
+                "isCollisionEnabled": true,
                 "isDraw": true,
                 "targetType": 0
             },
-            "guid": "e135c4b3-1506-423e-a755-2402130e095d",
+            "guid": "132bf502-69cc-4b34-ad8a-eb615cc5673c",
             "modelConfig": {
                 "blendMode": 5,
                 "materialConfig": {
@@ -205,8 +566,8 @@
                     "isReflect": false,
                     "shininess": 20.0
                 },
-                "modelName": "plane.obj",
-                "textureGuid": "887f7536-6e5c-4875-ac80-0c56d5e40bff",
+                "modelName": "largeBuilding.obj",
+                "textureGuid": "84f22e1b-318a-4813-a065-e60099cc9dc7",
                 "uvTransConfig": {
                     "rotation": 0.0,
                     "scale": {
@@ -215,25 +576,25 @@
                     }
                 }
             },
-            "name": "plane",
+            "name": "largeBuilding",
             "objectType": 2,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
                 "rotation": {
-                    "w": 0.9352518916130066,
-                    "x": 0.09919959306716919,
-                    "y": -0.16166460514068604,
-                    "z": 0.2988775670528412
+                    "w": 0.9867918491363525,
+                    "x": 0.0,
+                    "y": 0.161993607878685,
+                    "z": 0.0
                 },
                 "scale": {
-                    "x": 0.9999874234199524,
-                    "y": 0.9999872446060181,
-                    "z": 0.999988317489624
+                    "x": 12.519989967346191,
+                    "y": 13.699761390686035,
+                    "z": 9.99999713897705
                 },
                 "translation": {
-                    "x": 2.5722289085388184,
-                    "y": 0.0,
-                    "z": -4.579125881195068
+                    "x": -33.139244079589844,
+                    "y": -85.20612335205078,
+                    "z": 636.489990234375
                 }
             },
             "type": "BaseGameObject"
@@ -241,11 +602,11 @@
         {
             "colliderConfig": {
                 "colliderType": 0,
-                "isCollisionEnabled": false,
+                "isCollisionEnabled": true,
                 "isDraw": true,
                 "targetType": 0
             },
-            "guid": "32782902-1a82-4ed1-aa44-a81cfadbcbd4",
+            "guid": "d5993d2c-8c49-48c4-a3c7-362bd9ca5816",
             "modelConfig": {
                 "blendMode": 5,
                 "materialConfig": {
@@ -261,8 +622,8 @@
                     "isReflect": false,
                     "shininess": 20.0
                 },
-                "modelName": "cylinder.obj",
-                "textureGuid": "47165394-1552-497f-bf1b-8247948b99a3",
+                "modelName": "smallBuilding_01.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
                 "uvTransConfig": {
                     "rotation": 0.0,
                     "scale": {
@@ -271,9 +632,513 @@
                     }
                 }
             },
-            "name": "cylinder",
+            "name": "smallBuilding_01",
             "objectType": 2,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "rotation": {
+                    "w": 0.9539265632629395,
+                    "x": 0.0,
+                    "y": 0.3000401556491852,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 10.000009536743164,
+                    "y": 17.750213623046875,
+                    "z": 10.000009536743164
+                },
+                "translation": {
+                    "x": -169.92782592773438,
+                    "y": -59.5330696105957,
+                    "z": 354.791748046875
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "b8c72844-628e-4c28-aa8d-6ca903fe057e",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "tallBuilding_01.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "tallBuilding_01",
+            "objectType": 2,
+            "parentGuid": "3db6e95e-1e38-4758-939b-b0ad5fb8bcc8",
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 0.9999662637710571,
+                    "y": 0.9999585747718811,
+                    "z": 0.9999352693557739
+                },
+                "translation": {
+                    "x": -52.94036102294922,
+                    "y": -5.418656826019287,
+                    "z": -3.8896408081054688
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "c2410ab7-7859-4b6f-b771-6b8b51efd474",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "largeBuilding.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "largeBuilding",
+            "objectType": 2,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "rotation": {
+                    "w": 0.9968401193618774,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": -0.07943418622016907
+                },
+                "scale": {
+                    "x": 10.000017166137695,
+                    "y": 9.999980926513672,
+                    "z": 9.999994277954102
+                },
+                "translation": {
+                    "x": -99.9935531616211,
+                    "y": -63.683837890625,
+                    "z": 240.82571411132813
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "cc843f20-48fc-4874-8a73-76e96448020a",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "smallBuilding_01.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "smallBuilding_01",
+            "objectType": 2,
+            "parentGuid": "0c6dbd13-8006-4d21-aca4-2e25b7ae13c6",
+            "transform": {
+                "rotation": {
+                    "w": 0.9426608681678772,
+                    "x": -0.1901620477437973,
+                    "y": 0.23974908888339996,
+                    "z": 0.13322655856609344
+                },
+                "scale": {
+                    "x": 2.190565347671509,
+                    "y": 3.7748446464538574,
+                    "z": 1.5101557970046997
+                },
+                "translation": {
+                    "x": -12.005532264709473,
+                    "y": 3.8484678268432617,
+                    "z": 12.00747299194336
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "a207fe9e-7864-4998-bf04-196996dafed4",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "tallBuilding_01.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "tallBuilding_01",
+            "objectType": 2,
+            "parentGuid": "8900299e-57a9-481d-9e3c-d47a5d5d16b4",
+            "transform": {
+                "rotation": {
+                    "w": 0.9753944277763367,
+                    "x": 0.0,
+                    "y": 0.22046692669391632,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0733706951141357,
+                    "y": 1.4553321599960327,
+                    "z": 0.9341736435890198
+                },
+                "translation": {
+                    "x": -16.757972717285156,
+                    "y": -1.7301344871520996,
+                    "z": 40.358978271484375
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "3db6e95e-1e38-4758-939b-b0ad5fb8bcc8",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "largeBuilding.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "largeBuilding",
+            "objectType": 2,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "rotation": {
+                    "w": 0.841018557548523,
+                    "x": 0.07481148093938828,
+                    "y": -0.5337014198303223,
+                    "z": -0.04747503623366356
+                },
+                "scale": {
+                    "x": 12.519844055175781,
+                    "y": 13.6997652053833,
+                    "z": 9.999953269958496
+                },
+                "translation": {
+                    "x": -311.5562438964844,
+                    "y": -51.240325927734375,
+                    "z": 722.79345703125
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "95b8171f-bf1c-4e0e-85b2-83722a5f8c88",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "largeBuilding.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "largeBuilding",
+            "objectType": 2,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "rotation": {
+                    "w": 0.9889731407165527,
+                    "x": 0.0,
+                    "y": 0.14809508621692657,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 12.519981384277344,
+                    "y": 13.699895858764648,
+                    "z": 9.999971389770508
+                },
+                "translation": {
+                    "x": -112.6528549194336,
+                    "y": -58.536102294921875,
+                    "z": 974.1870727539063
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "d4e3c73b-61fa-436d-bd77-94f6b9ad7699",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "tallBuilding_01.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "tallBuilding_01",
+            "objectType": 2,
+            "parentGuid": "0c6dbd13-8006-4d21-aca4-2e25b7ae13c6",
+            "transform": {
+                "rotation": {
+                    "w": 0.9512942433357239,
+                    "x": -0.2598974108695984,
+                    "y": 0.12940573692321777,
+                    "z": 0.10366663336753845
+                },
+                "scale": {
+                    "x": 1.790425181388855,
+                    "y": 1.5743062496185303,
+                    "z": 2.0352871417999268
+                },
+                "translation": {
+                    "x": -17.341747283935547,
+                    "y": 9.162171363830566,
+                    "z": 33.4516487121582
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "91068202-082c-45db-a7e4-6b128a341420",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "largeBuilding.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "largeBuilding",
+            "objectType": 2,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "rotation": {
+                    "w": 0.988028883934021,
+                    "x": -0.006470513064414263,
+                    "y": 0.1479528248310089,
+                    "z": 0.043210163712501526
+                },
+                "scale": {
+                    "x": 12.519983291625977,
+                    "y": 13.69998836517334,
+                    "z": 10.000024795532227
+                },
+                "translation": {
+                    "x": -112.6528549194336,
+                    "y": -87.46444702148438,
+                    "z": 974.1870727539063
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "057af1ae-78b5-45f8-828a-3d29e39814c0",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "tallBuilding_01.obj",
+                "textureGuid": "84f22e1b-318a-4813-a065-e60099cc9dc7",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "tallBuilding_01",
+            "objectType": 2,
+            "parentGuid": "132bf502-69cc-4b34-ad8a-eb615cc5673c",
             "transform": {
                 "rotation": {
                     "w": 1.0,
@@ -287,9 +1152,569 @@
                     "z": 1.0
                 },
                 "translation": {
-                    "x": -6.989112377166748,
-                    "y": 0.0,
-                    "z": 2.9988150596618652
+                    "x": -21.18000602722168,
+                    "y": 0.8799669742584229,
+                    "z": -19.367006301879883
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "899750d6-e0e2-4619-887b-b5e18e0cfe1c",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "smallBuilding_01.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "smallBuilding_01",
+            "objectType": 2,
+            "parentGuid": "95b8171f-bf1c-4e0e-85b2-83722a5f8c88",
+            "transform": {
+                "rotation": {
+                    "w": 0.9886507987976074,
+                    "x": 0.0,
+                    "y": 0.1502319723367691,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.9440929889678955,
+                    "y": 3.3204638957977295,
+                    "z": 3.642369508743286
+                },
+                "translation": {
+                    "x": -28.398107528686523,
+                    "y": -4.6037678718566895,
+                    "z": 8.0736083984375
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "e9a1da7f-be81-4c28-a364-e6a87b677bc6",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "smallBuilding_01.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "smallBuilding_01",
+            "objectType": 2,
+            "parentGuid": "3db6e95e-1e38-4758-939b-b0ad5fb8bcc8",
+            "transform": {
+                "rotation": {
+                    "w": 0.9886507987976074,
+                    "x": -1.9366160231015783e-08,
+                    "y": 0.15023186802864075,
+                    "z": 3.783052093808692e-08
+                },
+                "scale": {
+                    "x": 1.944094181060791,
+                    "y": 3.320464611053467,
+                    "z": 3.6423707008361816
+                },
+                "translation": {
+                    "x": -27.732908248901367,
+                    "y": -9.745433807373047,
+                    "z": -40.45616912841797
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "20e99f07-ccda-4931-aa0b-853728ca1517",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "smallBuilding_01.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "smallBuilding_01",
+            "objectType": 2,
+            "parentGuid": "5baaa5d1-1467-4c3f-82df-1d566db1bcfb",
+            "transform": {
+                "rotation": {
+                    "w": 0.9914328455924988,
+                    "x": -0.10033755749464035,
+                    "y": 0.00395252276211977,
+                    "z": -0.08353245258331299
+                },
+                "scale": {
+                    "x": 1.354225516319275,
+                    "y": 1.3643118143081665,
+                    "z": 1.16099214553833
+                },
+                "translation": {
+                    "x": -6.665012359619141,
+                    "y": 2.271700859069824,
+                    "z": 7.318017959594727
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "5baaa5d1-1467-4c3f-82df-1d566db1bcfb",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "largeBuilding.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "largeBuilding",
+            "objectType": 2,
+            "parentGuid": "91068202-082c-45db-a7e4-6b128a341420",
+            "transform": {
+                "rotation": {
+                    "w": 0.9730738401412964,
+                    "x": 0.12371400743722916,
+                    "y": 0.19446305930614471,
+                    "z": 0.0025154801551252604
+                },
+                "scale": {
+                    "x": 1.225283145904541,
+                    "y": 1.0149065256118774,
+                    "z": 1.4493666887283325
+                },
+                "translation": {
+                    "x": -30.445968627929688,
+                    "y": 2.574207305908203,
+                    "z": -23.38201141357422
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "0c6dbd13-8006-4d21-aca4-2e25b7ae13c6",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "largeBuilding.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "largeBuilding",
+            "objectType": 2,
+            "parentGuid": "3db6e95e-1e38-4758-939b-b0ad5fb8bcc8",
+            "transform": {
+                "rotation": {
+                    "w": 0.9962283372879028,
+                    "x": 0.08493311703205109,
+                    "y": 0.0024732996243983507,
+                    "z": 0.01758788898587227
+                },
+                "scale": {
+                    "x": 1.1926125288009644,
+                    "y": 1.0072276592254639,
+                    "z": 1.1964709758758545
+                },
+                "translation": {
+                    "x": -17.23346519470215,
+                    "y": -4.04528284072876,
+                    "z": -19.845821380615234
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": false,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "5860cf0a-4217-4c9f-8bb8-262b33ef01fa",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "smallBuilding_01.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "smallBuilding_01",
+            "objectType": 2,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "rotation": {
+                    "w": 0.9869514107704163,
+                    "x": 0.15149274468421936,
+                    "y": 0.05392907187342644,
+                    "z": -0.008277945220470428
+                },
+                "scale": {
+                    "x": 9.999646186828613,
+                    "y": 23.921899795532227,
+                    "z": 9.999971389770508
+                },
+                "translation": {
+                    "x": -1021.9114379882813,
+                    "y": -143.2105712890625,
+                    "z": 1166.800048828125
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "499ce792-df57-4fa3-a459-3a032af1fea7",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "tallBuilding_01.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "tallBuilding_01",
+            "objectType": 2,
+            "parentGuid": "91068202-082c-45db-a7e4-6b128a341420",
+            "transform": {
+                "rotation": {
+                    "w": 0.9565008282661438,
+                    "x": -0.016855774447321892,
+                    "y": -0.2844723165035248,
+                    "z": -0.06243083253502846
+                },
+                "scale": {
+                    "x": 1.0603983402252197,
+                    "y": 1.0019316673278809,
+                    "z": 0.9429210424423218
+                },
+                "translation": {
+                    "x": -44.521419525146484,
+                    "y": 1.9734106063842773,
+                    "z": -12.950767517089844
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": false,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "2336036e-b5b7-4fa9-82bb-f0920d763dc5",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "largeBuilding.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "largeBuilding",
+            "objectType": 2,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "rotation": {
+                    "w": 0.9645221829414368,
+                    "x": -0.03278982266783714,
+                    "y": 0.21820902824401855,
+                    "z": 0.14493699371814728
+                },
+                "scale": {
+                    "x": 18.868379592895508,
+                    "y": 28.858285903930664,
+                    "z": 55.50832748413086
+                },
+                "translation": {
+                    "x": -140.1108856201172,
+                    "y": -91.91483306884766,
+                    "z": 1278.9349365234375
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "891b55db-c3d7-42c1-9b65-721a47c5dee5",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "tallBuilding_01.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "tallBuilding_01",
+            "objectType": 2,
+            "parentGuid": "5baaa5d1-1467-4c3f-82df-1d566db1bcfb",
+            "transform": {
+                "rotation": {
+                    "w": 0.948635995388031,
+                    "x": 0.006296674720942974,
+                    "y": 0.316299706697464,
+                    "z": -0.002137167612090707
+                },
+                "scale": {
+                    "x": 1.438539981842041,
+                    "y": 1.6805970668792725,
+                    "z": 1.0031328201293945
+                },
+                "translation": {
+                    "x": -22.66149139404297,
+                    "y": 5.549772262573242,
+                    "z": 15.811075210571289
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "8900299e-57a9-481d-9e3c-d47a5d5d16b4",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "largeBuilding.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "largeBuilding",
+            "objectType": 2,
+            "parentGuid": "95b8171f-bf1c-4e0e-85b2-83722a5f8c88",
+            "transform": {
+                "rotation": {
+                    "w": 0.9951145648956299,
+                    "x": 0.0,
+                    "y": 0.09872744977474213,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.201128363609314,
+                    "y": 0.9999338984489441,
+                    "z": 0.8469324111938477
+                },
+                "translation": {
+                    "x": -23.0483341217041,
+                    "y": -2.435899257659912,
+                    "z": -16.369300842285156
                 }
             },
             "type": "BaseGameObject"

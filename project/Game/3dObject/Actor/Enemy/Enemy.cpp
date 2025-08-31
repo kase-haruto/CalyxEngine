@@ -4,7 +4,7 @@
 #include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Objects/Collider/BoxCollider.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
-
+#include <Engine/Scene/Context/SceneContext.h>
 #include <numbers>
 
 /* ========================================================================
@@ -87,10 +87,25 @@ void Enemy::Update(float dt) {
 			if (this->IsGameplayEngaged()) {
 				Shoot();
 			}
-			// ★ 弾プール更新＆クールダウン更新（無許可時は中で早期 return 済み）
 
 			shootingController_->Update(dt);
 		}
+		{
+			const Vector3 myPos = GetWorldPosition();
+			const Vector3 targetPos = playerTransform_->GetWorldPosition();
+
+			Vector3 d = targetPos - myPos;
+			if (d.LengthSquared() > 1e-12f) {
+				d = d.Normalize();
+
+				const float yaw = std::atan2(d.x, d.z);                            // 水平旋回
+				const float pitch = std::atan2(-d.y, std::sqrt(d.x * d.x + d.z * d.z));  // 上下（LH）
+
+				const Quaternion qWorld = Quaternion::MakeRotateY(yaw) * Quaternion::MakeRotateX(pitch);
+				worldTransform_.rotation = qWorld;
+			}
+		}
+
 
 		// 波移動
 		waveTime_ += dt * waveSpeed_;

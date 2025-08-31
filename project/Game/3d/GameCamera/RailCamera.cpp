@@ -11,6 +11,13 @@
 
 REGISTER_SCENE_OBJECT(RailCamera)
 
+//-------------------------------------------------------------------------
+// 9割停止の比率（必要ならここを変更）
+//-------------------------------------------------------------------------
+namespace {
+	constexpr float kStopRatio = 0.9f; // ★ 9割で止める
+}
+
 RailCamera::RailCamera() {}
 RailCamera::RailCamera(const std::string& name) {
 	SceneObject::SetName(name, ObjectType::Camera);
@@ -65,11 +72,11 @@ void RailCamera::ClearSpline() {
 // 補助: スプライン評価
 // ----------------------------------------------------------------------------
 Vector3 RailCamera::Eval(float t) const {
-	return spline_.Evaluate(t); // Catmull–Rom 補間（closed対応）:contentReference[oaicite:3]{index=3}
+	return spline_.Evaluate(t); // Catmull–Rom 補間（closed対応）
 }
 
 // ----------------------------------------------------------------------------
-// 補助: 弧長テーブル作成（等速化用）
+/* 補助: 弧長テーブル作成（等速化用） */
 // ----------------------------------------------------------------------------
 void RailCamera::RebuildArcTable() {
 	arc_.clear();
@@ -152,7 +159,6 @@ void RailCamera::UpdateOrientationFromPath(float dt) {
 	worldTransform_.eulerRotation.y = std::atan2(dir.x, dir.z);
 
 	// ロール（曲率由来の簡易バンク）
-	// 2点先読みで左右曲がり具合を推定 → [-1,1] に正規化して tiltAngle_ をスケール
 	float sAhead2 = traveled_ + lookAhead_ * 2.0f;
 	float tAhead2 = (totalLength_ > 0.0f) ? DistanceToT(
 		spline_.closed ? std::fmod(sAhead2, totalLength_) : std::min(sAhead2, totalLength_)
@@ -166,10 +172,10 @@ void RailCamera::UpdateOrientationFromPath(float dt) {
 	if (l1 > 1e-4f) v1 /= l1;
 	if (l2 > 1e-4f) v2 /= l2;
 
-	// 横方向の曲がり＝法線成分を Y-up 前提でスカラー化（右旋回で負、左旋回で正にして自然な傾き）
-	float turn = v1.x * v2.z - v1.z * v2.x; // 2Dクロス（XZ平面）
+	// 横方向の曲がり＝法線成分（XZ平面の2Dクロス）
+	float turn = v1.x * v2.z - v1.z * v2.x;
 	turn = std::clamp(turn, -1.0f, 1.0f);
-	targetTilt_ = -turn * tiltAngle_; // 右に曲がると右に傾く（-）
+	targetTilt_ = -turn * tiltAngle_; // 右旋回で右に傾く
 
 	// ロール補間
 	zTiltOffset_ = std::lerp(zTiltOffset_, targetTilt_, tiltLerpSpeed_ * dt);
@@ -180,11 +186,6 @@ void RailCamera::UpdateOrientationFromPath(float dt) {
 }
 
 void RailCamera::Update(float dt) {
-	// 入力で速度調整したい場合はここで（例：↑で加速、↓で減速）
-	// auto& in = *Input::GetInstance();
-	// if (in.Pressed(KeyCode::Up))   speed_ += 5.0f * dt;
-	// if (in.Pressed(KeyCode::Down)) speed_ -= 5.0f * dt;
-
 	// 走行弧長を更新（等速）
 	traveled_ += (std::max)(0.0f, speed_) * dt;
 
@@ -197,8 +198,9 @@ void RailCamera::Update(float dt) {
 			traveled_ = 0.0f;
 		}
 	} else {
-		// 非ループは末端で止める
-		traveled_ = std::clamp(traveled_, 0.0f, totalLength_);
+		// 非ループは「9割」で止める
+		const float maxS = totalLength_ * kStopRatio;              // ★ 追加
+		traveled_ = std::clamp(traveled_, 0.0f, (std::max)(0.0f, maxS)); // ★ 変更
 	}
 
 	UpdateOrientationFromPath(dt);
@@ -216,9 +218,10 @@ void RailCamera::ShowGui() {
 		ImGui::Text("Spline: %zu pts, closed=%s, length=%.2f",
 					spline_.points.size(), spline_.closed ? "true" : "false", totalLength_);
 
-		// デバッグ：位置手動調整
+		// デバッグ：位置手動調整（9割上限）
 		float tNow = (totalLength_ > 1e-6f) ? DistanceToT(traveled_) : 0.0f;
-		if (ImGui::SliderFloat("t (debug)", &tNow, 0.0f, 1.0f)) {
+		const float tMax = kStopRatio; // ★ 9割を上限に
+		if (ImGui::SliderFloat("t (debug)", &tNow, 0.0f, tMax)) {
 			traveled_ = totalLength_ * tNow;
 		}
 
@@ -238,7 +241,6 @@ Vector3 RailCamera::GetPosition() {
 	return worldTransform_.GetWorldPosition();
 }
 
-
 /////////////////////////////////////////////////////////////////////////////////////////
 //  Tの取得
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -251,7 +253,7 @@ float RailCamera::GetT() const {
 		if (mod < 0.0f) mod += totalLength_;
 		s = mod;
 	}
-	s = std::clamp(s, 0.0f, totalLength_);
+	s = std::clamp(s, 0.0f, totalLength_); // 非ループ時は Update 側で 9割にクランプ済み
 	return DistanceToT(s);
 }
 
@@ -267,6 +269,6 @@ float RailCamera::GetProgress() const {
 		if (mod < 0.0f) mod += totalLength_;
 		s = mod;
 	}
-	s = std::clamp(s, 0.0f, totalLength_);
-	return s / totalLength_;
+	s = std::clamp(s, 0.0f, totalLength_); // 非ループ時は Update 側で 9割にクランプ済み
+	return (totalLength_ > 0.0f) ? (s / totalLength_) : 0.0f;
 }
