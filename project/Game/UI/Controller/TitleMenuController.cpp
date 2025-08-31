@@ -21,13 +21,13 @@ TitleMenuController::TitleMenuController() :
 
 	// ゲームスタートボタン
 	std::unique_ptr<Button> startButton =
-		std::make_unique<Button>("Textures/white1x1.png",
+		std::make_unique<Button>("Textures/gameStart_titleButton.png",
 								 basePos_,
 								 baseSize_);
 	basePos_.y += space_;
 
 	std::unique_ptr<Button> exitButton =
-		std::make_unique<Button>("Textures/white1x1.png",
+		std::make_unique<Button>("Textures/endGame_titleButton.png",
 								 basePos_,
 								 baseSize_);
 
