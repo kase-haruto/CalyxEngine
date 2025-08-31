@@ -44,9 +44,14 @@ public:
 
 	virtual void OnExit(){}
 	virtual void OnEnter(){}
+
+	bool GetIsEndGame()const { return isEndGame_; };
+	void GameEndReqest() { isEndGame_ = true; }
 protected:
 	//===================================================================*/
 	//			protected methods
 	//===================================================================*/
 	DxCore* pDxCore_ = nullptr;
+
+	bool isEndGame_ = false;
 };

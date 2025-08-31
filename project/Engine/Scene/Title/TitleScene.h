@@ -34,5 +34,6 @@ private:
 
 	/* func ======================================================*/
 	std::function<void()> transitionForGameScene_;
+	std::function<void()> endGameReqest_;
 };
 

@@ -151,6 +151,12 @@ void TitleMenuController::SetMenuEvent(std::function<void()> gameStart) {
 	}
 }
 
+void TitleMenuController::SetGameEndEvent(std::function<void()> gameEnd) {
+	if (!buttons_.empty()) {
+		buttons_[1]->SetOnExecute(std::move(gameEnd)); // ゲームスタートボタン
+	}
+}
+
 // GUIから呼ばれる既存関数。現在の animT を使って再配置するように変更。
 void TitleMenuController::AdaptationForSprite() {
 	LayoutButtons_();

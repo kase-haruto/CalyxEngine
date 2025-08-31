@@ -41,6 +41,7 @@ public:
 	void BindPlaySession(PlaySession* ps) { pPlaySession_ = ps; }
 	SceneContext* ActiveCtx() const;
 	bool ActiveRuntimeFlag() const;
+	bool GetIsEndGame()const;
 	void RebindIfContextChanged();
 private:
 	struct SceneSlot
