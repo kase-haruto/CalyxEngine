@@ -11,6 +11,8 @@
 #include <Game/3dObject/Actor/Bullet/PlayerBullet/HomingBullet.h>
 #include <Game/3dObject/Actor/Bullet/PlayerBullet/PlayerBullet.h>
 #include <Game/3dObject/Actor/Bullet/EnemyBullet/EnemyBullet.h>
+#include <Game/3dObject/Actor/Bullet/EnemyBullet/EnemyHomingBullet.h>
+
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		使用する弾の登録
@@ -35,6 +37,15 @@ namespace BulletRegistrar{
 			bullet->Initialize();
 			return bullet;
 								});
+
+		//===================================================================*/
+		//						enemyホーミング弾
+		//===================================================================*/
+		BulletFactory::Register(BulletID::Enemy_Homing, [] {
+			auto bullet = SceneAPI::Instantiate<EnemyHomingBullet>("debugCube.obj", "enemyBullet");
+			bullet->Initialize();
+			return bullet;
+		});
 		
 		//===================================================================*/
 		//						追尾弾

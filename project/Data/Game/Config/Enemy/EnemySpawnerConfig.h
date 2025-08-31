@@ -11,7 +11,6 @@ struct EnemySpawnerConfig : public SceneObjectConfig {
 	Vector3 spawnAreaMax = { 10.0f, 5.0f, -30.0f };
 	size_t maxSpawnCount = 5;
 
-	// ★ 距離ゲート（ヒステリシス）
 	float activateRadius = 80.0f;       // これ以内でスポーン許可/維持
 	float deactivateRadius = 100.0f;    // これを超えたらスポーン停止＆遠距離デスポーン
 	bool  useXZDistance = true;         // レール系はXZ距離でOK

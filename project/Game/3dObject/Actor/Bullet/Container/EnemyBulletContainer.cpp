@@ -16,3 +16,9 @@ void EnemyBulletContainer::AddBullet(BulletID id, const Vector3& pos, const Vect
 	bullet->ShootInitialize(pos, vel);
 	typedBullets_[id].push_back(bullet);
 }
+
+void EnemyBulletContainer::AddBullet(BulletID id, const std::shared_ptr<BaseBullet>& bullet) {
+	if (id != BulletID::Enemy_Homing && id != BulletID::Enemy_Homing) return;
+	if (!bullet) return;
+	typedBullets_[id].push_back(bullet);
+}
