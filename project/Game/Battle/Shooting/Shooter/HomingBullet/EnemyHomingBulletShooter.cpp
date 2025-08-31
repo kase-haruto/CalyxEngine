@@ -9,8 +9,6 @@
 EnemyHomingBulletShooter::EnemyHomingBulletShooter(BulletContainer* container, BulletID id)
 	: container_(container), id_(id) {}
 
-EnemyHomingBulletShooter::~EnemyHomingBulletShooter() = default;
-
 void EnemyHomingBulletShooter::Shoot(const Vector3& origin,
 									 [[maybe_unused]] const Vector3& direction) {
 	if (!container_ || !target_) return;

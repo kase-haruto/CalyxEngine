@@ -4,19 +4,12 @@
 /* ===================================================================== */
 
 /* engine */
-#include <Engine/Objects/Collider/BoxCollider.h>
-
 /* external */
 #include <externals/imgui/imgui.h>
 
 BaseBullet::BaseBullet(const std::string& modelName, const std::string& name)
 	:Actor::Actor(modelName, name){
-	collider_->SetType(ColliderType::Type_PlayerAttack);
-	collider_->SetTargetType(ColliderType::Type_Enemy);
-	collider_->SetOwner(this);
-	collider_->SetIsDrawCollider(false);
-	auto* boxCollider = dynamic_cast< BoxCollider* >(collider_.get());
-	boxCollider->SetSize(Vector3(3.0f, 3.0f, 3.0f));
+
 
 	moveSpeed_ = 50.0f;
 	SetDrawEnable(false);
@@ -44,7 +37,6 @@ void BaseBullet::Update(float deltaTime){
 
 	if (lifeTime_ <= 0.0f){
 		isAlive_ = false;
-
 	}
 }
 

@@ -45,6 +45,9 @@ public:
 	/* runtime ==============================================================*/
 	void Start() override;
 
+	void OnCollisionEnter(Collider* other)override;
+	void OnCollisionStay([[maybe_unused]] Collider* other)override {}
+	void OnCollisionExit([[maybe_unused]] Collider* other)override {}
 
 	/* accessor =========================================================== */
 	//settter

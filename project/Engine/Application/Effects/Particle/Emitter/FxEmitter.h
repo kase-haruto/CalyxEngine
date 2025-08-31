@@ -78,7 +78,7 @@ private:
 	//					private variable
 	//===================================================================*/
 
-	const int kMaxUnits_ = 2048;			//< 最大パーティクル数
+	const int kMaxUnits_ = 4096;			//< 最大パーティクル数
 
 	std::unique_ptr<FxModuleContainer> moduleContainer_;	// モジュールコンテナ
 

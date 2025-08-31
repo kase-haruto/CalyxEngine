@@ -101,11 +101,8 @@ void Enemy::Update(float dt) {
 				const float yaw = std::atan2(d.x, d.z);                            // 水平旋回
 				const float pitch = std::atan2(-d.y, std::sqrt(d.x * d.x + d.z * d.z));  // 上下（LH）
 
-				// 掛け順はエンジン流儀で調整。まずは Yaw→Pitch
 				const Quaternion qWorld = Quaternion::MakeRotateY(yaw) * Quaternion::MakeRotateX(pitch);
-				// もし向きが崩れるなら順序を入れ替え：MakeRotateX(pitch) * MakeRotateY(yaw)
-
-					worldTransform_.rotation = qWorld;
+				worldTransform_.rotation = qWorld;
 			}
 		}
 

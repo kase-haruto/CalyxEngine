@@ -2,11 +2,17 @@
 
 #include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
+#include <Engine/Objects/Collider/BoxCollider.h>
 
 HomingBullet::HomingBullet(const std::string& modelName, const std::string& name) 
 	:BaseBullet::BaseBullet(modelName, name){
 	collider_->SetType(ColliderType::Type_PlayerAttack);
 	collider_->SetTargetType(ColliderType::Type_Enemy);
+	collider_->SetOwner(this);
+	collider_->SetIsDrawCollider(false);
+	auto* boxCollider = dynamic_cast<BoxCollider*>(collider_.get());
+	boxCollider->SetSize(Vector3(3.0f, 3.0f, 3.0f));
+
 
 	trailFx_ = SceneAPI::Instantiate<ParticleSystemObject>("playerBulletTrail");
 	trailFx_->LoadConfig("Resources/Assets/Configs/Effect/HomingBulletTrail.json");

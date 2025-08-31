@@ -8,11 +8,16 @@
 // externals
 #include <externals/imgui/imgui.h>
 
+// engine
+#include <Game/UI/Button/Button.h>
+
+// 指定のEase
+#include <Engine/Foundation/Utility/Ease/Ease.h>
 
 TitleMenuController::TitleMenuController() :
 	basePos_(Vector2(750, 400.0f)),
 	baseSize_(Vector2(256.0f, 64.0f)),
-	space_(100.0f) {
+	space_(120.0f) {
 
 	// ゲームスタートボタン
 	std::unique_ptr<Button> startButton =
@@ -26,21 +31,32 @@ TitleMenuController::TitleMenuController() :
 								 basePos_,
 								 baseSize_);
 
-	//リストに追加
+	// リストに追加
 	buttons_.push_back(std::move(startButton));
 	buttons_.push_back(std::move(exitButton));
 
+	// 初期選択
+	selectedIndex_ = 0;
 	for (size_t i = 0; i < buttons_.size(); ++i) {
-		buttons_[i]->SetSelected(i == 0);
+		buttons_[i]->SetSelected(i == selectedIndex_);
 	}
+
+	// アニメ係数を初期化（選択中=1, それ以外=0）
+	selectedAnimT_.assign(buttons_.size(), 0.0f);
+	if (!selectedAnimT_.empty()) selectedAnimT_[selectedIndex_] = 1.0f;
+
+	// 初回レイアウト
+	AdaptationForSprite();
 }
+
+TitleMenuController::~TitleMenuController() = default;
 
 void TitleMenuController::Update(float dt) {
 	// --- 入力で選択移動 ---
 	auto* in = Input::GetInstance();
-	auto moveDown = in->TriggerKey(DIK_DOWN) || in->TriggerKey(DIK_S)
+	bool moveDown = in->TriggerKey(DIK_DOWN) || in->TriggerKey(DIK_S)
 		|| in->TriggerGamepadButton(PAD_BUTTON::DPAD_DOWN);
-	auto moveUp = in->TriggerKey(DIK_UP) || in->TriggerKey(DIK_W)
+	bool moveUp = in->TriggerKey(DIK_UP) || in->TriggerKey(DIK_W)
 		|| in->TriggerGamepadButton(PAD_BUTTON::DPAD_UP);
 
 	if (!buttons_.empty()) {
@@ -61,6 +77,25 @@ void TitleMenuController::Update(float dt) {
 		}
 	}
 
+	// --- 選択拡大アニメの t を更新 ---
+	if (selectedAnimT_.size() != buttons_.size()) {
+		selectedAnimT_.assign(buttons_.size(), 0.0f);
+	}
+	for (size_t i = 0; i < buttons_.size(); ++i) {
+		const float target = (i == selectedIndex_) ? 1.0f : 0.0f;
+		float t = selectedAnimT_[i];
+		const float step = animSpeed_ * dt;
+		if (t < target) {
+			t = (t + step < target) ? (t + step) : target;
+		} else if (t > target) {
+			t = (t - step > target) ? (t - step) : target;
+		}
+		selectedAnimT_[i] = t;
+	}
+
+	// --- 拡大を考慮したレイアウト ---
+	LayoutButtons_();
+
 	// --- いつもの更新 ---
 	for (auto& b : buttons_) {
 		b->Update(dt);
@@ -69,14 +104,23 @@ void TitleMenuController::Update(float dt) {
 
 void TitleMenuController::ShowGui() {
 	ImGui::Begin("menuController");
-	ImGui::Text("%d", selectedIndex_);
-	ImGui::SeparatorText("baseParm");
+	ImGui::Text("selectedIndex = %d", selectedIndex_);
+	ImGui::SeparatorText("baseParams");
+
 	bool changed = false;
 	changed |= GuiCmd::DragFloat2("basePos", basePos_);
 	changed |= GuiCmd::DragFloat2("baseSize", baseSize_);
 	changed |= GuiCmd::DragFloat("space", space_);
 
-	if (changed) AdaptationForSprite(); // ← 追加
+	ImGui::Separator();
+	ImGui::SeparatorText("animation");
+	changed |= ImGui::DragFloat("enlargedScale (x)", &enlargedScale_, 0.01f, 1.0f, 2.0f);
+	changed |= ImGui::DragFloat("animSpeed", &animSpeed_, 0.1f, 0.1f, 50.0f);
+	ImGui::Checkbox("Use EaseOutBack (pop)", &useBackEase_);
+
+	if (changed) {
+		AdaptationForSprite(); // GUI変更時に即反映
+	}
 
 	ImGui::SeparatorText("sprites");
 	if (ImGui::BeginTabBar("Buttons")) {
@@ -102,16 +146,38 @@ std::vector<Sprite*> TitleMenuController::GetAllButtonImage() const {
 }
 
 void TitleMenuController::SetMenuEvent(std::function<void()> gameStart) {
-	buttons_[0]->SetOnExecute(gameStart);//ゲームスタートボタン
+	if (!buttons_.empty()) {
+		buttons_[0]->SetOnExecute(std::move(gameStart)); // ゲームスタートボタン
+	}
 }
 
+// GUIから呼ばれる既存関数。現在の animT を使って再配置するように変更。
 void TitleMenuController::AdaptationForSprite() {
+	LayoutButtons_();
+}
+
+void TitleMenuController::LayoutButtons_() {
 	Vector2 pos = basePos_;
-	for (auto& b : buttons_) {
-		if (auto* s = b->GetSprite()) {
-			s->SetPosition(pos);
-			s->SetSize(baseSize_);
-		}
+	for (size_t i = 0; i < buttons_.size(); ++i) {
+		auto* s = buttons_[i]->GetSprite();
+		if (!s) { pos.y += space_; continue; }
+
+		// easing
+		const float t = (i < selectedAnimT_.size()) ? selectedAnimT_[i] : 0.0f;
+		const float eased = useBackEase_ ? CalyxEase::EaseOutBack(t) : CalyxEase::EaseOutQuad(t);
+
+		const float scale = 1.0f + (enlargedScale_ - 1.0f) * eased;
+
+		// 拡大後サイズ
+		Vector2 size = { baseSize_.x * scale, baseSize_.y * scale };
+
+		// 中央を合わせるための位置補正
+		Vector2 center = { pos.x + baseSize_.x * 0.5f, pos.y + baseSize_.y * 0.5f };
+		Vector2 topLeft = { center.x - size.x * 0.5f, center.y - size.y * 0.5f };
+
+		s->SetPosition(topLeft);
+		s->SetSize(size);
+
 		pos.y += space_;
 	}
 }
