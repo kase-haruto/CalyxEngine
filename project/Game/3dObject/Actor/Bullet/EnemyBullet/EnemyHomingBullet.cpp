@@ -59,9 +59,9 @@ EnemyHomingBullet::EnemyHomingBullet(const std::string& modelName, const std::st
 }
 
 EnemyHomingBullet::~EnemyHomingBullet() {
-	auto ctx = SceneContext::Current();
-	ctx->RemoveEditorObject(trailFx_);
-	ctx->RemoveEditorObject(shootFx_);
+	//auto ctx = SceneContext::Current();
+	//ctx->RemoveEditorObject(trailFx_);
+	//ctx->RemoveEditorObject(shootFx_);
 }
 
 void EnemyHomingBullet::ShootInitialize(const Vector3& initPos, const Vector3& velocity) {

@@ -85,6 +85,10 @@ bool SceneManager::ActiveRuntimeFlag() const{
 	return slots_[currentIdx_].ctx->IsRuntime();
 }
 
+bool SceneManager::GetIsEndGame() const {
+	return slots_[currentIdx_].scene->GetIsEndGame();
+}
+
 void SceneManager::RebindIfContextChanged(){
 	SceneContext* ctx = ActiveCtx();
 	if (!ctx) return;

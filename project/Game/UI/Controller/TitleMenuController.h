@@ -19,6 +19,7 @@ public:
 	std::vector<Sprite*> GetAllButtonImage() const;
 
 	void SetMenuEvent(std::function<void()> gameStart);
+	void SetGameEndEvent(std::function<void()> gameEnd);
 
 	void AdaptationForSprite();
 
