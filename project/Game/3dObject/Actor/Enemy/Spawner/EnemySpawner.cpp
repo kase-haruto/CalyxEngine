@@ -160,7 +160,7 @@ void EnemySpawner::Spawn() {
 	if (!enemy) return;
 
 	enemy->Initialize();
-	enemy->SetPlayerTransform(playerTransform_); // null でも可（後で再配線）
+	enemy->SetPlayerTransform(playerTransform_);
 
 	// 位置と親子付け（ローカルでランダム）
 	Vector3 localOffset = Random::GenerateVector3(spawnAreaMin_, spawnAreaMax_);

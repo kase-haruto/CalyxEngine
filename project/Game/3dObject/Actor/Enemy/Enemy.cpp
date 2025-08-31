@@ -4,7 +4,7 @@
 #include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Objects/Collider/BoxCollider.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
-
+#include <Engine/Scene/Context/SceneContext.h>
 #include <numbers>
 
 /* ========================================================================
@@ -90,6 +90,25 @@ void Enemy::Update(float dt) {
 
 			shootingController_->Update(dt);
 		}
+		{
+			const Vector3 myPos = GetWorldPosition();
+			const Vector3 targetPos = playerTransform_->GetWorldPosition();
+
+			Vector3 d = targetPos - myPos;
+			if (d.LengthSquared() > 1e-12f) {
+				d = d.Normalize();
+
+				const float yaw = std::atan2(d.x, d.z);                            // 水平旋回
+				const float pitch = std::atan2(-d.y, std::sqrt(d.x * d.x + d.z * d.z));  // 上下（LH）
+
+				// 掛け順はエンジン流儀で調整。まずは Yaw→Pitch
+				const Quaternion qWorld = Quaternion::MakeRotateY(yaw) * Quaternion::MakeRotateX(pitch);
+				// もし向きが崩れるなら順序を入れ替え：MakeRotateX(pitch) * MakeRotateY(yaw)
+
+					worldTransform_.rotation = qWorld;
+			}
+		}
+
 
 		// 波移動
 		waveTime_ += dt * waveSpeed_;
