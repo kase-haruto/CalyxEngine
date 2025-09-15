@@ -1,7 +1,19 @@
 #include "SceneObjectLibrary.h"
-#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/System/Event/EventBus.h>
 #include <iostream>
+
+static void GatherSubtreePostorder(
+	const std::shared_ptr<SceneObject>& node,
+	std::vector<std::shared_ptr<SceneObject>>& out)
+{
+	if (!node) return;
+	// まず全ての子を収集
+	for (const auto& ch : node->GetChildren()) { // GetChildren はあります
+		GatherSubtreePostorder(ch, out);
+	}
+	// 最後に自分
+	out.push_back(node);
+}
 
 /* 追加 ------------------------------------------------------------------*/
 void SceneObjectLibrary::AddObject(const std::shared_ptr<SceneObject>& object){
@@ -13,32 +25,44 @@ void SceneObjectLibrary::AddObject(const std::shared_ptr<SceneObject>& object){
 }
 
 /* 削除 ------------------------------------------------------------------*/
-bool SceneObjectLibrary::RemoveObject(const std::shared_ptr<SceneObject>& obj){
-	if (!obj) return false;
+	bool SceneObjectLibrary::RemoveObject(const std::shared_ptr<SceneObject>& obj) {
+		if (!obj) return false;
 
-	std::shared_ptr<SceneObject> target;
-	Guid guidToErase;
-
-	for (const auto& [id, sp] : objects_){
-		if (sp.get() == obj.get()){ //< ポインタ一致で探す
-			target = sp;
-			guidToErase = id;
-			break;
+		std::shared_ptr<SceneObject> target;
+		for (const auto& [id, sp] : objects_) {
+			if (sp.get() == obj.get()) {
+				target = sp;
+				break;
+			}
 		}
+		if (!target) {
+			std::cout << "[RemoveObject] Not found by ptr: " 
+					  << (obj ? obj->GetName() : "null") << "\n";
+			return false;
+		}
+
+		// サブツリーを後置順で収集
+		std::vector<std::shared_ptr<SceneObject>> postorder;
+		GatherSubtreePostorder(target, postorder);
+
+		// 子から順に削除
+		for (auto& node : postorder) {
+			// 親リンクを切る
+			if (auto parent = node->GetParent()) {
+				node->SetParent(nullptr);
+			}
+
+			auto it = objects_.find(node->GetGuid());
+			if (it != objects_.end()) {
+				EventBus::Publish(ObjectRemoved{it->second});
+				std::cout << "[RemoveObject] " << node->GetName()
+						  << " GUID=" << node->GetGuid().ToString() << "\n";
+				objects_.erase(it);
+			}
+		}
+
+		return true;
 	}
-
-	if (!target){
-		std::cout << "[RemoveObject] Not found by ptr: " << obj->GetName() << "\n";
-		return false;
-	}
-
-	std::cout << "[RemoveObject] Found: " << obj->GetName()
-		<< ", GUID: " << guidToErase.ToString() << "\n";
-
-	// 子も削除（省略）
-	objects_.erase(guidToErase);
-	return true;
-}
 
 
 

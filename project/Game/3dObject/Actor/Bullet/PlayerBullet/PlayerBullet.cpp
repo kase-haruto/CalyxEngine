@@ -25,11 +25,7 @@ PlayerBullet::PlayerBullet(const std::string& modelName, const std::string& name
 
 }
 
-PlayerBullet::~PlayerBullet(){
-	auto ctx = SceneContext::Current();
-	ctx->RemoveEditorObject(trailFx_);
-	ctx->RemoveEditorObject(shootFx_);
-}
+PlayerBullet::~PlayerBullet() = default;
 
 void PlayerBullet::Initialize(){
 	auto self = shared_from_this();

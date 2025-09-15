@@ -9,8 +9,6 @@
 #include <Engine/Application/Effects/Particle/Module/Container/FxModuleContainer.h>
 #include <Engine/Application/Effects/Particle/Parm/FxParm.h>
 
-#include <Engine/Objects/ConfigurableObject/ConfigurableObject.h>
-
 // c++
 #include <functional>
 #include <vector>

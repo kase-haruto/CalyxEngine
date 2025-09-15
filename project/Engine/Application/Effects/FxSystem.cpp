@@ -55,7 +55,6 @@ void FxSystem::RemoveEmitter(BaseEmitter* emitter){
 /*  毎フレーム同期 / ディスパッチ                                            */
 /*===========================================================================*/
 void FxSystem::SyncEmitters(){
-	// ── CPU 側（Transform → GPU 転送） ──────────────────────
 	for (auto it = cpuEmitters_.begin(); it != cpuEmitters_.end(); ){
 		if (auto sp = it->lock()){
 			sp->TransferParticleDataToGPU();
@@ -65,7 +64,6 @@ void FxSystem::SyncEmitters(){
 		}
 	}
 
-	// ── GPU 側（必要なら追加の CB などを転送） ─────────────────
 	for (auto it = gpuEmitters_.begin(); it != gpuEmitters_.end(); ){
 		if (auto sp = it->lock()){
 			sp->TransferParticleDataToGPU();

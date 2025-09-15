@@ -58,11 +58,7 @@ EnemyHomingBullet::EnemyHomingBullet(const std::string& modelName, const std::st
 	shootFx_->LoadConfig("Resources/Assets/Configs/Effect/ShootFx.json");
 }
 
-EnemyHomingBullet::~EnemyHomingBullet() {
-	auto ctx = SceneContext::Current();
-	ctx->RemoveEditorObject(trailFx_);
-	ctx->RemoveEditorObject(shootFx_);
-}
+EnemyHomingBullet::~EnemyHomingBullet() = default;
 
 void EnemyHomingBullet::ShootInitialize(const Vector3& initPos, const Vector3& velocity) {
 	Vector3 initDir = (velocity.Length() > 0.001f) ? velocity.Normalize() : Vector3(0, 0, 1);

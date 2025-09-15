@@ -5,7 +5,6 @@
 // engine
 #include <Engine/Application/Effects/Particle/Emitter/FxEmitter.h>
 #include <Engine/Application/Effects/Particle/Emitter/GpuFxEmitter.h>
-#include <Engine/Objects/ConfigurableObject/ConfigurableObject.h>
 #include <Engine/Renderer/Particle/ParticleRenderer.h>
 #include <Engine/System/Event/EventBus.h>
 

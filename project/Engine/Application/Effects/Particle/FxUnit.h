@@ -2,11 +2,8 @@
 
 #include <Engine/Objects/Transform/Transform.h>
 
-#include <Engine/Foundation/Math/Vector2.h>
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Foundation/Math/Vector4.h>
-
-#include <string>
 
 struct FxUnit{
 	Vector3 position;		//< 座標
