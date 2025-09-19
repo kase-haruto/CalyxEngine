@@ -110,7 +110,7 @@ void GameScene::Update([[maybe_unused]] float dt) {
 	if (attackSprite_) attackSprite_->Update();
 
 	// 衝突判定
-	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
+	//CollisionManager::GetInstance()->UpdateCollisionAllCollider();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

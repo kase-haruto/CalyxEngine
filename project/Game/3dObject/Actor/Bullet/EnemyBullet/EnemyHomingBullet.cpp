@@ -72,7 +72,6 @@ void EnemyHomingBullet::Initialize() {
 	trailFx_->SetParent(self);
 	shootFx_->SetParent(self);
 
-	// ★コライダ設定はコンストラクタではなくここで（生成順の安全性）
 	collider_->SetType(ColliderType::Type_EnemyAttack);
 	collider_->SetTargetType(ColliderType::Type_Player);
 	collider_->SetOwner(this);

@@ -18,7 +18,7 @@ struct Guid{
 	static Guid New();
 	static Guid Empty();
 
-	/* string ←→ binary ----------------------------------------------------*/
+	/* string ----------------------------------------------------*/
 	static Guid FromString(std::string_view s);
 	std::string ToString() const;
 
