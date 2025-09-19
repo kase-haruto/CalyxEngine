@@ -21,11 +21,7 @@ HomingBullet::HomingBullet(const std::string& modelName, const std::string& name
 	shootFx_->LoadConfig("Resources/Assets/Configs/Effect/ShootFx.json");
 }
 
-HomingBullet::~HomingBullet(){
-	auto ctx = SceneContext::Current();
-	ctx->RemoveEditorObject(trailFx_);
-	ctx->RemoveEditorObject(shootFx_);
-}
+HomingBullet::~HomingBullet() = default;
 
 void HomingBullet::ShootInitialize(const Vector3& initPos, const Vector3& velocity){
 	Vector3 initVel = (velocity.Length() > 0.001f)

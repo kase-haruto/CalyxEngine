@@ -37,15 +37,12 @@ void EnemySpawner::Update(float dt) {
 		}
 	}
 
-	// 3) 死体回収（Scene からも除去）
 	GarbageCollectDead();
 }
 
 void EnemySpawner::AlwaysUpdate([[maybe_unused]] float dt) {
 	worldTransform_.Update();
-	// デバッグ表示
 	PrimitiveDrawer::GetInstance()->DrawSphere(worldTransform_.GetWorldPosition());
-	// ※ 半径の可視化 API があればここで activation/deactivation を描くと便利
 }
 
 void EnemySpawner::ApplyConfig() {
@@ -61,10 +58,8 @@ void EnemySpawner::ApplyConfig() {
 	spawnAreaMax_ = cfg.spawnAreaMax;
 	maxSpawnCount_ = cfg.maxSpawnCount;
 
-	// 新規：半径・判定平面
 	useXZDistance_ = cfg.useXZDistance;
 
-	// 安全：ヒステリシス最低確保
 	if (deactivationRadius_ < activationRadius_) {
 		deactivationRadius_ = activationRadius_ + 10.0f;
 	}
@@ -145,7 +140,6 @@ void EnemySpawner::UpdateProximity_() {
 			Spawn();
 		}
 	} else {
-		// 停止：停止半径以上に離れたら
 		if (d >= deactivationRadius_) {
 			isActive_ = false;
 			spawnTimer_ = 0.0f;    // 非アクティブ中はタイマー蓄積しない
