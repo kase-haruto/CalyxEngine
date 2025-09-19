@@ -68,7 +68,8 @@ void EngineController::Run(){
 	while (!system_->ProcessMessage()){
 		if (!Update()) break;
 		Render();
-		if (Input::TriggerKey(DIK_ESCAPE)) break;
+		if (Input::TriggerKey(DIK_ESCAPE)||
+			sceneManager_->GetIsEndGame()) break;
 	}
 }
 

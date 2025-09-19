@@ -49,11 +49,16 @@ void TitleScene::Initialize() {
 		transitionRequestor_->RequestSceneChange(SceneType::PLAY);
 	};
 
+	endGameReqest_ = [this] {
+		GameEndReqest();
+	};
+
 	//=========================
 	// menuボタン
 	//=========================
 	menu_ = std::make_unique<TitleMenuController>();
 	menu_->SetMenuEvent(transitionForGameScene_);
+	menu_->SetGameEndEvent(endGameReqest_);
 }
 
 void TitleScene::Update([[maybe_unused]] float dt) {

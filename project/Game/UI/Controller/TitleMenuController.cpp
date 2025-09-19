@@ -21,13 +21,13 @@ TitleMenuController::TitleMenuController() :
 
 	// ゲームスタートボタン
 	std::unique_ptr<Button> startButton =
-		std::make_unique<Button>("Textures/white1x1.png",
+		std::make_unique<Button>("Textures/gameStart_titleButton.png",
 								 basePos_,
 								 baseSize_);
 	basePos_.y += space_;
 
 	std::unique_ptr<Button> exitButton =
-		std::make_unique<Button>("Textures/white1x1.png",
+		std::make_unique<Button>("Textures/endGame_titleButton.png",
 								 basePos_,
 								 baseSize_);
 
@@ -148,6 +148,12 @@ std::vector<Sprite*> TitleMenuController::GetAllButtonImage() const {
 void TitleMenuController::SetMenuEvent(std::function<void()> gameStart) {
 	if (!buttons_.empty()) {
 		buttons_[0]->SetOnExecute(std::move(gameStart)); // ゲームスタートボタン
+	}
+}
+
+void TitleMenuController::SetGameEndEvent(std::function<void()> gameEnd) {
+	if (!buttons_.empty()) {
+		buttons_[1]->SetOnExecute(std::move(gameEnd)); // ゲームスタートボタン
 	}
 }
 
