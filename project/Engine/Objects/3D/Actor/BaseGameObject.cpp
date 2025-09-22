@@ -122,6 +122,15 @@ void BaseGameObject::ShowGui(){
 
 	collider_->ShowGui();
 
+	// === Billboard GUI ===
+	{
+		int mode = static_cast<int>(billboardMode_);
+		const char* items = "None\0Full\0AxisY\0\0";
+		if (ImGui::Combo("Billboard Mode", &mode, items)){
+			billboardMode_ = static_cast<BillboardMode>(mode);
+		}
+	}
+
 	DerivativeGui();
 }
 

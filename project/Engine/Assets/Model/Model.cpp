@@ -3,9 +3,8 @@
 /* include space
 /* ===================================================================== */
 // engine
-#include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Application/System/System.h>
-#include "engine/graphics/Material.h"
+#include <Engine/graphics/Material.h>
 #include <Engine/Objects/Transform/Transform.h>
 #include <Engine/Objects/Transform/TransformationMatrix.h>
 #include <Engine/Foundation/Math/Vector4.h>
@@ -13,44 +12,51 @@
 #include <Engine/Assets/Model/ModelManager.h>
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
-#include <Engine/Renderer/Mesh/VertexData.h>
 #include <Engine/Lighting/LightData.h>
-
-#ifdef _DEBUG
-#include "externals/imgui/imgui.h"
-#endif
-
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 
-Model::Model(const std::string& fileName){
+/////////////////////////////////////////////////////////////////////////////////////////
+//		コンストラクタ
+/////////////////////////////////////////////////////////////////////////////////////////
+Model::Model(const std::string& fileName) {
 	fileName_ = fileName;
 	Initialize();
 }
 
-Model::~Model(){
-	// 必要があれば後処理
-}
+/////////////////////////////////////////////////////////////////////////////////////////
+//		デストラクタ
+/////////////////////////////////////////////////////////////////////////////////////////
+Model::~Model() = default;
 
-void Model::Initialize(){
+/////////////////////////////////////////////////////////////////////////////////////////
+//		初期化
+/////////////////////////////////////////////////////////////////////////////////////////
+void Model::Initialize() {
 	// マテリアル・行列バッファ生成
 	CreateMaterialBuffer();
 	Map();
 }
 
-void Model::InitializeTextures(const std::vector<std::string>& textureFilePaths){
+/////////////////////////////////////////////////////////////////////////////////////////
+//		テクスチャの初期化
+/////////////////////////////////////////////////////////////////////////////////////////
+void Model::InitializeTextures(const std::vector<std::string>& textureFilePaths) {
 	textureHandles_.clear();
-	for (const auto& filePath : textureFilePaths){
+	for (const auto& filePath : textureFilePaths)
+	{
 		textureHandles_.push_back(TextureManager::GetInstance()->LoadTexture(filePath));
 	}
-	if (!textureHandles_.empty()){
+	if (!textureHandles_.empty())
+	{
 		handle_ = textureHandles_[0]; // 初期テクスチャ
 	}
 }
 
-void Model::Draw(const WorldTransform& transform){
-	if (!modelData_){
-		return;
-	}
+/////////////////////////////////////////////////////////////////////////////////////////
+//		描画
+/////////////////////////////////////////////////////////////////////////////////////////
+void Model::Draw(const WorldTransform& transform) {
+	if (!modelData_) { return; }
 	ID3D12GraphicsCommandList* cmdList = GraphicsGroup::GetInstance()->GetCommandList().Get();
 	// 頂点バッファ/インデックスバッファをセット
 	modelData_->vertexBuffer.SetCommand(cmdList);
@@ -58,21 +64,27 @@ void Model::Draw(const WorldTransform& transform){
 	BaseModel::Draw(transform);
 }
 
-void Model::Map(){
+/////////////////////////////////////////////////////////////////////////////////////////
+//		マップ
+/////////////////////////////////////////////////////////////////////////////////////////
+void Model::Map() {
 	// マテリアルと行列のマッピング
 	MaterialBufferMap();
 }
 
-void Model::ShowImGuiInterface(){
+/////////////////////////////////////////////////////////////////////////////////////////
+//		デバッグuiの描画
+/////////////////////////////////////////////////////////////////////////////////////////
+void Model::ShowImGuiInterface() {
 #ifdef _DEBUG
 	BaseModel::ShowImGuiInterface();
 #endif
 }
 
-//==============================================================================
-// バッファ生成/マッピング
-//==============================================================================
-void Model::CreateMaterialBuffer(){
+/////////////////////////////////////////////////////////////////////////////////////////
+//		マテリアルバッファの作成
+/////////////////////////////////////////////////////////////////////////////////////////
+void Model::CreateMaterialBuffer() {
 	ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
 	// materialData_ に初期値をセットする
 	materialData_.color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -83,9 +95,7 @@ void Model::CreateMaterialBuffer(){
 	materialBuffer_.Initialize(device);
 }
 
-void Model::MaterialBufferMap(){
-	// materialData_ の内容で GPU に転送
-	// マテリアルのデータを転送
-	materialBuffer_.TransferData(materialData_);
-}
-
+/////////////////////////////////////////////////////////////////////////////////////////
+//		バッファのマップ
+/////////////////////////////////////////////////////////////////////////////////////////
+void Model::MaterialBufferMap() { materialBuffer_.TransferData(materialData_); }

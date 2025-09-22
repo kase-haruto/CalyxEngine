@@ -1,4 +1,5 @@
 #include "SceneManager.h"
+
 // engine
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
@@ -12,6 +13,7 @@
 // scene
 #include <Engine/Scene/Title/TitleScene.h>
 #include <Engine/Scene/Game/GameScene.h>
+#include "Engine/Scene/Test/TestScene.h"
 
 SceneManager::SceneManager(DxCore* dx) : dx_(dx){}
 SceneManager::~SceneManager() = default;
@@ -21,9 +23,10 @@ void SceneManager::Initialize(){
 	// 登録（この段階では Initialize しない）
 	AddScene(SceneType::TITLE,std::make_unique<TitleScene>());
 	AddScene(SceneType::PLAY,std::make_unique<GameScene>());
+	AddScene(SceneType::TEST,std::make_unique<TestScene>());
 
 	// 最初のシーンへ（ここで初期化が走る）
-	SetCurrent(typeToIndex_.at(SceneType::TITLE));
+	SetCurrent(typeToIndex_.at(SceneType::TEST));
 }
 
 //------------------------------------------------------------
@@ -48,7 +51,6 @@ size_t SceneManager::AddScene(SceneType type, std::unique_ptr<BaseScene> scene){
 void SceneManager::SetCurrent(size_t index){
 	if (index >= slots_.size()) return;
 
-	// ★ 停止リクエストがあれば先に確定（競合防止）
 	if (pPlaySession_ && pPlaySession_->ExitRequested()){ pPlaySession_->FinalizeExitCleanup(); }
 
 	if (!slots_.empty()){ slots_[currentIdx_].scene->OnExit(); }
@@ -62,7 +64,6 @@ void SceneManager::SetCurrent(size_t index){
 	// 再生中なら新しい Editor 内容から Runtime を再構築
 	if (pPlaySession_ && pPlaySession_->IsRuntime()){ pPlaySession_->RebuildRuntimeFromEditor(s.ctx.get()); }
 
-	// ★ 今使うべき ctx / gen を見て再バインド
 	RebindIfContextChanged();
 }
 
@@ -105,7 +106,7 @@ void SceneManager::RebindIfContextChanged(){
 			slot.assetsLoaded = true;
 		}
 
-		// 毎回初期化（この ctx 用に作り直す）
+		// 毎回初期化
 		slot.scene->Initialize();
 		slot.scene->OnEnter();
 
@@ -117,14 +118,12 @@ void SceneManager::RebindIfContextChanged(){
 void SceneManager::Update(float dt){
 	if (slots_.empty()) return;
 
-	// ★ フレーム先頭で停止確定（遅延破棄の完了）
 	if (pPlaySession_ && pPlaySession_->ExitRequested()){
 		pPlaySession_->FinalizeExitCleanup();
-		lastBoundCtx_   = nullptr;   // ★ これで RebindIfContextChanged が必ず走る
+		lastBoundCtx_   = nullptr;
 		lastRuntimeGen_ = 0;
 	}
 
-	// ★ ActiveCtx 変化（Editor↔Runtime, 世代変化）時は再初期化
 	RebindIfContextChanged();
 
 	SceneContext* ctx = ActiveCtx();
@@ -147,7 +146,7 @@ void SceneManager::Update(float dt){
 void SceneManager::PostUpdate(ID3D12GraphicsCommandList* cmd, PipelineService* pso){
 	if (slots_.empty()) return;
 
-	RebindIfContextChanged();                 // ★ 追加
+	RebindIfContextChanged();
 	if (auto* ctx = ActiveCtx()){ 
 		ctx->MakeCurrent();
 	}

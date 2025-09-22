@@ -4,7 +4,9 @@
 /* ===================================================================== */
 #include <Engine/Graphics/Pipeline/Service/PipelineService.h>
 #include <Engine/Objects/3D/Geometory/AABB.h>
+#include <Engine/Objects/3D/Details/BillboardParams.h> 
 #include <Engine/Objects/Transform/Transform.h>
+#include <Engine/Graphics/Buffer/DxStructuredBuffer.h> 
 
 #include <unordered_map>
 #include <vector>
@@ -20,7 +22,7 @@ public:
 	//===================================================================*/
 	//					public methods
 	//===================================================================*/
-	void RegisterStatic(BaseModel* model, const WorldTransform& transform);
+	void RegisterStatic(BaseModel* model, const WorldTransform& transform, BillboardMode billMode);
 	void RegisterSkinned(AnimationModel* model, const WorldTransform& transform);
 	void Clear();
 	void BeginFrame();
@@ -41,20 +43,28 @@ private:
 	//===================================================================*/
 	struct InstanceStatic{
 		WorldTransform tf;
-		AABB worldAABB {};
-		bool dirty = true;
-		bool visible = false;
+		AABB  worldAABB {};
+		bool  dirty   = true;
+		bool  visible = false;
+		BillboardMode mode = BillboardMode::None; //< 初期は無効
 	};
 	struct InstanceSkinned{
 		WorldTransform tf;
-		AABB worldAABB {};
-		bool dirty = true;
-		bool visible = false;
+		AABB  worldAABB {};
+		bool  dirty   = true;
+		bool  visible = false;
 	};
 
-	using PipelineKey = PipelineService::PipelineKey;
+	using PipelineKey       = PipelineService::PipelineKey;
 	using PipelineKeyHasher = PipelineService::PipelineKeyHasher;
-	using StaticBatch = std::vector<std::pair<BaseModel*, std::vector<WorldTransform>>>;
+
+	// ★ 可視サブセットを「モデル＋配列」で束ねる描画単位
+	struct StaticBatchItem {
+		BaseModel* model = nullptr;
+		std::vector<WorldTransform>     transforms; // t0 用
+		std::vector<GpuBillboardParams> billboards; // t1 用
+	};
+	using StaticBatch  = std::vector<StaticBatchItem>;
 	using SkinnedBatch = std::vector<std::pair<AnimationModel*, std::vector<WorldTransform>>>;
 
 	//===================================================================*/
@@ -66,12 +76,16 @@ private:
 	//===================================================================*/
 	//					private fields
 	//===================================================================*/
-	std::unordered_map<BaseModel*, std::vector<InstanceStatic>>   staticModels_;
-	std::unordered_map<AnimationModel*, std::vector<InstanceSkinned>>  skinnedModels_;
+	std::unordered_map<BaseModel*,      std::vector<InstanceStatic>>  staticModels_;
+	std::unordered_map<AnimationModel*, std::vector<InstanceSkinned>> skinnedModels_;
 
-	std::unordered_map<PipelineKey, StaticBatch, PipelineKeyHasher> staticBatches_;
+	std::unordered_map<PipelineKey, StaticBatch,  PipelineKeyHasher> staticBatches_;
 	std::unordered_map<PipelineKey, SkinnedBatch, PipelineKeyHasher> skinnedBatches_;
 
 	std::vector<WorldTransform> tempVisibleStatic_;
 	std::vector<WorldTransform> tempVisibleSkinned_;
+
+	DxStructuredBuffer<GpuBillboardParams> billboardBuf_;
+
+	static constexpr UINT kBillboardSrvRootSlot_Object3D = 2;
 };

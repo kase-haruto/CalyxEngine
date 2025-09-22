@@ -9,11 +9,11 @@
 #include <Engine/objects/ConfigurableObject/ConfigurableObject.h>
 #include <Data/Engine/Configs/Scene/Objects/BaseGameObject/BaseGameObjectConfig.h>
 #include <Engine/objects/Collider/Collider.h>
+#include <Engine/Objects/3D/Details/BillboardParams.h>
 
 //* c++ lib *//
 #include <memory>
 #include <string>
-#include <functional>
 
 class BaseGameObject
 	: public SceneObject,
@@ -34,9 +34,8 @@ public:
 	BaseGameObject();
 	virtual ~BaseGameObject()override;
 
-	virtual void Initialize()override{};
+	virtual void Initialize()override{}
 	void AlwaysUpdate(float dt)override;
-	virtual void Draw(){};
 
 	//--------- ui/gui --------------------------------------------------
 	void ShowGui()override;
@@ -54,6 +53,8 @@ public:
 	void ExtractConfigToJson(nlohmann::json& j) const override;
 
 	//--------- accessor ------------------------------------------------
+	void SetBillboardMode(BillboardMode m){ billboardMode_ = m; }
+	BillboardMode GetBillboardMode() const { return billboardMode_; }
 	void SetName(const std::string& name);
 	std::string_view GetTypeName() const override{ return "BaseGameObject"; }
 	void SetTranslate(const Vector3& pos);
@@ -93,8 +94,8 @@ protected:
 	ObjectModelType objectModelType_ = ModelType_Static;
 
 	std::unique_ptr<Collider> collider_;
-	ColliderKind currentColliderKind_ = ColliderKind::None;	// コライダーの種類
-
+	ColliderKind currentColliderKind_ = ColliderKind::None;	//< コライダーの種類
+	BillboardMode billboardMode_ = BillboardMode::None;		//< ビルボードモード
 protected:
 	//===================================================================*/
 	//                    config

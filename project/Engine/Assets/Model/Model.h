@@ -5,29 +5,23 @@
 class Model
 	: public BaseModel{
 public:
+	//===================================================================*/
+	//                   public methods
+	//===================================================================*/
 	Model() = default;
 	Model(const std::string& fileName);
 	~Model() override;
 
-	//================================
-	// BaseModel の純粋仮想関数の実装
-	//================================
 	void Initialize() override;
 	void InitializeTextures(const std::vector<std::string>& textureFilePaths);
 	void Map() override;
 	void Draw(const WorldTransform& transform)override;
 	void ShowImGuiInterface() override;
 
-	//=============
-	// Transform関連
-	//=============
-
 private:
-	//============
-	// バッファ生成/マップの実装
-	//============
+	//===================================================================*/
+	//                   private methods
+	//===================================================================*/
 	void CreateMaterialBuffer() override;
-
 	void MaterialBufferMap()override;
-
 };
