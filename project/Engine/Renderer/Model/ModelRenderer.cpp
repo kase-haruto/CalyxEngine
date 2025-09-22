@@ -8,7 +8,10 @@
 #include <Engine/Graphics/Camera/3d/Camera3d.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Lighting/LightLibrary.h>
-#include <cassert>
+
+#include "Engine/Graphics/Context/GraphicsGroup.h"
+
+ModelRenderer::ModelRenderer() = default;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		静的モデル登録（ビルボードモード付き）
@@ -18,7 +21,7 @@ void ModelRenderer::RegisterStatic(BaseModel* model, const WorldTransform& trans
 	inst.tf      = transform;
 	inst.dirty   = true;
 	inst.visible = false;
-	inst.mode    = billMode; // ★
+	inst.mode    = billMode;
 	staticModels_[model].push_back(inst);
 }
 
@@ -43,7 +46,6 @@ void ModelRenderer::Clear(){
 	skinnedBatches_.clear();
 	tempVisibleStatic_.clear();
 	tempVisibleSkinned_.clear();
-	// billboardBuf_ は再利用可（必要なら Reset してもOK）
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

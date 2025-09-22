@@ -53,7 +53,7 @@ GraphicsPipelineDesc PipelinePresets::MakeSkinningObject3D(BlendMode mode) {
 
 	desc.root_
 	    .AllowIA()
-	    .CBV(0, D3D12_SHADER_VISIBILITY_PIXEL) // Material
+	    .CBV(0, D3D12_SHADER_VISIBILITY_ALL) // Material
 	    .SRVTable(0, 2, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_VERTEX) 
 	    .SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL) // Tex
 	    .CBV(2, D3D12_SHADER_VISIBILITY_PIXEL) // DirLight

@@ -66,7 +66,7 @@ void DxStructuredBuffer<T>::Initialize(Microsoft::WRL::ComPtr<ID3D12Device> devi
     // Upload ヒープ（CPU 書き込み可）
     this->CreateUploadResource(device, byteSize);
 
-    // 互換（未使用推奨）
+    // 互換
     vbView_.BufferLocation = this->resource_->GetGPUVirtualAddress();
     vbView_.StrideInBytes  = sizeof(T);
     vbView_.SizeInBytes    = static_cast<UINT>(byteSize);

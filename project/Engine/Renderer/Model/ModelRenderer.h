@@ -22,6 +22,7 @@ public:
 	//===================================================================*/
 	//					public methods
 	//===================================================================*/
+	ModelRenderer();
 	void RegisterStatic(BaseModel* model, const WorldTransform& transform, BillboardMode billMode);
 	void RegisterSkinned(AnimationModel* model, const WorldTransform& transform);
 	void Clear();
@@ -58,7 +59,6 @@ private:
 	using PipelineKey       = PipelineService::PipelineKey;
 	using PipelineKeyHasher = PipelineService::PipelineKeyHasher;
 
-	// ★ 可視サブセットを「モデル＋配列」で束ねる描画単位
 	struct StaticBatchItem {
 		BaseModel* model = nullptr;
 		std::vector<WorldTransform>     transforms; // t0 用
@@ -87,5 +87,5 @@ private:
 
 	DxStructuredBuffer<GpuBillboardParams> billboardBuf_;
 
-	static constexpr UINT kBillboardSrvRootSlot_Object3D = 2;
+	static constexpr UINT kBillboardSrvRootSlot_Object3D = 7;
 };
