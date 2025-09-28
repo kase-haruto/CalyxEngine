@@ -60,26 +60,51 @@ VertexShaderOutput main(VertexShaderInput input, uint instancedId : SV_InstanceI
 	float Sy = max(length(basisY), 1e-6);
 	float Sz = max(length(basisZ), 1e-6);
 
-    // ビルボード基底（R:右, U:上, F:前）
+    // ビルボード基底（R:右=X, U:上=Y, F:前=Z）
 	float3 R, U, F;
 
 	if(bp.mode == 1) {
-        // --- フル正対 ---
-		F = normalize(cameraPosition - centerWS);
-		R = normalize(cross(camUp, F));
-		if(length(R) < 1e-4)
-			R = normalize(cross(float3(0, 0, 1), F)); // 退化フォールバック
-		U = normalize(cross(F, R));
+    // --- フル正対（LH）---
+		F = normalize(cameraPosition - centerWS); // Z
+		float3 Uref = normalize(camUp);
+
+    // LH: R = F × Up
+		R = normalize(cross(F, Uref));
+
+		if(length(R) < 1e-4) {
+			Uref = float3(0, 1, 0);
+			R = normalize(cross(F, Uref));
+			if(length(R) < 1e-4) {
+				Uref = float3(0, 0, 1);
+				R = normalize(cross(F, Uref));
+			}
+		}
+
+    // LH: U = R × F
+		U = normalize(cross(R, F));
 	}
 	else // bp.mode == 2 : AxisY
 	{
 		float3 toCam = cameraPosition - centerWS;
 		toCam.y = 0.0;
-		F = (length(toCam) > 1e-4) ? normalize(toCam) : float3(0, 0, 1);
-		U = WORLD_UP;
-		R = normalize(cross(U, F));
+		F = (length(toCam) > 1e-4) ? normalize(toCam) : float3(0, 0, 1); // 前方(Z)
+		U = WORLD_UP; // 上(Y)
+
+    // LH: 右ベクトル = 前 × 上
+		R = normalize(cross(F, U));
 		if(length(R) < 1e-4)
 			R = float3(1, 0, 0);
+
+    // LH: 上ベクトル再直交化
+		U = normalize(cross(R, F));
+	}
+
+
+    // ---- パリティ（巻き方向）補正：負スケール対応 ----
+	const float detW = determinant((float3x3)tm.World);
+	if(detW < 0.0f) {
+        // いずれか1軸を反転（ここでは X を反転）
+		R = -R;
 	}
 
     // 位置： center + (local.x*Sx)*R + (local.y*Sy)*U + (local.z*Sz)*F

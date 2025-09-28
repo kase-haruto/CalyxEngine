@@ -200,7 +200,7 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList* cmdList,
 				const auto ps = psoService->GetPipelineSet(key.tag, key.blend);
 				psoService->SetCommand(ps, cmdList);
 
-				if (auto* cam = CameraManager::GetActive())
+				if (auto* cam = CameraManager::GetActive())	
 					cam->SetCommand(cmdList, PipelineType::Object3D);
 
 				lightLibrary->SetCommand(cmdList, PipelineType::Object3D);
