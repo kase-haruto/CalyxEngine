@@ -63,6 +63,7 @@ private:
 		BaseModel* model = nullptr;
 		std::vector<WorldTransform>     transforms; // t0 用
 		std::vector<GpuBillboardParams> billboards; // t1 用
+		DxStructuredBuffer<GpuBillboardParams> billboardSrv;
 	};
 	using StaticBatch  = std::vector<StaticBatchItem>;
 	using SkinnedBatch = std::vector<std::pair<AnimationModel*, std::vector<WorldTransform>>>;
@@ -84,8 +85,4 @@ private:
 
 	std::vector<WorldTransform> tempVisibleStatic_;
 	std::vector<WorldTransform> tempVisibleSkinned_;
-
-	DxStructuredBuffer<GpuBillboardParams> billboardBuf_;
-
-	static constexpr UINT kBillboardSrvRootSlot_Object3D = 7;
 };

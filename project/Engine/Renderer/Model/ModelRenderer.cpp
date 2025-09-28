@@ -187,7 +187,7 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList* cmdList,
 	psoService->ResetState();
 
 	//------------------------------------------------------------
-	// 1) 静的モデル
+	// 静的モデル
 	//------------------------------------------------------------
 	{
 		PipelineKey lastKey {};
@@ -209,36 +209,47 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList* cmdList,
 				hasLast = true;
 			}
 
-			for (auto& item : batch){
-				auto* model   = item.model;
+			for (auto& item : batch) {
+				BaseModel* model = item.model;
 				auto& visible = item.transforms;
-				if (visible.empty()) continue;
+				if (!model || visible.empty()) continue;
 
-				// --- Billboard SRV 準備（Upload ヒープ / 可視数に合わせて） ---
 				const UINT need = static_cast<UINT>(item.billboards.size());
-				if (!billboardBuf_.IsValid() || billboardBuf_.GetElementCount() < need){
-					billboardBuf_.ReleaseSrv();
-					billboardBuf_.Reset();
-					billboardBuf_.Initialize(device, need); // Upload
-					billboardBuf_.CreateSrv(device);        // t1 用 SRV
-				}
-				// 書き込み
-				std::memcpy(billboardBuf_.Data(),
-							item.billboards.data(),
-							sizeof(GpuBillboardParams) * need);
+				if (need == 0) continue;
+				// 変数個数の一致を念のため検査
+				assert(item.transforms.size() == item.billboards.size());
 
-				// ★ gBillboard(t1) を含む SRV テーブルをセット（要：RootParam index合わせ）
-				cmdList->SetGraphicsRootDescriptorTable(kBillboardSrvRootSlot_Object3D,
-				                                        billboardBuf_.GetGpuSrvHandle());
+				// --- Billboard (VS:t1)：モデル側の単一バッファ ---
+				model->EnsureBillboardCapacity(device, need);
+				model->UploadBillboardParams(item.billboards);
+				cmdList->SetGraphicsRootDescriptorTable(
+					7, // = 7
+					model->GetBillboardSrv());      // VS:t1 (gBillboard)
 
-				// インスタンシング描画（VS で gTransMat[t0], gBillboard[t1] を SV_InstanceID で参照）
-				model->DrawInstanced(visible, cmdList);
+				// --- インスタンス行列 (VS:t0) ---
+				model->EnsureInstanceCapacity(device, need);
+				model->UploadInstanceMatrices(visible);
+				cmdList->SetGraphicsRootDescriptorTable(1, model->GetInstanceSrv()); // VS:t0 (gTransMat)
+
+				// --- マテリアル / テクスチャ（PS） ---
+				model->BindMaterialCB(cmdList);                                      // b0
+				cmdList->SetGraphicsRootDescriptorTable(2, model->GetTexSrv());      // PS:t0 (gTexture)
+				cmdList->SetGraphicsRootDescriptorTable(6, model->GetEnvMapSrv());   // PS:t1 (gEnvironmentMap)
+
+				// --- VB/IB / トポロジ ---
+				cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+				model->BindVertexIndexBuffers(cmdList);
+
+				// --- Draw ---
+				const UINT indexCount = static_cast<UINT>(model->GetModelData()->meshData.indices.size());
+				const UINT instanceCount = need;
+				cmdList->DrawIndexedInstanced(indexCount, instanceCount, 0, 0, 0);
 			}
 		}
 	}
 
 	//------------------------------------------------------------
-	// 2) スキンメッシュ（従来通り）
+	// スキンメッシュ（従来通り）
 	//------------------------------------------------------------
 	{
 		PipelineKey lastKey {};
