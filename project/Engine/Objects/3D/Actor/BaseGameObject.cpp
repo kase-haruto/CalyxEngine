@@ -122,6 +122,15 @@ void BaseGameObject::ShowGui(){
 
 	collider_->ShowGui();
 
+	// === Billboard GUI ===
+	{
+		int mode = static_cast<int>(billboardMode_);
+		const char* items = "None\0Full\0AxisY\0\0";
+		if (ImGui::Combo("Billboard Mode", &mode, items)){
+			billboardMode_ = static_cast<BillboardMode>(mode);
+		}
+	}
+
 	DerivativeGui();
 }
 
@@ -216,6 +225,8 @@ void BaseGameObject::SetCollider(std::unique_ptr<Collider> collider){
 }
 
 Collider* BaseGameObject::GetCollider(){ return collider_.get(); }
+
+void BaseGameObject::SetTexture(const std::string& texName) { model_->SetTex(texName); }
 
 Model* BaseGameObject::GetStaticModel(){
 	return (objectModelType_ == ObjectModelType::ModelType_Static)

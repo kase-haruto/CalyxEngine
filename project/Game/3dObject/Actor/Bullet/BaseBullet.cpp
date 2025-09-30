@@ -20,6 +20,7 @@ BaseBullet::BaseBullet(const std::string& modelName, const std::string& name)
 /////////////////////////////////////////////////////////////////////////////////////////
 void BaseBullet::ShootInitialize(const Vector3& initPos, const Vector3& velocity){
 	worldTransform_.translation = initPos;
+	worldTransform_.scale = { 2, 2, 2 };
 	velocity_ = velocity;
 	isAlive_ = true;
 	OnShot();

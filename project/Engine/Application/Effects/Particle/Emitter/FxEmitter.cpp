@@ -3,13 +3,11 @@
 /*	include space
 /* ===================================================================== */
 // engine
-#include <Data/Engine/Configs/Scene/Objects/Particle/Module/ModuleConfigFactory.h>
 #include <Engine/Application/Effects/Particle/FxUnit.h>
 #include <Engine/Application/Effects/Particle/Module/Factory/ModuleFactory.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 
-#include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 

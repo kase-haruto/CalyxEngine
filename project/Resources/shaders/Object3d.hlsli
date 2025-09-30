@@ -11,4 +11,6 @@ cbuffer CameraConstants : register(b1) {
 	float4x4 Projection;
 	float4x4 ViewProjection;
 	float3 cameraPosition;
+	float3 camRight;
+	float3 camUp;
 }

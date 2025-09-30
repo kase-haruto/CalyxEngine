@@ -2,43 +2,27 @@
     "autoDestroy": false,
     "color": {
         "w": 1.0,
-        "x": 0.5921568870544434,
-        "y": 0.38823530077934265,
-        "z": 0.9333333373069763
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
     },
-    "emitCount": 9,
+    "emitCount": 10,
     "emitDelay": 0.0,
     "emitDuration": -1.0,
     "emitRate": 0.10000000149011612,
     "guid": "00000000-0000-0000-0000-000000000000",
     "isComplement": true,
     "isDrawEnable": true,
-    "isOneShot": true,
+    "isOneShot": false,
     "isStatic": false,
     "lifetime": {
-        "constant": 1.059999942779541,
-        "max": 0.9399999976158142,
-        "min": 0.029999999329447746,
-        "mode": 1
+        "constant": 0.0,
+        "max": 0.0,
+        "min": 0.0,
+        "mode": 0
     },
     "modelPath": "plane.obj",
-    "modules": [
-        {
-            "animationSpeed": 15.260000228881836,
-            "cols": 4,
-            "enabled": true,
-            "loop": true,
-            "name": "TextureSheetAnimationModule",
-            "rows": 4,
-            "useCustomFrames": false
-        },
-        {
-            "easeType": 6,
-            "enabled": true,
-            "isGrowing": false,
-            "name": "SizeOverLifetimeModule"
-        }
-    ],
+    "modules": [],
     "name": "",
     "objectType": 0,
     "parentGuid": "00000000-0000-0000-0000-000000000000",
@@ -49,9 +33,9 @@
     },
     "scale": {
         "constant": {
-            "x": 2.869999885559082,
-            "y": 2.890000104904175,
-            "z": 1.0
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
         },
         "max": {
             "x": 0.0,
@@ -65,7 +49,7 @@
         },
         "mode": 0
     },
-    "texturePath": "hitEffect.png",
+    "texturePath": "particle.png",
     "transform": {
         "rotation": {
             "w": 1.0,
@@ -91,15 +75,15 @@
             "z": 0.0
         },
         "max": {
-            "x": 5.710000038146973,
-            "y": 3.8399999141693115,
-            "z": 1.9199999570846558
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
         },
         "min": {
-            "x": -6.340000152587891,
-            "y": -3.2699999809265137,
-            "z": -1.940000057220459
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
         },
-        "mode": 1
+        "mode": 0
     }
 }

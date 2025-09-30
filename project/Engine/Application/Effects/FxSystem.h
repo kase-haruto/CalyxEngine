@@ -30,7 +30,7 @@ public:
 	void DispatchEmitters(class PipelineService* psoService, ID3D12GraphicsCommandList* cmdList);
 	void Render(class PipelineService*, ID3D12GraphicsCommandList*);
 	void Clear();
-
+	
 private:
 	//===================================================================*/
 	//                  private variable

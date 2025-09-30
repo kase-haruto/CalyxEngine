@@ -4,11 +4,11 @@
 /* ===================================================================== */
 #include <Game/3dObject/Actor/Bullet/BaseBullet.h>
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
-#include <memory>
 #include <string>
-#include <algorithm> // std::clamp
+#include <algorithm>
 
-class EnemyHomingBullet : public BaseBullet {
+class EnemyHomingBullet 
+	: public BaseBullet {
 public:
 	EnemyHomingBullet() = default;
 	EnemyHomingBullet(const std::string& modelName, const std::string& name);
@@ -46,7 +46,4 @@ private:
 	// 最初の homingDurationSec_ 秒だけ追尾
 	float homingDurationSec_ = 1.0f;
 	float homingElapsedSec_ = 0.0f;
-
-	std::shared_ptr<ParticleSystemObject> trailFx_;
-	std::shared_ptr<ParticleSystemObject> shootFx_;
 };

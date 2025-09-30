@@ -16,6 +16,9 @@
 
 //external
 #include "externals/imgui/imgui.h"
+#include <algorithm>
+#include <cstring>
+#include <Engine/Objects/3D/Details/BillboardParams.h>
 
 const std::string BaseModel::directoryPath_ = "Resource/models";
 
@@ -58,14 +61,14 @@ void BaseModel::OnModelLoaded() {
 	if (!handle_) {
 		handle_ = TextureManager::GetInstance()->LoadTexture(
 			"Textures/" + modelData_->meshData.material.textureFilePath);
-		textureName_ = "textures/"+ modelData_->meshData.material.textureFilePath;
+		textureName_ = "textures/" + modelData_->meshData.material.textureFilePath;
 		if (!handle_) { // 読み込み失敗・空文字列など
 			handle_ = TextureManager::GetInstance()->LoadTexture("textures/white1x1.png");
 		}
 	}
 
 	// -------- インスタンシングバッファの初期確保 --------
-	if (!instanceBufferCreated_){
+	if (!instanceBufferCreated_) {
 		instanceBufferCapacity_ = 1024; // 初期インスタンス数（適宜調整）
 		instanceBuffer_.Initialize(device, instanceBufferCapacity_);
 		instanceBuffer_.CreateSrv(device);
@@ -139,40 +142,6 @@ void BaseModel::Draw(const WorldTransform& transform) {
 	cmdList->DrawIndexedInstanced(UINT(modelData_->meshData.indices.size()), 1, 0, 0, 0);
 }
 
-void BaseModel::DrawInstanced(const std::vector<WorldTransform>& transforms,
-							  ID3D12GraphicsCommandList* cmdList){
-	if (!isDrawEnable_ || !modelData_ || transforms.empty()) return;
-
-	// 転送
-	std::vector<TransformationMatrix> matrices;
-	matrices.reserve(transforms.size());
-	for (const auto& tf : transforms){
-		TransformationMatrix mat;
-		mat.world = tf.matrix.world;
-		mat.WorldInverseTranspose = Matrix4x4::Transpose(Matrix4x4::Inverse(tf.matrix.world));
-		matrices.push_back(mat);
-	}
-	instanceBuffer_.TransferVectorData(matrices);
-
-	cmdList->SetGraphicsRootDescriptorTable(1, instanceBuffer_.GetGpuSrvHandle());
-
-	// マテリアル・テクスチャ等
-	materialBuffer_.SetCommand(cmdList, 0);
-	cmdList->SetGraphicsRootDescriptorTable(2, handle_.value());
-
-	auto envMapHandle = TextureManager::GetInstance()->GetEnvironmentTextureSrvHandle();
-	cmdList->SetGraphicsRootDescriptorTable(6, envMapHandle);
-
-	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	modelData_->vertexBuffer.SetCommand(cmdList);
-	modelData_->indexBuffer.SetCommand(cmdList);
-
-	cmdList->DrawIndexedInstanced(
-		static_cast< UINT >(modelData_->meshData.indices.size()),
-		static_cast< UINT >(transforms.size()), 0, 0, 0);
-}
-
-
 void BaseModel::ApplyConfig(const BaseModelConfig& config) {
 	materialData_.ApplyConfig(config.materialConfig);
 	uvTransform.ApplyConfig(config.uvTransConfig);
@@ -181,12 +150,11 @@ void BaseModel::ApplyConfig(const BaseModelConfig& config) {
 
 	bool ok = false;
 
-	// 1) GUID があれば最優先
+	//  GUID があれば最優先
 	if (config.textureGuid.isValid()) {
 		ok = LoadTextureByGuid(config.textureGuid);
 	}
 
-	// 2) 旧データ：legacyTextureName から GUID を引いて移行
 	if (!ok && config.legacyTextureName && !config.legacyTextureName->empty()) {
 		auto* db = AssetDatabase::GetInstance();
 		const auto& view = db->GetView();
@@ -207,7 +175,6 @@ void BaseModel::ApplyConfig(const BaseModelConfig& config) {
 		}
 	}
 
-	// 3) 最終フォールバック
 	if (!ok) {
 		handle_ = TextureManager::GetInstance()->LoadTexture("textures/white1x1.png");
 		textureGuid_ = Guid{}; // 未設定
@@ -318,6 +285,90 @@ bool BaseModel::LoadTextureByGuid(const Guid& g) {
 	return true;
 }
 
-const std::optional<ModelData>& BaseModel::GetModelData() const{
+const std::optional<ModelData>& BaseModel::GetModelData() const {
 	return modelData_;
+}
+
+// ======================================= renderer 専用 ==========================================
+
+void BaseModel::SetTex(const std::string& name) {
+	handle_ = TextureManager::GetInstance()->LoadTexture("textures/"+name);
+}
+
+void BaseModel::EnsureInstanceCapacity(ID3D12Device* device, UINT needCount) {
+	if (!instanceBufferCreated_) {
+		instanceBufferCapacity_ = std::max<UINT>(1024, needCount);
+		instanceBuffer_.Initialize(device, instanceBufferCapacity_); // Upload
+		instanceBuffer_.CreateSrv(device);
+		instanceBufferCreated_ = true;
+		return;
+	}
+	if (needCount <= instanceBufferCapacity_) return;
+
+	// 2倍拡張で再確保頻度を抑制
+	instanceBufferCapacity_ = std::max<UINT>(needCount, instanceBufferCapacity_ * 2);
+	instanceBuffer_.ReleaseSrv();
+	instanceBuffer_.Reset();
+	instanceBuffer_.Initialize(device, instanceBufferCapacity_); // Upload
+	instanceBuffer_.CreateSrv(device);
+}
+
+void BaseModel::UploadInstanceMatrices(const std::vector<WorldTransform>& transforms) {
+	std::vector<TransformationMatrix> matrices;
+	matrices.reserve(transforms.size());
+	for (const auto& tf : transforms) {
+		TransformationMatrix m{};
+		m.world = tf.matrix.world;
+		m.WorldInverseTranspose = Matrix4x4::Transpose(Matrix4x4::Inverse(tf.matrix.world));
+		matrices.push_back(m);
+	}
+	instanceBuffer_.TransferVectorData(matrices);
+}
+
+D3D12_GPU_DESCRIPTOR_HANDLE BaseModel::GetInstanceSrv() const {
+	return instanceBuffer_.GetGpuSrvHandle();
+}
+D3D12_GPU_DESCRIPTOR_HANDLE BaseModel::GetTexSrv() const {
+	return handle_.value();
+}
+D3D12_GPU_DESCRIPTOR_HANDLE BaseModel::GetEnvMapSrv() const {
+	return TextureManager::GetInstance()->GetEnvironmentTextureSrvHandle();
+}
+
+void BaseModel::BindVertexIndexBuffers(ID3D12GraphicsCommandList* cmdList) const {
+	modelData_->vertexBuffer.SetCommand(cmdList);
+	modelData_->indexBuffer.SetCommand(cmdList);
+}
+void BaseModel::BindMaterialCB(ID3D12GraphicsCommandList* cmdList) const {
+	materialBuffer_.SetCommand(cmdList, 0);
+}
+
+
+// ================= billboard (VS:t1) =================
+void BaseModel::EnsureBillboardCapacity(ID3D12Device* device, UINT needCount) {
+	if (!billboardBuffer_.IsValid()) {
+		billboardCapacity_ = std::max<UINT>(needCount, 256u);
+		billboardBuffer_.Initialize(device, billboardCapacity_); // Upload
+		billboardBuffer_.CreateSrv(device);                      // VS:t1
+		return;
+
+	}
+	if (needCount <= billboardCapacity_) return;
+	billboardCapacity_ = std::max<UINT>(needCount, billboardCapacity_ * 2);
+	billboardBuffer_.ReleaseSrv();
+	billboardBuffer_.Reset();
+	billboardBuffer_.Initialize(device, billboardCapacity_);
+	billboardBuffer_.CreateSrv(device);
+
+}
+
+void BaseModel::UploadBillboardParams(const std::vector<GpuBillboardParams>& params) {
+	if (!billboardBuffer_.IsValid() || params.empty()) return;
+	std::memcpy(billboardBuffer_.Data(), params.data(), sizeof(GpuBillboardParams) * params.size());
+
+}
+
+D3D12_GPU_DESCRIPTOR_HANDLE BaseModel::GetBillboardSrv() const {
+	return billboardBuffer_.GetGpuSrvHandle();
+
 }

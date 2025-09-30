@@ -7,18 +7,21 @@
 #include <Engine/Assets/Model/BaseModel.h>
 #include <Engine/Graphics/Camera/3d/Camera3d.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
-#include <Engine/Graphics/Pipeline/Presets/PipelinePresets.h>
 #include <Engine/Lighting/LightLibrary.h>
 
+#include "Engine/Graphics/Context/GraphicsGroup.h"
+
+ModelRenderer::ModelRenderer() = default;
+
 /////////////////////////////////////////////////////////////////////////////////////////
-//		静的モデル登録
+//		静的モデル登録（ビルボードモード付き）
 /////////////////////////////////////////////////////////////////////////////////////////
-void ModelRenderer::RegisterStatic(BaseModel* model, const WorldTransform& transform){
-	// {transform} 初期化は避ける
+void ModelRenderer::RegisterStatic(BaseModel* model, const WorldTransform& transform, BillboardMode billMode){
 	InstanceStatic inst {};
-	inst.tf = transform;
-	inst.dirty = true;
+	inst.tf      = transform;
+	inst.dirty   = true;
 	inst.visible = false;
+	inst.mode    = billMode;
 	staticModels_[model].push_back(inst);
 }
 
@@ -27,8 +30,8 @@ void ModelRenderer::RegisterStatic(BaseModel* model, const WorldTransform& trans
 /////////////////////////////////////////////////////////////////////////////////////////
 void ModelRenderer::RegisterSkinned(AnimationModel* model, const WorldTransform& transform){
 	InstanceSkinned inst {};
-	inst.tf = transform;
-	inst.dirty = true;
+	inst.tf      = transform;
+	inst.dirty   = true;
 	inst.visible = false;
 	skinnedModels_[model].push_back(inst);
 }
@@ -50,18 +53,15 @@ void ModelRenderer::Clear(){
 /////////////////////////////////////////////////////////////////////////////////////////
 void ModelRenderer::BeginFrame(){
 	for (auto& [m, insts] : staticModels_){
-		for (auto& inst : insts){
-			inst.visible = false;
-		}
+		for (auto& inst : insts){ inst.visible = false; }
 	}
 	for (auto& [m, insts] : skinnedModels_){
-		for (auto& inst : insts){
-			inst.visible = false;
-		}
+		for (auto& inst : insts){ inst.visible = false; }
 	}
 	staticBatches_.clear();
 	skinnedBatches_.clear();
 
+	// 毎フレ登録方式なのでクリア
 	staticModels_.clear();
 	skinnedModels_.clear();
 }
@@ -75,6 +75,7 @@ void ModelRenderer::MarkStaticDirty(BaseModel* model, size_t index){
 	if (index >= it->second.size()) return;
 	it->second[index].dirty = true;
 }
+
 void ModelRenderer::MarkSkinnedDirty(AnimationModel* model, size_t index){
 	auto it = skinnedModels_.find(model);
 	if (it == skinnedModels_.end()) return;
@@ -119,31 +120,40 @@ void ModelRenderer::PreCullAndBatch(const Camera3d* camera){
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//		静的モデル・バッチ作成
+//		静的モデル・バッチ作成（BillboardParams も可視分だけ詰める）
 /////////////////////////////////////////////////////////////////////////////////////////
 void ModelRenderer::BuildStaticBatches(){
 	for (auto& [model, insts] : staticModels_){
 		if (!model->GetModelData().has_value() || !model->GetIsDrawEnable()) continue;
 
-		tempVisibleStatic_.clear();
-		tempVisibleStatic_.reserve(insts.size());
+		std::vector<WorldTransform>     visTf;
+		std::vector<GpuBillboardParams> visBb;
+		visTf.reserve(insts.size());
+		visBb.reserve(insts.size());
 
 		for (auto& inst : insts){
-			if (inst.visible){
-				tempVisibleStatic_.push_back(inst.tf);
-			}
+			if (!inst.visible) continue;
+			visTf.push_back(inst.tf);
+
+			GpuBillboardParams p{};
+			p.mode = static_cast<uint32_t>(inst.mode);
+			visBb.push_back(p);
 		}
-		if (tempVisibleStatic_.empty()) continue;
+		if (visTf.empty()) continue;
 
 		PipelineKey key {PipelineTag::Object::Object3d, model->GetBlendMode()};
 		auto& batch = staticBatches_[key];
-		batch.emplace_back(model, std::vector<WorldTransform>());
-		batch.back().second.swap(tempVisibleStatic_);
+
+		StaticBatchItem item;
+		item.model = model;
+		item.transforms.swap(visTf);
+		item.billboards.swap(visBb);
+		batch.emplace_back(std::move(item));
 	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//		スキンモデル・バッチ作成
+//		スキンモデル・バッチ作成（従来通り）
 /////////////////////////////////////////////////////////////////////////////////////////
 void ModelRenderer::BuildSkinnedBatches(){
 	for (auto& [model, insts] : skinnedModels_){
@@ -167,17 +177,17 @@ void ModelRenderer::BuildSkinnedBatches(){
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//		イッセイ描画
+//		一斉描画（静的：t1 に Billboard SRV をバインド）
 /////////////////////////////////////////////////////////////////////////////////////////
 void ModelRenderer::DrawAll(ID3D12GraphicsCommandList* cmdList,
-							[[maybe_unused]] ID3D12Device* device,
+							ID3D12Device* device,
 							[[maybe_unused]] const Camera3d* /*unused*/,
 							PipelineService* psoService,
 							LightLibrary* lightLibrary){
 	psoService->ResetState();
 
 	//------------------------------------------------------------
-	// 1) 静的モデル
+	// 静的モデル
 	//------------------------------------------------------------
 	{
 		PipelineKey lastKey {};
@@ -190,7 +200,7 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList* cmdList,
 				const auto ps = psoService->GetPipelineSet(key.tag, key.blend);
 				psoService->SetCommand(ps, cmdList);
 
-				if (auto* cam = CameraManager::GetActive())
+				if (auto* cam = CameraManager::GetActive())	
 					cam->SetCommand(cmdList, PipelineType::Object3D);
 
 				lightLibrary->SetCommand(cmdList, PipelineType::Object3D);
@@ -199,14 +209,47 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList* cmdList,
 				hasLast = true;
 			}
 
-			for (auto& [model, visible] : batch){
-				if (!visible.empty()) model->DrawInstanced(visible, cmdList);
+			for (auto& item : batch) {
+				BaseModel* model = item.model;
+				auto& visible = item.transforms;
+				if (!model || visible.empty()) continue;
+
+				const UINT need = static_cast<UINT>(item.billboards.size());
+				if (need == 0) continue;
+				// 変数個数の一致を念のため検査
+				assert(item.transforms.size() == item.billboards.size());
+
+				// --- Billboard (VS:t1)：モデル側の単一バッファ ---
+				model->EnsureBillboardCapacity(device, need);
+				model->UploadBillboardParams(item.billboards);
+				cmdList->SetGraphicsRootDescriptorTable(
+					7, // = 7
+					model->GetBillboardSrv());      // VS:t1 (gBillboard)
+
+				// --- インスタンス行列 (VS:t0) ---
+				model->EnsureInstanceCapacity(device, need);
+				model->UploadInstanceMatrices(visible);
+				cmdList->SetGraphicsRootDescriptorTable(1, model->GetInstanceSrv()); // VS:t0 (gTransMat)
+
+				// --- マテリアル / テクスチャ（PS） ---
+				model->BindMaterialCB(cmdList);                                      // b0
+				cmdList->SetGraphicsRootDescriptorTable(2, model->GetTexSrv());      // PS:t0 (gTexture)
+				cmdList->SetGraphicsRootDescriptorTable(6, model->GetEnvMapSrv());   // PS:t1 (gEnvironmentMap)
+
+				// --- VB/IB / トポロジ ---
+				cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+				model->BindVertexIndexBuffers(cmdList);
+
+				// --- Draw ---
+				const UINT indexCount = static_cast<UINT>(model->GetModelData()->meshData.indices.size());
+				const UINT instanceCount = need;
+				cmdList->DrawIndexedInstanced(indexCount, instanceCount, 0, 0, 0);
 			}
 		}
 	}
 
 	//------------------------------------------------------------
-	// 2) スキンメッシュ
+	// スキンメッシュ（従来通り）
 	//------------------------------------------------------------
 	{
 		PipelineKey lastKey {};
