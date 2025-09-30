@@ -1,5 +1,5 @@
 #pragma once
-#include <Engine/Foundation/Utility/Func/Fwd.h>
+#include "../Utility/Func/Fwd.h"
 
 namespace Cx::Math{
 Matrix4x4 MakeTranslateMatrix(const Vector3&) noexcept;
