@@ -1,9 +1,9 @@
 #pragma once
-#include <Engine/Objects/3D/Actor/Actor.h>
 /* ========================================================================
 /* include space
 /* ===================================================================== */
 // engine
+#include <Engine/Objects/3D/Actor/Actor.h>
 #include <Engine/objects/Collider/SphereCollider.h>
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 // game
@@ -72,4 +72,3 @@ private:
 	std::shared_ptr<ParticleSystemObject> hitFx_;
 	std::shared_ptr<ParticleSystemObject> explosionFx_;
 };
-

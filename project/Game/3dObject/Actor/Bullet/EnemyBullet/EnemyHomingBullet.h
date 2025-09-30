@@ -4,9 +4,8 @@
 /* ===================================================================== */
 #include <Game/3dObject/Actor/Bullet/BaseBullet.h>
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
-#include <memory>
 #include <string>
-#include <algorithm> // std::clamp
+#include <algorithm>
 
 class EnemyHomingBullet 
 	: public BaseBullet {
