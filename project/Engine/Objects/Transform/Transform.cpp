@@ -5,6 +5,7 @@
 
 // engine
 #include <Engine/Graphics/Context/GraphicsGroup.h>
+#include <Engine/Foundation/Utility/Func/CxUtils.h>
 
 //data
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
@@ -12,7 +13,6 @@
 // lib
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <externals/imgui/imgui.h>
-#include <Engine/Foundation/Json/JsonUtils.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //	コンストラクタ
@@ -78,7 +78,7 @@ Vector3 BaseTransform::GetWorldPosition() const {
 //	worldTransformの更新
 /////////////////////////////////////////////////////////////////////////////////////////
 void WorldTransform::Update(const Matrix4x4& viewProjMatrix) {
-	Matrix4x4 scaleMat = MakeScaleMatrix(scale);
+	Matrix4x4 scaleMat = Cx::Math::MakeScaleMatrix(scale);
 
 	// どちらをソースとするかで処理を分ける
 	if (rotationSource == RotationSource::Euler) {
@@ -88,7 +88,7 @@ void WorldTransform::Update(const Matrix4x4& viewProjMatrix) {
 	}
 
 	Matrix4x4 rotateMat = Quaternion::ToMatrix(rotation);
-	Matrix4x4 translateMat = MakeTranslateMatrix(translation);
+	Matrix4x4 translateMat = Cx::Math::MakeTranslateMatrix(translation);
 
 	Matrix4x4 localMat = scaleMat * rotateMat * translateMat;
 
@@ -109,7 +109,7 @@ void WorldTransform::Update(const Matrix4x4& viewProjMatrix) {
 //	worldTransformの更新(カメラなし
 /////////////////////////////////////////////////////////////////////////////////////////
 void WorldTransform::Update() {
-	Matrix4x4 scaleMat = MakeScaleMatrix(scale);
+	Matrix4x4 scaleMat = Cx::Math::MakeScaleMatrix(scale);
 
 	// 回転の更新（オイラー角 ↔ クォータニオン 双方向変換）
 	switch (rotationSource) {
@@ -122,7 +122,7 @@ void WorldTransform::Update() {
 	}
 
 	Matrix4x4 rotateMat = Quaternion::ToMatrix(rotation);
-	Matrix4x4 translateMat = MakeTranslateMatrix(translation);
+	Matrix4x4 translateMat = Cx::Math::MakeTranslateMatrix(translation);
 
 	Matrix4x4 localMat = scaleMat * rotateMat * translateMat;
 

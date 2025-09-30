@@ -1,7 +1,6 @@
 #include "RailCamera.h"
 
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
-#include <Engine/Foundation/Utility/Func/MathFunc.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/Application/Input/Input.h>
 

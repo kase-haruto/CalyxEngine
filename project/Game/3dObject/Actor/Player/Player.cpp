@@ -18,6 +18,8 @@
 #include <externals/imgui/imgui.h>
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 
+#include "Engine/Foundation/Utility/Func/CxUtils.h"
+
 // c++
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -110,7 +112,7 @@ void Player::Update(float dt){
 		reticleSprites_[i]->SetUvRotate(currentUvRotate + uvRotateSpeed);
 
 		// スクリーン座標に変換して配置
-		Vector2 screenPos = WorldToScreen(worldPos);
+		Vector2 screenPos = Cx::Math::WorldToScreen(worldPos);
 		reticleSprites_[i]->SetPosition(screenPos);
 		reticleSprites_[i]->Update();
 	}
@@ -127,7 +129,7 @@ void Player::Update(float dt){
 		}
 
 		// 位置更新（毎フレーム投影）
-		Vector2 pos = WorldToScreen(enemy->GetCenterPos());
+		Vector2 pos = Cx::Math::WorldToScreen(enemy->GetCenterPos());
 		lockOnSprites_[i]->SetPosition(pos);
 
 		// 演出：くるくる回す + 少し拡縮して点滅
@@ -206,7 +208,7 @@ void Player::RequestLockOn(){
 	Camera3d* camera = CameraManager::GetMain3d();
 	if (!camera) return;
 
-	const Vector2 reticleScreen = WorldToScreen(reticleTransform_.GetWorldPosition());
+	const Vector2 reticleScreen = Cx::Math::WorldToScreen(reticleTransform_.GetWorldPosition());
 	const float radius = 30.0f;
 
 	for (const auto& enemy : targets_){
@@ -215,7 +217,7 @@ void Player::RequestLockOn(){
 
 		if (!camera->IsVisible(enemy->GetWorldAABB())) continue;
 
-		Vector2 enemyScreen = WorldToScreen(enemy->GetWorldPosition());
+		Vector2 enemyScreen = Cx::Math::WorldToScreen(enemy->GetWorldPosition());
 		if ((enemyScreen - reticleScreen).Length() > radius) continue;
 
 		// ロックオン登録
@@ -273,8 +275,8 @@ void Player::UpdateTilt(const Vector3& inputVector){
 
 		// カメラ傾きを戻す（オイラー角）
 		Vector3 currentRot = cam->GetRotate();
-		currentRot.x = Lerp(currentRot.x,0.0f,0.1f); // pitch
-		currentRot.z = Lerp(currentRot.z,0.0f,0.1f); // roll
+		currentRot.x = Cx::Math::Lerp(currentRot.x,0.0f,0.1f); // pitch
+		currentRot.z = Cx::Math::Lerp(currentRot.z,0.0f,0.1f); // roll
 		cam->SetCamera(cam->GetTranslate(),currentRot);
 		return;
 	}
@@ -297,8 +299,8 @@ void Player::UpdateTilt(const Vector3& inputVector){
 
 	// カメラ回転（Euler）
 	Vector3 currentRot = cam->GetRotate();
-	currentRot.x = Lerp(currentRot.x,targetPitch * 0.3f,0.15f); // pitch
-	currentRot.z = Lerp(currentRot.z,targetRoll * 0.3f,0.15f); // roll
+	currentRot.x = Cx::Math::Lerp(currentRot.x,targetPitch * 0.3f,0.15f); // pitch
+	currentRot.z = Cx::Math::Lerp(currentRot.z,targetRoll * 0.3f,0.15f); // roll
 	cam->SetCamera(cam->GetTranslate(),currentRot);
 }
 

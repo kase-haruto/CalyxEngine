@@ -6,7 +6,7 @@
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Graphics/Descriptor/DescriptorAllocator.h>
 #include <Engine/Application/System/Enviroment.h>
-
+#include <Engine/Foundation/Utility/Func/CxUtils.h>
 // c++
 #include<cassert>
 #include<cmath>
@@ -18,97 +18,6 @@
 #include<assimp/Importer.hpp>
 #include<assimp/postprocess.h>
 
-
-//平行移動行列
-Matrix4x4 MakeTranslateMatrix(const Vector3& translate) {
-	Matrix4x4 result = {
-		1,0,0,0,
-		0,1,0,0,
-		0,0,1,0,
-		translate.x,translate.y,translate.z,1
-	};
-	return result;
-}
-
-//拡大縮小行列
-Matrix4x4 MakeScaleMatrix(const Vector3& scale) {
-	Matrix4x4 result = {
-		scale.x,0,0,0,
-		0,scale.y,0,0,
-		0,0,scale.z,0,
-		0,0,0,1
-	};
-	return result;
-}
-
-//回転行列
-Matrix4x4 MakeRotateXMatrix(float theta) {
-	Matrix4x4 result = {
-		1,0,0,0,
-		0,std::cos(theta),std::sin(theta),0,
-		0,-std::sin(theta),std::cos(theta),0,
-		0,0,0,1
-	};
-
-	return result;
-}
-
-Matrix4x4 MakeRotateYMatrix(float theta) {
-	Matrix4x4 result = {
-		std::cos(theta),0,-std::sin(theta),0,
-		0,1,0,0,
-		std::sin(theta),0,std::cos(theta),0,
-		0,0,0,1
-	};
-	return result;
-}
-
-Matrix4x4 MakeRotateZMatrix(float theta) {
-	Matrix4x4 result = {
-		std::cos(theta),std::sin(theta),0,0,
-		-std::sin(theta),std::cos(theta),0,0,
-		0,0,1,0,
-		0,0,0,1
-	};
-	return result;
-}
-
-Matrix4x4 EulerToMatrix(const Vector3& euler) {
-	Matrix4x4 rotateXMatrix = MakeRotateXMatrix(euler.x);
-	Matrix4x4 rotateYMatrix = MakeRotateYMatrix(euler.y);
-	Matrix4x4 rotateZMatrix = MakeRotateZMatrix(euler.z);
-	return Matrix4x4::Multiply(Matrix4x4::Multiply(rotateXMatrix, rotateYMatrix), rotateZMatrix);
-}
-
-Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate) {
-	Matrix4x4 affineMatrix;
-	Matrix4x4 translateMatrix = MakeTranslateMatrix(translate);
-	Matrix4x4 scaleMatrix = MakeScaleMatrix(scale);
-
-	Matrix4x4 rotateXMatrix = MakeRotateXMatrix(rotate.x);
-	Matrix4x4 rotateYMatrix = MakeRotateYMatrix(rotate.y);
-	Matrix4x4 rotateZMatrix = MakeRotateZMatrix(rotate.z);
-	Matrix4x4 rotateMatrix = Matrix4x4::Multiply(Matrix4x4::Multiply(rotateXMatrix, rotateYMatrix), rotateZMatrix);
-
-	affineMatrix = Matrix4x4::Multiply(Matrix4x4::Multiply(scaleMatrix, rotateMatrix), translateMatrix);
-
-	return affineMatrix;
-}
-
-Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Quaternion& rotate, const Vector3& translate) {
-	// 各種変換行列を生成
-	const Matrix4x4 scaleMatrix = MakeScaleMatrix(scale);
-	const Matrix4x4 rotationMatrix = Quaternion::ToMatrix(rotate);
-	const Matrix4x4 translationMatrix = MakeTranslateMatrix(translate);
-
-	// スケーリング → 回転 → 平行移動 の順で合成
-	Matrix4x4 affineMatrix = Matrix4x4::Multiply(
-		Matrix4x4::Multiply(scaleMatrix, rotationMatrix),
-		translationMatrix
-	);
-
-	return affineMatrix;
-}
 
 Matrix4x4 MakeOrthographicMatrix(float l, float t, float r, float b, float nearClip, float farClip) {
 	Matrix4x4 result;
@@ -231,7 +140,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 		aiQuaternion rotate;
 		offsetMatrixAssimp.Decompose(scale, rotate, translate);
 
-		Matrix4x4 inverseBindPoseMatrix = MakeAffineMatrix(
+		Matrix4x4 inverseBindPoseMatrix = Cx::Math::MakeAffineMatrix(
 			{ scale.x, scale.y, scale.z },
 			{ rotate.x, -rotate.y, -rotate.z, rotate.w }, // 左手変換
 			{ -translate.x, translate.y, translate.z }     // 左手変換
@@ -364,221 +273,6 @@ bool IsCollision(const AABB& aabb, const Vector3& point) {
 		(point.z >= aabb.min_.z && point.z <= aabb.max_.z);
 }
 
-Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m) {
-	Vector3 result{
-		v.x * m.m[0][0] + v.y * m.m[1][0] + v.z * m.m[2][0],
-		v.x * m.m[0][1] + v.y * m.m[1][1] + v.z * m.m[2][1],
-		v.x * m.m[0][2] + v.y * m.m[1][2] + v.z * m.m[2][2] };
-	return result;
-}
-
-float Lerp(float v1, float v2, float t) {
-	return v1 + (v2 - v1) * t;
-}
-
-float LerpShortAngle(float a, float b, float t) {
-	const float TWO_PI = 2.0f * (float)std::numbers::pi; // 2π (6.283185307179586)
-	const float PI = (float)std::numbers::pi;            // π (3.141592653589793)
-
-	// 角度差分を求める
-	float diff = b - a;
-
-	// 角度を[-π, π]に補正する
-	diff = fmod(diff, TWO_PI);
-	if (diff > PI) {
-		diff -= TWO_PI;
-	} else if (diff < -PI) {
-		diff += TWO_PI;
-	}
-
-	// Lerpを使用して補間
-	return Lerp(a, a + diff, t);
-
-}
-
-
-Vector3 ExtractEulerAnglesFromMatrix(const Matrix4x4& worldMatrix) {
-	// 仮定: 回転順序は YXZ など
-	Vector3 euler;
-	// row-major 前提での計算例（回転順序に応じて変更必要）
-	euler.y = std::atan2(worldMatrix.m[0][2], worldMatrix.m[2][2]);
-	float cosY = std::cos(euler.y);
-	euler.x = std::atan2(-worldMatrix.m[1][2], worldMatrix.m[2][2] / cosY);
-	euler.z = std::atan2(worldMatrix.m[0][1], worldMatrix.m[0][0]);
-	return euler;
-}
-
-Vector2 WorldToScreen(const Vector3& worldPos) {
-	const Matrix4x4& viewProj = CameraManager::GetMain3d()->GetViewProjectionMatrix();
-
-	// ワールド→クリップ空間
-	Vector4 clipPos = Vector4::Transform(Vector4(worldPos, 1.0f),viewProj);
-
-	if (fabs(clipPos.w) < 1e-5f) {
-		return Vector2(0.0f, 0.0f); // 無効値
-	}
-
-	// NDC座標へ
-	Vector3 ndcPos = {
-		clipPos.x / clipPos.w,
-		clipPos.y / clipPos.w,
-		clipPos.z / clipPos.w
-	};
-
-	// NDC → スクリーン座標
-	float screenWidth = kGameWidth;
-	float screenHeight = kGameHeight;
-
-	float screenX = (ndcPos.x * 0.5f + 0.5f) * screenWidth;
-	float screenY = (1.0f - (ndcPos.y * 0.5f + 0.5f)) * screenHeight;
-
-	return Vector2(screenX, screenY);
-}
-
-Vector3 ScreenToWorld(const Vector2& screenPos, float depthZ) {
-	float screenWidth = kGameWidth;
-	float screenHeight = kGameHeight;
-
-	// スクリーン座標 → NDC座標に変換
-	float ndcX = (screenPos.x / screenWidth) * 2.0f - 1.0f;
-	float ndcY = 1.0f - (screenPos.y / screenHeight) * 2.0f;
-
-	// NDC → ワールド座標（逆 ViewProjection 行列を使う）
-	Vector4 ndcPos(ndcX, ndcY, depthZ, 1.0f);
-
-	Matrix4x4 invViewProj = Matrix4x4::Inverse(CameraManager::GetMain3d()->GetViewProjectionMatrix());
-	Vector4 worldH = Vector4::Transform(ndcPos,invViewProj );
-
-	if (fabs(worldH.w) > 1e-5f) {
-		worldH.x /= worldH.w;
-		worldH.y /= worldH.w;
-		worldH.z /= worldH.w;
-	}
-
-	return Vector3(worldH.x, worldH.y, worldH.z);
-}
-
-
-Vector4 MultiplyMatrixVector(const Matrix4x4& mat, const Vector4& vec) {
-	return Vector4(
-		mat.m[0][0] * vec.x + mat.m[1][0] * vec.y + mat.m[2][0] * vec.z + mat.m[3][0] * vec.w,
-		mat.m[0][1] * vec.x + mat.m[1][1] * vec.y + mat.m[2][1] * vec.z + mat.m[3][1] * vec.w,
-		mat.m[0][2] * vec.x + mat.m[1][2] * vec.y + mat.m[2][2] * vec.z + mat.m[3][2] * vec.w,
-		mat.m[0][3] * vec.x + mat.m[1][3] * vec.y + mat.m[2][3] * vec.z + mat.m[3][3] * vec.w
-	);
-}
-
-bool WorldToScreen(const Vector3& worldPos, Vector2& outScreenPos) {
-	// ビューポート行列を作成
-	Matrix4x4 matViewport = Matrix4x4::MakeViewportMatrix(0, 0, 1280.0f, 720.0f, 0, 1);
-
-	// ビュー・プロジェクションの合成行列を計算
-	Matrix4x4 matVP = CameraManager::GetMain3d()->GetViewProjectionMatrix();
-
-	// ワールド空間の座標をビュー・プロジェクション行列で変換（クリップ座標）
-	Vector4 clipPos = MultiplyMatrixVector(matVP, Vector4(worldPos.x, worldPos.y, worldPos.z, 1));
-
-	// 正規化デバイス座標（NDC）に変換
-	if (clipPos.w != 0.0f) {
-		clipPos.x /= clipPos.w;
-		clipPos.y /= clipPos.w;
-		clipPos.z /= clipPos.w;
-	}
-
-	// 視錐台（クリップ座標）の範囲外にある場合は false を返す
-	if (clipPos.x < -1.0f || clipPos.x > 1.0f ||
-		clipPos.y < -1.0f || clipPos.y > 1.0f ||
-		clipPos.z < 0.0f || clipPos.z > 1.0f) {
-		return false; // 見えていない
-	}
-
-	// ビューポート行列で変換し、スクリーン座標を計算
-	Vector4 screenPos = MultiplyMatrixVector(matViewport, clipPos);
-	outScreenPos = Vector2(screenPos.x, screenPos.y);
-
-	return true; // 見えている
-}
-
-void DecomposeMatrix(const Matrix4x4& mat, Vector3& outScale, Vector3& outRotate, Vector3& outTrans) {
-	// ① 平行移動成分の抽出
-	// ※ row-major の場合、4行目（インデックス 3）の 0～2列目に Translation が入っていると仮定
-	outTrans.x = mat.m[3][0];
-	outTrans.y = mat.m[3][1];
-	outTrans.z = mat.m[3][2];
-
-	// ② スケール成分の抽出
-	// 各行の上位３成分の長さが各軸方向のスケール（シアーがない前提）
-	outScale.x = std::sqrt(mat.m[0][0] * mat.m[0][0] +
-						   mat.m[0][1] * mat.m[0][1] +
-						   mat.m[0][2] * mat.m[0][2]);
-
-	outScale.y = std::sqrt(mat.m[1][0] * mat.m[1][0] +
-						   mat.m[1][1] * mat.m[1][1] +
-						   mat.m[1][2] * mat.m[1][2]);
-
-	outScale.z = std::sqrt(mat.m[2][0] * mat.m[2][0] +
-						   mat.m[2][1] * mat.m[2][1] +
-						   mat.m[2][2] * mat.m[2][2]);
-
-	// ③ 回転成分の抽出
-	// 上位3×3 部分からスケール成分を除く（各行を正規化）
-	// ※ここでは rXY は「行 X, 列 Y」の要素
-	float r00 = mat.m[0][0] / outScale.x;
-	/*float r01 = mat.m[0][1] / outScale.x;
-	float r02 = mat.m[0][2] / outScale.x;*/
-
-	float r10 = mat.m[1][0] / outScale.y;
-	float r11 = mat.m[1][1] / outScale.y;
-	float r12 = mat.m[1][2] / outScale.y;
-
-	float r20 = mat.m[2][0] / outScale.z;
-	float r21 = mat.m[2][1] / outScale.z;
-	float r22 = mat.m[2][2] / outScale.z;
-
-	// オイラー角抽出（回転順序：X→Y→Z、つまり outRotate.x = pitch, outRotate.y = yaw, outRotate.z = roll）
-	// ※以下は一般的な Tait-Bryan 角の抽出例です。※
-	// まず sy = sqrt(r00² + r10²) を求め、特異点（ジンバルロック）をチェックします。
-	float sy = std::sqrt(r00 * r00 + r10 * r10);
-	const float EPSILON = 1e-6f;
-	bool singular = sy < EPSILON;
-
-	if (!singular) {
-		// 通常ケース
-		outRotate.x = std::atan2(r21, r22);   // ピッチ（X軸回り）
-		outRotate.y = std::atan2(-r20, sy);     // ヨー（Y軸回り）
-		outRotate.z = std::atan2(r10, r00);     // ロール（Z軸回り）
-	} else {
-		// 特異点（ジンバルロック）の場合
-		outRotate.x = std::atan2(-r12, r11);
-		outRotate.y = std::atan2(-r20, sy);
-		outRotate.z = 0.0f;
-	}
-}
-
-void DecomposeMatrixToSRT(const Matrix4x4& m, Vector3& outScale, Matrix4x4& outRot, Vector3& outTrans) {
-	outTrans = Vector3(m.m[3][0], m.m[3][1], m.m[3][2]);
-
-	// スケール抽出（列ベクトルの長さ）
-	Vector3 x = Vector3(m.m[0][0], m.m[0][1], m.m[0][2]);
-	Vector3 y = Vector3(m.m[1][0], m.m[1][1], m.m[1][2]);
-	Vector3 z = Vector3(m.m[2][0], m.m[2][1], m.m[2][2]);
-
-	outScale = Vector3(x.Length(), y.Length(), z.Length());
-
-	// 正規直交化（回転行列）
-	Matrix4x4 rot;
-	for (int i = 0; i < 3; ++i) {
-		rot.m[0][i] = m.m[0][i] / outScale.x;
-		rot.m[1][i] = m.m[1][i] / outScale.y;
-		rot.m[2][i] = m.m[2][i] / outScale.z;
-	}
-	rot.m[3][0] = rot.m[3][1] = rot.m[3][2] = 0.0f;
-	rot.m[0][3] = rot.m[1][3] = rot.m[2][3] = 0.0f;
-	rot.m[3][3] = 1.0f;
-
-	outRot = rot;
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////////
 //							Animation
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -683,7 +377,7 @@ Node ConvertAssimpNode(const aiNode* node) {
 	result.transform.translate = { -translate.x, translate.y, translate.z }; // 左手系
 
 	result.localMatrix =
-		MakeAffineMatrix(result.transform.scale, result.transform.rotate, result.transform.translate);
+		Cx::Math::MakeAffineMatrix(result.transform.scale, result.transform.rotate, result.transform.translate);
 
 	result.name = node->mName.C_Str();
 	result.children.resize(node->mNumChildren);
@@ -788,7 +482,7 @@ Matrix4x4 MakeYAxisBillboard(const Matrix4x4& cameraMatrix) {
 	Vector3 camX = Vector3::Cross({ 0, 1, 0 }, camZ).Normalize();
 	Vector3 camY = Vector3::Cross(camZ, camX);
 	Vector3 cam = (camX, camY, camZ);
-	return MakeAffineMatrix(Vector3::One(), cam, {});
+	return Cx::Math::MakeAffineMatrix(Vector3::One(), cam, {});
 }
 
 Matrix4x4 MakeXAxisBillboard(const Matrix4x4& cameraMatrix) {
@@ -797,7 +491,7 @@ Matrix4x4 MakeXAxisBillboard(const Matrix4x4& cameraMatrix) {
 	Vector3 camY = Vector3::Cross(camZ, { 1, 0, 0 }).Normalize();
 	Vector3 camX = Vector3::Cross(camY, camZ);
 	Vector3 cam = (camX, camY, camZ);
-	return MakeAffineMatrix(Vector3::One(), cam, {});
+	return Cx::Math::MakeAffineMatrix(Vector3::One(), cam, {});
 }
 
 Matrix4x4 MakeZAxisBillboard(const Matrix4x4& cameraMatrix) {
@@ -806,5 +500,5 @@ Matrix4x4 MakeZAxisBillboard(const Matrix4x4& cameraMatrix) {
 	Vector3 camX = Vector3::Cross(camY, { 0, 0, 1 }).Normalize();
 	Vector3 camZ = Vector3::Cross(camX, camY);
 	Vector3 cam = (camX, camY, camZ);
-	return MakeAffineMatrix(Vector3::One(), cam, {});
+	return Cx::Math::MakeAffineMatrix(Vector3::One(), cam, {});
 }

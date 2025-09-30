@@ -15,6 +15,8 @@
 #include <externals/imgui/imgui.h>
 #include <externals/imgui/ImGuiFileDialog.h>
 
+#include "Engine/Foundation/Utility/Func/CxUtils.h"
+
 FxEmitter::FxEmitter() {
 	ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
 	// マテリアルの初期化
@@ -106,9 +108,9 @@ void FxEmitter::Update(float deltaTime) {
 		fx.age += deltaTime;
 		if (fx.age >= fx.lifetime) fx.alive = false;
 
-		Matrix4x4 uvTransformMatrix = MakeScaleMatrix(Vector3(fx.uvTransform.scale.x, fx.uvTransform.scale.y, 1.0f));
-		uvTransformMatrix = Matrix4x4::Multiply(uvTransformMatrix, MakeRotateZMatrix(fx.uvTransform.rotate));
-		uvTransformMatrix = Matrix4x4::Multiply(uvTransformMatrix, MakeTranslateMatrix(Vector3(fx.uvTransform.translate.x, fx.uvTransform.translate.y, 0.0f)));
+		Matrix4x4 uvTransformMatrix = Cx::Math::MakeScaleMatrix(Vector3(fx.uvTransform.scale.x, fx.uvTransform.scale.y, 1.0f));
+		uvTransformMatrix = Matrix4x4::Multiply(uvTransformMatrix, Cx::Math::MakeRotateZMatrix(fx.uvTransform.rotate));
+		uvTransformMatrix = Matrix4x4::Multiply(uvTransformMatrix, Cx::Math::MakeTranslateMatrix(Vector3(fx.uvTransform.translate.x, fx.uvTransform.translate.y, 0.0f)));
 		material_.uvTransform = uvTransformMatrix;
 	}
 
@@ -330,4 +332,3 @@ void FxEmitter::Reset() {
 	isFirstFrame_ = true;
 	hasEmitted_ = false;
 }
-

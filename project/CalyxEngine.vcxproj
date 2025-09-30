@@ -111,6 +111,84 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Foundation\Math\MathUtil.cpp">
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <Optimization>Disabled</Optimization>
+      <SupportJustMyCode>true</SupportJustMyCode>
+      <AssemblerOutput>NoListing</AssemblerOutput>
+      <AssemblerListingLocation>C:\MyProject\MyEngine\project\..\generated\obj\MyEngine\Debug\</AssemblerListingLocation>
+      <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
+      <BrowseInformation>false</BrowseInformation>
+      <BrowseInformationFile>C:\MyProject\MyEngine\project\..\generated\obj\MyEngine\Debug\</BrowseInformationFile>
+      <CompileAs>Default</CompileAs>
+      <ConformanceMode>true</ConformanceMode>
+      <DiagnosticsFormat>Column</DiagnosticsFormat>
+      <DisableLanguageExtensions>false</DisableLanguageExtensions>
+      <ErrorReporting>Prompt</ErrorReporting>
+      <ExpandAttributedSource>false</ExpandAttributedSource>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <EnableASAN>false</EnableASAN>
+      <EnableFuzzer>false</EnableFuzzer>
+      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <EnableVectorLength>NotSet</EnableVectorLength>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <GenerateModuleDependencies>false</GenerateModuleDependencies>
+      <GenerateSourceDependencies>false</GenerateSourceDependencies>
+      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>Default</LanguageStandard_C>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ModuleDependenciesFile>C:\MyProject\MyEngine\project\..\generated\obj\MyEngine\Debug\</ModuleDependenciesFile>
+      <ModuleOutputFile>C:\MyProject\MyEngine\project\..\generated\obj\MyEngine\Debug\</ModuleOutputFile>
+      <OmitDefaultLibName>false</OmitDefaultLibName>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <ObjectFileName>C:\MyProject\MyEngine\project\..\generated\obj\MyEngine\Debug\</ObjectFileName>
+      <CallingConvention>Cdecl</CallingConvention>
+      <ProgramDataBaseFileName>C:\MyProject\MyEngine\project\..\generated\obj\MyEngine\Debug\vc143.pdb</ProgramDataBaseFileName>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>C:\MyProject\MyEngine\project\..\generated\obj\MyEngine\Debug\MyEngine.pch</PrecompiledHeaderOutputFile>
+      <PreprocessToFile>false</PreprocessToFile>
+      <PreprocessKeepComments>false</PreprocessKeepComments>
+      <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
+      <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+      <ShowIncludes>false</ShowIncludes>
+      <SourceDependenciesFile>C:\MyProject\MyEngine\project\..\generated\obj\MyEngine\Debug\</SourceDependenciesFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <SmallerTypeCheck>false</SmallerTypeCheck>
+      <SpectreMitigation>false</SpectreMitigation>
+      <StructMemberAlignment>Default</StructMemberAlignment>
+      <TrackerLogDirectory>C:\MyProject\MyEngine\project\..\generated\obj\MyEngine\Debug\MyEngine.tlog\</TrackerLogDirectory>
+      <TranslateIncludes>false</TranslateIncludes>
+      <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <UseFullPaths>true</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <XMLDocumentationFileName>C:\MyProject\MyEngine\project\..\generated\obj\MyEngine\Debug\</XMLDocumentationFileName>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <IntelJCCErratum>false</IntelJCCErratum>
+      <BuildStlModules>false</BuildStlModules>
+      <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
+      <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
+      <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
+      <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;_UNICODE;UNICODE;</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalOptions>/utf-8 </AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>C:\MyProject\MyEngine\project\;C:\MyProject\MyEngine\project\externals;C:\MyProject\MyEngine\project\externals\DirectXTex;C:\MyProject\MyEngine\project\externals\assimp\include;</AdditionalIncludeDirectories>
+      <LinkCompiled>true</LinkCompiled>
+    </ClCompile>
     <ClCompile Include="Game\3dObject\Actor\Bullet\EnemyBullet\EnemyHomingBullet.cpp" />
     <ClCompile Include="Game\Battle\Shooting\Pattern\PatternAimedNWay.cpp" />
     <ClCompile Include="Game\Battle\Shooting\Shooter\HomingBullet\EnemyHomingBulletShooter.cpp" />
@@ -254,7 +332,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Application\UI\GUI\ImGuiManager.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\ConvertString\ConvertString.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Func\DxFunc.cpp" />
-    <ClCompile Include="Engine\Foundation\Utility\Func\MathFunc.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Func\MyFunc.cpp" />
     <ClCompile Include="Engine\Renderer\Primitive\PrimitiveDrawer.cpp" />
     <ClCompile Include="Engine\Foundation\Math\Matrix4x4.cpp" />
@@ -335,6 +412,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\3dObject\Actor\Boss\Service\RailProgressBossSpawnService.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Foundation\Math\MathUtil.h" />
+    <ClInclude Include="Engine\Foundation\Utility\Func\Fwd.h" />
     <ClInclude Include="Engine\Objects\3D\Details\BillboardParams.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\EnemyBullet\EnemyHomingBullet.h" />
     <ClInclude Include="Game\Battle\Shooting\Details\AimProvider.h" />
@@ -542,7 +621,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Application\UI\GUI\ImGuiManager.h" />
     <ClInclude Include="Engine\Foundation\Utility\ConvertString\ConvertString.h" />
     <ClInclude Include="Engine\Foundation\Utility\Func\DxFunc.h" />
-    <ClInclude Include="Engine\Foundation\Utility\Func\MathFunc.h" />
     <ClInclude Include="Engine\Foundation\Utility\Func\MyFunc.h" />
     <ClInclude Include="Engine\Renderer\Primitive\PrimitiveDrawer.h" />
     <ClInclude Include="Engine\Foundation\Utility\Random\Random.h" />
@@ -843,6 +921,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Engine\Foundation\Utility\Func\CxUtils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

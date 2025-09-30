@@ -8,13 +8,14 @@
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
+#include <Engine/Foundation/Utility/Func/CxUtils.h>
 
 // externals
 #include <externals/imgui/imgui.h>
 
 // C++
-#include <algorithm>  // std::clamp
-#include <numbers>    // std::numbers::pi
+#include <algorithm>
+#include <numbers>
 
 DebugCamera::DebugCamera(const std::string& name)
 	: BaseCamera(),
@@ -44,13 +45,13 @@ void DebugCamera::AlwaysUpdate(float dt){
 		// orbitAngle_.x = 水平方向(Yaw)
 		// orbitAngle_.y = 垂直方向(Pitch)
 		// 距離と角度からカメラの相対座標を計算
-		Matrix4x4 matRotYaw = MakeRotateYMatrix(orbitAngle_.x);
-		Matrix4x4 matRotPitch = MakeRotateXMatrix(orbitAngle_.y);
+		Matrix4x4 matRotYaw =Cx::Math::MakeRotateYMatrix(orbitAngle_.x);
+		Matrix4x4 matRotPitch = Cx::Math::MakeRotateXMatrix(orbitAngle_.y);
 		Matrix4x4 matRot = Matrix4x4::Multiply(matRotPitch, matRotYaw);
 
 		// Z方向に距離分だけオフセットし、回転行列を適用
 		Vector3 offset(0.0f, 0.0f, -distance_);
-		offset = TransformNormal(offset, matRot);
+		offset = Cx::Math::TransformNormal(offset, matRot);
 
 		// カメラの位置 = ターゲット + オフセット
 		worldTransform_.translation = target_ + offset;
@@ -141,8 +142,8 @@ void DebugCamera::Move(){
 		}
 
 		// カメラの回転行列を作成
-		Matrix4x4 matRotYaw = MakeRotateYMatrix(orbitAngle_.x);
-		Matrix4x4 matRotPitch = MakeRotateXMatrix(orbitAngle_.y);
+		Matrix4x4 matRotYaw = Cx::Math::MakeRotateYMatrix(orbitAngle_.x);
+		Matrix4x4 matRotPitch = Cx::Math::MakeRotateXMatrix(orbitAngle_.y);
 		Matrix4x4 matRot = Matrix4x4::Multiply(matRotPitch, matRotYaw);
 
 		// パン方向の移動量 (画面右が-X, 上が+Yになるよう調整)
@@ -153,7 +154,7 @@ void DebugCamera::Move(){
 		);
 
 		// ローカル移動量をワールド座標に変換
-		Vector3 worldMove = TransformNormal(localMove, matRot);
+		Vector3 worldMove = Cx::Math::TransformNormal(localMove, matRot);
 
 		// ターゲット位置を移動
 		target_ += worldMove;

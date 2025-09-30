@@ -1,5 +1,6 @@
 #include "ModelManager.h"
 
+#include <Engine/Foundation/Utility/Func/CxUtils.h>
 #include <Engine/Graphics/Buffer/DxVertexBuffer.h>
 #include <Engine/Graphics/Buffer/DxIndexBuffer.h>
 #include <Engine/Graphics/Pipeline/PipelineDesc/Input/VertexLayout.h>
@@ -241,7 +242,7 @@ ModelData ModelManager::LoadModelFile(const std::string& directoryPath, const st
 			bindPoseMatrixAssimp.Decompose(scale, rotate, translate);
 
 			Matrix4x4 bindPoseMatrix =
-				MakeAffineMatrix({ scale.x,scale.y,scale.z }, { rotate.x,-rotate.y,-rotate.z,rotate.w }, { -translate.x,translate.y,translate.z });
+				Cx::Math::MakeAffineMatrix({ scale.x,scale.y,scale.z }, { rotate.x,-rotate.y,-rotate.z,rotate.w }, { -translate.x,translate.y,translate.z });
 			jointWeightData.inverseBindPoseMatrix = Matrix4x4::Inverse(bindPoseMatrix);
 
 			for (uint32_t weightIndex = 0; weightIndex < bone->mNumWeights; ++weightIndex) {
