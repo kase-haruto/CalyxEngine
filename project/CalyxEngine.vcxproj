@@ -332,7 +332,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Application\UI\GUI\ImGuiManager.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\ConvertString\ConvertString.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Func\DxFunc.cpp" />
-    <ClCompile Include="Engine\Foundation\Utility\Func\MathFunc.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Func\MyFunc.cpp" />
     <ClCompile Include="Engine\Renderer\Primitive\PrimitiveDrawer.cpp" />
     <ClCompile Include="Engine\Foundation\Math\Matrix4x4.cpp" />
@@ -622,7 +621,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Application\UI\GUI\ImGuiManager.h" />
     <ClInclude Include="Engine\Foundation\Utility\ConvertString\ConvertString.h" />
     <ClInclude Include="Engine\Foundation\Utility\Func\DxFunc.h" />
-    <ClInclude Include="Engine\Foundation\Utility\Func\MathFunc.h" />
     <ClInclude Include="Engine\Foundation\Utility\Func\MyFunc.h" />
     <ClInclude Include="Engine\Renderer\Primitive\PrimitiveDrawer.h" />
     <ClInclude Include="Engine\Foundation\Utility\Random\Random.h" />

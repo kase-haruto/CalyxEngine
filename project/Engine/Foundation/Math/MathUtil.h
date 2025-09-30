@@ -22,4 +22,9 @@ float LerpShortAngle(float a, float b, float t) noexcept;
 Vector2 WorldToScreen(const Vector3& worldPos);
 bool WorldToScreen(const Vector3& worldPos, Vector2& outScreenPos);
 Vector3 ScreenToWorld(const Vector2& screenPos, float depthZ);
+
+Vector3 CatmullRomInterpolation(
+	const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& p3, float t);
+
+Vector3 CatmullRomPosition(const std::vector<Vector3>& points, float t);
 }
