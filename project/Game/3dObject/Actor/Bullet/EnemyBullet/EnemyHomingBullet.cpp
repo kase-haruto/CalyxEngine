@@ -50,39 +50,31 @@ namespace {
 
 EnemyHomingBullet::EnemyHomingBullet(const std::string& modelName, const std::string& name)
 	: BaseBullet::BaseBullet(modelName, name) {
-
-	trailFx_ = SceneAPI::Instantiate<ParticleSystemObject>("playerBulletTrail");
-	trailFx_->LoadConfig("Resources/Assets/Configs/Effect/HomingBulletTrail.json");
-
-	shootFx_ = SceneAPI::Instantiate<ParticleSystemObject>("shootFx");
-	shootFx_->LoadConfig("Resources/Assets/Configs/Effect/ShootFx.json");
+	this->SetDrawEnable(true);
+	BaseBullet::SetBlendMode(BlendMode::SUB);
+	model_->SetColor(Vector4(1.0f, 1.0f, 0.0f, 1.0f));
 }
 
-EnemyHomingBullet::~EnemyHomingBullet() {
-	auto ctx = SceneContext::Current();
-	ctx->RemoveEditorObject(trailFx_);
-	ctx->RemoveEditorObject(shootFx_);
-}
+EnemyHomingBullet::~EnemyHomingBullet() {}
 
 void EnemyHomingBullet::ShootInitialize(const Vector3& initPos, const Vector3& velocity) {
 	Vector3 initDir = (velocity.Length() > 0.001f) ? velocity.Normalize() : Vector3(0, 0, 1);
 	BaseBullet::ShootInitialize(initPos, initDir * homingSpeed_);
 	time_ = 0.0f;
-	homingElapsedSec_ = 0.0f; // ★追尾時間リセット
+	homingElapsedSec_ = 0.0f;
 }
 
 void EnemyHomingBullet::Initialize() {
-	auto self = shared_from_this();
-	trailFx_->SetParent(self);
-	shootFx_->SetParent(self);
 
-	// ★コライダ設定はコンストラクタではなくここで（生成順の安全性）
 	collider_->SetType(ColliderType::Type_EnemyAttack);
 	collider_->SetTargetType(ColliderType::Type_Player);
 	collider_->SetOwner(this);
 	if (auto* box = dynamic_cast<BoxCollider*>(collider_.get())) {
 		box->SetSize({ 1.5f, 1.5f, 1.5f });
 	}
+	BaseGameObject::SetTexture("particle.png");
+	BaseGameObject::SetBillboardMode(BillboardMode::Full);
+
 }
 
 void EnemyHomingBullet::OnShot() {}

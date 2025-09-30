@@ -226,6 +226,8 @@ void BaseGameObject::SetCollider(std::unique_ptr<Collider> collider){
 
 Collider* BaseGameObject::GetCollider(){ return collider_.get(); }
 
+void BaseGameObject::SetTexture(const std::string& texName) { model_->SetTex(texName); }
+
 Model* BaseGameObject::GetStaticModel(){
 	return (objectModelType_ == ObjectModelType::ModelType_Static)
 		? static_cast< Model* >(model_.get()) : nullptr;

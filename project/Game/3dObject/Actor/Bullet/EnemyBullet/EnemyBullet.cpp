@@ -30,6 +30,7 @@ EnemyBullet::EnemyBullet(const std::string& modelName, const std::string& name)
 	: BaseBullet::BaseBullet(modelName, name) {
 	collider_->SetType(ColliderType::Type_EnemyAttack);
 	collider_->SetTargetType(ColliderType::Type_Player);
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

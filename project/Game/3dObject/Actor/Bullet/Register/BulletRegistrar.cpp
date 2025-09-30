@@ -33,7 +33,7 @@ namespace BulletRegistrar{
 		//						enemy通常弾
 		//===================================================================*/
 		BulletFactory::Register(BulletID::Enemy_Straight, []{
-			auto bullet = SceneAPI::Instantiate<EnemyBullet>("debugCube.obj", "enemyBullet");
+			auto bullet = SceneAPI::Instantiate<EnemyBullet>("plane.obj", "enemyBullet");
 			bullet->Initialize();
 			return bullet;
 								});
@@ -42,7 +42,7 @@ namespace BulletRegistrar{
 		//						enemyホーミング弾
 		//===================================================================*/
 		BulletFactory::Register(BulletID::Enemy_Homing, [] {
-			auto bullet = SceneAPI::Instantiate<EnemyHomingBullet>("debugCube.obj", "enemyBullet");
+			auto bullet = SceneAPI::Instantiate<EnemyHomingBullet>("plane.obj", "enemyBullet");
 			bullet->Initialize();
 			return bullet;
 		});

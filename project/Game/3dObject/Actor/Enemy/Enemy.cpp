@@ -16,7 +16,6 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 Enemy::Enemy(const std::string& modelName, const std::string objName)
 	: Actor(modelName, objName) {
-	worldTransform_.Initialize();
 	worldTransform_.scale = { 2, 2, 2 };
 
 	moveSpeed_ = Random::Generate<float>(1.0f, 3.0f);

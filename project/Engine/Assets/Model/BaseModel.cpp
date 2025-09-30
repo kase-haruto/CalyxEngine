@@ -61,14 +61,14 @@ void BaseModel::OnModelLoaded() {
 	if (!handle_) {
 		handle_ = TextureManager::GetInstance()->LoadTexture(
 			"Textures/" + modelData_->meshData.material.textureFilePath);
-		textureName_ = "textures/"+ modelData_->meshData.material.textureFilePath;
+		textureName_ = "textures/" + modelData_->meshData.material.textureFilePath;
 		if (!handle_) { // 読み込み失敗・空文字列など
 			handle_ = TextureManager::GetInstance()->LoadTexture("textures/white1x1.png");
 		}
 	}
 
 	// -------- インスタンシングバッファの初期確保 --------
-	if (!instanceBufferCreated_){
+	if (!instanceBufferCreated_) {
 		instanceBufferCapacity_ = 1024; // 初期インスタンス数（適宜調整）
 		instanceBuffer_.Initialize(device, instanceBufferCapacity_);
 		instanceBuffer_.CreateSrv(device);
@@ -285,11 +285,15 @@ bool BaseModel::LoadTextureByGuid(const Guid& g) {
 	return true;
 }
 
-const std::optional<ModelData>& BaseModel::GetModelData() const{
+const std::optional<ModelData>& BaseModel::GetModelData() const {
 	return modelData_;
 }
 
 // ======================================= renderer 専用 ==========================================
+
+void BaseModel::SetTex(const std::string& name) {
+	handle_ = TextureManager::GetInstance()->LoadTexture("textures/"+name);
+}
 
 void BaseModel::EnsureInstanceCapacity(ID3D12Device* device, UINT needCount) {
 	if (!instanceBufferCreated_) {
@@ -341,30 +345,30 @@ void BaseModel::BindMaterialCB(ID3D12GraphicsCommandList* cmdList) const {
 
 
 // ================= billboard (VS:t1) =================
-void BaseModel::EnsureBillboardCapacity(ID3D12Device * device, UINT needCount) {
+void BaseModel::EnsureBillboardCapacity(ID3D12Device* device, UINT needCount) {
 	if (!billboardBuffer_.IsValid()) {
 		billboardCapacity_ = std::max<UINT>(needCount, 256u);
 		billboardBuffer_.Initialize(device, billboardCapacity_); // Upload
 		billboardBuffer_.CreateSrv(device);                      // VS:t1
 		return;
-		
+
 	}
-	 if (needCount <= billboardCapacity_) return;
+	if (needCount <= billboardCapacity_) return;
 	billboardCapacity_ = std::max<UINT>(needCount, billboardCapacity_ * 2);
 	billboardBuffer_.ReleaseSrv();
 	billboardBuffer_.Reset();
 	billboardBuffer_.Initialize(device, billboardCapacity_);
 	billboardBuffer_.CreateSrv(device);
-	
+
 }
 
-void BaseModel::UploadBillboardParams(const std::vector<GpuBillboardParams>&params) {
+void BaseModel::UploadBillboardParams(const std::vector<GpuBillboardParams>& params) {
 	if (!billboardBuffer_.IsValid() || params.empty()) return;
 	std::memcpy(billboardBuffer_.Data(), params.data(), sizeof(GpuBillboardParams) * params.size());
-	
+
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE BaseModel::GetBillboardSrv() const {
 	return billboardBuffer_.GetGpuSrvHandle();
-	
+
 }

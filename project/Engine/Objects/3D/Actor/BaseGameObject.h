@@ -66,7 +66,9 @@ public:
 	BaseModel* GetModel() const{ return model_.get(); }
 	void SetCollider(std::unique_ptr<Collider> collider);
 	Collider* GetCollider();
+	void SetTexture(const std::string& texName);
 	void SetUvScale(const Vector2& scale){ model_->uvTransform.scale = scale; }
+	void SetBlendMode(BlendMode mode) { model_->SetBlendMode(mode); }
 
 	ObjectModelType GetModelType() const{ return objectModelType_; }
 

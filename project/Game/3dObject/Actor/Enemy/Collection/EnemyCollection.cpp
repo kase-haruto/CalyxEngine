@@ -11,8 +11,6 @@
 EnemyCollection::EnemyCollection(const std::string& name){ SetName(name,ObjectType::GameObject); }
 
 void EnemyCollection::Initialize(){
-	worldTransform_.Initialize();
-	//CreateSpawners();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

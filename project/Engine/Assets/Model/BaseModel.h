@@ -51,11 +51,13 @@ public:
 
 	//--------- accessor -----------------------------------------------------
 	BlendMode GetBlendMode() const { return blendMode_; }
+	void SetBlendMode(BlendMode mode) { blendMode_ = mode; }
 	const std::optional<ModelData>& GetModelData()const;
 	const Vector4& GetColor() const { return materialData_.color; }
 	void SetColor(const Vector4& color) { materialData_.color = color; }
 	void SetIsDrawEnable(bool drawEnable) { isDrawEnable_ = drawEnable; }
 	bool GetIsDrawEnable()const { return isDrawEnable_; }
+	void SetTex(const std::string& name);
 
 	//--------- render用（レンダラーから呼ぶ軽量API） -----------------------------
 	void EnsureInstanceCapacity(ID3D12Device* device, UINT needCount);
