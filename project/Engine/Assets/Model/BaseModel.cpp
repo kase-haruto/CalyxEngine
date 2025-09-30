@@ -17,9 +17,7 @@
 //external
 #include "externals/imgui/imgui.h"
 #include <algorithm>
-#include <cstring>
 #include <Engine/Objects/3D/Details/BillboardParams.h>
-
 #include "Engine/Foundation/Utility/Func/CxUtils.h"
 
 const std::string BaseModel::directoryPath_ = "Resource/models";

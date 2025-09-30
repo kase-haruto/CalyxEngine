@@ -2,19 +2,20 @@
 
 #include "IShootPattern.h"
 
-class PatternAimedNWay :
-	public IShootPattern {
+class PatternSpiral
+	: public IShootPattern {
 public:
 	//===================================================================*/
 	//					 public methods
 	//===================================================================*/
-	void Generate(const PatternInput& in, PatternOutput& out) override ;
-
+	void Advance(float dt);
+	void Generate(const PatternInput& in, PatternOutput& out) override;
+	
 public:
 	//===================================================================*/
-	//					 private methods
+	//					 public methods
 	//===================================================================*/
-	int nWay = 7;
-	float spreadDeg = 30.0f; // 総角度
-	float centerDeg = 0.0f;  // 中心オフセット（スイープ用）
+	float angularSpeedDegPerSec = 360.0f;
+	float tipDeg = 15.0f;
+	float angleDeg = 0.0f;
 };

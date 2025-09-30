@@ -6,7 +6,7 @@ EnemyShootingControllerSink::EnemyShootingControllerSink(EnemyShootingController
 	ctrl_(ctrl){}
 
 void EnemyShootingControllerSink::Submit(const ShootBatch& batch){
-	if (!ctrl_)return;;
+	if (!ctrl_)return;
 
 	for (auto& s : batch.shots){ ctrl_->RequestShoot(s.origin,s.dirN); }
 }

@@ -190,9 +190,14 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
     <ClCompile Include="Game\3dObject\Actor\Bullet\EnemyBullet\EnemyHomingBullet.cpp" />
+    <ClCompile Include="Game\Battle\Shooting\Details\FireScheduler.cpp" />
     <ClCompile Include="Game\Battle\Shooting\Pattern\PatternAimedNWay.cpp" />
     <ClCompile Include="Game\Battle\Shooting\Pattern\PatternCircleRing.cpp" />
+    <ClCompile Include="Game\Battle\Shooting\Pattern\PatternCommon.cpp" />
+    <ClCompile Include="Game\Battle\Shooting\Pattern\PatternSpiral.cpp" />
+    <ClCompile Include="Game\Battle\Shooting\Pattern\PatternSweepFan.cpp" />
     <ClCompile Include="Game\Battle\Shooting\Shooter\HomingBullet\EnemyHomingBulletShooter.cpp" />
+    <ClCompile Include="Game\Battle\Shooting\ShootingController\BulletEmitter.cpp" />
     <ClCompile Include="Game\Battle\Shooting\ShootingController\EnemyShootingControllerSink.cpp" />
     <ClCompile Include="Game\Installer\Enemy\EnemyEngagementInstaller.cpp" />
     <ClCompile Include="Game\Runtime\Engagement\EnemyEngagementService.cpp" />
@@ -418,12 +423,17 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Objects\3D\Details\BillboardParams.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\EnemyBullet\EnemyHomingBullet.h" />
     <ClInclude Include="Game\Battle\Shooting\Details\AimProvider.h" />
+    <ClInclude Include="Game\Battle\Shooting\Details\FireScheduler.h" />
     <ClInclude Include="Game\Battle\Shooting\Details\IShootSink.h" />
     <ClInclude Include="Game\Battle\Shooting\Details\ShootTypes.h" />
     <ClInclude Include="Game\Battle\Shooting\Pattern\IShootPattern.h" />
     <ClInclude Include="Game\Battle\Shooting\Pattern\PatternAimedNWay.h" />
     <ClInclude Include="Game\Battle\Shooting\Pattern\PatternCircleRing.h" />
+    <ClInclude Include="Game\Battle\Shooting\Pattern\PatternCommon.h" />
+    <ClInclude Include="Game\Battle\Shooting\Pattern\PatternSpiral.h" />
+    <ClInclude Include="Game\Battle\Shooting\Pattern\PatternSweepFan.h" />
     <ClInclude Include="Game\Battle\Shooting\Shooter\HomingBullet\EnemyHomingBulletShooter.h" />
+    <ClInclude Include="Game\Battle\Shooting\ShootingController\BulletEmitter.h" />
     <ClInclude Include="Game\Battle\Shooting\ShootingController\EnemyShootingControllerSink.h" />
     <ClInclude Include="Game\Installer\Enemy\EnemyEngagementInstaller.h" />
     <ClInclude Include="Game\Runtime\Engagement\EnemyEngagementService.h" />
