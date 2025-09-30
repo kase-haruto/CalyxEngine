@@ -19,6 +19,7 @@ namespace Math{
 
 	[[nodiscard]] float Lerp(float a, float b, float t) noexcept;
 	[[nodiscard]] float LerpShortAngle(float a, float b, float t) noexcept;
+	[[nodiscard]] float ToRadians(float v) noexcept;
 
 	[[nodiscard]] Vector2 WorldToScreen(const Vector3& worldPos);
 	[[nodiscard]] Vector3 ScreenToWorld(const Vector2& screenPos, float depthZ);

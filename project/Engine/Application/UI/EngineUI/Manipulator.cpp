@@ -2,7 +2,6 @@
 /* ========================================================================
 /* include space
 /* ===================================================================== */
-#include <Engine/Application/Input/Input.h>
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Editor/SceneObjectEditor.h>
 #include <Engine/Foundation/Math/Matrix4x4.h>
@@ -11,7 +10,7 @@
 #include <Engine/System/Command/Manager/CommandManager.h>
 #include <Engine/Scene/Context/SceneContext.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
-#include <cmath>
+#include <Engine/Foundation/Utility/Func/CxUtils.h>
 
 Manipulator::Manipulator(){
 	iconTranslate_.texture = reinterpret_cast< ImTextureID >(TextureManager::GetInstance()->LoadTexture("UI/Tool/translate.png").ptr);
@@ -90,11 +89,10 @@ void Manipulator::Update(){
 		target_->translation = {pos[0], pos[1], pos[2]};
 		target_->scale = {scl[0], scl[1], scl[2]};
 
-		constexpr float DegToRad = 3.14159265f / 180.0f;
 		Vector3 eulerRad = {
-			rotDeg[0] * DegToRad,
-			rotDeg[1] * DegToRad,
-			rotDeg[2] * DegToRad
+			Cx::Math::ToRadians( rotDeg[0]),
+			Cx::Math::ToRadians( rotDeg[1]),
+			Cx::Math::ToRadians( rotDeg[2])
 		};
 		target_->rotation = Quaternion::EulerToQuaternion(eulerRad);
 		target_->rotationSource = RotationSource::Quaternion;

@@ -1,13 +1,13 @@
 #include "EnemyHomingBullet.h"
 
-#include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
 #include <Engine/Objects/Collider/BoxCollider.h>
+
 #include <algorithm>
 #include <cmath>
+#include <numbers>
 
 namespace {
-	constexpr float kPI = 3.14159265358979323846f;
 
 	inline float Dot(const Vector3& a, const Vector3& b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
 	inline Vector3 Cross(const Vector3& a, const Vector3& b) {
@@ -105,7 +105,7 @@ void EnemyHomingBullet::Update(float dt) {
 			Vector3 desiredDir = NormalizeSafe(tgtPos - selfPos);
 			Vector3 currentDir = NormalizeSafe(velocity_, Vector3{ 0,0,1 });
 
-			const float maxRad = (rotateSpeed_ * kPI / 180.0f) * dt;
+			const float maxRad = (rotateSpeed_ * static_cast<float>(std::numbers::pi) / 180.0f) * dt;
 			Vector3 clampedDir = TurnTowards(currentDir, desiredDir, maxRad);
 			Vector3 newDir = NormalizeSafe(currentDir * (1.0f - guidance_) + clampedDir * guidance_, currentDir);
 
