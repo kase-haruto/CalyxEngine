@@ -3,6 +3,7 @@
 /* include space
 /* ===================================================================== */
 #include <Engine/Foundation/Math/Matrix4x4.h>
+#include <Engine/Foundation/Math/Vector4.h>
 #include <Engine/Foundation/Math/Quaternion.h>
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 
@@ -280,5 +281,3 @@ const float& Vector3::operator[](int index) const{
 Vector3 operator-(float scalar, const Vector3& vec){
 	return Vector3(vec.x - scalar, vec.y - scalar, vec.z - scalar);
 }
-
-

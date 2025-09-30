@@ -4,11 +4,12 @@
 /* ===================================================================== */
 #include <Engine/Renderer/Mesh/VertexData.h>
 #include <Engine/Assets/Texture/TextureManager.h>
-#include <Engine/Objects/Transform/TransformationMatrix.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
 
 /* math */
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
+#include <Engine/Foundation/Utility/Func/CxUtils.h>
+
 /* c++ */
 #include <stdint.h>
 /* externals */
@@ -77,9 +78,9 @@ void Sprite::ShowGui() {
 }
 
 void Sprite::UpdateMatrix() {
-	Matrix4x4 matWorld = MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
+	Matrix4x4 matWorld = Cx::Math::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
 	Matrix4x4 matView = Matrix4x4::MakeIdentity();
-	Matrix4x4 matProjection = MakeOrthographicMatrix(0.0f, 0.0f, 1280.0f, 720.0f, 0.0f, 100.0f);
+	Matrix4x4 matProjection = Cx::Math::MakeOrthographicMatrix(0.0f, 0.0f, 1280.0f, 720.0f, 0.0f, 100.0f);
 	Matrix4x4 wvpMatrix = Matrix4x4::Multiply(matWorld, Matrix4x4::Multiply(matView, matProjection));
 	*transformData = wvpMatrix;
 }
@@ -88,9 +89,9 @@ void Sprite::UpdateTransform() {
 	///===================================================
 	/// UV Transform
 	///===================================================
-	Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransform.scale);
-	uvTransformMatrix = Matrix4x4::Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransform.rotate.z));
-	uvTransformMatrix = Matrix4x4::Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransform.translate));
+	Matrix4x4 uvTransformMatrix = Cx::Math::MakeScaleMatrix(uvTransform.scale);
+	uvTransformMatrix = Matrix4x4::Multiply(uvTransformMatrix, Cx::Math::MakeRotateZMatrix(uvTransform.rotate.z));
+	uvTransformMatrix = Matrix4x4::Multiply(uvTransformMatrix, Cx::Math::MakeTranslateMatrix(uvTransform.translate));
 	materialData_->uvTransform = uvTransformMatrix;
 }
 

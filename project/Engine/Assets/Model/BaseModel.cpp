@@ -20,6 +20,8 @@
 #include <cstring>
 #include <Engine/Objects/3D/Details/BillboardParams.h>
 
+#include "Engine/Foundation/Utility/Func/CxUtils.h"
+
 const std::string BaseModel::directoryPath_ = "Resource/models";
 
 void BaseModel::Update(float deltaTime) {
@@ -36,9 +38,9 @@ void BaseModel::Update(float deltaTime) {
 		UpdateTexture(deltaTime);
 
 		// UV transform を行列化 
-		Matrix4x4 uvTransformMatrix = MakeScaleMatrix(Vector3(uvTransform.scale.x, uvTransform.scale.y, 1.0f));
-		uvTransformMatrix = Matrix4x4::Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransform.rotate));
-		uvTransformMatrix = Matrix4x4::Multiply(uvTransformMatrix, MakeTranslateMatrix(Vector3(uvTransform.translate.x, uvTransform.translate.y, 0.0f)));
+		Matrix4x4 uvTransformMatrix = Cx::Math::MakeScaleMatrix(Vector3(uvTransform.scale.x, uvTransform.scale.y, 1.0f));
+		uvTransformMatrix = Matrix4x4::Multiply(uvTransformMatrix, Cx::Math::MakeRotateZMatrix(uvTransform.rotate));
+		uvTransformMatrix = Matrix4x4::Multiply(uvTransformMatrix, Cx::Math::MakeTranslateMatrix(Vector3(uvTransform.translate.x, uvTransform.translate.y, 0.0f)));
 
 		materialData_.uvTransform = uvTransformMatrix;
 		materialBuffer_.TransferData(materialData_);

@@ -15,8 +15,9 @@
 #include <externals/imgui/imgui.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 #endif
-#include <filesystem> 
+#include <filesystem>
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
+#include <Engine/Foundation/Utility/Func/CxUtils.h>
 
 /* =====================================================================
    ctor – 最初に読み込んだファイルを初期アニメとして登録
@@ -262,7 +263,7 @@ void AnimationModel::SkinningStep() {
 		joint.transform.scale = S;
 
 		// local → skeleton space
-		joint.localMatrix = MakeAffineMatrix(S, R, P);
+		joint.localMatrix = Cx::Math::MakeAffineMatrix(S, R, P);
 		joint.skeletonSpaceMatrix =
 			joint.parent ?
 			(joint.localMatrix *
@@ -285,7 +286,7 @@ void AnimationModel::SkinningStep() {
 void AnimationModel::SkeletonUpdate() {
 	// すべてのjointを更新
 	for (Joint& joint : modelData_->skeleton.joints) {
-		joint.localMatrix = MakeAffineMatrix(joint.transform.scale, joint.transform.rotate, joint.transform.translate);
+		joint.localMatrix = Cx::Math::MakeAffineMatrix(joint.transform.scale, joint.transform.rotate, joint.transform.translate);
 
 		// 親の行列がある場合は、親の行列を掛け合わせる
 		if (joint.parent) {
