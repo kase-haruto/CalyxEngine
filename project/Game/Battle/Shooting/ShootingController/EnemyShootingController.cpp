@@ -28,6 +28,7 @@ void EnemyShootingController::Update(float dt) {
 		return;
 	}
 
+	// ベース側で shootCooldown_ の減算などを実施
 	BaseShootingController::Update(dt);
 }
 
@@ -36,7 +37,10 @@ void EnemyShootingController::Update(float dt) {
 /////////////////////////////////////////////////////////////////////////////////////////
 void EnemyShootingController::RequestShoot(const Vector3& pos, const Vector3& dir) {
 	if (!gameplayEngaged_) return;
-	if (shootCooldown_ >= 0) return;
+
+	if (!externalRateControl_) {
+		if (shootCooldown_ >= 0.0f) return;
+	}
 
 	if (auto ctx = SceneContext::Current()) {
 		if (auto player = ctx->FindFirst<Player>()) {
@@ -45,7 +49,10 @@ void EnemyShootingController::RequestShoot(const Vector3& pos, const Vector3& di
 	}
 
 	homingShooter->Shoot(pos, dir);
-	shootCooldown_ = GetInterval();
+
+	if (!externalRateControl_) {
+		shootCooldown_ = GetInterval();
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

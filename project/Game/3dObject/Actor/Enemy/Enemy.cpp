@@ -7,7 +7,6 @@
 #include <Engine/Scene/Context/SceneContext.h>
 #include <numbers>
 
-// ★ エミッタ構成パーツは cpp 側で include（ヘッダを軽く保つ）
 #include <Game/Battle/Shooting/ShootingController/EnemyShootingControllerSink.h>
 #include <Game/Battle/Shooting/Details/AimProvider.h>
 #include <Game/Battle/Shooting/Pattern/PatternSweepFan.h>

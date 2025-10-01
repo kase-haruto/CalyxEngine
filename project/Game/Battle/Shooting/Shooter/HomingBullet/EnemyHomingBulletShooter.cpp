@@ -10,26 +10,29 @@ EnemyHomingBulletShooter::EnemyHomingBulletShooter(BulletContainer* container, B
 	: container_(container), id_(id) {}
 
 void EnemyHomingBulletShooter::Shoot(const Vector3& origin,
-									 [[maybe_unused]] const Vector3& direction) {
+									 const Vector3& direction) {
 	if (!container_ || !target_) return;
 
 	auto* enemyContainer = dynamic_cast<EnemyBulletContainer*>(container_);
 	if (!enemyContainer) return;
 
-
 	auto bullet = BulletFactory::Create(id_);
-
 	bullet->SetScale(Vector3(0.3f, 0.3f, 0.3f));
-	Vector3 toTarget = target_->GetWorldPosition() - origin;
-	if (toTarget.Length() > 0.001f) {
-		toTarget.Normalize();
-	} else {
-		toTarget = Vector3(0, 0, 1);
-	}
-	bullet->ShootInitialize(origin, toTarget);
 
+	Vector3 initDir = direction;
+	if (initDir.LengthSquared() <= 1e-6f) {
+		initDir = target_->GetWorldPosition() - origin; // フォールバック
+	}
+	if (initDir.LengthSquared() > 1e-6f) initDir = initDir.Normalize();
+	else                                  initDir = Vector3(0, 0, 1);
+
+	bullet->ShootInitialize(origin, initDir);
+
+	// 追尾は弾側ロジックに委ねる（ここではターゲットだけ渡す）
 	if (auto* homing = dynamic_cast<EnemyHomingBullet*>(bullet.get())) {
 		homing->SetTarget(target_.get());
+		// homing->SetInitialLockTime(0.12f);
+		// homing->SetActivationDelay(0.06f);
+		// homing->SetMaxTurnRateRad(2.0f);
 	}
-	enemyContainer->AddBullet(id_, bullet);
 }
