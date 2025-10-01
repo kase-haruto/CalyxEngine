@@ -51,7 +51,7 @@ namespace {
 EnemyHomingBullet::EnemyHomingBullet(const std::string& modelName, const std::string& name)
 	: BaseBullet::BaseBullet(modelName, name) {
 	this->SetDrawEnable(true);
-	BaseBullet::SetBlendMode(BlendMode::SUB);
+	BaseBullet::SetBlendMode(BlendMode::ADD);
 	model_->SetColor(Vector4(1.0f, 1.0f, 0.0f, 1.0f));
 }
 

@@ -28,11 +28,12 @@ void EnemyHomingBulletShooter::Shoot(const Vector3& origin,
 
 	bullet->ShootInitialize(origin, initDir);
 
-	// 追尾は弾側ロジックに委ねる（ここではターゲットだけ渡す）
 	if (auto* homing = dynamic_cast<EnemyHomingBullet*>(bullet.get())) {
 		homing->SetTarget(target_.get());
 		// homing->SetInitialLockTime(0.12f);
 		// homing->SetActivationDelay(0.06f);
 		// homing->SetMaxTurnRateRad(2.0f);
 	}
+
+	enemyContainer->AddBullet(id_, bullet);
 }
