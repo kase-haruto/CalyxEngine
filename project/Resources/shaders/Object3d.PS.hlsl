@@ -87,7 +87,7 @@ void ComputeDirectionalLight(
 	if(gMaterial.enableLighting == 0) {
 		float NdotL = saturate(dot(normal, -gDirectionalLight.direction));
 		float halfLambert = pow(NdotL * 0.5f + 0.5f, 2.0f);
-		diffuse = textureColor * gDirectionalLight.color.rgb * halfLambert * gDirectionalLight.intensity;
+		diffuse = textureColor * gDirectionalLight.color.rgb * NdotL * gDirectionalLight.intensity;
 
 		float3 halfVec = normalize(-gDirectionalLight.direction + toEye);
 		float NdotH = saturate(dot(normal, halfVec));
@@ -118,8 +118,7 @@ void ComputePointLight(
 	float attenuation = pow(saturate(1.0f - distance / gPointLight.radius), gPointLight.decay);
 
 	float NdotL = saturate(dot(normal, -lightDir));
-	diffuse = gMaterial.color.rgb * gPointLight.color.rgb * textureColor * NdotL * gPointLight.intensity * attenuation;
-
+	diffuse = diffuse = textureColor * gPointLight.color.rgb * NdotL * gPointLight.intensity * attenuation;
 	float3 halfVec = normalize(-lightDir + toEye);
 	float NdotH = saturate(dot(normal, halfVec));
 	specular = gPointLight.color.rgb * pow(NdotH, gMaterial.shiniess) * gPointLight.intensity * attenuation;
@@ -134,16 +133,16 @@ PixelShaderOutput main(VertexShaderOutput input) {
     //================= UV 変換 & テクスチャ取得 =================
 	float4 transformedUV = mul(float4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform);
 	float4 textureColor = gTexture.Sample(gSampler, transformedUV.xy);
+	float3 albedo = gMaterial.color.rgb * textureColor.rgb;
 
 	float3 normal = normalize(input.normal);
 	float3 toEye = normalize(cameraPosition - input.worldPosition);
 
     //================= ライト計算 =================
 	float3 directionalDiffuse, directionalSpecular;
-	ComputeDirectionalLight(normal, toEye, textureColor.rgb, directionalDiffuse, directionalSpecular);
-
+	ComputeDirectionalLight(normal, toEye, albedo, directionalDiffuse, directionalSpecular);
 	float3 pointDiffuse, pointSpecular;
-	ComputePointLight(normal, toEye, input.worldPosition, textureColor.rgb, pointDiffuse, pointSpecular);
+	ComputePointLight(normal, toEye, input.worldPosition, albedo, pointDiffuse, pointSpecular);
 
     //================= 照明合成 =================
 	float3 litColor = directionalDiffuse + directionalSpecular + pointDiffuse + pointSpecular;
@@ -157,7 +156,7 @@ PixelShaderOutput main(VertexShaderOutput input) {
         float3 reflectDir = reflect(viewDir, normal);
 
 		// mipLevel を roughness に応じて指定
-        const float maxMipLevel = 7.0f; // ← キューブマップに応じて調整（最大mip数）
+        const float maxMipLevel = 7.0f;
         float mipLevel = saturate(gMaterial.roughness) * maxMipLevel;
 
         float3 envColor = gEnvironmentMap.SampleLevel(gSampler, reflectDir, mipLevel).rgb;

@@ -16,7 +16,7 @@ public:
 	//          public method
 	//===================================================================*/
 	EnemyShootingController(std::unique_ptr<BulletContainer> container);
-	~EnemyShootingController() override ;
+	~EnemyShootingController() override;
 
 	//--------- main ------------------------------------------------------
 	void Update(float dt) override;
@@ -26,6 +26,8 @@ public:
 	float GetInterval() const override;
 	void SetBulletContainer(std::unique_ptr<BulletContainer> container);
 
+	void SetExternalRateControl(bool v) { externalRateControl_ = v; }
+
 	void SetGameplayEngaged(bool v) { gameplayEngaged_ = v; }
 	bool IsGameplayEngaged() const { return gameplayEngaged_; }
 
@@ -34,7 +36,8 @@ private:
 	std::unique_ptr<EnemyHomingBulletShooter> homingShooter = nullptr;
 	std::unique_ptr<BulletContainer> bulletContainer_ = nullptr;
 
-	float kInterval = 1.5f;
+	float kInterval = 0.7f;
 
 	bool gameplayEngaged_ = true;
+	bool externalRateControl_ = true; //< trueなら内部クールダウン無効
 };

@@ -15,7 +15,7 @@
 #include<string>
 
 struct Material{
-	Vector4 color;
+	Vector4 color = { 1, 0, 1, 1 };;
 	int32_t enableLighting;
 	float pad[3];
 	Matrix4x4 uvTransform;

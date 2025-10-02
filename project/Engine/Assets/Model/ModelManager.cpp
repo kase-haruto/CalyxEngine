@@ -170,6 +170,7 @@ void ModelManager::SetOnModelLoadedCallback(std::function<void(const std::string
 //----------------------------------------------------------------------------
 void ModelManager::StartUpLoad() {
 	LoadModel("terrain.obj");
+	LoadModel("enemyBullet.obj");
 	LoadModel("player.gltf");
 	LoadModel("ghost.obj");
 	LoadModel("largeBuilding.obj");

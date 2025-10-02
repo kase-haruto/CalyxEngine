@@ -18,6 +18,7 @@ Vector4 MultiplyMatrixVector(const Matrix4x4&, const Vector4&) noexcept;
 
 float Lerp(float a, float b, float t) noexcept;
 float LerpShortAngle(float a, float b, float t) noexcept;
+float ToRadians(float) noexcept;
 
 Vector2 WorldToScreen(const Vector3& worldPos);
 bool WorldToScreen(const Vector3& worldPos, Vector2& outScreenPos);
