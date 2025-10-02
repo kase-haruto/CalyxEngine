@@ -43,7 +43,6 @@ void Material::ShowImGui(){
 		}
 		ImGui::EndCombo();
 	}
-	color = { 1.0f,0.0f,0.0f,1.0f };
 	// color
 	ImGui::SeparatorText("Color");
 	GuiCmd::ColorEdit4("color", color);
@@ -87,6 +86,6 @@ void Material::ShowImGui(MaterialConfig& config){
 		GuiCmd::SliderFloat("enviromentCoefficient", config.enviromentCoefficient, 0.0f, 1.0f);
 		GuiCmd::SliderFloat("roughness", roughness, 0.0f, 1.0f);
 	}
-
+	ApplyConfig(config);
 }
 
