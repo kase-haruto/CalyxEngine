@@ -2,6 +2,7 @@
 
 #include <Engine/Scene/Utility/SceneUtility.h>
 #include <Engine/Objects/Collider/BoxCollider.h>
+#include <Engine/Foundation/Utility/Random/Random.h>
 
 #include <algorithm>
 #include <cmath>
@@ -51,7 +52,6 @@ namespace {
 EnemyHomingBullet::EnemyHomingBullet(const std::string& modelName, const std::string& name)
 	: BaseBullet::BaseBullet(modelName, name) {
 	this->SetDrawEnable(true);
-	model_->SetColor(Vector4(1.0f, 1.0f, 0.0f, 1.0f));
 }
 
 EnemyHomingBullet::~EnemyHomingBullet() {}

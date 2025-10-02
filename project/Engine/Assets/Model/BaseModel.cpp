@@ -309,7 +309,7 @@ void BaseModel::EnsureInstanceCapacity(ID3D12Device* device, UINT needCount) {
 	instanceBufferCapacity_ = std::max<UINT>(needCount, instanceBufferCapacity_ * 2);
 	instanceBuffer_.ReleaseSrv();
 	instanceBuffer_.Reset();
-	instanceBuffer_.Initialize(device, instanceBufferCapacity_); // Upload
+	instanceBuffer_.Initialize(device, instanceBufferCapacity_);
 	instanceBuffer_.CreateSrv(device);
 }
 
@@ -359,7 +359,6 @@ void BaseModel::EnsureBillboardCapacity(ID3D12Device* device, UINT needCount) {
 	billboardBuffer_.Reset();
 	billboardBuffer_.Initialize(device, billboardCapacity_);
 	billboardBuffer_.CreateSrv(device);
-
 }
 
 void BaseModel::UploadBillboardParams(const std::vector<GpuBillboardParams>& params) {
