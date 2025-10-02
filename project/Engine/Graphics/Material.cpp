@@ -43,7 +43,7 @@ void Material::ShowImGui(){
 		}
 		ImGui::EndCombo();
 	}
-
+	color = { 1.0f,0.0f,0.0f,1.0f };
 	// color
 	ImGui::SeparatorText("Color");
 	GuiCmd::ColorEdit4("color", color);
@@ -76,7 +76,6 @@ void Material::ShowImGui(MaterialConfig& config){
 		}
 		ImGui::EndCombo();
 	}
-
 	// color
 	ImGui::SeparatorText("Color");
 	GuiCmd::ColorEdit4("color", config.color);
