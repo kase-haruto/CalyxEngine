@@ -7,6 +7,9 @@
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Foundation/Math/Vector4.h>
 
+// engine 
+#include <Engine/Lighting/LightData.h>
+
 // data
 #include <Data/Engine/Configs/Scene/Objects/Material/MaterialConfig.h>
 
@@ -15,8 +18,9 @@
 #include<string>
 
 struct Material{
+
 	Vector4 color = { 1, 1, 1, 1 };;
-	int32_t enableLighting;
+	int32_t lightingMode = LightingMode::HalfLambert;
 	float pad[3];
 	Matrix4x4 uvTransform;
 	float shininess;
@@ -29,6 +33,8 @@ struct Material{
 	MaterialConfig ExtractConfig() const;
 	void ShowImGui();
 	void ShowImGui(MaterialConfig& config);
+
+
 };
 
 struct ParticleMaterial{

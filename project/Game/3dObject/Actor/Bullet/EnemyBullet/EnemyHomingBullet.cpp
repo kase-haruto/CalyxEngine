@@ -71,9 +71,15 @@ void EnemyHomingBullet::Initialize() {
 	if (auto* box = dynamic_cast<BoxCollider*>(collider_.get())) {
 		box->SetSize({ 1.5f, 1.5f, 1.5f });
 	}
-	BaseGameObject::SetTexture("particle.png");
+	BaseGameObject::SetTexture("white1x1.png");
 	BaseGameObject::SetBillboardMode(BillboardMode::Full);
 
+	//ライティングなし
+	BaseGameObject::SetLightingMode(LightingMode::UnlitColor);
+
+	Vector3 rgb = Random::GenerateVector3(0.0f,1.0f);
+	Vector3 color{ rgb };
+	model_->SetColor(color);
 }
 
 void EnemyHomingBullet::OnShot() {}

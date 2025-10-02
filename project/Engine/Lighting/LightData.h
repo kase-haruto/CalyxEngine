@@ -11,4 +11,5 @@ enum LightingMode{
 	Lambert,
 	specularReflection,
 	NoLighting,
+	UnlitColor
 };

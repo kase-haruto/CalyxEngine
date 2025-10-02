@@ -7,7 +7,7 @@
 
 void Material::ApplyConfig(const MaterialConfig& config){
 	color = config.color;
-	enableLighting = config.enableLighting;
+	lightingMode = config.enableLighting;
 	shininess = config.shininess;
 	enviromentCoefficient = config.enviromentCoefficient;
 	isReflect = config.isReflect;
@@ -17,7 +17,7 @@ void Material::ApplyConfig(const MaterialConfig& config){
 MaterialConfig Material::ExtractConfig() const{
 	MaterialConfig config;
 	config.color = color;
-	config.enableLighting = enableLighting;
+	config.enableLighting = lightingMode;
 	config.shininess = shininess;
 	config.enviromentCoefficient = enviromentCoefficient;
 	config.isReflect = isReflect;
@@ -29,15 +29,24 @@ void Material::ShowImGui(){
 	// lighting
 	ImGui::SeparatorText("Lighting");
 	GuiCmd::DragFloat("shininess", shininess, 0.01f);
-	const char* lightingModes[] = {"Half-Lambert", "Lambert", "SpecularReflection", "No Lighting"};
-	if (ImGui::BeginCombo("Lighting Mode", lightingModes[currentLightingMode_])){
-		for (int n = 0; n < IM_ARRAYSIZE(lightingModes); n++){
+	currentLightingMode_ = std::clamp(lightingMode, 0, 4);
+
+	static const char* lightingModes[] = {
+		"Half-Lambert",
+		"Lambert",
+		"SpecularReflection",
+		"No Lighting (Black)",
+		"Unlit Color"
+	};
+
+	if (ImGui::BeginCombo("Lighting Mode", lightingModes[currentLightingMode_])) {
+		for (int n = 0; n < IM_ARRAYSIZE(lightingModes); ++n) {
 			bool is_selected = (currentLightingMode_ == n);
-			if (ImGui::Selectable(lightingModes[n], is_selected)){
+			if (ImGui::Selectable(lightingModes[n], is_selected)) {
 				currentLightingMode_ = n;
-				enableLighting = currentLightingMode_;
+				lightingMode = n;
 			}
-			if (is_selected){
+			if (is_selected) {
 				ImGui::SetItemDefaultFocus();
 			}
 		}
