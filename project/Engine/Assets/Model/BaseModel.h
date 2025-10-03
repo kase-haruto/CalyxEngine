@@ -58,6 +58,7 @@ public:
 	void SetIsDrawEnable(bool drawEnable) { isDrawEnable_ = drawEnable; }
 	bool GetIsDrawEnable()const { return isDrawEnable_; }
 	void SetTex(const std::string& name);
+	void SetLightingMode(LightingMode mode) { materialData_.lightingMode = mode; }
 
 	//--------- render用（レンダラーから呼ぶ軽量API） -----------------------------
 	void EnsureInstanceCapacity(ID3D12Device* device, UINT needCount);

@@ -22,20 +22,20 @@ namespace Installers {
 		svc->SetMaxEngageDistance(p.maxEngageDist);
 		svc->EnableLineOfSight(p.useLOS);
 
-		// --- プレイヤー判定（LOS用：hit.hitObject が Player か？） ---
+		// --- プレイヤー判定 ---
 		svc->SetLineOfSightPredicate([](void* obj) -> bool {
 			auto* so = static_cast<SceneObject*>(obj);
 			return (so && so->GetObjectTypeName() == "Player");
 			// 列挙/タグ/レイヤがあるなら、そちらでの判定に置き換えてOK
 		});
 
-		// --- レイキャスト候補（環境 + プレイヤー）---
+		// --- レイキャスト候補 ---
 		svc->SetRaycastCandidatesProvider(
 			[&ctx](std::vector<SceneObject*>& out, const SceneObject* ignore) {
 			out.clear();
 			out.reserve(256);
 
-			// ① 環境（地形/壁など）= BaseGameObject を列挙して追加
+			// 環境（地形/壁など）= BaseGameObject を列挙して追加
 			if (auto* lib = ctx.GetObjectLibrary()) {
 				auto env = lib->FindByType<BaseGameObject>();
 				for (auto& sp : env) {

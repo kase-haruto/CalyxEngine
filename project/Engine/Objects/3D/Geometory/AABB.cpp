@@ -34,6 +34,10 @@ void AABB::UpdateUI(std::string lavel) {
 Vector3 AABB::GetMin()const { return min_; }
 Vector3 AABB::GetMax()const { return max_; }
 
+Vector3 AABB::GetCenter() const {
+	return (min_ + max_) * 0.5f;
+}
+
 AABB AABB::Transform(const Matrix4x4& mat) const{
 	// AABBの8頂点を作成
 	Vector3 corners[8] = {

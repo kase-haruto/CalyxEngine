@@ -5,15 +5,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // マテリアル
 struct Material {
-    float4 color;
-    int enableLighting;
-    float4x4 uvTransform;
-    float shiniess;
+	float4 color;
+	int enableLighting;
+	float4x4 uvTransform;
+	float shiniess;
 
-	// enviromentMap
-    bool isReflect;
-    float enviromentCoefficient;
-    float roughness; // 0.0（鏡のような反射）～ 1.0（完全にぼけた反射）
+    // enviromentMap
+	bool isReflect;
+	float enviromentCoefficient;
+	float roughness; // 0.0（鏡のような反射）～ 1.0（完全にぼけた反射）
 };
 
 // ディレクショナルライト
@@ -77,25 +77,32 @@ float3 ApplyToneMappingAndGamma(float3 color, float exposure) {
 void ComputeDirectionalLight(
     float3 normal,
     float3 toEye,
-    float3 textureColor,
+    float3 albedo,
     out float3 diffuse,
     out float3 specular
 ) {
 	diffuse = float3(0.0f, 0.0f, 0.0f);
 	specular = float3(0.0f, 0.0f, 0.0f);
 
-	if(gMaterial.enableLighting == 0) {
-		float NdotL = saturate(dot(normal, -gDirectionalLight.direction));
-		float halfLambert = pow(NdotL * 0.5f + 0.5f, 2.0f);
-		diffuse = textureColor * gDirectionalLight.color.rgb * NdotL * gDirectionalLight.intensity;
+	float3 L = -gDirectionalLight.direction; // 表面→光源
+	float NdotL = saturate(dot(normal, L));
 
-		float3 halfVec = normalize(-gDirectionalLight.direction + toEye);
-		float NdotH = saturate(dot(normal, halfVec));
+	if(gMaterial.enableLighting == 0) {
+        // Half-Lambert
+		float halfLambert = pow(NdotL * 0.5f + 0.5f, 2.0f);
+		diffuse = albedo * gDirectionalLight.color.rgb * halfLambert * gDirectionalLight.intensity;
+
+		float3 H = normalize(L + toEye);
+		float NdotH = saturate(dot(normal, H));
 		specular = gDirectionalLight.color.rgb * pow(NdotH, gMaterial.shiniess) * gDirectionalLight.intensity;
 	}
 	else if(gMaterial.enableLighting == 1) {
-		float NdotL = saturate(dot(normal, -gDirectionalLight.direction));
-		diffuse = gMaterial.color.rgb * textureColor * gDirectionalLight.color.rgb * NdotL * gDirectionalLight.intensity;
+        // Lambert（※ここで material を二重に掛けないように albedo をそのまま使う）
+		diffuse = albedo * gDirectionalLight.color.rgb * NdotL * gDirectionalLight.intensity;
+
+		float3 H = normalize(L + toEye);
+		float NdotH = saturate(dot(normal, H));
+		specular = gDirectionalLight.color.rgb * pow(NdotH, gMaterial.shiniess) * gDirectionalLight.intensity;
 	}
 }
 
@@ -106,7 +113,7 @@ void ComputePointLight(
     float3 normal,
     float3 toEye,
     float3 worldPos,
-    float3 textureColor,
+    float3 albedo, // ← 呼び出し側から “material×texture” を渡す
     out float3 diffuse,
     out float3 specular
 ) {
@@ -117,8 +124,9 @@ void ComputePointLight(
 	float distance = length(gPointLight.position - worldPos);
 	float attenuation = pow(saturate(1.0f - distance / gPointLight.radius), gPointLight.decay);
 
-	float NdotL = saturate(dot(normal, -lightDir));
-	diffuse = diffuse = textureColor * gPointLight.color.rgb * NdotL * gPointLight.intensity * attenuation;
+	float NdotL = saturate(dot(normal, -lightDir)); // lightDir は表面→光源の負
+	diffuse = albedo * gPointLight.color.rgb * NdotL * gPointLight.intensity * attenuation;
+
 	float3 halfVec = normalize(-lightDir + toEye);
 	float NdotH = saturate(dot(normal, halfVec));
 	specular = gPointLight.color.rgb * pow(NdotH, gMaterial.shiniess) * gPointLight.intensity * attenuation;
@@ -133,7 +141,20 @@ PixelShaderOutput main(VertexShaderOutput input) {
     //================= UV 変換 & テクスチャ取得 =================
 	float4 transformedUV = mul(float4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform);
 	float4 textureColor = gTexture.Sample(gSampler, transformedUV.xy);
+
+    // アルベド：テクスチャ × マテリアル色
 	float3 albedo = gMaterial.color.rgb * textureColor.rgb;
+	float alpha = gMaterial.color.a * textureColor.a;
+
+    //================= アンリット =================
+    // enableLighting == 4 を “Unlit Color”（ライティング無視でそのままの色）
+	if(gMaterial.enableLighting == 4) {
+		if(alpha <= 0.01f)
+			discard;
+        // そのままの色を出す（トーンマップ/ガンマも無視したい要望に合わせて素通し）
+		output.color = float4(albedo, alpha);
+		return output;
+	}
 
 	float3 normal = normalize(input.normal);
 	float3 toEye = normalize(cameraPosition - input.worldPosition);
@@ -141,30 +162,29 @@ PixelShaderOutput main(VertexShaderOutput input) {
     //================= ライト計算 =================
 	float3 directionalDiffuse, directionalSpecular;
 	ComputeDirectionalLight(normal, toEye, albedo, directionalDiffuse, directionalSpecular);
+
 	float3 pointDiffuse, pointSpecular;
 	ComputePointLight(normal, toEye, input.worldPosition, albedo, pointDiffuse, pointSpecular);
 
     //================= 照明合成 =================
 	float3 litColor = directionalDiffuse + directionalSpecular + pointDiffuse + pointSpecular;
 
+    //================= 環境マップ =================
+	if(gMaterial.isReflect) {
+		float3 viewDir = normalize(input.worldPosition - cameraPosition);
+		float3 reflectDir = reflect(viewDir, normal);
+
+		const float maxMipLevel = 7.0f;
+		float mipLevel = saturate(gMaterial.roughness) * maxMipLevel;
+
+		float3 envColor = gEnvironmentMap.SampleLevel(gSampler, reflectDir, mipLevel).rgb;
+		litColor += envColor * gMaterial.enviromentCoefficient;
+	}
+
     //================= トーンマッピング + ガンマ補正 =================
 	float3 finalColor = ApplyToneMappingAndGamma(litColor, 1.0f);
 
-    //================= 環境マップ =================
-    if (gMaterial.isReflect) {
-        float3 viewDir = normalize(input.worldPosition - cameraPosition);
-        float3 reflectDir = reflect(viewDir, normal);
-
-		// mipLevel を roughness に応じて指定
-        const float maxMipLevel = 7.0f;
-        float mipLevel = saturate(gMaterial.roughness) * maxMipLevel;
-
-        float3 envColor = gEnvironmentMap.SampleLevel(gSampler, reflectDir, mipLevel).rgb;
-        finalColor += envColor * gMaterial.enviromentCoefficient;
-    }
-
     //================= アルファ計算 =================
-	float alpha = gMaterial.color.a * textureColor.a;
 	if(alpha <= 0.01f)
 		discard;
 

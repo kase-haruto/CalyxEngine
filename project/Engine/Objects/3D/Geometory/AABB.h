@@ -24,6 +24,8 @@ public:
 	Vector3 GetMin()const;
 	Vector3 GetMax()const;
 
+	Vector3 GetCenter() const;
+
 	AABB Transform(const Matrix4x4& mat) const;
 
 public:

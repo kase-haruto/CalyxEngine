@@ -46,4 +46,6 @@ private:
 	// 最初の homingDurationSec_ 秒だけ追尾
 	float homingDurationSec_ = 1.0f;
 	float homingElapsedSec_ = 0.0f;
+
+	Vector3 baseScale_{ 1.0f, 1.0f, 1.0f };
 };

@@ -419,7 +419,7 @@ void AnimationModel::CreateMaterialBuffer() {
 	// materialData_ に初期値をセットする
 	materialData_.color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	materialData_.shininess = 20.0f;
-	materialData_.enableLighting = HalfLambert;
+	materialData_.lightingMode =LightingMode::HalfLambert;
 	materialData_.uvTransform = Matrix4x4::MakeIdentity();
 
 	// materialData_ の内容で GPU に転送

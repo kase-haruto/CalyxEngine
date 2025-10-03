@@ -89,7 +89,7 @@ void Model::CreateMaterialBuffer() {
 	// materialData_ に初期値をセットする
 	materialData_.color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	materialData_.shininess = 20.0f;
-	materialData_.enableLighting = HalfLambert;
+	materialData_.lightingMode =LightingMode::HalfLambert;
 	materialData_.uvTransform = Matrix4x4::MakeIdentity();
 
 	materialBuffer_.Initialize(device);

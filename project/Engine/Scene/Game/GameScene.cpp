@@ -59,7 +59,7 @@ void GameScene::Initialize() {
 		}
 	}
 
-	// UI（攻撃状態）
+	// UI
 	attackSprite_ = std::make_unique<Sprite>("Textures/attackUI.png");
 	{
 		Vector2 attackUiPos = Vector2(1280.0f * 0.5f, 720.0f - 100.0f);
@@ -68,7 +68,7 @@ void GameScene::Initialize() {
 		attackSprite_->SetAnchorPoint(Vector2(0.5f, 0.5f));
 	}
 
-	// プレイヤー基本セットアップ（Move/Install など）
+	// プレイヤー基本セットアップ
 	{
 		auto player = sceneContext_->FindFirst<Player>();
 		PlayerInstaller installer;
@@ -91,7 +91,7 @@ void GameScene::Initialize() {
 	enemyEngagement_ = Installers::InstallEnemyEngagement(*sceneContext_, params);
 
 	if (enemyEngagement_) {
-		enemyEngagement_->SetDirectory(enemyBinding_->GetDirectory()); // ★ここが肝
+		enemyEngagement_->SetDirectory(enemyBinding_->GetDirectory());
 	}
 }
 
@@ -99,7 +99,6 @@ void GameScene::Initialize() {
 //  更新
 /////////////////////////////////////////////////////////////////////////////////////////
 void GameScene::Update([[maybe_unused]] float dt) {
-	// ランタイム配線サービスの更新
 	if (enemyBinding_)    enemyBinding_->Update(*sceneContext_, dt);
 	if (enemyEngagement_) enemyEngagement_->Update(dt);
 
@@ -110,7 +109,7 @@ void GameScene::Update([[maybe_unused]] float dt) {
 	if (attackSprite_) attackSprite_->Update();
 
 	// 衝突判定
-	//CollisionManager::GetInstance()->UpdateCollisionAllCollider();
+	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
