@@ -405,7 +405,7 @@ std::vector<Sprite*> Player::GetAllSprites(){
 }
 
 const Vector3 Player::GetCenterPos() const{
-	const Vector3 offset = {0.0f, 1.5f, 0.0f};
+	const Vector3 offset = {0.0f, 3.0f, 0.0f};
 	Vector3 worldPos = Vector3::Transform(offset,worldTransform_.matrix.world);
 	return worldPos;
 }
