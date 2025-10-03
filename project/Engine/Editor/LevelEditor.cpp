@@ -17,7 +17,7 @@
 using namespace EngineEdit;
 
 void LevelEditor::Initialize() {
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(DEVELOP)
 	// 各パネルの初期化
 	hierarchy_ = std::make_unique<HierarchyPanel>();
 	editor_ = std::make_unique<EditorPanel>();
@@ -139,7 +139,7 @@ void LevelEditor::Initialize() {
 }
 
 void LevelEditor::Update() {
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(DEVELOP)
 	SceneContext* ctx = SceneContext::Current();
 
 	const ImGuiIO& io = ImGui::GetIO();

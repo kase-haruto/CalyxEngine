@@ -11,10 +11,11 @@
 #include <Engine/Lighting/LightData.h>
 #include <Engine/Renderer/Mesh/VertexData.h>
 
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(DEVELOP)
 #include <externals/imgui/imgui.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 #endif
+
 #include <filesystem>
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <Engine/Foundation/Utility/Func/CxUtils.h>

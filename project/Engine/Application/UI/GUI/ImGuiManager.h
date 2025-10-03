@@ -1,8 +1,6 @@
 #pragma once
 
-#ifdef _DEBUG
-#include<externals/imgui/imgui.h>
-#endif // _DEBUG
+
 
 #include<d3d12.h>
 #include <wrl.h>

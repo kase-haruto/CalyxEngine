@@ -19,7 +19,7 @@
 //						初期化
 ////////////////////////////////////////////////////////////////////////////////////////////
 void EngineUICore::Initialize() {
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(DEVELOP)
 	panelController_ = std::make_unique<PanelController>();
 	panelController_->Initialize();
 
@@ -40,7 +40,7 @@ void EngineUICore::Update() {
 //						レンダリング
 ////////////////////////////////////////////////////////////////////////////////////////////
 void EngineUICore::Render() {
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(DEVELOP)
 
 	levelEditor_->RenderMenu();
 
@@ -85,7 +85,7 @@ void EngineUICore::SetCameraForViewport(BaseCamera* mainCamera, BaseCamera* debu
 //						パネル追加
 ////////////////////////////////////////////////////////////////////////////////////////////
 void EngineUICore::AddPanel([[maybe_unused]] std::unique_ptr<IEngineUI> panel) {
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(DEVELOP)
 	const std::string& name = panel->GetPanelName(); // 先に名前を取り出す
 	panelController_->RegisterPanel(name, std::move(panel));
 #endif // _DEBUG

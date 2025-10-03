@@ -167,7 +167,7 @@ void SceneManager::Draw(ID3D12GraphicsCommandList* cmd, PipelineService* pso){
 	auto* offscreen = dx_->GetRenderTargetCollection().Get("Offscreen");
 	DrawForRenderTarget(offscreen,cmd,pso);
 
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(DEVELOP)
 	if (auto* ctx = ActiveCtx()) ctx->MakeCurrent();
 	CameraManager::SetTypeStatic(CameraType::Debug);
 	auto* debugRT = dx_->GetRenderTargetCollection().Get("DebugView");
