@@ -169,7 +169,7 @@ void PrimitiveDrawer::DrawSphere(const Vector3& center, const float radius, int 
 }
 
 void PrimitiveDrawer::Render(){
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(DEVELOP)
 	if (lineDrawer_) {
 		lineDrawer_->Render();
 	}
