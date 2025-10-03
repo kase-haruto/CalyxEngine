@@ -17,6 +17,9 @@ Global
 		Debug|ARM64 = Debug|ARM64
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
+		Develop|ARM64 = Develop|ARM64
+		Develop|x64 = Develop|x64
+		Develop|x86 = Develop|x86
 		Profile|ARM64 = Profile|ARM64
 		Profile|x64 = Profile|x64
 		Profile|x86 = Profile|x86
@@ -31,6 +34,12 @@ Global
 		{617C498E-EFD4-4F5D-B046-31568C2BA625}.Debug|x64.Build.0 = Debug|x64
 		{617C498E-EFD4-4F5D-B046-31568C2BA625}.Debug|x86.ActiveCfg = Debug|x64
 		{617C498E-EFD4-4F5D-B046-31568C2BA625}.Debug|x86.Build.0 = Debug|x64
+		{617C498E-EFD4-4F5D-B046-31568C2BA625}.Develop|ARM64.ActiveCfg = Develop|x64
+		{617C498E-EFD4-4F5D-B046-31568C2BA625}.Develop|ARM64.Build.0 = Develop|x64
+		{617C498E-EFD4-4F5D-B046-31568C2BA625}.Develop|x64.ActiveCfg = Develop|x64
+		{617C498E-EFD4-4F5D-B046-31568C2BA625}.Develop|x64.Build.0 = Develop|x64
+		{617C498E-EFD4-4F5D-B046-31568C2BA625}.Develop|x86.ActiveCfg = Develop|x64
+		{617C498E-EFD4-4F5D-B046-31568C2BA625}.Develop|x86.Build.0 = Develop|x64
 		{617C498E-EFD4-4F5D-B046-31568C2BA625}.Profile|ARM64.ActiveCfg = Release|x64
 		{617C498E-EFD4-4F5D-B046-31568C2BA625}.Profile|ARM64.Build.0 = Release|x64
 		{617C498E-EFD4-4F5D-B046-31568C2BA625}.Profile|x64.ActiveCfg = Release|x64
@@ -49,6 +58,12 @@ Global
 		{371B9FA9-4C90-4AC6-A123-ACED756D6C77}.Debug|x64.Build.0 = Debug|x64
 		{371B9FA9-4C90-4AC6-A123-ACED756D6C77}.Debug|x86.ActiveCfg = Debug|Win32
 		{371B9FA9-4C90-4AC6-A123-ACED756D6C77}.Debug|x86.Build.0 = Debug|Win32
+		{371B9FA9-4C90-4AC6-A123-ACED756D6C77}.Develop|ARM64.ActiveCfg = Profile|ARM64
+		{371B9FA9-4C90-4AC6-A123-ACED756D6C77}.Develop|ARM64.Build.0 = Profile|ARM64
+		{371B9FA9-4C90-4AC6-A123-ACED756D6C77}.Develop|x64.ActiveCfg = Release|x64
+		{371B9FA9-4C90-4AC6-A123-ACED756D6C77}.Develop|x64.Build.0 = Release|x64
+		{371B9FA9-4C90-4AC6-A123-ACED756D6C77}.Develop|x86.ActiveCfg = Profile|Win32
+		{371B9FA9-4C90-4AC6-A123-ACED756D6C77}.Develop|x86.Build.0 = Profile|Win32
 		{371B9FA9-4C90-4AC6-A123-ACED756D6C77}.Profile|ARM64.ActiveCfg = Profile|ARM64
 		{371B9FA9-4C90-4AC6-A123-ACED756D6C77}.Profile|ARM64.Build.0 = Profile|ARM64
 		{371B9FA9-4C90-4AC6-A123-ACED756D6C77}.Profile|x64.ActiveCfg = Profile|x64

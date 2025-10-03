@@ -54,8 +54,7 @@ void EngineController::Initialize(HINSTANCE hInstance){
 	auto* ppEditor = dynamic_cast< PostProcessEditor* >(editorCollection_->GetEditor(EditorCollection::EditorType::PostProcess));
 	ppEditor->SetPostEffectCollection(system_->GetPostProcessCollection());
 
-#ifdef _DEBUG
-	engineUICore_->GetEditorPanel()->AddEditor(ppEditor);
+#if defined(_DEBUG) || defined(DEVELOP)
 	engineUICore_->SetCameraForViewport(CameraManager::GetMain3d(), CameraManager::GetDebug());
 #endif
 
