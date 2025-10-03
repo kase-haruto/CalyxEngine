@@ -76,10 +76,14 @@ void EnemyHomingBullet::Initialize() {
 
 	//ライティングなし
 	BaseGameObject::SetLightingMode(LightingMode::UnlitColor);
-
+	BaseGameObject::SetBlendMode(BlendMode::ADD);
 	Vector3 rgb = Random::GenerateVector3(0.0f,1.0f);
 	Vector3 color{ rgb };
 	model_->SetColor(color);
+
+	baseScale_ = worldTransform_.scale;
+
+	moveSpeed_ = 25.0f;
 }
 
 void EnemyHomingBullet::OnShot() {}
@@ -117,6 +121,18 @@ void EnemyHomingBullet::Update(float dt) {
 			velocity_ = newDir * homingSpeed_;
 		}
 	}
+
+	// --- scale をうねうね揺らす ---
+	const float freq = 6.0f;
+	const float amp = 0.3f;
+
+	float sx = 1.0f + amp * std::sin(time_ * freq);
+	float sy = 1.0f + amp * std::cos(time_ * freq);
+
+	// 基準スケールに対して相対的に揺らす
+	worldTransform_.scale.x = baseScale_.x * sx;
+	worldTransform_.scale.y = baseScale_.y * sy;
+	worldTransform_.scale.z = baseScale_.z;
 
 	BaseBullet::Update(dt);
 }
