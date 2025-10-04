@@ -29,8 +29,10 @@ public:
 
 	//--------- accessor ------------------------------------------------
 	std::string_view GetTypeName() const override { return "BossSpawner"; }
-
+	bool WasSpawned() const;
+	void SetPlayerTransform(const WorldTransform* tf){playerTransform_ = tf;}
 private:
+	const WorldTransform* playerTransform_;
 	std::weak_ptr<Boss> wBoss_;
 	ConfigurableObject<SceneObjectConfig> config_;
 };
