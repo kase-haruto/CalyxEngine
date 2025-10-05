@@ -7,6 +7,8 @@
 
 // externals
 #include <externals/imgui/imgui.h>
+#include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
+
 // c++
 #include <sstream> 
 
@@ -28,15 +30,15 @@ BoxCollider::BoxCollider(bool isEnuble):
 Collider::Collider(isEnuble){}
 
 void BoxCollider::Update(const Vector3& position, const Quaternion& rotate) {
-	// 位置を更新
-	shape_.center = position;
+	// 回転込みでローカルオフセットをワールドへ
+	const Vector3 worldOffset =Quaternion::RotateVector(offset_,rotate); // ← 回転を適用
+	shape_.center = position + worldOffset;
 	shape_.rotate = rotate;
 }
 
-
 void BoxCollider::Draw() {
 
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(DEVELOP)
 	if (isDraw_ && isCollisionEnabled_) {
 		PrimitiveDrawer::GetInstance()->DrawOBB(shape_.center, shape_.rotate, shape_.size, color_);
 	}
@@ -49,6 +51,7 @@ void BoxCollider::ShowGui() {
 	if(ImGui::CollapsingHeader("Collider")) {
 		Collider::ShowGui();
 		if (!isCollisionEnabled_) return;
+		GuiCmd::DragFloat3("offset", offset_);
 		ImGui::DragFloat3("Size", &shape_.size.x, 0.1f, 0.0f, 10.0f);
 	}
 }

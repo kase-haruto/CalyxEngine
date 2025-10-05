@@ -110,6 +110,26 @@ void GameScene::Update([[maybe_unused]] float dt) {
 
 	// 衝突判定
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
+
+
+	auto player = wPlayer_.lock();
+	wBoss_ = sceneContext_->FindFirst<Boss>();
+	auto boss = wBoss_.lock();
+
+	// ===== クリア／ゲームオーバー条件 =====
+	// プレイヤーの死亡
+	if (player && !player->GetIsAlive()) {
+		transitionRequestor_->RequestSceneChange(SceneType::TITLE);
+		return;
+	}
+
+	// ボスは「存在しているときだけ」死亡判定
+	// 未スポーン or 破棄済みのフレームでは何もしない
+	if (boss && !boss->GetIsAlive()) {
+		// ここでクリア演出→シーン遷移など
+		transitionRequestor_->RequestSceneChange(SceneType::TITLE);
+		return;
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

@@ -1,7 +1,7 @@
 #include "Boss.h"
 
 #include <Engine/Objects/Collider/BoxCollider.h>
-
+#include <Engine/Foundation/Utility/Func/CxUtils.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		ctor
@@ -17,10 +17,10 @@ Boss::Boss(const std::string& modelName, const std::string objName)
 	collider_->SetType(ColliderType::Type_Enemy);
 	collider_->SetTargetType(ColliderType::Type_PlayerAttack);
 	collider_->SetOwner(this);
-	if (auto* box = dynamic_cast<BoxCollider*>(collider_.get())) { box->SetSize({3, 3, 3}); }
+	if (auto* box = dynamic_cast<BoxCollider*>(collider_.get())) { box->SetSize({ 30, 30, 30 }); }
 	collider_->SetIsDrawCollider(false);
 
-	life_ = 1;
+	life_ = 10;
 	waveAmplitude_ = 2.0f;
 	waveSpeed_ = Random::Generate<float>(1.0f, 3.0f);
 }
@@ -97,7 +97,7 @@ void Boss::Update(float dt) {
 		float t = std::clamp(deathTimer_ / deathLength_, 0.0f, 1.0f);
 
 		// 0→90° まで補間して倒れる
-		float rad = Deg2Rad(90.0f * t);
+		float rad = Cx::Math::ToRadians(90.0f * t);
 		worldTransform_.rotation =
 			Quaternion::MakeRotateAxisQuaternion(deathRotateAxis_, rad);
 

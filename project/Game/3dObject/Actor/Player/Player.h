@@ -31,6 +31,7 @@ public:
 
 	/* mainFunc =========================================================== */
 	void Initialize() override;
+	void RefreshLifeUI();
 	void Update(float dt) override;
 	void Draw(ID3D12GraphicsCommandList* cmdList) override;
 	void DerivativeGui() override;

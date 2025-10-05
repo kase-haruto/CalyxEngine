@@ -31,6 +31,7 @@ Player::Player(const std::string& modelName,
 	worldTransform_.translation = {0.0f, 0.0f, 10.0f};
 	worldTransform_.scale = {1.5f, 1.5f, 1.5f};
 
+	
 }
 
 /* ======================================================================================
@@ -47,6 +48,13 @@ void Player::Initialize(){
 	reticleTransform_.parent = &ctx->GetCameraMgr()->GetMain3d()->GetWorldTransform();
 	reticleTransform_.translation = Vector3(0.0f,0.0f,50.0f);
 
+	collider_->SetType(ColliderType::Type_Player);
+	collider_->SetTargetType(ColliderType::Type_PlayerAttack);
+	collider_->SetOwner(this);
+	collider_->SetIsDrawCollider(true);
+	if (auto* box = dynamic_cast<BoxCollider*>(collider_.get())) { box->SetSize({ 3, 3, 3 }); }
+	collider_->SetOffset({ 0.0f,-2.0f,0.0f });
+	collider_->SetCollisionEnabled(true);
 
 	life_ = 10;
 
@@ -56,7 +64,7 @@ void Player::Initialize(){
 		Vector2 pos = {100.0f * i + 30.0f, 50.0f};
 		lifeSprite_[i]->Initialize(pos,{64.0f, 64.0f});
 	}
-
+	RefreshLifeUI();
 
 	//spriteの初期化
 	size_t spriteCount = reticleSprites_.size();
@@ -72,6 +80,13 @@ void Player::Initialize(){
 		reticleSprites_[i]->SetAnchorPoint(Vector2(0.5f,0.5f));
 	}
 
+}
+
+void Player::RefreshLifeUI() {
+	for (size_t i = 0; i < lifeSprite_.size(); ++i) {
+		const bool on = (i < static_cast<size_t>(life_));
+		lifeSprite_[i]->SetIsVisible(on);
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -142,6 +157,10 @@ void Player::Update(float dt){
 
 		lockOnSprites_[i]->Update();
 		++i;
+	}
+
+	if (life_<=0) {
+		isAlive_ = false;
 	}
 }
 
@@ -253,10 +272,12 @@ void Player::Start(){
 ///////////////////////////////////////////////////////////////////////////////////
 void Player::OnCollisionEnter(Collider* other) {
 	if (!other) return;
-	if (collider_->GetTargetType() != other->GetType()) return;
+	if (other->GetType() != ColliderType::Type_EnemyAttack) return;
 
 	if (life_ >= 1) {
 		life_--;
+		//lifeSpriteを適用
+		RefreshLifeUI();
 	}
 }
 

@@ -10,6 +10,7 @@
 
 /* game */
 #include <Game/3d/GameCamera/RailCamera.h>
+#include <Game/3dObject/Actor/Boss/Boss.h>
 #include <Game/3dObject/Actor/Boss/Service/RailProgressBossSpawnService.h>
 #include <Game/3dObject/Actor/Enemy/BindingService/EnemyRuntimeBindingService.h>
 #include <Game/Runtime/Engagement/EnemyEngagementService.h>
@@ -36,9 +37,9 @@ public:
 private:
 	/* objects ======================================================*/
 	std::shared_ptr<BaseGameObject> modelField_;
-	std::shared_ptr<Player>         player_;
 	std::shared_ptr<RailCamera>     railCamera_ = nullptr;
 	std::weak_ptr<Player>           wPlayer_;
+	std::weak_ptr<Boss> wBoss_;
 	std::unique_ptr<Sprite>         attackSprite_;
 
 	/* runtime services =============================================*/
