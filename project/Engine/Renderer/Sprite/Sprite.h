@@ -121,6 +121,8 @@ public:
 	const Vector2& GetLeftTop()const{ return textureLeftTop; }
 	void SetLeftTop(const Vector2& LTop){ this->textureLeftTop = LTop; }
 
+	void SetIsVisible(bool is) { isVisible = is; }
+
 	const std::string& GetTextureName() const{
 		return path;
 	}
@@ -165,7 +167,7 @@ private:
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSprite {};
 
 	//directX関連
-
+	bool isVisible = true;
 	Matrix4x4* transformData = nullptr;
 
 	//マテリアル用のリソース

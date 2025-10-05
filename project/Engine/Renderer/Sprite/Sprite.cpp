@@ -96,6 +96,7 @@ void Sprite::UpdateTransform() {
 }
 
 void Sprite::Draw(ID3D12GraphicsCommandList* cmdList) {
+	if (!isVisible) return;
 	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	cmdList->SetGraphicsRootDescriptorTable(2, handle);
 	cmdList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);

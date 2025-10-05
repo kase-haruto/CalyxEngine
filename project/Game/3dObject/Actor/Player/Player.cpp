@@ -64,7 +64,7 @@ void Player::Initialize(){
 		Vector2 pos = {100.0f * i + 30.0f, 50.0f};
 		lifeSprite_[i]->Initialize(pos,{64.0f, 64.0f});
 	}
-
+	RefreshLifeUI();
 
 	//spriteの初期化
 	size_t spriteCount = reticleSprites_.size();
@@ -80,6 +80,13 @@ void Player::Initialize(){
 		reticleSprites_[i]->SetAnchorPoint(Vector2(0.5f,0.5f));
 	}
 
+}
+
+void Player::RefreshLifeUI() {
+	for (size_t i = 0; i < lifeSprite_.size(); ++i) {
+		const bool on = (i < static_cast<size_t>(life_));
+		lifeSprite_[i]->SetIsVisible(on);
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -269,6 +276,8 @@ void Player::OnCollisionEnter(Collider* other) {
 
 	if (life_ >= 1) {
 		life_--;
+		//lifeSpriteを適用
+		RefreshLifeUI();
 	}
 }
 
