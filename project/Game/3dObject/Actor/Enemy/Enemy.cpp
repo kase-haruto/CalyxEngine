@@ -86,7 +86,7 @@ void Enemy::Update(float dt) {
             return; // このフレームはここで終了
         }
 
-        // ★ 一度だけエミッタを生成（依存が揃った最初のフレーム）
+        // 一度だけエミッタを生成（依存が揃った最初のフレーム）
         BuildEmitterIfReady();
 
         // 下流コントローラの更新
@@ -99,7 +99,7 @@ void Enemy::Update(float dt) {
             shootingController_->Update(dt);
         }
 
-        // ★ 弾幕駆動：emitter_ は一度生成したら以降は再利用
+        // 弾幕駆動：emitter_ は一度生成したら以降は再利用
         if (this->IsGameplayEngaged() && emitter_) {
             if (auto* sweep = dynamic_cast<PatternSweepFan*>(emitter_->Pattern())) {
                 sweep->Advance(dt); // 中心角の往復
@@ -240,7 +240,7 @@ void Enemy::BuildEmitterIfReady() {
 
     // Pattern：左右に揺れる N-way
     auto pattern = std::make_unique<PatternSweepFan>();
-    pattern->nWay         = 9;
+    pattern->nWay         = 5;
     pattern->spreadDeg    = 50.0f;
     pattern->periodSec    = 2.5f;
     pattern->amplitudeDeg = 40.0f;

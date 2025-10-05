@@ -6,11 +6,14 @@
 void RailProgressBossSpawnService::BossSpawnByRailProgress() {
 	auto spawner = wBossSpawner_.lock();
 	auto railCamera = wRailCamera_.lock();
+	auto player = wPlayer_.lock();
+	if (!spawner || !railCamera || !player) return;
 
-	float railProgress = railCamera->GetProgress();
+	if (spawner->WasSpawned()) return; // すでに出ていれば何もしない
 
-	//Railの進捗が8割まで来たら、ボスをスポーンさせる。
+	const float railProgress = railCamera->GetProgress();
 	if (railProgress >= 0.8f) {
+		spawner->SetPlayerTransform(&player->GetWorldTransform());
 		spawner->Spawn();
 	}
 }
@@ -18,4 +21,5 @@ void RailProgressBossSpawnService::BossSpawnByRailProgress() {
 void RailProgressBossSpawnService::OnSceneLoaded(SceneContext& ctx) {
 	wBossSpawner_ = ctx.FindFirst<BossSpawner>();
 	wRailCamera_ = ctx.FindFirst<RailCamera>();
+	wPlayer_ = ctx.FindFirst<Player>();
 }

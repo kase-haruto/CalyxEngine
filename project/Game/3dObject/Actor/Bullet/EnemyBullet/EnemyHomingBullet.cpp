@@ -96,7 +96,7 @@ void EnemyHomingBullet::Update(float dt) {
 	time_ += dt;
 	homingElapsedSec_ += dt;
 
-	// --- 最初の homingDurationSec_ 秒だけ誘導 ---
+	// --- 最初の homingDurationSec 秒だけ誘導 ---
 	if (homingElapsedSec_ < homingDurationSec_) {
 		if (target_ && target_->GetIsAlive()) {
 			const Vector3 selfPos = GetCenterPos();

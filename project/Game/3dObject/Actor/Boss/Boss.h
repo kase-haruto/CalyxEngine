@@ -29,7 +29,7 @@ public:
 	//--------- accessor -----------------------------------------------------
 	const Vector3 GetCenterPos()const override;
 	void SetShootingController(std::unique_ptr<BossShootingController>);
-
+	void SetPlayerTransform(const WorldTransform* position);
 private:
 	//===================================================================*/
 	//						private methods
@@ -44,7 +44,8 @@ private:
 	float waveSpeed_ = 2.0f;		// サイン波の速さ
 	float deathTimer_ = 0.0f;		// 死亡演出用
 	float deathLength_ = 1.5f;		// 倒れ終わるまでの秒数
-
+	
+	const WorldTransform* playerTransform_ = nullptr;
 	std::unique_ptr<BossShootingController> shootingController_ = nullptr;
 };
 

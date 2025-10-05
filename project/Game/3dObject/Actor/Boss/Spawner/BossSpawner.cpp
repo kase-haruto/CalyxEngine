@@ -39,6 +39,7 @@ void BossSpawner::Spawn() {
 
 	BossInstaller installer;
 	auto boss = installer.InstallBoss();
+	boss->SetPlayerTransform(playerTransform_);
 	if (!boss) return;
 
 	boss->Initialize();
@@ -91,4 +92,6 @@ void BossSpawner::ExtractConfigToJson(nlohmann::json& j) const {
 	const_cast<BossSpawner*>(this)->ExtractConfig();
 	config_.ExtractConfigToJson(j);
 }
+
+bool BossSpawner::WasSpawned() const { return !wBoss_.expired(); } 
 

@@ -64,7 +64,7 @@ private:
 	Vector3 spawnAreaMin_ = { -10.0f, 0.0f, -30.0f };
 	Vector3 spawnAreaMax_ = { 10.0f, 5.0f, -30.0f };
 
-	// ====== 新規：近接起動パラメータ ======
+	// ====== 近接起動パラメータ ======
 	bool  isActive_ = false;   // 近接で true、遠離で false
 	bool  useXZDistance_ = true;    // 水平距離で判定（XZ）
 	float activationRadius_ = 200.0f;   // 起動半径（以内で起動）
