@@ -240,7 +240,7 @@ void Enemy::BuildEmitterIfReady() {
 
     // Pattern：左右に揺れる N-way
     auto pattern = std::make_unique<PatternSweepFan>();
-    pattern->nWay         = 9;
+    pattern->nWay         = 5;
     pattern->spreadDeg    = 50.0f;
     pattern->periodSec    = 2.5f;
     pattern->amplitudeDeg = 40.0f;
