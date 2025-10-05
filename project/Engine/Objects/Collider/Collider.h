@@ -78,6 +78,7 @@ protected:
 	ColliderType type_;							//< 自身のタイプ
 	ColliderType targetType_;					//< 衝突相手のタイプ
 	Vector4 color_ = {1.0, 0.0, 0.0, 1.0};		//< 描画色
+	Vector3 offset_{ 0.0f, 0.0f, 0.0f };
 
 	bool isCollisionEnabled_ = false;			//< 衝突判定を行うかどうか
 	bool isDraw_ = true;						//< 描画を行うかどうか
@@ -107,6 +108,9 @@ public:
 
 	void SetIsDrawCollider(bool isDraw) { isDraw_ = isDraw; }
 
+	void SetOffset(const Vector3& off) { offset_ = off; }
+	const Vector3& GetOffset() const { return offset_; }
+	void AddOffset(const Vector3& d) { offset_ += d; }
 private:
 	BaseGameObject* owner_ = nullptr;
 };

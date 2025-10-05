@@ -36,6 +36,8 @@ void Collider::ShowGui(ColliderConfig& config){
 
 	if (ImGui::CollapsingHeader("Collider")){
 
+		GuiCmd::DragFloat3("offset", offset_);
+
 		bool enabled = config.isCollisionEnabled;
 		if (GuiCmd::CheckBox("Enable Collision", enabled)){
 			SetCollisionEnabled(enabled);

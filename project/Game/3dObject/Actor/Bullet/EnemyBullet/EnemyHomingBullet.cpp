@@ -83,7 +83,7 @@ void EnemyHomingBullet::Initialize() {
 
 	baseScale_ = worldTransform_.scale;
 
-	moveSpeed_ = 25.0f;
+	moveSpeed_ = 20.0f;
 }
 
 void EnemyHomingBullet::OnShot() {}
