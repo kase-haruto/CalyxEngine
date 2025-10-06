@@ -37,30 +37,24 @@ public:
 	void SetLookAhead(float d) { lookAhead_ = d; }			// 先読み距離（向き計算）
 	void SetBankScale(float rad) { tiltAngle_ = rad; }		// 最大ロール
 	void SetBankLerp(float spd) { tiltLerpSpeed_ = spd; }
-	
+	void SetTilt(float angleRad, float lerp = 10.0f);
+	void SetClosed(bool closed);
+	void SetStopRatio(float r);
+
 	float GetT() const;
 	float GetProgress() const;
 
 	std::string_view GetTypeName() const override { return "RailCamera"; }
 
 private:
-	// スプライン・等速移動用テーブル
-	struct ArcSample {
-		float t;			// [0,1]
-		float dist;			// 弧長（0 〜 totalLength_）
-		Vector3 pos;
-	};
-	void RebuildArcTable();				// スプライン変更時に作る
-	float DistanceToT(float s) const;	// 弧長→t の逆写像（二分探索）
-	Vector3 Eval(float t) const;		// t→位置
-
+	
 	// 進行方向とロール
 	void UpdateOrientationFromPath(float dt);
 
 private:
 	// スプライン
 	SplineData spline_;
-	std::vector<ArcSample> arc_;	// 細分化サンプル
+	int arcSamplesPerSeg_ = 32;		// 1セグメント間で32分割
 	float totalLength_ = 0.0f;
 
 	// 状態
@@ -73,4 +67,7 @@ private:
 	float targetTilt_ = 0.0f;		// 目標の傾き（曲率由来）
 	float tiltAngle_ = 0.3f;		// 最大傾き（ラジアン）
 	float tiltLerpSpeed_ = 10.0f;	// 傾き補間速度
+
+	// 
+	float stopRatio_ = 0.9f;		//停止
 };

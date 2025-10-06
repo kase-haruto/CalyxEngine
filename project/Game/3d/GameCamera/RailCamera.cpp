@@ -8,49 +8,57 @@
 #include <cmath>
 #include <algorithm>
 
+// externals
+#include <externals/imgui/imgui.h>
+
 REGISTER_SCENE_OBJECT(RailCamera)
 
-//-------------------------------------------------------------------------
-// 9割停止の比率（必要ならここを変更）
-//-------------------------------------------------------------------------
-namespace {
-	constexpr float kStopRatio = 0.9f; // ★ 9割で止める
-}
-
+/////////////////////////////////////////////////////////////////////////////////////////
+//  コンストラクタ
+/////////////////////////////////////////////////////////////////////////////////////////
 RailCamera::RailCamera() {}
 RailCamera::RailCamera(const std::string& name) {
 	SceneObject::SetName(name, ObjectType::Camera);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//  初期化
+/////////////////////////////////////////////////////////////////////////////////////////
 void RailCamera::Initialize() {
 	worldTransform_.Initialize();
 	worldTransform_.translation = { 0.0f, 10.0f, 0.0f };
 	BaseCamera::SetName("RailCamera");
 
-	// 既定値
-	speed_ = 35.0f;
-	lookAhead_ = 2.0f;
-	tiltAngle_ = 0.3f;
-	tiltLerpSpeed_ = 10.0f;
-	targetTilt_ = 0.0f;
-	zTiltOffset_ = 0.0f;
-	traveled_ = 0.0f;
+	// ==== 初期値設定 ====
+	speed_ = 35.0f;   // 速度（距離単位 / 秒）
+	lookAhead_ = 2.0f;    // 進行方向の先読み距離
+	tiltAngle_ = 0.3f;    // バンク角の最大値（ラジアン）
+	tiltLerpSpeed_ = 10.0f;   // バンク補間速度
+	targetTilt_ = 0.0f;    // 目標バンク角
+	zTiltOffset_ = 0.0f;    // 現在のバンク角
+	traveled_ = 0.0f;    // 移動距離の累積
 
-	// デフォルトのスプライン読み込み
+	// ==== デフォルトのスプライン読み込み ====
 	const std::string defaultPath = "Resources/Assets/Spline/Rail.json";
 	if (!LoadSplineFromJson(defaultPath)) {
 		spline_ = SplineData{};
-		arc_.clear();
-		totalLength_ = 0.0f;
+		spline_.closed = false;
+		spline_.BuildArcTable(arcSamplesPerSeg_);
 	}
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//  スプライン設定
+/////////////////////////////////////////////////////////////////////////////////////////
 void RailCamera::SetSpline(const SplineData& s) {
 	spline_ = s;
-	RebuildArcTable();    // 等速テーブルを再構築
-	traveled_ = 0.0f;     // 先頭へ
+	spline_.BuildArcTable(arcSamplesPerSeg_); // 等速移動のために弧長LUTを再構築
+	traveled_ = 0.0f; // 先頭へリセット
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//  スプライン読み込み
+/////////////////////////////////////////////////////////////////////////////////////////
 bool RailCamera::LoadSplineFromJson(const std::string& path) {
 	SplineData tmp;
 	if (!SplineJson::Load(path, tmp)) { // JSON から読み込み
@@ -60,214 +68,200 @@ bool RailCamera::LoadSplineFromJson(const std::string& path) {
 	return true;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//  スプライン削除
+/////////////////////////////////////////////////////////////////////////////////////////
 void RailCamera::ClearSpline() {
 	spline_ = SplineData{};
-	arc_.clear();
-	totalLength_ = 0.0f;
+	spline_.BuildArcTable(arcSamplesPerSeg_);
 	traveled_ = 0.0f;
 }
 
-// ----------------------------------------------------------------------------
-// 補助: スプライン評価
-// ----------------------------------------------------------------------------
-Vector3 RailCamera::Eval(float t) const {
-	return spline_.Evaluate(t); // Catmull–Rom 補間（closed対応）
-}
-
-// ----------------------------------------------------------------------------
-/* 補助: 弧長テーブル作成（等速化用） */
-// ----------------------------------------------------------------------------
-void RailCamera::RebuildArcTable() {
-	arc_.clear();
-	totalLength_ = 0.0f;
-
-	// 最低限の安全チェック
-	if (spline_.points.size() == 0) {
-		return;
-	}
-	if (spline_.points.size() == 1) {
-		arc_.push_back({ 0.0f, 0.0f, spline_.points[0].pos });
-		totalLength_ = 0.0f;
-		return;
-	}
-
-	// サンプリング密度（必要なら増やす）
-	const int kSamples = 1000;
-	arc_.reserve(kSamples + 1);
-
-	Vector3 prev = Eval(0.0f);
-	arc_.push_back({ 0.0f, 0.0f, prev });
-
-	float acc = 0.0f;
-	for (int i = 1; i <= kSamples; ++i) {
-		float t = static_cast<float>(i) / static_cast<float>(kSamples);
-		Vector3 p = Eval(t);
-		acc += (p - prev).Length();
-		arc_.push_back({ t, acc, p });
-		prev = p;
-	}
-	totalLength_ = acc;
-}
-
-// ----------------------------------------------------------------------------
-// 補助: 弧長→t（二分探索）
-// ----------------------------------------------------------------------------
-float RailCamera::DistanceToT(float s) const {
-	if (arc_.empty()) return 0.0f;
-	if (s <= 0.0f) return 0.0f;
-	if (s >= totalLength_) return 1.0f;
-
-	int lo = 0, hi = static_cast<int>(arc_.size()) - 1;
-	while (lo < hi) {
-		int mid = (lo + hi) / 2;
-		if (arc_[mid].dist < s) lo = mid + 1;
-		else hi = mid;
-	}
-	// 線形補間
-	const ArcSample& a = arc_[(std::max)(0, lo - 1)];
-	const ArcSample& b = arc_[lo];
-	float span = (std::max)(1e-6f, b.dist - a.dist);
-	float lt = (s - a.dist) / span;
-	return a.t + (b.t - a.t) * lt;
-}
-
-// ----------------------------------------------------------------------------
-// 進行方向（look-ahead）とロール
-// ----------------------------------------------------------------------------
+/////////////////////////////////////////////////////////////////////////////////////////
+//  進行方向（look-ahead）とロール計算
+/////////////////////////////////////////////////////////////////////////////////////////
 void RailCamera::UpdateOrientationFromPath(float dt) {
-	// 現在位置
-	float tNow = (totalLength_ > 0.0f) ? DistanceToT(traveled_) : 0.0f;
-	Vector3 eye = Eval(tNow);
+	// ==== 現在位置 ====
+	const float totalLen = spline_.TotalLength();
+	float tNow = (totalLen > 0.0f) ? spline_.DistanceToT(traveled_) : 0.0f;
+	Vector3 eye = spline_.Evaluate(tNow);
 
-	// 先読み点（進行方向）
+	// ==== 先読み点（進行方向計算用） ====
 	float sAhead = traveled_ + (std::max)(lookAhead_, 0.01f);
-	float tAhead = (totalLength_ > 0.0f) ? DistanceToT(
-		spline_.closed ? std::fmod(sAhead, totalLength_) : std::min(sAhead, totalLength_)
-	) : 0.0f;
-	Vector3 target = Eval(tAhead);
+	if (spline_.closed && totalLen > 0.0f) {
+		sAhead = std::fmod(sAhead, totalLen);
+		if (sAhead < 0.0f) sAhead += totalLen;
+	} else {
+		sAhead = std::clamp(sAhead, 0.0f, totalLen);
+	}
+	float tAhead = (totalLen > 0.0f) ? spline_.DistanceToT(sAhead) : 0.0f;
+	Vector3 target = spline_.Evaluate(tAhead);
 
-	// 向き
-	Vector3 dir = (target - eye);
+	// ==== 向きベクトル ====
+	Vector3 dir = target - eye;
 	float len = dir.Length();
-	if (len > 1e-4f) dir = dir / len;
+	if (len > 1e-4f) dir /= len;
 	else dir = { 0,0,1 };
 
-	// オイラーへの変換（Y-up前提）
+	// ==== オイラー角への変換（Y-up 前提） ====
 	float horizontalDist = std::sqrt(dir.x * dir.x + dir.z * dir.z);
 	worldTransform_.eulerRotation.x = std::atan2(-dir.y, (std::max)(1e-6f, horizontalDist));
 	worldTransform_.eulerRotation.y = std::atan2(dir.x, dir.z);
 
-	// ロール（曲率由来の簡易バンク）
+	// ==== ロール（曲率による簡易バンク） ====
 	float sAhead2 = traveled_ + lookAhead_ * 2.0f;
-	float tAhead2 = (totalLength_ > 0.0f) ? DistanceToT(
-		spline_.closed ? std::fmod(sAhead2, totalLength_) : std::min(sAhead2, totalLength_)
-	) : 0.0f;
+	if (spline_.closed && totalLen > 0.0f) {
+		sAhead2 = std::fmod(sAhead2, totalLen);
+		if (sAhead2 < 0.0f) sAhead2 += totalLen;
+	} else {
+		sAhead2 = std::clamp(sAhead2, 0.0f, totalLen);
+	}
+	float tAhead2 = (totalLen > 0.0f) ? spline_.DistanceToT(sAhead2) : 0.0f;
 	Vector3 p0 = eye;
 	Vector3 p1 = target;
-	Vector3 p2 = Eval(tAhead2);
+	Vector3 p2 = spline_.Evaluate(tAhead2);
 
-	Vector3 v1 = (p1 - p0); float l1 = v1.Length();
-	Vector3 v2 = (p2 - p1); float l2 = v2.Length();
-	if (l1 > 1e-4f) v1 /= l1;
-	if (l2 > 1e-4f) v2 /= l2;
+	Vector3 v1 = (p1 - p0);
+	Vector3 v2 = (p2 - p1);
+	if (v1.LengthSquared() > 1e-8f) v1.Normalize();
+	if (v2.LengthSquared() > 1e-8f) v2.Normalize();
 
-	// 横方向の曲がり＝法線成分（XZ平面の2Dクロス）
+	// XZ 平面のクロスで旋回方向を検出
 	float turn = v1.x * v2.z - v1.z * v2.x;
 	turn = std::clamp(turn, -1.0f, 1.0f);
 	targetTilt_ = -turn * tiltAngle_; // 右旋回で右に傾く
 
-	// ロール補間
+	// ==== ロール補間 ====
 	zTiltOffset_ = std::lerp(zTiltOffset_, targetTilt_, tiltLerpSpeed_ * dt);
 	worldTransform_.eulerRotation.z = zTiltOffset_;
 
-	// 位置更新
+	// ==== カメラ位置更新 ====
 	worldTransform_.translation = eye;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//  更新処理（カメラの前進制御）
+/////////////////////////////////////////////////////////////////////////////////////////
 void RailCamera::Update(float dt) {
-	// 走行弧長を更新（等速）
+	// ==== 走行距離を更新（等速） ====
 	traveled_ += (std::max)(0.0f, speed_) * dt;
+	const float totalLen = spline_.TotalLength();
 
 	if (spline_.closed) {
-		// ループ
-		if (totalLength_ > 0.0f) {
-			traveled_ = std::fmod(traveled_, totalLength_);
-			if (traveled_ < 0.0f) traveled_ += totalLength_;
+		// ==== ループ再生 ====
+		if (totalLen > 0.0f) {
+			traveled_ = std::fmod(traveled_, totalLen);
+			if (traveled_ < 0.0f) traveled_ += totalLen;
 		} else {
 			traveled_ = 0.0f;
 		}
 	} else {
-		// 非ループは「9割」で止める
-		const float maxS = totalLength_ * kStopRatio;              // ★ 追加
-		traveled_ = std::clamp(traveled_, 0.0f, (std::max)(0.0f, maxS)); // ★ 変更
+		// ==== 非ループ時は 9割で停止 ====
+		const float maxS = totalLen * stopRatio_;
+		traveled_ = std::clamp(traveled_, 0.0f, (std::max)(0.0f, maxS));
 	}
 
 	UpdateOrientationFromPath(dt);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//  デバッグ表示
+/////////////////////////////////////////////////////////////////////////////////////////
 void RailCamera::ShowGui() {
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(DEVELOP)
 	worldTransform_.ShowImGui();
 	if (ImGui::CollapsingHeader("RailCamera")) {
 		ImGui::DragFloat("Speed (units/s)", &speed_, 0.1f, 0.0f, 1000.0f);
 		ImGui::DragFloat("LookAhead", &lookAhead_, 0.01f, 0.0f, 100.0f);
 		ImGui::DragFloat("TiltAngle (rad)", &tiltAngle_, 0.01f, 0.0f, 1.57f);
 		ImGui::DragFloat("TiltLerp", &tiltLerpSpeed_, 0.1f, 0.0f, 50.0f);
+		ImGui::DragInt("Arc Samples/Seg", &arcSamplesPerSeg_, 1, 4, 128);
+		bool closed = spline_.closed;
+		if (ImGui::Checkbox("Closed", &closed)) {
+			spline_.closed = closed;
+			spline_.BuildArcTable(arcSamplesPerSeg_);
+		}
+		ImGui::DragFloat("StopRatio", &stopRatio_, 0.01f, 0.0f, 1.0f);
 
 		ImGui::Text("Spline: %zu pts, closed=%s, length=%.2f",
-					spline_.points.size(), spline_.closed ? "true" : "false", totalLength_);
+					spline_.points.size(), spline_.closed ? "true" : "false", spline_.TotalLength());
 
-		// デバッグ：位置手動調整（9割上限）
-		float tNow = (totalLength_ > 1e-6f) ? DistanceToT(traveled_) : 0.0f;
-		const float tMax = kStopRatio; // ★ 9割を上限に
+				// ==== デバッグ：位置を手動で調整 ====
+		float tNow = (spline_.TotalLength() > 1e-6f) ? spline_.DistanceToT(traveled_) : 0.0f;
+		float tMax = spline_.closed ? 1.0f : stopRatio_;
 		if (ImGui::SliderFloat("t (debug)", &tNow, 0.0f, tMax)) {
-			traveled_ = totalLength_ * tNow;
+			traveled_ = spline_.TotalLength() * tNow;
 		}
 
-		// 軌道再構築（外部編集後に押す）
+		// ==== 弧長テーブル再構築 ====
 		if (ImGui::Button("Rebuild Arc Table")) {
-			RebuildArcTable();
+			spline_.BuildArcTable(arcSamplesPerSeg_);
 		}
 	}
-#endif // _DEBUG
+#endif
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//  毎フレーム更新（基本カメラ処理）
+/////////////////////////////////////////////////////////////////////////////////////////
 void RailCamera::AlwaysUpdate(float dt) {
 	BaseCamera::AlwaysUpdate(dt);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//  カメラ位置の取得
+/////////////////////////////////////////////////////////////////////////////////////////
 Vector3 RailCamera::GetPosition() {
 	return worldTransform_.GetWorldPosition();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//  Tの取得
+//  パラメータ設定
 /////////////////////////////////////////////////////////////////////////////////////////
-float RailCamera::GetT() const {
-	if (totalLength_ <= 1e-6f) return 0.0f;
+void RailCamera::SetTilt(float angleRad, float lerp) {
+	tiltAngle_ = angleRad;
+	tiltLerpSpeed_ = lerp;
+}
 
-	float s = traveled_;
-	if (spline_.closed && totalLength_ > 0.0f) {
-		float mod = std::fmod(s, totalLength_);
-		if (mod < 0.0f) mod += totalLength_;
-		s = mod;
-	}
-	s = std::clamp(s, 0.0f, totalLength_); // 非ループ時は Update 側で 9割にクランプ済み
-	return DistanceToT(s);
+void RailCamera::SetClosed(bool closed) {
+	spline_.closed = closed;
+	spline_.BuildArcTable(arcSamplesPerSeg_);
+}
+
+void RailCamera::SetStopRatio(float r) {
+	stopRatio_ = std::clamp(r, 0.0f, 1.0f);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//  進捗率
+//  T値の取得（0〜1）
 /////////////////////////////////////////////////////////////////////////////////////////
-float RailCamera::GetProgress() const {
-	if (totalLength_ <= 1e-6f) return 0.0f;
+float RailCamera::GetT() const {
+	const float totalLen = spline_.TotalLength();
+	if (totalLen <= 1e-6f) return 0.0f;
 
 	float s = traveled_;
-	if (spline_.closed && totalLength_ > 0.0f) {
-		float mod = std::fmod(s, totalLength_);
-		if (mod < 0.0f) mod += totalLength_;
+	if (spline_.closed && totalLen > 0.0f) {
+		float mod = std::fmod(s, totalLen);
+		if (mod < 0.0f) mod += totalLen;
 		s = mod;
 	}
-	s = std::clamp(s, 0.0f, totalLength_); // 非ループ時は Update 側で 9割にクランプ済み
-	return (totalLength_ > 0.0f) ? (s / totalLength_) : 0.0f;
+	s = std::clamp(s, 0.0f, totalLen); // 非ループ時は stopRatio_ でクランプ済み
+	return spline_.DistanceToT(s);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//  進捗率の取得（0〜1）
+/////////////////////////////////////////////////////////////////////////////////////////
+float RailCamera::GetProgress() const {
+	const float totalLen = spline_.TotalLength();
+	if (totalLen <= 1e-6f) return 0.0f;
+
+	float s = traveled_;
+	if (spline_.closed && totalLen > 0.0f) {
+		float mod = std::fmod(s, totalLen);
+		if (mod < 0.0f) mod += totalLen;
+		s = mod;
+	}
+	s = std::clamp(s, 0.0f, totalLen);
+	return (totalLen > 0.0f) ? (s / totalLen) : 0.0f;
 }

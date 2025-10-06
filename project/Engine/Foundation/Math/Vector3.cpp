@@ -267,6 +267,11 @@ Vector3 Vector3::operator-=(const Vector3& other){
 	return Vector3(x, y, z);
 }
 
+Vector3 Vector3::operator-() const {
+	return Vector3(-x, -y, -z);
+}
+
+
 float& Vector3::operator[](int index){
 	assert(index >= 0 && index < 3);
 	return *(&x + index);

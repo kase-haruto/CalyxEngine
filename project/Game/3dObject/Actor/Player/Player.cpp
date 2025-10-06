@@ -17,7 +17,6 @@
 // externals
 #include <externals/imgui/imgui.h>
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
-
 #include "Engine/Foundation/Utility/Func/CxUtils.h"
 
 // c++
