@@ -77,7 +77,7 @@ struct Vector3 final {
 	Vector3 operator-(const Vector3& other) const;
 	Vector3 operator-=(const Vector3& other);
 	friend Vector3 operator-(float scalar, const Vector3& v);
-
+	Vector3 operator-() const;
 	float& operator[](int index);
 
 	const float& operator[](int index) const;

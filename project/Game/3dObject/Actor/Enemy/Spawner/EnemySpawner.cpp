@@ -4,41 +4,60 @@
 #include <Engine/Scene/Utility/SceneUtility.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
+#include <Engine/Objects/3D/Geometory/Spline/SplineJson.h>
 
 #include <Game/Installer/Enemy/EnemyInstaller.h>
 #include <Game/3dObject/Actor/Enemy/Directory/IEnemyDirectory.h>
+
 
 #include <externals/imgui/imgui.h>
 #include <cmath>
 
 EnemySpawner::EnemySpawner(const std::string& name) : SceneObject() {
 	SetName(name, ObjectType::GameObject);
+
+	if (!LoadRouteFromJson(moveRoutePath_)) {
+		enemyMoveRoute_ = SplineData{};
+		enemyMoveRoute_.closed = false;
+		enemyMoveRoute_.BuildArcTable();
+	}
 }
 
 void EnemySpawner::Update(float dt) {
-	// Vector3 rot = rotationDir_ * rotationSpeed_ * dt;
-	// worldTransform_.eulerRotation += rot;
-	// worldTransform_.rotationSource = RotationSource::Euler;
+	// 自分の行列は先に更新（距離計算の基準になる）
+	worldTransform_.Update();
 
-	UpdateProximity_();
+	UpdateProximity();
 
 	if (isActive_) {
-		// 現在の生存数を数える（死体は別途回収）
+		// 現在の距離を算出（XZ か 3D かはフラグに従う）
+		const float d = (playerTransform_)
+			? Distance_(worldTransform_.GetWorldPosition(), playerTransform_->GetWorldPosition(), useXZDistance_)
+			: std::numeric_limits<float>::infinity();
+
+		// 距離内にタイマーを進める（距離外では停止＝保持）
+		const bool within = (d <= activationRadius_);
+
+		// 現在の生存数（死体は別途回収）
 		size_t aliveCount = 0;
 		for (auto& e : spawnedEnemies_) {
 			if (e && e->GetIsAlive()) ++aliveCount;
 		}
+
 		if (aliveCount < maxSpawnCount_) {
-			spawnTimer_ += dt;
-			if (spawnTimer_ >= spawnInterval_) {
-				Spawn();
-				spawnTimer_ = 0.0f;
+			if (within) {
+				spawnTimer_ += dt;
+				if (spawnTimer_ >= 0.5f) {
+					Spawn();
+					spawnTimer_ = 0.0f; // 次の湧きへ
+				}
 			}
 		}
 	}
 
 	GarbageCollectDead();
 }
+
 
 void EnemySpawner::AlwaysUpdate([[maybe_unused]] float dt) {
 	worldTransform_.Update();
@@ -96,10 +115,8 @@ void EnemySpawner::ShowGui() {
 	ImGui::DragFloat("Activation Radius", &activationRadius_, 1.0f, 0.0f, 10000.0f);
 	ImGui::DragFloat("Deactivation Radius", &deactivationRadius_, 1.0f, 0.0f, 10000.0f);
 
-#ifdef _DEBUG
 	ImGui::SeparatorText("Spawner Config");
 	config_.ShowGui();
-#endif
 }
 
 void EnemySpawner::SetPlayerTransform(WorldTransform* playerTransform) {
@@ -116,13 +133,28 @@ void EnemySpawner::ExtractConfigToJson(nlohmann::json& j) const {
 	config_.ExtractConfigToJson(j);
 }
 
-void EnemySpawner::UpdateProximity_() {
-	// プレイヤー不在なら起動しない（ゲーム開始直後の暴発防止）
+void EnemySpawner::SetRoute(const SplineData& s) {
+	enemyMoveRoute_ = s;
+	enemyMoveRoute_.BuildArcTable();
+}
+
+bool EnemySpawner::LoadRouteFromJson(const std::string& path) {
+	SplineData tmp;
+	if (!SplineJson::Load(path, tmp)) { // JSON から読み込み
+		return false;
+	}
+	SetRoute(tmp);
+	return true;
+}
+
+void EnemySpawner::UpdateProximity() {
+	// プレイヤー不在なら停止＆掃除
 	if (!playerTransform_) {
 		if (isActive_) {
 			isActive_ = false;
+			// spawnTimer_ は保持しても良いが、明示的に止めたいなら 0 にする
 			spawnTimer_ = 0.0f;
-			DespawnAll_();
+			DespawnAll();
 		}
 		return;
 	}
@@ -135,19 +167,18 @@ void EnemySpawner::UpdateProximity_() {
 		// 起動：起動半径以内に入ったら
 		if (d <= activationRadius_) {
 			isActive_ = true;
-			spawnTimer_ = 0.0f;    // 起動直後の即湧きを避ける
-			//一体はスポーン
-			Spawn();
+			// タイマーはゼロから積み上げ開始
+			spawnTimer_ = 0.0f;
 		}
 	} else {
+		// 停止：停止半径以上で停止＆全消去
 		if (d >= deactivationRadius_) {
 			isActive_ = false;
-			spawnTimer_ = 0.0f;    // 非アクティブ中はタイマー蓄積しない
-			DespawnAll_();         // このスポナーの敵をまとめて消す
+			spawnTimer_ = 0.0f;
+			DespawnAll();
 		}
 	}
 }
-
 void EnemySpawner::Spawn() {
 	EnemyInstaller installer;
 	auto enemy = installer.InstallEnemy();
@@ -155,11 +186,10 @@ void EnemySpawner::Spawn() {
 
 	enemy->Initialize();
 	enemy->SetPlayerTransform(playerTransform_);
+	enemy->SetRouteSpline(enemyMoveRoute_);
 
 	// 位置と親子付け（ローカルでランダム）
-	Vector3 localOffset = Random::GenerateVector3(spawnAreaMin_, spawnAreaMax_);
-	enemy->SetPosition(localOffset);
-	enemy->SetParent(&worldTransform_);
+	enemy->SetSpawnerAnchor(&worldTransform_);
 
 	// 自前リストに登録
 	spawnedEnemies_.push_back(enemy);
@@ -167,7 +197,7 @@ void EnemySpawner::Spawn() {
 	if (directory_) { directory_->Register(enemy); }
 }
 
-void EnemySpawner::DespawnAll_() {
+void EnemySpawner::DespawnAll() {
 	auto* lib = SceneContext::Current()->GetObjectLibrary();
 	for (auto& e : spawnedEnemies_) {
 		if (e) {

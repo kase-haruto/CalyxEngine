@@ -68,6 +68,8 @@ public:
 	void ApplyConfig(const struct ColliderConfig& config);
 	ColliderConfig ExtractConfig() const;
 
+	virtual float GetColliderRadius()const = 0;
+
 protected:
 	//===================================================================*/
 	//                   protected methods

@@ -56,7 +56,6 @@ void EnemyEngagementService::Update(float dt) {
 
 	//
 	if (ctx && ctx->GetObjectLibrary()) {
-		// ★ フォールバック：シーンから直接 Enemy を列挙
 		auto all = ctx->GetObjectLibrary()->FindByType<Enemy>();
 		for (auto& sp : all) {
 			if (sp && sp->GetIsAlive()) enemies.emplace_back(sp);
@@ -70,7 +69,6 @@ void EnemyEngagementService::Update(float dt) {
 		if (!sp) continue;
 		Enemy& e = *sp;
 
-		// 1) 画面内（NDC + 余白）
 		bool onScreen = true;
 		if (camera_) {
 			const AABB worldAabb = e.GetWorldAABB();
@@ -82,14 +80,13 @@ void EnemyEngagementService::Update(float dt) {
 		t = onScreen ? (t + dt) : 0.0f;
 		const bool exposedEnough = (t >= minExposeSec_);
 
-		// 2) 射程
+		//  射程
 		bool inRange = true;
 		if (ply) {
 			inRange = GameplayVisibility::InEngageRangeSq(
 				e.GetWorldPosition(), ply->GetWorldPosition(), maxEngageDist_);
 		}
 
-		// 3) LOS（任意）
 		bool los = true;
 		if (ply) {
 			los = HasLineOfSightImpl(e, *ply);

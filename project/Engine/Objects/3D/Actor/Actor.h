@@ -19,7 +19,8 @@ public:
 	virtual ~Actor() override = default;
 
 	void SetMoveSpeed(float moveSpeed) { moveSpeed_ = moveSpeed; }
-	/* ui =========================================*/
+
+	float GetCollisionRadius() const;
 
 protected:
 	//===================================================================*/

@@ -23,6 +23,8 @@ public:
 	void OnCollisionStay([[maybe_unused]] Collider* other)override{};
 	void OnCollisionExit([[maybe_unused]] Collider* other)override{};
 
+	float GetColliderRadius()const override { return shape_.radius; }
+
 protected:
 	//===================================================================*/
 	//                   private methods

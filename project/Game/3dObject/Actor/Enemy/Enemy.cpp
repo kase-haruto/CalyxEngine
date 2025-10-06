@@ -41,6 +41,12 @@ Enemy::Enemy(const std::string& modelName, const std::string objName)
 
 	explosionFx_ = SceneAPI::Instantiate<ParticleSystemObject>("explosionFx");
 	explosionFx_->LoadConfig("Resources/Assets/Configs/Effect/Explosion.json");
+
+	// --- スプライン追従の既定値 ---
+	mover_.SetWorldSpeed(12.0f); // 等速（m/s）
+	mover_.SetLookMode(SplineFollower::LookMode::TowardsTarget); // 基本はプレイヤーへ向く
+	mover_.SetYOffset(0.0f);
+	mover_.SetLoop(false); // デフォルトは終端で停止
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -61,7 +67,12 @@ void Enemy::Initialize() {
 	explosionFx_->Stop();
 
 	// shootingController_ / playerTransform_ のセット順が分からない場合に備えて
-	// ここでは emitter_ を作らず、Update() 内で BuildEmitterIfReady_() を呼びます。
+	// ここでは emitter_ を作らず、Update() 内で BuildEmitterIfReady() を呼びます。
+
+	// もし経路が既に与えられていたら、ターゲットTFだけここで関連付け
+	if (hasRoute_) {
+		mover_.SetTargetTransform(playerTransform_);
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -74,7 +85,7 @@ static float Deg2Rad(float d) { return d * std::numbers::pi_v<float> / 180.0f; }
 ////////////////////////////////////////////////////////////////
 void Enemy::Update(float dt) {
 	/* =============================================
-	   1. 生存中のロジック
+	    生存中のロジック
 	   =============================================*/
 	if (deathState_ == DeathState::Alive) {
 		if (life_ <= 0) {
@@ -89,13 +100,55 @@ void Enemy::Update(float dt) {
 		// 一度だけエミッタを生成（依存が揃った最初のフレーム）
 		BuildEmitterIfReady();
 
+		// =========================
+		//   スプライン追従による移動
+		// =========================
+		if (hasRoute_) {
+			// プレイヤー参照が後から入るケースに対応
+			mover_.SetTargetTransform(playerTransform_);
+
+			// スプライン上を等速で進める（アンカー適用は mover_ 側）
+			mover_.Update(dt);
+
+			// 基本位置：スプライン上の位置
+			const Vector3 basePos = mover_.GetPosition();
+
+			// 波移動（ワールドYに揺らぎを加算）
+			waveTime_ += dt * waveSpeed_;
+			const float offsetY = std::sin(waveTime_) * waveAmplitude_;
+			worldTransform_.translation = basePos + Vector3{ 0, offsetY, 0 };
+
+			// 方向合わせ（プレイヤーへ）
+			const Vector3 myPos = worldTransform_.translation;
+			const Vector3 targetPos = playerTransform_ ? playerTransform_->GetWorldPosition() : myPos;
+			Vector3 d = targetPos - myPos;
+			if (d.LengthSquared() > 1e-12f) {
+				d = d.Normalize();
+				const float yaw = std::atan2(d.x, d.z);                                  // 水平旋回
+				const float pitch = std::atan2(-d.y, std::sqrt(d.x * d.x + d.z * d.z));    // 上下（LH）
+				worldTransform_.rotation = Quaternion::MakeRotateY(yaw) * Quaternion::MakeRotateX(pitch);
+			}
+		} else {
+			// フォールバック：従来の波移動（経路未設定時のみ）
+			waveTime_ += dt * waveSpeed_;
+			const float offsetY = std::sin(waveTime_) * waveAmplitude_;
+			worldTransform_.translation = basePosition_ + Vector3{ 0, offsetY, 0 };
+
+			// 方向合わせ（プレイヤーへ）
+			const Vector3 myPos = GetWorldPosition();
+			const Vector3 targetPos = playerTransform_ ? playerTransform_->GetWorldPosition() : myPos;
+			Vector3 d = targetPos - myPos;
+			if (d.LengthSquared() > 1e-12f) {
+				d = d.Normalize();
+				const float yaw = std::atan2(d.x, d.z);
+				const float pitch = std::atan2(-d.y, std::sqrt(d.x * d.x + d.z * d.z));
+				worldTransform_.rotation = Quaternion::MakeRotateY(yaw) * Quaternion::MakeRotateX(pitch);
+			}
+		}
+
 		// 下流コントローラの更新
 		if (shootingController_) {
 			shootingController_->SetGameplayEngaged(this->IsGameplayEngaged());
-
-			// 従来の単発発射は停止（弾幕は emitter_ が担当）
-			// if (this->IsGameplayEngaged()) { Shoot(); }
-
 			shootingController_->Update(dt);
 		}
 
@@ -106,7 +159,7 @@ void Enemy::Update(float dt) {
 			}
 
 			BulletEmitterContext cxt{};
-			cxt.origin = GetCenterPos();
+			cxt.origin = GetCenterPos(); // 先に移動を済ませてあるので常に最新
 			// cxt.selfForward は未使用ならデフォルトのまま
 			if (playerTransform_) {
 				cxt.targetPos = playerTransform_->GetWorldPosition();
@@ -116,32 +169,11 @@ void Enemy::Update(float dt) {
 			emitter_->Update(dt, cxt);
 		}
 
-		// 方向合わせ（プレイヤーへ）
-		{
-			const Vector3 myPos = GetWorldPosition();
-			const Vector3 targetPos = playerTransform_ ? playerTransform_->GetWorldPosition() : myPos;
-
-			Vector3 d = targetPos - myPos;
-			if (d.LengthSquared() > 1e-12f) {
-				d = d.Normalize();
-
-				const float yaw = std::atan2(d.x, d.z);                               // 水平旋回
-				const float pitch = std::atan2(-d.y, std::sqrt(d.x * d.x + d.z * d.z)); // 上下（LH）
-
-				const Quaternion qWorld = Quaternion::MakeRotateY(yaw) * Quaternion::MakeRotateX(pitch);
-				worldTransform_.rotation = qWorld;
-			}
-		}
-
-		// 波移動
-		waveTime_ += dt * waveSpeed_;
-		float offsetY = std::sin(waveTime_) * waveAmplitude_;
-		worldTransform_.translation = basePosition_ + Vector3{ 0, offsetY, 0 };
 		return;
 	}
 
 	/* =============================================
-	   2. 倒れ演出中 (Dying)
+	    倒れ演出中 (Dying)
 	   =============================================*/
 	if (deathState_ == DeathState::Dying) {
 		deathTimer_ += dt;
@@ -152,7 +184,8 @@ void Enemy::Update(float dt) {
 		worldTransform_.rotation =
 			Quaternion::MakeRotateAxisQuaternion(deathRotateAxis_, rad);
 
-		worldTransform_.translation = basePosition_; // 移動しない
+		// 倒れ演出中は移動しない（位置固定）
+		// worldTransform_.translation = basePosition_;
 
 		// 演出が終わり、爆発も再生終了したら Dead へ
 		if (t >= 1.0f && !explosionFx_->IsPlaying()) {
@@ -163,7 +196,7 @@ void Enemy::Update(float dt) {
 	}
 
 	/* =============================================
-	   3. 完全に死亡 (Dead)
+	   完全に死亡
 	   =============================================*/
 	if (deathState_ == DeathState::Dead) {
 		isAlive_ = false;
@@ -193,6 +226,14 @@ const Vector3 Enemy::GetCenterPos() const {
 	return worldPos;
 }
 
+BulletContainer* Enemy::GetBulletContainer() {
+	return shootingController_ ? shootingController_->GetbulletContaienr() : nullptr;
+}
+
+const BulletContainer* Enemy::GetBulletContainer() const {
+	return shootingController_ ? shootingController_->GetbulletContaienr() : nullptr;
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //      親の設定
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -208,15 +249,34 @@ void Enemy::SetShootingController(std::unique_ptr<EnemyShootingController> contr
 	shootingController_ = std::move(controller);
 }
 
-void Enemy::SetPlayerTransform(const WorldTransform* tf) { playerTransform_ = tf; }
+/////////////////////////////////////////////////////////////////////////////////////////
+//      プレイヤーのtfをセット
+/////////////////////////////////////////////////////////////////////////////////////////
+void Enemy::SetPlayerTransform(const WorldTransform* tf) {
+	playerTransform_ = tf;
+	// 追従の向きが TowardsTarget のときに参照される
+	mover_.SetTargetTransform(playerTransform_);
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//      移動
+//      移動ルートせってい
+/////////////////////////////////////////////////////////////////////////////////////////
+void Enemy::SetRouteSpline(const SplineData& data) {
+	moveRoute_ = data;
+	moveRoute_.BuildArcTable(); // 等速化のLUTを構築
+	mover_.BindPath(&moveRoute_);
+	mover_.SetLookMode(SplineFollower::LookMode::TowardsTarget);
+	mover_.SetTargetTransform(playerTransform_);
+	hasRoute_ = (moveRoute_.SegmentCount() > 0);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//      移動（未使用：スプライン追従が担当）
 /////////////////////////////////////////////////////////////////////////////////////////
 void Enemy::Move() {}
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//      弾発射（従来：単発）→ 弾幕化後は呼ばない（互換用に残置）
+//      弾発射
 /////////////////////////////////////////////////////////////////////////////////////////
 void Enemy::Shoot() {
 	Vector3 myPos = GetCenterPos();
@@ -225,7 +285,7 @@ void Enemy::Shoot() {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//      ★ エミッタの一度だけ生成する関数
+//      エミッタの一度だけ生成する関数
 /////////////////////////////////////////////////////////////////////////////////////////
 void Enemy::BuildEmitterIfReady() {
 	if (emitter_) return;                 // 既に作成済み
@@ -255,7 +315,7 @@ void Enemy::BuildEmitterIfReady() {
 
 	BulletEmitterConfig cfg;
 	cfg.tag = "enemy_homing";
-	// cfg.shotSpeed = 0.0f; // 弾側で速度管理なら未使用
+	// cfg.shotSpeed = 0.0f;
 
 	emitter_ = std::make_unique<BulletEmitter>(
 		cfg, std::move(sink), std::move(aim), std::move(pattern), sched

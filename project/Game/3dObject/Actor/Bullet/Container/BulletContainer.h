@@ -41,6 +41,16 @@ public:
 	const std::list<std::shared_ptr<BaseBullet>>& GetBullets(BulletID id) const;
 	std::string_view GetTypeName() const override{ return "BulletContainer"; }
 
+	template<class Fn>
+	void ForEachBullet(Fn&& fn) const {
+		for (auto& [id, lst] : typedBullets_) {
+			for (auto& sp : lst) {
+				if (sp) fn(*sp);
+			}
+		}
+	}
+
+
 protected:
 	//===================================================================*/
 	//					protected variables

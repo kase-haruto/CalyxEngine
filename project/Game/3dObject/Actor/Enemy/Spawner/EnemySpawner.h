@@ -31,6 +31,7 @@ public:
 	void SetSpawnInterval(float interval) { spawnInterval_ = interval; }
 	void SetSpawnArea(const Vector3& min, const Vector3& max) { spawnAreaMin_ = min; spawnAreaMax_ = max; }
 	void SetRotationDir(const Vector3& dir) { rotationDir_ = dir; }
+	void SetRoute(const SplineData& s);
 
 	void SetPlayerTransform(WorldTransform* playerTransform);
 	void SetDirectory(IEnemyDirectory* dir) { directory_ = dir; }
@@ -38,11 +39,12 @@ public:
 	std::string_view GetTypeName() const override { return "EnemySpawner"; }
 
 private:
-	void UpdateProximity_();
-	void DespawnAll_();
+	void UpdateProximity();
+	void DespawnAll();
 
 	void Spawn();
 	void GarbageCollectDead();
+	bool LoadRouteFromJson(const std::string& path);
 
 	// ====== util ======
 	static float Distance_(const Vector3& a, const Vector3& b, bool useXZ);
@@ -56,10 +58,11 @@ private:
 
 	Vector3 rotationDir_ = { 0,1,0 };
 	float   rotationSpeed_ = 1.0f;
+	SplineData enemyMoveRoute_;
 
 	// タイマーは「アクティブ時のみ」進む
-	float   spawnTimer_ = 5.0f;
-	float   spawnInterval_ = 5.0f;
+	float   spawnTimer_ = 0.0f;
+	float   spawnInterval_ = 1.0f;
 
 	Vector3 spawnAreaMin_ = { -10.0f, 0.0f, -30.0f };
 	Vector3 spawnAreaMax_ = { 10.0f, 5.0f, -30.0f };
@@ -67,9 +70,10 @@ private:
 	// ====== 近接起動パラメータ ======
 	bool  isActive_ = false;   // 近接で true、遠離で false
 	bool  useXZDistance_ = true;    // 水平距離で判定（XZ）
-	float activationRadius_ = 200.0f;   // 起動半径（以内で起動）
-	float deactivationRadius_ = 100.0f;  // 停止半径（以上で停止＆デスポーン）
+	float activationRadius_ = 150.0f;   // 起動半径（以内で起動）
+	float deactivationRadius_ = 200.0f;  // 停止半径（以上で停止＆デスポーン）
 
 private:
 	ConfigurableObject<EnemySpawnerConfig> config_;
+	std::string moveRoutePath_ = "Resources/Assets/Spline/EnemyMoveRouteR2L.json";
 };
