@@ -47,6 +47,9 @@ public:
 	void BindPath(const SplineData* path, float startT = 0.0f, bool loop = true, int arcSamplesPerSeg = 48) {
 		mover_.BindPath(path, startT, loop, arcSamplesPerSeg);
 	}
+	void SetSpawnerAnchor(const WorldTransform* spawnerTf) {
+		mover_.SetAnchor(spawnerTf, /*inheritPos=*/true, /*inheritRot=*/true);
+	}
 	void SetPathWorldSpeed(float mps) { mover_.SetWorldSpeed(mps); }
 	void SetPathLookMode(SplineFollower::LookMode m) { mover_.SetLookMode(m); }
 	void SetPathYOffset(float y) { mover_.SetYOffset(y); }

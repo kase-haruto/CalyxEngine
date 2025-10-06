@@ -31,6 +31,7 @@ public:
 	void SetSpawnInterval(float interval) { spawnInterval_ = interval; }
 	void SetSpawnArea(const Vector3& min, const Vector3& max) { spawnAreaMin_ = min; spawnAreaMax_ = max; }
 	void SetRotationDir(const Vector3& dir) { rotationDir_ = dir; }
+	void SetRoute(const SplineData& s);
 
 	void SetPlayerTransform(WorldTransform* playerTransform);
 	void SetDirectory(IEnemyDirectory* dir) { directory_ = dir; }
@@ -38,11 +39,12 @@ public:
 	std::string_view GetTypeName() const override { return "EnemySpawner"; }
 
 private:
-	void UpdateProximity_();
-	void DespawnAll_();
+	void UpdateProximity();
+	void DespawnAll();
 
 	void Spawn();
 	void GarbageCollectDead();
+	bool LoadRouteFromJson(const std::string& path);
 
 	// ====== util ======
 	static float Distance_(const Vector3& a, const Vector3& b, bool useXZ);
@@ -56,6 +58,7 @@ private:
 
 	Vector3 rotationDir_ = { 0,1,0 };
 	float   rotationSpeed_ = 1.0f;
+	SplineData enemyMoveRoute_;
 
 	// タイマーは「アクティブ時のみ」進む
 	float   spawnTimer_ = 5.0f;
@@ -72,4 +75,5 @@ private:
 
 private:
 	ConfigurableObject<EnemySpawnerConfig> config_;
+	std::string moveRoutePath_ = "Resources/Assets/Spline/EnemyMoveRouteR2L.json";
 };

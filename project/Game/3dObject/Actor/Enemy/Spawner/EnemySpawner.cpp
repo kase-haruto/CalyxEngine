@@ -4,15 +4,23 @@
 #include <Engine/Scene/Utility/SceneUtility.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
+#include <Engine/Objects/3D/Geometory/Spline/SplineJson.h>
 
 #include <Game/Installer/Enemy/EnemyInstaller.h>
 #include <Game/3dObject/Actor/Enemy/Directory/IEnemyDirectory.h>
+
 
 #include <externals/imgui/imgui.h>
 #include <cmath>
 
 EnemySpawner::EnemySpawner(const std::string& name) : SceneObject() {
 	SetName(name, ObjectType::GameObject);
+
+	if (!LoadRouteFromJson(moveRoutePath_)) {
+		enemyMoveRoute_ = SplineData{};
+		enemyMoveRoute_.closed = false;
+		enemyMoveRoute_.BuildArcTable();
+	}
 }
 
 void EnemySpawner::Update(float dt) {
@@ -20,7 +28,7 @@ void EnemySpawner::Update(float dt) {
 	// worldTransform_.eulerRotation += rot;
 	// worldTransform_.rotationSource = RotationSource::Euler;
 
-	UpdateProximity_();
+	UpdateProximity();
 
 	if (isActive_) {
 		// 現在の生存数を数える（死体は別途回収）
@@ -116,13 +124,27 @@ void EnemySpawner::ExtractConfigToJson(nlohmann::json& j) const {
 	config_.ExtractConfigToJson(j);
 }
 
-void EnemySpawner::UpdateProximity_() {
+void EnemySpawner::SetRoute(const SplineData& s) {
+	enemyMoveRoute_ = s;
+	enemyMoveRoute_.BuildArcTable();
+}
+
+bool EnemySpawner::LoadRouteFromJson(const std::string& path) {
+	SplineData tmp;
+	if (!SplineJson::Load(path, tmp)) { // JSON から読み込み
+		return false;
+	}
+	SetRoute(tmp);
+	return true;
+}
+
+void EnemySpawner::UpdateProximity() {
 	// プレイヤー不在なら起動しない（ゲーム開始直後の暴発防止）
 	if (!playerTransform_) {
 		if (isActive_) {
 			isActive_ = false;
 			spawnTimer_ = 0.0f;
-			DespawnAll_();
+			DespawnAll();
 		}
 		return;
 	}
@@ -143,7 +165,7 @@ void EnemySpawner::UpdateProximity_() {
 		if (d >= deactivationRadius_) {
 			isActive_ = false;
 			spawnTimer_ = 0.0f;    // 非アクティブ中はタイマー蓄積しない
-			DespawnAll_();         // このスポナーの敵をまとめて消す
+			DespawnAll();         // このスポナーの敵をまとめて消す
 		}
 	}
 }
@@ -155,11 +177,13 @@ void EnemySpawner::Spawn() {
 
 	enemy->Initialize();
 	enemy->SetPlayerTransform(playerTransform_);
+	enemy->SetRouteSpline(enemyMoveRoute_);
 
 	// 位置と親子付け（ローカルでランダム）
 	Vector3 localOffset = Random::GenerateVector3(spawnAreaMin_, spawnAreaMax_);
 	enemy->SetPosition(localOffset);
 	enemy->SetParent(&worldTransform_);
+	enemy->SetSpawnerAnchor(&worldTransform_);
 
 	// 自前リストに登録
 	spawnedEnemies_.push_back(enemy);
@@ -167,7 +191,7 @@ void EnemySpawner::Spawn() {
 	if (directory_) { directory_->Register(enemy); }
 }
 
-void EnemySpawner::DespawnAll_() {
+void EnemySpawner::DespawnAll() {
 	auto* lib = SceneContext::Current()->GetObjectLibrary();
 	for (auto& e : spawnedEnemies_) {
 		if (e) {
