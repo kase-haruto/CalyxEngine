@@ -13,6 +13,7 @@
 #include <Game/Battle/Shooting/Details/IShootSink.h>
 #include <Game/Battle/Shooting/Details/FireScheduler.h>
 #include <Game/Battle/Shooting/ShootingController/BulletEmitter.h>
+#include <Game/Battle/Movement/FollowSpline/SplineFollower.h>
 
 /* ========================================================================
 /* enemy
@@ -43,6 +44,15 @@ public:
 	void SetPlayerTransform(const WorldTransform* position);
 	void SetRouteSpline(const SplineData& data);
 
+	void BindPath(const SplineData* path, float startT = 0.0f, bool loop = true, int arcSamplesPerSeg = 48) {
+		mover_.BindPath(path, startT, loop, arcSamplesPerSeg);
+	}
+	void SetPathWorldSpeed(float mps) { mover_.SetWorldSpeed(mps); }
+	void SetPathLookMode(SplineFollower::LookMode m) { mover_.SetLookMode(m); }
+	void SetPathYOffset(float y) { mover_.SetYOffset(y); }
+	void SetPathTarget(const WorldTransform* t) { mover_.SetTargetTransform(t); }
+	bool PathFinished() const { return mover_.IsFinished(); }
+
 	const Vector3 GetCenterPos() const override;
 	void SetGameplayEngaged(bool v) { gameplayEngaged_ = v; }
 	bool IsGameplayEngaged() const { return gameplayEngaged_; }
@@ -66,10 +76,12 @@ private:
 	//===================================================================*/
 	const WorldTransform* playerTransform_ = nullptr;
 	DeathState deathState_ = DeathState::Alive;
-	SplineData moveRoute_;					//< 移動ルート
+	SplineFollower mover_;					//< 移動
+	SplineData moveRoute_{};				//< 経路データ
 	Vector3 deathRotateAxis_ = { 0, 0, 1 };	//< 傾く軸
 	Vector3 basePosition_{};				//< サイン波の基準位置
 
+	bool hasRoute_ = false;					//< 移動ルートを取得済みか
 	bool isHit_ = false;					//< 衝突フラグ
 	bool isDead_ = false;					//< 死んだフラグ
 	bool gameplayEngaged_ = false;			//<
@@ -84,5 +96,4 @@ private:
 	std::unique_ptr<EnemyShootingController> shootingController_;  //< 下流コントローラ
 	std::shared_ptr<ParticleSystemObject> hitFx_;
 	std::shared_ptr<ParticleSystemObject> explosionFx_;
-
 };

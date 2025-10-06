@@ -41,6 +41,12 @@ Enemy::Enemy(const std::string& modelName, const std::string objName)
 
 	explosionFx_ = SceneAPI::Instantiate<ParticleSystemObject>("explosionFx");
 	explosionFx_->LoadConfig("Resources/Assets/Configs/Effect/Explosion.json");
+
+	// --- スプライン追従の既定値 ---
+	mover_.SetWorldSpeed(12.0f);                      // 等速（m/s）
+	mover_.SetLookMode(SplineFollower::LookMode::TowardsTarget); // 既存仕様：基本はプレイヤーへ向く
+	mover_.SetYOffset(0.0f);
+	mover_.SetLoop(false);                            // デフォルトは終端で停止
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -61,7 +67,12 @@ void Enemy::Initialize() {
 	explosionFx_->Stop();
 
 	// shootingController_ / playerTransform_ のセット順が分からない場合に備えて
-	// ここでは emitter_ を作らず、Update() 内で BuildEmitterIfReady_() を呼びます。
+	// ここでは emitter_ を作らず、Update() 内で BuildEmitterIfReady() を呼びます。
+
+	// もし経路が既に与えられていたら、ターゲットTFだけここで関連付け
+	if (hasRoute_) {
+		mover_.SetTargetTransform(playerTransform_);
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -92,10 +103,8 @@ void Enemy::Update(float dt) {
 		// 下流コントローラの更新
 		if (shootingController_) {
 			shootingController_->SetGameplayEngaged(this->IsGameplayEngaged());
-
 			// 従来の単発発射は停止（弾幕は emitter_ が担当）
 			// if (this->IsGameplayEngaged()) { Shoot(); }
-
 			shootingController_->Update(dt);
 		}
 
@@ -116,27 +125,35 @@ void Enemy::Update(float dt) {
 			emitter_->Update(dt, cxt);
 		}
 
-		// 方向合わせ（プレイヤーへ）
-		{
+		// =========================
+		//   スプライン追従による移動
+		// =========================
+		if (hasRoute_) {
+			// プレイヤー参照が後から入るケースに対応
+			mover_.SetTargetTransform(playerTransform_);
+
+			// スプライン上を等速で進め、向きも更新
+			mover_.Update(dt);
+			worldTransform_.translation = mover_.GetPosition();
+			worldTransform_.rotation = mover_.GetRotation();
+		} else {
+			// フォールバック：従来の波移動（経路未設定時のみ）
+			waveTime_ += dt * waveSpeed_;
+			float offsetY = std::sin(waveTime_) * waveAmplitude_;
+			worldTransform_.translation = basePosition_ + Vector3{ 0, offsetY, 0 };
+
+			// 方向合わせ（プレイヤーへ）
 			const Vector3 myPos = GetWorldPosition();
 			const Vector3 targetPos = playerTransform_ ? playerTransform_->GetWorldPosition() : myPos;
-
 			Vector3 d = targetPos - myPos;
 			if (d.LengthSquared() > 1e-12f) {
 				d = d.Normalize();
-
 				const float yaw = std::atan2(d.x, d.z);                               // 水平旋回
 				const float pitch = std::atan2(-d.y, std::sqrt(d.x * d.x + d.z * d.z)); // 上下（LH）
-
 				const Quaternion qWorld = Quaternion::MakeRotateY(yaw) * Quaternion::MakeRotateX(pitch);
 				worldTransform_.rotation = qWorld;
 			}
 		}
-
-		// 波移動
-		waveTime_ += dt * waveSpeed_;
-		float offsetY = std::sin(waveTime_) * waveAmplitude_;
-		worldTransform_.translation = basePosition_ + Vector3{ 0, offsetY, 0 };
 		return;
 	}
 
@@ -152,7 +169,8 @@ void Enemy::Update(float dt) {
 		worldTransform_.rotation =
 			Quaternion::MakeRotateAxisQuaternion(deathRotateAxis_, rad);
 
-		worldTransform_.translation = basePosition_; // 移動しない
+		// 倒れ演出中は移動しない（位置固定）
+		// worldTransform_.translation = basePosition_;
 
 		// 演出が終わり、爆発も再生終了したら Dead へ
 		if (t >= 1.0f && !explosionFx_->IsPlaying()) {
@@ -211,15 +229,27 @@ void Enemy::SetShootingController(std::unique_ptr<EnemyShootingController> contr
 /////////////////////////////////////////////////////////////////////////////////////////
 //      プレイヤーのtfをセット
 /////////////////////////////////////////////////////////////////////////////////////////
-void Enemy::SetPlayerTransform(const WorldTransform* tf) { playerTransform_ = tf; }
+void Enemy::SetPlayerTransform(const WorldTransform* tf) {
+	playerTransform_ = tf;
+	// 追従の向きが TowardsTarget のときに参照される
+	mover_.SetTargetTransform(playerTransform_);
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//      移動ルートせってい
+//      移動ルートせってい（★スプライン追従に更新）
 /////////////////////////////////////////////////////////////////////////////////////////
-void Enemy::SetRouteSpline(const SplineData& data) { moveRoute_ = data; }
+void Enemy::SetRouteSpline(const SplineData& data) {
+	moveRoute_ = data;
+	moveRoute_.BuildArcTable(48); // 等速化のLUTを構築
+	mover_.BindPath(&moveRoute_, /*startT=*/0.0f, /*loop=*/false, /*arc*/48);
+	// 既定：プレイヤー方向に向く（Railと並べて沿わせたいなら AlongPath に変更可）
+	mover_.SetLookMode(SplineFollower::LookMode::TowardsTarget);
+	mover_.SetTargetTransform(playerTransform_);
+	hasRoute_ = (moveRoute_.SegmentCount() > 0);
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//      移動
+//      移動（未使用：スプライン追従が担当）
 /////////////////////////////////////////////////////////////////////////////////////////
 void Enemy::Move() {}
 

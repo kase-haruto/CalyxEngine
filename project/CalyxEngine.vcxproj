@@ -391,6 +391,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Application\UI\Panels\SplineEditorPanel.cpp" />
     <ClCompile Include="Game\UI\Controller\TitleMenuController.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Boss\Service\RailProgressBossSpawnService.cpp" />
+    <ClCompile Include="Game\Battle\Movement\FollowSpline\SplineFollower.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Foundation\Math\MathUtil.h" />
@@ -693,6 +694,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </ClInclude>
     <ClInclude Include="Engine\Application\UI\Panels\SplineEditorPanel.h" />
     <ClInclude Include="Game\UI\Controller\TitleMenuController.h" />
+    <ClInclude Include="Game\Battle\Movement\FollowSpline\SplineFollower.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">

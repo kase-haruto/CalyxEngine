@@ -39,7 +39,7 @@ public:
 
 private:
 	// 内部ユーティリティ
-	inline int CountP() const { return (int)points.size(); }
+	inline int CountP() const { return  (int)points.size(); }
 	int WrapIndex(int i) const;
 	void SegmentAndLocalT(float t, int& seg, float& lt) const;
 	static Vector3 CatmullRom(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& p3, float t);
