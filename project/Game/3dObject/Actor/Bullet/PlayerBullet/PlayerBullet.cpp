@@ -23,6 +23,7 @@ PlayerBullet::PlayerBullet(const std::string& modelName, const std::string& name
 	auto* boxCollider = dynamic_cast<BoxCollider*>(collider_.get());
 	boxCollider->SetSize(Vector3(3.0f, 3.0f, 3.0f));
 
+	moveSpeed_ *= 1.5f;
 }
 
 PlayerBullet::~PlayerBullet() = default;

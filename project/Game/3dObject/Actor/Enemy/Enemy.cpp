@@ -107,10 +107,27 @@ void Enemy::Update(float dt) {
 			// プレイヤー参照が後から入るケースに対応
 			mover_.SetTargetTransform(playerTransform_);
 
-			// スプライン上を等速で進め、向きも更新（アンカー適用は mover_ 側）
+			// スプライン上を等速で進める（アンカー適用は mover_ 側）
 			mover_.Update(dt);
-			worldTransform_.translation = mover_.GetPosition();
-			worldTransform_.rotation = mover_.GetRotation();
+
+			// 基本位置：スプライン上の位置
+			const Vector3 basePos = mover_.GetPosition();
+
+			// 波移動（ワールドYに揺らぎを加算）
+			waveTime_ += dt * waveSpeed_;
+			const float offsetY = std::sin(waveTime_) * waveAmplitude_;
+			worldTransform_.translation = basePos + Vector3{ 0, offsetY, 0 };
+
+			// 方向合わせ（プレイヤーへ）
+			const Vector3 myPos = worldTransform_.translation;
+			const Vector3 targetPos = playerTransform_ ? playerTransform_->GetWorldPosition() : myPos;
+			Vector3 d = targetPos - myPos;
+			if (d.LengthSquared() > 1e-12f) {
+				d = d.Normalize();
+				const float yaw = std::atan2(d.x, d.z);                                  // 水平旋回
+				const float pitch = std::atan2(-d.y, std::sqrt(d.x * d.x + d.z * d.z));    // 上下（LH）
+				worldTransform_.rotation = Quaternion::MakeRotateY(yaw) * Quaternion::MakeRotateX(pitch);
+			}
 		} else {
 			// フォールバック：従来の波移動（経路未設定時のみ）
 			waveTime_ += dt * waveSpeed_;
@@ -123,8 +140,8 @@ void Enemy::Update(float dt) {
 			Vector3 d = targetPos - myPos;
 			if (d.LengthSquared() > 1e-12f) {
 				d = d.Normalize();
-				const float yaw = std::atan2(d.x, d.z);                                // 水平旋回
-				const float pitch = std::atan2(-d.y, std::sqrt(d.x * d.x + d.z * d.z));  // 上下（LH）
+				const float yaw = std::atan2(d.x, d.z);
+				const float pitch = std::atan2(-d.y, std::sqrt(d.x * d.x + d.z * d.z));
 				worldTransform_.rotation = Quaternion::MakeRotateY(yaw) * Quaternion::MakeRotateX(pitch);
 			}
 		}
@@ -156,7 +173,7 @@ void Enemy::Update(float dt) {
 	}
 
 	/* =============================================
-	   2. 倒れ演出中 (Dying)
+	    倒れ演出中 (Dying)
 	   =============================================*/
 	if (deathState_ == DeathState::Dying) {
 		deathTimer_ += dt;

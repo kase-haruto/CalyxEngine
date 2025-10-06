@@ -6,7 +6,7 @@
 struct EnemySpawnerConfig : public SceneObjectConfig {
 	float rotationSpeed = 1.0f;
 	Vector3 rotationDir = { 0.0f, 1.0f, 0.0f };
-	float spawnInterval = 5.0f;
+	float spawnInterval = 1.0f;
 	Vector3 spawnAreaMin = { -10.0f, 0.0f, -30.0f };
 	Vector3 spawnAreaMax = { 10.0f, 5.0f, -30.0f };
 	size_t maxSpawnCount = 5;

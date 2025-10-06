@@ -61,8 +61,8 @@ private:
 	SplineData enemyMoveRoute_;
 
 	// タイマーは「アクティブ時のみ」進む
-	float   spawnTimer_ = 5.0f;
-	float   spawnInterval_ = 5.0f;
+	float   spawnTimer_ = 0.0f;
+	float   spawnInterval_ = 1.0f;
 
 	Vector3 spawnAreaMin_ = { -10.0f, 0.0f, -30.0f };
 	Vector3 spawnAreaMax_ = { 10.0f, 5.0f, -30.0f };
@@ -70,7 +70,7 @@ private:
 	// ====== 近接起動パラメータ ======
 	bool  isActive_ = false;   // 近接で true、遠離で false
 	bool  useXZDistance_ = true;    // 水平距離で判定（XZ）
-	float activationRadius_ = 200.0f;   // 起動半径（以内で起動）
+	float activationRadius_ = 100.0f;   // 起動半径（以内で起動）
 	float deactivationRadius_ = 100.0f;  // 停止半径（以上で停止＆デスポーン）
 
 private:
