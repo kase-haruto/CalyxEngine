@@ -31,6 +31,8 @@ public:
 	void OnCollisionExit([[maybe_unused]] Collider* other)override {}
 
 	//--------- accessor -------------------------------------------------
+	Collider* GetCollider() { return BaseGameObject::GetCollider(); }
+
 private:
 	//===================================================================*/
 	//private methods

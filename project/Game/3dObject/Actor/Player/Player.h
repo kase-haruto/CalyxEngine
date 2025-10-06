@@ -14,6 +14,8 @@
 #include <Game/Battle/Shooting/ShootingController/PlayerShootingController.h>
 #include <Game/Input/PlayerInput/PlayerInputHandler.h>
 
+class EnemyDirectory;
+class PlayerDangerSense;
 class PlayerDodge;
 
 /* =========================================================================
@@ -26,10 +28,10 @@ public:
 	//=====================================================================
 	// Public Methods
 	//=====================================================================
-	Player() = default;
+	Player();
 	Player(const std::string& modelName,
 		   std::optional<std::string> objectName = std::nullopt);
-	virtual ~Player() = default;
+	virtual ~Player();
 
 	/* mainFunc =========================================================== */
 	void Initialize() override;
@@ -42,8 +44,8 @@ public:
 	void RequestShoot();
 	void RequestLockOn();
 
+	void AttachDangerSenseSource(EnemyDirectory* dir);
 	void RequestLockOnTargetClear();
-	std::string_view GetTypeName() const override { return "Player"; }
 
 	/* runtime ==============================================================*/
 	void Start() override;
@@ -62,6 +64,7 @@ public:
 	void SetInputHandler(std::unique_ptr<PlayerInputHandler> ih);
 
 	//getter
+	std::string_view GetTypeName() const override { return "Player"; }
 	std::vector<Sprite*> GetAllSprites();
 	const Vector3 GetCenterPos() const override;
 	float GetMoveSpeed() const { return moveSpeed_; }
@@ -85,6 +88,7 @@ private:
 	std::unique_ptr<PlayerShootingController>shootingController_;
 	std::unique_ptr<PlayerInputHandler> inputHandler_ = nullptr;
 	std::unique_ptr<PlayerDodge> dodge_;					//< ジャスト回避
+	std::unique_ptr<PlayerDangerSense> danger_;				//< 危機察知
 
 	Vector3 lastMoveVector_;								//< 最後の移動ベクトル
 	WorldTransform reticleTransform_;						//< レティクルのワールド変換

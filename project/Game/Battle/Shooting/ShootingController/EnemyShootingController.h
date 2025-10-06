@@ -24,6 +24,7 @@ public:
 
 	//--------- accessor --------------------------------------------------
 	float GetInterval() const override;
+	BulletContainer* GetbulletContaienr()const { return bulletContainer_.get(); }
 	void SetBulletContainer(std::unique_ptr<BulletContainer> container);
 
 	void SetExternalRateControl(bool v) { externalRateControl_ = v; }

@@ -38,52 +38,49 @@ enum class DodgeState {
 
 class PlayerDodge {
 public:
-	PlayerDodge();
-	~PlayerDodge();
+    using Callback = std::function<void()>;
 
-	using Callback = std::function<void()>;
+    void Initialize(Player* owner, const PlayerDodgeConfig& cfg = PlayerDodgeConfig());
+    void Update(float dt);
 
-	void Initialize(Player* owner, const PlayerDodgeConfig& cfg = PlayerDodgeConfig());
-	void Update(float dt);
+    void RequestDodge();
 
-	// 外部（PlayerInputHandler 等）から叩ける
-	void RequestDodge();
+    void SetPerfectHintActive(bool v) { perfectHintActive_ = v; }
 
-	// true を返したら「このヒットは無効化済み」（ダメージを通さない）
-	bool HandlesHitNow();
+    bool WouldBePerfectIfDodgedNow() const { return perfectHintActive_; }
 
-	bool IsDodging()  const { return state_ != DodgeState::Idle; }
-	bool IsInIFrame() const { return state_ == DodgeState::IFrame; }
+    bool HandlesHitNow();
 
-	// コールバック（演出フック）
-	void SetOnDodgeStart(Callback cb) { onDodgeStart_ = std::move(cb); }
-	void SetOnDodgeEnd(Callback cb) { onDodgeEnd_ = std::move(cb); }
-	void SetOnPerfectDodge(Callback cb) { onPerfectDodge_ = std::move(cb); }
+    bool IsDodging()  const { return state_ != DodgeState::Idle; }
+    bool IsInIFrame() const { return state_ == DodgeState::IFrame; }
 
-	const PlayerDodgeConfig& GetConfig() const { return cfg_; }
-	void SetConfig(const PlayerDodgeConfig& c) { cfg_ = c; }
+    void SetOnDodgeStart(Callback cb) { onDodgeStart_ = std::move(cb); }
+    void SetOnDodgeEnd(Callback cb) { onDodgeEnd_ = std::move(cb); }
+    void SetOnPerfectDodge(Callback cb) { onPerfectDodge_ = std::move(cb); }
+
+    const PlayerDodgeConfig& GetConfig() const { return cfg_; }
+    void SetConfig(const PlayerDodgeConfig& c) { cfg_ = c; }
 
 private:
-	void ChangeState(DodgeState next);
-	void MoveOwnerBy(const Vector3& velocity);
+    void ChangeState(DodgeState next);
+    void MoveOwnerBy(const Vector3& velocity);
 
 private:
-	Player* owner_ = nullptr;
-	PlayerDodgeConfig cfg_{};
+    Player* owner_ = nullptr;
+    PlayerDodgeConfig cfg_{};
 
-	DodgeState state_{ DodgeState::Idle };
-	float timer_ = 0.0f;				//< 現在ステートの経過時間
-	float cooldown_ = 0.0f;				//< 残りクールダウン
+    DodgeState state_{ DodgeState::Idle };
+    float timer_ = 0.0f;
+    float cooldown_ = 0.0f;
 
-	// 時刻管理（ジャスト判定用）
-	float timeAccum_ = 0.0f;			//< 生存累積時刻
-	float lastInputTime_ = -9999.0f;	//< 最後に入力が通った時刻
+    float timeAccum_ = 0.0f;
+    float lastInputTime_ = -9999.0f;
 
-	// 方向
-	Vector3 dodgeDir_{ 0,0,1 };
+    Vector3 dodgeDir_{ 0,0,1 };
 
-	// 演出フック
-	Callback onDodgeStart_{};
-	Callback onDodgeEnd_{};
-	Callback onPerfectDodge_{};
+    bool perfectHintActive_ = false;
+
+    Callback onDodgeStart_{};
+    Callback onDodgeEnd_{};
+    Callback onPerfectDodge_{};
 };

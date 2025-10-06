@@ -226,6 +226,14 @@ const Vector3 Enemy::GetCenterPos() const {
 	return worldPos;
 }
 
+BulletContainer* Enemy::GetBulletContainer() {
+	return shootingController_ ? shootingController_->GetbulletContaienr() : nullptr;
+}
+
+const BulletContainer* Enemy::GetBulletContainer() const {
+	return shootingController_ ? shootingController_->GetbulletContaienr() : nullptr;
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //      親の設定
 /////////////////////////////////////////////////////////////////////////////////////////

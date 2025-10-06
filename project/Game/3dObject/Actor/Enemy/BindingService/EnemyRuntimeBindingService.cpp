@@ -18,7 +18,7 @@ void EnemyRuntimeBindingService::OnSceneLoaded(SceneContext& ctx) {
 	auto player = ctx.FindFirst<Player>();
 	PlayerInstaller{}.InstallPlayer(player);
 	wPlayer_ = player;
-
+	player->AttachDangerSenseSource(dir_.get());
 	WireAllSpawners_(ctx);
 }
 

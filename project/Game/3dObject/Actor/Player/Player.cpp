@@ -12,8 +12,8 @@
 #include <Engine/Objects/Collider/BoxCollider.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
-
 // game
+#include <Game/3dObject/Actor/Player/DangerSense/PlayerDangerSense.h>
 #include <Game/3dObject/Actor/Bullet/Container/PlayerBulletContainer.h>
 #include <Game/3dObject/Actor/Player/Dodge/PlayerDodge.h>
 
@@ -24,6 +24,9 @@
 
 // c++
 
+Player::Player() = default;
+Player::~Player() = default;
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //		コンストラクタ
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -32,9 +35,8 @@ Player::Player(const std::string& modelName,
 	: Actor::Actor(modelName, objectName) {
 	worldTransform_.translation = { 0.0f, 0.0f, 10.0f };
 	worldTransform_.scale = { 1.5f, 1.5f, 1.5f };
-
-
 }
+
 
 /* ======================================================================================
 /*		public functions
@@ -96,6 +98,12 @@ void Player::Initialize() {
 	dodge_->SetOnDodgeEnd([this]() {
 		SetColor(Vector4(1.0f));
 	});
+
+	if (!danger_) {
+		danger_ = std::make_unique<PlayerDangerSense>();
+		danger_->Initialize(this, dodge_.get(), {}); // UIやmarginは後で調整可
+	}
+
 }
 
 void Player::RefreshLifeUI() {
@@ -113,7 +121,8 @@ void Player::Update(float dt) {
 
 	if (shootingController_) { shootingController_->Update(dt); }
 
-	if (dodge_) dodge_->Update(dt);
+	if (dodge_)  dodge_->Update(dt);
+	if (danger_) danger_->Update(dt);
 
 	for (auto& sprite : lifeSprite_) { sprite->Update(); }
 
@@ -270,6 +279,10 @@ void Player::RequestLockOn() {
 	}
 }
 
+
+void Player::AttachDangerSenseSource(EnemyDirectory* dir) {
+	if (danger_) danger_->SetEnemyDirectory(dir);
+}
 
 void Player::RequestLockOnTargetClear() {
 	lockedOnTargets_.clear();
@@ -437,9 +450,12 @@ void Player::SetParent(WorldTransform* parent) { worldTransform_.parent = parent
 
 std::vector<Sprite*> Player::GetAllSprites() {
 	std::vector<Sprite*> sprites;
-	for (auto& s : reticleSprites_)sprites.push_back(s.get());
-	for (auto& s : lifeSprite_) sprites.push_back(s.get());
-	for (auto& s : lockOnSprites_) sprites.push_back(s.get());
+	for (auto& s : reticleSprites_) sprites.push_back(s.get());
+	for (auto& s : lifeSprite_)     sprites.push_back(s.get());
+	for (auto& s : lockOnSprites_)  sprites.push_back(s.get());
+
+	// 危険UI
+	if (danger_ && danger_->GetUiSprite()) sprites.push_back(danger_->GetUiSprite());
 	return sprites;
 }
 

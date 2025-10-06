@@ -60,6 +60,10 @@ public:
 	void SetGameplayEngaged(bool v) { gameplayEngaged_ = v; }
 	bool IsGameplayEngaged() const { return gameplayEngaged_; }
 
+	BulletContainer* GetBulletContainer();
+	const BulletContainer* GetBulletContainer() const;
+
+
 protected:
 	//===================================================================*/
 	//                      protected methods

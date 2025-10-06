@@ -4,7 +4,7 @@
 #include "Collider.h"
 
 class BoxCollider :
-	public Collider{
+	public Collider {
 public:
 	//===================================================================*/
 	//                   public methods
@@ -21,10 +21,13 @@ public:
 
 
 	//* collision ==========================================*//
-	void OnCollisionEnter([[maybe_unused]] Collider* other)override{};
-	void OnCollisionStay([[maybe_unused]] Collider* other)override{};
-	void OnCollisionExit([[maybe_unused]] Collider* other)override{};
+	void OnCollisionEnter([[maybe_unused]] Collider* other)override {};
+	void OnCollisionStay([[maybe_unused]] Collider* other)override {};
+	void OnCollisionExit([[maybe_unused]] Collider* other)override {};
 
+
+	float GetColliderRadius()const override { return shape_.size.x * 0.5f; }
+	const Vector3& GetSize()const {return shape_.size; }
 protected:
 	//===================================================================*/
 	//                   private methods
