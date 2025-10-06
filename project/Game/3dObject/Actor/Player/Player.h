@@ -115,4 +115,5 @@ private:
 	float invincibleTimer_ = 0.0f; // >0 の間は無敵
 	// 見た目に使いたければトグル点滅など
 	float invincibleBlinkAccum_ = 0.0f;
+	bool  invincibleBlinkState_ = true;
 };

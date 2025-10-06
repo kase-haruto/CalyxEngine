@@ -29,6 +29,12 @@
 Player::Player() = default;
 Player::~Player() = default;
 
+namespace {
+	constexpr float kHitIFrameSec = 1.0f;
+	constexpr float kBlinkHz = 12.0f;  // 点滅周波数
+	constexpr float kBlinkInterval = 1.0f / kBlinkHz;
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //		コンストラクタ
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -314,16 +320,18 @@ void Player::OnCollisionEnter(Collider* other) {
 	if (!other) return;
 	if (other->GetType() != ColliderType::Type_EnemyAttack) return;
 
-	// 回避成功でだーめーじ無効
-	if ((dodge_ && dodge_->HandlesHitNow()) || !CanBeDamaged()) {
-		return;
-	}
+	// 回避のi-frameや既存の無敵ならダメージ無視
+	if ((dodge_ && dodge_->HandlesHitNow()) || !CanBeDamaged()) return;
 
-	if (life_ >= 1) {
-		life_--;
-		//lifeSpriteを適用
+	// ===== 被弾確定 =====
+	if (life_ > 0) {
+		--life_;
 		RefreshLifeUI();
 	}
+
+	// 被弾後の無敵を1秒付与
+	SetInvincibleFor(kHitIFrameSec);
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -495,8 +503,16 @@ void Player::SetInputHandler(std::unique_ptr<PlayerInputHandler> ih) { inputHand
 
 void Player::SetInvincibleFor(float seconds) {
 	if (seconds <= 0.0f) return;
-	// すでに無敵中なら、残り時間と比較して長い方に
+
+	const bool wasInvincible = IsInvincible();
 	invincibleTimer_ = (std::max)(invincibleTimer_, seconds);
+
+	if (!wasInvincible) {
+		// 無敵開始
+		invincibleBlinkAccum_ = 0.0f;
+		invincibleBlinkState_ = false;
+		SetDrawEnable(false);
+	}
 }
 
 bool Player::IsInvincible() const {
@@ -504,14 +520,24 @@ bool Player::IsInvincible() const {
 }
 
 void Player::UpdateInvincibility(float dt) {
-	if (invincibleTimer_ > 0.0f) {
-		invincibleTimer_ -= dt;
-		if (invincibleTimer_ <= 0.0f) {
-			invincibleTimer_ = 0.0f;
-			invincibleBlinkAccum_ = 0.0f;
-		} else {
-			invincibleBlinkAccum_ += dt;
-		}
+	if (invincibleTimer_ <= 0.0f) return;
+
+	invincibleTimer_ -= dt;
+	if (invincibleTimer_ <= 0.0f) {
+		// 無敵終了：確実に表示ONへ戻す
+		invincibleTimer_ = 0.0f;
+		invincibleBlinkAccum_ = 0.0f;
+		invincibleBlinkState_ = true;
+		SetDrawEnable(true);
+		return;
+	}
+
+	// 無敵中は一定間隔で描画トグル
+	invincibleBlinkAccum_ += dt;
+	while (invincibleBlinkAccum_ >= kBlinkInterval) {
+		invincibleBlinkAccum_ -= kBlinkInterval;
+		invincibleBlinkState_ = !invincibleBlinkState_;
+		SetDrawEnable(invincibleBlinkState_);
 	}
 }
 
