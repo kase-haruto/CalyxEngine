@@ -16,6 +16,8 @@
 #include <Game/3dObject/Actor/Player/DangerSense/PlayerDangerSense.h>
 #include <Game/3dObject/Actor/Bullet/Container/PlayerBulletContainer.h>
 #include <Game/3dObject/Actor/Player/Dodge/PlayerDodge.h>
+#include <Game/3dObject/Actor/Player/Dodge/PlayerDodgeMotion.h>
+
 
 // externals
 #include <externals/imgui/imgui.h>
@@ -50,7 +52,7 @@ void Player::Initialize() {
 	reticleTransform_.Initialize();
 	auto ctx = SceneContext::Current();
 	reticleTransform_.parent = &ctx->GetCameraMgr()->GetMain3d()->GetWorldTransform();
-	reticleTransform_.translation = Vector3(0.0f, 0.0f, 50.0f);
+	reticleTransform_.translation = Vector3(0.0f, 0.0f, 80.0f);
 
 	collider_->SetType(ColliderType::Type_Player);
 	collider_->SetTargetType(ColliderType::Type_PlayerAttack);
@@ -86,22 +88,26 @@ void Player::Initialize() {
 
 
 	 // ---- 回避コンポーネント ----
-	dodge_ = std::make_unique<PlayerDodge>();
-	PlayerDodgeConfig dodgeCfg;
-	dodge_->Initialize(this, dodgeCfg);
+	if (!dodge_) {
+		PlayerDodgeConfig cfg;
+		cfg.useCustomCurve = true;
+		cfg.lateralScale = 0.0f;
+		cfg.backwardScale = 0.70f;
+		cfg.spinTurns = 1.0f;
+		dodge_ = std::make_unique<PlayerDodge>();
+		dodge_->Initialize(this, cfg);
+	}
 
-	// 回避したときの演出 デバッグ用に色変える
-	dodge_->SetOnDodgeStart([this]() {
-		SetColor(Vector4(1.0f, 0.0f, 0.0f));
-	});
-
-	dodge_->SetOnDodgeEnd([this]() {
-		SetColor(Vector4(1.0f));
-	});
-
+	// 危険察知
 	if (!danger_) {
 		danger_ = std::make_unique<PlayerDangerSense>();
 		danger_->Initialize(this, dodge_.get(), {}); // UIやmarginは後で調整可
+	}
+
+	// 回避モーション
+	if (!dodgeMotion_) {
+		dodgeMotion_ = std::make_unique<PlayerDodgeMotion>();
+		dodgeMotion_->Initialize(this, dodge_.get());
 	}
 
 }
@@ -123,9 +129,12 @@ void Player::Update(float dt) {
 
 	if (dodge_)  dodge_->Update(dt);
 	if (danger_) danger_->Update(dt);
+	if (dodgeMotion_) dodgeMotion_->Update(dt);
 
 	for (auto& sprite : lifeSprite_) { sprite->Update(); }
 
+	// 無敵時間
+	UpdateInvincibility(dt);
 
 	reticleTransform_.Update();
 
@@ -306,7 +315,9 @@ void Player::OnCollisionEnter(Collider* other) {
 	if (other->GetType() != ColliderType::Type_EnemyAttack) return;
 
 	// 回避成功でだーめーじ無効
-	if (dodge_ && dodge_->HandlesHitNow()) return;
+	if ((dodge_ && dodge_->HandlesHitNow()) || !CanBeDamaged()) {
+		return;
+	}
 
 	if (life_ >= 1) {
 		life_--;
@@ -480,5 +491,28 @@ std::optional<const float> Player::GetMaxShootInterval() const {
 void Player::SetShootingController(std::unique_ptr<PlayerShootingController> sc) { shootingController_ = std::move(sc); }
 
 void Player::SetInputHandler(std::unique_ptr<PlayerInputHandler> ih) { inputHandler_ = std::move(ih); }
+
+
+void Player::SetInvincibleFor(float seconds) {
+	if (seconds <= 0.0f) return;
+	// すでに無敵中なら、残り時間と比較して長い方に
+	invincibleTimer_ = (std::max)(invincibleTimer_, seconds);
+}
+
+bool Player::IsInvincible() const {
+	return invincibleTimer_ > 0.0f;
+}
+
+void Player::UpdateInvincibility(float dt) {
+	if (invincibleTimer_ > 0.0f) {
+		invincibleTimer_ -= dt;
+		if (invincibleTimer_ <= 0.0f) {
+			invincibleTimer_ = 0.0f;
+			invincibleBlinkAccum_ = 0.0f;
+		} else {
+			invincibleBlinkAccum_ += dt;
+		}
+	}
+}
 
 REGISTER_SCENE_OBJECT(Player)

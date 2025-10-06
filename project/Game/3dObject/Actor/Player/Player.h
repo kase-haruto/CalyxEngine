@@ -17,6 +17,7 @@
 class EnemyDirectory;
 class PlayerDangerSense;
 class PlayerDodge;
+class PlayerDodgeMotion;
 
 /* =========================================================================
    Player Class
@@ -62,6 +63,8 @@ public:
 	}
 	void SetShootingController(std::unique_ptr<PlayerShootingController> sc);
 	void SetInputHandler(std::unique_ptr<PlayerInputHandler> ih);
+	void SetInvincibleFor(float seconds); // 指定秒数だけ無敵にする（重ねがけは長い方を優先）
+	bool CanBeDamaged() const { return !IsInvincible(); }
 
 	//getter
 	std::string_view GetTypeName() const override { return "Player"; }
@@ -81,6 +84,10 @@ private:
 	void UpdateReticlePosition();
 	void UpdateTilt(const Vector3& moveVector);
 
+	// === 無敵API ===
+	bool IsInvincible() const;
+	void UpdateInvincibility(float dt);
+
 private:
 	//=====================================================================
 	// Private Variables
@@ -89,6 +96,7 @@ private:
 	std::unique_ptr<PlayerInputHandler> inputHandler_ = nullptr;
 	std::unique_ptr<PlayerDodge> dodge_;					//< ジャスト回避
 	std::unique_ptr<PlayerDangerSense> danger_;				//< 危機察知
+	std::unique_ptr<PlayerDodgeMotion> dodgeMotion_;		//< 回避モーション
 
 	Vector3 lastMoveVector_;								//< 最後の移動ベクトル
 	WorldTransform reticleTransform_;						//< レティクルのワールド変換
@@ -101,4 +109,10 @@ private:
 	std::array<std::unique_ptr<Sprite>, 4> reticleSprites_;	//< レティクルのスプライト
 	std::vector<std::unique_ptr<Sprite>> lifeSprite_;		//< ライフゲージスプライト
 	std::vector<std::unique_ptr<Sprite>> lockOnSprites_;	//< ロックオンマーカー
+
+
+	// 無敵時かん用
+	float invincibleTimer_ = 0.0f; // >0 の間は無敵
+	// 見た目に使いたければトグル点滅など
+	float invincibleBlinkAccum_ = 0.0f;
 };

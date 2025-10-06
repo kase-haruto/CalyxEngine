@@ -11,23 +11,25 @@
 class Player; // 前方宣言
 
 struct PlayerDodgeConfig {
-	int   dodgeKey = DIK_LSHIFT;	//< 受付キー
-	float distance = 6.0f;			//< 1回の回避距離（移動量）
-	float duration = 0.18f;			//< 実移動+i-frame 主区間 (IFrame)
-	float startup = 0.06f;			//< 予備動作
-	float recovery = 0.14f;			//< 後隙
-	float invuln = 0.20f;			//< IFrameの無敵時間（通常は duration と同等でOK）
-	float cooldown = 0.35f;			//< 連打防止
+	int dodgeKey = DIK_LSHIFT;
+	float distance = 10.0f;
+	float duration = 0.18f;
+	float startup = 0.06f;
+	float recovery = 0.14f;
+	float invuln = 0.20f;
+	float cooldown = 0.35f;
 
-	// ジャスト回避判定窓（入力時刻0を中心）
-	float perfectWindowBefore = 0.04f;		//< 入力直前の救済
-	float perfectWindowAfter = 0.12f;		//< 入力あとの先読み猶予
+	float perfectWindowBefore = 0.04f;
+	float perfectWindowAfter = 0.08f;
 
-	bool useCameraForward = true;			//< 方向決定
+	bool  useCameraForward = true;
 
-	// ジャスト成立時、Startup をスキップして即 I-Frame に入る（早送りする）
-	bool fastForwardToIFrameOnPerfect = true;
+	bool  useCustomCurve = true;   // IFrame直進を止め、モーション側に任せる
+	float spinTurns = 1.0f;   // Y軸回転回数（1.0=一回転）
+	float lateralScale = 0.0f;   // 横移動（今回は0で“後ろのみ”）
+	float backwardScale = 2.0f;  // 後ろ移動の強さ（0.60〜0.75推奨）
 };
+
 
 enum class DodgeState {
 	Idle,
@@ -38,49 +40,55 @@ enum class DodgeState {
 
 class PlayerDodge {
 public:
-    using Callback = std::function<void()>;
+	using Callback = std::function<void()>;
 
-    void Initialize(Player* owner, const PlayerDodgeConfig& cfg = PlayerDodgeConfig());
-    void Update(float dt);
+	void Initialize(Player* owner, const PlayerDodgeConfig& cfg = PlayerDodgeConfig());
+	void Update(float dt);
 
-    void RequestDodge();
+	void RequestDodge();
 
-    void SetPerfectHintActive(bool v) { perfectHintActive_ = v; }
+	void SetPerfectHintActive(bool v) { perfectHintActive_ = v; }
 
-    bool WouldBePerfectIfDodgedNow() const { return perfectHintActive_; }
+	bool WouldBePerfectIfDodgedNow() const { return perfectHintActive_; }
 
-    bool HandlesHitNow();
+	bool HandlesHitNow();
 
-    bool IsDodging()  const { return state_ != DodgeState::Idle; }
-    bool IsInIFrame() const { return state_ == DodgeState::IFrame; }
+	bool IsDodging()  const { return state_ != DodgeState::Idle; }
+	bool IsInIFrame() const { return state_ == DodgeState::IFrame; }
 
-    void SetOnDodgeStart(Callback cb) { onDodgeStart_ = std::move(cb); }
-    void SetOnDodgeEnd(Callback cb) { onDodgeEnd_ = std::move(cb); }
-    void SetOnPerfectDodge(Callback cb) { onPerfectDodge_ = std::move(cb); }
+		// モーション側が参照する情報
+	DodgeState GetState() const			{ return state_; }
+	float GetStateTime() const			{ return timer_; }
+	const Vector3& GetDodgeDir()  const	{ return dodgeDir_; }
+	const PlayerDodgeConfig& Cfg() const{ return cfg_; }
 
-    const PlayerDodgeConfig& GetConfig() const { return cfg_; }
-    void SetConfig(const PlayerDodgeConfig& c) { cfg_ = c; }
+	void SetOnDodgeStart(Callback cb) { onDodgeStart_ = std::move(cb); }
+	void SetOnDodgeEnd(Callback cb) { onDodgeEnd_ = std::move(cb); }
+	void SetOnPerfectDodge(Callback cb) { onPerfectDodge_ = std::move(cb); }
+
+	const PlayerDodgeConfig& GetConfig() const { return cfg_; }
+	void SetConfig(const PlayerDodgeConfig& c) { cfg_ = c; }
 
 private:
-    void ChangeState(DodgeState next);
-    void MoveOwnerBy(const Vector3& velocity);
+	void ChangeState(DodgeState next);
+	void MoveOwnerBy(const Vector3& velocity);
 
 private:
-    Player* owner_ = nullptr;
-    PlayerDodgeConfig cfg_{};
+	Player* owner_ = nullptr;
+	PlayerDodgeConfig cfg_{};
 
-    DodgeState state_{ DodgeState::Idle };
-    float timer_ = 0.0f;
-    float cooldown_ = 0.0f;
+	DodgeState state_{ DodgeState::Idle };
+	float timer_ = 0.0f;
+	float cooldown_ = 0.0f;
 
-    float timeAccum_ = 0.0f;
-    float lastInputTime_ = -9999.0f;
+	float timeAccum_ = 0.0f;
+	float lastInputTime_ = -9999.0f;
 
-    Vector3 dodgeDir_{ 0,0,1 };
+	Vector3 dodgeDir_{ 0,0,1 };
 
-    bool perfectHintActive_ = false;
+	bool perfectHintActive_ = false;
 
-    Callback onDodgeStart_{};
-    Callback onDodgeEnd_{};
-    Callback onPerfectDodge_{};
+	Callback onDodgeStart_{};
+	Callback onDodgeEnd_{};
+	Callback onPerfectDodge_{};
 };
