@@ -14,6 +14,8 @@
 #include <Game/Battle/Shooting/ShootingController/PlayerShootingController.h>
 #include <Game/Input/PlayerInput/PlayerInputHandler.h>
 
+class PlayerDodge;
+
 /* =========================================================================
    Player Class
    ========================================================================= */
@@ -82,6 +84,7 @@ private:
 	//=====================================================================
 	std::unique_ptr<PlayerShootingController>shootingController_;
 	std::unique_ptr<PlayerInputHandler> inputHandler_ = nullptr;
+	std::unique_ptr<PlayerDodge> dodge_;					//< ジャスト回避
 
 	Vector3 lastMoveVector_;								//< 最後の移動ベクトル
 	WorldTransform reticleTransform_;						//< レティクルのワールド変換

@@ -12,7 +12,10 @@
 #include <Engine/Objects/Collider/BoxCollider.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
+
+// game
 #include <Game/3dObject/Actor/Bullet/Container/PlayerBulletContainer.h>
+#include <Game/3dObject/Actor/Player/Dodge/PlayerDodge.h>
 
 // externals
 #include <externals/imgui/imgui.h>
@@ -25,12 +28,12 @@
 //		コンストラクタ
 /////////////////////////////////////////////////////////////////////////////////////////
 Player::Player(const std::string& modelName,
-	std::optional<std::string> objectName)
-	: Actor::Actor(modelName,objectName){
-	worldTransform_.translation = {0.0f, 0.0f, 10.0f};
-	worldTransform_.scale = {1.5f, 1.5f, 1.5f};
+			   std::optional<std::string> objectName)
+	: Actor::Actor(modelName, objectName) {
+	worldTransform_.translation = { 0.0f, 0.0f, 10.0f };
+	worldTransform_.scale = { 1.5f, 1.5f, 1.5f };
 
-	
+
 }
 
 /* ======================================================================================
@@ -40,12 +43,12 @@ Player::Player(const std::string& modelName,
 /////////////////////////////////////////////////////////////////////////////////////////
 //		初期化
 /////////////////////////////////////////////////////////////////////////////////////////
-void Player::Initialize(){
+void Player::Initialize() {
 	moveSpeed_ = 15.0f;
 	reticleTransform_.Initialize();
 	auto ctx = SceneContext::Current();
 	reticleTransform_.parent = &ctx->GetCameraMgr()->GetMain3d()->GetWorldTransform();
-	reticleTransform_.translation = Vector3(0.0f,0.0f,50.0f);
+	reticleTransform_.translation = Vector3(0.0f, 0.0f, 50.0f);
 
 	collider_->SetType(ColliderType::Type_Player);
 	collider_->SetTargetType(ColliderType::Type_PlayerAttack);
@@ -58,27 +61,41 @@ void Player::Initialize(){
 	life_ = 10;
 
 	lifeSprite_.resize(life_);
-	for (size_t i = 0; i < life_; i++){
+	for (size_t i = 0; i < life_; i++) {
 		lifeSprite_[i] = std::make_unique<Sprite>("Textures/life.png");
-		Vector2 pos = {100.0f * i + 30.0f, 50.0f};
-		lifeSprite_[i]->Initialize(pos,{64.0f, 64.0f});
+		Vector2 pos = { 100.0f * i + 30.0f, 50.0f };
+		lifeSprite_[i]->Initialize(pos, { 64.0f, 64.0f });
 	}
 	RefreshLifeUI();
 
 	//spriteの初期化
 	size_t spriteCount = reticleSprites_.size();
-	for (size_t i = 0; i < spriteCount; ++i){
+	for (size_t i = 0; i < spriteCount; ++i) {
 		reticleSprites_[i] = std::make_unique<Sprite>("Textures/reticle.png");
 
 		float t = static_cast<float>(i) / (spriteCount - 1);
-		float size = std::lerp(128.0f,16.0f,t);
-		Vector2 spriteSize(size,size);
+		float size = std::lerp(128.0f, 16.0f, t);
+		Vector2 spriteSize(size, size);
 
 		Vector2 initPos = kGameSize * 0.5f;
-		reticleSprites_[i]->Initialize(initPos,spriteSize);
-		reticleSprites_[i]->SetAnchorPoint(Vector2(0.5f,0.5f));
+		reticleSprites_[i]->Initialize(initPos, spriteSize);
+		reticleSprites_[i]->SetAnchorPoint(Vector2(0.5f, 0.5f));
 	}
 
+
+	 // ---- 回避コンポーネント ----
+	dodge_ = std::make_unique<PlayerDodge>();
+	PlayerDodgeConfig dodgeCfg;
+	dodge_->Initialize(this, dodgeCfg);
+
+	// 回避したときの演出 デバッグ用に色変える
+	dodge_->SetOnDodgeStart([this]() {
+		SetColor(Vector4(1.0f, 0.0f, 0.0f));
+	});
+
+	dodge_->SetOnDodgeEnd([this]() {
+		SetColor(Vector4(1.0f));
+	});
 }
 
 void Player::RefreshLifeUI() {
@@ -91,12 +108,15 @@ void Player::RefreshLifeUI() {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		更新
 /////////////////////////////////////////////////////////////////////////////////////////
-void Player::Update(float dt){
-	if (inputHandler_){ inputHandler_->Update(*this,dt); }
+void Player::Update(float dt) {
+	if (inputHandler_) { inputHandler_->Update(*this, dt); }
 
-	if (shootingController_){ shootingController_->Update(dt); }
+	if (shootingController_) { shootingController_->Update(dt); }
 
-	for (auto& sprite : lifeSprite_){ sprite->Update(); }
+	if (dodge_) dodge_->Update(dt);
+
+	for (auto& sprite : lifeSprite_) { sprite->Update(); }
+
 
 	reticleTransform_.Update();
 
@@ -109,7 +129,7 @@ void Player::Update(float dt){
 
 	Vector3 diff = (reticlePos - playerPos) * 0.5f;
 
-	for (size_t i = 0; i < spriteCount; ++i){
+	for (size_t i = 0; i < spriteCount; ++i) {
 		float t = static_cast<float>(i) / (spriteCount - 1);
 
 		Vector3 worldPos = playerPos + diff * t;
@@ -132,11 +152,11 @@ void Player::Update(float dt){
 	}
 
 	// ── ロックオンマーカー ─────────────────────────
-	for (size_t i = 0; i < lockOnSprites_.size();){
+	for (size_t i = 0; i < lockOnSprites_.size();) {
 		auto& enemy = lockedOnTargets_[i];
 
 		// 敵が死んだ・破棄されたら両方同時に消す
-		if (!enemy || !enemy->GetIsAlive()){
+		if (!enemy || !enemy->GetIsAlive()) {
 			lockedOnTargets_.erase(lockedOnTargets_.begin() + i);
 			lockOnSprites_.erase(lockOnSprites_.begin() + i);
 			continue; // erase したのでインデックスは進めない
@@ -152,13 +172,13 @@ void Player::Update(float dt){
 
 		// 軽いパルス演出（0.9 ↔ 1.1）
 		float scale = 1.0f + 0.1f * std::sin(r * 4.0f);
-		lockOnSprites_[i]->SetSize({64.0f * scale, 64.0f * scale});
+		lockOnSprites_[i]->SetSize({ 64.0f * scale, 64.0f * scale });
 
 		lockOnSprites_[i]->Update();
 		++i;
 	}
 
-	if (life_<=0) {
+	if (life_ <= 0) {
 		isAlive_ = false;
 	}
 }
@@ -166,13 +186,13 @@ void Player::Update(float dt){
 /////////////////////////////////////////////////////////////////////////////////////////
 //		描画
 /////////////////////////////////////////////////////////////////////////////////////////
-void Player::Draw([[maybe_unused]] ID3D12GraphicsCommandList* cmdList){}
+void Player::Draw([[maybe_unused]] ID3D12GraphicsCommandList* cmdList) {}
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		imgui
 /////////////////////////////////////////////////////////////////////////////////////////
-void Player::DerivativeGui(){ ImGui::DragFloat("moveSpeed",&moveSpeed_,0.01f,0.0f,10.0f); }
+void Player::DerivativeGui() { ImGui::DragFloat("moveSpeed", &moveSpeed_, 0.01f, 0.0f, 10.0f); }
 
 /* ======================================================================================
 /*		private functions
@@ -181,7 +201,7 @@ void Player::DerivativeGui(){ ImGui::DragFloat("moveSpeed",&moveSpeed_,0.01f,0.0
 ///////////////////////////////////////////////////////////////////////////////////
 //		playerの移動
 ///////////////////////////////////////////////////////////////////////////////////
-void Player::MoveBy(const Vector3& delta){
+void Player::MoveBy(const Vector3& delta) {
 	worldTransform_.translation += delta * ClockManager::GetInstance()->GetDeltaTime();
 	UpdateTilt(delta);
 }
@@ -189,28 +209,27 @@ void Player::MoveBy(const Vector3& delta){
 ///////////////////////////////////////////////////////////////////////////////////
 //		レティクルの移動
 ///////////////////////////////////////////////////////////////////////////////////
-void Player::MoveReticle(const Vector3& offset){ reticleTransform_.translation += offset; }
+void Player::MoveReticle(const Vector3& offset) { reticleTransform_.translation += offset; }
 
 ///////////////////////////////////////////////////////////////////////////////////
 //		弾の発射をりくえすと
 ///////////////////////////////////////////////////////////////////////////////////
-void Player::RequestShoot(){
+void Player::RequestShoot() {
 	Vector3 playerPos = worldTransform_.GetWorldPosition();
 	Vector3 reticlePos = reticleTransform_.GetWorldPosition();
 	Vector3 dir = reticlePos - playerPos;
 
-	if (dir.Length() > 0.001f){ dir = dir.Normalize(); }
-	else{ dir = Vector3(0.0f,0.0f,1.0f); }
+	if (dir.Length() > 0.001f) { dir = dir.Normalize(); } else { dir = Vector3(0.0f, 0.0f, 1.0f); }
 
 	if (!shootingController_) return;
 
 	// ロックオンしていればホーミングする弾を撃つ
 	shootingController_->SetTargets(lockedOnTargets_);
 	shootingController_->SetMode(lockedOnTargets_.empty()
-		                             ? PlayerShoot::BulletMode::Straight
-		                             : PlayerShoot::BulletMode::Homing);
+								 ? PlayerShoot::BulletMode::Straight
+								 : PlayerShoot::BulletMode::Homing);
 
-	shootingController_->RequestShoot(playerPos,dir);
+	shootingController_->RequestShoot(playerPos, dir);
 
 	RequestLockOnTargetClear();
 }
@@ -218,7 +237,7 @@ void Player::RequestShoot(){
 ///////////////////////////////////////////////////////////////////////////////////
 //		ロックオン処理
 ///////////////////////////////////////////////////////////////////////////////////
-void Player::RequestLockOn(){
+void Player::RequestLockOn() {
 	constexpr size_t kMaxLockOn = 4;
 	if (lockedOnTargets_.size() >= kMaxLockOn) return;
 
@@ -229,9 +248,9 @@ void Player::RequestLockOn(){
 	const Vector2 reticleScreen = Cx::Math::WorldToScreen(reticleTransform_.GetWorldPosition());
 	const float radius = 30.0f;
 
-	for (const auto& enemy : targets_){
+	for (const auto& enemy : targets_) {
 		if (!enemy) continue;
-		if (std::find(lockedOnTargets_.begin(),lockedOnTargets_.end(),enemy) != lockedOnTargets_.end()) continue;
+		if (std::find(lockedOnTargets_.begin(), lockedOnTargets_.end(), enemy) != lockedOnTargets_.end()) continue;
 
 		if (!camera->IsVisible(enemy->GetWorldAABB())) continue;
 
@@ -243,8 +262,8 @@ void Player::RequestLockOn(){
 
 		// ロックオンUI作成
 		auto marker = std::make_unique<Sprite>("Textures/lockOn.png");
-		marker->Initialize(enemyScreen,Vector2(64.0f,64.0f));
-		marker->SetAnchorPoint(Vector2(0.5f,0.5f));
+		marker->Initialize(enemyScreen, Vector2(64.0f, 64.0f));
+		marker->SetAnchorPoint(Vector2(0.5f, 0.5f));
 		lockOnSprites_.push_back(std::move(marker));
 
 		if (lockedOnTargets_.size() >= kMaxLockOn) break;
@@ -252,15 +271,15 @@ void Player::RequestLockOn(){
 }
 
 
-void Player::RequestLockOnTargetClear(){
+void Player::RequestLockOnTargetClear() {
 	lockedOnTargets_.clear();
 	lockOnSprites_.clear();
 }
 
-void Player::Start(){
+void Player::Start() {
 	if (!inputHandler_) inputHandler_ = std::make_unique<PlayerInputHandler>();
 
-	if (!shootingController_){
+	if (!shootingController_) {
 		auto bullets = SceneAPI::Instantiate<PlayerBulletContainer>("playerBulletController");
 		shootingController_ = std::make_unique<PlayerShootingController>(bullets.get());
 	}
@@ -273,6 +292,9 @@ void Player::OnCollisionEnter(Collider* other) {
 	if (!other) return;
 	if (other->GetType() != ColliderType::Type_EnemyAttack) return;
 
+	// 回避成功でだーめーじ無効
+	if (dodge_ && dodge_->HandlesHitNow()) return;
+
 	if (life_ >= 1) {
 		life_--;
 		//lifeSpriteを適用
@@ -283,21 +305,21 @@ void Player::OnCollisionEnter(Collider* other) {
 ///////////////////////////////////////////////////////////////////////////////////
 //		playerの傾き
 ///////////////////////////////////////////////////////////////////////////////////
-void Player::UpdateTilt(const Vector3& inputVector){
+void Player::UpdateTilt(const Vector3& inputVector) {
 	Camera3d* cam = CameraManager::GetMain3d();
 	if (!cam) return;
 
 	// 閾値以下で戻す
-	if (inputVector.Length() <= 0.01f){
+	if (inputVector.Length() <= 0.01f) {
 		Quaternion identity = Quaternion::MakeIdentity();
-		worldTransform_.rotation = Quaternion::Slerp(worldTransform_.rotation,identity,0.1f);
+		worldTransform_.rotation = Quaternion::Slerp(worldTransform_.rotation, identity, 0.1f);
 		worldTransform_.rotationSource = RotationSource::Quaternion;
 
 		// カメラ傾きを戻す（オイラー角）
 		Vector3 currentRot = cam->GetRotate();
-		currentRot.x = Cx::Math::Lerp(currentRot.x,0.0f,0.1f); // pitch
-		currentRot.z = Cx::Math::Lerp(currentRot.z,0.0f,0.1f); // roll
-		cam->SetCamera(cam->GetTranslate(),currentRot);
+		currentRot.x = Cx::Math::Lerp(currentRot.x, 0.0f, 0.1f); // pitch
+		currentRot.z = Cx::Math::Lerp(currentRot.z, 0.0f, 0.1f); // roll
+		cam->SetCamera(cam->GetTranslate(), currentRot);
 		return;
 	}
 
@@ -312,37 +334,35 @@ void Player::UpdateTilt(const Vector3& inputVector){
 	// プレイヤー回転（Quaternion）
 	Quaternion rollQ = Quaternion::MakeRotateZ(targetRoll);
 	Quaternion pitchQ = Quaternion::MakeRotateX(targetPitch);
-	Quaternion targetRotation = Quaternion::Multiply(rollQ,pitchQ);
+	Quaternion targetRotation = Quaternion::Multiply(rollQ, pitchQ);
 
-	worldTransform_.rotation = Quaternion::Slerp(worldTransform_.rotation,targetRotation,0.15f);
+	worldTransform_.rotation = Quaternion::Slerp(worldTransform_.rotation, targetRotation, 0.15f);
 	worldTransform_.rotationSource = RotationSource::Quaternion;
 
 	// カメラ回転（Euler）
 	Vector3 currentRot = cam->GetRotate();
-	currentRot.x = Cx::Math::Lerp(currentRot.x,targetPitch * 0.3f,0.15f); // pitch
-	currentRot.z = Cx::Math::Lerp(currentRot.z,targetRoll * 0.3f,0.15f); // roll
-	cam->SetCamera(cam->GetTranslate(),currentRot);
+	currentRot.x = Cx::Math::Lerp(currentRot.x, targetPitch * 0.3f, 0.15f); // pitch
+	currentRot.z = Cx::Math::Lerp(currentRot.z, targetRoll * 0.3f, 0.15f); // roll
+	cam->SetCamera(cam->GetTranslate(), currentRot);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
 //		移動
 ///////////////////////////////////////////////////////////////////////////////////
-void Player::Move(){
-	Vector3 moveVector = {0.0f, 0.0f, 0.0f};
+void Player::Move() {
+	Vector3 moveVector = { 0.0f, 0.0f, 0.0f };
 
 	// キーボード移動
-	if (Input::GetInstance()->PushKey(DIK_A)){ moveVector.x -= 1.0f; }
-	else if (Input::GetInstance()->PushKey(DIK_D)){ moveVector.x += 1.0f; }
+	if (Input::GetInstance()->PushKey(DIK_A)) { moveVector.x -= 1.0f; } else if (Input::GetInstance()->PushKey(DIK_D)) { moveVector.x += 1.0f; }
 
-	if (Input::GetInstance()->PushKey(DIK_W)){ moveVector.y += 1.0f; }
-	else if (Input::GetInstance()->PushKey(DIK_S)){ moveVector.y -= 1.0f; }
+	if (Input::GetInstance()->PushKey(DIK_W)) { moveVector.y += 1.0f; } else if (Input::GetInstance()->PushKey(DIK_S)) { moveVector.y -= 1.0f; }
 
 	// ゲームパッド左スティック入力
 	Vector2 leftStick = Input::GetInstance()->GetLeftStick();
 	moveVector.x += leftStick.x;
 	moveVector.y += leftStick.y;
 
-	if (moveVector.Length() > 0.0f){ moveVector.Normalize(); }
+	if (moveVector.Length() > 0.0f) { moveVector.Normalize(); }
 
 	moveVector *= moveSpeed_;
 
@@ -355,23 +375,22 @@ void Player::Move(){
 ///////////////////////////////////////////////////////////////////////////////////
 //		弾の発射
 ///////////////////////////////////////////////////////////////////////////////////
-void Player::Shoot(){
+void Player::Shoot() {
 	Vector3 playerPos = worldTransform_.GetWorldPosition();
 	Vector3 reticlePos = reticleTransform_.GetWorldPosition();
 
 	Vector3 dir = reticlePos - playerPos;
-	if (dir.Length() > 0.001f){ dir = dir.Normalize(); }
-	else{
-		dir = Vector3(0.0f,0.0f,1.0f); // フォールバック方向
+	if (dir.Length() > 0.001f) { dir = dir.Normalize(); } else {
+		dir = Vector3(0.0f, 0.0f, 1.0f); // フォールバック方向
 	}
 
-	shootingController_->RequestShoot(playerPos,dir);
+	shootingController_->RequestShoot(playerPos, dir);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
 //		レティクルの座標更新
 ///////////////////////////////////////////////////////////////////////////////////
-void Player::UpdateReticlePosition(){
+void Player::UpdateReticlePosition() {
 	constexpr float moveSpeed = 6.0f;
 	constexpr float stickSensitivity = 300.0f; // スティック感度を大きめに
 	float dt = ClockManager::GetInstance()->GetDeltaTime();
@@ -396,7 +415,7 @@ void Player::UpdateReticlePosition(){
 	keyboardOffset.x -= rightStick.x * stickSensitivity * dt;
 	keyboardOffset.y -= rightStick.y * stickSensitivity * dt;
 
-	if (keyboardOffset.Length() > 0.0f){
+	if (keyboardOffset.Length() > 0.0f) {
 		keyboardOffset.Normalize();
 		keyboardOffset *= moveSpeed * dt;
 		offset.x = keyboardOffset.x + rightStick.x * stickSensitivity * dt;
@@ -414,9 +433,9 @@ void Player::UpdateReticlePosition(){
 /* ======================================================================================
 /*		accessor
 /* ==================================================================================== */
-void Player::SetParent(WorldTransform* parent){ worldTransform_.parent = parent; }
+void Player::SetParent(WorldTransform* parent) { worldTransform_.parent = parent; }
 
-std::vector<Sprite*> Player::GetAllSprites(){
+std::vector<Sprite*> Player::GetAllSprites() {
 	std::vector<Sprite*> sprites;
 	for (auto& s : reticleSprites_)sprites.push_back(s.get());
 	for (auto& s : lifeSprite_) sprites.push_back(s.get());
@@ -424,26 +443,26 @@ std::vector<Sprite*> Player::GetAllSprites(){
 	return sprites;
 }
 
-const Vector3 Player::GetCenterPos() const{
-	const Vector3 offset = {0.0f, 3.0f, 0.0f};
-	Vector3 worldPos = Vector3::Transform(offset,worldTransform_.matrix.world);
+const Vector3 Player::GetCenterPos() const {
+	const Vector3 offset = { 0.0f, 3.0f, 0.0f };
+	Vector3 worldPos = Vector3::Transform(offset, worldTransform_.matrix.world);
 	return worldPos;
 }
 
-std::optional<float> Player::GetShootCooldown(){
-	if (shootingController_){ return shootingController_->GetCooldown(); }
+std::optional<float> Player::GetShootCooldown() {
+	if (shootingController_) { return shootingController_->GetCooldown(); }
 
 	return std::nullopt;
 }
 
-std::optional<const float> Player::GetMaxShootInterval() const{
-	if (shootingController_){ return shootingController_->GetInterval(); }
+std::optional<const float> Player::GetMaxShootInterval() const {
+	if (shootingController_) { return shootingController_->GetInterval(); }
 
 	return std::nullopt;
 }
 
-void Player::SetShootingController(std::unique_ptr<PlayerShootingController> sc){ shootingController_ = std::move(sc); }
+void Player::SetShootingController(std::unique_ptr<PlayerShootingController> sc) { shootingController_ = std::move(sc); }
 
-void Player::SetInputHandler(std::unique_ptr<PlayerInputHandler> ih){ inputHandler_ = std::move(ih); }
+void Player::SetInputHandler(std::unique_ptr<PlayerInputHandler> ih) { inputHandler_ = std::move(ih); }
 
 REGISTER_SCENE_OBJECT(Player)
