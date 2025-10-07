@@ -115,7 +115,7 @@ void PlayerDodgeMotion::OnPerfect(){
 			"ChromaticAberration",
 			[ca]{ return ca->GetIntensity(); },       // ← getter
 			[ca] (float v){ ca->SetIntensity(v); },    // ← setter
-			std::nullopt, 0.2f, 0.08f,               // ピーク/上げ時間はお好みで
+			std::nullopt, 0.2f, 0.08f,
 			EaseType::EaseOutExpo, false,
 			[ca]{
 				PostEffectManager::Get()->TweenFloat(
