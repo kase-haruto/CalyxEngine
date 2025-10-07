@@ -14,6 +14,7 @@
 #include <Game/Battle/Shooting/Details/FireScheduler.h>
 #include <Game/Battle/Shooting/ShootingController/BulletEmitter.h>
 #include <Game/Battle/Movement/FollowSpline/SplineFollower.h>
+#include <Game/Battle/Shooting/Pattern/ShootPatternDetails.h>
 
 /* ========================================================================
 /* enemy
@@ -31,6 +32,8 @@ public:
 
 	void Initialize() override;
 	void Update(float dt) override;
+
+	void EnsurePatternBound();
 
 	// collision ---------------------------------------------------------//
 	void OnCollisionEnter(Collider* other) override;
@@ -59,6 +62,8 @@ public:
 	const Vector3 GetCenterPos() const override;
 	void SetGameplayEngaged(bool v) { gameplayEngaged_ = v; }
 	bool IsGameplayEngaged() const { return gameplayEngaged_; }
+	void SetPatternKind(BulletPatternKind k){ patternKind_ = k; }
+	BulletPatternKind GetPatternKind() const{ return patternKind_; }
 
 	BulletContainer* GetBulletContainer();
 	const BulletContainer* GetBulletContainer() const;
@@ -81,6 +86,10 @@ private:
 	//===================================================================*/
 	//                      private variables
 	//===================================================================*/
+	BulletPatternKind patternKind_ = BulletPatternKind::SweepFan;
+	BulletPatternKind lastPatternKind_ = BulletPatternKind::Spiral;
+	std::unique_ptr<IShootPattern> pattern_;
+	
 	const WorldTransform* playerTransform_ = nullptr;
 	DeathState deathState_ = DeathState::Alive;
 	SplineFollower mover_;					//< 移動

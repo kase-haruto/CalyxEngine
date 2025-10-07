@@ -413,6 +413,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\Battle\Shooting\Pattern\PatternCommon.h" />
     <ClInclude Include="Game\Battle\Shooting\Pattern\PatternSpiral.h" />
     <ClInclude Include="Game\Battle\Shooting\Pattern\PatternSweepFan.h" />
+    <ClInclude Include="Game\Battle\Shooting\Pattern\ShootPatternDetails.h" />
     <ClInclude Include="Game\Battle\Shooting\Shooter\HomingBullet\EnemyHomingBulletShooter.h" />
     <ClInclude Include="Game\Battle\Shooting\ShootingController\BulletEmitter.h" />
     <ClInclude Include="Game\Battle\Shooting\ShootingController\EnemyShootingControllerSink.h" />

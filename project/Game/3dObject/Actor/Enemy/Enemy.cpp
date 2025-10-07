@@ -10,6 +10,7 @@
 #include <Game/Battle/Shooting/ShootingController/EnemyShootingControllerSink.h>
 #include <Game/Battle/Shooting/Details/AimProvider.h>
 #include <Game/Battle/Shooting/Pattern/PatternSweepFan.h>
+#include <Game/Battle/Shooting/Pattern/PatternCircleRing.h>
 #include <Game/Battle/Shooting/Details/FireScheduler.h>
 
 /* ========================================================================
@@ -73,6 +74,8 @@ void Enemy::Initialize() {
 	if (hasRoute_) {
 		mover_.SetTargetTransform(playerTransform_);
 	}
+
+	EnsurePatternBound();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -153,19 +156,15 @@ void Enemy::Update(float dt) {
 		}
 
 		// 弾幕駆動：emitter_ は一度生成したら以降は再利用
-		if (this->IsGameplayEngaged() && emitter_) {
-			if (auto* sweep = dynamic_cast<PatternSweepFan*>(emitter_->Pattern())) {
-				sweep->Advance(dt); // 中心角の往復
+		if (this->IsGameplayEngaged() && emitter_){
+			if (auto* pat = emitter_->Pattern()){
+				pat->Advance(dt); 
 			}
 
-			BulletEmitterContext cxt{};
+			BulletEmitterContext cxt {};
 			cxt.origin = GetCenterPos(); // 先に移動を済ませてあるので常に最新
-			// cxt.selfForward は未使用ならデフォルトのまま
-			if (playerTransform_) {
-				cxt.targetPos = playerTransform_->GetWorldPosition();
-			} else {
-				cxt.targetPos = cxt.origin;
-			}
+			cxt.targetPos = playerTransform_ ? playerTransform_->GetWorldPosition() : GetWorldPosition();
+
 			emitter_->Update(dt, cxt);
 		}
 
@@ -202,6 +201,16 @@ void Enemy::Update(float dt) {
 		isAlive_ = false;
 		return;
 	}
+}
+
+void Enemy::EnsurePatternBound(){
+	if (!emitter_) return;
+
+	if (!pattern_ || patternKind_ != lastPatternKind_){
+		pattern_ = CreatePattern(patternKind_);
+		lastPatternKind_ = patternKind_;
+	}
+	emitter_->SetPattern(pattern_.get()); // 非所有参照を差し替え
 }
 
 ////////////////////////////////////////////////////////////////
@@ -287,37 +296,24 @@ void Enemy::Shoot() {
 /////////////////////////////////////////////////////////////////////////////////////////
 //      エミッタの一度だけ生成する関数
 /////////////////////////////////////////////////////////////////////////////////////////
-void Enemy::BuildEmitterIfReady() {
-	if (emitter_) return;                 // 既に作成済み
-	if (!shootingController_) return;     // 下流がないと撃てない
-	if (!playerTransform_) return;        // 目標がないと狙えない
+void Enemy::BuildEmitterIfReady(){
+	if (emitter_) return;
+	if (!shootingController_) return;
+	if (!playerTransform_) return;
 
-	// Sink：既存コントローラへまとめて流す
 	auto sink = std::make_unique<EnemyShootingControllerSink>(shootingController_.get());
-
-	// Aim：プレイヤー狙い
 	auto aim = std::make_unique<AimAtTarget>();
 
-	// Pattern：左右に揺れる N-way
-	auto pattern = std::make_unique<PatternSweepFan>();
-	pattern->nWay = 5;
-	pattern->spreadDeg = 50.0f;
-	pattern->periodSec = 2.5f;
-	pattern->amplitudeDeg = 40.0f;
-
-	// Scheduler：1秒あたりのトリガ回数
 	FireScheduler sched;
 	sched.shotsPerSec = 6.0f;
-	// バーストさせたい場合：
-	// sched.useBurst = true;
-	// sched.burstsPerTrigger = 5;
-	// sched.burstIntervalSec = 0.07f;
 
 	BulletEmitterConfig cfg;
 	cfg.tag = "enemy_homing";
-	// cfg.shotSpeed = 0.0f;
 
+	// ここでは“パターンなし”で作る（SetPatternで後から差し込む）
 	emitter_ = std::make_unique<BulletEmitter>(
-		cfg, std::move(sink), std::move(aim), std::move(pattern), sched
+		cfg, std::move(sink), std::move(aim), nullptr, sched
 	);
+
+	EnsurePatternBound();
 }
