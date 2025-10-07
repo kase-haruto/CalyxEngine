@@ -11,8 +11,6 @@
 
 // postprocess
 #include <Engine/PostProcess/Collection/PostProcessCollection.h>
-#include <Engine/PostProcess/Graph/PostEffectGraph.h>
-#include <Engine/PostProcess/Slot/PostEffectSlot.h>
 
 //リークチェック
 #include <Engine/Foundation/Utility/LeakChecker/LeakChecker.h>
@@ -54,8 +52,6 @@ public:
 	static HWND GetHWND(){ return hwnd_; }
 	DxCore* GetDxCore()const{ return dxCore_.get(); }
 	void SetEngineUICore(EngineUICore* engineUI) { pEngineUICore_ = engineUI; }
-	PostProcessCollection* GetPostProcessCollection() const{ return postProcessCollection_.get(); }
-	PostEffectGraph* GetPostEffectGraph() const{ return postEffectGraph_.get(); }
 
 private:
 	//===================================================================*/
@@ -80,12 +76,7 @@ private:
 	// engineEditors
 	EngineUICore* pEngineUICore_;			//engineUIの描画
 	
-	// postprocess
-	std::unique_ptr<PostProcessCollection> postProcessCollection_;
-	std::unique_ptr<PostEffectGraph> postEffectGraph_;
-
 	float radialTimer_ = 0.0f;
 	const float kRadialDurationSec_ = 1.0f;
 	bool isRadialActive_ = false;
 };
-

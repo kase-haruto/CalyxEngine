@@ -58,7 +58,7 @@ void Player::Initialize() {
 	reticleTransform_.Initialize();
 	auto ctx = SceneContext::Current();
 	reticleTransform_.parent = &ctx->GetCameraMgr()->GetMain3d()->GetWorldTransform();
-	reticleTransform_.translation = Vector3(0.0f, 0.0f, 80.0f);
+	reticleTransform_.translation = Vector3(0.0f, 0.0f, 100.0f);
 
 	collider_->SetType(ColliderType::Type_Player);
 	collider_->SetTargetType(ColliderType::Type_PlayerAttack);

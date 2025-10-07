@@ -4,7 +4,6 @@
 
 // engine
 #include <Engine/Application/Input/Input.h>
-#include <Engine/Application/UI/Panels/EditorPanel.h>
 #include <Engine/Application/System/Enviroment.h>
 #include <Engine/Application/System/System.h>
 #include <Engine/Foundation/Audio/Audio.h>
@@ -12,7 +11,6 @@
 #include <Engine/Graphics/Context/GraphicsGroup.h>
 #include <Engine/Graphics/Pipeline/BlendMode/BlendMode.h>
 #include <Engine/Graphics/RenderTarget/SwapChainRT/SwapChainRenderTarget.h>
-#include <Engine/PostProcess/FullscreenDrawer.h>
 #include <Engine/System/Command/Manager/CommandManager.h>
 #include <Engine/Graphics/Pipeline/Service/PipelineService.h>
 #include <Engine/Graphics/Descriptor/DescriptorAllocator.h>
@@ -21,11 +19,10 @@
 #include <Engine/Assets/Model/ModelManager.h>
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Foundation/Clock/ClockManager.h>
-#include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Assets/Database/AssetDatabase.h>
+#include <Engine/PostProcess/Manager/PostEffectManager.h>
 
 // editor
-#include <Engine/Editor/UiEditor.h>
 
 // lib
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
@@ -101,32 +98,26 @@ void System::InitializePostProcess(PipelineService* service){
 	/*                     postProcessの初期化                                             */
 	/////////////////////////////////////////////////////////////////////////////////////////
 	//=========================================================
-	// PostProcessCollection の初期化
+	// PostProcessManager の初期化
 	//=========================================================
-	postProcessCollection_ = std::make_unique<PostProcessCollection>();
-	postProcessCollection_->Initialize(service);
-
-	//=========================================================
-	// PostEffectGraph の初期化
-	//=========================================================
-	postEffectGraph_ = std::make_unique<PostEffectGraph>(postProcessCollection_.get());
-
-
+	PostEffectManager::Get()->Initialize(service, /*enableAll=*/false);
 }
-
-
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //  フレーム開始処理
 /////////////////////////////////////////////////////////////////////////////////////////
 void System::BeginFrame(){
-	ClockManager::GetInstance()->Update();
+	// インプットの更新
+	Input::Update();
 
+	auto* clock = ClockManager::GetInstance();
+	clock->Update();
+
+	PostEffectManager::Get()->Update(clock->GetDeltaTime());
 
 	// ImGui受付開始
 	imguiManager_->Begin();
-	// インプットの更新
-	Input::Update();
+
 	ModelManager::GetInstance()->ProcessLoadingTasks();
 	// オフスクリーンレンダーターゲットの開始
 	dxCore_->PreDrawOffscreen();
@@ -155,7 +146,7 @@ void System::ExecutePostEffect(const PipelineService* service){
 		scTarget->SetBufferIndex(dxCore_->GetSwapChain().GetCurrentBackBufferIndex());
 	}
 
-	postEffectGraph_->Execute(cmd, offscreenRes, postOutput, dxCore_.get());
+	PostEffectManager::Get()->Execute(cmd, offscreenRes, postOutput, dxCore_.get());
 
 	postOutput->GetResource()->Transition(cmd, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	pEngineUICore_->SetMainViewportTexture(postOutput->GetSRV().ptr);

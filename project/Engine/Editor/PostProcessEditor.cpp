@@ -54,13 +54,6 @@ void PostProcessEditor::ShowImGuiInterface() {
 	}
 }
 
-void PostProcessEditor::SetPostEffectCollection(PostProcessCollection* postProcessCollection) {
-	pCollection_ = postProcessCollection;
-	if (pCollection_ && pCollection_->GetSlots().empty()) {
-		pCollection_->BuildInitialSlots(false); // 全スロット無効で初期化
-	}
-}
-
 void PostProcessEditor::ApplyToGraph(PostEffectGraph* graph) {
 	if (!graph || !pCollection_) return;
 
