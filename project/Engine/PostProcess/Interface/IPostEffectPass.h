@@ -20,5 +20,11 @@ public:
 
 	virtual void ShowImGui() {}
 
+	// 既定値へ戻す
+	virtual void ResetParameters() {}
+
+	// 更新
+	virtual void Tick(float /*dt*/) {}
+
 	virtual const std::string GetName() const = 0;
 };

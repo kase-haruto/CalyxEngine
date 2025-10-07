@@ -1,7 +1,5 @@
 #include "PlayerDodge.h"
 #include <Game/3dObject/Actor/Player/Player.h>
-#include <Engine/Graphics/Camera/Manager/CameraManager.h>
-#include <Engine/Application/Input/Input.h>
 #include <Engine/Foundation/Clock/ClockManager.h>
 
 void PlayerDodge::Initialize(Player* owner, const PlayerDodgeConfig& cfg) {
@@ -26,7 +24,8 @@ void PlayerDodge::Update(float dt) {
 	if (cooldown_ > 0.0f) cooldown_ -= dt;
 
 	switch (state_) {
-		case DodgeState::Idle: break;
+		case DodgeState::Idle:
+			break;
 
 		case DodgeState::Startup:
 			timer_ += dt;
@@ -37,8 +36,10 @@ void PlayerDodge::Update(float dt) {
 
 		case DodgeState::IFrame:
 			{
-				const float speed = (cfg_.duration > 0.0f) ? (cfg_.distance / cfg_.duration) : 0.0f;
-				MoveOwnerBy(dodgeDir_ * speed);
+				if (!cfg_.useCustomCurve) {
+					const float speed = (cfg_.duration > 0.0f) ? (cfg_.distance / cfg_.duration) : 0.0f;
+					MoveOwnerBy(dodgeDir_ * speed);
+				}
 				timer_ += dt;
 				if (timer_ >= cfg_.duration) {
 					ChangeState(DodgeState::Recovery);
@@ -56,19 +57,26 @@ void PlayerDodge::Update(float dt) {
 }
 
 void PlayerDodge::RequestDodge() {
-	if (!owner_ || state_ != DodgeState::Idle || cooldown_ > 0.0f) return;
+	if (!owner_) return;
+	if (state_ != DodgeState::Idle) return;
+	if (cooldown_ > 0.0f) return;
 
-	// 方向決定
+	// forward の決定
 	if (cfg_.useCameraForward) {
 		if (auto* cam = CameraManager::GetMain3d()) {
-			Vector3 fwd = Vector3::Forward();
+			Vector3 fwd =/* cam->GetForward()*/Vector3::Forward();
 			if (fwd.LengthSquared() > 1e-6f) fwd = fwd.Normalize();
 			dodgeDir_ = fwd;
-		} else { dodgeDir_ = Vector3(0, 0, 1); }
-	} else { dodgeDir_ = Vector3(0, 0, 1); }
+		} else {
+			dodgeDir_ = Vector3(0, 0, 1);
+		}
+	} else {
+		dodgeDir_ = Vector3(0, 0, 1);
+	}
 
 	lastInputTime_ = timeAccum_;
 	cooldown_ = cfg_.cooldown;
+
 	if (onDodgeStart_) onDodgeStart_();
 
 	if (perfectHintActive_) {
@@ -77,15 +85,11 @@ void PlayerDodge::RequestDodge() {
 		return;
 	}
 
-	// 通常回避
 	//ChangeState(DodgeState::Startup);
 }
 
 bool PlayerDodge::HandlesHitNow() {
-	if (IsInIFrame()) return true;
-
-	// = 警告無し or 警告中に押せなかったら食らう
-	return false;
+	return IsInIFrame();
 }
 
 void PlayerDodge::ChangeState(DodgeState next) {

@@ -161,6 +161,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Engine\Foundation\Math\MathUtil.cpp" />
+    <ClCompile Include="Engine\PostProcess\Manager\PostEffectManager.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Bullet\EnemyBullet\EnemyHomingBullet.cpp" />
     <ClCompile Include="Game\Battle\Shooting\Details\FireScheduler.cpp" />
     <ClCompile Include="Game\Battle\Shooting\Pattern\PatternAimedNWay.cpp" />
@@ -394,11 +395,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\Battle\Movement\FollowSpline\SplineFollower.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Player\Dodge\PlayerDodge.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Player\DangerSense\PlayerDangerSense.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Player\Dodge\PlayerDodgeMotion.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Foundation\Math\MathUtil.h" />
     <ClInclude Include="Engine\Foundation\Utility\Func\Fwd.h" />
     <ClInclude Include="Engine\Objects\3D\Details\BillboardParams.h" />
+    <ClInclude Include="Engine\PostProcess\Manager\PostEffectManager.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\EnemyBullet\EnemyHomingBullet.h" />
     <ClInclude Include="Game\Battle\Shooting\Details\AimProvider.h" />
     <ClInclude Include="Game\Battle\Shooting\Details\FireScheduler.h" />
@@ -691,6 +694,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\3dObject\Actor\Boss\Service\RailProgressBossSpawnService.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\Dodge\PlayerDodge.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\DangerSense\PlayerDangerSense.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\Dodge\PlayerDodgeMotion.h" />
     <ClInclude Include="Resources\shaders\CRT.PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>

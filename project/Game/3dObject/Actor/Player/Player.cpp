@@ -16,6 +16,8 @@
 #include <Game/3dObject/Actor/Player/DangerSense/PlayerDangerSense.h>
 #include <Game/3dObject/Actor/Bullet/Container/PlayerBulletContainer.h>
 #include <Game/3dObject/Actor/Player/Dodge/PlayerDodge.h>
+#include <Game/3dObject/Actor/Player/Dodge/PlayerDodgeMotion.h>
+
 
 // externals
 #include <externals/imgui/imgui.h>
@@ -26,6 +28,12 @@
 
 Player::Player() = default;
 Player::~Player() = default;
+
+namespace {
+	constexpr float kHitIFrameSec = 1.5f;
+	constexpr float kBlinkHz = 12.0f;  // 点滅周波数
+	constexpr float kBlinkInterval = 1.0f / kBlinkHz;
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		コンストラクタ
@@ -50,7 +58,7 @@ void Player::Initialize() {
 	reticleTransform_.Initialize();
 	auto ctx = SceneContext::Current();
 	reticleTransform_.parent = &ctx->GetCameraMgr()->GetMain3d()->GetWorldTransform();
-	reticleTransform_.translation = Vector3(0.0f, 0.0f, 50.0f);
+	reticleTransform_.translation = Vector3(0.0f, 0.0f, 100.0f);
 
 	collider_->SetType(ColliderType::Type_Player);
 	collider_->SetTargetType(ColliderType::Type_PlayerAttack);
@@ -86,22 +94,26 @@ void Player::Initialize() {
 
 
 	 // ---- 回避コンポーネント ----
-	dodge_ = std::make_unique<PlayerDodge>();
-	PlayerDodgeConfig dodgeCfg;
-	dodge_->Initialize(this, dodgeCfg);
+	if (!dodge_) {
+		PlayerDodgeConfig cfg;
+		cfg.useCustomCurve = true;
+		cfg.lateralScale = 0.0f;
+		cfg.backwardScale = 0.70f;
+		cfg.spinTurns = 1.0f;
+		dodge_ = std::make_unique<PlayerDodge>();
+		dodge_->Initialize(this, cfg);
+	}
 
-	// 回避したときの演出 デバッグ用に色変える
-	dodge_->SetOnDodgeStart([this]() {
-		SetColor(Vector4(1.0f, 0.0f, 0.0f));
-	});
-
-	dodge_->SetOnDodgeEnd([this]() {
-		SetColor(Vector4(1.0f));
-	});
-
+	// 危険察知
 	if (!danger_) {
 		danger_ = std::make_unique<PlayerDangerSense>();
 		danger_->Initialize(this, dodge_.get(), {}); // UIやmarginは後で調整可
+	}
+
+	// 回避モーション
+	if (!dodgeMotion_) {
+		dodgeMotion_ = std::make_unique<PlayerDodgeMotion>();
+		dodgeMotion_->Initialize(this, dodge_.get());
 	}
 
 }
@@ -123,9 +135,12 @@ void Player::Update(float dt) {
 
 	if (dodge_)  dodge_->Update(dt);
 	if (danger_) danger_->Update(dt);
+	if (dodgeMotion_) dodgeMotion_->Update(dt);
 
 	for (auto& sprite : lifeSprite_) { sprite->Update(); }
 
+	// 無敵時間
+	UpdateInvincibility(dt);
 
 	reticleTransform_.Update();
 
@@ -305,14 +320,23 @@ void Player::OnCollisionEnter(Collider* other) {
 	if (!other) return;
 	if (other->GetType() != ColliderType::Type_EnemyAttack) return;
 
-	// 回避成功でだーめーじ無効
-	if (dodge_ && dodge_->HandlesHitNow()) return;
+	// 回避のi-frameや既存の無敵ならダメージ無視
+	if ((dodge_ && dodge_->HandlesHitNow()) || !CanBeDamaged()) return;
 
-	if (life_ >= 1) {
-		life_--;
-		//lifeSpriteを適用
-		RefreshLifeUI();
-	}
+	// ===== 被弾確定 =====
+	--life_;
+
+	// 被弾時にカメラを揺らす
+	auto* cam = CameraManager::GetMain3d();
+	float duration = 0.5f;
+	float intensity = 0.8f;
+	cam->StartShake(duration, intensity);
+
+	RefreshLifeUI();
+
+	// 被弾後の無敵を1秒付与
+	SetInvincibleFor(kHitIFrameSec);
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -480,5 +504,46 @@ std::optional<const float> Player::GetMaxShootInterval() const {
 void Player::SetShootingController(std::unique_ptr<PlayerShootingController> sc) { shootingController_ = std::move(sc); }
 
 void Player::SetInputHandler(std::unique_ptr<PlayerInputHandler> ih) { inputHandler_ = std::move(ih); }
+
+
+void Player::SetInvincibleFor(float seconds) {
+	if (seconds <= 0.0f) return;
+
+	const bool wasInvincible = IsInvincible();
+	invincibleTimer_ = (std::max)(invincibleTimer_, seconds);
+
+	if (!wasInvincible) {
+		// 無敵開始
+		invincibleBlinkAccum_ = 0.0f;
+		invincibleBlinkState_ = false;
+		SetDrawEnable(false);
+	}
+}
+
+bool Player::IsInvincible() const {
+	return invincibleTimer_ > 0.0f;
+}
+
+void Player::UpdateInvincibility(float dt) {
+	if (invincibleTimer_ <= 0.0f) return;
+
+	invincibleTimer_ -= dt;
+	if (invincibleTimer_ <= 0.0f) {
+		// 無敵終了
+		invincibleTimer_ = 0.0f;
+		invincibleBlinkAccum_ = 0.0f;
+		invincibleBlinkState_ = true;
+		SetDrawEnable(true);
+		return;
+	}
+
+	// 無敵中は一定間隔で描画トグル
+	invincibleBlinkAccum_ += dt;
+	while (invincibleBlinkAccum_ >= kBlinkInterval) {
+		invincibleBlinkAccum_ -= kBlinkInterval;
+		invincibleBlinkState_ = !invincibleBlinkState_;
+		SetDrawEnable(invincibleBlinkState_);
+	}
+}
 
 REGISTER_SCENE_OBJECT(Player)
