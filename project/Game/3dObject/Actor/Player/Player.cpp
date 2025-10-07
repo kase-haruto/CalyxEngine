@@ -30,7 +30,7 @@ Player::Player() = default;
 Player::~Player() = default;
 
 namespace {
-	constexpr float kHitIFrameSec = 1.0f;
+	constexpr float kHitIFrameSec = 1.5f;
 	constexpr float kBlinkHz = 12.0f;  // 点滅周波数
 	constexpr float kBlinkInterval = 1.0f / kBlinkHz;
 }
@@ -529,7 +529,7 @@ void Player::UpdateInvincibility(float dt) {
 
 	invincibleTimer_ -= dt;
 	if (invincibleTimer_ <= 0.0f) {
-		// 無敵終了：確実に表示ONへ戻す
+		// 無敵終了
 		invincibleTimer_ = 0.0f;
 		invincibleBlinkAccum_ = 0.0f;
 		invincibleBlinkState_ = true;

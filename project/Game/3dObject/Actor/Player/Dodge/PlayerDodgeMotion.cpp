@@ -6,6 +6,7 @@
 // engine
 #include <Engine/PostProcess/Manager/PostEffectManager.h>
 #include <Engine/PostProcess/Blur/RadialBlur/RadialBlur.h>
+#include <Engine/PostProcess/ChromaticAberration/ChromaticAberrationEffect.h>
 
 /* util */
 #include <Engine/Foundation/Utility/Func/CxUtils.h>
@@ -37,7 +38,6 @@ namespace{
 	constexpr float kSinkHzIFrame = 6.0f;
 	constexpr float kSinkHzRecover = 10.0f;
 
-	// MoveBy の意味：true = “速度（内部で *dt）”を与える実装
 	constexpr bool kMoveByTakesVelocity = true;
 
 	// 1秒間無敵
@@ -91,33 +91,43 @@ void PlayerDodgeMotion::OnDodgeEnd(){
 }
 
 void PlayerDodgeMotion::OnPerfect(){
-	auto* rb = static_cast< RadialBlurEffect* >(
-		PostEffectManager::Get()->GetPass("RadialBlur")
+	if (auto* rb = static_cast< RadialBlurEffect* >(
+		PostEffectManager::Get()->GetPass("RadialBlur"))){
+		PostEffectManager::Get()->TweenFloat(
+			"RadialBlur",
+			[rb]{ return rb->GetWidth(); },
+			[rb] (float v){ rb->SetWidth(v); },
+			std::nullopt, 0.05f, 0.10f, EaseType::EaseOutExpo, false,
+			[rb]{
+				PostEffectManager::Get()->TweenFloat(
+					"RadialBlur",
+					[rb]{ return rb->GetWidth(); },
+					[rb] (float v){ rb->SetWidth(v); },
+					std::nullopt, 0.0f, 0.45f, EaseType::EaseOutSine, true
+				);
+			}
 		);
-	if (!rb) return;
+	}
 
-	PostEffectManager::Get()->TweenFloat(
-		"RadialBlur",
-		[rb]{ return rb->GetWidth(); },
-		[rb] (float v){ rb->SetWidth(v); },
-		std::nullopt,     // 現在値から
-		0.05f,            // ピーク
-		0.1f,            // 上げ時間
-		EaseType::EaseOutExpo,
-		false,            // この段階ではOFFにしない
-		[rb]{
-			PostEffectManager::Get()->TweenFloat(
-				"RadialBlur",
-				[rb]{ return rb->GetWidth(); },
-				[rb] (float v){ rb->SetWidth(v); },
-				std::nullopt,
-				0.0f,
-				0.45f,
-				EaseType::EaseOutSine,
-				true // 0 到達で自動無効化
-			);
-		}
-	);
+	if (auto* ca = static_cast< ChromaticAberrationEffect* >(
+		PostEffectManager::Get()->GetPass("ChromaticAberration"))){
+		PostEffectManager::Get()->TweenFloat(
+			"ChromaticAberration",
+			[ca]{ return ca->GetIntensity(); },       // ← getter
+			[ca] (float v){ ca->SetIntensity(v); },    // ← setter
+			std::nullopt, 0.2f, 0.08f,               // ピーク/上げ時間はお好みで
+			EaseType::EaseOutExpo, false,
+			[ca]{
+				PostEffectManager::Get()->TweenFloat(
+					"ChromaticAberration",
+					[ca]{ return ca->GetIntensity(); },
+					[ca] (float v){ ca->SetIntensity(v); },
+					std::nullopt, 0.0f, 0.2f,
+					EaseType::EaseOutSine, true
+				);
+			}
+		);
+	}
 }
 
 void PlayerDodgeMotion::Update(float dt){
