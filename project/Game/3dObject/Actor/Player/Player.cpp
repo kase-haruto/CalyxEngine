@@ -324,10 +324,15 @@ void Player::OnCollisionEnter(Collider* other) {
 	if ((dodge_ && dodge_->HandlesHitNow()) || !CanBeDamaged()) return;
 
 	// ===== 被弾確定 =====
-	if (life_ > 0) {
-		--life_;
-		RefreshLifeUI();
-	}
+	--life_;
+
+	// 被弾時にカメラを揺らす
+	auto* cam = CameraManager::GetMain3d();
+	float duration = 0.5f;
+	float intensity = 0.8f;
+	cam->StartShake(duration, intensity);
+
+	RefreshLifeUI();
 
 	// 被弾後の無敵を1秒付与
 	SetInvincibleFor(kHitIFrameSec);
