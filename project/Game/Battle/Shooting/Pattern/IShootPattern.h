@@ -14,4 +14,5 @@ struct PatternOutput {
 struct IShootPattern {
 	virtual ~IShootPattern() = default;
 	virtual void Generate(const PatternInput& in, PatternOutput& out) = 0;
+	virtual void Advance(float /*dt*/){}
 };
