@@ -26,8 +26,9 @@ struct PlayerDodgeConfig {
 
 	bool  useCustomCurve = true;   // IFrame直進を止め、モーション側に任せる
 	float spinTurns = 1.0f;   // Y軸回転回数（1.0=一回転）
-	float lateralScale = 0.0f;   // 横移動（今回は0で“後ろのみ”）
-	float backwardScale = 2.0f;  // 後ろ移動の強さ（0.60〜0.75推奨）
+	float lateralScale = 0.0f;   // 横移動
+	float backwardScale = 2.0f;  // 後ろ移動の強さ
+	float perfectInvulnBonus = 0.2f;	//回避成功時のボーナス無敵時間
 };
 
 

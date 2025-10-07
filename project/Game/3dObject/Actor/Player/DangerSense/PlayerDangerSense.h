@@ -1,8 +1,4 @@
 #pragma once
-/* =========================================================================
-   PlayerDangerSense - 近距離の敵弾がある間だけ回避UIを出し、
-   その間に押せばジャスト成立にする軽量コンポーネント
-   ========================================================================= */
 #include <memory>
 #include <optional>
 #include <vector>
@@ -20,7 +16,7 @@ class BaseBullet;
 struct DangerSenseConfig {
 	float playerInflate = 0.5f;
 	float margin = 3.0f;
-	float maxCheckDistance = 60.0f;
+	float maxCheckDistance = 80.0f;
 	int throttleFrames = 1;
 
 	// UI

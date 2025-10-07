@@ -56,21 +56,21 @@ void PlayerDodge::Update(float dt) {
 	}
 }
 
-void PlayerDodge::RequestDodge() {
+void PlayerDodge::RequestDodge(){
 	if (!owner_) return;
 	if (state_ != DodgeState::Idle) return;
 	if (cooldown_ > 0.0f) return;
 
 	// forward の決定
-	if (cfg_.useCameraForward) {
-		if (auto* cam = CameraManager::GetMain3d()) {
-			Vector3 fwd =/* cam->GetForward()*/Vector3::Forward();
+	if (cfg_.useCameraForward){
+		if (auto* cam = CameraManager::GetMain3d()){
+			Vector3 fwd = Vector3::Forward();
 			if (fwd.LengthSquared() > 1e-6f) fwd = fwd.Normalize();
 			dodgeDir_ = fwd;
-		} else {
+		} else{
 			dodgeDir_ = Vector3(0, 0, 1);
 		}
-	} else {
+	} else{
 		dodgeDir_ = Vector3(0, 0, 1);
 	}
 
@@ -79,12 +79,15 @@ void PlayerDodge::RequestDodge() {
 
 	if (onDodgeStart_) onDodgeStart_();
 
-	if (perfectHintActive_) {
+	if (perfectHintActive_){
+		// ジャスト成功：即IFrame + 追加無敵
 		if (onPerfectDodge_) onPerfectDodge_();
+		if (owner_) owner_->SetInvincibleFor(cfg_.invuln + cfg_.perfectInvulnBonus);
 		ChangeState(DodgeState::IFrame);
 		return;
 	}
 
+	//if (owner_) owner_->SetInvincibleFor(cfg_.invuln);
 	//ChangeState(DodgeState::Startup);
 }
 
