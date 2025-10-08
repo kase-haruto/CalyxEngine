@@ -251,6 +251,13 @@ void PlayerDodgeMotion::ApplyProceduralPose(float dt){
 	sinkCurrent_ = Cx::Math::Lerp(sinkCurrent_, sinkTarget, a);
 
 	// 最終姿勢＝開始姿勢 × 絶対スピン × 追加姿勢（Slerpしない）
-	owner_->GetWorldTransform().rotation =
-		Quaternion::Multiply(baseRot_, Quaternion::Multiply(spinQ_, poseQ));
+	if (IsDodging(st)) {
+		owner_->GetWorldTransform().rotation =
+			Quaternion::Multiply(baseRot_, Quaternion::Multiply(spinQ_, poseQ));
+	}
+}
+
+
+bool PlayerDodgeMotion::IsDodging(DodgeState s) {
+	return s == DodgeState::Startup || s == DodgeState::IFrame || s == DodgeState::Recovery;
 }
