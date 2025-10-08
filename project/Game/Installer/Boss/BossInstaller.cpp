@@ -5,7 +5,7 @@
 #include <Engine/Scene/Utility/SceneUtility.h>
 
 std::shared_ptr<Boss> BossInstaller::InstallBoss() {
-	std::shared_ptr<Boss> boss = SceneAPI::Instantiate<Boss>("ghost.obj", "boss");
+	std::shared_ptr<Boss> boss = SceneAPI::Instantiate<Boss>("boss.gltf", "boss");
 
 	std::unique_ptr<BossBulletContainer> bossBulletContainer
 		= std::make_unique<BossBulletContainer>("BossBullerContainer");

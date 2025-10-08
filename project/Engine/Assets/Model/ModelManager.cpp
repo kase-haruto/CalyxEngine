@@ -173,6 +173,7 @@ void ModelManager::StartUpLoad() {
 	LoadModel("enemyBullet.obj");
 	LoadModel("player.gltf");
 	LoadModel("ghost.obj");
+	LoadModel("boss.gltf");
 	LoadModel("largeBuilding.obj");
 	LoadModel("tallBuilding_01.obj");
 	LoadModel("tallBuilding_02.obj");
