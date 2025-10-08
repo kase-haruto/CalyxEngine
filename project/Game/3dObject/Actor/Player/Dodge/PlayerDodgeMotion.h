@@ -14,6 +14,7 @@
 
 class Player;
 class PlayerDodge;
+enum class DodgeState;
 
 class PlayerDodgeMotion {
 public:
@@ -22,6 +23,7 @@ public:
 
     void Initialize(Player* owner, PlayerDodge* dodge);
     void Update(float dt);
+    bool IsDodging(DodgeState s);
 
 private:
     void OnDodgeStart();
@@ -30,6 +32,7 @@ private:
 
     void ApplySpinAndCurve(float dt);
     void ApplyProceduralPose(float dt);
+
 
 private:
     Player* owner_ = nullptr;
