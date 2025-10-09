@@ -5,6 +5,7 @@
 #include <Engine/Renderer/Mesh/VertexData.h>
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
+#include <Engine/Application/System/Enviroment.h>
 
 /* math */
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
@@ -46,6 +47,11 @@ void Sprite::Initialize(const Vector2& newPosition, const Vector2& newSize) {
 	this->size = newSize;
 	transform_.scale.x = newSize.x;
 	transform_.scale.y = newSize.y;
+}
+
+void Sprite::Initialize() {
+	//Windowの中心に初期化、サイズはデフォルトサイズ
+	PutWindowCenter();
 }
 
 void Sprite::Update() {
@@ -178,6 +184,12 @@ void Sprite::MaterialResourceMap() {
 	materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
 	materialData_->color = { 1.0f, 1.0f, 1.0f, 1.0f };
 	materialData_->uvTransform = Matrix4x4::MakeIdentity();
+}
+
+void Sprite::PutWindowCenter() {
+	Vector2 windowCenter = {kWindowWidth*0.5f, kWindowHeight*0.5f};
+	transform_.translate.x = windowCenter.x;
+	transform_.translate.y = windowCenter.y;
 }
 
 

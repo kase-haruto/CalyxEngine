@@ -19,6 +19,7 @@
 
 /* c++ */
 #include <memory>
+#include <array>
 
 // 配線サービス
 class EnemyRuntimeBindingService;
@@ -44,7 +45,10 @@ private:
 	std::shared_ptr<RailCamera>     railCamera_ = nullptr;
 	std::weak_ptr<Player>           wPlayer_;
 	std::weak_ptr<Boss> wBoss_;
+
+	/* UIs ==========================================================*/
 	std::unique_ptr<Sprite>         attackSprite_;
+	std::array<std::unique_ptr<Sprite>, 5> score_;
 
 	/* runtime services =============================================*/
 	int16_t totalScore_;

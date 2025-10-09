@@ -2,8 +2,8 @@
 #include <cmath>
 #include <numbers>
 
-class CalyxEase{
-public:
+class CalyxEase {
+  public:
 	// Linear
 	static float Linear(float t);
 

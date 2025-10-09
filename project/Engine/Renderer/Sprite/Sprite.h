@@ -29,6 +29,7 @@ public:
 	/// 初期化
 	/// </summary>
 	void Initialize(const Vector2& position, const Vector2& size);
+	void Initialize();// 引数なし初期化初期座標はwindow中心座標
 
 	/// <summary>
 	/// 更新
@@ -83,6 +84,7 @@ public:
 
 	void SetUvRotate(const float uvRotate){ uvTransform.rotate.x = uvRotate; }
 	const float GetUvRotate()const{ return uvTransform.rotate.x; }
+	void PutWindowCenter();
 
 	/// <summary>
 	/// 座標
