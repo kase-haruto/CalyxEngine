@@ -2298,54 +2298,78 @@
     <None Include="Resources\shaders\Skybox.hlsli">
       <Filter>Resources\shaders</Filter>
     </None>
-    <ClInclude Include="Resources\shaders\CRT.PS.hlsl" />
+    <ClInclude Include="Resources\shaders\CRT.PS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Resources\shaders\ChromaticAberration.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\CopyImage.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\CopyImage.VS.hlsl" />
-    <FxCompile Include="Resources\shaders\Effect.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\Effect.VS.hlsl" />
-    <FxCompile Include="Resources\shaders\EmitParticle.CS.hlsl" />
-    <FxCompile Include="Resources\shaders\Fragment.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\Fragment.VS.hlsl" />
-    <FxCompile Include="Resources\shaders\GpuParticle.VS.hlsl" />
-    <FxCompile Include="Resources\shaders\Grayscale.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\InitializeParticle.CS.hlsl" />
-    <FxCompile Include="Resources\shaders\Object2d.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\Object2d.VS.hlsl" />
-    <FxCompile Include="Resources\shaders\Object3d.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\Object3d.VS.hlsl" />
-    <FxCompile Include="Resources\shaders\Particle.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\Particle.VS.hlsl" />
-    <FxCompile Include="Resources\shaders\RadialBlur.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\SkinningObject3d.VS.hlsl" />
-    <FxCompile Include="Resources\shaders\Skybox.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\Skybox.VS.hlsl" />
-    <FxCompile Include="Resources\shaders\UpdateParticle.CS.hlsl" />
-    <FxCompile Include="Resources\shaders\Vignette.PS.hlsl" />
-    <FxCompile Include="Engine\graphics\shaders\Fragment.PS.hlsl">
+    <FxCompile Include="Resources\shaders\ChromaticAberration.PS.hlsl">
       <Filter>Resources\shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Engine\graphics\shaders\Fragment.VS.hlsl">
+    <FxCompile Include="Resources\shaders\CopyImage.PS.hlsl">
       <Filter>Resources\shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Engine\graphics\shaders\Object2d.PS.hlsl">
+    <FxCompile Include="Resources\shaders\CopyImage.VS.hlsl">
       <Filter>Resources\shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Engine\graphics\shaders\Object2d.VS.hlsl">
+    <FxCompile Include="Resources\shaders\Effect.PS.hlsl">
       <Filter>Resources\shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Engine\graphics\shaders\Object3d.PS.hlsl">
+    <FxCompile Include="Resources\shaders\Effect.VS.hlsl">
       <Filter>Resources\shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Engine\graphics\shaders\Object3d.VS.hlsl">
+    <FxCompile Include="Resources\shaders\EmitParticle.CS.hlsl">
       <Filter>Resources\shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Engine\graphics\shaders\Particle.PS.hlsl">
+    <FxCompile Include="Resources\shaders\Fragment.PS.hlsl">
       <Filter>Resources\shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Engine\graphics\shaders\Particle.VS.hlsl">
+    <FxCompile Include="Resources\shaders\Fragment.VS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\shaders\GpuParticle.VS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\shaders\Grayscale.PS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\shaders\InitializeParticle.CS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\shaders\Object2d.PS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\shaders\Object2d.VS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\shaders\Object3d.PS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\shaders\Object3d.VS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\shaders\Particle.PS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\shaders\Particle.VS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\shaders\RadialBlur.PS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\shaders\SkinningObject3d.VS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\shaders\Skybox.PS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\shaders\Skybox.VS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\shaders\UpdateParticle.CS.hlsl">
+      <Filter>Resources\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\shaders\Vignette.PS.hlsl">
       <Filter>Resources\shaders</Filter>
     </FxCompile>
   </ItemGroup>
@@ -2354,14 +2378,5 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
-    <None Include="Engine\graphics\shaders\Fragment.hlsli">
-      <Filter>Resources\shaders</Filter>
-    </None>
-    <None Include="Engine\graphics\shaders\Object3d.hlsli">
-      <Filter>Resources\shaders</Filter>
-    </None>
-    <None Include="Engine\graphics\shaders\Particle.hlsli">
-      <Filter>Resources\shaders</Filter>
-    </None>
   </ItemGroup>
 </Project>

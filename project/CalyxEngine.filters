@@ -757,70 +757,141 @@
     <ClInclude Include="Engine\Graphics\Core\GraphicsSystem.h" />
     <ClInclude Include="Engine\System\Observer\SceneObject\IRenderableDeathListener.h" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="Engine\graphics\shaders\Fragment.hlsli">
-      <Filter>Engine\shaders</Filter>
-    </None>
-    <None Include="Engine\graphics\shaders\Object2d.hlsli">
-      <Filter>Engine\shaders</Filter>
-    </None>
-    <None Include="Engine\graphics\shaders\Object3d.hlsli">
-      <Filter>Engine\shaders</Filter>
-    </None>
-    <None Include="Engine\graphics\shaders\Particle.hlsli">
-      <Filter>Engine\shaders</Filter>
-    </None>
-    <None Include="Resources\shaders\CopyImage.hlsli" />
-    <None Include="Resources\shaders\Fragment.hlsli" />
-    <None Include="Resources\shaders\Object2d.hlsli" />
-    <None Include="Resources\shaders\Object3d.hlsli" />
-    <None Include="Resources\shaders\Particle.hlsli" />
-    <None Include="Resources\shaders\Effect.hlsli" />
-    <None Include="Resources\shaders\SkinningObject3d.hlsli" />
-    <None Include=".editorconfig" />
-    <None Include="Resources\shaders\Skybox.hlsli" />
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Engine\graphics\shaders\Fragment.PS.hlsl">
-      <Filter>Engine\shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Engine\graphics\shaders\Fragment.VS.hlsl">
-      <Filter>Engine\shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Engine\graphics\shaders\Object2d.PS.hlsl">
-      <Filter>Engine\shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Engine\graphics\shaders\Object2d.VS.hlsl">
-      <Filter>Engine\shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Engine\graphics\shaders\Object3d.PS.hlsl">
-      <Filter>Engine\shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Engine\graphics\shaders\Object3d.VS.hlsl">
-      <Filter>Engine\shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Engine\graphics\shaders\Particle.PS.hlsl">
-      <Filter>Engine\shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Engine\graphics\shaders\Particle.VS.hlsl">
-      <Filter>Engine\shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Resources\shaders\CopyImage.VS.hlsl" />
-    <FxCompile Include="Resources\shaders\CopyImage.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\Fragment.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\Fragment.VS.hlsl" />
-    <FxCompile Include="Resources\shaders\Object2d.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\Object2d.VS.hlsl" />
-    <FxCompile Include="Resources\shaders\Object3d.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\Object3d.VS.hlsl" />
-    <FxCompile Include="Resources\shaders\Particle.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\Particle.VS.hlsl" />
-    <FxCompile Include="Resources\shaders\Effect.VS.hlsl" />
-    <FxCompile Include="Resources\shaders\Effect.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\SkinningObject3d.VS.hlsl" />
-    <FxCompile Include="Resources\shaders\Grayscale.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\RadialBlur.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\Skybox.VS.hlsl" />
-    <FxCompile Include="Resources\shaders\Skybox.PS.hlsl" />
-  </ItemGroup>
+<ItemGroup>
+  <!-- すでに Filter 定義ブロックがある場合は重複しないように注意 -->
+  <Filter Include="Shaders">
+    <UniqueIdentifier>{E6B8C6A4-0000-4000-9000-000000000000}</UniqueIdentifier>
+  </Filter>
+  <Filter Include="Shaders\Engine">
+    <UniqueIdentifier>{E6B8C6A4-0000-4000-9000-000000000001}</UniqueIdentifier>
+  </Filter>
+  <Filter Include="Shaders\Resources">
+    <UniqueIdentifier>{E6B8C6A4-0000-4000-9000-000000000002}</UniqueIdentifier>
+  </Filter>
+</ItemGroup>
+
+<ItemGroup>
+  <!-- Engine/graphics/shaders (ヘッダ共有) -->
+  <None Include="Engine\graphics\shaders\Fragment.hlsli">
+    <Filter>Shaders\Engine</Filter>
+  </None>
+  <None Include="Engine\graphics\shaders\Object2d.hlsli">
+    <Filter>Shaders\Engine</Filter>
+  </None>
+  <None Include="Engine\graphics\shaders\Object3d.hlsli">
+    <Filter>Shaders\Engine</Filter>
+  </None>
+  <None Include="Engine\graphics\shaders\Particle.hlsli">
+    <Filter>Shaders\Engine</Filter>
+  </None>
+
+  <!-- Resources/shaders (ヘッダ共有) -->
+  <None Include="Resources\shaders\CopyImage.hlsli">
+    <Filter>Shaders\Resources</Filter>
+  </None>
+  <None Include="Resources\shaders\Fragment.hlsli">
+    <Filter>Shaders\Resources</Filter>
+  </None>
+  <None Include="Resources\shaders\Object2d.hlsli">
+    <Filter>Shaders\Resources</Filter>
+  </None>
+  <None Include="Resources\shaders\Object3d.hlsli">
+    <Filter>Shaders\Resources</Filter>
+  </None>
+  <None Include="Resources\shaders\Particle.hlsli">
+    <Filter>Shaders\Resources</Filter>
+  </None>
+  <None Include="Resources\shaders\Effect.hlsli">
+    <Filter>Shaders\Resources</Filter>
+  </None>
+  <None Include="Resources\shaders\SkinningObject3d.hlsli">
+    <Filter>Shaders\Resources</Filter>
+  </None>
+  <None Include="Resources\shaders\Skybox.hlsli">
+    <Filter>Shaders\Resources</Filter>
+  </None>
+
+  <None Include=".editorconfig" />
+</ItemGroup>
+
+<ItemGroup>
+  <!-- Engine/graphics/shaders (コンパイル対象) -->
+  <FxCompile Include="Engine\graphics\shaders\Fragment.PS.hlsl">
+    <Filter>Shaders\Engine</Filter>
+  </FxCompile>
+  <FxCompile Include="Engine\graphics\shaders\Fragment.VS.hlsl">
+    <Filter>Shaders\Engine</Filter>
+  </FxCompile>
+  <FxCompile Include="Engine\graphics\shaders\Object2d.PS.hlsl">
+    <Filter>Shaders\Engine</Filter>
+  </FxCompile>
+  <FxCompile Include="Engine\graphics\shaders\Object2d.VS.hlsl">
+    <Filter>Shaders\Engine</Filter>
+  </FxCompile>
+  <FxCompile Include="Engine\graphics\shaders\Object3d.PS.hlsl">
+    <Filter>Shaders\Engine</Filter>
+  </FxCompile>
+  <FxCompile Include="Engine\graphics\shaders\Object3d.VS.hlsl">
+    <Filter>Shaders\Engine</Filter>
+  </FxCompile>
+  <FxCompile Include="Engine\graphics\shaders\Particle.PS.hlsl">
+    <Filter>Shaders\Engine</Filter>
+  </FxCompile>
+  <FxCompile Include="Engine\graphics\shaders\Particle.VS.hlsl">
+    <Filter>Shaders\Engine</Filter>
+  </FxCompile>
+
+  <!-- Resources/shaders (コンパイル対象) -->
+  <FxCompile Include="Resources\shaders\CopyImage.VS.hlsl">
+    <Filter>Shaders\Resources</Filter>
+  </FxCompile>
+  <FxCompile Include="Resources\shaders\CopyImage.PS.hlsl">
+    <Filter>Shaders\Resources</Filter>
+  </FxCompile>
+  <FxCompile Include="Resources\shaders\Fragment.PS.hlsl">
+    <Filter>Shaders\Resources</Filter>
+  </FxCompile>
+  <FxCompile Include="Resources\shaders\Fragment.VS.hlsl">
+    <Filter>Shaders\Resources</Filter>
+  </FxCompile>
+  <FxCompile Include="Resources\shaders\Object2d.PS.hlsl">
+    <Filter>Shaders\Resources</Filter>
+  </FxCompile>
+  <FxCompile Include="Resources\shaders\Object2d.VS.hlsl">
+    <Filter>Shaders\Resources</Filter>
+  </FxCompile>
+  <FxCompile Include="Resources\shaders\Object3d.PS.hlsl">
+    <Filter>Shaders\Resources</Filter>
+  </FxCompile>
+  <FxCompile Include="Resources\shaders\Object3d.VS.hlsl">
+    <Filter>Shaders\Resources</Filter>
+  </FxCompile>
+  <FxCompile Include="Resources\shaders\Particle.PS.hlsl">
+    <Filter>Shaders\Resources</Filter>
+  </FxCompile>
+  <FxCompile Include="Resources\shaders\Particle.VS.hlsl">
+    <Filter>Shaders\Resources</Filter>
+  </FxCompile>
+  <FxCompile Include="Resources\shaders\Effect.VS.hlsl">
+    <Filter>Shaders\Resources</Filter>
+  </FxCompile>
+  <FxCompile Include="Resources\shaders\Effect.PS.hlsl">
+    <Filter>Shaders\Resources</Filter>
+  </FxCompile>
+  <FxCompile Include="Resources\shaders\SkinningObject3d.VS.hlsl">
+    <Filter>Shaders\Resources</Filter>
+  </FxCompile>
+  <FxCompile Include="Resources\shaders\Grayscale.PS.hlsl">
+    <Filter>Shaders\Resources</Filter>
+  </FxCompile>
+  <FxCompile Include="Resources\shaders\RadialBlur.PS.hlsl">
+    <Filter>Shaders\Resources</Filter>
+  </FxCompile>
+  <FxCompile Include="Resources\shaders\Skybox.VS.hlsl">
+    <Filter>Shaders\Resources</Filter>
+  </FxCompile>
+  <FxCompile Include="Resources\shaders\Skybox.PS.hlsl">
+    <Filter>Shaders\Resources</Filter>
+  </FxCompile>
+</ItemGroup>
 </Project>
