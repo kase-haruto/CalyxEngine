@@ -10,8 +10,6 @@
 
 // game
 #include <Game/Battle/Shooting/ShootingController/EnemyShootingController.h>
-#include <Game/Battle/Shooting/Details/IShootSink.h>
-#include <Game/Battle/Shooting/Details/FireScheduler.h>
 #include <Game/Battle/Shooting/ShootingController/BulletEmitter.h>
 #include <Game/Battle/Movement/FollowSpline/SplineFollower.h>
 #include <Game/Battle/Shooting/Pattern/ShootPatternDetails.h>
@@ -41,6 +39,7 @@ public:
 	void OnCollisionExit([[maybe_unused]] Collider* other) override {}
 	
 	// accessor ---------------------------------------------------------//
+	int16_t GetScore()const;
 	void SetPosition(const Vector3& position) { worldTransform_.translation = position; };
 	void SetParent(WorldTransform* parent);
 	void SetShootingController(std::unique_ptr<EnemyShootingController>);
@@ -86,16 +85,18 @@ private:
 	//===================================================================*/
 	//                      private variables
 	//===================================================================*/
+	int16_t score_ = 0.0f;					//< 撃破スコア
+
 	BulletPatternKind patternKind_ = BulletPatternKind::SweepFan;
 	BulletPatternKind lastPatternKind_ = BulletPatternKind::Spiral;
 	std::unique_ptr<IShootPattern> pattern_;
 	
 	const WorldTransform* playerTransform_ = nullptr;
 	DeathState deathState_ = DeathState::Alive;
-	SplineFollower mover_;					//< 移動
-	SplineData moveRoute_{};				//< 経路データ
+	SplineFollower mover_;								//< 移動
+	SplineData moveRoute_{};							//< 経路データ
 	Vector3 deathRotateAxis_ = { 0, 0, 1 };	//< 傾く軸
-	Vector3 basePosition_{};				//< サイン波の基準位置
+	Vector3 basePosition_{};							//< サイン波の基準位置
 
 	bool hasRoute_ = false;					//< 移動ルートを取得済みか
 	bool isHit_ = false;					//< 衝突フラグ
@@ -108,8 +109,8 @@ private:
 	float deathTimer_ = 0.0f;				//< 死亡演出用
 	float deathLength_ = 1.5f;				//< 倒れ終わるまでの秒数
 
-	std::unique_ptr<BulletEmitter> emitter_;                       //< 一度だけ生成して保持
-	std::unique_ptr<EnemyShootingController> shootingController_;  //< 下流コントローラ
-	std::shared_ptr<ParticleSystemObject> hitFx_;
-	std::shared_ptr<ParticleSystemObject> explosionFx_;
+	std::unique_ptr<BulletEmitter> emitter_;						//< 一度だけ生成して保持
+	std::unique_ptr<EnemyShootingController> shootingController_;	//< 下流コントローラ
+	std::shared_ptr<ParticleSystemObject> hitFx_;					//< ヒットエフェクト
+	std::shared_ptr<ParticleSystemObject> explosionFx_;				//< 爆破エフェクト
 };
