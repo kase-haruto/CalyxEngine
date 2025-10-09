@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 #include <type_traits>
+#include <algorithm>
 
 class SceneObjectLibrary{
 public:
@@ -18,36 +19,43 @@ public:
 	void AddObject(const std::shared_ptr<SceneObject>& object);
 	bool RemoveObject(const std::shared_ptr<SceneObject>& object);
 	bool RemoveObject(Guid id);
-	void Clear();
+	void Clear(); // 子孫含めて Remove イベントを正しく発火
 
 	/* 検索 --------------------------------------------------------------*/
-	std::shared_ptr<SceneObject> Find(Guid id)                       const;
+	std::shared_ptr<SceneObject> Find(Guid id) const;
 	std::shared_ptr<SceneObject> FindByName(const std::string& name) const;
 
-	template<class TObject>
+	template <class TObject>
 	std::vector<std::shared_ptr<TObject>> FindByType() const;
 
 	/* 一覧取得 ----------------------------------------------------------*/
-	std::vector<SceneObject*> GetAllObjectsRaw()   const;
+	std::vector<SceneObject*> GetAllObjectsRaw() const;
 	std::vector<std::shared_ptr<SceneObject>> GetAllObjectsShared() const;
 
 	bool Contains(const std::shared_ptr<SceneObject>& obj) const;
+	bool Contains(Guid id) const{ return objects_.contains(id); }
+
+private:
+	// フォレストを根ごとに後行順で集めるヘルパ
+	static void GatherSubtreePostorder(
+		const std::shared_ptr<SceneObject>& node,
+		std::vector<std::shared_ptr<SceneObject>>& out);
+
+	void RemoveSubtreePostorder_(const std::shared_ptr<SceneObject>& root);
 
 private:
 	std::unordered_map<Guid, std::shared_ptr<SceneObject>> objects_;
 };
 
 /* ---------------- テンプレート実装 ---------------------------------------*/
-template<class TObject>
+template <class TObject>
 std::vector<std::shared_ptr<TObject>> SceneObjectLibrary::FindByType() const{
 	static_assert(std::is_base_of_v<SceneObject, TObject>,
 				  "TObject must derive from SceneObject");
 	std::vector<std::shared_ptr<TObject>> result;
+	result.reserve(objects_.size());
 	for (const auto& [id, sp] : objects_){
-		if (auto casted = std::dynamic_pointer_cast< TObject >(sp)){
-			result.emplace_back(std::move(casted));
-		}
+		if (auto casted = std::dynamic_pointer_cast<TObject>(sp)){ result.emplace_back(std::move(casted)); }
 	}
 	return result;
 }
-

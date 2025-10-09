@@ -17,19 +17,22 @@ public:
 	void Update(float dt);
 
 	// パラメータ
-	void SetOnScreenPad(float ndcPad) { ndcPad_ = ndcPad; }
-	void SetMinExposeTime(float seconds) { minExposeSec_ = seconds; }
-	void SetMaxEngageDistance(float dist) { maxEngageDist_ = dist; }
-	void EnableLineOfSight(bool enable) { useLOS_ = enable; }
+	void SetOnScreenPad(float ndcPad)		 { ndcPad_ = ndcPad; }
+	void SetMinExposeTime(float seconds)	 { minExposeSec_ = seconds; }
+	void SetMaxEngageDistance(float dist)	 { maxEngageDist_ = dist; }
+	void EnableLineOfSight(bool enable)		 { useLOS_ = enable; }
 
 	// LOS 用コールバック
 	using IsPlayerFn = std::function<bool(void*)>;
 	void SetLineOfSightPredicate(IsPlayerFn fn) { isPlayer_ = std::move(fn); }
 
-	using BuildRaycastCandidatesFn = std::function<void(std::vector<SceneObject*>& out,
-														const SceneObject* ignore)>;
-	void SetRaycastCandidatesProvider(BuildRaycastCandidatesFn fn) { buildCandidates_ = std::move(fn); }
-	void SetDirectory(std::shared_ptr<EnemyDirectory> dir) { wDir_ = std::move(dir); }
+	using BuildRaycastCandidatesFn =
+		std::function<void(std::vector<SceneObject*>& out,
+		const SceneObject* ignore)>;
+
+	void SetRaycastCandidatesProvider(BuildRaycastCandidatesFn fn)	 { buildCandidates_ = std::move(fn); }
+	void SetDirectory(std::shared_ptr<EnemyDirectory> dir)			 { wDir_ = std::move(dir); }
+
 private:
 	void RefreshRefs(SceneContext& ctx);
 	bool HasLineOfSightImpl(const Enemy& e, const Player& p) const;

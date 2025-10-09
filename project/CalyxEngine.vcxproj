@@ -169,6 +169,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\Battle\Shooting\Pattern\PatternCommon.cpp" />
     <ClCompile Include="Game\Battle\Shooting\Pattern\PatternSpiral.cpp" />
     <ClCompile Include="Game\Battle\Shooting\Pattern\PatternSweepFan.cpp" />
+    <ClCompile Include="Game\Battle\Shooting\Score\GainScore.cpp" />
+    <ClCompile Include="Game\Battle\Shooting\Score\ScoreService.cpp" />
     <ClCompile Include="Game\Battle\Shooting\Shooter\HomingBullet\EnemyHomingBulletShooter.cpp" />
     <ClCompile Include="Game\Battle\Shooting\ShootingController\BulletEmitter.cpp" />
     <ClCompile Include="Game\Battle\Shooting\ShootingController\EnemyShootingControllerSink.cpp" />
@@ -414,6 +416,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\Battle\Shooting\Pattern\PatternSpiral.h" />
     <ClInclude Include="Game\Battle\Shooting\Pattern\PatternSweepFan.h" />
     <ClInclude Include="Game\Battle\Shooting\Pattern\ShootPatternDetails.h" />
+    <ClInclude Include="Game\Battle\Shooting\Score\GainScore.h" />
+    <ClInclude Include="Game\Battle\Shooting\Score\ScoreService.h" />
     <ClInclude Include="Game\Battle\Shooting\Shooter\HomingBullet\EnemyHomingBulletShooter.h" />
     <ClInclude Include="Game\Battle\Shooting\ShootingController\BulletEmitter.h" />
     <ClInclude Include="Game\Battle\Shooting\ShootingController\EnemyShootingControllerSink.h" />

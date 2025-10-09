@@ -20,7 +20,7 @@
 /* c++ */
 #include <memory>
 
-// 前方宣言（配線サービス）
+// 配線サービス
 class EnemyRuntimeBindingService;
 
 class GameScene final : public BaseScene {
@@ -34,6 +34,8 @@ public:
 	void CleanUp() override;
 	void LoadAssets() override;
 
+	int16_t GetTotalScore()const { return totalScore_; }
+
 private:
 	/* objects ======================================================*/
 	std::shared_ptr<BaseGameObject> modelField_;
@@ -43,9 +45,10 @@ private:
 	std::unique_ptr<Sprite>         attackSprite_;
 
 	/* runtime services =============================================*/
+	int16_t totalScore_;
+
 	std::unique_ptr<EnemyRuntimeBindingService> enemyBinding_;		//< 配線
 	std::unique_ptr<EnemyEngagementService> enemyEngagement_;		//< 
 	std::unique_ptr<RailProgressBossSpawnService> occurrenceBoss_;	//< カメラの進み具合でボスを発生
-
 	std::shared_ptr<EnemyCollection>  enemyCollection_;
 };
