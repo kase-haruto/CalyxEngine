@@ -17,6 +17,7 @@
 #include <Game/Installer/Enemy/EnemyEngagementInstaller.h>
 #include <Game/3dObject/Actor/Bullet/Register/BulletRegistrar.h>
 #include <Game/Installer/Player/PlayerInstaller.h>
+#include <Game/Battle/Shooting/Score/ScoreService.h>
 
 
 
@@ -26,6 +27,8 @@
 GameScene::GameScene() {
 	SetSceneName("Game");
 }
+
+GameScene::~GameScene() = default;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //  アセットのロード
@@ -93,6 +96,9 @@ void GameScene::Initialize() {
 	if (enemyEngagement_) {
 		enemyEngagement_->SetDirectory(enemyBinding_->GetDirectory());
 	}
+
+	scoreService_ = std::make_unique<ScoreService>();
+	scoreService_->Initialize();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -110,6 +116,9 @@ void GameScene::Update([[maybe_unused]] float dt) {
 
 	// 衝突判定
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
+
+	// スコア更新
+	if (scoreService_) scoreService_->Update();
 
 
 	auto player = wPlayer_.lock();
@@ -165,6 +174,11 @@ void GameScene::CleanUp() {
 	if (enemyBinding_) {
 		enemyBinding_->OnSceneCleared(*sceneContext_);
 		enemyBinding_.reset();
+	}
+
+	if (scoreService_) {
+		scoreService_->Shutdown();
+		scoreService_.reset();
 	}
 
 	// シーン内オブジェクト/コライダ掃除

@@ -74,6 +74,7 @@ protected:
 	//===================================================================*/
 	void Move();
 	void Shoot();
+	virtual void Die();
 
 private:
 	//===================================================================*/
@@ -85,7 +86,7 @@ private:
 	//===================================================================*/
 	//                      private variables
 	//===================================================================*/
-	int16_t score_ = 0.0f;					//< 撃破スコア
+	int16_t score_ = 125;					//< 撃破スコア
 
 	BulletPatternKind patternKind_ = BulletPatternKind::SweepFan;
 	BulletPatternKind lastPatternKind_ = BulletPatternKind::Spiral;

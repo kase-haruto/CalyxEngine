@@ -1,17 +1,22 @@
 #include "Enemy.h"
 
+// engine
 #include <Engine/Foundation/Utility/Random/Random.h>
 #include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Objects/Collider/BoxCollider.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
 #include <Engine/Scene/Context/SceneContext.h>
-#include <numbers>
 
+// game
 #include <Game/Battle/Shooting/ShootingController/EnemyShootingControllerSink.h>
 #include <Game/Battle/Shooting/Details/AimProvider.h>
 #include <Game/Battle/Shooting/Pattern/PatternSweepFan.h>
 #include <Game/Battle/Shooting/Pattern/PatternCircleRing.h>
 #include <Game/Battle/Shooting/Details/FireScheduler.h>
+#include <Game/Battle/Shooting/Score/GainScore.h>
+
+// stl
+#include <numbers>
 
 /* ========================================================================
 /* include space
@@ -88,7 +93,7 @@ static float Deg2Rad(float d) { return d * std::numbers::pi_v<float> / 180.0f; }
 ////////////////////////////////////////////////////////////////
 void Enemy::Update(float dt) {
 	/* =============================================
-	    生存中のロジック
+		生存中のロジック
 	   =============================================*/
 	if (deathState_ == DeathState::Alive) {
 		if (life_ <= 0) {
@@ -156,12 +161,12 @@ void Enemy::Update(float dt) {
 		}
 
 		// 弾幕駆動：emitter_ は一度生成したら以降は再利用
-		if (this->IsGameplayEngaged() && emitter_){
-			if (auto* pat = emitter_->Pattern()){
-				pat->Advance(dt); 
+		if (this->IsGameplayEngaged() && emitter_) {
+			if (auto* pat = emitter_->Pattern()) {
+				pat->Advance(dt);
 			}
 
-			BulletEmitterContext cxt {};
+			BulletEmitterContext cxt{};
 			cxt.origin = GetCenterPos(); // 先に移動を済ませてあるので常に最新
 			cxt.targetPos = playerTransform_ ? playerTransform_->GetWorldPosition() : GetWorldPosition();
 
@@ -172,7 +177,7 @@ void Enemy::Update(float dt) {
 	}
 
 	/* =============================================
-	    倒れ演出中 (Dying)
+		倒れ演出中 (Dying)
 	   =============================================*/
 	if (deathState_ == DeathState::Dying) {
 		deathTimer_ += dt;
@@ -198,15 +203,18 @@ void Enemy::Update(float dt) {
 	   完全に死亡
 	   =============================================*/
 	if (deathState_ == DeathState::Dead) {
+
+		//死亡処理
+		this->Die();
 		isAlive_ = false;
 		return;
 	}
 }
 
-void Enemy::EnsurePatternBound(){
+void Enemy::EnsurePatternBound() {
 	if (!emitter_) return;
 
-	if (!pattern_ || patternKind_ != lastPatternKind_){
+	if (!pattern_ || patternKind_ != lastPatternKind_) {
 		pattern_ = CreatePattern(patternKind_);
 		lastPatternKind_ = patternKind_;
 	}
@@ -244,7 +252,7 @@ const BulletContainer* Enemy::GetBulletContainer() const {
 }
 
 // スコア取得
-int16_t Enemy::GetScore() const{ { return score_; }}
+int16_t Enemy::GetScore() const { { return score_; } }
 /////////////////////////////////////////////////////////////////////////////////////////
 //      親の設定
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -296,9 +304,20 @@ void Enemy::Shoot() {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
+//      死亡時処理
+/////////////////////////////////////////////////////////////////////////////////////////
+void Enemy::Die() {
+	GainScore event;
+	event.amount = score_;
+	event.reason = "enemyKill";
+	event.tag = { "normal" };
+	EventBus::Publish(event);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
 //      エミッタの一度だけ生成する関数
 /////////////////////////////////////////////////////////////////////////////////////////
-void Enemy::BuildEmitterIfReady(){
+void Enemy::BuildEmitterIfReady() {
 	if (emitter_) return;
 	if (!shootingController_) return;
 	if (!playerTransform_) return;

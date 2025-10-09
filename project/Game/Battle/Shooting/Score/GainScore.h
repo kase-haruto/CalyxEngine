@@ -9,7 +9,8 @@
 
 struct GainScore{
 	int16_t amount;
-	Guid id_;
-	std::vector<std::string> tag_;
+	Guid id;
+	std::string reason;
+	std::vector<std::string> tag;
 
 };

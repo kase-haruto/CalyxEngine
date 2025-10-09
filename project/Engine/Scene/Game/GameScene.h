@@ -22,11 +22,13 @@
 
 // 配線サービス
 class EnemyRuntimeBindingService;
+class ScoreService;
 
-class GameScene final : public BaseScene {
+class GameScene final
+	: public BaseScene {
 public:
 	GameScene();
-	~GameScene() override = default;
+	~GameScene() override;
 
 	void Initialize() override;
 	void Update(float dt) override;
@@ -51,4 +53,5 @@ private:
 	std::unique_ptr<EnemyEngagementService> enemyEngagement_;		//< 
 	std::unique_ptr<RailProgressBossSpawnService> occurrenceBoss_;	//< カメラの進み具合でボスを発生
 	std::shared_ptr<EnemyCollection>  enemyCollection_;
+	std::unique_ptr<ScoreService> scoreService_;
 };
