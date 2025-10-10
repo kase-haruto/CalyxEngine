@@ -39,8 +39,8 @@ public:
 	// getter
 	const Vector2& GetAnchor() const;
 	const Vector2& GetSpriteSize() const;
-	const float	   GetValue() const;
-	const float	   GetSpace() const;
+	int			   GetValue() const;
+	float		   GetSpace() const;
 
 	// setter
 	void SetAnchor(const Vector2& anc);

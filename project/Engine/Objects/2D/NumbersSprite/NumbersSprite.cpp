@@ -22,7 +22,7 @@ NumbersSprite::~NumbersSprite() = default;
 /////////////////////////////////////////////////////////////////////////////////////////
 void NumbersSprite::Update() {
 	// スプライトの更新
-	for (auto& sp : sprites_)
+	for(auto& sp : sprites_)
 		sp->Update();
 }
 
@@ -38,16 +38,16 @@ void NumbersSprite::ShowGui(const std::string& label) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		getter
 /////////////////////////////////////////////////////////////////////////////////////////
-const Vector2& NumbersSprite::GetSpriteSize() const		{ return spriteSize_; }
-const float	   NumbersSprite::GetValue() const			{ return value_; }
-const float	   NumbersSprite::GetSpace() const			{ return space_; }
+const Vector2& NumbersSprite::GetSpriteSize() const { return spriteSize_; }
+int			   NumbersSprite::GetValue() const { return value_; }
+float		   NumbersSprite::GetSpace() const { return space_; }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		setter
 /////////////////////////////////////////////////////////////////////////////////////////
-void NumbersSprite::SetAnchor(const Vector2& anc)		{ anchor_ = anc; }
-void NumbersSprite::SetSpriteSize(const Vector2& size)	{ spriteSize_ = size; }
-void NumbersSprite::SetValue(int val)					{ value_ = val; }
-void NumbersSprite::SetMinDigit(int digit)				{ minDigits_ = digit; }
-void NumbersSprite::SetMaxDigit(int digit)				{ maxDigits_ = digit; }
-void NumbersSprite::SetSpace(float space)				{ space_ = space; }
+void NumbersSprite::SetAnchor(const Vector2& anc) { anchor_ = anc; }
+void NumbersSprite::SetSpriteSize(const Vector2& size) { spriteSize_ = size; }
+void NumbersSprite::SetValue(int val) { value_ = val; }
+void NumbersSprite::SetMinDigit(int digit) { minDigits_ = digit; }
+void NumbersSprite::SetMaxDigit(int digit) { maxDigits_ = digit; }
+void NumbersSprite::SetSpace(float space) { space_ = space; }

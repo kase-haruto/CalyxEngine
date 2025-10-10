@@ -1,6 +1,8 @@
 BasedOnStyle: Microsoft
 Language: Cpp
-AllowShortFunctionsOnASingleLine: All
+AllowShortFunctionsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: true 
+AllowShortLoopsOnASingleLine: true
 AlwaysBreakBeforeMultilineStrings: false
 AlwaysBreakTemplateDeclarations: true
 ColumnLimit: 0

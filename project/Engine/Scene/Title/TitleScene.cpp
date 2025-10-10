@@ -7,22 +7,22 @@
 #include <Engine/Scene/System/SceneManager.h>
 
 // engine
-#include <Engine/Graphics/Context/GraphicsGroup.h>
 #include <Engine/Application/Input/Input.h>
-#include <Engine/Graphics/Camera/Manager/CameraManager.h>
-#include <Engine/Objects/3D/Actor/SceneObjectManager.h>
-#include <Engine/Collision/CollisionManager.h>
-#include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Application/System/Enviroment.h>
-#include <Engine/Scene/Utility/SceneUtility.h>
+#include <Engine/Assets/Texture/TextureManager.h>
+#include <Engine/Collision/CollisionManager.h>
+#include <Engine/Graphics/Camera/Manager/CameraManager.h>
+#include <Engine/Graphics/Context/GraphicsGroup.h>
+#include <Engine/Objects/3D/Actor/SceneObjectManager.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
+#include <Engine/Scene/Utility/SceneUtility.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //	コンストラクタ/デストラクタ
 /////////////////////////////////////////////////////////////////////////////////////////
 TitleScene::TitleScene() {
 	// シーン名を設定
-	//IScene::SetSceneName("TitleScene");
+	// IScene::SetSceneName("TitleScene");
 	SetSceneName("TitleScene");
 }
 
@@ -37,7 +37,7 @@ void TitleScene::LoadAssets() {}
 void TitleScene::Initialize() {
 	sceneContext_->Initialize();
 
-		// シーンデータ読み込み
+	// シーンデータ読み込み
 	SceneSerializer::Load(*sceneContext_, "Resources/Assets/Scenes/TitleScene.scene");
 
 	LoadAssets();
@@ -72,7 +72,6 @@ void TitleScene::Update([[maybe_unused]] float dt) {
 	menu_->Update(dt);
 
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
-
 }
 
 void TitleScene::CleanUp() {
@@ -84,8 +83,7 @@ void TitleScene::CleanUp() {
 void TitleScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService, RenderTargetType type) {
 	BaseScene::Draw(cmdList, psoService, type);
 
-	for (auto& sprite : menu_->GetAllButtonImage()) {
+	for(auto& sprite : menu_->GetAllButtonImage()) {
 		spriteRenderer_->Register(sprite);
 	}
-
 }
