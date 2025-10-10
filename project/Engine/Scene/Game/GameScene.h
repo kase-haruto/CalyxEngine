@@ -19,14 +19,17 @@
 
 /* c++ */
 #include <memory>
+#include <array>
 
 // 配線サービス
 class EnemyRuntimeBindingService;
+class ScoreService;
 
-class GameScene final : public BaseScene {
+class GameScene final
+	: public BaseScene {
 public:
 	GameScene();
-	~GameScene() override = default;
+	~GameScene() override;
 
 	void Initialize() override;
 	void Update(float dt) override;
@@ -42,7 +45,10 @@ private:
 	std::shared_ptr<RailCamera>     railCamera_ = nullptr;
 	std::weak_ptr<Player>           wPlayer_;
 	std::weak_ptr<Boss> wBoss_;
+
+	/* UIs ==========================================================*/
 	std::unique_ptr<Sprite>         attackSprite_;
+	std::array<std::unique_ptr<Sprite>, 5> score_;
 
 	/* runtime services =============================================*/
 	int16_t totalScore_;
@@ -51,4 +57,5 @@ private:
 	std::unique_ptr<EnemyEngagementService> enemyEngagement_;		//< 
 	std::unique_ptr<RailProgressBossSpawnService> occurrenceBoss_;	//< カメラの進み具合でボスを発生
 	std::shared_ptr<EnemyCollection>  enemyCollection_;
+	std::unique_ptr<ScoreService> scoreService_;
 };

@@ -4,31 +4,36 @@
 /* ===================================================================== */
 #include <queue>
 
-struct  GainScore;
+struct GainScore;
 
 class ScoreService {
-public:
+  public:
 	//===================================================================*/
 	//					public methods
 	//===================================================================*/
+	ScoreService();
+	~ScoreService();
+
 	void Initialize();
-	void Shutdown();		// 購読解除
-	void Update();			// キューをドレインして合算
+	void Shutdown(); // 購読解除
+	void Update();	 // キューをドレインして合算
 
 	void AddRaw(int v);
-	int  GetTotal() const { return total_; }
+	int	 GetTotal() const { return total_; }
 
-private:
+  private:
 	//===================================================================*/
 	//					private func
 	//===================================================================*/
 	void OnGainScore(const GainScore& ev);
 
-private:
+  private:
 	//===================================================================*/
 	//					private variable
 	//===================================================================*/
 	int total_ = 0;
-	struct Pending { int amount;};
+	struct Pending {
+		int amount;
+	};
 	std::queue<Pending> q_;
 };

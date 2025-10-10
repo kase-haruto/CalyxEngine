@@ -6,6 +6,10 @@
 #include <Engine/System/Event/EventBus.h>
 #include "GainScore.h"
 
+ScoreService::ScoreService() = default;
+
+ScoreService::~ScoreService() = default;
+
 void ScoreService::Initialize(){
 	EventBus::Subscribe<GainScore>(
 		  [this](const GainScore& ev){ OnGainScore(ev); }
