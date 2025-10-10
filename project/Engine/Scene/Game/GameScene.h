@@ -24,6 +24,7 @@
 // 配線サービス
 class EnemyRuntimeBindingService;
 class ScoreService;
+class NumbersSprite;
 
 class GameScene final
 	: public BaseScene {
@@ -48,7 +49,6 @@ private:
 
 	/* UIs ==========================================================*/
 	std::unique_ptr<Sprite>         attackSprite_;
-	std::array<std::unique_ptr<Sprite>, 5> score_;
 
 	/* runtime services =============================================*/
 	int16_t totalScore_;
@@ -57,5 +57,6 @@ private:
 	std::unique_ptr<EnemyEngagementService> enemyEngagement_;		//< 
 	std::unique_ptr<RailProgressBossSpawnService> occurrenceBoss_;	//< カメラの進み具合でボスを発生
 	std::shared_ptr<EnemyCollection>  enemyCollection_;
-	std::unique_ptr<ScoreService> scoreService_;
+	std::unique_ptr<ScoreService> score_;
+	std::unique_ptr<NumbersSprite> scoreDigits_;
 };
