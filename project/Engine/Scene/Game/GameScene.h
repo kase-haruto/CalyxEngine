@@ -13,17 +13,18 @@
 #include <Game/3dObject/Actor/Boss/Boss.h>
 #include <Game/3dObject/Actor/Boss/Service/RailProgressBossSpawnService.h>
 #include <Game/3dObject/Actor/Enemy/BindingService/EnemyRuntimeBindingService.h>
-#include <Game/Runtime/Engagement/EnemyEngagementService.h>
 #include <Game/3dObject/Actor/Enemy/Collection/EnemyCollection.h>
 #include <Game/3dObject/Actor/Player/Player.h>
+#include <Game/Runtime/Engagement/EnemyEngagementService.h>
 
 /* c++ */
-#include <memory>
 #include <array>
+#include <memory>
 
 // 配線サービス
 class EnemyRuntimeBindingService;
 class ScoreService;
+class NumbersSprite;
 
 class GameScene final
 	: public BaseScene {
@@ -37,25 +38,25 @@ public:
 	void CleanUp() override;
 	void LoadAssets() override;
 
-	int16_t GetTotalScore()const { return totalScore_; }
+	int16_t GetTotalScore() const { return totalScore_; }
 
 private:
 	/* objects ======================================================*/
 	std::shared_ptr<BaseGameObject> modelField_;
-	std::shared_ptr<RailCamera>     railCamera_ = nullptr;
-	std::weak_ptr<Player>           wPlayer_;
-	std::weak_ptr<Boss> wBoss_;
+	std::shared_ptr<RailCamera>		railCamera_ = nullptr;
+	std::weak_ptr<Player>			wPlayer_;
+	std::weak_ptr<Boss>				wBoss_;
 
 	/* UIs ==========================================================*/
-	std::unique_ptr<Sprite>         attackSprite_;
-	std::array<std::unique_ptr<Sprite>, 5> score_;
+	std::unique_ptr<Sprite> attackSprite_;
 
 	/* runtime services =============================================*/
 	int16_t totalScore_;
 
-	std::unique_ptr<EnemyRuntimeBindingService> enemyBinding_;		//< 配線
-	std::unique_ptr<EnemyEngagementService> enemyEngagement_;		//< 
+	std::unique_ptr<EnemyRuntimeBindingService>	  enemyBinding_;	//< 配線
+	std::unique_ptr<EnemyEngagementService>		  enemyEngagement_; //<
 	std::unique_ptr<RailProgressBossSpawnService> occurrenceBoss_;	//< カメラの進み具合でボスを発生
-	std::shared_ptr<EnemyCollection>  enemyCollection_;
-	std::unique_ptr<ScoreService> scoreService_;
+	std::shared_ptr<EnemyCollection>			  enemyCollection_;
+	std::unique_ptr<ScoreService>				  score_;
+	std::unique_ptr<NumbersSprite>				  numbersSprite_;
 };

@@ -78,7 +78,7 @@ bool SceneSerializer::LoadJson(SceneContext& context,
 	/* ---------- ② 既存クリア ---------- */
 	context.Clear();
 
-	// ★ Light & Camera を一旦無効化
+	// Light & Camera を一旦無効化
 	if (auto* ll = context.GetLightLibrary()) {
 		ll->SetDirectionalLight({});
 		ll->SetPointLight({});

@@ -2,12 +2,13 @@
 /* ========================================================================
 /*	include space
 /* ===================================================================== */
+#include <Engine/System/Event/EventBus.h>
 #include <queue>
 
 struct GainScore;
 
 class ScoreService {
-  public:
+public:
 	//===================================================================*/
 	//					public methods
 	//===================================================================*/
@@ -21,13 +22,13 @@ class ScoreService {
 	void AddRaw(int v);
 	int	 GetTotal() const { return total_; }
 
-  private:
+private:
 	//===================================================================*/
 	//					private func
 	//===================================================================*/
 	void OnGainScore(const GainScore& ev);
 
-  private:
+private:
 	//===================================================================*/
 	//					private variable
 	//===================================================================*/
@@ -36,4 +37,6 @@ class ScoreService {
 		int amount;
 	};
 	std::queue<Pending> q_;
+
+	EventBus::Connection connGainScore_;
 };

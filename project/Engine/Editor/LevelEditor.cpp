@@ -161,7 +161,6 @@ void LevelEditor::Update() {
 	const bool uiBlocksClick = io.WantCaptureMouse && !overDebugViewport;
 
 	if (debugViewport_ && debugViewport_->IsShow() && !guizmoActive && !uiBlocksClick) {
-		// ★ ImGui と DirectInput の両方で“立ち上がり”を検出（更新順の影響を低減）
 		const bool imguiEdge = ImGui::IsMouseClicked(ImGuiMouseButton_Left);
 
 		static bool prevDILeft = false;
@@ -307,11 +306,11 @@ void LevelEditor::DeleteObject(const std::shared_ptr<SceneObject>& sp) {
 
 void LevelEditor::RenderViewport(ViewportType type, const ImTextureID& tex) {
 	if (type == ViewportType::VIEWPORT_MAIN) {
-		if (mainViewport_ && mainViewport_->IsShow()) {   // ★ 追加
+		if (mainViewport_ && mainViewport_->IsShow()) {
 			mainViewport_->Render(tex);
 		}
 	} else if (type == ViewportType::VIEWPORT_DEBUG) {
-		if (debugViewport_ && debugViewport_->IsShow()) {  // ★ 追加
+		if (debugViewport_ && debugViewport_->IsShow()) { 
 			debugViewport_->Render(tex);
 		}
 	}

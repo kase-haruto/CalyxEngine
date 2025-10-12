@@ -41,7 +41,7 @@ SOFTWARE.
 #include <cstdio>
 #include <cerrno>
 #include "imgui.h"
-#include "imgui_internal.h"   // ★これがないと BeginTableEx が宣言されません
+#include "imgui_internal.h"
 // this option need c++17
 #ifdef USE_STD_FILESYSTEM
 #include <filesystem>

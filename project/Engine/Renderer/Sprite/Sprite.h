@@ -124,6 +124,7 @@ public:
 	void SetLeftTop(const Vector2& LTop){ this->textureLeftTop = LTop; }
 
 	void SetIsVisible(bool is) { isVisible = is; }
+	bool GetIsVisible() const { return isVisible; }
 
 	const std::string& GetTextureName() const{
 		return path;

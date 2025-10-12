@@ -27,7 +27,7 @@ void UIEditor::ShowImGuiInterface(){
 #ifdef _DEBUG
 
 
-	// ★ JSON 保存ボタンの追加
+	// JSON 保存ボタンの追加
 	if (ImGui::Button("Save to JSON")){
 		// 実際にはパスをユーザに入力させても良いし、固定ファイル名でもOK
 		SaveSpriteDataToJson("Resources/json/sprite/spriteData.json");

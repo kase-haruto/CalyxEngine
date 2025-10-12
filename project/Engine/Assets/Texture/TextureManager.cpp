@@ -22,6 +22,16 @@ void TextureManager::StartUpLoad() {
 	LoadTexture("Textures/redCircle.png");
 	LoadTexture("Textures/fieldTile.png");
 	LoadTexture("Textures/TallBuilding01.png");
+	LoadTexture("Textures/Numbers/0.png");
+	LoadTexture("Textures/Numbers/1.png");
+	LoadTexture("Textures/Numbers/2.png");
+	LoadTexture("Textures/Numbers/3.png");
+	LoadTexture("Textures/Numbers/4.png");
+	LoadTexture("Textures/Numbers/5.png");
+	LoadTexture("Textures/Numbers/6.png");
+	LoadTexture("Textures/Numbers/7.png");
+	LoadTexture("Textures/Numbers/8.png");
+	LoadTexture("Textures/Numbers/9.png");
 }
 
 void TextureManager::Initialize(ImGuiManager* imgui) {
@@ -53,7 +63,6 @@ D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::LoadTexture(const std::string& fileP
 	D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle = texture.GetSrvHandle();
 	textures_[filePath] = std::move(texture);
 
-	// ★ パス→GUID の対応を覚える（AssetDB にある場合）
 	if (auto* db = AssetDatabase::GetInstance()) {
 		std::error_code ec;
 		auto root = db->GetRoot();
