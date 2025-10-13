@@ -1,13 +1,13 @@
 #pragma once
 
 /* engine */
-#include <Engine/Objects/Transform/Transform.h>
 #include <Engine/Foundation/Math/Matrix4x4.h>
 #include <Engine/Foundation/Math/Vector2.h>
 #include <Engine/Foundation/Math/Vector4.h>
 #include <Engine/Graphics/Material.h>
-#include <Engine/Renderer/Mesh/VertexData.h>
 #include <Engine/Graphics/RenderTarget/Detail/RenderTargetDetail.h>
+#include <Engine/Objects/Transform/Transform.h>
+#include <Engine/Renderer/Mesh/VertexData.h>
 
 /* c++ */
 #include <d3d12.h>
@@ -17,142 +17,82 @@ using namespace Microsoft::WRL;
 
 class DirectXCommon;
 
-/// <summary>
-/// スプライト
-/// </summary>
-class Sprite{
+class Sprite {
 public:
+	//===================================================================*/
+	//                    public method
+	//===================================================================*/
 	Sprite(const std::string& filePath);
 	~Sprite();
 
-	/// <summary>
-	/// 初期化
-	/// </summary>
 	void Initialize(const Vector2& position, const Vector2& size);
-	void Initialize();// 引数なし初期化初期座標はwindow中心座標
+	void Initialize(); // 引数なし初期化初期座標はwindow中心座標
 
-	/// <summary>
-	/// 更新
-	/// </summary>
 	void Update();
-
 	void ShowGui();
-
 	void UpdateMatrix();
-
-	/// <summary>
-	/// 行列の更新
-	/// </summary>
-	void UpdateMaterix();
-
-	/// <summary>
-	/// トランスフォームの更新
-	/// </summary>
 	void UpdateTransform();
-
-	/// <summary>
-	/// 描画
-	/// </summary>
 	void Draw(ID3D12GraphicsCommandList* cmdList);
 
-	/// <summary>
-	/// 定数バッファの作成
-	/// </summary>
-	void CreateBuffer();
+	// getter
+	const std::string&	   GetTextureName() const { return path; }
+	RenderTargetType	   GetTargetRt() const { return targetRT_; }
+	ComPtr<ID3D12Resource> GetConstBuffer() { return vertexResource_; }
+	const Vector4&		   GetColor() const { return materialData_->color; }
+	const Vector2&		   GetSize() const { return size; }
+	const Vector2&		   GetAnchorPoint() const { return anchorPoint; }
+	const Vector2&		   GetPosition() const { return position; }
+	const Vector2&		   GetUvTranslate() const { return Vector2(uvTransform.translate.x, uvTransform.translate.y); }
+	const Vector2&		   GetLeftTop() const { return textureLeftTop; }
+	float				   GetRotation() const { return rotate; }
+	const float			   GetUvRotate() const { return uvTransform.rotate.x; }
+	bool				   GetIsVisible() const { return isVisible; }
 
-	/// <summary>
-	/// マップ
-	/// </summary>
+	// setter
+	void	   SetRotation(float rotation) { this->rotate = rotation; }
+	void	   SetUvRotate(const float uvRotate) { uvTransform.rotate.x = uvRotate; }
+	void	   PutWindowCenter();
+	void	   SetPosition(const Vector2& newPosition) { this->position = newPosition; }
+	void	   SetUvTranslate(const Vector2& uvOffset) { Vector2(uvTransform.translate.x = uvOffset.x, uvTransform.translate.y = uvOffset.y); }
+	void	   SetColor(const Vector4& newColor) { materialData_->color = newColor; }
+	void	   SetSize(const Vector2& newSize) { this->size = newSize; }
+	void	   SetAnchorPoint(const Vector2& newAnchorPoint) { this->anchorPoint = newAnchorPoint; }
+	void	   SetLeftTop(const Vector2& LTop) { this->textureLeftTop = LTop; }
+	void	   SetIsVisible(bool is) { isVisible = is; }
+	void	   SetTargetRt(RenderTargetType targetRt) { targetRT_ = targetRt; }
+	const void SetTextureHandle(D3D12_GPU_DESCRIPTOR_HANDLE newHandle);
+
+private:
+	//===================================================================*/
+	//                    private methods
+	//===================================================================*/
+	void CreateBuffer();
 	void Map();
 	void IndexResourceMap();
 	void VertexResourceMap();
 	void TransformResourceMap();
 	void MaterialResourceMap();
 
-	/// <summary>
-	/// 定数バッファの取得
-	/// </summary>
-	/// <returns></returns>
-	ComPtr<ID3D12Resource>GetConstBuffer(){ return vertexResource_; }
-
-	/// <summary>
-	/// 回転
-	/// </summary>
-	/// <param name="rotation"></param>
-	void SetRotation(float rotation){ this->rotate = rotation; }
-	float GetRotation()const{ return rotate; }
-
-	void SetUvRotate(const float uvRotate){ uvTransform.rotate.x = uvRotate; }
-	const float GetUvRotate()const{ return uvTransform.rotate.x; }
-	void PutWindowCenter();
-
-	/// <summary>
-	/// 座標
-	/// </summary>
-	/// <param name="position"></param>
-	void SetPosition(const Vector2& newPosition){ this->position = newPosition; }
-	const Vector2& GetPosition()const{ return position; }
-
-	void SetUvTranslate(const Vector2& uvOffset){ Vector2(uvTransform.translate.x = uvOffset.x, uvTransform.translate.y = uvOffset.y); }
-	const Vector2 GetUvTranslate()const{ return Vector2(uvTransform.translate.x, uvTransform.translate.y); }
-	/// <summary>
-	/// 色
-	/// </summary>
-	/// <returns></returns>
-	const Vector4& GetColor()const{ return materialData_->color; }
-	void SetColor(const Vector4& newColor){ materialData_->color = newColor; }
-
-	/// <summary>
-	/// サイズ
-	/// </summary>
-	/// <returns></returns>
-	const Vector2& GetSize()const{ return size; }
-	void SetSize(const Vector2& newSize){ this->size = newSize; }
-
-	/// <summary>
-	/// アンカーポイント
-	/// </summary>
-	/// <returns></returns>
-	const Vector2& GetAnchorPoint()const{ return anchorPoint; }
-	void SetAnchorPoint(const Vector2& newAnchorPoint){ this->anchorPoint = newAnchorPoint; }
-
-	/// <summary>
-	/// 左上座標
-	/// </summary>
-	/// <returns></returns>
-	const Vector2& GetLeftTop()const{ return textureLeftTop; }
-	void SetLeftTop(const Vector2& LTop){ this->textureLeftTop = LTop; }
-
-	void SetIsVisible(bool is) { isVisible = is; }
-	bool GetIsVisible() const { return isVisible; }
-
-	const std::string& GetTextureName() const{
-		return path;
-	}
-
-	void SetTargetRt(RenderTargetType targetRt) { targetRT_ = targetRt; }
-	RenderTargetType GetTargetRt()const { return targetRT_; }
-
-	// テクスチャハンドルを設定する関数
-	const void SetTextureHandle(D3D12_GPU_DESCRIPTOR_HANDLE newHandle);
-
 private:
-	EulerTransform transform_ {{1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f}};
-	EulerTransform uvTransform {{1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f}};
-	//座標
-	Vector2 position {0.0f,0.0f};
-	//回転
+	//===================================================================*/
+	//                    private methods
+	//===================================================================*/
+	EulerTransform transform_{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}};
+	EulerTransform uvTransform{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}};
+	// 座標
+	Vector2 position{0.0f, 0.0f};
+	// 回転
 	float rotate = 0.0f;
-	//色
-	Vector4 color = {1.0f,1.0f,1.0f,1.0f};
-	//size
-	Vector2 size = {640.0f,360.0f};
-	//アンカーポイント
-	Vector2 anchorPoint = {0.0f,0.0f};
-	//テクスチャ左上座標
-	Vector2 textureLeftTop = {0.0f,0.0f};
-	//テクスチャ切り出しサイズ
-	Vector2 textureSize = {100.0f,100.0f};
+	// 色
+	Vector4 color = {1.0f, 1.0f, 1.0f, 1.0f};
+	// size
+	Vector2 size = {640.0f, 360.0f};
+	// アンカーポイント
+	Vector2 anchorPoint = {0.0f, 0.0f};
+	// テクスチャ左上座標
+	Vector2 textureLeftTop = {0.0f, 0.0f};
+	// テクスチャ切り出しサイズ
+	Vector2 textureSize = {100.0f, 100.0f};
 
 	std::string path;
 
@@ -162,22 +102,22 @@ private:
 	///=============================================================
 	///	リソース
 	///=============================================================
-	//viewの生成
-	D3D12_INDEX_BUFFER_VIEW indexBufferView {};
-	ComPtr<ID3D12Resource>vertexResource_;
-	ComPtr<ID3D12Resource>indexResource_;
-	ComPtr<ID3D12Resource>transformResource_;
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSprite {};
+	// viewの生成
+	D3D12_INDEX_BUFFER_VIEW	 indexBufferView{};
+	ComPtr<ID3D12Resource>	 vertexResource_;
+	ComPtr<ID3D12Resource>	 indexResource_;
+	ComPtr<ID3D12Resource>	 transformResource_;
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSprite{};
 
-	//directX関連
-	bool isVisible = true;
+	// directX関連
+	bool	   isVisible	 = true;
 	Matrix4x4* transformData = nullptr;
 
-	//マテリアル用のリソース
+	// マテリアル用のリソース
 	ComPtr<ID3D12Resource> materialResource_;
-	VertexData* vertexData = nullptr;
-	Material2D* materialData_;
-	RenderTargetType targetRT_ = RenderTargetType::BackBuffer;
+	VertexData*			   vertexData = nullptr;
+	Material2D*			   materialData_;
+	RenderTargetType	   targetRT_ = RenderTargetType::BackBuffer;
 #pragma endregion
 
 private:

@@ -24,6 +24,7 @@ void ScoreService::OnGainScore(const GainScore& ev) {
 
 void ScoreService::Update() {
 	while (!q_.empty()) {
+		//トータルスコアに加算
 		total_ += q_.front().amount;
 		q_.pop();
 	}
