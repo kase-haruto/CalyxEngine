@@ -107,8 +107,8 @@ void NumbersSprite::ApplyTexturesDiffOnly() {
 		const int d = digits_[i];
 		if(i < prevDigits_.size() && prevDigits_[i] == d) continue;
 
-		//const std::string full = JoinPath_(dir_, std::to_string(d) + ext_);
-		//sprites_[i]->SetTexture(full.c_str());
+	const std::string full = JoinPath_(dir_, std::to_string(d) + ext_);
+		sprites_[i]->SetTexture(full.c_str());
 	}
 	prevDigits_ = digits_;
 }
@@ -134,7 +134,6 @@ void NumbersSprite::Relayout() {
 	for(size_t i = 0; i < digits_.size(); ++i) {
 		sprites_[i]->SetPosition({x + digitSize_.x * anchor_.x, origin_.y});
 		sprites_[i]->SetIsVisible(true);
-		// サイズ変更APIがあるならここで呼ぶ（例：SetSize(digitSize_)）
 		x += w + spacing_;
 	}
 	dirtyLayout_ = false;

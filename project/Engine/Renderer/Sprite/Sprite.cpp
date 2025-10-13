@@ -193,6 +193,10 @@ void Sprite::PutWindowCenter() {
 }
 
 
+void Sprite::SetTexture(const std::string& tex) {
+	handle = TextureManager::GetInstance()->LoadTexture(tex);
+}
+
 const void Sprite::SetTextureHandle(D3D12_GPU_DESCRIPTOR_HANDLE newHandle) {
 	handle = newHandle;
 }

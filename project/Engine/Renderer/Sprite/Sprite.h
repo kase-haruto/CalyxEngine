@@ -60,6 +60,7 @@ public:
 	void	   SetLeftTop(const Vector2& LTop) { this->textureLeftTop = LTop; }
 	void	   SetIsVisible(bool is) { isVisible = is; }
 	void	   SetTargetRt(RenderTargetType targetRt) { targetRT_ = targetRt; }
+	void	   SetTexture(const std::string& tex);
 	const void SetTextureHandle(D3D12_GPU_DESCRIPTOR_HANDLE newHandle);
 
 private:
