@@ -43,15 +43,13 @@ public:
 	virtual void Draw([[maybe_unused]] ID3D12GraphicsCommandList* cmdList) {}
 	virtual void ShowGui();
 
-	bool Save() const;
-	bool Load();
+	virtual bool Save() const;
+	virtual bool Load();
 
 	 virtual void ApplyDerivedConfigFromJson([[maybe_unused]]const nlohmann::json& root,
 											[[maybe_unused]] const nlohmann::json* derived) {}
 	virtual void ExtractDerivedConfigToJson([[maybe_unused]]nlohmann::json& root,
 											[[maybe_unused]]nlohmann::json& derived) const {}
-
-	
 
 	// =======================
 	// Bounding Volume

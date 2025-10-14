@@ -8,6 +8,9 @@
 #include <externals/imgui/ImGuiFileDialog.h>
 #endif // _DEBUG
 
+#include <functional>
+
+
 template<typename TConfig>
 class ConfigurableObject 
 	: public IConfigurable{
@@ -19,6 +22,9 @@ public:
 	/*------------- ファイル入出力 --------------*/
 	void LoadConfig(const std::string& path);
 	void SaveConfig(const std::string& path) const;
+
+	void SetOnApplied(std::function<void(const TConfig&)> cb) { onApplied_ = std::move(cb); }
+	void SetOnExtracted(std::function<void(const TConfig&)> cb) { onExtract_ = std::move(cb); }
 
 	/*------------- ImGui GUI --------------*/
 	void ShowGui(const std::string& label = "");
@@ -32,6 +38,9 @@ protected:
 	virtual void OnExtractConfig(){}
 
 private:
+	std::function<void(const TConfig&)> onApplied_;
+	std::function<void(const TConfig&)> onExtract_;
+
 	TConfig config_;
 };
 
@@ -42,6 +51,8 @@ template<typename TConfig>
 inline void ConfigurableObject<TConfig>::ApplyConfigFromJson(const nlohmann::json& j){
 	config_ = j.get<TConfig>();
 	OnApplyConfig();
+
+	  if(onApplied_) onApplied_(config_);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -50,6 +61,7 @@ inline void ConfigurableObject<TConfig>::ApplyConfigFromJson(const nlohmann::jso
 template<typename TConfig>
 inline void ConfigurableObject<TConfig>::ExtractConfigToJson(nlohmann::json& j) const{
 	const_cast< ConfigurableObject* >(this)->OnExtractConfig(); // 状態→config_
+	if(onExtract_) onExtract_(config_);
 	j = config_;
 }
 

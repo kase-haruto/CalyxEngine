@@ -79,6 +79,9 @@ public:
 	const AnimationModel* GetAnimationModel() const;
 	AABB				  GetWorldAABB() const;
 
+	bool Save() const override;
+	bool Load()override;
+
 private:
 	//===================================================================*/
 	//                    private methods

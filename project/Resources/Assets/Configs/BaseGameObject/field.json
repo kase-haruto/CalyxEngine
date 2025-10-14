@@ -1,0 +1,55 @@
+{
+    "colliderConfig": {
+        "colliderType": 0,
+        "isCollisionEnabled": true,
+        "isDraw": true,
+        "targetType": 0
+    },
+    "guid": "b9eb76d7-84c2-4e92-871e-b2bbf38ff786",
+    "modelConfig": {
+        "blendMode": 5,
+        "materialConfig": {
+            "color": {
+                "w": 1.0,
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "currentLightingMode_": 0,
+            "enableLighting": 0,
+            "enviromentCoefficient": 0.5,
+            "isReflect": false,
+            "shininess": 20.0
+        },
+        "modelName": "terrain.obj",
+        "textureGuid": "f9492258-06c4-4742-9707-39995c0592dc",
+        "uvTransConfig": {
+            "rotation": 0.0,
+            "scale": {
+                "x": 10.0,
+                "y": 10.0
+            }
+        }
+    },
+    "name": "field",
+    "objectType": 2,
+    "parentGuid": "00000000-0000-0000-0000-000000000000",
+    "transform": {
+        "rotation": {
+            "w": 0.9987990856170654,
+            "x": 0.03831224888563156,
+            "y": -0.025777168571949005,
+            "z": -0.016375401988625526
+        },
+        "scale": {
+            "x": 300.0124206542969,
+            "y": 300.0034484863281,
+            "z": 300.01025390625
+        },
+        "translation": {
+            "x": -262.09307861328125,
+            "y": -138.90377807617188,
+            "z": 548.0985717773438
+        }
+    }
+}
