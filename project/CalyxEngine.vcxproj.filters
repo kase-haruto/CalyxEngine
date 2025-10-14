@@ -2304,6 +2304,7 @@
     <ClInclude Include="Game\Battle\Shooting\Score\GainScore.h" />
     <ClInclude Include="Game\Battle\Shooting\Score\ScoreService.h" />
     <ClInclude Include="Engine\Objects\2D\NumbersSprite\NumbersSprite.h" />
+    <ClInclude Include="Engine\Foundation\Serialization\FieldVisit.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\ChromaticAberration.PS.hlsl">

@@ -3,7 +3,7 @@
 #include <Engine/Objects/ConfigurableObject/IConfigurable.h>
 #include <Engine/Foundation/Json/JsonUtils.h>
 
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(DEVELOP)
 #include <externals/imgui/imgui.h>
 #include <externals/imgui/ImGuiFileDialog.h>
 #endif // _DEBUG
@@ -76,7 +76,7 @@ inline void ConfigurableObject<TConfig>::SaveConfig(const std::string& path) con
 /////////////////////////////////////////////////////////////////////////////////////////
 template<typename TConfig>
 inline void ConfigurableObject<TConfig>::ShowGui([[maybe_unused]]const std::string& label){
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(DEVELOP)
 	const std::string loadDlg = "ConfigLoadDialog##" + label;
 	const std::string saveDlg = "ConfigSaveDialog##" + label;
 

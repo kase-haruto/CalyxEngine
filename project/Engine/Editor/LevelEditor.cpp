@@ -1,16 +1,16 @@
 #include "LevelEditor.h"
 // engine
-#include <Engine/Application/UI/EngineUI/Context/EditorContext.h>
-#include <Engine/Application/Input/Input.h>
-#include <Engine/Graphics/Camera/Manager/CameraManager.h>
-#include <Engine/Physics/Ray/Raycastor.h>
-#include <Engine/Objects/3D/Actor/Library/SceneObjectLibrary.h>
 #include <Engine/Application/Effects/FxSystem.h>
+#include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
+#include <Engine/Application/Input/Input.h>
+#include <Engine/Application/System/PlaySession.h>
+#include <Engine/Application/UI/EngineUI/Context/EditorContext.h>
+#include <Engine/Assets/Database/AssetDatabase.h>
+#include <Engine/Graphics/Camera/Manager/CameraManager.h>
+#include <Engine/Objects/3D/Actor/Library/SceneObjectLibrary.h>
+#include <Engine/Physics/Ray/Raycastor.h>
 #include <Engine/Scene/Context/SceneContext.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
-#include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
-#include <Engine/Application/System/PlaySession.h>
-#include <Engine/Assets/Database/AssetDatabase.h>
 
 #include <externals/imgui/ImGuiFileDialog.h>
 
@@ -19,14 +19,14 @@ using namespace EngineEdit;
 void LevelEditor::Initialize() {
 #if defined(_DEBUG) || defined(DEVELOP)
 	// 各パネルの初期化
-	hierarchy_ = std::make_unique<HierarchyPanel>();
-	editor_ = std::make_unique<EditorPanel>();
-	inspector_ = std::make_unique<InspectorPanel>();
-	sceneEditor_ = std::make_unique<SceneObjectEditor>();
+	hierarchy_		= std::make_unique<HierarchyPanel>();
+	editor_			= std::make_unique<EditorPanel>();
+	inspector_		= std::make_unique<InspectorPanel>();
+	sceneEditor_	= std::make_unique<SceneObjectEditor>();
 	placeToolPanel_ = std::make_unique<PlaceToolPanel>();
-	splineEditor_ = std::make_unique<SplineEditorPanel>();
-	assetPanel_ = std::make_unique<AssetPanel>();
-	auto* db = AssetDatabase::GetInstance();
+	splineEditor_	= std::make_unique<SplineEditorPanel>();
+	assetPanel_		= std::make_unique<AssetPanel>();
+	auto* db		= AssetDatabase::GetInstance();
 	assetPanel_->Initialize(db->GetRoot());
 
 	// Panel に LevelEditor 自体を渡す（コールバック通知や setter）
@@ -53,47 +53,39 @@ void LevelEditor::Initialize() {
 	performanceOverlay_ = std::make_unique<PerformanceOverlay>();
 
 	// Manipulator をツールとして登録
-	if (auto* manipulator = sceneEditor_->GetManipulator()) {
+	if(auto* manipulator = sceneEditor_->GetManipulator()) {
 		debugViewport_->AddTool(manipulator);
 		debugViewport_->AddTool(performanceOverlay_.get());
 	}
 
 	// エディターメニューの初期化
 	menu_ = std::make_unique<EditorMenu>();
-	menu_->Add(MenuCategory::File, {
-		"Save Scene", "Ctrl+S", [this]() {
-			IGFD::FileDialogConfig config;
-			config.path = "Resources/Assets/Scenes/";
-			ImGuiFileDialog::Instance()->OpenDialog(
-				"SceneSaveDialog",
-				"load scene file",
-				".scene",
-				config
-			);
-		}, true
-			   });
+	menu_->Add(MenuCategory::File, {"Save Scene", "Ctrl+S", [this]() {
+										IGFD::FileDialogConfig config;
+										config.path = "Resources/Assets/Scenes/";
+										ImGuiFileDialog::Instance()->OpenDialog(
+											"SceneSaveDialog",
+											"load scene file",
+											".scene",
+											config);
+									},
+									true});
 
-	menu_->Add(MenuCategory::File, {
-		"Open Scene", "Ctrl+O", [] {
-			IGFD::FileDialogConfig config;
-			config.path = "Resources/Assets/Scenes/";
-			ImGuiFileDialog::Instance()->OpenDialog(
-				"SceneOpenDialog",
-				"open scene",
-				".scene",
-				config
-			);
-		}, true
-			   });
+	menu_->Add(MenuCategory::File, {"Open Scene", "Ctrl+O", [] {
+										IGFD::FileDialogConfig config;
+										config.path = "Resources/Assets/Scenes/";
+										ImGuiFileDialog::Instance()->OpenDialog(
+											"SceneOpenDialog",
+											"open scene",
+											".scene",
+											config);
+									},
+									true});
 
-	if (mode_ == EditorMode::Edit) {
-		menu_->Add(MenuCategory::View, {
-			"Enter Game Mode", "", [this]() { ToggleMode(); }, true
-				   });
+	if(mode_ == EditorMode::Edit) {
+		menu_->Add(MenuCategory::View, {"Enter Game Mode", "", [this]() { ToggleMode(); }, true});
 	} else {
-		menu_->Add(MenuCategory::View, {
-			"Exit Game Mode", "", [this]() { ToggleMode(); }, true
-				   });
+		menu_->Add(MenuCategory::View, {"Exit Game Mode", "", [this]() { ToggleMode(); }, true});
 	}
 
 	// パネル群を登録（Editors メニューに並べる）
@@ -105,36 +97,37 @@ void LevelEditor::Initialize() {
 	editorPanels_.push_back(assetPanel_.get());
 
 	// Editors メニュー（MenuCategory::Tools）に各パネルのトグルを追加
-	for (auto* p : editorPanels_) {
-		menu_->Add(MenuCategory::Tools, {
-			p->GetPanelName(), "",
-			[p, this]() {
-				TogglePanel(p); // 表示/非表示トグル
-			},
-			true
-				   });
+	for(auto* p : editorPanels_) {
+		menu_->Add(MenuCategory::Tools, {p->GetPanelName(), "",
+										 [p, this]() {
+											 TogglePanel(p); // 表示/非表示トグル
+										 },
+										 true});
 	}
 
-	menu_->Add(MenuCategory::View, { "Main Viewport",  "", [this] { mainViewport_->SetShow(!mainViewport_->IsShow());     }, true });
-	menu_->Add(MenuCategory::View, { "Debug Viewport", "", [this] { debugViewport_->SetShow(!debugViewport_->IsShow());   }, true });
+	menu_->Add(MenuCategory::View, {"Main Viewport", "", [this] { mainViewport_->SetShow(!mainViewport_->IsShow()); }, true});
+	menu_->Add(MenuCategory::View, {"Debug Viewport", "", [this] { debugViewport_->SetShow(!debugViewport_->IsShow()); }, true});
 
-	menu_->Add(MenuCategory::Edit, { "Play ", "(F5)", [this] {
-	if (pPlaySesseion_ && !pPlaySesseion_->IsRuntime()) {
-		pPlaySesseion_->Enter();
-	}
-	}, true });
+	menu_->Add(MenuCategory::Edit, {"Play ", "(F5)", [this] {
+										if(pPlaySesseion_ && !pPlaySesseion_->IsRuntime()) {
+											pPlaySesseion_->Enter();
+										}
+									},
+									true});
 
-	menu_->Add(MenuCategory::Edit, { "Pause ", "(F6)", [this] {
-		if (pPlaySesseion_ && pPlaySesseion_->IsRuntime()) {
-			pPlaySesseion_->TogglePause();
-		}
-	}, true });
+	menu_->Add(MenuCategory::Edit, {"Pause ", "(F6)", [this] {
+										if(pPlaySesseion_ && pPlaySesseion_->IsRuntime()) {
+											pPlaySesseion_->TogglePause();
+										}
+									},
+									true});
 
-	menu_->Add(MenuCategory::Edit, { "Exit ", "(Shift+F5)", [this] {
-		if (pPlaySesseion_ && pPlaySesseion_->IsRuntime()) {
-			pPlaySesseion_->Exit();
-		}
-	}, true });
+	menu_->Add(MenuCategory::Edit, {"Exit ", "(Shift+F5)", [this] {
+										if(pPlaySesseion_ && pPlaySesseion_->IsRuntime()) {
+											pPlaySesseion_->Exit();
+										}
+									},
+									true});
 #endif // _DEBUG
 }
 
@@ -142,15 +135,15 @@ void LevelEditor::Update() {
 #if defined(_DEBUG) || defined(DEVELOP)
 	SceneContext* ctx = SceneContext::Current();
 
-	const ImGuiIO& io = ImGui::GetIO();
-	const bool guizmoActive = ImGuizmo::IsOver() || ImGuizmo::IsUsing();
+	const ImGuiIO& io			= ImGui::GetIO();
+	const bool	   guizmoActive = ImGuizmo::IsOver() || ImGuizmo::IsUsing();
 
 	// --- デバッグビューポート上にマウスがあるか？ ---
 	bool overDebugViewport = false;
-	if (debugViewport_ && debugViewport_->IsShow()) {
+	if(debugViewport_ && debugViewport_->IsShow()) {
 		const Vector2 origin = debugViewport_->GetPosition(); // コンテンツ左上
-		const Vector2 size = debugViewport_->GetSize();     // コンテンツサイズ
-		const ImVec2  mouse = ImGui::GetMousePos();
+		const Vector2 size	 = debugViewport_->GetSize();	  // コンテンツサイズ
+		const ImVec2  mouse	 = ImGui::GetMousePos();
 
 		overDebugViewport =
 			(mouse.x >= origin.x && mouse.y >= origin.y &&
@@ -160,15 +153,15 @@ void LevelEditor::Update() {
 	// ImGui がマウスを掴んでいても、ビューポート上なら許可
 	const bool uiBlocksClick = io.WantCaptureMouse && !overDebugViewport;
 
-	if (debugViewport_ && debugViewport_->IsShow() && !guizmoActive && !uiBlocksClick) {
+	if(debugViewport_ && debugViewport_->IsShow() && !guizmoActive && !uiBlocksClick) {
 		const bool imguiEdge = ImGui::IsMouseClicked(ImGuiMouseButton_Left);
 
 		static bool prevDILeft = false;
-		const bool diNow = Input::GetInstance()->PushMouseButton(MouseButton::Left);
-		const bool diEdge = diNow && !prevDILeft;
-		prevDILeft = diNow;
+		const bool	diNow	   = Input::GetInstance()->PushMouseButton(MouseButton::Left);
+		const bool	diEdge	   = diNow && !prevDILeft;
+		prevDILeft			   = diNow;
 
-		if (imguiEdge || diEdge) {
+		if(imguiEdge || diEdge) {
 			TryPickUnderCursor();
 		}
 	}
@@ -176,8 +169,8 @@ void LevelEditor::Update() {
 	// ----------------------------
 	// Open Scene ダイアログ処理
 	// ----------------------------
-	if (ImGuiFileDialog::Instance()->Display("SceneOpenDialog")) {
-		if (ImGuiFileDialog::Instance()->IsOk()) {
+	if(ImGuiFileDialog::Instance()->Display("SceneOpenDialog")) {
+		if(ImGuiFileDialog::Instance()->IsOk()) {
 			std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
 			ClearSelection();
 			SceneSerializer::Load(*ctx, filePath);
@@ -188,8 +181,8 @@ void LevelEditor::Update() {
 	// ----------------------------
 	// Save Scene ダイアログ処理
 	// ----------------------------
-	if (ImGuiFileDialog::Instance()->Display("SceneSaveDialog")) {
-		if (ImGuiFileDialog::Instance()->IsOk()) {
+	if(ImGuiFileDialog::Instance()->Display("SceneSaveDialog")) {
+		if(ImGuiFileDialog::Instance()->IsOk()) {
 			std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
 			SceneSerializer::Save(*ctx, filePath);
 		}
@@ -199,23 +192,24 @@ void LevelEditor::Update() {
 	NotifySceneContextChanged();
 	prevCtx_ = SceneContext::Current();
 
-	if (pPlaySesseion_) {
+	if(pPlaySesseion_) {
 		const bool playing = pPlaySesseion_->IsRuntime();
-		if (playing && !lastPlaying_) EnterGameMode();
-		else if (!playing && lastPlaying_) ExitGameMode();
+		if(playing && !lastPlaying_)
+			EnterGameMode();
+		else if(!playing && lastPlaying_)
+			ExitGameMode();
 		lastPlaying_ = playing;
 	}
 #endif
 }
 
-
 void LevelEditor::Render() {
 
-	for (auto* p : editorPanels_) {
-		if (p->IsShow()) p->Render();
+	for(auto* p : editorPanels_) {
+		if(p->IsShow()) p->Render();
 	}
 
-	if (pPlaySesseion_) {
+	if(pPlaySesseion_) {
 		pPlaySesseion_->RenderToolbar();
 	}
 
@@ -239,7 +233,7 @@ void LevelEditor::EnterGameMode() {
 void LevelEditor::ExitGameMode() {
 	mode_ = EditorMode::Edit;
 
-	if (pPlaySesseion_ && pPlaySesseion_->IsRuntime()) {
+	if(pPlaySesseion_ && pPlaySesseion_->IsRuntime()) {
 		pPlaySesseion_->Exit();
 		lastPlaying_ = false;
 	}
@@ -256,16 +250,15 @@ void LevelEditor::SetSelectedObject(const std::shared_ptr<SceneObject>& sp) {
 	selectedEditor_ = nullptr;
 	hierarchy_->SetSelectedObject(sp);
 	inspector_->SetSelectedObject(sp);
-
 }
 void LevelEditor::CreateObject(const std::shared_ptr<SceneObject>& obj) {
-	if (!obj) return;
+	if(!obj) return;
 
 	SceneContext* ctx = SceneContext::Current();
 
 	// パーティクルなら FxSystem にも登録
-	if (obj->GetObjectType() == ObjectType::ParticleSystem) {
-		if (auto fx = std::dynamic_pointer_cast<ParticleSystemObject>(obj)) {
+	if(obj->GetObjectType() == ObjectType::ParticleSystem) {
+		if(auto fx = std::dynamic_pointer_cast<ParticleSystemObject>(obj)) {
 			ctx->GetFxSystem()->AddEmitter(fx);
 		}
 	}
@@ -274,43 +267,42 @@ void LevelEditor::CreateObject(const std::shared_ptr<SceneObject>& obj) {
 	ctx->GetObjectLibrary()->AddObject(obj);
 
 	// 子も再帰的に登録
-	for (const auto& child : obj->GetChildren()) {
-		if (child) {
+	for(const auto& child : obj->GetChildren()) {
+		if(child) {
 			CreateObject(child);
 		}
 	}
 }
 
-
 void LevelEditor::DeleteObject(const std::shared_ptr<SceneObject>& sp) {
-	if (!sp) return;
+	if(!sp) return;
 	SceneContext* ctx = SceneContext::Current();
 
 	// ── 選択状態をクリア ───────────────────────────────
-	if (selectedObject_ == sp) {
+	if(selectedObject_ == sp) {
 		selectedObject_.reset();
 		inspector_->SetSelectedObject(nullptr);
 	}
 
 	// ── パーティクルシステムなら FxSystem からも削除 ──────────
-	if (sp->GetObjectType() == ObjectType::ParticleSystem) {
-		if (auto fxEmitter = std::dynamic_pointer_cast<FxEmitter>(sp)) {
+	if(sp->GetObjectType() == ObjectType::ParticleSystem) {
+		if(auto fxEmitter = std::dynamic_pointer_cast<FxEmitter>(sp)) {
 			ctx->GetFxSystem()->RemoveEmitter(fxEmitter.get());
 		}
 	}
 
 	// ── シーンから除去 ────────────────────────────────
-	ctx->RemoveEditorObject(sp);          // editorObjects_ から
+	ctx->RemoveEditorObject(sp);			   // editorObjects_ から
 	ctx->GetObjectLibrary()->RemoveObject(sp); // ライブラリから
 }
 
 void LevelEditor::RenderViewport(ViewportType type, const ImTextureID& tex) {
-	if (type == ViewportType::VIEWPORT_MAIN) {
-		if (mainViewport_ && mainViewport_->IsShow()) {
+	if(type == ViewportType::VIEWPORT_MAIN) {
+		if(mainViewport_ && mainViewport_->IsShow()) {
 			mainViewport_->Render(tex);
 		}
-	} else if (type == ViewportType::VIEWPORT_DEBUG) {
-		if (debugViewport_ && debugViewport_->IsShow()) { 
+	} else if(type == ViewportType::VIEWPORT_DEBUG) {
+		if(debugViewport_ && debugViewport_->IsShow()) {
 			debugViewport_->Render(tex);
 		}
 	}
@@ -321,9 +313,8 @@ void LevelEditor::SetCameraForViewport(BaseCamera* mainCamera, BaseCamera* debug
 	debugViewport_->SetCamera(debugCamera);
 }
 
-
-void LevelEditor::TryPickObjectFromMouse(const Vector2& mouse,
-										 const Vector2& viewportSize,
+void LevelEditor::TryPickObjectFromMouse(const Vector2&	  mouse,
+										 const Vector2&	  viewportSize,
 										 const Matrix4x4& view,
 										 const Matrix4x4& proj) {
 	SceneContext* ctx = SceneContext::Current();
@@ -334,22 +325,21 @@ void LevelEditor::TryPickObjectFromMouse(const Vector2& mouse,
 	Ray ray = Raycastor::ConvertMouseToRay(mouseLocal, view, proj, viewportSize);
 
 	// ヒット判定（raw ptr）
-	if (SceneObject* raw = PickSceneObjectByRay(ray)) {
+	if(SceneObject* raw = PickSceneObjectByRay(ray)) {
 		// 対応する shared_ptr をライブラリから取得
-		if (auto sp = ctx->FindSharedObject(raw)) {
+		if(auto sp = ctx->FindSharedObject(raw)) {
 			SetSelectedObject(sp);
 		}
 	}
 }
 
-
 SceneObject* LevelEditor::PickSceneObjectByRay(const Ray& ray) {
 	const auto* lib = hierarchy_->GetSceneObjectLibrary();
-	if (!lib) return nullptr;
+	if(!lib) return nullptr;
 
 	const auto& allObjects = lib->GetAllObjectsRaw();
-	auto hit = Raycastor::Raycast(ray, allObjects);
-	if (hit) {
+	auto		hit		   = Raycastor::Raycast(ray, allObjects);
+	if(hit) {
 		return static_cast<SceneObject*>(hit->hitObject);
 	}
 	return nullptr;
@@ -363,7 +353,7 @@ void LevelEditor::SaveScene() {
 }
 
 void LevelEditor::NotifySceneContextChanged() {
-	if (prevCtx_ != SceneContext::Current()) {
+	if(prevCtx_ != SceneContext::Current()) {
 		SceneContext* current = SceneContext::Current();
 
 		// 新しい ObjectLibrary を各パネルに通知
@@ -372,15 +362,14 @@ void LevelEditor::NotifySceneContextChanged() {
 		SetSelectedObject(std::shared_ptr<SceneObject>{});
 		ClearSelection();
 
-		if (current) {
+		if(current) {
 			current->AddOnObjectRemovedListener(
 				[editor = this](SceneObject* removed) {
-				auto sel = editor->GetHierarchyPanel()->GetSelectedObject();
-				if (sel && sel.get() == removed) {
-					editor->SetSelectedObject(std::shared_ptr<SceneObject>{});
-				}
-			}
-			);
+					auto sel = editor->GetHierarchyPanel()->GetSelectedObject();
+					if(sel && sel.get() == removed) {
+						editor->SetSelectedObject(std::shared_ptr<SceneObject>{});
+					}
+				});
 
 			// SceneObjectEditor: 削除されたら無効化
 			sceneEditor_->BindRemovalCallback(current);
@@ -389,7 +378,7 @@ void LevelEditor::NotifySceneContextChanged() {
 }
 
 void LevelEditor::ToggleMode() {
-	if (mode_ == EditorMode::Edit) {
+	if(mode_ == EditorMode::Edit) {
 		mode_ = EditorMode::Game;
 	} else {
 		mode_ = EditorMode::Edit;
@@ -397,17 +386,17 @@ void LevelEditor::ToggleMode() {
 }
 
 void LevelEditor::TryPickUnderCursor() {
-	if (!debugViewport_ || !debugViewport_->IsShow()) return;
+	if(!debugViewport_ || !debugViewport_->IsShow()) return;
 
 	SceneContext* current = SceneContext::Current();
-	Vector2 origin = debugViewport_->GetPosition();
-	Vector2 size = debugViewport_->GetSize();
+	Vector2		  origin  = debugViewport_->GetPosition();
+	Vector2		  size	  = debugViewport_->GetSize();
 
-	ImVec2 mouse = ImGui::GetMousePos();
-	float relativeX = mouse.x - origin.x;
-	float relativeY = mouse.y - origin.y;
+	ImVec2 mouse	 = ImGui::GetMousePos();
+	float  relativeX = mouse.x - origin.x;
+	float  relativeY = mouse.y - origin.y;
 
-	if (relativeX < 0 || relativeY < 0 || relativeX > size.x || relativeY > size.y) return;
+	if(relativeX < 0 || relativeY < 0 || relativeX > size.x || relativeY > size.y) return;
 
 	Vector2 mousePos = Vector2(relativeX, relativeY);
 
@@ -415,8 +404,8 @@ void LevelEditor::TryPickUnderCursor() {
 	Matrix4x4 proj = CameraManager::GetDebug()->GetProjectionMatrix();
 
 	Ray ray = Raycastor::ConvertMouseToRay(mousePos, view, proj, size);
-	if (SceneObject* picked = PickSceneObjectByRay(ray)) {
-		if (auto sp = current->FindSharedObject(picked)) {
+	if(SceneObject* picked = PickSceneObjectByRay(ray)) {
+		if(auto sp = current->FindSharedObject(picked)) {
 			SetSelectedObject(sp);
 		}
 	}
