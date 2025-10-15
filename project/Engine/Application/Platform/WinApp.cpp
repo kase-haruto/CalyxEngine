@@ -58,7 +58,7 @@ void WinApp::CreateWnd(){
 
     SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast< LONG_PTR >(this));
 
-    ShowWindow(hwnd, SW_SHOW);
+    ShowWindow(hwnd, SW_MAXIMIZE);
 }
 
 // ウィンドウ破棄

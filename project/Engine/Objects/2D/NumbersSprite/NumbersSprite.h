@@ -1,8 +1,16 @@
 #pragma once
-#include <array>
+
+/* ========================================================================
+/*		include space
+/* ===================================================================== */
+
+#include <Engine/Foundation/Math/Vector2.h>
+
+// stl
 #include <memory>
 #include <string>
 #include <vector>
+#include <array>
 
 #include <Engine/Foundation/Math/Vector2.h>
 #include <Engine/Renderer/Sprite/Sprite.h>
@@ -13,6 +21,7 @@ enum class DigitsAlign {
 	Right
 };
 
+
 class NumbersSprite {
 public:
 	NumbersSprite(std::string dir, std::string ext = ".png");
@@ -22,6 +31,7 @@ public:
 
 	// 値設定（負・超過値はクランプ）
 	void SetValue(int value);
+
 
 	// レイアウト設定
 	void SetPosition(const Vector2& pos);
@@ -68,3 +78,4 @@ private:
 	bool dirtyDigits_ = true;
 	bool dirtyLayout_ = true;
 };
+

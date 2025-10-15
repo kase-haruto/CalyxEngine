@@ -14,6 +14,8 @@
 #include <Engine/Objects/3D/Actor/SceneObjectManager.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
+#include <Engine/Objects/2D/NumbersSprite/NumbersSprite.h>
+#include <Engine/Application/System/Enviroment.h>
 
 // game
 #include <Game/3dObject/Actor/Bullet/Register/BulletRegistrar.h>
@@ -24,17 +26,14 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 //  ctor / dtor
 /////////////////////////////////////////////////////////////////////////////////////////
-GameScene::GameScene() {
-	SetSceneName("Game");
-}
+GameScene::GameScene() { SetSceneName("Game"); }
 
 GameScene::~GameScene() = default;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //  アセットのロード
 /////////////////////////////////////////////////////////////////////////////////////////
-void GameScene::LoadAssets() {
-}
+void GameScene::LoadAssets() {}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //  初期化処理
@@ -44,7 +43,7 @@ void GameScene::Initialize() {
 	sceneContext_->Initialize();
 
 	// シーンデータ読み込み
-	SceneSerializer::Load(*sceneContext_, "Resources/Assets/Scenes/GameScene.scene");
+	SceneSerializer::Load(*sceneContext_,"Resources/Assets/Scenes/GameScene.scene");
 
 	// ベース初期化
 	BaseScene::Initialize();
@@ -90,7 +89,7 @@ void GameScene::Initialize() {
 	params.maxEngageDist = 120.0f; // 射程
 	params.useLOS		 = true;   // 遮蔽物チェックON
 
-	enemyEngagement_ = Installers::InstallEnemyEngagement(*sceneContext_, params);
+	enemyEngagement_ = Installers::InstallEnemyEngagement(*sceneContext_,params);
 
 	if(enemyEngagement_) {
 		enemyEngagement_->SetDirectory(enemyBinding_->GetDirectory());
@@ -105,6 +104,7 @@ void GameScene::Initialize() {
 	numbersSprite_->Initialize(/*pos*/ {1280.0f - 640.0f, 32.0f},
 							   /*digitSize*/ {32.0f, 32.0f});
 	numbersSprite_->SetAlign(DigitsAlign::Right);
+	                                 /*size*/ {64.0f,64.0f});
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -132,6 +132,7 @@ void GameScene::Update([[maybe_unused]] float dt) {
 		}
 	}
 
+	
 	auto player = wPlayer_.lock();
 	wBoss_		= sceneContext_->FindFirst<Boss>();
 	auto boss	= wBoss_.lock();
@@ -180,8 +181,12 @@ void GameScene::Draw(ID3D12GraphicsCommandList* cmdList,
 	if(attackSprite_) {
 		spriteRenderer_->Register(attackSprite_.get());
 	}
+	
+	// プレイヤーが持つ追加スプライトを登録
+	if(auto player = ctx->FindFirst<Player>()) { for(auto& sp : player->GetAllSprites()) { if(sp) spriteRenderer_->Register(sp); } }
+	if(attackSprite_) { spriteRenderer_->Register(attackSprite_.get()); }
 
-	BaseScene::Draw(cmdList, psoService, type);
+	BaseScene::Draw(cmdList,psoService,type);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

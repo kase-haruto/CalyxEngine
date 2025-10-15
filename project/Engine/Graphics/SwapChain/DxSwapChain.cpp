@@ -26,7 +26,7 @@ void DxSwapChain::Initialize(
 	swapChainDesc_.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapChainDesc_.BufferCount = 2;
 	swapChainDesc_.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-	swapChainDesc_.Scaling = DXGI_SCALING_STRETCH;
+	swapChainDesc_.Scaling = DXGI_SCALING_NONE;
 
 	// スワップチェイン作成
 	ComPtr<IDXGISwapChain1> tempSwapChain;

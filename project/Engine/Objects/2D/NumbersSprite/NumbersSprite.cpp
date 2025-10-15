@@ -165,3 +165,4 @@ std::vector<Sprite*> NumbersSprite::GetSpritesRaw() const {
 		if(up && up->GetIsVisible()) out.push_back(up.get());
 	return out;
 }
+
