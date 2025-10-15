@@ -104,7 +104,6 @@ void GameScene::Initialize() {
 	numbersSprite_->Initialize(/*pos*/ {1280.0f - 640.0f, 32.0f},
 							   /*digitSize*/ {32.0f, 32.0f});
 	numbersSprite_->SetAlign(DigitsAlign::Right);
-	                                 /*size*/ {64.0f,64.0f});
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
