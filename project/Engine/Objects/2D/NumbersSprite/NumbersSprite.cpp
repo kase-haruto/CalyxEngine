@@ -1,131 +1,117 @@
 #include "NumbersSprite.h"
-
-// engine
-#include <Engine/Renderer/Sprite/Sprite.h>
-#include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
-
-// std
 #include <algorithm>
 #include <cmath>
 
-static inline std::string Join2_(const std::string& a,const std::string& b) {
-#ifdef _WIN32
-	const char sep = '\\';
-#else
-	const char sep='/';
-#endif
+static inline std::string Join2_(const std::string& a, const std::string& b) {
+	const char sep = '/';
 	if(a.empty()) return b;
 	if(a.back() == '/' || a.back() == '\\') return a + b;
 	return a + sep + b;
 }
 
-std::string NumbersSprite::JoinPath_(const std::string& a,const std::string& b) { return Join2_(a,b); }
+std::string NumbersSprite::JoinPath_(const std::string& a, const std::string& b) {
+	return Join2_(a, b);
+}
 
+NumbersSprite::NumbersSprite(std::string dir, std::string ext)
+	: dir_(std::move(dir)), ext_(std::move(ext)) {}
 
-/* ======================= Ctor / Dtor ======================= */
-NumbersSprite::NumbersSprite() = default;
-NumbersSprite::NumbersSprite(int value) : value_(value) {}
-NumbersSprite::~NumbersSprite() = default;
+void NumbersSprite::Initialize(const Vector2& pos, const Vector2& digitSize) {
+	origin_	   = pos;
+	digitSize_ = digitSize;
+	SetValue(0);
+}
 
-/* ======================= Initialize ======================== */
-void NumbersSprite::Initialize(const Vector2& pos,const Vector2& digitSize) {
-	origin_     = pos;
-	spriteSize_ = digitSize;
-
-	// 最初の値を反映
-	dirtyDigits_ = true;
+void NumbersSprite::SetPosition(const Vector2& pos) {
+	origin_		 = pos;
+	dirtyLayout_ = true;
+}
+void NumbersSprite::SetDigitSize(const Vector2& size) {
+	digitSize_	 = size;
+	dirtyLayout_ = true;
+}
+void NumbersSprite::SetSpacing(float px) {
+	spacing_	 = px;
+	dirtyLayout_ = true;
+}
+void NumbersSprite::SetAlign(DigitsAlign a) {
+	align_		 = a;
 	dirtyLayout_ = true;
 }
 
-/* ======================== Update =========================== */
-void NumbersSprite::Update() {
-	// 桁更新（数値→桁列→スプライト反映）
-	if(dirtyDigits_) {
-		// 上限を計算してクランプ
-		const int maxVal = (maxDigits_ >= 9)
-			                   ? 999999999
-			                   : static_cast<int>(std::pow(10,maxDigits_) - 1);
-
-		int v = value_;
-		if(v < 0) v = 0;
-		if(v > maxVal) v = maxVal;
-
-		digits_ = ToDigits_(v);
-
-		// 先頭ゼロ埋め
-		if(static_cast<int>(digits_.size()) < minDigits_) {
-			const int             need = minDigits_ - static_cast<int>(digits_.size());
-			std::vector<unsigned> padded;
-			padded.reserve(minDigits_);
-			padded.insert(padded.end(),static_cast<size_t>(need),0u);
-			padded.insert(padded.end(),digits_.begin(),digits_.end());
-			digits_.swap(padded);
-		}
-
-		RebuildSpritesIfNeeded_(digits_.size());
-		ApplyTexturesDiffOnly_();
-
-		dirtyDigits_ = false;
-		dirtyLayout_ = true; // 桁数が変わったらレイアウトも必要
-	}
-
-	if(dirtyLayout_) {
-		Relayout_();
-		dirtyLayout_ = false;
-	}
-
-	// スプライトの更新
-	for(auto& sp : sprites_) { if(sp && sp->GetIsVisible()) sp->Update(); }
+void NumbersSprite::SetAnchor(const Vector2& anc) {
+	anchor_ = anc;
+	for(auto& sp : sprites_) sp->SetAnchorPoint(anchor_);
+	dirtyLayout_ = true;
 }
 
-/* ======================== GUI ============================== */
-void NumbersSprite::ShowGui(const std::string& label) { (void)label; }
+void NumbersSprite::SetMinDigits(int n) {
+	minDigits_	 = (std::max)(1, n);
+	dirtyDigits_ = true;
+}
+void NumbersSprite::SetMaxDigits(int n) {
+	maxDigits_	 = (std::max)(1, n);
+	dirtyDigits_ = true;
+}
 
-/* ===================== private helpers ===================== */
-std::vector<unsigned> NumbersSprite::ToDigits_(int value) {
-	if(value <= 0) return {0u};
-	std::vector<unsigned> ds;
+std::vector<int> NumbersSprite::ToDigits_(int value) {
+	if(value <= 0) return {0};
+	std::vector<int> ds;
 	while(value > 0) {
-		ds.push_back(static_cast<unsigned>(value % 10));
+		ds.push_back(value % 10);
 		value /= 10;
 	}
-	std::reverse(ds.begin(),ds.end());
+	std::reverse(ds.begin(), ds.end());
 	return ds;
 }
 
-void NumbersSprite::RebuildSpritesIfNeeded_(size_t needCount) {
+void NumbersSprite::SetValue(int value) {
+	// クランプ（上限 10^maxDigits - 1）
+	const int maxVal = (maxDigits_ >= 9) ? 999999999 : static_cast<int>(std::pow(10, maxDigits_) - 1);
+	if(value < 0) value = 0;
+	if(value > maxVal) value = maxVal;
+
+	if(value_ != value) {
+		value_		 = value;
+		dirtyDigits_ = true;
+	}
+}
+
+void NumbersSprite::RebuildSpritesIfNeeded(size_t needCount) {
+	// スプライト数が不足していたら追加、余っていたら保持（再利用）
 	if(sprites_.size() < needCount) {
 		const size_t old = sprites_.size();
 		sprites_.resize(needCount);
 		for(size_t i = old; i < needCount; ++i) {
-			const std::string path0 = JoinPath_(dir_,"0" + ext_);
-			sprites_[i]             = std::make_unique<Sprite>(path0.c_str());
-			sprites_[i]->Initialize(origin_,spriteSize_);
+			const std::string tex0 = JoinPath_(dir_, "0" + ext_);
+
+			sprites_[i] = std::make_unique<Sprite>(tex0.c_str());
+			sprites_[i]->Initialize(origin_, digitSize_);
 			sprites_[i]->SetAnchorPoint(anchor_);
 			sprites_[i]->SetIsVisible(true);
 		}
 	}
-	// 余剰は非表示（再利用前提）
-	for(size_t i = needCount; i < sprites_.size(); ++i) { if(sprites_[i]) sprites_[i]->SetIsVisible(false); }
-}
-
-void NumbersSprite::ApplyTexturesDiffOnly_() {
-	// 差分のあった桁だけ SetTexture を呼ぶ
-	for(size_t i = 0; i < digits_.size(); ++i) {
-		const unsigned d = digits_[i];
-		if(i < preDigits_.size() && preDigits_[i] == d) continue;
-
-		const std::string full = JoinPath_(dir_,std::to_string(d) + ext_);
-		//sprites_[i]->SetTexture(full.c_str());
-		sprites_[i]->SetIsVisible(true);
+	// 余りのスプライトは非表示（再利用想定）
+	for(size_t i = needCount; i < sprites_.size(); ++i) {
+		sprites_[i]->SetIsVisible(false);
 	}
-	preDigits_ = digits_;
 }
 
-void NumbersSprite::Relayout_() {
-	const float w      = spriteSize_.x;
-	const float totalW = static_cast<float>(digits_.size()) * w
-	                     + (std::max)(0,static_cast<int>(digits_.size()) - 1) * space_;
+void NumbersSprite::ApplyTexturesDiffOnly() {
+	// 変化のあった桁だけ SetTexture する
+	for(size_t i = 0; i < digits_.size(); ++i) {
+		const int d = digits_[i];
+		if(i < prevDigits_.size() && prevDigits_[i] == d) continue;
+
+		const std::string full = JoinPath_(dir_, std::to_string(d) + ext_);
+		sprites_[i]->SetTexture(full.c_str());
+	}
+	prevDigits_ = digits_;
+}
+
+void NumbersSprite::Relayout() {
+	const float w	   = digitSize_.x;
+	const float totalW = static_cast<float>(digits_.size()) * w + (std::max)(0, int(digits_.size()) - 1) * spacing_;
 
 	float startX = origin_.x;
 	switch(align_) {
@@ -142,86 +128,41 @@ void NumbersSprite::Relayout_() {
 
 	float x = startX;
 	for(size_t i = 0; i < digits_.size(); ++i) {
-		sprites_[i]->SetPosition({x + spriteSize_.x * anchor_.x,origin_.y});
-		x += w + space_;
+		sprites_[i]->SetPosition({x + digitSize_.x * anchor_.x, origin_.y});
+		sprites_[i]->SetIsVisible(true);
+		x += w + spacing_;
 	}
+	dirtyLayout_ = false;
 }
 
+void NumbersSprite::Update() {
+	if(dirtyDigits_) {
+		// 数値→桁列
+		digits_ = ToDigits_(value_);
+		if((int)digits_.size() < minDigits_) {
+			// 先頭ゼロ埋め
+			std::vector<int> padded(minDigits_ - digits_.size(), 0);
+			padded.insert(padded.end(), digits_.begin(), digits_.end());
+			digits_.swap(padded);
+		}
 
-/* ======================== setters ========================== */
-void NumbersSprite::SetAnchor(const Vector2& anc) {
-	anchor_ = anc;
-	for(auto& sp : sprites_) if(sp) sp->SetAnchorPoint(anchor_);
-	dirtyLayout_ = true;
-}
-
-void NumbersSprite::SetSpriteSize(const Vector2& size) {
-	spriteSize_  = size;
-	dirtyLayout_ = true;
-}
-
-void NumbersSprite::SetPosition(const Vector2& pos) {
-	origin_      = pos;
-	dirtyLayout_ = true;
-}
-
-void NumbersSprite::SetValue(int val) {
-	if(value_ != val) {
-		value_       = val;
-		dirtyDigits_ = true;
+		RebuildSpritesIfNeeded(digits_.size());
+		ApplyTexturesDiffOnly();
+		dirtyDigits_ = false;
+		dirtyLayout_ = true;
 	}
+
+	if(dirtyLayout_) Relayout();
+
+	for(auto& sp : sprites_)
+		if(sp->GetIsVisible()) sp->Update();
 }
-
-void NumbersSprite::SetMinDigit(int digit) {
-	if(digit < 1) digit = 1;
-	if(minDigits_ != digit) {
-		minDigits_   = digit;
-		dirtyDigits_ = true;
-	}
-}
-
-void NumbersSprite::SetMaxDigit(int digit) {
-	if(digit < 1) digit = 1;
-	if(maxDigits_ != digit) {
-		maxDigits_   = digit;
-		dirtyDigits_ = true;
-	}
-}
-
-void NumbersSprite::SetSpace(float space) {
-	space_       = space;
-	dirtyLayout_ = true;
-}
-
-void NumbersSprite::SetAlign(DigitsAlign a) {
-	align_       = a;
-	dirtyLayout_ = true;
-}
-
-void NumbersSprite::SetTextureDir(const std::string& dir) {
-	dir_         = dir;
-	dirtyDigits_ = true; // パスが変わる＝再貼替
-}
-
-void NumbersSprite::SetTextureExt(const std::string& ext) {
-	ext_         = ext;
-	dirtyDigits_ = true;
-}
-
-
-/* ======================== getters ========================== */
-const Vector2&             NumbersSprite::GetAnchor() const { return anchor_; }
-const Vector2&             NumbersSprite::GetSpriteSize() const { return spriteSize_; }
-const Vector2&             NumbersSprite::GetPosition() const { return origin_; }
-int                        NumbersSprite::GetValue() const { return value_; }
-float                      NumbersSprite::GetSpace() const { return space_; }
-int                        NumbersSprite::GetMinDigits() const { return minDigits_; }
-int                        NumbersSprite::GetMaxDigits() const { return maxDigits_; }
-NumbersSprite::DigitsAlign NumbersSprite::GetAlign() const { return align_; }
 
 std::vector<Sprite*> NumbersSprite::GetSpritesRaw() const {
 	std::vector<Sprite*> out;
 	out.reserve(sprites_.size());
-	for(auto& sprite : sprites_) { if(sprite && sprite->GetIsVisible()) out.push_back(sprite.get()); }
+	for(auto& up : sprites_)
+		if(up && up->GetIsVisible()) out.push_back(up.get());
 	return out;
 }
+

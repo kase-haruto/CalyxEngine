@@ -402,6 +402,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Foundation\Math\MathUtil.h" />
+    <ClInclude Include="Engine\Foundation\Serialization\FieldVisit.h" />
     <ClInclude Include="Engine\Foundation\Utility\Func\Fwd.h" />
     <ClInclude Include="Engine\Objects\3D\Details\BillboardParams.h" />
     <ClInclude Include="Engine\PostProcess\Manager\PostEffectManager.h" />

@@ -175,7 +175,7 @@ void PlaceToolPanel::RegisterPlaceItems() {
 //  パネル描画
 // ============================================================================
 void PlaceToolPanel::Render() {
-	if (!IsShow()) return; // ★メニューで非表示なら描かない
+	if (!IsShow()) return;//必要ないなら早期りたーん
 
 	bool open = true;
 	ImGui::Begin(panelName_.c_str(), &open);

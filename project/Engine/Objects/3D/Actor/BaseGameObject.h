@@ -56,20 +56,21 @@ public:
 	virtual const Vector3 GetCenterPos() const;
 	BillboardMode		  GetBillboardMode() const { return billboardMode_; }
 	std::string_view	  GetTypeName() const override { return "BaseGameObject"; }
-	Vector3				  GetWorldPosition() const { return worldTransform_.GetWorldPosition(); }
+	const Vector3		  GetWorldPosition() const { return worldTransform_.GetWorldPosition(); }
 	BaseModel*			  GetModel() const { return model_.get(); }
 	Collider*			  GetCollider();
-	void				  SetName(const std::string& name);
-	void				  SetBillboardMode(BillboardMode m) { billboardMode_ = m; }
-	void				  SetTranslate(const Vector3& pos);
-	void				  SetScale(const Vector3& scale);
-	void				  SetDrawEnable(bool isDrawEnable) override;
-	void				  SetColor(const Vector4& color);
-	void				  SetCollider(std::unique_ptr<Collider> collider);
-	void				  SetTexture(const std::string& texName);
-	void				  SetUvScale(const Vector2& scale) { model_->uvTransform.scale = scale; }
-	void				  SetBlendMode(BlendMode mode) { model_->SetBlendMode(mode); }
-	void				  SetLightingMode(LightingMode mode) { model_->SetLightingMode(mode); }
+
+	void SetName(const std::string& name);
+	void SetBillboardMode(BillboardMode m) { billboardMode_ = m; }
+	void SetTranslate(const Vector3& pos);
+	void SetScale(const Vector3& scale);
+	void SetDrawEnable(bool isDrawEnable) override;
+	void SetColor(const Vector4& color);
+	void SetCollider(std::unique_ptr<Collider> collider);
+	void SetTexture(const std::string& texName);
+	void SetUvScale(const Vector2& scale) { model_->uvTransform.scale = scale; }
+	void SetBlendMode(BlendMode mode) { model_->SetBlendMode(mode); }
+	void SetLightingMode(LightingMode mode) { model_->SetLightingMode(mode); }
 
 	ObjectModelType GetModelType() const { return objectModelType_; }
 
@@ -77,6 +78,9 @@ public:
 	AnimationModel*		  GetAnimationModel();
 	const AnimationModel* GetAnimationModel() const;
 	AABB				  GetWorldAABB() const;
+
+	bool Save() const override;
+	bool Load()override;
 
 private:
 	//===================================================================*/

@@ -7,6 +7,7 @@
 #include <Engine/objects/Collider/SphereCollider.h>
 
 #include "externals/imgui/imgui.h"
+#include "externals/nlohmann/json.hpp"
 
 BaseGameObject::BaseGameObject(const std::string&		  modelName,
 							   std::optional<std::string> objectName) {
@@ -42,10 +43,9 @@ BaseGameObject::BaseGameObject(const std::string&		  modelName,
 	//===================================================================*/
 	SwitchCollider(ColliderKind::Box, true); // 初期化時にBoxをセット
 
-	//// コンフィグパスの生成 preset名はdefault
-	// SceneObject::SetConfigPath(ConfigPathResolver::ResolvePath(GetObjectTypeName(), GetName()));
-	////コンフィグの適用
-	// LoadConfig(configPath_);
+	config_.SetOnApplied([this](const BaseGameObjectConfig&) {
+		this->ApplyConfig();
+	});
 }
 
 BaseGameObject::BaseGameObject() {
@@ -53,6 +53,10 @@ BaseGameObject::BaseGameObject() {
 	SetName("GameObject");								   // 仮の名前
 	SwitchCollider(ColliderKind::Box, false);			   // とりあえず Box
 	worldTransform_.Update();
+
+	config_.SetOnApplied([this](const BaseGameObjectConfig&) {
+		this->ApplyConfig();
+	});
 }
 
 BaseGameObject::~BaseGameObject() {}
@@ -177,11 +181,29 @@ void BaseGameObject::ExtractConfig() {
 void BaseGameObject::ApplyConfigFromJson(const nlohmann::json& j) {
 	config_.ApplyConfigFromJson(j);
 	ApplyConfig();
+
+	// 派生
+	const std::string	  typeKey(GetTypeName()); // クラス名
+	const nlohmann::json* derived = j.contains(typeKey) ? &j.at(typeKey) : nullptr;
+	ApplyDerivedConfigFromJson(j, derived);
 }
 
 void BaseGameObject::ExtractConfigToJson(nlohmann::json& j) const {
 	const_cast<BaseGameObject*>(this)->ExtractConfig();
 	config_.ExtractConfigToJson(j);
+
+	// 派生部分
+	const std::string typeKey(GetTypeName());
+	nlohmann::json	  derived;
+	ExtractDerivedConfigToJson(j, derived);
+	if(!derived.is_null() && !derived.empty()) {
+		j[typeKey] = std::move(derived);
+	}
+
+	// シーン側で利用できるように
+	if(!GetConfigPath().empty()) {
+		j["configPath"] = GetConfigPath();
+	}
 }
 
 //===================================================================*/
@@ -282,11 +304,21 @@ AABB BaseGameObject::GetWorldAABB() const {
 	return SceneObject::FallbackAABBFromTransform();
 }
 
-//===================================================================*/
-//                    load/save
-//===================================================================*/
-// void BaseGameObject::SaveToJson(const std::string& fileName) const{}
-//
-// void BaseGameObject::LoadFromJson(const std::string& fileName){}
+bool BaseGameObject::Save() const {
+	const std::string& path = GetConfigPath(); // SceneObject の保持値を使う
+	if(path.empty()) return false;
+	nlohmann::json j;
+	ExtractConfigToJson(j);
+	return JsonUtils::Save(path, j);
+}
+
+bool BaseGameObject::Load() {
+	const std::string& path = GetConfigPath();
+	if(path.empty()) return false;
+	nlohmann::json j;
+	if(!JsonUtils::Load(path, j)) return false;
+	ApplyConfigFromJson(j);
+	return true;
+}
 
 REGISTER_SCENE_OBJECT(BaseGameObject)

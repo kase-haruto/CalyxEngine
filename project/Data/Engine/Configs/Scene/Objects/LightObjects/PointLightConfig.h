@@ -4,7 +4,7 @@
 /* ===================================================================== */
 #include <Engine/Foundation/Math/Vector4.h>
 #include <Engine/Foundation/Math/Vector3.h>
-#include <Data/Engine/Configs/Scene/Objects/SceneObject/SceneObjectConfig.h> // ★追加
+#include <Data/Engine/Configs/Scene/Objects/SceneObject/SceneObjectConfig.h>
 
 #include <string>
 #include <externals/nlohmann/json.hpp>

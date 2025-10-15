@@ -1,4 +1,5 @@
 #pragma once
+
 /* ========================================================================
 /*		include space
 /* ===================================================================== */
@@ -9,98 +10,72 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <array>
 
-class Sprite;
+#include <Engine/Foundation/Math/Vector2.h>
+#include <Engine/Renderer/Sprite/Sprite.h>
 
-/* ========================================================================
-/*		スプライトを使用して数字を表示
-/* ===================================================================== */
+enum class DigitsAlign {
+	Left,
+	Center,
+	Right
+};
+
+
 class NumbersSprite {
 public:
-	// 左詰め中央右揃え
-	enum class DigitsAlign {
-		Left,
-		Center,
-		Right
-	};
+	NumbersSprite(std::string dir, std::string ext = ".png");
 
-public:
-	//===================================================================*/
-	//					public methods
-	//===================================================================*/
-	NumbersSprite();
-	NumbersSprite(int value);
-	~NumbersSprite();
+	// 初期化（基準位置・1桁サイズ）
+	void Initialize(const Vector2& pos, const Vector2& digitSize);
 
-	void Initialize(const Vector2& pos,const Vector2& digitSize);
-	void Update();
-	void ShowGui(const std::string& label = "NumbersSprite");
-
-	//--------- accessor -------------------------------------------------//
-	// getter
-	DigitsAlign    GetAlign() const;
-	const Vector2& GetAnchor() const;
-	const Vector2& GetSpriteSize() const;
-	const Vector2& GetPosition() const;
-
-	float GetSpace() const;
-	int   GetValue() const;
-	int   GetMinDigits() const;
-	int   GetMaxDigits() const;
+	// 値設定（負・超過値はクランプ）
+	void SetValue(int value);
 
 
-	// 描画登録用（可視の桁のみ返す）
+	// レイアウト設定
+	void SetPosition(const Vector2& pos);
+	void SetDigitSize(const Vector2& size);
+	void SetSpacing(float px);
+	void SetAlign(DigitsAlign a);
+	void SetAnchor(const Vector2& anc);
+
+	// 表示幅の制御
+	void SetMinDigits(int n); // 先頭ゼロ埋め（n以下ならゼロで埋める）
+	void SetMaxDigits(int n); // 表示の上限桁（n超はクランプ 10^n-1）
+
+	// 更新 & 描画登録
+	void				 Update();
 	std::vector<Sprite*> GetSpritesRaw() const;
 
-	// setter
-	void SetAnchor(const Vector2& anc);
-	void SetSpriteSize(const Vector2& size); // 1桁サイズ
-	void SetPosition(const Vector2& pos);    // 基準位置
-	void SetValue(int val);                  // 数値（クランプあり）
-	void SetMinDigit(int digit);             // 先頭ゼロ埋め桁
-	void SetMaxDigit(int digit);             // 表示上限桁
-	void SetSpace(float space);              // 桁間隔(px)
-	void SetAlign(DigitsAlign a);            // 左/中央/右
+private:
+	static std::vector<int> ToDigits_(int value);
 
-	// 数字テクスチャの格納場所（dir/0.png〜9.png）
-	void SetTextureDir(const std::string& dir);
-	void SetTextureExt(const std::string& ext);
+	void RebuildSpritesIfNeeded(size_t needCount); // 必要数に合わせて増減
+	void ApplyTexturesDiffOnly();				   // 変化桁だけ差し替え
+	void Relayout();
+
+	static std::string JoinPath_(const std::string& a, const std::string& b);
 
 private:
-	//===================================================================*/
-	//                  private methods
-	//===================================================================*/
-	static std::vector<unsigned> ToDigits_(int value);
+	// 設定
+	std::string dir_;
+	std::string ext_;
+	Vector2		origin_{0, 0};
+	Vector2		digitSize_{32, 48};
+	Vector2		anchor_{0.5f, 0.5f};
+	float		spacing_   = 2.0f;
+	DigitsAlign align_	   = DigitsAlign::Right;
+	int			minDigits_ = 1; // 先頭ゼロ埋め最小桁
+	int			maxDigits_ = 8; // 表示上限（例：8桁= 99,999,999 まで）
 
-	void RebuildSpritesIfNeeded_(size_t needCount);
-	void ApplyTexturesDiffOnly_();
-	void Relayout_();
+	// 状態
+	int									 value_ = 0;
+	std::vector<int>					 digits_;	  // 例: 120 -> {1,2,0}（ゼロ埋め後）
+	std::vector<int>					 prevDigits_; // 差分検出用
+	std::vector<std::unique_ptr<Sprite>> sprites_;
 
-	static std::string JoinPath_(const std::string& a,const std::string& b);
-
-private:
-	// ファイルパス
-	std::string dir_ = "Resources/Assets/Textures/Numbers";
-	std::string ext_ = ".png";
-
-	// 表示要素
-	std::vector<std::unique_ptr<Sprite>> sprites_;   //< 各桁スプライト
-	std::vector<unsigned>                digits_;    //< 今フレ表示桁
-	std::vector<unsigned>                preDigits_; //< 前フレ桁(差分用)
-
-	// レイアウト
-	Vector2     anchor_{0.5f,0.5f};       //< 各桁アンカー
-	Vector2     spriteSize_{64.0f,64.0f}; //< 1桁サイズ
-	Vector2     origin_{0.0f,0.0f};       //< 基準位置
-	float       space_ = 2.0f;            //< 桁間隔
-	DigitsAlign align_ = DigitsAlign::Right;
-
-	// 値とフォーマット
-	int value_     = 0; //< 表示値
-	int minDigits_ = 1; //< 最少桁（ゼロ埋め）
-	int maxDigits_ = 5; //< 最大桁（10^maxDigits - 1 にクランプ）
-
-	// ダーティフラグ
 	bool dirtyDigits_ = true;
 	bool dirtyLayout_ = true;
 };
+

@@ -11,9 +11,8 @@ ScoreService::ScoreService() = default;
 ScoreService::~ScoreService() = default;
 
 void ScoreService::Initialize(){
-	EventBus::Subscribe<GainScore>(
-		  [this](const GainScore& ev){ OnGainScore(ev); }
-	  );
+	connGainScore_ = EventBus::Subscribe<GainScore>(		//コネクションを受け取って保持
+		[this](const GainScore& ev) { OnGainScore(ev); });
 }
 
 void ScoreService::Shutdown(){}
@@ -25,6 +24,7 @@ void ScoreService::OnGainScore(const GainScore& ev) {
 
 void ScoreService::Update() {
 	while (!q_.empty()) {
+		//トータルスコアに加算
 		total_ += q_.front().amount;
 		q_.pop();
 	}
