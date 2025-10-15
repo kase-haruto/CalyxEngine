@@ -3,11 +3,7 @@
 #include <cmath>
 
 static inline std::string Join2_(const std::string& a, const std::string& b) {
-#ifdef _WIN32
-	const char sep = '\\';
-#else
 	const char sep = '/';
-#endif
 	if(a.empty()) return b;
 	if(a.back() == '/' || a.back() == '\\') return a + b;
 	return a + sep + b;
@@ -89,7 +85,7 @@ void NumbersSprite::RebuildSpritesIfNeeded(size_t needCount) {
 		for(size_t i = old; i < needCount; ++i) {
 			const std::string tex0 = JoinPath_(dir_, "0" + ext_);
 
-			sprites_[i]	= std::make_unique<Sprite>(tex0.c_str());
+			sprites_[i] = std::make_unique<Sprite>(tex0.c_str());
 			sprites_[i]->Initialize(origin_, digitSize_);
 			sprites_[i]->SetAnchorPoint(anchor_);
 			sprites_[i]->SetIsVisible(true);
@@ -107,7 +103,7 @@ void NumbersSprite::ApplyTexturesDiffOnly() {
 		const int d = digits_[i];
 		if(i < prevDigits_.size() && prevDigits_[i] == d) continue;
 
-	const std::string full = JoinPath_(dir_, std::to_string(d) + ext_);
+		const std::string full = JoinPath_(dir_, std::to_string(d) + ext_);
 		sprites_[i]->SetTexture(full.c_str());
 	}
 	prevDigits_ = digits_;
