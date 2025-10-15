@@ -15,15 +15,17 @@
 #include <Engine/Foundation/Math/Vector2.h>
 #include <Engine/Renderer/Sprite/Sprite.h>
 
-enum class DigitsAlign {
-	Left,
-	Center,
-	Right
-};
-
-
+/* ========================================================================
+/*		スプライトを使用して数字を表示
+/* ===================================================================== */
 class NumbersSprite {
 public:
+	// 左詰め中央右揃え
+	enum class DigitsAlign {
+		Left,
+		Center,
+		Right
+	};
 	NumbersSprite(std::string dir, std::string ext = ".png");
 
 	// 初期化（基準位置・1桁サイズ）

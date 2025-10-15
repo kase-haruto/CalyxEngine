@@ -9,13 +9,13 @@
 
 // engine
 #include <Engine/Application/Input/Input.h>
+#include <Engine/Application/System/Enviroment.h>
 #include <Engine/Collision/CollisionManager.h>
+#include <Engine/Graphics/Camera/Action/CameraTurnAroundAction.h>
 #include <Engine/Objects/2D/NumbersSprite/NumbersSprite.h>
 #include <Engine/Objects/3D/Actor/SceneObjectManager.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
-#include <Engine/Objects/2D/NumbersSprite/NumbersSprite.h>
-#include <Engine/Application/System/Enviroment.h>
 
 // game
 #include <Game/3dObject/Actor/Bullet/Register/BulletRegistrar.h>
@@ -43,7 +43,7 @@ void GameScene::Initialize() {
 	sceneContext_->Initialize();
 
 	// シーンデータ読み込み
-	SceneSerializer::Load(*sceneContext_,"Resources/Assets/Scenes/GameScene.scene");
+	SceneSerializer::Load(*sceneContext_, "Resources/Assets/Scenes/GameScene.scene");
 
 	// ベース初期化
 	BaseScene::Initialize();
@@ -89,7 +89,7 @@ void GameScene::Initialize() {
 	params.maxEngageDist = 120.0f; // 射程
 	params.useLOS		 = true;   // 遮蔽物チェックON
 
-	enemyEngagement_ = Installers::InstallEnemyEngagement(*sceneContext_,params);
+	enemyEngagement_ = Installers::InstallEnemyEngagement(*sceneContext_, params);
 
 	if(enemyEngagement_) {
 		enemyEngagement_->SetDirectory(enemyBinding_->GetDirectory());
@@ -103,7 +103,11 @@ void GameScene::Initialize() {
 
 	numbersSprite_->Initialize(/*pos*/ {1280.0f - 640.0f, 32.0f},
 							   /*digitSize*/ {32.0f, 32.0f});
-	numbersSprite_->SetAlign(DigitsAlign::Right);
+	numbersSprite_->SetAlign(NumbersSprite::DigitsAlign::Right);
+
+	// カメラアクション
+	cameraTurnAround_ = std::make_unique<CameraTurnAroundAction>();
+	wMainCamera_	  = sceneContext_->FindFirst<Camera3d>();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -112,6 +116,18 @@ void GameScene::Initialize() {
 void GameScene::Update([[maybe_unused]] float dt) {
 	if(enemyBinding_) enemyBinding_->Update(*sceneContext_, dt);
 	if(enemyEngagement_) enemyEngagement_->Update(dt);
+
+	auto mainCam = wMainCamera_.lock();
+	if(cameraTurnAround_) cameraTurnAround_->Update(mainCam.get(), dt);
+
+	auto player = wPlayer_.lock();
+	wBoss_		= sceneContext_->FindFirst<Boss>();
+	auto boss	= wBoss_.lock();
+
+	// カメラ振り向き
+	if(Input::TriggerGamepadButton(PAD_BUTTON::X)) {
+		cameraTurnAround_->Execute();
+	}
 
 	// Railの進み具合でボスを発生させる
 	occurrenceBoss_->BossSpawnByRailProgress();
@@ -130,11 +146,6 @@ void GameScene::Update([[maybe_unused]] float dt) {
 			numbersSprite_->Update();
 		}
 	}
-
-	
-	auto player = wPlayer_.lock();
-	wBoss_		= sceneContext_->FindFirst<Boss>();
-	auto boss	= wBoss_.lock();
 
 	// ===== クリア／ゲームオーバー条件 =====
 	// プレイヤーの死亡
@@ -180,12 +191,18 @@ void GameScene::Draw(ID3D12GraphicsCommandList* cmdList,
 	if(attackSprite_) {
 		spriteRenderer_->Register(attackSprite_.get());
 	}
-	
-	// プレイヤーが持つ追加スプライトを登録
-	if(auto player = ctx->FindFirst<Player>()) { for(auto& sp : player->GetAllSprites()) { if(sp) spriteRenderer_->Register(sp); } }
-	if(attackSprite_) { spriteRenderer_->Register(attackSprite_.get()); }
 
-	BaseScene::Draw(cmdList,psoService,type);
+	// プレイヤーが持つ追加スプライトを登録
+	if(auto player = ctx->FindFirst<Player>()) {
+		for(auto& sp : player->GetAllSprites()) {
+			if(sp) spriteRenderer_->Register(sp);
+		}
+	}
+	if(attackSprite_) {
+		spriteRenderer_->Register(attackSprite_.get());
+	}
+
+	BaseScene::Draw(cmdList, psoService, type);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
