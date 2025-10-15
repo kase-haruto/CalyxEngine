@@ -13,7 +13,7 @@ public:
 	virtual ~BaseCameraAction();
 
 	virtual void Update(class BaseCamera*, float) {}
-	virtual void Execute(class BaseCamera*) = 0;
+	virtual void Execute() = 0;
 	virtual void ShowGui() {}
 
 	//---------- accessor ------------------------------------------------//

@@ -16,6 +16,7 @@
 #include <Game/3dObject/Actor/Enemy/Collection/EnemyCollection.h>
 #include <Game/3dObject/Actor/Player/Player.h>
 #include <Game/Runtime/Engagement/EnemyEngagementService.h>
+#include <Engine/Graphics/Camera/Action/CameraTurnAroundAction.h>
 
 /* c++ */
 #include <array>
@@ -25,6 +26,7 @@
 class EnemyRuntimeBindingService;
 class ScoreService;
 class NumbersSprite;
+class CameraTurnAroundAction;
 
 class GameScene final
 	: public BaseScene {
@@ -43,7 +45,7 @@ public:
 private:
 	/* objects ======================================================*/
 	std::shared_ptr<BaseGameObject> modelField_;
-	std::shared_ptr<RailCamera>		railCamera_ = nullptr;
+	std::weak_ptr<Camera3d>			wMainCamera_;
 	std::weak_ptr<Player>			wPlayer_;
 	std::weak_ptr<Boss>				wBoss_;
 
@@ -59,4 +61,5 @@ private:
 	std::shared_ptr<EnemyCollection>			  enemyCollection_;
 	std::unique_ptr<ScoreService>				  score_;
 	std::unique_ptr<NumbersSprite>				  numbersSprite_;
+	std::unique_ptr<CameraTurnAroundAction>		  cameraTurnAround_;
 };

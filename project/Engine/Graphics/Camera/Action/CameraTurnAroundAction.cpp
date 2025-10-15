@@ -3,15 +3,13 @@
 // engine
 #include "../3d/Camera3d.h"
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
-#include <Engine\Foundation\Utility\Func\CxUtils.h>
+#include <Engine/Foundation/Utility/Func/CxUtils.h>
 
 CameraTurnAroundAction::CameraTurnAroundAction() = default;
 
 CameraTurnAroundAction::~CameraTurnAroundAction() = default;
 
-
-void CameraTurnAroundAction::Execute(BaseCamera* cam) {
-	if(!cam) return;
+void CameraTurnAroundAction::Execute() {
 	if(turning_) return;
 
 	turning_ = true;
@@ -25,22 +23,21 @@ void CameraTurnAroundAction::Update(BaseCamera* cam, float dt) {
 	float t	   = std::clamp(elapsed_ / turnTime_, 0.0f, 1.0f);
 	float rate = ApplyEase(easeType_, t);
 
-	// 現在の回転
-	Quaternion current = cam->GetWorldTransform().rotation;
+	WorldTransform& wt	   = cam->GetWorldTransform();
+	wt.rotationSource  = RotationSource::Quaternion;
+	Quaternion current = wt.rotation;
 
-	// 現在の姿勢に対して180°回転する目標姿勢を都度計算
 	Quaternion q180	  = Quaternion::MakeRotateY(Cx::Math::ToRadians(180.0f));
 	Quaternion target = Quaternion::Multiply(q180, current);
 
-	// 現在→反転姿勢へ少しずつ近づける
+	// 球面線形補間
 	Quaternion newRot = Quaternion::Slerp(current, target, rate * dt * (1.0f / turnTime_));
-	cam->GetWorldTransform().rotation = newRot;
+	wt.rotation		  = newRot;
 
 	if(t >= 1.0f) {
 		turning_ = false;
 	}
 }
-
 
 void CameraTurnAroundAction::ShowGui() {
 

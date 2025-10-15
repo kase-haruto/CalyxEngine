@@ -8,9 +8,8 @@
 /* ===================================================================== */
 
 class CameraTurnAroundAction
-	: public BaseCameraAction,
-	  public IConfigurable {
-
+	: public BaseCameraAction{
+public:
 	//===================================================================*/
 	//					public methods
 	//===================================================================*/
@@ -18,7 +17,7 @@ class CameraTurnAroundAction
 	~CameraTurnAroundAction() override;
 
 	void Update(class BaseCamera* cam, float dt) override;
-	void Execute(class BaseCamera* cam) override;
+	void Execute() override;
 	void ShowGui() override;
 
 	//---------- accessor ------------------------------------------------//
