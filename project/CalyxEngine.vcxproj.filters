@@ -2304,6 +2304,8 @@
     <ClInclude Include="Game\Battle\Shooting\Score\GainScore.h" />
     <ClInclude Include="Game\Battle\Shooting\Score\ScoreService.h" />
     <ClInclude Include="Engine\Objects\2D\NumbersSprite\NumbersSprite.h" />
+    <ClInclude Include="Engine\Graphics\Camera\Action\BaseCameraAction.h" />
+    <ClInclude Include="Engine\Graphics\Camera\Action\CameraTurnAroundAction.h" />
     <ClInclude Include="Engine\Foundation\Serialization\FieldVisit.h" />
   </ItemGroup>
   <ItemGroup>
@@ -2382,6 +2384,8 @@
     <ClCompile Include="Game\Battle\Shooting\Score\GainScore.cpp" />
     <ClCompile Include="Game\Battle\Shooting\Score\ScoreService.cpp" />
     <ClCompile Include="Engine\Objects\2D\NumbersSprite\NumbersSprite.cpp" />
+    <ClCompile Include="Engine\Graphics\Camera\Action\BaseCameraAction.cpp" />
+    <ClCompile Include="Engine\Graphics\Camera\Action\CameraTurnAroundAction.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />

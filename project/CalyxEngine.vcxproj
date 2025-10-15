@@ -160,7 +160,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Graphics\Camera\Action\CameraTurnAroundAction.cpp" />
     <ClCompile Include="Engine\Foundation\Math\MathUtil.cpp" />
+    <ClCompile Include="Engine\Graphics\Camera\Action\BaseCameraAction.cpp" />
     <ClCompile Include="Engine\PostProcess\Manager\PostEffectManager.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Bullet\EnemyBullet\EnemyHomingBullet.cpp" />
     <ClCompile Include="Game\Battle\Shooting\Details\FireScheduler.cpp" />
@@ -401,9 +403,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Objects\2D\NumbersSprite\NumbersSprite.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Graphics\Camera\Action\CameraTurnAroundAction.h" />
     <ClInclude Include="Engine\Foundation\Math\MathUtil.h" />
     <ClInclude Include="Engine\Foundation\Serialization\FieldVisit.h" />
     <ClInclude Include="Engine\Foundation\Utility\Func\Fwd.h" />
+    <ClInclude Include="Engine\Graphics\Camera\Action\BaseCameraAction.h" />
     <ClInclude Include="Engine\Objects\3D\Details\BillboardParams.h" />
     <ClInclude Include="Engine\PostProcess\Manager\PostEffectManager.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\EnemyBullet\EnemyHomingBullet.h" />
