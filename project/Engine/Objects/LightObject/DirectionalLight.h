@@ -12,6 +12,7 @@
 #include <Engine/Graphics/Pipeline/PipelineType.h>
 #include <Engine/Lighting/LightData.h>
 #include <Engine/Graphics/Buffer/DxConstantBuffer.h>
+#include <Engine/Objects/3D/Actor/BaseGameObject.h>
 
 /* config */
 #include <Data/Engine/Configs/Scene/Objects/LightObjects/DirectionalLightConfig.h>
@@ -36,9 +37,10 @@ public:
 	DirectionalLight();
 	~DirectionalLight();
 
-	void Initialize();
 	void Update(float dt)override;
-	void AlwaysUpdate(float dt)override;
+	void DrawDebug();
+
+	void AlwaysUpdate(float dt);
 	void UploadToGpu();
 	void SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList, PipelineType type);
 	void ShowGui()override;
@@ -55,7 +57,7 @@ private:
 	DxConstantBuffer<DirectionalLightData> constantBuffer_;
 	DirectionalLightData lightData_ = {};	// ライトデータ
 
+	std::shared_ptr<BaseGameObject> UiObject_ = nullptr;
 private:
 	ConfigurableObject<DirectionalLightConfig> config_;
 };
-

@@ -71,10 +71,16 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 
     // Particles
     sceneContext_->GetFxSystem()->Render(pso, cmd);
+
+#if defined(_DEBUG) || defined(DEVELOP)
+	// lightのデバッグ描画
+	auto dirLight = sceneContext_->FindFirst<DirectionalLight>();
+	dirLight->DrawDebug();
+#endif
+
 }
 
 void BaseScene::DrawSpritesOnly(ID3D12GraphicsCommandList* cmd,
                                 PipelineService* pso) {
     spriteRenderer_->Draw(cmd, pso, RenderTargetType::BackBuffer);
 }
-

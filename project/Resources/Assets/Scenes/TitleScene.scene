@@ -64,12 +64,12 @@
                 "z": 1.0
             },
             "direction": {
-                "x": 0.0,
+                "x": -0.5289999842643738,
                 "y": -1.0,
-                "z": 0.0
+                "z": -0.6809999942779541
             },
             "guid": "77beb688-44e1-4ddd-a804-e9bfa301ea6c",
-            "intensity": 0.25,
+            "intensity": 1.0,
             "name": "DirectionalLight",
             "objectType": 4,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
@@ -148,45 +148,6 @@
                 }
             },
             "type": "BaseGameObject"
-        },
-        {
-            "color": {
-                "w": 1.0,
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-            },
-            "decay": 1.0,
-            "guid": "9798566e-c783-4614-a85a-a6778a6ac47f",
-            "intensity": 0.25,
-            "name": "PointLight",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "position": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            },
-            "radius": 20.0,
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "PointLight"
         },
         {
             "guid": "d5039106-120e-4ef0-a5a6-a0394c7e5570",
@@ -371,7 +332,7 @@
                     "enableLighting": 0,
                     "enviromentCoefficient": 0.5,
                     "isReflect": false,
-                    "shininess": 20.0
+                    "shininess": 100.0
                 },
                 "modelName": "terrain.obj",
                 "textureGuid": "f9492258-06c4-4742-9707-39995c0592dc",
@@ -1068,7 +1029,7 @@
                     "enableLighting": 0,
                     "enviromentCoefficient": 0.5,
                     "isReflect": false,
-                    "shininess": 20.0
+                    "shininess": 7.230000019073486
                 },
                 "modelName": "largeBuilding.obj",
                 "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
