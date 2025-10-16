@@ -9,7 +9,6 @@
 
 // engine
 #include <Engine/Application/Input/Input.h>
-#include <Engine/Application/System/Enviroment.h>
 #include <Engine/Collision/CollisionManager.h>
 #include <Engine/Graphics/Camera/Action/CameraTurnAroundAction.h>
 #include <Engine/Objects/2D/NumbersSprite/NumbersSprite.h>
@@ -43,7 +42,7 @@ void GameScene::Initialize() {
 	sceneContext_->Initialize();
 
 	// シーンデータ読み込み
-	SceneSerializer::Load(*sceneContext_, "Resources/Assets/Scenes/GameScene.scene");
+	SceneSerializer::Load(*sceneContext_,"Resources/Assets/Scenes/GameScene.scene");
 
 	// ベース初期化
 	BaseScene::Initialize();
@@ -54,80 +53,78 @@ void GameScene::Initialize() {
 	// 弾の登録
 	BulletRegistrar::RegisterAll();
 
-	if(auto* ctx = SceneContext::Current()) {
-		if(auto ground = ctx->FindObjectByName<BaseGameObject>("field")) {
-			ground->SetEnableRaycast(false);
-		}
-	}
+	if(auto* ctx = SceneContext::Current()) { if(auto ground = ctx->FindObjectByName<BaseGameObject>("field")) { ground->SetEnableRaycast(false); } }
 
 	// UI
 	attackSprite_ = std::make_unique<Sprite>("Textures/attackUI.png");
 	{
-		Vector2 attackUiPos	 = Vector2(1280.0f * 0.5f, 720.0f - 100.0f);
-		Vector2 attackUiSize = Vector2(128.0f, 128.0f);
-		attackSprite_->Initialize(attackUiPos, attackUiSize);
-		attackSprite_->SetAnchorPoint(Vector2(0.5f, 0.5f));
+		Vector2 attackUiPos  = Vector2(1280.0f * 0.5f,720.0f - 100.0f);
+		Vector2 attackUiSize = Vector2(128.0f,128.0f);
+		attackSprite_->Initialize(attackUiPos,attackUiSize);
+		attackSprite_->SetAnchorPoint(Vector2(0.5f,0.5f));
 	}
 
 	// プレイヤー基本セットアップ
 	{
-		auto			player = sceneContext_->FindFirst<Player>();
+		auto            player = sceneContext_->FindFirst<Player>();
 		PlayerInstaller installer;
 		installer.InstallPlayer(player);
 		wPlayer_ = player; // Draw でスプライト拾うために持っておく
 	}
 
-	enemyBinding_ = std::make_unique<EnemyRuntimeBindingService>();
-	enemyBinding_->OnSceneLoaded(*sceneContext_);
+	// 敵セットアップ
 
-	occurrenceBoss_ = std::make_unique<RailProgressBossSpawnService>();
-	occurrenceBoss_->OnSceneLoaded(*sceneContext_);
+	{
+		//敵弾コンテナ
+		enemyBulletContainer_ = std::make_unique<EnemyBulletContainer>("EnemyBulletContainer");
 
-	EnemyEngagementParams params{};
-	params.ndcPad		 = 0.05f;  // 画面端の余白
-	params.minExposeSec	 = 0.20f;  // 0.2秒以上映ってから有効
-	params.maxEngageDist = 120.0f; // 射程
-	params.useLOS		 = true;   // 遮蔽物チェックON
+		enemyBinding_ = std::make_unique<EnemyRuntimeBindingService>();
+		enemyBinding_->OnSceneLoaded(*sceneContext_,enemyBulletContainer_.get());
 
-	enemyEngagement_ = Installers::InstallEnemyEngagement(*sceneContext_, params);
+		occurrenceBoss_ = std::make_unique<RailProgressBossSpawnService>();
+		occurrenceBoss_->OnSceneLoaded(*sceneContext_);
 
-	if(enemyEngagement_) {
-		enemyEngagement_->SetDirectory(enemyBinding_->GetDirectory());
+		EnemyEngagementParams params{};
+		params.ndcPad        = 0.05f;  // 画面端の余白
+		params.minExposeSec  = 0.20f;  // 0.2秒以上映ってから有効
+		params.maxEngageDist = 120.0f; // 射程
+		params.useLOS        = true;   // 遮蔽物チェックON
+
+		enemyEngagement_ = Installers::InstallEnemyEngagement(*sceneContext_,params);
+
+		if(enemyEngagement_) { enemyEngagement_->SetDirectory(enemyBinding_->GetDirectory()); }
 	}
-
 	score_ = std::make_unique<ScoreService>();
 	score_->Initialize();
 
 	numbersSprite_ = std::make_unique<NumbersSprite>(
-		"Textures/Numbers", ".png");
+		"Textures/Numbers",".png");
 
-	numbersSprite_->Initialize(/*pos*/ {1280.0f - 640.0f, 32.0f},
-							   /*digitSize*/ {32.0f, 32.0f});
+	numbersSprite_->Initialize(/*pos*/ {1280.0f - 640.0f,32.0f},
+									   /*digitSize*/ {32.0f,32.0f});
 	numbersSprite_->SetAlign(NumbersSprite::DigitsAlign::Right);
 
 	// カメラアクション
 	cameraTurnAround_ = std::make_unique<CameraTurnAroundAction>();
-	wMainCamera_	  = sceneContext_->FindFirst<Camera3d>();
+	wMainCamera_      = sceneContext_->FindFirst<Camera3d>();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //  更新
 /////////////////////////////////////////////////////////////////////////////////////////
 void GameScene::Update([[maybe_unused]] float dt) {
-	if(enemyBinding_) enemyBinding_->Update(*sceneContext_, dt);
+	if(enemyBinding_) enemyBinding_->Update(*sceneContext_,dt);
 	if(enemyEngagement_) enemyEngagement_->Update(dt);
 
 	auto mainCam = wMainCamera_.lock();
-	if(cameraTurnAround_) cameraTurnAround_->Update(mainCam.get(), dt);
-
-	auto player = wPlayer_.lock();
-	wBoss_		= sceneContext_->FindFirst<Boss>();
-	auto boss	= wBoss_.lock();
+	if(cameraTurnAround_) cameraTurnAround_->Update(mainCam.get(),dt);
 
 	// カメラ振り向き
-	if(Input::TriggerGamepadButton(PAD_BUTTON::X)) {
-		cameraTurnAround_->Execute();
-	}
+	if(Input::TriggerGamepadButton(PAD_BUTTON::X)) { cameraTurnAround_->Execute(); }
+
+	// 敵弾コンテナ更新
+	enemyBulletContainer_->Update(dt);
+	enemyBulletContainer_->AlwaysUpdate(dt);
 
 	// Railの進み具合でボスを発生させる
 	occurrenceBoss_->BossSpawnByRailProgress();
@@ -148,6 +145,10 @@ void GameScene::Update([[maybe_unused]] float dt) {
 	}
 
 	// ===== クリア／ゲームオーバー条件 =====
+	auto player = wPlayer_.lock();
+	wBoss_      = sceneContext_->FindFirst<Boss>();
+	auto boss   = wBoss_.lock();
+
 	// プレイヤーの死亡
 	if(player && !player->GetIsAlive()) {
 		// transitionRequestor_->RequestSceneChange(SceneType::TITLE);
@@ -167,42 +168,26 @@ void GameScene::Update([[maybe_unused]] float dt) {
 //  描画
 /////////////////////////////////////////////////////////////////////////////////////////
 void GameScene::Draw(ID3D12GraphicsCommandList* cmdList,
-					 PipelineService*			psoService,
-					 RenderTargetType			type) {
+					 PipelineService*           psoService,
+					 RenderTargetType           type) {
 	SceneContext* ctx = GetSceneContext();
 	if(!ctx) {
-		BaseScene::Draw(cmdList, psoService, type);
+		BaseScene::Draw(cmdList,psoService,type);
 		return;
 	}
 
 	// 既存のスプライト登録
-	if(numbersSprite_) {
-		for(auto* sp : numbersSprite_->GetSpritesRaw()) {
-			spriteRenderer_->Register(sp);
-		}
-	}
+	if(numbersSprite_) { for(auto* sp : numbersSprite_->GetSpritesRaw()) { spriteRenderer_->Register(sp); } }
 
 	// プレイヤーが持つ追加スプライトを登録
-	if(auto player = ctx->FindFirst<Player>()) {
-		for(auto& sp : player->GetAllSprites()) {
-			if(sp) spriteRenderer_->Register(sp);
-		}
-	}
-	if(attackSprite_) {
-		spriteRenderer_->Register(attackSprite_.get());
-	}
+	if(auto player = ctx->FindFirst<Player>()) { for(auto& sp : player->GetAllSprites()) { if(sp) spriteRenderer_->Register(sp); } }
+	if(attackSprite_) { spriteRenderer_->Register(attackSprite_.get()); }
 
 	// プレイヤーが持つ追加スプライトを登録
-	if(auto player = ctx->FindFirst<Player>()) {
-		for(auto& sp : player->GetAllSprites()) {
-			if(sp) spriteRenderer_->Register(sp);
-		}
-	}
-	if(attackSprite_) {
-		spriteRenderer_->Register(attackSprite_.get());
-	}
+	if(auto player = ctx->FindFirst<Player>()) { for(auto& sp : player->GetAllSprites()) { if(sp) spriteRenderer_->Register(sp); } }
+	if(attackSprite_) { spriteRenderer_->Register(attackSprite_.get()); }
 
-	BaseScene::Draw(cmdList, psoService, type);
+	BaseScene::Draw(cmdList,psoService,type);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

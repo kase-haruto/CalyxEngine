@@ -10,18 +10,18 @@
 class Player;
 class PlayerDodge;
 class EnemyDirectory;
-class BulletContainer;
+class EnemyBulletContainer;
 class BaseBullet;
 
 struct DangerSenseConfig {
-	float playerInflate = 0.5f;
-	float margin = 3.0f;
+	float playerInflate    = 0.5f;
+	float margin           = 3.0f;
 	float maxCheckDistance = 80.0f;
-	int throttleFrames = 1;
+	int   throttleFrames   = 1;
 
 	// UI
-	std::string uiTex = "Textures/white1x1.png";
-	Vector2 uiSize = { 64.0f, 64.0f };
+	std::string uiTex  = "Textures/white1x1.png";
+	Vector2     uiSize = {64.0f,64.0f};
 };
 
 class PlayerDangerSense {
@@ -29,7 +29,7 @@ public:
 	PlayerDangerSense();
 	~PlayerDangerSense();
 
-	void Initialize(Player* owner, PlayerDodge* dodge, const DangerSenseConfig& cfg = {});
+	void Initialize(Player* owner,PlayerDodge* dodge,const DangerSenseConfig& cfg = {});
 	void Update(float dt);
 
 	// 敵一覧の供給（各敵が個別に BulletContainer を所有している構成に対応）
@@ -38,21 +38,23 @@ public:
 	// UIスプライト（外部の一括描画や GetAllSprites への合流用）
 	Sprite* GetUiSprite() const { return cue_.get(); }
 
-	// 設定の出し入れ（ImGui等で調整したい場合）
 	const DangerSenseConfig& GetConfig() const { return cfg_; }
-	void SetConfig(const DangerSenseConfig& c) { cfg_ = c; }
+	void                     SetConfig(const DangerSenseConfig& c) { cfg_ = c; }
+
+	void SetEnemyBulletContainer(EnemyBulletContainer* bulletContainer);
 
 private:
 	// 近距離に弾があるかを判定して返す（true = 警告）
 	bool ComputeDangerNearby(Vector3& outPlayerPos) const;
 
 	// UI更新と PlayerDodge へのフラグ連携
-	void ApplyDangerResult(bool danger, const Vector3& playerPos);
+	void ApplyDangerResult(bool danger,const Vector3& playerPos);
 
 private:
-	Player* owner_ = nullptr;
-	PlayerDodge* dodge_ = nullptr;
-	EnemyDirectory* dir_ = nullptr;
+	Player*               owner_           = nullptr;
+	PlayerDodge*          dodge_           = nullptr;
+	EnemyDirectory*       dir_             = nullptr;
+	EnemyBulletContainer* bulletContainer_ = nullptr;
 
 	DangerSenseConfig cfg_{};
 

@@ -15,7 +15,7 @@ public:
 	//===================================================================*/
 	//          public method
 	//===================================================================*/
-	EnemyShootingController(std::unique_ptr<BulletContainer> container);
+	EnemyShootingController(BulletContainer* container);
 	~EnemyShootingController() override;
 
 	//--------- main ------------------------------------------------------
@@ -24,8 +24,7 @@ public:
 
 	//--------- accessor --------------------------------------------------
 	float GetInterval() const override;
-	BulletContainer* GetbulletContaienr()const { return bulletContainer_.get(); }
-	void SetBulletContainer(std::unique_ptr<BulletContainer> container);
+	void SetBulletContainer(BulletContainer* container);
 
 	void SetExternalRateControl(bool v) { externalRateControl_ = v; }
 
@@ -35,7 +34,7 @@ public:
 private:
 	std::unique_ptr<StraightBulletShooter>  straightShooter_ = nullptr;
 	std::unique_ptr<EnemyHomingBulletShooter> homingShooter = nullptr;
-	std::unique_ptr<BulletContainer> bulletContainer_ = nullptr;
+	BulletContainer* pBulletContainer_ = nullptr;
 
 	float kInterval = 0.7f;
 

@@ -4,6 +4,7 @@
 
 class SceneContext;
 class EnemyDirectory;
+class EnemyBulletContainer;
 class Player;
 
 class EnemyRuntimeBindingService {
@@ -13,7 +14,7 @@ public:
 	//===================================================================*/
 	EnemyRuntimeBindingService() = default;
 
-	void OnSceneLoaded(SceneContext& ctx);
+	void OnSceneLoaded(SceneContext& ctx,EnemyBulletContainer* bulletContainer);
 	void Update(SceneContext& ctx, float dt);
 	void OnSceneCleared(SceneContext& ctx);
 	std::shared_ptr<EnemyDirectory> GetDirectory() const { return dir_; }
@@ -22,7 +23,7 @@ private:
 	//===================================================================*/
 	//		 private methods
 	//===================================================================*/
-	void WireAllSpawners_(SceneContext& ctx);
+	void WireAllSpawners(SceneContext& ctx);
 
 private:
 	//===================================================================*/
@@ -30,6 +31,7 @@ private:
 	//===================================================================*/
 	std::shared_ptr<EnemyDirectory> dir_;
 	std::weak_ptr<Player> wPlayer_;
+	EnemyBulletContainer* bulletContainer_;
 	size_t lastSpawnerCount_ = 0;
 
 };

@@ -65,10 +65,6 @@ void TitleScene::Update([[maybe_unused]] float dt) {
 	/* 3dObject ============================*/
 	/* その他 ============================*/
 
-#ifdef _DEBUG
-	menu_->ShowGui();
-#endif // _DEBUG
-
 	menu_->Update(dt);
 
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();

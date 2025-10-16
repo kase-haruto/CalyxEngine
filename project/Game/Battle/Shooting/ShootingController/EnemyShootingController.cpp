@@ -11,9 +11,9 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 //      コンストラクタ
 /////////////////////////////////////////////////////////////////////////////////////////
-EnemyShootingController::EnemyShootingController(std::unique_ptr<BulletContainer> container) {
-	bulletContainer_ = std::move(container);
-	homingShooter = std::make_unique<EnemyHomingBulletShooter>(bulletContainer_.get(), BulletID::Enemy_Homing);
+EnemyShootingController::EnemyShootingController(BulletContainer* container) {
+	SetBulletContainer(container);
+	homingShooter = std::make_unique<EnemyHomingBulletShooter>(container, BulletID::Enemy_Homing);
 }
 
 EnemyShootingController::~EnemyShootingController() = default;
@@ -22,8 +22,6 @@ EnemyShootingController::~EnemyShootingController() = default;
 //      更新
 /////////////////////////////////////////////////////////////////////////////////////////
 void EnemyShootingController::Update(float dt) {
-	if (bulletContainer_) bulletContainer_->Update(dt);
-
 	if (!gameplayEngaged_) {
 		return;
 	}
@@ -60,6 +58,6 @@ void EnemyShootingController::RequestShoot(const Vector3& pos, const Vector3& di
 /////////////////////////////////////////////////////////////////////////////////////////
 float EnemyShootingController::GetInterval() const { return kInterval; }
 
-void EnemyShootingController::SetBulletContainer(std::unique_ptr<BulletContainer> container) {
-	bulletContainer_ = std::move(container);
+void EnemyShootingController::SetBulletContainer(BulletContainer* container) {
+	pBulletContainer_ = container;
 }

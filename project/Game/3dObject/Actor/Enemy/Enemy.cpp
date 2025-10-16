@@ -22,25 +22,26 @@
 /* include space
 /* ===================================================================== */
 
+Enemy::Enemy() = default;
 /////////////////////////////////////////////////////////////////////////////////////////
 //      コンストラクタ
 /////////////////////////////////////////////////////////////////////////////////////////
-Enemy::Enemy(const std::string& modelName, const std::string objName)
-	: Actor(modelName, objName) {
-	worldTransform_.scale = { 2, 2, 2 };
+Enemy::Enemy(const std::string& modelName,const std::string objName)
+	: Actor(modelName,objName) {
+	worldTransform_.scale = {2,2,2};
 
-	moveSpeed_ = Random::Generate<float>(1.0f, 3.0f);
-	velocity_ = Random::GenerateVector3(-1.0f, 1.0f);
+	moveSpeed_ = Random::Generate<float>(1.0f,3.0f);
+	velocity_  = Random::GenerateVector3(-1.0f,1.0f);
 
 	collider_->SetType(ColliderType::Type_Enemy);
 	collider_->SetTargetType(ColliderType::Type_PlayerAttack);
 	collider_->SetOwner(this);
-	if (auto* box = dynamic_cast<BoxCollider*>(collider_.get())) { box->SetSize({ 3, 3, 3 }); }
+	if(auto* box = dynamic_cast<BoxCollider*>(collider_.get())) { box->SetSize({3,3,3}); }
 	collider_->SetIsDrawCollider(false);
 
-	life_ = 1;
+	life_          = 1;
 	waveAmplitude_ = 2.0f;
-	waveSpeed_ = Random::Generate<float>(1.0f, 3.0f);
+	waveSpeed_     = Random::Generate<float>(1.0f,3.0f);
 
 	hitFx_ = SceneAPI::Instantiate<ParticleSystemObject>("hitFx");
 	hitFx_->LoadConfig("Resources/Assets/Configs/Effect/HitFx.json");
@@ -49,7 +50,7 @@ Enemy::Enemy(const std::string& modelName, const std::string objName)
 	explosionFx_->LoadConfig("Resources/Assets/Configs/Effect/Explosion.json");
 
 	// --- スプライン追従の既定値 ---
-	mover_.SetWorldSpeed(12.0f); // 等速（m/s）
+	mover_.SetWorldSpeed(12.0f);                                 // 等速（m/s）
 	mover_.SetLookMode(SplineFollower::LookMode::TowardsTarget); // 基本はプレイヤーへ向く
 	mover_.SetYOffset(0.0f);
 	mover_.SetLoop(false); // デフォルトは終端で停止
@@ -76,9 +77,7 @@ void Enemy::Initialize() {
 	// ここでは emitter_ を作らず、Update() 内で BuildEmitterIfReady() を呼びます。
 
 	// もし経路が既に与えられていたら、ターゲットTFだけここで関連付け
-	if (hasRoute_) {
-		mover_.SetTargetTransform(playerTransform_);
-	}
+	if(hasRoute_) { mover_.SetTargetTransform(playerTransform_); }
 
 	EnsurePatternBound();
 }
@@ -95,14 +94,14 @@ void Enemy::Update(float dt) {
 	/* =============================================
 		生存中のロジック
 	   =============================================*/
-	if (deathState_ == DeathState::Alive) {
-		if (life_ <= 0) {
+	if(deathState_ == DeathState::Alive) {
+		if(life_ <= 0) {
 			// ---- 死亡フラグ立った瞬間 ----
 			deathState_ = DeathState::Dying;
 			explosionFx_->Play();
-			deathTimer_ = 0.0f;
-			deathRotateAxis_ = { 1, 0, 0 }; // 前方に倒れる
-			return; // このフレームはここで終了
+			deathTimer_      = 0.0f;
+			deathRotateAxis_ = {1,0,0}; // 前方に倒れる
+			return;                     // このフレームはここで終了
 		}
 
 		// 一度だけエミッタを生成（依存が揃った最初のフレーム）
@@ -111,7 +110,7 @@ void Enemy::Update(float dt) {
 		// =========================
 		//   スプライン追従による移動
 		// =========================
-		if (hasRoute_) {
+		if(hasRoute_) {
 			// プレイヤー参照が後から入るケースに対応
 			mover_.SetTargetTransform(playerTransform_);
 
@@ -123,54 +122,52 @@ void Enemy::Update(float dt) {
 
 			// 波移動（ワールドYに揺らぎを加算）
 			waveTime_ += dt * waveSpeed_;
-			const float offsetY = std::sin(waveTime_) * waveAmplitude_;
-			worldTransform_.translation = basePos + Vector3{ 0, offsetY, 0 };
+			const float offsetY         = std::sin(waveTime_) * waveAmplitude_;
+			worldTransform_.translation = basePos + Vector3{0,offsetY,0};
 
 			// 方向合わせ（プレイヤーへ）
-			const Vector3 myPos = worldTransform_.translation;
+			const Vector3 myPos     = worldTransform_.translation;
 			const Vector3 targetPos = playerTransform_ ? playerTransform_->GetWorldPosition() : myPos;
-			Vector3 d = targetPos - myPos;
-			if (d.LengthSquared() > 1e-12f) {
-				d = d.Normalize();
-				const float yaw = std::atan2(d.x, d.z);                                  // 水平旋回
-				const float pitch = std::atan2(-d.y, std::sqrt(d.x * d.x + d.z * d.z));    // 上下（LH）
+			Vector3       d         = targetPos - myPos;
+			if(d.LengthSquared() > 1e-12f) {
+				d                        = d.Normalize();
+				const float yaw          = std::atan2(d.x,d.z);                               // 水平旋回
+				const float pitch        = std::atan2(-d.y,std::sqrt(d.x * d.x + d.z * d.z)); // 上下（LH）
 				worldTransform_.rotation = Quaternion::MakeRotateY(yaw) * Quaternion::MakeRotateX(pitch);
 			}
 		} else {
 			// フォールバック：従来の波移動（経路未設定時のみ）
 			waveTime_ += dt * waveSpeed_;
-			const float offsetY = std::sin(waveTime_) * waveAmplitude_;
-			worldTransform_.translation = basePosition_ + Vector3{ 0, offsetY, 0 };
+			const float offsetY         = std::sin(waveTime_) * waveAmplitude_;
+			worldTransform_.translation = basePosition_ + Vector3{0,offsetY,0};
 
 			// 方向合わせ（プレイヤーへ）
-			const Vector3 myPos = GetWorldPosition();
+			const Vector3 myPos     = GetWorldPosition();
 			const Vector3 targetPos = playerTransform_ ? playerTransform_->GetWorldPosition() : myPos;
-			Vector3 d = targetPos - myPos;
-			if (d.LengthSquared() > 1e-12f) {
-				d = d.Normalize();
-				const float yaw = std::atan2(d.x, d.z);
-				const float pitch = std::atan2(-d.y, std::sqrt(d.x * d.x + d.z * d.z));
+			Vector3       d         = targetPos - myPos;
+			if(d.LengthSquared() > 1e-12f) {
+				d                        = d.Normalize();
+				const float yaw          = std::atan2(d.x,d.z);
+				const float pitch        = std::atan2(-d.y,std::sqrt(d.x * d.x + d.z * d.z));
 				worldTransform_.rotation = Quaternion::MakeRotateY(yaw) * Quaternion::MakeRotateX(pitch);
 			}
 		}
 
 		// 下流コントローラの更新
-		if (shootingController_) {
+		if(shootingController_) {
 			shootingController_->SetGameplayEngaged(this->IsGameplayEngaged());
 			shootingController_->Update(dt);
 		}
 
 		// 弾幕駆動：emitter_ は一度生成したら以降は再利用
-		if (this->IsGameplayEngaged() && emitter_) {
-			if (auto* pat = emitter_->Pattern()) {
-				pat->Advance(dt);
-			}
+		if(this->IsGameplayEngaged() && emitter_) {
+			if(auto* pat = emitter_->Pattern()) { pat->Advance(dt); }
 
 			BulletEmitterContext cxt{};
-			cxt.origin = GetCenterPos(); // 先に移動を済ませてあるので常に最新
+			cxt.origin    = GetCenterPos(); // 先に移動を済ませてあるので常に最新
 			cxt.targetPos = playerTransform_ ? playerTransform_->GetWorldPosition() : GetWorldPosition();
 
-			emitter_->Update(dt, cxt);
+			emitter_->Update(dt,cxt);
 		}
 
 		return;
@@ -179,20 +176,20 @@ void Enemy::Update(float dt) {
 	/* =============================================
 		倒れ演出中 (Dying)
 	   =============================================*/
-	if (deathState_ == DeathState::Dying) {
+	if(deathState_ == DeathState::Dying) {
 		deathTimer_ += dt;
-		float t = std::clamp(deathTimer_ / deathLength_, 0.0f, 1.0f);
+		float t = std::clamp(deathTimer_ / deathLength_,0.0f,1.0f);
 
 		// 0→90° まで補間して倒れる
-		float rad = Deg2Rad(90.0f * t);
+		float rad                = Deg2Rad(90.0f * t);
 		worldTransform_.rotation =
-			Quaternion::MakeRotateAxisQuaternion(deathRotateAxis_, rad);
+			Quaternion::MakeRotateAxisQuaternion(deathRotateAxis_,rad);
 
 		// 倒れ演出中は移動しない（位置固定）
 		// worldTransform_.translation = basePosition_;
 
 		// 演出が終わり、爆発も再生終了したら Dead へ
-		if (t >= 1.0f && !explosionFx_->IsPlaying()) {
+		if(t >= 1.0f && !explosionFx_->IsPlaying()) {
 			deathState_ = DeathState::Dead;
 			deathTimer_ = 0.0f;
 		}
@@ -202,7 +199,7 @@ void Enemy::Update(float dt) {
 	/* =============================================
 	   完全に死亡
 	   =============================================*/
-	if (deathState_ == DeathState::Dead) {
+	if(deathState_ == DeathState::Dead) {
 
 		//死亡処理
 		this->Die();
@@ -212,10 +209,10 @@ void Enemy::Update(float dt) {
 }
 
 void Enemy::EnsurePatternBound() {
-	if (!emitter_) return;
+	if(!emitter_) return;
 
-	if (!pattern_ || patternKind_ != lastPatternKind_) {
-		pattern_ = CreatePattern(patternKind_);
+	if(!pattern_ || patternKind_ != lastPatternKind_) {
+		pattern_         = CreatePattern(patternKind_);
 		lastPatternKind_ = patternKind_;
 	}
 	emitter_->SetPattern(pattern_.get()); // 非所有参照を差し替え
@@ -225,10 +222,10 @@ void Enemy::EnsurePatternBound() {
 //  衝突
 ////////////////////////////////////////////////////////////////
 void Enemy::OnCollisionEnter(Collider* other) {
-	if (!other) return;
-	if (collider_->GetTargetType() != other->GetType()) return;
+	if(!other) return;
+	if(collider_->GetTargetType() != other->GetType()) return;
 
-	if (life_ >= 1) {
+	if(life_ >= 1) {
 		life_--;
 		hitFx_->Play();
 	}
@@ -238,35 +235,30 @@ void Enemy::OnCollisionEnter(Collider* other) {
 //      中心座標取得
 /////////////////////////////////////////////////////////////////////////////////////////
 const Vector3 Enemy::GetCenterPos() const {
-	const Vector3 offset = { 0.0f, 1.5f, 0.0f };
-	Vector3 worldPos = Vector3::Transform(offset, worldTransform_.matrix.world);
+	const Vector3 offset   = {0.0f,1.5f,0.0f};
+	Vector3       worldPos = Vector3::Transform(offset,worldTransform_.matrix.world);
 	return worldPos;
 }
 
-BulletContainer* Enemy::GetBulletContainer() {
-	return shootingController_ ? shootingController_->GetbulletContaienr() : nullptr;
-}
-
-const BulletContainer* Enemy::GetBulletContainer() const {
-	return shootingController_ ? shootingController_->GetbulletContaienr() : nullptr;
-}
-
 // スコア取得
-int16_t Enemy::GetScore() const { { return score_; } }
+int16_t Enemy::GetScore() const {
+	{
+		return score_;
+	}
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //      親の設定
 /////////////////////////////////////////////////////////////////////////////////////////
 void Enemy::SetParent(WorldTransform* parent) {
 	worldTransform_.parent = parent;
-	basePosition_ = worldTransform_.translation;
+	basePosition_          = worldTransform_.translation;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //      弾コントロール
 /////////////////////////////////////////////////////////////////////////////////////////
-void Enemy::SetShootingController(std::unique_ptr<EnemyShootingController> controller) {
-	shootingController_ = std::move(controller);
-}
+void Enemy::SetShootingController(std::unique_ptr<EnemyShootingController> controller) { shootingController_ = std::move(controller); }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //      プレイヤーのtfをセット
@@ -299,8 +291,8 @@ void Enemy::Move() {}
 /////////////////////////////////////////////////////////////////////////////////////////
 void Enemy::Shoot() {
 	Vector3 myPos = GetCenterPos();
-	Vector3 dir = Vector3(playerTransform_->GetWorldPosition() - myPos).Normalize();
-	shootingController_->RequestShoot(GetCenterPos(), dir);
+	Vector3 dir   = Vector3(playerTransform_->GetWorldPosition() - myPos).Normalize();
+	shootingController_->RequestShoot(GetCenterPos(),dir);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -310,7 +302,7 @@ void Enemy::Die() {
 	GainScore event;
 	event.amount = score_;
 	event.reason = "enemyKill";
-	event.tag = { "normal" };
+	event.tag    = {"normal"};
 	EventBus::Publish(event);
 }
 
@@ -318,12 +310,12 @@ void Enemy::Die() {
 //      エミッタの一度だけ生成する関数
 /////////////////////////////////////////////////////////////////////////////////////////
 void Enemy::BuildEmitterIfReady() {
-	if (emitter_) return;
-	if (!shootingController_) return;
-	if (!playerTransform_) return;
+	if(emitter_) return;
+	if(!shootingController_) return;
+	if(!playerTransform_) return;
 
 	auto sink = std::make_unique<EnemyShootingControllerSink>(shootingController_.get());
-	auto aim = std::make_unique<AimAtTarget>();
+	auto aim  = std::make_unique<AimAtTarget>();
 
 	FireScheduler sched;
 	sched.shotsPerSec = 6.0f;
@@ -333,8 +325,8 @@ void Enemy::BuildEmitterIfReady() {
 
 	// ここでは“パターンなし”で作る（SetPatternで後から差し込む）
 	emitter_ = std::make_unique<BulletEmitter>(
-		cfg, std::move(sink), std::move(aim), nullptr, sched
-	);
+		cfg,std::move(sink),std::move(aim),nullptr,sched
+		);
 
 	EnsurePatternBound();
 }

@@ -68,6 +68,7 @@ public:
 
 	//getter
 	std::string_view GetTypeName() const override { return "Player"; }
+	PlayerDangerSense* GetDangerSense(){return danger_.get();}
 	std::vector<Sprite*> GetAllSprites();
 	const Vector3 GetCenterPos() const override;
 	float GetMoveSpeed() const { return moveSpeed_; }
