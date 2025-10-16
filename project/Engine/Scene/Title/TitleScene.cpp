@@ -35,7 +35,7 @@ void TitleScene::LoadAssets() {}
 //	初期化処理
 /////////////////////////////////////////////////////////////////////////////////////////
 void TitleScene::Initialize() {
-	sceneContext_->Initialize();
+	sceneContext_->Initialize(false);
 
 	// シーンデータ読み込み
 	SceneSerializer::Load(*sceneContext_, "Resources/Assets/Scenes/TitleScene.scene");

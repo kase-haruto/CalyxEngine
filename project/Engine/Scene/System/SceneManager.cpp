@@ -34,7 +34,7 @@ size_t SceneManager::AddScene(SceneType type, std::unique_ptr<BaseScene> scene){
 	SceneSlot slot;
 	slot.scene = std::move(scene);
 	slot.ctx = std::make_unique<SceneContext>();
-	slot.ctx->Initialize(true);
+	slot.ctx->Initialize(false);
 
 	slots_.push_back(std::move(slot));
 	const size_t index = slots_.size() - 1;

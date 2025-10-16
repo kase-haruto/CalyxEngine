@@ -75,6 +75,7 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 #if defined(_DEBUG) || defined(DEVELOP)
 	// lightのデバッグ描画
 	auto dirLight = sceneContext_->FindFirst<DirectionalLight>();
+	if(dirLight)
 	dirLight->DrawDebug();
 #endif
 

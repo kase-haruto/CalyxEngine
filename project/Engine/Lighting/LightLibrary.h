@@ -7,9 +7,9 @@
 
 #include <memory>
 
-class LightLibrary{
+class LightLibrary {
 public:
-	LightLibrary() = default;
+	LightLibrary()  = default;
 	~LightLibrary() = default;
 
 	/* GPU 同期 ---------------------------------------------------------*/
@@ -20,14 +20,14 @@ public:
 	void SetDirectionalLight(const std::shared_ptr<DirectionalLight>& light);
 	void SetPointLight(const std::shared_ptr<PointLight>& light);
 
-	DirectionalLight* GetDirectionalLight() const{ return directionalLight_.get(); }
-	PointLight* GetPointLight()       const{ return pointLight_.get(); }
+	DirectionalLight* GetDirectionalLight() const { return directionalLight_.get(); }
+	PointLight*       GetPointLight() const { return pointLight_.get(); }
 
 	/* 描画コマンド ------------------------------------------------------*/
-	void SetCommand(ID3D12GraphicsCommandList* cmdList, PipelineType pipelineType);
+	void SetCommand(ID3D12GraphicsCommandList* cmdList,PipelineType pipelineType);
 	void SetCommand(ID3D12GraphicsCommandList* cmdList,
-					PipelineType pipelineType,
-					LightType    lightType);
+	                PipelineType               pipelineType,
+	                LightType                  lightType);
 
 private:
 	std::shared_ptr<DirectionalLight> directionalLight_;

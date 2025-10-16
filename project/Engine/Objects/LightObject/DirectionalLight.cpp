@@ -45,9 +45,9 @@ DirectionalLight::DirectionalLight() {
 	constantBuffer_.Initialize(device);
 
 	//初期化
-	lightData_.color     = Vector4(1.0f,1.0f,1.0f,1.0f); // ライトの色
-	lightData_.direction = Vector3(-0.08f,-1.0f,0.34f);  // ライトの向き
-	lightData_.intensity = 1.0f;                         // 輝度
+	lightData_.color     = Vector4(1.0f,1.0f,1.0f,1.0f);	// ライトの色
+	lightData_.direction = Vector3(-0.08f,-1.0f,0.34f);		// ライトの向き
+	lightData_.intensity = 1.0f;									// 輝度
 
 #if defined(_DEBUG) || defined(DEVELOP)
 	//transformの傾きにlightのdirectionを適用(ギズモ使用するため)
