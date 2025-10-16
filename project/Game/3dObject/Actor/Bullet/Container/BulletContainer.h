@@ -29,12 +29,12 @@ public:
 	virtual ~BulletContainer() = default;
 
 	//--------- mainfunc -----------------------------------------------------
-	virtual void AddBullet(BulletID id, const Vector3& pos, const Vector3& vel) = 0;
+	virtual void AddBullet(BulletID id,const Vector3& pos,const Vector3& vel) = 0;
 	virtual void RemoveBullet(const std::shared_ptr<BaseBullet>& bullet);
-	void		 Update(float dt) override;
+	void         Update(float dt) override;
 
 	//--------- ui / gui -----------------------------------------------------
-	void		 ShowGui();
+	void         ShowGui();
 	virtual void DerivativeGui();
 
 	//--------- accessor -----------------------------------------------------
@@ -43,14 +43,7 @@ public:
 	std::string_view GetTypeName() const override { return "BulletContainer"; }
 
 	template <class Fn>
-	void ForEachBullet(Fn&& fn) const {
-		for(auto& [id, lst] : typedBullets_) {
-			for(auto& sp : lst) {
-				if(sp)
-					fn(*sp);
-			}
-		}
-	}
+	void ForEachBullet(Fn&& fn) const { for(auto& [id, lst] : typedBullets_) { for(auto& sp : lst) { if(sp) fn(*sp); } } }
 
 protected:
 	//===================================================================*/
@@ -58,6 +51,6 @@ protected:
 	//===================================================================*/
 	std::unordered_map<BulletID,
 					   std::list<std::shared_ptr<BaseBullet>>>
-				typedBullets_;
+	typedBullets_;
 	BaseBullet* editBullet_;
 };

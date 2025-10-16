@@ -12,6 +12,8 @@
 
 namespace Installers {
 
+
+	// enemyが壁や地形越しに弾を撃ってこないようにする
 	std::unique_ptr<EnemyEngagementService>
 		InstallEnemyEngagement(SceneContext& ctx, const EnemyEngagementParams& p) {
 		auto svc = std::make_unique<EnemyEngagementService>();
@@ -26,7 +28,6 @@ namespace Installers {
 		svc->SetLineOfSightPredicate([](void* obj) -> bool {
 			auto* so = static_cast<SceneObject*>(obj);
 			return (so && so->GetObjectTypeName() == "Player");
-			// 列挙/タグ/レイヤがあるなら、そちらでの判定に置き換えてOK
 		});
 
 		// --- レイキャスト候補 ---

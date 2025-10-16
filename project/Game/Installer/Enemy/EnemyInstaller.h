@@ -7,5 +7,5 @@
 class EnemyInstaller{
 public:
 	EnemyInstaller() = default;
-	std::shared_ptr<Enemy> InstallEnemy();
+	std::shared_ptr<Enemy> InstallEnemy(class EnemyBulletContainer* bulletContainer);
 };
