@@ -184,6 +184,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\3dObject\Actor\Boss\Spawner\BossSpawner.cpp" />
     <ClCompile Include="Game\Installer\Boss\BossInstaller.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Boss\Boss.cpp" />
+    <ClCompile Include="Game\Scene\Game\GameScene.cpp" />
     <ClCompile Include="Game\UI\Button\Button.cpp" />
     <ClCompile Include="Engine\Assets\Database\AssetDatabase.cpp" />
     <ClCompile Include="Engine\Application\UI\Panels\AssetPanel.cpp" />
@@ -295,7 +296,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Objects\LightObject\PointLight.cpp" />
     <ClCompile Include="Engine\Objects\3D\Geometory\Sphere.cpp" />
     <ClCompile Include="Engine\Objects\3D\Geometory\Triangle.cpp" />
-    <ClCompile Include="Engine\Scene\Game\GameScene.cpp" />
     <ClCompile Include="Engine\Scene\Base\IScene.cpp" />
     <ClCompile Include="Engine\Scene\Test\TestScene.cpp" />
     <ClCompile Include="externals\GlobalVariable\GlobalVariables.cpp" />
@@ -346,7 +346,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Scene\System\SceneManager.cpp" />
     <ClCompile Include="Engine\Objects\3D\Actor\SceneObjectManager.cpp" />
     <ClCompile Include="Engine\Foundation\Math\Quaternion.cpp" />
-    <ClCompile Include="Engine\Scene\System\SceneFactory.cpp" />
     <ClCompile Include="Engine\Scene\Context\SceneContext.cpp" />
     <ClCompile Include="Engine\Renderer\Primitive\PrimitiveMesh.cpp" />
     <ClCompile Include="Engine\Graphics\RenderTarget\SwapChainRT\SwapChainRenderTarget.cpp" />
@@ -437,6 +436,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\3dObject\Actor\Boss\Spawner\BossSpawner.h" />
     <ClInclude Include="Game\Installer\Boss\BossInstaller.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\Boss.h" />
+    <ClInclude Include="Game\Scene\Game\GameScene.h" />
     <ClInclude Include="Game\UI\Button\Button.h" />
     <ClInclude Include="Engine\Assets\Database\AssetDatabase.h" />
     <ClInclude Include="Engine\Application\UI\Panels\AssetPanel.h" />
@@ -536,7 +536,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Assets\Model\BaseModel.h" />
     <ClInclude Include="Engine\Assets\Animation\AnimationModel.h" />
     <ClInclude Include="Engine\Assets\Animation\AnimationStruct.h" />
-    <ClInclude Include="Engine\Scene\Details\SceneType.h" />
     <ClInclude Include="externals\imgui\ImGuiFileDialog.h" />
     <ClInclude Include="externals\imgui\ImGuiFileDialogConfig.h" />
     <ClInclude Include="externals\imgui\ImGuizmo.h" />
@@ -602,7 +601,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Objects\LightObject\PointLight.h" />
     <ClInclude Include="Engine\Objects\3D\Geometory\Sphere.h" />
     <ClInclude Include="Engine\Objects\3D\Geometory\Triangle.h" />
-    <ClInclude Include="Engine\Scene\Game\GameScene.h" />
     <ClInclude Include="Engine\Scene\Base\IScene.h" />
     <ClInclude Include="Engine\Scene\Test\TestScene.h" />
     <ClInclude Include="externals\GlobalVariable\GlobalVariables.h" />
@@ -639,7 +637,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Scene\System\SceneManager.h" />
     <ClInclude Include="Engine\Objects\3D\Actor\SceneObjectManager.h" />
     <ClInclude Include="Engine\Foundation\Math\Quaternion.h" />
-    <ClInclude Include="Engine\Scene\System\SceneFactory.h" />
     <ClInclude Include="Engine\Scene\Context\SceneContext.h" />
     <ClInclude Include="Engine\Renderer\Primitive\PrimitiveMesh.h" />
     <ClInclude Include="Engine\Renderer\Primitive\LineDrawer.h" />

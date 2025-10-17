@@ -1764,15 +1764,6 @@
     <ClInclude Include="Engine\Scene\Context\SceneContext.h">
       <Filter>Engine\Scene\Context</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Scene\Details\SceneType.h">
-      <Filter>Engine\Scene\Details</Filter>
-    </ClInclude>
-    <ClCompile Include="Engine\Scene\Game\GameScene.cpp">
-      <Filter>Engine\Scene\Game</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Scene\Game\GameScene.h">
-      <Filter>Engine\Scene\Game</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Scene\Runtime\IRuntimeBehaviour.h">
       <Filter>Engine\Scene\Runtime</Filter>
     </ClInclude>
@@ -2307,6 +2298,7 @@
     <ClInclude Include="Engine\Graphics\Camera\Action\BaseCameraAction.h" />
     <ClInclude Include="Engine\Graphics\Camera\Action\CameraTurnAroundAction.h" />
     <ClInclude Include="Engine\Foundation\Serialization\FieldVisit.h" />
+    <ClInclude Include="Game\Scene\Game\GameScene.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\ChromaticAberration.PS.hlsl">
@@ -2386,6 +2378,7 @@
     <ClCompile Include="Engine\Objects\2D\NumbersSprite\NumbersSprite.cpp" />
     <ClCompile Include="Engine\Graphics\Camera\Action\BaseCameraAction.cpp" />
     <ClCompile Include="Engine\Graphics\Camera\Action\CameraTurnAroundAction.cpp" />
+    <ClCompile Include="Game\Scene\Game\GameScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />

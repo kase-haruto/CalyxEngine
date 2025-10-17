@@ -3,15 +3,14 @@
 /* ========================================================================
    include space
    ===================================================================== */
-#include <Engine/Scene/Context/SceneContext.h>
-#include <Engine/Objects/3D/Actor/BaseGameObject.h>
-#include <Engine/objects/LightObject/DirectionalLight.h>
-#include <Engine/objects/LightObject/PointLight.h>
-#include <Engine/Foundation/Json/JsonUtils.h>
-#include <Engine/Objects/3D/Actor/Library/SceneObjectLibrary.h>
 #include <Engine/Application/Effects/FxSystem.h>
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
+#include <Engine/Foundation/Json/JsonUtils.h>
+#include <Engine/Objects/3D/Actor/Library/SceneObjectLibrary.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
+#include <Engine/Scene/Context/SceneContext.h>
+#include <Engine/objects/LightObject/DirectionalLight.h>
+#include <Engine/objects/LightObject/PointLight.h>
 #include <memory>
 #include <unordered_map>
 
@@ -28,7 +27,7 @@ bool SceneSerializer::Save(const SceneContext& context, const std::string& path)
 // -----------------------------------------------------------------------------
 bool SceneSerializer::Load(SceneContext& context, const std::string& path) {
 	nlohmann::json root;
-	if (!JsonUtils::Load(path, root)) return false;
+	if(!JsonUtils::Load(path, root)) return false;
 	return LoadJson(context, root);
 }
 
@@ -91,13 +90,13 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 							   const nlohmann::json& root) {
 	// ---------- 配列取得（旧形式配慮） ----------
 	nlohmann::json jArray;
-	if(root.is_array())
+	if(root.is_array()) {
 		jArray = root; // 旧：直接配列
-	else
+	} else {
 		jArray = root.value("objects", nlohmann::json::array());
-
-	if(root.contains("sceneName"))
-		context.SetSceneName(root.value("sceneName", "scene"));
+	}
+	
+	if(root.contains("sceneName")) context.SetSceneName(root.value("sceneName", "scene"));
 
 	// ---------- 既存クリア ----------
 	context.Clear();
@@ -134,11 +133,11 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 				if(JsonUtils::Load(cfgPath, jCfg)) {
 					cfg->ApplyConfigFromJson(jCfg);
 				} else {
-					// フォールバック：内包があれば適用
+					// フォールバック
 					cfg->ApplyConfigFromJson(j);
 				}
 			} else {
-				// 従来：内包をそのまま適用
+				// 内包をそのまま適用
 				cfg->ApplyConfigFromJson(j);
 			}
 		}
@@ -172,8 +171,7 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 
 		auto cIt = guidMap.find(child);
 		auto pIt = guidMap.find(parent);
-		if(cIt != guidMap.end() && pIt != guidMap.end())
-			cIt->second->SetParent(pIt->second);
+		if(cIt != guidMap.end() && pIt != guidMap.end()) cIt->second->SetParent(pIt->second);
 	}
 	return true;
 }
