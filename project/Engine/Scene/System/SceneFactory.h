@@ -3,6 +3,9 @@
 // engine
 #include <Engine/Scene/Base/IScene.h>
 
+// game
+#include <Game/Scene/Details/SceneType.h>
+
 // lib
 #include <memory>
 

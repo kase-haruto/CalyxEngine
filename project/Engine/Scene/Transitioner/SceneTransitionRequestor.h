@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Engine/Scene/Details/SceneType.h>
+#include <Game/Scene/Details/SceneType.h>
 
 class SceneTransitionRequestor {
 public:

@@ -2,7 +2,7 @@
 #include <Engine/scene/Base/BaseScene.h>
 #include <Engine/Graphics/Device/DxCore.h>
 #include <Engine/Scene/Transitioner/SceneTransitionRequestor.h>
-#include <Engine/Scene/Details/SceneType.h>
+#include <Game/Scene/Details/SceneType.h>
 
 #include <memory>
 #include <d3d12.h>

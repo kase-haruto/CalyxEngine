@@ -4,10 +4,7 @@
 /* ===================================================================== */
 // engine
 #include <Engine/Objects/3D/Actor/SceneObject.h>
-#include <Engine/Scene/Details/SceneType.h>
 #include <Engine/Graphics/RenderTarget/Detail/RenderTargetDetail.h>
-// lib
-#include <vector>
 
 // forward declaration
 class DxCore;

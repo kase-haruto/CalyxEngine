@@ -12,7 +12,7 @@
 
 // scene
 #include <Engine/Scene/Title/TitleScene.h>
-#include <Engine/Scene/Game/GameScene.h>
+#include <Game/Scene/Game/GameScene.h>
 #include "Engine/Scene/Test/TestScene.h"
 
 SceneManager::SceneManager(DxCore* dx) : dx_(dx){}
