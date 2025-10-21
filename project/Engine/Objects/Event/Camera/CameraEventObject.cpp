@@ -4,4 +4,5 @@
 //		ctor / dtor
 /////////////////////////////////////////////////////////////////////////////////////////
 CameraEventObject::CameraEventObject() = default;
+CameraEventObject::CameraEventObject(const std::string& name):BaseEventObject(name) {}
 CameraEventObject::~CameraEventObject() =default;

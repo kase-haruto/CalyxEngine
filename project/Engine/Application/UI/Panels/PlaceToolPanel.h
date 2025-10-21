@@ -31,11 +31,12 @@ public:
 	};
 
 	enum class PlaceItemCategory{
-		Shape,
-		Light,
-		Particle,
-		InGameObject,
-		Model,
+		Shape,			//< 単純図形オブジェクト
+		Light,			//< ライト
+		Particle,		//< パーティクル
+		InGameObject,	//< インゲームのオブジェクト
+		Model,			//< モデル
+		Event,			//< イベント
 		Count
 	};
 

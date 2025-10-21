@@ -14,6 +14,7 @@ public:
 	//					public methods
 	//===================================================================*/
 	CameraTurnAroundEvent();
+	CameraTurnAroundEvent(const std::string& name);
 	~CameraTurnAroundEvent() override;
 
 	// 発火時処理

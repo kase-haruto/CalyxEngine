@@ -16,6 +16,7 @@ public:
 	//				 public methods
 	//===================================================================*/
 	BaseEventObject();
+	BaseEventObject(const std::string& name);
 	~BaseEventObject() override;
 
 	// 更新

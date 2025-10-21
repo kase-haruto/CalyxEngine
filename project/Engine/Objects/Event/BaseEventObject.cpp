@@ -15,11 +15,24 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 BaseEventObject::BaseEventObject() {
 	// デフォルトの名前とタイプの設定
-	SceneObject::SetName("EventObject",ObjectType::GameObject);
+	SceneObject::SetName(GetName(),ObjectType::GameObject);
 
 	// 衝突の設定(boxで初期化
 	std::unique_ptr<BoxCollider> box = std::make_unique<BoxCollider>(true);
 	box->SetName(GetName() + "BoxCollider"); //< コライダー名前設定
+	box->Initialize(Vector3(1.0f));          //< サイズ設定
+	collider_ = std::move(box);
+	collider_->SetType(ColliderType::Type_EventObject);
+	collider_->SetTargetType(ColliderType::Type_Player);
+}
+
+BaseEventObject::BaseEventObject(const std::string& name) {
+	// デフォルトの名前とタイプの設定
+	SceneObject::SetName(name,ObjectType::GameObject);
+
+	// 衝突の設定(boxで初期化
+	std::unique_ptr<BoxCollider> box = std::make_unique<BoxCollider>(true);
+	box->SetName(name + "BoxCollider"); //< コライダー名前設定
 	box->Initialize(Vector3(1.0f));          //< サイズ設定
 	collider_ = std::move(box);
 	collider_->SetType(ColliderType::Type_EventObject);

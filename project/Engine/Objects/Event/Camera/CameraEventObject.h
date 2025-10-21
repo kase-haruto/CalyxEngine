@@ -15,6 +15,7 @@ public:
 	//					 public methods
 	//===================================================================*/
 	CameraEventObject();
+	CameraEventObject(const std::string& name);
 	~CameraEventObject()override;
 
 protected:
