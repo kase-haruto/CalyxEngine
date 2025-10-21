@@ -1383,10 +1383,10 @@
         },
         {
             "colliderConfig": {
-                "colliderType": 2,
+                "colliderType": 1,
                 "isCollisionEnabled": true,
                 "isDraw": true,
-                "targetType": 6
+                "targetType": 5
             },
             "guid": "bc6ace27-7773-4bee-9b8d-0b02b65aa114",
             "modelConfig": {

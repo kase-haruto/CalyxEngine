@@ -221,10 +221,7 @@ void Enemy::EnsurePatternBound() {
 ////////////////////////////////////////////////////////////////
 //  衝突
 ////////////////////////////////////////////////////////////////
-void Enemy::OnCollisionEnter(Collider* other) {
-	if(!other) return;
-	if(collider_->GetTargetType() != other->GetType()) return;
-
+void Enemy::OnCollisionEnter(Collider* ) {
 	if(life_ >= 1) {
 		life_--;
 		hitFx_->Play();

@@ -46,7 +46,7 @@ public:
 	virtual bool Save() const;
 	virtual bool Load();
 
-	 virtual void ApplyDerivedConfigFromJson([[maybe_unused]]const nlohmann::json& root,
+	virtual void ApplyDerivedConfigFromJson([[maybe_unused]]const nlohmann::json& root,
 											[[maybe_unused]] const nlohmann::json* derived) {}
 	virtual void ExtractDerivedConfigToJson([[maybe_unused]]nlohmann::json& root,
 											[[maybe_unused]]nlohmann::json& derived) const {}

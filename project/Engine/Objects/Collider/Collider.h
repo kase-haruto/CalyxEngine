@@ -11,12 +11,12 @@
 //							  ColliderType
 //===================================================================*/
 enum class ColliderType{
-	Type_None				= 0,        // ビットが立っていない状態
-	Type_Player				= 1 << 1,
-	Type_PlayerAttack		= 2 << 1,
-	Type_Enemy				= 3 << 1,
-	Type_EnemySpawner		= 4 << 1,
-	Type_EnemyAttack		= 5 << 1,
+	Type_None         = 0,
+	Type_Player       = 1 << 0,  // 0b00000001
+	Type_PlayerAttack = 1 << 1,  // 0b00000010
+	Type_Enemy        = 1 << 2,  // 0b00000100
+	Type_EnemySpawner = 1 << 3,  // 0b00001000
+	Type_EnemyAttack  = 1 << 4,  // 0b00010000
 };
 
 // ビット演算のオーバーロード
@@ -116,5 +116,3 @@ public:
 private:
 	BaseGameObject* owner_ = nullptr;
 };
-
-

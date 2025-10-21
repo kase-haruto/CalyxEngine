@@ -1,0 +1,37 @@
+#include "BaseEventObject.h"
+/* ========================================================================
+/*		include space
+/* ===================================================================== */
+#include <Engine/Objects/Collider/BoxCollider.h>
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		ctor/dtor
+/////////////////////////////////////////////////////////////////////////////////////////
+BaseEventObject::BaseEventObject() {
+	// デフォルトの名前とタイプの設定
+	SceneObject::SetName("EventObject",ObjectType::GameObject);
+
+	// 衝突の設定(boxで初期化
+	std::unique_ptr<BoxCollider> box = std::make_unique<BoxCollider>(true);
+	box->SetName(GetName()+"BoxCollider");			//< コライダー名前設定
+	box->Initialize(Vector3(1.0f));	//< サイズ設定
+	collider_ = std::move(box);
+}
+BaseEventObject::~BaseEventObject() = default;
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		更新
+/////////////////////////////////////////////////////////////////////////////////////////
+void BaseEventObject::Update(float deltaTime) { SceneObject::Update(deltaTime); }
+void BaseEventObject::AlwaysUpdate(float dt) { SceneObject::AlwaysUpdate(dt); }
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		debugGui
+/////////////////////////////////////////////////////////////////////////////////////////
+void BaseEventObject::ShowGui() { SceneObject::ShowGui(); }
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		save / load
+/////////////////////////////////////////////////////////////////////////////////////////
+bool BaseEventObject::Save() const { return SceneObject::Save(); }
+bool BaseEventObject::Load() { return SceneObject::Load(); }

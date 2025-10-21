@@ -5,8 +5,6 @@
 // engine
 #include <Engine/Scene/Utility/SceneUtility.h>
 
-// c++
-#include <iostream>
 
 static inline Vector3 SafeNormalize(const Vector3& v, const Vector3& fb = {0, 0, 1}) {
 	float L = v.Length();
@@ -30,7 +28,6 @@ EnemyBullet::EnemyBullet(const std::string& modelName, const std::string& name)
 	: BaseBullet::BaseBullet(modelName, name) {
 	collider_->SetType(ColliderType::Type_EnemyAttack);
 	collider_->SetTargetType(ColliderType::Type_Player);
-
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

@@ -61,7 +61,7 @@ void Player::Initialize() {
 	reticleTransform_.translation = Vector3(0.0f, 0.0f, 100.0f);
 
 	collider_->SetType(ColliderType::Type_Player);
-	collider_->SetTargetType(ColliderType::Type_PlayerAttack);
+	collider_->SetTargetType(ColliderType::Type_EnemyAttack);
 	collider_->SetOwner(this);
 	collider_->SetIsDrawCollider(true);
 	if (auto* box = dynamic_cast<BoxCollider*>(collider_.get())) { box->SetSize({ 3, 3, 3 }); }
@@ -316,10 +316,7 @@ void Player::Start() {
 ///////////////////////////////////////////////////////////////////////////////////
 //		衝突
 ///////////////////////////////////////////////////////////////////////////////////
-void Player::OnCollisionEnter(Collider* other) {
-	if (!other) return;
-	if (other->GetType() != ColliderType::Type_EnemyAttack) return;
-
+void Player::OnCollisionEnter(Collider* ) {
 	// 回避のi-frameや既存の無敵ならダメージ無視
 	if ((dodge_ && dodge_->HandlesHitNow()) || !CanBeDamaged()) return;
 

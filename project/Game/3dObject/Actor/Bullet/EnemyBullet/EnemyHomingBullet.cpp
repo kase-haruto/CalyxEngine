@@ -137,11 +137,7 @@ void EnemyHomingBullet::Update(float dt) {
 	BaseBullet::Update(dt);
 }
 
-void EnemyHomingBullet::OnCollisionEnter(Collider* other) {
-	if (!other) return;
-	// 衝突マネージャが対象外を弾いている前提なら、タイプチェックは緩めでOK
-	if (other->GetType() != ColliderType::Type_Player) return;
-
+void EnemyHomingBullet::OnCollisionEnter(Collider* ) {
 	isAlive_ = false;
 }
 
