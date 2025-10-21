@@ -403,6 +403,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Objects\2D\NumbersSprite\NumbersSprite.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Data\Engine\Configs\Scene\Objects\Event\EventConfig.h" />
     <ClInclude Include="Engine\Graphics\Camera\Action\CameraTurnAroundAction.h" />
     <ClInclude Include="Engine\Foundation\Math\MathUtil.h" />
     <ClInclude Include="Engine\Foundation\Serialization\FieldVisit.h" />

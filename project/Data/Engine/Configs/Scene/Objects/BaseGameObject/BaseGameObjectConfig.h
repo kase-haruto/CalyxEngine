@@ -2,10 +2,8 @@
 
 #include <Data/Engine/Configs/Scene/Objects/Collider/ColliderConfig.h>
 #include <Data/Engine/Configs/Scene/Objects/Model/BaseModelConfig.h>
-#include <Data/Engine/Configs/Scene/Objects/Transform/WorldTransformConfig.h>
 #include <Data/Engine/Configs/Scene/Objects/SceneObject/SceneObjectConfig.h>
 
-#include <Engine/Foundation/Math/Vector3.h>
 #include <externals/nlohmann/json.hpp>
 
 struct BaseGameObjectConfig
