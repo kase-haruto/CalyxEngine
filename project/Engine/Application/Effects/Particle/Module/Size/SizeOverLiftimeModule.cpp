@@ -5,6 +5,7 @@
 // engine
 #include <Engine/Application/Effects/Particle/FxUnit.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
+#include <Engine/Foundation/Utility/Ease/CxEase.h>
 
 // c++
 
@@ -20,7 +21,7 @@ void SizeOverLiftimeModule::OnUpdate(FxUnit& unit,[[maybe_unused]] float dt){
 	float t = unit.age / unit.lifetime;
 	if (t > 1.0f) t = 1.0f;
 
-	float easeT = ApplyEase(easeType_, t);
+	float easeT = Cx::Ease::ApplyEase(easeType_, t);
 	float sizeFactor = isGrowing_ ? easeT : (1.0f - easeT);
 
 	unit.scale = unit.initialScale * sizeFactor;
@@ -32,8 +33,5 @@ void SizeOverLiftimeModule::OnUpdate(FxUnit& unit,[[maybe_unused]] float dt){
 void SizeOverLiftimeModule::ShowGuiContent(){
 	GuiCmd::CheckBox("isGrowing", isGrowing_);
 
-	int easeTypeIdx = static_cast< int >(easeType_);
-	if (ImGui::Combo("Ease Type", &easeTypeIdx, EaseTypeNames, static_cast< int >(EaseType::Count))){
-		easeType_ = static_cast< EaseType >(easeTypeIdx);
-	}
+	Cx::Ease::SelectEase(easeType_);
 }

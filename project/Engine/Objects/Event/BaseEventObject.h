@@ -23,6 +23,7 @@ public:
 
 	// gui
 	virtual void ShowGui() override;
+	virtual void DerivativeGui();		//< 派生先のparameter調整
 
 	// config
 	virtual void ApplyConfig();

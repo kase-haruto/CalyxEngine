@@ -2,7 +2,7 @@
 
 #include <string>
 #include <Engine/Foundation/Math/Vector3.h>
-#include <Engine/Foundation/Utility/Ease/EaseTypes.h>
+#include <Engine/Foundation/Utility/Ease/CxEase.h>
 #include <externals/nlohmann/json.hpp>
 
 struct BaseModuleConfig {
@@ -74,7 +74,7 @@ struct GravityModuleConfig : public BaseModuleConfig {
 struct SizeOverLifetimeConfig 
 	: public BaseModuleConfig {
 	bool isGrowing = true;
-	EaseType easeType = EaseType::EaseInOutCubic;
+	Cx::Ease::EaseType easeType = Cx::Ease::EaseType::EaseInOutCubic;
 
 	SizeOverLifetimeConfig() {
 		name = "SizeOverLifetimeModule";
@@ -98,7 +98,7 @@ struct SizeOverLifetimeConfig
 		if (j.contains("easeType")) {
 			int ease = 0;
 			j.at("easeType").get_to(ease);
-			easeType = static_cast<EaseType>(ease);
+			easeType = static_cast<Cx::Ease::EaseType>(ease);
 		}
 	}
 };
@@ -143,4 +143,3 @@ struct TextureSheetAnimationConfig
 		if (j.contains("useCustomFrames")) j.at("useCustomFrames").get_to(useCustomFrames);
 	}
 };
-

@@ -97,13 +97,13 @@ void PlayerDodgeMotion::OnPerfect(){
 			"RadialBlur",
 			[rb]{ return rb->GetWidth(); },
 			[rb] (float v){ rb->SetWidth(v); },
-			std::nullopt, 0.05f, 0.10f, EaseType::EaseOutExpo, false,
+			std::nullopt, 0.05f, 0.10f, Cx::Ease::EaseType::EaseOutExpo, false,
 			[rb]{
 				PostEffectManager::Get()->TweenFloat(
 					"RadialBlur",
 					[rb]{ return rb->GetWidth(); },
 					[rb] (float v){ rb->SetWidth(v); },
-					std::nullopt, 0.0f, 0.45f, EaseType::EaseOutSine, true
+					std::nullopt, 0.0f, 0.45f, Cx::Ease::EaseType::EaseOutSine, true
 				);
 			}
 		);
@@ -116,14 +116,14 @@ void PlayerDodgeMotion::OnPerfect(){
 			[ca]{ return ca->GetIntensity(); },       // ← getter
 			[ca] (float v){ ca->SetIntensity(v); },    // ← setter
 			std::nullopt, 0.2f, 0.08f,
-			EaseType::EaseOutExpo, false,
+			Cx::Ease::EaseType::EaseOutExpo, false,
 			[ca]{
 				PostEffectManager::Get()->TweenFloat(
 					"ChromaticAberration",
 					[ca]{ return ca->GetIntensity(); },
 					[ca] (float v){ ca->SetIntensity(v); },
 					std::nullopt, 0.0f, 0.2f,
-					EaseType::EaseOutSine, true
+					Cx::Ease::EaseType::EaseOutSine, true
 				);
 			}
 		);

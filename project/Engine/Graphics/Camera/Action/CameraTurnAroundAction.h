@@ -1,6 +1,6 @@
 #pragma once
 #include "BaseCameraAction.h"
-#include <Engine/Foundation/Utility/Ease/EaseTypes.h>
+#include <Engine/Foundation/Utility/Ease/CxEase.h>
 #include <Engine/objects/ConfigurableObject/ConfigurableObject.h>
 
 /* ========================================================================
@@ -27,7 +27,7 @@ private:
 	//					private methods
 	//===================================================================*/
 	//---------------- parms -------------//
-	EaseType easeType_ = EaseType::EaseOutSine;
+	Cx::Ease::EaseType easeType_ = Cx::Ease::EaseType::EaseOutSine;
 
 	float turnTime_ = 0.5f;
 

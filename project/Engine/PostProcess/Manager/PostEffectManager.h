@@ -9,7 +9,7 @@
 #include <Engine/Graphics/Device/DxCore.h>
 #include <Engine/Graphics/GpuResource/DxGpuResource.h>
 #include <Engine/Graphics/RenderTarget/Interface/IRenderTarget.h>
-#include <Engine/Foundation/Utility/Ease/EaseTypes.h>
+#include <Engine/Foundation/Utility/Ease/CxEase.h>
 
 // local
 #include "../Graph/PostEffectGraph.h"
@@ -62,7 +62,7 @@ public:
 					std::optional<float> from,
 					float to,
 					float durationSec,
-					EaseType ease = EaseType::EaseOutSine,
+					Cx::Ease::EaseType ease = Cx::Ease::EaseType::EaseOutSine,
 					bool autoDisableIfZero = true,
 					std::function<void()> onComplete = nullptr);
 
@@ -91,7 +91,7 @@ private:
 		float end = 0.f;
 		float t = 0.f;
 		float dur = 1.f;
-		EaseType ease = EaseType::Linear;
+		Cx::Ease::EaseType ease = Cx::Ease::EaseType::Linear;
 		bool autoDisableIfZero = true;
 		std::function<void()> onComplete;
 	};

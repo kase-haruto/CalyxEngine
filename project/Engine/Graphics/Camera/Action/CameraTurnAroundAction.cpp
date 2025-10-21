@@ -2,6 +2,8 @@
 
 // engine
 #include "../3d/Camera3d.h"
+#include "Engine/Foundation/Utility/Ease/CxEase.h"
+
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 #include <Engine/Foundation/Utility/Func/CxUtils.h>
 
@@ -21,7 +23,7 @@ void CameraTurnAroundAction::Update(BaseCamera* cam, float dt) {
 
 	elapsed_ += dt;
 	float t	   = std::clamp(elapsed_ / turnTime_, 0.0f, 1.0f);
-	float rate = ApplyEase(easeType_, t);
+	float rate = Cx::Ease::ApplyEase(easeType_, t);
 
 	WorldTransform& wt	   = cam->GetWorldTransform();
 	wt.rotationSource  = RotationSource::Quaternion;

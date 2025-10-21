@@ -5,7 +5,7 @@
 /* ===================================================================== */
 #include <Engine/Application/Effects/Particle/Module/BaseFxModule.h>
 #include <Engine/Foundation/Math/Vector3.h>
-#include <Engine/Foundation/Utility/Ease/EaseTypes.h>
+#include <Engine/Foundation/Utility/Ease/CxEase.h>
 
 class SizeOverLiftimeModule
 	:public BaseFxModule{
@@ -19,16 +19,15 @@ public:
 	void ShowGuiContent() override;
 
 	void SetIsGrowing(bool frag) { isGrowing_ = frag; }
-	void SetEaseType(EaseType type) { easeType_ =type; }
+	void SetEaseType(Cx::Ease::EaseType type) { easeType_ =type; }
 
 	bool GetIsGrowing() const { return isGrowing_; }
-	EaseType GetEaseType() const { return easeType_; }
+	Cx::Ease::EaseType GetEaseType() const { return easeType_; }
 
 private:
 	//===================================================================*/
 	//					private methods
 	//===================================================================*/
 	bool isGrowing_ = true;			//< サイズが大きくなるかどうか
-	EaseType easeType_ = EaseType::EaseInOutCubic;	//< サイズ変化のイージングタイプ
+	Cx::Ease::EaseType easeType_ = Cx::Ease::EaseType::EaseInOutCubic;	//< サイズ変化のイージングタイプ
 };
-
