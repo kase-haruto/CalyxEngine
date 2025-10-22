@@ -20,6 +20,7 @@ public:
 	virtual void Update(float deltaTime) = 0;
 	virtual void TransferParticleDataToGPU();
 
+
 	virtual void Play(){}
 	virtual void Stop(){}
 	virtual bool IsPlaying() const{ return true; }
