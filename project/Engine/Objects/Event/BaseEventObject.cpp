@@ -14,9 +14,6 @@
 //		ctor/dtor
 /////////////////////////////////////////////////////////////////////////////////////////
 BaseEventObject::BaseEventObject() {
-	// デフォルトの名前とタイプの設定
-	SceneObject::SetName(GetName(),ObjectType::GameObject);
-
 	// 衝突の設定(boxで初期化
 	std::unique_ptr<BoxCollider> box = std::make_unique<BoxCollider>(true);
 	box->SetName(GetName() + "BoxCollider"); //< コライダー名前設定
@@ -27,8 +24,7 @@ BaseEventObject::BaseEventObject() {
 }
 
 BaseEventObject::BaseEventObject(const std::string& name) {
-	// デフォルトの名前とタイプの設定
-	SceneObject::SetName(name,ObjectType::GameObject);
+	SceneObject::SetName(name,ObjectType::Event);
 
 	// 衝突の設定(boxで初期化
 	std::unique_ptr<BoxCollider> box = std::make_unique<BoxCollider>(true);
@@ -65,11 +61,9 @@ void BaseEventObject::AlwaysUpdate([[maybe_unused]]float dt) {
 //		debugGui
 /////////////////////////////////////////////////////////////////////////////////////////
 void BaseEventObject::ShowGui() {
-	ImGui::Begin(name_.c_str());
-
 	worldTransform_.ShowImGui();
 
-	ImGui::End();
+	DerivativeGui();
 }
 
 void BaseEventObject::DerivativeGui() {

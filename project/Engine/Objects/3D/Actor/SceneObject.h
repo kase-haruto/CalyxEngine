@@ -19,6 +19,7 @@ enum class ObjectType {
 	Light,			// ライト
 	GameObject,		// ゲームオブジェクト
 	ParticleSystem, // パーティクルシステム
+	Event,			// イベント
 	None,			// なし
 };
 
