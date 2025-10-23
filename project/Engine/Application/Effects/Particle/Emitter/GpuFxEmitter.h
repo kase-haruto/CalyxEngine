@@ -1,23 +1,17 @@
 #pragma once
-
-// engine
-#include <Engine/Application/Effects/Particle/Emitter/BaseEmitter.h>
+#include <Engine/Graphics/Buffer/DxStructuredBuffer.h>
+#include <Engine/Graphics/Buffer/DxConstantBuffer.h>
 #include <Engine/Application/Effects/Particle/FxUnit.h>
 #include <Engine/Application/Effects/Particle/Parm/FxParm.h>
-#include <Engine/Graphics/Buffer/DxConstantBuffer.h>
-#include <Engine/Graphics/Buffer/DxStructuredBuffer.h>
+#include <Engine/Application/Effects/Particle/Emitter/BaseEmitter.h>
 
-// fwd
 struct Vector3;
 
-/// <summary>
-/// gupuパーティクル発生emitter
-/// </summary>
 class GpuFxEmitter
-	: public BaseEmitter {
-
-	struct EmitterParam {
-		float	deltaTime	 = 0.f;
+	: public BaseEmitter{
+	// ----------------------------------------------------------------
+	struct EmitterParam{
+		float  deltaTime = 0.f;
 		Vector3 acceleration = Vector3(0, 0, 0);
 	};
 
@@ -27,56 +21,55 @@ class GpuFxEmitter
 	};
 
 	struct EmitterSphere {
-		Vector3	 translate;
-		float	 radius;
+		Vector3 translate;
+		float radius;
 		uint32_t count;
-		float	 frequency;
-		float	 frequencyTime;
+		float frequency;
+		float frequencyTime;
 		uint32_t emit;
 	};
 
 public:
-	/// <summary>
-	/// 最大数
-	/// </summary>
 	static constexpr uint32_t kMaxParticles = 1048576 * 4;
 
 	GpuFxEmitter() = default;
 	~GpuFxEmitter();
 
 	void Initialize();
+
+	// 毎フレーム呼ぶ
 	void Update(float dt) override;
 	void ShowGui();
-
-	// dispatch
 	void DispatchInitialize(ID3D12GraphicsCommandList* cmd);
 	void DispatchEmit(ID3D12GraphicsCommandList* cmd);
 	void DispatchUpdate(ID3D12GraphicsCommandList* cmd);
 
-	// データ転送
-	void TransferParticleDataToGPU() override {}
+	void ResetFreeListCounter();
+
 
 	// 描画側で使う SRV
-	D3D12_GPU_DESCRIPTOR_HANDLE GetParticleSrv() const;
+	D3D12_GPU_DESCRIPTOR_HANDLE GetParticleSrv() const{
+		return particleBuffer_.GetGpuSrvHandle();
+	}
 
-	// setter
-	void SetPosition(const Vector3& pos) { position_ = pos; }
+	void SetPosition(const Vector3& pos){ position_ = pos; }
+
+	void TransferParticleDataToGPU() override{}
+
 private:
-	Vector3 position_{0, 0, 0};
-	bool	isInitialized = false;
+	Vector3 position_ {0,0,0};
+	bool isInitialized = false;
 
-	// Structuerdbuffer
-	DxStructuredBuffer<ParticleCS> particleBuffer_; // UAV+SRV
-	DxStructuredBuffer<int>		   freeListIndexBuffer_;
-	DxStructuredBuffer<int>		   freeListBuffer_;
+	//buffer
+	DxStructuredBuffer<ParticleCS> particleBuffer_;  // UAV+SRV
+	DxStructuredBuffer<int> freeListIndexBuffer_;
+	DxStructuredBuffer<int> freeListBuffer_;
 
-	// CBV
-	DxConstantBuffer<EmitterParam>	paramBuffer_;
+	DxConstantBuffer<EmitterParam> paramBuffer_;
 	DxConstantBuffer<EmitterSphere> emitterParamBuf_;
-	DxConstantBuffer<PerFrame>		perFrameBuffer_;
-
-	// parm
-	EmitterParam  emitParam_{};
+	DxConstantBuffer<PerFrame> perFrameBuffer_;
+	
+	EmitterParam emitParam_ {};
 	EmitterSphere emitterData_;
-	PerFrame	  perFrame_;
+	PerFrame perFrame_;
 };

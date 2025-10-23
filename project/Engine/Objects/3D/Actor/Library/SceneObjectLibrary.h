@@ -1,10 +1,8 @@
 #pragma once
 
-// engine
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 #include <Engine/Foundation/Utility/Guid/Guid.h>
 
-// std
 #include <unordered_map>
 #include <vector>
 #include <memory>

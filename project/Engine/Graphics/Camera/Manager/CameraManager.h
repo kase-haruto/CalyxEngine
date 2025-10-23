@@ -4,6 +4,7 @@
 /* ===================================================================== */
 // engine
 #include <Engine/Graphics/Camera/3d/Camera3d.h>
+#include <Engine/graphics/camera/3d/FollowCamera.h>
 #include <Engine/graphics/camera/3d/DebugCamera.h>
 #include <Engine/graphics/camera/Base/BaseCamera.h>
 #include <Engine/Graphics/Camera/Viewport/ViewportDetail.h>
@@ -16,11 +17,9 @@
 /*	enum
 /* ===================================================================== */
 class SceneContext; // fwd
+
 enum class CameraType{ Default, Debug };
 
-/* ========================================================================
-/*	カメラ管理クラス
-/* ===================================================================== */
 class CameraManager{
 public:
 	//――― Scene‑side lifecycle ―――――――――――――――――――――――――――――

@@ -3,21 +3,13 @@
 
 class PostProcessCollection;
 
-/// <summary>
-/// ポストプロセスを編集
-/// </summary>
-class PostProcessEditor 
-	: public BaseEditor {
+class PostProcessEditor : public BaseEditor {
 public:
 	PostProcessEditor(const std::string& name);
 	~PostProcessEditor() = default;
 
 	void ShowImGuiInterface() override;
-
-	/// <summary>
-	/// graphに適用
-	/// </summary>
-	/// <param name="graph"></param>
+	void SetPostEffectCollection(PostProcessCollection* postProcessCollection);
 	void ApplyToGraph(class PostEffectGraph* graph);
 
 private:

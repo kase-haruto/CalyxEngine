@@ -231,11 +231,11 @@ float Input::NormalizeAxisInput(short value, short deadZone){
 	return std::clamp(norm, -1.0f, 1.0f);
 }
 
-bool Input::PushGamepadButton(PadButton button){
+bool Input::PushGamepadButton(PAD_BUTTON button){
 	return (instance_->gamepadState_.wButtons & static_cast< WORD >(button)) != 0;
 }
 
-bool Input::TriggerGamepadButton(PadButton button){
+bool Input::TriggerGamepadButton(PAD_BUTTON button){
 	return PushGamepadButton(button) && !((instance_->gamepadStatePre_.wButtons & static_cast< WORD >(button)) != 0);
 }
 

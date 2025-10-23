@@ -12,6 +12,7 @@
 #include <vector>
 #include <array>
 
+#include <Engine/Foundation/Math/Vector2.h>
 #include <Engine/Renderer/Sprite/Sprite.h>
 
 /* ========================================================================

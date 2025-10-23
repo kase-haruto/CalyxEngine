@@ -6,29 +6,27 @@
 #include <Engine/Application/UI/EngineUI/IEngineUI.h>
 
 // c++
-#include <string>
 #include <vector>
+#include <string>
 
-/// <summary>
-/// コンソールパネル
-/// </summary>
 class ConsolePanel
-	: public IEngineUI {
+    : public IEngineUI{
 public:
-	//===================================================================*/
-	//                   public funclion
-	//===================================================================*/
-	ConsolePanel();
-	~ConsolePanel() override = default;
+    //===================================================================*/
+    //                   public funclion
+    //===================================================================*/
+    ConsolePanel();
+    ~ConsolePanel() override = default;
 
-	void			   Render() override;
-	const std::string& GetPanelName() const override;
+    void Render() override;
+    const std::string& GetPanelName() const override;
 
-	void AddLog(const std::string& log);
+    void AddLog(const std::string& log);
 
 private:
-	//===================================================================*/
-	//                   private variable
-	//===================================================================*/
+    //===================================================================*/
+    //                   private variable
+    //===================================================================*/
 	int selectedLogType_ = 0;
 };
+

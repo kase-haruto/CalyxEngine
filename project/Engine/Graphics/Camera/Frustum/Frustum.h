@@ -1,7 +1,5 @@
 #pragma once
-/* ========================================================================
-/*		include space
-/* ===================================================================== */
+
 // engine
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Foundation/Math/Matrix4x4.h>
@@ -18,35 +16,13 @@ struct FrustumPlane{
 	}
 };
 
-/* ========================================================================
-/*		視推台
-/* ===================================================================== */
 class Frustum{
 public:
 	Frustum() = default;
 
-	/// <summary>
-	/// 行列から視推台を破棄だし
-	/// </summary>
-	/// <param name="viewProj"></param>
 	void ExtractFromMatrix(const Matrix4x4& viewProj);
-
-	/// <summary>
-	/// aabbが視推台の中にあるか
-	/// </summary>
-	/// <param name="min"></param>
-	/// <param name="max"></param>
-	/// <returns></returns>
 	bool IsAABBInside(const Vector3& min, const Vector3& max) const;
-
-	/// <summary>
-	/// 描画
-	/// </summary>
-	/// <param name="color"></param>
-	/// <param name="farPlaneRatio"></param>
 	void Draw(const Vector4& color = Vector4(1, 1, 0, 1), float farPlaneRatio = 0.005f) const;
-	
-	
 	void CalculateCorners(Vector3 outCorners[8]) const;
 
 private:
@@ -55,4 +31,6 @@ private:
 private:
 	std::array<FrustumPlane, 6> planes_;
 	Matrix4x4 viewProjection_;
+
+	
 };

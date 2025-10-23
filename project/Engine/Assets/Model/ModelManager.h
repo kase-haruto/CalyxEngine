@@ -27,9 +27,6 @@
 #include <thread>
 #include <unordered_map>
 
-/// <summary>
-/// モデル管理クラス
-/// </summary>
 class ModelManager {
 public:
 	static ModelManager* GetInstance();

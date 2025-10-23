@@ -4,32 +4,30 @@
 /* ===================================================================== */
 
 // engine
-#include <Engine/Assets/Database/AssetDatabase.h>
 #include <Engine/Assets/Model/ModelManager.h>
-#include <Engine/Assets/System/AssetDragPayload.h>
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
+#include <Engine/Assets/Database/AssetDatabase.h>
+#include <Engine/Assets/System/AssetDragPayload.h>
 
 // lib
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 
-// external
-#include "Engine/Foundation/Utility/Func/CxUtils.h"
+
+//external
 #include "externals/imgui/imgui.h"
-#include <Engine/Objects/3D/Details/BillboardParams.h>
 #include <algorithm>
+#include <Engine/Objects/3D/Details/BillboardParams.h>
+#include "Engine/Foundation/Utility/Func/CxUtils.h"
 
 const std::string BaseModel::directoryPath_ = "Resource/models";
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//		更新
-/////////////////////////////////////////////////////////////////////////////////////////
 void BaseModel::Update(float deltaTime) {
 	// --- まだ modelData_ を取得していないなら、取得を試みる ---
-	if(!modelData_) {
-		if(ModelManager::GetInstance()->IsModelLoaded(fileName_)) {
+	if (!modelData_) {
+		if (ModelManager::GetInstance()->IsModelLoaded(fileName_)) {
 			auto loaded = ModelManager::GetInstance()->GetModelData(fileName_);
-			modelData_	= loaded;
+			modelData_ = loaded;
 			OnModelLoaded();
 		}
 		// loaded が nullptr の場合、まだ読み込み中
@@ -37,10 +35,10 @@ void BaseModel::Update(float deltaTime) {
 		// テクスチャの更新
 		UpdateTexture(deltaTime);
 
-		// UV transform を行列化
+		// UV transform を行列化 
 		Matrix4x4 uvTransformMatrix = Cx::Math::MakeScaleMatrix(Vector3(uvTransform.scale.x, uvTransform.scale.y, 1.0f));
-		uvTransformMatrix			= Matrix4x4::Multiply(uvTransformMatrix, Cx::Math::MakeRotateZMatrix(uvTransform.rotate));
-		uvTransformMatrix			= Matrix4x4::Multiply(uvTransformMatrix, Cx::Math::MakeTranslateMatrix(Vector3(uvTransform.translate.x, uvTransform.translate.y, 0.0f)));
+		uvTransformMatrix = Matrix4x4::Multiply(uvTransformMatrix, Cx::Math::MakeRotateZMatrix(uvTransform.rotate));
+		uvTransformMatrix = Matrix4x4::Multiply(uvTransformMatrix, Cx::Math::MakeTranslateMatrix(Vector3(uvTransform.translate.x, uvTransform.translate.y, 0.0f)));
 
 		materialData_.uvTransform = uvTransformMatrix;
 		materialBuffer_.TransferData(materialData_);
@@ -50,28 +48,27 @@ void BaseModel::Update(float deltaTime) {
 		modelData_->indexBuffer.TransferVectorData(modelData_->meshData.indices);
 		Map();
 	}
+
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//	モデルのロード時処理
-/////////////////////////////////////////////////////////////////////////////////////////
 void BaseModel::OnModelLoaded() {
 	ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
 	modelData_->vertexBuffer.Initialize(device, UINT(modelData_->meshData.vertices.size()));
 	modelData_->indexBuffer.Initialize(device, UINT(modelData_->meshData.indices.size()));
 
+
 	// テクスチャ設定
-	if(!handle_) {
+	if (!handle_) {
 		handle_ = TextureManager::GetInstance()->LoadTexture(
 			"Textures/" + modelData_->meshData.material.textureFilePath);
 		textureName_ = "textures/" + modelData_->meshData.material.textureFilePath;
-		if(!handle_) { // 読み込み失敗・空文字列など
+		if (!handle_) { // 読み込み失敗・空文字列など
 			handle_ = TextureManager::GetInstance()->LoadTexture("textures/white1x1.png");
 		}
 	}
 
 	// -------- インスタンシングバッファの初期確保 --------
-	if(!instanceBufferCreated_) {
+	if (!instanceBufferCreated_) {
 		instanceBufferCapacity_ = 1024; // 初期インスタンス数（適宜調整）
 		instanceBuffer_.Initialize(device, instanceBufferCapacity_);
 		instanceBuffer_.CreateSrv(device);
@@ -79,38 +76,33 @@ void BaseModel::OnModelLoaded() {
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//		複数テクスチャなら更新
-/////////////////////////////////////////////////////////////////////////////////////////
 void BaseModel::UpdateTexture(float deltaTime) {
-	if(textureHandles_.size() <= 1) return; // アニメーション不要
+	if (textureHandles_.size() <= 1) return; // アニメーション不要
 	elapsedTime_ += deltaTime;
-	if(elapsedTime_ >= animationSpeed_) {
+	if (elapsedTime_ >= animationSpeed_) {
 		elapsedTime_ -= animationSpeed_;
 		currentFrameIndex_ = (currentFrameIndex_ + 1) % textureHandles_.size();
-		handle_			   = textureHandles_[currentFrameIndex_]; // テクスチャを切り替え
+		handle_ = textureHandles_[currentFrameIndex_]; // テクスチャを切り替え
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//		表示gui
-/////////////////////////////////////////////////////////////////////////////////////////
 void BaseModel::ShowImGuiInterface() {
+
 
 	uvTransform.ShowImGui("uvTransform");
 
-	if(ImGui::CollapsingHeader("Material")) {
+	if (ImGui::CollapsingHeader("Material")) {
 		materialData_.ShowImGui();
 
 		auto& textures = TextureManager::GetInstance()->GetLoadedTextures();
-		if(ImGui::BeginCombo("Texture", textureName_.c_str())) {
-			for(const auto& texture : textures) {
+		if (ImGui::BeginCombo("Texture", textureName_.c_str())) {
+			for (const auto& texture : textures) {
 				bool is_selected = (textureName_ == texture.first);
-				if(ImGui::Selectable(texture.first.c_str(), is_selected)) {
+				if (ImGui::Selectable(texture.first.c_str(), is_selected)) {
 					textureName_ = texture.first;
-					handle_		 = TextureManager::GetInstance()->LoadTexture(texture.first);
+					handle_ = TextureManager::GetInstance()->LoadTexture(texture.first);
 				}
-				if(is_selected) {
+				if (is_selected) {
 					ImGui::SetItemDefaultFocus();
 				}
 			}
@@ -118,22 +110,20 @@ void BaseModel::ShowImGuiInterface() {
 		}
 	}
 
-	if(ImGui::CollapsingHeader("Draw")) {
+	if (ImGui::CollapsingHeader("Draw")) {
 		static const char* blendModeNames[] = {
-			"NONE", "ALPHA", "ADD", "SUB", "MUL", "NORMAL", "SCREEN"};
+			"NONE", "ALPHA", "ADD", "SUB", "MUL", "NORMAL", "SCREEN"
+		};
 
 		int currentBlendMode = static_cast<int>(blendMode_);
-		if(ImGui::Combo("Blend Mode", &currentBlendMode, blendModeNames, IM_ARRAYSIZE(blendModeNames))) {
+		if (ImGui::Combo("Blend Mode", &currentBlendMode, blendModeNames, IM_ARRAYSIZE(blendModeNames))) {
 			blendMode_ = static_cast<BlendMode>(currentBlendMode);
 		}
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//		描画
-/////////////////////////////////////////////////////////////////////////////////////////
 void BaseModel::Draw(const WorldTransform& transform) {
-	if(!isDrawEnable_) return;
+	if (!isDrawEnable_)return;
 
 	ID3D12GraphicsCommandList* cmdList = GraphicsGroup::GetInstance()->GetCommandList().Get();
 	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -144,7 +134,7 @@ void BaseModel::Draw(const WorldTransform& transform) {
 
 	cmdList->SetGraphicsRootDescriptorTable(2, handle_.value());
 
-	// 環境マップ
+	//環境マップ
 	D3D12_GPU_DESCRIPTOR_HANDLE envMapHandle = TextureManager::GetInstance()->GetEnvironmentTextureSrvHandle();
 	cmdList->SetGraphicsRootDescriptorTable(6, envMapHandle);
 
@@ -152,57 +142,51 @@ void BaseModel::Draw(const WorldTransform& transform) {
 	cmdList->DrawIndexedInstanced(UINT(modelData_->meshData.indices.size()), 1, 0, 0, 0);
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//		コンフィグ適用
-/////////////////////////////////////////////////////////////////////////////////////////
 void BaseModel::ApplyConfig(const BaseModelConfig& config) {
 	materialData_.ApplyConfig(config.materialConfig);
 	uvTransform.ApplyConfig(config.uvTransConfig);
 	blendMode_ = static_cast<BlendMode>(config.blendMode);
-	fileName_  = config.modelName;
+	fileName_ = config.modelName;
 
 	bool ok = false;
 
 	//  GUID があれば最優先
-	if(config.textureGuid.isValid()) {
+	if (config.textureGuid.isValid()) {
 		ok = LoadTextureByGuid(config.textureGuid);
 	}
 
-	if(!ok && config.legacyTextureName && !config.legacyTextureName->empty()) {
-		auto*		db	 = AssetDatabase::GetInstance();
+	if (!ok && config.legacyTextureName && !config.legacyTextureName->empty()) {
+		auto* db = AssetDatabase::GetInstance();
 		const auto& view = db->GetView();
 
 		// 旧フィールドは「Assets ルート相対パス」やファイル名の可能性があるので両方見る
 		const std::string want = *config.legacyTextureName;
-		for(auto* r : view) {
-			if(!r || r->type != AssetType::Texture) continue;
+		for (auto* r : view) {
+			if (!r || r->type != AssetType::Texture) continue;
 
-			std::error_code	  ec;
-			auto			  rel = std::filesystem::relative(r->sourcePath, db->GetRoot(), ec);
+			std::error_code ec;
+			auto rel = std::filesystem::relative(r->sourcePath, db->GetRoot(), ec);
 			const std::string key = (ec ? r->sourcePath : rel).generic_string();
 
-			if(key == want || r->sourcePath.filename().string() == want) {
+			if (key == want || r->sourcePath.filename().string() == want) {
 				ok = LoadTextureByGuid(r->guid);
 				break;
 			}
 		}
 	}
 
-	if(!ok) {
-		handle_		 = TextureManager::GetInstance()->LoadTexture("textures/white1x1.png");
+	if (!ok) {
+		handle_ = TextureManager::GetInstance()->LoadTexture("textures/white1x1.png");
 		textureGuid_ = Guid{}; // 未設定
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//		コンフィグ掃き出し
-/////////////////////////////////////////////////////////////////////////////////////////
 BaseModelConfig BaseModel::ExtractConfig() const {
 	BaseModelConfig config;
 	config.materialConfig = materialData_.ExtractConfig();
-	config.uvTransConfig  = uvTransform.ExtractConfig();
-	config.blendMode	  = static_cast<int>(blendMode_);
-	config.modelName	  = fileName_;
+	config.uvTransConfig = uvTransform.ExtractConfig();
+	config.blendMode = static_cast<int>(blendMode_);
+	config.modelName = fileName_;
 
 	// 保存は GUID のみ
 	config.textureGuid = textureGuid_;
@@ -211,13 +195,10 @@ BaseModelConfig BaseModel::ExtractConfig() const {
 	return config;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//		gui表示
-/////////////////////////////////////////////////////////////////////////////////////////
 void BaseModel::ShowImGui(BaseModelConfig& config) {
 	uvTransform.ShowImGui("uvTransform");
 
-	if(ImGui::CollapsingHeader("Material")) {
+	if (ImGui::CollapsingHeader("Material")) {
 		materialData_.ShowImGui(config.materialConfig);
 
 		// ---- ドラッグ&ドロップでテクスチャ適用 ----
@@ -227,9 +208,9 @@ void BaseModel::ShowImGui(BaseModelConfig& config) {
 		ImGui::InvisibleButton("##TextureDrop", dropSize);
 
 		// 見た目（枠とテキスト）
-		const bool	 hovered = ImGui::IsItemHovered();
-		const ImVec2 rmin	 = ImGui::GetItemRectMin();
-		const ImVec2 rmax	 = ImGui::GetItemRectMax();
+		const bool hovered = ImGui::IsItemHovered();
+		const ImVec2 rmin = ImGui::GetItemRectMin();
+		const ImVec2 rmax = ImGui::GetItemRectMax();
 		ImGui::GetWindowDrawList()->AddRect(
 			rmin, rmax, hovered ? IM_COL32(120, 180, 255, 220) : IM_COL32(90, 90, 90, 160),
 			8.0f, 0, 2.0f);
@@ -239,12 +220,12 @@ void BaseModel::ShowImGui(BaseModelConfig& config) {
 			"Drop a Texture here");
 
 		// 受け取り
-		if(ImGui::BeginDragDropTarget()) {
-			if(const ImGuiPayload* p = ImGui::AcceptDragDropPayload("CALYX_ASSET")) {
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload* p = ImGui::AcceptDragDropPayload("CALYX_ASSET")) {
 				const AssetDragPayload payload =
 					*reinterpret_cast<const AssetDragPayload*>(p->Data);
-				if(payload.type == AssetType::Texture) {
-					if(LoadTextureByGuid(payload.guid)) {
+				if (payload.type == AssetType::Texture) {
+					if (LoadTextureByGuid(payload.guid)) {
 						// コンフィグ（保存用）にも反映
 						config.textureGuid = payload.guid;
 					} else {
@@ -256,17 +237,17 @@ void BaseModel::ShowImGui(BaseModelConfig& config) {
 		}
 
 		// 失敗メッセージ（2D 以外の SRV 等）
-		if(ImGui::BeginPopup("TextureDropError")) {
+		if (ImGui::BeginPopup("TextureDropError")) {
 			ImGui::TextUnformatted("このテクスチャは適用できません（2D以外/未対応形式）。");
 			ImGui::EndPopup();
 		}
 
 		// 現在のテクスチャ表示（GUID→ファイル名）
-		auto labelFromGuid = [](const Guid& g) -> std::string {
-			if(!g.isValid()) return "(none)";
+		auto labelFromGuid = [](const Guid& g)->std::string {
+			if (!g.isValid()) return "(none)";
 			auto* db = AssetDatabase::GetInstance();
-			for(auto* r : db->GetView()) {
-				if(r && r->type == AssetType::Texture && r->guid == g) {
+			for (auto* r : db->GetView()) {
+				if (r && r->type == AssetType::Texture && r->guid == g) {
 					return r->sourcePath.filename().string();
 				}
 			}
@@ -274,33 +255,32 @@ void BaseModel::ShowImGui(BaseModelConfig& config) {
 		};
 		ImGui::TextDisabled("Current: %s", labelFromGuid(textureGuid_).c_str());
 		ImGui::SameLine();
-		if(textureGuid_.isValid() && ImGui::SmallButton("Copy GUID")) {
+		if (textureGuid_.isValid() && ImGui::SmallButton("Copy GUID")) {
 			ImGui::SetClipboardText(textureGuid_.ToString().c_str());
 		}
 	}
 
-	if(ImGui::CollapsingHeader("Draw")) {
+	if (ImGui::CollapsingHeader("Draw")) {
 		static const char* blendModeNames[] = {
-			"NONE", "ALPHA", "ADD", "SUB", "MUL", "NORMAL", "SCREEN"};
+			"NONE", "ALPHA", "ADD", "SUB", "MUL", "NORMAL", "SCREEN"
+		};
 		int currentBlendMode = static_cast<int>(blendMode_);
-		if(ImGui::Combo("Blend Mode", &currentBlendMode,
-						blendModeNames, IM_ARRAYSIZE(blendModeNames))) {
+		if (ImGui::Combo("Blend Mode", &currentBlendMode,
+						 blendModeNames, IM_ARRAYSIZE(blendModeNames))) {
 			config.blendMode = currentBlendMode;
 		}
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//		guidからテクスチャロード
-/////////////////////////////////////////////////////////////////////////////////////////
+
 bool BaseModel::LoadTextureByGuid(const Guid& g) {
-	if(!g.isValid()) return false;
+	if (!g.isValid()) return false;
 
 	// （必要なら .meta の viewDimension 等で 2D 以外を弾く処理を先に）
 	auto h = TextureManager::GetInstance()->LoadTexture(g);
-	if(!h.ptr) return false;
+	if (!h.ptr) return false;
 
-	handle_		 = h;
+	handle_ = h;
 	textureGuid_ = g;
 	return true;
 }
@@ -312,18 +292,18 @@ const std::optional<ModelData>& BaseModel::GetModelData() const {
 // ======================================= renderer 専用 ==========================================
 
 void BaseModel::SetTex(const std::string& name) {
-	handle_ = TextureManager::GetInstance()->LoadTexture("textures/" + name);
+	handle_ = TextureManager::GetInstance()->LoadTexture("textures/"+name);
 }
 
 void BaseModel::EnsureInstanceCapacity(ID3D12Device* device, UINT needCount) {
-	if(!instanceBufferCreated_) {
+	if (!instanceBufferCreated_) {
 		instanceBufferCapacity_ = std::max<UINT>(1024, needCount);
 		instanceBuffer_.Initialize(device, instanceBufferCapacity_); // Upload
 		instanceBuffer_.CreateSrv(device);
 		instanceBufferCreated_ = true;
 		return;
 	}
-	if(needCount <= instanceBufferCapacity_) return;
+	if (needCount <= instanceBufferCapacity_) return;
 
 	// 2倍拡張で再確保頻度を抑制
 	instanceBufferCapacity_ = std::max<UINT>(needCount, instanceBufferCapacity_ * 2);
@@ -336,9 +316,9 @@ void BaseModel::EnsureInstanceCapacity(ID3D12Device* device, UINT needCount) {
 void BaseModel::UploadInstanceMatrices(const std::vector<WorldTransform>& transforms) {
 	std::vector<TransformationMatrix> matrices;
 	matrices.reserve(transforms.size());
-	for(const auto& tf : transforms) {
+	for (const auto& tf : transforms) {
 		TransformationMatrix m{};
-		m.world					= tf.matrix.world;
+		m.world = tf.matrix.world;
 		m.WorldInverseTranspose = Matrix4x4::Transpose(Matrix4x4::Inverse(tf.matrix.world));
 		matrices.push_back(m);
 	}
@@ -363,15 +343,17 @@ void BaseModel::BindMaterialCB(ID3D12GraphicsCommandList* cmdList) const {
 	materialBuffer_.SetCommand(cmdList, 0);
 }
 
+
 // ================= billboard (VS:t1) =================
 void BaseModel::EnsureBillboardCapacity(ID3D12Device* device, UINT needCount) {
-	if(!billboardBuffer_.IsValid()) {
+	if (!billboardBuffer_.IsValid()) {
 		billboardCapacity_ = std::max<UINT>(needCount, 256u);
 		billboardBuffer_.Initialize(device, billboardCapacity_); // Upload
-		billboardBuffer_.CreateSrv(device);						 // VS:t1
+		billboardBuffer_.CreateSrv(device);                      // VS:t1
 		return;
+
 	}
-	if(needCount <= billboardCapacity_) return;
+	if (needCount <= billboardCapacity_) return;
 	billboardCapacity_ = std::max<UINT>(needCount, billboardCapacity_ * 2);
 	billboardBuffer_.ReleaseSrv();
 	billboardBuffer_.Reset();
@@ -380,10 +362,12 @@ void BaseModel::EnsureBillboardCapacity(ID3D12Device* device, UINT needCount) {
 }
 
 void BaseModel::UploadBillboardParams(const std::vector<GpuBillboardParams>& params) {
-	if(!billboardBuffer_.IsValid() || params.empty()) return;
+	if (!billboardBuffer_.IsValid() || params.empty()) return;
 	std::memcpy(billboardBuffer_.Data(), params.data(), sizeof(GpuBillboardParams) * params.size());
+
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE BaseModel::GetBillboardSrv() const {
 	return billboardBuffer_.GetGpuSrvHandle();
+
 }

@@ -55,9 +55,9 @@ void TitleMenuController::Update(float dt) {
 	// --- 入力で選択移動 ---
 	auto* in = Input::GetInstance();
 	bool moveDown = in->TriggerKey(DIK_DOWN) || in->TriggerKey(DIK_S)
-		|| in->TriggerGamepadButton(PadButton::DPAD_DOWN);
+		|| in->TriggerGamepadButton(PAD_BUTTON::DPAD_DOWN);
 	bool moveUp = in->TriggerKey(DIK_UP) || in->TriggerKey(DIK_W)
-		|| in->TriggerGamepadButton(PadButton::DPAD_UP);
+		|| in->TriggerGamepadButton(PAD_BUTTON::DPAD_UP);
 
 	if (!buttons_.empty()) {
 		uint16_t prev = selectedIndex_;
@@ -72,7 +72,7 @@ void TitleMenuController::Update(float dt) {
 			}
 		}
 
-		if (in->TriggerKey(DIK_SPACE) || in->TriggerGamepadButton(PadButton::A)) {
+		if (in->TriggerKey(DIK_SPACE) || in->TriggerGamepadButton(PAD_BUTTON::A)) {
 			buttons_[selectedIndex_]->Execute();
 		}
 	}

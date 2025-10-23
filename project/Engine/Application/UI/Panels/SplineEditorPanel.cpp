@@ -283,13 +283,6 @@ void SplineEditorPanel::HandleGizmoUpdateAndDraw3D() {
 	}
 }
 
-SplineEditorPanel::SplineEditorPanel() : IEngineUI("SplineEditor") {
-	IEngineUI::SetShow(false);
-	gizmoTf_.Initialize();
-}
-
-SplineEditorPanel::~SplineEditorPanel() = default;
-
 void SplineEditorPanel::Render() {
 	if (!IsShow()) return;
 
@@ -315,9 +308,4 @@ void SplineEditorPanel::Render() {
 
 	ImGui::End();
 	if (!open) SetShow(false);
-}
-
-void SplineEditorPanel::SyncViewportRect(const Vector2& pos, const Vector2& size) {
-	vpPos_	= pos;
-	vpSize_ = size;
 }

@@ -1,8 +1,4 @@
 #include "NumbersSprite.h"
-
-#include <Engine/Foundation/Math/Vector2.h>
-
-// std
 #include <algorithm>
 #include <cmath>
 

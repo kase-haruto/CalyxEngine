@@ -82,7 +82,7 @@ void PlayerInputHandler::HandleShoot(Player& player){
 	const float maxInterval = player.GetMaxShootInterval().value();
 
 	if ((Input::GetInstance()->PushKey(DIK_SPACE) 
-		|| Input::GetInstance()->PushGamepadButton(PadButton::RB))
+		|| Input::GetInstance()->PushGamepadButton(PAD_BUTTON::RB))
 		&& cooldown <= 0.0f){
 		player.RequestShoot();
 		cooldown = maxInterval;
@@ -93,7 +93,7 @@ void PlayerInputHandler::HandleShoot(Player& player){
 //		ロックオン処理
 /////////////////////////////////////////////////////////////////////////////////////////
 void PlayerInputHandler::HandleLockOn(Player& player){
-	if (Input::GetInstance()->PushGamepadButton(PadButton::LB)){
+	if (Input::GetInstance()->PushGamepadButton(PAD_BUTTON::LB)){
 		player.RequestLockOn();
 	} else{
 		player.RequestLockOnTargetClear();

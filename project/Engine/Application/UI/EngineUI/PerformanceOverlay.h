@@ -5,9 +5,6 @@
 // engine
 #include <Engine/Application/UI/EngineUI/IOnViewportTool.h>
 
-/// <summary>
-/// Performance表示オーバーレイ
-/// </summary>
 class PerformanceOverlay
 	:public BaseOnViewportTool{
 public:

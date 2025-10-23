@@ -6,29 +6,26 @@
  UIパネルのインターフェース
  すべてのパネルがこのインターフェースを実装
 --------------------------------------*/
-class IEngineUI {
+class IEngineUI{
 public:
 	//===================================================================*/
 	//						public methods
 	//===================================================================*/
 	IEngineUI(const std::string& name);
 	IEngineUI();
-	virtual ~IEngineUI()  = default;
+	virtual ~IEngineUI() = default;
 
-	/// <summary>
-	/// ui描画
-	/// </summary>
 	virtual void Render() = 0;
 
 	//--------- accessor -----------------------------------------------------//
 	virtual const std::string& GetPanelName() const { return panelName_; }
-	void					   SetShow(bool isShow) { isShow_ = isShow; }
-	bool					   IsShow() const { return isShow_; }
+	void SetShow(bool isShow){ isShow_ = isShow; }
+	bool IsShow() const{ return isShow_; }
 
 protected:
 	//===================================================================*/
 	//						protected methods
 	//===================================================================*/
 	std::string panelName_;
-	bool		isShow_ = true;
+	bool isShow_ = true;
 };

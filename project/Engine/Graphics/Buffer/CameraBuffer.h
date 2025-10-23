@@ -22,9 +22,6 @@ struct Camera3DForGPU {
 	float padding3;
 };
 
-/// <summary>
-/// カメラバッファ
-/// </summary>
 class Camera3DBuffer{
 public:
 	//===================================================================*/

@@ -3,24 +3,21 @@
 /*	include space
 /* ===================================================================== */
 // engine
-#include <Engine/Application/Effects/FxSystem.h>
-#include <Engine/Application/Input/Input.h>
 #include <Engine/Application/System/Enviroment.h>
+#include <Engine/Scene/System/SceneManager.h>
+#include <Engine/Application/Input/Input.h>
 #include <Engine/Application/UI/EngineUI/Core/EngineUICore.h>
 #include <Engine/Editor/PostProcessEditor.h>
 #include <Engine/Foundation/Clock/ClockManager.h>
-#include <Engine/Scene/System/SceneManager.h>
+#include <Engine/Application/Effects/FxSystem.h>
 
-////////////////////////////////////////////////////////////////////////////////
-//  ctor / dtor
-////////////////////////////////////////////////////////////////////////////////
-EngineController::EngineController()  = default;
-EngineController::~EngineController() = default;
-
+/////////////////////////////////////////////////////////////////////////////////////////
+//		engine 初期化
+/////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //  engine 初期化
 ////////////////////////////////////////////////////////////////////////////////
-void EngineController::Initialize(HINSTANCE hInstance) {
+void EngineController::Initialize(HINSTANCE hInstance){
 	/* COM */
 	CoInitializeEx(0, COINIT_MULTITHREADED);
 
@@ -47,42 +44,43 @@ void EngineController::Initialize(HINSTANCE hInstance) {
 	engineUICore_->Initialize();
 	system_->SetEngineUICore(engineUICore_.get());
 
-	if(auto* lvl = engineUICore_->GetLevelEditor()) {
+	if (auto* lvl = engineUICore_->GetLevelEditor()){
 		lvl->SetPlaySession(playSession_.get());
 	}
 
 	editorCollection_ = std::make_unique<EditorCollection>();
 	editorCollection_->InitializeEditors();
 
+	//auto* ppEditor = dynamic_cast< PostProcessEditor* >(editorCollection_->GetEditor(EditorCollection::EditorType::PostProcess));
+
+	//ppEditor->SetPostEffectCollection(system_->GetPostProcessCollection());
+
 #if defined(_DEBUG) || defined(DEVELOP)
 	engineUICore_->SetCameraForViewport(CameraManager::GetMain3d(), CameraManager::GetDebug());
 #endif
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 //  メインループ
 ////////////////////////////////////////////////////////////////////////////////
-void EngineController::Run() {
-	while(!system_->ProcessMessage()) {
-		if(!Update()) break;
+void EngineController::Run(){
+	while (!system_->ProcessMessage()){
+		if (!Update()) break;
 		Render();
-		if(Input::TriggerKey(DIK_ESCAPE) ||
-		   sceneManager_->GetIsEndGame()) break;
+		if (Input::TriggerKey(DIK_ESCAPE)||
+			sceneManager_->GetIsEndGame()) break;
 	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//  終了処理
-////////////////////////////////////////////////////////////////////////////////
-void EngineController::Finalize() {
+void EngineController::Finalize(){
 	system_->Finalize();
 	CoUninitialize();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//  更新
-////////////////////////////////////////////////////////////////////////////////
-bool EngineController::Update() {
+bool EngineController::Update(){
 	float dt = ClockManager::GetInstance()->GetDeltaTime();
 
 	BeginUpdate();
@@ -96,26 +94,23 @@ bool EngineController::Update() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//  更新前処理
-////////////////////////////////////////////////////////////////////////////////
-void EngineController::BeginUpdate() {
+void EngineController::BeginUpdate(){
 	system_->BeginFrame();
 	engineUICore_->Update();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//  更新後処理
-////////////////////////////////////////////////////////////////////////////////
-void EngineController::EndUpdate() {
+void EngineController::EndUpdate(){
 	sceneManager_->PostUpdate(graphicsSystem_->GetCommandList(), graphicsSystem_->GetPipelineService());
 
 	engineUICore_->Render();
+
+	//uto* ppEditor = dynamic_cast< PostProcessEditor* >(editorCollection_->GetEditor(EditorCollection::EditorType::PostProcess));
+	//ppEditor->ApplyToGraph(system_->GetPostEffectGraph());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//  描画
-////////////////////////////////////////////////////////////////////////////////
-void EngineController::Render() {
+void EngineController::Render(){
 	sceneManager_->Draw(graphicsSystem_->GetCommandList(), graphicsSystem_->GetPipelineService());
 
 	system_->ExecutePostEffect(graphicsSystem_->GetPipelineService());

@@ -13,9 +13,6 @@
 //c++
 #include <wrl.h>
 
-/* ========================================================================
-/* カメラInterface
-/* ===================================================================== */
 class ICamera
 	:public SceneObject{
 public:
@@ -31,5 +28,7 @@ public:
 	virtual void TransfarToGPU(){}  // GPUへ転送
 	virtual void StartShake([[maybe_unused]] float duration, [[maybe_unused]] float intensity){};
 	virtual void SetAspectRatio(float aspect) = 0;
+
+	// config ===========================================================
 };
 
