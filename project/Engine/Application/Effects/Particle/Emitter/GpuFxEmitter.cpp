@@ -244,4 +244,6 @@ void GpuFxEmitter::DispatchUpdate(ID3D12GraphicsCommandList* cmd){
 	cmd->ResourceBarrier(_countof(toSrv), toSrv);
 }
 
-
+D3D12_GPU_DESCRIPTOR_HANDLE GpuFxEmitter::GetParticleSrv() const {
+	return particleBuffer_.GetGpuSrvHandle();
+}

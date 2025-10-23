@@ -10,6 +10,9 @@
 
 // c++
 
+/* ========================================================================
+/*		psoを作成
+/* ===================================================================== */
 class PsoFactory {
 public:
 	//===================================================================*/
@@ -19,6 +22,11 @@ public:
 	PsoFactory(ShaderCompiler* compiler) : shaderCompiler_(compiler) {}
 	~PsoFactory() = default;
 
+	/// <summary>
+	/// 作成
+	/// </summary>
+	/// <param name="desc"></param>
+	/// <returns></returns>
 	std::unique_ptr<PipelineStateObject> Create(const GraphicsPipelineDesc& desc);
 
 private:

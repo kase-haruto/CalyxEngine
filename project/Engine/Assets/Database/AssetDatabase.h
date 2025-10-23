@@ -7,6 +7,9 @@
 #include "../System/AssetType.h"
 #include <Engine/Foundation/Utility/Guid/Guid.h> // Guid
 
+/* ========================================================================
+/*		アセットを外部から取得できるように橋渡し
+/* ===================================================================== */
 class AssetDatabase {
 public:
 	static AssetDatabase* GetInstance();

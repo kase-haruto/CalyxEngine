@@ -10,6 +10,9 @@ enum class OverlayAlign{
 	CenterTop,
 };
 
+/* ========================================================================
+/*		viewport上に配置するツール
+/* ===================================================================== */
 class IOnViewportTool{
 public:
 	virtual ~IOnViewportTool() = default;

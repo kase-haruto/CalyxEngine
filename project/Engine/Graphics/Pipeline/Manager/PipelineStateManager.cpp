@@ -1,7 +1,10 @@
 #include "PipelineStateManager.h"
 
 
-PipelineStateManager::~PipelineStateManager(){}
+PipelineStateManager::PipelineStateManager(ComPtr<ID3D12Device> device, std::shared_ptr<ShaderManager> shaderManager)
+	: device_(device), shaderManager_(shaderManager) {}
+
+PipelineStateManager::~PipelineStateManager() {}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // パイプラインステートの生成
@@ -40,10 +43,15 @@ void PipelineStateManager::Finalize(){
 	}
 }
 
+const PipelineSet PipelineStateManager::GetPipelineSet(PipelineType pipelineType, BlendMode blendMode) const {
+	auto it = pipelineStates_.find({pipelineType, blendMode});
+	assert(it != pipelineStates_.end());
+	return it->second->GetPipelineSet();
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // PipelineStateの取得
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-const ComPtr<ID3D12PipelineState>& PipelineStateManager::GetPipelineState(
+const Microsoft::WRL::ComPtr<ID3D12PipelineState>& PipelineStateManager::GetPipelineState(
 	PipelineType pipelineType,
 	BlendMode blendMode
 ) const{
@@ -57,7 +65,7 @@ const ComPtr<ID3D12PipelineState>& PipelineStateManager::GetPipelineState(
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // RootSignatureの取得
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-const ComPtr<ID3D12RootSignature>& PipelineStateManager::GetRootSignature(
+const Microsoft::WRL::ComPtr<ID3D12RootSignature>& PipelineStateManager::GetRootSignature(
 	PipelineType pipelineType,
 	BlendMode blendMode
 ) const{

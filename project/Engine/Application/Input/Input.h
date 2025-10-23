@@ -17,7 +17,7 @@
 constexpr float DEFAULT_DEAD_ZONE = 0.2f;
 
 // XInput準拠のゲームパッドボタン列挙（トリガーは別扱い）
-enum class PAD_BUTTON : WORD{
+enum class PadButton : WORD{
 	A = XINPUT_GAMEPAD_A,
 	B = XINPUT_GAMEPAD_B,
 	X = XINPUT_GAMEPAD_X,
@@ -79,8 +79,8 @@ public:
 	static Vector2 GetMouseDelta();
 
 	// ゲームパッド
-	static bool PushGamepadButton(PAD_BUTTON button);
-	static bool TriggerGamepadButton(PAD_BUTTON button);
+	static bool PushGamepadButton(PadButton button);
+	static bool TriggerGamepadButton(PadButton button);
 	static float GetLeftTrigger();
 	static float GetRightTrigger();
 	static Vector2 GetLeftStick();
@@ -123,6 +123,6 @@ private:
 	float leftThumbY_ = 0.0f;
 	float rightThumbX_ = 0.0f;
 	float rightThumbY_ = 0.0f;
-	float leftTrigger_ = 0.0f;  // 新規追加
-	float rightTrigger_ = 0.0f; // 新規追加
+	float leftTrigger_ = 0.0f;
+	float rightTrigger_ = 0.0f;
 };

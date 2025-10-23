@@ -1,4 +1,5 @@
 #pragma once
+// engine
 #include <Engine/Application/UI/EngineUI/EditorMenu.h>
 #include <Engine/Application/UI/EngineUI/IEngineUI.h>
 #include <Engine/Application/UI/EngineUI/Manipulator.h>
@@ -28,6 +29,9 @@ enum class EditorMode {
 };
 } // namespace EngineEdit
 
+/* ========================================================================
+/*		レベル編集ツール
+/* ===================================================================== */
 class LevelEditor {
 public:
 	void Initialize();

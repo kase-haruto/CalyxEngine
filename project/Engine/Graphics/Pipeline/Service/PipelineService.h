@@ -1,12 +1,17 @@
 #pragma once
 
+// engine
 #include <Engine/Graphics/Pipeline/Shader/ShaderCompiler.h>
 #include <Engine/Graphics/Pipeline/Factory/PsoFactory.h>
 #include <Engine/Graphics/Pipeline/Library/PsoLibrary.h>
 #include <Engine/Graphics/Pipeline/Pso/PsoDetails.h>
 
+// std
 #include <array>
 
+/* ========================================================================
+/*		パイプライン配膳サービス
+/* ===================================================================== */
 class PipelineService {
 public:
 	//===================================================================*/
@@ -35,19 +40,27 @@ public:
 	PipelineService();
 	~PipelineService() = default;
 
+	/// <summary>
+	/// すべてのパイプライン登録
+	/// </summary>
 	void RegisterAllPipelines();
 
+	/// <summary>
+	/// desc空登録
+	/// </summary>
+	/// <param name="desc"></param>
 	void Register(const GraphicsPipelineDesc& desc);
-	void SetCommand(const GraphicsPipelineDesc& desc, ID3D12GraphicsCommandList* cmd){
-		GetPipelineSet(desc).SetCommand(cmd);
-	}
 
+	/// <summary>
+	/// コマンドに積む
+	/// </summary>
+	/// <param name="desc"></param>
+	/// <param name="cmd"></param>
+	void SetCommand(const GraphicsPipelineDesc& desc, ID3D12GraphicsCommandList* cmd);
 	void SetCommand(const PipelineSet& set, ID3D12GraphicsCommandList* cmd) const;
 
 	//--------- accessor -------------------------------------------------//
-	const PipelineSet GetPipelineSet(const GraphicsPipelineDesc& desc)const {
-		return {library_->GetOrCreate(desc),library_->GetRoot(desc)};
-	}
+	const PipelineSet	 GetPipelineSet(const GraphicsPipelineDesc& desc) const;
 	ID3D12PipelineState* GetPipelineState(const GraphicsPipelineDesc& desc) { return library_->GetOrCreate(desc); }
 	ID3D12RootSignature* GetRootSig(const GraphicsPipelineDesc& desc) { return library_->GetRoot(desc); }
 

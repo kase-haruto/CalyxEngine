@@ -14,12 +14,23 @@
 #include <dxcapi.h>
 #include <memory>
 
-
+/* ========================================================================
+/* パイプラインステイと
+/* ===================================================================== */
 class PipelineState{
 public:
 	PipelineState(Microsoft::WRL::ComPtr<ID3D12Device>device, std::shared_ptr<ShaderManager> shaderManager);
 	~PipelineState();
 
+	/// <summary>
+	/// パイプライン作成
+	/// </summary>
+	/// <param name="vsPath"></param>
+	/// <param name="psPath"></param>
+	/// <param name="rootSignatureDesc"></param>
+	/// <param name="psoDesc"></param>
+	/// <param name="blendMode"></param>
+	/// <returns></returns>
 	bool Initialize(const std::wstring& vsPath, const std::wstring& psPath,
 					const D3D12_ROOT_SIGNATURE_DESC& rootSignatureDesc,
 					const D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDesc,

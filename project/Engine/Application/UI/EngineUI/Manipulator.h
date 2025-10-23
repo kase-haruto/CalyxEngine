@@ -13,21 +13,44 @@ class WorldTransform;
 class BaseCamera;
 struct Matrix4x4;
 
+/* ========================================================================
+/*		マニピュレータ
+/* ===================================================================== */
 class Manipulator 
 	: public BaseOnViewportTool{
 public:
 	//===================================================================*/
-	//					methods
+	//					public methods
 	//===================================================================*/
 	Manipulator();
 	void Update();
+
+	/// <summary>
+	/// オーバーレイ描画
+	/// </summary>
+	/// <param name="basePos"></param>
 	void RenderOverlay(const ImVec2& basePos) override;
+
+	/// <summary>
+	/// ツールバー描画
+	/// </summary>
 	void RenderToolbar() override;
 
+	//--------- accessor -----------------------------------------------------
 	void SetTarget(WorldTransform* target);
 	void SetCamera(BaseCamera* camera);
 	void SetViewRect(const ImVec2& origin, const ImVec2& size);
+
 private:
+	//===================================================================*/
+	//					private methods
+	//===================================================================*/
+
+	/// <summary>
+	/// 行列計算
+	/// </summary>
+	/// <param name="m"></param>
+	/// <param name="out"></param>
 	void RowToColumnArray(const Matrix4x4& m, float out[16]);
 	Matrix4x4 ColumnArrayToRow(const float in_[16]);
 

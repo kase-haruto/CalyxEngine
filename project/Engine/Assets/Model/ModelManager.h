@@ -2,10 +2,9 @@
 
 #include <Engine/Assets/Animation/AnimationStruct.h>
 #include <Engine/Assets/Model/ModelData.h>
-#include <Engine/Graphics/Context/GraphicsGroup.h>
-
-#include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <Engine/Foundation/Math/Quaternion.h>
+#include <Engine/Foundation/Utility/Func/MyFunc.h>
+#include <Engine/Graphics/Context/GraphicsGroup.h>
 
 // Assimp
 #include <assimp/Importer.hpp>
@@ -30,8 +29,8 @@
 class ModelManager {
 public:
 	static ModelManager* GetInstance();
-	static void Initialize();
-	static void Finalize();
+	static void			 Initialize();
+	static void			 Finalize();
 
 	/// <summary>
 	/// 非同期でモデルをロードする (ワーカースレッド1本で順番に処理)
@@ -51,7 +50,7 @@ public:
 	/// </summary>
 	ModelData& GetModelData(const std::string& fileName);
 
-	//ロード済みのモデルをを判定
+	// ロード済みのモデルをを判定
 	bool IsModelLoaded(const std::string& fileName) const;
 
 	/// <summary>
@@ -85,31 +84,31 @@ private:
 	void LoadUVTransform(const aiMaterial* material, MaterialData& outMaterial);
 	void LoadSkinData(const aiMesh* mesh, ModelData& modelData);
 	// アニメーション評価関連
-	Vector3 Evaluate(const AnimationCurve<Vector3>& curve, float time);
+	Vector3	   Evaluate(const AnimationCurve<Vector3>& curve, float time);
 	Quaternion Evaluate(const AnimationCurve<Quaternion>& curve, float time);
 
 private:
 	// シングルトン
-	static ModelManager* instance_;
+	static ModelManager*	 instance_;
 	static const std::string directoryPath_;
 
 	// ------------------------------------------------------
 	// モデルデータマップ (ファイル名 -> ModelData)
 	// ------------------------------------------------------
 	std::unordered_map<std::string, ModelData> modelDatas_;
-	mutable std::mutex modelDataMutex_;
+	mutable std::mutex						   modelDataMutex_;
 
 	// ------------------------------------------------------
 	// ワーカースレッド (1本)
 	// ------------------------------------------------------
-	std::thread workerThread_;
-	bool stopWorker_ = false;
-	std::mutex taskQueueMutex_;
+	std::thread				workerThread_;
+	bool					stopWorker_ = false;
+	std::mutex				taskQueueMutex_;
 	std::condition_variable taskQueueCv_;
 
 	// ロードリクエスト
 	struct LoadRequest {
-		std::string fileName;
+		std::string				fileName;
 		std::promise<ModelData> promise;
 	};
 	std::queue<LoadRequest> requestQueue_; // リクエスト待ち行列
@@ -119,10 +118,10 @@ private:
 	// ------------------------------------------------------
 	struct LoadingTask {
 		std::string fileName;
-		ModelData modelData;
+		ModelData	modelData;
 	};
 	std::vector<LoadingTask> pendingTasks_;
-	std::mutex pendingTasksMutex_;
+	std::mutex				 pendingTasksMutex_;
 
 	// ロード完了コールバック
 	std::function<void(const std::string&)> onModelLoadedCallback_;

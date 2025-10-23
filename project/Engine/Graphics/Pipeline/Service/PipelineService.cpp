@@ -93,7 +93,11 @@ void PipelineService::Register(const GraphicsPipelineDesc& desc) {
 	library_->GetOrCreate(desc);
 }
 
-void PipelineService::SetCommand(const PipelineSet& set, ID3D12GraphicsCommandList* cmd) const{
+void PipelineService::SetCommand(const GraphicsPipelineDesc& desc, ID3D12GraphicsCommandList* cmd) {
+	GetPipelineSet(desc).SetCommand(cmd);
+}
+
+void PipelineService::SetCommand(const PipelineSet& set, ID3D12GraphicsCommandList* cmd) const {
 	if (set.pipelineState != lastPipelineState_){
 		cmd->SetPipelineState(set.pipelineState);
 		lastPipelineState_ = set.pipelineState;
@@ -102,6 +106,10 @@ void PipelineService::SetCommand(const PipelineSet& set, ID3D12GraphicsCommandLi
 		cmd->SetGraphicsRootSignature(set.rootSignature);
 		lastRootSignature_ = set.rootSignature;
 	}
+}
+
+const PipelineSet PipelineService::GetPipelineSet(const GraphicsPipelineDesc& desc) const {
+	return {library_->GetOrCreate(desc), library_->GetRoot(desc)};
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

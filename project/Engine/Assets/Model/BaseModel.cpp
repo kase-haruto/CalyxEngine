@@ -13,7 +13,6 @@
 // lib
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 
-
 //external
 #include "externals/imgui/imgui.h"
 #include <algorithm>

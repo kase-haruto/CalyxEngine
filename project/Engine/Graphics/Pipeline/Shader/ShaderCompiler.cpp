@@ -54,7 +54,7 @@ void ShaderCompiler::LoadHLSL(const std::wstring& filePath,[[maybe_unused]] cons
 	shaderSourceBuffer.Encoding = DXC_CP_UTF8;
 }
 
-ComPtr<IDxcBlob> ShaderCompiler::CompileShader(
+Microsoft::WRL::ComPtr<IDxcBlob> ShaderCompiler::CompileShader(
 	const std::wstring& filePath,
 	const wchar_t* profile) {
 	//========================================================================
@@ -110,7 +110,7 @@ void ShaderCompiler::Compile(const std::wstring& filePath,
 }
 
 void ShaderCompiler::CheckNoError() {
-	ComPtr<IDxcBlobUtf8> shaderError = nullptr;
+	Microsoft::WRL::ComPtr<IDxcBlobUtf8> shaderError = nullptr;
 	HRESULT hr = shaderResult->GetOutput(
 		DXC_OUT_ERRORS, IID_PPV_ARGS(shaderError.GetAddressOf()), nullptr);
 
@@ -127,12 +127,12 @@ void ShaderCompiler::CheckNoError() {
 	}
 }
 
-ComPtr<IDxcBlob> ShaderCompiler::GetCompileResult(const std::wstring& filePath,
+Microsoft::WRL::ComPtr<IDxcBlob> ShaderCompiler::GetCompileResult(const std::wstring& filePath,
 												  const wchar_t* profile) {
 	//========================================================================
 	//	コンパイル結果（実行用バイナリ部分）を取得
 	//========================================================================
-	ComPtr<IDxcBlob> shaderBlob = nullptr;
+	Microsoft::WRL::ComPtr<IDxcBlob> shaderBlob = nullptr;
 	HRESULT hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(shaderBlob.GetAddressOf()), nullptr);
 	if (FAILED(hr)) {
 		Log("Failed to get shader bytecode");

@@ -1,12 +1,17 @@
 #pragma once
 
+// engine
 #include <Engine/Foundation/Utility/FileSystem/FileScanner.h>
 #include <Engine/Foundation/Utility/FileSystem/FileSystemHelper.h>
 #include <Engine/Foundation/Json/JsonFileIO.h>
 
+// std
 #include <vector>
 #include <filesystem>
 
+/* ========================================================================
+/* 		json操作のutility関数
+/* ===================================================================== */
 namespace JsonUtils {
 
 	// 保存（ディレクトリがなければ作成）

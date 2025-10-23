@@ -2,6 +2,9 @@
 
 #include "BaseModel.h"
 
+/* ========================================================================
+/*		静的モデル
+/* ===================================================================== */
 class Model
 	: public BaseModel{
 public:
@@ -14,7 +17,6 @@ public:
 
 	void Initialize() override;
 	void InitializeTextures(const std::vector<std::string>& textureFilePaths);
-	void Map() override;
 	void Draw(const WorldTransform& transform)override;
 	void ShowImGuiInterface() override;
 
@@ -24,4 +26,5 @@ private:
 	//===================================================================*/
 	void CreateMaterialBuffer() override;
 	void MaterialBufferMap()override;
+	void Map() override;
 };

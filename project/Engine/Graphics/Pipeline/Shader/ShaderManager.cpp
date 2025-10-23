@@ -34,7 +34,7 @@ CompileShader(const std::wstring& filePath, const wchar_t* profile) {
 	//これからシェーダをコンパイルする旨をログに出す
 	Log(ConvertString(std::format(L"Begin CompileShader,path:{},profile:{}\n", filePath, profile)));
 	//hlslファイルを読む
-	ComPtr<IDxcBlobEncoding> shaderSource = nullptr;
+	Microsoft::WRL::ComPtr<IDxcBlobEncoding> shaderSource = nullptr;
 	hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, &shaderSource);
 	//読めなければ止める
 	assert(SUCCEEDED(hr));
@@ -58,7 +58,7 @@ CompileShader(const std::wstring& filePath, const wchar_t* profile) {
 		L"-Zpr",					//メモリレイアウトは行優先
 	};
 
-	ComPtr<IDxcResult> shaderResult = nullptr;
+	Microsoft::WRL::ComPtr<IDxcResult> shaderResult = nullptr;
 	//実際にshaderをコンパイルする
 	hr = dxcCompiler->Compile(
 		&shaderSourceBuffer,//読み込んだオプション
@@ -74,7 +74,7 @@ CompileShader(const std::wstring& filePath, const wchar_t* profile) {
 	//警告、エラーが出ていないか確認
 	//==============================
 	// 警告、エラーが出ていないか確認
-	ComPtr<IDxcBlobUtf8> shaderError = nullptr;
+	Microsoft::WRL::ComPtr<IDxcBlobUtf8> shaderError = nullptr;
 	hr = shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
 
 	if (SUCCEEDED(hr) && shaderError != nullptr && shaderError->GetStringLength() != 0) {
@@ -88,7 +88,7 @@ CompileShader(const std::wstring& filePath, const wchar_t* profile) {
 	//==============================
 
 	//コンパイル結果から実行用のバイナリ部分を取得
-	ComPtr<IDxcBlob> shaderBlob = nullptr;
+	Microsoft::WRL::ComPtr<IDxcBlob> shaderBlob = nullptr;
 	hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr);
 	assert(SUCCEEDED(hr));
 	//成功したログを出す
@@ -101,15 +101,15 @@ CompileShader(const std::wstring& filePath, const wchar_t* profile) {
 bool ShaderManager::LoadShader(const PipelineType& type, const std::wstring& vsPath, const std::wstring& psPath) {
 	//ファイルパスをワイド文字列として結合
 	//ファイルパスをワイド文字列として結合
-	ComPtr<IDxcBlob> vertexShader = CompileShader(L"Resources/shaders/" + vsPath, L"vs_6_0");
-	ComPtr<IDxcBlob> pixelShader = CompileShader(L"Resources/shaders/" + psPath, L"ps_6_0");
+	Microsoft::WRL::ComPtr<IDxcBlob> vertexShader = CompileShader(L"Resources/shaders/" + vsPath, L"vs_6_0");
+	Microsoft::WRL::ComPtr<IDxcBlob> pixelShader = CompileShader(L"Resources/shaders/" + psPath, L"ps_6_0");
 
 	vertexShaders[type] = vertexShader;
 	pixelShaders[type] = pixelShader;
 	return true;
 }
 
-const ComPtr<IDxcBlob>& ShaderManager::GetVertexShader(const PipelineType& type) const {
+const Microsoft::WRL::ComPtr<IDxcBlob>& ShaderManager::GetVertexShader(const PipelineType& type) const {
 	auto it = vertexShaders.find(type);
 	if (it != vertexShaders.end()) {
 		return it->second;
@@ -119,7 +119,7 @@ const ComPtr<IDxcBlob>& ShaderManager::GetVertexShader(const PipelineType& type)
 	return nullShader;
 }
 
-const ComPtr<IDxcBlob>& ShaderManager::GetPixelShader(const PipelineType& type) const {
+const Microsoft::WRL::ComPtr<IDxcBlob>& ShaderManager::GetPixelShader(const PipelineType& type) const {
 	auto it = pixelShaders.find(type);
 	if (it != pixelShaders.end()) {
 		return it->second;

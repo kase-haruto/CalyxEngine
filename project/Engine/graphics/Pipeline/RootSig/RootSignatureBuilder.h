@@ -17,7 +17,6 @@ public:
 	//===================================================================*/
 	RootSignatureBuilder& CBV(UINT reg, D3D12_SHADER_VISIBILITY vis);
 	RootSignatureBuilder& SRV(UINT reg, D3D12_SHADER_VISIBILITY vis);
-	RootSignatureBuilder& UAV(UINT baseRegister, UINT count, D3D12_SHADER_VISIBILITY vis);
 	RootSignatureBuilder& UAV(UINT reg, D3D12_SHADER_VISIBILITY vis);
 
 	RootSignatureBuilder& UAVTable(UINT shaderRegister, UINT count,

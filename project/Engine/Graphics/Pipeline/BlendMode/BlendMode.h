@@ -16,6 +16,9 @@ enum class BlendMode{
 	kBlendModeCount		//< ブレンドモードの数
 };
 
+/* ========================================================================
+/*		blendModeの作成
+/* ===================================================================== */
 inline D3D12_BLEND_DESC CreateBlendDesc(BlendMode mode){
 	// D3D12_DEFAULTをベースに初期化
 	D3D12_BLEND_DESC blendDesc = CD3DX12_BLEND_DESC(D3D12_DEFAULT);

@@ -3,6 +3,9 @@
 #include <type_traits>
 #include <Engine/Foundation/Math/Vector3.h>
 
+/* ========================================================================
+/*		ランダム生成
+/* ===================================================================== */
 class Random{
 public:
 	Random(){}
@@ -35,6 +38,10 @@ public:
 		);
 	}
 
+	/// <summary>
+	/// -1から1の範囲
+	/// </summary>
+	/// <returns></returns>
 	static Vector3 GenerateUnitVector3(){
 		float x = Generate<float>(-1.0f, 1.0f);
 		float y = Generate<float>(-1.0f, 1.0f);
@@ -45,6 +52,12 @@ public:
 		return v.Normalize();
 	}
 
+	/// <summary>
+	/// vector3のランダム生成
+	/// </summary>
+	/// <param name="min"></param>
+	/// <param name="max"></param>
+	/// <returns></returns>
 	static Vector3 GenerateVector3(const Vector3& min, const Vector3& max){
 		auto safeMinX = ( std::min ) (min.x, max.x);
 		auto safeMaxX = (std::max)(min.x, max.x);

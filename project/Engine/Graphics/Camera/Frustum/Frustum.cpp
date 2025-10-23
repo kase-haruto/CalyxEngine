@@ -33,7 +33,7 @@ void Frustum::Draw(const Vector4& color, float farPlaneRatio) const {
 	Vector3 corners[8];
 	CalculateCorners(corners);
 
-	// ---------- 🎯 ここで遠平面を手前に寄せる ----------
+	// ----------  ここで遠平面を手前に寄せる ----------
 	if (farPlaneRatio < 1.f) {
 		for (int i = 0; i < 4; ++i) {
 			// near[i] から far[i] 方向へのベクトル
@@ -42,7 +42,7 @@ void Frustum::Draw(const Vector4& color, float farPlaneRatio) const {
 		}
 	}
 
-	// ---------- 以降は元の描画 ----------
+	// ---------- 描画 ----------
 	auto draw = PrimitiveDrawer::GetInstance();
 	// near
 	draw->DrawLine3d(corners[0], corners[1], color);
