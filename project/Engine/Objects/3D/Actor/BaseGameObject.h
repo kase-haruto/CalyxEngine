@@ -11,10 +11,13 @@
 #include <Engine/objects/Collider/Collider.h>
 #include <Engine/objects/ConfigurableObject/ConfigurableObject.h>
 
-//* c++ lib *//
+//* c++ *//
 #include <memory>
 #include <string>
 
+/**
+ * ゲームオブジェクト基底クラス
+ */
 class BaseGameObject
 	: public SceneObject,
 	  public IConfigurable {
@@ -38,28 +41,57 @@ public:
 	void		 AlwaysUpdate(float dt) override;
 
 	//--------- ui/gui --------------------------------------------------
-	void		 ShowGui() override;
+	void ShowGui() override;
+
+	/// <summary>
+	/// 派生先クラスのgui
+	/// </summary>
 	virtual void DerivativeGui();
 
 	//--------- Collision -----------------------------------------------
+
+	/// <summary>
+	/// 衝突した瞬間の処理
+	/// </summary>
+	/// <param name="other"></param>
 	virtual void OnCollisionEnter([[maybe_unused]] Collider* other) {}
+
+	/// <summary>
+	/// 衝突中の処理
+	/// </summary>
+	/// <param name="other"></param>
 	virtual void OnCollisionStay([[maybe_unused]] Collider* other) {}
+
+	/// <summary>
+	/// 衝突終了時の処理
+	/// </summary>
+	/// <param name="other"></param>
 	virtual void OnCollisionExit([[maybe_unused]] Collider* other) {}
 
 	//--------- config ------------------------------------------------
+	// 適用
 	virtual void ApplyConfig();
-	virtual void ExtractConfig();
 	void		 ApplyConfigFromJson(const nlohmann::json& j) override;
+
+	// 吐き出し
+	virtual void ExtractConfig();
 	void		 ExtractConfigToJson(nlohmann::json& j) const override;
 
 	//--------- accessor ------------------------------------------------
+	// getter
 	virtual const Vector3 GetCenterPos() const;
 	BillboardMode		  GetBillboardMode() const { return billboardMode_; }
 	std::string_view	  GetTypeName() const override { return "BaseGameObject"; }
 	const Vector3		  GetWorldPosition() const { return worldTransform_.GetWorldPosition(); }
 	BaseModel*			  GetModel() const { return model_.get(); }
 	Collider*			  GetCollider();
+	ObjectModelType		  GetModelType() const { return objectModelType_; }
+	Model*				  GetStaticModel();
+	AnimationModel*		  GetAnimationModel();
+	const AnimationModel* GetAnimationModel() const;
+	AABB				  GetWorldAABB() const;
 
+	// setter
 	void SetName(const std::string& name);
 	void SetBillboardMode(BillboardMode m) { billboardMode_ = m; }
 	void SetTranslate(const Vector3& pos);
@@ -72,15 +104,9 @@ public:
 	void SetBlendMode(BlendMode mode) { model_->SetBlendMode(mode); }
 	void SetLightingMode(LightingMode mode) { model_->SetLightingMode(mode); }
 
-	ObjectModelType GetModelType() const { return objectModelType_; }
-
-	Model*				  GetStaticModel();
-	AnimationModel*		  GetAnimationModel();
-	const AnimationModel* GetAnimationModel() const;
-	AABB				  GetWorldAABB() const;
-
+	//--------- save / load ------------------------------------------------
 	bool Save() const override;
-	bool Load()override;
+	bool Load() override;
 
 private:
 	//===================================================================*/

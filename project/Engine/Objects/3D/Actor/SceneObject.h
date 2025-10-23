@@ -25,6 +25,9 @@ enum class ObjectType {
 
 class IConfigurable; // 前方宣言
 
+/* ========================================================================
+/*		シーン上のオブジェクト
+/* ===================================================================== */
 class SceneObject
 	: public std::enable_shared_from_this<SceneObject> {
 public:

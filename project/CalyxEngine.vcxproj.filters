@@ -1467,12 +1467,6 @@
     <ClInclude Include="Engine\Objects\3D\Actor\BaseGameObject.h">
       <Filter>Engine\Objects\3D\Actor</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Objects\3D\Actor\Character.cpp">
-      <Filter>Engine\Objects\3D\Actor</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Objects\3D\Actor\Character.h">
-      <Filter>Engine\Objects\3D\Actor</Filter>
-    </ClInclude>
     <ClCompile Include="Engine\Objects\3D\Actor\Factory\SceneObjectFactory.cpp">
       <Filter>Engine\Objects\3D\Actor\Factory</Filter>
     </ClCompile>
@@ -1524,12 +1518,6 @@
     <ClInclude Include="Engine\Objects\3D\Geometory\Shape.h">
       <Filter>Engine\Objects\3D\Geometory</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Objects\3D\Geometory\Sphere.cpp">
-      <Filter>Engine\Objects\3D\Geometory</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Objects\3D\Geometory\Sphere.h">
-      <Filter>Engine\Objects\3D\Geometory</Filter>
-    </ClInclude>
     <ClCompile Include="Engine\Objects\3D\Geometory\Spline\SplineData.cpp">
       <Filter>Engine\Objects\3D\Geometory\Spline</Filter>
     </ClCompile>
@@ -1541,12 +1529,6 @@
     </ClCompile>
     <ClInclude Include="Engine\Objects\3D\Geometory\Spline\SplineJson.h">
       <Filter>Engine\Objects\3D\Geometory\Spline</Filter>
-    </ClInclude>
-    <ClCompile Include="Engine\Objects\3D\Geometory\Triangle.cpp">
-      <Filter>Engine\Objects\3D\Geometory</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Objects\3D\Geometory\Triangle.h">
-      <Filter>Engine\Objects\3D\Geometory</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Objects\3D\Mesh\MeshData.h">
       <Filter>Engine\Objects\3D\Mesh</Filter>

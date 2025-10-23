@@ -32,7 +32,7 @@ bool SceneObjectLibrary::RemoveObject(const std::shared_ptr<SceneObject>& obj){
 	auto it = objects_.find(id);
 	if (it == objects_.end()) return false;
 
-	RemoveSubtreePostorder_(it->second);
+	RemoveSubtreePostorder(it->second);
 	return true;
 }
 
@@ -40,12 +40,12 @@ bool SceneObjectLibrary::RemoveObject(const std::shared_ptr<SceneObject>& obj){
 bool SceneObjectLibrary::RemoveObject(Guid id){
 	auto it = objects_.find(id);
 	if (it == objects_.end()) return false;
-	RemoveSubtreePostorder_(it->second);
+	RemoveSubtreePostorder(it->second);
 	return true;
 }
 
 /* サブツリーを後行順で外す（イベント発火を保証） ---------------------------*/
-void SceneObjectLibrary::RemoveSubtreePostorder_(const std::shared_ptr<SceneObject>& root){
+void SceneObjectLibrary::RemoveSubtreePostorder(const std::shared_ptr<SceneObject>& root){
 	std::vector<std::shared_ptr<SceneObject>> postorder;
 	postorder.reserve(16);
 	GatherSubtreePostorder(root,postorder);
@@ -83,7 +83,7 @@ void SceneObjectLibrary::Clear(){
 	}
 
 	// 各ルートのサブツリーを後行順に削除（イベント発火を保証）
-	for (auto& r : roots){ RemoveSubtreePostorder_(r); }
+	for (auto& r : roots){ RemoveSubtreePostorder(r); }
 
 	// 念のため漏れがあれば（単独ノード等）掃除
 	if (!objects_.empty()){
