@@ -6,6 +6,10 @@
 #include <externals/imgui/imgui.h>
 #include <externals/imgui/ImGuizmo.h>
 
+
+/* ========================================================================
+/* ギズモコマンドラッパ
+/* ===================================================================== */
 class ScopedGizmoCommand 
 	: public ICommand {
 public:
