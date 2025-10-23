@@ -7,8 +7,8 @@
 // lib
 #include <d3d12.h>
 #include <dxcapi.h>
-#include <wrl.h>
 #include <memory>
+#include <wrl.h>
 
 class PipelineStateObject {
 public:
@@ -23,11 +23,11 @@ public:
 
 	// アクセサ
 	const PipelineSet& GetPipelineSet() const {
-		return { pipelineState_.Get(), rootSignature_.Get() };
+		return {pipelineState_.Get(), rootSignature_.Get()};
 	}
 
-	const Microsoft::WRL::ComPtr<ID3D12PipelineState>& GetPipelineState()  const { return pipelineState_; }
-	const Microsoft::WRL::ComPtr<ID3D12RootSignature>& GetRootSignature()  const { return rootSignature_; }
+	const Microsoft::WRL::ComPtr<ID3D12PipelineState>& GetPipelineState() const { return pipelineState_; }
+	const Microsoft::WRL::ComPtr<ID3D12RootSignature>& GetRootSignature() const { return rootSignature_; }
 
 	// シェーダブロブ保持（ホットリロード等に使用）
 	void SetShaderBlobs(

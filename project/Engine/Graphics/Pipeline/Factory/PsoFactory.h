@@ -2,14 +2,14 @@
 /* ========================================================================
 /*	include space
 /* ===================================================================== */
-
 // engine
 #include <Engine/Graphics/Pipeline/PipelineDesc/GraphicsPipelineDesc.h>
 #include <Engine/Graphics/Pipeline/Pso/PipelineStateObject.h>
 #include <Engine/Graphics/Pipeline/Shader/ShaderCompiler.h>
 
-// c++
-
+/* ========================================================================
+/*		pso作成工場
+/* ===================================================================== */
 class PsoFactory {
 public:
 	//===================================================================*/
@@ -20,7 +20,6 @@ public:
 	~PsoFactory() = default;
 
 	std::unique_ptr<PipelineStateObject> Create(const GraphicsPipelineDesc& desc);
-
 private:
 	//===================================================================*/
 	//		private variables

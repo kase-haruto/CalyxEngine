@@ -1245,12 +1245,6 @@
     <ClInclude Include="Engine\Graphics\Camera\3d\DebugCamera.h">
       <Filter>Engine\Graphics\Camera\3d</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Graphics\Camera\3d\FollowCamera.cpp">
-      <Filter>Engine\Graphics\Camera\3d</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Graphics\Camera\3d\FollowCamera.h">
-      <Filter>Engine\Graphics\Camera\3d</Filter>
-    </ClInclude>
     <ClCompile Include="Engine\Graphics\Camera\Base\BaseCamera.cpp">
       <Filter>Engine\Graphics\Camera\Base</Filter>
     </ClCompile>

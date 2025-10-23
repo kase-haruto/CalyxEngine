@@ -3,6 +3,9 @@
 #include <d3d12.h>
 #include <wrl.h>
 
+//===================================================================*/
+//				リソース状態を追従
+//===================================================================*/
 class ResourceStateTracker{
 public:
 	void SetResourceState(ID3D12Resource* resource, D3D12_RESOURCE_STATES state);

@@ -1,9 +1,7 @@
 #pragma once
-
 /* ========================================================================
 /* include space
 /* ===================================================================== */
-
 // engine
 #include <Engine/Graphics/Pipeline/Factory/PsoFactory.h>
 #include <Engine/Graphics/Pipeline/PipelineDesc/GraphicsPipelineDesc.h>
@@ -12,6 +10,9 @@
 // c++
 #include <unordered_map>
 
+/* ========================================================================
+/*		pso
+/* ===================================================================== */
 class PsoLibrary {
 public:
 	//===================================================================*/
@@ -30,7 +31,5 @@ private:
 	//		private variables
 	//===================================================================*/
 	std::unordered_map<GraphicsPipelineDesc, std::unique_ptr<PipelineStateObject>> psoCache_;
-	PsoFactory* factory_{ nullptr };
-
+	PsoFactory*																	   factory_{nullptr};
 };
-

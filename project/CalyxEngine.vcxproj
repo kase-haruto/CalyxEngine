@@ -263,7 +263,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Objects\Collider\BoxCollider.cpp" />
     <ClCompile Include="Engine\Objects\Collider\Collider.cpp" />
     <ClCompile Include="Engine\Objects\3D\Geometory\Shape.cpp" />
-    <ClCompile Include="Engine\Graphics\Camera\3d\FollowCamera.cpp" />
     <ClCompile Include="Engine\Objects\3D\Actor\BaseGameObject.cpp" />
     <ClCompile Include="Engine\Objects\Particle\DemoParticle.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -562,7 +561,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Objects\Collider\BoxCollider.h" />
     <ClInclude Include="Engine\Objects\Collider\Collider.h" />
     <ClInclude Include="Engine\Objects\3D\Geometory\Shape.h" />
-    <ClInclude Include="Engine\Graphics\Camera\3d\FollowCamera.h" />
     <ClInclude Include="Engine\Objects\3D\Actor\BaseGameObject.h" />
     <ClInclude Include="Engine\Objects\Particle\DemoParticle.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

@@ -3,7 +3,9 @@
 #include <Engine/Graphics/Camera/Base/BaseCamera.h>
 #include <Engine/Graphics/Camera/Frustum/Frustum.h>
 
-
+/* ========================================================================
+/*		メインカメラ
+/* ===================================================================== */
 class Camera3d
 	: public BaseCamera{
 public:
@@ -17,6 +19,8 @@ public:
 	void Initialize();
 	void AlwaysUpdate(float dt) override;  //< 更新
 	void ShowGui() override;
+
+	// カメラと衝突しているか
 	bool IsVisible(const class AABB& aabb) const;
 	std::string_view GetTypeName() const override{ return "Camera3d"; }
 private:
