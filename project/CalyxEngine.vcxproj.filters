@@ -834,9 +834,6 @@
     <ClInclude Include="Engine\Application\Effects\Particle\Parm\FxParm.h">
       <Filter>Engine\Application\Effects\Particle\Parm</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Application\Effects\Particle\Parm\FxPreset.h">
-      <Filter>Engine\Application\Effects\Particle\Parm</Filter>
-    </ClInclude>
     <ClCompile Include="Engine\Application\Framework\EngineController.cpp">
       <Filter>Engine\Application\Framework</Filter>
     </ClCompile>
@@ -1174,9 +1171,6 @@
       <Filter>Engine\Foundation\Utility\Ease</Filter>
     </ClCompile>
     <ClInclude Include="Engine\Foundation\Utility\Ease\Ease.h">
-      <Filter>Engine\Foundation\Utility\Ease</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Foundation\Utility\Ease\EaseTypes.h">
       <Filter>Engine\Foundation\Utility\Ease</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Foundation\Utility\FileSystem\ConfigPathResolver\ConfigPathResolver.cpp">
@@ -1773,12 +1767,6 @@
     <ClInclude Include="Engine\Scene\Serializer\SceneSerializer.h">
       <Filter>Engine\Scene\Serializer</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Scene\System\SceneFactory.cpp">
-      <Filter>Engine\Scene\System</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Scene\System\SceneFactory.h">
-      <Filter>Engine\Scene\System</Filter>
-    </ClInclude>
     <ClCompile Include="Engine\Scene\System\SceneManager.cpp">
       <Filter>Engine\Scene\System</Filter>
     </ClCompile>
@@ -2299,6 +2287,11 @@
     <ClInclude Include="Engine\Graphics\Camera\Action\CameraTurnAroundAction.h" />
     <ClInclude Include="Engine\Foundation\Serialization\FieldVisit.h" />
     <ClInclude Include="Game\Scene\Game\GameScene.h" />
+    <ClInclude Include="Data\Engine\Configs\Scene\Objects\Event\EventConfig.h" />
+    <ClInclude Include="Engine\Foundation\Utility\Ease\CxEase.h" />
+    <ClInclude Include="Engine\Objects\Event\BaseEventObject.h" />
+    <ClInclude Include="Engine\Objects\Event\Camera\CameraEventObject.h" />
+    <ClInclude Include="Game\Event\Camera\CameraTurnAroundEvent.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\ChromaticAberration.PS.hlsl">
@@ -2379,6 +2372,10 @@
     <ClCompile Include="Engine\Graphics\Camera\Action\BaseCameraAction.cpp" />
     <ClCompile Include="Engine\Graphics\Camera\Action\CameraTurnAroundAction.cpp" />
     <ClCompile Include="Game\Scene\Game\GameScene.cpp" />
+    <ClCompile Include="Engine\Foundation\Utility\Ease\CxEase.cpp" />
+    <ClCompile Include="Engine\Objects\Event\BaseEventObject.cpp" />
+    <ClCompile Include="Engine\Objects\Event\Camera\CameraEventObject.cpp" />
+    <ClCompile Include="Game\Event\Camera\CameraTurnAroundEvent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />

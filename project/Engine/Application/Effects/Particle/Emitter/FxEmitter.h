@@ -27,14 +27,21 @@ public:
 	//===================================================================*/
 	FxEmitter();
 	~FxEmitter();
-
+	
 	virtual void Update(float dt)override;
+
+	/// <summary>
+	/// unitのリセット
+	/// </summary>
+	/// <param name="fxUnit"></param>
 	void ResetFxUnit(FxUnit& fxUnit);
+
+	// debug gui
 	void ShowGui();
 
-	void Play()override;
-	void Stop()override;
-	void Reset();
+	void Play()override;	//< 再生
+	void Stop()override;	//< 停止
+	void Reset();			//< リセット
 
 	//--------- config -------------------------------------------------//
 	void ApplyConfigFrom(const EmitterConfig& config);

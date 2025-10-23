@@ -1,26 +1,24 @@
 #include "ParticleSystemObject.h"
 
-#include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/Scene/Context/SceneContext.h>
+#include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 #include <Engine/System/Event/EventBus.h>
 
-ParticleSystemObject::ParticleSystemObject(const std::string& name){
+/////////////////////////////////////////////////////////////////////////////////////////
+//		cotr / dtor
+/////////////////////////////////////////////////////////////////////////////////////////
+ParticleSystemObject::ParticleSystemObject(const std::string& name) {
 	SceneObject::SetName(name, ObjectType::ParticleSystem);
 }
 
-ParticleSystemObject::~ParticleSystemObject(){
-}
+ParticleSystemObject::~ParticleSystemObject() = default;
 
-void ParticleSystemObject::Initialize(){
-	
-}
-
-void ParticleSystemObject::Update([[maybe_unused]]float dt){
-}
-
-void ParticleSystemObject::AlwaysUpdate([[maybe_unused]]float dt){
-	if (FxEmitter::IsPlaying()){
+/////////////////////////////////////////////////////////////////////////////////////////
+//		常時更新
+/////////////////////////////////////////////////////////////////////////////////////////
+void ParticleSystemObject::AlwaysUpdate([[maybe_unused]] float dt) {
+	if(FxEmitter::IsPlaying()) {
 		worldTransform_.Update();
 		position_ = worldTransform_.GetWorldPosition();
 	}
@@ -28,78 +26,122 @@ void ParticleSystemObject::AlwaysUpdate([[maybe_unused]]float dt){
 	FxEmitter::Update(dt);
 }
 
-void ParticleSystemObject::ShowGui(){
+/////////////////////////////////////////////////////////////////////////////////////////
+//		デバッグ描画
+/////////////////////////////////////////////////////////////////////////////////////////
+void ParticleSystemObject::ShowGui() {
 	config_.ShowGui();
 	FxEmitter::ShowGui();
 }
 
-void ParticleSystemObject::SetDrawEnable(bool isDrawEnable){
+/////////////////////////////////////////////////////////////////////////////////////////
+//		描画フラグ切り替え
+/////////////////////////////////////////////////////////////////////////////////////////
+void ParticleSystemObject::SetDrawEnable(bool isDrawEnable) {
 	FxEmitter::SetDrawEnable(isDrawEnable);
 
 	// 子にも適用
-	for (const auto& child : children_){
-		if (auto ps = std::dynamic_pointer_cast< ParticleSystemObject >(child)){
+	for(const auto& child : children_) {
+		if(auto ps = std::dynamic_pointer_cast<ParticleSystemObject>(child)) {
 			ps->SetDrawEnable(isDrawEnable);
 		}
 	}
 }
 
-void ParticleSystemObject::ApplyConfig(){
+/////////////////////////////////////////////////////////////////////////////////////////
+//		ワールド座標
+/////////////////////////////////////////////////////////////////////////////////////////
+Vector3 ParticleSystemObject::GetWorldPosition() const {
+	return GetWorldTransform().GetWorldPosition();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		コンフィグ適用
+/////////////////////////////////////////////////////////////////////////////////////////
+void ParticleSystemObject::ApplyConfig() {
 	const auto& cfg = config_.GetConfig();
 
 	// FxEmitter 設定反映
 	FxEmitter::ApplyConfigFrom(cfg); // config_ は ParticleSystemObjectConfig のはず
 
 	// SceneObject 情報
-	name_ = cfg.name;
-	id_ = cfg.guid;
+	name_	  = cfg.name;
+	id_		  = cfg.guid;
 	parentId_ = cfg.parentGuid;
 
 	worldTransform_.ApplyConfig(cfg.transform);
 }
 
-void ParticleSystemObject::ExtractConfig(){
-	auto& cfg = config_.GetConfig();
-	FxEmitter::ExtractConfigTo(cfg); // config_ は ParticleSystemObjectConfig
-
-	cfg.name = name_;
-	cfg.guid = id_;
-	cfg.parentGuid = parentId_;
-	worldTransform_.ExtractConfig();
-}
-
-void ParticleSystemObject::ApplyConfigFromJson(const nlohmann::json& j){
+void ParticleSystemObject::ApplyConfigFromJson(const nlohmann::json& j) {
 	config_.ApplyConfigFromJson(j);
 	ApplyConfig();
 }
 
-void ParticleSystemObject::ExtractConfigToJson(nlohmann::json& j) const{
-	const_cast< ParticleSystemObject* >(this)->ExtractConfig();
+/////////////////////////////////////////////////////////////////////////////////////////
+//		コンフィグ掃き出し
+/////////////////////////////////////////////////////////////////////////////////////////
+void ParticleSystemObject::ExtractConfig() {
+	auto& cfg = config_.GetConfig();
+	FxEmitter::ExtractConfigTo(cfg); // config_ は ParticleSystemObjectConfig
+
+	cfg.name	   = name_;
+	cfg.guid	   = id_;
+	cfg.parentGuid = parentId_;
+	worldTransform_.ExtractConfig();
+}
+
+void ParticleSystemObject::ExtractConfigToJson(nlohmann::json& j) const {
+	const_cast<ParticleSystemObject*>(this)->ExtractConfig();
 	config_.ExtractConfigToJson(j);
 }
 
-void ParticleSystemObject::PlayRecursive(){
+/////////////////////////////////////////////////////////////////////////////////////////
+//		ロード
+/////////////////////////////////////////////////////////////////////////////////////////
+void ParticleSystemObject::LoadConfig(const std::string& path) {
+	config_.LoadConfig(path);
+	ApplyConfig();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		セーブ
+/////////////////////////////////////////////////////////////////////////////////////////
+void ParticleSystemObject::SaveConfig(const std::string& path) const {
+	const_cast<ParticleSystemObject*>(this)->ExtractConfig();
+	config_.SaveConfig(path);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		再生
+/////////////////////////////////////////////////////////////////////////////////////////
+void ParticleSystemObject::PlayRecursive() {
 	Play();
-	for (const auto& child : children_){
-		if (auto ps = std::dynamic_pointer_cast< ParticleSystemObject >(child)){
+	for(const auto& child : children_) {
+		if(auto ps = std::dynamic_pointer_cast<ParticleSystemObject>(child)) {
 			ps->PlayRecursive();
 		}
 	}
 }
 
-void ParticleSystemObject::StopRecursive(){
+/////////////////////////////////////////////////////////////////////////////////////////
+//		停止
+/////////////////////////////////////////////////////////////////////////////////////////
+void ParticleSystemObject::StopRecursive() {
 	Stop();
-	for (const auto& child : children_){
-		if (auto ps = std::dynamic_pointer_cast< ParticleSystemObject >(child)){
+	for(const auto& child : children_) {
+		if(auto ps = std::dynamic_pointer_cast<ParticleSystemObject>(child)) {
 			ps->StopRecursive();
 		}
 	}
 }
 
-void ParticleSystemObject::ResetRecursive(){
+/////////////////////////////////////////////////////////////////////////////////////////
+//		リセット
+/////////////////////////////////////////////////////////////////////////////////////////
+void ParticleSystemObject::ResetRecursive() {
 	Reset();
-	for (const auto& child : children_){
-		if (auto ps = std::dynamic_pointer_cast< ParticleSystemObject >(child)){
+	for(const auto& child : children_) {
+		if(auto ps = std::dynamic_pointer_cast<ParticleSystemObject>(child)) {
 			ps->ResetRecursive();
 		}
 	}

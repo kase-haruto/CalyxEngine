@@ -3,25 +3,48 @@
 #include <cstdint>
 #include <string>
 
+/// <summary>
+/// ウィンドウクラス
+/// </summary>
 class WinApp{
 public:
-	// ウィンドウプロシージャ
+	WinApp(const int wWidth, const int wHeight, const std::string windowName);
+	~WinApp();
+
+	/// <summary>
+	/// ウィンドウプロシージャ
+	/// </summary>
+	/// <param name="hwnd"></param>
+	/// <param name="msg"></param>
+	/// <param name="wparam"></param>
+	/// <param name="lparam"></param>
+	/// <returns></returns>
 	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
-	// コンストラクタ
-	WinApp(const int wWidth, const int wHeight, const std::string windowName);
-	// デストラクタ
-	~WinApp();
-	// ウィンドウを作成
+	/// <summary>
+	/// ウィンドウ作成
+	/// </summary>
 	void CreateWnd();
-	// ウィンドウハンドルを取得
-	HWND GetHWND() const{ return hwnd; }
-	// ゲームウィンドウの破棄
+
+	/// <summary>
+	/// ウィンドウ破棄
+	/// </summary>
 	void TerminateGameWindow();
-	// メッセージ処理
+	
+	/// <summary>
+	/// message
+	/// </summary>
+	/// <returns></returns>
 	bool ProcessMessage();
-	// フルスクリーン切り替え
+
+	/// <summary>
+	/// フルスクリーン切り替え
+	/// </summary>
+	/// <param name="enable"></param>
 	void SetBorderlessFullscreen(bool enable);
+
+	// accessor
+	HWND GetHWND() const { return hwnd; }
 
 private:
 	// ウィンドウの情報

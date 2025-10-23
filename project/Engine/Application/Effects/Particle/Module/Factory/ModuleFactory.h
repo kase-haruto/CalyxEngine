@@ -7,6 +7,9 @@
 #include <memory>
 #include <string>
 
+/// <summary>
+/// モジュール工場
+/// </summary>
 namespace FxModuleFactory {
 	std::unique_ptr<BaseFxModule> CreateFromConfig(const BaseModuleConfig& config);
 	std::unique_ptr<BaseModuleConfig> CreateConfigFromModule(const BaseFxModule& module);

@@ -1,19 +1,29 @@
 #pragma once
 
+// engine
 #include <Engine/Application/Effects/Particle/Module/BaseFxModule.h>
 #include <Engine/Foundation/Math/Vector2.h>
 
+// std
 #include <string>
 #include <vector>
 #include <algorithm>
 
+/// <summary>
+/// テクスチャ切り替えアニメーション
+/// </summary>
 class TextureSheetAnimationModule
 	: public BaseFxModule{
 public:
-	struct FrameUV{
+	struct FrameUV {
 		Vector2 offset;
 		Vector2 scale;
 	};
+
+public:
+	//===================================================================*/
+	//				public methods
+	//===================================================================*/
 
 	TextureSheetAnimationModule(const std::string& name);
 
@@ -36,12 +46,19 @@ public:
 	std::vector<FrameUV> GetCustomFrameUVs() const{ return customFrameUVs_; }
 
 private:
+	//===================================================================*/
+	//				private methods
+	//===================================================================*/
+	// 分割数
 	int rows_ = 4;
 	int cols_ = 4;
+
+	// 時間
 	int totalFrames_ = 16;
-	bool loop_ = true;
 	float animationSpeed_ = 10.0f;
 
+
+	bool loop_ = true;
 	bool useCustomFrames_ = false;
 	std::vector<FrameUV> customFrameUVs_;
 };

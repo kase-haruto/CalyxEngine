@@ -489,7 +489,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Application\Effects\Particle\Emitter\FxEmitter.h" />
     <ClInclude Include="Engine\Application\Effects\Particle\FxUnit.h" />
     <ClInclude Include="Engine\Application\Effects\Particle\Parm\FxParm.h" />
-    <ClInclude Include="Engine\Application\Effects\Particle\Parm\FxPreset.h" />
     <ClInclude Include="Engine\Application\UI\EngineUI\EditorMenu.h" />
     <ClInclude Include="Engine\Foundation\Utility\Guid\Guid.h" />
     <ClInclude Include="Engine\Objects\3D\Mesh\MeshData.h" />
