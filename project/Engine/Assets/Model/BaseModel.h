@@ -17,7 +17,6 @@
 
 /* math */
 #include <Engine/Foundation/Math/Vector4.h>
-
 /* c++ */
 #include <d3d12.h>
 #include <memory>

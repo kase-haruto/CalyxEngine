@@ -2,6 +2,7 @@
 /* ========================================================================
 /* include space
 /* ===================================================================== */
+#include <Windows.h>
 #include <Engine/Application/Platform/WinApp.h>
 #include <Engine/Graphics/Context/DxCommand.h>
 #include <Engine/Graphics/Context/DxFence.h>

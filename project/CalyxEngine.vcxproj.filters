@@ -1518,12 +1518,6 @@
     <ClInclude Include="Engine\Objects\3D\Geometory\Shape.h">
       <Filter>Engine\Objects\3D\Geometory</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Objects\3D\Geometory\Sphere.cpp">
-      <Filter>Engine\Objects\3D\Geometory</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Objects\3D\Geometory\Sphere.h">
-      <Filter>Engine\Objects\3D\Geometory</Filter>
-    </ClInclude>
     <ClCompile Include="Engine\Objects\3D\Geometory\Spline\SplineData.cpp">
       <Filter>Engine\Objects\3D\Geometory\Spline</Filter>
     </ClCompile>

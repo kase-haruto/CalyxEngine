@@ -296,7 +296,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Objects\3D\Geometory\AABB.cpp" />
     <ClCompile Include="Engine\Objects\LightObject\DirectionalLight.cpp" />
     <ClCompile Include="Engine\Objects\LightObject\PointLight.cpp" />
-    <ClCompile Include="Engine\Objects\3D\Geometory\Sphere.cpp" />
     <ClCompile Include="Engine\Objects\3D\Geometory\Triangle.cpp" />
     <ClCompile Include="Engine\Scene\Base\IScene.cpp" />
     <ClCompile Include="Engine\Scene\Test\TestScene.cpp" />
@@ -601,7 +600,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Objects\3D\Geometory\AABB.h" />
     <ClInclude Include="Engine\Objects\LightObject\DirectionalLight.h" />
     <ClInclude Include="Engine\Objects\LightObject\PointLight.h" />
-    <ClInclude Include="Engine\Objects\3D\Geometory\Sphere.h" />
     <ClInclude Include="Engine\Objects\3D\Geometory\Triangle.h" />
     <ClInclude Include="Engine\Scene\Base\IScene.h" />
     <ClInclude Include="Engine\Scene\Test\TestScene.h" />
