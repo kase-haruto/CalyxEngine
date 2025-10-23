@@ -7,20 +7,27 @@
 #include <Engine/Foundation/Math/Vector2.h>
 
 // c++
-#include <memory>
 #include <d3d12.h>
+#include <functional>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <functional>
 
+// fwd
 class SceneContext;
 class SceneObject;
 
+/// <summary>
+/// オブジェクト配置エディタ
+/// </summary>
 class PlaceToolPanel
-	: public IEngineUI{
+	: public IEngineUI {
 public:
-	enum class ShapeObjType{
+	//===================================================================*/
+	//					enums
+	//===================================================================*/
+	enum class ShapeObjType {
 		Plane,
 		Cube,
 		Sphere,
@@ -30,37 +37,52 @@ public:
 		Count
 	};
 
-	enum class PlaceItemCategory{
-		Shape,			//< 単純図形オブジェクト
-		Light,			//< ライト
-		Particle,		//< パーティクル
-		InGameObject,	//< インゲームのオブジェクト
-		Model,			//< モデル
-		Event,			//< イベント
+	enum class PlaceItemCategory {
+		Shape,		  //< 単純図形オブジェクト
+		Light,		  //< ライト
+		Particle,	  //< パーティクル
+		InGameObject, //< インゲームのオブジェクト
+		Model,		  //< モデル
+		Event,		  //< イベント
 		Count
 	};
 
 private:
-	struct PlaceItem{
-		PlaceItemCategory category;
-		std::string name;
+	//===================================================================*/
+	//					private structs
+	//===================================================================*/
+	struct PlaceItem {
+		PlaceItemCategory			category;
+		std::string					name;
 		D3D12_GPU_DESCRIPTOR_HANDLE texture;
-		Vector2 iconSize {64.0f, 64.0f};
-		std::function<void()> createFunc;
+		Vector2						iconSize{64.0f, 64.0f};
+		std::function<void()>		createFunc;
 	};
 
 public:
+	//===================================================================*/
+	//					public methods
+	//===================================================================*/
 	PlaceToolPanel();
 	~PlaceToolPanel() override = default;
 
+	// editor描画
 	void Render() override;
 
-	const std::string& GetPanelName() const override{ return panelName_; }
+	// getter
+	const std::string& GetPanelName() const override { return panelName_; }
 
 private:
+	//===================================================================*/
+	//					private methods
+	//===================================================================*/
 	void RegisterPlaceItems();
 	void RenderCategoryItems();
 
+private:
+	//===================================================================*/
+	//					private methods
+	//===================================================================*/
 	std::unordered_map<PlaceItemCategory, std::vector<PlaceItem>> categoryItems_;
 	std::string panelName_ = "PlaceToolPanel";
 };

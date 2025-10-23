@@ -6,11 +6,11 @@
 /* engine */
 #include <Engine/Assets/Model/ModelData.h>
 #include <Engine/Graphics/Buffer/DxConstantBuffer.h>
-#include <engine/graphics/Material.h>
-#include <Engine/Graphics/Pipeline/BlendMode/BlendMode.h>
-#include <Engine/Objects/Transform/Transform.h>
 #include <Engine/Graphics/Buffer/DxStructuredBuffer.h>
-#include <Engine/Objects/3D/Details/BillboardParams.h> // ← 追加: GpuBillboardParams
+#include <Engine/Graphics/Pipeline/BlendMode/BlendMode.h>
+#include <Engine/Objects/3D/Details/BillboardParams.h>
+#include <Engine/Objects/Transform/Transform.h>
+#include <engine/graphics/Material.h>
 
 /*data*/
 #include <Data/Engine/Configs/Scene/Objects/Model/BaseModelConfig.h>
@@ -21,12 +21,12 @@
 /* c++ */
 #include <d3d12.h>
 #include <memory>
+#include <optional>
 #include <string>
 #include <wrl.h>
-#include <optional>
 
 /* ========================================================================
-/*		model
+/*		基底モデルクラス
 /* ===================================================================== */
 class BaseModel {
 public:
@@ -38,25 +38,28 @@ public:
 	virtual void Initialize() = 0;
 	virtual void Update(float deltaTime);
 	virtual void OnModelLoaded();
-	void UpdateTexture(float deltaTime);
+	void		 UpdateTexture(float deltaTime);
 	virtual void Map() = 0;
 	virtual void ShowImGuiInterface();
 	virtual void Draw(const WorldTransform& transform);
 
 	//--------- config -----------------------------------------------------
-	void ApplyConfig(const BaseModelConfig& config);
+	void			ApplyConfig(const BaseModelConfig& config);
 	BaseModelConfig ExtractConfig() const;
-	void ShowImGui(BaseModelConfig& config);
-	bool LoadTextureByGuid(const Guid& g);
+	void			ShowImGui(BaseModelConfig& config);
+	bool			LoadTextureByGuid(const Guid& g);
 
 	//--------- accessor -----------------------------------------------------
-	BlendMode GetBlendMode() const { return blendMode_; }
+	// getter
+	const std::optional<ModelData>& GetModelData() const;
+	BlendMode						GetBlendMode() const { return blendMode_; }
+	const Vector4&					GetColor() const { return materialData_.color; }
+	bool							GetIsDrawEnable() const { return isDrawEnable_; }
+
+	// setter
 	void SetBlendMode(BlendMode mode) { blendMode_ = mode; }
-	const std::optional<ModelData>& GetModelData()const;
-	const Vector4& GetColor() const { return materialData_.color; }
 	void SetColor(const Vector4& color) { materialData_.color = color; }
 	void SetIsDrawEnable(bool drawEnable) { isDrawEnable_ = drawEnable; }
-	bool GetIsDrawEnable()const { return isDrawEnable_; }
 	void SetTex(const std::string& name);
 	void SetLightingMode(LightingMode mode) { materialData_.lightingMode = mode; }
 
@@ -65,16 +68,16 @@ public:
 	void UploadInstanceMatrices(const std::vector<WorldTransform>& tf);
 
 	// レンダラーが使うハンドル
-	D3D12_GPU_DESCRIPTOR_HANDLE GetInstanceSrv()const;  //< VS:t0 (gTransMat)
-	D3D12_GPU_DESCRIPTOR_HANDLE GetTexSrv()const;       //< PS:t0 (gTexture)
-	D3D12_GPU_DESCRIPTOR_HANDLE GetEnvMapSrv()const;    //< PS:t1 (gEnvironmentMap)
+	D3D12_GPU_DESCRIPTOR_HANDLE GetInstanceSrv() const; //< VS:t0 (gTransMat)
+	D3D12_GPU_DESCRIPTOR_HANDLE GetTexSrv() const;		//< PS:t0 (gTexture)
+	D3D12_GPU_DESCRIPTOR_HANDLE GetEnvMapSrv() const;	//< PS:t1 (gEnvironmentMap)
 
-	void BindVertexIndexBuffers(ID3D12GraphicsCommandList* cmdList)const;
-	void BindMaterialCB(ID3D12GraphicsCommandList* cmdList)const;
+	void BindVertexIndexBuffers(ID3D12GraphicsCommandList* cmdList) const;
+	void BindMaterialCB(ID3D12GraphicsCommandList* cmdList) const;
 
 	// -------- billboard (VS:t1) をモデル側で保持  --------------
-	void EnsureBillboardCapacity(ID3D12Device* device, UINT needCount);
-	void UploadBillboardParams(const std::vector<GpuBillboardParams>&params);
+	void						EnsureBillboardCapacity(ID3D12Device* device, UINT needCount);
+	void						UploadBillboardParams(const std::vector<GpuBillboardParams>& params);
 	D3D12_GPU_DESCRIPTOR_HANDLE GetBillboardSrv() const;
 
 protected:
@@ -85,37 +88,41 @@ protected:
 
 	std::optional<D3D12_GPU_DESCRIPTOR_HANDLE> handle_{};
 
-	std::string fileName_;
-	std::string textureName_ = "textures/white1x1.png"; // デフォルトのテクスチャ名
+	std::string				 fileName_;
+	std::string				 textureName_ = "textures/white1x1.png"; // デフォルトのテクスチャ名
 	std::optional<ModelData> modelData_;
-	Material materialData_;
+	Material				 materialData_;
+
 public:
-	BlendMode blendMode_ = BlendMode::NORMAL;
-	Transform2D  uvTransform{ {1.0f, 1.0f},
-							  0.0f,
-							  {0.0f, 0.0f} };
+	BlendMode	blendMode_ = BlendMode::NORMAL;
+	Transform2D uvTransform{{1.0f, 1.0f},
+							0.0f,
+							{0.0f, 0.0f}};
 
 protected:
 	std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> textureHandles_; // テクスチャハンドルリスト
-	float animationSpeed_ = 0.1f; // アニメーションの速度 (秒/フレーム)
-	float elapsedTime_ = 0.0f;    // 経過時間
-	size_t currentFrameIndex_ = 0; // 現在のフレームインデックス
+
+	float  animationSpeed_	  = 0.1f; // アニメーションの速度 (秒/フレーム)
+	float  elapsedTime_		  = 0.0f; // 経過時間
+	size_t currentFrameIndex_ = 0;	  // 現在のフレームインデックス
 
 protected:
-	Guid textureGuid_;
+	Guid					 textureGuid_;
 	static const std::string directoryPath_;
-	bool isDrawEnable_ = true;
+	bool					 isDrawEnable_ = true;
 
 	virtual void CreateMaterialBuffer() = 0;
-	virtual void MaterialBufferMap() = 0;
+	virtual void MaterialBufferMap()	= 0;
 
 protected:
 	// -------- インスタンス行列（VS:t0） -----------------------------------------
 	DxStructuredBuffer<TransformationMatrix> instanceBuffer_;
-	bool instanceBufferCreated_ = false;
+
+	bool instanceBufferCreated_	 = false;
 	UINT instanceBufferCapacity_ = 0;
 
 	// -------- ビルボード（VS:t1）フレームリング -------------------------------
 	DxStructuredBuffer<GpuBillboardParams> billboardBuffer_;
+
 	UINT billboardCapacity_ = 0;
 };

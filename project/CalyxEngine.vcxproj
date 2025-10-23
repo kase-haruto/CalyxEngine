@@ -281,7 +281,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Foundation\Utility\LeakChecker\LeakChecker.cpp" />
     <ClCompile Include="Engine\Application\System\System.cpp" />
     <ClCompile Include="Engine\Application\Platform\WinApp.cpp" />
-    <ClCompile Include="Engine\Editor\UiEditor.cpp" />
     <ClCompile Include="Engine\Graphics\Camera\3d\Camera3d.cpp" />
     <ClCompile Include="Engine\Extensions\Fog\FogEffect.cpp" />
     <ClCompile Include="Engine\Graphics\Context\GraphicsGroup.cpp" />
@@ -495,7 +494,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Objects\ConfigurableObject\IConfigurable.h" />
     <ClInclude Include="Engine\System\Command\EditorCommand\LevelEditorCommand\CreateObjectCommand\CreateShapeObjectCommand.h" />
     <ClInclude Include="Engine\Application\UI\EngineUI\IOnViewportTool.h" />
-    <ClInclude Include="Engine\Application\UI\Panels\IInspectable.h" />
     <ClInclude Include="Engine\Editor\Collection\EditorCollection.h" />
     <ClInclude Include="Engine\Graphics\Camera\Viewport\ViewportDetail.h" />
     <ClInclude Include="Engine\Physics\Ray\RayDetail.h" />
@@ -584,7 +582,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Application\System\System.h" />
     <ClInclude Include="Engine\Application\Platform\WinApp.h" />
     <ClInclude Include="Engine\Editor\BaseEditor.h" />
-    <ClInclude Include="Engine\Editor\UiEditor.h" />
     <ClInclude Include="Engine\Graphics\Camera\3d\Camera3d.h" />
     <ClInclude Include="Engine\Extensions\Fog\FogEffect.h" />
     <ClInclude Include="Engine\Graphics\Context\GraphicsGroup.h" />

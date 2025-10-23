@@ -54,10 +54,6 @@ void EngineController::Initialize(HINSTANCE hInstance) {
 	editorCollection_ = std::make_unique<EditorCollection>();
 	editorCollection_->InitializeEditors();
 
-	// auto* ppEditor = dynamic_cast< PostProcessEditor* >(editorCollection_->GetEditor(EditorCollection::EditorType::PostProcess));
-
-	// ppEditor->SetPostEffectCollection(system_->GetPostProcessCollection());
-
 #if defined(_DEBUG) || defined(DEVELOP)
 	engineUICore_->SetCameraForViewport(CameraManager::GetMain3d(), CameraManager::GetDebug());
 #endif

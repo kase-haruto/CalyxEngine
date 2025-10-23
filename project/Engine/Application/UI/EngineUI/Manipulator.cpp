@@ -193,10 +193,6 @@ void Manipulator::RenderOverlay(const ImVec2& basePos){
 	}
 }
 
-void Manipulator::RenderToolbar(){
-
-}
-
 void Manipulator::RowToColumnArray(const Matrix4x4& m, float out[16]){
 	// 回転スケール 3×3 を転置（row→column変換）
 	out[0] = m.m[0][0]; out[1] = m.m[0][1]; out[2] = m.m[0][2]; out[3] = 0.0f;

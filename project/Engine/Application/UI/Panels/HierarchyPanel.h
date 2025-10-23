@@ -25,6 +25,9 @@ class SceneObjectLibrary;
 class HierarchyPanel
 	: public IEngineUI {
 private:
+	//===================================================================*/
+	//				コールバック
+	//===================================================================*/
 	using SelectCB = std::function<void(std::shared_ptr<SceneObject>)>;
 	using DeleteCB = std::function<void(std::shared_ptr<SceneObject>)>;
 	using CreateCB = std::function<void(std::shared_ptr<SceneObject>)>;
@@ -38,7 +41,19 @@ public:
 	~HierarchyPanel() override = default;
 
 	void Render() override;
+
+	/// <summary>
+	/// オブジェクトの種類表示
+	/// </summary>
+	/// <param name="obj"></param>
 	void ShowObjectRecursive(SceneObject* obj);
+
+	/// <summary>
+	/// 親子関係があればtrue
+	/// </summary>
+	/// <param name="parent"></param>
+	/// <param name="child"></param>
+	/// <returns></returns>
 	bool IsDescendantOf(SceneObject* parent, SceneObject* child);
 
 	// accessors -------------------------------------------------------

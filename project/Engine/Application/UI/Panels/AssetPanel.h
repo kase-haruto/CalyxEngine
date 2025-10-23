@@ -14,7 +14,12 @@
 #include <vector>
 #include <externals/imgui/imgui.h>
 
-class AssetPanel : public IEngineUI {
+
+/// <summary>
+/// アセットview
+/// </summary>
+class AssetPanel 
+	: public IEngineUI {
 private:
 	// --- フォルダツリー ---
 	struct DirNode {

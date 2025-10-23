@@ -966,9 +966,6 @@
     <ClInclude Include="Engine\Application\UI\Panels\HierarchyPanel.h">
       <Filter>Engine\Application\UI\Panels</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Application\UI\Panels\IInspectable.h">
-      <Filter>Engine\Application\UI\Panels</Filter>
-    </ClInclude>
     <ClCompile Include="Engine\Application\UI\Panels\InspectorPanel.cpp">
       <Filter>Engine\Application\UI\Panels</Filter>
     </ClCompile>
@@ -1081,12 +1078,6 @@
       <Filter>Engine\Editor</Filter>
     </ClCompile>
     <ClInclude Include="Engine\Editor\SceneObjectEditor.h">
-      <Filter>Engine\Editor</Filter>
-    </ClInclude>
-    <ClCompile Include="Engine\Editor\UiEditor.cpp">
-      <Filter>Engine\Editor</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Editor\UiEditor.h">
       <Filter>Engine\Editor</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Extensions\Fog\FogEffect.cpp">

@@ -26,17 +26,52 @@ public:
 	System();
 	~System() = default;
 
+	/// <summary>
+	/// 初期化処理
+	/// </summary>
 	void Initialize(HINSTANCE hInstance, int32_t clientWidth, int32_t clientHeight,const std::string _windowTitle);
-	void Finalize();
+	
+	/// <summary>
+	/// エディタ初期化
+	/// </summary>
 	void InitializeEditor();
+
+	/// <summary>
+	/// 終了処理
+	/// </summary>
+	void Finalize();
+
+	/// <summary>
+	/// 更新前処理
+	/// </summary>
 	void BeginFrame();
+
+	/// <summary>
+	/// 更新後処理
+	/// </summary>
 	void EndFrame();
 
-	void EditorUpdate();	//engine内部Editorの更新
+	/// <summary>
+	/// エディタ更新
+	/// </summary>
+	void EditorUpdate();
 
+	/// <summary>
+	/// message
+	/// </summary>
+	/// <returns></returns>
 	int ProcessMessage();
 
+	/// <summary>
+	/// ポストプロセス関連の初期化
+	/// </summary>
+	/// <param name="service"></param>
 	void InitializePostProcess(class PipelineService* service);
+
+	/// <summary>
+	/// ポストエフェクトの実行
+	/// </summary>
+	/// <param name="service"></param>
 	void ExecutePostEffect(const class  PipelineService* service);
 
 	//* パイプラインの作成 ==============================*/

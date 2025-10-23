@@ -15,6 +15,9 @@
 
 using AssetGUID = Guid;
 
+/// <summary>
+/// アセット単位
+/// </summary>
 struct AssetRecord {
 	AssetGUID guid{};
 	AssetType type = AssetType::Unknown;

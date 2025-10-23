@@ -8,6 +8,9 @@
 #include <vector>
 #include <unordered_set>
 
+/// <summary>
+/// コリジョン管理クラス
+/// </summary>
 class CollisionManager{
 public:
 	using CollisionShape = std::variant<Sphere, OBB>;

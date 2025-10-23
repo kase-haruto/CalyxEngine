@@ -28,6 +28,9 @@ enum class EditorMode {
 };
 } // namespace EngineEdit
 
+/// <summary>
+/// levelEditor
+/// </summary>
 class LevelEditor {
 public:
 	void Initialize();

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 /* lib */
 #include<d3d12.h>
@@ -44,9 +44,6 @@ public:
 
 	//定数バッファの生成
 	void CreateConstantBuffer();
-
-	//霧の効果を適用
-	void Apply();
 
 	ComPtr<ID3D12Resource>GetConstantBuffer()const{ return constantBuffer; }
 };
