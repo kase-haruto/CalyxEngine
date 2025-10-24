@@ -1,8 +1,12 @@
 #pragma once
 
+// engine
 #include <Engine/Foundation/Utility/Random/Random.h>
+
+// external
 #include <externals/nlohmann/json.hpp>
 
+// std
 #include <array>
 #include <cstdint>
 #include <string>
@@ -10,6 +14,9 @@
 #include <iomanip>
 #include <compare>
 
+/* ========================================================================
+/*		識別id
+/* ===================================================================== */
 struct Guid{
 	Guid() = default;
 	

@@ -10,6 +10,9 @@
 #include <type_traits>
 #include <algorithm>
 
+/* ========================================================================
+/*		シーンオブジェクトを一括保有するクラス
+/* ===================================================================== */
 class SceneObjectLibrary{
 public:
 	SceneObjectLibrary() = default;
@@ -22,26 +25,66 @@ public:
 	void Clear(); // 子孫含めて Remove イベントを正しく発火
 
 	/* 検索 --------------------------------------------------------------*/
+	
+	/// <summary>
+	/// guid空検索
+	/// </summary>
+	/// <param name="id"></param>
+	/// <returns></returns>
 	std::shared_ptr<SceneObject> Find(Guid id) const;
+
+	/// <summary>
+	/// 名前から検索
+	/// </summary>
+	/// <param name="name"></param>
+	/// <returns></returns>
 	std::shared_ptr<SceneObject> FindByName(const std::string& name) const;
 
+	/// <summary>
+	/// タイプから探す
+	/// </summary>
+	/// <typeparam name="TObject"></typeparam>
+	/// <returns></returns>
 	template <class TObject>
 	std::vector<std::shared_ptr<TObject>> FindByType() const;
 
 	/* 一覧取得 ----------------------------------------------------------*/
+	
+	/// <summary>
+	/// シーンオブジェクトの生ポインタを返す
+	/// </summary>
+	/// <returns></returns>
 	std::vector<SceneObject*> GetAllObjectsRaw() const;
+
+	/// <summary>
+	/// すべてのシーンオブジェクトのshardPtrを返す
+	/// </summary>
+	/// <returns></returns>
 	std::vector<std::shared_ptr<SceneObject>> GetAllObjectsShared() const;
 
+	/// <summary>
+	/// シーンオブジェクトがライブラリに含まれるかを返す
+	/// </summary>
+	/// <param name="obj"></param>
+	/// <returns> 含まれる場合true </returns>
 	bool Contains(const std::shared_ptr<SceneObject>& obj) const;
 	bool Contains(Guid id) const{ return objects_.contains(id); }
 
 private:
-	// フォレストを根ごとに後行順で集めるヘルパ
+	/// <summary>
+	/// ツリーを集める
+	/// </summary>
+	/// <param name="node"></param>
+	/// <param name="out"></param>
 	static void GatherSubtreePostorder(
 		const std::shared_ptr<SceneObject>& node,
 		std::vector<std::shared_ptr<SceneObject>>& out);
 
-	void RemoveSubtreePostorder_(const std::shared_ptr<SceneObject>& root);
+	/// <summary>
+	/// サブツリーを後行順で外す
+	/// </summary>
+	/// <param name="root"></param>
+	void RemoveSubtreePostorder(const std::shared_ptr<SceneObject>& root);
 
 private:
 	std::unordered_map<Guid, std::shared_ptr<SceneObject>> objects_;

@@ -834,9 +834,6 @@
     <ClInclude Include="Engine\Application\Effects\Particle\Parm\FxParm.h">
       <Filter>Engine\Application\Effects\Particle\Parm</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Application\Effects\Particle\Parm\FxPreset.h">
-      <Filter>Engine\Application\Effects\Particle\Parm</Filter>
-    </ClInclude>
     <ClCompile Include="Engine\Application\Framework\EngineController.cpp">
       <Filter>Engine\Application\Framework</Filter>
     </ClCompile>
@@ -1176,9 +1173,6 @@
     <ClInclude Include="Engine\Foundation\Utility\Ease\Ease.h">
       <Filter>Engine\Foundation\Utility\Ease</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Foundation\Utility\Ease\EaseTypes.h">
-      <Filter>Engine\Foundation\Utility\Ease</Filter>
-    </ClInclude>
     <ClCompile Include="Engine\Foundation\Utility\FileSystem\ConfigPathResolver\ConfigPathResolver.cpp">
       <Filter>Engine\Foundation\Utility\FileSystem\ConfigPathResolver</Filter>
     </ClCompile>
@@ -1201,9 +1195,6 @@
       <Filter>Engine\Foundation\Utility\Func</Filter>
     </ClCompile>
     <ClInclude Include="Engine\Foundation\Utility\Func\DxFunc.h">
-      <Filter>Engine\Foundation\Utility\Func</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Foundation\Utility\Func\Fwd.h">
       <Filter>Engine\Foundation\Utility\Func</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Foundation\Utility\Func\MyFunc.cpp">
@@ -1258,12 +1249,6 @@
       <Filter>Engine\Graphics\Camera\3d</Filter>
     </ClCompile>
     <ClInclude Include="Engine\Graphics\Camera\3d\DebugCamera.h">
-      <Filter>Engine\Graphics\Camera\3d</Filter>
-    </ClInclude>
-    <ClCompile Include="Engine\Graphics\Camera\3d\FollowCamera.cpp">
-      <Filter>Engine\Graphics\Camera\3d</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Graphics\Camera\3d\FollowCamera.h">
       <Filter>Engine\Graphics\Camera\3d</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Graphics\Camera\Base\BaseCamera.cpp">
@@ -1482,12 +1467,6 @@
     <ClInclude Include="Engine\Objects\3D\Actor\BaseGameObject.h">
       <Filter>Engine\Objects\3D\Actor</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Objects\3D\Actor\Character.cpp">
-      <Filter>Engine\Objects\3D\Actor</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Objects\3D\Actor\Character.h">
-      <Filter>Engine\Objects\3D\Actor</Filter>
-    </ClInclude>
     <ClCompile Include="Engine\Objects\3D\Actor\Factory\SceneObjectFactory.cpp">
       <Filter>Engine\Objects\3D\Actor\Factory</Filter>
     </ClCompile>
@@ -1539,12 +1518,6 @@
     <ClInclude Include="Engine\Objects\3D\Geometory\Shape.h">
       <Filter>Engine\Objects\3D\Geometory</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Objects\3D\Geometory\Sphere.cpp">
-      <Filter>Engine\Objects\3D\Geometory</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Objects\3D\Geometory\Sphere.h">
-      <Filter>Engine\Objects\3D\Geometory</Filter>
-    </ClInclude>
     <ClCompile Include="Engine\Objects\3D\Geometory\Spline\SplineData.cpp">
       <Filter>Engine\Objects\3D\Geometory\Spline</Filter>
     </ClCompile>
@@ -1556,12 +1529,6 @@
     </ClCompile>
     <ClInclude Include="Engine\Objects\3D\Geometory\Spline\SplineJson.h">
       <Filter>Engine\Objects\3D\Geometory\Spline</Filter>
-    </ClInclude>
-    <ClCompile Include="Engine\Objects\3D\Geometory\Triangle.cpp">
-      <Filter>Engine\Objects\3D\Geometory</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Objects\3D\Geometory\Triangle.h">
-      <Filter>Engine\Objects\3D\Geometory</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Objects\3D\Mesh\MeshData.h">
       <Filter>Engine\Objects\3D\Mesh</Filter>
@@ -1772,12 +1739,6 @@
     </ClCompile>
     <ClInclude Include="Engine\Scene\Serializer\SceneSerializer.h">
       <Filter>Engine\Scene\Serializer</Filter>
-    </ClInclude>
-    <ClCompile Include="Engine\Scene\System\SceneFactory.cpp">
-      <Filter>Engine\Scene\System</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Scene\System\SceneFactory.h">
-      <Filter>Engine\Scene\System</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Scene\System\SceneManager.cpp">
       <Filter>Engine\Scene\System</Filter>
@@ -2299,6 +2260,11 @@
     <ClInclude Include="Engine\Graphics\Camera\Action\CameraTurnAroundAction.h" />
     <ClInclude Include="Engine\Foundation\Serialization\FieldVisit.h" />
     <ClInclude Include="Game\Scene\Game\GameScene.h" />
+    <ClInclude Include="Data\Engine\Configs\Scene\Objects\Event\EventConfig.h" />
+    <ClInclude Include="Engine\Foundation\Utility\Ease\CxEase.h" />
+    <ClInclude Include="Engine\Objects\Event\BaseEventObject.h" />
+    <ClInclude Include="Engine\Objects\Event\Camera\CameraEventObject.h" />
+    <ClInclude Include="Game\Event\Camera\CameraTurnAroundEvent.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\ChromaticAberration.PS.hlsl">
@@ -2379,6 +2345,10 @@
     <ClCompile Include="Engine\Graphics\Camera\Action\BaseCameraAction.cpp" />
     <ClCompile Include="Engine\Graphics\Camera\Action\CameraTurnAroundAction.cpp" />
     <ClCompile Include="Game\Scene\Game\GameScene.cpp" />
+    <ClCompile Include="Engine\Foundation\Utility\Ease\CxEase.cpp" />
+    <ClCompile Include="Engine\Objects\Event\BaseEventObject.cpp" />
+    <ClCompile Include="Engine\Objects\Event\Camera\CameraEventObject.cpp" />
+    <ClCompile Include="Game\Event\Camera\CameraTurnAroundEvent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />

@@ -9,26 +9,48 @@
 #include <string>
 #include <algorithm>
 
+/* ========================================================================
+/*		エフェクトモジュールコンテナ
+/* ===================================================================== */
 class FxModuleContainer{
 public:
 	FxModuleContainer() = default;
-
 	FxModuleContainer(const std::vector<std::unique_ptr<BaseModuleConfig>>& moduleConfigs);
 
+	/// <summary>
+	/// 追加
+	/// </summary>
+	/// <param name="name"></param>
+	/// <param name="enabled"></param>
 	void AddModule(const std::string& name, bool enabled = true);
+
+	/// <summary>
+	/// 削除
+	/// </summary>
+	/// <param name="name"></param>
 	void RemoveModule(const std::string& name);
-	bool HasModule(const std::string& name) const;
-	void SetModuleEnabled(const std::string& name, bool enabled);
 
-	const std::vector<std::unique_ptr<BaseFxModule>>& GetModules() const{ return modules_; }
-
-	// GUI
+	//--------- GUI -----------------------------------------------------
+	/// <summary>
+	/// モジュールのパラメータ調整
+	/// </summary>
 	void ShowModulesGui();
+
+	/// <summary>
+	/// 追加されていないモジュールの追加gui
+	/// </summary>
 	void ShowAvailableModulesGui();
 
-	// Config serialization
+	//--------- config -----------------------------------------------------
+	// 適用
 	void ApplyConfigs(const std::vector<std::unique_ptr<BaseModuleConfig>>& configs);
+	// 掃き出し
 	std::vector<std::unique_ptr<BaseModuleConfig>> ExtractConfigs() const;
+
+	//--------- accessor -----------------------------------------------------
+	const std::vector<std::unique_ptr<BaseFxModule>>& GetModules() const{ return modules_; }
+	bool HasModule(const std::string& name) const;
+	void SetModuleEnabled(const std::string& name, bool enabled);
 
 private:
 	std::vector<std::unique_ptr<BaseFxModule>> modules_;

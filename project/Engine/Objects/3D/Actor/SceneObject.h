@@ -19,11 +19,15 @@ enum class ObjectType {
 	Light,			// ライト
 	GameObject,		// ゲームオブジェクト
 	ParticleSystem, // パーティクルシステム
+	Event,			// イベント
 	None,			// なし
 };
 
 class IConfigurable; // 前方宣言
 
+/* ========================================================================
+/*		シーン上のオブジェクト
+/* ===================================================================== */
 class SceneObject
 	: public std::enable_shared_from_this<SceneObject> {
 public:

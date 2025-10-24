@@ -6,6 +6,9 @@
 #include <memory>
 #include <wrl/client.h>
 
+/// <summary>
+/// particleCBデータ
+/// </summary>
 struct ParticleConstantData {
 	Vector3 position;
 	Vector3 scale;

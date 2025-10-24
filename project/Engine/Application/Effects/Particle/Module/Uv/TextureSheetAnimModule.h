@@ -1,20 +1,32 @@
 #pragma once
 
+// engine
 #include <Engine/Application/Effects/Particle/Module/BaseFxModule.h>
 #include <Engine/Foundation/Math/Vector2.h>
 
+// std
+#include <algorithm>
 #include <string>
 #include <vector>
-#include <algorithm>
 
+/* ========================================================================
+/*		uvアニメーションを行うモジュール
+/* ===================================================================== */
 class TextureSheetAnimationModule
-	: public BaseFxModule{
+	: public BaseFxModule {
 public:
-	struct FrameUV{
+	//===================================================================*/
+	//					structs
+	//===================================================================*/
+	struct FrameUV {
 		Vector2 offset;
 		Vector2 scale;
 	};
 
+public:
+	//===================================================================*/
+	//					public methods
+	//===================================================================*/
 	TextureSheetAnimationModule(const std::string& name);
 
 	void ShowGuiContent() override;
@@ -28,20 +40,23 @@ public:
 	void SetUseCustomFrames(bool enable);
 
 	//--------- getters -----------------------------------------------------
-	int GetRows() const{ return rows_; }
-	int GetCols() const{ return cols_; }
-	bool GetLoop() const{ return loop_; }
-	float GetAnimationSpeed() const{ return animationSpeed_; }
-	bool GetUseCustomFrames() const{ return useCustomFrames_; }
-	std::vector<FrameUV> GetCustomFrameUVs() const{ return customFrameUVs_; }
+	int					 GetRows() const { return rows_; }
+	int					 GetCols() const { return cols_; }
+	bool				 GetLoop() const { return loop_; }
+	float				 GetAnimationSpeed() const { return animationSpeed_; }
+	bool				 GetUseCustomFrames() const { return useCustomFrames_; }
+	std::vector<FrameUV> GetCustomFrameUVs() const { return customFrameUVs_; }
 
 private:
-	int rows_ = 4;
-	int cols_ = 4;
-	int totalFrames_ = 16;
-	bool loop_ = true;
-	float animationSpeed_ = 10.0f;
+	//===================================================================*/
+	//					private methods
+	//===================================================================*/
+	int	  rows_			   = 4;			//< 分割数(行
+	int	  cols_			   = 4;			//< 分割数(列
+	int	  totalFrames_	   = 16;		//< アニメーション時間
+	float animationSpeed_  = 10.0f;		//< アニメーション速度
+	bool  loop_			   = true;		//< ループフラグ
+	bool  useCustomFrames_ = false;		//< カスタムするか
 
-	bool useCustomFrames_ = false;
 	std::vector<FrameUV> customFrameUVs_;
 };

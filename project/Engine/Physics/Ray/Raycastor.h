@@ -7,6 +7,9 @@
 #include <optional>
 #include <vector>
 
+/// <summary>
+/// rayCastを行うためのutilityクラス
+/// </summary>
 class Raycastor {
 public:
 	static std::optional<RaycastHit> Raycast(

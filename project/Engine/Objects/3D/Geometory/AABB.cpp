@@ -7,6 +7,9 @@
 #include <cmath>
 
 
+AABB::AABB(const Vector3& min, const Vector3& max, uint32_t color)
+	: min_(min), max_(max), color(color) {}
+
 void AABB::Initialize(const Vector3& Min, const Vector3& Max) {
 	min_ = Min;
 	max_ = Max;

@@ -31,16 +31,34 @@ struct DescriptorHeapSettings{
 class DescriptorAllocator{
 public:
 	static void Initialize(ID3D12Device* device);
+	static void Finalize();
+	
+	/// <summary>
+	/// ヒープ作成
+	/// </summary>
+	/// <param name="usage"></param>
+	/// <param name="settings"></param>
 	static void CreateHeap(DescriptorUsage usage, const DescriptorHeapSettings& settings);
 
+	/// <summary>
+	/// 割り当て
+	/// </summary>
+	/// <param name="usage"></param>
+	/// <returns></returns>
 	static DescriptorHandle Allocate(DescriptorUsage usage);
+
+	/// <summary>
+	/// 再使用するために解放
+	/// </summary>
+	/// <param name="usage"></param>
+	/// <param name="handle"></param>
 	static void Free(DescriptorUsage usage, const DescriptorHandle& handle);
 
+	//--------- accessor -----------------------------------------------------
 	static ID3D12DescriptorHeap* GetHeap(DescriptorUsage usage);
 	static UINT GetDescriptorSize(DescriptorUsage usage);
 	static D3D12_CPU_DESCRIPTOR_HANDLE GetCpuHandleStart(DescriptorUsage usage);
 	static D3D12_GPU_DESCRIPTOR_HANDLE GetGpuHandleStart(DescriptorUsage usage);
-	static void Finalize();
 
 private:
 	struct HeapInfo{

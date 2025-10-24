@@ -1,5 +1,4 @@
 #pragma once
-
 /* ========================================================================
 /*	include space
 /* ===================================================================== */
@@ -33,7 +32,6 @@ public:
 	void EndFrame();
 
 	void EditorUpdate();	//engine内部Editorの更新
-
 	int ProcessMessage();
 
 	void InitializePostProcess(class PipelineService* service);

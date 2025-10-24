@@ -29,7 +29,7 @@ public:
 	const Microsoft::WRL::ComPtr<ID3D12PipelineState>& GetPipelineState()  const { return pipelineState_; }
 	const Microsoft::WRL::ComPtr<ID3D12RootSignature>& GetRootSignature()  const { return rootSignature_; }
 
-	// シェーダブロブ保持（ホットリロード等に使用）
+	// シェーダブロブ保持
 	void SetShaderBlobs(
 		Microsoft::WRL::ComPtr<IDxcBlob> vs,
 		Microsoft::WRL::ComPtr<IDxcBlob> ps) {

@@ -25,7 +25,6 @@ public:
 	// UIの描画
 	void ShowImGuiInterface()override;
 
-
 	// 更新処理
 	void Update();
 

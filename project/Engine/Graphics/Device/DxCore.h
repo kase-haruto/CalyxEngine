@@ -26,13 +26,16 @@ public:
 	// 初期化
 	void Initialize(WinApp* winApp, uint32_t width, uint32_t height);
 
-	// オフスクリーンレンダラー初期化
+	/// <summary>
+	/// レンダラ初期化
+	/// </summary>
+	/// <param name="width"></param>
+	/// <param name="height"></param>
 	void RendererInitialize(uint32_t width, uint32_t height);
 
 	// 描画処理
 	void PreDraw();
 	void PreDrawOffscreen();
-	void DrawOffscreenTexture();
 	void PostDraw();
 	void RenderEngineUI();
 

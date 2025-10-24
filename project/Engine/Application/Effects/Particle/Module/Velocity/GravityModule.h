@@ -5,6 +5,10 @@
 #include <Engine/Application/Effects/Particle/Module/BaseFxModule.h>
 #include <Engine/Foundation/Math/Vector3.h>
 
+/* ========================================================================
+/*		重力適用モジュール
+/* ===================================================================== */
+
 class GravityModule
 	:public BaseFxModule{
 public:
@@ -17,7 +21,10 @@ public:
 	void OnUpdate(struct FxUnit& unit, float dt) override;
 	void ShowGuiContent() override;
 
+	//--------- getters -----------------------------------------------------
 	const Vector3 GetGravity()const { return gravity_; }
+
+	//--------- setters -----------------------------------------------------
 	void SetGravity(const Vector3& grav) { gravity_ = grav; }
 
 private:

@@ -29,6 +29,10 @@ struct PointLightData{
 
 class DxCore;
 
+
+/* ========================================================================
+/*		ポイントライト
+/* ===================================================================== */
 class PointLight
 	: public SceneObject,
 	public IConfigurable{
@@ -41,7 +45,17 @@ public:
 	void Update(float dt)override;
 	void AlwaysUpdate(float dt)override;
 	void ShowGui()override;
+
+	/// <summary>
+	/// gpu転送
+	/// </summary>
 	void UploadToGpu();
+
+	/// <summary>
+	/// コマンドを積む
+	/// </summary>
+	/// <param name="commandList"></param>
+	/// <param name="type"></param>
 	void SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList, PipelineType type);
 	std::string_view GetTypeName() const override{ return "PointLight"; }
 	std::string GetObjectTypeName()const override{ return name_; }

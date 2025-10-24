@@ -1,5 +1,7 @@
 #pragma once
-
+/* ========================================================================
+/*		include space
+/* ===================================================================== */
 // Engine
 #include <Engine/Application/Effects/Particle/Emitter/FxEmitter.h>
 #include <Engine/Objects/3D/Actor/SceneObject.h>
@@ -9,43 +11,47 @@
 // C++
 #include <string>
 
+/* ========================================================================
+/*		パーティクルをシーンオブジェクトとして使用
+/* ===================================================================== */
 class ParticleSystemObject
 	: public SceneObject
 	, public FxEmitter
 	, public IConfigurable{
 public:
-	// コンストラクタ
+	//===================================================================*/
+	//			public methods
+	//===================================================================*/
 	ParticleSystemObject() = default;
-	explicit ParticleSystemObject(const std::string& name);
+	ParticleSystemObject(const std::string& name);
 	~ParticleSystemObject() override;
 
-	// 更新
-	void Initialize();
-	void Update(float dt)override;
 	void AlwaysUpdate(float dt)override;
 	void ShowGui() override;
-	void SetDrawEnable(bool isDrawEnable) override;
 
-	std::string_view GetTypeName() const override{ return "ParticleSystemObject"; }
-	Vector3 GetWorldPosition() const {
-		return GetWorldTransform().GetWorldPosition();
-	}
+	//--------- session -----------------------------------------------------
+	void PlayRecursive();		//< 再生
+	void StopRecursive();		//< 停止
+	void ResetRecursive();		//< リセット
 
-	// コンフィグ適用・抽出
+	//--------- config -----------------------------------------------------
+	// 適用
 	void ApplyConfig() ;
-	void ExtractConfig() ;
 	void ApplyConfigFromJson(const nlohmann::json& j) override;
+	// 掃き出し
+	void ExtractConfig() ;
 	void ExtractConfigToJson(nlohmann::json& j) const override;
-	void LoadConfig(const std::string& path){ config_.LoadConfig(path);  ApplyConfig(); }
-	void SaveConfig(const std::string& path) const{
-		const_cast< ParticleSystemObject* >(this)->ExtractConfig();
-		config_.SaveConfig(path);
-	}
 
-	// 再帰再生など
-	void PlayRecursive();
-	void StopRecursive();
-	void ResetRecursive();
+	//--------- save/load -----------------------------------------------------
+	// コンフィグのロード
+	void LoadConfig(const std::string& path);
+	// コンフィグのセーブ
+	void SaveConfig(const std::string& path) const;
+
+	//--------- accessor -----------------------------------------------------
+	void			 SetDrawEnable(bool isDrawEnable) override;
+	std::string_view GetTypeName() const override { return "ParticleSystemObject"; }
+	Vector3			 GetWorldPosition() const;
 
 private:
 	ConfigurableObject<ParticleSystemObjectConfig> config_;

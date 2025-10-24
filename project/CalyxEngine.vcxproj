@@ -256,14 +256,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\3dObject\Actor\Enemy\Enemy.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Player\Player.cpp" />
     <ClCompile Include="Engine\Objects\3D\Actor\Actor.cpp" />
-    <ClCompile Include="Engine\Objects\3D\Actor\Character.cpp" />
     <ClCompile Include="Engine\Application\UI\Panels\ConsolePanel.cpp" />
     <ClCompile Include="Engine\Application\UI\EngineUI\Core\EngineUICore.cpp" />
     <ClCompile Include="Engine\Collision\CollisionManager.cpp" />
     <ClCompile Include="Engine\Objects\Collider\BoxCollider.cpp" />
     <ClCompile Include="Engine\Objects\Collider\Collider.cpp" />
     <ClCompile Include="Engine\Objects\3D\Geometory\Shape.cpp" />
-    <ClCompile Include="Engine\Graphics\Camera\3d\FollowCamera.cpp" />
     <ClCompile Include="Engine\Objects\3D\Actor\BaseGameObject.cpp" />
     <ClCompile Include="Engine\Objects\Particle\DemoParticle.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -298,8 +296,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Objects\3D\Geometory\AABB.cpp" />
     <ClCompile Include="Engine\Objects\LightObject\DirectionalLight.cpp" />
     <ClCompile Include="Engine\Objects\LightObject\PointLight.cpp" />
-    <ClCompile Include="Engine\Objects\3D\Geometory\Sphere.cpp" />
-    <ClCompile Include="Engine\Objects\3D\Geometory\Triangle.cpp" />
     <ClCompile Include="Engine\Scene\Base\IScene.cpp" />
     <ClCompile Include="Engine\Scene\Test\TestScene.cpp" />
     <ClCompile Include="externals\GlobalVariable\GlobalVariables.cpp" />
@@ -411,7 +407,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Graphics\Camera\Action\CameraTurnAroundAction.h" />
     <ClInclude Include="Engine\Foundation\Math\MathUtil.h" />
     <ClInclude Include="Engine\Foundation\Serialization\FieldVisit.h" />
-    <ClInclude Include="Engine\Foundation\Utility\Func\Fwd.h" />
     <ClInclude Include="Engine\Graphics\Camera\Action\BaseCameraAction.h" />
     <ClInclude Include="Engine\Objects\3D\Details\BillboardParams.h" />
     <ClInclude Include="Engine\Objects\Event\BaseEventObject.h" />
@@ -489,7 +484,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Application\Effects\Particle\Emitter\FxEmitter.h" />
     <ClInclude Include="Engine\Application\Effects\Particle\FxUnit.h" />
     <ClInclude Include="Engine\Application\Effects\Particle\Parm\FxParm.h" />
-    <ClInclude Include="Engine\Application\Effects\Particle\Parm\FxPreset.h" />
     <ClInclude Include="Engine\Application\UI\EngineUI\EditorMenu.h" />
     <ClInclude Include="Engine\Foundation\Utility\Guid\Guid.h" />
     <ClInclude Include="Engine\Objects\3D\Mesh\MeshData.h" />
@@ -558,14 +552,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\3dObject\Actor\Enemy\Enemy.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\Player.h" />
     <ClInclude Include="Engine\Objects\3D\Actor\Actor.h" />
-    <ClInclude Include="Engine\Objects\3D\Actor\Character.h" />
     <ClInclude Include="Engine\Application\UI\Panels\ConsolePanel.h" />
     <ClInclude Include="Engine\Application\UI\EngineUI\Core\EngineUICore.h" />
     <ClInclude Include="Engine\Collision\CollisionManager.h" />
     <ClInclude Include="Engine\Objects\Collider\BoxCollider.h" />
     <ClInclude Include="Engine\Objects\Collider\Collider.h" />
     <ClInclude Include="Engine\Objects\3D\Geometory\Shape.h" />
-    <ClInclude Include="Engine\Graphics\Camera\3d\FollowCamera.h" />
     <ClInclude Include="Engine\Objects\3D\Actor\BaseGameObject.h" />
     <ClInclude Include="Engine\Objects\Particle\DemoParticle.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -607,8 +599,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Objects\3D\Geometory\AABB.h" />
     <ClInclude Include="Engine\Objects\LightObject\DirectionalLight.h" />
     <ClInclude Include="Engine\Objects\LightObject\PointLight.h" />
-    <ClInclude Include="Engine\Objects\3D\Geometory\Sphere.h" />
-    <ClInclude Include="Engine\Objects\3D\Geometory\Triangle.h" />
     <ClInclude Include="Engine\Scene\Base\IScene.h" />
     <ClInclude Include="Engine\Scene\Test\TestScene.h" />
     <ClInclude Include="externals\GlobalVariable\GlobalVariables.h" />

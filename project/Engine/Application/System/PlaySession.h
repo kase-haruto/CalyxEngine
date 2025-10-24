@@ -1,5 +1,7 @@
 #pragma once
-
+/* ========================================================================
+/*		include space
+/* ===================================================================== */
 // engine
 #include <Engine/Application/System/EngineMode.h>
 #include <Engine/Scene/Context/SceneContext.h>
@@ -8,27 +10,34 @@
 // c++
 #include <memory>
 
+/* ========================================================================
+/*		ランタイムの実行・停止・再実行・ワンステップ実行
+/* ===================================================================== */
 class PlaySession{
 public:
 	void Initialize(SceneContext* editorContext);
-	void Enter();
-	void Restart();
-	void Exit(); 
-	bool ExitRequested() const;
-	void FinalizeExitCleanup();
-	void TogglePause();
-	void StepOnce();
 	void Update(); 
-
-	SceneContext* GetContext() const;
-	void RebuildRuntimeFromEditor(SceneContext* newEditorCtx);
-
 	void RenderToolbar();
 
+	//--------- session -----------------------------------------------------
+	void Enter();			//< 実行
+	void Restart();			//< リスタート
+	void Exit();			//< 終了
+	void TogglePause();		//< 停止とグル
+	void StepOnce();		//< ワンステップ更新
+
+	// 終了Request
+	bool ExitRequested() const;
+	// 終了クリーンナップ
+	void FinalizeExitCleanup();
+	// 再接続
+	void RebuildRuntimeFromEditor(SceneContext* newEditorCtx);
 	// SceneManager からの接続API
 	void BindEditorContext(SceneContext* ctx);
-	bool IsRuntime() const;
 
+	//--------- accessor -----------------------------------------------------
+	bool IsRuntime() const;
+	SceneContext* GetContext() const;
 	uint64_t RuntimeGeneration() const { return runtimeGen_; }
 
 private:

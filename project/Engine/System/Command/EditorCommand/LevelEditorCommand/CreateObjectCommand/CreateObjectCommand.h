@@ -4,6 +4,7 @@
 #include <functional>
 #include <memory>
 
+
 template<class TObject>
 class CreateObjectCommand final
 	: public BaseLevelEditorCommand {

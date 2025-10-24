@@ -7,42 +7,37 @@
 #include <cstdint>
 #include <string>
 
-class Actor :
-	public BaseGameObject {
+/**
+ * ゲーム上の行動するキャラクター基底クラス
+ */
+class Actor
+	: public BaseGameObject {
 public:
 	//===================================================================*/
 	//                   public methods
 	//===================================================================*/
 	Actor() = default;
-	Actor(const std::string& modelName,
+	Actor(const std::string&		 modelName,
 		  std::optional<std::string> objectName);
 	virtual ~Actor() override = default;
 
-	void SetMoveSpeed(float moveSpeed) { moveSpeed_ = moveSpeed; }
+	// getter
+	float		  GetCollisionRadius() const;
+	const Vector3 GetVelocity() const { return velocity_; }
+	bool		  GetIsAlive() const { return isAlive_; }
 
-	float GetCollisionRadius() const;
+	// setter
+	void SetPosition(const Vector3& position) { worldTransform_.translation = position; };
+	void SetMoveSpeed(float moveSpeed) { moveSpeed_ = moveSpeed; }
+	void SetVelocity(const Vector3& velocity) { velocity_ = velocity; }
 
 protected:
 	//===================================================================*/
 	//                   private methods
 	//===================================================================*/
-	float moveSpeed_;			//* 移動速度
-	Vector3 velocity_ = {};		//* 移動ベクトル
-	Vector3 acceleration_ = {};	//* 加速度
-	int32_t life_ = 1;			//* 体力 (0で死亡)
-	bool isAlive_ = true;		//* 生存フラグ
-
-	//===================================================================*/
-	//                   getter/setter
-	//===================================================================*/
-public:
-	void velocity(const Vector3& velocity) { velocity_ = velocity; }
-
-	bool GetIsAlive() const { return isAlive_; }
-
-	void SetPosition(const Vector3& position) { worldTransform_.translation = position; };
-
-	void SetVelocity(const Vector3& velocity) { velocity_ = velocity; }
-
-	const Vector3 GetVelocity()const { return velocity_; }
+	float	moveSpeed_;			  //< 移動速度
+	Vector3 velocity_	  = {};	  //< 移動ベクトル
+	Vector3 acceleration_ = {};	  //< 加速度
+	int32_t life_		  = 1;	  //< 体力 (0で死亡)
+	bool	isAlive_	  = true; //< 生存フラグ
 };

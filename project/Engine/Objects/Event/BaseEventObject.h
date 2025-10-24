@@ -8,6 +8,9 @@
 #include <Engine/Objects/Collider/Collider.h>
 #include <Engine/objects/ConfigurableObject/ConfigurableObject.h>
 
+/* ========================================================================
+/*		イベントをシーンオブジェクトとして配置
+/* ===================================================================== */
 class BaseEventObject :
 	public SceneObject,
 	public IConfigurable {

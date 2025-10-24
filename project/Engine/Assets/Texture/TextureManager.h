@@ -11,6 +11,9 @@
 
 class ImGuiManager;
 
+/* ========================================================================
+/*		テクスチャ管理
+/* ===================================================================== */
 class TextureManager {
 public:
 	static TextureManager* GetInstance();
@@ -23,7 +26,7 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSrvHandle(const std::string& textureName) const;
 	const std::unordered_map<std::string, Texture>& GetLoadedTextures() const;
 
-	// ========= ここから GUID 対応  =========
+	// ========= ここから GUID =========
 	D3D12_GPU_DESCRIPTOR_HANDLE LoadTexture(const Guid& guid);
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSrvHandle(const Guid& guid) const;
 	bool HasTexture(const Guid& guid) const;
@@ -35,6 +38,11 @@ public:
 private:
 	TextureManager() = default;
 
+	/// <summary>
+	/// guidから探す
+	/// </summary>
+	/// <param name="g"></param>
+	/// <returns></returns>
 	const struct AssetRecord* FindTextureRecord(const Guid& g) const;
 	static std::string ToAssetsRelative(const std::filesystem::path& abs, const std::filesystem::path& root);
 

@@ -1,9 +1,15 @@
 #pragma once
+/* ========================================================================
+/*		include space
+/* ===================================================================== */
 #include <functional>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
+/* ========================================================================
+/*		メニューカテゴリ
+/* ===================================================================== */
 enum class MenuCategory {
 	File,
 	Edit,
@@ -11,6 +17,9 @@ enum class MenuCategory {
 	Tools
 };
 
+/* ========================================================================
+/*		メニューアイテム
+/* ===================================================================== */
 struct MenuItem {
 	std::string label;
 	std::string shortcut;
@@ -18,14 +27,38 @@ struct MenuItem {
 	bool enabled = true;
 };
 
+/* ========================================================================
+/*		エディタメニュ
+/* ===================================================================== */
 class EditorMenu {
 public:
+
+	/// <summary>
+	/// 追加
+	/// </summary>
+	/// <param name="category"></param>
+	/// <param name="item"></param>
 	void Add(MenuCategory category, const MenuItem& item);
-	const std::vector<MenuItem>& Get(MenuCategory category) const;
+
+	/// <summary>
+	/// クリア
+	/// </summary>
 	void Clear();
+
+	/// <summary>
+	/// 描画
+	/// </summary>
 	void Render();
 
+	//--------- accessor -----------------------------------------------------
+	const std::vector<MenuItem>& Get(MenuCategory category) const;
+
 private:
+	/// <summary>
+	/// カテゴリ描画
+	/// </summary>
+	/// <param name="label"></param>
+	/// <param name="category"></param>
 	void RenderCategory(const char* label, MenuCategory category);
 
 private:
