@@ -52,6 +52,8 @@ void BaseEventObject::AlwaysUpdate([[maybe_unused]]float dt) {
 	if(collider_) {
 		if(collider_->IsCollisionEnubled()) {
 			collider_->Update(worldPos,rot);
+			auto* box = dynamic_cast<BoxCollider*>(collider_.get());
+			if(box) box->SetSize(worldTransform_.scale);
 			collider_->Draw();
 		}
 	}
