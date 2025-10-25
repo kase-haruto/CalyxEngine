@@ -20,6 +20,8 @@ static const char* ObjectTypeToString(ObjectType type) {
 		return "GameObject";
 	case ObjectType::ParticleSystem:
 		return "ParticleSystem";
+	case ObjectType::Event:
+		return "Event";
 	default:
 		return "None";
 	}

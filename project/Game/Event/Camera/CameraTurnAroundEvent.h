@@ -23,6 +23,7 @@ public:
 
 	// debug ui
 	void DerivativeGui() override;
+	std::string GetObjectTypeName() const override { return name_; }
 
 private:
 	//===================================================================*/
