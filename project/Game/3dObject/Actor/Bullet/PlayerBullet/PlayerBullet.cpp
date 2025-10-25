@@ -1,7 +1,7 @@
 #include "PlayerBullet.h"
 
 #include <Engine/Foundation/Utility/FileSystem/ConfigPathResolver/ConfigPathResolver.h>
-#include <Engine/Objects/Collider/BoxCollider.h>
+#include <Engine/Objects/Collider/SphereCollider.h>
 #include <Engine/Scene/Context/SceneContext.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
 
@@ -16,12 +16,14 @@ PlayerBullet::PlayerBullet(const std::string& modelName, const std::string& name
 	shootFx_ = SceneAPI::Instantiate<ParticleSystemObject>("shootFx");
 	shootFx_->LoadConfig("Resources/Assets/Configs/Effect/ShootFx.json");
 
+	// collider初期化
+	BaseGameObject::InitializeCollider(ColliderKind::Sphere);
 	collider_->SetType(ColliderType::Type_PlayerAttack);
 	collider_->SetTargetType(ColliderType::Type_Enemy);
 	collider_->SetOwner(this);
 	collider_->SetIsDrawCollider(false);
-	auto* boxCollider = dynamic_cast<BoxCollider*>(collider_.get());
-	boxCollider->SetSize(Vector3(3.0f, 3.0f, 3.0f));
+	auto* sphereCollider = dynamic_cast<SphereCollider*>(collider_.get());
+	sphereCollider->SetRadius(1.5f);
 
 	moveSpeed_ *= 1.5f;
 }

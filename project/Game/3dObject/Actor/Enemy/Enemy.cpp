@@ -33,10 +33,13 @@ Enemy::Enemy(const std::string& modelName,const std::string objName)
 	moveSpeed_ = Random::Generate<float>(1.0f,3.0f);
 	velocity_  = Random::GenerateVector3(-1.0f,1.0f);
 
+	BaseGameObject::InitializeCollider(ColliderKind::Sphere);
 	collider_->SetType(ColliderType::Type_Enemy);
 	collider_->SetTargetType(ColliderType::Type_PlayerAttack);
 	collider_->SetOwner(this);
-	if(auto* box = dynamic_cast<BoxCollider*>(collider_.get())) { box->SetSize({3,3,3}); }
+	if(auto* radius = dynamic_cast<SphereCollider*>(collider_.get())) {
+		radius->SetRadius(1.5f);
+	}
 	collider_->SetIsDrawCollider(false);
 
 	life_          = 1;

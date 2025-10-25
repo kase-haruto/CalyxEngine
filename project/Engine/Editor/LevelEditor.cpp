@@ -216,9 +216,6 @@ void LevelEditor::Render() {
 	inspector_->SetSelectedEditor(selectedEditor_);
 	inspector_->SetSelectedObject(selectedObject_);
 
-	// inspector は editorPanels_ に含まれているので、ここで Render は呼ばない
-	// inspector_->Render();
-
 	sceneEditor_->Update();
 }
 

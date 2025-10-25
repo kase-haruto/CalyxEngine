@@ -22,6 +22,7 @@ class BaseGameObject
 	: public SceneObject,
 	  public IConfigurable {
 
+protected:
 	enum class ColliderKind {
 		None,
 		Box,
@@ -108,11 +109,11 @@ public:
 	bool Save() const override;
 	bool Load() override;
 
-private:
+protected:
 	//===================================================================*/
 	//                    private methods
 	//===================================================================*/
-	void SwitchCollider(ColliderKind kind, bool isCollisionEnubled = true);
+	void InitializeCollider(ColliderKind kind);
 
 protected:
 	//===================================================================*/
@@ -127,7 +128,7 @@ protected:
 	//===================================================================*/
 	ObjectModelType objectModelType_ = ModelType_Static;
 
-	std::unique_ptr<Collider> collider_;
+	std::unique_ptr<Collider> collider_ = nullptr;
 	ColliderKind			  currentColliderKind_ = ColliderKind::None;  //< コライダーの種類
 	BillboardMode			  billboardMode_	   = BillboardMode::None; //< ビルボードモード
 protected:

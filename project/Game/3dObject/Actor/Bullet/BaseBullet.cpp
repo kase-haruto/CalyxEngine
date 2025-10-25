@@ -12,6 +12,9 @@ BaseBullet::BaseBullet(const std::string& modelName,const std::string& name)
 
 	moveSpeed_ = 50.0f;
 	SetDrawEnable(false);
+
+	// コライダーの形状をsphereに設定
+	BaseGameObject::InitializeCollider(ColliderKind::Sphere);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
