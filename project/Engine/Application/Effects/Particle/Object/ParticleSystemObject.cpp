@@ -8,9 +8,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 //		ctor / dtor
 /////////////////////////////////////////////////////////////////////////////////////////
-ParticleSystemObject::ParticleSystemObject(const std::string& name) {
-	SceneObject::SetName(name, ObjectType::ParticleSystem);
-}
+ParticleSystemObject::ParticleSystemObject(const std::string& name) { SceneObject::SetName(name,ObjectType::ParticleSystem); }
 ParticleSystemObject::~ParticleSystemObject() = default;
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -38,16 +36,10 @@ void ParticleSystemObject::SetDrawEnable(bool isDrawEnable) {
 	FxEmitter::SetDrawEnable(isDrawEnable);
 
 	// 子にも適用
-	for(const auto& child : children_) {
-		if(auto ps = std::dynamic_pointer_cast<ParticleSystemObject>(child)) {
-			ps->SetDrawEnable(isDrawEnable);
-		}
-	}
+	for(const auto& child : children_) { if(auto ps = std::dynamic_pointer_cast<ParticleSystemObject>(child)) { ps->SetDrawEnable(isDrawEnable); } }
 }
 
-Vector3 ParticleSystemObject::GetWorldPosition() const {
-	return GetWorldTransform().GetWorldPosition();
-}
+Vector3 ParticleSystemObject::GetWorldPosition() const { return GetWorldTransform().GetWorldPosition(); }
 
 void ParticleSystemObject::ApplyConfig() {
 	const auto& cfg = config_.GetConfig();
@@ -56,8 +48,8 @@ void ParticleSystemObject::ApplyConfig() {
 	FxEmitter::ApplyConfigFrom(cfg); // config_ は ParticleSystemObjectConfig のはず
 
 	// SceneObject 情報
-	name_	  = cfg.name;
-	id_		  = cfg.guid;
+	name_     = cfg.name;
+	id_       = cfg.guid;
 	parentId_ = cfg.parentGuid;
 
 	worldTransform_.ApplyConfig(cfg.transform);
@@ -67,8 +59,8 @@ void ParticleSystemObject::ExtractConfig() {
 	auto& cfg = config_.GetConfig();
 	FxEmitter::ExtractConfigTo(cfg); // config_ は ParticleSystemObjectConfig
 
-	cfg.name	   = name_;
-	cfg.guid	   = id_;
+	cfg.name       = name_;
+	cfg.guid       = id_;
 	cfg.parentGuid = parentId_;
 	worldTransform_.ExtractConfig();
 }
@@ -95,29 +87,17 @@ void ParticleSystemObject::SaveConfig(const std::string& path) const {
 
 void ParticleSystemObject::PlayRecursive() {
 	Play();
-	for(const auto& child : children_) {
-		if(auto ps = std::dynamic_pointer_cast<ParticleSystemObject>(child)) {
-			ps->PlayRecursive();
-		}
-	}
+	for(const auto& child : children_) { if(auto ps = std::dynamic_pointer_cast<ParticleSystemObject>(child)) { ps->PlayRecursive(); } }
 }
 
 void ParticleSystemObject::StopRecursive() {
 	Stop();
-	for(const auto& child : children_) {
-		if(auto ps = std::dynamic_pointer_cast<ParticleSystemObject>(child)) {
-			ps->StopRecursive();
-		}
-	}
+	for(const auto& child : children_) { if(auto ps = std::dynamic_pointer_cast<ParticleSystemObject>(child)) { ps->StopRecursive(); } }
 }
 
 void ParticleSystemObject::ResetRecursive() {
 	Reset();
-	for(const auto& child : children_) {
-		if(auto ps = std::dynamic_pointer_cast<ParticleSystemObject>(child)) {
-			ps->ResetRecursive();
-		}
-	}
+	for(const auto& child : children_) { if(auto ps = std::dynamic_pointer_cast<ParticleSystemObject>(child)) { ps->ResetRecursive(); } }
 }
 
 REGISTER_SCENE_OBJECT(ParticleSystemObject)

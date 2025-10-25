@@ -150,7 +150,7 @@ void PlaceToolPanel::RegisterPlaceItems() {
 
 					auto factory = []() {
 						auto obj = SceneAPI::Instantiate<CameraTurnAroundEvent>("CameraTurnAroundEvent");
-						//obj->ApplyConfig();
+						obj->ApplyConfig();
 						return obj;
 					};
 
