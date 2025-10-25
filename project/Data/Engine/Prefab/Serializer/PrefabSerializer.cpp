@@ -67,7 +67,7 @@ std::vector<std::shared_ptr<SceneObject>> PrefabSerializer::Load(const std::stri
 		guidMap[newGuid] = sp;
 	}
 
-	// 2. 親子リンク復元（旧 GUID → 新 GUID をマップで追う）
+	// 親子リンク復元
 	for (const auto& j : jArray) {
 		Guid oldChild = j.value("guid", Guid{});
 		Guid oldParent = j.value("parentGuid", Guid{});
@@ -88,7 +88,7 @@ std::vector<std::shared_ptr<SceneObject>> PrefabSerializer::Load(const std::stri
 		}
 	}
 
-	// ✅ ルートだけでなく、すべてのオブジェクトを返す
+	// ルートだけでなく、すべてのオブジェクトを返す
 	std::vector<std::shared_ptr<SceneObject>> allObjects;
 	allObjects.reserve(guidMap.size());
 	for (auto& [g, sp] : guidMap) {

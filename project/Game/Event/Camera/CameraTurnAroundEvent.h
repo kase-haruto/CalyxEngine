@@ -24,7 +24,7 @@ public:
 	// debug ui
 	void DerivativeGui() override;
 	std::string GetObjectTypeName() const override { return name_; }
-
+	std::string_view GetTypeName() const override { return "CameraTurnAroundEvent"; }
 private:
 	//===================================================================*/
 	//					private methods
