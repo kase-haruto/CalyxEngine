@@ -40,8 +40,6 @@ BaseGameObject::BaseGameObject(const std::string&		  modelName,
 	//===================================================================*/
 	//			collider 設定
 	//===================================================================*/
-	SwitchCollider(ColliderKind::Box, true); // 初期化時にBoxをセット
-
 	config_.SetOnApplied([this](const BaseGameObjectConfig&) {
 		this->ApplyConfig();
 	});
@@ -50,7 +48,6 @@ BaseGameObject::BaseGameObject(const std::string&		  modelName,
 BaseGameObject::BaseGameObject() {
 	objectModelType_ = ObjectModelType::ModelType_Unknown; // まだ未定
 	SetName("GameObject");								   // 仮の名前
-	SwitchCollider(ColliderKind::Box, false);			   // とりあえず Box
 	worldTransform_.Update();
 
 	config_.SetOnApplied([this](const BaseGameObjectConfig&) {
@@ -80,22 +77,23 @@ void BaseGameObject::AlwaysUpdate(float dt) {
 }
 
 //===================================================================*/
-//                    コライダー形状の変更
+//						引数から種類をもらって初期化
 //===================================================================*/
-void BaseGameObject::SwitchCollider(ColliderKind kind, bool isCollisionEnubled) {
-	if(kind == currentColliderKind_)
-		return;
+void BaseGameObject::InitializeCollider(ColliderKind kind) {
+	if(kind == currentColliderKind_) return; // 差分がなければ早期リターン
 
 	switch(kind) {
+		// box形状のコライダーを生成
 	case ColliderKind::Box: {
-		auto box = std::make_unique<BoxCollider>(isCollisionEnubled);
+		auto box = std::make_unique<BoxCollider>(true);
 		box->SetName(GetName() + "_BoxCollider");
 		box->Initialize(Vector3(1.0f, 1.0f, 1.0f)); // 適当な初期サイズ
 		collider_ = std::move(box);
 		break;
 	}
+		// 球体形状のコライダーの生成
 	case ColliderKind::Sphere: {
-		auto sphere = std::make_unique<SphereCollider>(isCollisionEnubled);
+		auto sphere = std::make_unique<SphereCollider>(true);
 		sphere->SetName(GetName() + "_SphereCollider");
 		sphere->Initialize(1.0f); // 適当な初期半径
 		collider_ = std::move(sphere);
@@ -120,7 +118,7 @@ void BaseGameObject::ShowGui() {
 
 	model_->ShowImGui(config_.GetConfig().modelConfig);
 
-	collider_->ShowGui();
+	if(collider_) collider_->ShowGui();
 
 	// === Billboard GUI ===
 	{

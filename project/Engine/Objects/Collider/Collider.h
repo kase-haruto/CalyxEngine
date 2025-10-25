@@ -4,52 +4,51 @@
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Objects/3D/Geometory/Shape.h>
 
-#include <variant>
 #include <string>
+#include <variant>
 
 //===================================================================*/
 //							  ColliderType
 //===================================================================*/
-enum class ColliderType{
-	Type_None         = 0,
-	Type_Player       = 1 << 0,  // 0b00000001
-	Type_PlayerAttack = 1 << 1,  // 0b00000010
-	Type_Enemy        = 1 << 2,  // 0b00000100
-	Type_EnemySpawner = 1 << 3,  // 0b00001000
-	Type_EnemyAttack  = 1 << 4,  // 0b00010000
+enum class ColliderType {
+	Type_None		  = 0,
+	Type_Player		  = 1 << 0, // 0b00000001
+	Type_PlayerAttack = 1 << 1, // 0b00000010
+	Type_Enemy		  = 1 << 2, // 0b00000100
+	Type_EnemySpawner = 1 << 3, // 0b00001000
+	Type_EnemyAttack  = 1 << 4, // 0b00010000
 	Type_EventObject  = 1 << 5,
 };
 
 // ビット演算のオーバーロード
-inline ColliderType operator|(ColliderType lhs, ColliderType rhs){
+inline ColliderType operator|(ColliderType lhs, ColliderType rhs) {
 	using T = std::underlying_type_t<ColliderType>;
-	return static_cast< ColliderType >(static_cast< T >(lhs) | static_cast< T >(rhs));
+	return static_cast<ColliderType>(static_cast<T>(lhs) | static_cast<T>(rhs));
 }
 
-inline ColliderType& operator|=(ColliderType& lhs, ColliderType rhs){
+inline ColliderType& operator|=(ColliderType& lhs, ColliderType rhs) {
 	lhs = lhs | rhs;
 	return lhs;
 }
 
 // ビットAND演算のオーバーロード
-inline ColliderType operator&(ColliderType lhs, ColliderType rhs){
+inline ColliderType operator&(ColliderType lhs, ColliderType rhs) {
 	using T = std::underlying_type_t<ColliderType>;
-	return static_cast< ColliderType >(static_cast< T >(lhs) & static_cast< T >(rhs));
+	return static_cast<ColliderType>(static_cast<T>(lhs) & static_cast<T>(rhs));
 }
 
 // ビットAND代入演算のオーバーロード
-inline ColliderType& operator&=(ColliderType& lhs, ColliderType rhs){
+inline ColliderType& operator&=(ColliderType& lhs, ColliderType rhs) {
 	lhs = lhs & rhs;
 	return lhs;
 }
 
 class BaseGameObject; // 前方宣言
 
-
 /* ========================================================================
 /*		基底コライダー
 /* ===================================================================== */
-class Collider{
+class Collider {
 public:
 	//===================================================================*/
 	//                   public methods
@@ -57,67 +56,72 @@ public:
 	Collider() = default;
 	Collider(bool isEnuble);
 	virtual ~Collider();
-	virtual void Update(const Vector3& position,const Quaternion& rotate) = 0;
-	virtual void Draw() = 0;
+	virtual void Update(const Vector3& position, const Quaternion& rotate) = 0;
+	virtual void Draw()													   = 0;
 	virtual void ShowGui();
-	void ShowGui(struct ColliderConfig& config);
+	void		 ShowGui(struct ColliderConfig& config);
 
+	//* 衝突時処理 ==========================================*//
+	virtual void OnCollisionEnter([[maybe_unused]] Collider* other) {};
+	virtual void OnCollisionStay([[maybe_unused]] Collider* other) {};
+	virtual void OnCollisionExit([[maybe_unused]] Collider* other) {};
 
-	virtual void OnCollisionEnter([[maybe_unused]] Collider* other){};
-	virtual void OnCollisionStay([[maybe_unused]] Collider* other){};
-	virtual void OnCollisionExit([[maybe_unused]] Collider* other){};
-
+	//* 衝突通知 ==========================================*//
 	void NotifyCollisionEnter(Collider* other);
 	void NotifyCollisionStay(Collider* other);
 	void NotifyCollisionExit(Collider* other);
-	void ApplyConfig(const struct ColliderConfig& config);
+
+	//* config ==========================================*//
+	void		   ApplyConfig(const struct ColliderConfig& config);
 	ColliderConfig ExtractConfig() const;
 
-	virtual float GetColliderRadius()const = 0;
+	//* accessor ==========================================*//
+	virtual float GetColliderRadius() const = 0;
 
 protected:
 	//===================================================================*/
 	//                   protected methods
 	//===================================================================*/
 	std::variant<Sphere, OBB> collisionShape_;
-	std::string name_;
+	std::string				  name_;
 
 	ColliderType type_;							//< 自身のタイプ
 	ColliderType targetType_;					//< 衝突相手のタイプ
-	Vector4 color_ = {1.0, 0.0, 0.0, 1.0};		//< 描画色
-	Vector3 offset_{ 0.0f, 0.0f, 0.0f };
+	Vector4		 color_ = {1.0, 0.0, 0.0, 1.0}; //< 描画色
+	Vector3		 offset_{0.0f, 0.0f, 0.0f};
 
-	bool isCollisionEnabled_ = false;			//< 衝突判定を行うかどうか
-	bool isDraw_ = true;						//< 描画を行うかどうか
-	bool isTrigger_ = false;					//< 押し戻しなどを行うかどうか
+	bool isCollisionEnabled_ = false; //< 衝突判定を行うかどうか
+	bool isDraw_			 = true;  //< 描画を行うかどうか
+	bool isTrigger_			 = false; //< 押し戻しなどを行うかどうか
 public:
 	//===================================================================*/
 	//                   getter/setter
 	//===================================================================*/
 
-	void SetOwner(BaseGameObject* owner) { owner_ = owner; }
+	void			SetOwner(BaseGameObject* owner) { owner_ = owner; }
 	BaseGameObject* GetOwner() const { return owner_; }
 
-	virtual const Vector3& GetCenter()const = 0;
+	virtual const Vector3&					 GetCenter() const	 = 0;
 	virtual const std::variant<Sphere, OBB>& GetCollisionShape() = 0;
 
-	const std::string& GetName()const{ return name_; }
-	void SetName(const std::string& name){ name_ = name; }
+	const std::string& GetName() const { return name_; }
+	void			   SetName(const std::string& name) { name_ = name; }
 
-	ColliderType GetType() const{ return type_; }
-	ColliderType GetTargetType() const{ return targetType_; }
-	void SetType(ColliderType type) { type_ = type; }
-	void SetTargetType(ColliderType targetType) { targetType_ = targetType; }
-	void SetColor(const Vector4& color){ color_ = color; }
+	ColliderType GetType() const { return type_; }
+	ColliderType GetTargetType() const { return targetType_; }
+	void		 SetType(ColliderType type) { type_ = type; }
+	void		 SetTargetType(ColliderType targetType) { targetType_ = targetType; }
+	void		 SetColor(const Vector4& color) { color_ = color; }
 
-	bool IsCollisionEnubled()const{ return isCollisionEnabled_; }
+	bool IsCollisionEnubled() const { return isCollisionEnabled_; }
 	void SetCollisionEnabled(bool isCollisionEnuble);
 
 	void SetIsDrawCollider(bool isDraw) { isDraw_ = isDraw; }
 
-	void SetOffset(const Vector3& off) { offset_ = off; }
+	void		   SetOffset(const Vector3& off) { offset_ = off; }
 	const Vector3& GetOffset() const { return offset_; }
-	void AddOffset(const Vector3& d) { offset_ += d; }
+	void		   AddOffset(const Vector3& d) { offset_ += d; }
+
 private:
 	BaseGameObject* owner_ = nullptr;
 };

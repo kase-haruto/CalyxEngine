@@ -3,6 +3,8 @@
 /*   include space
 /* ===================================================================== */
 // engine
+#include "Engine/Objects/3D/Actor/BaseGameObject.h"
+
 #include <Engine/Scene/Utility/SceneUtility.h>
 
 
@@ -26,8 +28,10 @@ static inline Vector3 TurnTowards(const Vector3& fromDir, const Vector3& toDir, 
 /////////////////////////////////////////////////////////////////////////////////////////
 EnemyBullet::EnemyBullet(const std::string& modelName, const std::string& name)
 	: BaseBullet::BaseBullet(modelName, name) {
+
 	collider_->SetType(ColliderType::Type_EnemyAttack);
 	collider_->SetTargetType(ColliderType::Type_Player);
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

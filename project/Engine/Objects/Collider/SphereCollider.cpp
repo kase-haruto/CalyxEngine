@@ -1,52 +1,69 @@
 #include "SphereCollider.h"
+
+#include "Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h"
+
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 
 #include <externals/imgui/imgui.h>
 
-#include <sstream> 
+#include <sstream>
 
-SphereCollider::SphereCollider(bool isEnuble) :
-	Collider::Collider(isEnuble) {}
+/////////////////////////////////////////////////////////////////////////////////////////
+//		ctor
+/////////////////////////////////////////////////////////////////////////////////////////
+SphereCollider::SphereCollider(bool isEnuble) : Collider::Collider(isEnuble) {}
 
-void SphereCollider::Initialize(float radius){
+void SphereCollider::Initialize(float radius) {
 
 	std::stringstream ss;
 	ss << "sphere" << "_" << this; // 形状とアドレスを組み合わせ
 	name_ = ss.str();
 
-	collisionShape_ = Sphere {shape_};
-	shape_.radius = radius;
-
+	collisionShape_ = Sphere{shape_};
+	shape_.radius	= radius;
 }
 
-void SphereCollider::Update(const Vector3& position,[[maybe_unused]] const Quaternion& rotate){
+/////////////////////////////////////////////////////////////////////////////////////////
+//		更新処理
+/////////////////////////////////////////////////////////////////////////////////////////
+void SphereCollider::Update(const Vector3& position, [[maybe_unused]] const Quaternion& rotate) {
 	// 位置を更新
-	shape_.center = position;
+	shape_.center = position + offset_;
 }
 
-void SphereCollider::Draw(){
+void SphereCollider::Draw() {
 
-#ifdef _DEBUG
-	if (isDraw_ && isCollisionEnabled_) {
+#if defined(_DEBUG) || defined(DEVELOP)
+	// 形状の描画
+	if(isDraw_ && isCollisionEnabled_) {
 		PrimitiveDrawer::GetInstance()->DrawSphere(shape_.center, shape_.radius, 10, color_);
 	}
 #endif // DEBUG
-
 }
 
-void SphereCollider::ShowGui(){
+/////////////////////////////////////////////////////////////////////////////////////////
+//		debug ui
+/////////////////////////////////////////////////////////////////////////////////////////
+void SphereCollider::ShowGui() {
 	if(ImGui::CollapsingHeader("Collider")) {
 		Collider::ShowGui();
-		if (!isCollisionEnabled_) return;
-		ImGui::DragFloat("Radius", &shape_.radius, 0.1f, 0.0f, 10.0f);
+		if(!isCollisionEnabled_) return;
+		GuiCmd::DragFloat3("Offset", offset_);
+		GuiCmd::DragFloat("Radius", shape_.radius, 0.1f, 0.0f, 10.0f);
 	}
 }
 
-const Vector3& SphereCollider::GetCenter() const{
+/////////////////////////////////////////////////////////////////////////////////////////
+//		中心座標を返す
+/////////////////////////////////////////////////////////////////////////////////////////
+const Vector3& SphereCollider::GetCenter() const {
 	return shape_.center;
 }
 
-const std::variant<Sphere, OBB>& SphereCollider::GetCollisionShape(){
+/////////////////////////////////////////////////////////////////////////////////////////
+//		形状を返す
+/////////////////////////////////////////////////////////////////////////////////////////
+const std::variant<Sphere, OBB>& SphereCollider::GetCollisionShape() {
 	collisionShape_ = shape_;
 	return collisionShape_;
 };

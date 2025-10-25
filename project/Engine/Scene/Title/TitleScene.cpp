@@ -7,13 +7,7 @@
 #include <Engine/Scene/System/SceneManager.h>
 
 // engine
-#include <Engine/Application/Input/Input.h>
-#include <Engine/Application/System/Enviroment.h>
-#include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Collision/CollisionManager.h>
-#include <Engine/Graphics/Camera/Manager/CameraManager.h>
-#include <Engine/Graphics/Context/GraphicsGroup.h>
-#include <Engine/Objects/3D/Actor/SceneObjectManager.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
 
@@ -38,7 +32,7 @@ void TitleScene::Initialize() {
 	sceneContext_->Initialize(false);
 
 	// シーンデータ読み込み
-	SceneSerializer::Load(*sceneContext_, "Resources/Assets/Scenes/TitleScene.scene");
+	SceneSerializer::Load(*sceneContext_, "Resources/Assets/Scenes/GameScene.scene");
 
 	LoadAssets();
 

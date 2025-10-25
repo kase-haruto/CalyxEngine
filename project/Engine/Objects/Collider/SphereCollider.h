@@ -27,6 +27,7 @@ public:
 	void OnCollisionExit([[maybe_unused]] Collider* other)override{};
 
 	float GetColliderRadius()const override { return shape_.radius; }
+	void SetRadius(float radius) { shape_.radius = radius; }
 
 protected:
 	//===================================================================*/

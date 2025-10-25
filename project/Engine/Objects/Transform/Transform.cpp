@@ -74,9 +74,6 @@ Vector3 BaseTransform::GetWorldPosition() const {
 /* ========================================================================
 /* worldTransform class
 /* ===================================================================== */
-/////////////////////////////////////////////////////////////////////////////////////////
-//	worldTransformの更新
-/////////////////////////////////////////////////////////////////////////////////////////
 void WorldTransform::Update([[maybe_unused]]const Matrix4x4& viewProjMatrix) {
 	Matrix4x4 scaleMat = Cx::Math::MakeScaleMatrix(scale);
 
