@@ -213,6 +213,10 @@ void LevelEditor::Render() {
 		pPlaySesseion_->RenderToolbar();
 	}
 
+	if(performanceOverlay_) {
+		performanceOverlay_->RenderToolbar();
+	}
+
 	inspector_->SetSelectedEditor(selectedEditor_);
 	inspector_->SetSelectedObject(selectedObject_);
 
