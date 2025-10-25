@@ -70,7 +70,9 @@ std::string SceneObject::GetObjectTypeName() const {
 //		名前の設定
 /////////////////////////////////////////////////////////////////////////////////////////
 void SceneObject::SetName(const std::string& name, std::optional<ObjectType> type) {
-	name_ = name;
+	if (!name.empty()) {  // 空文字なら上書きしない
+		name_ = name;
+	}
 	if(type.has_value()) objectType_ = type.value();
 }
 

@@ -77,7 +77,7 @@ Vector3 BaseTransform::GetWorldPosition() const {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	worldTransformの更新
 /////////////////////////////////////////////////////////////////////////////////////////
-void WorldTransform::Update(const Matrix4x4& viewProjMatrix) {
+void WorldTransform::Update([[maybe_unused]]const Matrix4x4& viewProjMatrix) {
 	Matrix4x4 scaleMat = Cx::Math::MakeScaleMatrix(scale);
 
 	// どちらをソースとするかで処理を分ける
@@ -99,7 +99,6 @@ void WorldTransform::Update(const Matrix4x4& viewProjMatrix) {
 		matrix.world = localMat;
 	}
 
-	matrix.WVP = matrix.world * viewProjMatrix;
 	matrix.WorldInverseTranspose = Matrix4x4::Transpose(Matrix4x4::Inverse(matrix.world));
 
 	TransferData(matrix);

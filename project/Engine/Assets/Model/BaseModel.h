@@ -10,7 +10,7 @@
 #include <Engine/Graphics/Pipeline/BlendMode/BlendMode.h>
 #include <Engine/Objects/Transform/Transform.h>
 #include <Engine/Graphics/Buffer/DxStructuredBuffer.h>
-#include <Engine/Objects/3D/Details/BillboardParams.h> // ← 追加: GpuBillboardParams
+#include <Engine/Objects/3D/Details/BillboardParams.h>
 
 /*data*/
 #include <Data/Engine/Configs/Scene/Objects/Model/BaseModelConfig.h>
@@ -20,9 +20,7 @@
 
 /* c++ */
 #include <d3d12.h>
-#include <memory>
 #include <string>
-#include <wrl.h>
 #include <optional>
 
 /* ========================================================================

@@ -1,7 +1,6 @@
 #include "BaseGameObject.h"
 
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
-#include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 #include <Engine/foundation/Utility/FileSystem/ConfigPathResolver/ConfigPathResolver.h>
 #include <Engine/objects/Collider/BoxCollider.h>
 #include <Engine/objects/Collider/SphereCollider.h>
