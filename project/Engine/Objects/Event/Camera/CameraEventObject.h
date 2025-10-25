@@ -21,6 +21,9 @@ public:
 	CameraEventObject(const std::string& name);
 	~CameraEventObject()override;
 
+	
+	std::string GetObjectTypeName() const override { return name_; }
+
 protected:
 	//===================================================================*/
 	//					 protected methods

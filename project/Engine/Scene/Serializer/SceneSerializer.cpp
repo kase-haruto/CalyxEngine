@@ -60,10 +60,10 @@ nlohmann::json SceneSerializer::DumpJson(const SceneContext& context) {
 				cfg->ExtractConfigToJson(jCfg);
 				JsonUtils::Save(cfgPath, jCfg);
 
-				// シーンにはパスのみ記録（本体は内包しない）
+				// シーンにはパスのみ記録
 				jOne["configPath"] = cfgPath;
 			} else {
-				// 従来：設定を内包
+				// 設定を内包
 				nlohmann::json jInline;
 				cfg->ExtractConfigToJson(jInline);
 				// 内包データを jOne にマージ

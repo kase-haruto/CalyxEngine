@@ -21,7 +21,7 @@ public:
   // ICommand 実装
 	void Execute() override {
 		object_ = factory_();
-		ctx_->AddObject(object_);
+		//ctx_->AddObject(object_);
 	}
 	void Undo() override {
 		ctx_->RemoveObject(object_);

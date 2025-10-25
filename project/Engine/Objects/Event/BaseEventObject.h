@@ -40,6 +40,8 @@ public:
 	virtual void OnCollisionStay([[maybe_unused]] Collider* other) {}
 	virtual void OnCollisionExit([[maybe_unused]] Collider* other) {}
 
+
+	std::string GetObjectTypeName() const override { return name_; }
 protected:
 	//===================================================================*/
 	//				 protected methods
