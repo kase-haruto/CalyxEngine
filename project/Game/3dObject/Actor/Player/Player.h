@@ -112,11 +112,17 @@ private:
 	std::vector<std::unique_ptr<Sprite>> lockOnSprites_;	//< ロックオンマーカー
 
 	// ロックオン
-	float lockOnRadiusPx_ = 80.0f;     // 初期値: 80px（以前は 30px 相当）
-	size_t maxLockOn_     = 5;         // 既存の kMaxLockOn の置き換え用（任意）
+	float lockOnRadiusPx_ = 60.0f;     // 
+	size_t maxLockOn_     = 5;         //  kMaxLockOn 
 	// 無敵時かん用
 	float invincibleTimer_ = 0.0f; // >0 の間は無敵
 	// 見た目に使いたければトグル点滅など
 	float invincibleBlinkAccum_ = 0.0f;
 	bool  invincibleBlinkState_ = true;
+
+	// 画面内クランプ用設定
+	bool   clampPlayerInView_  = true;
+	bool   clampReticleInView_ = true;
+	float  clampMarginXpx_     = 24.0f; // 左右の余白(px)
+	float  clampMarginYpx_     = 24.0f; // 上下の余白(px)
 };

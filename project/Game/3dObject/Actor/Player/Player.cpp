@@ -32,6 +32,70 @@ namespace {
 constexpr float kHitIFrameSec  = 1.5f;
 constexpr float kBlinkHz	   = 12.0f; // 点滅周波数
 constexpr float kBlinkInterval = 1.0f / kBlinkHz;
+
+inline void SetWorldPosKeepRotScale(WorldTransform& wt, const Vector3& worldPos){
+    // 親が何段でもOK：親の world は祖先込み合成
+    if (wt.parent){
+        wt.parent->Update(); // 親の world を最新に
+        const Matrix4x4 invParent = Matrix4x4::Inverse(wt.parent->matrix.world);
+        // 位置のみをローカルへ戻す（回転・スケールはローカル既存値を維持）
+        wt.translation = Vector3::Transform(worldPos, invParent);
+    }else{
+        wt.translation = worldPos;
+    }
+}
+
+// world を「画面内の矩形（px余白あり）」に収めたワールド座標へ
+inline Vector3 ClampWorldByScreenBox(const Vector3& world,
+                                     float marginXpx, float marginYpx){
+    auto* cam = CameraManager::GetMain3d();
+    if (!cam) return world;
+
+    // 1) スクリーン座標と NDC z を取得
+    const Matrix4x4& VP = cam->GetViewProjectionMatrix();
+    const Vector4    clip = Vector4::Transform(Vector4(world, 1.0f), VP);
+
+    // 背面や極端ケースは触らない
+    constexpr float kEps = 1e-6f;
+    if (clip.w <= kEps) return world;
+
+    const Vector3 ndc = { clip.x/clip.w, clip.y/clip.w, clip.z/clip.w };
+    Vector2 scr      = Cx::Math::WorldToScreen(world);
+
+    // 2) 画面サイズと余白でクランプ（float化しておく）
+    const float W = static_cast<float>(kGameWidth);
+    const float H = static_cast<float>(kGameHeight);
+
+    const float minX = (std::max)(0.0f, marginXpx);
+    const float maxX = (std::max)(minX, W - marginXpx);
+    const float minY = (std::max)(0.0f, marginYpx);
+    const float maxY = (std::max)(minY, H - marginYpx);
+
+    const Vector2 clamped = {
+        std::clamp(scr.x, minX, maxX),
+        std::clamp(scr.y, minY, maxY)
+    };
+
+    // 変化なしなら元のワールドを返す
+    if (clamped.x == scr.x && clamped.y == scr.y) return world;
+
+    // 3) 元の NDC z を保って 2D→3D へ戻す（奥行きを変えない）
+    return Cx::Math::ScreenToWorld(clamped, ndc.z);
+}
+
+// WorldTransform を画面内にクランプ（ローカル translation へ反映まで）
+inline void ClampWorldTransformInView(WorldTransform& wt,
+                                      float marginXpx, float marginYpx){
+    // 自身・親の world を最新化
+    wt.Update();
+
+    const Vector3 nowW = wt.GetWorldPosition();
+    const Vector3 clW  = ClampWorldByScreenBox(nowW, marginXpx, marginYpx);
+
+    // 親が何段でもローカルへ戻して translation を更新
+    SetWorldPosKeepRotScale(wt, clW);
+}
+
 } // namespace
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -235,7 +299,9 @@ void Player::DerivativeGui() {
 ///////////////////////////////////////////////////////////////////////////////////
 void Player::MoveBy(const Vector3& delta) {
 	worldTransform_.translation += delta * ClockManager::GetInstance()->GetDeltaTime();
-	UpdateTilt(delta);
+	if (clampPlayerInView_) {
+		ClampWorldTransformInView(worldTransform_, clampMarginXpx_, clampMarginYpx_);
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -423,8 +489,9 @@ void Player::Move() {
 
 	// 移動加算
 	worldTransform_.translation += moveVector * ClockManager::GetInstance()->GetDeltaTime();
-
-	UpdateTilt(moveVector);
+	if (clampPlayerInView_) {
+		ClampWorldTransformInView(worldTransform_, clampMarginXpx_, clampMarginYpx_);
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -480,11 +547,9 @@ void Player::UpdateReticlePosition() {
 	}
 
 	reticleTransform_.translation += offset;
-
-	// 制限
-	// reticleTransform_.translation.x = std::clamp(reticleTransform_.translation.x, -6.0f, 6.0f);
-	// reticleTransform_.translation.y = std::clamp(reticleTransform_.translation.y, -3.0f, 4.0f);
-	// reticleTransform_.translation.z = std::clamp(reticleTransform_.translation.z, 1.0f, 20.0f);
+	if (clampReticleInView_) {
+		ClampWorldTransformInView(reticleTransform_, clampMarginXpx_, clampMarginYpx_);
+	}
 }
 
 /* ======================================================================================
