@@ -2,7 +2,6 @@
 
 #include <Engine/Collision/CollisionManager.h>
 #include <Data/Engine/Configs/Scene/Objects/Collider/ColliderConfig.h>
-#include <Engine/Objects/3D/Actor/BaseGameObject.h>
 
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 #include <externals/imgui/imgui.h>
@@ -60,27 +59,21 @@ void Collider::ShowGui(ColliderConfig& config){
 //		衝突通知(衝突フレーム
 /////////////////////////////////////////////////////////////////////////////////////////
 void Collider::NotifyCollisionEnter(Collider* other) {
-	if (owner_) {
-		owner_->OnCollisionEnter(other);
-	}
+	if (onEnter_) onEnter_(other);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		衝突通知(衝突中
 /////////////////////////////////////////////////////////////////////////////////////////
 void Collider::NotifyCollisionStay(Collider* other) {
-	if (owner_) {
-		owner_->OnCollisionStay(other);
-	}
+	if (onStay_) onStay_(other);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		衝突通知(離れた
 /////////////////////////////////////////////////////////////////////////////////////////
 void Collider::NotifyCollisionExit(Collider* other) {
-	if (owner_) {
-		owner_->OnCollisionExit(other);
-	}
+	if (onExit_) onExit_(other);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

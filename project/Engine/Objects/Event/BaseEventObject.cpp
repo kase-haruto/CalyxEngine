@@ -24,6 +24,10 @@ BaseEventObject::BaseEventObject() {
 	collider_->SetType(ColliderType::Type_EventObject);
 	collider_->SetTargetType(ColliderType::Type_Player);
 
+	collider_->SetOnEnter([this](Collider* other) { this->OnCollisionEnter(other); });
+	collider_->SetOnStay([this](Collider* other) { this->OnCollisionStay(other); });
+	collider_->SetOnExit([this](Collider* other) { this->OnCollisionExit(other); });
+	
 	baseConfig_.SetOnApplied([this](const EventConfig&) {
 		this->ApplyConfig();
 	});

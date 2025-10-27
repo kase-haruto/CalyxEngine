@@ -50,6 +50,8 @@ class BaseGameObject; // 前方宣言
 /* ===================================================================== */
 class Collider {
 public:
+	using CollisionCallback = std::function<void(Collider* other)>;
+
 	//===================================================================*/
 	//                   public methods
 	//===================================================================*/
@@ -70,6 +72,10 @@ public:
 	void NotifyCollisionEnter(Collider* other);
 	void NotifyCollisionStay(Collider* other);
 	void NotifyCollisionExit(Collider* other);
+
+	void SetOnEnter(CollisionCallback cb) { onEnter_ = std::move(cb); }
+	void SetOnStay(CollisionCallback cb)  { onStay_  = std::move(cb); }
+	void SetOnExit(CollisionCallback cb)  { onExit_  = std::move(cb); }
 
 	//* config ==========================================*//
 	void		   ApplyConfig(const struct ColliderConfig& config);
@@ -93,6 +99,13 @@ protected:
 	bool isCollisionEnabled_ = false; //< 衝突判定を行うかどうか
 	bool isDraw_			 = true;  //< 描画を行うかどうか
 	bool isTrigger_			 = false; //< 押し戻しなどを行うかどうか
+
+private:
+	// 汎用イベントコールバック
+	CollisionCallback onEnter_;
+	CollisionCallback onStay_;
+	CollisionCallback onExit_;
+
 public:
 	//===================================================================*/
 	//                   getter/setter
