@@ -67,6 +67,13 @@ void CameraTurnAroundEvent::AlwaysUpdate(float dt) {
 	Vector3 end	  = start + direction_.Normalize() + 10.0f;
 	Vector4 col(Vector3(0.518f, 0.788f, 0.545f)); // 緑色
 	PrimitiveDrawer::GetInstance()->DrawLine3d(start, end, col);
+
+	if(!cam_) {
+		return;
+	}
+	// アクションの更新
+	if(turnAction_) {turnAction_->Update(cam_,dt);}
+	if(returnAction_) {returnAction_->Update(cam_,dt);}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
