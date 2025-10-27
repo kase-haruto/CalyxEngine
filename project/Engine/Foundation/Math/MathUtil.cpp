@@ -141,19 +141,18 @@ namespace Cx::Math {
 		// ワールド→クリップ空間
 		Vector4 clipPos = Vector4::Transform(Vector4(worldPos, 1.0f), viewProj);
 
-		if (fabs(clipPos.w) < 1e-5f) {
+		if(fabs(clipPos.w) < 1e-5f) {
 			return Vector2(0.0f, 0.0f); // 無効値
 		}
 
 		// NDC座標へ
 		Vector3 ndcPos = {
-					clipPos.x / clipPos.w,
-					clipPos.y / clipPos.w,
-					clipPos.z / clipPos.w
-		};
+			clipPos.x / clipPos.w,
+			clipPos.y / clipPos.w,
+			clipPos.z / clipPos.w};
 
-// NDC → スクリーン座標
-		float screenWidth = kGameWidth;
+		// NDC → スクリーン座標
+		float screenWidth  = kGameWidth;
 		float screenHeight = kGameHeight;
 
 		float screenX = (ndcPos.x * 0.5f + 0.5f) * screenWidth;
@@ -163,7 +162,7 @@ namespace Cx::Math {
 	}
 
 	Vector3 ScreenToWorld(const Vector2& screenPos, float depthZ) {
-		float screenWidth = kGameWidth;
+		float screenWidth  = kGameWidth;
 		float screenHeight = kGameHeight;
 
 		// スクリーン座標 → NDC座標に変換
@@ -174,9 +173,9 @@ namespace Cx::Math {
 		Vector4 ndcPos(ndcX, ndcY, depthZ, 1.0f);
 
 		Matrix4x4 invViewProj = Matrix4x4::Inverse(CameraManager::GetMain3d()->GetViewProjectionMatrix());
-		Vector4 worldH = Vector4::Transform(ndcPos, invViewProj);
+		Vector4	  worldH	  = Vector4::Transform(ndcPos, invViewProj);
 
-		if (fabs(worldH.w) > 1e-5f) {
+		if(fabs(worldH.w) > 1e-5f) {
 			worldH.x /= worldH.w;
 			worldH.y /= worldH.w;
 			worldH.z /= worldH.w;

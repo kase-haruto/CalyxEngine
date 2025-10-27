@@ -122,7 +122,7 @@ public:
 	void ApplyConfig(const WorldTransformConfig& config);
 	WorldTransformConfig ExtractConfig();
 public:
-	
+	bool inheritScale = true;//< 親のスケールを継承するか
 };
 
 //============================================================================*/

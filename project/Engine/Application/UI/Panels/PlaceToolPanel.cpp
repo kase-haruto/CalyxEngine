@@ -15,6 +15,7 @@
 
 //event
 #include <Game/Event/Camera/CameraTurnAroundEvent.h>
+#include <Game/Event/Spawn/EnemySpawnEvent.h>
 
 // --- externals --------------------------------------------------------------
 #include <externals/imgui/imgui.h>
@@ -161,6 +162,28 @@ void PlaceToolPanel::RegisterPlaceItems() {
 			});
 	}
 
+	{
+		auto& eventItems = categoryItems_[PlaceItemCategory::Event];
+		eventItems.push_back({
+				PlaceItemCategory::Event,
+				"EnemySpawnEvent",
+				{},{64,64},
+				[] {
+					auto* ctx = SceneContext::Current();
+
+					auto factory = []() {
+						auto obj = SceneAPI::Instantiate<EnemySpawnEvent>("EnemySpawnEvent");
+						//obj->ApplyConfig();
+						return obj;
+					};
+
+					CommandManager::GetInstance()->Execute(
+						std::make_unique<CreateObjectCommand<EnemySpawnEvent>>(
+							ctx,factory,"Create CameraTurnAroundEvent"));
+				}
+			});
+	}
+
 	// ---------------------------- Models ------------------------------------
 	auto&                          modelItems = categoryItems_[PlaceItemCategory::Model];
 	const std::vector<std::string> modelNames = {
@@ -249,7 +272,7 @@ void PlaceToolPanel::RenderCategoryItems() {
 		}
 
 		// 折りたたみヘッダ
-		if(ImGui::CollapsingHeader(categoryName,ImGuiTreeNodeFlags_DefaultOpen)) {
+		if(ImGui::CollapsingHeader(categoryName)) {
 			ImGui::Columns(columns,nullptr,false);
 
 			for(size_t i = 0; i < items.size(); ++i) {

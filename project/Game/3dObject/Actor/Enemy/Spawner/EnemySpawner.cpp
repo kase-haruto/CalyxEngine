@@ -8,6 +8,7 @@
 
 #include <Game/Installer/Enemy/EnemyInstaller.h>
 #include <Game/3dObject/Actor/Enemy/Directory/IEnemyDirectory.h>
+#include <Game/Event/Spawn/EnemySpawnEvent.h>
 
 
 #include <externals/imgui/imgui.h>
@@ -41,38 +42,40 @@ void EnemySpawner::Initialize() {
 }
 
 void EnemySpawner::Update(float dt) {
-	// 自分の行列は先に更新（距離計算の基準になる）
 	worldTransform_.Update();
+	GarbageCollectDead();
+
+	// イベントが親にある場合は、自身では更新しない
+	if (dynamic_cast<EnemySpawnEvent*>(SceneObject::GetParent().get())) {
+		return;
+	}
 
 	UpdateProximity();
 
-	if(isActive_) {
-		// 現在の距離を算出（XZ か 3D かはフラグに従う）
-		const float d = (playerTransform_)
-							? Distance_(worldTransform_.GetWorldPosition(),playerTransform_->GetWorldPosition(),useXZDistance_)
-							: std::numeric_limits<float>::infinity();
-
-		// 距離内にタイマーを進める（距離外では停止＝保持）
-		const bool within = (d <= activationRadius_);
-
-		// 現在の生存数（死体は別途回収）
-		size_t aliveCount = 0;
-		for(auto& e : spawnedEnemies_) { if(e && e->GetIsAlive()) ++aliveCount; }
-
-		if(aliveCount < maxSpawnCount_) {
-			if(within) {
-				spawnTimer_ += dt;
-				if(spawnTimer_ >= 0.5f) {
-					Spawn();
-					spawnTimer_ = 0.0f; // 次の湧きへ
-				}
-			}
-		}
+	if (isActive_) {
+		TickSpawnTimer(dt);
 	}
 
-	GarbageCollectDead();
 }
 
+void EnemySpawner::TickSpawnTimer(float dt) {
+	const float d = (playerTransform_)
+		? Distance_(worldTransform_.GetWorldPosition(), playerTransform_->GetWorldPosition(), useXZDistance_)
+		: std::numeric_limits<float>::infinity();
+
+	const bool within = (d <= activationRadius_);
+
+	size_t aliveCount = 0;
+	for (auto& e : spawnedEnemies_) { if (e && e->GetIsAlive()) ++aliveCount; }
+
+	if (aliveCount < maxSpawnCount_ && within) {
+		spawnTimer_ += dt;
+		if (spawnTimer_ >= 0.5f) {
+			Spawn();
+			spawnTimer_ = 0.0f;
+		}
+	}
+}
 
 void EnemySpawner::AlwaysUpdate([[maybe_unused]] float dt) {
 	worldTransform_.Update();
@@ -83,11 +86,7 @@ void EnemySpawner::ApplyConfig() {
 	const auto& cfg = config_.GetConfig();
 	if(!cfg.name.empty()) { SetName(cfg.name,ObjectType::GameObject); }
 	worldTransform_.ApplyConfig(cfg.transform);
-	rotationSpeed_ = cfg.rotationSpeed;
-	rotationDir_   = cfg.rotationDir;
 	spawnInterval_ = cfg.spawnInterval;
-	spawnAreaMin_  = cfg.spawnAreaMin;
-	spawnAreaMax_  = cfg.spawnAreaMax;
 	maxSpawnCount_ = cfg.maxSpawnCount;
 
 	useXZDistance_ = cfg.useXZDistance;
@@ -98,11 +97,7 @@ void EnemySpawner::ApplyConfig() {
 void EnemySpawner::ExtractConfig() {
 	auto& cfg         = config_.GetConfig();
 	cfg.name          = GetName();
-	cfg.rotationSpeed = rotationSpeed_;
-	cfg.rotationDir   = rotationDir_;
 	cfg.spawnInterval = spawnInterval_;
-	cfg.spawnAreaMin  = spawnAreaMin_;
-	cfg.spawnAreaMax  = spawnAreaMax_;
 	cfg.maxSpawnCount = maxSpawnCount_;
 	cfg.transform     = worldTransform_.ExtractConfig();
 
@@ -200,11 +195,10 @@ void EnemySpawner::Spawn() {
 
 	enemy->Initialize();
 	enemy->SetPlayerTransform(playerTransform_);
-	enemy->SetRouteSpline(enemyMoveRoute_);
 
 	// 位置と親子付け（ローカルでランダム）
-	enemy->SetSpawnerAnchor(&worldTransform_);
-
+	enemy->StartStayInCamera();
+	
 	// 自前リストに登録
 	spawnedEnemies_.push_back(enemy);
 
@@ -226,7 +220,7 @@ void EnemySpawner::GarbageCollectDead() {
 	auto* lib = SceneContext::Current()->GetObjectLibrary();
 	for(auto it = spawnedEnemies_.begin(); it != spawnedEnemies_.end();) {
 		auto& e = *it;
-		if(!e || !e->GetIsAlive()) {
+		if(!e || e->GetDeathState() == Enemy::DeathState::Dead) {
 			if(e) {
 				if(directory_) directory_->Unregister(e.get());
 				if(lib) lib->RemoveObject(e);

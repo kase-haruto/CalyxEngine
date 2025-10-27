@@ -69,6 +69,8 @@ public:
 	const Matrix4x4& GetViewProjectionMatrix() const;
 	const Vector3& GetRotate() const;
 	const Vector3& GetTranslate() const;
+	float GetFovY() const{return fovAngleY_;}
+	float GetAspectRatio() const{return aspectRatio_;}
 	bool IsActive()const{ return isActive_; }
 	void SetActive(bool isActive){ isActive_ = isActive; }
 	void SetAspectRatio(float aspect)override;

@@ -31,7 +31,7 @@ public:
 	Camera3d* Main3D(){ return main_.get(); }
 	DebugCamera* DebugCam(){ return debug_.get(); }
 	BaseCamera* Active(){ return cameras_[active_]; }
-
+	std::shared_ptr<Camera3d> Main3DShared(){ return main_; };
 	void  SetType(CameraType t);
 	const Vector2& ViewportSize(ViewportType) const; // const ref (cheap & safe)
 	void  SetViewportSize(ViewportType, const Vector2&);
@@ -40,6 +40,7 @@ public:
 
 	//――― Thin static wrappers (legacy code support) ―――――――――
 	static Camera3d* GetMain3d();
+	static std::shared_ptr<Camera3d> GetMain3dShared();
 	static DebugCamera* GetDebug();
 	static BaseCamera* GetActive();
 	static void SetTypeStatic(CameraType);

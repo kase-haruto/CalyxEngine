@@ -107,8 +107,7 @@ void WorldTransform::Update([[maybe_unused]]const Matrix4x4& viewProjMatrix) {
 void WorldTransform::Update() {
 	Matrix4x4 scaleMat = Cx::Math::MakeScaleMatrix(scale);
 
-	// 回転の更新（オイラー角 ↔ クォータニオン 双方向変換）
-	switch(rotationSource) {
+	switch (rotationSource) {
 	case RotationSource::Euler:
 		rotation = Quaternion::EulerToQuaternion(eulerRotation);
 		break;
@@ -119,20 +118,29 @@ void WorldTransform::Update() {
 
 	Matrix4x4 rotateMat	   = Quaternion::ToMatrix(rotation);
 	Matrix4x4 translateMat = Cx::Math::MakeTranslateMatrix(translation);
+	Matrix4x4 localMat	   = scaleMat * rotateMat * translateMat;
 
-	Matrix4x4 localMat = scaleMat * rotateMat * translateMat;
-
-	if(parent) {
+	if (parent) {
 		parent->Update();
-		matrix.world = localMat * parent->matrix.world;
+
+		if (inheritScale) {
+			matrix.world = localMat * parent->matrix.world;
+		} else {
+			// 親スケールを無視（親の回転＋平行移動のみを手動合成）
+			Matrix4x4 parentRotMat   = Quaternion::ToMatrix(parent->rotation);
+			Matrix4x4 parentTransMat = Cx::Math::MakeTranslateMatrix(parent->translation);
+			Matrix4x4 parentNoScaleMat = parentRotMat * parentTransMat;
+
+			matrix.world = localMat * parentNoScaleMat;
+		}
 	} else {
 		matrix.world = localMat;
 	}
 
 	matrix.WorldInverseTranspose = Matrix4x4::Transpose(Matrix4x4::Inverse(matrix.world));
-
 	TransferData(matrix);
 }
+
 
 Vector3 WorldTransform::GetForward() const {
 	// ワールド行列のZ軸（前方向）

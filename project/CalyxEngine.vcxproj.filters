@@ -2265,6 +2265,7 @@
     <ClInclude Include="Engine\Objects\Event\BaseEventObject.h" />
     <ClInclude Include="Engine\Objects\Event\Camera\CameraEventObject.h" />
     <ClInclude Include="Game\Event\Camera\CameraTurnAroundEvent.h" />
+    <ClInclude Include="Game\Event\Spawn\EnemySpawnEvent.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\ChromaticAberration.PS.hlsl">
@@ -2349,6 +2350,7 @@
     <ClCompile Include="Engine\Objects\Event\BaseEventObject.cpp" />
     <ClCompile Include="Engine\Objects\Event\Camera\CameraEventObject.cpp" />
     <ClCompile Include="Game\Event\Camera\CameraTurnAroundEvent.cpp" />
+    <ClCompile Include="Game\Event\Spawn\EnemySpawnEvent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />

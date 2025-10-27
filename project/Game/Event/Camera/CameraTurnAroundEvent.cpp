@@ -54,6 +54,9 @@ void CameraTurnAroundEvent::Initialize() {
 	// 個別の調節パラメータ適用
 	const std::string configRoot = "Event/";
 	config_.LoadConfig(configRoot + GetName());
+
+	// コライダーの色を黄色に設定
+	collider_->SetColor(Vector3(1,1,0));
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
