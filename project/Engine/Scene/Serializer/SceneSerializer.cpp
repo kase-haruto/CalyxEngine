@@ -121,7 +121,6 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 		auto sp = SceneObjectRegistry::Get().Create(typeName);
 		if(!sp) continue;
 
-		sp->Initialize();
 
 		if(auto* cfg = dynamic_cast<IConfigurable*>(sp.get())) {
 			// onfigPath があるなら外部JSONを優先
@@ -144,6 +143,7 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 
 		// ライブラリへ登録
 		context.GetObjectLibrary()->AddObject(sp);
+		sp->Initialize();
 
 		// サブシステムへ橋渡し
 		if(auto dir = std::dynamic_pointer_cast<DirectionalLight>(sp)) {

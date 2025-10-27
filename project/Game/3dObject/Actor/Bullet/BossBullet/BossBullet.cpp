@@ -16,10 +16,10 @@ BossBullet::BossBullet(const std::string& modelName, const std::string& name) :B
 	collider_->SetTargetType(ColliderType::Type_Player);
 
 	trailFx_ = SceneAPI::Instantiate<ParticleSystemObject>("playerBulletTrail");
-	trailFx_->LoadConfig("Resources/Assets/Configs/Effect/playerBulletTrail.json");
+	trailFx_->LoadConfig("Effect/playerBulletTrail");
 
 	shootFx_ = SceneAPI::Instantiate<ParticleSystemObject>("shootFx");
-	shootFx_->LoadConfig("Resources/Assets/Configs/Effect/ShootFx.json");
+	shootFx_->LoadConfig("Effect/ShootFx");
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

@@ -88,6 +88,7 @@ private:
 
 private:
 	std::unordered_map<Guid, std::shared_ptr<SceneObject>> objects_;
+	std::unordered_map<std::string, uint32_t> nameCounters_; //< 名前ごとの通し番号
 };
 
 /* ---------------- テンプレート実装 ---------------------------------------*/

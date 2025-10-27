@@ -32,7 +32,7 @@ void TitleScene::Initialize() {
 	sceneContext_->Initialize(false);
 
 	// シーンデータ読み込み
-	SceneSerializer::Load(*sceneContext_, "Resources/Assets/Scenes/GameScene.scene");
+	SceneSerializer::Load(*sceneContext_, "Resources/Assets/Scenes/TitleScene.scene");
 
 	LoadAssets();
 
