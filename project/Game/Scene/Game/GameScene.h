@@ -40,6 +40,7 @@ public:
 	void CleanUp() override;
 	void LoadAssets() override;
 
+
 	int16_t GetTotalScore() const { return totalScore_; }
 
 private:
