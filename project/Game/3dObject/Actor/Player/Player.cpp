@@ -220,7 +220,11 @@ void Player::Draw([[maybe_unused]] ID3D12GraphicsCommandList* cmdList) {}
 /////////////////////////////////////////////////////////////////////////////////////////
 //		imgui
 /////////////////////////////////////////////////////////////////////////////////////////
-void Player::DerivativeGui() { ImGui::DragFloat("moveSpeed", &moveSpeed_, 0.01f, 0.0f, 10.0f); }
+void Player::DerivativeGui() {
+	ImGui::DragFloat("moveSpeed", &moveSpeed_, 0.01f, 0.0f, 10.0f);
+	ImGui::DragFloat("moveSpeed", &moveSpeed_, 0.01f, 0.0f, 10.0f);
+	ImGui::DragFloat("lockOnRadius(px)", &lockOnRadiusPx_, 1.0f, 10.0f, 400.0f);
+}
 
 /* ======================================================================================
 /*		private functions
@@ -270,35 +274,32 @@ void Player::RequestShoot() {
 //		ロックオン処理
 ///////////////////////////////////////////////////////////////////////////////////
 void Player::RequestLockOn() {
-	constexpr size_t kMaxLockOn = 4;
-	if(lockedOnTargets_.size() >= kMaxLockOn) return;
+	// constexpr size_t kMaxLockOn = 4; ← 使っているなら削除 or 下の maxLockOn_ に置換
+	if (lockedOnTargets_.size() >= maxLockOn_) return;
 
-	// 現在有効な 3D カメラ
 	Camera3d* camera = CameraManager::GetMain3d();
-	if(!camera) return;
+	if (!camera) return;
 
 	const Vector2 reticleScreen = Cx::Math::WorldToScreen(reticleTransform_.GetWorldPosition());
-	const float	  radius		= 30.0f;
 
-	for(const auto& enemy : targets_) {
-		if(!enemy) continue;
-		if(std::find(lockedOnTargets_.begin(), lockedOnTargets_.end(), enemy) != lockedOnTargets_.end()) continue;
+	const float radius = lockOnRadiusPx_;
 
-		if(!camera->IsVisible(enemy->GetWorldAABB())) continue;
+	for (const auto& enemy : targets_) {
+		if (!enemy) continue;
+		if (std::find(lockedOnTargets_.begin(), lockedOnTargets_.end(), enemy) != lockedOnTargets_.end()) continue;
+		if (!camera->IsVisible(enemy->GetWorldAABB())) continue;
 
 		Vector2 enemyScreen = Cx::Math::WorldToScreen(enemy->GetWorldPosition());
-		if((enemyScreen - reticleScreen).Length() > radius) continue;
+		if ((enemyScreen - reticleScreen).Length() > radius) continue;
 
-		// ロックオン登録
+		// ヒット：登録 & マーカー生成
 		lockedOnTargets_.push_back(enemy);
-
-		// ロックオンUI作成
 		auto marker = std::make_unique<Sprite>("Textures/lockOn.png");
 		marker->Initialize(enemyScreen, Vector2(64.0f, 64.0f));
 		marker->SetAnchorPoint(Vector2(0.5f, 0.5f));
 		lockOnSprites_.push_back(std::move(marker));
 
-		if(lockedOnTargets_.size() >= kMaxLockOn) break;
+		if (lockedOnTargets_.size() >= maxLockOn_) break;
 	}
 }
 

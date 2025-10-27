@@ -111,7 +111,9 @@ private:
 	std::vector<std::unique_ptr<Sprite>> lifeSprite_;		//< ライフゲージスプライト
 	std::vector<std::unique_ptr<Sprite>> lockOnSprites_;	//< ロックオンマーカー
 
-
+	// ロックオン
+	float lockOnRadiusPx_ = 80.0f;     // 初期値: 80px（以前は 30px 相当）
+	size_t maxLockOn_     = 5;         // 既存の kMaxLockOn の置き換え用（任意）
 	// 無敵時かん用
 	float invincibleTimer_ = 0.0f; // >0 の間は無敵
 	// 見た目に使いたければトグル点滅など
