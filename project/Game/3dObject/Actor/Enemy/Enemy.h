@@ -27,7 +27,8 @@ public:
 
 	enum class EnemyBehaviorState {
 		StayingInView,
-		Active
+		ExitingView,
+		Active /*…*/
 	};
 
 public:
@@ -77,7 +78,10 @@ protected:
 
 private:
 	void BuildEmitterIfReady();
+	void UpdateCameraSpaceDrift(float dt);
 	void StayInView(float dt); // stay-in-camera 用移動処理
+	void BeginExitFromCamera();
+	void UpdateExitFromCamera(float dt);
 
 private:
 	int16_t score_ = 125; //< 撃破スコア
@@ -106,9 +110,25 @@ private:
 	float deathTimer_	   = 0.0f;	//< 死亡演出用
 	float deathLength_	   = 1.5f;	//< 倒れ終わるまでの秒数
 
+	float camDriftAmpX_	  = 15.0f; // 画面左右方向の最大振れ幅（ローカル単位）
+	float camDriftAmpY_	  = 15.5f; // 画面上下方向の最大振れ幅
+	float camDriftAmpZ_	  = 15.0f; // 手前奥の振れ幅
+	float camDriftFreqX_  = 0.7f;  // Xの周波数
+	float camDriftFreqY_  = 0.85f; // Yの周波数
+	float camDriftFreqZ_  = 0.35f; // Zの周波数
+	float camDriftMargin_ = 0.4f;  // 画面端からの余白率（0〜1）
+
+	float	exitSpeedLocal_ = 35.0f; // 退場スピード（カメラローカル単位/秒）
+	float	exitOvershoot_	= 1.05f; // 画面外判定のオーバー率(>1で確実に外)
+	Vector3 exitDirLocal_	= {0, 0, 0};
+	bool	exitPrepared_	= false;
+
+	Vector3 camAnchor_ = {0, 0, 40};								 // 基準ローカル位置（Zで距離を調整）
+	float	camPhaseX_ = 0.0f, camPhaseY_ = 1.7f, camPhaseZ_ = 3.1f; // 初期位相
+
 	// stay-in-camera 用
 	float stayInViewTime_ = 0.0f;
-	float maxStayTime_	  = 2.0f;
+	float maxStayTime_	  = 3.0f;
 
 	std::unique_ptr<BulletEmitter>			 emitter_;			  //< 一度だけ生成して保持
 	std::unique_ptr<EnemyShootingController> shootingController_; //< 下流コントローラ
