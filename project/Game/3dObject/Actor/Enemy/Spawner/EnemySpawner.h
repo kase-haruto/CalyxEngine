@@ -7,7 +7,6 @@
 #include <Data/Game/Config/Enemy/EnemySpawnerConfig.h>
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 #include <Engine/Objects/ConfigurableObject/ConfigurableObject.h>
-#include <Engine/Scene/Context/SceneContext.h>
 #include <Game/3dObject/Actor/Enemy/Enemy.h>
 
 struct IEnemyDirectory;
@@ -18,6 +17,7 @@ class EnemySpawner
 	  public IConfigurable {
 public:
 	EnemySpawner(const std::string& name = "EnemySpawner");
+	void Initialize()override;
 	void Update(float dt) override;
 	void AlwaysUpdate(float dt) override;
 

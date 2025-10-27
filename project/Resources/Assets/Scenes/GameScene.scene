@@ -70,8 +70,8 @@
             },
             "guid": "77beb688-44e1-4ddd-a804-e9bfa301ea6c",
             "intensity": 1.0,
-            "name": "DirectionalLight",
-            "objectType": 4,
+            "name": "DirectionalLight(1)",
+            "objectType": 5,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
                 "rotation": {
@@ -94,75 +94,11 @@
             "type": "DirectionalLight"
         },
         {
-            "guid": "7cfe076b-090f-47be-93cb-b4159f6da58a",
-            "name": "BossSpawner",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": -1081.2208251953125,
-                    "y": -98.12322235107422,
-                    "z": 1404.8428955078125
-                }
-            },
-            "type": "BossSpawner"
-        },
-        {
-            "color": {
-                "w": 1.0,
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-            },
-            "decay": 1.0,
-            "guid": "9798566e-c783-4614-a85a-a6778a6ac47f",
-            "intensity": 0.25,
-            "name": "PointLight",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "position": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            },
-            "radius": 20.0,
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "PointLight"
-        },
-        {
             "activateRadius": 80.0,
             "deactivateRadius": 100.0,
-            "guid": "3531ddc8-6381-4775-a16a-71c276ccb2bc",
+            "guid": "6e02acd4-b8f8-45e2-a99b-6077ef454209",
             "maxSpawnCount": 5,
-            "name": "EnemySpawner6",
+            "name": "EnemySpawner",
             "rotationDir": {
                 "x": 0.0,
                 "y": 1.0,
@@ -202,6 +138,70 @@
             "useXZDistance": true
         },
         {
+            "color": {
+                "w": 1.0,
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "decay": 1.0,
+            "guid": "9798566e-c783-4614-a85a-a6778a6ac47f",
+            "intensity": 0.25,
+            "name": "PointLight(1)",
+            "objectType": 0,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "radius": 20.0,
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
+            "type": "PointLight"
+        },
+        {
+            "guid": "7cfe076b-090f-47be-93cb-b4159f6da58a",
+            "name": "BossSpawner",
+            "objectType": 0,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": -1081.2208251953125,
+                    "y": -98.12322235107422,
+                    "z": 1404.8428955078125
+                }
+            },
+            "type": "BossSpawner"
+        },
+        {
             "colliderConfig": {
                 "colliderType": 0,
                 "isCollisionEnabled": true,
@@ -234,7 +234,7 @@
                     }
                 }
             },
-            "name": "tallBuilding_01",
+            "name": "tallBuilding_01(1)",
             "objectType": 2,
             "parentGuid": "8900299e-57a9-481d-9e3c-d47a5d5d16b4",
             "transform": {
@@ -260,9 +260,9 @@
         {
             "activateRadius": 80.0,
             "deactivateRadius": 100.0,
-            "guid": "2e8a28a8-2e13-448b-8194-752b9f6d95ff",
+            "guid": "072e7245-8420-4b4d-8045-75030a2a8616",
             "maxSpawnCount": 5,
-            "name": "EnemySpawner8",
+            "name": "EnemySpawner(1)",
             "rotationDir": {
                 "x": 0.0,
                 "y": 1.0,
@@ -334,7 +334,7 @@
                     }
                 }
             },
-            "name": "tallBuilding_01",
+            "name": "tallBuilding_01(2)",
             "objectType": 2,
             "parentGuid": "0c6dbd13-8006-4d21-aca4-2e25b7ae13c6",
             "transform": {
@@ -416,9 +416,9 @@
         {
             "activateRadius": 80.0,
             "deactivateRadius": 100.0,
-            "guid": "c8b3540d-6ef6-49c2-9420-c7bb6ee368af",
+            "guid": "c0ecc55e-d88c-49a3-9a8f-af259c8a3d5c",
             "maxSpawnCount": 5,
-            "name": "EnemySpawner7",
+            "name": "EnemySpawner(2)",
             "rotationDir": {
                 "x": 0.0,
                 "y": 1.0,
@@ -458,11 +458,36 @@
             "useXZDistance": true
         },
         {
+            "guid": "d5039106-120e-4ef0-a5a6-a0394c7e5570",
+            "name": "MainCamera(1)",
+            "objectType": 0,
+            "parentGuid": "6d62f428-68bd-4338-b144-609422c4230a",
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
+            "type": "Camera3d"
+        },
+        {
             "activateRadius": 80.0,
             "deactivateRadius": 100.0,
-            "guid": "cab59a73-389c-4581-90de-2f395a426f13",
+            "guid": "b76c620d-f71e-491e-a76b-f3f3536ddf4b",
             "maxSpawnCount": 5,
-            "name": "EnemySpawner9",
+            "name": "EnemySpawner(7)",
             "rotationDir": {
                 "x": 0.0,
                 "y": 1.0,
@@ -493,20 +518,51 @@
                     "z": 1.0
                 },
                 "translation": {
-                    "x": -606.9072875976563,
-                    "y": -68.754150390625,
-                    "z": 1068.718505859375
+                    "x": -172.4667205810547,
+                    "y": 13.724258422851563,
+                    "z": 479.0047607421875
                 }
             },
             "type": "EnemySpawner",
             "useXZDistance": true
         },
         {
+            "colliderConfig": {
+                "colliderType": 32,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 1
+            },
+            "guid": "83791970-edf7-4a35-b0d6-338b7e2c30e5",
+            "name": "CameraTurnAroundEvent",
+            "objectType": 4,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "rotation": {
+                    "w": 0.9366148114204407,
+                    "x": -0.03983493149280548,
+                    "y": -0.34782674908638,
+                    "z": 0.01350915152579546
+                },
+                "scale": {
+                    "x": 73.8441162109375,
+                    "y": 76.93106842041016,
+                    "z": 212.6111602783203
+                },
+                "translation": {
+                    "x": -104.33055114746094,
+                    "y": -10.982452392578125,
+                    "z": 407.6672668457031
+                }
+            },
+            "type": "CameraTurnAroundEvent"
+        },
+        {
             "activateRadius": 80.0,
             "deactivateRadius": 100.0,
-            "guid": "b17fcfb1-f61f-4461-bcdf-04210ac39fe5",
+            "guid": "8ac84b8d-e99e-4d8b-9d83-3829cf16d49a",
             "maxSpawnCount": 5,
-            "name": "EnemySpawner11",
+            "name": "EnemySpawner(4)",
             "rotationDir": {
                 "x": 0.0,
                 "y": 1.0,
@@ -546,9 +602,53 @@
             "useXZDistance": true
         },
         {
+            "activateRadius": 80.0,
+            "deactivateRadius": 100.0,
+            "guid": "74053f14-3c6d-4afd-b4ec-b840711a13d9",
+            "maxSpawnCount": 5,
+            "name": "EnemySpawner(3)",
+            "rotationDir": {
+                "x": 0.0,
+                "y": 1.0,
+                "z": 0.0
+            },
+            "rotationSpeed": 1.0,
+            "spawnAreaMax": {
+                "x": 10.0,
+                "y": 5.0,
+                "z": -30.0
+            },
+            "spawnAreaMin": {
+                "x": -10.0,
+                "y": 0.0,
+                "z": -30.0
+            },
+            "spawnInterval": 5.0,
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": -606.9072875976563,
+                    "y": -68.754150390625,
+                    "z": 1068.718505859375
+                }
+            },
+            "type": "EnemySpawner",
+            "useXZDistance": true
+        },
+        {
             "guid": "a8319665-ec7e-4e52-b35b-dcd601d14845",
-            "name": "DebugCamera",
-            "objectType": 4,
+            "name": "DebugCamera(1)",
+            "objectType": 5,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
                 "rotation": {
@@ -659,7 +759,7 @@
                     }
                 }
             },
-            "name": "smallBuilding_01",
+            "name": "smallBuilding_01(1)",
             "objectType": 2,
             "parentGuid": "132bf502-69cc-4b34-ad8a-eb615cc5673c",
             "transform": {
@@ -678,156 +778,6 @@
                     "x": 14.327455520629883,
                     "y": -1.3394017219543457,
                     "z": 1.1729469299316406
-                }
-            },
-            "type": "BaseGameObject"
-        },
-        {
-            "activateRadius": 80.0,
-            "deactivateRadius": 100.0,
-            "guid": "d602ffe7-357f-424d-9ccd-55c999cf5dac",
-            "maxSpawnCount": 5,
-            "name": "EnemySpawner12",
-            "rotationDir": {
-                "x": 0.0,
-                "y": 1.0,
-                "z": 0.0
-            },
-            "rotationSpeed": 1.0,
-            "spawnAreaMax": {
-                "x": 10.0,
-                "y": 5.0,
-                "z": -30.0
-            },
-            "spawnAreaMin": {
-                "x": -10.0,
-                "y": 0.0,
-                "z": -30.0
-            },
-            "spawnInterval": 5.0,
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": -1025.0594482421875,
-                    "y": -56.64550018310547,
-                    "z": 1379.2777099609375
-                }
-            },
-            "type": "EnemySpawner",
-            "useXZDistance": true
-        },
-        {
-            "guid": "d5039106-120e-4ef0-a5a6-a0394c7e5570",
-            "name": "MainCamera",
-            "objectType": 0,
-            "parentGuid": "6d62f428-68bd-4338-b144-609422c4230a",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "Camera3d"
-        },
-        {
-            "guid": "6d62f428-68bd-4338-b144-609422c4230a",
-            "name": "RailCamera",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "RailCamera"
-        },
-        {
-            "colliderConfig": {
-                "colliderType": 0,
-                "isCollisionEnabled": true,
-                "isDraw": true,
-                "targetType": 0
-            },
-            "guid": "b9eb76d7-84c2-4e92-871e-b2bbf38ff786",
-            "modelConfig": {
-                "blendMode": 5,
-                "materialConfig": {
-                    "color": {
-                        "w": 1.0,
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    },
-                    "currentLightingMode_": 0,
-                    "enableLighting": 0,
-                    "enviromentCoefficient": 0.5,
-                    "isReflect": false,
-                    "shininess": 20.0
-                },
-                "modelName": "terrain.obj",
-                "textureGuid": "f9492258-06c4-4742-9707-39995c0592dc",
-                "uvTransConfig": {
-                    "rotation": 0.0,
-                    "scale": {
-                        "x": 10.0,
-                        "y": 10.0
-                    }
-                }
-            },
-            "name": "field",
-            "objectType": 2,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 300.0,
-                    "y": 300.0,
-                    "z": 300.0
-                },
-                "translation": {
-                    "x": -243.45144653320313,
-                    "y": -125.02078247070313,
-                    "z": 457.89599609375
                 }
             },
             "type": "BaseGameObject"
@@ -890,7 +840,7 @@
                     }
                 }
             },
-            "name": "smallBuilding_01",
+            "name": "smallBuilding_01(2)",
             "objectType": 2,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
@@ -916,7 +866,176 @@
         {
             "activateRadius": 80.0,
             "deactivateRadius": 100.0,
-            "guid": "56128bc1-c443-4782-a485-05321bf25684",
+            "guid": "f9ef78ef-69f3-4c44-b1ae-19c411d6b754",
+            "maxSpawnCount": 5,
+            "name": "EnemySpawner(5)",
+            "rotationDir": {
+                "x": 0.0,
+                "y": 1.0,
+                "z": 0.0
+            },
+            "rotationSpeed": 1.0,
+            "spawnAreaMax": {
+                "x": 10.0,
+                "y": 5.0,
+                "z": -30.0
+            },
+            "spawnAreaMin": {
+                "x": -10.0,
+                "y": 0.0,
+                "z": -30.0
+            },
+            "spawnInterval": 5.0,
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": -1025.0594482421875,
+                    "y": -56.64550018310547,
+                    "z": 1379.2777099609375
+                }
+            },
+            "type": "EnemySpawner",
+            "useXZDistance": true
+        },
+        {
+            "guid": "6d62f428-68bd-4338-b144-609422c4230a",
+            "name": "RailCamera",
+            "objectType": 0,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
+            "type": "RailCamera"
+        },
+        {
+            "activateRadius": 80.0,
+            "deactivateRadius": 100.0,
+            "guid": "c9975a78-1af6-41ff-8f48-f614f9cd9ee1",
+            "maxSpawnCount": 5,
+            "name": "EnemySpawner(9)",
+            "rotationDir": {
+                "x": 0.0,
+                "y": 1.0,
+                "z": 0.0
+            },
+            "rotationSpeed": 1.0,
+            "spawnAreaMax": {
+                "x": 10.0,
+                "y": 5.0,
+                "z": -30.0
+            },
+            "spawnAreaMin": {
+                "x": -10.0,
+                "y": 0.0,
+                "z": -30.0
+            },
+            "spawnInterval": 5.0,
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": -667.4278564453125,
+                    "y": -68.754150390625,
+                    "z": 1175.65234375
+                }
+            },
+            "type": "EnemySpawner",
+            "useXZDistance": true
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "b9eb76d7-84c2-4e92-871e-b2bbf38ff786",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "terrain.obj",
+                "textureGuid": "f9492258-06c4-4742-9707-39995c0592dc",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 10.0,
+                        "y": 10.0
+                    }
+                }
+            },
+            "name": "field",
+            "objectType": 2,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 300.0,
+                    "y": 300.0,
+                    "z": 300.0
+                },
+                "translation": {
+                    "x": -243.45144653320313,
+                    "y": -125.02078247070313,
+                    "z": 457.89599609375
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "activateRadius": 80.0,
+            "deactivateRadius": 100.0,
+            "guid": "0f6fa15c-80d1-44c3-a9fa-774b585d4ef7",
             "maxSpawnCount": 5,
             "name": "EnemySpawner0",
             "rotationDir": {
@@ -960,9 +1079,9 @@
         {
             "activateRadius": 80.0,
             "deactivateRadius": 100.0,
-            "guid": "11956124-dd19-4ce6-bff5-46f58c42e5e9",
+            "guid": "4e68fe5b-98e6-4e40-8bf1-7f408da72339",
             "maxSpawnCount": 5,
-            "name": "EnemySpawner5",
+            "name": "EnemySpawner(6)",
             "rotationDir": {
                 "x": 0.0,
                 "y": 1.0,
@@ -1034,7 +1153,7 @@
                     }
                 }
             },
-            "name": "smallBuilding_01",
+            "name": "smallBuilding_01(3)",
             "objectType": 2,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
@@ -1056,6 +1175,50 @@
                 }
             },
             "type": "BaseGameObject"
+        },
+        {
+            "activateRadius": 80.0,
+            "deactivateRadius": 100.0,
+            "guid": "d8d53aa5-9820-49d0-ad5d-35ac2ac7eca9",
+            "maxSpawnCount": 5,
+            "name": "EnemySpawner(11)",
+            "rotationDir": {
+                "x": 0.0,
+                "y": 1.0,
+                "z": 0.0
+            },
+            "rotationSpeed": 1.0,
+            "spawnAreaMax": {
+                "x": 10.0,
+                "y": 5.0,
+                "z": -30.0
+            },
+            "spawnAreaMin": {
+                "x": -10.0,
+                "y": 0.0,
+                "z": -30.0
+            },
+            "spawnInterval": 5.0,
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": -40.39155578613281,
+                    "y": -18.671619415283203,
+                    "z": 461.4215393066406
+                }
+            },
+            "type": "EnemySpawner",
+            "useXZDistance": true
         },
         {
             "colliderConfig": {
@@ -1090,7 +1253,7 @@
                     }
                 }
             },
-            "name": "largeBuilding",
+            "name": "largeBuilding(1)",
             "objectType": 2,
             "parentGuid": "91068202-082c-45db-a7e4-6b128a341420",
             "transform": {
@@ -1146,7 +1309,7 @@
                     }
                 }
             },
-            "name": "smallBuilding_01",
+            "name": "smallBuilding_01(4)",
             "objectType": 2,
             "parentGuid": "5baaa5d1-1467-4c3f-82df-1d566db1bcfb",
             "transform": {
@@ -1168,50 +1331,6 @@
                 }
             },
             "type": "BaseGameObject"
-        },
-        {
-            "activateRadius": 80.0,
-            "deactivateRadius": 100.0,
-            "guid": "fa63ac5b-da3a-4c0f-90f0-73f1f5d56ab2",
-            "maxSpawnCount": 5,
-            "name": "EnemySpawner3",
-            "rotationDir": {
-                "x": 0.0,
-                "y": 1.0,
-                "z": 0.0
-            },
-            "rotationSpeed": 1.0,
-            "spawnAreaMax": {
-                "x": 10.0,
-                "y": 5.0,
-                "z": -30.0
-            },
-            "spawnAreaMin": {
-                "x": -10.0,
-                "y": 0.0,
-                "z": -30.0
-            },
-            "spawnInterval": 5.0,
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": -172.4667205810547,
-                    "y": 13.724258422851563,
-                    "z": 479.0047607421875
-                }
-            },
-            "type": "EnemySpawner",
-            "useXZDistance": true
         },
         {
             "colliderConfig": {
@@ -1246,7 +1365,7 @@
                     }
                 }
             },
-            "name": "smallBuilding_01",
+            "name": "smallBuilding_01(5)",
             "objectType": 2,
             "parentGuid": "0c6dbd13-8006-4d21-aca4-2e25b7ae13c6",
             "transform": {
@@ -1257,7 +1376,7 @@
                     "z": 0.13322655856609344
                 },
                 "scale": {
-                    "x": 2.190565347671509,
+                    "x": 2.190565586090088,
                     "y": 3.7748446464538574,
                     "z": 1.5101557970046997
                 },
@@ -1302,7 +1421,7 @@
                     }
                 }
             },
-            "name": "largeBuilding",
+            "name": "largeBuilding(2)",
             "objectType": 2,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
@@ -1358,7 +1477,7 @@
                     }
                 }
             },
-            "name": "tallBuilding_01",
+            "name": "tallBuilding_01(3)",
             "objectType": 2,
             "parentGuid": "3db6e95e-1e38-4758-939b-b0ad5fb8bcc8",
             "transform": {
@@ -1470,7 +1589,7 @@
                     }
                 }
             },
-            "name": "smallBuilding_01",
+            "name": "smallBuilding_01(6)",
             "objectType": 2,
             "parentGuid": "91068202-082c-45db-a7e4-6b128a341420",
             "transform": {
@@ -1526,7 +1645,7 @@
                     }
                 }
             },
-            "name": "largeBuilding",
+            "name": "largeBuilding(3)",
             "objectType": 2,
             "parentGuid": "3db6e95e-1e38-4758-939b-b0ad5fb8bcc8",
             "transform": {
@@ -1552,9 +1671,9 @@
         {
             "activateRadius": 80.0,
             "deactivateRadius": 100.0,
-            "guid": "ef4e4061-2b5c-4d64-abcd-e9223ec42bf5",
+            "guid": "7af41563-efa3-4f16-84a2-d83bf053a087",
             "maxSpawnCount": 5,
-            "name": "EnemySpawner4",
+            "name": "EnemySpawner(8)",
             "rotationDir": {
                 "x": 0.0,
                 "y": 1.0,
@@ -1626,7 +1745,7 @@
                     }
                 }
             },
-            "name": "smallBuilding_01",
+            "name": "smallBuilding_01(7)",
             "objectType": 2,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
@@ -1682,7 +1801,7 @@
                     }
                 }
             },
-            "name": "largeBuilding",
+            "name": "largeBuilding(4)",
             "objectType": 2,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
@@ -1738,7 +1857,7 @@
                     }
                 }
             },
-            "name": "largeBuilding",
+            "name": "largeBuilding(5)",
             "objectType": 2,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
@@ -1764,53 +1883,9 @@
         {
             "activateRadius": 80.0,
             "deactivateRadius": 100.0,
-            "guid": "2a1157e2-2bbf-4435-a9b5-3b2d732553ed",
+            "guid": "acc4c670-fb09-410b-8699-ec1e562b53c4",
             "maxSpawnCount": 5,
-            "name": "EnemySpawner10",
-            "rotationDir": {
-                "x": 0.0,
-                "y": 1.0,
-                "z": 0.0
-            },
-            "rotationSpeed": 1.0,
-            "spawnAreaMax": {
-                "x": 10.0,
-                "y": 5.0,
-                "z": -30.0
-            },
-            "spawnAreaMin": {
-                "x": -10.0,
-                "y": 0.0,
-                "z": -30.0
-            },
-            "spawnInterval": 5.0,
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": -667.4278564453125,
-                    "y": -68.754150390625,
-                    "z": 1175.65234375
-                }
-            },
-            "type": "EnemySpawner",
-            "useXZDistance": true
-        },
-        {
-            "activateRadius": 80.0,
-            "deactivateRadius": 100.0,
-            "guid": "cd79add8-4742-45c2-99ac-84439904af46",
-            "maxSpawnCount": 5,
-            "name": "EnemySpawner2",
+            "name": "EnemySpawner(10)",
             "rotationDir": {
                 "x": 0.0,
                 "y": 1.0,
@@ -1882,7 +1957,7 @@
                     }
                 }
             },
-            "name": "tallBuilding_01",
+            "name": "tallBuilding_01(4)",
             "objectType": 2,
             "parentGuid": "132bf502-69cc-4b34-ad8a-eb615cc5673c",
             "transform": {
@@ -1938,7 +2013,7 @@
                     }
                 }
             },
-            "name": "largeBuilding",
+            "name": "largeBuilding(6)",
             "objectType": 2,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
@@ -1994,7 +2069,7 @@
                     }
                 }
             },
-            "name": "largeBuilding",
+            "name": "largeBuilding(7)",
             "objectType": 2,
             "parentGuid": "95b8171f-bf1c-4e0e-85b2-83722a5f8c88",
             "transform": {
@@ -2050,7 +2125,7 @@
                     }
                 }
             },
-            "name": "smallBuilding_01",
+            "name": "smallBuilding_01(8)",
             "objectType": 2,
             "parentGuid": "3db6e95e-1e38-4758-939b-b0ad5fb8bcc8",
             "transform": {
@@ -2106,7 +2181,7 @@
                     }
                 }
             },
-            "name": "smallBuilding_01",
+            "name": "smallBuilding_01(9)",
             "objectType": 2,
             "parentGuid": "95b8171f-bf1c-4e0e-85b2-83722a5f8c88",
             "transform": {
@@ -2162,7 +2237,7 @@
                     }
                 }
             },
-            "name": "tallBuilding_01",
+            "name": "tallBuilding_01(5)",
             "objectType": 2,
             "parentGuid": "91068202-082c-45db-a7e4-6b128a341420",
             "transform": {
@@ -2184,50 +2259,6 @@
                 }
             },
             "type": "BaseGameObject"
-        },
-        {
-            "activateRadius": 80.0,
-            "deactivateRadius": 100.0,
-            "guid": "c4c77544-a9f6-46ec-9f53-4df640888ab4",
-            "maxSpawnCount": 5,
-            "name": "EnemySpawner1",
-            "rotationDir": {
-                "x": 0.0,
-                "y": 1.0,
-                "z": 0.0
-            },
-            "rotationSpeed": 1.0,
-            "spawnAreaMax": {
-                "x": 10.0,
-                "y": 5.0,
-                "z": -30.0
-            },
-            "spawnAreaMin": {
-                "x": -10.0,
-                "y": 0.0,
-                "z": -30.0
-            },
-            "spawnInterval": 5.0,
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": -34.23933029174805,
-                    "y": -18.671619415283203,
-                    "z": 329.8800964355469
-                }
-            },
-            "type": "EnemySpawner",
-            "useXZDistance": true
         },
         {
             "colliderConfig": {
@@ -2262,7 +2293,7 @@
                     }
                 }
             },
-            "name": "tallBuilding_01",
+            "name": "tallBuilding_01(6)",
             "objectType": 2,
             "parentGuid": "5baaa5d1-1467-4c3f-82df-1d566db1bcfb",
             "transform": {
@@ -2318,7 +2349,7 @@
                     }
                 }
             },
-            "name": "largeBuilding",
+            "name": "largeBuilding(8)",
             "objectType": 2,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {

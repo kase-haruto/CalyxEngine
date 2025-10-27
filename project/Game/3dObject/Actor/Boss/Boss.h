@@ -30,6 +30,7 @@ public:
 	const Vector3 GetCenterPos()const override;
 	void SetShootingController(std::unique_ptr<BossShootingController>);
 	void SetPlayerTransform(const WorldTransform* position);
+	
 private:
 	//===================================================================*/
 	//						private methods

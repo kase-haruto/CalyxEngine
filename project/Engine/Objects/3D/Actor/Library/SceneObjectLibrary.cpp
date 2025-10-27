@@ -13,15 +13,30 @@ void SceneObjectLibrary::GatherSubtreePostorder(
 }
 
 /* 追加 ------------------------------------------------------------------*/
-void SceneObjectLibrary::AddObject(const std::shared_ptr<SceneObject>& object){
+void SceneObjectLibrary::AddObject(const std::shared_ptr<SceneObject>& object) {
 	if (!object) return;
 	const Guid id = object->GetGuid();
 
-	// すでに同じ GUID がある場合は上書き（差し替え）。重複 Add の事故を防ぐ。
-	auto [it, inserted] = objects_.insert_or_assign(id,object);
-	std::cout << "[AddObject] GUID: " << id.ToString()
-			<< (inserted ? " (new)\n" : " (replaced)\n");
+	std::string baseName = object->GetName();
+	std::string finalName = baseName;
 
+	// -------------------------
+	// 名前の重複をO(1)で回避
+	// -------------------------
+	auto it = nameCounters_.find(baseName);
+	if (it == nameCounters_.end()) {
+		// 初出 → カウンタ登録
+		nameCounters_[baseName] = 1;
+	} else {
+		// 既出 → インクリメントして "(n)" を付ける
+		finalName = baseName + "(" + std::to_string(it->second++) + ")";
+	}
+
+	// 名前を更新
+	object->SetName(finalName, object->GetObjectType());
+
+	// 登録
+	objects_.insert_or_assign(id, object);
 	EventBus::Publish(ObjectAdded{object});
 }
 

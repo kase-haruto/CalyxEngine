@@ -136,4 +136,5 @@ protected:
 	//                    config
 	//===================================================================*/
 	ConfigurableObject<BaseGameObjectConfig> config_;
+	const std::string configRoot_ = "BaseGameObject/";
 };

@@ -11,10 +11,10 @@ PlayerBullet::PlayerBullet(const std::string& modelName, const std::string& name
 	:BaseBullet::BaseBullet(modelName, name){
 
 	trailFx_ = SceneAPI::Instantiate<ParticleSystemObject>("playerBulletTrail");
-	trailFx_->LoadConfig("Resources/Assets/Configs/Effect/playerBulletTrail.json");
+	trailFx_->LoadConfig("Effect/playerBulletTrail");
 
 	shootFx_ = SceneAPI::Instantiate<ParticleSystemObject>("shootFx");
-	shootFx_->LoadConfig("Resources/Assets/Configs/Effect/ShootFx.json");
+	shootFx_->LoadConfig("Effect/ShootFx");
 
 	// collider初期化
 	BaseGameObject::InitializeCollider(ColliderKind::Sphere);

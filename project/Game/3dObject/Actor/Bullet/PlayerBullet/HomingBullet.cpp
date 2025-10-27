@@ -15,10 +15,10 @@ HomingBullet::HomingBullet(const std::string& modelName, const std::string& name
 
 
 	trailFx_ = SceneAPI::Instantiate<ParticleSystemObject>("playerBulletTrail");
-	trailFx_->LoadConfig("Resources/Assets/Configs/Effect/HomingBulletTrail.json");
+	trailFx_->LoadConfig("Effect/HomingBulletTrail");
 
 	shootFx_ = SceneAPI::Instantiate<ParticleSystemObject>("shootFx");
-	shootFx_->LoadConfig("Resources/Assets/Configs/Effect/ShootFx.json");
+	shootFx_->LoadConfig("Effect/ShootFx");
 }
 
 HomingBullet::~HomingBullet() = default;

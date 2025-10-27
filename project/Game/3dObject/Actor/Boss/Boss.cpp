@@ -1,7 +1,10 @@
 #include "Boss.h"
 
-#include <Engine/Objects/Collider/BoxCollider.h>
+#include "Engine/Objects/3D/Actor/BaseGameObject.h"
+
 #include <Engine/Foundation/Utility/Func/CxUtils.h>
+#include <Engine/Objects/Collider/SphereCollider.h>
+#include <Engine/Foundation/Json/JsonUtils.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		ctor
@@ -14,11 +17,12 @@ Boss::Boss(const std::string& modelName, const std::string objName)
 	moveSpeed_ = Random::Generate<float>(1.0f, 3.0f);
 	velocity_ = Random::GenerateVector3(-1.0f, 1.0f);
 
+	BaseGameObject::InitializeCollider(ColliderKind::Sphere);
 	collider_->SetType(ColliderType::Type_Enemy);
 	collider_->SetTargetType(ColliderType::Type_PlayerAttack);
 	collider_->SetOwner(this);
-	if (auto* box = dynamic_cast<BoxCollider*>(collider_.get())) { box->SetSize({ 30, 30, 30 }); }
-	collider_->SetIsDrawCollider(false);
+	if (auto* sphere = dynamic_cast<SphereCollider*>(collider_.get())) { sphere->SetRadius(15.0f); }
+	collider_->SetIsDrawCollider(true);
 
 	life_ = 10;
 	waveAmplitude_ = 2.0f;
@@ -33,7 +37,10 @@ Boss::~Boss() {}
 /////////////////////////////////////////////////////////////////////////////////////////
 //		初期化
 /////////////////////////////////////////////////////////////////////////////////////////
-void Boss::Initialize() {}
+void Boss::Initialize() {
+	// コンフィグの読み込みと適用
+	config_.LoadConfig(configRoot_ + "Boss");
+}
 
 
 /////////////////////////////////////////////////////////////////////////////////////////

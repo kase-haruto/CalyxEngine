@@ -14,13 +14,30 @@
 #include <cmath>
 
 EnemySpawner::EnemySpawner(const std::string& name) : SceneObject() {
-	SetName(name,ObjectType::GameObject);
+	SetName(name, ObjectType::GameObject);
 
+	// 発生的の移動ルート読み込み
 	if(!LoadRouteFromJson(moveRoutePath_)) {
-		enemyMoveRoute_        = SplineData{};
+		enemyMoveRoute_		   = SplineData{};
 		enemyMoveRoute_.closed = false;
 		enemyMoveRoute_.BuildArcTable();
 	}
+
+	config_.SetOnApplied([this](const EnemySpawnerConfig&) {
+		this->ApplyConfig();
+	});
+
+	config_.SetOnExtracted([this](const EnemySpawnerConfig&) {
+		this->ExtractConfig();
+	});
+
+	
+}
+
+void EnemySpawner::Initialize() {
+	// 個別の調節パラメータ適用
+	const std::string configRoot = "GameObject/";
+	config_.LoadConfig(configRoot + GetName());
 }
 
 void EnemySpawner::Update(float dt) {
@@ -110,7 +127,7 @@ void EnemySpawner::ShowGui() {
 	ImGui::DragFloat("Deactivation Radius",&deactivationRadius_,1.0f,0.0f,10000.0f);
 
 	ImGui::SeparatorText("Spawner Config");
-	config_.ShowGui();
+	config_.ShowGui("GameObject/"+GetName());
 }
 
 void EnemySpawner::SetPlayerTransform(WorldTransform* playerTransform) { playerTransform_ = playerTransform; }

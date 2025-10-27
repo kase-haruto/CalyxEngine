@@ -47,10 +47,10 @@ Enemy::Enemy(const std::string& modelName,const std::string objName)
 	waveSpeed_     = Random::Generate<float>(1.0f,3.0f);
 
 	hitFx_ = SceneAPI::Instantiate<ParticleSystemObject>("hitFx");
-	hitFx_->LoadConfig("Resources/Assets/Configs/Effect/HitFx.json");
+	hitFx_->LoadConfig("Effect/HitFx");
 
 	explosionFx_ = SceneAPI::Instantiate<ParticleSystemObject>("explosionFx");
-	explosionFx_->LoadConfig("Resources/Assets/Configs/Effect/Explosion.json");
+	explosionFx_->LoadConfig("Effect/Explosion");
 
 	// --- スプライン追従の既定値 ---
 	mover_.SetWorldSpeed(12.0f);                                 // 等速（m/s）
