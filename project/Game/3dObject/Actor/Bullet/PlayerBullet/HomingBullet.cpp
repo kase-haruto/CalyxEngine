@@ -6,12 +6,13 @@
 
 HomingBullet::HomingBullet(const std::string& modelName, const std::string& name) 
 	:BaseBullet::BaseBullet(modelName, name){
+	InitializeCollider(ColliderKind::Sphere);
 	collider_->SetType(ColliderType::Type_PlayerAttack);
 	collider_->SetTargetType(ColliderType::Type_Enemy);
 	collider_->SetOwner(this);
 	collider_->SetIsDrawCollider(false);
-	auto* boxCollider = dynamic_cast<BoxCollider*>(collider_.get());
-	boxCollider->SetSize(Vector3(3.0f, 3.0f, 3.0f));
+	auto* boxCollider = dynamic_cast<SphereCollider*>(collider_.get());
+	boxCollider->SetRadius(1.5f);
 
 
 	trailFx_ = SceneAPI::Instantiate<ParticleSystemObject>("playerBulletTrail");

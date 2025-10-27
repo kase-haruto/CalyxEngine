@@ -18,6 +18,7 @@ public:
 	//					public methods
 	//===================================================================*/
 	EnemySpawnEvent();
+	EnemySpawnEvent(const std::string& name);
 	~EnemySpawnEvent() override;
 
 	// 初期化
@@ -25,6 +26,7 @@ public:
 	void AlwaysUpdate(float dt) override;
 
 	// 発火時処理
+	void OnCollisionEnter(Collider* other) override;
 	void OnCollisionStay(Collider* other) override;
 	void OnCollisionExit(Collider* other) override;
 
@@ -35,7 +37,7 @@ public:
 	void ConfigGUi() override;
 
 	// クラス名取得
-	std::string_view GetTypeName() const override{return "EnemySpawnerEvent";};
+	std::string_view GetTypeName() const override{return "EnemySpawnEvent";};
 private:
 	//===================================================================*/
 	//					private methods

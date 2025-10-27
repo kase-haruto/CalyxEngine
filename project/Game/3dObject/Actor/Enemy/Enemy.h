@@ -17,26 +17,31 @@
 /* ========================================================================
 /* enemy
 /* ===================================================================== */
-class Enemy
-	: public Actor {
+class Enemy : public Actor {
+public:
 	enum class DeathState {
 		Alive,
 		Dying,
 		Dead
 	};
 
+	enum class EnemyBehaviorState {
+		StayingInView,
+		Active
+	};
+
 public:
-	//===================================================================*/
-	//                      public methods
-	//===================================================================*/
 	Enemy();
-	Enemy(const std::string& modelName,const std::string objName);
+	Enemy(const std::string& modelName, const std::string objName);
 	virtual ~Enemy() override;
 
 	void Initialize() override;
 	void Update(float dt) override;
 
 	void EnsurePatternBound();
+
+	// stay-in-camera 制御
+	void StartStayInCamera(float duration = 2.0f);
 
 	// collision ---------------------------------------------------------//
 	void OnCollisionEnter(Collider* other) override;
@@ -45,13 +50,12 @@ public:
 
 	// accessor ---------------------------------------------------------//
 	int16_t GetScore() const;
-	void    SetPosition(const Vector3& position) { worldTransform_.translation = position; };
-	void    SetParent(WorldTransform* parent);
-	void    SetShootingController(std::unique_ptr<EnemyShootingController>);
-	void    SetPlayerTransform(const WorldTransform* position);
-	void    SetRouteSpline(const SplineData& data);
+	void	SetPosition(const Vector3& position) { worldTransform_.translation = position; }
+	void	SetShootingController(std::unique_ptr<EnemyShootingController>);
+	void	SetPlayerTransform(const WorldTransform* position);
+	void	SetRouteSpline(const SplineData& data);
 
-	void BindPath(const SplineData* path,float startT = 0.0f,bool loop = true,int arcSamplesPerSeg = 48) { mover_.BindPath(path,startT,loop,arcSamplesPerSeg); }
+	void BindPath(const SplineData* path, float startT = 0.0f, bool loop = true, int arcSamplesPerSeg = 48) { mover_.BindPath(path, startT, loop, arcSamplesPerSeg); }
 	void SetSpawnerAnchor(const WorldTransform* spawnerTf) { mover_.SetAnchor(spawnerTf, /*inheritPos=*/true, /*inheritRot=*/true); }
 	void SetPathWorldSpeed(float mps) { mover_.SetWorldSpeed(mps); }
 	void SetPathLookMode(SplineFollower::LookMode m) { mover_.SetLookMode(m); }
@@ -59,56 +63,55 @@ public:
 	void SetPathTarget(const WorldTransform* t) { mover_.SetTargetTransform(t); }
 	bool PathFinished() const { return mover_.IsFinished(); }
 
-	const Vector3     GetCenterPos() const override;
-	void              SetGameplayEngaged(bool v) { gameplayEngaged_ = v; }
-	bool              IsGameplayEngaged() const { return gameplayEngaged_; }
-	void              SetPatternKind(BulletPatternKind k) { patternKind_ = k; }
+	DeathState		  GetDeathState() const { return deathState_; }
+	const Vector3	  GetCenterPos() const override;
+	void			  SetGameplayEngaged(bool v) { gameplayEngaged_ = v; }
+	bool			  IsGameplayEngaged() const { return gameplayEngaged_; }
+	void			  SetPatternKind(BulletPatternKind k) { patternKind_ = k; }
 	BulletPatternKind GetPatternKind() const { return patternKind_; }
 
 protected:
-	//===================================================================*/
-	//                      protected methods
-	//===================================================================*/
-	void         Move();
-	void         Shoot();
+	void		 Move();
+	void		 Shoot();
 	virtual void Die();
 
 private:
-	//===================================================================*/
-	//                      private methods
-	//===================================================================*/
 	void BuildEmitterIfReady();
+	void StayInView(float dt); // stay-in-camera 用移動処理
 
 private:
-	//===================================================================*/
-	//                      private variables
-	//===================================================================*/
 	int16_t score_ = 125; //< 撃破スコア
 
-	BulletPatternKind              patternKind_     = BulletPatternKind::AimedNWay;
-	BulletPatternKind              lastPatternKind_ = BulletPatternKind::Spiral;
+	BulletPatternKind			   patternKind_		= BulletPatternKind::AimedNWay;
+	BulletPatternKind			   lastPatternKind_ = BulletPatternKind::Spiral;
 	std::unique_ptr<IShootPattern> pattern_;
 
 	const WorldTransform* playerTransform_ = nullptr;
-	DeathState            deathState_      = DeathState::Alive;
-	SplineFollower        mover_;                     //< 移動
-	SplineData            moveRoute_{};               //< 経路データ
-	Vector3               deathRotateAxis_ = {0,0,1}; //< 傾く軸
-	Vector3               basePosition_{};            //< サイン波の基準位置
+	DeathState			  deathState_	   = DeathState::Alive;
+	EnemyBehaviorState	  behaviorState_   = EnemyBehaviorState::StayingInView;
 
-	bool  hasRoute_        = false; //< 移動ルートを取得済みか
-	bool  isHit_           = false; //< 衝突フラグ
-	bool  isDead_          = false; //< 死んだフラグ
+	SplineFollower mover_;						 //< 移動
+	SplineData	   moveRoute_{};				 //< 経路データ
+	Vector3		   deathRotateAxis_ = {0, 0, 1}; //< 傾く軸
+	Vector3		   basePosition_{};				 //< サイン波の基準位置
+
+	bool  hasRoute_		   = false; //< 移動ルートを取得済みか
+	bool  isHit_		   = false; //< 衝突フラグ
+	bool  isDead_		   = false; //< 死んだフラグ
 	bool  gameplayEngaged_ = false; //<
-	float deathRotation_   = 0.0f;  //< 傾きの進行度
-	float waveTime_        = 0.0f;  //< 経過時間
-	float waveAmplitude_   = 1.0f;  //< 振れ幅
-	float waveSpeed_       = 2.0f;  //< サイン波の速さ
-	float deathTimer_      = 0.0f;  //< 死亡演出用
-	float deathLength_     = 1.5f;  //< 倒れ終わるまでの秒数
+	float deathRotation_   = 0.0f;	//< 傾きの進行度
+	float waveTime_		   = 0.0f;	//< 経過時間
+	float waveAmplitude_   = 1.0f;	//< 振れ幅
+	float waveSpeed_	   = 2.0f;	//< サイン波の速さ
+	float deathTimer_	   = 0.0f;	//< 死亡演出用
+	float deathLength_	   = 1.5f;	//< 倒れ終わるまでの秒数
 
-	std::unique_ptr<BulletEmitter>           emitter_;            //< 一度だけ生成して保持
+	// stay-in-camera 用
+	float stayInViewTime_ = 0.0f;
+	float maxStayTime_	  = 2.0f;
+
+	std::unique_ptr<BulletEmitter>			 emitter_;			  //< 一度だけ生成して保持
 	std::unique_ptr<EnemyShootingController> shootingController_; //< 下流コントローラ
-	std::shared_ptr<ParticleSystemObject>    hitFx_;              //< ヒットエフェクト
-	std::shared_ptr<ParticleSystemObject>    explosionFx_;        //< 爆破エフェクト
+	std::shared_ptr<ParticleSystemObject>	 hitFx_;			  //< ヒットエフェクト
+	std::shared_ptr<ParticleSystemObject>	 explosionFx_;		  //< 爆破エフェクト
 };

@@ -23,7 +23,8 @@ void CameraManager::SetAspectRatio(float w, float h){ if (h > 0){ float asp = w 
 
 //------------------------------------------------------------------
 // static wrappers
-Camera3d* CameraManager::GetMain3d(){ return Mgr() ? Mgr()->Main3D() : nullptr; }
+Camera3d*				  CameraManager::GetMain3d() { return Mgr() ? Mgr()->Main3D() : nullptr; }
+std::shared_ptr<Camera3d> CameraManager::GetMain3dShared() {return Mgr() ? Mgr()->Main3DShared() : nullptr; }
 DebugCamera* CameraManager::GetDebug(){ return Mgr() ? Mgr()->DebugCam() : nullptr; }
 BaseCamera* CameraManager::GetActive(){ return Mgr() ? Mgr()->Active() : nullptr; }
 void CameraManager::SetTypeStatic(CameraType t){ if (Mgr()) Mgr()->SetType(t); }

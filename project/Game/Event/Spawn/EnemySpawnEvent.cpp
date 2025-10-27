@@ -8,7 +8,27 @@ REGISTER_SCENE_OBJECT(EnemySpawnEvent);
 /////////////////////////////////////////////////////////////////////////////////////////
 //		ctor
 /////////////////////////////////////////////////////////////////////////////////////////
-EnemySpawnEvent::EnemySpawnEvent()	= default;
+EnemySpawnEvent::EnemySpawnEvent(){
+	SceneObject::SetName("EnemySpawnEvent", ObjectType::Event);
+	baseConfig_.SetOnApplied([this](const EventConfig&) {
+			this->ApplyConfig();
+		});
+
+	baseConfig_.SetOnExtracted([this](const EventConfig&) {
+		this->ExtractConfig();
+	});
+}
+
+EnemySpawnEvent::EnemySpawnEvent(const std::string& name) : BaseEventObject(name) {
+	baseConfig_.SetOnApplied([this](const EventConfig&) {
+		this->ApplyConfig();
+	});
+
+	baseConfig_.SetOnExtracted([this](const EventConfig&) {
+		this->ExtractConfig();
+	});
+}
+
 EnemySpawnEvent::~EnemySpawnEvent() = default;
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -20,12 +40,7 @@ void EnemySpawnEvent::Initialize() {
 	baseConfig_.LoadConfig(configRoot + GetName());
 	// コライダーの色を黄色に設定
 	collider_->SetColor(Vector3(0, 1, 0));
-	// 起動時に子供の EnemySpawner をキャッシュしておく
-	for (auto& child : GetChildren()) {
-		if (auto spawner = std::dynamic_pointer_cast<EnemySpawner>(child)) {
-			spawners_.push_back(spawner.get());
-		}
-	}
+	
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -34,6 +49,14 @@ void EnemySpawnEvent::Initialize() {
 void EnemySpawnEvent::AlwaysUpdate(float dt) {
 	BaseEventObject::AlwaysUpdate(dt);
 	deltaTime_ = dt;
+}
+void EnemySpawnEvent::OnCollisionEnter(Collider*) {
+	// 起動時に子供の EnemySpawner をキャッシュしておく
+	for (auto& child : GetChildren()) {
+		if (auto spawner = std::dynamic_pointer_cast<EnemySpawner>(child)) {
+			spawners_.push_back(spawner.get());
+		}
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

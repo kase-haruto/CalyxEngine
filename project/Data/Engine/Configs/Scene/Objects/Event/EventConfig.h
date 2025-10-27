@@ -13,7 +13,7 @@ struct EventConfig
 inline void to_json(nlohmann::json& j, const EventConfig& c) {
 	// まずは基底クラスの情報を書き込む
 	to_json(j, static_cast<const SceneObjectConfig&>(c));
-
+	
 	// 追加フィールドを書き足す
 	j["colliderConfig"] = c.colliderConfig;
 }

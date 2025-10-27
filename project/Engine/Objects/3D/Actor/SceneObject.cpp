@@ -98,13 +98,13 @@ const std::string& SceneObject::GetConfigPath() const {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		親子関係構築
 /////////////////////////////////////////////////////////////////////////////////////////
-void SceneObject::SetParent(const std::shared_ptr<SceneObject>& newParentSp) {
+void SceneObject::SetParent(const std::shared_ptr<SceneObject>& newParentSp, bool inheritScale) {
 	// 無効ポインタだったら早期return
 	if(parent_.lock() == newParentSp || newParentSp.get() == this) {
 		return;
 	}
 
-	// 自分に入れる
+	// 旧親から削除
 	if(auto oldParent = parent_.lock()) {
 		auto& siblings = oldParent->children_;
 		siblings.erase(std::remove(siblings.begin(), siblings.end(), shared_from_this()),
@@ -115,13 +115,15 @@ void SceneObject::SetParent(const std::shared_ptr<SceneObject>& newParentSp) {
 		// Parentの構築
 		newParentSp->children_.push_back(shared_from_this());
 		newParentSp->worldTransform_.Update();
-		worldTransform_.parent = &newParentSp->worldTransform_;
+
+		worldTransform_.parent		 = &newParentSp->worldTransform_;
+		worldTransform_.inheritScale = inheritScale;
 	} else {
-		// Parentなし
-		worldTransform_.parent = nullptr;
+		worldTransform_.parent		 = nullptr;
+		worldTransform_.inheritScale = true; // デフォルトに戻す
 	}
 
-	//一応更新
+	// 一応更新
 	worldTransform_.Update();
 
 	// Parentの設定

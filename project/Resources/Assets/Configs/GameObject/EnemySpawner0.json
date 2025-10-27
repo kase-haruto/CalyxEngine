@@ -3,22 +3,6 @@
     "deactivateRadius": 100.0,
     "maxSpawnCount": 11,
     "name": "EnemySpawner0",
-    "rotationDir": {
-        "x": 0.0,
-        "y": 1.0,
-        "z": 0.0
-    },
-    "rotationSpeed": 1.0,
-    "spawnAreaMax": {
-        "x": 10.0,
-        "y": 5.0,
-        "z": -30.0
-    },
-    "spawnAreaMin": {
-        "x": -10.0,
-        "y": 0.0,
-        "z": -30.0
-    },
     "spawnInterval": 5.0,
     "transform": {
         "rotation": {
@@ -33,9 +17,9 @@
             "z": 1.0
         },
         "translation": {
-            "x": 0.0,
-            "y": -14.902608871459961,
-            "z": 172.6918182373047
+            "x": -0.47999998927116394,
+            "y": 0.47999998927116394,
+            "z": 1.559999942779541
         }
     },
     "useXZDistance": true

@@ -13,7 +13,6 @@ std::shared_ptr<SceneObject> SceneObjectRegistry::Create(std::string_view name) 
 		throw std::runtime_error("Unknown SceneObject type: " + std::string(name));
 	return it->second->New();
 }
-
 std::vector<std::string> SceneObjectRegistry::ListTypes() const{
 	std::vector<std::string> out;
 	for (auto& [k, _] : table_) out.push_back(k);

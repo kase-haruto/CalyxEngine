@@ -50,10 +50,10 @@ public:
 	virtual bool Save() const;
 	virtual bool Load();
 
-	virtual void ApplyDerivedConfigFromJson([[maybe_unused]]const nlohmann::json& root,
+	virtual void ApplyDerivedConfigFromJson([[maybe_unused]] const nlohmann::json& root,
 											[[maybe_unused]] const nlohmann::json* derived) {}
-	virtual void ExtractDerivedConfigToJson([[maybe_unused]]nlohmann::json& root,
-											[[maybe_unused]]nlohmann::json& derived) const {}
+	virtual void ExtractDerivedConfigToJson([[maybe_unused]] nlohmann::json& root,
+											[[maybe_unused]] nlohmann::json& derived) const {}
 
 	// =======================
 	// Bounding Volume
@@ -97,8 +97,8 @@ public:
 
 	void		 SetGuid(const Guid& g) { id_ = g; }
 	virtual void SetDrawEnable(bool enable) { isDrawEnable_ = enable; }
-	void		 SetParent(const std::shared_ptr<SceneObject>& newParentSp);
-	void		 SetEnableRaycast(bool enable) { isEnableRaycast_ = enable; }
+	void		 SetParent(const std::shared_ptr<SceneObject>& newParentSp, bool inheritScale = true);
+	void SetEnableRaycast(bool enable) { isEnableRaycast_ = enable; }
 
 	void UpdateWorldTransformRecursive();
 
