@@ -64,6 +64,8 @@ void BaseEventObject::Initialize() {
 		// 個別の調節パラメータ適用
 		const std::string configRoot = "Event/";
 		baseConfig_.LoadConfig(configRoot + GetName());
+		//コライダーの色を緑に設定
+		collider_->SetColor(Vector3(0,1,0));
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

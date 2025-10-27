@@ -180,6 +180,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\Battle\Shooting\ShootingController\BulletEmitter.cpp" />
     <ClCompile Include="Game\Battle\Shooting\ShootingController\EnemyShootingControllerSink.cpp" />
     <ClCompile Include="Game\Event\Camera\CameraTurnAroundEvent.cpp" />
+    <ClCompile Include="Game\Event\Spawn\EnemySpawnEvent.cpp" />
     <ClCompile Include="Game\Installer\Enemy\EnemyEngagementInstaller.cpp" />
     <ClCompile Include="Game\Runtime\Engagement\EnemyEngagementService.cpp" />
     <ClCompile Include="Game\Battle\Shooting\ShootingController\BossShootingController.cpp" />
@@ -430,6 +431,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\Battle\Shooting\ShootingController\BulletEmitter.h" />
     <ClInclude Include="Game\Battle\Shooting\ShootingController\EnemyShootingControllerSink.h" />
     <ClInclude Include="Game\Event\Camera\CameraTurnAroundEvent.h" />
+    <ClInclude Include="Game\Event\Spawn\EnemySpawnEvent.h" />
     <ClInclude Include="Game\Installer\Enemy\EnemyEngagementInstaller.h" />
     <ClInclude Include="Game\Runtime\Engagement\EnemyEngagementService.h" />
     <ClInclude Include="Engine\Application\Gameplay\Combat\lineOfSight.h" />

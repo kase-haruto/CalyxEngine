@@ -19,6 +19,7 @@ public:
 	EnemySpawner(const std::string& name = "EnemySpawner");
 	void Initialize()override;
 	void Update(float dt) override;
+	void TickSpawnTimer(float dt);
 	void AlwaysUpdate(float dt) override;
 
 	//--------- config ------------------------------------------------
