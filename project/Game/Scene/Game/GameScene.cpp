@@ -151,7 +151,7 @@ void GameScene::Update([[maybe_unused]] float dt) {
 
 	// プレイヤーの死亡
 	if(player && !player->GetIsAlive()) {
-		// transitionRequestor_->RequestSceneChange(SceneType::TITLE);
+		transitionRequestor_->RequestSceneChange(SceneType::DEFEAT);
 		return;
 	}
 

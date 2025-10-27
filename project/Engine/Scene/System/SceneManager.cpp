@@ -14,6 +14,7 @@
 #include <Engine/Scene/Title/TitleScene.h>
 #include <Game/Scene/Game/GameScene.h>
 #include "Engine/Scene/Test/TestScene.h"
+#include "Game/Scene/Defeat/DefeatScene.h"
 
 SceneManager::SceneManager(DxCore* dx) : dx_(dx){}
 SceneManager::~SceneManager() = default;
@@ -24,9 +25,10 @@ void SceneManager::Initialize(){
 	AddScene(SceneType::TITLE,std::make_unique<TitleScene>());
 	AddScene(SceneType::PLAY,std::make_unique<GameScene>());
 	AddScene(SceneType::TEST,std::make_unique<TestScene>());
+	AddScene(SceneType::DEFEAT,std::make_unique<DefeatScene>());
 
 	// 最初のシーンへ（ここで初期化が走る）
-	SetCurrent(typeToIndex_.at(SceneType::TITLE));
+	SetCurrent(typeToIndex_.at(SceneType::DEFEAT));
 }
 
 //------------------------------------------------------------
