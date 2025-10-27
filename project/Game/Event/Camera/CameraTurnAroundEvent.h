@@ -21,7 +21,8 @@ public:
 	~CameraTurnAroundEvent() override;
 
 	void Initialize() override;
-
+	void AlwaysUpdate(float dt) override;
+	
 	// 発火時処理
 	void OnCollisionEnter(Collider* other) override;
 	void OnCollisionExit(Collider* other) override;

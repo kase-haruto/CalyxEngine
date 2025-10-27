@@ -293,6 +293,14 @@ void SplineEditorPanel::Render() {
 		gizmoTf_.scale = { 1,1,1 };
 		gizmoTf_.rotation = Quaternion::MakeIdentity();
 		gizmoTf_.Update();
+
+		// --- 起動時ロード ---
+		currentPath_ = "Resources/Assets/Spline/Rail.json";
+		if (std::filesystem::exists(currentPath_)) {
+			SplineJson::Load(currentPath_, data_);
+			selectedPoint_ = -1;
+		}
+		
 		initialized = true;
 	}
 
@@ -302,8 +310,6 @@ void SplineEditorPanel::Render() {
 	DrawToolbar();
 	DrawPointsList();
 	ImGui::Separator();
-	DrawPreviewXZ();
-
 	HandleGizmoUpdateAndDraw3D();
 
 	ImGui::End();

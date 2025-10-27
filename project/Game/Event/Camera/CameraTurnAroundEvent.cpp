@@ -5,6 +5,7 @@
 #include "Engine/Foundation/Utility/Ease/CxEase.h"
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
+#include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 
 REGISTER_SCENE_OBJECT(CameraTurnAroundEvent);
@@ -51,6 +52,19 @@ void CameraTurnAroundEvent::Initialize() {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
+//		常時更新処理
+/////////////////////////////////////////////////////////////////////////////////////////
+void CameraTurnAroundEvent::AlwaysUpdate(float dt) {
+	BaseEventObject::AlwaysUpdate(dt); // 行列・コライダー更新
+
+	// カメラの向く方向をlineで表示
+	Vector3 start = worldTransform_.GetWorldPosition();
+	Vector3 end	  = start + direction_.Normalize() + 10.0f;
+	Vector4 col(Vector3(0.518f, 0.788f, 0.545f)); // 緑色
+	PrimitiveDrawer::GetInstance()->DrawLine3d(start, end, col);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
 //		発火時処理
 /////////////////////////////////////////////////////////////////////////////////////////
 void CameraTurnAroundEvent::OnCollisionEnter([[maybe_unused]] Collider* other) {
@@ -82,17 +96,16 @@ void CameraTurnAroundEvent::ExtractConfig() {
 	CameraTurnAroundEventConfig& cfg = config_.GetConfig();
 	cfg.time						 = time_;
 	cfg.easeType					 = static_cast<int16_t>(easeType_);
-	;
-	cfg.direction = direction_;
+	cfg.direction					 = direction_;
 }
 
 void CameraTurnAroundEvent::DerivativeGui() {
 	if(ImGui::CollapsingHeader("Turn Around Parm")) {
 		GuiCmd::DragFloat3("dir", direction_);
 		GuiCmd::DragFloat("time", time_);
-		//Cx::Ease::SelectEase(easeType_);
+		// Cx::Ease::SelectEase(easeType_);
 	}
 }
 void CameraTurnAroundEvent::ConfigGUi() {
-	config_.ShowGui("Event/"+GetName());
+	config_.ShowGui("Event/" + GetName());
 }

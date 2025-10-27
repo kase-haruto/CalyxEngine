@@ -13,7 +13,7 @@ struct Vector3;
 class SplineEditorPanel 
 	: public IEngineUI {
 public:
-	SplineEditorPanel() : IEngineUI("SplineEditor") { IEngineUI::SetShow(false);gizmoTf_.Initialize(); }
+	SplineEditorPanel() : IEngineUI("SplineEditor") { IEngineUI::SetShow(true);gizmoTf_.Initialize(); }
 	~SplineEditorPanel() override = default;
 
 	void Render() override;
