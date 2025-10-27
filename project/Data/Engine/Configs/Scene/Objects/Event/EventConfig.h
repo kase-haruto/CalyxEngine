@@ -10,22 +10,19 @@ struct EventConfig
 	ColliderConfig colliderConfig;
 };
 
-inline void to_json(nlohmann::json& j,const EventConfig& c) {
-	j = nlohmann::json{
-			{"guid",c.guid},
-			{"parentGuid",c.parentGuid},
-			{"objectType",c.objectType},
-			{"name",c.name},
-			{"transform",c.transform},
-			{"colliderConfig",c.colliderConfig},
-		};
+inline void to_json(nlohmann::json& j, const EventConfig& c) {
+	// まずは基底クラスの情報を書き込む
+	to_json(j, static_cast<const SceneObjectConfig&>(c));
+
+	// 追加フィールドを書き足す
+	j["colliderConfig"] = c.colliderConfig;
 }
 
-inline void from_json(const nlohmann::json& j,EventConfig& c) {
-	j.at("guid").get_to(c.guid);
-	j.at("parentGuid").get_to(c.parentGuid);
-	j.at("objectType").get_to(c.objectType);
-	j.at("name").get_to(c.name);
-	j.at("transform").get_to(c.transform);
-	j.at("colliderConfig").get_to(c.colliderConfig);
+inline void from_json(const nlohmann::json& j, EventConfig& c) {
+	// まずは基底クラスを復元
+	from_json(j, static_cast<SceneObjectConfig&>(c));
+
+	// 追加フィールドを復元
+	if (j.contains("colliderConfig"))
+		j.at("colliderConfig").get_to(c.colliderConfig);
 }

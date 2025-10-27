@@ -22,12 +22,15 @@ public:
 	BaseEventObject(const std::string& name);
 	~BaseEventObject() override;
 
+	// 初期化
+	virtual void Initialize() override;
 	// 更新
 	virtual void AlwaysUpdate(float dt) override; //< 常時更新
 
 	// gui
 	virtual void ShowGui() override;
 	virtual void DerivativeGui();		//< 派生先のparameter調整
+	virtual void ConfigGUi();
 
 	// config
 	virtual void ApplyConfig();
@@ -47,5 +50,5 @@ protected:
 	//				 protected methods
 	//===================================================================*/
 	std::unique_ptr<Collider> collider_ = nullptr;
-	ConfigurableObject<EventConfig> config_;
+	ConfigurableObject<EventConfig> baseConfig_;
 };

@@ -100,6 +100,11 @@ void BaseGameObject::InitializeCollider(ColliderKind kind) {
 		break;
 	}
 	}
+
+	collider_->SetOnEnter([this](Collider* other) { this->OnCollisionEnter(other); });
+	collider_->SetOnStay([this](Collider* other) { this->OnCollisionStay(other); });
+	collider_->SetOnExit([this](Collider* other) { this->OnCollisionExit(other); });
+	
 	currentColliderKind_ = kind;
 }
 

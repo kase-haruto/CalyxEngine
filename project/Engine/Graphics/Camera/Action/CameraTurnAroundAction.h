@@ -8,7 +8,7 @@
 /* ===================================================================== */
 
 class CameraTurnAroundAction
-	: public BaseCameraAction{
+	: public BaseCameraAction {
 public:
 	//===================================================================*/
 	//					public methods
@@ -21,6 +21,9 @@ public:
 	void ShowGui() override;
 
 	//---------- accessor ------------------------------------------------//
+	void SetEase(Cx::Ease::EaseType type) { easeType_ = type; }
+	void SetTime(float time) { turnTime_ = time; }
+	void SetDirection(const Vector3& dir) { direction_ = dir; }
 
 private:
 	//===================================================================*/
@@ -28,8 +31,8 @@ private:
 	//===================================================================*/
 	//---------------- parms -------------//
 	Cx::Ease::EaseType easeType_ = Cx::Ease::EaseType::EaseOutSine;
-
-	float turnTime_ = 0.5f;
+	Vector3			   direction_;
+	float			   turnTime_ = 0.5f;
 
 	//---------------- internal state -------------//
 	bool  turning_ = false;

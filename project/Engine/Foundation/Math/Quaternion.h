@@ -89,7 +89,7 @@ struct Quaternion{
 	static Quaternion LookAt(const Vector3& eye,
 							 const Vector3& target,
 							 const Vector3& worldUp = {0.0f, 1.0f, 0.0f});
-
+	Quaternion		  FromToRotation(const Vector3& from, const Vector3& to);
 };
 	//--------- serializer ---------------------------------------------------
 inline void to_json(nlohmann::json& j, const Quaternion& q) {

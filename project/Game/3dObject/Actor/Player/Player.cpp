@@ -323,7 +323,11 @@ void Player::Start() {
 ///////////////////////////////////////////////////////////////////////////////////
 //		衝突
 ///////////////////////////////////////////////////////////////////////////////////
-void Player::OnCollisionEnter(Collider*) {
+void Player::OnCollisionEnter(Collider* other) {
+
+	// イベントの場合スキップ
+	if(other->GetType() == ColliderType::Type_EventObject) return;
+	
 	// 回避のi-frameや既存の無敵ならダメージ無視
 	if((dodge_ && dodge_->HandlesHitNow()) || !CanBeDamaged()) return;
 
