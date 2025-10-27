@@ -3,10 +3,15 @@
 /*		include space
 /* ===================================================================== */
 #include "Engine/Foundation/Utility/Ease/CxEase.h"
+#include "Game/3dObject/Actor/Player/Player.h"
+
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
+
+// cameraAction
+#include <Engine/Graphics/Camera/Action/CameraTurnAroundAction.h>
 
 REGISTER_SCENE_OBJECT(CameraTurnAroundEvent);
 
@@ -68,11 +73,36 @@ void CameraTurnAroundEvent::AlwaysUpdate(float dt) {
 //		発火時処理
 /////////////////////////////////////////////////////////////////////////////////////////
 void CameraTurnAroundEvent::OnCollisionEnter([[maybe_unused]] Collider* other) {
-	// カメラを振り向かせる
+	if(active_) return;
+	active_ = true;
+
+	Camera3d* cam = CameraManager::GetMain3d();
+	if(!cam) return;
+
+	// 元の向きを保存
+	originalDir_ = cam->GetWorldTransform().GetForward();
+
+	turnAction_ = std::make_unique<CameraTurnAroundAction>();
+	turnAction_->SetEase(easeType_);
+	turnAction_->SetTime(time_);
+	turnAction_->SetDirection(direction_);
+	turnAction_->Execute();
 }
 
 void CameraTurnAroundEvent::OnCollisionExit([[maybe_unused]] Collider* other) {
 	// カメラを戻す
+	if(!active_) return;
+	active_ = false;
+
+	Camera3d* cam = CameraManager::GetMain3d();
+	if(!cam) return;
+
+	// 元の方向に戻す
+	returnAction_ = std::make_unique<CameraTurnAroundAction>();
+	returnAction_->SetEase(easeType_);
+	returnAction_->SetTime(time_);
+	returnAction_->SetDirection(originalDir_);
+	returnAction_->Execute();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

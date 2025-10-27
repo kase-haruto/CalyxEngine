@@ -4,7 +4,6 @@
 
 // c++
 #include <list>
-#include <array>
 #include <vector>
 #include <unordered_set>
 

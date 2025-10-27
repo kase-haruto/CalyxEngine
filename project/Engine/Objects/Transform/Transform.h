@@ -117,6 +117,7 @@ public:
 	virtual void Update(const Matrix4x4& viewProMatrix) override;
 	void Update()override;
 
+	Vector3 GetForward()const;
 	//--- コンフィグ同期 ---
 	void ApplyConfig(const WorldTransformConfig& config);
 	WorldTransformConfig ExtractConfig();

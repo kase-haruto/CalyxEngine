@@ -10,6 +10,8 @@
 // config
 #include <Data/Game/Config/Event/CameraTurnAroundEventConfig.h>
 
+class CameraTurnAroundAction;
+
 class CameraTurnAroundEvent final
 	: public CameraEventObject {
 public:
@@ -47,4 +49,10 @@ private:
 
 	// config
 	ConfigurableObject<CameraTurnAroundEventConfig> config_;
+
+	// action
+	std::unique_ptr<CameraTurnAroundAction> turnAction_;
+	std::unique_ptr<CameraTurnAroundAction> returnAction_;
+	Vector3 originalDir_;
+	bool active_ = false;
 };

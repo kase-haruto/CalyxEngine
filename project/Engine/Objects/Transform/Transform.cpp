@@ -108,21 +108,21 @@ void WorldTransform::Update() {
 	Matrix4x4 scaleMat = Cx::Math::MakeScaleMatrix(scale);
 
 	// 回転の更新（オイラー角 ↔ クォータニオン 双方向変換）
-	switch (rotationSource) {
-		case RotationSource::Euler:
-			rotation = Quaternion::EulerToQuaternion(eulerRotation);
-			break;
-		case RotationSource::Quaternion:
-			eulerRotation = Quaternion::ToEuler(rotation);
-			break;
+	switch(rotationSource) {
+	case RotationSource::Euler:
+		rotation = Quaternion::EulerToQuaternion(eulerRotation);
+		break;
+	case RotationSource::Quaternion:
+		eulerRotation = Quaternion::ToEuler(rotation);
+		break;
 	}
 
-	Matrix4x4 rotateMat = Quaternion::ToMatrix(rotation);
+	Matrix4x4 rotateMat	   = Quaternion::ToMatrix(rotation);
 	Matrix4x4 translateMat = Cx::Math::MakeTranslateMatrix(translation);
 
 	Matrix4x4 localMat = scaleMat * rotateMat * translateMat;
 
-	if (parent) {
+	if(parent) {
 		parent->Update();
 		matrix.world = localMat * parent->matrix.world;
 	} else {
@@ -134,6 +134,12 @@ void WorldTransform::Update() {
 	TransferData(matrix);
 }
 
+Vector3 WorldTransform::GetForward() const {
+	// ワールド行列のZ軸（前方向）
+	Matrix4x4 mat = Cx::Math::MakeAffineMatrix(scale, rotation, translation);
+	Vector3 forward = { mat.m[2][0], mat.m[2][1], mat.m[2][2] };
+	return forward.Normalize();
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //	コンフィグ適用

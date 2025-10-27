@@ -60,7 +60,6 @@ void BaseEventObject::Initialize() {
 		// 個別の調節パラメータ適用
 		const std::string configRoot = "Event/";
 		baseConfig_.LoadConfig(configRoot + GetName());
-
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

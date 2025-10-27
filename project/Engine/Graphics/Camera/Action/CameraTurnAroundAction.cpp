@@ -1,53 +1,50 @@
 #include "CameraTurnAroundAction.h"
 
-// engine
-#include "../3d/Camera3d.h"
-#include "Engine/Foundation/Utility/Ease/CxEase.h"
-
+#include <Engine/Foundation/Utility/Ease/CxEase.h>
+#include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
-#include <Engine/Foundation/Utility/Func/CxUtils.h>
 
 CameraTurnAroundAction::CameraTurnAroundAction() = default;
-
 CameraTurnAroundAction::~CameraTurnAroundAction() = default;
 
 void CameraTurnAroundAction::Execute() {
-	if(turning_) return;
+	if (turning_) return;
 
-	turning_ = true;
+	Camera3d* cam = CameraManager::GetMain3d();
+	if (!cam) return;
+
+	WorldTransform& wt = cam->GetWorldTransform();
+	startRot_ = wt.rotation;
+
+	// 目標回転を direction_ 方向に向かせる
+	Vector3 eye = wt.translation;
+	Vector3 target = eye + direction_.Normalize();
+	targetRot_ = Quaternion::LookAt(eye, target, {0, 1, 0});
+
 	elapsed_ = 0.0f;
+	turning_ = true;
 }
 
 void CameraTurnAroundAction::Update(BaseCamera* cam, float dt) {
-	if(!turning_ || !cam) return;
+	if (!turning_ || !cam) return;
 
 	elapsed_ += dt;
-	float t	   = std::clamp(elapsed_ / turnTime_, 0.0f, 1.0f);
-	float rate = Cx::Ease::ApplyEase(easeType_, t);
+	float t = std::clamp(elapsed_ / turnTime_, 0.0f, 1.0f);
+	float easeT = Cx::Ease::ApplyEase(easeType_, t);
 
-	WorldTransform& wt	   = cam->GetWorldTransform();
-	wt.rotationSource  = RotationSource::Quaternion;
-	Quaternion current = wt.rotation;
+	Quaternion newRot = Quaternion::Slerp(startRot_, targetRot_, easeT);
+	cam->GetWorldTransform().rotation = newRot;
+	cam->GetWorldTransform().rotationSource = RotationSource::Quaternion;
 
-	Quaternion q180	  = Quaternion::MakeRotateY(Cx::Math::ToRadians(180.0f));
-	Quaternion target = Quaternion::Multiply(q180, current);
-
-	// 球面線形補間
-	Quaternion newRot = Quaternion::Slerp(current, target, rate * dt * (1.0f / turnTime_));
-	wt.rotation		  = newRot;
-
-	if(t >= 1.0f) {
-		turning_ = false;
-	}
+	if (t >= 1.0f) turning_ = false;
 }
 
 void CameraTurnAroundAction::ShowGui() {
-
 	bool isOpen = true;
 	ImGui::Begin(actionName_.c_str(), &isOpen);
 
-	// パラメータ調整
-	GuiCmd::DragFloat("turnTime", turnTime_);
+	GuiCmd::DragFloat("Turn Time", turnTime_);
+	ImGui::DragFloat3("Direction", &direction_.x, 0.1f);
 
 	ImGui::End();
 }
