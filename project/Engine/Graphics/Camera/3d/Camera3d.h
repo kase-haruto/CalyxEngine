@@ -55,15 +55,15 @@ private:
     //======================= 追従用データ ==============================
     struct FollowSettings {
         bool   enabled          = true;            // 有効/無効
-        float  distanceBack     = 15.0f;             // 後方距離（-F * distanceBack）
-        float  heightOffset     = 2.0f;             // 上方向(Y)オフセット
+        float  distanceBack     = 13.0f;             // 後方距離（-F * distanceBack）
+        float  heightOffset     = 4.0f;             // 上方向(Y)オフセット
         float  sideOffset       = 0.0f;             // 右(+)左(-)オフセット
         Vector3 lookAtOffset    = {0.0f, 1.5f, 0.0f}; // 必要なら使用
 
         // 位置スムージング
-        float  posSmoothTime    = 0.38f;
+        float  posSmoothTime    = 0.78f;
         // 回転スムージング（時定数）
-        float  rotTimeConstant  = 0.12f;
+        float  rotTimeConstant  = 0.52f;
 
         // 俯角（ターゲットの forward を向きつつ少し下を見る）
         float  extraPitchDeg    = -10.0f;
