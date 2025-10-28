@@ -83,6 +83,12 @@ private:
 	void UpdateTilt(const Vector3& moveVector);
 	void UpdateAutoLockOn(float dt);
 
+	// 取得/返却/初期確保
+	// ロックオン
+	std::unique_ptr<Sprite> AcquireMarker();
+	void RecycleMarker(std::unique_ptr<Sprite> s);
+	void PrewarmLockMarkers(size_t n);
+
 	// 死んだ敵のロックオンを外す
 	void PurgeDeadLockedTargets();
 
@@ -110,7 +116,8 @@ private:
 	// sprites
 	std::array<std::unique_ptr<Sprite>,4> reticleSprites_; //< レティクルのスプライト
 	std::vector<std::unique_ptr<Sprite>>  lifeSprite_;     //< ライフゲージスプライト
-	std::vector<std::unique_ptr<Sprite>>  lockOnSprites_;  //< ロックオンマーカー
+	std::vector<std::unique_ptr<Sprite>> markerPool_; // 未使用(再利用待ち)のマーカー
+	std::vector<std::unique_ptr<Sprite>> lockOnSprites_; // 未使用(再利用待ち)のマーカー
 
 	// ロックオン
 	float  lockOnRadiusPx_ = 60.0f; //

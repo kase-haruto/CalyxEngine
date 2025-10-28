@@ -175,6 +175,8 @@ void Player::Initialize() {
 		dodgeMotion_ = std::make_unique<PlayerDodgeMotion>();
 		dodgeMotion_->Initialize(this,dodge_.get());
 	}
+
+	PrewarmLockMarkers(maxLockOn_);
 }
 
 void Player::RefreshLifeUI() {
@@ -206,7 +208,6 @@ void Player::Update(float dt) {
 	// 自動ロックオン
 	PurgeDeadLockedTargets();
 	UpdateAutoLockOn(dt);
-
 
 	Vector3 playerPos  = GetWorldPosition();
 	Vector3 reticlePos = reticleTransform_.GetWorldPosition();
@@ -347,9 +348,13 @@ void Player::RequestLockOn() {
 
 		// ヒット：登録 & マーカー生成
 		lockedOnTargets_.push_back(enemy);
-		auto marker = std::make_unique<Sprite>("Textures/lockOn.png");
-		marker->Initialize(enemyScreen,Vector2(64.0f,64.0f));
-		marker->SetAnchorPoint(Vector2(0.5f,0.5f));
+
+		auto marker = AcquireMarker();
+		if(!marker) break;
+		marker->SetPosition(enemyScreen);
+		marker->SetSize({64.0f, 64.0f});
+		marker->SetRotation(0.0f);
+		marker->SetUvRotate(0.0f);
 		lockOnSprites_.push_back(std::move(marker));
 
 		if(lockedOnTargets_.size() >= maxLockOn_) break;
@@ -359,8 +364,12 @@ void Player::RequestLockOn() {
 void Player::AttachDangerSenseSource(EnemyDirectory* dir) { if(danger_) danger_->SetEnemyDirectory(dir); }
 
 void Player::RequestLockOnTargetClear() {
-	lockedOnTargets_.clear();
+	// 再利用
+	for(size_t i=0;i<lockOnSprites_.size();++i){
+		RecycleMarker(std::move(lockOnSprites_[i]));
+	}
 	lockOnSprites_.clear();
+	lockedOnTargets_.clear();
 }
 
 void Player::Start() {
@@ -462,16 +471,23 @@ void Player::UpdateAutoLockOn(float dt) {
 		auto& enemy  = lockedOnTargets_[i];
 		bool  remove = false;
 
-		if(!enemy || !enemy->GetIsAlive()) { remove = true; } else if(!cam->IsVisible(enemy->GetWorldAABB())) { remove = true; } else {
+		// 敵が死んでいたらremove
+		if(!enemy || !enemy->GetIsAlive()) { remove = true; }
+		// enemyがカメラから外れたらremove
+		else if(!cam->IsVisible(enemy->GetWorldAABB())) { remove = true; }
+		// レティクルとの距離が外れたらremove
+		else {
 			Vector2 enemyScreen = Cx::Math::WorldToScreen(enemy->GetWorldPosition());
 			float   dist        = (enemyScreen - reticleScreen).Length();
 			if(dist > lockOnReleaseRadiusPx_) { remove = true; }
 		}
 
 		if(remove) {
-			lockedOnTargets_.erase(lockedOnTargets_.begin() + i);
+			// ロックオン解除処理
+			RecycleMarker(std::move(lockOnSprites_[i]));
 			lockOnSprites_.erase(lockOnSprites_.begin() + i);
-			continue; // eraseしたので i を進めない
+			lockedOnTargets_.erase(lockedOnTargets_.begin() + i);
+			continue;
 		}
 		++i;
 	}
@@ -502,13 +518,65 @@ void Player::UpdateAutoLockOn(float dt) {
 
 		for(const auto& c : cands) {
 			if(lockedOnTargets_.size() >= maxLockOn_) break;
+			auto marker = AcquireMarker();
+			if(!marker) break; // 上限
+
 			lockedOnTargets_.push_back(c.e);
 
-			auto marker = std::make_unique<Sprite>("Textures/lockOn.png");
-			marker->Initialize(c.s,Vector2(64.0f,64.0f));
-			marker->SetAnchorPoint(Vector2(0.5f,0.5f));
+			// 位置・サイズなどセット（Initializeは再度やらない）
+			marker->SetPosition(c.s);
+			marker->SetSize({64.0f, 64.0f});
+			marker->SetRotation(0.0f);
+			marker->SetUvRotate(0.0f);
+
 			lockOnSprites_.push_back(std::move(marker));
 		}
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+//		取得
+///////////////////////////////////////////////////////////////////////////////////
+std::unique_ptr<Sprite> Player::AcquireMarker() {
+	if(!markerPool_.empty()) {
+		auto s = std::move(markerPool_.back());
+		markerPool_.pop_back();
+		s->SetIsVisible(true);
+		return s;
+	}
+	// まだ上限に達していないなら新規作成を許可（保険）
+	if(lockOnSprites_.size() + markerPool_.size() < maxLockOn_) {
+		auto s = std::make_unique<Sprite>("Textures/lockOn.png");
+		s->Initialize({0.0f,0.0f},{64.0f,64.0f});
+		s->SetAnchorPoint({0.5f,0.5f});
+		s->SetIsVisible(true);
+		return s;
+	}
+	return nullptr; // これ以上は持たない
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+//		返却
+///////////////////////////////////////////////////////////////////////////////////
+void Player::RecycleMarker(std::unique_ptr<Sprite> s) {
+	if(!s) return;
+	s->SetIsVisible(false);
+	s->SetPosition({-10000.0f,-10000.0f}); // 画面外へ
+	markerPool_.push_back(std::move(s));
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+//		初期確保
+///////////////////////////////////////////////////////////////////////////////////
+void Player::PrewarmLockMarkers(size_t n) {
+	markerPool_.reserve(n);
+	for(size_t i = 0; i < n; ++i) {
+		auto s = std::make_unique<Sprite>("Textures/lockOn.png");
+		// 一度だけGPUリソースを確保
+		s->Initialize({-10000.0f,-10000.0f},{64.0f,64.0f});
+		s->SetAnchorPoint({0.5f,0.5f});
+		s->SetIsVisible(false);
+		markerPool_.push_back(std::move(s));
 	}
 }
 
@@ -518,9 +586,11 @@ void Player::UpdateAutoLockOn(float dt) {
 void Player::PurgeDeadLockedTargets() {
 	for(size_t i = 0; i < lockedOnTargets_.size(); ){
 		auto& e = lockedOnTargets_[i];
+		// 敵が死んでたらロックオン解除
 		if(!e || !e->GetIsAlive()){
-			lockedOnTargets_.erase(lockedOnTargets_.begin() + i);
+			RecycleMarker(std::move(lockOnSprites_[i]));
 			lockOnSprites_.erase(lockOnSprites_.begin() + i);
+			lockedOnTargets_.erase(lockedOnTargets_.begin() + i);
 			continue;
 		}
 		++i;
