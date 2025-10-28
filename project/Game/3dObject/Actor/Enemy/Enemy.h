@@ -100,11 +100,7 @@ private:
 	Vector3		   basePosition_{};				 //< サイン波の基準位置
 
 	bool  hasRoute_		   = false; //< 移動ルートを取得済みか
-	bool  isHit_		   = false; //< 衝突フラグ
-	bool  isDead_		   = false; //< 死んだフラグ
 	bool  gameplayEngaged_ = false; //<
-	float deathRotation_   = 0.0f;	//< 傾きの進行度
-	float waveTime_		   = 0.0f;	//< 経過時間
 	float waveAmplitude_   = 1.0f;	//< 振れ幅
 	float waveSpeed_	   = 2.0f;	//< サイン波の速さ
 	float deathTimer_	   = 0.0f;	//< 死亡演出用
