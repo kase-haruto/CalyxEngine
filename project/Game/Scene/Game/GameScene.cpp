@@ -119,9 +119,6 @@ void GameScene::Update([[maybe_unused]] float dt) {
 	auto mainCam = wMainCamera_.lock();
 	if(cameraTurnAround_) cameraTurnAround_->Update(mainCam.get(),dt);
 
-	// カメラ振り向き
-	if(Input::TriggerGamepadButton(PadButton::X)) { cameraTurnAround_->Execute(); }
-
 	// 敵弾コンテナ更新
 	enemyBulletContainer_->Update(dt);
 	enemyBulletContainer_->AlwaysUpdate(dt);
