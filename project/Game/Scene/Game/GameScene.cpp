@@ -107,6 +107,8 @@ void GameScene::Initialize() {
 	// カメラアクション
 	cameraTurnAround_ = std::make_unique<CameraTurnAroundAction>();
 	wMainCamera_      = sceneContext_->FindFirst<Camera3d>();
+	auto cam = wMainCamera_.lock();
+	cam->SetFollowTarget(&wPlayer_.lock()->GetWorldTransform());
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
