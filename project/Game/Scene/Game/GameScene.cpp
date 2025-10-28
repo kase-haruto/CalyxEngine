@@ -119,9 +119,6 @@ void GameScene::Update([[maybe_unused]] float dt) {
 	auto mainCam = wMainCamera_.lock();
 	if(cameraTurnAround_) cameraTurnAround_->Update(mainCam.get(),dt);
 
-	// カメラ振り向き
-	if(Input::TriggerGamepadButton(PadButton::X)) { cameraTurnAround_->Execute(); }
-
 	// 敵弾コンテナ更新
 	enemyBulletContainer_->Update(dt);
 	enemyBulletContainer_->AlwaysUpdate(dt);
@@ -151,7 +148,7 @@ void GameScene::Update([[maybe_unused]] float dt) {
 
 	// プレイヤーの死亡
 	if(player && !player->GetIsAlive()) {
-		// transitionRequestor_->RequestSceneChange(SceneType::TITLE);
+		transitionRequestor_->RequestSceneChange(SceneType::DEFEAT);
 		return;
 	}
 
