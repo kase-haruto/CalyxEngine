@@ -974,7 +974,7 @@
             },
             "name": "player",
             "objectType": 2,
-            "parentGuid": "d5039106-120e-4ef0-a5a6-a0394c7e5570",
+            "parentGuid": "6d62f428-68bd-4338-b144-609422c4230a",
             "transform": {
                 "rotation": {
                     "w": 1.0,
