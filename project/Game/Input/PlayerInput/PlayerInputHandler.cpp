@@ -12,7 +12,7 @@ void PlayerInputHandler::Update(Player& player, float dt){
 	HandleMove(player);
 	HandleReticle(player, dt);
 	HandleShoot(player);
-	HandleLockOn(player);
+	//HandleLockOn(player);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
