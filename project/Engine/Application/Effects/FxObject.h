@@ -26,9 +26,9 @@ public:
 	void AlwaysUpdate(float dt) override;
 
 	//--------- Player ----------------------------------------------------
-	void PlayAll();
-	void StopAll();
-	void RestartAll();
+	void PlayAll() const;
+	void StopAll() const;
+	void RestartAll() const;
 
 	//--------- debugUi ---------------------------------------------------
 	void ShowGui() override;
@@ -59,5 +59,5 @@ private:
 	//					private methods
 	//===================================================================*/
 	ConfigurableObject<EffectObjectConfig>             config_;
-	std::vector<std::shared_ptr<ParticleSystemObject>> particles_;
+	std::vector<std::shared_ptr<ParticleSystemObject>> emitters_;
 };

@@ -3,6 +3,7 @@
 /*		include space
 /* ===================================================================== */
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
+#include <Engine/Scene/Utility/SceneUtility.h>
 
 REGISTER_SCENE_OBJECT(FxObject);
 
@@ -10,13 +11,15 @@ REGISTER_SCENE_OBJECT(FxObject);
 //		ctor / dtor
 /////////////////////////////////////////////////////////////////////////////////////////
 FxObject::FxObject(const std::string& name) { SceneObject::SetName(name,ObjectType::Effect); }
-
 FxObject::~FxObject() = default;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		初期化
 /////////////////////////////////////////////////////////////////////////////////////////
-void FxObject::Initialize() {}
+void FxObject::Initialize() {
+	// 調節パラメータ適用
+
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		更新
@@ -34,22 +37,159 @@ void FxObject::AlwaysUpdate(float) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		再生
 /////////////////////////////////////////////////////////////////////////////////////////
-void FxObject::PlayAll() {}
+void FxObject::PlayAll() const {
+	for(const auto& particle : emitters_) {
+		// effect再生
+		particle->Play();
+	}
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		停止
 /////////////////////////////////////////////////////////////////////////////////////////
-void FxObject::StopAll() {}
+void FxObject::StopAll() const {
+	for(const auto& particle : emitters_) {
+		// effect停止
+		particle->Play();
+	}
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		再再生
 /////////////////////////////////////////////////////////////////////////////////////////
-void FxObject::RestartAll() {}
+void FxObject::RestartAll() const {
+	for(const auto& particle : emitters_) {
+		// effect再々再生
+		particle->Reset();
+	}
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		デバッグui
 /////////////////////////////////////////////////////////////////////////////////////////
-void FxObject::ShowGui() { worldTransform_.ShowImGui(); }
+void FxObject::ShowGui() {
+	// ルート Transform
+	worldTransform_.ShowImGui();
+
+	// 一括操作
+	if(ImGui::Button("Play All")) PlayAll();
+	ImGui::SameLine();
+	if(ImGui::Button("Stop All")) StopAll();
+	ImGui::SameLine();
+	if(ImGui::Button("Reset All")) RestartAll();
+
+	ImGui::SeparatorText("Emitters");
+
+	// タブバー開始
+	if(ImGui::BeginTabBar("EmittersTabBar",ImGuiTabBarFlags_Reorderable)) {
+		// 右端の [+] ボタン（タブバーの末尾に表示）
+		if(ImGui::TabItemButton("+",ImGuiTabItemFlags_Trailing)) {
+			EffectEmitterNodeConfig node{};
+			node.name         = "Emitter";
+			node.isDrawEnable = true;
+			AddEmitterNode(node);
+		}
+
+		// 遅延削除用
+		int removeIndex = -1;
+
+		// 各エミッターをタブとして描画
+		for(int i = 0; i < (int)emitters_.size(); ++i) {
+			auto& sp = emitters_[i];
+			if(!sp) continue;
+
+			// タブラベル（
+			std::string label = sp->GetName();
+			label += "###EmitterTab_";
+			// GUID
+			label += sp->GetGuid().ToString();
+
+			bool open = true;
+			if(ImGui::BeginTabItem(label.c_str(),&open)) {
+				// ---------- タブ内容 ----------
+				ImGui::Text("GUID: %s",sp->GetGuid().ToString().c_str());
+
+				// 名前編集
+				{
+					std::string editableName = sp->GetName();
+					char        buf[128];
+					std::snprintf(buf,sizeof(buf),"%s",editableName.c_str());
+					ImGui::SetNextItemWidth(240.0f);
+					if(ImGui::InputText("Name",buf,sizeof(buf))) {
+						sp->SetName(std::string(buf),objectType_); // シーン側の命名規約に合わせて
+					}
+				}
+
+				// ドロー可否
+				{
+					bool draw = true; // 必要なら PSO にゲッターを追加して取得
+					if(ImGui::Checkbox("Draw Enable",&draw)) { sp->SetDrawEnable(draw); }
+				}
+
+				// プレイ系
+				if(ImGui::Button("Play")) { sp->Play(); }
+				ImGui::SameLine();
+				if(ImGui::Button("Stop")) { sp->Stop(); }
+				ImGui::SameLine();
+				if(ImGui::Button("Reset")) { sp->Reset(); }
+
+				// 並べ替え（保存順に反映したい場合）
+				{
+					if(i > 0) {
+						ImGui::SameLine();
+						if(ImGui::Button("Move Up")) { std::swap(emitters_[i - 1],emitters_[i]); }
+					}
+					if(i + 1 < (int)emitters_.size()) {
+						ImGui::SameLine();
+						if(ImGui::Button("Move Down")) { std::swap(emitters_[i],emitters_[i + 1]); }
+					}
+				}
+
+				ImGui::Separator();
+
+				// Transform（子のローカル or ワールド、あなたの編集方針に合わせて）
+				if(ImGui::CollapsingHeader("Transform",ImGuiTreeNodeFlags_DefaultOpen)) {
+					sp->GetWorldTransform().ShowImGui(); // ローカル編集なら専用GUIに置換
+				}
+
+				// エミッター詳細GUI（既存を委譲）
+				if(ImGui::CollapsingHeader("Emitter Params",ImGuiTreeNodeFlags_DefaultOpen)) {
+					sp->ShowGui(); // 既存の FxEmitter::ShowGui() が呼ばれる
+				}
+
+				ImGui::EndTabItem();
+			}
+
+			// タブの [x] で閉じた場合は削除予約
+			if(!open) removeIndex = i;
+
+			// タブのコンテキストメニュー（右クリック）
+			if(ImGui::BeginPopupContextItem((std::string("ctx_") + sp->GetGuid().ToString()).c_str())) {
+				if(ImGui::MenuItem("Duplicate")) {
+					// 簡易複製：Config 抜き出し→ AddEmitterNode
+					EffectEmitterNodeConfig node{};
+					node.name       = sp->GetName() + "_Copy";
+					node.parentGuid = this->GetGuid();
+					sp->GetWorldTransform().ExtractConfig();
+					node.transform = sp->GetConfigObject().GetConfig().transform;
+					sp->FxEmitter::ExtractConfigTo(node.emitter);
+					node.isDrawEnable = true;
+					AddEmitterNode(node);
+				}
+				if(ImGui::MenuItem("Delete")) { removeIndex = i; }
+				ImGui::EndPopup();
+			}
+		}
+
+		// 予約削除を実行
+		if(removeIndex >= 0 && removeIndex < (int)emitters_.size()) {
+			if(emitters_[removeIndex]) emitters_[removeIndex]->SetParent(nullptr);
+			emitters_.erase(emitters_.begin() + removeIndex);
+		}
+
+		ImGui::EndTabBar();
+	}
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		config 適用
@@ -109,14 +249,12 @@ std::string_view FxObject::GetTypeName() const { return "FxObject"; }
 /////////////////////////////////////////////////////////////////////////////////////////
 void FxObject::RebuildChildrenFromConfig() {
 	// 既存の子  を全削除
-	for (auto& sp : particles_) if (sp) this->SetParent(nullptr);
-	particles_.clear();
+	for(auto& sp : emitters_) if(sp) this->SetParent(nullptr);
+	emitters_.clear();
 
 	// Config から生成
 	const auto& cfg = config_.GetConfig();
-	for (const auto& n : cfg.emitters){
-		AddEmitterNode(n);
-	}
+	for(const auto& n : cfg.emitters) { AddEmitterNode(n); }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -126,25 +264,28 @@ void FxObject::SyncConfigFromChildren() {
 	auto& cfg = config_.GetConfig();
 	cfg.emitters.clear();
 
-	for (auto& sp : particles_){
-		if (!sp) continue;
+	for(auto& sp : emitters_) {
+		if(!sp) continue;
 		EffectEmitterNodeConfig n{};
 		n.name       = sp->GetName();
 		n.guid       = sp->GetGuid();
 		n.parentGuid = this->GetGuid();
 
 		sp->GetWorldTransform().ExtractConfig();
-		n.transform  = sp->GetConfigObject().GetConfig().transform;
+		n.transform = sp->GetConfigObject().GetConfig().transform;
 
 		sp->FxEmitter::ExtractConfigTo(n.emitter);
 		cfg.emitters.push_back(std::move(n));
 	}
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//		エミッター単位
+/////////////////////////////////////////////////////////////////////////////////////////
 std::shared_ptr<ParticleSystemObject>
 FxObject::AddEmitterNode(const EffectEmitterNodeConfig& node) {
 	// 子を生成
-	auto child = std::make_shared<ParticleSystemObject>(node.name);
+	auto child = SceneAPI::Instantiate<ParticleSystemObject>("emitter");
 	child->SetDrawEnable(node.isDrawEnable);
 
 	// 親子付け（Transform 親子・Scene 階層）
@@ -154,17 +295,18 @@ FxObject::AddEmitterNode(const EffectEmitterNodeConfig& node) {
 	child->GetWorldTransform().ApplyConfig(node.transform);
 	child->FxEmitter::ApplyConfigFrom(node.emitter);
 
-	particles_.push_back(child);
+	emitters_.push_back(child);
 	return child;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//		idから削除
+/////////////////////////////////////////////////////////////////////////////////////////
 void FxObject::RemoveEmitterByGuid(const Guid& id) {
-	auto it = std::find_if(particles_.begin(), particles_.end(),
-		[&](const std::shared_ptr<ParticleSystemObject>& sp){
-			return sp && sp->GetGuid() == id;
-		});
-	if (it != particles_.end()) {
+	auto it = std::find_if(emitters_.begin(),emitters_.end(),
+						   [&](const std::shared_ptr<ParticleSystemObject>& sp) { return sp && sp->GetGuid() == id; });
+	if(it != emitters_.end()) {
 		this->SetParent(nullptr);
-		particles_.erase(it);
+		emitters_.erase(it);
 	}
 }

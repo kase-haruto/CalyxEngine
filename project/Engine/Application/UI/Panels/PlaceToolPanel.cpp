@@ -8,6 +8,7 @@
 #include <Engine/System/Command/EditorCommand/LevelEditorCommand/CreateObjectCommand/CreateObjectCommand.h>
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
+#include <Engine/Application/Effects/FxObject.h>
 
 // --- game objects -----------------------------------------------------------
 #include <Game/3dObject/Actor/Enemy/Spawner/EnemySpawner.h>
@@ -69,24 +70,47 @@ void PlaceToolPanel::RegisterPlaceItems() {
 	}
 
 	// ---------------------------- Particle ----------------------------------
-	auto& particleItems = categoryItems_[PlaceItemCategory::Particle];
-	particleItems.push_back({
-			PlaceItemCategory::Particle,
-			"ParticleSystem",
-			TextureManager::GetInstance()->LoadTexture("UI/Tool/particle.png"),
-			{64,64},
-			[]() {
-				const std::string name    = "ParticleSystem";
-				auto              factory = [name]() {
-					auto obj = SceneAPI::Instantiate<ParticleSystemObject>(name);
-					obj->Initialize();
-					return obj;
-				};
-				CommandManager::GetInstance()->Execute(
-					std::make_unique<CreateObjectCommand<ParticleSystemObject>>(
-						SceneContext::Current(),factory,"Create ParticleSystem"));
-			}
-		});
+	{
+		auto& particleItems = categoryItems_[PlaceItemCategory::Particle];
+		particleItems.push_back({
+				PlaceItemCategory::Particle,
+				"ParticleSystem",
+				TextureManager::GetInstance()->LoadTexture("UI/Tool/particle.png"),
+				{64,64},
+				[]() {
+					const std::string name    = "ParticleSystem";
+					auto              factory = [name]() {
+						auto obj = SceneAPI::Instantiate<ParticleSystemObject>(name);
+						obj->Initialize();
+						return obj;
+					};
+					CommandManager::GetInstance()->Execute(
+						std::make_unique<CreateObjectCommand<ParticleSystemObject>>(
+							SceneContext::Current(),factory,"Create ParticleSystem"));
+				}
+			});
+	}
+
+	{
+		auto& particleItems = categoryItems_[PlaceItemCategory::Particle];
+		particleItems.push_back({
+				PlaceItemCategory::Particle,
+				"EffectObject",
+				TextureManager::GetInstance()->LoadTexture("UI/Tool/particle.png"),
+				{64,64},
+				[]() {
+					const std::string name    = "EffectObject";
+					auto              factory = [name]() {
+						auto obj = SceneAPI::Instantiate<FxObject>(name);
+						obj->Initialize();
+						return obj;
+					};
+					CommandManager::GetInstance()->Execute(
+						std::make_unique<CreateObjectCommand<FxObject>>(
+							SceneContext::Current(),factory,"Create EffectObject"));
+				}
+			});
+	}
 
 	// ---------------------------- Spawner -----------------------------------
 	{
