@@ -28,7 +28,7 @@ void SceneManager::Initialize(){
 	AddScene(SceneType::DEFEAT,std::make_unique<DefeatScene>());
 
 	// 最初のシーンへ（ここで初期化が走る）
-	SetCurrent(typeToIndex_.at(SceneType::TEST));
+	SetCurrent(typeToIndex_.at(SceneType::TITLE));
 }
 
 //------------------------------------------------------------

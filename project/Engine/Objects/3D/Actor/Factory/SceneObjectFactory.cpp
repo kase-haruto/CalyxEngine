@@ -23,7 +23,7 @@ std::unordered_map<ObjectType, ObjectFactory::CreatorFunc> ObjectFactory::regist
 		return obj;
 	}
 	}},
-	{ ObjectType::Effect, [] ([[maybe_unused]]const nlohmann::json& j){
+	{ ObjectType::ParticleSystem, [] ([[maybe_unused]]const nlohmann::json& j){
 		auto obj = std::make_unique<ParticleSystemObject>();
 		obj->ApplyConfigFromJson(j);
 		return obj;

@@ -18,7 +18,7 @@ static const char* ObjectTypeToString(ObjectType type) {
 		return "Light";
 	case ObjectType::GameObject:
 		return "GameObject";
-	case ObjectType::Effect:
+	case ObjectType::ParticleSystem:
 		return "ParticleSystem";
 	case ObjectType::Event:
 		return "Event";
@@ -34,8 +34,6 @@ SceneObject::SceneObject() {
 	worldTransform_.Initialize();
 	id_ = Guid::New();
 }
-
-SceneObject::~SceneObject() =default;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		デバッグui

@@ -22,7 +22,7 @@ public:
 	//===================================================================*/
 	//			public methods
 	//===================================================================*/
-	ParticleSystemObject();
+	ParticleSystemObject() = default;
 	ParticleSystemObject(const std::string& name);
 	~ParticleSystemObject() override;
 
@@ -51,8 +51,7 @@ public:
 	//--------- accessor -----------------------------------------------------
 	void			 SetDrawEnable(bool isDrawEnable) override;
 	std::string_view GetTypeName() const override { return "ParticleSystemObject"; }
-
-	const ConfigurableObject<ParticleSystemObjectConfig>& GetConfigObject()const{return config_;}
+	Vector3			 GetWorldPosition() const;
 
 private:
 	ConfigurableObject<ParticleSystemObjectConfig> config_;

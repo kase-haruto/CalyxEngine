@@ -20,7 +20,7 @@ WinApp::WinApp(const int wWidth, const int wHeight, const std::string windowName
 	wrc.bottom	= wHeight;
 	windowName_ = windowName;
 	CreateWnd();
-	SetBorderlessFullscreen(false);
+	SetBorderlessFullscreen(true);
 }
 
 // デストラクタ

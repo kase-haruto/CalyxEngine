@@ -18,7 +18,7 @@ enum class ObjectType {
 	Camera,			// カメラ
 	Light,			// ライト
 	GameObject,		// ゲームオブジェクト
-	Effect,			 // パーティクルシステム
+	ParticleSystem, // パーティクルシステム
 	Event,			// イベント
 	None,			// なし
 };
@@ -35,7 +35,7 @@ public:
 	// Constructors & Destructor
 	// =======================
 	SceneObject();
-	virtual ~SceneObject();
+	virtual ~SceneObject() = default;
 
 	// =======================
 	// Main Interface

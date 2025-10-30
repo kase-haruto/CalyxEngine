@@ -2,8 +2,6 @@
 
 #include <iostream>
 
-BaseEmitter::BaseEmitter() =default;
-
 void BaseEmitter::TransferParticleDataToGPU(){
 	if (units_.empty()) return;
 	std::vector<ParticleConstantData> gpuUnits;

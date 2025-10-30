@@ -182,7 +182,7 @@ inline bool DrawFxParamGui(const char* label, FxParam<float>& param) {
 	}
 	ImGui::SameLine();
 
-	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth;
+	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanAvailWidth;
 	bool			   open	 = ImGui::CollapsingHeader(label, flags);
 
 	if(open) {

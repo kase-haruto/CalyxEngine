@@ -30,7 +30,7 @@ inline int TypePriority(ObjectType t) {
 		return 1;
 	case ObjectType::GameObject:
 		return 2;
-	case ObjectType::Effect:
+	case ObjectType::ParticleSystem:
 		return 3;
 	default:
 		return 9;
@@ -179,7 +179,7 @@ void HierarchyPanel::ShowObjectRecursive(SceneObject* obj) {
 	case ObjectType::GameObject:
 		typeI = iconGameObj_.tex;
 		break;
-	case ObjectType::Effect:
+	case ObjectType::ParticleSystem:
 		typeI = iconFx_.tex;
 		break;
 	default:

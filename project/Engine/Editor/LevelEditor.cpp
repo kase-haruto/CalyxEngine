@@ -258,7 +258,7 @@ void LevelEditor::CreateObject(const std::shared_ptr<SceneObject>& obj) {
 	SceneContext* ctx = SceneContext::Current();
 
 	// パーティクルなら FxSystem にも登録
-	if(obj->GetObjectType() == ObjectType::Effect) {
+	if(obj->GetObjectType() == ObjectType::ParticleSystem) {
 		if(auto fx = std::dynamic_pointer_cast<ParticleSystemObject>(obj)) {
 			ctx->GetFxSystem()->AddEmitter(fx);
 		}
@@ -286,7 +286,7 @@ void LevelEditor::DeleteObject(const std::shared_ptr<SceneObject>& sp) {
 	}
 
 	// ── パーティクルシステムなら FxSystem からも削除 ──────────
-	if(sp->GetObjectType() == ObjectType::Effect) {
+	if(sp->GetObjectType() == ObjectType::ParticleSystem) {
 		if(auto fxEmitter = std::dynamic_pointer_cast<FxEmitter>(sp)) {
 			ctx->GetFxSystem()->RemoveEmitter(fxEmitter.get());
 		}
