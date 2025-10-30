@@ -8,7 +8,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 //		ctor / dtor
 /////////////////////////////////////////////////////////////////////////////////////////
-ParticleSystemObject::ParticleSystemObject(const std::string& name) { SceneObject::SetName(name,ObjectType::ParticleSystem); }
+ParticleSystemObject::ParticleSystemObject() =default;
+ParticleSystemObject::ParticleSystemObject(const std::string& name) { SceneObject::SetName(name,ObjectType::Effect); }
 ParticleSystemObject::~ParticleSystemObject() = default;
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -38,8 +39,6 @@ void ParticleSystemObject::SetDrawEnable(bool isDrawEnable) {
 	// 子にも適用
 	for(const auto& child : children_) { if(auto ps = std::dynamic_pointer_cast<ParticleSystemObject>(child)) { ps->SetDrawEnable(isDrawEnable); } }
 }
-
-Vector3 ParticleSystemObject::GetWorldPosition() const { return GetWorldTransform().GetWorldPosition(); }
 
 void ParticleSystemObject::ApplyConfig() {
 	const auto& cfg = config_.GetConfig();

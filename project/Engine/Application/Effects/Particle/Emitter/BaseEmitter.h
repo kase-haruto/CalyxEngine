@@ -5,8 +5,6 @@
 #include <Engine/Graphics/Material.h>
 #include <Engine/Application/Effects/Particle/FxUnit.h>
 
-#include <d3d12.h>
-
 /* ========================================================================
 /*	particle emitter
 /* ===================================================================== */
@@ -15,6 +13,7 @@ public:
 	//===================================================================*/
 	//					public func
 	//===================================================================*/
+	BaseEmitter();
 	virtual ~BaseEmitter() = default;
 
 	virtual void Update(float deltaTime) = 0;
@@ -40,4 +39,3 @@ protected:
 	DxStructuredBuffer<ParticleConstantData> instanceBuffer_;
 	DxConstantBuffer<ParticleMaterial> materialBuffer_; // パーティクルマテリアルの定数バッファ
 };
-
