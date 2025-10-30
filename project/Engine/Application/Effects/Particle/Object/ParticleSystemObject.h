@@ -30,9 +30,10 @@ public:
 	void ShowGui() override;
 
 	//--------- session -----------------------------------------------------
-	void PlayRecursive();		//< 再生
-	void StopRecursive();		//< 停止
-	void ResetRecursive();		//< リセット
+	void PlayRecursive();  //< 再生
+	void StopRecursive();  //< 停止
+	void ResetRecursive(); //< リセット
+	bool LoadTextureByGuid(const Guid& g);
 
 	//--------- config -----------------------------------------------------
 	// 適用
@@ -55,5 +56,6 @@ public:
 	const ConfigurableObject<ParticleSystemObjectConfig>& GetConfigObject()const{return config_;}
 
 private:
+	Guid textureGuid_;
 	ConfigurableObject<ParticleSystemObjectConfig> config_;
 };

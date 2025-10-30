@@ -49,7 +49,7 @@ public:
 	bool IsDrawEnable() { return isDrawEnable_; }
 	void SetDrawEnable(bool isEnable) { isDrawEnable_ = isEnable; }
 	bool IsPlaying() const override { return isPlaying_; }
-
+	const D3D12_GPU_DESCRIPTOR_HANDLE& GetTextureHandle()const{return textureHandle_;}
 	//--------- callback -----------------------------------------------//
 
 	/// <summary>
@@ -78,12 +78,13 @@ public:
 	FxParam<Vector3> velocity_; //< パーティクルの速度（定数またはランダム）
 	FxParam<float>	 lifetime_; //< パーティクルの寿命（定数またはランダム）
 
-private:
+protected:
 	//===================================================================*/
 	//					private variable
 	//===================================================================*/
 
 	const int kMaxUnits_ = 4096; //< 最大パーティクル数
+	D3D12_GPU_DESCRIPTOR_HANDLE textureHandle_;
 
 	std::unique_ptr<FxModuleContainer> moduleContainer_; // モジュールコンテナ
 
@@ -93,7 +94,7 @@ private:
 	bool isStatic_	   = false; //< 静止か
 	bool isDrawEnable_ = true;	//< 描画するか
 
-private:
+protected:
 	bool isOneShot_	  = false; //<
 	bool hasEmitted_  = false; //< 発生したか
 	bool autoDestroy_ = false; //< 自動削除するか

@@ -95,7 +95,7 @@ void FxEmitter::Update(float deltaTime) {
 		prevPostion_ = position_;
 	}
 
-	// パーティクル更新処理（省略なしで元のまま）
+	// パーティクル更新処理
 	for (auto& fx : units_) {
 		if (!fx.alive) continue;
 
@@ -147,7 +147,7 @@ void FxEmitter::Emit(const Vector3& pos) {
 
 	FxUnit fx;
 	ResetFxUnit(fx);
-	fx.position = pos; // ← 引数位置で初期化
+	fx.position = pos; // 引数位置で初期化
 	units_.push_back(fx);
 }
 

@@ -283,17 +283,11 @@ void FxObject::SyncConfigFromChildren() {
 //		エミッター単位
 /////////////////////////////////////////////////////////////////////////////////////////
 std::shared_ptr<ParticleSystemObject>
-FxObject::AddEmitterNode(const EffectEmitterNodeConfig& node) {
+FxObject::AddEmitterNode(const EffectEmitterNodeConfig& ) {
 	// 子を生成
 	auto child = SceneAPI::Instantiate<ParticleSystemObject>("emitter");
-	child->SetDrawEnable(node.isDrawEnable);
-
 	// 親子付け（Transform 親子・Scene 階層）
 	this->AddChild(child);
-
-	// Transform と Emitter を適用
-	child->GetWorldTransform().ApplyConfig(node.transform);
-	child->FxEmitter::ApplyConfigFrom(node.emitter);
 
 	emitters_.push_back(child);
 	return child;

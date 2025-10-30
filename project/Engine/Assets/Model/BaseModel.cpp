@@ -275,7 +275,6 @@ void BaseModel::ShowImGui(BaseModelConfig& config) {
 bool BaseModel::LoadTextureByGuid(const Guid& g) {
 	if (!g.isValid()) return false;
 
-	// （必要なら .meta の viewDimension 等で 2D 以外を弾く処理を先に）
 	auto h = TextureManager::GetInstance()->LoadTexture(g);
 	if (!h.ptr) return false;
 

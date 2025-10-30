@@ -30,7 +30,7 @@ void ParticleRenderer::Render(
 
 			em->GetMaterialBuffer().SetCommand(cmdList, 1);
 			auto tex = TextureManager::GetInstance()->LoadTexture("Textures/" + em->GetTexturePath());
-			cmdList->SetGraphicsRootDescriptorTable(3, tex);
+			cmdList->SetGraphicsRootDescriptorTable(3, em->GetTextureHandle());
 
 			ModelData& model =
 				ModelManager::GetInstance()->GetModelData(em->GetModelPath());
