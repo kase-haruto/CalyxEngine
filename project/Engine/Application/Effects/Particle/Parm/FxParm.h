@@ -8,7 +8,7 @@
 #include <Engine/Foundation/Utility/Random/Random.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 #include <type_traits>
-
+#include <Engine/Application/Effects/FxGuiHelpers.h>
 // external
 #include <externals/imgui/imgui.h>
 
@@ -140,107 +140,97 @@ inline FxParamConfig<T> FxParam<T>::ToConfig() const { return FxParamConfig<T>{m
 
 namespace ImGuiHelpers {
 
-inline bool DrawFxParamGui(const char* label,FxParam<float>& param) {
-	bool changed = false;
-
-	bool isRandom  = (param.GetMode() == FxValueMode::Random);
-	bool useRandom = isRandom;
-
-	ImGui::PushID(label);
-
-	if(ImGui::Checkbox("##UseRandom",&useRandom)) {
-		if(useRandom != isRandom) {
-			if(useRandom) { param.SetRandom(param.GetMin(),param.GetMax()); } else { param.SetConstant(param.GetConstant()); }
-			changed = true;
-		}
-	}
-	ImGui::SameLine();
-
-	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth;
-	bool               open  = ImGui::CollapsingHeader(label,flags);
-
-	if(open) {
-		ImGui::Indent();
-		if(!useRandom) {
-			float value = param.GetConstant();
-			if(GuiCmd::DragFloat("Constant",value)) {
-				param.SetConstant(value);
-				changed = true;
-			}
-		} else {
-			float minVal = param.GetMin();
-			float maxVal = param.GetMax();
-
-			bool edited = false;
-			if(GuiCmd::DragFloat("Min",minVal)) edited = true;
-			if(GuiCmd::DragFloat("Max",maxVal)) edited = true;
-
-			if(edited) {
-				if(minVal > maxVal) std::swap(minVal,maxVal);
-				param.SetRandom(minVal,maxVal);
-				changed = true;
-			}
-		}
-		ImGui::Unindent();
-	}
-
-	ImGui::PopID();
-	return changed;
+inline bool DrawModeCombo(const char* id, FxValueMode& m) {
+    int cur = (m == FxValueMode::Constant) ? 0 : (m == FxValueMode::Random ? 1 : 2);
+    const char* items[] = { "Constant", "Random(Box)", "RandomSphere" };
+    bool changed = false;
+    if (ImGui::Combo(id, &cur, items, IM_ARRAYSIZE(items))) {
+        m = (cur == 0) ? FxValueMode::Constant : (cur == 1 ? FxValueMode::Random : FxValueMode::RandomSphere);
+        changed = true;
+    }
+    return changed;
 }
 
-inline bool DrawFxParamGui(const char* label,FxParam<Vector3>& param) {
-	bool changed   = false;
-	bool isRandom  = (param.GetMode() == FxValueMode::Random);
-	bool useRandom = isRandom;
+inline bool DrawFxParamGui(const char* label, FxParam<float>& p) {
+    bool changed = false;
+    ImGui::PushID(label);
+    FxValueMode mode = p.GetMode();
 
-	ImGui::PushID(label);
+    FxGui::RowLabel(label);
+    // 1行目：モード
+    {
+        ImGui::BeginGroup();
+        changed |= DrawModeCombo("##mode", mode);
+        // モード確定後に値ブロック
+        if (mode == FxValueMode::Constant) {
+            float v = p.GetConstant();
+            if (GuiCmd::DragFloat("Value", v)) { p.SetConstant(v); changed = true; }
+        } else { // Random
+            float mn = p.GetMin(), mx = p.GetMax();
+            bool e1 = GuiCmd::DragFloat("Min", mn);
+            bool e2 = GuiCmd::DragFloat("Max", mx);
+            if (e1 || e2) { if (mn > mx) std::swap(mn, mx); p.SetRandom(mn, mx); changed = true; }
+        }
+        ImGui::EndGroup();
+    }
 
-	// ランダムか定数かをcheckBoxでトグル
-	if(ImGui::Checkbox("##UseRandom",&useRandom)) {
-		if(useRandom != isRandom) {
-			if(useRandom) { param.SetRandom(param.GetMin(),param.GetMax()); } else { param.SetConstant(param.GetConstant()); }
-			changed = true;
-		}
-	}
-	ImGui::SameLine();
+    // モードを反映
+    if (mode != p.GetMode()) {
+        if (mode == FxValueMode::Constant) p.SetConstant(p.GetConstant());
+        else p.SetRandom(p.GetMin(), p.GetMax());
+        changed = true;
+    }
+    ImGui::PopID();
+    return changed;
+}
 
-	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth;
-	bool               open  = ImGui::CollapsingHeader(label,flags);
+inline bool DrawFxParamGui(const char* label, FxParam<Vector3>& p) {
+    bool changed = false;
+    ImGui::PushID(label);
+    FxValueMode mode = p.GetMode();
 
-	if(open) {
-		ImGui::Indent();
-		if(!useRandom) {
-			//低数値の調整
-			Vector3 value = param.GetConstant();
-			if(GuiCmd::DragFloat3("Constant",value)) {
-				param.SetConstant(value);
-				changed = true;
-			}
-		} else {
-			// ランダムシードの設定
+    FxGui::RowLabel(label);
+    ImGui::BeginGroup();
+    changed |= DrawModeCombo("##mode", mode);
 
-			Vector3 minVal = param.GetMin();
-			Vector3 maxVal = param.GetMax();
+    if (mode == FxValueMode::Constant) {
+        Vector3 v = p.GetConstant();
+        if (GuiCmd::DragFloat3("Value", v)) { p.SetConstant(v); changed = true; }
+    } else if (mode == FxValueMode::Random) {
+        Vector3 mn = p.GetMin(), mx = p.GetMax();
+        bool e1 = GuiCmd::DragFloat3("Min", mn);
+        bool e2 = GuiCmd::DragFloat3("Max", mx);
+        if (e1 || e2) {
+            if (mn.x > mx.x) std::swap(mn.x, mx.x);
+            if (mn.y > mx.y) std::swap(mn.y, mx.y);
+            if (mn.z > mx.z) std::swap(mn.z, mx.z);
+            p.SetRandom(mn, mx);
+            changed = true;
+        }
+    } else { // RandomSphere
+        // ユーザーにとって直感的な Center+Radius 入力にする
+        Vector3 center = (p.GetMin() + p.GetMax()) * 0.5f;
+        Vector3 half   = (p.GetMax() - p.GetMin()) * 0.5f;
+        float radius   = half.Length();
+        bool e1 = GuiCmd::DragFloat3("Center", center);
+        bool e2 = GuiCmd::DragFloat("Radius", radius, 0.01f, 0.0f, 1e6f);
+        if (e1 || e2) {
+            Vector3 mn = center - Vector3(radius, radius, radius);
+            Vector3 mx = center + Vector3(radius, radius, radius);
+            p.SetRandom(mn, mx);
+            changed = true;
+        }
+    }
+    ImGui::EndGroup();
 
-			bool edited = false;
-			if(GuiCmd::DragFloat3("Min",minVal)) edited = true;
-			if(GuiCmd::DragFloat3("Max",maxVal)) edited = true;
-
-			if(edited) {
-				// 各成分で min > max をチェックして入れ替え
-				if(minVal.x > maxVal.x) std::swap(minVal.x,maxVal.x);
-				if(minVal.y > maxVal.y) std::swap(minVal.y,maxVal.y);
-				if(minVal.z > maxVal.z) std::swap(minVal.z,maxVal.z);
-
-				param.SetRandom(minVal,maxVal);
-				changed = true;
-			}
-		}
-		ImGui::Unindent();
-	}
-
-	ImGui::PopID();
-	return changed;
+    // 反映
+    if (mode != p.GetMode()) {
+        if (mode == FxValueMode::Constant) p.SetConstant(p.GetConstant());
+        else p.SetRandom(p.GetMin(), p.GetMax()); // RandomSphere も min/max を使う実装のためOK
+        changed = true;
+    }
+    ImGui::PopID();
+    return changed;
 }
 
 } // namespace ImGuiHelpers

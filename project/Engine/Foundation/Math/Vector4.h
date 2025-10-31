@@ -19,7 +19,8 @@ struct Vector4 final{
 	static Vector4 TransformVector(const Matrix4x4& m, const Vector4& v);
 
 	static Vector4 Transform(const Vector4& v, const Matrix4x4& m);
-
+	static Vector4 Lerp(const Vector4& a, const Vector4& b, float t) noexcept;
+	static Vector4 LerpUnclamped(const Vector4& a, const Vector4& b, float t) noexcept;   // クランプなし
 	//--------- operator ---------------------------------------------------
 	bool operator==(const Vector4& other) const;
 	bool operator!=(const Vector4& other) const;

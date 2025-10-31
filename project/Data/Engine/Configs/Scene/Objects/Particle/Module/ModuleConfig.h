@@ -2,6 +2,7 @@
 
 #include <string>
 #include <Engine/Foundation/Math/Vector3.h>
+#include <Engine/Foundation/Math/Vector4.h>
 #include <Engine/Foundation/Utility/Ease/CxEase.h>
 #include <externals/nlohmann/json.hpp>
 
@@ -74,7 +75,7 @@ struct GravityModuleConfig : public BaseModuleConfig {
 struct SizeOverLifetimeConfig 
 	: public BaseModuleConfig {
 	bool isGrowing = true;
-	Cx::Ease::EaseType easeType = Cx::Ease::EaseType::EaseInOutCubic;
+	Cx::Ease::EaseType easeType =	 Cx::Ease::EaseType::EaseInOutCubic;
 
 	SizeOverLifetimeConfig() {
 		name = "SizeOverLifetimeModule";
@@ -100,6 +101,51 @@ struct SizeOverLifetimeConfig
 			j.at("easeType").get_to(ease);
 			easeType = static_cast<Cx::Ease::EaseType>(ease);
 		}
+	}
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// lifeTimeに応じてパラメータの調整
+/////////////////////////////////////////////////////////////////////////////////////////
+struct OverLifetimeModuleConfig : public BaseModuleConfig {
+	OverLifetimeModuleConfig() { name = "OverLifetimeModule"; }
+	OverLifetimeModuleConfig(const std::string& _name, bool _enable)
+		: BaseModuleConfig(_name, _enable) {}
+
+	// Target/Blend/Ease は int で保存（モジュール側の enum と対応）
+	int  target  = 0;  // 0:Scale, 1:RotX, 2:RotY, 3:RotZ, 4:ColorRGBA, 5:AlphaOnly
+	int  blend   = 0;  // 0:Set, 1:Add, 2:Multiply
+	int  ease    = static_cast<int>(Cx::Ease::EaseType::EaseInOutCubic);
+	bool clamp01 = true;
+	bool invert  = false;
+
+	// start/end は Vector4
+	Vector4 start {0,0,0,1};
+	Vector4 end   {1,1,1,1};
+
+	nlohmann::json ToJson() const override {
+		return {
+	            {"name", name},
+				{"enabled", enabled},
+				{"target", target},
+				{"blend",  blend},
+				{"ease",   ease},
+				{"clamp01", clamp01},
+				{"invert",  invert},
+				{"start",   {start.x, start.y, start.z, start.w}},
+				{"end",     {end.x,   end.y,   end.z,   end.w}},
+			};
+	}
+
+	void FromJson(const nlohmann::json& j) override {
+		if (j.contains("enabled")) j.at("enabled").get_to(enabled);
+		if (j.contains("target"))  j.at("target").get_to(target);
+		if (j.contains("blend"))   j.at("blend").get_to(blend);
+		if (j.contains("ease"))    j.at("ease").get_to(ease);
+		if (j.contains("clamp01")) j.at("clamp01").get_to(clamp01);
+		if (j.contains("invert"))  j.at("invert").get_to(invert);
+		if (j.contains("start")) { auto a=j.at("start"); start={a.at(0),a.at(1),a.at(2),a.at(3)}; }
+		if (j.contains("end"))   { auto a=j.at("end");   end  ={a.at(0),a.at(1),a.at(2),a.at(3)}; }
 	}
 };
 

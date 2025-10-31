@@ -6,6 +6,22 @@
 #include <Engine/Assets/Database/AssetDatabase.h>
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Assets/System/AssetDragPayload.h>
+namespace {
+void VSeparator(float height = 0.0f, float thickness = 1.0f, float pad = 6.0f) {
+	ImVec2 pos  = ImGui::GetCursorScreenPos();
+	if (height <= 0.0f) height = ImGui::GetTextLineHeightWithSpacing();
+
+	// 線の色は ImGuiCol_Separator を流用
+	ImU32 col = ImGui::GetColorU32(ImGuiCol_Separator);
+	ImDrawList* dl = ImGui::GetWindowDrawList();
+	float x = pos.x + pad * 0.5f; // ちょい内側に
+	dl->AddLine(ImVec2(x, pos.y), ImVec2(x, pos.y + height), col, thickness);
+
+	// レイアウトを前へ送る（幅 = pad + thickness）
+	ImGui::Dummy(ImVec2(pad + thickness, height));
+	ImGui::SameLine();
+}
+};
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		ctor / dtor
@@ -36,119 +52,190 @@ void ParticleSystemObject::AlwaysUpdate([[maybe_unused]] float dt) {
 //		debug gui
 /////////////////////////////////////////////////////////////////////////////////////////
 void ParticleSystemObject::ShowGui() {
-	config_.ShowGui();
-
 	ImGui::PushID(this);
 
-	// =============================
-	// マテリアルセクション
-	// =============================
-	ImGui::SeparatorText("Material");
-	ImGui::ColorEdit4("Color", &material_.color.x);
+	// ---- 上部ミニバー：よく触る項目をサッと ----
+		ImGui::AlignTextToFramePadding();
+		ImGui::TextUnformatted("Quick Controls");
+		ImGui::SameLine();
+		ImGui::Spacing();
+		ImGui::SameLine();
 
-	// 現在のパスを表示
-	// ---- ドラッグ&ドロップでテクスチャ適用 ----
-	ImGui::Text("Texture (Drag & Drop from Assets)");
-	// ドロップ領域（InvisibleButton で有効アイテム化）
-	ImVec2 dropSize(ImGui::GetContentRegionAvail().x, 56.0f);
-	ImGui::InvisibleButton("##TextureDrop", dropSize);
+		ImGui::TextUnformatted("Rate");
+		ImGui::SameLine();
+		ImGui::SetNextItemWidth(120);
+		GuiCmd::DragFloat("##rate_top", emitRate_, 0.01f, 0.0f, 10.0f);
+		ImGui::SameLine();
 
-	// 見た目（枠とテキスト）
-	const bool hovered = ImGui::IsItemHovered();
-	const ImVec2 rmin = ImGui::GetItemRectMin();
-	const ImVec2 rmax = ImGui::GetItemRectMax();
-	ImGui::GetWindowDrawList()->AddRect(
-		rmin, rmax, hovered ? IM_COL32(120, 180, 255, 220) : IM_COL32(90, 90, 90, 160),
-		8.0f, 0, 2.0f);
-	ImGui::GetWindowDrawList()->AddText(
-		ImVec2(rmin.x + 8.0f, rmin.y + 8.0f),
-		IM_COL32(230, 230, 230, 255),
-		"Drop a Texture here");
+		ImGui::TextUnformatted("OneShot");
+		ImGui::SameLine();
+		GuiCmd::CheckBox("##oneshot_top", isOneShot_);
 
-	// 受け取り
-	if (ImGui::BeginDragDropTarget()) {
-		if (const ImGuiPayload* p = ImGui::AcceptDragDropPayload("CALYX_ASSET")) {
-			const AssetDragPayload payload =
-				*reinterpret_cast<const AssetDragPayload*>(p->Data);
-			if (payload.type == AssetType::Texture) {
-				if (LoadTextureByGuid(payload.guid)) {
-					// コンフィグ（保存用）にも反映
-					config_.GetConfig().textureGuid = payload.guid;
-				} else {
-					ImGui::OpenPopup("TextureDropError");
+	// ================= Material =================
+	if(FxGui::GridScope sec{"Material"}; sec.open) {
+		// Color
+		FxGui::RowLabel("Color");
+		ImGui::ColorEdit4("##color", &material_.color.x);
+
+		// Texture (path表示 + 選択ボタン)
+		FxGui::RowLabel("Texture");
+		ImGui::BeginGroup();
+		// 現在のパスを表示
+		// ---- ドラッグ&ドロップでテクスチャ適用 ----
+		ImGui::Text("Texture (Drag & Drop from Assets)");
+		// ドロップ領域（InvisibleButton で有効アイテム化）
+		ImVec2 dropSize(ImGui::GetContentRegionAvail().x, 56.0f);
+		ImGui::InvisibleButton("##TextureDrop", dropSize);
+
+		// 見た目（枠とテキスト）
+		const bool hovered = ImGui::IsItemHovered();
+		const ImVec2 rmin = ImGui::GetItemRectMin();
+		const ImVec2 rmax = ImGui::GetItemRectMax();
+		ImGui::GetWindowDrawList()->AddRect(
+			rmin, rmax, hovered ? IM_COL32(120, 180, 255, 220) : IM_COL32(90, 90, 90, 160),
+			8.0f, 0, 2.0f);
+		ImGui::GetWindowDrawList()->AddText(
+			ImVec2(rmin.x + 8.0f, rmin.y + 8.0f),
+			IM_COL32(230, 230, 230, 255),
+			"Drop a Texture here");
+
+		// 受け取り
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload* p = ImGui::AcceptDragDropPayload("CALYX_ASSET")) {
+				const AssetDragPayload payload =
+					*reinterpret_cast<const AssetDragPayload*>(p->Data);
+				if (payload.type == AssetType::Texture) {
+					if (LoadTextureByGuid(payload.guid)) {
+						// コンフィグ（保存用）にも反映
+						config_.GetConfig().textureGuid = payload.guid;
+					} else {
+						ImGui::OpenPopup("TextureDropError");
+					}
 				}
 			}
+			ImGui::EndDragDropTarget();
 		}
-		ImGui::EndDragDropTarget();
-	}
 
-	// 失敗メッセージ（2D 以外の SRV 等）
-	if (ImGui::BeginPopup("TextureDropError")) {
-		ImGui::TextUnformatted("このテクスチャは適用できません（2D以外/未対応形式）。");
-		ImGui::EndPopup();
-	}
+		// 失敗メッセージ（2D 以外の SRV 等）
+		if (ImGui::BeginPopup("TextureDropError")) {
+			ImGui::TextUnformatted("このテクスチャは適用できません（2D以外/未対応形式）。");
+			ImGui::EndPopup();
+		}
 
-	// 現在のテクスチャ表示（GUID→ファイル名）
-	auto labelFromGuid = [](const Guid& g)->std::string {
-		if (!g.isValid()) return "(none)";
-		auto* db = AssetDatabase::GetInstance();
-		for (auto* r : db->GetView()) {
-			if (r && r->type == AssetType::Texture && r->guid == g) {
-				return r->sourcePath.filename().string();
+		// 現在のテクスチャ表示（GUID→ファイル名）
+		auto labelFromGuid = [](const Guid& g)->std::string {
+			if (!g.isValid()) return "(none)";
+			auto* db = AssetDatabase::GetInstance();
+			for (auto* r : db->GetView()) {
+				if (r && r->type == AssetType::Texture && r->guid == g) {
+					return r->sourcePath.filename().string();
+				}
 			}
+			return "(missing)";
+		};
+		ImGui::EndGroup();
+	}
+
+	// ================= Emission =================
+	if(FxGui::GridScope sec{"Emission"}; sec.open) {
+		FxGui::RowLabel("Alive Count");
+		ImGui::Text("%zu", units_.size());
+
+		FxGui::RowLabel("World Position");
+		GuiCmd::DragFloat3("##pos", position_);
+
+		FxGui::RowLabel("Emit Rate (sec)");
+		GuiCmd::DragFloat("##rate", emitRate_, 0.01f, 0.0f, 10.0f);
+
+		FxGui::RowLabel("Complement Trail");
+		GuiCmd::CheckBox("##comp", isComplement_);
+
+		FxGui::RowLabel("Static");
+		GuiCmd::CheckBox("##static", isStatic_);
+	}
+
+	// ================= Params =================
+	if(FxGui::GridScope sec{"Params"}; sec.open) {
+		FxGui::DrawParam("Scale", scale_);
+		FxGui::DrawParam("Velocity", velocity_);
+		FxGui::DrawParam("Lifetime", lifetime_);
+	}
+
+	// ================= Playback =================
+	if(FxGui::GridScope sec{"Playback"}; sec.open) {
+		FxGui::RowLabel("Controls");
+		ImGui::BeginGroup();
+		if(ImGui::Button("Play")) {
+			Play();
 		}
-		return "(missing)";
-	};
-	// =============================
-	// Emit設定
-	// =============================
-	ImGui::SeparatorText("Emit");
-	ImGui::Text("emitCount: %d", units_.size());
-	GuiCmd::DragFloat3("position", position_);
-	GuiCmd::DragFloat("emitRate", emitRate_, 0.01f, 0.0f, 10.0f);
+		ImGui::SameLine();
+		if(ImGui::Button("Stop")) {
+			Stop();
+		}
+		ImGui::SameLine();
+		if(ImGui::Button("Reset")) {
+			Reset();
+		}
+		ImGui::EndGroup();
 
-	GuiCmd::CheckBox("isComplement", isComplement_);
-	GuiCmd::CheckBox("isStatic", isStatic_);
-
-	ImGuiHelpers::DrawFxParamGui("Scale", scale_);
-	ImGuiHelpers::DrawFxParamGui("Velocity", velocity_);
-	ImGuiHelpers::DrawFxParamGui("Lifetime", lifetime_);
-
-	// =============================
-	// 再生制御
-	// =============================
-	ImGui::Spacing();
-	ImGui::SeparatorText("Emitter Controls");
-	if (ImGui::Button("Play")) { Play(); }
-	ImGui::SameLine();
-	if (ImGui::Button("Stop")) { Stop(); }
-	ImGui::SameLine();
-	if (ImGui::Button("Reset")) { Reset(); }
-
-	// =============================
-	// OneShot
-	// =============================
-	ImGui::Spacing();
-	ImGui::SeparatorText("OneShot Settings");
-	GuiCmd::CheckBox("OneShot", isOneShot_);
-	if (isOneShot_) {
-		ImGui::DragInt("Emit Count", &emitCount_, 1, 1, kMaxUnits_);
-		GuiCmd::CheckBox("Auto Destroy", autoDestroy_);
-		GuiCmd::DragFloat("Emit Delay", emitDelay_, 0.01f, 0.0f, 10.0f);
-	} else {
-		GuiCmd::DragFloat("Emit Duration", emitDuration_, 0.01f, -1.0f, 60.0f);
+		FxGui::RowLabel("Draw Enable");
 	}
 
-	// =============================
-	// モジュール
-	// =============================
+	// ================= One-Shot =================
+	if(FxGui::GridScope sec{"One-Shot"}; sec.open) {
+		FxGui::RowLabel("Enable");
+		if(GuiCmd::CheckBox("##oneshot", isOneShot_)) {
+			if(!isOneShot_) {
+				hasEmitted_ = false;
+			} // OFFに戻した時の自然な継続
+		}
+
+		ImGui::BeginDisabled(!isOneShot_);
+		FxGui::RowLabel("Emit Count");
+		ImGui::DragInt("##count", &emitCount_, 1, 1, kMaxUnits_);
+
+		FxGui::RowLabel("Auto Destroy");
+		GuiCmd::CheckBox("##autoDestroy", autoDestroy_);
+
+		FxGui::RowLabel("Delay (sec)");
+		GuiCmd::DragFloat("##delay", emitDelay_, 0.01f, 0.0f, 10.0f);
+		ImGui::EndDisabled();
+
+		ImGui::BeginDisabled(isOneShot_);
+		FxGui::RowLabel("Emit Duration (sec)");
+		GuiCmd::DragFloat("##duration", emitDuration_, 0.01f, -1.0f, 60.0f);
+		ImGui::EndDisabled();
+	}
+
+	// ================= Modules =================
 	if (moduleContainer_) {
-		moduleContainer_->ShowModulesGui();
-		moduleContainer_->ShowAvailableModulesGui();
+		if (FxGui::GridScope sec{"Modules"}; sec.open) {
+			// ラベル列
+			FxGui::RowLabel("Modules");
+
+			ImGui::BeginGroup();
+			// 幅を常にその列いっぱいに
+			FxGui::FullWidthScope _fullWidth{};
+			// 少しだけ余裕を持たせる見た目
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 4));
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing,  ImVec2(6, 6));
+
+			// --- 有効モジュール（パラメータをここで全部縦に描く） ---
+			moduleContainer_->ShowModulesGui();
+
+			// --- 追加パレット（同じ列のまま下に表示） ---
+			moduleContainer_->ShowAvailableModulesGui();
+
+			ImGui::PopStyleVar(2);
+			ImGui::EndGroup();
+		}
 	}
 
+
+	ImGui::Spacing();
 	ImGui::PopID();
 }
+
 
 
 void ParticleSystemObject::SetDrawEnable(bool isDrawEnable) {
