@@ -4,10 +4,9 @@
    ===================================================================== */
 #include <Engine/Application/Effects/Particle/FxUnit.h>
 #include <Engine/Application/Effects/Particle/Module/BaseFxModule.h>
-#include <Engine/Foundation/Utility/Ease/CxEase.h>
 #include <Engine/Foundation/Math/Vector4.h>
+#include <Engine/Foundation/Utility/Ease/CxEase.h>
 #include <string>
-
 
 class OverLifetimeModule final : public BaseFxModule {
 public:

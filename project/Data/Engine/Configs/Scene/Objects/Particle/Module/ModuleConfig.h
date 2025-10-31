@@ -6,6 +6,8 @@
 #include <Engine/Foundation/Utility/Ease/CxEase.h>
 #include <externals/nlohmann/json.hpp>
 
+class OverLifetimeModule;
+
 struct BaseModuleConfig {
 	std::string name;
 	bool enabled = true;
@@ -123,30 +125,13 @@ struct OverLifetimeModuleConfig : public BaseModuleConfig {
 	Vector4 start {0,0,0,1};
 	Vector4 end   {1,1,1,1};
 
-	nlohmann::json ToJson() const override {
-		return {
-	            {"name", name},
-				{"enabled", enabled},
-				{"target", target},
-				{"blend",  blend},
-				{"ease",   ease},
-				{"clamp01", clamp01},
-				{"invert",  invert},
-				{"start",   {start.x, start.y, start.z, start.w}},
-				{"end",     {end.x,   end.y,   end.z,   end.w}},
-			};
-	}
+	nlohmann::json ToJson() const override;
 
-	void FromJson(const nlohmann::json& j) override {
-		if (j.contains("enabled")) j.at("enabled").get_to(enabled);
-		if (j.contains("target"))  j.at("target").get_to(target);
-		if (j.contains("blend"))   j.at("blend").get_to(blend);
-		if (j.contains("ease"))    j.at("ease").get_to(ease);
-		if (j.contains("clamp01")) j.at("clamp01").get_to(clamp01);
-		if (j.contains("invert"))  j.at("invert").get_to(invert);
-		if (j.contains("start")) { auto a=j.at("start"); start={a.at(0),a.at(1),a.at(2),a.at(3)}; }
-		if (j.contains("end"))   { auto a=j.at("end");   end  ={a.at(0),a.at(1),a.at(2),a.at(3)}; }
-	}
+	void FromJson(const nlohmann::json& j) override ;
+
+	void ApplyTo(OverLifetimeModule& m) const;
+	
+	void ExtractFrom(const OverLifetimeModule& m);
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////
