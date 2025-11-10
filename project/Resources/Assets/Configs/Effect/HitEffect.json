@@ -1,0 +1,505 @@
+{
+    "emitters": [
+        {
+            "emitter": {
+                "autoDestroy": false,
+                "color": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "emitCount": 16,
+                "emitDelay": 0.0,
+                "emitDuration": -1.0,
+                "emitRate": 1.840000033378601,
+                "isComplement": true,
+                "isDrawEnable": true,
+                "isOneShot": true,
+                "lifetime": {
+                    "constant": 0.5600000023841858,
+                    "max": 1.0,
+                    "min": 0.0,
+                    "mode": 0
+                },
+                "modelPath": "plane.obj",
+                "modules": [
+                    {
+                        "easeType": 10,
+                        "enabled": true,
+                        "isGrowing": false,
+                        "name": "SizeOverLifetimeModule"
+                    },
+                    {
+                        "blend": 0,
+                        "clamp01": true,
+                        "ease": 4,
+                        "enabled": true,
+                        "end": [
+                            0.0,
+                            0.871886134147644,
+                            0.8253440260887146,
+                            1.0
+                        ],
+                        "invert": false,
+                        "name": "OverLifetimeModule",
+                        "start": [
+                            0.501779317855835,
+                            0.0,
+                            0.0,
+                            1.0
+                        ],
+                        "target": 4
+                    }
+                ],
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "randomSpinEmit": true,
+                "scale": {
+                    "constant": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "max": {
+                        "x": 1.159999966621399,
+                        "y": 13.079999923706055,
+                        "z": 1.0
+                    },
+                    "min": {
+                        "x": -1.2599999904632568,
+                        "y": -15.600000381469727,
+                        "z": 0.0
+                    },
+                    "mode": 1
+                },
+                "textureGuid": "918b71a5-ef26-4dcb-9f5b-3ff3de55adce",
+                "texturePath": "particle.png",
+                "velocity": {
+                    "constant": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "max": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "min": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "mode": 0
+                }
+            },
+            "guid": "16be7bca-ba6e-45ec-98ad-064426f654ff",
+            "isDrawEnable": true,
+            "isGpu": false,
+            "name": "hit",
+            "objectType": 0,
+            "parentGuid": "f89b26de-aedd-4450-bb8f-e4733230150f",
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            }
+        },
+        {
+            "emitter": {
+                "autoDestroy": false,
+                "color": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "emitCount": 1,
+                "emitDelay": 0.0,
+                "emitDuration": -1.0,
+                "emitRate": 0.10000000149011612,
+                "isComplement": true,
+                "isDrawEnable": true,
+                "isOneShot": true,
+                "lifetime": {
+                    "constant": 0.5,
+                    "max": 1.0,
+                    "min": 0.0,
+                    "mode": 0
+                },
+                "modelPath": "plane.obj",
+                "modules": [
+                    {
+                        "animationSpeed": 32.18000030517578,
+                        "cols": 4,
+                        "enabled": true,
+                        "loop": false,
+                        "name": "TextureSheetAnimationModule",
+                        "rows": 4,
+                        "useCustomFrames": false
+                    },
+                    {
+                        "blend": 0,
+                        "clamp01": true,
+                        "ease": 1,
+                        "enabled": true,
+                        "end": [
+                            0.0,
+                            0.5587188601493835,
+                            0.5288938879966736,
+                            1.0
+                        ],
+                        "invert": false,
+                        "name": "OverLifetimeModule",
+                        "start": [
+                            0.7010676264762878,
+                            0.0,
+                            0.0,
+                            1.0
+                        ],
+                        "target": 4
+                    }
+                ],
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "randomSpinEmit": false,
+                "scale": {
+                    "constant": {
+                        "x": 7.0,
+                        "y": 7.0,
+                        "z": 5.0
+                    },
+                    "max": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "min": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "mode": 0
+                },
+                "textureGuid": "887f7536-6e5c-4875-ac80-0c56d5e40bff",
+                "texturePath": "particle.png",
+                "velocity": {
+                    "constant": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "max": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "min": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "mode": 0
+                }
+            },
+            "guid": "6091a317-642e-4778-8564-dcf2fcae95ae",
+            "isDrawEnable": true,
+            "isGpu": false,
+            "name": "hitAnim",
+            "objectType": 0,
+            "parentGuid": "f89b26de-aedd-4450-bb8f-e4733230150f",
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            }
+        },
+        {
+            "emitter": {
+                "autoDestroy": false,
+                "color": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "emitCount": 1,
+                "emitDelay": 0.0,
+                "emitDuration": -1.0,
+                "emitRate": 0.10000000149011612,
+                "isComplement": true,
+                "isDrawEnable": false,
+                "isOneShot": true,
+                "lifetime": {
+                    "constant": 0.5600000023841858,
+                    "max": 1.0,
+                    "min": 0.0,
+                    "mode": 0
+                },
+                "modelPath": "plane.obj",
+                "modules": [
+                    {
+                        "easeType": 11,
+                        "enabled": true,
+                        "isGrowing": true,
+                        "name": "SizeOverLifetimeModule"
+                    }
+                ],
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "randomSpinEmit": false,
+                "scale": {
+                    "constant": {
+                        "x": 4.0,
+                        "y": 4.0,
+                        "z": 1.0
+                    },
+                    "max": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "min": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "mode": 0
+                },
+                "textureGuid": "3cf57a10-5b98-4fde-8730-907fc3d43bde",
+                "texturePath": "particle.png",
+                "velocity": {
+                    "constant": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "max": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "min": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "mode": 0
+                }
+            },
+            "guid": "597dfa11-3369-407d-ba6b-4292c926a903",
+            "isDrawEnable": true,
+            "isGpu": false,
+            "name": "rect",
+            "objectType": 0,
+            "parentGuid": "f89b26de-aedd-4450-bb8f-e4733230150f",
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            }
+        },
+        {
+            "emitter": {
+                "autoDestroy": false,
+                "color": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "emitCount": 1,
+                "emitDelay": 0.0,
+                "emitDuration": -1.0,
+                "emitRate": 0.0,
+                "isComplement": true,
+                "isDrawEnable": true,
+                "isOneShot": true,
+                "lifetime": {
+                    "constant": 0.6200000047683716,
+                    "max": 1.0,
+                    "min": 0.0,
+                    "mode": 0
+                },
+                "modelPath": "plane.obj",
+                "modules": [
+                    {
+                        "easeType": 11,
+                        "enabled": true,
+                        "isGrowing": true,
+                        "name": "SizeOverLifetimeModule"
+                    },
+                    {
+                        "animationSpeed": 27.280000686645508,
+                        "cols": 4,
+                        "enabled": true,
+                        "loop": false,
+                        "name": "TextureSheetAnimationModule",
+                        "rows": 4,
+                        "useCustomFrames": false
+                    },
+                    {
+                        "blend": 0,
+                        "clamp01": true,
+                        "ease": 3,
+                        "enabled": true,
+                        "end": [
+                            0.5088968276977539,
+                            0.044557731598615646,
+                            0.0,
+                            1.0
+                        ],
+                        "invert": false,
+                        "name": "OverLifetimeModule",
+                        "start": [
+                            0.8220640420913696,
+                            0.7021186947822571,
+                            0.0,
+                            1.0
+                        ],
+                        "target": 4
+                    }
+                ],
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "randomSpinEmit": false,
+                "scale": {
+                    "constant": {
+                        "x": 6.0,
+                        "y": 6.0,
+                        "z": 1.0
+                    },
+                    "max": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "min": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "mode": 0
+                },
+                "textureGuid": "887f7536-6e5c-4875-ac80-0c56d5e40bff",
+                "texturePath": "particle.png",
+                "velocity": {
+                    "constant": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "max": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "min": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "mode": 0
+                }
+            },
+            "guid": "de00f1f4-fada-41e8-89ae-f143e9eaa058",
+            "isDrawEnable": true,
+            "isGpu": false,
+            "name": "ring",
+            "objectType": 0,
+            "parentGuid": "f89b26de-aedd-4450-bb8f-e4733230150f",
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            }
+        }
+    ],
+    "guid": "f89b26de-aedd-4450-bb8f-e4733230150f",
+    "name": "HitEffect",
+    "objectType": 0,
+    "parentGuid": "00000000-0000-0000-0000-000000000000",
+    "transform": {
+        "rotation": {
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+        },
+        "translation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        }
+    }
+}
