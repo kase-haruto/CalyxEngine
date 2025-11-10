@@ -36,7 +36,9 @@ void SceneContext::Update(float dt,bool runtimePass) {
 	}
 
 	// Always パス
-	for(auto& sp : objectLibrary_->GetAllObjectsShared()) { if(sp) sp->AlwaysUpdate(dt); }
+	for(auto& sp : objectLibrary_->GetAllObjectsShared()) {
+		if(sp) sp->AlwaysUpdate(dt);
+	}
 
 	lightLibrary_->CyncGpu();
 	fxSystem_->SyncEmitters();

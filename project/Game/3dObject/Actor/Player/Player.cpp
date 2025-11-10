@@ -209,6 +209,8 @@ void Player::Update(float dt) {
 	PurgeDeadLockedTargets();
 	UpdateAutoLockOn(dt);
 
+
+
 	Vector3 playerPos  = GetWorldPosition();
 	Vector3 reticlePos = reticleTransform_.GetWorldPosition();
 
@@ -445,10 +447,10 @@ void Player::UpdateTilt(const Vector3& inputVector) {
 	worldTransform_.rotationSource = RotationSource::Quaternion;
 
 	// カメラ回転（Euler）
-	Vector3 currentRot = cam->GetRotate();
-	currentRot.x       = Cx::Math::Lerp(currentRot.x,targetPitch * 0.3f,0.15f); // pitch
-	currentRot.z       = Cx::Math::Lerp(currentRot.z,targetRoll * 0.3f,0.15f);  // roll
-	cam->SetCamera(cam->GetTranslate(),currentRot);
+	// Vector3 currentRot = cam->GetRotate();
+	// currentRot.x       = Cx::Math::Lerp(currentRot.x,targetPitch * 0.3f,0.15f); // pitch
+	// currentRot.z       = Cx::Math::Lerp(currentRot.z,targetRoll * 0.3f,0.15f);  // roll
+	// cam->SetCamera(cam->GetTranslate(),currentRot);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////

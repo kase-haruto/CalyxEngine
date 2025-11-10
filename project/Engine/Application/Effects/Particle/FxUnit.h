@@ -8,6 +8,7 @@
 struct FxUnit{
 	Vector3 position;		//< 座標
 	Vector3 rotationEuler;	//< オイラー回転
+	float spinSpeed;		// < スピン速度
 	Vector3 velocity;		//< 速度
 	Vector3 initialScale = {1.0f, 1.0f, 1.0f}; // 初期スケール
 	Vector3 scale;			//< スケール

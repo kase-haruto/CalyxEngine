@@ -14,6 +14,27 @@
 
 #include <externals/imgui/ImGuiFileDialog.h>
 
+namespace {
+
+bool LibraryHasRaw(const SceneObjectLibrary*		   lib,
+				   const std::shared_ptr<SceneObject>& sp) {
+	if(!lib || !sp) return false;
+	const auto& raws = lib->GetAllObjectsRaw(); // 既存API
+	return std::find(raws.begin(), raws.end(), sp.get()) != raws.end();
+}
+// FxSystem 側に列挙APIがない場合はスキップしてOK（見つかれば使う）
+template <class FnEnum>
+bool FxHasEmitter(FnEnum enumRaw, FxEmitter* e) {
+	if(!e) return false;
+	bool found = false;
+	enumRaw([&](FxEmitter* raw) {
+		if(raw == e) found = true;
+	});
+	return found;
+}
+
+} // namespace
+
 using namespace EngineEdit;
 
 void LevelEditor::Initialize() {
@@ -252,26 +273,28 @@ void LevelEditor::SetSelectedObject(const std::shared_ptr<SceneObject>& sp) {
 	hierarchy_->SetSelectedObject(sp);
 	inspector_->SetSelectedObject(sp);
 }
+// 置き換え：LevelEditor::CreateObject
 void LevelEditor::CreateObject(const std::shared_ptr<SceneObject>& obj) {
 	if(!obj) return;
 
 	SceneContext* ctx = SceneContext::Current();
+	auto*		  lib = ctx->GetObjectLibrary();
 
-	// パーティクルなら FxSystem にも登録
-	if(obj->GetObjectType() == ObjectType::Effect) {
-		if(auto fx = std::dynamic_pointer_cast<ParticleSystemObject>(obj)) {
-			ctx->GetFxSystem()->AddEmitter(fx);
+	// --- ライブラリ重複ガード ---
+	if(!LibraryHasRaw(lib, obj)) {
+		lib->AddObject(obj);
+
+		// パーティクルなら FxSystem 側も
+		if(obj->GetObjectType() == ObjectType::Effect) {
+			if(auto fx = std::dynamic_pointer_cast<ParticleSystemObject>(obj)) {
+				ctx->GetFxSystem()->AddEmitter(fx);
+			}
 		}
 	}
 
-	// 自身を登録
-	ctx->GetObjectLibrary()->AddObject(obj);
-
-	// 子も再帰的に登録
+	// --- 子も再帰的に登録（各子も上の重複ガードが効く） ---
 	for(const auto& child : obj->GetChildren()) {
-		if(child) {
-			CreateObject(child);
-		}
+		if(child) CreateObject(child);
 	}
 }
 

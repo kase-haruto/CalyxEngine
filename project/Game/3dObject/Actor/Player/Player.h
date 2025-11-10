@@ -43,6 +43,7 @@ public:
 	void MoveReticle(const Vector3& offset);
 	void RequestShoot();
 	void RequestLockOn();
+	void UpdateTilt(const Vector3& moveVector);
 
 	void AttachDangerSenseSource(EnemyDirectory* dir);
 	void RequestLockOnTargetClear();
@@ -80,7 +81,6 @@ private:
 	void Move();
 	void Shoot();
 	void UpdateReticlePosition();
-	void UpdateTilt(const Vector3& moveVector);
 	void UpdateAutoLockOn(float dt);
 
 	// 取得/返却/初期確保

@@ -26,7 +26,9 @@ void VSeparator(float height = 0.0f, float thickness = 1.0f, float pad = 6.0f) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		ctor / dtor
 /////////////////////////////////////////////////////////////////////////////////////////
-ParticleSystemObject::ParticleSystemObject() =default;
+ParticleSystemObject::ParticleSystemObject() {
+	SceneObject::SetName("ParticleSystemObject", ObjectType::Effect);
+}
 ParticleSystemObject::ParticleSystemObject(const std::string& name) {
 	SceneObject::SetName(name,ObjectType::Effect);
 	// デフォルト値の設定
@@ -136,6 +138,18 @@ void ParticleSystemObject::ShowGui() {
 		ImGui::EndGroup();
 	}
 
+	// // ================= Billboard =================
+	if(FxGui::GridScope sec{"Billboard"}; sec.open) {
+		FxGui::RowLabel("Mode");
+		static const char* modes[] = {"None", "Full", "AxisY"};
+		int current = static_cast<int>(billboardMode_);
+		if(ImGui::Combo("##billmode", &current, modes, IM_ARRAYSIZE(modes))) {
+			billboardMode_ = static_cast<BillboardMode>(current);
+			billboardParams_.mode = current;
+			billboardCB_.TransferData(billboardParams_);
+		}
+	}
+
 	// ================= Emission =================
 	if(FxGui::GridScope sec{"Emission"}; sec.open) {
 		FxGui::RowLabel("Alive Count");
@@ -150,8 +164,8 @@ void ParticleSystemObject::ShowGui() {
 		FxGui::RowLabel("Complement Trail");
 		GuiCmd::CheckBox("##comp", isComplement_);
 
-		FxGui::RowLabel("Static");
-		GuiCmd::CheckBox("##static", isStatic_);
+		FxGui::RowLabel("random Spin on Emit");
+		GuiCmd::CheckBox("##randspin", randomSpinEmit_);
 	}
 
 	// ================= Params =================
@@ -159,6 +173,7 @@ void ParticleSystemObject::ShowGui() {
 		FxGui::DrawParam("Scale", scale_);
 		FxGui::DrawParam("Velocity", velocity_);
 		FxGui::DrawParam("Lifetime", lifetime_);
+		FxGui::DrawParam("spin", spin_);
 	}
 
 	// ================= Playback =================
@@ -189,7 +204,19 @@ void ParticleSystemObject::ShowGui() {
 				hasEmitted_ = false;
 			} // OFFに戻した時の自然な継続
 		}
+		bool tp = GetTimedPreview();
+		if (GuiCmd::CheckBox("##timedPrev", tp)) {
+			SetTimedPreview(tp);
+			// ON にした瞬間に一度流したい場合は以下を有効に
+			// if (tp && isOneShot_) RestartOneShot();
+		}
 
+		FxGui::RowLabel("Interval (sec)");
+		float iv = GetPreviewInterval();
+		if (GuiCmd::DragFloat("##prevInt", iv, 0.01f, 0.05f, 10.0f)) {
+			SetPreviewInterval(iv);
+		}
+		
 		ImGui::BeginDisabled(!isOneShot_);
 		FxGui::RowLabel("Emit Count");
 		ImGui::DragInt("##count", &emitCount_, 1, 1, kMaxUnits_);
@@ -249,7 +276,7 @@ void ParticleSystemObject::ApplyConfig() {
 	const auto& cfg = config_.GetConfig();
 
 	// FxEmitter 設定反映
-	FxEmitter::ApplyConfigFrom(cfg); // config_ は ParticleSystemObjectConfig のはず
+	FxEmitter::ApplyConfigFrom(cfg);
 
 	textureHandle_ = TextureManager::GetInstance()->LoadTexture("Textures/"+GetTexturePath());
 

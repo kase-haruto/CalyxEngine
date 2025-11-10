@@ -119,7 +119,7 @@ void GameScene::Update([[maybe_unused]] float dt) {
 	if(enemyEngagement_) enemyEngagement_->Update(dt);
 
 	auto mainCam = wMainCamera_.lock();
-	if(cameraTurnAround_) cameraTurnAround_->Update(mainCam.get(),dt);
+	//if(cameraTurnAround_) cameraTurnAround_->Update(mainCam.get(),dt);
 
 	// 敵弾コンテナ更新
 	enemyBulletContainer_->Update(dt);

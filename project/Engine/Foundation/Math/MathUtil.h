@@ -2,6 +2,8 @@
 #include "../Utility/Func/Fwd.h"
 
 namespace Cx::Math{
+const float kPi = 3.14159265358979323846f;
+
 Matrix4x4 MakeTranslateMatrix(const Vector3&) noexcept;
 Matrix4x4 MakeScaleMatrix(const Vector3&) noexcept;
 Matrix4x4 MakeRotateXMatrix(float) noexcept;

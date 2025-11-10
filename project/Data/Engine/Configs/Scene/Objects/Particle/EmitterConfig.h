@@ -5,53 +5,55 @@
 #include <Data/Engine/Configs/Scene/Objects/Particle/Module/ModuleConfigFactory.h>
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Foundation/Math/Vector4.h>
+#include <Engine/Objects/3D/Details/BillboardParams.h>
 #include <engine/Foundation/Utility/Guid/Guid.h>
 #include <externals/nlohmann/json.hpp>
 #include <string>
 #include <vector>
 
 struct EmitterConfig {
-	Vector3              position{};
-	Vector4              color;
+	Vector3				 position{};
+	Vector4				 color{1.0f, 1.0f, 1.0f, 1.0f};
 	FxVector3ParamConfig scale;
 	FxVector3ParamConfig velocity;
-	FxFloatParamConfig   lifetime;
+	FxFloatParamConfig	 lifetime;
 
-	float       emitRate    = 0.1f;
-	std::string modelPath   = "plane.obj";
+	float		emitRate	= 0.1f;
+	std::string modelPath	= "plane.obj";
 	std::string texturePath = "particle.png";
 
 	Guid textureGuid{Guid::Empty()};
 
-	bool isDrawEnable = true;
-	bool isComplement = true;
-	bool isStatic     = false;
+	bool		  isDrawEnable	  = true;
+	bool		  isComplement	  = true;
+	bool		  randomSpinEmit  = false;
+	BillboardMode billboardMode	  = BillboardMode::Full;
 
 	// 再生・OneShot制御関連
-	bool  isOneShot    = false;
+	bool  isOneShot	   = false;
 	bool  autoDestroy  = false;
-	int   emitCount    = 10;
-	float emitDelay    = 0.0f;
+	int	  emitCount	   = 10;
+	float emitDelay	   = 0.0f;
 	float emitDuration = -1.0f;
 
 	std::vector<std::unique_ptr<BaseModuleConfig>> modules;
 
-	void           FromJson(const nlohmann::json& j);
+	void		   FromJson(const nlohmann::json& j);
 	nlohmann::json ToJson() const;
 };
 
 inline void EmitterConfig::FromJson(const nlohmann::json& j) {
-	position     = j.value("position",Vector3{0,0,0});
-	scale        = j.value("scale",FxVector3ParamConfig{});
-	color        = j.value("color",Vector4{1,1,1,1});
-	velocity     = j.value("velocity",FxVector3ParamConfig{});
-	lifetime     = j.value("lifetime",FxFloatParamConfig{});
-	emitRate     = j.value("emitRate",1.0f);
-	modelPath    = j.value("modelPath","plane.obj");
-	texturePath  = j.value("texturePath","particle.png");
-	isDrawEnable = j.value("isDrawEnable",true);
-	isComplement = j.value("isComplement",true);
-	isStatic     = j.value("isStatic",false);
+	position	 = j.value("position", Vector3{0, 0, 0});
+	scale		 = j.value("scale", FxVector3ParamConfig{});
+	color		 = j.value("color", Vector4{1, 1, 1, 1});
+	velocity	 = j.value("velocity", FxVector3ParamConfig{});
+	lifetime	 = j.value("lifetime", FxFloatParamConfig{});
+	emitRate	 = j.value("emitRate", 1.0f);
+	modelPath	 = j.value("modelPath", "plane.obj");
+	texturePath	 = j.value("texturePath", "particle.png");
+	isDrawEnable = j.value("isDrawEnable", true);
+	isComplement = j.value("isComplement", true);
+	randomSpinEmit = j.value("randomSpinEmit", false);
 
 	// 互換のため両方のキーを受け入れる
 	if(auto it = j.find("textureGuid"); it != j.end() && !it->is_null()) {
@@ -60,14 +62,16 @@ inline void EmitterConfig::FromJson(const nlohmann::json& j) {
 	} else if(auto it2 = j.find("textureGUID"); it2 != j.end() && !it2->is_null()) {
 		textureGuid = it2->get<Guid>();
 		// guidがない場合0で初期化
-	} else { textureGuid = Guid::Empty(); }
+	} else {
+		textureGuid = Guid::Empty();
+	}
 
 	// 再生・OneShot制御
-	isOneShot    = j.value("isOneShot",false);
-	autoDestroy  = j.value("autoDestroy",false);
-	emitCount    = j.value("emitCount",10);
-	emitDelay    = j.value("emitDelay",0.0f);
-	emitDuration = j.value("emitDuration",-1.0f);
+	isOneShot	 = j.value("isOneShot", false);
+	autoDestroy	 = j.value("autoDestroy", false);
+	emitCount	 = j.value("emitCount", 10);
+	emitDelay	 = j.value("emitDelay", 0.0f);
+	emitDuration = j.value("emitDuration", -1.0f);
 
 	// モジュール
 	modules.clear();
@@ -81,23 +85,23 @@ inline void EmitterConfig::FromJson(const nlohmann::json& j) {
 
 inline nlohmann::json EmitterConfig::ToJson() const {
 	nlohmann::json j;
-	j["position"]     = position;
-	j["color"]        = color;
-	j["velocity"]     = velocity;
-	j["scale"]        = scale;
-	j["lifetime"]     = lifetime;
-	j["emitRate"]     = emitRate;
-	j["modelPath"]    = modelPath;
+	j["position"]	  = position;
+	j["color"]		  = color;
+	j["velocity"]	  = velocity;
+	j["scale"]		  = scale;
+	j["lifetime"]	  = lifetime;
+	j["emitRate"]	  = emitRate;
+	j["modelPath"]	  = modelPath;
 	j["texturePath"]  = texturePath;
 	j["isDrawEnable"] = isDrawEnable;
 	j["isComplement"] = isComplement;
-	j["isStatic"]     = isStatic;
+	j["randomSpinEmit"] = randomSpinEmit;
 
 	// 再生・OneShot制御
-	j["isOneShot"]    = isOneShot;
+	j["isOneShot"]	  = isOneShot;
 	j["autoDestroy"]  = autoDestroy;
-	j["emitCount"]    = emitCount;
-	j["emitDelay"]    = emitDelay;
+	j["emitCount"]	  = emitCount;
+	j["emitDelay"]	  = emitDelay;
 	j["emitDuration"] = emitDuration;
 
 	// モジュール
@@ -109,5 +113,5 @@ inline nlohmann::json EmitterConfig::ToJson() const {
 	return j;
 }
 
-inline void to_json(nlohmann::json& j,const EmitterConfig& c) { j = c.ToJson(); }
-inline void from_json(const nlohmann::json& j,EmitterConfig& c) { c.FromJson(j); }
+inline void to_json(nlohmann::json& j, const EmitterConfig& c) { j = c.ToJson(); }
+inline void from_json(const nlohmann::json& j, EmitterConfig& c) { c.FromJson(j); }

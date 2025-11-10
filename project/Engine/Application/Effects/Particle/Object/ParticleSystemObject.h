@@ -56,6 +56,5 @@ public:
 	const ConfigurableObject<ParticleSystemObjectConfig>& GetConfigObject()const{return config_;}
 
 private:
-	Guid textureGuid_;
 	ConfigurableObject<ParticleSystemObjectConfig> config_;
 };

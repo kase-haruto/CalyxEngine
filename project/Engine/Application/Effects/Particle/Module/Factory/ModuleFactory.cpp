@@ -38,7 +38,7 @@ std::unique_ptr<BaseFxModule> CreateFromConfig(const BaseModuleConfig& config) {
 		m->SetUseCustomFrames(c->useCustomFrames);
 		return m;
 	}
-	// OverLifetime ← New
+	// OverLifetime
 	if (auto* c = dynamic_cast<const OverLifetimeModuleConfig*>(&config)) {
 		auto m = std::make_unique<OverLifetimeModule>(c->name);
 		c->ApplyTo(*m);
@@ -83,7 +83,7 @@ std::unique_ptr<BaseModuleConfig> CreateConfigFromModule(const BaseFxModule& mod
 		cfg->useCustomFrames   = m->GetUseCustomFrames();
 		return cfg;
 	}
-	// OverLifetime ← New
+	// OverLifetime
 	if (auto* m = dynamic_cast<const OverLifetimeModule*>(&module)) {
 		auto cfg = std::make_unique<OverLifetimeModuleConfig>();
 		cfg->ExtractFrom(*m);
@@ -108,7 +108,7 @@ std::unique_ptr<BaseFxModule> CreateByName(const std::string& typeName) {
 		return std::make_unique<TextureSheetAnimationModule>("TextureSheetAnimationModule");
 	}
 	if (typeName == "OverLifetimeModule") { 
-		return std::make_unique<OverLifetimeModule>("OverLifetime");
+		return std::make_unique<OverLifetimeModule>("OverLifetimeModule");
 	}
 	return nullptr;
 }

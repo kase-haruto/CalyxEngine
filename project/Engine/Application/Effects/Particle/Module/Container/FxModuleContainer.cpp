@@ -7,7 +7,7 @@
 namespace {
 
 // 一意な表示名を作る
-static std::string MakeUniqueName(
+std::string MakeUniqueName(
 	const std::vector<std::unique_ptr<BaseFxModule>>& mods,
 	const std::string&								  base) {
 	auto exists = [&](const std::string& s) {
@@ -26,13 +26,13 @@ static std::string MakeUniqueName(
 }
 
 // 複数インスタンス許可フラグ（OverLifetime は複数OK）
-static bool CanHaveMultipleInstances(const std::string& typeName) {
+bool CanHaveMultipleInstances(const std::string& typeName) {
 	if(typeName == "OverLifetimeModule") return true;
 	return false;
 }
 
-// ★ 型名ベースで「その型が既にあるか」を判定（"Name (2)" も検出）
-static bool HasModuleOfType(const std::vector<std::unique_ptr<BaseFxModule>>& mods,
+// 型名ベースで「その型が既にあるか」を判定（"Name (2)" も検出）
+bool HasModuleOfType(const std::vector<std::unique_ptr<BaseFxModule>>& mods,
 							const std::string&								  typeName) {
 	for(const auto& m : mods) {
 		const std::string& n = m->GetName();
@@ -50,7 +50,7 @@ FxModuleContainer::FxModuleContainer(const std::vector<std::unique_ptr<BaseModul
 }
 
 void FxModuleContainer::AddModule(const std::string& name, bool enabled) {
-	// ★ 複数不可の型だけ、型名ベースで重複ブロック
+	// 複数不可の型だけ、型名ベースで重複ブロック
 	if(!CanHaveMultipleInstances(name) && HasModuleOfType(modules_, name)) return;
 
 	auto module = FxModuleFactory::CreateByName(name);
@@ -147,7 +147,7 @@ void FxModuleContainer::ShowAvailableModulesGui() {
 	};
 
 	for(const auto& typeName : allModules) {
-		// ★ 複数不可の型だけ、既に同型があればボタン非表示
+		// 複数不可の型だけ、既に同型があればボタン非表示
 		if(!CanHaveMultipleInstances(typeName) && HasModuleOfType(modules_, typeName))
 			continue;
 

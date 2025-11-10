@@ -72,52 +72,66 @@ inline void ConfigurableObject<TConfig>::ExtractConfigToJson(nlohmann::json& j) 
 /////////////////////////////////////////////////////////////////////////////////////////
 template <typename TConfig>
 inline void ConfigurableObject<TConfig>::LoadConfig(std::string categoryAndName) {
-	nlohmann::json j;
-
-	// バックスラッシュをスラッシュに統一
+	// --- 正規化 ---
 	std::replace(categoryAndName.begin(), categoryAndName.end(), '\\', '/');
 
-	// プロジェクト内のルートパスを取り除く（絶対パスだった場合）
+	// ルート接頭辞の除去（絶対/相対どちらでもOKに）
 	const std::string prefix = "Resources/Assets/Configs/";
-	size_t prefixPos = categoryAndName.find(prefix);
-	if (prefixPos != std::string::npos) {
-		categoryAndName = categoryAndName.substr(prefixPos + prefix.size());
+	if(size_t pos = categoryAndName.find(prefix); pos != std::string::npos) {
+		categoryAndName = categoryAndName.substr(pos + prefix.size());
 	}
 
-	// 拡張子を除去（もし付いていたら）
-	if (auto extPos = categoryAndName.find(".json"); extPos != std::string::npos) {
+	// 拡張子を除去
+	if(size_t extPos = categoryAndName.rfind(".json"); extPos != std::string::npos) {
 		categoryAndName = categoryAndName.substr(0, extPos);
 	}
 
 	// "Category/Name" 形式チェック
-	const auto slashPos = categoryAndName.find_last_of('/');
-	if (slashPos == std::string::npos) {
+	const size_t slashPos = categoryAndName.find_last_of('/');
+	if(slashPos == std::string::npos) {
 		throw std::runtime_error("Invalid category/name format. Expected \"Category/Name\"");
 	}
 
 	const std::string category = categoryAndName.substr(0, slashPos);
-	std::string name = categoryAndName.substr(slashPos + 1);
+	const std::string name	   = categoryAndName.substr(slashPos + 1);
 
-	// "(1)" などを除いたベース名
+	// "(1)" などを除いたベース名（テンプレと個別の二層構成を想定）
 	std::string baseName = name;
-	if (const auto parenPos = baseName.find('('); parenPos != std::string::npos)
-		baseName = baseName.substr(0, parenPos);
-
-	// ファイルパス構築
-	const std::string basePath     = "Resources/Assets/Configs/" + category + "/" + baseName + ".json";
-	const std::string instancePath = "Resources/Assets/Configs/" + category + "/" + name + ".json";
-
-	bool baseLoaded = false;
-	if (JsonUtils::Load(basePath, j)) {
-		ApplyConfigFromJson(j);
-		baseLoaded = true;
+	if(size_t paren = baseName.find('('); paren != std::string::npos) {
+		baseName = baseName.substr(0, paren);
+		// 末尾空白をトリム
+		while(!baseName.empty() && std::isspace(static_cast<unsigned char>(baseName.back()))) {
+			baseName.pop_back();
+		}
 	}
 
-	if (JsonUtils::Load(instancePath, j)) {
-		ApplyConfigFromJson(j);
+	// パス構築
+	const std::string basePath	   = prefix + category + "/" + baseName + ".json";
+	const std::string instancePath = prefix + category + "/" + name + ".json";
+
+	// --- 読み込み（存在する方だけ）---
+	nlohmann::json jBase, jInst, jMerged;
+
+	const bool hasBase = JsonUtils::Load(basePath, jBase);
+	const bool hasInst = JsonUtils::Load(instancePath, jInst);
+
+	if(!hasBase && !hasInst) {
+		// 何も無ければ何もしない（現在値を保持）
+		return;
 	}
+
+	// --- マージ（上書き優先：個別 > ベース）---
+	if(hasBase) jMerged = jBase;
+	if(hasInst) {
+		if(jMerged.is_null()) {
+			jMerged = jInst;
+		} else {
+			jMerged.update(jInst, /*merge_objects=*/true);
+		}
+	}
+
+	ApplyConfigFromJson(jMerged);
 }
-
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //      コンフィグのセーブ 個別設定を保存
@@ -145,13 +159,13 @@ inline void ConfigurableObject<TConfig>::SaveConfig(const std::string& categoryA
 //      コンフィグのgui
 /////////////////////////////////////////////////////////////////////////////////////////
 template <typename TConfig>
-inline void ConfigurableObject<TConfig>::ShowGui(const std::string& path, const std::string& label) {
+void ConfigurableObject<TConfig>::ShowGui([[maybe_unused]] const std::string& path, [[maybe_unused]] const std::string& label) {
 #if defined(_DEBUG) || defined(DEVELOP)
 	const std::string loadDlg = "ConfigLoadDialog##" + label;
 	const std::string baseDir = "Resources/Assets/Configs/";
 
 	// --- ロード ---
-	if (ImGui::Button(("Load##" + label).c_str())) {
+	if(ImGui::Button(("Load##" + label).c_str())) {
 		IGFD::FileDialogConfig cfg;
 		cfg.path = baseDir;
 		ImGuiFileDialog::Instance()->OpenDialog(loadDlg, "Load Config", ".json", cfg);
@@ -160,9 +174,9 @@ inline void ConfigurableObject<TConfig>::ShowGui(const std::string& path, const 
 	ImGui::SameLine();
 
 	// --- セーブ ---
-	if (ImGui::Button(("Save##" + label).c_str())) {
+	if(ImGui::Button(("Save##" + label).c_str())) {
 		std::filesystem::path dirPath = std::filesystem::path(baseDir + path).parent_path();
-		if (!std::filesystem::exists(dirPath)) {
+		if(!std::filesystem::exists(dirPath)) {
 			std::filesystem::create_directories(dirPath);
 		}
 		SaveConfig(path);
@@ -171,15 +185,15 @@ inline void ConfigurableObject<TConfig>::ShowGui(const std::string& path, const 
 	ImGui::Text("Config Path: %s", (baseDir + path).c_str());
 
 	// --- ダイアログ処理 ---
-	if (ImGuiFileDialog::Instance()->Display(loadDlg)) {
-		if (ImGuiFileDialog::Instance()->IsOk()) {
+	if(ImGuiFileDialog::Instance()->Display(loadDlg)) {
+		if(ImGuiFileDialog::Instance()->IsOk()) {
 			std::string selectedPath = ImGuiFileDialog::Instance()->GetFilePathName();
 
 			// 相対化して category/name に変換
 			const std::string base = "Resources/Assets/Configs/";
-			size_t pos = selectedPath.find(base);
-			if (pos != std::string::npos) {
-				std::string relative = selectedPath.substr(pos + base.size());
+			size_t			  pos  = selectedPath.find(base);
+			if(pos != std::string::npos) {
+				std::string			  relative = selectedPath.substr(pos + base.size());
 				std::filesystem::path relPath(relative);
 				relative = relPath.replace_extension("").string();
 				LoadConfig(relative);

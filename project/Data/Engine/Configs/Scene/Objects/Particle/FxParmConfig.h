@@ -36,14 +36,22 @@ struct FxParamConfig{
 // -------------------------
 struct FxFloatParamConfig : public FxParamConfig<float>{
 	using FxParamConfig<float>::FxParamConfig;
-	FxFloatParamConfig() = default;
+	FxFloatParamConfig() {
+		constant = 1.0f;
+		min = 0.0f;
+		max = 1.0f;
+	}
 	FxFloatParamConfig(const FxParamConfig<float>& base)
 		: FxParamConfig<float>(base){}
 };
 
 struct FxVector3ParamConfig : public FxParamConfig<Vector3>{
 	using FxParamConfig<Vector3>::FxParamConfig;
-	FxVector3ParamConfig() = default;
+	FxVector3ParamConfig() {
+		constant = Vector3(1.0f,1.0f,1.0f);
+		min	  = Vector3(0.0f,0.0f,0.0f);
+		max	  = Vector3(1.0f,1.0f,1.0f);
+	}
 	FxVector3ParamConfig(const FxParamConfig<Vector3>& base)
 		: FxParamConfig<Vector3>(base){}
 };

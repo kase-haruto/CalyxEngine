@@ -7,6 +7,15 @@
 
 REGISTER_SCENE_OBJECT(FxObject);
 
+namespace {
+std::shared_ptr<ParticleSystemObject>
+FindChildByGuid(const std::vector<std::shared_ptr<ParticleSystemObject>>& list, const Guid& g) {
+	for(auto& sp : list)
+		if(sp && sp->GetGuid() == g) return sp;
+	return nullptr;
+}
+} // namespace
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //		ctor / dtor
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -17,7 +26,12 @@ FxObject::~FxObject() = default;
 //		初期化
 /////////////////////////////////////////////////////////////////////////////////////////
 void FxObject::Initialize() {
-	// 調節パラメータ適用
+	config_.SetOnApplied([this](const EffectObjectConfig&) {
+		this->ApplyConfig();
+	});
+	config_.SetOnExtracted([this](const EffectObjectConfig&) {
+		this->ExtractConfig();
+	});
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -49,7 +63,7 @@ void FxObject::PlayAll() const {
 void FxObject::StopAll() const {
 	for(const auto& particle : emitters_) {
 		// effect停止
-		particle->Play();
+		particle->Stop();
 	}
 }
 
@@ -67,6 +81,10 @@ void FxObject::RestartAll() const {
 //		デバッグui
 /////////////////////////////////////////////////////////////////////////////////////////
 void FxObject::ShowGui() {
+
+	// コンフィグのセーブ・ロード
+	config_.ShowGui("Effect/" + GetName());
+
 	// ルート Transform
 	worldTransform_.ShowImGui();
 
@@ -222,7 +240,6 @@ void FxObject::ExtractConfig() {
 /////////////////////////////////////////////////////////////////////////////////////////
 void FxObject::ApplyConfigFromJson(const nlohmann::json& j) {
 	config_.ApplyConfigFromJson(j);
-	ApplyConfig();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -242,18 +259,18 @@ std::string_view FxObject::GetTypeName() const { return "FxObject"; }
 //		コンフィグからエフェクトの再構築
 /////////////////////////////////////////////////////////////////////////////////////////
 void FxObject::RebuildChildrenFromConfig() {
-	// 既存の子  を全削除
-	for(auto& sp : emitters_)
-		if(sp) this->SetParent(nullptr);
+	// 既存の子（このFxObject直下の ParticleSystemObject）を外す
+	for(auto& sp : emitters_) {
+		if(sp) sp->SetParent(nullptr);
+	}
 	emitters_.clear();
 
-	// Config から生成
+	// Config から再構築
 	const auto& cfg = config_.GetConfig();
 	for(const auto& n : cfg.emitters) {
 		AddEmitterNode(n);
 	}
 }
-
 /////////////////////////////////////////////////////////////////////////////////////////
 //		子供からコンフィグの同期k
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -280,11 +297,28 @@ void FxObject::SyncConfigFromChildren() {
 //		エミッター単位
 /////////////////////////////////////////////////////////////////////////////////////////
 std::shared_ptr<ParticleSystemObject>
-FxObject::AddEmitterNode(const EffectEmitterNodeConfig&) {
-	// 子を生成
-	auto child = SceneAPI::Instantiate<ParticleSystemObject>("emitter");
-	// 親子付け（Transform 親子・Scene 階層）
-	this->AddChild(child);
+FxObject::AddEmitterNode(const EffectEmitterNodeConfig& node) {
+	// 既に同GUIDの子がいたら再利用
+	if(node.guid.isValid()) {
+		if(auto exist = FindChildByGuid(emitters_, node.guid)) {
+			// 名前/Transform/Emitterだけ更新して返す
+			exist->SetName(node.name.empty() ? exist->GetName() : node.name, ObjectType::Effect);
+			exist->GetWorldTransform().ApplyConfig(node.transform);
+			exist->SetDrawEnable(node.isDrawEnable);
+			exist->FxEmitter::ApplyConfigFrom(node.emitter);
+			return exist;
+		}
+	}
+
+	auto child = SceneAPI::Instantiate<ParticleSystemObject>(
+		node.name.empty() ? "emitter" : node.name);
+
+
+	child->SetGuid(node.guid.isValid() ? node.guid : Guid::New());
+	child->GetWorldTransform().ApplyConfig(node.transform);
+	child->SetDrawEnable(node.isDrawEnable);
+	child->FxEmitter::ApplyConfigFrom(node.emitter);
+	child->SetParent(shared_from_this());
 
 	emitters_.push_back(child);
 	return child;
@@ -297,7 +331,7 @@ void FxObject::RemoveEmitterByGuid(const Guid& id) {
 	auto it = std::find_if(emitters_.begin(), emitters_.end(),
 						   [&](const std::shared_ptr<ParticleSystemObject>& sp) { return sp && sp->GetGuid() == id; });
 	if(it != emitters_.end()) {
-		this->SetParent(nullptr);
+		if(*it) (*it)->SetParent(nullptr);
 		emitters_.erase(it);
 	}
 }
