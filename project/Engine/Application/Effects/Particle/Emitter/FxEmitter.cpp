@@ -3,38 +3,61 @@
 /*	include space
 /* ===================================================================== */
 // engine
+#include <Engine/Application/Effects/FxGuiHelpers.h>
 #include <Engine/Application/Effects/Particle/FxUnit.h>
 #include <Engine/Application/Effects/Particle/Module/Factory/ModuleFactory.h>
+#include <Engine/Foundation/Math/Vector3.h>
+#include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 
-#include <Engine/Foundation/Math/Vector3.h>
-#include <Engine/Foundation/Utility/Func/MyFunc.h>
-
 // externals
-#include <externals/imgui/imgui.h>
-#include <externals/imgui/ImGuiFileDialog.h>
+#include "Engine/Assets/Texture/TextureManager.h"
+#include "Engine/Foundation/Math/MathUtil.h"
 
 #include "Engine/Foundation/Utility/Func/CxUtils.h"
+#include <externals/imgui/ImGuiFileDialog.h>
+#include <externals/imgui/imgui.h>
 
+namespace {
+void VSeparator(float height = 0.0f, float thickness = 1.0f, float pad = 6.0f) {
+	ImVec2 pos = ImGui::GetCursorScreenPos();
+	if(height <= 0.0f) height = ImGui::GetTextLineHeightWithSpacing();
+
+	ImU32		col = ImGui::GetColorU32(ImGuiCol_Separator);
+	ImDrawList* dl	= ImGui::GetWindowDrawList();
+	float		x	= pos.x + pad * 0.5f;
+	dl->AddLine(ImVec2(x, pos.y), ImVec2(x, pos.y + height), col, thickness);
+
+	ImGui::Dummy(ImVec2(pad + thickness, height));
+	ImGui::SameLine();
+}
+}; // namespace
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// ctor / dtor
+/////////////////////////////////////////////////////////////////////////////////////////
 FxEmitter::FxEmitter() {
 	ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
-	// マテリアルの初期化
+
+	// マテリアル
 	material_.color = Vector4(1, 1, 1, 1);
 	materialBuffer_.Initialize(GraphicsGroup::GetInstance()->GetDevice());
 
 	instanceBuffer_.Initialize(device, kMaxUnits_);
 	instanceBuffer_.CreateSrv(device);
 
-	velocity_ = FxParam<Vector3>::MakeRandom(
-		Vector3(-1.0f, 0.0f, -1.0f),
-		Vector3(1.0f, 0.0f, 1.0f)
-	);
+	// ビルボード定数バッファ初期化
+	billboardParams_.mode = static_cast<uint32_t>(billboardMode_);
+	billboardCB_.Initialize(device);
+	billboardCB_.TransferData(billboardParams_);
 
+	// 各種パラメータ
+	velocity_ = FxParam<Vector3>::MakeRandom(Vector3(-1.0f, 0.0f, -1.0f),
+											 Vector3(1.0f, 0.0f, 1.0f));
 	lifetime_ = FxParam<float>::MakeRandom(1.0f, 3.0f);
-	scale_ = FxParam<Vector3>::MakeConstant();
+	scale_	  = FxParam<Vector3>::MakeConstant();
 
-	//モジュールの初期化
 	moduleContainer_ = std::make_unique<FxModuleContainer>();
 }
 
@@ -43,74 +66,95 @@ FxEmitter::~FxEmitter() {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//			更新
+// Update
 /////////////////////////////////////////////////////////////////////////////////////////
 void FxEmitter::Update(float deltaTime) {
-	if (!isPlaying_) return;
+	// ---- プレビュー ----
+	if(isOneShot_ && timedPreview_) {
+		previewTimer_ += deltaTime;
+		if(previewTimer_ >= previewIntervalSec_) {
+			previewTimer_ = 0.0f;
+			RestartOneShot();
+		}
+	}
 
-	// ワールド座標に追従
+	if(!isPlaying_) return;
+
 	position_ = GetWorldPosition();
-
 	elapsedTime_ += deltaTime;
 
-	if (elapsedTime_ < emitDelay_) return;
+	if(elapsedTime_ < emitDelay_) return;
 
-	if (emitDuration_ >= 0.0f && elapsedTime_ > emitDelay_ + emitDuration_) {
+	// ---- 発生停止判定 ----
+	if(emitDuration_ >= 0.0f && elapsedTime_ > emitDelay_ + emitDuration_) {
 		Stop();
 	}
 
-	if (isOneShot_) {
-		if (!hasEmitted_) {
-			for (int i = 0; i < emitCount_ && units_.size() < kMaxUnits_; ++i) {
-				Emit();  // 自動的に GetWorldPosition() 使用
+	// ---- パーティクル発生 ----
+	if(isOneShot_) {
+		if(!hasEmitted_) {
+			for(int i = 0; i < emitCount_ && units_.size() < kMaxUnits_; ++i) {
+				Emit();
 			}
 			hasEmitted_ = true;
 		}
 	} else {
-		if (isFirstFrame_) {
-			prevPostion_ = position_;
+		if(isFirstFrame_) {
+			prevPostion_  = position_;
 			isFirstFrame_ = false;
 		}
 
 		Vector3 moveDelta = position_ - prevPostion_;
-		float distance = moveDelta.Length();
+		float	distance  = moveDelta.Length();
 
-		if (distance > 0.0f && isComplement_) {
+		if(distance > 0.0f && isComplement_) {
 			float spawnInterval = 0.02f;
-			int trailCount = static_cast<int>(distance / spawnInterval);
-			for (int i = 0; i < trailCount; ++i) {
-				float dist = i * spawnInterval;
-				float t = dist / distance;
+			int	  trailCount	= static_cast<int>(distance / spawnInterval);
+			for(int i = 0; i < trailCount; ++i) {
+				float	dist	 = i * spawnInterval;
+				float	t		 = dist / distance;
 				Vector3 spawnPos = Vector3::Lerp(prevPostion_, position_, t);
-				Emit(spawnPos);  // 明示的に座標指定
+				Emit(spawnPos);
 			}
 		} else {
 			emitTimer_ += deltaTime;
 			const float interval = emitRate_;
-			if (emitTimer_ >= interval && units_.size() < kMaxUnits_) {
+			if(emitTimer_ >= interval && units_.size() < kMaxUnits_) {
 				emitTimer_ -= interval;
-				Emit();  // 自動でワールド座標
+				Emit();
 			}
 		}
 		prevPostion_ = position_;
 	}
 
-	// パーティクル更新処理（省略なしで元のまま）
-	for (auto& fx : units_) {
-		if (!fx.alive) continue;
+	// ---- 各パーティクル更新 ----
+	for(auto& fx : units_) {
+		if(!fx.alive) continue;
 
-		for (auto& m : moduleContainer_->GetModules()) {
-			if (m->IsEnabled()) m->OnUpdate(fx, deltaTime);
+		if(fx.lifetime > 0.0f) {
+			float t	 = fx.age / fx.lifetime;
+			fx.lifeT = std::clamp(t, 0.0f, 1.0f);
+		} else {
+			fx.lifeT = 1.0f;
 		}
 
-		if (!isStatic_) fx.position += fx.velocity * deltaTime;
+		for(auto& m : moduleContainer_->GetModules()) {
+			if(m->IsEnabled()) m->OnUpdate(fx, deltaTime);
+		}
+
+		fx.position += fx.velocity * deltaTime;
+
+		// スピン
+		fx.rotationEuler.z += fx.spinSpeed * deltaTime;
 
 		fx.age += deltaTime;
-		if (fx.age >= fx.lifetime) fx.alive = false;
+		if(fx.age >= fx.lifetime) fx.alive = false;
 
-		Matrix4x4 uvTransformMatrix = Cx::Math::MakeScaleMatrix(Vector3(fx.uvTransform.scale.x, fx.uvTransform.scale.y, 1.0f));
-		uvTransformMatrix = Matrix4x4::Multiply(uvTransformMatrix, Cx::Math::MakeRotateZMatrix(fx.uvTransform.rotate));
-		uvTransformMatrix = Matrix4x4::Multiply(uvTransformMatrix, Cx::Math::MakeTranslateMatrix(Vector3(fx.uvTransform.translate.x, fx.uvTransform.translate.y, 0.0f)));
+		Matrix4x4 uvTransformMatrix =
+			Cx::Math::MakeScaleMatrix(Vector3(fx.uvTransform.scale.x, fx.uvTransform.scale.y, 1.0f));
+		uvTransformMatrix	  = Matrix4x4::Multiply(uvTransformMatrix, Cx::Math::MakeRotateZMatrix(fx.uvTransform.rotate));
+		uvTransformMatrix	  = Matrix4x4::Multiply(uvTransformMatrix,
+													Cx::Math::MakeTranslateMatrix(Vector3(fx.uvTransform.translate.x, fx.uvTransform.translate.y, 0.0f)));
 		material_.uvTransform = uvTransformMatrix;
 	}
 
@@ -121,209 +165,327 @@ void FxEmitter::Update(float deltaTime) {
 		(isOneShot_ && hasEmitted_ && units_.empty()) ||
 		(emitDuration_ >= 0.0f && elapsedTime_ > emitDelay_ + emitDuration_ && units_.empty());
 
-	if (shouldNotify && !isFinishedNotified_) {
+	if(shouldNotify && !isFinishedNotified_) {
 		isFinishedNotified_ = true;
 		Stop();
-		if (onFinished_) {
-			onFinished_();
-		}
+		if(onFinished_) onFinished_();
+	}
+
+	// ---- Billboardモード転送 ----
+	billboardParams_.mode = static_cast<uint32_t>(billboardMode_);
+	billboardCB_.TransferData(billboardParams_);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// Emit / Reset
+/////////////////////////////////////////////////////////////////////////////////////////
+void FxEmitter::TransferParticleDataToGPU() {
+	if(units_.empty()) return;
+
+	std::vector<ParticleConstantData> gpuUnits;
+	gpuUnits.reserve(units_.size());
+
+	for(const auto& fx : units_) {
+		if(!fx.alive) continue;
+
+		ParticleConstantData data{};
+		data.position = fx.position;
+		data.scale	  = fx.scale;
+		data.color	  = fx.color;
+		data.rotation = fx.rotationEuler.z;
+
+		gpuUnits.push_back(data);
+	}
+
+	if(!gpuUnits.empty()) {
+		instanceBuffer_.TransferVectorData(gpuUnits);
 	}
 }
 
-
-void FxEmitter::SetOnFinishedCallback(std::function<void()> callback) {
-	onFinished_ = std::move(callback);
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////
-//			発生
+// Emit / Reset
 /////////////////////////////////////////////////////////////////////////////////////////
-void FxEmitter::Emit() {
-	Emit(GetWorldPosition());
-}
+void FxEmitter::Emit() { Emit(GetWorldPosition()); }
 
 void FxEmitter::Emit(const Vector3& pos) {
-	if (units_.size() >= kMaxUnits_) return;
-
+	if(units_.size() >= kMaxUnits_) return;
 	FxUnit fx;
 	ResetFxUnit(fx);
-	fx.position = pos; // ← 引数位置で初期化
+	fx.position = pos;
 	units_.push_back(fx);
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//			リセット
-/////////////////////////////////////////////////////////////////////////////////////////
+void FxEmitter::RestartOneShot() {
+	units_.clear();
+	emitTimer_			= 0.0f;
+	elapsedTime_		= 0.0f;
+	isFirstFrame_		= true;
+	hasEmitted_			= false;
+	isFinishedNotified_ = false;
+	isPlaying_			= true;
+}
+
 void FxEmitter::ResetFxUnit(FxUnit& fx) {
-	fx.position = position_;
-	fx.scale = scale_.Get();
-	fx.velocity = velocity_.Get();
-	fx.lifetime = lifetime_.Get();
-	fx.age = 0.0f;
-	fx.initialScale = fx.scale; // 初期スケールを設定
-	fx.color = Vector4(1, 1, 1, 1);
-	fx.alive = true;
+	fx.position		= position_;
+	fx.scale		= scale_.Get();
+	fx.velocity		= velocity_.Get();
+	fx.lifetime		= lifetime_.Get();
+	fx.age			= 0.0f;
+	fx.initialScale = fx.scale;
+	fx.color		= Vector4(1, 1, 1, 1);
+	fx.alive		= true;
 	fx.uvTransform.Initialize();
+	fx.spinSpeed = spin_.Get();
+	if(randomSpinEmit_) {
+		fx.rotationEuler.z = Random::Generate<float>(-Cx::Math::kPi,Cx::Math::kPi);
+	} else {
+		fx.rotationEuler.z = 0.0f;
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//			gui表示
+// ShowGui
 /////////////////////////////////////////////////////////////////////////////////////////
 void FxEmitter::ShowGui() {
 	ImGui::PushID(this);
 
-	// =============================
-	// マテリアルセクション
-	// =============================
-	ImGui::SeparatorText("Material");
-	ImGui::ColorEdit4("Color", &material_.color.x);
-
-	// 現在のパスを表示
-	ImGui::Text("Texture: %s", material_.texturePath.c_str());
-
-	// ファイル選択ボタン
-	if (ImGui::Button("Select Texture")) {
-		IGFD::FileDialogConfig config;
-		config.path = "Resources/Assets/Textures/";
-		ImGuiFileDialog::Instance()->OpenDialog(
-			"ChooseTex",
-			"Select Texture",
-			".png",
-			config
-		);
-	}
-
-	// ダイアログの描画と選択結果処理
-	if (ImGuiFileDialog::Instance()->Display("ChooseTex")) {
-		if (ImGuiFileDialog::Instance()->IsOk()) {
-			// ファイル名だけを取得
-			std::string fileNameOnly = ImGuiFileDialog::Instance()->GetCurrentFileName();
-			material_.texturePath = fileNameOnly;
+	// ---- Quick Controls ----
+	if(ImGui::BeginChild("mini", ImVec2(0, 48), false, ImGuiWindowFlags_NoScrollbar)) {
+		ImGui::AlignTextToFramePadding();
+		ImGui::TextUnformatted("Quick Controls");
+		ImGui::SameLine();
+		ImGui::Spacing();
+		ImGui::SameLine();
+		if(ImGui::Button("Play")) {
+			Play();
+			ImGui::SameLine();
 		}
-		ImGuiFileDialog::Instance()->Close();
+		if(ImGui::Button("Stop")) {
+			Stop();
+			ImGui::SameLine();
+		}
+		if(ImGui::Button("Reset")) {
+			Reset();
+		}
+		ImGui::SameLine();
+		VSeparator();
+		ImGui::SameLine();
+		ImGui::TextUnformatted("Rate");
+		ImGui::SameLine();
+		ImGui::SetNextItemWidth(120);
+		GuiCmd::DragFloat("##rate_top", emitRate_, 0.01f, 0.0f, 10.0f);
+		ImGui::SameLine();
+		ImGui::TextUnformatted("OneShot");
+		ImGui::SameLine();
+		GuiCmd::CheckBox("##oneshot_top", isOneShot_);
+		ImGui::SameLine();
+		ImGui::TextUnformatted("Draw");
+		ImGui::SameLine();
+		GuiCmd::CheckBox("##draw_top", isDrawEnable_);
+	}
+	ImGui::EndChild();
+
+	// ---- Billboard ----
+	if(FxGui::GridScope sec{"Billboard"}; sec.open) {
+		FxGui::RowLabel("Mode");
+		static const char* modes[] = {"None", "Full", "AxisY"};
+		int				   current = static_cast<int>(billboardMode_);
+		if(ImGui::Combo("##billmode", &current, modes, IM_ARRAYSIZE(modes))) {
+			billboardMode_		  = static_cast<BillboardMode>(current);
+			billboardParams_.mode = current;
+			billboardCB_.TransferData(billboardParams_);
+		}
 	}
 
-	// =============================
-	// Emit設定
-	// =============================
-	ImGui::SeparatorText("Emit");
-	ImGui::Text("emitCount: %d", units_.size());
-	GuiCmd::DragFloat3("position", position_);
-	GuiCmd::DragFloat("emitRate", emitRate_, 0.01f, 0.0f, 10.0f);
+	// ---- Material ----
+	if(FxGui::GridScope sec{"Material"}; sec.open) {
+		FxGui::RowLabel("Color");
+		ImGui::ColorEdit4("##color", &material_.color.x);
+		FxGui::RowLabel("Texture");
+		ImGui::BeginGroup();
+		ImGui::TextUnformatted(material_.texturePath.c_str());
+		ImGui::SameLine();
+		if(ImGui::Button("Select...")) {
+			IGFD::FileDialogConfig c;
+			c.path = "Resources/Assets/Textures/";
+			ImGuiFileDialog::Instance()->OpenDialog("ChooseTex", "Select Texture", ".png,.jpg,.dds", c);
+		}
+		if(ImGuiFileDialog::Instance()->Display("ChooseTex")) {
+			if(ImGuiFileDialog::Instance()->IsOk())
+				material_.texturePath = ImGuiFileDialog::Instance()->GetCurrentFileName();
+			ImGuiFileDialog::Instance()->Close();
+		}
+		ImGui::EndGroup();
+	}
 
-	GuiCmd::CheckBox("isComplement", isComplement_);
-	GuiCmd::CheckBox("isStatic", isStatic_);
+	// ================= Emission =================
+	if(FxGui::GridScope sec{"Emission"}; sec.open) {
+		FxGui::RowLabel("Alive Count");
+		ImGui::Text("%zu", units_.size());
 
-	ImGuiHelpers::DrawFxParamGui("Scale", scale_);
-	ImGuiHelpers::DrawFxParamGui("Velocity", velocity_);
-	ImGuiHelpers::DrawFxParamGui("Lifetime", lifetime_);
+		FxGui::RowLabel("World Position");
+		GuiCmd::DragFloat3("##pos", position_);
 
-	// =============================
-	// 再生制御
-	// =============================
+		FxGui::RowLabel("Emit Rate (sec)");
+		GuiCmd::DragFloat("##rate", emitRate_, 0.01f, 0.0f, 10.0f);
+
+		FxGui::RowLabel("Complement Trail");
+		GuiCmd::CheckBox("##comp", isComplement_);
+
+		FxGui::RowLabel("Static");
+	}
+
+	// ================= Params =================
+	if(FxGui::GridScope sec{"Params"}; sec.open) {
+		FxGui::DrawParam("Scale", scale_);
+		FxGui::DrawParam("Velocity", velocity_);
+		FxGui::DrawParam("Lifetime", lifetime_);
+	}
+
+	// ================= Playback =================
+	if(FxGui::GridScope sec{"Playback"}; sec.open) {
+		FxGui::RowLabel("Controls");
+		ImGui::BeginGroup();
+		if(ImGui::Button("Play")) {
+			Play();
+		}
+		ImGui::SameLine();
+		if(ImGui::Button("Stop")) {
+			Stop();
+		}
+		ImGui::SameLine();
+		if(ImGui::Button("Reset")) {
+			Reset();
+		}
+		ImGui::EndGroup();
+
+		FxGui::RowLabel("Draw Enable");
+		GuiCmd::CheckBox("##draw", isDrawEnable_);
+	}
+
+	// ================= One-Shot =================
+	if(FxGui::GridScope sec{"One-Shot"}; sec.open) {
+		FxGui::RowLabel("Enable");
+		if(GuiCmd::CheckBox("##oneshot", isOneShot_)) {
+			if(!isOneShot_) {
+				hasEmitted_ = false;
+			} // OFFに戻した時の自然な継続
+		}
+
+		ImGui::BeginDisabled(!isOneShot_);
+		FxGui::RowLabel("Emit Count");
+		ImGui::DragInt("##count", &emitCount_, 1, 1, kMaxUnits_);
+
+		FxGui::RowLabel("Auto Destroy");
+		GuiCmd::CheckBox("##autoDestroy", autoDestroy_);
+
+		FxGui::RowLabel("Delay (sec)");
+		GuiCmd::DragFloat("##delay", emitDelay_, 0.01f, 0.0f, 10.0f);
+		ImGui::EndDisabled();
+
+		ImGui::BeginDisabled(isOneShot_);
+		FxGui::RowLabel("Emit Duration (sec)");
+		GuiCmd::DragFloat("##duration", emitDuration_, 0.01f, -1.0f, 60.0f);
+		ImGui::EndDisabled();
+	}
+
+	// ================= Modules =================
+	if(moduleContainer_) {
+		if(FxGui::GridScope sec{"Modules"}; sec.open) {
+			// 左: 現在のモジュール一覧 / 右: 追加パレット
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::BeginChild("mod_list", ImVec2(0, 200), true);
+			moduleContainer_->ShowModulesGui(); // 有効/無効・順序など
+			ImGui::EndChild();
+
+			ImGui::TableSetColumnIndex(1);
+			ImGui::BeginChild("mod_add", ImVec2(0, 200), true);
+			moduleContainer_->ShowAvailableModulesGui(); // 追加用
+			ImGui::EndChild();
+		}
+	}
+
 	ImGui::Spacing();
-	ImGui::SeparatorText("Emitter Controls");
-	if (ImGui::Button("Play")) { Play(); }
-	ImGui::SameLine();
-	if (ImGui::Button("Stop")) { Stop(); }
-	ImGui::SameLine();
-	if (ImGui::Button("Reset")) { Reset(); }
-
-	// =============================
-	// OneShot
-	// =============================
-	ImGui::Spacing();
-	ImGui::SeparatorText("OneShot Settings");
-	GuiCmd::CheckBox("OneShot", isOneShot_);
-	if (isOneShot_) {
-		ImGui::DragInt("Emit Count", &emitCount_, 1, 1, kMaxUnits_);
-		GuiCmd::CheckBox("Auto Destroy", autoDestroy_);
-		GuiCmd::DragFloat("Emit Delay", emitDelay_, 0.01f, 0.0f, 10.0f);
-	} else {
-		GuiCmd::DragFloat("Emit Duration", emitDuration_, 0.01f, -1.0f, 60.0f);
-	}
-
-	// =============================
-	// モジュール
-	// =============================
-	if (moduleContainer_) {
-		moduleContainer_->ShowModulesGui();
-		moduleContainer_->ShowAvailableModulesGui();
-	}
-
 	ImGui::PopID();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//			コンフィグの適用
+// SetCommand
+/////////////////////////////////////////////////////////////////////////////////////////
+void FxEmitter::SetCommand(ID3D12GraphicsCommandList* cmdList) {
+	materialBuffer_.SetCommand(cmdList, 1);							// マテリアル
+	cmdList->SetGraphicsRootDescriptorTable(3, GetTextureHandle()); // テクスチャ
+	billboardCB_.SetCommand(cmdList, 4);							// ビルボードCB
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// Config apply/extract
 /////////////////////////////////////////////////////////////////////////////////////////
 void FxEmitter::ApplyConfigFrom(const EmitterConfig& config) {
-	position_ = config.position;
+	position_		= config.position;
 	material_.color = config.color;
 	velocity_.FromConfig(config.velocity);
 	lifetime_.FromConfig(config.lifetime);
 	scale_.FromConfig(config.scale);
-	emitRate_ = config.emitRate;
-	modelPath = config.modelPath;
+	emitRate_			  = config.emitRate;
+	modelPath			  = config.modelPath;
 	material_.texturePath = config.texturePath;
-	isDrawEnable_ = config.isDrawEnable;
-	isComplement_ = config.isComplement;
-	isStatic_ = config.isStatic;
+	textureGuid_		  = config.textureGuid;
+	textureHandle_		  = TextureManager::GetInstance()->LoadTexture(textureGuid_);
+	isDrawEnable_		  = config.isDrawEnable;
+	isComplement_		  = config.isComplement;
+	moduleContainer_	  = std::make_unique<FxModuleContainer>(config.modules);
+	isOneShot_			  = config.isOneShot;
+	autoDestroy_		  = config.autoDestroy;
+	emitCount_			  = config.emitCount;
+	emitDelay_			  = config.emitDelay;
+	emitDuration_		  = config.emitDuration;
+	billboardMode_		  = config.billboardMode;
+	randomSpinEmit_ = config.randomSpinEmit;
 
-	moduleContainer_ = std::make_unique<FxModuleContainer>(config.modules);
-
-	isOneShot_ = config.isOneShot;
-	autoDestroy_ = config.autoDestroy;
-	emitCount_ = config.emitCount;
-	emitDelay_ = config.emitDelay;
-	emitDuration_ = config.emitDuration;
-
-	// 再生状態を初期化
 	isFirstFrame_ = true;
-	hasEmitted_ = false;
-	elapsedTime_ = 0.0f;
-	isPlaying_ = true;
+	hasEmitted_	  = false;
+	elapsedTime_  = 0.0f;
+	isPlaying_	  = true;
 }
 
 void FxEmitter::ExtractConfigTo(EmitterConfig& config) const {
-	config.position = position_;
-	config.color = material_.color;
-	config.velocity = FxVector3ParamConfig{ velocity_.ToConfig() };
-	config.lifetime = FxFloatParamConfig{ lifetime_.ToConfig() };
-	config.scale = FxVector3ParamConfig{ scale_.ToConfig() };
-	config.emitRate = emitRate_;
-	config.modelPath = modelPath;
-	config.texturePath = material_.texturePath;
+	config.position		= position_;
+	config.color		= material_.color;
+	config.velocity		= FxVector3ParamConfig{velocity_.ToConfig()};
+	config.lifetime		= FxFloatParamConfig{lifetime_.ToConfig()};
+	config.scale		= FxVector3ParamConfig{scale_.ToConfig()};
+	config.emitRate		= emitRate_;
+	config.modelPath	= modelPath;
+	config.texturePath	= material_.texturePath;
+	config.textureGuid	= textureGuid_;
 	config.isDrawEnable = isDrawEnable_;
 	config.isComplement = isComplement_;
-	config.isStatic = isStatic_;
-
-	// モジュール情報を保存
-	if (moduleContainer_) {
+	config.randomSpinEmit = randomSpinEmit_;
+	if(moduleContainer_)
 		config.modules = moduleContainer_->ExtractConfigs();
-	} else {
+	else
 		config.modules.clear();
-	}
-
-	config.isOneShot = isOneShot_;
-	config.autoDestroy = autoDestroy_;
-	config.emitCount = emitCount_;
-	config.emitDelay = emitDelay_;
-	config.emitDuration = emitDuration_;
+	config.isOneShot	 = isOneShot_;
+	config.autoDestroy	 = autoDestroy_;
+	config.emitCount	 = emitCount_;
+	config.emitDelay	 = emitDelay_;
+	config.emitDuration	 = emitDuration_;
+	config.billboardMode = billboardMode_;
 }
-
 
 void FxEmitter::Play() {
-	isPlaying_ = true;
+	isPlaying_	  = true;
 	isFirstFrame_ = true;
 
-	if (isOneShot_) {
+	if(isOneShot_) {
 		// OneShot 時は状態も初期化しておく
-		hasEmitted_ = false;
-		elapsedTime_ = 0.0f;
+		hasEmitted_	  = false;
+		elapsedTime_  = 0.0f;
+		previewTimer_ = 0.0f;
 	}
 }
-
 
 void FxEmitter::Stop() {
 	isPlaying_ = false;
@@ -331,8 +493,9 @@ void FxEmitter::Stop() {
 
 void FxEmitter::Reset() {
 	units_.clear();
-	emitTimer_ = 0.0f;
-	elapsedTime_ = 0.0f;
+	emitTimer_	  = 0.0f;
+	elapsedTime_  = 0.0f;
 	isFirstFrame_ = true;
-	hasEmitted_ = false;
+	hasEmitted_	  = false;
+	previewTimer_ = 0.0f;
 }

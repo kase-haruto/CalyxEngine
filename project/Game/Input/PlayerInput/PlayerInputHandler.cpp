@@ -36,6 +36,7 @@ void PlayerInputHandler::HandleMove(Player& player){
 	moveVector *= player.GetMoveSpeed();
 
 	player.MoveBy(moveVector);
+	player.UpdateTilt(moveVector);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

@@ -8,6 +8,7 @@
 #include <Engine/Application/Effects/Particle/Emitter/BaseEmitter.h>
 #include <Engine/Application/Effects/Particle/Module/Container/FxModuleContainer.h>
 #include <Engine/Application/Effects/Particle/Parm/FxParm.h>
+#include <Engine/Objects/3D/Details/BillboardParams.h>
 
 // c++
 #include <functional>
@@ -25,10 +26,14 @@ public:
 	//					public func
 	//===================================================================*/
 	FxEmitter();
-	~FxEmitter();
+	~FxEmitter()override;
 
 	virtual void Update(float dt) override;
-	void ShowGui();
+	void		 TransferParticleDataToGPU();
+	void		 ShowGui();
+
+	// コマンドを積む
+	void SetCommand(ID3D12GraphicsCommandList* cmdList);
 
 	// particleUnit のリセット
 	void ResetFxUnit(FxUnit& fxUnit);
@@ -46,9 +51,16 @@ public:
 	//--------- accessor -----------------------------------------------//
 	const std::vector<FxUnit>& GetUnits() const { return units_; }
 
-	bool IsDrawEnable() { return isDrawEnable_; }
-	void SetDrawEnable(bool isEnable) { isDrawEnable_ = isEnable; }
-	bool IsPlaying() const override { return isPlaying_; }
+	bool							   IsDrawEnable() { return isDrawEnable_; }
+	void							   SetDrawEnable(bool isEnable) { isDrawEnable_ = isEnable; }
+	bool							   IsPlaying() const override { return isPlaying_; }
+	const D3D12_GPU_DESCRIPTOR_HANDLE& GetTextureHandle() const { return textureHandle_; }
+
+	//--------- Timed Preview（一定間隔での自動再生） ---------------//
+	void  SetTimedPreview(bool v) { timedPreview_ = v; }
+	bool  GetTimedPreview() const { return timedPreview_; }
+	void  SetPreviewInterval(float sec) { previewIntervalSec_ = (sec < 0.01f ? 0.01f : sec); }
+	float GetPreviewInterval() const { return previewIntervalSec_; }
 
 	//--------- callback -----------------------------------------------//
 
@@ -65,6 +77,7 @@ private:
 	// 発生
 	void Emit();
 	void Emit(const Vector3& pos);
+	void RestartOneShot();
 
 public:
 	//===================================================================*/
@@ -77,23 +90,26 @@ public:
 	FxParam<Vector3> scale_;	//< パーティクルのスケール（定数またはランダム）
 	FxParam<Vector3> velocity_; //< パーティクルの速度（定数またはランダム）
 	FxParam<float>	 lifetime_; //< パーティクルの寿命（定数またはランダム）
+	FxParam<float>	 spin_;	 //< パーティクルのスピン（定数またはランダム）
 
-private:
+protected:
 	//===================================================================*/
 	//					private variable
 	//===================================================================*/
 
-	const int kMaxUnits_ = 4096; //< 最大パーティクル数
+	const int					kMaxUnits_ = 4096; //< 最大パーティクル数
+	D3D12_GPU_DESCRIPTOR_HANDLE textureHandle_;
+	Guid						textureGuid_;
 
 	std::unique_ptr<FxModuleContainer> moduleContainer_; // モジュールコンテナ
 
 	bool isPlaying_	   = true;	//< エフェクト再生中
 	bool isFirstFrame_ = true;	//< 最初のフレーム
 	bool isComplement_ = true;	//< trailするか
-	bool isStatic_	   = false; //< 静止か
 	bool isDrawEnable_ = true;	//< 描画するか
-
-private:
+	bool randomSpinEmit_ = false; // emit時にスピン使用するか
+	
+protected:
 	bool isOneShot_	  = false; //<
 	bool hasEmitted_  = false; //< 発生したか
 	bool autoDestroy_ = false; //< 自動削除するか
@@ -103,6 +119,16 @@ private:
 	float emitDelay_	= 0.0f;
 	float emitDuration_ = -1.0f;
 	float elapsedTime_	= 0.0f;
+
+	// === 一定間隔プレビュー用 ===
+	bool  timedPreview_		  = false; // 1秒毎などで自動再生
+	float previewIntervalSec_ = 1.0f;  // 既定 1 秒
+	float previewTimer_		  = 0.0f;  // 経過タイマ
+
+	// === billBoard ===
+	GpuBillboardParams					 billboardParams_{};
+	DxConstantBuffer<GpuBillboardParams> billboardCB_;
+	BillboardMode						 billboardMode_ = BillboardMode::Full;
 
 	std::function<void()> onFinished_;				   // 終了時コールバック
 	bool				  isFinishedNotified_ = false; // すでに通知したかどうか

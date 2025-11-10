@@ -1,10 +1,6 @@
 
 #pragma once
 #include <Engine/Graphics/Pipeline/PipelineDesc/Input/VertexLayout.h>
-#include <Engine/Assets/Model/ModelData.h>
-
-#include <memory>
-#include <wrl/client.h>
 
 /// <summary>
 /// particleCBデータ
@@ -13,4 +9,5 @@ struct ParticleConstantData {
 	Vector3 position;
 	Vector3 scale;
 	Vector4 color;
+	float rotation = 0.0f;
 };

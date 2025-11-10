@@ -28,9 +28,7 @@ void ParticleRenderer::Render(
 		for (auto& em : cpuEmitters){
 			if (!em || !em->IsDrawEnable() || em->GetUnits().empty()) continue;
 
-			em->GetMaterialBuffer().SetCommand(cmdList, 1);
-			auto tex = TextureManager::GetInstance()->LoadTexture("Textures/" + em->GetTexturePath());
-			cmdList->SetGraphicsRootDescriptorTable(3, tex);
+			em->SetCommand(cmdList);
 
 			ModelData& model =
 				ModelManager::GetInstance()->GetModelData(em->GetModelPath());

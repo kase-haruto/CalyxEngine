@@ -2,8 +2,11 @@
 
 #include <string>
 #include <Engine/Foundation/Math/Vector3.h>
+#include <Engine/Foundation/Math/Vector4.h>
 #include <Engine/Foundation/Utility/Ease/CxEase.h>
 #include <externals/nlohmann/json.hpp>
+
+class OverLifetimeModule;
 
 struct BaseModuleConfig {
 	std::string name;
@@ -74,7 +77,7 @@ struct GravityModuleConfig : public BaseModuleConfig {
 struct SizeOverLifetimeConfig 
 	: public BaseModuleConfig {
 	bool isGrowing = true;
-	Cx::Ease::EaseType easeType = Cx::Ease::EaseType::EaseInOutCubic;
+	Cx::Ease::EaseType easeType =	 Cx::Ease::EaseType::EaseInOutCubic;
 
 	SizeOverLifetimeConfig() {
 		name = "SizeOverLifetimeModule";
@@ -101,6 +104,34 @@ struct SizeOverLifetimeConfig
 			easeType = static_cast<Cx::Ease::EaseType>(ease);
 		}
 	}
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// lifeTimeに応じてパラメータの調整
+/////////////////////////////////////////////////////////////////////////////////////////
+struct OverLifetimeModuleConfig : public BaseModuleConfig {
+	OverLifetimeModuleConfig() { name = "OverLifetimeModule"; }
+	OverLifetimeModuleConfig(const std::string& _name, bool _enable)
+		: BaseModuleConfig(_name, _enable) {}
+
+	// Target/Blend/Ease は int で保存（モジュール側の enum と対応）
+	int  target  = 0;  // 0:Scale, 1:RotX, 2:RotY, 3:RotZ, 4:ColorRGBA, 5:AlphaOnly
+	int  blend   = 0;  // 0:Set, 1:Add, 2:Multiply
+	int  ease    = static_cast<int>(Cx::Ease::EaseType::EaseInOutCubic);
+	bool clamp01 = true;
+	bool invert  = false;
+
+	// start/end は Vector4
+	Vector4 start {0,0,0,1};
+	Vector4 end   {1,1,1,1};
+
+	nlohmann::json ToJson() const override;
+
+	void FromJson(const nlohmann::json& j) override ;
+
+	void ApplyTo(OverLifetimeModule& m) const;
+	
+	void ExtractFrom(const OverLifetimeModule& m);
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////

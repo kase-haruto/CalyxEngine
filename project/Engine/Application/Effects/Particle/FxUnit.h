@@ -7,6 +7,8 @@
 
 struct FxUnit{
 	Vector3 position;		//< 座標
+	Vector3 rotationEuler;	//< オイラー回転
+	float spinSpeed;		// < スピン速度
 	Vector3 velocity;		//< 速度
 	Vector3 initialScale = {1.0f, 1.0f, 1.0f}; // 初期スケール
 	Vector3 scale;			//< スケール
@@ -14,7 +16,7 @@ struct FxUnit{
 	float age;				//< 経過時間
 	Vector4 color;			//< 色
 	bool alive = true;		//< 生存フラグ
-
+	float lifeT = 0.0f;		//< 補完の01
 	//UVオフセット・スケール
 	Transform2D uvTransform;
 };
