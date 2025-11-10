@@ -32,6 +32,7 @@ public:
 
 	//--------- debugUi ---------------------------------------------------
 	void ShowGui() override;
+	void LoadFromPath(const std::string& path);
 
 	//--------- json ------------------------------------------------------
 	void ApplyConfig();

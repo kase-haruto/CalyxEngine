@@ -57,11 +57,8 @@ Enemy::Enemy(const std::string& modelName, const std::string objName)
 	waveAmplitude_ = 2.0f;
 	waveSpeed_	   = Random::Generate<float>(1.0f, 3.0f);
 
-	hitFx_ = SceneAPI::Instantiate<ParticleSystemObject>("hitFx");
-	hitFx_->LoadConfig("Effect/HitFx");
-
-	explosionFx_ = SceneAPI::Instantiate<ParticleSystemObject>("explosionFx");
-	explosionFx_->LoadConfig("Effect/Explosion");
+	hitFx_ = SceneAPI::Instantiate<FxObject>("HitFx");
+	hitFx_->LoadFromPath("Effect/HitEffect");
 
 	// --- スプライン追従の既定値 ---
 	mover_.SetWorldSpeed(12.0f);								 // 等速（m/s）
@@ -82,13 +79,7 @@ void Enemy::Initialize() {
 	auto self = shared_from_this();
 
 	hitFx_->SetParent(self);
-	hitFx_->Stop();
-
-	explosionFx_->SetParent(self);
-	explosionFx_->Stop();
-
-	// shootingController_ / playerTransform_ のセット順が分からない場合に備えて
-	// ここでは emitter_ を作らず、Update() 内で BuildEmitterIfReady() を呼びます。
+	hitFx_->StopAll();
 
 	// もし経路が既に与えられていたら、ターゲットTFだけここで関連付け
 	if(hasRoute_) {
@@ -217,7 +208,6 @@ void Enemy::Update(float dt) {
 		//  どのステイトでも最優先で死亡へ
 		if(life_ <= 0) {
 			deathState_ = DeathState::Dying;
-			explosionFx_->Play();
 			deathTimer_		 = 0.0f;
 			deathRotateAxis_ = {1, 0, 0};
 			return;
@@ -307,7 +297,7 @@ void Enemy::Update(float dt) {
 		worldTransform_.rotation = Quaternion::MakeRotateAxisQuaternion(deathRotateAxis_, rad);
 
 		// タイマー経過でも Dead へ進める
-		if(t >= 1.0f || !explosionFx_->IsPlaying()) {
+		if(t >= 1.0f ) {
 			deathState_ = DeathState::Dead;
 			deathTimer_ = 0.0f;
 		}
@@ -337,7 +327,7 @@ void Enemy::EnsurePatternBound() {
 void Enemy::OnCollisionEnter(Collider*) {
 	if(life_ >= 1) {
 		life_--;
-		hitFx_->Play();
+		hitFx_->PlayAll();
 	}
 }
 
