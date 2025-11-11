@@ -202,6 +202,10 @@ void FxObject::ShowGui() {
 		ImGui::EndTabBar();
 	}
 }
+void FxObject::LoadFromPath(const std::string& path) {
+	config_.LoadConfig(path);
+	ApplyConfig();
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		config 適用

@@ -3,6 +3,7 @@
 /* include space
 /* ===================================================================== */
 // engine
+#include <Engine/Application/Effects/FxObject.h>
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 #include <Engine/Objects/3D/Actor/Actor.h>
 #include <Engine/Objects/3D/Geometory/Spline/SplineData.h>
@@ -17,7 +18,8 @@
 /* ========================================================================
 /* enemy
 /* ===================================================================== */
-class Enemy : public Actor {
+class Enemy
+	: public Actor {
 public:
 	enum class DeathState {
 		Alive,
@@ -128,6 +130,5 @@ private:
 
 	std::unique_ptr<BulletEmitter>			 emitter_;			  //< 一度だけ生成して保持
 	std::unique_ptr<EnemyShootingController> shootingController_; //< 下流コントローラ
-	std::shared_ptr<ParticleSystemObject>	 hitFx_;			  //< ヒットエフェクト
-	std::shared_ptr<ParticleSystemObject>	 explosionFx_;		  //< 爆破エフェクト
+	std::shared_ptr<FxObject>				 hitFx_;			  //< ヒットエフェクト
 };
