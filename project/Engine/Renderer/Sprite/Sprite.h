@@ -57,6 +57,7 @@ public:
 	void       SetUvTranslate(const Vector2& uvOffset) { Vector2(uvTransform.translate.x = uvOffset.x,uvTransform.translate.y = uvOffset.y); }
 	void       SetColor(const Vector4& newColor) { materialData_.color = newColor; }
 	void       SetSize(const Vector2& newSize) { this->size = newSize; }
+	void       SetAlpha(float newAlpha) { this->materialData_.color.w = newAlpha; }
 	void       SetAnchorPoint(const Vector2& newAnchorPoint) { this->anchorPoint = newAnchorPoint; }
 	void       SetLeftTop(const Vector2& LTop) { this->textureLeftTop = LTop; }
 	void       SetIsVisible(bool is) { isVisible = is; }

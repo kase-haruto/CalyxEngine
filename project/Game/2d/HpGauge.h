@@ -1,52 +1,73 @@
 #pragma once
 
-//engine
 #include <Engine/Renderer/Sprite/Sprite.h>
-
-// stl
 #include <memory>
 
-// forward declaration
 struct Vector2;
+struct Vector4;
 class Sprite;
 
-/*********************************************
- * HPゲージをスプライトで表現するクラス
- *********************************************/
+/************************************
+ * \brief
+ * hpゲージを表示するためのクラス
+ ************************************/
 class HpGauge {
 public:
+	//=================================================================
+	//				 public method
+	//=================================================================
 	HpGauge(float maxHp);
 	~HpGauge();
 
-	void Initialize(const Vector2& position,const Vector2& size);
+	/**
+	 * \brief 初期化処理
+	 * \param position	座標
+	 * \param size		サイズ
+	 */
+	void Initialize(const Vector2& position, const Vector2& size);
+	/**
+	 * \brief 更新処理
+	 * \param dt 時間
+	 */
 	void Update(float dt);
-	void SetHp(float hp); // HP変更 API
+	/**
+	 * \brief 参照するHPをセット
+	 * \param hp 参照hp
+	 */
+	void SetHp(float hp);
 
-	// スプライト取得
+	//--------- accessor -----------------------------------------------------
 	Sprite* GetMainGauge() const { return blueGauge_.get(); }
 	Sprite* GetDamageGauge() const { return redGauge_.get(); }
 	Sprite* GetFrameSprite() const { return frameSprite_.get(); }
 
 private:
-	// 色補間
+	//=================================================================
+	//				 private method
+	//=================================================================
+	/**
+	 * \brief 表示する色の計算
+	 * \param ratio hp割合
+	 * \return 計算結果の色を返す
+	 */
 	Vector4 ComputeColor(float ratio) const;
 
 private:
-	// ========= HP =========
-	float maxHp_;
-	float currentHp_; // ゲーム側が設定する HP（目標）
-	float blueRatio_; // 実際の青ゲージの補間値
-	float redRatio_;  // 遅れて減る赤ゲージの補間値
+	//=================================================================
+	//				 private variable
+	//=================================================================
+	float maxHp_;		//< 最大hp
+	float currentHp_;	//< 現在のhp
 
-	// ========= 演出 =========
-	float shakeTimer_   = 0.0f; // バウンド演出
-	float visibleTimer_ = 0.0f; // フェード演出
+	float blueRatio_;	//< 青ゲージの割合
+	float redRatio_;	//< 赤ゲージの割合
 
-	// ========= サイズ =========
-	Vector2 baseSize_;
+	float shakeTimer_   = 0.0f;	//< 揺れタイマー
+	float visibleTimer_ = 0.0f;	//< 可視タイマー
 
-	// ========= スプライト =========
-	std::unique_ptr<Sprite> blueGauge_;   // 青：現在 HP
-	std::unique_ptr<Sprite> redGauge_;    // 赤：遅れて減る
-	std::unique_ptr<Sprite> frameSprite_; // 枠
+	Vector2 baseSize_;			//< 基本サイズ
+
+	std::unique_ptr<Sprite> blueGauge_;		//< 青ゲージ
+	std::unique_ptr<Sprite> redGauge_;		//< 赤ゲージ
+	std::unique_ptr<Sprite> frameSprite_;	//< フレーム
 };

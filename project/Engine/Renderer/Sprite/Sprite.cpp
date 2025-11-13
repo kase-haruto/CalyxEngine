@@ -68,6 +68,10 @@ void Sprite::Update() {
 	vertexData[2].position = {right,bottom,0.0f,1.0f};
 	vertexData[3].position = {right,top,0.0f,1.0f};
 
+
+	// materialデータの更新
+	materialCB_.TransferData(materialData_);
+
 	UpdateMatrix();
 	UpdateTransform();
 }
