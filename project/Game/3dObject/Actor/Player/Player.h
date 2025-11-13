@@ -12,15 +12,17 @@
 #include <Game/3dObject/Actor/Enemy/Enemy.h>
 #include <Game/Battle/Shooting/ShootingController/PlayerShootingController.h>
 #include <Game/Input/PlayerInput/PlayerInputHandler.h>
+#include <Game/2d/HpGauge.h>
 
 class EnemyDirectory;
 class PlayerDangerSense;
 class PlayerDodge;
 class PlayerDodgeMotion;
 
-/* =========================================================================
-   Player Class
-   ========================================================================= */
+/**
+ * \brief
+ * 操作するキャラクタークラス
+ */
 class Player :
 	public Actor,
 	public IRuntimeBehaviour {
@@ -31,24 +33,55 @@ public:
 	Player();
 	Player(const std::string&         modelName,
 		   std::optional<std::string> objectName = std::nullopt);
-	virtual ~Player();
+	virtual ~Player() override;
 
 	/* mainFunc =========================================================== */
 	void Initialize() override;
-	void RefreshLifeUI();
 	void Update(float dt) override;
 	void Draw(ID3D12GraphicsCommandList* cmdList) override;
 	void DerivativeGui() override;
-	void MoveBy(const Vector3& delta);
-	void MoveReticle(const Vector3& offset);
-	void RequestShoot();
-	void RequestLockOn();
-	void UpdateTilt(const Vector3& moveVector);
 
+	/**
+	 * \brief ライフuiを更新
+	 */
+	void RefreshLifeUI();
+	/**
+	 * \brief 受け取った移動ベクトルをもとに移動する
+	 * \param delta
+	 */
+	void MoveBy(const Vector3& delta);
+	/**
+	 * \brief レティクルをオフセット分移動する
+	 * \param offset
+	 */
+	void MoveReticle(const Vector3& offset);
+	/**
+	 * \brief 弾の発射をリクエストする
+	 */
+	void RequestShoot();
+	/**
+	 * \brief ロックオンをリクエストする
+	 */
+	void RequestLockOn();
+	/**
+	 * \brief 移動ベクトルに応じて傾きを更新する
+	 * \param moveVector 移動ベクトル
+	 */
+	void UpdateTilt(const Vector3& moveVector);
+	/**
+	 * \brief 危険察知ソースをアタッチする
+	 * \param dir 敵ディレクトリ
+	 */
 	void AttachDangerSenseSource(EnemyDirectory* dir);
+	/**
+	 * \brief ロックオン解除をリクエストする
+	 */
 	void RequestLockOnTargetClear();
 
 	/* runtime ==============================================================*/
+	/**
+	 * \brief ランタイムスタート処理
+	 */
 	void Start() override;
 
 	void OnCollisionEnter(Collider* other) override;
@@ -56,7 +89,7 @@ public:
 	void OnCollisionExit([[maybe_unused]] Collider* other) override {}
 
 	/* accessor =========================================================== */
-	//settter
+	//setter
 	void SetParent(WorldTransform* parent);
 	void SetEnemyList(const std::list<std::shared_ptr<Enemy>>& list) { targets_.assign(list.begin(),list.end()); }
 	void SetShootingController(std::unique_ptr<PlayerShootingController> sc);
@@ -78,16 +111,30 @@ private:
 	//=====================================================================
 	// Private Methods
 	//=====================================================================
-	void Move();
-	void Shoot();
+	/**
+	 * \brief レティクルのポジションを更新
+	 */
 	void UpdateReticlePosition();
+	/**
+	 * \brief autoロックオン処理
+	 * \param dt デルタタイム
+	 */
 	void UpdateAutoLockOn(float dt);
-
-	// 取得/返却/初期確保
-	// ロックオン
+	/**
+	 * \brief ロックオンマーカーを取得する
+	 * \return
+	 */
 	std::unique_ptr<Sprite> AcquireMarker();
-	void                    RecycleMarker(std::unique_ptr<Sprite> s);
-	void                    PrewarmLockMarkers(size_t n);
+	/**
+	 * \brief ロックオンmarkerを再利用プールに戻す
+	 * \param s スプライトポインタ
+	 */
+	void RecycleMarker(std::unique_ptr<Sprite> s);
+	/**
+	 * \brief
+	 * \param n
+	 */
+	void PrewarmLockMarkers(size_t n);
 
 	// 死んだ敵のロックオンを外す
 	void PurgeDeadLockedTargets();
@@ -116,6 +163,7 @@ private:
 	// sprites
 	std::array<std::unique_ptr<Sprite>,4> reticleSprites_; //< レティクルのスプライト
 	std::vector<std::unique_ptr<Sprite>>  lifeSprite_;     //< ライフゲージスプライト
+	std::unique_ptr<HpGauge>              hpGauge_;        //< HPゲージ
 	std::vector<std::unique_ptr<Sprite>>  markerPool_;     // 未使用(再利用待ち)のマーカー
 	std::vector<std::unique_ptr<Sprite>>  lockOnSprites_;  // 未使用(再利用待ち)のマーカー
 

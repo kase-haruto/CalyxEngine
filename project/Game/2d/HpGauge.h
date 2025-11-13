@@ -1,6 +1,8 @@
 #pragma once
 
 #include <Engine/Renderer/Sprite/Sprite.h>
+#include <Engine/Objects/Transform/Transform.h>
+
 #include <memory>
 
 struct Vector2;
@@ -24,7 +26,7 @@ public:
 	 * \param position	座標
 	 * \param size		サイズ
 	 */
-	void Initialize(const Vector2& position, const Vector2& size);
+	void Initialize(const Vector2& position,const Vector2& size);
 	/**
 	 * \brief 更新処理
 	 * \param dt 時間
@@ -36,38 +38,47 @@ public:
 	 */
 	void SetHp(float hp);
 
+	/**
+	 * \brief デバッグ用gui表示
+	 * \param label 表示名
+	 */
+	void ShowGui(const std::string& label = "HpGauge");
+
 	//--------- accessor -----------------------------------------------------
+	// getter
 	Sprite* GetMainGauge() const { return blueGauge_.get(); }
 	Sprite* GetDamageGauge() const { return redGauge_.get(); }
 	Sprite* GetFrameSprite() const { return frameSprite_.get(); }
+
+	// setter
+	void SetAncorPoint(const Vector2& point)const;
 
 private:
 	//=================================================================
 	//				 private method
 	//=================================================================
 	/**
-	 * \brief 表示する色の計算
-	 * \param ratio hp割合
-	 * \return 計算結果の色を返す
+	 * \brief 各スプライトにtransformを同期させる
 	 */
-	Vector4 ComputeColor(float ratio) const;
+	void SyncTransform()const;
 
 private:
 	//=================================================================
 	//				 private variable
 	//=================================================================
-	float maxHp_;		//< 最大hp
-	float currentHp_;	//< 現在のhp
+	float maxHp_;     //< 最大hp
+	float currentHp_; //< 現在のhp
 
-	float blueRatio_;	//< 青ゲージの割合
-	float redRatio_;	//< 赤ゲージの割合
+	float blueRatio_; //< 青ゲージの割合
+	float redRatio_;  //< 赤ゲージの割合
 
-	float shakeTimer_   = 0.0f;	//< 揺れタイマー
-	float visibleTimer_ = 0.0f;	//< 可視タイマー
+	float shakeTimer_   = 0.0f; //< 揺れタイマー
+	float visibleTimer_ = 0.0f; //< 可視タイマー
 
-	Vector2 baseSize_;			//< 基本サイズ
+	Vector2     baseSize_;  //< 基本サイズ
+	Transform2D transform_; //< 変換情報
 
-	std::unique_ptr<Sprite> blueGauge_;		//< 青ゲージ
-	std::unique_ptr<Sprite> redGauge_;		//< 赤ゲージ
-	std::unique_ptr<Sprite> frameSprite_;	//< フレーム
+	std::unique_ptr<Sprite> blueGauge_;   //< 青ゲージ
+	std::unique_ptr<Sprite> redGauge_;    //< 赤ゲージ
+	std::unique_ptr<Sprite> frameSprite_; //< フレーム
 };
