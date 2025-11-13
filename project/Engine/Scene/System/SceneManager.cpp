@@ -186,11 +186,15 @@ void SceneManager::Draw(ID3D12GraphicsCommandList* cmd, PipelineService* pso){
 void SceneManager::DrawForRenderTarget(IRenderTarget* rt,
 	ID3D12GraphicsCommandList* cmd,
 	PipelineService* pso){
+
 	if (!rt) return;
 	rt->SetRenderTarget(cmd);
 	rt->Clear(cmd);
 
-	slots_[currentIdx_].scene->Draw(cmd,pso,rt->GetRenderTargetType());
+	auto& slot = slots_[currentIdx_];
+	slot.scene->Draw(cmd, pso, rt->GetRenderTargetType());
+
+	slot.scene->DrawSpritesOnly(cmd, pso);
 }
 
 //------------------------------------------------------------

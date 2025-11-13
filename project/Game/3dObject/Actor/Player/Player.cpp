@@ -137,6 +137,14 @@ void Player::Initialize() {
 		Vector2 pos    = {100.0f * i + 30.0f,50.0f};
 		lifeSprite_[i]->Initialize(pos,{64.0f,64.0f});
 	}
+
+	// ライフゲージの初期化
+	hpGauge_ = std::make_unique<HpGauge>(static_cast<float>(life_));
+	// 左下にライフゲージを設定
+	Vector2 windowHalf = kWindowSize * 0.5f;
+	hpGauge_->Initialize(windowHalf,Vector2(200.0f,32.0f));
+	hpGauge_->SetAncorPoint({0.0f,0.5f}); // 左中央
+
 	RefreshLifeUI();
 
 	// spriteの初期化
@@ -179,6 +187,9 @@ void Player::Initialize() {
 	PrewarmLockMarkers(maxLockOn_);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//		ライフuiの更新
+/////////////////////////////////////////////////////////////////////////////////////////
 void Player::RefreshLifeUI() {
 	for(size_t i = 0; i < lifeSprite_.size(); ++i) {
 		const bool on = (i < static_cast<size_t>(life_));
@@ -200,6 +211,11 @@ void Player::Update(float dt) {
 
 	for(auto& sprite : lifeSprite_) { sprite->Update(); }
 
+	if(hpGauge_) {
+		hpGauge_->Update(dt);
+		hpGauge_->SetHp(static_cast<float>(life_));
+	}
+
 	// 無敵時間
 	UpdateInvincibility(dt);
 
@@ -208,8 +224,6 @@ void Player::Update(float dt) {
 	// 自動ロックオン
 	PurgeDeadLockedTargets();
 	UpdateAutoLockOn(dt);
-
-
 
 	Vector3 playerPos  = GetWorldPosition();
 	Vector3 reticlePos = reticleTransform_.GetWorldPosition();
@@ -281,7 +295,10 @@ void Player::Draw([[maybe_unused]] ID3D12GraphicsCommandList* cmdList) {}
 //		imgui
 /////////////////////////////////////////////////////////////////////////////////////////
 void Player::DerivativeGui() {
-	ImGui::DragFloat("moveSpeed",&moveSpeed_,0.01f,0.0f,10.0f);
+	if(hpGauge_) {
+		hpGauge_->ShowGui();
+	}
+
 	ImGui::DragFloat("moveSpeed",&moveSpeed_,0.01f,0.0f,10.0f);
 	ImGui::DragFloat("lockOnRadius(px)",&lockOnRadiusPx_,1.0f,10.0f,400.0f);
 }
@@ -354,7 +371,7 @@ void Player::RequestLockOn() {
 		auto marker = AcquireMarker();
 		if(!marker) break;
 		marker->SetPosition(enemyScreen);
-		marker->SetSize({64.0f, 64.0f});
+		marker->SetSize({64.0f,64.0f});
 		marker->SetRotation(0.0f);
 		marker->SetUvRotate(0.0f);
 		lockOnSprites_.push_back(std::move(marker));
@@ -367,9 +384,7 @@ void Player::AttachDangerSenseSource(EnemyDirectory* dir) { if(danger_) danger_-
 
 void Player::RequestLockOnTargetClear() {
 	// 再利用
-	for(size_t i=0;i<lockOnSprites_.size();++i){
-		RecycleMarker(std::move(lockOnSprites_[i]));
-	}
+	for(size_t i = 0; i < lockOnSprites_.size(); ++i) { RecycleMarker(std::move(lockOnSprites_[i])); }
 	lockOnSprites_.clear();
 	lockedOnTargets_.clear();
 }
@@ -527,7 +542,7 @@ void Player::UpdateAutoLockOn(float dt) {
 
 			// 位置・サイズなどセット（Initializeは再度やらない）
 			marker->SetPosition(c.s);
-			marker->SetSize({64.0f, 64.0f});
+			marker->SetSize({64.0f,64.0f});
 			marker->SetRotation(0.0f);
 			marker->SetUvRotate(0.0f);
 
@@ -586,10 +601,10 @@ void Player::PrewarmLockMarkers(size_t n) {
 //		死んだ敵のロックオンを外す
 ///////////////////////////////////////////////////////////////////////////////////
 void Player::PurgeDeadLockedTargets() {
-	for(size_t i = 0; i < lockedOnTargets_.size(); ){
+	for(size_t i = 0; i < lockedOnTargets_.size();) {
 		auto& e = lockedOnTargets_[i];
 		// 敵が死んでたらロックオン解除
-		if(!e || !e->GetIsAlive()){
+		if(!e || !e->GetIsAlive()) {
 			RecycleMarker(std::move(lockOnSprites_[i]));
 			lockOnSprites_.erase(lockOnSprites_.begin() + i);
 			lockedOnTargets_.erase(lockedOnTargets_.begin() + i);
@@ -597,46 +612,6 @@ void Player::PurgeDeadLockedTargets() {
 		}
 		++i;
 	}
-}
-
-///////////////////////////////////////////////////////////////////////////////////
-//		移動
-///////////////////////////////////////////////////////////////////////////////////
-void Player::Move() {
-	Vector3 moveVector = {0.0f,0.0f,0.0f};
-
-	// キーボード移動
-	if(Input::GetInstance()->PushKey(DIK_A)) { moveVector.x -= 1.0f; } else if(Input::GetInstance()->PushKey(DIK_D)) { moveVector.x += 1.0f; }
-
-	if(Input::GetInstance()->PushKey(DIK_W)) { moveVector.y += 1.0f; } else if(Input::GetInstance()->PushKey(DIK_S)) { moveVector.y -= 1.0f; }
-
-	// ゲームパッド左スティック入力
-	Vector2 leftStick = Input::GetInstance()->GetLeftStick();
-	moveVector.x += leftStick.x;
-	moveVector.y += leftStick.y;
-
-	if(moveVector.Length() > 0.0f) { moveVector.Normalize(); }
-
-	moveVector *= moveSpeed_;
-
-	// 移動加算
-	worldTransform_.translation += moveVector * ClockManager::GetInstance()->GetDeltaTime();
-	if(clampPlayerInView_) { ClampWorldTransformInView(worldTransform_,clampMarginXpx_,clampMarginYpx_); }
-}
-
-///////////////////////////////////////////////////////////////////////////////////
-//		弾の発射
-///////////////////////////////////////////////////////////////////////////////////
-void Player::Shoot() {
-	Vector3 playerPos  = worldTransform_.GetWorldPosition();
-	Vector3 reticlePos = reticleTransform_.GetWorldPosition();
-
-	Vector3 dir = reticlePos - playerPos;
-	if(dir.Length() > 0.001f) { dir = dir.Normalize(); } else {
-		dir = Vector3(0.0f,0.0f,1.0f); // フォールバック方向
-	}
-
-	shootingController_->RequestShoot(playerPos,dir);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -686,9 +661,15 @@ void Player::SetParent(WorldTransform* parent) { worldTransform_.parent = parent
 std::vector<Sprite*> Player::GetAllSprites() {
 	std::vector<Sprite*> sprites;
 	for(auto& s : reticleSprites_) sprites.push_back(s.get());
-	for(auto& s : lifeSprite_) sprites.push_back(s.get());
+	//for(auto& s : lifeSprite_) sprites.push_back(s.get());
 	for(auto& s : lockOnSprites_) sprites.push_back(s.get());
 
+	// ライフゲージ
+	if(hpGauge_) {
+		sprites.push_back(hpGauge_->GetMainGauge());
+		sprites.push_back(hpGauge_->GetDamageGauge());
+		sprites.push_back(hpGauge_->GetFrameSprite());
+	}
 	// 危険UI
 	if(danger_ && danger_->GetUiSprite()) sprites.push_back(danger_->GetUiSprite());
 	return sprites;

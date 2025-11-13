@@ -62,6 +62,11 @@ void TitleScene::Update([[maybe_unused]] float dt) {
 	menu_->Update(dt);
 
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
+
+	// スプライトの描画
+	for(auto& sprite : menu_->GetAllButtonImage()) {
+		spriteRenderer_->Register(sprite);
+	}
 }
 
 void TitleScene::CleanUp() {
@@ -72,8 +77,4 @@ void TitleScene::CleanUp() {
 
 void TitleScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService, RenderTargetType type) {
 	BaseScene::Draw(cmdList, psoService, type);
-
-	for(auto& sprite : menu_->GetAllButtonImage()) {
-		spriteRenderer_->Register(sprite);
-	}
 }

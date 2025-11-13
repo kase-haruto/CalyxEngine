@@ -1,6 +1,7 @@
 #include "CxEase.h"
 #include "Ease.h"
 #include <externals/imgui/imgui.h>
+#include <algorithm>
 
 namespace Cx {
 namespace Ease {
@@ -16,6 +17,19 @@ const char* EaseTypeNames[static_cast<int>(EaseType::Count)] = {
 		"EaseInExpo","EaseOutExpo","EaseInOutExpo",
 		"EaseInBack","EaseOutBack","EaseInOutBack"
 	};
+
+//==============================================================
+//  イージング補完
+//==============================================================
+float EaseLerp(float start, float end, float t, EaseType ease){
+	// 0〜1 の補間率にクランプ
+	t = std::clamp(t, 0.0f, 1.0f);
+
+	// イージングを適用（
+	float e = ApplyEase(ease, t);
+
+	return start + (end - start) * e;
+}
 
 //==============================================================
 //  イージング計算
