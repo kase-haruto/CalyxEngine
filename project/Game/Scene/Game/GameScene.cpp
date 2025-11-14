@@ -154,13 +154,7 @@ void GameScene::Update([[maybe_unused]] float dt) {
 		return;
 	}
 
-	// 既存のスプライト登録
-	if(numbersSprite_) { for(auto* sp : numbersSprite_->GetSpritesRaw()) { spriteRenderer_->Register(sp); } }
-
-	// プレイヤーが持つ追加スプライトを登録
-	if(player) { for(auto& sp : player->GetAllSprites()) { if(sp) spriteRenderer_->Register(sp); } }
-	if(attackSprite_) { spriteRenderer_->Register(attackSprite_.get()); }
-
+	
 	// ボスは「存在しているときだけ」死亡判定
 	// 未スポーン or 破棄済みのフレームでは何もしない
 	if(boss && !boss->GetIsAlive()) {
@@ -177,8 +171,16 @@ void GameScene::Draw(ID3D12GraphicsCommandList* cmdList,
 					 PipelineService*           psoService,
 					 RenderTargetType           type) {
 
-
+	auto player = wPlayer_.lock();
+	
 	BaseScene::Draw(cmdList,psoService,type);
+	// 既存のスプライト登録
+	if(numbersSprite_) { for(auto* sp : numbersSprite_->GetSpritesRaw()) { spriteRenderer_->Register(sp); } }
+
+	// プレイヤーが持つ追加スプライトを登録
+	if(player) { for(auto& sp : player->GetAllSprites()) { if(sp) spriteRenderer_->Register(sp); } }
+	if(attackSprite_) { spriteRenderer_->Register(attackSprite_.get()); }
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

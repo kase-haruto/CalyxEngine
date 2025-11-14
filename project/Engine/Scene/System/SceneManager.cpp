@@ -194,7 +194,9 @@ void SceneManager::DrawForRenderTarget(IRenderTarget* rt,
 	auto& slot = slots_[currentIdx_];
 	slot.scene->Draw(cmd, pso, rt->GetRenderTargetType());
 
-	slot.scene->DrawSpritesOnly(cmd, pso);
+	if(rt->GetRenderTargetType() != RenderTargetType::DebugView) {
+//	slot.scene->DrawSpritesOnly(cmd, pso);
+	}
 }
 
 //------------------------------------------------------------
