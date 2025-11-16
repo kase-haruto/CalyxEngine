@@ -67,6 +67,7 @@ void HpGauge::Initialize(const Vector2& position,const Vector2& size) {
 
 	transform_.Initialize();
 	transform_.translate = position;
+	transform_.scale = size;
 }
 
 //------------------------------------------------------------
