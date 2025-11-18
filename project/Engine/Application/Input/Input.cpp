@@ -143,7 +143,9 @@ bool Input::TriggerKey(uint32_t keyNum){
 void Input::MouseUpdate(){
 	HRESULT hr = mouse_->GetDeviceState(sizeof(DIMOUSESTATE), &mouseState_);
 	if (FAILED(hr)){
-		hr = mouse_->Acquire();
+		while (hr == DIERR_INPUTLOST) {
+			hr = mouse_->Acquire();
+		}
 	}
 
 	if (FAILED(hr)){

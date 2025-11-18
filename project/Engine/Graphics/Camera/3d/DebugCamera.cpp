@@ -10,22 +10,13 @@
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 #include <Engine/Foundation/Utility/Func/CxUtils.h>
 
-// externals
-#include <externals/imgui/imgui.h>
-
 // C++
 #include <algorithm>
 #include <numbers>
 
-DebugCamera::DebugCamera(const std::string& name)
-	: BaseCamera(),
-	lastMousePosRotate_ {0.0f, 0.0f},
-	isDraggingRotate_ {false},
-	lastMousePosMove_ {0.0f, 0.0f},
-	isDraggingMove_ {false}{
+DebugCamera::DebugCamera(const std::string& name){
 	BaseCamera::SetName(name);
 	fovAngleY_ = static_cast< float >(std::numbers::pi) * 0.25f; // 45度
-
 	worldTransform_.translation = {0.0f, 4.0f, -10.0f};
 }
 
