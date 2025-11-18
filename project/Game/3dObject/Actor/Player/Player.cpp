@@ -141,8 +141,8 @@ void Player::Initialize() {
 	// ライフゲージの初期化
 	hpGauge_ = std::make_unique<HpGauge>(static_cast<float>(life_));
 	// 左下にライフゲージを設定
-	Vector2 windowHalf = kWindowSize * 0.5f;
-	hpGauge_->Initialize(windowHalf,Vector2(200.0f,32.0f));
+	Vector2 lifeGaugePos = {100.0f,630.0f};
+	hpGauge_->Initialize(lifeGaugePos,Vector2(360.0f,32.0f));
 	hpGauge_->SetAncorPoint({0.0f,0.5f}); // 左中央
 
 	RefreshLifeUI();
@@ -295,9 +295,7 @@ void Player::Draw([[maybe_unused]] ID3D12GraphicsCommandList* cmdList) {}
 //		imgui
 /////////////////////////////////////////////////////////////////////////////////////////
 void Player::DerivativeGui() {
-	if(hpGauge_) {
-		hpGauge_->ShowGui();
-	}
+	if(hpGauge_) { hpGauge_->ShowGui(); }
 
 	ImGui::DragFloat("moveSpeed",&moveSpeed_,0.01f,0.0f,10.0f);
 	ImGui::DragFloat("lockOnRadius(px)",&lockOnRadiusPx_,1.0f,10.0f,400.0f);
@@ -666,9 +664,9 @@ std::vector<Sprite*> Player::GetAllSprites() {
 
 	// ライフゲージ
 	if(hpGauge_) {
-		sprites.push_back(hpGauge_->GetMainGauge());
-		sprites.push_back(hpGauge_->GetDamageGauge());
 		sprites.push_back(hpGauge_->GetFrameSprite());
+		sprites.push_back(hpGauge_->GetDamageGauge());
+		sprites.push_back(hpGauge_->GetMainGauge());
 	}
 	// 危険UI
 	if(danger_ && danger_->GetUiSprite()) sprites.push_back(danger_->GetUiSprite());

@@ -43,7 +43,7 @@ public:
 	const Vector2&         GetSize() const { return size; }
 	const Vector2&         GetAnchorPoint() const { return anchorPoint; }
 	const Vector2&         GetPosition() const { return position; }
-	const Vector2&         GetUvTranslate() const { return Vector2(uvTransform.translate.x,uvTransform.translate.y); }
+	Vector2         GetUvTranslate() const { return Vector2(uvTransform.translate.x,uvTransform.translate.y); }
 	const Vector2&         GetLeftTop() const { return textureLeftTop; }
 	float                  GetRotation() const { return rotate; }
 	const float            GetUvRotate() const { return uvTransform.rotate.x; }

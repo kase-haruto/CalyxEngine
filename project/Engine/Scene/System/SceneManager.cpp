@@ -16,11 +16,11 @@
 #include "Engine/Scene/Test/TestScene.h"
 #include "Game/Scene/Defeat/DefeatScene.h"
 
-SceneManager::SceneManager(DxCore* dx) : dx_(dx){}
+SceneManager::SceneManager(DxCore* dx) : dx_(dx) {}
 SceneManager::~SceneManager() = default;
 
 //------------------------------------------------------------
-void SceneManager::Initialize(){
+void SceneManager::Initialize() {
 	// 登録（この段階では Initialize しない）
 	AddScene(SceneType::TITLE,std::make_unique<TitleScene>());
 	AddScene(SceneType::PLAY,std::make_unique<GameScene>());
@@ -32,10 +32,10 @@ void SceneManager::Initialize(){
 }
 
 //------------------------------------------------------------
-size_t SceneManager::AddScene(SceneType type, std::unique_ptr<BaseScene> scene){
+size_t SceneManager::AddScene(SceneType type,std::unique_ptr<BaseScene> scene) {
 	SceneSlot slot;
 	slot.scene = std::move(scene);
-	slot.ctx = std::make_unique<SceneContext>();
+	slot.ctx   = std::make_unique<SceneContext>();
 	slot.ctx->Initialize(false);
 
 	slots_.push_back(std::move(slot));
@@ -50,55 +50,53 @@ size_t SceneManager::AddScene(SceneType type, std::unique_ptr<BaseScene> scene){
 }
 
 //------------------------------------------------------------
-void SceneManager::SetCurrent(size_t index){
-	if (index >= slots_.size()) return;
+void SceneManager::SetCurrent(size_t index) {
+	if(index >= slots_.size()) return;
 
-	if (pPlaySession_ && pPlaySession_->ExitRequested()){ pPlaySession_->FinalizeExitCleanup(); }
+	if(pPlaySession_ && pPlaySession_->ExitRequested()) { pPlaySession_->FinalizeExitCleanup(); }
 
-	if (!slots_.empty()){ slots_[currentIdx_].scene->OnExit(); }
+	if(!slots_.empty()) { slots_[currentIdx_].scene->OnExit(); }
 
 	currentIdx_ = index;
-	auto& s = slots_[currentIdx_];
+	auto& s     = slots_[currentIdx_];
 
 	// 新しい Editor ctx を PlaySession に通知
-	if (pPlaySession_) pPlaySession_->BindEditorContext(s.ctx.get());
+	if(pPlaySession_) pPlaySession_->BindEditorContext(s.ctx.get());
 
 	// 再生中なら新しい Editor 内容から Runtime を再構築
-	if (pPlaySession_ && pPlaySession_->IsRuntime()){ pPlaySession_->RebuildRuntimeFromEditor(s.ctx.get()); }
+	if(pPlaySession_ && pPlaySession_->IsRuntime()) { pPlaySession_->RebuildRuntimeFromEditor(s.ctx.get()); }
 
 	RebindIfContextChanged();
 }
 
 //------------------------------------------------------------
-SceneContext* SceneManager::GetCurrentSceneContext() const{
-	if (slots_.empty()) return nullptr;
+SceneContext* SceneManager::GetCurrentSceneContext() const {
+	if(slots_.empty()) return nullptr;
 	return slots_[currentIdx_].ctx.get();
 }
 
 //------------------------------------------------------------
-SceneContext* SceneManager::ActiveCtx() const{
-	if (pPlaySession_) return pPlaySession_->GetContext();
-	if (slots_.empty()) return nullptr;
+SceneContext* SceneManager::ActiveCtx() const {
+	if(pPlaySession_) return pPlaySession_->GetContext();
+	if(slots_.empty()) return nullptr;
 	return slots_[currentIdx_].ctx.get();
 }
 
-bool SceneManager::ActiveRuntimeFlag() const{
-	if (pPlaySession_) return pPlaySession_->IsRuntime();
-	if (slots_.empty()) return false;
+bool SceneManager::ActiveRuntimeFlag() const {
+	if(pPlaySession_) return pPlaySession_->IsRuntime();
+	if(slots_.empty()) return false;
 	return slots_[currentIdx_].ctx->IsRuntime();
 }
 
-bool SceneManager::GetIsEndGame() const {
-	return slots_[currentIdx_].scene->GetIsEndGame();
-}
+bool SceneManager::GetIsEndGame() const { return slots_[currentIdx_].scene->GetIsEndGame(); }
 
-void SceneManager::RebindIfContextChanged(){
+void SceneManager::RebindIfContextChanged() {
 	SceneContext* ctx = ActiveCtx();
-	if (!ctx) return;
+	if(!ctx) return;
 
 	const uint64_t gen = pPlaySession_ ? pPlaySession_->RuntimeGeneration() : 0;
 
-	if (ctx != lastBoundCtx_ || gen != lastRuntimeGen_){
+	if(ctx != lastBoundCtx_ || gen != lastRuntimeGen_) {
 		auto& slot = slots_[currentIdx_];
 
 		// 前回のctxにぶら下がるキャッシュを捨てる
@@ -107,7 +105,7 @@ void SceneManager::RebindIfContextChanged(){
 		ctx->MakeCurrent();
 		slot.scene->InjectContext(ctx);
 
-		if (!slot.assetsLoaded){
+		if(!slot.assetsLoaded) {
 			slot.scene->LoadAssets();
 			slot.assetsLoaded = true;
 		}
@@ -116,15 +114,15 @@ void SceneManager::RebindIfContextChanged(){
 		slot.scene->Initialize();
 		slot.scene->OnEnter();
 
-		lastBoundCtx_ = ctx;
+		lastBoundCtx_   = ctx;
 		lastRuntimeGen_ = gen;
 	}
 }
 
-void SceneManager::Update(float dt){
-	if (slots_.empty()) return;
+void SceneManager::Update(float dt) {
+	if(slots_.empty()) return;
 
-	if (pPlaySession_ && pPlaySession_->ExitRequested()){
+	if(pPlaySession_ && pPlaySession_->ExitRequested()) {
 		pPlaySession_->FinalizeExitCleanup();
 		lastBoundCtx_   = nullptr;
 		lastRuntimeGen_ = 0;
@@ -133,7 +131,7 @@ void SceneManager::Update(float dt){
 	RebindIfContextChanged();
 
 	SceneContext* ctx = ActiveCtx();
-	if (!ctx) return;
+	if(!ctx) return;
 
 	ctx->MakeCurrent();
 	ctx->Update(dt,ActiveRuntimeFlag());
@@ -142,72 +140,70 @@ void SceneManager::Update(float dt){
 	slot.scene->InjectContext(ctx);
 	slot.scene->Update(dt);
 
-	if (pendingSwitchIndex_.has_value()){
+	if(pendingSwitchIndex_.has_value()) {
 		SetCurrent(*pendingSwitchIndex_);
 		pendingSwitchIndex_.reset();
 	}
 }
 
 //------------------------------------------------------------
-void SceneManager::PostUpdate(ID3D12GraphicsCommandList* cmd, PipelineService* pso){
-	if (slots_.empty()) return;
+void SceneManager::PostUpdate(ID3D12GraphicsCommandList* cmd,PipelineService* pso) {
+	if(slots_.empty()) return;
 
 	RebindIfContextChanged();
-	if (auto* ctx = ActiveCtx()){ 
-		ctx->MakeCurrent();
-	}
-	slots_[currentIdx_].scene->PostUpdate(cmd, pso);
+	if(auto* ctx = ActiveCtx()) { ctx->MakeCurrent(); }
+	slots_[currentIdx_].scene->PostUpdate(cmd,pso);
 }
-//------------------------------------------------------------
-void SceneManager::Draw(ID3D12GraphicsCommandList* cmd, PipelineService* pso){
-	if (slots_.empty()) return;
-	RebindIfContextChanged();  
 
-	if (auto* ctx = ActiveCtx()) ctx->MakeCurrent();
+//------------------------------------------------------------
+void SceneManager::Draw(ID3D12GraphicsCommandList* cmd,PipelineService* pso) {
+	if(slots_.empty()) return;
+	RebindIfContextChanged();
+
+	if(auto* ctx = ActiveCtx()) ctx->MakeCurrent();
 
 	CameraManager::SetTypeStatic(CameraType::Default);
 	auto* offscreen = dx_->GetRenderTargetCollection().Get("Offscreen");
 	DrawForRenderTarget(offscreen,cmd,pso);
 
 #if defined(_DEBUG) || defined(DEVELOP)
-	if (auto* ctx = ActiveCtx()) ctx->MakeCurrent();
+	if(auto* ctx = ActiveCtx()) ctx->MakeCurrent();
 	CameraManager::SetTypeStatic(CameraType::Debug);
 	auto* debugRT = dx_->GetRenderTargetCollection().Get("DebugView");
 	DrawForRenderTarget(debugRT,cmd,pso);
 #endif
 
 	GraphicsGroup::GetInstance()->SetCommand(cmd,PipelineType::Line,BlendMode::NORMAL);
-	if (auto* cam = CameraManager::GetActive()) cam->SetCommand(cmd,PipelineType::Line);
+	if(auto* cam = CameraManager::GetActive()) cam->SetCommand(cmd,PipelineType::Line);
 	PrimitiveDrawer::GetInstance()->Render();
 	PrimitiveDrawer::GetInstance()->ClearMesh();
 }
 
 //------------------------------------------------------------
-void SceneManager::DrawForRenderTarget(IRenderTarget* rt,
-	ID3D12GraphicsCommandList* cmd,
-	PipelineService* pso){
+void SceneManager::DrawForRenderTarget(IRenderTarget*             rt,
+									   ID3D12GraphicsCommandList* cmd,
+									   PipelineService*           pso) {
 
-	if (!rt) return;
+	if(!rt) return;
 	rt->SetRenderTarget(cmd);
 	rt->Clear(cmd);
 
 	auto& slot = slots_[currentIdx_];
-	slot.scene->Draw(cmd, pso, rt->GetRenderTargetType());
+	slot.scene->Draw(cmd,pso,rt->GetRenderTargetType());
 
-	if(rt->GetRenderTargetType() != RenderTargetType::DebugView) {
-//	slot.scene->DrawSpritesOnly(cmd, pso);
-	}
+	// gameViewパネルにもスプライトを描画する
+	if(rt->GetRenderTargetType() != RenderTargetType::DebugView) { slot.scene->DrawSpritesOnly(cmd,pso); }
 }
 
 //------------------------------------------------------------
-void SceneManager::DrawNotAffectedFromPE(ID3D12GraphicsCommandList* cmd, PipelineService* pso){
-	if (slots_.empty()) return;
+void SceneManager::DrawNotAffectedFromPE(ID3D12GraphicsCommandList* cmd,PipelineService* pso) {
+	if(slots_.empty()) return;
 	slots_[currentIdx_].scene->DrawSpritesOnly(cmd,pso);
 }
 
 //------------------------------------------------------------
-void SceneManager::RequestSceneChange(SceneType nextScene){
+void SceneManager::RequestSceneChange(SceneType nextScene) {
 	auto it = typeToIndex_.find(nextScene);
-	if (it == typeToIndex_.end()) return;
+	if(it == typeToIndex_.end()) return;
 	pendingSwitchIndex_ = it->second;
 }
