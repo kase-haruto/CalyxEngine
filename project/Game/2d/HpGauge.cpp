@@ -58,7 +58,7 @@ void HpGauge::Initialize(const Vector2& position, const Vector2& size)
 	//----------------------------------------
 	// 青ゲージ（現在 HP）
 	//----------------------------------------
-	blueGauge_ = std::make_unique<Sprite>("Textures/white1x1.png");
+	blueGauge_ = std::make_unique<Sprite>("Textures/noise.png");
 	blueGauge_->Initialize(position, size);
 	blueGauge_->SetFillMethod(1);
 	blueGauge_->SetFillOrigin(0.0f, 0.0f);
@@ -110,6 +110,8 @@ void HpGauge::ShowGui(const std::string& label)
 	ImGui::Text("redRatio  (delayed)    : %.2f", redRatio_);
 
 	transform_.ShowImGui(label + "_transform");
+
+	blueGauge_->ShowGui();
 }
 
 
@@ -160,6 +162,10 @@ void HpGauge::Update(float dt)
 	// 青ゲージ（現在 HP）
 	//----------------------------------------
 	if (blueGauge_) {
+		// uv スクロール
+		float speed = 2.0f;
+		float uvY   = blueGauge_->GetUvTranslate().y - speed * dt;
+		blueGauge_->SetUvTranslate({uvY, uvY});
 		blueGauge_->SetFillAmount(blueRatio_);
 		blueGauge_->SetColor(ComputeColor(blueRatio_));
 		blueGauge_->SetAlpha(alpha);

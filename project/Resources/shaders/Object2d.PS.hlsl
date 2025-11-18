@@ -22,44 +22,26 @@ SamplerState      gSampler : register(s0);
 PSOutput main(VSOutput input) {
 	PSOutput output;
 
-	float4 uvT = mul(float4(input.texcoord,0.0f,1.0f),gMaterial.uvTransform);
-	float2 uv  = uvT.xy;
+	float2 baseUV = input.texcoord; // フィル判定用（動かさない）
 
-	// ======================================
-	// 汎用 Fill 処理
-	// ======================================
-	if(gMaterial.fillMethod == 1) {
-		// Horizontal
-		if(gMaterial.fillOrigin.x < 0.5f) {
-			// 左 -> 右
-			if(uv.x > gMaterial.fillAmount) discard;
+	// フィル判定
+	if (gMaterial.fillMethod == 1) {
+		if (gMaterial.fillOrigin.x < 0.5f) {
+			if (baseUV.x > gMaterial.fillAmount) discard;
 		} else {
-			// 右 -> 左
-			if(uv.x < 1.0f - gMaterial.fillAmount) discard;
+			if (baseUV.x < 1.0f - gMaterial.fillAmount) discard;
 		}
-	} else if(gMaterial.fillMethod == 2) {
-		// Vertical
-		if(gMaterial.fillOrigin.y < 0.5f) {
-			// 下 -> 上
-			if(uv.y > gMaterial.fillAmount) discard;
-		} else {
-			// 上 -> 下
-			if(uv.y < 1.0f - gMaterial.fillAmount) discard;
-		}
-	} else if(gMaterial.fillMethod == 3) {
-		// Mask Fill
-		// float mask = gMaskTexture.Sample(gSampler,uv).r;
-		// if(mask < gMaterial.fillAmount)
-		// 	discard;
 	}
 
-	// ======================================
-	// 通常スプライト処理
-	// ======================================
-	float4 texColor = gTexture.Sample(gSampler,uv);
-	output.color    = float4(
-		texColor.rgb * gMaterial.color.rgb,
-		texColor.a * gMaterial.color.a
-		);
+	// --------------------------
+	// こちらはアニメ用UV
+	// fillAmount の判定に使わない
+	// --------------------------
+	float4 uvT   = mul(float4(baseUV,0,1), gMaterial.uvTransform);
+	float2 animUV = uvT.xy;
+
+	float4 texColor = gTexture.Sample(gSampler, animUV);
+
+	output.color = texColor * gMaterial.color;
 	return output;
 }
