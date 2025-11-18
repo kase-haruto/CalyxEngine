@@ -68,7 +68,6 @@ void LevelEditor::Initialize() {
 
 	// ビューポートの初期化
 	mainViewport_ = std::make_unique<Viewport>(ViewportType::VIEWPORT_MAIN, "Game Viewport");
-	mainViewport_->SetShow(false);
 	debugViewport_ = std::make_unique<Viewport>(ViewportType::VIEWPORT_DEBUG, "Debug Viewport");
 
 	performanceOverlay_ = std::make_unique<PerformanceOverlay>();
