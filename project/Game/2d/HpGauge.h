@@ -4,6 +4,7 @@
 #include <Engine/Objects/Transform/Transform.h>
 
 #include <memory>
+#include <string>
 
 struct Vector2;
 struct Vector4;
@@ -26,7 +27,7 @@ public:
 	 * \param position	座標
 	 * \param size		サイズ
 	 */
-	void Initialize(const Vector2& position,const Vector2& size);
+	void Initialize(const Vector2& position, const Vector2& size);
 	/**
 	 * \brief 更新処理
 	 * \param dt 時間
@@ -51,7 +52,7 @@ public:
 	Sprite* GetFrameSprite() const { return frameSprite_.get(); }
 
 	// setter
-	void SetAncorPoint(const Vector2& point)const;
+	void SetAncorPoint(const Vector2& point) const;
 
 private:
 	//=================================================================
@@ -60,7 +61,7 @@ private:
 	/**
 	 * \brief 各スプライトにtransformを同期させる
 	 */
-	void SyncTransform()const;
+	void SyncTransform() const;
 
 private:
 	//=================================================================
@@ -75,10 +76,10 @@ private:
 	float shakeTimer_   = 0.0f; //< 揺れタイマー
 	float visibleTimer_ = 0.0f; //< 可視タイマー
 
-	Vector2     baseSize_;  //< 基本サイズ
-	Transform2D transform_; //< 変換情報
+	Vector2     baseSize_;  //< 基本サイズ（初期サイズ）
+	Transform2D transform_; //< 変換情報（位置・回転・スケール）
 
-	std::unique_ptr<Sprite> blueGauge_;   //< 青ゲージ
-	std::unique_ptr<Sprite> redGauge_;    //< 赤ゲージ
+	std::unique_ptr<Sprite> blueGauge_;   //< 青ゲージ（現在 HP）
+	std::unique_ptr<Sprite> redGauge_;    //< 赤ゲージ（ダメージ遅延）
 	std::unique_ptr<Sprite> frameSprite_; //< フレーム
 };
