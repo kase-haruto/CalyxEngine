@@ -40,7 +40,8 @@ public:
 
 	void Play() override; //< 再生
 	void Stop() override; //< ストップ
-	void Reset();		  //< リセット
+	void Reset();         //< リセット
+	bool LoadTextureByGuid(const Guid& g);
 
 	//--------- config -------------------------------------------------//
 	// 適用
@@ -58,6 +59,7 @@ public:
 
 	//--------- Timed Preview（一定間隔での自動再生） ---------------//
 	void  SetTimedPreview(bool v) { timedPreview_ = v; }
+	void SetPosition(const Vector3& pos){position_ = pos;}
 	bool  GetTimedPreview() const { return timedPreview_; }
 	void  SetPreviewInterval(float sec) { previewIntervalSec_ = (sec < 0.01f ? 0.01f : sec); }
 	float GetPreviewInterval() const { return previewIntervalSec_; }

@@ -16,7 +16,6 @@
 /* ===================================================================== */
 class ParticleSystemObject
 	: public SceneObject
-	, public FxEmitter
 	, public IConfigurable{
 public:
 	//===================================================================*/
@@ -33,6 +32,9 @@ public:
 	void PlayRecursive();  //< 再生
 	void StopRecursive();  //< 停止
 	void ResetRecursive(); //< リセット
+	void Play();
+	void Stop();
+	void Reset();
 	bool LoadTextureByGuid(const Guid& g);
 
 	//--------- config -----------------------------------------------------
@@ -54,7 +56,8 @@ public:
 	std::string_view GetTypeName() const override { return "ParticleSystemObject"; }
 
 	const ConfigurableObject<ParticleSystemObjectConfig>& GetConfigObject()const{return config_;}
-
+	FxEmitter* GetEmitter()const{return emitter_.get();}
 private:
 	ConfigurableObject<ParticleSystemObjectConfig> config_;
+	std::unique_ptr<FxEmitter> emitter_;
 };

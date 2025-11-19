@@ -21,7 +21,7 @@ void CreateParticleSystemObjectCommand::Execute(){
 	context_->GetObjectLibrary()->AddObject(obj);
 
 	// FxSystem は参照だけ保持
-	context_->GetFxSystem()->AddEmitter(particleSystem_);
+	context_->GetFxSystem()->AddEmitter(particleSystem_->GetEmitter());
 }
 
 void CreateParticleSystemObjectCommand::Undo(){
