@@ -56,8 +56,10 @@ public:
 	std::string_view GetTypeName() const override { return "ParticleSystemObject"; }
 
 	const ConfigurableObject<ParticleSystemObjectConfig>& GetConfigObject()const{return config_;}
-	FxEmitter* GetEmitter()const{return emitter_.get();}
+	std::shared_ptr<BaseEmitter> GetEmitter() const {
+		return emitter_;
+	}
 private:
 	ConfigurableObject<ParticleSystemObjectConfig> config_;
-	std::unique_ptr<FxEmitter> emitter_;
+	std::shared_ptr<FxEmitter> emitter_;
 };

@@ -151,7 +151,7 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 		} else if(auto pt = std::dynamic_pointer_cast<PointLight>(sp)) {
 			context.GetLightLibrary()->SetPointLight(pt);
 		} else if(auto fx = std::dynamic_pointer_cast<ParticleSystemObject>(sp)) {
-			context.GetFxSystem()->AddEmitter(fx);
+			context.GetFxSystem()->AddEmitter(fx->GetEmitter(),fx->GetGuid());
 		} else if(auto camMain = std::dynamic_pointer_cast<Camera3d>(sp)) {
 			context.GetCameraMgr()->SetMainCamera(camMain);
 		} else if(auto camDbg = std::dynamic_pointer_cast<DebugCamera>(sp)) {

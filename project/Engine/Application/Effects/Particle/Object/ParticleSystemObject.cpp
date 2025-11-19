@@ -28,12 +28,13 @@ void VSeparator(float height = 0.0f, float thickness = 1.0f, float pad = 6.0f) {
 /////////////////////////////////////////////////////////////////////////////////////////
 ParticleSystemObject::ParticleSystemObject() {
 	SceneObject::SetName("ParticleSystemObject", ObjectType::Effect);
+	emitter_ = std::make_shared<FxEmitter>();
 }
 ParticleSystemObject::ParticleSystemObject(const std::string& name) {
 	SceneObject::SetName(name,ObjectType::Effect);
 
 	// エミッター
-	emitter_ = std::make_unique<FxEmitter>();
+	emitter_ = std::make_shared<FxEmitter>();
 
 	// デフォルト値の設定
 	emitter_->velocity_.SetConstant({0.0f, 2.0f, 0.0f});

@@ -4,7 +4,7 @@
 /* ===================================================================== */
 
 // engine
-#include <Data/Engine/Configs/Scene/Objects/Particle/EmitterConfig.h>
+
 #include <Engine/Application/Effects/Particle/Emitter/BaseEmitter.h>
 #include <Engine/Application/Effects/Particle/Module/Container/FxModuleContainer.h>
 #include <Engine/Application/Effects/Particle/Parm/FxParm.h>
@@ -45,9 +45,9 @@ public:
 
 	//--------- config -------------------------------------------------//
 	// 適用
-	void ApplyConfigFrom(const EmitterConfig& config);
+	void ApplyConfigFrom(const EmitterConfig& config)override;
 	// 掃き出し
-	void ExtractConfigTo(EmitterConfig& config) const;
+	void ExtractConfigTo(EmitterConfig& config) const override;
 
 	//--------- accessor -----------------------------------------------//
 	const std::vector<FxUnit>& GetUnits() const { return units_; }
