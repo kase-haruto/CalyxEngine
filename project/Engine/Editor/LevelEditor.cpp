@@ -286,7 +286,7 @@ void LevelEditor::CreateObject(const std::shared_ptr<SceneObject>& obj) {
 		// パーティクルなら FxSystem 側も
 		if(obj->GetObjectType() == ObjectType::Effect) {
 			if(auto fx = std::dynamic_pointer_cast<ParticleSystemObject>(obj)) {
-				ctx->GetFxSystem()->AddEmitter(fx);
+				ctx->GetFxSystem()->AddEmitter(fx->GetEmitter(),fx->GetGuid());
 			}
 		}
 	}

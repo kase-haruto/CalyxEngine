@@ -1,5 +1,6 @@
 #pragma once
 #include "../BaseBullet.h"
+#include <Engine/Application/Effects/FxObject.h>
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 
 class PlayerBullet :
@@ -17,7 +18,5 @@ public:
 	//--------- accessor ---------------------------------------------------
 	
 private:
-	std::shared_ptr<ParticleSystemObject> trailFx_;
-	std::shared_ptr<ParticleSystemObject> shootFx_;
+	std::shared_ptr<FxObject> shootFx_;
 };
-

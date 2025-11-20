@@ -71,7 +71,7 @@ void GpuFxEmitter::Update(float dt){
 void GpuFxEmitter::ShowGui() {
 	ImGui::Begin("GPU FX Emitter");
 
-	if (ImGui::CollapsingHeader("Emitter Parameters", ImGuiTreeNodeFlags_DefaultOpen)) {
+	if(ImGui::CollapsingHeader("Emitter Parameters", ImGuiTreeNodeFlags_DefaultOpen)) {
 		ImGui::DragFloat3("Position", &emitterData_.translate.x, 0.1f);
 		ImGui::DragFloat("Radius", &emitterData_.radius, 0.01f, 0.0f, 100.0f);
 		ImGui::DragInt("Emit Count", reinterpret_cast<int*>(&emitterData_.count), 1, 0, kMaxParticles);
@@ -81,7 +81,12 @@ void GpuFxEmitter::ShowGui() {
 
 	ImGui::End();
 }
-
+void GpuFxEmitter::ApplyConfigFrom(const EmitterConfig& config) {
+	(void)config;
+}
+void GpuFxEmitter::ExtractConfigTo(EmitterConfig& config) const {
+	(void)config;
+}
 
 // ────────────────────────────────────────────────────────────────
 //  Dispatch: CS でパーティクル更新

@@ -4,7 +4,7 @@
 /* ===================================================================== */
 
 // engine
-#include <Data/Engine/Configs/Scene/Objects/Particle/EmitterConfig.h>
+
 #include <Engine/Application/Effects/Particle/Emitter/BaseEmitter.h>
 #include <Engine/Application/Effects/Particle/Module/Container/FxModuleContainer.h>
 #include <Engine/Application/Effects/Particle/Parm/FxParm.h>
@@ -40,13 +40,14 @@ public:
 
 	void Play() override; //< 再生
 	void Stop() override; //< ストップ
-	void Reset();		  //< リセット
+	void Reset();         //< リセット
+	bool LoadTextureByGuid(const Guid& g);
 
 	//--------- config -------------------------------------------------//
 	// 適用
-	void ApplyConfigFrom(const EmitterConfig& config);
+	void ApplyConfigFrom(const EmitterConfig& config)override;
 	// 掃き出し
-	void ExtractConfigTo(EmitterConfig& config) const;
+	void ExtractConfigTo(EmitterConfig& config) const override;
 
 	//--------- accessor -----------------------------------------------//
 	const std::vector<FxUnit>& GetUnits() const { return units_; }
@@ -58,6 +59,7 @@ public:
 
 	//--------- Timed Preview（一定間隔での自動再生） ---------------//
 	void  SetTimedPreview(bool v) { timedPreview_ = v; }
+	void SetPosition(const Vector3& pos){position_ = pos;}
 	bool  GetTimedPreview() const { return timedPreview_; }
 	void  SetPreviewInterval(float sec) { previewIntervalSec_ = (sec < 0.01f ? 0.01f : sec); }
 	float GetPreviewInterval() const { return previewIntervalSec_; }

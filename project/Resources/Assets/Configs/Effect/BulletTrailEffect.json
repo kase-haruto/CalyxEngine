@@ -1,0 +1,532 @@
+{
+    "emitters": [
+        {
+            "emitter": {
+                "autoDestroy": false,
+                "color": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "emitCount": 10,
+                "emitDelay": 0.0,
+                "emitDuration": -1.0,
+                "emitRate": 0.10000000149011612,
+                "isComplement": true,
+                "isDrawEnable": true,
+                "isOneShot": false,
+                "lifetime": {
+                    "constant": 0.5699999928474426,
+                    "max": 1.0,
+                    "min": 0.0,
+                    "mode": 0
+                },
+                "modelPath": "plane.obj",
+                "modules": [
+                    {
+                        "easeType": 11,
+                        "enabled": true,
+                        "isGrowing": false,
+                        "name": "SizeOverLifetimeModule"
+                    },
+                    {
+                        "blend": 0,
+                        "clamp01": true,
+                        "ease": 1,
+                        "enabled": true,
+                        "end": [
+                            0.6725978851318359,
+                            0.3422829210758209,
+                            0.3422829210758209,
+                            0.7409999966621399
+                        ],
+                        "invert": false,
+                        "name": "OverLifetimeModule",
+                        "start": [
+                            0.6334519386291504,
+                            0.0,
+                            0.0,
+                            1.0
+                        ],
+                        "target": 4
+                    }
+                ],
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 6.437881946563721
+                },
+                "randomSpinEmit": false,
+                "scale": {
+                    "constant": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "max": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "min": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "mode": 0
+                },
+                "textureGuid": "918b71a5-ef26-4dcb-9f5b-3ff3de55adce",
+                "texturePath": "particle.png",
+                "velocity": {
+                    "constant": {
+                        "x": 0.5400000214576721,
+                        "y": 0.7599999904632568,
+                        "z": 0.0
+                    },
+                    "max": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "min": {
+                        "x": -1.0,
+                        "y": -1.0,
+                        "z": -1.0
+                    },
+                    "mode": 1
+                }
+            },
+            "guid": "b3735d23-b025-4a12-8eb3-99e73ac04fd8",
+            "isDrawEnable": true,
+            "isGpu": false,
+            "name": "trail",
+            "objectType": 0,
+            "parentGuid": "401b8d4c-59b6-4477-a69b-a6f78848f86e",
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            }
+        },
+        {
+            "emitter": {
+                "autoDestroy": false,
+                "color": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "emitCount": 1,
+                "emitDelay": 0.0,
+                "emitDuration": -1.0,
+                "emitRate": 0.10000000149011612,
+                "isComplement": true,
+                "isDrawEnable": true,
+                "isOneShot": true,
+                "lifetime": {
+                    "constant": 0.5600000023841858,
+                    "max": 1.0,
+                    "min": 0.0,
+                    "mode": 0
+                },
+                "modelPath": "plane.obj",
+                "modules": [
+                    {
+                        "animationSpeed": 30.0,
+                        "cols": 4,
+                        "enabled": true,
+                        "loop": false,
+                        "name": "TextureSheetAnimationModule",
+                        "rows": 4,
+                        "useCustomFrames": false
+                    },
+                    {
+                        "blend": 0,
+                        "clamp01": true,
+                        "ease": 2,
+                        "enabled": true,
+                        "end": [
+                            0.7651245594024658,
+                            0.0,
+                            0.0,
+                            1.0
+                        ],
+                        "invert": false,
+                        "name": "OverLifetimeModule",
+                        "start": [
+                            0.012284546159207821,
+                            0.5962769985198975,
+                            0.6903914213180542,
+                            1.0
+                        ],
+                        "target": 4
+                    }
+                ],
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 6.437881946563721
+                },
+                "randomSpinEmit": false,
+                "scale": {
+                    "constant": {
+                        "x": 3.0,
+                        "y": 3.0,
+                        "z": 1.0
+                    },
+                    "max": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "min": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "mode": 0
+                },
+                "textureGuid": "887f7536-6e5c-4875-ac80-0c56d5e40bff",
+                "texturePath": "particle.png",
+                "velocity": {
+                    "constant": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "max": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "min": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "mode": 0
+                }
+            },
+            "guid": "01318234-36d8-42a3-a34c-b2fa9d52d614",
+            "isDrawEnable": true,
+            "isGpu": false,
+            "name": "shootFx",
+            "objectType": 0,
+            "parentGuid": "401b8d4c-59b6-4477-a69b-a6f78848f86e",
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            }
+        },
+        {
+            "emitter": {
+                "autoDestroy": false,
+                "color": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "emitCount": 1,
+                "emitDelay": 0.0,
+                "emitDuration": -1.0,
+                "emitRate": 0.10000000149011612,
+                "isComplement": true,
+                "isDrawEnable": true,
+                "isOneShot": true,
+                "lifetime": {
+                    "constant": 0.7799999713897705,
+                    "max": 1.0,
+                    "min": 0.0,
+                    "mode": 0
+                },
+                "modelPath": "plane.obj",
+                "modules": [
+                    {
+                        "easeType": 8,
+                        "enabled": true,
+                        "isGrowing": true,
+                        "name": "SizeOverLifetimeModule"
+                    },
+                    {
+                        "blend": 0,
+                        "clamp01": true,
+                        "ease": 6,
+                        "enabled": true,
+                        "end": [
+                            8.300000190734863,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "invert": false,
+                        "name": "OverLifetimeModule",
+                        "start": [
+                            0.0,
+                            0.0,
+                            0.0,
+                            1.0
+                        ],
+                        "target": 3
+                    },
+                    {
+                        "blend": 0,
+                        "clamp01": true,
+                        "ease": 6,
+                        "enabled": true,
+                        "end": [
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.8309999704360962
+                        ],
+                        "invert": false,
+                        "name": "OverLifetimeModule (2)",
+                        "start": [
+                            0.6492605805397034,
+                            0.7793594598770142,
+                            0.033282265067100525,
+                            1.0
+                        ],
+                        "target": 4
+                    }
+                ],
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 6.437881946563721
+                },
+                "randomSpinEmit": false,
+                "scale": {
+                    "constant": {
+                        "x": 3.0,
+                        "y": 3.0,
+                        "z": 1.0
+                    },
+                    "max": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "min": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "mode": 0
+                },
+                "textureGuid": "3cf57a10-5b98-4fde-8730-907fc3d43bde",
+                "texturePath": "particle.png",
+                "velocity": {
+                    "constant": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "max": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "min": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "mode": 0
+                }
+            },
+            "guid": "8cdecbab-799d-483a-b2a8-28a376151c50",
+            "isDrawEnable": true,
+            "isGpu": false,
+            "name": "rect",
+            "objectType": 0,
+            "parentGuid": "401b8d4c-59b6-4477-a69b-a6f78848f86e",
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            }
+        },
+        {
+            "emitter": {
+                "autoDestroy": false,
+                "color": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "emitCount": 10,
+                "emitDelay": 0.0,
+                "emitDuration": -1.0,
+                "emitRate": 0.10000000149011612,
+                "isComplement": true,
+                "isDrawEnable": true,
+                "isOneShot": true,
+                "lifetime": {
+                    "constant": 0.5600000023841858,
+                    "max": 1.0,
+                    "min": 0.0,
+                    "mode": 0
+                },
+                "modelPath": "plane.obj",
+                "modules": [
+                    {
+                        "blend": 0,
+                        "clamp01": true,
+                        "ease": 1,
+                        "enabled": true,
+                        "end": [
+                            0.619217038154602,
+                            0.06170133873820305,
+                            0.12122280895709991,
+                            0.7490000128746033
+                        ],
+                        "invert": false,
+                        "name": "OverLifetimeModule",
+                        "start": [
+                            0.0,
+                            0.2908778488636017,
+                            0.7046263217926025,
+                            1.0
+                        ],
+                        "target": 4
+                    }
+                ],
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 6.437881946563721
+                },
+                "randomSpinEmit": true,
+                "scale": {
+                    "constant": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "max": {
+                        "x": 0.3499999940395355,
+                        "y": 3.0999999046325684,
+                        "z": 1.0
+                    },
+                    "min": {
+                        "x": -0.3100000023841858,
+                        "y": -3.880000114440918,
+                        "z": 0.0
+                    },
+                    "mode": 1
+                },
+                "textureGuid": "918b71a5-ef26-4dcb-9f5b-3ff3de55adce",
+                "texturePath": "particle.png",
+                "velocity": {
+                    "constant": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "max": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "min": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "mode": 0
+                }
+            },
+            "guid": "287b6ccc-fd34-46dc-8b58-c654134b30c8",
+            "isDrawEnable": true,
+            "isGpu": false,
+            "name": "shotFx",
+            "objectType": 0,
+            "parentGuid": "401b8d4c-59b6-4477-a69b-a6f78848f86e",
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            }
+        }
+    ],
+    "guid": "401b8d4c-59b6-4477-a69b-a6f78848f86e",
+    "name": "ShootFx",
+    "objectType": 0,
+    "parentGuid": "00000000-0000-0000-0000-000000000000",
+    "transform": {
+        "rotation": {
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+        },
+        "translation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        }
+    }
+}

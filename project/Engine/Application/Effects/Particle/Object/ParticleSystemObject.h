@@ -16,8 +16,7 @@
 /* ===================================================================== */
 class ParticleSystemObject
 	: public SceneObject
-	, public FxEmitter
-	, public IConfigurable{
+	 ,public IConfigurable {
 public:
 	//===================================================================*/
 	//			public methods
@@ -26,21 +25,23 @@ public:
 	ParticleSystemObject(const std::string& name);
 	~ParticleSystemObject() override;
 
-	void AlwaysUpdate(float dt)override;
+	void AlwaysUpdate(float dt) override;
 	void ShowGui() override;
 
 	//--------- session -----------------------------------------------------
-	void PlayRecursive();  //< 再生
-	void StopRecursive();  //< 停止
-	void ResetRecursive(); //< リセット
-	bool LoadTextureByGuid(const Guid& g);
+	void PlayRecursive() const;  //< 再生
+	void StopRecursive() const;  //< 停止
+	void ResetRecursive() const; //< リセット
+	void Play() const;
+	void Stop() const;
+	void Reset() const;
 
 	//--------- config -----------------------------------------------------
 	// 適用
-	void ApplyConfig() ;
+	void ApplyConfig();
 	void ApplyConfigFromJson(const nlohmann::json& j) override;
 	// 掃き出し
-	void ExtractConfig() ;
+	void ExtractConfig();
 	void ExtractConfigToJson(nlohmann::json& j) const override;
 
 	//--------- save/load -----------------------------------------------------
@@ -50,11 +51,13 @@ public:
 	void SaveConfig(const std::string& path) const;
 
 	//--------- accessor -----------------------------------------------------
-	void			 SetDrawEnable(bool isDrawEnable) override;
+	void             SetDrawEnable(bool isDrawEnable) override;
 	std::string_view GetTypeName() const override { return "ParticleSystemObject"; }
 
-	const ConfigurableObject<ParticleSystemObjectConfig>& GetConfigObject()const{return config_;}
+	const ConfigurableObject<ParticleSystemObjectConfig>& GetConfigObject() const { return config_; }
+	std::shared_ptr<BaseEmitter>                          GetEmitter() const { return emitter_; }
 
 private:
 	ConfigurableObject<ParticleSystemObjectConfig> config_;
+	std::shared_ptr<FxEmitter>                     emitter_;
 };

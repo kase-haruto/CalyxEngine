@@ -45,6 +45,9 @@ public:
 	void Update(float dt) override;
 	void ShowGui();
 
+	void ApplyConfigFrom(const EmitterConfig& config) override;
+	void ExtractConfigTo(EmitterConfig& config) const override;
+
 	//--------- Dispatch -----------------------------------------------------
 	void DispatchInitialize(ID3D12GraphicsCommandList* cmd);
 	void DispatchEmit(ID3D12GraphicsCommandList* cmd);

@@ -182,7 +182,7 @@ void FxObject::ShowGui() {
 					node.parentGuid = this->GetGuid();
 					sp->GetWorldTransform().ExtractConfig();
 					node.transform = sp->GetConfigObject().GetConfig().transform;
-					sp->FxEmitter::ExtractConfigTo(node.emitter);
+					sp->GetEmitter()->ExtractConfigTo(node.emitter);
 					node.isDrawEnable = true;
 					AddEmitterNode(node);
 				}
@@ -292,7 +292,7 @@ void FxObject::SyncConfigFromChildren() {
 		sp->GetWorldTransform().ExtractConfig();
 		n.transform = sp->GetConfigObject().GetConfig().transform;
 
-		sp->FxEmitter::ExtractConfigTo(n.emitter);
+		sp->GetEmitter()->ExtractConfigTo(n.emitter);
 		cfg.emitters.push_back(std::move(n));
 	}
 }
@@ -309,7 +309,7 @@ FxObject::AddEmitterNode(const EffectEmitterNodeConfig& node) {
 			exist->SetName(node.name.empty() ? exist->GetName() : node.name, ObjectType::Effect);
 			exist->GetWorldTransform().ApplyConfig(node.transform);
 			exist->SetDrawEnable(node.isDrawEnable);
-			exist->FxEmitter::ApplyConfigFrom(node.emitter);
+			exist->GetEmitter()->ApplyConfigFrom(node.emitter);
 			return exist;
 		}
 	}
@@ -321,7 +321,7 @@ FxObject::AddEmitterNode(const EffectEmitterNodeConfig& node) {
 	child->SetGuid(node.guid.isValid() ? node.guid : Guid::New());
 	child->GetWorldTransform().ApplyConfig(node.transform);
 	child->SetDrawEnable(node.isDrawEnable);
-	child->FxEmitter::ApplyConfigFrom(node.emitter);
+	child->GetEmitter()->ApplyConfigFrom(node.emitter);
 	child->SetParent(shared_from_this());
 
 	emitters_.push_back(child);

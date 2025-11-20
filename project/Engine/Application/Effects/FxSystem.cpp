@@ -8,37 +8,6 @@
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 
 /*===========================================================================*/
-/*  helpers                                                                  */
-/*===========================================================================*/
-
-// weak_ptr コンテナにguidがあるか判定
-template <class T>
-static bool ContainsGuid(const std::vector<std::weak_ptr<T>>& vec, const Guid& id) {
-	for(auto const& w : vec) {
-		if(auto sp = w.lock()) {
-			if(auto so = std::dynamic_pointer_cast<SceneObject>(sp)) {
-				if(so->GetGuid() == id) return true;
-			}
-		}
-	}
-	return false;
-}
-
-// weak_ptr コンテナから削除（
-template <class T>
-static void EraseByGuid(std::vector<std::weak_ptr<T>>& vec, const Guid& id) {
-	auto pred = [&](const std::weak_ptr<T>& w) {
-		auto sp = w.lock();
-		if(!sp) return true; // 失効は掃除
-		if(auto so = std::dynamic_pointer_cast<SceneObject>(sp)) {
-			return (so->GetGuid() == id);
-		}
-		return false;
-	};
-	std::erase_if(vec, pred);
-}
-
-/*===========================================================================*/
 /*  ctor / dtor                                                              */
 /*===========================================================================*/
 FxSystem::FxSystem() {
@@ -47,14 +16,19 @@ FxSystem::FxSystem() {
 	// 追加イベント
 	connAdd_ = EventBus::Subscribe<ObjectAdded>(
 		[this](const ObjectAdded& e) {
-			if(auto fx = std::dynamic_pointer_cast<ParticleSystemObject>(e.sp)) {
-				AddEmitter(fx);
+			if(auto ps = std::dynamic_pointer_cast<ParticleSystemObject>(e.sp)) {
+				auto emitter = ps->GetEmitter(); // std::shared_ptr<BaseEmitter> など
+				if(emitter) {
+					AddEmitter(emitter, ps->GetGuid());
+				}
 			}
 		});
 
-	// 削除イベント
+	// 削除イベント（SceneObject が消えたら GUID で emitter を外す）
 	connRem_ = EventBus::Subscribe<ObjectRemoved>(
-		[this](const ObjectRemoved& e) { RemoveEmitterByGuid(e.sp->GetGuid()); });
+		[this](const ObjectRemoved& e) {
+			RemoveEmitterByGuid(e.sp->GetGuid());
+		});
 }
 
 FxSystem::~FxSystem() {
@@ -66,67 +40,101 @@ FxSystem::~FxSystem() {
 /*  追加 / 削除                                                              */
 /*===========================================================================*/
 
-void FxSystem::AddEmitter(const std::shared_ptr<BaseEmitter>& sp) {
-	if(!sp) return;
+void FxSystem::AddEmitter(const std::shared_ptr<BaseEmitter>& sp,
+						  const Guid&						  ownerGuid) {
+	if(!sp || !ownerGuid.isValid()) return;
 
-	Guid gid{};
-	if(auto so = std::dynamic_pointer_cast<SceneObject>(sp)) {
-		gid = so->GetGuid();
-	}
-
+	// CPU emitter?
 	if(auto cpu = std::dynamic_pointer_cast<FxEmitter>(sp)) {
-		if(gid.isValid() && ContainsGuid(cpuEmitters_, gid)) return;
-		cpuEmitters_.push_back(cpu);
+		// 重複登録チェック（同じ ownerGuid & emitter）
+		auto it = std::find_if(cpuEmitters_.begin(), cpuEmitters_.end(),
+							   [&](const CpuEmitterEntry& e) {
+								   auto locked = e.emitter.lock();
+								   return (e.ownerGuid == ownerGuid) &&
+										  locked && (locked.get() == cpu.get());
+							   });
+		if(it == cpuEmitters_.end()) {
+			CpuEmitterEntry entry;
+			entry.ownerGuid = ownerGuid;
+			entry.emitter	= cpu;
+			cpuEmitters_.push_back(entry);
+		}
 		return;
 	}
+
+	// GPU emitter?
 	if(auto gpu = std::dynamic_pointer_cast<GpuFxEmitter>(sp)) {
-		if(gid.isValid() && ContainsGuid(gpuEmitters_, gid)) return;
-		gpuEmitters_.push_back(gpu);
+		auto it = std::find_if(gpuEmitters_.begin(), gpuEmitters_.end(),
+							   [&](const GpuEmitterEntry& e) {
+								   auto locked = e.emitter.lock();
+								   return (e.ownerGuid == ownerGuid) &&
+										  locked && (locked.get() == gpu.get());
+							   });
+		if(it == gpuEmitters_.end()) {
+			GpuEmitterEntry entry;
+			entry.ownerGuid = ownerGuid;
+			entry.emitter	= gpu;
+			gpuEmitters_.push_back(entry);
+		}
 		return;
 	}
+
+	// どちらでもなければ何もしない
 }
 
 void FxSystem::RemoveEmitter(BaseEmitter* emitter) {
 	if(!emitter) return;
 
-	if(auto so = dynamic_cast<SceneObject*>(emitter)) {
-		auto gid = so->GetGuid();
-		if(gid.isValid()) {
-			RemoveEmitterByGuid(gid);
-			return;
-		}
-	}
+	// CPU emitter 側をポインタ一致で削除
+	std::erase_if(cpuEmitters_,
+				  [emitter](const CpuEmitterEntry& e) {
+					  auto sp = e.emitter.lock();
+					  return !sp || (sp.get() == emitter);
+				  });
 
-	// フォールバック
-	auto pred = [emitter](const auto& wp) {
-		auto sp = wp.lock();
-		return sp && (sp.get() == emitter);
-	};
-	std::erase_if(cpuEmitters_, pred);
-	std::erase_if(gpuEmitters_, pred);
+	// GPU emitter 側をポインタ一致で削除
+	std::erase_if(gpuEmitters_,
+				  [emitter](const GpuEmitterEntry& e) {
+					  auto sp = e.emitter.lock();
+					  return !sp || (sp.get() == emitter);
+				  });
 }
 
 void FxSystem::RemoveEmitterByGuid(const Guid& id) {
 	if(!id.isValid()) return;
-	EraseByGuid(cpuEmitters_, id);
-	EraseByGuid(gpuEmitters_, id);
+
+	// ownerGuid が一致するものを削除（weak_ptr 失効もついでに掃除）
+	std::erase_if(cpuEmitters_,
+				  [&](const CpuEmitterEntry& e) {
+					  if(!e.emitter.lock()) return true;
+					  return (e.ownerGuid == id);
+				  });
+
+	std::erase_if(gpuEmitters_,
+				  [&](const GpuEmitterEntry& e) {
+					  if(!e.emitter.lock()) return true;
+					  return (e.ownerGuid == id);
+				  });
 }
 
 /*===========================================================================*/
 /*  毎フレーム同期 / ディスパッチ                                            */
 /*===========================================================================*/
 void FxSystem::SyncEmitters() {
+	// CPU
 	for(auto it = cpuEmitters_.begin(); it != cpuEmitters_.end();) {
-		if(auto sp = it->lock()) {
+		if(auto sp = it->emitter.lock()) {
 			sp->TransferParticleDataToGPU();
 			++it;
 		} else {
+			// weak_ptr が失効していたら削除
 			it = cpuEmitters_.erase(it);
 		}
 	}
 
+	// GPU
 	for(auto it = gpuEmitters_.begin(); it != gpuEmitters_.end();) {
-		if(auto sp = it->lock()) {
+		if(auto sp = it->emitter.lock()) {
 			sp->TransferParticleDataToGPU();
 			++it;
 		} else {
@@ -135,24 +143,28 @@ void FxSystem::SyncEmitters() {
 	}
 }
 
-void FxSystem::DispatchEmitters(PipelineService* psoService, ID3D12GraphicsCommandList* cmd) {
+void FxSystem::DispatchEmitters(PipelineService*		   psoService,
+								ID3D12GraphicsCommandList* cmd) {
 	for(auto it = gpuEmitters_.begin(); it != gpuEmitters_.end();) {
-		if(auto sp = it->lock()) {
+		if(auto sp = it->emitter.lock()) {
 			// 初期化
 			{
-				auto psoInit = psoService->GetComputePipelineSet(PipelineTag::Compute::ParticleInitializeCompute);
+				auto psoInit = psoService->GetComputePipelineSet(
+					PipelineTag::Compute::ParticleInitializeCompute);
 				psoInit.SetCompute(cmd);
 				sp->DispatchInitialize(cmd);
 			}
 			// Emit
 			{
-				auto psoEmit = psoService->GetComputePipelineSet(PipelineTag::Compute::ParticleEmitCompute);
+				auto psoEmit = psoService->GetComputePipelineSet(
+					PipelineTag::Compute::ParticleEmitCompute);
 				psoEmit.SetCompute(cmd);
 				sp->DispatchEmit(cmd);
 			}
 			// Update
 			{
-				auto psoUpd = psoService->GetComputePipelineSet(PipelineTag::Compute::ParticleUpdateCompute);
+				auto psoUpd = psoService->GetComputePipelineSet(
+					PipelineTag::Compute::ParticleUpdateCompute);
 				psoUpd.SetCompute(cmd);
 				sp->DispatchUpdate(cmd);
 			}
@@ -171,7 +183,7 @@ void FxSystem::Render(PipelineService* pso, ID3D12GraphicsCommandList* cmd) {
 	std::vector<std::shared_ptr<GpuFxEmitter>> activeGpu;
 
 	for(auto it = cpuEmitters_.begin(); it != cpuEmitters_.end();) {
-		if(auto sp = it->lock()) {
+		if(auto sp = it->emitter.lock()) {
 			activeCpu.push_back(sp);
 			++it;
 		} else {
@@ -179,7 +191,7 @@ void FxSystem::Render(PipelineService* pso, ID3D12GraphicsCommandList* cmd) {
 		}
 	}
 	for(auto it = gpuEmitters_.begin(); it != gpuEmitters_.end();) {
-		if(auto sp = it->lock()) {
+		if(auto sp = it->emitter.lock()) {
 			activeGpu.push_back(sp);
 			++it;
 		} else {

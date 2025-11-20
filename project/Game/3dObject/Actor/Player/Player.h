@@ -8,6 +8,8 @@
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 #include <Engine/Renderer/Sprite/Sprite.h>
 #include <Engine/Scene/Runtime/IRuntimeBehaviour.h>
+#include <Engine/Application/Effects/FxObject.h>
+
 // game
 #include <Game/3dObject/Actor/Enemy/Enemy.h>
 #include <Game/Battle/Shooting/ShootingController/PlayerShootingController.h>
@@ -190,4 +192,7 @@ private:
 	bool  clampReticleInView_ = true;
 	float clampMarginXpx_     = 24.0f; // 左右の余白(px)
 	float clampMarginYpx_     = 24.0f; // 上下の余白(px)
+
+	// effect
+	std::shared_ptr<FxObject> shootFx_;
 };
