@@ -3,7 +3,7 @@
 /* include space
 /* ===================================================================== */
 #include <Game/3dObject/Actor/Bullet/BaseBullet.h>
-#include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
+#include <Engine/Application/Effects/FxObject.h>
 
 class HomingBullet :
 	public BaseBullet{
@@ -32,7 +32,6 @@ private:
 	float homingSpeed_ = 2.0f;
 	float rotateSpeed_ = 100.0f;
 
-	std::shared_ptr<ParticleSystemObject> trailFx_;
-	std::shared_ptr<ParticleSystemObject> shootFx_;
+	// trail
+	std::shared_ptr<FxObject> trailFx_ = nullptr;
 };
-

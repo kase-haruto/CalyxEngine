@@ -24,12 +24,13 @@ void BossShootingController::Update(float dt) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		発射Request
 /////////////////////////////////////////////////////////////////////////////////////////
-void BossShootingController::RequestShoot([[maybe_unused]] const Vector3& pos, [[maybe_unused]] const Vector3& dir) {
-	if (shootCooldown_ >= 0) { return; }
+bool BossShootingController::RequestShoot([[maybe_unused]] const Vector3& pos, [[maybe_unused]] const Vector3& dir) {
+	if (shootCooldown_ >= 0) { return false; }
 
 	straightShooter_->Shoot(pos, dir);
 
 	shootCooldown_ = GetInterval();
+	return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

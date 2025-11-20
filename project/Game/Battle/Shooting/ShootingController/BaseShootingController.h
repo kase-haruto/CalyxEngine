@@ -8,7 +8,7 @@ public:
 	virtual ~BaseShootingController() = default;
 
 	virtual  void Update(float dt);
-	virtual  void RequestShoot(const Vector3& pos, const Vector3& dir) = 0;
+	virtual  bool RequestShoot(const Vector3& pos, const Vector3& dir) = 0;
 	virtual float GetInterval() const = 0;
 
 	void SetCooldown(float cooldown);

@@ -14,12 +14,8 @@ HomingBullet::HomingBullet(const std::string& modelName, const std::string& name
 	auto* boxCollider = dynamic_cast<SphereCollider*>(collider_.get());
 	boxCollider->SetRadius(1.5f);
 
-
-	trailFx_ = SceneAPI::Instantiate<ParticleSystemObject>("playerBulletTrail");
-	trailFx_->LoadConfig("Effect/HomingBulletTrail");
-
-	shootFx_ = SceneAPI::Instantiate<ParticleSystemObject>("shootFx");
-	shootFx_->LoadConfig("Effect/ShootFx");
+	trailFx_ = SceneAPI::Instantiate<FxObject>("TrailFx");
+	trailFx_->LoadFromPath("Effect/HomingBulletTrail");
 }
 
 HomingBullet::~HomingBullet() = default;
@@ -30,15 +26,18 @@ void HomingBullet::ShootInitialize(const Vector3& initPos, const Vector3& veloci
 		: Vector3(0, 0, 1) * homingSpeed_; // fallback
 
 	BaseBullet::ShootInitialize(initPos, initVel);
+
+
 }
 
 void HomingBullet::Initialize(){
 	auto self = shared_from_this();
 	trailFx_->SetParent(self);
-	shootFx_->SetParent(self);
+	trailFx_->StopAll();
 }
 
 void HomingBullet::OnShot() {
+	trailFx_->PlayAll();
 }
 
 void HomingBullet::SetTarget(const Actor* target){

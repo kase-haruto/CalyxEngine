@@ -19,7 +19,7 @@ public:
 
 	//--------- main ------------------------------------------------------
 	void Update(float dt) override;
-	void RequestShoot(const Vector3& pos, const Vector3& dir) override;
+	bool RequestShoot(const Vector3& pos, const Vector3& dir) override;
 
 	//--------- accessor --------------------------------------------------
 	float GetInterval() const override;
