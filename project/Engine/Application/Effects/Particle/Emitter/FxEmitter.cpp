@@ -143,7 +143,12 @@ void FxEmitter::Update(float deltaTime) {
 			if(m->IsEnabled()) m->OnUpdate(fx, deltaTime);
 		}
 
-		fx.position += fx.velocity * deltaTime;
+		// 追従フラグが立っている場合はエミッタ位置+オフセットに常に合わせる（速度適用は行わない）
+		if (fx.followEmitter) {
+			fx.position = position_ + fx.followOffset;
+		} else {
+			fx.position += fx.velocity * deltaTime;
+		}
 
 		// スピン
 		fx.rotationEuler.z += fx.spinSpeed * deltaTime;
@@ -213,6 +218,10 @@ void FxEmitter::Emit(const Vector3& pos) {
 	FxUnit fx;
 	ResetFxUnit(fx);
 	fx.position = pos;
+	if (isOneShot_ && followOneShot_) {
+		fx.followEmitter = true;
+		fx.followOffset  = fx.position - position_; // エミッタ基準のオフセットを保存
+	}
 	units_.push_back(fx);
 }
 
@@ -397,34 +406,42 @@ void FxEmitter::ShowGui() {
 				hasEmitted_ = false;
 			} // OFFに戻した時の自然な継続
 		}
-		bool tp = GetTimedPreview();
-		if (GuiCmd::CheckBox("##timedPrev", tp)) {
-			SetTimedPreview(tp);
-			// ON にした瞬間に一度流したい場合は以下を有効に
-			// if (tp && isOneShot_) RestartOneShot();
+
+		if(isOneShot_) {
+			FxGui::RowLabel("Follow Emitter");
+			GuiCmd::CheckBox("##followoneshot", followOneShot_);
+
+			bool tp = GetTimedPreview();
+			if (GuiCmd::CheckBox("##timedPrev", tp)) {
+				SetTimedPreview(tp);
+				// ON にした瞬間に一度流したい場合は以下を有効に
+				// if (tp && isOneShot_) RestartOneShot();
+			}
+
+			FxGui::RowLabel("Interval (sec)");
+			float iv = GetPreviewInterval();
+			if (GuiCmd::DragFloat("##prevInt", iv, 0.01f, 0.05f, 10.0f)) {
+				SetPreviewInterval(iv);
+			}
+
+			ImGui::BeginDisabled(!isOneShot_);
+			FxGui::RowLabel("Emit Count");
+			ImGui::DragInt("##count", &emitCount_, 1, 1, kMaxUnits_);
+
+			FxGui::RowLabel("Auto Destroy");
+			GuiCmd::CheckBox("##autoDestroy", autoDestroy_);
+
+			FxGui::RowLabel("Delay (sec)");
+			GuiCmd::DragFloat("##delay", emitDelay_, 0.01f, 0.0f, 10.0f);
+			ImGui::EndDisabled();
+
+			ImGui::BeginDisabled(isOneShot_);
+			FxGui::RowLabel("Emit Duration (sec)");
+			GuiCmd::DragFloat("##duration", emitDuration_, 0.01f, -1.0f, 60.0f);
+			ImGui::EndDisabled();
 		}
 
-		FxGui::RowLabel("Interval (sec)");
-		float iv = GetPreviewInterval();
-		if (GuiCmd::DragFloat("##prevInt", iv, 0.01f, 0.05f, 10.0f)) {
-			SetPreviewInterval(iv);
-		}
 
-		ImGui::BeginDisabled(!isOneShot_);
-		FxGui::RowLabel("Emit Count");
-		ImGui::DragInt("##count", &emitCount_, 1, 1, kMaxUnits_);
-
-		FxGui::RowLabel("Auto Destroy");
-		GuiCmd::CheckBox("##autoDestroy", autoDestroy_);
-
-		FxGui::RowLabel("Delay (sec)");
-		GuiCmd::DragFloat("##delay", emitDelay_, 0.01f, 0.0f, 10.0f);
-		ImGui::EndDisabled();
-
-		ImGui::BeginDisabled(isOneShot_);
-		FxGui::RowLabel("Emit Duration (sec)");
-		GuiCmd::DragFloat("##duration", emitDuration_, 0.01f, -1.0f, 60.0f);
-		ImGui::EndDisabled();
 	}
 
 	// ================= Modules =================
