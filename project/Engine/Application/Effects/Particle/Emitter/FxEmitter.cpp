@@ -143,7 +143,12 @@ void FxEmitter::Update(float deltaTime) {
 			if(m->IsEnabled()) m->OnUpdate(fx, deltaTime);
 		}
 
-		fx.position += fx.velocity * deltaTime;
+		// 追従フラグが立っている場合はエミッタ位置+オフセットに常に合わせる（速度適用は行わない）
+		if (fx.followEmitter) {
+			fx.position = position_ + fx.followOffset;
+		} else {
+			fx.position += fx.velocity * deltaTime;
+		}
 
 		// スピン
 		fx.rotationEuler.z += fx.spinSpeed * deltaTime;
@@ -213,6 +218,10 @@ void FxEmitter::Emit(const Vector3& pos) {
 	FxUnit fx;
 	ResetFxUnit(fx);
 	fx.position = pos;
+	if (isOneShot_ && followOneShot_) {
+		fx.followEmitter = true;
+		fx.followOffset  = fx.position - position_; // エミッタ基準のオフセットを保存
+	}
 	units_.push_back(fx);
 }
 
