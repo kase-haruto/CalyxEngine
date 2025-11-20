@@ -185,6 +185,13 @@ void Player::Initialize() {
 	}
 
 	PrewarmLockMarkers(maxLockOn_);
+
+	// fx
+	shootFx_ = SceneAPI::Instantiate<FxObject>("ShootFx");
+	shootFx_->LoadFromPath("Effect/ShootEffect");
+	auto self = shared_from_this();
+	shootFx_->SetParent(self);
+	shootFx_->StopAll();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -337,6 +344,9 @@ void Player::RequestShoot() {
 									 : PlayerShoot::BulletMode::Homing);
 
 	shootingController_->RequestShoot(playerPos,dir);
+
+	//発射エフェクト
+	shootFx_->PlayAll();
 
 	RequestLockOnTargetClear();
 }

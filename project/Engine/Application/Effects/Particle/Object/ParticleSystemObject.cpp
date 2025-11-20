@@ -24,7 +24,7 @@ void VSeparator(float height = 0.0f, float thickness = 1.0f, float pad = 6.0f) {
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//		ctor / dtor
+//		コンストラクタ/デストラクタ
 /////////////////////////////////////////////////////////////////////////////////////////
 ParticleSystemObject::ParticleSystemObject() {
 	SceneObject::SetName("ParticleSystemObject", ObjectType::Effect);
@@ -62,11 +62,8 @@ void ParticleSystemObject::ShowGui() {
 	emitter_->ShowGui();
 }
 
-
-
 void ParticleSystemObject::SetDrawEnable(bool isDrawEnable) {
 	emitter_->SetDrawEnable(isDrawEnable);
-
 	// 子にも適用
 	for(const auto& child : children_) { if(auto ps = std::dynamic_pointer_cast<ParticleSystemObject>(child)) { ps->SetDrawEnable(isDrawEnable); } }
 }
@@ -114,22 +111,22 @@ void ParticleSystemObject::SaveConfig(const std::string& path) const {
 	config_.SaveConfig(path);
 }
 
-void ParticleSystemObject::PlayRecursive() {
+void ParticleSystemObject::PlayRecursive()const {
 	emitter_->Play();
 	for(const auto& child : children_) { if(auto ps = std::dynamic_pointer_cast<ParticleSystemObject>(child)) { ps->PlayRecursive(); } }
 }
 
-void ParticleSystemObject::StopRecursive() {
+void ParticleSystemObject::StopRecursive()const {
 	emitter_->Stop();
 	for(const auto& child : children_) { if(auto ps = std::dynamic_pointer_cast<ParticleSystemObject>(child)) { ps->StopRecursive(); } }
 }
 
-void ParticleSystemObject::ResetRecursive() {
+void ParticleSystemObject::ResetRecursive()const {
 	emitter_->Reset();
 	for(const auto& child : children_) { if(auto ps = std::dynamic_pointer_cast<ParticleSystemObject>(child)) { ps->ResetRecursive(); } }
 }
 
-void ParticleSystemObject::Play() {emitter_->Play();}
-void ParticleSystemObject::Stop() {emitter_->Stop();}
-void ParticleSystemObject::Reset() {emitter_->Reset();}
+void ParticleSystemObject::Play()const {emitter_->Play();}
+void ParticleSystemObject::Stop()const {emitter_->Stop();}
+void ParticleSystemObject::Reset()const {emitter_->Reset();}
 REGISTER_SCENE_OBJECT(ParticleSystemObject)
