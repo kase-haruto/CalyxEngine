@@ -406,34 +406,42 @@ void FxEmitter::ShowGui() {
 				hasEmitted_ = false;
 			} // OFFに戻した時の自然な継続
 		}
-		bool tp = GetTimedPreview();
-		if (GuiCmd::CheckBox("##timedPrev", tp)) {
-			SetTimedPreview(tp);
-			// ON にした瞬間に一度流したい場合は以下を有効に
-			// if (tp && isOneShot_) RestartOneShot();
+
+		if(isOneShot_) {
+			FxGui::RowLabel("Follow Emitter");
+			GuiCmd::CheckBox("##followoneshot", followOneShot_);
+
+			bool tp = GetTimedPreview();
+			if (GuiCmd::CheckBox("##timedPrev", tp)) {
+				SetTimedPreview(tp);
+				// ON にした瞬間に一度流したい場合は以下を有効に
+				// if (tp && isOneShot_) RestartOneShot();
+			}
+
+			FxGui::RowLabel("Interval (sec)");
+			float iv = GetPreviewInterval();
+			if (GuiCmd::DragFloat("##prevInt", iv, 0.01f, 0.05f, 10.0f)) {
+				SetPreviewInterval(iv);
+			}
+
+			ImGui::BeginDisabled(!isOneShot_);
+			FxGui::RowLabel("Emit Count");
+			ImGui::DragInt("##count", &emitCount_, 1, 1, kMaxUnits_);
+
+			FxGui::RowLabel("Auto Destroy");
+			GuiCmd::CheckBox("##autoDestroy", autoDestroy_);
+
+			FxGui::RowLabel("Delay (sec)");
+			GuiCmd::DragFloat("##delay", emitDelay_, 0.01f, 0.0f, 10.0f);
+			ImGui::EndDisabled();
+
+			ImGui::BeginDisabled(isOneShot_);
+			FxGui::RowLabel("Emit Duration (sec)");
+			GuiCmd::DragFloat("##duration", emitDuration_, 0.01f, -1.0f, 60.0f);
+			ImGui::EndDisabled();
 		}
 
-		FxGui::RowLabel("Interval (sec)");
-		float iv = GetPreviewInterval();
-		if (GuiCmd::DragFloat("##prevInt", iv, 0.01f, 0.05f, 10.0f)) {
-			SetPreviewInterval(iv);
-		}
 
-		ImGui::BeginDisabled(!isOneShot_);
-		FxGui::RowLabel("Emit Count");
-		ImGui::DragInt("##count", &emitCount_, 1, 1, kMaxUnits_);
-
-		FxGui::RowLabel("Auto Destroy");
-		GuiCmd::CheckBox("##autoDestroy", autoDestroy_);
-
-		FxGui::RowLabel("Delay (sec)");
-		GuiCmd::DragFloat("##delay", emitDelay_, 0.01f, 0.0f, 10.0f);
-		ImGui::EndDisabled();
-
-		ImGui::BeginDisabled(isOneShot_);
-		FxGui::RowLabel("Emit Duration (sec)");
-		GuiCmd::DragFloat("##duration", emitDuration_, 0.01f, -1.0f, 60.0f);
-		ImGui::EndDisabled();
 	}
 
 	// ================= Modules =================
