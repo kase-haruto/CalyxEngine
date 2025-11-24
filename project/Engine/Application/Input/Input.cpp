@@ -100,8 +100,6 @@ void Input::DirectInputInitialize(){
 	assert(SUCCEEDED(hr));
 	hr = keyboard_->SetCooperativeLevel(System::GetHWND(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
 	assert(SUCCEEDED(hr));
-	hr = keyboard_->Acquire();
-	assert(SUCCEEDED(hr));
 
 	// マウス
 	hr = directInput_->CreateDevice(GUID_SysMouse, &mouse_, NULL);
@@ -110,8 +108,6 @@ void Input::DirectInputInitialize(){
 	assert(SUCCEEDED(hr));
 	hr = mouse_->SetCooperativeLevel(System::GetHWND(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
 	assert(SUCCEEDED(hr));
-	hr = mouse_->Acquire();
-	assert(SUCCEEDED(hr));
 }
 
 //-----------------------------------------------------------------------------
@@ -119,9 +115,19 @@ void Input::DirectInputInitialize(){
 void Input::KeyboardUpdate(){
 	keyPre_ = key_;
 	HRESULT hr = keyboard_->GetDeviceState(sizeof(key_), key_.data());
+
 	if (FAILED(hr)){
-		while (hr == DIERR_INPUTLOST){
+		// 何度かトライしてみる
+		while (hr == DIERR_INPUTLOST || hr == DIERR_NOTACQUIRED){
 			hr = keyboard_->Acquire();
+			if (SUCCEEDED(hr)) {
+				hr = keyboard_->GetDeviceState(sizeof(key_), key_.data());
+			}
+		}
+
+		// それでも失敗したら全キーオフ扱い
+		if (FAILED(hr)) {
+			key_.fill(0);
 		}
 	}
 }
@@ -142,9 +148,10 @@ bool Input::TriggerKey(uint32_t keyNum){
 
 void Input::MouseUpdate(){
 	HRESULT hr = mouse_->GetDeviceState(sizeof(DIMOUSESTATE), &mouseState_);
-	if (FAILED(hr)){
-		while (hr == DIERR_INPUTLOST) {
-			hr = mouse_->Acquire();
+	while (hr == DIERR_INPUTLOST || hr == DIERR_NOTACQUIRED) {
+		hr = mouse_->Acquire();
+		if (SUCCEEDED(hr)) {
+			hr = mouse_->GetDeviceState(sizeof(DIMOUSESTATE), &mouseState_);
 		}
 	}
 
@@ -155,7 +162,7 @@ void Input::MouseUpdate(){
 		GetCursorPos(&pt);
 		ScreenToClient(System::GetHWND(), &pt);
 		mousePos_ = {static_cast< float >(pt.x), static_cast< float >(pt.y)};
-		mouseWheel_ = static_cast< float >(mouseState_.lZ) / 120.0f;
+		mouseWheel_ = static_cast<float>(mouseState_.lZ) / WHEEL_DELTA;
 	}
 }
 

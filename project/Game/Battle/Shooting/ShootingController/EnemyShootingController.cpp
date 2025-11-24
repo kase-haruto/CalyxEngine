@@ -33,11 +33,11 @@ void EnemyShootingController::Update(float dt) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //      発射Request
 /////////////////////////////////////////////////////////////////////////////////////////
-void EnemyShootingController::RequestShoot(const Vector3& pos, const Vector3& dir) {
-	if (!gameplayEngaged_) return;
+bool EnemyShootingController::RequestShoot(const Vector3& pos, const Vector3& dir) {
+	if (!gameplayEngaged_) return false;
 
 	if (!externalRateControl_) {
-		if (shootCooldown_ >= 0.0f) return;
+		if (shootCooldown_ >= 0.0f) return false;
 	}
 
 	if (auto ctx = SceneContext::Current()) {
@@ -51,6 +51,8 @@ void EnemyShootingController::RequestShoot(const Vector3& pos, const Vector3& di
 	if (!externalRateControl_) {
 		shootCooldown_ = GetInterval();
 	}
+
+	return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

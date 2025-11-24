@@ -18,17 +18,17 @@
                 "isDrawEnable": true,
                 "isOneShot": false,
                 "lifetime": {
-                    "constant": 1.0,
+                    "constant": 0.4699999988079071,
                     "max": 1.0,
-                    "min": 0.30000001192092896,
-                    "mode": 1
+                    "min": 0.0,
+                    "mode": 0
                 },
                 "modelPath": "plane.obj",
                 "modules": [
                     {
-                        "easeType": 7,
+                        "easeType": 11,
                         "enabled": true,
-                        "isGrowing": false,
+                        "isGrowing": true,
                         "name": "SizeOverLifetimeModule"
                     },
                     {
@@ -54,9 +54,9 @@
                     }
                 ],
                 "position": {
-                    "x": -0.7542033195495605,
-                    "y": 2.7586207389831543,
-                    "z": -2.4254865646362305
+                    "x": -0.27736514806747437,
+                    "y": 3.1958365440368652,
+                    "z": -9.97973918914795
                 },
                 "randomSpinEmit": false,
                 "scale": {
@@ -86,14 +86,14 @@
                         "z": 0.0
                     },
                     "max": {
-                        "x": 3.0,
-                        "y": 3.0,
-                        "z": 3.0
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
                     },
                     "min": {
-                        "x": -3.0,
-                        "y": -3.0,
-                        "z": -3.0
+                        "x": -1.0,
+                        "y": -1.0,
+                        "z": -1.0
                     },
                     "mode": 1
                 }
@@ -125,7 +125,7 @@
         }
     ],
     "guid": "401b8d4c-59b6-4477-a69b-a6f78848f86e",
-    "name": "BulletTrail",
+    "name": "Fire",
     "objectType": 0,
     "parentGuid": "00000000-0000-0000-0000-000000000000",
     "transform": {

@@ -131,12 +131,6 @@ void Player::Initialize() {
 
 	// life関連初期化
 	life_ = 10;
-	lifeSprite_.resize(life_);
-	for(size_t i = 0; i < life_; i++) {
-		lifeSprite_[i] = std::make_unique<Sprite>("Textures/life.png");
-		Vector2 pos    = {100.0f * i + 30.0f,50.0f};
-		lifeSprite_[i]->Initialize(pos,{64.0f,64.0f});
-	}
 
 	// ライフゲージの初期化
 	hpGauge_ = std::make_unique<HpGauge>(static_cast<float>(life_));
@@ -145,7 +139,6 @@ void Player::Initialize() {
 	hpGauge_->Initialize(lifeGaugePos,Vector2(360.0f,32.0f));
 	hpGauge_->SetAncorPoint({0.0f,0.5f}); // 左中央
 
-	RefreshLifeUI();
 
 	// spriteの初期化
 	size_t spriteCount = reticleSprites_.size();
@@ -195,16 +188,6 @@ void Player::Initialize() {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//		ライフuiの更新
-/////////////////////////////////////////////////////////////////////////////////////////
-void Player::RefreshLifeUI() {
-	for(size_t i = 0; i < lifeSprite_.size(); ++i) {
-		const bool on = (i < static_cast<size_t>(life_));
-		lifeSprite_[i]->SetIsVisible(on);
-	}
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////
 //		更新
 /////////////////////////////////////////////////////////////////////////////////////////
 void Player::Update(float dt) {
@@ -215,8 +198,6 @@ void Player::Update(float dt) {
 	if(dodge_) dodge_->Update(dt);
 	if(danger_) danger_->Update(dt);
 	if(dodgeMotion_) dodgeMotion_->Update(dt);
-
-	for(auto& sprite : lifeSprite_) { sprite->Update(); }
 
 	if(hpGauge_) {
 		hpGauge_->Update(dt);
@@ -343,10 +324,11 @@ void Player::RequestShoot() {
 									 ? PlayerShoot::BulletMode::Straight
 									 : PlayerShoot::BulletMode::Homing);
 
-	shootingController_->RequestShoot(playerPos,dir);
-
-	//発射エフェクト
-	shootFx_->PlayAll();
+	// 発射されていたらエフェクトを再生
+	if(bool isFired = shootingController_->RequestShoot(playerPos,dir)) {
+		//発射エフェクト
+		shootFx_->PlayAll();
+	}
 
 	RequestLockOnTargetClear();
 }
@@ -425,8 +407,6 @@ void Player::OnCollisionEnter(Collider* other) {
 	float duration  = 0.5f;
 	float intensity = 0.8f;
 	cam->StartShake(duration,intensity);
-
-	RefreshLifeUI();
 
 	// 被弾後の無敵を1秒付与
 	SetInvincibleFor(kHitIFrameSec);

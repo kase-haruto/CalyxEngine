@@ -44,10 +44,6 @@ public:
 	void DerivativeGui() override;
 
 	/**
-	 * \brief ライフuiを更新
-	 */
-	void RefreshLifeUI();
-	/**
 	 * \brief 受け取った移動ベクトルをもとに移動する
 	 * \param delta
 	 */
@@ -164,7 +160,6 @@ private:
 
 	// sprites
 	std::array<std::unique_ptr<Sprite>,4> reticleSprites_; //< レティクルのスプライト
-	std::vector<std::unique_ptr<Sprite>>  lifeSprite_;     //< ライフゲージスプライト
 	std::unique_ptr<HpGauge>              hpGauge_;        //< HPゲージ
 	std::vector<std::unique_ptr<Sprite>>  markerPool_;     // 未使用(再利用待ち)のマーカー
 	std::vector<std::unique_ptr<Sprite>>  lockOnSprites_;  // 未使用(再利用待ち)のマーカー

@@ -14,8 +14,8 @@ PlayerShootingController::PlayerShootingController(BulletContainer* container){
 	homingShooter_ = std::make_unique<PlayerHomingBulletShooter>(container,BulletID::Player_Homing);
 }
 
-void PlayerShootingController::RequestShoot(const Vector3& pos, const Vector3& dir){
-	if (shootCooldown_ > 0.0f) return;
+bool PlayerShootingController::RequestShoot(const Vector3& pos, const Vector3& dir){
+	if (shootCooldown_ > 0.0f) return false;
 
 	switch (bulletMode_){
 		case BulletMode::Straight: RequestShootStraight(pos, dir); break;
@@ -23,6 +23,7 @@ void PlayerShootingController::RequestShoot(const Vector3& pos, const Vector3& d
 	}
 
 	shootCooldown_ = kShootInterval_;
+	return true;
 }
 
 void PlayerShootingController::Update(float dt){

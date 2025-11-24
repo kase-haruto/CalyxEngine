@@ -30,7 +30,7 @@ public:
 	//===================================================================*/
 	PlayerShootingController(BulletContainer* container);
 	~PlayerShootingController()override = default;
-	void RequestShoot(const Vector3& pos, const Vector3& dir)override;
+	bool RequestShoot(const Vector3& pos, const Vector3& dir)override;
 	void Update(float dt)override;
 	//--------- accessor -------------------------------------------------
 	void SetMode(PlayerShoot::BulletMode bulletMode);
@@ -56,5 +56,5 @@ private:
 
 	std::unique_ptr<BulletContainer> bulletContainer_;
 private:
-	static constexpr float kShootInterval_ = 0.3f;
+	static constexpr float kShootInterval_ = 0.45f;
 };

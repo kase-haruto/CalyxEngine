@@ -11,7 +11,7 @@ PlayerBullet::PlayerBullet(const std::string& modelName, const std::string& name
 	:BaseBullet::BaseBullet(modelName, name){
 
 	// fx
-	shootFx_ = SceneAPI::Instantiate<FxObject>("HitFx");
+	shootFx_ = SceneAPI::Instantiate<FxObject>("TrailFx");
 	shootFx_->LoadFromPath("Effect/BulletTrailEffect");
 
 	// collider初期化
