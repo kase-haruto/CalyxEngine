@@ -1,0 +1,149 @@
+{
+    "emitters": [
+        {
+            "emitter": {
+                "autoDestroy": false,
+                "color": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 0.01568627543747425,
+                    "z": 0.0
+                },
+                "emitCount": 10,
+                "emitDelay": 0.0,
+                "emitDuration": -1.0,
+                "emitRate": 0.10000000149011612,
+                "followOneShot": false,
+                "isComplement": true,
+                "isDrawEnable": true,
+                "isOneShot": false,
+                "lifetime": {
+                    "constant": 1.0,
+                    "max": 1.0,
+                    "min": 0.30000001192092896,
+                    "mode": 1
+                },
+                "modelPath": "plane.obj",
+                "modules": [
+                    {
+                        "easeType": 7,
+                        "enabled": true,
+                        "isGrowing": false,
+                        "name": "SizeOverLifetimeModule"
+                    },
+                    {
+                        "blend": 0,
+                        "clamp01": true,
+                        "ease": 1,
+                        "enabled": true,
+                        "end": [
+                            0.0,
+                            0.3422829210758209,
+                            0.3422829210758209,
+                            0.7409999966621399
+                        ],
+                        "invert": false,
+                        "name": "OverLifetimeModule",
+                        "start": [
+                            1.0,
+                            0.0,
+                            0.0,
+                            1.0
+                        ],
+                        "target": 5
+                    }
+                ],
+                "position": {
+                    "x": -1.4884016513824463,
+                    "y": 3.8679678440093994,
+                    "z": -8.357861518859863
+                },
+                "randomSpinEmit": false,
+                "scale": {
+                    "constant": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "max": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "min": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "mode": 0
+                },
+                "textureGuid": "918b71a5-ef26-4dcb-9f5b-3ff3de55adce",
+                "texturePath": "particle.png",
+                "velocity": {
+                    "constant": {
+                        "x": 0.5400000214576721,
+                        "y": 0.7599999904632568,
+                        "z": 0.0
+                    },
+                    "max": {
+                        "x": 2.0,
+                        "y": 2.0,
+                        "z": 2.0
+                    },
+                    "min": {
+                        "x": -2.0,
+                        "y": -2.0,
+                        "z": -2.0
+                    },
+                    "mode": 1
+                }
+            },
+            "guid": "b3735d23-b025-4a12-8eb3-99e73ac04fd8",
+            "isDrawEnable": true,
+            "isGpu": false,
+            "name": "trail",
+            "objectType": 0,
+            "parentGuid": "401b8d4c-59b6-4477-a69b-a6f78848f86e",
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            }
+        }
+    ],
+    "guid": "401b8d4c-59b6-4477-a69b-a6f78848f86e",
+    "name": "BulletTrail",
+    "objectType": 0,
+    "parentGuid": "00000000-0000-0000-0000-000000000000",
+    "transform": {
+        "rotation": {
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+        },
+        "translation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        }
+    }
+}
