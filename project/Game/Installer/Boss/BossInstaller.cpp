@@ -13,7 +13,11 @@ std::shared_ptr<Boss> BossInstaller::InstallBoss() {
 	std::unique_ptr<BossShootingController> shootingController
 		= std::make_unique<BossShootingController>(std::move(bossBulletContainer));
 
+	// 発射制御クラスをセット
 	boss->SetShootingController(std::move(shootingController));
+
+	// AI初期化
+	boss->InitializeAI();
 
 	return boss;
 }
