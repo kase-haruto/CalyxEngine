@@ -42,7 +42,7 @@ void GameScene::Initialize() {
 	sceneContext_->Initialize();
 
 	// シーンデータ読み込み
-	SceneSerializer::Load(*sceneContext_,"Resources/Assets/Scenes/TestScene.scene");
+	SceneSerializer::Load(*sceneContext_,"Resources/Assets/Scenes/GameScene.scene");
 
 	// ベース初期化
 	BaseScene::Initialize();

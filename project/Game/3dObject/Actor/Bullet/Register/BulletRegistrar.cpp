@@ -12,6 +12,7 @@
 #include <Game/3dObject/Actor/Bullet/PlayerBullet/PlayerBullet.h>
 #include <Game/3dObject/Actor/Bullet/EnemyBullet/EnemyBullet.h>
 #include <Game/3dObject/Actor/Bullet/EnemyBullet/EnemyHomingBullet.h>
+#include <Game/3dObject/Actor/Bullet/BossBullet/BossBullet.h>
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -55,5 +56,14 @@ namespace BulletRegistrar{
 			bullet->Initialize();
 			return bullet;
 								});
+
+		//===================================================================*/
+		//						ボス弾
+		//===================================================================*/
+		BulletFactory::Register(BulletID::Boss_Straight, [] {
+			auto bullet = SceneAPI::Instantiate<BossBullet>("debugCube.obj", "bossBullet");
+			bullet->Initialize();
+			return bullet;
+		});
 	}
 }

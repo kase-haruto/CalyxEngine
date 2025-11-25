@@ -9,7 +9,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 BossShootingController::BossShootingController(std::unique_ptr<BulletContainer> container) {
 	bulletContainer_ = std::move(container);
-	straightShooter_ = std::make_unique<StraightBulletShooter>(bulletContainer_.get(), BulletID::Enemy_Straight);
+	straightShooter_ = std::make_unique<StraightBulletShooter>(bulletContainer_.get(), BulletID::Boss_Straight);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

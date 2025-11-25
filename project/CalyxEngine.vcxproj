@@ -172,6 +172,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Objects\Event\Camera\CameraEventObject.cpp" />
     <ClCompile Include="Engine\PostProcess\Manager\PostEffectManager.cpp" />
     <ClCompile Include="Game\2d\HpGauge.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Boss\AI\BossAI.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Boss\Attack\BossNormalShoot.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Boss\Attack\IBossAttack.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Bullet\EnemyBullet\EnemyHomingBullet.cpp" />
     <ClCompile Include="Game\Battle\Shooting\Details\FireScheduler.cpp" />
     <ClCompile Include="Game\Battle\Shooting\Pattern\PatternAimedNWay.cpp" />
@@ -424,6 +427,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Objects\Event\Camera\CameraEventObject.h" />
     <ClInclude Include="Engine\PostProcess\Manager\PostEffectManager.h" />
     <ClInclude Include="Game\2d\HpGauge.h" />
+    <ClInclude Include="Game\3dObject\Actor\Boss\AI\BossAI.h" />
+    <ClInclude Include="Game\3dObject\Actor\Boss\Attack\BossNormalShoot.h" />
+    <ClInclude Include="Game\3dObject\Actor\Boss\Attack\IBossAttack.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\EnemyBullet\EnemyHomingBullet.h" />
     <ClInclude Include="Game\Battle\Shooting\Details\AimProvider.h" />
     <ClInclude Include="Game\Battle\Shooting\Details\FireScheduler.h" />
