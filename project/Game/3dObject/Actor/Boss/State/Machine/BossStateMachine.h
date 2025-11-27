@@ -5,9 +5,10 @@
 
 // c++
 #include <memory>
+#include <vector>
 
 // fwd
-class IBossState;
+class BaseBossState;
 
 /**
  * ボスの状態の切り替えと更新などを担うクラス
@@ -24,16 +25,33 @@ public:
 	 * \brief 状態の更新
 	 */
 	void Update(float dt);
+	/**
+	 * \brief 初期状態の設定
+	 */
+	void SetInitialState(BossStateType type);
 
 private:
 	//===================================================================*/
 	//                    private method
 	//===================================================================*/
+	/**
+	 * \brief 状態の変更変更時の処理を行う
+	 * \param nextType 次の状態の種類
+	 */
 	void ChangeState(BossStateType nextType);
+	/**
+	 * \brief 状態を上に積む
+	 * \param nextType 状態の種類
+	 */
+	void PushState(BossStateType nextType);
+	/**
+	 * \brief 状態の破棄
+	 */
+	void PopState();
 	
 private:
 	//===================================================================*/
 	//                    private members
 	//===================================================================*/
-	std::unique_ptr<IBossState> currentState_ = nullptr;
+	std::vector<std::unique_ptr<BaseBossState>> stack_;
 };

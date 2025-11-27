@@ -43,7 +43,7 @@ Boss::~Boss() {}
 void Boss::Initialize() {
 	// コンフィグの読み込みと適用
 	config_.LoadConfig(configRoot_ + "Boss");
-
+	stateMachine_ = std::make_unique<BossStateMachine>();
 }
 
 void Boss::InitializeAI() {
@@ -60,6 +60,7 @@ void Boss::Update(float dt) {
 	/* =============================================
 		1. 生存中のロジック
 	=============================================*/
+	stateMachine_->Update(dt);
 	if(deathState_ == DeathState::Alive) {
 		if(life_ <= 0) {
 			// ---- 死亡フラグ立った瞬間 ----

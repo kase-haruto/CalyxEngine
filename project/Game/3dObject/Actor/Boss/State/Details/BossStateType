@@ -4,5 +4,6 @@ enum class BossStateType{
     Idle,       //< アイドル状態 
     Attack,     //< 攻撃状態
     Defend,     //< 防御状態
-    Dead        //< 死亡状態
+    Dead,       //< 死亡状態
+    None        //< 無効状態
 };
