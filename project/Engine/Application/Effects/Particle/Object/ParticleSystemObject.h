@@ -1,63 +1,61 @@
 #pragma once
 /* ========================================================================
-/*		include space
-/* ===================================================================== */
+    include space
+   ===================================================================== */
 // Engine
-#include <Engine/Application/Effects/Particle/Emitter/FxEmitter.h>
+#include <Engine/Application/Effects/Particle/Emitter/BaseEmitter.h>
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 #include <Data/Engine/Configs/Scene/Objects/Particle/ParticleSystemObjectConfig.h>
-#include <Engine/objects/ConfigurableObject/ConfigurableObject.h>
+#include <Engine/Objects/ConfigurableObject/ConfigurableObject.h>
+#include <Engine/Application/Effects/FxSystem.h>
 
 // C++
 #include <string>
+#include <memory>
 
 /* ========================================================================
-/*		パーティクルをシーンオブジェクトとして使用
-/* ===================================================================== */
+    パーティクルをシーンオブジェクトとして使用
+   ===================================================================== */
 class ParticleSystemObject
-	: public SceneObject
-	 ,public IConfigurable {
+    : public SceneObject
+    , public IConfigurable {
 public:
-	//===================================================================*/
-	//			public methods
-	//===================================================================*/
-	ParticleSystemObject();
-	ParticleSystemObject(const std::string& name);
-	~ParticleSystemObject() override;
+    ParticleSystemObject();
+    ParticleSystemObject(const std::string& name);
+    ~ParticleSystemObject() override;
 
-	void AlwaysUpdate(float dt) override;
-	void ShowGui() override;
+    /* -------- SceneObject overrides -------- */
+    void AlwaysUpdate(float dt) override;
+    void ShowGui() override;
 
-	//--------- session -----------------------------------------------------
-	void PlayRecursive() const;  //< 再生
-	void StopRecursive() const;  //< 停止
-	void ResetRecursive() const; //< リセット
-	void Play() const;
-	void Stop() const;
-	void Reset() const;
+    /* -------- control -------- */
+    void PlayRecursive() const;
+    void StopRecursive() const;
+    void ResetRecursive() const;
 
-	//--------- config -----------------------------------------------------
-	// 適用
-	void ApplyConfig();
-	void ApplyConfigFromJson(const nlohmann::json& j) override;
-	// 掃き出し
-	void ExtractConfig();
-	void ExtractConfigToJson(nlohmann::json& j) const override;
+    void Play() const;
+    void Stop() const;
+    void Reset() const;
 
-	//--------- save/load -----------------------------------------------------
-	// コンフィグのロード
-	void LoadConfig(const std::string& path);
-	// コンフィグのセーブ
-	void SaveConfig(const std::string& path) const;
+    /* -------- config -------- */
+    void ApplyConfig();
+    void ApplyConfigFromJson(const nlohmann::json& j) override;
+    void ExtractConfig();
+    void ExtractConfigToJson(nlohmann::json& j) const override;
 
-	//--------- accessor -----------------------------------------------------
-	void             SetDrawEnable(bool isDrawEnable) override;
-	std::string_view GetTypeName() const override { return "ParticleSystemObject"; }
+    void LoadConfig(const std::string& path);
+    void SaveConfig(const std::string& path) const;
 
-	const ConfigurableObject<ParticleSystemObjectConfig>& GetConfigObject() const { return config_; }
-	std::shared_ptr<BaseEmitter>                          GetEmitter() const { return emitter_; }
+    /* -------- accessors -------- */
+    void SetDrawEnable(bool isDrawEnable) override;
+    std::string_view GetTypeName() const override { return "ParticleSystemObject"; }
+
+    const ConfigurableObject<ParticleSystemObjectConfig>& GetConfigObject() const { return config_; }
+
+    std::shared_ptr<FxEmitter> GetEmitter() const { return emitter_; }
 
 private:
-	ConfigurableObject<ParticleSystemObjectConfig> config_;
-	std::shared_ptr<FxEmitter>                     emitter_;
+    ConfigurableObject<ParticleSystemObjectConfig> config_;
+
+    std::shared_ptr<FxEmitter> emitter_;
 };

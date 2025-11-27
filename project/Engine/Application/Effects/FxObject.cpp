@@ -8,12 +8,19 @@
 REGISTER_SCENE_OBJECT(FxObject);
 
 namespace {
+
 std::shared_ptr<ParticleSystemObject>
-FindChildByGuid(const std::vector<std::shared_ptr<ParticleSystemObject>>& list, const Guid& g) {
-	for(auto& sp : list)
-		if(sp && sp->GetGuid() == g) return sp;
+FindChildByGuid(const std::vector<std::weak_ptr<ParticleSystemObject>>& list, const Guid& g) {
+	for(const auto& wp : list) {
+		if(auto sp = wp.lock()) {
+			if(sp->GetGuid() == g) {
+				return sp;
+			}
+		}
+	}
 	return nullptr;
 }
+
 } // namespace
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -47,13 +54,26 @@ void FxObject::AlwaysUpdate(float) {
 	worldTransform_.Update();
 }
 
+void FxObject::Destroy()
+{
+	emitters_.clear();
+
+	// 最後に自分を破壊する
+	SceneObject::Destroy();
+}
 /////////////////////////////////////////////////////////////////////////////////////////
 //		再生
 /////////////////////////////////////////////////////////////////////////////////////////
 void FxObject::PlayAll() const {
-	for(const auto& particle : emitters_) {
-		// effect再生
-		particle->Play();
+	// 期限切れを掃除しつつ再生
+	auto& selfEmitters = const_cast<std::vector<std::weak_ptr<ParticleSystemObject>>&>(emitters_);
+	for(auto it = selfEmitters.begin(); it != selfEmitters.end();) {
+		if(auto sp = it->lock()) {
+			sp->Play();
+			++it;
+		} else {
+			it = selfEmitters.erase(it);
+		}
 	}
 }
 
@@ -61,9 +81,14 @@ void FxObject::PlayAll() const {
 //		停止
 /////////////////////////////////////////////////////////////////////////////////////////
 void FxObject::StopAll() const {
-	for(const auto& particle : emitters_) {
-		// effect停止
-		particle->Stop();
+	auto& selfEmitters = const_cast<std::vector<std::weak_ptr<ParticleSystemObject>>&>(emitters_);
+	for(auto it = selfEmitters.begin(); it != selfEmitters.end();) {
+		if(auto sp = it->lock()) {
+			sp->Stop();
+			++it;
+		} else {
+			it = selfEmitters.erase(it);
+		}
 	}
 }
 
@@ -71,9 +96,14 @@ void FxObject::StopAll() const {
 //		再再生
 /////////////////////////////////////////////////////////////////////////////////////////
 void FxObject::RestartAll() const {
-	for(const auto& particle : emitters_) {
-		// effect再々再生
-		particle->Reset();
+	auto& selfEmitters = const_cast<std::vector<std::weak_ptr<ParticleSystemObject>>&>(emitters_);
+	for(auto it = selfEmitters.begin(); it != selfEmitters.end();) {
+		if(auto sp = it->lock()) {
+			sp->Reset();
+			++it;
+		} else {
+			it = selfEmitters.erase(it);
+		}
 	}
 }
 
@@ -111,11 +141,16 @@ void FxObject::ShowGui() {
 		int removeIndex = -1;
 
 		// 各エミッターをタブとして描画
-		for(int i = 0; i < (int)emitters_.size(); ++i) {
-			auto& sp = emitters_[i];
-			if(!sp) continue;
+		for(int i = 0; i < static_cast<int>(emitters_.size()); ++i) {
+			auto sp = emitters_[i].lock();
+			if(!sp) {
+				// 期限切れなら消す
+				emitters_.erase(emitters_.begin() + i);
+				--i;
+				continue;
+			}
 
-			// タブラベル（
+			// タブラベル
 			std::string label = sp->GetName();
 			label += "###EmitterTab_";
 			// GUID
@@ -194,8 +229,10 @@ void FxObject::ShowGui() {
 		}
 
 		// 予約削除を実行
-		if(removeIndex >= 0 && removeIndex < (int)emitters_.size()) {
-			if(emitters_[removeIndex]) emitters_[removeIndex]->SetParent(nullptr);
+		if(removeIndex >= 0 && removeIndex < static_cast<int>(emitters_.size())) {
+			if(auto sp = emitters_[removeIndex].lock()) {
+				sp->SetParent(nullptr);
+			}
 			emitters_.erase(emitters_.begin() + removeIndex);
 		}
 
@@ -215,7 +252,6 @@ void FxObject::ApplyConfig() {
 
 	// ルート（エフェクト本体）
 	name_	  = cfg.name;
-	id_		  = cfg.guid;
 	parentId_ = cfg.parentGuid;
 	worldTransform_.ApplyConfig(cfg.transform);
 
@@ -231,7 +267,6 @@ void FxObject::ExtractConfig() {
 
 	// ルートを書き出し
 	cfg.name	   = name_;
-	cfg.guid	   = id_;
 	cfg.parentGuid = parentId_;
 	worldTransform_.ExtractConfig();
 
@@ -264,8 +299,10 @@ std::string_view FxObject::GetTypeName() const { return "FxObject"; }
 /////////////////////////////////////////////////////////////////////////////////////////
 void FxObject::RebuildChildrenFromConfig() {
 	// 既存の子（このFxObject直下の ParticleSystemObject）を外す
-	for(auto& sp : emitters_) {
-		if(sp) sp->SetParent(nullptr);
+	for(auto& wp : emitters_) {
+		if(auto sp = wp.lock()) {
+			sp->SetParent(nullptr);
+		}
 	}
 	emitters_.clear();
 
@@ -282,43 +319,51 @@ void FxObject::SyncConfigFromChildren() {
 	auto& cfg = config_.GetConfig();
 	cfg.emitters.clear();
 
-	for(auto& sp : emitters_) {
-		if(!sp) continue;
-		EffectEmitterNodeConfig n{};
-		n.name		 = sp->GetName();
-		n.guid		 = sp->GetGuid();
-		n.parentGuid = this->GetGuid();
+	for(auto it = emitters_.begin(); it != emitters_.end();) {
+		if(auto sp = it->lock()) {
+			EffectEmitterNodeConfig n{};
+			n.name		 = sp->GetName();
+			n.guid		 = sp->GetGuid();
+			n.parentGuid = this->GetGuid();
 
-		sp->GetWorldTransform().ExtractConfig();
-		n.transform = sp->GetConfigObject().GetConfig().transform;
+			sp->GetWorldTransform().ExtractConfig();
+			n.transform = sp->GetConfigObject().GetConfig().transform;
 
-		sp->GetEmitter()->ExtractConfigTo(n.emitter);
-		cfg.emitters.push_back(std::move(n));
+			sp->GetEmitter()->ExtractConfigTo(n.emitter);
+			n.isDrawEnable = sp->IsDrawEnable();
+
+			cfg.emitters.push_back(std::move(n));
+			++it;
+		} else {
+			// 期限切れを掃除
+			it = emitters_.erase(it);
+		}
 	}
 }
+
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		エミッター単位
 /////////////////////////////////////////////////////////////////////////////////////////
 std::shared_ptr<ParticleSystemObject>
 FxObject::AddEmitterNode(const EffectEmitterNodeConfig& node) {
-	// 既に同GUIDの子がいたら再利用
-	if(node.guid.isValid()) {
-		if(auto exist = FindChildByGuid(emitters_, node.guid)) {
-			// 名前/Transform/Emitterだけ更新して返す
-			exist->SetName(node.name.empty() ? exist->GetName() : node.name, ObjectType::Effect);
-			exist->GetWorldTransform().ApplyConfig(node.transform);
-			exist->SetDrawEnable(node.isDrawEnable);
-			exist->GetEmitter()->ApplyConfigFrom(node.emitter);
-			return exist;
-		}
-	}
+	// // 既に同GUIDの子がいたら再利用
+	// if(node.guid.isValid()) {
+	// 	if(auto exist = FindChildByGuid(emitters_, node.guid)) {
+	// 		// 名前/Transform/Emitterだけ更新して返す
+	// 		exist->SetName(node.name.empty() ? exist->GetName() : node.name, ObjectType::Effect);
+	// 		exist->GetWorldTransform().ApplyConfig(node.transform);
+	// 		exist->SetDrawEnable(node.isDrawEnable);
+	// 		exist->GetEmitter()->ApplyConfigFrom(node.emitter);
+	// 		return exist;
+	// 	}
+	// }
 
 	auto child = SceneAPI::Instantiate<ParticleSystemObject>(
 		node.name.empty() ? "emitter" : node.name);
 
 
-	child->SetGuid(node.guid.isValid() ? node.guid : Guid::New());
+	//child->SetGuid(node.guid.isValid() ? node.guid : Guid::New());
 	child->GetWorldTransform().ApplyConfig(node.transform);
 	child->SetDrawEnable(node.isDrawEnable);
 	child->GetEmitter()->ApplyConfigFrom(node.emitter);
@@ -332,10 +377,17 @@ FxObject::AddEmitterNode(const EffectEmitterNodeConfig& node) {
 //		idから削除
 /////////////////////////////////////////////////////////////////////////////////////////
 void FxObject::RemoveEmitterByGuid(const Guid& id) {
-	auto it = std::find_if(emitters_.begin(), emitters_.end(),
-						   [&](const std::shared_ptr<ParticleSystemObject>& sp) { return sp && sp->GetGuid() == id; });
-	if(it != emitters_.end()) {
-		if(*it) (*it)->SetParent(nullptr);
-		emitters_.erase(it);
+	for(auto it = emitters_.begin(); it != emitters_.end();) {
+		auto sp = it->lock();
+		if(!sp) {
+			it = emitters_.erase(it);
+			continue;
+		}
+		if(sp->GetGuid() == id) {
+			sp->SetParent(nullptr);
+			it = emitters_.erase(it);
+		} else {
+			++it;
+		}
 	}
 }

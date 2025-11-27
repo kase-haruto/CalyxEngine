@@ -1,105 +1,128 @@
 #pragma once
 
-#include <Engine/Objects/3D/Actor/SceneObject.h>
+// engine
 #include <Engine/Foundation/Utility/Guid/Guid.h>
+#include <Engine/System/Event/EventBus.h>
 
-#include <unordered_map>
-#include <vector>
+// std
+#include <algorithm>
 #include <memory>
 #include <string>
 #include <type_traits>
-#include <algorithm>
+#include <unordered_map>
+#include <vector>
+
+class SceneObject;
 
 /* ========================================================================
-/*		シーンオブジェクトを一括保有するクラス
+/*      シーンオブジェクトを一括保有するクラス
 /* ===================================================================== */
-class SceneObjectLibrary{
+class SceneObjectLibrary {
 public:
-	SceneObjectLibrary() = default;
-	~SceneObjectLibrary() = default;
+    //====================================================================*//
+    //      public functions
+    //====================================================================*//
+    SceneObjectLibrary();
+    ~SceneObjectLibrary();
 
-	/* 追加・削除・クリア --------------------------------------------------*/
-	void AddObject(const std::shared_ptr<SceneObject>& object);
-	bool RemoveObject(const std::shared_ptr<SceneObject>& object);
-	bool RemoveObject(Guid id);
-	void Clear(); // 子孫含めて Remove イベントを正しく発火
+    /**
+     * @brief オブジェクト追加
+     * @param object
+     */
+    void AddObject(const std::shared_ptr<SceneObject>& object);
 
-	/* 検索 --------------------------------------------------------------*/
-	
-	/// <summary>
-	/// guid空検索
-	/// </summary>
-	/// <param name="id"></param>
-	/// <returns></returns>
-	std::shared_ptr<SceneObject> Find(Guid id) const;
+    /**
+     * @brief オブジェクトの削除
+     * @param object
+     * @return
+     */
+    bool RemoveObject(const std::shared_ptr<SceneObject>& object);
 
-	/// <summary>
-	/// 名前から検索
-	/// </summary>
-	/// <param name="name"></param>
-	/// <returns></returns>
-	std::shared_ptr<SceneObject> FindByName(const std::string& name) const;
+    /**
+     * @brief オブジェクトの削除（ID指定）
+     * @param id
+     * @return
+     */
+    bool RemoveObject(Guid id);
 
-	/// <summary>
-	/// タイプから探す
-	/// </summary>
-	/// <typeparam name="TObject"></typeparam>
-	/// <returns></returns>
-	template <class TObject>
-	std::vector<std::shared_ptr<TObject>> FindByType() const;
+    /**
+     * @brief 全オブジェクト削除
+     */
+    void Clear();
 
-	/* 一覧取得 ----------------------------------------------------------*/
-	
-	/// <summary>
-	/// シーンオブジェクトの生ポインタを返す
-	/// </summary>
-	/// <returns></returns>
-	std::vector<SceneObject*> GetAllObjectsRaw() const;
+    /**
+     * @brief idからオブジェクトを検索
+     * @param id
+     * @return 検索結果のオブジェクト（見つからなければ nullptr）
+     */
+    std::shared_ptr<SceneObject> Find(Guid id) const;
 
-	/// <summary>
-	/// すべてのシーンオブジェクトのshardPtrを返す
-	/// </summary>
-	/// <returns></returns>
-	std::vector<std::shared_ptr<SceneObject>> GetAllObjectsShared() const;
+    /**
+     * @brief 名前からオブジェクトを検索（最初に見つかったものを返す）
+     * @param name
+     * @return 検索結果のオブジェクト（見つからなければ nullptr）
+     */
+    std::shared_ptr<SceneObject> FindByName(const std::string& name) const;
 
-	/// <summary>
-	/// シーンオブジェクトがライブラリに含まれるかを返す
-	/// </summary>
-	/// <param name="obj"></param>
-	/// <returns> 含まれる場合true </returns>
-	bool Contains(const std::shared_ptr<SceneObject>& obj) const;
-	bool Contains(Guid id) const{ return objects_.contains(id); }
+    /**
+     * @brief 型からオブジェクトを検索
+     * @tparam TObject
+     * @return 検索結果の配列
+     */
+    template <class TObject>
+    std::vector<std::shared_ptr<TObject>> FindByType() const;
+
+    /**
+     * @brief 全オブジェクト取得（生ポインタ版）
+     * @return シーン上のオブジェクトリストの配列
+     */
+    std::vector<SceneObject*> GetAllObjectsRaw() const;
+
+    /**
+     * @brief 全オブジェクト取得（shared_ptr版）
+     * @return シーン上のオブジェクトリストの配列
+     */
+    std::vector<std::shared_ptr<SceneObject>> GetAllObjectsShared() const;
+
+    /**
+     * @brief オブジェクトが含まれているか
+     * @param obj
+     * @return
+     */
+    bool Contains(const std::shared_ptr<SceneObject>& obj) const;
+
+    /**
+     * @brief 指定IDのオブジェクトが含まれているか
+     * @param id
+     * @return
+     */
+    bool Contains(Guid id) const { return objects_.contains(id); }
 
 private:
-	/// <summary>
-	/// ツリーを集める
-	/// </summary>
-	/// <param name="node"></param>
-	/// <param name="out"></param>
-	static void GatherSubtreePostorder(
-		const std::shared_ptr<SceneObject>& node,
-		std::vector<std::shared_ptr<SceneObject>>& out);
-
-	/// <summary>
-	/// サブツリーを後行順で外す
-	/// </summary>
-	/// <param name="root"></param>
-	void RemoveSubtreePostorder(const std::shared_ptr<SceneObject>& root);
-
-private:
-	std::unordered_map<Guid, std::shared_ptr<SceneObject>> objects_;
-	std::unordered_map<std::string, uint32_t> nameCounters_; //< 名前ごとの通し番号
+    //====================================================================*//
+    //      private variables
+    //====================================================================*//
+    std::unordered_map<Guid, std::shared_ptr<SceneObject>> objects_;
+    std::unordered_map<std::string, uint32_t>              nameCounters_;
+	EventBus::Connection connDestroy_;
 };
 
-/* ---------------- テンプレート実装 ---------------------------------------*/
+// =====================================================
+// テンプレート実装
+// =====================================================
 template <class TObject>
-std::vector<std::shared_ptr<TObject>> SceneObjectLibrary::FindByType() const{
-	static_assert(std::is_base_of_v<SceneObject, TObject>,
-				  "TObject must derive from SceneObject");
-	std::vector<std::shared_ptr<TObject>> result;
-	result.reserve(objects_.size());
-	for (const auto& [id, sp] : objects_){
-		if (auto casted = std::dynamic_pointer_cast<TObject>(sp)){ result.emplace_back(std::move(casted)); }
-	}
-	return result;
+std::vector<std::shared_ptr<TObject>> SceneObjectLibrary::FindByType() const {
+    static_assert(std::is_base_of_v<SceneObject, TObject>,
+                  "TObject must derive from SceneObject");
+
+    std::vector<std::shared_ptr<TObject>> result;
+    result.reserve(objects_.size());
+
+    for (const auto& [id, sp] : objects_) {
+        if (!sp) continue;
+        if (auto casted = std::dynamic_pointer_cast<TObject>(sp)) {
+            result.emplace_back(std::move(casted));
+        }
+    }
+    return result;
 }

@@ -21,6 +21,10 @@ class BaseEditor;
 class SceneContext;
 class SceneObject;
 class PlaySession;
+class BaseCamera;
+struct Vector2;
+struct Matrix4x4;
+struct Ray;
 
 namespace EngineEdit {
 enum class EditorMode {
@@ -29,8 +33,8 @@ enum class EditorMode {
 };
 } // namespace EngineEdit
 
-/* ========================================================================
-/*		レベル編集ツール
+/* ======================================================================== */
+/*		レベル編集ツール                                                    */
 /* ===================================================================== */
 class LevelEditor {
 public:
@@ -38,39 +42,46 @@ public:
 	void Update();
 	void Render();
 	void RenderMenu();
+	void ClearSelection();
 
-	// 編集対象
-	void				   SetSelectedEditor(BaseEditor* editor);
-	void				   SetSelectedObject(const std::shared_ptr<SceneObject>& sp);
-	void				   CreateObject(const std::shared_ptr<SceneObject>& obj);
-	void				   DeleteObject(const std::shared_ptr<SceneObject>& sp);
-	void				   RenderViewport(ViewportType type, const ImTextureID& tex);
-	void				   SetCameraForViewport(BaseCamera* mainCamera, BaseCamera* debugCamera);
-	HierarchyPanel*		   GetHierarchyPanel() const { return hierarchy_.get(); }
-	EditorPanel*		   GetEditorPanel() const { return editor_.get(); }
-	PlaceToolPanel*		   GetPlaceToolPanel() const { return placeToolPanel_.get(); }
+	// 編集対象 ----------------------------------------------------------------
+	void SetSelectedEditor(BaseEditor* editor);
+	/// SceneObject の選択（shared_ptr で受けて内部では weak_ptr で保持）
+	void SetSelectedObject(const std::shared_ptr<SceneObject>& sp);
+
+	/// シーンへのオブジェクト追加（Prefab / PlaceTool などから呼ばれる）
+	void CreateObject(const std::shared_ptr<SceneObject>& obj);
+	/// シーンからオブジェクト削除（階層パネルなどから呼ばれる）
+	void DeleteObject(const std::shared_ptr<SceneObject>& sp);
+
+	// ビューポート関連 --------------------------------------------------------
+	void RenderViewport(ViewportType type, const ImTextureID& tex);
+	void SetCameraForViewport(BaseCamera* mainCamera, BaseCamera* debugCamera);
+
+	// パネル取得 --------------------------------------------------------------
+	HierarchyPanel* GetHierarchyPanel() const { return hierarchy_.get(); }
+	EditorPanel*	GetEditorPanel() const { return editor_.get(); }
+	PlaceToolPanel* GetPlaceToolPanel() const { return placeToolPanel_.get(); }
+
 	EngineEdit::EditorMode GetMode() const { return mode_; }
 	void				   SetPlaySession(PlaySession* session) { pPlaySesseion_ = session; }
 
 private:
+	// マウスピッキング関連 ----------------------------------------------------
 	void		 TryPickUnderCursor();
-	void		 TryPickObjectFromMouse(const Vector2& mouse, const Vector2& viewportSize, const Matrix4x4& view, const Matrix4x4& proj);
-	SceneObject* PickSceneObjectByRay(const struct Ray& ray);
+	void		 TryPickObjectFromMouse(const Vector2&	 mouse,
+										const Vector2&	 viewportSize,
+										const Matrix4x4& view,
+										const Matrix4x4& proj);
+	SceneObject* PickSceneObjectByRay(const Ray& ray);
 
-private:
+	// シーン管理 --------------------------------------------------------------
 	void SaveScene();
 	void NotifySceneContextChanged();
-	void ClearSelection() {
-		selectedEditor_ = nullptr;
-		selectedObject_ = nullptr;
-		hierarchy_->SetSelectedObject(nullptr);
-		inspector_->SetSelectedObject(nullptr);
-		sceneEditor_->ClearSelection();
-	}
 
+	// モード切り替え ----------------------------------------------------------
 	void EnterGameMode();
 	void ExitGameMode();
-
 	void ToggleMode();
 
 	void TogglePanel(IEngineUI* p) {
@@ -98,10 +109,11 @@ private:
 	std::unique_ptr<PerformanceOverlay> performanceOverlay_; //< パフォーマンスオーバーレイ
 
 	// 状態
-	bool						 lastPlaying_ = false;
-	SceneContext*				 prevCtx_;
-	BaseEditor*					 selectedEditor_ = nullptr;
-	std::shared_ptr<SceneObject> selectedObject_;
+	bool		  lastPlaying_	  = false;
+	SceneContext* prevCtx_		  = nullptr;
+	BaseEditor*	  selectedEditor_ = nullptr;
+	/// SceneObject 選択は weak_ptr で保持（寿命を伸ばさない）
+	std::weak_ptr<SceneObject> selectedObject_;
 
 	// Editors メニューに並べるパネル群
 	std::vector<IEngineUI*> editorPanels_;

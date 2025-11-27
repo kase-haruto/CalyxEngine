@@ -18,5 +18,5 @@ public:
 	//--------- accessor ---------------------------------------------------
 	
 private:
-	std::shared_ptr<FxObject> shootFx_;
+	std::weak_ptr<FxObject> shootFx_;
 };

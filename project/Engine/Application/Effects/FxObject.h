@@ -27,6 +27,7 @@ public:
 	void Initialize() override;
 	void Update(float dt) override;
 	void AlwaysUpdate(float dt) override;
+	void Destroy()override;
 
 	//--------- Player ----------------------------------------------------
 	///<summary>すべてのエミッターを再生</summary>
@@ -80,5 +81,5 @@ private:
 	//					private methods
 	//===================================================================*/
 	ConfigurableObject<EffectObjectConfig>             config_;
-	std::vector<std::shared_ptr<ParticleSystemObject>> emitters_;
+	std::vector<std::weak_ptr<ParticleSystemObject>> emitters_;
 };

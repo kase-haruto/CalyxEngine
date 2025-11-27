@@ -10,7 +10,10 @@
 #include <Engine/objects/3D/Actor/Library/SceneObjectLibrary.h>
 
 // c++
+#include <functional>
 #include <memory>
+#include <string>
+#include <vector>
 
 using ObjectRemovedCallback = std::function<void(SceneObject*)>;
 
@@ -26,56 +29,55 @@ public:
 	void Clear();
 
 	/* ---------- object API ---------- */
-	
-	/// <summary>
-	/// インスタンスを作成
-	/// </summary>
-	/// <typeparam name="TObject"></typeparam>
-	/// <typeparam name="...Args"></typeparam>
-	/// <param name="...args"></param>
-	/// <returns></returns>
+
+	/**
+	 * インスタンスの作成とライブラリに登録
+	 * @tparam TObject
+	 * @tparam Args
+	 * @param args
+	 * @return
+	 */
 	template <class TObject, class... Args>
 	std::shared_ptr<TObject> Instantiate(Args&&... args);
 
-	/// <summary>
-	/// 型名から取得
-	/// </summary>
-	/// <typeparam name="T"></typeparam>
-	/// <returns></returns>
+	/**
+	 * 最初に見つかった型Tのオブジェクトを返す
+	 */
 	template <typename T>
 	std::shared_ptr<T> FindFirst() const;
 
-	/// <summary>
-	/// 名前からオブジェクト検索
-	/// </summary>
-	/// <typeparam name="T"></typeparam>
-	/// <param name="name"></param>
-	/// <returns></returns>
+	/**
+	 * 名前からオブジェクトを探す
+	 * @tparam T
+	 * @param name
+	 * @return 検索結果のオブジェクト（見つからなければ nullptr）
+	 */
 	template <typename T>
 	std::shared_ptr<T> FindObjectByName(const std::string& name) const;
-
-	/// <summary>
-	/// Objectをリムーブ
-	/// </summary>
-	/// <param name="object"></param>
-	void RemoveEditorObject(const std::shared_ptr<SceneObject>& object);
 
 	/* ---------- accessors ----------- */
 	// getter
 	SceneObjectLibrary* GetObjectLibrary() const { return objectLibrary_.get(); }
 	LightLibrary*		GetLightLibrary() const { return lightLibrary_.get(); }
 	FxSystem*			GetFxSystem() const { return fxSystem_.get(); }
-	std::string GetSceneName() const { return sceneName_; }
-	bool		   IsRuntime() const { return isRuntime_; }
-	CameraManager* GetCameraMgr() { return cameraMgr_.get(); }
-	
-	//setter
-	void		SetSceneName(const std::string& n) { sceneName_ = n; }
-	void		   SetRuntime(bool f) { isRuntime_ = f; }
+	std::string			GetSceneName() const { return sceneName_; }
+	bool				IsRuntime() const { return isRuntime_; }
+	CameraManager*		GetCameraMgr() { return cameraMgr_.get(); }
+
+	// setter
+	void SetSceneName(const std::string& n) { sceneName_ = n; }
+	void SetRuntime(bool f) { isRuntime_ = f; }
 
 	/* ---------- callbacks ----------- */
-	void AddOnObjectRemovedListener(ObjectRemovedCallback cb) { objectRemovedCallbacks_.push_back(std::move(cb)); }
-	void SetOnEditorObjectRemoved(ObjectRemovedCallback cb) { onEditorObjectRemoved_ = std::move(cb); }
+	/// 個別削除時に飛ぶコールバック（複数登録可）
+	void AddOnObjectRemovedListener(ObjectRemovedCallback cb) {
+		objectRemovedCallbacks_.push_back(std::move(cb));
+	}
+
+	/// Clear 時など、Editor 側で一括ハンドリングしたい用途向け
+	void SetOnEditorObjectRemoved(ObjectRemovedCallback cb) {
+		onEditorObjectRemoved_ = std::move(cb);
+	}
 
 	/* ---------- utils --------------- */
 	std::shared_ptr<SceneObject> FindSharedObject(SceneObject* raw);
@@ -88,9 +90,9 @@ public:
 
 private:
 	std::unique_ptr<SceneObjectLibrary> objectLibrary_;
-	std::unique_ptr<LightLibrary>		lightLibrary_;
-	std::unique_ptr<FxSystem>			fxSystem_;
-	std::unique_ptr<CameraManager>		cameraMgr_;
+	std::unique_ptr<LightLibrary>		 lightLibrary_;
+	std::unique_ptr<FxSystem>			 fxSystem_;
+	std::unique_ptr<CameraManager>		 cameraMgr_;
 
 	ObjectRemovedCallback			   onEditorObjectRemoved_;
 	std::vector<ObjectRemovedCallback> objectRemovedCallbacks_;
@@ -102,10 +104,12 @@ private:
 };
 
 // --------------------------- template implementations ------------------------
+
 template <class TObject, class... Args>
 std::shared_ptr<TObject> SceneContext::Instantiate(Args&&... args) {
 	static_assert(std::is_base_of_v<SceneObject, TObject>,
 				  "TObject must derive from SceneObject");
+
 	auto obj = std::make_shared<TObject>(std::forward<Args>(args)...);
 	objectLibrary_->AddObject(obj);
 	return obj;
@@ -113,8 +117,8 @@ std::shared_ptr<TObject> SceneContext::Instantiate(Args&&... args) {
 
 template <typename T>
 std::shared_ptr<T> SceneContext::FindFirst() const {
-	for(const auto& obj : objectLibrary_->GetAllObjectsShared()) {
-		if(auto casted = std::dynamic_pointer_cast<T>(obj)) {
+	for (const auto& obj : objectLibrary_->GetAllObjectsShared()) {
+		if (auto casted = std::dynamic_pointer_cast<T>(obj)) {
 			return casted;
 		}
 	}
@@ -123,12 +127,12 @@ std::shared_ptr<T> SceneContext::FindFirst() const {
 
 template <typename T>
 std::shared_ptr<T> SceneContext::FindObjectByName(const std::string& name) const {
-	for(const auto& obj : objectLibrary_->GetAllObjectsShared()) {
-		if(obj && obj->GetName() == name) {
-			if constexpr(std::is_same_v<T, SceneObject>) {
+	for (const auto& obj : objectLibrary_->GetAllObjectsShared()) {
+		if (obj && obj->GetName() == name) {
+			if constexpr (std::is_same_v<T, SceneObject>) {
 				return obj;
 			} else {
-				if(auto casted = std::dynamic_pointer_cast<T>(obj)) {
+				if (auto casted = std::dynamic_pointer_cast<T>(obj)) {
 					return casted;
 				}
 			}

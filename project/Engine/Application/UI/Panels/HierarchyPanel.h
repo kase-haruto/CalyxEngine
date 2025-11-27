@@ -10,9 +10,7 @@
 #include <functional>
 #include <memory>
 #include <string>
-#include <vector>
 
-// externals
 #include <externals/imgui/imgui.h>
 
 // forward
@@ -20,10 +18,9 @@ class SceneObject;
 class SceneObjectLibrary;
 
 //===================================================================*//
-//					HierarchyPanel
+//                    HierarchyPanel
 //===================================================================*//
-class HierarchyPanel
-	: public IEngineUI {
+class HierarchyPanel : public IEngineUI {
 private:
 	using SelectCB = std::function<void(std::shared_ptr<SceneObject>)>;
 	using DeleteCB = std::function<void(std::shared_ptr<SceneObject>)>;
@@ -31,9 +28,6 @@ private:
 	using RenameCB = std::function<void(std::shared_ptr<SceneObject>, const std::string& newName)>;
 
 public:
-	//===================================================================*/
-	//					public methods
-	//===================================================================*/
 	HierarchyPanel();
 	~HierarchyPanel() override = default;
 
@@ -48,40 +42,41 @@ public:
 	void SetOnObjectSelected(SelectCB cb) { onSelect_ = std::move(cb); }
 	void SetOnObjectDelete(DeleteCB cb) { onDelete_ = std::move(cb); }
 	void SetOnObjectCreate(CreateCB cb) { onCreate_ = std::move(cb); }
-	void SetObObjectRename(RenameCB cb) { onRename_ = std::move(cb); }
+	void SetOnObjectRename(RenameCB cb) { onRename_ = std::move(cb); }
 
-	void SetSelectedObject(const std::shared_ptr<SceneObject>& sp) { selected_ = sp; }
+	void SetSelectedObject(std::weak_ptr<SceneObject> wp) { selected_ = wp; }
 
-	const SceneObjectLibrary*	 GetSceneObjectLibrary() const { return lib_; }
-	std::shared_ptr<SceneObject> GetSelectedObject() const { return selected_; }
+	const SceneObjectLibrary* GetSceneObjectLibrary() const { return lib_; }
+	std::weak_ptr<SceneObject> GetSelectedObject() const {
+		return selected_;
+	}
 
 private:
-	//===================================================================*/
-	//					private methods
-	//===================================================================*/
+	// rename
 	void BeginRename(SceneObject* obj);
 	void CancelRename();
 	void CommitRename();
 
 private:
 	// runtime state
-	const SceneObjectLibrary*	 lib_ = nullptr;
-	std::shared_ptr<SceneObject> selected_;
+	const SceneObjectLibrary* lib_ = nullptr;
 
-	SelectCB onSelect_; //< 選択コールバック
-	DeleteCB onDelete_; //< 削除コールバック
-	CreateCB onCreate_; //< 作成コールバック
-	RenameCB onRename_; //< 再名コールバック
+	std::weak_ptr<SceneObject> selected_;
+	std::weak_ptr<SceneObject> renameTarget_;
 
-	// ぷれふぁbダイアログ
+	SelectCB onSelect_;
+	DeleteCB onDelete_;
+	CreateCB onCreate_;
+	RenameCB onRename_;
+
+	// prefab dialog
 	bool		 showSavePrefabDlg_ = false;
 	bool		 showLoadPrefabDlg_ = false;
 	SceneObject* prefabSaveTarget_	= nullptr;
 
-	// リネーム
-	bool		 renaming_	   = false;	  //< フラグ
-	SceneObject* renameTarget_ = nullptr; //< リネーム大賞
-	std::string	 renameBuf_;			  //< 文字列
+	// rename buffer
+	bool		renaming_ = false;
+	std::string renameBuf_;
 
 	// icons
 	struct Icon {

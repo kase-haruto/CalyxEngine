@@ -2,7 +2,6 @@
 /*  include space
 /* ===================================================================== */
 
-// engine
 #include <Data/Engine/Prefab/Serializer/PrefabSerializer.h>
 #include <Engine/Application/UI/Panels/HierarchyPanel.h>
 #include <Engine/Application/UI/Panels/InspectorPanel.h>
@@ -10,9 +9,9 @@
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 #include <Engine/Scene/Context/SceneContext.h>
 #include <Engine/objects/3D/Actor/Library/SceneObjectLibrary.h>
+
 // lib
 #include <externals/imgui/ImGuiFileDialog.h>
-#include <externals/imgui/imgui.h>
 
 #include <algorithm>
 #include <string>
@@ -22,6 +21,7 @@
 /*  local helpers
 /* ===================================================================== */
 namespace {
+
 inline int TypePriority(ObjectType t) {
 	switch(t) {
 	case ObjectType::Camera:
@@ -39,20 +39,22 @@ inline int TypePriority(ObjectType t) {
 
 inline bool LessByTypeThenName(const std::shared_ptr<SceneObject>& a,
 							   const std::shared_ptr<SceneObject>& b) {
-	const int pa = TypePriority(a->GetObjectType());
-	const int pb = TypePriority(b->GetObjectType());
+	int pa = TypePriority(a->GetObjectType());
+	int pb = TypePriority(b->GetObjectType());
 	if(pa != pb) return pa < pb;
-	const auto& na = a->GetName();
-	const auto& nb = b->GetName();
-	return na < nb;
+	return a->GetName() < b->GetName();
 }
+
 } // namespace
 
 /* ========================================================================
 /*  ctor
 /* ===================================================================== */
-HierarchyPanel::HierarchyPanel() : IEngineUI("Hierarchy") {
-	auto& tm		 = *TextureManager::GetInstance();
+HierarchyPanel::HierarchyPanel()
+	: IEngineUI("Hierarchy") {
+
+	auto& tm = *TextureManager::GetInstance();
+
 	iconEye_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/Hierarchy/eyeIcon.png").ptr;
 	iconEyeOff_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/Hierarchy/closedEyeIcon.png").ptr;
 	iconCamera_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/Hierarchy/camIcon.png").ptr;
@@ -65,6 +67,7 @@ HierarchyPanel::HierarchyPanel() : IEngineUI("Hierarchy") {
 /*  render
 /* ===================================================================== */
 void HierarchyPanel::Render() {
+
 	bool open = true;
 	ImGui::Begin(panelName_.c_str(), &open, ImGuiWindowFlags_NoDecoration);
 	ImGui::Text("Scene Hierarchy");
@@ -78,21 +81,32 @@ void HierarchyPanel::Render() {
 		return;
 	}
 
-	// ルート候補収集（親が無い or 親がシーンに存在しない物）
+	// --- 消去された selected_ を無効化 ---
+	{
+		auto sp = selected_.lock();
+		if(sp && !lib_->Contains(sp)) {
+			selected_.reset();
+		}
+	}
+
+	// --- root 探索 ---
 	std::vector<std::shared_ptr<SceneObject>> roots;
-	roots.reserve(lib_->GetAllObjectsShared().size());
-	for(const auto& sp : lib_->GetAllObjectsShared()) {
+	auto									  all = lib_->GetAllObjectsShared();
+	roots.reserve(all.size());
+
+	for(auto& sp : all) {
 		if(!sp) continue;
+
 		auto parent = sp->GetParent();
 		if(!parent || !lib_->Contains(parent)) {
 			roots.push_back(sp);
 		}
 	}
-	// タイプ→名前で安定ソート
+
 	std::sort(roots.begin(), roots.end(), LessByTypeThenName);
 
-	// 表示
-	for(const auto& sp : roots) {
+	// --- draw ---
+	for(auto& sp : roots) {
 		ShowObjectRecursive(sp.get());
 	}
 
@@ -106,18 +120,20 @@ void HierarchyPanel::Render() {
 	if(ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
 		ImGui::OpenPopup("BlankContextMenu");
 	}
+
 	if(ImGui::BeginPopup("BlankContextMenu")) {
 		if(ImGui::MenuItem("Load Prefab")) showLoadPrefabDlg_ = true;
 		ImGui::EndPopup();
 	}
 
-	// ---------- ダイアログ ----------
+	// --- Prefab Dialog ---
 	if(showLoadPrefabDlg_) {
 		IGFD::FileDialogConfig cfg;
 		cfg.path = "Resources/Assets/Prefabs/";
 		ImGuiFileDialog::Instance()->OpenDialog("LoadPrefabDlg", "Load Prefab", ".prefab", cfg);
 		showLoadPrefabDlg_ = false;
 	}
+
 	if(showSavePrefabDlg_) {
 		IGFD::FileDialogConfig cfg;
 		cfg.path = "Resources/Assets/Prefabs/";
@@ -128,7 +144,8 @@ void HierarchyPanel::Render() {
 	// Save
 	if(ImGuiFileDialog::Instance()->Display("SavePrefabDlg")) {
 		if(ImGuiFileDialog::Instance()->IsOk() && prefabSaveTarget_) {
-			PrefabSerializer::Save({prefabSaveTarget_}, ImGuiFileDialog::Instance()->GetFilePathName());
+			PrefabSerializer::Save({prefabSaveTarget_},
+								   ImGuiFileDialog::Instance()->GetFilePathName());
 		}
 		ImGuiFileDialog::Instance()->Close();
 		prefabSaveTarget_ = nullptr;
@@ -137,7 +154,9 @@ void HierarchyPanel::Render() {
 	// Load
 	if(ImGuiFileDialog::Instance()->Display("LoadPrefabDlg")) {
 		if(ImGuiFileDialog::Instance()->IsOk()) {
-			auto vec = PrefabSerializer::Load(ImGuiFileDialog::Instance()->GetFilePathName());
+			auto vec = PrefabSerializer::Load(
+				ImGuiFileDialog::Instance()->GetFilePathName());
+
 			for(auto& up : vec) {
 				if(lib_ && onCreate_) {
 					onCreate_(std::shared_ptr<SceneObject>(std::move(up)));
@@ -152,10 +171,13 @@ void HierarchyPanel::Render() {
 }
 
 /* ========================================================================
-/*  recursive draw (sorted children)
+/*  recursive UI
 /* ===================================================================== */
 void HierarchyPanel::ShowObjectRecursive(SceneObject* obj) {
-	bool sel = (selected_.get() == obj);
+
+	auto selectedPtr = selected_.lock();
+	bool sel		 = (selectedPtr.get() == obj);
+
 	ImGui::PushID(obj);
 
 	// 表示トグル
@@ -168,30 +190,29 @@ void HierarchyPanel::ShowObjectRecursive(SceneObject* obj) {
 	ImGui::SameLine();
 
 	// 種類アイコン
-	ImTextureID typeI = nullptr;
+	ImTextureID typeIcon = nullptr;
 	switch(obj->GetObjectType()) {
 	case ObjectType::Camera:
-		typeI = iconCamera_.tex;
+		typeIcon = iconCamera_.tex;
 		break;
 	case ObjectType::Light:
-		typeI = iconLight_.tex;
+		typeIcon = iconLight_.tex;
 		break;
 	case ObjectType::GameObject:
-		typeI = iconGameObj_.tex;
+		typeIcon = iconGameObj_.tex;
 		break;
 	case ObjectType::Effect:
-		typeI = iconFx_.tex;
-		break;
-	default:
+		typeIcon = iconFx_.tex;
 		break;
 	}
-	if(typeI) {
-		ImGui::Image(typeI, eye.size);
+	if(typeIcon) {
+		ImGui::Image(typeIcon, eye.size);
 		ImGui::SameLine();
 	}
 
-	// ---- リネーム中か ----
-	const bool isRenamingThis = (renaming_ && renameTarget_ == obj);
+	// rename 中か
+	auto renameSP		= renameTarget_.lock();
+	bool isRenamingThis = (renaming_ && renameSP.get() == obj);
 
 	ImGuiTreeNodeFlags fl =
 		ImGuiTreeNodeFlags_OpenOnArrow |
@@ -201,23 +222,23 @@ void HierarchyPanel::ShowObjectRecursive(SceneObject* obj) {
 	bool open = false;
 
 	if(isRenamingThis) {
-		// リネーム中はラベルの代わりに InputText を出す
-		open = ImGui::TreeNodeEx("##renamingNode", fl | ImGuiTreeNodeFlags_Leaf);
+
+		open = ImGui::TreeNodeEx("##renameNode", fl | ImGuiTreeNodeFlags_Leaf);
 		ImGui::SameLine();
 
-		// 初回にフォーカスを与える
 		if(!ImGui::IsAnyItemActive()) {
 			ImGui::SetKeyboardFocusHere();
 		}
-		char buf[256];
-		std::snprintf(buf, sizeof(buf), "%s", renameBuf_.c_str());
 
-		ImGuiInputTextFlags itf =
+		char buf[256];
+		snprintf(buf, sizeof(buf), "%s", renameBuf_.c_str());
+
+		ImGuiInputTextFlags flags =
 			ImGuiInputTextFlags_AutoSelectAll |
 			ImGuiInputTextFlags_EnterReturnsTrue;
 
-		if(ImGui::InputText("##rename", buf, sizeof(buf), itf)) {
-			renameBuf_ = buf; // 入力を反映
+		if(ImGui::InputText("##rename", buf, sizeof(buf), flags)) {
+			renameBuf_ = buf;
 			CommitRename();
 		} else {
 			if(ImGui::IsItemFocused() && ImGui::IsKeyPressed(ImGuiKey_Escape)) {
@@ -229,61 +250,76 @@ void HierarchyPanel::ShowObjectRecursive(SceneObject* obj) {
 			}
 		}
 	} else {
-		// 通常表示
+
 		open = ImGui::TreeNodeEx(obj->GetName().c_str(), fl);
 
-		// クリックで選択
 		if(ImGui::IsItemClicked()) {
-			selected_ = obj->shared_from_this();
-			if(onSelect_) onSelect_(selected_);
+			if (auto sp = obj->shared_from_this()) {
+				selected_ = sp;
+				if(onSelect_) onSelect_(sp);
+			}
 		}
 
-		// F2 でリネーム開始（選択時）
+		// F2 rename
 		if(sel && ImGui::IsWindowFocused() && ImGui::IsKeyPressed(ImGuiKey_F2)) {
 			BeginRename(obj);
 		}
 
-		// ダブルクリックでリネーム開始（ラベル上）
+		// double click rename
 		if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 			BeginRename(obj);
 		}
 
-		// コンテキスト（右クリック）に Rename を追加
+		// context menu
 		if(ImGui::BeginPopupContextItem("SOContext")) {
+
 			if(ImGui::MenuItem("Rename")) {
 				BeginRename(obj);
 			}
-			if(ImGui::MenuItem("Delete") && onDelete_) onDelete_(selected_);
+
+			if(ImGui::MenuItem("Delete") && onDelete_) {
+				if (auto sp = obj->shared_from_this())
+					onDelete_(sp);
+			}
+
 			if(ImGui::MenuItem("Create Prefab")) {
 				prefabSaveTarget_  = obj;
 				showSavePrefabDlg_ = true;
 			}
+
 			ImGui::EndPopup();
 		}
 	}
 
-	// Drag&Drop
+	// Drag & Drop
 	if(ImGui::BeginDragDropSource()) {
 		SceneObject* drag = obj;
 		ImGui::SetDragDropPayload("SceneObjectPtr", &drag, sizeof(SceneObject*));
 		ImGui::Text("%s", obj->GetName().c_str());
 		ImGui::EndDragDropSource();
 	}
+
 	if(ImGui::BeginDragDropTarget()) {
 		if(const ImGuiPayload* pl = ImGui::AcceptDragDropPayload("SceneObjectPtr")) {
+
 			SceneObject* drag = *reinterpret_cast<SceneObject**>(pl->Data);
-			if(drag && drag != obj && !IsDescendantOf(obj, drag)) {
-				drag->SetParent(obj->shared_from_this());
+			if(drag && drag != obj) {
+
+				auto dragSP = drag->shared_from_this();
+				auto objSP	= obj->shared_from_this();
+
+				if(lib_->Contains(dragSP) && lib_->Contains(objSP) && !IsDescendantOf(obj, drag)) {
+
+					drag->SetParent(objSP);
+				}
 			}
 		}
 		ImGui::EndDragDropTarget();
 	}
 
-	// 子の描画
 	if(open) {
 		if(!isRenamingThis) {
 			std::vector<std::shared_ptr<SceneObject>> sortedChildren;
-			sortedChildren.reserve(obj->GetChildren().size());
 			for(auto& ch : obj->GetChildren()) {
 				if(ch) sortedChildren.push_back(ch);
 			}
@@ -295,16 +331,18 @@ void HierarchyPanel::ShowObjectRecursive(SceneObject* obj) {
 		}
 		ImGui::TreePop();
 	}
+
 	ImGui::PopID();
 }
 
 /* ========================================================================
 /*  utils
 /* ===================================================================== */
-bool HierarchyPanel::IsDescendantOf(SceneObject* par, SceneObject* child) {
+bool HierarchyPanel::IsDescendantOf(SceneObject* parent, SceneObject* child) {
 	if(!child) return false;
-	for(auto sp = child->GetParent(); sp; sp = sp->GetParent()) {
-		if(sp.get() == par) return true;
+
+	for(auto p = child->GetParent(); p; p = p->GetParent()) {
+		if(p.get() == parent) return true;
 	}
 	return false;
 }
@@ -313,45 +351,54 @@ const std::string& HierarchyPanel::GetPanelName() const {
 	return panelName_;
 }
 
+/* ========================================================================
+/*  rename
+/* ===================================================================== */
 void HierarchyPanel::BeginRename(SceneObject* obj) {
+
 	if(!obj) return;
+
 	renaming_	  = true;
-	renameTarget_ = obj;
+	renameTarget_ = obj->shared_from_this();
 	renameBuf_	  = obj->GetName();
 }
 
 void HierarchyPanel::CancelRename() {
-	renaming_	  = false;
-	renameTarget_ = nullptr;
+	renaming_ = false;
+	renameTarget_.reset();
 	renameBuf_.clear();
 }
 
 void HierarchyPanel::CommitRename() {
-	if(!renaming_ || !renameTarget_) {
+
+	auto target = renameTarget_.lock();
+	if(!renaming_ || !target) {
 		CancelRename();
 		return;
 	}
+
 	std::string newName = renameBuf_;
-	// 前後空白を軽くトリム
+
 	auto l = newName.find_first_not_of(" \t\r\n");
 	auto r = newName.find_last_not_of(" \t\r\n");
+
 	if(l == std::string::npos)
 		newName.clear();
 	else
 		newName = newName.substr(l, r - l + 1);
 
-	// 空ならキャンセル扱い
 	if(newName.empty()) {
 		CancelRename();
 		return;
 	}
 
-	// コールバックがあればエディタ側に任せる
-	if(onRename_) {
-		onRename_(renameTarget_->shared_from_this(), newName);
-	} else {
-		// フォールバック
-		renameTarget_->SetName(newName, renameTarget_->GetObjectType());
+	if (auto sp = renameTarget_.lock()) {
+		if (onRename_) {
+			onRename_(sp, newName);
+		} else {
+			sp->SetName(newName, sp->GetObjectType());
+		}
 	}
+
 	CancelRename();
 }
