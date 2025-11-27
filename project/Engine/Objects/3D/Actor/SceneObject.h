@@ -40,44 +40,70 @@ public:
 	// =======================
 	// Main Interface
 	// =======================
+	/**
+	 * \brief オブジェクト初期化
+	 */
 	virtual void Initialize() {}
-	virtual void AlwaysUpdate([[maybe_unused]] float dt) {}; //< 常時更新
-	virtual void Update([[maybe_unused]] float dt) {};		 //< ランタイム時更新
-
+	/**
+	 * \brief オブジェクト更新(常時更新)
+	 */
+	virtual void AlwaysUpdate([[maybe_unused]] float dt) {}
+	/**
+	 * \brief オブジェクト更新(ランタイム時のみ)
+	 */
+	virtual void Update([[maybe_unused]] float dt) {}
+	/**
+	 * \brief オブジェクト描画
+	 */
 	virtual void Draw([[maybe_unused]] ID3D12GraphicsCommandList* cmdList) {}
+	/**
+	 * \brief デバッグGUI表示
+	 */
 	virtual void ShowGui();
+	/**
+	 * \brief オブジェクト破棄
+	 */
+	virtual void Destroy();
 
+	// =======================
+	// configs
+	// =======================
+	/**
+	 * \brief オブジェクト設定保存
+	 */
 	virtual bool Save() const;
+	/**
+	 * \brief オブジェクト設定読み込み
+	 */
 	virtual bool Load();
-
+	/**
+	 * \brief JSONから派生クラスの設定を適用
+	 */
 	virtual void ApplyDerivedConfigFromJson([[maybe_unused]] const nlohmann::json& root,
 											[[maybe_unused]] const nlohmann::json* derived) {}
+	/**
+	 * \brief 派生クラスの設定をJSONに抽出
+	 */
 	virtual void ExtractDerivedConfigToJson([[maybe_unused]] nlohmann::json& root,
 											[[maybe_unused]] nlohmann::json& derived) const {}
 
-	// =======================
-	// Bounding Volume
-	// =======================
-	virtual AABB GetWorldAABB() const { return FallbackAABBFromTransform(); }
 
-	// トランスフォームから簡易AABBを計算
-	AABB FallbackAABBFromTransform() const;
 
 	// =======================
 	// Config I/O virtuals
 	// =======================
 	virtual std::string GetObjectTypeName() const;
-
+	virtual bool IsSerializable() const { return true; }
+	virtual bool HasConfigInterface() const;
+	virtual AABB GetWorldAABB() const { return FallbackAABBFromTransform(); }
+	AABB FallbackAABBFromTransform() const;
 	virtual void SetName(const std::string& name, std::optional<ObjectType> type);
-
 	void SetConfigPath(const std::string& path) { configPath_ = path; }
 
 	// =======================
 	// Serialization and Config Interface
 	// =======================
-	virtual bool IsSerializable() const { return true; }
 
-	virtual bool HasConfigInterface() const;
 
 	// =======================
 	// Accessors
@@ -100,9 +126,13 @@ public:
 	void		 SetParent(const std::shared_ptr<SceneObject>& newParentSp, bool inheritScale = true);
 	void SetEnableRaycast(bool enable) { isEnableRaycast_ = enable; }
 
-	void UpdateWorldTransformRecursive();
-
 	void AddChild(const std::shared_ptr<SceneObject>& child);
+
+protected:
+	/**
+	 * \brief 自分と子オブジェクトを再帰的に破棄する
+	 */
+	void DestroyRecursive();
 
 protected:
 	// =======================

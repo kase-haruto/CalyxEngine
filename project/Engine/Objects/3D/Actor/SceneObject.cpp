@@ -1,11 +1,13 @@
+
+
 #include "SceneObject.h"
-#include "SceneObjectManager.h"
 #include <Engine/Foundation/Json/JsonUtils.h>
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/Objects/ConfigurableObject/IConfigurable.h>
+#include <Engine/Objects/Event/Destroying/ObjectDestroying.h>
+#include <Engine/System/Event/EventBus.h>
 #include <Engine/graphics/Camera/Manager/CameraManager.h>
-#include <externals/imgui/imgui.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		オブジェクトタイプからストリグに
@@ -35,12 +37,19 @@ SceneObject::SceneObject() {
 	id_ = Guid::New();
 }
 
-SceneObject::~SceneObject() =default;
+SceneObject::~SceneObject() = default;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		デバッグui
 /////////////////////////////////////////////////////////////////////////////////////////
 void SceneObject::ShowGui() {}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+///		子を含めて階層階層から完全に切り離すObject破棄
+/////////////////////////////////////////////////////////////////////////////////////////
+void SceneObject::Destroy() {
+	DestroyRecursive();
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		セーブ
@@ -74,7 +83,7 @@ std::string SceneObject::GetObjectTypeName() const {
 //		名前の設定
 /////////////////////////////////////////////////////////////////////////////////////////
 void SceneObject::SetName(const std::string& name, std::optional<ObjectType> type) {
-	if (!name.empty()) {  // 空文字なら上書きしない
+	if(!name.empty()) { // 空文字なら上書きしない
 		name_ = name;
 	}
 	if(type.has_value()) objectType_ = type.value();
@@ -101,7 +110,9 @@ const std::string& SceneObject::GetConfigPath() const {
 //		親子関係構築
 /////////////////////////////////////////////////////////////////////////////////////////
 void SceneObject::SetParent(const std::shared_ptr<SceneObject>& newParentSp, bool inheritScale) {
-	// 無効ポインタだったら早期return
+	auto self = shared_from_this();
+
+	// 同じ or 自分自身
 	if(parent_.lock() == newParentSp || newParentSp.get() == this) {
 		return;
 	}
@@ -109,40 +120,22 @@ void SceneObject::SetParent(const std::shared_ptr<SceneObject>& newParentSp, boo
 	// 旧親から削除
 	if(auto oldParent = parent_.lock()) {
 		auto& siblings = oldParent->children_;
-		siblings.erase(std::remove(siblings.begin(), siblings.end(), shared_from_this()),
+		siblings.erase(std::remove(siblings.begin(), siblings.end(), self),
 					   siblings.end());
 	}
 
 	if(newParentSp) {
-		// Parentの構築
-		newParentSp->children_.push_back(shared_from_this());
-		newParentSp->worldTransform_.Update();
-
+		// 新しい親へ登録
+		newParentSp->children_.push_back(self);
 		worldTransform_.parent		 = &newParentSp->worldTransform_;
 		worldTransform_.inheritScale = inheritScale;
 	} else {
 		worldTransform_.parent		 = nullptr;
-		worldTransform_.inheritScale = true; // デフォルトに戻す
+		worldTransform_.inheritScale = true;
 	}
 
-	// 一応更新
-	worldTransform_.Update();
-
-	// Parentの設定
+	// 親だけ書き換え（Transform Update は呼ばない）
 	parent_ = newParentSp;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////
-//		transformの更新
-/////////////////////////////////////////////////////////////////////////////////////////
-void SceneObject::UpdateWorldTransformRecursive() {
-	// 自身のワールド行列を更新
-	worldTransform_.Update();
-
-	// 子供たちのワールド行列を再帰的に更新
-	for(auto& child : children_) {
-		child->UpdateWorldTransformRecursive();
-	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -152,6 +145,33 @@ void SceneObject::AddChild(const std::shared_ptr<SceneObject>& child) {
 	if(!child || child.get() == this) return;
 
 	child->SetParent(shared_from_this());
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+/// 		自分と子オブジェクトを再帰的に破棄する
+/////////////////////////////////////////////////////////////////////////////////////////
+void SceneObject::DestroyRecursive() {
+
+	// 自分の破棄を通知（Library が拾う）
+	EventBus::Publish(ObjectDestroying{shared_from_this()});
+
+	// 子供の破棄
+	for(auto& child : children_) {
+		if(child) {
+			child->DestroyRecursive();
+		}
+	}
+	children_.clear();
+
+	// 親とのリンク解除
+	if(auto p = parent_.lock()) {
+		auto& siblings = p->children_;
+		siblings.erase(std::remove(siblings.begin(), siblings.end(), shared_from_this()), siblings.end());
+	}
+
+	// 自分のリンク解除
+	parent_.reset();
+	worldTransform_.parent = nullptr;
 }
 
 REGISTER_SCENE_OBJECT(SceneObject)

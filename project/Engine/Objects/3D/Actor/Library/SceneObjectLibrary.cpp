@@ -1,142 +1,168 @@
 #include "SceneObjectLibrary.h"
+
+#include <Engine/Objects/3D/Actor/SceneObject.h>
 #include <Engine/System/Event/EventBus.h>
 #include <iostream>
-#include <unordered_set>
 
-/* 静的ヘルパ -------------------------------------------------------------*/
-void SceneObjectLibrary::GatherSubtreePostorder(
-	const std::shared_ptr<SceneObject>& node,
-	std::vector<std::shared_ptr<SceneObject>>& out){
-	if (!node) return;
-	for (const auto& ch : node->GetChildren()){ GatherSubtreePostorder(ch,out); }
-	out.push_back(node);
-}
+SceneObjectLibrary::SceneObjectLibrary()  = default;
+SceneObjectLibrary::~SceneObjectLibrary() = default;
 
-/* 追加 ------------------------------------------------------------------*/
+//////////////////////////////////////////////////////////////////////////////////
+///     オブジェクトの追加
+//////////////////////////////////////////////////////////////////////////////////
 void SceneObjectLibrary::AddObject(const std::shared_ptr<SceneObject>& object) {
-	if (!object) return;
-	const Guid id = object->GetGuid();
+	if(!object) return;
 
-	std::string baseName = object->GetName();
+	const Guid	id		  = object->GetGuid();
+	std::string baseName  = object->GetName();
 	std::string finalName = baseName;
 
-	// -------------------------
-	// 名前の重複をO(1)で回避
-	// -------------------------
+	// -----------------------------------------
+	// 名前重複回避
+	// -----------------------------------------
 	auto it = nameCounters_.find(baseName);
-	if (it == nameCounters_.end()) {
-		// 初出 → カウンタ登録
+	if(it == nameCounters_.end()) {
 		nameCounters_[baseName] = 1;
 	} else {
-		// 既出 → インクリメントして "(n)" を付ける
 		finalName = baseName + "(" + std::to_string(it->second++) + ")";
 	}
 
-	// 名前を更新
 	object->SetName(finalName, object->GetObjectType());
 
-	// 登録
-	objects_.insert_or_assign(id, object);
+	// ★ shared_ptr で登録
+	objects_[id] = object;
+
+	// イベント発火
 	EventBus::Publish(ObjectAdded{object});
 }
 
-/* 削除（共有_ptr 指定） ---------------------------------------------------*/
-bool SceneObjectLibrary::RemoveObject(const std::shared_ptr<SceneObject>& obj){
-	if (!obj) return false;
-	const Guid id = obj->GetGuid();
-	auto it = objects_.find(id);
-	if (it == objects_.end()) return false;
+//////////////////////////////////////////////////////////////////////////////////
+///     オブジェクトの削除(shared_ptr指定)
+//////////////////////////////////////////////////////////////////////////////////
+bool SceneObjectLibrary::RemoveObject(const std::shared_ptr<SceneObject>& object) {
+	if(!object) return false;
+	Guid id = object->GetGuid();
+	std::cout << "[REMOVE] " << object->GetName()
+			  << " GUID=" << id.ToString()
+			  << " use_count=" << object.use_count() << std::endl;
 
-	RemoveSubtreePostorder(it->second);
+	// 1. 子を完全に削除（再帰）
+	auto children = object->GetChildren();
+	for(auto& child : children) {
+		if(child) {
+			RemoveObject(child);
+		}
+	}
+
+	// 2. 先に削除イベントを発火（FxSystem が emitter を消す）
+	EventBus::Publish(ObjectRemoved{object});
+
+	// 3. DestroyRecursive で階層を断つ
+	object->Destroy();
+
+	// 4. 最後にライブラリから除外
+	objects_.erase(id);
+	std::cout << "[AFTER ERASE]" 
+			  << " use_count=" << object.use_count()
+			  << std::endl;
 	return true;
 }
 
-/* 削除（GUID 指定） -------------------------------------------------------*/
+
+//////////////////////////////////////////////////////////////////////////////////
+///     idをもとに削除
+//////////////////////////////////////////////////////////////////////////////////
 bool SceneObjectLibrary::RemoveObject(Guid id){
 	auto it = objects_.find(id);
 	if (it == objects_.end()) return false;
-	RemoveSubtreePostorder(it->second);
+
+	if (auto sp = it->second) {
+		// 子リストをコピーしてから再帰削除
+		auto children = sp->GetChildren();
+		for (auto& child : children) {
+			if (child) {
+				RemoveObject(child);
+			}
+		}
+
+		sp->Destroy();
+		EventBus::Publish(ObjectRemoved{sp});
+	}
+
+	objects_.erase(it);
 	return true;
 }
 
-/* サブツリーを後行順で外す（イベント発火を保証） ---------------------------*/
-void SceneObjectLibrary::RemoveSubtreePostorder(const std::shared_ptr<SceneObject>& root){
-	std::vector<std::shared_ptr<SceneObject>> postorder;
-	postorder.reserve(16);
-	GatherSubtreePostorder(root,postorder);
+//////////////////////////////////////////////////////////////////////////////////
+///     リストのクリア
+//////////////////////////////////////////////////////////////////////////////////
+void SceneObjectLibrary::Clear() {
+	// Destroy → イベント → クリア
+	for(auto& [id, sp] : objects_) {
+		if(!sp) continue;
+		sp->Destroy();
+		EventBus::Publish(ObjectRemoved{sp});
+	}
 
-	for (auto& node : postorder){
-		if (node->GetParent()) node->SetParent(nullptr);
-		auto it = objects_.find(node->GetGuid());
-		if (it != objects_.end()){
-			EventBus::Publish(ObjectRemoved{it->second});
-			objects_.erase(it);
+	objects_.clear();
+	nameCounters_.clear(); // ここは好み。リセットしたいなら消す
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+///     オブジェクトの検索(idから)
+//////////////////////////////////////////////////////////////////////////////////
+std::shared_ptr<SceneObject> SceneObjectLibrary::Find(Guid id) const {
+	auto it = objects_.find(id);
+	if(it == objects_.end()) return nullptr;
+	return it->second;
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+///     オブジェクトの検索(名前から)
+//////////////////////////////////////////////////////////////////////////////////
+std::shared_ptr<SceneObject> SceneObjectLibrary::FindByName(const std::string& name) const {
+	for(const auto& [id, sp] : objects_) {
+		if(sp && sp->GetName() == name) {
+			return sp;
 		}
 	}
-}
-
-/* クリア（全フォレストを根から） -----------------------------------------*/
-void SceneObjectLibrary::Clear(){
-	if (objects_.empty()) return;
-
-	// まず現在の全ノードをスナップショット
-	std::vector<std::shared_ptr<SceneObject>> all;
-	all.reserve(objects_.size());
-	for (auto& [id, sp] : objects_) if (sp) all.emplace_back(sp);
-
-	// ルート（親がいない or 親が未登録）を抽出
-	std::unordered_set<Guid> live;
-	live.reserve(objects_.size());
-	for (auto& [id, _] : objects_) live.insert(id);
-
-	std::vector<std::shared_ptr<SceneObject>> roots;
-	roots.reserve(all.size());
-	for (auto& sp : all){
-		auto parent = sp->GetParent();
-		const bool isRoot = !parent || !live.contains(parent->GetGuid());
-		if (isRoot) roots.emplace_back(sp);
-	}
-
-	// 各ルートのサブツリーを後行順に削除（イベント発火を保証）
-	for (auto& r : roots){ RemoveSubtreePostorder(r); }
-
-	// 念のため漏れがあれば（単独ノード等）掃除
-	if (!objects_.empty()){
-		// 残存分もイベント付きで落とす
-		std::vector<Guid> rest;
-		rest.reserve(objects_.size());
-		for (auto& [id, _] : objects_) rest.push_back(id);
-		for (auto id : rest) RemoveObject(id);
-	}
-}
-
-/* 検索 ---------------------------------------------------------------*/
-std::shared_ptr<SceneObject> SceneObjectLibrary::Find(Guid id) const{
-	auto it = objects_.find(id);
-	return it != objects_.end() ? it->second : nullptr;
-}
-
-std::shared_ptr<SceneObject> SceneObjectLibrary::FindByName(const std::string& name) const{
-	for (const auto& [id, sp] : objects_){ if (sp && sp->GetName() == name) return sp; }
 	return nullptr;
 }
 
-/* 一覧取得 -------------------------------------------------------------*/
-std::vector<SceneObject*> SceneObjectLibrary::GetAllObjectsRaw() const{
+//////////////////////////////////////////////////////////////////////////////////
+///     オブジェクトの一覧取得(raw)
+//////////////////////////////////////////////////////////////////////////////////
+std::vector<SceneObject*> SceneObjectLibrary::GetAllObjectsRaw() const {
 	std::vector<SceneObject*> result;
 	result.reserve(objects_.size());
-	for (const auto& [id, sp] : objects_) if (sp) result.emplace_back(sp.get());
+
+	for(const auto& [id, sp] : objects_) {
+		if(sp) {
+			result.push_back(sp.get());
+		}
+	}
 	return result;
 }
 
-std::vector<std::shared_ptr<SceneObject>> SceneObjectLibrary::GetAllObjectsShared() const{
+//////////////////////////////////////////////////////////////////////////////////
+///     オブジェクトの一覧取得(shared_ptr版)
+//////////////////////////////////////////////////////////////////////////////////
+std::vector<std::shared_ptr<SceneObject>> SceneObjectLibrary::GetAllObjectsShared() const {
 	std::vector<std::shared_ptr<SceneObject>> result;
 	result.reserve(objects_.size());
-	for (const auto& [id, sp] : objects_) result.emplace_back(sp);
+
+	for(const auto& [id, sp] : objects_) {
+		if(sp) {
+			result.push_back(sp);
+		}
+	}
 	return result;
 }
 
-bool SceneObjectLibrary::Contains(const std::shared_ptr<SceneObject>& obj) const{
-	if (!obj) return false;
+//////////////////////////////////////////////////////////////////////////////////
+///     オブジェクトの所属判定
+//////////////////////////////////////////////////////////////////////////////////
+bool SceneObjectLibrary::Contains(const std::shared_ptr<SceneObject>& obj) const {
+	if(!obj) return false;
 	return objects_.contains(obj->GetGuid());
 }

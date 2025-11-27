@@ -12,7 +12,8 @@ PlayerBullet::PlayerBullet(const std::string& modelName, const std::string& name
 
 	// fx
 	shootFx_ = SceneAPI::Instantiate<FxObject>("TrailFx");
-	shootFx_->LoadFromPath("Effect/BulletTrailEffect");
+	auto fx = shootFx_.lock();
+	fx->LoadFromPath("Effect/BulletTrailEffect");
 
 	// collider初期化
 	BaseGameObject::InitializeCollider(ColliderKind::Sphere);
@@ -30,11 +31,12 @@ PlayerBullet::~PlayerBullet() = default;
 
 void PlayerBullet::Initialize(){
 	auto self = shared_from_this();
-
-	shootFx_->SetParent(self);
-	shootFx_->StopAll();
+	auto fx = shootFx_.lock();
+	fx->SetParent(self);
+	fx->StopAll();
 }
 
 void PlayerBullet::OnShot() {
-	shootFx_->PlayAll();
+	auto fx = shootFx_.lock();
+	fx->PlayAll();
 }

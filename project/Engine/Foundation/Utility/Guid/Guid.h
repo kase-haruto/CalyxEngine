@@ -10,9 +10,6 @@
 #include <array>
 #include <cstdint>
 #include <string>
-#include <sstream>
-#include <iomanip>
-#include <compare>
 
 /* ========================================================================
 /*		識別id
