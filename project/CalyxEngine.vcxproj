@@ -175,6 +175,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\3dObject\Actor\Boss\AI\BossAI.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Boss\Attack\BossNormalShoot.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Boss\Attack\IBossAttack.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Boss\State\Interface\IBossState.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Boss\State\Machine\BossStateMachine.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Bullet\EnemyBullet\EnemyHomingBullet.cpp" />
     <ClCompile Include="Game\Battle\Shooting\Details\FireScheduler.cpp" />
     <ClCompile Include="Game\Battle\Shooting\Pattern\PatternAimedNWay.cpp" />
@@ -430,6 +432,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\3dObject\Actor\Boss\AI\BossAI.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\Attack\BossNormalShoot.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\Attack\IBossAttack.h" />
+    <ClInclude Include="Game\3dObject\Actor\Boss\State\Interface\IBossState.h" />
+    <ClInclude Include="Game\3dObject\Actor\Boss\State\Machine\BossStateMachine.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\EnemyBullet\EnemyHomingBullet.h" />
     <ClInclude Include="Game\Battle\Shooting\Details\AimProvider.h" />
     <ClInclude Include="Game\Battle\Shooting\Details\FireScheduler.h" />
@@ -952,6 +956,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <Content Include="Data\Game\Config\Event\CameraTurnAroundEventConfig.h" />
     <Content Include="Engine\Foundation\Utility\Func\CxUtils.h" />
+    <Content Include="Game\3dObject\Actor\Boss\State\Details\BossStateType" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,0 +1,47 @@
+#include "BossStateMachine.h"
+#include "../Interface/IBossState.h"
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		ctor / dtor
+/////////////////////////////////////////////////////////////////////////////////////////
+BossStateMachine::BossStateMachine()  = default;
+BossStateMachine::~BossStateMachine() = default;
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		更新
+/////////////////////////////////////////////////////////////////////////////////////////
+void BossStateMachine::Update(float dt) {
+	if(!currentState_) return;
+
+	// 現在のステートを更新
+	currentState_->Update(dt);
+
+	// ステートが遷移リクエストを投げたら処理する
+	const auto& request = currentState_->GetTransitionRequest();
+	if(request.hasRequest) {
+		ChangeState(request.nextType);
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		状態の変更
+/////////////////////////////////////////////////////////////////////////////////////////
+void BossStateMachine::ChangeState(BossStateType nextType) {
+
+	// 現在のステートとリクエストが同じなら何もしない
+	if(currentState_->GetStateType() == nextType) {
+		return;
+	}
+
+	// 現在の状態から抜ける
+	switch(nextType) {
+	case BossStateType::Attack:
+		currentState_ = nullptr;
+		break;
+	case BossStateType::Dead:
+		currentState_ = nullptr;
+		break;
+	default:
+		break;
+	}
+}
