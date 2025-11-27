@@ -82,7 +82,6 @@ void ParticleSystemObject::ApplyConfig() {
 	emitter_->ApplyConfigFrom(cfg);
 	// SceneObject 情報
 	name_	  = cfg.name;
-	id_		  = cfg.guid;
 	parentId_ = cfg.parentGuid;
 
 	worldTransform_.ApplyConfig(cfg.transform);
@@ -93,7 +92,6 @@ void ParticleSystemObject::ExtractConfig() {
 	emitter_->ExtractConfigTo(cfg); // config_ は ParticleSystemObjectConfig
 
 	cfg.name	   = name_;
-	cfg.guid	   = id_;
 	cfg.parentGuid = parentId_;
 	worldTransform_.ExtractConfig();
 }
