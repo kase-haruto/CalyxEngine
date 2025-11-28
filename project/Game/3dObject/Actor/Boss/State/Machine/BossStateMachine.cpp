@@ -5,6 +5,9 @@
 #include "../Idle/BossStateIdle.h"
 #include "../Attack/BossStateAttack.h"
 
+// c++
+#include <externals/imgui/imgui.h>
+
 namespace  {
 std::unique_ptr<BaseBossState> CreateState(BossStateType type) {
 	switch(type) {
@@ -56,6 +59,17 @@ void BossStateMachine::SetInitialState(BossStateType type) {
 	stack_.clear();
 	stack_.push_back(CreateState(type));
 	stack_.back()->Enter();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		状態の変更
+/////////////////////////////////////////////////////////////////////////////////////////
+void BossStateMachine::ShowGui() {
+	if (stack_.empty()) {
+		ImGui::Text("No state (stack empty)");
+		return;
+	}
+	stack_.back()->ShowGui();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

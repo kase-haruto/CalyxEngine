@@ -4,10 +4,11 @@
 //		ctor / dtor
 /////////////////////////////////////////////////////////////////////////////////////////
 BossStateAttack::BossStateAttack() {
+	// タイプの設定
+	BaseBossState::SetStatypeType(BossStateType::Attack);
 }
 
-BossStateAttack::~BossStateAttack() {
-}
+BossStateAttack::~BossStateAttack() = default;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		更新処理
@@ -20,3 +21,9 @@ void BossStateAttack::Update(float dt) {
 //		状態に入るときの処理
 /////////////////////////////////////////////////////////////////////////////////////////
 void BossStateAttack::Enter() {}
+
+
+void BossStateAttack::ShowGui() {
+	BaseBossState::ShowGui();
+	
+}

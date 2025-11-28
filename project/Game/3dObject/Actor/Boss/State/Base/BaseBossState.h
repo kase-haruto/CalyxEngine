@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Details/BossStateType"
+#include "../../Details/BossStateType"
 
 /**
  * \brief ボスの状態インターフェース
@@ -36,6 +36,10 @@ public:
 	 * \brief 状態の更新
 	 */
 	virtual void Update(float dt) = 0;
+	/**
+	 * \brief GUI表示
+	 */
+	virtual void ShowGui();
 
 	// accessor ==========================================================//
 	const TransitionRequest& GetTransitionRequest() const;

@@ -173,6 +173,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\PostProcess\Manager\PostEffectManager.cpp" />
     <ClCompile Include="Game\2d\HpGauge.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Boss\AI\BossAI.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Boss\Anim\BossAnimController.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Boss\Attack\BossNormalShoot.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Boss\Attack\IBossAttack.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Boss\State\Attack\BossStateAttack.cpp" />
@@ -432,6 +433,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\PostProcess\Manager\PostEffectManager.h" />
     <ClInclude Include="Game\2d\HpGauge.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\AI\BossAI.h" />
+    <ClInclude Include="Game\3dObject\Actor\Boss\Anim\BossAnimController.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\Attack\BossNormalShoot.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\Attack\IBossAttack.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\State\Attack\BossStateAttack.h" />
@@ -960,7 +962,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <Content Include="Data\Game\Config\Event\CameraTurnAroundEventConfig.h" />
     <Content Include="Engine\Foundation\Utility\Func\CxUtils.h" />
-    <Content Include="Game\3dObject\Actor\Boss\State\Details\BossStateType" />
+    <Content Include="Game\3dObject\Actor\Boss\Details\BossAnimType.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

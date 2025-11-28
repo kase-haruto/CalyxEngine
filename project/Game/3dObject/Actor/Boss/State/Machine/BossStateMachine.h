@@ -1,7 +1,7 @@
 #pragma once
 
 // game
-#include "../Details/BossStateType"
+#include "../../Details/BossStateType"
 
 // c++
 #include <memory>
@@ -29,6 +29,10 @@ public:
 	 * \brief 初期状態の設定
 	 */
 	void SetInitialState(BossStateType type);
+	/**
+	 * \brief GUI表示
+	 */
+	void ShowGui();
 
 private:
 	//===================================================================*/

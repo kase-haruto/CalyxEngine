@@ -9,7 +9,7 @@
 #include <Game/Battle/Shooting/ShootingController/BossShootingController.h>
 
 class BossAI;
-
+class BossAnimController;
 /**
  * \brief レールの最後で出てくるボスキャラクター
  */
@@ -42,6 +42,11 @@ public:
 	 */
 	void Update(float dt) override;
 
+	/**
+	 * \brief GUI表示
+	 */
+	void DerivativeGui() override;
+
 	//--------- collider -----------------------------------------------------
 	/**
 	 * \brief 衝突時処理
@@ -63,6 +68,7 @@ public:
 	Vector3		  GetTargetWorldPos() const;
 	void		  SetShootingController(std::unique_ptr<BossShootingController>);
 	void		  SetPlayerTransform(const WorldTransform* position);
+	BossAnimController* GetAnim()const;
 
 private:
 	//===================================================================*/
@@ -81,4 +87,5 @@ private:
 	std::unique_ptr<BossShootingController> shootingController_ = nullptr;
 	std::unique_ptr<BossAI>					ai_					= nullptr;
 	std::unique_ptr<BossStateMachine>		stateMachine_		= nullptr;
+	std::unique_ptr<BossAnimController>		anim_				= nullptr;
 };

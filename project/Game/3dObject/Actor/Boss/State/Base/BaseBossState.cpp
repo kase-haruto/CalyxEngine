@@ -1,10 +1,34 @@
 #include "BaseBossState.h"
 
-#include <iterator>
+#include "imgui/imgui.h"
+
+#include <string>
 
 BaseBossState::BaseBossState()	= default;
 BaseBossState::~BaseBossState() = default;
 
+namespace {
+std::string TypeToString(BossStateType type) {
+	switch(type) {
+	case BossStateType::Idle:
+		return "Idle";
+	case BossStateType::Attack:
+		return "Attack";
+	case BossStateType::Defend:
+		return "Defend";
+	case BossStateType::Dead:
+		return "Dead";
+	default:
+		return "None";
+	}
+}
+
+} // namespace
+
+void BaseBossState::ShowGui() {
+	//現在のタイプを表示
+	ImGui::SeparatorText(TypeToString(state_).c_str());
+}
 /////////////////////////////////////////////////////////////////////////////////////////
 //		状態遷移リクエストの取得
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -30,7 +54,7 @@ void BaseBossState::SetStatypeType(BossStateType type) {
 //		リクエストの送信
 /////////////////////////////////////////////////////////////////////////////////////////
 void BaseBossState::RequestChange(BossStateType next) {
-request_ = { TransitionRequest::Type::Change, next };
+	request_ = {TransitionRequest::Type::Change, next};
 }
 void BaseBossState::RequestPush(BossStateType next) {
 	request_ = {TransitionRequest::Type::Push, next};

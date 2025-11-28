@@ -22,6 +22,10 @@ public:
 	 * @brief 状態に入るときの処理
 	 */
 	void Enter() override;
+	/**
+	 * @brief GUI表示
+	 */
+	void ShowGui() override;
 
 private:
 	//===================================================================*/

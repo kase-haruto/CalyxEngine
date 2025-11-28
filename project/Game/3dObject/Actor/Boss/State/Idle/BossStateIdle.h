@@ -18,6 +18,10 @@ public:
 	 * @param dt
 	 */
 	void Update(float dt) override;
+	/**
+	 * @brief GUI表示
+	 */
+	void ShowGui() override;
 
 private:
 	//===================================================================*/
