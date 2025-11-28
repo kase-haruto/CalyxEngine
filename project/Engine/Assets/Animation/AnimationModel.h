@@ -6,8 +6,7 @@
 /* ========================================================================
 /*		動的モデル
 /* ===================================================================== */
-class AnimationModel
-	: public BaseModel {
+class AnimationModel : public BaseModel {
 public:
 	//===================================================================*/
 	//					public method
@@ -24,24 +23,31 @@ public:
 	// モデル読み込み時処理
 	void OnModelLoaded() override;
 
+	// アニメーションの登録 (ゲーム側は enum を int16_t にキャストして渡す想定)
+	void RegisterAnimation(int16_t animID, const std::string& animName, const std::optional<std::string>& fileName = std::nullopt);
+	// アニメーション再生 (ID ベース)
+	void Play(int16_t id, float blend = 0.2f);
+	// ワンショット再生（再生終了後に returnAnim へ戻す）
+	void PlayOneShot(int16_t id, int16_t returnAnim, float blend = 0.1f);
+	// ループ設定
+	void SetLoop(int16_t id, bool isLoop);
+
 	//--------- skeleton -----------------------------------------------------
 	void SkeletonUpdate();
 	void SkinClusterUpdate();
 	void DrawSkeleton();
 
-	// アニメーションを追加
+	// アニメーションを追加（名前ベース・従来 API）
 	void AddAnimation(const std::string& animName, const std::string& fileName);
-	// アニメーションを再生
+	// アニメーションを再生（名前ベース・従来 API）
 	void PlayAnimation(const std::string& animName, float blendDuration);
 
-	//--------- accessor ------------------------------------------------------
-	// getter
+	//--------- accessor ------------------------------------------------------//
 	std::string				 GetCurrentAnimationName() const;
 	float					 GetAnimationSpeed() const { return animationSpeed_; }
 	std::vector<std::string> GetAnimationNodeNames() const;
 	std::optional<Matrix4x4> GetJointMatrix(const std::string& name) const;
 
-	// setter
 	void SetAnimationSpeed(float speed) { animationSpeed_ = speed; }
 
 private:
@@ -52,34 +58,20 @@ private:
 	void MaterialBufferMap() override;
 	void Map() override;
 
-	/// <summary>
-	/// アニメーション再生
-	/// </summary>
+	/// アニメーション再生（毎フレーム更新側）
 	void PlayAnimation();
 
-	/// <summary>
 	/// アニメーションをバインド
-	/// </summary>
-	/// <param name="anim"></param>
 	void BuildFastChannels(Animation& anim);
 
-	/// <summary>
 	/// スケルトンのアニメーションを適用
-	/// </summary>
 	void ApplyAnimationToSkeleton();
 
-	/// <summary>
 	/// アニメーションCurveを適用
-	/// </summary>
-	/// <param name="curve"></param>
-	/// <param name="time"></param>
-	/// <returns></returns>
 	Quaternion CalculateValue(const AnimationCurve<Quaternion>& curve, float time);
 	Vector3	   CalculateValue(const AnimationCurve<Vector3>& curve, float time);
 
-	/// <summary>
 	/// スケルトン計算
-	/// </summary>
 	void SkinningStep();
 
 private:
@@ -88,11 +80,12 @@ private:
 	//===================================================================*/
 	float animationTime_ = 0.0f; //< アニメーションの経過時間
 
-	Animation				 animationData_; //< アニメーションデータ
+	Animation				 animationData_;
 	int						 selectedJoint_		= -1;
 	ImVec4					 jointHighlightCol_ = {1.0f, 0.2f, 0.2f, 1.0f};
-	SkinCluster				 skinCluster_; //< スキンクラスター
-	D3D12_VERTEX_BUFFER_VIEW vbvs_[2];	   //< スキンクラスター用のバッファビュー
+	SkinCluster				 skinCluster_;
+	D3D12_VERTEX_BUFFER_VIEW vbvs_[2];
+
 public:
 	float animationSpeed_ = 1.0f;  //< アニメーションの再生速度
 	bool  isDrawSkeleton_ = false; //< スケルトンを描画するかどうか
@@ -103,4 +96,10 @@ private:
 	AnimationState*									nextAnimation_	  = nullptr;
 	float											blendTime_		  = 0.0f;
 	float											blendDuration_	  = 0.2f; // ブレンド時間（秒）
+
+private:
+	// ID → アニメーション名
+	std::unordered_map<int16_t, std::string> animIdTable_;
+	bool    isOneShot_      = false;
+	int16_t oneShotReturn_  = 0;
 };
