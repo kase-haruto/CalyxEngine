@@ -2,13 +2,13 @@
 #include "../Base/BaseBossState.h"
 
 // state
-#include "../Idle/BossStateIdle.h"
 #include "../Attack/BossStateAttack.h"
+#include "../Idle/BossStateIdle.h"
 
 // c++
 #include <externals/imgui/imgui.h>
 
-namespace  {
+namespace {
 std::unique_ptr<BaseBossState> CreateState(BossStateType type) {
 	switch(type) {
 	case BossStateType::Idle:
@@ -19,7 +19,7 @@ std::unique_ptr<BaseBossState> CreateState(BossStateType type) {
 		return nullptr;
 	}
 }
-}
+} // namespace
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		ctor / dtor
@@ -31,13 +31,13 @@ BossStateMachine::~BossStateMachine() = default;
 //		更新
 /////////////////////////////////////////////////////////////////////////////////////////
 void BossStateMachine::Update(float dt) {
-	if (stack_.empty()) return;
+	if(stack_.empty()) return;
 
 	BaseBossState* cur = stack_.back().get();
 	cur->Update(dt);
 
 	auto req = cur->GetTransitionRequest();
-	switch (req.op) {
+	switch(req.op) {
 	case BaseBossState::TransitionRequest::Type::Change:
 		ChangeState(req.nextType);
 		break;
@@ -137,12 +137,29 @@ void BossStateMachine::SetOwner(Boss* owner) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		状態の変更
 /////////////////////////////////////////////////////////////////////////////////////////
-void BossStateMachine::ChangeState(BossStateType nextType) {
-	if (!stack_.empty()) {
+void BossStateMachine::ChangeState(BossStateType nextType, int16_t param) {
+	if(!stack_.empty()) {
 		stack_.back()->Exit();
 		stack_.pop_back();
 	}
+
+	auto st = CreateState(nextType);
+
+	st->SetOwner(owner_);
+	st->SetTransitionParam(param);
+	st->Enter();
+
+	stack_.push_back(std::move(st));
+}
+/////////////////////////////////////////////////////////////////////////////////////////
+//		状態の変更
+/////////////////////////////////////////////////////////////////////////////////////////
+void BossStateMachine::PushState(BossStateType nextType) {
+	if(!stack_.empty())
+		stack_.back()->Exit();
+
 	stack_.push_back(CreateState(nextType));
+	stack_.back()->SetOwner(owner_);
 	stack_.back()->SetOwner(owner_);
 	stack_.back()->Enter();
 }
@@ -150,26 +167,12 @@ void BossStateMachine::ChangeState(BossStateType nextType) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		状態の変更
 /////////////////////////////////////////////////////////////////////////////////////////
-void BossStateMachine::PushState(BossStateType nextType) {
-	if (!stack_.empty())
-	stack_.back()->Exit();
-
-	stack_.push_back(CreateState(nextType));
-	stack_.back()->SetOwner(owner_);	stack_.back()->SetOwner(owner_);
-	stack_.back()->Enter();
-}
-
-
-/////////////////////////////////////////////////////////////////////////////////////////
-//		状態の変更
-/////////////////////////////////////////////////////////////////////////////////////////
 void BossStateMachine::PopState() {
-	if (stack_.empty()) return;
+	if(stack_.empty()) return;
 
 	stack_.back()->Exit();
 	stack_.pop_back();
 
-	if (!stack_.empty())
+	if(!stack_.empty())
 		stack_.back()->Enter();
 }
-

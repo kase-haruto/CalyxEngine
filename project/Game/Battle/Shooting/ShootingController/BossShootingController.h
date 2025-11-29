@@ -15,7 +15,7 @@ public:
 	//			public method
 	//===================================================================*/
 	BossShootingController(std::unique_ptr<BulletContainer> container);
-	~BossShootingController() override = default;
+	~BossShootingController() override;
 
 	//--------- main ------------------------------------------------------
 	void Update(float dt) override;

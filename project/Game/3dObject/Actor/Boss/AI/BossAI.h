@@ -4,13 +4,12 @@
 /* ===================================================================== */
 
 // c++
-#include <memory>
-#include <vector>
+#include "Game/3dObject/Actor/Boss/Details/BossAttackType.h"
+
+#include <optional>
 
 // fwd
 class Boss;
-class BossShootingController;
-class IBossAttack;
 
 /**
  * \brief ボスの行動を制御するAIクラス
@@ -20,17 +19,24 @@ public:
 	//===================================================================*/
 	//                    public methods
 	//===================================================================*/
-	BossAI(Boss* owner,BossShootingController* shooter);
+	BossAI(Boss* owner);
 	~BossAI();
 
+	/**
+	 * \brief 更新処理
+	 * \param dt デルタタイム
+	 */
 	void Update(float dt);
-	void AddAttack(std::unique_ptr<IBossAttack> attack);
+	/**
+	 * \brief 攻撃方法を決定する
+	 * \param dt デルタタイム
+	 * \return 攻撃方法（攻撃しない場合は std::nullopt）
+	 */
+	std::optional<BossAttackType>DecideAttack(float dt);
 private:
 	//===================================================================*/
 	//                    private methods
 	//===================================================================*/
 	Boss* owner_;
-	BossShootingController* shooter_;
-	std::vector<std::unique_ptr<IBossAttack>> attacks_;
 	float cooldownTimer_ = 0.0f;
 };

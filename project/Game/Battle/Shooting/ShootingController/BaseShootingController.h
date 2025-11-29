@@ -4,8 +4,8 @@ struct Vector3;
 
 class BaseShootingController{
 public:
-	BaseShootingController() = default;
-	virtual ~BaseShootingController() = default;
+	BaseShootingController();
+	virtual ~BaseShootingController();
 
 	virtual  void Update(float dt);
 	virtual  bool RequestShoot(const Vector3& pos, const Vector3& dir) = 0;

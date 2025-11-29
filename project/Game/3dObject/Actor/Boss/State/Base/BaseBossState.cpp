@@ -56,11 +56,14 @@ void BaseBossState::SetOwner(Boss* owner) {
 	owner_ = owner;
 }
 
+void BaseBossState::SetTransitionParam(int16_t parm) {
+	transitionParm_ = parm;
+}
 /////////////////////////////////////////////////////////////////////////////////////////
 //		リクエストの送信
 /////////////////////////////////////////////////////////////////////////////////////////
-void BaseBossState::RequestChange(BossStateType next) {
-	request_ = {TransitionRequest::Type::Change, next};
+void BaseBossState::RequestChange(BossStateType next, int16_t parm) {
+	request_ = {TransitionRequest::Type::Change, next, parm};
 }
 void BaseBossState::RequestPush(BossStateType next) {
 	request_ = {TransitionRequest::Type::Push, next};
