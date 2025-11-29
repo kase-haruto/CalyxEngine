@@ -58,6 +58,7 @@ void BossStateMachine::Update(float dt) {
 void BossStateMachine::SetInitialState(BossStateType type) {
 	stack_.clear();
 	stack_.push_back(CreateState(type));
+	stack_.back()->SetOwner(owner_);
 	stack_.back()->Enter();
 }
 
@@ -65,11 +66,72 @@ void BossStateMachine::SetInitialState(BossStateType type) {
 //		状態の変更
 /////////////////////////////////////////////////////////////////////////////////////////
 void BossStateMachine::ShowGui() {
-	if (stack_.empty()) {
+	if(stack_.empty()) {
 		ImGui::Text("No state (stack empty)");
 		return;
 	}
+
+	ImGui::Text("=== Boss State Debug ===");
+	ImGui::Separator();
+
+	// 現在のステート名を表示
+	ImGui::Text("Current: %s", stack_.back()->GetStateName().c_str());
+
+	ImGui::Spacing();
+	ImGui::Text("Change State:");
+	ImGui::Separator();
+
+	// --- ChangeState Buttons ---
+	if(ImGui::Button("Idle")) {
+		ChangeState(BossStateType::Idle);
+	}
+	ImGui::SameLine();
+	if(ImGui::Button("Attack")) {
+		ChangeState(BossStateType::Attack);
+	}
+
+	ImGui::Spacing();
+	ImGui::Text("Push State:");
+	ImGui::Separator();
+
+	// --- PushState Buttons ---
+	if(ImGui::Button("Push Idle")) {
+		PushState(BossStateType::Idle);
+	}
+	ImGui::SameLine();
+	if(ImGui::Button("Push Attack")) {
+		PushState(BossStateType::Attack);
+	}
+
+	ImGui::Spacing();
+	ImGui::Text("Pop State:");
+	ImGui::Separator();
+
+	// --- PopState Button ---
+	if(ImGui::Button("Pop")) {
+		PopState();
+	}
+
+	// スタック状況も表示
+	ImGui::Spacing();
+	ImGui::Text("State Stack:");
+	for(int i = 0; i < (int)stack_.size(); i++) {
+		ImGui::BulletText("[%d] %s", i, stack_[i]->GetStateName().c_str());
+	}
+
+	// 各ステートの独自GUIも呼ぶ
+	ImGui::Separator();
+	ImGui::Text("=== State Internal GUI ===");
+
+	if(stack_.empty()) return;
 	stack_.back()->ShowGui();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		ボスを設定
+/////////////////////////////////////////////////////////////////////////////////////////
+void BossStateMachine::SetOwner(Boss* owner) {
+	owner_ = owner;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -81,6 +143,7 @@ void BossStateMachine::ChangeState(BossStateType nextType) {
 		stack_.pop_back();
 	}
 	stack_.push_back(CreateState(nextType));
+	stack_.back()->SetOwner(owner_);
 	stack_.back()->Enter();
 }
 
@@ -92,6 +155,7 @@ void BossStateMachine::PushState(BossStateType nextType) {
 	stack_.back()->Exit();
 
 	stack_.push_back(CreateState(nextType));
+	stack_.back()->SetOwner(owner_);	stack_.back()->SetOwner(owner_);
 	stack_.back()->Enter();
 }
 

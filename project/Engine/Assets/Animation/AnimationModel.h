@@ -31,6 +31,8 @@ public:
 	void PlayOneShot(int16_t id, int16_t returnAnim, float blend = 0.1f);
 	// ループ設定
 	void SetLoop(int16_t id, bool isLoop);
+	// アニメーション終了判定
+	bool IsAnimationFinished()const;
 
 	//--------- skeleton -----------------------------------------------------
 	void SkeletonUpdate();

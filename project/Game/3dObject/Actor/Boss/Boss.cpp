@@ -38,6 +38,7 @@ Boss::Boss(const std::string& modelName,const std::string objName)
 
 	// ステートの初期化
 	stateMachine_ = std::make_unique<BossStateMachine>();
+	stateMachine_->SetOwner(this);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -181,6 +182,6 @@ void Boss::SetShootingController(std::unique_ptr<BossShootingController> control
 
 void				Boss::SetPlayerTransform(const WorldTransform* tf) { playerTransform_ = tf; }
 
-BossAnimController* Boss::GetAnim() const {
+BossAnimController* Boss::GetAnimator() const {
 	return anim_.get();
 }

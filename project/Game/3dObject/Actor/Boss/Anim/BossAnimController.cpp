@@ -37,3 +37,7 @@ void BossAnimController::SetLoop(int16_t id, bool isLoop) const {
 std::string BossAnimController::GetCurrentAnimName() const {
 	return animModel_->GetCurrentAnimationName();
 }
+
+bool BossAnimController::IsAnimFinished() const {
+	return animModel_->IsAnimationFinished();
+}

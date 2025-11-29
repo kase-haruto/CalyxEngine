@@ -25,7 +25,8 @@
    ===================================================================*/
 AnimationModel::AnimationModel(const std::string& fileName) {
 	fileName_ = fileName;
-	Initialize();
+	CreateMaterialBuffer();
+	Map();
 
 	// メインアニメをロード
 	animationData_ = LoadAnimationFile("Resources/models", fileName_);
@@ -41,8 +42,7 @@ AnimationModel::AnimationModel(const std::string& fileName) {
    初期化 – マテリアルバッファなど
    ===================================================================*/
 void AnimationModel::Initialize() {
-	CreateMaterialBuffer();
-	Map();
+
 }
 
 void AnimationModel::Update(float dt) {
@@ -389,6 +389,14 @@ void AnimationModel::SetLoop(int16_t id, bool isLoop) {
 	if(stIt == animationStates_.end()) return;
 
 	stIt->second.loop = isLoop;
+}
+bool AnimationModel::IsAnimationFinished() const {
+	if(!currentAnimation_) return false;
+
+	if(currentAnimation_->loop)
+		return false; // ループアニメは終わらない
+
+	return currentAnimation_->currentTime >= currentAnimation_->animation.duration;
 }
 
 //-----------------------------------------------------------------------------

@@ -46,6 +46,7 @@ public:
 
 	// getter
 	std::string GetCurrentAnimName() const;
+	bool		IsAnimFinished() const;
 
 private:
 	AnimationModel* animModel_;

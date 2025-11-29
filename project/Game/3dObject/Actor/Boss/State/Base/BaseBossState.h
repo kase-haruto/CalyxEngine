@@ -2,6 +2,10 @@
 
 #include "../../Details/BossStateType"
 
+#include <string>
+
+class Boss;
+
 /**
  * \brief ボスの状態インターフェース
  */
@@ -44,8 +48,9 @@ public:
 	// accessor ==========================================================//
 	const TransitionRequest& GetTransitionRequest() const;
 	BossStateType GetStateType() const;
+	std::string GetStateName() const;
 	void SetStatypeType(BossStateType type);
-	
+	void SetOwner(Boss* owner);
 protected:
 	//===================================================================*/
 	//                    protected methods
@@ -71,4 +76,7 @@ private:
 	//===================================================================*/
 	TransitionRequest request_;
 	BossStateType state_;
+
+protected:
+	Boss* owner_ = nullptr;
 };

@@ -68,7 +68,7 @@ public:
 	Vector3		  GetTargetWorldPos() const;
 	void		  SetShootingController(std::unique_ptr<BossShootingController>);
 	void		  SetPlayerTransform(const WorldTransform* position);
-	BossAnimController* GetAnim()const;
+	BossAnimController* GetAnimator()const;
 
 private:
 	//===================================================================*/

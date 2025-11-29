@@ -23,6 +23,11 @@ public:
 	 */
 	void ShowGui() override;
 
+	/**
+	 * \brief 状態に入るときの処理
+	 */
+	void Enter() override;
+
 private:
 	//===================================================================*/
 	//                    private methods

@@ -42,12 +42,18 @@ const BaseBossState::TransitionRequest& BaseBossState::GetTransitionRequest() co
 BossStateType BaseBossState::GetStateType() const {
 	return state_;
 }
+std::string BaseBossState::GetStateName() const {
+	return TypeToString(state_);
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		ステートタイプの設定
 /////////////////////////////////////////////////////////////////////////////////////////
 void BaseBossState::SetStatypeType(BossStateType type) {
 	state_ = type;
+}
+void BaseBossState::SetOwner(Boss* owner) {
+	owner_ = owner;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

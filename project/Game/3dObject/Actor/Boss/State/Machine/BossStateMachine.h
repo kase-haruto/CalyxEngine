@@ -7,6 +7,7 @@
 #include <memory>
 #include <vector>
 
+class Boss;
 // fwd
 class BaseBossState;
 
@@ -34,6 +35,8 @@ public:
 	 */
 	void ShowGui();
 
+	void SetOwner(Boss* owner);
+
 private:
 	//===================================================================*/
 	//                    private method
@@ -58,4 +61,5 @@ private:
 	//                    private members
 	//===================================================================*/
 	std::vector<std::unique_ptr<BaseBossState>> stack_;
+	Boss* owner_ = nullptr;
 };

@@ -1,5 +1,9 @@
 #include "BossStateIdle.h"
 
+#include "Game/3dObject/Actor/Boss/Anim/BossAnimController.h"
+#include "Game/3dObject/Actor/Boss/Boss.h"
+#include "Game/3dObject/Actor/Boss/Details/BossAnimType.h"
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //		ctor / dtor
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -22,6 +26,8 @@ void BossStateIdle::Update(float dt) {
 void BossStateIdle::ShowGui() {
 	// 名前表示
 	BaseBossState::ShowGui();
-
-	
+}
+void BossStateIdle::Enter() {
+	if(!owner_) return;
+	owner_->GetAnimator()->Play(static_cast<int16_t>(BossAnimType::Idle), /*loop=*/true);
 }
