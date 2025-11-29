@@ -31,15 +31,24 @@ BossStateMachine::~BossStateMachine() = default;
 //		更新
 /////////////////////////////////////////////////////////////////////////////////////////
 void BossStateMachine::Update(float dt) {
-	if(stack_.empty()) return;
+	if (stack_.empty()) return;
 
 	BaseBossState* cur = stack_.back().get();
 	cur->Update(dt);
 
 	auto req = cur->GetTransitionRequest();
+	if (req.op != BaseBossState::TransitionRequest::Type::None) {
+		HandleTransition(req);
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		状態遷移の処理
+/////////////////////////////////////////////////////////////////////////////////////////
+void BossStateMachine::HandleTransition(const BaseBossState::TransitionRequest& req) {
 	switch(req.op) {
 	case BaseBossState::TransitionRequest::Type::Change:
-		ChangeState(req.nextType);
+		ChangeState(req.nextType, req.param);
 		break;
 	case BaseBossState::TransitionRequest::Type::Push:
 		PushState(req.nextType);
@@ -49,6 +58,10 @@ void BossStateMachine::Update(float dt) {
 		break;
 	default:
 		break;
+	}
+
+	if (!stack_.empty()) {
+		stack_.back()->ResetRequest();
 	}
 }
 
@@ -138,19 +151,22 @@ void BossStateMachine::SetOwner(Boss* owner) {
 //		状態の変更
 /////////////////////////////////////////////////////////////////////////////////////////
 void BossStateMachine::ChangeState(BossStateType nextType, int16_t param) {
-	if(!stack_.empty()) {
+	// 現在のステートを削除
+	if (!stack_.empty()) {
 		stack_.back()->Exit();
 		stack_.pop_back();
 	}
 
+	// 新しいステート作成
 	auto st = CreateState(nextType);
-
 	st->SetOwner(owner_);
 	st->SetTransitionParam(param);
-	st->Enter();
 
+	// ここで push してから Enter を呼ぶ
 	stack_.push_back(std::move(st));
+	stack_.back()->Enter();
 }
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //		状態の変更
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -158,9 +174,10 @@ void BossStateMachine::PushState(BossStateType nextType) {
 	if(!stack_.empty())
 		stack_.back()->Exit();
 
-	stack_.push_back(CreateState(nextType));
-	stack_.back()->SetOwner(owner_);
-	stack_.back()->SetOwner(owner_);
+	auto st = CreateState(nextType);
+	st->SetOwner(owner_);
+
+	stack_.push_back(std::move(st));
 	stack_.back()->Enter();
 }
 

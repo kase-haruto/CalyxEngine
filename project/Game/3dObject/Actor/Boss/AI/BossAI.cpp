@@ -34,7 +34,7 @@ std::optional<BossAttackType> BossAI::DecideAttack(float dt) {
 	// -------------------------
 	// ランダムに攻撃を決める
 	// -------------------------
-	int			   r   = Random::Generate<int>(0, 0); // 0~0 → NormalShot
+	int			   r   = Random::Generate<int>(0, 1);
 	BossAttackType atk = static_cast<BossAttackType>(r);
 
 	// 攻撃が決まった → クールダウン設定

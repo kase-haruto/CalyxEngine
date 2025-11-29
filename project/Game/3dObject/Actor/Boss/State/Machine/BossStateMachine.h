@@ -4,6 +4,8 @@
 #include "../../Details/BossStateType"
 
 // c++
+#include "Game/3dObject/Actor/Boss/State/Base/BaseBossState.h"
+
 #include <memory>
 #include <vector>
 
@@ -26,6 +28,10 @@ public:
 	 * \brief 状態の更新
 	 */
 	void Update(float dt);
+	/**
+	 * \brief 状態遷移要求の処理
+	 */		
+	void HandleTransition(const BaseBossState::TransitionRequest& req);
 	/**
 	 * \brief 初期状態の設定
 	 */

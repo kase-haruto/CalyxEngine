@@ -46,7 +46,7 @@ private:
 	//===================================================================*/
 	//					private methods
 	//===================================================================*/
-	BossAttackType													 attackType_ = BossAttackType::NormalShoot; //< 攻撃タイプ
+	BossAttackType													 attackType_ = BossAttackType::Punch; //< 攻撃タイプ
 	std::unordered_map<BossAttackType, std::unique_ptr<IBossAttack>> attacks_;									//< 攻撃クラスのマップ
-	std::unordered_map<BossAttackType, BossAnimType>				 attackAnimTable_;
+	std::unordered_map<BossAttackType, BossAnimType>				 attackAnimTable_;							//< 攻撃アニメーションテーブル
 };

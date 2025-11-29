@@ -11,10 +11,12 @@ void BossAnimController::Initialize()const {
 	// ゲーム側で指定した Idle ID を初期アニメに紐付ける
 	animModel_->RegisterAnimation(static_cast<int16_t>(BossAnimType::Idle), firstName);
 	animModel_->RegisterAnimation(static_cast<int16_t>(BossAnimType::AttackNormal),"bossAttackNormal");
+	animModel_->RegisterAnimation(static_cast<int16_t>(BossAnimType::Punch), "bossPunch");
 
 	// ループ設定
 	animModel_->SetLoop(static_cast<int16_t>(BossAnimType::Idle), true);
 	animModel_->SetLoop(static_cast<int16_t>(BossAnimType::AttackNormal), false);
+	animModel_->SetLoop(static_cast<int16_t>(BossAnimType::Punch), false);
 }
 
 void BossAnimController::Register(int16_t id, const std::string& name,

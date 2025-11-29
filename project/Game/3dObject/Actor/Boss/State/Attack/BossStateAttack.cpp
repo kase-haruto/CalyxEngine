@@ -18,8 +18,8 @@ std::string_view AttackTypeToString(BossAttackType type) {
 	switch(type) {
 	case BossAttackType::NormalShoot:
 		return "NormalShoot"sv;
-	case BossAttackType::JumpAttack:
-		return "JumpAttack"sv;
+	case BossAttackType::Punch:
+		return "Punch"sv;
 	case BossAttackType::Laser:
 		return "Laser"sv;
 	}
@@ -37,11 +37,12 @@ BossStateAttack::BossStateAttack() {
 
 	// 攻撃テーブルの初期化
 	attacks_[BossAttackType::NormalShoot] = std::make_unique<BossNormalShoot>();
+	attacks_[BossAttackType::Punch]       = std::make_unique<BossNormalShoot>();
 
 	attackAnimTable_ = {
-		{ BossAttackType::NormalShoot, BossAnimType::AttackNormal },
-		{ BossAttackType::JumpAttack,  BossAnimType::AttackNormal },
-		{ BossAttackType::Laser,       BossAnimType::AttackNormal },
+		{BossAttackType::NormalShoot, BossAnimType::AttackNormal},
+		{BossAttackType::Punch, BossAnimType::Punch},
+		{BossAttackType::Laser, BossAnimType::AttackNormal},
 	};
 }
 
@@ -66,7 +67,7 @@ void BossStateAttack::Enter() {
 	attackType_ = static_cast<BossAttackType>(GetTransitionParam());
 
 	auto it = attackAnimTable_.find(attackType_);
-	if (it != attackAnimTable_.end()) {
+	if(it != attackAnimTable_.end()) {
 		owner_->GetAnimator()->Play(static_cast<int16_t>(it->second), false);
 	}
 
