@@ -8,7 +8,6 @@
 // game
 #include "AI/BossAI.h"
 #include "Anim/BossAnimController.h"
-#include "Attack/BossNormalShoot.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		ctor
@@ -58,10 +57,7 @@ void Boss::Initialize() {
 }
 
 void Boss::InitializeAI() {
-	ai_ = std::make_unique<BossAI>(this,shootingController_.get());
-
-	//攻撃の追加
-	ai_->AddAttack(std::make_unique<BossNormalShoot>());
+	ai_ = std::make_unique<BossAI>(this);
 
 	stateMachine_->SetInitialState(BossStateType::Idle);
 }
@@ -173,6 +169,7 @@ const Vector3 Boss::GetCenterPos() const {
 	return worldPos;
 }
 
+#pragma region accessor
 Vector3 Boss::GetTargetWorldPos() const { return playerTransform_ ? playerTransform_->GetWorldPosition() : GetCenterPos(); }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -180,8 +177,22 @@ Vector3 Boss::GetTargetWorldPos() const { return playerTransform_ ? playerTransf
 /////////////////////////////////////////////////////////////////////////////////////////
 void Boss::SetShootingController(std::unique_ptr<BossShootingController> controller) { shootingController_ = std::move(controller); }
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//		プレイヤーのTransformを設定
+/////////////////////////////////////////////////////////////////////////////////////////
 void				Boss::SetPlayerTransform(const WorldTransform* tf) { playerTransform_ = tf; }
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//		アニメーター
+/////////////////////////////////////////////////////////////////////////////////////////
 BossAnimController* Boss::GetAnimator() const {
 	return anim_.get();
 }
+/////////////////////////////////////////////////////////////////////////////////////////
+//		AI取得
+/////////////////////////////////////////////////////////////////////////////////////////
+BossAI* Boss::GetAI() const {
+	return ai_.get();
+}
+
+#pragma endregion

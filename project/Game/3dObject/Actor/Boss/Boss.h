@@ -66,9 +66,11 @@ public:
 	//--------- accessor -----------------------------------------------------
 	const Vector3 GetCenterPos() const override;
 	Vector3		  GetTargetWorldPos() const;
+	BossAnimController* GetAnimator()const;
+	BossAI* GetAI()const;
+	BossShootingController* GetShootController() const { return shootingController_.get(); }
 	void		  SetShootingController(std::unique_ptr<BossShootingController>);
 	void		  SetPlayerTransform(const WorldTransform* position);
-	BossAnimController* GetAnimator()const;
 
 private:
 	//===================================================================*/
@@ -83,9 +85,9 @@ private:
 	float	   deathTimer_	  = 0.0f;		 // 死亡演出用
 	float	   deathLength_	  = 1.5f;		 // 倒れ終わるまでの秒数
 
-	const WorldTransform*					playerTransform_	= nullptr;
-	std::unique_ptr<BossShootingController> shootingController_ = nullptr;
-	std::unique_ptr<BossAI>					ai_					= nullptr;
-	std::unique_ptr<BossStateMachine>		stateMachine_		= nullptr;
-	std::unique_ptr<BossAnimController>		anim_				= nullptr;
+	const WorldTransform*					playerTransform_	= nullptr;		//< プレイヤーのTransform
+	std::unique_ptr<BossShootingController> shootingController_ = nullptr;		//< 発射制御クラス
+	std::unique_ptr<BossAI>					ai_					= nullptr;		//< AIクラス
+	std::unique_ptr<BossStateMachine>		stateMachine_		= nullptr;		//< ステートマシン
+	std::unique_ptr<BossAnimController>		anim_				= nullptr;		//< アニメーションコントローラ
 };

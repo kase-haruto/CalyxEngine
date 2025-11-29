@@ -7,36 +7,38 @@
 // game
 #include <Game/3dObject/Actor/Boss/Boss.h>
 #include <Game/Battle/Shooting/ShootingController/BossShootingController.h>
-#include "../Attack/IBossAttack.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 ///  ctor / dtor
 ///////////////////////////////////////////////////////////////////////////////////////////
-BossAI::BossAI(Boss* owner,BossShootingController* shooter) : owner_(owner), shooter_(shooter) {}
-BossAI::~BossAI() =default;
+BossAI::BossAI(Boss* owner) : owner_(owner) {}
+BossAI::~BossAI() = default;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 ///		更新
 ///////////////////////////////////////////////////////////////////////////////////////////
 void BossAI::Update(float dt) {
-	if (!owner_ || !shooter_) return;
+	if(!owner_) return;
 
 	cooldownTimer_ -= dt;
-	if (cooldownTimer_ > 0.0f) return;
-
-	// 先頭から順に、実行可能な攻撃を探す
-	for (auto& atk : attacks_) {
-		//実行
-		if (atk->Execute(*owner_, *shooter_)) {
-			cooldownTimer_ = atk->GetCooldown();
-			break;
-		}
-	}
+	if(cooldownTimer_ > 0.0f) return;
 }
+std::optional<BossAttackType> BossAI::DecideAttack(float dt) {
+	if(!owner_) return std::nullopt;
 
-///////////////////////////////////////////////////////////////////////////////////////////
-///		攻撃行動の追加
-///////////////////////////////////////////////////////////////////////////////////////////
-void BossAI::AddAttack(std::unique_ptr<IBossAttack> attack) {
-	attacks_.push_back(std::move(attack));
+	// クールダウン
+	cooldownTimer_ -= dt;
+	if(cooldownTimer_ > 0.f)
+		return std::nullopt;
+
+	// -------------------------
+	// ランダムに攻撃を決める
+	// -------------------------
+	int			   r   = Random::Generate<int>(0, 0); // 0~0 → NormalShot
+	BossAttackType atk = static_cast<BossAttackType>(r);
+
+	// 攻撃が決まった → クールダウン設定
+	cooldownTimer_ = 2.0f;
+
+	return atk;
 }

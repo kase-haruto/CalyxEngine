@@ -9,22 +9,22 @@
 ///////////////////////////////////////////////////////////////////////////////////////////
 //		ctor / dtor
 ///////////////////////////////////////////////////////////////////////////////////////////
-BossNormalShoot::BossNormalShoot()  = default;
+BossNormalShoot::BossNormalShoot()	= default;
 BossNormalShoot::~BossNormalShoot() = default;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //		攻撃実行
 ///////////////////////////////////////////////////////////////////////////////////////////
-bool BossNormalShoot::Execute(class Boss&                   boss,
-								 class BossShootingController& shooter) const {
+bool BossNormalShoot::Execute(class Boss&					boss,
+							  class BossShootingController& shooter) const {
 
 	// targetの方向に弾を撃つ
-	const Vector3 bossPos = boss.GetCenterPos();
+	const Vector3 bossPos	= boss.GetCenterPos();
 	const Vector3 playerPos = boss.GetTargetWorldPos();
-	const Vector3 dir = (playerPos - bossPos).Normalize();
+	const Vector3 dir		= (playerPos - bossPos).Normalize();
 
 	// 発射Request
-	shooter.RequestShoot(bossPos,dir);
+	shooter.RequestShoot(bossPos, dir);
 	return true;
 }
 

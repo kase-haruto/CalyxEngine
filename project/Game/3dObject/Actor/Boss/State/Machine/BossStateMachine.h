@@ -45,7 +45,7 @@ private:
 	 * \brief 状態の変更変更時の処理を行う
 	 * \param nextType 次の状態の種類
 	 */
-	void ChangeState(BossStateType nextType);
+	void ChangeState(BossStateType nextType, int16_t param = 0);
 	/**
 	 * \brief 状態を上に積む
 	 * \param nextType 状態の種類

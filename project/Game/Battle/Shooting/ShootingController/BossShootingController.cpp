@@ -11,6 +11,7 @@ BossShootingController::BossShootingController(std::unique_ptr<BulletContainer> 
 	bulletContainer_ = std::move(container);
 	straightShooter_ = std::make_unique<StraightBulletShooter>(bulletContainer_.get(), BulletID::Boss_Straight);
 }
+BossShootingController::~BossShootingController() = default;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		更新

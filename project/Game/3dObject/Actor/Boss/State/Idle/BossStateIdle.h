@@ -13,6 +13,7 @@ public:
 	BossStateIdle();
 	~BossStateIdle()override;
 
+	void Initialize();
 	/**
 	 * @brief 更新処理
 	 * @param dt
@@ -32,4 +33,5 @@ private:
 	//===================================================================*/
 	//                    private methods
 	//===================================================================*/
+	float idleTime_ = 1.0f;
 };
