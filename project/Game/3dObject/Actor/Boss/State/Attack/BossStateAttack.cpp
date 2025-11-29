@@ -1,0 +1,41 @@
+#include "BossStateAttack.h"
+
+#include "Game/3dObject/Actor/Boss/Anim/BossAnimController.h"
+#include "Game/3dObject/Actor/Boss/Boss.h"
+#include "Game/3dObject/Actor/Boss/Details/BossAnimType.h"
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		ctor / dtor
+/////////////////////////////////////////////////////////////////////////////////////////
+BossStateAttack::BossStateAttack() {
+	// タイプの設定
+	BaseBossState::SetStatypeType(BossStateType::Attack);
+}
+
+BossStateAttack::~BossStateAttack() = default;
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		更新処理
+/////////////////////////////////////////////////////////////////////////////////////////
+void BossStateAttack::Update(float dt) {
+	(void) dt;
+
+	// アニメーション終了で次の状態へ移行
+	if(owner_->GetAnimator()->IsAnimFinished()) {
+		BaseBossState::RequestChange(BossStateType::Idle);
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		状態に入るときの処理
+/////////////////////////////////////////////////////////////////////////////////////////
+void BossStateAttack::Enter() {
+	
+	owner_->GetAnimator()->Play(static_cast<int16_t>(BossAnimType::AttackNormal), /*loop=*/false);
+}
+
+
+void BossStateAttack::ShowGui() {
+	BaseBossState::ShowGui();
+	
+}
