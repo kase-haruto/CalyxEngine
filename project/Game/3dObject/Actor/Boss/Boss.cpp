@@ -12,28 +12,30 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 //		ctor
 /////////////////////////////////////////////////////////////////////////////////////////
-Boss::Boss(const std::string& modelName,const std::string objName)
-	: Actor(modelName,objName) {
+Boss::Boss(const std::string& modelName, const std::string objName)
+	: Actor(modelName, objName) {
 	worldTransform_.Initialize();
-	worldTransform_.scale = {30,30,30};
+	worldTransform_.scale = {30, 30, 30};
 
-	moveSpeed_ = Random::Generate<float>(1.0f,3.0f);
-	velocity_  = Random::GenerateVector3(-1.0f,1.0f);
+	moveSpeed_ = Random::Generate<float>(1.0f, 3.0f);
+	velocity_  = Random::GenerateVector3(-1.0f, 1.0f);
 
 	BaseGameObject::InitializeCollider(ColliderKind::Sphere);
 	collider_->SetType(ColliderType::Type_Enemy);
 	collider_->SetTargetType(ColliderType::Type_PlayerAttack);
 	collider_->SetOwner(this);
-	if(auto* sphere = dynamic_cast<SphereCollider*>(collider_.get())) { sphere->SetRadius(15.0f); }
+	if(auto* sphere = dynamic_cast<SphereCollider*>(collider_.get())) {
+		sphere->SetRadius(15.0f);
+	}
 	collider_->SetIsDrawCollider(true);
 
-	life_          = 10;
+	life_		   = 10;
 	waveAmplitude_ = 2.0f;
-	waveSpeed_     = Random::Generate<float>(1.0f,3.0f);
+	waveSpeed_	   = Random::Generate<float>(1.0f, 3.0f);
 
 	// アニメーションコントローラの生成
 	AnimationModel* animModel = GetAnimationModel();
-	anim_ = std::make_unique<BossAnimController>(animModel);
+	anim_					  = std::make_unique<BossAnimController>(animModel);
 
 	// ステートの初期化
 	stateMachine_ = std::make_unique<BossStateMachine>();
@@ -52,7 +54,7 @@ void Boss::Initialize() {
 	// コンフィグの読み込みと適用
 	config_.LoadConfig(configRoot_ + "Boss");
 
-	//アニメーション初期化
+	// アニメーション初期化
 	anim_->Initialize();
 }
 
@@ -69,7 +71,6 @@ void Boss::Update(float dt) {
 	/* =============================================
 		1. 生存中のロジック
 	=============================================*/
-	stateMachine_->Update(dt);
 	if(deathState_ == DeathState::Alive) {
 		if(life_ <= 0) {
 			// ---- 死亡フラグ立った瞬間 ----
@@ -87,6 +88,8 @@ void Boss::Update(float dt) {
 		if(shootingController_) {
 			shootingController_->Update(dt);
 		}
+
+		stateMachine_->Update(dt);
 
 		// 方向合わせ（プレイヤーへ）
 		{
@@ -143,9 +146,8 @@ void Boss::Update(float dt) {
 	}
 }
 
-
 void Boss::DerivativeGui() {
-	if(ImGui::CollapsingHeader("State")){
+	if(ImGui::CollapsingHeader("State")) {
 		stateMachine_->ShowGui();
 	}
 }
@@ -157,15 +159,17 @@ void Boss::OnCollisionEnter(Collider* other) {
 	if(!other) return;
 	if(collider_->GetTargetType() != other->GetType()) return;
 
-	if(life_ >= 1) { life_--; }
+	if(life_ >= 1) {
+		life_--;
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		中心座標取得
 /////////////////////////////////////////////////////////////////////////////////////////
 const Vector3 Boss::GetCenterPos() const {
-	const Vector3 offset   = {0.0f,1.5f,0.0f};
-	Vector3       worldPos = Vector3::Transform(offset,worldTransform_.matrix.world);
+	const Vector3 offset   = {0.0f, 1.5f, 0.0f};
+	Vector3		  worldPos = Vector3::Transform(offset, worldTransform_.matrix.world);
 	return worldPos;
 }
 
@@ -180,7 +184,7 @@ void Boss::SetShootingController(std::unique_ptr<BossShootingController> control
 /////////////////////////////////////////////////////////////////////////////////////////
 //		プレイヤーのTransformを設定
 /////////////////////////////////////////////////////////////////////////////////////////
-void				Boss::SetPlayerTransform(const WorldTransform* tf) { playerTransform_ = tf; }
+void Boss::SetPlayerTransform(const WorldTransform* tf) { playerTransform_ = tf; }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		アニメーター

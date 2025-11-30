@@ -45,6 +45,10 @@ public:
 	 * \brief GUI表示
 	 */
 	virtual void ShowGui();
+	/**
+	 * \brief 遷移リクエストのリセット
+	 */
+	void ResetRequest();
 
 	// accessor ==========================================================//
 	const TransitionRequest& GetTransitionRequest() const;
@@ -54,7 +58,7 @@ public:
 	void SetOwner(Boss* owner);
 
 	// 遷移時のパラメータ
-	int16_t GetTransitionParam() const { return request_.param; }
+	int16_t GetTransitionParam() const { return transitionParm_; }
 	void SetTransitionParam(int16_t parm);
 protected:
 	//===================================================================*/
@@ -82,7 +86,7 @@ private:
 	//===================================================================*/
 	TransitionRequest request_;	//< 遷移リクエスト
 	BossStateType state_;		//< ステートタイプ
-	int transitionParm_ = 0;	//< 遷移先に送るパラメータ
+	int16_t transitionParm_ = 0;	//< 遷移先に送るパラメータ
 
 protected:
 	Boss* owner_ = nullptr;

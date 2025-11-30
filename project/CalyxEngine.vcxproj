@@ -202,6 +202,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\3dObject\Actor\Boss\Spawner\BossSpawner.cpp" />
     <ClCompile Include="Game\Installer\Boss\BossInstaller.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Boss\Boss.cpp" />
+    <ClCompile Include="Game\Scene\Clear\ClearScene.cpp" />
     <ClCompile Include="Game\Scene\Defeat\DefeatScene.cpp" />
     <ClCompile Include="Game\Scene\Game\GameScene.cpp" />
     <ClCompile Include="Game\UI\Button\Button.cpp" />
@@ -470,6 +471,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\3dObject\Actor\Boss\Spawner\BossSpawner.h" />
     <ClInclude Include="Game\Installer\Boss\BossInstaller.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\Boss.h" />
+    <ClInclude Include="Game\Scene\Clear\ClearScene.h" />
     <ClInclude Include="Game\Scene\Defeat\DefeatScene.h" />
     <ClInclude Include="Game\Scene\Game\GameScene.h" />
     <ClInclude Include="Game\UI\Button\Button.h" />

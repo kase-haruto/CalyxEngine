@@ -4,7 +4,8 @@ enum class BossAnimType
  : int16_t {
     Idle = 0,   
     AttackNormal,
-    Attack2,
+    Punch,
+	Laser,
     Stun,
     Dead,
 };

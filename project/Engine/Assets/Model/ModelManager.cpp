@@ -211,7 +211,7 @@ ModelData ModelManager::LoadModelFile(const std::string& directoryPath, const st
 		+ fileNameWithExt.substr(0, fileNameWithExt.find_last_of('.')) + "/"
 		+ fileNameWithExt;
 
-	const aiScene* scene = importer.ReadFile(
+		const aiScene* scene = importer.ReadFile(
 		filePath.c_str(),
 		aiProcess_Triangulate |
 		aiProcess_FlipUVs |

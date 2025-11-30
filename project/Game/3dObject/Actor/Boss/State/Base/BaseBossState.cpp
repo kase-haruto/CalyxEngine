@@ -71,3 +71,7 @@ void BaseBossState::RequestPush(BossStateType next) {
 void BaseBossState::RequestPop() {
 	request_ = {TransitionRequest::Type::Pop, BossStateType::None};
 }
+
+void BaseBossState::ResetRequest() {
+	request_ = TransitionRequest{}; // None に戻す
+}

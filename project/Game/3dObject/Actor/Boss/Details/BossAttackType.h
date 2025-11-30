@@ -2,7 +2,8 @@
 #include <cstdint>
 
 enum class BossAttackType : int16_t {
-	NormalShoot,
-	JumpAttack,
+	NormalShoot = 0,
+	Punch,
 	Laser,
+	Count,
 };

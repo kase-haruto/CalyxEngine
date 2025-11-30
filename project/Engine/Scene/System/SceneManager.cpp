@@ -15,6 +15,7 @@
 #include <Game/Scene/Game/GameScene.h>
 #include "Engine/Scene/Test/TestScene.h"
 #include "Game/Scene/Defeat/DefeatScene.h"
+#include "Game/Scene/Clear/ClearScene.h"
 
 SceneManager::SceneManager(DxCore* dx) : dx_(dx) {}
 SceneManager::~SceneManager() = default;
@@ -26,9 +27,10 @@ void SceneManager::Initialize() {
 	AddScene(SceneType::PLAY,std::make_unique<GameScene>());
 	AddScene(SceneType::TEST,std::make_unique<TestScene>());
 	AddScene(SceneType::DEFEAT,std::make_unique<DefeatScene>());
+	AddScene(SceneType::CLEAR,std::make_unique<ClearScene>());
 
 	// 最初のシーンへ（ここで初期化が走る）
-	SetCurrent(typeToIndex_.at(SceneType::PLAY));
+	SetCurrent(typeToIndex_.at(SceneType::CLEAR));
 }
 
 //------------------------------------------------------------
@@ -92,11 +94,11 @@ bool SceneManager::GetIsEndGame() const { return slots_[currentIdx_].scene->GetI
 
 void SceneManager::RebindIfContextChanged() {
 	SceneContext* ctx = ActiveCtx();
-	if(!ctx) return;
+	if (!ctx) return;
 
 	const uint64_t gen = pPlaySession_ ? pPlaySession_->RuntimeGeneration() : 0;
 
-	if(ctx != lastBoundCtx_ || gen != lastRuntimeGen_) {
+	if (ctx != lastBoundCtx_ || gen != lastRuntimeGen_) {
 		auto& slot = slots_[currentIdx_];
 
 		// 前回のctxにぶら下がるキャッシュを捨てる
@@ -105,9 +107,13 @@ void SceneManager::RebindIfContextChanged() {
 		ctx->MakeCurrent();
 		slot.scene->InjectContext(ctx);
 
-		if(!slot.assetsLoaded) {
+		if (!slot.assetsLoaded) {
 			slot.scene->LoadAssets();
 			slot.assetsLoaded = true;
+		}
+
+		if (auto* clear = dynamic_cast<ClearScene*>(slot.scene.get())) {
+			clear->SetPayload(pendingPayload_);
 		}
 
 		// 毎回初期化
@@ -206,4 +212,9 @@ void SceneManager::RequestSceneChange(SceneType nextScene) {
 	auto it = typeToIndex_.find(nextScene);
 	if(it == typeToIndex_.end()) return;
 	pendingSwitchIndex_ = it->second;
+}
+
+void SceneManager::RequestSceneChange(SceneType nextScene, const SceneTransitionPayload& payload) {
+	pendingPayload_ = payload;
+	RequestSceneChange(nextScene); // 既存の処理
 }

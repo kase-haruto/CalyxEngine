@@ -157,9 +157,12 @@ void GameScene::Update([[maybe_unused]] float dt) {
 	
 	// ボスは「存在しているときだけ」死亡判定
 	// 未スポーン or 破棄済みのフレームでは何もしない
-	if(boss && !boss->GetIsAlive()) {
-		// ここでクリア演出→シーン遷移など
-		transitionRequestor_->RequestSceneChange(SceneType::TITLE);
+	if (boss && !boss->GetIsAlive()) {
+
+		SceneTransitionPayload payload{};
+		payload.score = score_ ? score_->GetTotal() : 0;
+
+		transitionRequestor_->RequestSceneChange(SceneType::CLEAR, payload);
 		return;
 	}
 }
