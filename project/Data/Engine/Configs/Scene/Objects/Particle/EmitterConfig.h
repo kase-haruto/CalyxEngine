@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Engine/Graphics/Pipeline/BlendMode/BlendMode.h"
+
 #include <Data/Engine/Configs/Scene/Objects/Particle/FxParmConfig.h>
 #include <Data/Engine/Configs/Scene/Objects/Particle/Module/ModuleConfig.h>
 #include <Data/Engine/Configs/Scene/Objects/Particle/Module/ModuleConfigFactory.h>
@@ -29,6 +31,7 @@ struct EmitterConfig {
 	bool          isComplement   = true;
 	bool          randomSpinEmit = false;
 	BillboardMode billboardMode  = BillboardMode::Full;
+	BlendMode blendMode		= BlendMode::ADD;
 
 	// 再生・OneShot制御関連
 	bool  isOneShot    = false;
@@ -72,6 +75,7 @@ inline void EmitterConfig::FromJson(const nlohmann::json& j) {
 	emitCount    = j.value("emitCount",10);
 	emitDelay    = j.value("emitDelay",0.0f);
 	emitDuration = j.value("emitDuration",-1.0f);
+	blendMode = j.value("blendMode",BlendMode::ADD);
 
 	// モジュール
 	modules.clear();
@@ -97,6 +101,7 @@ inline nlohmann::json EmitterConfig::ToJson() const {
 	j["isComplement"]   = isComplement;
 	j["randomSpinEmit"] = randomSpinEmit;
 	j["followOneShot"]  = followOneShot;
+	j["blendMode"]	  = blendMode;
 
 	// 再生・OneShot制御
 	j["isOneShot"]    = isOneShot;

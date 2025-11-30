@@ -6,6 +6,8 @@
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 
 // game
+#include "Engine/Application/Effects/FxObject.h"
+
 #include <Game/3dObject/Actor/Bullet/BaseBullet.h>
 
 class BossBullet
@@ -23,5 +25,6 @@ public:
 	//--------- accessor ---------------------------------------------------
 
 private:
+	std::weak_ptr<FxObject> shootFx_;
 
 };
