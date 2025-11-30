@@ -62,10 +62,11 @@ public:
 	 * \brief 衝突終了処理
 	 * \param other
 	 */
-	void OnCollisionExit([[maybe_unused]] Collider* other) override {}
+	void OnCollisionExit([[maybe_unused]] Collider* other) override;
 
 	//--------- accessor -----------------------------------------------------
 	const Vector3			GetCenterPos() const override;
+	bool 					IsHit() const { return isHit_; }
 	Vector3					GetTargetWorldPos() const;
 	BossAnimController*		GetAnimator() const;
 	BossAI*					GetAI() const;
@@ -78,14 +79,10 @@ private:
 	//===================================================================*/
 	//						private methods
 	//===================================================================*/
+	bool isHit_ = false; // ダメージを受けたかどうか
 	DeathState deathState_		= DeathState::Alive;
 	Vector3	   deathRotateAxis_ = {0, 0, 1}; // 傾く軸
 	Vector3	   basePosition_{};				 // サイン波の基準位置
-	float	   waveTime_	  = 0.0f;		 // 経過時間
-	float	   waveAmplitude_ = 1.0f;		 // 振れ幅
-	float	   waveSpeed_	  = 2.0f;		 // サイン波の速さ
-	float	   deathTimer_	  = 0.0f;		 // 死亡演出用
-	float	   deathLength_	  = 1.5f;		 // 倒れ終わるまでの秒数
 
 	const WorldTransform*					playerTransform_	= nullptr; //< プレイヤーのTransform
 	std::unique_ptr<BossShootingController> shootingController_ = nullptr; //< 発射制御クラス

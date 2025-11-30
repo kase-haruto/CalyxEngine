@@ -6,6 +6,6 @@ enum class BossAnimType
     AttackNormal,
     Punch,
 	Laser,
-    Stun,
+    Damage,
     Dead,
 };

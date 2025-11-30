@@ -30,6 +30,12 @@ void BossStateIdle::Update(float dt) {
 	idleTime_ -= dt;
 	if (idleTime_ > 0.0f) return;
 
+	// ボスのヒットフラグがたったらDamageリアクション
+	if (owner_ && owner_->IsHit()) {
+		RequestChange(BossStateType::Damage);
+		return;
+	}
+
 	auto ai = owner_->GetAI();
 	if (!ai) return;
 
@@ -56,5 +62,5 @@ void BossStateIdle::Enter() {
 	if(!owner_) return;
 	Initialize();
 	// 待機アニメーション再生
-	owner_->GetAnimator()->Play(static_cast<int16_t>(BossAnimType::Idle), /*loop=*/true);
+	owner_->GetAnimator()->Play(static_cast<int16_t>(BossAnimType::Idle));
 }

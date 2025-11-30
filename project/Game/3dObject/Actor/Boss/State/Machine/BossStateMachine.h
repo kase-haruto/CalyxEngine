@@ -41,8 +41,11 @@ public:
 	 */
 	void ShowGui();
 
+	// setter
 	void SetOwner(Boss* owner);
 
+	// getter
+	BaseBossState* GetCurrentState() const;
 private:
 	//===================================================================*/
 	//                    private method

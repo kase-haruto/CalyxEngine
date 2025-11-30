@@ -6,6 +6,8 @@
 #include "../Idle/BossStateIdle.h"
 
 // c++
+#include "Game/3dObject/Actor/Boss/State/Damage/BossStateDamage.h"
+
 #include <externals/imgui/imgui.h>
 
 namespace {
@@ -15,6 +17,8 @@ std::unique_ptr<BaseBossState> CreateState(BossStateType type) {
 		return std::make_unique<BossStateIdle>();
 	case BossStateType::Attack:
 		return std::make_unique<BossStateAttack>();
+	case BossStateType::Damage:
+		return std::make_unique<BossStateDamage>();
 	default:
 		return nullptr;
 	}
@@ -103,6 +107,10 @@ void BossStateMachine::ShowGui() {
 	if(ImGui::Button("Attack")) {
 		ChangeState(BossStateType::Attack);
 	}
+	ImGui::SameLine();
+	if(ImGui::Button("Damage")) {
+		ChangeState(BossStateType::Damage);
+	}
 
 	ImGui::Spacing();
 	ImGui::Text("Push State:");
@@ -146,6 +154,14 @@ void BossStateMachine::ShowGui() {
 /////////////////////////////////////////////////////////////////////////////////////////
 void BossStateMachine::SetOwner(Boss* owner) {
 	owner_ = owner;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		現在のボスの状態を取得
+/////////////////////////////////////////////////////////////////////////////////////////
+BaseBossState* BossStateMachine::GetCurrentState() const {
+	if (stack_.empty()) return nullptr;
+	return stack_.back().get();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

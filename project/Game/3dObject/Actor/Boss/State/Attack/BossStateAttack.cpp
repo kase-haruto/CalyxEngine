@@ -37,8 +37,8 @@ BossStateAttack::BossStateAttack() {
 
 	// 攻撃テーブルの初期化
 	attacks_[BossAttackType::NormalShoot] = std::make_unique<BossNormalShoot>();
-	attacks_[BossAttackType::Punch]       = std::make_unique<BossNormalShoot>();
-	attacks_[BossAttackType::Laser] 	 = std::make_unique<BossNormalShoot>();
+	attacks_[BossAttackType::Punch]		  = std::make_unique<BossNormalShoot>();
+	attacks_[BossAttackType::Laser]		  = std::make_unique<BossNormalShoot>();
 
 	attackAnimTable_ = {
 		{BossAttackType::NormalShoot, BossAnimType::AttackNormal},
@@ -55,12 +55,12 @@ BossStateAttack::~BossStateAttack() = default;
 void BossStateAttack::Update(float dt) {
 	timer_ += dt;
 
-	if (owner_->GetAnimator()->IsAnimFinished()) {
+	if(owner_->GetAnimator()->IsAnimFinished()) {
 		RequestChange(BossStateType::Idle);
 		return;
 	}
 
-	if (timer_ >= maxAttackTime_) {
+	if(timer_ >= maxAttackTime_) {
 		RequestChange(BossStateType::Idle);
 		return;
 	}
@@ -76,7 +76,7 @@ void BossStateAttack::Enter() {
 
 	auto it = attackAnimTable_.find(attackType_);
 	if(it != attackAnimTable_.end()) {
-		owner_->GetAnimator()->Play(static_cast<int16_t>(it->second), false);
+		owner_->GetAnimator()->Play(static_cast<int16_t>(it->second));
 	}
 
 	ExecuteAttack();
