@@ -30,9 +30,7 @@ Boss::Boss(const std::string& modelName, const std::string objName)
 	}
 	collider_->SetIsDrawCollider(true);
 
-	life_		   = 10;
-	waveAmplitude_ = 2.0f;
-	waveSpeed_	   = Random::Generate<float>(1.0f, 3.0f);
+	life_ = 10;
 
 	// アニメーションコントローラの生成
 	AnimationModel* animModel = GetAnimationModel();
@@ -74,9 +72,6 @@ void Boss::InitializeAI() {
 //		更新処理
 /////////////////////////////////////////////////////////////////////////////////////////
 void Boss::Update(float dt) {
-	/* =============================================
-		1. 生存中のロジック
-	=============================================*/
 	if(hpGauge_) {
 		hpGauge_->Update(dt);
 		hpGauge_->SetHp(static_cast<float>(life_));
@@ -86,7 +81,6 @@ void Boss::Update(float dt) {
 			// ---- 死亡フラグ立った瞬間 ----
 			// 親子付け解除
 			deathState_		 = DeathState::Dying;
-			deathTimer_		 = 0.0f;
 			deathRotateAxis_ = {1, 0, 0}; // 前方に倒れる
 			return;						  // このフレームはここで終了
 		}
@@ -117,46 +111,21 @@ void Boss::Update(float dt) {
 				worldTransform_.rotation = qWorld;
 			}
 		}
-
-		// 波移動
-		waveTime_ += dt * waveSpeed_;
-		float offsetY				= std::sin(waveTime_) * waveAmplitude_;
-		worldTransform_.translation = basePosition_ + Vector3{0, offsetY, 0};
-		return;
 	}
 
-	/* =============================================
-	   2. 倒れ演出中 (Dying)
-	   =============================================*/
 	if(deathState_ == DeathState::Dying) {
-		deathTimer_ += dt;
-		float t = std::clamp(deathTimer_ / deathLength_, 0.0f, 1.0f);
-
-		// 0→90° まで補間して倒れる
-		float rad = Cx::Math::ToRadians(90.0f * t);
-		worldTransform_.rotation =
-			Quaternion::MakeRotateAxisQuaternion(deathRotateAxis_, rad);
-
-		worldTransform_.translation = basePosition_; // 移動しない
-
-		// 演出が終わり、爆発も再生終了したら Dead へ
-		if(t >= 1.0f) {
-			deathState_ = DeathState::Dead;
-			deathTimer_ = 0.0f;
-		}
 		return;
 	}
 
-	/* =============================================
-	   3. 完全に死亡 (Dead)
-	   =============================================*/
 	if(deathState_ == DeathState::Dead) {
 		isAlive_ = false;
 		return;
 	}
-
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//		デバッグgui描画
+/////////////////////////////////////////////////////////////////////////////////////////
 void Boss::DerivativeGui() {
 	if(ImGui::CollapsingHeader("State")) {
 		stateMachine_->ShowGui();
@@ -175,7 +144,21 @@ void Boss::OnCollisionEnter(Collider* other) {
 
 	if(life_ >= 1) {
 		life_--;
+
+		// アイドル状態の時に攻撃を食らったら通知を送って状態遷移させる
+		auto* curState = stateMachine_->GetCurrentState();
+		if(curState && curState->GetStateType() == BossStateType::Idle) {
+			isHit_ = true;
+		}
 	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		衝突終了処理
+/////////////////////////////////////////////////////////////////////////////////////////
+void Boss::OnCollisionExit(Collider* other) {
+	(void)other;
+	if(isHit_) isHit_ = false; // ダメージフラグ解除
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
