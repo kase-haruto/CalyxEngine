@@ -8,6 +8,7 @@
 // game
 #include "AI/BossAI.h"
 #include "Anim/BossAnimController.h"
+#include "Engine/Application/System/Enviroment.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		ctor
@@ -56,6 +57,11 @@ void Boss::Initialize() {
 
 	// アニメーション初期化
 	anim_->Initialize();
+	hpGauge_ = std::make_unique<HpGauge>(static_cast<float>(life_));
+	// 画面中央上にゲージを設定
+	Vector2 gaugePos = {kGameSize.x * 0.5f, 50.0f};
+	hpGauge_->Initialize(gaugePos, Vector2(500.0f, 32.0f));
+	hpGauge_->SetAncorPoint(Vector2(0.5f, 0.5f));
 }
 
 void Boss::InitializeAI() {
@@ -71,6 +77,10 @@ void Boss::Update(float dt) {
 	/* =============================================
 		1. 生存中のロジック
 	=============================================*/
+	if(hpGauge_) {
+		hpGauge_->Update(dt);
+		hpGauge_->SetHp(static_cast<float>(life_));
+	}
 	if(deathState_ == DeathState::Alive) {
 		if(life_ <= 0) {
 			// ---- 死亡フラグ立った瞬間 ----
@@ -144,11 +154,15 @@ void Boss::Update(float dt) {
 		isAlive_ = false;
 		return;
 	}
+
 }
 
 void Boss::DerivativeGui() {
 	if(ImGui::CollapsingHeader("State")) {
 		stateMachine_->ShowGui();
+	}
+	if(ImGui::CollapsingHeader("hpGauge")) {
+		hpGauge_->ShowGui();
 	}
 }
 
@@ -185,6 +199,17 @@ void Boss::SetShootingController(std::unique_ptr<BossShootingController> control
 //		プレイヤーのTransformを設定
 /////////////////////////////////////////////////////////////////////////////////////////
 void Boss::SetPlayerTransform(const WorldTransform* tf) { playerTransform_ = tf; }
+
+std::vector<Sprite*> Boss::GetAllSprites() const {
+	std::vector<Sprite*> sprites;
+	// ライフゲージ
+	if(hpGauge_) {
+		sprites.push_back(hpGauge_->GetFrameSprite());
+		sprites.push_back(hpGauge_->GetDamageGauge());
+		sprites.push_back(hpGauge_->GetMainGauge());
+	}
+	return sprites;
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		アニメーター

@@ -11,6 +11,8 @@
 #include <Engine/Objects/3D/Details/BillboardParams.h>
 
 // c++
+#include "Engine/Graphics/Pipeline/BlendMode/BlendMode.h"
+
 #include <functional>
 #include <vector>
 
@@ -63,6 +65,7 @@ public:
 	bool  GetTimedPreview() const { return timedPreview_; }
 	void  SetPreviewInterval(float sec) { previewIntervalSec_ = (sec < 0.01f ? 0.01f : sec); }
 	float GetPreviewInterval() const { return previewIntervalSec_; }
+	BlendMode GetBlendMode() const { return blendMode_; }
 
 	//--------- callback -----------------------------------------------//
 
@@ -98,7 +101,7 @@ protected:
 	//===================================================================*/
 	//					private variable
 	//===================================================================*/
-
+	BlendMode blendMode_ = BlendMode::ADD; //< ブレンドモード
 	const int                   kMaxUnits_ = 4096; //< 最大パーティクル数
 	D3D12_GPU_DESCRIPTOR_HANDLE textureHandle_;
 	Guid                        textureGuid_;

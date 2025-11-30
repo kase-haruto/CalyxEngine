@@ -5,6 +5,7 @@
 // engine
 #include <Engine/Objects/3D/Actor/Actor.h>
 // game
+#include "Game/2d/HpGauge.h"
 #include "State/Machine/BossStateMachine.h"
 #include <Game/Battle/Shooting/ShootingController/BossShootingController.h>
 
@@ -64,13 +65,14 @@ public:
 	void OnCollisionExit([[maybe_unused]] Collider* other) override {}
 
 	//--------- accessor -----------------------------------------------------
-	const Vector3 GetCenterPos() const override;
-	Vector3		  GetTargetWorldPos() const;
-	BossAnimController* GetAnimator()const;
-	BossAI* GetAI()const;
+	const Vector3			GetCenterPos() const override;
+	Vector3					GetTargetWorldPos() const;
+	BossAnimController*		GetAnimator() const;
+	BossAI*					GetAI() const;
 	BossShootingController* GetShootController() const { return shootingController_.get(); }
-	void		  SetShootingController(std::unique_ptr<BossShootingController>);
-	void		  SetPlayerTransform(const WorldTransform* position);
+	void					SetShootingController(std::unique_ptr<BossShootingController>);
+	void					SetPlayerTransform(const WorldTransform* position);
+	std::vector<Sprite*>	GetAllSprites() const;
 
 private:
 	//===================================================================*/
@@ -85,9 +87,10 @@ private:
 	float	   deathTimer_	  = 0.0f;		 // 死亡演出用
 	float	   deathLength_	  = 1.5f;		 // 倒れ終わるまでの秒数
 
-	const WorldTransform*					playerTransform_	= nullptr;		//< プレイヤーのTransform
-	std::unique_ptr<BossShootingController> shootingController_ = nullptr;		//< 発射制御クラス
-	std::unique_ptr<BossAI>					ai_					= nullptr;		//< AIクラス
-	std::unique_ptr<BossStateMachine>		stateMachine_		= nullptr;		//< ステートマシン
-	std::unique_ptr<BossAnimController>		anim_				= nullptr;		//< アニメーションコントローラ
+	const WorldTransform*					playerTransform_	= nullptr; //< プレイヤーのTransform
+	std::unique_ptr<BossShootingController> shootingController_ = nullptr; //< 発射制御クラス
+	std::unique_ptr<BossAI>					ai_					= nullptr; //< AIクラス
+	std::unique_ptr<BossStateMachine>		stateMachine_		= nullptr; //< ステートマシン
+	std::unique_ptr<BossAnimController>		anim_				= nullptr; //< アニメーションコントローラ
+	std::unique_ptr<HpGauge>				hpGauge_			= nullptr; //< HPゲージ
 };

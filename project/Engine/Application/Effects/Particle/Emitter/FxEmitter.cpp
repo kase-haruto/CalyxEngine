@@ -354,6 +354,21 @@ void FxEmitter::ShowGui() {
 
 	// ================= Emission =================
 	if(FxGui::GridScope sec{"Emission"}; sec.open) {
+		// ブレンドモードを選べるようにする
+		FxGui::RowLabel("blend mode");
+		static const char* blendModeNames[] = {
+			"None",        // NONE (0)
+			"Alpha",       // ALPHA (1)
+			"Add",         // ADD (2)
+			"Subtract",    // SUB (3)
+			"Multiply",    // MUL (4)
+			"Normal",      // NORMAL (5)
+			"Screen"       // SCREEN (6)
+		};
+		int currentBlend = static_cast<int>(blendMode_);
+		if (ImGui::Combo("##blendmode", &currentBlend, blendModeNames, IM_ARRAYSIZE(blendModeNames))) {
+			blendMode_ = static_cast<BlendMode>(currentBlend);
+		}
 		FxGui::RowLabel("Alive Count");
 		ImGui::Text("%zu", units_.size());
 
@@ -506,6 +521,7 @@ void FxEmitter::ApplyConfigFrom(const EmitterConfig& config) {
 	emitDuration_		  = config.emitDuration;
 	billboardMode_		  = config.billboardMode;
 	randomSpinEmit_ = config.randomSpinEmit;
+	blendMode_ = config.blendMode;
 
 	isFirstFrame_ = true;
 	hasEmitted_	  = false;
@@ -536,6 +552,7 @@ void FxEmitter::ExtractConfigTo(EmitterConfig& config) const {
 	config.emitDelay	 = emitDelay_;
 	config.emitDuration	 = emitDuration_;
 	config.billboardMode = billboardMode_;
+	config.blendMode = blendMode_;
 }
 
 void FxEmitter::Play() {

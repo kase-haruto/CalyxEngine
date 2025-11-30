@@ -46,6 +46,8 @@ private:
 	//===================================================================*/
 	//					private methods
 	//===================================================================*/
+	float timer_ = 0.0f;
+	float maxAttackTime_ = 3.0f; // 最大3秒で強制終了（必要に応じて変更）
 	BossAttackType													 attackType_ = BossAttackType::Punch; //< 攻撃タイプ
 	std::unordered_map<BossAttackType, std::unique_ptr<IBossAttack>> attacks_;									//< 攻撃クラスのマップ
 	std::unordered_map<BossAttackType, BossAnimType>				 attackAnimTable_;							//< 攻撃アニメーションテーブル

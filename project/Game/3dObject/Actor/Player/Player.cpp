@@ -77,7 +77,6 @@ inline Vector3 ClampWorldByScreenBox(const Vector3& world,
 	// 変化なしなら元のワールドを返す
 	if(clamped.x == scr.x && clamped.y == scr.y) return world;
 
-	// 3) 元の NDC z を保って 2D→3D へ戻す（奥行きを変えない）
 	return Cx::Math::ScreenToWorld(clamped,ndc.z);
 }
 
@@ -102,7 +101,7 @@ inline void ClampWorldTransformInView(WorldTransform& wt,
 Player::Player(const std::string&         modelName,
 			   std::optional<std::string> objectName)
 	: Actor::Actor(modelName,objectName) {
-	worldTransform_.translation = {0.0f,0.0f,10.0f};
+	worldTransform_.translation = {0.0f,0.0f,8.0f};
 	worldTransform_.scale       = {1.5f,1.5f,1.5f};
 }
 
@@ -450,10 +449,10 @@ void Player::UpdateTilt(const Vector3& inputVector) {
 	worldTransform_.rotationSource = RotationSource::Quaternion;
 
 	// カメラ回転（Euler）
-	// Vector3 currentRot = cam->GetRotate();
-	// currentRot.x       = Cx::Math::Lerp(currentRot.x,targetPitch * 0.3f,0.15f); // pitch
-	// currentRot.z       = Cx::Math::Lerp(currentRot.z,targetRoll * 0.3f,0.15f);  // roll
-	// cam->SetCamera(cam->GetTranslate(),currentRot);
+	Vector3 currentRot = cam->GetRotate();
+	currentRot.x       = Cx::Math::Lerp(currentRot.x,targetPitch * 0.3f,0.15f); // pitch
+	currentRot.z       = Cx::Math::Lerp(currentRot.z,targetRoll * 0.3f,0.15f);  // roll
+	cam->SetCamera(cam->GetTranslate(),currentRot);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////

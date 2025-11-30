@@ -53,11 +53,16 @@ BossStateAttack::~BossStateAttack() = default;
 //		更新処理
 /////////////////////////////////////////////////////////////////////////////////////////
 void BossStateAttack::Update(float dt) {
-	(void)dt;
+	timer_ += dt;
 
-	// アニメーション終了で次の状態へ移行
-	if(owner_->GetAnimator()->IsAnimFinished()) {
-		BaseBossState::RequestChange(BossStateType::Idle);
+	if (owner_->GetAnimator()->IsAnimFinished()) {
+		RequestChange(BossStateType::Idle);
+		return;
+	}
+
+	if (timer_ >= maxAttackTime_) {
+		RequestChange(BossStateType::Idle);
+		return;
 	}
 }
 
@@ -65,6 +70,8 @@ void BossStateAttack::Update(float dt) {
 //		状態に入るときの処理
 /////////////////////////////////////////////////////////////////////////////////////////
 void BossStateAttack::Enter() {
+	timer_ = 0.0f;
+
 	attackType_ = static_cast<BossAttackType>(GetTransitionParam());
 
 	auto it = attackAnimTable_.find(attackType_);
@@ -99,7 +106,6 @@ void BossStateAttack::ExecuteAttack() const {
 	// Boss 本体から Shooter を取得
 	BossShootingController* shooter = owner_->GetShootController();
 	if(!shooter) return;
-
 	// 攻撃実行
 	atk->Execute(*owner_, *shooter);
 }

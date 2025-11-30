@@ -18,14 +18,16 @@ void ParticleRenderer::Render(
 
 	// ───────────── CPU パーティクル ─────────────
 	if (!cpuEmitters.empty()){
-		auto psoCpu = pipelineService->GetPipelineSet(
-			PipelineTag::Object::Particle, BlendMode::ADD);
-		pipelineService->SetCommand(psoCpu, cmdList);
 
-		if (auto* cam = CameraManager::GetActive()) 
-			cam->SetCommand(cmdList, PipelineType::StructuredObject);
 
 		for (auto& em : cpuEmitters){
+			auto psoCpu = pipelineService->GetPipelineSet(
+				PipelineTag::Object::Particle, em->GetBlendMode());
+			pipelineService->SetCommand(psoCpu, cmdList);
+
+			if (auto* cam = CameraManager::GetActive()) 
+				cam->SetCommand(cmdList, PipelineType::StructuredObject);
+			
 			if (!em || !em->IsDrawEnable() || em->GetUnits().empty()) continue;
 
 			em->SetCommand(cmdList);
