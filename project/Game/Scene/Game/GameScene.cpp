@@ -148,9 +148,6 @@ void GameScene::Update([[maybe_unused]] float dt) {
 	occurrenceBoss_->BossSpawnByRailProgress();
 
 	// UI 更新など
-	shootUI_->ShowGui();
-	aimUI_->ShowGui();
-	avoidanceUI_->ShowGui();
 	shootUI_->Update();
 	aimUI_->Update();
 	avoidanceUI_->Update();

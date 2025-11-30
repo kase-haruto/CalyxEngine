@@ -17,7 +17,7 @@ void PlayerDodge::Update(float dt) {
 	timeAccum_ += dt;
 
 	if (Input::GetInstance()->TriggerKey(cfg_.dodgeKey) ||
-		Input::GetInstance()->TriggerGamepadButton(PadButton::A)) {
+		Input::GetInstance()->TriggerGamepadButton(PadButton::X)) {
 		RequestDodge();
 	}
 

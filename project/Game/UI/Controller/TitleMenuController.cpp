@@ -19,16 +19,19 @@ TitleMenuController::TitleMenuController() :
 	baseSize_(Vector2(256.0f, 64.0f)),
 	space_(120.0f) {
 
+	// basePos_ を変更しないようローカル pos を使う
+	Vector2 pos = basePos_;
+
 	// ゲームスタートボタン
 	std::unique_ptr<Button> startButton =
 		std::make_unique<Button>("Textures/gameStart_titleButton.png",
-								 basePos_,
+								 pos,
 								 baseSize_);
-	basePos_.y += space_;
+	pos.y += space_;
 
 	std::unique_ptr<Button> exitButton =
 		std::make_unique<Button>("Textures/endGame_titleButton.png",
-								 basePos_,
+								 pos,
 								 baseSize_);
 
 	// リストに追加

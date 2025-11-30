@@ -77,12 +77,12 @@ Matrix4x4 OrthonormalizeRotation(const Matrix4x4& M) {
 //--------------------------------- ctor ---------------------------------
 Camera3d::Camera3d() : BaseCamera() {
 	BaseCamera::SetName("MainCamera");
-	worldTransform_.translation = {0.0f,2.0f,-10.0f};
+	worldTransform_.translation = {0.0f,2.0f,-3.0f};
 }
 
 Camera3d::Camera3d(const std::string& name) { SceneObject::SetName(name,ObjectType::Camera); }
 
-void Camera3d::Initialize() { worldTransform_.translation = {0.0f,2.0f,-10.0f}; }
+void Camera3d::Initialize() { worldTransform_.translation = {0.0f,2.0f,-3.0f}; }
 
 float Camera3d::ExpLerpAlpha(float dt,float tau) {
 	if(tau <= 1e-6f) return 1.0f;
@@ -171,7 +171,7 @@ void Camera3d::AlwaysUpdate(float dt) {
 	BaseCamera::AlwaysUpdate(dt);
 
 	// 追従
-	if(follow_.enabled && follow_.target) { UpdateFollow(dt); }
+//9	if(follow_.enabled && follow_.target) { UpdateFollow(dt); }
 
 	// 視錐台更新
 	frustum_.ExtractFromMatrix(viewProjectionMatrix_);

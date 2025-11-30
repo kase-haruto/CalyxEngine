@@ -30,7 +30,7 @@ void SceneManager::Initialize() {
 	AddScene(SceneType::CLEAR,std::make_unique<ClearScene>());
 
 	// 最初のシーンへ（ここで初期化が走る）
-	SetCurrent(typeToIndex_.at(SceneType::PLAY));
+	SetCurrent(typeToIndex_.at(SceneType::TITLE));
 }
 
 //------------------------------------------------------------

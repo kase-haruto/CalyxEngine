@@ -13,7 +13,6 @@
 #include <Game/UI/Controller/TitleMenuController.h>
 
 /* c++ */
-#include <array>
 #include <memory>
 
 /* ========================================================================
