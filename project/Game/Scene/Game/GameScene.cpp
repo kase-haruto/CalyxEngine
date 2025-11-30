@@ -17,6 +17,8 @@
 #include <Engine/Scene/Utility/SceneUtility.h>
 
 // game
+#include "Engine/Application/System/Enviroment.h"
+
 #include <Game/3dObject/Actor/Bullet/Register/BulletRegistrar.h>
 #include <Game/Battle/Shooting/Score/ScoreService.h>
 #include <Game/Installer/Enemy/EnemyEngagementInstaller.h>
@@ -99,8 +101,8 @@ void GameScene::Initialize() {
 
 	numbersSprite_ = std::make_unique<NumbersSprite>(
 		"Textures/Numbers",".png");
-
-	numbersSprite_->Initialize(/*pos*/ {1280.0f - 640.0f,32.0f},
+	Vector2 scoreSpritePos = {100.0f,630.0f};
+	numbersSprite_->Initialize(/*pos*/ {kGameWidth - scoreSpritePos.x,scoreSpritePos.y},
 									   /*digitSize*/ {32.0f,32.0f});
 	numbersSprite_->SetAlign(NumbersSprite::DigitsAlign::Right);
 
@@ -120,7 +122,6 @@ void GameScene::Update([[maybe_unused]] float dt) {
 
 	auto mainCam = wMainCamera_.lock();
 	//if(cameraTurnAround_) cameraTurnAround_->Update(mainCam.get(),dt);
-
 	// 敵弾コンテナ更新
 	enemyBulletContainer_->Update(dt);
 	enemyBulletContainer_->AlwaysUpdate(dt);
@@ -184,6 +185,13 @@ void GameScene::Draw(ID3D12GraphicsCommandList* cmdList,
 	if(player) { for(auto& sp : player->GetAllSprites()) { if(sp) spriteRenderer_->Register(sp); } }
 	if(attackSprite_) { spriteRenderer_->Register(attackSprite_.get()); }
 
+	wBoss_      = sceneContext_->FindFirst<Boss>();
+	auto boss   = wBoss_.lock();
+	if(boss) {
+		for(auto& sp : boss->GetAllSprites()) {
+			if(sp) spriteRenderer_->Register(sp);
+		}
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

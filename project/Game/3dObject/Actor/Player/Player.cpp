@@ -77,7 +77,6 @@ inline Vector3 ClampWorldByScreenBox(const Vector3& world,
 	// 変化なしなら元のワールドを返す
 	if(clamped.x == scr.x && clamped.y == scr.y) return world;
 
-	// 3) 元の NDC z を保って 2D→3D へ戻す（奥行きを変えない）
 	return Cx::Math::ScreenToWorld(clamped,ndc.z);
 }
 

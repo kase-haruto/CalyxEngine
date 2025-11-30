@@ -38,6 +38,7 @@ void BossStateMachine::Update(float dt) {
 
 	auto req = cur->GetTransitionRequest();
 	if (req.op != BaseBossState::TransitionRequest::Type::None) {
+
 		HandleTransition(req);
 	}
 }
