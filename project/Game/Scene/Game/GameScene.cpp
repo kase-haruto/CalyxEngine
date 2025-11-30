@@ -58,12 +58,30 @@ void GameScene::Initialize() {
 	if(auto* ctx = SceneContext::Current()) { if(auto ground = ctx->FindObjectByName<BaseGameObject>("field")) { ground->SetEnableRaycast(false); } }
 
 	// UI
-	attackSprite_ = std::make_unique<Sprite>("Textures/attackUI.png");
 	{
-		Vector2 attackUiPos  = Vector2(1280.0f * 0.5f,720.0f - 100.0f);
-		Vector2 attackUiSize = Vector2(128.0f,128.0f);
-		attackSprite_->Initialize(attackUiPos,attackUiSize);
-		attackSprite_->SetAnchorPoint(Vector2(0.5f,0.5f));
+		shootUI_ = std::make_unique<Sprite>("Textures/UI/shootUI.png");
+		aimUI_ = std::make_unique<Sprite>("Textures/UI/aimUI.png");
+		avoidanceUI_ = std::make_unique<Sprite>("Textures/UI/avoidanceUI.png");
+		Vector2 uiSize = {128.0f,64.0f};
+		shootUI_->SetSize(uiSize);
+		aimUI_->SetSize(uiSize);
+		avoidanceUI_->SetSize(uiSize);
+
+		// 左端中央
+		shootUI_->SetAnchorPoint(Vector2(0.0f,0.5f));
+		aimUI_->SetAnchorPoint(Vector2(0.0f,0.5f));
+		avoidanceUI_->SetAnchorPoint(Vector2(0.0f,0.5f));
+		float space = 32.0f;
+		Vector2 base = {100.0f, (kGameHeight / 2.0f) - space};
+		Sprite* uis[] = { shootUI_.get(), aimUI_.get(), avoidanceUI_.get() };
+
+		for (size_t i = 0; i < std::size(uis); ++i) {
+			if (uis[i]) {
+				Vector2 pos = base;
+				pos.y += static_cast<float>(i) * space; // 200ずつ下にずらす
+				uis[i]->SetPosition(pos);
+			}
+		}
 	}
 
 	// プレイヤー基本セットアップ
@@ -130,8 +148,14 @@ void GameScene::Update([[maybe_unused]] float dt) {
 	occurrenceBoss_->BossSpawnByRailProgress();
 
 	// UI 更新など
-	if(attackSprite_) attackSprite_->Update();
+	shootUI_->ShowGui();
+	aimUI_->ShowGui();
+	avoidanceUI_->ShowGui();
+	shootUI_->Update();
+	aimUI_->Update();
+	avoidanceUI_->Update();
 
+	
 	// 衝突判定
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
 
@@ -183,7 +207,9 @@ void GameScene::Draw(ID3D12GraphicsCommandList* cmdList,
 
 	// プレイヤーが持つ追加スプライトを登録
 	if(player) { for(auto& sp : player->GetAllSprites()) { if(sp) spriteRenderer_->Register(sp); } }
-	if(attackSprite_) { spriteRenderer_->Register(attackSprite_.get()); }
+	if(shootUI_) { spriteRenderer_->Register(shootUI_.get()); }
+	if(aimUI_) { spriteRenderer_->Register(aimUI_.get()); }
+	if(avoidanceUI_) { spriteRenderer_->Register(avoidanceUI_.get()); }
 
 	wBoss_      = sceneContext_->FindFirst<Boss>();
 	auto boss   = wBoss_.lock();

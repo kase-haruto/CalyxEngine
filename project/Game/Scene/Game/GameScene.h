@@ -53,7 +53,9 @@ private:
 	std::unique_ptr<EnemyBulletContainer> enemyBulletContainer_ = nullptr; //< 敵の弾コンテナ
 
 	/* UIs ==========================================================*/
-	std::unique_ptr<Sprite> attackSprite_;
+	std::unique_ptr<Sprite> shootUI_;
+	std::unique_ptr<Sprite> aimUI_;
+	std::unique_ptr<Sprite> avoidanceUI_;
 
 	/* runtime services =============================================*/
 	int16_t totalScore_;
