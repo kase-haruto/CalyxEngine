@@ -38,11 +38,12 @@ BossStateAttack::BossStateAttack() {
 	// 攻撃テーブルの初期化
 	attacks_[BossAttackType::NormalShoot] = std::make_unique<BossNormalShoot>();
 	attacks_[BossAttackType::Punch]       = std::make_unique<BossNormalShoot>();
+	attacks_[BossAttackType::Laser] 	 = std::make_unique<BossNormalShoot>();
 
 	attackAnimTable_ = {
 		{BossAttackType::NormalShoot, BossAnimType::AttackNormal},
 		{BossAttackType::Punch, BossAnimType::Punch},
-		{BossAttackType::Laser, BossAnimType::AttackNormal},
+		{BossAttackType::Laser, BossAnimType::Laser},
 	};
 }
 

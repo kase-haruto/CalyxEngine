@@ -50,6 +50,7 @@ public:
 	/// </summary>
 	/// <param name="nextScene"></param>
 	void RequestSceneChange(SceneType nextScene) override;
+	void RequestSceneChange(SceneType nextScene, const SceneTransitionPayload& payload);
 
 	/// <summary>
 	/// セッションとバインド
@@ -98,6 +99,7 @@ private:
 		std::unique_ptr<BaseScene>	  scene;
 		std::unique_ptr<SceneContext> ctx;
 		bool						  assetsLoaded = false;
+		int score_;
 	};
 
 	std::vector<SceneSlot> slots_;
@@ -111,4 +113,5 @@ private:
 
 	SceneContext* lastBoundCtx_	  = nullptr;
 	uint64_t	  lastRuntimeGen_ = 0;
+	SceneTransitionPayload pendingPayload_;
 };

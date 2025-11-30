@@ -12,11 +12,13 @@ void BossAnimController::Initialize()const {
 	animModel_->RegisterAnimation(static_cast<int16_t>(BossAnimType::Idle), firstName);
 	animModel_->RegisterAnimation(static_cast<int16_t>(BossAnimType::AttackNormal),"bossAttackNormal");
 	animModel_->RegisterAnimation(static_cast<int16_t>(BossAnimType::Punch), "bossPunch");
+	animModel_->RegisterAnimation(static_cast<int16_t>(BossAnimType::Laser), "bossLaser");
 
 	// ループ設定
 	animModel_->SetLoop(static_cast<int16_t>(BossAnimType::Idle), true);
 	animModel_->SetLoop(static_cast<int16_t>(BossAnimType::AttackNormal), false);
 	animModel_->SetLoop(static_cast<int16_t>(BossAnimType::Punch), false);
+	animModel_->SetLoop(static_cast<int16_t>(BossAnimType::Laser), false);
 }
 
 void BossAnimController::Register(int16_t id, const std::string& name,

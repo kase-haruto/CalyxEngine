@@ -5,6 +5,7 @@ enum class BossAnimType
     Idle = 0,   
     AttackNormal,
     Punch,
+	Laser,
     Stun,
     Dead,
 };
