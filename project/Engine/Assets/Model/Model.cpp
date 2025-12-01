@@ -34,7 +34,7 @@ Model::~Model() = default;
 void Model::Initialize() {
 	// マテリアル・行列バッファ生成
 	CreateMaterialBuffer();
-	Map();
+	Map();  
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
