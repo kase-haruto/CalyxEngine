@@ -33,7 +33,7 @@ void BossHomingBullet::Update(float dt) {
 	homingTimer_ += dt;
 
 	// ホーミング開始前は直進
-	if (homingTimer_ <= homingDelay_) {
+	if (homingTimer_ <= homingDelay_ || homingTimer_ >= homingLimitTime_) {
 		// ホーミング処理なし → 直進だけ
 		BaseBullet::Update(dt);
 		return;

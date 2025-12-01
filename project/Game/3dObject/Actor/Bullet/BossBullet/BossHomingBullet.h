@@ -32,11 +32,13 @@ public:
 	void  SetHomingDelay(float delay) { homingDelay_ = delay; }
 	float GetHomingTimer() const { return homingTimer_; }
 	void  SetHomingTimer(float time) { homingTimer_ = time; }
+	void SetHomingLimit(float time){homingLimitTime_ = time;}
 
 private:
 	//===================================================================*/
 	//		private methods
 	//===================================================================*/
-	float homingDelay_ = 0.0f; //< ホーミング開始までの遅延時間
-	float homingTimer_ = 0.0f; //< ホーミング継続時間
+	float homingDelay_	   = 0.5f; //< ホーミング開始までの遅延時間
+	float homingTimer_	   = 0.0f; //< ホーミング継続時間
+	float homingLimitTime_ = 1.0f; //< ホーミング継続時間の上限
 };

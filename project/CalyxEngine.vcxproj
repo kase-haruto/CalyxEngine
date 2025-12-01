@@ -175,6 +175,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\3dObject\Actor\Boss\AI\BossAI.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Boss\Anim\BossAnimController.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Boss\Attack\BossHomingSpreadShoot.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Boss\Attack\BossLaser.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Boss\Attack\BossNormalShoot.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Boss\Attack\IBossAttack.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Boss\State\Attack\BossStateAttack.cpp" />
@@ -439,6 +440,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\3dObject\Actor\Boss\AI\BossAI.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\Anim\BossAnimController.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\Attack\BossHomingSpreadShoot.h" />
+    <ClInclude Include="Game\3dObject\Actor\Boss\Attack\BossLaser.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\Attack\BossNormalShoot.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\Attack\IBossAttack.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\Details\BossAttackType.h" />
