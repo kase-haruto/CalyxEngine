@@ -32,6 +32,7 @@ public:
 	void  SetHomingDelay(float delay) { homingDelay_ = delay; }
 	float GetHomingTimer() const { return homingTimer_; }
 	void  SetHomingTimer(float time) { homingTimer_ = time; }
+	void SetHomingLimit(float time){homingLimitTime_ = time;}
 
 private:
 	//===================================================================*/
