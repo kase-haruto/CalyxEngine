@@ -39,7 +39,7 @@ void BossSpawner::Spawn() {
 
 	BossInstaller installer;
 	auto boss = installer.InstallBoss();
-	boss->SetPlayerTransform(playerTransform_);
+	boss->SetPlayerTransform(target_);
 	if (!boss) return;
 
 	boss->Initialize();

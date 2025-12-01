@@ -6,4 +6,5 @@ enum class BulletID{
 	Enemy_Straight,
 	Enemy_Homing,
 	Boss_Straight,
+	Boss_Homing,
 };

@@ -98,7 +98,7 @@ void Boss::Update(float dt) {
 		// 方向合わせ（プレイヤーへ）
 		{
 			const Vector3 myPos		= GetWorldPosition();
-			const Vector3 targetPos = playerTransform_ ? playerTransform_->GetWorldPosition() : myPos;
+			const Vector3 targetPos = target_ ? target_->GetWorldTransform().GetWorldPosition() : myPos;
 
 			Vector3 d = targetPos - myPos;
 			if(d.LengthSquared() > 1e-12f) {
@@ -171,7 +171,7 @@ const Vector3 Boss::GetCenterPos() const {
 }
 
 #pragma region accessor
-Vector3 Boss::GetTargetWorldPos() const { return playerTransform_ ? playerTransform_->GetWorldPosition() : GetCenterPos(); }
+Vector3 Boss::GetTargetWorldPos() const { return target_? target_->GetWorldTransform().GetWorldPosition() : GetCenterPos(); }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		発射制御クラスの取得
@@ -181,7 +181,7 @@ void Boss::SetShootingController(std::unique_ptr<BossShootingController> control
 /////////////////////////////////////////////////////////////////////////////////////////
 //		プレイヤーのTransformを設定
 /////////////////////////////////////////////////////////////////////////////////////////
-void Boss::SetPlayerTransform(const WorldTransform* tf) { playerTransform_ = tf; }
+void Boss::SetPlayerTransform(const Actor* target) { target_ = target; }
 
 std::vector<Sprite*> Boss::GetAllSprites() const {
 	std::vector<Sprite*> sprites;
@@ -192,6 +192,9 @@ std::vector<Sprite*> Boss::GetAllSprites() const {
 		sprites.push_back(hpGauge_->GetMainGauge());
 	}
 	return sprites;
+}
+const Actor* Boss::GetTargetActor() const {
+	return target_;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

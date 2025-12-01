@@ -31,6 +31,7 @@ void BossStateDamage::Update(float dt) {
 	(void)dt;
 	if(!owner_) return;
 	if (BossAnimController* animator = owner_->GetAnimator()) {
+		owner_->SetIsHit(false);	// ダメージフラグリセット
 		// ダメージアニメーションが終了したら待機状態へ遷移
 		if (animator->IsAnimFinished()) RequestChange(BossStateType::Idle);
 	}

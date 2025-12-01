@@ -15,7 +15,8 @@ HomingBullet::HomingBullet(const std::string& modelName, const std::string& name
 	boxCollider->SetRadius(1.5f);
 
 	trailFx_ = SceneAPI::Instantiate<FxObject>("TrailFx");
-	trailFx_->LoadFromPath("Effect/HomingBulletTrail");
+	auto fx = trailFx_.lock();
+	fx->LoadFromPath("Effect/HomingBulletTrail");
 }
 
 HomingBullet::~HomingBullet() = default;
@@ -32,12 +33,14 @@ void HomingBullet::ShootInitialize(const Vector3& initPos, const Vector3& veloci
 
 void HomingBullet::Initialize(){
 	auto self = shared_from_this();
-	trailFx_->SetParent(self);
-	trailFx_->StopAll();
+	auto fx = trailFx_.lock();
+	fx->SetParent(self);
+	fx->StopAll();
 }
 
 void HomingBullet::OnShot() {
-	trailFx_->PlayAll();
+	auto fx = trailFx_.lock();
+	fx->PlayAll();
 }
 
 void HomingBullet::SetTarget(const Actor* target){

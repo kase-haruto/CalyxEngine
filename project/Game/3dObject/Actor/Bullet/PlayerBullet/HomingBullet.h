@@ -22,16 +22,11 @@ public:
 
 	const Vector3 GetCenterPos() const override;
 
-private:
-	//===================================================================*/
-	//						private methods
-	//===================================================================*/
-
-private:
+protected:
 	const Actor* target_ = nullptr;
 	float homingSpeed_ = 2.0f;
 	float rotateSpeed_ = 100.0f;
 
 	// trail
-	std::shared_ptr<FxObject> trailFx_ = nullptr;
+	std::weak_ptr<FxObject> trailFx_;
 };
