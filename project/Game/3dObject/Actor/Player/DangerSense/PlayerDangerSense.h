@@ -18,10 +18,11 @@ struct DangerSenseConfig {
 	float margin           = 3.0f;
 	float maxCheckDistance = 80.0f;
 	int   throttleFrames   = 1;
+	float graceTime = 0.2f; // 回避猶予時間
 
 	// UI
-	std::string uiTex  = "Textures/white1x1.png";
-	Vector2     uiSize = {64.0f,64.0f};
+	std::string uiTex  = "Textures/UI/dodgeUI.png";
+	Vector2     uiSize = {128.0f,64.0f};
 };
 
 class PlayerDangerSense {
@@ -55,7 +56,8 @@ private:
 	PlayerDodge*          dodge_           = nullptr;
 	EnemyDirectory*       dir_             = nullptr;
 	EnemyBulletContainer* bulletContainer_ = nullptr;
-
+	float dangerHold_ = 0.0f;
+	
 	DangerSenseConfig cfg_{};
 
 	std::unique_ptr<Sprite> cue_;

@@ -103,7 +103,7 @@ void Enemy::StartStayInCamera(float duration) {
 		worldTransform_.parent = &camSp->GetWorldTransform();
 	}
 	// 画面中央ちょい奥を基準に
-	camAnchor_ = Vector3(0.0f, 0.0f, 55.0f);
+	camAnchor_ = Vector3(0.0f, 0.0f, 80.0f);
 
 	// ランダム位相を入れて個体差を出す
 	camPhaseX_ = Random::Generate<float>(0.0f, 6.28318f);

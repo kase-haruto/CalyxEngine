@@ -93,15 +93,31 @@ bool PlayerDangerSense::ComputeDangerNearby(Vector3& outPlayerPos) const {
 }
 
 void PlayerDangerSense::ApplyDangerResult(bool danger,const Vector3& playerPos) {
-	// PlayerDodge へ「今は押せばジャスト成立」フラグを渡す
-	if(dodge_) { dodge_->SetPerfectHintActive(danger); }
 
-	// UI：危険時のみ点灯。色は“押せばジャスト可”なので緑。
+	float dt = ClockManager::GetInstance()->GetDeltaTime();
+
+	// danger が true なら猶予時間をリセット
+	if (danger) {
+		dangerHold_ = cfg_.graceTime;
+	} else {
+		// 減衰させる
+		dangerHold_ = (std::max)(0.0f, dangerHold_ - dt);
+	}
+
+	bool hint = (dangerHold_ > 0.0f);
+
+	// PlayerDodge に通知
+	if(dodge_) {
+		dodge_->SetPerfectHintActive(hint);
+	}
+
+	// UI
 	if(!cue_) return;
-
-	if(danger) {
+	if(hint) {
 		Vector2 screen = Cx::Math::WorldToScreen(playerPos);
 		cue_->SetPosition(screen);
 		cue_->SetIsVisible(true);
-	} else { cue_->SetIsVisible(false); }
+	} else {
+		cue_->SetIsVisible(false);
+	}
 }
