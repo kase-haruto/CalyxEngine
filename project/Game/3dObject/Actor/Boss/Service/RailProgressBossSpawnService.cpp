@@ -13,7 +13,7 @@ void RailProgressBossSpawnService::BossSpawnByRailProgress() {
 
 	const float railProgress = railCamera->GetProgress();
 	if (railProgress >= 0.8f) {
-		spawner->SetPlayerTransform(&player->GetWorldTransform());
+		spawner->SetPlayerTransform(player.get());
 		spawner->Spawn();
 	}
 }

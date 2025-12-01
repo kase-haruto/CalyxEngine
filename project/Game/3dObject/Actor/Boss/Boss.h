@@ -66,25 +66,27 @@ public:
 
 	//--------- accessor -----------------------------------------------------
 	const Vector3			GetCenterPos() const override;
-	bool 					IsHit() const { return isHit_; }
+	bool					IsHit() const { return isHit_; }
+	void SetIsHit(bool hit) { isHit_ = hit; }
 	Vector3					GetTargetWorldPos() const;
 	BossAnimController*		GetAnimator() const;
 	BossAI*					GetAI() const;
 	BossShootingController* GetShootController() const { return shootingController_.get(); }
 	void					SetShootingController(std::unique_ptr<BossShootingController>);
-	void					SetPlayerTransform(const WorldTransform* position);
+	void					SetPlayerTransform(const Actor* target);
 	std::vector<Sprite*>	GetAllSprites() const;
+	const Actor*			GetTargetActor() const;
 
 private:
 	//===================================================================*/
 	//						private methods
 	//===================================================================*/
-	bool isHit_ = false; // ダメージを受けたかどうか
+	bool	   isHit_			= false; // ダメージを受けたかどうか
 	DeathState deathState_		= DeathState::Alive;
 	Vector3	   deathRotateAxis_ = {0, 0, 1}; // 傾く軸
 	Vector3	   basePosition_{};				 // サイン波の基準位置
 
-	const WorldTransform*					playerTransform_	= nullptr; //< プレイヤーのTransform
+	const Actor*							target_				= nullptr; //< プレイヤーのTransform
 	std::unique_ptr<BossShootingController> shootingController_ = nullptr; //< 発射制御クラス
 	std::unique_ptr<BossAI>					ai_					= nullptr; //< AIクラス
 	std::unique_ptr<BossStateMachine>		stateMachine_		= nullptr; //< ステートマシン

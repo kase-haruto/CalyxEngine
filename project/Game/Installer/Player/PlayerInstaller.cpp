@@ -3,16 +3,22 @@
 #include <Game/Input/PlayerInput/PlayerInputHandler.h>
 
 std::shared_ptr<Player> PlayerInstaller::InstallPlayer(const std::shared_ptr<Player>& player){
-	// shoot
-	auto playerBulletContainer_ = std::make_unique<PlayerBulletContainer>("playerBulletContainer");
-	auto playerShootingController_ = std::make_unique<PlayerShootingController>(playerBulletContainer_.get());
-	playerShootingController_->SetBulletContainer(std::move(playerBulletContainer_));
-	
-	// input
-	auto playerInput = std::make_unique<PlayerInputHandler>();
 
-	player->SetShootingController(std::move(playerShootingController_));
-	player->SetInputHandler(std::move(playerInput));
+	// BulletContainer を作る
+	auto bulletContainer = std::make_unique<PlayerBulletContainer>("playerBulletContainer");
+
+	// ShootingController を bulletContainer を “所有” する形で作る
+	auto shooting = std::make_unique<PlayerShootingController>(bulletContainer.get());
+
+	// ShootingController に container の所有権を渡す
+	shooting->SetBulletContainer(std::move(bulletContainer));
+
+	// Player に ShootingController をセット
+	player->SetShootingController(std::move(shooting));
+
+	// input
+	auto input = std::make_unique<PlayerInputHandler>();
+	player->SetInputHandler(std::move(input));
 
 	return player;
 }
