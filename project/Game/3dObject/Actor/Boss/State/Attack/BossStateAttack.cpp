@@ -1,6 +1,7 @@
 #include "BossStateAttack.h"
 
 #include "Game/3dObject/Actor/Boss/Anim/BossAnimController.h"
+#include "Game/3dObject/Actor/Boss/Attack/BossHomingSpreadShoot.h"
 #include "Game/3dObject/Actor/Boss/Attack/BossNormalShoot.h"
 #include "Game/3dObject/Actor/Boss/Boss.h"
 #include "Game/3dObject/Actor/Boss/Details/BossAnimType.h"
@@ -37,7 +38,7 @@ BossStateAttack::BossStateAttack() {
 
 	// 攻撃テーブルの初期化
 	attacks_[BossAttackType::NormalShoot] = std::make_unique<BossNormalShoot>();
-	attacks_[BossAttackType::Punch]		  = std::make_unique<BossNormalShoot>();
+	attacks_[BossAttackType::Punch]		  = std::make_unique<BossHomingSpreadShoot>();
 	attacks_[BossAttackType::Laser]		  = std::make_unique<BossNormalShoot>();
 
 	attackAnimTable_ = {

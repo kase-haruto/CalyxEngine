@@ -3,20 +3,21 @@
 #include "Engine/Foundation/Math/Vector3.h"
 #include "Engine/Foundation/Utility/Func/CxUtils.h"
 #include "Game/3dObject/Actor/Boss/Boss.h"
+#include "Game/3dObject/Actor/Bullet/BossBullet/BossHomingBullet.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //		ctor / dtor
 ///////////////////////////////////////////////////////////////////////////////////////////
-BossHomingSpreadShoot::BossHomingSpreadShoot() {
-	
-}
+BossHomingSpreadShoot::BossHomingSpreadShoot() = default;
 BossHomingSpreadShoot::~BossHomingSpreadShoot() = default;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //		攻撃実行
 ///////////////////////////////////////////////////////////////////////////////////////////
-bool BossHomingSpreadShoot::Execute(class Boss& , class BossShootingController& ) const {
-	// const Vector3 bossPos = boss.GetCenterPos();
+
+bool BossHomingSpreadShoot::Execute(Boss& boss, BossShootingController& shooter) const {
+
+	const Vector3 bossPos = boss.GetCenterPos();
 
 	const float startRad = Cx::Math::ToRadians(startAngleDeg_);
 	const float stepRad  = Cx::Math::ToRadians(360.0f / bulletCount_);
@@ -32,18 +33,24 @@ bool BossHomingSpreadShoot::Execute(class Boss& , class BossShootingController& 
 			std::sin(angle)
 		};
 
-		// 生成
-		// auto bullet = shooter.CreateBullet<BossHomingBullet>();
-		// if (!bullet) continue;
-		//
-		// bullet->SetTarget(boss.GetTarget());
-		// bullet->SetHomingDelay(homingDelay_);
-		// bullet->ShootInitialize(bossPos, dir * initialSpeed_);
+		// 弾生成
+		auto bullet = shooter.AddBullet(
+			BulletID::Boss_Homing,
+			bossPos,
+			dir * initialSpeed_          // ← 初速度
+		);
+
+		if (!bullet) continue;
+
+		// ホーミング設定
+		if (auto* homing = dynamic_cast<BossHomingBullet*>(bullet.get())) {
+			homing->SetTarget(boss.GetTargetActor());
+			homing->SetHomingDelay(homingDelay_);
+		}
 	}
 
 	return true;
 }
-
 ///////////////////////////////////////////////////////////////////////////////////////////
 //		デバッグ用gui
 ///////////////////////////////////////////////////////////////////////////////////////////
