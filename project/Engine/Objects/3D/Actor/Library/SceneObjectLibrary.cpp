@@ -29,7 +29,7 @@ void SceneObjectLibrary::AddObject(const std::shared_ptr<SceneObject>& object) {
 
 	object->SetName(finalName, object->GetObjectType());
 
-	// ★ shared_ptr で登録
+	// shared_ptr で登録
 	objects_[id] = object;
 
 	// イベント発火
@@ -46,7 +46,7 @@ bool SceneObjectLibrary::RemoveObject(const std::shared_ptr<SceneObject>& object
 			  << " GUID=" << id.ToString()
 			  << " use_count=" << object.use_count() << std::endl;
 
-	// 1. 子を完全に削除（再帰）
+	// 子を完全に削除（再帰）
 	auto children = object->GetChildren();
 	for(auto& child : children) {
 		if(child) {
@@ -54,13 +54,13 @@ bool SceneObjectLibrary::RemoveObject(const std::shared_ptr<SceneObject>& object
 		}
 	}
 
-	// 2. 先に削除イベントを発火（FxSystem が emitter を消す）
+	// 先に削除イベントを発火（FxSystem が emitter を消す）
 	EventBus::Publish(ObjectRemoved{object});
 
-	// 3. DestroyRecursive で階層を断つ
+	// DestroyRecursive で階層を断つ
 	object->Destroy();
 
-	// 4. 最後にライブラリから除外
+	// 最後にライブラリから除外
 	objects_.erase(id);
 	std::cout << "[AFTER ERASE]" 
 			  << " use_count=" << object.use_count()

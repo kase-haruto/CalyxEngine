@@ -52,10 +52,10 @@ void ModelRenderer::Clear(){
 //		フレーム開始
 /////////////////////////////////////////////////////////////////////////////////////////
 void ModelRenderer::BeginFrame(){
-	for (auto& [m, insts] : staticModels_){
+	for (auto& insts : staticModels_ | std::views::values) {
 		for (auto& inst : insts){ inst.visible = false; }
 	}
-	for (auto& [m, insts] : skinnedModels_){
+	for (auto& insts : skinnedModels_ | std::views::values) {
 		for (auto& inst : insts){ inst.visible = false; }
 	}
 	staticBatches_.clear();
@@ -153,7 +153,7 @@ void ModelRenderer::BuildStaticBatches(){
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//		スキンモデル・バッチ作成（従来通り）
+//		スキンモデル・バッチ作成
 /////////////////////////////////////////////////////////////////////////////////////////
 void ModelRenderer::BuildSkinnedBatches(){
 	for (auto& [model, insts] : skinnedModels_){
@@ -249,7 +249,7 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList* cmdList,
 	}
 
 	//------------------------------------------------------------
-	// スキンメッシュ（従来通り）
+	// スキンメッシュ
 	//------------------------------------------------------------
 	{
 		PipelineKey lastKey {};

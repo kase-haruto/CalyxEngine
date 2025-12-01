@@ -8,6 +8,7 @@
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Lighting/LightLibrary.h>
 #include <Engine/objects/3D/Actor/Library/SceneObjectLibrary.h>
+#include <Engine/System/Event/EventBus.h>
 
 // c++
 #include <functional>
@@ -16,6 +17,7 @@
 #include <vector>
 
 using ObjectRemovedCallback = std::function<void(SceneObject*)>;
+using ObjectAddedCallback   = std::function<void(SceneObject*)>; 
 
 class SceneContext {
 public:
@@ -69,14 +71,18 @@ public:
 	void SetRuntime(bool f) { isRuntime_ = f; }
 
 	/* ---------- callbacks ----------- */
-	/// 個別削除時に飛ぶコールバック（複数登録可）
+	/// 個別削除時に飛ぶコールバック
 	void AddOnObjectRemovedListener(ObjectRemovedCallback cb) {
 		objectRemovedCallbacks_.push_back(std::move(cb));
 	}
 
-	/// Clear 時など、Editor 側で一括ハンドリングしたい用途向け
+	/// Clear 時など、Editor 側で一括ハンドリングしたい
 	void SetOnEditorObjectRemoved(ObjectRemovedCallback cb) {
 		onEditorObjectRemoved_ = std::move(cb);
+	}
+
+	void AddOnObjectAddedListener(ObjectAddedCallback cb) {
+		objectAddedCallbacks_.push_back(std::move(cb));
 	}
 
 	/* ---------- utils --------------- */
@@ -96,10 +102,14 @@ private:
 
 	ObjectRemovedCallback			   onEditorObjectRemoved_;
 	std::vector<ObjectRemovedCallback> objectRemovedCallbacks_;
+	std::vector<ObjectAddedCallback>   objectAddedCallbacks_; 
 
 	std::string sceneName_ = "scene";
 	bool		isRuntime_ = false;
 
+	EventBus::Connection connObjectAdded_;
+	EventBus::Connection connObjectRemoved_;
+	
 	static SceneContext* current_;
 };
 

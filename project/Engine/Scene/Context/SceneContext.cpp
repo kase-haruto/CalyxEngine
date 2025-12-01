@@ -29,6 +29,33 @@ void SceneContext::Initialize(bool createDefaultLights) {
 
 	cameraMgr_ = std::make_unique<CameraManager>();
 	cameraMgr_->Initialize(this);
+
+	// --- ObjectAdded を購読 ---
+	connObjectAdded_ = EventBus::Subscribe<ObjectAdded>(
+		[this](const ObjectAdded& ev) {
+			SceneObject* raw = ev.sp.get();
+			// 登録されたリスナー全員に通知
+			for (auto& cb : objectAddedCallbacks_) {
+				if (cb) cb(raw);
+			}
+		}
+	);
+
+	// --- ObjectRemoved を購読 ---
+	connObjectRemoved_ = EventBus::Subscribe<ObjectRemoved>(
+		[this](const ObjectRemoved& ev) {
+			SceneObject* raw = ev.sp.get();
+
+			// Editor 用（1個だけ）
+			if (onEditorObjectRemoved_) {
+				onEditorObjectRemoved_(raw);
+			}
+			// 通常リスナー（複数）
+			for (auto& cb : objectRemovedCallbacks_) {
+				if (cb) cb(raw);
+			}
+		}
+	);
 }
 
 void SceneContext::Update(float dt, bool runtimePass) {
