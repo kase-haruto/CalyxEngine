@@ -28,7 +28,7 @@ Boss::Boss(const std::string& modelName,const std::string objName)
 	if(auto* sphere = dynamic_cast<SphereCollider*>(collider_.get())) { sphere->SetRadius(15.0f); }
 	collider_->SetIsDrawCollider(true);
 
-	life_ = 20;
+	life_ = 35;
 
 	// アニメーションコントローラの生成
 	AnimationModel* animModel = GetAnimationModel();
