@@ -20,7 +20,7 @@ struct DangerSenseConfig {
 	float margin           = 3.0f;
 	float maxCheckDistance = 80.0f;
 	int   throttleFrames   = 1;
-	float graceTime = 0.2f; // 回避猶予時間
+	float graceTime        = 0.2f; // 回避猶予時間
 
 	// UI
 	std::string uiTex  = "Textures/UI/dodgeUI.png";
@@ -54,12 +54,12 @@ private:
 	void ApplyDangerResult(bool danger,const Vector3& playerPos);
 
 private:
-	const Player*               owner_           = nullptr;
-	PlayerDodge*          dodge_           = nullptr;
-	EnemyDirectory*       dir_             = nullptr;
-	std::vector<const BulletContainer* > bulletContainers_;
-	float dangerHold_ = 0.0f;
-	
+	const Player*                       owner_ = nullptr;
+	PlayerDodge*                        dodge_ = nullptr;
+	EnemyDirectory*                     dir_   = nullptr;
+	std::vector<const BulletContainer*> bulletContainers_;
+	float                               dangerHold_ = 0.0f;
+
 	DangerSenseConfig cfg_{};
 
 	std::unique_ptr<Sprite> cue_;

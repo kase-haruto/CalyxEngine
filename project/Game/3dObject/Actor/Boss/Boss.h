@@ -74,8 +74,8 @@ private:
 	//===================================================================*/
 	//						private methods
 	//===================================================================*/
-	Vector3	   deathRotateAxis_ = {0, 0, 1}; // 傾く軸
-	Vector3	   basePosition_{};				 // サイン波の基準位置
+	int16_t filnchValue_  = 0;
+	int16_t flinchMax_    = 4;
 
 	const Actor*							target_				= nullptr; //< プレイヤーのTransform
 	std::unique_ptr<BossShootingController> shootingController_ = nullptr; //< 発射制御クラス

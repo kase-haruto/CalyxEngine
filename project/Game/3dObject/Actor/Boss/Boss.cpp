@@ -101,9 +101,7 @@ void Boss::Update(float dt) {
 	// 死亡処理
 	if(stateMachine_->GetCurrentStateType() == BossStateType::Dead) {
 		// 死亡アニメーションが終わったら死亡フラグを立てる
-		if(anim_->IsAnimFinished()) {
-			isAlive_ = false;
-		}
+		if(anim_->IsAnimFinished()) { isAlive_ = false; }
 	}
 }
 
@@ -120,19 +118,24 @@ void Boss::DerivativeGui() {
 /////////////////////////////////////////////////////////////////////////////////////////
 void Boss::OnCollisionEnter(Collider* other) {
 	if(!other) return;
+	if(life_ <= 0) return;
+	// 攻撃以外は無視
 	if(collider_->GetTargetType() != other->GetType()) return;
 
 	if(life_ >= 1) {
 		life_--;
-
-		// アイドル状態の時に攻撃を食らったら通知を送って状態遷移させる
-		auto* curState = stateMachine_->GetCurrentState();
-		if(curState && curState->GetStateType() == BossStateType::Idle) { stateMachine_->ChangeState(BossStateType::Damage); }
+		if(filnchValue_ < flinchMax_) {
+			filnchValue_++;
+			return;
+		} else {
+			filnchValue_ = 0;
+			// アイドル状態の時に攻撃を食らったら通知を送って状態遷移させる
+			auto* curState = stateMachine_->GetCurrentState();
+			if(curState && curState->GetStateType() == BossStateType::Idle) { stateMachine_->ChangeState(BossStateType::Damage); }
+		}
 	} else {
-		// 死亡状態へ遷移
-		// アイドル状態の時に攻撃を食らったら通知を送って状態遷移させる
 		auto* curState = stateMachine_->GetCurrentState();
-		if(curState && curState->GetStateType() == BossStateType::Idle) { stateMachine_->ChangeState(BossStateType::Dead); }
+		stateMachine_->ChangeState(BossStateType::Dead);
 	}
 }
 
