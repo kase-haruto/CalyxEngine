@@ -552,7 +552,7 @@ void Player::UpdateAutoLockOn(float dt) {
 			if(lockedOnTargets_.size() >= maxLockOn_) break;
 			auto marker = AcquireMarker();
 			if(!marker) break; // 上限
-
+			if(c.e->GetLife() <= 0) continue; // 死んでたらスキップ
 			lockedOnTargets_.push_back(c.e);
 
 			// 位置・サイズなどセット（Initializeは再度やらない）

@@ -28,7 +28,7 @@ Boss::Boss(const std::string& modelName,const std::string objName)
 	if(auto* sphere = dynamic_cast<SphereCollider*>(collider_.get())) { sphere->SetRadius(15.0f); }
 	collider_->SetIsDrawCollider(true);
 
-	life_ = 15;
+	life_ = 20;
 
 	// アニメーションコントローラの生成
 	AnimationModel* animModel = GetAnimationModel();
@@ -117,32 +117,40 @@ void Boss::DerivativeGui() {
 //		衝突時処理
 /////////////////////////////////////////////////////////////////////////////////////////
 void Boss::OnCollisionEnter(Collider* other) {
-	if(!other) return;
-	if(life_ <= 0) return;
-	// 攻撃以外は無視
-	if(collider_->GetTargetType() != other->GetType()) return;
+	if (!other) return;
 
-	if(life_ >= 1) {
-		life_--;
-		if(filnchValue_ < flinchMax_) {
-			filnchValue_++;
-			return;
-		} else {
-			filnchValue_ = 0;
-			// アイドル状態の時に攻撃を食らったら通知を送って状態遷移させる
-			auto* curState = stateMachine_->GetCurrentState();
-			if(curState && curState->GetStateType() == BossStateType::Idle) { stateMachine_->ChangeState(BossStateType::Damage); }
-		}
-	} else {
-		auto* curState = stateMachine_->GetCurrentState();
+	// 攻撃以外は無視
+	if (collider_->GetTargetType() != other->GetType()) return;
+	if (life_ <= 0) return; // すでに死んでる
+
+	// ダメージ
+	life_--;
+
+	// HP0 なら即 Dead へ（どの状態でも）
+	if (life_ <= 0) {
 		stateMachine_->ChangeState(BossStateType::Dead);
+		return;
+	}
+
+	// ここからは生存時のひるみ処理
+	if (flinchValue_ < flinchMax_) {
+		flinchValue_++;
+		return;
+	}
+
+	flinchValue_ = 0;
+
+	// Idle のときだけ Damage へ遷移（これは好み）
+	auto* curState = stateMachine_->GetCurrentState();
+	if (curState && curState->GetStateType() == BossStateType::Idle) {
+		stateMachine_->ChangeState(BossStateType::Damage);
 	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		衝突終了処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void Boss::OnCollisionExit(Collider* other) { (void)other; }
+void Boss::OnCollisionExit([[maybe_unused]]Collider* other) {  }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		中心座標取得

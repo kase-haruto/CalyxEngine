@@ -74,7 +74,7 @@ private:
 	//===================================================================*/
 	//						private methods
 	//===================================================================*/
-	int16_t filnchValue_  = 0;
+	int16_t flinchValue_  = 0;
 	int16_t flinchMax_    = 4;
 
 	const Actor*							target_				= nullptr; //< プレイヤーのTransform
