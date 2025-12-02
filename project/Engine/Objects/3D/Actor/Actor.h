@@ -29,6 +29,7 @@ public:
 	// setter
 	void SetPosition(const Vector3& position) { worldTransform_.translation = position; };
 	void SetMoveSpeed(float moveSpeed) { moveSpeed_ = moveSpeed; }
+	float GetMoveSpeed() const { return moveSpeed_; }
 	void SetVelocity(const Vector3& velocity) { velocity_ = velocity; }
 
 protected:

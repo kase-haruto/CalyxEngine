@@ -4,6 +4,8 @@
 #include <vector>
 
 // engine
+#include "Game/3dObject/Actor/Bullet/Container/BulletContainer.h"
+
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Renderer/Sprite/Sprite.h>
 
@@ -42,7 +44,7 @@ public:
 	const DangerSenseConfig& GetConfig() const { return cfg_; }
 	void                     SetConfig(const DangerSenseConfig& c) { cfg_ = c; }
 
-	void SetEnemyBulletContainer(EnemyBulletContainer* bulletContainer);
+	void AddBulletContainer(const BulletContainer* container);
 
 private:
 	// 近距離に弾があるかを判定して返す（true = 警告）
@@ -52,10 +54,10 @@ private:
 	void ApplyDangerResult(bool danger,const Vector3& playerPos);
 
 private:
-	Player*               owner_           = nullptr;
+	const Player*               owner_           = nullptr;
 	PlayerDodge*          dodge_           = nullptr;
 	EnemyDirectory*       dir_             = nullptr;
-	EnemyBulletContainer* bulletContainer_ = nullptr;
+	std::vector<const BulletContainer* > bulletContainers_;
 	float dangerHold_ = 0.0f;
 	
 	DangerSenseConfig cfg_{};

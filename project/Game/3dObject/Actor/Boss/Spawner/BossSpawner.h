@@ -26,6 +26,7 @@ public:
 	void ShowGui() override;
 	void ApplyConfigFromJson(const nlohmann::json& j) override;
 	void ExtractConfigToJson(nlohmann::json& j) const override;
+	std::weak_ptr<Boss> GetBoss() const { return wBoss_; }
 
 	//--------- accessor ------------------------------------------------
 	std::string_view GetTypeName() const override { return "BossSpawner"; }

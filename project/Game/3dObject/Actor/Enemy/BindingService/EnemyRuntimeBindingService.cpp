@@ -6,6 +6,7 @@
 #include <Engine/objects/3D/Actor/Library/SceneObjectLibrary.h>
 
 // game
+#include "Game/3dObject/Actor/Bullet/Container/EnemyBulletContainer.h"
 #include "Game/3dObject/Actor/Player/DangerSense/PlayerDangerSense.h"
 
 #include <Game/3dObject/Actor/Player/Player.h>
@@ -18,14 +19,13 @@ void EnemyRuntimeBindingService::OnSceneLoaded(SceneContext& ctx,EnemyBulletCont
 
 	// プレイヤー構築
 	auto player = ctx.FindFirst<Player>();
-	PlayerInstaller{}.InstallPlayer(player);
 	wPlayer_ = player;
 	player->AttachDangerSenseSource(dir_.get());
 
 	// 弾コンテナ情報
 	bulletContainer_ = bulletContainer;
 	//プレイヤーの危機察知用に渡す
-	player->GetDangerSense()->SetEnemyBulletContainer(bulletContainer);
+	player->GetDangerSense()->AddBulletContainer(bulletContainer);
 
 	// スポナー
 	WireAllSpawners(ctx);

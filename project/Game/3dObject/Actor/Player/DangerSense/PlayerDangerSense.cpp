@@ -2,17 +2,16 @@
 
 // engine
 #include <Engine/Foundation/Utility/Func/CxUtils.h>
+#include <Engine/Foundation/Clock/ClockManager.h>
 
 // game
 #include <Game/3dObject/Actor/Player/Player.h>
 #include <Game/3dObject/Actor/Player/Dodge/PlayerDodge.h>
 #include <Game/3dObject/Actor/Enemy/Directory/EnemyDirectory.h>
-#include <Game/3dObject/Actor/Enemy/Enemy.h>
-#include <Game/3dObject/Actor/Bullet/Container/EnemyBulletContainer.h>
 #include <Game/3dObject/Actor/Bullet/BaseBullet.h>
+#include <Game/3dObject/Actor/Bullet/Container/BulletContainer.h>
 
-PlayerDangerSense::PlayerDangerSense() = default;
-
+PlayerDangerSense::PlayerDangerSense()  = default;
 PlayerDangerSense::~PlayerDangerSense() = default;
 
 void PlayerDangerSense::Initialize(Player* owner,PlayerDodge* dodge,const DangerSenseConfig& cfg) {
@@ -21,8 +20,8 @@ void PlayerDangerSense::Initialize(Player* owner,PlayerDodge* dodge,const Danger
 	cfg_   = cfg;
 
 	cue_ = std::make_unique<Sprite>(cfg_.uiTex);
-	cue_->Initialize(Vector2{-1000.0f,-1000.0f},cfg_.uiSize); // 初期は画面外
-	cue_->SetAnchorPoint(Vector2{0.5f,0.5f});
+	cue_->Initialize(Vector2{-1000.0f,-1000.0f},cfg_.uiSize);
+	cue_->SetAnchorPoint({0.5f,0.5f});
 	cue_->SetIsVisible(false);
 
 	frameCounter_ = 0;
@@ -32,7 +31,7 @@ void PlayerDangerSense::Initialize(Player* owner,PlayerDodge* dodge,const Danger
 void PlayerDangerSense::Update(float /*dt*/) {
 	if(!owner_ || !dir_) return;
 
-	// スキャン間引き
+	// 間引き
 	bool computeNow = true;
 	if(cfg_.throttleFrames > 1) {
 		frameCounter_ = (frameCounter_ + 1) % cfg_.throttleFrames;
@@ -52,72 +51,83 @@ void PlayerDangerSense::Update(float /*dt*/) {
 	if(cue_) cue_->Update();
 }
 
-void PlayerDangerSense::SetEnemyBulletContainer(EnemyBulletContainer* bulletContainer) { bulletContainer_ = bulletContainer; }
+// ============================================================
+// 複数コンテナ登録
+// ============================================================
+void PlayerDangerSense::AddBulletContainer(const BulletContainer* container) { if(container) { bulletContainers_.push_back(container); } }
 
+// ============================================================
+// 複数 BulletContainer を走査して危険判定
+// ============================================================
 bool PlayerDangerSense::ComputeDangerNearby(Vector3& outPlayerPos) const {
+
 	outPlayerPos = owner_->GetCenterPos();
 
 	const float playerR = owner_->GetCollisionRadius() + cfg_.playerInflate;
+	//const float maxDist = cfg_.maxCheckDistance;
 
-	// 生存敵スナップショット
-	auto enemies = dir_->SnapshotAlive();
+	// --- 重要：今出したい猶予 ---
+	const float warnTime = 0.5f;
 
-	for(auto& e : enemies) {
-		if(!e) continue;
+	for (auto* container : bulletContainers_) {
+		if (!container) continue;
 
-		if(!bulletContainer_) continue;
-
-		// 全弾走査
 		bool found = false;
-		bulletContainer_->ForEachBullet([&](BaseBullet& b) {
-			const float br    = b.GetCollisionRadius();
-			const float range = playerR + br + cfg_.margin;
 
-			// 遠距離カット
-			const Vector3 bpos = b.GetWorldPosition();
-			if(cfg_.maxCheckDistance > 0.0f) {
-				const float roughDist = (bpos - outPlayerPos).Length();
-				if(roughDist > cfg_.maxCheckDistance) return;
-			}
+		container->ForEachBullet([&](BaseBullet& b) {
+			if (!b.GetIsAlive()) return;
 
-			const float dist = (bpos - outPlayerPos).Length();
-			if(dist < range) {
-				found = true; // 1発でも近ければ危険
+			Vector3 bpos = b.GetWorldPosition();
+			Vector3 bvel = b.GetVelocity();
+			float   br   = b.GetCollisionRadius();
+			float   safeRange = playerR + br + cfg_.margin;
+
+			// 静止弾は無視
+			float speed = b.GetMoveSpeed();
+			if (speed < 0.01f) return;
+
+			Vector3 toPlayer = outPlayerPos - bpos;
+			float distance  = toPlayer.Length();
+
+			// 弾の進行方向とプレイヤー方向の内積（正面のみ判定）
+			float dot = Vector3::Dot(toPlayer.Normalize(), bvel.Normalize());
+			if (dot < 0.2f) return; // ← ほぼ向いていない弾は除外
+
+			// 衝突までの時間（Time-To-Impact）
+			float timeToImpact = (distance - safeRange) / speed;
+
+			// 判定
+			if (timeToImpact <= warnTime) {
+				found = true;
 			}
 		});
 
-		if(found) return true;
+		if (found) return true;
 	}
 
 	return false;
 }
 
+
+// ============================================================
+// UI & Dodge flag 更新
+// ============================================================
 void PlayerDangerSense::ApplyDangerResult(bool danger,const Vector3& playerPos) {
 
 	float dt = ClockManager::GetInstance()->GetDeltaTime();
 
-	// danger が true なら猶予時間をリセット
-	if (danger) {
-		dangerHold_ = cfg_.graceTime;
-	} else {
-		// 減衰させる
-		dangerHold_ = (std::max)(0.0f, dangerHold_ - dt);
-	}
+	if(danger) { dangerHold_ = cfg_.graceTime; } else { dangerHold_ = (std::max)(0.0f,dangerHold_ - dt); }
 
 	bool hint = (dangerHold_ > 0.0f);
 
-	// PlayerDodge に通知
-	if(dodge_) {
-		dodge_->SetPerfectHintActive(hint);
-	}
+	if(dodge_) { dodge_->SetPerfectHintActive(hint); }
 
-	// UI
+	// UI 更新
 	if(!cue_) return;
+
 	if(hint) {
 		Vector2 screen = Cx::Math::WorldToScreen(playerPos);
 		cue_->SetPosition(screen);
 		cue_->SetIsVisible(true);
-	} else {
-		cue_->SetIsVisible(false);
-	}
+	} else { cue_->SetIsVisible(false); }
 }

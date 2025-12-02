@@ -68,6 +68,7 @@ public:
 	void					SetPlayerTransform(const Actor* target);
 	std::vector<Sprite*>	GetAllSprites() const;
 	const Actor*			GetTargetActor() const;
+	BulletContainer*		GetBulletContainer() const{return shootingController_->GetBulletContainer();}
 
 private:
 	//===================================================================*/

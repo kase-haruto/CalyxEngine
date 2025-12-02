@@ -4,10 +4,6 @@
 BossBulletContainer::BossBulletContainer(const std::string& name) : BulletContainer(name) {}
 BossBulletContainer::~BossBulletContainer() = default;
 
-void BossBulletContainer::Update(float dt) {
-	BulletContainer::Update(dt);
-}
-
 void BossBulletContainer::AddBullet(BulletID id, const Vector3& pos, const Vector3& vel) {
 
 	// Boss 弾として許可するID
