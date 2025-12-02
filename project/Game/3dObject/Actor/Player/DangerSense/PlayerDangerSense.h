@@ -4,6 +4,8 @@
 #include <vector>
 
 // engine
+#include "Game/3dObject/Actor/Bullet/Container/BulletContainer.h"
+
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Renderer/Sprite/Sprite.h>
 
@@ -18,7 +20,7 @@ struct DangerSenseConfig {
 	float margin           = 3.0f;
 	float maxCheckDistance = 80.0f;
 	int   throttleFrames   = 1;
-	float graceTime = 0.2f; // 回避猶予時間
+	float graceTime        = 0.2f; // 回避猶予時間
 
 	// UI
 	std::string uiTex  = "Textures/UI/dodgeUI.png";
@@ -42,7 +44,7 @@ public:
 	const DangerSenseConfig& GetConfig() const { return cfg_; }
 	void                     SetConfig(const DangerSenseConfig& c) { cfg_ = c; }
 
-	void SetEnemyBulletContainer(EnemyBulletContainer* bulletContainer);
+	void AddBulletContainer(const BulletContainer* container);
 
 private:
 	// 近距離に弾があるかを判定して返す（true = 警告）
@@ -52,12 +54,12 @@ private:
 	void ApplyDangerResult(bool danger,const Vector3& playerPos);
 
 private:
-	Player*               owner_           = nullptr;
-	PlayerDodge*          dodge_           = nullptr;
-	EnemyDirectory*       dir_             = nullptr;
-	EnemyBulletContainer* bulletContainer_ = nullptr;
-	float dangerHold_ = 0.0f;
-	
+	const Player*                       owner_ = nullptr;
+	PlayerDodge*                        dodge_ = nullptr;
+	EnemyDirectory*                     dir_   = nullptr;
+	std::vector<const BulletContainer*> bulletContainers_;
+	float                               dangerHold_ = 0.0f;
+
 	DangerSenseConfig cfg_{};
 
 	std::unique_ptr<Sprite> cue_;

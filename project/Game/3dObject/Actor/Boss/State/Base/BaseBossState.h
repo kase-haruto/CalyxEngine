@@ -40,7 +40,7 @@ public:
 	/**
 	 * \brief 状態の更新
 	 */
-	virtual void Update(float dt) = 0;
+	virtual void Update([[maybe_unused]]float dt){}
 	/**
 	 * \brief GUI表示
 	 */

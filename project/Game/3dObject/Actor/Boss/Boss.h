@@ -16,12 +16,6 @@ class BossAnimController;
  */
 class Boss final
 	: public Actor {
-	enum class DeathState {
-		Alive,
-		Dying,
-		Dead
-	};
-
 public:
 	//===================================================================*/
 	//						public methods
@@ -66,8 +60,6 @@ public:
 
 	//--------- accessor -----------------------------------------------------
 	const Vector3			GetCenterPos() const override;
-	bool					IsHit() const { return isHit_; }
-	void SetIsHit(bool hit) { isHit_ = hit; }
 	Vector3					GetTargetWorldPos() const;
 	BossAnimController*		GetAnimator() const;
 	BossAI*					GetAI() const;
@@ -76,15 +68,14 @@ public:
 	void					SetPlayerTransform(const Actor* target);
 	std::vector<Sprite*>	GetAllSprites() const;
 	const Actor*			GetTargetActor() const;
+	BulletContainer*		GetBulletContainer() const{return shootingController_->GetBulletContainer();}
 
 private:
 	//===================================================================*/
 	//						private methods
 	//===================================================================*/
-	bool	   isHit_			= false; // ダメージを受けたかどうか
-	DeathState deathState_		= DeathState::Alive;
-	Vector3	   deathRotateAxis_ = {0, 0, 1}; // 傾く軸
-	Vector3	   basePosition_{};				 // サイン波の基準位置
+	int16_t flinchValue_  = 0;
+	int16_t flinchMax_    = 4;
 
 	const Actor*							target_				= nullptr; //< プレイヤーのTransform
 	std::unique_ptr<BossShootingController> shootingController_ = nullptr; //< 発射制御クラス

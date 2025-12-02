@@ -139,7 +139,6 @@ void GameScene::Update([[maybe_unused]] float dt) {
 	if(enemyEngagement_) enemyEngagement_->Update(dt);
 
 	auto mainCam = wMainCamera_.lock();
-	//if(cameraTurnAround_) cameraTurnAround_->Update(mainCam.get(),dt);
 	// 敵弾コンテナ更新
 	enemyBulletContainer_->Update(dt);
 	enemyBulletContainer_->AlwaysUpdate(dt);
@@ -176,7 +175,6 @@ void GameScene::Update([[maybe_unused]] float dt) {
 		return;
 	}
 
-	
 	// ボスは「存在しているときだけ」死亡判定
 	// 未スポーン or 破棄済みのフレームでは何もしない
 	if (boss && !boss->GetIsAlive()) {

@@ -180,6 +180,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\3dObject\Actor\Boss\Attack\IBossAttack.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Boss\State\Attack\BossStateAttack.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Boss\State\Damage\BossStateDamage.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Boss\State\Death\BossStateDeath.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Boss\State\Idle\BossStateIdle.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Boss\State\Base\BaseBossState.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Boss\State\Machine\BossStateMachine.cpp" />
@@ -446,6 +447,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\3dObject\Actor\Boss\Details\BossAttackType.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\State\Attack\BossStateAttack.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\State\Damage\BossStateDamage.h" />
+    <ClInclude Include="Game\3dObject\Actor\Boss\State\Death\BossStateDeath.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\State\Idle\BossStateIdle.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\State\Base\BaseBossState.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\State\Machine\BossStateMachine.h" />

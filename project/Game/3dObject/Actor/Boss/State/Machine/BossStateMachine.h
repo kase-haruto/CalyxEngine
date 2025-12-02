@@ -30,7 +30,7 @@ public:
 	void Update(float dt);
 	/**
 	 * \brief 状態遷移要求の処理
-	 */		
+	 */
 	void HandleTransition(const BaseBossState::TransitionRequest& req);
 	/**
 	 * \brief 初期状態の設定
@@ -46,29 +46,35 @@ public:
 
 	// getter
 	BaseBossState* GetCurrentState() const;
+	BossStateType GetCurrentStateType() const;
+
+	/**
+	* \brief 状態の変更変更時の処理を行う
+	* \param nextType 次の状態の種類
+	*/
+	void ChangeState(BossStateType nextType,int16_t param = 0);
+
+	/**
+	* \brief 状態を上に積む
+	* \param nextType 状態の種類
+	*/
+	void PushState(BossStateType nextType);
+
 private:
 	//===================================================================*/
 	//                    private method
 	//===================================================================*/
-	/**
-	 * \brief 状態の変更変更時の処理を行う
-	 * \param nextType 次の状態の種類
-	 */
-	void ChangeState(BossStateType nextType, int16_t param = 0);
-	/**
-	 * \brief 状態を上に積む
-	 * \param nextType 状態の種類
-	 */
-	void PushState(BossStateType nextType);
+
+
 	/**
 	 * \brief 状態の破棄
 	 */
 	void PopState();
-	
+
 private:
 	//===================================================================*/
 	//                    private members
 	//===================================================================*/
 	std::vector<std::unique_ptr<BaseBossState>> stack_;
-	Boss* owner_ = nullptr;
+	Boss*                                       owner_ = nullptr;
 };

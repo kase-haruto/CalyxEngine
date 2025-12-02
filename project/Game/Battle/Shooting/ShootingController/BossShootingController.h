@@ -32,6 +32,7 @@ public:
 
 	//--------- accessor --------------------------------------------------
 	float GetInterval() const override;
+	BulletContainer* GetBulletContainer() const{return bulletContainer_.get();}
 
 private:
 	std::unique_ptr<StraightBulletShooter> straightShooter_ = nullptr;

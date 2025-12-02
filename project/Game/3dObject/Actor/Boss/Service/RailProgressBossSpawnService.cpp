@@ -1,6 +1,8 @@
 #include "RailProgressBossSpawnService.h"
 
 // engine
+#include "Game/3dObject/Actor/Player/DangerSense/PlayerDangerSense.h"
+
 #include <Engine/Scene/Context/SceneContext.h>
 
 void RailProgressBossSpawnService::BossSpawnByRailProgress() {
@@ -15,6 +17,15 @@ void RailProgressBossSpawnService::BossSpawnByRailProgress() {
 	if (railProgress >= 0.8f) {
 		spawner->SetPlayerTransform(player.get());
 		spawner->Spawn();
+
+		// ボスの弾コンテナをプレイヤーの危機察知に登録
+		auto boss = spawner->GetBoss().lock();
+		if (boss) {
+			auto bossBulletContainer = boss->GetBulletContainer();
+			if (bossBulletContainer) {
+				player->GetDangerSense()->AddBulletContainer(bossBulletContainer);
+			}
+		}
 	}
 }
 

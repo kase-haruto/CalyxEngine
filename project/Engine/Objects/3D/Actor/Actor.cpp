@@ -16,5 +16,5 @@ float Actor::GetCollisionRadius() const {
 		auto half = b->GetSize() * 0.5f;
 		return std::sqrt(half.x * half.x + half.y * half.y + half.z * half.z);
 	}
-	return collider_->GetColliderRadius(); // あれば
+	return collider_->GetColliderRadius();
 }
