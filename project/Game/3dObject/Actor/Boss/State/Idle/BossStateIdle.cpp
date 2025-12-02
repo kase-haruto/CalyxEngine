@@ -30,12 +30,6 @@ void BossStateIdle::Update(float dt) {
 	idleTime_ -= dt;
 	if (idleTime_ > 0.0f) return;
 
-	// ボスのヒットフラグがたったらDamageリアクション
-	if (owner_ && owner_->IsHit()) {
-		RequestChange(BossStateType::Damage);
-		return;
-	}
-
 	auto ai = owner_->GetAI();
 	if (!ai) return;
 

@@ -25,7 +25,7 @@ public:
 	float		  GetCollisionRadius() const;
 	const Vector3 GetVelocity() const { return velocity_; }
 	bool		  GetIsAlive() const { return isAlive_; }
-
+	int32_t		  GetLife() const { return life_; }
 	// setter
 	void SetPosition(const Vector3& position) { worldTransform_.translation = position; };
 	void SetMoveSpeed(float moveSpeed) { moveSpeed_ = moveSpeed; }

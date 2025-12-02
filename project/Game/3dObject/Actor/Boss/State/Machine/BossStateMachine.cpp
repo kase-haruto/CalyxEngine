@@ -7,6 +7,7 @@
 
 // c++
 #include "Game/3dObject/Actor/Boss/State/Damage/BossStateDamage.h"
+#include "Game/3dObject/Actor/Boss/State/Death/BossStateDeath.h"
 
 #include <externals/imgui/imgui.h>
 
@@ -19,6 +20,8 @@ std::unique_ptr<BaseBossState> CreateState(BossStateType type) {
 		return std::make_unique<BossStateAttack>();
 	case BossStateType::Damage:
 		return std::make_unique<BossStateDamage>();
+	case BossStateType::Dead:
+		return std::make_unique<BossStateDeath>();
 	default:
 		return nullptr;
 	}
@@ -162,6 +165,11 @@ void BossStateMachine::SetOwner(Boss* owner) {
 BaseBossState* BossStateMachine::GetCurrentState() const {
 	if (stack_.empty()) return nullptr;
 	return stack_.back().get();
+}
+
+BossStateType BossStateMachine::GetCurrentStateType() const {
+	if (stack_.empty()) return BossStateType::Idle; // デフォルト値を返す
+	return stack_.back()->GetStateType();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

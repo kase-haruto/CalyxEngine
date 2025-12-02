@@ -16,12 +16,6 @@ class BossAnimController;
  */
 class Boss final
 	: public Actor {
-	enum class DeathState {
-		Alive,
-		Dying,
-		Dead
-	};
-
 public:
 	//===================================================================*/
 	//						public methods
@@ -66,8 +60,6 @@ public:
 
 	//--------- accessor -----------------------------------------------------
 	const Vector3			GetCenterPos() const override;
-	bool					IsHit() const { return isHit_; }
-	void SetIsHit(bool hit) { isHit_ = hit; }
 	Vector3					GetTargetWorldPos() const;
 	BossAnimController*		GetAnimator() const;
 	BossAI*					GetAI() const;
@@ -81,8 +73,6 @@ private:
 	//===================================================================*/
 	//						private methods
 	//===================================================================*/
-	bool	   isHit_			= false; // ダメージを受けたかどうか
-	DeathState deathState_		= DeathState::Alive;
 	Vector3	   deathRotateAxis_ = {0, 0, 1}; // 傾く軸
 	Vector3	   basePosition_{};				 // サイン波の基準位置
 
