@@ -57,7 +57,6 @@ void ClearScene::Initialize() {
 		{48.0f, 48.0f} // 桁サイズ
 	);
 	scoreSprite_->SetAlign(NumbersSprite::DigitsAlign::Center);
-	finalScore_ = 100000;
 	scoreSprite_->SetValue(finalScore_);
 
 	auto cam = sceneContext_->FindFirst<RailCamera>();
