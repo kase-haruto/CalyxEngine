@@ -132,7 +132,7 @@ void Player::Initialize() {
 	collider_->SetCollisionEnabled(true);
 
 	// life関連初期化
-	life_ = 10;
+	life_ = 20;
 
 	// ライフゲージの初期化
 	hpGauge_ = std::make_unique<HpGauge>(static_cast<float>(life_));
