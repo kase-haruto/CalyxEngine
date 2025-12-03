@@ -9,10 +9,8 @@
 
 // game
 #include <Game/Battle/Shooting/Pattern/ShootPatternDetails.h>
-#include <Game/Battle/Shooting/ShootingController/BulletEmitter.h>
-#include <Game/Battle/Shooting/ShootingController/EnemyShootingController.h>
-
 #include "Movement/EnemyMovementController.h"
+#include "Shoot/EnemyShootingAgent.h"
 
 class Enemy : public Actor {
 public:
@@ -29,8 +27,6 @@ public:
 
 	void Initialize() override;
 	void Update(float dt) override;
-
-	void EnsurePatternBound();
 
 	// stay-in-camera → movementController に委譲
 	void StartStayInCamera(float duration = 2.0f);
@@ -51,25 +47,20 @@ public:
 	DeathState	  GetDeathState() const { return deathState_; }
 	const Vector3 GetCenterPos() const override;
 
-	void SetGameplayEngaged(bool v) { gameplayEngaged_ = v; }
-	bool IsGameplayEngaged() const { return gameplayEngaged_; }
+	void SetGameplayEngaged(bool v) { shooting_.SetGameplayEngaged(v); }
+	bool IsGameplayEngaged() const { return shooting_.IsGameplayEngaged(); }
 
-	void			  SetPatternKind(BulletPatternKind k) { patternKind_ = k; }
-	BulletPatternKind GetPatternKind() const { return patternKind_; }
+	void			  SetPatternKind(BulletPatternKind k) { shooting_.SetPatternKind(k); }
+	BulletPatternKind GetPatternKind() const { return shooting_.GetPatternKind(); }
+
+	/// 互換性用
+	void EnsurePatternBound() { shooting_.EnsurePatternBound(); }
 
 protected:
-	void		 Shoot();
 	virtual void Die();
 
 private:
-	void BuildEmitterIfReady();
-
-private:
 	int16_t score_ = 125;
-
-	BulletPatternKind			   patternKind_		= BulletPatternKind::AimedNWay;
-	BulletPatternKind			   lastPatternKind_ = BulletPatternKind::Spiral;
-	std::unique_ptr<IShootPattern> pattern_;
 
 	const WorldTransform* playerTransform_ = nullptr;
 
@@ -80,12 +71,10 @@ private:
 	float	deathTimer_		 = 0.0f;
 	float	deathLength_	 = 1.5f;
 
-	bool gameplayEngaged_ = false;
-
+	// movement
 	EnemyMovementController movement_;
-
 	// shooting
-	std::unique_ptr<BulletEmitter>			 emitter_;
-	std::unique_ptr<EnemyShootingController> shootingController_;
+	EnemyShootingAgent shooting_;
+	// effects
 	std::shared_ptr<FxObject> hitFx_;
 };

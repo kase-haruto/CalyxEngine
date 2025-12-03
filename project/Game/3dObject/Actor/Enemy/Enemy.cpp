@@ -6,10 +6,7 @@
 #include <Engine/Scene/Utility/SceneUtility.h>
 
 // game
-#include <Game/Battle/Shooting/Details/AimProvider.h>
-#include <Game/Battle/Shooting/Details/FireScheduler.h>
 #include <Game/Battle/Shooting/Score/GainScore.h>
-#include <Game/Battle/Shooting/ShootingController/EnemyShootingControllerSink.h>
 
 #include <numbers>
 
@@ -33,17 +30,16 @@ Enemy::Enemy(const std::string& modelName, const std::string objName)
 	hitFx_->LoadFromPath("Effect/HitEffect");
 }
 
-Enemy::~Enemy() {}
+Enemy::~Enemy() = default;
 
 void Enemy::Initialize() {
 	auto self = shared_from_this();
 	hitFx_->SetParent(self);
 	hitFx_->StopAll();
 
-	// movement controller 初期化
+	// movement / shooting 初期化
 	movement_.Initialize(this);
-
-	EnsurePatternBound();
+	shooting_.Initialize(this);
 }
 
 void Enemy::StartStayInCamera(float duration) {
@@ -53,10 +49,15 @@ void Enemy::StartStayInCamera(float duration) {
 void Enemy::SetPlayerTransform(const WorldTransform* tf) {
 	playerTransform_ = tf;
 	movement_.SetPlayerTransform(tf);
+	shooting_.SetTarget(tf);
 }
 
 void Enemy::SetRouteSpline(const SplineData& data) {
 	movement_.SetRoute(data, playerTransform_);
+}
+
+void Enemy::SetShootingController(std::unique_ptr<EnemyShootingController> controller) {
+	shooting_.SetController(std::move(controller));
 }
 
 void Enemy::Update(float dt) {
@@ -75,24 +76,7 @@ void Enemy::Update(float dt) {
 	movement_.Update(dt);
 
 	// shooting
-	BuildEmitterIfReady();
-
-	if(shootingController_) {
-		shootingController_->SetGameplayEngaged(IsGameplayEngaged());
-		shootingController_->Update(dt);
-	}
-
-	if(IsGameplayEngaged() && emitter_) {
-		if(auto* pat = emitter_->Pattern()) pat->Advance(dt);
-
-		BulletEmitterContext cxt{};
-		cxt.origin	  = GetCenterPos();
-		cxt.targetPos = playerTransform_
-							? playerTransform_->GetWorldPosition()
-							: GetWorldPosition();
-
-		emitter_->Update(dt, cxt);
-	}
+	shooting_.Update(dt);
 
 	// death anim
 	if(deathState_ == DeathState::Dying) {
@@ -118,41 +102,6 @@ void Enemy::Update(float dt) {
 	}
 }
 
-void Enemy::BuildEmitterIfReady() {
-	if(emitter_) return;
-	if(!shootingController_) return;
-	if(!playerTransform_) return;
-
-	auto sink = std::make_unique<EnemyShootingControllerSink>(shootingController_.get());
-	auto aim  = std::make_unique<AimAtTarget>();
-
-	FireScheduler sched;
-	sched.shotsPerSec = 1.5f;
-
-	BulletEmitterConfig cfg;
-	cfg.tag = "enemy_homing";
-
-	emitter_ = std::make_unique<BulletEmitter>(
-		cfg, std::move(sink), std::move(aim), nullptr, sched);
-
-	EnsurePatternBound();
-}
-
-void Enemy::EnsurePatternBound() {
-	if(!emitter_) return;
-
-	if(!pattern_ || patternKind_ != lastPatternKind_) {
-		pattern_		 = CreatePattern(patternKind_);
-		lastPatternKind_ = patternKind_;
-	}
-
-	emitter_->SetPattern(pattern_.get());
-}
-
-void Enemy::SetShootingController(std::unique_ptr<EnemyShootingController> controller) {
-	shootingController_ = std::move(controller);
-}
-
 void Enemy::OnCollisionEnter(Collider*) {
 	if(life_ >= 1) {
 		life_--;
@@ -171,5 +120,6 @@ void Enemy::Die() {
 	GainScore e;
 	e.amount = score_;
 	e.reason = "enemyKill";
+	e.tag	 = {"normal"};
 	EventBus::Publish(e);
 }

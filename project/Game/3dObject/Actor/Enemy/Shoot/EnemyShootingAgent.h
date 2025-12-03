@@ -1,0 +1,65 @@
+#pragma once
+
+#include <memory>
+
+// game shooting
+#include <Game/Battle/Shooting/Pattern/ShootPatternDetails.h>
+#include <Game/Battle/Shooting/ShootingController/BulletEmitter.h>
+#include <Game/Battle/Shooting/ShootingController/EnemyShootingController.h>
+
+class Enemy;
+class WorldTransform;
+
+/**
+ * \brief Enemy の射撃全般を担当するコンポーネント
+ */
+class EnemyShootingAgent {
+public:
+	EnemyShootingAgent();
+	~EnemyShootingAgent();
+
+	/**
+	 * \brief 初期化
+	 * \param owner 所有者 Enemy
+	 */
+	void Initialize(Enemy* owner);
+	/**
+	 * \brief 更新
+	 * \param dt デルタタイム
+	 */
+	void Update(float dt);
+	/**
+	 * \brief パターンのバインドを保証する
+	 */
+	void EnsurePatternBound();
+
+	// accessors --------------------------------------------------//
+	void SetController(std::unique_ptr<EnemyShootingController> ctrl);
+	void SetTarget(const WorldTransform* tf);
+	void SetPatternKind(BulletPatternKind k) { patternKind_ = k; }
+	BulletPatternKind GetPatternKind() const { return patternKind_; }
+	void SetGameplayEngaged(bool v) { gameplayEngaged_ = v; }
+	bool IsGameplayEngaged() const { return gameplayEngaged_; }
+
+
+
+private:
+	/**
+	 * \brief 発射器を構築する
+	 */
+	void BuildEmitterIfReady();
+
+private:
+	Enemy* owner_ = nullptr;
+
+	const WorldTransform* targetTf_ = nullptr;
+
+	std::unique_ptr<EnemyShootingController> controller_;	//< 弾管理
+	std::unique_ptr<BulletEmitter>           emitter_;		//< 発射器
+	std::unique_ptr<IShootPattern>           pattern_;		//< 発射パターン
+
+	BulletPatternKind patternKind_     = BulletPatternKind::AimedNWay;
+	BulletPatternKind lastPatternKind_ = BulletPatternKind::Spiral;
+
+	bool gameplayEngaged_ = false;
+};
