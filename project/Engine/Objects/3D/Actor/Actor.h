@@ -25,12 +25,13 @@ public:
 	float		  GetCollisionRadius() const;
 	const Vector3 GetVelocity() const { return velocity_; }
 	bool		  GetIsAlive() const { return isAlive_; }
+	void		  SetIsAlive(bool isAlive) { isAlive_ = isAlive; }
 	int32_t		  GetLife() const { return life_; }
 	// setter
-	void SetPosition(const Vector3& position) { worldTransform_.translation = position; };
-	void SetMoveSpeed(float moveSpeed) { moveSpeed_ = moveSpeed; }
+	void  SetPosition(const Vector3& position) { worldTransform_.translation = position; };
+	void  SetMoveSpeed(float moveSpeed) { moveSpeed_ = moveSpeed; }
 	float GetMoveSpeed() const { return moveSpeed_; }
-	void SetVelocity(const Vector3& velocity) { velocity_ = velocity; }
+	void  SetVelocity(const Vector3& velocity) { velocity_ = velocity; }
 
 protected:
 	//===================================================================*/
