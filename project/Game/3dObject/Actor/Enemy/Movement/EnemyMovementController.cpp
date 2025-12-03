@@ -1,7 +1,7 @@
 #include "EnemyMovementController.h"
 #include "../Enemy.h"
 #include "Game/3dObject/Actor/Enemy/Enemy.h"
-
+#include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Foundation/Utility/Random/Random.h>
 #include <algorithm>
 

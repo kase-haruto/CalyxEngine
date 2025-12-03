@@ -1,8 +1,5 @@
 #pragma once
-#include <Engine/Foundation/Clock/ClockManager.h>
-#include <Engine/Foundation/Math/Matrix4x4.h>
 #include <Engine/Foundation/Math/Vector3.h>
-#include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Game/Battle/Movement/FollowSpline/SplineFollower.h>
 
 class Enemy;
@@ -20,36 +17,64 @@ public:
 	EnemyMovementController();
 	~EnemyMovementController() = default;
 
+	/**
+	 * \brief 初期化
+	 * \param owner 所有者 Enemy
+	 */
 	void Initialize(Enemy* owner);
+	/**
+	 * \brief 更新
+	 * \param dt デルタタイム
+	 */
 	void Update(float dt);
-
-	// StayInView を開始
+	/**
+	 * \brief カメラ内ステイ開始
+	 * \param duration ステイ時間
+	 */
 	void StartStay(float duration);
-
-	// Active に戻す
+	/**
+	 * \brief アクティブモード開始
+	 */
 	void StartActive();
-
-	// Exit 処理を開始（内部からも呼ばれる）
+	/**
+	 * \brief カメラ外退場開始
+	 */
 	void BeginExit();
 
-	// ルート（スプライン）セット
+	//  accessor -------------------------------------------------------------//
 	void SetRoute(const SplineData& route, const WorldTransform* playerTf);
 	void SetPlayerTransform(const WorldTransform* playerTf);
 	Mode GetMode() const { return mode_; }
 
 private:
-	// 更新処理
+	/**
+	 * \brief ステイ中更新
+	 * \param dt デルタタイム
+	 */
 	void UpdateStay(float dt);
+	/**
+	 * \brief 退場中更新
+	 * \param dt デルタタイム
+	 */
 	void UpdateExit(float dt);
+	/**
+	 * \brief アクティブ中更新
+	 * \param dt デルタタイム
+	 */
 	void UpdateActive(float dt);
-
-	// ステイ中のドリフト
+	/**
+	 * \brief カメラドリフト更新
+	 * \param dt デルタタイム
+	 */
 	void UpdateCameraDrift(float dt);
-
-	// LookAt プレイヤー
+	/**
+	 * \brief プレイヤーを注視
+	 */
 	void LookAtPlayer();
-
-	// 退場完了判定
+	/**
+	 * \brief 退場完了チェック
+	 * \return 退場完了したら true
+	 */
 	bool CheckExitFinished() const;
 
 private:
