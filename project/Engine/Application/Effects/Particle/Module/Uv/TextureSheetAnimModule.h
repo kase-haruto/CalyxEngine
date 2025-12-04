@@ -46,7 +46,7 @@ public:
 	float				 GetAnimationSpeed() const { return animationSpeed_; }
 	bool				 GetUseCustomFrames() const { return useCustomFrames_; }
 	std::vector<FrameUV> GetCustomFrameUVs() const { return customFrameUVs_; }
-
+	virtual const char* GetTypeName() const override { return "TextureSheetAnimationModule"; }
 private:
 	//===================================================================*/
 	//					private methods

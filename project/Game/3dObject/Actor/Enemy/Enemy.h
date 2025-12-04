@@ -88,7 +88,7 @@ private:
 private:
 	int16_t score_ = 125; //< 撃破スコア
 
-	BulletPatternKind			   patternKind_		= BulletPatternKind::AimedNWay;
+	BulletPatternKind			   patternKind_		= BulletPatternKind::SweepFan;
 	BulletPatternKind			   lastPatternKind_ = BulletPatternKind::Spiral;
 	std::unique_ptr<IShootPattern> pattern_;
 

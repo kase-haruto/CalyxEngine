@@ -41,7 +41,7 @@ public:
 	bool			   GetClamp01() const { return clamp01_; }
 	void			   SetInvert(bool v) { invert_ = v; }
 	bool			   GetInvert() const { return invert_; }
-
+	virtual const char* GetTypeName() const override { return "OverLifetimeModule"; }
 	void	SetStart(const Vector4& v) { start_ = v; }
 	void	SetEnd(const Vector4& v) { end_ = v; }
 	Vector4 GetStart() const { return start_; }

@@ -26,11 +26,10 @@ public:
 
 	//--------- setters -----------------------------------------------------
 	void SetGravity(const Vector3& grav) { gravity_ = grav; }
-
+	virtual const char* GetTypeName() const override { return "GravityModule"; }
 private:
 	//===================================================================*/
 	//					private methods
 	//===================================================================*/
 	Vector3 gravity_ {0.0f,-9.8f,0.0f};		//< 重力の強さ
 };
-

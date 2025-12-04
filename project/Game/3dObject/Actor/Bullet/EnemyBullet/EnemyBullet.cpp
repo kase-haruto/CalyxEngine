@@ -32,6 +32,9 @@ EnemyBullet::EnemyBullet(const std::string& modelName, const std::string& name)
 	collider_->SetType(ColliderType::Type_EnemyAttack);
 	collider_->SetTargetType(ColliderType::Type_Player);
 
+	trailFx_ = SceneAPI::Instantiate<FxObject>("TrailFx");
+	auto fx = trailFx_.lock();
+	fx->LoadFromPath("Effect/EnemyBulletTrailEffect");
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -42,12 +45,22 @@ EnemyBullet::~EnemyBullet() = default;
 /////////////////////////////////////////////////////////////////////////////////////////
 //		初期化
 /////////////////////////////////////////////////////////////////////////////////////////
-void EnemyBullet::Initialize() { this->SetDrawEnable(true); }
+void EnemyBullet::Initialize() {
+	this->SetDrawEnable(true);
+
+	auto self = shared_from_this();
+	auto fx = trailFx_.lock();
+	fx->SetParent(self);
+	fx->StopAll();
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		発射時処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void EnemyBullet::OnShot() {}
+void EnemyBullet::OnShot() {
+	auto fx = trailFx_.lock();
+	fx->PlayAll();
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		更新処理

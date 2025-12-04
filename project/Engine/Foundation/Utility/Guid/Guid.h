@@ -16,7 +16,9 @@
 /* ===================================================================== */
 struct Guid{
 	Guid() = default;
-	
+	Guid(const std::string& s) {
+		*this = FromString(s);
+	}
 	std::array<std::uint8_t, 16> bytes {};
 
 	static Guid New();

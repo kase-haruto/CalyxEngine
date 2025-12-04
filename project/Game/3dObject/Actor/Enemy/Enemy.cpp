@@ -95,22 +95,27 @@ void Enemy::Initialize() {
 static float Deg2Rad(float d) { return d * std::numbers::pi_v<float> / 180.0f; }
 
 void Enemy::StartStayInCamera(float duration) {
-	behaviorState_	= EnemyBehaviorState::StayingInView;
+	behaviorState_ = EnemyBehaviorState::StayingInView;
 	stayInViewTime_ = 0.0f;
-	maxStayTime_	= duration;
+	maxStayTime_ = duration;
 
 	if(auto camSp = CameraManager::GetMain3dShared()) {
 		worldTransform_.parent = &camSp->GetWorldTransform();
 	}
-	// 画面中央ちょい奥を基準に
-	camAnchor_ = Vector3(0.0f, 0.0f, 80.0f);
 
-	// ランダム位相を入れて個体差を出す
+	// Z だけは一定、X/Y はランダムに散らす
+	const float baseZ = 80.0f;
+
+	float randX = Random::Generate<float>(-30.0f, 30.0f);
+	float randY = Random::Generate<float>(-20.0f, 20.0f);
+
+	camAnchor_ = Vector3(randX, randY, baseZ);
+
+	// ランダム位相
 	camPhaseX_ = Random::Generate<float>(0.0f, 6.28318f);
 	camPhaseY_ = Random::Generate<float>(0.0f, 6.28318f);
 	camPhaseZ_ = Random::Generate<float>(0.0f, 6.28318f);
 }
-
 /* ========================================================================
    カメラ前方ステイ処理
    ===================================================================== */
@@ -296,6 +301,11 @@ void Enemy::Update(float dt) {
 		float rad				 = std::numbers::pi_v<float> * 0.5f * t;
 		worldTransform_.rotation = Quaternion::MakeRotateAxisQuaternion(deathRotateAxis_, rad);
 
+		// 色を薄くしていく
+		Vector4 color = GetModel()->GetColor();
+		color.w		 = 1.0f - t;
+		GetModel()->SetColor(color);
+
 		// タイマー経過でも Dead へ進める
 		if(t >= 1.0f ) {
 			deathState_ = DeathState::Dead;
@@ -342,9 +352,7 @@ const Vector3 Enemy::GetCenterPos() const {
 
 // スコア取得
 int16_t Enemy::GetScore() const {
-	{
 		return score_;
-	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -440,7 +448,8 @@ void Enemy::UpdateCameraSpaceDrift(float /*dt*/) {
 		camPhaseY_ = Random::Generate<float>(0.0f, 6.28318f);
 		camPhaseZ_ = Random::Generate<float>(0.0f, 6.28318f);
 	}
-	if(camAnchor_.z <= 0.0f) camAnchor_ = {0, 0, 55}; // 視距離の初期値
+	if(camAnchor_.z <= 0.0f)
+		camAnchor_.z = 55.0f; // XY はそのまま
 
 	// Lissajous 風ドリフト
 	const float dx = std::sin((t + camPhaseX_) * camDriftFreqX_) * camDriftAmpX_;

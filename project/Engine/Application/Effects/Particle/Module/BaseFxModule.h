@@ -1,30 +1,34 @@
 #pragma once
-/* ========================================================================
-/* include space
-/* ===================================================================== */
+#include "Engine/Foundation/Utility/Guid/Guid.h"
+
 #include <string>
 
-class BaseFxModule{
+class BaseFxModule {
 public:
-	//===================================================================*/
-	//					public methods
-	//===================================================================*/
-	BaseFxModule(const std::string name);
+	BaseFxModule(const std::string& name)
+		: name_(name)
+	{}
+
 	virtual ~BaseFxModule() = default;
 
 	virtual void ShowGuiContent() = 0;
-	virtual void OnEmit(struct FxUnit&){}
-	virtual void OnUpdate(struct FxUnit&, float){}
+	virtual void OnEmit(struct FxUnit&) {}
+	virtual void OnUpdate(struct FxUnit&, float) {}
 
-	bool IsEnabled() const{ return isEnabled_; }
-	void SetEnabled(bool value){ isEnabled_ = value; }
-	const std::string& GetName()const{ return name_; }
-	void SetName(const std::string& n){ name_ = n; } 
+	bool IsEnabled() const { return isEnabled_; }
+	void SetEnabled(bool v) { isEnabled_ = v; }
+
+	const std::string& GetName() const { return name_; }
+	void SetName(const std::string& s) { name_ = s; }
+
+	const Guid& GetGuid() const { return guid_; }
+	void SetGuid(const Guid& g) { guid_ = g; }
+
+	virtual const char* GetTypeName() const = 0;
+
 protected:
-	//===================================================================*/
-	//					protected methods
-	//===================================================================*/
-	bool isEnabled_ = true; // モジュールが有効かどうか
-	std::string name_ = "Module";
-};
+	bool        isEnabled_ = true;
+	std::string name_;
 
+	Guid guid_;
+};

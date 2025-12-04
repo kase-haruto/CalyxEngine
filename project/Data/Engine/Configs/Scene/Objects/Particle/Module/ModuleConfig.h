@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Engine/Foundation/Utility/Guid/Guid.h"
+
 #include <string>
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Foundation/Math/Vector4.h>
@@ -9,6 +11,7 @@
 class OverLifetimeModule;
 
 struct BaseModuleConfig {
+	Guid guid;
 	std::string name;
 	bool enabled = true;
 
@@ -113,7 +116,6 @@ struct OverLifetimeModuleConfig : public BaseModuleConfig {
 	OverLifetimeModuleConfig() { name = "OverLifetimeModule"; }
 	OverLifetimeModuleConfig(const std::string& _name, bool _enable)
 		: BaseModuleConfig(_name, _enable) {}
-
 	// Target/Blend/Ease は int で保存（モジュール側の enum と対応）
 	int  target  = 0;  // 0:Scale, 1:RotX, 2:RotY, 3:RotZ, 4:ColorRGBA, 5:AlphaOnly
 	int  blend   = 0;  // 0:Set, 1:Add, 2:Multiply
