@@ -221,6 +221,16 @@ void BaseGameObject::SetTranslate(const Vector3& pos) {
 		worldTransform_.translation = pos;
 	}
 }
+void BaseGameObject::SetRotate(const Quaternion& rot) {
+	if(model_) {
+		worldTransform_.rotation = rot;
+	}
+}
+void BaseGameObject::SetRotate(const Vector3& euler) {
+	if(model_) {
+		worldTransform_.eulerRotation = euler;
+	}
+}
 
 void BaseGameObject::SetScale(const Vector3& scale) {
 	if(model_) {

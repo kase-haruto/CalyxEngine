@@ -96,6 +96,8 @@ public:
 	void SetName(const std::string& name);
 	void SetBillboardMode(BillboardMode m) { billboardMode_ = m; }
 	void SetTranslate(const Vector3& pos);
+	void SetRotate(const Quaternion& rot);
+	void SetRotate(const Vector3& euler);
 	void SetScale(const Vector3& scale);
 	void SetDrawEnable(bool isDrawEnable) override;
 	void SetColor(const Vector4& color);
