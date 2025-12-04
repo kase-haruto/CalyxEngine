@@ -185,6 +185,11 @@ void GameScene::Update([[maybe_unused]] float dt) {
 		transitionRequestor_->RequestSceneChange(SceneType::CLEAR, payload);
 		return;
 	}
+
+	// 一応タイトル戻るよう
+	if(Input::GetInstance()->TriggerGamepadButton(PadButton::START)) {
+		transitionRequestor_->RequestSceneChange(SceneType::TITLE);
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

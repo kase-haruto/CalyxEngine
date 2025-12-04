@@ -75,6 +75,10 @@ void ParticleSystemObject::SetDrawEnable(bool isDrawEnable) {
 	}
 }
 
+void ParticleSystemObject::SetPosition(const Vector3& pos) {
+	emitter_->SetPosition(pos);
+}
+
 void ParticleSystemObject::ApplyConfig() {
 	const auto& cfg = config_.GetConfig();
 

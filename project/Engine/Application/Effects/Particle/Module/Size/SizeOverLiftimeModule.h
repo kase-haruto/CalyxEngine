@@ -29,7 +29,7 @@ public:
 	// setter
 	bool			   GetIsGrowing() const { return isGrowing_; }
 	Cx::Ease::EaseType GetEaseType() const { return easeType_; }
-
+	virtual const char* GetTypeName() const override { return "SizeOverLiftimeModule"; }
 private:
 	//===================================================================*/
 	//					private methods

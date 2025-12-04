@@ -1,6 +1,8 @@
 #pragma once
 
 // game
+#include "Engine/Application/Effects/FxObject.h"
+
 #include <Game/3dObject/Actor/Bullet/BaseBullet.h>
 
 struct SoftHomingParam {
@@ -38,5 +40,6 @@ private:
 private:
 	SoftHomingParam homing_{};					//< ホーミングパラメータ
 	std::weak_ptr<SceneObject> wTarget_{};		//< ターゲットのポインタ
+	std::weak_ptr<FxObject> trailFx_{};			//< トレイルエフェクト
 	float age_ = 0.0f;							//< 寿命
 };

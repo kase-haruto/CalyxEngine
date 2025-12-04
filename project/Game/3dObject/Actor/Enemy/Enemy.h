@@ -64,6 +64,9 @@ private:
 
 	const WorldTransform* playerTransform_ = nullptr;
 
+	BulletPatternKind			   patternKind_		= BulletPatternKind::SweepFan;
+	BulletPatternKind			   lastPatternKind_ = BulletPatternKind::Spiral;
+	std::unique_ptr<IShootPattern> pattern_;
 	DeathState deathState_ = DeathState::Alive;
 
 	// death animation

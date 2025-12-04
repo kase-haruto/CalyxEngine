@@ -116,6 +116,7 @@ public:
 
 	virtual const Vector3&					 GetCenter() const	 = 0;
 	virtual const std::variant<Sphere, OBB>& GetCollisionShape() = 0;
+	Vector3 GetWorldPos()const;
 
 	const std::string& GetName() const { return name_; }
 	void			   SetName(const std::string& name) { name_ = name; }

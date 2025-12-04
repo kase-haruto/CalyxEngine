@@ -7,7 +7,9 @@
 #include <string>
 #include <algorithm>
 
-class EnemyHomingBullet 
+class FxObject;
+
+class EnemyHomingBullet
 	: public BaseBullet {
 public:
 	EnemyHomingBullet() = default;
@@ -46,6 +48,8 @@ private:
 	// 最初の homingDurationSec_ 秒だけ追尾
 	float homingDurationSec_ = 1.0f;
 	float homingElapsedSec_ = 0.0f;
+
+	std::weak_ptr<FxObject> trailFx_; //< 発射エフェクト
 
 	Vector3 baseScale_{ 1.0f, 1.0f, 1.0f };
 };

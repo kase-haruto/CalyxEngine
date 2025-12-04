@@ -71,7 +71,7 @@ private:
 
 	// タイマーは「アクティブ時のみ」進む
 	float spawnTimer_    = 0.0f;
-	float spawnInterval_ = 1.0f;
+	float spawnInterval_ = 1.5f;
 
 	Vector3 spawnAreaMin_ = {-10.0f,0.0f,-30.0f};
 	Vector3 spawnAreaMax_ = {10.0f,5.0f,-30.0f};

@@ -1,5 +1,7 @@
 #include "EnemyHomingBullet.h"
 
+#include "Engine/Application/Effects/FxObject.h"
+
 #include <Engine/Scene/Utility/SceneUtility.h>
 #include <Engine/Objects/Collider/BoxCollider.h>
 #include <Engine/Foundation/Utility/Random/Random.h>
@@ -52,6 +54,10 @@ namespace {
 EnemyHomingBullet::EnemyHomingBullet(const std::string& modelName, const std::string& name)
 	: BaseBullet::BaseBullet(modelName, name) {
 	this->SetDrawEnable(true);
+
+	trailFx_ = SceneAPI::Instantiate<FxObject>("TrailFx");
+	auto fx = trailFx_.lock();
+	fx->LoadFromPath("Effect/EnemyBulletTrail");
 }
 
 EnemyHomingBullet::~EnemyHomingBullet() {}
@@ -84,9 +90,21 @@ void EnemyHomingBullet::Initialize() {
 	baseScale_ = worldTransform_.scale;
 
 	moveSpeed_ = 20.0f;
+
+
+
+	auto self = shared_from_this();
+	auto fx = trailFx_.lock();
+	fx->SetParent(self);
+	fx->StopAll();
+
 }
 
-void EnemyHomingBullet::OnShot() {}
+void EnemyHomingBullet::OnShot() {
+
+	auto fx = trailFx_.lock();
+	fx->PlayAll();
+}
 
 void EnemyHomingBullet::SetTarget(const Actor* target) {
 	target_ = target;
