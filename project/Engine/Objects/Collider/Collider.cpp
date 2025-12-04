@@ -1,5 +1,7 @@
 #include "Collider.h"
 
+#include "Engine/Objects/3D/Actor/BaseGameObject.h"
+
 #include <Engine/Collision/CollisionManager.h>
 #include <Data/Engine/Configs/Scene/Objects/Collider/ColliderConfig.h>
 
@@ -99,6 +101,13 @@ ColliderConfig Collider::ExtractConfig() const{
 }
 
 
+Vector3 Collider::GetWorldPos() const {
+	if(owner_) {
+		return owner_->GetWorldPosition();
+	}
+	// オーナーがいない場合はゼロベクトルを返す
+	return Vector3::Zero();
+}
 /////////////////////////////////////////////////////////////////////////////////////////
 //		Collisionするか
 /////////////////////////////////////////////////////////////////////////////////////////

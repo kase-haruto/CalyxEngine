@@ -9,6 +9,7 @@
 #include "AI/BossAI.h"
 #include "Anim/BossAnimController.h"
 #include "Engine/Application/System/Enviroment.h"
+#include "Engine/Scene/Utility/SceneUtility.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		ctor
@@ -37,6 +38,13 @@ Boss::Boss(const std::string& modelName,const std::string objName)
 	// ステートの初期化
 	stateMachine_ = std::make_unique<BossStateMachine>();
 	stateMachine_->SetOwner(this);
+
+	// --- FxObject を生成して再生 ---
+	hitEffects_ = SceneAPI::Instantiate<FxObject>("HitFx");
+
+	// コンフィグ読み込み（FxObject 内部で ApplyConfig が呼ばれる）
+	auto fx = hitEffects_.lock();
+	fx->LoadFromPath("Effect/BossHitEffect");
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -58,6 +66,9 @@ void Boss::Initialize() {
 	Vector2 gaugePos = {kGameSize.x * 0.5f,50.0f};
 	hpGauge_->Initialize(gaugePos,Vector2(500.0f,32.0f));
 	hpGauge_->SetAncorPoint(Vector2(0.5f,0.5f));
+
+	auto fx = hitEffects_.lock();
+	fx->StopAll();
 }
 
 void Boss::InitializeAI() {
@@ -119,28 +130,35 @@ void Boss::DerivativeGui() {
 void Boss::OnCollisionEnter(Collider* other) {
 	if (!other) return;
 
-	// 攻撃以外は無視
+	// 攻撃以外を除外
 	if (collider_->GetTargetType() != other->GetType()) return;
-	if (life_ <= 0) return; // すでに死んでる
+	if (life_ <= 0) return;
 
-	// ダメージ
+	// --- ダメージ処理 ---
 	life_--;
 
-	// HP0 なら即 Dead へ（どの状態でも）
+	// --- 衝突位置を取得 ---
+	Vector3 hitPos = other->GetWorldPos(); // ← マジでこれだけでOKのことが多い
+
+	auto fx = hitEffects_.lock();
+	// 位置設定
+	fx->SetWorldPosition(hitPos);
+	// 再生
+	fx->PlayAll();
+
+	// --- HP0 なら Dead へ ---
 	if (life_ <= 0) {
 		stateMachine_->ChangeState(BossStateType::Dead);
 		return;
 	}
 
-	// ここからは生存時のひるみ処理
+	// --- ひるみ処理 ---
 	if (flinchValue_ < flinchMax_) {
 		flinchValue_++;
 		return;
 	}
-
 	flinchValue_ = 0;
 
-	// Idle のときだけ Damage へ遷移（これは好み）
 	auto* curState = stateMachine_->GetCurrentState();
 	if (curState && curState->GetStateType() == BossStateType::Idle) {
 		stateMachine_->ChangeState(BossStateType::Damage);

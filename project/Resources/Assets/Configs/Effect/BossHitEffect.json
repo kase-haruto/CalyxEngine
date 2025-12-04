@@ -62,13 +62,13 @@
                         "z": 1.0
                     },
                     "max": {
-                        "x": 1.159999966621399,
-                        "y": 35.0,
+                        "x": 3.0,
+                        "y": 40.0,
                         "z": 1.0
                     },
                     "min": {
-                        "x": -1.2599999904632568,
-                        "y": -25.0,
+                        "x": -3.0,
+                        "y": -40.0,
                         "z": 0.0
                     },
                     "mode": 1
@@ -94,12 +94,12 @@
                     "mode": 0
                 }
             },
-            "guid": "23ecacae-d9e1-4227-9c45-d2f744ac72eb",
+            "guid": "a029cb35-0749-49bc-90e4-8d56c62ce51e",
             "isDrawEnable": true,
             "isGpu": false,
             "name": "hit",
             "objectType": 0,
-            "parentGuid": "c6726376-9724-4381-abe8-c43c21ba11ea",
+            "parentGuid": "c62366e7-5ad9-431d-a183-9e972d975374",
             "transform": {
                 "rotation": {
                     "w": 1.0,
@@ -185,8 +185,8 @@
                 "randomSpinEmit": false,
                 "scale": {
                     "constant": {
-                        "x": 18.0,
-                        "y": 18.0,
+                        "x": 28.0,
+                        "y": 28.0,
                         "z": 5.0
                     },
                     "max": {
@@ -222,12 +222,12 @@
                     "mode": 0
                 }
             },
-            "guid": "5cd74f44-4f0a-4fcc-acff-260fac30ae38",
+            "guid": "a5b2b03f-d02d-4a89-a1b4-98cff276adae",
             "isDrawEnable": true,
             "isGpu": false,
             "name": "hitAnim",
             "objectType": 0,
-            "parentGuid": "c6726376-9724-4381-abe8-c43c21ba11ea",
+            "parentGuid": "c62366e7-5ad9-431d-a183-9e972d975374",
             "transform": {
                 "rotation": {
                     "w": 1.0,
@@ -281,8 +281,8 @@
                 "randomSpinEmit": false,
                 "scale": {
                     "constant": {
-                        "x": 16.0,
-                        "y": 16.0,
+                        "x": 26.0,
+                        "y": 26.0,
                         "z": 1.0
                     },
                     "max": {
@@ -318,12 +318,12 @@
                     "mode": 0
                 }
             },
-            "guid": "e50f1366-3c69-4878-8da8-80a4030afccf",
+            "guid": "0ec340e2-7b3a-447c-bc39-29cdcaa50dab",
             "isDrawEnable": true,
             "isGpu": false,
             "name": "rect",
             "objectType": 0,
-            "parentGuid": "c6726376-9724-4381-abe8-c43c21ba11ea",
+            "parentGuid": "c62366e7-5ad9-431d-a183-9e972d975374",
             "transform": {
                 "rotation": {
                     "w": 1.0,
@@ -409,8 +409,8 @@
                 "randomSpinEmit": false,
                 "scale": {
                     "constant": {
-                        "x": 15.0,
-                        "y": 15.0,
+                        "x": 26.0,
+                        "y": 26.0,
                         "z": 1.0
                     },
                     "max": {
@@ -446,12 +446,12 @@
                     "mode": 0
                 }
             },
-            "guid": "7625fe3c-ea32-43a1-bd80-78bdfaf5ac2b",
+            "guid": "afa2ae96-e4e2-4493-a235-fb444104fadf",
             "isDrawEnable": true,
             "isGpu": false,
             "name": "ring",
             "objectType": 0,
-            "parentGuid": "c6726376-9724-4381-abe8-c43c21ba11ea",
+            "parentGuid": "c62366e7-5ad9-431d-a183-9e972d975374",
             "transform": {
                 "rotation": {
                     "w": 1.0,
@@ -473,7 +473,7 @@
         },
         {
             "emitter": {
-                "autoDestroy": false,
+                "autoDestroy": true,
                 "blendMode": 2,
                 "color": {
                     "w": 0.23529411852359772,
@@ -496,7 +496,14 @@
                     "mode": 0
                 },
                 "modelPath": "plane.obj",
-                "modules": [],
+                "modules": [
+                    {
+                        "easeType": 11,
+                        "enabled": true,
+                        "isGrowing": true,
+                        "name": "SizeOverLiftimeModule"
+                    }
+                ],
                 "position": {
                     "x": 0.0,
                     "y": 0.0,
@@ -505,8 +512,8 @@
                 "randomSpinEmit": false,
                 "scale": {
                     "constant": {
-                        "x": 16.0,
-                        "y": 16.0,
+                        "x": 26.0,
+                        "y": 26.0,
                         "z": 1.0
                     },
                     "max": {
@@ -542,12 +549,12 @@
                     "mode": 0
                 }
             },
-            "guid": "a9e97b02-399d-4840-84be-1c7b21c1dca3",
+            "guid": "dbda339b-a9d8-4361-aa73-38f93ba0f639",
             "isDrawEnable": true,
             "isGpu": false,
             "name": "hitCircle",
             "objectType": 0,
-            "parentGuid": "c6726376-9724-4381-abe8-c43c21ba11ea",
+            "parentGuid": "c62366e7-5ad9-431d-a183-9e972d975374",
             "transform": {
                 "rotation": {
                     "w": 1.0,
@@ -569,7 +576,7 @@
         }
     ],
     "guid": "f89b26de-aedd-4450-bb8f-e4733230150f",
-    "name": "HitEffect",
+    "name": "BossHitEffect",
     "objectType": 0,
     "parentGuid": "00000000-0000-0000-0000-000000000000",
     "transform": {

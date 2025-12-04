@@ -5,6 +5,7 @@
 // engine
 #include <Engine/Objects/3D/Actor/Actor.h>
 // game
+#include "Engine/Application/Effects/FxObject.h"
 #include "Game/2d/HpGauge.h"
 #include "State/Machine/BossStateMachine.h"
 #include <Game/Battle/Shooting/ShootingController/BossShootingController.h>
@@ -20,7 +21,7 @@ public:
 	//===================================================================*/
 	//						public methods
 	//===================================================================*/
-	Boss(const std::string& modelName, const std::string objName);
+	Boss(const std::string& modelName,const std::string objName);
 	~Boss() override;
 
 	/**
@@ -59,28 +60,29 @@ public:
 	void OnCollisionExit([[maybe_unused]] Collider* other) override;
 
 	//--------- accessor -----------------------------------------------------
-	const Vector3			GetCenterPos() const override;
-	Vector3					GetTargetWorldPos() const;
-	BossAnimController*		GetAnimator() const;
-	BossAI*					GetAI() const;
+	const Vector3           GetCenterPos() const override;
+	Vector3                 GetTargetWorldPos() const;
+	BossAnimController*     GetAnimator() const;
+	BossAI*                 GetAI() const;
 	BossShootingController* GetShootController() const { return shootingController_.get(); }
-	void					SetShootingController(std::unique_ptr<BossShootingController>);
-	void					SetPlayerTransform(const Actor* target);
-	std::vector<Sprite*>	GetAllSprites() const;
-	const Actor*			GetTargetActor() const;
-	BulletContainer*		GetBulletContainer() const{return shootingController_->GetBulletContainer();}
+	void                    SetShootingController(std::unique_ptr<BossShootingController>);
+	void                    SetPlayerTransform(const Actor* target);
+	std::vector<Sprite*>    GetAllSprites() const;
+	const Actor*            GetTargetActor() const;
+	BulletContainer*        GetBulletContainer() const { return shootingController_->GetBulletContainer(); }
 
 private:
 	//===================================================================*/
 	//						private methods
 	//===================================================================*/
-	int16_t flinchValue_  = 0;
-	int16_t flinchMax_    = 4;
+	int16_t flinchValue_ = 0;
+	int16_t flinchMax_   = 4;
 
-	const Actor*							target_				= nullptr; //< プレイヤーのTransform
+	const Actor*                            target_             = nullptr; //< プレイヤーのTransform
 	std::unique_ptr<BossShootingController> shootingController_ = nullptr; //< 発射制御クラス
-	std::unique_ptr<BossAI>					ai_					= nullptr; //< AIクラス
-	std::unique_ptr<BossStateMachine>		stateMachine_		= nullptr; //< ステートマシン
-	std::unique_ptr<BossAnimController>		anim_				= nullptr; //< アニメーションコントローラ
-	std::unique_ptr<HpGauge>				hpGauge_			= nullptr; //< HPゲージ
+	std::unique_ptr<BossAI>                 ai_                 = nullptr; //< AIクラス
+	std::unique_ptr<BossStateMachine>       stateMachine_       = nullptr; //< ステートマシン
+	std::unique_ptr<BossAnimController>     anim_               = nullptr; //< アニメーションコントローラ
+	std::unique_ptr<HpGauge>                hpGauge_            = nullptr; //< HPゲージ
+	std::weak_ptr<FxObject>    hitEffects_;      //< ヒットエフェクト群
 };
