@@ -4,13 +4,15 @@
 
 class Enemy;
 class WorldTransform;
+class EnemyFormationController;
 
 class EnemyMovementController {
 public:
 	enum class Mode {
 		Active,
 		StayInView,
-		ExitFromView
+		ExitFromView,
+		Formation, //< 隊列モード
 	};
 
 public:
@@ -41,6 +43,13 @@ public:
 	 */
 	void BeginExit();
 
+	/**
+	 * \brief 編隊モード開始（カメラローカル）
+	 * \param formation 編隊コントローラ（非所有）
+	 * \param offset    編隊内オフセット（カメラローカル）
+	 */
+	void StartFormation(EnemyFormationController* formation, const Vector3& offset);
+
 	//  accessor -------------------------------------------------------------//
 	void SetRoute(const SplineData& route, const WorldTransform* playerTf);
 	void SetPlayerTransform(const WorldTransform* playerTf);
@@ -67,6 +76,7 @@ private:
 	 * \param dt デルタタイム
 	 */
 	void UpdateCameraDrift(float dt);
+	void UpdateFormation(float);
 	/**
 	 * \brief プレイヤーを注視
 	 */
@@ -105,4 +115,9 @@ private:
 	bool		   hasRoute_ = false;
 
 	const WorldTransform* playerTf_ = nullptr;
+
+	// Formation
+	EnemyFormationController* formation_	   = nullptr; // 非所有
+	Vector3					  formationOffset_ = {0, 0, 0};
+	float					  formationPhase_  = 0.0f; // 個体差の揺れ用
 };

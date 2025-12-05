@@ -32,13 +32,30 @@ EnemySpawner::EnemySpawner(const std::string& name) : SceneObject() {
 		this->ExtractConfig();
 	});
 
-	
+	// Formation デフォルト設定
+	formationConfig_.useFormation  = true;
+	formationConfig_.motionType    = EnemyFormationMotionType::Snake;
+	formationConfig_.baseZ         = 40.0f;
+	formationConfig_.speedZ        = 0.0f;
+	formationConfig_.snakeAmpX     = 25.0f;
+	formationConfig_.snakeAmpY     = 10.0f;
+	formationConfig_.snakeFreqX    = 2.0f;
+	formationConfig_.snakeFreqY    = 1.7f;
+	formationConfig_.radius        = 30.0f;
+	formationConfig_.angularSpeed  = 1.2f;
+	formationConfig_.dissolveTime  = 0.0f;
 }
 
 void EnemySpawner::Initialize() {
 	// 個別の調節パラメータ適用
 	const std::string configRoot = "GameObject/";
 	config_.LoadConfig(configRoot + GetName());
+
+	if(formationConfig_.useFormation) {
+		formation_ = std::make_unique<EnemyFormationController>();
+		formation_->Initialize(formationConfig_);
+		formationTimer_ = 0.0f;
+	}
 }
 
 void EnemySpawner::Update(float dt) {
@@ -54,6 +71,16 @@ void EnemySpawner::Update(float dt) {
 
 	if (isActive_) {
 		TickSpawnTimer(dt);
+	}
+
+	if (isActive_) {
+		TickSpawnTimer(dt);
+
+		// Formation 更新
+		if(formationConfig_.useFormation && formation_) {
+			formation_->Update(dt);
+			formationTimer_ = formation_->GetTime();
+		}
 	}
 
 }
@@ -146,11 +173,25 @@ void EnemySpawner::SetRoute(const SplineData& s) {
 
 bool EnemySpawner::LoadRouteFromJson(const std::string& path) {
 	SplineData tmp;
-	if(!SplineJson::Load(path,tmp)) { // JSON から読み込み
+	if(!SplineJson::Load(path, tmp)) { // JSON から読み込み
 		return false;
 	}
 	SetRoute(tmp);
 	return true;
+}
+Vector3 EnemySpawner::CalcFormationOffset(size_t index) const {
+	if(maxSpawnCount_ == 0) return {0, 0, 0};
+
+	int center = (int)(maxSpawnCount_ - 1) / 2;
+	int i = (int)index;
+
+	float spacing = 18.0f;
+	float x = (i - center) * spacing;
+
+	// 少し V 字型に奥方向へずらす
+	float z = std::abs(i - center) * 4.0f;
+
+	return Vector3{x, 0, z};
 }
 
 void EnemySpawner::UpdateProximity() {
@@ -187,22 +228,29 @@ void EnemySpawner::UpdateProximity() {
 }
 
 void EnemySpawner::Spawn() {
-	if(!bulletContainer_) return; // 敵弾コンテナがなければ早期return
+	if(!bulletContainer_) return;
 
 	EnemyInstaller installer;
-	auto           enemy = installer.InstallEnemy(bulletContainer_);
+	auto enemy = installer.InstallEnemy(bulletContainer_);
 	if(!enemy) return;
 
 	enemy->Initialize();
 	enemy->SetPlayerTransform(playerTransform_);
 
-	// 位置と親子付け（ローカルでランダム）
-	enemy->StartStayInCamera();
-	
-	// 自前リストに登録
-	spawnedEnemies_.push_back(enemy);
+	// 編隊モードの場合
+	if(formationConfig_.useFormation && formation_) {
 
-	if(directory_) { directory_->Register(enemy); }
+		const size_t index = spawnedEnemies_.size();
+		Vector3 offset = CalcFormationOffset(index);
+
+		enemy->StartFormation(formation_.get(), offset);
+	}
+	else {
+		enemy->StartStayInCamera();
+	}
+	
+	spawnedEnemies_.push_back(enemy);
+	if(directory_) directory_->Register(enemy);
 }
 
 void EnemySpawner::DespawnAll() {

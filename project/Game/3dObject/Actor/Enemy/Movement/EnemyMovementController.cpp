@@ -3,7 +3,11 @@
 #include "Game/3dObject/Actor/Enemy/Enemy.h"
 #include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Foundation/Utility/Random/Random.h>
+#include <Engine/Graphics/Camera/Manager/CameraManager.h>
+#include <Game/Battle/Movement/Formation/EnemyFormationController.h>
+
 #include <algorithm>
+#include <cmath>
 
 namespace {
 inline void ClampToFrustum(Vector3& p, float fovY, float aspect, float margin) {
@@ -52,6 +56,10 @@ void EnemyMovementController::Update(float dt) {
 
 	case Mode::ExitFromView:
 		UpdateExit(dt);
+		break;
+
+	case Mode::Formation:
+		UpdateFormation(dt);
 		break;
 
 	case Mode::Active:
@@ -141,7 +149,7 @@ void EnemyMovementController::UpdateExit(float dt) {
 	// 移動
 	Vector3 newPos = owner_->GetWorldTransform().translation + exitDirLocal_ * exitSpeed_ * dt;
 	owner_->SetTranslate(newPos);
-		LookAtPlayer();
+	LookAtPlayer();
 
 	if(CheckExitFinished()) {
 		owner_->SetIsAlive(false);
@@ -172,6 +180,41 @@ void EnemyMovementController::UpdateActive(float dt) {
 	if(hasRoute_) {
 		mover_.Update(dt);
 	}
+	LookAtPlayer();
+}
+
+//==================================================================
+//  FORMATION
+//==================================================================
+void EnemyMovementController::StartFormation(EnemyFormationController* formation, const Vector3& offset) {
+	formation_      = formation;
+	formationOffset_ = offset;
+	formationPhase_  = Random::Generate<float>(0.0f, 6.2831f);
+
+	// 念のためカメラに親子付け（していれば二重で設定しても問題ない）
+	if(auto cam = CameraManager::GetMain3dShared()) {
+		owner_->GetWorldTransform().parent = &cam->GetWorldTransform();
+	}
+
+	mode_ = Mode::Formation;
+}
+
+void EnemyMovementController::UpdateFormation(float /*dt*/) {
+	if(!formation_ || !owner_) return;
+
+	// FormationController の座標は「カメラローカル」として扱う
+	Vector3 leaderPos = formation_->GetPosition();
+	Vector3 off       = formationOffset_;
+
+	// 個体差の揺れを乗せてスターフォックス感
+	float t = ClockManager::GetInstance()->GetTotalTime();
+	off.x += std::sin(t * 2.1f + formationPhase_) * 1.5f;
+	off.y += std::sin(t * 1.7f + formationPhase_) * 1.5f;
+
+	Vector3 localPos = leaderPos + off;
+	owner_->SetTranslate(localPos);
+
+	// 見た目の向き：とりあえずプレイヤーを向かせる
 	LookAtPlayer();
 }
 

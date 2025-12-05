@@ -8,6 +8,7 @@
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 #include <Engine/Objects/ConfigurableObject/ConfigurableObject.h>
 #include <Game/3dObject/Actor/Enemy/Enemy.h>
+#include <Game/Battle/Movement/Formation/EnemyFormationController.h>
 
 struct IEnemyDirectory;
 class EnemyBulletContainer;
@@ -17,7 +18,7 @@ class EnemySpawner
 	  public IConfigurable {
 public:
 	EnemySpawner(const std::string& name = "EnemySpawner");
-	void Initialize()override;
+	void Initialize() override;
 	void Update(float dt) override;
 	void TickSpawnTimer(float dt);
 	void AlwaysUpdate(float dt) override;
@@ -33,7 +34,7 @@ public:
 	void SetRotationSpeed(float speed) { rotationSpeed_ = speed; }
 	void SetSpawnInterval(float interval) { spawnInterval_ = interval; }
 
-	void SetSpawnArea(const Vector3& min,const Vector3& max) {
+	void SetSpawnArea(const Vector3& min, const Vector3& max) {
 		spawnAreaMin_ = min;
 		spawnAreaMax_ = max;
 	}
@@ -53,36 +54,41 @@ private:
 	void Spawn();
 	void GarbageCollectDead();
 	bool LoadRouteFromJson(const std::string& path);
+	Vector3 CalcFormationOffset(size_t index) const;
 
 	// ====== util ======
-	static float Distance_(const Vector3& a,const Vector3& b,bool useXZ);
+	static float Distance_(const Vector3& a, const Vector3& b, bool useXZ);
 
 private:
 	std::list<std::shared_ptr<Enemy>> spawnedEnemies_;
-	size_t                            maxSpawnCount_ = 5;
+	size_t							  maxSpawnCount_ = 5;
 
-	WorldTransform*       playerTransform_ = nullptr; // 非所有
-	IEnemyDirectory*      directory_       = nullptr;
+	WorldTransform*		  playerTransform_ = nullptr; // 非所有
+	IEnemyDirectory*	  directory_	   = nullptr;
 	EnemyBulletContainer* bulletContainer_ = nullptr;
 
-	Vector3    rotationDir_   = {0,1,0};
-	float      rotationSpeed_ = 1.0f;
+	Vector3	   rotationDir_	  = {0, 1, 0};
+	float	   rotationSpeed_ = 1.0f;
 	SplineData enemyMoveRoute_;
 
 	// タイマーは「アクティブ時のみ」進む
-	float spawnTimer_    = 0.0f;
+	float spawnTimer_	 = 0.0f;
 	float spawnInterval_ = 1.5f;
 
-	Vector3 spawnAreaMin_ = {-10.0f,0.0f,-30.0f};
-	Vector3 spawnAreaMax_ = {10.0f,5.0f,-30.0f};
+	Vector3 spawnAreaMin_ = {-10.0f, 0.0f, -30.0f};
+	Vector3 spawnAreaMax_ = {10.0f, 5.0f, -30.0f};
 
 	// ====== 近接起動パラメータ ======
-	bool  isActive_           = false;  // 近接で true、遠離で false
-	bool  useXZDistance_      = true;   // 水平距離で判定（XZ）
-	float activationRadius_   = 150.0f; // 起動半径（以内で起動）
+	bool  isActive_			  = false;	// 近接で true、遠離で false
+	bool  useXZDistance_	  = true;	// 水平距離で判定（XZ）
+	float activationRadius_	  = 150.0f; // 起動半径（以内で起動）
 	float deactivationRadius_ = 200.0f; // 停止半径（以上で停止＆デスポーン）
 
+	// ====== 編隊 ======
+	EnemyFormationConfig                      formationConfig_;   // 設定
+	std::unique_ptr<EnemyFormationController> formation_;         // 実インスタンス
+	float                                formationTimer_ = 0.0f;
 private:
 	ConfigurableObject<EnemySpawnerConfig> config_;
-	std::string                            moveRoutePath_ = "Resources/Assets/Spline/EnemyMoveRouteR2L.json";
+	std::string							   moveRoutePath_ = "Resources/Assets/Spline/EnemyMoveRouteR2L.json";
 };
