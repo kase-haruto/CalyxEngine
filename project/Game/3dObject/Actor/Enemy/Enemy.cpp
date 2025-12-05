@@ -43,41 +43,6 @@ void Enemy::Initialize() {
 }
 
 void Enemy::StartStayInCamera(float duration) {
-	behaviorState_ = EnemyBehaviorState::StayingInView;
-	stayInViewTime_ = 0.0f;
-	maxStayTime_ = duration;
-
-	if(auto camSp = CameraManager::GetMain3dShared()) {
-		worldTransform_.parent = &camSp->GetWorldTransform();
-	}
-
-	// Z だけは一定、X/Y はランダムに散らす
-	const float baseZ = 80.0f;
-
-	float randX = Random::Generate<float>(-30.0f, 30.0f);
-	float randY = Random::Generate<float>(-20.0f, 20.0f);
-
-	camAnchor_ = Vector3(randX, randY, baseZ);
-
-	// ランダム位相
-	camPhaseX_ = Random::Generate<float>(0.0f, 6.28318f);
-	camPhaseY_ = Random::Generate<float>(0.0f, 6.28318f);
-	camPhaseZ_ = Random::Generate<float>(0.0f, 6.28318f);
-}
-/* ========================================================================
-   カメラ前方ステイ処理
-   ===================================================================== */
-void Enemy::StayInView(float dt) {
-	// 時間だけ加算
-	stayInViewTime_ += dt;
-
-	// ここでドリフト（ローカルXYを揺らし＆画面内クランプ＆向き合わせ）
-	UpdateCameraSpaceDrift(dt);
-
-	// 規定時間を超えたら退場へ
-	if(stayInViewTime_ >= maxStayTime_) {
-		BeginExitFromCamera();
-	}
 	movement_.StartStay(duration);
 }
 
@@ -123,13 +88,7 @@ void Enemy::Update(float dt) {
 		worldTransform_.rotation =
 			Quaternion::MakeRotateAxisQuaternion(deathRotateAxis_, rad);
 
-		// 色を薄くしていく
-		Vector4 color = GetModel()->GetColor();
-		color.w		 = 1.0f - t;
-		GetModel()->SetColor(color);
-
-		// タイマー経過でも Dead へ進める
-		if(t >= 1.0f ) {
+		if(t >= 1.0f) {
 			deathState_ = DeathState::Dead;
 			deathTimer_ = 0.0f;
 		}
@@ -151,40 +110,8 @@ void Enemy::OnCollisionEnter(Collider*) {
 }
 
 const Vector3 Enemy::GetCenterPos() const {
-	const Vector3 offset   = {0.0f, 1.5f, 0.0f};
-	Vector3		  worldPos = Vector3::Transform(offset, worldTransform_.matrix.world);
-	return worldPos;
-}
-
-// スコア取得
-int16_t Enemy::GetScore() const {
-		return score_;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////
-//      弾コントロール
-/////////////////////////////////////////////////////////////////////////////////////////
-void Enemy::SetShootingController(std::unique_ptr<EnemyShootingController> controller) { shootingController_ = std::move(controller); }
-
-/////////////////////////////////////////////////////////////////////////////////////////
-//      プレイヤーのtfをセット
-/////////////////////////////////////////////////////////////////////////////////////////
-void Enemy::SetPlayerTransform(const WorldTransform* tf) {
-	playerTransform_ = tf;
-	// 追従の向きが TowardsTarget のときに参照される
-	mover_.SetTargetTransform(playerTransform_);
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////
-//      移動ルートせってい
-/////////////////////////////////////////////////////////////////////////////////////////
-void Enemy::SetRouteSpline(const SplineData& data) {
-	moveRoute_ = data;
-	moveRoute_.BuildArcTable(); // 等速化のLUTを構築
-	mover_.BindPath(&moveRoute_);
-	mover_.SetLookMode(SplineFollower::LookMode::TowardsTarget);
-	mover_.SetTargetTransform(playerTransform_);
-	hasRoute_ = (moveRoute_.SegmentCount() > 0);
+	const Vector3 offset{0, 1.5f, 0};
+	return Vector3::Transform(offset, worldTransform_.matrix.world);
 }
 
 int16_t Enemy::GetScore() const { return score_; }
@@ -195,51 +122,4 @@ void Enemy::Die() {
 	e.reason = "enemyKill";
 	e.tag	 = {"normal"};
 	EventBus::Publish(e);
-}
-
-void Enemy::UpdateCameraSpaceDrift(float /*dt*/) {
-	auto cam = CameraManager::GetMain3d();
-	if(!cam || !worldTransform_.parent) return; // ← 親チェックを追加
-
-	const float t = ClockManager::GetInstance()->GetTotalTime();
-
-	// ふらつき初期値ガード（すべて 0 のときにデフォルトを入れる）
-	if(std::abs(camDriftAmpX_) < 1e-6f && std::abs(camDriftAmpY_) < 1e-6f && std::abs(camDriftAmpZ_) < 1e-6f) {
-		camDriftAmpX_ = 8.0f;
-		camDriftAmpY_ = 4.5f;
-		camDriftAmpZ_ = 2.0f;
-	}
-	if(camPhaseX_ == 0 && camPhaseY_ == 0 && camPhaseZ_ == 0) {
-		camPhaseX_ = Random::Generate<float>(0.0f, 6.28318f);
-		camPhaseY_ = Random::Generate<float>(0.0f, 6.28318f);
-		camPhaseZ_ = Random::Generate<float>(0.0f, 6.28318f);
-	}
-	if(camAnchor_.z <= 0.0f)
-		camAnchor_.z = 55.0f; // XY はそのまま
-
-	// Lissajous 風ドリフト
-	const float dx = std::sin((t + camPhaseX_) * camDriftFreqX_) * camDriftAmpX_;
-	const float dy = std::sin((t + camPhaseY_) * camDriftFreqY_) * camDriftAmpY_;
-	const float dz = std::sin((t + camPhaseZ_) * camDriftFreqZ_) * camDriftAmpZ_;
-	Vector3		p  = camAnchor_ + Vector3{dx, dy, dz};
-
-	// 画面内クランプ
-	const float fovY   = cam->GetFovY();
-	const float aspect = cam->GetAspectRatio(); // 命名を統一
-	ClampToCameraFrustumXY(p, fovY, aspect, camDriftMargin_);
-	worldTransform_.translation = p;
-
-	// 親=カメラ基準でプレイヤーの方向へ向く
-	if(playerTransform_) {
-		const Matrix4x4& parentWorld = worldTransform_.parent->matrix.world;
-		Matrix4x4		 invParent	 = Matrix4x4::Inverse(parentWorld);
-		Vector3			 targetLocal = Vector3::Transform(playerTransform_->GetWorldPosition(), invParent);
-		Vector3			 myLocal	 = Vector3::Transform(GetWorldPosition(), invParent);
-		Vector3			 dir		 = (targetLocal - myLocal).Normalize();
-		if(dir.LengthSquared() > 1e-12f) {
-			const float yaw			 = std::atan2(dir.x, dir.z);
-			const float pitch		 = std::atan2(-dir.y, std::sqrt(dir.x * dir.x + dir.z * dir.z));
-			worldTransform_.rotation = Quaternion::MakeRotateY(yaw) * Quaternion::MakeRotateX(pitch);
-		}
-	}
 }
