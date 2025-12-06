@@ -40,6 +40,8 @@ void Enemy::Initialize() {
 	// movement / shooting 初期化
 	movement_.Initialize(this);
 	shooting_.Initialize(this);
+
+	moveSpeed_ = 30.0f;
 }
 
 void Enemy::StartStayInCamera(float duration) {
@@ -79,8 +81,22 @@ void Enemy::Update(float dt) {
 	// movement
 	movement_.Update(dt);
 
-	// shooting
-	shooting_.Update(dt);
+	// 解散行動中は射撃しない
+	if(movement_.GetMode() != EnemyMovementController::Mode::Dissolving) {
+		shooting_.Update(dt);
+	} else {
+		// 解散行動中に色を薄くしていく
+		float subAlpha = 0.5f * dt;
+		Vector4 col	  = GetModel()->GetColor();
+		col.w		  = (std::max)(0.0f, col.w - subAlpha);
+		GetModel()->SetColor(col);
+
+		// 完全に透明になったら即死
+		if(col.w <= 0.01f) {
+			isAlive_ = false;
+			return;
+		}
+	}
 
 	// death anim
 	if(deathState_ == DeathState::Dying) {

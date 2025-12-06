@@ -10,11 +10,57 @@
 #include <cmath>
 
 namespace {
-inline void ClampToFrustum(Vector3& p, float fovY, float aspect, float margin) {
+void ClampToFrustum(Vector3& p, float fovY, float aspect, float margin) {
 	const float halfH = p.z * std::tan(fovY * 0.5f);
 	const float halfW = halfH * aspect;
 	p.x				  = std::clamp(p.x, -halfW * margin, halfW * margin);
 	p.y				  = std::clamp(p.y, -halfH * margin, halfH * margin);
+}
+
+Vector3 ComputeDissolveDirection(int index, DissolvePattern pattern) {
+	switch(pattern) {
+
+	case DissolvePattern::AlternatingLeftRight:
+		return Vector3(
+				   (index % 2 == 0 ? -1.0f : +1.0f),
+				   0.0f,
+				   0.0f)
+			.Normalize();
+
+	case DissolvePattern::FourWay:
+		switch(index % 4) {
+		case 0:
+			return Vector3(-1, +0.5f, 0.0f).Normalize();
+		case 1:
+			return Vector3(+1, +0.5f, 0.0f).Normalize();
+		case 2:
+			return Vector3(-1, -0.5f, 0.0f).Normalize();
+		case 3:
+			return Vector3(+1, -0.5f, 0.0f).Normalize();
+		}
+		return Vector3(0, 0, 1).Normalize();
+
+	case DissolvePattern::VShape: {
+		int pair = index / 2;
+		int side = (index % 2 == 0) ? -1 : +1;
+		return Vector3(
+				   float(side) * (float(pair) + 1),
+				   -(float(pair) + 1),
+				   2.0f)
+			.Normalize();
+	}
+
+	case DissolvePattern::Circle: {
+		float angle = index * 0.8f;
+		return Vector3(std::cos(angle), std::sin(angle), 0.0f).Normalize();
+	}
+
+	case DissolvePattern::StraightBack:
+		return Vector3(0, 0, 1).Normalize();
+
+	default:
+		return Vector3(0, 0, 1).Normalize();
+	}
 }
 } // namespace
 
@@ -27,6 +73,20 @@ void EnemyMovementController::Initialize(Enemy* owner) {
 	camPhaseX_ = Random::Generate<float>(0, 6.2831f);
 	camPhaseY_ = Random::Generate<float>(0, 6.2831f);
 	camPhaseZ_ = Random::Generate<float>(0, 6.2831f);
+}
+
+void EnemyMovementController::StartDissolve(int index) {
+	mode_ = Mode::Dissolving;
+
+	float speed = owner_->GetMoveSpeed();
+
+	// 方向だけ pattern から決める
+	Vector3 dir = ComputeDissolveDirection(index, formation_->GetDissolvePattern());
+
+	// ベロシティに変換
+	scatterVelocity_ = dir.Normalize() * speed;
+
+	formation_ = nullptr;
 }
 
 void EnemyMovementController::SetRoute(const SplineData& route, const WorldTransform* playerTf) {
@@ -62,9 +122,9 @@ void EnemyMovementController::Update(float dt) {
 		UpdateFormation(dt);
 		break;
 
-	case Mode::Active:
+	case Mode::Dissolving:
 	default:
-		//UpdateActive(dt);
+		UpdateActive(dt);
 		break;
 	}
 }
@@ -95,7 +155,7 @@ void EnemyMovementController::UpdateStay(float dt) {
 	}
 }
 
-void EnemyMovementController::UpdateCameraDrift([[maybe_unused]]float dt) {
+void EnemyMovementController::UpdateCameraDrift([[maybe_unused]] float dt) {
 	auto cam = CameraManager::GetMain3d();
 	if(!cam || !owner_->GetWorldTransform().parent) return;
 
@@ -120,7 +180,7 @@ void EnemyMovementController::BeginExit() {
 }
 
 void EnemyMovementController::UpdateExit(float dt) {
-	auto  cam	 = CameraManager::GetMain3dShared();
+	auto cam = CameraManager::GetMain3dShared();
 
 	if(!cam) {
 		owner_->SetIsAlive(false);
@@ -177,19 +237,25 @@ void EnemyMovementController::StartActive() {
 }
 
 void EnemyMovementController::UpdateActive(float dt) {
+	// dissolve 時は scatterVelocity_ を使って移動する
+	if(scatterVelocity_.LengthSquared() > 0.01f) {
+		auto& wt = owner_->GetWorldTransform();
+		wt.translation += scatterVelocity_ * dt;
+		LookAtPlayer();
+		return;
+	}
+
+	// dissolve でなければ通常の Active 動作
 	if(hasRoute_) {
 		mover_.Update(dt);
 	}
 	LookAtPlayer();
 }
 
-//==================================================================
-//  FORMATION
-//==================================================================
 void EnemyMovementController::StartFormation(EnemyFormationController* formation, const Vector3& offset) {
-	formation_      = formation;
+	formation_		 = formation;
 	formationOffset_ = offset;
-	formationPhase_  = Random::Generate<float>(0.0f, 6.2831f);
+	formationPhase_	 = Random::Generate<float>(0.0f, 6.2831f);
 
 	// 念のためカメラに親子付け（していれば二重で設定しても問題ない）
 	if(auto cam = CameraManager::GetMain3dShared()) {
@@ -204,7 +270,7 @@ void EnemyMovementController::UpdateFormation(float /*dt*/) {
 
 	// FormationController の座標は「カメラローカル」として扱う
 	Vector3 leaderPos = formation_->GetPosition();
-	Vector3 off       = formationOffset_;
+	Vector3 off		  = formationOffset_;
 
 	// 個体差の揺れを乗せてスターフォックス感
 	float t = ClockManager::GetInstance()->GetTotalTime();

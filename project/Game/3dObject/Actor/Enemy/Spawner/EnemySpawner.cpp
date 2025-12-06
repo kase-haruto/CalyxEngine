@@ -1,18 +1,17 @@
 #include "EnemySpawner.h"
 
-#include <Engine/Scene/Context/SceneContext.h>
-#include <Engine/Scene/Utility/SceneUtility.h>
-#include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/Objects/3D/Geometory/Spline/SplineJson.h>
+#include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
+#include <Engine/Scene/Context/SceneContext.h>
+#include <Engine/Scene/Utility/SceneUtility.h>
 
-#include <Game/Installer/Enemy/EnemyInstaller.h>
 #include <Game/3dObject/Actor/Enemy/Directory/IEnemyDirectory.h>
 #include <Game/Event/Spawn/EnemySpawnEvent.h>
+#include <Game/Installer/Enemy/EnemyInstaller.h>
 
-
-#include <externals/imgui/imgui.h>
 #include <cmath>
+#include <externals/imgui/imgui.h>
 
 EnemySpawner::EnemySpawner(const std::string& name) : SceneObject() {
 	SetName(name, ObjectType::GameObject);
@@ -33,17 +32,17 @@ EnemySpawner::EnemySpawner(const std::string& name) : SceneObject() {
 	});
 
 	// Formation デフォルト設定
-	formationConfig_.useFormation  = true;
-	formationConfig_.motionType    = EnemyFormationMotionType::Snake;
-	formationConfig_.baseZ         = 40.0f;
-	formationConfig_.speedZ        = 0.0f;
-	formationConfig_.snakeAmpX     = 25.0f;
-	formationConfig_.snakeAmpY     = 10.0f;
-	formationConfig_.snakeFreqX    = 2.0f;
-	formationConfig_.snakeFreqY    = 1.7f;
-	formationConfig_.radius        = 30.0f;
-	formationConfig_.angularSpeed  = 1.2f;
-	formationConfig_.dissolveTime  = 0.0f;
+	formationConfig_.useFormation = true;
+	formationConfig_.motionType	  = EnemyFormationMotionType::Snake;
+	formationConfig_.baseZ		  = 40.0f;
+	formationConfig_.speedZ		  = 0.0f;
+	formationConfig_.snakeAmpX	  = 25.0f;
+	formationConfig_.snakeAmpY	  = 10.0f;
+	formationConfig_.snakeFreqX	  = 2.0f;
+	formationConfig_.snakeFreqY	  = 1.7f;
+	formationConfig_.radius		  = 30.0f;
+	formationConfig_.angularSpeed = 1.2f;
+	formationConfig_.dissolveTime = 0.0f;
 }
 
 void EnemySpawner::Initialize() {
@@ -63,17 +62,17 @@ void EnemySpawner::Update(float dt) {
 	GarbageCollectDead();
 
 	// イベントが親にある場合は、自身では更新しない
-	if (dynamic_cast<EnemySpawnEvent*>(SceneObject::GetParent().get())) {
+	if(dynamic_cast<EnemySpawnEvent*>(SceneObject::GetParent().get())) {
 		return;
 	}
 
 	UpdateProximity();
 
-	if (isActive_) {
+	if(isActive_) {
 		TickSpawnTimer(dt);
 	}
 
-	if (isActive_) {
+	if(isActive_) {
 		TickSpawnTimer(dt);
 
 		// Formation 更新
@@ -82,22 +81,42 @@ void EnemySpawner::Update(float dt) {
 			formationTimer_ = formation_->GetTime();
 		}
 	}
+}
 
+void EnemySpawner::DissolveFormation() {
+	// formation が存在する場合はまず解散フラグを立てる
+	if(formation_) {
+		formation_->Dissolve();
+	}
+
+	int index = 0;
+	for(auto& e : spawnedEnemies_) {
+		if(e && e->GetIsAlive()) {
+			e->GetMovementController()->StartDissolve(index);
+			++index;
+		}
+	}
+
+	// formation はもう不要
+	formation_.reset();
+	formationTimer_ = 0.0f;
 }
 
 void EnemySpawner::TickSpawnTimer(float dt) {
 	const float d = (playerTransform_)
-		? Distance_(worldTransform_.GetWorldPosition(), playerTransform_->GetWorldPosition(), useXZDistance_)
-		: std::numeric_limits<float>::infinity();
+						? Distance_(worldTransform_.GetWorldPosition(), playerTransform_->GetWorldPosition(), useXZDistance_)
+						: std::numeric_limits<float>::infinity();
 
 	const bool within = (d <= activationRadius_);
 
 	size_t aliveCount = 0;
-	for (auto& e : spawnedEnemies_) { if (e && e->GetIsAlive()) ++aliveCount; }
+	for(auto& e : spawnedEnemies_) {
+		if(e && e->GetIsAlive()) ++aliveCount;
+	}
 
-	if (aliveCount < maxSpawnCount_ && within) {
+	if(aliveCount < maxSpawnCount_ && within) {
 		spawnTimer_ += dt;
-		if (spawnTimer_ >= 0.5f) {
+		if(spawnTimer_ >= 0.5f) {
 			Spawn();
 			spawnTimer_ = 0.0f;
 		}
@@ -111,22 +130,26 @@ void EnemySpawner::AlwaysUpdate([[maybe_unused]] float dt) {
 
 void EnemySpawner::ApplyConfig() {
 	const auto& cfg = config_.GetConfig();
-	if(!cfg.name.empty()) { SetName(cfg.name,ObjectType::GameObject); }
+	if(!cfg.name.empty()) {
+		SetName(cfg.name, ObjectType::GameObject);
+	}
 	worldTransform_.ApplyConfig(cfg.transform);
 	spawnInterval_ = cfg.spawnInterval;
 	maxSpawnCount_ = cfg.maxSpawnCount;
 
 	useXZDistance_ = cfg.useXZDistance;
 
-	if(deactivationRadius_ < activationRadius_) { deactivationRadius_ = activationRadius_ + 10.0f; }
+	if(deactivationRadius_ < activationRadius_) {
+		deactivationRadius_ = activationRadius_ + 10.0f;
+	}
 }
 
 void EnemySpawner::ExtractConfig() {
-	auto& cfg         = config_.GetConfig();
-	cfg.name          = GetName();
+	auto& cfg		  = config_.GetConfig();
+	cfg.name		  = GetName();
 	cfg.spawnInterval = spawnInterval_;
 	cfg.maxSpawnCount = maxSpawnCount_;
-	cfg.transform     = worldTransform_.ExtractConfig();
+	cfg.transform	  = worldTransform_.ExtractConfig();
 
 	// 新規
 	cfg.useXZDistance = useXZDistance_;
@@ -136,20 +159,20 @@ void EnemySpawner::ShowGui() {
 	// Transform情報
 	worldTransform_.ShowImGui();
 
-	ImGui::DragFloat("Rotation Speed",&rotationSpeed_,0.1f);
-	ImGui::DragFloat3("Rotation Dir",&rotationDir_.x,0.1f);
-	ImGui::InputFloat("Spawn Interval",&spawnInterval_);
-	ImGui::DragInt("Max Spawn Count",reinterpret_cast<int*>(&maxSpawnCount_),1,1,100);
-	ImGui::DragFloat3("Spawn Area Min",&spawnAreaMin_.x,0.1f);
-	ImGui::DragFloat3("Spawn Area Max",&spawnAreaMax_.x,0.1f);
+	ImGui::DragFloat("Rotation Speed", &rotationSpeed_, 0.1f);
+	ImGui::DragFloat3("Rotation Dir", &rotationDir_.x, 0.1f);
+	ImGui::InputFloat("Spawn Interval", &spawnInterval_);
+	ImGui::DragInt("Max Spawn Count", reinterpret_cast<int*>(&maxSpawnCount_), 1, 1, 100);
+	ImGui::DragFloat3("Spawn Area Min", &spawnAreaMin_.x, 0.1f);
+	ImGui::DragFloat3("Spawn Area Max", &spawnAreaMax_.x, 0.1f);
 
 	ImGui::SeparatorText("Proximity Activation");
-	ImGui::Checkbox("Use XZ Distance",&useXZDistance_);
-	ImGui::DragFloat("Activation Radius",&activationRadius_,1.0f,0.0f,10000.0f);
-	ImGui::DragFloat("Deactivation Radius",&deactivationRadius_,1.0f,0.0f,10000.0f);
+	ImGui::Checkbox("Use XZ Distance", &useXZDistance_);
+	ImGui::DragFloat("Activation Radius", &activationRadius_, 1.0f, 0.0f, 10000.0f);
+	ImGui::DragFloat("Deactivation Radius", &deactivationRadius_, 1.0f, 0.0f, 10000.0f);
 
 	ImGui::SeparatorText("Spawner Config");
-	config_.ShowGui("GameObject/"+GetName());
+	config_.ShowGui("GameObject/" + GetName());
 }
 
 void EnemySpawner::SetPlayerTransform(WorldTransform* playerTransform) { playerTransform_ = playerTransform; }
@@ -183,10 +206,10 @@ Vector3 EnemySpawner::CalcFormationOffset(size_t index) const {
 	if(maxSpawnCount_ == 0) return {0, 0, 0};
 
 	int center = (int)(maxSpawnCount_ - 1) / 2;
-	int i = (int)index;
+	int i	   = (int)index;
 
 	float spacing = 18.0f;
-	float x = (i - center) * spacing;
+	float x		  = (i - center) * spacing;
 
 	// 少し V 字型に奥方向へずらす
 	float z = std::abs(i - center) * 4.0f;
@@ -208,7 +231,7 @@ void EnemySpawner::UpdateProximity() {
 
 	const Vector3 spPos = worldTransform_.GetWorldPosition();
 	const Vector3 plPos = playerTransform_->GetWorldPosition();
-	const float   d     = Distance_(spPos,plPos,useXZDistance_);
+	const float	  d		= Distance_(spPos, plPos, useXZDistance_);
 
 	if(!isActive_) {
 		// 起動：起動半径以内に入ったら
@@ -220,7 +243,7 @@ void EnemySpawner::UpdateProximity() {
 	} else {
 		// 停止：停止半径以上で停止＆全消去
 		if(d >= deactivationRadius_) {
-			isActive_   = false;
+			isActive_	= false;
 			spawnTimer_ = 0.0f;
 			DespawnAll();
 		}
@@ -231,7 +254,7 @@ void EnemySpawner::Spawn() {
 	if(!bulletContainer_) return;
 
 	EnemyInstaller installer;
-	auto enemy = installer.InstallEnemy(bulletContainer_);
+	auto		   enemy = installer.InstallEnemy(bulletContainer_);
 	if(!enemy) return;
 
 	enemy->Initialize();
@@ -240,15 +263,14 @@ void EnemySpawner::Spawn() {
 	// 編隊モードの場合
 	if(formationConfig_.useFormation && formation_) {
 
-		const size_t index = spawnedEnemies_.size();
-		Vector3 offset = CalcFormationOffset(index);
+		const size_t index	= spawnedEnemies_.size();
+		Vector3		 offset = CalcFormationOffset(index);
 
 		enemy->StartFormation(formation_.get(), offset);
-	}
-	else {
+	} else {
 		enemy->StartStayInCamera();
 	}
-	
+
 	spawnedEnemies_.push_back(enemy);
 	if(directory_) directory_->Register(enemy);
 }
@@ -274,15 +296,21 @@ void EnemySpawner::GarbageCollectDead() {
 				if(lib) lib->RemoveObject(e);
 			}
 			it = spawnedEnemies_.erase(it);
-		} else { ++it; }
+		} else {
+			++it;
+		}
 	}
 }
 
-float EnemySpawner::Distance_(const Vector3& a,const Vector3& b,bool useXZ) {
+float EnemySpawner::Distance_(const Vector3& a, const Vector3& b, bool useXZ) {
 	const float dx = a.x - b.x;
 	const float dy = a.y - b.y;
 	const float dz = a.z - b.z;
-	if(useXZ) { return std::sqrt(dx * dx + dz * dz); } else { return std::sqrt(dx * dx + dy * dy + dz * dz); }
+	if(useXZ) {
+		return std::sqrt(dx * dx + dz * dz);
+	} else {
+		return std::sqrt(dx * dx + dy * dy + dz * dz);
+	}
 }
 
 REGISTER_SCENE_OBJECT(EnemySpawner)

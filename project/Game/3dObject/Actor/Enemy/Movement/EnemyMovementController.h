@@ -13,6 +13,7 @@ public:
 		StayInView,
 		ExitFromView,
 		Formation, //< 隊列モード
+		Dissolving
 	};
 
 public:
@@ -42,6 +43,11 @@ public:
 	 * \brief カメラ外退場開始
 	 */
 	void BeginExit();
+	/**
+	 * \brief 退場エフェクト開始
+	 * \param formationIndex 編隊内インデックス（0～N）
+	 */
+	void StartDissolve(int formationIndex);
 
 	/**
 	 * \brief 編隊モード開始（カメラローカル）
@@ -120,4 +126,10 @@ private:
 	EnemyFormationController* formation_	   = nullptr; // 非所有
 	Vector3					  formationOffset_ = {0, 0, 0};
 	float					  formationPhase_  = 0.0f; // 個体差の揺れ用
+
+	// dissolve 用の速度ベクトル
+	Vector3 scatterVelocity_ = {0,0,0};
+	int formationSize_ = 1;
+
+	int formationIndex_ = 0;
 };

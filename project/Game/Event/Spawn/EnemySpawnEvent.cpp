@@ -8,11 +8,11 @@ REGISTER_SCENE_OBJECT(EnemySpawnEvent);
 /////////////////////////////////////////////////////////////////////////////////////////
 //		ctor
 /////////////////////////////////////////////////////////////////////////////////////////
-EnemySpawnEvent::EnemySpawnEvent(){
+EnemySpawnEvent::EnemySpawnEvent() {
 	SceneObject::SetName("EnemySpawnEvent", ObjectType::Event);
 	baseConfig_.SetOnApplied([this](const EventConfig&) {
-			this->ApplyConfig();
-		});
+		this->ApplyConfig();
+	});
 
 	baseConfig_.SetOnExtracted([this](const EventConfig&) {
 		this->ExtractConfig();
@@ -40,7 +40,6 @@ void EnemySpawnEvent::Initialize() {
 	baseConfig_.LoadConfig(configRoot + GetName());
 	// コライダーの色を黄色に設定
 	collider_->SetColor(Vector3(0, 1, 0));
-	
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -52,8 +51,8 @@ void EnemySpawnEvent::AlwaysUpdate(float dt) {
 }
 void EnemySpawnEvent::OnCollisionEnter(Collider*) {
 	// 起動時に子供の EnemySpawner をキャッシュしておく
-	for (auto& child : GetChildren()) {
-		if (auto spawner = std::dynamic_pointer_cast<EnemySpawner>(child)) {
+	for(auto& child : GetChildren()) {
+		if(auto spawner = std::dynamic_pointer_cast<EnemySpawner>(child)) {
 			spawners_.push_back(spawner.get());
 		}
 	}
@@ -62,9 +61,9 @@ void EnemySpawnEvent::OnCollisionEnter(Collider*) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		衝突中
 /////////////////////////////////////////////////////////////////////////////////////////
-void EnemySpawnEvent::OnCollisionStay(Collider* ) {
-	for (auto* spawner : spawners_) {
-		if (spawner) {
+void EnemySpawnEvent::OnCollisionStay(Collider*) {
+	for(auto* spawner : spawners_) {
+		if(spawner) {
 			spawner->TickSpawnTimer(deltaTime_);
 		}
 	}
@@ -73,9 +72,13 @@ void EnemySpawnEvent::OnCollisionStay(Collider* ) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		離れた時
 /////////////////////////////////////////////////////////////////////////////////////////
-void EnemySpawnEvent::OnCollisionExit(Collider* ) {
-	//リストをクリア
-	spawners_.clear();
+void EnemySpawnEvent::OnCollisionExit(Collider*) {
+	// 各スポナーに解散を命令
+	for(auto* spawner : spawners_) {
+		if(spawner) {
+			spawner->DissolveFormation();
+		}
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

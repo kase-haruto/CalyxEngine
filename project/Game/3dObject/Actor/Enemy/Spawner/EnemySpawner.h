@@ -20,6 +20,7 @@ public:
 	EnemySpawner(const std::string& name = "EnemySpawner");
 	void Initialize() override;
 	void Update(float dt) override;
+	void DissolveFormation();
 	void TickSpawnTimer(float dt);
 	void AlwaysUpdate(float dt) override;
 
@@ -51,9 +52,9 @@ private:
 	void UpdateProximity();
 	void DespawnAll();
 
-	void Spawn();
-	void GarbageCollectDead();
-	bool LoadRouteFromJson(const std::string& path);
+	void	Spawn();
+	void	GarbageCollectDead();
+	bool	LoadRouteFromJson(const std::string& path);
 	Vector3 CalcFormationOffset(size_t index) const;
 
 	// ====== util ======
@@ -85,9 +86,10 @@ private:
 	float deactivationRadius_ = 200.0f; // 停止半径（以上で停止＆デスポーン）
 
 	// ====== 編隊 ======
-	EnemyFormationConfig                      formationConfig_;   // 設定
-	std::unique_ptr<EnemyFormationController> formation_;         // 実インスタンス
-	float                                formationTimer_ = 0.0f;
+	EnemyFormationConfig					  formationConfig_; // 設定
+	std::unique_ptr<EnemyFormationController> formation_;		// 実インスタンス
+	float									  formationTimer_ = 0.0f;
+
 private:
 	ConfigurableObject<EnemySpawnerConfig> config_;
 	std::string							   moveRoutePath_ = "Resources/Assets/Spline/EnemyMoveRouteR2L.json";

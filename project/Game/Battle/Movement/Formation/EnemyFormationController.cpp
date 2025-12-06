@@ -49,7 +49,17 @@ void EnemyFormationController::Initialize(const EnemyFormationConfig& cfg) {
 void EnemyFormationController::Update(float dt) {
 	time_ += dt;
 
-	if(motionFunc_) {
-		pos_ = motionFunc_(time_);
+	if (!dissolved_ && cfg_.dissolveTime > 0.0f && time_ >= cfg_.dissolveTime) {
+		Dissolve();
 	}
+
+	// 解散後はフォーメーション位置を更新しない
+	if (dissolved_) return;
+
+	pos_ = motionFunc_(time_);
+}
+
+void EnemyFormationController::Dissolve() {
+	if (dissolved_) return;
+	dissolved_ = true;
 }
