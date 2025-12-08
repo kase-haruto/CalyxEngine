@@ -95,10 +95,6 @@ void EnemyMovementController::SetPlayerTransform(const WorldTransform* playerTf)
 //  Update
 //==================================================================
 void EnemyMovementController::Update(float dt) {
-	if(mode_ == Mode::Dissolving || scatterVelocity_.LengthSquared() > 0.0001f) {
-		UpdateDissolve(dt);
-		return;
-	}
 
 	switch(mode_) {
 	case Mode::Entrance:
@@ -263,7 +259,8 @@ void EnemyMovementController::StartEntranceToFormation(EnemyFormationController*
 }
 
 void EnemyMovementController::UpdateEntrance(float dt) {
-
+	if(mode_ == Mode::Dissolving)
+		return;
 	entranceTime_ += dt;
 	float t = std::clamp(entranceTime_ / entranceLength_, 0.0f, 1.0f);
 
@@ -301,21 +298,6 @@ void EnemyMovementController::UpdateActive(float dt) {
 		mover_.Update(dt);
 	}
 	LookAtPlayer();
-}
-
-void EnemyMovementController::StartFormation(EnemyFormationController* formation, const Vector3& offset) {
-	if(mode_ == Mode::Dissolving)
-		return;
-
-	formation_		 = formation;
-	formationOffset_ = offset;
-	formationPhase_	 = Random::Generate<float>(0.0f, 6.2831f);
-
-	if(auto cam = CameraManager::GetMain3dShared()) {
-		owner_->GetWorldTransform().parent = &cam->GetWorldTransform();
-	}
-
-	mode_ = Mode::Formation;
 }
 
 void EnemyMovementController::UpdateFormation(float /*dt*/) {

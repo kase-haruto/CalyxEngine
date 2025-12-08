@@ -36,7 +36,8 @@ EnemySpawner::EnemySpawner(const std::string& name) : SceneObject() {
 
 	// Formation デフォルト設定
 	formationConfig_.useFormation = true;
-	formationConfig_.motionType	  = EnemyFormationMotionType::Snake;
+	// ランダムで設定
+
 	formationConfig_.baseZ		  = 40.0f;
 	formationConfig_.speedZ		  = 0.0f;
 	formationConfig_.snakeAmpX	  = 25.0f;
@@ -55,7 +56,8 @@ void EnemySpawner::Initialize() {
 	// 個別の調節パラメータ適用
 	const std::string configRoot = "GameObject/";
 	config_.LoadConfig(configRoot + GetName());
-
+	int formationType			= Random::Generate(0, static_cast<int>(EnemyFormationMotionType::Count));
+	formationConfig_.motionType = static_cast<EnemyFormationMotionType>(formationType);
 	formation_ = std::make_unique<EnemyFormationController>();
 	formation_->Initialize(formationConfig_);
 	formationTimer_ = 0.0f;
@@ -100,15 +102,19 @@ void EnemySpawner::DissolveFormation() {
 		pattern = formation_->GetDissolvePattern();
 	}
 
-	int index = 0;
 	for(auto& e : spawnedEnemies_) {
-		e->GetMovementController()->StartDissolve(index, pattern);
-		++index;
+		if(!e) continue;
+		e->GetMovementController()->StartDissolve(0, pattern);
 	}
 
 	formation_.reset();
 	formationTimer_ = 0.0f;
+
+	isActive_ = false;
+
+	spawnedEnemies_.clear();
 }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ///		 スポーンタイマー更新
@@ -323,17 +329,69 @@ bool EnemySpawner::LoadRouteFromJson(const std::string& path) {
 Vector3 EnemySpawner::CalcFormationOffset(size_t index) const {
 	if(maxSpawnCount_ == 0) return {0, 0, 0};
 
-	int center = (int)(maxSpawnCount_ - 1) / 2;
-	int i	   = (int)index;
+	const int	N	= static_cast<int>(maxSpawnCount_);
+	const int	i	= static_cast<int>(index);
+	const float mid = (N - 1) * 0.5f; // 中央インデックス
+	const float idx = static_cast<float>(i) - mid;
 
-	float spacing = 18.0f;
-	float x		  = (i - center) * spacing;
+	switch(formationConfig_.motionType) {
+	case EnemyFormationMotionType::Straight:
+		// いままで通り：横一列＋少しだけ V 字
+		{
+			float spacing = 18.0f;
+			float x		  = idx * spacing;
 
-	// 少し V 字型に奥方向へずらす
-	float z = std::abs(i - center) * 4.0f;
+			// 少し V 字型に奥方向へずらす
+			float z = std::abs(idx) * 4.0f;
 
-	return Vector3{x, 0, z};
+			return Vector3{x, 0.0f, z};
+		}
+
+	case EnemyFormationMotionType::Snake: {
+		float spacing = 18.0f;
+
+		float x = idx * spacing;
+
+		// 中央が一番下、外に行くほど上がる
+		float height = 8.0f;
+		float y		 = std::abs(idx) * height;
+
+		float z = 0.0f;
+
+		return Vector3{x, y, z};
+	}
+
+	case EnemyFormationMotionType::Circle:
+		// 円形隊列
+		{
+			const float radius =
+				(formationConfig_.radius > 0.0f)
+					? formationConfig_.radius
+					: 30.0f;
+
+			const float angleStep =
+				2.0f * std::numbers::pi_v<float> / static_cast<float>(N);
+
+			const float angle = angleStep * static_cast<float>(i);
+
+			float x = std::cos(angle) * radius;
+			float y = std::sin(angle) * radius;
+			float z = 0.0f; // Z は固定
+
+			return Vector3{x, y, z};
+		}
+
+	default:
+		// デフォルトは Straight と同じ
+		{
+			float spacing = 18.0f;
+			float x		  = idx * spacing;
+			float z		  = std::abs(idx) * 4.0f;
+			return Vector3{x, 0.0f, z};
+		}
+	}
 }
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 ///		 侵入開始位置計算
@@ -419,7 +477,6 @@ void EnemySpawner::Spawn() {
 		directory_->Register(enemy);
 	}
 
-	// ✅ Dissolve 中は侵入させない
 	if(formation_) {
 		size_t index = spawnedEnemies_.size() - 1;
 

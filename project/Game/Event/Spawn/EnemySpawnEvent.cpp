@@ -86,7 +86,9 @@ void EnemySpawnEvent::OnCollisionStay(Collider*) {
 //		離れた時
 /////////////////////////////////////////////////////////////////////////////////////////
 void EnemySpawnEvent::OnCollisionExit(Collider*) {
-	// 離れたタイミングでも、そのイベント配下の spawner を取り直す
+
+	OutputDebugStringA("[EnemySpawnEvent] OnCollisionExit called\n");
+
 	CollectSpawners();
 
 	for(auto* spawner : spawners_) {

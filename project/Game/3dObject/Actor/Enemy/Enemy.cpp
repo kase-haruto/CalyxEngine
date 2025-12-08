@@ -48,10 +48,6 @@ void Enemy::StartStayInCamera(float duration) {
 	movement_.StartStay(duration);
 }
 
-void Enemy::StartFormation(EnemyFormationController* formation, const Vector3& offset) {
-	movement_.StartFormation(formation, offset);
-}
-
 void Enemy::SetPlayerTransform(const WorldTransform* tf) {
 	playerTransform_ = tf;
 	movement_.SetPlayerTransform(tf);

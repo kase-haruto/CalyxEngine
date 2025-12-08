@@ -53,13 +53,6 @@ public:
 	 */
 	void StartDissolve(int index, DissolvePattern pattern);
 
-	/**
-	 * \brief 編隊モード開始（カメラローカル）
-	 * \param formation 編隊コントローラ（非所有）
-	 * \param offset    編隊内オフセット（カメラローカル）
-	 */
-	void StartFormation(EnemyFormationController* formation, const Vector3& offset);
-
 	void StartEntranceToFormation(
 		EnemyFormationController* formation,
 		const Vector3&			  formationOffset,

@@ -14,6 +14,7 @@ enum class EnemyFormationMotionType {
 	Straight,
 	Snake,
 	Circle,
+	Count,
 };
 
 struct EnemyFormationConfig {
