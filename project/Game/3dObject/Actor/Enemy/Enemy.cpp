@@ -86,9 +86,9 @@ void Enemy::Update(float dt) {
 		shooting_.Update(dt);
 	} else {
 		// 解散行動中に色を薄くしていく
-		float subAlpha = 0.5f * dt;
-		Vector4 col	  = GetModel()->GetColor();
-		col.w		  = (std::max)(0.0f, col.w - subAlpha);
+		float	subAlpha = 0.5f * dt;
+		Vector4 col		 = GetModel()->GetColor();
+		col.w			 = (std::max)(0.0f, col.w - subAlpha);
 		GetModel()->SetColor(col);
 
 		// 完全に透明になったら即死
@@ -120,6 +120,16 @@ void Enemy::Update(float dt) {
 		isAlive_ = false;
 		return;
 	}
+}
+
+void Enemy::StartEntranceToFormation(
+	EnemyFormationController* formation,
+	const Vector3&			  offset,
+	const Vector3&			  entranceStart) {
+	movement_.StartEntranceToFormation(
+		formation,
+		offset,
+		entranceStart);
 }
 
 void Enemy::OnCollisionEnter(Collider*) {

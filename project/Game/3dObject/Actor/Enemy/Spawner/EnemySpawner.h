@@ -23,6 +23,7 @@ public:
 	void DissolveFormation();
 	void TickSpawnTimer(float dt);
 	void AlwaysUpdate(float dt) override;
+	void SpawnAllImmediate();
 
 	//--------- config ------------------------------------------------
 	void ApplyConfig();
@@ -53,9 +54,11 @@ private:
 	void DespawnAll();
 
 	void	Spawn();
+	void	StartFormationSpawn();
 	void	GarbageCollectDead();
 	bool	LoadRouteFromJson(const std::string& path);
 	Vector3 CalcFormationOffset(size_t index) const;
+	Vector3 CalcEntranceStartPos(size_t index) const;
 
 	// ====== util ======
 	static float Distance_(const Vector3& a, const Vector3& b, bool useXZ);

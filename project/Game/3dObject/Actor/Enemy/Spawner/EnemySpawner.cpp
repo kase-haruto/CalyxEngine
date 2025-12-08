@@ -83,21 +83,22 @@ void EnemySpawner::Update(float dt) {
 	}
 }
 
-void EnemySpawner::DissolveFormation() {
-	// formation が存在する場合はまず解散フラグを立てる
-	if(formation_) {
-		formation_->Dissolve();
-	}
+void EnemySpawner::DissolveFormation()
+{
+	if(!formation_) return;
+
+	// 先にパターンを取得（
+	DissolvePattern pattern = formation_->GetDissolvePattern();
 
 	int index = 0;
 	for(auto& e : spawnedEnemies_) {
 		if(e && e->GetIsAlive()) {
-			e->GetMovementController()->StartDissolve(index);
+			e->GetMovementController()->StartDissolve(index, pattern);
 			++index;
 		}
 	}
 
-	// formation はもう不要
+	// 全員に配布したあとで消す
 	formation_.reset();
 	formationTimer_ = 0.0f;
 }
@@ -217,6 +218,28 @@ Vector3 EnemySpawner::CalcFormationOffset(size_t index) const {
 	return Vector3{x, 0, z};
 }
 
+Vector3 EnemySpawner::CalcEntranceStartPos(size_t index) const {
+	float side = (index % 2 == 0) ? -1.0f : +1.0f; // 左右外
+	float y	   = Random::Generate<float>(-0.3f, 0.3f);
+
+	// Z はかなり奥から
+	return Vector3(
+		side * 120.0f,
+		y * 40.0f,
+		-200.0f);
+}
+void EnemySpawner::SpawnAllImmediate() {
+	if(!formation_ && formationConfig_.useFormation) {
+		formation_ = std::make_unique<EnemyFormationController>();
+		formation_->Initialize(formationConfig_);
+		formationTimer_ = 0.0f;
+	}
+
+	while(spawnedEnemies_.size() < maxSpawnCount_) {
+		Spawn();
+	}
+}
+
 void EnemySpawner::UpdateProximity() {
 	// プレイヤー不在なら停止＆掃除
 	if(!playerTransform_) {
@@ -250,29 +273,49 @@ void EnemySpawner::UpdateProximity() {
 	}
 }
 
-void EnemySpawner::Spawn() {
+void EnemySpawner::Spawn()
+{
 	if(!bulletContainer_) return;
 
 	EnemyInstaller installer;
-	auto		   enemy = installer.InstallEnemy(bulletContainer_);
+	auto enemy = installer.InstallEnemy(bulletContainer_);
 	if(!enemy) return;
 
 	enemy->Initialize();
 	enemy->SetPlayerTransform(playerTransform_);
 
-	// 編隊モードの場合
-	if(formationConfig_.useFormation && formation_) {
+	spawnedEnemies_.push_back(enemy);
 
-		const size_t index	= spawnedEnemies_.size();
-		Vector3		 offset = CalcFormationOffset(index);
-
-		enemy->StartFormation(formation_.get(), offset);
-	} else {
-		enemy->StartStayInCamera();
+	if(directory_) {
+		directory_->Register(enemy);
 	}
 
-	spawnedEnemies_.push_back(enemy);
-	if(directory_) directory_->Register(enemy);
+	// 編隊用侵入
+	if (formation_) {
+		size_t index = spawnedEnemies_.size() - 1;
+
+		Vector3 offset   = CalcFormationOffset(index);
+		Vector3 entrance = CalcEntranceStartPos(index);
+
+		enemy->StartEntranceToFormation(
+			formation_.get(),
+			offset,
+			entrance
+		);
+	}
+
+	// 全員揃ったら Formation 開始
+	if (spawnedEnemies_.size() >= maxSpawnCount_) {
+		StartFormationSpawn();
+	}
+}
+
+void EnemySpawner::StartFormationSpawn(){
+	if (formation_) return;
+
+	formation_ = std::make_unique<EnemyFormationController>();
+	formation_->Initialize(formationConfig_);
+	formationTimer_ = 0.0f;
 }
 
 void EnemySpawner::DespawnAll() {

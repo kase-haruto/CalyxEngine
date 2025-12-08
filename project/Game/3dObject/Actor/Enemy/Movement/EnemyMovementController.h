@@ -1,4 +1,6 @@
 #pragma once
+#include "Game/Battle/Movement/Formation/EnemyFormationController.h"
+
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Game/Battle/Movement/FollowSpline/SplineFollower.h>
 
@@ -12,8 +14,9 @@ public:
 		Active,
 		StayInView,
 		ExitFromView,
-		Formation, //< 隊列モード
-		Dissolving
+		Formation,	//< 隊列モード
+		Dissolving, //< 退場エフェクト中
+		Entrance,	//< 進入エフェクト中
 	};
 
 public:
@@ -47,7 +50,7 @@ public:
 	 * \brief 退場エフェクト開始
 	 * \param formationIndex 編隊内インデックス（0～N）
 	 */
-	void StartDissolve(int formationIndex);
+	void StartDissolve(int index, DissolvePattern pattern);
 
 	/**
 	 * \brief 編隊モード開始（カメラローカル）
@@ -55,6 +58,11 @@ public:
 	 * \param offset    編隊内オフセット（カメラローカル）
 	 */
 	void StartFormation(EnemyFormationController* formation, const Vector3& offset);
+
+	void StartEntranceToFormation(
+		EnemyFormationController* formation,
+		const Vector3&			  formationOffset,
+		const Vector3&			  entranceStartWorld);
 
 	//  accessor -------------------------------------------------------------//
 	void SetRoute(const SplineData& route, const WorldTransform* playerTf);
@@ -93,6 +101,8 @@ private:
 	 */
 	bool CheckExitFinished() const;
 
+	void UpdateEntrance(float dt);
+
 private:
 	Enemy* owner_ = nullptr;
 
@@ -128,8 +138,14 @@ private:
 	float					  formationPhase_  = 0.0f; // 個体差の揺れ用
 
 	// dissolve 用の速度ベクトル
-	Vector3 scatterVelocity_ = {0,0,0};
-	int formationSize_ = 1;
+	Vector3 scatterVelocity_ = {0, 0, 0};
+	int		formationSize_	 = 1;
 
 	int formationIndex_ = 0;
+
+	// 侵入用
+	Vector3 entranceStart_	= {0, 0, 0}; // 開始位置（画面外）
+	Vector3 entranceTarget_ = {0, 0, 0}; // 合流目標（編隊オフセット位置）
+	float	entranceTime_	= 0.0f;
+	float	entranceLength_ = 1.2f; // 侵入にかける時間（秒）
 };

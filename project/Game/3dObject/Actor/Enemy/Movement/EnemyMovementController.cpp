@@ -75,20 +75,6 @@ void EnemyMovementController::Initialize(Enemy* owner) {
 	camPhaseZ_ = Random::Generate<float>(0, 6.2831f);
 }
 
-void EnemyMovementController::StartDissolve(int index) {
-	mode_ = Mode::Dissolving;
-
-	float speed = owner_->GetMoveSpeed();
-
-	// 方向だけ pattern から決める
-	Vector3 dir = ComputeDissolveDirection(index, formation_->GetDissolvePattern());
-
-	// ベロシティに変換
-	scatterVelocity_ = dir.Normalize() * speed;
-
-	formation_ = nullptr;
-}
-
 void EnemyMovementController::SetRoute(const SplineData& route, const WorldTransform* playerTf) {
 	moveRoute_ = route;
 	moveRoute_.BuildArcTable();
@@ -110,6 +96,14 @@ void EnemyMovementController::SetPlayerTransform(const WorldTransform* playerTf)
 //==================================================================
 void EnemyMovementController::Update(float dt) {
 	switch(mode_) {
+	case Mode::Entrance:
+		UpdateEntrance(dt);
+		break;
+
+	case Mode::Formation:
+		UpdateFormation(dt);
+		break;
+
 	case Mode::StayInView:
 		UpdateStay(dt);
 		break;
@@ -118,11 +112,7 @@ void EnemyMovementController::Update(float dt) {
 		UpdateExit(dt);
 		break;
 
-	case Mode::Formation:
-		UpdateFormation(dt);
-		break;
-
-	case Mode::Dissolving:
+	case Mode::Active:
 	default:
 		UpdateActive(dt);
 		break;
@@ -179,6 +169,18 @@ void EnemyMovementController::BeginExit() {
 	exitPrepared_ = false;
 }
 
+void EnemyMovementController::StartDissolve(int index, DissolvePattern pattern) {
+	mode_ = Mode::Dissolving;
+
+	float speed = owner_->GetMoveSpeed();
+
+	Vector3 dir = ComputeDissolveDirection(index, pattern);
+
+	scatterVelocity_ = dir.Normalize() * speed;
+
+	formation_ = nullptr;
+}
+
 void EnemyMovementController::UpdateExit(float dt) {
 	auto cam = CameraManager::GetMain3dShared();
 
@@ -227,6 +229,43 @@ bool EnemyMovementController::CheckExitFinished() const {
 	bool outY = std::abs(p.y) > halfH * exitOvershoot_;
 
 	return outX || outY;
+}
+void EnemyMovementController::StartEntranceToFormation(EnemyFormationController* formation, const Vector3& formationOffset, const Vector3& entranceStartWorld) {
+	formation_		 = formation;
+	formationOffset_ = formationOffset;
+
+	entranceStart_	= entranceStartWorld;
+	entranceTarget_ = formation_->GetPosition() + formationOffset_;
+
+	entranceTime_ = 0.0f;
+
+	// 最初は画面外に配置
+	owner_->SetTranslate(entranceStartWorld);
+
+	// 親はカメラ
+	if(auto cam = CameraManager::GetMain3dShared()) {
+		owner_->GetWorldTransform().parent = &cam->GetWorldTransform();
+	}
+
+	mode_ = Mode::Entrance;
+}
+
+void EnemyMovementController::UpdateEntrance(float dt) {
+
+	entranceTime_ += dt;
+	float t = std::clamp(entranceTime_ / entranceLength_, 0.0f, 1.0f);
+
+	// イージング（
+	float ease = 1.0f - std::pow(1.0f - t, 3.0f); // EaseOutCubic
+
+	Vector3 pos = Vector3::Lerp(entranceStart_, entranceTarget_, ease);
+	owner_->SetTranslate(pos);
+	LookAtPlayer();
+
+	if(t >= 1.0f) {
+		// 侵入完了 → Formation モードへ合流
+		mode_ = Mode::Formation;
+	}
 }
 
 //==================================================================

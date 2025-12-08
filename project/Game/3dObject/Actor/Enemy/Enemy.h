@@ -32,6 +32,11 @@ public:
 	void StartStayInCamera(float duration = 2.0f);
 	void StartFormation(EnemyFormationController* formation, const Vector3& offset);
 	EnemyMovementController* GetMovementController() { return &movement_; }
+
+	void StartEntranceToFormation(
+		EnemyFormationController* formation,
+		const Vector3&			  formationOffset,
+		const Vector3&			  entranceStartWorld);
 	
 	// collision
 	void OnCollisionEnter(Collider* other) override;

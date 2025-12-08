@@ -50,10 +50,14 @@ void EnemySpawnEvent::AlwaysUpdate(float dt) {
 	deltaTime_ = dt;
 }
 void EnemySpawnEvent::OnCollisionEnter(Collider*) {
-	// 起動時に子供の EnemySpawner をキャッシュしておく
+	spawners_.clear();
+
 	for(auto& child : GetChildren()) {
 		if(auto spawner = std::dynamic_pointer_cast<EnemySpawner>(child)) {
 			spawners_.push_back(spawner.get());
+
+			// ここで一気に最大数スポーン
+			spawner->SpawnAllImmediate();
 		}
 	}
 }
@@ -62,11 +66,11 @@ void EnemySpawnEvent::OnCollisionEnter(Collider*) {
 //		衝突中
 /////////////////////////////////////////////////////////////////////////////////////////
 void EnemySpawnEvent::OnCollisionStay(Collider*) {
-	for(auto* spawner : spawners_) {
-		if(spawner) {
-			spawner->TickSpawnTimer(deltaTime_);
-		}
-	}
+	// for(auto* spawner : spawners_) {
+	// 	if(spawner) {
+	// 		spawner->TickSpawnTimer(deltaTime_);
+	// 	}
+	// }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -79,6 +83,7 @@ void EnemySpawnEvent::OnCollisionExit(Collider*) {
 			spawner->DissolveFormation();
 		}
 	}
+	spawners_.clear();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
