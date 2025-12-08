@@ -32,8 +32,9 @@ struct EnemyFormationConfig {
 	float snakeFreqX = 2.0f;
 	float snakeFreqY = 1.7f;
 
-	// 解散までの時間（秒）
 	float dissolveTime = 0.0f;
+
+	DissolvePattern dissolvePattern = DissolvePattern::FourWay;
 };
 
 /// --------------------------------------------------------------
@@ -72,3 +73,50 @@ private:
 
 	DissolvePattern dissolvePattern_ = DissolvePattern::FourWay;
 };
+
+inline void to_json(nlohmann::json& j, const EnemyFormationConfig& f)
+{
+	j = {
+		{"useFormation", f.useFormation},
+		{"motionType", (int)f.motionType},
+		{"baseZ", f.baseZ},
+		{"speedZ", f.speedZ},
+		{"radius", f.radius},
+		{"angularSpeed", f.angularSpeed},
+		{"snakeAmpX", f.snakeAmpX},
+		{"snakeAmpY", f.snakeAmpY},
+		{"snakeFreqX", f.snakeFreqX},
+		{"snakeFreqY", f.snakeFreqY},
+		{"dissolveTime", f.dissolveTime},
+		{"dissolvePattern", (int)f.dissolvePattern}
+	};
+}
+
+inline void from_json(const nlohmann::json& j, EnemyFormationConfig& f)
+{
+	if(j.contains("useFormation")) j.at("useFormation").get_to(f.useFormation);
+
+	int mt = 0;
+	if(j.contains("motionType")) {
+		j.at("motionType").get_to(mt);
+		f.motionType = (EnemyFormationMotionType)mt;
+	}
+
+	if(j.contains("baseZ"))          j.at("baseZ").get_to(f.baseZ);
+	if(j.contains("speedZ"))         j.at("speedZ").get_to(f.speedZ);
+	if(j.contains("radius"))         j.at("radius").get_to(f.radius);
+	if(j.contains("angularSpeed"))   j.at("angularSpeed").get_to(f.angularSpeed);
+
+	if(j.contains("snakeAmpX"))      j.at("snakeAmpX").get_to(f.snakeAmpX);
+	if(j.contains("snakeAmpY"))      j.at("snakeAmpY").get_to(f.snakeAmpY);
+	if(j.contains("snakeFreqX"))     j.at("snakeFreqX").get_to(f.snakeFreqX);
+	if(j.contains("snakeFreqY"))     j.at("snakeFreqY").get_to(f.snakeFreqY);
+
+	if(j.contains("dissolveTime"))   j.at("dissolveTime").get_to(f.dissolveTime);
+
+	int dp = 0;
+	if(j.contains("dissolvePattern")) {
+		j.at("dissolvePattern").get_to(dp);
+		f.dissolvePattern = (DissolvePattern)dp;
+	}
+}

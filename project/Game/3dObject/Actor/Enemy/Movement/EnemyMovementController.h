@@ -33,6 +33,7 @@ public:
 	 * \param dt デルタタイム
 	 */
 	void Update(float dt);
+	void UpdateDissolve(float dt);
 	/**
 	 * \brief カメラ内ステイ開始
 	 * \param duration ステイ時間

@@ -100,6 +100,10 @@ void EnemyMovementController::Update(float dt) {
 		UpdateEntrance(dt);
 		break;
 
+	case Mode::Dissolving:
+		UpdateDissolve(dt);
+		break;
+
 	case Mode::Formation:
 		UpdateFormation(dt);
 		break;
@@ -116,6 +120,13 @@ void EnemyMovementController::Update(float dt) {
 	default:
 		UpdateActive(dt);
 		break;
+	}
+}
+
+void EnemyMovementController::UpdateDissolve(float dt) {
+	if(scatterVelocity_.LengthSquared() > 0.0001f) {
+		owner_->GetWorldTransform().translation += scatterVelocity_ * dt;
+		LookAtPlayer();
 	}
 }
 
@@ -231,6 +242,8 @@ bool EnemyMovementController::CheckExitFinished() const {
 	return outX || outY;
 }
 void EnemyMovementController::StartEntranceToFormation(EnemyFormationController* formation, const Vector3& formationOffset, const Vector3& entranceStartWorld) {
+	if(mode_ == Mode::Dissolving)
+		return;
 	formation_		 = formation;
 	formationOffset_ = formationOffset;
 
@@ -292,11 +305,13 @@ void EnemyMovementController::UpdateActive(float dt) {
 }
 
 void EnemyMovementController::StartFormation(EnemyFormationController* formation, const Vector3& offset) {
+	if(mode_ == Mode::Dissolving)
+		return;
+
 	formation_		 = formation;
 	formationOffset_ = offset;
 	formationPhase_	 = Random::Generate<float>(0.0f, 6.2831f);
 
-	// 念のためカメラに親子付け（していれば二重で設定しても問題ない）
 	if(auto cam = CameraManager::GetMain3dShared()) {
 		owner_->GetWorldTransform().parent = &cam->GetWorldTransform();
 	}

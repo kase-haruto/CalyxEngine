@@ -91,11 +91,13 @@ void Enemy::Update(float dt) {
 		col.w			 = (std::max)(0.0f, col.w - subAlpha);
 		GetModel()->SetColor(col);
 
-		// 完全に透明になったら即死
-		if(col.w <= 0.01f) {
-			isAlive_ = false;
-			return;
-		}
+		
+	}
+
+	// 完全に透明になったら即死
+	if(GetModel()->GetColor().w <= 0.01f) {
+		isAlive_ = false;
+		return;
 	}
 
 	// death anim

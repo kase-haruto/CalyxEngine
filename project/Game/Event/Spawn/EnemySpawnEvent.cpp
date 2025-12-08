@@ -35,11 +35,11 @@ EnemySpawnEvent::~EnemySpawnEvent() = default;
 //		初期か
 /////////////////////////////////////////////////////////////////////////////////////////
 void EnemySpawnEvent::Initialize() {
-	// 個別の調節パラメータ適用
 	const std::string configRoot = "Event/";
 	baseConfig_.LoadConfig(configRoot + GetName());
-	// コライダーの色を黄色に設定
+
 	collider_->SetColor(Vector3(0, 1, 0));
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -48,15 +48,27 @@ void EnemySpawnEvent::Initialize() {
 void EnemySpawnEvent::AlwaysUpdate(float dt) {
 	BaseEventObject::AlwaysUpdate(dt);
 	deltaTime_ = dt;
+
+	if (spawners_.empty()) {
+		for (auto& child : GetChildren()) {
+			if (auto spawner = std::dynamic_pointer_cast<EnemySpawner>(child)) {
+				spawners_.push_back(spawner.get());
+			}
+		}
+	}
 }
 void EnemySpawnEvent::OnCollisionEnter(Collider*) {
-	spawners_.clear();
 
-	for(auto& child : GetChildren()) {
-		if(auto spawner = std::dynamic_pointer_cast<EnemySpawner>(child)) {
-			spawners_.push_back(spawner.get());
+	if (spawners_.empty()) {
+		for (auto& child : GetChildren()) {
+			if (auto spawner = std::dynamic_pointer_cast<EnemySpawner>(child)) {
+				spawners_.push_back(spawner.get());
+			}
+		}
+	}
 
-			// ここで一気に最大数スポーン
+	for (auto* spawner : spawners_) {
+		if (spawner) {
 			spawner->SpawnAllImmediate();
 		}
 	}
@@ -77,15 +89,25 @@ void EnemySpawnEvent::OnCollisionStay(Collider*) {
 //		離れた時
 /////////////////////////////////////////////////////////////////////////////////////////
 void EnemySpawnEvent::OnCollisionExit(Collider*) {
-	// 各スポナーに解散を命令
-	for(auto* spawner : spawners_) {
-		if(spawner) {
+
+	if (spawners_.empty()) {
+		for (auto& child : GetChildren()) {
+			if (auto spawner = std::dynamic_pointer_cast<EnemySpawner>(child)) {
+				spawners_.push_back(spawner.get());
+			}
+		}
+	}
+
+	auto copy = spawners_;
+
+	for (auto* spawner : copy) {
+		if (spawner) {
 			spawner->DissolveFormation();
 		}
 	}
+
 	spawners_.clear();
 }
-
 /////////////////////////////////////////////////////////////////////////////////////////
 //		parameter調整
 /////////////////////////////////////////////////////////////////////////////////////////

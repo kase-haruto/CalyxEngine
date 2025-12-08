@@ -18,11 +18,32 @@ class EnemySpawner
 	  public IConfigurable {
 public:
 	EnemySpawner(const std::string& name = "EnemySpawner");
+
+	/**
+	 * \brief 初期化
+	 */
 	void Initialize() override;
+	/**
+	 * \brief 更新
+	 * \param dt デルタタイム
+	 */
 	void Update(float dt) override;
+	/**
+	 * \brief 編隊解散
+	 */
 	void DissolveFormation();
+	/**
+	 * \brief スポーンタイマー更新
+	 * \param dt デルタタイム
+	 */
 	void TickSpawnTimer(float dt);
+	/**
+	 * \brief 即時全スポーン
+	 */
 	void AlwaysUpdate(float dt) override;
+	/**
+	 * \brief 即時全スポーン
+	 */
 	void SpawnAllImmediate();
 
 	//--------- config ------------------------------------------------
@@ -50,17 +71,48 @@ public:
 	std::string_view GetTypeName() const override { return "EnemySpawner"; }
 
 private:
+	/**
+	 * \brief 近接判定更新
+	 */
 	void UpdateProximity();
+	/**
+	 * \brief 全デスポーン
+	 */
 	void DespawnAll();
-
-	void	Spawn();
-	void	StartFormationSpawn();
-	void	GarbageCollectDead();
-	bool	LoadRouteFromJson(const std::string& path);
+	/**
+	 * \brief 敵スポーン
+	 */
+	void Spawn();
+	/**
+	 * \brief 死亡敵の掃除
+	 */
+	void GarbageCollectDead();
+	/**
+	 * \brief 経路データをJSONから読み込み
+	 * \param path ファイルパス
+	 * \return 成功したら true
+	 */
+	bool LoadRouteFromJson(const std::string& path);
+	/**
+	 * \brief 編隊内オフセット計算
+	 * \param index 編隊内インデックス
+	 * \return オフセット位置
+	 */
 	Vector3 CalcFormationOffset(size_t index) const;
+	/**
+	 * \brief 侵入開始位置計算
+	 * \param index 編隊内インデックス
+	 * \return 侵入開始位置
+	 */
 	Vector3 CalcEntranceStartPos(size_t index) const;
 
-	// ====== util ======
+	/**
+	 * \brief ２点間距離計算
+	 * \param a 点A
+	 * \param b 点B
+	 * \param useXZ XZ距離を使うか
+	 * \return 距離
+	 */
 	static float Distance_(const Vector3& a, const Vector3& b, bool useXZ);
 
 private:
@@ -90,7 +142,7 @@ private:
 
 	// ====== 編隊 ======
 	EnemyFormationConfig					  formationConfig_; // 設定
-	std::unique_ptr<EnemyFormationController> formation_;		// 実インスタンス
+	std::unique_ptr<EnemyFormationController> formation_;
 	float									  formationTimer_ = 0.0f;
 
 private:
