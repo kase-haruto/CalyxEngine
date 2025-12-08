@@ -97,7 +97,7 @@ void EnemySpawner::Update(float dt) {
 /////////////////////////////////////////////////////////////////////////////////////////////////
 void EnemySpawner::DissolveFormation() {
 
-	DissolvePattern pattern = DissolvePattern::VShape;
+	DissolvePattern pattern = DissolvePattern::FourWay;
 	if(formation_) {
 		pattern = formation_->GetDissolvePattern();
 	}
