@@ -19,7 +19,8 @@ EnemySpawnEvent::EnemySpawnEvent() {
 	});
 }
 
-EnemySpawnEvent::EnemySpawnEvent(const std::string& name) : BaseEventObject(name) {
+EnemySpawnEvent::EnemySpawnEvent(const std::string& name)
+	: BaseEventObject(name) {
 	baseConfig_.SetOnApplied([this](const EventConfig&) {
 		this->ApplyConfig();
 	});
@@ -32,7 +33,7 @@ EnemySpawnEvent::EnemySpawnEvent(const std::string& name) : BaseEventObject(name
 EnemySpawnEvent::~EnemySpawnEvent() = default;
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//		初期か
+//		初期化
 /////////////////////////////////////////////////////////////////////////////////////////
 void EnemySpawnEvent::Initialize() {
 	const std::string configRoot = "Event/";
@@ -40,6 +41,8 @@ void EnemySpawnEvent::Initialize() {
 
 	collider_->SetColor(Vector3(0, 1, 0));
 
+	// シーンロード直後に一度収集
+	CollectSpawners();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -49,26 +52,18 @@ void EnemySpawnEvent::AlwaysUpdate(float dt) {
 	BaseEventObject::AlwaysUpdate(dt);
 	deltaTime_ = dt;
 
-	if (spawners_.empty()) {
-		for (auto& child : GetChildren()) {
-			if (auto spawner = std::dynamic_pointer_cast<EnemySpawner>(child)) {
-				spawners_.push_back(spawner.get());
-			}
-		}
+	// 子構成が変わる可能性があるなら、空のときは取り直す
+	if(spawners_.empty()) {
+		CollectSpawners();
 	}
 }
+
 void EnemySpawnEvent::OnCollisionEnter(Collider*) {
+	// 毎回、最新の子 spawner を取り直す
+	CollectSpawners();
 
-	if (spawners_.empty()) {
-		for (auto& child : GetChildren()) {
-			if (auto spawner = std::dynamic_pointer_cast<EnemySpawner>(child)) {
-				spawners_.push_back(spawner.get());
-			}
-		}
-	}
-
-	for (auto* spawner : spawners_) {
-		if (spawner) {
+	for(auto* spawner : spawners_) {
+		if(spawner) {
 			spawner->SpawnAllImmediate();
 		}
 	}
@@ -78,10 +73,12 @@ void EnemySpawnEvent::OnCollisionEnter(Collider*) {
 //		衝突中
 /////////////////////////////////////////////////////////////////////////////////////////
 void EnemySpawnEvent::OnCollisionStay(Collider*) {
-	// for(auto* spawner : spawners_) {
-	// 	if(spawner) {
-	// 		spawner->TickSpawnTimer(deltaTime_);
-	// 	}
+	// 必要であれば個別スポーン制御を復活させる
+	// CollectSpawners(*this);
+	// for (auto* spawner : spawners_) {
+	//     if (spawner) {
+	//         spawner->TickSpawnTimer(deltaTime_);
+	//     }
 	// }
 }
 
@@ -89,25 +86,16 @@ void EnemySpawnEvent::OnCollisionStay(Collider*) {
 //		離れた時
 /////////////////////////////////////////////////////////////////////////////////////////
 void EnemySpawnEvent::OnCollisionExit(Collider*) {
+	// 離れたタイミングでも、そのイベント配下の spawner を取り直す
+	CollectSpawners();
 
-	if (spawners_.empty()) {
-		for (auto& child : GetChildren()) {
-			if (auto spawner = std::dynamic_pointer_cast<EnemySpawner>(child)) {
-				spawners_.push_back(spawner.get());
-			}
-		}
-	}
-
-	auto copy = spawners_;
-
-	for (auto* spawner : copy) {
-		if (spawner) {
+	for(auto* spawner : spawners_) {
+		if(spawner) {
 			spawner->DissolveFormation();
 		}
 	}
-
-	spawners_.clear();
 }
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //		parameter調整
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -120,4 +108,14 @@ void EnemySpawnEvent::DerivativeGui() {
 /////////////////////////////////////////////////////////////////////////////////////////
 void EnemySpawnEvent::ConfigGUi() {
 	BaseEventObject::ConfigGUi();
+}
+
+void EnemySpawnEvent::CollectSpawners() {
+	spawners_.clear();
+
+	for(auto& child : GetChildren()) {
+		if(auto spawner = std::dynamic_pointer_cast<EnemySpawner>(child)) {
+			spawners_.push_back(spawner.get());
+		}
+	}
 }

@@ -67,15 +67,13 @@ void EnemySpawner::Initialize() {
 void EnemySpawner::Update(float dt) {
 	worldTransform_.Update();
 	GarbageCollectDead();
-	
-	UpdateProximity();
 
+	UpdateProximity();
 
 	// イベントが親にある場合は、自身では更新しない
 	if(dynamic_cast<EnemySpawnEvent*>(SceneObject::GetParent().get())) {
 		return;
 	}
-
 
 	if(isActive_) {
 		TickSpawnTimer(dt);
@@ -104,10 +102,8 @@ void EnemySpawner::DissolveFormation() {
 
 	int index = 0;
 	for(auto& e : spawnedEnemies_) {
-		if(e && e->GetIsAlive()) {
-			e->GetMovementController()->StartDissolve(index, pattern);
-			++index;
-		}
+		e->GetMovementController()->StartDissolve(index, pattern);
+		++index;
 	}
 
 	formation_.reset();
@@ -219,7 +215,6 @@ void EnemySpawner::ShowGui() {
 			formation_->Initialize(formationConfig_);
 			formationTimer_ = 0.0f;
 		}
-
 	}
 
 	if(!formationConfig_.useFormation) {

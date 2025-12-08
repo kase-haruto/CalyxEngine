@@ -38,6 +38,10 @@ public:
 
 	// クラス名取得
 	std::string_view GetTypeName() const override{return "EnemySpawnEvent";};
+
+	private:
+	void CollectSpawners();
+
 private:
 	//===================================================================*/
 	//					private methods

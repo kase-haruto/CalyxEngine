@@ -95,19 +95,20 @@ void EnemyMovementController::SetPlayerTransform(const WorldTransform* playerTf)
 //  Update
 //==================================================================
 void EnemyMovementController::Update(float dt) {
+	if(mode_ == Mode::Dissolving || scatterVelocity_.LengthSquared() > 0.0001f) {
+		UpdateDissolve(dt);
+		return;
+	}
+
 	switch(mode_) {
 	case Mode::Entrance:
 		UpdateEntrance(dt);
 		break;
 
-	case Mode::Dissolving:
-		UpdateDissolve(dt);
-		break;
-
 	case Mode::Formation:
 		UpdateFormation(dt);
 		break;
-
+		 
 	case Mode::StayInView:
 		UpdateStay(dt);
 		break;
@@ -188,8 +189,6 @@ void EnemyMovementController::StartDissolve(int index, DissolvePattern pattern) 
 	Vector3 dir = ComputeDissolveDirection(index, pattern);
 
 	scatterVelocity_ = dir.Normalize() * speed;
-
-	formation_ = nullptr;
 }
 
 void EnemyMovementController::UpdateExit(float dt) {
