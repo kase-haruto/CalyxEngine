@@ -101,10 +101,14 @@ void EnemyMovementController::Update(float dt) {
 		UpdateEntrance(dt);
 		break;
 
+	case Mode::Dissolving:
+		UpdateDissolve(dt);
+		break;
+
 	case Mode::Formation:
 		UpdateFormation(dt);
 		break;
-		 
+
 	case Mode::StayInView:
 		UpdateStay(dt);
 		break;

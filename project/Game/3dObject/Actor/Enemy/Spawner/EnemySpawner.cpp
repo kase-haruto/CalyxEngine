@@ -511,7 +511,7 @@ void EnemySpawner::GarbageCollectDead() {
 	auto* lib = SceneContext::Current()->GetObjectLibrary();
 	for(auto it = spawnedEnemies_.begin(); it != spawnedEnemies_.end();) {
 		auto& e = *it;
-		if(!e || e->GetDeathState() == Enemy::DeathState::Dead) {
+		if(!e || !e->GetIsAlive()) {
 			if(e) {
 				if(directory_) directory_->Unregister(e.get());
 				if(lib) lib->RemoveObject(e);

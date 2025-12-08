@@ -36,8 +36,8 @@ private:
 	std::unique_ptr<EnemyHomingBulletShooter> homingShooter = nullptr;
 	BulletContainer* pBulletContainer_ = nullptr;
 
-	float kInterval = 0.7f;
+	float kInterval = 1.2f;
 
 	bool gameplayEngaged_ = true;
-	bool externalRateControl_ = true; //< trueなら内部クールダウン無効
+	bool externalRateControl_ = false; //< trueなら内部クールダウン無効
 };
