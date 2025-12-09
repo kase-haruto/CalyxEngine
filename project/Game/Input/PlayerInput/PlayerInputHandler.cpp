@@ -34,13 +34,12 @@ void PlayerInputHandler::HandleMove(Player& player){
 
 	// 正規化
 	if (moveVector.Length() > 0.0f)
-		moveVector.Normalize();
+		moveVector = moveVector.Normalize();
 
 	// 移動速度をかける
 	moveVector *= player.GetMoveSpeed();
 
 	// 移動と傾き更新
-	player.MoveBy(moveVector);
 	player.UpdateTilt(moveVector);
 }
 
@@ -83,7 +82,7 @@ void PlayerInputHandler::HandleReticle(Player& player, float dt){
 //		発射処理
 /////////////////////////////////////////////////////////////////////////////////////////
 void PlayerInputHandler::HandleShoot(Player& player){
-	if (!player.GetShootCooldown().has_value() 
+	if (!player.GetShootCooldown().has_value()
 		|| !player.GetMaxShootInterval().has_value()){
 		return;
 	}
@@ -93,7 +92,7 @@ void PlayerInputHandler::HandleShoot(Player& player){
 	const float maxInterval = player.GetMaxShootInterval().value();
 
 	// スペースキー or 右肩ボタンで発射
-	if ((Input::GetInstance()->PushKey(DIK_SPACE) 
+	if ((Input::GetInstance()->PushKey(DIK_SPACE)
 		|| Input::GetInstance()->PushGamepadButton(PadButton::RB))
 		&& cooldown <= 0.0f){
 		player.RequestShoot();

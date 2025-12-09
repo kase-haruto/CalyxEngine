@@ -103,6 +103,6 @@ void PlayerDodge::ChangeState(DodgeState next) {
 	}
 }
 
-void PlayerDodge::MoveOwnerBy(const Vector3& velocity) {
-	if (owner_) owner_->MoveBy(velocity);
+void PlayerDodge::MoveOwnerBy(const Vector3& ) {
+	//if (owner_) owner_->MoveBy(velocity);
 }

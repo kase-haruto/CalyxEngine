@@ -26,6 +26,11 @@ bool PlayerShootingController::RequestShoot(const Vector3& pos, const Vector3& d
 	return true;
 }
 
+void PlayerShootingController::Initialize() {
+	straightShooter_ = std::make_unique<StraightBulletShooter>(bulletContainer_.get(), BulletID::Player_Straight);
+	homingShooter_ = std::make_unique<PlayerHomingBulletShooter>(bulletContainer_.get(),BulletID::Player_Homing);
+}
+
 void PlayerShootingController::Update(float dt){
 	bulletContainer_->Update(dt);
 	BaseShootingController::Update(dt);

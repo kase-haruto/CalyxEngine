@@ -29,8 +29,11 @@ public:
 	//						public functions
 	//===================================================================*/
 	PlayerShootingController(BulletContainer* container);
+	PlayerShootingController() = default;
 	~PlayerShootingController()override = default;
+
 	bool RequestShoot(const Vector3& pos, const Vector3& dir)override;
+	void Initialize();
 	void Update(float dt)override;
 	//--------- accessor -------------------------------------------------
 	void SetMode(PlayerShoot::BulletMode bulletMode);

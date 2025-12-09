@@ -11,6 +11,8 @@
 #include <Engine/Application/Effects/FxObject.h>
 
 // game
+#include "Move/PlayerMoveController.h"
+
 #include <Game/3dObject/Actor/Enemy/Enemy.h>
 #include <Game/Battle/Shooting/ShootingController/PlayerShootingController.h>
 #include <Game/Input/PlayerInput/PlayerInputHandler.h>
@@ -44,10 +46,10 @@ public:
 	void DerivativeGui() override;
 
 	/**
-	 * \brief 受け取った移動ベクトルをもとに移動する
+	 * \brief 移動量の追加をRequest
 	 * \param delta
 	 */
-	void MoveBy(const Vector3& delta);
+	void AddMoveRequest(const Vector3& delta);
 	/**
 	 * \brief レティクルをオフセット分移動する
 	 * \param offset
@@ -145,6 +147,7 @@ private:
 	//=====================================================================
 	// Private Variables
 	//=====================================================================
+	PlayerMoveController moveCtrler_;
 	std::unique_ptr<PlayerShootingController> shootingController_;
 	std::unique_ptr<PlayerInputHandler>       inputHandler_ = nullptr;
 	std::unique_ptr<PlayerDodge>              dodge_;       //< ジャスト回避

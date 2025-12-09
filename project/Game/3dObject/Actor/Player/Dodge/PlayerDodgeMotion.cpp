@@ -46,7 +46,17 @@ namespace{
 	inline float Saturate(float x){ return std::clamp(x, 0.0f, 1.0f); }
 } // namespace
 
-PlayerDodgeMotion::PlayerDodgeMotion() = default;
+PlayerDodgeMotion::PlayerDodgeMotion()
+	: owner_(nullptr)
+	, dodge_(nullptr)
+	, appliedOffset_(Vector3::Zero())
+	, sinkCurrent_(0.0f)
+	, additiveRoll_(0.0f)
+	, additivePitch_(0.0f)
+	, leanLerp_(0.0f)
+	, spinQ_(Quaternion::MakeIdentity())
+	, baseRot_(Quaternion::MakeIdentity())
+{}
 PlayerDodgeMotion::~PlayerDodgeMotion() = default;
 
 void PlayerDodgeMotion::Initialize(Player* owner, PlayerDodge* dodge){
@@ -201,8 +211,7 @@ void PlayerDodgeMotion::ApplySpinAndCurve(float dt){
 	const Vector3 step = delta * alpha; // 今フレーム“位置”として動かしたい分
 
 	if constexpr (kMoveByTakesVelocity){
-		const Vector3 vel = step * (1.0f / dt); // MoveBy が速度前提
-		owner_->MoveBy(vel);
+		owner_->AddMoveRequest(step);
 	} else{
 		owner_->GetWorldTransform().translation += step;
 	}

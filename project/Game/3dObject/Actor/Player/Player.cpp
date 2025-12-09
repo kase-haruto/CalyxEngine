@@ -195,6 +195,9 @@ void Player::Update(float dt) {
 	if(inputHandler_) {
 		inputHandler_->Update(*this, dt);
 	}
+	if(dodgeMotion_) dodgeMotion_->Update(dt);
+
+	moveCtrler_.Apply(worldTransform_);
 
 	if(shootingController_) {
 		shootingController_->Update(dt);
@@ -202,7 +205,6 @@ void Player::Update(float dt) {
 
 	if(dodge_) dodge_->Update(dt);
 	if(danger_) danger_->Update(dt);
-	if(dodgeMotion_) dodgeMotion_->Update(dt);
 
 	if(hpGauge_) {
 		hpGauge_->Update(dt);
@@ -298,19 +300,16 @@ void Player::DerivativeGui() {
 	ImGui::DragFloat("lockOnRadius(px)", &lockOnRadiusPx_, 1.0f, 10.0f, 400.0f);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////
+/// 	移動リクエストの追加
+/////////////////////////////////////////////////////////////////////////////////////////
+void Player::AddMoveRequest(const Vector3& delta) {
+	moveCtrler_.AddMove(delta);
+}
+
 /* ======================================================================================
 /*		private functions
 /* ==================================================================================== */
-
-///////////////////////////////////////////////////////////////////////////////////
-//		playerの移動
-///////////////////////////////////////////////////////////////////////////////////
-void Player::MoveBy(const Vector3& delta) {
-	worldTransform_.translation += delta * ClockManager::GetInstance()->GetDeltaTime();
-	if(clampPlayerInView_) {
-		ClampWorldTransformInView(worldTransform_, clampMarginXpx_, clampMarginYpx_);
-	}
-}
 
 ///////////////////////////////////////////////////////////////////////////////////
 //		レティクルの移動
