@@ -327,15 +327,23 @@ void EnemyMovementController::UpdateFormation(float /*dt*/) {
 //  LOOK AT
 //==================================================================
 void EnemyMovementController::LookAtPlayer() {
-	if(!playerTf_) return;
-
-	Vector3 target = playerTf_->GetWorldPosition();
-	Vector3 myPos  = owner_->GetWorldPosition();
-	Vector3 dir	   = (target - myPos).Normalize();
-	if(dir.LengthSquared() < 1e-12f) return;
-
-	float yaw	= std::atan2(dir.x, dir.z);
-	float pitch = std::atan2(-dir.y, std::sqrt(dir.x * dir.x + dir.z * dir.z));
-
-	owner_->SetRotate(Quaternion::MakeRotateY(yaw) * Quaternion::MakeRotateX(pitch));
+	if(playerTf_) {
+		Vector3 targetWorld = playerTf_->GetWorldPosition();
+		Vector3 myWorld		= owner_->GetWorldTransform().GetWorldPosition();
+		WorldTransform& worldTransform_ = owner_->GetWorldTransform();
+		Vector3 dir;
+		if(worldTransform_.parent) {
+			Matrix4x4 invParent	  = Matrix4x4::Inverse(worldTransform_.parent->matrix.world);
+			Vector3	  targetLocal = Vector3::Transform(targetWorld, invParent);
+			Vector3	  myLocal	  = Vector3::Transform(myWorld, invParent);
+			dir					  = (targetLocal - myLocal).Normalize();
+		} else {
+			dir = (targetWorld - myWorld).Normalize();
+		}
+		if(dir.LengthSquared() > 1e-12f) {
+			const float yaw			 = std::atan2(dir.x, dir.z);
+			const float pitch		 = std::atan2(-dir.y, std::sqrt(dir.x * dir.x + dir.z * dir.z));
+			worldTransform_.rotation = Quaternion::MakeRotateY(yaw) * Quaternion::MakeRotateX(pitch);
+		}
+	}
 }

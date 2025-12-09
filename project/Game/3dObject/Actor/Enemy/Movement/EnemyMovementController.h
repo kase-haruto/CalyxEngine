@@ -141,5 +141,5 @@ private:
 	Vector3 entranceStart_	= {0, 0, 0}; // 開始位置（画面外）
 	Vector3 entranceTarget_ = {0, 0, 0}; // 合流目標（編隊オフセット位置）
 	float	entranceTime_	= 0.0f;
-	float	entranceLength_ = 1.2f; // 侵入にかける時間（秒）
+	float	entranceLength_ = 2.0f; // 侵入にかける時間（秒）
 };
