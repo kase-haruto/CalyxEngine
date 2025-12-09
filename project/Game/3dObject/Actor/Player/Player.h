@@ -18,6 +18,7 @@
 #include <Game/Input/PlayerInput/PlayerInputHandler.h>
 #include <Game/2d/HpGauge.h>
 
+class PlayerDodgeSystem;
 class EnemyDirectory;
 class PlayerDangerSense;
 class PlayerDodge;
@@ -83,6 +84,7 @@ public:
 	 * \brief ランタイムスタート処理
 	 */
 	void Start() override;
+	void RequestDodge();
 
 	void OnCollisionEnter(Collider* other) override;
 	void OnCollisionStay([[maybe_unused]] Collider* other) override {}
@@ -147,12 +149,12 @@ private:
 	//=====================================================================
 	// Private Variables
 	//=====================================================================
-	PlayerMoveController moveCtrler_;
+	PlayerMoveController                      moveCtrler_;
+	std::unique_ptr<PlayerDodgeMotion>        dodgeMotion_; //< 回避モーション
+	std::unique_ptr<PlayerDodgeSystem>        dodgeSystem_ = nullptr;
 	std::unique_ptr<PlayerShootingController> shootingController_;
 	std::unique_ptr<PlayerInputHandler>       inputHandler_ = nullptr;
-	std::unique_ptr<PlayerDodge>              dodge_;       //< ジャスト回避
 	std::unique_ptr<PlayerDangerSense>        danger_;      //< 危機察知
-	std::unique_ptr<PlayerDodgeMotion>        dodgeMotion_; //< 回避モーション
 
 	Vector3        lastMoveVector_;   //< 最後の移動ベクトル
 	WorldTransform reticleTransform_; //< レティクルのワールド変換

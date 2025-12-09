@@ -14,7 +14,7 @@
 PlayerDangerSense::PlayerDangerSense()  = default;
 PlayerDangerSense::~PlayerDangerSense() = default;
 
-void PlayerDangerSense::Initialize(Player* owner,PlayerDodge* dodge,const DangerSenseConfig& cfg) {
+void PlayerDangerSense::Initialize(Player* owner,PlayerDodgeSystem* dodge,const DangerSenseConfig& cfg) {
 	owner_ = owner;
 	dodge_ = dodge;
 	cfg_   = cfg;
@@ -91,7 +91,7 @@ bool PlayerDangerSense::ComputeDangerNearby(Vector3& outPlayerPos) const {
 
 			// 弾の進行方向とプレイヤー方向の内積（正面のみ判定）
 			float dot = Vector3::Dot(toPlayer.Normalize(), bvel.Normalize());
-			if (dot < 0.2f) return; // ← ほぼ向いていない弾は除外
+			if (dot < 0.2f) return;
 
 			// 衝突までの時間（Time-To-Impact）
 			float timeToImpact = (distance - safeRange) / speed;

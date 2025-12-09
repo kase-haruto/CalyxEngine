@@ -12,6 +12,10 @@ void PlayerInputHandler::Update(Player& player, float dt){
 	HandleMove(player);
 	HandleReticle(player, dt);
 	HandleShoot(player);
+	if (Input::GetInstance()->TriggerKey(DIK_LSHIFT) ||
+	Input::GetInstance()->TriggerGamepadButton(PadButton::X)) {
+		player.RequestDodge();
+	}
 	//HandleLockOn(player);
 }
 
