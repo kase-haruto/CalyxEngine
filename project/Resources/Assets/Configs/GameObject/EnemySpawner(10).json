@@ -3,7 +3,7 @@
     "deactivateRadius": 100.0,
     "formation": {
         "angularSpeed": 1.0,
-        "baseZ": 84.0,
+        "baseZ": 78.0,
         "dissolvePattern": 1,
         "dissolveTime": 0.0,
         "motionType": 1,
@@ -16,13 +16,13 @@
         "useFormation": true
     },
     "maxSpawnCount": 5,
-    "name": "EnemySpawner0",
+    "name": "EnemySpawner(10)",
     "spawnInterval": 5.0,
     "transform": {
         "rotation": {
             "w": 1.0,
             "x": 0.0,
-            "y": 0.0,
+            "y": -7.450580596923828e-09,
             "z": 0.0
         },
         "scale": {
@@ -31,9 +31,9 @@
             "z": 1.0
         },
         "translation": {
-            "x": -0.47999998927116394,
-            "y": 0.47999998927116394,
-            "z": 1.559999942779541
+            "x": 3.612041473388672e-05,
+            "y": 0.5893687009811401,
+            "z": 0.4613841772079468
         }
     },
     "useXZDistance": true

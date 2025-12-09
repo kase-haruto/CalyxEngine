@@ -14,6 +14,7 @@
 EnemyShootingController::EnemyShootingController(BulletContainer* container) {
 	SetBulletContainer(container);
 	homingShooter = std::make_unique<EnemyHomingBulletShooter>(container, BulletID::Enemy_Homing);
+	shootCooldown_ = 1.5f;
 }
 
 EnemyShootingController::~EnemyShootingController() = default;

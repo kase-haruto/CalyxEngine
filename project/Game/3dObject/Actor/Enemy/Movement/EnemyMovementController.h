@@ -1,16 +1,22 @@
 #pragma once
+#include "Game/Battle/Movement/Formation/EnemyFormationController.h"
+
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Game/Battle/Movement/FollowSpline/SplineFollower.h>
 
 class Enemy;
 class WorldTransform;
+class EnemyFormationController;
 
 class EnemyMovementController {
 public:
 	enum class Mode {
 		Active,
 		StayInView,
-		ExitFromView
+		ExitFromView,
+		Formation,	//< 隊列モード
+		Dissolving, //< 退場エフェクト中
+		Entrance,	//< 進入エフェクト中
 	};
 
 public:
@@ -27,6 +33,7 @@ public:
 	 * \param dt デルタタイム
 	 */
 	void Update(float dt);
+	void UpdateDissolve(float dt);
 	/**
 	 * \brief カメラ内ステイ開始
 	 * \param duration ステイ時間
@@ -40,6 +47,16 @@ public:
 	 * \brief カメラ外退場開始
 	 */
 	void BeginExit();
+	/**
+	 * \brief 退場エフェクト開始
+	 * \param formationIndex 編隊内インデックス（0～N）
+	 */
+	void StartDissolve(int index, DissolvePattern pattern);
+
+	void StartEntranceToFormation(
+		EnemyFormationController* formation,
+		const Vector3&			  formationOffset,
+		const Vector3&			  entranceStartWorld);
 
 	//  accessor -------------------------------------------------------------//
 	void SetRoute(const SplineData& route, const WorldTransform* playerTf);
@@ -67,6 +84,7 @@ private:
 	 * \param dt デルタタイム
 	 */
 	void UpdateCameraDrift(float dt);
+	void UpdateFormation(float);
 	/**
 	 * \brief プレイヤーを注視
 	 */
@@ -76,6 +94,8 @@ private:
 	 * \return 退場完了したら true
 	 */
 	bool CheckExitFinished() const;
+
+	void UpdateEntrance(float dt);
 
 private:
 	Enemy* owner_ = nullptr;
@@ -105,4 +125,21 @@ private:
 	bool		   hasRoute_ = false;
 
 	const WorldTransform* playerTf_ = nullptr;
+
+	// Formation
+	EnemyFormationController* formation_	   = nullptr; // 非所有
+	Vector3					  formationOffset_ = {0, 0, 0};
+	float					  formationPhase_  = 0.0f; // 個体差の揺れ用
+
+	// dissolve 用の速度ベクトル
+	Vector3 scatterVelocity_ = {0, 0, 0};
+	int		formationSize_	 = 1;
+
+	int formationIndex_ = 0;
+
+	// 侵入用
+	Vector3 entranceStart_	= {0, 0, 0}; // 開始位置（画面外）
+	Vector3 entranceTarget_ = {0, 0, 0}; // 合流目標（編隊オフセット位置）
+	float	entranceTime_	= 0.0f;
+	float	entranceLength_ = 2.0f; // 侵入にかける時間（秒）
 };

@@ -1,0 +1,30 @@
+{
+    "colliderConfig": {
+        "colliderType": 32,
+        "isCollisionEnabled": true,
+        "isDraw": true,
+        "targetType": 1
+    },
+    "guid": "a378b57f-9464-4e8d-90d5-5a08516888ea",
+    "name": "EnemySpawnEvent(2)",
+    "objectType": 4,
+    "parentGuid": "00000000-0000-0000-0000-000000000000",
+    "transform": {
+        "rotation": {
+            "w": 0.9947938323020935,
+            "x": 0.10190775990486145,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "scale": {
+            "x": 88.72114562988281,
+            "y": 89.65363311767578,
+            "z": 317.92193603515625
+        },
+        "translation": {
+            "x": -229.18484497070313,
+            "y": -58.85162353515625,
+            "z": 819.2767333984375
+        }
+    }
+}

@@ -30,7 +30,13 @@ public:
 
 	// stay-in-camera → movementController に委譲
 	void StartStayInCamera(float duration = 2.0f);
+	EnemyMovementController* GetMovementController() { return &movement_; }
 
+	void StartEntranceToFormation(
+		EnemyFormationController* formation,
+		const Vector3&			  formationOffset,
+		const Vector3&			  entranceStartWorld);
+	
 	// collision
 	void OnCollisionEnter(Collider* other) override;
 	void OnCollisionStay(Collider*) override {}
