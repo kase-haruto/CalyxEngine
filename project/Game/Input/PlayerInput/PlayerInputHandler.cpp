@@ -9,7 +9,7 @@
 //		playerのinput処理更新
 /////////////////////////////////////////////////////////////////////////////////////////
 void PlayerInputHandler::Update(Player& player, float dt){
-	HandleMove(player);
+	HandleMove(player,dt);
 	HandleReticle(player, dt);
 	HandleShoot(player);
 	if (Input::GetInstance()->TriggerKey(DIK_LSHIFT) ||
@@ -22,13 +22,13 @@ void PlayerInputHandler::Update(Player& player, float dt){
 /////////////////////////////////////////////////////////////////////////////////////////
 //		移動処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void PlayerInputHandler::HandleMove(Player& player){
+void PlayerInputHandler::HandleMove(Player& player, float dt){
 	Vector3 moveVector = {0.0f, 0.0f, 0.0f};
 
 	// キーボード入力
 	if (Input::GetInstance()->PushKey(DIK_A)) moveVector.x -= 1.0f;
 	if (Input::GetInstance()->PushKey(DIK_D)) moveVector.x += 1.0f;
-	if (Input::GetInstance()->PushKey(DIK_W)) moveVector.y += 1.0f;
+	if (Input::GetInstance()->PushKey(DIK_W)) moveVector.y += 1.0f; // ← y ではなく z
 	if (Input::GetInstance()->PushKey(DIK_S)) moveVector.y -= 1.0f;
 
 	// ゲームパッド左スティック入力
@@ -37,15 +37,19 @@ void PlayerInputHandler::HandleMove(Player& player){
 	moveVector.y += leftStick.y;
 
 	// 正規化
-	if (moveVector.Length() > 0.0f)
+	if (moveVector.LengthSquared() > 0.0f){
 		moveVector = moveVector.Normalize();
 
-	// 移動速度をかける
-	moveVector *= player.GetMoveSpeed();
+		// 速度と dt をかける
+		moveVector *= player.GetMoveSpeed() * dt;
 
-	// 移動と傾き更新
+		player.AddMoveRequest(moveVector);
+	}
+
+	// 傾き更新
 	player.UpdateTilt(moveVector);
 }
+
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		レティクル更新

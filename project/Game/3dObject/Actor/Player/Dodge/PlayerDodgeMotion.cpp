@@ -217,9 +217,6 @@ void PlayerDodgeMotion::ApplySpinAndCurve(float dt){
 	const Vector3 step = delta * alpha; // 今フレーム“位置”として動かしたい分
 
 	if constexpr (kMoveByTakesVelocity){
-		// もし MoveBy が「速度」前提ならここで vel を渡す設計
-		// const Vector3 vel = step * (1.0f / dt);
-		// owner_->MoveBy(vel);
 		owner_->AddMoveRequest(step); // 現状はこちらだけ使う形でもOK
 	} else{
 		owner_->AddMoveRequest(step);

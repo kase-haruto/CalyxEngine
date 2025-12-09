@@ -32,9 +32,6 @@ Player::Player()  = default;
 Player::~Player() = default;
 
 namespace {
-constexpr float kHitIFrameSec  = 1.5f;
-constexpr float kBlinkHz       = 12.0f; // 点滅周波数
-constexpr float kBlinkInterval = 1.0f / kBlinkHz;
 
 inline void SetWorldPosKeepRotScale(WorldTransform& wt,const Vector3& worldPos) {
 	// 親が何段でもOK：親の world は祖先込み合成
@@ -64,8 +61,8 @@ inline Vector3 ClampWorldByScreenBox(const Vector3& world,
 	Vector2       scr = Cx::Math::WorldToScreen(world);
 
 	// 画面サイズと余白でクランプ（float化しておく）
-	const float W = static_cast<float>(kGameWidth);
-	const float H = static_cast<float>(kGameHeight);
+	constexpr float W = static_cast<float>(kGameWidth);
+	constexpr float H = static_cast<float>(kGameHeight);
 
 	const float minX = (std::max)(0.0f,marginXpx);
 	const float maxX = (std::max)(minX,W - marginXpx);

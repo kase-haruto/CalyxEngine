@@ -5,7 +5,6 @@
    ========================================================================= */
 #include <Engine/Objects/3D/Actor/Actor.h>
 #include <Game/3dObject/Actor/Bullet/Container/BulletContainer.h>
-#include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 #include <Engine/Renderer/Sprite/Sprite.h>
 #include <Engine/Scene/Runtime/IRuntimeBehaviour.h>
 #include <Engine/Application/Effects/FxObject.h>

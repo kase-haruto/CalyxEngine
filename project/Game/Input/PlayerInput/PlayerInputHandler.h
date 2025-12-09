@@ -7,7 +7,7 @@ public:
 	void Update(Player& player,float dt);
 
 private:
-	void HandleMove(Player& player);
+	void HandleMove(Player& player,float dt);
 	void HandleReticle(Player& player, float dt);
 	void HandleShoot(Player& player);
 	void HandleLockOn(Player& player);
