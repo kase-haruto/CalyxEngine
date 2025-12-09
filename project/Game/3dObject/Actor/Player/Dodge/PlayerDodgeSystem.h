@@ -79,6 +79,7 @@ public:
 	void SetOnDodgeStart(Callback cb);
 	void SetOnDodgeEnd(Callback cb);
 	void SetOnPerfectDodge(Callback cb);
+	void SetOnRequestInvincible(std::function<void(float)> fn);
 
 	// accessor -------------------------------------------------------//
 	bool IsDodging()  const;
@@ -119,4 +120,6 @@ private:
 	Callback onDodgeStart_{};				//< 回避開始コールバック
 	Callback onDodgeEnd_{};					//< 回避終了コールバック
 	Callback onPerfectDodge_{};				//< パーフェクト回避コールバック
+
+	std::function<void(float)> onRequestInvincible_;	//< 無敵リクエストコールバック
 };

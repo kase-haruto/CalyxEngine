@@ -61,15 +61,15 @@ void PlayerDodgeSystem::Update(float dt){
 //			回避要求
 /////////////////////////////////////////////////////////////////////////////////////////
 void PlayerDodgeSystem::RequestDodge() {
-	if(!owner_)return;
-	if(state_ != DodgeState::Idle)return;
-	if(cooldown_ > 0.0f)return;
+	if(!owner_) return;
+	if(state_ != DodgeState::Idle) return;
+	if(cooldown_ > 0.0f) return;
 
 	// dodge方向設定
-	if (cfg_.useCameraForward){
-		if (auto* cam = CameraManager::GetMain3d()){
+	if(cfg_.useCameraForward) {
+		if(auto* cam = CameraManager::GetMain3d()) {
 			Vector3 fwd = Vector3::Forward();
-			if (fwd.LengthSquared() > 1e-6f) fwd = fwd.Normalize();
+			if(fwd.LengthSquared() > 1e-6f) fwd = fwd.Normalize();
 			dodgeDir_ = fwd;
 		} else {
 			dodgeDir_ = {0,0,1};
@@ -81,18 +81,30 @@ void PlayerDodgeSystem::RequestDodge() {
 	lastInputTime_ = timeAccum_;
 	cooldown_      = cfg_.cooldown;
 
-	if (onDodgeStart_) onDodgeStart_();
+	// 回避開始イベント
+	if(onDodgeStart_) onDodgeStart_();
 
-	if (perfectHintActive_){
-		if (onPerfectDodge_) onPerfectDodge_();
-		if (owner_) owner_->SetInvincibleFor(cfg_.invuln + cfg_.perfectInvulnBonus);
+	// ジャスト回避成功
+	if(perfectHintActive_) {
+		if(onPerfectDodge_) onPerfectDodge_();
+
+		// 無敵は「要求」だけ出す
+		if(onRequestInvincible_) {
+			onRequestInvincible_(cfg_.invuln + cfg_.perfectInvulnBonus);
+		}
+
 		ChangeState(DodgeState::IFrame);
 		return;
 	}
 
-	if (owner_) owner_->SetInvincibleFor(cfg_.invuln);
+	// 通常回避の無敵要求
+	if(onRequestInvincible_) {
+		onRequestInvincible_(cfg_.invuln);
+	}
+
 	ChangeState(DodgeState::Startup);
 }
+
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //			状態変更
@@ -104,6 +116,13 @@ void PlayerDodgeSystem::ChangeState(DodgeState next) {
 	if (state_ == DodgeState::Idle){
 		if (onDodgeEnd_) onDodgeEnd_();
 	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//			コールバック関数を設定する
+/////////////////////////////////////////////////////////////////////////////////////////
+void PlayerDodgeSystem::SetOnRequestInvincible(std::function<void(float)> fn) {
+	onRequestInvincible_ = std::move(fn);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

@@ -18,8 +18,11 @@
 #include <Game/3dObject/Actor/Player/Dodge/PlayerDodgeMotion.h>
 
 // externals
+#include "Damage/PlayerDamageHandler.h"
 #include "Dodge/PlayerDodgeSystem.h"
 #include "Engine/Foundation/Utility/Func/CxUtils.h"
+#include "Game/Input/PlayerInput/PlayerInputHandler.h"
+
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <externals/imgui/imgui.h>
 
@@ -128,7 +131,7 @@ void Player::Initialize() {
 	collider_->SetCollisionEnabled(true);
 
 	// life関連初期化
-	life_ = 30;
+	Actor::SetLife(30);
 
 	// ライフゲージの初期化
 	hpGauge_ = std::make_unique<HpGauge>(static_cast<float>(life_));
@@ -175,6 +178,15 @@ void Player::Initialize() {
 		danger_->Initialize(this,dodgeSystem_.get(),{}); // UIやmarginは後で調整可
 	}
 
+	// DamageHandler
+	if(!damageHandler_) {
+		damageHandler_ = std::make_unique<PlayerDamageHandler>();
+		damageHandler_->Initialize(this);
+	}
+	dodgeSystem_->SetOnRequestInvincible(
+		[this](float sec) { if(damageHandler_) { damageHandler_->RequestInvincible(sec); } }
+		);
+
 	PrewarmLockMarkers(maxLockOn_);
 
 	// fx
@@ -190,8 +202,9 @@ void Player::Initialize() {
 /////////////////////////////////////////////////////////////////////////////////////////
 void Player::Update(float dt) {
 	if(inputHandler_) { inputHandler_->Update(*this,dt); }
-	if(dodgeSystem_)dodgeSystem_->Update(dt);
-	if(dodgeMotion_) dodgeMotion_->Update(dt);
+	if(dodgeSystem_) { dodgeSystem_->Update(dt); }
+	if(dodgeMotion_) { dodgeMotion_->Update(dt); }
+	if(damageHandler_) { damageHandler_->Update(dt); }
 
 	moveCtrler_.Apply(worldTransform_);
 
@@ -203,10 +216,6 @@ void Player::Update(float dt) {
 		hpGauge_->Update(dt);
 		hpGauge_->SetHp(static_cast<float>(life_));
 	}
-
-	// 無敵時間
-	UpdateInvincibility(dt);
-
 	reticleTransform_.Update();
 
 	// 自動ロックオン
@@ -385,11 +394,7 @@ void Player::Start() {
 	}
 }
 
-void Player::RequestDodge() {
-	if (dodgeSystem_) {
-		dodgeSystem_->RequestDodge();
-	}
-}
+void Player::RequestDodge() { if(dodgeSystem_) { dodgeSystem_->RequestDodge(); } }
 
 ///////////////////////////////////////////////////////////////////////////////////
 //		衝突
@@ -399,20 +404,7 @@ void Player::OnCollisionEnter(Collider* other) {
 	// イベントの場合スキップ
 	if(other->GetType() == ColliderType::Type_EventObject) return;
 
-	// 回避のi-frameや既存の無敵ならダメージ無視
-	//if((dodgeSystem_ && dodgeSystem_->HandlesHitNow()) || !CanBeDamaged()) return;
-
-	// ===== 被弾確定 =====
-	--life_;
-
-	// 被弾時にカメラを揺らす
-	auto* cam       = CameraManager::GetMain3d();
-	float duration  = 0.5f;
-	float intensity = 0.8f;
-	cam->StartShake(duration,intensity);
-
-	// 被弾後の無敵を1秒付与
-	SetInvincibleFor(kHitIFrameSec);
+	if(damageHandler_) { damageHandler_->OnHit(other); }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -687,43 +679,5 @@ std::optional<const float> Player::GetMaxShootInterval() const {
 void Player::SetShootingController(std::unique_ptr<PlayerShootingController> sc) { shootingController_ = std::move(sc); }
 
 void Player::SetInputHandler(std::unique_ptr<PlayerInputHandler> ih) { inputHandler_ = std::move(ih); }
-
-void Player::SetInvincibleFor(float seconds) {
-	if(seconds <= 0.0f) return;
-
-	const bool wasInvincible = IsInvincible();
-	invincibleTimer_         = (std::max)(invincibleTimer_,seconds);
-
-	if(!wasInvincible) {
-		// 無敵開始
-		invincibleBlinkAccum_ = 0.0f;
-		invincibleBlinkState_ = false;
-		SetDrawEnable(false);
-	}
-}
-
-bool Player::IsInvincible() const { return invincibleTimer_ > 0.0f; }
-
-void Player::UpdateInvincibility(float dt) {
-	if(invincibleTimer_ <= 0.0f) return;
-
-	invincibleTimer_ -= dt;
-	if(invincibleTimer_ <= 0.0f) {
-		// 無敵終了
-		invincibleTimer_      = 0.0f;
-		invincibleBlinkAccum_ = 0.0f;
-		invincibleBlinkState_ = true;
-		SetDrawEnable(true);
-		return;
-	}
-
-	// 無敵中は一定間隔で描画トグル
-	invincibleBlinkAccum_ += dt;
-	while(invincibleBlinkAccum_ >= kBlinkInterval) {
-		invincibleBlinkAccum_ -= kBlinkInterval;
-		invincibleBlinkState_ = !invincibleBlinkState_;
-		SetDrawEnable(invincibleBlinkState_);
-	}
-}
 
 REGISTER_SCENE_OBJECT(Player)

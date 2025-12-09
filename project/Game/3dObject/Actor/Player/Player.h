@@ -15,14 +15,15 @@
 
 #include <Game/3dObject/Actor/Enemy/Enemy.h>
 #include <Game/Battle/Shooting/ShootingController/PlayerShootingController.h>
-#include <Game/Input/PlayerInput/PlayerInputHandler.h>
 #include <Game/2d/HpGauge.h>
 
+class PlayerInputHandler;
 class PlayerDodgeSystem;
 class EnemyDirectory;
 class PlayerDangerSense;
 class PlayerDodge;
 class PlayerDodgeMotion;
+class PlayerDamageHandler;
 
 /**
  * \brief
@@ -96,8 +97,6 @@ public:
 	void SetEnemyList(const std::list<std::shared_ptr<Enemy>>& list) { targets_.assign(list.begin(),list.end()); }
 	void SetShootingController(std::unique_ptr<PlayerShootingController> sc);
 	void SetInputHandler(std::unique_ptr<PlayerInputHandler> ih);
-	void SetInvincibleFor(float seconds); // 指定秒数だけ無敵にする（重ねがけは長い方を優先）
-	bool CanBeDamaged() const { return !IsInvincible(); }
 
 	//getter
 	std::string_view                           GetTypeName() const override { return "Player"; }
@@ -137,13 +136,10 @@ private:
 	 * \param n
 	 */
 	void PrewarmLockMarkers(size_t n);
-
-	// 死んだ敵のロックオンを外す
+	/**
+	 * \brief 死んだ敵のロックオン解除
+	 */
 	void PurgeDeadLockedTargets();
-
-	// === 無敵API ===
-	bool IsInvincible() const;
-	void UpdateInvincibility(float dt);
 
 private:
 	//=====================================================================
@@ -154,7 +150,8 @@ private:
 	std::unique_ptr<PlayerDodgeSystem>        dodgeSystem_ = nullptr;
 	std::unique_ptr<PlayerShootingController> shootingController_;
 	std::unique_ptr<PlayerInputHandler>       inputHandler_ = nullptr;
-	std::unique_ptr<PlayerDangerSense>        danger_;      //< 危機察知
+	std::unique_ptr<PlayerDangerSense>        danger_; //< 危機察知
+	std::unique_ptr<PlayerDamageHandler>      damageHandler_ = nullptr;
 
 	Vector3        lastMoveVector_;   //< 最後の移動ベクトル
 	WorldTransform reticleTransform_; //< レティクルのワールド変換
@@ -179,13 +176,6 @@ private:
 	float lockOnReleaseRadiusPx_ = 150.0f; // 解除半径
 	float lockOnRefreshInterval_ = 0.15f;  // 判定間隔（秒）
 	float lockOnRefreshTimer_    = 0.0f;
-
-
-	// 無敵時かん用
-	float invincibleTimer_ = 0.0f; // >0 の間は無敵
-	// 見た目に使いたければトグル点滅など
-	float invincibleBlinkAccum_ = 0.0f;
-	bool  invincibleBlinkState_ = true;
 
 	// 画面内クランプ用設定
 	bool  clampPlayerInView_  = true;
