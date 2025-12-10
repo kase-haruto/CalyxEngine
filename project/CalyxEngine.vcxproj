@@ -190,6 +190,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\3dObject\Actor\Enemy\Shoot\EnemyShootingAgent.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Player\Damage\PlayerDamageHandler.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Player\Dodge\PlayerDodgeSystem.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Player\LockOn\PlayerLockOn.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Player\Move\PlayerMoveController.cpp" />
     <ClCompile Include="Game\Battle\Movement\Formation\EnemyFormationController.cpp" />
     <ClCompile Include="Game\Battle\Shooting\Details\FireScheduler.cpp" />
@@ -462,6 +463,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\3dObject\Actor\Enemy\Shoot\EnemyShootingAgent.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\Damage\PlayerDamageHandler.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\Dodge\PlayerDodgeSystem.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\LockOn\PlayerLockOn.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\Move\PlayerMoveController.h" />
     <ClInclude Include="Game\Battle\Movement\Formation\EnemyFormationController.h" />
     <ClInclude Include="Game\Battle\Shooting\Details\AimProvider.h" />
