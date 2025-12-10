@@ -32,6 +32,7 @@ public:
 	void  SetMoveSpeed(float moveSpeed) { moveSpeed_ = moveSpeed; }
 	float GetMoveSpeed() const { return moveSpeed_; }
 	void  SetVelocity(const Vector3& velocity) { velocity_ = velocity; }
+	void SetLife(int32_t life) { life_ = life; }
 
 protected:
 	//===================================================================*/

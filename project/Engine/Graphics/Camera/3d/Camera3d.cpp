@@ -170,9 +170,6 @@ void Camera3d::AlwaysUpdate(float dt) {
 	// 入力等の既存処理
 	BaseCamera::AlwaysUpdate(dt);
 
-	// 追従
-//9	if(follow_.enabled && follow_.target) { UpdateFollow(dt); }
-
 	// 視錐台更新
 	frustum_.ExtractFromMatrix(viewProjectionMatrix_);
 	frustum_.Draw();

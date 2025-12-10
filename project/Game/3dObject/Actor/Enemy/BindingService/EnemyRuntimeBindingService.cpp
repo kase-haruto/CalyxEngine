@@ -45,7 +45,7 @@ void EnemyRuntimeBindingService::Update(SceneContext& ctx,float) {
 	for(auto& obj : lib->GetAllObjectsShared()) if(std::dynamic_pointer_cast<EnemySpawner>(obj)) ++currCount;
 	if(currCount != lastSpawnerCount_) { WireAllSpawners(ctx); }
 
-	if(player && dir_) { player->SetEnemyList(dir_->SnapshotAlive()); }
+	if(player && dir_) { player->AttachEnemyList(dir_->SnapshotAlive()); }
 }
 
 void EnemyRuntimeBindingService::OnSceneCleared(SceneContext&) {

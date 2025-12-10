@@ -317,18 +317,6 @@ void FxObject::SyncConfigFromChildren() {
 /////////////////////////////////////////////////////////////////////////////////////////
 std::shared_ptr<ParticleSystemObject>
 FxObject::AddEmitterNode(const EffectEmitterNodeConfig& node) {
-	// // 既に同GUIDの子がいたら再利用
-	// if(node.guid.isValid()) {
-	// 	if(auto exist = FindChildByGuid(emitters_, node.guid)) {
-	// 		// 名前/Transform/Emitterだけ更新して返す
-	// 		exist->SetName(node.name.empty() ? exist->GetName() : node.name, ObjectType::Effect);
-	// 		exist->GetWorldTransform().ApplyConfig(node.transform);
-	// 		exist->SetDrawEnable(node.isDrawEnable);
-	// 		exist->GetEmitter()->ApplyConfigFrom(node.emitter);
-	// 		return exist;
-	// 	}
-	// }
-
 	auto child = SceneAPI::Instantiate<ParticleSystemObject>(
 		node.name.empty() ? "emitter" : node.name);
 

@@ -5,6 +5,7 @@
 
 // engine
 #include "Game/3dObject/Actor/Bullet/Container/BulletContainer.h"
+#include "Game/3dObject/Actor/Player/Dodge/PlayerDodgeSystem.h"
 
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Renderer/Sprite/Sprite.h>
@@ -32,7 +33,7 @@ public:
 	PlayerDangerSense();
 	~PlayerDangerSense();
 
-	void Initialize(Player* owner,PlayerDodge* dodge,const DangerSenseConfig& cfg = {});
+	void Initialize(Player* owner,PlayerDodgeSystem* dodge,const DangerSenseConfig& cfg = {});
 	void Update(float dt);
 
 	// 敵一覧の供給（各敵が個別に BulletContainer を所有している構成に対応）
@@ -55,7 +56,7 @@ private:
 
 private:
 	const Player*                       owner_ = nullptr;
-	PlayerDodge*                        dodge_ = nullptr;
+	PlayerDodgeSystem*                        dodge_ = nullptr;
 	EnemyDirectory*                     dir_   = nullptr;
 	std::vector<const BulletContainer*> bulletContainers_;
 	float                               dangerHold_ = 0.0f;
