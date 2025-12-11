@@ -43,7 +43,7 @@ void HandleMove(Player& player, float dt) {
 /////////////////////////////////////////////////////////////////////////////////////////
 void HandleReticle(Player& player, float dt) {
 	constexpr float moveSpeed		 = 6.0f;
-	constexpr float stickSensitivity = 300.0f;
+	constexpr float stickSensitivity = 150.0f;
 
 	Vector3 offset = Vector3::Zero();
 	if(Input::GetInstance()->PushKey(DIK_UP)) offset.y += 3.0f;

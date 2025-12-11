@@ -12,7 +12,10 @@ struct Vector2{
 	Vector2(float vx, float vy);
 	Vector2(const Vector2& v);
 
-	float Length()const;
+	float          Length()const;
+	static Vector2 Zero();
+	float          LengthSquared() const;
+	Vector2 Normalize();
 
 	//--------- operator -----------------------------------------------------
 	Vector2 operator+(const Vector2& v) const;

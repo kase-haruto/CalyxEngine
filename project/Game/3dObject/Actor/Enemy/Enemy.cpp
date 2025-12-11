@@ -79,7 +79,9 @@ void Enemy::Update(float dt) {
 
 	// 解散行動中は射撃しない
 	if(movement_.GetMode() != EnemyMovementController::Mode::Dissolving) {
+		if(deathState_ == DeathState::Alive) {
 		shooting_.Update(dt);
+		}
 	} else {
 		// 解散行動中に色を薄くしていく
 		float	subAlpha = 0.5f * dt;
@@ -87,7 +89,7 @@ void Enemy::Update(float dt) {
 		col.w			 = (std::max)(0.0f, col.w - subAlpha);
 		GetModel()->SetColor(col);
 
-		
+
 	}
 
 	// 完全に透明になったら即死

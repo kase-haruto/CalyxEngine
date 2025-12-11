@@ -86,7 +86,7 @@ protected:
 
 	float aspectRatio_ = 16.0f / 9.0f;                           // アスペクト比
 	float nearZ_ = 0.1f;                                         // 近クリップ面
-	float farZ_ = 1000.0f;                                       // 遠クリップ面
+	float farZ_ = 3000.0f;                                       // 遠クリップ面
 	float fovAngleY_ = 75.0f * static_cast< float >(std::numbers::pi) / 180.0f;  // 垂直視野角
 
 protected:
