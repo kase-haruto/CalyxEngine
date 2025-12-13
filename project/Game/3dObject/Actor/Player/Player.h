@@ -10,8 +10,11 @@
 #include <Engine/Scene/Runtime/IRuntimeBehaviour.h>
 
 // game
+#include "Input/PlayerInput.h"
 #include "LockOn/PlayerLockOn.h"
 #include "Move/PlayerMoveController.h"
+#include "Updater/PlayerUpdaterCollection.h"
+
 #include <Game/2d/HpGauge.h>
 #include <Game/3dObject/Actor/Bullet/Container/BulletContainer.h>
 #include <Game/3dObject/Actor/Enemy/Enemy.h>
@@ -135,6 +138,7 @@ private:
 	// Private Variables
 	//=====================================================================
 	PlayerMoveController                      moveCtrler_;                   //< 移動コントローラ
+	PlayerUpdaterCollection updaterCollection_;
 	std::unique_ptr<PlayerDodgeMotion>        dodgeMotion_        = nullptr; //< 回避モーション
 	std::unique_ptr<PlayerDodgeSystem>        dodgeSystem_        = nullptr; //< 回避システム
 	std::unique_ptr<PlayerInputHandler>       inputHandler_       = nullptr; //< 入力ハンドラ
@@ -142,6 +146,7 @@ private:
 	std::unique_ptr<PlayerDamageHandler>      damageHandler_      = nullptr; //< ダメージハンドラ
 	std::unique_ptr<PlayerLockOn>             lockOn_             = nullptr; //< ロックオンシステム
 	std::unique_ptr<PlayerShootingController> shootingController_ = nullptr; //< 射撃コントローラ
+	PlayerInput input_;
 
 	Vector3        lastMoveVector_;   //< 最後の移動ベクトル
 	WorldTransform reticleTransform_; //< レティクルのワールド変換
