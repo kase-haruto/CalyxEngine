@@ -50,21 +50,12 @@ namespace{
 	inline float Saturate(float x){ return std::clamp(x, 0.0f, 1.0f); }
 } // namespace
 
-PlayerDodgeMotion::PlayerDodgeMotion()
-	: owner_(nullptr)
-	, dodge_(nullptr)
-	, appliedOffset_(Vector3::Zero())
-	, sinkCurrent_(0.0f)
-	, additiveRoll_(0.0f)
-	, additivePitch_(0.0f)
-	, leanLerp_(0.0f)
-	, spinQ_(Quaternion::MakeIdentity())
-	, baseRot_(Quaternion::MakeIdentity())
-{}
+PlayerDodgeMotion::PlayerDodgeMotion() {
+}
 PlayerDodgeMotion::~PlayerDodgeMotion() = default;
 
-void PlayerDodgeMotion::Initialize(Player* owner, PlayerDodgeSystem* dodge){
-	owner_ = owner;
+void PlayerDodgeMotion::Initialize(const PlayerDodgeContext& ctx, PlayerDodgeSystem* dodge){
+	ctx_ = ctx;
 	dodge_ = dodge;
 
 	// コールバック接続
@@ -79,7 +70,7 @@ void PlayerDodgeMotion::OnDodgeStart(){
 	leanLerp_      = 0.0f;
 
 	// 姿勢の基準をキャプチャ
-	baseRot_ = owner_->GetWorldTransform().rotation;
+	baseRot_ = ctx_.getWorldTransform().rotation;
 	spinQ_   = Quaternion::MakeIdentity();
 
 	// 位置サーボ初期化
@@ -92,12 +83,12 @@ void PlayerDodgeMotion::OnDodgeStart(){
 void PlayerDodgeMotion::OnDodgeEnd(){
 	// --- 位置の最終スナップ---
 	if (appliedOffset_.LengthSquared() > 1e-10f){
-		owner_->GetWorldTransform().translation += (-appliedOffset_);
+		ctx_.getWorldTransform().translation += (-appliedOffset_);
 		appliedOffset_ = Vector3::Zero();
 	}
 
 	// --- 回転の最終スナップ
-	owner_->GetWorldTransform().rotation = baseRot_;
+	ctx_.getWorldTransform().rotation = baseRot_;
 	spinQ_ = Quaternion::MakeIdentity();
 
 	additiveRoll_  = 0.0f;
@@ -147,7 +138,7 @@ void PlayerDodgeMotion::OnPerfect(){
 }
 
 void PlayerDodgeMotion::Update(float dt){
-	if (!owner_ || !dodge_) return;
+	if (!dodge_) return;
 	ApplySpinAndCurve(dt);   // 位置（Pull/Hold/Return）＋回転（絶対）
 	ApplyProceduralPose(dt); // 姿勢＆沈み目標更新 → 最終姿勢合成
 }
@@ -217,9 +208,9 @@ void PlayerDodgeMotion::ApplySpinAndCurve(float dt){
 	const Vector3 step = delta * alpha; // 今フレーム“位置”として動かしたい分
 
 	if constexpr (kMoveByTakesVelocity){
-		owner_->AddMoveRequest(step); // 現状はこちらだけ使う形でもOK
+		ctx_.addMoveRequest(step); // 現状はこちらだけ使う形でもOK
 	} else{
-		owner_->AddMoveRequest(step);
+		ctx_.addMoveRequest(step);
 	}
 	appliedOffset_ += step;
 }
@@ -270,7 +261,7 @@ void PlayerDodgeMotion::ApplyProceduralPose(float dt){
 
 	// 最終姿勢＝開始姿勢 × 絶対スピン × 追加姿勢（Slerpしない）
 	if (IsDodging(st)) {
-		owner_->GetWorldTransform().rotation =
+		ctx_.getWorldTransform().rotation =
 			Quaternion::Multiply(baseRot_, Quaternion::Multiply(spinQ_, poseQ));
 	}
 }

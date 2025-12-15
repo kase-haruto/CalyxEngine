@@ -5,8 +5,10 @@
 #include <algorithm>
 
 /* engine */
-#include <Engine/Foundation/Math/Vector3.h>
+#include "Game/3dObject/Actor/Player/PlayerContext.h"
+
 #include <Engine/Foundation/Math/Quaternion.h>
+#include <Engine/Foundation/Math/Vector3.h>
 
 class Player;
 class PlayerDodgeSystem;
@@ -19,10 +21,10 @@ public:
 
 	/**
 	 * \brief 初期化
-	 * \param owner		操作先のプレイヤー
+	 * \param ctx		コンテキスト
 	 * \param dodge		危機システム
 	 */
-	void Initialize(Player* owner, PlayerDodgeSystem* dodge);
+	void Initialize(const PlayerDodgeContext& ctx,PlayerDodgeSystem* dodge);
 	/**
 	 * \brief 更新
 	 * \param dt	デルタタイム
@@ -60,7 +62,7 @@ private:
 	void ApplyProceduralPose(float dt);
 
 private:
-	Player*            owner_ = nullptr;
+	PlayerDodgeContext ctx_;
 	PlayerDodgeSystem* dodge_ = nullptr;
 
 	// ==== 姿勢系 ====

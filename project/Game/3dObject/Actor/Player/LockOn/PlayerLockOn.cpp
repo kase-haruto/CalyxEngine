@@ -13,8 +13,8 @@ PlayerLockOn::~PlayerLockOn() = default;
 //////////////////////////////////////////////////////////////////////////////
 //		初期化
 //////////////////////////////////////////////////////////////////////////////
-void PlayerLockOn::Initialize(Player* owner) {
-	owner_				   = owner;
+void PlayerLockOn::Initialize(const PlayerLockOnContext& ctx) {
+	ctx_ 				   = ctx;
 	PrewarmMarkers(maxLockOn_);
 }
 
@@ -51,11 +51,11 @@ void PlayerLockOn::RequestLockOn() {
 
 	// constexpr size_t kMaxLockOn = 4; //< 使っているなら削除 or 下の maxLockOn_ に置換
 	auto* cam = CameraManager::GetMain3d();
-	if(!cam || !owner_) return;
+	if(!cam) return;
 
 	// 画面上のレティクル座標
 	const Vector2 reticleScreen =
-		Cx::Math::WorldToScreen(owner_->GetReticleWorldPos());
+		Cx::Math::WorldToScreen(ctx_.getReticleWorldPos());
 
 	// ヒット判定
 	for(const auto& enemy : targets_) {
@@ -105,10 +105,10 @@ void PlayerLockOn::UpdateAutoLockOn(float dt) {
 	lockOnRefreshTimer_ = lockOnRefreshInterval_;
 
 	auto* cam = CameraManager::GetMain3d();
-	if(!cam || !owner_) return;
+	if(!cam) return;
 
 	const Vector2 reticleScreen =
-		Cx::Math::WorldToScreen(owner_->GetReticleWorldPos());
+		Cx::Math::WorldToScreen(ctx_.getReticleWorldPos());
 
 	for(size_t i = 0; i < lockedOnTargets_.size();) {
 		auto& enemy	 = lockedOnTargets_[i];

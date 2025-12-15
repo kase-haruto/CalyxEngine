@@ -6,6 +6,8 @@
 #include <Engine/Renderer/Sprite/Sprite.h>
 
 // game
+#include "Game/3dObject/Actor/Player/PlayerContext.h"
+
 #include <Game/3dObject/Actor/Enemy/Enemy.h>
 
 // forward
@@ -24,7 +26,7 @@ public:
 	 * 初期化
 	 * @param owner / Player 所有者
 	 */
-	void Initialize(Player* owner);
+	void Initialize(const PlayerLockOnContext& ctx);
 	/**
 	 * 更新
 	 * @param dt / デルタタイム
@@ -81,8 +83,7 @@ private:
 	void PrewarmMarkers(size_t n);
 
 private:
-	Player* owner_ = nullptr;		//< 所有者
-
+	PlayerLockOnContext ctx_;
 	std::list<std::shared_ptr<Enemy>> targets_;				//< 敵リスト
 	std::vector<std::shared_ptr<Enemy>> lockedOnTargets_;	//< ロックオン中の敵リスト
 

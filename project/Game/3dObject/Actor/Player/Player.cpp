@@ -163,14 +163,24 @@ void Player::Initialize() {
 		cfg.backwardScale  = 0.70f;
 		cfg.spinTurns	   = 1.0f;
 
+		PlayerDodgeContext dodgeContext{};
+
 		dodgeSystem_ = std::make_unique<PlayerDodgeSystem>();
-		dodgeSystem_->Initialize(this, cfg);
+		dodgeSystem_->Initialize(dodgeContext, cfg);
 	}
 
 	// 回避モーション
 	if(!dodgeMotion_) {
+		PlayerDodgeContext dodgeContext;
+		dodgeContext.addMoveRequest = [this](const Vector3& delta) {
+			AddMoveRequest(delta);
+		};
+		dodgeContext.getWorldTransform = [this]() -> WorldTransform& {
+			return this->worldTransform_;
+		};
+		
 		dodgeMotion_ = std::make_unique<PlayerDodgeMotion>();
-		dodgeMotion_->Initialize(this, dodgeSystem_.get());
+		dodgeMotion_->Initialize(dodgeContext, dodgeSystem_.get());
 	}
 
 	// ---- 危険察知 ----
@@ -202,15 +212,30 @@ void Player::Initialize() {
 
 	// DamageHandler
 	if(!damageHandler_) {
+		PlayerDamageContext damageContext;
+		damageContext.getLife = [this]() {
+			return this->GetLife();
+		};
+		damageContext.setLife = [this](int life) {
+			this->SetLife(life);
+		};
+		damageContext.setVisible = [this](bool v) {
+			this->SetDrawEnable(v);
+		};
+		
 		damageHandler_ = std::make_unique<PlayerDamageHandler>();
-		damageHandler_->Initialize(this);
+		damageHandler_->Initialize(damageContext);
 	}
 	dodgeSystem_->SetOnRequestInvincible(
 		[this](float sec) { if(damageHandler_) { damageHandler_->RequestInvincible(sec); } });
 
 	if(!lockOn_) {
+		PlayerLockOnContext lockOnCtx;
+		lockOnCtx.getReticleWorldPos = [this]() {
+			return this->GetReticleWorldPos();
+		};
 		lockOn_ = std::make_unique<PlayerLockOn>();
-		lockOn_->Initialize(this);
+		lockOn_->Initialize(lockOnCtx);
 	}
 
 	// fx

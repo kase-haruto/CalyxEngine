@@ -1,4 +1,6 @@
 #pragma once
+#include "Game/3dObject/Actor/Player/PlayerContext.h"
+
 #include <memory>
 
 // forward
@@ -15,9 +17,9 @@ public:
 
 	/**
 	 * \brief 初期化
-	 * \param owner
+	 * \param context コンテキスト
 	 */
-	void Initialize(Player* owner);
+	void Initialize(const PlayerDamageContext& context);
 	/**
 	 * \brief 更新
 	 * \param dt
@@ -53,7 +55,7 @@ private:
 	void UpdateInvincibility(float dt);
 
 private:
-	Player* owner_ = nullptr;
+	PlayerDamageContext ctx_;
 
 	// --- 無敵 ---
 	float invincibleTimer_       = 0.0f;

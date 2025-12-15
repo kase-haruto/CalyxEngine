@@ -17,6 +17,11 @@ struct PlayerCombatContext {
 	std::function<void()> clearLockOn;
 };
 
+struct PlayerDodgeContext {
+	std::function<WorldTransform()> getWorldTransform;
+	std::function<void(const Vector3&)> addMoveRequest;
+};
+
 struct PlayerDamageContext {
 	std::function<int()>	  getLife;
 	std::function<void(int)>  setLife;
@@ -25,6 +30,10 @@ struct PlayerDamageContext {
 
 struct PlayerReticleContext {
 	std::function<void(const Vector3&)> moveReticle;
+};
+
+struct PlayerLockOnContext {
+	std::function<Vector3()> getReticleWorldPos;
 };
 
 struct DangerSenseContext {

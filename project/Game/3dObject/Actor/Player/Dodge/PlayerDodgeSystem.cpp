@@ -9,8 +9,8 @@ PlayerDodgeSystem::~PlayerDodgeSystem() = default;
 /////////////////////////////////////////////////////////////////////////////////////////
 //			初期化処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void PlayerDodgeSystem::Initialize(Player* owner,const PlayerDodgeConfig& cfg) {
-	owner_ = owner;
+void PlayerDodgeSystem::Initialize(const PlayerDodgeContext& ctx,const PlayerDodgeConfig& cfg) {
+	ctx_ = ctx;
 	cfg_   = cfg;
 	state_ = DodgeState::Idle;
 	timer_ = 0.0f;
@@ -61,7 +61,6 @@ void PlayerDodgeSystem::Update(float dt){
 //			回避要求
 /////////////////////////////////////////////////////////////////////////////////////////
 void PlayerDodgeSystem::RequestDodge() {
-	if(!owner_) return;
 	if(state_ != DodgeState::Idle) return;
 	if(cooldown_ > 0.0f) return;
 
