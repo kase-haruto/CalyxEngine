@@ -277,6 +277,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>C:\WorkSpace\project\;C:\WorkSpace\project\externals;C:\WorkSpace\project\externals\DirectXTex;C:\WorkSpace\project\externals\assimp\include;</AdditionalIncludeDirectories>
       <LinkCompiled>true</LinkCompiled>
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
+      <IntrinsicFunctions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</IntrinsicFunctions>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</WholeProgramOptimization>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <ClCompile Include="Game\3dObject\Actor\Player\Updater\PlayerReticleUpdater.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Player\Updater\PlayerUpdaterCollection.cpp" />
@@ -555,7 +559,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\3dObject\Actor\Player\Input\PlayerInput.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\LockOn\PlayerLockOn.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\Move\PlayerMoveController.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\PlayerContext.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\Updater\IPlayerTickUpdater.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\Updater\IPlayerUpdater.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\Updater\PlayerCombatUpdater.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\Updater\PlayerDamageUpdater.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\Updater\PlayerDodgeUpdater.h" />
