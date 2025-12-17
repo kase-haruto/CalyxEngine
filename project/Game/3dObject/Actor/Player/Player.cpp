@@ -171,16 +171,8 @@ void Player::Initialize() {
 
 	// 回避モーション
 	if(!dodgeMotion_) {
-		PlayerDodgeContext dodgeContext;
-		dodgeContext.addMoveRequest = [this](const Vector3& delta) {
-			AddMoveRequest(delta);
-		};
-		dodgeContext.getWorldTransform = [this]() -> WorldTransform& {
-			return this->worldTransform_;
-		};
-		
-		dodgeMotion_ = std::make_unique<PlayerDodgeMotion>();
-		dodgeMotion_->Initialize(dodgeContext, dodgeSystem_.get());
+		dodgeMotion_ = std::make_unique<PlayerDodgeSpinMotion>();
+		dodgeMotion_->Initialize(dodgeSystem_.get(),&worldTransform_);
 	}
 
 	// ---- 危険察知 ----

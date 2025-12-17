@@ -238,7 +238,7 @@ IPostEffectPass* PostEffectManager::GetPass(const std::string& name){
 	return collection_.GetSlots()[idx].pass;
 }
 
-// ---------- UI（任意） ----------
+// ---------- UI ----------
 void PostEffectManager::DrawImGui(){
 	if (!initialized_) return;
 	auto& slots = collection_.GetSlots();

@@ -10,6 +10,7 @@
 #include <Engine/Scene/Runtime/IRuntimeBehaviour.h>
 
 // game
+#include "Dodge/PlayerDodgeMotion.h"
 #include "Input/PlayerInput.h"
 #include "LockOn/PlayerLockOn.h"
 #include "Move/PlayerMoveController.h"
@@ -26,7 +27,6 @@ class PlayerDodgeSystem;
 class EnemyDirectory;
 class PlayerDangerSense;
 class PlayerDodge;
-class PlayerDodgeMotion;
 class PlayerDamageHandler;
 
 /**
@@ -139,7 +139,7 @@ private:
 	//=====================================================================
 	PlayerMoveController                      moveCtrler_;                   //< 移動コントローラ
 	PlayerUpdaterCollection updaterCollection_;
-	std::unique_ptr<PlayerDodgeMotion>        dodgeMotion_        = nullptr; //< 回避モーション
+	std::unique_ptr<PlayerDodgeSpinMotion>    dodgeMotion_        = nullptr; //< 回避モーション
 	std::unique_ptr<PlayerDodgeSystem>        dodgeSystem_        = nullptr; //< 回避システム
 	std::unique_ptr<PlayerInputHandler>       inputHandler_       = nullptr; //< 入力ハンドラ
 	std::unique_ptr<PlayerDangerSense>        danger_             = nullptr; //< 危機察知
