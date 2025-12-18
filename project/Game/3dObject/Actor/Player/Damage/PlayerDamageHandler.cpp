@@ -13,7 +13,7 @@ PlayerDamageHandler::~PlayerDamageHandler() = default;
 /////////////////////////////////////////////////////////////////////////////////////////
 // 初期化
 /////////////////////////////////////////////////////////////////////////////////////////
-void PlayerDamageHandler::Initialize(const PlayerDamageContext& context) {
+void PlayerDamageHandler::Initialize(const PlayerStateContext& context) {
 	ctx_				  = context;
 	invincibleTimer_	  = 0.0f;
 	invincibleBlinkAccum_ = 0.0f;

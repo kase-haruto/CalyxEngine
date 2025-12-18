@@ -1,5 +1,5 @@
 #pragma once
-#include "Game/3dObject/Actor/Player/PlayerContext.h"
+#include "Game/3dObject/Actor/Player/Context/PlayerContext.h"
 
 #include <memory>
 
@@ -19,7 +19,7 @@ public:
 	 * \brief 初期化
 	 * \param context コンテキスト
 	 */
-	void Initialize(const PlayerDamageContext& context);
+	void Initialize(const PlayerStateContext& context);
 	/**
 	 * \brief 更新
 	 * \param dt
@@ -55,7 +55,7 @@ private:
 	void UpdateInvincibility(float dt);
 
 private:
-	PlayerDamageContext ctx_;
+	PlayerStateContext ctx_;
 
 	// --- 無敵 ---
 	float invincibleTimer_       = 0.0f;

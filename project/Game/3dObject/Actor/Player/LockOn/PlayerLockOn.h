@@ -6,7 +6,7 @@
 #include <Engine/Renderer/Sprite/Sprite.h>
 
 // game
-#include "Game/3dObject/Actor/Player/PlayerContext.h"
+#include "Game/3dObject/Actor/Player/Context/PlayerContext.h"
 
 #include <Game/3dObject/Actor/Enemy/Enemy.h>
 
@@ -26,7 +26,7 @@ public:
 	 * 初期化
 	 * @param owner / Player 所有者
 	 */
-	void Initialize(const PlayerLockOnContext& ctx);
+	void Initialize(const PlayerActionContext& ctx);
 	/**
 	 * 更新
 	 * @param dt / デルタタイム
@@ -83,7 +83,7 @@ private:
 	void PrewarmMarkers(size_t n);
 
 private:
-	PlayerLockOnContext ctx_;
+	PlayerActionContext ctx_;
 	std::list<std::shared_ptr<Enemy>> targets_;				//< 敵リスト
 	std::vector<std::shared_ptr<Enemy>> lockedOnTargets_;	//< ロックオン中の敵リスト
 

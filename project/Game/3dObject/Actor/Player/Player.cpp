@@ -18,6 +18,7 @@
 #include <Game/3dObject/Actor/Player/Dodge/PlayerDodgeMotion.h>
 
 // externals
+#include "Context/PlayerContextBuilder.h"
 #include "Damage/PlayerDamageHandler.h"
 #include "Dodge/PlayerDodgeSystem.h"
 #include "Engine/Foundation/Utility/Func/CxUtils.h"
@@ -155,6 +156,9 @@ void Player::Initialize() {
 		reticleSprites_[i]->SetAnchorPoint(Vector2(0.5f, 0.5f));
 	}
 
+	// context 構築
+	PlayerContextBuilder ctxBuilder= PlayerContextBuilder(*this);
+
 	// ---- 回避コンポーネント ----
 	if(!dodgeSystem_) {
 		PlayerDodgeConfig cfg;
@@ -163,10 +167,8 @@ void Player::Initialize() {
 		cfg.backwardScale  = 0.70f;
 		cfg.spinTurns	   = 1.0f;
 
-		PlayerDodgeContext dodgeContext{};
-
 		dodgeSystem_ = std::make_unique<PlayerDodgeSystem>();
-		dodgeSystem_->Initialize(dodgeContext, cfg);
+		dodgeSystem_->Initialize(cfg);
 	}
 
 	// 回避モーション
@@ -178,56 +180,21 @@ void Player::Initialize() {
 	// ---- 危険察知 ----
 	if(!danger_) {
 
-		DangerSenseContext dangerCtx{
-			// プレイヤー中心座標
-			.getPlayerCenter = [this]() {
-				return GetCenterPos();
-			},
-
-			// プレイヤー半径
-			.getPlayerRadius = [this]() {
-				return GetCollisionRadius();
-			},
-
-			// ジャスト回避ヒントの伝達先
-			.setPerfectDodgeHint =
-				[this](bool enable) {
-					if(dodgeSystem_) {
-						dodgeSystem_->SetPerfectHintActive(enable);
-					}
-			}
-		};
-
 		danger_ = std::make_unique<PlayerDangerSense>();
-		danger_->Initialize(dangerCtx, {});
+		danger_->Initialize(ctxBuilder.BuildState(), {});
 	}
 
 	// DamageHandler
 	if(!damageHandler_) {
-		PlayerDamageContext damageContext;
-		damageContext.getLife = [this]() {
-			return this->GetLife();
-		};
-		damageContext.setLife = [this](int life) {
-			this->SetLife(life);
-		};
-		damageContext.setVisible = [this](bool v) {
-			this->SetDrawEnable(v);
-		};
-		
 		damageHandler_ = std::make_unique<PlayerDamageHandler>();
-		damageHandler_->Initialize(damageContext);
+		damageHandler_->Initialize(ctxBuilder.BuildState());
 	}
 	dodgeSystem_->SetOnRequestInvincible(
 		[this](float sec) { if(damageHandler_) { damageHandler_->RequestInvincible(sec); } });
 
 	if(!lockOn_) {
-		PlayerLockOnContext lockOnCtx;
-		lockOnCtx.getReticleWorldPos = [this]() {
-			return this->GetReticleWorldPos();
-		};
 		lockOn_ = std::make_unique<PlayerLockOn>();
-		lockOn_->Initialize(lockOnCtx);
+		lockOn_->Initialize(ctxBuilder.BuildAction());
 	}
 
 	// fx

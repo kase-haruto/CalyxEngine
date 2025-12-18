@@ -9,8 +9,7 @@ PlayerDodgeSystem::~PlayerDodgeSystem() = default;
 /////////////////////////////////////////////////////////////////////////////////////////
 //			初期化処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void PlayerDodgeSystem::Initialize(const PlayerDodgeContext& ctx,const PlayerDodgeConfig& cfg) {
-	ctx_ = ctx;
+void PlayerDodgeSystem::Initialize(const PlayerDodgeConfig& cfg) {
 	cfg_   = cfg;
 	state_ = DodgeState::Idle;
 	timer_ = 0.0f;

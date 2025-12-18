@@ -13,7 +13,7 @@ PlayerLockOn::~PlayerLockOn() = default;
 //////////////////////////////////////////////////////////////////////////////
 //		初期化
 //////////////////////////////////////////////////////////////////////////////
-void PlayerLockOn::Initialize(const PlayerLockOnContext& ctx) {
+void PlayerLockOn::Initialize(const PlayerActionContext& ctx) {
 	ctx_ 				   = ctx;
 	PrewarmMarkers(maxLockOn_);
 }
@@ -55,7 +55,7 @@ void PlayerLockOn::RequestLockOn() {
 
 	// 画面上のレティクル座標
 	const Vector2 reticleScreen =
-		Cx::Math::WorldToScreen(ctx_.getReticleWorldPos());
+		Cx::Math::WorldToScreen(ctx_.getReticlePos());
 
 	// ヒット判定
 	for(const auto& enemy : targets_) {
@@ -108,7 +108,7 @@ void PlayerLockOn::UpdateAutoLockOn(float dt) {
 	if(!cam) return;
 
 	const Vector2 reticleScreen =
-		Cx::Math::WorldToScreen(ctx_.getReticleWorldPos());
+		Cx::Math::WorldToScreen(ctx_.getReticlePos());
 
 	for(size_t i = 0; i < lockedOnTargets_.size();) {
 		auto& enemy	 = lockedOnTargets_[i];

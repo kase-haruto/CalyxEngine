@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Game/3dObject/Actor/Player/PlayerContext.h"
+#include "Game/3dObject/Actor/Player/Context/PlayerContext.h"
 
 #include <Engine/Application/Input/Input.h>
 #include <Engine/Foundation/Math/Vector3.h>
@@ -54,7 +54,7 @@ public:
 	 * \param owner プレイヤー
 	 * \param cfg 回避設定
 	 */
-	void Initialize(const PlayerDodgeContext& ctx, const PlayerDodgeConfig& cfg);
+	void Initialize(const PlayerDodgeConfig& cfg);
 	/**
 	 * \brief 更新
 	 * \param dt デルタタイム
@@ -105,7 +105,6 @@ private:
 	//			private variables
 	//=====================================================================*/
 	PlayerDodgeConfig  cfg_{}; //< 設定
-	PlayerDodgeContext ctx_;
 	DodgeState		   state_ = DodgeState::Idle; //< 現在の状態
 	Vector3			   dodgeDir_{0, 0, 1};		  //< 回避方向
 

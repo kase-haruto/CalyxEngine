@@ -4,7 +4,7 @@
 
 // engine
 #include "Game/3dObject/Actor/Bullet/Container/BulletContainer.h"
-#include "Game/3dObject/Actor/Player/PlayerContext.h"
+#include "Game/3dObject/Actor/Player/Context/PlayerContext.h"
 
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Renderer/Sprite/Sprite.h>
@@ -42,7 +42,7 @@ public:
 	 * \param ctx コンテキスト
 	 * \param cfg 設定
 	 */
-	void Initialize(const DangerSenseContext& ctx,const DangerSenseConfig& cfg = {});
+	void Initialize(const PlayerStateContext& ctx,const DangerSenseConfig& cfg = {});
 	/** \brief 更新
 	 * \param dt デルタタイム
 	 */
@@ -83,7 +83,7 @@ private:
 	//=====================================================================*/
 	// Private Variables
 	//=====================================================================*/
-	DangerSenseContext ctx_;
+	PlayerStateContext ctx_;
 	EnemyDirectory*                     dir_   = nullptr;
 	std::vector<const BulletContainer*> bulletContainers_;
 	float                               dangerHold_ = 0.0f;

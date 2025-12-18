@@ -14,7 +14,7 @@
 PlayerDangerSense::PlayerDangerSense()	= default;
 PlayerDangerSense::~PlayerDangerSense() = default;
 
-void PlayerDangerSense::Initialize(const DangerSenseContext& ctx, const DangerSenseConfig& cfg) {
+void PlayerDangerSense::Initialize(const PlayerStateContext& ctx, const DangerSenseConfig& cfg) {
 	ctx_ = ctx;
 	cfg_ = cfg;
 
@@ -37,7 +37,7 @@ void PlayerDangerSense::Update(float /*dt*/) {
 		computeNow	  = (frameCounter_ == 0);
 	}
 
-	Vector3 playerPos = ctx_.getPlayerCenter();
+	Vector3 playerPos = ctx_.getCenterPos();
 	bool	dangerNow = lastDanger_;
 
 	if(computeNow) {
@@ -64,9 +64,9 @@ void PlayerDangerSense::AddBulletContainer(const BulletContainer* container) {
 // ============================================================
 bool PlayerDangerSense::ComputeDangerNearby(Vector3& outPlayerPos) const {
 
-	outPlayerPos = ctx_.getPlayerCenter();
+	outPlayerPos = ctx_.getCenterPos();
 
-	const float playerR = ctx_.getPlayerRadius() + cfg_.playerInflate;
+	const float playerR = ctx_.getCollisionRadius() + cfg_.playerInflate;
 	// const float maxDist = cfg_.maxCheckDistance;
 
 	// --- 重要：今出したい猶予 ---
@@ -126,7 +126,7 @@ void PlayerDangerSense::ApplyDangerResult(bool danger, const Vector3& playerPos)
 
 	bool hint = (dangerHold_ > 0.0f);
 
-	ctx_.setPerfectDodgeHint(hint);
+	ctx_.setPerfectHintActive(hint);
 
 	// UI 更新
 	if(!cue_) return;

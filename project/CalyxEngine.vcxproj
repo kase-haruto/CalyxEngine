@@ -188,102 +188,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\3dObject\Actor\Bullet\EnemyBullet\EnemyHomingBullet.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Enemy\Movement\EnemyMovementController.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Enemy\Shoot\EnemyShootingAgent.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Player\Context\PlayerContextBuilder.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Player\Damage\PlayerDamageHandler.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Player\Dodge\PlayerDodgeSystem.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Player\Input\PlayerInput.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Player\LockOn\PlayerLockOn.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Player\Move\PlayerMoveController.cpp" />
-    <ClCompile Include="Game\3dObject\Actor\Player\Updater\IPlayerTickUpdater.cpp" />
-    <ClCompile Include="Game\3dObject\Actor\Player\Updater\PlayerCombatUpdater.cpp" />
-    <ClCompile Include="Game\3dObject\Actor\Player\Updater\PlayerDamageUpdater.cpp" />
-    <ClCompile Include="Game\3dObject\Actor\Player\Updater\PlayerDodgeUpdater.cpp" />
-    <ClCompile Include="Game\3dObject\Actor\Player\Updater\PlayerLockOnUpdater.cpp" />
-    <ClCompile Include="Game\3dObject\Actor\Player\Updater\PlayerMoveUpdater.cpp">
-      <AssemblerOutput>NoListing</AssemblerOutput>
-      <AssemblerListingLocation>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\</AssemblerListingLocation>
-      <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
-      <BrowseInformation>false</BrowseInformation>
-      <BrowseInformationFile>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\</BrowseInformationFile>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <CompileAs>Default</CompileAs>
-      <UseDynamicDebugging>false</UseDynamicDebugging>
-      <ConformanceMode>true</ConformanceMode>
-      <DiagnosticsFormat>Column</DiagnosticsFormat>
-      <DisableLanguageExtensions>false</DisableLanguageExtensions>
-      <ErrorReporting>Prompt</ErrorReporting>
-      <ExpandAttributedSource>false</ExpandAttributedSource>
-      <ExceptionHandling>Sync</ExceptionHandling>
-      <EnableASAN>false</EnableASAN>
-      <EnableFuzzer>false</EnableFuzzer>
-      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
-      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
-      <EnableVectorLength>NotSet</EnableVectorLength>
-      <FloatingPointModel>Precise</FloatingPointModel>
-      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
-      <GenerateModuleDependencies>false</GenerateModuleDependencies>
-      <GenerateSourceDependencies>false</GenerateSourceDependencies>
-      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-      <LanguageStandard_C>Default</LanguageStandard_C>
-      <MinimalRebuild>false</MinimalRebuild>
-      <ModuleDependenciesFile>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\</ModuleDependenciesFile>
-      <ModuleOutputFile>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\</ModuleOutputFile>
-      <OmitDefaultLibName>false</OmitDefaultLibName>
-      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
-      <WholeProgramOptimization>true</WholeProgramOptimization>
-      <Optimization>MaxSpeed</Optimization>
-      <ObjectFileName>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\</ObjectFileName>
-      <CallingConvention>Cdecl</CallingConvention>
-      <ProgramDataBaseFileName>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\vc143.pdb</ProgramDataBaseFileName>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\MyEngine.pch</PrecompiledHeaderOutputFile>
-      <PreprocessToFile>false</PreprocessToFile>
-      <PreprocessKeepComments>false</PreprocessKeepComments>
-      <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
-      <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
-      <ShowIncludes>false</ShowIncludes>
-      <SourceDependenciesFile>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\</SourceDependenciesFile>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <BufferSecurityCheck>true</BufferSecurityCheck>
-      <SmallerTypeCheck>false</SmallerTypeCheck>
-      <SpectreMitigation>false</SpectreMitigation>
-      <StructMemberAlignment>Default</StructMemberAlignment>
-      <SupportJustMyCode>false</SupportJustMyCode>
-      <TrackerLogDirectory>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\MyEngine.tlog\</TrackerLogDirectory>
-      <TranslateIncludes>false</TranslateIncludes>
-      <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
-      <TreatWarningAsError>true</TreatWarningAsError>
-      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <UseFullPaths>true</UseFullPaths>
-      <WarningLevel>Level4</WarningLevel>
-      <XMLDocumentationFileName>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\</XMLDocumentationFileName>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <IntelJCCErratum>false</IntelJCCErratum>
-      <BuildStlModules>false</BuildStlModules>
-      <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
-      <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
-      <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
-      <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
-      <PreprocessorDefinitions>DEVELOP;_WINDOWS;_UNICODE;UNICODE;</PreprocessorDefinitions>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <SDLCheck>true</SDLCheck>
-      <AdditionalOptions>/utf-8 </AdditionalOptions>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>C:\WorkSpace\project\;C:\WorkSpace\project\externals;C:\WorkSpace\project\externals\DirectXTex;C:\WorkSpace\project\externals\assimp\include;</AdditionalIncludeDirectories>
-      <LinkCompiled>true</LinkCompiled>
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
-      <IntrinsicFunctions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</IntrinsicFunctions>
-      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</WholeProgramOptimization>
-      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">MultiThreadedDebug</RuntimeLibrary>
-    </ClCompile>
-    <ClCompile Include="Game\3dObject\Actor\Player\Updater\PlayerReticleUpdater.cpp" />
-    <ClCompile Include="Game\3dObject\Actor\Player\Updater\PlayerUpdaterCollection.cpp" />
     <ClCompile Include="Game\Battle\Movement\Formation\EnemyFormationController.cpp" />
     <ClCompile Include="Game\Battle\Shooting\Details\FireScheduler.cpp" />
     <ClCompile Include="Game\Battle\Shooting\Pattern\PatternAimedNWay.cpp" />
@@ -508,7 +418,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\Battle\Shooting\Shooter\StraightBullet\StraightBulletShooter.cpp" />
     <ClCompile Include="Game\Battle\Shooting\ShootingController\PlayerShootingController.cpp" />
     <ClCompile Include="Game\Installer\Player\PlayerInstaller.cpp" />
-    <ClCompile Include="Game\Input\PlayerInput\PlayerInputHandler.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Bullet\PlayerBullet\HomingBullet.cpp" />
     <ClCompile Include="Engine\PostProcess\Vignette\Vignette.cpp" />
     <ClCompile Include="Engine\Application\System\PlaySession.cpp" />
@@ -553,22 +462,14 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\3dObject\Actor\Bullet\EnemyBullet\EnemyHomingBullet.h" />
     <ClInclude Include="Game\3dObject\Actor\Enemy\Movement\EnemyMovementController.h" />
     <ClInclude Include="Game\3dObject\Actor\Enemy\Shoot\EnemyShootingAgent.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\Context\PlayerContext.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\Context\PlayerContextBuilder.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\Damage\PlayerDamageHandler.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\Dodge\PlayerDodgeSystem.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\Input\PlayerCommand.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\Input\PlayerInput.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\LockOn\PlayerLockOn.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\Move\PlayerMoveController.h" />
-    <ClInclude Include="Game\3dObject\Actor\Player\PlayerContext.h" />
-    <ClInclude Include="Game\3dObject\Actor\Player\Updater\IPlayerTickUpdater.h" />
-    <ClInclude Include="Game\3dObject\Actor\Player\Updater\IPlayerUpdater.h" />
-    <ClInclude Include="Game\3dObject\Actor\Player\Updater\PlayerCombatUpdater.h" />
-    <ClInclude Include="Game\3dObject\Actor\Player\Updater\PlayerDamageUpdater.h" />
-    <ClInclude Include="Game\3dObject\Actor\Player\Updater\PlayerDodgeUpdater.h" />
-    <ClInclude Include="Game\3dObject\Actor\Player\Updater\PlayerLockOnUpdater.h" />
-    <ClInclude Include="Game\3dObject\Actor\Player\Updater\PlayerMoveUpdater.h" />
-    <ClInclude Include="Game\3dObject\Actor\Player\Updater\PlayerReticleUpdater.h" />
-    <ClInclude Include="Game\3dObject\Actor\Player\Updater\PlayerUpdaterCollection.h" />
     <ClInclude Include="Game\Battle\Movement\Formation\EnemyFormationController.h" />
     <ClInclude Include="Game\Battle\Shooting\Details\AimProvider.h" />
     <ClInclude Include="Game\Battle\Shooting\Details\FireScheduler.h" />
@@ -851,7 +752,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\Battle\Shooting\ShootingController\PlayerShootingController.h" />
     <ClInclude Include="Game\Installer\Enemy\EnemyInstaller.h" />
     <ClInclude Include="Game\Installer\Player\PlayerInstaller.h" />
-    <ClInclude Include="Game\Input\PlayerInput\PlayerInputHandler.h" />
     <ClInclude Include="Game\Battle\Shooting\Shooter\HomingBullet\PlayerHomingBulletShooter.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\PlayerBullet\HomingBullet.h" />
     <ClInclude Include="Engine\PostProcess\Vignette\Vignette.h" />
@@ -1093,7 +993,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <Content Include="Engine\Foundation\Utility\Func\CxUtils.h" />
     <Content Include="Game\3dObject\Actor\Boss\Details\BossAnimType.h" />
     <Content Include="Game\3dObject\Actor\Player\PlayerContext.h" />
-    <Content Include="Game\3dObject\Actor\Player\Updater\IPlayerUpdater.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
