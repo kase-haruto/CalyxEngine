@@ -4,7 +4,7 @@
 
 #include <Engine/Objects/3D/Geometory/Spline/SplineJson.h>
 #include <Engine/Scene/Context/SceneContext.h>
-#include <Engine/Application/Input/Input.h>
+#include <Engine/Foundation/Input/Input.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Physics/Ray/Raycastor.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>

@@ -1,6 +1,6 @@
 #include "CalyxHuman.h"
 
-#include <Engine/Application/Input/Input.h>
+#include <Engine/Foundation/Input/Input.h>
 #include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Foundation/Utility/FileSystem/ConfigPathResolver/ConfigPathResolver.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>

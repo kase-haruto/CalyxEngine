@@ -305,7 +305,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Graphics\Context\DxFence.cpp" />
     <ClCompile Include="Engine\Graphics\SwapChain\DxSwapChain.cpp" />
     <ClCompile Include="Engine\Application\Framework\CalyxFrameWork.cpp" />
-    <ClCompile Include="Engine\Application\Input\Input.cpp" />
+    <ClCompile Include="Engine\Foundation\Input\Input.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\LeakChecker\LeakChecker.cpp" />
     <ClCompile Include="Engine\Application\System\CalyxCore.cpp" />
     <ClCompile Include="Engine\Application\Platform\WinApp.cpp" />
@@ -633,7 +633,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Graphics\SwapChain\DxSwapChain.h" />
     <ClInclude Include="Engine\Application\Framework\CalyxFrameWork.h" />
     <ClInclude Include="Engine\Application\System\Enviroment.h" />
-    <ClInclude Include="Engine\Application\Input\Input.h" />
+    <ClInclude Include="Engine\Foundation\Input\Input.h" />
     <ClInclude Include="Engine\Foundation\Utility\LeakChecker\LeakChecker.h" />
     <ClInclude Include="Engine\Application\System\CalyxCore.h" />
     <ClInclude Include="Engine\Application\Platform\WinApp.h" />

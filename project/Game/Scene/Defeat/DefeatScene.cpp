@@ -1,7 +1,7 @@
 #include "DefeatScene.h"
 
 // scene
-#include <Engine/Application/Input/Input.h>
+#include <Engine/Foundation/Input/Input.h>
 #include <Engine/Application/System/Enviroment.h>
 #include <Engine/Collision/CollisionManager.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>

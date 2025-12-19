@@ -1,6 +1,6 @@
 #include "PlayerInput.h"
 
-#include "Engine/Application/Input/Input.h"
+#include "Engine/Foundation/Input/Input.h"
 
 
 std::vector<PlayerCommand> PlayerInput::CollectCommands(float dt) {

@@ -4,7 +4,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 
 // engine
-#include <Engine/Application/Input/Input.h>
+#include <Engine/Foundation/Input/Input.h>
 #include <Engine/Application/System/Enviroment.h>
 #include <Engine/Foundation/Audio/Audio.h>
 #include <Engine/Foundation/Utility/Func/DxFunc.h>

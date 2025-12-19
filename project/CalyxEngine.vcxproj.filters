@@ -849,10 +849,10 @@
     <ClInclude Include="Game\Battle\Visibility\GameplayVisibility.h">
       <Filter>Engine\Application\Gameplay\Visibility</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Application\Input\Input.cpp">
+    <ClCompile Include="Engine\Foundation\Input\Input.cpp">
       <Filter>Engine\Application\Input</Filter>
     </ClCompile>
-    <ClInclude Include="Engine\Application\Input\Input.h">
+    <ClInclude Include="Engine\Foundation\Input\Input.h">
       <Filter>Engine\Application\Input</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Application\Platform\WinApp.cpp">

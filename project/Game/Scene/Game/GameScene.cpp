@@ -8,7 +8,7 @@
 #include <Engine/Scene/System/SceneManager.h>
 
 // engine
-#include <Engine/Application/Input/Input.h>
+#include <Engine/Foundation/Input/Input.h>
 #include <Engine/Collision/CollisionManager.h>
 #include <Engine/Graphics/Camera/Action/CameraTurnAroundAction.h>
 #include <Engine/Objects/2D/NumbersSprite/NumbersSprite.h>
