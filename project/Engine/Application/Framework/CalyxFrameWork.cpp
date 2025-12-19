@@ -63,7 +63,7 @@ namespace CalyxEngine {
 		while(!system_->ProcessMessage()) {
 			if(!Update()) break;
 			Render();
-			if(Input::TriggerKey(DIK_ESCAPE) ||
+			if(CalyxFoundation::Input::TriggerKey(DIK_ESCAPE) ||
 			   sceneManager_->GetIsEndGame()) break;
 		}
 	}

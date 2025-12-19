@@ -75,20 +75,20 @@ void DebugCamera::ShowGui(){
 // 回転処理 (MMBドラッグ): ターゲット中心にカメラを回転させる
 //-----------------------------------------------------------------------
 void DebugCamera::Rotate(){
-	bool mmbPressed = Input::PushMouseButton(MouseButton::Middle);
-	bool shiftHeld = Input::PushKey(DIK_LSHIFT) || Input::PushKey(DIK_RSHIFT);
-	bool ctrlHeld = Input::PushKey(DIK_LCONTROL) || Input::PushKey(DIK_RCONTROL);
+	bool mmbPressed = CalyxFoundation::Input::PushMouseButton(CalyxFoundation::MouseButton::Middle);
+	bool shiftHeld = CalyxFoundation::Input::PushKey(DIK_LSHIFT) || CalyxFoundation::Input::PushKey(DIK_RSHIFT);
+	bool ctrlHeld = CalyxFoundation::Input::PushKey(DIK_LCONTROL) || CalyxFoundation::Input::PushKey(DIK_RCONTROL);
 
 	// ShiftもCtrlも押されていない -> 回転処理
 	if (mmbPressed && !shiftHeld && !ctrlHeld){
 		if (!isDraggingRotate_){
 			// ドラッグ開始時に現在のマウス位置を記録
-			lastMousePosRotate_ = Input::GetMouseDelta(); // 初回のデルタは無視
+			lastMousePosRotate_ = CalyxFoundation::Input::GetMouseDelta(); // 初回のデルタは無視
 			isDraggingRotate_ = true;
 			return; // 初回は移動量を無視
 		}
 
-		CalyxMath::Vector2 mouseDelta = Input::GetMouseDelta(); // 各フレームの移動量を取得
+		CalyxMath::Vector2 mouseDelta = CalyxFoundation::Input::GetMouseDelta(); // 各フレームの移動量を取得
 
 		// マウスがほとんど動いていない場合は無視
 		if (std::abs(mouseDelta.x) < 0.1f && std::abs(mouseDelta.y) < 0.1f){
@@ -112,20 +112,20 @@ void DebugCamera::Rotate(){
 // パン処理 (Shift + MMBドラッグ): カメラのターゲットを移動させる
 //-----------------------------------------------------------------------
 void DebugCamera::Move(){
-	bool mmbPressed = Input::PushMouseButton(MouseButton::Middle); // 中央ボタンは通常ボタンインデックス2
-	bool shiftHeld = Input::PushKey(DIK_LSHIFT) || Input::PushKey(DIK_RSHIFT);
-	bool ctrlHeld = Input::PushKey(DIK_LCONTROL) || Input::PushKey(DIK_RCONTROL);
+	bool mmbPressed = CalyxFoundation::Input::PushMouseButton(CalyxFoundation::MouseButton::Middle); // 中央ボタンは通常ボタンインデックス2
+	bool shiftHeld = CalyxFoundation::Input::PushKey(DIK_LSHIFT) || CalyxFoundation::Input::PushKey(DIK_RSHIFT);
+	bool ctrlHeld = CalyxFoundation::Input::PushKey(DIK_LCONTROL) || CalyxFoundation::Input::PushKey(DIK_RCONTROL);
 
 	// Shiftが押されていて、Ctrlは押されていない -> パン処理
 	if (mmbPressed && shiftHeld && !ctrlHeld){
 		if (!isDraggingMove_){
 			// ドラッグ開始時に現在のマウス移動量を記録
-			lastMousePosMove_ = Input::GetMouseDelta(); // 初回のデルタは無視
+			lastMousePosMove_ = CalyxFoundation::Input::GetMouseDelta(); // 初回のデルタは無視
 			isDraggingMove_ = true;
 			return; // 初回は移動量を無視
 		}
 
-		CalyxMath::Vector2 mouseDelta = Input::GetMouseDelta(); // 各フレームの移動量を取得
+		CalyxMath::Vector2 mouseDelta = CalyxFoundation::Input::GetMouseDelta(); // 各フレームの移動量を取得
 
 		// マウスがほとんど動いていない場合は無視
 		if (std::abs(mouseDelta.x) < 0.1f && std::abs(mouseDelta.y) < 0.1f){
@@ -161,12 +161,12 @@ void DebugCamera::Move(){
 void DebugCamera::Zoom(){
 
 	// ホイールクリックが押されている場合はズームを無視
-	if (Input::PushMouseButton(MouseButton::Middle)){
+	if(CalyxFoundation::Input::PushMouseButton(CalyxFoundation::MouseButton::Middle)) {
 		return;
 	}
 
 	// マウスホイールによるズーム処理
-	float wheel = Input::GetMouseWheel(); // 1フレーム当たりのホイール回転量
+	float wheel = CalyxFoundation::Input::GetMouseWheel(); // 1フレーム当たりのホイール回転量
 	if (wheel != 0.0f){
 		distance_ -= wheel * (zoomSpeed_ * 5.0f);
 		distance_ = ( std::max ) (0.01f, distance_);

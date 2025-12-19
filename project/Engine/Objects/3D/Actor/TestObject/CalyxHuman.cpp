@@ -52,7 +52,7 @@ std::optional<CalyxMath::Vector3> CalyxHuman::GetJointWorldPos(const std::string
 }
 
 void CalyxHuman::TransitionAnimation(){
-	CalyxMath::Vector2 stickInput = Input::GetInstance()->GetLeftStick();
+	CalyxMath::Vector2 stickInput = CalyxFoundation::Input::GetInstance()->GetLeftStick();
 	bool isMoving = stickInput.Length() > 0.1f;
 	auto* model = GetAnimationModel();
 
@@ -70,7 +70,7 @@ void CalyxHuman::TransitionAnimation(){
 void CalyxHuman::Move(float dt){
 	velocity_ = {0.0f, 0.0f, 0.0f};
 
-	CalyxMath::Vector2 leftStick = Input::GetInstance()->GetLeftStick();
+	CalyxMath::Vector2 leftStick = CalyxFoundation::Input::GetInstance()->GetLeftStick();
 	velocity_.x += leftStick.x;
 	velocity_.z += leftStick.y;
 

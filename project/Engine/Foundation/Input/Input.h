@@ -13,116 +13,119 @@
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "xinput.lib")
 
-// ゲームパッドのデッドゾーンのデフォルト値
-constexpr float DEFAULT_DEAD_ZONE = 0.2f;
+namespace CalyxFoundation {
 
-// XInput準拠のゲームパッドボタン列挙（トリガーは別扱い）
-enum class PadButton : WORD{
-	A = XINPUT_GAMEPAD_A,
-	B = XINPUT_GAMEPAD_B,
-	X = XINPUT_GAMEPAD_X,
-	Y = XINPUT_GAMEPAD_Y,
-	LB = XINPUT_GAMEPAD_LEFT_SHOULDER,
-	RB = XINPUT_GAMEPAD_RIGHT_SHOULDER,
-	BACK = XINPUT_GAMEPAD_BACK,
-	START = XINPUT_GAMEPAD_START,
-	L_STICK = XINPUT_GAMEPAD_LEFT_THUMB,
-	R_STICK = XINPUT_GAMEPAD_RIGHT_THUMB,
-	DPAD_UP = XINPUT_GAMEPAD_DPAD_UP,
-	DPAD_DOWN = XINPUT_GAMEPAD_DPAD_DOWN,
-	DPAD_LEFT = XINPUT_GAMEPAD_DPAD_LEFT,
-	DPAD_RIGHT = XINPUT_GAMEPAD_DPAD_RIGHT,
-	COUNT
-};
+	// ゲームパッドのデッドゾーンのデフォルト値
+	constexpr float DEFAULT_DEAD_ZONE = 0.2f;
 
-enum class MouseButton{
-	Left = 0,
-	Right = 1,
-	Middle = 2,
-	XButton1 = 3,
-	XButton2 = 4
-};
+	// XInput準拠のゲームパッドボタン列挙（トリガーは別扱い）
+	enum class PadButton : WORD {
+		A		   = XINPUT_GAMEPAD_A,
+		B		   = XINPUT_GAMEPAD_B,
+		X		   = XINPUT_GAMEPAD_X,
+		Y		   = XINPUT_GAMEPAD_Y,
+		LB		   = XINPUT_GAMEPAD_LEFT_SHOULDER,
+		RB		   = XINPUT_GAMEPAD_RIGHT_SHOULDER,
+		BACK	   = XINPUT_GAMEPAD_BACK,
+		START	   = XINPUT_GAMEPAD_START,
+		L_STICK	   = XINPUT_GAMEPAD_LEFT_THUMB,
+		R_STICK	   = XINPUT_GAMEPAD_RIGHT_THUMB,
+		DPAD_UP	   = XINPUT_GAMEPAD_DPAD_UP,
+		DPAD_DOWN  = XINPUT_GAMEPAD_DPAD_DOWN,
+		DPAD_LEFT  = XINPUT_GAMEPAD_DPAD_LEFT,
+		DPAD_RIGHT = XINPUT_GAMEPAD_DPAD_RIGHT,
+		COUNT
+	};
 
-using Microsoft::WRL::ComPtr;
+	enum class MouseButton {
+		Left	 = 0,
+		Right	 = 1,
+		Middle	 = 2,
+		XButton1 = 3,
+		XButton2 = 4
+	};
 
-// スティック状態構造体
-struct StickState{
-	CalyxMath::Vector2 leftStick;
-	CalyxMath::Vector2 rightStick;
-};
+	using Microsoft::WRL::ComPtr;
 
-class Input{
-public:
-	static Input* GetInstance();
+	// スティック状態構造体
+	struct StickState {
+		CalyxMath::Vector2 leftStick;
+		CalyxMath::Vector2 rightStick;
+	};
 
-	// コピー禁止
-	Input(const Input&) = delete;
-	Input& operator=(const Input&) = delete;
+	class Input {
+	public:
+		static Input* GetInstance();
 
-public:
-	static void Initialize();
-	static void Update();
-	static void Finalize();
-	static void ShowImGui();
+		// コピー禁止
+		Input(const Input&)			   = delete;
+		Input& operator=(const Input&) = delete;
 
-	// キーボード
-	static bool PushKey(uint32_t keyNum);
-	static bool TriggerKey(uint32_t keyNum);
+	public:
+		static void Initialize();
+		static void Update();
+		static void Finalize();
+		static void ShowImGui();
 
-	// マウス
-	static bool PushMouseButton(MouseButton button);
-	static bool TriggerMouseButton(MouseButton button);
-	static bool ReleaseMouseButton(MouseButton button);
-	static CalyxMath::Vector2 GetMousePosition();
-	static CalyxMath::Vector2 GetMousePosInDebugWindow();
-	static float GetMouseWheel();
-	static CalyxMath::Vector2 GetMouseDelta();
+		// キーボード
+		static bool PushKey(uint32_t keyNum);
+		static bool TriggerKey(uint32_t keyNum);
 
-	// ゲームパッド
-	static bool PushGamepadButton(PadButton button);
-	static bool TriggerGamepadButton(PadButton button);
-	static float GetLeftTrigger();
-	static float GetRightTrigger();
-	static CalyxMath::Vector2 GetLeftStick();
-	static CalyxMath::Vector2 GetRightStick();
-	static StickState GetStickState();
-	static bool IsLeftStickMoved();
+		// マウス
+		static bool				  PushMouseButton(MouseButton button);
+		static bool				  TriggerMouseButton(MouseButton button);
+		static bool				  ReleaseMouseButton(MouseButton button);
+		static CalyxMath::Vector2 GetMousePosition();
+		static CalyxMath::Vector2 GetMousePosInDebugWindow();
+		static float			  GetMouseWheel();
+		static CalyxMath::Vector2 GetMouseDelta();
 
-private:
-	Input() = default;
-	~Input();
+		// ゲームパッド
+		static bool				  PushGamepadButton(PadButton button);
+		static bool				  TriggerGamepadButton(PadButton button);
+		static float			  GetLeftTrigger();
+		static float			  GetRightTrigger();
+		static CalyxMath::Vector2 GetLeftStick();
+		static CalyxMath::Vector2 GetRightStick();
+		static StickState		  GetStickState();
+		static bool				  IsLeftStickMoved();
 
-	void DirectInputInitialize();
-	void KeyboardUpdate();
-	void MouseUpdate();
-	void GamepadUpdate();
-	float NormalizeAxisInput(short value, short deadZone);
+	private:
+		Input() = default;
+		~Input();
 
-private:
-	static Input* instance_;
+		void  DirectInputInitialize();
+		void  KeyboardUpdate();
+		void  MouseUpdate();
+		void  GamepadUpdate();
+		float NormalizeAxisInput(short value, short deadZone);
 
-	// DirectInputオブジェクト（キーボード・マウス用）
-	ComPtr<IDirectInput8> directInput_ = nullptr;
+	private:
+		static Input* instance_;
 
-	// キーボード
-	ComPtr<IDirectInputDevice8> keyboard_ = nullptr;
-	std::array<BYTE, 256> key_ {};
-	std::array<BYTE, 256> keyPre_ {};
+		// DirectInputオブジェクト（キーボード・マウス用）
+		ComPtr<IDirectInput8> directInput_ = nullptr;
 
-	// マウス
-	ComPtr<IDirectInputDevice8> mouse_ = nullptr;
-	DIMOUSESTATE mouseState_ {};
-	DIMOUSESTATE mouseStatePre_ {};
-	CalyxMath::Vector2 mousePos_ {};
-	float mouseWheel_ = 0.0f;
+		// キーボード
+		ComPtr<IDirectInputDevice8> keyboard_ = nullptr;
+		std::array<BYTE, 256>		key_{};
+		std::array<BYTE, 256>		keyPre_{};
 
-	// ゲームパッド（XInput）
-	XINPUT_GAMEPAD gamepadState_ {};
-	XINPUT_GAMEPAD gamepadStatePre_ {};
-	float leftThumbX_ = 0.0f;
-	float leftThumbY_ = 0.0f;
-	float rightThumbX_ = 0.0f;
-	float rightThumbY_ = 0.0f;
-	float leftTrigger_ = 0.0f;
-	float rightTrigger_ = 0.0f;
-};
+		// マウス
+		ComPtr<IDirectInputDevice8> mouse_ = nullptr;
+		DIMOUSESTATE				mouseState_{};
+		DIMOUSESTATE				mouseStatePre_{};
+		CalyxMath::Vector2			mousePos_{};
+		float						mouseWheel_ = 0.0f;
+
+		// ゲームパッド（XInput）
+		XINPUT_GAMEPAD gamepadState_{};
+		XINPUT_GAMEPAD gamepadStatePre_{};
+		float		   leftThumbX_	 = 0.0f;
+		float		   leftThumbY_	 = 0.0f;
+		float		   rightThumbX_	 = 0.0f;
+		float		   rightThumbY_	 = 0.0f;
+		float		   leftTrigger_	 = 0.0f;
+		float		   rightTrigger_ = 0.0f;
+	};
+} // namespace CalyxFoundation

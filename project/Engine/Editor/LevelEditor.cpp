@@ -224,7 +224,7 @@ void LevelEditor::Update() {
 		const bool imguiEdge = ImGui::IsMouseClicked(ImGuiMouseButton_Left);
 
 		static bool prevDILeft = false;
-		const bool	diNow	   = Input::GetInstance()->PushMouseButton(MouseButton::Left);
+		const bool	diNow	   = CalyxFoundation::Input::GetInstance()->PushMouseButton(CalyxFoundation::MouseButton::Left);
 		const bool	diEdge	   = diNow && !prevDILeft;
 		prevDILeft			   = diNow;
 

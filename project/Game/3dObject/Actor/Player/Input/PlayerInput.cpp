@@ -2,6 +2,7 @@
 
 #include "Engine/Foundation/Input/Input.h"
 
+using CalyxFoundation::Input;
 
 std::vector<PlayerCommand> PlayerInput::CollectCommands(float dt) {
 	std::vector<PlayerCommand> cmds;
@@ -37,13 +38,13 @@ std::vector<PlayerCommand> PlayerInput::CollectCommands(float dt) {
 	}
 
 	if(Input::GetInstance()->TriggerKey(DIK_LSHIFT) ||
-	   Input::GetInstance()->TriggerGamepadButton(PadButton::X)) {
+	   Input::GetInstance()->TriggerGamepadButton(CalyxFoundation::PadButton::X)) {
 		cmds.push_back({ PlayerCommandType::Dodge, {} });
 
 	   }
 
 	if(Input::GetInstance()->PushKey(DIK_SPACE) ||
-	   Input::GetInstance()->PushGamepadButton(PadButton::RB)) {
+		  Input::GetInstance()->PushGamepadButton(CalyxFoundation::PadButton::RB)) {
 		cmds.push_back({ PlayerCommandType::Shoot, {} });
 	   }
 

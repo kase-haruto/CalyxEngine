@@ -78,8 +78,8 @@ void ClearScene::Update(float dt) {
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
 
 	// 遷移
-	if(Input::GetInstance()->TriggerGamepadButton(PadButton::A) ||
-	   Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+	if(CalyxFoundation::Input::GetInstance()->TriggerGamepadButton(CalyxFoundation::PadButton::A) ||
+	   CalyxFoundation::Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 		transitionRequestor_->RequestSceneChange(SceneType::TITLE);
 	}
 }

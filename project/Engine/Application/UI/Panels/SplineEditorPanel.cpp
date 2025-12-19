@@ -212,7 +212,7 @@ void SplineEditorPanel::HandleGizmoUpdateAndDraw3D() {
 	if (aabbHalf <= 0.0f) aabbHalf = 0.05f;
 
 	// ---- 入力/状態 ----
-	Input* in = Input::GetInstance();
+	CalyxFoundation::Input* in			= CalyxFoundation::Input::GetInstance();
 	const bool gizmoOn = gizmoEnabled_ && (manipulator_ != nullptr);
 	const bool wantCapture = ImGui::GetIO().WantCaptureMouse; // ImGuiがマウスを使用中か
 
@@ -223,13 +223,13 @@ void SplineEditorPanel::HandleGizmoUpdateAndDraw3D() {
 
 	// ---- 選択/解除操作 ----
 	if (gizmoOn) {
-		if (in->TriggerMouseButton(MouseButton::Right)) {
+		if(in->TriggerMouseButton(CalyxFoundation::MouseButton::Right)) {
 			SetSelectedIndex(-1);
 			manipulator_->SetTarget(nullptr);
 		}
 
 		// ImGuiがマウスを掴んでいない時だけピッキング
-		if (!wantCapture && in->TriggerMouseButton(MouseButton::Left)) {
+		if(!wantCapture && in->TriggerMouseButton(CalyxFoundation::MouseButton::Left)) {
 			Ray ray = MakeMouseRay();
 			float t = 0.0f;
 			int idx = PickPointByRayAABB(ray, aabbHalf, t);

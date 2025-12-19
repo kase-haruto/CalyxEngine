@@ -31,6 +31,8 @@
 Player::Player()  = default;
 Player::~Player() = default;
 
+using CalyxFoundation::Input;
+
 namespace {
 
 inline void SetWorldPosKeepRotScale(WorldTransform& wt, const CalyxMath::Vector3& worldPos) {

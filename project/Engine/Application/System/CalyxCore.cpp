@@ -52,7 +52,7 @@ void CalyxCore::Initialize(HINSTANCE hInstance, int32_t clientWidth, int32_t cli
 	ComPtr<ID3D12Device> device = dxCore_->GetDevice();
 
 	//インプットの初期化
-	Input::Initialize();
+	CalyxFoundation::Input::Initialize();
 
 	//audioの初期化
 	Audio::Initialize();
@@ -108,7 +108,7 @@ void CalyxCore::InitializePostProcess(PipelineService* service) {
 /////////////////////////////////////////////////////////////////////////////////////////
 void CalyxCore::BeginFrame() {
 	// インプットの更新
-	Input::Update();
+	CalyxFoundation::Input::Update();
 
 	auto* clock = ClockManager::GetInstance();
 	clock->Update();
@@ -164,7 +164,7 @@ void CalyxCore::ExecutePostEffect(const PipelineService* service) {
 //  Editorの更新
 /////////////////////////////////////////////////////////////////////////////////////////
 void CalyxCore::EditorUpdate() {
-	Input* input = Input::GetInstance();
+	CalyxFoundation::Input* input	   = CalyxFoundation::Input::GetInstance();
 	CommandManager* cmdManager = CommandManager::GetInstance();
 	//コマンド
 	if (input->PushKey(DIK_LCONTROL) && input->TriggerKey(DIK_Z)){
@@ -196,7 +196,7 @@ void CalyxCore::Finalize() {
 	//pipelineの終了処理
 	pipelineStateManager_->Finalize();
 	DescriptorAllocator::Finalize();
-	Input::Finalize();
+	CalyxFoundation::Input::Finalize();
 	Audio::Finalize();
 	//ウィンドウの破棄
 	winApp_->TerminateGameWindow();

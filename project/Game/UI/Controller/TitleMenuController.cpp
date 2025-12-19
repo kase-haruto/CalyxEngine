@@ -56,11 +56,10 @@ TitleMenuController::~TitleMenuController() = default;
 
 void TitleMenuController::Update(float dt) {
 	// --- 入力で選択移動 ---
-	auto* in = Input::GetInstance();
-	bool moveDown = in->TriggerKey(DIK_DOWN) || in->TriggerKey(DIK_S)
-		|| in->TriggerGamepadButton(PadButton::DPAD_DOWN);
+	auto* in	   = CalyxFoundation::Input::GetInstance();
+	bool moveDown = in->TriggerKey(DIK_DOWN) || in->TriggerKey(DIK_S) || in->TriggerGamepadButton(CalyxFoundation::PadButton::DPAD_DOWN);
 	bool moveUp = in->TriggerKey(DIK_UP) || in->TriggerKey(DIK_W)
-		|| in->TriggerGamepadButton(PadButton::DPAD_UP);
+		|| in->TriggerGamepadButton(CalyxFoundation::PadButton::DPAD_UP);
 
 	if (!buttons_.empty()) {
 		uint16_t prev = selectedIndex_;
@@ -75,7 +74,7 @@ void TitleMenuController::Update(float dt) {
 			}
 		}
 
-		if (in->TriggerKey(DIK_SPACE) || in->TriggerGamepadButton(PadButton::A)) {
+		if (in->TriggerKey(DIK_SPACE) || in->TriggerGamepadButton(CalyxFoundation::PadButton::A)) {
 			buttons_[selectedIndex_]->Execute();
 		}
 	}

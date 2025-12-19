@@ -187,7 +187,7 @@ void GameScene::Update([[maybe_unused]] float dt) {
 	}
 
 	// 一応タイトル戻るよう
-	if(Input::GetInstance()->TriggerGamepadButton(PadButton::START)) {
+	if(CalyxFoundation::Input::GetInstance()->TriggerGamepadButton(CalyxFoundation::PadButton::START)) {
 		transitionRequestor_->RequestSceneChange(SceneType::TITLE);
 	}
 }
