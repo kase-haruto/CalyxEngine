@@ -1,17 +1,19 @@
 #include "EditorContext.h"
 
-void EditorContext::SetSelectedObject(SceneObject* obj) {
-	selectedObject_ = obj;
-}
+namespace CalyxEditor {
+	void EditorContext::SetSelectedObject(SceneObject* obj) {
+		selectedObject_ = obj;
+	}
 
-SceneObject* EditorContext::GetSelectedObject() const {
-	return selectedObject_;
-}
+	SceneObject* EditorContext::GetSelectedObject() const {
+		return selectedObject_;
+	}
 
-void EditorContext::SetSelectedEditor(BaseEditor* editor) {
-	selectedEditor_ = editor;
-}
+	void EditorContext::SetSelectedEditor(BaseEditor* editor) {
+		selectedEditor_ = editor;
+	}
 
-BaseEditor* EditorContext::GetSelectedEditor() const {
-	return selectedEditor_;
-}
+	BaseEditor* EditorContext::GetSelectedEditor() const {
+		return selectedEditor_;
+	}
+} // namespace CalyxEditor

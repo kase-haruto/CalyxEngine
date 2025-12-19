@@ -1,12 +1,16 @@
 #pragma once
-#include <Engine/Foundation/Math/Vector3.h>
-#include <Engine/Foundation/Math/Vector2.h>
-#include <Engine/Foundation/Math/Quaternion.h>
+
 
 #include <Engine/Graphics/Buffer/DxConstantBuffer.h>
 
 #include <Data/Engine/Configs/Scene/Objects/Transform/UvTransformConfig.h>
 #include <Data/Engine/Configs/Scene/Objects/Transform/WorldTransformConfig.h>
+
+// math
+#include <Engine/Foundation/Math/Vector3.h>
+#include <Engine/Foundation/Math/Vector2.h>
+#include <Engine/Foundation/Math/Quaternion.h>
+#include <Engine/Foundation/Math/Matrix4x4.h>
 
 // c++
 #include <string>
@@ -17,14 +21,14 @@ enum class RotationSource {
 };
 
 struct TransformationMatrix{
-	Matrix4x4 world;
-	Matrix4x4 WorldInverseTranspose;
+	CalyxMath::Matrix4x4 world;
+	CalyxMath::Matrix4x4 WorldInverseTranspose;
 };
 
 struct EulerTransform{
-	Vector3 scale;
-	Vector3 rotate;
-	Vector3 translate;
+	CalyxMath::Vector3 scale;
+	CalyxMath::Vector3 rotate;
+	CalyxMath::Vector3 translate;
 
 	void Initialize(){
 		scale = {1.0f,1.0f,1.0f};
@@ -37,9 +41,9 @@ struct EulerTransform{
 
 
 struct Transform2D{
-	Vector2 scale;
+	CalyxMath::Vector2 scale;
 	float rotate;
-	Vector2 translate;
+	CalyxMath::Vector2 translate;
 	
 	void Initialize(){
 		scale = {1.0f,1.0f};
@@ -53,9 +57,9 @@ struct Transform2D{
 };
 
 struct QuaternionTransform{
-	Vector3 scale;
-	Quaternion rotate;
-	Vector3 translate;
+	CalyxMath::Vector3 scale;
+	CalyxMath::Quaternion rotate;
+	CalyxMath::Vector3 translate;
 };
 
 //============================================================================*/
@@ -72,7 +76,7 @@ public:
 
 	//--------- main -----------------------------------------------------
 	virtual void Initialize();
-	virtual void Update([[maybe_unused]]const Matrix4x4& viewProMatrix){}
+	virtual void Update([[maybe_unused]]const CalyxMath::Matrix4x4& viewProMatrix){}
 	virtual void Update(){}
 	virtual void SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList,
 							UINT rootParameterIndex)const{
@@ -83,17 +87,17 @@ public:
 	virtual void ShowImGui(const std::string& lavel = "Transform");
 
 	//--------- accessor -------------------------------------------------
-	virtual Vector3 GetWorldPosition()const;
+	virtual CalyxMath::Vector3 GetWorldPosition()const;
 
 public:
 	//========================================================================*/
 	//	public variables
 	//========================================================================*/
-	Vector3 scale;
-	Quaternion rotation;
-	Vector3 translation;
+	CalyxMath::Vector3 scale;
+	CalyxMath::Quaternion rotation;
+	CalyxMath::Vector3 translation;
 
-	Vector3 eulerRotation;
+	CalyxMath::Vector3 eulerRotation;
 
 	TransformationMatrix matrix;
 	BaseTransform* parent = nullptr;
@@ -114,10 +118,10 @@ public:
 	WorldTransform() = default;
 	~WorldTransform()override = default;
 
-	virtual void Update(const Matrix4x4& viewProMatrix) override;
+	virtual void Update(const CalyxMath::Matrix4x4& viewProMatrix) override;
 	void Update()override;
 
-	Vector3 GetForward()const;
+	CalyxMath::Vector3 GetForward()const;
 	//--- コンフィグ同期 ---
 	void ApplyConfig(const WorldTransformConfig& config);
 	WorldTransformConfig ExtractConfig();

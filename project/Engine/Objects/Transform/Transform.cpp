@@ -14,6 +14,8 @@
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <externals/imgui/imgui.h>
 
+using namespace CalyxMath;
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //	コンストラクタ
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -32,9 +34,8 @@ void EulerTransform::ShowImGui(const std::string& label) {
 /////////////////////////////////////////////////////////////////////////////////////////
 void BaseTransform::Initialize() {
 	// デフォルト値
-	scale.Initialize({ 1.0f, 1.0f, 1.0f });
+	scale.Initialize(1.0f);
 	rotation.Initialize();
-	translation.Initialize();
 
 	//バッファの作成
 	DxConstantBuffer::Initialize(GraphicsGroup::GetInstance()->GetDevice());
@@ -62,8 +63,8 @@ void BaseTransform::ShowImGui(const std::string& label){
 /////////////////////////////////////////////////////////////////////////////////////////
 //	ワールド座標空間での位置を取得
 /////////////////////////////////////////////////////////////////////////////////////////
-Vector3 BaseTransform::GetWorldPosition() const {
-	Vector3 worldPos{};
+CalyxMath::Vector3 BaseTransform::GetWorldPosition() const {
+	CalyxMath::Vector3 worldPos{};
 	worldPos.x = matrix.world.m[3][0];
 	worldPos.y = matrix.world.m[3][1];
 	worldPos.z = matrix.world.m[3][2];
@@ -74,20 +75,20 @@ Vector3 BaseTransform::GetWorldPosition() const {
 /* ========================================================================
 /* worldTransform class
 /* ===================================================================== */
-void WorldTransform::Update([[maybe_unused]]const Matrix4x4& viewProjMatrix) {
-	Matrix4x4 scaleMat = Cx::Math::MakeScaleMatrix(scale);
+void WorldTransform::Update([[maybe_unused]]const CalyxMath::Matrix4x4& viewProjMatrix) {
+	CalyxMath::Matrix4x4 scaleMat = CalyxMath::MakeScaleMatrix(scale);
 
 	// どちらをソースとするかで処理を分ける
 	if (rotationSource == RotationSource::Euler) {
-		rotation = Quaternion::EulerToQuaternion(eulerRotation);
+		rotation = CalyxMath::Quaternion::EulerToQuaternion(eulerRotation);
 	} else if (rotationSource == RotationSource::Quaternion) {
-		eulerRotation = Quaternion::ToEuler(rotation);
+		eulerRotation = CalyxMath::Quaternion::ToEuler(rotation);
 	}
 
-	Matrix4x4 rotateMat = Quaternion::ToMatrix(rotation);
-	Matrix4x4 translateMat = Cx::Math::MakeTranslateMatrix(translation);
+	CalyxMath::Matrix4x4 rotateMat = CalyxMath::Quaternion::ToMatrix(rotation);
+	CalyxMath::Matrix4x4 translateMat = CalyxMath::MakeTranslateMatrix(translation);
 
-	Matrix4x4 localMat = scaleMat * rotateMat * translateMat;
+	CalyxMath::Matrix4x4 localMat = scaleMat * rotateMat * translateMat;
 
 	if (parent) {
 		parent->Update();
@@ -96,7 +97,7 @@ void WorldTransform::Update([[maybe_unused]]const Matrix4x4& viewProjMatrix) {
 		matrix.world = localMat;
 	}
 
-	matrix.WorldInverseTranspose = Matrix4x4::Transpose(Matrix4x4::Inverse(matrix.world));
+	matrix.WorldInverseTranspose = CalyxMath::Matrix4x4::Transpose(CalyxMath::Matrix4x4::Inverse(matrix.world));
 
 	TransferData(matrix);
 }
@@ -105,20 +106,20 @@ void WorldTransform::Update([[maybe_unused]]const Matrix4x4& viewProjMatrix) {
 //	worldTransformの更新(カメラなし
 /////////////////////////////////////////////////////////////////////////////////////////
 void WorldTransform::Update() {
-	Matrix4x4 scaleMat = Cx::Math::MakeScaleMatrix(scale);
+	CalyxMath::Matrix4x4 scaleMat = CalyxMath::MakeScaleMatrix(scale);
 
 	switch (rotationSource) {
 	case RotationSource::Euler:
-		rotation = Quaternion::EulerToQuaternion(eulerRotation);
+		rotation = CalyxMath::Quaternion::EulerToQuaternion(eulerRotation);
 		break;
 	case RotationSource::Quaternion:
-		eulerRotation = Quaternion::ToEuler(rotation);
+		eulerRotation = CalyxMath::Quaternion::ToEuler(rotation);
 		break;
 	}
 
-	Matrix4x4 rotateMat	   = Quaternion::ToMatrix(rotation);
-	Matrix4x4 translateMat = Cx::Math::MakeTranslateMatrix(translation);
-	Matrix4x4 localMat	   = scaleMat * rotateMat * translateMat;
+	CalyxMath::Matrix4x4 rotateMat	   = CalyxMath::Quaternion::ToMatrix(rotation);
+	CalyxMath::Matrix4x4 translateMat = CalyxMath::MakeTranslateMatrix(translation);
+	CalyxMath::Matrix4x4 localMat	   = scaleMat * rotateMat * translateMat;
 
 	if (parent) {
 		parent->Update();
@@ -127,9 +128,9 @@ void WorldTransform::Update() {
 			matrix.world = localMat * parent->matrix.world;
 		} else {
 			// 親スケールを無視（親の回転＋平行移動のみを手動合成）
-			Matrix4x4 parentRotMat   = Quaternion::ToMatrix(parent->rotation);
-			Matrix4x4 parentTransMat = Cx::Math::MakeTranslateMatrix(parent->translation);
-			Matrix4x4 parentNoScaleMat = parentRotMat * parentTransMat;
+			CalyxMath::Matrix4x4 parentRotMat   = CalyxMath::Quaternion::ToMatrix(parent->rotation);
+			CalyxMath::Matrix4x4 parentTransMat = CalyxMath::MakeTranslateMatrix(parent->translation);
+			CalyxMath::Matrix4x4 parentNoScaleMat = parentRotMat * parentTransMat;
 
 			matrix.world = localMat * parentNoScaleMat;
 		}
@@ -137,15 +138,15 @@ void WorldTransform::Update() {
 		matrix.world = localMat;
 	}
 
-	matrix.WorldInverseTranspose = Matrix4x4::Transpose(Matrix4x4::Inverse(matrix.world));
+	matrix.WorldInverseTranspose = CalyxMath::Matrix4x4::Transpose(CalyxMath::Matrix4x4::Inverse(matrix.world));
 	TransferData(matrix);
 }
 
 
-Vector3 WorldTransform::GetForward() const {
+CalyxMath::Vector3 WorldTransform::GetForward() const {
 	// ワールド行列のZ軸（前方向）
-	Matrix4x4 mat = Cx::Math::MakeAffineMatrix(scale, rotation, translation);
-	Vector3 forward = { mat.m[2][0], mat.m[2][1], mat.m[2][2] };
+	CalyxMath::Matrix4x4 mat = CalyxMath::MakeAffineMatrix(scale, rotation, translation);
+	CalyxMath::Vector3 forward = { mat.m[2][0], mat.m[2][1], mat.m[2][2] };
 	return forward.Normalize();
 }
 
@@ -157,7 +158,7 @@ void WorldTransform::ApplyConfig(const WorldTransformConfig& config) {
 	translation = config.translation;
 	rotation = config.rotation;
 
-	eulerRotation = Quaternion::ToEuler(rotation);
+	eulerRotation = CalyxMath::Quaternion::ToEuler(rotation);
 	rotationSource = RotationSource::Quaternion;
 }
 
@@ -169,7 +170,7 @@ WorldTransformConfig WorldTransform::ExtractConfig() {
 	config.translation = translation;
 
 	if (rotationSource == RotationSource::Euler) {
-		config.rotation = Quaternion::EulerToQuaternion(eulerRotation);
+		config.rotation = CalyxMath::Quaternion::EulerToQuaternion(eulerRotation);
 	} else {
 		config.rotation = rotation;
 	}

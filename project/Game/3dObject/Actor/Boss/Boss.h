@@ -60,8 +60,8 @@ public:
 	void OnCollisionExit([[maybe_unused]] Collider* other) override;
 
 	//--------- accessor -----------------------------------------------------
-	const Vector3           GetCenterPos() const override;
-	Vector3                 GetTargetWorldPos() const;
+	const CalyxMath::Vector3           GetCenterPos() const override;
+	CalyxMath::Vector3                 GetTargetWorldPos() const;
 	BossAnimController*     GetAnimator() const;
 	BossAI*                 GetAI() const;
 	BossShootingController* GetShootController() const { return shootingController_.get(); }
@@ -84,5 +84,5 @@ private:
 	std::unique_ptr<BossStateMachine>       stateMachine_       = nullptr; //< ステートマシン
 	std::unique_ptr<BossAnimController>     anim_               = nullptr; //< アニメーションコントローラ
 	std::unique_ptr<HpGauge>                hpGauge_            = nullptr; //< HPゲージ
-	std::weak_ptr<FxObject>    hitEffects_;      //< ヒットエフェクト群
+	std::weak_ptr<CalyxEffect::FxObject>	hitEffects_;				   //< ヒットエフェクト群
 };

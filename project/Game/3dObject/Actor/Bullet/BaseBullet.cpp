@@ -20,7 +20,7 @@ BaseBullet::BaseBullet(const std::string& modelName,const std::string& name)
 /////////////////////////////////////////////////////////////////////////////////////////
 //		初期化
 /////////////////////////////////////////////////////////////////////////////////////////
-void BaseBullet::ShootInitialize(const Vector3& initPos,const Vector3& velocity) {
+void BaseBullet::ShootInitialize(const CalyxMath::Vector3& initPos,const CalyxMath::Vector3& velocity) {
 	worldTransform_.translation = initPos;
 	worldTransform_.scale       = {3,3,3};
 	velocity_                   = velocity;

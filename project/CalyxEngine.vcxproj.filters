@@ -789,9 +789,6 @@
     <ClInclude Include="Engine\Application\Effects\Particle\FxUnit.h">
       <Filter>Engine\Application\Effects\Particle</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Application\Effects\Particle\Module\BaseFxModule.cpp">
-      <Filter>Engine\Application\Effects\Particle\Module</Filter>
-    </ClCompile>
     <ClInclude Include="Engine\Application\Effects\Particle\Module\BaseFxModule.h">
       <Filter>Engine\Application\Effects\Particle\Module</Filter>
     </ClInclude>
@@ -834,10 +831,10 @@
     <ClInclude Include="Engine\Application\Effects\Particle\Parm\FxParm.h">
       <Filter>Engine\Application\Effects\Particle\Parm</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Application\Framework\EngineController.cpp">
+    <ClCompile Include="Engine\Application\Framework\CalyxFrameWork.cpp">
       <Filter>Engine\Application\Framework</Filter>
     </ClCompile>
-    <ClInclude Include="Engine\Application\Framework\EngineController.h">
+    <ClInclude Include="Engine\Application\Framework\CalyxFrameWork.h">
       <Filter>Engine\Application\Framework</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Application\Framework\EngineMain.cpp">
@@ -846,16 +843,16 @@
     <ClInclude Include="Engine\Application\Framework\EngineMain.h">
       <Filter>Engine\Application\Framework</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Application\Gameplay\Combat\lineOfSight.h">
+    <ClInclude Include="Game\Battle\Combat\lineOfSight.h">
       <Filter>Engine\Application\Gameplay\Combat</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Application\Gameplay\Visibility\GameplayVisibility.h">
+    <ClInclude Include="Game\Battle\Visibility\GameplayVisibility.h">
       <Filter>Engine\Application\Gameplay\Visibility</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Application\Input\Input.cpp">
+    <ClCompile Include="Engine\Foundation\Input\Input.cpp">
       <Filter>Engine\Application\Input</Filter>
     </ClCompile>
-    <ClInclude Include="Engine\Application\Input\Input.h">
+    <ClInclude Include="Engine\Foundation\Input\Input.h">
       <Filter>Engine\Application\Input</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Application\Platform\WinApp.cpp">
@@ -876,10 +873,10 @@
     <ClInclude Include="Engine\Application\System\PlaySession.h">
       <Filter>Engine\Application\System</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Application\System\System.cpp">
+    <ClCompile Include="Engine\Application\System\CalyxCore.cpp">
       <Filter>Engine\Application\System</Filter>
     </ClCompile>
-    <ClInclude Include="Engine\Application\System\System.h">
+    <ClInclude Include="Engine\Application\System\CalyxCore.h">
       <Filter>Engine\Application\System</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Application\UI\EngineUI\Context\EditorContext.cpp">
@@ -1581,9 +1578,6 @@
     <ClInclude Include="Engine\Objects\Transform\Transform.h">
       <Filter>Engine\Objects\Transform</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Objects\Transform\TransformationMatrix.h">
-      <Filter>Engine\Objects\Transform</Filter>
-    </ClInclude>
     <ClCompile Include="Engine\Physics\Ray\Raycastor.cpp">
       <Filter>Engine\Physics\Ray</Filter>
     </ClCompile>
@@ -2169,12 +2163,6 @@
     <ClInclude Include="Game\Battle\Shooting\ShootingController\PlayerShootingController.h">
       <Filter>Game\Battle\Shooting\ShootingController</Filter>
     </ClInclude>
-    <ClCompile Include="Game\Input\PlayerInput\PlayerInputHandler.cpp">
-      <Filter>Game\Input\PlayerInput</Filter>
-    </ClCompile>
-    <ClInclude Include="Game\Input\PlayerInput\PlayerInputHandler.h">
-      <Filter>Game\Input\PlayerInput</Filter>
-    </ClInclude>
     <ClCompile Include="Game\Installer\Boss\BossInstaller.cpp">
       <Filter>Game\Installer\Boss</Filter>
     </ClCompile>
@@ -2287,19 +2275,11 @@
     <ClInclude Include="Game\3dObject\Actor\Player\Input\PlayerInput.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\LockOn\PlayerLockOn.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\Move\PlayerMoveController.h" />
-    <ClInclude Include="Game\3dObject\Actor\Player\Updater\IPlayerTickUpdater.h" />
-    <ClInclude Include="Game\3dObject\Actor\Player\Updater\PlayerCombatUpdater.h" />
-    <ClInclude Include="Game\3dObject\Actor\Player\Updater\PlayerDamageUpdater.h" />
-    <ClInclude Include="Game\3dObject\Actor\Player\Updater\PlayerDodgeUpdater.h" />
-    <ClInclude Include="Game\3dObject\Actor\Player\Updater\PlayerLockOnUpdater.h" />
-    <ClInclude Include="Game\3dObject\Actor\Player\Updater\PlayerMoveUpdater.h" />
-    <ClInclude Include="Game\3dObject\Actor\Player\Updater\PlayerReticleUpdater.h" />
-    <ClInclude Include="Game\3dObject\Actor\Player\Updater\PlayerUpdaterCollection.h" />
     <ClInclude Include="Game\Battle\Movement\Formation\EnemyFormationController.h" />
     <ClInclude Include="Game\Scene\Clear\ClearScene.h" />
     <ClInclude Include="Game\Scene\Defeat\DefeatScene.h" />
-    <ClInclude Include="Game\3dObject\Actor\Player\Updater\IPlayerUpdater.h" />
-    <ClInclude Include="Game\3dObject\Actor\Player\PlayerContext.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\Context\PlayerContext.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\Context\PlayerContextBuilder.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\ChromaticAberration.PS.hlsl">
@@ -2410,17 +2390,11 @@
     <ClCompile Include="Game\3dObject\Actor\Player\Input\PlayerInput.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Player\LockOn\PlayerLockOn.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Player\Move\PlayerMoveController.cpp" />
-    <ClCompile Include="Game\3dObject\Actor\Player\Updater\IPlayerTickUpdater.cpp" />
-    <ClCompile Include="Game\3dObject\Actor\Player\Updater\PlayerCombatUpdater.cpp" />
-    <ClCompile Include="Game\3dObject\Actor\Player\Updater\PlayerDamageUpdater.cpp" />
-    <ClCompile Include="Game\3dObject\Actor\Player\Updater\PlayerDodgeUpdater.cpp" />
-    <ClCompile Include="Game\3dObject\Actor\Player\Updater\PlayerLockOnUpdater.cpp" />
-    <ClCompile Include="Game\3dObject\Actor\Player\Updater\PlayerMoveUpdater.cpp" />
-    <ClCompile Include="Game\3dObject\Actor\Player\Updater\PlayerReticleUpdater.cpp" />
-    <ClCompile Include="Game\3dObject\Actor\Player\Updater\PlayerUpdaterCollection.cpp" />
     <ClCompile Include="Game\Battle\Movement\Formation\EnemyFormationController.cpp" />
     <ClCompile Include="Game\Scene\Clear\ClearScene.cpp" />
     <ClCompile Include="Game\Scene\Defeat\DefeatScene.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Player\Context\PlayerContextBuilder.cpp" />
+    <ClCompile Include="Game\Battle\Combat\lineOfSight.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />

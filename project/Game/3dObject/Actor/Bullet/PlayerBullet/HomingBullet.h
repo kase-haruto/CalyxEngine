@@ -14,13 +14,13 @@ public:
 	HomingBullet() = default;
 	HomingBullet(const std::string& modelName, const std::string& name);
 	~HomingBullet();
-	void ShootInitialize(const Vector3& initPos, const Vector3& velocity)override;
+	void ShootInitialize(const CalyxMath::Vector3& initPos, const CalyxMath::Vector3& velocity)override;
 	void Initialize()override;
 	void OnShot();
 	void SetTarget(const Actor* target);
 	void Update(float dt) override;
 
-	const Vector3 GetCenterPos() const override;
+	const CalyxMath::Vector3 GetCenterPos() const override;
 
 protected:
 	const Actor* target_ = nullptr;
@@ -28,5 +28,5 @@ protected:
 	float rotateSpeed_ = 100.0f;
 
 	// trail
-	std::weak_ptr<FxObject> trailFx_;
+	std::weak_ptr<CalyxEffect::FxObject> trailFx_;
 };

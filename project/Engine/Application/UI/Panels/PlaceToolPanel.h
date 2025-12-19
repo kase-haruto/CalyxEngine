@@ -17,50 +17,53 @@
 class SceneContext;
 class SceneObject;
 
-class PlaceToolPanel
-	: public IEngineUI{
-public:
-	enum class ShapeObjType{
-		Plane,
-		Cube,
-		Sphere,
-		Cylinder,
-		Cone,
-		Torus,
-		Count
+namespace CalyxEditor {
+	class PlaceToolPanel
+		: public IEngineUI {
+	public:
+		enum class ShapeObjType {
+			Plane,
+			Cube,
+			Sphere,
+			Cylinder,
+			Cone,
+			Torus,
+			Count
+		};
+
+		enum class PlaceItemCategory {
+			Shape,		  //< 単純図形オブジェクト
+			Light,		  //< ライト
+			Particle,	  //< パーティクル
+			InGameObject, //< インゲームのオブジェクト
+			Model,		  //< モデル
+			Event,		  //< イベント
+			Count
+		};
+
+	private:
+		struct PlaceItem {
+			PlaceItemCategory			category;
+			std::string					name;
+			D3D12_GPU_DESCRIPTOR_HANDLE texture;
+			CalyxMath::Vector2			iconSize{64.0f, 64.0f};
+			std::function<void()>		createFunc;
+		};
+
+	public:
+		PlaceToolPanel();
+		~PlaceToolPanel() override = default;
+
+		void Render() override;
+
+		const std::string& GetPanelName() const override { return panelName_; }
+
+	private:
+		void RegisterPlaceItems();
+		void RenderCategoryItems();
+
+		std::unordered_map<PlaceItemCategory, std::vector<PlaceItem>> categoryItems_;
+		std::string													  panelName_ = "PlaceToolPanel";
 	};
+}
 
-	enum class PlaceItemCategory{
-		Shape,			//< 単純図形オブジェクト
-		Light,			//< ライト
-		Particle,		//< パーティクル
-		InGameObject,	//< インゲームのオブジェクト
-		Model,			//< モデル
-		Event,			//< イベント
-		Count
-	};
-
-private:
-	struct PlaceItem{
-		PlaceItemCategory category;
-		std::string name;
-		D3D12_GPU_DESCRIPTOR_HANDLE texture;
-		Vector2 iconSize {64.0f, 64.0f};
-		std::function<void()> createFunc;
-	};
-
-public:
-	PlaceToolPanel();
-	~PlaceToolPanel() override = default;
-
-	void Render() override;
-
-	const std::string& GetPanelName() const override{ return panelName_; }
-
-private:
-	void RegisterPlaceItems();
-	void RenderCategoryItems();
-
-	std::unordered_map<PlaceItemCategory, std::vector<PlaceItem>> categoryItems_;
-	std::string panelName_ = "PlaceToolPanel";
-};

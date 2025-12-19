@@ -47,12 +47,12 @@ public:
 	//---------------------------------------------------------------
 	//		アクセサ
 	//---------------------------------------------------------------
-	Vector3     GetPosition()    const { return curPos_; }			//< 現在のワールド位置
-	Quaternion  GetRotation()    const { return curRot_; }			//< 現在のワールド回転
+	CalyxMath::Vector3     GetPosition()    const { return curPos_; }			//< 現在のワールド位置
+	CalyxMath::Quaternion  GetRotation()    const { return curRot_; }			//< 現在のワールド回転
 	float       GetT()           const { return t_; }				//< 現在の補間パラメータ
 	bool        IsFinished()     const { return finished_; }			//< 終端に達したか
 	const SplineData* GetPath()  const { return path_; }				//< 経路参照
-	Vector3     GetWorldPosition() const { return curPos_; }			//< エイリアス
+	CalyxMath::Vector3     GetWorldPosition() const { return curPos_; }			//< エイリアス
 
 	//---------------------------------------------------------------
 	//		パラメータ設定
@@ -92,7 +92,7 @@ private:
 	float  yOffset_ = 0.0f;
 	LookMode lookMode_ = LookMode::AlongPath;
 
-	Quaternion curRot_ = Quaternion();		//< 現在の回転
-	Vector3    curPos_ = Vector3(0, 0, 0);	//< 現在の位置
-	Vector3    lastPos_ = Vector3(0, 0, 0);	//< 前フレーム位置
+	CalyxMath::Quaternion curRot_ = CalyxMath::Quaternion();		//< 現在の回転
+	CalyxMath::Vector3    curPos_ = CalyxMath::Vector3(0, 0, 0);	//< 現在の位置
+	CalyxMath::Vector3    lastPos_ = CalyxMath::Vector3(0, 0, 0);	//< 前フレーム位置
 };

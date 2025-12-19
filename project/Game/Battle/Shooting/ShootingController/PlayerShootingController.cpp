@@ -14,7 +14,7 @@ PlayerShootingController::PlayerShootingController(BulletContainer* container){
 	homingShooter_ = std::make_unique<PlayerHomingBulletShooter>(container,BulletID::Player_Homing);
 }
 
-bool PlayerShootingController::RequestShoot(const Vector3& pos, const Vector3& dir){
+bool PlayerShootingController::RequestShoot(const CalyxMath::Vector3& pos, const CalyxMath::Vector3& dir){
 	if (shootCooldown_ > 0.0f) return false;
 
 	switch (bulletMode_){
@@ -44,11 +44,11 @@ void PlayerShootingController::SetBulletContainer(std::unique_ptr<BulletContaine
 	bulletContainer_ = std::move(container);
 }
 
-void PlayerShootingController::RequestShootStraight(const Vector3& pos, const Vector3& dir){
+void PlayerShootingController::RequestShootStraight(const CalyxMath::Vector3& pos, const CalyxMath::Vector3& dir){
 	if (straightShooter_) straightShooter_->Shoot(pos, dir);
 }
 
-void PlayerShootingController::RequestShootHoming(const Vector3& pos, const Vector3& dir){
+void PlayerShootingController::RequestShootHoming(const CalyxMath::Vector3& pos, const CalyxMath::Vector3& dir){
 	if (homingShooter_)   homingShooter_->Shoot(pos, dir);
 }
 

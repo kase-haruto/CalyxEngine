@@ -5,7 +5,7 @@
 #include <numeric>
 
 struct SplinePoint {
-	Vector3 pos{};
+	CalyxMath::Vector3 pos{};
 };
 
 class SplineData {
@@ -19,15 +19,15 @@ public:
 
 	// 補間API（Catmull–Rom）
 	int  SegmentCount() const { int n = (int)points.size(); return closed ? n : (std::max)(0, n - 1); }
-	Vector3 Evaluate(float t) const;      // 0..1 の正規化パラメータ
-	Vector3 Tangent(float t) const;       // 進行方向ベクトル（正規化推奨）
+	CalyxMath::Vector3 Evaluate(float t) const;      // 0..1 の正規化パラメータ
+	CalyxMath::Vector3 Tangent(float t) const;       // 進行方向ベクトル（正規化推奨）
 
 	// 弧長 → t 逆写像（距離で進める用）
 	float DistanceToT(float distance) const;      // 0..totalLength_ の距離を 0..1 の t に
 	float AdvanceTBy(float t, float distance) const; // 今の t からdistanceだけ前進して新しい t を返す
 
 	// 編集ユーティリティ
-	void InsertPoint(int index, const Vector3& p) {
+	void InsertPoint(int index, const CalyxMath::Vector3& p) {
 		index = std::clamp(index, 0, (int)points.size());
 		points.insert(points.begin() + index, SplinePoint{ p });
 	}
@@ -42,8 +42,8 @@ private:
 	inline int CountP() const { return  (int)points.size(); }
 	int WrapIndex(int i) const;
 	void SegmentAndLocalT(float t, int& seg, float& lt) const;
-	static Vector3 CatmullRom(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& p3, float t);
-	static Vector3 CatmullRomTangent(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& p3, float t);
+	static CalyxMath::Vector3 CatmullRom(const CalyxMath::Vector3& p0, const CalyxMath::Vector3& p1, const CalyxMath::Vector3& p2, const CalyxMath::Vector3& p3, float t);
+	static CalyxMath::Vector3 CatmullRomTangent(const CalyxMath::Vector3& p0, const CalyxMath::Vector3& p1, const CalyxMath::Vector3& p2, const CalyxMath::Vector3& p3, float t);
 
 private:
 	// 弧長LUT（正規化 t に対する累積距離）

@@ -5,23 +5,25 @@
 // engine
 #include <Engine/Application/UI/EngineUI/IOnViewportTool.h>
 
-/* ========================================================================
+namespace CalyxEditor {
+	/* ========================================================================
 /*		Performance表示
 /* ===================================================================== */
-class PerformanceOverlay
-	: public BaseOnViewportTool {
-public:
-	//===================================================================*/
-	//					methods
-	//===================================================================*/
-	PerformanceOverlay();
-	~PerformanceOverlay() = default;
+	class PerformanceOverlay
+		: public BaseOnViewportTool {
+	public:
+		//===================================================================*/
+		//					methods
+		//===================================================================*/
+		PerformanceOverlay();
+		~PerformanceOverlay() = default;
 
-	void RenderOverlay(const ImVec2& basePos) override;
-	void RenderToolbar() override;
+		void RenderOverlay(const ImVec2& basePos) override;
+		void RenderToolbar() override;
 
-private:
-	bool   showOverlay_ = true;
-	bool   isAdjustment_	= false;	//< 調整中か
-	ImVec4 color_		= ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-};
+	private:
+		bool   showOverlay_	 = true;
+		bool   isAdjustment_ = false; //< 調整中か
+		ImVec4 color_		 = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+	};
+} // namespace CalyxEditor

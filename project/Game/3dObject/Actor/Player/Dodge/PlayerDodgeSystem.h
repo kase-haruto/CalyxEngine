@@ -2,7 +2,7 @@
 
 #include "Game/3dObject/Actor/Player/Context/PlayerContext.h"
 
-#include <Engine/Application/Input/Input.h>
+#include <Engine/Foundation/Input/Input.h>
 #include <Engine/Foundation/Math/Vector3.h>
 #include <functional>
 
@@ -87,7 +87,7 @@ public:
 	bool					 IsInIFrame() const;
 	DodgeState				 GetState() const;
 	float					 GetStateTime() const;
-	const Vector3&			 GetDodgeDir() const;
+	const CalyxMath::Vector3&			 GetDodgeDir() const;
 	const PlayerDodgeConfig& GetConfig() const;
 
 private:
@@ -106,7 +106,7 @@ private:
 	//=====================================================================*/
 	PlayerDodgeConfig  cfg_{}; //< 設定
 	DodgeState		   state_ = DodgeState::Idle; //< 現在の状態
-	Vector3			   dodgeDir_{0, 0, 1};		  //< 回避方向
+	CalyxMath::Vector3			   dodgeDir_{0, 0, 1};		  //< 回避方向
 
 	float timer_		 = 0.0f;	 //< 状態経過時間
 	float cooldown_		 = 0.0f;	 //< 回避クールダウン

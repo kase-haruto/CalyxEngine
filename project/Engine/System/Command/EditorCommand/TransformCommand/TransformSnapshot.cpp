@@ -13,5 +13,5 @@ void TransformSnapshot::ApplyToTransform(WorldTransform* tf) const {
 bool TransformSnapshot::Equals(const TransformSnapshot& other, float epsilon) const {
 	return (translate - other.translate).LengthSquared() < epsilon &&
 		(scale - other.scale).LengthSquared() < epsilon &&
-		Quaternion::Dot(rotate, other.rotate) > 1.0f - epsilon;
+		CalyxMath::Quaternion::Dot(rotate, other.rotate) > 1.0f - epsilon;
 }

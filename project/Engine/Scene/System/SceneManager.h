@@ -14,7 +14,10 @@ class BaseScene;
 class SceneContext;
 class DxCore;
 class PipelineService;
-class PlaySession;
+
+namespace CalyxEditor {
+	class PlaySession;
+}
 
 /* ========================================================================
 /*		シーン管理クラス
@@ -56,7 +59,7 @@ public:
 	/// セッションとバインド
 	/// </summary>
 	/// <param name="ps"></param>
-	void BindPlaySession(PlaySession* ps) { pPlaySession_ = ps; }
+	void BindPlaySession(CalyxEditor::PlaySession* ps) { pPlaySession_ = ps; }
 
 	/// <summary>
 	/// アクティブなコンテキストを返す
@@ -109,7 +112,7 @@ private:
 	std::optional<size_t>				  pendingSwitchIndex_;
 
 	DxCore*		 dx_		   = nullptr;
-	PlaySession* pPlaySession_ = nullptr;
+	CalyxEditor::PlaySession* pPlaySession_ = nullptr;
 
 	SceneContext* lastBoundCtx_	  = nullptr;
 	uint64_t	  lastRuntimeGen_ = 0;

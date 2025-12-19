@@ -24,7 +24,7 @@ std::unordered_map<ObjectType, ObjectFactory::CreatorFunc> ObjectFactory::regist
 	}
 	}},
 	{ ObjectType::Effect, [] ([[maybe_unused]]const nlohmann::json& j){
-		auto obj = std::make_unique<ParticleSystemObject>();
+		 auto obj = std::make_unique<CalyxEffect::ParticleSystemObject>();
 		obj->ApplyConfigFromJson(j);
 		return obj;
 	}},

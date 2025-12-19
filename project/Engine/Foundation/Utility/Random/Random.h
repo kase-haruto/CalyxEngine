@@ -30,8 +30,8 @@ public:
 		}
 	}
 
-	static Vector3 GenerateVector3(float min, float max){
-		return Vector3(
+	static CalyxMath::Vector3 GenerateVector3(float min, float max){
+		return CalyxMath::Vector3(
 			Generate<float>(min, max),
 			Generate<float>(min, max),
 			Generate<float>(min, max)
@@ -42,11 +42,11 @@ public:
 	/// -1から1の範囲
 	/// </summary>
 	/// <returns></returns>
-	static Vector3 GenerateUnitVector3(){
+	static CalyxMath::Vector3 GenerateUnitVector3(){
 		float x = Generate<float>(-1.0f, 1.0f);
 		float y = Generate<float>(-1.0f, 1.0f);
 		float z = Generate<float>(-1.0f, 1.0f);
-		Vector3 v(x, y, z);
+		CalyxMath::Vector3 v(x, y, z);
 
 		// 正規化して単位ベクトルを返す
 		return v.Normalize();
@@ -58,7 +58,7 @@ public:
 	/// <param name="min"></param>
 	/// <param name="max"></param>
 	/// <returns></returns>
-	static Vector3 GenerateVector3(const Vector3& min, const Vector3& max){
+	static CalyxMath::Vector3 GenerateVector3(const CalyxMath::Vector3& min, const CalyxMath::Vector3& max){
 		auto safeMinX = ( std::min ) (min.x, max.x);
 		auto safeMaxX = (std::max)(min.x, max.x);
 
@@ -68,7 +68,7 @@ public:
 		auto safeMinZ = (std::min)(min.z, max.z);
 		auto safeMaxZ = (std::max)(min.z, max.z);
 
-		return Vector3(
+		return CalyxMath::Vector3(
 			Generate<float>(safeMinX, safeMaxX),
 			Generate<float>(safeMinY, safeMaxY),
 			Generate<float>(safeMinZ, safeMaxZ)

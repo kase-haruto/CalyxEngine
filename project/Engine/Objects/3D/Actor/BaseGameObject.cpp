@@ -67,8 +67,8 @@ void BaseGameObject::AlwaysUpdate(float dt) {
 	// collider の更新
 	if(collider_) {
 		if(collider_->IsCollisionEnubled()) {
-			Vector3	   worldPos = GetCenterPos();
-			Quaternion worldRot = worldTransform_.rotation;
+			CalyxMath::Vector3	   worldPos = GetCenterPos();
+			CalyxMath::Quaternion worldRot = worldTransform_.rotation;
 			collider_->Update(worldPos, worldRot);
 			collider_->Draw();
 		}
@@ -87,7 +87,7 @@ void BaseGameObject::InitializeCollider(ColliderKind kind) {
 	case ColliderKind::Box: {
 		auto box = std::make_unique<BoxCollider>(true);
 		box->SetName(GetName() + "_BoxCollider");
-		box->Initialize(Vector3(1.0f, 1.0f, 1.0f)); // 適当な初期サイズ
+		box->Initialize(CalyxMath::Vector3(1.0f, 1.0f, 1.0f)); // 適当な初期サイズ
 		collider_ = std::move(box);
 		break;
 	}
@@ -216,23 +216,23 @@ void BaseGameObject::SetName(const std::string& name) {
 	SceneObject::SetName(name, ObjectType::GameObject);
 }
 
-void BaseGameObject::SetTranslate(const Vector3& pos) {
+void BaseGameObject::SetTranslate(const CalyxMath::Vector3& pos) {
 	if(model_) {
 		worldTransform_.translation = pos;
 	}
 }
-void BaseGameObject::SetRotate(const Quaternion& rot) {
+void BaseGameObject::SetRotate(const CalyxMath::Quaternion& rot) {
 	if(model_) {
 		worldTransform_.rotation = rot;
 	}
 }
-void BaseGameObject::SetRotate(const Vector3& euler) {
+void BaseGameObject::SetRotate(const CalyxMath::Vector3& euler) {
 	if(model_) {
 		worldTransform_.eulerRotation = euler;
 	}
 }
 
-void BaseGameObject::SetScale(const Vector3& scale) {
+void BaseGameObject::SetScale(const CalyxMath::Vector3& scale) {
 	if(model_) {
 		worldTransform_.scale = scale;
 	}
@@ -243,13 +243,13 @@ void BaseGameObject::SetDrawEnable(bool isDrawEnable) {
 	model_->SetIsDrawEnable(isDrawEnable);
 }
 
-const Vector3 BaseGameObject::GetCenterPos() const {
-	const Vector3 offset   = {0.0f, 0.5f, 0.0f};
-	Vector3		  worldPos = Vector3::Transform(offset, worldTransform_.matrix.world);
+const CalyxMath::Vector3 BaseGameObject::GetCenterPos() const {
+	const CalyxMath::Vector3 offset   = {0.0f, 0.5f, 0.0f};
+	CalyxMath::Vector3		  worldPos = CalyxMath::Vector3::Transform(offset, worldTransform_.matrix.world);
 	return worldPos;
 }
 
-void BaseGameObject::SetColor(const Vector4& color) {
+void BaseGameObject::SetColor(const CalyxMath::Vector4& color) {
 	if(model_) {
 		model_->SetColor(color);
 	}
@@ -281,17 +281,17 @@ const AnimationModel* BaseGameObject::GetAnimationModel() const {
 			   : nullptr;
 }
 
-static inline AABB TransformAabb(const AABB& local, const Matrix4x4& W) {
-	const Vector3 lc  = (local.min_ + local.max_) * 0.5f;
-	const Vector3 le0 = (local.max_ - local.min_) * 0.5f;
+static inline AABB TransformAabb(const AABB& local, const CalyxMath::Matrix4x4& W) {
+	const CalyxMath::Vector3 lc  = (local.min_ + local.max_) * 0.5f;
+	const CalyxMath::Vector3 le0 = (local.max_ - local.min_) * 0.5f;
 
-	const Vector3 wc = (W * Vector4(lc, 1.0f)).xyz();
+	const CalyxMath::Vector3 wc = (W * CalyxMath::Vector4(lc, 1.0f)).xyz();
 
 	const float m00 = std::fabs(W.m[0][0]), m01 = std::fabs(W.m[0][1]), m02 = std::fabs(W.m[0][2]);
 	const float m10 = std::fabs(W.m[1][0]), m11 = std::fabs(W.m[1][1]), m12 = std::fabs(W.m[1][2]);
 	const float m20 = std::fabs(W.m[2][0]), m21 = std::fabs(W.m[2][1]), m22 = std::fabs(W.m[2][2]);
 
-	const Vector3 we = {
+	const CalyxMath::Vector3 we = {
 		m00 * le0.x + m01 * le0.y + m02 * le0.z,
 		m10 * le0.x + m11 * le0.y + m12 * le0.z,
 		m20 * le0.x + m21 * le0.y + m22 * le0.z};
@@ -299,7 +299,7 @@ static inline AABB TransformAabb(const AABB& local, const Matrix4x4& W) {
 }
 
 AABB BaseGameObject::GetWorldAABB() const {
-	const Matrix4x4& W = worldTransform_.matrix.world;
+	const CalyxMath::Matrix4x4& W = worldTransform_.matrix.world;
 
 	if(objectModelType_ == ModelType_Static) {
 		if(model_ && model_->GetModelData().has_value()) {

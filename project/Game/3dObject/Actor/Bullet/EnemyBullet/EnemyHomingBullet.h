@@ -7,7 +7,9 @@
 #include <string>
 #include <algorithm>
 
-class FxObject;
+namespace CalyxEffect {
+	class FxObject;
+}
 
 class EnemyHomingBullet
 	: public BaseBullet {
@@ -16,7 +18,7 @@ public:
 	EnemyHomingBullet(const std::string& modelName, const std::string& name);
 	~EnemyHomingBullet() override;
 
-	void ShootInitialize(const Vector3& initPos, const Vector3& velocity) override;
+	void ShootInitialize(const CalyxMath::Vector3& initPos, const CalyxMath::Vector3& velocity) override;
 	void Initialize() override;
 	void OnShot();
 	void SetTarget(const Actor* target);
@@ -26,7 +28,7 @@ public:
 	void OnCollisionStay([[maybe_unused]] Collider* other) override {}
 	void OnCollisionExit([[maybe_unused]] Collider* other) override {}
 
-	const Vector3 GetCenterPos() const override;
+	const CalyxMath::Vector3 GetCenterPos() const override;
 
 	// 調整用
 	void SetHomingSpeed(float v) { homingSpeed_ = v; }
@@ -49,7 +51,7 @@ private:
 	float homingDurationSec_ = 1.0f;
 	float homingElapsedSec_ = 0.0f;
 
-	std::weak_ptr<FxObject> trailFx_; //< 発射エフェクト
+	std::weak_ptr<CalyxEffect::FxObject> trailFx_; //< 発射エフェクト
 
-	Vector3 baseScale_{ 1.0f, 1.0f, 1.0f };
+	CalyxMath::Vector3 baseScale_{ 1.0f, 1.0f, 1.0f };
 };

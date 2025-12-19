@@ -1,7 +1,10 @@
 #pragma once
-enum class EngineMode{
-	Editor,
-	Playing,
-	Paused,
-	Step
-};
+
+namespace CalyxEditor {
+	enum class EngineMode {
+		Editor,
+		Playing,
+		Paused,
+		Step
+	};
+}

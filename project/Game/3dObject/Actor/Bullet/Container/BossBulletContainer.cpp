@@ -4,7 +4,7 @@
 BossBulletContainer::BossBulletContainer(const std::string& name) : BulletContainer(name) {}
 BossBulletContainer::~BossBulletContainer() = default;
 
-void BossBulletContainer::AddBullet(BulletID id, const Vector3& pos, const Vector3& vel) {
+void BossBulletContainer::AddBullet(BulletID id, const CalyxMath::Vector3& pos, const CalyxMath::Vector3& vel) {
 
 	// Boss 弾として許可するID
 	switch(id) {

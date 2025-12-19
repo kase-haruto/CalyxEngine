@@ -20,8 +20,8 @@ DirectionalLight::DirectionalLight(const std::string& name) {
 	constantBuffer_.Initialize(device);
 
 	//初期化
-	lightData_.color     = Vector4(1.0f,1.0f,1.0f,1.0f); // ライトの色
-	lightData_.direction = Vector3(-0.08f,-1.0f,0.34f);  // ライトの向き
+	lightData_.color     = CalyxMath::Vector4(1.0f,1.0f,1.0f,1.0f); // ライトの色
+	lightData_.direction = CalyxMath::Vector3(-0.08f,-1.0f,0.34f);  // ライトの向き
 	lightData_.intensity = 1.0f;                         // 輝度
 
 	//// コンフィグパスの生成 preset名はdefault
@@ -45,8 +45,8 @@ DirectionalLight::DirectionalLight() {
 	constantBuffer_.Initialize(device);
 
 	//初期化
-	lightData_.color     = Vector4(1.0f,1.0f,1.0f,1.0f);	// ライトの色
-	lightData_.direction = Vector3(-0.08f,-1.0f,0.34f);		// ライトの向き
+	lightData_.color     = CalyxMath::Vector4(1.0f,1.0f,1.0f,1.0f);	// ライトの色
+	lightData_.direction = CalyxMath::Vector3(-0.08f,-1.0f,0.34f);		// ライトの向き
 	lightData_.intensity = 1.0f;									// 輝度
 
 #if defined(_DEBUG) || defined(DEVELOP)
@@ -94,12 +94,12 @@ void DirectionalLight::SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandLi
 void DirectionalLight::DrawDebug() {
 
 	// ライトの始点（ワールド座標系での位置）
-	const Vector3 start = worldTransform_.GetWorldPosition();
+	const CalyxMath::Vector3 start = worldTransform_.GetWorldPosition();
 
 	// ライトの向き（方向ベクトル × 長さ）
-	const Vector3 dir    = lightData_.direction.Normalize();
+	const CalyxMath::Vector3 dir    = lightData_.direction.Normalize();
 	const float   length = 3.0f; // 可視化用の長さ
-	const Vector3 end    = start + dir * length;
+	const CalyxMath::Vector3 end    = start + dir * length;
 
 	// 線を描く
 	PrimitiveDrawer::GetInstance()->DrawLine3d(start,end,{1.0f,1.0f,0.0f,1.0f});

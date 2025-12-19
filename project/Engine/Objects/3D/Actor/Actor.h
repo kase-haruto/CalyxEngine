@@ -23,15 +23,15 @@ public:
 
 	// getter
 	float		  GetCollisionRadius() const;
-	const Vector3 GetVelocity() const { return velocity_; }
+	const CalyxMath::Vector3 GetVelocity() const { return velocity_; }
 	bool		  GetIsAlive() const { return isAlive_; }
 	void		  SetIsAlive(bool isAlive) { isAlive_ = isAlive; }
 	int32_t		  GetLife() const { return life_; }
 	// setter
-	void  SetPosition(const Vector3& position) { worldTransform_.translation = position; };
+	void  SetPosition(const CalyxMath::Vector3& position) { worldTransform_.translation = position; };
 	void  SetMoveSpeed(float moveSpeed) { moveSpeed_ = moveSpeed; }
 	float GetMoveSpeed() const { return moveSpeed_; }
-	void  SetVelocity(const Vector3& velocity) { velocity_ = velocity; }
+	void  SetVelocity(const CalyxMath::Vector3& velocity) { velocity_ = velocity; }
 	void SetLife(int32_t life) { life_ = life; }
 
 protected:
@@ -39,8 +39,8 @@ protected:
 	//                   private methods
 	//===================================================================*/
 	float	moveSpeed_;			  //< 移動速度
-	Vector3 velocity_	  = {};	  //< 移動ベクトル
-	Vector3 acceleration_ = {};	  //< 加速度
+	CalyxMath::Vector3 velocity_	  = {};	  //< 移動ベクトル
+	CalyxMath::Vector3 acceleration_ = {};	  //< 加速度
 	int32_t life_		  = 1;	  //< 体力 (0で死亡)
 	bool	isAlive_	  = true; //< 生存フラグ
 };

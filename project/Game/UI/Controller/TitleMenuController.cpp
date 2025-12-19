@@ -3,7 +3,7 @@
 // engine
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 #include <Engine/Foundation/Math/Vector2.h>
-#include <Engine/Application/Input/Input.h>
+#include <Engine/Foundation/Input/Input.h>
 
 // externals
 #include <externals/imgui/imgui.h>
@@ -15,12 +15,12 @@
 #include <Engine/Foundation/Utility/Ease/Ease.h>
 
 TitleMenuController::TitleMenuController() :
-	basePos_(Vector2(750, 400.0f)),
-	baseSize_(Vector2(256.0f, 64.0f)),
+	basePos_(CalyxMath::Vector2(750, 400.0f)),
+	baseSize_(CalyxMath::Vector2(256.0f, 64.0f)),
 	space_(120.0f) {
 
 	// basePos_ を変更しないようローカル pos を使う
-	Vector2 pos = basePos_;
+	CalyxMath::Vector2 pos = basePos_;
 
 	// ゲームスタートボタン
 	std::unique_ptr<Button> startButton =
@@ -56,11 +56,10 @@ TitleMenuController::~TitleMenuController() = default;
 
 void TitleMenuController::Update(float dt) {
 	// --- 入力で選択移動 ---
-	auto* in = Input::GetInstance();
-	bool moveDown = in->TriggerKey(DIK_DOWN) || in->TriggerKey(DIK_S)
-		|| in->TriggerGamepadButton(PadButton::DPAD_DOWN);
+	auto* in	   = CalyxFoundation::Input::GetInstance();
+	bool moveDown = in->TriggerKey(DIK_DOWN) || in->TriggerKey(DIK_S) || in->TriggerGamepadButton(CalyxFoundation::PadButton::DPAD_DOWN);
 	bool moveUp = in->TriggerKey(DIK_UP) || in->TriggerKey(DIK_W)
-		|| in->TriggerGamepadButton(PadButton::DPAD_UP);
+		|| in->TriggerGamepadButton(CalyxFoundation::PadButton::DPAD_UP);
 
 	if (!buttons_.empty()) {
 		uint16_t prev = selectedIndex_;
@@ -75,7 +74,7 @@ void TitleMenuController::Update(float dt) {
 			}
 		}
 
-		if (in->TriggerKey(DIK_SPACE) || in->TriggerGamepadButton(PadButton::A)) {
+		if (in->TriggerKey(DIK_SPACE) || in->TriggerGamepadButton(CalyxFoundation::PadButton::A)) {
 			buttons_[selectedIndex_]->Execute();
 		}
 	}
@@ -166,7 +165,7 @@ void TitleMenuController::AdaptationForSprite() {
 }
 
 void TitleMenuController::LayoutButtons_() {
-	Vector2 pos = basePos_;
+	CalyxMath::Vector2 pos = basePos_;
 	for (size_t i = 0; i < buttons_.size(); ++i) {
 		auto* s = buttons_[i]->GetSprite();
 		if (!s) { pos.y += space_; continue; }
@@ -178,11 +177,11 @@ void TitleMenuController::LayoutButtons_() {
 		const float scale = 1.0f + (enlargedScale_ - 1.0f) * eased;
 
 		// 拡大後サイズ
-		Vector2 size = { baseSize_.x * scale, baseSize_.y * scale };
+		CalyxMath::Vector2 size = { baseSize_.x * scale, baseSize_.y * scale };
 
 		// 中央を合わせるための位置補正
-		Vector2 center = { pos.x + baseSize_.x * 0.5f, pos.y + baseSize_.y * 0.5f };
-		Vector2 topLeft = { center.x - size.x * 0.5f, center.y - size.y * 0.5f };
+		CalyxMath::Vector2 center = { pos.x + baseSize_.x * 0.5f, pos.y + baseSize_.y * 0.5f };
+		CalyxMath::Vector2 topLeft = { center.x - size.x * 0.5f, center.y - size.y * 0.5f };
 
 		s->SetPosition(topLeft);
 		s->SetSize(size);

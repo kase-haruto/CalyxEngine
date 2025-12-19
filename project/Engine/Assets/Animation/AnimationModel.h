@@ -48,7 +48,7 @@ public:
 	std::string				 GetCurrentAnimationName() const;
 	float					 GetAnimationSpeed() const { return animationSpeed_; }
 	std::vector<std::string> GetAnimationNodeNames() const;
-	std::optional<Matrix4x4> GetJointMatrix(const std::string& name) const;
+	std::optional<CalyxMath::Matrix4x4> GetJointMatrix(const std::string& name) const;
 
 	void SetAnimationSpeed(float speed) { animationSpeed_ = speed; }
 
@@ -70,8 +70,8 @@ private:
 	void ApplyAnimationToSkeleton();
 
 	/// アニメーションCurveを適用
-	Quaternion CalculateValue(const AnimationCurve<Quaternion>& curve, float time);
-	Vector3	   CalculateValue(const AnimationCurve<Vector3>& curve, float time);
+	CalyxMath::Quaternion CalculateValue(const AnimationCurve<CalyxMath::Quaternion>& curve, float time);
+	CalyxMath::Vector3	   CalculateValue(const AnimationCurve<CalyxMath::Vector3>& curve, float time);
 
 	/// スケルトン計算
 	void SkinningStep();

@@ -19,7 +19,7 @@ BaseEventObject::BaseEventObject() {
 	// 衝突の設定(boxで初期化
 	std::unique_ptr<BoxCollider> box = std::make_unique<BoxCollider>(true);
 	box->SetName(GetName() + "BoxCollider"); //< コライダー名前設定
-	box->Initialize(Vector3(1.0f));			 //< サイズ設定
+	box->Initialize(CalyxMath::Vector3(1.0f));			 //< サイズ設定
 	collider_ = std::move(box);
 	collider_->SetType(ColliderType::Type_EventObject);
 	collider_->SetTargetType(ColliderType::Type_Player);
@@ -42,7 +42,7 @@ BaseEventObject::BaseEventObject(const std::string& name) {
 	// 衝突の設定(boxで初期化
 	std::unique_ptr<BoxCollider> box = std::make_unique<BoxCollider>(true);
 	box->SetName(name + "BoxCollider"); //< コライダー名前設定
-	box->Initialize(Vector3(1.0f));		//< サイズ設定
+	box->Initialize(CalyxMath::Vector3(1.0f));		//< サイズ設定
 	collider_ = std::move(box);
 	collider_->SetType(ColliderType::Type_EventObject);
 	collider_->SetTargetType(ColliderType::Type_Player);
@@ -65,7 +65,7 @@ void BaseEventObject::Initialize() {
 		const std::string configRoot = "Event/";
 		baseConfig_.LoadConfig(configRoot + GetName());
 		//コライダーの色を緑に設定
-		collider_->SetColor(Vector3(0,1,0));
+		collider_->SetColor(CalyxMath::Vector3(0,1,0));
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -75,8 +75,8 @@ void BaseEventObject::AlwaysUpdate([[maybe_unused]] float dt) {
 
 	worldTransform_.Update();
 
-	Vector3	   worldPos = worldTransform_.GetWorldPosition();
-	Quaternion rot		= worldTransform_.rotation;
+	CalyxMath::Vector3	   worldPos = worldTransform_.GetWorldPosition();
+	CalyxMath::Quaternion rot		= worldTransform_.rotation;
 
 	// collider の更新
 	if(collider_) {

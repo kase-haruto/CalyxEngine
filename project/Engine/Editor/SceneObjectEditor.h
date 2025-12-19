@@ -8,30 +8,37 @@
 #include <memory>
 
 class SceneObject;
+class SceneContext;
+namespace CalyxEditor {
+	/* ========================================================================
+	/*		sceneオブジェクト編集クラス
+	/* ===================================================================== */
 
-//　sceneオブジェクト編集
-class SceneObjectEditor :
-	public BaseEditor {
-public:
-	//===================================================================*/
-	//                   public functions
-	//===================================================================*/
-	SceneObjectEditor(const std::string& name);
-	SceneObjectEditor();
-	~SceneObjectEditor() override = default;
+	class SceneObjectEditor 
+		: public BaseEditor {
+	public:
+		//===================================================================*/
+		//                   public functions
+		//===================================================================*/
+		SceneObjectEditor(const std::string& name);
+		SceneObjectEditor();
+		~SceneObjectEditor() override = default;
 
-	void Update();
-	void ShowImGuiInterface() override;
-	void SetSceneObject(SceneObject* sceneObject) { sceneObject_ = sceneObject; }
-	void BindRemovalCallback(class SceneContext* ctx);
-	void ClearSelection(); // ← 明示クリアも使える
+		void Update();
+		void ShowImGuiInterface() override;
+		void SetSceneObject(SceneObject* sceneObject) { sceneObject_ = sceneObject; }
+		void BindRemovalCallback(SceneContext* ctx);
+		void ClearSelection(); // ← 明示クリアも使える
 
-	void SetTarget(SceneObject* object);
-	Manipulator* GetManipulator() const { return manipulator_.get(); }
-private:
-	//===================================================================*/
-	//                   private variables
-	//===================================================================*/
-	std::unique_ptr<Manipulator> manipulator_ = nullptr;	// マニピュレーター
-	SceneObject* sceneObject_ = nullptr;					// 編集対象のSceneObject
-};
+		void					  SetTarget(SceneObject* object);
+		Manipulator* GetManipulator() const { return manipulator_.get(); }
+
+	private:
+		//===================================================================*/
+		//                   private variables
+		//===================================================================*/
+		std::unique_ptr<Manipulator> manipulator_ = nullptr; // マニピュレーター
+		SceneObject*							  sceneObject_ = nullptr; // 編集対象のSceneObject
+	};
+
+}

@@ -55,8 +55,8 @@ public:
 
 	void StartEntranceToFormation(
 		EnemyFormationController* formation,
-		const Vector3&			  formationOffset,
-		const Vector3&			  entranceStartWorld);
+		const CalyxMath::Vector3&			  formationOffset,
+		const CalyxMath::Vector3&			  entranceStartWorld);
 
 	//  accessor -------------------------------------------------------------//
 	void SetRoute(const SplineData& route, const WorldTransform* playerTf);
@@ -111,11 +111,11 @@ private:
 	float driftFreqX_ = 0.7f, driftFreqY_ = 0.85f, driftFreqZ_ = 0.35f;
 	float driftMargin_ = 0.4f;
 
-	Vector3 camAnchor_ = {0, 0, 40};
+	CalyxMath::Vector3 camAnchor_ = {0, 0, 40};
 
 	// Exit
 	bool	exitPrepared_  = false;
-	Vector3 exitDirLocal_  = {0, 0, 0};
+	CalyxMath::Vector3 exitDirLocal_  = {0, 0, 0};
 	float	exitSpeed_	   = 35.0f;
 	float	exitOvershoot_ = 1.05f;
 
@@ -128,18 +128,18 @@ private:
 
 	// Formation
 	EnemyFormationController* formation_	   = nullptr; // 非所有
-	Vector3					  formationOffset_ = {0, 0, 0};
+	CalyxMath::Vector3					  formationOffset_ = {0, 0, 0};
 	float					  formationPhase_  = 0.0f; // 個体差の揺れ用
 
 	// dissolve 用の速度ベクトル
-	Vector3 scatterVelocity_ = {0, 0, 0};
+	CalyxMath::Vector3 scatterVelocity_ = {0, 0, 0};
 	int		formationSize_	 = 1;
 
 	int formationIndex_ = 0;
 
 	// 侵入用
-	Vector3 entranceStart_	= {0, 0, 0}; // 開始位置（画面外）
-	Vector3 entranceTarget_ = {0, 0, 0}; // 合流目標（編隊オフセット位置）
+	CalyxMath::Vector3 entranceStart_	= {0, 0, 0}; // 開始位置（画面外）
+	CalyxMath::Vector3 entranceTarget_ = {0, 0, 0}; // 合流目標（編隊オフセット位置）
 	float	entranceTime_	= 0.0f;
 	float	entranceLength_ = 2.0f; // 侵入にかける時間（秒）
 };

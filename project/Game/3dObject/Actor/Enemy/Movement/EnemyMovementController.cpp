@@ -10,18 +10,18 @@
 #include <cmath>
 
 namespace {
-void ClampToFrustum(Vector3& p, float fovY, float aspect, float margin) {
+void ClampToFrustum(CalyxMath::Vector3& p, float fovY, float aspect, float margin) {
 	const float halfH = p.z * std::tan(fovY * 0.5f);
 	const float halfW = halfH * aspect;
 	p.x				  = std::clamp(p.x, -halfW * margin, halfW * margin);
 	p.y				  = std::clamp(p.y, -halfH * margin, halfH * margin);
 }
 
-Vector3 ComputeDissolveDirection(int index, DissolvePattern pattern) {
+CalyxMath::Vector3 ComputeDissolveDirection(int index, DissolvePattern pattern) {
 	switch(pattern) {
 
 	case DissolvePattern::AlternatingLeftRight:
-		return Vector3(
+		return CalyxMath::Vector3(
 				   (index % 2 == 0 ? -1.0f : +1.0f),
 				   0.0f,
 				   0.0f)
@@ -30,20 +30,20 @@ Vector3 ComputeDissolveDirection(int index, DissolvePattern pattern) {
 	case DissolvePattern::FourWay:
 		switch(index % 4) {
 		case 0:
-			return Vector3(-1, +0.5f, 0.0f).Normalize();
+			return CalyxMath::Vector3(-1, +0.5f, 0.0f).Normalize();
 		case 1:
-			return Vector3(+1, +0.5f, 0.0f).Normalize();
+			return CalyxMath::Vector3(+1, +0.5f, 0.0f).Normalize();
 		case 2:
-			return Vector3(-1, -0.5f, 0.0f).Normalize();
+			return CalyxMath::Vector3(-1, -0.5f, 0.0f).Normalize();
 		case 3:
-			return Vector3(+1, -0.5f, 0.0f).Normalize();
+			return CalyxMath::Vector3(+1, -0.5f, 0.0f).Normalize();
 		}
-		return Vector3(0, 0, 1).Normalize();
+		return CalyxMath::Vector3(0, 0, 1).Normalize();
 
 	case DissolvePattern::VShape: {
 		int pair = index / 2;
 		int side = (index % 2 == 0) ? -1 : +1;
-		return Vector3(
+		return CalyxMath::Vector3(
 				   float(side) * (float(pair) + 1),
 				   -(float(pair) + 1),
 				   2.0f)
@@ -52,14 +52,14 @@ Vector3 ComputeDissolveDirection(int index, DissolvePattern pattern) {
 
 	case DissolvePattern::Circle: {
 		float angle = index * 0.8f;
-		return Vector3(std::cos(angle), std::sin(angle), 0.0f).Normalize();
+		return CalyxMath::Vector3(std::cos(angle), std::sin(angle), 0.0f).Normalize();
 	}
 
 	case DissolvePattern::StraightBack:
-		return Vector3(0, 0, 1).Normalize();
+		return CalyxMath::Vector3(0, 0, 1).Normalize();
 
 	default:
-		return Vector3(0, 0, 1).Normalize();
+		return CalyxMath::Vector3(0, 0, 1).Normalize();
 	}
 }
 } // namespace
@@ -143,7 +143,7 @@ void EnemyMovementController::StartStay(float duration) {
 		owner_->GetWorldTransform().parent = &cam->GetWorldTransform();
 	}
 
-	camAnchor_ = Vector3(0, 0, 80);
+	camAnchor_ = CalyxMath::Vector3(0, 0, 80);
 }
 
 void EnemyMovementController::UpdateStay(float dt) {
@@ -167,7 +167,7 @@ void EnemyMovementController::UpdateCameraDrift([[maybe_unused]] float dt) {
 	float dy = std::sin((t + camPhaseY_) * driftFreqY_) * driftAmpY_;
 	float dz = std::sin((t + camPhaseZ_) * driftFreqZ_) * driftAmpZ_;
 
-	Vector3 p = camAnchor_ + Vector3(dx, dy, dz);
+	CalyxMath::Vector3 p = camAnchor_ + CalyxMath::Vector3(dx, dy, dz);
 
 	ClampToFrustum(p, cam->GetFovY(), cam->GetAspectRatio(), driftMargin_);
 	owner_->SetTranslate(p);
@@ -186,7 +186,7 @@ void EnemyMovementController::StartDissolve(int index, DissolvePattern pattern) 
 
 	float speed = owner_->GetMoveSpeed();
 
-	Vector3 dir = ComputeDissolveDirection(index, pattern);
+	CalyxMath::Vector3 dir = ComputeDissolveDirection(index, pattern);
 
 	scatterVelocity_ = dir.Normalize() * speed;
 }
@@ -201,7 +201,7 @@ void EnemyMovementController::UpdateExit(float dt) {
 
 	// 初回：外へ向かう方向を決める
 	if(!exitPrepared_) {
-		Vector3 p = owner_->GetWorldTransform().translation;
+		CalyxMath::Vector3 p = owner_->GetWorldTransform().translation;
 
 		float halfH = p.z * std::tan(cam->GetFovY() * 0.5f);
 		float halfW = halfH * cam->GetAspectRatio();
@@ -210,8 +210,8 @@ void EnemyMovementController::UpdateExit(float dt) {
 		float edgeX = side * halfW * 1.2f;
 		float edgeY = Random::Generate<float>(-halfH * 0.8f, halfH * 0.8f);
 
-		Vector3 target = {edgeX, edgeY, p.z};
-		Vector3 dir	   = (target - p).Normalize();
+		CalyxMath::Vector3 target = {edgeX, edgeY, p.z};
+		CalyxMath::Vector3 dir	   = (target - p).Normalize();
 		if(dir.LengthSquared() < 1e-8f) dir = {side, 0, 0};
 
 		exitDirLocal_ = dir;
@@ -219,7 +219,7 @@ void EnemyMovementController::UpdateExit(float dt) {
 	}
 
 	// 移動
-	Vector3 newPos = owner_->GetWorldTransform().translation + exitDirLocal_ * exitSpeed_ * dt;
+	CalyxMath::Vector3 newPos = owner_->GetWorldTransform().translation + exitDirLocal_ * exitSpeed_ * dt;
 	owner_->SetTranslate(newPos);
 	LookAtPlayer();
 
@@ -230,7 +230,7 @@ void EnemyMovementController::UpdateExit(float dt) {
 
 bool EnemyMovementController::CheckExitFinished() const {
 	auto		   cam = CameraManager::GetMain3dShared();
-	const Vector3& p   = owner_->GetWorldTransform().translation;
+	const CalyxMath::Vector3& p   = owner_->GetWorldTransform().translation;
 
 	float halfH = p.z * std::tan(cam->GetFovY() * 0.5f);
 	float halfW = halfH * cam->GetAspectRatio();
@@ -240,7 +240,7 @@ bool EnemyMovementController::CheckExitFinished() const {
 
 	return outX || outY;
 }
-void EnemyMovementController::StartEntranceToFormation(EnemyFormationController* formation, const Vector3& formationOffset, const Vector3& entranceStartWorld) {
+void EnemyMovementController::StartEntranceToFormation(EnemyFormationController* formation, const CalyxMath::Vector3& formationOffset, const CalyxMath::Vector3& entranceStartWorld) {
 	if(mode_ == Mode::Dissolving)
 		return;
 	formation_		 = formation;
@@ -271,7 +271,7 @@ void EnemyMovementController::UpdateEntrance(float dt) {
 	// イージング（
 	float ease = 1.0f - std::pow(1.0f - t, 3.0f); // EaseOutCubic
 
-	Vector3 pos = Vector3::Lerp(entranceStart_, entranceTarget_, ease);
+	CalyxMath::Vector3 pos = CalyxMath::Vector3::Lerp(entranceStart_, entranceTarget_, ease);
 	owner_->SetTranslate(pos);
 	LookAtPlayer();
 
@@ -308,15 +308,15 @@ void EnemyMovementController::UpdateFormation(float /*dt*/) {
 	if(!formation_ || !owner_) return;
 
 	// FormationController の座標は「カメラローカル」として扱う
-	Vector3 leaderPos = formation_->GetPosition();
-	Vector3 off		  = formationOffset_;
+	CalyxMath::Vector3 leaderPos = formation_->GetPosition();
+	CalyxMath::Vector3 off		  = formationOffset_;
 
 	// 個体差の揺れを乗せてスターフォックス感
 	float t = ClockManager::GetInstance()->GetTotalTime();
 	off.x += std::sin(t * 2.1f + formationPhase_) * 1.5f;
 	off.y += std::sin(t * 1.7f + formationPhase_) * 1.5f;
 
-	Vector3 localPos = leaderPos + off;
+	CalyxMath::Vector3 localPos = leaderPos + off;
 	owner_->SetTranslate(localPos);
 
 	// 見た目の向き：とりあえずプレイヤーを向かせる
@@ -328,14 +328,14 @@ void EnemyMovementController::UpdateFormation(float /*dt*/) {
 //==================================================================
 void EnemyMovementController::LookAtPlayer() {
 	if(playerTf_) {
-		Vector3 targetWorld = playerTf_->GetWorldPosition();
-		Vector3 myWorld		= owner_->GetWorldTransform().GetWorldPosition();
+		CalyxMath::Vector3 targetWorld = playerTf_->GetWorldPosition();
+		CalyxMath::Vector3 myWorld		= owner_->GetWorldTransform().GetWorldPosition();
 		WorldTransform& worldTransform_ = owner_->GetWorldTransform();
-		Vector3 dir;
+		CalyxMath::Vector3 dir;
 		if(worldTransform_.parent) {
-			Matrix4x4 invParent	  = Matrix4x4::Inverse(worldTransform_.parent->matrix.world);
-			Vector3	  targetLocal = Vector3::Transform(targetWorld, invParent);
-			Vector3	  myLocal	  = Vector3::Transform(myWorld, invParent);
+			CalyxMath::Matrix4x4 invParent	  = CalyxMath::Matrix4x4::Inverse(worldTransform_.parent->matrix.world);
+			CalyxMath::Vector3	  targetLocal = CalyxMath::Vector3::Transform(targetWorld, invParent);
+			CalyxMath::Vector3	  myLocal	  = CalyxMath::Vector3::Transform(myWorld, invParent);
 			dir					  = (targetLocal - myLocal).Normalize();
 		} else {
 			dir = (targetWorld - myWorld).Normalize();
@@ -343,7 +343,7 @@ void EnemyMovementController::LookAtPlayer() {
 		if(dir.LengthSquared() > 1e-12f) {
 			const float yaw			 = std::atan2(dir.x, dir.z);
 			const float pitch		 = std::atan2(-dir.y, std::sqrt(dir.x * dir.x + dir.z * dir.z));
-			worldTransform_.rotation = Quaternion::MakeRotateY(yaw) * Quaternion::MakeRotateX(pitch);
+			worldTransform_.rotation = CalyxMath::Quaternion::MakeRotateY(yaw) * CalyxMath::Quaternion::MakeRotateX(pitch);
 		}
 	}
 }

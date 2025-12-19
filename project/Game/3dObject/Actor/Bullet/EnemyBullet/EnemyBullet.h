@@ -40,6 +40,6 @@ private:
 private:
 	SoftHomingParam homing_{};					//< ホーミングパラメータ
 	std::weak_ptr<SceneObject> wTarget_{};		//< ターゲットのポインタ
-	std::weak_ptr<FxObject> trailFx_{};			//< トレイルエフェクト
+	std::weak_ptr<CalyxEffect::FxObject> trailFx_{};				 //< トレイルエフェクト
 	float age_ = 0.0f;							//< 寿命
 };

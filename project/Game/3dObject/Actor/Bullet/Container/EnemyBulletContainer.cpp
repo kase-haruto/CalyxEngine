@@ -4,7 +4,7 @@
 EnemyBulletContainer::EnemyBulletContainer(const std::string& name):
 	BulletContainer(name){}
 
-void EnemyBulletContainer::AddBullet(BulletID id, const Vector3& pos, const Vector3& vel){
+void EnemyBulletContainer::AddBullet(BulletID id, const CalyxMath::Vector3& pos, const CalyxMath::Vector3& vel){
 	if (id != BulletID::Enemy_Straight){return;}
 
 	auto bullet = BulletFactory::Create(id);

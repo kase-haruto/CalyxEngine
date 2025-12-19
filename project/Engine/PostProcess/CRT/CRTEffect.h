@@ -8,7 +8,7 @@
 class CRTEffect : public IPostEffectPass {
 private:
 	struct CRTParameter {
-		Vector2 screenSize;
+		CalyxMath::Vector2 screenSize;
 		float time;
 		float padding; // align 16
 	};
@@ -20,7 +20,7 @@ public:
 			   IRenderTarget* outputRT) override;
 	const std::string GetName() const override { return "CRTEffect"; }
 
-	void SetScreenSize(const Vector2& size) {
+	void SetScreenSize(const CalyxMath::Vector2& size) {
 		param_.screenSize = size;
 	}
 

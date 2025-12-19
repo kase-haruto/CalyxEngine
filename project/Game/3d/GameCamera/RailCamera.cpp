@@ -1,6 +1,6 @@
 #include "RailCamera.h"
 
-#include <Engine/Application/Input/Input.h>
+#include <Engine/Foundation/Input/Input.h>
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 
@@ -84,7 +84,7 @@ void RailCamera::UpdateOrientationFromPath(float dt) {
 	// ==== 現在位置 ====
 	const float totalLen = spline_.TotalLength();
 	float		tNow	 = (totalLen > 0.0f) ? spline_.DistanceToT(traveled_) : 0.0f;
-	Vector3		eye		 = spline_.Evaluate(tNow);
+	CalyxMath::Vector3		eye		 = spline_.Evaluate(tNow);
 
 	// ==== 先読み点（進行方向計算用） ====
 	float sAhead = traveled_ + (std::max)(lookAhead_, 0.01f);
@@ -95,10 +95,10 @@ void RailCamera::UpdateOrientationFromPath(float dt) {
 		sAhead = std::clamp(sAhead, 0.0f, totalLen);
 	}
 	float	tAhead = (totalLen > 0.0f) ? spline_.DistanceToT(sAhead) : 0.0f;
-	Vector3 target = spline_.Evaluate(tAhead);
+	CalyxMath::Vector3 target = spline_.Evaluate(tAhead);
 
 	// ==== 向きベクトル ====
-	Vector3 dir = target - eye;
+	CalyxMath::Vector3 dir = target - eye;
 	float	len = dir.Length();
 	if(len > 1e-4f)
 		dir /= len;
@@ -119,12 +119,12 @@ void RailCamera::UpdateOrientationFromPath(float dt) {
 		sAhead2 = std::clamp(sAhead2, 0.0f, totalLen);
 	}
 	float	tAhead2 = (totalLen > 0.0f) ? spline_.DistanceToT(sAhead2) : 0.0f;
-	Vector3 p0		= eye;
-	Vector3 p1		= target;
-	Vector3 p2		= spline_.Evaluate(tAhead2);
+	CalyxMath::Vector3 p0		= eye;
+	CalyxMath::Vector3 p1		= target;
+	CalyxMath::Vector3 p2		= spline_.Evaluate(tAhead2);
 
-	Vector3 v1 = (p1 - p0);
-	Vector3 v2 = (p2 - p1);
+	CalyxMath::Vector3 v1 = (p1 - p0);
+	CalyxMath::Vector3 v2 = (p2 - p1);
 	if(v1.LengthSquared() > 1e-8f) v1.Normalize();
 	if(v2.LengthSquared() > 1e-8f) v2.Normalize();
 
@@ -213,7 +213,7 @@ void RailCamera::AlwaysUpdate(float dt) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //  カメラ位置の取得
 /////////////////////////////////////////////////////////////////////////////////////////
-Vector3 RailCamera::GetPosition() {
+CalyxMath::Vector3 RailCamera::GetPosition() {
 	return worldTransform_.GetWorldPosition();
 }
 

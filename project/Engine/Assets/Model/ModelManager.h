@@ -84,8 +84,8 @@ private:
 	void LoadUVTransform(const aiMaterial* material, MaterialData& outMaterial);
 	void LoadSkinData(const aiMesh* mesh, ModelData& modelData);
 	// アニメーション評価関連
-	Vector3	   Evaluate(const AnimationCurve<Vector3>& curve, float time);
-	Quaternion Evaluate(const AnimationCurve<Quaternion>& curve, float time);
+	CalyxMath::Vector3	   Evaluate(const AnimationCurve<CalyxMath::Vector3>& curve, float time);
+	CalyxMath::Quaternion Evaluate(const AnimationCurve<CalyxMath::Quaternion>& curve, float time);
 
 private:
 	// シングルトン

@@ -43,7 +43,7 @@ private:
 	//===================================================================*/
 	//					private methods
 	//===================================================================*/
-	Vector3			   direction_; //< 振り向く方向
+	CalyxMath::Vector3			   direction_; //< 振り向く方向
 	float			   time_;	   //< 振り向く時間
 	Cx::Ease::EaseType easeType_;  //< 使用イージングタイプ
 
@@ -53,6 +53,6 @@ private:
 	// action
 	std::unique_ptr<CameraTurnAroundAction> turnAction_;
 	std::unique_ptr<CameraTurnAroundAction> returnAction_;
-	Vector3 originalDir_;
+	CalyxMath::Vector3 originalDir_;
 	bool active_ = false;
 };

@@ -9,21 +9,27 @@
 #include <memory>
 
 class SceneContext;
-class ParticleSystemObject;
 
-class CreateParticleSystemObjectCommand : public ICommand{
-public:
-	using ObjectFactory = std::function<std::shared_ptr<ParticleSystemObject>()>;
+namespace CalyxEffect {
+	class ParticleSystemObject;
 
-	CreateParticleSystemObjectCommand(SceneContext* context, ObjectFactory factory, std::string name);
+	class CreateParticleSystemObjectCommand 
+		: public ICommand {
+	public:
+		using ObjectFactory = std::function<std::shared_ptr<ParticleSystemObject>()>;
 
-	void Execute() override;
-	void Undo() override;
-	const char* GetName() const override;
+		CreateParticleSystemObjectCommand(SceneContext* context, ObjectFactory factory, std::string name);
 
-private:
-	SceneContext* context_ = nullptr;
-	ObjectFactory factory_;
-	std::shared_ptr<ParticleSystemObject> particleSystem_; // 所有する
-	std::string name_;
-};
+		void		Execute() override;
+		void		Undo() override;
+		const char* GetName() const override;
+
+	private:
+		SceneContext*						  context_ = nullptr;
+		ObjectFactory						  factory_;
+		std::shared_ptr<ParticleSystemObject> particleSystem_; // 所有する
+		std::string							  name_;
+	};
+
+}
+

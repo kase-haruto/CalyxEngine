@@ -8,8 +8,8 @@
 
 
 void ParticleRenderer::Render(
-	const std::vector<std::shared_ptr<FxEmitter>>& cpuEmitters,
-	const std::vector<std::shared_ptr<GpuFxEmitter>>& gpuEmitters,
+	const std::vector<std::shared_ptr<CalyxEffect::FxEmitter>>& cpuEmitters,
+	const std::vector<std::shared_ptr<CalyxEffect::GpuFxEmitter>>& gpuEmitters,
 	PipelineService* pipelineService,
 	ID3D12GraphicsCommandList* cmdList){
 	if (cpuEmitters.empty() && gpuEmitters.empty()) return;
@@ -65,7 +65,7 @@ void ParticleRenderer::Render(
 			EnsureModelIsReady(model, device);
 
 			DrawModelInstanced(model, cmdList,
-							   GpuFxEmitter::kMaxParticles,
+							   CalyxEffect::GpuFxEmitter::kMaxParticles,
 							   em->GetParticleSrv());
 		}
 	}
@@ -73,7 +73,7 @@ void ParticleRenderer::Render(
 
 
 void ParticleRenderer::RenderGrouped(const std::string& modelPath,
-									 const std::vector<ParticleConstantData>& gpuUnits,
+									 const std::vector<CalyxEffect::ParticleConstantData>& gpuUnits,
 									 ID3D12GraphicsCommandList* cmdList){
 	if (gpuUnits.empty()) return;
 
@@ -84,7 +84,7 @@ void ParticleRenderer::RenderGrouped(const std::string& modelPath,
 	EnsureModelIsReady(model, device);
 
 	// 一時バッファをローカルで作成
-	DxStructuredBuffer<ParticleConstantData> tempBuffer;
+	DxStructuredBuffer<CalyxEffect::ParticleConstantData> tempBuffer;
 	tempBuffer.Initialize(device, static_cast< UINT >(gpuUnits.size()));
 	tempBuffer.TransferVectorData(gpuUnits);
 	tempBuffer.CreateSrv(device);

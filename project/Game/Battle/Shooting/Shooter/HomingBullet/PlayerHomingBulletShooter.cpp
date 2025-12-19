@@ -7,8 +7,8 @@
 PlayerHomingBulletShooter::PlayerHomingBulletShooter(BulletContainer* container, BulletID id)
 	: container_(container), id_(id){}
 
-void PlayerHomingBulletShooter::Shoot(const Vector3& origin,
-									  [[maybe_unused]] const Vector3& direction){
+void PlayerHomingBulletShooter::Shoot(const CalyxMath::Vector3& origin,
+									  [[maybe_unused]] const CalyxMath::Vector3& direction){
 	if (!container_ || targets_.empty()) return;
 
 	auto* playerContainer = dynamic_cast< PlayerBulletContainer* >(container_);
@@ -20,12 +20,12 @@ void PlayerHomingBulletShooter::Shoot(const Vector3& origin,
 		auto bullet = BulletFactory::Create(id_);
 		if (!bullet) continue;
 
-		bullet->SetScale(Vector3(0.3f, 0.3f, 0.3f));
-		Vector3 toTarget = target->GetWorldPosition() - origin;
+		bullet->SetScale(CalyxMath::Vector3(0.3f, 0.3f, 0.3f));
+		CalyxMath::Vector3 toTarget = target->GetWorldPosition() - origin;
 		if (toTarget.Length() > 0.001f){
 			toTarget.Normalize();
 		} else{
-			toTarget = Vector3(0, 0, 1);
+			toTarget = CalyxMath::Vector3(0, 0, 1);
 		}
 		bullet->ShootInitialize(origin, toTarget);
 

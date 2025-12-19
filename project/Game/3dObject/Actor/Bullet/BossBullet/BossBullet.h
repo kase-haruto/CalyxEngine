@@ -25,6 +25,6 @@ public:
 	//--------- accessor ---------------------------------------------------
 
 private:
-	std::weak_ptr<FxObject> shootFx_;
+	std::weak_ptr<CalyxEffect::FxObject> shootFx_;
 
 };

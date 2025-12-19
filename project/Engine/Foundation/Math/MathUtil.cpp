@@ -14,7 +14,7 @@
 
 #include <cmath>
 
-namespace Cx::Math {
+namespace CalyxMath {
 	Matrix4x4 MakeTranslateMatrix(const Vector3& translate) noexcept {
 		Matrix4x4 result = {
 					1, 0, 0, 0,
@@ -72,12 +72,12 @@ namespace Cx::Math {
 
 	Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate) noexcept {
 		Matrix4x4 affineMatrix;
-		Matrix4x4 translateMatrix = Cx::Math::MakeTranslateMatrix(translate);
-		Matrix4x4 scaleMatrix = Cx::Math::MakeScaleMatrix(scale);
+		Matrix4x4 translateMatrix = CalyxMath::MakeTranslateMatrix(translate);
+		Matrix4x4 scaleMatrix = CalyxMath::MakeScaleMatrix(scale);
 
-		Matrix4x4 rotateXMatrix = Cx::Math::MakeRotateXMatrix(rotate.x);
-		Matrix4x4 rotateYMatrix = Cx::Math::MakeRotateYMatrix(rotate.y);
-		Matrix4x4 rotateZMatrix = Cx::Math::MakeRotateZMatrix(rotate.z);
+		Matrix4x4 rotateXMatrix = CalyxMath::MakeRotateXMatrix(rotate.x);
+		Matrix4x4 rotateYMatrix = CalyxMath::MakeRotateYMatrix(rotate.y);
+		Matrix4x4 rotateZMatrix = CalyxMath::MakeRotateZMatrix(rotate.z);
 		Matrix4x4 rotateMatrix = Matrix4x4::Multiply(Matrix4x4::Multiply(rotateXMatrix, rotateYMatrix), rotateZMatrix);
 
 		affineMatrix = Matrix4x4::Multiply(Matrix4x4::Multiply(scaleMatrix, rotateMatrix), translateMatrix);
@@ -88,9 +88,9 @@ namespace Cx::Math {
 
 	Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Quaternion& rotate, const Vector3& translate) noexcept {
 		// 各種変換行列を生成
-		const Matrix4x4 scaleMatrix = Cx::Math::MakeScaleMatrix(scale);
+		const Matrix4x4 scaleMatrix = CalyxMath::MakeScaleMatrix(scale);
 		const Matrix4x4 rotationMatrix = Quaternion::ToMatrix(rotate);
-		const Matrix4x4 translationMatrix = Cx::Math::MakeTranslateMatrix(translate);
+		const Matrix4x4 translationMatrix = CalyxMath::MakeTranslateMatrix(translate);
 
 		// スケーリング → 回転 → 平行移動 の順で合成
 		Matrix4x4 affineMatrix = Matrix4x4::Multiply(
@@ -135,14 +135,14 @@ namespace Cx::Math {
 
 	float ToRadians(float deg) noexcept { return deg * 3.14159265358979323846f / 180.0f; }
 
-	Vector2 WorldToScreen(const Vector3& worldPos) {
+	CalyxMath::Vector2 WorldToScreen(const Vector3& worldPos) {
 		const Matrix4x4& viewProj = CameraManager::GetMain3d()->GetViewProjectionMatrix();
 
 		// ワールド→クリップ空間
 		Vector4 clipPos = Vector4::Transform(Vector4(worldPos, 1.0f), viewProj);
 
 		if(fabs(clipPos.w) < 1e-5f) {
-			return Vector2(0.0f, 0.0f); // 無効値
+			return CalyxMath::Vector2(0.0f, 0.0f); // 無効値
 		}
 
 		// NDC座標へ
@@ -158,10 +158,10 @@ namespace Cx::Math {
 		float screenX = (ndcPos.x * 0.5f + 0.5f) * screenWidth;
 		float screenY = (1.0f - (ndcPos.y * 0.5f + 0.5f)) * screenHeight;
 
-		return Vector2(screenX, screenY);
+		return CalyxMath::Vector2(screenX, screenY);
 	}
 
-	Vector3 ScreenToWorld(const Vector2& screenPos, float depthZ) {
+	Vector3 ScreenToWorld(const CalyxMath::Vector2& screenPos, float depthZ) {
 		float screenWidth  = kGameWidth;
 		float screenHeight = kGameHeight;
 

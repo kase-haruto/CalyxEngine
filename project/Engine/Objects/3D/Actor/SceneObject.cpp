@@ -65,10 +65,10 @@ bool SceneObject::Load() { return false; }
 //		トランスフォームからaabbを構築して返す
 /////////////////////////////////////////////////////////////////////////////////////////
 AABB SceneObject::FallbackAABBFromTransform() const {
-	Vector3 center	  = worldTransform_.GetWorldPosition();
-	Vector3 halfScale = worldTransform_.scale * 0.5f;
-	Vector3 min		  = center - halfScale;
-	Vector3 max		  = center + halfScale;
+	CalyxMath::Vector3 center	  = worldTransform_.GetWorldPosition();
+	CalyxMath::Vector3 halfScale = worldTransform_.scale * 0.5f;
+	CalyxMath::Vector3 min		  = center - halfScale;
+	CalyxMath::Vector3 max		  = center + halfScale;
 	return AABB(min, max);
 }
 

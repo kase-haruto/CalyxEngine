@@ -6,8 +6,8 @@
 #include <memory>
 #include <string>
 
-struct Vector2;
-struct Vector4;
+struct CalyxMath::Vector2;
+struct CalyxMath::Vector4;
 class Sprite;
 
 /************************************
@@ -27,7 +27,7 @@ public:
 	 * \param position	座標
 	 * \param size		サイズ
 	 */
-	void Initialize(const Vector2& position, const Vector2& size);
+	void Initialize(const CalyxMath::Vector2& position, const CalyxMath::Vector2& size);
 	/**
 	 * \brief 更新処理
 	 * \param dt 時間
@@ -52,7 +52,7 @@ public:
 	Sprite* GetFrameSprite() const { return frameSprite_.get(); }
 
 	// setter
-	void SetAncorPoint(const Vector2& point) const;
+	void SetAncorPoint(const CalyxMath::Vector2& point) const;
 
 private:
 	//=================================================================
@@ -76,7 +76,7 @@ private:
 	float shakeTimer_   = 0.0f; //< 揺れタイマー
 	float visibleTimer_ = 0.0f; //< 可視タイマー
 
-	Vector2     baseSize_;  //< 基本サイズ（初期サイズ）
+	CalyxMath::Vector2     baseSize_;  //< 基本サイズ（初期サイズ）
 	Transform2D transform_; //< 変換情報（位置・回転・スケール）
 
 	std::unique_ptr<Sprite> blueGauge_;   //< 青ゲージ（現在 HP）

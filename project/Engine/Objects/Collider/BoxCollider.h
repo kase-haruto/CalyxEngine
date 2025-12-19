@@ -15,8 +15,8 @@ public:
 	BoxCollider(bool isEnuble);
 	~BoxCollider() override = default;
 
-	void Update(const Vector3& position, const Quaternion& rotate) override;
-	void Initialize(const Vector3& size);
+	void Update(const CalyxMath::Vector3& position, const CalyxMath::Quaternion& rotate) override;
+	void Initialize(const CalyxMath::Vector3& size);
 	void Draw() override;
 
 	void ShowGui() override;
@@ -27,7 +27,7 @@ public:
 	void OnCollisionExit([[maybe_unused]] Collider* other) override {};
 
 	float		   GetColliderRadius() const override { return shape_.size.x * 0.5f; }
-	const Vector3& GetSize() const { return shape_.size; }
+	const CalyxMath::Vector3& GetSize() const { return shape_.size; }
 
 protected:
 	//===================================================================*/
@@ -45,8 +45,8 @@ public:
 	//===================================================================*/
 	//                   getter/setter
 	//===================================================================*/
-	const Vector3& GetCenter() const override;
-	void		   SetSize(const Vector3& size) { shape_.size = size; }
+	const CalyxMath::Vector3& GetCenter() const override;
+	void		   SetSize(const CalyxMath::Vector3& size) { shape_.size = size; }
 
 	const std::variant<Sphere, OBB>& GetCollisionShape() override;
 };

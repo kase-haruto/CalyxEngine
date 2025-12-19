@@ -4,7 +4,7 @@
 // scene
 #include "Game/3d/GameCamera/RailCamera.h"
 
-#include <Engine/Application/Input/Input.h>
+#include <Engine/Foundation/Input/Input.h>
 #include <Engine/Application/System/Enviroment.h>
 #include <Engine/Collision/CollisionManager.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
@@ -33,22 +33,22 @@ void ClearScene::Initialize() {
 	BaseScene::Initialize();
 
 	clearSprite_   = std::make_unique<Sprite>("Textures/clear.png");
-	Vector2 center = kGameSize * 0.5f;
+	CalyxMath::Vector2 center = kGameSize * 0.5f;
 	clearSprite_->SetSize(kGameSize);
-	clearSprite_->SetAnchorPoint(Vector2(0.5f, 0.5f));
+	clearSprite_->SetAnchorPoint(CalyxMath::Vector2(0.5f, 0.5f));
 	clearSprite_->SetPosition(center);
 
 	buttonSprite_ = std::make_unique<Sprite>("Textures/button_A.png");
-	buttonSprite_->SetAnchorPoint(Vector2(0.5f, 0.5f));
-	buttonSprite_->SetSize(Vector2(64.0f, 64.0f));
-	Vector2 pos = Vector2(center.x, 600.0f);
+	buttonSprite_->SetAnchorPoint(CalyxMath::Vector2(0.5f, 0.5f));
+	buttonSprite_->SetSize(CalyxMath::Vector2(64.0f, 64.0f));
+	CalyxMath::Vector2 pos = CalyxMath::Vector2(center.x, 600.0f);
 	buttonSprite_->SetPosition(pos);
 
 	// result:用スプライト
 	resultScoreSprite_ = std::make_unique<Sprite>("Textures/resultScore.png");
-	resultScoreSprite_->SetAnchorPoint(Vector2(0.0f, 0.5f));
-	resultScoreSprite_->SetSize(Vector2(300.0f, 56.0f));
-	resultScoreSprite_->SetPosition(Vector2(center.x - 400.0f, 320.0f));
+	resultScoreSprite_->SetAnchorPoint(CalyxMath::Vector2(0.0f, 0.5f));
+	resultScoreSprite_->SetSize(CalyxMath::Vector2(300.0f, 56.0f));
+	resultScoreSprite_->SetPosition(CalyxMath::Vector2(center.x - 400.0f, 320.0f));
 
 	// スコア表示用 NumbersSpriteカクトクスコア
 	scoreSprite_ = std::make_unique<NumbersSprite>("Textures/Numbers", ".png");
@@ -78,8 +78,8 @@ void ClearScene::Update(float dt) {
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
 
 	// 遷移
-	if(Input::GetInstance()->TriggerGamepadButton(PadButton::A) ||
-	   Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+	if(CalyxFoundation::Input::GetInstance()->TriggerGamepadButton(CalyxFoundation::PadButton::A) ||
+	   CalyxFoundation::Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 		transitionRequestor_->RequestSceneChange(SceneType::TITLE);
 	}
 }

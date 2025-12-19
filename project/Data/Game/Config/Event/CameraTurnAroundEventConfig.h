@@ -5,7 +5,7 @@
 
 struct CameraTurnAroundEventConfig
 	: public EventConfig {
-	Vector3 direction; // 振り向く方向
+	CalyxMath::Vector3 direction; // 振り向く方向
 	float	time;	   // かかる時間
 	int16_t easeType;  // イージングの処理
 };

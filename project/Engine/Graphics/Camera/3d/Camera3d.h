@@ -41,9 +41,9 @@ private:
     void UpdateFollow(float dt);
 
     // ベクトル版 SmoothDamp（Unity 近似）
-    static Vector3 SmoothDampVec(const Vector3& current,
-                                 const Vector3& target,
-                                 Vector3& currentVelocity,
+    static CalyxMath::Vector3 SmoothDampVec(const CalyxMath::Vector3& current,
+                                 const CalyxMath::Vector3& target,
+                                 CalyxMath::Vector3& currentVelocity,
                                  float smoothTime, float dt);
 
     // 回転の指数補間率（0..1）
@@ -58,7 +58,7 @@ private:
         float  distanceBack     = 13.0f;             // 後方距離（-F * distanceBack）
         float  heightOffset     = 4.0f;             // 上方向(Y)オフセット
         float  sideOffset       = 0.0f;             // 右(+)左(-)オフセット
-        Vector3 lookAtOffset    = {0.0f, 1.5f, 0.0f}; // 必要なら使用
+        CalyxMath::Vector3 lookAtOffset    = {0.0f, 1.5f, 0.0f}; // 必要なら使用
 
         // 位置スムージング
         float  posSmoothTime    = 0.78f;
@@ -69,6 +69,6 @@ private:
         float  extraPitchDeg    = -10.0f;
 
         const WorldTransform* target = nullptr;     // 追従対象
-        Vector3 posVel = {0,0,0};                   // SmoothDamp 用速度
+        CalyxMath::Vector3 posVel = {0,0,0};                   // SmoothDamp 用速度
     } follow_;
 };

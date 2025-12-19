@@ -43,7 +43,7 @@ struct EnemyFormationConfig {
 /// --------------------------------------------------------------
 class EnemyFormationController {
 public:
-	using MotionFunc = std::function<Vector3(float)>;
+	using MotionFunc = std::function<CalyxMath::Vector3(float)>;
 
 	EnemyFormationController();
 
@@ -52,7 +52,7 @@ public:
 
 	void Dissolve();
 
-	const Vector3& GetPosition() const { return pos_; }
+	const CalyxMath::Vector3& GetPosition() const { return pos_; }
 
 	float GetTime() const { return time_; }
 
@@ -68,7 +68,7 @@ private:
 	MotionFunc motionFunc_;
 
 	float time_ = 0.0f;
-	Vector3 pos_ = {0, 0, 0};
+	CalyxMath::Vector3 pos_ = {0, 0, 0};
 
 	bool dissolved_ = false;
 

@@ -34,7 +34,7 @@ void EnemyShootingController::Update(float dt) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //      発射Request
 /////////////////////////////////////////////////////////////////////////////////////////
-bool EnemyShootingController::RequestShoot(const Vector3& pos, const Vector3& dir) {
+bool EnemyShootingController::RequestShoot(const CalyxMath::Vector3& pos, const CalyxMath::Vector3& dir) {
 	if (!gameplayEngaged_) return false;
 
 	if (!externalRateControl_) {

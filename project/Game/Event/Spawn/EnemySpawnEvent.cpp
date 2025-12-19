@@ -39,7 +39,7 @@ void EnemySpawnEvent::Initialize() {
 	const std::string configRoot = "Event/";
 	baseConfig_.LoadConfig(configRoot + GetName());
 
-	collider_->SetColor(Vector3(0, 1, 0));
+	collider_->SetColor(CalyxMath::Vector3(0, 1, 0));
 
 	// シーンロード直後に一度収集
 	CollectSpawners();

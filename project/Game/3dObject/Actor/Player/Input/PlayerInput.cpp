@@ -1,19 +1,20 @@
 #include "PlayerInput.h"
 
-#include "Engine/Application/Input/Input.h"
+#include "Engine/Foundation/Input/Input.h"
 
+using CalyxFoundation::Input;
 
 std::vector<PlayerCommand> PlayerInput::CollectCommands(float dt) {
 	std::vector<PlayerCommand> cmds;
 
-	Vector3 move{};
+	CalyxMath::Vector3 move{};
 
 	if(Input::GetInstance()->PushKey(DIK_A)) move.x -= 1.0f;
 	if(Input::GetInstance()->PushKey(DIK_D)) move.x += 1.0f;
 	if(Input::GetInstance()->PushKey(DIK_W)) move.y+= 1.0f;
 	if(Input::GetInstance()->PushKey(DIK_S)) move.y -= 1.0f;
 
-	Vector2 stick = Input::GetInstance()->GetLeftStick();
+	CalyxMath::Vector2 stick = Input::GetInstance()->GetLeftStick();
 	move.x += stick.x;
 	move.y += stick.y;
 
@@ -25,8 +26,8 @@ std::vector<PlayerCommand> PlayerInput::CollectCommands(float dt) {
 	}
 
 	// レティクル
-	Vector3 ret{};
-	Vector2 rs = Input::GetInstance()->GetRightStick();
+	CalyxMath::Vector3 ret{};
+	CalyxMath::Vector2 rs = Input::GetInstance()->GetRightStick();
 	ret.x = rs.x * 300.0f * dt;
 	ret.y = rs.y * 300.0f * dt;
 	if(ret.LengthSquared() > 0.0f) {
@@ -37,13 +38,13 @@ std::vector<PlayerCommand> PlayerInput::CollectCommands(float dt) {
 	}
 
 	if(Input::GetInstance()->TriggerKey(DIK_LSHIFT) ||
-	   Input::GetInstance()->TriggerGamepadButton(PadButton::X)) {
+	   Input::GetInstance()->TriggerGamepadButton(CalyxFoundation::PadButton::X)) {
 		cmds.push_back({ PlayerCommandType::Dodge, {} });
 
 	   }
 
 	if(Input::GetInstance()->PushKey(DIK_SPACE) ||
-	   Input::GetInstance()->PushGamepadButton(PadButton::RB)) {
+		  Input::GetInstance()->PushGamepadButton(CalyxFoundation::PadButton::RB)) {
 		cmds.push_back({ PlayerCommandType::Shoot, {} });
 	   }
 

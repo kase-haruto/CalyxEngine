@@ -1,7 +1,7 @@
 #include "DefeatScene.h"
 
 // scene
-#include <Engine/Application/Input/Input.h>
+#include <Engine/Foundation/Input/Input.h>
 #include <Engine/Application/System/Enviroment.h>
 #include <Engine/Collision/CollisionManager.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
@@ -29,15 +29,15 @@ void DefeatScene::Initialize() {
 	BaseScene::Initialize();
 
 	defeatSprite_  = std::make_unique<Sprite>("Textures/defeat.png");
-	Vector2 center = kGameSize * 0.5f;
+	CalyxMath::Vector2 center = kGameSize * 0.5f;
 	defeatSprite_->SetSize(kGameSize);
-	defeatSprite_->SetAnchorPoint(Vector2(0.5f, 0.5f));
+	defeatSprite_->SetAnchorPoint(CalyxMath::Vector2(0.5f, 0.5f));
 	defeatSprite_->SetPosition(center);
 
 	buttonSprite = std::make_unique<Sprite>("Textures/button_A.png");
-	buttonSprite->SetAnchorPoint(Vector2(0.5f, 0.5f));
-	buttonSprite->SetSize(Vector2(64.0f, 64.0f));
-	Vector2 pos = Vector2(center.x, 600.0f);
+	buttonSprite->SetAnchorPoint(CalyxMath::Vector2(0.5f, 0.5f));
+	buttonSprite->SetSize(CalyxMath::Vector2(64.0f, 64.0f));
+	CalyxMath::Vector2 pos = CalyxMath::Vector2(center.x, 600.0f);
 	buttonSprite->SetPosition(pos);
 }
 void DefeatScene::Update(float dt) {
@@ -53,7 +53,7 @@ void DefeatScene::Update(float dt) {
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
 
 	// 遷移
-	if(Input::GetInstance()->TriggerGamepadButton(PadButton::A)) {
+	if(CalyxFoundation::Input::GetInstance()->TriggerGamepadButton(CalyxFoundation::PadButton::A)) {
 		transitionRequestor_->RequestSceneChange(SceneType::TITLE);
 	}
 }
