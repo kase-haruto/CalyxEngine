@@ -1,6 +1,5 @@
 #include "PlayerInstaller.h"
 #include <Game/3dObject/Actor/Bullet/Container/PlayerBulletContainer.h>
-#include <Game/Input/PlayerInput/PlayerInputHandler.h>
 
 std::shared_ptr<Player> PlayerInstaller::InstallPlayer(const std::shared_ptr<Player>& player){
 
@@ -17,10 +16,6 @@ std::shared_ptr<Player> PlayerInstaller::InstallPlayer(const std::shared_ptr<Pla
 
 	// Player に ShootingController をセット
 	player->SetShootingController(std::move(shooting));
-
-	// input
-	auto input = std::make_unique<PlayerInputHandler>();
-	player->SetInputHandler(std::move(input));
 
 	return player;
 }

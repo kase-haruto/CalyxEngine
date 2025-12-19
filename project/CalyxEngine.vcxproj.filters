@@ -2040,12 +2040,6 @@
     <ClInclude Include="Game\3dObject\Actor\Player\DangerSense\PlayerDangerSense.h">
       <Filter>Game\3dObject\Actor\Player\DangerSense</Filter>
     </ClInclude>
-    <ClCompile Include="Game\3dObject\Actor\Player\Dodge\PlayerDodge.cpp">
-      <Filter>Game\3dObject\Actor\Player\Dodge</Filter>
-    </ClCompile>
-    <ClInclude Include="Game\3dObject\Actor\Player\Dodge\PlayerDodge.h">
-      <Filter>Game\3dObject\Actor\Player\Dodge</Filter>
-    </ClInclude>
     <ClCompile Include="Game\3dObject\Actor\Player\Dodge\PlayerDodgeMotion.cpp">
       <Filter>Game\3dObject\Actor\Player\Dodge</Filter>
     </ClCompile>
@@ -2266,6 +2260,46 @@
     <ClInclude Include="Engine\Objects\Event\Camera\CameraEventObject.h" />
     <ClInclude Include="Game\Event\Camera\CameraTurnAroundEvent.h" />
     <ClInclude Include="Game\Event\Spawn\EnemySpawnEvent.h" />
+    <ClInclude Include="Data\Engine\Configs\Scene\Objects\Particle\EffectConfig.h" />
+    <ClInclude Include="Engine\Application\Effects\FxGuiHelpers.h" />
+    <ClInclude Include="Engine\Application\Effects\FxObject.h" />
+    <ClInclude Include="Engine\Application\Effects\Particle\Module\OverLifetime\OverLifetimeModule.h" />
+    <ClInclude Include="Game\2d\HpGauge.h" />
+    <ClInclude Include="Game\3dObject\Actor\Boss\AI\BossAI.h" />
+    <ClInclude Include="Game\3dObject\Actor\Boss\Anim\BossAnimController.h" />
+    <ClInclude Include="Game\3dObject\Actor\Boss\Attack\BossHomingSpreadShoot.h" />
+    <ClInclude Include="Game\3dObject\Actor\Boss\Attack\BossLaser.h" />
+    <ClInclude Include="Game\3dObject\Actor\Boss\Attack\BossNormalShoot.h" />
+    <ClInclude Include="Game\3dObject\Actor\Boss\Attack\IBossAttack.h" />
+    <ClInclude Include="Game\3dObject\Actor\Boss\Details\BossAttackType.h" />
+    <ClInclude Include="Game\3dObject\Actor\Boss\State\Attack\BossStateAttack.h" />
+    <ClInclude Include="Game\3dObject\Actor\Boss\State\Damage\BossStateDamage.h" />
+    <ClInclude Include="Game\3dObject\Actor\Boss\State\Death\BossStateDeath.h" />
+    <ClInclude Include="Game\3dObject\Actor\Boss\State\Idle\BossStateIdle.h" />
+    <ClInclude Include="Game\3dObject\Actor\Boss\State\Base\BaseBossState.h" />
+    <ClInclude Include="Game\3dObject\Actor\Boss\State\Machine\BossStateMachine.h" />
+    <ClInclude Include="Game\3dObject\Actor\Bullet\BossBullet\BossHomingBullet.h" />
+    <ClInclude Include="Game\3dObject\Actor\Enemy\Movement\EnemyMovementController.h" />
+    <ClInclude Include="Game\3dObject\Actor\Enemy\Shoot\EnemyShootingAgent.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\Damage\PlayerDamageHandler.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\Dodge\PlayerDodgeSystem.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\Input\PlayerCommand.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\Input\PlayerInput.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\LockOn\PlayerLockOn.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\Move\PlayerMoveController.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\Updater\IPlayerTickUpdater.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\Updater\PlayerCombatUpdater.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\Updater\PlayerDamageUpdater.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\Updater\PlayerDodgeUpdater.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\Updater\PlayerLockOnUpdater.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\Updater\PlayerMoveUpdater.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\Updater\PlayerReticleUpdater.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\Updater\PlayerUpdaterCollection.h" />
+    <ClInclude Include="Game\Battle\Movement\Formation\EnemyFormationController.h" />
+    <ClInclude Include="Game\Scene\Clear\ClearScene.h" />
+    <ClInclude Include="Game\Scene\Defeat\DefeatScene.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\Updater\IPlayerUpdater.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\PlayerContext.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\ChromaticAberration.PS.hlsl">
@@ -2351,6 +2385,42 @@
     <ClCompile Include="Engine\Objects\Event\Camera\CameraEventObject.cpp" />
     <ClCompile Include="Game\Event\Camera\CameraTurnAroundEvent.cpp" />
     <ClCompile Include="Game\Event\Spawn\EnemySpawnEvent.cpp" />
+    <ClCompile Include="Data\Engine\Configs\Scene\Objects\Particle\Module\ModuleConfig.cpp" />
+    <ClCompile Include="Engine\Application\Effects\FxGuiHelpers.cpp" />
+    <ClCompile Include="Engine\Application\Effects\FxObject.cpp" />
+    <ClCompile Include="Engine\Application\Effects\Particle\Module\OverLifetime\OverLifetimeModule.cpp" />
+    <ClCompile Include="Game\2d\HpGauge.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Boss\AI\BossAI.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Boss\Anim\BossAnimController.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Boss\Attack\BossHomingSpreadShoot.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Boss\Attack\BossLaser.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Boss\Attack\BossNormalShoot.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Boss\Attack\IBossAttack.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Boss\State\Attack\BossStateAttack.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Boss\State\Damage\BossStateDamage.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Boss\State\Death\BossStateDeath.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Boss\State\Idle\BossStateIdle.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Boss\State\Base\BaseBossState.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Boss\State\Machine\BossStateMachine.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Bullet\BossBullet\BossHomingBullet.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Enemy\Movement\EnemyMovementController.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Enemy\Shoot\EnemyShootingAgent.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Player\Damage\PlayerDamageHandler.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Player\Dodge\PlayerDodgeSystem.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Player\Input\PlayerInput.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Player\LockOn\PlayerLockOn.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Player\Move\PlayerMoveController.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Player\Updater\IPlayerTickUpdater.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Player\Updater\PlayerCombatUpdater.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Player\Updater\PlayerDamageUpdater.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Player\Updater\PlayerDodgeUpdater.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Player\Updater\PlayerLockOnUpdater.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Player\Updater\PlayerMoveUpdater.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Player\Updater\PlayerReticleUpdater.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Player\Updater\PlayerUpdaterCollection.cpp" />
+    <ClCompile Include="Game\Battle\Movement\Formation\EnemyFormationController.cpp" />
+    <ClCompile Include="Game\Scene\Clear\ClearScene.cpp" />
+    <ClCompile Include="Game\Scene\Defeat\DefeatScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />

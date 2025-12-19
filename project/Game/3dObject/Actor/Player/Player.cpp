@@ -18,10 +18,10 @@
 #include <Game/3dObject/Actor/Player/Dodge/PlayerDodgeMotion.h>
 
 // externals
+#include "Context/PlayerContextBuilder.h"
 #include "Damage/PlayerDamageHandler.h"
 #include "Dodge/PlayerDodgeSystem.h"
 #include "Engine/Foundation/Utility/Func/CxUtils.h"
-#include "Game/Input/PlayerInput/PlayerInputHandler.h"
 
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <externals/imgui/imgui.h>
@@ -155,6 +155,9 @@ void Player::Initialize() {
 		reticleSprites_[i]->SetAnchorPoint(Vector2(0.5f, 0.5f));
 	}
 
+	// context 構築
+	PlayerContextBuilder ctxBuilder= PlayerContextBuilder(*this);
+
 	// ---- 回避コンポーネント ----
 	if(!dodgeSystem_) {
 		PlayerDodgeConfig cfg;
@@ -164,32 +167,33 @@ void Player::Initialize() {
 		cfg.spinTurns	   = 1.0f;
 
 		dodgeSystem_ = std::make_unique<PlayerDodgeSystem>();
-		dodgeSystem_->Initialize(this, cfg);
+		dodgeSystem_->Initialize(cfg);
 	}
 
 	// 回避モーション
 	if(!dodgeMotion_) {
-		dodgeMotion_ = std::make_unique<PlayerDodgeMotion>();
-		dodgeMotion_->Initialize(this, dodgeSystem_.get());
+		dodgeMotion_ = std::make_unique<PlayerDodgeSpinMotion>();
+		dodgeMotion_->Initialize(dodgeSystem_.get(),&worldTransform_);
 	}
 
-	// 危険察知
+	// ---- 危険察知 ----
 	if(!danger_) {
+
 		danger_ = std::make_unique<PlayerDangerSense>();
-		danger_->Initialize(this, dodgeSystem_.get(), {}); // UIやmarginは後で調整可
+		danger_->Initialize(ctxBuilder.BuildState(), {});
 	}
 
 	// DamageHandler
 	if(!damageHandler_) {
 		damageHandler_ = std::make_unique<PlayerDamageHandler>();
-		damageHandler_->Initialize(this);
+		damageHandler_->Initialize(ctxBuilder.BuildState());
 	}
 	dodgeSystem_->SetOnRequestInvincible(
 		[this](float sec) { if(damageHandler_) { damageHandler_->RequestInvincible(sec); } });
 
 	if(!lockOn_) {
 		lockOn_ = std::make_unique<PlayerLockOn>();
-		lockOn_->Initialize(this);
+		lockOn_->Initialize(ctxBuilder.BuildAction());
 	}
 
 	// fx
@@ -204,8 +208,37 @@ void Player::Initialize() {
 //		更新
 /////////////////////////////////////////////////////////////////////////////////////////
 void Player::Update(float dt) {
-	if(inputHandler_) {
-		inputHandler_->Update(*this, dt);
+	// 入力取得
+	std::vector<PlayerCommand> cmds = input_.CollectCommands(dt);
+
+	// コマンド処理
+	for(const auto& c : cmds) {
+		switch(c.type) {
+
+		case PlayerCommandType::Move:
+			if(auto* m = std::get_if<CmdMove>(&c.value)) {
+				AddMoveRequest(m->delta * moveSpeed_ * dt);
+				UpdateTilt(m->delta);
+			}
+			break;
+
+		case PlayerCommandType::MoveReticle:
+			if(auto* m = std::get_if<CmdMove>(&c.value)) {
+				MoveReticle(m->delta);
+			}
+			break;
+
+		case PlayerCommandType::Shoot:
+			RequestShoot();
+			break;
+
+		case PlayerCommandType::Dodge:
+			RequestDodge();
+			break;
+
+		default:
+			break;
+		}
 	}
 	if(dodgeSystem_) {
 		dodgeSystem_->Update(dt);
@@ -303,7 +336,7 @@ void Player::MoveReticle(const Vector3& offset) { reticleTransform_.translation 
 ///////////////////////////////////////////////////////////////////////////////////
 //		弾の発射をりくえすと
 ///////////////////////////////////////////////////////////////////////////////////
-void Player::RequestShoot()const {
+void Player::RequestShoot() const {
 	Vector3 playerPos  = worldTransform_.GetWorldPosition();
 	Vector3 reticlePos = reticleTransform_.GetWorldPosition();
 	Vector3 dir		   = reticlePos - playerPos;
@@ -332,7 +365,7 @@ void Player::RequestShoot()const {
 		// 発射エフェクト
 		shootFx_->PlayAll();
 	}
-	if (lockOn_) {
+	if(lockOn_) {
 		lockOn_->RequestLockOnClear();
 	}
 }
@@ -340,32 +373,30 @@ void Player::RequestShoot()const {
 ///////////////////////////////////////////////////////////////////////////////////
 //		ロックオン処理
 ///////////////////////////////////////////////////////////////////////////////////
-void Player::RequestLockOn()const {
-	if (lockOn_) {
+void Player::RequestLockOn() const {
+	if(lockOn_) {
 		lockOn_->RequestLockOn();
 	}
 }
 
-void Player::AttachDangerSenseSource(EnemyDirectory* dir)const {
+void Player::AttachDangerSenseSource(EnemyDirectory* dir) const {
 	if(danger_) danger_->SetEnemyDirectory(dir);
 }
 
-void Player::RequestLockOnTargetClear()const {
-	if (lockOn_) {
+void Player::RequestLockOnTargetClear() const {
+	if(lockOn_) {
 		lockOn_->RequestLockOnClear();
 	}
 }
 
 void Player::Start() {
-	if(!inputHandler_) inputHandler_ = std::make_unique<PlayerInputHandler>();
-
 	if(!shootingController_) {
 		auto bullets		= SceneAPI::Instantiate<PlayerBulletContainer>("playerBulletController");
 		shootingController_ = std::make_unique<PlayerShootingController>(bullets.get());
 	}
 }
 
-void Player::RequestDodge()const {
+void Player::RequestDodge() const {
 	if(dodgeSystem_) {
 		dodgeSystem_->RequestDodge();
 	}
@@ -474,13 +505,13 @@ void Player::UpdateReticlePosition() {
 /* ==================================================================================== */
 void Player::SetParent(WorldTransform* parent) { worldTransform_.parent = parent; }
 
-void Player::AttachEnemyList(const std::list<std::shared_ptr<Enemy>>& list)const {
+void Player::AttachEnemyList(const std::list<std::shared_ptr<Enemy>>& list) const {
 	if(lockOn_) {
 		lockOn_->SetEnemyList(list);
 	}
 }
 
-std::vector<Sprite*> Player::GetAllSprites()const {
+std::vector<Sprite*> Player::GetAllSprites() const {
 	std::vector<Sprite*> sprites;
 	for(auto& s : reticleSprites_) sprites.push_back(s.get());
 	// for(auto& s : lifeSprite_) sprites.push_back(s.get());
@@ -503,7 +534,7 @@ const Vector3 Player::GetCenterPos() const {
 	return worldPos;
 }
 
-std::optional<float> Player::GetShootCooldown()const {
+std::optional<float> Player::GetShootCooldown() const {
 	if(shootingController_) {
 		return shootingController_->GetCooldown();
 	}
@@ -520,7 +551,5 @@ std::optional<const float> Player::GetMaxShootInterval() const {
 }
 
 void Player::SetShootingController(std::unique_ptr<PlayerShootingController> sc) { shootingController_ = std::move(sc); }
-
-void Player::SetInputHandler(std::unique_ptr<PlayerInputHandler> ih) { inputHandler_ = std::move(ih); }
 
 REGISTER_SCENE_OBJECT(Player)

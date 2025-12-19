@@ -188,8 +188,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\3dObject\Actor\Bullet\EnemyBullet\EnemyHomingBullet.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Enemy\Movement\EnemyMovementController.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Enemy\Shoot\EnemyShootingAgent.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Player\Context\PlayerContextBuilder.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Player\Damage\PlayerDamageHandler.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Player\Dodge\PlayerDodgeSystem.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Player\Input\PlayerInput.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Player\LockOn\PlayerLockOn.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Player\Move\PlayerMoveController.cpp" />
     <ClCompile Include="Game\Battle\Movement\Formation\EnemyFormationController.cpp" />
@@ -416,7 +418,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\Battle\Shooting\Shooter\StraightBullet\StraightBulletShooter.cpp" />
     <ClCompile Include="Game\Battle\Shooting\ShootingController\PlayerShootingController.cpp" />
     <ClCompile Include="Game\Installer\Player\PlayerInstaller.cpp" />
-    <ClCompile Include="Game\Input\PlayerInput\PlayerInputHandler.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Bullet\PlayerBullet\HomingBullet.cpp" />
     <ClCompile Include="Engine\PostProcess\Vignette\Vignette.cpp" />
     <ClCompile Include="Engine\Application\System\PlaySession.cpp" />
@@ -461,8 +462,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\3dObject\Actor\Bullet\EnemyBullet\EnemyHomingBullet.h" />
     <ClInclude Include="Game\3dObject\Actor\Enemy\Movement\EnemyMovementController.h" />
     <ClInclude Include="Game\3dObject\Actor\Enemy\Shoot\EnemyShootingAgent.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\Context\PlayerContext.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\Context\PlayerContextBuilder.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\Damage\PlayerDamageHandler.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\Dodge\PlayerDodgeSystem.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\Input\PlayerCommand.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\Input\PlayerInput.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\LockOn\PlayerLockOn.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\Move\PlayerMoveController.h" />
     <ClInclude Include="Game\Battle\Movement\Formation\EnemyFormationController.h" />
@@ -747,7 +752,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\Battle\Shooting\ShootingController\PlayerShootingController.h" />
     <ClInclude Include="Game\Installer\Enemy\EnemyInstaller.h" />
     <ClInclude Include="Game\Installer\Player\PlayerInstaller.h" />
-    <ClInclude Include="Game\Input\PlayerInput\PlayerInputHandler.h" />
     <ClInclude Include="Game\Battle\Shooting\Shooter\HomingBullet\PlayerHomingBulletShooter.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\PlayerBullet\HomingBullet.h" />
     <ClInclude Include="Engine\PostProcess\Vignette\Vignette.h" />
@@ -988,6 +992,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <Content Include="Data\Game\Config\Event\CameraTurnAroundEventConfig.h" />
     <Content Include="Engine\Foundation\Utility\Func\CxUtils.h" />
     <Content Include="Game\3dObject\Actor\Boss\Details\BossAnimType.h" />
+    <Content Include="Game\3dObject\Actor\Player\PlayerContext.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

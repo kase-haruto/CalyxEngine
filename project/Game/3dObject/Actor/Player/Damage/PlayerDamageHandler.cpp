@@ -4,18 +4,18 @@
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 
 // game
-#include <Game/3dObject/Actor/Player/Player.h>
 #include <Engine/Objects/Collider/Collider.h>
+#include <Game/3dObject/Actor/Player/Player.h>
 
-PlayerDamageHandler::PlayerDamageHandler() = default;
+PlayerDamageHandler::PlayerDamageHandler()	= default;
 PlayerDamageHandler::~PlayerDamageHandler() = default;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // 初期化
 /////////////////////////////////////////////////////////////////////////////////////////
-void PlayerDamageHandler::Initialize(Player* owner) {
-	owner_ = owner;
-	invincibleTimer_ = 0.0f;
+void PlayerDamageHandler::Initialize(const PlayerStateContext& context) {
+	ctx_				  = context;
+	invincibleTimer_	  = 0.0f;
 	invincibleBlinkAccum_ = 0.0f;
 	invincibleBlinkState_ = true;
 }
@@ -31,19 +31,18 @@ void PlayerDamageHandler::Update(float dt) {
 // 被弾処理
 /////////////////////////////////////////////////////////////////////////////////////////
 void PlayerDamageHandler::OnHit(Collider* other) {
-	if (!owner_) return;
-	if (!other) return;
+	if(!other) return;
 
 	// 無敵中なら無視
-	if (IsInvincible()) return;
+	if(IsInvincible()) return;
 
 	// ===== ダメージ確定（Actor のライフを減らす）=====
-	int32_t currentLife = owner_->GetLife();
+	int32_t currentLife = ctx_.getLife();
 	currentLife--;
-	owner_->SetLife(currentLife);
+	ctx_.setLife(currentLife);
 
 	// ===== カメラシェイク =====
-	if (auto* cam = CameraManager::GetMain3d()) {
+	if(auto* cam = CameraManager::GetMain3d()) {
 		cam->StartShake(0.5f, 0.8f);
 	}
 
@@ -55,15 +54,15 @@ void PlayerDamageHandler::OnHit(Collider* other) {
 // 無敵付与
 /////////////////////////////////////////////////////////////////////////////////////////
 void PlayerDamageHandler::SetInvincibleFor(float seconds) {
-	if (seconds <= 0.0f) return;
+	if(seconds <= 0.0f) return;
 
 	const bool wasInvincible = IsInvincible();
-	invincibleTimer_ = (std::max)(invincibleTimer_, seconds);
+	invincibleTimer_		 = (std::max)(invincibleTimer_, seconds);
 
-	if (!wasInvincible && owner_) {
+	if(!wasInvincible) {
 		invincibleBlinkAccum_ = 0.0f;
 		invincibleBlinkState_ = false;
-		owner_->SetDrawEnable(false);
+		ctx_.setVisible(false);
 	}
 }
 
@@ -78,40 +77,36 @@ void PlayerDamageHandler::RequestInvincible(float seconds) {
 	if(seconds <= 0.0f) return;
 
 	const bool wasInvincible = IsInvincible();
-	invincibleTimer_ = (std::max)(invincibleTimer_, seconds);
+	invincibleTimer_		 = (std::max)(invincibleTimer_, seconds);
 
-	if(!wasInvincible && owner_) {
+	if(!wasInvincible) {
 		invincibleBlinkAccum_ = 0.0f;
 		invincibleBlinkState_ = false;
-		owner_->SetDrawEnable(false);
+		ctx_.setVisible(false);
 	}
 }
 /////////////////////////////////////////////////////////////////////////////////////////
 // 無敵更新（点滅処理）
 /////////////////////////////////////////////////////////////////////////////////////////
 void PlayerDamageHandler::UpdateInvincibility(float dt) {
-	if (invincibleTimer_ <= 0.0f) return;
+	if(invincibleTimer_ <= 0.0f) return;
 
 	invincibleTimer_ -= dt;
-	if (invincibleTimer_ <= 0.0f) {
-		invincibleTimer_      = 0.0f;
+	if(invincibleTimer_ <= 0.0f) {
+		invincibleTimer_	  = 0.0f;
 		invincibleBlinkAccum_ = 0.0f;
 		invincibleBlinkState_ = true;
 
-		if (owner_) {
-			owner_->SetDrawEnable(true);
-		}
+		ctx_.setVisible(true);
 		return;
 	}
 
 	// 無敵中は一定間隔で描画トグル
 	invincibleBlinkAccum_ += dt;
-	while (invincibleBlinkAccum_ >= kBlinkInterval) {
+	while(invincibleBlinkAccum_ >= kBlinkInterval) {
 		invincibleBlinkAccum_ -= kBlinkInterval;
 		invincibleBlinkState_ = !invincibleBlinkState_;
 
-		if (owner_) {
-			owner_->SetDrawEnable(invincibleBlinkState_);
-		}
+			ctx_.setVisible(invincibleBlinkState_);
 	}
 }
