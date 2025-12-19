@@ -10,35 +10,36 @@
 #include <vector>
 #include <string>
 #include <functional>
+namespace CalyxEditor {
+	class EditorPanel
+		: public IEngineUI {
+		using OnEditorSelectedCallback = std::function<void(BaseEditor*)>;
 
-class EditorPanel
-	:public IEngineUI{
-	using OnEditorSelectedCallback = std::function<void(BaseEditor*)>;
+	public:
+		//===================================================================*/
+		//                   public functions
+		//===================================================================*/
+		EditorPanel();
+		~EditorPanel() = default;
 
-public:
-	//===================================================================*/
-	//                   public functions
-	//===================================================================*/
-	EditorPanel();
-	~EditorPanel() = default;
+		void			   Render() override;
+		const std::string& GetPanelName() const override;
 
-	void Render() override;
-	const std::string& GetPanelName() const override;
+		void AddEditor(const BaseEditor* editor);
+		void RemoveEditor(const BaseEditor* editor);
 
-	void AddEditor(const BaseEditor* editor);
-	void RemoveEditor(const BaseEditor* editor);
+		void SetOnEditorSelected(OnEditorSelectedCallback cb) { onEditorSelected_ = std::move(cb); }
 
-	void SetOnEditorSelected(OnEditorSelectedCallback cb){ onEditorSelected_ = std::move(cb); }
+	private:
+		//===================================================================*/
+		//                   private variables
+		//===================================================================*/
+		std::vector<BaseEditor*> editors_; //< エディタのリスト
+	public:
+		static int selectedEditorIndex; //< 選択されたエディタ
 
-private:
-	//===================================================================*/
-	//                   private variables
-	//===================================================================*/
-	std::vector<BaseEditor*> editors_;	//< エディタのリスト
-public:
-	static int selectedEditorIndex;							//< 選択されたエディタ
+	private:
+		OnEditorSelectedCallback onEditorSelected_;
+	};
 
-private:
-	OnEditorSelectedCallback onEditorSelected_;
-};
-
+} // namespace CalyxEditor

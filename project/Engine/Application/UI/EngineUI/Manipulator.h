@@ -13,73 +13,77 @@ class WorldTransform;
 class BaseCamera;
 struct CalyxMath::Matrix4x4;
 
-/* ========================================================================
-/*		マニピュレータ
-/* ===================================================================== */
-class Manipulator 
-	: public BaseOnViewportTool{
-public:
-	//===================================================================*/
-	//					public methods
-	//===================================================================*/
-	Manipulator();
-	void Update();
+namespace CalyxEditor {
 
-	/// <summary>
-	/// オーバーレイ描画
-	/// </summary>
-	/// <param name="basePos"></param>
-	void RenderOverlay(const ImVec2& basePos) override;
+	/* ========================================================================
+	/*		マニピュレータ
+	/* ===================================================================== */
+	class Manipulator
+		: public BaseOnViewportTool {
+	public:
+		//===================================================================*/
+		//					public methods
+		//===================================================================*/
+		Manipulator();
+		void Update();
 
-	/// <summary>
-	/// ツールバー描画
-	/// </summary>
-	void RenderToolbar() override;
+		/// <summary>
+		/// オーバーレイ描画
+		/// </summary>
+		/// <param name="basePos"></param>
+		void RenderOverlay(const ImVec2& basePos) override;
 
-	//--------- accessor -----------------------------------------------------
-	void SetTarget(WorldTransform* target);
-	void SetCamera(BaseCamera* camera);
-	void SetViewRect(const ImVec2& origin, const ImVec2& size);
+		/// <summary>
+		/// ツールバー描画
+		/// </summary>
+		void RenderToolbar() override;
 
-private:
-	//===================================================================*/
-	//					private methods
-	//===================================================================*/
+		//--------- accessor -----------------------------------------------------
+		void SetTarget(WorldTransform* target);
+		void SetCamera(BaseCamera* camera);
+		void SetViewRect(const ImVec2& origin, const ImVec2& size);
 
-	/// <summary>
-	/// 行列計算
-	/// </summary>
-	/// <param name="m"></param>
-	/// <param name="out"></param>
-	void RowToColumnArray(const CalyxMath::Matrix4x4& m, float out[16]);
-	CalyxMath::Matrix4x4 ColumnArrayToRow(const float in_[16]);
+	private:
+		//===================================================================*/
+		//					private methods
+		//===================================================================*/
 
-private:
-	ImGuizmo::OPERATION operation_ = ImGuizmo::TRANSLATE;
-	ImGuizmo::MODE mode_ = ImGuizmo::WORLD;
+		/// <summary>
+		/// 行列計算
+		/// </summary>
+		/// <param name="m"></param>
+		/// <param name="out"></param>
+		void				 RowToColumnArray(const CalyxMath::Matrix4x4& m, float out[16]);
+		CalyxMath::Matrix4x4 ColumnArrayToRow(const float in_[16]);
 
-	bool wasUsing = false;
-	std::unique_ptr<ScopedGizmoCommand> scopedCmd;
+	private:
+		ImGuizmo::OPERATION operation_ = ImGuizmo::TRANSLATE;
+		ImGuizmo::MODE		mode_	   = ImGuizmo::WORLD;
 
-	WorldTransform* target_ = nullptr;
-	BaseCamera* camera_ = nullptr;
+		bool								wasUsing = false;
+		std::unique_ptr<ScopedGizmoCommand> scopedCmd;
 
-	ImVec2 viewOrigin_ = {0, 0};
-	ImVec2 viewSize_ = {0, 0};
+		WorldTransform* target_ = nullptr;
+		BaseCamera*		camera_ = nullptr;
 
-private:
-	// アイコン
-	struct Icon {
-		ImTextureID texture = nullptr;
-		ImVec2 size{32.0f,32.0f};
+		ImVec2 viewOrigin_ = {0, 0};
+		ImVec2 viewSize_   = {0, 0};
+
+	private:
+		// アイコン
+		struct Icon {
+			ImTextureID texture = nullptr;
+			ImVec2		size{32.0f, 32.0f};
+		};
+
+	public:
+		Icon iconTranslate_;
+		Icon iconRotate_;
+		Icon iconScale_;
+		Icon iconUniversal_;
+		Icon iconWorld_;
+
+		Icon iconDrawGrid_;
 	};
 
-public:
-	Icon iconTranslate_;
-	Icon iconRotate_;
-	Icon iconScale_;
-	Icon iconUniversal_;
-	Icon iconWorld_;
-
-	Icon iconDrawGrid_;
-};
+} // namespace CalyxEditor

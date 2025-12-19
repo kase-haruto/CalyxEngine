@@ -1,4 +1,4 @@
-#pragma
+#pragma once
 /* ========================================================================
 /* include space
 /* ===================================================================== */
@@ -39,12 +39,12 @@ namespace CalyxEngine {
 		std::unique_ptr<GraphicsSystem> graphicsSystem_;
 
 		// ui
-		std::unique_ptr<EngineUICore> engineUICore_;
+		std::unique_ptr<CalyxEditor::EngineUICore> engineUICore_;
 
 		// scene
 		std::unique_ptr<SceneManager>	  sceneManager_;
-		std::unique_ptr<EditorCollection> editorCollection_;
-		std::unique_ptr<PlaySession>	  playSession_;
+		std::unique_ptr<CalyxEditor::EditorCollection> editorCollection_;
+		std::unique_ptr<CalyxEditor::PlaySession> playSession_;
 
 		// ポストエフェクトの適用と管理
 		PostEffectGraph*	   postEffectGraph_;

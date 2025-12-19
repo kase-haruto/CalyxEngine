@@ -1,6 +1,9 @@
 #include "IEngineUI.h"
 
-IEngineUI::IEngineUI(const std::string& name)
-:panelName_(name){}
+namespace CalyxEditor {
+	IEngineUI::IEngineUI(const std::string& name)
+		: panelName_(name) {}
 
-IEngineUI::IEngineUI() :panelName_("Unnamed") {}
+	IEngineUI::IEngineUI() : panelName_("Unnamed") {}
+
+}

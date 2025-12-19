@@ -2,20 +2,24 @@
 #include <Engine/Editor/BaseEditor.h>
 
 class PostProcessCollection;
+class PostEffectGraph;
 
-/* ========================================================================
-/*		ポストプロセス編集ツール
-/* ===================================================================== */
-class PostProcessEditor 
-	: public BaseEditor {
-public:
-	PostProcessEditor(const std::string& name);
-	~PostProcessEditor() = default;
+namespace CalyxEditor {
+	/* ========================================================================
+	/*		ポストプロセス編集ツール
+	/* ===================================================================== */
+	class PostProcessEditor
+		: public BaseEditor {
+	public:
+		PostProcessEditor(const std::string& name);
+		~PostProcessEditor() = default;
 
-	void ShowImGuiInterface() override;
-	void ApplyToGraph(class PostEffectGraph* graph);
+		void ShowImGuiInterface() override;
+		void ApplyToGraph(PostEffectGraph* graph);
 
-private:
-	PostProcessCollection* pCollection_ = nullptr;
-	const std::string directoryPath_ = "Resources/Json/PostEffect/";
-};
+	private:
+		PostProcessCollection* pCollection_	  = nullptr;
+		const std::string	   directoryPath_ = "Resources/Json/PostEffect/";
+	};
+
+}

@@ -17,15 +17,6 @@
 #include <memory>
 #include <vector>
 
-class BaseEditor;
-class SceneContext;
-class SceneObject;
-class PlaySession;
-class BaseCamera;
-struct CalyxMath::Vector2;
-struct CalyxMath::Matrix4x4;
-struct Ray;
-
 namespace EngineEdit {
 enum class EditorMode {
 	Edit,
@@ -33,88 +24,103 @@ enum class EditorMode {
 };
 } // namespace EngineEdit
 
-/* ======================================================================== */
-/*		レベル編集ツール                                                    */
-/* ===================================================================== */
-class LevelEditor {
-public:
-	void Initialize();
-	void Update();
-	void Render();
-	void RenderMenu();
-	void ClearSelection();
+class BaseEditor;
+class SceneContext;
+class SceneObject;
+class BaseCamera;
+struct CalyxMath::Vector2;
+struct CalyxMath::Matrix4x4;
+struct Ray;
 
-	// 編集対象 ----------------------------------------------------------------
-	void SetSelectedEditor(BaseEditor* editor);
-	/// SceneObject の選択（shared_ptr で受けて内部では weak_ptr で保持）
-	void SetSelectedObject(const std::shared_ptr<SceneObject>& sp);
+namespace CalyxEditor {
 
-	/// シーンへのオブジェクト追加（Prefab / PlaceTool などから呼ばれる）
-	void CreateObject(const std::shared_ptr<SceneObject>& obj);
-	/// シーンからオブジェクト削除（階層パネルなどから呼ばれる）
-	void DeleteObject(const std::shared_ptr<SceneObject>& sp);
+	class PlaySession;
 
-	// ビューポート関連 --------------------------------------------------------
-	void RenderViewport(ViewportType type, const ImTextureID& tex);
-	void SetCameraForViewport(BaseCamera* mainCamera, BaseCamera* debugCamera);
+	/* ======================================================================== */
+	/*		レベル編集ツール                                                    */
+	/* ===================================================================== */
+	class LevelEditor {
+	public:
+		void Initialize();
+		void Update();
+		void Render();
+		void RenderMenu();
+		void ClearSelection();
 
-	// パネル取得 --------------------------------------------------------------
-	HierarchyPanel* GetHierarchyPanel() const { return hierarchy_.get(); }
-	EditorPanel*	GetEditorPanel() const { return editor_.get(); }
-	PlaceToolPanel* GetPlaceToolPanel() const { return placeToolPanel_.get(); }
+		// 編集対象 ----------------------------------------------------------------
+		void SetSelectedEditor(BaseEditor* editor);
+		/// SceneObject の選択（shared_ptr で受けて内部では weak_ptr で保持）
+		void SetSelectedObject(const std::shared_ptr<SceneObject>& sp);
 
-	EngineEdit::EditorMode GetMode() const { return mode_; }
-	void				   SetPlaySession(PlaySession* session) { pPlaySesseion_ = session; }
+		/// シーンへのオブジェクト追加（Prefab / PlaceTool などから呼ばれる）
+		void CreateObject(const std::shared_ptr<SceneObject>& obj);
+		/// シーンからオブジェクト削除（階層パネルなどから呼ばれる）
+		void DeleteObject(const std::shared_ptr<SceneObject>& sp);
 
-private:
-	// マウスピッキング関連 ----------------------------------------------------
-	void		 TryPickUnderCursor();
-	void		 TryPickObjectFromMouse(const CalyxMath::Vector2&	 mouse,
-										const CalyxMath::Vector2&	 viewportSize,
-										const CalyxMath::Matrix4x4& view,
-										const CalyxMath::Matrix4x4& proj);
-	SceneObject* PickSceneObjectByRay(const Ray& ray);
+		// ビューポート関連 --------------------------------------------------------
+		void RenderViewport(ViewportType type, const ImTextureID& tex);
+		void SetCameraForViewport(BaseCamera* mainCamera, BaseCamera* debugCamera);
 
-	// シーン管理 --------------------------------------------------------------
-	void SaveScene();
-	void NotifySceneContextChanged();
+		// パネル取得 --------------------------------------------------------------
+		HierarchyPanel* GetHierarchyPanel() const { return hierarchy_.get(); }
+		EditorPanel*	GetEditorPanel() const { return editor_.get(); }
+		PlaceToolPanel* GetPlaceToolPanel() const { return placeToolPanel_.get(); }
 
-	// モード切り替え ----------------------------------------------------------
-	void EnterGameMode();
-	void ExitGameMode();
-	void ToggleMode();
+		EngineEdit::EditorMode GetMode() const { return mode_; }
+		void				   SetPlaySession(PlaySession* session) { pPlaySesseion_ = session; }
 
-	void TogglePanel(IEngineUI* p) {
-		if(p) p->SetShow(!p->IsShow());
-	}
+	private:
+		// マウスピッキング関連 ----------------------------------------------------
+		void		 TryPickUnderCursor();
+		void		 TryPickObjectFromMouse(const CalyxMath::Vector2&	mouse,
+											const CalyxMath::Vector2&	viewportSize,
+											const CalyxMath::Matrix4x4& view,
+											const CalyxMath::Matrix4x4& proj);
+		SceneObject* PickSceneObjectByRay(const Ray& ray);
 
-private:
-	// 管理UI
-	std::unique_ptr<HierarchyPanel>	   hierarchy_;
-	std::unique_ptr<EditorPanel>	   editor_;
-	std::unique_ptr<InspectorPanel>	   inspector_;
-	std::unique_ptr<SceneObjectEditor> sceneEditor_;
-	std::unique_ptr<PlaceToolPanel>	   placeToolPanel_;
-	std::unique_ptr<SplineEditorPanel> splineEditor_;
-	std::unique_ptr<AssetPanel>		   assetPanel_;
-	PlaySession*					   pPlaySesseion_ = nullptr;
+		// シーン管理 --------------------------------------------------------------
+		void SaveScene();
+		void NotifySceneContextChanged();
 
-	// メニュー
-	std::unique_ptr<EditorMenu> menu_; //< エディターメニュー
-	EngineEdit::EditorMode		mode_ = EngineEdit::EditorMode::Edit;
+		// モード切り替え ----------------------------------------------------------
+		void EnterGameMode();
+		void ExitGameMode();
+		void ToggleMode();
 
-	// ビューポート
-	std::unique_ptr<Viewport>			mainViewport_;		 //< メインビューポート
-	std::unique_ptr<Viewport>			debugViewport_;		 //< デバッグビューポート
-	std::unique_ptr<PerformanceOverlay> performanceOverlay_; //< パフォーマンスオーバーレイ
+		void TogglePanel(IEngineUI* p) {
+			if(p) p->SetShow(!p->IsShow());
+		}
 
-	// 状態
-	bool		  lastPlaying_	  = false;
-	SceneContext* prevCtx_		  = nullptr;
-	BaseEditor*	  selectedEditor_ = nullptr;
-	/// SceneObject 選択は weak_ptr で保持（寿命を伸ばさない）
-	std::weak_ptr<SceneObject> selectedObject_;
+	private:
+		// 管理UI
+		std::unique_ptr<HierarchyPanel>	   hierarchy_;
+		std::unique_ptr<EditorPanel>	   editor_;
+		std::unique_ptr<InspectorPanel>	   inspector_;
+		std::unique_ptr<SceneObjectEditor> sceneEditor_;
+		std::unique_ptr<PlaceToolPanel>	   placeToolPanel_;
+		std::unique_ptr<SplineEditorPanel> splineEditor_;
+		std::unique_ptr<AssetPanel>		   assetPanel_;
+		PlaySession*					   pPlaySesseion_ = nullptr;
 
-	// Editors メニューに並べるパネル群
-	std::vector<IEngineUI*> editorPanels_;
-};
+		// メニュー
+		std::unique_ptr<EditorMenu> menu_; //< エディターメニュー
+		EngineEdit::EditorMode		mode_ = EngineEdit::EditorMode::Edit;
+
+		// ビューポート
+		std::unique_ptr<Viewport>			mainViewport_;		 //< メインビューポート
+		std::unique_ptr<Viewport>			debugViewport_;		 //< デバッグビューポート
+		std::unique_ptr<PerformanceOverlay> performanceOverlay_; //< パフォーマンスオーバーレイ
+
+		// 状態
+		bool		  lastPlaying_	  = false;
+		SceneContext* prevCtx_		  = nullptr;
+		BaseEditor*	  selectedEditor_ = nullptr;
+		/// SceneObject 選択は weak_ptr で保持（寿命を伸ばさない）
+		std::weak_ptr<SceneObject> selectedObject_;
+
+		// Editors メニューに並べるパネル群
+		std::vector<IEngineUI*> editorPanels_;
+	};
+
+}
+

@@ -17,76 +17,80 @@
 class SceneObject;
 class SceneObjectLibrary;
 
-//===================================================================*//
-//                    HierarchyPanel
-//===================================================================*//
-class HierarchyPanel : public IEngineUI {
-private:
-	using SelectCB = std::function<void(std::shared_ptr<SceneObject>)>;
-	using DeleteCB = std::function<void(std::shared_ptr<SceneObject>)>;
-	using CreateCB = std::function<void(std::shared_ptr<SceneObject>)>;
-	using RenameCB = std::function<void(std::shared_ptr<SceneObject>, const std::string& newName)>;
+namespace CalyxEditor {
+	//===================================================================*//
+	//                    HierarchyPanel
+	//===================================================================*//
+	class HierarchyPanel
+		: public IEngineUI {
+	private:
+		using SelectCB = std::function<void(std::shared_ptr<SceneObject>)>;
+		using DeleteCB = std::function<void(std::shared_ptr<SceneObject>)>;
+		using CreateCB = std::function<void(std::shared_ptr<SceneObject>)>;
+		using RenameCB = std::function<void(std::shared_ptr<SceneObject>, const std::string& newName)>;
 
-public:
-	HierarchyPanel();
-	~HierarchyPanel() override = default;
+	public:
+		HierarchyPanel();
+		~HierarchyPanel() override = default;
 
-	void Render() override;
-	void ShowObjectRecursive(SceneObject* obj);
-	bool IsDescendantOf(SceneObject* parent, SceneObject* child);
+		void Render() override;
+		void ShowObjectRecursive(SceneObject* obj);
+		bool IsDescendantOf(SceneObject* parent, SceneObject* child);
 
-	// accessors -------------------------------------------------------
-	const std::string& GetPanelName() const override;
+		// accessors -------------------------------------------------------
+		const std::string& GetPanelName() const override;
 
-	void SetSceneObjectLibrary(const SceneObjectLibrary* lib) { lib_ = lib; }
-	void SetOnObjectSelected(SelectCB cb) { onSelect_ = std::move(cb); }
-	void SetOnObjectDelete(DeleteCB cb) { onDelete_ = std::move(cb); }
-	void SetOnObjectCreate(CreateCB cb) { onCreate_ = std::move(cb); }
-	void SetOnObjectRename(RenameCB cb) { onRename_ = std::move(cb); }
+		void SetSceneObjectLibrary(const SceneObjectLibrary* lib) { lib_ = lib; }
+		void SetOnObjectSelected(SelectCB cb) { onSelect_ = std::move(cb); }
+		void SetOnObjectDelete(DeleteCB cb) { onDelete_ = std::move(cb); }
+		void SetOnObjectCreate(CreateCB cb) { onCreate_ = std::move(cb); }
+		void SetOnObjectRename(RenameCB cb) { onRename_ = std::move(cb); }
 
-	void SetSelectedObject(std::weak_ptr<SceneObject> wp) { selected_ = wp; }
+		void SetSelectedObject(std::weak_ptr<SceneObject> wp) { selected_ = wp; }
 
-	const SceneObjectLibrary* GetSceneObjectLibrary() const { return lib_; }
-	std::weak_ptr<SceneObject> GetSelectedObject() const {
-		return selected_;
-	}
+		const SceneObjectLibrary*  GetSceneObjectLibrary() const { return lib_; }
+		std::weak_ptr<SceneObject> GetSelectedObject() const {
+			return selected_;
+		}
 
-private:
-	// rename
-	void BeginRename(SceneObject* obj);
-	void CancelRename();
-	void CommitRename();
+	private:
+		// rename
+		void BeginRename(SceneObject* obj);
+		void CancelRename();
+		void CommitRename();
 
-private:
-	// runtime state
-	const SceneObjectLibrary* lib_ = nullptr;
+	private:
+		// runtime state
+		const SceneObjectLibrary* lib_ = nullptr;
 
-	std::weak_ptr<SceneObject> selected_;
-	std::weak_ptr<SceneObject> renameTarget_;
+		std::weak_ptr<SceneObject> selected_;
+		std::weak_ptr<SceneObject> renameTarget_;
 
-	SelectCB onSelect_;
-	DeleteCB onDelete_;
-	CreateCB onCreate_;
-	RenameCB onRename_;
+		SelectCB onSelect_;
+		DeleteCB onDelete_;
+		CreateCB onCreate_;
+		RenameCB onRename_;
 
-	// prefab dialog
-	bool		 showSavePrefabDlg_ = false;
-	bool		 showLoadPrefabDlg_ = false;
-	SceneObject* prefabSaveTarget_	= nullptr;
+		// prefab dialog
+		bool		 showSavePrefabDlg_ = false;
+		bool		 showLoadPrefabDlg_ = false;
+		SceneObject* prefabSaveTarget_	= nullptr;
 
-	// rename buffer
-	bool		renaming_ = false;
-	std::string renameBuf_;
+		// rename buffer
+		bool		renaming_ = false;
+		std::string renameBuf_;
 
-	// icons
-	struct Icon {
-		ImTextureID tex{};
-		ImVec2		size{24, 24};
+		// icons
+		struct Icon {
+			ImTextureID tex{};
+			ImVec2		size{24, 24};
+		};
+
+	public:
+		Icon iconEye_, iconEyeOff_, iconCamera_, iconLight_, iconGameObj_, iconFx_;
+
+	private:
+		using IEngineUI::panelName_;
 	};
 
-public:
-	Icon iconEye_, iconEyeOff_, iconCamera_, iconLight_, iconGameObj_, iconFx_;
-
-private:
-	using IEngineUI::panelName_;
-};
+}

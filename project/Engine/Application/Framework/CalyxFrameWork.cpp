@@ -30,13 +30,13 @@ namespace CalyxEngine {
 		sceneManager_->Initialize();
 
 		/* PlaySession  (EditorCtx は SceneManager が作ったシーン 0 のものを使う) */
-		playSession_ = std::make_unique<PlaySession>();
+		playSession_ = std::make_unique<CalyxEditor::PlaySession>();
 		playSession_->Initialize(sceneManager_->GetCurrentSceneContext());
 
 		sceneManager_->BindPlaySession(playSession_.get());
 
 		/* UI / Editor */
-		engineUICore_ = std::make_unique<EngineUICore>();
+		engineUICore_ = std::make_unique<CalyxEditor::EngineUICore>();
 		engineUICore_->Initialize();
 		system_->SetEngineUICore(engineUICore_.get());
 
@@ -44,7 +44,7 @@ namespace CalyxEngine {
 			lvl->SetPlaySession(playSession_.get());
 		}
 
-		editorCollection_ = std::make_unique<EditorCollection>();
+		editorCollection_ = std::make_unique<CalyxEditor::EditorCollection>();
 		editorCollection_->InitializeEditors();
 
 		// auto* ppEditor = dynamic_cast< PostProcessEditor* >(editorCollection_->GetEditor(EditorCollection::EditorType::PostProcess));

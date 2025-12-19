@@ -5,219 +5,238 @@
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Editor/SceneObjectEditor.h>
 #include <Engine/Foundation/Math/Matrix4x4.h>
+#include <Engine/Foundation/Utility/Func/CxUtils.h>
 #include <Engine/Graphics/Camera/Base/BaseCamera.h>
 #include <Engine/Objects/Transform/Transform.h>
-#include <Engine/System/Command/Manager/CommandManager.h>
-#include <Engine/Scene/Context/SceneContext.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
-#include <Engine/Foundation/Utility/Func/CxUtils.h>
+#include <Engine/Scene/Context/SceneContext.h>
+#include <Engine/System/Command/Manager/CommandManager.h>
 
-Manipulator::Manipulator(){
-	iconTranslate_.texture = reinterpret_cast< ImTextureID >(TextureManager::GetInstance()->LoadTexture("UI/Tool/translate.png").ptr);
-	iconRotate_.texture = reinterpret_cast< ImTextureID >(TextureManager::GetInstance()->LoadTexture("UI/Tool/rotate.png").ptr);
-	iconScale_.texture = reinterpret_cast< ImTextureID >(TextureManager::GetInstance()->LoadTexture("UI/Tool/scale.png").ptr);
-	iconUniversal_.texture = reinterpret_cast< ImTextureID >(TextureManager::GetInstance()->LoadTexture("UI/Tool/universal.png").ptr);
-	iconWorld_.texture = reinterpret_cast< ImTextureID >(TextureManager::GetInstance()->LoadTexture("UI/Tool/world.png").ptr);
-	iconDrawGrid_.texture = reinterpret_cast< ImTextureID >(TextureManager::GetInstance()->LoadTexture("UI/Tool/grid.png").ptr);
-	SetOverlayAlign(OverlayAlign::TopLeft);
-	SetOverlayOffset(overlayOffset_); // Viewport右上から左下に少しずらす
-}
+namespace CalyxEditor {
 
-void Manipulator::SetTarget(WorldTransform* target){
-	if (target_ != target){
-		target_ = target;
-	}
-}
-
-void Manipulator::SetCamera(BaseCamera* camera){
-	camera_ = camera;
-}
-
-void Manipulator::SetViewRect(const ImVec2& origin, const ImVec2& size){
-	viewOrigin_ = origin;
-	viewSize_ = size;
-}
-
-void Manipulator::Update(){
-	if (camera_ != SceneContext::Current()->GetCameraMgr()->GetDebug()) {
-		camera_ = SceneContext::Current()->GetCameraMgr()->GetDebug();
+	Manipulator::Manipulator() {
+		iconTranslate_.texture = reinterpret_cast<ImTextureID>(TextureManager::GetInstance()->LoadTexture("UI/Tool/translate.png").ptr);
+		iconRotate_.texture	   = reinterpret_cast<ImTextureID>(TextureManager::GetInstance()->LoadTexture("UI/Tool/rotate.png").ptr);
+		iconScale_.texture	   = reinterpret_cast<ImTextureID>(TextureManager::GetInstance()->LoadTexture("UI/Tool/scale.png").ptr);
+		iconUniversal_.texture = reinterpret_cast<ImTextureID>(TextureManager::GetInstance()->LoadTexture("UI/Tool/universal.png").ptr);
+		iconWorld_.texture	   = reinterpret_cast<ImTextureID>(TextureManager::GetInstance()->LoadTexture("UI/Tool/world.png").ptr);
+		iconDrawGrid_.texture  = reinterpret_cast<ImTextureID>(TextureManager::GetInstance()->LoadTexture("UI/Tool/grid.png").ptr);
+		SetOverlayAlign(OverlayAlign::TopLeft);
+		SetOverlayOffset(overlayOffset_); // Viewport右上から左下に少しずらす
 	}
 
-	if (!target_ || !camera_) return;
-
-	float view[16], proj[16], world[16], parent[16];
-
-	// カメラビュー、プロジェクションを転置して列優先配列に変換
-	CalyxMath::Matrix4x4::Transpose(camera_->GetViewMatrix()).CopyToArray(view);
-	CalyxMath::Matrix4x4::Transpose(camera_->GetProjectionMatrix()).CopyToArray(proj);
-
-	// 操作対象のワールド行列を転置して列優先配列に変換
-	CalyxMath::Matrix4x4::Transpose(target_->matrix.world).CopyToArray(world);
-
-	// 親がいれば親のワールド行列を渡す。なければ単位行列
-	if (target_->parent){
-		CalyxMath::Matrix4x4::Transpose(target_->parent->matrix.world).CopyToArray(parent);
-	} else{
-		CalyxMath::Matrix4x4 identity;
-		identity.MakeIdentity(); // または MakeIdentity()
-		CalyxMath::Matrix4x4::Transpose(identity).CopyToArray(parent);
+	void Manipulator::SetTarget(WorldTransform* target) {
+		if(target_ != target) {
+			target_ = target;
+		}
 	}
 
-	// 親行列を渡してManipulateを呼ぶ
-	ImGuizmo::Manipulate(view, proj, operation_, mode_, world, nullptr, nullptr, nullptr, parent);
+	void Manipulator::SetCamera(BaseCamera* camera) {
+		camera_ = camera;
+	}
 
-	bool usingNow = ImGuizmo::IsUsing();
+	void Manipulator::SetViewRect(const ImVec2& origin, const ImVec2& size) {
+		viewOrigin_ = origin;
+		viewSize_	= size;
+	}
 
-	if (usingNow){
-		CalyxMath::Matrix4x4 worldEdited = ColumnArrayToRow(world);
-
-		CalyxMath::Matrix4x4 localEdited;
-		if (target_->parent){
-			// ここで掛ける順序を逆にしてみる
-			localEdited = worldEdited * CalyxMath::Matrix4x4::Inverse(target_->parent->matrix.world);
-		} else{
-			localEdited = worldEdited;
+	void Manipulator::Update() {
+		if(camera_ != SceneContext::Current()->GetCameraMgr()->GetDebug()) {
+			camera_ = SceneContext::Current()->GetCameraMgr()->GetDebug();
 		}
 
-		// 以降は同じ
-		float decomposed[16];
-		RowToColumnArray(localEdited, decomposed);
+		if(!target_ || !camera_) return;
 
-		float pos[3], rotDeg[3], scl[3];
-		ImGuizmo::DecomposeMatrixToComponents(decomposed, pos, rotDeg, scl);
+		float view[16], proj[16], world[16], parent[16];
 
-		target_->translation = {pos[0], pos[1], pos[2]};
-		target_->scale = {scl[0], scl[1], scl[2]};
+		// カメラビュー、プロジェクションを転置して列優先配列に変換
+		CalyxMath::Matrix4x4::Transpose(camera_->GetViewMatrix()).CopyToArray(view);
+		CalyxMath::Matrix4x4::Transpose(camera_->GetProjectionMatrix()).CopyToArray(proj);
 
-		CalyxMath::Vector3 eulerRad = {
-			CalyxMath::ToRadians( rotDeg[0]),
-			CalyxMath::ToRadians( rotDeg[1]),
-			CalyxMath::ToRadians( rotDeg[2])
+		// 操作対象のワールド行列を転置して列優先配列に変換
+		CalyxMath::Matrix4x4::Transpose(target_->matrix.world).CopyToArray(world);
+
+		// 親がいれば親のワールド行列を渡す。なければ単位行列
+		if(target_->parent) {
+			CalyxMath::Matrix4x4::Transpose(target_->parent->matrix.world).CopyToArray(parent);
+		} else {
+			CalyxMath::Matrix4x4 identity;
+			identity.MakeIdentity(); // または MakeIdentity()
+			CalyxMath::Matrix4x4::Transpose(identity).CopyToArray(parent);
+		}
+
+		// 親行列を渡してManipulateを呼ぶ
+		ImGuizmo::Manipulate(view, proj, operation_, mode_, world, nullptr, nullptr, nullptr, parent);
+
+		bool usingNow = ImGuizmo::IsUsing();
+
+		if(usingNow) {
+			CalyxMath::Matrix4x4 worldEdited = ColumnArrayToRow(world);
+
+			CalyxMath::Matrix4x4 localEdited;
+			if(target_->parent) {
+				// ここで掛ける順序を逆にしてみる
+				localEdited = worldEdited * CalyxMath::Matrix4x4::Inverse(target_->parent->matrix.world);
+			} else {
+				localEdited = worldEdited;
+			}
+
+			// 以降は同じ
+			float decomposed[16];
+			RowToColumnArray(localEdited, decomposed);
+
+			float pos[3], rotDeg[3], scl[3];
+			ImGuizmo::DecomposeMatrixToComponents(decomposed, pos, rotDeg, scl);
+
+			target_->translation = {pos[0], pos[1], pos[2]};
+			target_->scale		 = {scl[0], scl[1], scl[2]};
+
+			CalyxMath::Vector3 eulerRad = {
+				CalyxMath::ToRadians(rotDeg[0]),
+				CalyxMath::ToRadians(rotDeg[1]),
+				CalyxMath::ToRadians(rotDeg[2])};
+			target_->rotation		= CalyxMath::Quaternion::EulerToQuaternion(eulerRad);
+			target_->rotationSource = RotationSource::Quaternion;
+		}
+
+		// Undoコマンド管理はそのまま
+		if(usingNow && !wasUsing) {
+			scopedCmd = std::make_unique<ScopedGizmoCommand>(target_, operation_);
+		} else if(!usingNow && wasUsing && scopedCmd) {
+			scopedCmd->CaptureAfter();
+			if(!scopedCmd->IsTrivial())
+				CommandManager::GetInstance()->Execute(std::move(scopedCmd));
+			else
+				scopedCmd.reset();
+		}
+		wasUsing = usingNow;
+	}
+
+	void Manipulator::RenderOverlay(const ImVec2& basePos) {
+		ImVec2 iconSize = iconTranslate_.size;
+		float  spacing	= 8.0f;
+
+		struct ButtonInfo {
+			ImGuizmo::OPERATION op;
+			const char*			tooltip;
+			const Icon&			icon;
 		};
-		target_->rotation = CalyxMath::Quaternion::EulerToQuaternion(eulerRad);
-		target_->rotationSource = RotationSource::Quaternion;
-	}
 
-	// Undoコマンド管理はそのまま
-	if (usingNow && !wasUsing){
-		scopedCmd = std::make_unique<ScopedGizmoCommand>(target_, operation_);
-	} else if (!usingNow && wasUsing && scopedCmd){
-		scopedCmd->CaptureAfter();
-		if (!scopedCmd->IsTrivial())
-			CommandManager::GetInstance()->Execute(std::move(scopedCmd));
-		else
-			scopedCmd.reset();
-	}
-	wasUsing = usingNow;
-}
+		ButtonInfo buttons[] = {
+			{ImGuizmo::TRANSLATE, "Translate", iconTranslate_},
+			{ImGuizmo::ROTATE, "Rotate", iconRotate_},
+			{ImGuizmo::SCALE, "Scale", iconScale_},
+			{ImGuizmo::UNIVERSAL, "Universal", iconUniversal_}};
 
-void Manipulator::RenderOverlay(const ImVec2& basePos){
-	ImVec2 iconSize = iconTranslate_.size;
-	float spacing = 8.0f;
+		for(int i = 0; i < IM_ARRAYSIZE(buttons); ++i) {
+			ImVec2 btnPos = ImVec2(basePos.x, basePos.y + i * (iconSize.y + spacing));
+			ImGui::SetCursorScreenPos(btnPos);
 
-	struct ButtonInfo{
-		ImGuizmo::OPERATION op;
-		const char* tooltip;
-		const Icon& icon;
-	};
+			bool isSelected = (operation_ == buttons[i].op);
+			if(isSelected)
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.5f, 0.9f, 1.0f));
 
-	ButtonInfo buttons[] = {
-		{ ImGuizmo::TRANSLATE, "Translate", iconTranslate_ },
-		{ ImGuizmo::ROTATE,    "Rotate",    iconRotate_ },
-		{ ImGuizmo::SCALE,     "Scale",     iconScale_ },
-		{ ImGuizmo::UNIVERSAL, "Universal", iconUniversal_ }
-	};
+			if(ImGui::ImageButton(buttons[i].icon.texture, iconSize))
+				operation_ = buttons[i].op;
 
-	for (int i = 0; i < IM_ARRAYSIZE(buttons); ++i){
-		ImVec2 btnPos = ImVec2(basePos.x, basePos.y + i * (iconSize.y + spacing));
-		ImGui::SetCursorScreenPos(btnPos);
+			if(isSelected)
+				ImGui::PopStyleColor();
 
-		bool isSelected = (operation_ == buttons[i].op);
-		if (isSelected)
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.5f, 0.9f, 1.0f));
-
-		if (ImGui::ImageButton(buttons[i].icon.texture, iconSize))
-			operation_ = buttons[i].op;
-
-		if (isSelected)
-			ImGui::PopStyleColor();
-
-		if (ImGui::IsItemHovered())
-			ImGui::SetTooltip("%s", buttons[i].tooltip);
-	}
-
-	// ワールド/ローカル切り替えボタン
-	{
-		int i = IM_ARRAYSIZE(buttons);
-		ImVec2 btnPos = ImVec2(basePos.x, basePos.y + i * (iconSize.y + spacing));
-		ImGui::SetCursorScreenPos(btnPos);
-
-		bool isWorld = (mode_ == ImGuizmo::WORLD);
-		if (isWorld)
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.5f, 0.9f, 1.0f));
-
-		if (ImGui::ImageButton(iconWorld_.texture, iconSize))
-			mode_ = isWorld ? ImGuizmo::LOCAL : ImGuizmo::WORLD;
-
-		if (isWorld)
-			ImGui::PopStyleColor();
-
-		if (ImGui::IsItemHovered())
-			ImGui::SetTooltip("%s Mode", isWorld ? "World" : "Local");
-	}
-
-	{
-		static bool showGrid = false;
-		int i = IM_ARRAYSIZE(buttons);
-		spacing += 15.0f;
-		ImVec2 btnPos = ImVec2(basePos.x, basePos.y + i * (iconSize.y + spacing));
-		ImGui::SetCursorScreenPos(btnPos);
-
-		bool pushStyle = false;
-		if (showGrid){
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.5f, 0.9f, 1.0f));
-			pushStyle = true;
+			if(ImGui::IsItemHovered())
+				ImGui::SetTooltip("%s", buttons[i].tooltip);
 		}
 
-		if (ImGui::ImageButton(iconDrawGrid_.texture, iconSize)){
-			showGrid = !showGrid;
+		// ワールド/ローカル切り替えボタン
+		{
+			int	   i	  = IM_ARRAYSIZE(buttons);
+			ImVec2 btnPos = ImVec2(basePos.x, basePos.y + i * (iconSize.y + spacing));
+			ImGui::SetCursorScreenPos(btnPos);
+
+			bool isWorld = (mode_ == ImGuizmo::WORLD);
+			if(isWorld)
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.5f, 0.9f, 1.0f));
+
+			if(ImGui::ImageButton(iconWorld_.texture, iconSize))
+				mode_ = isWorld ? ImGuizmo::LOCAL : ImGuizmo::WORLD;
+
+			if(isWorld)
+				ImGui::PopStyleColor();
+
+			if(ImGui::IsItemHovered())
+				ImGui::SetTooltip("%s Mode", isWorld ? "World" : "Local");
 		}
 
-		if (pushStyle){
-			ImGui::PopStyleColor(); // Push したときだけ Pop する
-		}
+		{
+			static bool showGrid = false;
+			int			i		 = IM_ARRAYSIZE(buttons);
+			spacing += 15.0f;
+			ImVec2 btnPos = ImVec2(basePos.x, basePos.y + i * (iconSize.y + spacing));
+			ImGui::SetCursorScreenPos(btnPos);
 
-		if (showGrid){
-			PrimitiveDrawer::GetInstance()->DrawGrid();
+			bool pushStyle = false;
+			if(showGrid) {
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.5f, 0.9f, 1.0f));
+				pushStyle = true;
+			}
+
+			if(ImGui::ImageButton(iconDrawGrid_.texture, iconSize)) {
+				showGrid = !showGrid;
+			}
+
+			if(pushStyle) {
+				ImGui::PopStyleColor(); // Push したときだけ Pop する
+			}
+
+			if(showGrid) {
+				PrimitiveDrawer::GetInstance()->DrawGrid();
+			}
 		}
 	}
-}
 
-void Manipulator::RenderToolbar(){
+	void Manipulator::RenderToolbar() {
+	}
 
-}
+	void Manipulator::RowToColumnArray(const CalyxMath::Matrix4x4& m, float out[16]) {
+		// 回転スケール 3×3 を転置（row→column変換）
+		out[0]	= m.m[0][0];
+		out[1]	= m.m[0][1];
+		out[2]	= m.m[0][2];
+		out[3]	= 0.0f;
+		out[4]	= m.m[1][0];
+		out[5]	= m.m[1][1];
+		out[6]	= m.m[1][2];
+		out[7]	= 0.0f;
+		out[8]	= m.m[2][0];
+		out[9]	= m.m[2][1];
+		out[10] = m.m[2][2];
+		out[11] = 0.0f;
 
-void Manipulator::RowToColumnArray(const CalyxMath::Matrix4x4& m, float out[16]){
-	// 回転スケール 3×3 を転置（row→column変換）
-	out[0] = m.m[0][0]; out[1] = m.m[0][1]; out[2] = m.m[0][2]; out[3] = 0.0f;
-	out[4] = m.m[1][0]; out[5] = m.m[1][1]; out[6] = m.m[1][2]; out[7] = 0.0f;
-	out[8] = m.m[2][0]; out[9] = m.m[2][1]; out[10] = m.m[2][2]; out[11] = 0.0f;
+		out[12] = m.m[3][0];
+		out[13] = m.m[3][1];
+		out[14] = m.m[3][2];
+		out[15] = 1.0f;
+	}
 
-	out[12] = m.m[3][0];
-	out[13] = m.m[3][1];
-	out[14] = m.m[3][2];
-	out[15] = 1.0f;
-}
+	CalyxMath::Matrix4x4 Manipulator::ColumnArrayToRow(const float in_[16]) {
+		CalyxMath::Matrix4x4 m;
+		m.m[0][0] = in_[0];
+		m.m[0][1] = in_[1];
+		m.m[0][2] = in_[2];
+		m.m[0][3] = 0.0f;
+		m.m[1][0] = in_[4];
+		m.m[1][1] = in_[5];
+		m.m[1][2] = in_[6];
+		m.m[1][3] = 0.0f;
+		m.m[2][0] = in_[8];
+		m.m[2][1] = in_[9];
+		m.m[2][2] = in_[10];
+		m.m[2][3] = 0.0f;
 
-CalyxMath::Matrix4x4 Manipulator::ColumnArrayToRow(const float in_[16]){
-	CalyxMath::Matrix4x4 m;
-	m.m[0][0] = in_[0];  m.m[0][1] = in_[1];  m.m[0][2] = in_[2];  m.m[0][3] = 0.0f;
-	m.m[1][0] = in_[4];  m.m[1][1] = in_[5];  m.m[1][2] = in_[6];  m.m[1][3] = 0.0f;
-	m.m[2][0] = in_[8];  m.m[2][1] = in_[9];  m.m[2][2] = in_[10]; m.m[2][3] = 0.0f;
+		m.m[3][0] = in_[12];
+		m.m[3][1] = in_[13];
+		m.m[3][2] = in_[14];
+		m.m[3][3] = 1.0f;
+		return m;
+	}
 
-	m.m[3][0] = in_[12];
-	m.m[3][1] = in_[13];
-	m.m[3][2] = in_[14];
-	m.m[3][3] = 1.0f;
-	return m;
-}
+} // namespace CalyxEditor
