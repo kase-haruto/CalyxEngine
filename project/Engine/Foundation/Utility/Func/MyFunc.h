@@ -42,7 +42,7 @@ Animation LoadAnimationFile(const std::string& directoryPath, const std::string&
 
 DirectX::ScratchImage LoadTextureImage(const std::string& filePath);
 
-bool IsCollision(const AABB& aabb, const CxMath::Vector3& point);
+bool IsCollision(const AABB& aabb, const CalyxMath::Vector3& point);
 
 // skeletonの作成
 Skeleton CreateSkeleton(const Node& rootNode);
@@ -60,7 +60,7 @@ SkinCluster CreateSkinCluster(const Microsoft::WRL::ComPtr<ID3D12Device>& device
 
 
 //ビルボードの関数
-CxMath::Matrix4x4 MakeYAxisBillboard(const CxMath::Matrix4x4& cameraMatrix);
+CalyxMath::Matrix4x4 MakeYAxisBillboard(const CalyxMath::Matrix4x4& cameraMatrix);
 
-CxMath::Matrix4x4 MakeXAxisBillboard(const CxMath::Matrix4x4& cameraMatrix);
-CxMath::Matrix4x4 MakeZAxisBillboard(const CxMath::Matrix4x4& cameraMatrix);
+CalyxMath::Matrix4x4 MakeXAxisBillboard(const CalyxMath::Matrix4x4& cameraMatrix);
+CalyxMath::Matrix4x4 MakeZAxisBillboard(const CalyxMath::Matrix4x4& cameraMatrix);

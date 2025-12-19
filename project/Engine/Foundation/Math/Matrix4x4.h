@@ -1,7 +1,7 @@
 #pragma once
 #include <externals/nlohmann/json.hpp>
 
-namespace CxMath {
+namespace CalyxMath {
 
 	struct Vector3;
 	struct Vector4;
@@ -37,15 +37,15 @@ namespace CxMath {
 	};
 
 
-} // namespace CxMath
+} // namespace CalyxMath
 
 	//--------- serializer ---------------------------------------------------
-inline void to_json(nlohmann::json& j, const CxMath::Matrix4x4& mat) {
+inline void to_json(nlohmann::json& j, const CalyxMath::Matrix4x4& mat) {
 	j = nlohmann::json{
 		{"m00", mat.m[0][0]}, {"m01", mat.m[0][1]}, {"m02", mat.m[0][2]}, {"m03", mat.m[0][3]}, {"m10", mat.m[1][0]}, {"m11", mat.m[1][1]}, {"m12", mat.m[1][2]}, {"m13", mat.m[1][3]}, {"m20", mat.m[2][0]}, {"m21", mat.m[2][1]}, {"m22", mat.m[2][2]}, {"m23", mat.m[2][3]}, {"m30", mat.m[3][0]}, {"m31", mat.m[3][1]}, {"m32", mat.m[3][2]}, {"m33", mat.m[3][3]}};
 }
 
-inline void from_json(const nlohmann::json& j, CxMath::Matrix4x4& mat) {
+inline void from_json(const nlohmann::json& j, CalyxMath::Matrix4x4& mat) {
 	j.at("m00").get_to(mat.m[0][0]);
 	j.at("m01").get_to(mat.m[0][1]);
 	j.at("m02").get_to(mat.m[0][2]);

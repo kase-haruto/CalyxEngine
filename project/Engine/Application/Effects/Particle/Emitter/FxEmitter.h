@@ -17,7 +17,7 @@
 #include <vector>
 
 // forward declaration
-struct CxMath::Vector3;
+struct CalyxMath::Vector3;
 
 /* ========================================================================
 /*	particle emitter
@@ -61,7 +61,7 @@ public:
 
 	//--------- Timed Preview（一定間隔での自動再生） ---------------//
 	void  SetTimedPreview(bool v) { timedPreview_ = v; }
-	void  SetPosition(const CxMath::Vector3& pos) { position_ = pos; }
+	void  SetPosition(const CalyxMath::Vector3& pos) { position_ = pos; }
 	bool  GetTimedPreview() const { return timedPreview_; }
 	void  SetPreviewInterval(float sec) { previewIntervalSec_ = (sec < 0.01f ? 0.01f : sec); }
 	float GetPreviewInterval() const { return previewIntervalSec_; }
@@ -81,19 +81,19 @@ private:
 	//===================================================================*/
 	// 発生
 	void Emit();
-	void Emit(const CxMath::Vector3& pos);
+	void Emit(const CalyxMath::Vector3& pos);
 	void RestartOneShot();
 
 public:
 	//===================================================================*/
 	//					public variable
 	//===================================================================*/
-	CxMath::Vector3 prevPostion_;        //< 前回の座標
+	CalyxMath::Vector3 prevPostion_;        //< 前回の座標
 	float   emitRate_    = 0.1f; //< パーティクル生成レート
 	float   defaultSize_ = 1.0f; //< パーティクルのデフォルトサイズ
 
-	FxParam<CxMath::Vector3> scale_;    //< パーティクルのスケール（定数またはランダム）
-	FxParam<CxMath::Vector3> velocity_; //< パーティクルの速度（定数またはランダム）
+	FxParam<CalyxMath::Vector3> scale_;    //< パーティクルのスケール（定数またはランダム）
+	FxParam<CalyxMath::Vector3> velocity_; //< パーティクルの速度（定数またはランダム）
 	FxParam<float>   lifetime_; //< パーティクルの寿命（定数またはランダム）
 	FxParam<float>   spin_;     //< パーティクルのスピン（定数またはランダム）
 

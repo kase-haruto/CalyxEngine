@@ -7,30 +7,30 @@
 #include<stdint.h>
 #include<string>
 
-struct CxMath::Vector3;
+struct CalyxMath::Vector3;
 
 /* ========================================================================
 /*		aabb
 /* ===================================================================== */
 class AABB{
 public:
-	AABB(const CxMath::Vector3& min, const CxMath::Vector3& max, uint32_t color = 0xFFFFFFFF);
+	AABB(const CalyxMath::Vector3& min, const CalyxMath::Vector3& max, uint32_t color = 0xFFFFFFFF);
 	AABB() = default;
 	~AABB() = default;
 
-	void Initialize(const CxMath::Vector3& min, const CxMath::Vector3& max);
+	void Initialize(const CalyxMath::Vector3& min, const CalyxMath::Vector3& max);
 	void Update();
 	void UpdateUI(std::string lavel);
 
 	//--------- accessor -----------------------------------------------------
-	CxMath::Vector3 GetMin()const;
-	CxMath::Vector3 GetMax()const;
-	CxMath::Vector3 GetCenter() const;
-	AABB Transform(const CxMath::Matrix4x4& mat) const;
+	CalyxMath::Vector3 GetMin()const;
+	CalyxMath::Vector3 GetMax()const;
+	CalyxMath::Vector3 GetCenter() const;
+	AABB Transform(const CalyxMath::Matrix4x4& mat) const;
 
 public:
-	CxMath::Vector3 min_;
-	CxMath::Vector3 max_;
+	CalyxMath::Vector3 min_;
+	CalyxMath::Vector3 max_;
 	uint32_t color;
 };
 

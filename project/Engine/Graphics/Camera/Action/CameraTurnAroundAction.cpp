@@ -17,9 +17,9 @@ void CameraTurnAroundAction::Execute() {
 	startRot_ = wt.rotation;
 
 	// 目標回転を direction_ 方向に向かせる
-	CxMath::Vector3 eye = wt.translation;
-	CxMath::Vector3 target = eye + direction_.Normalize();
-	targetRot_ = CxMath::Quaternion::LookAt(eye, target, {0, 1, 0});
+	CalyxMath::Vector3 eye = wt.translation;
+	CalyxMath::Vector3 target = eye + direction_.Normalize();
+	targetRot_ = CalyxMath::Quaternion::LookAt(eye, target);
 
 	elapsed_ = 0.0f;
 	turning_ = true;
@@ -32,7 +32,7 @@ void CameraTurnAroundAction::Update(BaseCamera* cam, float dt) {
 	float t = std::clamp(elapsed_ / turnTime_, 0.0f, 1.0f);
 	float easeT = Cx::Ease::ApplyEase(easeType_, t);
 
-	CxMath::Quaternion newRot = CxMath::Quaternion::Slerp(startRot_, targetRot_, easeT);
+	CalyxMath::Quaternion newRot = CalyxMath::Quaternion::Slerp(startRot_, targetRot_, easeT);
 	cam->GetWorldTransform().rotation = newRot;
 	cam->GetWorldTransform().rotationSource = RotationSource::Quaternion;
 

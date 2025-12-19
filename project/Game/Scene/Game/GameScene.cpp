@@ -62,22 +62,22 @@ void GameScene::Initialize() {
 		shootUI_ = std::make_unique<Sprite>("Textures/UI/shootUI.png");
 		aimUI_ = std::make_unique<Sprite>("Textures/UI/aimUI.png");
 		avoidanceUI_ = std::make_unique<Sprite>("Textures/UI/avoidanceUI.png");
-		CxMath::Vector2 uiSize = {128.0f,64.0f};
+		CalyxMath::Vector2 uiSize = {128.0f,64.0f};
 		shootUI_->SetSize(uiSize);
 		aimUI_->SetSize(uiSize);
 		avoidanceUI_->SetSize(uiSize);
 
 		// 左端中央
-		shootUI_->SetAnchorPoint(CxMath::Vector2(0.0f,0.5f));
-		aimUI_->SetAnchorPoint(CxMath::Vector2(0.0f,0.5f));
-		avoidanceUI_->SetAnchorPoint(CxMath::Vector2(0.0f,0.5f));
+		shootUI_->SetAnchorPoint(CalyxMath::Vector2(0.0f,0.5f));
+		aimUI_->SetAnchorPoint(CalyxMath::Vector2(0.0f,0.5f));
+		avoidanceUI_->SetAnchorPoint(CalyxMath::Vector2(0.0f,0.5f));
 		float space = 32.0f;
-		CxMath::Vector2 base = {100.0f, (kGameHeight / 2.0f) - space};
+		CalyxMath::Vector2 base = {100.0f, (kGameHeight / 2.0f) - space};
 		Sprite* uis[] = { shootUI_.get(), aimUI_.get(), avoidanceUI_.get() };
 
 		for (size_t i = 0; i < std::size(uis); ++i) {
 			if (uis[i]) {
-				CxMath::Vector2 pos = base;
+				CalyxMath::Vector2 pos = base;
 				pos.y += static_cast<float>(i) * space; // 200ずつ下にずらす
 				uis[i]->SetPosition(pos);
 			}
@@ -119,7 +119,7 @@ void GameScene::Initialize() {
 
 	numbersSprite_ = std::make_unique<NumbersSprite>(
 		"Textures/Numbers",".png");
-	CxMath::Vector2 scoreSpritePos = {100.0f,630.0f};
+	CalyxMath::Vector2 scoreSpritePos = {100.0f,630.0f};
 	numbersSprite_->Initialize(/*pos*/ {kGameWidth - scoreSpritePos.x,scoreSpritePos.y},
 									   /*digitSize*/ {32.0f,32.0f});
 	numbersSprite_->SetAlign(NumbersSprite::DigitsAlign::Right);

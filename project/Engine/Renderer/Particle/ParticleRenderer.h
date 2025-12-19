@@ -21,7 +21,7 @@ public:
 
 	// （CPU 用のまとめ描きユーティリティは残す）
 	void RenderGrouped(const std::string& modelPath,
-					   const std::vector<ParticleConstantData>& gpuUnits,
+					   const std::vector<CxEffect::ParticleConstantData>& gpuUnits,
 					   ID3D12GraphicsCommandList* cmdList);
 
 private:
@@ -32,5 +32,5 @@ private:
 							D3D12_GPU_DESCRIPTOR_HANDLE handle);
 
 private:
-	DxStructuredBuffer<ParticleConstantData> instanceBuffer_;
+	DxStructuredBuffer<CxEffect::ParticleConstantData> instanceBuffer_;
 };

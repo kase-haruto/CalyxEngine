@@ -5,7 +5,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 // ctor
 /////////////////////////////////////////////////////////////////////////////////////////
-Button::Button(const std::string& texturePath, const CxMath::Vector2& pos, const CxMath::Vector2& size)
+Button::Button(const std::string& texturePath, const CalyxMath::Vector2& pos, const CalyxMath::Vector2& size)
 	:pos_(pos), size_(size) {
 	image_ = std::make_unique<Sprite>(texturePath);
 	image_->Initialize(pos, size);

@@ -34,16 +34,16 @@ void CalyxHuman::Update(float dt){
 
 }
 
-std::optional<CxMath::Vector3> CalyxHuman::GetJointWorldPos(const std::string& name) const {
+std::optional<CalyxMath::Vector3> CalyxHuman::GetJointWorldPos(const std::string& name) const {
 	const AnimationModel* anim = GetAnimationModel();
 	if (!anim) return std::nullopt;
 
 	auto matOpt = anim->GetJointMatrix(name);
 	if (!matOpt) return std::nullopt;
 
-	CxMath::Matrix4x4 worldM = (*matOpt) * worldTransform_.matrix.world;
+	CalyxMath::Matrix4x4 worldM = (*matOpt) * worldTransform_.matrix.world;
 
-	CxMath::Vector3 pos = {
+	CalyxMath::Vector3 pos = {
 		worldM.m[3][0],
 		worldM.m[3][1],
 		worldM.m[3][2]
@@ -52,7 +52,7 @@ std::optional<CxMath::Vector3> CalyxHuman::GetJointWorldPos(const std::string& n
 }
 
 void CalyxHuman::TransitionAnimation(){
-	CxMath::Vector2 stickInput = Input::GetInstance()->GetLeftStick();
+	CalyxMath::Vector2 stickInput = Input::GetInstance()->GetLeftStick();
 	bool isMoving = stickInput.Length() > 0.1f;
 	auto* model = GetAnimationModel();
 
@@ -70,7 +70,7 @@ void CalyxHuman::TransitionAnimation(){
 void CalyxHuman::Move(float dt){
 	velocity_ = {0.0f, 0.0f, 0.0f};
 
-	CxMath::Vector2 leftStick = Input::GetInstance()->GetLeftStick();
+	CalyxMath::Vector2 leftStick = Input::GetInstance()->GetLeftStick();
 	velocity_.x += leftStick.x;
 	velocity_.z += leftStick.y;
 
@@ -85,11 +85,11 @@ void CalyxHuman::Move(float dt){
 }
 
 void CalyxHuman::Turn(){
-	CxMath::Vector3 from = CxMath::Vector3::Forward(); // (0, 0, 1)
-	CxMath::Vector3 to = velocity_.Normalize();                  // 移動方向
+	CalyxMath::Vector3 from = CalyxMath::Vector3::Forward(); // (0, 0, 1)
+	CalyxMath::Vector3 to = velocity_.Normalize();                  // 移動方向
 
 	if (to.Length() > 0.0f){
-		CxMath::Quaternion rot = CxMath::Quaternion::FromToQuaternion(from, to);
+		CalyxMath::Quaternion rot = CalyxMath::Quaternion::FromToQuaternion(from, to);
 		worldTransform_.rotation = rot;
 	}
 }

@@ -12,7 +12,7 @@ public:
 
 	bool Equals(const TransformSnapshot& other, float epsilon = 1e-5f) const;
 
-	CxMath::Vector3 scale;
-	CxMath::Quaternion rotate;
-	CxMath::Vector3 translate;
+	CalyxMath::Vector3 scale;
+	CalyxMath::Quaternion rotate;
+	CalyxMath::Vector3 translate;
 };

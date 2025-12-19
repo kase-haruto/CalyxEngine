@@ -1,6 +1,6 @@
 #pragma once
 
-namespace CxMath {
+namespace CalyxMath {
 	struct Vector3;
 } 
 
@@ -10,6 +10,6 @@ public:
 	//					public methods
 	//===================================================================*/
 	virtual ~IBulletShooter() = default;
-	virtual void Shoot(const CxMath::Vector3& origin, const CxMath::Vector3& direction) = 0;
+	virtual void Shoot(const CalyxMath::Vector3& origin, const CalyxMath::Vector3& direction) = 0;
 };
 

@@ -19,8 +19,8 @@ PointLight::PointLight(const std::string& name){
 	constantBuffer_.Initialize(device);
 
 	//初期化
-	lightData_.color = CxMath::Vector4(1.0f, 1.0f, 1.0f, 1.0f);	// ライトの色
-	lightData_.position = CxMath::Vector3(0.0f, 0.0f, 0.0f);		// ライトの位置
+	lightData_.color = CalyxMath::Vector4(1.0f, 1.0f, 1.0f, 1.0f);	// ライトの色
+	lightData_.position = CalyxMath::Vector3(0.0f, 0.0f, 0.0f);		// ライトの位置
 	lightData_.intensity = 0.25f;						// 光度
 	lightData_.radius = 20.0f;							// 最大距離
 	lightData_.decay = 1.0f;							// 減衰率
@@ -36,8 +36,8 @@ PointLight::PointLight(){
 	constantBuffer_.Initialize(device);
 
 	//初期化
-	lightData_.color = CxMath::Vector4(1.0f, 1.0f, 1.0f, 1.0f);	// ライトの色
-	lightData_.position = CxMath::Vector3(0.0f, 0.0f, 0.0f);		// ライトの位置
+	lightData_.color = CalyxMath::Vector4(1.0f, 1.0f, 1.0f, 1.0f);	// ライトの色
+	lightData_.position = CalyxMath::Vector3(0.0f, 0.0f, 0.0f);		// ライトの位置
 	lightData_.intensity = 0.25f;						// 光度
 	lightData_.radius = 20.0f;							// 最大距離
 	lightData_.decay = 1.0f;							// 減衰率

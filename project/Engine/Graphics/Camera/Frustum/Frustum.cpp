@@ -2,7 +2,7 @@
 
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 
-void Frustum::ExtractFromMatrix(const CxMath::Matrix4x4& viewProj){
+void Frustum::ExtractFromMatrix(const CalyxMath::Matrix4x4& viewProj){
 	viewProjection_ = viewProj;
 	const auto& m = viewProj.m;
 
@@ -14,9 +14,9 @@ void Frustum::ExtractFromMatrix(const CxMath::Matrix4x4& viewProj){
 	planes_[5] = NormalizePlane({m[0][3] - m[0][2], m[1][3] - m[1][2], m[2][3] - m[2][2], m[3][3] - m[3][2]}); // Far
 }
 
-bool Frustum::IsAABBInside(const CxMath::Vector3& min, const CxMath::Vector3& max) const{
+bool Frustum::IsAABBInside(const CalyxMath::Vector3& min, const CalyxMath::Vector3& max) const{
 	for (const auto& plane : planes_){
-		CxMath::Vector3 positive = {
+		CalyxMath::Vector3 positive = {
 			(plane.normal.x >= 0) ? max.x : min.x,
 			(plane.normal.y >= 0) ? max.y : min.y,
 			(plane.normal.z >= 0) ? max.z : min.z
@@ -29,15 +29,15 @@ bool Frustum::IsAABBInside(const CxMath::Vector3& min, const CxMath::Vector3& ma
 	return true;
 }
 
-void Frustum::Draw(const CxMath::Vector4& color, float farPlaneRatio) const {
-	CxMath::Vector3 corners[8];
+void Frustum::Draw(const CalyxMath::Vector4& color, float farPlaneRatio) const {
+	CalyxMath::Vector3 corners[8];
 	CalculateCorners(corners);
 
 	// ----------  ここで遠平面を手前に寄せる ----------
 	if (farPlaneRatio < 1.f) {
 		for (int i = 0; i < 4; ++i) {
 			// near[i] から far[i] 方向へのベクトル
-			CxMath::Vector3 v = corners[i + 4] - corners[i];
+			CalyxMath::Vector3 v = corners[i + 4] - corners[i];
 			corners[i + 4] = corners[i] + v * farPlaneRatio;   // 圧縮
 		}
 	}
@@ -61,22 +61,22 @@ void Frustum::Draw(const CxMath::Vector4& color, float farPlaneRatio) const {
 	draw->DrawLine3d(corners[3], corners[7], color);
 }
 
-void Frustum::CalculateCorners(CxMath::Vector3 outCorners[8]) const{
-	CxMath::Matrix4x4 inv = CxMath::Matrix4x4::Inverse(viewProjection_);
-	CxMath::Vector3 ndc[8] = {
+void Frustum::CalculateCorners(CalyxMath::Vector3 outCorners[8]) const{
+	CalyxMath::Matrix4x4 inv = CalyxMath::Matrix4x4::Inverse(viewProjection_);
+	CalyxMath::Vector3 ndc[8] = {
 		{-1, -1, 0}, {1, -1, 0}, {1, 1, 0}, {-1, 1, 0},
 		{-1, -1, 1}, {1, -1, 1}, {1, 1, 1}, {-1, 1, 1}
 	};
 
 	for (int i = 0; i < 8; ++i){
-		CxMath::Vector4 clip(ndc[i].x, ndc[i].y, ndc[i].z, 1.0f);
-		CxMath::Vector4 world = CxMath::Vector4::Transform(clip, inv);
-		outCorners[i] = CxMath::Vector3(world.x / world.w, world.y / world.w, world.z / world.w);
+		CalyxMath::Vector4 clip(ndc[i].x, ndc[i].y, ndc[i].z, 1.0f);
+		CalyxMath::Vector4 world = CalyxMath::Vector4::Transform(clip, inv);
+		outCorners[i] = CalyxMath::Vector3(world.x / world.w, world.y / world.w, world.z / world.w);
 	}
 }
 
-FrustumPlane Frustum::NormalizePlane(const CxMath::Vector4& p){
-	CxMath::Vector3 n = {p.x, p.y, p.z};
+FrustumPlane Frustum::NormalizePlane(const CalyxMath::Vector4& p){
+	CalyxMath::Vector3 n = {p.x, p.y, p.z};
 	float len = n.Length();
 	return {n / len, p.w / len};
 }

@@ -63,9 +63,9 @@ void Boss::Initialize() {
 	anim_->Initialize();
 	hpGauge_ = std::make_unique<HpGauge>(static_cast<float>(life_));
 	// 画面中央上にゲージを設定
-	CxMath::Vector2 gaugePos = {kGameSize.x * 0.5f,50.0f};
-	hpGauge_->Initialize(gaugePos,CxMath::Vector2(500.0f,32.0f));
-	hpGauge_->SetAncorPoint(CxMath::Vector2(0.5f,0.5f));
+	CalyxMath::Vector2 gaugePos = {kGameSize.x * 0.5f,50.0f};
+	hpGauge_->Initialize(gaugePos,CalyxMath::Vector2(500.0f,32.0f));
+	hpGauge_->SetAncorPoint(CalyxMath::Vector2(0.5f,0.5f));
 
 	auto fx = hitEffects_.lock();
 	fx->StopAll();
@@ -94,17 +94,17 @@ void Boss::Update(float dt) {
 
 	// 方向合わせ（プレイヤーへ）
 	{
-		const CxMath::Vector3 myPos     = GetWorldPosition();
-		const CxMath::Vector3 targetPos = target_ ? target_->GetWorldTransform().GetWorldPosition() : myPos;
+		const CalyxMath::Vector3 myPos     = GetWorldPosition();
+		const CalyxMath::Vector3 targetPos = target_ ? target_->GetWorldTransform().GetWorldPosition() : myPos;
 
-		CxMath::Vector3 d = targetPos - myPos;
+		CalyxMath::Vector3 d = targetPos - myPos;
 		if(d.LengthSquared() > 1e-12f) {
 			d = d.Normalize();
 
 			const float yaw   = std::atan2(d.x,d.z);                               // 水平旋回
 			const float pitch = std::atan2(-d.y,std::sqrt(d.x * d.x + d.z * d.z)); // 上下（LH）
 
-			const CxMath::Quaternion qWorld  = CxMath::Quaternion::MakeRotateY(yaw) * CxMath::Quaternion::MakeRotateX(pitch);
+			const CalyxMath::Quaternion qWorld  = CalyxMath::Quaternion::MakeRotateY(yaw) * CalyxMath::Quaternion::MakeRotateX(pitch);
 			worldTransform_.rotation = qWorld;
 		}
 	}
@@ -138,7 +138,7 @@ void Boss::OnCollisionEnter(Collider* other) {
 	life_--;
 
 	// --- 衝突位置を取得 ---
-	CxMath::Vector3 hitPos = other->GetWorldPos(); // ← マジでこれだけでOKのことが多い
+	CalyxMath::Vector3 hitPos = other->GetWorldPos(); // ← マジでこれだけでOKのことが多い
 
 	auto fx = hitEffects_.lock();
 	// 位置設定
@@ -173,14 +173,14 @@ void Boss::OnCollisionExit([[maybe_unused]]Collider* other) {  }
 /////////////////////////////////////////////////////////////////////////////////////////
 //		中心座標取得
 /////////////////////////////////////////////////////////////////////////////////////////
-const CxMath::Vector3 Boss::GetCenterPos() const {
-	const CxMath::Vector3 offset   = {0.0f,1.5f,0.0f};
-	CxMath::Vector3       worldPos = CxMath::Vector3::Transform(offset,worldTransform_.matrix.world);
+const CalyxMath::Vector3 Boss::GetCenterPos() const {
+	const CalyxMath::Vector3 offset   = {0.0f,1.5f,0.0f};
+	CalyxMath::Vector3       worldPos = CalyxMath::Vector3::Transform(offset,worldTransform_.matrix.world);
 	return worldPos;
 }
 
 #pragma region accessor
-CxMath::Vector3 Boss::GetTargetWorldPos() const { return target_ ? target_->GetWorldTransform().GetWorldPosition() : GetCenterPos(); }
+CalyxMath::Vector3 Boss::GetTargetWorldPos() const { return target_ ? target_->GetWorldTransform().GetWorldPosition() : GetCenterPos(); }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		発射制御クラスの取得

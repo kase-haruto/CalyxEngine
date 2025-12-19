@@ -265,7 +265,7 @@ void FxObject::ExtractConfigToJson(nlohmann::json& j) const {
 /////////////////////////////////////////////////////////////////////////////////////////
 std::string_view FxObject::GetTypeName() const { return "FxObject"; }
 
-void FxObject::SetWorldPosition(const CxMath::Vector3& pos) {
+void FxObject::SetWorldPosition(const CalyxMath::Vector3& pos) {
 	worldTransform_.translation = pos;
 }
 

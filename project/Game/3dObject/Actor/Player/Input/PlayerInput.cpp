@@ -6,14 +6,14 @@
 std::vector<PlayerCommand> PlayerInput::CollectCommands(float dt) {
 	std::vector<PlayerCommand> cmds;
 
-	CxMath::Vector3 move{};
+	CalyxMath::Vector3 move{};
 
 	if(Input::GetInstance()->PushKey(DIK_A)) move.x -= 1.0f;
 	if(Input::GetInstance()->PushKey(DIK_D)) move.x += 1.0f;
 	if(Input::GetInstance()->PushKey(DIK_W)) move.y+= 1.0f;
 	if(Input::GetInstance()->PushKey(DIK_S)) move.y -= 1.0f;
 
-	CxMath::Vector2 stick = Input::GetInstance()->GetLeftStick();
+	CalyxMath::Vector2 stick = Input::GetInstance()->GetLeftStick();
 	move.x += stick.x;
 	move.y += stick.y;
 
@@ -25,8 +25,8 @@ std::vector<PlayerCommand> PlayerInput::CollectCommands(float dt) {
 	}
 
 	// レティクル
-	CxMath::Vector3 ret{};
-	CxMath::Vector2 rs = Input::GetInstance()->GetRightStick();
+	CalyxMath::Vector3 ret{};
+	CalyxMath::Vector2 rs = Input::GetInstance()->GetRightStick();
 	ret.x = rs.x * 300.0f * dt;
 	ret.y = rs.y * 300.0f * dt;
 	if(ret.LengthSquared() > 0.0f) {

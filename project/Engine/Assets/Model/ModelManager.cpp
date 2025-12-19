@@ -247,9 +247,9 @@ ModelData ModelManager::LoadModelFile(const std::string& directoryPath, const st
 			aiQuaternion rotate;
 			bindPoseMatrixAssimp.Decompose(scale, rotate, translate);
 
-			CxMath::Matrix4x4 bindPoseMatrix =
-				CxMath::MakeAffineMatrix({ scale.x,scale.y,scale.z }, { rotate.x,-rotate.y,-rotate.z,rotate.w }, { -translate.x,translate.y,translate.z });
-			jointWeightData.inverseBindPoseMatrix = CxMath::Matrix4x4::Inverse(bindPoseMatrix);
+			CalyxMath::Matrix4x4 bindPoseMatrix =
+				CalyxMath::MakeAffineMatrix({ scale.x,scale.y,scale.z }, { rotate.x,-rotate.y,-rotate.z,rotate.w }, { -translate.x,translate.y,translate.z });
+			jointWeightData.inverseBindPoseMatrix = CalyxMath::Matrix4x4::Inverse(bindPoseMatrix);
 
 			for (uint32_t weightIndex = 0; weightIndex < bone->mNumWeights; ++weightIndex) {
 
@@ -333,8 +333,8 @@ void ModelManager::LoadMesh(const aiMesh* mesh, ModelData& modelData) {
 	uint32_t baseVertex = static_cast<uint32_t>(modelData.meshData.vertices.size());
 
 	// 初期AABBを極端な値に
-	CxMath::Vector3 minPos = { FLT_MAX, FLT_MAX, FLT_MAX };
-	CxMath::Vector3 maxPos = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
+	CalyxMath::Vector3 minPos = { FLT_MAX, FLT_MAX, FLT_MAX };
+	CalyxMath::Vector3 maxPos = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
 
 	for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
 		VertexPosUvN vertex{};
@@ -349,9 +349,9 @@ void ModelManager::LoadMesh(const aiMesh* mesh, ModelData& modelData) {
 		modelData.meshData.vertices.push_back(vertex);
 
 		// AABB更新用の min/max 反映
-		CxMath::Vector3 pos = { vertex.position.x, vertex.position.y, vertex.position.z };
-		minPos = CxMath::Vector3::Min(minPos, pos);
-		maxPos = CxMath::Vector3::Max(maxPos, pos);
+		CalyxMath::Vector3 pos = { vertex.position.x, vertex.position.y, vertex.position.z };
+		minPos = CalyxMath::Vector3::Min(minPos, pos);
+		maxPos = CalyxMath::Vector3::Max(maxPos, pos);
 	}
 
 	for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
@@ -362,12 +362,12 @@ void ModelManager::LoadMesh(const aiMesh* mesh, ModelData& modelData) {
 	}
 
 	// ローカルAABBを格納
-	if (modelData.localAABB.min_ == CxMath::Vector3{} && modelData.localAABB.max_ == CxMath::Vector3{}) {
+	if (modelData.localAABB.min_ == CalyxMath::Vector3{} && modelData.localAABB.max_ == CalyxMath::Vector3{}) {
 		modelData.localAABB.Initialize(minPos, maxPos);
 	} else {
 		// モデル全体の AABB を統合（複数メッシュ時）
-		CxMath::Vector3 mergedMin = CxMath::Vector3::Min(modelData.localAABB.min_, minPos);
-		CxMath::Vector3 mergedMax = CxMath::Vector3::Max(modelData.localAABB.max_, maxPos);
+		CalyxMath::Vector3 mergedMin = CalyxMath::Vector3::Min(modelData.localAABB.min_, minPos);
+		CalyxMath::Vector3 mergedMax = CalyxMath::Vector3::Max(modelData.localAABB.max_, maxPos);
 		modelData.localAABB.Initialize(mergedMin, mergedMax);
 	}
 }
@@ -417,7 +417,7 @@ void ModelManager::LoadSkinData([[maybe_unused]] const aiMesh* mesh, [[maybe_unu
 //----------------------------------------------------------------------------
 // アニメーション評価サンプル
 //----------------------------------------------------------------------------
-CxMath::Vector3 ModelManager::Evaluate(const AnimationCurve<CxMath::Vector3>& curve, float time) {
+CalyxMath::Vector3 ModelManager::Evaluate(const AnimationCurve<CalyxMath::Vector3>& curve, float time) {
 	const auto& keyframes = curve.keyframes;
 	if (keyframes.empty()) {
 		return { 0,0,0 };
@@ -433,13 +433,13 @@ CxMath::Vector3 ModelManager::Evaluate(const AnimationCurve<CxMath::Vector3>& cu
 		float t1 = keyframes[i + 1].time;
 		if (time >= t0 && time <= t1) {
 			float localT = (time - t0) / (t1 - t0);
-			return CxMath::Vector3::Lerp(keyframes[i].value, keyframes[i + 1].value, localT);
+			return CalyxMath::Vector3::Lerp(keyframes[i].value, keyframes[i + 1].value, localT);
 		}
 	}
 	return keyframes.back().value;
 }
 
-CxMath::Quaternion ModelManager::Evaluate(const AnimationCurve<CxMath::Quaternion>& curve, float time) {
+CalyxMath::Quaternion ModelManager::Evaluate(const AnimationCurve<CalyxMath::Quaternion>& curve, float time) {
 	const auto& keyframes = curve.keyframes;
 	if (keyframes.empty()) {
 		return { 0,0,0,1 };
@@ -455,7 +455,7 @@ CxMath::Quaternion ModelManager::Evaluate(const AnimationCurve<CxMath::Quaternio
 		float t1 = keyframes[i + 1].time;
 		if (time >= t0 && time <= t1) {
 			float localT = (time - t0) / (t1 - t0);
-			return CxMath::Quaternion::Slerp(keyframes[i].value, keyframes[i + 1].value, localT);
+			return CalyxMath::Quaternion::Slerp(keyframes[i].value, keyframes[i + 1].value, localT);
 		}
 	}
 	return keyframes.back().value;

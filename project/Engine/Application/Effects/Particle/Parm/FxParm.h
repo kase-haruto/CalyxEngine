@@ -60,8 +60,8 @@ public:
 	}
 
 private:
-	static T getDefault() { if constexpr(std::is_same_v<T,CxMath::Vector3>) { return CxMath::Vector3(1.0f,1.0f,1.0f); } else if constexpr(std::is_arithmetic_v<T>) { return T(1); } else { return T{}; } }
-	static T getHalf(const T& v) { if constexpr(std::is_same_v<T,CxMath::Vector3>) { return v * 0.5f; } else if constexpr(std::is_arithmetic_v<T>) { return v * T(0.5f); } else { return T{}; } }
+	static T getDefault() { if constexpr(std::is_same_v<T,CalyxMath::Vector3>) { return CalyxMath::Vector3(1.0f,1.0f,1.0f); } else if constexpr(std::is_arithmetic_v<T>) { return T(1); } else { return T{}; } }
+	static T getHalf(const T& v) { if constexpr(std::is_same_v<T,CalyxMath::Vector3>) { return v * 0.5f; } else if constexpr(std::is_arithmetic_v<T>) { return v * T(0.5f); } else { return T{}; } }
 
 private:
 	FxValueMode mode_ = FxValueMode::Constant;
@@ -100,19 +100,19 @@ template <typename T>
 inline T FxParam<T>::Get() const { if(mode_ == FxValueMode::Constant) { return constant_; } else { return Random::Generate<T>(min_,max_); } }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//		値の取得（CxMath::Vector3 専用特殊化）
+//		値の取得（CalyxMath::Vector3 専用特殊化）
 /////////////////////////////////////////////////////////////////////////////////////////
 template <>
-inline CxMath::Vector3 FxParam<CxMath::Vector3>::Get() const {
+inline CalyxMath::Vector3 FxParam<CalyxMath::Vector3>::Get() const {
 	switch(mode_) {
 	case FxValueMode::Constant:
 		return constant_;
 	case FxValueMode::Random: // 立方体ランダム
 		return Random::GenerateVector3(min_,max_);
 	case FxValueMode::RandomSphere: { // 球状ランダム
-		CxMath::Vector3 center = (min_ + max_) * 0.5f;
+		CalyxMath::Vector3 center = (min_ + max_) * 0.5f;
 		float   radius = ((max_ - min_).Length()) * 0.5f;
-		CxMath::Vector3 dir    = Random::GenerateUnitVector3();
+		CalyxMath::Vector3 dir    = Random::GenerateUnitVector3();
 		float   dist   = Random::Generate<float>(0.0f,radius);
 		return center + dir * dist;
 	}
@@ -184,7 +184,7 @@ inline bool DrawFxParamGui(const char* label, FxParam<float>& p) {
     return changed;
 }
 
-inline bool DrawFxParamGui(const char* label, FxParam<CxMath::Vector3>& p) {
+inline bool DrawFxParamGui(const char* label, FxParam<CalyxMath::Vector3>& p) {
     bool changed = false;
     ImGui::PushID(label);
     FxValueMode mode = p.GetMode();
@@ -194,10 +194,10 @@ inline bool DrawFxParamGui(const char* label, FxParam<CxMath::Vector3>& p) {
     changed |= DrawModeCombo("##mode", mode);
 
     if (mode == FxValueMode::Constant) {
-        CxMath::Vector3 v = p.GetConstant();
+        CalyxMath::Vector3 v = p.GetConstant();
         if (GuiCmd::DragFloat3("Value", v)) { p.SetConstant(v); changed = true; }
     } else if (mode == FxValueMode::Random) {
-        CxMath::Vector3 mn = p.GetMin(), mx = p.GetMax();
+        CalyxMath::Vector3 mn = p.GetMin(), mx = p.GetMax();
         bool e1 = GuiCmd::DragFloat3("Min", mn);
         bool e2 = GuiCmd::DragFloat3("Max", mx);
         if (e1 || e2) {
@@ -209,14 +209,14 @@ inline bool DrawFxParamGui(const char* label, FxParam<CxMath::Vector3>& p) {
         }
     } else { // RandomSphere
         // ユーザーにとって直感的な Center+Radius 入力にする
-        CxMath::Vector3 center = (p.GetMin() + p.GetMax()) * 0.5f;
-        CxMath::Vector3 half   = (p.GetMax() - p.GetMin()) * 0.5f;
+        CalyxMath::Vector3 center = (p.GetMin() + p.GetMax()) * 0.5f;
+        CalyxMath::Vector3 half   = (p.GetMax() - p.GetMin()) * 0.5f;
         float radius   = half.Length();
         bool e1 = GuiCmd::DragFloat3("Center", center);
         bool e2 = GuiCmd::DragFloat("Radius", radius, 0.01f, 0.0f, 1e6f);
         if (e1 || e2) {
-            CxMath::Vector3 mn = center - CxMath::Vector3(radius, radius, radius);
-            CxMath::Vector3 mx = center + CxMath::Vector3(radius, radius, radius);
+            CalyxMath::Vector3 mn = center - CalyxMath::Vector3(radius, radius, radius);
+            CalyxMath::Vector3 mx = center + CalyxMath::Vector3(radius, radius, radius);
             p.SetRandom(mn, mx);
             changed = true;
         }

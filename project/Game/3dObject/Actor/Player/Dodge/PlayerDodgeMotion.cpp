@@ -40,8 +40,8 @@ void PlayerDodgeSpinMotion::Update(float /*dt*/) {
 	const float rad =
 		std::numbers::pi_v<float> * 2.0f * t; // ★ 1回転だけ
 
-	const CxMath::Quaternion spinQ = CxMath::Quaternion::MakeRotateY(rad);
-	wt_->rotation = CxMath::Quaternion::Multiply(baseRot_, spinQ);
+	const CalyxMath::Quaternion spinQ = CalyxMath::Quaternion::MakeRotateY(rad);
+	wt_->rotation = CalyxMath::Quaternion::Multiply(baseRot_, spinQ);
 	wt_->rotationSource = RotationSource::Quaternion;
 }
 

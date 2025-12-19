@@ -48,7 +48,7 @@ public:
 
     /* -------- accessors -------- */
     void SetDrawEnable(bool isDrawEnable) override;
-	void SetPosition(const CxMath::Vector3& pos);
+	void SetPosition(const CalyxMath::Vector3& pos);
     std::string_view GetTypeName() const override { return "ParticleSystemObject"; }
 
     const ConfigurableObject<ParticleSystemObjectConfig>& GetConfigObject() const { return config_; }

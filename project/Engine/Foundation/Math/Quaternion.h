@@ -3,7 +3,7 @@
 #include <optional>
 #include "Vector3.h"
 
-namespace CxMath {
+namespace CalyxMath {
 	struct Matrix4x4;
 
 	struct Quaternion {
@@ -63,9 +63,9 @@ namespace CxMath {
 		static Quaternion MakeRotateAxisQuaternion(const Vector3& axis, float angle);
 
 		// クォータニオンから回転行列を生成する
-		static CxMath::Matrix4x4 ToMatrix(const Quaternion& q);
+		static CalyxMath::Matrix4x4 ToMatrix(const Quaternion& q);
 
-		static Quaternion FromMatrix(const CxMath::Matrix4x4& m);
+		static Quaternion FromMatrix(const CalyxMath::Matrix4x4& m);
 
 		// クォータニオンでベクトルを回転させる
 		static Vector3 RotateVector(const Vector3& vector, const Quaternion& quaternion);
@@ -95,11 +95,11 @@ namespace CxMath {
 	};
 
 	//--------- serializer ---------------------------------------------------
-	inline void to_json(nlohmann::json& j, const CxMath::Quaternion& q) {
+	inline void to_json(nlohmann::json& j, const CalyxMath::Quaternion& q) {
 		j = nlohmann::json{{"x", q.x}, {"y", q.y}, {"z", q.z}, {"w", q.w}};
 	}
 
-	inline void from_json(const nlohmann::json& j, CxMath::Quaternion& q) {
+	inline void from_json(const nlohmann::json& j, CalyxMath::Quaternion& q) {
 		j.at("x").get_to(q.x);
 		j.at("y").get_to(q.y);
 		j.at("z").get_to(q.z);
@@ -112,8 +112,8 @@ namespace CxMath {
 			q.y /= n;
 			q.z /= n;
 		} else {
-			q = CxMath::Quaternion::MakeIdentity();
+			q = CalyxMath::Quaternion::MakeIdentity();
 		}
 	}
 
-} // namespace CxMath
+} // namespace CalyxMath

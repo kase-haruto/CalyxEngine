@@ -11,11 +11,11 @@
 /*			視推台の面
 /* ===================================================================== */
 struct FrustumPlane{
-	CxMath::Vector3 normal;
+	CalyxMath::Vector3 normal;
 	float distance;
 
-	float GetSignedDistanceToPoint(const CxMath::Vector3& point) const{
-		return CxMath::Vector3::Dot(normal, point) + distance;
+	float GetSignedDistanceToPoint(const CalyxMath::Vector3& point) const{
+		return CalyxMath::Vector3::Dot(normal, point) + distance;
 	}
 };
 
@@ -30,7 +30,7 @@ public:
 	/// 行列から掃き出し
 	/// </summary>
 	/// <param name="viewProj"></param>
-	void ExtractFromMatrix(const CxMath::Matrix4x4& viewProj);
+	void ExtractFromMatrix(const CalyxMath::Matrix4x4& viewProj);
 
 	/// <summary>
 	/// aabbとの判定
@@ -38,20 +38,20 @@ public:
 	/// <param name="min"></param>
 	/// <param name="max"></param>
 	/// <returns></returns>
-	bool IsAABBInside(const CxMath::Vector3& min, const CxMath::Vector3& max) const;
+	bool IsAABBInside(const CalyxMath::Vector3& min, const CalyxMath::Vector3& max) const;
 
 	/// <summary>
 	/// 描画
 	/// </summary>
 	/// <param name="color"></param>
 	/// <param name="farPlaneRatio"></param>
-	void Draw(const CxMath::Vector4& color = CxMath::Vector4(1, 1, 0, 1), float farPlaneRatio = 0.005f) const;
+	void Draw(const CalyxMath::Vector4& color = CalyxMath::Vector4(1, 1, 0, 1), float farPlaneRatio = 0.005f) const;
 	
 	/// <summary>
 	/// 8頂点をワールド座標で計算
 	/// </summary>
 	/// <param name="outCorners"></param>
-	void CalculateCorners(CxMath::Vector3 outCorners[8]) const;
+	void CalculateCorners(CalyxMath::Vector3 outCorners[8]) const;
 
 private:
 	/// <summary>
@@ -59,11 +59,11 @@ private:
 	/// </summary>
 	/// <param name="p"></param>
 	/// <returns></returns>
-	FrustumPlane NormalizePlane(const CxMath::Vector4& p);
+	FrustumPlane NormalizePlane(const CalyxMath::Vector4& p);
 
 private:
 	std::array<FrustumPlane, 6> planes_;
-	CxMath::Matrix4x4 viewProjection_;
+	CalyxMath::Matrix4x4 viewProjection_;
 
 	
 };

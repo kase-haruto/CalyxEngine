@@ -1,6 +1,6 @@
 #include "Vector2.h"
 
-namespace  CxMath {
+namespace  CalyxMath {
 	Vector2::Vector2(float vx, float vy) : x(vx), y(vy){}
 
 	Vector2::Vector2(const Vector2& v){

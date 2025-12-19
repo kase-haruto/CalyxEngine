@@ -4,8 +4,8 @@
 
 namespace Cx {
 	namespace GameUtil {
-		CxMath::Vector3 RotateAroundAxis(const CxMath::Vector3& v, const CxMath::Vector3& axisN, float rad);
-		void MakeOrthoBasis(const CxMath::Vector3& forwardN, CxMath::Vector3& rightN, CxMath::Vector3& upN);
-		std::vector<CxMath::Vector3> GenFanDirs( const CxMath::Vector3& forwardN, float centerDeg, float spreadDeg, int nWay);
+		CalyxMath::Vector3 RotateAroundAxis(const CalyxMath::Vector3& v, const CalyxMath::Vector3& axisN, float rad);
+		void MakeOrthoBasis(const CalyxMath::Vector3& forwardN, CalyxMath::Vector3& rightN, CalyxMath::Vector3& upN);
+		std::vector<CalyxMath::Vector3> GenFanDirs( const CalyxMath::Vector3& forwardN, float centerDeg, float spreadDeg, int nWay);
 	}
 }

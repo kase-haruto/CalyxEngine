@@ -37,7 +37,7 @@ void RadialBlurEffect::SetWidth(float width) {
     blurParam_.width = std::clamp(width, kMinWidth, kMaxWidth);
 }
 
-void RadialBlurEffect::SetCenter(const CxMath::Vector2& uv) {
+void RadialBlurEffect::SetCenter(const CalyxMath::Vector2& uv) {
     // 画面正規座標 [0,1] にクランプ
     blurParam_.center.x = std::clamp(uv.x, 0.0f, 1.0f);
     blurParam_.center.y = std::clamp(uv.y, 0.0f, 1.0f);

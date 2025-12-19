@@ -23,9 +23,9 @@ void OverLifetimeModule::OnUpdate(FxUnit& unit, float /*dt*/) {
 
 	switch(target_) {
 	case Target::Scale: {
-		CxMath::Vector3 s{start_.x, start_.y, start_.z};
-		CxMath::Vector3 e{end_.x, end_.y, end_.z};
-		CxMath::Vector3 v = CxMath::Vector3::Lerp(s, e, et);
+		CalyxMath::Vector3 s{start_.x, start_.y, start_.z};
+		CalyxMath::Vector3 e{end_.x, end_.y, end_.z};
+		CalyxMath::Vector3 v = CalyxMath::Vector3::Lerp(s, e, et);
 		ApplyTo(unit, {v.x, v.y, v.z, 1.0f});
 	} break;
 
@@ -33,22 +33,22 @@ void OverLifetimeModule::OnUpdate(FxUnit& unit, float /*dt*/) {
 	case Target::RotationY:
 	case Target::RotationZ:
 	case Target::AlphaOnly: {
-		float v = CxMath::Lerp(start_.x, end_.x, et);
+		float v = CalyxMath::Lerp(start_.x, end_.x, et);
 		ApplyTo(unit, {v, 0, 0, 0});
 	} break;
 
 	case Target::ColorRGBA: {
-		CxMath::Vector4 v = CxMath::Vector4::Lerp(start_, end_, et);
+		CalyxMath::Vector4 v = CalyxMath::Vector4::Lerp(start_, end_, et);
 		ApplyTo(unit, v);
 	} break;
 	}
 }
 
-void OverLifetimeModule::ApplyTo(FxUnit& u, const CxMath::Vector4& v) const {
+void OverLifetimeModule::ApplyTo(FxUnit& u, const CalyxMath::Vector4& v) const {
 	switch(target_) {
 	case Target::Scale: {
-		CxMath::Vector3 cur = u.scale;
-		CxMath::Vector3 nv	= {v.x, v.y, v.z};
+		CalyxMath::Vector3 cur = u.scale;
+		CalyxMath::Vector3 nv	= {v.x, v.y, v.z};
 		switch(blend_) {
 		case BlendOp::Set:
 			u.scale = nv;
@@ -108,7 +108,7 @@ void OverLifetimeModule::ApplyTo(FxUnit& u, const CxMath::Vector4& v) const {
 	} break;
 
 	case Target::ColorRGBA: {
-		CxMath::Vector4 cur = u.color, nv = v;
+		CalyxMath::Vector4 cur = u.color, nv = v;
 		switch(blend_) {
 		case BlendOp::Set:
 			u.color = nv;
@@ -139,7 +139,7 @@ void OverLifetimeModule::ApplyTo(FxUnit& u, const CxMath::Vector4& v) const {
 	}
 }
 
-void OverLifetimeModule::DrawValueEditor(const char* label, CxMath::Vector4& v) {
+void OverLifetimeModule::DrawValueEditor(const char* label, CalyxMath::Vector4& v) {
 	ImGui::TextUnformatted(label);
 	ImGui::PushID(label);
 	switch(target_) {

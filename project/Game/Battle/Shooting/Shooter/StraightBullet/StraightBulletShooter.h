@@ -14,7 +14,7 @@ public:
 	//===================================================================*/
 	StraightBulletShooter(class BulletContainer* container,BulletID id);
 
-	void Shoot(const CxMath::Vector3& origin, const CxMath::Vector3& direction) override;
+	void Shoot(const CalyxMath::Vector3& origin, const CalyxMath::Vector3& direction) override;
 
 private:
 	//===================================================================*/

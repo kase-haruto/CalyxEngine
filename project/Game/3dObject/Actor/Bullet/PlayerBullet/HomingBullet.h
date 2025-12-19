@@ -14,13 +14,13 @@ public:
 	HomingBullet() = default;
 	HomingBullet(const std::string& modelName, const std::string& name);
 	~HomingBullet();
-	void ShootInitialize(const CxMath::Vector3& initPos, const CxMath::Vector3& velocity)override;
+	void ShootInitialize(const CalyxMath::Vector3& initPos, const CalyxMath::Vector3& velocity)override;
 	void Initialize()override;
 	void OnShot();
 	void SetTarget(const Actor* target);
 	void Update(float dt) override;
 
-	const CxMath::Vector3 GetCenterPos() const override;
+	const CalyxMath::Vector3 GetCenterPos() const override;
 
 protected:
 	const Actor* target_ = nullptr;

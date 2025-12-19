@@ -5,8 +5,8 @@
 #include <Engine/Graphics/Camera/Base/BaseCamera.h>
 
 // forward declaration
-struct CxMath::Vector3;
-struct CxMath::Vector2;
+struct CalyxMath::Vector3;
+struct CalyxMath::Vector2;
 
 /* ========================================================================
 /*			デバッグ用カメラ
@@ -29,7 +29,7 @@ public:
 	//							public アクセッサ
 	//===================================================================//
 	//* ターゲット（注視点）を設定
-	void SetTarget(const CxMath::Vector3& target) { target_ = target; }
+	void SetTarget(const CalyxMath::Vector3& target) { target_ = target; }
 
 	//* カメラとターゲットとの初期距離を設定
 	void SetDistance(float dist) { distance_ = dist; }
@@ -47,9 +47,9 @@ private:
 	//===================================================================//
 	//							private 変数
 	//===================================================================//
-	CxMath::Vector3 target_{0.0f,0.0f,0.0f}; //* ターゲット（注視点）
+	CalyxMath::Vector3 target_{0.0f,0.0f,0.0f}; //* ターゲット（注視点）
 	float   distance_ = 10.0f;       //* カメラまでの距離
-	CxMath::Vector2 orbitAngle_{0.0f,0.0f};  //* オービット時の回転角度(Yaw, Pitch)
+	CalyxMath::Vector2 orbitAngle_{0.0f,0.0f};  //* オービット時の回転角度(Yaw, Pitch)
 
 	// 操作速度
 	float rotateSpeed_ = 0.005f; //* 回転速度
@@ -57,10 +57,10 @@ private:
 	float zoomSpeed_   = 0.1f;   //* ズーム速度
 
 	// ドラッグ状態の管理（Rotate用）
-	CxMath::Vector2 lastMousePosRotate_{0.0f,0.0f}; //* Rotate用の前フレームのマウス位置
+	CalyxMath::Vector2 lastMousePosRotate_{0.0f,0.0f}; //* Rotate用の前フレームのマウス位置
 	bool    isDraggingRotate_{false};       //* Rotateがドラッグ中かどうか
 
 	// ドラッグ状態の管理（Move用）
-	CxMath::Vector2 lastMousePosMove_{0.0f,0.0f}; //* Move用の前フレームのマウス位置
+	CalyxMath::Vector2 lastMousePosMove_{0.0f,0.0f}; //* Move用の前フレームのマウス位置
 	bool    isDraggingMove_{false};       //* Moveがドラッグ中かどうか
 };

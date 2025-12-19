@@ -30,7 +30,7 @@ void PlayerLockOn::Update(float dt) {
 		auto& enemy = lockedOnTargets_[i];
 		if(!enemy) continue;
 
-		CxMath::Vector2 pos = CxMath::WorldToScreen(enemy->GetCenterPos());
+		CalyxMath::Vector2 pos = CalyxMath::WorldToScreen(enemy->GetCenterPos());
 		lockOnSprites_[i]->SetPosition(pos);
 
 		float r = lockOnSprites_[i]->GetRotation() + 0.05f;
@@ -54,8 +54,8 @@ void PlayerLockOn::RequestLockOn() {
 	if(!cam) return;
 
 	// 画面上のレティクル座標
-	const CxMath::Vector2 reticleScreen =
-		CxMath::WorldToScreen(ctx_.getReticlePos());
+	const CalyxMath::Vector2 reticleScreen =
+		CalyxMath::WorldToScreen(ctx_.getReticlePos());
 
 	// ヒット判定
 	for(const auto& enemy : targets_) {
@@ -65,7 +65,7 @@ void PlayerLockOn::RequestLockOn() {
 		// カメラに映っていなかったらスキップ
 		if(!cam->IsVisible(enemy->GetWorldAABB())) continue;
 
-		CxMath::Vector2 enemyScreen = CxMath::WorldToScreen(enemy->GetWorldPosition());
+		CalyxMath::Vector2 enemyScreen = CalyxMath::WorldToScreen(enemy->GetWorldPosition());
 		if((enemyScreen - reticleScreen).Length() > lockOnRadiusPx_) continue;
 
 		lockedOnTargets_.push_back(enemy);
@@ -107,8 +107,8 @@ void PlayerLockOn::UpdateAutoLockOn(float dt) {
 	auto* cam = CameraManager::GetMain3d();
 	if(!cam) return;
 
-	const CxMath::Vector2 reticleScreen =
-		CxMath::WorldToScreen(ctx_.getReticlePos());
+	const CalyxMath::Vector2 reticleScreen =
+		CalyxMath::WorldToScreen(ctx_.getReticlePos());
 
 	for(size_t i = 0; i < lockedOnTargets_.size();) {
 		auto& enemy	 = lockedOnTargets_[i];
@@ -121,7 +121,7 @@ void PlayerLockOn::UpdateAutoLockOn(float dt) {
 			remove = true;
 		else {
 			// レティクルとの距離が外れたら解除
-			CxMath::Vector2 enemyScreen = CxMath::WorldToScreen(enemy->GetWorldPosition());
+			CalyxMath::Vector2 enemyScreen = CalyxMath::WorldToScreen(enemy->GetWorldPosition());
 			float	dist		= (enemyScreen - reticleScreen).Length();
 			if(dist > lockOnReleaseRadiusPx_) remove = true;
 		}
@@ -144,7 +144,7 @@ void PlayerLockOn::UpdateAutoLockOn(float dt) {
 			if(!cam->IsVisible(e->GetWorldAABB())) continue;
 
 			// レティクルとの距離判定
-			CxMath::Vector2 s = CxMath::WorldToScreen(e->GetWorldPosition());
+			CalyxMath::Vector2 s = CalyxMath::WorldToScreen(e->GetWorldPosition());
 			float	d = (s - reticleScreen).Length();
 			if(d > lockOnAcquireRadiusPx_) continue;
 

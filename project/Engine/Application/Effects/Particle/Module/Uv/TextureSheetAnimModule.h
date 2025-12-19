@@ -19,8 +19,8 @@ public:
 	//					structs
 	//===================================================================*/
 	struct FrameUV {
-		CxMath::Vector2 offset;
-		CxMath::Vector2 scale;
+		CalyxMath::Vector2 offset;
+		CalyxMath::Vector2 scale;
 	};
 
 public:

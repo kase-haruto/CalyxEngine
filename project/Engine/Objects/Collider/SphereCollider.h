@@ -17,7 +17,7 @@ public:
 	~SphereCollider()override = default;
 
 	void Initialize(float radius);
-	void Update(const CxMath::Vector3& position, const CxMath::Quaternion& rotate)override;
+	void Update(const CalyxMath::Vector3& position, const CalyxMath::Quaternion& rotate)override;
 	void Draw()override;
 	void ShowGui()override;
 
@@ -39,7 +39,7 @@ public:
 	//===================================================================*/
 	//                   getter/setter
 	//===================================================================*/
-	const CxMath::Vector3& GetCenter()const override;
+	const CalyxMath::Vector3& GetCenter()const override;
 
 	const std::variant<Sphere, OBB>& GetCollisionShape() override;
 };

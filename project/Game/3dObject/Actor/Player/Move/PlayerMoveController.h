@@ -14,7 +14,7 @@ public:
 	 * \brief 移動量を追加する
 	 * \param delta
 	 */
-	void AddMove(const CxMath::Vector3& delta);
+	void AddMove(const CalyxMath::Vector3& delta);
 	/**
 	 * \brief ワールド変換に移動を適用する
 	 * \param wt
@@ -25,5 +25,5 @@ private:
 	//===================================================================*/
 	//			private methods
 	//===================================================================*/
-	CxMath::Vector3 pendingMove_ = CxMath::Vector3::Zero();
+	CalyxMath::Vector3 pendingMove_ = CalyxMath::Vector3::Zero();
 };

@@ -124,7 +124,7 @@ bool                     PlayerDodgeSystem::IsDodging() const { return state_ !=
 bool                     PlayerDodgeSystem::IsInIFrame() const { return state_ == DodgeState::IFrame; }
 DodgeState               PlayerDodgeSystem::GetState() const { return state_; }
 float                    PlayerDodgeSystem::GetStateTime() const { return timer_; }
-const CxMath::Vector3&           PlayerDodgeSystem::GetDodgeDir() const { return dodgeDir_; }
+const CalyxMath::Vector3&           PlayerDodgeSystem::GetDodgeDir() const { return dodgeDir_; }
 const PlayerDodgeConfig& PlayerDodgeSystem::GetConfig() const { return cfg_; }
 void                     PlayerDodgeSystem::SetPerfectHintActive(bool v) { perfectHintActive_ = v; }
 bool                     PlayerDodgeSystem::WouldBePerfectIfDodgedNow() const { return perfectHintActive_; }

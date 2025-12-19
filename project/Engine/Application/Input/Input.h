@@ -47,8 +47,8 @@ using Microsoft::WRL::ComPtr;
 
 // スティック状態構造体
 struct StickState{
-	CxMath::Vector2 leftStick;
-	CxMath::Vector2 rightStick;
+	CalyxMath::Vector2 leftStick;
+	CalyxMath::Vector2 rightStick;
 };
 
 class Input{
@@ -73,18 +73,18 @@ public:
 	static bool PushMouseButton(MouseButton button);
 	static bool TriggerMouseButton(MouseButton button);
 	static bool ReleaseMouseButton(MouseButton button);
-	static CxMath::Vector2 GetMousePosition();
-	static CxMath::Vector2 GetMousePosInDebugWindow();
+	static CalyxMath::Vector2 GetMousePosition();
+	static CalyxMath::Vector2 GetMousePosInDebugWindow();
 	static float GetMouseWheel();
-	static CxMath::Vector2 GetMouseDelta();
+	static CalyxMath::Vector2 GetMouseDelta();
 
 	// ゲームパッド
 	static bool PushGamepadButton(PadButton button);
 	static bool TriggerGamepadButton(PadButton button);
 	static float GetLeftTrigger();
 	static float GetRightTrigger();
-	static CxMath::Vector2 GetLeftStick();
-	static CxMath::Vector2 GetRightStick();
+	static CalyxMath::Vector2 GetLeftStick();
+	static CalyxMath::Vector2 GetRightStick();
 	static StickState GetStickState();
 	static bool IsLeftStickMoved();
 
@@ -113,7 +113,7 @@ private:
 	ComPtr<IDirectInputDevice8> mouse_ = nullptr;
 	DIMOUSESTATE mouseState_ {};
 	DIMOUSESTATE mouseStatePre_ {};
-	CxMath::Vector2 mousePos_ {};
+	CalyxMath::Vector2 mousePos_ {};
 	float mouseWheel_ = 0.0f;
 
 	// ゲームパッド（XInput）

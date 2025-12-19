@@ -9,13 +9,13 @@ PlayerActionContext PlayerContextBuilder::BuildAction() {
 	Player& p = player_;
 
 	return PlayerActionContext{
-		.addMove	  = [&p](const CxMath::Vector3& v) { p.AddMoveRequest(v); },
-		.updateTilt	  = [&p](const CxMath::Vector3& v) { p.UpdateTilt(v); },
+		.addMove	  = [&p](const CalyxMath::Vector3& v) { p.AddMoveRequest(v); },
+		.updateTilt	  = [&p](const CalyxMath::Vector3& v) { p.UpdateTilt(v); },
 		.getMoveSpeed = [&p]() -> float {
 			return p.GetMoveSpeed();
 		},
-		.moveReticle   = [&p](const CxMath::Vector3& v) { p.MoveReticle(v); },
-		.getReticlePos = [&p]() -> CxMath::Vector3 {
+		.moveReticle   = [&p](const CalyxMath::Vector3& v) { p.MoveReticle(v); },
+		.getReticlePos = [&p]() -> CalyxMath::Vector3 {
 			return p.GetReticleWorldPos();
 		},
 		.shoot		 = [&p]() { p.RequestShoot(); },

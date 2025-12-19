@@ -56,7 +56,7 @@ void CameraTurnAroundEvent::Initialize() {
 	config_.LoadConfig(configRoot + GetName());
 
 	// コライダーの色を黄色に設定
-	collider_->SetColor(CxMath::Vector3(1,1,0));
+	collider_->SetColor(CalyxMath::Vector3(1,1,0));
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -66,9 +66,9 @@ void CameraTurnAroundEvent::AlwaysUpdate(float dt) {
 	BaseEventObject::AlwaysUpdate(dt); // 行列・コライダー更新
 
 	// カメラの向く方向をlineで表示
-	CxMath::Vector3 start = worldTransform_.GetWorldPosition();
-	CxMath::Vector3 end	  = start + direction_.Normalize() + 10.0f;
-	CxMath::Vector4 col(CxMath::Vector3(0.518f, 0.788f, 0.545f)); // 緑色
+	CalyxMath::Vector3 start = worldTransform_.GetWorldPosition();
+	CalyxMath::Vector3 end	  = start + direction_.Normalize() + 10.0f;
+	CalyxMath::Vector4 col(CalyxMath::Vector3(0.518f, 0.788f, 0.545f)); // 緑色
 	PrimitiveDrawer::GetInstance()->DrawLine3d(start, end, col);
 
 	if(!cam_) {

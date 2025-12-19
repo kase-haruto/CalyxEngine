@@ -16,15 +16,15 @@ void Camera3DBuffer::Initialize(ID3D12Device* device){
 /////////////////////////////////////////////////////////////////////////////////////////
 //		更新処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void Camera3DBuffer::Update(const CxMath::Matrix4x4& view, const CxMath::Matrix4x4& proj, const CxMath::Vector3& worldPos){
+void Camera3DBuffer::Update(const CalyxMath::Matrix4x4& view, const CalyxMath::Matrix4x4& proj, const CalyxMath::Vector3& worldPos){
 	data_.view = view;
 	data_.projection = proj;
-	data_.viewProjection = CxMath::Matrix4x4::Multiply(view, proj);
+	data_.viewProjection = CalyxMath::Matrix4x4::Multiply(view, proj);
 	data_.worldPosition = worldPos;
 
 	  // ビルボード用のカメラの右・上ベクトル（View行列のX列とY列）
-	data_.camRight = CxMath::Vector3(view.m[0][0], view.m[1][0], view.m[2][0]);
-	data_.camUp = CxMath::Vector3(view.m[0][1], view.m[1][1], view.m[2][1]);
+	data_.camRight = CalyxMath::Vector3(view.m[0][0], view.m[1][0], view.m[2][0]);
+	data_.camUp = CalyxMath::Vector3(view.m[0][1], view.m[1][1], view.m[2][1]);
 
 	// バッファにデータを転送
 	buffer_.TransferData(data_);

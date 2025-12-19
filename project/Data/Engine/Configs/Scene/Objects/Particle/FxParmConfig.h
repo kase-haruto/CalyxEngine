@@ -45,15 +45,15 @@ struct FxFloatParamConfig : public FxParamConfig<float> {
 		: FxParamConfig<float>(base) {}
 };
 
-struct Vector3ParamConfig : public FxParamConfig<CxMath::Vector3> {
-	using FxParamConfig<CxMath::Vector3>::FxParamConfig;
+struct Vector3ParamConfig : public FxParamConfig<CalyxMath::Vector3> {
+	using FxParamConfig<CalyxMath::Vector3>::FxParamConfig;
 	Vector3ParamConfig() {
-		constant = CxMath::Vector3(1.0f, 1.0f, 1.0f);
-		min		 = CxMath::Vector3(0.0f, 0.0f, 0.0f);
-		max		 = CxMath::Vector3(1.0f, 1.0f, 1.0f);
+		constant = CalyxMath::Vector3(1.0f, 1.0f, 1.0f);
+		min		 = CalyxMath::Vector3(0.0f, 0.0f, 0.0f);
+		max		 = CalyxMath::Vector3(1.0f, 1.0f, 1.0f);
 	}
-	Vector3ParamConfig(const FxParamConfig<CxMath::Vector3>& base)
-		: FxParamConfig<CxMath::Vector3>(base) {}
+	Vector3ParamConfig(const FxParamConfig<CalyxMath::Vector3>& base)
+		: FxParamConfig<CalyxMath::Vector3>(base) {}
 };
 
 // -------------------------

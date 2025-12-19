@@ -8,10 +8,10 @@
 #include <memory>
 #include <vector>
 
-struct CxMath::Vector3;
-struct CxMath::Vector4;
+struct CalyxMath::Vector3;
+struct CalyxMath::Vector4;
 struct Matrix4x4;
-struct CxMath::Quaternion;
+struct CalyxMath::Quaternion;
 
 class PrimitiveDrawer{
 public:
@@ -24,11 +24,11 @@ public:
 	void ClearMesh();
 
 	void DrawGrid();
-	void DrawOBB(const CxMath::Vector3& center, const CxMath::Quaternion& rotate, const CxMath::Vector3& size, const CxMath::Vector4& color);
-	void DrawAABB(const CxMath::Vector3& minPos, const CxMath::Vector3& maxPos, const CxMath::Vector4& color);
-	void DrawSphere(const CxMath::Vector3& center, const float radius = 2.0f, int subdivision = 8, CxMath::Vector4 color ={1.0f,0.0f,0.0f,1.0f});
-	void DrawLine3d(const CxMath::Vector3& start, const CxMath::Vector3& end, const CxMath::Vector4& color);
-	void DrawBox(const CxMath::Vector3& center, CxMath::Quaternion& rotate, const CxMath::Vector3& size, const CxMath::Vector4& color);
+	void DrawOBB(const CalyxMath::Vector3& center, const CalyxMath::Quaternion& rotate, const CalyxMath::Vector3& size, const CalyxMath::Vector4& color);
+	void DrawAABB(const CalyxMath::Vector3& minPos, const CalyxMath::Vector3& maxPos, const CalyxMath::Vector4& color);
+	void DrawSphere(const CalyxMath::Vector3& center, const float radius = 2.0f, int subdivision = 8, CalyxMath::Vector4 color ={1.0f,0.0f,0.0f,1.0f});
+	void DrawLine3d(const CalyxMath::Vector3& start, const CalyxMath::Vector3& end, const CalyxMath::Vector4& color);
+	void DrawBox(const CalyxMath::Vector3& center, CalyxMath::Quaternion& rotate, const CalyxMath::Vector3& size, const CalyxMath::Vector4& color);
 private:
 	PrimitiveDrawer() = default;
 

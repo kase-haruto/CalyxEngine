@@ -7,7 +7,7 @@
 #include <cmath>
 #include <numbers>
 
-namespace CxMath {
+namespace CalyxMath {
 	///////////////////////////////////////////////////////////////////////////
 	//              メンバ関数
 	///////////////////////////////////////////////////////////////////////////
@@ -328,7 +328,7 @@ namespace CxMath {
 			if(axis.LengthSquared() < 1e-6f) {
 				axis = Vector3::Cross({0, 1, 0}, f);
 			}
-			return Quaternion::MakeRotateAxisQuaternion(axis.Normalize(), CxMath::ToRadians(180.0f));
+			return Quaternion::MakeRotateAxisQuaternion(axis.Normalize(), CalyxMath::ToRadians(180.0f));
 		}
 
 		Vector3 axis = Vector3::Cross(f, t);
@@ -387,4 +387,4 @@ namespace CxMath {
 		return {x * scalar, y * scalar, z * scalar, w * scalar};
 	}
 
-} // namespace CxMath
+} // namespace CalyxMath

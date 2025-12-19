@@ -16,7 +16,7 @@ public:
 	//						public functions
 	//===================================================================*/
 	EnemyHomingBulletShooter(BulletContainer* container, BulletID id);
-	void Shoot(const CxMath::Vector3& origin, const CxMath::Vector3& direction = {})override;
+	void Shoot(const CalyxMath::Vector3& origin, const CalyxMath::Vector3& direction = {})override;
 	void SetTarget(const std::shared_ptr<Actor>& target) {
 		target_ = target;
 	}

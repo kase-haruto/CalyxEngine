@@ -12,7 +12,7 @@ void LineDrawer::Initialize(){
 	transformBuffer_.Initialize(GraphicsGroup::GetInstance()->GetDevice(), 1);
 }
 
-void LineDrawer::DrawLine(const CxMath::Vector3& start, const CxMath::Vector3& end, const CxMath::Vector4& color){
+void LineDrawer::DrawLine(const CalyxMath::Vector3& start, const CalyxMath::Vector3& end, const CalyxMath::Vector4& color){
 	if (vertices_.size() / 2 >= kMaxLines) return;
 
 	vertices_.emplace_back(VertexPosColor {start, color});
@@ -32,11 +32,11 @@ void LineDrawer::Render(){
 	vertexBuffer_.SetCommand(cmdList);
 
 	// WVP定数バッファ更新
-	CxMath::Matrix4x4 identity = CxMath::Matrix4x4::MakeIdentity();
+	CalyxMath::Matrix4x4 identity = CalyxMath::Matrix4x4::MakeIdentity();
 
 	TransformationMatrix wvpData;
 	wvpData.world = identity;
-	wvpData.WorldInverseTranspose = CxMath::Matrix4x4::Transpose(CxMath::Matrix4x4::Inverse(identity));
+	wvpData.WorldInverseTranspose = CalyxMath::Matrix4x4::Transpose(CalyxMath::Matrix4x4::Inverse(identity));
 
 	transformBuffer_.TransferData(wvpData);
 	transformBuffer_.SetCommand(cmdList, 0);

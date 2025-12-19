@@ -30,8 +30,8 @@ bool EnemyEngagementService::HasLineOfSightImpl(const Enemy& e, const Player& p)
 	if (!isPlayer_) return true;
 	if (!buildCandidates_) return true;
 
-	const CxMath::Vector3 from = e.GetCenterPos();
-	const CxMath::Vector3 to = p.GetCenterPos();
+	const CalyxMath::Vector3 from = e.GetCenterPos();
+	const CalyxMath::Vector3 to = p.GetCenterPos();
 
 	std::vector<SceneObject*> candidates;
 	buildCandidates_(candidates, /*ignore*/ static_cast<const SceneObject*>(&e));

@@ -4,11 +4,11 @@
 #include <vector>
 
 struct PatternInput {
-	CxMath::Vector3 baseDirN{};
+	CalyxMath::Vector3 baseDirN{};
 };
 
 struct PatternOutput {
-	std::vector<CxMath::Vector3> dirsN; // 発射方向（正規化）
+	std::vector<CalyxMath::Vector3> dirsN; // 発射方向（正規化）
 };
 
 struct IShootPattern {

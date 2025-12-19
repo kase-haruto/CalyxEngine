@@ -13,7 +13,7 @@ class RadialBlurEffect
 	: public IPostEffectPass {
 private:
 	struct BlurParameter {
-		CxMath::Vector2 center; // [0,1] normalized
+		CalyxMath::Vector2 center; // [0,1] normalized
 		float   width;  // 強度（シェーダー側の扱いに合わせて "width" 名）
 		float   _pad;   // 16byte アラインメント用（必要なら）
 	};
@@ -34,8 +34,8 @@ public:
 	// ---------------- Runtime API（Tween用にgetter/setter揃える） ----------------
 	float   GetWidth() const           { return blurParam_.width; }
 	void    SetWidth(float width);                     // 強度（0で効果無し）
-	CxMath::Vector2 GetCenter() const          { return blurParam_.center; }
-	void    SetCenter(const CxMath::Vector2& uv);
+	CalyxMath::Vector2 GetCenter() const          { return blurParam_.center; }
+	void    SetCenter(const CalyxMath::Vector2& uv);
 
 private:
 	// パラメータ

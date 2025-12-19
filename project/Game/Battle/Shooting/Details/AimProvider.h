@@ -3,10 +3,10 @@
 #include <Engine/Foundation/Math/Vector3.h>
 
 struct AimContext {
-	CxMath::Vector3 origin{};
-	CxMath::Vector3 selfForward{0,0,1};
-	CxMath::Vector3 targetPos{};
-	CxMath::Vector3 targetVel{};
+	CalyxMath::Vector3 origin{};
+	CalyxMath::Vector3 selfForward{0,0,1};
+	CalyxMath::Vector3 targetPos{};
+	CalyxMath::Vector3 targetVel{};
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -14,7 +14,7 @@ struct AimContext {
 /////////////////////////////////////////////////////////////////////////////////////////
 struct IAimProvider {
 	virtual ~IAimProvider() = default;
-	virtual CxMath::Vector3 GetForwardN(const AimContext& ctx) = 0;
+	virtual CalyxMath::Vector3 GetForwardN(const AimContext& ctx) = 0;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -23,10 +23,10 @@ struct IAimProvider {
 class AimAtTarget :
 	public IAimProvider {
 public:
-	CxMath::Vector3 GetForwardN(const AimContext& ctx) override {
-		CxMath::Vector3 d = ctx.targetPos - ctx.origin;
+	CalyxMath::Vector3 GetForwardN(const AimContext& ctx) override {
+		CalyxMath::Vector3 d = ctx.targetPos - ctx.origin;
 		float L2 = d.LengthSquared();
-		return (L2>1e-12f) ? d.Normalize() : CxMath::Vector3{0,0,1};
+		return (L2>1e-12f) ? d.Normalize() : CalyxMath::Vector3{0,0,1};
 	}
 };
 
@@ -36,7 +36,7 @@ public:
 class FixedForward :
 	public IAimProvider {
 public:
-	CxMath::Vector3 GetForwardN(const AimContext& ctx) override {
-		return ctx.selfForward.LengthSquared()>0 ? ctx.selfForward.Normalize() : CxMath::Vector3{0,0,1};
+	CalyxMath::Vector3 GetForwardN(const AimContext& ctx) override {
+		return ctx.selfForward.LengthSquared()>0 ? ctx.selfForward.Normalize() : CalyxMath::Vector3{0,0,1};
 	}
 };

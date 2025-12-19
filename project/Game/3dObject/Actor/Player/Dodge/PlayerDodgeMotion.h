@@ -17,5 +17,5 @@ private:
 	PlayerDodgeSystem* dodge_ = nullptr;
 	WorldTransform*    wt_    = nullptr;
 
-	CxMath::Quaternion baseRot_{0,0,0,1};
+	CalyxMath::Quaternion baseRot_{0,0,0,1};
 };

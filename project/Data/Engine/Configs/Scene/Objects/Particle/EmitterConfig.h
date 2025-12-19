@@ -14,8 +14,8 @@
 #include <vector>
 
 struct EmitterConfig {
-	CxMath::Vector3              position{};
-	CxMath::Vector4              color{1.0f,1.0f,1.0f,1.0f};
+	CalyxMath::Vector3              position{};
+	CalyxMath::Vector4              color{1.0f,1.0f,1.0f,1.0f};
 	Vector3ParamConfig scale;
 	Vector3ParamConfig velocity;
 	FxFloatParamConfig   lifetime;
@@ -47,9 +47,9 @@ struct EmitterConfig {
 };
 
 inline void EmitterConfig::FromJson(const nlohmann::json& j) {
-	position       = j.value("position",CxMath::Vector3{0,0,0});
+	position       = j.value("position",CalyxMath::Vector3{0,0,0});
 	scale          = j.value("scale",Vector3ParamConfig{});
-	color          = j.value("color",CxMath::Vector4{1,1,1,1});
+	color          = j.value("color",CalyxMath::Vector4{1,1,1,1});
 	velocity       = j.value("velocity",Vector3ParamConfig{});
 	lifetime       = j.value("lifetime",FxFloatParamConfig{});
 	emitRate       = j.value("emitRate",1.0f);

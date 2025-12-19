@@ -73,7 +73,7 @@ void ParticleRenderer::Render(
 
 
 void ParticleRenderer::RenderGrouped(const std::string& modelPath,
-									 const std::vector<ParticleConstantData>& gpuUnits,
+									 const std::vector<CxEffect::ParticleConstantData>& gpuUnits,
 									 ID3D12GraphicsCommandList* cmdList){
 	if (gpuUnits.empty()) return;
 
@@ -84,7 +84,7 @@ void ParticleRenderer::RenderGrouped(const std::string& modelPath,
 	EnsureModelIsReady(model, device);
 
 	// 一時バッファをローカルで作成
-	DxStructuredBuffer<ParticleConstantData> tempBuffer;
+	DxStructuredBuffer<CxEffect::ParticleConstantData> tempBuffer;
 	tempBuffer.Initialize(device, static_cast< UINT >(gpuUnits.size()));
 	tempBuffer.TransferVectorData(gpuUnits);
 	tempBuffer.CreateSrv(device);

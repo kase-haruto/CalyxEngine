@@ -4,8 +4,8 @@
 #include <Engine/Foundation/Math/Vector4.h>
 
 struct VertexData{
-	CxMath::Vector4 position;
-	CxMath::Vector2 texcoord;
-	CxMath::Vector3 normal;
+	CalyxMath::Vector4 position;
+	CalyxMath::Vector2 texcoord;
+	CalyxMath::Vector3 normal;
 };
 

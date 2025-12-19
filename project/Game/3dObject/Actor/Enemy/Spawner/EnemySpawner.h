@@ -57,12 +57,12 @@ public:
 	void SetRotationSpeed(float speed) { rotationSpeed_ = speed; }
 	void SetSpawnInterval(float interval) { spawnInterval_ = interval; }
 
-	void SetSpawnArea(const CxMath::Vector3& min, const CxMath::Vector3& max) {
+	void SetSpawnArea(const CalyxMath::Vector3& min, const CalyxMath::Vector3& max) {
 		spawnAreaMin_ = min;
 		spawnAreaMax_ = max;
 	}
 
-	void SetRotationDir(const CxMath::Vector3& dir) { rotationDir_ = dir; }
+	void SetRotationDir(const CalyxMath::Vector3& dir) { rotationDir_ = dir; }
 	void SetRoute(const SplineData& s);
 	void SetPlayerTransform(WorldTransform* playerTransform);
 	void SetDirectory(IEnemyDirectory* dir) { directory_ = dir; }
@@ -98,13 +98,13 @@ private:
 	 * \param index 編隊内インデックス
 	 * \return オフセット位置
 	 */
-	CxMath::Vector3 CalcFormationOffset(size_t index) const;
+	CalyxMath::Vector3 CalcFormationOffset(size_t index) const;
 	/**
 	 * \brief 侵入開始位置計算
 	 * \param index 編隊内インデックス
 	 * \return 侵入開始位置
 	 */
-	CxMath::Vector3 CalcEntranceStartPos(size_t index) const;
+	CalyxMath::Vector3 CalcEntranceStartPos(size_t index) const;
 
 	/**
 	 * \brief ２点間距離計算
@@ -113,7 +113,7 @@ private:
 	 * \param useXZ XZ距離を使うか
 	 * \return 距離
 	 */
-	static float Distance_(const CxMath::Vector3& a, const CxMath::Vector3& b, bool useXZ);
+	static float Distance_(const CalyxMath::Vector3& a, const CalyxMath::Vector3& b, bool useXZ);
 
 private:
 	std::list<std::shared_ptr<Enemy>> spawnedEnemies_;
@@ -123,7 +123,7 @@ private:
 	IEnemyDirectory*	  directory_	   = nullptr;
 	EnemyBulletContainer* bulletContainer_ = nullptr;
 
-	CxMath::Vector3	   rotationDir_	  = {0, 1, 0};
+	CalyxMath::Vector3	   rotationDir_	  = {0, 1, 0};
 	float	   rotationSpeed_ = 1.0f;
 	SplineData enemyMoveRoute_;
 
@@ -131,8 +131,8 @@ private:
 	float spawnTimer_	 = 0.0f;
 	float spawnInterval_ = 1.5f;
 
-	CxMath::Vector3 spawnAreaMin_ = {-10.0f, 0.0f, -30.0f};
-	CxMath::Vector3 spawnAreaMax_ = {10.0f, 5.0f, -30.0f};
+	CalyxMath::Vector3 spawnAreaMin_ = {-10.0f, 0.0f, -30.0f};
+	CalyxMath::Vector3 spawnAreaMax_ = {10.0f, 5.0f, -30.0f};
 
 	// ====== 近接起動パラメータ ======
 	bool  isActive_			  = false;	// 近接で true、遠離で false

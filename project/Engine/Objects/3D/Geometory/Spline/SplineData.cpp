@@ -27,7 +27,7 @@ void SplineData::SegmentAndLocalT(float t, int& seg, float& lt) const {
 	lt = ft - seg; // 0..1
 }
 
-CxMath::Vector3 SplineData::CatmullRom(const CxMath::Vector3& p0, const CxMath::Vector3& p1, const CxMath::Vector3& p2, const CxMath::Vector3& p3, float t) {
+CalyxMath::Vector3 SplineData::CatmullRom(const CalyxMath::Vector3& p0, const CalyxMath::Vector3& p1, const CalyxMath::Vector3& p2, const CalyxMath::Vector3& p3, float t) {
 	// 標準 Catmull–Rom (centripetal ではなくuniform)
 	float t2 = t * t;
 	float t3 = t2 * t;
@@ -38,7 +38,7 @@ CxMath::Vector3 SplineData::CatmullRom(const CxMath::Vector3& p0, const CxMath::
 		(-p0 + 3.0f * p1 - 3.0f * p2 + p3) * t3
 		);
 }
-CxMath::Vector3 SplineData::CatmullRomTangent(const CxMath::Vector3& p0, const CxMath::Vector3& p1, const CxMath::Vector3& p2, const CxMath::Vector3& p3, float t) {
+CalyxMath::Vector3 SplineData::CatmullRomTangent(const CalyxMath::Vector3& p0, const CalyxMath::Vector3& p1, const CalyxMath::Vector3& p2, const CalyxMath::Vector3& p3, float t) {
 	float t2 = t * t;
 	// d/dt
 	return 0.5f * (
@@ -48,7 +48,7 @@ CxMath::Vector3 SplineData::CatmullRomTangent(const CxMath::Vector3& p0, const C
 		);
 }
 
-CxMath::Vector3 SplineData::Evaluate(float t) const {
+CalyxMath::Vector3 SplineData::Evaluate(float t) const {
 	const int n = CountP();
 	if (n == 0) return {};
 	if (n == 1) return points[0].pos;
@@ -66,9 +66,9 @@ CxMath::Vector3 SplineData::Evaluate(float t) const {
 	return CatmullRom(points[i0].pos, points[i1].pos, points[i2].pos, points[i3].pos, lt);
 }
 
-CxMath::Vector3 SplineData::Tangent(float t) const {
+CalyxMath::Vector3 SplineData::Tangent(float t) const {
 	const int n = CountP();
-	if (n <= 1) return CxMath::Vector3(0, 0, 1);
+	if (n <= 1) return CalyxMath::Vector3(0, 0, 1);
 
 	int seg; float lt;
 	SegmentAndLocalT(t, seg, lt);
@@ -77,7 +77,7 @@ CxMath::Vector3 SplineData::Tangent(float t) const {
 	const int i0 = WrapIndex(seg - 1);
 	const int i3 = WrapIndex(seg + 2);
 
-	CxMath::Vector3 tg = CatmullRomTangent(points[i0].pos, points[i1].pos, points[i2].pos, points[i3].pos, lt);
+	CalyxMath::Vector3 tg = CatmullRomTangent(points[i0].pos, points[i1].pos, points[i2].pos, points[i3].pos, lt);
 	if (tg.LengthSquared() > 1e-12f) tg = tg.Normalize();
 	return tg;
 }
@@ -95,13 +95,13 @@ void SplineData::BuildArcTable(int samplesPerSegment) {
 	tSamples_.reserve(totalSamples);
 	sCumulative_.reserve(totalSamples);
 
-	CxMath::Vector3 prev = Evaluate(0.0f);
+	CalyxMath::Vector3 prev = Evaluate(0.0f);
 	tSamples_.push_back(0.0f);
 	sCumulative_.push_back(0.0f);
 
 	for (int s = 1; s < totalSamples; ++s) {
 		float t = (float)s / (float)(totalSamples - 1);
-		CxMath::Vector3 cur = Evaluate(t);
+		CalyxMath::Vector3 cur = Evaluate(t);
 		totalLength_ += (cur - prev).Length();
 		tSamples_.push_back(t);
 		sCumulative_.push_back(totalLength_);

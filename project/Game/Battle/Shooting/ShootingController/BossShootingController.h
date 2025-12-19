@@ -19,7 +19,7 @@ public:
 
 	//--------- main ------------------------------------------------------
 	void Update(float dt) override;
-	bool RequestShoot(const CxMath::Vector3& pos, const CxMath::Vector3& dir) override;
+	bool RequestShoot(const CalyxMath::Vector3& pos, const CalyxMath::Vector3& dir) override;
 
 	/**
 	 * \brief 弾の生成
@@ -28,7 +28,7 @@ public:
 	 * \param vel 初速度
 	 * \return 生成した弾のshared_ptr
 	 */
-	std::shared_ptr<BaseBullet> AddBullet(BulletID id, const CxMath::Vector3& pos, const CxMath::Vector3& vel);
+	std::shared_ptr<BaseBullet> AddBullet(BulletID id, const CalyxMath::Vector3& pos, const CalyxMath::Vector3& vel);
 
 	//--------- accessor --------------------------------------------------
 	float GetInterval() const override;

@@ -19,7 +19,7 @@ void PlayerDangerSense::Initialize(const PlayerStateContext& ctx, const DangerSe
 	cfg_ = cfg;
 
 	cue_ = std::make_unique<Sprite>(cfg_.uiTex);
-	cue_->Initialize(CxMath::Vector2{-1000.0f, -1000.0f}, cfg_.uiSize);
+	cue_->Initialize(CalyxMath::Vector2{-1000.0f, -1000.0f}, cfg_.uiSize);
 	cue_->SetAnchorPoint({0.5f, 0.5f});
 	cue_->SetIsVisible(false);
 
@@ -37,7 +37,7 @@ void PlayerDangerSense::Update(float /*dt*/) {
 		computeNow	  = (frameCounter_ == 0);
 	}
 
-	CxMath::Vector3 playerPos = ctx_.getCenterPos();
+	CalyxMath::Vector3 playerPos = ctx_.getCenterPos();
 	bool	dangerNow = lastDanger_;
 
 	if(computeNow) {
@@ -62,7 +62,7 @@ void PlayerDangerSense::AddBulletContainer(const BulletContainer* container) {
 // ============================================================
 // 複数 BulletContainer を走査して危険判定
 // ============================================================
-bool PlayerDangerSense::ComputeDangerNearby(CxMath::Vector3& outPlayerPos) const {
+bool PlayerDangerSense::ComputeDangerNearby(CalyxMath::Vector3& outPlayerPos) const {
 
 	outPlayerPos = ctx_.getCenterPos();
 
@@ -80,8 +80,8 @@ bool PlayerDangerSense::ComputeDangerNearby(CxMath::Vector3& outPlayerPos) const
 		container->ForEachBullet([&](BaseBullet& b) {
 			if(!b.GetIsAlive()) return;
 
-			CxMath::Vector3 bpos	  = b.GetWorldPosition();
-			CxMath::Vector3 bvel	  = b.GetVelocity();
+			CalyxMath::Vector3 bpos	  = b.GetWorldPosition();
+			CalyxMath::Vector3 bvel	  = b.GetVelocity();
 			float	br		  = b.GetCollisionRadius();
 			float	safeRange = playerR + br + cfg_.margin;
 
@@ -89,11 +89,11 @@ bool PlayerDangerSense::ComputeDangerNearby(CxMath::Vector3& outPlayerPos) const
 			float speed = b.GetMoveSpeed();
 			if(speed < 0.01f) return;
 
-			CxMath::Vector3 toPlayer = outPlayerPos - bpos;
+			CalyxMath::Vector3 toPlayer = outPlayerPos - bpos;
 			float	distance = toPlayer.Length();
 
 			// 弾の進行方向とプレイヤー方向の内積（正面のみ判定）
-			float dot = CxMath::Vector3::Dot(toPlayer.Normalize(), bvel.Normalize());
+			float dot = CalyxMath::Vector3::Dot(toPlayer.Normalize(), bvel.Normalize());
 			if(dot < 0.2f) return;
 
 			// 衝突までの時間（Time-To-Impact）
@@ -114,7 +114,7 @@ bool PlayerDangerSense::ComputeDangerNearby(CxMath::Vector3& outPlayerPos) const
 // ============================================================
 // UI & Dodge flag 更新
 // ============================================================
-void PlayerDangerSense::ApplyDangerResult(bool danger, const CxMath::Vector3& playerPos) {
+void PlayerDangerSense::ApplyDangerResult(bool danger, const CalyxMath::Vector3& playerPos) {
 
 	float dt = ClockManager::GetInstance()->GetDeltaTime();
 
@@ -132,7 +132,7 @@ void PlayerDangerSense::ApplyDangerResult(bool danger, const CxMath::Vector3& pl
 	if(!cue_) return;
 
 	if(hint) {
-		CxMath::Vector2 screen = CxMath::WorldToScreen(playerPos);
+		CalyxMath::Vector2 screen = CalyxMath::WorldToScreen(playerPos);
 		cue_->SetPosition(screen);
 		cue_->SetIsVisible(true);
 	} else {

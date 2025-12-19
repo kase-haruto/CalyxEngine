@@ -10,15 +10,15 @@
 
 // 定数バッファ用データ構造体
 struct Camera3DForGPU {
-	CxMath::Matrix4x4 view;
-	CxMath::Matrix4x4 projection;
-	CxMath::Matrix4x4 viewProjection;
-	CxMath::Vector3 worldPosition;
+	CalyxMath::Matrix4x4 view;
+	CalyxMath::Matrix4x4 projection;
+	CalyxMath::Matrix4x4 viewProjection;
+	CalyxMath::Vector3 worldPosition;
 	float padding1;		// 16バイトアライメント調整
 
-	CxMath::Vector3 camRight;	// ビルボード用のカメラ右方向
+	CalyxMath::Vector3 camRight;	// ビルボード用のカメラ右方向
 	float padding2;
-	CxMath::Vector3 camUp;		// ビルボード用のカメラ上方向
+	CalyxMath::Vector3 camUp;		// ビルボード用のカメラ上方向
 	float padding3;
 };
 
@@ -28,7 +28,7 @@ public:
 	//                   public methods
 	//===================================================================*/
 	void Initialize(ID3D12Device* device);
-	void Update(const CxMath::Matrix4x4& view, const CxMath::Matrix4x4& proj, const CxMath::Vector3& worldPos);
+	void Update(const CalyxMath::Matrix4x4& view, const CalyxMath::Matrix4x4& proj, const CalyxMath::Vector3& worldPos);
 	void SetCommand(ID3D12GraphicsCommandList* cmdList, PipelineType pipelineType);
 
 private:

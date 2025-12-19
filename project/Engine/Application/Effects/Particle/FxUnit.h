@@ -6,29 +6,29 @@
 #include <Engine/Foundation/Math/Vector4.h>
 
 struct FxUnit {
-	CxMath::Vector3 position;                        //< 座標
-	CxMath::Vector3 rotationEuler;                   //< オイラー回転
+	CalyxMath::Vector3 position;                        //< 座標
+	CalyxMath::Vector3 rotationEuler;                   //< オイラー回転
 	float   spinSpeed;                       // < スピン速度
-	CxMath::Vector3 velocity;                        //< 速度
-	CxMath::Vector3 initialScale = {1.0f,1.0f,1.0f}; // 初期スケール
-	CxMath::Vector3 scale;                           //< スケール
+	CalyxMath::Vector3 velocity;                        //< 速度
+	CalyxMath::Vector3 initialScale = {1.0f,1.0f,1.0f}; // 初期スケール
+	CalyxMath::Vector3 scale;                           //< スケール
 	float   lifetime = 1.0f;                 //< 寿命
 	float   age;                             //< 経過時間
-	CxMath::Vector4 color;                           //< 色
+	CalyxMath::Vector4 color;                           //< 色
 	bool    alive = true;                    //< 生存フラグ
 	float   lifeT = 0.0f;                    //< 補完の01
 	//UVオフセット・スケール
 	Transform2D uvTransform;
 	bool        followEmitter = false;                   // エミッタ追従フラグ
-	CxMath::Vector3     followOffset  = CxMath::Vector3(0.0f,0.0f,0.0f); // エミッタからのオフセット
+	CalyxMath::Vector3     followOffset  = CalyxMath::Vector3(0.0f,0.0f,0.0f); // エミッタからのオフセット
 
 };
 
 struct ParticleCS {
-	CxMath::Vector3 translate;
-	CxMath::Vector3 scale;
+	CalyxMath::Vector3 translate;
+	CalyxMath::Vector3 scale;
 	float   lifeTime;
-	CxMath::Vector3 velocity;
+	CalyxMath::Vector3 velocity;
 	float   currentTIme;
-	CxMath::Vector4 color;
+	CalyxMath::Vector4 color;
 };

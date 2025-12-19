@@ -20,7 +20,7 @@ void GpuFxEmitter::Initialize(){
 	paramBuffer_.Initialize(dev);
 	paramBuffer_.TransferData(emitParam_);
 
-	material_.color = CxMath::Vector4(1, 1, 1, 1);
+	material_.color = CalyxMath::Vector4(1, 1, 1, 1);
 	materialBuffer_.Initialize(dev);
 
 	instanceBuffer_.Initialize(dev, kMaxParticles);

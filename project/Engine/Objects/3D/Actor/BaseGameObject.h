@@ -80,10 +80,10 @@ public:
 
 	//--------- accessor ------------------------------------------------
 	// getter
-	virtual const CxMath::Vector3 GetCenterPos() const;
+	virtual const CalyxMath::Vector3 GetCenterPos() const;
 	BillboardMode		  GetBillboardMode() const { return billboardMode_; }
 	std::string_view	  GetTypeName() const override { return "BaseGameObject"; }
-	const CxMath::Vector3		  GetWorldPosition() const { return worldTransform_.GetWorldPosition(); }
+	const CalyxMath::Vector3		  GetWorldPosition() const { return worldTransform_.GetWorldPosition(); }
 	BaseModel*			  GetModel() const { return model_.get(); }
 	Collider*			  GetCollider();
 	ObjectModelType		  GetModelType() const { return objectModelType_; }
@@ -95,15 +95,15 @@ public:
 	// setter
 	void SetName(const std::string& name);
 	void SetBillboardMode(BillboardMode m) { billboardMode_ = m; }
-	void SetTranslate(const CxMath::Vector3& pos);
-	void SetRotate(const CxMath::Quaternion& rot);
-	void SetRotate(const CxMath::Vector3& euler);
-	void SetScale(const CxMath::Vector3& scale);
+	void SetTranslate(const CalyxMath::Vector3& pos);
+	void SetRotate(const CalyxMath::Quaternion& rot);
+	void SetRotate(const CalyxMath::Vector3& euler);
+	void SetScale(const CalyxMath::Vector3& scale);
 	void SetDrawEnable(bool isDrawEnable) override;
-	void SetColor(const CxMath::Vector4& color);
+	void SetColor(const CalyxMath::Vector4& color);
 	void SetCollider(std::unique_ptr<Collider> collider);
 	void SetTexture(const std::string& texName);
-	void SetUvScale(const CxMath::Vector2& scale) { model_->uvTransform.scale = scale; }
+	void SetUvScale(const CalyxMath::Vector2& scale) { model_->uvTransform.scale = scale; }
 	void SetBlendMode(BlendMode mode) { model_->SetBlendMode(mode); }
 	void SetLightingMode(LightingMode mode) { model_->SetLightingMode(mode); }
 

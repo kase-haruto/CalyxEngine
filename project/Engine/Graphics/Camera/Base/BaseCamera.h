@@ -13,8 +13,8 @@
 #include <d3d12.h>
 #include <wrl.h>
 
-struct CxMath::Matrix4x4;
-struct CxMath::Vector3;
+struct CalyxMath::Matrix4x4;
+struct CalyxMath::Vector3;
 
 class BaseCamera :
 	public ICamera,
@@ -52,7 +52,7 @@ protected:
 	//==================================================================*//
 	//			protected functions
 	//==================================================================*//
-	CxMath::Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip);
+	CalyxMath::Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip);
 	void SetName(const std::string& name);
 
 
@@ -61,14 +61,14 @@ public:
 	//			getter / setter
 	//==================================================================*//
 	// Setter
-	void SetCamera(const CxMath::Vector3& pos, const CxMath::Vector3& rotate);
+	void SetCamera(const CalyxMath::Vector3& pos, const CalyxMath::Vector3& rotate);
 
 	// Getter
-	const CxMath::Matrix4x4& GetViewMatrix() const;
-	const CxMath::Matrix4x4& GetProjectionMatrix() const;
-	const CxMath::Matrix4x4& GetViewProjectionMatrix() const;
-	const CxMath::Vector3& GetRotate() const;
-	const CxMath::Vector3& GetTranslate() const;
+	const CalyxMath::Matrix4x4& GetViewMatrix() const;
+	const CalyxMath::Matrix4x4& GetProjectionMatrix() const;
+	const CalyxMath::Matrix4x4& GetViewProjectionMatrix() const;
+	const CalyxMath::Vector3& GetRotate() const;
+	const CalyxMath::Vector3& GetTranslate() const;
 	float GetFovY() const{return fovAngleY_;}
 	float GetAspectRatio() const{return aspectRatio_;}
 	bool IsActive()const{ return isActive_; }
@@ -81,8 +81,8 @@ protected:
 	//			protected variables
 	//==================================================================*//
 
-	CxMath::Matrix4x4 viewMatrix_;          // ビュー行列
-	CxMath::Matrix4x4 projectionMatrix_;    // プロジェクション行列
+	CalyxMath::Matrix4x4 viewMatrix_;          // ビュー行列
+	CalyxMath::Matrix4x4 projectionMatrix_;    // プロジェクション行列
 
 	float aspectRatio_ = 16.0f / 9.0f;                           // アスペクト比
 	float nearZ_ = 0.1f;                                         // 近クリップ面
@@ -95,14 +95,14 @@ protected:
 	float shakeDuration_ = 0.0f;
 	float shakeElapsed_ = 0.0f;
 	float shakeIntensity_ = 0.0f;  // シェイクの強さ
-	CxMath::Vector3 originalPosition_;     // シェイク前の元のカメラ位置
+	CalyxMath::Vector3 originalPosition_;     // シェイク前の元のカメラ位置
 
 protected:
 	//==================================================================*//
 	//			protected variables
 	//==================================================================*//
 	bool isActive_ = true;				//アクティブかどうか
-	CxMath::Matrix4x4 viewProjectionMatrix_;	// ビュープロジェクション行列
+	CalyxMath::Matrix4x4 viewProjectionMatrix_;	// ビュープロジェクション行列
 
 private:
 	//==================================================================*//

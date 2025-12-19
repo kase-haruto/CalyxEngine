@@ -23,7 +23,7 @@ public:
 	//---------- accessor ------------------------------------------------//
 	void SetEase(Cx::Ease::EaseType type) { easeType_ = type; }
 	void SetTime(float time) { turnTime_ = time; }
-	void SetDirection(const CxMath::Vector3& dir) { direction_ = dir; }
+	void SetDirection(const CalyxMath::Vector3& dir) { direction_ = dir; }
 
 private:
 	//===================================================================*/
@@ -31,13 +31,13 @@ private:
 	//===================================================================*/
 	//---------------- parms -------------//
 	Cx::Ease::EaseType easeType_ = Cx::Ease::EaseType::EaseOutSine;
-	CxMath::Vector3			   direction_;
+	CalyxMath::Vector3			   direction_;
 	float			   turnTime_ = 0.5f;
 
 	//---------------- internal state -------------//
 	bool  turning_ = false;
 	float elapsed_ = 0.0f;
 
-	CxMath::Quaternion startRot_;
-	CxMath::Quaternion targetRot_;
+	CalyxMath::Quaternion startRot_;
+	CalyxMath::Quaternion targetRot_;
 };

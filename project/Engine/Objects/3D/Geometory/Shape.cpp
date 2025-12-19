@@ -9,23 +9,23 @@
 // c++
 #include <numbers>
 
-std::array<CxMath::Vector3, 8> OBB::GetVertices() const{
-	std::array<CxMath::Vector3, 8> localVertices = {
-	CxMath::Vector3(-size.x, -size.y, -size.z),
-	CxMath::Vector3(-size.x, -size.y,  size.z),
-	CxMath::Vector3(-size.x,  size.y, -size.z),
-	CxMath::Vector3(-size.x,  size.y,  size.z),
-	CxMath::Vector3(size.x, -size.y, -size.z),
-	CxMath::Vector3(size.x, -size.y,  size.z),
-	CxMath::Vector3(size.x,  size.y, -size.z),
-	CxMath::Vector3(size.x,  size.y,  size.z)
+std::array<CalyxMath::Vector3, 8> OBB::GetVertices() const{
+	std::array<CalyxMath::Vector3, 8> localVertices = {
+	CalyxMath::Vector3(-size.x, -size.y, -size.z),
+	CalyxMath::Vector3(-size.x, -size.y,  size.z),
+	CalyxMath::Vector3(-size.x,  size.y, -size.z),
+	CalyxMath::Vector3(-size.x,  size.y,  size.z),
+	CalyxMath::Vector3(size.x, -size.y, -size.z),
+	CalyxMath::Vector3(size.x, -size.y,  size.z),
+	CalyxMath::Vector3(size.x,  size.y, -size.z),
+	CalyxMath::Vector3(size.x,  size.y,  size.z)
 	};
 
-	CxMath::Matrix4x4 rotationMatrix = CxMath::Quaternion::ToMatrix(rotate); // クォータニオンから回転行列へ変換
+	CalyxMath::Matrix4x4 rotationMatrix = CalyxMath::Quaternion::ToMatrix(rotate); // クォータニオンから回転行列へ変換
 
-	std::array<CxMath::Vector3, 8> globalVertices;
+	std::array<CalyxMath::Vector3, 8> globalVertices;
 	for (size_t i = 0; i < localVertices.size(); ++i){
-		CxMath::Vector3 rotated = CxMath::Vector3::Transform(localVertices[i], rotationMatrix);
+		CalyxMath::Vector3 rotated = CalyxMath::Vector3::Transform(localVertices[i], rotationMatrix);
 		globalVertices[i] = center + rotated;
 	}
 
@@ -36,20 +36,20 @@ std::array<CxMath::Vector3, 8> OBB::GetVertices() const{
 void OBB::Draw(){
 	const uint32_t vertexNum = 8;
 
-	CxMath::Matrix4x4 rotationMatrix = CxMath::Quaternion::ToMatrix(rotate);
+	CalyxMath::Matrix4x4 rotationMatrix = CalyxMath::Quaternion::ToMatrix(rotate);
 
-	CxMath::Vector3 halfSizeX = CxMath::Vector3::Transform({1.0f, 0.0f, 0.0f}, rotationMatrix) * size.x * 0.5f;
-	CxMath::Vector3 halfSizeY = CxMath::Vector3::Transform({0.0f, 1.0f, 0.0f}, rotationMatrix) * size.y * 0.5f;
-	CxMath::Vector3 halfSizeZ = CxMath::Vector3::Transform({0.0f, 0.0f, 1.0f}, rotationMatrix) * size.z * 0.5f;
+	CalyxMath::Vector3 halfSizeX = CalyxMath::Vector3::Transform({1.0f, 0.0f, 0.0f}, rotationMatrix) * size.x * 0.5f;
+	CalyxMath::Vector3 halfSizeY = CalyxMath::Vector3::Transform({0.0f, 1.0f, 0.0f}, rotationMatrix) * size.y * 0.5f;
+	CalyxMath::Vector3 halfSizeZ = CalyxMath::Vector3::Transform({0.0f, 0.0f, 1.0f}, rotationMatrix) * size.z * 0.5f;
 
-	CxMath::Vector3 vertices[vertexNum];
-	CxMath::Vector3 offsets[vertexNum] = {
+	CalyxMath::Vector3 vertices[vertexNum];
+	CalyxMath::Vector3 offsets[vertexNum] = {
 		{-1, -1, -1}, {-1,  1, -1}, {1, -1, -1}, {1,  1, -1},
 		{-1, -1,  1}, {-1,  1,  1}, {1, -1,  1}, {1,  1,  1}
 	};
 
 	for (int i = 0; i < vertexNum; ++i){
-		CxMath::Vector3 localVertex =
+		CalyxMath::Vector3 localVertex =
 			offsets[i].x * halfSizeX +
 			offsets[i].y * halfSizeY +
 			offsets[i].z * halfSizeZ;
@@ -68,12 +68,12 @@ void OBB::Draw(){
 }
 
 
-void Sphere::Draw(int subdivision, CxMath::Vector4 color){
+void Sphere::Draw(int subdivision, CalyxMath::Vector4 color){
 	// 分割数
 	const uint32_t kSubdivision = subdivision; // 分割数を増やして滑らかに
 	const float kLonEvery = 2 * float(std::numbers::pi) / kSubdivision;
 	const float kLatEvery = float(std::numbers::pi) / kSubdivision;
-	CxMath::Vector3 a, b, c, d;
+	CalyxMath::Vector3 a, b, c, d;
 
 	// 緯度方向に分割
 	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex){

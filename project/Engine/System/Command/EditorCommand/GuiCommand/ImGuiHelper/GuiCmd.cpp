@@ -65,9 +65,9 @@ bool GuiCmd::DragFloat(const char* label, float& value, float speed, float min, 
 	return changed;
 }
 
-bool GuiCmd::DragFloat2(const char* label, CxMath::Vector2& value, float speed, float min, float max){
-	static GuiCmdInternal::GuiCmdSetValueComputer<CxMath::Vector2> computer;
-	CxMath::Vector2 temp = value;
+bool GuiCmd::DragFloat2(const char* label, CalyxMath::Vector2& value, float speed, float min, float max){
+	static GuiCmdInternal::GuiCmdSetValueComputer<CalyxMath::Vector2> computer;
+	CalyxMath::Vector2 temp = value;
 	bool changed = ImGui::DragFloat2(label, &temp.x, speed, min, max);
 	value = temp;
 	// マウスが押された 検知開始
@@ -75,16 +75,16 @@ bool GuiCmd::DragFloat2(const char* label, CxMath::Vector2& value, float speed, 
 	// マウスが離れた
 	if (ImGui::IsItemDeactivatedAfterEdit()){
 		std::string labelStr(label);
-		auto cmd = computer.End(value, [&value] (const CxMath::Vector2& v){ value = v; }, labelStr);
+		auto cmd = computer.End(value, [&value] (const CalyxMath::Vector2& v){ value = v; }, labelStr);
 		//マウスが押された位置から動いていたらコマンドを発行する
 		if (cmd) CommandManager::GetInstance()->Execute(std::move(cmd));
 	}
 	return changed;
 }
 
-bool GuiCmd::DragFloat3(const char* label, CxMath::Vector3& value, float speed, float min, float max){
-	static GuiCmdInternal::GuiCmdSetValueComputer<CxMath::Vector3> computer;
-	CxMath::Vector3 temp = value;
+bool GuiCmd::DragFloat3(const char* label, CalyxMath::Vector3& value, float speed, float min, float max){
+	static GuiCmdInternal::GuiCmdSetValueComputer<CalyxMath::Vector3> computer;
+	CalyxMath::Vector3 temp = value;
 	bool changed = ImGui::DragFloat3(label, &temp.x, speed, min, max);
 	value = temp;
 
@@ -94,16 +94,16 @@ bool GuiCmd::DragFloat3(const char* label, CxMath::Vector3& value, float speed, 
 	// マウスが離れた
 	if (ImGui::IsItemDeactivatedAfterEdit()){
 		std::string labelStr(label);
-		auto cmd = computer.End(value, [&value] (const CxMath::Vector3& v){ value = v; }, labelStr);
+		auto cmd = computer.End(value, [&value] (const CalyxMath::Vector3& v){ value = v; }, labelStr);
 		//マウスが押された位置から動いていたらコマンドを発行する
 		if (cmd) CommandManager::GetInstance()->Execute(std::move(cmd));
 	}
 	return changed;
 }
 
-bool GuiCmd::DragFloat4(const char* label, CxMath::Vector4& value, float speed, float min, float max){
-	static GuiCmdInternal::GuiCmdSetValueComputer<CxMath::Vector4> computer;
-	CxMath::Vector4 temp = value;
+bool GuiCmd::DragFloat4(const char* label, CalyxMath::Vector4& value, float speed, float min, float max){
+	static GuiCmdInternal::GuiCmdSetValueComputer<CalyxMath::Vector4> computer;
+	CalyxMath::Vector4 temp = value;
 	bool changed = ImGui::DragFloat4(label, &temp.x, speed, min, max);
 	value = temp;
 	// マウスが押された 検知開始
@@ -111,7 +111,7 @@ bool GuiCmd::DragFloat4(const char* label, CxMath::Vector4& value, float speed, 
 	// マウスが離れた
 	if (ImGui::IsItemDeactivatedAfterEdit()){
 		std::string labelStr(label);
-		auto cmd = computer.End(value, [&value] (const CxMath::Vector4& v){ value = v; }, labelStr);
+		auto cmd = computer.End(value, [&value] (const CalyxMath::Vector4& v){ value = v; }, labelStr);
 		//マウスが押された位置から動いていたらコマンドを発行する
 		if (cmd) CommandManager::GetInstance()->Execute(std::move(cmd));
 	}
@@ -120,14 +120,14 @@ bool GuiCmd::DragFloat4(const char* label, CxMath::Vector4& value, float speed, 
 
 
 bool GuiCmd::ColoredDragFloat3(const char* label,
-							   CxMath::Vector3& value,
+							   CalyxMath::Vector3& value,
 							   float speed,
 							   float min,
 							   float max,
 							   const char* format,
 							   const char* suffix){
-	static GuiCmdInternal::GuiCmdSetValueComputer<CxMath::Vector3> computer;
-	CxMath::Vector3 temp = value;
+	static GuiCmdInternal::GuiCmdSetValueComputer<CalyxMath::Vector3> computer;
+	CalyxMath::Vector3 temp = value;
 	bool changed = false;
 
 	const char* axisLabels[3] = {"X", "Y", "Z"};
@@ -169,7 +169,7 @@ bool GuiCmd::ColoredDragFloat3(const char* label,
 
 	if (ImGui::IsItemDeactivatedAfterEdit()){
 		std::string labelStr(label);
-		auto cmd = computer.End(value, [&value] (const CxMath::Vector3& v){ value = v; }, labelStr);
+		auto cmd = computer.End(value, [&value] (const CalyxMath::Vector3& v){ value = v; }, labelStr);
 		if (cmd) CommandManager::GetInstance()->Execute(std::move(cmd));
 	}
 
@@ -200,9 +200,9 @@ bool GuiCmd::SliderFloat(const char* label, float& value, float min, float max){
 	return changed;
 }
 
-bool GuiCmd::SliderFloat2(const char* label, CxMath::Vector2& value, float min, float max){
-	static GuiCmdInternal::GuiCmdSetValueComputer<CxMath::Vector2> computer;
-	CxMath::Vector2 temp = value;
+bool GuiCmd::SliderFloat2(const char* label, CalyxMath::Vector2& value, float min, float max){
+	static GuiCmdInternal::GuiCmdSetValueComputer<CalyxMath::Vector2> computer;
+	CalyxMath::Vector2 temp = value;
 	bool changed = ImGui::SliderFloat2(label, &temp.x, min, max);
 	value = temp;
 	// マウスが押された 検知開始
@@ -210,16 +210,16 @@ bool GuiCmd::SliderFloat2(const char* label, CxMath::Vector2& value, float min, 
 	// マウスが離れた
 	if (ImGui::IsItemDeactivatedAfterEdit()){
 		std::string labelStr(label);
-		auto cmd = computer.End(value, [&value] (const CxMath::Vector2& v){ value = v; }, labelStr);
+		auto cmd = computer.End(value, [&value] (const CalyxMath::Vector2& v){ value = v; }, labelStr);
 		//マウスが押された位置から動いていたらコマンドを発行する
 		if (cmd) CommandManager::GetInstance()->Execute(std::move(cmd));
 	}
 	return changed;
 }
 
-bool GuiCmd::SliderFloat3(const char* label, CxMath::Vector3& value, float min, float max){
-	static GuiCmdInternal::GuiCmdSetValueComputer<CxMath::Vector3> computer;
-	CxMath::Vector3 temp = value;
+bool GuiCmd::SliderFloat3(const char* label, CalyxMath::Vector3& value, float min, float max){
+	static GuiCmdInternal::GuiCmdSetValueComputer<CalyxMath::Vector3> computer;
+	CalyxMath::Vector3 temp = value;
 	bool changed = ImGui::SliderFloat3(label, &temp.x, min, max);
 	value = temp;
 	// マウスが押された 検知開始
@@ -227,16 +227,16 @@ bool GuiCmd::SliderFloat3(const char* label, CxMath::Vector3& value, float min, 
 	// マウスが離れた
 	if (ImGui::IsItemDeactivatedAfterEdit()){
 		std::string labelStr(label);
-		auto cmd = computer.End(value, [&value] (const CxMath::Vector3& v){ value = v; }, labelStr);
+		auto cmd = computer.End(value, [&value] (const CalyxMath::Vector3& v){ value = v; }, labelStr);
 		//マウスが押された位置から動いていたらコマンドを発行する
 		if (cmd) CommandManager::GetInstance()->Execute(std::move(cmd));
 	}
 	return changed;
 }
 
-bool GuiCmd::SliderFloat4(const char* label, CxMath::Vector4& value, float min, float max){
-	static GuiCmdInternal::GuiCmdSetValueComputer<CxMath::Vector4> computer;
-	CxMath::Vector4 temp = value;
+bool GuiCmd::SliderFloat4(const char* label, CalyxMath::Vector4& value, float min, float max){
+	static GuiCmdInternal::GuiCmdSetValueComputer<CalyxMath::Vector4> computer;
+	CalyxMath::Vector4 temp = value;
 	bool changed = ImGui::SliderFloat3(label, &temp.x, min, max);
 	value = temp;
 	// マウスが押された 検知開始
@@ -244,7 +244,7 @@ bool GuiCmd::SliderFloat4(const char* label, CxMath::Vector4& value, float min, 
 	// マウスが離れた
 	if (ImGui::IsItemDeactivatedAfterEdit()){
 		std::string labelStr(label);
-		auto cmd = computer.End(value, [&value] (const CxMath::Vector4& v){ value = v; }, labelStr);
+		auto cmd = computer.End(value, [&value] (const CalyxMath::Vector4& v){ value = v; }, labelStr);
 		//マウスが押された位置から動いていたらコマンドを発行する
 		if (cmd) CommandManager::GetInstance()->Execute(std::move(cmd));
 	}
@@ -256,10 +256,10 @@ bool GuiCmd::SliderFloat4(const char* label, CxMath::Vector4& value, float min, 
 /*			ColorEdit
 /* ======================================================================================================== */
 #pragma region ColorEdit
-bool GuiCmd::ColorEdit4(const char* label, CxMath::Vector4& value, ImGuiColorEditFlags flags){
-	static GuiCmdInternal::GuiCmdSetValueComputer<CxMath::Vector4> computer;
+bool GuiCmd::ColorEdit4(const char* label, CalyxMath::Vector4& value, ImGuiColorEditFlags flags){
+	static GuiCmdInternal::GuiCmdSetValueComputer<CalyxMath::Vector4> computer;
 
-	CxMath::Vector4 temp = value;
+	CalyxMath::Vector4 temp = value;
 	bool changed = ImGui::ColorEdit4(label, &temp.x, flags);
 
 	// マウスが押された 検知開始
@@ -271,7 +271,7 @@ bool GuiCmd::ColorEdit4(const char* label, CxMath::Vector4& value, ImGuiColorEdi
 	// マウスが離れた
 	if (ImGui::IsItemDeactivatedAfterEdit()){
 		std::string labelStr(label);
-		auto cmd = computer.End(value, [&value] (const CxMath::Vector4& v){ value = v; }, labelStr);
+		auto cmd = computer.End(value, [&value] (const CalyxMath::Vector4& v){ value = v; }, labelStr);
 		//マウスが押された位置から動いていたらコマンドを発行する
 		if (cmd) CommandManager::GetInstance()->Execute(std::move(cmd));
 	}

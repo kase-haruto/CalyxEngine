@@ -169,12 +169,12 @@ bool CollisionManager::CheckCollisionPair(Collider* colliderA,Collider* collider
 }
 
 bool CollisionManager::SphereToSphere(const Sphere& sphereA,const Sphere& sphereB) {
-	const CxMath::Vector3& centerA   = sphereA.center;
-	const CxMath::Vector3& centerB   = sphereB.center;
+	const CalyxMath::Vector3& centerA   = sphereA.center;
+	const CalyxMath::Vector3& centerB   = sphereB.center;
 	float          radiusSum = sphereA.radius + sphereB.radius;
 
 	// 中心間距離の2乗を計算
-	CxMath::Vector3 diff            = centerA - centerB;
+	CalyxMath::Vector3 diff            = centerA - centerB;
 	float   distanceSquared = diff.LengthSquared();
 
 	// 衝突判定
@@ -183,29 +183,29 @@ bool CollisionManager::SphereToSphere(const Sphere& sphereA,const Sphere& sphere
 }
 
 bool CollisionManager::SphereToOBB(const Sphere& sphere,const OBB obb) {
-	const CxMath::Vector3& sphereCenter = sphere.center;
+	const CalyxMath::Vector3& sphereCenter = sphere.center;
 
-	// CxMath::Quaternion から回転行列を作成
-	CxMath::Matrix4x4 rotationMatrix = CxMath::Quaternion::ToMatrix(obb.rotate);
+	// CalyxMath::Quaternion から回転行列を作成
+	CalyxMath::Matrix4x4 rotationMatrix = CalyxMath::Quaternion::ToMatrix(obb.rotate);
 
 	// OBBの軸方向（ローカル軸 X, Y, Z）
-	CxMath::Vector3 obbAxes[3] = {
-			CxMath::Vector3::Transform(CxMath::Vector3(1.0f,0.0f,0.0f),rotationMatrix),
-			CxMath::Vector3::Transform(CxMath::Vector3(0.0f,1.0f,0.0f),rotationMatrix),
-			CxMath::Vector3::Transform(CxMath::Vector3(0.0f,0.0f,1.0f),rotationMatrix),
+	CalyxMath::Vector3 obbAxes[3] = {
+			CalyxMath::Vector3::Transform(CalyxMath::Vector3(1.0f,0.0f,0.0f),rotationMatrix),
+			CalyxMath::Vector3::Transform(CalyxMath::Vector3(0.0f,1.0f,0.0f),rotationMatrix),
+			CalyxMath::Vector3::Transform(CalyxMath::Vector3(0.0f,0.0f,1.0f),rotationMatrix),
 		};
 
-	CxMath::Vector3 diff         = sphereCenter - obb.center;
-	CxMath::Vector3 closestPoint = obb.center;
+	CalyxMath::Vector3 diff         = sphereCenter - obb.center;
+	CalyxMath::Vector3 closestPoint = obb.center;
 
 	for(int i = 0; i < 3; ++i) {
-		float distance   = CxMath::Vector3::Dot(diff,obbAxes[i]);
+		float distance   = CalyxMath::Vector3::Dot(diff,obbAxes[i]);
 		float halfExtent = (i == 0) ? obb.size.x * 0.5f : (i == 1) ? obb.size.y * 0.5f : obb.size.z * 0.5f;
 		distance         = std::clamp(distance,-halfExtent,halfExtent);
 		closestPoint += distance * obbAxes[i];
 	}
 
-	CxMath::Vector3 closestToSphere = closestPoint - sphereCenter;
+	CalyxMath::Vector3 closestToSphere = closestPoint - sphereCenter;
 	float   distanceSquared = closestToSphere.LengthSquared();
 	return distanceSquared <= (sphere.radius * sphere.radius);
 }
@@ -213,8 +213,8 @@ bool CollisionManager::SphereToOBB(const Sphere& sphere,const OBB obb) {
 
 bool CollisionManager::OBBToOBB([[maybe_unused]] const OBB& obbA,[[maybe_unused]] const OBB& obbB) {
 	// 1) A, B それぞれの 3軸ベクトル を求める
-	CxMath::Vector3 aAxes[3];
-	CxMath::Vector3 bAxes[3];
+	CalyxMath::Vector3 aAxes[3];
+	CalyxMath::Vector3 bAxes[3];
 	ComputeOBBAxes(obbA,aAxes);
 	ComputeOBBAxes(obbB,bAxes);
 
@@ -230,7 +230,7 @@ bool CollisionManager::OBBToOBB([[maybe_unused]] const OBB& obbA,[[maybe_unused]
 	//    (3) A.axis[i] × B.axis[j]  (i,j in [0..2])
 	for(int i = 0; i < 3; i++) {
 		for(int j = 0; j < 3; j++) {
-			CxMath::Vector3 crossAxis = CxMath::Vector3::Cross(aAxes[i],bAxes[j]);
+			CalyxMath::Vector3 crossAxis = CalyxMath::Vector3::Cross(aAxes[i],bAxes[j]);
 			if(!OverlapOnAxis(obbA,aAxes,obbB,bAxes,crossAxis)) { return false; }
 		}
 	}
@@ -239,34 +239,34 @@ bool CollisionManager::OBBToOBB([[maybe_unused]] const OBB& obbA,[[maybe_unused]
 	return true;
 }
 
-void CollisionManager::ComputeOBBAxes(const OBB& obb,CxMath::Vector3 outAxis[3]) {
-	CxMath::Matrix4x4 rot = CxMath::Quaternion::ToMatrix(obb.rotate); // CxMath::Quaternion → 回転行列
+void CollisionManager::ComputeOBBAxes(const OBB& obb,CalyxMath::Vector3 outAxis[3]) {
+	CalyxMath::Matrix4x4 rot = CalyxMath::Quaternion::ToMatrix(obb.rotate); // CalyxMath::Quaternion → 回転行列
 
-	outAxis[0] = CxMath::Vector3(rot.m[0][0],rot.m[0][1],rot.m[0][2]); // X軸
-	outAxis[1] = CxMath::Vector3(rot.m[1][0],rot.m[1][1],rot.m[1][2]); // Y軸
-	outAxis[2] = CxMath::Vector3(rot.m[2][0],rot.m[2][1],rot.m[2][2]); // Z軸
+	outAxis[0] = CalyxMath::Vector3(rot.m[0][0],rot.m[0][1],rot.m[0][2]); // X軸
+	outAxis[1] = CalyxMath::Vector3(rot.m[1][0],rot.m[1][1],rot.m[1][2]); // Y軸
+	outAxis[2] = CalyxMath::Vector3(rot.m[2][0],rot.m[2][1],rot.m[2][2]); // Z軸
 
 	outAxis[0].Normalize();
 	outAxis[1].Normalize();
 	outAxis[2].Normalize();
 }
 
-float CollisionManager::ProjectOBB(const OBB& obb,const CxMath::Vector3 obbAxes[3],const CxMath::Vector3& axisCandidate) {
+float CollisionManager::ProjectOBB(const OBB& obb,const CalyxMath::Vector3 obbAxes[3],const CalyxMath::Vector3& axisCandidate) {
 	// OBBの半サイズ(各軸方向の半径)
-	CxMath::Vector3 halfSize = obb.size * 0.5f;
+	CalyxMath::Vector3 halfSize = obb.size * 0.5f;
 
 	// 3つの軸に投影して絶対値を足し合わせる
 	float r =
-		fabs(halfSize.x * CxMath::Vector3::Dot(obbAxes[0],axisCandidate)) +
-		fabs(halfSize.y * CxMath::Vector3::Dot(obbAxes[1],axisCandidate)) +
-		fabs(halfSize.z * CxMath::Vector3::Dot(obbAxes[2],axisCandidate));
+		fabs(halfSize.x * CalyxMath::Vector3::Dot(obbAxes[0],axisCandidate)) +
+		fabs(halfSize.y * CalyxMath::Vector3::Dot(obbAxes[1],axisCandidate)) +
+		fabs(halfSize.z * CalyxMath::Vector3::Dot(obbAxes[2],axisCandidate));
 
 	return r;
 }
 
-bool CollisionManager::OverlapOnAxis(const OBB& obbA,const CxMath::Vector3 aAxes[3],const OBB& obbB,const CxMath::Vector3 bAxes[3],const CxMath::Vector3& axisCandidate) {
+bool CollisionManager::OverlapOnAxis(const OBB& obbA,const CalyxMath::Vector3 aAxes[3],const OBB& obbB,const CalyxMath::Vector3 bAxes[3],const CalyxMath::Vector3& axisCandidate) {
 	// 軸が正規化されていないなら正規化しておく
-	CxMath::Vector3 axis  = axisCandidate;
+	CalyxMath::Vector3 axis  = axisCandidate;
 	float   lenSq = axis.LengthSquared();
 	if(lenSq < 1e-8f) {
 		// 軸がほぼゼロベクトルの場合は別の軸としてスキップ or 重なっているとみなす
@@ -275,8 +275,8 @@ bool CollisionManager::OverlapOnAxis(const OBB& obbA,const CxMath::Vector3 aAxes
 	axis.Normalize();
 
 	// A, B それぞれの投影中心(スカラー値)
-	float centerA = CxMath::Vector3::Dot(obbA.center,axis);
-	float centerB = CxMath::Vector3::Dot(obbB.center,axis);
+	float centerA = CalyxMath::Vector3::Dot(obbA.center,axis);
+	float centerB = CalyxMath::Vector3::Dot(obbB.center,axis);
 
 	// A, B それぞれの投影半径
 	float rA = ProjectOBB(obbA,aAxes,axis);

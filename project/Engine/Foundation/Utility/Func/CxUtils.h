@@ -3,7 +3,7 @@
 
 #include <d3d12.h>
 
-namespace CxMath {
+namespace CalyxMath {
 	[[nodiscard]] Matrix4x4 MakeTranslateMatrix(const Vector3&) noexcept;
 	[[nodiscard]] Matrix4x4 MakeScaleMatrix(const Vector3&) noexcept;
 	[[nodiscard]] Matrix4x4 MakeRotateXMatrix(float) noexcept;
@@ -22,7 +22,7 @@ namespace CxMath {
 
 	[[nodiscard]] Vector2 WorldToScreen(const Vector3& worldPos);
 	[[nodiscard]] Vector3 ScreenToWorld(const Vector2& screenPos, float depthZ);
-} // namespace CxMath
+} // namespace CalyxMath
 
 namespace Cx {
 

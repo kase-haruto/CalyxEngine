@@ -20,7 +20,7 @@ public:
 
 	//--------- main ------------------------------------------------------
 	void Update(float dt) override;
-	bool RequestShoot(const CxMath::Vector3& pos, const CxMath::Vector3& dir) override;
+	bool RequestShoot(const CalyxMath::Vector3& pos, const CalyxMath::Vector3& dir) override;
 
 	//--------- accessor --------------------------------------------------
 	float GetInterval() const override;

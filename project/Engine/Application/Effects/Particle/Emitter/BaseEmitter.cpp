@@ -6,7 +6,7 @@ BaseEmitter::BaseEmitter() =default;
 
 void BaseEmitter::TransferParticleDataToGPU(){
 	if (units_.empty()) return;
-	std::vector<ParticleConstantData> gpuUnits;
+	std::vector<CxEffect::ParticleConstantData> gpuUnits;
 	for (const auto& fx : units_){
 		if (fx.alive){
 			gpuUnits.push_back({fx.position, fx.scale, fx.color});

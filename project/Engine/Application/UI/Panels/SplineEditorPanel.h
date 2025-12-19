@@ -8,7 +8,7 @@
 #include <string>
 
 struct Ray;
-struct CxMath::Vector3;
+struct CalyxMath::Vector3;
 
 class SplineEditorPanel 
 	: public IEngineUI {
@@ -18,7 +18,7 @@ public:
 
 	void Render() override;
 
-	void SyncViewportRect(const CxMath::Vector2& pos, const CxMath::Vector2& size) {
+	void SyncViewportRect(const CalyxMath::Vector2& pos, const CalyxMath::Vector2& size) {
 		vpPos_ = pos; vpSize_ = size;
 	}
 
@@ -34,7 +34,7 @@ private:
 	void HandleGizmoUpdateAndDraw3D();
 	Ray  MakeMouseRay() const;
 	int  PickPointByRayAABB(const Ray& ray, float halfSize, float& outT) const;
-	bool IntersectPlane(const Ray& ray, const CxMath::Vector3& n, float d, CxMath::Vector3& out) const;
+	bool IntersectPlane(const Ray& ray, const CalyxMath::Vector3& n, float d, CalyxMath::Vector3& out) const;
 
 private:
 	SplineData data_;
@@ -43,11 +43,11 @@ private:
 	std::string currentPath_;
 	bool gizmoEnabled_ = true;
 
-	CxMath::Vector2 vpPos_{ 0,0 };
-	CxMath::Vector2 vpSize_{ 1920,1080 };
+	CalyxMath::Vector2 vpPos_{ 0,0 };
+	CalyxMath::Vector2 vpSize_{ 1920,1080 };
 
 	bool    dragging_ = false;
-	CxMath::Vector3 dragPlaneN_{ 0,1,0 };
+	CalyxMath::Vector3 dragPlaneN_{ 0,1,0 };
 	float   dragPlaneD_ = 0.0f;
 
 	std::unique_ptr<Manipulator> manipulator_;

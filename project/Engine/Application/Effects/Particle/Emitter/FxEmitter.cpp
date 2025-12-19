@@ -42,7 +42,7 @@ FxEmitter::FxEmitter() {
 	ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
 
 	// マテリアル
-	material_.color = CxMath::Vector4(1, 1, 1, 1);
+	material_.color = CalyxMath::Vector4(1, 1, 1, 1);
 	materialBuffer_.Initialize(GraphicsGroup::GetInstance()->GetDevice());
 
 	instanceBuffer_.Initialize(device, kMaxUnits_);
@@ -54,10 +54,10 @@ FxEmitter::FxEmitter() {
 	billboardCB_.TransferData(billboardParams_);
 
 	// 各種パラメータ
-	velocity_ = FxParam<CxMath::Vector3>::MakeRandom(CxMath::Vector3(-1.0f, 0.0f, -1.0f),
-											 CxMath::Vector3(1.0f, 0.0f, 1.0f));
+	velocity_ = FxParam<CalyxMath::Vector3>::MakeRandom(CalyxMath::Vector3(-1.0f, 0.0f, -1.0f),
+											 CalyxMath::Vector3(1.0f, 0.0f, 1.0f));
 	lifetime_ = FxParam<float>::MakeRandom(1.0f, 3.0f);
-	scale_	  = FxParam<CxMath::Vector3>::MakeConstant();
+	scale_	  = FxParam<CalyxMath::Vector3>::MakeConstant();
 
 	moduleContainer_ = std::make_unique<FxModuleContainer>();
 }
@@ -105,7 +105,7 @@ void FxEmitter::Update(float deltaTime) {
 			isFirstFrame_ = false;
 		}
 
-		CxMath::Vector3 moveDelta = position_ - prevPostion_;
+		CalyxMath::Vector3 moveDelta = position_ - prevPostion_;
 		float	distance  = moveDelta.Length();
 
 		if(distance > 0.0f && isComplement_) {
@@ -114,7 +114,7 @@ void FxEmitter::Update(float deltaTime) {
 			for(int i = 0; i < trailCount; ++i) {
 				float	dist	 = i * spawnInterval;
 				float	t		 = dist / distance;
-				CxMath::Vector3 spawnPos = CxMath::Vector3::Lerp(prevPostion_, position_, t);
+				CalyxMath::Vector3 spawnPos = CalyxMath::Vector3::Lerp(prevPostion_, position_, t);
 				Emit(spawnPos);
 			}
 		} else {
@@ -156,11 +156,11 @@ void FxEmitter::Update(float deltaTime) {
 		fx.age += deltaTime;
 		if(fx.age >= fx.lifetime) fx.alive = false;
 
-		CxMath::Matrix4x4 uvTransformMatrix =
-			CxMath::MakeScaleMatrix(CxMath::Vector3(fx.uvTransform.scale.x, fx.uvTransform.scale.y, 1.0f));
-		uvTransformMatrix	  = CxMath::Matrix4x4::Multiply(uvTransformMatrix, CxMath::MakeRotateZMatrix(fx.uvTransform.rotate));
-		uvTransformMatrix	  = CxMath::Matrix4x4::Multiply(uvTransformMatrix,
-													CxMath::MakeTranslateMatrix(CxMath::Vector3(fx.uvTransform.translate.x, fx.uvTransform.translate.y, 0.0f)));
+		CalyxMath::Matrix4x4 uvTransformMatrix =
+			CalyxMath::MakeScaleMatrix(CalyxMath::Vector3(fx.uvTransform.scale.x, fx.uvTransform.scale.y, 1.0f));
+		uvTransformMatrix	  = CalyxMath::Matrix4x4::Multiply(uvTransformMatrix, CalyxMath::MakeRotateZMatrix(fx.uvTransform.rotate));
+		uvTransformMatrix	  = CalyxMath::Matrix4x4::Multiply(uvTransformMatrix,
+													CalyxMath::MakeTranslateMatrix(CalyxMath::Vector3(fx.uvTransform.translate.x, fx.uvTransform.translate.y, 0.0f)));
 		material_.uvTransform = uvTransformMatrix;
 	}
 
@@ -188,13 +188,13 @@ void FxEmitter::Update(float deltaTime) {
 void FxEmitter::TransferParticleDataToGPU() {
 	if(units_.empty()) return;
 
-	std::vector<ParticleConstantData> gpuUnits;
+	std::vector<CxEffect::ParticleConstantData> gpuUnits;
 	gpuUnits.reserve(units_.size());
 
 	for(const auto& fx : units_) {
 		if(!fx.alive) continue;
 
-		ParticleConstantData data{};
+		CxEffect::ParticleConstantData data{};
 		data.position = fx.position;
 		data.scale	  = fx.scale;
 		data.color	  = fx.color;
@@ -213,7 +213,7 @@ void FxEmitter::TransferParticleDataToGPU() {
 /////////////////////////////////////////////////////////////////////////////////////////
 void FxEmitter::Emit() { Emit(GetWorldPosition()); }
 
-void FxEmitter::Emit(const CxMath::Vector3& pos) {
+void FxEmitter::Emit(const CalyxMath::Vector3& pos) {
 	if(units_.size() >= kMaxUnits_) return;
 	FxUnit fx;
 	ResetFxUnit(fx);
@@ -242,12 +242,12 @@ void FxEmitter::ResetFxUnit(FxUnit& fx) {
 	fx.lifetime		= lifetime_.Get();
 	fx.age			= 0.0f;
 	fx.initialScale = fx.scale;
-	fx.color		= CxMath::Vector4(1, 1, 1, 1);
+	fx.color		= CalyxMath::Vector4(1, 1, 1, 1);
 	fx.alive		= true;
 	fx.uvTransform.Initialize();
 	fx.spinSpeed = spin_.Get();
 	if(randomSpinEmit_) {
-		fx.rotationEuler.z = Random::Generate<float>(-CxMath::kPi,CxMath::kPi);
+		fx.rotationEuler.z = Random::Generate<float>(-CalyxMath::kPi,CalyxMath::kPi);
 	} else {
 		fx.rotationEuler.z = 0.0f;
 	}

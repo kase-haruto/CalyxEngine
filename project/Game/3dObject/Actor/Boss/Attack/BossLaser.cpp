@@ -15,11 +15,11 @@ bool BossLaser::Execute(Boss& boss, BossShootingController& shooter) const {
 	// いったんホーミング弾を撃つように作成
 	
 	// ボスの位置
-	const CxMath::Vector3 bossPos = boss.GetCenterPos();
+	const CalyxMath::Vector3 bossPos = boss.GetCenterPos();
 
 	// プレイヤー方向（初速）
-	const CxMath::Vector3 playerPos = boss.GetTargetWorldPos();
-	const CxMath::Vector3 dir = (playerPos - bossPos).Normalize();
+	const CalyxMath::Vector3 playerPos = boss.GetTargetWorldPos();
+	const CalyxMath::Vector3 dir = (playerPos - bossPos).Normalize();
 
 	// Boss ホーミング弾を生成
 	auto bullet = shooter.AddBullet(

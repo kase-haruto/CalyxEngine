@@ -2,7 +2,7 @@
 
 #include <externals/nlohmann/json.hpp>
 
-namespace CxMath {
+namespace CalyxMath {
 	struct Vector2{
 		float x;
 		float y;

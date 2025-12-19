@@ -67,12 +67,12 @@ public:
 	 * \brief 移動量の追加をRequest
 	 * \param delta
 	 */
-	void AddMoveRequest(const CxMath::Vector3& delta);
+	void AddMoveRequest(const CalyxMath::Vector3& delta);
 	/**
 	 * \brief レティクルをオフセット分移動する
 	 * \param offset
 	 */
-	void MoveReticle(const CxMath::Vector3& offset);
+	void MoveReticle(const CalyxMath::Vector3& offset);
 	/**
 	 * \brief 弾の発射をリクエストする
 	 */
@@ -85,7 +85,7 @@ public:
 	 * \brief 移動ベクトルに応じて傾きを更新する
 	 * \param moveVector 移動ベクトル
 	 */
-	void UpdateTilt(const CxMath::Vector3& moveVector);
+	void UpdateTilt(const CalyxMath::Vector3& moveVector);
 	/**
 	 * \brief 危険察知ソースをアタッチする
 	 * \param dir 敵ディレクトリ
@@ -118,10 +118,10 @@ public:
 	PlayerDangerSense*		   GetDangerSense() const { return danger_.get(); }
 	PlayerDodgeSystem* 	   GetDodgeSystem() const { return dodgeSystem_.get(); }
 	std::vector<Sprite*>	   GetAllSprites() const;
-	const CxMath::Vector3			   GetCenterPos() const override;
+	const CalyxMath::Vector3			   GetCenterPos() const override;
 	std::optional<float>	   GetShootCooldown() const;
 	std::optional<const float> GetMaxShootInterval() const;
-	CxMath::Vector3					   GetReticleWorldPos() const { return reticleTransform_.GetWorldPosition(); }
+	CalyxMath::Vector3					   GetReticleWorldPos() const { return reticleTransform_.GetWorldPosition(); }
 
 private:
 	//=====================================================================
@@ -145,7 +145,7 @@ private:
 	std::unique_ptr<PlayerShootingController> shootingController_ = nullptr; //< 射撃コントローラ
 	PlayerInput								  input_;
 
-	CxMath::Vector3		   lastMoveVector_;	  //< 最後の移動ベクトル
+	CalyxMath::Vector3		   lastMoveVector_;	  //< 最後の移動ベクトル
 	WorldTransform reticleTransform_; //< レティクルのワールド変換
 
 	// sprites

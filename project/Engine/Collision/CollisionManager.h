@@ -44,12 +44,12 @@ private:
 	bool CheckCollisionPair(Collider* colliderA, Collider* colliderB);
 	std::string MakeCollisionKey(Collider* colliderA, Collider* colliderB);
 
-	void ComputeOBBAxes(const OBB& obb, CxMath::Vector3 outAxis[3]);
-	float ProjectOBB(const OBB& obb, const CxMath::Vector3 obbAxes[3], const CxMath::Vector3& axisCandidate);
+	void ComputeOBBAxes(const OBB& obb, CalyxMath::Vector3 outAxis[3]);
+	float ProjectOBB(const OBB& obb, const CalyxMath::Vector3 obbAxes[3], const CalyxMath::Vector3& axisCandidate);
 	bool OverlapOnAxis(
-		const OBB& obbA, const CxMath::Vector3 aAxes[3],
-		const OBB& obbB, const CxMath::Vector3 bAxes[3],
-		const CxMath::Vector3& axisCandidate);
+		const OBB& obbA, const CalyxMath::Vector3 aAxes[3],
+		const OBB& obbB, const CalyxMath::Vector3 bAxes[3],
+		const CalyxMath::Vector3& axisCandidate);
 
 	/*----------------
 	 各形状ごとの衝突

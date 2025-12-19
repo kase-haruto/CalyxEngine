@@ -36,13 +36,13 @@ void PrimitiveDrawer::Finalize(){
 }
 
 
-void PrimitiveDrawer::DrawLine3d(const CxMath::Vector3& start, const CxMath::Vector3& end, const CxMath::Vector4& color){
+void PrimitiveDrawer::DrawLine3d(const CalyxMath::Vector3& start, const CalyxMath::Vector3& end, const CalyxMath::Vector4& color){
 	if (lineDrawer_){
 		lineDrawer_->DrawLine(start, end, color);
 	}
 }
 
-void PrimitiveDrawer::DrawBox(const CxMath::Vector3& center, CxMath::Quaternion& rotate, const CxMath::Vector3& size, const CxMath::Vector4& color) {
+void PrimitiveDrawer::DrawBox(const CalyxMath::Vector3& center, CalyxMath::Quaternion& rotate, const CalyxMath::Vector3& size, const CalyxMath::Vector4& color) {
 	if (boxDrawer_) {
 		boxDrawer_->DrawBox(center, rotate,size, color);
 	}
@@ -57,52 +57,52 @@ void PrimitiveDrawer::DrawGrid(){
 		float offset = -kGridHalfWidth + index * kGridEvery;
 
 		// --- 縦線（Z軸方向） ---
-		CxMath::Vector3 verticalStart(offset, 0.0f, kGridHalfWidth);
-		CxMath::Vector3 verticalEnd(offset, 0.0f, -kGridHalfWidth);
+		CalyxMath::Vector3 verticalStart(offset, 0.0f, kGridHalfWidth);
+		CalyxMath::Vector3 verticalEnd(offset, 0.0f, -kGridHalfWidth);
 
-		CxMath::Vector4 verticalColor = (std::abs(offset) < 0.001f) ? CxMath::Vector4(0.0f, 1.0f, 0.0f, 1.0f) // X=0 line
-			: CxMath::Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+		CalyxMath::Vector4 verticalColor = (std::abs(offset) < 0.001f) ? CalyxMath::Vector4(0.0f, 1.0f, 0.0f, 1.0f) // X=0 line
+			: CalyxMath::Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 		DrawLine3d(verticalStart, verticalEnd, verticalColor);
 
-		CxMath::Vector3 horizontalStart(-kGridHalfWidth, 0.0f, offset);
-		CxMath::Vector3 horizontalEnd(kGridHalfWidth, 0.0f, offset);
+		CalyxMath::Vector3 horizontalStart(-kGridHalfWidth, 0.0f, offset);
+		CalyxMath::Vector3 horizontalEnd(kGridHalfWidth, 0.0f, offset);
 
-		CxMath::Vector4 horizontalColor = (std::abs(offset) < 0.001f) ? CxMath::Vector4(1.0f, 0.0f, 0.0f, 1.0f) // Z=0 line
-			: CxMath::Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+		CalyxMath::Vector4 horizontalColor = (std::abs(offset) < 0.001f) ? CalyxMath::Vector4(1.0f, 0.0f, 0.0f, 1.0f) // Z=0 line
+			: CalyxMath::Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 		DrawLine3d(horizontalStart, horizontalEnd, horizontalColor);
 	}
 }
 
-void PrimitiveDrawer::DrawAABB(const CxMath::Vector3& minP, const CxMath::Vector3& maxP,
-							   const CxMath::Vector4& color) {
+void PrimitiveDrawer::DrawAABB(const CalyxMath::Vector3& minP, const CalyxMath::Vector3& maxP,
+							   const CalyxMath::Vector4& color) {
 	// 中心とサイズを計算
-	CxMath::Vector3 center = (minP + maxP) * 0.5f;
-	CxMath::Vector3 size = (maxP - minP);
+	CalyxMath::Vector3 center = (minP + maxP) * 0.5f;
+	CalyxMath::Vector3 size = (maxP - minP);
 
 	// OBB は回転付きだが、Identity を渡せば AABB 扱いになる
-	CxMath::Quaternion identity; // (0,0,0,1)
+	CalyxMath::Quaternion identity; // (0,0,0,1)
 	identity.MakeIdentity();
 
 	DrawBox(center, identity, size, color); // 既存 API を再利用
 }
 
-void PrimitiveDrawer::DrawOBB(const CxMath::Vector3& center, const CxMath::Quaternion& rotate, const CxMath::Vector3& size, const CxMath::Vector4& color){
+void PrimitiveDrawer::DrawOBB(const CalyxMath::Vector3& center, const CalyxMath::Quaternion& rotate, const CalyxMath::Vector3& size, const CalyxMath::Vector4& color){
 	const uint32_t vertexNum = 8;
 
 	// 各軸の半サイズをクォータニオンで回転
-	CxMath::Vector3 halfSizeX = CxMath::Vector3::Transform({1.0f, 0.0f, 0.0f}, rotate) * (size.x * 0.5f);
-	CxMath::Vector3 halfSizeY = CxMath::Vector3::Transform({0.0f, 1.0f, 0.0f}, rotate) * (size.y * 0.5f);
-	CxMath::Vector3 halfSizeZ = CxMath::Vector3::Transform({0.0f, 0.0f, 1.0f}, rotate) * (size.z * 0.5f);
+	CalyxMath::Vector3 halfSizeX = CalyxMath::Vector3::Transform({1.0f, 0.0f, 0.0f}, rotate) * (size.x * 0.5f);
+	CalyxMath::Vector3 halfSizeY = CalyxMath::Vector3::Transform({0.0f, 1.0f, 0.0f}, rotate) * (size.y * 0.5f);
+	CalyxMath::Vector3 halfSizeZ = CalyxMath::Vector3::Transform({0.0f, 0.0f, 1.0f}, rotate) * (size.z * 0.5f);
 
 	// 頂点を計算
-	CxMath::Vector3 vertices[vertexNum];
-	CxMath::Vector3 offsets[vertexNum] = {
+	CalyxMath::Vector3 vertices[vertexNum];
+	CalyxMath::Vector3 offsets[vertexNum] = {
 		{-1, -1, -1}, {-1,  1, -1}, {1, -1, -1}, {1,  1, -1},
 		{-1, -1,  1}, {-1,  1,  1}, {1, -1,  1}, {1,  1,  1}
 	};
 
 	for (int i = 0; i < vertexNum; ++i){
-		CxMath::Vector3 localVertex =
+		CalyxMath::Vector3 localVertex =
 			offsets[i].x * halfSizeX +
 			offsets[i].y * halfSizeY +
 			offsets[i].z * halfSizeZ;
@@ -121,13 +121,13 @@ void PrimitiveDrawer::DrawOBB(const CxMath::Vector3& center, const CxMath::Quate
 	}
 }
 
-void PrimitiveDrawer::DrawSphere(const CxMath::Vector3& center, const float radius, int subdivision, CxMath::Vector4 color){
+void PrimitiveDrawer::DrawSphere(const CalyxMath::Vector3& center, const float radius, int subdivision, CalyxMath::Vector4 color){
 
 	// 分割数
 	const uint32_t kSubdivision = subdivision;
 	const float kLonEvery = 2 * float(std::numbers::pi) / kSubdivision;
 	const float kLatEvery = float(std::numbers::pi) / kSubdivision;
-	CxMath::Vector3 a, b, c, d;
+	CalyxMath::Vector3 a, b, c, d;
 
 	// 緯度方向に分割
 	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex){

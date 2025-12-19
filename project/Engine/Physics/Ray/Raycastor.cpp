@@ -6,8 +6,8 @@
 // 極薄AABBや数値誤差で抜けるのを防ぐため、ほんの少し膨らませる
 static inline AABB ExpandAabb(const AABB& b, float eps) {
 	AABB c = b;
-	c.min_ -= CxMath::Vector3{ eps, eps, eps };
-	c.max_ += CxMath::Vector3{ eps, eps, eps };
+	c.min_ -= CalyxMath::Vector3{ eps, eps, eps };
+	c.max_ += CalyxMath::Vector3{ eps, eps, eps };
 	return c;
 }
 
@@ -47,25 +47,25 @@ bool IntersectRayAABB(const Ray& ray, const AABB& aabbRaw, float& tOut) {
 }
 
 // t に対応する当たり面の法線をざっくり算出（スラブ判定）
-static inline CxMath::Vector3 ComputeAabbHitNormal(const Ray& ray, const AABB& aabb, float t) {
-	const CxMath::Vector3 p = ray.origin + ray.direction * t;
+static inline CalyxMath::Vector3 ComputeAabbHitNormal(const Ray& ray, const AABB& aabb, float t) {
+	const CalyxMath::Vector3 p = ray.origin + ray.direction * t;
 	const float eps = 1e-3f; // 近さ判定
 
 	// どの面から入ったか（近い面を優先）
-	if (std::fabs(p.x - aabb.min_.x) < eps) return CxMath::Vector3{ -1, 0, 0 };
-	if (std::fabs(p.x - aabb.max_.x) < eps) return CxMath::Vector3{ 1, 0, 0 };
-	if (std::fabs(p.y - aabb.min_.y) < eps) return CxMath::Vector3{ 0,-1, 0 };
-	if (std::fabs(p.y - aabb.max_.y) < eps) return CxMath::Vector3{ 0, 1, 0 };
-	if (std::fabs(p.z - aabb.min_.z) < eps) return CxMath::Vector3{ 0, 0,-1 };
-	if (std::fabs(p.z - aabb.max_.z) < eps) return CxMath::Vector3{ 0, 0, 1 };
+	if (std::fabs(p.x - aabb.min_.x) < eps) return CalyxMath::Vector3{ -1, 0, 0 };
+	if (std::fabs(p.x - aabb.max_.x) < eps) return CalyxMath::Vector3{ 1, 0, 0 };
+	if (std::fabs(p.y - aabb.min_.y) < eps) return CalyxMath::Vector3{ 0,-1, 0 };
+	if (std::fabs(p.y - aabb.max_.y) < eps) return CalyxMath::Vector3{ 0, 1, 0 };
+	if (std::fabs(p.z - aabb.min_.z) < eps) return CalyxMath::Vector3{ 0, 0,-1 };
+	if (std::fabs(p.z - aabb.max_.z) < eps) return CalyxMath::Vector3{ 0, 0, 1 };
 
 	// うまく取れない場合はレイの最も支配的な軸の反対向きにしておく
 	const float ax = std::fabs(ray.direction.x);
 	const float ay = std::fabs(ray.direction.y);
 	const float az = std::fabs(ray.direction.z);
-	if (ax >= ay && ax >= az) return CxMath::Vector3{ (float)-SignBit(ray.direction.x), 0, 0 };
-	if (ay >= ax && ay >= az) return CxMath::Vector3{ 0, (float)-SignBit(ray.direction.y), 0 };
-	return CxMath::Vector3{ 0, 0, (float)-SignBit(ray.direction.z) };
+	if (ax >= ay && ax >= az) return CalyxMath::Vector3{ (float)-SignBit(ray.direction.x), 0, 0 };
+	if (ay >= ax && ay >= az) return CalyxMath::Vector3{ 0, (float)-SignBit(ray.direction.y), 0 };
+	return CalyxMath::Vector3{ 0, 0, (float)-SignBit(ray.direction.z) };
 }
 
 std::optional<RaycastHit>
@@ -99,35 +99,35 @@ Raycastor::Raycast(const Ray& ray,
 	return closestHit;
 }
 
-Ray Raycastor::ConvertMouseToRay(const CxMath::Vector2& mousePos,
-								 const CxMath::Matrix4x4& view,
-								 const CxMath::Matrix4x4& proj,
-								 const CxMath::Vector2& viewportSize) {
+Ray Raycastor::ConvertMouseToRay(const CalyxMath::Vector2& mousePos,
+								 const CalyxMath::Matrix4x4& view,
+								 const CalyxMath::Matrix4x4& proj,
+								 const CalyxMath::Vector2& viewportSize) {
 	// 1. NDC
 	const float ndcX = (2.0f * mousePos.x) / viewportSize.x - 1.0f;
 	const float ndcY = 1.0f - (2.0f * mousePos.y) / viewportSize.y; // DirectX: Y反転
 
 	// 2. クリップ空間の near / far
-	const CxMath::Vector4 nearPoint(ndcX, ndcY, 0.0f, 1.0f);
-	const CxMath::Vector4 farPoint(ndcX, ndcY, 1.0f, 1.0f);
+	const CalyxMath::Vector4 nearPoint(ndcX, ndcY, 0.0f, 1.0f);
+	const CalyxMath::Vector4 farPoint(ndcX, ndcY, 1.0f, 1.0f);
 
 	// 3. View 空間へ
-	const CxMath::Matrix4x4 invProj = CxMath::Matrix4x4::Inverse(proj);
-	CxMath::Vector4 nearView = invProj * nearPoint;
-	CxMath::Vector4 farView = invProj * farPoint;
+	const CalyxMath::Matrix4x4 invProj = CalyxMath::Matrix4x4::Inverse(proj);
+	CalyxMath::Vector4 nearView = invProj * nearPoint;
+	CalyxMath::Vector4 farView = invProj * farPoint;
 
 	// 同次座標正規化
 	nearView /= nearView.w;
 	farView /= farView.w;
 
 	// 4. World 空間へ
-	const CxMath::Matrix4x4 invView = CxMath::Matrix4x4::Inverse(view);
-	const CxMath::Vector4 nearWorld = invView * nearView;
-	const CxMath::Vector4 farWorld = invView * farView;
+	const CalyxMath::Matrix4x4 invView = CalyxMath::Matrix4x4::Inverse(view);
+	const CalyxMath::Vector4 nearWorld = invView * nearView;
+	const CalyxMath::Vector4 farWorld = invView * farView;
 
 	// 5. レイ作成（正規化）
-	CxMath::Vector3 origin = nearWorld.xyz();
-	CxMath::Vector3 direction = (farWorld.xyz() - origin).Normalize();
+	CalyxMath::Vector3 origin = nearWorld.xyz();
+	CalyxMath::Vector3 direction = (farWorld.xyz() - origin).Normalize();
 
 	return Ray{ origin, direction };
 }

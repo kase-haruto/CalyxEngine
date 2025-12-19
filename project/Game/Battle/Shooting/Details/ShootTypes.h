@@ -8,8 +8,8 @@
 #include <string>
 
 struct  ShootRequest{
-	CxMath::Vector3 origin{};
-	CxMath::Vector3 dirN{};
+	CalyxMath::Vector3 origin{};
+	CalyxMath::Vector3 dirN{};
 	float speed;
 	std::string tag;
 };

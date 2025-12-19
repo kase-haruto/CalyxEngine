@@ -19,11 +19,11 @@ public:
 
 	//--------- accessor -----------------------------------------------------
 	//material
-	virtual void SetColor(const CxMath::Vector4& color) = 0;
+	virtual void SetColor(const CalyxMath::Vector4& color) = 0;
 
 	virtual void SetBlendMode(BlendMode mode) = 0;
 	virtual BlendMode GetBlendMode() const = 0;
-	virtual const CxMath::Matrix4x4& GetWorldMatrix() const =0;
+	virtual const CalyxMath::Matrix4x4& GetWorldMatrix() const =0;
 private:
 	//===================================================================*/
 	//			private functions

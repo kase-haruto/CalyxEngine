@@ -326,7 +326,7 @@ bool EnemySpawner::LoadRouteFromJson(const std::string& path) {
 /////////////////////////////////////////////////////////////////////////////////////////////////
 ///		 編隊内オフセット計算
 /////////////////////////////////////////////////////////////////////////////////////////////////
-CxMath::Vector3 EnemySpawner::CalcFormationOffset(size_t index) const {
+CalyxMath::Vector3 EnemySpawner::CalcFormationOffset(size_t index) const {
 	if(maxSpawnCount_ == 0) return {0, 0, 0};
 
 	const int	N	= static_cast<int>(maxSpawnCount_);
@@ -344,7 +344,7 @@ CxMath::Vector3 EnemySpawner::CalcFormationOffset(size_t index) const {
 			// 少し V 字型に奥方向へずらす
 			float z = std::abs(idx) * 4.0f;
 
-			return CxMath::Vector3{x, 0.0f, z};
+			return CalyxMath::Vector3{x, 0.0f, z};
 		}
 
 	case EnemyFormationMotionType::Snake: {
@@ -358,7 +358,7 @@ CxMath::Vector3 EnemySpawner::CalcFormationOffset(size_t index) const {
 
 		float z = 0.0f;
 
-		return CxMath::Vector3{x, y, z};
+		return CalyxMath::Vector3{x, y, z};
 	}
 
 	case EnemyFormationMotionType::Circle:
@@ -378,7 +378,7 @@ CxMath::Vector3 EnemySpawner::CalcFormationOffset(size_t index) const {
 			float y = std::sin(angle) * radius;
 			float z = 0.0f; // Z は固定
 
-			return CxMath::Vector3{x, y, z};
+			return CalyxMath::Vector3{x, y, z};
 		}
 
 	default:
@@ -387,7 +387,7 @@ CxMath::Vector3 EnemySpawner::CalcFormationOffset(size_t index) const {
 			float spacing = 18.0f;
 			float x		  = idx * spacing;
 			float z		  = std::abs(idx) * 4.0f;
-			return CxMath::Vector3{x, 0.0f, z};
+			return CalyxMath::Vector3{x, 0.0f, z};
 		}
 	}
 }
@@ -396,12 +396,12 @@ CxMath::Vector3 EnemySpawner::CalcFormationOffset(size_t index) const {
 /////////////////////////////////////////////////////////////////////////////////////////////////
 ///		 侵入開始位置計算
 /////////////////////////////////////////////////////////////////////////////////////////////////
-CxMath::Vector3 EnemySpawner::CalcEntranceStartPos(size_t index) const {
+CalyxMath::Vector3 EnemySpawner::CalcEntranceStartPos(size_t index) const {
 	float side = (index % 2 == 0) ? -1.0f : +1.0f; // 左右外
 	float y	   = Random::Generate<float>(-0.3f, 0.3f);
 
 	// Z はかなり奥から
-	return CxMath::Vector3(
+	return CalyxMath::Vector3(
 		side * 120.0f,
 		y * 40.0f,
 		-200.0f);
@@ -437,8 +437,8 @@ void EnemySpawner::UpdateProximity() {
 		return;
 	}
 
-	const CxMath::Vector3 spPos = worldTransform_.GetWorldPosition();
-	const CxMath::Vector3 plPos = playerTransform_->GetWorldPosition();
+	const CalyxMath::Vector3 spPos = worldTransform_.GetWorldPosition();
+	const CalyxMath::Vector3 plPos = playerTransform_->GetWorldPosition();
 	const float	  d		= Distance_(spPos, plPos, useXZDistance_);
 
 	if(!isActive_) {
@@ -480,8 +480,8 @@ void EnemySpawner::Spawn() {
 	if(formation_) {
 		size_t index = spawnedEnemies_.size() - 1;
 
-		CxMath::Vector3 offset	 = CalcFormationOffset(index);
-		CxMath::Vector3 entrance = CalcEntranceStartPos(index);
+		CalyxMath::Vector3 offset	 = CalcFormationOffset(index);
+		CalyxMath::Vector3 entrance = CalcEntranceStartPos(index);
 
 		enemy->StartEntranceToFormation(
 			formation_.get(),
@@ -526,7 +526,7 @@ void EnemySpawner::GarbageCollectDead() {
 //////////////////////////////////////////////////////////////////////////////////////////////
 ///		 ２点間距離計算
 //////////////////////////////////////////////////////////////////////////////////////////////
-float EnemySpawner::Distance_(const CxMath::Vector3& a, const CxMath::Vector3& b, bool useXZ) {
+float EnemySpawner::Distance_(const CalyxMath::Vector3& a, const CalyxMath::Vector3& b, bool useXZ) {
 	const float dx = a.x - b.x;
 	const float dy = a.y - b.y;
 	const float dz = a.z - b.z;

@@ -35,7 +35,7 @@ public:
 	void LoadSpriteDataFromJson(const std::string& filePath);
 
 private:
-	void AddSprite(const std::string& textureName, const CxMath::Vector2& position, const CxMath::Vector2& size);
+	void AddSprite(const std::string& textureName, const CalyxMath::Vector2& position, const CalyxMath::Vector2& size);
 
 private:
 	// テクスチャマネージャーのインスタンス

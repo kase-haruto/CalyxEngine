@@ -17,9 +17,9 @@
 //  コンストラクタ
 /////////////////////////////////////////////////////////////////////////
 BaseCamera::BaseCamera()
-	:viewMatrix_(CxMath::Matrix4x4::Inverse(worldTransform_.matrix.world)),
+	:viewMatrix_(CalyxMath::Matrix4x4::Inverse(worldTransform_.matrix.world)),
 	projectionMatrix_(MakePerspectiveFovMatrix(fovAngleY_, aspectRatio_, nearZ_, farZ_)){
-	viewProjectionMatrix_ = CxMath::Matrix4x4::Multiply(viewMatrix_, projectionMatrix_);
+	viewProjectionMatrix_ = CalyxMath::Matrix4x4::Multiply(viewMatrix_, projectionMatrix_);
 
 	/* バッファの生成とマッピング =======================*/
 	cameraBuffer_.Initialize(GraphicsGroup::GetInstance()->GetDevice().Get());
@@ -29,11 +29,11 @@ BaseCamera::BaseCamera()
 }
 
 BaseCamera::BaseCamera(const std::string& name)
-	:viewMatrix_(CxMath::Matrix4x4::Inverse(worldTransform_.matrix.world)),
+	:viewMatrix_(CalyxMath::Matrix4x4::Inverse(worldTransform_.matrix.world)),
 	projectionMatrix_(MakePerspectiveFovMatrix(fovAngleY_, aspectRatio_, nearZ_, farZ_)){
 	SceneObject::SetName(name, ObjectType::Camera);
 
-	viewProjectionMatrix_ = CxMath::Matrix4x4::Multiply(viewMatrix_, projectionMatrix_);
+	viewProjectionMatrix_ = CalyxMath::Matrix4x4::Multiply(viewMatrix_, projectionMatrix_);
 	/* バッファの生成とマッピング =======================*/
 	cameraBuffer_.Initialize(GraphicsGroup::GetInstance()->GetDevice().Get());
 	worldTransform_.rotationSource = RotationSource::Euler;
@@ -54,7 +54,7 @@ void BaseCamera::Update(float dt){
 			float offsetZ = ((rand() / ( float ) RAND_MAX) * 2.0f - 1.0f) * shakeIntensity_;
 
 			// 現在のカメラ位置にオフセットを加算
-			worldTransform_.translation = originalPosition_ + CxMath::Vector3(offsetX, offsetY, offsetZ);
+			worldTransform_.translation = originalPosition_ + CalyxMath::Vector3(offsetX, offsetY, offsetZ);
 		} else{
 			// シェイク終了時に元の位置に戻す
 			isShaking_ = false;
@@ -74,9 +74,9 @@ void BaseCamera::AlwaysUpdate([[maybe_unused]]float dt){
 /////////////////////////////////////////////////////////////////////////
 void BaseCamera::UpdateMatrix(){
 	// 行列の更新
-	viewMatrix_ = CxMath::Matrix4x4::Inverse(worldTransform_.matrix.world);
+	viewMatrix_ = CalyxMath::Matrix4x4::Inverse(worldTransform_.matrix.world);
 	projectionMatrix_ = MakePerspectiveFovMatrix(fovAngleY_, aspectRatio_, nearZ_, farZ_);
-	viewProjectionMatrix_ = CxMath::Matrix4x4::Multiply(viewMatrix_, projectionMatrix_);
+	viewProjectionMatrix_ = CalyxMath::Matrix4x4::Multiply(viewMatrix_, projectionMatrix_);
 
 	cameraBuffer_.Update(viewMatrix_, projectionMatrix_, worldTransform_.translation);
 }
@@ -84,8 +84,8 @@ void BaseCamera::UpdateMatrix(){
 /////////////////////////////////////////////////////////////////////////
 //  projection行列の作成
 /////////////////////////////////////////////////////////////////////////
-CxMath::Matrix4x4 BaseCamera::MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip){
-	CxMath::Matrix4x4 result = {
+CalyxMath::Matrix4x4 BaseCamera::MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip){
+	CalyxMath::Matrix4x4 result = {
 		1 / (aspectRatio * std::tan(fovY / 2)), 0, 0, 0,
 		0, 1 / std::tan(fovY / 2), 0, 0,
 		0, 0, farClip / (farClip - nearClip), 1,
@@ -141,28 +141,28 @@ void BaseCamera::SetName(const std::string& name){
 	SceneObject::SetName(name, ObjectType::Camera);
 }
 
-void BaseCamera::SetCamera(const CxMath::Vector3& pos, const CxMath::Vector3& rotate){
+void BaseCamera::SetCamera(const CalyxMath::Vector3& pos, const CalyxMath::Vector3& rotate){
 	worldTransform_.translation = pos;
 	worldTransform_.eulerRotation = rotate;
 }
 
-const CxMath::Matrix4x4& BaseCamera::GetViewMatrix() const{
+const CalyxMath::Matrix4x4& BaseCamera::GetViewMatrix() const{
 	return viewMatrix_;
 }
 
-const CxMath::Matrix4x4& BaseCamera::GetProjectionMatrix() const{
+const CalyxMath::Matrix4x4& BaseCamera::GetProjectionMatrix() const{
 	return projectionMatrix_;
 }
 
-const CxMath::Matrix4x4& BaseCamera::GetViewProjectionMatrix() const{
+const CalyxMath::Matrix4x4& BaseCamera::GetViewProjectionMatrix() const{
 	return viewProjectionMatrix_;
 }
 
-const CxMath::Vector3& BaseCamera::GetRotate() const{
+const CalyxMath::Vector3& BaseCamera::GetRotate() const{
 	return worldTransform_.eulerRotation;
 }
 
-const CxMath::Vector3& BaseCamera::GetTranslate() const{
+const CalyxMath::Vector3& BaseCamera::GetTranslate() const{
 	return worldTransform_.translation;
 }
 
@@ -187,7 +187,7 @@ void BaseCamera::SetAspectRatio(float aspect){
 		adjustedFov *= 1.0f + (aspect - highAspectThreshold) * 0.5f; // 横長 → 少し広げる
 	}
 
-	projectionMatrix_ = CxMath::Matrix4x4::PerspectiveFovRH(adjustedFov, aspect, nearZ_, farZ_);
+	projectionMatrix_ = CalyxMath::Matrix4x4::PerspectiveFovRH(adjustedFov, aspect, nearZ_, farZ_);
 }
 
 REGISTER_SCENE_OBJECT(BaseCamera)

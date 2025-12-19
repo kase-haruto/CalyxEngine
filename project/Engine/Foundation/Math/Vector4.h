@@ -3,7 +3,7 @@
 #include <externals/nlohmann/json.hpp>
 
 
-namespace CxMath {
+namespace CalyxMath {
 	struct Matrix4x4;
 	struct Vector3;
 
@@ -47,4 +47,4 @@ namespace CxMath {
 		j.at("w").get_to(v.w);
 	}
 
-} // namespace CxMath
+} // namespace CalyxMath

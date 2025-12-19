@@ -36,19 +36,19 @@ void DebugCamera::AlwaysUpdate(float dt){
 		// orbitAngle_.x = 水平方向(Yaw)
 		// orbitAngle_.y = 垂直方向(Pitch)
 		// 距離と角度からカメラの相対座標を計算
-		CxMath::Matrix4x4 matRotYaw =CxMath::MakeRotateYMatrix(orbitAngle_.x);
-		CxMath::Matrix4x4 matRotPitch = CxMath::MakeRotateXMatrix(orbitAngle_.y);
-		CxMath::Matrix4x4 matRot = CxMath::Matrix4x4::Multiply(matRotPitch, matRotYaw);
+		CalyxMath::Matrix4x4 matRotYaw =CalyxMath::MakeRotateYMatrix(orbitAngle_.x);
+		CalyxMath::Matrix4x4 matRotPitch = CalyxMath::MakeRotateXMatrix(orbitAngle_.y);
+		CalyxMath::Matrix4x4 matRot = CalyxMath::Matrix4x4::Multiply(matRotPitch, matRotYaw);
 
 		// Z方向に距離分だけオフセットし、回転行列を適用
-		CxMath::Vector3 offset(0.0f, 0.0f, -distance_);
-		offset = CxMath::TransformNormal(offset, matRot);
+		CalyxMath::Vector3 offset(0.0f, 0.0f, -distance_);
+		offset = CalyxMath::TransformNormal(offset, matRot);
 
 		// カメラの位置 = ターゲット + オフセット
 		worldTransform_.translation = target_ + offset;
 
 		// カメラの回転は (Pitch, Yaw, 0)
-		worldTransform_.eulerRotation = CxMath::Vector3(orbitAngle_.y, orbitAngle_.x, 0.0f);
+		worldTransform_.eulerRotation = CalyxMath::Vector3(orbitAngle_.y, orbitAngle_.x, 0.0f);
 	}
 
 	// BaseCameraの更新処理を呼び出す
@@ -88,7 +88,7 @@ void DebugCamera::Rotate(){
 			return; // 初回は移動量を無視
 		}
 
-		CxMath::Vector2 mouseDelta = Input::GetMouseDelta(); // 各フレームの移動量を取得
+		CalyxMath::Vector2 mouseDelta = Input::GetMouseDelta(); // 各フレームの移動量を取得
 
 		// マウスがほとんど動いていない場合は無視
 		if (std::abs(mouseDelta.x) < 0.1f && std::abs(mouseDelta.y) < 0.1f){
@@ -125,7 +125,7 @@ void DebugCamera::Move(){
 			return; // 初回は移動量を無視
 		}
 
-		CxMath::Vector2 mouseDelta = Input::GetMouseDelta(); // 各フレームの移動量を取得
+		CalyxMath::Vector2 mouseDelta = Input::GetMouseDelta(); // 各フレームの移動量を取得
 
 		// マウスがほとんど動いていない場合は無視
 		if (std::abs(mouseDelta.x) < 0.1f && std::abs(mouseDelta.y) < 0.1f){
@@ -133,19 +133,19 @@ void DebugCamera::Move(){
 		}
 
 		// カメラの回転行列を作成
-		CxMath::Matrix4x4 matRotYaw = CxMath::MakeRotateYMatrix(orbitAngle_.x);
-		CxMath::Matrix4x4 matRotPitch = CxMath::MakeRotateXMatrix(orbitAngle_.y);
-		CxMath::Matrix4x4 matRot = CxMath::Matrix4x4::Multiply(matRotPitch, matRotYaw);
+		CalyxMath::Matrix4x4 matRotYaw = CalyxMath::MakeRotateYMatrix(orbitAngle_.x);
+		CalyxMath::Matrix4x4 matRotPitch = CalyxMath::MakeRotateXMatrix(orbitAngle_.y);
+		CalyxMath::Matrix4x4 matRot = CalyxMath::Matrix4x4::Multiply(matRotPitch, matRotYaw);
 
 		// パン方向の移動量 (画面右が-X, 上が+Yになるよう調整)
-		CxMath::Vector3 localMove(
+		CalyxMath::Vector3 localMove(
 			-mouseDelta.x * panSpeed_,
 			mouseDelta.y * panSpeed_,
 			0.0f
 		);
 
 		// ローカル移動量をワールド座標に変換
-		CxMath::Vector3 worldMove = CxMath::TransformNormal(localMove, matRot);
+		CalyxMath::Vector3 worldMove = CalyxMath::TransformNormal(localMove, matRot);
 
 		// ターゲット位置を移動
 		target_ += worldMove;

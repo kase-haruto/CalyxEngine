@@ -35,9 +35,9 @@ void BaseModel::Update(float deltaTime) {
 		UpdateTexture(deltaTime);
 
 		// UV transform を行列化 
-		CxMath::Matrix4x4 uvTransformMatrix = CxMath::MakeScaleMatrix(CxMath::Vector3(uvTransform.scale.x, uvTransform.scale.y, 1.0f));
-		uvTransformMatrix = CxMath::Matrix4x4::Multiply(uvTransformMatrix, CxMath::MakeRotateZMatrix(uvTransform.rotate));
-		uvTransformMatrix = CxMath::Matrix4x4::Multiply(uvTransformMatrix, CxMath::MakeTranslateMatrix(CxMath::Vector3(uvTransform.translate.x, uvTransform.translate.y, 0.0f)));
+		CalyxMath::Matrix4x4 uvTransformMatrix = CalyxMath::MakeScaleMatrix(CalyxMath::Vector3(uvTransform.scale.x, uvTransform.scale.y, 1.0f));
+		uvTransformMatrix = CalyxMath::Matrix4x4::Multiply(uvTransformMatrix, CalyxMath::MakeRotateZMatrix(uvTransform.rotate));
+		uvTransformMatrix = CalyxMath::Matrix4x4::Multiply(uvTransformMatrix, CalyxMath::MakeTranslateMatrix(CalyxMath::Vector3(uvTransform.translate.x, uvTransform.translate.y, 0.0f)));
 
 		materialData_.uvTransform = uvTransformMatrix;
 		materialBuffer_.TransferData(materialData_);
@@ -317,7 +317,7 @@ void BaseModel::UploadInstanceMatrices(const std::vector<WorldTransform>& transf
 	for (const auto& tf : transforms) {
 		TransformationMatrix m{};
 		m.world = tf.matrix.world;
-		m.WorldInverseTranspose = CxMath::Matrix4x4::Transpose(CxMath::Matrix4x4::Inverse(tf.matrix.world));
+		m.WorldInverseTranspose = CalyxMath::Matrix4x4::Transpose(CalyxMath::Matrix4x4::Inverse(tf.matrix.world));
 		matrices.push_back(m);
 	}
 	instanceBuffer_.TransferVectorData(matrices);

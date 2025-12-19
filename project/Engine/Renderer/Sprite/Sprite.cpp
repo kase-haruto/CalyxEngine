@@ -38,7 +38,7 @@ Sprite::Sprite(const std::string& filePath) {
 
 Sprite::~Sprite() {}
 
-void Sprite::Initialize(const CxMath::Vector2& newPosition,const CxMath::Vector2& newSize) {
+void Sprite::Initialize(const CalyxMath::Vector2& newPosition,const CalyxMath::Vector2& newSize) {
 	this->position         = newPosition;
 	transform_.translate.x = position.x;
 	transform_.translate.y = position.y;
@@ -87,10 +87,10 @@ void Sprite::ShowGui() {
 }
 
 void Sprite::UpdateMatrix() {
-	CxMath::Matrix4x4 matWorld      = CxMath::MakeAffineMatrix(transform_.scale,transform_.rotate,transform_.translate);
-	CxMath::Matrix4x4 matView       = CxMath::Matrix4x4::MakeIdentity();
-	CxMath::Matrix4x4 matProjection = CxMath::MakeOrthographicMatrix(0.0f,0.0f,1280.0f,720.0f,0.0f,100.0f);
-	CxMath::Matrix4x4 wvpMatrix     = CxMath::Matrix4x4::Multiply(matWorld,CxMath::Matrix4x4::Multiply(matView,matProjection));
+	CalyxMath::Matrix4x4 matWorld      = CalyxMath::MakeAffineMatrix(transform_.scale,transform_.rotate,transform_.translate);
+	CalyxMath::Matrix4x4 matView       = CalyxMath::Matrix4x4::MakeIdentity();
+	CalyxMath::Matrix4x4 matProjection = CalyxMath::MakeOrthographicMatrix(0.0f,0.0f,1280.0f,720.0f,0.0f,100.0f);
+	CalyxMath::Matrix4x4 wvpMatrix     = CalyxMath::Matrix4x4::Multiply(matWorld,CalyxMath::Matrix4x4::Multiply(matView,matProjection));
 	*transformData          = wvpMatrix;
 }
 
@@ -98,9 +98,9 @@ void Sprite::UpdateTransform() {
 	///===================================================
 	/// UV Transform
 	///===================================================
-	CxMath::Matrix4x4 uvTransformMatrix = CxMath::MakeScaleMatrix(uvTransform.scale);
-	uvTransformMatrix           = CxMath::Matrix4x4::Multiply(uvTransformMatrix,CxMath::MakeRotateZMatrix(uvTransform.rotate.z));
-	uvTransformMatrix           = CxMath::Matrix4x4::Multiply(uvTransformMatrix,CxMath::MakeTranslateMatrix(uvTransform.translate));
+	CalyxMath::Matrix4x4 uvTransformMatrix = CalyxMath::MakeScaleMatrix(uvTransform.scale);
+	uvTransformMatrix           = CalyxMath::Matrix4x4::Multiply(uvTransformMatrix,CalyxMath::MakeRotateZMatrix(uvTransform.rotate.z));
+	uvTransformMatrix           = CalyxMath::Matrix4x4::Multiply(uvTransformMatrix,CalyxMath::MakeTranslateMatrix(uvTransform.translate));
 	materialData_.uvTransform   = uvTransformMatrix;
 }	
 
@@ -185,17 +185,17 @@ void Sprite::VertexResourceMap() {
 
 void Sprite::TransformResourceMap() {
 	transformResource_->Map(0,nullptr,reinterpret_cast<void**>(&transformData));
-	*transformData = CxMath::Matrix4x4::MakeIdentity(); // 初期値は単位行列
+	*transformData = CalyxMath::Matrix4x4::MakeIdentity(); // 初期値は単位行列
 }
 
 void Sprite::MaterialResourceMap() {
 	materialData_.color       = {1.0f,1.0f,1.0f,1.0f};
-	materialData_.uvTransform = CxMath::Matrix4x4::MakeIdentity();
+	materialData_.uvTransform = CalyxMath::Matrix4x4::MakeIdentity();
 	materialCB_.TransferData(materialData_);
 }
 
 void Sprite::PutWindowCenter() {
-	CxMath::Vector2 windowCenter   = {kWindowWidth * 0.5f,kWindowHeight * 0.5f};
+	CalyxMath::Vector2 windowCenter   = {kWindowWidth * 0.5f,kWindowHeight * 0.5f};
 	transform_.translate.x = windowCenter.x;
 	transform_.translate.y = windowCenter.y;
 }

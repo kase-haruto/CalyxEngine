@@ -34,8 +34,8 @@ public:
 
 	void StartEntranceToFormation(
 		EnemyFormationController* formation,
-		const CxMath::Vector3&			  formationOffset,
-		const CxMath::Vector3&			  entranceStartWorld);
+		const CalyxMath::Vector3&			  formationOffset,
+		const CalyxMath::Vector3&			  entranceStartWorld);
 	
 	// collision
 	void OnCollisionEnter(Collider* other) override;
@@ -44,14 +44,14 @@ public:
 
 	// accessor
 	int16_t GetScore() const;
-	void	SetPosition(const CxMath::Vector3& pos) { worldTransform_.translation = pos; }
+	void	SetPosition(const CalyxMath::Vector3& pos) { worldTransform_.translation = pos; }
 
 	void SetShootingController(std::unique_ptr<EnemyShootingController>);
 	void SetPlayerTransform(const WorldTransform* pos);
 	void SetRouteSpline(const SplineData& data);
 
 	DeathState	  GetDeathState() const { return deathState_; }
-	const CxMath::Vector3 GetCenterPos() const override;
+	const CalyxMath::Vector3 GetCenterPos() const override;
 
 	void SetGameplayEngaged(bool v) { shooting_.SetGameplayEngaged(v); }
 	bool IsGameplayEngaged() const { return shooting_.IsGameplayEngaged(); }
@@ -76,7 +76,7 @@ private:
 	DeathState deathState_ = DeathState::Alive;
 
 	// death animation
-	CxMath::Vector3 deathRotateAxis_ = {0, 0, 1};
+	CalyxMath::Vector3 deathRotateAxis_ = {0, 0, 1};
 	float	deathTimer_		 = 0.0f;
 	float	deathLength_	 = 1.5f;
 

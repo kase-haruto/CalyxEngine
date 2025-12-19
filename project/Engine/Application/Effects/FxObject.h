@@ -63,7 +63,7 @@ public:
 
 	//--------- accessor --------------------------------------------------
 	std::string_view GetTypeName() const override;
-	void SetWorldPosition(const CxMath::Vector3& pos);
+	void SetWorldPosition(const CalyxMath::Vector3& pos);
 private:
 	//===================================================================*/
 	//					private methods

@@ -47,10 +47,10 @@ void Viewport::Render(const ImTextureID& tex){
 				 ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
 	ImVec2 contentSize = ImGui::GetContentRegionAvail();
-	size_ = CxMath::Vector2(contentSize.x, contentSize.y);
+	size_ = CalyxMath::Vector2(contentSize.x, contentSize.y);
 	// 画像描画
 	ImVec2 imagePos = ImGui::GetCursorScreenPos();
-	viewOrigin_ = CxMath::Vector2(imagePos.x, imagePos.y);
+	viewOrigin_ = CalyxMath::Vector2(imagePos.x, imagePos.y);
 	if (size_.y > 0.0f) {
 		camera_->SetAspectRatio(size_.x / size_.y);
 		camera_->UpdateMatrix();
@@ -124,8 +124,8 @@ void Viewport::AddTool(IOnViewportTool* tool){ tools_.push_back(tool); }
 
 bool Viewport::IsHovered() const{ return isHovered_; }
 bool Viewport::IsClicked() const{ return isClicked_; }
-CxMath::Vector2 Viewport::GetSize() const{ return size_; }
-CxMath::Vector2 Viewport::GetPosition() const{
+CalyxMath::Vector2 Viewport::GetSize() const{ return size_; }
+CalyxMath::Vector2 Viewport::GetPosition() const{
 	// ビューポートの位置を取得
 	return viewOrigin_;
 }

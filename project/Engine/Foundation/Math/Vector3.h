@@ -2,7 +2,7 @@
 
 #include <externals/nlohmann/json.hpp>
 
-namespace CxMath {
+namespace CalyxMath {
 	struct Matrix4x4;
 	struct Quaternion;
 
@@ -90,14 +90,14 @@ namespace CxMath {
 
 		//--------- serializer ---------------------------------------------------
 #pragma region serializer
-	inline void to_json(nlohmann::json& j, const CxMath::Vector3& v) {
+	inline void to_json(nlohmann::json& j, const CalyxMath::Vector3& v) {
 		j = nlohmann::json{{"x", v.x}, {"y", v.y}, {"z", v.z}};
 	}
-	inline void from_json(const nlohmann::json& j, CxMath::Vector3& v) {
+	inline void from_json(const nlohmann::json& j, CalyxMath::Vector3& v) {
 		j.at("x").get_to(v.x);
 		j.at("y").get_to(v.y);
 		j.at("z").get_to(v.z);
 	}
 
 #pragma endregion
-} // namespace CxMath
+} // namespace CalyxMath
