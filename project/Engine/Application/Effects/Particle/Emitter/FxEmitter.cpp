@@ -6,12 +6,12 @@
 #include <Engine/Application/Effects/FxGuiHelpers.h>
 #include <Engine/Application/Effects/Particle/FxUnit.h>
 #include <Engine/Application/Effects/Particle/Module/Factory/ModuleFactory.h>
+#include <Engine/Assets/Database/AssetDatabase.h>
+#include <Engine/Assets/System/AssetDragPayload.h>
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
-#include <Engine/Assets/Database/AssetDatabase.h>
-#include <Engine/Assets/System/AssetDragPayload.h>
 
 // externals
 #include "Engine/Assets/Texture/TextureManager.h"
@@ -21,245 +21,246 @@
 #include <externals/imgui/imgui.h>
 
 namespace {
-void VSeparator(float height = 0.0f, float thickness = 1.0f, float pad = 6.0f) {
-	ImVec2 pos = ImGui::GetCursorScreenPos();
-	if(height <= 0.0f) height = ImGui::GetTextLineHeightWithSpacing();
+	void VSeparator(float height = 0.0f, float thickness = 1.0f, float pad = 6.0f) {
+		ImVec2 pos = ImGui::GetCursorScreenPos();
+		if(height <= 0.0f) height = ImGui::GetTextLineHeightWithSpacing();
 
-	ImU32		col = ImGui::GetColorU32(ImGuiCol_Separator);
-	ImDrawList* dl	= ImGui::GetWindowDrawList();
-	float		x	= pos.x + pad * 0.5f;
-	dl->AddLine(ImVec2(x, pos.y), ImVec2(x, pos.y + height), col, thickness);
+		ImU32		col = ImGui::GetColorU32(ImGuiCol_Separator);
+		ImDrawList* dl	= ImGui::GetWindowDrawList();
+		float		x	= pos.x + pad * 0.5f;
+		dl->AddLine(ImVec2(x, pos.y), ImVec2(x, pos.y + height), col, thickness);
 
-	ImGui::Dummy(ImVec2(pad + thickness, height));
-	ImGui::SameLine();
-}
+		ImGui::Dummy(ImVec2(pad + thickness, height));
+		ImGui::SameLine();
+	}
 }; // namespace
 
-/////////////////////////////////////////////////////////////////////////////////////////
-// ctor / dtor
-/////////////////////////////////////////////////////////////////////////////////////////
-FxEmitter::FxEmitter() {
-	ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
+namespace CalyxEffect {
+	/////////////////////////////////////////////////////////////////////////////////////////
+	// ctor / dtor
+	/////////////////////////////////////////////////////////////////////////////////////////
+	FxEmitter::FxEmitter() {
+		ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
 
-	// マテリアル
-	material_.color = CalyxMath::Vector4(1, 1, 1, 1);
-	materialBuffer_.Initialize(GraphicsGroup::GetInstance()->GetDevice());
+		// マテリアル
+		material_.color = CalyxMath::Vector4(1, 1, 1, 1);
+		materialBuffer_.Initialize(GraphicsGroup::GetInstance()->GetDevice());
 
-	instanceBuffer_.Initialize(device, kMaxUnits_);
-	instanceBuffer_.CreateSrv(device);
+		instanceBuffer_.Initialize(device, kMaxUnits_);
+		instanceBuffer_.CreateSrv(device);
 
-	// ビルボード定数バッファ初期化
-	billboardParams_.mode = static_cast<uint32_t>(billboardMode_);
-	billboardCB_.Initialize(device);
-	billboardCB_.TransferData(billboardParams_);
+		// ビルボード定数バッファ初期化
+		billboardParams_.mode = static_cast<uint32_t>(billboardMode_);
+		billboardCB_.Initialize(device);
+		billboardCB_.TransferData(billboardParams_);
 
-	// 各種パラメータ
-	velocity_ = FxParam<CalyxMath::Vector3>::MakeRandom(CalyxMath::Vector3(-1.0f, 0.0f, -1.0f),
-											 CalyxMath::Vector3(1.0f, 0.0f, 1.0f));
-	lifetime_ = FxParam<float>::MakeRandom(1.0f, 3.0f);
-	scale_	  = FxParam<CalyxMath::Vector3>::MakeConstant();
+		// 各種パラメータ
+		velocity_ = FxParam<CalyxMath::Vector3>::MakeRandom(CalyxMath::Vector3(-1.0f, 0.0f, -1.0f),
+															CalyxMath::Vector3(1.0f, 0.0f, 1.0f));
+		lifetime_ = FxParam<float>::MakeRandom(1.0f, 3.0f);
+		scale_	  = FxParam<CalyxMath::Vector3>::MakeConstant();
 
-	moduleContainer_ = std::make_unique<FxModuleContainer>();
-}
-
-FxEmitter::~FxEmitter() {
-	instanceBuffer_.ReleaseSrv();
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// Update
-/////////////////////////////////////////////////////////////////////////////////////////
-void FxEmitter::Update(float deltaTime) {
-	// ---- プレビュー ----
-	if(isOneShot_ && timedPreview_) {
-		previewTimer_ += deltaTime;
-		if(previewTimer_ >= previewIntervalSec_) {
-			previewTimer_ = 0.0f;
-			RestartOneShot();
-		}
+		moduleContainer_ = std::make_unique<CalyxEffect::FxModuleContainer>();
 	}
 
-	if(!isPlaying_) return;
-
-	position_ = GetWorldPosition();
-	elapsedTime_ += deltaTime;
-
-	if(elapsedTime_ < emitDelay_) return;
-
-	// ---- 発生停止判定 ----
-	if(emitDuration_ >= 0.0f && elapsedTime_ > emitDelay_ + emitDuration_) {
-		Stop();
+	FxEmitter::~FxEmitter() {
+		instanceBuffer_.ReleaseSrv();
 	}
 
-	// ---- パーティクル発生 ----
-	if(isOneShot_) {
-		if(!hasEmitted_) {
-			for(int i = 0; i < emitCount_ && units_.size() < kMaxUnits_; ++i) {
-				Emit();
-			}
-			hasEmitted_ = true;
-		}
-	} else {
-		if(isFirstFrame_) {
-			prevPostion_  = position_;
-			isFirstFrame_ = false;
-		}
-
-		CalyxMath::Vector3 moveDelta = position_ - prevPostion_;
-		float	distance  = moveDelta.Length();
-
-		if(distance > 0.0f && isComplement_) {
-			float spawnInterval = 0.02f;
-			int	  trailCount	= static_cast<int>(distance / spawnInterval);
-			for(int i = 0; i < trailCount; ++i) {
-				float	dist	 = i * spawnInterval;
-				float	t		 = dist / distance;
-				CalyxMath::Vector3 spawnPos = CalyxMath::Vector3::Lerp(prevPostion_, position_, t);
-				Emit(spawnPos);
-			}
-		} else {
-			emitTimer_ += deltaTime;
-			const float interval = emitRate_;
-			if(emitTimer_ >= interval && units_.size() < kMaxUnits_) {
-				emitTimer_ -= interval;
-				Emit();
+	/////////////////////////////////////////////////////////////////////////////////////////
+	// Update
+	/////////////////////////////////////////////////////////////////////////////////////////
+	void FxEmitter::Update(float deltaTime) {
+		// ---- プレビュー ----
+		if(isOneShot_ && timedPreview_) {
+			previewTimer_ += deltaTime;
+			if(previewTimer_ >= previewIntervalSec_) {
+				previewTimer_ = 0.0f;
+				RestartOneShot();
 			}
 		}
-		prevPostion_ = position_;
-	}
 
-	// ---- 各パーティクル更新 ----
-	for(auto& fx : units_) {
-		if(!fx.alive) continue;
+		if(!isPlaying_) return;
 
-		if(fx.lifetime > 0.0f) {
-			float t	 = fx.age / fx.lifetime;
-			fx.lifeT = std::clamp(t, 0.0f, 1.0f);
+		position_ = GetWorldPosition();
+		elapsedTime_ += deltaTime;
+
+		if(elapsedTime_ < emitDelay_) return;
+
+		// ---- 発生停止判定 ----
+		if(emitDuration_ >= 0.0f && elapsedTime_ > emitDelay_ + emitDuration_) {
+			Stop();
+		}
+
+		// ---- パーティクル発生 ----
+		if(isOneShot_) {
+			if(!hasEmitted_) {
+				for(int i = 0; i < emitCount_ && units_.size() < kMaxUnits_; ++i) {
+					Emit();
+				}
+				hasEmitted_ = true;
+			}
 		} else {
-			fx.lifeT = 1.0f;
+			if(isFirstFrame_) {
+				prevPostion_  = position_;
+				isFirstFrame_ = false;
+			}
+
+			CalyxMath::Vector3 moveDelta = position_ - prevPostion_;
+			float			   distance	 = moveDelta.Length();
+
+			if(distance > 0.0f && isComplement_) {
+				float spawnInterval = 0.02f;
+				int	  trailCount	= static_cast<int>(distance / spawnInterval);
+				for(int i = 0; i < trailCount; ++i) {
+					float			   dist		= i * spawnInterval;
+					float			   t		= dist / distance;
+					CalyxMath::Vector3 spawnPos = CalyxMath::Vector3::Lerp(prevPostion_, position_, t);
+					Emit(spawnPos);
+				}
+			} else {
+				emitTimer_ += deltaTime;
+				const float interval = emitRate_;
+				if(emitTimer_ >= interval && units_.size() < kMaxUnits_) {
+					emitTimer_ -= interval;
+					Emit();
+				}
+			}
+			prevPostion_ = position_;
 		}
 
-		for(auto& m : moduleContainer_->GetModules()) {
-			if(m->IsEnabled()) m->OnUpdate(fx, deltaTime);
+		// ---- 各パーティクル更新 ----
+		for(auto& fx : units_) {
+			if(!fx.alive) continue;
+
+			if(fx.lifetime > 0.0f) {
+				float t	 = fx.age / fx.lifetime;
+				fx.lifeT = std::clamp(t, 0.0f, 1.0f);
+			} else {
+				fx.lifeT = 1.0f;
+			}
+
+			for(auto& m : moduleContainer_->GetModules()) {
+				if(m->IsEnabled()) m->OnUpdate(fx, deltaTime);
+			}
+
+			// 追従フラグが立っている場合はエミッタ位置+オフセットに常に合わせる（速度適用は行わない）
+			if(fx.followEmitter) {
+				fx.position = position_ + fx.followOffset;
+			} else {
+				fx.position += fx.velocity * deltaTime;
+			}
+
+			// スピン
+			fx.rotationEuler.z += fx.spinSpeed * deltaTime;
+
+			fx.age += deltaTime;
+			if(fx.age >= fx.lifetime) fx.alive = false;
+
+			CalyxMath::Matrix4x4 uvTransformMatrix =
+				CalyxMath::MakeScaleMatrix(CalyxMath::Vector3(fx.uvTransform.scale.x, fx.uvTransform.scale.y, 1.0f));
+			uvTransformMatrix	  = CalyxMath::Matrix4x4::Multiply(uvTransformMatrix, CalyxMath::MakeRotateZMatrix(fx.uvTransform.rotate));
+			uvTransformMatrix	  = CalyxMath::Matrix4x4::Multiply(uvTransformMatrix,
+																   CalyxMath::MakeTranslateMatrix(CalyxMath::Vector3(fx.uvTransform.translate.x, fx.uvTransform.translate.y, 0.0f)));
+			material_.uvTransform = uvTransformMatrix;
 		}
 
-		// 追従フラグが立っている場合はエミッタ位置+オフセットに常に合わせる（速度適用は行わない）
-		if (fx.followEmitter) {
-			fx.position = position_ + fx.followOffset;
+		materialBuffer_.TransferData(material_);
+		std::erase_if(units_, [](const FxUnit& fx) { return !fx.alive; });
+
+		bool shouldNotify =
+			(isOneShot_ && hasEmitted_ && units_.empty()) ||
+			(emitDuration_ >= 0.0f && elapsedTime_ > emitDelay_ + emitDuration_ && units_.empty());
+
+		if(shouldNotify && !isFinishedNotified_) {
+			isFinishedNotified_ = true;
+			Stop();
+			if(onFinished_) onFinished_();
+		}
+
+		// ---- Billboardモード転送 ----
+		billboardParams_.mode = static_cast<uint32_t>(billboardMode_);
+		billboardCB_.TransferData(billboardParams_);
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////
+	// Emit / Reset
+	/////////////////////////////////////////////////////////////////////////////////////////
+	void FxEmitter::TransferParticleDataToGPU() {
+		if(units_.empty()) return;
+
+		std::vector<ParticleConstantData> gpuUnits;
+		gpuUnits.reserve(units_.size());
+
+		for(const auto& fx : units_) {
+			if(!fx.alive) continue;
+
+			ParticleConstantData data{};
+			data.position = fx.position;
+			data.scale	  = fx.scale;
+			data.color	  = fx.color;
+			data.rotation = fx.rotationEuler.z;
+
+			gpuUnits.push_back(data);
+		}
+
+		if(!gpuUnits.empty()) {
+			instanceBuffer_.TransferVectorData(gpuUnits);
+		}
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////
+	// Emit / Reset
+	/////////////////////////////////////////////////////////////////////////////////////////
+	void FxEmitter::Emit() { Emit(GetWorldPosition()); }
+
+	void FxEmitter::Emit(const CalyxMath::Vector3& pos) {
+		if(units_.size() >= kMaxUnits_) return;
+		FxUnit fx;
+		ResetFxUnit(fx);
+		fx.position = pos;
+		if(isOneShot_ && followOneShot_) {
+			fx.followEmitter = true;
+			fx.followOffset	 = fx.position - position_; // エミッタ基準のオフセットを保存
+		}
+		units_.push_back(fx);
+	}
+
+	void FxEmitter::RestartOneShot() {
+		units_.clear();
+		emitTimer_			= 0.0f;
+		elapsedTime_		= 0.0f;
+		isFirstFrame_		= true;
+		hasEmitted_			= false;
+		isFinishedNotified_ = false;
+		isPlaying_			= true;
+	}
+
+	void FxEmitter::ResetFxUnit(FxUnit& fx) {
+		fx.position		= position_;
+		fx.scale		= scale_.Get();
+		fx.velocity		= velocity_.Get();
+		fx.lifetime		= lifetime_.Get();
+		fx.age			= 0.0f;
+		fx.initialScale = fx.scale;
+		fx.color		= CalyxMath::Vector4(1, 1, 1, 1);
+		fx.alive		= true;
+		fx.uvTransform.Initialize();
+		fx.spinSpeed = spin_.Get();
+		if(randomSpinEmit_) {
+			fx.rotationEuler.z = Random::Generate<float>(-CalyxMath::kPi, CalyxMath::kPi);
 		} else {
-			fx.position += fx.velocity * deltaTime;
+			fx.rotationEuler.z = 0.0f;
 		}
-
-		// スピン
-		fx.rotationEuler.z += fx.spinSpeed * deltaTime;
-
-		fx.age += deltaTime;
-		if(fx.age >= fx.lifetime) fx.alive = false;
-
-		CalyxMath::Matrix4x4 uvTransformMatrix =
-			CalyxMath::MakeScaleMatrix(CalyxMath::Vector3(fx.uvTransform.scale.x, fx.uvTransform.scale.y, 1.0f));
-		uvTransformMatrix	  = CalyxMath::Matrix4x4::Multiply(uvTransformMatrix, CalyxMath::MakeRotateZMatrix(fx.uvTransform.rotate));
-		uvTransformMatrix	  = CalyxMath::Matrix4x4::Multiply(uvTransformMatrix,
-													CalyxMath::MakeTranslateMatrix(CalyxMath::Vector3(fx.uvTransform.translate.x, fx.uvTransform.translate.y, 0.0f)));
-		material_.uvTransform = uvTransformMatrix;
 	}
 
-	materialBuffer_.TransferData(material_);
-	std::erase_if(units_, [](const FxUnit& fx) { return !fx.alive; });
-
-	bool shouldNotify =
-		(isOneShot_ && hasEmitted_ && units_.empty()) ||
-		(emitDuration_ >= 0.0f && elapsedTime_ > emitDelay_ + emitDuration_ && units_.empty());
-
-	if(shouldNotify && !isFinishedNotified_) {
-		isFinishedNotified_ = true;
-		Stop();
-		if(onFinished_) onFinished_();
-	}
-
-	// ---- Billboardモード転送 ----
-	billboardParams_.mode = static_cast<uint32_t>(billboardMode_);
-	billboardCB_.TransferData(billboardParams_);
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// Emit / Reset
-/////////////////////////////////////////////////////////////////////////////////////////
-void FxEmitter::TransferParticleDataToGPU() {
-	if(units_.empty()) return;
-
-	std::vector<CxEffect::ParticleConstantData> gpuUnits;
-	gpuUnits.reserve(units_.size());
-
-	for(const auto& fx : units_) {
-		if(!fx.alive) continue;
-
-		CxEffect::ParticleConstantData data{};
-		data.position = fx.position;
-		data.scale	  = fx.scale;
-		data.color	  = fx.color;
-		data.rotation = fx.rotationEuler.z;
-
-		gpuUnits.push_back(data);
-	}
-
-	if(!gpuUnits.empty()) {
-		instanceBuffer_.TransferVectorData(gpuUnits);
-	}
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// Emit / Reset
-/////////////////////////////////////////////////////////////////////////////////////////
-void FxEmitter::Emit() { Emit(GetWorldPosition()); }
-
-void FxEmitter::Emit(const CalyxMath::Vector3& pos) {
-	if(units_.size() >= kMaxUnits_) return;
-	FxUnit fx;
-	ResetFxUnit(fx);
-	fx.position = pos;
-	if (isOneShot_ && followOneShot_) {
-		fx.followEmitter = true;
-		fx.followOffset  = fx.position - position_; // エミッタ基準のオフセットを保存
-	}
-	units_.push_back(fx);
-}
-
-void FxEmitter::RestartOneShot() {
-	units_.clear();
-	emitTimer_			= 0.0f;
-	elapsedTime_		= 0.0f;
-	isFirstFrame_		= true;
-	hasEmitted_			= false;
-	isFinishedNotified_ = false;
-	isPlaying_			= true;
-}
-
-void FxEmitter::ResetFxUnit(FxUnit& fx) {
-	fx.position		= position_;
-	fx.scale		= scale_.Get();
-	fx.velocity		= velocity_.Get();
-	fx.lifetime		= lifetime_.Get();
-	fx.age			= 0.0f;
-	fx.initialScale = fx.scale;
-	fx.color		= CalyxMath::Vector4(1, 1, 1, 1);
-	fx.alive		= true;
-	fx.uvTransform.Initialize();
-	fx.spinSpeed = spin_.Get();
-	if(randomSpinEmit_) {
-		fx.rotationEuler.z = Random::Generate<float>(-CalyxMath::kPi,CalyxMath::kPi);
-	} else {
-		fx.rotationEuler.z = 0.0f;
-	}
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// ShowGui
-/////////////////////////////////////////////////////////////////////////////////////////
-void FxEmitter::ShowGui() {
+	/////////////////////////////////////////////////////////////////////////////////////////
+	// ShowGui
+	/////////////////////////////////////////////////////////////////////////////////////////
+	void FxEmitter::ShowGui() {
 		ImGui::PushID(this);
 
-	// ---- 上部ミニバー：よく触る項目をサッと ----
+		// ---- 上部ミニバー：よく触る項目をサッと ----
 		ImGui::AlignTextToFramePadding();
 		ImGui::TextUnformatted("Quick Controls");
 		ImGui::SameLine();
@@ -276,317 +277,315 @@ void FxEmitter::ShowGui() {
 		ImGui::SameLine();
 		GuiCmd::CheckBox("##oneshot_top", isOneShot_);
 
-	// ================= Material =================
-	if(FxGui::GridScope sec{"Material"}; sec.open) {
-		// Color
-		FxGui::RowLabel("Color");
-		ImGui::ColorEdit4("##color", &material_.color.x);
+		// ================= Material =================
+		if(FxGui::GridScope sec{"Material"}; sec.open) {
+			// Color
+			FxGui::RowLabel("Color");
+			ImGui::ColorEdit4("##color", &material_.color.x);
 
-		// Texture (path表示 + 選択ボタン)
-		FxGui::RowLabel("Texture");
-		ImGui::BeginGroup();
-		// 現在のパスを表示
-		// ---- ドラッグ&ドロップでテクスチャ適用 ----
-		ImGui::Text("Texture (Drag & Drop from Assets)");
-		// ドロップ領域（InvisibleButton で有効アイテム化）
-		ImVec2 dropSize(ImGui::GetContentRegionAvail().x, 56.0f);
-		ImGui::InvisibleButton("##TextureDrop", dropSize);
+			// Texture (path表示 + 選択ボタン)
+			FxGui::RowLabel("Texture");
+			ImGui::BeginGroup();
+			// 現在のパスを表示
+			// ---- ドラッグ&ドロップでテクスチャ適用 ----
+			ImGui::Text("Texture (Drag & Drop from Assets)");
+			// ドロップ領域（InvisibleButton で有効アイテム化）
+			ImVec2 dropSize(ImGui::GetContentRegionAvail().x, 56.0f);
+			ImGui::InvisibleButton("##TextureDrop", dropSize);
 
-		// 見た目（枠とテキスト）
-		const bool hovered = ImGui::IsItemHovered();
-		const ImVec2 rmin = ImGui::GetItemRectMin();
-		const ImVec2 rmax = ImGui::GetItemRectMax();
-		ImGui::GetWindowDrawList()->AddRect(
-			rmin, rmax, hovered ? IM_COL32(120, 180, 255, 220) : IM_COL32(90, 90, 90, 160),
-			8.0f, 0, 2.0f);
-		ImGui::GetWindowDrawList()->AddText(
-			ImVec2(rmin.x + 8.0f, rmin.y + 8.0f),
-			IM_COL32(230, 230, 230, 255),
-			"Drop a Texture here");
+			// 見た目（枠とテキスト）
+			const bool	 hovered = ImGui::IsItemHovered();
+			const ImVec2 rmin	 = ImGui::GetItemRectMin();
+			const ImVec2 rmax	 = ImGui::GetItemRectMax();
+			ImGui::GetWindowDrawList()->AddRect(
+				rmin, rmax, hovered ? IM_COL32(120, 180, 255, 220) : IM_COL32(90, 90, 90, 160),
+				8.0f, 0, 2.0f);
+			ImGui::GetWindowDrawList()->AddText(
+				ImVec2(rmin.x + 8.0f, rmin.y + 8.0f),
+				IM_COL32(230, 230, 230, 255),
+				"Drop a Texture here");
 
-		// 受け取り
-		if (ImGui::BeginDragDropTarget()) {
-			if (const ImGuiPayload* p = ImGui::AcceptDragDropPayload("CALYX_ASSET")) {
-				const AssetDragPayload payload =
-					*reinterpret_cast<const AssetDragPayload*>(p->Data);
-				if (payload.type == AssetType::Texture) {
-					if (LoadTextureByGuid(payload.guid)) {
-						textureGuid_ = payload.guid;
-					} else {
-						ImGui::OpenPopup("TextureDropError");
+			// 受け取り
+			if(ImGui::BeginDragDropTarget()) {
+				if(const ImGuiPayload* p = ImGui::AcceptDragDropPayload("CALYX_ASSET")) {
+					const AssetDragPayload payload =
+						*reinterpret_cast<const AssetDragPayload*>(p->Data);
+					if(payload.type == AssetType::Texture) {
+						if(LoadTextureByGuid(payload.guid)) {
+							textureGuid_ = payload.guid;
+						} else {
+							ImGui::OpenPopup("TextureDropError");
+						}
 					}
 				}
+				ImGui::EndDragDropTarget();
 			}
-			ImGui::EndDragDropTarget();
-		}
 
-		// 失敗メッセージ（2D 以外の SRV 等）
-		if (ImGui::BeginPopup("TextureDropError")) {
-			ImGui::TextUnformatted("このテクスチャは適用できません（2D以外/未対応形式）。");
-			ImGui::EndPopup();
-		}
+			// 失敗メッセージ（2D 以外の SRV 等）
+			if(ImGui::BeginPopup("TextureDropError")) {
+				ImGui::TextUnformatted("このテクスチャは適用できません（2D以外/未対応形式）。");
+				ImGui::EndPopup();
+			}
 
-		// 現在のテクスチャ表示（GUID→ファイル名）
-		auto labelFromGuid = [](const Guid& g)->std::string {
-			if (!g.isValid()) return "(none)";
-			auto* db = AssetDatabase::GetInstance();
-			for (auto* r : db->GetView()) {
-				if (r && r->type == AssetType::Texture && r->guid == g) {
-					return r->sourcePath.filename().string();
+			// 現在のテクスチャ表示（GUID→ファイル名）
+			auto labelFromGuid = [](const Guid& g) -> std::string {
+				if(!g.isValid()) return "(none)";
+				auto* db = AssetDatabase::GetInstance();
+				for(auto* r : db->GetView()) {
+					if(r && r->type == AssetType::Texture && r->guid == g) {
+						return r->sourcePath.filename().string();
+					}
 				}
-			}
-			return "(missing)";
-		};
-		ImGui::EndGroup();
-	}
-
-	// // ================= Billboard =================
-	if(FxGui::GridScope sec{"Billboard"}; sec.open) {
-		FxGui::RowLabel("Mode");
-		static const char* modes[] = {"None", "Full", "AxisY"};
-		int current = static_cast<int>(billboardMode_);
-		if(ImGui::Combo("##billmode", &current, modes, IM_ARRAYSIZE(modes))) {
-			billboardMode_ = static_cast<BillboardMode>(current);
-			billboardParams_.mode = current;
-			billboardCB_.TransferData(billboardParams_);
-		}
-	}
-
-	// ================= Emission =================
-	if(FxGui::GridScope sec{"Emission"}; sec.open) {
-		// ブレンドモードを選べるようにする
-		FxGui::RowLabel("blend mode");
-		static const char* blendModeNames[] = {
-			"None",        // NONE (0)
-			"Alpha",       // ALPHA (1)
-			"Add",         // ADD (2)
-			"Subtract",    // SUB (3)
-			"Multiply",    // MUL (4)
-			"Normal",      // NORMAL (5)
-			"Screen"       // SCREEN (6)
-		};
-		int currentBlend = static_cast<int>(blendMode_);
-		if (ImGui::Combo("##blendmode", &currentBlend, blendModeNames, IM_ARRAYSIZE(blendModeNames))) {
-			blendMode_ = static_cast<BlendMode>(currentBlend);
-		}
-		FxGui::RowLabel("Alive Count");
-		ImGui::Text("%zu", units_.size());
-
-		FxGui::RowLabel("World Position");
-		GuiCmd::DragFloat3("##pos", position_);
-
-		FxGui::RowLabel("Emit Rate (sec)");
-		GuiCmd::DragFloat("##rate", emitRate_, 0.01f, 0.0f, 10.0f);
-
-		FxGui::RowLabel("Complement Trail");
-		GuiCmd::CheckBox("##comp", isComplement_);
-
-		FxGui::RowLabel("random Spin on Emit");
-		GuiCmd::CheckBox("##randspin", randomSpinEmit_);
-	}
-
-	// ================= Params =================
-	if(FxGui::GridScope sec{"Params"}; sec.open) {
-		FxGui::DrawParam("Scale", scale_);
-		FxGui::DrawParam("Velocity", velocity_);
-		FxGui::DrawParam("Lifetime", lifetime_);
-		FxGui::DrawParam("spin", spin_);
-	}
-
-	// ================= Playback =================
-	if(FxGui::GridScope sec{"Playback"}; sec.open) {
-		FxGui::RowLabel("Controls");
-		ImGui::BeginGroup();
-		if(ImGui::Button("Play")) {
-			Play();
-		}
-		ImGui::SameLine();
-		if(ImGui::Button("Stop")) {
-			Stop();
-		}
-		ImGui::SameLine();
-		if(ImGui::Button("Reset")) {
-			Reset();
-		}
-		ImGui::EndGroup();
-
-		FxGui::RowLabel("Draw Enable");
-	}
-
-	// ================= One-Shot =================
-	if(FxGui::GridScope sec{"One-Shot"}; sec.open) {
-		FxGui::RowLabel("Enable");
-		if(GuiCmd::CheckBox("##oneshot", isOneShot_)) {
-			if(!isOneShot_) {
-				hasEmitted_ = false;
-			} // OFFに戻した時の自然な継続
-		}
-
-		if(isOneShot_) {
-			FxGui::RowLabel("Follow Emitter");
-			GuiCmd::CheckBox("##followoneshot", followOneShot_);
-
-			bool tp = GetTimedPreview();
-			if (GuiCmd::CheckBox("##timedPrev", tp)) {
-				SetTimedPreview(tp);
-				// ON にした瞬間に一度流したい場合は以下を有効に
-				// if (tp && isOneShot_) RestartOneShot();
-			}
-
-			FxGui::RowLabel("Interval (sec)");
-			float iv = GetPreviewInterval();
-			if (GuiCmd::DragFloat("##prevInt", iv, 0.01f, 0.05f, 10.0f)) {
-				SetPreviewInterval(iv);
-			}
-
-			ImGui::BeginDisabled(!isOneShot_);
-			FxGui::RowLabel("Emit Count");
-			ImGui::DragInt("##count", &emitCount_, 1, 1, kMaxUnits_);
-
-			FxGui::RowLabel("Auto Destroy");
-			GuiCmd::CheckBox("##autoDestroy", autoDestroy_);
-
-			FxGui::RowLabel("Delay (sec)");
-			GuiCmd::DragFloat("##delay", emitDelay_, 0.01f, 0.0f, 10.0f);
-			ImGui::EndDisabled();
-
-			ImGui::BeginDisabled(isOneShot_);
-			FxGui::RowLabel("Emit Duration (sec)");
-			GuiCmd::DragFloat("##duration", emitDuration_, 0.01f, -1.0f, 60.0f);
-			ImGui::EndDisabled();
-		}
-
-
-	}
-
-	// ================= Modules =================
-	if (moduleContainer_) {
-		if (FxGui::GridScope sec{"Modules"}; sec.open) {
-			// ラベル列
-			FxGui::RowLabel("Modules");
-
-			ImGui::BeginGroup();
-			// 幅を常にその列いっぱいに
-			FxGui::FullWidthScope _fullWidth{};
-			// 少しだけ余裕を持たせる見た目
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 4));
-			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing,  ImVec2(6, 6));
-
-			// --- 有効モジュール（パラメータをここで全部縦に描く） ---
-			moduleContainer_->ShowModulesGui();
-
-			// --- 追加パレット（同じ列のまま下に表示） ---
-			moduleContainer_->ShowAvailableModulesGui();
-
-			ImGui::PopStyleVar(2);
+				return "(missing)";
+			};
 			ImGui::EndGroup();
 		}
+
+		// // ================= Billboard =================
+		if(FxGui::GridScope sec{"Billboard"}; sec.open) {
+			FxGui::RowLabel("Mode");
+			static const char* modes[] = {"None", "Full", "AxisY"};
+			int				   current = static_cast<int>(billboardMode_);
+			if(ImGui::Combo("##billmode", &current, modes, IM_ARRAYSIZE(modes))) {
+				billboardMode_		  = static_cast<BillboardMode>(current);
+				billboardParams_.mode = current;
+				billboardCB_.TransferData(billboardParams_);
+			}
+		}
+
+		// ================= Emission =================
+		if(FxGui::GridScope sec{"Emission"}; sec.open) {
+			// ブレンドモードを選べるようにする
+			FxGui::RowLabel("blend mode");
+			static const char* blendModeNames[] = {
+				"None",		// NONE (0)
+				"Alpha",	// ALPHA (1)
+				"Add",		// ADD (2)
+				"Subtract", // SUB (3)
+				"Multiply", // MUL (4)
+				"Normal",	// NORMAL (5)
+				"Screen"	// SCREEN (6)
+			};
+			int currentBlend = static_cast<int>(blendMode_);
+			if(ImGui::Combo("##blendmode", &currentBlend, blendModeNames, IM_ARRAYSIZE(blendModeNames))) {
+				blendMode_ = static_cast<BlendMode>(currentBlend);
+			}
+			FxGui::RowLabel("Alive Count");
+			ImGui::Text("%zu", units_.size());
+
+			FxGui::RowLabel("World Position");
+			GuiCmd::DragFloat3("##pos", position_);
+
+			FxGui::RowLabel("Emit Rate (sec)");
+			GuiCmd::DragFloat("##rate", emitRate_, 0.01f, 0.0f, 10.0f);
+
+			FxGui::RowLabel("Complement Trail");
+			GuiCmd::CheckBox("##comp", isComplement_);
+
+			FxGui::RowLabel("random Spin on Emit");
+			GuiCmd::CheckBox("##randspin", randomSpinEmit_);
+		}
+
+		// ================= Params =================
+		if(FxGui::GridScope sec{"Params"}; sec.open) {
+			FxGui::DrawParam("Scale", scale_);
+			FxGui::DrawParam("Velocity", velocity_);
+			FxGui::DrawParam("Lifetime", lifetime_);
+			FxGui::DrawParam("spin", spin_);
+		}
+
+		// ================= Playback =================
+		if(FxGui::GridScope sec{"Playback"}; sec.open) {
+			FxGui::RowLabel("Controls");
+			ImGui::BeginGroup();
+			if(ImGui::Button("Play")) {
+				Play();
+			}
+			ImGui::SameLine();
+			if(ImGui::Button("Stop")) {
+				Stop();
+			}
+			ImGui::SameLine();
+			if(ImGui::Button("Reset")) {
+				Reset();
+			}
+			ImGui::EndGroup();
+
+			FxGui::RowLabel("Draw Enable");
+		}
+
+		// ================= One-Shot =================
+		if(FxGui::GridScope sec{"One-Shot"}; sec.open) {
+			FxGui::RowLabel("Enable");
+			if(GuiCmd::CheckBox("##oneshot", isOneShot_)) {
+				if(!isOneShot_) {
+					hasEmitted_ = false;
+				} // OFFに戻した時の自然な継続
+			}
+
+			if(isOneShot_) {
+				FxGui::RowLabel("Follow Emitter");
+				GuiCmd::CheckBox("##followoneshot", followOneShot_);
+
+				bool tp = GetTimedPreview();
+				if(GuiCmd::CheckBox("##timedPrev", tp)) {
+					SetTimedPreview(tp);
+					// ON にした瞬間に一度流したい場合は以下を有効に
+					// if (tp && isOneShot_) RestartOneShot();
+				}
+
+				FxGui::RowLabel("Interval (sec)");
+				float iv = GetPreviewInterval();
+				if(GuiCmd::DragFloat("##prevInt", iv, 0.01f, 0.05f, 10.0f)) {
+					SetPreviewInterval(iv);
+				}
+
+				ImGui::BeginDisabled(!isOneShot_);
+				FxGui::RowLabel("Emit Count");
+				ImGui::DragInt("##count", &emitCount_, 1, 1, kMaxUnits_);
+
+				FxGui::RowLabel("Auto Destroy");
+				GuiCmd::CheckBox("##autoDestroy", autoDestroy_);
+
+				FxGui::RowLabel("Delay (sec)");
+				GuiCmd::DragFloat("##delay", emitDelay_, 0.01f, 0.0f, 10.0f);
+				ImGui::EndDisabled();
+
+				ImGui::BeginDisabled(isOneShot_);
+				FxGui::RowLabel("Emit Duration (sec)");
+				GuiCmd::DragFloat("##duration", emitDuration_, 0.01f, -1.0f, 60.0f);
+				ImGui::EndDisabled();
+			}
+		}
+
+		// ================= Modules =================
+		if(moduleContainer_) {
+			if(FxGui::GridScope sec{"Modules"}; sec.open) {
+				// ラベル列
+				FxGui::RowLabel("Modules");
+
+				ImGui::BeginGroup();
+				// 幅を常にその列いっぱいに
+				FxGui::FullWidthScope _fullWidth{};
+				// 少しだけ余裕を持たせる見た目
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 4));
+				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(6, 6));
+
+				// --- 有効モジュール（パラメータをここで全部縦に描く） ---
+				moduleContainer_->ShowModulesGui();
+
+				// --- 追加パレット（同じ列のまま下に表示） ---
+				moduleContainer_->ShowAvailableModulesGui();
+
+				ImGui::PopStyleVar(2);
+				ImGui::EndGroup();
+			}
+		}
+
+		ImGui::Spacing();
+		ImGui::PopID();
 	}
 
+	/////////////////////////////////////////////////////////////////////////////////////////
+	// SetCommand
+	/////////////////////////////////////////////////////////////////////////////////////////
+	void FxEmitter::SetCommand(ID3D12GraphicsCommandList* cmdList) {
+		materialBuffer_.SetCommand(cmdList, 1);							// マテリアル
+		cmdList->SetGraphicsRootDescriptorTable(3, GetTextureHandle()); // テクスチャ
+		billboardCB_.SetCommand(cmdList, 4);							// ビルボードCB
+	}
 
-	ImGui::Spacing();
-	ImGui::PopID();
-}
+	/////////////////////////////////////////////////////////////////////////////////////////
+	// Config apply/extract
+	/////////////////////////////////////////////////////////////////////////////////////////
+	void FxEmitter::ApplyConfigFrom(const EmitterConfig& config) {
+		position_		= config.position;
+		material_.color = config.color;
+		velocity_.FromConfig(config.velocity);
+		lifetime_.FromConfig(config.lifetime);
+		scale_.FromConfig(config.scale);
+		emitRate_			  = config.emitRate;
+		modelPath			  = config.modelPath;
+		material_.texturePath = config.texturePath;
+		textureGuid_		  = config.textureGuid;
+		textureHandle_		  = TextureManager::GetInstance()->LoadTexture(textureGuid_);
+		isDrawEnable_		  = config.isDrawEnable;
+		isComplement_		  = config.isComplement;
+		moduleContainer_	  = std::make_unique<CalyxEffect::FxModuleContainer>(config.modules);
+		isOneShot_			  = config.isOneShot;
+		autoDestroy_		  = config.autoDestroy;
+		emitCount_			  = config.emitCount;
+		emitDelay_			  = config.emitDelay;
+		emitDuration_		  = config.emitDuration;
+		billboardMode_		  = config.billboardMode;
+		randomSpinEmit_		  = config.randomSpinEmit;
+		blendMode_			  = config.blendMode;
 
-/////////////////////////////////////////////////////////////////////////////////////////
-// SetCommand
-/////////////////////////////////////////////////////////////////////////////////////////
-void FxEmitter::SetCommand(ID3D12GraphicsCommandList* cmdList) {
-	materialBuffer_.SetCommand(cmdList, 1);							// マテリアル
-	cmdList->SetGraphicsRootDescriptorTable(3, GetTextureHandle()); // テクスチャ
-	billboardCB_.SetCommand(cmdList, 4);							// ビルボードCB
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////
-// Config apply/extract
-/////////////////////////////////////////////////////////////////////////////////////////
-void FxEmitter::ApplyConfigFrom(const EmitterConfig& config) {
-	position_		= config.position;
-	material_.color = config.color;
-	velocity_.FromConfig(config.velocity);
-	lifetime_.FromConfig(config.lifetime);
-	scale_.FromConfig(config.scale);
-	emitRate_			  = config.emitRate;
-	modelPath			  = config.modelPath;
-	material_.texturePath = config.texturePath;
-	textureGuid_		  = config.textureGuid;
-	textureHandle_		  = TextureManager::GetInstance()->LoadTexture(textureGuid_);
-	isDrawEnable_		  = config.isDrawEnable;
-	isComplement_		  = config.isComplement;
-	moduleContainer_	  = std::make_unique<FxModuleContainer>(config.modules);
-	isOneShot_			  = config.isOneShot;
-	autoDestroy_		  = config.autoDestroy;
-	emitCount_			  = config.emitCount;
-	emitDelay_			  = config.emitDelay;
-	emitDuration_		  = config.emitDuration;
-	billboardMode_		  = config.billboardMode;
-	randomSpinEmit_ = config.randomSpinEmit;
-	blendMode_ = config.blendMode;
-
-	isFirstFrame_ = true;
-	hasEmitted_	  = false;
-	elapsedTime_  = 0.0f;
-	isPlaying_	  = true;
-}
-
-void FxEmitter::ExtractConfigTo(EmitterConfig& config) const {
-	config.position		= position_;
-	config.color		= material_.color;
-	config.velocity		= Vector3ParamConfig{velocity_.ToConfig()};
-	config.lifetime		= FxFloatParamConfig{lifetime_.ToConfig()};
-	config.scale		= Vector3ParamConfig{scale_.ToConfig()};
-	config.emitRate		= emitRate_;
-	config.modelPath	= modelPath;
-	config.texturePath	= material_.texturePath;
-	config.textureGuid	= textureGuid_;
-	config.isDrawEnable = isDrawEnable_;
-	config.isComplement = isComplement_;
-	config.randomSpinEmit = randomSpinEmit_;
-	if(moduleContainer_)
-		config.modules = moduleContainer_->ExtractConfigs();
-	else
-		config.modules.clear();
-	config.isOneShot	 = isOneShot_;
-	config.autoDestroy	 = autoDestroy_;
-	config.emitCount	 = emitCount_;
-	config.emitDelay	 = emitDelay_;
-	config.emitDuration	 = emitDuration_;
-	config.billboardMode = billboardMode_;
-	config.blendMode = blendMode_;
-}
-
-void FxEmitter::Play() {
-	isPlaying_	  = true;
-	isFirstFrame_ = true;
-
-	if(isOneShot_) {
-		// OneShot 時は状態も初期化しておく
+		isFirstFrame_ = true;
 		hasEmitted_	  = false;
 		elapsedTime_  = 0.0f;
+		isPlaying_	  = true;
+	}
+
+	void FxEmitter::ExtractConfigTo(EmitterConfig& config) const {
+		config.position		  = position_;
+		config.color		  = material_.color;
+		config.velocity		  = Vector3ParamConfig{velocity_.ToConfig()};
+		config.lifetime		  = FxFloatParamConfig{lifetime_.ToConfig()};
+		config.scale		  = Vector3ParamConfig{scale_.ToConfig()};
+		config.emitRate		  = emitRate_;
+		config.modelPath	  = modelPath;
+		config.texturePath	  = material_.texturePath;
+		config.textureGuid	  = textureGuid_;
+		config.isDrawEnable	  = isDrawEnable_;
+		config.isComplement	  = isComplement_;
+		config.randomSpinEmit = randomSpinEmit_;
+		if(moduleContainer_)
+			config.modules = moduleContainer_->ExtractConfigs();
+		else
+			config.modules.clear();
+		config.isOneShot	 = isOneShot_;
+		config.autoDestroy	 = autoDestroy_;
+		config.emitCount	 = emitCount_;
+		config.emitDelay	 = emitDelay_;
+		config.emitDuration	 = emitDuration_;
+		config.billboardMode = billboardMode_;
+		config.blendMode	 = blendMode_;
+	}
+
+	void FxEmitter::Play() {
+		isPlaying_	  = true;
+		isFirstFrame_ = true;
+
+		if(isOneShot_) {
+			// OneShot 時は状態も初期化しておく
+			hasEmitted_	  = false;
+			elapsedTime_  = 0.0f;
+			previewTimer_ = 0.0f;
+		}
+	}
+
+	void FxEmitter::Stop() {
+		isPlaying_ = false;
+	}
+
+	void FxEmitter::Reset() {
+		units_.clear();
+		emitTimer_	  = 0.0f;
+		elapsedTime_  = 0.0f;
+		isFirstFrame_ = true;
+		hasEmitted_	  = false;
 		previewTimer_ = 0.0f;
 	}
-}
 
-void FxEmitter::Stop() {
-	isPlaying_ = false;
-}
+	bool FxEmitter::LoadTextureByGuid(const Guid& g) {
+		if(!g.isValid()) return false;
 
-void FxEmitter::Reset() {
-	units_.clear();
-	emitTimer_	  = 0.0f;
-	elapsedTime_  = 0.0f;
-	isFirstFrame_ = true;
-	hasEmitted_	  = false;
-	previewTimer_ = 0.0f;
-}
+		auto h = TextureManager::GetInstance()->LoadTexture(g);
+		if(!h.ptr) return false;
 
-bool FxEmitter::LoadTextureByGuid(const Guid& g) {
-	if (!g.isValid()) return false;
-
-	auto h = TextureManager::GetInstance()->LoadTexture(g);
-	if (!h.ptr) return false;
-
-	textureHandle_ = h;
-	textureGuid_ = g;
-	return true;
-}
+		textureHandle_ = h;
+		textureGuid_   = g;
+		return true;
+	}
+} // namespace CalyxEffect

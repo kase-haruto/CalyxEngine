@@ -9,29 +9,31 @@
 
 // c++
 
-SizeOverLiftimeModule::SizeOverLiftimeModule(const std::string name)
-	:BaseFxModule(name){}
+namespace CalyxEffect {
+	SizeOverLiftimeModule::SizeOverLiftimeModule(const std::string name)
+		: CalyxEffect::BaseFxModule(name) {}
 
-/////////////////////////////////////////////////////////////////////////////////////////
-// 適用
-/////////////////////////////////////////////////////////////////////////////////////////
-void SizeOverLiftimeModule::OnUpdate(FxUnit& unit,[[maybe_unused]] float dt){
-	if (unit.lifetime <= 0.0f) return; // ゼロ割り防止
+	/////////////////////////////////////////////////////////////////////////////////////////
+	// 適用
+	/////////////////////////////////////////////////////////////////////////////////////////
+	void SizeOverLiftimeModule::OnUpdate(FxUnit& unit, [[maybe_unused]] float dt) {
+		if(unit.lifetime <= 0.0f) return; // ゼロ割り防止
 
-	float t = unit.age / unit.lifetime;
-	if (t > 1.0f) t = 1.0f;
+		float t = unit.age / unit.lifetime;
+		if(t > 1.0f) t = 1.0f;
 
-	float easeT = Cx::Ease::ApplyEase(easeType_, t);
-	float sizeFactor = isGrowing_ ? easeT : (1.0f - easeT);
+		float easeT		 = Cx::Ease::ApplyEase(easeType_, t);
+		float sizeFactor = isGrowing_ ? easeT : (1.0f - easeT);
 
-	unit.scale = unit.initialScale * sizeFactor;
-}
+		unit.scale = unit.initialScale * sizeFactor;
+	}
 
-/////////////////////////////////////////////////////////////////////////////////////////
-// gui表示
-/////////////////////////////////////////////////////////////////////////////////////////
-void SizeOverLiftimeModule::ShowGuiContent(){
-	GuiCmd::CheckBox("isGrowing", isGrowing_);
+	/////////////////////////////////////////////////////////////////////////////////////////
+	// gui表示
+	/////////////////////////////////////////////////////////////////////////////////////////
+	void SizeOverLiftimeModule::ShowGuiContent() {
+		GuiCmd::CheckBox("isGrowing", isGrowing_);
 
-	Cx::Ease::SelectEase(easeType_);
+		Cx::Ease::SelectEase(easeType_);
+	}
 }

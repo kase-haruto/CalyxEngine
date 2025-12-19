@@ -18,7 +18,7 @@ BossHomingBullet::BossHomingBullet(const std::string& modelName,
 	auto* boxCollider = dynamic_cast<SphereCollider*>(collider_.get());
 	boxCollider->SetRadius(2.5f);
 
-	trailFx_ = SceneAPI::Instantiate<FxObject>("BossHomingBulletTrail");
+	trailFx_ = SceneAPI::Instantiate<CalyxEffect::FxObject>("BossHomingBulletTrail");
 	auto fx	 = trailFx_.lock();
 	fx->LoadFromPath("Effect/BossBulletTrail");
 }

@@ -390,15 +390,12 @@ void LevelEditor::CreateObject(const std::shared_ptr<SceneObject>& obj) {
 
 	// パーティクルなら FxSystem 側にも登録
 	if(obj->GetObjectType() == ObjectType::Effect) {
-		if(auto fxObj = std::dynamic_pointer_cast<ParticleSystemObject>(obj)) {
+		if(auto fxObj = std::dynamic_pointer_cast<CalyxEffect::ParticleSystemObject>(obj)) {
 			if(auto* fxSys = ctx->GetFxSystem()) {
 				fxSys->AddEmitter(fxObj->GetEmitter(), fxObj->GetGuid());
 			}
 		}
 	}
-
-	// 子オブジェクトは「SceneObject の階層」としてぶら下がっている想定なので、
-	// Library に再帰登録は行わない（ルートのみを Library が保有）。
 }
 
 void LevelEditor::DeleteObject(const std::shared_ptr<SceneObject>& sp) {
@@ -416,7 +413,7 @@ void LevelEditor::DeleteObject(const std::shared_ptr<SceneObject>& sp) {
 
 	// ── パーティクルシステムなら FxSystem からも削除 ─────────────
 	if(sp->GetObjectType() == ObjectType::Effect) {
-		if(auto fxObj = std::dynamic_pointer_cast<ParticleSystemObject>(sp)) {
+		if(auto fxObj = std::dynamic_pointer_cast<CalyxEffect::ParticleSystemObject>(sp)) {
 			if(auto* fxSys = ctx->GetFxSystem()) {
 				fxSys->RemoveEmitter(fxObj->GetEmitter().get());
 			}

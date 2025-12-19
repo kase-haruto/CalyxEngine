@@ -14,7 +14,7 @@ HomingBullet::HomingBullet(const std::string& modelName, const std::string& name
 	auto* boxCollider = dynamic_cast<SphereCollider*>(collider_.get());
 	boxCollider->SetRadius(1.5f);
 
-	trailFx_ = SceneAPI::Instantiate<FxObject>("TrailFx");
+	trailFx_ = SceneAPI::Instantiate<CalyxEffect::FxObject>("TrailFx");
 	auto fx = trailFx_.lock();
 	fx->LoadFromPath("Effect/HomingBulletTrail");
 }

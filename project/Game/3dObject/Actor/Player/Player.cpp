@@ -197,7 +197,7 @@ void Player::Initialize() {
 	}
 
 	// fx
-	shootFx_ = SceneAPI::Instantiate<FxObject>("ShootFx");
+	shootFx_ = SceneAPI::Instantiate<CalyxEffect::FxObject>("ShootFx");
 	shootFx_->LoadFromPath("Effect/ShootEffect");
 	auto self = shared_from_this();
 	shootFx_->SetParent(self);

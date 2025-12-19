@@ -14,7 +14,7 @@ void SceneContext::Initialize(bool createDefaultLights) {
 
 	objectLibrary_ = std::make_unique<SceneObjectLibrary>();
 	lightLibrary_  = std::make_unique<LightLibrary>();
-	fxSystem_      = std::make_unique<FxSystem>();
+	fxSystem_	   = std::make_unique<CalyxEffect::FxSystem>();
 
 	if (createDefaultLights) {
 		auto dir = Instantiate<DirectionalLight>("DirectionalLight");

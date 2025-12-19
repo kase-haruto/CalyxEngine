@@ -40,7 +40,7 @@ Boss::Boss(const std::string& modelName,const std::string objName)
 	stateMachine_->SetOwner(this);
 
 	// --- FxObject を生成して再生 ---
-	hitEffects_ = SceneAPI::Instantiate<FxObject>("HitFx");
+	hitEffects_ = SceneAPI::Instantiate<CalyxEffect::FxObject>("HitFx");
 
 	// コンフィグ読み込み（FxObject 内部で ApplyConfig が呼ばれる）
 	auto fx = hitEffects_.lock();

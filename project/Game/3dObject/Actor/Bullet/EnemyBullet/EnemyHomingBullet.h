@@ -7,7 +7,9 @@
 #include <string>
 #include <algorithm>
 
-class FxObject;
+namespace CalyxEffect {
+	class FxObject;
+}
 
 class EnemyHomingBullet
 	: public BaseBullet {
@@ -49,7 +51,7 @@ private:
 	float homingDurationSec_ = 1.0f;
 	float homingElapsedSec_ = 0.0f;
 
-	std::weak_ptr<FxObject> trailFx_; //< 発射エフェクト
+	std::weak_ptr<CalyxEffect::FxObject> trailFx_; //< 発射エフェクト
 
 	CalyxMath::Vector3 baseScale_{ 1.0f, 1.0f, 1.0f };
 };

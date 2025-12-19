@@ -2,7 +2,7 @@
 #pragma once
 #include <Engine/Graphics/Pipeline/PipelineDesc/Input/VertexLayout.h>
 
-namespace CxEffect {
+namespace CalyxEffect {
 	/// <summary>
 	/// particleCBデータ
 	/// </summary>

@@ -85,5 +85,5 @@ private:
 	// shooting
 	EnemyShootingAgent shooting_;
 	// effects
-	std::shared_ptr<FxObject> hitFx_;
+	std::shared_ptr<CalyxEffect::FxObject> hitFx_;
 };

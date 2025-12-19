@@ -32,7 +32,7 @@ EnemyBullet::EnemyBullet(const std::string& modelName, const std::string& name)
 	collider_->SetType(ColliderType::Type_EnemyAttack);
 	collider_->SetTargetType(ColliderType::Type_Player);
 
-	trailFx_ = SceneAPI::Instantiate<FxObject>("TrailFx");
+	trailFx_ = SceneAPI::Instantiate<CalyxEffect::FxObject>("TrailFx");
 	auto fx = trailFx_.lock();
 	fx->LoadFromPath("Effect/EnemyBulletTrailEffect");
 }

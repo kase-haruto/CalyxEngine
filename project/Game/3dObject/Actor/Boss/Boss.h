@@ -84,5 +84,5 @@ private:
 	std::unique_ptr<BossStateMachine>       stateMachine_       = nullptr; //< ステートマシン
 	std::unique_ptr<BossAnimController>     anim_               = nullptr; //< アニメーションコントローラ
 	std::unique_ptr<HpGauge>                hpGauge_            = nullptr; //< HPゲージ
-	std::weak_ptr<FxObject>    hitEffects_;      //< ヒットエフェクト群
+	std::weak_ptr<CalyxEffect::FxObject>	hitEffects_;				   //< ヒットエフェクト群
 };

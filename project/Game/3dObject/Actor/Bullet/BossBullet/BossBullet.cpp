@@ -15,7 +15,7 @@ BossBullet::BossBullet(const std::string& modelName, const std::string& name) :B
 
 
 	// fx
-	shootFx_ = SceneAPI::Instantiate<FxObject>("BossBulletTrail");
+	shootFx_ = SceneAPI::Instantiate<CalyxEffect::FxObject>("BossBulletTrail");
 	auto fx = shootFx_.lock();
 	fx->LoadFromPath("Effect/BossBulletTrail");
 

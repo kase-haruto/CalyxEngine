@@ -162,5 +162,5 @@ private:
 	float clampMarginYpx_	  = 24.0f; // 上下の余白(px)
 
 	// effect
-	std::shared_ptr<FxObject> shootFx_;
+	std::shared_ptr<CalyxEffect::FxObject> shootFx_;
 };

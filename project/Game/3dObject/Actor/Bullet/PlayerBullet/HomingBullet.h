@@ -28,5 +28,5 @@ protected:
 	float rotateSpeed_ = 100.0f;
 
 	// trail
-	std::weak_ptr<FxObject> trailFx_;
+	std::weak_ptr<CalyxEffect::FxObject> trailFx_;
 };

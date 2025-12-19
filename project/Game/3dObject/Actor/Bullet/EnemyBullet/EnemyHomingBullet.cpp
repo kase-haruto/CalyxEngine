@@ -55,7 +55,7 @@ EnemyHomingBullet::EnemyHomingBullet(const std::string& modelName, const std::st
 	: BaseBullet::BaseBullet(modelName, name) {
 	this->SetDrawEnable(true);
 
-	trailFx_ = SceneAPI::Instantiate<FxObject>("TrailFx");
+	trailFx_ = SceneAPI::Instantiate<CalyxEffect::FxObject>("TrailFx");
 	auto fx = trailFx_.lock();
 	fx->LoadFromPath("Effect/EnemyBulletTrail");
 }

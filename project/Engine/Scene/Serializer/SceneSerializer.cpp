@@ -150,7 +150,7 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 			context.GetLightLibrary()->SetDirectionalLight(dir);
 		} else if(auto pt = std::dynamic_pointer_cast<PointLight>(sp)) {
 			context.GetLightLibrary()->SetPointLight(pt);
-		} else if(auto fx = std::dynamic_pointer_cast<ParticleSystemObject>(sp)) {
+		} else if(auto fx = std::dynamic_pointer_cast<CalyxEffect::ParticleSystemObject>(sp)) {
 			context.GetFxSystem()->AddEmitter(fx->GetEmitter(),fx->GetGuid());
 		} else if(auto camMain = std::dynamic_pointer_cast<Camera3d>(sp)) {
 			context.GetCameraMgr()->SetMainCamera(camMain);

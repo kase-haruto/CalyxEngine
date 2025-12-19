@@ -12,51 +12,53 @@
 // C++
 #include <string>
 #include <memory>
+namespace CalyxEffect {
+	/* ========================================================================
+		パーティクルをシーンオブジェクトとして使用
+	   ===================================================================== */
+	class ParticleSystemObject
+		: public SceneObject,
+		  public IConfigurable {
+	public:
+		ParticleSystemObject();
+		ParticleSystemObject(const std::string& name);
+		~ParticleSystemObject() override;
 
-/* ========================================================================
-    パーティクルをシーンオブジェクトとして使用
-   ===================================================================== */
-class ParticleSystemObject
-    : public SceneObject
-    , public IConfigurable {
-public:
-    ParticleSystemObject();
-    ParticleSystemObject(const std::string& name);
-    ~ParticleSystemObject() override;
+		/* -------- SceneObject overrides -------- */
+		void AlwaysUpdate(float dt) override;
+		void ShowGui() override;
 
-    /* -------- SceneObject overrides -------- */
-    void AlwaysUpdate(float dt) override;
-    void ShowGui() override;
+		/* -------- control -------- */
+		void PlayRecursive() const;
+		void StopRecursive() const;
+		void ResetRecursive() const;
 
-    /* -------- control -------- */
-    void PlayRecursive() const;
-    void StopRecursive() const;
-    void ResetRecursive() const;
+		void Play() const;
+		void Stop() const;
+		void Reset() const;
 
-    void Play() const;
-    void Stop() const;
-    void Reset() const;
+		/* -------- config -------- */
+		void ApplyConfig();
+		void ApplyConfigFromJson(const nlohmann::json& j) override;
+		void ExtractConfig();
+		void ExtractConfigToJson(nlohmann::json& j) const override;
 
-    /* -------- config -------- */
-    void ApplyConfig();
-    void ApplyConfigFromJson(const nlohmann::json& j) override;
-    void ExtractConfig();
-    void ExtractConfigToJson(nlohmann::json& j) const override;
+		void LoadConfig(const std::string& path);
+		void SaveConfig(const std::string& path) const;
 
-    void LoadConfig(const std::string& path);
-    void SaveConfig(const std::string& path) const;
+		/* -------- accessors -------- */
+		void			 SetDrawEnable(bool isDrawEnable) override;
+		void			 SetPosition(const CalyxMath::Vector3& pos);
+		std::string_view GetTypeName() const override { return "ParticleSystemObject"; }
 
-    /* -------- accessors -------- */
-    void SetDrawEnable(bool isDrawEnable) override;
-	void SetPosition(const CalyxMath::Vector3& pos);
-    std::string_view GetTypeName() const override { return "ParticleSystemObject"; }
+		const ConfigurableObject<ParticleSystemObjectConfig>& GetConfigObject() const { return config_; }
 
-    const ConfigurableObject<ParticleSystemObjectConfig>& GetConfigObject() const { return config_; }
+		std::shared_ptr<CalyxEffect::FxEmitter> GetEmitter() const { return emitter_; }
 
-    std::shared_ptr<FxEmitter> GetEmitter() const { return emitter_; }
+	private:
+		ConfigurableObject<ParticleSystemObjectConfig> config_;
 
-private:
-    ConfigurableObject<ParticleSystemObjectConfig> config_;
+		std::shared_ptr<CalyxEffect::FxEmitter> emitter_;
+	};
+}
 
-    std::shared_ptr<FxEmitter> emitter_;
-};

@@ -26,7 +26,7 @@ Enemy::Enemy(const std::string& modelName, const std::string objName)
 	collider_->SetOwner(this);
 
 	// hit effect
-	hitFx_ = SceneAPI::Instantiate<FxObject>("HitFx");
+	hitFx_ = SceneAPI::Instantiate<CalyxEffect::FxObject>("HitFx");
 	hitFx_->LoadFromPath("Effect/HitEffect");
 }
 

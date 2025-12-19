@@ -80,12 +80,12 @@ void PlaceToolPanel::RegisterPlaceItems() {
 				[]() {
 					const std::string name    = "ParticleSystem";
 					auto              factory = [name]() {
-						auto obj = SceneAPI::Instantiate<ParticleSystemObject>(name);
+						auto obj = SceneAPI::Instantiate<CalyxEffect::ParticleSystemObject>(name);
 						obj->Initialize();
 						return obj;
 					};
 					CommandManager::GetInstance()->Execute(
-						std::make_unique<CreateObjectCommand<ParticleSystemObject>>(
+						std::make_unique<CreateObjectCommand<CalyxEffect::ParticleSystemObject>>(
 							SceneContext::Current(),factory,"Create ParticleSystem"));
 				}
 			});
@@ -101,12 +101,12 @@ void PlaceToolPanel::RegisterPlaceItems() {
 				[]() {
 					const std::string name    = "EffectObject";
 					auto              factory = [name]() {
-						auto obj = SceneAPI::Instantiate<FxObject>(name);
+						 auto obj = SceneAPI::Instantiate<CalyxEffect::FxObject>(name);
 						obj->Initialize();
 						return obj;
 					};
 					CommandManager::GetInstance()->Execute(
-						std::make_unique<CreateObjectCommand<FxObject>>(
+						std::make_unique<CreateObjectCommand<CalyxEffect::FxObject>>(
 							SceneContext::Current(),factory,"Create EffectObject"));
 				}
 			});

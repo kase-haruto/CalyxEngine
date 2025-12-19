@@ -243,7 +243,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\System\Command\EditorCommand\LevelEditorCommand\CreateObjectCommand\CreateParticleSystemCommand.cpp" />
     <ClCompile Include="Engine\Application\Effects\FxSystem.cpp" />
     <ClCompile Include="Engine\Application\Effects\Particle\Emitter\FxEmitter.cpp" />
-    <ClCompile Include="Engine\Application\Effects\Particle\Module\BaseFxModule.cpp" />
     <ClCompile Include="Engine\Application\UI\EngineUI\EditorMenu.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Guid\Guid.cpp" />
     <ClCompile Include="Engine\System\Command\EditorCommand\LevelEditorCommand\CreateObjectCommand\CreateShapeObjectCommand.cpp" />
