@@ -1,19 +1,18 @@
 #define ENGINE_EXPORTS
 #include "EngineMain.h"
-#include <Engine/Application/Framework/EngineController.h>
+#include <Engine/Application/Framework/CalyxFrameWork.h>
 
 // c++
 #include <memory>
 
-static std::unique_ptr<EngineController> engine;
+static std::unique_ptr<CalyxCore::CalyxFrameWork> engine;
 
 void Engine_Initialize(HINSTANCE hInstance){
-	engine = std::make_unique<EngineController>();
+	engine = std::make_unique<CalyxCore::CalyxFrameWork>();
 	engine->Initialize(hInstance);
 }
 
 bool Engine_Update(){
-	// ここで false を返せば終了
 	return engine->Update();
 }
 

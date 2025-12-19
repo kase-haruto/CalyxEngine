@@ -789,9 +789,6 @@
     <ClInclude Include="Engine\Application\Effects\Particle\FxUnit.h">
       <Filter>Engine\Application\Effects\Particle</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Application\Effects\Particle\Module\BaseFxModule.cpp">
-      <Filter>Engine\Application\Effects\Particle\Module</Filter>
-    </ClCompile>
     <ClInclude Include="Engine\Application\Effects\Particle\Module\BaseFxModule.h">
       <Filter>Engine\Application\Effects\Particle\Module</Filter>
     </ClInclude>
@@ -834,10 +831,10 @@
     <ClInclude Include="Engine\Application\Effects\Particle\Parm\FxParm.h">
       <Filter>Engine\Application\Effects\Particle\Parm</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Application\Framework\EngineController.cpp">
+    <ClCompile Include="Engine\Application\Framework\CalyxFrameWork.cpp">
       <Filter>Engine\Application\Framework</Filter>
     </ClCompile>
-    <ClInclude Include="Engine\Application\Framework\EngineController.h">
+    <ClInclude Include="Engine\Application\Framework\CalyxFrameWork.h">
       <Filter>Engine\Application\Framework</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Application\Framework\EngineMain.cpp">
@@ -846,10 +843,10 @@
     <ClInclude Include="Engine\Application\Framework\EngineMain.h">
       <Filter>Engine\Application\Framework</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Application\Gameplay\Combat\lineOfSight.h">
+    <ClInclude Include="Game\Battle\Combat\lineOfSight.h">
       <Filter>Engine\Application\Gameplay\Combat</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Application\Gameplay\Visibility\GameplayVisibility.h">
+    <ClInclude Include="Game\Battle\Visibility\GameplayVisibility.h">
       <Filter>Engine\Application\Gameplay\Visibility</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Application\Input\Input.cpp">
@@ -2397,6 +2394,7 @@
     <ClCompile Include="Game\Scene\Clear\ClearScene.cpp" />
     <ClCompile Include="Game\Scene\Defeat\DefeatScene.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Player\Context\PlayerContextBuilder.cpp" />
+    <ClCompile Include="Game\Battle\Combat\lineOfSight.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />

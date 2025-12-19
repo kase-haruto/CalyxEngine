@@ -11,8 +11,8 @@
 #include <Game/3dObject/Actor/Player/Player.h>
 
 // helpers
-#include <Engine/Application/Gameplay/Visibility/GameplayVisibility.h>
-#include <Engine/Application/Gameplay/Combat/LineOfSight.h>
+#include <Game/Battle/Visibility/GameplayVisibility.h>
+#include <Game/Battle/Combat/LineOfSight.h>
 
 void EnemyEngagementService::OnSceneLoaded(SceneContext& ctx) {
 	RefreshRefs(ctx);
@@ -36,7 +36,7 @@ bool EnemyEngagementService::HasLineOfSightImpl(const Enemy& e, const Player& p)
 	std::vector<SceneObject*> candidates;
 	buildCandidates_(candidates, /*ignore*/ static_cast<const SceneObject*>(&e));
 
-	return HasLineOfSight(from, to, candidates, isPlayer_);
+	return CalyxUtil::HasLineOfSight(from, to, candidates, isPlayer_);
 }
 
 void EnemyEngagementService::Update(float dt) {
@@ -72,7 +72,7 @@ void EnemyEngagementService::Update(float dt) {
 		bool onScreen = true;
 		if (camera_) {
 			const AABB worldAabb = e.GetWorldAABB();
-			onScreen = GameplayVisibility::IsAabbOnScreenNdc(camera_, worldAabb, ndcPad_);
+			onScreen = CalyxUtil::GameplayVisibility::IsAabbOnScreenNdc(camera_, worldAabb, ndcPad_);
 		}
 
 		// 露出時間の積算
@@ -83,7 +83,7 @@ void EnemyEngagementService::Update(float dt) {
 		//  射程
 		bool inRange = true;
 		if (ply) {
-			inRange = GameplayVisibility::InEngageRangeSq(
+			inRange = CalyxUtil::GameplayVisibility::InEngageRangeSq(
 				e.GetWorldPosition(), ply->GetWorldPosition(), maxEngageDist_);
 		}
 

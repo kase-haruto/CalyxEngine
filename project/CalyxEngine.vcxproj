@@ -164,6 +164,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Application\Effects\FxGuiHelpers.cpp" />
     <ClCompile Include="Engine\Application\Effects\FxObject.cpp" />
     <ClCompile Include="Engine\Application\Effects\Particle\Module\OverLifetime\OverLifetimeModule.cpp" />
+    <ClCompile Include="Game\Battle\Combat\lineOfSight.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Ease\CxEase.cpp" />
     <ClCompile Include="Engine\Graphics\Camera\Action\CameraTurnAroundAction.cpp" />
     <ClCompile Include="Engine\Foundation\Math\MathUtil.cpp" />
@@ -303,7 +304,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Graphics\Device\DxDevice.cpp" />
     <ClCompile Include="Engine\Graphics\Context\DxFence.cpp" />
     <ClCompile Include="Engine\Graphics\SwapChain\DxSwapChain.cpp" />
-    <ClCompile Include="Engine\Application\Framework\EngineController.cpp" />
+    <ClCompile Include="Engine\Application\Framework\CalyxFrameWork.cpp" />
     <ClCompile Include="Engine\Application\Input\Input.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\LeakChecker\LeakChecker.cpp" />
     <ClCompile Include="Engine\Application\System\System.cpp" />
@@ -490,8 +491,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\Event\Spawn\EnemySpawnEvent.h" />
     <ClInclude Include="Game\Installer\Enemy\EnemyEngagementInstaller.h" />
     <ClInclude Include="Game\Runtime\Engagement\EnemyEngagementService.h" />
-    <ClInclude Include="Engine\Application\Gameplay\Combat\lineOfSight.h" />
-    <ClInclude Include="Engine\Application\Gameplay\Visibility\GameplayVisibility.h" />
+    <ClInclude Include="Game\Battle\Combat\lineOfSight.h" />
+    <ClInclude Include="Game\Battle\Visibility\GameplayVisibility.h" />
     <ClInclude Include="Game\Battle\Shooting\ShootingController\BossShootingController.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\BossBullet\BossBullet.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\Container\BossBulletContainer.h" />
@@ -630,7 +631,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Graphics\Device\DxDevice.h" />
     <ClInclude Include="Engine\Graphics\Context\DxFence.h" />
     <ClInclude Include="Engine\Graphics\SwapChain\DxSwapChain.h" />
-    <ClInclude Include="Engine\Application\Framework\EngineController.h" />
+    <ClInclude Include="Engine\Application\Framework\CalyxFrameWork.h" />
     <ClInclude Include="Engine\Application\System\Enviroment.h" />
     <ClInclude Include="Engine\Application\Input\Input.h" />
     <ClInclude Include="Engine\Foundation\Utility\LeakChecker\LeakChecker.h" />
