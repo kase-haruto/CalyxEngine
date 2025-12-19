@@ -112,8 +112,7 @@ public:
 	void SetParent(WorldTransform* parent);
 	void AttachEnemyList(const std::list<std::shared_ptr<Enemy>>& list) const;
 	void SetShootingController(std::unique_ptr<PlayerShootingController> sc);
-	void SetInputHandler(std::unique_ptr<PlayerInputHandler> ih);
-
+	
 	// getter
 	std::string_view		   GetTypeName() const override { return "Player"; }
 	PlayerDangerSense*		   GetDangerSense() const { return danger_.get(); }
@@ -140,7 +139,6 @@ private:
 	PlayerMoveController					  moveCtrler_;					 //< 移動コントローラ
 	std::unique_ptr<PlayerDodgeSpinMotion>	  dodgeMotion_		  = nullptr; //< 回避モーション
 	std::unique_ptr<PlayerDodgeSystem>		  dodgeSystem_		  = nullptr; //< 回避システム
-	std::unique_ptr<PlayerInputHandler>		  inputHandler_		  = nullptr; //< 入力ハンドラ
 	std::unique_ptr<PlayerDangerSense>		  danger_			  = nullptr; //< 危機察知
 	std::unique_ptr<PlayerDamageHandler>	  damageHandler_	  = nullptr; //< ダメージハンドラ
 	std::unique_ptr<PlayerLockOn>			  lockOn_			  = nullptr; //< ロックオンシステム

@@ -22,7 +22,6 @@
 #include "Damage/PlayerDamageHandler.h"
 #include "Dodge/PlayerDodgeSystem.h"
 #include "Engine/Foundation/Utility/Func/CxUtils.h"
-#include "Game/Input/PlayerInput/PlayerInputHandler.h"
 
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <externals/imgui/imgui.h>
@@ -391,8 +390,6 @@ void Player::RequestLockOnTargetClear() const {
 }
 
 void Player::Start() {
-	if(!inputHandler_) inputHandler_ = std::make_unique<PlayerInputHandler>();
-
 	if(!shootingController_) {
 		auto bullets		= SceneAPI::Instantiate<PlayerBulletContainer>("playerBulletController");
 		shootingController_ = std::make_unique<PlayerShootingController>(bullets.get());
@@ -554,7 +551,5 @@ std::optional<const float> Player::GetMaxShootInterval() const {
 }
 
 void Player::SetShootingController(std::unique_ptr<PlayerShootingController> sc) { shootingController_ = std::move(sc); }
-
-void Player::SetInputHandler(std::unique_ptr<PlayerInputHandler> ih) { inputHandler_ = std::move(ih); }
 
 REGISTER_SCENE_OBJECT(Player)
