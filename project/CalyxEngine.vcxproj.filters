@@ -873,10 +873,10 @@
     <ClInclude Include="Engine\Application\System\PlaySession.h">
       <Filter>Engine\Application\System</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Application\System\System.cpp">
+    <ClCompile Include="Engine\Application\System\CalyxCore.cpp">
       <Filter>Engine\Application\System</Filter>
     </ClCompile>
-    <ClInclude Include="Engine\Application\System\System.h">
+    <ClInclude Include="Engine\Application\System\CalyxCore.h">
       <Filter>Engine\Application\System</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Application\UI\EngineUI\Context\EditorContext.cpp">

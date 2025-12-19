@@ -307,7 +307,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Application\Framework\CalyxFrameWork.cpp" />
     <ClCompile Include="Engine\Application\Input\Input.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\LeakChecker\LeakChecker.cpp" />
-    <ClCompile Include="Engine\Application\System\System.cpp" />
+    <ClCompile Include="Engine\Application\System\CalyxCore.cpp" />
     <ClCompile Include="Engine\Application\Platform\WinApp.cpp" />
     <ClCompile Include="Engine\Editor\UiEditor.cpp" />
     <ClCompile Include="Engine\Graphics\Camera\3d\Camera3d.cpp" />
@@ -635,7 +635,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Application\System\Enviroment.h" />
     <ClInclude Include="Engine\Application\Input\Input.h" />
     <ClInclude Include="Engine\Foundation\Utility\LeakChecker\LeakChecker.h" />
-    <ClInclude Include="Engine\Application\System\System.h" />
+    <ClInclude Include="Engine\Application\System\CalyxCore.h" />
     <ClInclude Include="Engine\Application\Platform\WinApp.h" />
     <ClInclude Include="Engine\Editor\BaseEditor.h" />
     <ClInclude Include="Engine\Editor\UiEditor.h" />

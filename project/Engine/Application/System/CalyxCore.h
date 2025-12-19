@@ -17,13 +17,13 @@
 /* c++ */
 #include<stdint.h>
 
-class System{
+class CalyxCore{
 public:
 	//===================================================================*/
 	//                    public functions
 	//===================================================================*/
-	System();
-	~System() = default;
+	CalyxCore();
+	~CalyxCore() = default;
 
 	void Initialize(HINSTANCE hInstance, int32_t clientWidth, int32_t clientHeight,const std::string _windowTitle);
 	void Finalize();

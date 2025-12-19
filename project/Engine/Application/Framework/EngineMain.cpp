@@ -5,10 +5,10 @@
 // c++
 #include <memory>
 
-static std::unique_ptr<CalyxCore::CalyxFrameWork> engine;
+static std::unique_ptr<CalyxEngine::CalyxFrameWork> engine;
 
 void Engine_Initialize(HINSTANCE hInstance){
-	engine = std::make_unique<CalyxCore::CalyxFrameWork>();
+	engine = std::make_unique<CalyxEngine::CalyxFrameWork>();
 	engine->Initialize(hInstance);
 }
 

@@ -4,8 +4,8 @@
 /* ===================================================================== */
 // engine
 #include <Engine/Application/Platform/WinApp.h>
+#include <Engine/Application/System/CalyxCore.h>
 #include <Engine/Application/System/PlaySession.h>
-#include <Engine/Application/System/System.h>
 #include <Engine/Application/UI/EngineUI/Core/EngineUICore.h>
 #include <Engine/Editor/Collection/EditorCollection.h>
 #include <Engine/Graphics/Core/GraphicsSystem.h>
@@ -16,8 +16,7 @@
 
 // c++
 #include <Windows.h>
-
-namespace CalyxCore {
+namespace CalyxEngine {
 	/* ========================================================================
 	/*		エンジンフレームワーク
 	/* ===================================================================== */
@@ -36,7 +35,7 @@ namespace CalyxCore {
 
 	private:
 		// system
-		std::unique_ptr<System>			system_;
+		std::unique_ptr<CalyxCore>		system_;
 		std::unique_ptr<GraphicsSystem> graphicsSystem_;
 
 		// ui
@@ -51,4 +50,4 @@ namespace CalyxCore {
 		PostEffectGraph*	   postEffectGraph_;
 		PostProcessCollection* postProcessCollection_;
 	};
-} // namespace CalyxFrameWork
+} // namespace CalyxEngine

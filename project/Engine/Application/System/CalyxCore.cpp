@@ -1,3 +1,4 @@
+#include "CalyxCore.h"
 /////////////////////////////////////////////////////////////////////////////////////////
 //  include space
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -5,7 +6,6 @@
 // engine
 #include <Engine/Application/Input/Input.h>
 #include <Engine/Application/System/Enviroment.h>
-#include <Engine/Application/System/System.h>
 #include <Engine/Foundation/Audio/Audio.h>
 #include <Engine/Foundation/Utility/Func/DxFunc.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
@@ -30,18 +30,18 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 //  静的変数初期化
 /////////////////////////////////////////////////////////////////////////////////////////
-HINSTANCE System::hInstance_ = nullptr;
-HWND System::hwnd_ = nullptr;
+HINSTANCE CalyxCore::hInstance_ = nullptr;
+HWND CalyxCore::hwnd_ = nullptr;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //  コンストラクタ
 /////////////////////////////////////////////////////////////////////////////////////////
-System::System(){}
+CalyxCore::CalyxCore() {}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //  初期化処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void System::Initialize(HINSTANCE hInstance, int32_t clientWidth, int32_t clientHeight, const std::string _windowTitle){
+void CalyxCore::Initialize(HINSTANCE hInstance, int32_t clientWidth, int32_t clientHeight, const std::string _windowTitle) {
 	winApp_ = std::make_unique<WinApp>(clientWidth, clientHeight, _windowTitle);
 	hInstance_ = hInstance;
 	hwnd_ = winApp_->GetHWND();
@@ -93,7 +93,7 @@ void System::Initialize(HINSTANCE hInstance, int32_t clientWidth, int32_t client
 	db->Initialize(assetsRoot);
 }
 
-void System::InitializePostProcess(PipelineService* service){
+void CalyxCore::InitializePostProcess(PipelineService* service) {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	/*                     postProcessの初期化                                             */
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -106,7 +106,7 @@ void System::InitializePostProcess(PipelineService* service){
 /////////////////////////////////////////////////////////////////////////////////////////
 //  フレーム開始処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void System::BeginFrame(){
+void CalyxCore::BeginFrame() {
 	// インプットの更新
 	Input::Update();
 
@@ -127,14 +127,14 @@ void System::BeginFrame(){
 /////////////////////////////////////////////////////////////////////////////////////////
 //  フレーム終了処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void System::EndFrame(){
+void CalyxCore::EndFrame() {
 	imguiManager_->End();
 	imguiManager_->Draw();
 
 	dxCore_->PostDraw();
 }
 
-void System::ExecutePostEffect(const PipelineService* service){
+void CalyxCore::ExecutePostEffect(const PipelineService* service) {
 	auto* cmd = dxCore_->GetCommandList().Get();
 
 	auto* backBuffer = dxCore_->GetRenderTargetCollection().Get("BackBuffer");
@@ -163,7 +163,7 @@ void System::ExecutePostEffect(const PipelineService* service){
 /////////////////////////////////////////////////////////////////////////////////////////
 //  Editorの更新
 /////////////////////////////////////////////////////////////////////////////////////////
-void System::EditorUpdate(){
+void CalyxCore::EditorUpdate() {
 	Input* input = Input::GetInstance();
 	CommandManager* cmdManager = CommandManager::GetInstance();
 	//コマンド
@@ -183,7 +183,7 @@ void System::EditorUpdate(){
 /////////////////////////////////////////////////////////////////////////////////////////
 //  終了処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void System::Finalize(){
+void CalyxCore::Finalize() {
 
 	//imgui終了処理
 	imguiManager_->Finalize();
@@ -202,7 +202,7 @@ void System::Finalize(){
 	winApp_->TerminateGameWindow();
 }
 
-void System::InitializeEditor(){
+void CalyxCore::InitializeEditor() {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	/*                     editorの初期化と追加                                              */
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -211,13 +211,13 @@ void System::InitializeEditor(){
 /////////////////////////////////////////////////////////////////////////////////////////
 //プロセスメッセージ
 /////////////////////////////////////////////////////////////////////////////////////////
-int System::ProcessMessage(){ return winApp_->ProcessMessage() ? 1 : 0; }
+int CalyxCore::ProcessMessage() { return winApp_->ProcessMessage() ? 1 : 0; }
 
 
 //=============================================================================================================
 //              Pipelineの作成
 //=============================================================================================================
-void System::CreatePipelines(){
+void CalyxCore::CreatePipelines() {
 	shaderManager_->InitializeDXC();
 	LinePipeline();
 	EffectPipeline();
@@ -225,7 +225,7 @@ void System::CreatePipelines(){
 }
 
 
-void System::LinePipeline(){
+void CalyxCore::LinePipeline() {
 	// InputLayoutの設定
 	D3D12_INPUT_ELEMENT_DESC inputElementDescs[2] = {};
 	inputElementDescs[0].SemanticName = "POSITION";
@@ -330,7 +330,7 @@ void System::LinePipeline(){
 }
 
 
-void System::EffectPipeline(){
+void CalyxCore::EffectPipeline() {
 	//InputLayoutの設定
 	D3D12_INPUT_ELEMENT_DESC inputElementDescs[3] = {};
 	inputElementDescs[0].SemanticName = "POSITION";
@@ -460,7 +460,7 @@ void System::EffectPipeline(){
 	}
 }
 
-void System::SkyBoxPipeline(){
+void CalyxCore::SkyBoxPipeline() {
 	// InputLayoutの設定
 	D3D12_INPUT_ELEMENT_DESC inputElementDescs[2] = {};
 	inputElementDescs[0].SemanticName = "POSITION";

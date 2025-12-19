@@ -3,14 +3,13 @@
 /*	include space
 /* ===================================================================== */
 // engine
-#include <Engine/Application/System/Enviroment.h>
-#include <Engine/Scene/System/SceneManager.h>
+#include <Engine/Application/Effects/FxSystem.h>
 #include <Engine/Application/Input/Input.h>
+#include <Engine/Application/System/Enviroment.h>
 #include <Engine/Application/UI/EngineUI/Core/EngineUICore.h>
 #include <Engine/Foundation/Clock/ClockManager.h>
-#include <Engine/Application/Effects/FxSystem.h>
-
-namespace CalyxCore {
+#include <Engine/Scene/System/SceneManager.h>
+namespace CalyxEngine {
 	////////////////////////////////////////////////////////////////////////////////
 	//  engine 初期化
 	////////////////////////////////////////////////////////////////////////////////
@@ -19,7 +18,7 @@ namespace CalyxCore {
 		CoInitializeEx(0, COINIT_MULTITHREADED);
 
 		/* System & Graphics */
-		system_ = std::make_unique<System>();
+		system_ = std::make_unique<CalyxCore>();
 		system_->Initialize(hInstance, kWindowWidth, kWindowHeight, windowTitle);
 
 		graphicsSystem_ = std::make_unique<GraphicsSystem>();
@@ -114,5 +113,4 @@ namespace CalyxCore {
 		sceneManager_->DrawNotAffectedFromPE(graphicsSystem_->GetCommandList(), graphicsSystem_->GetPipelineService());
 		system_->EndFrame();
 	}
-}
-
+} // namespace CalyxEngine

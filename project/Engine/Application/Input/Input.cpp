@@ -1,7 +1,7 @@
 #include "Input.h"
 
 // engine
-#include <Engine/Application/System/System.h>
+#include <Engine/Application/System/CalyxCore.h>
 #include <Engine/Application/System/Enviroment.h>
 
 // c++
@@ -47,7 +47,7 @@ void Input::Initialize(){
 
 	POINT pt;
 	if (GetCursorPos(&pt)){
-		ScreenToClient(System::GetHWND(), &pt);
+		ScreenToClient(CalyxCore::GetHWND(), &pt);
 		instance_->mousePos_ = {static_cast< float >(pt.x), static_cast< float >(pt.y)};
 	}
 }
@@ -85,7 +85,7 @@ void Input::ShowImGui(){
 
 void Input::DirectInputInitialize(){
 	HRESULT hr = DirectInput8Create(
-		System::GetHinstance(),
+		CalyxCore::GetHinstance(),
 		DIRECTINPUT_VERSION,
 		IID_IDirectInput8,
 		reinterpret_cast< void** >(directInput_.GetAddressOf()),
@@ -98,7 +98,7 @@ void Input::DirectInputInitialize(){
 	assert(SUCCEEDED(hr));
 	hr = keyboard_->SetDataFormat(&c_dfDIKeyboard);
 	assert(SUCCEEDED(hr));
-	hr = keyboard_->SetCooperativeLevel(System::GetHWND(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+	hr = keyboard_->SetCooperativeLevel(CalyxCore::GetHWND(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
 	assert(SUCCEEDED(hr));
 
 	// マウス
@@ -106,7 +106,7 @@ void Input::DirectInputInitialize(){
 	assert(SUCCEEDED(hr));
 	hr = mouse_->SetDataFormat(&c_dfDIMouse);
 	assert(SUCCEEDED(hr));
-	hr = mouse_->SetCooperativeLevel(System::GetHWND(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
+	hr = mouse_->SetCooperativeLevel(CalyxCore::GetHWND(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
 	assert(SUCCEEDED(hr));
 }
 
@@ -160,7 +160,7 @@ void Input::MouseUpdate(){
 	} else{
 		POINT pt;
 		GetCursorPos(&pt);
-		ScreenToClient(System::GetHWND(), &pt);
+		ScreenToClient(CalyxCore::GetHWND(), &pt);
 		mousePos_ = {static_cast< float >(pt.x), static_cast< float >(pt.y)};
 		mouseWheel_ = static_cast<float>(mouseState_.lZ) / WHEEL_DELTA;
 	}
