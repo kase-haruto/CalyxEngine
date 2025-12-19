@@ -15,13 +15,13 @@ void BoxDrawer::Initialize() {
 	transformBuffer_.Initialize(GraphicsGroup::GetInstance()->GetDevice(), 1);
 }
 
-void BoxDrawer::DrawBox(const Vector3& center, const Quaternion& rotate, const Vector3& size, const Vector4& color){
+void BoxDrawer::DrawBox(const CxMath::Vector3& center, const CxMath::Quaternion& rotate, const CxMath::Vector3& size, const CxMath::Vector4& color){
 	if (vertices_.size() + 36 > kMaxBoxes * 36) return;
 
-	Vector3 half = size * 0.5f;
+	CxMath::Vector3 half = size * 0.5f;
 
 	// ローカル座標の頂点
-	Vector3 localVertices[8] = {
+	CxMath::Vector3 localVertices[8] = {
 		{-half.x, -half.y, -half.z}, // 0
 		{+half.x, -half.y, -half.z}, // 1
 		{+half.x, +half.y, -half.z}, // 2
@@ -33,9 +33,9 @@ void BoxDrawer::DrawBox(const Vector3& center, const Quaternion& rotate, const V
 	};
 
 	// 回転と平行移動を適用
-	Vector3 worldVertices[8];
+	CxMath::Vector3 worldVertices[8];
 	for (int i = 0; i < 8; ++i){
-		Vector3 rotated = Vector3::Transform(localVertices[i], rotate);
+		CxMath::Vector3 rotated = CxMath::Vector3::Transform(localVertices[i], rotate);
 		worldVertices[i] = rotated + center;
 	}
 
@@ -67,10 +67,10 @@ void BoxDrawer::Render() {
 	vertexBuffer_.SetCommand(cmdList);
 
 	// WVP行列
-	Matrix4x4 identity = Matrix4x4::MakeIdentity();
+	CxMath::Matrix4x4 identity = CxMath::Matrix4x4::MakeIdentity();
 	TransformationMatrix wvpData;
 	wvpData.world = identity;
-	wvpData.WorldInverseTranspose = Matrix4x4::Transpose(Matrix4x4::Inverse(identity));
+	wvpData.WorldInverseTranspose = CxMath::Matrix4x4::Transpose(CxMath::Matrix4x4::Inverse(identity));
 	transformBuffer_.TransferData(wvpData);
 	transformBuffer_.SetCommand(cmdList, 0);
 

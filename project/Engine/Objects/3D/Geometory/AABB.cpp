@@ -7,10 +7,10 @@
 #include <cmath>
 
 
-AABB::AABB(const Vector3& min, const Vector3& max, uint32_t color)
+AABB::AABB(const CxMath::Vector3& min, const CxMath::Vector3& max, uint32_t color)
 	: min_(min), max_(max), color(color) {}
 
-void AABB::Initialize(const Vector3& Min, const Vector3& Max) {
+void AABB::Initialize(const CxMath::Vector3& Min, const CxMath::Vector3& Max) {
 	min_ = Min;
 	max_ = Max;
 }
@@ -34,16 +34,16 @@ void AABB::UpdateUI(std::string lavel) {
 	ImGui::End();
 }
 
-Vector3 AABB::GetMin()const { return min_; }
-Vector3 AABB::GetMax()const { return max_; }
+CxMath::Vector3 AABB::GetMin()const { return min_; }
+CxMath::Vector3 AABB::GetMax()const { return max_; }
 
-Vector3 AABB::GetCenter() const {
+CxMath::Vector3 AABB::GetCenter() const {
 	return (min_ + max_) * 0.5f;
 }
 
-AABB AABB::Transform(const Matrix4x4& mat) const{
+AABB AABB::Transform(const CxMath::Matrix4x4& mat) const{
 	// AABBの8頂点を作成
-	Vector3 corners[8] = {
+	CxMath::Vector3 corners[8] = {
 		{min_.x, min_.y, min_.z},
 		{max_.x, min_.y, min_.z},
 		{min_.x, max_.y, min_.z},
@@ -54,13 +54,13 @@ AABB AABB::Transform(const Matrix4x4& mat) const{
 		{max_.x, max_.y, max_.z},
 	};
 
-	Vector3 newMin(FLT_MAX, FLT_MAX, FLT_MAX);
-	Vector3 newMax(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+	CxMath::Vector3 newMin(FLT_MAX, FLT_MAX, FLT_MAX);
+	CxMath::Vector3 newMax(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
 	for (int i = 0; i < 8; ++i){
-		Vector3 transformed = Vector3::Transform(corners[i], mat);
-		newMin = Vector3::Min(newMin, transformed);
-		newMax = Vector3::Max(newMax, transformed);
+		CxMath::Vector3 transformed = CxMath::Vector3::Transform(corners[i], mat);
+		newMin = CxMath::Vector3::Min(newMin, transformed);
+		newMax = CxMath::Vector3::Max(newMax, transformed);
 	}
 
 	return AABB(newMin, newMax, color);

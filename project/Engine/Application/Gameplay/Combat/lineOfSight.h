@@ -6,10 +6,10 @@
 #include <Engine/Physics/Ray/RayDetail.h>
 #include <Engine/Physics/Ray/Raycastor.h>
 
-inline bool RaycastSegment(const Vector3& from, const Vector3& to,
+inline bool RaycastSegment(const CxMath::Vector3& from, const CxMath::Vector3& to,
 						   const std::vector<SceneObject*>& objects,
 						   RaycastHit& outHit, float startOffset = 0.05f) {
-	Vector3 dir = to - from;
+	CxMath::Vector3 dir = to - from;
 	float   dist = dir.Length();
 	if (dist <= 1e-4f) return false; //区間長ゼロ
 
@@ -26,7 +26,7 @@ inline bool RaycastSegment(const Vector3& from, const Vector3& to,
 	return true;
 }
 
-inline bool HasLineOfSight(const Vector3& from, const Vector3& to,
+inline bool HasLineOfSight(const CxMath::Vector3& from, const CxMath::Vector3& to,
 						   const std::vector<SceneObject*>& objects,
 						   const std::function<bool(void*)>& isPlayer,
 						   float startOffset = 0.05f) {

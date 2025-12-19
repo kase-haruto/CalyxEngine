@@ -8,7 +8,7 @@
 #include <string>
 
 struct Ray;
-struct Vector3;
+struct CxMath::Vector3;
 
 class SplineEditorPanel 
 	: public IEngineUI {
@@ -34,7 +34,7 @@ private:
 	void HandleGizmoUpdateAndDraw3D();
 	Ray  MakeMouseRay() const;
 	int  PickPointByRayAABB(const Ray& ray, float halfSize, float& outT) const;
-	bool IntersectPlane(const Ray& ray, const Vector3& n, float d, Vector3& out) const;
+	bool IntersectPlane(const Ray& ray, const CxMath::Vector3& n, float d, CxMath::Vector3& out) const;
 
 private:
 	SplineData data_;
@@ -47,7 +47,7 @@ private:
 	Vector2 vpSize_{ 1920,1080 };
 
 	bool    dragging_ = false;
-	Vector3 dragPlaneN_{ 0,1,0 };
+	CxMath::Vector3 dragPlaneN_{ 0,1,0 };
 	float   dragPlaneD_ = 0.0f;
 
 	std::unique_ptr<Manipulator> manipulator_;

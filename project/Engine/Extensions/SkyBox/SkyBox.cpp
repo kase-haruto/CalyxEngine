@@ -30,7 +30,7 @@ void SkyBox::ShowGui(){
 void SkyBox::Update([[maybe_unused]]float dt){}
 
 void SkyBox::AlwaysUpdate([[maybe_unused]] float dt){
-	Vector3 half = worldTransform_.scale * 0.5f;
+	CxMath::Vector3 half = worldTransform_.scale * 0.5f;
 
 	// --- 頂点データ設定 ---
 	vertices_[0].position = {+1.0f, +1.0f, +1.0f, 1.0f}; // 右
@@ -64,12 +64,12 @@ void SkyBox::AlwaysUpdate([[maybe_unused]] float dt){
 	vertices_[23].position = {-1.0f, -1.0f, -1.0f, 1.0f};
 
 	for (int i = 0; i < 24; ++i){
-		Vector3 local = {
+		CxMath::Vector3 local = {
 			vertices_[i].position.x,
 			vertices_[i].position.y,
 			vertices_[i].position.z
 		};
-		Vector3 world = local * half;
+		CxMath::Vector3 world = local * half;
 		vertices_[i].position = {world.x, world.y, world.z, 1.0f};
 		/*	vertices_[i].texcoord = { 0.0f, 0.0f };
 			vertices_[i].normal = { 0.0f, 0.0f, 0.0f };*/

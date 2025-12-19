@@ -20,7 +20,7 @@ public:
 	virtual ~BaseBullet()override = default;
 
 	virtual void OnShot();
-	virtual void ShootInitialize(const Vector3& initPos, const Vector3& velocity);
+	virtual void ShootInitialize(const CxMath::Vector3& initPos, const CxMath::Vector3& velocity);
 	void Initialize() override {}
 	void Update(float dt)override;
 	void DerivativeGui()override;

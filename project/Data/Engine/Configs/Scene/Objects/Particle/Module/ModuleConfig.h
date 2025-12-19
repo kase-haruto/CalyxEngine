@@ -51,7 +51,7 @@ struct SimpleModuleConfig : public BaseModuleConfig {
 // 重力適用モジュール
 /////////////////////////////////////////////////////////////////////////////////////////
 struct GravityModuleConfig : public BaseModuleConfig {
-	Vector3 gravity{ 0.0f, -9.8f, 0.0f };
+	CxMath::Vector3 gravity{ 0.0f, -9.8f, 0.0f };
 
 	GravityModuleConfig() {
 		name = "GravityModule";
@@ -123,9 +123,9 @@ struct OverLifetimeModuleConfig : public BaseModuleConfig {
 	bool clamp01 = true;
 	bool invert  = false;
 
-	// start/end は Vector4
-	Vector4 start {0,0,0,1};
-	Vector4 end   {1,1,1,1};
+	// start/end は CxMath::Vector4
+	CxMath::Vector4 start {0,0,0,1};
+	CxMath::Vector4 end   {1,1,1,1};
 
 	nlohmann::json ToJson() const override;
 

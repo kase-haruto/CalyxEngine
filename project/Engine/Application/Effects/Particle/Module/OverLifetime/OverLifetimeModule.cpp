@@ -23,9 +23,9 @@ void OverLifetimeModule::OnUpdate(FxUnit& unit, float /*dt*/) {
 
 	switch(target_) {
 	case Target::Scale: {
-		Vector3 s{start_.x, start_.y, start_.z};
-		Vector3 e{end_.x, end_.y, end_.z};
-		Vector3 v = Vector3::Lerp(s, e, et);
+		CxMath::Vector3 s{start_.x, start_.y, start_.z};
+		CxMath::Vector3 e{end_.x, end_.y, end_.z};
+		CxMath::Vector3 v = CxMath::Vector3::Lerp(s, e, et);
 		ApplyTo(unit, {v.x, v.y, v.z, 1.0f});
 	} break;
 
@@ -33,22 +33,22 @@ void OverLifetimeModule::OnUpdate(FxUnit& unit, float /*dt*/) {
 	case Target::RotationY:
 	case Target::RotationZ:
 	case Target::AlphaOnly: {
-		float v = Cx::Math::Lerp(start_.x, end_.x, et);
+		float v = CxMath::Lerp(start_.x, end_.x, et);
 		ApplyTo(unit, {v, 0, 0, 0});
 	} break;
 
 	case Target::ColorRGBA: {
-		Vector4 v = Vector4::Lerp(start_, end_, et);
+		CxMath::Vector4 v = CxMath::Vector4::Lerp(start_, end_, et);
 		ApplyTo(unit, v);
 	} break;
 	}
 }
 
-void OverLifetimeModule::ApplyTo(FxUnit& u, const Vector4& v) const {
+void OverLifetimeModule::ApplyTo(FxUnit& u, const CxMath::Vector4& v) const {
 	switch(target_) {
 	case Target::Scale: {
-		Vector3 cur = u.scale;
-		Vector3 nv	= {v.x, v.y, v.z};
+		CxMath::Vector3 cur = u.scale;
+		CxMath::Vector3 nv	= {v.x, v.y, v.z};
 		switch(blend_) {
 		case BlendOp::Set:
 			u.scale = nv;
@@ -108,7 +108,7 @@ void OverLifetimeModule::ApplyTo(FxUnit& u, const Vector4& v) const {
 	} break;
 
 	case Target::ColorRGBA: {
-		Vector4 cur = u.color, nv = v;
+		CxMath::Vector4 cur = u.color, nv = v;
 		switch(blend_) {
 		case BlendOp::Set:
 			u.color = nv;
@@ -139,7 +139,7 @@ void OverLifetimeModule::ApplyTo(FxUnit& u, const Vector4& v) const {
 	}
 }
 
-void OverLifetimeModule::DrawValueEditor(const char* label, Vector4& v) {
+void OverLifetimeModule::DrawValueEditor(const char* label, CxMath::Vector4& v) {
 	ImGui::TextUnformatted(label);
 	ImGui::PushID(label);
 	switch(target_) {

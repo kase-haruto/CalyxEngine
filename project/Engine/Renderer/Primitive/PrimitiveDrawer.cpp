@@ -36,13 +36,13 @@ void PrimitiveDrawer::Finalize(){
 }
 
 
-void PrimitiveDrawer::DrawLine3d(const Vector3& start, const Vector3& end, const Vector4& color){
+void PrimitiveDrawer::DrawLine3d(const CxMath::Vector3& start, const CxMath::Vector3& end, const CxMath::Vector4& color){
 	if (lineDrawer_){
 		lineDrawer_->DrawLine(start, end, color);
 	}
 }
 
-void PrimitiveDrawer::DrawBox(const Vector3& center, Quaternion& rotate, const Vector3& size, const Vector4& color) {
+void PrimitiveDrawer::DrawBox(const CxMath::Vector3& center, CxMath::Quaternion& rotate, const CxMath::Vector3& size, const CxMath::Vector4& color) {
 	if (boxDrawer_) {
 		boxDrawer_->DrawBox(center, rotate,size, color);
 	}
@@ -57,52 +57,52 @@ void PrimitiveDrawer::DrawGrid(){
 		float offset = -kGridHalfWidth + index * kGridEvery;
 
 		// --- 縦線（Z軸方向） ---
-		Vector3 verticalStart(offset, 0.0f, kGridHalfWidth);
-		Vector3 verticalEnd(offset, 0.0f, -kGridHalfWidth);
+		CxMath::Vector3 verticalStart(offset, 0.0f, kGridHalfWidth);
+		CxMath::Vector3 verticalEnd(offset, 0.0f, -kGridHalfWidth);
 
-		Vector4 verticalColor = (std::abs(offset) < 0.001f) ? Vector4(0.0f, 1.0f, 0.0f, 1.0f) // X=0 line
-			: Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+		CxMath::Vector4 verticalColor = (std::abs(offset) < 0.001f) ? CxMath::Vector4(0.0f, 1.0f, 0.0f, 1.0f) // X=0 line
+			: CxMath::Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 		DrawLine3d(verticalStart, verticalEnd, verticalColor);
 
-		Vector3 horizontalStart(-kGridHalfWidth, 0.0f, offset);
-		Vector3 horizontalEnd(kGridHalfWidth, 0.0f, offset);
+		CxMath::Vector3 horizontalStart(-kGridHalfWidth, 0.0f, offset);
+		CxMath::Vector3 horizontalEnd(kGridHalfWidth, 0.0f, offset);
 
-		Vector4 horizontalColor = (std::abs(offset) < 0.001f) ? Vector4(1.0f, 0.0f, 0.0f, 1.0f) // Z=0 line
-			: Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+		CxMath::Vector4 horizontalColor = (std::abs(offset) < 0.001f) ? CxMath::Vector4(1.0f, 0.0f, 0.0f, 1.0f) // Z=0 line
+			: CxMath::Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 		DrawLine3d(horizontalStart, horizontalEnd, horizontalColor);
 	}
 }
 
-void PrimitiveDrawer::DrawAABB(const Vector3& minP, const Vector3& maxP,
-							   const Vector4& color) {
+void PrimitiveDrawer::DrawAABB(const CxMath::Vector3& minP, const CxMath::Vector3& maxP,
+							   const CxMath::Vector4& color) {
 	// 中心とサイズを計算
-	Vector3 center = (minP + maxP) * 0.5f;
-	Vector3 size = (maxP - minP);
+	CxMath::Vector3 center = (minP + maxP) * 0.5f;
+	CxMath::Vector3 size = (maxP - minP);
 
 	// OBB は回転付きだが、Identity を渡せば AABB 扱いになる
-	Quaternion identity; // (0,0,0,1)
+	CxMath::Quaternion identity; // (0,0,0,1)
 	identity.MakeIdentity();
 
 	DrawBox(center, identity, size, color); // 既存 API を再利用
 }
 
-void PrimitiveDrawer::DrawOBB(const Vector3& center, const Quaternion& rotate, const Vector3& size, const Vector4& color){
+void PrimitiveDrawer::DrawOBB(const CxMath::Vector3& center, const CxMath::Quaternion& rotate, const CxMath::Vector3& size, const CxMath::Vector4& color){
 	const uint32_t vertexNum = 8;
 
 	// 各軸の半サイズをクォータニオンで回転
-	Vector3 halfSizeX = Vector3::Transform({1.0f, 0.0f, 0.0f}, rotate) * (size.x * 0.5f);
-	Vector3 halfSizeY = Vector3::Transform({0.0f, 1.0f, 0.0f}, rotate) * (size.y * 0.5f);
-	Vector3 halfSizeZ = Vector3::Transform({0.0f, 0.0f, 1.0f}, rotate) * (size.z * 0.5f);
+	CxMath::Vector3 halfSizeX = CxMath::Vector3::Transform({1.0f, 0.0f, 0.0f}, rotate) * (size.x * 0.5f);
+	CxMath::Vector3 halfSizeY = CxMath::Vector3::Transform({0.0f, 1.0f, 0.0f}, rotate) * (size.y * 0.5f);
+	CxMath::Vector3 halfSizeZ = CxMath::Vector3::Transform({0.0f, 0.0f, 1.0f}, rotate) * (size.z * 0.5f);
 
 	// 頂点を計算
-	Vector3 vertices[vertexNum];
-	Vector3 offsets[vertexNum] = {
+	CxMath::Vector3 vertices[vertexNum];
+	CxMath::Vector3 offsets[vertexNum] = {
 		{-1, -1, -1}, {-1,  1, -1}, {1, -1, -1}, {1,  1, -1},
 		{-1, -1,  1}, {-1,  1,  1}, {1, -1,  1}, {1,  1,  1}
 	};
 
 	for (int i = 0; i < vertexNum; ++i){
-		Vector3 localVertex =
+		CxMath::Vector3 localVertex =
 			offsets[i].x * halfSizeX +
 			offsets[i].y * halfSizeY +
 			offsets[i].z * halfSizeZ;
@@ -121,13 +121,13 @@ void PrimitiveDrawer::DrawOBB(const Vector3& center, const Quaternion& rotate, c
 	}
 }
 
-void PrimitiveDrawer::DrawSphere(const Vector3& center, const float radius, int subdivision, Vector4 color){
+void PrimitiveDrawer::DrawSphere(const CxMath::Vector3& center, const float radius, int subdivision, CxMath::Vector4 color){
 
 	// 分割数
 	const uint32_t kSubdivision = subdivision;
 	const float kLonEvery = 2 * float(std::numbers::pi) / kSubdivision;
 	const float kLatEvery = float(std::numbers::pi) / kSubdivision;
-	Vector3 a, b, c, d;
+	CxMath::Vector3 a, b, c, d;
 
 	// 緯度方向に分割
 	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex){

@@ -9,6 +9,7 @@
 // math
 #include <Engine/Foundation/Math/Quaternion.h>
 #include <Engine/Foundation/Math/Vector3.h>
+#include <Engine/Foundation/Math/Matrix4x4.h>
 
 // C++
 #include <array>
@@ -25,10 +26,10 @@
 template <typename tValue>
 struct Keyframe {
 	float time;     // アニメーション時間(秒)
-	tValue value;   // 補間対象の値 (Vector3 or Quaternion)
+	tValue value;   // 補間対象の値 (CxMath::Vector3 or CxMath::Quaternion)
 };
-using KeyframeQuaternion = Keyframe<Quaternion>;
-using KeyframeVector3 = Keyframe<Vector3>;
+using KeyframeQuaternion = Keyframe<CxMath::Quaternion>;
+using KeyframeVector3 = Keyframe<CxMath::Vector3>;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //          AnimationCurve
@@ -42,14 +43,14 @@ struct AnimationCurve {
 //          NodeAnimation
 /////////////////////////////////////////////////////////////////////////////////////////
 struct NodeAnimation {
-	AnimationCurve<Vector3>     translate;	// 平行移動
-	AnimationCurve<Quaternion>  rotate;		// 回転
-	AnimationCurve<Vector3>     scale;		// スケーリング
+	AnimationCurve<CxMath::Vector3>     translate;	// 平行移動
+	AnimationCurve<CxMath::Quaternion>  rotate;		// 回転
+	AnimationCurve<CxMath::Vector3>     scale;		// スケーリング
 };
 
 struct Node {
 	QuaternionTransform transform;
-	Matrix4x4 localMatrix;
+	CxMath::Matrix4x4 localMatrix;
 	std::string name;
 	std::vector<Node> children;
 };
@@ -69,8 +70,8 @@ struct Animation {
 struct Joint {
 	QuaternionTransform restTransform;	//< バインドポーズ
 	QuaternionTransform transform;	//< transform情報
-	Matrix4x4 localMatrix;			//< ローカル行列
-	Matrix4x4 skeletonSpaceMatrix;	//< スケルトン空間行列
+	CxMath::Matrix4x4 localMatrix;			//< ローカル行列
+	CxMath::Matrix4x4 skeletonSpaceMatrix;	//< スケルトン空間行列
 	std::string name;				//< ボーン名
 	std::vector<int32_t> children;	//< 子ボーンのインデックス
 	int32_t index;					//< インデックス
@@ -82,11 +83,11 @@ struct Skeleton {
 	std::map<std::string, int32_t> jointMap;
 	std::vector<Joint> joints;
 
-	void JointDraw(const Matrix4x4& m, const Vector4& color);
+	void JointDraw(const CxMath::Matrix4x4& m, const CxMath::Vector4& color);
 
-	void Draw(const Matrix4x4& world = Matrix4x4::MakeIdentity(),
+	void Draw(const CxMath::Matrix4x4& world = CxMath::Matrix4x4::MakeIdentity(),
 			  int highlightIndex = -1,
-			  const Vector4& colorHi = { 1,0.2f,0.2f,1 });
+			  const CxMath::Vector4& colorHi = { 1,0.2f,0.2f,1 });
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -98,7 +99,7 @@ struct VertexWeightData {
 };
 
 struct JointWeightData {
-	Matrix4x4 inverseBindPoseMatrix;
+	CxMath::Matrix4x4 inverseBindPoseMatrix;
 	std::vector<VertexWeightData> vertexWeights;
 };
 
@@ -115,12 +116,12 @@ struct VertexInfluence {
 };
 
 struct WellForGPU {
-	Matrix4x4 skeletonSpaceMatrix;							//位置用
-	Matrix4x4 skeletonSpaceInverseTransposeMatrix;			//法線用
+	CxMath::Matrix4x4 skeletonSpaceMatrix;							//位置用
+	CxMath::Matrix4x4 skeletonSpaceInverseTransposeMatrix;			//法線用
 };
 
 struct SkinCluster {
-	std::vector<Matrix4x4> inverseBindPoseMatrices;
+	std::vector<CxMath::Matrix4x4> inverseBindPoseMatrices;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource>influenceResource;
 	D3D12_VERTEX_BUFFER_VIEW influenceBufferView;

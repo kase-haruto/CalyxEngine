@@ -22,14 +22,14 @@ public:
 	void ShowGuiContent() override;
 
 	//--------- getters -----------------------------------------------------
-	const Vector3 GetGravity()const { return gravity_; }
+	const CxMath::Vector3 GetGravity()const { return gravity_; }
 
 	//--------- setters -----------------------------------------------------
-	void SetGravity(const Vector3& grav) { gravity_ = grav; }
+	void SetGravity(const CxMath::Vector3& grav) { gravity_ = grav; }
 	virtual const char* GetTypeName() const override { return "GravityModule"; }
 private:
 	//===================================================================*/
 	//					private methods
 	//===================================================================*/
-	Vector3 gravity_ {0.0f,-9.8f,0.0f};		//< 重力の強さ
+	CxMath::Vector3 gravity_ {0.0f,-9.8f,0.0f};		//< 重力の強さ
 };

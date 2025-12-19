@@ -19,10 +19,10 @@
 
 struct Material {
 
-	Vector4   color        = {1,1,1,1};;
+	CxMath::Vector4   color        = {1,1,1,1};;
 	int32_t   lightingMode = LightingMode::HalfLambert;
 	float     pad[3];
-	Matrix4x4 uvTransform;
+	CxMath::Matrix4x4 uvTransform;
 	float     shininess;
 	bool      isReflect             = false;
 	float     enviromentCoefficient = 0.5f;
@@ -38,14 +38,14 @@ struct Material {
 };
 
 struct ParticleMaterial {
-	Vector4     color       = {1,1,1,1};     // 基本色（tint）
-	Matrix4x4   uvTransform = Matrix4x4::MakeIdentity(); // UVアニメ用
+	CxMath::Vector4     color       = {1,1,1,1};     // 基本色（tint）
+	CxMath::Matrix4x4   uvTransform = CxMath::Matrix4x4::MakeIdentity(); // UVアニメ用
 	std::string texturePath = "particle.png";            // テクスチャパス
 };
 
 struct Material2D {
-	Vector4   color;
-	Matrix4x4 uvTransform;
+	CxMath::Vector4   color;
+	CxMath::Matrix4x4 uvTransform;
 
 	float   fillAmount = 1.0f;        // 0〜1 (初期は1、全部描画)
 	Vector2 fillOrigin = {0.0f,0.0f}; // (0,0)=左/下, (1,0)=右/下, etc.
@@ -56,7 +56,7 @@ struct Material2D {
 
 struct MaterialData {
 	std::string textureFilePath;
-	Vector3     uv_scale;
-	Vector3     uv_offset;
-	Vector3     uv_translate;
+	CxMath::Vector3     uv_scale;
+	CxMath::Vector3     uv_offset;
+	CxMath::Vector3     uv_translate;
 };

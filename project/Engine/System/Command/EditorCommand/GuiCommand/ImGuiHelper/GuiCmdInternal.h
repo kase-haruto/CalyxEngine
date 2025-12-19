@@ -24,8 +24,8 @@ namespace GuiCmdInternal{
 
 	private:
 		bool IsNotEqual(const Vector2& a, const Vector2& b) const;
-		bool IsNotEqual(const Vector3& a, const Vector3& b) const;
-		bool IsNotEqual(const Vector4& a, const Vector4& b) const;
+		bool IsNotEqual(const CxMath::Vector3& a, const CxMath::Vector3& b) const;
+		bool IsNotEqual(const CxMath::Vector4& a, const CxMath::Vector4& b) const;
 		bool IsNotEqual(bool a, bool b) const;
 		bool IsNotEqual(float a, float b) const;
 		bool IsNotEqual(int a, int b) const;
@@ -71,13 +71,13 @@ namespace GuiCmdInternal{
 	}
 
 	template<typename T>
-	inline bool GuiCmdSetValueComputer<T>::IsNotEqual(const Vector3& a, const Vector3& b) const{
+	inline bool GuiCmdSetValueComputer<T>::IsNotEqual(const CxMath::Vector3& a, const CxMath::Vector3& b) const{
 		const float eps = 0.0001f;
 		return std::fabs(a.x - b.x) > eps || std::fabs(a.y - b.y) > eps || std::fabs(a.z - b.z) > eps;
 	}
 
 	template<typename T>
-	inline bool GuiCmdSetValueComputer<T>::IsNotEqual(const Vector4& a, const Vector4& b) const{
+	inline bool GuiCmdSetValueComputer<T>::IsNotEqual(const CxMath::Vector4& a, const CxMath::Vector4& b) const{
 		const float eps = 0.0001f;
 		return std::fabs(a.x - b.x) > eps || std::fabs(a.y - b.y) > eps ||
 			std::fabs(a.z - b.z) > eps || std::fabs(a.w - b.w) > eps;

@@ -16,7 +16,7 @@ void EnemyFormationController::Initialize(const EnemyFormationConfig& cfg) {
 	switch(cfg_.motionType) {
 	case EnemyFormationMotionType::Straight:
 		motionFunc_ = [c = cfg_](float t) {
-			return Vector3{0.0f, 0.0f, c.baseZ - c.speedZ * t};
+			return CxMath::Vector3{0.0f, 0.0f, c.baseZ - c.speedZ * t};
 	};
 		break;
 
@@ -25,7 +25,7 @@ void EnemyFormationController::Initialize(const EnemyFormationConfig& cfg) {
 			float x = std::sin(t * c.snakeFreqX) * c.snakeAmpX;
 			float y = std::sin(t * c.snakeFreqY) * c.snakeAmpY;
 			float z = c.baseZ - c.speedZ * t;
-			return Vector3{x, y, z};
+			return CxMath::Vector3{x, y, z};
 	};
 		break;
 
@@ -35,13 +35,13 @@ void EnemyFormationController::Initialize(const EnemyFormationConfig& cfg) {
 			float x = std::cos(theta) * c.radius;
 			float y = std::sin(theta) * c.radius;
 			float z = c.baseZ - c.speedZ * t;
-			return Vector3{x, y, z};
+			return CxMath::Vector3{x, y, z};
 	};
 		break;
 
 	default:
 		motionFunc_ = [c = cfg_](float t) {
-			return Vector3{0.0f, 0.0f, c.baseZ - c.speedZ * t};
+			return CxMath::Vector3{0.0f, 0.0f, c.baseZ - c.speedZ * t};
 	};
 		break;
 	}

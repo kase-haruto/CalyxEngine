@@ -14,8 +14,6 @@
 #include <d3d12.h>
 #include <wrl.h>
 
-using namespace Microsoft::WRL;
-
 class DirectXCommon;
 
 class Sprite {
@@ -38,8 +36,8 @@ public:
 	// getter
 	const std::string&     GetTextureName() const { return path; }
 	RenderTargetType       GetTargetRt() const { return targetRT_; }
-	ComPtr<ID3D12Resource> GetConstBuffer() { return vertexResource_; }
-	const Vector4&         GetColor() const { return materialData_.color; }
+	Microsoft::WRL::ComPtr<ID3D12Resource> GetConstBuffer() { return vertexResource_; }
+	const CxMath::Vector4&         GetColor() const { return materialData_.color; }
 	const Vector2&         GetSize() const { return size; }
 	const Vector2&         GetAnchorPoint() const { return anchorPoint; }
 	const Vector2&         GetPosition() const { return position; }
@@ -55,7 +53,7 @@ public:
 	void       PutWindowCenter();
 	void       SetPosition(const Vector2& newPosition) { this->position = newPosition; }
 	void       SetUvTranslate(const Vector2& uvOffset) { Vector2(uvTransform.translate.x = uvOffset.x,uvTransform.translate.y = uvOffset.y); }
-	void       SetColor(const Vector4& newColor) { materialData_.color = newColor; }
+	void       SetColor(const CxMath::Vector4& newColor) { materialData_.color = newColor; }
 	void       SetSize(const Vector2& newSize) { this->size = newSize; }
 	void       SetAlpha(float newAlpha) { this->materialData_.color.w = newAlpha; }
 	void       SetAnchorPoint(const Vector2& newAnchorPoint) { this->anchorPoint = newAnchorPoint; }
@@ -91,7 +89,7 @@ private:
 	// 回転
 	float rotate = 0.0f;
 	// 色
-	Vector4 color = {1.0f,1.0f,1.0f,1.0f};
+	CxMath::Vector4 color = {1.0f,1.0f,1.0f,1.0f};
 	// size
 	Vector2 size = {640.0f,360.0f};
 	// アンカーポイント
@@ -111,14 +109,14 @@ private:
 	///=============================================================
 	// viewの生成
 	D3D12_INDEX_BUFFER_VIEW  indexBufferView{};
-	ComPtr<ID3D12Resource>   vertexResource_;
-	ComPtr<ID3D12Resource>   indexResource_;
-	ComPtr<ID3D12Resource>   transformResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource>   vertexResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource>   indexResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource>   transformResource_;
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSprite{};
 
 	// directX関連
 	bool       isVisible     = true;
-	Matrix4x4* transformData = nullptr;
+	CxMath::Matrix4x4* transformData = nullptr;
 
 	// マテリアル用のリソース
 	VertexData*                  vertexData = nullptr;

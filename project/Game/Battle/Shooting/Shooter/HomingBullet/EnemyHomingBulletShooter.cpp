@@ -9,22 +9,22 @@
 EnemyHomingBulletShooter::EnemyHomingBulletShooter(BulletContainer* container, BulletID id)
 	: container_(container), id_(id) {}
 
-void EnemyHomingBulletShooter::Shoot(const Vector3& origin,
-									 const Vector3& direction) {
+void EnemyHomingBulletShooter::Shoot(const CxMath::Vector3& origin,
+									 const CxMath::Vector3& direction) {
 	if (!container_ || !target_) return;
 
 	auto* enemyContainer = dynamic_cast<EnemyBulletContainer*>(container_);
 	if (!enemyContainer) return;
 
 	auto bullet = BulletFactory::Create(id_);
-	bullet->SetScale(Vector3(0.3f, 0.3f, 0.3f));
+	bullet->SetScale(CxMath::Vector3(0.3f, 0.3f, 0.3f));
 
-	Vector3 initDir = direction;
+	CxMath::Vector3 initDir = direction;
 	if (initDir.LengthSquared() <= 1e-6f) {
 		initDir = target_->GetWorldPosition() - origin; // フォールバック
 	}
 	if (initDir.LengthSquared() > 1e-6f) initDir = initDir.Normalize();
-	else                                  initDir = Vector3(0, 0, 1);
+	else                                  initDir = CxMath::Vector3(0, 0, 1);
 
 	bullet->ShootInitialize(origin, initDir);
 

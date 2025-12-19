@@ -12,7 +12,7 @@
 // c++
 #include <sstream> 
 
-void BoxCollider::Initialize([[maybe_unused]] const Vector3& size) {
+void BoxCollider::Initialize([[maybe_unused]] const CxMath::Vector3& size) {
 
 	if (name_.empty()) {
 		std::stringstream ss;
@@ -29,9 +29,9 @@ void BoxCollider::Initialize([[maybe_unused]] const Vector3& size) {
 BoxCollider::BoxCollider(bool isEnuble):
 Collider::Collider(isEnuble){}
 
-void BoxCollider::Update(const Vector3& position, const Quaternion& rotate) {
+void BoxCollider::Update(const CxMath::Vector3& position, const CxMath::Quaternion& rotate) {
 	// 回転込みでローカルオフセットをワールドへ
-	const Vector3 worldOffset =Quaternion::RotateVector(offset_,rotate); // ← 回転を適用
+	const CxMath::Vector3 worldOffset =CxMath::Quaternion::RotateVector(offset_,rotate); // ← 回転を適用
 	shape_.center = position + worldOffset;
 	shape_.rotate = rotate;
 }
@@ -56,7 +56,7 @@ void BoxCollider::ShowGui() {
 	}
 }
 
-const Vector3& BoxCollider::GetCenter() const {
+const CxMath::Vector3& BoxCollider::GetCenter() const {
 	return shape_.center;
 }
 

@@ -58,7 +58,7 @@ public:
 	Collider() = default;
 	Collider(bool isEnuble);
 	virtual ~Collider();
-	virtual void Update(const Vector3& position, const Quaternion& rotate) = 0;
+	virtual void Update(const CxMath::Vector3& position, const CxMath::Quaternion& rotate) = 0;
 	virtual void Draw()													   = 0;
 	virtual void ShowGui();
 	void		 ShowGui(struct ColliderConfig& config);
@@ -93,8 +93,8 @@ protected:
 
 	ColliderType type_;							//< 自身のタイプ
 	ColliderType targetType_;					//< 衝突相手のタイプ
-	Vector4		 color_ = {1.0, 0.0, 0.0, 1.0}; //< 描画色
-	Vector3		 offset_{0.0f, 0.0f, 0.0f};
+	CxMath::Vector4		 color_ = {1.0, 0.0, 0.0, 1.0}; //< 描画色
+	CxMath::Vector3		 offset_{0.0f, 0.0f, 0.0f};
 
 	bool isCollisionEnabled_ = false; //< 衝突判定を行うかどうか
 	bool isDraw_			 = true;  //< 描画を行うかどうか
@@ -114,9 +114,9 @@ public:
 	void			SetOwner(BaseGameObject* owner) { owner_ = owner; }
 	BaseGameObject* GetOwner() const { return owner_; }
 
-	virtual const Vector3&					 GetCenter() const	 = 0;
+	virtual const CxMath::Vector3&					 GetCenter() const	 = 0;
 	virtual const std::variant<Sphere, OBB>& GetCollisionShape() = 0;
-	Vector3 GetWorldPos()const;
+	CxMath::Vector3 GetWorldPos()const;
 
 	const std::string& GetName() const { return name_; }
 	void			   SetName(const std::string& name) { name_ = name; }
@@ -125,16 +125,16 @@ public:
 	ColliderType GetTargetType() const { return targetType_; }
 	void		 SetType(ColliderType type) { type_ = type; }
 	void		 SetTargetType(ColliderType targetType) { targetType_ = targetType; }
-	void		 SetColor(const Vector4& color) { color_ = color; }
+	void		 SetColor(const CxMath::Vector4& color) { color_ = color; }
 
 	bool IsCollisionEnubled() const { return isCollisionEnabled_; }
 	void SetCollisionEnabled(bool isCollisionEnuble);
 
 	void SetIsDrawCollider(bool isDraw) { isDraw_ = isDraw; }
 
-	void		   SetOffset(const Vector3& off) { offset_ = off; }
-	const Vector3& GetOffset() const { return offset_; }
-	void		   AddOffset(const Vector3& d) { offset_ += d; }
+	void		   SetOffset(const CxMath::Vector3& off) { offset_ = off; }
+	const CxMath::Vector3& GetOffset() const { return offset_; }
+	void		   AddOffset(const CxMath::Vector3& d) { offset_ += d; }
 
 private:
 	BaseGameObject* owner_ = nullptr;

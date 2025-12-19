@@ -5,7 +5,7 @@
 #include <Engine/Graphics/Buffer/DxConstantBuffer.h>
 #include <Engine/Graphics/Buffer/DxStructuredBuffer.h>
 
-struct Vector3;
+struct CxMath::Vector3;
 
 /* ========================================================================
 /*	gpuパーティクル排出
@@ -17,7 +17,7 @@ class GpuFxEmitter
 	/* ===================================================================== */
 	struct EmitterParam {
 		float	deltaTime	 = 0.f;
-		Vector3 acceleration = Vector3(0, 0, 0);
+		CxMath::Vector3 acceleration = CxMath::Vector3(0, 0, 0);
 	};
 
 	struct PerFrame {
@@ -26,7 +26,7 @@ class GpuFxEmitter
 	};
 
 	struct EmitterSphere {
-		Vector3	 translate;
+		CxMath::Vector3	 translate;
 		float	 radius;
 		uint32_t count;
 		float	 frequency;
@@ -63,10 +63,10 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetParticleSrv() const;
 
 	// setter
-	void SetPosition(const Vector3& pos) { position_ = pos; }
+	void SetPosition(const CxMath::Vector3& pos) { position_ = pos; }
 
 private:
-	Vector3 position_{0, 0, 0};
+	CxMath::Vector3 position_{0, 0, 0};
 	bool	isInitialized = false;
 
 	// SBuff

@@ -3,7 +3,7 @@
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 
 enum class FxValueMode;
-struct Vector3;
+struct CxMath::Vector3;
 template <class T>
 class FxParam;
 
@@ -37,7 +37,7 @@ inline bool DrawParamEditor<float>(const char* id, float& v) {
 	return GuiCmd::DragFloat(id, v);
 }
 template <>
-inline bool DrawParamEditor<Vector3>(const char* id, Vector3& v) {
+inline bool DrawParamEditor<CxMath::Vector3>(const char* id, CxMath::Vector3& v) {
 	return GuiCmd::DragFloat3(id, v);
 }
 
@@ -67,9 +67,9 @@ bool DrawParam(const char* label, FxParam<T>& p) {
 			p.SetRandom(mn, mx);
 			changed = true;
 		}
-	} else if constexpr(std::is_same_v<T, Vector3>) {
+	} else if constexpr(std::is_same_v<T, CxMath::Vector3>) {
 		if(mode == FxValueMode::Random) {
-			Vector3 mn = p.GetMin(), mx = p.GetMax();
+			CxMath::Vector3 mn = p.GetMin(), mx = p.GetMax();
 			bool	e1 = GuiCmd::DragFloat3("Min", mn);
 			bool	e2 = GuiCmd::DragFloat3("Max", mx);
 			if(e1 || e2) {
@@ -80,14 +80,14 @@ bool DrawParam(const char* label, FxParam<T>& p) {
 				changed = true;
 			}
 		} else { // RandomSphere (Center + Radius)
-			Vector3 center = (p.GetMin() + p.GetMax()) * 0.5f;
-			Vector3 half   = (p.GetMax() - p.GetMin()) * 0.5f;
+			CxMath::Vector3 center = (p.GetMin() + p.GetMax()) * 0.5f;
+			CxMath::Vector3 half   = (p.GetMax() - p.GetMin()) * 0.5f;
 			float	radius = half.Length();
 			bool	e1	   = GuiCmd::DragFloat3("Center", center);
 			bool	e2	   = GuiCmd::DragFloat("Radius", radius, 0.01f, 0.0f, 1e6f);
 			if(e1 || e2) {
-				Vector3 mn = center - Vector3(radius, radius, radius);
-				Vector3 mx = center + Vector3(radius, radius, radius);
+				CxMath::Vector3 mn = center - CxMath::Vector3(radius, radius, radius);
+				CxMath::Vector3 mx = center + CxMath::Vector3(radius, radius, radius);
 				p.SetRandom(mn, mx);
 				changed = true;
 			}

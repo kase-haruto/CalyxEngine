@@ -12,7 +12,7 @@ PlayerBulletContainer::PlayerBulletContainer(const std::string name) :
 /////////////////////////////////////////////////////////////////////////////////////////
 //		弾追加
 /////////////////////////////////////////////////////////////////////////////////////////
-void PlayerBulletContainer::AddBullet(BulletID id, const Vector3& pos, const Vector3& vel){
+void PlayerBulletContainer::AddBullet(BulletID id, const CxMath::Vector3& pos, const CxMath::Vector3& vel){
 	if (id != BulletID::Player_Straight && id != BulletID::Player_Homing) return;
 	auto bullet = BulletFactory::Create(id);
 	if (!bullet) return;

@@ -21,8 +21,8 @@
 #include <wrl.h>
 
 struct DirectionalLightData {
-	Vector4 color;	   // ライトの色
-	Vector3 direction; // ライトの向き
+	CxMath::Vector4 color;	   // ライトの色
+	CxMath::Vector3 direction; // ライトの向き
 	float	intensity; // 輝度
 };
 

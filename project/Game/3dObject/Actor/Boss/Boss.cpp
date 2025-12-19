@@ -94,17 +94,17 @@ void Boss::Update(float dt) {
 
 	// 方向合わせ（プレイヤーへ）
 	{
-		const Vector3 myPos     = GetWorldPosition();
-		const Vector3 targetPos = target_ ? target_->GetWorldTransform().GetWorldPosition() : myPos;
+		const CxMath::Vector3 myPos     = GetWorldPosition();
+		const CxMath::Vector3 targetPos = target_ ? target_->GetWorldTransform().GetWorldPosition() : myPos;
 
-		Vector3 d = targetPos - myPos;
+		CxMath::Vector3 d = targetPos - myPos;
 		if(d.LengthSquared() > 1e-12f) {
 			d = d.Normalize();
 
 			const float yaw   = std::atan2(d.x,d.z);                               // 水平旋回
 			const float pitch = std::atan2(-d.y,std::sqrt(d.x * d.x + d.z * d.z)); // 上下（LH）
 
-			const Quaternion qWorld  = Quaternion::MakeRotateY(yaw) * Quaternion::MakeRotateX(pitch);
+			const CxMath::Quaternion qWorld  = CxMath::Quaternion::MakeRotateY(yaw) * CxMath::Quaternion::MakeRotateX(pitch);
 			worldTransform_.rotation = qWorld;
 		}
 	}
@@ -138,7 +138,7 @@ void Boss::OnCollisionEnter(Collider* other) {
 	life_--;
 
 	// --- 衝突位置を取得 ---
-	Vector3 hitPos = other->GetWorldPos(); // ← マジでこれだけでOKのことが多い
+	CxMath::Vector3 hitPos = other->GetWorldPos(); // ← マジでこれだけでOKのことが多い
 
 	auto fx = hitEffects_.lock();
 	// 位置設定
@@ -173,14 +173,14 @@ void Boss::OnCollisionExit([[maybe_unused]]Collider* other) {  }
 /////////////////////////////////////////////////////////////////////////////////////////
 //		中心座標取得
 /////////////////////////////////////////////////////////////////////////////////////////
-const Vector3 Boss::GetCenterPos() const {
-	const Vector3 offset   = {0.0f,1.5f,0.0f};
-	Vector3       worldPos = Vector3::Transform(offset,worldTransform_.matrix.world);
+const CxMath::Vector3 Boss::GetCenterPos() const {
+	const CxMath::Vector3 offset   = {0.0f,1.5f,0.0f};
+	CxMath::Vector3       worldPos = CxMath::Vector3::Transform(offset,worldTransform_.matrix.world);
 	return worldPos;
 }
 
 #pragma region accessor
-Vector3 Boss::GetTargetWorldPos() const { return target_ ? target_->GetWorldTransform().GetWorldPosition() : GetCenterPos(); }
+CxMath::Vector3 Boss::GetTargetWorldPos() const { return target_ ? target_->GetWorldTransform().GetWorldPosition() : GetCenterPos(); }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		発射制御クラスの取得

@@ -8,14 +8,14 @@
 
 #include<vector>
 
-struct Vector3;
-struct Vector4;
+struct CxMath::Vector3;
+struct CxMath::Vector4;
 struct Matrix4x4;
 
 class LineDrawer{
 public:
 	void Initialize();
-	void DrawLine(const Vector3& start, const Vector3& end, const Vector4& color);
+	void DrawLine(const CxMath::Vector3& start, const CxMath::Vector3& end, const CxMath::Vector4& color);
 	void Render();
 	void Clear();
 

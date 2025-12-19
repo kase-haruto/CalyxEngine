@@ -137,7 +137,7 @@ GraphicsPipelineDesc PipelinePresets::MakeObject2D() {
 	desc.VS(L"Object2d.VS.hlsl")
 		.PS(L"Object2d.PS.hlsl")
 
-		// 入力レイアウトは VertexPosUv4 （Vector4 pos + Vector2 uv）用
+		// 入力レイアウトは VertexPosUv4 （CxMath::Vector4 pos + Vector2 uv）用
 		.Input(VertexInputLayout<VertexData>::Get())
 
 		// アルファブレンド

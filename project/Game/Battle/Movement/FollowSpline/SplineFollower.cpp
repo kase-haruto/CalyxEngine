@@ -55,40 +55,40 @@ void SplineFollower::Update(float dt) {
 	// ===========================================================
 	//  ローカル（スプライン空間）で位置・回転を算出
 	// ===========================================================
-	Vector3 localPos = path_->Evaluate(t_);
+	CxMath::Vector3 localPos = path_->Evaluate(t_);
 	localPos.y += yOffset_;
 
 	// lookMode が TowardsTarget の場合、向きはワールド位置決定後に計算するので一旦 identity
-	Quaternion localRot; // 単位クォータニオン
+	CxMath::Quaternion localRot; // 単位クォータニオン
 	switch (lookMode_) {
 		case LookMode::None:
 			{
-				localRot = Quaternion(); // 単位
+				localRot = CxMath::Quaternion(); // 単位
 				break;
 			}
 		case LookMode::AlongPath:
 			{
-				Vector3 fwd = path_->Tangent(t_);
-				if (fwd.LengthSquared() < 1e-8f) fwd = Vector3(0, 0, 1);
+				CxMath::Vector3 fwd = path_->Tangent(t_);
+				if (fwd.LengthSquared() < 1e-8f) fwd = CxMath::Vector3(0, 0, 1);
 				const float yaw = std::atan2(fwd.x, fwd.z);
 				const float pitch = std::atan2(-fwd.y, std::sqrt(fwd.x * fwd.x + fwd.z * fwd.z));
-				localRot = Quaternion::MakeRotateY(yaw) * Quaternion::MakeRotateX(pitch);
+				localRot = CxMath::Quaternion::MakeRotateY(yaw) * CxMath::Quaternion::MakeRotateX(pitch);
 				break;
 			}
 		case LookMode::TowardsTarget:
 			{
 				// 後でワールド位置が決まってから計算する
-				localRot = Quaternion(); // ひとまず単位
+				localRot = CxMath::Quaternion(); // ひとまず単位
 				break;
 			}
 	}
 
-	Vector3 worldPos;
-	Quaternion worldRotPre = localRot;
+	CxMath::Vector3 worldPos;
+	CxMath::Quaternion worldRotPre = localRot;
 
 	if (anchor_ && inheritPos_) {
 		// アンカーのワールド行列でローカル点を変換（回転＋並進）
-		worldPos = Vector3::Transform(localPos, anchor_->matrix.world);
+		worldPos = CxMath::Vector3::Transform(localPos, anchor_->matrix.world);
 	} else {
 		worldPos = localPos;
 	}
@@ -101,14 +101,14 @@ void SplineFollower::Update(float dt) {
 	}
 
 	if (lookMode_ == LookMode::TowardsTarget) {
-		Vector3 target = (targetTransform_) ? targetTransform_->GetWorldPosition() : worldPos;
-		Vector3 d = target - worldPos;
-		if (d.LengthSquared() <= 1e-12f) d = Vector3(0, 0, 1);
+		CxMath::Vector3 target = (targetTransform_) ? targetTransform_->GetWorldPosition() : worldPos;
+		CxMath::Vector3 d = target - worldPos;
+		if (d.LengthSquared() <= 1e-12f) d = CxMath::Vector3(0, 0, 1);
 		else d = d.Normalize();
 
 		const float yaw = std::atan2(d.x, d.z);
 		const float pitch = std::atan2(-d.y, std::sqrt(d.x * d.x + d.z * d.z));
-		curRot_ = Quaternion::MakeRotateY(yaw) * Quaternion::MakeRotateX(pitch);
+		curRot_ = CxMath::Quaternion::MakeRotateY(yaw) * CxMath::Quaternion::MakeRotateX(pitch);
 	} else {
 		curRot_ = worldRotPre;
 	}

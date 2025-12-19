@@ -23,19 +23,19 @@ template<>
 }
 
 template<>
- void SetValueCommand<Vector3>::UpdateName(){
-	auto toStr = [] (const Vector3& v){
+ void SetValueCommand<CxMath::Vector3>::UpdateName(){
+	auto toStr = [] (const CxMath::Vector3& v){
 		return "(" + std::to_string(v.x) + "," + std::to_string(v.y) + "," + std::to_string(v.z) + ")";
 		};
-	name_ = "Set Vector3: \"" + label_ + "\" from " + toStr(before_) + " -> " + toStr(after_);
+	name_ = "Set CxMath::Vector3: \"" + label_ + "\" from " + toStr(before_) + " -> " + toStr(after_);
 }
 
 template<>
- void SetValueCommand<Vector4>::UpdateName(){
-	auto toStr = [] (const Vector4& v){
+ void SetValueCommand<CxMath::Vector4>::UpdateName(){
+	auto toStr = [] (const CxMath::Vector4& v){
 		return "(" + std::to_string(v.x) + "," + std::to_string(v.y) + "," + std::to_string(v.z) + "," + std::to_string(v.w) + ")";
 		};
-	name_ = "Set Vector4: \"" + label_ + "\" from " + toStr(before_) + " -> " + toStr(after_);
+	name_ = "Set CxMath::Vector4: \"" + label_ + "\" from " + toStr(before_) + " -> " + toStr(after_);
 }
 
 template<>

@@ -37,7 +37,7 @@ void PlayerDangerSense::Update(float /*dt*/) {
 		computeNow	  = (frameCounter_ == 0);
 	}
 
-	Vector3 playerPos = ctx_.getCenterPos();
+	CxMath::Vector3 playerPos = ctx_.getCenterPos();
 	bool	dangerNow = lastDanger_;
 
 	if(computeNow) {
@@ -62,7 +62,7 @@ void PlayerDangerSense::AddBulletContainer(const BulletContainer* container) {
 // ============================================================
 // 複数 BulletContainer を走査して危険判定
 // ============================================================
-bool PlayerDangerSense::ComputeDangerNearby(Vector3& outPlayerPos) const {
+bool PlayerDangerSense::ComputeDangerNearby(CxMath::Vector3& outPlayerPos) const {
 
 	outPlayerPos = ctx_.getCenterPos();
 
@@ -80,8 +80,8 @@ bool PlayerDangerSense::ComputeDangerNearby(Vector3& outPlayerPos) const {
 		container->ForEachBullet([&](BaseBullet& b) {
 			if(!b.GetIsAlive()) return;
 
-			Vector3 bpos	  = b.GetWorldPosition();
-			Vector3 bvel	  = b.GetVelocity();
+			CxMath::Vector3 bpos	  = b.GetWorldPosition();
+			CxMath::Vector3 bvel	  = b.GetVelocity();
 			float	br		  = b.GetCollisionRadius();
 			float	safeRange = playerR + br + cfg_.margin;
 
@@ -89,11 +89,11 @@ bool PlayerDangerSense::ComputeDangerNearby(Vector3& outPlayerPos) const {
 			float speed = b.GetMoveSpeed();
 			if(speed < 0.01f) return;
 
-			Vector3 toPlayer = outPlayerPos - bpos;
+			CxMath::Vector3 toPlayer = outPlayerPos - bpos;
 			float	distance = toPlayer.Length();
 
 			// 弾の進行方向とプレイヤー方向の内積（正面のみ判定）
-			float dot = Vector3::Dot(toPlayer.Normalize(), bvel.Normalize());
+			float dot = CxMath::Vector3::Dot(toPlayer.Normalize(), bvel.Normalize());
 			if(dot < 0.2f) return;
 
 			// 衝突までの時間（Time-To-Impact）
@@ -114,7 +114,7 @@ bool PlayerDangerSense::ComputeDangerNearby(Vector3& outPlayerPos) const {
 // ============================================================
 // UI & Dodge flag 更新
 // ============================================================
-void PlayerDangerSense::ApplyDangerResult(bool danger, const Vector3& playerPos) {
+void PlayerDangerSense::ApplyDangerResult(bool danger, const CxMath::Vector3& playerPos) {
 
 	float dt = ClockManager::GetInstance()->GetDeltaTime();
 
@@ -132,7 +132,7 @@ void PlayerDangerSense::ApplyDangerResult(bool danger, const Vector3& playerPos)
 	if(!cue_) return;
 
 	if(hint) {
-		Vector2 screen = Cx::Math::WorldToScreen(playerPos);
+		Vector2 screen = CxMath::WorldToScreen(playerPos);
 		cue_->SetPosition(screen);
 		cue_->SetIsVisible(true);
 	} else {

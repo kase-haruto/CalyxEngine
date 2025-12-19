@@ -12,7 +12,7 @@
 #include <memory>
 
 // forward
-struct Vector3;
+struct CxMath::Vector3;
 class BulletContainer;
 
 namespace PlayerShoot{
@@ -32,7 +32,7 @@ public:
 	PlayerShootingController() = default;
 	~PlayerShootingController()override = default;
 
-	bool RequestShoot(const Vector3& pos, const Vector3& dir)override;
+	bool RequestShoot(const CxMath::Vector3& pos, const CxMath::Vector3& dir)override;
 	void Initialize();
 	void Update(float dt)override;
 	//--------- accessor -------------------------------------------------
@@ -46,8 +46,8 @@ private:
 	//===================================================================*/
 	//						private functions
 	//===================================================================*/
-	void RequestShootStraight(const Vector3& pos, const Vector3& dir);
-	void RequestShootHoming(const Vector3& pos, const Vector3& dir);
+	void RequestShootStraight(const CxMath::Vector3& pos, const CxMath::Vector3& dir);
+	void RequestShootHoming(const CxMath::Vector3& pos, const CxMath::Vector3& dir);
 
 private:
 	//===================================================================*/

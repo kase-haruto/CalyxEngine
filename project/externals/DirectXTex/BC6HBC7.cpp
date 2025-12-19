@@ -1591,7 +1591,7 @@ namespace
                 XMVECTOR tpixel = XMLoadUByte4(reinterpret_cast<const XMUBYTE4*>(&aPalette[i]));
                 // Compute ErrorMetricRGB
                 tpixel = XMVectorSubtract(vpixel, tpixel);
-                const float fErr = XMVectorGetX(XMVector3Dot(tpixel, tpixel));
+				const float fErr = XMVectorGetX(XMVector3Dot(tpixel, tpixel));
                 if (fErr > fBestErr)	// error increased, so we're done searching
                     break;
                 if (fErr < fBestErr)

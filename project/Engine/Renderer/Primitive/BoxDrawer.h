@@ -5,14 +5,14 @@
 #include <Engine/Graphics/Buffer/DxConstantBuffer.h>
 #include <Engine/Objects/Transform/Transform.h>
 #include <Engine/Graphics/Pipeline/PipelineDesc/Input/VertexLayout.h>
-struct Vector3;
-struct Vector4;
+struct CxMath::Vector3;
+struct CxMath::Vector4;
 struct Matrix4x4;
 
 class BoxDrawer {
 public:
 	void Initialize();
-	void DrawBox(const Vector3& center, const Quaternion& rotate, const Vector3& size, const Vector4& color);
+	void DrawBox(const CxMath::Vector3& center, const CxMath::Quaternion& rotate, const CxMath::Vector3& size, const CxMath::Vector4& color);
 	void Render();
 	void Clear();
 

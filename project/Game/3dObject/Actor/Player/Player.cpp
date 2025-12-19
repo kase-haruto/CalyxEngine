@@ -33,34 +33,34 @@ Player::~Player() = default;
 
 namespace {
 
-inline void SetWorldPosKeepRotScale(WorldTransform& wt, const Vector3& worldPos) {
+inline void SetWorldPosKeepRotScale(WorldTransform& wt, const CxMath::Vector3& worldPos) {
 	// 親が何段でもOK：親の world は祖先込み合成
 	if(wt.parent) {
 		wt.parent->Update(); // 親の world を最新に
-		const Matrix4x4 invParent = Matrix4x4::Inverse(wt.parent->matrix.world);
+		const CxMath::Matrix4x4 invParent = CxMath::Matrix4x4::Inverse(wt.parent->matrix.world);
 		// 位置のみをローカルへ戻す（回転・スケールはローカル既存値を維持）
-		wt.translation = Vector3::Transform(worldPos, invParent);
+		wt.translation = CxMath::Vector3::Transform(worldPos, invParent);
 	} else {
 		wt.translation = worldPos;
 	}
 }
 
 // world を「画面内の矩形（px余白あり）」に収めたワールド座標へ
-inline Vector3 ClampWorldByScreenBox(const Vector3& world,
+inline CxMath::Vector3 ClampWorldByScreenBox(const CxMath::Vector3& world,
 									 float marginXpx, float marginYpx) {
 	auto* cam = CameraManager::GetMain3d();
 	if(!cam) return world;
 
 	// スクリーン座標と NDC z を取得
-	const Matrix4x4& VP	  = cam->GetViewProjectionMatrix();
-	const Vector4	 clip = Vector4::Transform(Vector4(world, 1.0f), VP);
+	const CxMath::Matrix4x4& VP	  = cam->GetViewProjectionMatrix();
+	const CxMath::Vector4	 clip = CxMath::Vector4::Transform(CxMath::Vector4(world, 1.0f), VP);
 
 	// 背面や極端ケースは触らない
 	constexpr float kEps = 1e-6f;
 	if(clip.w <= kEps) return world;
 
-	const Vector3 ndc = {clip.x / clip.w, clip.y / clip.w, clip.z / clip.w};
-	Vector2		  scr = Cx::Math::WorldToScreen(world);
+	const CxMath::Vector3 ndc = {clip.x / clip.w, clip.y / clip.w, clip.z / clip.w};
+	Vector2		  scr = CxMath::WorldToScreen(world);
 
 	// 画面サイズと余白でクランプ（float化しておく）
 	constexpr float W = static_cast<float>(kGameWidth);
@@ -78,7 +78,7 @@ inline Vector3 ClampWorldByScreenBox(const Vector3& world,
 	// 変化なしなら元のワールドを返す
 	if(clamped.x == scr.x && clamped.y == scr.y) return world;
 
-	return Cx::Math::ScreenToWorld(clamped, ndc.z);
+	return CxMath::ScreenToWorld(clamped, ndc.z);
 }
 
 // WorldTransform を画面内にクランプ（ローカル translation へ反映まで）
@@ -87,8 +87,8 @@ inline void ClampWorldTransformInView(WorldTransform& wt,
 	// 自身・親の world を最新化
 	wt.Update();
 
-	const Vector3 nowW = wt.GetWorldPosition();
-	const Vector3 clW  = ClampWorldByScreenBox(nowW, marginXpx, marginYpx);
+	const CxMath::Vector3 nowW = wt.GetWorldPosition();
+	const CxMath::Vector3 clW  = ClampWorldByScreenBox(nowW, marginXpx, marginYpx);
 
 	// 親が何段でもローカルへ戻して translation を更新
 	SetWorldPosKeepRotScale(wt, clW);
@@ -117,7 +117,7 @@ void Player::Initialize() {
 	moveSpeed_ = 15.0f;
 	reticleTransform_.Initialize();
 	reticleTransform_.parent	  = &CameraManager::GetMain3d()->GetWorldTransform();
-	reticleTransform_.translation = Vector3(0.0f, 0.0f, 100.0f);
+	reticleTransform_.translation = CxMath::Vector3(0.0f, 0.0f, 100.0f);
 
 	// コライダー初期化
 	BaseGameObject::InitializeCollider(ColliderKind::Sphere);
@@ -267,19 +267,19 @@ void Player::Update(float dt) {
 	}
 	reticleTransform_.Update();
 
-	Vector3 playerPos  = GetWorldPosition();
-	Vector3 reticlePos = reticleTransform_.GetWorldPosition();
+	CxMath::Vector3 playerPos  = GetWorldPosition();
+	CxMath::Vector3 reticlePos = reticleTransform_.GetWorldPosition();
 
 	// ── レティクル─────────────────────────
 	size_t spriteCount = reticleSprites_.size();
 	if(spriteCount < 2) return;
 
-	Vector3 diff = (reticlePos - playerPos) * 0.5f;
+	CxMath::Vector3 diff = (reticlePos - playerPos) * 0.5f;
 
 	for(size_t i = 0; i < spriteCount; ++i) {
 		float t = static_cast<float>(i) / (spriteCount - 1);
 
-		Vector3 worldPos = playerPos + diff * t;
+		CxMath::Vector3 worldPos = playerPos + diff * t;
 
 		// 偶奇で回転方向を変える
 		float rotateSpeed	= (i % 2 == 0) ? 0.02f : -0.02f;
@@ -293,7 +293,7 @@ void Player::Update(float dt) {
 		reticleSprites_[i]->SetUvRotate(currentUvRotate + uvRotateSpeed);
 
 		// スクリーン座標に変換して配置
-		Vector2 screenPos = Cx::Math::WorldToScreen(worldPos);
+		Vector2 screenPos = CxMath::WorldToScreen(worldPos);
 		reticleSprites_[i]->SetPosition(screenPos);
 		reticleSprites_[i]->Update();
 	}
@@ -322,7 +322,7 @@ void Player::DerivativeGui() {
 /////////////////////////////////////////////////////////////////////////////////////////
 /// 	移動リクエストの追加
 /////////////////////////////////////////////////////////////////////////////////////////
-void Player::AddMoveRequest(const Vector3& delta) { moveCtrler_.AddMove(delta); }
+void Player::AddMoveRequest(const CxMath::Vector3& delta) { moveCtrler_.AddMove(delta); }
 
 /* ======================================================================================
 /*		private functions
@@ -331,20 +331,20 @@ void Player::AddMoveRequest(const Vector3& delta) { moveCtrler_.AddMove(delta); 
 ///////////////////////////////////////////////////////////////////////////////////
 //		レティクルの移動
 ///////////////////////////////////////////////////////////////////////////////////
-void Player::MoveReticle(const Vector3& offset) { reticleTransform_.translation += offset; }
+void Player::MoveReticle(const CxMath::Vector3& offset) { reticleTransform_.translation += offset; }
 
 ///////////////////////////////////////////////////////////////////////////////////
 //		弾の発射をりくえすと
 ///////////////////////////////////////////////////////////////////////////////////
 void Player::RequestShoot() const {
-	Vector3 playerPos  = worldTransform_.GetWorldPosition();
-	Vector3 reticlePos = reticleTransform_.GetWorldPosition();
-	Vector3 dir		   = reticlePos - playerPos;
+	CxMath::Vector3 playerPos  = worldTransform_.GetWorldPosition();
+	CxMath::Vector3 reticlePos = reticleTransform_.GetWorldPosition();
+	CxMath::Vector3 dir		   = reticlePos - playerPos;
 
 	if(dir.Length() > 0.001f) {
 		dir = dir.Normalize();
 	} else {
-		dir = Vector3(0.0f, 0.0f, 1.0f);
+		dir = CxMath::Vector3(0.0f, 0.0f, 1.0f);
 	}
 
 	if(!shootingController_) return;
@@ -418,25 +418,25 @@ void Player::OnCollisionEnter(Collider* other) {
 ///////////////////////////////////////////////////////////////////////////////////
 //		playerの傾き
 ///////////////////////////////////////////////////////////////////////////////////
-void Player::UpdateTilt(const Vector3& inputVector) {
+void Player::UpdateTilt(const CxMath::Vector3& inputVector) {
 	Camera3d* cam = CameraManager::GetMain3d();
 	if(!cam) return;
 
 	// 閾値以下で戻す
 	if(inputVector.Length() <= 0.01f) {
-		Quaternion identity			   = Quaternion::MakeIdentity();
-		worldTransform_.rotation	   = Quaternion::Slerp(worldTransform_.rotation, identity, 0.1f);
+		CxMath::Quaternion identity			   = CxMath::Quaternion::MakeIdentity();
+		worldTransform_.rotation	   = CxMath::Quaternion::Slerp(worldTransform_.rotation, identity, 0.1f);
 		worldTransform_.rotationSource = RotationSource::Quaternion;
 
 		// カメラ傾きを戻す（オイラー角）
-		Vector3 currentRot = cam->GetRotate();
-		currentRot.x	   = Cx::Math::Lerp(currentRot.x, 0.0f, 0.1f); // pitch
-		currentRot.z	   = Cx::Math::Lerp(currentRot.z, 0.0f, 0.1f); // roll
+		CxMath::Vector3 currentRot = cam->GetRotate();
+		currentRot.x	   = CxMath::Lerp(currentRot.x, 0.0f, 0.1f); // pitch
+		currentRot.z	   = CxMath::Lerp(currentRot.z, 0.0f, 0.1f); // roll
 		cam->SetCamera(cam->GetTranslate(), currentRot);
 		return;
 	}
 
-	Vector3 dir = inputVector.Normalize();
+	CxMath::Vector3 dir = inputVector.Normalize();
 
 	const float maxRoll	 = 0.3f;
 	const float maxPitch = 0.3f;
@@ -444,18 +444,18 @@ void Player::UpdateTilt(const Vector3& inputVector) {
 	float targetRoll  = -dir.x * maxRoll;
 	float targetPitch = -dir.y * maxPitch;
 
-	// プレイヤー回転（Quaternion）
-	Quaternion rollQ		  = Quaternion::MakeRotateZ(targetRoll);
-	Quaternion pitchQ		  = Quaternion::MakeRotateX(targetPitch);
-	Quaternion targetRotation = Quaternion::Multiply(rollQ, pitchQ);
+	// プレイヤー回転（CxMath::Quaternion）
+	CxMath::Quaternion rollQ		  = CxMath::Quaternion::MakeRotateZ(targetRoll);
+	CxMath::Quaternion pitchQ		  = CxMath::Quaternion::MakeRotateX(targetPitch);
+	CxMath::Quaternion targetRotation = CxMath::Quaternion::Multiply(rollQ, pitchQ);
 
-	worldTransform_.rotation	   = Quaternion::Slerp(worldTransform_.rotation, targetRotation, 0.15f);
+	worldTransform_.rotation	   = CxMath::Quaternion::Slerp(worldTransform_.rotation, targetRotation, 0.15f);
 	worldTransform_.rotationSource = RotationSource::Quaternion;
 
 	// カメラ回転（Euler）
-	Vector3 currentRot = cam->GetRotate();
-	currentRot.x	   = Cx::Math::Lerp(currentRot.x, targetPitch * 0.3f, 0.15f); // pitch
-	currentRot.z	   = Cx::Math::Lerp(currentRot.z, targetRoll * 0.3f, 0.15f);  // roll
+	CxMath::Vector3 currentRot = cam->GetRotate();
+	currentRot.x	   = CxMath::Lerp(currentRot.x, targetPitch * 0.3f, 0.15f); // pitch
+	currentRot.z	   = CxMath::Lerp(currentRot.z, targetRoll * 0.3f, 0.15f);  // roll
 	cam->SetCamera(cam->GetTranslate(), currentRot);
 }
 
@@ -467,7 +467,7 @@ void Player::UpdateReticlePosition() {
 	constexpr float stickSensitivity = 300.0f; // スティック感度を大きめに
 	float			dt				 = ClockManager::GetInstance()->GetDeltaTime();
 
-	Vector3 offset = Vector3::Zero();
+	CxMath::Vector3 offset = CxMath::Vector3::Zero();
 
 	// キーボード入力
 	if(Input::GetInstance()->PushKey(DIK_UP)) offset.y += 3.0f;
@@ -483,7 +483,7 @@ void Player::UpdateReticlePosition() {
 	offset.y += rightStick.y * stickSensitivity * dt;
 
 	// キーボードだけ正規化
-	Vector3 keyboardOffset = offset;
+	CxMath::Vector3 keyboardOffset = offset;
 	keyboardOffset.x -= rightStick.x * stickSensitivity * dt;
 	keyboardOffset.y -= rightStick.y * stickSensitivity * dt;
 
@@ -528,9 +528,9 @@ std::vector<Sprite*> Player::GetAllSprites() const {
 	return sprites;
 }
 
-const Vector3 Player::GetCenterPos() const {
-	const Vector3 offset   = {0.0f, 3.0f, 0.0f};
-	Vector3		  worldPos = Vector3::Transform(offset, worldTransform_.matrix.world);
+const CxMath::Vector3 Player::GetCenterPos() const {
+	const CxMath::Vector3 offset   = {0.0f, 3.0f, 0.0f};
+	CxMath::Vector3		  worldPos = CxMath::Vector3::Transform(offset, worldTransform_.matrix.world);
 	return worldPos;
 }
 

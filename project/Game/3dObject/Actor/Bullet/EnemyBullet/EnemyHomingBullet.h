@@ -16,7 +16,7 @@ public:
 	EnemyHomingBullet(const std::string& modelName, const std::string& name);
 	~EnemyHomingBullet() override;
 
-	void ShootInitialize(const Vector3& initPos, const Vector3& velocity) override;
+	void ShootInitialize(const CxMath::Vector3& initPos, const CxMath::Vector3& velocity) override;
 	void Initialize() override;
 	void OnShot();
 	void SetTarget(const Actor* target);
@@ -26,7 +26,7 @@ public:
 	void OnCollisionStay([[maybe_unused]] Collider* other) override {}
 	void OnCollisionExit([[maybe_unused]] Collider* other) override {}
 
-	const Vector3 GetCenterPos() const override;
+	const CxMath::Vector3 GetCenterPos() const override;
 
 	// 調整用
 	void SetHomingSpeed(float v) { homingSpeed_ = v; }
@@ -51,5 +51,5 @@ private:
 
 	std::weak_ptr<FxObject> trailFx_; //< 発射エフェクト
 
-	Vector3 baseScale_{ 1.0f, 1.0f, 1.0f };
+	CxMath::Vector3 baseScale_{ 1.0f, 1.0f, 1.0f };
 };

@@ -6,29 +6,29 @@
 #include <Engine/Foundation/Math/Vector4.h>
 
 struct FxUnit {
-	Vector3 position;                        //< 座標
-	Vector3 rotationEuler;                   //< オイラー回転
+	CxMath::Vector3 position;                        //< 座標
+	CxMath::Vector3 rotationEuler;                   //< オイラー回転
 	float   spinSpeed;                       // < スピン速度
-	Vector3 velocity;                        //< 速度
-	Vector3 initialScale = {1.0f,1.0f,1.0f}; // 初期スケール
-	Vector3 scale;                           //< スケール
+	CxMath::Vector3 velocity;                        //< 速度
+	CxMath::Vector3 initialScale = {1.0f,1.0f,1.0f}; // 初期スケール
+	CxMath::Vector3 scale;                           //< スケール
 	float   lifetime = 1.0f;                 //< 寿命
 	float   age;                             //< 経過時間
-	Vector4 color;                           //< 色
+	CxMath::Vector4 color;                           //< 色
 	bool    alive = true;                    //< 生存フラグ
 	float   lifeT = 0.0f;                    //< 補完の01
 	//UVオフセット・スケール
 	Transform2D uvTransform;
 	bool        followEmitter = false;                   // エミッタ追従フラグ
-	Vector3     followOffset  = Vector3(0.0f,0.0f,0.0f); // エミッタからのオフセット
+	CxMath::Vector3     followOffset  = CxMath::Vector3(0.0f,0.0f,0.0f); // エミッタからのオフセット
 
 };
 
 struct ParticleCS {
-	Vector3 translate;
-	Vector3 scale;
+	CxMath::Vector3 translate;
+	CxMath::Vector3 scale;
 	float   lifeTime;
-	Vector3 velocity;
+	CxMath::Vector3 velocity;
 	float   currentTIme;
-	Vector4 color;
+	CxMath::Vector4 color;
 };

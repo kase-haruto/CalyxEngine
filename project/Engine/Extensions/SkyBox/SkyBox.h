@@ -16,7 +16,7 @@
 #include <functional>
 #include <optional>
 
-struct Vector3;
+struct CxMath::Vector3;
 
 class SkyBox :
 	public SceneObject{

@@ -1,8 +1,8 @@
 #include "AnimationStruct.h"
 
-void Skeleton::JointDraw(const Matrix4x4& m, const Vector4& color /* = white */) {
+void Skeleton::JointDraw(const CxMath::Matrix4x4& m, const CxMath::Vector4& color /* = white */) {
 	constexpr float kJointCubeHalf = 0.03f;
-	Vector3 jointCube[8] = {
+	CxMath::Vector3 jointCube[8] = {
 		{ kJointCubeHalf,  kJointCubeHalf,  kJointCubeHalf},
 		{-kJointCubeHalf,  kJointCubeHalf,  kJointCubeHalf},
 		{-kJointCubeHalf,  kJointCubeHalf, -kJointCubeHalf},
@@ -13,7 +13,7 @@ void Skeleton::JointDraw(const Matrix4x4& m, const Vector4& color /* = white */)
 		{ kJointCubeHalf, -kJointCubeHalf, -kJointCubeHalf},
 	};
 	for (auto& v : jointCube) {
-		v = Vector3::Transform(v, m);
+		v = CxMath::Vector3::Transform(v, m);
 	}
 	// 上面
 	for (int i = 0; i < 4; ++i) {
@@ -32,23 +32,23 @@ void Skeleton::JointDraw(const Matrix4x4& m, const Vector4& color /* = white */)
 }
 
 
-void Skeleton::Draw(const Matrix4x4& world,
+void Skeleton::Draw(const CxMath::Matrix4x4& world,
 					int highlightIndex,
-					const Vector4& hiCol) {
-	const Vector4 white{ 1,1,1,1 };
+					const CxMath::Vector4& hiCol) {
+	const CxMath::Vector4 white{ 1,1,1,1 };
 
 	for (const Joint& joint : joints) {
-		Matrix4x4 ws = joint.skeletonSpaceMatrix * world;
+		CxMath::Matrix4x4 ws = joint.skeletonSpaceMatrix * world;
 
-		Vector3 jointPos{ ws.m[3][0], ws.m[3][1], ws.m[3][2] };
+		CxMath::Vector3 jointPos{ ws.m[3][0], ws.m[3][1], ws.m[3][2] };
 
-		Vector4 cubeCol = (joint.index == highlightIndex) ? hiCol : white;
+		CxMath::Vector4 cubeCol = (joint.index == highlightIndex) ? hiCol : white;
 		JointDraw(ws, cubeCol);
 
 		// 親とのライン
 		if (joint.parent) {
-			Matrix4x4 pws = joints[*joint.parent].skeletonSpaceMatrix * world;
-			Vector3 parentPos{ pws.m[3][0], pws.m[3][1], pws.m[3][2] };
+			CxMath::Matrix4x4 pws = joints[*joint.parent].skeletonSpaceMatrix * world;
+			CxMath::Vector3 parentPos{ pws.m[3][0], pws.m[3][1], pws.m[3][2] };
 			PrimitiveDrawer::GetInstance()->DrawLine3d(
 				jointPos, parentPos, cubeCol); // ラインも同色に
 		}

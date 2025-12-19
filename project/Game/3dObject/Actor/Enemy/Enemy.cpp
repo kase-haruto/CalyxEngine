@@ -85,7 +85,7 @@ void Enemy::Update(float dt) {
 	} else {
 		// 解散行動中に色を薄くしていく
 		float	subAlpha = 0.5f * dt;
-		Vector4 col		 = GetModel()->GetColor();
+		CxMath::Vector4 col		 = GetModel()->GetColor();
 		col.w			 = (std::max)(0.0f, col.w - subAlpha);
 		GetModel()->SetColor(col);
 
@@ -106,7 +106,7 @@ void Enemy::Update(float dt) {
 
 		float rad = std::numbers::pi_v<float> * 0.5f * t;
 		worldTransform_.rotation =
-			Quaternion::MakeRotateAxisQuaternion(deathRotateAxis_, rad);
+			CxMath::Quaternion::MakeRotateAxisQuaternion(deathRotateAxis_, rad);
 
 		if(t >= 1.0f) {
 			deathState_ = DeathState::Dead;
@@ -124,8 +124,8 @@ void Enemy::Update(float dt) {
 
 void Enemy::StartEntranceToFormation(
 	EnemyFormationController* formation,
-	const Vector3&			  offset,
-	const Vector3&			  entranceStart) {
+	const CxMath::Vector3&			  offset,
+	const CxMath::Vector3&			  entranceStart) {
 	movement_.StartEntranceToFormation(
 		formation,
 		offset,
@@ -139,9 +139,9 @@ void Enemy::OnCollisionEnter(Collider*) {
 	}
 }
 
-const Vector3 Enemy::GetCenterPos() const {
-	const Vector3 offset{0, 1.5f, 0};
-	return Vector3::Transform(offset, worldTransform_.matrix.world);
+const CxMath::Vector3 Enemy::GetCenterPos() const {
+	const CxMath::Vector3 offset{0, 1.5f, 0};
+	return CxMath::Vector3::Transform(offset, worldTransform_.matrix.world);
 }
 
 int16_t Enemy::GetScore() const { return score_; }

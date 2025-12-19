@@ -26,7 +26,7 @@ void BossShootingController::Update(float dt) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		発射Request
 /////////////////////////////////////////////////////////////////////////////////////////
-bool BossShootingController::RequestShoot([[maybe_unused]] const Vector3& pos, [[maybe_unused]] const Vector3& dir) {
+bool BossShootingController::RequestShoot([[maybe_unused]] const CxMath::Vector3& pos, [[maybe_unused]] const CxMath::Vector3& dir) {
 	if(shootCooldown_ >= 0) {
 		return false;
 	}
@@ -40,7 +40,7 @@ bool BossShootingController::RequestShoot([[maybe_unused]] const Vector3& pos, [
 /////////////////////////////////////////////////////////////////////////////////////////
 //		弾の生成
 /////////////////////////////////////////////////////////////////////////////////////////
-std::shared_ptr<BaseBullet> BossShootingController::AddBullet(BulletID id, const Vector3& pos, const Vector3& vel) {
+std::shared_ptr<BaseBullet> BossShootingController::AddBullet(BulletID id, const CxMath::Vector3& pos, const CxMath::Vector3& vel) {
 	// BulletContainer より生成を委譲
 	auto bullet = BulletFactory::Create(id);
 	if(!bullet) return nullptr;

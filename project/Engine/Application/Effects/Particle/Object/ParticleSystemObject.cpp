@@ -75,7 +75,7 @@ void ParticleSystemObject::SetDrawEnable(bool isDrawEnable) {
 	}
 }
 
-void ParticleSystemObject::SetPosition(const Vector3& pos) {
+void ParticleSystemObject::SetPosition(const CxMath::Vector3& pos) {
 	emitter_->SetPosition(pos);
 }
 

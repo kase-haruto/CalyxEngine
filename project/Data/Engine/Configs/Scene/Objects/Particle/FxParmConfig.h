@@ -1,59 +1,59 @@
 #pragma once
 
 #include <Engine/Foundation/Math/Vector3.h>
-#include <externals/nlohmann/json.hpp> // 必須
+#include <externals/nlohmann/json.hpp>
 
 // -------------------------
 // FxValueMode enum
 // -------------------------
-enum class FxValueMode{
+enum class FxValueMode {
 	Constant,
 	Random,
 	RandomSphere
 };
 
 // JSON enum対応
-inline void to_json(nlohmann::json& j, const FxValueMode& mode){
-	j = static_cast< int >(mode);
+inline void to_json(nlohmann::json& j, const FxValueMode& mode) {
+	j = static_cast<int>(mode);
 }
-inline void from_json(const nlohmann::json& j, FxValueMode& mode){
-	mode = static_cast< FxValueMode >(j.get<int>());
+inline void from_json(const nlohmann::json& j, FxValueMode& mode) {
+	mode = static_cast<FxValueMode>(j.get<int>());
 }
 
 // -------------------------
 // テンプレート基底
 // -------------------------
-template<typename T>
-struct FxParamConfig{
+template <typename T>
+struct FxParamConfig {
 	FxValueMode mode = FxValueMode::Constant;
-	T constant {};
-	T min {};
-	T max {};
+	T			constant{};
+	T			min{};
+	T			max{};
 };
 
 // -------------------------
 // 型別特殊構造体
 // -------------------------
-struct FxFloatParamConfig : public FxParamConfig<float>{
+struct FxFloatParamConfig : public FxParamConfig<float> {
 	using FxParamConfig<float>::FxParamConfig;
 	FxFloatParamConfig() {
 		constant = 1.0f;
-		min = 0.0f;
-		max = 1.0f;
+		min		 = 0.0f;
+		max		 = 1.0f;
 	}
 	FxFloatParamConfig(const FxParamConfig<float>& base)
-		: FxParamConfig<float>(base){}
+		: FxParamConfig<float>(base) {}
 };
 
-struct FxVector3ParamConfig : public FxParamConfig<Vector3>{
-	using FxParamConfig<Vector3>::FxParamConfig;
-	FxVector3ParamConfig() {
-		constant = Vector3(1.0f,1.0f,1.0f);
-		min	  = Vector3(0.0f,0.0f,0.0f);
-		max	  = Vector3(1.0f,1.0f,1.0f);
+struct Vector3ParamConfig : public FxParamConfig<CxMath::Vector3> {
+	using FxParamConfig<CxMath::Vector3>::FxParamConfig;
+	Vector3ParamConfig() {
+		constant = CxMath::Vector3(1.0f, 1.0f, 1.0f);
+		min		 = CxMath::Vector3(0.0f, 0.0f, 0.0f);
+		max		 = CxMath::Vector3(1.0f, 1.0f, 1.0f);
 	}
-	FxVector3ParamConfig(const FxParamConfig<Vector3>& base)
-		: FxParamConfig<Vector3>(base){}
+	Vector3ParamConfig(const FxParamConfig<CxMath::Vector3>& base)
+		: FxParamConfig<CxMath::Vector3>(base) {}
 };
 
 // -------------------------
@@ -65,8 +65,17 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(FxFloatParamConfig,
 								   min,
 								   max)
 
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(FxVector3ParamConfig,
-									   mode,
-									   constant,
-									   min,
-									   max)
+inline void to_json(nlohmann::json& j, const Vector3ParamConfig& p) {
+	j = nlohmann::json{
+		{"mode", p.mode},
+		{"constant", p.constant},
+		{"min", p.min},
+		{"max", p.max}};
+}
+
+inline void from_json(const nlohmann::json& j, Vector3ParamConfig& p) {
+	j.at("mode").get_to(p.mode);
+	j.at("constant").get_to(p.constant);
+	j.at("min").get_to(p.min);
+	j.at("max").get_to(p.max);
+}

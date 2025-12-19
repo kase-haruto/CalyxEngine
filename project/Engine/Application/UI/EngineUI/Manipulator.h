@@ -11,7 +11,7 @@
 
 class WorldTransform;
 class BaseCamera;
-struct Matrix4x4;
+struct CxMath::Matrix4x4;
 
 /* ========================================================================
 /*		マニピュレータ
@@ -51,8 +51,8 @@ private:
 	/// </summary>
 	/// <param name="m"></param>
 	/// <param name="out"></param>
-	void RowToColumnArray(const Matrix4x4& m, float out[16]);
-	Matrix4x4 ColumnArrayToRow(const float in_[16]);
+	void RowToColumnArray(const CxMath::Matrix4x4& m, float out[16]);
+	CxMath::Matrix4x4 ColumnArrayToRow(const float in_[16]);
 
 private:
 	ImGuizmo::OPERATION operation_ = ImGuizmo::TRANSLATE;

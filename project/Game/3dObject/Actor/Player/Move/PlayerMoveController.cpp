@@ -6,7 +6,7 @@ PlayerMoveController::~PlayerMoveController() =default;
 //////////////////////////////////////////////////////////////////
 //  移動量を追加する
 //////////////////////////////////////////////////////////////////
-void PlayerMoveController::AddMove(const Vector3& delta) {
+void PlayerMoveController::AddMove(const CxMath::Vector3& delta) {
 	pendingMove_ += delta;
 }
 
@@ -17,9 +17,9 @@ void PlayerMoveController::Apply(WorldTransform& wt) {
 	if(!std::isfinite(pendingMove_.x) ||
 	   !std::isfinite(pendingMove_.y) ||
 	   !std::isfinite(pendingMove_.z)){
-		pendingMove_ = Vector3::Zero();
+		pendingMove_ = CxMath::Vector3::Zero();
 	   }
 
 	wt.translation += pendingMove_;
-	pendingMove_ = Vector3::Zero();
+	pendingMove_ = CxMath::Vector3::Zero();
 }

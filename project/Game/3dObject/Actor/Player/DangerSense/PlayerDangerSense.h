@@ -72,12 +72,12 @@ private:
 	 * \param outPlayerPos プレイヤー位置出力先
 	 * \return 危険があるか
 	 */
-	bool ComputeDangerNearby(Vector3& outPlayerPos) const;
+	bool ComputeDangerNearby(CxMath::Vector3& outPlayerPos) const;
 	/** \brief 危険結果適用
 	 * \param danger 危険があるか
 	 * \param playerPos プレイヤー位置
 	 */
-	void ApplyDangerResult(bool danger,const Vector3& playerPos);
+	void ApplyDangerResult(bool danger,const CxMath::Vector3& playerPos);
 
 private:
 	//=====================================================================*/

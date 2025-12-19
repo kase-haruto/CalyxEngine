@@ -19,9 +19,9 @@ bool BossNormalShoot::Execute(class Boss&					boss,
 							  class BossShootingController& shooter) const {
 
 	// targetの方向に弾を撃つ
-	const Vector3 bossPos	= boss.GetCenterPos();
-	const Vector3 playerPos = boss.GetTargetWorldPos();
-	const Vector3 dir		= (playerPos - bossPos).Normalize();
+	const CxMath::Vector3 bossPos	= boss.GetCenterPos();
+	const CxMath::Vector3 playerPos = boss.GetTargetWorldPos();
+	const CxMath::Vector3 dir		= (playerPos - bossPos).Normalize();
 
 	// 発射Request
 	shooter.RequestShoot(bossPos, dir);

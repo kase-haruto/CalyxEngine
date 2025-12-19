@@ -14,31 +14,31 @@ template<typename T>
 struct VertexInputLayout;
 
 struct VertexPosUv {
-	Vector3 pos;
+	CxMath::Vector3 pos;
 	Vector2 uv;
 };
 
 struct VertexPosColor {
-	Vector3 pos;
-	Vector4 color;
+	CxMath::Vector3 pos;
+	CxMath::Vector4 color;
 };
 
 struct VertexPosUvColor {
-	Vector4 pos;
+	CxMath::Vector4 pos;
 	Vector2 uv;
-	Vector4 color;
+	CxMath::Vector4 color;
 };
 
 struct VertexPosUvN {
-	Vector4 position;	// 16 B
+	CxMath::Vector4 position;	// 16 B
 	Vector2 texcoord;	// 24 B
-	Vector3 normal;		// 36 B
+	CxMath::Vector3 normal;		// 36 B
 };
 
 struct VertexPosUvNSkinning {
-	Vector4 pos;		// 16 B
+	CxMath::Vector4 pos;		// 16 B
 	Vector2 uv;			// 24 B
-	Vector3 normal;		// 36 B
+	CxMath::Vector3 normal;		// 36 B
 };
 
 template<>
@@ -101,7 +101,7 @@ struct VertexInputLayout<VertexData> {
 			  0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
-			  sizeof(Vector4), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+			  sizeof(CxMath::Vector4), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 		};
 	}
 };

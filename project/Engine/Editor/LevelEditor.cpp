@@ -458,8 +458,8 @@ void LevelEditor::SetCameraForViewport(BaseCamera* mainCamera, BaseCamera* debug
 //=============================================================================
 void LevelEditor::TryPickObjectFromMouse(const Vector2&	  mouse,
 										 const Vector2&	  viewportSize,
-										 const Matrix4x4& view,
-										 const Matrix4x4& proj) {
+										 const CxMath::Matrix4x4& view,
+										 const CxMath::Matrix4x4& proj) {
 	SceneContext* ctx = SceneContext::Current();
 	if(!ctx || !debugViewport_) return;
 
@@ -506,8 +506,8 @@ void LevelEditor::TryPickUnderCursor() {
 
 	Vector2 mousePos(relativeX, relativeY);
 
-	Matrix4x4 view = CameraManager::GetDebug()->GetViewMatrix();
-	Matrix4x4 proj = CameraManager::GetDebug()->GetProjectionMatrix();
+	CxMath::Matrix4x4 view = CameraManager::GetDebug()->GetViewMatrix();
+	CxMath::Matrix4x4 proj = CameraManager::GetDebug()->GetProjectionMatrix();
 
 	Ray ray = Raycastor::ConvertMouseToRay(mousePos, view, proj, size);
 	if(SceneObject* picked = PickSceneObjectByRay(ray)) {

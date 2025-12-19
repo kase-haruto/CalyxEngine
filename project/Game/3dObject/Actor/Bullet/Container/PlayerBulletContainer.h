@@ -16,7 +16,7 @@ public:
 	~PlayerBulletContainer()override = default;
 
 	//--------- mainFunc -----------------------------------------------------
-	void AddBullet(BulletID id, const Vector3& pos, const Vector3& vel) override;
+	void AddBullet(BulletID id, const CxMath::Vector3& pos, const CxMath::Vector3& vel) override;
 	void AddBullet(BulletID id, const std::shared_ptr<BaseBullet>& bullet);
 	std::string_view GetTypeName() const override{ return "PlayerBulletContainer"; }
 };

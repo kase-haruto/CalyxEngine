@@ -10,6 +10,7 @@
 /* math */
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <Engine/Foundation/Utility/Func/CxUtils.h>
+#include <Engine/Foundation/Math/Vector3.h>
 
 /* c++ */
 #include <stdint.h>
@@ -86,10 +87,10 @@ void Sprite::ShowGui() {
 }
 
 void Sprite::UpdateMatrix() {
-	Matrix4x4 matWorld      = Cx::Math::MakeAffineMatrix(transform_.scale,transform_.rotate,transform_.translate);
-	Matrix4x4 matView       = Matrix4x4::MakeIdentity();
-	Matrix4x4 matProjection = Cx::Math::MakeOrthographicMatrix(0.0f,0.0f,1280.0f,720.0f,0.0f,100.0f);
-	Matrix4x4 wvpMatrix     = Matrix4x4::Multiply(matWorld,Matrix4x4::Multiply(matView,matProjection));
+	CxMath::Matrix4x4 matWorld      = CxMath::MakeAffineMatrix(transform_.scale,transform_.rotate,transform_.translate);
+	CxMath::Matrix4x4 matView       = CxMath::Matrix4x4::MakeIdentity();
+	CxMath::Matrix4x4 matProjection = CxMath::MakeOrthographicMatrix(0.0f,0.0f,1280.0f,720.0f,0.0f,100.0f);
+	CxMath::Matrix4x4 wvpMatrix     = CxMath::Matrix4x4::Multiply(matWorld,CxMath::Matrix4x4::Multiply(matView,matProjection));
 	*transformData          = wvpMatrix;
 }
 
@@ -97,11 +98,11 @@ void Sprite::UpdateTransform() {
 	///===================================================
 	/// UV Transform
 	///===================================================
-	Matrix4x4 uvTransformMatrix = Cx::Math::MakeScaleMatrix(uvTransform.scale);
-	uvTransformMatrix           = Matrix4x4::Multiply(uvTransformMatrix,Cx::Math::MakeRotateZMatrix(uvTransform.rotate.z));
-	uvTransformMatrix           = Matrix4x4::Multiply(uvTransformMatrix,Cx::Math::MakeTranslateMatrix(uvTransform.translate));
+	CxMath::Matrix4x4 uvTransformMatrix = CxMath::MakeScaleMatrix(uvTransform.scale);
+	uvTransformMatrix           = CxMath::Matrix4x4::Multiply(uvTransformMatrix,CxMath::MakeRotateZMatrix(uvTransform.rotate.z));
+	uvTransformMatrix           = CxMath::Matrix4x4::Multiply(uvTransformMatrix,CxMath::MakeTranslateMatrix(uvTransform.translate));
 	materialData_.uvTransform   = uvTransformMatrix;
-}
+}	
 
 void Sprite::Draw(ID3D12GraphicsCommandList* cmdList) {
 	if(!isVisible) return;
@@ -184,12 +185,12 @@ void Sprite::VertexResourceMap() {
 
 void Sprite::TransformResourceMap() {
 	transformResource_->Map(0,nullptr,reinterpret_cast<void**>(&transformData));
-	*transformData = Matrix4x4::MakeIdentity(); // 初期値は単位行列
+	*transformData = CxMath::Matrix4x4::MakeIdentity(); // 初期値は単位行列
 }
 
 void Sprite::MaterialResourceMap() {
 	materialData_.color       = {1.0f,1.0f,1.0f,1.0f};
-	materialData_.uvTransform = Matrix4x4::MakeIdentity();
+	materialData_.uvTransform = CxMath::Matrix4x4::MakeIdentity();
 	materialCB_.TransferData(materialData_);
 }
 

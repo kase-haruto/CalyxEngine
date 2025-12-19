@@ -12,7 +12,7 @@ public:
 	void Initialize()override;
 	void Update(float dt)override;
 
-	std::optional<Vector3> GetJointWorldPos(const std::string& name) const;
+	std::optional<CxMath::Vector3> GetJointWorldPos(const std::string& name) const;
 	std::string_view GetTypeName() const override{ return "CalyxHuman"; }
 private:
 	void TransitionAnimation();

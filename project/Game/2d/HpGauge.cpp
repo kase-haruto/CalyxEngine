@@ -16,7 +16,7 @@ namespace {
 /////////////////////////////////////////////////////////////////////////////////////////
 // HP 比率による色変化（緑→黄→赤）→ 青ゲージ(現在HP)に使用
 /////////////////////////////////////////////////////////////////////////////////////////
-Vector4 ComputeColor(float ratio)
+CxMath::Vector4 ComputeColor(float ratio)
 {
 	if (ratio > 0.5f) {
 		float t = (ratio - 0.5f) / 0.5f;
@@ -72,7 +72,7 @@ void HpGauge::Initialize(const Vector2& position, const Vector2& size)
 	redGauge_->SetFillMethod(1);
 	redGauge_->SetFillOrigin(0.0f, 0.0f);
 	redGauge_->SetFillAmount(1.0f);
-	redGauge_->SetColor(Vector4(1,0,0,1));
+	redGauge_->SetColor(CxMath::Vector4(1,0,0,1));
 
 	//----------------------------------------
 	// フレーム

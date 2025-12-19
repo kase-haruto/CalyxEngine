@@ -11,11 +11,11 @@
 class OverLifetimeModule final : public BaseFxModule {
 public:
 	enum class Target {
-		Scale = 0, // Vector3
+		Scale = 0, // CxMath::Vector3
 		RotationX, // float (deg)
 		RotationY, // float (deg)
 		RotationZ, // float (deg)
-		ColorRGBA, // Vector4
+		ColorRGBA, // CxMath::Vector4
 		AlphaOnly  // float (color.w)
 	};
 	enum class BlendOp {
@@ -42,14 +42,14 @@ public:
 	void			   SetInvert(bool v) { invert_ = v; }
 	bool			   GetInvert() const { return invert_; }
 	virtual const char* GetTypeName() const override { return "OverLifetimeModule"; }
-	void	SetStart(const Vector4& v) { start_ = v; }
-	void	SetEnd(const Vector4& v) { end_ = v; }
-	Vector4 GetStart() const { return start_; }
-	Vector4 GetEnd() const { return end_; }
+	void	SetStart(const CxMath::Vector4& v) { start_ = v; }
+	void	SetEnd(const CxMath::Vector4& v) { end_ = v; }
+	CxMath::Vector4 GetStart() const { return start_; }
+	CxMath::Vector4 GetEnd() const { return end_; }
 
 private:
-	void ApplyTo(FxUnit& u, const Vector4& v) const;
-	void DrawValueEditor(const char* label, Vector4& v);
+	void ApplyTo(FxUnit& u, const CxMath::Vector4& v) const;
+	void DrawValueEditor(const char* label, CxMath::Vector4& v);
 
 private:
 	Target			   target_	= Target::Scale;
@@ -58,6 +58,6 @@ private:
 	bool			   clamp01_ = true;
 	bool			   invert_	= false;
 
-	Vector4 start_{0, 0, 0, 1};
-	Vector4 end_{1, 1, 1, 1};
+	CxMath::Vector4 start_{0, 0, 0, 1};
+	CxMath::Vector4 end_{1, 1, 1, 1};
 };

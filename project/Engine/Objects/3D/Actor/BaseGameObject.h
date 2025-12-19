@@ -80,10 +80,10 @@ public:
 
 	//--------- accessor ------------------------------------------------
 	// getter
-	virtual const Vector3 GetCenterPos() const;
+	virtual const CxMath::Vector3 GetCenterPos() const;
 	BillboardMode		  GetBillboardMode() const { return billboardMode_; }
 	std::string_view	  GetTypeName() const override { return "BaseGameObject"; }
-	const Vector3		  GetWorldPosition() const { return worldTransform_.GetWorldPosition(); }
+	const CxMath::Vector3		  GetWorldPosition() const { return worldTransform_.GetWorldPosition(); }
 	BaseModel*			  GetModel() const { return model_.get(); }
 	Collider*			  GetCollider();
 	ObjectModelType		  GetModelType() const { return objectModelType_; }
@@ -95,12 +95,12 @@ public:
 	// setter
 	void SetName(const std::string& name);
 	void SetBillboardMode(BillboardMode m) { billboardMode_ = m; }
-	void SetTranslate(const Vector3& pos);
-	void SetRotate(const Quaternion& rot);
-	void SetRotate(const Vector3& euler);
-	void SetScale(const Vector3& scale);
+	void SetTranslate(const CxMath::Vector3& pos);
+	void SetRotate(const CxMath::Quaternion& rot);
+	void SetRotate(const CxMath::Vector3& euler);
+	void SetScale(const CxMath::Vector3& scale);
 	void SetDrawEnable(bool isDrawEnable) override;
-	void SetColor(const Vector4& color);
+	void SetColor(const CxMath::Vector4& color);
 	void SetCollider(std::unique_ptr<Collider> collider);
 	void SetTexture(const std::string& texName);
 	void SetUvScale(const Vector2& scale) { model_->uvTransform.scale = scale; }

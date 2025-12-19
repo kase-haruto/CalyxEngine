@@ -9,8 +9,8 @@
 #include <externals/nlohmann/json.hpp>
 
 struct DirectionalLightConfig : public SceneObjectConfig {
-	Vector4 color;     //< 光の色
-	Vector3 direction; //< 光の方向
+	CxMath::Vector4 color;     //< 光の色
+	CxMath::Vector3 direction; //< 光の方向
 	float   intensity; //< 光の強度
 };
 
@@ -38,7 +38,7 @@ inline void from_json(const nlohmann::json& j,DirectionalLightConfig& c) {
 		c.transform = WorldTransformConfig(); // デフォルト構築
 	}
 
-	c.color     = j.value("color",Vector4(1,1,1,1));
-	c.direction = j.value("direction",Vector3(0,-1,0));
+	c.color     = j.value("color",CxMath::Vector4(1,1,1,1));
+	c.direction = j.value("direction",CxMath::Vector3(0,-1,0));
 	c.intensity = j.value("intensity",1.0f);
 }

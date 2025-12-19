@@ -7,7 +7,7 @@
 #include <string>
 
 struct Vector2;
-struct Vector4;
+struct CxMath::Vector4;
 class Sprite;
 
 /************************************

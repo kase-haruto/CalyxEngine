@@ -6,35 +6,35 @@ namespace Cx {
 	namespace GameUtil {
 
 		
-		Vector3 RotateAroundAxis(const Vector3& v, const Vector3& axisN, float rad) {
+		CxMath::Vector3 RotateAroundAxis(const CxMath::Vector3& v, const CxMath::Vector3& axisN, float rad) {
 			float c = std::cos(rad), s = std::sin(rad);
-			return v * c + Vector3::Cross(axisN, v) * s + axisN * (Vector3::Dot(axisN, v) * (1.0f - c));
+			return v * c + CxMath::Vector3::Cross(axisN, v) * s + axisN * (CxMath::Vector3::Dot(axisN, v) * (1.0f - c));
 		}
 
-		void MakeOrthoBasis(const Vector3& forwardN, Vector3& rightN, Vector3& upN){
-			const Vector3 worldUp = {0,1,0};
-			rightN = Vector3::Cross(worldUp, forwardN);
+		void MakeOrthoBasis(const CxMath::Vector3& forwardN, CxMath::Vector3& rightN, CxMath::Vector3& upN){
+			const CxMath::Vector3 worldUp = {0,1,0};
+			rightN = CxMath::Vector3::Cross(worldUp, forwardN);
 			if (rightN.LengthSquared() < 1e-8f){
-				rightN = Vector3::Cross({1,0,0}, forwardN);
+				rightN = CxMath::Vector3::Cross({1,0,0}, forwardN);
 			}
 			rightN = rightN.Normalize();
-			upN    = Vector3::Cross(forwardN, rightN).Normalize();
+			upN    = CxMath::Vector3::Cross(forwardN, rightN).Normalize();
 		}
 
-		std::vector<Vector3> GenFanDirs(const Vector3& forwardN, float centerDeg, float spreadDeg, int nWay) {
-			std::vector<Vector3> out;
+		std::vector<CxMath::Vector3> GenFanDirs(const CxMath::Vector3& forwardN, float centerDeg, float spreadDeg, int nWay) {
+			std::vector<CxMath::Vector3> out;
 			if (nWay <= 0) return out;
 
-			Vector3 rightN, upN;
+			CxMath::Vector3 rightN, upN;
 			MakeOrthoBasis(forwardN, rightN, upN);
 
-			float center = Cx::Math::ToRadians(centerDeg);
-			float spread = Cx::Math::ToRadians(spreadDeg);
+			float center = CxMath::ToRadians(centerDeg);
+			float spread = CxMath::ToRadians(spreadDeg);
 
 			for (int i=0; i<nWay; ++i){
 				float t = (nWay==1) ? 0.5f : (float)i/(nWay-1);
 				float ang = (t-0.5f)*spread + center;
-				Vector3 d = (forwardN*std::cos(ang)) + (rightN*std::sin(ang));
+				CxMath::Vector3 d = (forwardN*std::cos(ang)) + (rightN*std::sin(ang));
 				out.push_back(d.Normalize());
 			}
 			return out;

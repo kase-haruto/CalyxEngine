@@ -29,7 +29,7 @@ public:
 	virtual ~BulletContainer() = default;
 
 	//--------- mainfunc -----------------------------------------------------
-	virtual void AddBullet(BulletID id,const Vector3& pos,const Vector3& vel) = 0;
+	virtual void AddBullet(BulletID id,const CxMath::Vector3& pos,const CxMath::Vector3& vel) = 0;
 	virtual void RemoveBullet(const std::shared_ptr<BaseBullet>& bullet);
 	void         Update(float dt) override;
 

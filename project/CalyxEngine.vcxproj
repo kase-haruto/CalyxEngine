@@ -656,7 +656,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Assets\Texture\Texture.h" />
     <ClInclude Include="Engine\Assets\Texture\TextureManager.h" />
     <ClInclude Include="Engine\Objects\Transform\Transform.h" />
-    <ClInclude Include="Engine\Objects\Transform\TransformationMatrix.h" />
     <ClInclude Include="Engine\Objects\3D\Geometory\AABB.h" />
     <ClInclude Include="Engine\Objects\LightObject\DirectionalLight.h" />
     <ClInclude Include="Engine\Objects\LightObject\PointLight.h" />

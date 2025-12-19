@@ -34,16 +34,16 @@ void CalyxHuman::Update(float dt){
 
 }
 
-std::optional<Vector3> CalyxHuman::GetJointWorldPos(const std::string& name) const {
+std::optional<CxMath::Vector3> CalyxHuman::GetJointWorldPos(const std::string& name) const {
 	const AnimationModel* anim = GetAnimationModel();
 	if (!anim) return std::nullopt;
 
 	auto matOpt = anim->GetJointMatrix(name);
 	if (!matOpt) return std::nullopt;
 
-	Matrix4x4 worldM = (*matOpt) * worldTransform_.matrix.world;
+	CxMath::Matrix4x4 worldM = (*matOpt) * worldTransform_.matrix.world;
 
-	Vector3 pos = {
+	CxMath::Vector3 pos = {
 		worldM.m[3][0],
 		worldM.m[3][1],
 		worldM.m[3][2]
@@ -85,11 +85,11 @@ void CalyxHuman::Move(float dt){
 }
 
 void CalyxHuman::Turn(){
-	Vector3 from = Vector3::Forward(); // (0, 0, 1)
-	Vector3 to = velocity_.Normalize();                  // 移動方向
+	CxMath::Vector3 from = CxMath::Vector3::Forward(); // (0, 0, 1)
+	CxMath::Vector3 to = velocity_.Normalize();                  // 移動方向
 
 	if (to.Length() > 0.0f){
-		Quaternion rot = Quaternion::FromToQuaternion(from, to);
+		CxMath::Quaternion rot = CxMath::Quaternion::FromToQuaternion(from, to);
 		worldTransform_.rotation = rot;
 	}
 }

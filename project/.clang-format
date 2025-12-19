@@ -26,3 +26,4 @@ SpacesInCStyleCastParentheses: false
 SpaceAfterCStyleCast: false
 SpaceInEmptyParentheses: false
 SpaceBeforeAssignmentOperators: true
+NamespaceIndentation: All

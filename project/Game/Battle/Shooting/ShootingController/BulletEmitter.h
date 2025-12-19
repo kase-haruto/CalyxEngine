@@ -12,10 +12,10 @@ struct BulletEmitterConfig{
 	std::string tag;          // 任意の識別
 };
 struct BulletEmitterContext{
-	Vector3 origin {};
-	Vector3 selfForward {0,0,1};
-	Vector3 targetPos {};
-	Vector3 targetVel {};
+	CxMath::Vector3 origin {};
+	CxMath::Vector3 selfForward {0,0,1};
+	CxMath::Vector3 targetPos {};
+	CxMath::Vector3 targetVel {};
 };
 
 class BulletEmitter{

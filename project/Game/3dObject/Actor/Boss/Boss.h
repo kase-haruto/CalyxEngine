@@ -60,8 +60,8 @@ public:
 	void OnCollisionExit([[maybe_unused]] Collider* other) override;
 
 	//--------- accessor -----------------------------------------------------
-	const Vector3           GetCenterPos() const override;
-	Vector3                 GetTargetWorldPos() const;
+	const CxMath::Vector3           GetCenterPos() const override;
+	CxMath::Vector3                 GetTargetWorldPos() const;
 	BossAnimController*     GetAnimator() const;
 	BossAI*                 GetAI() const;
 	BossShootingController* GetShootController() const { return shootingController_.get(); }

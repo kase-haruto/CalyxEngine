@@ -19,8 +19,8 @@
 #include <wrl.h>
 
 struct PointLightData{
-	Vector4 color;		//ライトの色
-	Vector3 position;	//ライトの位置
+	CxMath::Vector4 color;		//ライトの色
+	CxMath::Vector3 position;	//ライトの位置
 	float intensity;	//光度
 	float radius;		//ライトの届く最大距離
 	float decay;		//減衰率

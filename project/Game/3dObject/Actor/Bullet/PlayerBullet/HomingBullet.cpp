@@ -21,10 +21,10 @@ HomingBullet::HomingBullet(const std::string& modelName, const std::string& name
 
 HomingBullet::~HomingBullet() = default;
 
-void HomingBullet::ShootInitialize(const Vector3& initPos, const Vector3& velocity){
-	Vector3 initVel = (velocity.Length() > 0.001f)
+void HomingBullet::ShootInitialize(const CxMath::Vector3& initPos, const CxMath::Vector3& velocity){
+	CxMath::Vector3 initVel = (velocity.Length() > 0.001f)
 		? velocity.Normalize() * homingSpeed_
-		: Vector3(0, 0, 1) * homingSpeed_; // fallback
+		: CxMath::Vector3(0, 0, 1) * homingSpeed_; // fallback
 
 	BaseBullet::ShootInitialize(initPos, initVel);
 
@@ -49,21 +49,21 @@ void HomingBullet::SetTarget(const Actor* target){
 
 void HomingBullet::Update([[maybe_unused]]float dt){
 	if (target_ && target_->GetIsAlive()){
-		Vector3 objectOffset = {0.0f,1.0f,0.0f};
-		Matrix4x4 targetWorldMat = target_->GetWorldTransform().matrix.world;
-		Vector3 centerPos = Vector3::Transform(objectOffset, targetWorldMat);
+		CxMath::Vector3 objectOffset = {0.0f,1.0f,0.0f};
+		CxMath::Matrix4x4 targetWorldMat = target_->GetWorldTransform().matrix.world;
+		CxMath::Vector3 centerPos = CxMath::Vector3::Transform(objectOffset, targetWorldMat);
 
-		Vector3 toTarget = centerPos - GetCenterPos();
+		CxMath::Vector3 toTarget = centerPos - GetCenterPos();
 
 		if (toTarget.Length() > 0.001f){
-			Vector3 desiredDir = toTarget.Normalize();
-			Vector3 currentDir = velocity_.Normalize();
+			CxMath::Vector3 desiredDir = toTarget.Normalize();
+			CxMath::Vector3 currentDir = velocity_.Normalize();
 
-			Quaternion fromToQuat = Quaternion::FromToQuaternion(currentDir, desiredDir);
+			CxMath::Quaternion fromToQuat = CxMath::Quaternion::FromToQuaternion(currentDir, desiredDir);
 			float t = std::clamp(rotateSpeed_ * dt, 0.0f, 1.0f);
 
-			Quaternion slerpedRot = Quaternion::Slerp(Quaternion::MakeIdentity(), fromToQuat, t);
-			Vector3 newDir = Quaternion::RotateVector(currentDir, slerpedRot).Normalize();
+			CxMath::Quaternion slerpedRot = CxMath::Quaternion::Slerp(CxMath::Quaternion::MakeIdentity(), fromToQuat, t);
+			CxMath::Vector3 newDir = CxMath::Quaternion::RotateVector(currentDir, slerpedRot).Normalize();
 			velocity_ = newDir * homingSpeed_;
 		}
 	}
@@ -71,8 +71,8 @@ void HomingBullet::Update([[maybe_unused]]float dt){
 	BaseBullet::Update(dt);
 }
 
-const Vector3 HomingBullet::GetCenterPos()const{
-	const Vector3 offset = {0.0f, 1.0f, 0.0f};
-	Vector3 worldPos = Vector3::Transform(offset, worldTransform_.matrix.world);
+const CxMath::Vector3 HomingBullet::GetCenterPos()const{
+	const CxMath::Vector3 offset = {0.0f, 1.0f, 0.0f};
+	CxMath::Vector3 worldPos = CxMath::Vector3::Transform(offset, worldTransform_.matrix.world);
 	return worldPos;
 }

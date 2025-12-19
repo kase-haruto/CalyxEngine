@@ -14,10 +14,10 @@
 #include <vector>
 
 struct EmitterConfig {
-	Vector3              position{};
-	Vector4              color{1.0f,1.0f,1.0f,1.0f};
-	FxVector3ParamConfig scale;
-	FxVector3ParamConfig velocity;
+	CxMath::Vector3              position{};
+	CxMath::Vector4              color{1.0f,1.0f,1.0f,1.0f};
+	Vector3ParamConfig scale;
+	Vector3ParamConfig velocity;
 	FxFloatParamConfig   lifetime;
 
 	float       emitRate    = 0.1f;
@@ -47,10 +47,10 @@ struct EmitterConfig {
 };
 
 inline void EmitterConfig::FromJson(const nlohmann::json& j) {
-	position       = j.value("position",Vector3{0,0,0});
-	scale          = j.value("scale",FxVector3ParamConfig{});
-	color          = j.value("color",Vector4{1,1,1,1});
-	velocity       = j.value("velocity",FxVector3ParamConfig{});
+	position       = j.value("position",CxMath::Vector3{0,0,0});
+	scale          = j.value("scale",Vector3ParamConfig{});
+	color          = j.value("color",CxMath::Vector4{1,1,1,1});
+	velocity       = j.value("velocity",Vector3ParamConfig{});
 	lifetime       = j.value("lifetime",FxFloatParamConfig{});
 	emitRate       = j.value("emitRate",1.0f);
 	modelPath      = j.value("modelPath","plane.obj");

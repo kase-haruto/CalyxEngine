@@ -19,8 +19,11 @@
 
 // math
 struct Vector2;
-struct Vector3;
-struct Vector4;
+
+namespace CxMath {
+	struct Vector3;
+	struct Vector4;
+} // namespace CxMath
 
 /* ========================================================================
 /*		imgui コマンドラッパ
@@ -37,10 +40,10 @@ namespace GuiCmd{
 	//===================================================================*/
 	bool DragFloat(const char* label, float& value, float speed = 0.01f, float min = 0.0f, float max = 0.0f);
 	bool DragFloat2(const char* label, Vector2& value, float speed = 0.01f, float min = 0.0f, float max = 0.0f);
-	bool DragFloat3(const char* label,Vector3& value,float speed = 0.01f,float min = 0.0f,float max = 0.0f);
-	bool DragFloat4(const char* label, Vector4& value, float speed = 0.01f, float min = 0.0f, float max = 0.0f);
+	bool DragFloat3(const char* label,CxMath::Vector3& value,float speed = 0.01f,float min = 0.0f,float max = 0.0f);
+	bool DragFloat4(const char* label, CxMath::Vector4& value, float speed = 0.01f, float min = 0.0f, float max = 0.0f);
 	bool ColoredDragFloat3(const char* label,
-						   Vector3& value,
+						   CxMath::Vector3& value,
 						   float speed = 0.1f,
 						   float min = 0.0f,
 						   float max = 0.0f,
@@ -52,13 +55,13 @@ namespace GuiCmd{
 	//===================================================================*/
 	bool SliderFloat(const char* label, float& value, float min = 0.0f, float max = 1.0f);
 	bool SliderFloat2(const char* label, Vector2& value, float min = 0.0f, float max = 1.0f);
-	bool SliderFloat3(const char* label, Vector3& value, float min = 0.0f, float max = 1.0f);
-	bool SliderFloat4(const char* label, Vector4& value, float min = 0.0f, float max = 1.0f);
+	bool SliderFloat3(const char* label, CxMath::Vector3& value, float min = 0.0f, float max = 1.0f);
+	bool SliderFloat4(const char* label, CxMath::Vector4& value, float min = 0.0f, float max = 1.0f);
 
 	//===================================================================*/
 	//		colorEdit
 	//===================================================================*/
-	bool ColorEdit4(const char* label, Vector4& value, ImGuiColorEditFlags flags = 0);
+	bool ColorEdit4(const char* label, CxMath::Vector4& value, ImGuiColorEditFlags flags = 0);
 
 	//===================================================================*/
 	//		checkbox

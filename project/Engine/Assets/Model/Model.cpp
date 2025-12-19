@@ -6,7 +6,6 @@
 #include <Engine/Application/System/System.h>
 #include <Engine/graphics/Material.h>
 #include <Engine/Objects/Transform/Transform.h>
-#include <Engine/Objects/Transform/TransformationMatrix.h>
 #include <Engine/Foundation/Math/Vector4.h>
 #include <Engine/Assets/Model/ModelData.h>
 #include <Engine/Assets/Model/ModelManager.h>
@@ -87,10 +86,10 @@ void Model::ShowImGuiInterface() {
 void Model::CreateMaterialBuffer() {
 	ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
 	// materialData_ に初期値をセットする
-	materialData_.color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	materialData_.color = CxMath::Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	materialData_.shininess = 20.0f;
 	materialData_.lightingMode =LightingMode::HalfLambert;
-	materialData_.uvTransform = Matrix4x4::MakeIdentity();
+	materialData_.uvTransform = CxMath::Matrix4x4::MakeIdentity();
 
 	materialBuffer_.Initialize(device);
 }

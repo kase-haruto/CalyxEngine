@@ -23,8 +23,8 @@ public:
 	void AlwaysUpdate(float dt)override;
 
 	// 位置/姿勢
-	Vector3 GetPosition();
-	const Vector3& GetRotation() const { return worldTransform_.eulerRotation; }
+	CxMath::Vector3 GetPosition();
+	const CxMath::Vector3& GetRotation() const { return worldTransform_.eulerRotation; }
 	const WorldTransform& GetWorldTransform() const { return worldTransform_; }
 
 	// スプライン設定API

@@ -8,19 +8,19 @@
 #include <array>
 
 struct OBB{
-	Vector3 size;
-	Quaternion rotate;
-	Vector3 center;
+	CxMath::Vector3 size;
+	CxMath::Quaternion rotate;
+	CxMath::Vector3 center;
 
 	// 8頂点を返す関数
-	std::array<Vector3, 8> GetVertices() const;
+	std::array<CxMath::Vector3, 8> GetVertices() const;
 
 	void Draw();
 };
 
 struct Sphere{
-	Vector3 center;
+	CxMath::Vector3 center;
 	float radius;
 
-	void Draw(int subdivision = 8, Vector4 color = {1.0f,0.0f,0.0f,1.0f});
+	void Draw(int subdivision = 8, CxMath::Vector4 color = {1.0f,0.0f,0.0f,1.0f});
 };

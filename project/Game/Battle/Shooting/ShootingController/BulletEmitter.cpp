@@ -6,8 +6,8 @@ void BulletEmitter::Update(float dt, const BulletEmitterContext& ctx){
 	if (tick.triggers <= 0) return;
 
 	AimContext a {ctx.origin, ctx.selfForward, ctx.targetPos, ctx.targetVel};
-	Vector3 base = aim_->GetForwardN(a);
-	base = (base.LengthSquared() > 1e-8f) ? base.Normalize() : Vector3 {0,0,1};
+	CxMath::Vector3 base = aim_->GetForwardN(a);
+	base = (base.LengthSquared() > 1e-8f) ? base.Normalize() : CxMath::Vector3 {0,0,1};
 
 	PatternInput pin {base}; 
 	PatternOutput pout;

@@ -6,13 +6,13 @@
 
 struct PlayerActionContext {
 	// movement
-	std::function<void(const Vector3&)> addMove;
-	std::function<void(const Vector3&)> updateTilt;
+	std::function<void(const CxMath::Vector3&)> addMove;
+	std::function<void(const CxMath::Vector3&)> updateTilt;
 	std::function<float()>				getMoveSpeed;
 
 	// reticle
-	std::function<void(const Vector3&)> moveReticle;
-	std::function<Vector3()>   getReticlePos;
+	std::function<void(const CxMath::Vector3&)> moveReticle;
+	std::function<CxMath::Vector3()>   getReticlePos;
 
 	// combat
 	std::function<void()> shoot;
@@ -26,7 +26,7 @@ struct PlayerActionContext {
  */
 struct PlayerStateContext {
 	// spatial state
-	std::function<Vector3()> getCenterPos;
+	std::function<CxMath::Vector3()> getCenterPos;
 	std::function<float()>	 getCollisionRadius;
 
 	// life

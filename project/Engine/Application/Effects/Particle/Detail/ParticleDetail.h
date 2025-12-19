@@ -6,8 +6,8 @@
 /// particleCBデータ
 /// </summary>
 struct ParticleConstantData {
-	Vector3 position;
-	Vector3 scale;
-	Vector4 color;
+	CxMath::Vector3 position;
+	CxMath::Vector3 scale;
+	CxMath::Vector4 color;
 	float rotation = 0.0f;
 };

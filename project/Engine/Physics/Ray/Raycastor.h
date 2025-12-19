@@ -19,8 +19,8 @@ public:
 
 	static Ray ConvertMouseToRay(
 		const Vector2& mousePos,         // マウス位置（ピクセル）
-		const Matrix4x4& viewMatrix,     // カメラのView行列
-		const Matrix4x4& projMatrix,     // カメラのProjection行列
+		const CxMath::Matrix4x4& viewMatrix,     // カメラのView行列
+		const CxMath::Matrix4x4& projMatrix,     // カメラのProjection行列
 		const Vector2& viewportSize      // ビューポートのサイズ（ピクセル）
 	);
 };

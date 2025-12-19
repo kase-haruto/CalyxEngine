@@ -2,6 +2,8 @@
 #include "Engine/PostProcess/Manager/PostEffectManager.h"
 #include "PlayerDodgeSystem.h"
 
+
+
 #include <numbers>
 
 void PlayerDodgeSpinMotion::Initialize(PlayerDodgeSystem* dodge, WorldTransform* wt) {
@@ -38,8 +40,8 @@ void PlayerDodgeSpinMotion::Update(float /*dt*/) {
 	const float rad =
 		std::numbers::pi_v<float> * 2.0f * t; // ★ 1回転だけ
 
-	const Quaternion spinQ = Quaternion::MakeRotateY(rad);
-	wt_->rotation = Quaternion::Multiply(baseRot_, spinQ);
+	const CxMath::Quaternion spinQ = CxMath::Quaternion::MakeRotateY(rad);
+	wt_->rotation = CxMath::Quaternion::Multiply(baseRot_, spinQ);
 	wt_->rotationSource = RotationSource::Quaternion;
 }
 

@@ -5,7 +5,7 @@
 #include <Engine/Graphics/Camera/Base/BaseCamera.h>
 
 // forward declaration
-struct Vector3;
+struct CxMath::Vector3;
 struct Vector2;
 
 /* ========================================================================
@@ -29,7 +29,7 @@ public:
 	//							public アクセッサ
 	//===================================================================//
 	//* ターゲット（注視点）を設定
-	void SetTarget(const Vector3& target) { target_ = target; }
+	void SetTarget(const CxMath::Vector3& target) { target_ = target; }
 
 	//* カメラとターゲットとの初期距離を設定
 	void SetDistance(float dist) { distance_ = dist; }
@@ -47,7 +47,7 @@ private:
 	//===================================================================//
 	//							private 変数
 	//===================================================================//
-	Vector3 target_{0.0f,0.0f,0.0f}; //* ターゲット（注視点）
+	CxMath::Vector3 target_{0.0f,0.0f,0.0f}; //* ターゲット（注視点）
 	float   distance_ = 10.0f;       //* カメラまでの距離
 	Vector2 orbitAngle_{0.0f,0.0f};  //* オービット時の回転角度(Yaw, Pitch)
 

@@ -10,7 +10,7 @@ void PatternAimedNWay::Generate(const PatternInput& in, PatternOutput& out) {
 	if (nWay <= 0) return;
 
 	// 基準 forward（安全側フォールバック）
-	Vector3 forward = in.baseDirN;
+	CxMath::Vector3 forward = in.baseDirN;
 	if (forward.LengthSquared() < 1e-8f) {
 		forward = {0,0,1};
 	} else {
@@ -18,11 +18,11 @@ void PatternAimedNWay::Generate(const PatternInput& in, PatternOutput& out) {
 	}
 
 	// 直交基底
-	Vector3 rightN, upN;
+	CxMath::Vector3 rightN, upN;
 	Cx::GameUtil::MakeOrthoBasis(forward, rightN, upN);
 
-	const float spread = Cx::Math::ToRadians(spreadDeg);
-	const float center = Cx::Math::ToRadians(centerDeg);
+	const float spread = CxMath::ToRadians(spreadDeg);
+	const float center = CxMath::ToRadians(centerDeg);
 
 	out.dirsN.reserve(static_cast<size_t>((std::max)(0, nWay)));
 	for (int i = 0; i < nWay; ++i) {
@@ -31,7 +31,7 @@ void PatternAimedNWay::Generate(const PatternInput& in, PatternOutput& out) {
 		const float ang = (t - 0.5f) * spread + center; // 左(-spread/2) → 右(+spread/2)
 
 		// 扇：上下は固定し、right 方向にのみ振る（必要なら upN も混ぜて3Dコーンに拡張可）
-		Vector3 dir = forward * std::cos(ang) + rightN * std::sin(ang);
+		CxMath::Vector3 dir = forward * std::cos(ang) + rightN * std::sin(ang);
 		out.dirsN.push_back(dir.Normalize());
 	}
 }

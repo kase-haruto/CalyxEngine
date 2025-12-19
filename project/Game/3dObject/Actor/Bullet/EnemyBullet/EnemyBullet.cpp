@@ -8,15 +8,15 @@
 #include <Engine/Scene/Utility/SceneUtility.h>
 
 
-static inline Vector3 SafeNormalize(const Vector3& v, const Vector3& fb = {0, 0, 1}) {
+static inline CxMath::Vector3 SafeNormalize(const CxMath::Vector3& v, const CxMath::Vector3& fb = {0, 0, 1}) {
 	float L = v.Length();
 	return (L > 1e-6f) ? (v / L) : fb;
 }
 
-static inline Vector3 TurnTowards(const Vector3& fromDir, const Vector3& toDir, float maxTurnRad) {
-	Vector3 f = SafeNormalize(fromDir);
-	Vector3 t = SafeNormalize(toDir, f);
-	float d = std::clamp(Vector3::Dot(f, t), -1.0f, 1.0f);
+static inline CxMath::Vector3 TurnTowards(const CxMath::Vector3& fromDir, const CxMath::Vector3& toDir, float maxTurnRad) {
+	CxMath::Vector3 f = SafeNormalize(fromDir);
+	CxMath::Vector3 t = SafeNormalize(toDir, f);
+	float d = std::clamp(CxMath::Vector3::Dot(f, t), -1.0f, 1.0f);
 	float ang = std::acos(d);
 	if (ang < 1e-5f) return t;
 	float k = (std::min)(1.0f, maxTurnRad / ang);
@@ -76,17 +76,17 @@ void EnemyBullet::Update(float dt) {
 
 		if (auto tgt = wTarget_.lock())
 		{
-			const Vector3 myPos = GetWorldTransform().GetWorldPosition();
-			const Vector3 tgtPos = tgt->GetWorldTransform().GetWorldPosition();
-			const Vector3 toTarget = tgtPos - myPos;
+			const CxMath::Vector3 myPos = GetWorldTransform().GetWorldPosition();
+			const CxMath::Vector3 tgtPos = tgt->GetWorldTransform().GetWorldPosition();
+			const CxMath::Vector3 toTarget = tgtPos - myPos;
 
-			Vector3 v = GetVelocity();
+			CxMath::Vector3 v = GetVelocity();
 			float sp = v.Length();
 			if (sp > 1e-5f)
 			{
 				const float maxTurn = homing_.turnRateRadPerSec * dt;
-				Vector3 newDir = TurnTowards(v / sp, toTarget, maxTurn);
-				Vector3 desiredVel = newDir * sp;
+				CxMath::Vector3 newDir = TurnTowards(v / sp, toTarget, maxTurn);
+				CxMath::Vector3 desiredVel = newDir * sp;
 
 				if (homing_.damping > 0.0f)
 				{

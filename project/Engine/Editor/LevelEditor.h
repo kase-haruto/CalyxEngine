@@ -23,7 +23,7 @@ class SceneObject;
 class PlaySession;
 class BaseCamera;
 struct Vector2;
-struct Matrix4x4;
+struct CxMath::Matrix4x4;
 struct Ray;
 
 namespace EngineEdit {
@@ -71,8 +71,8 @@ private:
 	void		 TryPickUnderCursor();
 	void		 TryPickObjectFromMouse(const Vector2&	 mouse,
 										const Vector2&	 viewportSize,
-										const Matrix4x4& view,
-										const Matrix4x4& proj);
+										const CxMath::Matrix4x4& view,
+										const CxMath::Matrix4x4& proj);
 	SceneObject* PickSceneObjectByRay(const Ray& ray);
 
 	// シーン管理 --------------------------------------------------------------

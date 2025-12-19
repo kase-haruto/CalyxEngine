@@ -17,17 +17,17 @@ BossHomingSpreadShoot::~BossHomingSpreadShoot() = default;
 
 bool BossHomingSpreadShoot::Execute(Boss& boss, BossShootingController& shooter) const {
 
-	const Vector3 bossPos = boss.GetCenterPos();
+	const CxMath::Vector3 bossPos = boss.GetCenterPos();
 
-	const float startRad = Cx::Math::ToRadians(startAngleDeg_);
-	const float stepRad  = Cx::Math::ToRadians(360.0f / bulletCount_);
+	const float startRad = CxMath::ToRadians(startAngleDeg_);
+	const float stepRad  = CxMath::ToRadians(360.0f / bulletCount_);
 
 	for (int i = 0; i < bulletCount_; i++) {
 
 		float angle = startRad + stepRad * i;
 
 		// 放射方向ベクトル
-		Vector3 dir = {
+		CxMath::Vector3 dir = {
 			std::cos(angle),
 			0.0f,
 			std::sin(angle)

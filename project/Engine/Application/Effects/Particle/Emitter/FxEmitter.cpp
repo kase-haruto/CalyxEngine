@@ -42,7 +42,7 @@ FxEmitter::FxEmitter() {
 	ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
 
 	// マテリアル
-	material_.color = Vector4(1, 1, 1, 1);
+	material_.color = CxMath::Vector4(1, 1, 1, 1);
 	materialBuffer_.Initialize(GraphicsGroup::GetInstance()->GetDevice());
 
 	instanceBuffer_.Initialize(device, kMaxUnits_);
@@ -54,10 +54,10 @@ FxEmitter::FxEmitter() {
 	billboardCB_.TransferData(billboardParams_);
 
 	// 各種パラメータ
-	velocity_ = FxParam<Vector3>::MakeRandom(Vector3(-1.0f, 0.0f, -1.0f),
-											 Vector3(1.0f, 0.0f, 1.0f));
+	velocity_ = FxParam<CxMath::Vector3>::MakeRandom(CxMath::Vector3(-1.0f, 0.0f, -1.0f),
+											 CxMath::Vector3(1.0f, 0.0f, 1.0f));
 	lifetime_ = FxParam<float>::MakeRandom(1.0f, 3.0f);
-	scale_	  = FxParam<Vector3>::MakeConstant();
+	scale_	  = FxParam<CxMath::Vector3>::MakeConstant();
 
 	moduleContainer_ = std::make_unique<FxModuleContainer>();
 }
@@ -105,7 +105,7 @@ void FxEmitter::Update(float deltaTime) {
 			isFirstFrame_ = false;
 		}
 
-		Vector3 moveDelta = position_ - prevPostion_;
+		CxMath::Vector3 moveDelta = position_ - prevPostion_;
 		float	distance  = moveDelta.Length();
 
 		if(distance > 0.0f && isComplement_) {
@@ -114,7 +114,7 @@ void FxEmitter::Update(float deltaTime) {
 			for(int i = 0; i < trailCount; ++i) {
 				float	dist	 = i * spawnInterval;
 				float	t		 = dist / distance;
-				Vector3 spawnPos = Vector3::Lerp(prevPostion_, position_, t);
+				CxMath::Vector3 spawnPos = CxMath::Vector3::Lerp(prevPostion_, position_, t);
 				Emit(spawnPos);
 			}
 		} else {
@@ -156,11 +156,11 @@ void FxEmitter::Update(float deltaTime) {
 		fx.age += deltaTime;
 		if(fx.age >= fx.lifetime) fx.alive = false;
 
-		Matrix4x4 uvTransformMatrix =
-			Cx::Math::MakeScaleMatrix(Vector3(fx.uvTransform.scale.x, fx.uvTransform.scale.y, 1.0f));
-		uvTransformMatrix	  = Matrix4x4::Multiply(uvTransformMatrix, Cx::Math::MakeRotateZMatrix(fx.uvTransform.rotate));
-		uvTransformMatrix	  = Matrix4x4::Multiply(uvTransformMatrix,
-													Cx::Math::MakeTranslateMatrix(Vector3(fx.uvTransform.translate.x, fx.uvTransform.translate.y, 0.0f)));
+		CxMath::Matrix4x4 uvTransformMatrix =
+			CxMath::MakeScaleMatrix(CxMath::Vector3(fx.uvTransform.scale.x, fx.uvTransform.scale.y, 1.0f));
+		uvTransformMatrix	  = CxMath::Matrix4x4::Multiply(uvTransformMatrix, CxMath::MakeRotateZMatrix(fx.uvTransform.rotate));
+		uvTransformMatrix	  = CxMath::Matrix4x4::Multiply(uvTransformMatrix,
+													CxMath::MakeTranslateMatrix(CxMath::Vector3(fx.uvTransform.translate.x, fx.uvTransform.translate.y, 0.0f)));
 		material_.uvTransform = uvTransformMatrix;
 	}
 
@@ -213,7 +213,7 @@ void FxEmitter::TransferParticleDataToGPU() {
 /////////////////////////////////////////////////////////////////////////////////////////
 void FxEmitter::Emit() { Emit(GetWorldPosition()); }
 
-void FxEmitter::Emit(const Vector3& pos) {
+void FxEmitter::Emit(const CxMath::Vector3& pos) {
 	if(units_.size() >= kMaxUnits_) return;
 	FxUnit fx;
 	ResetFxUnit(fx);
@@ -242,12 +242,12 @@ void FxEmitter::ResetFxUnit(FxUnit& fx) {
 	fx.lifetime		= lifetime_.Get();
 	fx.age			= 0.0f;
 	fx.initialScale = fx.scale;
-	fx.color		= Vector4(1, 1, 1, 1);
+	fx.color		= CxMath::Vector4(1, 1, 1, 1);
 	fx.alive		= true;
 	fx.uvTransform.Initialize();
 	fx.spinSpeed = spin_.Get();
 	if(randomSpinEmit_) {
-		fx.rotationEuler.z = Random::Generate<float>(-Cx::Math::kPi,Cx::Math::kPi);
+		fx.rotationEuler.z = Random::Generate<float>(-CxMath::kPi,CxMath::kPi);
 	} else {
 		fx.rotationEuler.z = 0.0f;
 	}
@@ -532,9 +532,9 @@ void FxEmitter::ApplyConfigFrom(const EmitterConfig& config) {
 void FxEmitter::ExtractConfigTo(EmitterConfig& config) const {
 	config.position		= position_;
 	config.color		= material_.color;
-	config.velocity		= FxVector3ParamConfig{velocity_.ToConfig()};
+	config.velocity		= Vector3ParamConfig{velocity_.ToConfig()};
 	config.lifetime		= FxFloatParamConfig{lifetime_.ToConfig()};
-	config.scale		= FxVector3ParamConfig{scale_.ToConfig()};
+	config.scale		= Vector3ParamConfig{scale_.ToConfig()};
 	config.emitRate		= emitRate_;
 	config.modelPath	= modelPath;
 	config.texturePath	= material_.texturePath;

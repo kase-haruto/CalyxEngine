@@ -12,7 +12,7 @@ enum class PlayerCommandType {
 };
 
 struct CmdMove {
-	Vector3 delta;
+	CxMath::Vector3 delta;
 };
 
 struct PlayerCommand {

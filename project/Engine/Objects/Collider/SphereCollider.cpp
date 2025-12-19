@@ -26,7 +26,7 @@ void SphereCollider::Initialize(float radius) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		更新処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void SphereCollider::Update(const Vector3& position, [[maybe_unused]] const Quaternion& rotate) {
+void SphereCollider::Update(const CxMath::Vector3& position, [[maybe_unused]] const CxMath::Quaternion& rotate) {
 	// 位置を更新
 	shape_.center = position + offset_;
 }
@@ -56,7 +56,7 @@ void SphereCollider::ShowGui() {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		中心座標を返す
 /////////////////////////////////////////////////////////////////////////////////////////
-const Vector3& SphereCollider::GetCenter() const {
+const CxMath::Vector3& SphereCollider::GetCenter() const {
 	return shape_.center;
 }
 
