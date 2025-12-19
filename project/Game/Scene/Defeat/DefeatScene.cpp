@@ -29,15 +29,15 @@ void DefeatScene::Initialize() {
 	BaseScene::Initialize();
 
 	defeatSprite_  = std::make_unique<Sprite>("Textures/defeat.png");
-	Vector2 center = kGameSize * 0.5f;
+	CxMath::Vector2 center = kGameSize * 0.5f;
 	defeatSprite_->SetSize(kGameSize);
-	defeatSprite_->SetAnchorPoint(Vector2(0.5f, 0.5f));
+	defeatSprite_->SetAnchorPoint(CxMath::Vector2(0.5f, 0.5f));
 	defeatSprite_->SetPosition(center);
 
 	buttonSprite = std::make_unique<Sprite>("Textures/button_A.png");
-	buttonSprite->SetAnchorPoint(Vector2(0.5f, 0.5f));
-	buttonSprite->SetSize(Vector2(64.0f, 64.0f));
-	Vector2 pos = Vector2(center.x, 600.0f);
+	buttonSprite->SetAnchorPoint(CxMath::Vector2(0.5f, 0.5f));
+	buttonSprite->SetSize(CxMath::Vector2(64.0f, 64.0f));
+	CxMath::Vector2 pos = CxMath::Vector2(center.x, 600.0f);
 	buttonSprite->SetPosition(pos);
 }
 void DefeatScene::Update(float dt) {

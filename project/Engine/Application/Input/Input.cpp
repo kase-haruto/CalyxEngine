@@ -178,31 +178,31 @@ bool Input::ReleaseMouseButton(MouseButton button){
 	return !PushMouseButton(button) && ((instance_->mouseStatePre_.rgbButtons[static_cast< int >(button)] & 0x80) != 0);
 }
 
-Vector2 Input::GetMousePosition(){
+CxMath::Vector2 Input::GetMousePosition(){
 	return instance_->mousePos_;
 }
 
-Vector2 Input::GetMousePosInDebugWindow(){
-	Vector2 m_ImagePos = Vector2(0, 38);
-	Vector2 m_ImageSize = kExecuteWindowSize;
-	Vector2 m_GameSize = kWindowSize;
+CxMath::Vector2 Input::GetMousePosInDebugWindow(){
+	CxMath::Vector2 m_ImagePos = CxMath::Vector2(0, 38);
+	CxMath::Vector2 m_ImageSize = kExecuteWindowSize;
+	CxMath::Vector2 m_GameSize = kWindowSize;
 
-	Vector2 mousePos = GetMousePosition();
+	CxMath::Vector2 mousePos = GetMousePosition();
 	float relativeX = mousePos.x - m_ImagePos.x;
 	float relativeY = mousePos.y - m_ImagePos.y;
 
 	float scaleX = m_GameSize.x / m_ImageSize.x;
 	float scaleY = m_GameSize.y / m_ImageSize.y;
 
-	return Vector2(relativeX * scaleX, relativeY * scaleY);
+	return CxMath::Vector2(relativeX * scaleX, relativeY * scaleY);
 }
 
 float Input::GetMouseWheel(){
 	return instance_->mouseWheel_;
 }
 
-Vector2 Input::GetMouseDelta(){
-	return Vector2(
+CxMath::Vector2 Input::GetMouseDelta(){
+	return CxMath::Vector2(
 		static_cast< float >(instance_->mouseState_.lX),
 		static_cast< float >(instance_->mouseState_.lY)
 	);
@@ -251,8 +251,8 @@ bool Input::TriggerGamepadButton(PadButton button){
 float Input::GetLeftTrigger(){ return instance_->leftTrigger_; }
 float Input::GetRightTrigger(){ return instance_->rightTrigger_; }
 
-Vector2 Input::GetLeftStick(){ return {instance_->leftThumbX_, instance_->leftThumbY_}; }
-Vector2 Input::GetRightStick(){ return {instance_->rightThumbX_, instance_->rightThumbY_}; }
+CxMath::Vector2 Input::GetLeftStick(){ return {instance_->leftThumbX_, instance_->leftThumbY_}; }
+CxMath::Vector2 Input::GetRightStick(){ return {instance_->rightThumbX_, instance_->rightThumbY_}; }
 
 StickState Input::GetStickState(){
 	return {GetLeftStick(), GetRightStick()};

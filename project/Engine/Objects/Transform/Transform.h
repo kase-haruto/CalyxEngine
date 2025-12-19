@@ -41,9 +41,9 @@ struct EulerTransform{
 
 
 struct Transform2D{
-	Vector2 scale;
+	CxMath::Vector2 scale;
 	float rotate;
-	Vector2 translate;
+	CxMath::Vector2 translate;
 	
 	void Initialize(){
 		scale = {1.0f,1.0f};

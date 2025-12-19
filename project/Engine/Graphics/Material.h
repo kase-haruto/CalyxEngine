@@ -48,7 +48,7 @@ struct Material2D {
 	CxMath::Matrix4x4 uvTransform;
 
 	float   fillAmount = 1.0f;        // 0〜1 (初期は1、全部描画)
-	Vector2 fillOrigin = {0.0f,0.0f}; // (0,0)=左/下, (1,0)=右/下, etc.
+	CxMath::Vector2 fillOrigin = {0.0f,0.0f}; // (0,0)=左/下, (1,0)=右/下, etc.
 	int     fillMethod = 0;           // 0=none, 1=horizontal, 2=vertical, 3=mask
 
 	float padding; // 16バイト境界を合わせる

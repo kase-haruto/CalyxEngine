@@ -5,7 +5,7 @@
 
 struct VertexData{
 	CxMath::Vector4 position;
-	Vector2 texcoord;
+	CxMath::Vector2 texcoord;
 	CxMath::Vector3 normal;
 };
 

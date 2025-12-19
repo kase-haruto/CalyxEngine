@@ -33,22 +33,22 @@ void ClearScene::Initialize() {
 	BaseScene::Initialize();
 
 	clearSprite_   = std::make_unique<Sprite>("Textures/clear.png");
-	Vector2 center = kGameSize * 0.5f;
+	CxMath::Vector2 center = kGameSize * 0.5f;
 	clearSprite_->SetSize(kGameSize);
-	clearSprite_->SetAnchorPoint(Vector2(0.5f, 0.5f));
+	clearSprite_->SetAnchorPoint(CxMath::Vector2(0.5f, 0.5f));
 	clearSprite_->SetPosition(center);
 
 	buttonSprite_ = std::make_unique<Sprite>("Textures/button_A.png");
-	buttonSprite_->SetAnchorPoint(Vector2(0.5f, 0.5f));
-	buttonSprite_->SetSize(Vector2(64.0f, 64.0f));
-	Vector2 pos = Vector2(center.x, 600.0f);
+	buttonSprite_->SetAnchorPoint(CxMath::Vector2(0.5f, 0.5f));
+	buttonSprite_->SetSize(CxMath::Vector2(64.0f, 64.0f));
+	CxMath::Vector2 pos = CxMath::Vector2(center.x, 600.0f);
 	buttonSprite_->SetPosition(pos);
 
 	// result:用スプライト
 	resultScoreSprite_ = std::make_unique<Sprite>("Textures/resultScore.png");
-	resultScoreSprite_->SetAnchorPoint(Vector2(0.0f, 0.5f));
-	resultScoreSprite_->SetSize(Vector2(300.0f, 56.0f));
-	resultScoreSprite_->SetPosition(Vector2(center.x - 400.0f, 320.0f));
+	resultScoreSprite_->SetAnchorPoint(CxMath::Vector2(0.0f, 0.5f));
+	resultScoreSprite_->SetSize(CxMath::Vector2(300.0f, 56.0f));
+	resultScoreSprite_->SetPosition(CxMath::Vector2(center.x - 400.0f, 320.0f));
 
 	// スコア表示用 NumbersSpriteカクトクスコア
 	scoreSprite_ = std::make_unique<NumbersSprite>("Textures/Numbers", ".png");

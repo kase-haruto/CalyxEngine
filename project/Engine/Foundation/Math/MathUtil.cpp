@@ -135,14 +135,14 @@ namespace CxMath {
 
 	float ToRadians(float deg) noexcept { return deg * 3.14159265358979323846f / 180.0f; }
 
-	Vector2 WorldToScreen(const Vector3& worldPos) {
+	CxMath::Vector2 WorldToScreen(const Vector3& worldPos) {
 		const Matrix4x4& viewProj = CameraManager::GetMain3d()->GetViewProjectionMatrix();
 
 		// ワールド→クリップ空間
 		Vector4 clipPos = Vector4::Transform(Vector4(worldPos, 1.0f), viewProj);
 
 		if(fabs(clipPos.w) < 1e-5f) {
-			return Vector2(0.0f, 0.0f); // 無効値
+			return CxMath::Vector2(0.0f, 0.0f); // 無効値
 		}
 
 		// NDC座標へ
@@ -158,10 +158,10 @@ namespace CxMath {
 		float screenX = (ndcPos.x * 0.5f + 0.5f) * screenWidth;
 		float screenY = (1.0f - (ndcPos.y * 0.5f + 0.5f)) * screenHeight;
 
-		return Vector2(screenX, screenY);
+		return CxMath::Vector2(screenX, screenY);
 	}
 
-	Vector3 ScreenToWorld(const Vector2& screenPos, float depthZ) {
+	Vector3 ScreenToWorld(const CxMath::Vector2& screenPos, float depthZ) {
 		float screenWidth  = kGameWidth;
 		float screenHeight = kGameHeight;
 

@@ -51,8 +51,8 @@ void TextureSheetAnimationModule::OnUpdate(FxUnit& unit,[[maybe_unused]] float d
 		float uStep = 1.0f / static_cast< float >(cols_);
 		float vStep = 1.0f / static_cast< float >(rows_);
 
-		unit.uvTransform.translate = Vector2(uStep * col, vStep * row);
-		unit.uvTransform.scale = Vector2(uStep, vStep);
+		unit.uvTransform.translate = CxMath::Vector2(uStep * col, vStep * row);
+		unit.uvTransform.scale = CxMath::Vector2(uStep, vStep);
 	}
 }
 

@@ -47,8 +47,8 @@ using Microsoft::WRL::ComPtr;
 
 // スティック状態構造体
 struct StickState{
-	Vector2 leftStick;
-	Vector2 rightStick;
+	CxMath::Vector2 leftStick;
+	CxMath::Vector2 rightStick;
 };
 
 class Input{
@@ -73,18 +73,18 @@ public:
 	static bool PushMouseButton(MouseButton button);
 	static bool TriggerMouseButton(MouseButton button);
 	static bool ReleaseMouseButton(MouseButton button);
-	static Vector2 GetMousePosition();
-	static Vector2 GetMousePosInDebugWindow();
+	static CxMath::Vector2 GetMousePosition();
+	static CxMath::Vector2 GetMousePosInDebugWindow();
 	static float GetMouseWheel();
-	static Vector2 GetMouseDelta();
+	static CxMath::Vector2 GetMouseDelta();
 
 	// ゲームパッド
 	static bool PushGamepadButton(PadButton button);
 	static bool TriggerGamepadButton(PadButton button);
 	static float GetLeftTrigger();
 	static float GetRightTrigger();
-	static Vector2 GetLeftStick();
-	static Vector2 GetRightStick();
+	static CxMath::Vector2 GetLeftStick();
+	static CxMath::Vector2 GetRightStick();
 	static StickState GetStickState();
 	static bool IsLeftStickMoved();
 
@@ -113,7 +113,7 @@ private:
 	ComPtr<IDirectInputDevice8> mouse_ = nullptr;
 	DIMOUSESTATE mouseState_ {};
 	DIMOUSESTATE mouseStatePre_ {};
-	Vector2 mousePos_ {};
+	CxMath::Vector2 mousePos_ {};
 	float mouseWheel_ = 0.0f;
 
 	// ゲームパッド（XInput）

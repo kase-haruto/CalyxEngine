@@ -24,7 +24,7 @@ struct DangerSenseConfig {
 
 	// UI
 	std::string uiTex  = "Textures/UI/dodgeUI.png";
-	Vector2     uiSize = {128.0f,64.0f};
+	CxMath::Vector2     uiSize = {128.0f,64.0f};
 };
 
 /**

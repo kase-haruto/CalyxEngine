@@ -47,7 +47,7 @@ HpGauge::~HpGauge() = default;
 /////////////////////////////////////////////////////////////////////////////////////////
 // 初期化
 /////////////////////////////////////////////////////////////////////////////////////////
-void HpGauge::Initialize(const Vector2& position, const Vector2& size)
+void HpGauge::Initialize(const CxMath::Vector2& position, const CxMath::Vector2& size)
 {
 	baseSize_ = size;
 
@@ -194,7 +194,7 @@ void HpGauge::Update(float dt)
 /////////////////////////////////////////////////////////////////////////////////////////
 // anchor
 /////////////////////////////////////////////////////////////////////////////////////////
-void HpGauge::SetAncorPoint(const Vector2& point) const
+void HpGauge::SetAncorPoint(const CxMath::Vector2& point) const
 {
 	if (blueGauge_) blueGauge_->SetAnchorPoint(point);
 	if (redGauge_) redGauge_->SetAnchorPoint(point);

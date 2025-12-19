@@ -88,7 +88,7 @@ void DebugCamera::Rotate(){
 			return; // 初回は移動量を無視
 		}
 
-		Vector2 mouseDelta = Input::GetMouseDelta(); // 各フレームの移動量を取得
+		CxMath::Vector2 mouseDelta = Input::GetMouseDelta(); // 各フレームの移動量を取得
 
 		// マウスがほとんど動いていない場合は無視
 		if (std::abs(mouseDelta.x) < 0.1f && std::abs(mouseDelta.y) < 0.1f){
@@ -125,7 +125,7 @@ void DebugCamera::Move(){
 			return; // 初回は移動量を無視
 		}
 
-		Vector2 mouseDelta = Input::GetMouseDelta(); // 各フレームの移動量を取得
+		CxMath::Vector2 mouseDelta = Input::GetMouseDelta(); // 各フレームの移動量を取得
 
 		// マウスがほとんど動いていない場合は無視
 		if (std::abs(mouseDelta.x) < 0.1f && std::abs(mouseDelta.y) < 0.1f){

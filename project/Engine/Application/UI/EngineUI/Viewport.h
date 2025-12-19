@@ -17,7 +17,7 @@
 #include <externals/imgui/imgui.h>
 
 // forward declaration
-struct Vector2;
+struct CxMath::Vector2;
 class BaseCamera;
 
 
@@ -38,8 +38,8 @@ public:
 	//--------- accessor -----------------------------------------------------
 	bool IsHovered() const;
 	bool IsClicked() const;
-	Vector2 GetSize() const;
-	Vector2 GetPosition() const;				//< ビューポートの位置
+	CxMath::Vector2 GetSize() const;
+	CxMath::Vector2 GetPosition() const;				//< ビューポートの位置
 	ViewportType GetType() const;
 	void SetCamera(BaseCamera* camera);
 
@@ -55,8 +55,8 @@ private:
 	ImTextureID textureID_ = nullptr;
 
 	BaseCamera* camera_ = nullptr;						//< ビューポートに関連付けられたカメラ
-	Vector2 size_ {};
-	Vector2 viewOrigin_;								//< ImGui上での描画開始位置
+	CxMath::Vector2 size_ {};
+	CxMath::Vector2 viewOrigin_;								//< ImGui上での描画開始位置
 	bool isHovered_ = false;
 	bool isClicked_ = false;
 };

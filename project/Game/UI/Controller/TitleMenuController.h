@@ -25,8 +25,8 @@ public:
 
 private:
 	// 基本レイアウト
-	Vector2 basePos_{ 750.0f, 450.0f };
-	Vector2 baseSize_{ 256.0f, 64.0f };
+	CxMath::Vector2 basePos_{ 750.0f, 450.0f };
+	CxMath::Vector2 baseSize_{ 256.0f, 64.0f };
 	float   space_{ 100.0f };
 
 	// 選択状態

@@ -24,9 +24,9 @@ namespace CxMath {
 	float LerpShortAngle(float a, float b, float t) noexcept;
 	float ToRadians(float) noexcept;
 
-	Vector2			WorldToScreen(const CxMath::Vector3& worldPos);
-	bool			WorldToScreen(const CxMath::Vector3& worldPos, Vector2& outScreenPos);
-	CxMath::Vector3 ScreenToWorld(const Vector2& screenPos, float depthZ);
+	CxMath::Vector2			WorldToScreen(const CxMath::Vector3& worldPos);
+	bool			WorldToScreen(const CxMath::Vector3& worldPos, CxMath::Vector2& outScreenPos);
+	CxMath::Vector3 ScreenToWorld(const CxMath::Vector2& screenPos, float depthZ);
 
 	CxMath::Vector3 CatmullRomInterpolation(
 		const CxMath::Vector3& p0, const CxMath::Vector3& p1, const CxMath::Vector3& p2, const CxMath::Vector3& p3, float t);

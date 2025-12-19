@@ -65,9 +65,9 @@ bool GuiCmd::DragFloat(const char* label, float& value, float speed, float min, 
 	return changed;
 }
 
-bool GuiCmd::DragFloat2(const char* label, Vector2& value, float speed, float min, float max){
-	static GuiCmdInternal::GuiCmdSetValueComputer<Vector2> computer;
-	Vector2 temp = value;
+bool GuiCmd::DragFloat2(const char* label, CxMath::Vector2& value, float speed, float min, float max){
+	static GuiCmdInternal::GuiCmdSetValueComputer<CxMath::Vector2> computer;
+	CxMath::Vector2 temp = value;
 	bool changed = ImGui::DragFloat2(label, &temp.x, speed, min, max);
 	value = temp;
 	// マウスが押された 検知開始
@@ -75,7 +75,7 @@ bool GuiCmd::DragFloat2(const char* label, Vector2& value, float speed, float mi
 	// マウスが離れた
 	if (ImGui::IsItemDeactivatedAfterEdit()){
 		std::string labelStr(label);
-		auto cmd = computer.End(value, [&value] (const Vector2& v){ value = v; }, labelStr);
+		auto cmd = computer.End(value, [&value] (const CxMath::Vector2& v){ value = v; }, labelStr);
 		//マウスが押された位置から動いていたらコマンドを発行する
 		if (cmd) CommandManager::GetInstance()->Execute(std::move(cmd));
 	}
@@ -200,9 +200,9 @@ bool GuiCmd::SliderFloat(const char* label, float& value, float min, float max){
 	return changed;
 }
 
-bool GuiCmd::SliderFloat2(const char* label, Vector2& value, float min, float max){
-	static GuiCmdInternal::GuiCmdSetValueComputer<Vector2> computer;
-	Vector2 temp = value;
+bool GuiCmd::SliderFloat2(const char* label, CxMath::Vector2& value, float min, float max){
+	static GuiCmdInternal::GuiCmdSetValueComputer<CxMath::Vector2> computer;
+	CxMath::Vector2 temp = value;
 	bool changed = ImGui::SliderFloat2(label, &temp.x, min, max);
 	value = temp;
 	// マウスが押された 検知開始
@@ -210,7 +210,7 @@ bool GuiCmd::SliderFloat2(const char* label, Vector2& value, float min, float ma
 	// マウスが離れた
 	if (ImGui::IsItemDeactivatedAfterEdit()){
 		std::string labelStr(label);
-		auto cmd = computer.End(value, [&value] (const Vector2& v){ value = v; }, labelStr);
+		auto cmd = computer.End(value, [&value] (const CxMath::Vector2& v){ value = v; }, labelStr);
 		//マウスが押された位置から動いていたらコマンドを発行する
 		if (cmd) CommandManager::GetInstance()->Execute(std::move(cmd));
 	}

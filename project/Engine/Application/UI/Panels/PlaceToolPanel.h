@@ -45,7 +45,7 @@ private:
 		PlaceItemCategory category;
 		std::string name;
 		D3D12_GPU_DESCRIPTOR_HANDLE texture;
-		Vector2 iconSize {64.0f, 64.0f};
+		CxMath::Vector2 iconSize {64.0f, 64.0f};
 		std::function<void()> createFunc;
 	};
 

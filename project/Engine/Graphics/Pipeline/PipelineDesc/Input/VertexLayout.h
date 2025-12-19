@@ -15,7 +15,7 @@ struct VertexInputLayout;
 
 struct VertexPosUv {
 	CxMath::Vector3 pos;
-	Vector2 uv;
+	CxMath::Vector2 uv;
 };
 
 struct VertexPosColor {
@@ -25,19 +25,19 @@ struct VertexPosColor {
 
 struct VertexPosUvColor {
 	CxMath::Vector4 pos;
-	Vector2 uv;
+	CxMath::Vector2 uv;
 	CxMath::Vector4 color;
 };
 
 struct VertexPosUvN {
 	CxMath::Vector4 position;	// 16 B
-	Vector2 texcoord;	// 24 B
+	CxMath::Vector2 texcoord;	// 24 B
 	CxMath::Vector3 normal;		// 36 B
 };
 
 struct VertexPosUvNSkinning {
 	CxMath::Vector4 pos;		// 16 B
-	Vector2 uv;			// 24 B
+	CxMath::Vector2 uv;			// 24 B
 	CxMath::Vector3 normal;		// 36 B
 };
 

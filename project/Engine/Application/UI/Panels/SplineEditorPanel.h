@@ -18,7 +18,7 @@ public:
 
 	void Render() override;
 
-	void SyncViewportRect(const Vector2& pos, const Vector2& size) {
+	void SyncViewportRect(const CxMath::Vector2& pos, const CxMath::Vector2& size) {
 		vpPos_ = pos; vpSize_ = size;
 	}
 
@@ -43,8 +43,8 @@ private:
 	std::string currentPath_;
 	bool gizmoEnabled_ = true;
 
-	Vector2 vpPos_{ 0,0 };
-	Vector2 vpSize_{ 1920,1080 };
+	CxMath::Vector2 vpPos_{ 0,0 };
+	CxMath::Vector2 vpSize_{ 1920,1080 };
 
 	bool    dragging_ = false;
 	CxMath::Vector3 dragPlaneN_{ 0,1,0 };

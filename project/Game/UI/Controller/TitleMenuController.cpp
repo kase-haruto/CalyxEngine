@@ -15,12 +15,12 @@
 #include <Engine/Foundation/Utility/Ease/Ease.h>
 
 TitleMenuController::TitleMenuController() :
-	basePos_(Vector2(750, 400.0f)),
-	baseSize_(Vector2(256.0f, 64.0f)),
+	basePos_(CxMath::Vector2(750, 400.0f)),
+	baseSize_(CxMath::Vector2(256.0f, 64.0f)),
 	space_(120.0f) {
 
 	// basePos_ を変更しないようローカル pos を使う
-	Vector2 pos = basePos_;
+	CxMath::Vector2 pos = basePos_;
 
 	// ゲームスタートボタン
 	std::unique_ptr<Button> startButton =
@@ -166,7 +166,7 @@ void TitleMenuController::AdaptationForSprite() {
 }
 
 void TitleMenuController::LayoutButtons_() {
-	Vector2 pos = basePos_;
+	CxMath::Vector2 pos = basePos_;
 	for (size_t i = 0; i < buttons_.size(); ++i) {
 		auto* s = buttons_[i]->GetSprite();
 		if (!s) { pos.y += space_; continue; }
@@ -178,11 +178,11 @@ void TitleMenuController::LayoutButtons_() {
 		const float scale = 1.0f + (enlargedScale_ - 1.0f) * eased;
 
 		// 拡大後サイズ
-		Vector2 size = { baseSize_.x * scale, baseSize_.y * scale };
+		CxMath::Vector2 size = { baseSize_.x * scale, baseSize_.y * scale };
 
 		// 中央を合わせるための位置補正
-		Vector2 center = { pos.x + baseSize_.x * 0.5f, pos.y + baseSize_.y * 0.5f };
-		Vector2 topLeft = { center.x - size.x * 0.5f, center.y - size.y * 0.5f };
+		CxMath::Vector2 center = { pos.x + baseSize_.x * 0.5f, pos.y + baseSize_.y * 0.5f };
+		CxMath::Vector2 topLeft = { center.x - size.x * 0.5f, center.y - size.y * 0.5f };
 
 		s->SetPosition(topLeft);
 		s->SetSize(size);

@@ -19,7 +19,7 @@ void PlayerDangerSense::Initialize(const PlayerStateContext& ctx, const DangerSe
 	cfg_ = cfg;
 
 	cue_ = std::make_unique<Sprite>(cfg_.uiTex);
-	cue_->Initialize(Vector2{-1000.0f, -1000.0f}, cfg_.uiSize);
+	cue_->Initialize(CxMath::Vector2{-1000.0f, -1000.0f}, cfg_.uiSize);
 	cue_->SetAnchorPoint({0.5f, 0.5f});
 	cue_->SetIsVisible(false);
 
@@ -132,7 +132,7 @@ void PlayerDangerSense::ApplyDangerResult(bool danger, const CxMath::Vector3& pl
 	if(!cue_) return;
 
 	if(hint) {
-		Vector2 screen = CxMath::WorldToScreen(playerPos);
+		CxMath::Vector2 screen = CxMath::WorldToScreen(playerPos);
 		cue_->SetPosition(screen);
 		cue_->SetIsVisible(true);
 	} else {

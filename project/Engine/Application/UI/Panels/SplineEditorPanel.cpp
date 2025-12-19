@@ -145,7 +145,7 @@ Ray SplineEditorPanel::MakeMouseRay() const {
 	auto* cam = CameraManager::GetDebug();
 
 	ImVec2 m = ImGui::GetMousePos();
-	Vector2 mouseLocal{ m.x - vpPos_.x, m.y - vpPos_.y };
+	CxMath::Vector2 mouseLocal{ m.x - vpPos_.x, m.y - vpPos_.y };
 
 	// ビューポート外なら前方へ（当たらないレイ）
 	if (mouseLocal.x < 0 || mouseLocal.y < 0 || mouseLocal.x > vpSize_.x || mouseLocal.y > vpSize_.y) {

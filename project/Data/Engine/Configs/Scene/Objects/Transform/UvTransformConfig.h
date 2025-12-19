@@ -7,9 +7,9 @@
 
 struct Transform2DConfig final {
     //========================= variable =========================
-	Vector2 scale {1.0f,1.0f};		//<scale
+	CxMath::Vector2 scale {1.0f,1.0f};		//<scale
 	float rotation;					//<rotate
-	Vector2 translation;			//<translate
+	CxMath::Vector2 translation;			//<translate
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Transform2DConfig,
 								   scale,

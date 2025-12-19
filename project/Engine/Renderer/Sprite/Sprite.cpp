@@ -38,7 +38,7 @@ Sprite::Sprite(const std::string& filePath) {
 
 Sprite::~Sprite() {}
 
-void Sprite::Initialize(const Vector2& newPosition,const Vector2& newSize) {
+void Sprite::Initialize(const CxMath::Vector2& newPosition,const CxMath::Vector2& newSize) {
 	this->position         = newPosition;
 	transform_.translate.x = position.x;
 	transform_.translate.y = position.y;
@@ -195,7 +195,7 @@ void Sprite::MaterialResourceMap() {
 }
 
 void Sprite::PutWindowCenter() {
-	Vector2 windowCenter   = {kWindowWidth * 0.5f,kWindowHeight * 0.5f};
+	CxMath::Vector2 windowCenter   = {kWindowWidth * 0.5f,kWindowHeight * 0.5f};
 	transform_.translate.x = windowCenter.x;
 	transform_.translate.y = windowCenter.y;
 }

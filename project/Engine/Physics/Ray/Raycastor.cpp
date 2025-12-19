@@ -99,10 +99,10 @@ Raycastor::Raycast(const Ray& ray,
 	return closestHit;
 }
 
-Ray Raycastor::ConvertMouseToRay(const Vector2& mousePos,
+Ray Raycastor::ConvertMouseToRay(const CxMath::Vector2& mousePos,
 								 const CxMath::Matrix4x4& view,
 								 const CxMath::Matrix4x4& proj,
-								 const Vector2& viewportSize) {
+								 const CxMath::Vector2& viewportSize) {
 	// 1. NDC
 	const float ndcX = (2.0f * mousePos.x) / viewportSize.x - 1.0f;
 	const float ndcY = 1.0f - (2.0f * mousePos.y) / viewportSize.y; // DirectX: Y反転

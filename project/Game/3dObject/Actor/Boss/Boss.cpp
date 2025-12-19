@@ -63,9 +63,9 @@ void Boss::Initialize() {
 	anim_->Initialize();
 	hpGauge_ = std::make_unique<HpGauge>(static_cast<float>(life_));
 	// 画面中央上にゲージを設定
-	Vector2 gaugePos = {kGameSize.x * 0.5f,50.0f};
-	hpGauge_->Initialize(gaugePos,Vector2(500.0f,32.0f));
-	hpGauge_->SetAncorPoint(Vector2(0.5f,0.5f));
+	CxMath::Vector2 gaugePos = {kGameSize.x * 0.5f,50.0f};
+	hpGauge_->Initialize(gaugePos,CxMath::Vector2(500.0f,32.0f));
+	hpGauge_->SetAncorPoint(CxMath::Vector2(0.5f,0.5f));
 
 	auto fx = hitEffects_.lock();
 	fx->StopAll();

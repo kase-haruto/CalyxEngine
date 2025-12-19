@@ -103,7 +103,7 @@ public:
 	void SetColor(const CxMath::Vector4& color);
 	void SetCollider(std::unique_ptr<Collider> collider);
 	void SetTexture(const std::string& texName);
-	void SetUvScale(const Vector2& scale) { model_->uvTransform.scale = scale; }
+	void SetUvScale(const CxMath::Vector2& scale) { model_->uvTransform.scale = scale; }
 	void SetBlendMode(BlendMode mode) { model_->SetBlendMode(mode); }
 	void SetLightingMode(LightingMode mode) { model_->SetLightingMode(mode); }
 

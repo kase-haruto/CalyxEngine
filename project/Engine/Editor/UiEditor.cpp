@@ -59,8 +59,8 @@ void UIEditor::ShowImGuiInterface(){
 	}
 
 	// スプライトの生成用の入力欄
-	static Vector2 newPosition = {400.0f, 0.0f}; // デフォルトの位置
-	static Vector2 newSize = {64.0f, 64.0f};     // デフォルトのサイズ
+	static CxMath::Vector2 newPosition = {400.0f, 0.0f}; // デフォルトの位置
+	static CxMath::Vector2 newSize = {64.0f, 64.0f};     // デフォルトのサイズ
 
 	GuiCmd::SliderFloat2("Position", newPosition, 0.0f, 1280.0f); // 位置の入力
 	GuiCmd::SliderFloat2("Size", newSize, 0.0f, 512.0f);          // サイズの入力
@@ -82,9 +82,9 @@ void UIEditor::ShowImGuiInterface(){
 			// 各スプライトごとに CollapsingHeader を作成
 			if (ImGui::CollapsingHeader(spriteLabel.c_str(), ImGuiTreeNodeFlags_None)){
 				// スプライトのプロパティ編集
-				Vector2 position = sprite->GetPosition();
+				CxMath::Vector2 position = sprite->GetPosition();
 				float rotate = sprite->GetRotation();
-				Vector2 size = sprite->GetSize();
+				CxMath::Vector2 size = sprite->GetSize();
 
 				// アドレスを使ったのIDを生成
 				std::string uniqueId = std::to_string(reinterpret_cast< uintptr_t >(sprite.get()));
@@ -109,7 +109,7 @@ void UIEditor::ShowImGuiInterface(){
 #endif // _DEBUG
 }
 
-void UIEditor::AddSprite(const std::string& textureName, const Vector2& position, const Vector2& size){
+void UIEditor::AddSprite(const std::string& textureName, const CxMath::Vector2& position, const CxMath::Vector2& size){
 	// 指定されたテクスチャ名でテクスチャをロード
 	D3D12_GPU_DESCRIPTOR_HANDLE textureHandle = textureManager_->LoadTexture(textureName);
 	auto sprite = std::make_shared<Sprite>(textureName);
@@ -144,14 +144,14 @@ void UIEditor::SaveSpriteDataToJson(const std::string& filePath){
 		spriteData["textureName"] = sprite->GetTextureName();  // ※Sprite 側で GetTextureName() を用意してください
 
 		// 位置
-		Vector2 pos = sprite->GetPosition();
+		CxMath::Vector2 pos = sprite->GetPosition();
 		spriteData["position"] = {
 			{"x", pos.x},
 			{"y", pos.y}
 		};
 
 		// サイズ
-		Vector2 size = sprite->GetSize();
+		CxMath::Vector2 size = sprite->GetSize();
 		spriteData["size"] = {
 			{"x", size.x},
 			{"y", size.y}
@@ -191,11 +191,11 @@ void UIEditor::LoadSpriteDataFromJson(const std::string& filePath){
 			// 必要情報を取得
 			std::string textureName = spriteData.value("textureName", "uvChecker.png");
 
-			Vector2 pos;
+			CxMath::Vector2 pos;
 			pos.x = spriteData["position"].value("x", 0.0f);
 			pos.y = spriteData["position"].value("y", 0.0f);
 
-			Vector2 size;
+			CxMath::Vector2 size;
 			size.x = spriteData["size"].value("x", 64.0f);
 			size.y = spriteData["size"].value("y", 64.0f);
 

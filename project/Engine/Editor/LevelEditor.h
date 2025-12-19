@@ -22,7 +22,7 @@ class SceneContext;
 class SceneObject;
 class PlaySession;
 class BaseCamera;
-struct Vector2;
+struct CxMath::Vector2;
 struct CxMath::Matrix4x4;
 struct Ray;
 
@@ -69,8 +69,8 @@ public:
 private:
 	// マウスピッキング関連 ----------------------------------------------------
 	void		 TryPickUnderCursor();
-	void		 TryPickObjectFromMouse(const Vector2&	 mouse,
-										const Vector2&	 viewportSize,
+	void		 TryPickObjectFromMouse(const CxMath::Vector2&	 mouse,
+										const CxMath::Vector2&	 viewportSize,
 										const CxMath::Matrix4x4& view,
 										const CxMath::Matrix4x4& proj);
 	SceneObject* PickSceneObjectByRay(const Ray& ray);

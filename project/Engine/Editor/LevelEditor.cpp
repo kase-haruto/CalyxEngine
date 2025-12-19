@@ -208,8 +208,8 @@ void LevelEditor::Update() {
 	// --- デバッグビューポート上にマウスがあるか？ -----------------------
 	bool overDebugViewport = false;
 	if(debugViewport_ && debugViewport_->IsShow()) {
-		const Vector2 origin = debugViewport_->GetPosition(); // コンテンツ左上
-		const Vector2 size	 = debugViewport_->GetSize();	  // コンテンツサイズ
+		const CxMath::Vector2 origin = debugViewport_->GetPosition(); // コンテンツ左上
+		const CxMath::Vector2 size	 = debugViewport_->GetSize();	  // コンテンツサイズ
 		const ImVec2  mouse	 = ImGui::GetMousePos();
 
 		overDebugViewport =
@@ -456,15 +456,15 @@ void LevelEditor::SetCameraForViewport(BaseCamera* mainCamera, BaseCamera* debug
 //=============================================================================
 // Picking
 //=============================================================================
-void LevelEditor::TryPickObjectFromMouse(const Vector2&	  mouse,
-										 const Vector2&	  viewportSize,
+void LevelEditor::TryPickObjectFromMouse(const CxMath::Vector2&	  mouse,
+										 const CxMath::Vector2&	  viewportSize,
 										 const CxMath::Matrix4x4& view,
 										 const CxMath::Matrix4x4& proj) {
 	SceneContext* ctx = SceneContext::Current();
 	if(!ctx || !debugViewport_) return;
 
 	// ビューポート内ローカル座標へ変換
-	Vector2 mouseLocal = mouse - debugViewport_->GetPosition();
+	CxMath::Vector2 mouseLocal = mouse - debugViewport_->GetPosition();
 
 	Ray ray = Raycastor::ConvertMouseToRay(mouseLocal, view, proj, viewportSize);
 
@@ -495,8 +495,8 @@ void LevelEditor::TryPickUnderCursor() {
 	SceneContext* current = SceneContext::Current();
 	if(!current) return;
 
-	Vector2 origin = debugViewport_->GetPosition();
-	Vector2 size   = debugViewport_->GetSize();
+	CxMath::Vector2 origin = debugViewport_->GetPosition();
+	CxMath::Vector2 size   = debugViewport_->GetSize();
 
 	ImVec2 mouse	 = ImGui::GetMousePos();
 	float  relativeX = mouse.x - origin.x;
@@ -504,7 +504,7 @@ void LevelEditor::TryPickUnderCursor() {
 
 	if(relativeX < 0 || relativeY < 0 || relativeX > size.x || relativeY > size.y) return;
 
-	Vector2 mousePos(relativeX, relativeY);
+	CxMath::Vector2 mousePos(relativeX, relativeY);
 
 	CxMath::Matrix4x4 view = CameraManager::GetDebug()->GetViewMatrix();
 	CxMath::Matrix4x4 proj = CameraManager::GetDebug()->GetProjectionMatrix();

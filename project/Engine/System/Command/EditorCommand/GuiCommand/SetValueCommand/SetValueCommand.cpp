@@ -15,11 +15,11 @@ template<>
 }
 
 template<>
- void SetValueCommand<Vector2>::UpdateName(){
-	auto toStr = [] (const Vector2& v){
+ void SetValueCommand<CxMath::Vector2>::UpdateName(){
+	auto toStr = [] (const CxMath::Vector2& v){
 		return "(" + std::to_string(v.x) + "," + std::to_string(v.y) + ")";
 		};
-	name_ = "Set Vector2: \"" + label_ + "\" from " + toStr(before_) + " -> " + toStr(after_);
+	name_ = "Set CxMath::Vector2: \"" + label_ + "\" from " + toStr(before_) + " -> " + toStr(after_);
 }
 
 template<>

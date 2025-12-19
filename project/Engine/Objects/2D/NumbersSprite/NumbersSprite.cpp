@@ -16,17 +16,17 @@ std::string NumbersSprite::JoinPath_(const std::string& a, const std::string& b)
 NumbersSprite::NumbersSprite(std::string dir, std::string ext)
 	: dir_(std::move(dir)), ext_(std::move(ext)) {}
 
-void NumbersSprite::Initialize(const Vector2& pos, const Vector2& digitSize) {
+void NumbersSprite::Initialize(const CxMath::Vector2& pos, const CxMath::Vector2& digitSize) {
 	origin_	   = pos;
 	digitSize_ = digitSize;
 	SetValue(0);
 }
 
-void NumbersSprite::SetPosition(const Vector2& pos) {
+void NumbersSprite::SetPosition(const CxMath::Vector2& pos) {
 	origin_		 = pos;
 	dirtyLayout_ = true;
 }
-void NumbersSprite::SetDigitSize(const Vector2& size) {
+void NumbersSprite::SetDigitSize(const CxMath::Vector2& size) {
 	digitSize_	 = size;
 	dirtyLayout_ = true;
 }
@@ -39,7 +39,7 @@ void NumbersSprite::SetAlign(DigitsAlign a) {
 	dirtyLayout_ = true;
 }
 
-void NumbersSprite::SetAnchor(const Vector2& anc) {
+void NumbersSprite::SetAnchor(const CxMath::Vector2& anc) {
 	anchor_ = anc;
 	for(auto& sp : sprites_) sp->SetAnchorPoint(anchor_);
 	dirtyLayout_ = true;

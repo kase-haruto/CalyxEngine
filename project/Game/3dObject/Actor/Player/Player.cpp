@@ -60,7 +60,7 @@ inline CxMath::Vector3 ClampWorldByScreenBox(const CxMath::Vector3& world,
 	if(clip.w <= kEps) return world;
 
 	const CxMath::Vector3 ndc = {clip.x / clip.w, clip.y / clip.w, clip.z / clip.w};
-	Vector2		  scr = CxMath::WorldToScreen(world);
+	CxMath::Vector2		  scr = CxMath::WorldToScreen(world);
 
 	// 画面サイズと余白でクランプ（float化しておく）
 	constexpr float W = static_cast<float>(kGameWidth);
@@ -71,7 +71,7 @@ inline CxMath::Vector3 ClampWorldByScreenBox(const CxMath::Vector3& world,
 	const float minY = (std::max)(0.0f, marginYpx);
 	const float maxY = (std::max)(minY, H - marginYpx);
 
-	const Vector2 clamped = {
+	const CxMath::Vector2 clamped = {
 		std::clamp(scr.x, minX, maxX),
 		std::clamp(scr.y, minY, maxY)};
 
@@ -137,8 +137,8 @@ void Player::Initialize() {
 	// ライフゲージの初期化
 	hpGauge_ = std::make_unique<HpGauge>(static_cast<float>(life_));
 	// 左下にライフゲージを設定
-	Vector2 lifeGaugePos = {100.0f, 630.0f};
-	hpGauge_->Initialize(lifeGaugePos, Vector2(360.0f, 32.0f));
+	CxMath::Vector2 lifeGaugePos = {100.0f, 630.0f};
+	hpGauge_->Initialize(lifeGaugePos, CxMath::Vector2(360.0f, 32.0f));
 	hpGauge_->SetAncorPoint({0.0f, 0.5f}); // 左中央
 
 	// spriteの初期化
@@ -148,11 +148,11 @@ void Player::Initialize() {
 
 		float	t	 = static_cast<float>(i) / (spriteCount - 1);
 		float	size = std::lerp(128.0f, 16.0f, t);
-		Vector2 spriteSize(size, size);
+		CxMath::Vector2 spriteSize(size, size);
 
-		Vector2 initPos = kGameSize * 0.5f;
+		CxMath::Vector2 initPos = kGameSize * 0.5f;
 		reticleSprites_[i]->Initialize(initPos, spriteSize);
-		reticleSprites_[i]->SetAnchorPoint(Vector2(0.5f, 0.5f));
+		reticleSprites_[i]->SetAnchorPoint(CxMath::Vector2(0.5f, 0.5f));
 	}
 
 	// context 構築
@@ -293,7 +293,7 @@ void Player::Update(float dt) {
 		reticleSprites_[i]->SetUvRotate(currentUvRotate + uvRotateSpeed);
 
 		// スクリーン座標に変換して配置
-		Vector2 screenPos = CxMath::WorldToScreen(worldPos);
+		CxMath::Vector2 screenPos = CxMath::WorldToScreen(worldPos);
 		reticleSprites_[i]->SetPosition(screenPos);
 		reticleSprites_[i]->Update();
 	}
@@ -476,7 +476,7 @@ void Player::UpdateReticlePosition() {
 	if(Input::GetInstance()->PushKey(DIK_RIGHT)) offset.x += 3.0f;
 
 	// ゲームパッド右スティック
-	Vector2 rightStick = Input::GetInstance()->GetRightStick();
+	CxMath::Vector2 rightStick = Input::GetInstance()->GetRightStick();
 
 	// スティック感度を別で調整
 	offset.x += rightStick.x * stickSensitivity * dt;
