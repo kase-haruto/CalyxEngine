@@ -7,7 +7,7 @@
 #include <Engine/Application/Effects/FxObject.h>
 #include <Engine/Objects/3D/Actor/Actor.h>
 #include <Engine/Renderer/Sprite/Sprite.h>
-#include <Engine/Scene/Runtime/IRuntimeBehaviour.h>
+#include <Engine/Foundation/Serialization/SerializableObject.h>
 
 // game
 #include "Context/PlayerContext.h"
@@ -33,8 +33,9 @@ class PlayerDamageHandler;
  * \brief
  * 操作するキャラクタークラス
  */
-class Player : public Actor,
-			   public IRuntimeBehaviour {
+class Player
+	: public Actor,
+	 public CalyxEngine::SerializableObject {
 public:
 	//=====================================================================
 	// Public Methods
@@ -97,10 +98,6 @@ public:
 	void RequestLockOnTargetClear() const;
 
 	/* runtime ==============================================================*/
-	/**
-	 * \brief ランタイムスタート処理
-	 */
-	void Start() override;
 	void RequestDodge() const;
 
 	void OnCollisionEnter(Collider* other) override;
@@ -112,16 +109,16 @@ public:
 	void SetParent(WorldTransform* parent);
 	void AttachEnemyList(const std::list<std::shared_ptr<Enemy>>& list) const;
 	void SetShootingController(std::unique_ptr<PlayerShootingController> sc);
-	
+
 	// getter
 	std::string_view		   GetTypeName() const override { return "Player"; }
 	PlayerDangerSense*		   GetDangerSense() const { return danger_.get(); }
-	PlayerDodgeSystem* 	   GetDodgeSystem() const { return dodgeSystem_.get(); }
+	PlayerDodgeSystem*		   GetDodgeSystem() const { return dodgeSystem_.get(); }
 	std::vector<Sprite*>	   GetAllSprites() const;
-	const CalyxMath::Vector3			   GetCenterPos() const override;
+	const CalyxMath::Vector3   GetCenterPos() const override;
 	std::optional<float>	   GetShootCooldown() const;
 	std::optional<const float> GetMaxShootInterval() const;
-	CalyxMath::Vector3					   GetReticleWorldPos() const { return reticleTransform_.GetWorldPosition(); }
+	CalyxMath::Vector3		   GetReticleWorldPos() const { return reticleTransform_.GetWorldPosition(); }
 
 private:
 	//=====================================================================
@@ -131,6 +128,10 @@ private:
 	 * \brief レティクルのポジションを更新
 	 */
 	void UpdateReticlePosition();
+
+	void MakeSerializableParam();
+
+	CalyxEngine::ParamPath GetParamPath() const override;
 
 private:
 	//=====================================================================
@@ -145,8 +146,8 @@ private:
 	std::unique_ptr<PlayerShootingController> shootingController_ = nullptr; //< 射撃コントローラ
 	PlayerInput								  input_;
 
-	CalyxMath::Vector3		   lastMoveVector_;	  //< 最後の移動ベクトル
-	WorldTransform reticleTransform_; //< レティクルのワールド変換
+	CalyxMath::Vector3 lastMoveVector_;	  //< 最後の移動ベクトル
+	WorldTransform	   reticleTransform_; //< レティクルのワールド変換
 
 	// sprites
 	std::array<std::unique_ptr<Sprite>, 4> reticleSprites_; //< レティクルのスプライト

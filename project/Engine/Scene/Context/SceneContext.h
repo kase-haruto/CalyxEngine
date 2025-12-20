@@ -27,10 +27,6 @@ public:
 	void Initialize(bool createDefaultLights = true);
 	void Update(float dt, bool runtimePass);
 	/**
-	 * \brief
-	 */
-	void RunRuntimeBootstrap();
-	/**
 	 * \brief 更新後処理
 	 * \param psoService
 	 * \param cmd

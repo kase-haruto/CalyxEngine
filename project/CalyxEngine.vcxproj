@@ -164,6 +164,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Application\Effects\FxGuiHelpers.cpp" />
     <ClCompile Include="Engine\Application\Effects\FxObject.cpp" />
     <ClCompile Include="Engine\Application\Effects\Particle\Module\OverLifetime\OverLifetimeModule.cpp" />
+    <ClCompile Include="Engine\Foundation\Serialization\ParamStore.cpp" />
+    <ClCompile Include="Engine\Foundation\Serialization\SerializableObject.cpp" />
     <ClCompile Include="Game\Battle\Combat\lineOfSight.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Ease\CxEase.cpp" />
     <ClCompile Include="Engine\Graphics\Camera\Action\CameraTurnAroundAction.cpp" />
@@ -435,6 +437,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Application\Effects\FxGuiHelpers.h" />
     <ClInclude Include="Engine\Application\Effects\FxObject.h" />
     <ClInclude Include="Engine\Application\Effects\Particle\Module\OverLifetime\OverLifetimeModule.h" />
+    <ClInclude Include="Engine\Foundation\Serialization\SerializableField.h" />
+    <ClInclude Include="Engine\Foundation\Serialization\SerializableObject.h" />
     <ClInclude Include="Engine\Foundation\Utility\Ease\CxEase.h" />
     <ClInclude Include="Engine\Graphics\Camera\Action\CameraTurnAroundAction.h" />
     <ClInclude Include="Engine\Foundation\Math\MathUtil.h" />
@@ -989,6 +993,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <Content Include="Data\Game\Config\Event\CameraTurnAroundEventConfig.h" />
+    <Content Include="Engine\Foundation\Serialization\ParamStore.h" />
     <Content Include="Engine\Foundation\Utility\Func\CxUtils.h" />
     <Content Include="Game\3dObject\Actor\Boss\Details\BossAnimType.h" />
     <Content Include="Game\3dObject\Actor\Player\PlayerContext.h" />

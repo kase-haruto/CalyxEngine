@@ -106,6 +106,7 @@ Player::Player(const std::string&		  modelName,
 	: Actor::Actor(modelName, objectName) {
 	worldTransform_.translation = {0.0f, 0.0f, 8.0f};
 	worldTransform_.scale		= {1.5f, 1.5f, 1.5f};
+
 }
 
 /* ======================================================================================
@@ -160,6 +161,11 @@ void Player::Initialize() {
 	// context 構築
 	PlayerContextBuilder ctxBuilder= PlayerContextBuilder(*this);
 
+	if(!shootingController_) {
+		auto bullets		= SceneAPI::Instantiate<PlayerBulletContainer>("playerBulletController");
+		shootingController_ = std::make_unique<PlayerShootingController>(bullets.get());
+	}
+
 	// ---- 回避コンポーネント ----
 	if(!dodgeSystem_) {
 		PlayerDodgeConfig cfg;
@@ -204,6 +210,9 @@ void Player::Initialize() {
 	auto self = shared_from_this();
 	shootFx_->SetParent(self);
 	shootFx_->StopAll();
+
+	MakeSerializableParam();
+	
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -314,6 +323,9 @@ void Player::Draw([[maybe_unused]] ID3D12GraphicsCommandList* cmdList) {}
 //		imgui
 /////////////////////////////////////////////////////////////////////////////////////////
 void Player::DerivativeGui() {
+	if(ImGui::Button("Save")) {
+		SerializableObject::SaveParams();
+	}
 	if(hpGauge_) {
 		hpGauge_->ShowGui();
 	}
@@ -388,13 +400,6 @@ void Player::AttachDangerSenseSource(EnemyDirectory* dir) const {
 void Player::RequestLockOnTargetClear() const {
 	if(lockOn_) {
 		lockOn_->RequestLockOnClear();
-	}
-}
-
-void Player::Start() {
-	if(!shootingController_) {
-		auto bullets		= SceneAPI::Instantiate<PlayerBulletContainer>("playerBulletController");
-		shootingController_ = std::make_unique<PlayerShootingController>(bullets.get());
 	}
 }
 
@@ -500,6 +505,18 @@ void Player::UpdateReticlePosition() {
 	if(clampReticleInView_) {
 		ClampWorldTransformInView(reticleTransform_, clampMarginXpx_, clampMarginYpx_);
 	}
+}
+
+void Player::MakeSerializableParam() {
+	SerializableObject::AddField("isAutoLockOn", autoLockOn_);
+
+	SerializableObject::LoadParams();
+}
+
+CalyxEngine::ParamPath Player::GetParamPath() const {
+	return {
+	CalyxEngine::ParamDomain::Game,
+	SceneObject::GetName()};
 }
 
 /* ======================================================================================

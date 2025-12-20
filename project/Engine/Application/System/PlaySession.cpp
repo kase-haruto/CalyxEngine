@@ -134,7 +134,6 @@ namespace CalyxEditor {
 		runtimeContext_->Initialize(false);
 		runtimeContext_->MakeCurrent();
 		SceneSerializer::LoadJson(*runtimeContext_, json);
-		runtimeContext_->RunRuntimeBootstrap();
 		runtimeContext_->SetRuntime(true);
 
 		mode_ = EngineMode::Playing;
@@ -148,7 +147,6 @@ namespace CalyxEditor {
 			runtimeContext_->Initialize(false);
 			runtimeContext_->MakeCurrent();
 			SceneSerializer::LoadJson(*runtimeContext_, json);
-			runtimeContext_->RunRuntimeBootstrap();
 			runtimeContext_->SetRuntime(true);
 			mode_ = EngineMode::Playing;
 			++runtimeGen_;
@@ -170,7 +168,6 @@ namespace CalyxEditor {
 		runtimeContext_->Initialize(false);
 		runtimeContext_->MakeCurrent();
 		SceneSerializer::LoadJson(*runtimeContext_, json);
-		runtimeContext_->RunRuntimeBootstrap();
 		runtimeContext_->SetRuntime(true);
 		++runtimeGen_;
 	}
