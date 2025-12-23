@@ -80,17 +80,6 @@ void SceneContext::Update(float dt, bool runtimePass) {
 	fxSystem_->SyncEmitters();
 }
 
-void SceneContext::RunRuntimeBootstrap() {
-	if (!objectLibrary_) return;
-
-	// 最初の Start 呼び出し
-	for (auto* o : objectLibrary_->GetAllObjectsRaw()) {
-		if (auto* b = dynamic_cast<IRuntimeBehaviour*>(o)) {
-			b->Start();
-		}
-	}
-}
-
 void SceneContext::PostUpdate(PipelineService* psoService, ID3D12GraphicsCommandList* cmd) {
 	if (fxSystem_) {
 		fxSystem_->DispatchEmitters(psoService, cmd);

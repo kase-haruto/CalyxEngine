@@ -164,6 +164,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Application\Effects\FxGuiHelpers.cpp" />
     <ClCompile Include="Engine\Application\Effects\FxObject.cpp" />
     <ClCompile Include="Engine\Application\Effects\Particle\Module\OverLifetime\OverLifetimeModule.cpp" />
+    <ClCompile Include="Engine\Foundation\Serialization\ParamStore.cpp" />
+    <ClCompile Include="Engine\Foundation\Serialization\SerializableObject.cpp" />
+    <ClCompile Include="Engine\Objects\2D\Object2d\GameObject2d.cpp" />
+    <ClCompile Include="Engine\Objects\2D\Renderer\Renderer2d.cpp" />
+    <ClCompile Include="Engine\Objects\2D\Sprite\Component\SpriteComponent.cpp" />
+    <ClCompile Include="Engine\Objects\2D\Sprite\SpriteAsset.cpp" />
     <ClCompile Include="Game\Battle\Combat\lineOfSight.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Ease\CxEase.cpp" />
     <ClCompile Include="Engine\Graphics\Camera\Action\CameraTurnAroundAction.cpp" />
@@ -435,15 +441,24 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Application\Effects\FxGuiHelpers.h" />
     <ClInclude Include="Engine\Application\Effects\FxObject.h" />
     <ClInclude Include="Engine\Application\Effects\Particle\Module\OverLifetime\OverLifetimeModule.h" />
+    <ClInclude Include="Engine\Foundation\Serialization\SerializableField.h" />
+    <ClInclude Include="Engine\Foundation\Serialization\SerializableObject.h" />
     <ClInclude Include="Engine\Foundation\Utility\Ease\CxEase.h" />
     <ClInclude Include="Engine\Graphics\Camera\Action\CameraTurnAroundAction.h" />
     <ClInclude Include="Engine\Foundation\Math\MathUtil.h" />
     <ClInclude Include="Engine\Foundation\Serialization\FieldVisit.h" />
     <ClInclude Include="Engine\Graphics\Camera\Action\BaseCameraAction.h" />
+    <ClInclude Include="Engine\Objects\2D\Object2d\GameObject2d.h" />
+    <ClInclude Include="Engine\Objects\2D\Renderer\Renderer2d.h" />
+    <ClInclude Include="Engine\Objects\2D\Renderer\SpriteDrawData.h" />
+    <ClInclude Include="Engine\Objects\2D\Sprite\Component\SpriteComponent.h" />
+    <ClInclude Include="Engine\Objects\2D\Sprite\SpriteAsset.h" />
     <ClInclude Include="Engine\Objects\3D\Details\BillboardParams.h" />
+    <ClInclude Include="Engine\Objects\base\BaseObject.h" />
     <ClInclude Include="Engine\Objects\Event\BaseEventObject.h" />
     <ClInclude Include="Engine\Objects\Event\Camera\CameraEventObject.h" />
     <ClInclude Include="Engine\PostProcess\Manager\PostEffectManager.h" />
+    <ClInclude Include="Engine\System\Component\IComponent.h" />
     <ClInclude Include="Game\2d\HpGauge.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\AI\BossAI.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\Anim\BossAnimController.h" />
@@ -989,6 +1004,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <Content Include="Data\Game\Config\Event\CameraTurnAroundEventConfig.h" />
+    <Content Include="Engine\Foundation\Serialization\ParamStore.h" />
     <Content Include="Engine\Foundation\Utility\Func\CxUtils.h" />
     <Content Include="Game\3dObject\Actor\Boss\Details\BossAnimType.h" />
     <Content Include="Game\3dObject\Actor\Player\PlayerContext.h" />

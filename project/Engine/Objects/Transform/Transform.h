@@ -21,8 +21,8 @@ enum class RotationSource {
 };
 
 struct TransformationMatrix{
-	CalyxMath::Matrix4x4 world;
-	CalyxMath::Matrix4x4 WorldInverseTranspose;
+	CalyxMath::Matrix4x4 world= CalyxMath::Matrix4x4::MakeIdentity();
+	CalyxMath::Matrix4x4 WorldInverseTranspose= CalyxMath::Matrix4x4::MakeIdentity();
 };
 
 struct EulerTransform{
@@ -50,6 +50,7 @@ struct Transform2D{
 		rotate =0.0f;
 		translate = {0.0f,0.0f};
 	}
+	CalyxMath::Matrix4x4 GetMatrix() const;
 	void ShowImGui(const std::string& lavel = "Transform");
 	Transform2DConfig ExtractConfig()const;
 	void ShowImGui(Transform2DConfig& config, const std::string& lavel = "Transform");

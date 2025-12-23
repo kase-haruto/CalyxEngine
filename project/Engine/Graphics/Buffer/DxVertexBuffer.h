@@ -24,7 +24,17 @@ public:
 		// **入力アセンブラに頂点バッファを設定**
 		cmdList->IASetVertexBuffers(0, 1, &vertexBufferView_);
 	}
+    // ---- CPU 書き込みヘルパ（Upload ヒープ Initialize() 時のみ有効）----
+    void Write(UINT index, const T& value) {
+        assert(this->mappedPtr_ && "Write() requires mappedPtr_. Ensure DxBuffer maps upload resources.");
+        assert(index < this->elementCount_);
+        std::memcpy(static_cast<uint8_t*>(this->mappedPtr_) + sizeof(T) * index, &value, sizeof(T));
+    }
 
+    T* Data() {
+        assert(this->mappedPtr_ && "Data() requires mappedPtr_. Ensure DxBuffer maps upload resources.");
+        return reinterpret_cast<T*>(this->mappedPtr_);
+    }
 
 	// viewの取得 ===================================================================*/
 	D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferView(){ return vertexBufferView_; }
