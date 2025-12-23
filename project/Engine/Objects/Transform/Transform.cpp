@@ -11,6 +11,8 @@
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 
 // lib
+#include "Engine/Application/System/Enviroment.h"
+
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <externals/imgui/imgui.h>
 
@@ -169,7 +171,7 @@ WorldTransformConfig WorldTransform::ExtractConfig() {
 	WorldTransformConfig config;
 	config.translation = translation;
 
-	if (rotationSource == RotationSource::Euler) {
+	if(rotationSource == RotationSource::Euler) {
 		config.rotation = CalyxMath::Quaternion::EulerToQuaternion(eulerRotation);
 	} else {
 		config.rotation = rotation;
@@ -179,6 +181,23 @@ WorldTransformConfig WorldTransform::ExtractConfig() {
 	return config;
 }
 
+CalyxMath::Matrix4x4 Transform2D::GetMatrix() const {
+	CalyxMath::Matrix4x4 matWorld =
+		MakeAffineMatrix(
+			{scale.x, scale.y, 1.0f},
+			{0, 0, rotate},
+			{translate.x, translate.y, 0.0f}
+		);
+
+	CalyxMath::Matrix4x4 matView = CalyxMath::Matrix4x4::MakeIdentity();
+	CalyxMath::Matrix4x4 matProj = MakeOrthographicMatrix(
+		0.0f, 0.0f,
+		kWindowWidth, kWindowHeight,
+		0.0f, 100.0f
+	);
+
+	return CalyxMath::Matrix4x4::Multiply(matWorld, CalyxMath::Matrix4x4::Multiply(matView, matProj));
+}
 /* ========================================================================
 /* Transform2D class
 /* ===================================================================== */

@@ -39,7 +39,6 @@ public:
     D3D12_GPU_DESCRIPTOR_HANDLE GetGpuUavHandle() const { return uavHandle_.gpu; }
     D3D12_CPU_DESCRIPTOR_HANDLE GetCpuUavHandle() const { return uavHandle_.cpu; }
 
-    // ※ StructuredBuffer は IA の VB ではありません。必要なら使わないでください。
     [[deprecated("StructuredBuffer is not a vertex buffer. Bind via SetGraphicsRootDescriptorTable.")]]
     void SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> cmdList, UINT slot = 0){
         cmdList->IASetVertexBuffers(slot, 1, &vbView_);
