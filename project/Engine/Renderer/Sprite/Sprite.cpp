@@ -200,6 +200,13 @@ void Sprite::PutWindowCenter() {
 	transform_.translate.y = windowCenter.y;
 }
 
+void Sprite::SetUvOffset(const CalyxMath::Vector2& offset) {
+	materialData_.uvOffset = offset;
+}
+
+void Sprite::SetUvScale(const CalyxMath::Vector2& scale) {
+	materialData_.uvScale = scale;
+}
 
 void Sprite::SetTexture(const std::string& tex) { handle = TextureManager::GetInstance()->LoadTexture(tex); }
 

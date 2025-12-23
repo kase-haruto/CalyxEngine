@@ -8,6 +8,9 @@ struct Material {
 	float4   color;
 	float4x4 uvTransform;
 
+	float2 uvOffset;   // 追加
+	float2 uvScale;    // 追加
+
 	float  fillAmount;
 	float2 fillOrigin;
 	int    fillMethod;
@@ -16,15 +19,19 @@ struct Material {
 ConstantBuffer<Material> gMaterial : register(b0);
 
 Texture2D<float4> gTexture : register(t0);
-//Texture2D<float4> gMaskTexture : register(t1); // mask mode時に使用
 SamplerState      gSampler : register(s0);
 
 PSOutput main(VSOutput input) {
 	PSOutput output;
 
-	float2 baseUV = input.texcoord; // フィル判定用（動かさない）
+	//--------------------------------
+	// baseUV（0〜1）はそのまま保持
+	//--------------------------------
+	float2 baseUV = input.texcoord;
 
+	//--------------------------------
 	// フィル判定
+	//--------------------------------
 	if (gMaterial.fillMethod == 1) {
 		if (gMaterial.fillOrigin.x < 0.5f) {
 			if (baseUV.x > gMaterial.fillAmount) discard;
@@ -33,13 +40,23 @@ PSOutput main(VSOutput input) {
 		}
 	}
 
-	// --------------------------
-	// こちらはアニメ用UV
-	// fillAmount の判定に使わない
-	// --------------------------
-	float4 uvT   = mul(float4(baseUV,0,1), gMaterial.uvTransform);
-	float2 animUV = uvT.xy;
+	//--------------------------------
+	// アニメーション用 UV 計算
+	//--------------------------------
 
+	// 分割スケール適用
+	float2 animUV = baseUV * gMaterial.uvScale;
+
+	// 分割オフセット適用
+	animUV += gMaterial.uvOffset;
+
+	// UV Transform（回転・移動）
+	float4 uvT = mul(float4(animUV, 0, 1), gMaterial.uvTransform);
+	animUV = uvT.xy;
+
+	//--------------------------------
+	// テクスチャサンプリング
+	//--------------------------------
 	float4 texColor = gTexture.Sample(gSampler, animUV);
 
 	output.color = texColor * gMaterial.color;
