@@ -88,8 +88,8 @@ public:
 	Collider*			  GetCollider();
 	ObjectModelType		  GetModelType() const { return objectModelType_; }
 	Model*				  GetStaticModel();
-	AnimationModel*		  GetAnimationModel();
-	const AnimationModel* GetAnimationModel() const;
+	CalyxAssets::AnimationModel*		  AnimationModel();
+	const CalyxAssets::AnimationModel* AnimationModel() const;
 	AABB				  GetWorldAABB() const;
 
 	// setter
@@ -122,7 +122,7 @@ protected:
 	//                    protected methods
 	//===================================================================*/
 	std::unique_ptr<BaseModel>		model_			= nullptr; // 描画用モデル
-	std::unique_ptr<AnimationModel> animationModel_ = nullptr; // アニメーションモデル
+	std::unique_ptr<CalyxAssets::AnimationModel> animationModel_ = nullptr; // アニメーションモデル
 
 protected:
 	//===================================================================*/

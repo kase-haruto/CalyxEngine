@@ -3,105 +3,109 @@
 #include "AnimationStruct.h"
 #include <externals/imgui/imgui.h>
 
-/* ========================================================================
-/*		動的モデル
-/* ===================================================================== */
-class AnimationModel : public BaseModel {
-public:
-	//===================================================================*/
-	//					public method
-	//===================================================================*/
-	AnimationModel() = default;
-	AnimationModel(const std::string& fileName);
-	~AnimationModel() override = default;
+namespace CalyxAssets {
+	/* ========================================================================
+	/*		動的モデル
+	/* ===================================================================== */
+	class AnimationModel
+		: public BaseModel {
+	public:
+		//===================================================================*/
+		//					public method
+		//===================================================================*/
+		AnimationModel() = default;
+		AnimationModel(const std::string& fileName);
+		~AnimationModel() override = default;
 
-	void Initialize() override;
-	void Update(float dt) override;
-	void Draw(const WorldTransform& transform) override;
-	void ShowImGuiInterface() override;
+		void Initialize() override;
+		void Update(float dt) override;
+		void Draw(const WorldTransform& transform) override;
+		void ShowImGuiInterface() override;
 
-	// モデル読み込み時処理
-	void OnModelLoaded() override;
+		// モデル読み込み時処理
+		void OnModelLoaded() override;
 
-	// アニメーションの登録 (ゲーム側は enum を int16_t にキャストして渡す想定)
-	void RegisterAnimation(int16_t animID, const std::string& animName, const std::optional<std::string>& fileName = std::nullopt);
-	// アニメーション再生 (ID ベース)
-	void Play(int16_t id, float blend = 0.2f);
-	// ワンショット再生（再生終了後に returnAnim へ戻す）
-	void PlayOneShot(int16_t id, int16_t returnAnim, float blend = 0.1f);
-	// ループ設定
-	void SetLoop(int16_t id, bool isLoop);
-	// アニメーション終了判定
-	bool IsAnimationFinished()const;
+		// アニメーションの登録 (ゲーム側は enum を int16_t にキャストして渡す想定)
+		void RegisterAnimation(int16_t animID,const std::string& animName,const std::optional<std::string>& fileName = std::nullopt);
+		// アニメーション再生 (ID ベース)
+		void Play(int16_t id,float blend = 0.2f);
+		// ワンショット再生（再生終了後に returnAnim へ戻す）
+		void PlayOneShot(int16_t id,int16_t returnAnim,float blend = 0.1f);
+		// ループ設定
+		void SetLoop(int16_t id,bool isLoop);
+		// アニメーション終了判定
+		bool IsAnimationFinished() const;
 
-	//--------- skeleton -----------------------------------------------------
-	void SkeletonUpdate();
-	void SkinClusterUpdate();
-	void DrawSkeleton();
+		//--------- skeleton -----------------------------------------------------
+		void SkeletonUpdate();
+		void SkinClusterUpdate();
+		void DrawSkeleton();
 
-	// アニメーションを追加（名前ベース・従来 API）
-	void AddAnimation(const std::string& animName, const std::string& fileName);
-	// アニメーションを再生（名前ベース・従来 API）
-	void PlayAnimation(const std::string& animName, float blendDuration);
+		// アニメーションを追加（名前ベース・従来 API）
+		void AddAnimation(const std::string& animName,const std::string& fileName);
+		// アニメーションを再生（名前ベース・従来 API）
+		void PlayAnimation(const std::string& animName,float blendDuration);
 
-	//--------- accessor ------------------------------------------------------//
-	std::string				 GetCurrentAnimationName() const;
-	float					 GetAnimationSpeed() const { return animationSpeed_; }
-	std::vector<std::string> GetAnimationNodeNames() const;
-	std::optional<CalyxMath::Matrix4x4> GetJointMatrix(const std::string& name) const;
+		//--------- accessor ------------------------------------------------------//
+		std::string                         GetCurrentAnimationName() const;
+		float                               GetAnimationSpeed() const { return animationSpeed_; }
+		std::vector<std::string>            GetAnimationNodeNames() const;
+		std::optional<CalyxMath::Matrix4x4> GetJointMatrix(const std::string& name) const;
 
-	void SetAnimationSpeed(float speed) { animationSpeed_ = speed; }
+		void SetAnimationSpeed(float speed) { animationSpeed_ = speed; }
 
-private:
-	//===================================================================*/
-	//					private method
-	//===================================================================*/
-	void CreateMaterialBuffer() override;
-	void MaterialBufferMap() override;
-	void Map() override;
+	private:
+		//===================================================================*/
+		//					private method
+		//===================================================================*/
+		void CreateMaterialBuffer() override;
+		void MaterialBufferMap() override;
+		void Map() override;
 
-	/// アニメーション再生（毎フレーム更新側）
-	void PlayAnimation();
+		/// アニメーション再生（毎フレーム更新側）
+		void PlayAnimation();
 
-	/// アニメーションをバインド
-	void BuildFastChannels(Animation& anim);
+		/// アニメーションをバインド
+		void BuildFastChannels(Animation& anim);
 
-	/// スケルトンのアニメーションを適用
-	void ApplyAnimationToSkeleton();
+		/// スケルトンのアニメーションを適用
+		void ApplyAnimationToSkeleton();
 
-	/// アニメーションCurveを適用
-	CalyxMath::Quaternion CalculateValue(const AnimationCurve<CalyxMath::Quaternion>& curve, float time);
-	CalyxMath::Vector3	   CalculateValue(const AnimationCurve<CalyxMath::Vector3>& curve, float time);
+		/// アニメーションCurveを適用
+		CalyxMath::Quaternion CalculateValue(const AnimationCurve<CalyxMath::Quaternion>& curve,float time);
+		CalyxMath::Vector3    CalculateValue(const AnimationCurve<CalyxMath::Vector3>& curve,float time);
 
-	/// スケルトン計算
-	void SkinningStep();
+		/// スケルトン計算
+		void SkinningStep();
 
-private:
-	//===================================================================*/
-	//                    private variables
-	//===================================================================*/
-	float animationTime_ = 0.0f; //< アニメーションの経過時間
+	private:
+		//===================================================================*/
+		//                    private variables
+		//===================================================================*/
+		float animationTime_ = 0.0f; //< アニメーションの経過時間
 
-	Animation				 animationData_;
-	int						 selectedJoint_		= -1;
-	ImVec4					 jointHighlightCol_ = {1.0f, 0.2f, 0.2f, 1.0f};
-	SkinCluster				 skinCluster_;
-	D3D12_VERTEX_BUFFER_VIEW vbvs_[2];
+		Animation                animationData_;
+		int                      selectedJoint_     = -1;
+		ImVec4                   jointHighlightCol_ = {1.0f,0.2f,0.2f,1.0f};
+		SkinCluster              skinCluster_;
+		D3D12_VERTEX_BUFFER_VIEW vbvs_[2];
 
-public:
-	float animationSpeed_ = 1.0f;  //< アニメーションの再生速度
-	bool  isDrawSkeleton_ = false; //< スケルトンを描画するかどうか
+	public:
+		float animationSpeed_ = 1.0f;  //< アニメーションの再生速度
+		bool  isDrawSkeleton_ = false; //< スケルトンを描画するかどうか
 
-private:
-	std::unordered_map<std::string, AnimationState> animationStates_;
-	AnimationState*									currentAnimation_ = nullptr;
-	AnimationState*									nextAnimation_	  = nullptr;
-	float											blendTime_		  = 0.0f;
-	float											blendDuration_	  = 0.2f; // ブレンド時間（秒）
+	private:
+		std::unordered_map<std::string,AnimationState> animationStates_;
+		AnimationState*                                currentAnimation_ = nullptr;
+		AnimationState*                                nextAnimation_    = nullptr;
+		float                                          blendTime_        = 0.0f;
+		float                                          blendDuration_    = 0.2f; // ブレンド時間（秒）
 
-private:
-	// ID → アニメーション名
-	std::unordered_map<int16_t, std::string> animIdTable_;
-	bool    isOneShot_      = false;
-	int16_t oneShotReturn_  = 0;
-};
+	private:
+		// ID → アニメーション名
+		std::unordered_map<int16_t,std::string> animIdTable_;
+		bool                                    isOneShot_     = false;
+		int16_t                                 oneShotReturn_ = 0;
+	};
+
+}

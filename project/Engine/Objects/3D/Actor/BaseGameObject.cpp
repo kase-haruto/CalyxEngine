@@ -22,7 +22,7 @@ BaseGameObject::BaseGameObject(const std::string&		  modelName,
 		// gltf
 		else if(extension == ".gltf") {
 			objectModelType_ = ObjectModelType::ModelType_Animation;
-			model_			 = std::make_unique<AnimationModel>(modelName);
+			model_			 = std::make_unique<CalyxAssets::AnimationModel>(modelName);
 		} else {
 			objectModelType_ = ObjectModelType::ModelType_Unknown;
 		}
@@ -149,7 +149,7 @@ void BaseGameObject::ApplyConfig() {
 		auto dot = modelPath.find_last_of('.');
 		if(dot != std::string::npos && modelPath.substr(dot) == ".gltf") {
 			objectModelType_ = ObjectModelType::ModelType_Animation;
-			model_			 = std::make_unique<AnimationModel>(modelPath);
+			model_			 = std::make_unique<CalyxAssets::AnimationModel>(modelPath);
 		} else {
 			objectModelType_ = ObjectModelType::ModelType_Static;
 			model_			 = std::make_unique<Model>(modelPath);
@@ -269,15 +269,15 @@ Model* BaseGameObject::GetStaticModel() {
 			   : nullptr;
 }
 
-AnimationModel* BaseGameObject::GetAnimationModel() {
+CalyxAssets::AnimationModel* BaseGameObject::AnimationModel() {
 	return (objectModelType_ == ObjectModelType::ModelType_Animation)
-			   ? static_cast<AnimationModel*>(model_.get())
+			   ? static_cast<CalyxAssets::AnimationModel*>(model_.get())
 			   : nullptr;
 }
 
-const AnimationModel* BaseGameObject::GetAnimationModel() const {
+const CalyxAssets::AnimationModel* BaseGameObject::AnimationModel() const {
 	return (objectModelType_ == ObjectModelType::ModelType_Animation)
-			   ? static_cast<AnimationModel*>(model_.get())
+			   ? static_cast<CalyxAssets::AnimationModel*>(model_.get())
 			   : nullptr;
 }
 

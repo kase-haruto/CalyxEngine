@@ -32,6 +32,7 @@ void Calyx2D::SpriteObject2d::Draw(ID3D12GraphicsCommandList* cmdList) const {
 //  アニメーションがあれば更新
 ///////////////////////////////////////////////////////////////////////////////////////////
 void Calyx2D::SpriteObject2d::AnimationUpdate(float dt) const {
+	// 分割されているスプライト以外は早期return
 	if(division_.first < 1 || division_.second < 1) return;
 
 	// 時間更新

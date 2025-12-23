@@ -1,7 +1,7 @@
 #include "BossAnimController.h"
 #include "../Details/BossAnimType.h"
 
-BossAnimController::BossAnimController(AnimationModel* animModel) : animModel_(animModel) {}
+BossAnimController::BossAnimController(CalyxAssets::AnimationModel* animModel) : animModel_(animModel) {}
 BossAnimController::~BossAnimController() = default;
 
 void BossAnimController::Initialize() const {
