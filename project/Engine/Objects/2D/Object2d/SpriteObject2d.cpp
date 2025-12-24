@@ -1,48 +1,97 @@
 #include "SpriteObject2d.h"
-
 #include <Engine/Renderer/Sprite/Sprite.h>
 
-Calyx2D::SpriteObject2d::SpriteObject2d()  = default;
-Calyx2D::SpriteObject2d::~SpriteObject2d() = default;
+using namespace Calyx2D;
 
-///////////////////////////////////////////////////////////////////////////////////////////
-//  初期化処理
-///////////////////////////////////////////////////////////////////////////////////////////
-void Calyx2D::SpriteObject2d::Initializes(const std::string& filePath) {
+SpriteObject2d::SpriteObject2d()  = default;
+SpriteObject2d::~SpriteObject2d() = default;
+
+void SpriteObject2d::Initialize(const std::string& filePath) {
 	sprite_ = std::make_unique<Sprite>(filePath);
 	sprite_->Initialize();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////
-//  更新処理
-///////////////////////////////////////////////////////////////////////////////////////////
-void Calyx2D::SpriteObject2d::Update(float dt) const {
+void SpriteObject2d::Update(float dt) const {
 	AnimationUpdate(dt);
 	sprite_->Update();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////
-//  描画処理
-///////////////////////////////////////////////////////////////////////////////////////////
-void Calyx2D::SpriteObject2d::Draw(ID3D12GraphicsCommandList* cmdList) const {
+void SpriteObject2d::Draw(ID3D12GraphicsCommandList* cmdList) const {
 	sprite_->Draw(cmdList);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////
-//  アニメーションがあれば更新
-///////////////////////////////////////////////////////////////////////////////////////////
-void Calyx2D::SpriteObject2d::AnimationUpdate(float dt) const {
-	// 分割されているスプライト以外は早期return
-	if(division_.first < 1 || division_.second < 1) return;
-
-	// 時間更新
-	frameTime_ += dt;
-	if(frameTime_ >= frameDuration_) {
-		frameTime_ -= frameDuration_;
-		currentFrame_ = (currentFrame_ + 1) % (division_.first * division_.second);
+//====================================================
+// アニメ追加
+//====================================================
+void SpriteObject2d::AddAnimation(const std::string& name, SpriteAnimation anim) {
+	// frameCount が 0 の場合に自動計算
+	if(anim.frameCount == 0) {
+		anim.frameCount = anim.division.first * anim.division.second;
 	}
 
-	// フレーム位置
+	animations_[name] = anim;
+}
+
+//====================================================
+// アニメ切替
+//====================================================
+bool SpriteObject2d::SetAnimation(const std::string& name, bool restart) {
+	auto it = animations_.find(name);
+	if(it == animations_.end()) return false;
+
+	currentAnim_	 = &it->second;
+	currentAnimName_ = name;
+
+	// テクスチャ切替
+	sprite_->SetTexture(currentAnim_->texturePath);
+
+	// division更新
+	division_ = currentAnim_->division;
+
+	// 再生位置初期化
+	if(restart) {
+		currentFrame_ = currentAnim_->startFrame;
+		frameTime_	  = 0.0f;
+	}
+
+	// UV反映
+	ApplyFrameToUv();
+	return true;
+}
+
+//====================================================
+// アニメ更新
+//====================================================
+void SpriteObject2d::AnimationUpdate(float dt) const {
+	if(!currentAnim_) return;
+	if(division_.first < 1 || division_.second < 1) return;
+
+	frameTime_ += dt;
+	if(frameTime_ >= currentAnim_->frameDuration) {
+
+		frameTime_ -= currentAnim_->frameDuration;
+		currentFrame_++;
+
+		int endFrame	= currentAnim_->startFrame + currentAnim_->frameCount;
+
+		// 終了判定
+		if(currentFrame_ >= endFrame) {
+			if(currentAnim_->loop) {
+				currentFrame_ = currentAnim_->startFrame;
+			} else {
+				currentFrame_ = endFrame - 1; // 最後で停止
+			}
+		}
+
+		ApplyFrameToUv();
+	}
+}
+
+//====================================================
+// UV反映
+//====================================================
+void SpriteObject2d::ApplyFrameToUv() const {
+
 	int divX = division_.first;
 	int divY = division_.second;
 
@@ -52,22 +101,18 @@ void Calyx2D::SpriteObject2d::AnimationUpdate(float dt) const {
 	float frameW = 1.0f / divX;
 	float frameH = 1.0f / divY;
 
-	// UV セット
 	sprite_->SetUvScale({frameW, frameH});
 	sprite_->SetUvOffset({fx * frameW, fy * frameH});
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////
-//  getter
-///////////////////////////////////////////////////////////////////////////////////////////
-const std::pair<int32_t, int32_t>& Calyx2D::SpriteObject2d::GetDivision() const { return division_; }
-const CalyxMath::Vector2&		   Calyx2D::SpriteObject2d::GetPosition() const { return sprite_->GetPosition(); }
-const CalyxMath::Vector2&		   Calyx2D::SpriteObject2d::GetScale() const { return sprite_->GetSize(); }
-Sprite*							   Calyx2D::SpriteObject2d::GetSprite() const {return sprite_.get();}
+//====================================================
+// getter / setter
+//====================================================
+const std::pair<int32_t, int32_t>& SpriteObject2d::GetDivision() const { return division_; }
+const CalyxMath::Vector2&		   SpriteObject2d::GetPosition() const { return sprite_->GetPosition(); }
+const CalyxMath::Vector2&		   SpriteObject2d::GetScale() const { return sprite_->GetSize(); }
+Sprite*							   SpriteObject2d::GetSprite() const { return sprite_.get(); }
 
-///////////////////////////////////////////////////////////////////////////////////////////
-//  settere
-///////////////////////////////////////////////////////////////////////////////////////////
-void Calyx2D::SpriteObject2d::SetDivision(const std::pair<int32_t, int32_t>& division) { division_ = division; }
-void Calyx2D::SpriteObject2d::SetPosition(const CalyxMath::Vector2& position) const { sprite_->SetPosition(position); }
-void Calyx2D::SpriteObject2d::SetScale(const CalyxMath::Vector2& scale) const { sprite_->SetSize(scale); }
+void SpriteObject2d::SetDivision(const std::pair<int32_t, int32_t>& division) { division_ = division; }
+void SpriteObject2d::SetPosition(const CalyxMath::Vector2& position) const { sprite_->SetPosition(position); }
+void SpriteObject2d::SetScale(const CalyxMath::Vector2& scale) const { sprite_->SetSize(scale); }

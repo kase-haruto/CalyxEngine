@@ -2,15 +2,15 @@
 /* ========================================================================
 /* include space
 /* ===================================================================== */
-#include <Engine/Renderer/Mesh/VertexData.h>
+#include <Engine/Application/System/Enviroment.h>
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
-#include <Engine/Application/System/Enviroment.h>
+#include <Engine/Renderer/Mesh/VertexData.h>
 
 /* math */
-#include <Engine/Foundation/Utility/Func/MyFunc.h>
-#include <Engine/Foundation/Utility/Func/CxUtils.h>
 #include <Engine/Foundation/Math/Vector3.h>
+#include <Engine/Foundation/Utility/Func/CxUtils.h>
+#include <Engine/Foundation/Utility/Func/MyFunc.h>
 
 /* c++ */
 #include <stdint.h>
@@ -21,7 +21,7 @@ Sprite::Sprite(const std::string& filePath) {
 
 	handle = TextureManager::GetInstance()->LoadTexture(filePath);
 
-	transform_ = {{1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f}};
+	transform_ = {{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}};
 
 	path = filePath;
 
@@ -38,37 +38,36 @@ Sprite::Sprite(const std::string& filePath) {
 
 Sprite::~Sprite() {}
 
-void Sprite::Initialize(const CalyxMath::Vector2& newPosition,const CalyxMath::Vector2& newSize) {
-	this->position         = newPosition;
+void Sprite::Initialize(const CalyxMath::Vector2& newPosition, const CalyxMath::Vector2& newSize) {
+	this->position		   = newPosition;
 	transform_.translate.x = position.x;
 	transform_.translate.y = position.y;
 
-	this->size         = newSize;
+	this->size		   = newSize;
 	transform_.scale.x = newSize.x;
 	transform_.scale.y = newSize.y;
 }
 
 void Sprite::Initialize() {
-	//Windowの中心に初期化、サイズはデフォルトサイズ
+	// Windowの中心に初期化、サイズはデフォルトサイズ
 	PutWindowCenter();
 }
 
 void Sprite::Update() {
-	transform_.translate = {position.x,position.y,0.0f};
-	transform_.rotate    = {0.0f,0.0f,rotate};
-	transform_.scale     = {size.x,size.y,1.0f};
+	transform_.translate = {position.x, position.y, 0.0f};
+	transform_.rotate	 = {0.0f, 0.0f, rotate};
+	transform_.scale	 = {size.x, size.y, 1.0f};
 
 	// アンカー反映（頂点は常時Map済みを前提）
 	const float left   = 0.0f - anchorPoint.x;
 	const float right  = 1.0f - anchorPoint.x;
-	const float top    = 0.0f - anchorPoint.y;
+	const float top	   = 0.0f - anchorPoint.y;
 	const float bottom = 1.0f - anchorPoint.y;
 
-	vertexData[0].position = {left,bottom,0.0f,1.0f};
-	vertexData[1].position = {left,top,0.0f,1.0f};
-	vertexData[2].position = {right,bottom,0.0f,1.0f};
-	vertexData[3].position = {right,top,0.0f,1.0f};
-
+	vertexData[0].position = {left, bottom, 0.0f, 1.0f};
+	vertexData[1].position = {left, top, 0.0f, 1.0f};
+	vertexData[2].position = {right, bottom, 0.0f, 1.0f};
+	vertexData[3].position = {right, top, 0.0f, 1.0f};
 
 	// materialデータの更新
 	materialCB_.TransferData(materialData_);
@@ -78,20 +77,20 @@ void Sprite::Update() {
 }
 
 void Sprite::ShowGui() {
-	ImGui::Text("%s",path.c_str());
-	ImGui::DragFloat2("Position",&position.x,1.0f);
-	ImGui::DragFloat2("Size",&size.x,1.0f);
-	ImGui::SliderFloat("RotateZ",&rotate,-180.0f,180.0f);
-	ImGui::DragFloat2("Anchor",&anchorPoint.x,0.01f,0.0f,1.0f);
+	ImGui::Text("%s", path.c_str());
+	ImGui::DragFloat2("Position", &position.x, 1.0f);
+	ImGui::DragFloat2("Size", &size.x, 1.0f);
+	ImGui::SliderFloat("RotateZ", &rotate, -180.0f, 180.0f);
+	ImGui::DragFloat2("Anchor", &anchorPoint.x, 0.01f, 0.0f, 1.0f);
 	uvTransform.ShowImGui("uvTransform");
 }
 
 void Sprite::UpdateMatrix() {
-	CalyxMath::Matrix4x4 matWorld      = CalyxMath::MakeAffineMatrix(transform_.scale,transform_.rotate,transform_.translate);
-	CalyxMath::Matrix4x4 matView       = CalyxMath::Matrix4x4::MakeIdentity();
-	CalyxMath::Matrix4x4 matProjection = CalyxMath::MakeOrthographicMatrix(0.0f,0.0f,1280.0f,720.0f,0.0f,100.0f);
-	CalyxMath::Matrix4x4 wvpMatrix     = CalyxMath::Matrix4x4::Multiply(matWorld,CalyxMath::Matrix4x4::Multiply(matView,matProjection));
-	*transformData          = wvpMatrix;
+	CalyxMath::Matrix4x4 matWorld	   = CalyxMath::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
+	CalyxMath::Matrix4x4 matView	   = CalyxMath::Matrix4x4::MakeIdentity();
+	CalyxMath::Matrix4x4 matProjection = CalyxMath::MakeOrthographicMatrix(0.0f, 0.0f, 1280.0f, 720.0f, 0.0f, 100.0f);
+	CalyxMath::Matrix4x4 wvpMatrix	   = CalyxMath::Matrix4x4::Multiply(matWorld, CalyxMath::Matrix4x4::Multiply(matView, matProjection));
+	*transformData					   = wvpMatrix;
 }
 
 void Sprite::UpdateTransform() {
@@ -99,44 +98,44 @@ void Sprite::UpdateTransform() {
 	/// UV Transform
 	///===================================================
 	CalyxMath::Matrix4x4 uvTransformMatrix = CalyxMath::MakeScaleMatrix(uvTransform.scale);
-	uvTransformMatrix           = CalyxMath::Matrix4x4::Multiply(uvTransformMatrix,CalyxMath::MakeRotateZMatrix(uvTransform.rotate.z));
-	uvTransformMatrix           = CalyxMath::Matrix4x4::Multiply(uvTransformMatrix,CalyxMath::MakeTranslateMatrix(uvTransform.translate));
-	materialData_.uvTransform   = uvTransformMatrix;
-}	
+	uvTransformMatrix					   = CalyxMath::Matrix4x4::Multiply(uvTransformMatrix, CalyxMath::MakeRotateZMatrix(uvTransform.rotate.z));
+	uvTransformMatrix					   = CalyxMath::Matrix4x4::Multiply(uvTransformMatrix, CalyxMath::MakeTranslateMatrix(uvTransform.translate));
+	materialData_.uvTransform			   = uvTransformMatrix;
+}
 
 void Sprite::Draw(ID3D12GraphicsCommandList* cmdList) {
 	if(!isVisible) return;
 	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	cmdList->SetGraphicsRootDescriptorTable(2,handle);
-	cmdList->IASetVertexBuffers(0,1,&vertexBufferViewSprite);
+	cmdList->SetGraphicsRootDescriptorTable(2, handle);
+	cmdList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
 	cmdList->IASetIndexBuffer(&indexBufferView);
-	materialCB_.SetCommand(cmdList,0);
-	cmdList->SetGraphicsRootConstantBufferView(1,transformResource_->GetGPUVirtualAddress());
+	materialCB_.SetCommand(cmdList, 0);
+	cmdList->SetGraphicsRootConstantBufferView(1, transformResource_->GetGPUVirtualAddress());
 
-	cmdList->DrawIndexedInstanced(6,1,0,0,0);
+	cmdList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
 
 void Sprite::CreateBuffer() {
 	ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
 
 	// 頂点用リソース
-	vertexResource_ = CreateBufferResource(device,sizeof(VertexData) * 4);
+	vertexResource_ = CreateBufferResource(device, sizeof(VertexData) * 4);
 
 	vertexBufferViewSprite.BufferLocation = vertexResource_->GetGPUVirtualAddress();
-	vertexBufferViewSprite.SizeInBytes    = sizeof(VertexData) * 4;
+	vertexBufferViewSprite.SizeInBytes	  = sizeof(VertexData) * 4;
 	vertexBufferViewSprite.StrideInBytes  = sizeof(VertexData);
 
 	// トランスフォーム用リソース
-	transformResource_ = CreateBufferResource(device,sizeof(TransformationMatrix));
+	transformResource_ = CreateBufferResource(device, sizeof(TransformationMatrix));
 
 	// マテリアル用リソース
 	materialCB_.Initialize(device);
 
 	// インデックス用リソース
-	indexResource_                 = CreateBufferResource(device,sizeof(uint32_t) * 6);
+	indexResource_				   = CreateBufferResource(device, sizeof(uint32_t) * 6);
 	indexBufferView.BufferLocation = indexResource_->GetGPUVirtualAddress();
-	indexBufferView.SizeInBytes    = sizeof(uint32_t) * 6;
-	indexBufferView.Format         = DXGI_FORMAT_R32_UINT;
+	indexBufferView.SizeInBytes	   = sizeof(uint32_t) * 6;
+	indexBufferView.Format		   = DXGI_FORMAT_R32_UINT;
 }
 
 void Sprite::Map() {
@@ -148,7 +147,7 @@ void Sprite::Map() {
 
 void Sprite::IndexResourceMap() {
 	uint32_t* indexData = nullptr;
-	indexResource_->Map(0,nullptr,reinterpret_cast<void**>(&indexData));
+	indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&indexData));
 
 	indexData[0] = 0;
 	indexData[1] = 1;
@@ -157,47 +156,47 @@ void Sprite::IndexResourceMap() {
 	indexData[4] = 3;
 	indexData[5] = 2;
 
-	indexResource_->Unmap(0,nullptr);
+	indexResource_->Unmap(0, nullptr);
 }
 
 void Sprite::VertexResourceMap() {
-	vertexResource_->Map(0,nullptr,reinterpret_cast<void**>(&vertexData));
+	vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
 
 	// UV座標の設定
-	vertexData[0].texcoord = {0.0f,1.0f}; // 左下
-	vertexData[1].texcoord = {0.0f,0.0f}; // 左上
-	vertexData[2].texcoord = {1.0f,1.0f}; // 右下
-	vertexData[3].texcoord = {1.0f,0.0f}; // 右上
+	vertexData[0].texcoord = {0.0f, 1.0f}; // 左下
+	vertexData[1].texcoord = {0.0f, 0.0f}; // 左上
+	vertexData[2].texcoord = {1.0f, 1.0f}; // 右下
+	vertexData[3].texcoord = {1.0f, 0.0f}; // 右上
 
 	// アンカーポイントの反映
-	float left   = 0.0f - anchorPoint.x;
-	float right  = 1.0f - anchorPoint.x;
-	float top    = 0.0f - anchorPoint.y;
+	float left	 = 0.0f - anchorPoint.x;
+	float right	 = 1.0f - anchorPoint.x;
+	float top	 = 0.0f - anchorPoint.y;
 	float bottom = 1.0f - anchorPoint.y;
 
-	vertexData[0].position = {left,bottom,0.0f,1.0f};  // 左下
-	vertexData[1].position = {left,top,0.0f,1.0f};     // 左上
-	vertexData[2].position = {right,bottom,0.0f,1.0f}; // 右下
-	vertexData[3].position = {right,top,0.0f,1.0f};    // 右上
+	vertexData[0].position = {left, bottom, 0.0f, 1.0f};  // 左下
+	vertexData[1].position = {left, top, 0.0f, 1.0f};	  // 左上
+	vertexData[2].position = {right, bottom, 0.0f, 1.0f}; // 右下
+	vertexData[3].position = {right, top, 0.0f, 1.0f};	  // 右上
 
-	vertexResource_->Unmap(0,nullptr);
+	vertexResource_->Unmap(0, nullptr);
 }
 
 void Sprite::TransformResourceMap() {
-	transformResource_->Map(0,nullptr,reinterpret_cast<void**>(&transformData));
+	transformResource_->Map(0, nullptr, reinterpret_cast<void**>(&transformData));
 	*transformData = CalyxMath::Matrix4x4::MakeIdentity(); // 初期値は単位行列
 }
 
 void Sprite::MaterialResourceMap() {
-	materialData_.color       = {1.0f,1.0f,1.0f,1.0f};
+	materialData_.color		  = {1.0f, 1.0f, 1.0f, 1.0f};
 	materialData_.uvTransform = CalyxMath::Matrix4x4::MakeIdentity();
 	materialCB_.TransferData(materialData_);
 }
 
 void Sprite::PutWindowCenter() {
-	CalyxMath::Vector2 windowCenter   = {kWindowWidth * 0.5f,kWindowHeight * 0.5f};
-	transform_.translate.x = windowCenter.x;
-	transform_.translate.y = windowCenter.y;
+	CalyxMath::Vector2 windowCenter = {kWindowWidth * 0.5f, kWindowHeight * 0.5f};
+	transform_.translate.x			= windowCenter.x;
+	transform_.translate.y			= windowCenter.y;
 }
 
 void Sprite::SetUvOffset(const CalyxMath::Vector2& offset) {

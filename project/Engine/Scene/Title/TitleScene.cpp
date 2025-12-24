@@ -48,7 +48,7 @@ void TitleScene::Initialize() {
 	};
 
 	flyingPlayer = std::make_unique<Calyx2D::SpriteObject2d>();
-	flyingPlayer->Initializes("Textures/flyingPlayer.png");
+	flyingPlayer->Initialize("Textures/Player/flyingPlayer.png");
 	flyingPlayer->SetDivision({3,2});
 
 	//=========================
