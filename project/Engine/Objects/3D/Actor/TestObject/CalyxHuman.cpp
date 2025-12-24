@@ -10,14 +10,14 @@ CalyxHuman::CalyxHuman(const std::string& modelName,
 	Actor::Actor(modelName, objectName){
 	moveSpeed_ = 10.0f;
 	//animationを追加
-	GetAnimationModel()->AddAnimation("idle", "idle.gltf");
+	//GetAnimationModel()->AddAnimation("idle", "idle.gltf");
 
 }
 
 CalyxHuman::CalyxHuman(){
 	moveSpeed_ = 10.0f;
 	//animationを追加
-//	GetAnimationModel()->AddAnimation("idle", "idle.gltf");
+//	GetCalyxAssets::AnimationModel()->AddAnimation("idle", "idle.gltf");
 
 }
 
@@ -35,7 +35,7 @@ void CalyxHuman::Update(float dt){
 }
 
 std::optional<CalyxMath::Vector3> CalyxHuman::GetJointWorldPos(const std::string& name) const {
-	const AnimationModel* anim = GetAnimationModel();
+	const CalyxAssets::AnimationModel* anim = AnimationModel();
 	if (!anim) return std::nullopt;
 
 	auto matOpt = anim->GetJointMatrix(name);
@@ -54,7 +54,7 @@ std::optional<CalyxMath::Vector3> CalyxHuman::GetJointWorldPos(const std::string
 void CalyxHuman::TransitionAnimation(){
 	CalyxMath::Vector2 stickInput = CalyxFoundation::Input::GetInstance()->GetLeftStick();
 	bool isMoving = stickInput.Length() > 0.1f;
-	auto* model = GetAnimationModel();
+	auto* model = AnimationModel();
 
 	if (isMoving){
 		if (model->GetCurrentAnimationName() != "run"){

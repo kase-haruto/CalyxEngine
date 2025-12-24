@@ -53,7 +53,7 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 					modelRenderer_->RegisterStatic(m, go->GetWorldTransform(), go->GetBillboardMode());
 				break;
 			case ObjectModelType::ModelType_Animation:
-				if(auto* m = go->GetAnimationModel())
+				if(auto* m = go->AnimationModel())
 					modelRenderer_->RegisterSkinned(m, go->GetWorldTransform());
 				break;
 			default:

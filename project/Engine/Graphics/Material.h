@@ -47,6 +47,9 @@ struct Material2D {
 	CalyxMath::Vector4   color;
 	CalyxMath::Matrix4x4 uvTransform;
 
+	CalyxMath::Vector2 uvOffset;
+	CalyxMath::Vector2 uvScale = {1.0f,1.0f};
+
 	float   fillAmount = 1.0f;        // 0〜1 (初期は1、全部描画)
 	CalyxMath::Vector2 fillOrigin = {0.0f,0.0f}; // (0,0)=左/下, (1,0)=右/下, etc.
 	int     fillMethod = 0;           // 0=none, 1=horizontal, 2=vertical, 3=mask

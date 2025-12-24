@@ -62,6 +62,8 @@ public:
 	void       SetTargetRt(RenderTargetType targetRt) { targetRT_ = targetRt; }
 	void       SetTexture(const std::string& tex);
 	const void SetTextureHandle(D3D12_GPU_DESCRIPTOR_HANDLE newHandle);
+	void SetUvOffset(const CalyxMath::Vector2& offset);
+	void SetUvScale(const CalyxMath::Vector2& scale);
 
 	void SetFillAmount(float amt) { materialData_.fillAmount = amt; }
 	void SetFillOrigin(float x,float y) { materialData_.fillOrigin = {x,y}; }

@@ -32,7 +32,7 @@ Boss::Boss(const std::string& modelName,const std::string objName)
 	life_ = 35;
 
 	// アニメーションコントローラの生成
-	AnimationModel* animModel = GetAnimationModel();
+	CalyxAssets::AnimationModel* animModel = AnimationModel();
 	anim_                     = std::make_unique<BossAnimController>(animModel);
 
 	// ステートの初期化

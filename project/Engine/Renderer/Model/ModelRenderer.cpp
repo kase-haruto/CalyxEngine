@@ -28,7 +28,7 @@ void ModelRenderer::RegisterStatic(BaseModel* model, const WorldTransform& trans
 /////////////////////////////////////////////////////////////////////////////////////////
 //		アニメーションモデル登録
 /////////////////////////////////////////////////////////////////////////////////////////
-void ModelRenderer::RegisterSkinned(AnimationModel* model, const WorldTransform& transform){
+void ModelRenderer::RegisterSkinned(CalyxAssets::AnimationModel* model, const WorldTransform& transform){
 	InstanceSkinned inst {};
 	inst.tf      = transform;
 	inst.dirty   = true;
@@ -76,7 +76,7 @@ void ModelRenderer::MarkStaticDirty(BaseModel* model, size_t index){
 	it->second[index].dirty = true;
 }
 
-void ModelRenderer::MarkSkinnedDirty(AnimationModel* model, size_t index){
+void ModelRenderer::MarkSkinnedDirty(CalyxAssets::AnimationModel* model, size_t index){
 	auto it = skinnedModels_.find(model);
 	if (it == skinnedModels_.end()) return;
 	if (index >= it->second.size()) return;

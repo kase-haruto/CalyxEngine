@@ -4,12 +4,12 @@
 
 /**
  * \brief ボスのアニメーション制御クラス
- * AnimationModel への Facade（仲介クラス）
+ * CalyxAssets::AnimationModel への Facade（仲介クラス）
  */
 class BossAnimController {
 public:
 	// コンストラクタ
-	BossAnimController(AnimationModel* animModel);
+	BossAnimController(CalyxAssets::AnimationModel* animModel);
 	~BossAnimController();
 
 	/**
@@ -49,5 +49,5 @@ public:
 	bool		IsAnimFinished() const;
 
 private:
-	AnimationModel* animModel_;
+	CalyxAssets::AnimationModel* animModel_;
 };
