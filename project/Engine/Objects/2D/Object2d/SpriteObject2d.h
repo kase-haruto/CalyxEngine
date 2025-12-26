@@ -13,6 +13,19 @@ class Sprite;
 
 namespace Calyx2D {
 
+	//==============================================
+	// アニメーション構造体（1スプライトシート用）
+	//==============================================
+	struct SpriteAnimation {
+		std::string texturePath;
+		std::pair<int32_t,int32_t> division{1,1};
+
+		int32_t startFrame = 0;
+		int32_t frameCount = 0;    // 0 → 自動で division.x * division.y
+		float frameDuration = 0.1f;
+		bool loop = true;
+	};
+
 	/*----------------------------------------------------------------------------------------
 	 * 2Dスプライトオブジェクトクラス
 	 * - spriteクラスを使いやすくしたラッパ
@@ -20,60 +33,80 @@ namespace Calyx2D {
 	 *---------------------------------------------------------------------------------------*/
 	class SpriteObject2d {
 	public:
-		//===================================================================*/
-		//			public methods
-		//===================================================================*/
 		/** \brief コンストラクタ・デストラクタ */
 		SpriteObject2d();
 		~SpriteObject2d();
 
 		/**
-		 * \brief 初期化
-		 * \param filePath ファイルパス(Textures/以下からの相対パス)
+		 * \brief 初期化処理
+		 * \param filePath
 		 */
-		void Initializes(const std::string& filePath);
+		void Initialize(const std::string& filePath);
 		/**
-		 * \brief 更新
+		 * \brief 更新処理
+		 * \param dt デルタタイム
 		 */
 		void Update(float dt) const;
 		/**
-		 * \brief 描画
+		 * \brief 描画処理
 		 * \param cmdList コマンドリスト
 		 */
 		void Draw(ID3D12GraphicsCommandList* cmdList) const;
 
+		//====================================================
+		// Animation API
+		//====================================================
+		/**
+		 * \brief アニメーション追加
+		 * \param name アニメーション名
+		 * \param anim アニメーションデータ
+		 */
+		void AddAnimation(const std::string& name, SpriteAnimation anim);
+		/**
+		 * \brief アニメーション設定
+		 * \param name アニメーション名
+		 * \param restart 再生を最初からにするか
+		 * \return 成功したらtrue
+		 */
+		bool SetAnimation(const std::string& name, bool restart = true);
+
 	public:
-		//===================================================================*/
-		//			accessor
-		//===================================================================*/
 		// getter
 		const std::pair<int32_t, int32_t>& GetDivision() const;
 		const CalyxMath::Vector2&		   GetPosition() const;
 		const CalyxMath::Vector2&		   GetScale() const;
-		Sprite* GetSprite() const;
+		Sprite*							   GetSprite() const;
+
 		// setter
 		void SetDivision(const std::pair<int32_t, int32_t>& division);
 		void SetPosition(const CalyxMath::Vector2& position) const;
 		void SetScale(const CalyxMath::Vector2& scale) const;
 
 	private:
-		//===================================================================*/
-		//			private methods
-		//===================================================================*/
-		/**
-		 * \brief アニメーション更新
+		/** \brief アニメーション更新処理
+		 * \param dt デルタタイム
 		 */
 		void AnimationUpdate(float dt) const;
+		/**
+		 * \brief フレームをUVに反映する
+		 */
+		void ApplyFrameToUv() const;
 
 	private:
-		//===================================================================*/
-		//			private members
-		//===================================================================*/
-		std::unique_ptr<Sprite>		sprite_			   = nullptr;	//< スプライト本体
-		std::pair<int32_t, int32_t> division_		   = {1, 1};	//< スプライト分割数
-		mutable int32_t				currentFrame_	   = 0;			//< 現在のフレーム
-		mutable float				frameTime_		   = 0.0f;		//< フレーム経過時間
-		float						frameDuration_	   = 0.1f;		// 1フレームあたり0.1秒 (10fps)
+		std::unique_ptr<Sprite> sprite_ = nullptr;
+
+		// 現在使用中の division
+		std::pair<int32_t, int32_t> division_ = {1, 1};
+
+		// アニメーション用
+		std::unordered_map<std::string, SpriteAnimation> animations_;
+		const SpriteAnimation*							 currentAnim_ = nullptr;
+		std::string										 currentAnimName_;
+
+		// フレーム制御
+		mutable int32_t currentFrame_  = 0;
+		mutable float	frameTime_	   = 0.0f;
+		float			frameDuration_ = 0.1f;
 	};
 
 } // namespace Calyx2D

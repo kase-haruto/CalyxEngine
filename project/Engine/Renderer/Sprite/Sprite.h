@@ -4,11 +4,11 @@
 #include <Engine/Foundation/Math/Matrix4x4.h>
 #include <Engine/Foundation/Math/Vector2.h>
 #include <Engine/Foundation/Math/Vector4.h>
+#include <Engine/Graphics/Buffer/DxConstantBuffer.h>
 #include <Engine/Graphics/Material.h>
 #include <Engine/Graphics/RenderTarget/Detail/RenderTargetDetail.h>
 #include <Engine/Objects/Transform/Transform.h>
 #include <Engine/Renderer/Mesh/VertexData.h>
-#include <Engine/Graphics/Buffer/DxConstantBuffer.h>
 
 /* c++ */
 #include <d3d12.h>
@@ -24,7 +24,7 @@ public:
 	Sprite(const std::string& filePath);
 	~Sprite();
 
-	void Initialize(const CalyxMath::Vector2& position,const CalyxMath::Vector2& size);
+	void Initialize(const CalyxMath::Vector2& position, const CalyxMath::Vector2& size);
 	void Initialize(); // 引数なし初期化初期座標はwindow中心座標
 
 	void Update();
@@ -34,39 +34,40 @@ public:
 	void Draw(ID3D12GraphicsCommandList* cmdList);
 
 	// getter
-	const std::string&     GetTextureName() const { return path; }
-	RenderTargetType       GetTargetRt() const { return targetRT_; }
+	const std::string&					   GetTextureName() const { return path; }
+	RenderTargetType					   GetTargetRt() const { return targetRT_; }
 	Microsoft::WRL::ComPtr<ID3D12Resource> GetConstBuffer() { return vertexResource_; }
-	const CalyxMath::Vector4&         GetColor() const { return materialData_.color; }
-	const CalyxMath::Vector2&         GetSize() const { return size; }
-	const CalyxMath::Vector2&         GetAnchorPoint() const { return anchorPoint; }
-	const CalyxMath::Vector2&         GetPosition() const { return position; }
-	CalyxMath::Vector2         GetUvTranslate() const { return CalyxMath::Vector2(uvTransform.translate.x,uvTransform.translate.y); }
-	const CalyxMath::Vector2&         GetLeftTop() const { return textureLeftTop; }
-	float                  GetRotation() const { return rotate; }
-	const float            GetUvRotate() const { return uvTransform.rotate.x; }
-	bool                   GetIsVisible() const { return isVisible; }
+	const CalyxMath::Vector4&			   GetColor() const { return materialData_.color; }
+	CalyxMath::Vector4&					   GetColor() { return materialData_.color; }
+	const CalyxMath::Vector2&			   GetSize() const { return size; }
+	const CalyxMath::Vector2&			   GetAnchorPoint() const { return anchorPoint; }
+	const CalyxMath::Vector2&			   GetPosition() const { return position; }
+	CalyxMath::Vector2					   GetUvTranslate() const { return CalyxMath::Vector2(uvTransform.translate.x, uvTransform.translate.y); }
+	const CalyxMath::Vector2&			   GetLeftTop() const { return textureLeftTop; }
+	float								   GetRotation() const { return rotate; }
+	const float							   GetUvRotate() const { return uvTransform.rotate.x; }
+	bool								   GetIsVisible() const { return isVisible; }
 
 	// setter
-	void       SetRotation(float rotation) { this->rotate = rotation; }
-	void       SetUvRotate(const float uvRotate) { uvTransform.rotate.x = uvRotate; }
-	void       PutWindowCenter();
-	void       SetPosition(const CalyxMath::Vector2& newPosition) { this->position = newPosition; }
-	void       SetUvTranslate(const CalyxMath::Vector2& uvOffset) { CalyxMath::Vector2(uvTransform.translate.x = uvOffset.x,uvTransform.translate.y = uvOffset.y); }
-	void       SetColor(const CalyxMath::Vector4& newColor) { materialData_.color = newColor; }
-	void       SetSize(const CalyxMath::Vector2& newSize) { this->size = newSize; }
-	void       SetAlpha(float newAlpha) { this->materialData_.color.w = newAlpha; }
-	void       SetAnchorPoint(const CalyxMath::Vector2& newAnchorPoint) { this->anchorPoint = newAnchorPoint; }
-	void       SetLeftTop(const CalyxMath::Vector2& LTop) { this->textureLeftTop = LTop; }
-	void       SetIsVisible(bool is) { isVisible = is; }
-	void       SetTargetRt(RenderTargetType targetRt) { targetRT_ = targetRt; }
-	void       SetTexture(const std::string& tex);
+	void	   SetRotation(float rotation) { this->rotate = rotation; }
+	void	   SetUvRotate(const float uvRotate) { uvTransform.rotate.x = uvRotate; }
+	void	   PutWindowCenter();
+	void	   SetPosition(const CalyxMath::Vector2& newPosition) { this->position = newPosition; }
+	void	   SetUvTranslate(const CalyxMath::Vector2& uvOffset) { CalyxMath::Vector2(uvTransform.translate.x = uvOffset.x, uvTransform.translate.y = uvOffset.y); }
+	void	   SetColor(const CalyxMath::Vector4& newColor) { materialData_.color = newColor; }
+	void	   SetSize(const CalyxMath::Vector2& newSize) { this->size = newSize; }
+	void	   SetAlpha(float newAlpha) { this->materialData_.color.w = newAlpha; }
+	void	   SetAnchorPoint(const CalyxMath::Vector2& newAnchorPoint) { this->anchorPoint = newAnchorPoint; }
+	void	   SetLeftTop(const CalyxMath::Vector2& LTop) { this->textureLeftTop = LTop; }
+	void	   SetIsVisible(bool is) { isVisible = is; }
+	void	   SetTargetRt(RenderTargetType targetRt) { targetRT_ = targetRt; }
+	void	   SetTexture(const std::string& tex);
 	const void SetTextureHandle(D3D12_GPU_DESCRIPTOR_HANDLE newHandle);
-	void SetUvOffset(const CalyxMath::Vector2& offset);
-	void SetUvScale(const CalyxMath::Vector2& scale);
+	void	   SetUvOffset(const CalyxMath::Vector2& offset);
+	void	   SetUvScale(const CalyxMath::Vector2& scale);
 
 	void SetFillAmount(float amt) { materialData_.fillAmount = amt; }
-	void SetFillOrigin(float x,float y) { materialData_.fillOrigin = {x,y}; }
+	void SetFillOrigin(float x, float y) { materialData_.fillOrigin = {x, y}; }
 	void SetFillMethod(int method) { materialData_.fillMethod = method; }
 
 private:
@@ -84,22 +85,22 @@ private:
 	//===================================================================*/
 	//                    private methods
 	//===================================================================*/
-	EulerTransform transform_{{1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f}};
-	EulerTransform uvTransform{{1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f}};
+	EulerTransform transform_{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}};
+	EulerTransform uvTransform{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}};
 	// 座標
-	CalyxMath::Vector2 position{0.0f,0.0f};
+	CalyxMath::Vector2 position{0.0f, 0.0f};
 	// 回転
 	float rotate = 0.0f;
 	// 色
-	CalyxMath::Vector4 color = {1.0f,1.0f,1.0f,1.0f};
+	CalyxMath::Vector4 color = {1.0f, 1.0f, 1.0f, 1.0f};
 	// size
-	CalyxMath::Vector2 size = {640.0f,360.0f};
+	CalyxMath::Vector2 size = {640.0f, 360.0f};
 	// アンカーポイント
-	CalyxMath::Vector2 anchorPoint = {0.0f,0.0f};
+	CalyxMath::Vector2 anchorPoint = {0.0f, 0.0f};
 	// テクスチャ左上座標
-	CalyxMath::Vector2 textureLeftTop = {0.0f,0.0f};
+	CalyxMath::Vector2 textureLeftTop = {0.0f, 0.0f};
 	// テクスチャ切り出しサイズ
-	CalyxMath::Vector2 textureSize = {100.0f,100.0f};
+	CalyxMath::Vector2 textureSize = {100.0f, 100.0f};
 
 	std::string path;
 
@@ -110,21 +111,21 @@ private:
 	///	リソース
 	///=============================================================
 	// viewの生成
-	D3D12_INDEX_BUFFER_VIEW  indexBufferView{};
-	Microsoft::WRL::ComPtr<ID3D12Resource>   vertexResource_;
-	Microsoft::WRL::ComPtr<ID3D12Resource>   indexResource_;
-	Microsoft::WRL::ComPtr<ID3D12Resource>   transformResource_;
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSprite{};
+	D3D12_INDEX_BUFFER_VIEW				   indexBufferView{};
+	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> transformResource_;
+	D3D12_VERTEX_BUFFER_VIEW			   vertexBufferViewSprite{};
 
 	// directX関連
-	bool       isVisible     = true;
+	bool				  isVisible		= true;
 	CalyxMath::Matrix4x4* transformData = nullptr;
 
 	// マテリアル用のリソース
-	VertexData*                  vertexData = nullptr;
+	VertexData*					 vertexData = nullptr;
 	DxConstantBuffer<Material2D> materialCB_;
-	Material2D                   materialData_;
-	RenderTargetType             targetRT_ = RenderTargetType::BackBuffer;
+	Material2D					 materialData_;
+	RenderTargetType			 targetRT_ = RenderTargetType::BackBuffer;
 #pragma endregion
 
 private:
