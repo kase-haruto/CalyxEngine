@@ -52,13 +52,13 @@ void PlayerDodgeSpinMotion::OnPerfect(){
 			"RadialBlur",
 			[rb]{ return rb->GetWidth(); },
 			[rb](float v){ rb->SetWidth(v); },
-			std::nullopt, 0.05f, 0.10f, Cx::Ease::EaseType::EaseOutExpo, false,
+			std::nullopt, 0.05f, 0.10f, CalyxEase::EaseType::EaseOutExpo, false,
 			[rb]{
 				PostEffectManager::Get()->TweenFloat(
 					"RadialBlur",
 					[rb]{ return rb->GetWidth(); },
 					[rb](float v){ rb->SetWidth(v); },
-					std::nullopt, 0.0f, 0.45f, Cx::Ease::EaseType::EaseOutSine, true
+					std::nullopt, 0.0f, 0.45f, CalyxEase::EaseType::EaseOutSine, true
 				);
 			}
 		);
@@ -71,14 +71,14 @@ void PlayerDodgeSpinMotion::OnPerfect(){
 			[ca]{ return ca->GetIntensity(); },
 			[ca](float v){ ca->SetIntensity(v); },
 			std::nullopt, 0.2f, 0.08f,
-			Cx::Ease::EaseType::EaseOutExpo, false,
+			CalyxEase::EaseType::EaseOutExpo, false,
 			[ca]{
 				PostEffectManager::Get()->TweenFloat(
 					"ChromaticAberration",
 					[ca]{ return ca->GetIntensity(); },
 					[ca](float v){ ca->SetIntensity(v); },
 					std::nullopt, 0.0f, 0.2f,
-					Cx::Ease::EaseType::EaseOutSine, true
+					CalyxEase::EaseType::EaseOutSine, true
 				);
 			}
 		);

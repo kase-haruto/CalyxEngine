@@ -41,7 +41,7 @@ namespace CalyxEffect {
 		m.SetEnabled(enabled);
 		m.SetTarget(static_cast<OverLifetimeModule::Target>(target));
 		m.SetBlend(static_cast<OverLifetimeModule::BlendOp>(blend));
-		m.SetEaseType(static_cast<Cx::Ease::EaseType>(ease));
+		m.SetEaseType(static_cast<CalyxEase::EaseType>(ease));
 		m.SetClamp01(clamp01);
 		m.SetInvert(invert);
 		m.SetStart(start);

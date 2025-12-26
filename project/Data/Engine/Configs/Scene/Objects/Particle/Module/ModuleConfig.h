@@ -78,7 +78,7 @@ namespace CalyxEffect {
 	struct SizeOverLifetimeConfig
 		: public BaseModuleConfig {
 		bool			   isGrowing = true;
-		Cx::Ease::EaseType easeType	 = Cx::Ease::EaseType::EaseInOutCubic;
+		CalyxEase::EaseType easeType	 = CalyxEase::EaseType::EaseInOutCubic;
 
 		SizeOverLifetimeConfig() {
 			name = "SizeOverLifetimeModule";
@@ -101,7 +101,7 @@ namespace CalyxEffect {
 			if(j.contains("easeType")) {
 				int ease = 0;
 				j.at("easeType").get_to(ease);
-				easeType = static_cast<Cx::Ease::EaseType>(ease);
+				easeType = static_cast<CalyxEase::EaseType>(ease);
 			}
 		}
 	};
@@ -117,7 +117,7 @@ namespace CalyxEffect {
 		// Target/Blend/Ease は int で保存（モジュール側の enum と対応）
 		int	 target	 = 0; // 0:Scale, 1:RotX, 2:RotY, 3:RotZ, 4:ColorRGBA, 5:AlphaOnly
 		int	 blend	 = 0; // 0:Set, 1:Add, 2:Multiply
-		int	 ease	 = static_cast<int>(Cx::Ease::EaseType::EaseInOutCubic);
+		int	 ease	 = static_cast<int>(CalyxEase::EaseType::EaseInOutCubic);
 		bool clamp01 = true;
 		bool invert	 = false;
 

@@ -13,6 +13,7 @@ namespace CalyxMath {
 
 		float          Length()const;
 		static Vector2 Zero();
+		static Vector2 Lerp(const Vector2& v1, const Vector2& v2, float t);
 		float          LengthSquared() const;
 		Vector2 Normalize();
 

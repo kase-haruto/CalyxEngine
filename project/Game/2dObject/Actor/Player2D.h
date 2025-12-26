@@ -2,6 +2,7 @@
 
 #include <Engine/Foundation/Serialization/SerializableObject.h>
 #include <Engine/Objects/2D/Actor/Character2D.h>
+#include <Engine/Foundation/Utility/Animation/SimpleAnimator.h>
 
 /*-----------------------------------------------------------------------------------------
  * 2dオブジェクトを使用したプレイヤークラス
@@ -46,7 +47,7 @@ private:
 	//===================================================================*/
 	//			private methods
 	//===================================================================*/
-	void InitializeAnimation()const;
+	void InitializeSpriteAnimation()const;
 	/**
 	 * \brief シリアライズ可能パラメータの初期化
 	 */
@@ -71,7 +72,10 @@ private:
 	Player2dState currentState_{};	//< 現在の状態
 	Player2dState prevState_{};		//< 前回の状態
 
-	float amplitude_ = 0.0f;		//< 移動振幅
+	float amplitude_ = 30.0f;		//< 移動振幅
 	float attackCoolTime_ = 0.0f;	//< 攻撃クールダウン
 	float attackTimer_ = 0.0f;		//< 攻撃タイマー
+
+	CalyxMath::Vector2 basePos_;
+	CalyxUtil::SimpleAnimator animator_;  // アニメーター
 };

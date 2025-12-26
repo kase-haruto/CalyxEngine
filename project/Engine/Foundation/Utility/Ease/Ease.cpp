@@ -1,52 +1,55 @@
 #include "Ease.h"
+namespace CalyxEase {
+	// Linear
+	float Linear(float t) { return t; }
 
-// Linear
-float CalyxEase::Linear(float t) { return t; }
+	// Quad
+	float EaseInQuad(float t) { return t * t; }
 
-// Quad
-float CalyxEase::EaseInQuad(float t) { return t * t; }
+	float EaseOutQuad(float t) { return t * (2 - t); }
 
-float CalyxEase::EaseOutQuad(float t) { return t * (2 - t); }
+	float EaseInOutQuad(float t) { return t < 0.5f ? 2 * t * t : -1 + (4 - 2 * t) * t; }
 
-float CalyxEase::EaseInOutQuad(float t) { return t < 0.5f ? 2 * t * t : -1 + (4 - 2 * t) * t; }
+	// Cubic
+	float EaseInCubic(float t) { return t * t * t; }
 
-// Cubic
-float CalyxEase::EaseInCubic(float t) { return t * t * t; }
+	float EaseOutCubic(float t) { return (-t) * t * t + 1; }
 
-float CalyxEase::EaseOutCubic(float t) { return (-t) * t * t + 1; }
+	float EaseInOutCubic(float t) { return t < 0.5f ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1; }
 
-float CalyxEase::EaseInOutCubic(float t) { return t < 0.5f ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1; }
+	// Sine
+	float EaseInSine(float t) { return 1 - std::cos((t * std::numbers::pi_v<float>) / 2); }
 
-// Sine
-float CalyxEase::EaseInSine(float t) { return 1 - std::cos((t * std::numbers::pi_v<float>) / 2); }
+	float EaseOutSine(float t) { return std::sin((t * std::numbers::pi_v<float>) / 2); }
 
-float CalyxEase::EaseOutSine(float t) { return std::sin((t * std::numbers::pi_v<float>) / 2); }
+	float EaseInOutSine(float t) { return -(std::cos(std::numbers::pi_v<float> * t) - 1) / 2; }
 
-float CalyxEase::EaseInOutSine(float t) { return -(std::cos(std::numbers::pi_v<float> * t) - 1) / 2; }
+	// Exponential
+	float EaseInExpo(float t) { return t == 0 ? 0 : std::powf(2, 10 * (t - 1)); }
 
-// Exponential
-float CalyxEase::EaseInExpo(float t) { return t == 0 ? 0 : std::powf(2,10 * (t - 1)); }
+	float EaseOutExpo(float t) { return t == 1 ? 1 : 1 - std::powf(2, -10 * t); }
 
-float CalyxEase::EaseOutExpo(float t) { return t == 1 ? 1 : 1 - std::powf(2,-10 * t); }
-
-float CalyxEase::EaseInOutExpo(float t) {
-	if(t == 0) return 0;
-	if(t == 1) return 1;
-	return t < 0.5f
-			   ? std::powf(2,10 * (2 * t - 1)) / 2
-			   : (2 - std::powf(2,-10 * (2 * t - 1))) / 2;
-}
-
-// Back
-float CalyxEase::EaseInBack(float t,float s) { return t * t * ((s + 1) * t - s); }
-
-float CalyxEase::EaseOutBack(float t,float s) { return (--t) * t * ((s + 1) * t + s) + 1; }
-
-float CalyxEase::EaseInOutBack(float t,float s) {
-	t *= 2;
-	s *= 1.525f;
-	if(t < 1) { return 0.5f * (t * t * ((s + 1) * t - s)); } else {
-		t -= 2;
-		return 0.5f * (t * t * ((s + 1) * t + s) + 2);
+	float EaseInOutExpo(float t) {
+		if(t == 0) return 0;
+		if(t == 1) return 1;
+		return t < 0.5f
+				   ? std::powf(2, 10 * (2 * t - 1)) / 2
+				   : (2 - std::powf(2, -10 * (2 * t - 1))) / 2;
 	}
-}
+
+	// Back
+	float EaseInBack(float t, float s) { return t * t * ((s + 1) * t - s); }
+
+	float EaseOutBack(float t, float s) { return (--t) * t * ((s + 1) * t + s) + 1; }
+
+	float EaseInOutBack(float t, float s) {
+		t *= 2;
+		s *= 1.525f;
+		if(t < 1) {
+			return 0.5f * (t * t * ((s + 1) * t - s));
+		} else {
+			t -= 2;
+			return 0.5f * (t * t * ((s + 1) * t + s) + 2);
+		}
+	}
+} // namespace CalyxEase

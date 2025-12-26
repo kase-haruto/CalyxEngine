@@ -17,14 +17,23 @@ Player2D::~Player2D() = default;
 ///////////////////////////////////////////////////////////////////////////////////////////
 void Player2D::Initialize() {
 	spriteObj_->Initialize("Textures/Player/flyingPlayer.png");
-	InitializeAnimation();
+	InitializeSpriteAnimation();
+
+	// ============================
+	// 上下ゆらゆらアニメーション
+	// ============================
+	auto& swayY = animator_.Add<CalyxMath::Vector2>("SwayY");
+
+	swayY.Animation().SetStart({0.0f, -amplitude_}); // 上
+	swayY.Animation().SetEnd  ({0.0f,  amplitude_}); // した
+	swayY.Animation().Start();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //	更新処理
 ///////////////////////////////////////////////////////////////////////////////////////////
 void Player2D::Update(float deltaTime) {
-
+	ShowGui();
 	StateUpdate(deltaTime);
 	
 	// 状態ごとにアニメーションをセット
@@ -77,6 +86,10 @@ void Player2D::ShowGui() {
 			currentState_ = Player2dState::Attack;
 		}
 
+		// アニメーション
+		ImGui::SeparatorText("Animator");
+		animator_.ShowGui();
+
 		
 		ImGui::End();
 	}
@@ -85,7 +98,7 @@ void Player2D::ShowGui() {
 ///////////////////////////////////////////////////////////////////////////////////////////
 //	スプライトアニメーションの初期化
 ///////////////////////////////////////////////////////////////////////////////////////////
-void Player2D::InitializeAnimation()const {
+void Player2D::InitializeSpriteAnimation()const {
 	// アニメーション設定
 	Calyx2D::SpriteAnimation anim;
 	anim.texturePath   = "Textures/Player/flyingPlayer_inv.png";
@@ -150,6 +163,14 @@ void Player2D::ChangeAnimation(Player2dState state) const {
 //	移動処理
 ///////////////////////////////////////////////////////////////////////////////////////////
 void Player2D::Move() {
+
+	CalyxMath::Vector2 pos = basePos_;
+
+	if(animator_.Has<CalyxMath::Vector2>("SwayY")) {
+		pos = pos + animator_.Get<CalyxMath::Vector2>("SwayY");
+	}
+
+	SetPosition(pos);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -157,13 +178,14 @@ void Player2D::Move() {
 ///////////////////////////////////////////////////////////////////////////////////////////
 void Player2D::StateUpdate(float dt) {
 	// 一定間隔のクール時間で攻撃状態に移る
-	attackTimer_+=dt;
-	if(attackTimer_>=attackCoolTime_) {
-		// 攻撃状態へタイマーのリセット
-		currentState_ = Player2dState::Attack;
-		attackTimer_  = 0.0f;
-	}
-
+	// attackTimer_+=dt;
+	// if(attackTimer_>=attackCoolTime_) {
+	// 	// 攻撃状態へタイマーのリセット
+	// 	currentState_ = Player2dState::Attack;
+	// 	attackTimer_  = 0.0f;
+	// }
+	// アニメーション更新
+	animator_.Update(dt);
 	// 移動処理
 	Move();
 }

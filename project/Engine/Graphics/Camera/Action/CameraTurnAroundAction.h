@@ -21,7 +21,7 @@ public:
 	void ShowGui() override;
 
 	//---------- accessor ------------------------------------------------//
-	void SetEase(Cx::Ease::EaseType type) { easeType_ = type; }
+	void SetEase(CalyxEase::EaseType type) { easeType_ = type; }
 	void SetTime(float time) { turnTime_ = time; }
 	void SetDirection(const CalyxMath::Vector3& dir) { direction_ = dir; }
 
@@ -30,7 +30,7 @@ private:
 	//					private methods
 	//===================================================================*/
 	//---------------- parms -------------//
-	Cx::Ease::EaseType easeType_ = Cx::Ease::EaseType::EaseOutSine;
+	CalyxEase::EaseType easeType_ = CalyxEase::EaseType::EaseOutSine;
 	CalyxMath::Vector3			   direction_;
 	float			   turnTime_ = 0.5f;
 

@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <cmath>
 
-using Cx::Ease::EaseType;
+using CalyxEase::EaseType;
 
 namespace {
 
@@ -123,14 +123,14 @@ void HpGauge::Update(float dt)
 	float invMaxHp = (maxHp_ > 0.0f ? 1.0f / maxHp_ : 0.0f);
 	float target   = currentHp_ * invMaxHp;
 
-	blueRatio_ = Cx::Ease::EaseLerp(
+	blueRatio_ = CalyxEase::EaseLerp(
 		blueRatio_,
 		target,
 		dt * 12.0f,
 		EaseType::EaseOutSine
 	);
 
-	redRatio_ = Cx::Ease::EaseLerp(
+	redRatio_ = CalyxEase::EaseLerp(
 		redRatio_,
 		blueRatio_,
 		dt * 2.0f,      // target に直接追従させない

@@ -22,7 +22,7 @@ namespace CalyxEffect {
 		float t = unit.age / unit.lifetime;
 		if(t > 1.0f) t = 1.0f;
 
-		float easeT		 = Cx::Ease::ApplyEase(easeType_, t);
+		float easeT		 = CalyxEase::ApplyEase(easeType_, t);
 		float sizeFactor = isGrowing_ ? easeT : (1.0f - easeT);
 
 		unit.scale = unit.initialScale * sizeFactor;
@@ -34,6 +34,6 @@ namespace CalyxEffect {
 	void SizeOverLiftimeModule::ShowGuiContent() {
 		GuiCmd::CheckBox("isGrowing", isGrowing_);
 
-		Cx::Ease::SelectEase(easeType_);
+		CalyxEase::SelectEase(easeType_);
 	}
 }

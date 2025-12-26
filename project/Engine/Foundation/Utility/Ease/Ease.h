@@ -2,33 +2,32 @@
 #include <cmath>
 #include <numbers>
 
-class CalyxEase {
-  public:
+namespace CalyxEase {
 	// Linear
-	static float Linear(float t);
+	 float Linear(float t);
 
 	// Quad
-	static float EaseInQuad(float t);
-	static float EaseOutQuad(float t);
-	static float EaseInOutQuad(float t);
+	 float EaseInQuad(float t);
+	 float EaseOutQuad(float t);
+	 float EaseInOutQuad(float t);
 
 	// Cubic
-	static float EaseInCubic(float t);
-	static float EaseOutCubic(float t);
-	static float EaseInOutCubic(float t);
+	 float EaseInCubic(float t);
+	 float EaseOutCubic(float t);
+	 float EaseInOutCubic(float t);
 
 	// Sine
-	static float EaseInSine(float t);
-	static float EaseOutSine(float t);
-	static float EaseInOutSine(float t);
+	 float EaseInSine(float t);
+	 float EaseOutSine(float t);
+	 float EaseInOutSine(float t);
 
 	// Exponential
-	static float EaseInExpo(float t);
-	static float EaseOutExpo(float t);
-	static float EaseInOutExpo(float t);
+	 float EaseInExpo(float t);
+	 float EaseOutExpo(float t);
+	 float EaseInOutExpo(float t);
 
 	// Back
-	static float EaseInBack(float t, float s = 1.70158f);
-	static float EaseOutBack(float t, float s = 1.70158f);
-	static float EaseInOutBack(float t, float s = 1.70158f);
-};
+	 float EaseInBack(float t, float s = 1.70158f);
+	 float EaseOutBack(float t, float s = 1.70158f);
+	 float EaseInOutBack(float t, float s = 1.70158f);
+}; // namespace CalyxEase
