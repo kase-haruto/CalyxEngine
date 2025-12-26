@@ -9,6 +9,7 @@
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
 #include <Engine/Renderer/Sprite/Sprite.h>
 #include <Engine/Objects/2D/Object2d/SpriteObject2d.h>
+#include <Game/2dObject/Actor/Player2D.h>
 
 /* service */
 #include <Game/UI/Controller/TitleMenuController.h>
@@ -35,7 +36,8 @@ class TitleScene final :
 	/* objects ======================================================*/
 	std::shared_ptr<BaseGameObject> modelField_ = nullptr;
 	std::unique_ptr<TitleMenuController> menu_ = nullptr;
-	std::unique_ptr<Calyx2D::SpriteObject2d> flyingPlayer = nullptr;
+
+	std::unique_ptr<Player2D> player2d_ = nullptr;
 
 	/* func ======================================================*/
 	std::function<void()> transitionForGameScene_;

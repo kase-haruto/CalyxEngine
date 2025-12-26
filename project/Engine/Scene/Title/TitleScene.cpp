@@ -47,9 +47,8 @@ void TitleScene::Initialize() {
 		GameEndReqest();
 	};
 
-	flyingPlayer = std::make_unique<Calyx2D::SpriteObject2d>();
-	flyingPlayer->Initialize("Textures/Player/flyingPlayer.png");
-	flyingPlayer->SetDivision({3,2});
+	player2d_ = std::make_unique<Player2D>();
+	player2d_->Initialize();
 
 	//=========================
 	// menuボタン
@@ -64,7 +63,7 @@ void TitleScene::Update([[maybe_unused]] float dt) {
 	/* その他 ============================*/
 	menu_->Update(dt);
 
-	flyingPlayer->Update(dt);
+	player2d_->Update(dt);
 
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
 
@@ -80,8 +79,8 @@ void TitleScene::CleanUp() {
 void TitleScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService, RenderTargetType type) {
 	BaseScene::Draw(cmdList, psoService, type);
 
+	spriteRenderer_->Register(player2d_->GetSprite());
 	// スプライトの描画
-	spriteRenderer_->Register(flyingPlayer->GetSprite());
 	for(auto& sprite : menu_->GetAllButtonImage()) {
 		spriteRenderer_->Register(sprite);
 	}
