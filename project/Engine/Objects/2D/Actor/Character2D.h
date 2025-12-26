@@ -42,14 +42,16 @@ namespace Calyx2D {
 		const CalyxMath::Vector2& GetPosition() const { return position_; }
 		const CalyxMath::Vector2& GetVelocity() const { return velocity_; }
 		// setter
-		void SetPosition(const CalyxMath::Vector2& pos) { position_ = pos; }
+		void SetPosition(const CalyxMath::Vector2& pos)const { spriteObj_->SetPosition(pos); }
 		void SetVelocity(const CalyxMath::Vector2& vel) { velocity_ = vel; }
 
 	protected:
+		std::unique_ptr<SpriteObject2d> spriteObj_ = nullptr; //< スプライトオブジェクト
+		
+	private:
 		//===================================================================*/
 		//                   private members
 		//===================================================================*/
-		std::unique_ptr<SpriteObject2d> spriteObj_ = nullptr; //< スプライトオブジェクト
 		CalyxMath::Vector2				position_;			  //< 位置
 		CalyxMath::Vector2				velocity_;			  //< 速度
 	};

@@ -123,7 +123,7 @@ void CameraTurnAroundEvent::ApplyConfig() {
 
 	const CameraTurnAroundEventConfig& cfg = config_.GetConfig();
 	time_								   = cfg.time;
-	easeType_							   = static_cast<Cx::Ease::EaseType>(cfg.easeType);
+	easeType_							   = static_cast<CalyxEase::EaseType>(cfg.easeType);
 	direction_							   = cfg.direction;
 }
 
@@ -143,7 +143,7 @@ void CameraTurnAroundEvent::DerivativeGui() {
 	if(ImGui::CollapsingHeader("Turn Around Parm")) {
 		GuiCmd::DragFloat3("dir", direction_);
 		GuiCmd::DragFloat("time", time_);
-		// Cx::Ease::SelectEase(easeType_);
+		// CalyxEase::SelectEase(easeType_);
 	}
 }
 void CameraTurnAroundEvent::ConfigGUi() {

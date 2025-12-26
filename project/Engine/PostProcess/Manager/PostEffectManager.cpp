@@ -151,7 +151,7 @@ void PostEffectManager::Update(float dt){
 
 		tw.t += dt;
 		const float r = std::clamp(tw.t / ( std::max ) (0.0001f, tw.dur), 0.f, 1.f);
-		const float k = Cx::Ease::ApplyEase(tw.ease, r);
+		const float k = CalyxEase::ApplyEase(tw.ease, r);
 		const float v = std::lerp(tw.start, tw.end, k);
 
 		if (tw.setter) tw.setter(v);
@@ -208,7 +208,7 @@ void PostEffectManager::TweenFloat(const std::string& passName,
 								   std::optional<float> from,
 								   float to,
 								   float durationSec,
-								   Cx::Ease::EaseType ease,
+								   CalyxEase::EaseType ease,
 								   bool autoDisableIfZero,
 								   std::function<void()> onComplete){
 	FloatTween tw;

@@ -30,7 +30,7 @@ void CameraTurnAroundAction::Update(BaseCamera* cam, float dt) {
 
 	elapsed_ += dt;
 	float t = std::clamp(elapsed_ / turnTime_, 0.0f, 1.0f);
-	float easeT = Cx::Ease::ApplyEase(easeType_, t);
+	float easeT = CalyxEase::ApplyEase(easeType_, t);
 
 	CalyxMath::Quaternion newRot = CalyxMath::Quaternion::Slerp(startRot_, targetRot_, easeT);
 	cam->GetWorldTransform().rotation = newRot;

@@ -37,8 +37,8 @@ namespace CalyxEffect {
 		Target				GetTarget() const { return target_; }
 		void				SetBlend(BlendOp b) { blend_ = b; }
 		BlendOp				GetBlend() const { return blend_; }
-		void				SetEaseType(Cx::Ease::EaseType e) { ease_ = e; }
-		Cx::Ease::EaseType	GetEaseType() const { return ease_; }
+		void				SetEaseType(CalyxEase::EaseType e) { ease_ = e; }
+		CalyxEase::EaseType	GetEaseType() const { return ease_; }
 		void				SetClamp01(bool v) { clamp01_ = v; }
 		bool				GetClamp01() const { return clamp01_; }
 		void				SetInvert(bool v) { invert_ = v; }
@@ -56,7 +56,7 @@ namespace CalyxEffect {
 	private:
 		Target			   target_	= Target::Scale;
 		BlendOp			   blend_	= BlendOp::Set;
-		Cx::Ease::EaseType ease_	= Cx::Ease::EaseType::EaseInOutCubic;
+		CalyxEase::EaseType ease_	= CalyxEase::EaseType::EaseInOutCubic;
 		bool			   clamp01_ = true;
 		bool			   invert_	= false;
 

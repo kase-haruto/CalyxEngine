@@ -25,11 +25,11 @@ namespace CalyxEffect{
 		//--------- accessor -----------------------------------------------------
 		// getter
 		void SetIsGrowing(bool frag) { isGrowing_ = frag; }
-		void SetEaseType(Cx::Ease::EaseType type) { easeType_ = type; }
+		void SetEaseType(CalyxEase::EaseType type) { easeType_ = type; }
 
 		// setter
 		bool				GetIsGrowing() const { return isGrowing_; }
-		Cx::Ease::EaseType	GetEaseType() const { return easeType_; }
+		CalyxEase::EaseType	GetEaseType() const { return easeType_; }
 		virtual const char* GetTypeName() const override { return "SizeOverLiftimeModule"; }
 
 	private:
@@ -38,6 +38,6 @@ namespace CalyxEffect{
 		//===================================================================*/
 		bool isGrowing_ = true; //< サイズが大きくなるかどうか
 
-		Cx::Ease::EaseType easeType_ = Cx::Ease::EaseType::EaseInOutCubic; //< サイズ変化のイージングタイプ
+		CalyxEase::EaseType easeType_ = CalyxEase::EaseType::EaseInOutCubic; //< サイズ変化のイージングタイプ
 	};
 }

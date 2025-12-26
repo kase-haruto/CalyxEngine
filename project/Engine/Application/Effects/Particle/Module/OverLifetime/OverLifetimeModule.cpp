@@ -20,7 +20,7 @@ namespace CalyxEffect {
 		if(clamp01_) t = std::clamp(t, 0.0f, 1.0f);
 		if(invert_) t = 1.0f - t;
 
-		const float et = Cx::Ease::ApplyEase(ease_, t);
+		const float et = CalyxEase::ApplyEase(ease_, t);
 
 		switch(target_) {
 		case Target::Scale: {
@@ -201,7 +201,7 @@ namespace CalyxEffect {
 			int et = static_cast<int>(ease_);
 			if(ImGui::Combo("##ease", &et,
 							"Linear\0EaseIn\0EaseOut\0EaseInOut\0EaseInOutCubic\0")) {
-				ease_ = static_cast<Cx::Ease::EaseType>(et);
+				ease_ = static_cast<CalyxEase::EaseType>(et);
 							}
 		}
 

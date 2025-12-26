@@ -45,7 +45,7 @@ private:
 	//===================================================================*/
 	CalyxMath::Vector3			   direction_; //< 振り向く方向
 	float			   time_;	   //< 振り向く時間
-	Cx::Ease::EaseType easeType_;  //< 使用イージングタイプ
+	CalyxEase::EaseType easeType_;  //< 使用イージングタイプ
 
 	// config
 	ConfigurableObject<CameraTurnAroundEventConfig> config_;

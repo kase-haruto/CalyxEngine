@@ -62,7 +62,7 @@ public:
 					std::optional<float> from,
 					float to,
 					float durationSec,
-					Cx::Ease::EaseType ease = Cx::Ease::EaseType::EaseOutSine,
+					CalyxEase::EaseType ease = CalyxEase::EaseType::EaseOutSine,
 					bool autoDisableIfZero = true,
 					std::function<void()> onComplete = nullptr);
 
@@ -91,7 +91,7 @@ private:
 		float end = 0.f;
 		float t = 0.f;
 		float dur = 1.f;
-		Cx::Ease::EaseType ease = Cx::Ease::EaseType::Linear;
+		CalyxEase::EaseType ease = CalyxEase::EaseType::Linear;
 		bool autoDisableIfZero = true;
 		std::function<void()> onComplete;
 	};
