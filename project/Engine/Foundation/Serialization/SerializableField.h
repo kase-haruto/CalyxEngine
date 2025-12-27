@@ -1,6 +1,8 @@
 #pragma once
 
+#include <Engine/Foundation/Math/Vector2.h>
 #include <Engine/Foundation/Math/Vector3.h>
+#include <Engine/Foundation/Math/Vector4.h>
 #include <externals/nlohmann/json.hpp>
 
 #include <cstdint>
@@ -19,8 +21,15 @@ namespace CalyxEngine {
 		int32_t*,
 		float*,
 		bool*,
+		CalyxMath::Vector2*,
 		CalyxMath::Vector3*,
-		CalyxMath::Vector4*>;
+		CalyxMath::Vector4*,
+		const int32_t*,
+		const float*,
+		const bool*,
+		const CalyxMath::Vector2*,
+		const CalyxMath::Vector3*,
+		const CalyxMath::Vector4*>;
 
 	struct SerializableField {
 		std::string key;
@@ -33,8 +42,12 @@ namespace CalyxEngine {
 	inline void WriteValue(Json& out, const ValuePtr& ptr) {
 		std::visit([&](auto* p) {
 			using T = std::remove_pointer_t<decltype(p)>;
-			if constexpr(std::is_same_v<T, CalyxMath::Vector3>) {
+			if constexpr(std::is_same_v<T, CalyxMath::Vector2> || std::is_same_v<T, const CalyxMath::Vector2>) {
+				out = Json::array({p->x, p->y});
+			} else if constexpr(std::is_same_v<T, CalyxMath::Vector3> || std::is_same_v<T, const CalyxMath::Vector3>) {
 				out = Json::array({p->x, p->y, p->z});
+			} else if constexpr(std::is_same_v<T, CalyxMath::Vector4> || std::is_same_v<T, const CalyxMath::Vector4>) {
+				out = Json::array({p->x, p->y, p->z, p->w});
 			} else {
 				out = *p;
 			}
@@ -45,37 +58,46 @@ namespace CalyxEngine {
 	inline bool ReadValue(const Json& in, ValuePtr& ptr) {
 		return std::visit([&](auto* p) -> bool {
 			using T = std::remove_pointer_t<decltype(p)>;
-			try {
-				if constexpr(std::is_same_v<T, int32_t>) {
-					if(!in.is_number_integer()) return false;
-					*p = in.get<int32_t>();
-					return true;
-				} else if constexpr(std::is_same_v<T, float>) {
-					if(!in.is_number()) return false;
-					*p = in.get<float>();
-					return true;
-				} else if constexpr(std::is_same_v<T, bool>) {
-					if(!in.is_boolean()) return false;
-					*p = in.get<bool>();
-					return true;
-				} else if constexpr(std::is_same_v<T, CalyxMath::Vector3>) {
-					if(!in.is_array() || in.size() != 3) return false;
-					p->x = in.at(0).get<float>();
-					p->y = in.at(1).get<float>();
-					p->z = in.at(2).get<float>();
-					return true;
-				} else if constexpr(std::is_same_v<T, CalyxMath::Vector4>) {
-					if(!in.is_array() || in.size() != 4) return false;
-					p->x = in.at(0).get<float>();
-					p->y = in.at(1).get<float>();
-					p->z = in.at(2).get<float>();
-					p->z = in.at(3).get<float>();
-					return true;
-				} else {
+			if constexpr(std::is_const_v<T>) {
+				return false; // constな値は読み込めない
+			} else {
+				try {
+					if constexpr(std::is_same_v<T, int32_t>) {
+						if(!in.is_number_integer()) return false;
+						*p = in.get<int32_t>();
+						return true;
+					} else if constexpr(std::is_same_v<T, float>) {
+						if(!in.is_number()) return false;
+						*p = in.get<float>();
+						return true;
+					} else if constexpr(std::is_same_v<T, bool>) {
+						if(!in.is_boolean()) return false;
+						*p = in.get<bool>();
+						return true;
+					} else if constexpr(std::is_same_v<T, CalyxMath::Vector2>) {
+						if(!in.is_array() || in.size() != 2) return false;
+						p->x = in.at(0).get<float>();
+						p->y = in.at(1).get<float>();
+						return true;
+					} else if constexpr(std::is_same_v<T, CalyxMath::Vector3>) {
+						if(!in.is_array() || in.size() != 3) return false;
+						p->x = in.at(0).get<float>();
+						p->y = in.at(1).get<float>();
+						p->z = in.at(2).get<float>();
+						return true;
+					} else if constexpr(std::is_same_v<T, CalyxMath::Vector4>) {
+						if(!in.is_array() || in.size() != 4) return false;
+						p->x = in.at(0).get<float>();
+						p->y = in.at(1).get<float>();
+						p->z = in.at(2).get<float>();
+						p->w = in.at(3).get<float>();
+						return true;
+					} else {
+						return false;
+					}
+				} catch(...) {
 					return false;
 				}
-			} catch(...) {
-				return false;
 			}
 		},
 						  ptr);

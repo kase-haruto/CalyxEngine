@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Engine/Foundation/Math/Vector2.h"
 #include "Engine/Foundation/Math/Vector4.h"
 #include "SerializableField.h"
 
@@ -48,6 +49,7 @@ namespace CalyxEngine {
 				std::is_same_v<T, int32_t> ||
 				std::is_same_v<T, float> ||
 				std::is_same_v<T, bool> ||
+				std::is_same_v<T, CalyxMath::Vector2> ||
 				std::is_same_v<T, CalyxMath::Vector3>||
 				std::is_same_v<T,CalyxMath::Vector4>,
 				"AddField: Unsupported type. Add it to ValuePtr and Read/WriteValue."

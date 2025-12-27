@@ -1,8 +1,8 @@
 #pragma once
 
 #include <Engine/Foundation/Serialization/SerializableObject.h>
-#include <Engine/Objects/2D/Actor/Character2D.h>
 #include <Engine/Foundation/Utility/Animation/SimpleAnimator.h>
+#include <Engine/Objects/2D/Actor/Character2D.h>
 
 /*-----------------------------------------------------------------------------------------
  * 2dオブジェクトを使用したプレイヤークラス
@@ -40,14 +40,14 @@ public:
 	void ShowGui() override;
 
 	CalyxEngine::ParamPath GetParamPath() const override {
-		return { CalyxEngine::ParamDomain::Game, "Player2D" };
+		return {CalyxEngine::ParamDomain::Game, "Player2D"};
 	}
 
 private:
 	//===================================================================*/
 	//			private methods
 	//===================================================================*/
-	void InitializeSpriteAnimation()const;
+	void InitializeSpriteAnimation() const;
 	/**
 	 * \brief シリアライズ可能パラメータの初期化
 	 */
@@ -69,13 +69,18 @@ private:
 	//===================================================================*/
 	//			private methods
 	//===================================================================*/
-	Player2dState currentState_{};	//< 現在の状態
-	Player2dState prevState_{};		//< 前回の状態
+	Player2dState currentState_{}; //< 現在の状態
+	Player2dState prevState_{};	   //< 前回の状態
 
-	float amplitude_ = 30.0f;		//< 移動振幅
-	float attackCoolTime_ = 0.0f;	//< 攻撃クールダウン
-	float attackTimer_ = 0.0f;		//< 攻撃タイマー
+	float amplitude_	  = 30.0f; //< 移動振幅
+	float attackCoolTime_ = 0.0f;  //< 攻撃クールダウン
+	float attackTimer_	  = 0.0f;  //< 攻撃タイマー
 
-	CalyxMath::Vector2 basePos_;
-	CalyxUtil::SimpleAnimator animator_;  // アニメーター
+	float moveSpeed_ = 80.0f;  // 自動移動速度
+	float moveRange_ = 128.0f; // 移動可能範囲（左右）
+	int	  moveDir_	 = 1;	   // 1 = 右, -1 = 左
+
+	CalyxMath::Vector2		  size_{64.0f, 64.0f}; //< サイズ
+	CalyxMath::Vector2		  basePos_;
+	CalyxUtil::SimpleAnimator animator_; // アニメーター
 };

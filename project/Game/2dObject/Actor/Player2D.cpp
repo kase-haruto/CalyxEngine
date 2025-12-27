@@ -1,5 +1,6 @@
 #include "Player2D.h"
 
+#include "Engine/Application/System/Enviroment.h"
 #include "Engine/Renderer/Sprite/Sprite.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
@@ -18,14 +19,14 @@ Player2D::~Player2D() = default;
 void Player2D::Initialize() {
 	spriteObj_->Initialize("Textures/Player/flyingPlayer.png");
 	InitializeSpriteAnimation();
-
+	InitializeSerializableParm();
 	// ============================
 	// 上下ゆらゆらアニメーション
 	// ============================
 	auto& swayY = animator_.Add<CalyxMath::Vector2>("SwayY");
 
 	swayY.Animation().SetStart({0.0f, -amplitude_}); // 上
-	swayY.Animation().SetEnd  ({0.0f,  amplitude_}); // した
+	swayY.Animation().SetEnd({0.0f, amplitude_});	 // した
 	swayY.Animation().Start();
 }
 
@@ -35,7 +36,7 @@ void Player2D::Initialize() {
 void Player2D::Update(float deltaTime) {
 	ShowGui();
 	StateUpdate(deltaTime);
-	
+
 	// 状態ごとにアニメーションをセット
 	if(prevState_ != currentState_) {
 		ChangeAnimation(currentState_);
@@ -51,57 +52,59 @@ void Player2D::Update(float deltaTime) {
 ///////////////////////////////////////////////////////////////////////////////////////////
 void Player2D::ShowGui() {
 	bool isShow = true;
-	if(ImGui::Begin("Player2D", &isShow)) {
+	ImGui::Begin("Player2D", &isShow);
 
-		// パラメータセーブ
-		if(ImGui::Button("SaveParams")) {
-			SerializableObject::SaveParams();
-		}
-		
-		ImGui::SameLine();
-
-		// パラメータロード
-		if(ImGui::Button("LoadParams")) {
-			SerializableObject::LoadParams();
-		}
-		
-		ImGui::Separator();
-
-		ImGui::SeparatorText("material");
-		// 色設定
-		CalyxMath::Vector4 color = Character2D::GetSprite()->GetColor();
-		if(ImGui::ColorEdit4("color", &color.x)) {
-			Character2D::GetSprite()->SetColor(color);
-		}
-
-		ImGui::SeparatorText("state");
-		// 状態を変える
-		if(ImGui::Button("dirLeft")) {
-			currentState_ = Player2dState::MoveL;
-		}
-		if(ImGui::Button("dirRight")) {
-			currentState_ = Player2dState::MoveR;
-		}
-		if(ImGui::Button("attack")) {
-			currentState_ = Player2dState::Attack;
-		}
-
-		// アニメーション
-		ImGui::SeparatorText("Animator");
-		animator_.ShowGui();
-
-		
-		ImGui::End();
+	// パラメータセーブ
+	if(ImGui::Button("SaveParams")) {
+		SerializableObject::SaveParams();
 	}
+
+	ImGui::SameLine();
+
+	// パラメータロード
+	if(ImGui::Button("LoadParams")) {
+		SerializableObject::LoadParams();
+	}
+
+	ImGui::Separator();
+	// transform 表示
+	ImGui::DragFloat2("position",&basePos_.x, 1.0f);
+	ImGui::DragFloat2("scale",&size_.x, 0.1f);
+	spriteObj_->SetScale(size_);
+	
+	ImGui::SeparatorText("material");
+	// 色設定
+	CalyxMath::Vector4 color = Character2D::GetSprite()->GetColor();
+	if(ImGui::ColorEdit4("color", &color.x)) {
+		Character2D::GetSprite()->SetColor(color);
+	}
+
+	ImGui::SeparatorText("state");
+	// 状態を変える
+	if(ImGui::Button("dirLeft")) {
+		currentState_ = Player2dState::MoveL;
+	}
+	if(ImGui::Button("dirRight")) {
+		currentState_ = Player2dState::MoveR;
+	}
+	if(ImGui::Button("attack")) {
+		currentState_ = Player2dState::Attack;
+	}
+
+	// アニメーション
+	ImGui::SeparatorText("Animator");
+	animator_.ShowGui();
+
+	ImGui::End();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //	スプライトアニメーションの初期化
 ///////////////////////////////////////////////////////////////////////////////////////////
-void Player2D::InitializeSpriteAnimation()const {
+void Player2D::InitializeSpriteAnimation() const {
 	// アニメーション設定
 	Calyx2D::SpriteAnimation anim;
-	anim.texturePath   = "Textures/Player/flyingPlayer_inv.png";
+	anim.texturePath   = "Textures/Player/flyingPlayer.png";
 	anim.division	   = {3, 2};
 	anim.frameDuration = 0.1f;
 	anim.loop		   = true;
@@ -110,7 +113,7 @@ void Player2D::InitializeSpriteAnimation()const {
 	// 移動反転
 	spriteObj_->AddAnimation("MoveInv", anim);
 	// 通常移動
-	anim.texturePath = "Textures/Player/flyingPlayer.png";
+	anim.texturePath = "Textures/Player/flyingPlayer_inv.png";
 	spriteObj_->AddAnimation("Move", anim);
 	// 攻撃
 	anim.loop		 = false;
@@ -127,10 +130,13 @@ void Player2D::InitializeSpriteAnimation()const {
 //	デバッグUIを表示
 ///////////////////////////////////////////////////////////////////////////////////////////
 void Player2D::InitializeSerializableParm() {
-	SerializableObject::AddField("color", Character2D::GetSprite()->GetColor());
 	SerializableObject::AddField("amplitude", amplitude_);
 	SerializableObject::AddField("attackCoolTime", attackCoolTime_);
+	SerializableObject::AddField("size", size_ );
+	SerializableObject::AddField("moveSpeed", moveSpeed_ );
+	SerializableObject::AddField("moveRange", moveRange_ );
 	
+
 	SerializableObject::LoadParams();
 }
 
@@ -177,15 +183,21 @@ void Player2D::Move() {
 //	移動処理
 ///////////////////////////////////////////////////////////////////////////////////////////
 void Player2D::StateUpdate(float dt) {
-	// 一定間隔のクール時間で攻撃状態に移る
-	// attackTimer_+=dt;
-	// if(attackTimer_>=attackCoolTime_) {
-	// 	// 攻撃状態へタイマーのリセット
-	// 	currentState_ = Player2dState::Attack;
-	// 	attackTimer_  = 0.0f;
-	// }
-	// アニメーション更新
+	// X方向自動移動
+	basePos_.x += moveSpeed_ * moveDir_ * dt;
+
+	// 範囲制限 [0, 1280]
+	if (basePos_.x >= kGameWidth) {
+		basePos_.x = kGameWidth;
+		moveDir_ = -1;
+		currentState_ = Player2dState::MoveL;
+	}
+	else if (basePos_.x <= 0.0f) {
+		basePos_.x = 0.0f;
+		moveDir_ = 1;
+		currentState_ = Player2dState::MoveR;
+	}
+
 	animator_.Update(dt);
-	// 移動処理
 	Move();
 }

@@ -43,6 +43,7 @@ namespace Calyx2D {
 		const CalyxMath::Vector2& GetVelocity() const { return velocity_; }
 		// setter
 		void SetPosition(const CalyxMath::Vector2& pos)const { spriteObj_->SetPosition(pos); }
+		void SetSize(const CalyxMath::Vector2& size)const { spriteObj_->SetScale(size); }
 		void SetVelocity(const CalyxMath::Vector2& vel) { velocity_ = vel; }
 
 	protected:
@@ -52,8 +53,8 @@ namespace Calyx2D {
 		//===================================================================*/
 		//                   private members
 		//===================================================================*/
-		CalyxMath::Vector2				position_;			  //< 位置
-		CalyxMath::Vector2				velocity_;			  //< 速度
+		CalyxMath::Vector2				position_;	  //< 位置
+		CalyxMath::Vector2				velocity_;	  //< 速度
 	};
 
 } // namespace Calyx2D

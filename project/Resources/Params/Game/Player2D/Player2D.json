@@ -1,0 +1,10 @@
+{
+    "fields": {
+        "amplitude": 30.0,
+        "attackCoolTime": 0.0,
+        "size": [
+            64.0,
+            64.0
+        ]
+    }
+}
