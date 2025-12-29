@@ -12,11 +12,15 @@
 
 Enemy::Enemy() = default;
 
-Enemy::Enemy(const std::string& modelName, const std::string objName)
-	: Actor(modelName, objName) {
+Enemy::Enemy(const std::string& modelName, const std::string& objName)
+	: EnemyFactionActor(modelName, objName) {
 
 	worldTransform_.scale = {2, 2, 2};
 
+	// ---- EnemyFactionActor 設定 ----
+	SetEnemyKind(EnemyKind::Normal);
+	SetKillScore(125);
+	
 	BaseGameObject::InitializeCollider(ColliderKind::Sphere);
 	if(auto* c = dynamic_cast<SphereCollider*>(collider_.get())) {
 		c->SetRadius(1.5f);
@@ -42,10 +46,6 @@ void Enemy::Initialize() {
 	shooting_.Initialize(this);
 
 	moveSpeed_ = 30.0f;
-}
-
-void Enemy::StartStayInCamera(float duration) {
-	movement_.StartStay(duration);
 }
 
 void Enemy::SetPlayerTransform(const WorldTransform* tf) {
@@ -144,12 +144,13 @@ const CalyxMath::Vector3 Enemy::GetCenterPos() const {
 	return CalyxMath::Vector3::Transform(offset, worldTransform_.matrix.world);
 }
 
-int16_t Enemy::GetScore() const { return score_; }
+CalyxEngine::ParamPath Enemy::GetParamPath() const{
+	return {
+		CalyxEngine::ParamDomain::Game,
+		SceneObject::GetName()};
+}
 
 void Enemy::Die() {
-	GainScore e;
-	e.amount = score_;
-	e.reason = "enemyKill";
-	e.tag	 = {"normal"};
-	EventBus::Publish(e);
+	// スコアを送る
+	EnemyFactionActor::PublishKillScore();
 }

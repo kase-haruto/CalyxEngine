@@ -22,7 +22,6 @@ namespace CalyxUtil {
 		void Update(float dt) {
 			animation_.LerpValue(current_, dt);
 		}
-
 		/**
 		 * \brief 現在の値を取得
 		 * \return 
@@ -30,7 +29,6 @@ namespace CalyxUtil {
 		const T& GetValue() const {
 			return current_;
 		}
-		
 		/**
 		 * \brief 現在の値をリセット
 		 * \param v 
@@ -38,11 +36,9 @@ namespace CalyxUtil {
 		void ResetValue(const T& v = T{}) {
 			current_ = v;
 		}
-
 		const AnimationLoop& GetLoop()const {
 			return animation_.GetLoop();
 		}
-
 		void ShowGui(const std::string& label, bool isLoop = true) {
 			animation_.ImGui(label, isLoop);
 		}

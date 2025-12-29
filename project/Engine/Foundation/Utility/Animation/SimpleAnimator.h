@@ -1,8 +1,8 @@
 #pragma once
 
-#include <unordered_map>
-#include <string>
 #include <memory>
+#include <string>
+#include <unordered_map>
 
 #include "SimpleAnimChannel.h"
 
@@ -14,70 +14,99 @@ namespace CalyxUtil {
 	/* ----------------------------------------------------------------------------*/
 	class SimpleAnimator {
 	public:
-		//----------------------------
-		// 追加
-		//----------------------------
-		template<typename T>
+		//===================================================================*/
+		//                    private methods
+		//===================================================================*/
+		/**
+		 * \brief 指定した型のアニメーションチャンネルを追加
+		 * \tparam T アニメーションの型
+		 * \param name アニメーション名
+		 * \return 追加したアニメーションチャンネルの参照
+		 */
+		template <typename T>
 		SimpleAnimChannel<T>& Add(const std::string& name) {
-			auto ch = std::make_unique<SimpleAnimChannel<T>>();
-			auto& ref = *ch;
+			auto  ch		  = std::make_unique<SimpleAnimChannel<T>>();
+			auto& ref		  = *ch;
 			GetMap<T>()[name] = std::move(ch);
 			return ref;
 		}
-
-		//----------------------------
-		// 更新
-		//----------------------------
+		/**
+		 * \brief 更新処理
+		 * \param dt デルタタイム
+		 */
 		void Update(float dt) {
 			UpdateMap<float>(dt);
 			UpdateMap<CalyxMath::Vector2>(dt);
 			UpdateMap<CalyxMath::Vector3>(dt);
 			UpdateMap<CalyxMath::Vector4>(dt);
 		}
-
+		/**
+		 * \brief GUI表示
+		 * \param isLoop ループ設定を表示するか
+		 */
 		void ShowGui(bool isLoop = true) {
 			ShowGuiMap<float>("Float", isLoop);
 			ShowGuiMap<CalyxMath::Vector2>("Vector2", isLoop);
 			ShowGuiMap<CalyxMath::Vector3>("Vector3", isLoop);
 			ShowGuiMap<CalyxMath::Vector4>("Vector4", isLoop);
 		}
-
-		//----------------------------
-		// 取得
-		//----------------------------
-		template<typename T>
+		/**
+		 * \brief 指定した名前のアニメーションの値を取得
+		 * \tparam T アニメーションの型
+		 * \param name アニメーション名
+		 * \return アニメーションの値の参照
+		 */
+		template <typename T>
 		const T& Get(const std::string& name) const {
 			return GetMap<T>().at(name)->GetValue();
 		}
-
-		template<typename T>
+		/**
+		 * \brief 指定した名前のアニメーションが存在するか
+		 * \tparam T アニメーションの型
+		 * \param name アニメーション名
+		 * \return 存在する場合true
+		 */
+		template <typename T>
 		bool Has(const std::string& name) const {
 			return GetMap<T>().contains(name);
 		}
 
 	private:
-		std::unordered_map<std::string, std::unique_ptr<SimpleAnimChannel<float>>>            floatAnims_;
-		std::unordered_map<std::string, std::unique_ptr<SimpleAnimChannel<CalyxMath::Vector2>>> vec2Anims_;
-		std::unordered_map<std::string, std::unique_ptr<SimpleAnimChannel<CalyxMath::Vector3>>> vec3Anims_;
-		std::unordered_map<std::string, std::unique_ptr<SimpleAnimChannel<CalyxMath::Vector4>>> vec4Anims_;
-
-		template<typename T>
+		//===================================================================*/
+		//                    private methods
+		//===================================================================*/
+		/**
+		 * \brief 非const版GetMap
+		 * \tparam T
+		 * \return
+		 */
+		template <typename T>
 		auto& GetMap();
-
-		template<typename T>
+		/**
+		 * \brief const版GetMap
+		 * \tparam T
+		 * \return
+		 */
+		template <typename T>
 		auto& GetMap() const;
-
-		template<typename T>
+		/**
+		 * \brief アニメーション更新
+		 * \tparam T
+		 * \param dt
+		 */
+		template <typename T>
 		void UpdateMap(float dt) {
 			for(auto& [_, ch] : GetMap<T>()) {
 				ch->Update(dt);
 			}
 		}
-
-		//====================================
-		// ImGui helper
-		//====================================
-		template<typename T>
+		/**
+		 * \brief GUI表示
+		 * \tparam T
+		 * \param typeLabel
+		 * \param isLoop
+		 */
+		template <typename T>
 		void ShowGuiMap(const char* typeLabel, bool isLoop) {
 			auto& map = GetMap<T>();
 			if(map.empty()) {
@@ -92,31 +121,39 @@ namespace CalyxUtil {
 				}
 			}
 		}
+
+	private:
+		//===================================================================*/
+		//                    public methods
+		//===================================================================*/
+		std::unordered_map<std::string, std::unique_ptr<SimpleAnimChannel<float>>>				floatAnims_; //< floatアニメーション
+		std::unordered_map<std::string, std::unique_ptr<SimpleAnimChannel<CalyxMath::Vector2>>> vec2Anims_;	 //< Vector2アニメーション
+		std::unordered_map<std::string, std::unique_ptr<SimpleAnimChannel<CalyxMath::Vector3>>> vec3Anims_;	 //< Vector3アニメーション
+		std::unordered_map<std::string, std::unique_ptr<SimpleAnimChannel<CalyxMath::Vector4>>> vec4Anims_;	 //< Vector4アニメーション
 	};
 
 	// float
-	template<>
+	template <>
 	inline auto& SimpleAnimator::GetMap<float>() { return floatAnims_; }
-	template<>
+	template <>
 	inline auto& SimpleAnimator::GetMap<float>() const { return floatAnims_; }
 
 	// Vector2
-	template<>
+	template <>
 	inline auto& SimpleAnimator::GetMap<CalyxMath::Vector2>() { return vec2Anims_; }
-	template<>
+	template <>
 	inline auto& SimpleAnimator::GetMap<CalyxMath::Vector2>() const { return vec2Anims_; }
 
 	// Vector3
-	template<>
+	template <>
 	inline auto& SimpleAnimator::GetMap<CalyxMath::Vector3>() { return vec3Anims_; }
-	template<>
+	template <>
 	inline auto& SimpleAnimator::GetMap<CalyxMath::Vector3>() const { return vec3Anims_; }
 
 	// Vector4
-	template<>
+	template <>
 	inline auto& SimpleAnimator::GetMap<CalyxMath::Vector4>() { return vec4Anims_; }
-	template<>
+	template <>
 	inline auto& SimpleAnimator::GetMap<CalyxMath::Vector4>() const { return vec4Anims_; }
-
 
 } // namespace CalyxUtil
