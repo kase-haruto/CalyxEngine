@@ -11,6 +11,10 @@ class DxCore;
 class BaseCamera;
 class SceneContext;
 
+namespace CalyxScene {
+	class ISceneTransitionRequestor;
+}
+
 /* ========================================================================
 /* シーンインターフェース
 /* ===================================================================== */
@@ -34,7 +38,7 @@ public:
 								 [[maybe_unused]] class PipelineService* psoService) {}
 	virtual void CleanUp() = 0;
 	virtual void LoadAssets() = 0;
-	virtual void SetTransitionRequestor(class SceneTransitionRequestor* requestor) = 0;
+	virtual void SetTransitionRequestor(CalyxScene::ISceneTransitionRequestor* requestor) = 0;
 	//--------- accessor -----------------------------------------------------
 	virtual SceneContext* GetSceneContext() const = 0;
 	virtual void InjectContext([[maybe_unused]]SceneContext* ctx) {};

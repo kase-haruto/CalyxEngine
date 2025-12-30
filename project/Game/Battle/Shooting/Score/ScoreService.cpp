@@ -1,37 +1,43 @@
 #include "ScoreService.h"
-
 #include "GainScore.h"
 
 ScoreService::ScoreService() = default;
 ScoreService::~ScoreService() = default;
 
+////////////////////////////////////////////////////////////////////////////////
+//		初期化
+////////////////////////////////////////////////////////////////////////////////
 void ScoreService::Initialize() {
 	connGainScore_ =
-		EventBus::Subscribe<GainScore>([this](const GainScore& ev) {
-			OnGainScore(ev);
-		});
+		EventBus::Subscribe<GainScore>(
+			[this](const GainScore& ev) {
+				OnGainScore(ev);
+			});
 }
 
-void ScoreService::Shutdown() {}
+////////////////////////////////////////////////////////////////////////////////
+//		終了処理
+////////////////////////////////////////////////////////////////////////////////
+void ScoreService::Shutdown() {
+}
 
+////////////////////////////////////////////////////////////////////////////////
+//		イベント処理
+////////////////////////////////////////////////////////////////////////////////
 void ScoreService::OnGainScore(const GainScore& ev) {
-	// 合計スコア
+	// 合計スコアは遅延反映
 	q_.push(Pending{ ev.amount });
 
 	// 敵撃破内訳
-	if (ev.reason == ScoreReason::EnemyKill) {
-		for (const auto& t : ev.tag) {
-			if (t.rfind("enemyType:", 0) == 0) {
-				auto& stat = enemyStats_[t];
-				stat.count += 1;
-				stat.score += ev.amount;
-			}
-		}
-	}
+	auto& stat = enemyStats_[ev.enemyKind];
+	stat.count += 1;
+	stat.score += ev.amount;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//		更新
+////////////////////////////////////////////////////////////////////////////////
 void ScoreService::Update() {
-	// 保留中スコアを合計に反映
 	while (!q_.empty()) {
 		total_ += q_.front().amount;
 		q_.pop();

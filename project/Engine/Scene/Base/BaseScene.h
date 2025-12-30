@@ -41,12 +41,15 @@ public:
 	void SetSceneName(const std::string& name){ sceneName_ = name; }
 	void InjectContext(SceneContext* ctx) override { sceneContext_ = ctx; }
 	SceneContext* GetSceneContext() const { return sceneContext_; }
-	void SetTransitionRequestor(SceneTransitionRequestor* requestor)override{
+	void SetTransitionRequestor(CalyxScene::ISceneTransitionRequestor* requestor)override{
 		transitionRequestor_ = requestor;
 	}
 
 	virtual void OnExit()override{}
 	virtual void OnEnter()override{}
+	virtual void OnPayload(std::unique_ptr<CalyxScene::IScenePayload> payload) {
+		(void)payload;
+	}
 protected:
 	//===================================================================*/
 	//			protected methods
@@ -62,5 +65,5 @@ protected:
 	std::unique_ptr<ModelRenderer> modelRenderer_ = nullptr;
 
 protected:
-	SceneTransitionRequestor* transitionRequestor_ = nullptr;
+	CalyxScene::ISceneTransitionRequestor* transitionRequestor_ = nullptr;
 };

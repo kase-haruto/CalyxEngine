@@ -323,6 +323,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\Scene\Clear\ClearScene.cpp" />
     <ClCompile Include="Game\Scene\Defeat\DefeatScene.cpp" />
     <ClCompile Include="Game\Scene\Game\GameScene.cpp" />
+    <ClCompile Include="Game\Scene\Transition\ResultTransitionPayload.cpp" />
+    <ClCompile Include="Game\Scene\Utility\SceneTypeUtil.cpp" />
     <ClCompile Include="Game\UI\Button\Button.cpp" />
     <ClCompile Include="Engine\Assets\Database\AssetDatabase.cpp" />
     <ClCompile Include="Engine\Application\UI\Panels\AssetPanel.cpp" />
@@ -562,6 +564,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Objects\Event\BaseEventObject.h" />
     <ClInclude Include="Engine\Objects\Event\Camera\CameraEventObject.h" />
     <ClInclude Include="Engine\PostProcess\Manager\PostEffectManager.h" />
+    <ClInclude Include="Engine\Scene\Transitioner\IScenePayload.h" />
     <ClInclude Include="Engine\System\Component\IComponent.h" />
     <ClInclude Include="Game\2dObject\Actor\Player2D.h" />
     <ClInclude Include="Game\2d\HpGauge.h" />
@@ -580,6 +583,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\3dObject\Actor\Boss\State\Machine\BossStateMachine.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\BossBullet\BossHomingBullet.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\EnemyBullet\EnemyHomingBullet.h" />
+    <ClInclude Include="Game\3dObject\Actor\Enemy\Details\EnemyKind.h" />
     <ClInclude Include="Game\3dObject\Actor\Enemy\EnemyFactionActor.h" />
     <ClInclude Include="Game\3dObject\Actor\Enemy\Movement\EnemyMovementController.h" />
     <ClInclude Include="Game\3dObject\Actor\Enemy\Shoot\EnemyShootingAgent.h" />
@@ -623,6 +627,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\Scene\Clear\ClearScene.h" />
     <ClInclude Include="Game\Scene\Defeat\DefeatScene.h" />
     <ClInclude Include="Game\Scene\Game\GameScene.h" />
+    <ClInclude Include="Game\Scene\Transition\ResultTransitionPayload.h" />
+    <ClInclude Include="Game\Scene\Utility\SceneTypeUtil.h" />
     <ClInclude Include="Game\UI\Button\Button.h" />
     <ClInclude Include="Engine\Assets\Database\AssetDatabase.h" />
     <ClInclude Include="Engine\Application\UI\Panels\AssetPanel.h" />

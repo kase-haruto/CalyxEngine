@@ -18,6 +18,8 @@
 
 // game
 #include "Engine/Application/System/Enviroment.h"
+#include "Game/Scene/Transition/ResultTransitionPayload.h"
+#include "Game/Scene/Utility/SceneTypeUtil.h"
 
 #include <Game/3dObject/Actor/Bullet/Register/BulletRegistrar.h>
 #include <Game/Battle/Shooting/Score/ScoreService.h>
@@ -171,7 +173,7 @@ void GameScene::Update([[maybe_unused]] float dt) {
 
 	// プレイヤーの死亡
 	if(player && !player->GetIsAlive()) {
-		transitionRequestor_->RequestSceneChange(SceneType::DEFEAT);
+		transitionRequestor_->RequestSceneChange(GameSceneUtil::ToSceneId(SceneType::DEFEAT));
 		return;
 	}
 
@@ -179,16 +181,18 @@ void GameScene::Update([[maybe_unused]] float dt) {
 	// 未スポーン or 破棄済みのフレームでは何もしない
 	if (boss && !boss->GetIsAlive()) {
 
-		SceneTransitionPayload payload{};
-		payload.score = score_ ? score_->GetTotal() : 0;
+		auto payload = std::make_unique<ResultTransitionPayload>();
+		payload->score = score_ ? score_->GetTotal() : 0;
 
-		transitionRequestor_->RequestSceneChange(SceneType::CLEAR, payload);
+		transitionRequestor_->RequestSceneChange(
+			GameSceneUtil::ToSceneId(SceneType::CLEAR),
+			std::move(payload)
+		);
 		return;
 	}
-
 	// 一応タイトル戻るよう
 	if(CalyxFoundation::Input::GetInstance()->TriggerGamepadButton(CalyxFoundation::PadButton::START)) {
-		transitionRequestor_->RequestSceneChange(SceneType::TITLE);
+		transitionRequestor_->RequestSceneChange(GameSceneUtil::ToSceneId(SceneType::TITLE));
 	}
 }
 

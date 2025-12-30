@@ -46,15 +46,7 @@ void EnemyFactionActor::PublishKillScore() const {
 	if (GetGuid().isValid()) {
 		e.id = GetGuid();
 	}
-
-	e.reason = ScoreReason::EnemyKill;
-	e.tag = {
-		"src:enemy",
-		"bucket:kill",
-		EnemyKindToTypeTag(kind_),
-		EnemyKindToIconTag(kind_)
-	};
-
+	e.enemyKind = kind_;
 	EventBus::Publish(e);
 }
 

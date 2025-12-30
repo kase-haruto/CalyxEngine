@@ -1,10 +1,14 @@
 #pragma once
-/* ========================================================================
-/*	include space
-/* ===================================================================== */
+/* ======================================================================== */
+/*	include space                                                            */
+/* ======================================================================== */
 #include <Engine/System/Event/EventBus.h>
+#include <Game/3dObject/Actor/Enemy/Details/EnemyKind.h>
+
 #include <queue>
-#include <string>
+#include <unordered_map>
+#include <cstdint>
+
 
 struct GainScore;
 
@@ -13,10 +17,10 @@ struct GainScore;
  * - スコア管理サービス
  *---------------------------------------------------------------------------------------*/
 class ScoreService {
+public:
 	//===================================================================*/
 	//			structs
 	//===================================================================*/
-public:
 	struct EnemyStat {
 		int32_t count = 0;
 		int32_t score = 0;
@@ -31,32 +35,32 @@ public:
 	//===================================================================*/
 	//			public methods
 	//===================================================================*/
-	/** \brief コンストラクタ / デストラクタ*/
 	ScoreService();
 	~ScoreService();
-
 	/**
 	 * \brief 初期化
 	 */
 	void Initialize();
+
 	/**
 	 * \brief 終了処理
 	 */
 	void Shutdown();
+
 	/**
 	 * \brief 更新
 	 */
 	void Update();
+
 	/**
 	 * \brief スコアの合計を取得
-	 * \return スコアの合計
 	 */
 	int32_t GetTotal() const { return total_; }
+
 	/**
-	 * \brief 敵の統計情報を取得
-	 * \return 敵の統計情報のマップ
+	 * \brief 敵撃破統計を取得（EnemyKind ベース）
 	 */
-	const std::unordered_map<std::string, EnemyStat>& GetEnemyStats() const {
+	const std::unordered_map<EnemyKind, EnemyStat>& GetEnemyStats() const {
 		return enemyStats_;
 	}
 
@@ -64,15 +68,12 @@ private:
 	//===================================================================*/
 	//			private methods
 	//===================================================================*/
-	/**
-	 * \brief スコア獲得イベントの処理
-	 * \param ev
-	 */
 	void OnGainScore(const GainScore& ev);
 
 private:
-	int32_t									   total_ = 0;		//< スコアの合計
-	std::queue<Pending>						   q_;				//< 保留中のスコア獲得要求キュー
-	std::unordered_map<std::string, EnemyStat> enemyStats_;		//< 敵の統計情報マップ
-	EventBus::Connection					   connGainScore_;	//< スコア獲得イベントのコネクション
+	int32_t total_ = 0;						//< スコア合計
+	std::queue<Pending> q_;					//< 遅延加算キュー
+	
+	std::unordered_map<EnemyKind, EnemyStat> enemyStats_;	//< 敵撃破統計
+	EventBus::Connection connGainScore_;					//< GainScore イベントコネクション
 };

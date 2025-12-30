@@ -26,7 +26,7 @@ namespace CalyxEngine {
 		system_->InitializePostProcess(graphicsSystem_->GetPipelineService());
 
 		/* SceneManager */
-		sceneManager_ = std::make_unique<SceneManager>(system_->GetDxCore());
+		sceneManager_ = std::make_unique<CalyxScene::SceneManager>(system_->GetDxCore());
 		sceneManager_->Initialize();
 
 		/* PlaySession  (EditorCtx は SceneManager が作ったシーン 0 のものを使う) */

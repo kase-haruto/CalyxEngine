@@ -3,14 +3,7 @@
 #include <Engine/Objects/3D/Actor/Actor.h>
 // engine
 #include <Engine/Foundation/Serialization/SerializableObject.h>
-/*---------------------------------------------------
- * EnemyKind enum class
- * - 敵の種別
- *-------------------------------------------------*/
-enum class EnemyKind : uint8_t {
-	Normal = 0, //< 通常型
-	Boss,		//< ボス型
-};
+#include "Details/EnemyKind.h"
 
 /*-----------------------------------------------------------------------------------------
  * EnemyFactionActor class
@@ -29,7 +22,6 @@ public:
 	virtual ~EnemyFactionActor() override;
 	/**
 	 * \brief 敵の種別を設定
-	 * \param kind 敵種別
 	 */
 	EnemyKind GetEnemyKind() const;
 	/**
@@ -41,7 +33,7 @@ public:
 	 * \brief パラメータパスの取得
 	 * \return パラメータパス
 	 */
-	CalyxEngine::ParamPath GetParamPath() const;
+	CalyxEngine::ParamPath GetParamPath() const override;
 
 protected:
 	//===================================================================*/

@@ -51,10 +51,9 @@ public:
 	 */
 	void LoadAssets() override;
 	/**
-	 * \brief シーン遷移ペイロード設定
-	 * \param payload
+	 * \brief シーン遷移リクエスト設定
 	 */
-	void SetPayload(const SceneTransitionPayload& payload);
+	void OnPayload(std::unique_ptr<CalyxScene::IScenePayload> payload) override;
 
 private:
 	//================================================*/

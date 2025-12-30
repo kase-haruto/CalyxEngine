@@ -3,12 +3,14 @@
 
 // scene
 #include "Game/3d/GameCamera/RailCamera.h"
+#include <Game/Scene/Utility/SceneTypeUtil.h>
 
 #include <Engine/Foundation/Input/Input.h>
 #include <Engine/Application/System/Enviroment.h>
 #include <Engine/Collision/CollisionManager.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
 #include <Engine/Scene/System/SceneManager.h>
+#include <Game/Scene/Transition/ResultTransitionPayload.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //  ctor / dtor
@@ -80,7 +82,7 @@ void ClearScene::Update(float dt) {
 	// 遷移
 	if(CalyxFoundation::Input::GetInstance()->TriggerGamepadButton(CalyxFoundation::PadButton::A) ||
 	   CalyxFoundation::Input::GetInstance()->TriggerKey(DIK_SPACE)) {
-		transitionRequestor_->RequestSceneChange(SceneType::TITLE);
+		transitionRequestor_->RequestSceneChange(GameSceneUtil::ToSceneId(SceneType::TITLE));
 	}
 }
 
@@ -120,7 +122,11 @@ void ClearScene::CleanUp() {
 }
 void ClearScene::LoadAssets() {
 }
+void ClearScene::OnPayload(std::unique_ptr<CalyxScene::IScenePayload> payload) {
+	if (!payload) return;
 
-void ClearScene::SetPayload(const SceneTransitionPayload& payload) {
-	finalScore_ = payload.score;
+	// 自分が知っている型にだけキャストする
+	if (auto* p = static_cast< ResultTransitionPayload*>(payload.get())) {
+		finalScore_ = p->score;
+	}
 }

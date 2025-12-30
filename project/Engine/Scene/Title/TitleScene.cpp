@@ -10,6 +10,7 @@
 #include <Engine/Collision/CollisionManager.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
+#include <Game/Scene/Utility/SceneTypeUtil.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //	コンストラクタ/デストラクタ
@@ -40,7 +41,7 @@ void TitleScene::Initialize() {
 	// ボタンで発行される関数
 	//=========================
 	transitionForGameScene_ = [this] {
-		transitionRequestor_->RequestSceneChange(SceneType::PLAY);
+		transitionRequestor_->RequestSceneChange(GameSceneUtil::ToSceneId(SceneType::PLAY));
 	};
 
 	endGameReqest_ = [this] {

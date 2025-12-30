@@ -1,18 +1,18 @@
 #pragma once
 
-#include <Game/Scene/Details/SceneType.h>
+#include <Engine/Scene/Transitioner/IScenePayload.h>
+#include <Engine/Scene/Utility/SceneUtility.h>
 #include <cstdint>
 
-struct SceneTransitionPayload {
-	int32_t score = 0;
-};
+namespace CalyxScene {
+	/* ========================================================================
+	/* シーン遷移リクエスト
+	/* ===================================================================== */
+	class ISceneTransitionRequestor {
+	public:
+		virtual ~ISceneTransitionRequestor()												= default;
+		virtual void RequestSceneChange(SceneId nextScene)								= 0;
+		virtual void RequestSceneChange(SceneId nextScene, std::unique_ptr<IScenePayload> payload) = 0;
+	};
 
-/* ========================================================================
-/* シーン遷移リクエスト
-/* ===================================================================== */
-class SceneTransitionRequestor {
-public:
-	virtual void RequestSceneChange(SceneType nextScene) = 0;
-	virtual ~SceneTransitionRequestor() = default;
-	virtual void RequestSceneChange(SceneType nextScene, const SceneTransitionPayload& payload) = 0;
-};
+} // namespace CalyxScene
