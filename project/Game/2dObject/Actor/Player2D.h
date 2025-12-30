@@ -22,9 +22,9 @@ public:
 	//===================================================================*/
 	//			public methods
 	//===================================================================*/
+	/** \brief コンストラクタ*/
 	Player2D();
 	~Player2D() override;
-
 	/**
 	 * \brief 初期化
 	 */
@@ -47,6 +47,9 @@ private:
 	//===================================================================*/
 	//			private methods
 	//===================================================================*/
+	/**
+	 * \brief スプライトアニメーションの初期化
+	 */
 	void InitializeSpriteAnimation() const;
 	/**
 	 * \brief シリアライズ可能パラメータの初期化
@@ -76,9 +79,9 @@ private:
 	float attackCoolTime_ = 0.0f;  //< 攻撃クールダウン
 	float attackTimer_	  = 0.0f;  //< 攻撃タイマー
 
-	float moveSpeed_ = 80.0f;  // 自動移動速度
-	float moveRange_ = 128.0f; // 移動可能範囲（左右）
-	int	  moveDir_	 = 1;	   // 1 = 右, -1 = 左
+	float moveSpeed_ = 80.0f;  //< 自動移動速度
+	float moveRange_ = 128.0f; //< 移動可能範囲（左右）
+	int	  moveDir_	 = 1;	   //< 1 = 右, -1 = 左
 
 	CalyxMath::Vector2		  size_{64.0f, 64.0f}; //< サイズ
 	CalyxMath::Vector2		  basePos_;

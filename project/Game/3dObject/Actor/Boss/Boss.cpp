@@ -2,7 +2,6 @@
 
 // engine
 #include "Engine/Objects/3D/Actor/BaseGameObject.h"
-#include <Engine/Foundation/Utility/Func/CxUtils.h>
 #include <Engine/Objects/Collider/SphereCollider.h>
 
 // game
@@ -14,26 +13,25 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 //		ctor
 /////////////////////////////////////////////////////////////////////////////////////////
-Boss::Boss(const std::string& modelName,const std::string objName)
-	: Actor(modelName,objName) {
+Boss::Boss(const std::string& modelName, const std::string objName)
+	: EnemyFactionActor(modelName, objName) {
 	worldTransform_.Initialize();
-	worldTransform_.scale = {30,30,30};
 
-	moveSpeed_ = Random::Generate<float>(1.0f,3.0f);
-	velocity_  = Random::GenerateVector3(-1.0f,1.0f);
+	moveSpeed_ = Random::Generate<float>(1.0f, 3.0f);
+	velocity_  = Random::GenerateVector3(-1.0f, 1.0f);
 
 	BaseGameObject::InitializeCollider(ColliderKind::Sphere);
 	collider_->SetType(ColliderType::Type_Enemy);
 	collider_->SetTargetType(ColliderType::Type_PlayerAttack);
 	collider_->SetOwner(this);
-	if(auto* sphere = dynamic_cast<SphereCollider*>(collider_.get())) { sphere->SetRadius(15.0f); }
+	if(auto* sphere = dynamic_cast<SphereCollider*>(collider_.get())) {
+		sphere->SetRadius(15.0f);
+	}
 	collider_->SetIsDrawCollider(true);
-
-	life_ = 35;
 
 	// アニメーションコントローラの生成
 	CalyxAssets::AnimationModel* animModel = AnimationModel();
-	anim_                     = std::make_unique<BossAnimController>(animModel);
+	anim_								   = std::make_unique<BossAnimController>(animModel);
 
 	// ステートの初期化
 	stateMachine_ = std::make_unique<BossStateMachine>();
@@ -45,6 +43,11 @@ Boss::Boss(const std::string& modelName,const std::string objName)
 	// コンフィグ読み込み（FxObject 内部で ApplyConfig が呼ばれる）
 	auto fx = hitEffects_.lock();
 	fx->LoadFromPath("Effect/BossHitEffect");
+
+	// 敵基底クラスの設定。種類スコア
+	SetEnemyKind(EnemyKind::Boss);
+
+	InitializeSerializableParm();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -63,9 +66,9 @@ void Boss::Initialize() {
 	anim_->Initialize();
 	hpGauge_ = std::make_unique<HpGauge>(static_cast<float>(life_));
 	// 画面中央上にゲージを設定
-	CalyxMath::Vector2 gaugePos = {kGameSize.x * 0.5f,50.0f};
-	hpGauge_->Initialize(gaugePos,CalyxMath::Vector2(500.0f,32.0f));
-	hpGauge_->SetAncorPoint(CalyxMath::Vector2(0.5f,0.5f));
+	CalyxMath::Vector2 gaugePos = {kGameSize.x * 0.5f, 50.0f};
+	hpGauge_->Initialize(gaugePos, CalyxMath::Vector2(500.0f, 32.0f));
+	hpGauge_->SetAncorPoint(CalyxMath::Vector2(0.5f, 0.5f));
 
 	auto fx = hitEffects_.lock();
 	fx->StopAll();
@@ -81,38 +84,77 @@ void Boss::InitializeAI() {
 //		更新処理
 /////////////////////////////////////////////////////////////////////////////////////////
 void Boss::Update(float dt) {
+	// hpゲージ更新
 	if(hpGauge_) {
 		hpGauge_->Update(dt);
 		hpGauge_->SetHp(static_cast<float>(life_));
 	}
-
 	// 弾発射管理クラスの更新
-	if(ai_) { ai_->Update(dt); }
-	if(shootingController_) { shootingController_->Update(dt); }
-
-	stateMachine_->Update(dt);
+	if(ai_) {
+		ai_->Update(dt);
+	}
+	// 発射制御クラスの更新
+	if(shootingController_) {
+		shootingController_->Update(dt);
+	}
+	// ステートマシン更新
+	if(stateMachine_) {
+		stateMachine_->Update(dt);
+	}
 
 	// 方向合わせ（プレイヤーへ）
-	{
-		const CalyxMath::Vector3 myPos     = GetWorldPosition();
-		const CalyxMath::Vector3 targetPos = target_ ? target_->GetWorldTransform().GetWorldPosition() : myPos;
-
-		CalyxMath::Vector3 d = targetPos - myPos;
-		if(d.LengthSquared() > 1e-12f) {
-			d = d.Normalize();
-
-			const float yaw   = std::atan2(d.x,d.z);                               // 水平旋回
-			const float pitch = std::atan2(-d.y,std::sqrt(d.x * d.x + d.z * d.z)); // 上下（LH）
-
-			const CalyxMath::Quaternion qWorld  = CalyxMath::Quaternion::MakeRotateY(yaw) * CalyxMath::Quaternion::MakeRotateX(pitch);
-			worldTransform_.rotation = qWorld;
-		}
-	}
+	LookAtPlayer();
 
 	// 死亡処理
 	if(stateMachine_->GetCurrentStateType() == BossStateType::Dead) {
-		// 死亡アニメーションが終わったら死亡フラグを立てる
-		if(anim_->IsAnimFinished()) { isAlive_ = false; }
+		// 死亡アニメーションが終わったら死亡処理
+		if(anim_->IsAnimFinished()) {
+			Die();
+		}
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//		パラメータパス取得
+///////////////////////////////////////////////////////////////////////////////////////////
+CalyxEngine::ParamPath Boss::GetParamPath() const {
+	return {
+		CalyxEngine::ParamDomain::Game,
+		SceneObject::GetName()};
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//		パラメータパス取得
+///////////////////////////////////////////////////////////////////////////////////////////
+void Boss::InitializeSerializableParm() {
+	// 調整変数の追加
+	SerializableObject::AddField("scale", worldTransform_.scale);
+	SerializableObject::AddField("flinchValue", flinchValue_);
+	SerializableObject::AddField("flinchMax", flinchMax_);
+	SerializableObject::AddField("life", life_);
+
+	// ロード
+	SerializableObject::LoadParams();
+}
+void Boss::Die() {
+	// スコアを送信する
+	EnemyFactionActor::PublishKillScore();
+	// 生存フラグを折る
+	isAlive_ = false;
+}
+void Boss::LookAtPlayer() {
+	const CalyxMath::Vector3 myPos	   = GetWorldPosition();
+	const CalyxMath::Vector3 targetPos = target_ ? target_->GetWorldTransform().GetWorldPosition() : myPos;
+
+	CalyxMath::Vector3 d = targetPos - myPos;
+	if(d.LengthSquared() > 1e-12f) {
+		d = d.Normalize();
+
+		const float yaw	  = std::atan2(d.x, d.z);								// 水平旋回
+		const float pitch = std::atan2(-d.y, std::sqrt(d.x * d.x + d.z * d.z)); // 上下（LH）
+
+		const CalyxMath::Quaternion qWorld = CalyxMath::Quaternion::MakeRotateY(yaw) * CalyxMath::Quaternion::MakeRotateX(pitch);
+		worldTransform_.rotation		   = qWorld;
 	}
 }
 
@@ -120,19 +162,37 @@ void Boss::Update(float dt) {
 //		デバッグgui描画
 /////////////////////////////////////////////////////////////////////////////////////////
 void Boss::DerivativeGui() {
-	if(ImGui::CollapsingHeader("State")) { stateMachine_->ShowGui(); }
-	if(ImGui::CollapsingHeader("hpGauge")) { hpGauge_->ShowGui(); }
+
+	GuiCmd::DragInt("flinchMax", flinchMax_, 1, 0, 100);
+	GuiCmd::DragInt("life", life_, 1, 0, 100);
+
+	if(ImGui::CollapsingHeader("State")) {
+		stateMachine_->ShowGui();
+	}
+	if(ImGui::CollapsingHeader("hpGauge")) {
+		hpGauge_->ShowGui();
+	}
+}
+
+void Boss::HeaderGui() {
+	if(ImGui::Button("load")) {
+		SerializableObject::LoadParams();
+	}
+	ImGui::SameLine();
+	if(ImGui::Button("save")) {
+		SerializableObject::SaveParams();
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		衝突時処理
 /////////////////////////////////////////////////////////////////////////////////////////
 void Boss::OnCollisionEnter(Collider* other) {
-	if (!other) return;
+	if(!other) return;
 
 	// 攻撃以外を除外
-	if (collider_->GetTargetType() != other->GetType()) return;
-	if (life_ <= 0) return;
+	if(collider_->GetTargetType() != other->GetType()) return;
+	if(life_ <= 0) return;
 
 	// --- ダメージ処理 ---
 	life_--;
@@ -147,20 +207,20 @@ void Boss::OnCollisionEnter(Collider* other) {
 	fx->PlayAll();
 
 	// --- HP0 なら Dead へ ---
-	if (life_ <= 0) {
+	if(life_ <= 0) {
 		stateMachine_->ChangeState(BossStateType::Dead);
 		return;
 	}
 
 	// --- ひるみ処理 ---
-	if (flinchValue_ < flinchMax_) {
+	if(flinchValue_ < flinchMax_) {
 		flinchValue_++;
 		return;
 	}
 	flinchValue_ = 0;
 
 	auto* curState = stateMachine_->GetCurrentState();
-	if (curState && curState->GetStateType() == BossStateType::Idle) {
+	if(curState && curState->GetStateType() == BossStateType::Idle) {
 		stateMachine_->ChangeState(BossStateType::Damage);
 	}
 }
@@ -168,14 +228,14 @@ void Boss::OnCollisionEnter(Collider* other) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		衝突終了処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void Boss::OnCollisionExit([[maybe_unused]]Collider* other) {  }
+void Boss::OnCollisionExit([[maybe_unused]] Collider* other) {}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		中心座標取得
 /////////////////////////////////////////////////////////////////////////////////////////
 const CalyxMath::Vector3 Boss::GetCenterPos() const {
-	const CalyxMath::Vector3 offset   = {0.0f,1.5f,0.0f};
-	CalyxMath::Vector3       worldPos = CalyxMath::Vector3::Transform(offset,worldTransform_.matrix.world);
+	const CalyxMath::Vector3 offset	  = {0.0f, 1.5f, 0.0f};
+	CalyxMath::Vector3		 worldPos = CalyxMath::Vector3::Transform(offset, worldTransform_.matrix.world);
 	return worldPos;
 }
 

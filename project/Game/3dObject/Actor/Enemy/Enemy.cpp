@@ -12,11 +12,12 @@
 
 Enemy::Enemy() = default;
 
-Enemy::Enemy(const std::string& modelName, const std::string objName)
-	: Actor(modelName, objName) {
+Enemy::Enemy(const std::string& modelName, const std::string& objName)
+	: EnemyFactionActor(modelName, objName) {
 
-	worldTransform_.scale = {2, 2, 2};
-
+	// ---- EnemyFactionActor 設定 ----
+	SetEnemyKind(EnemyKind::Normal);
+	
 	BaseGameObject::InitializeCollider(ColliderKind::Sphere);
 	if(auto* c = dynamic_cast<SphereCollider*>(collider_.get())) {
 		c->SetRadius(1.5f);
@@ -28,6 +29,9 @@ Enemy::Enemy(const std::string& modelName, const std::string objName)
 	// hit effect
 	hitFx_ = SceneAPI::Instantiate<CalyxEffect::FxObject>("HitFx");
 	hitFx_->LoadFromPath("Effect/HitEffect");
+
+	// パラメータのロード
+	InitializeSerializableParm();
 }
 
 Enemy::~Enemy() = default;
@@ -41,11 +45,6 @@ void Enemy::Initialize() {
 	movement_.Initialize(this);
 	shooting_.Initialize(this);
 
-	moveSpeed_ = 30.0f;
-}
-
-void Enemy::StartStayInCamera(float duration) {
-	movement_.StartStay(duration);
 }
 
 void Enemy::SetPlayerTransform(const WorldTransform* tf) {
@@ -144,12 +143,22 @@ const CalyxMath::Vector3 Enemy::GetCenterPos() const {
 	return CalyxMath::Vector3::Transform(offset, worldTransform_.matrix.world);
 }
 
-int16_t Enemy::GetScore() const { return score_; }
+CalyxEngine::ParamPath Enemy::GetParamPath() const {
+	return {
+		CalyxEngine::ParamDomain::Game,
+		SceneObject::GetName()};
+}
+void Enemy::InitializeSerializableParm() {
+	SerializableObject::AddField("life", life_);
+	SerializableObject::AddField("moveSpeed", moveSpeed_);
+	SerializableObject::AddField("scale",worldTransform_.scale);
+	SerializableObject::AddField("score", killScore_);
+
+	// ロード
+	SerializableObject::LoadParams();
+}
 
 void Enemy::Die() {
-	GainScore e;
-	e.amount = score_;
-	e.reason = "enemyKill";
-	e.tag	 = {"normal"};
-	EventBus::Publish(e);
+	// スコアを送る
+	EnemyFactionActor::PublishKillScore();
 }

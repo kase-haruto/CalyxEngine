@@ -8,7 +8,7 @@
 #include <cstdint>
 
 struct GainScore{
-	int16_t amount;
+	int32_t amount;
 	Guid id;
 	std::string reason;
 	std::vector<std::string> tag;

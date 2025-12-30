@@ -187,7 +187,6 @@ void BossStateMachine::ChangeState(BossStateType nextType, int16_t param) {
 	st->SetOwner(owner_);
 	st->SetTransitionParam(param);
 
-	// ここで push してから Enter を呼ぶ
 	stack_.push_back(std::move(st));
 	stack_.back()->Enter();
 }

@@ -117,7 +117,7 @@ void BaseGameObject::ShowGui() {
 	ImGui::Dummy(ImVec2(0.0f, 5.0f));
 	ImGui::Separator();
 
-	config_.ShowGui();
+	HeaderGui();
 
 	worldTransform_.ShowImGui("world");
 
@@ -135,6 +135,9 @@ void BaseGameObject::ShowGui() {
 	}
 
 	DerivativeGui();
+}
+void BaseGameObject::HeaderGui() {
+	config_.ShowGui();
 }
 
 void BaseGameObject::DerivativeGui() {
