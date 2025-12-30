@@ -18,8 +18,7 @@
  * - 敵キャラクタの基本的な振る舞いを実装
  *---------------------------------------------------------------------------------------*/
 class Enemy
-	: public EnemyFactionActor,
-	  public CalyxEngine::SerializableObject {
+	: public EnemyFactionActor{
 public:
 	//===================================================================*/
 	//			public types
@@ -76,7 +75,6 @@ public:
 	//===================================================================*/
 	//			accessore
 	//===================================================================*/
-	int16_t					 GetScore() const;
 	void					 SetPosition(const CalyxMath::Vector3& pos) { worldTransform_.translation = pos; }
 	EnemyMovementController* GetMovementController() { return &movement_; }
 	void					 SetShootingController(std::unique_ptr<EnemyShootingController>);
@@ -89,7 +87,6 @@ public:
 	void					 SetPatternKind(BulletPatternKind k) { shooting_.SetPatternKind(k); }
 	BulletPatternKind		 GetPatternKind() const { return shooting_.GetPatternKind(); }
 	void					 EnsurePatternBound() { shooting_.EnsurePatternBound(); }
-	CalyxEngine::ParamPath	 GetParamPath() const;
 
 private:
 	//===================================================================*/

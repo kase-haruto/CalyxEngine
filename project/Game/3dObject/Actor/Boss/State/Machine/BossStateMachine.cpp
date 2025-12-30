@@ -114,6 +114,10 @@ void BossStateMachine::ShowGui() {
 	if(ImGui::Button("Damage")) {
 		ChangeState(BossStateType::Damage);
 	}
+	ImGui::SameLine();
+	if(ImGui::Button("Death")) {
+		ChangeState(BossStateType::Dead);
+	}
 
 	ImGui::Spacing();
 	ImGui::Text("Push State:");

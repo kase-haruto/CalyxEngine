@@ -1,33 +1,39 @@
 #include "ScoreService.h"
 
-/* ========================================================================
-/*	include space
-/* ===================================================================== */
-#include <Engine/System/Event/EventBus.h>
 #include "GainScore.h"
 
 ScoreService::ScoreService() = default;
-
 ScoreService::~ScoreService() = default;
 
-void ScoreService::Initialize(){
-	connGainScore_ = EventBus::Subscribe<GainScore>(		//コネクションを受け取って保持
-		[this](const GainScore& ev) { OnGainScore(ev); });
+void ScoreService::Initialize() {
+	connGainScore_ =
+		EventBus::Subscribe<GainScore>([this](const GainScore& ev) {
+			OnGainScore(ev);
+		});
 }
 
-void ScoreService::Shutdown(){}
+void ScoreService::Shutdown() {}
 
 void ScoreService::OnGainScore(const GainScore& ev) {
-	int add = static_cast<int>(ev.amount);
-	q_.push(Pending{ add });
+	// 合計スコア
+	q_.push(Pending{ ev.amount });
+
+	// 敵撃破内訳
+	if (ev.reason == ScoreReason::EnemyKill) {
+		for (const auto& t : ev.tag) {
+			if (t.rfind("enemyType:", 0) == 0) {
+				auto& stat = enemyStats_[t];
+				stat.count += 1;
+				stat.score += ev.amount;
+			}
+		}
+	}
 }
 
 void ScoreService::Update() {
+	// 保留中スコアを合計に反映
 	while (!q_.empty()) {
-		//トータルスコアに加算
 		total_ += q_.front().amount;
 		q_.pop();
 	}
 }
-
-void ScoreService::AddRaw(int v) { q_.push(Pending{ v }); }

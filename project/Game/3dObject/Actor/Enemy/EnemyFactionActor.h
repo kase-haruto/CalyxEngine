@@ -1,7 +1,8 @@
 #pragma once
 
 #include <Engine/Objects/3D/Actor/Actor.h>
-
+// engine
+#include <Engine/Foundation/Serialization/SerializableObject.h>
 /*---------------------------------------------------
  * EnemyKind enum class
  * - 敵の種別
@@ -16,7 +17,8 @@ enum class EnemyKind : uint8_t {
  * - 敵勢力のアクター基底クラス
  *---------------------------------------------------------------------------------------*/
 class EnemyFactionActor
-	: public Actor {
+	: public Actor ,
+	  public CalyxEngine::SerializableObject{
 public:
 	//===================================================================*/
 	//                    public methods
@@ -35,6 +37,11 @@ public:
 	 * \return 撃破スコア
 	 */
 	int32_t GetKillScore() const ;
+	/**
+	 * \brief パラメータパスの取得
+	 * \return パラメータパス
+	 */
+	CalyxEngine::ParamPath GetParamPath() const;
 
 protected:
 	//===================================================================*/
@@ -48,7 +55,7 @@ protected:
 	/**
 	 * \brief 撃破スコアをスコアサービスに通知
 	 */
-	void PublishKillScore()const;
+	void				   PublishKillScore() const;
 
 protected:
 	//===================================================================*/
