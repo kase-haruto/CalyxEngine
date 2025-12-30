@@ -42,7 +42,15 @@ public:
 	void		 AlwaysUpdate(float dt) override;
 
 	//--------- ui/gui --------------------------------------------------
+	/// <summary>
+	/// GUI表示
+	/// </summary>
 	void ShowGui() override;
+
+	/// <summary>
+	/// パラメータ調整前のヘッダーgui
+	/// </summary>
+	virtual void HeaderGui();
 
 	/// <summary>
 	/// 派生先クラスのgui

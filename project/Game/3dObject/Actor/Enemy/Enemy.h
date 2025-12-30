@@ -91,6 +91,15 @@ public:
 	void					 EnsurePatternBound() { shooting_.EnsurePatternBound(); }
 	CalyxEngine::ParamPath	 GetParamPath() const;
 
+private:
+	//===================================================================*/
+	//			private methods
+	//===================================================================*/
+	/**
+	 * \brief シリアライズ可能パラメータの初期化
+	 */
+	void InitializeSerializableParm();
+	
 protected:
 	//===================================================================*/
 	//			private methods

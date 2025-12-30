@@ -46,19 +46,19 @@ protected:
 	 */
 	void SetEnemyKind(EnemyKind kind);
 	/**
-	 * \brief 撃破スコアを設定
-	 * \param score 撃破スコア
-	 */
-	void SetKillScore(int32_t score);
-	/**
 	 * \brief 撃破スコアをスコアサービスに通知
 	 */
 	void PublishKillScore()const;
 
+protected:
+	//===================================================================*/
+	//                    protected methods
+	//===================================================================*/
+	int32_t	  killScore_ = 0;				  //< 撃破スコア
+	
 private:
 	//===================================================================*/
 	//                    private members
 	//===================================================================*/
 	EnemyKind kind_		 = EnemyKind::Normal; //< 敵種別
-	int32_t	  killScore_ = 0;				  //< 撃破スコア
 };

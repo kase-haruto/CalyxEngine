@@ -1,0 +1,12 @@
+{
+    "fields": {
+        "flinchMax": 4,
+        "flinchValue": 0,
+        "life": 35,
+        "scale": [
+            30.0,
+            30.0,
+            30.0
+        ]
+    }
+}

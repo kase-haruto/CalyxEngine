@@ -54,8 +54,6 @@ void EnemyFactionActor::PublishKillScore()const {
 ///////////////////////////////////////////////////////////////////////////////////////////////
 /** \brief 敵種別設定 */
 void EnemyFactionActor::SetEnemyKind(EnemyKind kind) { kind_ = kind; }
-/** \brief キルスコア設定 */
-void EnemyFactionActor::SetKillScore(int32_t score) { killScore_ = score; }
 /** \brief 敵種別取得 */
 EnemyKind EnemyFactionActor::GetEnemyKind() const { return kind_; }
 /** \brief キルスコア取得 */
