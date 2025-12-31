@@ -12,3 +12,8 @@ namespace SceneAPI{
 		return ctx->Instantiate<T>(std::forward<Args>(args)...);
 	}
 }
+
+namespace CalyxScene {
+	// scene識別id
+	using SceneId = uint8_t;
+}

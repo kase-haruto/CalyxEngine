@@ -251,8 +251,96 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>C:\WorkSpace\project\;C:\WorkSpace\project\externals;C:\WorkSpace\project\externals\DirectXTex;C:\WorkSpace\project\externals\assimp\include;</AdditionalIncludeDirectories>
       <LinkCompiled>true</LinkCompiled>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">_DEVELOP;_WINDOWS;_UNICODE;UNICODE;</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">_RELEASE;_WINDOWS;_UNICODE;UNICODE;</PreprocessorDefinitions>
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">ProgramDatabase</DebugInformationFormat>
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <ClCompile Include="Engine\Objects\2D\Actor\Character2D.cpp" />
+    <ClCompile Include="Engine\Objects\2D\Hud\BaseHud.cpp">
+      <AssemblerOutput>NoListing</AssemblerOutput>
+      <AssemblerListingLocation>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\</AssemblerListingLocation>
+      <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
+      <BrowseInformation>false</BrowseInformation>
+      <BrowseInformationFile>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\</BrowseInformationFile>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <CompileAs>Default</CompileAs>
+      <UseDynamicDebugging>false</UseDynamicDebugging>
+      <ConformanceMode>true</ConformanceMode>
+      <DiagnosticsFormat>Column</DiagnosticsFormat>
+      <DisableLanguageExtensions>false</DisableLanguageExtensions>
+      <ErrorReporting>Prompt</ErrorReporting>
+      <ExpandAttributedSource>false</ExpandAttributedSource>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <EnableASAN>false</EnableASAN>
+      <EnableFuzzer>false</EnableFuzzer>
+      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <EnableVectorLength>NotSet</EnableVectorLength>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <GenerateModuleDependencies>false</GenerateModuleDependencies>
+      <GenerateSourceDependencies>false</GenerateSourceDependencies>
+      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>Default</LanguageStandard_C>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ModuleDependenciesFile>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\</ModuleDependenciesFile>
+      <ModuleOutputFile>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\</ModuleOutputFile>
+      <OmitDefaultLibName>false</OmitDefaultLibName>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <Optimization>MaxSpeed</Optimization>
+      <ObjectFileName>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\</ObjectFileName>
+      <CallingConvention>Cdecl</CallingConvention>
+      <ProgramDataBaseFileName>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\vc143.pdb</ProgramDataBaseFileName>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\MyEngine.pch</PrecompiledHeaderOutputFile>
+      <PreprocessToFile>false</PreprocessToFile>
+      <PreprocessKeepComments>false</PreprocessKeepComments>
+      <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
+      <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+      <ShowIncludes>false</ShowIncludes>
+      <SourceDependenciesFile>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\</SourceDependenciesFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <SmallerTypeCheck>false</SmallerTypeCheck>
+      <SpectreMitigation>false</SpectreMitigation>
+      <StructMemberAlignment>Default</StructMemberAlignment>
+      <SupportJustMyCode>false</SupportJustMyCode>
+      <TrackerLogDirectory>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\MyEngine.tlog\</TrackerLogDirectory>
+      <TranslateIncludes>false</TranslateIncludes>
+      <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <UseFullPaths>true</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <XMLDocumentationFileName>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\</XMLDocumentationFileName>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <IntelJCCErratum>false</IntelJCCErratum>
+      <BuildStlModules>false</BuildStlModules>
+      <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
+      <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
+      <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
+      <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
+      <PreprocessorDefinitions>DEVELOP;_WINDOWS;_UNICODE;UNICODE;</PreprocessorDefinitions>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalOptions>/utf-8 </AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>C:\WorkSpace\project\;C:\WorkSpace\project\externals;C:\WorkSpace\project\externals\DirectXTex;C:\WorkSpace\project\externals\assimp\include;</AdditionalIncludeDirectories>
+      <LinkCompiled>true</LinkCompiled>
+    </ClCompile>
+    <ClCompile Include="Engine\Objects\2D\Hud\HudMotion.cpp" />
     <ClCompile Include="Engine\Objects\2D\Object2d\GameObject2d.cpp" />
     <ClCompile Include="Engine\Objects\2D\Object2d\SpriteObject2d.cpp" />
     <ClCompile Include="Engine\Objects\2D\Renderer\Renderer2d.cpp" />
@@ -316,6 +404,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\Scene\Clear\ClearScene.cpp" />
     <ClCompile Include="Game\Scene\Defeat\DefeatScene.cpp" />
     <ClCompile Include="Game\Scene\Game\GameScene.cpp" />
+    <ClCompile Include="Game\Scene\Game\Result\ResultOverlay.cpp" />
+    <ClCompile Include="Game\Scene\Transition\ResultTransitionPayload.cpp" />
+    <ClCompile Include="Game\Scene\Utility\SceneTypeUtil.cpp" />
     <ClCompile Include="Game\UI\Button\Button.cpp" />
     <ClCompile Include="Engine\Assets\Database\AssetDatabase.cpp" />
     <ClCompile Include="Engine\Application\UI\Panels\AssetPanel.cpp" />
@@ -544,6 +635,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Foundation\Serialization\FieldVisit.h" />
     <ClInclude Include="Engine\Graphics\Camera\Action\BaseCameraAction.h" />
     <ClInclude Include="Engine\Objects\2D\Actor\Character2D.h" />
+    <ClInclude Include="Engine\Objects\2D\Hud\BaseHud.h" />
+    <ClInclude Include="Engine\Objects\2D\Hud\HudMotion.h" />
+    <ClInclude Include="Engine\Objects\2D\Hud\HudMotionDesc.h" />
+    <ClInclude Include="Engine\Objects\2D\Hud\HudMotionSet.h" />
     <ClInclude Include="Engine\Objects\2D\Object2d\GameObject2d.h" />
     <ClInclude Include="Engine\Objects\2D\Object2d\SpriteObject2d.h" />
     <ClInclude Include="Engine\Objects\2D\Renderer\Renderer2d.h" />
@@ -555,6 +650,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Objects\Event\BaseEventObject.h" />
     <ClInclude Include="Engine\Objects\Event\Camera\CameraEventObject.h" />
     <ClInclude Include="Engine\PostProcess\Manager\PostEffectManager.h" />
+    <ClInclude Include="Engine\Scene\Transitioner\IScenePayload.h" />
     <ClInclude Include="Engine\System\Component\IComponent.h" />
     <ClInclude Include="Game\2dObject\Actor\Player2D.h" />
     <ClInclude Include="Game\2d\HpGauge.h" />
@@ -573,6 +669,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\3dObject\Actor\Boss\State\Machine\BossStateMachine.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\BossBullet\BossHomingBullet.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\EnemyBullet\EnemyHomingBullet.h" />
+    <ClInclude Include="Game\3dObject\Actor\Enemy\Details\EnemyKind.h" />
     <ClInclude Include="Game\3dObject\Actor\Enemy\EnemyFactionActor.h" />
     <ClInclude Include="Game\3dObject\Actor\Enemy\Movement\EnemyMovementController.h" />
     <ClInclude Include="Game\3dObject\Actor\Enemy\Shoot\EnemyShootingAgent.h" />
@@ -616,6 +713,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\Scene\Clear\ClearScene.h" />
     <ClInclude Include="Game\Scene\Defeat\DefeatScene.h" />
     <ClInclude Include="Game\Scene\Game\GameScene.h" />
+    <ClInclude Include="Game\Scene\Game\Result\ResultOverlay.h" />
+    <ClInclude Include="Game\Scene\Transition\ResultTransitionPayload.h" />
+    <ClInclude Include="Game\Scene\Utility\SceneTypeUtil.h" />
     <ClInclude Include="Game\UI\Button\Button.h" />
     <ClInclude Include="Engine\Assets\Database\AssetDatabase.h" />
     <ClInclude Include="Engine\Application\UI\Panels\AssetPanel.h" />

@@ -2,8 +2,6 @@
 /* ========================================================================
 /* include space
 /* ===================================================================== */
-// engine
-#include <Engine/Foundation/Serialization/SerializableObject.h>
 // game
 #include "Engine/Application/Effects/FxObject.h"
 #include "Game/2d/HpGauge.h"
@@ -21,8 +19,7 @@ class BossAnimController;
  * - 倒したらゲームクリア
  *---------------------------------------------------------------------------------------*/
 class Boss final
-	: public EnemyFactionActor,
-	  public CalyxEngine::SerializableObject {
+	: public EnemyFactionActor {
 public:
 	//===================================================================*/
 	//						public methods
@@ -78,8 +75,7 @@ public:
 	std::vector<Sprite*>	 GetAllSprites() const;
 	const Actor*			 GetTargetActor() const;
 	BulletContainer*		 GetBulletContainer() const { return shootingController_->GetBulletContainer(); }
-	CalyxEngine::ParamPath	 GetParamPath() const override;
-
+	
 private:
 	//===================================================================*/
 	//						private methods

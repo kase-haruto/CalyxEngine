@@ -1,4 +1,7 @@
 #include "SpriteObject2d.h"
+
+#include "Engine/Renderer/Sprite/SpriteRenderer.h"
+
 #include <Engine/Renderer/Sprite/Sprite.h>
 
 using namespace Calyx2D;
@@ -11,13 +14,13 @@ void SpriteObject2d::Initialize(const std::string& filePath) {
 	sprite_->Initialize();
 }
 
-void SpriteObject2d::Update(float dt) const {
+void SpriteObject2d::Update(float dt) {
 	AnimationUpdate(dt);
 	sprite_->Update();
 }
 
-void SpriteObject2d::Draw(ID3D12GraphicsCommandList* cmdList) const {
-	sprite_->Draw(cmdList);
+void SpriteObject2d::Draw(SpriteRenderer* renderer) const {
+	renderer->Register(sprite_.get());
 }
 
 //====================================================
@@ -62,7 +65,7 @@ bool SpriteObject2d::SetAnimation(const std::string& name, bool restart) {
 //====================================================
 // アニメ更新
 //====================================================
-void SpriteObject2d::AnimationUpdate(float dt) const {
+void SpriteObject2d::AnimationUpdate(float dt) {
 	if(!currentAnim_) return;
 	if(division_.first < 1 || division_.second < 1) return;
 
@@ -116,3 +119,5 @@ Sprite*							   SpriteObject2d::GetSprite() const { return sprite_.get(); }
 void SpriteObject2d::SetDivision(const std::pair<int32_t, int32_t>& division) { division_ = division; }
 void SpriteObject2d::SetPosition(const CalyxMath::Vector2& position) const { sprite_->SetPosition(position); }
 void SpriteObject2d::SetScale(const CalyxMath::Vector2& scale) const { sprite_->SetSize(scale); }
+void SpriteObject2d::SetRotation(float rotation) const {sprite_->SetRotation(rotation); }
+void SpriteObject2d::SetAlpha(float alpha) const { sprite_->SetAlpha(alpha); }

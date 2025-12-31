@@ -7,6 +7,9 @@
 #include <Engine/Scene/Serializer/SceneSerializer.h>
 #include <Engine/Scene/System/SceneManager.h>
 
+// game
+#include <Game/Scene/Utility/SceneTypeUtil.h>
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //  ctor / dtor
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -54,7 +57,7 @@ void DefeatScene::Update(float dt) {
 
 	// 遷移
 	if(CalyxFoundation::Input::GetInstance()->TriggerGamepadButton(CalyxFoundation::PadButton::A)) {
-		transitionRequestor_->RequestSceneChange(SceneType::TITLE);
+		transitionRequestor_->RequestSceneChange(GameSceneUtil::ToSceneId(SceneType::TITLE));
 	}
 }
 

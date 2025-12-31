@@ -1,0 +1,120 @@
+#pragma once
+/* ==========================================================================
+ *	include space
+ * ========================================================================*/
+#include "HudMotion.h"
+#include "HudMotionSet.h"
+
+#include <Engine/Objects/2D/Object2d/SpriteObject2d.h>
+
+namespace Calyx2D {
+
+	/*-----------------------------------------------------------------------------------------
+	 * HUD設定構造体
+	 * - HUDの登場・退場の設定をまとめた構造体
+	 *---------------------------------------------------------------------------------------*/
+	struct HudConfig {
+		std::string texturePath; //< テクスチャパス
+
+		HudMotionSet enterMotion; //< 登場モーション
+		HudMotionSet exitMotion;  //< 退場モーション
+	};
+
+	/*-----------------------------------------------------------------------------------------
+	 * HUD基底クラス
+	 * - HUDのフェーズ管理と描画を担当
+	 * - アニメーション処理は HudMotion に委譲する
+	 *---------------------------------------------------------------------------------------*/
+	class BaseHud {
+		//===================================================================*/
+		//                    structs / enums
+		//===================================================================*/
+		enum class HudPhase {
+			Enter, //< 登場
+			Stay,  //< 滞在
+			Exit,  //< 退場
+			End,   //< 終了
+		};
+
+	public:
+		//===================================================================*/
+		//                    public methods
+		//===================================================================*/
+		/** \brief コンストラクタ / デストラクタ */
+		BaseHud();
+		virtual ~BaseHud();
+
+		/**
+		 * \brief 初期化処理
+		 * \param config HUD設定
+		 */
+		void Initialize(const HudConfig& config);
+
+		/**
+		 * \brief 更新処理
+		 * \param dt デルタタイム
+		 */
+		virtual void Update(float dt);
+
+		/**
+		 * \brief 描画処理
+		 * \param renderer スプライトレンダラー
+		 */
+		void Draw(SpriteRenderer* renderer) const;
+
+		/**
+		 * \brief HUDの登場を開始
+		 */
+		void StartEnter();
+
+		/**
+		 * \brief HUDの退場を開始
+		 */
+		void StartExit();
+
+		//===================================================================*/
+		//                    accessor
+		//===================================================================*/
+		bool IsFinished() const { return phase_ == HudPhase::End; }
+
+	protected:
+		//===================================================================*/
+		//                    protected methods
+		//===================================================================*/
+		/**
+		 * \brief 滞在フェーズ更新
+		 */
+		virtual void StayUpdate(float dt);
+
+		/**
+		 * \brief スプライト取得
+		 */
+		SpriteObject2d& Sprite() const { return *spriteObj_; }
+
+		/**
+		 * \brief 登場完了時処理
+		 */
+		virtual void OnEnterFinished() {}
+
+		/**
+		 * \brief 退場完了時処理
+		 */
+		virtual void OnExitFinished() {}
+
+	protected:
+		//===================================================================*/
+		//                    protected members
+		//===================================================================*/
+		HudPhase  phase_ = HudPhase::Enter; //< フェーズ
+		HudConfig config_;					//< HUD設定
+
+		HudMotion motion_; //< HUDモーション
+
+	private:
+		//===================================================================*/
+		//                    private members
+		//===================================================================*/
+		std::unique_ptr<SpriteObject2d> spriteObj_ = nullptr; //< スプライト
+	};
+
+} // namespace Calyx2D

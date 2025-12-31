@@ -33,6 +33,8 @@ namespace Calyx2D {
 		 */
 		virtual void ShowGui() = 0;
 
+		void Draw(SpriteRenderer* renderer) const;
+
 	public:
 		//===================================================================*/
 		//                    accessor

@@ -89,7 +89,6 @@ namespace CalyxUtil {
 	}
 
 	void StateTimer::UpdateEasing() {
-		// easingType_ は typo だが、ヘッダ定義に合わせて使用している
 		easedT_ = CalyxEase::ApplyEase(easingType_, t_);
 	}
 

@@ -1,10 +1,15 @@
 #pragma once
+#include <cstdint>
 
-enum class SceneType{
-    TITLE,
-    PLAY,
-    TEST,
-    DEFEAT,
-    CLEAR,
-    count,
+
+/*-----------------------------------------------------------------------------------------
+* シーンタイプ列挙型
+* - ゲーム内シーンの種類を定義
+*---------------------------------------------------------------------------------------*/
+enum class SceneType : int8_t {
+	TITLE,
+	PLAY,
+	TEST,
+	DEFEAT,
+	CLEAR,
 };

@@ -105,6 +105,12 @@ void Boss::Update(float dt) {
 	// 方向合わせ（プレイヤーへ）
 	LookAtPlayer();
 
+	// --- HP0 かつ 死んだ状態じゃなければ なら Dead へ ---
+	if(life_ <= 0 && stateMachine_->GetCurrentStateType() != BossStateType::Dead) {
+		stateMachine_->ChangeState(BossStateType::Dead);
+		return;
+	}
+
 	// 死亡処理
 	if(stateMachine_->GetCurrentStateType() == BossStateType::Dead) {
 		// 死亡アニメーションが終わったら死亡処理
@@ -112,15 +118,6 @@ void Boss::Update(float dt) {
 			Die();
 		}
 	}
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////
-//		パラメータパス取得
-///////////////////////////////////////////////////////////////////////////////////////////
-CalyxEngine::ParamPath Boss::GetParamPath() const {
-	return {
-		CalyxEngine::ParamDomain::Game,
-		SceneObject::GetName()};
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -205,12 +202,6 @@ void Boss::OnCollisionEnter(Collider* other) {
 	fx->SetWorldPosition(hitPos);
 	// 再生
 	fx->PlayAll();
-
-	// --- HP0 なら Dead へ ---
-	if(life_ <= 0) {
-		stateMachine_->ChangeState(BossStateType::Dead);
-		return;
-	}
 
 	// --- ひるみ処理 ---
 	if(flinchValue_ < flinchMax_) {

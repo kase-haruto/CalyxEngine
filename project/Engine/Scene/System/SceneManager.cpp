@@ -1,6 +1,7 @@
 #include "SceneManager.h"
 
 // engine
+#include <Engine/Application/System/PlaySession.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
 #include <Engine/Graphics/Device/DxCore.h>
@@ -8,213 +9,244 @@
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 #include <Engine/Scene/Base/IScene.h>
 #include <Engine/Scene/Context/SceneContext.h>
-#include <Engine/Application/System/PlaySession.h>
 
 // scene
+#include "Engine/Scene/Test/TestScene.h"
+#include "Game/Scene/Clear/ClearScene.h"
+#include "Game/Scene/Defeat/DefeatScene.h"
+#include "Game/Scene/Utility/SceneTypeUtil.h"
+
 #include <Engine/Scene/Title/TitleScene.h>
 #include <Game/Scene/Game/GameScene.h>
-#include "Engine/Scene/Test/TestScene.h"
-#include "Game/Scene/Defeat/DefeatScene.h"
-#include "Game/Scene/Clear/ClearScene.h"
 
-SceneManager::SceneManager(DxCore* dx) : dx_(dx) {}
-SceneManager::~SceneManager() = default;
+namespace CalyxScene {
+	SceneManager::SceneManager(DxCore* dx)
+	: dx_(dx) {
+		transitionService_ = std::make_unique<SceneTransitionService>(*this);
+	}
 
-//------------------------------------------------------------
-void SceneManager::Initialize() {
-	// 登録（この段階では Initialize しない）
-	AddScene(SceneType::TITLE,std::make_unique<TitleScene>());
-	AddScene(SceneType::PLAY,std::make_unique<GameScene>());
-	AddScene(SceneType::TEST,std::make_unique<TestScene>());
-	AddScene(SceneType::DEFEAT,std::make_unique<DefeatScene>());
-	AddScene(SceneType::CLEAR,std::make_unique<ClearScene>());
+	SceneManager::~SceneManager() = default;
 
-	// 最初のシーンへ（ここで初期化が走る）
-	SetCurrent(typeToIndex_.at(SceneType::TITLE));
-}
+	CalyxScene::ISceneTransitionRequestor& SceneManager::GetTransitionRequestor() {
+		return *transitionService_;
+	}
 
-//------------------------------------------------------------
-size_t SceneManager::AddScene(SceneType type,std::unique_ptr<BaseScene> scene) {
-	SceneSlot slot;
-	slot.scene = std::move(scene);
-	slot.ctx   = std::make_unique<SceneContext>();
-	slot.ctx->Initialize(false);
+	//------------------------------------------------------------
+	void SceneManager::Initialize() {
+		AddScene(GameSceneUtil::ToSceneId(SceneType::TITLE),
+				 std::make_unique<TitleScene>());
 
-	slots_.push_back(std::move(slot));
-	const size_t index = slots_.size() - 1;
+		AddScene(GameSceneUtil::ToSceneId(SceneType::PLAY),
+				 std::make_unique<GameScene>());
 
-	typeToIndex_[type] = index;
+		AddScene(GameSceneUtil::ToSceneId(SceneType::TEST),
+				 std::make_unique<TestScene>());
 
-	// 遷移リクエスト先を注入
-	slots_[index].scene->SetTransitionRequestor(this);
+		AddScene(GameSceneUtil::ToSceneId(SceneType::DEFEAT),
+				 std::make_unique<DefeatScene>());
 
-	return index;
-}
+		AddScene(GameSceneUtil::ToSceneId(SceneType::CLEAR),
+				 std::make_unique<ClearScene>());
 
-//------------------------------------------------------------
-void SceneManager::SetCurrent(size_t index) {
-	if(index >= slots_.size()) return;
+		SetCurrent(idToIndex_.at(
+			GameSceneUtil::ToSceneId(SceneType::TITLE)
+		));
+	}
 
-	if(pPlaySession_ && pPlaySession_->ExitRequested()) { pPlaySession_->FinalizeExitCleanup(); }
+	//------------------------------------------------------------
+	size_t SceneManager::AddScene(SceneId id, std::unique_ptr<BaseScene> scene) {
+		SceneSlot slot;
+		slot.scene = std::move(scene);
+		slot.ctx = std::make_unique<SceneContext>();
+		slot.ctx->Initialize(false);
 
-	if(!slots_.empty()) { slots_[currentIdx_].scene->OnExit(); }
+		slot.scene->SetTransitionRequestor(&GetTransitionRequestor());
 
-	currentIdx_ = index;
-	auto& s     = slots_[currentIdx_];
+		slots_.push_back(std::move(slot));
+		size_t index = slots_.size() - 1;
+		idToIndex_[id] = index;
+		return index;
+	}
 
-	// 新しい Editor ctx を PlaySession に通知
-	if(pPlaySession_) pPlaySession_->BindEditorContext(s.ctx.get());
+	//------------------------------------------------------------
+	void SceneManager::SetCurrent(size_t index) {
+		if(index >= slots_.size()) return;
 
-	// 再生中なら新しい Editor 内容から Runtime を再構築
-	if(pPlaySession_ && pPlaySession_->IsRuntime()) { pPlaySession_->RebuildRuntimeFromEditor(s.ctx.get()); }
+		if(pPlaySession_ && pPlaySession_->ExitRequested()) {
+			pPlaySession_->FinalizeExitCleanup();
+		}
 
-	RebindIfContextChanged();
-}
+		if(!slots_.empty()) {
+			slots_[currentIdx_].scene->OnExit();
+		}
 
-//------------------------------------------------------------
-SceneContext* SceneManager::GetCurrentSceneContext() const {
-	if(slots_.empty()) return nullptr;
-	return slots_[currentIdx_].ctx.get();
-}
+		currentIdx_ = index;
+		auto& s		= slots_[currentIdx_];
 
-//------------------------------------------------------------
-SceneContext* SceneManager::ActiveCtx() const {
-	if(pPlaySession_) return pPlaySession_->GetContext();
-	if(slots_.empty()) return nullptr;
-	return slots_[currentIdx_].ctx.get();
-}
+		// 新しい Editor ctx を PlaySession に通知
+		if(pPlaySession_) pPlaySession_->BindEditorContext(s.ctx.get());
 
-bool SceneManager::ActiveRuntimeFlag() const {
-	if(pPlaySession_) return pPlaySession_->IsRuntime();
-	if(slots_.empty()) return false;
-	return slots_[currentIdx_].ctx->IsRuntime();
-}
+		// 再生中なら新しい Editor 内容から Runtime を再構築
+		if(pPlaySession_ && pPlaySession_->IsRuntime()) {
+			pPlaySession_->RebuildRuntimeFromEditor(s.ctx.get());
+		}
 
-bool SceneManager::GetIsEndGame() const { return slots_[currentIdx_].scene->GetIsEndGame(); }
+		RebindIfContextChanged();
+	}
 
-void SceneManager::RebindIfContextChanged() {
-	SceneContext* ctx = ActiveCtx();
-	if (!ctx) return;
+	//------------------------------------------------------------
+	SceneContext* SceneManager::GetCurrentSceneContext() const {
+		if(slots_.empty()) return nullptr;
+		return slots_[currentIdx_].ctx.get();
+	}
 
-	const uint64_t gen = pPlaySession_ ? pPlaySession_->RuntimeGeneration() : 0;
+	//------------------------------------------------------------
+	SceneContext* SceneManager::ActiveCtx() const {
+		if(pPlaySession_) return pPlaySession_->GetContext();
+		if(slots_.empty()) return nullptr;
+		return slots_[currentIdx_].ctx.get();
+	}
 
-	if (ctx != lastBoundCtx_ || gen != lastRuntimeGen_) {
-		auto& slot = slots_[currentIdx_];
+	bool SceneManager::ActiveRuntimeFlag() const {
+		if(pPlaySession_) return pPlaySession_->IsRuntime();
+		if(slots_.empty()) return false;
+		return slots_[currentIdx_].ctx->IsRuntime();
+	}
 
-		// 前回のctxにぶら下がるキャッシュを捨てる
-		slot.scene->OnExit();
+	bool SceneManager::GetIsEndGame() const { return slots_[currentIdx_].scene->GetIsEndGame(); }
+
+	void SceneManager::RebindIfContextChanged() {
+		SceneContext* ctx = ActiveCtx();
+		if(!ctx) return;
+
+		const uint64_t gen = pPlaySession_ ? pPlaySession_->RuntimeGeneration() : 0;
+
+		if(ctx != lastBoundCtx_ || gen != lastRuntimeGen_) {
+			auto& slot = slots_[currentIdx_];
+
+			// 前回のctxにぶら下がるキャッシュを捨てる
+			slot.scene->OnExit();
+
+			ctx->MakeCurrent();
+			slot.scene->InjectContext(ctx);
+
+			if(!slot.assetsLoaded) {
+				slot.scene->LoadAssets();
+				slot.assetsLoaded = true;
+			}
+
+			// payload があれば、次のシーンに渡す
+			if (pendingPayload_) {
+				slot.scene->OnPayload(std::move(pendingPayload_));
+			}
+
+			// 毎回初期化
+			slot.scene->Initialize();
+			slot.scene->OnEnter();
+
+			lastBoundCtx_	= ctx;
+			lastRuntimeGen_ = gen;
+		}
+	}
+
+	void SceneManager::Update(float dt) {
+		if(slots_.empty()) return;
+
+		if(pPlaySession_ && pPlaySession_->ExitRequested()) {
+			pPlaySession_->FinalizeExitCleanup();
+			lastBoundCtx_	= nullptr;
+			lastRuntimeGen_ = 0;
+		}
+
+		RebindIfContextChanged();
+
+		SceneContext* ctx = ActiveCtx();
+		if(!ctx) return;
 
 		ctx->MakeCurrent();
+		ctx->Update(dt, ActiveRuntimeFlag());
+
+		auto& slot = slots_[currentIdx_];
 		slot.scene->InjectContext(ctx);
+		slot.scene->Update(dt);
 
-		if (!slot.assetsLoaded) {
-			slot.scene->LoadAssets();
-			slot.assetsLoaded = true;
+		if(pendingSwitchIndex_.has_value()) {
+			SetCurrent(*pendingSwitchIndex_);
+			pendingSwitchIndex_.reset();
 		}
+	}
 
-		if (auto* clear = dynamic_cast<ClearScene*>(slot.scene.get())) {
-			clear->SetPayload(pendingPayload_);
+	//------------------------------------------------------------
+	void SceneManager::PostUpdate(ID3D12GraphicsCommandList* cmd, PipelineService* pso) {
+		if(slots_.empty()) return;
+
+		RebindIfContextChanged();
+		if(auto* ctx = ActiveCtx()) {
+			ctx->MakeCurrent();
 		}
-
-		// 毎回初期化
-		slot.scene->Initialize();
-		slot.scene->OnEnter();
-
-		lastBoundCtx_   = ctx;
-		lastRuntimeGen_ = gen;
-	}
-}
-
-void SceneManager::Update(float dt) {
-	if(slots_.empty()) return;
-
-	if(pPlaySession_ && pPlaySession_->ExitRequested()) {
-		pPlaySession_->FinalizeExitCleanup();
-		lastBoundCtx_   = nullptr;
-		lastRuntimeGen_ = 0;
+		slots_[currentIdx_].scene->PostUpdate(cmd, pso);
 	}
 
-	RebindIfContextChanged();
+	//------------------------------------------------------------
+	void SceneManager::Draw(ID3D12GraphicsCommandList* cmd, PipelineService* pso) {
+		if(slots_.empty()) return;
+		RebindIfContextChanged();
 
-	SceneContext* ctx = ActiveCtx();
-	if(!ctx) return;
+		if(auto* ctx = ActiveCtx()) ctx->MakeCurrent();
 
-	ctx->MakeCurrent();
-	ctx->Update(dt,ActiveRuntimeFlag());
-
-	auto& slot = slots_[currentIdx_];
-	slot.scene->InjectContext(ctx);
-	slot.scene->Update(dt);
-
-	if(pendingSwitchIndex_.has_value()) {
-		SetCurrent(*pendingSwitchIndex_);
-		pendingSwitchIndex_.reset();
-	}
-}
-
-//------------------------------------------------------------
-void SceneManager::PostUpdate(ID3D12GraphicsCommandList* cmd,PipelineService* pso) {
-	if(slots_.empty()) return;
-
-	RebindIfContextChanged();
-	if(auto* ctx = ActiveCtx()) { ctx->MakeCurrent(); }
-	slots_[currentIdx_].scene->PostUpdate(cmd,pso);
-}
-
-//------------------------------------------------------------
-void SceneManager::Draw(ID3D12GraphicsCommandList* cmd,PipelineService* pso) {
-	if(slots_.empty()) return;
-	RebindIfContextChanged();
-
-	if(auto* ctx = ActiveCtx()) ctx->MakeCurrent();
-
-	CameraManager::SetTypeStatic(CameraType::Default);
-	auto* offscreen = dx_->GetRenderTargetCollection().Get("Offscreen");
-	DrawForRenderTarget(offscreen,cmd,pso);
+		CameraManager::SetTypeStatic(CameraType::Default);
+		auto* offscreen = dx_->GetRenderTargetCollection().Get("Offscreen");
+		DrawForRenderTarget(offscreen, cmd, pso);
 
 #if defined(_DEBUG) || defined(DEVELOP)
-	if(auto* ctx = ActiveCtx()) ctx->MakeCurrent();
-	CameraManager::SetTypeStatic(CameraType::Debug);
-	auto* debugRT = dx_->GetRenderTargetCollection().Get("DebugView");
-	DrawForRenderTarget(debugRT,cmd,pso);
+		if(auto* ctx = ActiveCtx()) ctx->MakeCurrent();
+		CameraManager::SetTypeStatic(CameraType::Debug);
+		auto* debugRT = dx_->GetRenderTargetCollection().Get("DebugView");
+		DrawForRenderTarget(debugRT, cmd, pso);
 #endif
 
-	GraphicsGroup::GetInstance()->SetCommand(cmd,PipelineType::Line,BlendMode::NORMAL);
-	if(auto* cam = CameraManager::GetActive()) cam->SetCommand(cmd,PipelineType::Line);
-	PrimitiveDrawer::GetInstance()->Render();
-	PrimitiveDrawer::GetInstance()->ClearMesh();
-}
+		GraphicsGroup::GetInstance()->SetCommand(cmd, PipelineType::Line, BlendMode::NORMAL);
+		if(auto* cam = CameraManager::GetActive()) cam->SetCommand(cmd, PipelineType::Line);
+		PrimitiveDrawer::GetInstance()->Render();
+		PrimitiveDrawer::GetInstance()->ClearMesh();
+	}
 
-//------------------------------------------------------------
-void SceneManager::DrawForRenderTarget(IRenderTarget*             rt,
-									   ID3D12GraphicsCommandList* cmd,
-									   PipelineService*           pso) {
+	//------------------------------------------------------------
+	void SceneManager::DrawForRenderTarget(IRenderTarget*			  rt,
+										   ID3D12GraphicsCommandList* cmd,
+										   PipelineService*			  pso) {
 
-	if(!rt) return;
-	rt->SetRenderTarget(cmd);
-	rt->Clear(cmd);
+		if(!rt) return;
+		rt->SetRenderTarget(cmd);
+		rt->Clear(cmd);
 
-	auto& slot = slots_[currentIdx_];
-	slot.scene->Draw(cmd,pso,rt->GetRenderTargetType());
+		auto& slot = slots_[currentIdx_];
+		slot.scene->Draw(cmd, pso, rt->GetRenderTargetType());
 
-	// gameViewパネルにもスプライトを描画する
-	if(rt->GetRenderTargetType() != RenderTargetType::DebugView) { slot.scene->DrawSpritesOnly(cmd,pso); }
-}
+		// gameViewパネルにもスプライトを描画する
+		if(rt->GetRenderTargetType() != RenderTargetType::DebugView) {
+			slot.scene->DrawSpritesOnly(cmd, pso);
+		}
+	}
 
-//------------------------------------------------------------
-void SceneManager::DrawNotAffectedFromPE(ID3D12GraphicsCommandList* cmd,PipelineService* pso) {
-	if(slots_.empty()) return;
-	slots_[currentIdx_].scene->DrawSpritesOnly(cmd,pso);
-}
+	//------------------------------------------------------------
+	void SceneManager::DrawNotAffectedFromPE(ID3D12GraphicsCommandList* cmd, PipelineService* pso) {
+		if(slots_.empty()) return;
+		slots_[currentIdx_].scene->DrawSpritesOnly(cmd, pso);
+	}
 
-//------------------------------------------------------------
-void SceneManager::RequestSceneChange(SceneType nextScene) {
-	auto it = typeToIndex_.find(nextScene);
-	if(it == typeToIndex_.end()) return;
-	pendingSwitchIndex_ = it->second;
-}
+	void SceneManager::RequestSceneChangeInternal(SceneId next) {
+		auto it = idToIndex_.find(next);
+		if(it == idToIndex_.end()) return;
+		pendingSwitchIndex_ = it->second;
+	}
 
-void SceneManager::RequestSceneChange(SceneType nextScene, const SceneTransitionPayload& payload) {
-	pendingPayload_ = payload;
-	RequestSceneChange(nextScene); // 既存の処理
-}
+	void SceneManager::RequestSceneChangeInternal(
+		SceneId						   next,
+		std::unique_ptr<IScenePayload> payload) {
+
+		pendingPayload_ = std::move(payload);
+		RequestSceneChangeInternal(next);
+	}
+
+} // namespace CalyxScene

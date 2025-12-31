@@ -5,10 +5,10 @@
 
 // stde
 #include <cstdint>
-#include <d3d12.h>
 #include <memory>
 #include <string>
 
+class SpriteRenderer;
 class Sprite;
 
 namespace Calyx2D {
@@ -17,13 +17,13 @@ namespace Calyx2D {
 	// アニメーション構造体（1スプライトシート用）
 	//==============================================
 	struct SpriteAnimation {
-		std::string texturePath;
-		std::pair<int32_t,int32_t> division{1,1};
+		std::string					texturePath;
+		std::pair<int32_t, int32_t> division{1, 1};
 
-		int32_t startFrame = 0;
-		int32_t frameCount = 0;    // 0 → 自動で division.x * division.y
-		float frameDuration = 0.1f;
-		bool loop = true;
+		int32_t startFrame	  = 0;
+		int32_t frameCount	  = 0; // 0 → 自動で division.x * division.y
+		float	frameDuration = 0.1f;
+		bool	loop		  = true;
 	};
 
 	/*----------------------------------------------------------------------------------------
@@ -46,12 +46,12 @@ namespace Calyx2D {
 		 * \brief 更新処理
 		 * \param dt デルタタイム
 		 */
-		void Update(float dt) const;
+		void Update(float dt);
 		/**
 		 * \brief 描画処理
-		 * \param cmdList コマンドリスト
+		 * \param renderer レンダラー
 		 */
-		void Draw(ID3D12GraphicsCommandList* cmdList) const;
+		void Draw(SpriteRenderer* renderer) const;
 
 		//====================================================
 		// Animation API
@@ -81,12 +81,14 @@ namespace Calyx2D {
 		void SetDivision(const std::pair<int32_t, int32_t>& division);
 		void SetPosition(const CalyxMath::Vector2& position) const;
 		void SetScale(const CalyxMath::Vector2& scale) const;
+		void SetRotation(float rotation) const;
+		void SetAlpha(float alpha) const;
 
 	private:
 		/** \brief アニメーション更新処理
 		 * \param dt デルタタイム
 		 */
-		void AnimationUpdate(float dt) const;
+		void AnimationUpdate(float dt);
 		/**
 		 * \brief フレームをUVに反映する
 		 */
@@ -104,9 +106,9 @@ namespace Calyx2D {
 		std::string										 currentAnimName_;
 
 		// フレーム制御
-		mutable int32_t currentFrame_  = 0;
-		mutable float	frameTime_	   = 0.0f;
-		float			frameDuration_ = 0.1f;
+		int32_t currentFrame_  = 0;
+		float	frameTime_	   = 0.0f;
+		float	frameDuration_ = 0.1f;
 	};
 
 } // namespace Calyx2D

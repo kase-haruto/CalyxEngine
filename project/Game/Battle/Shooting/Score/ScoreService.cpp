@@ -1,33 +1,45 @@
 #include "ScoreService.h"
-
-/* ========================================================================
-/*	include space
-/* ===================================================================== */
-#include <Engine/System/Event/EventBus.h>
 #include "GainScore.h"
 
 ScoreService::ScoreService() = default;
-
 ScoreService::~ScoreService() = default;
 
-void ScoreService::Initialize(){
-	connGainScore_ = EventBus::Subscribe<GainScore>(		//コネクションを受け取って保持
-		[this](const GainScore& ev) { OnGainScore(ev); });
+////////////////////////////////////////////////////////////////////////////////
+//		初期化
+////////////////////////////////////////////////////////////////////////////////
+void ScoreService::Initialize() {
+	connGainScore_ =
+		EventBus::Subscribe<GainScore>(
+			[this](const GainScore& ev) {
+				OnGainScore(ev);
+			});
 }
 
-void ScoreService::Shutdown(){}
+////////////////////////////////////////////////////////////////////////////////
+//		終了処理
+////////////////////////////////////////////////////////////////////////////////
+void ScoreService::Shutdown() {
+}
 
+////////////////////////////////////////////////////////////////////////////////
+//		イベント処理
+////////////////////////////////////////////////////////////////////////////////
 void ScoreService::OnGainScore(const GainScore& ev) {
-	int add = static_cast<int>(ev.amount);
-	q_.push(Pending{ add });
+	// 合計スコアは遅延反映
+	q_.push(Pending{ ev.amount });
+
+	// 敵撃破内訳
+	auto& stat = enemyStats_[ev.enemyKind];
+	stat.count += 1;
+	stat.score += ev.amount;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//		更新
+////////////////////////////////////////////////////////////////////////////////
 void ScoreService::Update() {
 	while (!q_.empty()) {
-		//トータルスコアに加算
 		total_ += q_.front().amount;
 		q_.pop();
 	}
 }
-
-void ScoreService::AddRaw(int v) { q_.push(Pending{ v }); }

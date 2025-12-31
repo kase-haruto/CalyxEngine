@@ -8,7 +8,9 @@ namespace {
 		switch (k) {
 		case EnemyKind::Normal: return "enemyType:normal";
 		case EnemyKind::Boss:   return "enemyType:boss";
-		default:                return "enemyType:unknown";
+		default:
+			assert(false && "Unhandled EnemyKind");
+			return "enemyType:unknown";
 		}
 	}
 
@@ -16,10 +18,13 @@ namespace {
 		switch (k) {
 		case EnemyKind::Normal: return "icon:enemy_normal";
 		case EnemyKind::Boss:   return "icon:enemy_boss";
-		default:                return "icon:enemy_unknown";
+		default:
+			assert(false && "Unhandled EnemyKind");
+			return "icon:enemy_unknown";
 		}
 	}
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //	コンストラクタ / デストラクタ
@@ -34,19 +39,22 @@ EnemyFactionActor::~EnemyFactionActor() = default;
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //	スコア送信
 ///////////////////////////////////////////////////////////////////////////////////////////////
-void EnemyFactionActor::PublishKillScore()const {
+void EnemyFactionActor::PublishKillScore() const {
 	GainScore e{};
 	e.amount = killScore_;
-	e.id     = GetGuid();            // ActorがGuidを持つ前提
-	e.reason = "enemyKill";
-	e.tag = {
-		"src:enemy",
-		"bucket:kill",
-		EnemyKindToTypeTag(kind_),
-		EnemyKindToIconTag(kind_)
-	};
 
+	if (GetGuid().isValid()) {
+		e.id = GetGuid();
+	}
+	e.enemyKind = kind_;
 	EventBus::Publish(e);
+}
+
+CalyxEngine::ParamPath EnemyFactionActor::GetParamPath() const {
+	return {
+		CalyxEngine::ParamDomain::Game,
+		(kind_ == EnemyKind::Boss) ? "Boss" : "Enemy"
+	};
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////

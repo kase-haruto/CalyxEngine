@@ -4,8 +4,8 @@
 //	include
 //============================================================================
 #include <Engine/Foundation/Clock/StateTimer.h>
-#include <Engine/Foundation/Utility/Animation/AnimationLoop.h>
 #include <Engine/Foundation/Math/MathUtil.h>
+#include <Engine/Foundation/Utility/Animation/AnimationLoop.h>
 
 // c++
 #include <optional>
@@ -39,20 +39,34 @@ namespace CalyxUtil {
 		//========================================================================
 		//	public Methods
 		//========================================================================
-
+		/** \brief コンストラクタ・デストラクタ */
 		SimpleAnimation()  = default;
 		~SimpleAnimation() = default;
 
+		/**
+		 * \brief ImGui表示
+		 * \param label
+		 * \param isLoop
+		 */
 		void ImGui(const std::string& label, bool isLoop = true);
-
-		// 0.0fから1.0fの間で補間された値を取得
-		void LerpValue(T& value,float dt);
-
-		// 動き出し開始
+		/**
+		 * \brief 補間値取得
+		 * \param value 補間値の参照
+		 * \param dt デルタタイム
+		 */
+		void LerpValue(T& value, float dt);
+		/**
+		 * \brief 開始
+		 */
 		void Start();
-		// リセット
+		/**
+		 * \brief リセット
+		 * \param isStop 停止するかどうか
+		 */
 		void Reset(bool isStop = true);
-		// 停止
+		/**
+		 * \brief 停止
+		 */
 		void Stop();
 
 		//--------- accessor -----------------------------------------------------
@@ -62,14 +76,19 @@ namespace CalyxUtil {
 		void SetAnimationType(SimpleAnimationType type) { type_ = type; }
 		void SetDragValue(float value);
 		void SetDragValue(int value);
+		void SetLoopType(AnimationLoop::AnimationLoopType type);
+		void SetLoopCount(int count);
+		void SetEasing(CalyxEase::EaseType ease) { timer_.easingType_ = ease; }
+		void SetReturnEasing(CalyxEase::EaseType ease) { returnTimer_.easingType_ = ease; }
+		void SetDuration(float seconds) { timer_.SetTarget(seconds); }
 
 		bool IsStart() const { return isRunning_; }
 		bool IsFinished() const { return isFinished_; }
 
-		float	 GetProgress() const;
-		const T& GetStart() const { return move_.start; }
-		const T& GetEnd() const { return move_.end; }
-		const AnimationLoop& GetLoop()const { return loop_; }
+		float				 GetProgress() const;
+		const T&			 GetStart() const { return move_.start; }
+		const T&			 GetEnd() const { return move_.end; }
+		const AnimationLoop& GetLoop() const { return loop_; }
 
 	private:
 		//========================================================================
@@ -109,10 +128,10 @@ namespace CalyxUtil {
 	//============================================================================
 
 	template <typename T>
-inline void SimpleAnimation<T>::LerpValue(T& value, float dt) {
+	inline void SimpleAnimation<T>::LerpValue(T& value, float dt) {
 
 		// 実行中でなければ固定
-		if (!isRunning_) {
+		if(!isRunning_) {
 			value = (type_ == SimpleAnimationType::Return)
 						? move_.start
 						: move_.end;
@@ -120,7 +139,7 @@ inline void SimpleAnimation<T>::LerpValue(T& value, float dt) {
 		}
 
 		// イージング用タイマー更新
-		if (type_ == SimpleAnimationType::Return && useReturnTimer_) {
+		if(type_ == SimpleAnimationType::Return && useReturnTimer_) {
 			returnTimer_.Update(dt);
 		} else {
 			timer_.Update(dt);
@@ -137,53 +156,50 @@ inline void SimpleAnimation<T>::LerpValue(T& value, float dt) {
 		// 補間方向
 		T from = move_.start;
 		T to   = move_.end;
-		if (type_ == SimpleAnimationType::Return) {
+		if(type_ == SimpleAnimationType::Return) {
 			std::swap(from, to);
 		}
 
 		// 補間
-		if constexpr (std::is_same_v<T, float>) {
+		if constexpr(std::is_same_v<T, float>) {
 			value = CalyxMath::Lerp(from, to, easedT);
-		}
-		else if constexpr (std::is_same_v<T, CalyxMath::Vector2>) {
+		} else if constexpr(std::is_same_v<T, CalyxMath::Vector2>) {
 			value = CalyxMath::Vector2::Lerp(from, to, easedT);
-		}
-		else if constexpr (std::is_same_v<T, CalyxMath::Vector3>) {
+		} else if constexpr(std::is_same_v<T, CalyxMath::Vector3>) {
 			value = CalyxMath::Vector3::Lerp(from, to, easedT);
-		}
-		else if constexpr (std::is_same_v<T, CalyxMath::Vector4>) {
+		} else if constexpr(std::is_same_v<T, CalyxMath::Vector4>) {
 			value = CalyxMath::Vector4::Lerp(from, to, easedT);
 		}
 
 		// ================================
 		// 終了判定（無限ループは止めない）
 		// ================================
-		if (loop_.GetLoopCount() != 0) {
-			if (rawT_ >= static_cast<float>(loop_.GetLoopCount())) {
+		if(loop_.GetLoopCount() != 0) {
+			if(rawT_ >= static_cast<float>(loop_.GetLoopCount())) {
 				isFinished_ = true;
-				isRunning_  = false;
+				isRunning_	= false;
 			}
 		}
 	}
 
 	template <typename T>
 	inline void SimpleAnimation<T>::Start() {
-		isRunning_  = true;
+		isRunning_	= true;
 		isFinished_ = false;
-		rawT_       = 0.0f;
+		rawT_		= 0.0f;
 		timer_.Reset();
 		returnTimer_.Reset();
 	}
 
 	template <typename T>
 	inline void SimpleAnimation<T>::Reset(bool isStop) {
-		isRunning_  = !isStop;
+		isRunning_	= !isStop;
 		isFinished_ = false;
-		rawT_       = 0.0f;
+		rawT_		= 0.0f;
 		timer_.Reset();
 		returnTimer_.Reset();
 	}
-	
+
 	template <typename T>
 	inline void SimpleAnimation<T>::Stop() {
 
@@ -254,6 +270,21 @@ inline void SimpleAnimation<T>::LerpValue(T& value, float dt) {
 	inline void SimpleAnimation<T>::SetDragValue(int value) {
 
 		dragValueInt = value;
+	}
+	template <typename T>
+	void SimpleAnimation<T>::SetLoopType(AnimationLoop::AnimationLoopType type) {
+		// ループタイプ設定
+		if(AnimationLoop::AnimationLoopType::PingPong == type) {
+			// ピングポン設定
+			loop_.SetLoopTypePingPong();
+		} else {
+			// リピート設定
+			loop_.SetLoopTypeRepeat();
+		}
+	}
+	template <typename T>
+	void SimpleAnimation<T>::SetLoopCount(int count) {
+		loop_.SetLoopCount(count);
 	}
 
 	template <typename T>

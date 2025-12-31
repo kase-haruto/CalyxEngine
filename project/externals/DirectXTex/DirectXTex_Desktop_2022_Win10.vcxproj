@@ -470,7 +470,9 @@
     <ClCompile Include="BCDirectCompute.cpp" />
     <ClCompile Include="DirectXTexCompress.cpp" />
     <ClCompile Include="DirectXTexCompressGPU.cpp" />
-    <ClCompile Include="DirectXTexConvert.cpp" />
+    <ClCompile Include="DirectXTexConvert.cpp">
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
     <ClCompile Include="DirectXTexD3D11.cpp" />
     <ClCompile Include="DirectXTexD3D12.cpp" />
     <ClCompile Include="DirectXTexDDS.cpp" />

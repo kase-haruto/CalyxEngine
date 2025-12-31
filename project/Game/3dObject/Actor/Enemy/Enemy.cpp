@@ -143,11 +143,6 @@ const CalyxMath::Vector3 Enemy::GetCenterPos() const {
 	return CalyxMath::Vector3::Transform(offset, worldTransform_.matrix.world);
 }
 
-CalyxEngine::ParamPath Enemy::GetParamPath() const {
-	return {
-		CalyxEngine::ParamDomain::Game,
-		SceneObject::GetName()};
-}
 void Enemy::InitializeSerializableParm() {
 	SerializableObject::AddField("life", life_);
 	SerializableObject::AddField("moveSpeed", moveSpeed_);
