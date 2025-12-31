@@ -119,3 +119,5 @@ Sprite*							   SpriteObject2d::GetSprite() const { return sprite_.get(); }
 void SpriteObject2d::SetDivision(const std::pair<int32_t, int32_t>& division) { division_ = division; }
 void SpriteObject2d::SetPosition(const CalyxMath::Vector2& position) const { sprite_->SetPosition(position); }
 void SpriteObject2d::SetScale(const CalyxMath::Vector2& scale) const { sprite_->SetSize(scale); }
+void SpriteObject2d::SetRotation(float rotation) const {sprite_->SetRotation(rotation); }
+void SpriteObject2d::SetAlpha(float alpha) const { sprite_->SetAlpha(alpha); }

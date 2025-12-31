@@ -1,5 +1,8 @@
 #include "HudMotion.h"
 
+#include "Game/Battle/Shooting/Pattern/ShootPatternDetails.h"
+#include "HudMotionSet.h"
+
 namespace Calyx2D {
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -7,99 +10,74 @@ namespace Calyx2D {
 	//////////////////////////////////////////////////////////////////////////////
 	void HudMotion::Initialize(uint32_t flags) {
 		enabledChannels_ = flags;
+		// アニメーションチャンネル追加
 
-		if(flags & (uint32_t)HudMotionChannel::Position) {
-			animator_.Add<CalyxMath::Vector2>("Position").SetLoopCount(1);
-			position_ = {};
+		// 移動チャンネル
+		if(flags & static_cast<uint32_t>(HudMotionChannel::Position)) {
+			animator_.Add<CalyxMath::Vector2>(ToChannelName(HudMotionChannel::Position)).SetLoopCount(1);
 		}
 
-		if(flags & (uint32_t)HudMotionChannel::Scale) {
-			animator_.Add<CalyxMath::Vector2>("Scale").SetLoopCount(1);
-			scale_ = {1.0f, 1.0f};
+		// スケールチャンネル
+		if(flags & static_cast<uint32_t>(HudMotionChannel::Scale)) {
+			animator_.Add<CalyxMath::Vector2>(ToChannelName(HudMotionChannel::Scale)).SetLoopCount(1);
 		}
 
-		if(flags & (uint32_t)HudMotionChannel::Alpha) {
-			animator_.Add<float>("Alpha").SetLoopCount(1);
-			alpha_ = 1.0f;
+		// 透明度チャンネル
+		if(flags & static_cast<uint32_t>(HudMotionChannel::Alpha)) {
+			animator_.Add<float>(ToChannelName(HudMotionChannel::Alpha)).SetLoopCount(1);
+		}
+
+		// 回転チャンネル
+		if(flags & static_cast<uint32_t>(HudMotionChannel::Rotation)) {
+			animator_.Add<float>(ToChannelName(HudMotionChannel::Rotation)).SetLoopCount(1);
 		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
 	//		入場開始
 	//////////////////////////////////////////////////////////////////////////////
-	void HudMotion::StartEnter(
-		const CalyxMath::Vector2& from,
-		const CalyxMath::Vector2& to,
-		float					  duration) {
-
-		if(enabledChannels_ & static_cast<uint32_t>(HudMotionChannel::Position)) {
-			auto& ch = animator_.GetChannel<CalyxMath::Vector2>("Position");
-			ch.ResetValue(from);
-			ch.Animation().Reset();
-			ch.Animation().SetStart(from);
-			ch.Animation().SetEnd(to);
-			ch.Animation().SetDuration(duration);
-			ch.Animation().Start();
-		}
-
-		if(enabledChannels_ & static_cast<uint32_t>(HudMotionChannel::Alpha)) {
-			auto& ch = animator_.GetChannel<float>("Alpha");
-			ch.ResetValue(0.0f);
-			ch.Animation().Reset();
-			ch.Animation().SetStart(0.0f);
-			ch.Animation().SetEnd(1.0f);
-			ch.Animation().SetDuration(duration * 0.8f);
-			ch.Animation().Start();
-		}
+	void HudMotion::ApplyMotionSet(const HudMotionSet& set) {
+		ApplyMotion(set.position, HudMotionChannel::Position);
+		ApplyMotion(set.scale, HudMotionChannel::Scale);
+		ApplyMotion(set.alpha, HudMotionChannel::Alpha);
+		ApplyMotion(set.rotation, HudMotionChannel::Rotation);
 	}
 
-	////////////////////////////////////////////////////////////////////////////////
-	//		退場開始
-	////////////////////////////////////////////////////////////////////////////////
-	void HudMotion::StartExit(
-		const CalyxMath::Vector2& from,
-		const CalyxMath::Vector2& to,
-		float					  duration) {
+	///////////////////////////////////////////////////////////////////////////////
+	//		更新処理
+	///////////////////////////////////////////////////////////////////////////////
+	void HudMotion::Update(float dt) {
+		animator_.Update(dt);
 
-		if(enabledChannels_ & static_cast<uint32_t>(HudMotionChannel::Position)) {
-			auto& ch = animator_.GetChannel<CalyxMath::Vector2>("Position");
-			ch.ResetValue(from);
-			ch.Animation().Reset();
-			ch.Animation().SetStart(from);
-			ch.Animation().SetEnd(to);
-			ch.Animation().SetDuration(duration);
-			ch.Animation().Start();
-		}
-
-		if(enabledChannels_ & static_cast<uint32_t>(HudMotionChannel::Alpha)) {
-			auto& ch = animator_.GetChannel<float>("Alpha");
-			ch.ResetValue(1.0f);
-			ch.Animation().Reset();
-			ch.Animation().SetStart(1.0f);
-			ch.Animation().SetEnd(0.0f);
-			ch.Animation().SetDuration(duration * 0.6f);
-			ch.Animation().Start();
-		}
+		UpdateValue(position_, HudMotionChannel::Position);
+		UpdateValue(scale_, HudMotionChannel::Scale);
+		UpdateValue(rotation_, HudMotionChannel::Rotation);
+		UpdateValue(alpha_, HudMotionChannel::Alpha);
 	}
 
 	///////////////////////////////////////////////////////////////////////////////
 	//		終了判定
 	///////////////////////////////////////////////////////////////////////////////
 	bool HudMotion::IsFinished() const {
+		return CheckFinished<CalyxMath::Vector2>(HudMotionChannel::Position) && CheckFinished<CalyxMath::Vector2>(HudMotionChannel::Scale) && CheckFinished<float>(HudMotionChannel::Rotation) && CheckFinished<float>(HudMotionChannel::Alpha);
+	}
 
-		bool finished = true;
-
-		if(enabledChannels_ & static_cast<uint32_t>(HudMotionChannel::Position))
-			finished &= animator_.GetChannel<CalyxMath::Vector2>("Position")
-							.Animation()
-							.IsFinished();
-
-		if(enabledChannels_ & static_cast<uint32_t>(HudMotionChannel::Alpha))
-			finished &= animator_.GetChannel<float>("Alpha")
-							.Animation()
-							.IsFinished();
-
-		return finished;
+	///////////////////////////////////////////////////////////////////////////////
+	//		チャンネル名取得
+	///////////////////////////////////////////////////////////////////////////////
+	const char* HudMotion::ToChannelName(HudMotionChannel ch) {
+		switch(ch) {
+		case HudMotionChannel::Position:
+			return "Position";
+		case HudMotionChannel::Scale:
+			return "Scale";
+		case HudMotionChannel::Alpha:
+			return "Alpha";
+		case HudMotionChannel::Rotation:
+			return "Rotation";
+		default:
+			return "";
+		}
 	}
 
 } // namespace Calyx2D

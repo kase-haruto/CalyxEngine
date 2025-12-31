@@ -12,21 +12,21 @@ namespace Calyx2D {
 	//		初期化
 	//////////////////////////////////////////////////////////////////////////////////////////
 	void BaseHud::Initialize(const HudConfig& config) {
-		// コンフィグから設定構築
-		config_	   = config;
+		config_ = config;
+
+		// スプライト生成
 		spriteObj_ = std::make_unique<SpriteObject2d>();
 		spriteObj_->Initialize(config_.texturePath);
 
-		// 座標スタート
-		moveAnim_.SetStart(config.startPos_);
-		moveAnim_.SetEnd(config.endPos_);
+		// モーション初期化（全チャネル使用）
+		motion_.Initialize(
+			static_cast<uint32_t>(HudMotionChannel::Position) |
+			static_cast<uint32_t>(HudMotionChannel::Scale) |
+			static_cast<uint32_t>(HudMotionChannel::Alpha) |
+			static_cast<uint32_t>(HudMotionChannel::Rotation));
 
-		// アニメーション設定
-		moveAnim_.SetLoopType(CalyxUtil::AnimationLoop::AnimationLoopType::PingPong);
-		moveAnim_.Start();
-
-		// フェーズ初期化
-		phase_ = HudPhase::Enter;
+		// 登場開始
+		StartEnter();
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -35,19 +35,23 @@ namespace Calyx2D {
 	void BaseHud::Update(float dt) {
 		if(phase_ == HudPhase::End) return;
 
-		CalyxMath::Vector2 pos;
-		moveAnim_.LerpValue(pos, dt);
-		spriteObj_->SetPosition(pos);
+		// モーション更新
+		motion_.Update(dt);
+
+		// Spriteへ反映
+		spriteObj_->SetPosition(motion_.GetPosition());
+		spriteObj_->SetScale(motion_.GetScale());
+		spriteObj_->SetRotation(motion_.GetRotation());
+		spriteObj_->SetAlpha(motion_.GetAlpha());
 
 		switch(phase_) {
 
 		//==================================================================================
-		//		入場フェーズ
+		//		登場フェーズ
 		//==================================================================================
 		case HudPhase::Enter:
-			if(moveAnim_.IsFinished()) {
+			if(motion_.IsFinished()) {
 				phase_ = HudPhase::Stay;
-				// 入場完了コールバック
 				OnEnterFinished();
 			}
 			break;
@@ -63,9 +67,8 @@ namespace Calyx2D {
 		//		退場フェーズ
 		//==================================================================================
 		case HudPhase::Exit:
-			if(moveAnim_.IsFinished()) {
+			if(motion_.IsFinished()) {
 				phase_ = HudPhase::End;
-				// 退場完了コールバック
 				OnExitFinished();
 			}
 			break;
@@ -76,45 +79,36 @@ namespace Calyx2D {
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////
-	//		GUI表示
+	//		描画
 	//////////////////////////////////////////////////////////////////////////////////////////
 	void BaseHud::Draw(SpriteRenderer* renderer) const {
-		// 退場し終わったら表示しない
 		if(phase_ == HudPhase::End) return;
 		spriteObj_->Draw(renderer);
 	}
 
-	///////////////////////////////////////////////////////////////////////////////////////////
-	//		終了処理開始
-	///////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////
+	//		登場開始
+	//////////////////////////////////////////////////////////////////////////////////////////
+	void BaseHud::StartEnter() {
+		// 登場モーション開始
+		motion_.ApplyMotionSet(config_.enterMotion);
+		phase_ = HudPhase::Enter;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////////////////
+	//		退場開始
+	//////////////////////////////////////////////////////////////////////////////////////////
 	void BaseHud::StartExit() {
 		if(phase_ != HudPhase::Stay) return;
 
-		// アニメーションリセット
-		moveAnim_.Reset();
-		moveAnim_.SetStart(config_.stayPos_);
-		moveAnim_.SetEnd(config_.endPos_);
-		moveAnim_.SetLoopCount(1);
-		moveAnim_.Start();
-
-		// フェーズ変更
+		// 退場モーション開始
+		motion_.ApplyMotionSet(config_.exitMotion);
 		phase_ = HudPhase::Exit;
 	}
-	
-	void BaseHud::StartEnter() {
-		// アニメーションリセット
-		moveAnim_.Reset();
-		moveAnim_.SetStart(config_.startPos_);
-		moveAnim_.SetEnd(config_.stayPos_);
-		moveAnim_.SetLoopCount(1);
-		moveAnim_.Start();
 
-		// フェーズ変更
-		phase_ = HudPhase::Enter;
-	}
-	///////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////
 	//		滞在フェーズ更新
-	///////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////
 	void BaseHud::StayUpdate(float dt) {
 		(void)dt;
 	}

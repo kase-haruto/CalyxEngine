@@ -81,6 +81,8 @@ namespace Calyx2D {
 		void SetDivision(const std::pair<int32_t, int32_t>& division);
 		void SetPosition(const CalyxMath::Vector2& position) const;
 		void SetScale(const CalyxMath::Vector2& scale) const;
+		void SetRotation(float rotation) const;
+		void SetAlpha(float alpha) const;
 
 	private:
 		/** \brief アニメーション更新処理

@@ -637,6 +637,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Objects\2D\Actor\Character2D.h" />
     <ClInclude Include="Engine\Objects\2D\Hud\BaseHud.h" />
     <ClInclude Include="Engine\Objects\2D\Hud\HudMotion.h" />
+    <ClInclude Include="Engine\Objects\2D\Hud\HudMotionDesc.h" />
+    <ClInclude Include="Engine\Objects\2D\Hud\HudMotionSet.h" />
     <ClInclude Include="Engine\Objects\2D\Object2d\GameObject2d.h" />
     <ClInclude Include="Engine\Objects\2D\Object2d\SpriteObject2d.h" />
     <ClInclude Include="Engine\Objects\2D\Renderer\Renderer2d.h" />
