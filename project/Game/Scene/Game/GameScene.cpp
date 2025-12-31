@@ -132,7 +132,10 @@ void GameScene::Initialize() {
 							   /*digitSize*/ {32.0f, 32.0f});
 	numbersSprite_->SetAlign(NumbersSprite::DigitsAlign::Right);
 
-	// 既存処理そのまま
+	// リザルトオーバーレイ初期化
+	resultOverlay_ = std::make_unique<ResultOverlay>();
+	
+	
 	updateFunc_ = &GameScene::PlayingUpdate;
 }
 
@@ -183,8 +186,7 @@ void GameScene::PlayingUpdate(float dt) {
 	}
 
 	if(boss && !boss->GetIsAlive()) {
-		BuildResultPayload();
-		updateFunc_ = &GameScene::ResultUpdate;
+		EnterResultPhase();
 		return;
 	}
 
@@ -198,7 +200,9 @@ void GameScene::PlayingUpdate(float dt) {
 //  リザルト用更新
 /////////////////////////////////////////////////////////////////////////////////////////
 void GameScene::ResultUpdate(float dt) {
-	(void)dt;
+	if (resultOverlay_) {
+		resultOverlay_->Update(dt);
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -241,6 +245,10 @@ void GameScene::Draw(ID3D12GraphicsCommandList* cmdList,
 			if(sp) spriteRenderer_->Register(sp);
 		}
 	}
+
+	if (updateFunc_ == &GameScene::ResultUpdate) {
+		resultOverlay_->Draw(spriteRenderer_.get());
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -263,25 +271,34 @@ void GameScene::CleanUp() {
 	CollisionManager::GetInstance()->ClearColliders();
 }
 
-void GameScene::BuildResultPayload() const {
+std::unique_ptr<ResultTransitionPayload> GameScene::BuildResultPayload() const {
 	auto payload = std::make_unique<ResultTransitionPayload>();
 
-	if(score_) {
+	if (score_) {
 		payload->score = score_->GetTotal();
-
-		for(const auto& [kind, stat] : score_->GetEnemyStats()) {
+		for (const auto& [kind, stat] : score_->GetEnemyStats()) {
 			ResultTransitionPayload::ResultEntry entry{};
-			entry.kind	= kind;
+			entry.kind = kind;
 			entry.count = stat.count;
 			entry.score = stat.score;
 			payload->results.push_back(entry);
 		}
 	}
 
-	transitionRequestor_->RequestSceneChange(
-		GameSceneUtil::ToSceneId(SceneType::CLEAR),
-		std::move(payload));
+	return payload;
 }
+
+void GameScene::EnterResultPhase() {
+	resultPayload_ = BuildResultPayload();
+
+	// リザルトオーバーレイ初期化
+	resultOverlay_ = std::make_unique<ResultOverlay>();
+	resultOverlay_->Initialize(*resultPayload_);
+
+	// 更新パスをへんこう
+	updateFunc_ = &GameScene::ResultUpdate;
+}
+
 void GameScene::ScoreUpdate() const {
 	// ---- スコア更新とUI反映 ----
 	if(score_) {

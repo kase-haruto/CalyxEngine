@@ -323,6 +323,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\Scene\Clear\ClearScene.cpp" />
     <ClCompile Include="Game\Scene\Defeat\DefeatScene.cpp" />
     <ClCompile Include="Game\Scene\Game\GameScene.cpp" />
+    <ClCompile Include="Game\Scene\Game\Result\ResultOverlay.cpp" />
     <ClCompile Include="Game\Scene\Transition\ResultTransitionPayload.cpp" />
     <ClCompile Include="Game\Scene\Utility\SceneTypeUtil.cpp" />
     <ClCompile Include="Game\UI\Button\Button.cpp" />
@@ -627,6 +628,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\Scene\Clear\ClearScene.h" />
     <ClInclude Include="Game\Scene\Defeat\DefeatScene.h" />
     <ClInclude Include="Game\Scene\Game\GameScene.h" />
+    <ClInclude Include="Game\Scene\Game\Result\ResultOverlay.h" />
     <ClInclude Include="Game\Scene\Transition\ResultTransitionPayload.h" />
     <ClInclude Include="Game\Scene\Utility\SceneTypeUtil.h" />
     <ClInclude Include="Game\UI\Button\Button.h" />
