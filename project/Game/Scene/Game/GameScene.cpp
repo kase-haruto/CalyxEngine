@@ -134,8 +134,7 @@ void GameScene::Initialize() {
 
 	// リザルトオーバーレイ初期化
 	resultOverlay_ = std::make_unique<ResultOverlay>();
-	
-	
+
 	updateFunc_ = &GameScene::PlayingUpdate;
 }
 
@@ -200,7 +199,7 @@ void GameScene::PlayingUpdate(float dt) {
 //  リザルト用更新
 /////////////////////////////////////////////////////////////////////////////////////////
 void GameScene::ResultUpdate(float dt) {
-	if (resultOverlay_) {
+	if(resultOverlay_) {
 		resultOverlay_->Update(dt);
 	}
 }
@@ -211,42 +210,43 @@ void GameScene::ResultUpdate(float dt) {
 void GameScene::Draw(ID3D12GraphicsCommandList* cmdList,
 					 PipelineService*			psoService,
 					 RenderTargetType			type) {
-
-	auto player = wPlayer_.lock();
-
 	BaseScene::Draw(cmdList, psoService, type);
-	// 既存のスプライト登録
-	if(numbersSprite_) {
-		for(auto* sp : numbersSprite_->GetSpritesRaw()) {
-			spriteRenderer_->Register(sp);
-		}
-	}
 
-	// プレイヤーが持つ追加スプライトを登録
-	if(player) {
-		for(auto& sp : player->GetAllSprites()) {
-			if(sp) spriteRenderer_->Register(sp);
-		}
-	}
-	if(shootUI_) {
-		spriteRenderer_->Register(shootUI_.get());
-	}
-	if(aimUI_) {
-		spriteRenderer_->Register(aimUI_.get());
-	}
-	if(avoidanceUI_) {
-		spriteRenderer_->Register(avoidanceUI_.get());
-	}
+	// ingameの更新の時
+	if(updateFunc_ == &GameScene::PlayingUpdate) {
+		auto player = wPlayer_.lock();
 
-	wBoss_	  = sceneContext_->FindFirst<Boss>();
-	auto boss = wBoss_.lock();
-	if(boss) {
-		for(auto& sp : boss->GetAllSprites()) {
-			if(sp) spriteRenderer_->Register(sp);
+		// 既存のスプライト登録
+		if(numbersSprite_) {
+			for(auto* sp : numbersSprite_->GetSpritesRaw()) {
+				spriteRenderer_->Register(sp);
+			}
 		}
-	}
 
-	if (updateFunc_ == &GameScene::ResultUpdate) {
+		// プレイヤーが持つ追加スプライトを登録
+		if(player) {
+			for(auto& sp : player->GetAllSprites()) {
+				if(sp) spriteRenderer_->Register(sp);
+			}
+		}
+		if(shootUI_) {
+			spriteRenderer_->Register(shootUI_.get());
+		}
+		if(aimUI_) {
+			spriteRenderer_->Register(aimUI_.get());
+		}
+		if(avoidanceUI_) {
+			spriteRenderer_->Register(avoidanceUI_.get());
+		}
+
+		wBoss_	  = sceneContext_->FindFirst<Boss>();
+		auto boss = wBoss_.lock();
+		if(boss) {
+			for(auto& sp : boss->GetAllSprites()) {
+				if(sp) spriteRenderer_->Register(sp);
+			}
+		}
+	} else {
 		resultOverlay_->Draw(spriteRenderer_.get());
 	}
 }
@@ -274,11 +274,11 @@ void GameScene::CleanUp() {
 std::unique_ptr<ResultTransitionPayload> GameScene::BuildResultPayload() const {
 	auto payload = std::make_unique<ResultTransitionPayload>();
 
-	if (score_) {
+	if(score_) {
 		payload->score = score_->GetTotal();
-		for (const auto& [kind, stat] : score_->GetEnemyStats()) {
+		for(const auto& [kind, stat] : score_->GetEnemyStats()) {
 			ResultTransitionPayload::ResultEntry entry{};
-			entry.kind = kind;
+			entry.kind	= kind;
 			entry.count = stat.count;
 			entry.score = stat.score;
 			payload->results.push_back(entry);

@@ -42,7 +42,9 @@ namespace CalyxUtil {
 		void ShowGui(const std::string& label, bool isLoop = true) {
 			animation_.ImGui(label, isLoop);
 		}
-
+		void SetLoopCount(int32_t loopCount) {
+			animation_.SetLoopCount(loopCount);
+		}
 	private:
 		SimpleAnimation<T> animation_;
 		T current_{};

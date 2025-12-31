@@ -5,7 +5,6 @@
 
 // stde
 #include <cstdint>
-#include <d3d12.h>
 #include <memory>
 #include <string>
 
@@ -105,9 +104,9 @@ namespace Calyx2D {
 		std::string										 currentAnimName_;
 
 		// フレーム制御
-		mutable int32_t currentFrame_  = 0;
-		mutable float	frameTime_	   = 0.0f;
-		float			frameDuration_ = 0.1f;
+		int32_t currentFrame_  = 0;
+		float	frameTime_	   = 0.0f;
+		float	frameDuration_ = 0.1f;
 	};
 
 } // namespace Calyx2D

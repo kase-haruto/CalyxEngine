@@ -71,6 +71,16 @@ namespace CalyxUtil {
 			return GetMap<T>().contains(name);
 		}
 
+		template <typename T>
+		SimpleAnimChannel<T>& GetChannel(const std::string& name) {
+			return *GetMap<T>().at(name);
+		}
+
+		template <typename T>
+		const SimpleAnimChannel<T>& GetChannel(const std::string& name) const {
+			return *GetMap<T>().at(name);
+		}
+
 	private:
 		//===================================================================*/
 		//                    private methods
