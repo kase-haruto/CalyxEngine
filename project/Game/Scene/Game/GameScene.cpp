@@ -8,8 +8,8 @@
 #include <Engine/Scene/System/SceneManager.h>
 
 // engine
-#include <Engine/Foundation/Input/Input.h>
 #include <Engine/Collision/CollisionManager.h>
+#include <Engine/Foundation/Input/Input.h>
 #include <Engine/Graphics/Camera/Action/CameraTurnAroundAction.h>
 #include <Engine/Objects/2D/NumbersSprite/NumbersSprite.h>
 #include <Engine/Objects/3D/Actor/SceneObjectManager.h>
@@ -46,7 +46,7 @@ void GameScene::Initialize() {
 	sceneContext_->Initialize();
 
 	// シーンデータ読み込み
-	SceneSerializer::Load(*sceneContext_,"Resources/Assets/Scenes/GameScene.scene");
+	SceneSerializer::Load(*sceneContext_, "Resources/Assets/Scenes/GameScene.scene");
 
 	// ベース初期化
 	BaseScene::Initialize();
@@ -57,28 +57,32 @@ void GameScene::Initialize() {
 	// 弾の登録
 	BulletRegistrar::RegisterAll();
 
-	if(auto* ctx = SceneContext::Current()) { if(auto ground = ctx->FindObjectByName<BaseGameObject>("field")) { ground->SetEnableRaycast(false); } }
+	if(auto* ctx = SceneContext::Current()) {
+		if(auto ground = ctx->FindObjectByName<BaseGameObject>("field")) {
+			ground->SetEnableRaycast(false);
+		}
+	}
 
 	// UI
 	{
-		shootUI_ = std::make_unique<Sprite>("Textures/UI/shootUI.png");
-		aimUI_ = std::make_unique<Sprite>("Textures/UI/aimUI.png");
-		avoidanceUI_ = std::make_unique<Sprite>("Textures/UI/avoidanceUI.png");
-		CalyxMath::Vector2 uiSize = {128.0f,64.0f};
+		shootUI_				  = std::make_unique<Sprite>("Textures/UI/shootUI.png");
+		aimUI_					  = std::make_unique<Sprite>("Textures/UI/aimUI.png");
+		avoidanceUI_			  = std::make_unique<Sprite>("Textures/UI/avoidanceUI.png");
+		CalyxMath::Vector2 uiSize = {128.0f, 64.0f};
 		shootUI_->SetSize(uiSize);
 		aimUI_->SetSize(uiSize);
 		avoidanceUI_->SetSize(uiSize);
 
 		// 左端中央
-		shootUI_->SetAnchorPoint(CalyxMath::Vector2(0.0f,0.5f));
-		aimUI_->SetAnchorPoint(CalyxMath::Vector2(0.0f,0.5f));
-		avoidanceUI_->SetAnchorPoint(CalyxMath::Vector2(0.0f,0.5f));
-		float space = 32.0f;
-		CalyxMath::Vector2 base = {100.0f, (kGameHeight / 2.0f) - space};
-		Sprite* uis[] = { shootUI_.get(), aimUI_.get(), avoidanceUI_.get() };
+		shootUI_->SetAnchorPoint(CalyxMath::Vector2(0.0f, 0.5f));
+		aimUI_->SetAnchorPoint(CalyxMath::Vector2(0.0f, 0.5f));
+		avoidanceUI_->SetAnchorPoint(CalyxMath::Vector2(0.0f, 0.5f));
+		float			   space = 32.0f;
+		CalyxMath::Vector2 base	 = {100.0f, (kGameHeight / 2.0f) - space};
+		Sprite*			   uis[] = {shootUI_.get(), aimUI_.get(), avoidanceUI_.get()};
 
-		for (size_t i = 0; i < std::size(uis); ++i) {
-			if (uis[i]) {
+		for(size_t i = 0; i < std::size(uis); ++i) {
+			if(uis[i]) {
 				CalyxMath::Vector2 pos = base;
 				pos.y += static_cast<float>(i) * space; // 200ずつ下にずらす
 				uis[i]->SetPosition(pos);
@@ -88,7 +92,7 @@ void GameScene::Initialize() {
 
 	// プレイヤー基本セットアップ
 	{
-		auto            player = sceneContext_->FindFirst<Player>();
+		auto			player = sceneContext_->FindFirst<Player>();
 		PlayerInstaller installer;
 		installer.InstallPlayer(player);
 		wPlayer_ = player; // Draw でスプライト拾うために持っておく
@@ -97,47 +101,56 @@ void GameScene::Initialize() {
 	// 敵セットアップ
 
 	{
-		//敵弾コンテナ
+		// 敵弾コンテナ
 		enemyBulletContainer_ = std::make_unique<EnemyBulletContainer>("EnemyBulletContainer");
 
 		enemyBinding_ = std::make_unique<EnemyRuntimeBindingService>();
-		enemyBinding_->OnSceneLoaded(*sceneContext_,enemyBulletContainer_.get());
+		enemyBinding_->OnSceneLoaded(*sceneContext_, enemyBulletContainer_.get());
 
 		occurrenceBoss_ = std::make_unique<RailProgressBossSpawnService>();
 		occurrenceBoss_->OnSceneLoaded(*sceneContext_);
 
 		EnemyEngagementParams params{};
-		params.ndcPad        = 0.05f;  // 画面端の余白
-		params.minExposeSec  = 0.20f;  // 0.2秒以上映ってから有効
+		params.ndcPad		 = 0.05f;  // 画面端の余白
+		params.minExposeSec	 = 0.20f;  // 0.2秒以上映ってから有効
 		params.maxEngageDist = 120.0f; // 射程
-		params.useLOS        = true;   // 遮蔽物チェックON
+		params.useLOS		 = true;   // 遮蔽物チェックON
 
-		enemyEngagement_ = Installers::InstallEnemyEngagement(*sceneContext_,params);
+		enemyEngagement_ = Installers::InstallEnemyEngagement(*sceneContext_, params);
 
-		if(enemyEngagement_) { enemyEngagement_->SetDirectory(enemyBinding_->GetDirectory()); }
+		if(enemyEngagement_) {
+			enemyEngagement_->SetDirectory(enemyBinding_->GetDirectory());
+		}
 	}
 	score_ = std::make_unique<ScoreService>();
 	score_->Initialize();
 
 	numbersSprite_ = std::make_unique<NumbersSprite>(
-		"Textures/Numbers",".png");
-	CalyxMath::Vector2 scoreSpritePos = {100.0f,630.0f};
-	numbersSprite_->Initialize(/*pos*/ {kGameWidth - scoreSpritePos.x,scoreSpritePos.y},
-									   /*digitSize*/ {32.0f,32.0f});
+		"Textures/Numbers", ".png");
+	CalyxMath::Vector2 scoreSpritePos = {100.0f, 630.0f};
+	numbersSprite_->Initialize(/*pos*/ {kGameWidth - scoreSpritePos.x, scoreSpritePos.y},
+							   /*digitSize*/ {32.0f, 32.0f});
 	numbersSprite_->SetAlign(NumbersSprite::DigitsAlign::Right);
 
-	// カメラアクション
-	cameraTurnAround_ = std::make_unique<CameraTurnAroundAction>();
-	wMainCamera_      = sceneContext_->FindFirst<Camera3d>();
-	auto cam = wMainCamera_.lock();
-	cam->SetFollowTarget(&wPlayer_.lock()->GetWorldTransform());
+	// 既存処理そのまま
+	updateFunc_ = &GameScene::PlayingUpdate;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //  更新
 /////////////////////////////////////////////////////////////////////////////////////////
-void GameScene::Update([[maybe_unused]] float dt) {
-	if(enemyBinding_) enemyBinding_->Update(*sceneContext_,dt);
+void GameScene::Update(float dt) {
+	// 更新関数の呼び出し
+	if(updateFunc_) {
+		(this->*updateFunc_)(dt);
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//  ゲームプレイ中の更新
+/////////////////////////////////////////////////////////////////////////////////////////
+void GameScene::PlayingUpdate(float dt) {
+	if(enemyBinding_) enemyBinding_->Update(*sceneContext_, dt);
 	if(enemyEngagement_) enemyEngagement_->Update(dt);
 
 	auto mainCam = wMainCamera_.lock();
@@ -152,24 +165,16 @@ void GameScene::Update([[maybe_unused]] float dt) {
 	shootUI_->Update();
 	aimUI_->Update();
 	avoidanceUI_->Update();
+	// スコア更新とスプライト反映
+	ScoreUpdate();
 
-	
 	// 衝突判定
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
 
-	// ---- スコア更新とUI反映 ----
-	if(score_) {
-		score_->Update();
-		if(numbersSprite_) {
-			numbersSprite_->SetValue(score_->GetTotal());
-			numbersSprite_->Update();
-		}
-	}
-
 	// ===== クリア／ゲームオーバー条件 =====
 	auto player = wPlayer_.lock();
-	wBoss_      = sceneContext_->FindFirst<Boss>();
-	auto boss   = wBoss_.lock();
+	wBoss_		= sceneContext_->FindFirst<Boss>();
+	auto boss	= wBoss_.lock();
 
 	// プレイヤーの死亡
 	if(player && !player->GetIsAlive()) {
@@ -177,19 +182,12 @@ void GameScene::Update([[maybe_unused]] float dt) {
 		return;
 	}
 
-	// ボスは「存在しているときだけ」死亡判定
-	// 未スポーン or 破棄済みのフレームでは何もしない
-	if (boss && !boss->GetIsAlive()) {
-
-		auto payload = std::make_unique<ResultTransitionPayload>();
-		payload->score = score_ ? score_->GetTotal() : 0;
-
-		transitionRequestor_->RequestSceneChange(
-			GameSceneUtil::ToSceneId(SceneType::CLEAR),
-			std::move(payload)
-		);
+	if(boss && !boss->GetIsAlive()) {
+		BuildResultPayload();
+		updateFunc_ = &GameScene::ResultUpdate;
 		return;
 	}
+
 	// 一応タイトル戻るよう
 	if(CalyxFoundation::Input::GetInstance()->TriggerGamepadButton(CalyxFoundation::PadButton::START)) {
 		transitionRequestor_->RequestSceneChange(GameSceneUtil::ToSceneId(SceneType::TITLE));
@@ -197,26 +195,47 @@ void GameScene::Update([[maybe_unused]] float dt) {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
+//  リザルト用更新
+/////////////////////////////////////////////////////////////////////////////////////////
+void GameScene::ResultUpdate(float dt) {
+	(void)dt;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
 //  描画
 /////////////////////////////////////////////////////////////////////////////////////////
 void GameScene::Draw(ID3D12GraphicsCommandList* cmdList,
-					 PipelineService*           psoService,
-					 RenderTargetType           type) {
+					 PipelineService*			psoService,
+					 RenderTargetType			type) {
 
 	auto player = wPlayer_.lock();
-	
-	BaseScene::Draw(cmdList,psoService,type);
+
+	BaseScene::Draw(cmdList, psoService, type);
 	// 既存のスプライト登録
-	if(numbersSprite_) { for(auto* sp : numbersSprite_->GetSpritesRaw()) { spriteRenderer_->Register(sp); } }
+	if(numbersSprite_) {
+		for(auto* sp : numbersSprite_->GetSpritesRaw()) {
+			spriteRenderer_->Register(sp);
+		}
+	}
 
 	// プレイヤーが持つ追加スプライトを登録
-	if(player) { for(auto& sp : player->GetAllSprites()) { if(sp) spriteRenderer_->Register(sp); } }
-	if(shootUI_) { spriteRenderer_->Register(shootUI_.get()); }
-	if(aimUI_) { spriteRenderer_->Register(aimUI_.get()); }
-	if(avoidanceUI_) { spriteRenderer_->Register(avoidanceUI_.get()); }
+	if(player) {
+		for(auto& sp : player->GetAllSprites()) {
+			if(sp) spriteRenderer_->Register(sp);
+		}
+	}
+	if(shootUI_) {
+		spriteRenderer_->Register(shootUI_.get());
+	}
+	if(aimUI_) {
+		spriteRenderer_->Register(aimUI_.get());
+	}
+	if(avoidanceUI_) {
+		spriteRenderer_->Register(avoidanceUI_.get());
+	}
 
-	wBoss_      = sceneContext_->FindFirst<Boss>();
-	auto boss   = wBoss_.lock();
+	wBoss_	  = sceneContext_->FindFirst<Boss>();
+	auto boss = wBoss_.lock();
 	if(boss) {
 		for(auto& sp : boss->GetAllSprites()) {
 			if(sp) spriteRenderer_->Register(sp);
@@ -242,4 +261,34 @@ void GameScene::CleanUp() {
 	// シーン内オブジェクト/コライダ掃除
 	sceneContext_->GetObjectLibrary()->Clear();
 	CollisionManager::GetInstance()->ClearColliders();
+}
+
+void GameScene::BuildResultPayload() const {
+	auto payload = std::make_unique<ResultTransitionPayload>();
+
+	if(score_) {
+		payload->score = score_->GetTotal();
+
+		for(const auto& [kind, stat] : score_->GetEnemyStats()) {
+			ResultTransitionPayload::ResultEntry entry{};
+			entry.kind	= kind;
+			entry.count = stat.count;
+			entry.score = stat.score;
+			payload->results.push_back(entry);
+		}
+	}
+
+	transitionRequestor_->RequestSceneChange(
+		GameSceneUtil::ToSceneId(SceneType::CLEAR),
+		std::move(payload));
+}
+void GameScene::ScoreUpdate() const {
+	// ---- スコア更新とUI反映 ----
+	if(score_) {
+		score_->Update();
+		if(numbersSprite_) {
+			numbersSprite_->SetValue(score_->GetTotal());
+			numbersSprite_->Update();
+		}
+	}
 }

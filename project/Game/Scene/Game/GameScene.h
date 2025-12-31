@@ -44,6 +44,27 @@ public:
 	int16_t GetTotalScore() const { return totalScore_; }
 
 private:
+	//===============================================================*/
+	//                    private methods
+	//===============================================================*/
+	/**
+	 * \brief プレイ中更新
+	 */
+	void PlayingUpdate(float dt);
+	/**
+	 * \brief 結果画面更新
+	 */
+	void ResultUpdate(float dt);
+	/**
+	 * \brief 結果ペイロードの構築
+	 */
+	void BuildResultPayload()const;
+	/**
+	 * \brief スコア更新
+	 */
+	void ScoreUpdate()const;
+
+private:
 	/* objects ======================================================*/
 	std::shared_ptr<BaseGameObject> modelField_;
 	std::weak_ptr<Camera3d>         wMainCamera_;
@@ -66,5 +87,8 @@ private:
 	std::shared_ptr<EnemyCollection>              enemyCollection_;
 	std::unique_ptr<ScoreService>                 score_;
 	std::unique_ptr<NumbersSprite>                numbersSprite_;
-	std::unique_ptr<CameraTurnAroundAction>       cameraTurnAround_;
+
+	// 更新関数ポインタ
+	using UpdateFunc = void (GameScene::*)(float);
+	UpdateFunc updateFunc_ = nullptr;
 };

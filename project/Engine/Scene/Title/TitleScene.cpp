@@ -67,8 +67,6 @@ void TitleScene::Update([[maybe_unused]] float dt) {
 	player2d_->Update(dt);
 
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
-
-
 }
 
 void TitleScene::CleanUp() {
@@ -80,7 +78,8 @@ void TitleScene::CleanUp() {
 void TitleScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService, RenderTargetType type) {
 	BaseScene::Draw(cmdList, psoService, type);
 
-	spriteRenderer_->Register(player2d_->GetSprite());
+	player2d_->Draw(spriteRenderer_.get());
+
 	// スプライトの描画
 	for(auto& sprite : menu_->GetAllButtonImage()) {
 		spriteRenderer_->Register(sprite);

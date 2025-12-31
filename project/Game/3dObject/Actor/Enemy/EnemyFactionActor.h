@@ -2,16 +2,16 @@
 
 #include <Engine/Objects/3D/Actor/Actor.h>
 // engine
-#include <Engine/Foundation/Serialization/SerializableObject.h>
 #include "Details/EnemyKind.h"
+#include <Engine/Foundation/Serialization/SerializableObject.h>
 
 /*-----------------------------------------------------------------------------------------
  * EnemyFactionActor class
  * - 敵勢力のアクター基底クラス
  *---------------------------------------------------------------------------------------*/
 class EnemyFactionActor
-	: public Actor ,
-	  public CalyxEngine::SerializableObject{
+	: public Actor,
+	  public CalyxEngine::SerializableObject {
 public:
 	//===================================================================*/
 	//                    public methods
@@ -28,7 +28,7 @@ public:
 	 * \brief 撃破スコアを取得
 	 * \return 撃破スコア
 	 */
-	int32_t GetKillScore() const ;
+	int32_t GetKillScore() const;
 	/**
 	 * \brief パラメータパスの取得
 	 * \return パラメータパス
@@ -47,17 +47,17 @@ protected:
 	/**
 	 * \brief 撃破スコアをスコアサービスに通知
 	 */
-	void				   PublishKillScore() const;
+	void PublishKillScore() const;
 
 protected:
 	//===================================================================*/
 	//                    protected methods
 	//===================================================================*/
-	int32_t	  killScore_ = 0;				  //< 撃破スコア
-	
+	int32_t killScore_ = 0; //< 撃破スコア
+
 private:
 	//===================================================================*/
 	//                    private members
 	//===================================================================*/
-	EnemyKind kind_		 = EnemyKind::Normal; //< 敵種別
+	EnemyKind kind_ = EnemyKind::Normal; //< 敵種別
 };

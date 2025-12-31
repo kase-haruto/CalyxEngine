@@ -1,4 +1,7 @@
 #include "SpriteObject2d.h"
+
+#include "Engine/Renderer/Sprite/SpriteRenderer.h"
+
 #include <Engine/Renderer/Sprite/Sprite.h>
 
 using namespace Calyx2D;
@@ -11,13 +14,13 @@ void SpriteObject2d::Initialize(const std::string& filePath) {
 	sprite_->Initialize();
 }
 
-void SpriteObject2d::Update(float dt) const {
+void SpriteObject2d::Update(float dt) {
 	AnimationUpdate(dt);
 	sprite_->Update();
 }
 
-void SpriteObject2d::Draw(ID3D12GraphicsCommandList* cmdList) const {
-	sprite_->Draw(cmdList);
+void SpriteObject2d::Draw(SpriteRenderer* renderer) const {
+	renderer->Register(sprite_.get());
 }
 
 //====================================================
@@ -62,7 +65,7 @@ bool SpriteObject2d::SetAnimation(const std::string& name, bool restart) {
 //====================================================
 // アニメ更新
 //====================================================
-void SpriteObject2d::AnimationUpdate(float dt) const {
+void SpriteObject2d::AnimationUpdate(float dt) {
 	if(!currentAnim_) return;
 	if(division_.first < 1 || division_.second < 1) return;
 
