@@ -268,6 +268,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Objects\2D\Sprite\Component\SpriteComponent.cpp" />
     <ClCompile Include="Engine\Objects\2D\Sprite\SpriteAsset.cpp" />
     <ClCompile Include="Game\2dObject\Actor\Player2D.cpp" />
+    <ClCompile Include="Game\2d\Hud\ClearLogoHud.cpp" />
+    <ClCompile Include="Game\2d\Hud\EnemyRowHud.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Enemy\EnemyFactionActor.cpp" />
     <ClCompile Include="Game\Battle\Combat\lineOfSight.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Ease\CxEase.cpp" />
@@ -576,6 +578,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\System\Component\IComponent.h" />
     <ClInclude Include="Game\2dObject\Actor\Player2D.h" />
     <ClInclude Include="Game\2d\HpGauge.h" />
+    <ClInclude Include="Game\2d\Hud\ClearLogoHud.h" />
+    <ClInclude Include="Game\2d\Hud\EnemyRowHud.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\AI\BossAI.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\Anim\BossAnimController.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\Attack\BossHomingSpreadShoot.h" />

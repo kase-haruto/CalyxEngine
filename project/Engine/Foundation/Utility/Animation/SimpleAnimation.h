@@ -132,9 +132,6 @@ namespace CalyxUtil {
 
 		// 実行中でなければ固定
 		if(!isRunning_) {
-			value = (type_ == SimpleAnimationType::Return)
-						? move_.start
-						: move_.end;
 			return;
 		}
 

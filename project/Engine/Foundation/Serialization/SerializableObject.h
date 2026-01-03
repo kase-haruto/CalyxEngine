@@ -37,6 +37,8 @@ namespace CalyxEngine {
 		bool SaveParams() const;
 		bool LoadParams();
 
+		void SaveAndLoadButtonGui();
+
 		std::vector<SerializableField>& FieldsMutable() { return fields_; }
 		const std::vector<SerializableField>& Fields() const { return fields_; }
 

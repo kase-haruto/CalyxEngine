@@ -11,10 +11,10 @@ namespace Calyx2D {
 	 * - HUDモーションチャネル列挙型
 	 *---------------------------------------------------------------------------------------*/
 	enum class HudMotionChannel : uint32_t {
-		None	 = 0,
+		None = 0,
 		Position = 1 << 0,
-		Scale	 = 1 << 1,
-		Alpha	 = 1 << 2,
+		Scale = 1 << 1,
+		Alpha = 1 << 2,
 		Rotation = 1 << 3,
 	};
 
@@ -29,7 +29,7 @@ namespace Calyx2D {
 		//			public methods
 		//===================================================================*/
 		/** \brief コンストラクタ / デストラクタ*/
-		HudMotion()	 = default;
+		HudMotion()  = default;
 		~HudMotion() = default;
 		/**
 		 * \brief 初期化処理
@@ -57,8 +57,9 @@ namespace Calyx2D {
 		// getters
 		const CalyxMath::Vector2& GetPosition() const { return position_; }
 		const CalyxMath::Vector2& GetScale() const { return scale_; }
-		float					  GetRotation() const { return rotation_; }
-		float					  GetAlpha() const { return alpha_; }
+		float                     GetRotation() const { return rotation_; }
+		float                     GetAlpha() const { return alpha_; }
+		bool                      IsChannelEnabled(HudMotionChannel ch) const { return enabledChannels_ & static_cast<uint32_t>(ch); }
 
 	private:
 		//===================================================================*/
@@ -71,7 +72,7 @@ namespace Calyx2D {
 		 * \param ch
 		 */
 		template <class T>
-		void UpdateValue(T& out, HudMotionChannel ch);
+		void UpdateValue(T& out,HudMotionChannel ch);
 		/**
 		 * \brief 指定チャネルのアニメーション終了判定
 		 * \tparam T
@@ -88,7 +89,7 @@ namespace Calyx2D {
 		 */
 		template <typename T>
 		void ApplyMotion(
-			const std::optional<HudMotionDesc<T>>& desc, HudMotionChannel motionType);
+			const std::optional<HudMotionDesc<T>>& desc,HudMotionChannel motionType);
 
 		/**
 		 * \brief チャネル名変換
@@ -107,21 +108,17 @@ namespace Calyx2D {
 		uint32_t enabledChannels_ = 0;
 
 		// 実値
-		CalyxMath::Vector2 position_;		   //< 位置
-		CalyxMath::Vector2 scale_{1.0f, 1.0f}; //< スケール
-		float			   rotation_ = 0.0f;   //< 回転角
-		float			   alpha_	 = 1.0f;   //< 透明度
+		CalyxMath::Vector2 position_;         //< 位置
+		CalyxMath::Vector2 scale_{1.0f,1.0f}; //< スケール
+		float              rotation_ = 0.0f;  //< 回転角
+		float              alpha_    = 1.0f;  //< 透明度
 	};
 
 	//////////////////////////////////////////////////////////////////////////////////
 	// 値の更新
 	//////////////////////////////////////////////////////////////////////////////////
 	template <typename T>
-	void HudMotion::UpdateValue(T& out, HudMotionChannel ch) {
-		if(enabledChannels_ & (uint32_t)ch) {
-			out = animator_.Get<T>(ToChannelName(ch));
-		}
-	}
+	void HudMotion::UpdateValue(T& out,HudMotionChannel ch) { if(enabledChannels_ & (uint32_t)ch) { out = animator_.Get<T>(ToChannelName(ch)); } }
 
 	///////////////////////////////////////////////////////////////////////////////
 	// 指定チャネルのアニメーション終了判定
@@ -130,8 +127,8 @@ namespace Calyx2D {
 	bool HudMotion::CheckFinished(HudMotionChannel ch) const {
 		if(!(enabledChannels_ & (uint32_t)ch)) return true;
 		return animator_.GetChannel<T>(ToChannelName(ch))
-			.Animation()
-			.IsFinished();
+						.Animation()
+						.IsFinished();
 	}
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -139,7 +136,7 @@ namespace Calyx2D {
 	////////////////////////////////////////////////////////////////////////////////
 	template <typename T>
 	void HudMotion::ApplyMotion(
-		const std::optional<HudMotionDesc<T>>& desc, HudMotionChannel motionType) {
+		const std::optional<HudMotionDesc<T>>& desc,HudMotionChannel motionType) {
 
 		if(!desc) return;
 		if(!(enabledChannels_ & static_cast<uint32_t>(motionType))) return;

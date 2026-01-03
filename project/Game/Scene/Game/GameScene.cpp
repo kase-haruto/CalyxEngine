@@ -200,6 +200,7 @@ void GameScene::PlayingUpdate(float dt) {
 /////////////////////////////////////////////////////////////////////////////////////////
 void GameScene::ResultUpdate(float dt) {
 	if(resultOverlay_) {
+		resultOverlay_->ShowGUi();
 		resultOverlay_->Update(dt);
 	}
 }

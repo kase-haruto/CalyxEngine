@@ -27,6 +27,7 @@ public:
 		Right
 	};
 	NumbersSprite(std::string dir, std::string ext = ".png");
+	NumbersSprite();
 
 	// 初期化（基準位置・1桁サイズ）
 	void Initialize(const CalyxMath::Vector2& pos, const CalyxMath::Vector2& digitSize);
@@ -80,4 +81,3 @@ private:
 	bool dirtyDigits_ = true;
 	bool dirtyLayout_ = true;
 };
-

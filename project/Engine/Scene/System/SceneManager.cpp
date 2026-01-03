@@ -49,7 +49,7 @@ namespace CalyxScene {
 				 std::make_unique<ClearScene>());
 
 		SetCurrent(idToIndex_.at(
-			GameSceneUtil::ToSceneId(SceneType::TITLE)
+			GameSceneUtil::ToSceneId(SceneType::PLAY)
 		));
 	}
 

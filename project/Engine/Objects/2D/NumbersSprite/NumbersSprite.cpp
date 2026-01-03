@@ -16,6 +16,8 @@ std::string NumbersSprite::JoinPath_(const std::string& a, const std::string& b)
 NumbersSprite::NumbersSprite(std::string dir, std::string ext)
 	: dir_(std::move(dir)), ext_(std::move(ext)) {}
 
+NumbersSprite::NumbersSprite() =default;
+
 void NumbersSprite::Initialize(const CalyxMath::Vector2& pos, const CalyxMath::Vector2& digitSize) {
 	origin_	   = pos;
 	digitSize_ = digitSize;
@@ -165,4 +167,3 @@ std::vector<Sprite*> NumbersSprite::GetSpritesRaw() const {
 		if(up && up->GetIsVisible()) out.push_back(up.get());
 	return out;
 }
-

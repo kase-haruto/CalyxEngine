@@ -47,8 +47,14 @@ namespace Calyx2D {
 		/**
 		 * \brief 初期化処理
 		 * \param config HUD設定
+		 * \param moveFlags 動作チャネルフラグ (デフォルトですべて有効)
+		 * \note 派生クラスは呼び出す前にコンフィグを構築して設定しておくこと
 		 */
-		void Initialize(const HudConfig& config);
+		void Initialize(uint32_t moveFlags =
+			static_cast<uint32_t>(HudMotionChannel::Position) |
+			static_cast<uint32_t>(HudMotionChannel::Scale) |
+			static_cast<uint32_t>(HudMotionChannel::Alpha) |
+			static_cast<uint32_t>(HudMotionChannel::Rotation));
 
 		/**
 		 * \brief 更新処理
@@ -75,7 +81,18 @@ namespace Calyx2D {
 		//===================================================================*/
 		//                    accessor
 		//===================================================================*/
-		bool IsFinished() const { return phase_ == HudPhase::End; }
+		bool             IsFinished() const { return phase_ == HudPhase::End; }
+		const HudMotion& GetMotion() const { return motion_; }
+		const HudConfig& GetConfig() const { return config_; }
+
+	private:
+		//===================================================================*/
+		//                    private methods
+		//===================================================================*/
+		/**
+		 * \brief モーション値適用
+		 */
+		void ApplyMotionValue()const;
 
 	protected:
 		//===================================================================*/
@@ -106,7 +123,7 @@ namespace Calyx2D {
 		//                    protected members
 		//===================================================================*/
 		HudPhase  phase_ = HudPhase::Enter; //< フェーズ
-		HudConfig config_;					//< HUD設定
+		HudConfig config_;                  //< HUD設定
 
 		HudMotion motion_; //< HUDモーション
 

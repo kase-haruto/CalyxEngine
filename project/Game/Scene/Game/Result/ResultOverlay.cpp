@@ -19,10 +19,8 @@ void ResultOverlay::Initialize(const ResultTransitionPayload& payload) {
 	const CalyxMath::Vector2 center = kGameSize * 0.5f;
 
 	// CLEAR LOGO
-	clearLogo_ = std::make_unique<Calyx2D::SpriteObject2d>();
-	clearLogo_->Initialize("Textures/white1x1.png");
-	clearLogo_->SetScale({600, 160});
-	clearLogo_->SetPosition({center.x, 120});
+	clearLogo_ = std::make_unique<ClearLogoHud>();
+	clearLogo_->Initialize();
 
 	// TOTAL SCORE
 	totalScore_ = std::make_unique<NumbersSprite>("Textures/Numbers", ".png");
@@ -94,4 +92,15 @@ void ResultOverlay::Draw(class SpriteRenderer* renderer) const {
 	if(continueIcon_) {
 		continueIcon_->Draw(renderer);
 	}
+}
+
+void ResultOverlay::ShowGUi() {
+	ImGui::Begin("Result");
+
+	// クリアロゴ
+	if(ImGui::CollapsingHeader("clearLogo")) {
+		clearLogo_->ShowGui();
+	}
+
+	ImGui::End();
 }
