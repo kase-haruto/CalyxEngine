@@ -28,6 +28,10 @@ void ResultOverlay::Initialize(const ResultTransitionPayload& payload) {
 	totalScore_->SetAlign(NumbersSprite::DigitsAlign::Center);
 	totalScore_->SetValue(payload.score);
 
+	scoreHud_ = std::make_unique<ScoreResultHud>();
+	scoreHud_->Initialize();
+	scoreHud_->SetScore(payload.score);
+
 	// ENEMY RESULT（左）
 	float y = 320.0f;
 	for(const auto& e : payload.results) {
@@ -61,7 +65,7 @@ void ResultOverlay::Update(float dt) {
 
 	if(clearLogo_) clearLogo_->Update(dt);
 	if(continueIcon_) continueIcon_->Update(dt);
-	if(totalScore_) totalScore_->Update();
+	if(scoreHud_) scoreHud_->Update(dt);
 
 	// 1秒後に CONTINUE 表示
 	if(timer_ > 1.0f) {
@@ -83,10 +87,8 @@ void ResultOverlay::Draw(class SpriteRenderer* renderer) const {
 		}
 	}
 
-	if(totalScore_) {
-		for(auto* sp : totalScore_->GetSpritesRaw()) {
-			renderer->Register(sp);
-		}
+	if(scoreHud_) {
+		scoreHud_->Draw(renderer);
 	}
 
 	if(continueIcon_) {
@@ -100,6 +102,11 @@ void ResultOverlay::ShowGUi() {
 	// クリアロゴ
 	if(ImGui::CollapsingHeader("clearLogo")) {
 		clearLogo_->ShowGui();
+	}
+
+	// スコアHUD
+	if(ImGui::CollapsingHeader("scoreHud")) {
+		scoreHud_->ShowGui();
 	}
 
 	ImGui::End();

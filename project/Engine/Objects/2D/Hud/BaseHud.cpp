@@ -82,32 +82,20 @@ namespace Calyx2D {
 		TopGui();
 
 		// タイムライン表示
-		if(ImGui::CollapsingHeader("Timeline")) {
-			motion_.ShowTimelineGui();
-		}
+		motion_.ShowTimelineGui();
 
-		if(ImGui::Button("Start Enter")) {
-			StartEnter();
-		}
+		if(ImGui::Button("Start Enter")) { StartEnter(); }
 		ImGui::SameLine();
-		if(ImGui::Button("Start Exit")) {
-			StartExit();
-		}
+		if(ImGui::Button("Start Exit")) { StartExit(); }
 
 		bool changed = false;
 
-		if(ImGui::CollapsingHeader("Enter Motion")) {
-			changed |= config_.enterMotion.ShowGui("Enter Motion");
-		}
-
-		if(ImGui::CollapsingHeader("Exit Motion")) {
-			changed |= config_.exitMotion.ShowGui("Exit Motion");
-		}
+		// if(ImGui::CollapsingHeader("Enter Motion")) { changed |= config_.enterMotion.ShowGui("Enter Motion"); }
+		//
+		// if(ImGui::CollapsingHeader("Exit Motion")) { changed |= config_.exitMotion.ShowGui("Exit Motion"); }
 
 		// GUI変更があったら即 Enter 再生
-		if(changed) {
-			StartEnter();
-		}
+		if(changed) { StartEnter(); }
 
 		//派生先の調整Gui
 		DerivedGui();
@@ -125,6 +113,7 @@ namespace Calyx2D {
 	//		登場開始
 	//////////////////////////////////////////////////////////////////////////////////////////
 	void BaseHud::StartEnter() {
+		motion_.Reset();
 		// 登場モーション開始
 		motion_.ApplyMotionSet(config_.enterMotion);
 		phase_ = HudPhase::Enter;
@@ -135,7 +124,7 @@ namespace Calyx2D {
 	//////////////////////////////////////////////////////////////////////////////////////////
 	void BaseHud::StartExit() {
 		if(phase_ != HudPhase::Stay) return;
-
+		motion_.Reset();
 		// 退場モーション開始
 		motion_.ApplyMotionSet(config_.exitMotion);
 		phase_ = HudPhase::Exit;

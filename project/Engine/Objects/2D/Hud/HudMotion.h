@@ -62,6 +62,8 @@ namespace Calyx2D {
 		 */
 		bool IsFinished() const;
 
+		void Reset();
+
 		// getters
 		const CalyxMath::Vector2& GetPosition() const { return position_; }
 		const CalyxMath::Vector2& GetScale() const { return scale_; }

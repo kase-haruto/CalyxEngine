@@ -7,6 +7,8 @@
 #include <Engine/Foundation/Math/Vector2.h>
 
 // stl
+#include "Engine/Renderer/Sprite/SpriteRenderer.h"
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -49,6 +51,7 @@ public:
 
 	// 更新 & 描画登録
 	void				 Update();
+	void Draw(SpriteRenderer* renderer) const;
 	std::vector<Sprite*> GetSpritesRaw() const;
 
 private:

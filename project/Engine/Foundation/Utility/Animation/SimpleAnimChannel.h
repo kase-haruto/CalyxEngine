@@ -14,7 +14,7 @@ namespace CalyxUtil {
 	public:
 		SimpleAnimation<T>&       Animation() { return animation_; }
 		const SimpleAnimation<T>& Animation() const { return animation_; }
-
+		void Reset();
 		/**
 		 * \brief アニメーションの更新
 		 * \param dt
@@ -42,5 +42,10 @@ namespace CalyxUtil {
 		SimpleAnimation<T> animation_;
 		T                  current_{};
 	};
+
+	template <typename T>
+	void SimpleAnimChannel<T>::Reset() {
+		animation_.Reset();
+	}
 
 } // namespace CalyxUtil

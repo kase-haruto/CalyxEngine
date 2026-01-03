@@ -9,6 +9,8 @@
 #include <Engine/Objects/2D/Object2d/SpriteObject2d.h>
 #include <Engine/Objects/2D/NumbersSprite/NumbersSprite.h>
 // game
+#include "Game/2d/Hud/ScoreResultHud.h"
+
 #include <Game/Scene/Transition/ResultTransitionPayload.h>
 #include<Game/2d/Hud/ClearLogoHud.h>
 
@@ -65,6 +67,7 @@ private:
 	std::unique_ptr<ClearLogoHud>            clearLogo_;    //< クリアロゴ
 	std::unique_ptr<Calyx2D::SpriteObject2d> continueIcon_; //< コンティニューアイコン
 	std::unique_ptr<NumbersSprite>           totalScore_;   //< 総スコア表示
+	std::unique_ptr<ScoreResultHud>          scoreHud_;     //< スコアHUD
 
 	std::vector<EnemyRow> enemyRows_; //< 敵撃破データ
 	float                 timer_        = 0.0f;

@@ -164,6 +164,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <ClCompile Include="Data\Game\Config\Hud\ClearHudConfig.cpp" />
+    <ClCompile Include="Data\Game\Config\Hud\HudTransformMotionConfig.cpp" />
+    <ClCompile Include="Data\Game\Config\Hud\ScoreResultConfig.cpp" />
     <ClCompile Include="Engine\Application\Effects\FxGuiHelpers.cpp" />
     <ClCompile Include="Engine\Application\Effects\FxObject.cpp" />
     <ClCompile Include="Engine\Application\Effects\Particle\Module\OverLifetime\OverLifetimeModule.cpp" />
@@ -272,6 +274,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\2dObject\Actor\Player2D.cpp" />
     <ClCompile Include="Game\2d\Hud\ClearLogoHud.cpp" />
     <ClCompile Include="Game\2d\Hud\EnemyRowHud.cpp" />
+    <ClCompile Include="Game\2d\Hud\HudMotionBuilder.cpp" />
+    <ClCompile Include="Game\2d\Hud\HudMotionGuiHelper.cpp" />
+    <ClCompile Include="Game\2d\Hud\ScoreResultHud.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Enemy\EnemyFactionActor.cpp" />
     <ClCompile Include="Game\Battle\Combat\lineOfSight.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Ease\CxEase.cpp" />
@@ -544,6 +549,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Event\EventConfig.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Particle\EffectConfig.h" />
     <ClInclude Include="Data\Game\Config\Hud\ClearHudConfig.h" />
+    <ClInclude Include="Data\Game\Config\Hud\HudTransformMotionConfig.h" />
+    <ClInclude Include="Data\Game\Config\Hud\ScoreResultConfig.h" />
     <ClInclude Include="Engine\Application\Effects\FxGuiHelpers.h" />
     <ClInclude Include="Engine\Application\Effects\FxObject.h" />
     <ClInclude Include="Engine\Application\Effects\Particle\Module\OverLifetime\OverLifetimeModule.h" />
@@ -583,6 +590,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\2d\HpGauge.h" />
     <ClInclude Include="Game\2d\Hud\ClearLogoHud.h" />
     <ClInclude Include="Game\2d\Hud\EnemyRowHud.h" />
+    <ClInclude Include="Game\2d\Hud\HudMotionBuilder.h" />
+    <ClInclude Include="Game\2d\Hud\HudMotionGuiHelper.h" />
+    <ClInclude Include="Game\2d\Hud\ScoreResultHud.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\AI\BossAI.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\Anim\BossAnimController.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\Attack\BossHomingSpreadShoot.h" />

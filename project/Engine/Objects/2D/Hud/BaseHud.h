@@ -69,7 +69,7 @@ namespace Calyx2D {
 		 * \brief 描画処理
 		 * \param renderer スプライトレンダラー
 		 */
-		void Draw(SpriteRenderer* renderer) const;
+		virtual void Draw(SpriteRenderer* renderer) const;
 
 		/**
 		 * \brief HUDの登場を開始

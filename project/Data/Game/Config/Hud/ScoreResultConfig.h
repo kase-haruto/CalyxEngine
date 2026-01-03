@@ -1,17 +1,21 @@
 #pragma once
+#include "HudTransformMotionConfig.h"
 #include "Engine/Foundation/Serialization/SerializableObject.h"
 #include "Engine/Foundation/Utility/Ease/CxEase.h"
 
 /* ----------------------------------------------------
- *	ClearLogoHudConfig class
- *	- クリアロゴHUD設定クラス
+ *	ScoreResultConfig class
+ *	- スコアリザルトHUD設定クラス
  * ---------------------------------------------------*/
-#pragma once
-#include "HudTransformMotionConfig.h"
 
-class ClearLogoHudConfig final
+class ScoreResultConfig final
 	: public Calyx2D::HudTransformMotionConfig {
 public:
-	ClearLogoHudConfig();
+	ScoreResultConfig();
 	CalyxEngine::ParamPath GetParamPath() const override;
+
+	// スコア固有
+	float    delaySec   = 0.5f;
+	float    countUpSec = 1.0f;
+	int32_t  countEaseInt = static_cast<int32_t>(CalyxEase::EaseType::EaseOutCubic);
 };

@@ -31,7 +31,7 @@ namespace CalyxEngine {
 	public:
 		virtual ~SerializableObject() = default;
 
-		virtual ParamPath GetParamPath() const = 0;
+		virtual ParamPath GetParamPath() const {return{ ParamDomain::Game,"Default"};}
 
 		// --- 各オブジェクトから呼ぶAPI ---
 		bool SaveParams() const;

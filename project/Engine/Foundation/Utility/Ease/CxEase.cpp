@@ -74,18 +74,41 @@ namespace CalyxEase {
 	//==============================================================
 	//  ImGuiでイージングを選択
 	//==============================================================
-	void SelectEase(EaseType& type) {
-		if(ImGui::BeginCombo("Ease Type", EaseTypeNames[static_cast<int>(type)])) {
-			for(int i = 0; i < static_cast<int>(EaseType::Count); i++) {
-				bool isSelected = (type == static_cast<EaseType>(i));
-				if(ImGui::Selectable(EaseTypeNames[i], isSelected)) {
-					type = static_cast<EaseType>(i);
+	bool SelectEase(EaseType& type) {
+		bool changed = false;
+		int current = static_cast<int>(type);
+
+		if (ImGui::BeginCombo("Ease Type", EaseTypeNames[current])) {
+			for (int i = 0; i < static_cast<int>(EaseType::Count); ++i) {
+				bool isSelected = (current == i);
+				if (ImGui::Selectable(EaseTypeNames[i], isSelected)) {
+					if (current != i) {
+						type = static_cast<EaseType>(i);
+						changed = true;
+					}
 				}
-				if(isSelected)
+				if (isSelected)
 					ImGui::SetItemDefaultFocus();
 			}
 			ImGui::EndCombo();
 		}
+
+		return changed;
+	}
+
+	bool SelectEaseInt(const char* label, int32_t& easeInt) {
+		bool changed = false;
+
+		CalyxEase::EaseType tmp = static_cast<CalyxEase::EaseType>(easeInt);
+
+		ImGui::PushID(label);
+		if (CalyxEase::SelectEase(tmp)) {
+			easeInt = static_cast<int32_t>(tmp);
+			changed = true;
+		}
+		ImGui::PopID();
+
+		return changed;
 	}
 
 } // namespace CalyxEase
