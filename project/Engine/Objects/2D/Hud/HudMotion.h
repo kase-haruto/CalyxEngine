@@ -1,8 +1,8 @@
 #pragma once
-#include "Engine/Foundation/Math/Vector2.h"
 #include "HudMotionDesc.h"
-#include <Engine/Foundation/Utility/Animation/SimpleAnimator.h>
-#include <Engine/Foundation/Utility/Converter/EnumConverter.h>
+#include "Engine/Foundation/Utility/Converter/EnumConverter.h"
+#include "Engine/Foundation/Utility/Animation/SimpleAnimator.h"
+
 
 namespace Calyx2D {
 

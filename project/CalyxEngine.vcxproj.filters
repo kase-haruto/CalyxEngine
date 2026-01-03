@@ -2289,10 +2289,20 @@
     <ClInclude Include="Engine\Objects\base\BaseObject.h" />
     <ClInclude Include="Engine\System\Component\IComponent.h" />
     <ClInclude Include="Game\2dObject\Actor\Player2D.h" />
+    <ClInclude Include="Game\3dObject\Actor\Enemy\EnemyFactionActor.h" />
+    <ClInclude Include="Engine\Scene\Transitioner\IScenePayload.h" />
+    <ClInclude Include="Game\3dObject\Actor\Enemy\Details\EnemyKind.h" />
+    <ClInclude Include="Game\Scene\Game\Result\ResultOverlay.h" />
+    <ClInclude Include="Game\Scene\Transition\ResultTransitionPayload.h" />
+    <ClInclude Include="Game\Scene\Utility\SceneTypeUtil.h" />
+    <ClInclude Include="Engine\Objects\2D\Hud\BaseHud.h" />
+    <ClInclude Include="Engine\Objects\2D\Hud\HudMotion.h" />
+    <ClInclude Include="Engine\Objects\2D\Hud\HudMotionDesc.h" />
+    <ClInclude Include="Engine\Objects\2D\Hud\HudMotionSet.h" />
+    <ClInclude Include="Engine\Foundation\Utility\Animation\AnimationLoop.h" />
     <ClInclude Include="Engine\Foundation\Utility\Animation\SimpleAnimation.h" />
     <ClInclude Include="Engine\Foundation\Utility\Animation\SimpleAnimator.h" />
     <ClInclude Include="Engine\Foundation\Utility\Animation\SimpleAnimChannel.h" />
-    <ClInclude Include="Game\3dObject\Actor\Enemy\EnemyFactionActor.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\ChromaticAberration.PS.hlsl">
@@ -2411,7 +2421,6 @@
     <ClCompile Include="Engine\Foundation\Clock\StateTimer.cpp" />
     <ClCompile Include="Engine\Foundation\Serialization\ParamStore.cpp" />
     <ClCompile Include="Engine\Foundation\Serialization\SerializableObject.cpp" />
-    <ClCompile Include="Engine\Foundation\Utility\Animation\AnimationLoop.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Converter\ConvertString.cpp" />
     <ClCompile Include="Engine\Objects\2D\Actor\Character2D.cpp" />
     <ClCompile Include="Engine\Objects\2D\Object2d\GameObject2d.cpp" />
@@ -2420,10 +2429,16 @@
     <ClCompile Include="Engine\Objects\2D\Sprite\Component\SpriteComponent.cpp" />
     <ClCompile Include="Engine\Objects\2D\Sprite\SpriteAsset.cpp" />
     <ClCompile Include="Game\2dObject\Actor\Player2D.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Enemy\EnemyFactionActor.cpp" />
+    <ClCompile Include="Game\Scene\Game\Result\ResultOverlay.cpp" />
+    <ClCompile Include="Game\Scene\Transition\ResultTransitionPayload.cpp" />
+    <ClCompile Include="Game\Scene\Utility\SceneTypeUtil.cpp" />
+    <ClCompile Include="Engine\Objects\2D\Hud\BaseHud.cpp" />
+    <ClCompile Include="Engine\Objects\2D\Hud\HudMotion.cpp" />
+    <ClCompile Include="Engine\Foundation\Utility\Animation\AnimationLoop.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Animation\SimpleAnimation.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Animation\SimpleAnimator.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Animation\SimpleAnimChannel.cpp" />
-    <ClCompile Include="Game\3dObject\Actor\Enemy\EnemyFactionActor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
