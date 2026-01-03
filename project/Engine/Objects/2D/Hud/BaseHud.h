@@ -5,7 +5,7 @@
 #include "HudMotion.h"
 #include "HudMotionSet.h"
 
-#include <Engine/Objects/2D/Object2d/SpriteObject2d.h>
+#include "../Object2d/SpriteObject2d.h"
 
 namespace Calyx2D {
 

@@ -25,9 +25,9 @@ void Player2D::Initialize() {
 	// ============================
 	auto& swayY = animator_.Add<CalyxMath::Vector2>("SwayY");
 
-	swayY.Animation().SetStart({0.0f, -amplitude_}); // 上
-	swayY.Animation().SetEnd({0.0f, amplitude_});	 // した
-	swayY.Animation().Start();
+	 swayY.Animation().SetStart({0.0f, -amplitude_}); // 上
+	 swayY.Animation().SetEnd({0.0f, amplitude_});	 // した
+	 swayY.Animation().Start();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -172,9 +172,9 @@ void Player2D::Move() {
 
 	CalyxMath::Vector2 pos = basePos_;
 
-	if(animator_.Has<CalyxMath::Vector2>("SwayY")) {
-		pos = pos + animator_.Get<CalyxMath::Vector2>("SwayY");
-	}
+	 if(animator_.Has<CalyxMath::Vector2>("SwayY")) {
+	 	pos = pos + animator_.Get<CalyxMath::Vector2>("SwayY");
+	 }
 
 	SetPosition(pos);
 }

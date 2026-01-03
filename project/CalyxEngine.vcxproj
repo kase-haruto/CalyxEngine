@@ -260,86 +260,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <ClCompile Include="Engine\Objects\2D\Actor\Character2D.cpp" />
-    <ClCompile Include="Engine\Objects\2D\Hud\BaseHud.cpp">
-      <AssemblerOutput>NoListing</AssemblerOutput>
-      <AssemblerListingLocation>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\</AssemblerListingLocation>
-      <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
-      <BrowseInformation>false</BrowseInformation>
-      <BrowseInformationFile>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\</BrowseInformationFile>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <CompileAs>Default</CompileAs>
-      <UseDynamicDebugging>false</UseDynamicDebugging>
-      <ConformanceMode>true</ConformanceMode>
-      <DiagnosticsFormat>Column</DiagnosticsFormat>
-      <DisableLanguageExtensions>false</DisableLanguageExtensions>
-      <ErrorReporting>Prompt</ErrorReporting>
-      <ExpandAttributedSource>false</ExpandAttributedSource>
-      <ExceptionHandling>Sync</ExceptionHandling>
-      <EnableASAN>false</EnableASAN>
-      <EnableFuzzer>false</EnableFuzzer>
-      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
-      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
-      <EnableVectorLength>NotSet</EnableVectorLength>
-      <FloatingPointModel>Precise</FloatingPointModel>
-      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
-      <GenerateModuleDependencies>false</GenerateModuleDependencies>
-      <GenerateSourceDependencies>false</GenerateSourceDependencies>
-      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-      <LanguageStandard_C>Default</LanguageStandard_C>
-      <MinimalRebuild>false</MinimalRebuild>
-      <ModuleDependenciesFile>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\</ModuleDependenciesFile>
-      <ModuleOutputFile>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\</ModuleOutputFile>
-      <OmitDefaultLibName>false</OmitDefaultLibName>
-      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
-      <WholeProgramOptimization>true</WholeProgramOptimization>
-      <Optimization>MaxSpeed</Optimization>
-      <ObjectFileName>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\</ObjectFileName>
-      <CallingConvention>Cdecl</CallingConvention>
-      <ProgramDataBaseFileName>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\vc143.pdb</ProgramDataBaseFileName>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\MyEngine.pch</PrecompiledHeaderOutputFile>
-      <PreprocessToFile>false</PreprocessToFile>
-      <PreprocessKeepComments>false</PreprocessKeepComments>
-      <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
-      <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
-      <ShowIncludes>false</ShowIncludes>
-      <SourceDependenciesFile>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\</SourceDependenciesFile>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <BufferSecurityCheck>true</BufferSecurityCheck>
-      <SmallerTypeCheck>false</SmallerTypeCheck>
-      <SpectreMitigation>false</SpectreMitigation>
-      <StructMemberAlignment>Default</StructMemberAlignment>
-      <SupportJustMyCode>false</SupportJustMyCode>
-      <TrackerLogDirectory>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\MyEngine.tlog\</TrackerLogDirectory>
-      <TranslateIncludes>false</TranslateIncludes>
-      <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
-      <TreatWarningAsError>true</TreatWarningAsError>
-      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <UseFullPaths>true</UseFullPaths>
-      <WarningLevel>Level4</WarningLevel>
-      <XMLDocumentationFileName>C:\WorkSpace\project\..\generated\obj\MyEngine\Develop\</XMLDocumentationFileName>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <IntelJCCErratum>false</IntelJCCErratum>
-      <BuildStlModules>false</BuildStlModules>
-      <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
-      <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
-      <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
-      <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
-      <PreprocessorDefinitions>DEVELOP;_WINDOWS;_UNICODE;UNICODE;</PreprocessorDefinitions>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <SDLCheck>true</SDLCheck>
-      <AdditionalOptions>/utf-8 </AdditionalOptions>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>C:\WorkSpace\project\;C:\WorkSpace\project\externals;C:\WorkSpace\project\externals\DirectXTex;C:\WorkSpace\project\externals\assimp\include;</AdditionalIncludeDirectories>
-      <LinkCompiled>true</LinkCompiled>
-    </ClCompile>
+    <ClCompile Include="Engine\Objects\2D\Hud\BaseHud.cpp" />
     <ClCompile Include="Engine\Objects\2D\Hud\HudMotion.cpp" />
     <ClCompile Include="Engine\Objects\2D\Object2d\GameObject2d.cpp" />
     <ClCompile Include="Engine\Objects\2D\Object2d\SpriteObject2d.cpp" />
@@ -624,6 +545,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Foundation\Clock\StateTimer.h" />
     <ClInclude Include="Engine\Foundation\Serialization\SerializableField.h" />
     <ClInclude Include="Engine\Foundation\Serialization\SerializableObject.h" />
+    <ClInclude Include="Engine\Foundation\Utility\Animation\AnimationLoop.h" />
     <ClInclude Include="Engine\Foundation\Utility\Animation\SimpleAnimation.h" />
     <ClInclude Include="Engine\Foundation\Utility\Animation\SimpleAnimator.h" />
     <ClInclude Include="Engine\Foundation\Utility\Animation\SimpleAnimChannel.h" />
@@ -1203,7 +1125,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <Content Include="Data\Game\Config\Event\CameraTurnAroundEventConfig.h" />
     <Content Include="Engine\Foundation\Serialization\ParamStore.h" />
-    <Content Include="Engine\Foundation\Utility\Animation\AnimationLoop.h" />
     <Content Include="Engine\Foundation\Utility\Func\CxUtils.h" />
     <Content Include="Game\3dObject\Actor\Boss\Details\BossAnimType.h" />
     <Content Include="Game\3dObject\Actor\Player\PlayerContext.h" />

@@ -1,8 +1,7 @@
 #pragma once
 #include <optional>
 #include "HudMotionDesc.h"
-#include <Engine/Foundation/Math/Vector2.h>
-
+#include "../../../Foundation/Math/Vector2.h"
 namespace Calyx2D {
 
 	/*-----------------------------------------------------------------------------------------

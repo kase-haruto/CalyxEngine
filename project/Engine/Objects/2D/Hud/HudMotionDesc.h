@@ -1,5 +1,5 @@
 #pragma once
-#include <Engine/Foundation/Utility/Ease/CxEase.h>
+#include "../../../Foundation/Utility/Ease/CxEase.h"
 
 namespace Calyx2D {
 
