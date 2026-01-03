@@ -13,6 +13,14 @@ namespace Calyx2D {
 		std::optional<HudMotionDesc<CalyxMath::Vector2>> scale;
 		std::optional<HudMotionDesc<float>>              alpha;
 		std::optional<HudMotionDesc<float>>              rotation;
+
+		/**
+		 * \brief 表示用GUI
+		 * \param label 表示名
+		 * \return 変更があったらtrue
+		 */
+		bool ShowGui(const char* label);
 	};
+
 
 }

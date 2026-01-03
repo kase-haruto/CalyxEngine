@@ -19,16 +19,18 @@ void ResultOverlay::Initialize(const ResultTransitionPayload& payload) {
 	const CalyxMath::Vector2 center = kGameSize * 0.5f;
 
 	// CLEAR LOGO
-	clearLogo_ = std::make_unique<Calyx2D::SpriteObject2d>();
-	clearLogo_->Initialize("Textures/white1x1.png");
-	clearLogo_->SetScale({600, 160});
-	clearLogo_->SetPosition({center.x, 120});
+	clearLogo_ = std::make_unique<ClearLogoHud>();
+	clearLogo_->Initialize();
 
 	// TOTAL SCORE
 	totalScore_ = std::make_unique<NumbersSprite>("Textures/Numbers", ".png");
 	totalScore_->Initialize({center.x + 200, 340}, {64, 64});
 	totalScore_->SetAlign(NumbersSprite::DigitsAlign::Center);
 	totalScore_->SetValue(payload.score);
+
+	scoreHud_ = std::make_unique<ScoreResultHud>();
+	scoreHud_->Initialize();
+	scoreHud_->SetScore(payload.score);
 
 	// ENEMY RESULT（左）
 	float y = 320.0f;
@@ -63,7 +65,7 @@ void ResultOverlay::Update(float dt) {
 
 	if(clearLogo_) clearLogo_->Update(dt);
 	if(continueIcon_) continueIcon_->Update(dt);
-	if(totalScore_) totalScore_->Update();
+	if(scoreHud_) scoreHud_->Update(dt);
 
 	// 1秒後に CONTINUE 表示
 	if(timer_ > 1.0f) {
@@ -85,13 +87,27 @@ void ResultOverlay::Draw(class SpriteRenderer* renderer) const {
 		}
 	}
 
-	if(totalScore_) {
-		for(auto* sp : totalScore_->GetSpritesRaw()) {
-			renderer->Register(sp);
-		}
+	if(scoreHud_) {
+		scoreHud_->Draw(renderer);
 	}
 
 	if(continueIcon_) {
 		continueIcon_->Draw(renderer);
 	}
+}
+
+void ResultOverlay::ShowGUi() {
+	ImGui::Begin("Result");
+
+	// クリアロゴ
+	if(ImGui::CollapsingHeader("clearLogo")) {
+		clearLogo_->ShowGui();
+	}
+
+	// スコアHUD
+	if(ImGui::CollapsingHeader("scoreHud")) {
+		scoreHud_->ShowGui();
+	}
+
+	ImGui::End();
 }

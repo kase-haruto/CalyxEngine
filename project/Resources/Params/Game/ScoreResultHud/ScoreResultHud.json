@@ -1,0 +1,39 @@
+{
+    "fields": {
+        "alphaDuration": 0.5,
+        "alphaEaseInt": 0,
+        "alphaEnabled": false,
+        "alphaEnd": 1.0,
+        "alphaStart": 1.0,
+        "countEaseInt": 5,
+        "countUpSec": 1.0,
+        "delaySec": 0.5,
+        "posDuration": 0.5,
+        "posEaseInt": 8,
+        "posEnabled": true,
+        "posEnd": [
+            1000.0,
+            256.0
+        ],
+        "posStart": [
+            1508.3299560546875,
+            300.0
+        ],
+        "rotDuration": 0.5,
+        "rotEaseInt": 0,
+        "rotEnabled": false,
+        "rotEnd": 0.0,
+        "rotStart": 0.0,
+        "scaleDuration": 0.5,
+        "scaleEaseInt": 0,
+        "scaleEnabled": false,
+        "scaleEnd": [
+            1.0,
+            1.0
+        ],
+        "scaleStart": [
+            1.0,
+            1.0
+        ]
+    }
+}

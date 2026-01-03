@@ -81,6 +81,8 @@ namespace CalyxUtil {
 			return *GetMap<T>().at(name);
 		}
 
+		void Reset();
+
 	private:
 		//===================================================================*/
 		//                    private methods

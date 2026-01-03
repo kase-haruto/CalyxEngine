@@ -11,7 +11,7 @@ namespace Calyx2D {
 	struct HudMotionDesc {
 		T start{};
 		T end{};
-		float duration = 0.0f;
+		float duration = 0.5f;
 		CalyxEase::EaseType easing = CalyxEase::EaseType::Linear;
 	};
 

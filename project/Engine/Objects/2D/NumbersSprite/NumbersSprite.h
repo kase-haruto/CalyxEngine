@@ -7,6 +7,8 @@
 #include <Engine/Foundation/Math/Vector2.h>
 
 // stl
+#include "Engine/Renderer/Sprite/SpriteRenderer.h"
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -27,6 +29,7 @@ public:
 		Right
 	};
 	NumbersSprite(std::string dir, std::string ext = ".png");
+	NumbersSprite();
 
 	// 初期化（基準位置・1桁サイズ）
 	void Initialize(const CalyxMath::Vector2& pos, const CalyxMath::Vector2& digitSize);
@@ -48,6 +51,7 @@ public:
 
 	// 更新 & 描画登録
 	void				 Update();
+	void Draw(SpriteRenderer* renderer) const;
 	std::vector<Sprite*> GetSpritesRaw() const;
 
 private:
@@ -80,4 +84,3 @@ private:
 	bool dirtyDigits_ = true;
 	bool dirtyLayout_ = true;
 };
-

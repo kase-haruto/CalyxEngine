@@ -1,7 +1,9 @@
 #pragma once
+#include <cstdint>
+
 namespace CalyxEase {
 
-	enum class EaseType {
+	enum class EaseType :int32_t{
 		Linear = 0,
 		EaseInQuad,
 		EaseOutQuad,
@@ -25,5 +27,6 @@ namespace CalyxEase {
 	float ApplyEase(EaseType type, float t);
 	float EaseLerp(float start, float end, float t, EaseType ease);
 	// ImGuiで選択UIを表示
-	void SelectEase(EaseType& type);
+	bool SelectEase(EaseType& type);
+	bool SelectEaseInt(const char* label, int32_t& easeInt);
 } // namespace CalyxEase

@@ -85,6 +85,7 @@ namespace CalyxUtil {
 		bool IsStart() const { return isRunning_; }
 		bool IsFinished() const { return isFinished_; }
 
+		float GetDuration() const { return timer_.target_; }
 		float				 GetProgress() const;
 		const T&			 GetStart() const { return move_.start; }
 		const T&			 GetEnd() const { return move_.end; }
@@ -132,9 +133,6 @@ namespace CalyxUtil {
 
 		// 実行中でなければ固定
 		if(!isRunning_) {
-			value = (type_ == SimpleAnimationType::Return)
-						? move_.start
-						: move_.end;
 			return;
 		}
 

@@ -83,6 +83,7 @@ namespace Calyx2D {
 		void SetScale(const CalyxMath::Vector2& scale) const;
 		void SetRotation(float rotation) const;
 		void SetAlpha(float alpha) const;
+		void SetVisibility(bool visible) const;
 
 	private:
 		/** \brief アニメーション更新処理
