@@ -49,6 +49,14 @@ namespace Calyx2D {
 		 */
 		void Update(float dt);
 		/**
+		 * \brief デバッグ用GUI表示
+		 */
+		void ShowGui();
+		/**
+		 * \brief タイムラインGUI表示
+		 */
+		void ShowTimelineGui() const;
+		/**
 		 * \brief アニメーション終了判定
 		 * \return 終了していれば true
 		 */
@@ -97,6 +105,10 @@ namespace Calyx2D {
 		 * \return
 		 */
 		static const char* ToChannelName(HudMotionChannel ch);
+
+		// チャンネル制御
+		void EnableChannel(HudMotionChannel ch);
+		void DisableChannel(HudMotionChannel ch);
 
 	private:
 		//===================================================================*/

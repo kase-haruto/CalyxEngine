@@ -1,7 +1,9 @@
 #pragma once
+#include <cstdint>
+
 namespace CalyxEase {
 
-	enum class EaseType {
+	enum class EaseType :int32_t{
 		Linear = 0,
 		EaseInQuad,
 		EaseOutQuad,

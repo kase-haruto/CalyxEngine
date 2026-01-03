@@ -61,7 +61,10 @@ namespace Calyx2D {
 		 * \param dt デルタタイム
 		 */
 		virtual void Update(float dt);
-
+		/**
+		 * \brief デバッグ用GUI表示
+		 */
+		void ShowGui();
 		/**
 		 * \brief 描画処理
 		 * \param renderer スプライトレンダラー
@@ -92,7 +95,7 @@ namespace Calyx2D {
 		/**
 		 * \brief モーション値適用
 		 */
-		void ApplyMotionValue()const;
+		void ApplyMotionValue() const;
 
 	protected:
 		//===================================================================*/
@@ -117,6 +120,15 @@ namespace Calyx2D {
 		 * \brief 退場完了時処理
 		 */
 		virtual void OnExitFinished() {}
+
+		/**
+		 * \brief トップに表示するGUI
+		 */
+		virtual void TopGui() {}
+		/**
+		 * \brief 派生先Gui
+		 */
+		virtual void DerivedGui() {}
 
 	protected:
 		//===================================================================*/

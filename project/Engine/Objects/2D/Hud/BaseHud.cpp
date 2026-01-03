@@ -74,6 +74,45 @@ namespace Calyx2D {
 		spriteObj_->Update(dt);
 	}
 
+	///////////////////////////////////////////////////////////////////////////////////////////
+	//		GUI表示
+	///////////////////////////////////////////////////////////////////////////////////////////
+	void BaseHud::ShowGui() {
+
+		TopGui();
+
+		// タイムライン表示
+		if(ImGui::CollapsingHeader("Timeline")) {
+			motion_.ShowTimelineGui();
+		}
+
+		if(ImGui::Button("Start Enter")) {
+			StartEnter();
+		}
+		ImGui::SameLine();
+		if(ImGui::Button("Start Exit")) {
+			StartExit();
+		}
+
+		bool changed = false;
+
+		if(ImGui::CollapsingHeader("Enter Motion")) {
+			changed |= config_.enterMotion.ShowGui("Enter Motion");
+		}
+
+		if(ImGui::CollapsingHeader("Exit Motion")) {
+			changed |= config_.exitMotion.ShowGui("Exit Motion");
+		}
+
+		// GUI変更があったら即 Enter 再生
+		if(changed) {
+			StartEnter();
+		}
+
+		//派生先の調整Gui
+		DerivedGui();
+	}
+
 	//////////////////////////////////////////////////////////////////////////////////////////
 	//		描画
 	//////////////////////////////////////////////////////////////////////////////////////////

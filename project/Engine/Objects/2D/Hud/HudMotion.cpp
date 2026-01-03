@@ -54,6 +54,106 @@ namespace Calyx2D {
 			UpdateValue(alpha_,HudMotionChannel::Alpha);
 	}
 
+	////////////////////////////////////////////////////////////////////////////////
+	//		GUI表示
+	////////////////////////////////////////////////////////////////////////////////
+	void HudMotion::ShowGui() {
+		ImGui::SeparatorText("HudMotion Channels");
+
+		auto drawChannel = [&](HudMotionChannel ch, const char* label) {
+			bool enabled = IsChannelEnabled(ch);
+			if(ImGui::Checkbox(label, &enabled)) {
+				if(enabled) {
+					EnableChannel(ch);
+				} else {
+					DisableChannel(ch);
+				}
+			}
+		};
+
+		drawChannel(HudMotionChannel::Position, "Position");
+		drawChannel(HudMotionChannel::Scale, "Scale");
+		drawChannel(HudMotionChannel::Rotation, "Rotation");
+		drawChannel(HudMotionChannel::Alpha, "Alpha");
+
+		ImGui::Spacing();
+
+		ImGui::SeparatorText("Runtime Animator");
+		animator_.ShowGui(true);
+	}
+
+	////////////////////////////////////////////////////////////////////////////////
+	//		タイムラインGUI表示
+	////////////////////////////////////////////////////////////////////////////////
+	void HudMotion::ShowTimelineGui() const {
+		ImGui::SeparatorText("Timeline");
+
+		const float width  = ImGui::GetContentRegionAvail().x;
+		const float height = 18.0f;
+
+		auto drawTrack = [&](const char* label,
+					 float duration,
+					 float progress) {
+
+			ImGui::Text("%s (%.2fs)", label, duration);
+
+			ImVec2 p = ImGui::GetCursorScreenPos();
+			ImDrawList* dl = ImGui::GetWindowDrawList();
+
+			// 背景
+			dl->AddRectFilled(
+				p,
+				{ p.x + width, p.y + height },
+				IM_COL32(60, 60, 60, 255));
+
+			// 再生位置
+			float x = p.x + width * progress;
+			dl->AddLine(
+				{ x, p.y },
+				{ x, p.y + height },
+				IM_COL32(255, 220, 0, 255),
+				2.0f);
+
+			ImGui::Dummy({ width, height });
+		};
+
+		if(IsChannelEnabled(HudMotionChannel::Position)) {
+			const auto& ch = animator_.GetChannel<CalyxMath::Vector2>("Position");
+			drawTrack("Position",
+				ch.GetDuration(),
+				ch.GetProgress());
+		}
+
+		if(IsChannelEnabled(HudMotionChannel::Scale)) {
+			const auto& ch = animator_.GetChannel<CalyxMath::Vector2>("Scale");
+			drawTrack("Scale",
+				ch.GetDuration(),
+				ch.GetProgress());
+		}
+
+		if(IsChannelEnabled(HudMotionChannel::Rotation)) {
+			const auto& ch = animator_.GetChannel<float>("Rotation");
+			drawTrack("Rotation",
+				ch.GetDuration(),
+				ch.GetProgress());
+		}
+
+		if(IsChannelEnabled(HudMotionChannel::Alpha)) {
+			const auto& ch = animator_.GetChannel<float>("Alpha");
+			drawTrack("Alpha",
+				ch.GetDuration(),
+				ch.GetProgress());
+		}
+	}
+
+	void HudMotion::EnableChannel(HudMotionChannel ch) {
+		enabledChannels_ |= static_cast<uint32_t>(ch);
+	}
+
+	void HudMotion::DisableChannel(HudMotionChannel ch) {
+		enabledChannels_ &= ~static_cast<uint32_t>(ch);
+	}
+
 	///////////////////////////////////////////////////////////////////////////////
 	//		終了判定
 	///////////////////////////////////////////////////////////////////////////////
