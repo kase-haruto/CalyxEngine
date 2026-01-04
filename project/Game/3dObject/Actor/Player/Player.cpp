@@ -378,10 +378,11 @@ void Player::RequestShoot() const {
 	if(bool isFired = shootingController_->RequestShoot(playerPos, dir)) {
 		// 発射エフェクト
 		shootFx_->PlayAll();
+		if(lockOn_) {
+			lockOn_->RequestLockOnClear();
+		}
 	}
-	if(lockOn_) {
-		lockOn_->RequestLockOnClear();
-	}
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
