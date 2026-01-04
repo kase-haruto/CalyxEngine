@@ -22,6 +22,22 @@ void ClearLogoHud::Initialize() {
 
 	// BaseHud 初期化（Position を使用）
 	BaseHud::Initialize(static_cast<uint32_t>(Calyx2D::HudMotionChannel::Position));
+
+	Sprite().SetScale(configData_->logoSize);
+
+	floatingAnimation_ = std::make_unique<CalyxUtil::SimpleAnimation<float>>();
+	floatingAnimation_->SetLoopCount(0); // 無限ループ
+
+
+	floatingAnimation_->SetStart(-configData_->amplitude);
+	floatingAnimation_->SetEnd(configData_->amplitude);
+	floatingAnimation_->SetDuration(configData_->period);
+	// PingPong にして上下往復させる
+	floatingAnimation_->SetLoopType(CalyxUtil::AnimationLoop::AnimationLoopType::PingPong);
+	floatingAnimation_->Start();
+
+	// 基準位置はまだ取得していない
+	floatingBaseSet_ = false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -39,12 +55,33 @@ void ClearLogoHud::DerivedGui() {
 	}
 }
 
+void ClearLogoHud::StayUpdate(float dt) {
+	if(!floatingAnimation_) {
+		return;
+	}
+
+	// 基準位置を一度だけ取得（モーション再構築時にリセットされる）
+	if(!floatingBaseSet_) {
+		auto pos = Sprite().GetPosition();
+		floatingBaseX_ = pos.x;
+		floatingBaseY_ = pos.y;
+		floatingBaseSet_ = true;
+	}
+
+	// アニメーション更新してオフセット取得
+	float offset = 0.0f;
+	floatingAnimation_->LerpValue(offset, dt);
+
+	// 基準位置にオフセットを合成してスプライト位置を更新
+	Sprite().SetPosition({ floatingBaseX_, floatingBaseY_ + offset });
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //		データからコンフィグ作成
 ///////////////////////////////////////////////////////////////////////////////////////////////
 void ClearLogoHud::RebuildMotionFromConfig() {
 	// テクスチャ（固定）
-	config_.texturePath = "Textures/uvChecker.png";
+	config_.texturePath = "Textures/ResultHud/resultLogo.png";
 
 	// Enter Motion
 	Calyx2D::BuildMotionSetFromFlatConfig(

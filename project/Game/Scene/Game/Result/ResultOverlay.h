@@ -9,6 +9,9 @@
 #include <Engine/Objects/2D/Object2d/SpriteObject2d.h>
 #include <Engine/Objects/2D/NumbersSprite/NumbersSprite.h>
 // game
+#include "Game/2d/Background/ResultBackgroundObject.h"
+#include "Game/2d/DimFilter/ScreenDimFilter.h"
+#include "Game/2d/Hud/EnemyRowHud.h"
 #include "Game/2d/Hud/ScoreResultHud.h"
 
 #include <Game/Scene/Transition/ResultTransitionPayload.h>
@@ -20,20 +23,6 @@
  * - スコアや撃破数の表示を担当
  *---------------------------------------------------------------------------------------*/
 class ResultOverlay {
-private:
-	//===================================================================*/
-	//			structs
-	//===================================================================*/
-
-	/*---------------------------------------------------------------------
-	 * 敵撃破行データ構造体
-	 * - 敵アイコンと撃破数表示をまとめた構造体
-	 *--------------------------------------------------------------------*/
-	struct EnemyRow {
-		std::unique_ptr<Calyx2D::SpriteObject2d> icon;
-		std::unique_ptr<NumbersSprite>           count;
-	};
-
 public:
 	//===================================================================*/
 	//			public methods
@@ -66,10 +55,11 @@ private:
 	//===================================================================*/
 	std::unique_ptr<ClearLogoHud>            clearLogo_;    //< クリアロゴ
 	std::unique_ptr<Calyx2D::SpriteObject2d> continueIcon_; //< コンティニューアイコン
-	std::unique_ptr<NumbersSprite>           totalScore_;   //< 総スコア表示
 	std::unique_ptr<ScoreResultHud>          scoreHud_;     //< スコアHUD
+	std::unique_ptr<EnemyResultHud>          enemyHud_;     //< 敵撃破数HUD
+	std::unique_ptr<ScreenDimFilter>         dimFilter_;    //< 背景暗転フィルタ
+	std::unique_ptr<ResultBackgroundObject> bkObject_;      //< 背景オブジェクト
 
-	std::vector<EnemyRow> enemyRows_; //< 敵撃破データ
-	float                 timer_        = 0.0f;
-	bool                  showContinue_ = false;
+	float timer_        = 0.0f;
+	bool  showContinue_ = false;
 };

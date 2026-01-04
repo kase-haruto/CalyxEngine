@@ -17,44 +17,35 @@ ResultOverlay::~ResultOverlay() = default;
 //////////////////////////////////////////////////////////////////////////
 void ResultOverlay::Initialize(const ResultTransitionPayload& payload) {
 	const CalyxMath::Vector2 center = kGameSize * 0.5f;
+	//==============================
+	// 背景暗転フィルタ
+	//==============================
+	dimFilter_ = std::make_unique<ScreenDimFilter>();
+	dimFilter_->Initialize(kGameSize);
+
+	// Result開始と同時にフェードイン
+	dimFilter_->StartFadeIn();
 
 	// CLEAR LOGO
 	clearLogo_ = std::make_unique<ClearLogoHud>();
 	clearLogo_->Initialize();
 
-	// TOTAL SCORE
-	totalScore_ = std::make_unique<NumbersSprite>("Textures/Numbers", ".png");
-	totalScore_->Initialize({center.x + 200, 340}, {64, 64});
-	totalScore_->SetAlign(NumbersSprite::DigitsAlign::Center);
-	totalScore_->SetValue(payload.score);
-
 	scoreHud_ = std::make_unique<ScoreResultHud>();
 	scoreHud_->Initialize();
 	scoreHud_->SetScore(payload.score);
 
-	// ENEMY RESULT（左）
-	float y = 320.0f;
-	for(const auto& e : payload.results) {
-		EnemyRow row;
-
-		row.icon = std::make_unique<Calyx2D::SpriteObject2d>();
-		row.icon->Initialize("Textures/white1x1.png");
-		row.icon->SetScale({48, 48});
-		row.icon->SetPosition({center.x - 320, y});
-
-		row.count = std::make_unique<NumbersSprite>("Textures/Numbers", ".png");
-		row.count->Initialize({center.x - 240, y}, {32, 32});
-		row.count->SetValue(e.count);
-
-		enemyRows_.push_back(std::move(row));
-		y += 56.0f;
-	}
+	enemyHud_ = std::make_unique<EnemyResultHud>();
+	enemyHud_->Initialize(payload);
 
 	// CONTINUE
 	continueIcon_ = std::make_unique<Calyx2D::SpriteObject2d>();
 	continueIcon_->Initialize("Textures/white1x1.png");
 	continueIcon_->SetScale({96, 96});
 	continueIcon_->SetPosition({center.x, 600});
+
+	// 背景オブジェクト
+	bkObject_ = std::make_unique<ResultBackgroundObject>();
+	bkObject_->Initialize("Textures/ResultHud/bkTexture.png");
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -62,15 +53,21 @@ void ResultOverlay::Initialize(const ResultTransitionPayload& payload) {
 //////////////////////////////////////////////////////////////////////////
 void ResultOverlay::Update(float dt) {
 	timer_ += dt;
+	if(dimFilter_)    dimFilter_->Update(dt);
 
-	if(clearLogo_) clearLogo_->Update(dt);
-	if(continueIcon_) continueIcon_->Update(dt);
-	if(scoreHud_) scoreHud_->Update(dt);
+	// フェードが終わったら各hud更新
+	if(dimFilter_&&dimFilter_->IsFinished()) {
+		bkObject_->Update(dt);
+		if(clearLogo_) clearLogo_->Update(dt);
+		if(continueIcon_) continueIcon_->Update(dt);
+		if(scoreHud_) scoreHud_->Update(dt);
+		if(enemyHud_) enemyHud_->Update(dt);
 
-	// 1秒後に CONTINUE 表示
-	if(timer_ > 1.0f) {
-		showContinue_ = true;
-		continueIcon_->GetSprite()->SetIsVisible(showContinue_);
+		// 1秒後に CONTINUE 表示
+		if(timer_ > 1.0f) {
+			showContinue_ = true;
+			continueIcon_->GetSprite()->SetIsVisible(showContinue_);
+		}
 	}
 }
 
@@ -78,13 +75,21 @@ void ResultOverlay::Update(float dt) {
 //	描画
 //////////////////////////////////////////////////////////////////////////
 void ResultOverlay::Draw(class SpriteRenderer* renderer) const {
+	//==============================
+	// 背景暗転（最背面）
+	//==============================
+	if(dimFilter_) {
+		dimFilter_->Draw(renderer);
+	}
+
+	if(bkObject_) {
+		bkObject_->Draw(renderer);
+	}
+
 	if(clearLogo_) clearLogo_->Draw(renderer);
 
-	for(auto& row : enemyRows_) {
-		row.icon->Draw(renderer);
-		for(auto* sp : row.count->GetSpritesRaw()) {
-			renderer->Register(sp);
-		}
+	if(enemyHud_) {
+		enemyHud_->Draw(renderer);
 	}
 
 	if(scoreHud_) {
@@ -107,6 +112,16 @@ void ResultOverlay::ShowGUi() {
 	// スコアHUD
 	if(ImGui::CollapsingHeader("scoreHud")) {
 		scoreHud_->ShowGui();
+	}
+
+	// 敵撃破数HUD
+	if(ImGui::CollapsingHeader("enemyHud")) {
+		enemyHud_->ShowGui();
+	}
+
+	// 背景オブジェクト
+	if(ImGui::CollapsingHeader("bkObject")) {
+		bkObject_->ShowGui();
 	}
 
 	ImGui::End();

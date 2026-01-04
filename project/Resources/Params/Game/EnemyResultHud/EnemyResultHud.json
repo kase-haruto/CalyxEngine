@@ -6,24 +6,42 @@
         "alphaEnd": 1.0,
         "alphaStart": 1.0,
         "countEaseInt": 5,
-        "countUpSec": 1.0399999618530273,
-        "delaySec": 0.4699999988079071,
+        "countUpSec": 0.6299999952316284,
+        "delaySec": 0.49000000953674316,
+        "digitSize": [
+            32.0,
+            32.0
+        ],
+        "iconOffset": [
+            -70.0,
+            -18.030000686645508
+        ],
+        "iconSize": [
+            64.0,
+            64.0
+        ],
+        "numberOffset": [
+            90.0,
+            0.0
+        ],
+        "perRowDelaySec": 0.15000000596046448,
         "posDuration": 0.5,
         "posEaseInt": 8,
         "posEnabled": true,
         "posEnd": [
             640.0,
-            200.0
+            350.0
         ],
         "posStart": [
             1508.3299560546875,
-            200.0
+            350.0
         ],
         "rotDuration": 0.5,
         "rotEaseInt": 0,
         "rotEnabled": false,
         "rotEnd": 0.0,
         "rotStart": 0.0,
+        "rowSpacing": 125.0,
         "scaleDuration": 0.5,
         "scaleEaseInt": 0,
         "scaleEnabled": false,

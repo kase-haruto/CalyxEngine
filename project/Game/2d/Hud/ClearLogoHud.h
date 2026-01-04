@@ -35,6 +35,8 @@ public:
 	 */
 	void DerivedGui() override;
 
+	void StayUpdate(float dt) override;
+
 private:
 	//===================================================================*/
 	//		private method
@@ -46,4 +48,10 @@ private:
 	//		private members
 	//===================================================================*/
 	std::unique_ptr<ClearLogoHudConfig> configData_;
+	std::unique_ptr<CalyxUtil::SimpleAnimation<float>> floatingAnimation_;
+
+	// 浮遊用の基準位置（スプライトの座標に対してオフセットを加算する）
+	float floatingBaseX_ = 0.0f;
+	float floatingBaseY_ = 0.0f;
+	bool  floatingBaseSet_ = false;
 };

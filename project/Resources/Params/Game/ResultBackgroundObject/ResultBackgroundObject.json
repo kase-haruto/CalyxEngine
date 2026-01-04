@@ -1,0 +1,16 @@
+{
+    "fields": {
+        "bottomPosition": [
+            0.0,
+            0.0
+        ],
+        "bottomRotate": 0.0,
+        "topPosition": [
+            0.0,
+            0.0
+        ],
+        "topRotate": 9.199999809265137,
+        "uvRotate": 0.20999999344348907,
+        "uvScrollSpeed": -10.069999694824219
+    }
+}
