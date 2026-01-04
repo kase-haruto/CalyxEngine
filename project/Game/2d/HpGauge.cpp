@@ -58,7 +58,7 @@ void HpGauge::Initialize(const CalyxMath::Vector2& position, const CalyxMath::Ve
 	//----------------------------------------
 	// 青ゲージ（現在 HP）
 	//----------------------------------------
-	blueGauge_ = std::make_unique<Sprite>("Textures/noise.png");
+	blueGauge_ = std::make_unique<Sprite>("Textures/white1x1.png");
 	blueGauge_->Initialize(position, size);
 	blueGauge_->SetFillMethod(1);
 	blueGauge_->SetFillOrigin(0.0f, 0.0f);
