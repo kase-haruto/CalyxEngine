@@ -163,6 +163,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Data\Engine\Configs\Scene\Objects\Particle\Module\ModuleConfig.cpp">
       <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ProgramDatabase</DebugInformationFormat>
     </ClCompile>
+    <ClCompile Include="Data\Game\Config\Background\ResultBackgroundObjectConfig.cpp" />
     <ClCompile Include="Data\Game\Config\DimFilter\DimFilterConfig.cpp" />
     <ClCompile Include="Data\Game\Config\Hud\ClearHudConfig.cpp" />
     <ClCompile Include="Data\Game\Config\Hud\EnemyResultConfig.cpp" />
@@ -274,6 +275,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Objects\2D\Sprite\Component\SpriteComponent.cpp" />
     <ClCompile Include="Engine\Objects\2D\Sprite\SpriteAsset.cpp" />
     <ClCompile Include="Game\2dObject\Actor\Player2D.cpp" />
+    <ClCompile Include="Game\2d\Background\ResultBackgroundObject.cpp" />
     <ClCompile Include="Game\2d\DimFilter\ScreenDimFilter.cpp" />
     <ClCompile Include="Game\2d\Hud\ClearLogoHud.cpp" />
     <ClCompile Include="Game\2d\Hud\EnemyRowHud.cpp" />
@@ -551,6 +553,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Event\EventConfig.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Particle\EffectConfig.h" />
+    <ClInclude Include="Data\Game\Config\Background\ResultBackgroundObjectConfig.h" />
     <ClInclude Include="Data\Game\Config\DimFilter\DimFilterConfig.h" />
     <ClInclude Include="Data\Game\Config\Hud\ClearHudConfig.h" />
     <ClInclude Include="Data\Game\Config\Hud\EnemyResultConfig.h" />
@@ -592,6 +595,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Scene\Transitioner\IScenePayload.h" />
     <ClInclude Include="Engine\System\Component\IComponent.h" />
     <ClInclude Include="Game\2dObject\Actor\Player2D.h" />
+    <ClInclude Include="Game\2d\Background\ResultBackgroundObject.h" />
     <ClInclude Include="Game\2d\DimFilter\ScreenDimFilter.h" />
     <ClInclude Include="Game\2d\HpGauge.h" />
     <ClInclude Include="Game\2d\Hud\ClearLogoHud.h" />

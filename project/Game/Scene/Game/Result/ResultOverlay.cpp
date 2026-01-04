@@ -42,6 +42,10 @@ void ResultOverlay::Initialize(const ResultTransitionPayload& payload) {
 	continueIcon_->Initialize("Textures/white1x1.png");
 	continueIcon_->SetScale({96, 96});
 	continueIcon_->SetPosition({center.x, 600});
+
+	// 背景オブジェクト
+	bkObject_ = std::make_unique<ResultBackgroundObject>();
+	bkObject_->Initialize("Textures/ResultHud/bkTexture.png");
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -53,6 +57,7 @@ void ResultOverlay::Update(float dt) {
 
 	// フェードが終わったら各hud更新
 	if(dimFilter_&&dimFilter_->IsFinished()) {
+		bkObject_->Update(dt);
 		if(clearLogo_) clearLogo_->Update(dt);
 		if(continueIcon_) continueIcon_->Update(dt);
 		if(scoreHud_) scoreHud_->Update(dt);
@@ -75,6 +80,10 @@ void ResultOverlay::Draw(class SpriteRenderer* renderer) const {
 	//==============================
 	if(dimFilter_) {
 		dimFilter_->Draw(renderer);
+	}
+
+	if(bkObject_) {
+		bkObject_->Draw(renderer);
 	}
 
 	if(clearLogo_) clearLogo_->Draw(renderer);
@@ -108,6 +117,11 @@ void ResultOverlay::ShowGUi() {
 	// 敵撃破数HUD
 	if(ImGui::CollapsingHeader("enemyHud")) {
 		enemyHud_->ShowGui();
+	}
+
+	// 背景オブジェクト
+	if(ImGui::CollapsingHeader("bkObject")) {
+		bkObject_->ShowGui();
 	}
 
 	ImGui::End();

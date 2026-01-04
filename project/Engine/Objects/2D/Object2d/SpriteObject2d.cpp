@@ -15,12 +15,18 @@ void SpriteObject2d::Initialize(const std::string& filePath) {
 }
 
 void SpriteObject2d::Update(float dt) {
-	AnimationUpdate(dt);
+	if(currentAnim_ && division_.first > 1 && division_.second > 1) {
+		AnimationUpdate(dt);
+	}
 	sprite_->Update();
 }
 
 void SpriteObject2d::Draw(SpriteRenderer* renderer) const {
 	renderer->Register(sprite_.get());
+}
+
+void SpriteObject2d::ShowGui() {
+	sprite_->ShowGui();
 }
 
 //====================================================
@@ -115,6 +121,12 @@ const std::pair<int32_t, int32_t>& SpriteObject2d::GetDivision() const { return 
 const CalyxMath::Vector2&		   SpriteObject2d::GetPosition() const { return sprite_->GetPosition(); }
 const CalyxMath::Vector2&		   SpriteObject2d::GetScale() const { return sprite_->GetSize(); }
 Sprite*							   SpriteObject2d::GetSprite() const { return sprite_.get(); }
+CalyxMath::Vector2 SpriteObject2d::GetUvTranslate() const {
+	return sprite_->GetUvTranslate();
+}
+float SpriteObject2d::GetUvRotate() const {
+	return sprite_->GetUvRotate();
+}
 
 void SpriteObject2d::SetDivision(const std::pair<int32_t, int32_t>& division) { division_ = division; }
 void SpriteObject2d::SetPosition(const CalyxMath::Vector2& position) const { sprite_->SetPosition(position); }
@@ -123,3 +135,14 @@ void SpriteObject2d::SetRotation(float rotation) const {sprite_->SetRotation(rot
 void SpriteObject2d::SetAlpha(float alpha) const { sprite_->SetAlpha(alpha); }
 void SpriteObject2d::SetColor(const CalyxMath::Vector4& color) const {sprite_->SetColor(color);}
 void SpriteObject2d::SetVisibility(bool visible) const {sprite_->SetIsVisible(visible);}
+
+
+void SpriteObject2d::SetUvTranslate(const CalyxMath::Vector2& uv) const {
+	sprite_->SetUvTranslate(uv);
+}
+void SpriteObject2d::SetUvRotate(float rot) const {
+	sprite_->SetUvRotate(rot);
+}
+void SpriteObject2d::SetUvOffset(const CalyxMath::Vector2& offset) const {
+	sprite_->SetUvOffset(offset);
+}

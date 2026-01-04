@@ -87,6 +87,7 @@ namespace Calyx2D {
 		bool             IsFinished() const { return phase_ == HudPhase::End; }
 		const HudMotion& GetMotion() const { return motion_; }
 		const HudConfig& GetConfig() const { return config_; }
+		void SetConfig(const HudConfig& config) { config_ = config; }
 
 	private:
 		//===================================================================*/

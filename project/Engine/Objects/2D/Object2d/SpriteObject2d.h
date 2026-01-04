@@ -55,6 +55,11 @@ namespace Calyx2D {
 		 */
 		void Draw(SpriteRenderer* renderer) const;
 
+		/**
+		 * \brief デバッグGui
+		 */
+		void ShowGui();
+
 		//====================================================
 		// Animation API
 		//====================================================
@@ -78,6 +83,8 @@ namespace Calyx2D {
 		const CalyxMath::Vector2&		   GetPosition() const;
 		const CalyxMath::Vector2&		   GetScale() const;
 		Sprite*							   GetSprite() const;
+		CalyxMath::Vector2 GetUvTranslate() const;
+		float GetUvRotate() const;
 
 		// setter
 		void SetDivision(const std::pair<int32_t, int32_t>& division);
@@ -87,6 +94,9 @@ namespace Calyx2D {
 		void SetAlpha(float alpha) const;
 		void SetColor(const CalyxMath::Vector4 & color) const;
 		void SetVisibility(bool visible) const;
+		void SetUvTranslate(const CalyxMath::Vector2& uv) const;
+		void SetUvRotate(float rot) const;
+		void SetUvOffset(const CalyxMath::Vector2& offset) const; // 加算したいなら
 
 	private:
 		/** \brief アニメーション更新処理

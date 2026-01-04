@@ -5,11 +5,17 @@
         "alphaEnabled": false,
         "alphaEnd": 1.0,
         "alphaStart": 1.0,
+        "amplitude": 20.0,
+        "logoSize": [
+            304.0,
+            176.32000732421875
+        ],
+        "period": 1.5,
         "posDuration": 0.4000000059604645,
         "posEaseInt": 8,
         "posEnabled": true,
         "posEnd": [
-            50.0,
+            199.0,
             50.0
         ],
         "posStart": [

@@ -9,6 +9,7 @@
 #include <Engine/Objects/2D/Object2d/SpriteObject2d.h>
 #include <Engine/Objects/2D/NumbersSprite/NumbersSprite.h>
 // game
+#include "Game/2d/Background/ResultBackgroundObject.h"
 #include "Game/2d/DimFilter/ScreenDimFilter.h"
 #include "Game/2d/Hud/EnemyRowHud.h"
 #include "Game/2d/Hud/ScoreResultHud.h"
@@ -57,6 +58,7 @@ private:
 	std::unique_ptr<ScoreResultHud>          scoreHud_;     //< スコアHUD
 	std::unique_ptr<EnemyResultHud>          enemyHud_;     //< 敵撃破数HUD
 	std::unique_ptr<ScreenDimFilter>         dimFilter_;    //< 背景暗転フィルタ
+	std::unique_ptr<ResultBackgroundObject> bkObject_;      //< 背景オブジェクト
 
 	float timer_        = 0.0f;
 	bool  showContinue_ = false;
