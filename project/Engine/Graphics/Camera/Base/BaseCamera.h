@@ -27,16 +27,16 @@ public:
 	BaseCamera(const std::string& name);
 	virtual ~BaseCamera() = default;
 
-	virtual void Update(float dt)override;  // 更新
-	virtual void AlwaysUpdate(float dt)override;
+	virtual void Update(float dt) override; // 更新
+	virtual void AlwaysUpdate(float dt) override;
 
-	void ShowImGui();// ImGui表示
-	virtual void UpdateMatrix();  // 行列の更新
+	void         ShowImGui();    // ImGui表示
+	virtual void UpdateMatrix(); // 行列の更新
 
 	void SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> command,
-					PipelineType pipelineType);
+					PipelineType                                      pipelineType);
 
-	void StartShake(float duration, float intensity)override;  // カメラシェイク開始
+	void StartShake(float duration,float intensity) override; // カメラシェイク開始
 
 	std::string_view GetTypeName() const override { return "BaseCamera"; }
 	// config ============================================================
@@ -45,70 +45,67 @@ public:
 	void ApplyConfigFromJson(const nlohmann::json& j) override;
 	void ExtractConfigToJson(nlohmann::json& j) const override;
 
-	std::string GetObjectTypeName()const override { return name_; }
-
+	std::string GetObjectTypeName() const override { return name_; }
 
 protected:
 	//==================================================================*//
 	//			protected functions
 	//==================================================================*//
-	CalyxMath::Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip);
-	void SetName(const std::string& name);
-
+	CalyxMath::Matrix4x4 MakePerspectiveFovMatrix(float fovY,float aspectRatio,float nearClip,float farClip);
+	void                 SetName(const std::string& name);
 
 public:
 	//==================================================================*//
 	//			getter / setter
 	//==================================================================*//
 	// Setter
-	void SetCamera(const CalyxMath::Vector3& pos, const CalyxMath::Vector3& rotate);
+	void SetCamera(const CalyxMath::Vector3& pos,const CalyxMath::Vector3& rotate);
 
 	// Getter
 	const CalyxMath::Matrix4x4& GetViewMatrix() const;
 	const CalyxMath::Matrix4x4& GetProjectionMatrix() const;
 	const CalyxMath::Matrix4x4& GetViewProjectionMatrix() const;
-	const CalyxMath::Vector3& GetRotate() const;
-	const CalyxMath::Vector3& GetTranslate() const;
-	float GetFovY() const{return fovAngleY_;}
-	float GetAspectRatio() const{return aspectRatio_;}
-	bool IsActive()const{ return isActive_; }
-	void SetActive(bool isActive){ isActive_ = isActive; }
-	void SetAspectRatio(float aspect)override;
-
+	const CalyxMath::Vector3&   GetRotate() const;
+	const CalyxMath::Vector3&   GetTranslate() const;
+	float                       GetFovY() const { return fovAngleY_; }
+	float                       GetAspectRatio() const { return aspectRatio_; }
+	bool                        IsActive() const { return isActive_; }
+	void                        SetActive(bool isActive) { isActive_ = isActive; }
+	void                        SetAspectRatio(float aspect) override;
 
 protected:
 	//==================================================================*//
 	//			protected variables
 	//==================================================================*//
 
-	CalyxMath::Matrix4x4 viewMatrix_;          // ビュー行列
-	CalyxMath::Matrix4x4 projectionMatrix_;    // プロジェクション行列
+	CalyxMath::Matrix4x4 viewMatrix_;       // ビュー行列
+	CalyxMath::Matrix4x4 projectionMatrix_; // プロジェクション行列
 
-	float aspectRatio_ = 16.0f / 9.0f;                           // アスペクト比
-	float nearZ_ = 0.1f;                                         // 近クリップ面
-	float farZ_ = 3000.0f;                                       // 遠クリップ面
-	float fovAngleY_ = 75.0f * static_cast< float >(std::numbers::pi) / 180.0f;  // 垂直視野角
+	float aspectRatio_ = 16.0f / 9.0f;                                          // アスペクト比
+	float nearZ_       = 0.1f;                                                  // 近クリップ面
+	float farZ_        = 10000.0f;                                              // 遠クリップ面
+	float fovAngleY_   = 75.0f * static_cast<float>(std::numbers::pi) / 180.0f; // 垂直視野角
 
 protected:
 	// カメラシェイク関連
-	bool isShaking_ = false;
-	float shakeDuration_ = 0.0f;
-	float shakeElapsed_ = 0.0f;
-	float shakeIntensity_ = 0.0f;  // シェイクの強さ
-	CalyxMath::Vector3 originalPosition_;     // シェイク前の元のカメラ位置
+	bool               isShaking_      = false;
+	float              shakeDuration_  = 0.0f;
+	float              shakeElapsed_   = 0.0f;
+	float              shakeIntensity_ = 0.0f; // シェイクの強さ
+	CalyxMath::Vector3 originalPosition_;      // シェイク前の元のカメラ位置
 
 protected:
 	//==================================================================*//
 	//			protected variables
 	//==================================================================*//
-	bool isActive_ = true;				//アクティブかどうか
-	CalyxMath::Matrix4x4 viewProjectionMatrix_;	// ビュープロジェクション行列
+	bool                 isActive_ = true;      //アクティブかどうか
+	CalyxMath::Matrix4x4 viewProjectionMatrix_; // ビュープロジェクション行列
 
 private:
 	//==================================================================*//
 	//			private variables
 	//==================================================================*//
-	Camera3DBuffer cameraBuffer_;		// カメラバッファ
+	Camera3DBuffer cameraBuffer_; // カメラバッファ
 
 	ConfigurableObject<SceneObjectConfig> config_;
 };

@@ -164,6 +164,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <ClCompile Include="Data\Game\Config\Hud\ClearHudConfig.cpp" />
+    <ClCompile Include="Data\Game\Config\Hud\EnemyResultConfig.cpp" />
     <ClCompile Include="Data\Game\Config\Hud\HudTransformMotionConfig.cpp" />
     <ClCompile Include="Data\Game\Config\Hud\ScoreResultConfig.cpp" />
     <ClCompile Include="Engine\Application\Effects\FxGuiHelpers.cpp" />
@@ -549,6 +550,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Event\EventConfig.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Particle\EffectConfig.h" />
     <ClInclude Include="Data\Game\Config\Hud\ClearHudConfig.h" />
+    <ClInclude Include="Data\Game\Config\Hud\EnemyResultConfig.h" />
     <ClInclude Include="Data\Game\Config\Hud\HudTransformMotionConfig.h" />
     <ClInclude Include="Data\Game\Config\Hud\ScoreResultConfig.h" />
     <ClInclude Include="Engine\Application\Effects\FxGuiHelpers.h" />

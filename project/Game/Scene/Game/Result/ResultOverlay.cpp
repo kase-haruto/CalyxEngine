@@ -22,33 +22,12 @@ void ResultOverlay::Initialize(const ResultTransitionPayload& payload) {
 	clearLogo_ = std::make_unique<ClearLogoHud>();
 	clearLogo_->Initialize();
 
-	// TOTAL SCORE
-	totalScore_ = std::make_unique<NumbersSprite>("Textures/Numbers", ".png");
-	totalScore_->Initialize({center.x + 200, 340}, {64, 64});
-	totalScore_->SetAlign(NumbersSprite::DigitsAlign::Center);
-	totalScore_->SetValue(payload.score);
-
 	scoreHud_ = std::make_unique<ScoreResultHud>();
 	scoreHud_->Initialize();
 	scoreHud_->SetScore(payload.score);
 
-	// ENEMY RESULT（左）
-	float y = 320.0f;
-	for(const auto& e : payload.results) {
-		EnemyRow row;
-
-		row.icon = std::make_unique<Calyx2D::SpriteObject2d>();
-		row.icon->Initialize("Textures/white1x1.png");
-		row.icon->SetScale({48, 48});
-		row.icon->SetPosition({center.x - 320, y});
-
-		row.count = std::make_unique<NumbersSprite>("Textures/Numbers", ".png");
-		row.count->Initialize({center.x - 240, y}, {32, 32});
-		row.count->SetValue(e.count);
-
-		enemyRows_.push_back(std::move(row));
-		y += 56.0f;
-	}
+	enemyHud_ = std::make_unique<EnemyResultHud>();
+	enemyHud_->Initialize(payload);
 
 	// CONTINUE
 	continueIcon_ = std::make_unique<Calyx2D::SpriteObject2d>();
@@ -66,6 +45,7 @@ void ResultOverlay::Update(float dt) {
 	if(clearLogo_) clearLogo_->Update(dt);
 	if(continueIcon_) continueIcon_->Update(dt);
 	if(scoreHud_) scoreHud_->Update(dt);
+	if(enemyHud_) enemyHud_->Update(dt);
 
 	// 1秒後に CONTINUE 表示
 	if(timer_ > 1.0f) {
@@ -80,11 +60,8 @@ void ResultOverlay::Update(float dt) {
 void ResultOverlay::Draw(class SpriteRenderer* renderer) const {
 	if(clearLogo_) clearLogo_->Draw(renderer);
 
-	for(auto& row : enemyRows_) {
-		row.icon->Draw(renderer);
-		for(auto* sp : row.count->GetSpritesRaw()) {
-			renderer->Register(sp);
-		}
+	if(enemyHud_) {
+		enemyHud_->Draw(renderer);
 	}
 
 	if(scoreHud_) {
@@ -107,6 +84,11 @@ void ResultOverlay::ShowGUi() {
 	// スコアHUD
 	if(ImGui::CollapsingHeader("scoreHud")) {
 		scoreHud_->ShowGui();
+	}
+
+	// 敵撃破数HUD
+	if(ImGui::CollapsingHeader("enemyHud")) {
+		enemyHud_->ShowGui();
 	}
 
 	ImGui::End();
