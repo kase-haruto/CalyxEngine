@@ -121,4 +121,5 @@ void SpriteObject2d::SetPosition(const CalyxMath::Vector2& position) const { spr
 void SpriteObject2d::SetScale(const CalyxMath::Vector2& scale) const { sprite_->SetSize(scale); }
 void SpriteObject2d::SetRotation(float rotation) const {sprite_->SetRotation(rotation); }
 void SpriteObject2d::SetAlpha(float alpha) const { sprite_->SetAlpha(alpha); }
+void SpriteObject2d::SetColor(const CalyxMath::Vector4& color) const {sprite_->SetColor(color);}
 void SpriteObject2d::SetVisibility(bool visible) const {sprite_->SetIsVisible(visible);}

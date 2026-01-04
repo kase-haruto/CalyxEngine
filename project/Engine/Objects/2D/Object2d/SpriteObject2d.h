@@ -4,6 +4,8 @@
 #include <Engine/Foundation/Math/Vector2.h>
 
 // stde
+#include "Engine/Foundation/Math/Vector4.h"
+
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -83,6 +85,7 @@ namespace Calyx2D {
 		void SetScale(const CalyxMath::Vector2& scale) const;
 		void SetRotation(float rotation) const;
 		void SetAlpha(float alpha) const;
+		void SetColor(const CalyxMath::Vector4 & color) const;
 		void SetVisibility(bool visible) const;
 
 	private:
