@@ -39,9 +39,10 @@ void ResultOverlay::Initialize(const ResultTransitionPayload& payload) {
 
 	// CONTINUE
 	continueIcon_ = std::make_unique<Calyx2D::SpriteObject2d>();
-	continueIcon_->Initialize("Textures/white1x1.png");
+	continueIcon_->Initialize("Textures/button_A.png");
 	continueIcon_->SetScale({96, 96});
-	continueIcon_->SetPosition({center.x, 600});
+	continueIcon_->GetSprite()->SetAnchorPoint({0.5f, 0.5f});
+	continueIcon_->SetPosition({center.x, 550});
 
 	// 背景オブジェクト
 	bkObject_ = std::make_unique<ResultBackgroundObject>();
