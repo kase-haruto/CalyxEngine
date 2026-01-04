@@ -34,7 +34,6 @@ void Player2D::Initialize() {
 //	更新処理
 ///////////////////////////////////////////////////////////////////////////////////////////
 void Player2D::Update(float deltaTime) {
-	ShowGui();
 	StateUpdate(deltaTime);
 
 	// 状態ごとにアニメーションをセット

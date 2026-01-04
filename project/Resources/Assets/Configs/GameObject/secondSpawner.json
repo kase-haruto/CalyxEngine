@@ -1,0 +1,40 @@
+{
+    "activateRadius": 80.0,
+    "deactivateRadius": 100.0,
+    "formation": {
+        "angularSpeed": 1.0,
+        "baseZ": 78.0,
+        "dissolvePattern": 1,
+        "dissolveTime": 0.0,
+        "motionType": 1,
+        "radius": 30.0,
+        "snakeAmpX": 25.0,
+        "snakeAmpY": 10.0,
+        "snakeFreqX": 2.0,
+        "snakeFreqY": 1.7000000476837158,
+        "speedZ": 20.0,
+        "useFormation": true
+    },
+    "maxSpawnCount": 5,
+    "name": "secondSpawner",
+    "spawnInterval": 5.0,
+    "transform": {
+        "rotation": {
+            "w": 1.0,
+            "x": 0.0,
+            "y": -7.450580596923828e-09,
+            "z": 0.0
+        },
+        "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+        },
+        "translation": {
+            "x": 3.612041473388672e-05,
+            "y": 0.5893687009811401,
+            "z": 0.4613841772079468
+        }
+    },
+    "useXZDistance": true
+}

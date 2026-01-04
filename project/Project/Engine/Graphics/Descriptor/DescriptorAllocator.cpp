@@ -1,0 +1,106 @@
+#include "DescriptorAllocator.h"
+#include <stdexcept>
+
+ID3D12Device* DescriptorAllocator::device_ = nullptr;
+std::unordered_map<DescriptorUsage, DescriptorAllocator::HeapInfo> DescriptorAllocator::heaps_;
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		初期化
+/////////////////////////////////////////////////////////////////////////////////////////
+void DescriptorAllocator::Initialize(ID3D12Device* device){
+	device_ = device;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		ヒープ作成
+/////////////////////////////////////////////////////////////////////////////////////////
+void DescriptorAllocator::CreateHeap(DescriptorUsage usage, const DescriptorHeapSettings& settings){
+	if (!device_) throw std::runtime_error("DescriptorAllocator: device not initialized.");
+
+	D3D12_DESCRIPTOR_HEAP_DESC desc {};
+	switch (usage){
+		case DescriptorUsage::CbvSrvUav: desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV; break;
+		case DescriptorUsage::Rtv:       desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV; break;
+		case DescriptorUsage::Dsv:       desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV; break;
+		case DescriptorUsage::Sampler:   desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER; break;
+	}
+	desc.NumDescriptors = settings.maxDescriptors;
+	desc.Flags = settings.shaderVisible ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	desc.NodeMask = 0;
+
+	HeapInfo& info = heaps_[usage];
+	HRESULT hr = device_->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&info.heap));
+	if (FAILED(hr)) throw std::runtime_error("DescriptorAllocator: failed to create descriptor heap.");
+
+	info.descriptorSize = device_->GetDescriptorHandleIncrementSize(desc.Type);
+	info.currentOffset = 0;
+	info.maxDescriptors = settings.maxDescriptors;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		渡す
+/////////////////////////////////////////////////////////////////////////////////////////
+DescriptorHandle DescriptorAllocator::Allocate(DescriptorUsage usage){
+	HeapInfo& info = heaps_[usage];
+	std::lock_guard<std::mutex> lock(info.mutex);
+
+	if (info.currentOffset >= info.maxDescriptors && info.freeList.empty()){
+		throw std::runtime_error("DescriptorAllocator: Heap is full");
+	}
+
+	uint32_t offset = 0;
+	if (!info.freeList.empty()){
+		offset = info.freeList.top();
+		info.freeList.pop();
+	} else{
+		offset = info.currentOffset++;
+	}
+
+	D3D12_CPU_DESCRIPTOR_HANDLE cpu = info.heap->GetCPUDescriptorHandleForHeapStart();
+	D3D12_GPU_DESCRIPTOR_HANDLE gpu = info.heap->GetGPUDescriptorHandleForHeapStart();
+	cpu.ptr += offset * info.descriptorSize;
+	gpu.ptr += offset * info.descriptorSize;
+
+	return DescriptorHandle {cpu, gpu, offset};
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//
+/////////////////////////////////////////////////////////////////////////////////////////
+void DescriptorAllocator::Free(DescriptorUsage usage, const DescriptorHandle& handle){
+	if (!handle.IsValid()) return;
+	HeapInfo& info = heaps_[usage];
+	std::lock_guard<std::mutex> lock(info.mutex);
+	info.freeList.push(handle.offset);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		ヒープ取得
+/////////////////////////////////////////////////////////////////////////////////////////
+ID3D12DescriptorHeap* DescriptorAllocator::GetHeap(DescriptorUsage usage){
+	return heaps_[usage].heap.Get();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		ディスクリプタのサイズ取得
+/////////////////////////////////////////////////////////////////////////////////////////
+UINT DescriptorAllocator::GetDescriptorSize(DescriptorUsage usage){
+	return heaps_[usage].descriptorSize;
+}
+
+D3D12_CPU_DESCRIPTOR_HANDLE DescriptorAllocator::GetCpuHandleStart(DescriptorUsage usage){
+	return heaps_[usage].heap->GetCPUDescriptorHandleForHeapStart();
+}
+
+D3D12_GPU_DESCRIPTOR_HANDLE DescriptorAllocator::GetGpuHandleStart(DescriptorUsage usage){
+	return heaps_[usage].heap->GetGPUDescriptorHandleForHeapStart();
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		解放
+/////////////////////////////////////////////////////////////////////////////////////////
+void DescriptorAllocator::Finalize(){
+	heaps_.clear();
+	device_ = nullptr;
+}

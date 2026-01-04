@@ -56,8 +56,7 @@ void EnemySpawner::Initialize() {
 	// 個別の調節パラメータ適用
 	const std::string configRoot = "GameObject/";
 	config_.LoadConfig(configRoot + GetName());
-	int formationType			= Random::Generate(0, static_cast<int>(EnemyFormationMotionType::Count));
-	formationConfig_.motionType = static_cast<EnemyFormationMotionType>(formationType);
+
 	formation_ = std::make_unique<EnemyFormationController>();
 	formation_->Initialize(formationConfig_);
 	formationTimer_ = 0.0f;

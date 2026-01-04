@@ -8,8 +8,8 @@ struct Material {
 	float4   color;
 	float4x4 uvTransform;
 
-	float2 uvOffset;   // 追加
-	float2 uvScale;    // 追加
+	float2 uvOffset;
+	float2 uvScale;
 
 	float  fillAmount;
 	float2 fillOrigin;

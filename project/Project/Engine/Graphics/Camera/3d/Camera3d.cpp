@@ -1,0 +1,47 @@
+#include "Camera3d.h"
+/* ========================================================================
+/* include space
+/* ===================================================================== */
+#include <Engine/Graphics/Context/GraphicsGroup.h>
+#include <Engine/Objects/3D/Geometory/AABB.h>
+#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
+
+// lib
+#include <Engine/Foundation/Utility/Func/MyFunc.h>
+
+// c++
+#include <externals/imgui/imgui.h>
+#include <cmath>
+
+Camera3d::Camera3d()
+    : BaseCamera(){
+	BaseCamera::SetName("MainCamera");
+	worldTransform_.translation = {0.0f, 2.0f, -10.0f};
+}
+
+Camera3d::Camera3d(const std::string& name){
+	SceneObject::SetName(name, ObjectType::Camera);
+}
+
+void Camera3d::Initialize() {
+	worldTransform_.translation = { 0.0f, 2.0f, -10.0f };
+}
+
+void Camera3d::AlwaysUpdate(float dt){
+
+	BaseCamera::AlwaysUpdate(dt);
+
+	frustum_.ExtractFromMatrix(viewProjectionMatrix_);
+	frustum_.Draw();
+}
+
+void Camera3d::ShowGui(){
+	//名前の表示
+	worldTransform_.ShowImGui();
+}
+
+bool Camera3d::IsVisible(const AABB& aabb) const{
+	return frustum_.IsAABBInside(aabb.min_, aabb.max_);
+}
+
+REGISTER_SCENE_OBJECT(Camera3d)

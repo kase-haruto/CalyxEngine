@@ -40,6 +40,5 @@ inline void from_json(const nlohmann::json& j, EnemySpawnerConfig& c) {
 	if (j.contains("useXZDistance"))     j.at("useXZDistance").get_to(c.useXZDistance);
 	if (j.contains("transform"))         j.at("transform").get_to(c.transform);
 
-	// ✅ これを必ず追加
 	if (j.contains("formation"))         j.at("formation").get_to(c.formation);
 }
