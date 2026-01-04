@@ -38,7 +38,11 @@ void EnemyResultHud::Initialize(const ResultTransitionPayload& payload) {
 
 		// icon
 		row.icon = std::make_unique<Calyx2D::SpriteObject2d>();
-		row.icon->Initialize("Textures/uvChecker.png"); // TODO: 敵アイコンテクスチャに差し替え
+		if(e.kind == EnemyKind::Boss) {
+			row.icon->Initialize("Textures/ResultHud/bossDead.png");
+		}else {
+			row.icon->Initialize("Textures/ResultHud/enemyDead.png");
+		}
 		row.icon->SetScale(configData_->iconSize);
 		row.icon->SetPosition(configData_->posEnd + CalyxMath::Vector2{0.0f,row.rowY} + configData_->iconOffset);
 

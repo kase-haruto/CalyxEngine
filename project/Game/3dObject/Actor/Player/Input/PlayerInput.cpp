@@ -28,8 +28,8 @@ std::vector<PlayerCommand> PlayerInput::CollectCommands(float dt) {
 	// レティクル
 	CalyxMath::Vector3 ret{};
 	CalyxMath::Vector2 rs = Input::GetInstance()->GetRightStick();
-	ret.x = rs.x * 300.0f * dt;
-	ret.y = rs.y * 300.0f * dt;
+	ret.x = rs.x * 100.0f * dt;
+	ret.y = rs.y * 100.0f * dt;
 	if(ret.LengthSquared() > 0.0f) {
 		cmds.push_back({
 			PlayerCommandType::MoveReticle,

@@ -204,7 +204,6 @@ void GameScene::ResultUpdate(float dt) {
 	enemyBulletContainer_->Update(dt);
 
 	if(resultOverlay_) {
-		resultOverlay_->ShowGUi();
 		resultOverlay_->Update(dt);
 	}
 }

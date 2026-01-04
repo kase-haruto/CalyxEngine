@@ -40,6 +40,6 @@ public:
 	CalyxMath::Vector2 numberOffset = {80.0f,0.0f};
 
 	// サイズ
-	CalyxMath::Vector2 iconSize  = {48.0f,48.0f};
+	CalyxMath::Vector2 iconSize  = {64.0f,64.0f};
 	CalyxMath::Vector2 digitSize = {32.0f,32.0f};
 };

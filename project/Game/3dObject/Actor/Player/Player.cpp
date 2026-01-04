@@ -375,13 +375,14 @@ void Player::RequestShoot() const {
 									 : PlayerShoot::BulletMode::Homing);
 
 	// 発射されていたらエフェクトを再生
-	if(bool isFired = shootingController_->RequestShoot(playerPos, dir)) {
+	if(shootingController_->RequestShoot(playerPos, dir)) {
 		// 発射エフェクト
 		shootFx_->PlayAll();
+		if(lockOn_) {
+			lockOn_->RequestLockOnClear();
+		}
 	}
-	if(lockOn_) {
-		lockOn_->RequestLockOnClear();
-	}
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////

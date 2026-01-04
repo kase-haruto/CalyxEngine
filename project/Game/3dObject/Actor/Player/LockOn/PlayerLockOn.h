@@ -94,7 +94,7 @@ private:
 
 	float lockOnRadiusPx_        = 60.0f;	//< ロックオン表示半径(px)
 	float lockOnAcquireRadiusPx_ = 60.0f;	//< ロックオン獲得半径(px)
-	float lockOnReleaseRadiusPx_ = 150.0f;	//< ロックオン解除半径(px)
+	float lockOnReleaseRadiusPx_ = 400.0f;	//< ロックオン解除半径(px)
 	float lockOnRefreshInterval_ = 0.15f;	//< ロックオン判定間隔（秒）
 	float lockOnRefreshTimer_    = 0.0f;	//< ロックオン判定タイマー
 
