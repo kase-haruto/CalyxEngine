@@ -173,6 +173,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Application\Effects\FxObject.cpp" />
     <ClCompile Include="Engine\Application\Effects\Particle\Module\OverLifetime\OverLifetimeModule.cpp" />
     <ClCompile Include="Engine\Foundation\Clock\StateTimer.cpp" />
+    <ClCompile Include="Engine\Foundation\Math\Matrix3x4.cpp" />
     <ClCompile Include="Engine\Foundation\Serialization\ParamStore.cpp" />
     <ClCompile Include="Engine\Foundation\Serialization\SerializableObject.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Animation\AnimationLoop.cpp" />
@@ -566,6 +567,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Application\Effects\FxObject.h" />
     <ClInclude Include="Engine\Application\Effects\Particle\Module\OverLifetime\OverLifetimeModule.h" />
     <ClInclude Include="Engine\Foundation\Clock\StateTimer.h" />
+    <ClInclude Include="Engine\Foundation\Math\Matrix3x4.h" />
     <ClInclude Include="Engine\Foundation\Serialization\SerializableField.h" />
     <ClInclude Include="Engine\Foundation\Serialization\SerializableObject.h" />
     <ClInclude Include="Engine\Foundation\Utility\Animation\AnimationLoop.h" />

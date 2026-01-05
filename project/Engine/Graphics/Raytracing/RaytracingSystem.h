@@ -2,6 +2,8 @@
 /* ========================================================================
 /*	include space
 /* ===================================================================== */
+#include "Engine/Graphics/Descriptor/DescriptorAllocator.h"
+
 #include <d3d12.h>
 #include <wrl.h>
 
@@ -32,23 +34,23 @@ namespace CalyxGraphics {
 		 */
 		void BuildTLAS(
 			ID3D12GraphicsCommandList4* cmd,
-			const RaytracingScene& scene
-		);
+			const RaytracingScene&		scene);
 		/**
 		 * \brief TLASの取得
 		 * \return TLASのGPU仮想アドレス
 		 */
 		D3D12_GPU_DESCRIPTOR_HANDLE GetTLASSrv() const;
-		
+
 	private:
 		//===========================================================*/
 		// private members
 		//===========================================================*/
-		Microsoft::WRL::ComPtr<ID3D12Resource> tlas_;		//< TLAS
-		Microsoft::WRL::ComPtr<ID3D12Resource> scratch_;	//< スクラッチバッファ
-		D3D12_GPU_DESCRIPTOR_HANDLE tlasSrv_{};				//< TLASのSRV
+		Microsoft::WRL::ComPtr<ID3D12Resource> tlas_;	 //< TLAS
+		Microsoft::WRL::ComPtr<ID3D12Resource> scratch_; //< スクラッチバッファ
+
+		ID3D12Device5*	 device_ = nullptr;
+		DescriptorHandle tlasSrv_;			//< TLASのSRV
+		uint32_t		 tlasCapacity_ = 0; //< TLASを確保した時のインスタンス容量
 	};
 
-	
-}
-
+} // namespace CalyxGraphics

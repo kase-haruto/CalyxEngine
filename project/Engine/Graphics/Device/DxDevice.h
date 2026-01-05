@@ -24,6 +24,7 @@ namespace CalyxGraphics {
 			D3D12_RAYTRACING_TIER raytracingTier = D3D12_RAYTRACING_TIER_NOT_SUPPORTED;
 			bool shaderModel6_5 = false; // RayQuery 前提
 		};
+		
 	public:
 		///===========================================================*/
 		/// public functions
@@ -40,7 +41,9 @@ namespace CalyxGraphics {
 		// getter
 		const ComPtr<ID3D12Device>&	 GetDevice() const { return device_; }
 		const ComPtr<IDXGIFactory7>& GetDXGIFactory() const { return dxgiFactory_; }
-
+		const Capabilities& GetCaps() const { return caps_; } 
+		bool IsInlineRaytracingSupported() const;
+		
 	private:
 		//===========================================================*/
 		// private methods
