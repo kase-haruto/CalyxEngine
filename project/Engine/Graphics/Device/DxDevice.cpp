@@ -12,13 +12,20 @@
 #include <format>
 
 namespace CalyxGraphics {
-	DxDevice::~DxDevice() {}
+	DxDevice::~DxDevice() =default;
 
+	/////////////////////////////////////////////////////////////////////////////////
+	//  初期化処理
+	/////////////////////////////////////////////////////////////////////////////////
 	void DxDevice::Initialize() {
 		SetupDebugLayer();
 		CreateDXGIDevice();
+		QueryCapabilities();
 	}
 
+	/////////////////////////////////////////////////////////////////////////////////
+	//  デバッグレイヤーのセットアップ
+	/////////////////////////////////////////////////////////////////////////////////
 	void DxDevice::SetupDebugLayer() {
 #if defined(_DEBUG)
 		if(SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController_)))) {
@@ -28,6 +35,9 @@ namespace CalyxGraphics {
 #endif
 	}
 
+	//////////////////////////////////////////////////////////////////////////////
+	//  DXGIデバイスの生成
+	//////////////////////////////////////////////////////////////////////////////
 	void DxDevice::CreateDXGIDevice() {
 		HRESULT hr;
 		// dxgiファクトリーの生成
@@ -98,5 +108,32 @@ namespace CalyxGraphics {
 			infoQueue->PushStorageFilter(&filter);
 		}
 #endif // _DEBUG
+	}
+
+	///////////////////////////////////////////////////////////////////////////////
+	//  レイトレーシング機能確認
+	///////////////////////////////////////////////////////////////////////////////
+	void DxDevice::QueryCapabilities() {
+		assert(device_ && "Device must be created before QueryCapabilities().");
+
+		// ---- Device5 取得（DXRで必須）----
+		HRESULT hr = device_->QueryInterface(IID_PPV_ARGS(&device5_));
+		assert(SUCCEEDED(hr) && device5_ && "Failed to get ID3D12Device5 (DXR requires it).");
+
+		// ---- DXR Tier（Options5）----
+		D3D12_FEATURE_DATA_D3D12_OPTIONS5 opt5{};
+		hr = device_->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &opt5, sizeof(opt5));
+		assert(SUCCEEDED(hr) && "CheckFeatureSupport OPTIONS5 failed.");
+		caps_.raytracingTier = opt5.RaytracingTier;
+
+		// ---- Shader Model 6.5（RayQueryに必要）----
+		D3D12_FEATURE_DATA_SHADER_MODEL sm{};
+		sm.HighestShaderModel = D3D_SHADER_MODEL_6_5;
+		hr					  = device_->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &sm, sizeof(sm));
+		caps_.shaderModel6_5  = SUCCEEDED(hr) && (sm.HighestShaderModel >= D3D_SHADER_MODEL_6_5);
+
+		// ログ
+		Log(std::format("RaytracingTier:{}\n", static_cast<int>(caps_.raytracingTier)));
+		Log(std::format("ShaderModel6_5:{}\n", caps_.shaderModel6_5 ? "true" : "false"));
 	}
 } // namespace CalyxGraphics
