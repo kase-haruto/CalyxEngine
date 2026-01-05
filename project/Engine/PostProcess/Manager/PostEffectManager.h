@@ -54,7 +54,7 @@ public:
 	void Execute(ID3D12GraphicsCommandList* cmd,
 				 DxGpuResource* input,
 				 IRenderTarget* finalTarget,
-				 DxCore* dxCore);
+				 CalyxGraphics::DxCore* dxCore);
 
 	void TweenFloat(const std::string& passName,
 					std::function<float()> getter,
@@ -101,7 +101,7 @@ private:
 	bool initialized_ = false;
 	bool dirty_ = true;
 
-	DxCore* dxCore_ = nullptr;
+	CalyxGraphics::DxCore* dxCore_ = nullptr;
 
 	PostProcessCollection collection_;
 	PostEffectGraph graph_{&collection_};

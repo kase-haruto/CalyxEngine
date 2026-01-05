@@ -20,7 +20,7 @@
 #include <Game/Scene/Game/GameScene.h>
 
 namespace CalyxScene {
-	SceneManager::SceneManager(DxCore* dx)
+	SceneManager::SceneManager(CalyxGraphics::DxCore* dx)
 	: dx_(dx) {
 		transitionService_ = std::make_unique<SceneTransitionService>(*this);
 	}

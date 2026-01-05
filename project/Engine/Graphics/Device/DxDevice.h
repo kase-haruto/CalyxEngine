@@ -5,34 +5,52 @@
 #include <string>
 #include <wrl.h>
 
-class DxDevice {
-	template <class T>
-	using ComPtr = Microsoft::WRL::ComPtr<T>;
+namespace CalyxGraphics {
 
-public:
-	DxDevice() = default;
-	~DxDevice();
+	/*----------------------------------------------------------------
+	 *	Dx Device
+	 *	- DirectX12デバイス管理
+	 *---------------------------------------------------------------*/
+	class DxDevice {
+		template <class T>
+		using ComPtr = Microsoft::WRL::ComPtr<T>;
 
-	void						 Initialize();
-	const ComPtr<ID3D12Device>&	 GetDevice() const { return device_; }
-	const ComPtr<IDXGIFactory7>& GetDXGIFactory() const { return dxgiFactory_; }
+	public:
+		///===========================================================*/
+		/// public functions
+		///===========================================================*/
+		/** \brief コンストラクタ・デストラクタ */
+		DxDevice() = default;
+		~DxDevice();
 
-private:
-	/// <summary>
-	/// デバッグレイヤーの設定
-	/// </summary>
-	void SetupDebugLayer();
-	/// <summary>
-	/// デバイスの作成
-	/// </summary>
-	void CreateDXGIDevice();
+		/**
+		 * \brief 初期化
+		 */
+		void						 Initialize();
 
-private:
-	///////////////////////////////////////////////////
-	//              リソース
-	///////////////////////////////////////////////////
-	ComPtr<ID3D12Device>  device_		   = nullptr;
-	ComPtr<IDXGIAdapter4> adapter_		   = nullptr;
-	ComPtr<IDXGIFactory7> dxgiFactory_	   = nullptr;
-	ComPtr<ID3D12Debug1>  debugController_ = nullptr;
-};
+		//- accessors --------------------------------//
+		// getter
+		const ComPtr<ID3D12Device>&	 GetDevice() const { return device_; }
+		const ComPtr<IDXGIFactory7>& GetDXGIFactory() const { return dxgiFactory_; }
+
+	private:
+		/**
+		 * \brief デバッグレイヤーのセットアップ
+		 */
+		void SetupDebugLayer();
+		/**
+		 * \brief DXGIデバイスの生成
+		 */
+		void CreateDXGIDevice();
+
+	private:
+		///////////////////////////////////////////////////
+		//              リソース
+		///////////////////////////////////////////////////
+		ComPtr<ID3D12Device>  device_		   = nullptr;	//< D3D12デバイス
+		ComPtr<IDXGIAdapter4> adapter_		   = nullptr;	//< アダプター
+		ComPtr<IDXGIFactory7> dxgiFactory_	   = nullptr;	//< DXGIファクトリー
+		ComPtr<ID3D12Debug1>  debugController_ = nullptr;	//< デバッグコントローラー
+	};
+
+} // namespace CalyxGraphics

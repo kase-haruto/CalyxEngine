@@ -23,7 +23,7 @@ void PostEffectGraph::SetPassesFromList(const std::vector<PostEffectSlot>& slots
 void PostEffectGraph::Execute(ID3D12GraphicsCommandList* cmd,
 							  DxGpuResource* input,
 							  IRenderTarget* finalTarget,
-							  DxCore* dxCore){
+							  CalyxGraphics::DxCore* dxCore){
 
 
 

@@ -22,7 +22,7 @@ void FogEffect::ShowImGuiInterface(){
 #endif // _DEBUG
 }
 
-FogEffect::FogEffect(const DxCore* dxCore):pDxCore_(dxCore){
+FogEffect::FogEffect(const CalyxGraphics::DxCore* dxCore):pDxCore_(dxCore){
 	//定数バッファの生成
 	CreateConstantBuffer();
 
@@ -63,7 +63,7 @@ void FogEffect::CreateConstantBuffer(){
 	D3D12_HEAP_PROPERTIES heapProps = {};
 	heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
 
-	ComPtr<ID3D12Device> device = pDxCore_->GetDevice();
+	ComPtr<ID3D12Device> device =pDxCore_->GetDevice();
 
 	// リソースの作成
 	device->CreateCommittedResource(
@@ -76,7 +76,7 @@ void FogEffect::CreateConstantBuffer(){
 }
 
 void FogEffect::Update(){
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>commandList = pDxCore_->GetCommandList();
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>commandList =pDxCore_->GetCommandList();
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature = GraphicsGroup::GetInstance()->GetRootSignature(Object3D);
 	commandList->SetGraphicsRootSignature(rootSignature.Get());
 	//フォグ用のCBufferの設定

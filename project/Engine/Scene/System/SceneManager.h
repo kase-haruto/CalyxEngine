@@ -22,7 +22,7 @@ namespace CalyxScene {
 
 	class SceneManager {
 	public:
-		explicit SceneManager(DxCore* dx);
+		explicit SceneManager(CalyxGraphics::DxCore* dx);
 		~SceneManager();
 
 		void Initialize();
@@ -95,7 +95,7 @@ namespace CalyxScene {
 		std::optional<size_t> pendingSwitchIndex_;
 		std::unique_ptr<IScenePayload> pendingPayload_;
 
-		DxCore* dx_ = nullptr;
+		CalyxGraphics::DxCore* dx_ = nullptr;
 		CalyxEditor::PlaySession* pPlaySession_ = nullptr;
 
 		SceneContext* lastBoundCtx_ = nullptr;
