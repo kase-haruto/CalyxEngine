@@ -266,6 +266,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">ProgramDatabase</DebugInformationFormat>
       <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ProgramDatabase</DebugInformationFormat>
     </ClCompile>
+    <ClCompile Include="Engine\Graphics\Shadow\Raytracing\RaytracingMesh.cpp" />
+    <ClCompile Include="Engine\Graphics\Shadow\Raytracing\RaytracingScene.cpp" />
+    <ClCompile Include="Engine\Graphics\Shadow\Raytracing\RaytracingSystem.cpp" />
     <ClCompile Include="Engine\Graphics\Shadow\ShadowMap\GpuResource\ShadowMapResource.cpp" />
     <ClCompile Include="Engine\Graphics\Shadow\ShadowMap\ShadowMapSystem.cpp" />
     <ClCompile Include="Engine\Objects\2D\Actor\Character2D.cpp" />
@@ -580,6 +583,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Foundation\Math\MathUtil.h" />
     <ClInclude Include="Engine\Foundation\Serialization\FieldVisit.h" />
     <ClInclude Include="Engine\Graphics\Camera\Action\BaseCameraAction.h" />
+    <ClInclude Include="Engine\Graphics\Shadow\Raytracing\RaytracingMesh.h" />
+    <ClInclude Include="Engine\Graphics\Shadow\Raytracing\RaytracingScene.h" />
+    <ClInclude Include="Engine\Graphics\Shadow\Raytracing\RaytracingSystem.h" />
+    <ClInclude Include="Engine\Graphics\Shadow\Raytracing\RaytracingTypes.h" />
     <ClInclude Include="Engine\Graphics\Shadow\ShadowMap\GpuResource\ShadowMapResource.h" />
     <ClInclude Include="Engine\Graphics\Shadow\ShadowMap\ShadowMapSystem.h" />
     <ClInclude Include="Engine\Objects\2D\Actor\Character2D.h" />

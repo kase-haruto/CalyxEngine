@@ -2319,6 +2319,10 @@
     <ClInclude Include="Game\2d\Hud\HudMotionBuilder.h" />
     <ClInclude Include="Game\2d\Hud\HudMotionGuiHelper.h" />
     <ClInclude Include="Game\2d\Hud\ScoreResultHud.h" />
+    <ClInclude Include="Engine\Graphics\Shadow\Raytracing\RaytracingMesh.h" />
+    <ClInclude Include="Engine\Graphics\Shadow\Raytracing\RaytracingScene.h" />
+    <ClInclude Include="Engine\Graphics\Shadow\Raytracing\RaytracingSystem.h" />
+    <ClInclude Include="Engine\Graphics\Shadow\Raytracing\RaytracingTypes.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\ChromaticAberration.PS.hlsl">
@@ -2472,6 +2476,9 @@
     <ClCompile Include="Game\2d\Hud\HudMotionBuilder.cpp" />
     <ClCompile Include="Game\2d\Hud\HudMotionGuiHelper.cpp" />
     <ClCompile Include="Game\2d\Hud\ScoreResultHud.cpp" />
+    <ClCompile Include="Engine\Graphics\Shadow\Raytracing\RaytracingMesh.cpp" />
+    <ClCompile Include="Engine\Graphics\Shadow\Raytracing\RaytracingScene.cpp" />
+    <ClCompile Include="Engine\Graphics\Shadow\Raytracing\RaytracingSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
