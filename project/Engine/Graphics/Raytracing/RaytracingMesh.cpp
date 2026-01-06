@@ -70,7 +70,7 @@ namespace CalyxGraphics {
 		geom.Triangles.VertexCount =
 			static_cast<UINT>(model.meshData.vertices.size());
 		geom.Triangles.VertexFormat =
-			DXGI_FORMAT_R32G32B32A32_FLOAT; // position : float4
+			DXGI_FORMAT_R32G32B32_FLOAT; // position only
 
 		geom.Triangles.IndexBuffer =
 			ib.GetResource()->GetGPUVirtualAddress();

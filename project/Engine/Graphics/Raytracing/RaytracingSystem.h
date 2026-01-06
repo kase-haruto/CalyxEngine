@@ -41,6 +41,8 @@ namespace CalyxGraphics {
 		 */
 		D3D12_GPU_DESCRIPTOR_HANDLE GetTLASSrv() const;
 
+		ID3D12Resource* GetTLAS() const;
+
 	private:
 		//===========================================================*/
 		// private members

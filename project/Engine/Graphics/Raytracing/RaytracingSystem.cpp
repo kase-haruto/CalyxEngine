@@ -149,4 +149,8 @@ namespace CalyxGraphics {
 		return tlasSrv_.gpu;
 	}
 
+	ID3D12Resource* RaytracingSystem::GetTLAS() const {
+		return tlas_.Get();
+	}
+
 } // namespace CalyxGraphics

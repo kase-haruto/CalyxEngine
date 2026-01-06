@@ -87,6 +87,16 @@ void BaseModel::UpdateTexture(float deltaTime) {
 	}
 }
 
+void BaseModel::EnsureRaytracingBLAS(ID3D12Device5* device5, ID3D12GraphicsCommandList4* cmdList4) {
+	if (blasBuilt_) return;
+	if (!modelData_.has_value()) return;
+	if (!device5 || !cmdList4) return;
+
+	// VB/IB が初期化されていることが前提（OnModelLoaded 済み）
+	rayMesh_.BuildBLAS(device5, cmdList4, *modelData_);
+	blasBuilt_ = true;
+}
+
 void BaseModel::ShowImGuiInterface() {
 
 

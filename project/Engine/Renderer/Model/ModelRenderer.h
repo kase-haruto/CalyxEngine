@@ -8,6 +8,8 @@
 #include <Engine/Objects/3D/Details/BillboardParams.h>
 #include <Engine/Objects/Transform/Transform.h>
 #include <Engine/Graphics/Buffer/DxStructuredBuffer.h>
+#include <Engine/Graphics/Raytracing/RaytracingScene.h>
+#include <Engine/Graphics/Raytracing/RaytracingSystem.h>
 
 #include <unordered_map>
 #include <vector>
@@ -91,4 +93,10 @@ private:
 
 	std::vector<WorldTransform> tempVisibleStatic_;
 	std::vector<WorldTransform> tempVisibleSkinned_;
+
+	// ============================
+	// Inline Raytracing (Shadow)
+	// ============================
+	CalyxGraphics::RaytracingSystem raytracingSystem_;
+	CalyxGraphics::RaytracingScene  raytracingScene_;
 };

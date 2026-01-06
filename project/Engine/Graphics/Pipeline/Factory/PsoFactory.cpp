@@ -68,11 +68,11 @@ PsoFactory::Create(const GraphicsPipelineDesc& desc) {
 
 	ComPtr<IDxcBlob> vsBlob, psBlob;
 	if (!desc.vs_.empty()) {
-		vsBlob = compile(desc.vs_, L"vs_6_0");
+		vsBlob = compile(desc.vs_, L"vs_6_5");
 		pso.VS = { vsBlob->GetBufferPointer(), vsBlob->GetBufferSize() };
 	}
 	if (!desc.ps_.empty()) {
-		psBlob = compile(desc.ps_, L"ps_6_0");
+		psBlob = compile(desc.ps_, L"ps_6_5");
 		pso.PS = { psBlob->GetBufferPointer(), psBlob->GetBufferSize() };
 	}
 
