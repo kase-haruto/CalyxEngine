@@ -29,6 +29,14 @@ void PipelineService::RegisterAllPipelines() {
 		objCache_[key] = { pso, root };
 	};
 
+	auto regObjNoBlend = [&](PipelineTag::Object tag, auto makeFn) {
+		GraphicsPipelineDesc desc = makeFn();
+		auto pso = library_->GetOrCreate(desc);
+		auto root = library_->GetRoot(desc);
+		PipelineKey key{ tag, BlendMode::ADD };
+		objCache_[key] = { pso, root };
+	};
+
 	auto regPP = [&](PipelineTag::PostProcess tag, auto makeFn) {
 		GraphicsPipelineDesc desc = makeFn();
 		auto pso = library_->GetOrCreate(desc);
@@ -66,6 +74,10 @@ void PipelineService::RegisterAllPipelines() {
 		regObj(PipelineTag::Object::Particle, mode, PipelinePresets::MakeParticle);
 		regObj(PipelineTag::Object::GpuParticle, mode, PipelinePresets::MakeGpuParticle);
 	}
+
+	//========================= Shadow ===================================
+	regObjNoBlend(PipelineTag::Object::ShadowStatic, PipelinePresets::MakeShadowStatic());
+	regObjNoBlend(PipelineTag::Object::ShadowSkinned, PipelinePresets::MakeShadowSkinned());
 
 	//=================== cs Pipelines ===================================
 

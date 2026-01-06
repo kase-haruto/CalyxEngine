@@ -37,6 +37,33 @@ GraphicsPipelineDesc PipelinePresets::MakeObject3D(BlendMode mode) {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
+//		3d 静的オブジェクトshadowMap用
+/////////////////////////////////////////////////////////////////////////////////////////
+GraphicsPipelineDesc PipelinePresets::MakeShadowStatic() {
+	GraphicsPipelineDesc desc;
+
+	desc.VS(L"ShadowStatic.VS.hlsl")
+		.Input(VertexInputLayout<VertexPosUvN>::Get())
+		.CullBack()
+		.DepthEnable(true)
+		.DepthFunc(D3D12_COMPARISON_FUNC_LESS_EQUAL)
+		.Samples(1);
+
+	// Shadow は色を書かない
+	desc.rtvFormats_.clear();
+
+	// ShadowMap の DSV
+	desc.dsvFormat_ = DXGI_FORMAT_D32_FLOAT;
+
+	desc.root_
+		.AllowIA()
+		.CBV(0,D3D12_SHADER_VISIBILITY_VERTEX)  // ShadowCB
+		.CBV(1,D3D12_SHADER_VISIBILITY_VERTEX); // World
+
+	return desc;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
 //		skinModel
 /////////////////////////////////////////////////////////////////////////////////////////
 GraphicsPipelineDesc PipelinePresets::MakeSkinningObject3D(BlendMode mode) {
@@ -63,6 +90,34 @@ GraphicsPipelineDesc PipelinePresets::MakeSkinningObject3D(BlendMode mode) {
 		.SRVTable(0,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_VERTEX) // SkinningBuffer
 
 		.SamplerWrapLinear(0);
+
+	return desc;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//		3d スキニング shadowMap用
+/////////////////////////////////////////////////////////////////////////////////////////
+GraphicsPipelineDesc PipelinePresets::MakeShadowSkinned() {
+	GraphicsPipelineDesc desc;
+
+	desc.VS(L"ShadowSkinned.VS.hlsl")
+		.Input(VertexInputLayout<VertexPosUvNSkinning>::Get())
+		.CullBack()
+		.DepthEnable(true)
+		.DepthFunc(D3D12_COMPARISON_FUNC_LESS_EQUAL)
+		.Samples(1);
+
+	desc.rtvFormats_.clear();
+	desc.dsvFormat_ = DXGI_FORMAT_D32_FLOAT;
+
+	desc.root_
+		.AllowIA()
+		.CBV(0,D3D12_SHADER_VISIBILITY_VERTEX) // ShadowCB
+		.CBV(1,D3D12_SHADER_VISIBILITY_VERTEX) // World
+		.SRVTable(
+			0,1,
+			D3D12_DESCRIPTOR_RANGE_TYPE_SRV,
+			D3D12_SHADER_VISIBILITY_VERTEX); // JointMatrices
 
 	return desc;
 }
@@ -99,6 +154,7 @@ GraphicsPipelineDesc PipelinePresets::MakeParticle(BlendMode mode) {
 	return desc;
 }
 
+
 GraphicsPipelineDesc PipelinePresets::MakeGpuParticle(BlendMode mode) {
 	D3D12_DEPTH_STENCIL_DESC depthDesc = {};
 	depthDesc.DepthEnable              = TRUE;
@@ -126,6 +182,7 @@ GraphicsPipelineDesc PipelinePresets::MakeGpuParticle(BlendMode mode) {
 
 	return desc;
 }
+
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		2dObject

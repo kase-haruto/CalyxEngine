@@ -25,6 +25,8 @@ RootSignatureBuilder& RootSignatureBuilder::UAV(UINT reg, D3D12_SHADER_VISIBILIT
 	return *this;
 }
 
+
+
 RootSignatureBuilder& RootSignatureBuilder::UAVTable(UINT shaderRegister, UINT count, D3D12_SHADER_VISIBILITY visibility) {
 	descriptorTables_.emplace_back();
 	auto& entry = descriptorTables_.back();
@@ -66,12 +68,16 @@ RootSignatureBuilder& RootSignatureBuilder::SamplerWrapAniso(UINT reg, UINT maxA
 	return *this;
 }
 
-
-
 /////////////////////////////////////////////////////////////////////////////////////////
 //		フラグを設定
 /////////////////////////////////////////////////////////////////////////////////////////
 RootSignatureBuilder& RootSignatureBuilder::AllowIA(){ flags_ |= D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT; return *this; }
+
+RootSignatureBuilder& RootSignatureBuilder::AllowDXR() {
+	flags_ |= D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED;
+	flags_ |= D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED;
+	return *this;
+}
 
 RootSignatureBuilder& RootSignatureBuilder::DenyVS(){ flags_ |= D3D12_ROOT_SIGNATURE_FLAG_DENY_VERTEX_SHADER_ROOT_ACCESS;    return *this; }
 
@@ -152,5 +158,3 @@ D3D12_STATIC_SAMPLER_DESC RootSignatureBuilder::MakeSampler(UINT reg, D3D12_SHAD
 void RootSignatureBuilder::AddParm(D3D12_ROOT_PARAMETER param){
 	params_.push_back(param);
 }
-
-

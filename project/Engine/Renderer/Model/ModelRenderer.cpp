@@ -17,7 +17,6 @@ ModelRenderer::ModelRenderer() {
 	Microsoft::WRL::ComPtr<ID3D12Device5> device5;
 	GraphicsGroup::GetInstance()->GetDevice()->QueryInterface(IID_PPV_ARGS(&device5));
 
-	raytracingSystem_.Initialize(device5.Get());
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

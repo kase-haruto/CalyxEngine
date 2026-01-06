@@ -11,7 +11,7 @@
 #include <Engine/Objects/Transform/Transform.h>
 #include <Engine/Graphics/Buffer/DxStructuredBuffer.h>
 #include <Engine/Objects/3D/Details/BillboardParams.h>
-#include <Engine/Graphics/Raytracing/RaytracingMesh.h>
+#include <Engine/Graphics/Shadow/Raytracing/RaytracingMesh.h>
 
 /*data*/
 #include <Data/Engine/Configs/Scene/Objects/Model/BaseModelConfig.h>

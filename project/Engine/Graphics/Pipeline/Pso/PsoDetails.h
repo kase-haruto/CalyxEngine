@@ -22,6 +22,8 @@ namespace PipelineTag {
 	enum class Object :std::uint16_t {
 		Object3d,
 		SkinningObject3D,
+		ShadowStatic,
+		ShadowSkinned,
 		Object2d,
 		Particle,
 		GpuParticle,
@@ -29,7 +31,7 @@ namespace PipelineTag {
 		Effect,
 		Skybox,
 
-		count
+		count,
 	};
 
 	enum class PostProcess :std::uint16_t {
