@@ -30,14 +30,14 @@ namespace CalyxGraphics {
 		~DxCore();
 
 		// 初期化
-		void Initialize(WinApp* winApp, uint32_t width, uint32_t height);
+		void Initialize(WinApp* winApp,uint32_t width,uint32_t height);
 
 		/// <summary>
 		/// レンダラ初期化
 		/// </summary>
 		/// <param name="width"></param>
 		/// <param name="height"></param>
-		void RendererInitialize(uint32_t width, uint32_t height);
+		void RendererInitialize(uint32_t width,uint32_t height);
 
 		// 描画処理
 		void PreDraw();
@@ -57,10 +57,11 @@ namespace CalyxGraphics {
 		//===================================================================*/
 		//		accessor
 		//===================================================================*/
-		const ComPtr<ID3D12Device>&				 GetDevice() const { return dxDevice_->GetDevice(); }
+		const ComPtr<ID3D12Device>&              GetDevice() const { return dxDevice_->GetDevice(); }
+		ID3D12Device5*                           GetDevice5()const { return dxDevice_->GetDevice5(); }
 		const ComPtr<ID3D12GraphicsCommandList>& GetCommandList() const { return dxCommand_->GetCommandList(); }
-		const DxSwapChain&						 GetSwapChain() const { return *dxSwapChain_; }
-		const RenderTargetCollection&			 GetRenderTargetCollection() const { return *renderTargetCollection_; }
+		const DxSwapChain&                       GetSwapChain() const { return *dxSwapChain_; }
+		const RenderTargetCollection&            GetRenderTargetCollection() const { return *renderTargetCollection_; }
 		// メソッド追加
 		DXGI_FORMAT GetFormat() const { return format_; }
 
@@ -69,21 +70,21 @@ namespace CalyxGraphics {
 		//		private methods
 		//===================================================================*/
 
-		WinApp*	 winApp_	   = nullptr;
+		WinApp*  winApp_       = nullptr;
 		uint32_t clientWidth_  = 0;
 		uint32_t clientHeight_ = 0;
 
 		// DirectX関連
-		std::unique_ptr<DxDevice>	 dxDevice_;
-		std::unique_ptr<DxCommand>	 dxCommand_;
+		std::unique_ptr<DxDevice>    dxDevice_;
+		std::unique_ptr<DxCommand>   dxCommand_;
 		std::unique_ptr<DxSwapChain> dxSwapChain_;
 
-		ComPtr<ID3D12DescriptorHeap>			rtvHeap_;
-		ComPtr<ID3D12DescriptorHeap>			dsvHeap_;
-		UINT									rtvDescriptorSize_ = 0;
-		DXGI_FORMAT								format_			   = DXGI_FORMAT_R8G8B8A8_UNORM; // 仮の初期値
+		ComPtr<ID3D12DescriptorHeap>            rtvHeap_;
+		ComPtr<ID3D12DescriptorHeap>            dsvHeap_;
+		UINT                                    rtvDescriptorSize_ = 0;
+		DXGI_FORMAT                             format_            = DXGI_FORMAT_R8G8B8A8_UNORM; // 仮の初期値
 		std::unique_ptr<RenderTargetCollection> renderTargetCollection_;
-		std::unique_ptr<DxFence>				dxFence_;
+		std::unique_ptr<DxFence>                dxFence_;
 	};
 
 } // namespace CalyxGraphics

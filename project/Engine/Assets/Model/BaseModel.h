@@ -11,6 +11,7 @@
 #include <Engine/Objects/Transform/Transform.h>
 #include <Engine/Graphics/Buffer/DxStructuredBuffer.h>
 #include <Engine/Objects/3D/Details/BillboardParams.h>
+#include <Engine/Graphics/Raytracing/RaytracingMesh.h>
 
 /*data*/
 #include <Data/Engine/Configs/Scene/Objects/Model/BaseModelConfig.h>
@@ -58,9 +59,17 @@ public:
 	void SetTex(const std::string& name);
 	void SetLightingMode(LightingMode mode) { materialData_.lightingMode = mode; }
 
+	// 参照用（TLAS インスタンス登録で使う）
+	D3D12_GPU_VIRTUAL_ADDRESS GetBLAS() const { return rayMesh_.GetBLAS(); }
+	bool HasBLAS() const { return blasBuilt_ && rayMesh_.GetBLAS() != 0; }
+
 	//--------- render用（レンダラーから呼ぶ軽量API） -----------------------------
 	void EnsureInstanceCapacity(ID3D12Device* device, UINT needCount);
 	void UploadInstanceMatrices(const std::vector<WorldTransform>& tf);
+
+	void EnsureRaytracingBLAS(ID3D12Device5* device5, ID3D12GraphicsCommandList4* cmdList4);
+
+
 
 	// レンダラーが使うハンドル
 	D3D12_GPU_DESCRIPTOR_HANDLE GetInstanceSrv()const;  //< VS:t0 (gTransMat)
@@ -116,4 +125,8 @@ protected:
 	// -------- ビルボード（VS:t1）フレームリング -------------------------------
 	DxStructuredBuffer<GpuBillboardParams> billboardBuffer_;
 	UINT billboardCapacity_ = 0;
+
+
+	CalyxGraphics::RaytracingMesh rayMesh_;
+	bool blasBuilt_ = false;
 };

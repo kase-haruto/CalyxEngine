@@ -40,6 +40,7 @@ namespace CalyxGraphics {
 		//- accessors ------------------------------------------------//
 		// getter
 		const ComPtr<ID3D12Device>&	 GetDevice() const { return device_; }
+		ID3D12Device5* GetDevice5(){return device5_.Get();}
 		const ComPtr<IDXGIFactory7>& GetDXGIFactory() const { return dxgiFactory_; }
 		const Capabilities& GetCaps() const { return caps_; } 
 		bool IsInlineRaytracingSupported() const;

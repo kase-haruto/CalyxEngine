@@ -27,6 +27,7 @@ public:
 	/// device/commandListの取得
 	///=========================================
 	ComPtr<ID3D12Device>			  GetDevice() const;
+	ID3D12Device5*					  GetDevice5() const;
 	ComPtr<ID3D12GraphicsCommandList> GetCommandList() const;
 
 	void SetCommand(ComPtr<ID3D12GraphicsCommandList> commandList, PipelineType psoType, BlendMode blendMode);

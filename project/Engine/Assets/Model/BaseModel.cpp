@@ -27,6 +27,7 @@ void BaseModel::Update(float deltaTime) {
 		if (ModelManager::GetInstance()->IsModelLoaded(fileName_)) {
 			auto loaded = ModelManager::GetInstance()->GetModelData(fileName_);
 			modelData_ = loaded;
+
 			OnModelLoaded();
 		}
 		// loaded が nullptr の場合、まだ読み込み中
@@ -43,8 +44,8 @@ void BaseModel::Update(float deltaTime) {
 		materialBuffer_.TransferData(materialData_);
 
 		// カメラ行列との掛け合わせ
-		modelData_->vertexBuffer.TransferVectorData(modelData_->meshData.vertices);
-		modelData_->indexBuffer.TransferVectorData(modelData_->meshData.indices);
+		// modelData_->vertexBuffer.TransferVectorData(modelData_->meshData.vertices);
+		// modelData_->indexBuffer.TransferVectorData(modelData_->meshData.indices);
 		Map();
 	}
 
@@ -55,7 +56,8 @@ void BaseModel::OnModelLoaded() {
 	modelData_->vertexBuffer.Initialize(device, UINT(modelData_->meshData.vertices.size()));
 	modelData_->indexBuffer.Initialize(device, UINT(modelData_->meshData.indices.size()));
 
-
+	modelData_->vertexBuffer.TransferVectorData(modelData_->meshData.vertices);
+	modelData_->indexBuffer.TransferVectorData(modelData_->meshData.indices);
 	// テクスチャ設定
 	if (!handle_) {
 		handle_ = TextureManager::GetInstance()->LoadTexture(
