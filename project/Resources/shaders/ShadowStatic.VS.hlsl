@@ -39,8 +39,6 @@ VSOut main(VertexShaderInput input, uint instancedId : SV_InstanceID) {
 
 	float4 worldPos = mul(input.position, tm.World);
 
-	worldPos.x += instancedId * 100.0f;
-
 	o.svpos = mul(worldPos, gLightVP);
 
 	return o;

@@ -45,9 +45,18 @@ GraphicsPipelineDesc PipelinePresets::MakeObject3D(BlendMode mode) {
 GraphicsPipelineDesc PipelinePresets::MakeShadowStatic() {
 	GraphicsPipelineDesc desc;
 
+	D3D12_RASTERIZER_DESC raster = {};
+	raster.FillMode				 = D3D12_FILL_MODE_SOLID;
+	raster.CullMode				 = D3D12_CULL_MODE_BACK;
+	raster.DepthClipEnable		 = TRUE;
+
+	raster.DepthBias			= 250; // 固定バイアス
+	raster.SlopeScaledDepthBias = 1.0f; // 角度依存バイアス
+	raster.DepthBiasClamp		= 0.0f;
+
 	desc.VS(L"ShadowStatic.VS.hlsl")
 		.Input(VertexInputLayout<VertexPosUvN>::Get())
-		.CullBack()
+		.Rasterizer(raster)
 		.DepthEnable(true)
 		.DepthFunc(D3D12_COMPARISON_FUNC_LESS_EQUAL)
 		.Samples(1);
@@ -60,7 +69,7 @@ GraphicsPipelineDesc PipelinePresets::MakeShadowStatic() {
 
 	desc.root_
 		.AllowIA()
-		.CBV(0, D3D12_SHADER_VISIBILITY_VERTEX)	 // ShadowCB
+		.CBV(0, D3D12_SHADER_VISIBILITY_VERTEX)											  // ShadowCB
 		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_VERTEX); // t0: gTransMat
 
 	return desc;
