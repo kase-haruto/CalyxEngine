@@ -101,8 +101,8 @@ CompileShader(const std::wstring& filePath, const wchar_t* profile) {
 bool ShaderManager::LoadShader(const PipelineType& type, const std::wstring& vsPath, const std::wstring& psPath) {
 	//ファイルパスをワイド文字列として結合
 	//ファイルパスをワイド文字列として結合
-	Microsoft::WRL::ComPtr<IDxcBlob> vertexShader = CompileShader(L"Resources/shaders/" + vsPath, L"vs_6_0");
-	Microsoft::WRL::ComPtr<IDxcBlob> pixelShader = CompileShader(L"Resources/shaders/" + psPath, L"ps_6_0");
+	Microsoft::WRL::ComPtr<IDxcBlob> vertexShader = CompileShader(L"Resources/shaders/" + vsPath, L"vs_6_5");
+	Microsoft::WRL::ComPtr<IDxcBlob> pixelShader = CompileShader(L"Resources/shaders/" + psPath, L"ps_6_5");
 
 	vertexShaders[type] = vertexShader;
 	pixelShaders[type] = pixelShader;

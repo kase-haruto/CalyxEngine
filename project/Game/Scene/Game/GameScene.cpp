@@ -205,8 +205,8 @@ void GameScene::ResultUpdate(float dt) {
 /////////////////////////////////////////////////////////////////////////////////////////
 void GameScene::Draw(ID3D12GraphicsCommandList* cmdList,
 					 PipelineService*           psoService,
-					 RenderTargetType           type) {
-	BaseScene::Draw(cmdList,psoService,type);
+					  IRenderTarget* rt) {
+	BaseScene::Draw(cmdList,psoService,rt);
 
 	// ingameの更新の時
 	if(updateFunc_ == &GameScene::PlayingUpdate) {

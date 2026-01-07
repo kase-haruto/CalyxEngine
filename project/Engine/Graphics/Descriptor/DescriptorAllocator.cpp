@@ -35,33 +35,41 @@ void DescriptorAllocator::CreateHeap(DescriptorUsage usage, const DescriptorHeap
 	info.descriptorSize = device_->GetDescriptorHandleIncrementSize(desc.Type);
 	info.currentOffset = 0;
 	info.maxDescriptors = settings.maxDescriptors;
+	info.shaderVisible = settings.shaderVisible;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		渡す
 /////////////////////////////////////////////////////////////////////////////////////////
 DescriptorHandle DescriptorAllocator::Allocate(DescriptorUsage usage){
-	HeapInfo& info = heaps_[usage];
+	HeapInfo&					info = heaps_[usage];
 	std::lock_guard<std::mutex> lock(info.mutex);
 
-	if (info.currentOffset >= info.maxDescriptors && info.freeList.empty()){
-		throw std::runtime_error("DescriptorAllocator: Heap is full");
-	}
+	UINT offset = 0;
 
-	uint32_t offset = 0;
-	if (!info.freeList.empty()){
+	if(!info.freeList.empty()) {
 		offset = info.freeList.top();
 		info.freeList.pop();
-	} else{
+	} else {
+		if(info.currentOffset >= info.maxDescriptors)
+			throw std::runtime_error("DescriptorAllocator: Heap is full");
 		offset = info.currentOffset++;
 	}
 
-	D3D12_CPU_DESCRIPTOR_HANDLE cpu = info.heap->GetCPUDescriptorHandleForHeapStart();
-	D3D12_GPU_DESCRIPTOR_HANDLE gpu = info.heap->GetGPUDescriptorHandleForHeapStart();
-	cpu.ptr += offset * info.descriptorSize;
-	gpu.ptr += offset * info.descriptorSize;
+	DescriptorHandle handle{};
+	handle.offset = offset;
 
-	return DescriptorHandle {cpu, gpu, offset};
+	auto cpuStart  = info.heap->GetCPUDescriptorHandleForHeapStart();
+	handle.cpu.ptr = cpuStart.ptr + offset * info.descriptorSize;
+
+	if(info.shaderVisible) {
+		auto gpuStart  = info.heap->GetGPUDescriptorHandleForHeapStart();
+		handle.gpu.ptr = gpuStart.ptr + offset * info.descriptorSize;
+	} else {
+		handle.gpu.ptr = 0;
+	}
+
+	return handle;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

@@ -55,7 +55,7 @@ void TestScene::Update([[maybe_unused]]float dt){
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
 }
 
-void TestScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService, RenderTargetType type){
+void TestScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService, IRenderTarget*  rt){
 
 	//========================================================//
 	//	spriteの登録
@@ -63,7 +63,7 @@ void TestScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoSer
 	// 
 	// 
 	//シーン上のオブジェクトの描画
-	BaseScene::Draw(cmdList, psoService, type);
+	BaseScene::Draw(cmdList, psoService, rt);
 
 }
 

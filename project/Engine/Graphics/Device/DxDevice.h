@@ -1,38 +1,78 @@
 #pragma once
-#include <cassert>
+/* ========================================================================
+/* include space
+/* ===================================================================== */
 #include <d3d12.h>
 #include <dxgi1_6.h>
-#include <string>
 #include <wrl.h>
 
-class DxDevice {
-	template <class T>
-	using ComPtr = Microsoft::WRL::ComPtr<T>;
+namespace CalyxGraphics {
 
-public:
-	DxDevice() = default;
-	~DxDevice();
+	/*----------------------------------------------------------------
+	 *	Dx Device
+	 *	- DirectX12デバイス管理
+	 *---------------------------------------------------------------*/
+	class DxDevice {
+		template <class T>
+		using ComPtr = Microsoft::WRL::ComPtr<T>;
 
-	void						 Initialize();
-	const ComPtr<ID3D12Device>&	 GetDevice() const { return device_; }
-	const ComPtr<IDXGIFactory7>& GetDXGIFactory() const { return dxgiFactory_; }
+		/*-----------------------------------------------------------
+		 *	Capabilities
+		 *	- デバイスの機能情報
+		 *----------------------------------------------------------*/
+		struct Capabilities {
+			D3D12_RAYTRACING_TIER raytracingTier = D3D12_RAYTRACING_TIER_NOT_SUPPORTED;
+			bool shaderModel6_5 = false; // RayQuery 前提
+		};
+		
+	public:
+		///===========================================================*/
+		/// public functions
+		///===========================================================*/
+		/** \brief コンストラクタ・デストラクタ */
+		DxDevice() = default;
+		~DxDevice();
+		/**
+		 * \brief 初期化
+		 */
+		void Initialize();
 
-private:
-	/// <summary>
-	/// デバッグレイヤーの設定
-	/// </summary>
-	void SetupDebugLayer();
-	/// <summary>
-	/// デバイスの作成
-	/// </summary>
-	void CreateDXGIDevice();
+		//- accessors ------------------------------------------------//
+		// getter
+		const ComPtr<ID3D12Device>&	 GetDevice() const { return device_; }
+		ID3D12Device5* GetDevice5(){return device5_.Get();}
+		const ComPtr<IDXGIFactory7>& GetDXGIFactory() const { return dxgiFactory_; }
+		const Capabilities& GetCaps() const { return caps_; } 
+		bool IsInlineRaytracingSupported() const;
+		
+	private:
+		//===========================================================*/
+		// private methods
+		//===========================================================*/
+		/**
+		 * \brief デバッグレイヤーのセットアップ
+		 */
+		void SetupDebugLayer();
+		/**
+		 * \brief DXGIデバイスの生成
+		 */
+		void CreateDXGIDevice();
+		/**
+		 * \brief レイトレーシング機能確認
+		 * \note DXR対応確認など
+		 */
+		void QueryCapabilities();
+	private:
+		//==========================================================*/
+		// private members
+		//==========================================================*/
+		ComPtr<ID3D12Device>  device_		   = nullptr; //< D3D12デバイス
+		ComPtr<IDXGIAdapter4> adapter_		   = nullptr; //< アダプター
+		ComPtr<IDXGIFactory7> dxgiFactory_	   = nullptr; //< DXGIファクトリー
+		ComPtr<ID3D12Debug1>  debugController_ = nullptr; //< デバッグコントローラー
+		ComPtr<ID3D12Device5> device5_		   = nullptr; //< D3D12デバイス5 (DXR用)
 
-private:
-	///////////////////////////////////////////////////
-	//              リソース
-	///////////////////////////////////////////////////
-	ComPtr<ID3D12Device>  device_		   = nullptr;
-	ComPtr<IDXGIAdapter4> adapter_		   = nullptr;
-	ComPtr<IDXGIFactory7> dxgiFactory_	   = nullptr;
-	ComPtr<ID3D12Debug1>  debugController_ = nullptr;
-};
+		Capabilities caps_{}; // デバイスの機能情報
+	};
+
+} // namespace CalyxGraphics

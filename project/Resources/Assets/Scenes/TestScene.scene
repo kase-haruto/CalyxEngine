@@ -8,13 +8,13 @@
                 "z": 1.0
             },
             "direction": {
-                "x": 0.0,
+                "x": -1.0,
                 "y": -1.0,
-                "z": 0.0
+                "z": -0.9710000157356262
             },
-            "guid": "77beb688-44e1-4ddd-a804-e9bfa301ea6c",
-            "intensity": 0.25,
-            "name": "DirectionalLight(1)",
+            "guid": "82840b84-fca8-40cc-95c6-2d93bc6b02a2",
+            "intensity": 1.0,
+            "name": "DirectionalLight",
             "objectType": 5,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
@@ -45,9 +45,9 @@
                 "z": 1.0
             },
             "decay": 1.0,
-            "guid": "9798566e-c783-4614-a85a-a6778a6ac47f",
-            "intensity": 1.0,
-            "name": "PointLight(1)",
+            "guid": "7fad0d4c-dc3c-4523-9d23-0f83fb5ed607",
+            "intensity": 0.25,
+            "name": "PointLight",
             "objectType": 0,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "position": {
@@ -77,10 +77,10 @@
             "type": "PointLight"
         },
         {
-            "guid": "d5039106-120e-4ef0-a5a6-a0394c7e5570",
-            "name": "MainCamera(1)",
+            "guid": "668a116e-5968-4b79-b395-04c1660c72c9",
+            "name": "MainCamera",
             "objectType": 0,
-            "parentGuid": "6d62f428-68bd-4338-b144-609422c4230a",
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
                 "rotation": {
                     "w": 1.0,
@@ -102,8 +102,8 @@
             "type": "Camera3d"
         },
         {
-            "guid": "a8319665-ec7e-4e52-b35b-dcd601d14845",
-            "name": "DebugCamera(1)",
+            "guid": "b5851743-7f99-4e96-bb2f-c2849fcf6492",
+            "name": "DebugCamera",
             "objectType": 5,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
@@ -127,161 +127,13 @@
             "type": "DebugCamera"
         },
         {
-            "autoDestroy": false,
-            "color": {
-                "w": 1.0,
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-            },
-            "emitCount": 1,
-            "emitDelay": 0.0,
-            "emitDuration": -1.0,
-            "emitRate": 0.10000000149011612,
-            "followOneShot": false,
-            "guid": "01318234-36d8-42a3-a34c-b2fa9d52d614",
-            "isComplement": true,
-            "isDrawEnable": true,
-            "isOneShot": true,
-            "lifetime": {
-                "constant": 0.5600000023841858,
-                "max": 1.0,
-                "min": 0.0,
-                "mode": 0
-            },
-            "modelPath": "plane.obj",
-            "modules": [
-                {
-                    "animationSpeed": 30.0,
-                    "cols": 4,
-                    "enabled": true,
-                    "loop": false,
-                    "name": "TextureSheetAnimationModule",
-                    "rows": 4,
-                    "useCustomFrames": false
-                },
-                {
-                    "blend": 0,
-                    "clamp01": true,
-                    "ease": 2,
-                    "enabled": true,
-                    "end": [
-                        0.7651245594024658,
-                        0.0,
-                        0.0,
-                        1.0
-                    ],
-                    "invert": false,
-                    "name": "OverLifetimeModule",
-                    "start": [
-                        0.012284546159207821,
-                        0.5962769985198975,
-                        0.6903914213180542,
-                        1.0
-                    ],
-                    "target": 4
-                }
-            ],
-            "name": "shootFx",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "position": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            },
-            "randomSpinEmit": false,
-            "scale": {
-                "constant": {
-                    "x": 8.0,
-                    "y": 8.0,
-                    "z": 1.0
-                },
-                "max": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "min": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "mode": 0
-            },
-            "textureGuid": "887f7536-6e5c-4875-ac80-0c56d5e40bff",
-            "texturePath": "particle.png",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "ParticleSystemObject",
-            "velocity": {
-                "constant": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "max": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "min": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "mode": 0
-            }
-        },
-        {
-            "guid": "6d62f428-68bd-4338-b144-609422c4230a",
-            "name": "RailCamera",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "RailCamera"
-        },
-        {
             "colliderConfig": {
-                "colliderType": 1,
-                "isCollisionEnabled": true,
+                "colliderType": 0,
+                "isCollisionEnabled": false,
                 "isDraw": true,
-                "targetType": 16
+                "targetType": 0
             },
-            "guid": "bc6ace27-7773-4bee-9b8d-0b02b65aa114",
+            "guid": "04094621-e71d-4c93-8aa2-bea1629f8232",
             "modelConfig": {
                 "blendMode": 5,
                 "materialConfig": {
@@ -297,8 +149,64 @@
                     "isReflect": false,
                     "shininess": 20.0
                 },
-                "modelName": "player.gltf",
-                "textureGuid": "0f5b7b26-3a3d-4de0-b818-0c5dc168ce7c",
+                "modelName": "largeBuilding.obj",
+                "textureGuid": "00000000-0000-0000-0000-000000000000",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 200.0
+                    }
+                }
+            },
+            "name": "largeBuilding(1)",
+            "objectType": 2,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "rotation": {
+                    "w": 0.9080933332443237,
+                    "x": 0.0,
+                    "y": 0.41876786947250366,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 9.999994277954102,
+                    "y": 9.999992370605469,
+                    "z": 9.999994277954102
+                },
+                "translation": {
+                    "x": 43.497642517089844,
+                    "y": -4.061956405639648,
+                    "z": 275.2914733886719
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": false,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "92d83d2a-f198-4e85-99a4-cb4be66efdde",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "torus.obj",
+                "textureGuid": "93fea04f-9b49-444b-8b34-5783816add5d",
                 "uvTransConfig": {
                     "rotation": 0.0,
                     "scale": {
@@ -307,659 +215,63 @@
                     }
                 }
             },
-            "name": "player",
+            "name": "torus",
             "objectType": 2,
-            "parentGuid": "d5039106-120e-4ef0-a5a6-a0394c7e5570",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.5,
-                    "y": 1.5,
-                    "z": 1.5
-                },
-                "translation": {
-                    "x": 2.649256944656372,
-                    "y": -0.08470439910888672,
-                    "z": 9.410676956176758
-                }
-            },
-            "type": "Player"
-        },
-        {
-            "emitters": [
-                {
-                    "emitter": {
-                        "autoDestroy": false,
-                        "color": {
-                            "w": 1.0,
-                            "x": 1.0,
-                            "y": 1.0,
-                            "z": 1.0
-                        },
-                        "emitCount": 1,
-                        "emitDelay": 0.0,
-                        "emitDuration": -1.0,
-                        "emitRate": 0.10000000149011612,
-                        "followOneShot": false,
-                        "isComplement": true,
-                        "isDrawEnable": true,
-                        "isOneShot": true,
-                        "lifetime": {
-                            "constant": 0.5600000023841858,
-                            "max": 1.0,
-                            "min": 0.0,
-                            "mode": 0
-                        },
-                        "modelPath": "plane.obj",
-                        "modules": [
-                            {
-                                "animationSpeed": 30.0,
-                                "cols": 4,
-                                "enabled": true,
-                                "loop": false,
-                                "name": "TextureSheetAnimationModule",
-                                "rows": 4,
-                                "useCustomFrames": false
-                            },
-                            {
-                                "blend": 0,
-                                "clamp01": true,
-                                "ease": 2,
-                                "enabled": true,
-                                "end": [
-                                    0.7651245594024658,
-                                    0.0,
-                                    0.0,
-                                    1.0
-                                ],
-                                "invert": false,
-                                "name": "OverLifetimeModule",
-                                "start": [
-                                    0.012284546159207821,
-                                    0.5962769985198975,
-                                    0.6903914213180542,
-                                    1.0
-                                ],
-                                "target": 4
-                            }
-                        ],
-                        "position": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        },
-                        "randomSpinEmit": false,
-                        "scale": {
-                            "constant": {
-                                "x": 8.0,
-                                "y": 8.0,
-                                "z": 1.0
-                            },
-                            "max": {
-                                "x": 1.0,
-                                "y": 1.0,
-                                "z": 1.0
-                            },
-                            "min": {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
-                            },
-                            "mode": 0
-                        },
-                        "textureGuid": "887f7536-6e5c-4875-ac80-0c56d5e40bff",
-                        "texturePath": "particle.png",
-                        "velocity": {
-                            "constant": {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
-                            },
-                            "max": {
-                                "x": 1.0,
-                                "y": 1.0,
-                                "z": 1.0
-                            },
-                            "min": {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
-                            },
-                            "mode": 0
-                        }
-                    },
-                    "guid": "01318234-36d8-42a3-a34c-b2fa9d52d614",
-                    "isDrawEnable": true,
-                    "isGpu": false,
-                    "name": "shootFx",
-                    "objectType": 0,
-                    "parentGuid": "401b8d4c-59b6-4477-a69b-a6f78848f86e",
-                    "transform": {
-                        "rotation": {
-                            "w": 1.0,
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        },
-                        "scale": {
-                            "x": 1.0,
-                            "y": 1.0,
-                            "z": 1.0
-                        },
-                        "translation": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        }
-                    }
-                },
-                {
-                    "emitter": {
-                        "autoDestroy": false,
-                        "color": {
-                            "w": 1.0,
-                            "x": 1.0,
-                            "y": 1.0,
-                            "z": 1.0
-                        },
-                        "emitCount": 1,
-                        "emitDelay": 0.0,
-                        "emitDuration": -1.0,
-                        "emitRate": 0.10000000149011612,
-                        "followOneShot": false,
-                        "isComplement": true,
-                        "isDrawEnable": true,
-                        "isOneShot": true,
-                        "lifetime": {
-                            "constant": 0.7799999713897705,
-                            "max": 1.0,
-                            "min": 0.0,
-                            "mode": 0
-                        },
-                        "modelPath": "plane.obj",
-                        "modules": [
-                            {
-                                "easeType": 8,
-                                "enabled": true,
-                                "isGrowing": true,
-                                "name": "SizeOverLifetimeModule"
-                            },
-                            {
-                                "blend": 0,
-                                "clamp01": true,
-                                "ease": 6,
-                                "enabled": true,
-                                "end": [
-                                    8.300000190734863,
-                                    1.0,
-                                    1.0,
-                                    1.0
-                                ],
-                                "invert": false,
-                                "name": "OverLifetimeModule",
-                                "start": [
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    1.0
-                                ],
-                                "target": 3
-                            }
-                        ],
-                        "position": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        },
-                        "randomSpinEmit": false,
-                        "scale": {
-                            "constant": {
-                                "x": 5.0,
-                                "y": 5.0,
-                                "z": 1.0
-                            },
-                            "max": {
-                                "x": 1.0,
-                                "y": 1.0,
-                                "z": 1.0
-                            },
-                            "min": {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
-                            },
-                            "mode": 0
-                        },
-                        "textureGuid": "3cf57a10-5b98-4fde-8730-907fc3d43bde",
-                        "texturePath": "particle.png",
-                        "velocity": {
-                            "constant": {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
-                            },
-                            "max": {
-                                "x": 1.0,
-                                "y": 1.0,
-                                "z": 1.0
-                            },
-                            "min": {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
-                            },
-                            "mode": 0
-                        }
-                    },
-                    "guid": "8cdecbab-799d-483a-b2a8-28a376151c50",
-                    "isDrawEnable": true,
-                    "isGpu": false,
-                    "name": "rect",
-                    "objectType": 0,
-                    "parentGuid": "401b8d4c-59b6-4477-a69b-a6f78848f86e",
-                    "transform": {
-                        "rotation": {
-                            "w": 1.0,
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        },
-                        "scale": {
-                            "x": 1.0,
-                            "y": 1.0,
-                            "z": 1.0
-                        },
-                        "translation": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        }
-                    }
-                },
-                {
-                    "emitter": {
-                        "autoDestroy": false,
-                        "color": {
-                            "w": 1.0,
-                            "x": 1.0,
-                            "y": 1.0,
-                            "z": 1.0
-                        },
-                        "emitCount": 10,
-                        "emitDelay": 0.0,
-                        "emitDuration": -1.0,
-                        "emitRate": 0.10000000149011612,
-                        "followOneShot": false,
-                        "isComplement": true,
-                        "isDrawEnable": true,
-                        "isOneShot": true,
-                        "lifetime": {
-                            "constant": 0.5600000023841858,
-                            "max": 1.0,
-                            "min": 0.0,
-                            "mode": 0
-                        },
-                        "modelPath": "plane.obj",
-                        "modules": [
-                            {
-                                "blend": 0,
-                                "clamp01": true,
-                                "ease": 1,
-                                "enabled": true,
-                                "end": [
-                                    0.619217038154602,
-                                    0.06170133873820305,
-                                    0.12122280895709991,
-                                    0.7490000128746033
-                                ],
-                                "invert": false,
-                                "name": "OverLifetimeModule",
-                                "start": [
-                                    0.0,
-                                    0.2908778488636017,
-                                    0.7046263217926025,
-                                    1.0
-                                ],
-                                "target": 4
-                            }
-                        ],
-                        "position": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        },
-                        "randomSpinEmit": true,
-                        "scale": {
-                            "constant": {
-                                "x": 1.0,
-                                "y": 1.0,
-                                "z": 1.0
-                            },
-                            "max": {
-                                "x": 0.3499999940395355,
-                                "y": 6.099999904632568,
-                                "z": 1.0
-                            },
-                            "min": {
-                                "x": -0.3100000023841858,
-                                "y": -6.880000114440918,
-                                "z": 0.0
-                            },
-                            "mode": 1
-                        },
-                        "textureGuid": "918b71a5-ef26-4dcb-9f5b-3ff3de55adce",
-                        "texturePath": "particle.png",
-                        "velocity": {
-                            "constant": {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
-                            },
-                            "max": {
-                                "x": 1.0,
-                                "y": 1.0,
-                                "z": 1.0
-                            },
-                            "min": {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
-                            },
-                            "mode": 0
-                        }
-                    },
-                    "guid": "287b6ccc-fd34-46dc-8b58-c654134b30c8",
-                    "isDrawEnable": true,
-                    "isGpu": false,
-                    "name": "shotFx",
-                    "objectType": 0,
-                    "parentGuid": "401b8d4c-59b6-4477-a69b-a6f78848f86e",
-                    "transform": {
-                        "rotation": {
-                            "w": 1.0,
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        },
-                        "scale": {
-                            "x": 1.0,
-                            "y": 1.0,
-                            "z": 1.0
-                        },
-                        "translation": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        }
-                    }
-                }
-            ],
-            "guid": "401b8d4c-59b6-4477-a69b-a6f78848f86e",
-            "name": "ShootEffect",
-            "objectType": 0,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
                 "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
+                    "w": 0.8526918292045593,
+                    "x": 0.12450043857097626,
+                    "y": -0.44886571168899536,
+                    "z": -0.2365073263645172
                 },
                 "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
+                    "x": 283.9450988769531,
+                    "y": 104.08111572265625,
+                    "z": 241.4642333984375
                 },
                 "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
+                    "x": 236.3924560546875,
+                    "y": 50.407493591308594,
+                    "z": 340.3679504394531
                 }
             },
-            "type": "FxObject"
+            "type": "BaseGameObject"
         },
         {
-            "autoDestroy": false,
-            "color": {
-                "w": 1.0,
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": false,
+                "isDraw": true,
+                "targetType": 0
             },
-            "emitCount": 1,
-            "emitDelay": 0.0,
-            "emitDuration": -1.0,
-            "emitRate": 0.10000000149011612,
-            "followOneShot": false,
-            "guid": "8cdecbab-799d-483a-b2a8-28a376151c50",
-            "isComplement": true,
-            "isDrawEnable": true,
-            "isOneShot": true,
-            "lifetime": {
-                "constant": 0.7799999713897705,
-                "max": 1.0,
-                "min": 0.0,
-                "mode": 0
-            },
-            "modelPath": "plane.obj",
-            "modules": [
-                {
-                    "easeType": 8,
-                    "enabled": true,
-                    "isGrowing": true,
-                    "name": "SizeOverLifetimeModule"
+            "guid": "432df03c-2a5c-4cd6-b5a5-79031ca335fc",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.06800000369548798,
+                    "isReflect": true,
+                    "shininess": 20.0
                 },
-                {
-                    "blend": 0,
-                    "clamp01": true,
-                    "ease": 6,
-                    "enabled": true,
-                    "end": [
-                        8.300000190734863,
-                        1.0,
-                        1.0,
-                        1.0
-                    ],
-                    "invert": false,
-                    "name": "OverLifetimeModule",
-                    "start": [
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0
-                    ],
-                    "target": 3
-                }
-            ],
-            "name": "rect",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "position": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            },
-            "randomSpinEmit": false,
-            "scale": {
-                "constant": {
-                    "x": 5.0,
-                    "y": 5.0,
-                    "z": 1.0
-                },
-                "max": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "min": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "mode": 0
-            },
-            "textureGuid": "3cf57a10-5b98-4fde-8730-907fc3d43bde",
-            "texturePath": "particle.png",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
+                "modelName": "debugCube.obj",
+                "textureGuid": "2a356c31-f1e7-4d0a-8245-d0f306dd55b8",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 200.0,
+                        "y": 200.0
+                    }
                 }
             },
-            "type": "ParticleSystemObject",
-            "velocity": {
-                "constant": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "max": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "min": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "mode": 0
-            }
-        },
-        {
-            "autoDestroy": false,
-            "color": {
-                "w": 1.0,
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-            },
-            "emitCount": 10,
-            "emitDelay": 0.0,
-            "emitDuration": -1.0,
-            "emitRate": 0.10000000149011612,
-            "followOneShot": false,
-            "guid": "287b6ccc-fd34-46dc-8b58-c654134b30c8",
-            "isComplement": true,
-            "isDrawEnable": true,
-            "isOneShot": true,
-            "lifetime": {
-                "constant": 0.5600000023841858,
-                "max": 1.0,
-                "min": 0.0,
-                "mode": 0
-            },
-            "modelPath": "plane.obj",
-            "modules": [
-                {
-                    "blend": 0,
-                    "clamp01": true,
-                    "ease": 1,
-                    "enabled": true,
-                    "end": [
-                        0.619217038154602,
-                        0.06170133873820305,
-                        0.12122280895709991,
-                        0.7490000128746033
-                    ],
-                    "invert": false,
-                    "name": "OverLifetimeModule",
-                    "start": [
-                        0.0,
-                        0.2908778488636017,
-                        0.7046263217926025,
-                        1.0
-                    ],
-                    "target": 4
-                }
-            ],
-            "name": "shotFx",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "position": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            },
-            "randomSpinEmit": true,
-            "scale": {
-                "constant": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "max": {
-                    "x": 0.3499999940395355,
-                    "y": 6.099999904632568,
-                    "z": 1.0
-                },
-                "min": {
-                    "x": -0.3100000023841858,
-                    "y": -6.880000114440918,
-                    "z": 0.0
-                },
-                "mode": 1
-            },
-            "textureGuid": "918b71a5-ef26-4dcb-9f5b-3ff3de55adce",
-            "texturePath": "particle.png",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "ParticleSystemObject",
-            "velocity": {
-                "constant": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "max": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "min": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "mode": 0
-            }
-        },
-        {
-            "guid": "3ab80609-6ceb-4ff2-969f-1cd4b6911787",
-            "name": "enemyContainer",
+            "name": "ground",
             "objectType": 2,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
@@ -970,47 +282,131 @@
                     "z": 0.0
                 },
                 "scale": {
-                    "x": 1.0,
+                    "x": 1459.5240478515625,
                     "y": 1.0,
-                    "z": 1.0
+                    "z": 1159.3929443359375
                 },
                 "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
+                    "x": -1.9073486328125e-06,
+                    "y": -3.8282461166381836,
+                    "z": 4.136318206787109
                 }
             },
-            "type": "EnemyCollection"
+            "type": "BaseGameObject"
         },
         {
-            "activateRadius": 80.0,
-            "deactivateRadius": 100.0,
-            "guid": "56dd43b5-3135-48bd-8fa7-ea039794ac57",
-            "maxSpawnCount": 5,
-            "name": "EnemySpawner",
-            "spawnInterval": 5.0,
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": false,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "b74c4da7-1e2f-4cf5-85bb-3c66b22f298c",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "smallBuilding_01.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "smallBuilding_01",
+            "objectType": 2,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
                 "rotation": {
                     "w": 1.0,
                     "x": 0.0,
                     "y": 0.0,
-                    "z": 0.0
+                    "z": -6.973012034450221e-08
                 },
                 "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
+                    "x": 9.999646186828613,
+                    "y": 23.921899795532227,
+                    "z": 9.999971389770508
                 },
                 "translation": {
-                    "x": 0.0,
-                    "y": -7.376788139343262,
-                    "z": 62.80455780029297
+                    "x": -86.08694458007813,
+                    "y": -8.984576225280762,
+                    "z": -132.52842712402344
                 }
             },
-            "type": "EnemySpawner",
-            "useXZDistance": true
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "2423ad41-4093-46ea-b211-cea2906b2b2b",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "smallBuilding_01.obj",
+                "textureGuid": "e6db45e2-7ad6-44b3-b137-e04e02d4c8c7",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "smallBuilding_01(1)",
+            "objectType": 2,
+            "parentGuid": "5860cf0a-4217-4c9f-8bb8-262b33ef01fa",
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 9.536721279346239e-08,
+                    "y": -6.233030078301891e-22,
+                    "z": -6.535820570462061e-15
+                },
+                "scale": {
+                    "x": 4.348606109619141,
+                    "y": 2.1211905479431152,
+                    "z": 4.880408763885498
+                },
+                "translation": {
+                    "x": -6.280223846435547,
+                    "y": -0.6319721937179565,
+                    "z": 38.33307647705078
+                }
+            },
+            "type": "BaseGameObject"
         }
     ],
-    "sceneName": "scene",
+    "sceneName": "TestScene",
     "version": 1
 }

@@ -30,8 +30,47 @@ GraphicsPipelineDesc PipelinePresets::MakeObject3D(BlendMode mode) {
 		.CBV(1, D3D12_SHADER_VISIBILITY_ALL)											 // Camera
 		.CBV(4, D3D12_SHADER_VISIBILITY_PIXEL)											 // PointLight
 		.SRVTable(1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)	 // EnvMap
-		.SRVTable(1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_VERTEX) // billboard
+		.SRVTable(1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_VERTEX) // billboard'
+		.CBV(3, D3D12_SHADER_VISIBILITY_PIXEL)											 // [8] ShadowConstants b3
+		.SRVTable(2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)	 // [9] ShadowMap t2
+
 		.SamplerWrapLinear(0);
+
+	return desc;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		3d 静的オブジェクトshadowMap用
+/////////////////////////////////////////////////////////////////////////////////////////
+GraphicsPipelineDesc PipelinePresets::MakeShadowStatic() {
+	GraphicsPipelineDesc desc;
+
+	D3D12_RASTERIZER_DESC raster = {};
+	raster.FillMode				 = D3D12_FILL_MODE_SOLID;
+	raster.CullMode				 = D3D12_CULL_MODE_BACK;
+	raster.DepthClipEnable		 = TRUE;
+
+	raster.DepthBias			= 250; // 固定バイアス
+	raster.SlopeScaledDepthBias = 1.0f; // 角度依存バイアス
+	raster.DepthBiasClamp		= 0.0f;
+
+	desc.VS(L"ShadowStatic.VS.hlsl")
+		.Input(VertexInputLayout<VertexPosUvN>::Get())
+		.Rasterizer(raster)
+		.DepthEnable(true)
+		.DepthFunc(D3D12_COMPARISON_FUNC_LESS_EQUAL)
+		.Samples(1);
+
+	// Shadow は色を書かない
+	desc.rtvFormats_.clear();
+
+	// ShadowMap の DSV
+	desc.dsvFormat_ = DXGI_FORMAT_D32_FLOAT;
+
+	desc.root_
+		.AllowIA()
+		.CBV(0, D3D12_SHADER_VISIBILITY_VERTEX)											  // ShadowCB
+		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_VERTEX); // t0: gTransMat
 
 	return desc;
 }
@@ -61,8 +100,38 @@ GraphicsPipelineDesc PipelinePresets::MakeSkinningObject3D(BlendMode mode) {
 		.CBV(4, D3D12_SHADER_VISIBILITY_PIXEL)											 // PointLight
 		.SRVTable(1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)	 // EnvMap
 		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_VERTEX) // SkinningBuffer
+		.CBV(3, D3D12_SHADER_VISIBILITY_PIXEL)											 // [8] ShadowConstants b3
+		.SRVTable(2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)	 // [9] ShadowMap t2
 
 		.SamplerWrapLinear(0);
+
+	return desc;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//		3d スキニング shadowMap用
+/////////////////////////////////////////////////////////////////////////////////////////
+GraphicsPipelineDesc PipelinePresets::MakeShadowSkinned() {
+	GraphicsPipelineDesc desc;
+
+	desc.VS(L"ShadowSkinned.VS.hlsl")
+		.Input(VertexInputLayout<VertexPosUvNSkinning>::Get())
+		.CullBack()
+		.DepthEnable(true)
+		.DepthFunc(D3D12_COMPARISON_FUNC_LESS_EQUAL)
+		.Samples(1);
+
+	desc.rtvFormats_.clear();
+	desc.dsvFormat_ = DXGI_FORMAT_D32_FLOAT;
+
+	desc.root_
+		.AllowIA()
+		.CBV(0, D3D12_SHADER_VISIBILITY_VERTEX) // ShadowCB
+		.CBV(1, D3D12_SHADER_VISIBILITY_VERTEX) // World
+		.SRVTable(
+			0, 1,
+			D3D12_DESCRIPTOR_RANGE_TYPE_SRV,
+			D3D12_SHADER_VISIBILITY_VERTEX); // JointMatrices
 
 	return desc;
 }

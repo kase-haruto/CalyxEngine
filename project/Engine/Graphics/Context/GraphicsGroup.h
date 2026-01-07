@@ -14,7 +14,7 @@ public:
 	static GraphicsGroup* GetInstance();
 	~GraphicsGroup() = default;
 
-	void Initialize(const DxCore* dxCore, PipelineStateManager* psManager);
+	void Initialize(const CalyxGraphics::DxCore* dxCore, PipelineStateManager* psManager);
 
 	///=========================================
 	/// pipelineの取得
@@ -27,16 +27,17 @@ public:
 	/// device/commandListの取得
 	///=========================================
 	ComPtr<ID3D12Device>			  GetDevice() const;
+	ID3D12Device5*					  GetDevice5() const;
 	ComPtr<ID3D12GraphicsCommandList> GetCommandList() const;
 
 	void SetCommand(ComPtr<ID3D12GraphicsCommandList> commandList, PipelineType psoType, BlendMode blendMode);
 
 private:
-	GraphicsGroup() : pDxCore_(nullptr), pipelineManager_(nullptr) {}
+	GraphicsGroup() :pDxCore_(nullptr), pipelineManager_(nullptr) {}
 	GraphicsGroup(const GraphicsGroup&)			   = delete;
 	GraphicsGroup& operator=(const GraphicsGroup*) = delete;
 
 private:
-	const DxCore*		  pDxCore_;
+	const CalyxGraphics::DxCore*		 pDxCore_;
 	PipelineStateManager* pipelineManager_;
 };

@@ -1,10 +1,10 @@
 #include "Matrix4x4.h"
 
-#include <Engine/Foundation/Math/Vector4.h>
 #include <Engine/Foundation/Math/Vector3.h>
+#include <Engine/Foundation/Math/Vector4.h>
 
 /* lib */
-#include<cmath>
+#include <cmath>
 #include <numbers>
 
 namespace CalyxMath {
@@ -286,27 +286,48 @@ namespace CalyxMath {
 	}
 
 	Vector3 CalyxMath::Matrix4x4::Transform(const Vector3& vector, const CalyxMath::Matrix4x4& matrix) {
-		Vector3 result = {0, 0, 0};
+		Vector3 result;
 
-		// 同次座標系への変換
-		// 変換行列を適用
-		CalyxMath::Vector4 homogeneousCoordinate(
-			vector.x * matrix.m[0][0] + vector.y * matrix.m[1][0] + vector.z * matrix.m[2][0] + matrix.m[3][0],
-			vector.x * matrix.m[0][1] + vector.y * matrix.m[1][1] + vector.z * matrix.m[2][1] + matrix.m[3][1],
-			vector.x * matrix.m[0][2] + vector.y * matrix.m[1][2] + vector.z * matrix.m[2][2] + matrix.m[3][2],
-			vector.x * matrix.m[0][3] + vector.y * matrix.m[1][3] + vector.z * matrix.m[2][3] + matrix.m[3][3]);
+		float x =
+			vector.x * matrix.m[0][0] +
+			vector.y * matrix.m[1][0] +
+			vector.z * matrix.m[2][0] +
+			matrix.m[3][0];
 
-		// 同次座標系から3次元座標系に戻す
-		float w	 = homogeneousCoordinate.w;
-		result.x = homogeneousCoordinate.x / w;
-		result.y = homogeneousCoordinate.y / w;
-		result.z = homogeneousCoordinate.z / w;
+		float y =
+			vector.x * matrix.m[0][1] +
+			vector.y * matrix.m[1][1] +
+			vector.z * matrix.m[2][1] +
+			matrix.m[3][1];
+
+		float z =
+			vector.x * matrix.m[0][2] +
+			vector.y * matrix.m[1][2] +
+			vector.z * matrix.m[2][2] +
+			matrix.m[3][2];
+
+		float w =
+			vector.x * matrix.m[0][3] +
+			vector.y * matrix.m[1][3] +
+			vector.z * matrix.m[2][3] +
+			matrix.m[3][3];
+
+		if(std::fabs(w) > 1e-6f) {
+			result.x = x / w;
+			result.y = y / w;
+			result.z = z / w;
+		} else {
+			// w=0 の場合は座標として扱わない（View 行列ではここに来ないのが正常）
+			result.x = x;
+			result.y = y;
+			result.z = z;
+		}
 
 		return result;
 	}
 
 	CalyxMath::Matrix4x4 CalyxMath::Matrix4x4::MakeLookRotationMatrix(const Vector3& forward, const Vector3& up) {
-		Vector3 zAxis = forward.Normalize();						   // 前方方向
+		Vector3 zAxis = forward.Normalize();				   // 前方方向
 		Vector3 xAxis = Vector3::Cross(up, zAxis).Normalize(); // 右方向
 		Vector3 yAxis = Vector3::Cross(zAxis, xAxis);		   // 上方向
 
@@ -363,6 +384,31 @@ namespace CalyxMath {
 		mat.m[3][3] = 0.0f;
 
 		return mat;
+	}
+	Matrix4x4 Matrix4x4::MakeLookAt(const Vector3& eye, const Vector3& target, const Vector3& up) {
+		Vector3 zaxis = (target - eye).Normalize();			   // forward
+		Vector3 xaxis = Vector3::Cross(up, zaxis).Normalize(); // right
+		Vector3 yaxis = Vector3::Cross(zaxis, xaxis);		   // up
+
+		Matrix4x4 m = Matrix4x4::MakeIdentity();
+
+		m.m[0][0] = xaxis.x;
+		m.m[1][0] = xaxis.y;
+		m.m[2][0] = xaxis.z;
+
+		m.m[0][1] = yaxis.x;
+		m.m[1][1] = yaxis.y;
+		m.m[2][1] = yaxis.z;
+
+		m.m[0][2] = zaxis.x;
+		m.m[1][2] = zaxis.y;
+		m.m[2][2] = zaxis.z;
+
+		m.m[3][0] = -Vector3::Dot(xaxis, eye);
+		m.m[3][1] = -Vector3::Dot(yaxis, eye);
+		m.m[3][2] = -Vector3::Dot(zaxis, eye);
+
+		return m;
 	}
 
 	void CalyxMath::Matrix4x4::CopyToArray(float out[16]) const {

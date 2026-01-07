@@ -41,7 +41,7 @@ public:
 	/**
 	 * \brief 描画処理
 	 */
-	void Draw(ID3D12GraphicsCommandList*, class PipelineService*, RenderTargetType) override;
+	void Draw(ID3D12GraphicsCommandList*, class PipelineService*, IRenderTarget* rt) override;
 	/**
 	 * \brief 終了処理
 	 */

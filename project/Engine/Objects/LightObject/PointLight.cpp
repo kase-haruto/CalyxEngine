@@ -75,7 +75,8 @@ void PointLight::UploadToGpu(){
 
 void PointLight::SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList, PipelineType type){
 	uint32_t index = 0;
-	if (type == PipelineType::Object3D || PipelineType::SkinningObject3D){
+	if(type == PipelineType::Object3D ||
+	   type == PipelineType::SkinningObject3D) {
 		index = 5;
 	}
 	constantBuffer_.SetCommand(commandList, index);

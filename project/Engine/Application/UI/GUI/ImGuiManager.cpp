@@ -18,8 +18,8 @@
 #include <externals/imgui/imgui_impl_win32.h>
 
 
-void ImGuiManager::Initialize(WinApp* winApp, const DxCore* dxCore){
-	pDxCore_ = dxCore;
+void ImGuiManager::Initialize(WinApp* winApp, const CalyxGraphics::DxCore* dxCore){
+	pDxCore_ =dxCore;
 
 	ID3D12DescriptorHeap* heap = DescriptorAllocator::GetHeap(DescriptorUsage::CbvSrvUav);
 	//srvの設定
@@ -63,7 +63,7 @@ void ImGuiManager::Begin(){
 #endif // _DEBUG	
 
 
-	ComPtr<ID3D12GraphicsCommandList> commandList = pDxCore_->GetCommandList();
+	ComPtr<ID3D12GraphicsCommandList> commandList =pDxCore_->GetCommandList();
 	//でスクリプタヒープの配列をセットする
 	ID3D12DescriptorHeap* descriptorHeaps[] = {
 	DescriptorAllocator::GetHeap(DescriptorUsage::CbvSrvUav)
@@ -78,7 +78,7 @@ void ImGuiManager::End(){
 }
 
 void ImGuiManager::Draw(){
-	ComPtr<ID3D12GraphicsCommandList> commandList = pDxCore_->GetCommandList();
+	ComPtr<ID3D12GraphicsCommandList> commandList =pDxCore_->GetCommandList();
 	//描画コマンドを発行
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList.Get());
 }

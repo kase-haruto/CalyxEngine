@@ -21,12 +21,14 @@
 #include <wrl.h>
 
 struct DirectionalLightData {
-	CalyxMath::Vector4 color;	   // ライトの色
+	CalyxMath::Vector4 color;	  // ライトの色
 	CalyxMath::Vector3 direction; // ライトの向き
-	float	intensity; // 輝度
+	float			   intensity; // 輝度
 };
 
-class DxCore;
+namespace CalyxGraphics {
+	class DxCore;
+}
 
 /* ========================================================================
 /*		方向性ライト
@@ -44,18 +46,21 @@ public:
 	void DrawDebug();
 	void AlwaysUpdate(float dt);
 
-	/// <summary>
-	/// gpuに転送
-	/// </summary>
+	/**
+	 * \brief GPUにデータをアップロード
+	 */
 	void UploadToGpu();
-
-	/// <summary>
-	/// コマンドを積む
-	/// </summary>
-	/// <param name="commandList"></param>
-	/// <param name="type"></param>
+	/**
+	 * \brief ライトのビュー・プロジェクション行列を更新
+	 * \param sceneBounds シーンのAABB
+	 */
+	void UpdateLightVP(const AABB& sceneBounds);
+	/**
+	 * \brief コマンドリストにセット
+	 * \param commandList コマンドリスト
+	 * \param type パイプラインタイプ
+	 */
 	void SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList, PipelineType type);
-
 
 	// config ============================================================
 	void ApplyConfig();
@@ -64,13 +69,15 @@ public:
 	void ExtractConfigToJson(nlohmann::json& j) const override;
 
 	std::string_view GetTypeName() const override { return "DirectionalLight"; }
-	std::string GetObjectTypeName() const override { return name_; }
-
+	std::string		 GetObjectTypeName() const override { return name_; }
+	const CalyxMath::Matrix4x4& GetLightVP() const { return lightViewProj_; }
 private:
 	DxConstantBuffer<DirectionalLightData> constantBuffer_;
 	DirectionalLightData				   lightData_ = {}; // ライトデータ
 
 	std::shared_ptr<BaseGameObject> UiObject_ = nullptr;
+	CalyxMath::Matrix4x4 lightViewProj_;
+	
 
 private:
 	ConfigurableObject<DirectionalLightConfig> config_;

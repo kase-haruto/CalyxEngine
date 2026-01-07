@@ -51,7 +51,7 @@ namespace CalyxAssets {
 		float                               GetAnimationSpeed() const { return animationSpeed_; }
 		std::vector<std::string>            GetAnimationNodeNames() const;
 		std::optional<CalyxMath::Matrix4x4> GetJointMatrix(const std::string& name) const;
-
+		D3D12_GPU_DESCRIPTOR_HANDLE GetJointMatrixSrv() const;
 		void SetAnimationSpeed(float speed) { animationSpeed_ = speed; }
 
 	private:

@@ -3,73 +3,93 @@
 /*  include space
 /* ===================================================================== */
 #include <d3d12.h>
-#include <wrl.h>
-#include <unordered_map>
 #include <mutex>
 #include <stack>
+#include <unordered_map>
+#include <wrl.h>
 
-struct DescriptorHandle{
-	D3D12_CPU_DESCRIPTOR_HANDLE cpu {};
-	D3D12_GPU_DESCRIPTOR_HANDLE gpu {};
-	uint32_t offset = 0;
+/*----------------------------------------------------------------
+ * Descriptor Handle
+ *	- ディスクリプタハンドル
+ *--------------------------------------------------------------*/
+struct DescriptorHandle {
+	D3D12_CPU_DESCRIPTOR_HANDLE cpu{};
+	D3D12_GPU_DESCRIPTOR_HANDLE gpu{};
+	uint32_t					offset = 0;
 
-	bool IsValid() const{ return cpu.ptr != 0; }
+	bool IsValid() const { return cpu.ptr != 0; }
 };
 
-enum class DescriptorUsage{
+/*----------------------------------------------------------------
+ * Descriptor Usage
+ *	- ディスクリプタの使用用途
+ *--------------------------------------------------------------*/
+enum class DescriptorUsage {
 	CbvSrvUav,
 	Rtv,
 	Dsv,
 	Sampler
 };
 
-struct DescriptorHeapSettings{
+/*----------------------------------------------------------------
+ * Descriptor Heap Settings
+ *	- ディスクリプタヒープ生成時の設定
+ *--------------------------------------------------------------*/
+struct DescriptorHeapSettings {
 	UINT maxDescriptors = 60000;
-	bool shaderVisible = true;
+	bool shaderVisible	= true;
 };
 
-class DescriptorAllocator{
+/*----------------------------------------------------------------
+ * Descriptor Allocator
+ *	- ディスクリプタヒープの管理・割り当てを行うクラス
+ *--------------------------------------------------------------*/
+class DescriptorAllocator {
 public:
+	/**
+	 * \brief 初期化
+	 * \param device
+	 */
 	static void Initialize(ID3D12Device* device);
+	/**
+	 * \brief 終了処理
+	 */
 	static void Finalize();
-	
-	/// <summary>
-	/// ヒープ作成
-	/// </summary>
-	/// <param name="usage"></param>
-	/// <param name="settings"></param>
+	/**
+	 * \brief ヒープの生成
+	 * \param usage
+	 * \param settings
+	 */
 	static void CreateHeap(DescriptorUsage usage, const DescriptorHeapSettings& settings);
-
-	/// <summary>
-	/// 割り当て
-	/// </summary>
-	/// <param name="usage"></param>
-	/// <returns></returns>
+	/**
+	 * \brief ディスクリプタの割り当て
+	 * \param usage
+	 * \return 割り当てたディスクリプタハンドル
+	 */
 	static DescriptorHandle Allocate(DescriptorUsage usage);
-
-	/// <summary>
-	/// 再使用するために解放
-	/// </summary>
-	/// <param name="usage"></param>
-	/// <param name="handle"></param>
+	/*	 * \brief ディスクリプタの解放
+	 * \param usage
+	 * \param handle
+	 */
 	static void Free(DescriptorUsage usage, const DescriptorHandle& handle);
 
 	//--------- accessor -----------------------------------------------------
-	static ID3D12DescriptorHeap* GetHeap(DescriptorUsage usage);
-	static UINT GetDescriptorSize(DescriptorUsage usage);
+	static ID3D12DescriptorHeap*	   GetHeap(DescriptorUsage usage);
+	static UINT						   GetDescriptorSize(DescriptorUsage usage);
 	static D3D12_CPU_DESCRIPTOR_HANDLE GetCpuHandleStart(DescriptorUsage usage);
 	static D3D12_GPU_DESCRIPTOR_HANDLE GetGpuHandleStart(DescriptorUsage usage);
 
 private:
-	struct HeapInfo{
+	struct HeapInfo {
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> heap;
-		UINT descriptorSize = 0;
-		UINT currentOffset = 1; // reserve 0 for ImGui
-		std::stack<UINT> freeList;
-		std::mutex mutex;
-		UINT maxDescriptors = 0;
+		UINT										 descriptorSize = 0;
+		UINT										 currentOffset	= 1; // reserve 0 for ImGui
+		std::stack<UINT>							 freeList;
+		std::mutex									 mutex;
+		UINT										 maxDescriptors = 0;
+		bool shaderVisible = false;
 	};
 
-	static ID3D12Device* device_;
+	static ID3D12Device*								 device_;
 	static std::unordered_map<DescriptorUsage, HeapInfo> heaps_;
 };

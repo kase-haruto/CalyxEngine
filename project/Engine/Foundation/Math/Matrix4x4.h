@@ -1,4 +1,6 @@
 #pragma once
+#include "Vector3.h"
+
 #include <externals/nlohmann/json.hpp>
 
 namespace CalyxMath {
@@ -13,18 +15,19 @@ namespace CalyxMath {
 		float m[4][4];
 
 		//--------- function ---------------------------------------------------
-		static Matrix4x4	   Multiply(const Matrix4x4& m1, const Matrix4x4& m2);
-		static Matrix4x4	   MakeIdentity();
-		static Matrix4x4	   Inverse(const Matrix4x4& m);
-		static Vector3 ToEuler(const Matrix4x4& matrix);
-		static Vector3 Translation(const Matrix4x4& matrix);
-		static Matrix4x4	   Transpose(const Matrix4x4& mat);
-		static Vector3 Transform(const Vector3& vector, const Matrix4x4& matrix);
-		static Matrix4x4	   MakeLookRotationMatrix(const Vector3& forward, const Vector3& up);
-		static Matrix4x4	   MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth);
-		static Matrix4x4	   PerspectiveFovRH(float fovY, float aspect, float nearZ, float farZ);
-		void				   CopyToArray(float out[16]) const;
-		Vector3		   GetTranslationMatrix() const;
+		static Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2);
+		static Matrix4x4 MakeIdentity();
+		static Matrix4x4 Inverse(const Matrix4x4& m);
+		static Vector3	 ToEuler(const Matrix4x4& matrix);
+		static Vector3	 Translation(const Matrix4x4& matrix);
+		static Matrix4x4 Transpose(const Matrix4x4& mat);
+		static Vector3	 Transform(const Vector3& vector, const Matrix4x4& matrix);
+		static Matrix4x4 MakeLookRotationMatrix(const Vector3& forward, const Vector3& up);
+		static Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth);
+		static Matrix4x4 PerspectiveFovRH(float fovY, float aspect, float nearZ, float farZ);
+		static Matrix4x4 MakeLookAt(const Vector3& eye,	const Vector3& target,const Vector3& up = Vector3::Up());
+		void			 CopyToArray(float out[16]) const;
+		Vector3			 GetTranslationMatrix() const;
 
 		//--------- operator ---------------------------------------------------
 		// operator関数
@@ -36,10 +39,9 @@ namespace CalyxMath {
 		Vector4 operator*(const Vector4& v) const;
 	};
 
-
 } // namespace CalyxMath
 
-	//--------- serializer ---------------------------------------------------
+//--------- serializer ---------------------------------------------------
 inline void to_json(nlohmann::json& j, const CalyxMath::Matrix4x4& mat) {
 	j = nlohmann::json{
 		{"m00", mat.m[0][0]}, {"m01", mat.m[0][1]}, {"m02", mat.m[0][2]}, {"m03", mat.m[0][3]}, {"m10", mat.m[1][0]}, {"m11", mat.m[1][1]}, {"m12", mat.m[1][2]}, {"m13", mat.m[1][3]}, {"m20", mat.m[2][0]}, {"m21", mat.m[2][1]}, {"m22", mat.m[2][2]}, {"m23", mat.m[2][3]}, {"m30", mat.m[3][0]}, {"m31", mat.m[3][1]}, {"m32", mat.m[3][2]}, {"m33", mat.m[3][3]}};

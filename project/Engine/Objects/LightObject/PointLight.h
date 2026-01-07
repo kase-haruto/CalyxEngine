@@ -27,7 +27,10 @@ struct PointLightData{
 	float pad[2];
 };
 
-class DxCore;
+namespace CalyxGraphics {
+	class DxCore;
+}
+
 
 
 /* ========================================================================

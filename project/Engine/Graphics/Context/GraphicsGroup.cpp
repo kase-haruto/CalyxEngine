@@ -5,7 +5,7 @@ GraphicsGroup* GraphicsGroup::GetInstance(){
 	return& instance;
 }
 
-void GraphicsGroup::Initialize(const DxCore* dxCore, PipelineStateManager* psManager){
+void GraphicsGroup::Initialize(const CalyxGraphics::DxCore* dxCore, PipelineStateManager* psManager){
 	pDxCore_ = dxCore;
 	pipelineManager_ = psManager;
 }
@@ -17,6 +17,7 @@ const ComPtr<ID3D12PipelineState>& GraphicsGroup::GetPipelineState(const Pipelin
 const ComPtr<ID3D12RootSignature>& GraphicsGroup::GetRootSignature(const PipelineType& type, const BlendMode& blendMode)const{ return pipelineManager_->GetRootSignature(type,blendMode); }
 
 ComPtr<ID3D12Device> GraphicsGroup::GetDevice() const{ return pDxCore_->GetDevice(); }
+ID3D12Device5*       GraphicsGroup::GetDevice5() const {return pDxCore_->GetDevice5();}
 
 ComPtr<ID3D12GraphicsCommandList> GraphicsGroup::GetCommandList() const{ return pDxCore_->GetCommandList(); }
 

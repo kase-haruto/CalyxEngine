@@ -7,7 +7,11 @@
 #include <Engine/Graphics/RenderTarget/Detail/RenderTargetDetail.h>
 
 // forward declaration
-class DxCore;
+namespace CalyxGraphics {
+	class DxCore;
+
+	
+}
 class BaseCamera;
 class SceneContext;
 
@@ -24,7 +28,7 @@ public:
 	//			public methods
 	//===================================================================*/
 	IScene();
-	IScene(DxCore* dxCore);
+	IScene(CalyxGraphics::DxCore* dxCore);
 	virtual ~IScene() = default;
 
 	virtual void Initialize() = 0;
@@ -33,7 +37,7 @@ public:
 							class PipelineService* psoService) = 0;
 	virtual void Draw([[maybe_unused]]ID3D12GraphicsCommandList* cmdList,
 					  [[maybe_unused]] class PipelineService*,
-					  [[maybe_unused]] RenderTargetType){}
+					  [[maybe_unused]] class IRenderTarget* rt){}
 	virtual void DrawSpritesOnly([[maybe_unused]] ID3D12GraphicsCommandList* cmdList,
 								 [[maybe_unused]] class PipelineService* psoService) {}
 	virtual void CleanUp() = 0;
@@ -52,7 +56,7 @@ protected:
 	//===================================================================*/
 	//			protected methods
 	//===================================================================*/
-	DxCore* pDxCore_ = nullptr;
+	CalyxGraphics::DxCore* pDxCore_ = nullptr;
 
 	bool isEndGame_ = false;
 };

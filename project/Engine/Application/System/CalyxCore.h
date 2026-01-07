@@ -48,14 +48,14 @@ namespace CalyxEngine {
 		//===================================================================*/
 		static HINSTANCE GetHinstance() { return hInstance_; }
 		static HWND		 GetHWND() { return hwnd_; }
-		DxCore*			 GetDxCore() const { return dxCore_.get(); }
+		CalyxGraphics::DxCore*			 GetDxCore() const { return dxCore_.get(); }
 		void			 SetEngineUICore(CalyxEditor::EngineUICore* engineUI) { pEngineUICore_ = engineUI; }
 
 	private:
 		//===================================================================*/
 		//                    private members
 		//===================================================================*/
-		std::unique_ptr<DxCore> dxCore_ = nullptr;
+		std::unique_ptr<CalyxGraphics::DxCore>dxCore_ = nullptr;
 
 		/*window*/
 		std::unique_ptr<WinApp> winApp_;	// ウィンドウ

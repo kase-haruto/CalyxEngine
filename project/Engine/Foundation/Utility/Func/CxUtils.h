@@ -12,6 +12,11 @@ namespace CalyxMath {
 	[[nodiscard]] Matrix4x4 MakeAffineMatrix(const Vector3&, const Vector3&, const Vector3&) noexcept;
 	[[nodiscard]] Matrix4x4 MakeAffineMatrix(const Vector3&, const Quaternion&, const Vector3&) noexcept;
 	[[nodiscard]] Matrix4x4 MakeOrthographicMatrix(float l, float t, float r, float b, float n, float f) noexcept;
+	[[nodiscard]] Matrix4x4 MakeOrthographicMatrixLH(
+	float l, float r,
+float b, float t,
+float nearClip,
+float farClip);
 
 	[[nodiscard]] Vector3 TransformNormal(const Vector3&, const Matrix4x4&) noexcept;
 	[[nodiscard]] Vector4 MultiplyMatrixVector(const Matrix4x4&, const Vector4&) noexcept;

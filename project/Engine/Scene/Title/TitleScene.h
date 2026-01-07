@@ -30,7 +30,7 @@ class TitleScene final :
 	void Update(float dt) override;
 	void CleanUp() override;
 	void LoadAssets() override;
-	void Draw([[maybe_unused]] ID3D12GraphicsCommandList* cmdList, class PipelineService* psoService, RenderTargetType type) override;
+	void Draw([[maybe_unused]] ID3D12GraphicsCommandList* cmdList, class PipelineService* psoService, IRenderTarget* rt) override;
 
   private:
 	/* objects ======================================================*/

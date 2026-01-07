@@ -27,6 +27,7 @@ void BaseModel::Update(float deltaTime) {
 		if (ModelManager::GetInstance()->IsModelLoaded(fileName_)) {
 			auto loaded = ModelManager::GetInstance()->GetModelData(fileName_);
 			modelData_ = loaded;
+
 			OnModelLoaded();
 		}
 		// loaded が nullptr の場合、まだ読み込み中
@@ -43,8 +44,8 @@ void BaseModel::Update(float deltaTime) {
 		materialBuffer_.TransferData(materialData_);
 
 		// カメラ行列との掛け合わせ
-		modelData_->vertexBuffer.TransferVectorData(modelData_->meshData.vertices);
-		modelData_->indexBuffer.TransferVectorData(modelData_->meshData.indices);
+		// modelData_->vertexBuffer.TransferVectorData(modelData_->meshData.vertices);
+		// modelData_->indexBuffer.TransferVectorData(modelData_->meshData.indices);
 		Map();
 	}
 
@@ -55,7 +56,8 @@ void BaseModel::OnModelLoaded() {
 	modelData_->vertexBuffer.Initialize(device, UINT(modelData_->meshData.vertices.size()));
 	modelData_->indexBuffer.Initialize(device, UINT(modelData_->meshData.indices.size()));
 
-
+	modelData_->vertexBuffer.TransferVectorData(modelData_->meshData.vertices);
+	modelData_->indexBuffer.TransferVectorData(modelData_->meshData.indices);
 	// テクスチャ設定
 	if (!handle_) {
 		handle_ = TextureManager::GetInstance()->LoadTexture(
@@ -83,6 +85,16 @@ void BaseModel::UpdateTexture(float deltaTime) {
 		currentFrameIndex_ = (currentFrameIndex_ + 1) % textureHandles_.size();
 		handle_ = textureHandles_[currentFrameIndex_]; // テクスチャを切り替え
 	}
+}
+
+void BaseModel::EnsureRaytracingBLAS(ID3D12Device5* device5, ID3D12GraphicsCommandList4* cmdList4) {
+	if (blasBuilt_) return;
+	if (!modelData_.has_value()) return;
+	if (!device5 || !cmdList4) return;
+
+	// VB/IB が初期化されていることが前提（OnModelLoaded 済み）
+	rayMesh_.BuildBLAS(device5, cmdList4, *modelData_);
+	blasBuilt_ = true;
 }
 
 void BaseModel::ShowImGuiInterface() {

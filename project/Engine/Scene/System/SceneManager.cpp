@@ -20,7 +20,7 @@
 #include <Game/Scene/Game/GameScene.h>
 
 namespace CalyxScene {
-	SceneManager::SceneManager(DxCore* dx)
+	SceneManager::SceneManager(CalyxGraphics::DxCore* dx)
 	: dx_(dx) {
 		transitionService_ = std::make_unique<SceneTransitionService>(*this);
 	}
@@ -221,7 +221,7 @@ namespace CalyxScene {
 		rt->Clear(cmd);
 
 		auto& slot = slots_[currentIdx_];
-		slot.scene->Draw(cmd, pso, rt->GetRenderTargetType());
+		slot.scene->Draw(cmd, pso, rt);
 
 		// gameViewパネルにもスプライトを描画する
 		if(rt->GetRenderTargetType() != RenderTargetType::DebugView) {

@@ -73,16 +73,21 @@ GraphicsPipelineDesc& GraphicsPipelineDesc::DepthFunc(D3D12_COMPARISON_FUNC func
 /////////////////////////////////////////////////////////////////////////////////////////
 bool GraphicsPipelineDesc::operator==(const GraphicsPipelineDesc& o) const noexcept {
 	return vs_ == o.vs_ && ps_ == o.ps_ && cs_ == o.cs_ &&
-		isCompute_ == o.isCompute_ && 
-		rasterizer_.CullMode == o.rasterizer_.CullMode && rasterizer_.FillMode == o.rasterizer_.FillMode &&
-		blend_.RenderTarget[0].SrcBlend == o.blend_.RenderTarget[0].SrcBlend &&
-		blend_.RenderTarget[0].DestBlend == o.blend_.RenderTarget[0].DestBlend &&
-		depth_.DepthEnable == o.depth_.DepthEnable &&
-		sampleCount_ == o.sampleCount_ &&
-		rtvFormats_ == o.rtvFormats_ &&
-		inputElems_.size() == o.inputElems_.size() &&
-		root_.Hash() == o.root_.Hash();
+		   isCompute_ == o.isCompute_ &&
+		   dsvFormat_ == o.dsvFormat_ &&
+		   rasterizer_.CullMode == o.rasterizer_.CullMode &&
+		   rasterizer_.FillMode == o.rasterizer_.FillMode &&
+		   blend_.RenderTarget[0].SrcBlend == o.blend_.RenderTarget[0].SrcBlend &&
+		   blend_.RenderTarget[0].DestBlend == o.blend_.RenderTarget[0].DestBlend &&
+		   depth_.DepthEnable == o.depth_.DepthEnable &&
+		   depth_.DepthWriteMask == o.depth_.DepthWriteMask &&
+		   depth_.DepthFunc == o.depth_.DepthFunc &&
+		   sampleCount_ == o.sampleCount_ &&
+		   rtvFormats_ == o.rtvFormats_ &&
+		   inputElems_.size() == o.inputElems_.size() && 
+		   root_.Hash() == o.root_.Hash();
 }
+
 
 size_t GraphicsPipelineDesc::Hash() const noexcept {
 	size_t h = 0;
@@ -90,15 +95,29 @@ size_t GraphicsPipelineDesc::Hash() const noexcept {
 	HashCombine(h, std::hash<std::wstring>{}(ps_));
 	HashCombine(h, std::hash<std::wstring>{}(cs_));
 	HashCombine(h, static_cast<size_t>(isCompute_));
+
+	HashCombine(h, dsvFormat_);
+
 	HashCombine(h, rasterizer_.CullMode);
 	HashCombine(h, rasterizer_.FillMode);
+
 	HashCombine(h, blend_.RenderTarget[0].SrcBlend);
 	HashCombine(h, blend_.RenderTarget[0].DestBlend);
+
 	HashCombine(h, depth_.DepthEnable);
+	HashCombine(h, depth_.DepthWriteMask);
+	HashCombine(h, depth_.DepthFunc);
+
 	HashCombine(h, sampleCount_);
-	HashCombine(h, root_.Hash());
-	HashCombine(h, inputElems_.size());
+
 	HashCombine(h, rtvFormats_.size());
+	for(auto f : rtvFormats_) HashCombine(h, f);
+
+	HashCombine(h, root_.Hash());
+
+	HashCombine(h, inputElems_.size());
+
 	return h;
 }
+
 

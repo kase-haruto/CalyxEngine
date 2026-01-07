@@ -1,10 +1,14 @@
 #pragma once
-#include <Engine/PostProcess/Interface/IPostEffectPass.h>
+#include "Engine/Graphics/Device/DxCore.h"
+
 #include <Engine/Graphics/GpuResource/DxGpuResource.h>
+#include <Engine/PostProcess/Interface/IPostEffectPass.h>
 #include <Engine/PostProcess/Slot/PostEffectSlot.h>
 #include <vector>
 
-class DxCore;
+namespace CalyxGraphics {
+	class CalyxGraphics::DxCore;
+}
 class PostProcessCollection;
 class IRenderTarget;
 
@@ -18,7 +22,7 @@ public:
 	void Execute(ID3D12GraphicsCommandList* cmd,
 				 DxGpuResource* input,
 				 IRenderTarget* finalTarget,
-				 DxCore* dxCore);
+				 CalyxGraphics::DxCore* dxCore);
 
 private:
 	std::vector<IPostEffectPass*> passes_;

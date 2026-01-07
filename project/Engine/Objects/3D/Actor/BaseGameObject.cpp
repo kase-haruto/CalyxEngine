@@ -43,6 +43,7 @@ BaseGameObject::BaseGameObject(const std::string&		  modelName,
 	config_.SetOnApplied([this](const BaseGameObjectConfig&) {
 		this->ApplyConfig();
 	});
+	InitializeCollider(ColliderKind::Sphere);
 }
 
 BaseGameObject::BaseGameObject() {

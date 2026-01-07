@@ -7,8 +7,9 @@
 
 using namespace DirectX;
 using namespace Microsoft::WRL;
-
-class DxCore;
+namespace CalyxGraphics {
+	class DxCore;
+}
 
 //霧のパラメータを表す構造体
 struct FogParameters{
@@ -29,11 +30,11 @@ private:
 
 
 
-	const DxCore* pDxCore_;
+	const CalyxGraphics::DxCore*pDxCore_;
 
 public:
 	//コンストラクタ
-	FogEffect(const DxCore* dxCore);
+	FogEffect(const CalyxGraphics::DxCore* dxCore);
 	//デストラクタ
 	~FogEffect();
 

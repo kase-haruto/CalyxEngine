@@ -2303,6 +2303,27 @@
     <ClInclude Include="Engine\Foundation\Utility\Animation\SimpleAnimation.h" />
     <ClInclude Include="Engine\Foundation\Utility\Animation\SimpleAnimator.h" />
     <ClInclude Include="Engine\Foundation\Utility\Animation\SimpleAnimChannel.h" />
+    <ClInclude Include="Data\Game\Config\Background\ResultBackgroundObjectConfig.h" />
+    <ClInclude Include="Data\Game\Config\DimFilter\DimFilterConfig.h" />
+    <ClInclude Include="Data\Game\Config\Hud\ClearHudConfig.h" />
+    <ClInclude Include="Data\Game\Config\Hud\EnemyResultConfig.h" />
+    <ClInclude Include="Data\Game\Config\Hud\HudTransformMotionConfig.h" />
+    <ClInclude Include="Data\Game\Config\Hud\ScoreResultConfig.h" />
+    <ClInclude Include="Engine\Foundation\Math\Matrix3x4.h" />
+    <ClInclude Include="Engine\Graphics\Shadow\ShadowMap\GpuResource\ShadowMapResource.h" />
+    <ClInclude Include="Engine\Graphics\Shadow\ShadowMap\ShadowMapSystem.h" />
+    <ClInclude Include="Game\2d\Background\ResultBackgroundObject.h" />
+    <ClInclude Include="Game\2d\DimFilter\ScreenDimFilter.h" />
+    <ClInclude Include="Game\2d\Hud\ClearLogoHud.h" />
+    <ClInclude Include="Game\2d\Hud\EnemyRowHud.h" />
+    <ClInclude Include="Game\2d\Hud\HudMotionBuilder.h" />
+    <ClInclude Include="Game\2d\Hud\HudMotionGuiHelper.h" />
+    <ClInclude Include="Game\2d\Hud\ScoreResultHud.h" />
+    <ClInclude Include="Engine\Graphics\Shadow\Raytracing\RaytracingMesh.h" />
+    <ClInclude Include="Engine\Graphics\Shadow\Raytracing\RaytracingScene.h" />
+    <ClInclude Include="Engine\Graphics\Shadow\Raytracing\RaytracingSystem.h" />
+    <ClInclude Include="Engine\Graphics\Shadow\Raytracing\RaytracingTypes.h" />
+    <ClInclude Include="Engine\Graphics\Shadow\ShadowMap\GpuResource\SceneDepthResource.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\ChromaticAberration.PS.hlsl">
@@ -2374,6 +2395,8 @@
     <FxCompile Include="Resources\shaders\Vignette.PS.hlsl">
       <Filter>Resources\shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Resources\shaders\ShadowStatic.VS.hlsl" />
+    <FxCompile Include="Resources\shaders\ShadowSkinned.VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -2439,6 +2462,27 @@
     <ClCompile Include="Engine\Foundation\Utility\Animation\SimpleAnimation.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Animation\SimpleAnimator.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Animation\SimpleAnimChannel.cpp" />
+    <ClCompile Include="Data\Game\Config\Background\ResultBackgroundObjectConfig.cpp" />
+    <ClCompile Include="Data\Game\Config\DimFilter\DimFilterConfig.cpp" />
+    <ClCompile Include="Data\Game\Config\Hud\ClearHudConfig.cpp" />
+    <ClCompile Include="Data\Game\Config\Hud\EnemyResultConfig.cpp" />
+    <ClCompile Include="Data\Game\Config\Hud\HudTransformMotionConfig.cpp" />
+    <ClCompile Include="Data\Game\Config\Hud\ScoreResultConfig.cpp" />
+    <ClCompile Include="Engine\Foundation\Math\Matrix3x4.cpp" />
+    <ClCompile Include="Engine\Graphics\Shadow\ShadowMap\GpuResource\ShadowMapResource.cpp" />
+    <ClCompile Include="Engine\Graphics\Shadow\ShadowMap\ShadowMapSystem.cpp" />
+    <ClCompile Include="Engine\Objects\2D\Hud\HudMotionSet.cpp" />
+    <ClCompile Include="Game\2d\Background\ResultBackgroundObject.cpp" />
+    <ClCompile Include="Game\2d\DimFilter\ScreenDimFilter.cpp" />
+    <ClCompile Include="Game\2d\Hud\ClearLogoHud.cpp" />
+    <ClCompile Include="Game\2d\Hud\EnemyRowHud.cpp" />
+    <ClCompile Include="Game\2d\Hud\HudMotionBuilder.cpp" />
+    <ClCompile Include="Game\2d\Hud\HudMotionGuiHelper.cpp" />
+    <ClCompile Include="Game\2d\Hud\ScoreResultHud.cpp" />
+    <ClCompile Include="Engine\Graphics\Shadow\Raytracing\RaytracingMesh.cpp" />
+    <ClCompile Include="Engine\Graphics\Shadow\Raytracing\RaytracingScene.cpp" />
+    <ClCompile Include="Engine\Graphics\Shadow\Raytracing\RaytracingSystem.cpp" />
+    <ClCompile Include="Engine\Graphics\Shadow\ShadowMap\GpuResource\SceneDepthResource.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />

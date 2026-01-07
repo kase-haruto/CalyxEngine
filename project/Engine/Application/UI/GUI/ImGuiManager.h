@@ -6,7 +6,9 @@
 #include <wrl.h>
 
 class WinApp;
-class DxCore;
+namespace CalyxGraphics {
+	class DxCore;
+}
 
 class ImGuiManager{
 public:
@@ -14,7 +16,7 @@ public:
 	ImGuiManager() = default;
 	~ImGuiManager() = default;
 
-	void Initialize(WinApp* winApp, const DxCore* dxCore);
+	void Initialize(WinApp* winApp, const CalyxGraphics::DxCore* dxCore);
 	void Finalize();
 	void Begin();
 	void End();
@@ -23,6 +25,6 @@ public:
 private:
 	void CustomizeImGuiStyle();
 private:
-	const DxCore* pDxCore_ = nullptr;
+	const CalyxGraphics::DxCore* pDxCore_ = nullptr;
 };
 

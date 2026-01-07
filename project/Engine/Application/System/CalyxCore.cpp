@@ -48,7 +48,7 @@ namespace CalyxEngine {
 		hInstance_ = hInstance;
 		hwnd_	   = winApp_->GetHWND();
 
-		dxCore_ = std::make_unique<DxCore>();
+		dxCore_ = std::make_unique<CalyxGraphics::DxCore>();
 		dxCore_->Initialize(winApp_.get(), clientWidth, clientHeight);
 
 		ComPtr<ID3D12Device> device = dxCore_->GetDevice();
@@ -61,6 +61,7 @@ namespace CalyxEngine {
 
 		DescriptorAllocator::Initialize(dxCore_->GetDevice().Get());
 		DescriptorAllocator::CreateHeap(DescriptorUsage::CbvSrvUav, {});
+		DescriptorAllocator::CreateHeap(DescriptorUsage::Dsv,  { .maxDescriptors = 1024, .shaderVisible = false });
 
 		// 管理クラスの初期化
 		shaderManager_		  = std::make_shared<ShaderManager>();

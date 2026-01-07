@@ -195,7 +195,7 @@ void PostEffectManager::Update(float dt){
 void PostEffectManager::Execute(ID3D12GraphicsCommandList* cmd,
 								DxGpuResource* input,
 								IRenderTarget* finalTarget,
-								DxCore* dxCore){
+								CalyxGraphics::DxCore* dxCore){
 	if (!initialized_) return;
 	RebuildGraphIfDirty();
 	graph_.Execute(cmd,input,finalTarget,dxCore);

@@ -17,7 +17,7 @@ public:
 
 	DxGpuResource* GetResource() const override{ return nullptr; };
 	D3D12_CPU_DESCRIPTOR_HANDLE GetRTV() const override;
-	D3D12_CPU_DESCRIPTOR_HANDLE GetDSV() const override{ return {}; }
+	D3D12_CPU_DESCRIPTOR_HANDLE GetDSV() const override{ return dsv_; }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSRV() const override;
 	void SetRenderTarget(ID3D12GraphicsCommandList* commandList) override;
 	void TransitionTo(ID3D12GraphicsCommandList* commandList, D3D12_RESOURCE_STATES newState) override;
@@ -30,7 +30,7 @@ public:
 	RenderTargetType GetRenderTargetType() const{ return rtType_; }
 
 	void ReleaseSRVs();
-
+	void SetDepthDSV(D3D12_CPU_DESCRIPTOR_HANDLE dsv)override { dsv_ = dsv; }
 private:
 	//===================================================================*/
 	//			private variables
@@ -41,6 +41,7 @@ private:
 	UINT rtvDescriptorSize_ = 0;
 	UINT bufferIndex_ = 0;
 
+	D3D12_CPU_DESCRIPTOR_HANDLE dsv_{};
 	std::vector<D3D12_RESOURCE_STATES> currentStates_;
 	std::vector<DescriptorHandle> srvHandles_;
 
