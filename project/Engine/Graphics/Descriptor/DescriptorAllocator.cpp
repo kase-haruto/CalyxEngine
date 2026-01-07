@@ -42,25 +42,28 @@ void DescriptorAllocator::CreateHeap(DescriptorUsage usage, const DescriptorHeap
 //		渡す
 /////////////////////////////////////////////////////////////////////////////////////////
 DescriptorHandle DescriptorAllocator::Allocate(DescriptorUsage usage){
-	HeapInfo& info = heaps_[usage];
-
+	HeapInfo&					info = heaps_[usage];
 	std::lock_guard<std::mutex> lock(info.mutex);
 
-	UINT offset = !info.freeList.empty()
-		? info.freeList.top()
-		: info.currentOffset++;
+	UINT offset = 0;
 
-	if (offset >= info.maxDescriptors)
-		throw std::runtime_error("DescriptorAllocator: Heap is full");
+	if(!info.freeList.empty()) {
+		offset = info.freeList.top();
+		info.freeList.pop();
+	} else {
+		if(info.currentOffset >= info.maxDescriptors)
+			throw std::runtime_error("DescriptorAllocator: Heap is full");
+		offset = info.currentOffset++;
+	}
 
 	DescriptorHandle handle{};
 	handle.offset = offset;
 
-	auto cpuStart = info.heap->GetCPUDescriptorHandleForHeapStart();
+	auto cpuStart  = info.heap->GetCPUDescriptorHandleForHeapStart();
 	handle.cpu.ptr = cpuStart.ptr + offset * info.descriptorSize;
 
-	if (info.shaderVisible) {
-		auto gpuStart = info.heap->GetGPUDescriptorHandleForHeapStart();
+	if(info.shaderVisible) {
+		auto gpuStart  = info.heap->GetGPUDescriptorHandleForHeapStart();
 		handle.gpu.ptr = gpuStart.ptr + offset * info.descriptorSize;
 	} else {
 		handle.gpu.ptr = 0;
