@@ -269,6 +269,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Graphics\Shadow\Raytracing\RaytracingMesh.cpp" />
     <ClCompile Include="Engine\Graphics\Shadow\Raytracing\RaytracingScene.cpp" />
     <ClCompile Include="Engine\Graphics\Shadow\Raytracing\RaytracingSystem.cpp" />
+    <ClCompile Include="Engine\Graphics\Shadow\ShadowMap\GpuResource\SceneDepthResource.cpp" />
     <ClCompile Include="Engine\Graphics\Shadow\ShadowMap\GpuResource\ShadowMapResource.cpp" />
     <ClCompile Include="Engine\Graphics\Shadow\ShadowMap\ShadowMapSystem.cpp" />
     <ClCompile Include="Engine\Objects\2D\Actor\Character2D.cpp" />
@@ -587,6 +588,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Graphics\Shadow\Raytracing\RaytracingScene.h" />
     <ClInclude Include="Engine\Graphics\Shadow\Raytracing\RaytracingSystem.h" />
     <ClInclude Include="Engine\Graphics\Shadow\Raytracing\RaytracingTypes.h" />
+    <ClInclude Include="Engine\Graphics\Shadow\ShadowMap\GpuResource\SceneDepthResource.h" />
     <ClInclude Include="Engine\Graphics\Shadow\ShadowMap\GpuResource\ShadowMapResource.h" />
     <ClInclude Include="Engine\Graphics\Shadow\ShadowMap\ShadowMapSystem.h" />
     <ClInclude Include="Engine\Objects\2D\Actor\Character2D.h" />
@@ -1113,6 +1115,16 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">Pixel</ShaderType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Resources\shaders\ShadowSkinned.VS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Resources\shaders\ShadowStatic.VS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Resources\shaders\SkinningObject3d.VS.hlsl">

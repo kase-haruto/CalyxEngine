@@ -111,7 +111,30 @@ namespace CalyxMath {
 		};
 		return result;
 	}
+	Matrix4x4 MakeOrthographicMatrixLH(
+	float l, float r,
+float b, float t,
+float nearClip,
+float farClip
+	) noexcept
+	{
+		Matrix4x4 m{};
 
+		const float invRL = 1.0f / (r - l);
+		const float invTB = 1.0f / (t - b);
+		const float invFN = 1.0f / (farClip - nearClip);
+
+		m.m[0][0] =  2.0f * invRL;
+		m.m[1][1] =  2.0f * invTB;
+		m.m[2][2] =  1.0f * invFN;
+
+		m.m[3][0] = -(r + l) * invRL;
+		m.m[3][1] = -(t + b) * invTB;
+		m.m[3][2] = -nearClip * invFN;
+		m.m[3][3] =  1.0f;
+
+		return m;
+	}
 
 	Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m) noexcept {
 		Vector3 result{

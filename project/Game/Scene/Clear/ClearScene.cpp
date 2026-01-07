@@ -91,10 +91,10 @@ void ClearScene::Update(float dt) {
 /////////////////////////////////////////////////////////////////////////////////////////
 void ClearScene::Draw(ID3D12GraphicsCommandList* cmdlist,
 					  class PipelineService*	 pso,
-					  RenderTargetType			 renderTarget) {
+					  IRenderTarget* rt) {
 	SceneContext* ctx = GetSceneContext();
 	if(!ctx) {
-		BaseScene::Draw(cmdlist, pso, renderTarget);
+		BaseScene::Draw(cmdlist, pso, rt);
 		return;
 	}
 	
@@ -109,7 +109,7 @@ void ClearScene::Draw(ID3D12GraphicsCommandList* cmdlist,
 	}
 	spriteRenderer_->Register(resultScoreSprite_.get());
 
-	BaseScene::Draw(cmdlist, pso, renderTarget);
+	BaseScene::Draw(cmdlist, pso, rt);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

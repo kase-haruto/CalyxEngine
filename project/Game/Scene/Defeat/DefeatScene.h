@@ -22,7 +22,7 @@ public:
 
 	void Initialize() override;
 	void Update(float dt) override;
-	void Draw(ID3D12GraphicsCommandList*,class PipelineService*,RenderTargetType) override;
+	void Draw(ID3D12GraphicsCommandList*,class PipelineService*,IRenderTarget* ) override;
 	void CleanUp() override;
 	void LoadAssets() override;
 

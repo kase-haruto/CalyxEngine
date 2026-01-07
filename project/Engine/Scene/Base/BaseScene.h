@@ -10,8 +10,12 @@
 
 #include <Engine/Renderer/Sprite/SpriteRenderer.h>
 #include <Engine/Renderer/Model/ModelRenderer.h>
+#include <Engine/Graphics/Shadow/ShadowMap/ShadowMapSystem.h>
 
 // c++
+#include "Engine/Graphics/RenderTarget/Interface/IRenderTarget.h"
+#include "Engine/Graphics/Shadow/ShadowMap/GpuResource/SceneDepthResource.h"
+
 #include <string>
 
 /* ========================================================================
@@ -32,7 +36,7 @@ public:
 							class PipelineService* psoService)override;
 	virtual void Draw(ID3D12GraphicsCommandList* cmdList,
 					  class PipelineService* psoService,
-					  RenderTargetType renderTargetType)override;
+					  IRenderTarget* rt)override;
 	void DrawSpritesOnly(ID3D12GraphicsCommandList* cmdList,
 					class PipelineService* psoService)override;
 	void CleanUp()override{};
@@ -63,7 +67,7 @@ protected:
 	//===================================================================*/
 	std::unique_ptr<SpriteRenderer> spriteRenderer_ = nullptr;
 	std::unique_ptr<ModelRenderer> modelRenderer_ = nullptr;
-
+	std::unique_ptr<CalyxGraphics::ShadowMapSystem> shadowMapSystem_ = nullptr;
 protected:
 	CalyxScene::ISceneTransitionRequestor* transitionRequestor_ = nullptr;
 };

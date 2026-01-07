@@ -7,7 +7,7 @@
 
 #include <memory>
 
-class OffscreenRenderTarget
+class	OffscreenRenderTarget
 	: public IRenderTarget{
 public:
 	//===================================================================*/

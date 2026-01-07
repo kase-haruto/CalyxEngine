@@ -61,6 +61,7 @@ namespace CalyxEngine {
 
 		DescriptorAllocator::Initialize(dxCore_->GetDevice().Get());
 		DescriptorAllocator::CreateHeap(DescriptorUsage::CbvSrvUav, {});
+		DescriptorAllocator::CreateHeap(DescriptorUsage::Dsv,  { .maxDescriptors = 1024, .shaderVisible = false });
 
 		// 管理クラスの初期化
 		shaderManager_		  = std::make_shared<ShaderManager>();

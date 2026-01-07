@@ -2323,6 +2323,7 @@
     <ClInclude Include="Engine\Graphics\Shadow\Raytracing\RaytracingScene.h" />
     <ClInclude Include="Engine\Graphics\Shadow\Raytracing\RaytracingSystem.h" />
     <ClInclude Include="Engine\Graphics\Shadow\Raytracing\RaytracingTypes.h" />
+    <ClInclude Include="Engine\Graphics\Shadow\ShadowMap\GpuResource\SceneDepthResource.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\ChromaticAberration.PS.hlsl">
@@ -2394,6 +2395,8 @@
     <FxCompile Include="Resources\shaders\Vignette.PS.hlsl">
       <Filter>Resources\shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Resources\shaders\ShadowStatic.VS.hlsl" />
+    <FxCompile Include="Resources\shaders\ShadowSkinned.VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -2479,6 +2482,7 @@
     <ClCompile Include="Engine\Graphics\Shadow\Raytracing\RaytracingMesh.cpp" />
     <ClCompile Include="Engine\Graphics\Shadow\Raytracing\RaytracingScene.cpp" />
     <ClCompile Include="Engine\Graphics\Shadow\Raytracing\RaytracingSystem.cpp" />
+    <ClCompile Include="Engine\Graphics\Shadow\ShadowMap\GpuResource\SceneDepthResource.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />

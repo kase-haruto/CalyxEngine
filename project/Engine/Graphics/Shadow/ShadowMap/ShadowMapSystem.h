@@ -3,6 +3,8 @@
 /* ========================================================================*/
 /*		include space
 /* ===================================================================== */
+#include "Engine/Graphics/Buffer/DxStructuredBuffer.h"
+#include "Engine/Graphics/Pipeline/PipelineType.h"
 #include "Engine/Objects/Transform/Transform.h"
 #include "GpuResource/ShadowMapResource.h"
 
@@ -22,28 +24,30 @@ class BaseModel;
 namespace CalyxGraphics {
 
 	/*----------------------------------------------------------------------*
-	*	ShadowCBData
-	*	- シャドウマップ用定数バッファデータ
-	*---------------------------------------------------------------------*/
+	 *	ShadowCBData
+	 *	- シャドウマップ用定数バッファデータ
+	 *---------------------------------------------------------------------*/
 	struct ShadowCBData {
 		CalyxMath::Matrix4x4 lightVP;
 	};
 
 	/*----------------------------------------------------------------------*
-	*	shadowMapSystem
-	*	- シャドウマップシステム
-	*---------------------------------------------------------------------*/
+	 *	shadowMapSystem
+	 *	- シャドウマップシステム
+	 *---------------------------------------------------------------------*/
 	class ShadowMapSystem {
 	public:
 		//===================================================================*/
 		//				public methods
 		//===================================================================*/
+		ShadowMapSystem()  = default;
+		~ShadowMapSystem() = default;
 		/**
 		 * \brief  初期化処理
 		 * \param device
 		 * \param size
 		 */
-		void Initialize(ID3D12Device* device,uint32_t size);
+		void Initialize(ID3D12Device* device, uint32_t size);
 		/**
 		 * \brief シャドウマップレンダリング
 		 * \param cmdList
@@ -53,12 +57,13 @@ namespace CalyxGraphics {
 		 * \param skinnedVisible
 		 */
 		void Render(
-			ID3D12GraphicsCommandList*                                                          cmdList,
-			PipelineService*                                                                    psoService,
-			ID3D12Device*                                                                       device,
-			const std::unordered_map<BaseModel*,std::vector<WorldTransform>>&                   staticVisible,
-			const std::unordered_map<CalyxAssets::AnimationModel*,std::vector<WorldTransform>>& skinnedVisible
-			);
+			ID3D12GraphicsCommandList*															 cmdList,
+			PipelineService*																	 psoService,
+			ID3D12Device*																		 device,
+			const std::unordered_map<BaseModel*, std::vector<WorldTransform>>&					 staticVisible,
+			const std::unordered_map<CalyxAssets::AnimationModel*, std::vector<WorldTransform>>& skinnedVisible);
+
+		void BindForMainPass(ID3D12GraphicsCommandList* cmd);
 
 		//--------- accessor -------------------------------------------
 		/**
@@ -77,9 +82,9 @@ namespace CalyxGraphics {
 		//===================================================================*/
 		//				private members
 		//===================================================================*/
-		ShadowMapResource                      shadowMap_; //< シャドウマップ用リソース
-		DxConstantBuffer<ShadowCBData>         shadowCB_;  //< シャドウマップ用定数バッファ
-		DxConstantBuffer<CalyxMath::Matrix4x4> worldCB_;   //< world用定数バッファ
+		ShadowMapResource					   shadowMap_; //< シャドウマップ用リソース
+		DxConstantBuffer<ShadowCBData>		   shadowCB_;  //< シャドウマップ用定数バッファ
+		
 	};
 
-}
+} // namespace CalyxGraphics

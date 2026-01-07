@@ -64,17 +64,17 @@ void DefeatScene::Update(float dt) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //  描画
 /////////////////////////////////////////////////////////////////////////////////////////
-void DefeatScene::Draw(ID3D12GraphicsCommandList* cmdlist, class PipelineService* pso, RenderTargetType renderTarget) {
+void DefeatScene::Draw(ID3D12GraphicsCommandList* cmdlist, class PipelineService* pso, IRenderTarget* rt) {
 	SceneContext* ctx = GetSceneContext();
 	if(!ctx) {
-		BaseScene::Draw(cmdlist, pso, renderTarget);
+		BaseScene::Draw(cmdlist, pso, rt);
 		return;
 	}
 
 	spriteRenderer_->Register(defeatSprite_.get());
 	spriteRenderer_->Register(buttonSprite.get());
 
-	BaseScene::Draw(cmdlist, pso, renderTarget);
+	BaseScene::Draw(cmdlist, pso, rt);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

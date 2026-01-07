@@ -61,7 +61,11 @@ void SwapChainRenderTarget::SetRenderTarget(ID3D12GraphicsCommandList* cmdList){
 	cmdList->RSSetScissorRects(1, &scissorRect_);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE rtv = GetRTV();
-	cmdList->OMSetRenderTargets(1, &rtv, FALSE, nullptr);
+	if(dsv_.ptr == 0) {
+		cmdList->OMSetRenderTargets(1, &rtv, FALSE, nullptr);
+	} else {
+		cmdList->OMSetRenderTargets(1, &rtv, FALSE, &dsv_);
+	}
 }
 
 void SwapChainRenderTarget::Clear(ID3D12GraphicsCommandList* cmdList){

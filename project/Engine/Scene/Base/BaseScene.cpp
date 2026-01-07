@@ -2,6 +2,8 @@
 /* ===================================================================== */
 /* include space                                                         */
 /* ===================================================================== */
+#include "Engine/Application/System/Enviroment.h"
+
 #include <Engine/Application/Effects/FxSystem.h>
 #include <Engine/Assets/Animation/AnimationModel.h>
 #include <Engine/Assets/Model/Model.h>
@@ -12,12 +14,15 @@
 #include <Engine/Scene/Utility/SceneUtility.h>
 
 BaseScene::BaseScene() {
-	spriteRenderer_ = std::make_unique<SpriteRenderer>();
-	modelRenderer_	= std::make_unique<ModelRenderer>();
+	spriteRenderer_	 = std::make_unique<SpriteRenderer>();
+	modelRenderer_	 = std::make_unique<ModelRenderer>();
+	shadowMapSystem_ = std::make_unique<CalyxGraphics::ShadowMapSystem>();
+	shadowMapSystem_->Initialize(
+		GraphicsGroup::GetInstance()->GetDevice().Get(),
+		2048);
 }
 
 void BaseScene::Initialize() {
-	// 必要なら各派生で実装
 }
 
 void BaseScene::PostUpdate(ID3D12GraphicsCommandList* cmd,
@@ -28,7 +33,7 @@ void BaseScene::PostUpdate(ID3D12GraphicsCommandList* cmd,
 
 void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 					 PipelineService*			pso,
-					 RenderTargetType) {
+					 IRenderTarget*				rt) {
 	if(!sceneContext_) return;
 
 	// Skybox
@@ -64,11 +69,62 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 
 	const Camera3d* cam = static_cast<Camera3d*>(CameraManager::GetMain3d());
 	modelRenderer_->PreCullAndBatch(cam);
+
+	// =========================================================
+	//  ShadowPass
+	// =========================================================
+	{
+		auto* dirLight = sceneContext_->GetLightLibrary()->GetDirectionalLight();
+		if(dirLight && modelRenderer_->HasSceneBounds()) {
+			dirLight->UpdateLightVP(modelRenderer_->GetSceneBounds());
+			shadowMapSystem_->SetLightVP(dirLight->GetLightVP());
+		}
+
+		// ShadowMap を作る
+		shadowMapSystem_->Render(
+			cmd,
+			pso,
+			GraphicsGroup::GetInstance()->GetDevice().Get(),
+			modelRenderer_->GetStaticVisible(),
+			modelRenderer_->GetSkinnedVisible());
+	}
+
+
+#if defined(_DEBUG) || defined(DEVELOP)
+	if(ImGui::Begin("ShadowMap Debug")) {
+
+		ImTextureID texId =
+			reinterpret_cast<ImTextureID>(
+				shadowMapSystem_->GetShadowMap().GetSrv().ptr);
+
+		ImGui::Image(
+			texId,
+			ImVec2(256, 256), // 表示サイズ
+			ImVec2(0, 0),	  // UV0
+			ImVec2(1, 1)	  // UV1
+		);
+	}
+	ImGui::End();
+#endif
+
+	// =========================================================
+	// MainPass の前に、描画先(OM)を必ず復帰させる
+	// =========================================================
+	{
+		// RTV + DSV + Viewport を復帰
+		rt->SetRenderTarget(cmd);
+	}
+
+	// =========================================================
+	// MainPass
+	// =========================================================
+	// ===== ShadowMap を MainPass にバインド =====
+
 	modelRenderer_->DrawAll(cmd,
 							GraphicsGroup::GetInstance()->GetDevice().Get(),
 							cam,
 							pso,
-							sceneContext_->GetLightLibrary());
+							sceneContext_->GetLightLibrary(), shadowMapSystem_.get());
 
 	// Particles
 	sceneContext_->GetFxSystem()->Render(pso, cmd);

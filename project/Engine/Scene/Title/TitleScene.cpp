@@ -71,8 +71,8 @@ void TitleScene::CleanUp() {
 	CollisionManager::GetInstance()->ClearColliders();
 }
 
-void TitleScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService, RenderTargetType type) {
-	BaseScene::Draw(cmdList, psoService, type);
+void TitleScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService, IRenderTarget* rt) {
+	BaseScene::Draw(cmdList, psoService, rt);
 
 	// スプライトの描画
 	for(auto& sprite : menu_->GetAllButtonImage()) {

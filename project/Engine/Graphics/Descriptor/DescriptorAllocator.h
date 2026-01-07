@@ -87,6 +87,7 @@ private:
 		std::stack<UINT>							 freeList;
 		std::mutex									 mutex;
 		UINT										 maxDescriptors = 0;
+		bool shaderVisible = false;
 	};
 
 	static ID3D12Device*								 device_;

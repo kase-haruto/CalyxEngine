@@ -17,7 +17,7 @@ namespace CalyxGraphics {
 		desc.Height           = height;
 		desc.DepthOrArraySize = 1;
 		desc.MipLevels        = 1;
-		desc.Format           = DXGI_FORMAT_D32_FLOAT;
+		desc.Format			  = DXGI_FORMAT_R32_TYPELESS;
 		desc.SampleDesc.Count = 1;
 		desc.Layout           = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		desc.Flags            = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
@@ -45,7 +45,17 @@ namespace CalyxGraphics {
 		{
 			auto handle = DescriptorAllocator::Allocate(DescriptorUsage::Dsv);
 			dsv_        = handle.cpu;
-			device->CreateDepthStencilView(resource_.Get(),nullptr,dsv_);
+			D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
+			dsvDesc.Format        = DXGI_FORMAT_D32_FLOAT;
+			dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+			dsvDesc.Flags         = D3D12_DSV_FLAG_NONE;
+			dsvDesc.Texture2D.MipSlice = 0;
+
+			device->CreateDepthStencilView(
+				resource_.Get(),
+				&dsvDesc,
+				dsv_
+			);
 		}
 
 		// -----------------------------

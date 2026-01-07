@@ -49,7 +49,7 @@ namespace CalyxScene {
 				 std::make_unique<ClearScene>());
 
 		SetCurrent(idToIndex_.at(
-			GameSceneUtil::ToSceneId(SceneType::TITLE)
+			GameSceneUtil::ToSceneId(SceneType::TEST)
 		));
 	}
 
@@ -221,7 +221,7 @@ namespace CalyxScene {
 		rt->Clear(cmd);
 
 		auto& slot = slots_[currentIdx_];
-		slot.scene->Draw(cmd, pso, rt->GetRenderTargetType());
+		slot.scene->Draw(cmd, pso, rt);
 
 		// gameViewパネルにもスプライトを描画する
 		if(rt->GetRenderTargetType() != RenderTargetType::DebugView) {

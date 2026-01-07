@@ -33,7 +33,7 @@ void PipelineService::RegisterAllPipelines() {
 		GraphicsPipelineDesc desc = makeFn();
 		auto pso = library_->GetOrCreate(desc);
 		auto root = library_->GetRoot(desc);
-		PipelineKey key{ tag, BlendMode::ADD };
+		PipelineKey key{ tag, BlendMode::NONE };
 		objCache_[key] = { pso, root };
 	};
 
@@ -76,8 +76,8 @@ void PipelineService::RegisterAllPipelines() {
 	}
 
 	//========================= Shadow ===================================
-	regObjNoBlend(PipelineTag::Object::ShadowStatic, PipelinePresets::MakeShadowStatic());
-	regObjNoBlend(PipelineTag::Object::ShadowSkinned, PipelinePresets::MakeShadowSkinned());
+	regObjNoBlend(PipelineTag::Object::ShadowStatic, PipelinePresets::MakeShadowStatic);
+	regObjNoBlend(PipelineTag::Object::ShadowSkinned, PipelinePresets::MakeShadowSkinned);
 
 	//=================== cs Pipelines ===================================
 

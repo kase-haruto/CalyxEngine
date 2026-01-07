@@ -37,7 +37,7 @@ public:
 							class PipelineService* psoService) = 0;
 	virtual void Draw([[maybe_unused]]ID3D12GraphicsCommandList* cmdList,
 					  [[maybe_unused]] class PipelineService*,
-					  [[maybe_unused]] RenderTargetType){}
+					  [[maybe_unused]] class IRenderTarget* rt){}
 	virtual void DrawSpritesOnly([[maybe_unused]] ID3D12GraphicsCommandList* cmdList,
 								 [[maybe_unused]] class PipelineService* psoService) {}
 	virtual void CleanUp() = 0;
