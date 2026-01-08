@@ -60,5 +60,6 @@ VSOut main(VSIn v) {
 	Skinned skinned = Skinning(v);
 	float4 worldPos = mul(skinned.position, World);
 	o.svpos = mul(worldPos,gLightVP);
+	
 	return o;
 }
