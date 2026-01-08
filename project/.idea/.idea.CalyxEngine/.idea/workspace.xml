@@ -9,7 +9,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f5403cee-c7a0-4b9b-aa5b-39c938897f1e" name="変更" comment="">
-      <change beforePath="$PROJECT_DIR$/Resources/Assets/Scenes/TitleScene.scene" beforeDir="false" afterPath="$PROJECT_DIR$/Resources/Assets/Scenes/TitleScene.scene" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.CalyxEngine/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.CalyxEngine/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,7 +39,7 @@
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="cidr-memory-view://6" root0="FORCE_HIGHLIGHTING" />
+    <setting file="cidr-memory-view://8" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Program Files (x86)/Windows Kits/10/Include/10.0.22621.0/um/d3d12.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/um/d3d12.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.44.35207/include/functional" root0="SKIP_HIGHLIGHTING" />
@@ -194,7 +194,15 @@
       <option name="project" value="LOCAL" />
       <updated>1767895552501</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="シーンオブジェクト配置の調整">
+      <option name="closed" value="true" />
+      <created>1767898976917</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1767898976917</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -207,7 +215,8 @@
     <MESSAGE value="プロジェクト読み込みがうまくいっていなかったところを修正しました。" />
     <MESSAGE value="スキニングモデルに影を落とすように修正" />
     <MESSAGE value="シーンを調整しました。" />
-    <option name="LAST_COMMIT_MESSAGE" value="シーンを調整しました。" />
+    <MESSAGE value="シーンオブジェクト配置の調整" />
+    <option name="LAST_COMMIT_MESSAGE" value="シーンオブジェクト配置の調整" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
