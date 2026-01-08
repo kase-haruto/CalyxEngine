@@ -37,8 +37,11 @@ namespace CalyxGraphics {
 				nullptr,
 				IID_PPV_ARGS(&res)
 				);
-			assert(SUCCEEDED(hr));
-			return res;
+			if(FAILED(hr)) {
+				assert(false); // デバッグ時に失敗を検出
+			}
+				return res;    // 空の ComPtr を返す（呼び出し側でチェック）
+
 		}
 	}
 

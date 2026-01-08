@@ -62,11 +62,15 @@ namespace CalyxGraphics {
 
 				cmdList->SetGraphicsRootDescriptorTable(2,model->GetJointMatrixSrv());
 
+				// skin pallet
+				model->SetCommandPalletSrv(2,cmdList);
+
 				model->BindVertexIndexBuffers(cmdList);
 				const UINT indexCount = (UINT)model->GetModelData()->meshData.indices.size();
 
 				for(const auto& tf : tfs) {
 					(void)tf;
+					tf.SetCommand(cmdList,1);
 					cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 					cmdList->DrawIndexedInstanced(indexCount,1,0,0,0);
 				}

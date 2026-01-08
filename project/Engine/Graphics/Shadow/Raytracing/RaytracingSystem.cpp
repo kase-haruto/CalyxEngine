@@ -16,8 +16,8 @@ namespace CalyxGraphics {
 		/////////////////////////////////////////////////////////////////////////////
 		Microsoft::WRL::ComPtr<ID3D12Resource>
 		CreateDefaultBuffer(
-			ID3D12Device*		  device,
-			size_t				  bytes,
+			ID3D12Device*         device,
+			size_t                bytes,
 			D3D12_RESOURCE_STATES initialState) {
 			Microsoft::WRL::ComPtr<ID3D12Resource> res;
 
@@ -27,13 +27,13 @@ namespace CalyxGraphics {
 
 			// リソースの設定
 			D3D12_RESOURCE_DESC desc{};
-			desc.Dimension		  = D3D12_RESOURCE_DIMENSION_BUFFER;
-			desc.Width			  = bytes;
-			desc.Height			  = 1;
+			desc.Dimension        = D3D12_RESOURCE_DIMENSION_BUFFER;
+			desc.Width            = bytes;
+			desc.Height           = 1;
 			desc.DepthOrArraySize = 1;
-			desc.MipLevels		  = 1;
+			desc.MipLevels        = 1;
 			desc.SampleDesc.Count = 1;
-			desc.Layout			  = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+			desc.Layout           = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
 			// リソースの生成
 			HRESULT hr = device->CreateCommittedResource(
@@ -43,8 +43,11 @@ namespace CalyxGraphics {
 				initialState,
 				nullptr,
 				IID_PPV_ARGS(&res));
-			assert(SUCCEEDED(hr));
-			return res;
+			if(FAILED(hr)) {
+				assert(false); // デバッグ時に失敗を検出
+			}
+				return res;    // 空の ComPtr を返す（呼び出し側でチェック）
+
 		}
 
 	} // namespace
@@ -62,7 +65,7 @@ namespace CalyxGraphics {
 	/////////////////////////////////////////////////////////////////////////////////
 	void RaytracingSystem::BuildTLAS(
 		ID3D12GraphicsCommandList4* cmd,
-		const RaytracingScene&		scene) {
+		const RaytracingScene&      scene) {
 		assert(device_ && cmd);
 
 		// インスタンス数の取得
@@ -73,16 +76,16 @@ namespace CalyxGraphics {
 		D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS inputs{};
 		inputs.Type =
 			D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL;
-		inputs.DescsLayout	 = D3D12_ELEMENTS_LAYOUT_ARRAY;
-		inputs.NumDescs		 = instanceCount;
+		inputs.DescsLayout   = D3D12_ELEMENTS_LAYOUT_ARRAY;
+		inputs.NumDescs      = instanceCount;
 		inputs.InstanceDescs = scene.GetInstanceDescGPUVA();
-		inputs.Flags =
+		inputs.Flags         =
 			D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE;
 
 		// 事前ビルド情報の取得
 		D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO prebuild{};
 		device_->GetRaytracingAccelerationStructurePrebuildInfo(
-			&inputs, &prebuild);
+			&inputs,&prebuild);
 
 		// サイズのアサート
 		assert(prebuild.ResultDataMaxSizeInBytes > 0);
@@ -121,36 +124,32 @@ namespace CalyxGraphics {
 				tlas_->GetGPUVirtualAddress();
 
 			device_->CreateShaderResourceView(
-				nullptr, &srv, tlasSrv_.cpu);
+				nullptr,&srv,tlasSrv_.cpu);
 		}
 
 		// TLASのビルド
 		D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC build{};
-		build.Inputs = inputs;
+		build.Inputs                           = inputs;
 		build.ScratchAccelerationStructureData =
 			scratch_->GetGPUVirtualAddress();
 		build.DestAccelerationStructureData =
 			tlas_->GetGPUVirtualAddress();
 
 		// TLASの構築コマンド発行
-		cmd->BuildRaytracingAccelerationStructure(&build, 0, nullptr);
+		cmd->BuildRaytracingAccelerationStructure(&build,0,nullptr);
 
 		// UAVバリアの発行
 		D3D12_RESOURCE_BARRIER uav{};
-		uav.Type		  = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+		uav.Type          = D3D12_RESOURCE_BARRIER_TYPE_UAV;
 		uav.UAV.pResource = tlas_.Get();
-		cmd->ResourceBarrier(1, &uav);
+		cmd->ResourceBarrier(1,&uav);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
 	//  TLASの取得
 	//////////////////////////////////////////////////////////////////////////////
-	D3D12_GPU_DESCRIPTOR_HANDLE RaytracingSystem::GetTLASSrv() const {
-		return tlasSrv_.gpu;
-	}
+	D3D12_GPU_DESCRIPTOR_HANDLE RaytracingSystem::GetTLASSrv() const { return tlasSrv_.gpu; }
 
-	ID3D12Resource* RaytracingSystem::GetTLAS() const {
-		return tlas_.Get();
-	}
+	ID3D12Resource* RaytracingSystem::GetTLAS() const { return tlas_.Get(); }
 
 } // namespace CalyxGraphics

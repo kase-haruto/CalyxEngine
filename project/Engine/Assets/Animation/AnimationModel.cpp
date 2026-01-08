@@ -381,6 +381,10 @@ namespace CalyxAssets {
 		return currentAnimation_->currentTime >= currentAnimation_->animation.duration;
 	}
 
+	void AnimationModel::SetCommandPalletSrv(UINT rootParameterIndex,ID3D12GraphicsCommandList* cmdList)const {
+		cmdList->SetGraphicsRootDescriptorTable(rootParameterIndex,skinCluster_.paletteSrvHandle.second);
+	}
+
 	//-----------------------------------------------------------------------------
 	// 描画
 	//-----------------------------------------------------------------------------
@@ -390,7 +394,7 @@ namespace CalyxAssets {
 
 		ID3D12GraphicsCommandList* cmdList = GraphicsGroup::GetInstance()->GetCommandList().Get();
 
-		cmdList->SetGraphicsRootDescriptorTable(7,skinCluster_.paletteSrvHandle.second);
+		SetCommandPalletSrv(7,cmdList);
 
 		// 頂点バッファ/インデックスバッファをセット
 		vbvs_[0] = modelData_->vertexBuffer.GetVertexBufferView(); // vertexDataのvbv

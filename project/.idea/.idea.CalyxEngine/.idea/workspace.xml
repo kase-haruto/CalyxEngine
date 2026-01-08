@@ -8,16 +8,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f5403cee-c7a0-4b9b-aa5b-39c938897f1e" name="変更" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.CalyxEngine/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.CalyxEngine/.idea/dictionaries/project.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.CalyxEngine/.idea/encodings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Engine/Graphics/Camera/3d/Camera3d.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Engine/Graphics/Camera/3d/Camera3d.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Engine/Graphics/Camera/3d/Camera3d.h" beforeDir="false" afterPath="$PROJECT_DIR$/Engine/Graphics/Camera/3d/Camera3d.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Engine/Graphics/Shadow/ShadowMap/ShadowBounds.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Engine/Graphics/Shadow/ShadowMap/ShadowBounds.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.CalyxEngine/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.CalyxEngine/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Engine/Assets/Animation/AnimationModel.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Engine/Assets/Animation/AnimationModel.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Engine/Assets/Animation/AnimationModel.h" beforeDir="false" afterPath="$PROJECT_DIR$/Engine/Assets/Animation/AnimationModel.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Engine/Assets/Model/BaseModel.h" beforeDir="false" afterPath="$PROJECT_DIR$/Engine/Assets/Model/BaseModel.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Engine/Graphics/Pipeline/Presets/PipelinePresets.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Engine/Graphics/Pipeline/Presets/PipelinePresets.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Engine/Graphics/Shadow/Raytracing/RaytracingMesh.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Engine/Graphics/Shadow/Raytracing/RaytracingMesh.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Engine/Graphics/Shadow/Raytracing/RaytracingSystem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Engine/Graphics/Shadow/Raytracing/RaytracingSystem.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Engine/Graphics/Shadow/ShadowMap/ShadowMapSystem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Engine/Graphics/Shadow/ShadowMap/ShadowMapSystem.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Engine/Scene/Base/BaseScene.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Engine/Scene/Base/BaseScene.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Resources/Assets/Scenes/Game.scene" beforeDir="false" afterPath="$PROJECT_DIR$/Resources/Assets/Scenes/Game.scene" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Resources/Assets/Scenes/GameScene.scene" beforeDir="false" afterPath="$PROJECT_DIR$/Resources/Assets/Scenes/GameScene.scene" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Engine/Scene/System/SceneManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Engine/Scene/System/SceneManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Game/Scene/Game/GameScene.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Scene/Game/GameScene.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Resources/shaders/ShadowSkinned.VS.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/Resources/shaders/ShadowSkinned.VS.hlsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,8 +32,57 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="cidr-memory-view://1" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="cidr-memory-view://25" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../Program Files (x86)/Windows Kits/10/Include/10.0.22621.0/um/d3d12.h" root0="SKIP_HIGHLIGHTING" />
   </component>
+  <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="Toolset" />
   </component>
@@ -76,6 +126,30 @@
         <option name="TERMINAL_INTERACTION_BEHAVIOR" value="AUTO_DETECT" />
         <option name="PROJECT_FILE_PATH" value="$PROJECT_DIR$/CalyxEngine.vcxproj" />
       </configuration_1>
+      <configuration_2 setup="1">
+        <option name="CONFIGURATION" value="Debug" />
+        <option name="PLATFORM" value="x64" />
+        <option name="CURRENT_LAUNCH_PROFILE" value="Local" />
+        <option name="EXE_PATH" value="$(LocalDebuggerCommand)" />
+        <option name="PROGRAM_PARAMETERS" value="$(LocalDebuggerCommandArguments)" />
+        <option name="WORKING_DIRECTORY" value="$(LocalDebuggerWorkingDirectory)" />
+        <option name="PASS_PARENT_ENVS" value="1" />
+        <option name="USE_EXTERNAL_CONSOLE" value="0" />
+        <option name="TERMINAL_INTERACTION_BEHAVIOR" value="AUTO_DETECT" />
+        <option name="PROJECT_FILE_PATH" value="$PROJECT_DIR$/CalyxEngine.vcxproj" />
+      </configuration_2>
+      <configuration_3 setup="1">
+        <option name="CONFIGURATION" value="Release" />
+        <option name="PLATFORM" value="x64" />
+        <option name="CURRENT_LAUNCH_PROFILE" value="Local" />
+        <option name="EXE_PATH" value="$(LocalDebuggerCommand)" />
+        <option name="PROGRAM_PARAMETERS" value="$(LocalDebuggerCommandArguments)" />
+        <option name="WORKING_DIRECTORY" value="$(LocalDebuggerWorkingDirectory)" />
+        <option name="PASS_PARENT_ENVS" value="1" />
+        <option name="USE_EXTERNAL_CONSOLE" value="0" />
+        <option name="TERMINAL_INTERACTION_BEHAVIOR" value="AUTO_DETECT" />
+        <option name="PROJECT_FILE_PATH" value="$PROJECT_DIR$/CalyxEngine.vcxproj" />
+      </configuration_3>
       <option name="DEFAULT_PROJECT_PATH" value="$PROJECT_DIR$/CalyxEngine.vcxproj" />
       <option name="PROJECT_FILE_PATH" value="$PROJECT_DIR$/CalyxEngine.vcxproj" />
       <option name="AUTO_SELECT_PRIORITY" value="0" />
@@ -91,16 +165,28 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1767850953124</updated>
-      <workItem from="1767850955605" duration="2187000" />
+      <workItem from="1767850955605" duration="8570000" />
     </task>
+    <task id="LOCAL-00001" summary="プロジェクト読み込みがうまくいっていなかったところを修正しました。">
+      <option name="closed" value="true" />
+      <created>1767853312267</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1767853312267</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
   <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+    <MESSAGE value="プロジェクト読み込みがうまくいっていなかったところを修正しました。" />
+    <option name="LAST_COMMIT_MESSAGE" value="プロジェクト読み込みがうまくいっていなかったところを修正しました。" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
