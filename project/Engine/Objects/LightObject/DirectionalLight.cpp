@@ -105,6 +105,8 @@ void DirectionalLight::UpdateLightVP(const AABB& sceneBounds) {
 	CalyxMath::Vector3 lightPos =
 		center - lightDir * (radius * 2.0f);
 
+	lightPos.y = 4000.0f; // 高さを固定
+
 	// -------------------------
 	// up ベクトル
 	// -------------------------

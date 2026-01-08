@@ -196,6 +196,15 @@ void Camera3d::ShowGui() {
 	}
 }
 
+void Camera3d::GetShadowFrustumCorners(CalyxMath::Vector3 outCorners[8], float shadowFar) const {
+	const float cameraFar = farZ_;
+	float ratio = 1.0f;
+	if (cameraFar > 1e-6f) ratio = (std::min)(shadowFar / cameraFar, 1.0f);
+
+	frustum_.CalculateCorners(outCorners, ratio);
+}
+
+
 bool Camera3d::IsVisible(const AABB& aabb) const { return frustum_.IsAABBInside(aabb.min_,aabb.max_); }
 
 REGISTER_SCENE_OBJECT(Camera3d)

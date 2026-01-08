@@ -93,6 +93,10 @@ void ShadowMapSystem::BindForMainPass(ID3D12GraphicsCommandList* cmd) {
 	shadowCB_.SetCommand(cmd, 8);
 }
 
+void ShadowMapSystem::UpdateShadowBounds(const Camera3d& camera, float shadowFar, float expandMargin) {
+		shadowBounds_.UpdateFromCamera(camera,shadowFar,expandMargin);
+	}
+
 //////////////////////////////////////////////////////////////////////////////////////
 //		ライトビュー・プロジェクション行列セット
 //////////////////////////////////////////////////////////////////////////////////////

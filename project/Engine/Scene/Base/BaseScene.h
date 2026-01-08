@@ -68,6 +68,7 @@ protected:
 	std::unique_ptr<SpriteRenderer> spriteRenderer_ = nullptr;
 	std::unique_ptr<ModelRenderer> modelRenderer_ = nullptr;
 	std::unique_ptr<CalyxGraphics::ShadowMapSystem> shadowMapSystem_ = nullptr;
+
 protected:
 	CalyxScene::ISceneTransitionRequestor* transitionRequestor_ = nullptr;
 };

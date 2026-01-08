@@ -7,7 +7,7 @@
 #include "Engine/Graphics/Pipeline/PipelineType.h"
 #include "Engine/Objects/Transform/Transform.h"
 #include "GpuResource/ShadowMapResource.h"
-
+#include <Engine/Graphics/Shadow/ShadowMap/ShadowBounds.h>
 #include <Engine/Foundation/Math/Matrix4x4.h>
 
 namespace CalyxMath {
@@ -47,7 +47,7 @@ namespace CalyxGraphics {
 		 * \param device
 		 * \param size
 		 */
-		void Initialize(ID3D12Device* device, uint32_t size);
+		void Initialize(ID3D12Device* device,uint32_t size);
 		/**
 		 * \brief シャドウマップレンダリング
 		 * \param cmdList
@@ -57,13 +57,15 @@ namespace CalyxGraphics {
 		 * \param skinnedVisible
 		 */
 		void Render(
-			ID3D12GraphicsCommandList*															 cmdList,
-			PipelineService*																	 psoService,
-			ID3D12Device*																		 device,
-			const std::unordered_map<BaseModel*, std::vector<WorldTransform>>&					 staticVisible,
-			const std::unordered_map<CalyxAssets::AnimationModel*, std::vector<WorldTransform>>& skinnedVisible);
+			ID3D12GraphicsCommandList*                                                          cmdList,
+			PipelineService*                                                                    psoService,
+			ID3D12Device*                                                                       device,
+			const std::unordered_map<BaseModel*,std::vector<WorldTransform>>&                   staticVisible,
+			const std::unordered_map<CalyxAssets::AnimationModel*,std::vector<WorldTransform>>& skinnedVisible);
 
 		void BindForMainPass(ID3D12GraphicsCommandList* cmd);
+
+		void UpdateShadowBounds(const class Camera3d& camera, float shadowFar, float expandMargin = 5.0f);
 
 		//--------- accessor -------------------------------------------
 		/**
@@ -78,13 +80,15 @@ namespace CalyxGraphics {
 		 */
 		void SetLightVP(const CalyxMath::Matrix4x4& lightVP);
 
+		const ShadowBounds& GetShadowBounds()const { return shadowBounds_; }
+
 	private:
 		//===================================================================*/
 		//				private members
 		//===================================================================*/
-		ShadowMapResource					   shadowMap_; //< シャドウマップ用リソース
-		DxConstantBuffer<ShadowCBData>		   shadowCB_;  //< シャドウマップ用定数バッファ
-		
+		ShadowMapResource              shadowMap_;    //< シャドウマップ用リソース
+		DxConstantBuffer<ShadowCBData> shadowCB_;     //< シャドウマップ用定数バッファ
+		ShadowBounds                   shadowBounds_; //< シャドウ範囲管理
 	};
 
 } // namespace CalyxGraphics

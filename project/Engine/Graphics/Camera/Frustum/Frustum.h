@@ -53,6 +53,12 @@ public:
 	/// <param name="outCorners"></param>
 	void CalculateCorners(CalyxMath::Vector3 outCorners[8]) const;
 
+	/**
+	 * \brief 8頂点を計算
+	 * \param outCorners
+	 * \param farPlaneRatio
+	 */
+	void CalculateCorners(CalyxMath::Vector3 outCorners[8], float farPlaneRatio) const;
 private:
 	/// <summary>
 	/// 面の正規化
