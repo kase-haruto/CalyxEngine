@@ -33,6 +33,7 @@ public:
     const WorldTransform* GetFollowTarget() const { return follow_.target; }
     void EnableFollow(bool e) { follow_.enabled = e; }
     bool IsFollowEnabled() const { return follow_.enabled; }
+	CalyxMath::Vector3 GetForward()const;
 
 private:
     //==================================================================*//

@@ -103,6 +103,14 @@ CalyxMath::Vector3 Camera3d::SmoothDampVec(const CalyxMath::Vector3& current,con
 	return target + (change + temp) * exp;
 }
 
+CalyxMath::Vector3 Camera3d::GetForward() const {
+	return CalyxMath::Vector3(
+	  GetWorldTransform().matrix.world.m[2][0],
+	  GetWorldTransform().matrix.world.m[2][1],
+	  GetWorldTransform().matrix.world.m[2][2]
+   ).Normalize();
+}
+
 void Camera3d::UpdateFollow(float dt) {
 	if(!follow_.target) return;
 

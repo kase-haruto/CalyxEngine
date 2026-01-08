@@ -19,11 +19,10 @@ BaseScene::BaseScene() {
 	shadowMapSystem_ = std::make_unique<CalyxGraphics::ShadowMapSystem>();
 	shadowMapSystem_->Initialize(
 		GraphicsGroup::GetInstance()->GetDevice().Get(),
-		2048);
+		4096);
 }
 
-void BaseScene::Initialize() {
-}
+void BaseScene::Initialize() {}
 
 void BaseScene::PostUpdate(ID3D12GraphicsCommandList* cmd,
 						   PipelineService*			  pso) {
@@ -76,7 +75,8 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 	{
 		auto* dirLight = sceneContext_->GetLightLibrary()->GetDirectionalLight();
 		if(dirLight ) {
-			shadowMapSystem_->UpdateShadowBounds(*cam,1000.0f, 10.0f);
+			// シーン全体のAABBからシャドウマップの範囲を決定
+			shadowMapSystem_->UpdateShadowBounds(*cam,500.0f, 10.0f);
 			dirLight->UpdateLightVP(shadowMapSystem_->GetShadowBounds().GetBounds());
 			shadowMapSystem_->SetLightVP(dirLight->GetLightVP());
 		}
@@ -102,7 +102,6 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 	// MainPass
 	// =========================================================
 	// ===== ShadowMap を MainPass にバインド =====
-
 	modelRenderer_->DrawAll(cmd,
 							GraphicsGroup::GetInstance()->GetDevice().Get(),
 							cam,

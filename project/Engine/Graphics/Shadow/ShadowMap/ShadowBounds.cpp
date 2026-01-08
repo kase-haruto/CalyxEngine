@@ -4,22 +4,40 @@
 
 namespace CalyxGraphics {
 
-	void ShadowBounds::UpdateFromCamera(const Camera3d& camera, float shadowFar, float expandMargin) {
-		CalyxMath::Vector3 corners[8];
-		camera.GetShadowFrustumCorners(corners, shadowFar);
+	void ShadowBounds::UpdateFromCamera(const Camera3d& camera,float shadowFar,float expandMargin) {
+		// -----------------------------
+		// カメラのワールド位置
+		// -----------------------------
+		const CalyxMath::Vector3 camPos = camera.GetWorldTransform().GetWorldPosition();
 
-		CalyxMath::Vector3 mn = corners[0];
-		CalyxMath::Vector3 mx = corners[0];
-		for (int i = 1; i < 8; ++i) {
-			mn = CalyxMath::Vector3::Min(mn, corners[i]);
-			mx = CalyxMath::Vector3::Max(mx, corners[i]);
-		}
+		// -----------------------------
+		// カメラの Forward
+		// -----------------------------
+		CalyxMath::Vector3 camForward = camera.GetForward();
 
-		// 影のはみ出し防止（外から侵入してくる影/キャスタ対策）
-		mn -= CalyxMath::Vector3(expandMargin);
-		mx += CalyxMath::Vector3(expandMargin);
+		// -----------------------------
+		// Shadow AABB の中心
+		// （カメラ前方に half shadowFar）
+		// -----------------------------
+		CalyxMath::Vector3 center =
+			camPos + camForward * (shadowFar * 0.5f);
 
-		bounds_.min_ = mn;
-		bounds_.max_ = mx;
+		// -----------------------------
+		// Shadow AABB の半サイズ
+		// -----------------------------
+		CalyxMath::Vector3 halfSize(
+			shadowFar * 0.5f,
+			shadowFar*2, // 高さは少し余裕
+			shadowFar * 0.5f
+			);
+
+		// expandMargin を加算
+		halfSize += CalyxMath::Vector3(expandMargin);
+
+		// -----------------------------
+		// AABB 設定
+		// -----------------------------
+		bounds_.min_ = center - halfSize;
+		bounds_.max_ = center + halfSize;
 	}
 }
