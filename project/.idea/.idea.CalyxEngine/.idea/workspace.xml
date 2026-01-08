@@ -9,10 +9,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f5403cee-c7a0-4b9b-aa5b-39c938897f1e" name="変更" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.CalyxEngine/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.CalyxEngine/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Game/Scene/Game/GameScene.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Scene/Game/GameScene.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Resources/Assets/Scenes/TitleScene.scene" beforeDir="false" afterPath="$PROJECT_DIR$/Resources/Assets/Scenes/TitleScene.scene" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Resources/shaders/ShadowSkinned.VS.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/Resources/shaders/ShadowSkinned.VS.hlsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,7 +39,7 @@
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="cidr-memory-view://4" root0="FORCE_HIGHLIGHTING" />
+    <setting file="cidr-memory-view://6" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Program Files (x86)/Windows Kits/10/Include/10.0.22621.0/um/d3d12.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/um/d3d12.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.44.35207/include/functional" root0="SKIP_HIGHLIGHTING" />
@@ -80,6 +77,8 @@
     <setting file="file://$PROJECT_DIR$/Game/3dObject/Actor/Boss/Details/BossStateType" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Game/Scene/Details/SceneType.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock://C:/WorkSpace/project/Game/Scene/Game/GameScene.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/WorkSpace/project/Resources/Assets/Scenes/GameScene.scene" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/WorkSpace/project/Resources/Assets/Scenes/TitleScene.scene" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock://C:/WorkSpace/project/Resources/shaders/ShadowSkinned.VS.hlsl" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/externals/nlohmann/json.hpp" root0="SKIP_HIGHLIGHTING" />
   </component>
@@ -187,7 +186,15 @@
       <option name="project" value="LOCAL" />
       <updated>1767859997946</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="シーンを調整しました。">
+      <option name="closed" value="true" />
+      <created>1767895552501</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1767895552501</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -199,7 +206,8 @@
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
     <MESSAGE value="プロジェクト読み込みがうまくいっていなかったところを修正しました。" />
     <MESSAGE value="スキニングモデルに影を落とすように修正" />
-    <option name="LAST_COMMIT_MESSAGE" value="スキニングモデルに影を落とすように修正" />
+    <MESSAGE value="シーンを調整しました。" />
+    <option name="LAST_COMMIT_MESSAGE" value="シーンを調整しました。" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
