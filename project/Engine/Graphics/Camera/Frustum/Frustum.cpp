@@ -75,6 +75,17 @@ void Frustum::CalculateCorners(CalyxMath::Vector3 outCorners[8]) const{
 	}
 }
 
+void Frustum::CalculateCorners(CalyxMath::Vector3 outCorners[8], float farPlaneRatio) const {
+	CalculateCorners(outCorners); // 既存の8点（near/farそのまま）
+
+	if (farPlaneRatio < 1.0f) {
+		for (int i = 0; i < 4; ++i) {
+			CalyxMath::Vector3 v = outCorners[i + 4] - outCorners[i];
+			outCorners[i + 4] = outCorners[i] + v * farPlaneRatio;
+		}
+	}
+}
+
 FrustumPlane Frustum::NormalizePlane(const CalyxMath::Vector4& p){
 	CalyxMath::Vector3 n = {p.x, p.y, p.z};
 	float len = n.Length();

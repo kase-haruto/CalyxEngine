@@ -23,7 +23,7 @@ public:
     void Initialize();
     void AlwaysUpdate(float dt) override;
     void ShowGui() override;
-
+	void GetShadowFrustumCorners(CalyxMath::Vector3 outCorners[8], float shadowFar) const;
     //--------- accessor -----------------------------------------------------
     bool IsVisible(const class AABB& aabb) const;
     std::string_view GetTypeName() const override { return "Camera3d"; }
@@ -33,6 +33,7 @@ public:
     const WorldTransform* GetFollowTarget() const { return follow_.target; }
     void EnableFollow(bool e) { follow_.enabled = e; }
     bool IsFollowEnabled() const { return follow_.enabled; }
+	CalyxMath::Vector3 GetForward()const;
 
 private:
     //==================================================================*//

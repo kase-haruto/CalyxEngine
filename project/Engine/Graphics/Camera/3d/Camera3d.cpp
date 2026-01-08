@@ -103,6 +103,14 @@ CalyxMath::Vector3 Camera3d::SmoothDampVec(const CalyxMath::Vector3& current,con
 	return target + (change + temp) * exp;
 }
 
+CalyxMath::Vector3 Camera3d::GetForward() const {
+	return CalyxMath::Vector3(
+	  GetWorldTransform().matrix.world.m[2][0],
+	  GetWorldTransform().matrix.world.m[2][1],
+	  GetWorldTransform().matrix.world.m[2][2]
+   ).Normalize();
+}
+
 void Camera3d::UpdateFollow(float dt) {
 	if(!follow_.target) return;
 
@@ -195,6 +203,15 @@ void Camera3d::ShowGui() {
 		else ImGui::TextDisabled("Target: (null)");
 	}
 }
+
+void Camera3d::GetShadowFrustumCorners(CalyxMath::Vector3 outCorners[8], float shadowFar) const {
+	const float cameraFar = farZ_;
+	float ratio = 1.0f;
+	if (cameraFar > 1e-6f) ratio = (std::min)(shadowFar / cameraFar, 1.0f);
+
+	frustum_.CalculateCorners(outCorners, ratio);
+}
+
 
 bool Camera3d::IsVisible(const AABB& aabb) const { return frustum_.IsAABBInside(aabb.min_,aabb.max_); }
 

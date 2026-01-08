@@ -23,16 +23,16 @@ GraphicsPipelineDesc PipelinePresets::MakeObject3D(BlendMode mode) {
 
 	desc.root_
 		.AllowIA()
-		.CBV(0, D3D12_SHADER_VISIBILITY_PIXEL)											 // Material
-		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_VERTEX) // WVP
-		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)	 // Tex
-		.CBV(2, D3D12_SHADER_VISIBILITY_PIXEL)											 // DirLight
-		.CBV(1, D3D12_SHADER_VISIBILITY_ALL)											 // Camera
-		.CBV(4, D3D12_SHADER_VISIBILITY_PIXEL)											 // PointLight
-		.SRVTable(1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)	 // EnvMap
-		.SRVTable(1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_VERTEX) // billboard'
-		.CBV(3, D3D12_SHADER_VISIBILITY_PIXEL)											 // [8] ShadowConstants b3
-		.SRVTable(2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)	 // [9] ShadowMap t2
+		.CBV(0,D3D12_SHADER_VISIBILITY_PIXEL)                                         // Material
+		.SRVTable(0,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_VERTEX) // WVP
+		.SRVTable(0,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_PIXEL)  // Tex
+		.CBV(2,D3D12_SHADER_VISIBILITY_PIXEL)                                         // DirLight
+		.CBV(1,D3D12_SHADER_VISIBILITY_ALL)                                           // Camera
+		.CBV(4,D3D12_SHADER_VISIBILITY_PIXEL)                                         // PointLight
+		.SRVTable(1,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_PIXEL)  // EnvMap
+		.SRVTable(1,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_VERTEX) // billboard'
+		.CBV(3,D3D12_SHADER_VISIBILITY_PIXEL)                                         // [8] ShadowConstants b3
+		.SRVTable(2,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_PIXEL)  // [9] ShadowMap t2
 
 		.SamplerWrapLinear(0);
 
@@ -46,13 +46,13 @@ GraphicsPipelineDesc PipelinePresets::MakeShadowStatic() {
 	GraphicsPipelineDesc desc;
 
 	D3D12_RASTERIZER_DESC raster = {};
-	raster.FillMode				 = D3D12_FILL_MODE_SOLID;
-	raster.CullMode				 = D3D12_CULL_MODE_BACK;
-	raster.DepthClipEnable		 = TRUE;
+	raster.FillMode              = D3D12_FILL_MODE_SOLID;
+	raster.CullMode              = D3D12_CULL_MODE_BACK;
+	raster.DepthClipEnable       = TRUE;
 
-	raster.DepthBias			= 250; // 固定バイアス
+	raster.DepthBias            = 250;  // 固定バイアス
 	raster.SlopeScaledDepthBias = 1.0f; // 角度依存バイアス
-	raster.DepthBiasClamp		= 0.0f;
+	raster.DepthBiasClamp       = 0.0f;
 
 	desc.VS(L"ShadowStatic.VS.hlsl")
 		.Input(VertexInputLayout<VertexPosUvN>::Get())
@@ -69,8 +69,8 @@ GraphicsPipelineDesc PipelinePresets::MakeShadowStatic() {
 
 	desc.root_
 		.AllowIA()
-		.CBV(0, D3D12_SHADER_VISIBILITY_VERTEX)											  // ShadowCB
-		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_VERTEX); // t0: gTransMat
+		.CBV(0,D3D12_SHADER_VISIBILITY_VERTEX)                                         // ShadowCB
+		.SRVTable(0,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_VERTEX); // t0: gTransMat
 
 	return desc;
 }
@@ -92,16 +92,16 @@ GraphicsPipelineDesc PipelinePresets::MakeSkinningObject3D(BlendMode mode) {
 
 	desc.root_
 		.AllowIA()
-		.CBV(0, D3D12_SHADER_VISIBILITY_PIXEL)											 // Material
-		.CBV(0, D3D12_SHADER_VISIBILITY_VERTEX)											 // WVP
-		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)	 // Tex
-		.CBV(2, D3D12_SHADER_VISIBILITY_PIXEL)											 // DirLight
-		.CBV(1, D3D12_SHADER_VISIBILITY_ALL)											 // Camera
-		.CBV(4, D3D12_SHADER_VISIBILITY_PIXEL)											 // PointLight
-		.SRVTable(1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)	 // EnvMap
-		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_VERTEX) // SkinningBuffer
-		.CBV(3, D3D12_SHADER_VISIBILITY_PIXEL)											 // [8] ShadowConstants b3
-		.SRVTable(2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)	 // [9] ShadowMap t2
+		.CBV(0,D3D12_SHADER_VISIBILITY_PIXEL)                                         // Material
+		.CBV(0,D3D12_SHADER_VISIBILITY_VERTEX)                                        // WVP
+		.SRVTable(0,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_PIXEL)  // Tex
+		.CBV(2,D3D12_SHADER_VISIBILITY_PIXEL)                                         // DirLight
+		.CBV(1,D3D12_SHADER_VISIBILITY_ALL)                                           // Camera
+		.CBV(4,D3D12_SHADER_VISIBILITY_PIXEL)                                         // PointLight
+		.SRVTable(1,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_PIXEL)  // EnvMap
+		.SRVTable(0,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_VERTEX) // SkinningBuffer
+		.CBV(3,D3D12_SHADER_VISIBILITY_PIXEL)                                         // [8] ShadowConstants b3
+		.SRVTable(2,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_PIXEL)  // [9] ShadowMap t2
 
 		.SamplerWrapLinear(0);
 
@@ -126,12 +126,9 @@ GraphicsPipelineDesc PipelinePresets::MakeShadowSkinned() {
 
 	desc.root_
 		.AllowIA()
-		.CBV(0, D3D12_SHADER_VISIBILITY_VERTEX) // ShadowCB
-		.CBV(1, D3D12_SHADER_VISIBILITY_VERTEX) // World
-		.SRVTable(
-			0, 1,
-			D3D12_DESCRIPTOR_RANGE_TYPE_SRV,
-			D3D12_SHADER_VISIBILITY_VERTEX); // JointMatrices
+		.CBV(0,D3D12_SHADER_VISIBILITY_VERTEX)                                        // ShadowCB
+		.CBV(1,D3D12_SHADER_VISIBILITY_VERTEX)                                        // wvp
+		.SRVTable(0,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_VERTEX); // SkinningBuffer
 
 	return desc;
 }
@@ -141,10 +138,10 @@ GraphicsPipelineDesc PipelinePresets::MakeShadowSkinned() {
 /////////////////////////////////////////////////////////////////////////////////////////
 GraphicsPipelineDesc PipelinePresets::MakeParticle(BlendMode mode) {
 	D3D12_DEPTH_STENCIL_DESC depthDesc = {};
-	depthDesc.DepthEnable			   = TRUE;
-	depthDesc.DepthWriteMask		   = D3D12_DEPTH_WRITE_MASK_ZERO; // 書き込みを無効にする
-	depthDesc.DepthFunc				   = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-	depthDesc.StencilEnable			   = FALSE;
+	depthDesc.DepthEnable              = TRUE;
+	depthDesc.DepthWriteMask           = D3D12_DEPTH_WRITE_MASK_ZERO; // 書き込みを無効にする
+	depthDesc.DepthFunc                = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	depthDesc.StencilEnable            = FALSE;
 
 	GraphicsPipelineDesc desc;
 	desc.VS(L"Particle.VS.hlsl")
@@ -158,22 +155,22 @@ GraphicsPipelineDesc PipelinePresets::MakeParticle(BlendMode mode) {
 
 	desc.root_
 		.AllowIA()
-		.CBV(0, D3D12_SHADER_VISIBILITY_VERTEX)											 // gCamera (b0)
-		.CBV(1, D3D12_SHADER_VISIBILITY_PIXEL)											 // gMaterial (b1)
-		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_VERTEX) // gParticle (t0)
-		.SRVTable(1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)	 // gTexture  (t1)
-		.CBV(2, D3D12_SHADER_VISIBILITY_VERTEX)											 // gLight   (b2)
-		.SamplerWrapLinear(0);															 // gSampler (s0)
+		.CBV(0,D3D12_SHADER_VISIBILITY_VERTEX)                                        // gCamera (b0)
+		.CBV(1,D3D12_SHADER_VISIBILITY_PIXEL)                                         // gMaterial (b1)
+		.SRVTable(0,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_VERTEX) // gParticle (t0)
+		.SRVTable(1,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_PIXEL)  // gTexture  (t1)
+		.CBV(2,D3D12_SHADER_VISIBILITY_VERTEX)                                        // gLight   (b2)
+		.SamplerWrapLinear(0);                                                        // gSampler (s0)
 
 	return desc;
 }
 
 GraphicsPipelineDesc PipelinePresets::MakeGpuParticle(BlendMode mode) {
 	D3D12_DEPTH_STENCIL_DESC depthDesc = {};
-	depthDesc.DepthEnable			   = TRUE;
-	depthDesc.DepthWriteMask		   = D3D12_DEPTH_WRITE_MASK_ZERO; // 書き込みを無効にする
-	depthDesc.DepthFunc				   = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-	depthDesc.StencilEnable			   = FALSE;
+	depthDesc.DepthEnable              = TRUE;
+	depthDesc.DepthWriteMask           = D3D12_DEPTH_WRITE_MASK_ZERO; // 書き込みを無効にする
+	depthDesc.DepthFunc                = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	depthDesc.StencilEnable            = FALSE;
 
 	GraphicsPipelineDesc desc;
 	desc.VS(L"GpuParticle.VS.hlsl")
@@ -187,11 +184,11 @@ GraphicsPipelineDesc PipelinePresets::MakeGpuParticle(BlendMode mode) {
 
 	desc.root_
 		.AllowIA()
-		.CBV(0, D3D12_SHADER_VISIBILITY_VERTEX)											 // gCamera (b0)
-		.CBV(1, D3D12_SHADER_VISIBILITY_PIXEL)											 // gMaterial (b1)
-		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_VERTEX) // gParticle (t0)
-		.SRVTable(1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)	 // gTexture  (t1)
-		.SamplerWrapLinear(0);															 // gSampler (s0)
+		.CBV(0,D3D12_SHADER_VISIBILITY_VERTEX)                                        // gCamera (b0)
+		.CBV(1,D3D12_SHADER_VISIBILITY_PIXEL)                                         // gMaterial (b1)
+		.SRVTable(0,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_VERTEX) // gParticle (t0)
+		.SRVTable(1,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_PIXEL)  // gTexture  (t1)
+		.SamplerWrapLinear(0);                                                        // gSampler (s0)
 
 	return desc;
 }
@@ -228,9 +225,9 @@ GraphicsPipelineDesc PipelinePresets::MakeObject2D() {
 	// ルートシグネチャ設定
 	desc.root_
 		.AllowIA()
-		.CBV(0, D3D12_SHADER_VISIBILITY_PIXEL)
-		.CBV(0, D3D12_SHADER_VISIBILITY_VERTEX)
-		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)
+		.CBV(0,D3D12_SHADER_VISIBILITY_PIXEL)
+		.CBV(0,D3D12_SHADER_VISIBILITY_VERTEX)
+		.SRVTable(0,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_PIXEL)
 		.SamplerWrapLinear(0);
 
 	return desc;
@@ -245,10 +242,10 @@ GraphicsPipelineDesc PipelinePresets::MakeGpuParticleCS() {
 
 	desc.root_
 		// b0: EmitterParams（deltaTime, acceleration）
-		.CBV(0, D3D12_SHADER_VISIBILITY_ALL)
-		.UAVTable(0, 1)	 // u0 : RWStructuredBuffer<Particle>
-		.UAVTable(1, 1)	 // u0 : RWStructuredBuffer<Particle>
-		.UAVTable(2, 1); // u1 : RWStructuredBuffer<uint> (freeCounter)
+		.CBV(0,D3D12_SHADER_VISIBILITY_ALL)
+		.UAVTable(0,1)  // u0 : RWStructuredBuffer<Particle>
+		.UAVTable(1,1)  // u0 : RWStructuredBuffer<Particle>
+		.UAVTable(2,1); // u1 : RWStructuredBuffer<uint> (freeCounter)
 
 	return desc;
 }
@@ -259,12 +256,12 @@ GraphicsPipelineDesc PipelinePresets::MakeGpuParticleEmit() {
 
 	desc.root_
 		// b0: EmitterParams
-		.CBV(0, D3D12_SHADER_VISIBILITY_ALL)
-		.CBV(1, D3D12_SHADER_VISIBILITY_ALL)
+		.CBV(0,D3D12_SHADER_VISIBILITY_ALL)
+		.CBV(1,D3D12_SHADER_VISIBILITY_ALL)
 		// u0: RWStructuredBuffer<Particle>
-		.UAVTable(0, 1)	 // u0 : RWStructuredBuffer<Particle>
-		.UAVTable(1, 1)	 // u1 : RWStructuredBuffer<uint> (freeListIndex)
-		.UAVTable(2, 1); // u2 : RWStructuredBuffer<uint> (freeList)
+		.UAVTable(0,1)  // u0 : RWStructuredBuffer<Particle>
+		.UAVTable(1,1)  // u1 : RWStructuredBuffer<uint> (freeListIndex)
+		.UAVTable(2,1); // u2 : RWStructuredBuffer<uint> (freeList)
 
 	return desc;
 }
@@ -274,10 +271,10 @@ GraphicsPipelineDesc PipelinePresets::MakeGpuParticleUpdate() {
 	desc.CS(L"UpdateParticle.CS.hlsl");
 
 	desc.root_
-		.CBV(0, D3D12_SHADER_VISIBILITY_ALL) // b0 frameTime
-		.UAVTable(0, 1)						 // u0 : RWStructuredBuffer<Particle>
-		.UAVTable(1, 1)						 // u1 : RWStructuredBuffer<uint> (freeListIndex)
-		.UAVTable(2, 1);					 // u2 : RWStructuredBuffer<uint> (freeList)
+		.CBV(0,D3D12_SHADER_VISIBILITY_ALL) // b0 frameTime
+		.UAVTable(0,1)                      // u0 : RWStructuredBuffer<Particle>
+		.UAVTable(1,1)                      // u1 : RWStructuredBuffer<uint> (freeListIndex)
+		.UAVTable(2,1);                     // u2 : RWStructuredBuffer<uint> (freeList)
 
 	return desc;
 }
@@ -307,7 +304,7 @@ GraphicsPipelineDesc PipelinePresets::MakeCopyImage() {
 
 	desc.root_
 		.AllowIA()
-		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)
+		.SRVTable(0,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_PIXEL)
 		.SampleClampLinear(0);
 	return desc;
 }
@@ -329,7 +326,7 @@ GraphicsPipelineDesc PipelinePresets::MakeGrayScale() {
 
 	desc.root_
 		.AllowIA()
-		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)
+		.SRVTable(0,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_PIXEL)
 		.SampleClampLinear(0);
 
 	return desc;
@@ -352,8 +349,8 @@ GraphicsPipelineDesc PipelinePresets::MakeChromaticAberration() {
 
 	desc.root_
 		.AllowIA()
-		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)
-		.CBV(0, D3D12_SHADER_VISIBILITY_PIXEL) // Distortion parameters
+		.SRVTable(0,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_PIXEL)
+		.CBV(0,D3D12_SHADER_VISIBILITY_PIXEL) // Distortion parameters
 		.SampleClampLinear(0);
 
 	return desc;
@@ -376,8 +373,8 @@ GraphicsPipelineDesc PipelinePresets::MakeVignette() {
 
 	desc.root_
 		.AllowIA()
-		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)
-		.CBV(0, D3D12_SHADER_VISIBILITY_PIXEL)
+		.SRVTable(0,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_PIXEL)
+		.CBV(0,D3D12_SHADER_VISIBILITY_PIXEL)
 		.SampleClampLinear(0);
 	return desc;
 }
@@ -399,8 +396,8 @@ GraphicsPipelineDesc PipelinePresets::MakeCRT() {
 
 	desc.root_
 		.AllowIA()
-		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)
-		.CBV(0, D3D12_SHADER_VISIBILITY_PIXEL) // crt parameters
+		.SRVTable(0,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_PIXEL)
+		.CBV(0,D3D12_SHADER_VISIBILITY_PIXEL) // crt parameters
 		.SampleClampLinear(0);
 	return desc;
 }
@@ -422,8 +419,8 @@ GraphicsPipelineDesc PipelinePresets::MakeRadialBlur() {
 
 	desc.root_
 		.AllowIA()
-		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)
-		.CBV(0, D3D12_SHADER_VISIBILITY_PIXEL) // Blur parameters
+		.SRVTable(0,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_PIXEL)
+		.CBV(0,D3D12_SHADER_VISIBILITY_PIXEL) // Blur parameters
 		.SampleClampLinear(0);
 	return desc;
 }

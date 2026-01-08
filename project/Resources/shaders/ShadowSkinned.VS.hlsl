@@ -5,27 +5,51 @@ cbuffer ShadowCB : register(b0) {
 	float4x4 gLightVP;
 };
 
-cbuffer ObjectCB : register(b1) {
-	float4x4 gWorld;
+cbuffer ObjectConstants : register(b1) {
+	float4x4 World;
+	float4x4 WorldInverseTranspose;
+}
+
+struct Well {
+	float4x4 skeletonSpaceMatrix;
+	float4x4 skeletonSpaceInverseTransposeMatrix;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 // tables
 ///////////////////////////////////////////////////////////////////////////////
-StructuredBuffer<float4x4> gJointMatrices : register(t0);
+StructuredBuffer<Well> gMatrixPalette : register(t0);
 
 ///////////////////////////////////////////////////////////////////////////////
 // structs
 ///////////////////////////////////////////////////////////////////////////////
 struct VSIn {
-	float4 pos : POSITION;
-	float4 weights : WEIGHT;
-	int4   joints : INDEX;
+	float4 position : POSITION;
+	float4 weight : WEIGHT;
+	int4   index : INDEX;
 };
 
 struct VSOut {
 	float4 svpos : SV_POSITION;
 };
+
+struct Skinned {
+	float4 position;
+};
+
+Skinned Skinning(VSIn input) {
+
+	Skinned skinned;
+
+	// 位置の変換
+	skinned.position = mul(input.position, gMatrixPalette[input.index.x].skeletonSpaceMatrix) * input.weight.x;
+	skinned.position += mul(input.position, gMatrixPalette[input.index.y].skeletonSpaceMatrix) * input.weight.y;
+	skinned.position += mul(input.position, gMatrixPalette[input.index.z].skeletonSpaceMatrix) * input.weight.z;
+	skinned.position += mul(input.position, gMatrixPalette[input.index.w].skeletonSpaceMatrix) * input.weight.w;
+	skinned.position.w = 1.0f;
+
+	return skinned;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // main
@@ -33,12 +57,8 @@ struct VSOut {
 VSOut main(VSIn v) {
 	VSOut o;
 
-	float4 skinned =
-		mul(v.pos,gJointMatrices[v.joints.x]) * v.weights.x
-		+ mul(v.pos,gJointMatrices[v.joints.y]) * v.weights.y
-		+ mul(v.pos,gJointMatrices[v.joints.z]) * v.weights.z
-		+ mul(v.pos,gJointMatrices[v.joints.w]) * v.weights.w;
-
-	o.svpos = mul(mul(skinned,gWorld),gLightVP);
+	Skinned skinned = Skinning(v);
+	float4 worldPos = mul(skinned.position, World);
+	o.svpos = mul(worldPos,gLightVP);
 	return o;
 }

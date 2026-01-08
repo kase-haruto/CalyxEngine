@@ -19,11 +19,10 @@ BaseScene::BaseScene() {
 	shadowMapSystem_ = std::make_unique<CalyxGraphics::ShadowMapSystem>();
 	shadowMapSystem_->Initialize(
 		GraphicsGroup::GetInstance()->GetDevice().Get(),
-		2048);
+		4096);
 }
 
-void BaseScene::Initialize() {
-}
+void BaseScene::Initialize() {}
 
 void BaseScene::PostUpdate(ID3D12GraphicsCommandList* cmd,
 						   PipelineService*			  pso) {
@@ -75,8 +74,10 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 	// =========================================================
 	{
 		auto* dirLight = sceneContext_->GetLightLibrary()->GetDirectionalLight();
-		if(dirLight && modelRenderer_->HasSceneBounds()) {
-			dirLight->UpdateLightVP(modelRenderer_->GetSceneBounds());
+		if(dirLight ) {
+			// シーン全体のAABBからシャドウマップの範囲を決定
+			shadowMapSystem_->UpdateShadowBounds(*cam,500.0f, 10.0f);
+			dirLight->UpdateLightVP(shadowMapSystem_->GetShadowBounds().GetBounds());
 			shadowMapSystem_->SetLightVP(dirLight->GetLightVP());
 		}
 
@@ -88,24 +89,6 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 			modelRenderer_->GetStaticVisible(),
 			modelRenderer_->GetSkinnedVisible());
 	}
-
-
-#if defined(_DEBUG) || defined(DEVELOP)
-	if(ImGui::Begin("ShadowMap Debug")) {
-
-		ImTextureID texId =
-			reinterpret_cast<ImTextureID>(
-				shadowMapSystem_->GetShadowMap().GetSrv().ptr);
-
-		ImGui::Image(
-			texId,
-			ImVec2(256, 256), // 表示サイズ
-			ImVec2(0, 0),	  // UV0
-			ImVec2(1, 1)	  // UV1
-		);
-	}
-	ImGui::End();
-#endif
 
 	// =========================================================
 	// MainPass の前に、描画先(OM)を必ず復帰させる
@@ -119,7 +102,6 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 	// MainPass
 	// =========================================================
 	// ===== ShadowMap を MainPass にバインド =====
-
 	modelRenderer_->DrawAll(cmd,
 							GraphicsGroup::GetInstance()->GetDevice().Get(),
 							cam,
