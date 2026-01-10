@@ -5,6 +5,7 @@
 
 // externals
 #include <externals/imgui/imgui.h>
+#include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 
 // c++
 #include "Engine/Foundation/Utility/Ease/CxEase.h"
@@ -256,7 +257,7 @@ void PostEffectManager::DrawImGui(){
 		if (isCopy) ImGui::BeginDisabled();
 
 		bool on = s.enabled;
-		if (ImGui::Checkbox("##on",&on)){
+		if (GuiCmd::CheckBox("##on",on)){
 			s.enabled = on;
 			MarkDirty();
 		}

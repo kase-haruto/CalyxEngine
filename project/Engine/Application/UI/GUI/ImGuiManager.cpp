@@ -38,7 +38,7 @@ void ImGuiManager::Initialize(WinApp* winApp, const CalyxGraphics::DxCore* dxCor
 	ImGui::StyleColorsDark(); // ダークテーマを適用
 
 	// fontの設定
-	ImFont* font = io.Fonts->AddFontFromFileTTF("Resources/Assets/fonts/FiraMono.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
+	ImFont* font = io.Fonts->AddFontFromFileTTF("Resources/Assets/fonts/inter.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
 	io.FontDefault = font;
 	CustomizeImGuiStyle();
 }
@@ -84,97 +84,111 @@ void ImGuiManager::Draw(){
 }
 
 void ImGuiManager::CustomizeImGuiStyle() {
-
 	ImGuiStyle& style = ImGui::GetStyle();
 	ImVec4* colors = style.Colors;
 
-	// === Unreal Engine風 カラーパレット ===
-	const ImVec4 darkBg      = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
-	const ImVec4 darkPanel   = ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
-	const ImVec4 midPanel    = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
-	const ImVec4 darkHover   = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
-	const ImVec4 darkActive  = ImVec4(0.28f, 0.28f, 0.28f, 1.00f);
-	const ImVec4 borderDim   = ImVec4(0.22f, 0.22f, 0.22f, 1.00f);
+	// === Unreal Engine 5 風 カラーパレット (Dark Theme) ===
+	const ImVec4 bgDark       = ImVec4(0.13f, 0.13f, 0.13f, 1.00f);
+	const ImVec4 panelDark    = ImVec4(0.16f, 0.16f, 0.16f, 1.00f); // パネル背景
+	const ImVec4 panelHover   = ImVec4(0.24f, 0.24f, 0.24f, 1.00f); // ホバー時
+	const ImVec4 panelActive  = ImVec4(0.32f, 0.32f, 0.32f, 1.00f); // アクティブ
+	
+	const ImVec4 accentColor  = ImVec4(0.00f, 0.44f, 0.87f, 1.00f);
+	const ImVec4 accentHover  = ImVec4(0.12f, 0.52f, 0.95f, 1.00f);
+	const ImVec4 accentActive = ImVec4(0.00f, 0.38f, 0.75f, 1.00f);
 
-	const ImVec4 highlight     = ImVec4(0.10f, 0.45f, 0.90f, 1.00f); // ブルーアクセント
-	const ImVec4 highlightLow  = ImVec4(0.10f, 0.45f, 0.90f, 0.50f);
-	const ImVec4 highlightHigh = ImVec4(0.25f, 0.65f, 1.00f, 1.00f);
+	const ImVec4 textMain     = ImVec4(0.90f, 0.90f, 0.90f, 1.00f);
+	const ImVec4 textDim      = ImVec4(0.55f, 0.55f, 0.55f, 1.00f);
 
-	// === 基本色 ===
-	colors[ImGuiCol_Text]                 = ImVec4(0.86f, 0.86f, 0.86f, 1.00f);
-	colors[ImGuiCol_TextDisabled]         = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
-	colors[ImGuiCol_WindowBg]             = darkBg;
-	colors[ImGuiCol_ChildBg]              = darkBg;
-	colors[ImGuiCol_PopupBg]              = darkPanel;
-	colors[ImGuiCol_Border]               = borderDim;     // ← 視認できる細めの枠
-	colors[ImGuiCol_BorderShadow]         = ImVec4(0,0,0,0);
+	// --- Colors ---
+	colors[ImGuiCol_Text]                 = textMain;
+	colors[ImGuiCol_TextDisabled]         = textDim;
+	colors[ImGuiCol_WindowBg]             = bgDark;
+	colors[ImGuiCol_ChildBg]              = bgDark;
+	colors[ImGuiCol_PopupBg]              = panelDark;
+	colors[ImGuiCol_Border]               = ImVec4(0.04f, 0.04f, 0.04f, 1.00f); // ボーダーレス
+	colors[ImGuiCol_BorderShadow]         = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+	
+	// Frame (Input fields, checkboxes)
+	colors[ImGuiCol_FrameBg]              = ImVec4(0.03f, 0.03f, 0.03f, 1.00f); 
+	colors[ImGuiCol_FrameBgHovered]       = panelHover;
+	colors[ImGuiCol_FrameBgActive]        = panelActive;
 
-	// === Frame / Controls（チェックボックス・入力などの背景）===
-	//   背景(darkBg)と同色にしない。少し明るめにして浮かせる。
-	colors[ImGuiCol_FrameBg]              = darkPanel;
-	colors[ImGuiCol_FrameBgHovered]       = midPanel;
-	colors[ImGuiCol_FrameBgActive]        = darkHover;
+	// Title
+	colors[ImGuiCol_TitleBg]              = bgDark;
+	colors[ImGuiCol_TitleBgActive]        = bgDark;
+	colors[ImGuiCol_TitleBgCollapsed]     = bgDark;
 
-	// ──────────── タイトルバー ────────────
-	colors[ImGuiCol_TitleBg]              = darkBg;
-	colors[ImGuiCol_TitleBgActive]        = darkBg;
-	colors[ImGuiCol_TitleBgCollapsed]     = darkBg;
+	// Scrollbar
+	colors[ImGuiCol_ScrollbarBg]          = ImVec4(0.02f, 0.02f, 0.02f, 0.53f);
+	colors[ImGuiCol_ScrollbarGrab]        = ImVec4(0.31f, 0.31f, 0.31f, 1.00f);
+	colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.41f, 0.41f, 0.41f, 1.00f);
+	colors[ImGuiCol_ScrollbarGrabActive]  = ImVec4(0.51f, 0.51f, 0.51f, 1.00f);
 
-	// === Scrollbar / Sliders / Buttons ===
-	colors[ImGuiCol_ScrollbarBg]          = darkBg;
-	colors[ImGuiCol_ScrollbarGrab]        = darkHover;
-	colors[ImGuiCol_ScrollbarGrabHovered] = highlightLow;
-	colors[ImGuiCol_ScrollbarGrabActive]  = highlight;
-	colors[ImGuiCol_CheckMark]            = highlightHigh; // ← ✓ を明るめに
-	colors[ImGuiCol_SliderGrab]           = highlight;
-	colors[ImGuiCol_SliderGrabActive]     = highlightHigh;
+	// Slider / Checkmark
+	colors[ImGuiCol_CheckMark]            = accentColor;
+	colors[ImGuiCol_SliderGrab]           = accentColor;
+	colors[ImGuiCol_SliderGrabActive]     = accentActive;
 
-	colors[ImGuiCol_Button]               = darkPanel;
-	colors[ImGuiCol_ButtonHovered]        = highlightLow;
-	colors[ImGuiCol_ButtonActive]         = highlight;
+	// Buttons
+	colors[ImGuiCol_Button]               = panelDark;
+	colors[ImGuiCol_ButtonHovered]        = panelHover;
+	colors[ImGuiCol_ButtonActive]         = panelActive;
 
-	// ──────────── Header / Tree ────────────
-	colors[ImGuiCol_Header]               = darkPanel;
-	colors[ImGuiCol_HeaderHovered]        = midPanel;
-	colors[ImGuiCol_HeaderActive]         = darkHover;
-	colors[ImGuiCol_MenuBarBg]            = darkBg;
+	// Headers (CollapsingHeader, TreeNodes)
+	colors[ImGuiCol_Header]               = ImVec4(0.18f, 0.18f, 0.18f, 1.00f);
+	colors[ImGuiCol_HeaderHovered]        = panelHover;
+	colors[ImGuiCol_HeaderActive]         = panelActive;
 
-	// ──────────── Tabs ────────────
-	colors[ImGuiCol_Tab]                  = darkPanel;
-	colors[ImGuiCol_TabHovered]           = midPanel;
-	colors[ImGuiCol_TabActive]            = darkActive;
-	colors[ImGuiCol_TabUnfocused]         = darkPanel;
-	colors[ImGuiCol_TabUnfocusedActive]   = ImVec4(0.24f, 0.24f, 0.24f, 1.00f);
+	// Tabs
+	colors[ImGuiCol_Tab]                  = bgDark;
+	colors[ImGuiCol_TabHovered]           = panelHover;
+	colors[ImGuiCol_TabActive]            = panelDark; // アクティブなタブはパネル背景と一体化
+	colors[ImGuiCol_TabUnfocused]         = bgDark;
+	colors[ImGuiCol_TabUnfocusedActive]   = panelDark;
 
-	// === その他 ===
-	colors[ImGuiCol_ResizeGrip]           = darkPanel;
-	colors[ImGuiCol_ResizeGripHovered]    = highlightLow;
-	colors[ImGuiCol_ResizeGripActive]     = highlight;
+	// Docking
+	colors[ImGuiCol_DockingPreview]       = accentColor;
+	colors[ImGuiCol_DockingEmptyBg]       = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
 
-	colors[ImGuiCol_TextSelectedBg]       = highlightLow;
-	colors[ImGuiCol_DragDropTarget]       = ImVec4(1.00f, 1.00f, 0.00f, 0.90f);
-	colors[ImGuiCol_NavWindowingHighlight]= highlight;
-	colors[ImGuiCol_NavWindowingDimBg]    = ImVec4(0.20f, 0.20f, 0.20f, 0.30f);
-	colors[ImGuiCol_ModalWindowDimBg]     = ImVec4(0.20f, 0.20f, 0.20f, 0.60f);
+	// Selection
+	colors[ImGuiCol_TextSelectedBg]       = ImVec4(0.26f, 0.59f, 0.98f, 0.35f);
+	colors[ImGuiCol_DragDropTarget]       = accentColor;
+	colors[ImGuiCol_NavWindowingHighlight]= ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
+	colors[ImGuiCol_NavWindowingDimBg]    = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
+	colors[ImGuiCol_ModalWindowDimBg]     = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
 
-	// === スタイル設定 ===
-	style.WindowRounding           = 2.0f;
-	style.FrameRounding            = 2.0f;
-	style.GrabRounding             = 2.0f;
-	style.TabRounding              = 2.0f;
+	// --- Style Vars ---
+	style.WindowPadding     = ImVec2(8.0f, 8.0f);
+	style.FramePadding      = ImVec2(5.0f, 5.0f); // 入力欄を少し広めに
+	style.CellPadding       = ImVec2(4.0f, 4.0f);
+	style.ItemSpacing       = ImVec2(8.0f, 4.0f);
+	style.ItemInnerSpacing  = ImVec2(4.0f, 4.0f);
+	style.TouchExtraPadding = ImVec2(0.0f, 0.0f);
+	style.IndentSpacing     = 21.0f;
+	style.ScrollbarSize     = 14.0f; // 少し太く視認しやすく
+	style.GrabMinSize       = 10.0f;
 
-	style.ScrollbarSize            = 12.0f;
-	style.GrabMinSize              = 12.0f;
+	style.WindowBorderSize  = 0.0f; // フラットデザイン
+	style.ChildBorderSize   = 0.0f;
+	style.PopupBorderSize   = 1.0f;
+	style.FrameBorderSize   = 0.0f;
+	style.TabBorderSize     = 0.0f;
 
-	// □の枠線を出す（0だと描かれない／背景に溶けやすい）
-	style.FrameBorderSize          = 1.0f;  // ← 重要
-	style.WindowBorderSize         = 1.0f;
+	style.WindowRounding    = 0.0f; // ウィンドウは角ばらせる
+	style.ChildRounding     = 0.0f;
+	style.FrameRounding     = 3.0f; // UI部品は少しだけ丸める
+	style.PopupRounding     = 3.0f;
+	style.ScrollbarRounding = 9.0f;
+	style.GrabRounding      = 3.0f;
+	style.LogSliderDeadzone = 4.0f;
+	style.TabRounding       = 4.0f; // タブの上部は丸める
+	
+	// ──────────── Separators (Gaps) ────────────
+	colors[ImGuiCol_Separator]            = bgDark;
+	colors[ImGuiCol_SeparatorHovered]     = accentHover;
+	colors[ImGuiCol_SeparatorActive]      = accentActive;
 
-	// クリックしやすく視認しやすいサイズ感
-	style.FramePadding             = ImVec2(6.0f, 4.0f);
-	style.ItemSpacing              = ImVec2(8.0f, 6.0f);
-
-	style.WindowMenuButtonPosition = ImGuiDir_Right;
-	style.SeparatorTextBorderSize  = 2.0f;
-	style.DockingSeparatorSize     = 1.0f;
+	// Docking Gaps
+	style.DockingSeparatorSize     = 4.0f;
 }

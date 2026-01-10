@@ -6,6 +6,7 @@
 #include <Engine/objects/Collider/SphereCollider.h>
 
 #include "externals/imgui/imgui.h"
+#include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 #include "externals/nlohmann/json.hpp"
 
 BaseGameObject::BaseGameObject(const std::string&		  modelName,
@@ -129,8 +130,8 @@ void BaseGameObject::ShowGui() {
 	// === Billboard GUI ===
 	{
 		int			mode  = static_cast<int>(billboardMode_);
-		const char* items = "None\0Full\0AxisY\0\0";
-		if(ImGui::Combo("Billboard Mode", &mode, items)) {
+		const char* items[] = { "None", "Full", "AxisY" };
+		if(GuiCmd::Combo("Billboard Mode", mode, items, 3)) {
 			billboardMode_ = static_cast<BillboardMode>(mode);
 		}
 	}

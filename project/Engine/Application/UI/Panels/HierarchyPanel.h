@@ -88,7 +88,7 @@ namespace CalyxEditor {
 
 	public:
 		Icon iconEye_, iconEyeOff_, iconCamera_, iconLight_, iconGameObj_, iconFx_;
-
+		int rowIndex_ = 0;
 	private:
 		using IEngineUI::panelName_;
 	};

@@ -18,8 +18,7 @@ namespace CalyxEditor {
 	//		imgui描画
 	/////////////////////////////////////////////////////////////////////////////////////////
 	void InspectorPanel::Render() {
-		bool open = true;
-		ImGui::Begin(panelName_.c_str(), &open);
+		ImGui::Begin(panelName_.c_str(), nullptr);
 
 		// --- Editor が選択されている場合 ---
 		if(selectedEditor_) {
@@ -36,7 +35,6 @@ namespace CalyxEditor {
 		}
 
 		ImGui::End();
-		if(!open) SetShow(false);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////

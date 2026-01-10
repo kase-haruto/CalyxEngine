@@ -63,7 +63,7 @@ void PointLight::ShowGui(){
 	ImGui::Separator();
 	GuiCmd::DragFloat3("position", lightData_.position);
 	GuiCmd::ColorEdit4("color", lightData_.color);
-	ImGui::SliderFloat("Intensity", &lightData_.intensity, 0.0f, 1.0f);
+	GuiCmd::SliderFloat("Intensity", lightData_.intensity, 0.0f, 1.0f);
 	GuiCmd::DragFloat("radius", lightData_.radius);
 	GuiCmd::DragFloat("decay", lightData_.decay);
 #endif // _DEBUG

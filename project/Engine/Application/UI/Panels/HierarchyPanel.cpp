@@ -70,8 +70,7 @@ namespace CalyxEditor {
 	/* ===================================================================== */
 	void HierarchyPanel::Render() {
 
-		bool open = true;
-		ImGui::Begin(panelName_.c_str(), &open, ImGuiWindowFlags_NoDecoration);
+		ImGui::Begin(panelName_.c_str(), nullptr, ImGuiWindowFlags_NoDecoration);
 		ImGui::Text("Scene Hierarchy");
 
 		lib_ = SceneContext::Current()->GetObjectLibrary();
@@ -79,10 +78,11 @@ namespace CalyxEditor {
 		if(!lib_) {
 			ImGui::Text("SceneObjectLibrary not set.");
 			ImGui::End();
-			if(!open) SetShow(false);
 			return;
 		}
 
+		// ===== 行ストライプ用カウンタ初期化 =====
+		rowIndex_ = 0;
 		// --- 消去された selected_ を無効化 ---
 		{
 			auto sp = selected_.lock();
@@ -169,172 +169,218 @@ namespace CalyxEditor {
 		}
 
 		ImGui::End();
-		if(!open) SetShow(false);
 	}
 
 	/* ========================================================================
 	/*  recursive UI
 	/* ===================================================================== */
 	void HierarchyPanel::ShowObjectRecursive(SceneObject* obj) {
+ if(!obj) return;
 
-		auto selectedPtr = selected_.lock();
-		bool sel		 = (selectedPtr.get() == obj);
+    // =====================================================================
+    // 行背景（Blender風ストライプ）
+    // =====================================================================
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
 
-		ImGui::PushID(obj);
+    ImVec2 rowMin = ImGui::GetCursorScreenPos();
+    float  rowHeight = ImGui::GetFrameHeight();
 
-		// 表示トグル
-		auto eye = obj->IsDrawEnable() ? iconEye_ : iconEyeOff_;
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {0, 0});
-		if(ImGui::ImageButton(eye.tex, eye.size)) {
-			obj->SetDrawEnable(!obj->IsDrawEnable());
-		}
-		ImGui::PopStyleVar();
-		ImGui::SameLine();
+    ImVec2 rowMax = ImVec2(
+        ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x,
+        rowMin.y + rowHeight
+    );
 
-		// 種類アイコン
-		ImTextureID typeIcon = nullptr;
-		switch(obj->GetObjectType()) {
-		case ObjectType::Camera:
-			typeIcon = iconCamera_.tex;
-			break;
-		case ObjectType::Light:
-			typeIcon = iconLight_.tex;
-			break;
-		case ObjectType::GameObject:
-			typeIcon = iconGameObj_.tex;
-			break;
-		case ObjectType::Effect:
-			typeIcon = iconFx_.tex;
-			break;
-		}
-		if(typeIcon) {
-			ImGui::Image(typeIcon, eye.size);
-			ImGui::SameLine();
-		}
+    const bool evenRow = (rowIndex_ % 2) == 0;
 
-		// rename 中か
-		auto renameSP		= renameTarget_.lock();
-		bool isRenamingThis = (renaming_ && renameSP.get() == obj);
+    ImU32 stripeColor = evenRow
+        ? IM_COL32(20, 20, 20, 255)   // #141414
+        : IM_COL32(30, 30, 30, 255);  // #1A1A1A
 
-		ImGuiTreeNodeFlags fl =
-			ImGuiTreeNodeFlags_OpenOnArrow |
-			(obj->GetChildren().empty() ? ImGuiTreeNodeFlags_Leaf : 0) |
-			(sel ? ImGuiTreeNodeFlags_Selected : 0);
+    drawList->AddRectFilled(rowMin, rowMax, stripeColor);
 
-		bool open = false;
+    auto selectedPtr = selected_.lock();
+    bool isSelected  = (selectedPtr.get() == obj);
 
-		if(isRenamingThis) {
+    // 選択行ハイライト（縞を殺さない半透明）
+    if(isSelected) {
+        drawList->AddRectFilled(
+            rowMin,
+            rowMax,
+            IM_COL32(0, 112, 224, 80) // UE5 / Blender系ブルー
+        );
+    }
 
-			open = ImGui::TreeNodeEx("##renameNode", fl | ImGuiTreeNodeFlags_Leaf);
-			ImGui::SameLine();
+    ++rowIndex_;
 
-			if(!ImGui::IsAnyItemActive()) {
-				ImGui::SetKeyboardFocusHere();
-			}
+    // =====================================================================
+    // UI 本体
+    // =====================================================================
+    ImGui::PushID(obj);
 
-			char buf[256];
-			snprintf(buf, sizeof(buf), "%s", renameBuf_.c_str());
+    // ---- 表示トグル（Eye） ----
+    auto eye = obj->IsDrawEnable() ? iconEye_ : iconEyeOff_;
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {0, 0});
+    if(ImGui::ImageButton(eye.tex, eye.size)) {
+        obj->SetDrawEnable(!obj->IsDrawEnable());
+    }
+    ImGui::PopStyleVar();
+    ImGui::SameLine();
 
-			ImGuiInputTextFlags flags =
-				ImGuiInputTextFlags_AutoSelectAll |
-				ImGuiInputTextFlags_EnterReturnsTrue;
+    // ---- 種類アイコン ----
+    ImTextureID typeIcon = nullptr;
+    switch(obj->GetObjectType()) {
+    case ObjectType::Camera:     typeIcon = iconCamera_.tex; break;
+    case ObjectType::Light:      typeIcon = iconLight_.tex;  break;
+    case ObjectType::GameObject: typeIcon = iconGameObj_.tex;break;
+    case ObjectType::Effect:     typeIcon = iconFx_.tex;     break;
+    default: break;
+    }
 
-			if(ImGui::InputText("##rename", buf, sizeof(buf), flags)) {
-				renameBuf_ = buf;
-				CommitRename();
-			} else {
-				if(ImGui::IsItemFocused() && ImGui::IsKeyPressed(ImGuiKey_Escape)) {
-					CancelRename();
-				}
-				if(ImGui::IsItemDeactivatedAfterEdit()) {
-					renameBuf_ = buf;
-					CommitRename();
-				}
-			}
-		} else {
+    if(typeIcon) {
+        ImGui::Image(typeIcon, eye.size);
+        ImGui::SameLine();
+    }
 
-			open = ImGui::TreeNodeEx(obj->GetName().c_str(), fl);
+    // ---- Rename 判定 ----
+    auto renameSP        = renameTarget_.lock();
+    bool isRenamingThis  = (renaming_ && renameSP.get() == obj);
 
-			if(ImGui::IsItemClicked()) {
-				if(auto sp = obj->shared_from_this()) {
-					selected_ = sp;
-					if(onSelect_) onSelect_(sp);
-				}
-			}
+    ImGuiTreeNodeFlags flags =
+        ImGuiTreeNodeFlags_OpenOnArrow |
+        (obj->GetChildren().empty() ? ImGuiTreeNodeFlags_Leaf : 0) |
+        (isSelected ? ImGuiTreeNodeFlags_Selected : 0);
 
-			// F2 rename
-			if(sel && ImGui::IsWindowFocused() && ImGui::IsKeyPressed(ImGuiKey_F2)) {
-				BeginRename(obj);
-			}
+    bool open = false;
 
-			// double click rename
-			if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-				BeginRename(obj);
-			}
+    // =====================================================================
+    // Rename モード
+    // =====================================================================
+    if(isRenamingThis) {
 
-			// context menu
-			if(ImGui::BeginPopupContextItem("SOContext")) {
+        open = ImGui::TreeNodeEx("##renameNode", flags | ImGuiTreeNodeFlags_Leaf);
+        ImGui::SameLine();
 
-				if(ImGui::MenuItem("Rename")) {
-					BeginRename(obj);
-				}
+        if(!ImGui::IsAnyItemActive())
+            ImGui::SetKeyboardFocusHere();
 
-				if(ImGui::MenuItem("Delete") && onDelete_) {
-					if(auto sp = obj->shared_from_this())
-						onDelete_(sp);
-				}
+        char buf[256];
+        snprintf(buf, sizeof(buf), "%s", renameBuf_.c_str());
 
-				if(ImGui::MenuItem("Create Prefab")) {
-					prefabSaveTarget_  = obj;
-					showSavePrefabDlg_ = true;
-				}
+        ImGuiInputTextFlags inputFlags =
+            ImGuiInputTextFlags_AutoSelectAll |
+            ImGuiInputTextFlags_EnterReturnsTrue;
 
-				ImGui::EndPopup();
-			}
-		}
+        if(ImGui::InputText("##rename", buf, sizeof(buf), inputFlags)) {
+            renameBuf_ = buf;
+            CommitRename();
+        } else {
+            if(ImGui::IsItemFocused() && ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+                CancelRename();
+            }
+            if(ImGui::IsItemDeactivatedAfterEdit()) {
+                renameBuf_ = buf;
+                CommitRename();
+            }
+        }
+    }
+    // =====================================================================
+    // 通常表示
+    // =====================================================================
+    else {
 
-		// Drag & Drop
-		if(ImGui::BeginDragDropSource()) {
-			SceneObject* drag = obj;
-			ImGui::SetDragDropPayload("SceneObjectPtr", &drag, sizeof(SceneObject*));
-			ImGui::Text("%s", obj->GetName().c_str());
-			ImGui::EndDragDropSource();
-		}
+        open = ImGui::TreeNodeEx(obj->GetName().c_str(), flags);
 
-		if(ImGui::BeginDragDropTarget()) {
-			if(const ImGuiPayload* pl = ImGui::AcceptDragDropPayload("SceneObjectPtr")) {
+        if(ImGui::IsItemClicked()) {
+            if(auto sp = obj->shared_from_this()) {
+                selected_ = sp;
+                if(onSelect_) onSelect_(sp);
+            }
+        }
 
-				SceneObject* drag = *reinterpret_cast<SceneObject**>(pl->Data);
-				if(drag && drag != obj) {
+        // F2 Rename
+        if(isSelected && ImGui::IsWindowFocused() && ImGui::IsKeyPressed(ImGuiKey_F2)) {
+            BeginRename(obj);
+        }
 
-					auto dragSP = drag->shared_from_this();
-					auto objSP	= obj->shared_from_this();
+        // Double Click Rename
+        if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+            BeginRename(obj);
+        }
 
-					if(lib_->Contains(dragSP) && lib_->Contains(objSP) && !IsDescendantOf(obj, drag)) {
+        // ---- Context Menu ----
+        if(ImGui::BeginPopupContextItem("SOContext")) {
 
-						drag->SetParent(objSP);
-					}
-				}
-			}
-			ImGui::EndDragDropTarget();
-		}
+            if(ImGui::MenuItem("Rename")) {
+                BeginRename(obj);
+            }
 
-		if(open) {
-			if(!isRenamingThis) {
-				std::vector<std::shared_ptr<SceneObject>> sortedChildren;
-				for(auto& ch : obj->GetChildren()) {
-					if(ch) sortedChildren.push_back(ch);
-				}
-				std::sort(sortedChildren.begin(), sortedChildren.end(), LessByTypeThenName);
+            if(ImGui::MenuItem("Delete") && onDelete_) {
+                if(auto sp = obj->shared_from_this())
+                    onDelete_(sp);
+            }
 
-				for(auto& ch : sortedChildren) {
-					ShowObjectRecursive(ch.get());
-				}
-			}
-			ImGui::TreePop();
-		}
+            if(ImGui::MenuItem("Create Prefab")) {
+                prefabSaveTarget_  = obj;
+                showSavePrefabDlg_ = true;
+            }
 
-		ImGui::PopID();
+            ImGui::EndPopup();
+        }
+    }
+
+    // =====================================================================
+    // Drag & Drop
+    // =====================================================================
+    if(ImGui::BeginDragDropSource()) {
+        SceneObject* drag = obj;
+        ImGui::SetDragDropPayload("SceneObjectPtr", &drag, sizeof(SceneObject*));
+        ImGui::Text("%s", obj->GetName().c_str());
+        ImGui::EndDragDropSource();
+    }
+
+    if(ImGui::BeginDragDropTarget()) {
+        if(const ImGuiPayload* pl = ImGui::AcceptDragDropPayload("SceneObjectPtr")) {
+
+            SceneObject* drag = *reinterpret_cast<SceneObject**>(pl->Data);
+            if(drag && drag != obj) {
+
+                auto dragSP = drag->shared_from_this();
+                auto objSP  = obj->shared_from_this();
+
+                if(lib_->Contains(dragSP) &&
+                   lib_->Contains(objSP) &&
+                   !IsDescendantOf(obj, drag)) {
+
+                    drag->SetParent(objSP);
+                }
+            }
+        }
+        ImGui::EndDragDropTarget();
+    }
+
+    // =====================================================================
+    // Children
+    // =====================================================================
+    if(open) {
+        if(!isRenamingThis) {
+
+            std::vector<std::shared_ptr<SceneObject>> sortedChildren;
+            for(auto& ch : obj->GetChildren()) {
+                if(ch) sortedChildren.push_back(ch);
+            }
+
+            std::sort(sortedChildren.begin(),
+                      sortedChildren.end(),
+                      LessByTypeThenName);
+
+            for(auto& ch : sortedChildren) {
+                ShowObjectRecursive(ch.get());
+            }
+        }
+        ImGui::TreePop();
+    }
+
+    ImGui::PopID();
 	}
 
 	/* ========================================================================

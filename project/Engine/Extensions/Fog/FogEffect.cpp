@@ -7,6 +7,7 @@
 // external
 #ifdef _DEBUG
 #include<externals/imgui/imgui.h>
+#include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 #endif // _DEBUG
 
 
@@ -16,8 +17,8 @@ FogEffect::~FogEffect(){
 void FogEffect::ShowImGuiInterface(){
 #ifdef _DEBUG
 	ImGui::Begin("fogEffect");
-	ImGui::SliderFloat("fogStart", &parameters->fogStart, 100.0f, 50.0f);
-	ImGui::SliderFloat("fogEnd", &parameters->fogEnd, 500.0f, 1000.0f);
+	GuiCmd::SliderFloat("fogStart", parameters->fogStart, 100.0f, 50.0f);
+	GuiCmd::SliderFloat("fogEnd", parameters->fogEnd, 500.0f, 1000.0f);
 	ImGui::End();
 #endif // _DEBUG
 }

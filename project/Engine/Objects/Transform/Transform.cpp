@@ -202,7 +202,7 @@ CalyxMath::Matrix4x4 Transform2D::GetMatrix() const {
 /* Transform2D class
 /* ===================================================================== */
 void Transform2D::ShowImGui(const std::string& lavel) {
-	if (ImGui::CollapsingHeader(lavel.c_str())) {
+	if (GuiCmd::CollapsingHeader(lavel.c_str())) {
 		GuiCmd::DragFloat2("scale", scale, 0.01f);
 		GuiCmd::DragFloat("rotation", rotate, 0.01f);
 		GuiCmd::DragFloat2("translate", translate, 0.01f);
@@ -218,7 +218,7 @@ Transform2DConfig Transform2D::ExtractConfig() const {
 }
 
 void Transform2D::ShowImGui(Transform2DConfig& config, const std::string& lavel) {
-	if (ImGui::CollapsingHeader(lavel.c_str())) {
+	if (GuiCmd::CollapsingHeader(lavel.c_str())) {
 		GuiCmd::DragFloat2("scale", config.scale, 0.01f);
 		GuiCmd::DragFloat("rotation", config.rotation, 0.01f);
 		GuiCmd::DragFloat2("translate", config.translation, 0.01f);

@@ -202,7 +202,15 @@
       <option name="project" value="LOCAL" />
       <updated>1767898976917</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="workspace.xmlのシーンオブジェクト配置を調整">
+      <option name="closed" value="true" />
+      <created>1767908349836</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1767908349836</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -216,7 +224,8 @@
     <MESSAGE value="スキニングモデルに影を落とすように修正" />
     <MESSAGE value="シーンを調整しました。" />
     <MESSAGE value="シーンオブジェクト配置の調整" />
-    <option name="LAST_COMMIT_MESSAGE" value="シーンオブジェクト配置の調整" />
+    <MESSAGE value="workspace.xmlのシーンオブジェクト配置を調整" />
+    <option name="LAST_COMMIT_MESSAGE" value="workspace.xmlのシーンオブジェクト配置を調整" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
