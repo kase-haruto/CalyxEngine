@@ -8,9 +8,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f5403cee-c7a0-4b9b-aa5b-39c938897f1e" name="変更" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.CalyxEngine/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.CalyxEngine/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="f5403cee-c7a0-4b9b-aa5b-39c938897f1e" name="変更" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -20,26 +18,36 @@
     <option name="firstShow" value="false" />
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$/.." value="fix/shadowMap" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/kase-haruto/CG2.git&quot;,
-    &quot;accountId&quot;: &quot;1ce3a246-8968-41a8-8043-b022458456c0&quot;
-  },
-  &quot;recentNewPullRequestHead&quot;: {
-    &quot;server&quot;: {
-      &quot;useHttp&quot;: false,
-      &quot;host&quot;: &quot;github.com&quot;,
-      &quot;port&quot;: null,
-      &quot;suffix&quot;: null
-    },
-    &quot;owner&quot;: &quot;kase-haruto&quot;,
-    &quot;repository&quot;: &quot;CG2&quot;
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "kase-haruto"
   }
-}</component>
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/kase-haruto/CalyxEngine.git",
+    "accountId": "b3a98955-bb61-4cb3-adc2-1c2d2083fd0b"
+  },
+  "recentNewPullRequestHead": {
+    "server": {
+      "useHttp": false,
+      "host": "github.com",
+      "port": null,
+      "suffix": null
+    },
+    "owner": "kase-haruto",
+    "repository": "CG2"
+  }
+}]]></component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="cidr-memory-view://8" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Program Files (x86)/Windows Kits/10/Include/10.0.22621.0/um/d3d12.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/um/d3d12.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.44.35207/include/functional" root0="SKIP_HIGHLIGHTING" />
@@ -70,21 +78,20 @@
     <setting file="file://$PROJECT_DIR$/Engine/Application/Effects/Particle/Module/Container/FxModuleContainer.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Engine/Application/Effects/Particle/Module/OverLifetime/OverLifetimeModule.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Engine/Application/Effects/Particle/Module/OverLifetime/OverLifetimeModule.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock://C:/WorkSpace/project/Engine/Application/UI/GUI/ImGuiManager.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Engine/Graphics/Buffer/DxBuffer.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Engine/Graphics/Device/DxCore.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Engine/Graphics/Device/DxCore.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="mock://C:/WorkSpace/project/Engine/Objects/LightObject/DirectionalLight.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/WorkSpace/project/Engine/Objects/3D/Actor/BaseGameObject.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/WorkSpace/project/Engine/PostProcess/Manager/PostEffectManager.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/WorkSpace/project/Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Game/3dObject/Actor/Boss/Details/BossStateType" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Game/Scene/Details/SceneType.h" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock://C:/WorkSpace/project/Game/Scene/Game/GameScene.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock://C:/WorkSpace/project/Resources/Assets/Scenes/GameScene.scene" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock://C:/WorkSpace/project/Resources/Assets/Scenes/TitleScene.scene" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock://C:/WorkSpace/project/Resources/shaders/ShadowSkinned.VS.hlsl" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/externals/nlohmann/json.hpp" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="Toolset" />
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
@@ -105,7 +112,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "fix/shadowMap の #278",
+    "git-widget-placeholder": "fix/engineLayout",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -169,6 +176,7 @@
       <option name="presentableId" value="Default" />
       <updated>1767850953124</updated>
       <workItem from="1767850955605" duration="8916000" />
+      <workItem from="1767993057324" duration="10425000" />
     </task>
     <task id="LOCAL-00001" summary="プロジェクト読み込みがうまくいっていなかったところを修正しました。">
       <option name="closed" value="true" />
@@ -210,7 +218,15 @@
       <option name="project" value="LOCAL" />
       <updated>1767908349836</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="GuiCmdを使用してImGuiのコールバックを統一し、コードの可読性を向上させました。">
+      <option name="closed" value="true" />
+      <created>1768004177798</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1768004177798</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -225,7 +241,8 @@
     <MESSAGE value="シーンを調整しました。" />
     <MESSAGE value="シーンオブジェクト配置の調整" />
     <MESSAGE value="workspace.xmlのシーンオブジェクト配置を調整" />
-    <option name="LAST_COMMIT_MESSAGE" value="workspace.xmlのシーンオブジェクト配置を調整" />
+    <MESSAGE value="GuiCmdを使用してImGuiのコールバックを統一し、コードの可読性を向上させました。" />
+    <option name="LAST_COMMIT_MESSAGE" value="GuiCmdを使用してImGuiのコールバックを統一し、コードの可読性を向上させました。" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

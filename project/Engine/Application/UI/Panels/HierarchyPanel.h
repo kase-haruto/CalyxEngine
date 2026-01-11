@@ -53,12 +53,16 @@ namespace CalyxEditor {
 			return selected_;
 		}
 
+
+
 	private:
 		// rename
 		void BeginRename(SceneObject* obj);
 		void CancelRename();
 		void CommitRename();
-
+		// render helper
+		bool DrawNode(SceneObject* obj);
+		
 	private:
 		// runtime state
 		const SceneObjectLibrary* lib_ = nullptr;
@@ -79,6 +83,9 @@ namespace CalyxEditor {
 		// rename buffer
 		bool		renaming_ = false;
 		std::string renameBuf_;
+
+		// search
+		ImGuiTextFilter searchFilter_;
 
 		// icons
 		struct Icon {

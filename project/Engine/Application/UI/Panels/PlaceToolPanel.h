@@ -7,12 +7,14 @@
 #include <Engine/Foundation/Math/Vector2.h>
 
 // c++
-#include <memory>
+#include "imgui/imgui.h"
+
 #include <d3d12.h>
+#include <functional>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <functional>
 
 class SceneContext;
 class SceneObject;
@@ -60,10 +62,15 @@ namespace CalyxEditor {
 
 	private:
 		void RegisterPlaceItems();
-		void RenderCategoryItems();
+		void RenderSidebar();
+		void RenderContent();
 
 		std::unordered_map<PlaceItemCategory, std::vector<PlaceItem>> categoryItems_;
-		std::string													  panelName_ = "PlaceToolPanel";
+		std::string													  panelName_ = "Place Actors";
+
+		// Selection & Filter
+		PlaceItemCategory selectedCategory_ = PlaceItemCategory::Shape;
+		ImGuiTextFilter	  filter_;
 	};
 }
 

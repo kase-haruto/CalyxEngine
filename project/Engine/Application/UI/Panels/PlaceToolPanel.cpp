@@ -234,93 +234,159 @@ namespace CalyxEditor {
 	//  パネル描画
 	// ============================================================================
 	void PlaceToolPanel::Render() {
-		if(!IsShow()) return; // 必要ないなら早期りたーん
+		if(!IsShow()) return;
 
 		bool open = true;
-		ImGui::Begin(panelName_.c_str(), &open);
+		// 少しパディングを入れて見やすく
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8.0f, 8.0f));
+		if(ImGui::Begin(panelName_.c_str(), &open)) {
+			if(!SceneContext::Current()) {
+				ImGui::Text("sceneContext not set");
+			} else {
+				// 2カラムのテーブルを作成 (Sidebar | Content)
+				// Resizable: 境界線をドラッグ可能
+				// BordersInnerV: 縦の境界線を表示
+				if(ImGui::BeginTable("PlaceToolTable", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersInnerV)) {
+					// --- Sidebar ---
+					ImGui::TableSetupColumn("Category", ImGuiTableColumnFlags_WidthFixed, 100.0f);
+					ImGui::TableSetupColumn("Items", ImGuiTableColumnFlags_None);
+					
+					// Sidebar 描画
+					ImGui::TableNextColumn();
+					RenderSidebar();
 
-		if(!SceneContext::Current()) {
-			ImGui::Text("sceneContext not set");
-			ImGui::End();
-			if(!open) SetShow(false);
-			return;
+					// Content 描画
+					ImGui::TableNextColumn();
+					RenderContent();
+
+					ImGui::EndTable();
+				}
+			}
 		}
-
-		RenderCategoryItems();
 		ImGui::End();
+		ImGui::PopStyleVar();
+
 		if(!open) SetShow(false);
 	}
 
 	// ============================================================================
-	//  カテゴリ別アイテム描画
+	//  サイドバー（カテゴリ一覧）
 	// ============================================================================
-	void PlaceToolPanel::RenderCategoryItems() {
-		constexpr int columns = 4; // 1 カテゴリあたりの列数
+	void PlaceToolPanel::RenderSidebar() {
+		// カテゴリ名の定義マップ
+		static const std::vector<std::pair<PlaceItemCategory, std::string>> categoryNames = {
+			{PlaceItemCategory::Shape, "Shapes"},
+			{PlaceItemCategory::Light, "Lights"},
+			{PlaceItemCategory::Particle, "Particles"},
+			{PlaceItemCategory::InGameObject, "Game Objects"},
+			{PlaceItemCategory::Model, "Models"},
+			{PlaceItemCategory::Event, "Events"},
+		};
 
-		for(auto& [category, items] : categoryItems_) {
-
-			// カテゴリ名
-			const char* categoryName = "";
-			switch(category) {
-			case PlaceItemCategory::Shape:
-				categoryName = "Shape";
-				break;
-			case PlaceItemCategory::Particle:
-				categoryName = "Particle";
-				break;
-			case PlaceItemCategory::InGameObject:
-				categoryName = "IngameObject";
-				break;
-			case PlaceItemCategory::Event:
-				categoryName = "Event";
-				break;
-			case PlaceItemCategory::Model:
-				categoryName = "Model";
-				break;
-			default:
-				categoryName = "Unknown";
-				break;
+		ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.2f, 0.2f, 0.2f, 1.0f)); // 選択時の色を少し調整
+		for(const auto& [cat, name] : categoryNames) {
+			// カテゴリにアイテムが含まれているかチェック (空なら表示しない等の制御が必要ならここ)
+			// 今回は全部表示する方針で
+			
+			bool isSelected = (selectedCategory_ == cat);
+			if(ImGui::Selectable(name.c_str(), isSelected)) {
+				selectedCategory_ = cat;
+				// カテゴリ切り替え時にフィルタリセットするかはお好みで。今回は維持する。
 			}
+		}
+		ImGui::PopStyleColor();
+	}
 
-			// 折りたたみヘッダ
-			if(ImGui::CollapsingHeader(categoryName)) {
-				ImGui::Columns(columns, nullptr, false);
+	// ============================================================================
+	//  コンテンツ（検索 + アイテムグリッド）
+	// ============================================================================
+	void PlaceToolPanel::RenderContent() {
+		// --- Search Bar ---
+		ImGui::SetNextItemWidth(-1.0f); // 横幅いっぱい
+		filter_.Draw("##Search", -1.0f);
+		
+		ImGui::Separator();
+		ImGui::Spacing();
 
-				for(size_t i = 0; i < items.size(); ++i) {
-					const auto& item = items[i];
-					ImGui::PushID(static_cast<int>(i));
+		// --- Item Grid ---
+		// 子ウィンドウにしてスクロール可能にする
+		if(ImGui::BeginChild("ItemGrid", ImVec2(0, 0), false)) {
+			
+			// グリッドのカラム数はウィンドウ幅に応じて動的に決めるのが望ましいが、
+			// とりあえず固定サイズまたはImGui::Columnsを使う
+			float panelWidth = ImGui::GetContentRegionAvail().x;
+			float itemWidth  = 80.0f;  // アイコンサイズ(64) + パディング
+			int   columns    = static_cast<int>(panelWidth / itemWidth);
+			if(columns < 1) columns = 1;
 
-					// アイコン有無で描画を切り替え
+			if(ImGui::BeginTable("Grid", columns)) {
+				
+				auto drawItem = [](const PlaceItem& item) {
+					ImGui::PushID(&item);
+					
+					// グループ化して全体をクリッカブルっぽく見せる
+					ImGui::BeginGroup();
+					
+					// アイコン（画像がなければボタン）
 					bool clicked = false;
+					float iconSize = 64.0f; 
+					
+					// 中央寄せのためのカーソル操作
+					float availW = ImGui::GetContentRegionAvail().x;
+					float offX = (availW - iconSize) * 0.5f;
+					if (offX > 0.0f) ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offX);
+
 					if(item.texture.ptr) {
 						clicked = ImGui::ImageButton(
 							(ImTextureID)item.texture.ptr,
-							ImVec2(item.iconSize.x, item.iconSize.y));
+							ImVec2(iconSize, iconSize));
 					} else {
-						clicked = ImGui::Button(
-							item.name.c_str(),
-							ImVec2(item.iconSize.x, item.iconSize.y));
+						clicked = ImGui::Button(item.name.c_str(), ImVec2(iconSize, iconSize));
 					}
+
+					// テキストも中央寄せ
+					{
+						float textW = ImGui::CalcTextSize(item.name.c_str()).x;
+						float textOffX = (availW - textW) * 0.5f;
+						if (textOffX > 0.0f) ImGui::SetCursorPosX(ImGui::GetCursorPosX() + textOffX);
+						ImGui::TextWrapped("%s", item.name.c_str());
+					}
+
+					ImGui::EndGroup();
 
 					if(clicked) {
 						item.createFunc();
 					}
-
-					if(ImGui::IsItemHovered()) {
-						ImGui::SetTooltip("%s", item.name.c_str());
-					}
-
-					// ラベル
-					ImGui::TextWrapped("%s", item.name.c_str());
-
-					ImGui::NextColumn();
+					
 					ImGui::PopID();
+				};
+
+				// フィルタが有効な場合は全カテゴリから検索
+				if (filter_.IsActive()) {
+					for (const auto& [cat, items] : categoryItems_) {
+						for (const auto& item : items) {
+							if (filter_.PassFilter(item.name.c_str())) {
+								ImGui::TableNextColumn();
+								drawItem(item);
+							}
+						}
+					}
+				} 
+				else {
+					// 選択中のカテゴリのみ表示
+					if (categoryItems_.count(selectedCategory_)) {
+						const auto& items = categoryItems_[selectedCategory_];
+						for (const auto& item : items) {
+							ImGui::TableNextColumn();
+							drawItem(item);
+						}
+					}
 				}
 
-				ImGui::Columns(1);
-				ImGui::Spacing();
+				ImGui::EndTable();
 			}
 		}
+		ImGui::EndChild();
 	}
 }
 

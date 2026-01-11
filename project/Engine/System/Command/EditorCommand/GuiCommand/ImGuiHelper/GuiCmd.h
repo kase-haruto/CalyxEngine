@@ -76,4 +76,23 @@ namespace GuiCmd{
 	//		CollapsingHeader
 	//===================================================================*/
 	bool CollapsingHeader(const char* label, ImGuiTreeNodeFlags flags = 0);
+
+	//===================================================================*/
+	//		Layout Helpers
+	//===================================================================*/
+	void BeginTableLayout(const char* id = "InspectorTable");
+	void EndTableLayout();
+
+	//===================================================================*/
+	//		Section Filter Helpers (For Tab View)
+	//===================================================================*/
+	// Set the current active section name. "" or "All" means show everything.
+	void SetSectionFilter(const char* filterName);
+	
+	// Begins a named section. Returns true if the section receives drawing commands.
+	bool BeginSection(const char* sectionName);
+	
+	// Ends the current section.
+	void EndSection();
+
 }

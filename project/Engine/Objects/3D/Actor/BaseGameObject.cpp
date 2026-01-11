@@ -115,28 +115,50 @@ void BaseGameObject::InitializeCollider(ColliderKind kind) {
 //===================================================================*/
 void BaseGameObject::ShowGui() {
 	ImGui::Spacing();
-
 	ImGui::Dummy(ImVec2(0.0f, 5.0f));
 	ImGui::Separator();
 
-	HeaderGui();
+	// --- パラメータデータ ---
+	if (GuiCmd::BeginSection("ParameterData")) {
+		HeaderGui();
+		GuiCmd::EndSection();
+	}
 
-	worldTransform_.ShowImGui("world");
+	// --- トランスフォーム ---
+	if (GuiCmd::BeginSection("Tf")) {
+		worldTransform_.ShowImGui("world");
+		GuiCmd::EndSection();
+	}
 
-	model_->ShowImGui(config_.GetConfig().modelConfig);
+	// --- マテリアル・モデル ---
+	if (GuiCmd::BeginSection("Material")) {
+		model_->ShowImGui(config_.GetConfig().modelConfig);
+		GuiCmd::EndSection();
+	}
 
-	if(collider_) collider_->ShowGui();
+	// --- コライダー ---
+	if(collider_) {
+		if (GuiCmd::BeginSection("Collider")) {
+			collider_->ShowGui();
+			GuiCmd::EndSection();
+		}
+	}
 
-	// === Billboard GUI ===
-	{
-		int			mode  = static_cast<int>(billboardMode_);
+	// --- 描画設定 ---
+	if (GuiCmd::BeginSection("Draw")) {
+		int	mode  = static_cast<int>(billboardMode_);
 		const char* items[] = { "None", "Full", "AxisY" };
 		if(GuiCmd::Combo("Billboard Mode", mode, items, 3)) {
 			billboardMode_ = static_cast<BillboardMode>(mode);
 		}
+		GuiCmd::EndSection();
 	}
 
-	DerivativeGui();
+	// --- 派生クラス用パラメータ ---
+	if (GuiCmd::BeginSection("ParameterData")) {
+		DerivativeGui();
+		GuiCmd::EndSection();
+	}
 }
 void BaseGameObject::HeaderGui() {
 	config_.ShowGui();

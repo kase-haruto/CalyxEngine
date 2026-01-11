@@ -23,13 +23,42 @@
 /*		Internal Helpers (Custom Rendering)
 /* ======================================================================================================== */
 namespace {
-
 	using namespace CalyxMath;
 
-	//-------------------------------------------------------------------------
-	// Layout Constants
-	//-------------------------------------------------------------------------
-	static const float DRAG_MOUSE_THRESHOLD_FACTOR = 0.50f;
+	// テーブルレイアウトの使用フラグ
+	static bool useTableLayout_ = false;
+
+	// Internal helper to begin a property row
+	static void BeginPropertyRow(const char* label) {
+		if (useTableLayout_) {
+			ImGui::TableNextRow();
+			ImGui::TableNextColumn();
+			ImGui::AlignTextToFramePadding();
+			
+			// ラベル表示（ID部分は隠す）
+			const char* label_end = strstr(label, "##");
+			if (label_end == nullptr) {
+				ImGui::TextUnformatted(label); 
+			} else {
+				ImGui::TextUnformatted(label, label_end);
+			}
+
+			ImGui::TableNextColumn();
+			ImGui::SetNextItemWidth(-1.0f); // 右カラムいっぱいに
+		} else {
+			// 通常モード（必要ならラベル表示など）
+			// ImGui::Text("%s", label); // 標準のDrag系はラベルを内部で描写するので不要
+		}
+	}
+	
+	// ただしIDの一意性は保つ必要があるため "##Label" 形式にする
+	static std::string GetWidgetLabel(const char* label) {
+		if (useTableLayout_) {
+			// もともと "Name##ID" だった場合 -> "##Name##ID"
+			return std::string("##") + label;
+		}
+		return std::string(label);
+	}
 
 	//-------------------------------------------------------------------------
 	// マルチコンポーネントベクトルの描画 (Unreal/Unity スタイル)
@@ -195,10 +224,13 @@ namespace GuiCmd {
 
 #pragma region DragInt
 	bool DragInt(const char* label, int& value, float speed, float min, float max) {
+		BeginPropertyRow(label); // Row開始 + ラベル描画（テーブル時）
+
 		static GuiCmdInternal::GuiCmdSetValueComputer<int> computer;
 		int temp = value;
 		
-		bool changed = ImGui::DragInt(label, &temp, speed, (int)min, (int)max);
+		std::string widgetLabel = GetWidgetLabel(label);
+		bool changed = ImGui::DragInt(widgetLabel.c_str(), &temp, speed, (int)min, (int)max);
 
 		if (ImGui::IsItemActivated()) computer.Begin(value);
 		if (ImGui::IsItemDeactivatedAfterEdit()) {
@@ -214,9 +246,13 @@ namespace GuiCmd {
 
 #pragma region DragFloat
 	bool DragFloat(const char* label, float& value, float speed, float min, float max) {
+		BeginPropertyRow(label);
+
 		static GuiCmdInternal::GuiCmdSetValueComputer<float> computer;
 		float temp = value;
-		bool changed = ImGui::DragFloat(label, &temp, speed, min, max);
+		
+		std::string widgetLabel = GetWidgetLabel(label);
+		bool changed = ImGui::DragFloat(widgetLabel.c_str(), &temp, speed, min, max);
 		value = temp;
 
 		if (ImGui::IsItemActivated()) computer.Begin(value);
@@ -229,13 +265,18 @@ namespace GuiCmd {
 	}
 
 	bool DragFloat2(const char* label, CalyxMath::Vector2& value, float speed, float min, float max) {
+		BeginPropertyRow(label);
+
 		static GuiCmdInternal::GuiCmdSetValueComputer<CalyxMath::Vector2> computer;
 		CalyxMath::Vector2 temp = value;
 		
-		ImGui::PushID(label);
+		std::string widgetLabel = GetWidgetLabel(label);
+		ImGui::PushID(widgetLabel.c_str());
 		ImGui::BeginGroup();
 		
 		float full_width = ImGui::CalcItemWidth();
+		
+		// テーブルモードならラベル表示しないので幅はそのまま使える
 		float item_width = (full_width - ImGui::GetStyle().ItemInnerSpacing.x) / 2.0f;
 		
 		bool changed = false;
@@ -254,8 +295,11 @@ namespace GuiCmd {
 		
 		ImGui::PopItemWidth();
 
-		ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
-		ImGui::Text("%s", label);
+		// テーブルモードでないならラベルを描画
+		if (!useTableLayout_) {
+			ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
+			ImGui::Text("%s", label);
+		}
 
 		ImGui::EndGroup();
 		ImGui::PopID();
@@ -274,10 +318,13 @@ namespace GuiCmd {
 
 	// Float3
 	bool DragFloat3(const char* label, CalyxMath::Vector3& value, float speed, float min, float max) {
+		BeginPropertyRow(label);
+
 		static GuiCmdInternal::GuiCmdSetValueComputer<CalyxMath::Vector3> computer;
 		CalyxMath::Vector3 temp = value;
 
-		ImGui::PushID(label);
+		std::string widgetLabel = GetWidgetLabel(label);
+		ImGui::PushID(widgetLabel.c_str());
 		ImGui::BeginGroup();
 
 		float full_width = ImGui::CalcItemWidth();
@@ -300,8 +347,10 @@ namespace GuiCmd {
 
 		ImGui::PopItemWidth();
 
-		ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
-		ImGui::Text("%s", label);
+		if (!useTableLayout_) {
+			ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
+			ImGui::Text("%s", label);
+		}
 
 		ImGui::EndGroup();
 		ImGui::PopID();
@@ -319,10 +368,13 @@ namespace GuiCmd {
 
 	// Float4
 	bool DragFloat4(const char* label, CalyxMath::Vector4& value, float speed, float min, float max) {
+		BeginPropertyRow(label);
+
 		static GuiCmdInternal::GuiCmdSetValueComputer<CalyxMath::Vector4> computer;
 		CalyxMath::Vector4 temp = value;
 
-		ImGui::PushID(label);
+		std::string widgetLabel = GetWidgetLabel(label);
+		ImGui::PushID(widgetLabel.c_str());
 		ImGui::BeginGroup();
 
 		float full_width = ImGui::CalcItemWidth();
@@ -349,8 +401,10 @@ namespace GuiCmd {
 
 		ImGui::PopItemWidth();
 
-		ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
-		ImGui::Text("%s", label);
+		if (!useTableLayout_) {
+			ImGui::SameLine(0, ImGui::GetStyle().ItemInnerSpacing.x);
+			ImGui::Text("%s", label);
+		}
 
 		ImGui::EndGroup();
 		ImGui::PopID();
@@ -375,9 +429,13 @@ namespace GuiCmd {
 	// SliderFloat
 	//-------------------------------------------------------------------------
 	bool SliderFloat(const char* label, float& value, float min, float max) {
+		BeginPropertyRow(label);
+
 		static GuiCmdInternal::GuiCmdSetValueComputer<float> computer;
 		float temp = value;
-		bool changed = ImGui::SliderFloat(label, &temp, min, max);
+		
+		std::string widgetLabel = GetWidgetLabel(label);
+		bool changed = ImGui::SliderFloat(widgetLabel.c_str(), &temp, min, max);
 		value = temp;
 
 		if (ImGui::IsItemActivated()) computer.Begin(value);
@@ -390,9 +448,13 @@ namespace GuiCmd {
 	}
 
 	bool SliderFloat2(const char* label, CalyxMath::Vector2& value, float min, float max) {
+		BeginPropertyRow(label);
+
 		static GuiCmdInternal::GuiCmdSetValueComputer<CalyxMath::Vector2> computer;
 		CalyxMath::Vector2 temp = value;
-		bool changed = ImGui::SliderFloat2(label, &temp.x, min, max);
+		
+		std::string widgetLabel = GetWidgetLabel(label);
+		bool changed = ImGui::SliderFloat2(widgetLabel.c_str(), &temp.x, min, max);
 		value = temp;
 
 		if (ImGui::IsItemActivated()) computer.Begin(value);
@@ -405,9 +467,13 @@ namespace GuiCmd {
 	}
 
 	bool SliderFloat3(const char* label, CalyxMath::Vector3& value, float min, float max) {
+		BeginPropertyRow(label);
+
 		static GuiCmdInternal::GuiCmdSetValueComputer<CalyxMath::Vector3> computer;
 		CalyxMath::Vector3 temp = value;
-		bool changed = ImGui::SliderFloat3(label, &temp.x, min, max);
+		
+		std::string widgetLabel = GetWidgetLabel(label);
+		bool changed = ImGui::SliderFloat3(widgetLabel.c_str(), &temp.x, min, max);
 		value = temp;
 
 		if (ImGui::IsItemActivated()) computer.Begin(value);
@@ -420,9 +486,13 @@ namespace GuiCmd {
 	}
 
 	bool SliderFloat4(const char* label, CalyxMath::Vector4& value, float min, float max) {
+		BeginPropertyRow(label);
+
 		static GuiCmdInternal::GuiCmdSetValueComputer<CalyxMath::Vector4> computer;
 		CalyxMath::Vector4 temp = value;
-		bool changed = ImGui::SliderFloat4(label, &temp.x, min, max);
+		
+		std::string widgetLabel = GetWidgetLabel(label);
+		bool changed = ImGui::SliderFloat4(widgetLabel.c_str(), &temp.x, min, max);
 		value = temp;
 
 		if (ImGui::IsItemActivated()) computer.Begin(value);
@@ -437,9 +507,13 @@ namespace GuiCmd {
 
 #pragma region ColorEdit
 	bool ColorEdit4(const char* label, CalyxMath::Vector4& value, ImGuiColorEditFlags flags) {
+		BeginPropertyRow(label);
+
 		static GuiCmdInternal::GuiCmdSetValueComputer<CalyxMath::Vector4> computer;
 		CalyxMath::Vector4 temp = value;
-		bool changed = ImGui::ColorEdit4(label, &temp.x, flags);
+		
+		std::string widgetLabel = GetWidgetLabel(label);
+		bool changed = ImGui::ColorEdit4(widgetLabel.c_str(), &temp.x, flags);
 		value = temp;
 
 		if (ImGui::IsItemActivated()) computer.Begin(value);
@@ -454,9 +528,13 @@ namespace GuiCmd {
 
 #pragma region Combo
 	bool Combo(const char* label, int& current_item, const char* const items[], int items_count, int popup_max_height_in_items) {
+		BeginPropertyRow(label);
+
 		static GuiCmdInternal::GuiCmdSetValueComputer<int> computer;
 		int temp = current_item;
-		bool changed = ImGui::Combo(label, &temp, items, items_count, popup_max_height_in_items);
+		
+		std::string widgetLabel = GetWidgetLabel(label);
+		bool changed = ImGui::Combo(widgetLabel.c_str(), &temp, items, items_count, popup_max_height_in_items);
 		
 		// マウスが押された 検知開始
 		if (ImGui::IsItemActivated()) computer.Begin(current_item);
@@ -476,11 +554,14 @@ namespace GuiCmd {
 
 #pragma region CheckBox
 	bool CheckBox(const char* label, bool& value) {
+		BeginPropertyRow(label);
+
 		static GuiCmdInternal::GuiCmdSetValueComputer<bool> computer;
 		bool temp = value;
 		
 		// Use custom ToggleButton
-		bool changed = ToggleButton(label, &temp);
+		std::string widgetLabel = GetWidgetLabel(label);
+		bool changed = ToggleButton(widgetLabel.c_str(), &temp);
 		value = temp;
 
 		if (ImGui::IsItemActivated()) computer.Begin(value);
@@ -495,6 +576,21 @@ namespace GuiCmd {
 
 #pragma region CollapsingHeader
 	bool CollapsingHeader(const char* label, ImGuiTreeNodeFlags flags) {
+		// テーブルモード内のヘッダーは、行を占有しつつ背景を描画
+		if (useTableLayout_) {
+			ImGui::TableNextRow();
+			ImGui::TableNextColumn(); 
+			
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 4.0f));
+			bool isOpen = ImGui::TreeNodeEx(label, flags | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_NoTreePushOnOpen);
+			ImGui::PopStyleVar();
+			
+			// ダミーのカラム進行 (TreeNodeExはカラムを消費しない場合もあるが、安全策)
+			ImGui::TableNextColumn(); 
+			
+			return isOpen;
+		}
+
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 2.0f); // 少し角ばらせる
 
 		// 少し余白を入れる
@@ -506,5 +602,70 @@ namespace GuiCmd {
 		return isOpen;
 	}
 #pragma endregion
+
+	//===================================================================*/
+	//		Layout Helpers
+	//===================================================================*/
+	void BeginTableLayout(const char* id) {
+		useTableLayout_ = true;
+		
+		if (ImGui::BeginTable(id, 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingStretchProp)) {
+			ImGui::TableSetupColumn("Property", ImGuiTableColumnFlags_None, 0.4f);
+			ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_None, 0.6f);
+		} else {
+			useTableLayout_ = false;
+		}
+	}
+
+	void EndTableLayout() {
+		if (useTableLayout_) {
+			ImGui::EndTable();
+			useTableLayout_ = false;
+		}
+	}
+
+	//===================================================================*/
+	//		Section Filter Helpers
+	//===================================================================*/
+	static std::string currentSectionFilter_ = "";
+	// セクションが表示対象か
+	static bool isSectionActive_ = true; 
+	static bool isSectionHeaderOpen_ = true;
+
+	void SetSectionFilter(const char* filterName) {
+		if (filterName) {
+			currentSectionFilter_ = filterName;
+		} else {
+			currentSectionFilter_ = "";
+		}
+	}
+
+	bool BeginSection(const char* sectionName) {
+		bool isAll = (currentSectionFilter_.empty() || currentSectionFilter_ == "All");
+		
+		// フィルタリング判定
+		if (!isAll) {
+			if (currentSectionFilter_ == sectionName) {
+				isSectionActive_ = true;
+				isSectionHeaderOpen_ = true; 
+				return true;
+			} else {
+				isSectionActive_ = false;
+				return false;
+			}
+		}
+
+		// All選択中
+		isSectionActive_ = true;
+		isSectionHeaderOpen_ = true;
+		
+		return true;
+	}
+
+	void EndSection() {
+		// 必要ならインデント戻しなど
+		isSectionActive_ = true; 
+		isSectionHeaderOpen_ = true;
+	}
 
 } // namespace GuiCmd
