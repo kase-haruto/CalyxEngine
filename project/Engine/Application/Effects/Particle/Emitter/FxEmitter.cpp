@@ -278,208 +278,218 @@ namespace CalyxEffect {
 		GuiCmd::CheckBox("##oneshot_top", isOneShot_);
 
 		// ================= Material =================
-		if(FxGui::GridScope sec{"Material"}; sec.open) {
-			// Color
-			FxGui::RowLabel("Color");
-			ImGui::ColorEdit4("##color", &material_.color.x);
+		if (GuiCmd::BeginSection("Material")) {
+			if(FxGui::GridScope sec{"Material"}; sec.open) {
+				// Color
+				FxGui::RowLabel("Color");
+				ImGui::ColorEdit4("##color", &material_.color.x);
 
-			// Texture (path表示 + 選択ボタン)
-			FxGui::RowLabel("Texture");
-			ImGui::BeginGroup();
-			// 現在のパスを表示
-			// ---- ドラッグ&ドロップでテクスチャ適用 ----
-			ImGui::Text("Texture (Drag & Drop from Assets)");
-			// ドロップ領域（InvisibleButton で有効アイテム化）
-			ImVec2 dropSize(ImGui::GetContentRegionAvail().x, 56.0f);
-			ImGui::InvisibleButton("##TextureDrop", dropSize);
+				// Texture (path表示 + 選択ボタン)
+				FxGui::RowLabel("Texture");
+				ImGui::BeginGroup();
+				// 現在のパスを表示
+				// ---- ドラッグ&ドロップでテクスチャ適用 ----
+				ImGui::Text("Texture (Drag & Drop from Assets)");
+				// ドロップ領域（InvisibleButton で有効アイテム化）
+				ImVec2 dropSize(ImGui::GetContentRegionAvail().x, 56.0f);
+				ImGui::InvisibleButton("##TextureDrop", dropSize);
 
-			// 見た目（枠とテキスト）
-			const bool	 hovered = ImGui::IsItemHovered();
-			const ImVec2 rmin	 = ImGui::GetItemRectMin();
-			const ImVec2 rmax	 = ImGui::GetItemRectMax();
-			ImGui::GetWindowDrawList()->AddRect(
-				rmin, rmax, hovered ? IM_COL32(120, 180, 255, 220) : IM_COL32(90, 90, 90, 160),
-				8.0f, 0, 2.0f);
-			ImGui::GetWindowDrawList()->AddText(
-				ImVec2(rmin.x + 8.0f, rmin.y + 8.0f),
-				IM_COL32(230, 230, 230, 255),
-				"Drop a Texture here");
+				// 見た目（枠とテキスト）
+				const bool	 hovered = ImGui::IsItemHovered();
+				const ImVec2 rmin	 = ImGui::GetItemRectMin();
+				const ImVec2 rmax	 = ImGui::GetItemRectMax();
+				ImGui::GetWindowDrawList()->AddRect(
+					rmin, rmax, hovered ? IM_COL32(120, 180, 255, 220) : IM_COL32(90, 90, 90, 160),
+					8.0f, 0, 2.0f);
+				ImGui::GetWindowDrawList()->AddText(
+					ImVec2(rmin.x + 8.0f, rmin.y + 8.0f),
+					IM_COL32(230, 230, 230, 255),
+					"Drop a Texture here");
 
-			// 受け取り
-			if(ImGui::BeginDragDropTarget()) {
-				if(const ImGuiPayload* p = ImGui::AcceptDragDropPayload("CALYX_ASSET")) {
-					const AssetDragPayload payload =
-						*reinterpret_cast<const AssetDragPayload*>(p->Data);
-					if(payload.type == AssetType::Texture) {
-						if(LoadTextureByGuid(payload.guid)) {
-							textureGuid_ = payload.guid;
-						} else {
-							ImGui::OpenPopup("TextureDropError");
+				// 受け取り
+				if(ImGui::BeginDragDropTarget()) {
+					if(const ImGuiPayload* p = ImGui::AcceptDragDropPayload("CALYX_ASSET")) {
+						const AssetDragPayload payload =
+							*reinterpret_cast<const AssetDragPayload*>(p->Data);
+						if(payload.type == AssetType::Texture) {
+							if(LoadTextureByGuid(payload.guid)) {
+								textureGuid_ = payload.guid;
+							} else {
+								ImGui::OpenPopup("TextureDropError");
+							}
 						}
 					}
+					ImGui::EndDragDropTarget();
 				}
-				ImGui::EndDragDropTarget();
-			}
 
-			// 失敗メッセージ（2D 以外の SRV 等）
-			if(ImGui::BeginPopup("TextureDropError")) {
-				ImGui::TextUnformatted("このテクスチャは適用できません（2D以外/未対応形式）。");
-				ImGui::EndPopup();
-			}
+				// 失敗メッセージ（2D 以外の SRV 等）
+				if(ImGui::BeginPopup("TextureDropError")) {
+					ImGui::TextUnformatted("このテクスチャは適用できません（2D以外/未対応形式）。");
+					ImGui::EndPopup();
+				}
 
-			// 現在のテクスチャ表示（GUID→ファイル名）
-			auto labelFromGuid = [](const Guid& g) -> std::string {
-				if(!g.isValid()) return "(none)";
-				auto* db = AssetDatabase::GetInstance();
-				for(auto* r : db->GetView()) {
-					if(r && r->type == AssetType::Texture && r->guid == g) {
-						return r->sourcePath.filename().string();
+				// 現在のテクスチャ表示（GUID→ファイル名）
+				auto labelFromGuid = [](const Guid& g) -> std::string {
+					if(!g.isValid()) return "(none)";
+					auto* db = AssetDatabase::GetInstance();
+					for(auto* r : db->GetView()) {
+						if(r && r->type == AssetType::Texture && r->guid == g) {
+							return r->sourcePath.filename().string();
+						}
 					}
-				}
-				return "(missing)";
-			};
-			ImGui::EndGroup();
+					return "(missing)";
+				};
+				ImGui::EndGroup();
+			}
+			GuiCmd::EndSection();
 		}
 
 		// // ================= Billboard =================
-		if(FxGui::GridScope sec{"Billboard"}; sec.open) {
-			FxGui::RowLabel("Mode");
-			static const char* modes[] = {"None", "Full", "AxisY"};
-			int				   current = static_cast<int>(billboardMode_);
-			if(ImGui::Combo("##billmode", &current, modes, IM_ARRAYSIZE(modes))) {
-				billboardMode_		  = static_cast<BillboardMode>(current);
-				billboardParams_.mode = current;
-				billboardCB_.TransferData(billboardParams_);
-			}
-		}
-
-		// ================= Emission =================
-		if(FxGui::GridScope sec{"Emission"}; sec.open) {
-			// ブレンドモードを選べるようにする
-			FxGui::RowLabel("blend mode");
-			static const char* blendModeNames[] = {
-				"None",		// NONE (0)
-				"Alpha",	// ALPHA (1)
-				"Add",		// ADD (2)
-				"Subtract", // SUB (3)
-				"Multiply", // MUL (4)
-				"Normal",	// NORMAL (5)
-				"Screen"	// SCREEN (6)
-			};
-			int currentBlend = static_cast<int>(blendMode_);
-			if(ImGui::Combo("##blendmode", &currentBlend, blendModeNames, IM_ARRAYSIZE(blendModeNames))) {
-				blendMode_ = static_cast<BlendMode>(currentBlend);
-			}
-			FxGui::RowLabel("Alive Count");
-			ImGui::Text("%zu", units_.size());
-
-			FxGui::RowLabel("World Position");
-			GuiCmd::DragFloat3("##pos", position_);
-
-			FxGui::RowLabel("Emit Rate (sec)");
-			GuiCmd::DragFloat("##rate", emitRate_, 0.01f, 0.0f, 10.0f);
-
-			FxGui::RowLabel("Complement Trail");
-			GuiCmd::CheckBox("##comp", isComplement_);
-
-			FxGui::RowLabel("random Spin on Emit");
-			GuiCmd::CheckBox("##randspin", randomSpinEmit_);
-		}
-
-		// ================= Params =================
-		if(FxGui::GridScope sec{"Params"}; sec.open) {
-			FxGui::DrawParam("Scale", scale_);
-			FxGui::DrawParam("Velocity", velocity_);
-			FxGui::DrawParam("Lifetime", lifetime_);
-			FxGui::DrawParam("spin", spin_);
-		}
-
-		// ================= Playback =================
-		if(FxGui::GridScope sec{"Playback"}; sec.open) {
-			FxGui::RowLabel("Controls");
-			ImGui::BeginGroup();
-			if(ImGui::Button("Play")) {
-				Play();
-			}
-			ImGui::SameLine();
-			if(ImGui::Button("Stop")) {
-				Stop();
-			}
-			ImGui::SameLine();
-			if(ImGui::Button("Reset")) {
-				Reset();
-			}
-			ImGui::EndGroup();
-
-			FxGui::RowLabel("Draw Enable");
-		}
-
-		// ================= One-Shot =================
-		if(FxGui::GridScope sec{"One-Shot"}; sec.open) {
-			FxGui::RowLabel("Enable");
-			if(GuiCmd::CheckBox("##oneshot", isOneShot_)) {
-				if(!isOneShot_) {
-					hasEmitted_ = false;
-				} // OFFに戻した時の自然な継続
-			}
-
-			if(isOneShot_) {
-				FxGui::RowLabel("Follow Emitter");
-				GuiCmd::CheckBox("##followoneshot", followOneShot_);
-
-				bool tp = GetTimedPreview();
-				if(GuiCmd::CheckBox("##timedPrev", tp)) {
-					SetTimedPreview(tp);
-					// ON にした瞬間に一度流したい場合は以下を有効に
-					// if (tp && isOneShot_) RestartOneShot();
+		if (GuiCmd::BeginSection("Object")) {
+			if(FxGui::GridScope sec{"Billboard"}; sec.open) {
+				FxGui::RowLabel("Mode");
+				static const char* modes[] = {"None", "Full", "AxisY"};
+				int				   current = static_cast<int>(billboardMode_);
+				if(ImGui::Combo("##billmode", &current, modes, IM_ARRAYSIZE(modes))) {
+					billboardMode_		  = static_cast<BillboardMode>(current);
+					billboardParams_.mode = current;
+					billboardCB_.TransferData(billboardParams_);
 				}
-
-				FxGui::RowLabel("Interval (sec)");
-				float iv = GetPreviewInterval();
-				if(GuiCmd::DragFloat("##prevInt", iv, 0.01f, 0.05f, 10.0f)) {
-					SetPreviewInterval(iv);
-				}
-
-				ImGui::BeginDisabled(!isOneShot_);
-				FxGui::RowLabel("Emit Count");
-				ImGui::DragInt("##count", &emitCount_, 1, 1, kMaxUnits_);
-
-				FxGui::RowLabel("Auto Destroy");
-				GuiCmd::CheckBox("##autoDestroy", autoDestroy_);
-
-				FxGui::RowLabel("Delay (sec)");
-				GuiCmd::DragFloat("##delay", emitDelay_, 0.01f, 0.0f, 10.0f);
-				ImGui::EndDisabled();
-
-				ImGui::BeginDisabled(isOneShot_);
-				FxGui::RowLabel("Emit Duration (sec)");
-				GuiCmd::DragFloat("##duration", emitDuration_, 0.01f, -1.0f, 60.0f);
-				ImGui::EndDisabled();
 			}
+			GuiCmd::EndSection();
 		}
 
-		// ================= Modules =================
-		if(moduleContainer_) {
-			if(FxGui::GridScope sec{"Modules"}; sec.open) {
-				// ラベル列
-				FxGui::RowLabel("Modules");
+		// ================= ParameterData =================
+		if (GuiCmd::BeginSection("ParameterData")) {
+			// ================= Emission =================
+			if(FxGui::GridScope sec{"Emission"}; sec.open) {
+				// ブレンドモードを選べるようにする
+				FxGui::RowLabel("blend mode");
+				static const char* blendModeNames[] = {
+					"None",		// NONE (0)
+					"Alpha",	// ALPHA (1)
+					"Add",		// ADD (2)
+					"Subtract", // SUB (3)
+					"Multiply", // MUL (4)
+					"Normal",	// NORMAL (5)
+					"Screen"	// SCREEN (6)
+				};
+				int currentBlend = static_cast<int>(blendMode_);
+				if(ImGui::Combo("##blendmode", &currentBlend, blendModeNames, IM_ARRAYSIZE(blendModeNames))) {
+					blendMode_ = static_cast<BlendMode>(currentBlend);
+				}
+				FxGui::RowLabel("Alive Count");
+				ImGui::Text("%zu", units_.size());
 
+				FxGui::RowLabel("World Position");
+				GuiCmd::DragFloat3("##pos", position_);
+
+				FxGui::RowLabel("Emit Rate (sec)");
+				GuiCmd::DragFloat("##rate", emitRate_, 0.01f, 0.0f, 10.0f);
+
+				FxGui::RowLabel("Complement Trail");
+				GuiCmd::CheckBox("##comp", isComplement_);
+
+				FxGui::RowLabel("random Spin on Emit");
+				GuiCmd::CheckBox("##randspin", randomSpinEmit_);
+			}
+
+			// ================= Params =================
+			if(FxGui::GridScope sec{"Params"}; sec.open) {
+				FxGui::DrawParam("Scale", scale_);
+				FxGui::DrawParam("Velocity", velocity_);
+				FxGui::DrawParam("Lifetime", lifetime_);
+				FxGui::DrawParam("spin", spin_);
+			}
+
+			// ================= Playback =================
+			if(FxGui::GridScope sec{"Playback"}; sec.open) {
+				FxGui::RowLabel("Controls");
 				ImGui::BeginGroup();
-				// 幅を常にその列いっぱいに
-				FxGui::FullWidthScope _fullWidth{};
-				// 少しだけ余裕を持たせる見た目
-				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 4));
-				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(6, 6));
-
-				// --- 有効モジュール（パラメータをここで全部縦に描く） ---
-				moduleContainer_->ShowModulesGui();
-
-				// --- 追加パレット（同じ列のまま下に表示） ---
-				moduleContainer_->ShowAvailableModulesGui();
-
-				ImGui::PopStyleVar(2);
+				if(ImGui::Button("Play")) {
+					Play();
+				}
+				ImGui::SameLine();
+				if(ImGui::Button("Stop")) {
+					Stop();
+				}
+				ImGui::SameLine();
+				if(ImGui::Button("Reset")) {
+					Reset();
+				}
 				ImGui::EndGroup();
+
+				FxGui::RowLabel("Draw Enable");
 			}
+
+			// ================= One-Shot =================
+			if(FxGui::GridScope sec{"One-Shot"}; sec.open) {
+				FxGui::RowLabel("Enable");
+				if(GuiCmd::CheckBox("##oneshot", isOneShot_)) {
+					if(!isOneShot_) {
+						hasEmitted_ = false;
+					} // OFFに戻した時の自然な継続
+				}
+
+				if(isOneShot_) {
+					FxGui::RowLabel("Follow Emitter");
+					GuiCmd::CheckBox("##followoneshot", followOneShot_);
+
+					bool tp = GetTimedPreview();
+					if(GuiCmd::CheckBox("##timedPrev", tp)) {
+						SetTimedPreview(tp);
+						// ON にした瞬間に一度流したい場合は以下を有効に
+						// if (tp && isOneShot_) RestartOneShot();
+					}
+
+					FxGui::RowLabel("Interval (sec)");
+					float iv = GetPreviewInterval();
+					if(GuiCmd::DragFloat("##prevInt", iv, 0.01f, 0.05f, 10.0f)) {
+						SetPreviewInterval(iv);
+					}
+
+					ImGui::BeginDisabled(!isOneShot_);
+					FxGui::RowLabel("Emit Count");
+					ImGui::DragInt("##count", &emitCount_, 1, 1, kMaxUnits_);
+
+					FxGui::RowLabel("Auto Destroy");
+					GuiCmd::CheckBox("##autoDestroy", autoDestroy_);
+
+					FxGui::RowLabel("Delay (sec)");
+					GuiCmd::DragFloat("##delay", emitDelay_, 0.01f, 0.0f, 10.0f);
+					ImGui::EndDisabled();
+
+					ImGui::BeginDisabled(isOneShot_);
+					FxGui::RowLabel("Emit Duration (sec)");
+					GuiCmd::DragFloat("##duration", emitDuration_, 0.01f, -1.0f, 60.0f);
+					ImGui::EndDisabled();
+				}
+			}
+
+			// ================= Modules =================
+			if(moduleContainer_) {
+				if(FxGui::GridScope sec{"Modules"}; sec.open) {
+					// ラベル列
+					FxGui::RowLabel("Modules");
+
+					ImGui::BeginGroup();
+					// 幅を常にその列いっぱいに
+					FxGui::FullWidthScope _fullWidth{};
+					// 少しだけ余裕を持たせる見た目
+					ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 4));
+					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(6, 6));
+
+					// --- 有効モジュール（パラメータをここで全部縦に描く） ---
+					moduleContainer_->ShowModulesGui();
+
+					// --- 追加パレット（同じ列のまま下に表示） ---
+					moduleContainer_->ShowAvailableModulesGui();
+
+					ImGui::PopStyleVar(2);
+					ImGui::EndGroup();
+				}
+			}
+			GuiCmd::EndSection();
 		}
 
 		ImGui::Spacing();

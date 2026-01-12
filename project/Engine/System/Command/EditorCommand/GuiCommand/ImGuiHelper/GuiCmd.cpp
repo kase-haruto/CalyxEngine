@@ -185,8 +185,8 @@ namespace {
 		// ホバー時は少し明るく、アクティブ時はアクセントカラー
 		ImVec4 col_bg;
 		if (*v) {
-			// On Color (UE Blue Accent)
-			col_bg = hovered ? ImVec4(0.12f, 0.52f, 0.95f, 1.00f) : ImVec4(0.00f, 0.44f, 0.87f, 1.00f);
+			// On Color (Red-Orange Accent)
+			col_bg = hovered ? ImVec4(1.00f, 0.45f, 0.25f, 1.00f) : ImVec4(1.00f, 0.35f, 0.15f, 1.00f);
 		} else {
 			// Off Color (Dark Gray)
 			col_bg = hovered ? ImVec4(0.25f, 0.25f, 0.25f, 1.00f) : ImVec4(0.15f, 0.15f, 0.15f, 1.00f);

@@ -9,6 +9,8 @@
 
 #include <externals/imgui/imgui.h>
 
+#include <Engine/Assets/Texture/TextureManager.h>
+
 namespace CalyxEditor {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	//		コンストラクタ
@@ -16,23 +18,26 @@ namespace CalyxEditor {
 	InspectorPanel::InspectorPanel()
 		: IEngineUI("Inspector") {}
 
-	/////////////////////////////////////////////////////////////////////////////////////////
+	// ============================================================================
 	//		imgui描画
-	/////////////////////////////////////////////////////////////////////////////////////////
+	// ============================================================================
 	void InspectorPanel::Render() {
 		if(!IsShow()) return;
 
 		// タブの初期化
 		if (tabs_.empty()) {
-			// 将来的にはアイコン画像を使用するが、現在は仮置き
+			auto& tm = *TextureManager::GetInstance();
 			tabs_ = {
-				{"All",           "Textures/white1x1.png", "All"},
-				{"Tf",            "Textures/white1x1.png", "Tf"},
-				{"Material",      "Textures/white1x1.png", "Material"},
-				{"ParameterData", "Textures/white1x1.png", "ParameterData"},
-				{"Draw",          "Textures/white1x1.png", "Draw"},
-				{"Collider",      "Textures/white1x1.png", "Collider"},
+				{"All",           "UI/Tool/Inspector/inspectorUI_Al.png", "All"},
+				{"Object",        "UI/Tool/Inspector/inspectorUI_Ob.png", "Object"},
+				{"Material",      "UI/Tool/Inspector/inspectorUI_Ma.png", "Material"},
+				{"ParameterData", "UI/Tool/Inspector/inspectorUI_Pa.png", "ParameterData"},
+				{"Collider",      "UI/Tool/Inspector/inspectorUI_Co.png", "Collider"},
 			};
+
+			for (auto& tab : tabs_) {
+				tab.iconTex = (void*)tm.LoadTexture(tab.iconPath).ptr;
+			}
 		}
 
 		bool open = true;
@@ -100,7 +105,7 @@ namespace CalyxEditor {
 	void InspectorPanel::RenderSidebar() {
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0,0,0,0)); // 背景透明
 		
-		for (int i = 0; i < tabs_.size(); ++i) {
+		for (int i = 0; i < (int)tabs_.size(); ++i) {
 			const auto& tab = tabs_[i];
 			bool isSelected = (currentTabIndex_ == i);
 			
@@ -111,8 +116,8 @@ namespace CalyxEditor {
 
 			ImGui::PushID(i);
 			
-			// テクスチャロードが未実装のため、ボタンで代用（先頭2文字表示）
-			if (ImGui::Button(tab.name.substr(0, 2).c_str(), ImVec2(32, 32))) {
+			// アイコンボタン
+			if (ImGui::ImageButton(tab.iconTex, ImVec2(20, 20))) {
 				currentTabIndex_ = i;
 			}
 			

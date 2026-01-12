@@ -54,7 +54,7 @@ namespace CalyxEditor {
 			std::string name;		   // Tooltip name
 			std::string iconPath;	   // Texture path
 			std::string filterSection; // Filter string for GuiCmd (match BeginSection)
-			// ImTextureID textureId = 0; // Runtime texture ID (loaded from iconPath)
+			void*		iconTex = nullptr; // Runtime texture ID (D3D12_GPU_DESCRIPTOR_HANDLE::ptr)
 		};
 
 		void RenderSidebar();

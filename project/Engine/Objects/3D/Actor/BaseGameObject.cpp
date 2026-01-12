@@ -125,7 +125,7 @@ void BaseGameObject::ShowGui() {
 	}
 
 	// --- トランスフォーム ---
-	if (GuiCmd::BeginSection("Tf")) {
+	if (GuiCmd::BeginSection("Object")) {
 		worldTransform_.ShowImGui("world");
 		GuiCmd::EndSection();
 	}
@@ -145,7 +145,7 @@ void BaseGameObject::ShowGui() {
 	}
 
 	// --- 描画設定 ---
-	if (GuiCmd::BeginSection("Draw")) {
+	if (GuiCmd::BeginSection("Object")) {
 		int	mode  = static_cast<int>(billboardMode_);
 		const char* items[] = { "None", "Full", "AxisY" };
 		if(GuiCmd::Combo("Billboard Mode", mode, items, 3)) {

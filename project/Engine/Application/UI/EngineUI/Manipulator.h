@@ -73,7 +73,7 @@ namespace CalyxEditor {
 		// アイコン
 		struct Icon {
 			ImTextureID texture = nullptr;
-			ImVec2		size{32.0f, 32.0f};
+			ImVec2		size{24.0f, 24.0f};
 		};
 
 	public:

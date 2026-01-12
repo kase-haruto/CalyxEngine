@@ -217,13 +217,22 @@ void DirectionalLight::ShowGui() {
 #if defined(_DEBUG) || defined(DEVELOP)
 	ImGui::Dummy(ImVec2(0.0f, 5.0f));
 
-	config_.ShowGui();
+	if (GuiCmd::BeginSection("ParameterData")) {
+		config_.ShowGui();
+		ImGui::Separator();
+		GuiCmd::EndSection();
+	}
 
-	ImGui::Separator();
+	if (GuiCmd::BeginSection("Object")) {
+		GuiCmd::SliderFloat3("direction", lightData_.direction, -1.0f, 1.0f);
+		GuiCmd::EndSection();
+	}
 
-	GuiCmd::SliderFloat3("direction", lightData_.direction, -1.0f, 1.0f);
-	GuiCmd::ColorEdit4("color", lightData_.color);
-	GuiCmd::SliderFloat("Intensity", lightData_.intensity, 0.0f, 1.0f);
+	if (GuiCmd::BeginSection("ParameterData")) {
+		GuiCmd::ColorEdit4("color", lightData_.color);
+		GuiCmd::SliderFloat("Intensity", lightData_.intensity, 0.0f, 1.0f);
+		GuiCmd::EndSection();
+	}
 #endif // _DEBUG
 }
 

@@ -93,9 +93,9 @@ void ImGuiManager::CustomizeImGuiStyle() {
 	const ImVec4 panelHover   = ImVec4(0.24f, 0.24f, 0.24f, 1.00f); // ホバー時
 	const ImVec4 panelActive  = ImVec4(0.32f, 0.32f, 0.32f, 1.00f); // アクティブ
 	
-	const ImVec4 accentColor  = ImVec4(0.00f, 0.44f, 0.87f, 1.00f);
-	const ImVec4 accentHover  = ImVec4(0.12f, 0.52f, 0.95f, 1.00f);
-	const ImVec4 accentActive = ImVec4(0.00f, 0.38f, 0.75f, 1.00f);
+	const ImVec4 accentColor  = ImVec4(1.00f, 0.35f, 0.15f, 1.00f);
+	const ImVec4 accentHover  = ImVec4(1.00f, 0.45f, 0.25f, 1.00f);
+	const ImVec4 accentActive = ImVec4(0.80f, 0.25f, 0.05f, 1.00f);
 
 	const ImVec4 textMain     = ImVec4(0.90f, 0.90f, 0.90f, 1.00f);
 	const ImVec4 textDim      = ImVec4(0.55f, 0.55f, 0.55f, 1.00f);
@@ -152,7 +152,7 @@ void ImGuiManager::CustomizeImGuiStyle() {
 	colors[ImGuiCol_DockingEmptyBg]       = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
 
 	// Selection
-	colors[ImGuiCol_TextSelectedBg]       = ImVec4(0.26f, 0.59f, 0.98f, 0.35f);
+	colors[ImGuiCol_TextSelectedBg]       = ImVec4(1.00f, 0.35f, 0.15f, 0.35f);
 	colors[ImGuiCol_DragDropTarget]       = accentColor;
 	colors[ImGuiCol_NavWindowingHighlight]= ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
 	colors[ImGuiCol_NavWindowingDimBg]    = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);

@@ -78,12 +78,18 @@ void Sprite::Update() {
 }
 
 void Sprite::ShowGui() {
-	//ImGui::Text("%s", path.c_str());
-	GuiCmd::DragFloat2("Position", position, 1.0f);
-	GuiCmd::DragFloat2("Size", size, 1.0f);
-	GuiCmd::SliderFloat("RotateZ", rotate, -180.0f, 180.0f);
-	GuiCmd::DragFloat2("Anchor", anchorPoint, 0.01f, 0.0f, 1.0f);
-	uvTransform.ShowImGui("uvTransform");
+	if (GuiCmd::BeginSection("Object")) {
+		GuiCmd::DragFloat2("Position", position, 1.0f);
+		GuiCmd::DragFloat2("Size", size, 1.0f);
+		GuiCmd::SliderFloat("RotateZ", rotate, -180.0f, 180.0f);
+		GuiCmd::DragFloat2("Anchor", anchorPoint, 0.01f, 0.0f, 1.0f);
+		GuiCmd::EndSection();
+	}
+	
+	if (GuiCmd::BeginSection("Material")) {
+		uvTransform.ShowImGui("uvTransform");
+		GuiCmd::EndSection();
+	}
 }
 
 void Sprite::UpdateMatrix() {

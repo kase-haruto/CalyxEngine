@@ -67,7 +67,7 @@ void PointLight::ShowGui(){
 	ImGui::Separator();
 	
 	// トランスフォーム (位置)
-	if (GuiCmd::BeginSection("Tf")) {
+	if (GuiCmd::BeginSection("Object")) {
 		GuiCmd::DragFloat3("position", lightData_.position);
 		GuiCmd::EndSection();
 	}
