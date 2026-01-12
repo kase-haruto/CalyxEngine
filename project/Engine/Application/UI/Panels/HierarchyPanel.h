@@ -53,12 +53,16 @@ namespace CalyxEditor {
 			return selected_;
 		}
 
+
+
 	private:
 		// rename
 		void BeginRename(SceneObject* obj);
 		void CancelRename();
 		void CommitRename();
-
+		// render helper
+		bool DrawNode(SceneObject* obj);
+		
 	private:
 		// runtime state
 		const SceneObjectLibrary* lib_ = nullptr;
@@ -80,6 +84,9 @@ namespace CalyxEditor {
 		bool		renaming_ = false;
 		std::string renameBuf_;
 
+		// search
+		ImGuiTextFilter searchFilter_;
+
 		// icons
 		struct Icon {
 			ImTextureID tex{};
@@ -88,7 +95,7 @@ namespace CalyxEditor {
 
 	public:
 		Icon iconEye_, iconEyeOff_, iconCamera_, iconLight_, iconGameObj_, iconFx_;
-
+		int rowIndex_ = 0;
 	private:
 		using IEngineUI::panelName_;
 	};

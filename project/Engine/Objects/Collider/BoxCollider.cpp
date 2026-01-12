@@ -48,11 +48,11 @@ void BoxCollider::Draw() {
 
 void BoxCollider::ShowGui() {
 
-	if(ImGui::CollapsingHeader("Collider")) {
+	if(GuiCmd::CollapsingHeader("Collider")) {
 		Collider::ShowGui();
 		if (!isCollisionEnabled_) return;
 		GuiCmd::DragFloat3("offset", offset_);
-		ImGui::DragFloat3("Size", &shape_.size.x, 0.1f, 0.0f, 10.0f);
+		GuiCmd::DragFloat3("Size", shape_.size, 0.1f, 0.0f, 10.0f);
 	}
 }
 

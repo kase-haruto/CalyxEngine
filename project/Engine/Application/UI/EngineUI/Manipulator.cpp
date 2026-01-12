@@ -114,12 +114,12 @@ namespace CalyxEditor {
 
 	void Manipulator::RenderOverlay(const ImVec2& basePos) {
 		ImVec2 iconSize = iconTranslate_.size;
-		float  spacing	= 8.0f;
+		float  spacing	= 10.0f;
 
 		struct ButtonInfo {
 			ImGuizmo::OPERATION op;
 			const char*			tooltip;
-			const Icon&			icon;
+			const Manipulator::Icon&	icon;
 		};
 
 		ButtonInfo buttons[] = {
@@ -134,7 +134,7 @@ namespace CalyxEditor {
 
 			bool isSelected = (operation_ == buttons[i].op);
 			if(isSelected)
-				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.5f, 0.9f, 1.0f));
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.00f, 0.45f, 0.25f, 1.00f));
 
 			if(ImGui::ImageButton(buttons[i].icon.texture, iconSize))
 				operation_ = buttons[i].op;
@@ -154,7 +154,7 @@ namespace CalyxEditor {
 
 			bool isWorld = (mode_ == ImGuizmo::WORLD);
 			if(isWorld)
-				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.5f, 0.9f, 1.0f));
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.00f, 0.45f, 0.25f, 1.00f));
 
 			if(ImGui::ImageButton(iconWorld_.texture, iconSize))
 				mode_ = isWorld ? ImGuizmo::LOCAL : ImGuizmo::WORLD;
@@ -175,7 +175,7 @@ namespace CalyxEditor {
 
 			bool pushStyle = false;
 			if(showGrid) {
-				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.5f, 0.9f, 1.0f));
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.00f, 0.45f, 0.25f, 1.00f));
 				pushStyle = true;
 			}
 

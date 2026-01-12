@@ -6,6 +6,7 @@
 #include <Engine/objects/Collider/SphereCollider.h>
 
 #include "externals/imgui/imgui.h"
+#include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 #include "externals/nlohmann/json.hpp"
 
 BaseGameObject::BaseGameObject(const std::string&		  modelName,
@@ -114,28 +115,50 @@ void BaseGameObject::InitializeCollider(ColliderKind kind) {
 //===================================================================*/
 void BaseGameObject::ShowGui() {
 	ImGui::Spacing();
-
 	ImGui::Dummy(ImVec2(0.0f, 5.0f));
 	ImGui::Separator();
 
-	HeaderGui();
+	// --- パラメータデータ ---
+	if (GuiCmd::BeginSection("ParameterData")) {
+		HeaderGui();
+		GuiCmd::EndSection();
+	}
 
-	worldTransform_.ShowImGui("world");
+	// --- トランスフォーム ---
+	if (GuiCmd::BeginSection("Object")) {
+		worldTransform_.ShowImGui("world");
+		GuiCmd::EndSection();
+	}
 
-	model_->ShowImGui(config_.GetConfig().modelConfig);
+	// --- マテリアル・モデル ---
+	if (GuiCmd::BeginSection("Material")) {
+		model_->ShowImGui(config_.GetConfig().modelConfig);
+		GuiCmd::EndSection();
+	}
 
-	if(collider_) collider_->ShowGui();
-
-	// === Billboard GUI ===
-	{
-		int			mode  = static_cast<int>(billboardMode_);
-		const char* items = "None\0Full\0AxisY\0\0";
-		if(ImGui::Combo("Billboard Mode", &mode, items)) {
-			billboardMode_ = static_cast<BillboardMode>(mode);
+	// --- コライダー ---
+	if(collider_) {
+		if (GuiCmd::BeginSection("Collider")) {
+			collider_->ShowGui();
+			GuiCmd::EndSection();
 		}
 	}
 
-	DerivativeGui();
+	// --- 描画設定 ---
+	if (GuiCmd::BeginSection("Object")) {
+		int	mode  = static_cast<int>(billboardMode_);
+		const char* items[] = { "None", "Full", "AxisY" };
+		if(GuiCmd::Combo("Billboard Mode", mode, items, 3)) {
+			billboardMode_ = static_cast<BillboardMode>(mode);
+		}
+		GuiCmd::EndSection();
+	}
+
+	// --- 派生クラス用パラメータ ---
+	if (GuiCmd::BeginSection("ParameterData")) {
+		DerivativeGui();
+		GuiCmd::EndSection();
+	}
 }
 void BaseGameObject::HeaderGui() {
 	config_.ShowGui();

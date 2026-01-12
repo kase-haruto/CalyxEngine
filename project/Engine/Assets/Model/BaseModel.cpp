@@ -15,6 +15,7 @@
 
 //external
 #include "externals/imgui/imgui.h"
+#include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 #include <algorithm>
 #include <Engine/Objects/3D/Details/BillboardParams.h>
 #include "Engine/Foundation/Utility/Func/CxUtils.h"
@@ -102,7 +103,7 @@ void BaseModel::ShowImGuiInterface() {
 
 	uvTransform.ShowImGui("uvTransform");
 
-	if (ImGui::CollapsingHeader("Material")) {
+	if (GuiCmd::CollapsingHeader("Material")) {
 		materialData_.ShowImGui();
 
 		auto& textures = TextureManager::GetInstance()->GetLoadedTextures();
@@ -121,13 +122,13 @@ void BaseModel::ShowImGuiInterface() {
 		}
 	}
 
-	if (ImGui::CollapsingHeader("Draw")) {
+	if (GuiCmd::CollapsingHeader("Draw")) {
 		static const char* blendModeNames[] = {
 			"NONE", "ALPHA", "ADD", "SUB", "MUL", "NORMAL", "SCREEN"
 		};
 
 		int currentBlendMode = static_cast<int>(blendMode_);
-		if (ImGui::Combo("Blend Mode", &currentBlendMode, blendModeNames, IM_ARRAYSIZE(blendModeNames))) {
+		if (GuiCmd::Combo("Blend Mode", currentBlendMode, blendModeNames, IM_ARRAYSIZE(blendModeNames))) {
 			blendMode_ = static_cast<BlendMode>(currentBlendMode);
 		}
 	}
@@ -209,7 +210,7 @@ BaseModelConfig BaseModel::ExtractConfig() const {
 void BaseModel::ShowImGui(BaseModelConfig& config) {
 	uvTransform.ShowImGui("uvTransform");
 
-	if (ImGui::CollapsingHeader("Material")) {
+	if (GuiCmd::CollapsingHeader("Material")) {
 		materialData_.ShowImGui(config.materialConfig);
 
 		// ---- ドラッグ&ドロップでテクスチャ適用 ----
@@ -271,12 +272,12 @@ void BaseModel::ShowImGui(BaseModelConfig& config) {
 		}
 	}
 
-	if (ImGui::CollapsingHeader("Draw")) {
+	if (GuiCmd::CollapsingHeader("Draw")) {
 		static const char* blendModeNames[] = {
 			"NONE", "ALPHA", "ADD", "SUB", "MUL", "NORMAL", "SCREEN"
 		};
 		int currentBlendMode = static_cast<int>(blendMode_);
-		if (ImGui::Combo("Blend Mode", &currentBlendMode,
+		if (GuiCmd::Combo("Blend Mode", currentBlendMode,
 						 blendModeNames, IM_ARRAYSIZE(blendModeNames))) {
 			config.blendMode = currentBlendMode;
 		}

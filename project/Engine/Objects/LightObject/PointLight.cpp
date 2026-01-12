@@ -56,16 +56,30 @@ void PointLight::AlwaysUpdate([[maybe_unused]]float dt){}
 void PointLight::ShowGui(){
 #ifdef _DEBUG
 	ImGui::Dummy(ImVec2(0.0f, 5.0f));
-	config_.ShowGui();
+	
+	// コンフィグ
+	if (GuiCmd::BeginSection("ParameterData")) {
+		config_.ShowGui();
+		ImGui::Separator();
+		GuiCmd::EndSection();
+	}
 
 	ImGui::Separator();
+	
+	// トランスフォーム (位置)
+	if (GuiCmd::BeginSection("Object")) {
+		GuiCmd::DragFloat3("position", lightData_.position);
+		GuiCmd::EndSection();
+	}
 
-	ImGui::Separator();
-	GuiCmd::DragFloat3("position", lightData_.position);
-	GuiCmd::ColorEdit4("color", lightData_.color);
-	ImGui::SliderFloat("Intensity", &lightData_.intensity, 0.0f, 1.0f);
-	GuiCmd::DragFloat("radius", lightData_.radius);
-	GuiCmd::DragFloat("decay", lightData_.decay);
+	// ライトパラメータ
+	if (GuiCmd::BeginSection("ParameterData")) {
+		GuiCmd::ColorEdit4("color", lightData_.color);
+		GuiCmd::SliderFloat("Intensity", lightData_.intensity, 0.0f, 1.0f);
+		GuiCmd::DragFloat("radius", lightData_.radius);
+		GuiCmd::DragFloat("decay", lightData_.decay);
+		GuiCmd::EndSection();
+	}
 #endif // _DEBUG
 }
 

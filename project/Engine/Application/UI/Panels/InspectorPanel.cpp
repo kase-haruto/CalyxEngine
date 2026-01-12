@@ -5,7 +5,11 @@
 #include <Engine/Editor/BaseEditor.h>
 
 // externals
+#include "Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h"
+
 #include <externals/imgui/imgui.h>
+
+#include <Engine/Assets/Texture/TextureManager.h>
 
 namespace CalyxEditor {
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -14,29 +18,125 @@ namespace CalyxEditor {
 	InspectorPanel::InspectorPanel()
 		: IEngineUI("Inspector") {}
 
-	/////////////////////////////////////////////////////////////////////////////////////////
+	// ============================================================================
 	//		imgui描画
-	/////////////////////////////////////////////////////////////////////////////////////////
+	// ============================================================================
 	void InspectorPanel::Render() {
-		bool open = true;
-		ImGui::Begin(panelName_.c_str(), &open);
+		if(!IsShow()) return;
 
-		// --- Editor が選択されている場合 ---
-		if(selectedEditor_) {
-			ImGui::Text("Editor: %s", selectedEditor_->GetEditorName().c_str());
-			selectedEditor_->ShowImGuiInterface();
-		} else {
-			auto sp = selectedObject_.lock();
-			if(sp && sceneObjectEditor_) {
-				sceneObjectEditor_->SetSceneObject(sp.get());
-				sceneObjectEditor_->ShowImGuiInterface();
-			} else {
-				ImGui::Text("Nothing is selected.");
+		// タブの初期化
+		if (tabs_.empty()) {
+			auto& tm = *TextureManager::GetInstance();
+			tabs_ = {
+				{"All",           "UI/Tool/Inspector/inspectorUI_Al.png", "All"},
+				{"Object",        "UI/Tool/Inspector/inspectorUI_Ob.png", "Object"},
+				{"Material",      "UI/Tool/Inspector/inspectorUI_Ma.png", "Material"},
+				{"ParameterData", "UI/Tool/Inspector/inspectorUI_Pa.png", "ParameterData"},
+				{"Collider",      "UI/Tool/Inspector/inspectorUI_Co.png", "Collider"},
+			};
+
+			for (auto& tab : tabs_) {
+				tab.iconTex = (void*)tm.LoadTexture(tab.iconPath).ptr;
 			}
 		}
 
+		bool open = true;
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f)); // サイドバーは全高使用
+		if(ImGui::Begin(panelName_.c_str(), &open)) {
+
+			if(selectedEditor_) { 
+				ImGui::Text("Editor: %s", selectedEditor_->GetEditorName().c_str());
+				ImGui::Separator();
+				selectedEditor_->ShowImGuiInterface();
+			} 
+			else {
+				auto sp = selectedObject_.lock();
+				if(sp && sceneObjectEditor_) {
+					
+					// レイアウト: サイドバー | コンテンツ
+					if (ImGui::BeginTable("InspectorMainLayout", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingFixedFit)) {
+						
+						ImGui::TableSetupColumn("Sidebar", ImGuiTableColumnFlags_WidthFixed, 40.0f);
+						ImGui::TableSetupColumn("Content", ImGuiTableColumnFlags_None);
+						
+						ImGui::TableNextColumn();
+						RenderSidebar();
+
+						ImGui::TableNextColumn();
+						
+						// コンテンツのスクロール領域開始
+						if(ImGui::BeginChild("##ContentScroll", ImVec2(0, 0), false, ImGuiWindowFlags_None)) {
+						
+							ImGui::Dummy(ImVec2(0, 4));
+							ImGui::Indent(4.0f);
+							
+							ImGui::TextDisabled("Type: %s", sp->GetObjectTypeName().c_str());
+							ImGui::SameLine();
+							ImGui::Text("%s", sp->GetName().c_str());
+							ImGui::Separator();
+							ImGui::Spacing();
+
+							sceneObjectEditor_->SetSceneObject(sp.get());
+
+							// フィルタ設定
+							const auto& activeTab = tabs_[currentTabIndex_];
+							GuiCmd::SetSectionFilter(activeTab.filterSection.c_str());
+
+							sceneObjectEditor_->ShowImGuiInterface();
+							
+							ImGui::Unindent(4.0f);
+						}
+						ImGui::EndChild();
+
+						ImGui::EndTable();
+					}
+
+				} else {
+					ImGui::Text("Nothing is selected.");
+				}
+			}
+		}
 		ImGui::End();
+		ImGui::PopStyleVar();
+
 		if(!open) SetShow(false);
+	}
+
+	void InspectorPanel::RenderSidebar() {
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0,0,0,0)); // 背景透明
+		
+		for (int i = 0; i < (int)tabs_.size(); ++i) {
+			const auto& tab = tabs_[i];
+			bool isSelected = (currentTabIndex_ == i);
+			
+			// 選択中の場合ハイライト
+			if (isSelected) {
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
+			}
+
+			ImGui::PushID(i);
+			
+			// アイコンボタン
+			if (ImGui::ImageButton(tab.iconTex, ImVec2(20, 20))) {
+				currentTabIndex_ = i;
+			}
+			
+			if (ImGui::IsItemHovered()) {
+				ImGui::SetTooltip("%s", tab.name.c_str());
+			}
+
+			if (isSelected) {
+				ImGui::PopStyleColor();
+			}
+			ImGui::PopID();
+			
+			ImGui::Spacing();
+		}
+		
+		ImGui::PopStyleColor();
+	}
+
+	void InspectorPanel::RenderContent() {
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////

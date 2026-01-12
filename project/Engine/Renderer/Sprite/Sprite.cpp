@@ -15,7 +15,8 @@
 /* c++ */
 #include <stdint.h>
 /* externals */
-#include "externals/imgui/imgui.h"
+#include <externals/imgui/imgui.h>
+#include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 
 Sprite::Sprite(const std::string& filePath) {
 
@@ -77,12 +78,18 @@ void Sprite::Update() {
 }
 
 void Sprite::ShowGui() {
-	ImGui::Text("%s", path.c_str());
-	ImGui::DragFloat2("Position", &position.x, 1.0f);
-	ImGui::DragFloat2("Size", &size.x, 1.0f);
-	ImGui::SliderFloat("RotateZ", &rotate, -180.0f, 180.0f);
-	ImGui::DragFloat2("Anchor", &anchorPoint.x, 0.01f, 0.0f, 1.0f);
-	uvTransform.ShowImGui("uvTransform");
+	if (GuiCmd::BeginSection("Object")) {
+		GuiCmd::DragFloat2("Position", position, 1.0f);
+		GuiCmd::DragFloat2("Size", size, 1.0f);
+		GuiCmd::SliderFloat("RotateZ", rotate, -180.0f, 180.0f);
+		GuiCmd::DragFloat2("Anchor", anchorPoint, 0.01f, 0.0f, 1.0f);
+		GuiCmd::EndSection();
+	}
+	
+	if (GuiCmd::BeginSection("Material")) {
+		uvTransform.ShowImGui("uvTransform");
+		GuiCmd::EndSection();
+	}
 }
 
 void Sprite::UpdateMatrix() {

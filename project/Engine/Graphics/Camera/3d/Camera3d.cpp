@@ -12,6 +12,7 @@
 
 // imgui
 #include <externals/imgui/imgui.h>
+#include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 
 // c++
 #include <cmath>
@@ -185,22 +186,28 @@ void Camera3d::AlwaysUpdate(float dt) {
 
 void Camera3d::ShowGui() {
 	// 既存のWT GUI
-	worldTransform_.ShowImGui();
+	if (GuiCmd::BeginSection("Object")) {
+		worldTransform_.ShowImGui("world");
+		GuiCmd::EndSection();
+	}
 
-	if(ImGui::CollapsingHeader("Follow Target##Camera3d",ImGuiTreeNodeFlags_DefaultOpen)) {
-		ImGui::Checkbox("Enabled",&follow_.enabled);
-		ImGui::DragFloat("Distance Back",&follow_.distanceBack,0.05f,0.0f,1000.0f);
-		ImGui::DragFloat("Height Offset",&follow_.heightOffset,0.05f,-100.0f,100.0f);
-		ImGui::DragFloat("Side Offset",&follow_.sideOffset,0.05f,-100.0f,100.0f);
-		ImGui::DragFloat3("LookAt Offset",&follow_.lookAtOffset.x,0.05f);
+	if (GuiCmd::BeginSection("ParameterData")) {
+		if (GuiCmd::CollapsingHeader("Follow Target##Camera3d", ImGuiTreeNodeFlags_DefaultOpen)) {
+			GuiCmd::CheckBox("Enabled", follow_.enabled);
+			GuiCmd::DragFloat("Distance Back", follow_.distanceBack, 0.05f, 0.0f, 1000.0f);
+			GuiCmd::DragFloat("Height Offset", follow_.heightOffset, 0.05f, -100.0f, 100.0f);
+			GuiCmd::DragFloat("Side Offset", follow_.sideOffset, 0.05f, -100.0f, 100.0f);
+			GuiCmd::DragFloat3("LookAt Offset", follow_.lookAtOffset, 0.05f);
 
-		ImGui::SeparatorText("Smoothing");
-		ImGui::DragFloat("Pos Smooth Time",&follow_.posSmoothTime,0.005f,0.01f,1.0f);
-		ImGui::DragFloat("Rot Time Constant",&follow_.rotTimeConstant,0.005f,0.01f,1.0f);
-		ImGui::DragFloat("Extra Pitch (deg)",&follow_.extraPitchDeg,0.1f,-89.0f,89.0f);
+			ImGui::SeparatorText("Smoothing");
+			GuiCmd::DragFloat("Pos Smooth Time", follow_.posSmoothTime, 0.005f, 0.01f, 1.0f);
+			GuiCmd::DragFloat("Rot Time Constant", follow_.rotTimeConstant, 0.005f, 0.01f, 1.0f);
+			GuiCmd::DragFloat("Extra Pitch (deg)", follow_.extraPitchDeg, 0.1f, -89.0f, 89.0f);
 
-		if(follow_.target) ImGui::Text("Target: set");
-		else ImGui::TextDisabled("Target: (null)");
+			if (follow_.target) ImGui::Text("Target: set");
+			else ImGui::TextDisabled("Target: (null)");
+		}
+		GuiCmd::EndSection();
 	}
 }
 

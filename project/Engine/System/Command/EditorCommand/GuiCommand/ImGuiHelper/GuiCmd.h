@@ -63,7 +63,36 @@ namespace GuiCmd{
 	bool ColorEdit4(const char* label, CalyxMath::Vector4& value, ImGuiColorEditFlags flags = 0);
 
 	//===================================================================*/
+	//		combo
+	//===================================================================*/
+	bool Combo(const char* label, int& current_item, const char* const items[], int items_count, int popup_max_height_in_items = -1);
+
+	//===================================================================*/
 	//		checkbox
 	//===================================================================*/
 	bool CheckBox(const char* label, bool& value);
+	
+	//===================================================================*/
+	//		CollapsingHeader
+	//===================================================================*/
+	bool CollapsingHeader(const char* label, ImGuiTreeNodeFlags flags = 0);
+
+	//===================================================================*/
+	//		Layout Helpers
+	//===================================================================*/
+	void BeginTableLayout(const char* id = "InspectorTable");
+	void EndTableLayout();
+
+	//===================================================================*/
+	//		Section Filter Helpers (For Tab View)
+	//===================================================================*/
+	// Set the current active section name. "" or "All" means show everything.
+	void SetSectionFilter(const char* filterName);
+	
+	// Begins a named section. Returns true if the section receives drawing commands.
+	bool BeginSection(const char* sectionName);
+	
+	// Ends the current section.
+	void EndSection();
+
 }
