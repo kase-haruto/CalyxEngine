@@ -23,12 +23,12 @@ using namespace CalyxMath;
 /////////////////////////////////////////////////////////////////////////////////////////
 void EulerTransform::ShowImGui(const std::string& label) {
 	ImGui::SeparatorText(label.c_str());
-	std::string scaleLabel = label + "_scale";
-	std::string rotationLabel = label + "_rotation";
+	std::string scaleLabel       = label + "_scale";
+	std::string rotationLabel    = label + "_rotation";
 	std::string translationLabel = label + "_translate";
-	GuiCmd::DragFloat3(scaleLabel.c_str(), scale);
-	GuiCmd::DragFloat3(rotationLabel.c_str(), rotate);
-	GuiCmd::DragFloat3(translationLabel.c_str(), translate);
+	GuiCmd::DragFloat3(scaleLabel.c_str(),scale);
+	GuiCmd::DragFloat3(rotationLabel.c_str(),rotate);
+	GuiCmd::DragFloat3(translationLabel.c_str(),translate);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -48,17 +48,17 @@ void BaseTransform::Initialize() {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	imgui
 /////////////////////////////////////////////////////////////////////////////////////////
-void BaseTransform::ShowImGui(const std::string& label){
-	if (ImGui::CollapsingHeader(label.c_str())){
-		if (GuiCmd::ColoredDragFloat3("Scale", scale, 0.01f)){
-		}
+void BaseTransform::ShowImGui(const std::string& label) {
+	std::string nodeLabel = label + "##node";
+	// 小さめの折りたたみ見出しとして TreeNodeEx を使用
+	if(ImGui::TreeNodeEx(nodeLabel.c_str(),ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
+		if(GuiCmd::ColoredDragFloat3("Scale",scale,0.01f)) {}
 
-		if (GuiCmd::ColoredDragFloat3("Rotation", eulerRotation, 0.1f, -360.0f, 360.0f, "%.1f", "°")){
-			rotationSource = RotationSource::Euler;
-		}
+		if(GuiCmd::ColoredDragFloat3("Rotation",eulerRotation,0.1f,-360.0f,360.0f,"%.1f","°")) { rotationSource = RotationSource::Euler; }
 
-		if (GuiCmd::ColoredDragFloat3("Translation", translation, 0.01f)){
-		}
+		if(GuiCmd::ColoredDragFloat3("Translation",translation,0.01f)) {}
+
+		ImGui::TreePop();
 	}
 }
 
@@ -77,27 +77,21 @@ CalyxMath::Vector3 BaseTransform::GetWorldPosition() const {
 /* ========================================================================
 /* worldTransform class
 /* ===================================================================== */
-void WorldTransform::Update([[maybe_unused]]const CalyxMath::Matrix4x4& viewProjMatrix) {
+void WorldTransform::Update([[maybe_unused]] const CalyxMath::Matrix4x4& viewProjMatrix) {
 	CalyxMath::Matrix4x4 scaleMat = CalyxMath::MakeScaleMatrix(scale);
 
 	// どちらをソースとするかで処理を分ける
-	if (rotationSource == RotationSource::Euler) {
-		rotation = CalyxMath::Quaternion::EulerToQuaternion(eulerRotation);
-	} else if (rotationSource == RotationSource::Quaternion) {
-		eulerRotation = CalyxMath::Quaternion::ToEuler(rotation);
-	}
+	if(rotationSource == RotationSource::Euler) { rotation = CalyxMath::Quaternion::EulerToQuaternion(eulerRotation); } else if(rotationSource == RotationSource::Quaternion) { eulerRotation = CalyxMath::Quaternion::ToEuler(rotation); }
 
-	CalyxMath::Matrix4x4 rotateMat = CalyxMath::Quaternion::ToMatrix(rotation);
+	CalyxMath::Matrix4x4 rotateMat    = CalyxMath::Quaternion::ToMatrix(rotation);
 	CalyxMath::Matrix4x4 translateMat = CalyxMath::MakeTranslateMatrix(translation);
 
 	CalyxMath::Matrix4x4 localMat = scaleMat * rotateMat * translateMat;
 
-	if (parent) {
+	if(parent) {
 		parent->Update();
 		matrix.world = localMat * parent->matrix.world;
-	} else {
-		matrix.world = localMat;
-	}
+	} else { matrix.world = localMat; }
 
 	matrix.WorldInverseTranspose = CalyxMath::Matrix4x4::Transpose(CalyxMath::Matrix4x4::Inverse(matrix.world));
 
@@ -110,7 +104,7 @@ void WorldTransform::Update([[maybe_unused]]const CalyxMath::Matrix4x4& viewProj
 void WorldTransform::Update() {
 	CalyxMath::Matrix4x4 scaleMat = CalyxMath::MakeScaleMatrix(scale);
 
-	switch (rotationSource) {
+	switch(rotationSource) {
 	case RotationSource::Euler:
 		rotation = CalyxMath::Quaternion::EulerToQuaternion(eulerRotation);
 		break;
@@ -119,26 +113,22 @@ void WorldTransform::Update() {
 		break;
 	}
 
-	CalyxMath::Matrix4x4 rotateMat	   = CalyxMath::Quaternion::ToMatrix(rotation);
+	CalyxMath::Matrix4x4 rotateMat    = CalyxMath::Quaternion::ToMatrix(rotation);
 	CalyxMath::Matrix4x4 translateMat = CalyxMath::MakeTranslateMatrix(translation);
-	CalyxMath::Matrix4x4 localMat	   = scaleMat * rotateMat * translateMat;
+	CalyxMath::Matrix4x4 localMat     = scaleMat * rotateMat * translateMat;
 
-	if (parent) {
+	if(parent) {
 		parent->Update();
 
-		if (inheritScale) {
-			matrix.world = localMat * parent->matrix.world;
-		} else {
+		if(inheritScale) { matrix.world = localMat * parent->matrix.world; } else {
 			// 親スケールを無視（親の回転＋平行移動のみを手動合成）
-			CalyxMath::Matrix4x4 parentRotMat   = CalyxMath::Quaternion::ToMatrix(parent->rotation);
-			CalyxMath::Matrix4x4 parentTransMat = CalyxMath::MakeTranslateMatrix(parent->translation);
+			CalyxMath::Matrix4x4 parentRotMat     = CalyxMath::Quaternion::ToMatrix(parent->rotation);
+			CalyxMath::Matrix4x4 parentTransMat   = CalyxMath::MakeTranslateMatrix(parent->translation);
 			CalyxMath::Matrix4x4 parentNoScaleMat = parentRotMat * parentTransMat;
 
 			matrix.world = localMat * parentNoScaleMat;
 		}
-	} else {
-		matrix.world = localMat;
-	}
+	} else { matrix.world = localMat; }
 
 	matrix.WorldInverseTranspose = CalyxMath::Matrix4x4::Transpose(CalyxMath::Matrix4x4::Inverse(matrix.world));
 	TransferData(matrix);
@@ -147,8 +137,8 @@ void WorldTransform::Update() {
 
 CalyxMath::Vector3 WorldTransform::GetForward() const {
 	// ワールド行列のZ軸（前方向）
-	CalyxMath::Matrix4x4 mat = CalyxMath::MakeAffineMatrix(scale, rotation, translation);
-	CalyxMath::Vector3 forward = { mat.m[2][0], mat.m[2][1], mat.m[2][2] };
+	CalyxMath::Matrix4x4 mat     = CalyxMath::MakeAffineMatrix(scale,rotation,translation);
+	CalyxMath::Vector3   forward = {mat.m[2][0],mat.m[2][1],mat.m[2][2]};
 	return forward.Normalize();
 }
 
@@ -156,11 +146,11 @@ CalyxMath::Vector3 WorldTransform::GetForward() const {
 //	コンフィグ適用
 /////////////////////////////////////////////////////////////////////////////////////////
 void WorldTransform::ApplyConfig(const WorldTransformConfig& config) {
-	scale = config.scale;
+	scale       = config.scale;
 	translation = config.translation;
-	rotation = config.rotation;
+	rotation    = config.rotation;
 
-	eulerRotation = CalyxMath::Quaternion::ToEuler(rotation);
+	eulerRotation  = CalyxMath::Quaternion::ToEuler(rotation);
 	rotationSource = RotationSource::Quaternion;
 }
 
@@ -171,11 +161,7 @@ WorldTransformConfig WorldTransform::ExtractConfig() {
 	WorldTransformConfig config;
 	config.translation = translation;
 
-	if(rotationSource == RotationSource::Euler) {
-		config.rotation = CalyxMath::Quaternion::EulerToQuaternion(eulerRotation);
-	} else {
-		config.rotation = rotation;
-	}
+	if(rotationSource == RotationSource::Euler) { config.rotation = CalyxMath::Quaternion::EulerToQuaternion(eulerRotation); } else { config.rotation = rotation; }
 
 	config.scale = scale;
 	return config;
@@ -184,49 +170,59 @@ WorldTransformConfig WorldTransform::ExtractConfig() {
 CalyxMath::Matrix4x4 Transform2D::GetMatrix() const {
 	CalyxMath::Matrix4x4 matWorld =
 		MakeAffineMatrix(
-			{scale.x, scale.y, 1.0f},
-			{0, 0, rotate},
-			{translate.x, translate.y, 0.0f}
-		);
+			{scale.x,scale.y,1.0f},
+			{0,0,rotate},
+			{translate.x,translate.y,0.0f}
+			);
 
 	CalyxMath::Matrix4x4 matView = CalyxMath::Matrix4x4::MakeIdentity();
 	CalyxMath::Matrix4x4 matProj = MakeOrthographicMatrix(
-		0.0f, 0.0f,
-		kWindowWidth, kWindowHeight,
-		0.0f, 100.0f
-	);
+		0.0f,0.0f,
+		kWindowWidth,kWindowHeight,
+		0.0f,100.0f
+		);
 
-	return CalyxMath::Matrix4x4::Multiply(matWorld, CalyxMath::Matrix4x4::Multiply(matView, matProj));
+	return CalyxMath::Matrix4x4::Multiply(matWorld,CalyxMath::Matrix4x4::Multiply(matView,matProj));
 }
+
 /* ========================================================================
 /* Transform2D class
 /* ===================================================================== */
 void Transform2D::ShowImGui(const std::string& lavel) {
-	if (GuiCmd::CollapsingHeader(lavel.c_str())) {
-		GuiCmd::DragFloat2("scale", scale, 0.01f);
-		GuiCmd::DragFloat("rotation", rotate, 0.01f);
-		GuiCmd::DragFloat2("translate", translate, 0.01f);
+	std::string nodeLabel = lavel + "_tabbar";
+
+	if(ImGui::TreeNodeEx(nodeLabel.c_str(),ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
+		if(GuiCmd::DragFloat2("scale",scale,0.01f)) {}
+
+		if(GuiCmd::DragFloat("rotation",rotate,0.01f)) {}
+
+		if(GuiCmd::DragFloat2("translate",translate,0.01f)) {}
+
+		ImGui::TreePop();
 	}
 }
 
 Transform2DConfig Transform2D::ExtractConfig() const {
 	Transform2DConfig config;
-	config.scale = scale;
-	config.rotation = rotate;
+	config.scale       = scale;
+	config.rotation    = rotate;
 	config.translation = translate;
 	return config;
 }
 
-void Transform2D::ShowImGui(Transform2DConfig& config, const std::string& lavel) {
-	if (GuiCmd::CollapsingHeader(lavel.c_str())) {
-		GuiCmd::DragFloat2("scale", config.scale, 0.01f);
-		GuiCmd::DragFloat("rotation", config.rotation, 0.01f);
-		GuiCmd::DragFloat2("translate", config.translation, 0.01f);
+void Transform2D::ShowImGui(Transform2DConfig& config,const std::string& lavel) {
+	if(ImGui::TreeNodeEx(lavel.c_str(),ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
+		if(GuiCmd::DragFloat2("scale",config.scale,0.01f)) {}
+
+		if(GuiCmd::DragFloat("rotation",config.rotation,0.01f)) {}
+
+		if(GuiCmd::DragFloat2("translate",config.translation,0.01f)) {}
+		ImGui::TreePop();
 	}
 }
 
 void Transform2D::ApplyConfig(const Transform2DConfig& config) {
-	scale = config.scale;
-	rotate = config.rotation;
+	scale     = config.scale;
+	rotate    = config.rotation;
 	translate = config.translation;
 }
