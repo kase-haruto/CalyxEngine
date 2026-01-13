@@ -3,6 +3,7 @@
 #include "Engine/Foundation/Math/Vector2.h"
 #include "Engine/Foundation/Math/Vector4.h"
 #include "SerializableField.h"
+#include "SerializableFieldBuilder.h"
 
 #include <string>
 #include <type_traits>
@@ -31,35 +32,31 @@ namespace CalyxEngine {
 	public:
 		virtual ~SerializableObject() = default;
 
-		virtual ParamPath GetParamPath() const {return{ ParamDomain::Game,"Default"};}
+		virtual ParamPath GetParamPath() const { return {ParamDomain::Game,"Default"}; }
 
 		// --- 各オブジェクトから呼ぶAPI ---
 		bool SaveParams() const;
 		bool LoadParams();
 
-		void SaveAndLoadButtonGui();
+		void         SaveAndLoadButtonGui();
 
-		std::vector<SerializableField>& FieldsMutable() { return fields_; }
+		std::vector<SerializableField>&       FieldsMutable() { return fields_; }
 		const std::vector<SerializableField>& Fields() const { return fields_; }
+
+	private:
+		void ShowInspector();
 
 	protected:
 		SerializableObject() = default;
 
-		template<typename T>
-		void AddField(const std::string& key, T& value) {
-			static_assert(
-				std::is_same_v<T, int32_t> ||
-				std::is_same_v<T, float> ||
-				std::is_same_v<T, bool> ||
-				std::is_same_v<T, CalyxMath::Vector2> ||
-				std::is_same_v<T, CalyxMath::Vector3>||
-				std::is_same_v<T,CalyxMath::Vector4>,
-				"AddField: Unsupported type. Add it to ValuePtr and Read/WriteValue."
-			);
-			fields_.push_back(SerializableField{ key, &value });
+		template <typename T>
+		FieldBuilder AddField(const std::string& key,T& value) {
+			fields_.push_back(SerializableField{
+					key,
+					ValuePtr{&value}
+				});
+			return FieldBuilder(fields_.back());
 		}
-
-
 
 	private:
 		std::vector<SerializableField> fields_;

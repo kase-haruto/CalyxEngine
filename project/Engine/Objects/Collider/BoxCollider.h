@@ -29,6 +29,7 @@ public:
 	float		   GetColliderRadius() const override { return shape_.size.x * 0.5f; }
 	const CalyxMath::Vector3& GetSize() const { return shape_.size; }
 
+
 protected:
 	//===================================================================*/
 	//                   private methods

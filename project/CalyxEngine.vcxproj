@@ -175,7 +175,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Foundation\Clock\StateTimer.cpp" />
     <ClCompile Include="Engine\Foundation\Math\Matrix3x4.cpp" />
     <ClCompile Include="Engine\Foundation\Serialization\ParamStore.cpp" />
+    <ClCompile Include="Engine\Foundation\Serialization\SerializableFieldBuilder.cpp" />
     <ClCompile Include="Engine\Foundation\Serialization\SerializableObject.cpp" />
+    <ClCompile Include="Engine\Foundation\Serialization\SerializableUtil.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Animation\AnimationLoop.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Animation\SimpleAnimation.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Animation\SimpleAnimator.cpp" />
@@ -573,7 +575,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Foundation\Clock\StateTimer.h" />
     <ClInclude Include="Engine\Foundation\Math\Matrix3x4.h" />
     <ClInclude Include="Engine\Foundation\Serialization\SerializableField.h" />
+    <ClInclude Include="Engine\Foundation\Serialization\SerializableFieldBuilder.h" />
     <ClInclude Include="Engine\Foundation\Serialization\SerializableObject.h" />
+    <ClInclude Include="Engine\Foundation\Serialization\SerializableUtil.h" />
     <ClInclude Include="Engine\Foundation\Utility\Animation\AnimationLoop.h" />
     <ClInclude Include="Engine\Foundation\Utility\Animation\SimpleAnimation.h" />
     <ClInclude Include="Engine\Foundation\Utility\Animation\SimpleAnimator.h" />

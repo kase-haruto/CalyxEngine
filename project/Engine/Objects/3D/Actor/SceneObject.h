@@ -154,6 +154,6 @@ protected:
 	// =======================
 	// State Flags
 	// =======================
-	bool isEnableRaycast_ = true; // レイキャスト有効/無効
+	bool isEnableRaycast_ = false; // レイキャスト有効/無効
 	bool isDrawEnable_	  = true; // 描画有効/無効
 };
