@@ -61,6 +61,8 @@ namespace CalyxFoundation {
 		Input(const Input&)			   = delete;
 		Input& operator=(const Input&) = delete;
 
+		friend struct std::default_delete<Input>;
+
 	public:
 		static void Initialize();
 		static void Update();
@@ -101,7 +103,7 @@ namespace CalyxFoundation {
 		float NormalizeAxisInput(short value, short deadZone);
 
 	private:
-		static Input* instance_;
+		static std::unique_ptr<Input> instance_;
 
 		// DirectInputオブジェクト（キーボード・マウス用）
 		ComPtr<IDirectInput8> directInput_ = nullptr;

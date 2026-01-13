@@ -11,7 +11,7 @@
 // externals
 #include <externals/imgui/imgui.h>
 namespace CalyxFoundation {
-	Input* Input::instance_ = nullptr;
+	std::unique_ptr<Input> Input::instance_ = nullptr;
 
 	//-----------------------------------------------------------------------------
 
@@ -34,9 +34,9 @@ namespace CalyxFoundation {
 
 	Input* Input::GetInstance() {
 		if(!instance_) {
-			instance_ = new Input();
+			instance_ = std::unique_ptr<Input>(new Input());
 		}
-		return instance_;
+		return instance_.get();
 	}
 
 	//-----------------------------------------------------------------------------
@@ -64,8 +64,7 @@ namespace CalyxFoundation {
 	//-----------------------------------------------------------------------------
 
 	void Input::Finalize() {
-		delete instance_;
-		instance_ = nullptr;
+		instance_.reset();
 	}
 
 	//-----------------------------------------------------------------------------

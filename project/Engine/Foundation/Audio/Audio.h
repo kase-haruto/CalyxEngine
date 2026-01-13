@@ -64,10 +64,17 @@ struct FormatChunk {
 struct SoundData {
 	// 波形フォーマット
 	WAVEFORMATEX wfex{};
-	// バッファの先頭アドレス
-	BYTE* pBuffer = nullptr;
-	// バッファのサイズ
-	uint32_t bufferSize = 0;
+	// バッファ
+	std::vector<BYTE> buffer;
+};
+
+// SourceVoice用カスタムデリータ
+struct SourceVoiceDeleter {
+	void operator()(IXAudio2SourceVoice* voice) const {
+		if (voice) {
+			voice->DestroyVoice();
+		}
+	}
 };
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -82,6 +89,8 @@ private:
 	// コピー禁止
 	Audio(const Audio&)			 = delete;
 	void operator=(const Audio&) = delete;
+
+	friend struct std::default_delete<Audio>;
 
 public:
 	// デストラクタ
@@ -122,7 +131,7 @@ private:
 
 private:
 	// シングルトンインスタンス
-	static Audio* instance_;
+	static std::unique_ptr<Audio> instance_;
 
 	// XAudio2インターフェース
 	ComPtr<IXAudio2> xAudio2_;
@@ -132,7 +141,7 @@ private:
 	// ロード済み音声データ (filename -> SoundData)
 	std::unordered_map<std::string, SoundData> audios_;
 	// 再生中のソースボイス (filename -> SourceVoice)
-	std::unordered_map<std::string, IXAudio2SourceVoice*> sourceVoices_;
+	std::unordered_map<std::string, std::unique_ptr<IXAudio2SourceVoice, SourceVoiceDeleter>> sourceVoices_;
 	// 再生中かどうか (filename -> bool)
 	std::unordered_map<std::string, bool> isPlaying_;
 

@@ -4,7 +4,7 @@
 #include <iostream>   // デバッグ用などに
 
 // 静的メンバ変数の定義
-Audio* Audio::instance_ = nullptr;
+std::unique_ptr<Audio> Audio::instance_ = nullptr;
 const std::string Audio::directoryPath_ = "Resources/sounds/";
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -19,9 +19,9 @@ Audio::~Audio(){
 /////////////////////////////////////////////////////////////////////////////////////
 const Audio* Audio::GetInstance(){
 	if (!instance_){
-		instance_ = new Audio();
+		instance_ = std::unique_ptr<Audio>(new Audio());
 	}
-	return instance_;
+	return instance_.get();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -56,10 +56,7 @@ void Audio::StartUpLoad(){
 }
 
 void Audio::Finalize(){
-	if (instance_){
-		delete instance_;
-		instance_ = nullptr;
-	}
+	instance_.reset();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -88,14 +85,15 @@ void Audio::PlayAudio(
 
 	// 既にSourceVoiceがあれば解放
 	if (sourceVoices_[filename] != nullptr){
-		sourceVoices_[filename]->DestroyVoice();
-		sourceVoices_[filename] = nullptr;
+		sourceVoices_[filename].reset();
 	}
 
 	// ソースボイスの生成
+	IXAudio2SourceVoice* pSourceVoice = nullptr;
 	if (loop){
-		hr = xAudio2->CreateSourceVoice(&sourceVoices_[filename], &soundData.wfex);
+		hr = xAudio2->CreateSourceVoice(&pSourceVoice, &soundData.wfex);
 		assert(SUCCEEDED(hr));
+		sourceVoices_[filename] = std::unique_ptr<IXAudio2SourceVoice, SourceVoiceDeleter>(pSourceVoice);
 	} else{
 		// 同じfilenameがあった場合、連番をつける等の処理
 		int count = 0;
@@ -103,14 +101,15 @@ void Audio::PlayAudio(
 			count++;
 			tmpFilename = filename + std::to_string(count);
 		}
-		hr = xAudio2->CreateSourceVoice(&sourceVoices_[tmpFilename], &soundData.wfex);
+		hr = xAudio2->CreateSourceVoice(&pSourceVoice, &soundData.wfex);
 		assert(SUCCEEDED(hr));
+		sourceVoices_[tmpFilename] = std::unique_ptr<IXAudio2SourceVoice, SourceVoiceDeleter>(pSourceVoice);
 	}
 
 	// バッファ設定
 	XAUDIO2_BUFFER buf {};
-	buf.pAudioData = soundData.pBuffer;
-	buf.AudioBytes = soundData.bufferSize;
+	buf.pAudioData = soundData.buffer.data();
+	buf.AudioBytes = static_cast<UINT32>(soundData.buffer.size());
 	buf.Flags = XAUDIO2_END_OF_STREAM;
 	if (loop){
 		buf.LoopCount = XAUDIO2_LOOP_INFINITE;
@@ -163,8 +162,7 @@ void Audio::EndAudio(const std::string& filename){
 	assert(SUCCEEDED(hr));
 
 	// ボイス解放
-	instance_->sourceVoices_[filename]->DestroyVoice();
-	instance_->sourceVoices_[filename] = nullptr;
+	instance_->sourceVoices_[filename].reset();
 
 	// 再生フラグをおろす
 	instance_->isPlaying_[filename] = false;
@@ -305,8 +303,8 @@ SoundData Audio::LoadWave(const char* filename){
 	}
 
 	// データ部読み込み
-	char* pCbuffer = new char[data.size];
-	file.read(pCbuffer, data.size);
+	std::vector<BYTE> buffer(data.size);
+	file.read(reinterpret_cast<char*>(buffer.data()), data.size);
 
 	// 閉じる
 	file.close();
@@ -314,8 +312,7 @@ SoundData Audio::LoadWave(const char* filename){
 	// SoundDataへ格納
 	SoundData soundData {};
 	soundData.wfex = format.fmt;
-	soundData.pBuffer = reinterpret_cast< BYTE* >(pCbuffer);
-	soundData.bufferSize = data.size;
+	soundData.buffer = std::move(buffer);
 
 	return soundData;
 }
@@ -407,9 +404,7 @@ SoundData Audio::LoadMP3(const wchar_t* filename){
 
 	// SoundDataに格納
 	SoundData soundData;
-	soundData.pBuffer = new BYTE[audioData.size()];
-	std::copy(audioData.begin(), audioData.end(), soundData.pBuffer);
-	soundData.bufferSize = static_cast< uint32_t >(audioData.size());
+	soundData.buffer = std::move(audioData);
 
 	// フォーマット情報を取得
 	hr = pOutputType->GetUINT32(MF_MT_AUDIO_NUM_CHANNELS, ( UINT32* ) &soundData.wfex.nChannels);
@@ -439,14 +434,10 @@ void Audio::UnloadAudio(const std::string& filename){
 	// まだロードされていなければエラー
 	assert(instance_->audios_.find(filename) != instance_->audios_.end());
 
-	// SoundData破棄
-	instance_->UnloadAudio(&instance_->audios_[filename]);
+	// SoundData破棄 (vectorなので自動的に解放される)
 	instance_->audios_.erase(filename);
 
-	// SourceVoice破棄
-	if (instance_->sourceVoices_[filename]){
-		instance_->sourceVoices_[filename]->DestroyVoice();
-	}
+	// SourceVoice破棄 (unique_ptrなので自動的に解放される)
 	instance_->sourceVoices_.erase(filename);
 	instance_->isPlaying_.erase(filename);
 }
@@ -473,8 +464,6 @@ void Audio::UnloadAllAudio(){
 // UnloadAudio(内部実装)
 /////////////////////////////////////////////////////////////////////////////////////
 void Audio::UnloadAudio(SoundData* soundData){
-	delete[] soundData->pBuffer;
-	soundData->pBuffer = nullptr;
-	soundData->bufferSize = 0;
+	soundData->buffer.clear();
 	soundData->wfex = {};
 }

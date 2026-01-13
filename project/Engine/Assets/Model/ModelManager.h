@@ -32,6 +32,8 @@ public:
 	static void			 Initialize();
 	static void			 Finalize();
 
+	friend struct std::default_delete<ModelManager>;
+
 	/// <summary>
 	/// 非同期でモデルをロードする (ワーカースレッド1本で順番に処理)
 	/// </summary>
@@ -89,7 +91,7 @@ private:
 
 private:
 	// シングルトン
-	static ModelManager*	 instance_;
+	static std::unique_ptr<ModelManager> instance_;
 	static const std::string directoryPath_;
 
 	// ------------------------------------------------------

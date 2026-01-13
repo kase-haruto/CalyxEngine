@@ -6,7 +6,7 @@
 #include <Engine/Graphics/Pipeline/PipelineDesc/Input/VertexLayout.h>
 
 // static 変数初期化
-ModelManager* ModelManager::instance_ = nullptr;
+std::unique_ptr<ModelManager> ModelManager::instance_ = nullptr;
 const std::string ModelManager::directoryPath_ = "Resources/models";
 
 ModelManager::ModelManager() {
@@ -29,9 +29,9 @@ ModelManager::~ModelManager() {
 
 ModelManager* ModelManager::GetInstance() {
 	if (!instance_) {
-		instance_ = new ModelManager();
+		instance_ = std::unique_ptr<ModelManager>(new ModelManager());
 	}
-	return instance_;
+	return instance_.get();
 }
 
 void ModelManager::Initialize() {
@@ -39,10 +39,7 @@ void ModelManager::Initialize() {
 }
 
 void ModelManager::Finalize() {
-	if (instance_) {
-		delete instance_;
-		instance_ = nullptr;
-	}
+	instance_.reset();
 }
 
 //----------------------------------------------------------------------------
