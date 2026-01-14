@@ -199,31 +199,29 @@ namespace CalyxFoundation {
 		float NormalizeAxisInput(short value, short deadZone);
 
 	private:
-		static std::unique_ptr<Input> instance_;
+		//===================================================================*/
+		//                    private member variables
+		//===================================================================*/
+		static std::unique_ptr<Input> instance_; //< インスタンス
 
-		// DirectInputオブジェクト（キーボード・マウス用）
-		ComPtr<IDirectInput8> directInput_ = nullptr;
+		ComPtr<IDirectInput8> directInput_ = nullptr; //< DirectInputインスタンス
+		ComPtr<IDirectInputDevice8> keyboard_ = nullptr; //< キーボードデバイス
+		std::array<BYTE, 256> key_ = {}; //< 現在のキー状態
+		std::array<BYTE, 256> keyPre_ = {}; //< 前回のキー状態
 
-		// キーボード
-		ComPtr<IDirectInputDevice8> keyboard_ = nullptr;
-		std::array<BYTE, 256>		key_{};
-		std::array<BYTE, 256>		keyPre_{};
+		ComPtr<IDirectInputDevice8> mouse_ = nullptr; //< マウスデバイス
+		DIMOUSESTATE mouseState_ = {}; //< 現在のマウス状態
+		DIMOUSESTATE mouseStatePre_ = {}; //< 前回のマウス状態
+		CalyxMath::Vector2 mousePos_ = {}; //< マウス座標
+		float mouseWheel_ = 0.0f; //< マウスホイール回転量
 
-		// マウス
-		ComPtr<IDirectInputDevice8> mouse_ = nullptr;
-		DIMOUSESTATE				mouseState_{};
-		DIMOUSESTATE				mouseStatePre_{};
-		CalyxMath::Vector2			mousePos_{};
-		float						mouseWheel_ = 0.0f;
-
-		// ゲームパッド（XInput）
-		XINPUT_GAMEPAD gamepadState_{};
-		XINPUT_GAMEPAD gamepadStatePre_{};
-		float		   leftThumbX_	 = 0.0f;
-		float		   leftThumbY_	 = 0.0f;
-		float		   rightThumbX_	 = 0.0f;
-		float		   rightThumbY_	 = 0.0f;
-		float		   leftTrigger_	 = 0.0f;
-		float		   rightTrigger_ = 0.0f;
+		XINPUT_GAMEPAD gamepadState_ = {}; //< 現在のゲームパッド状態
+		XINPUT_GAMEPAD gamepadStatePre_ = {}; //< 前回のゲームパッド状態
+		float leftThumbX_ = 0.0f; //< 左スティックX
+		float leftThumbY_ = 0.0f; //< 左スティックY
+		float rightThumbX_ = 0.0f; //< 右スティックX
+		float rightThumbY_ = 0.0f; //< 右スティックY
+		float leftTrigger_ = 0.0f; //< 左トリガー
+		float rightTrigger_ = 0.0f; //< 右トリガー
 	};
 } // namespace CalyxFoundation

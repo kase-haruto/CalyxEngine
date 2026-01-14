@@ -3,37 +3,72 @@
 #include <cstdint>
 #include <string>
 
+/*-----------------------------------------------------------------------------------------
+ * WinApp
+ * - Windowsアプリケーション管理クラス
+ * - ウィンドウの生成、メッセージループの管理、フルスクリーン切り替えなどを担当
+ *---------------------------------------------------------------------------------------*/
 class WinApp{
 public:
-	// ウィンドウプロシージャ
+	/**
+	 * \brief ウィンドウプロシージャ
+	 * \param hwnd ウィンドウハンドル
+	 * \param msg メッセージ
+	 * \param wparam パラメータ
+	 * \param lparam パラメータ
+	 * \return 処理結果
+	 */
 	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
-	// コンストラクタ
+	/**
+	 * \brief コンストラクタ
+	 * \param wWidth ウィンドウ幅
+	 * \param wHeight ウィンドウ高さ
+	 * \param windowName ウィンドウタイトル
+	 */
 	WinApp(const int wWidth, const int wHeight, const std::string windowName);
-	// デストラクタ
+
+	/**
+	 * \brief デストラクタ
+	 */
 	~WinApp();
-	// ウィンドウを作成
+
+	/**
+	 * \brief ウィンドウを作成
+	 */
 	void CreateWnd();
-	// ウィンドウハンドルを取得
+
+	/**
+	 * \brief ウィンドウハンドルを取得
+	 * \return ウィンドウハンドル
+	 */
 	HWND GetHWND() const{ return hwnd; }
-	// ゲームウィンドウの破棄
+
+	/**
+	 * \brief ゲームウィンドウの破棄
+	 */
 	void TerminateGameWindow();
-	// メッセージ処理
+
+	/**
+	 * \brief メッセージ処理
+	 * \return アプリケーションを終了するか
+	 */
 	bool ProcessMessage();
-	// フルスクリーン切り替え
+
+	/**
+	 * \brief フルスクリーン切り替え
+	 * \param enable 有効にするか
+	 */
 	void SetBorderlessFullscreen(bool enable);
 
 private:
-	// ウィンドウの情報
-	WNDCLASSEX wc {};
-	// ウィンドウのサイズ
-	RECT wrc = {};
-	// ウィンドウのハンドル
-	HWND hwnd {};
-	// ウィンドウタイトル
-	std::string windowName_;
-	// フルスクリーン状態
-	bool isFullScreen = true;
-	// ウィンドウの元の位置とサイズ
-	WINDOWPLACEMENT windowPlacement = {sizeof(WINDOWPLACEMENT)};
+	//===================================================================*/
+	//                    private member variables
+	//===================================================================*/
+	WNDCLASSEX wc {}; //< ウィンドウクラス情報
+	RECT wrc = {}; //< ウィンドウサイズ情報
+	HWND hwnd {}; //< ウィンドウハンドル
+	std::string windowName_; //< ウィンドウタイトル
+	bool isFullScreen = true; //< フルスクリーンフラグ
+	WINDOWPLACEMENT windowPlacement = {sizeof(WINDOWPLACEMENT)}; //< ウィンドウの元の位置とサイズ
 };

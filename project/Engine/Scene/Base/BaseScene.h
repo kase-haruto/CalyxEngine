@@ -120,19 +120,18 @@ public:
 	}
 protected:
 	//===================================================================*/
-	//			protected methods
+	//			protected member variables
 	//===================================================================*/
-	SceneContext* sceneContext_ = nullptr;
-	std::shared_ptr<SkyBox> skyBox_ = nullptr;
-	std::string sceneName_ = "Scene";
+	SceneContext* sceneContext_ = nullptr; //< シーンコンテキスト
+	std::shared_ptr<SkyBox> skyBox_ = nullptr; //< スカイボックス
+	std::string sceneName_ = "Scene"; //< シーン名
 
 	//===================================================================*/
 	//			renderers
 	//===================================================================*/
-	std::unique_ptr<SpriteRenderer> spriteRenderer_ = nullptr;
-	std::unique_ptr<ModelRenderer> modelRenderer_ = nullptr;
-	std::unique_ptr<CalyxGraphics::ShadowMapSystem> shadowMapSystem_ = nullptr;
+	std::unique_ptr<SpriteRenderer> spriteRenderer_ = nullptr; //< スプライトレンダラ
+	std::unique_ptr<ModelRenderer> modelRenderer_ = nullptr; //< モデルレンダラ
+	std::unique_ptr<CalyxGraphics::ShadowMapSystem> shadowMapSystem_ = nullptr; //< シャドウマップシステム
 
-protected:
-	CalyxScene::ISceneTransitionRequestor* transitionRequestor_ = nullptr;
+	CalyxScene::ISceneTransitionRequestor* transitionRequestor_ = nullptr; //< 遷移リクエスタ
 };

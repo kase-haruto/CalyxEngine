@@ -52,6 +52,9 @@ public:
 private:
 	void CustomizeImGuiStyle();
 private:
-	const CalyxGraphics::DxCore* pDxCore_ = nullptr;
+	//===================================================================*/
+	//                    private member variables
+	//===================================================================*/
+	const CalyxGraphics::DxCore* pDxCore_ = nullptr; //< DirectXコアへのポインタ
 };
 

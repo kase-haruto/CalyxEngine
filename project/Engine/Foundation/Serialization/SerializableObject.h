@@ -17,8 +17,8 @@ namespace CalyxEngine {
 	};
 
 	struct ParamPath {
-		ParamDomain domain;
-		std::string name;
+		ParamDomain domain; //< パラメータのドメイン
+		std::string name; //< パラメータ名
 	};
 
 	/*-----------------------------------------------------------------------------------------
@@ -95,7 +95,10 @@ namespace CalyxEngine {
 
 
 	private:
-		std::vector<SerializableField> fields_;
+		//===================================================================*/
+		//                    private member variables
+		//===================================================================*/
+		std::vector<SerializableField> fields_; //< フィールドリスト
 	};
 
 } // namespace CalyxEngine

@@ -112,43 +112,34 @@ private:
 	CalyxMath::Quaternion Evaluate(const AnimationCurve<CalyxMath::Quaternion>& curve, float time);
 
 private:
-	// シングルトン
-	static std::unique_ptr<ModelManager> instance_;
-	static const std::string directoryPath_;
+	//===================================================================*/
+	//                    private member variables
+	//===================================================================*/
+	static std::unique_ptr<ModelManager> instance_; //< シングルトンインスタンス
+	static const std::string directoryPath_; //< モデルディレクトリパス
 
-	// ------------------------------------------------------
-	// モデルデータマップ (ファイル名 -> ModelData)
-	// ------------------------------------------------------
-	std::unordered_map<std::string, ModelData> modelDatas_;
-	mutable std::mutex						   modelDataMutex_;
+	std::unordered_map<std::string, ModelData> modelDatas_; //< モデルデータマップ
+	mutable std::mutex						   modelDataMutex_; //< モデルデータ用ミューテックス
 
-	// ------------------------------------------------------
-	// ワーカースレッド (1本)
-	// ------------------------------------------------------
-	std::thread				workerThread_;
-	bool					stopWorker_ = false;
-	std::mutex				taskQueueMutex_;
-	std::condition_variable taskQueueCv_;
+	std::thread				workerThread_; //< ワーカースレッド
+	bool					stopWorker_ = false; //< スレッド停止フラグ
+	std::mutex				taskQueueMutex_; //< タスクキュー用ミューテックス
+	std::condition_variable taskQueueCv_; //< タスクキュー用条件変数
 
-	// ロードリクエスト
 	struct LoadRequest {
-		std::string				fileName;
-		std::promise<ModelData> promise;
+		std::string				fileName; //< ファイル名
+		std::promise<ModelData> promise; //< プロミス
 	};
-	std::queue<LoadRequest> requestQueue_; // リクエスト待ち行列
+	std::queue<LoadRequest> requestQueue_; //< リクエスト待ち行列
 
-	// ------------------------------------------------------
-	// CPUロード完了後のタスク (GPUリソース化待ち)
-	// ------------------------------------------------------
 	struct LoadingTask {
-		std::string fileName;
-		ModelData	modelData;
+		std::string fileName; //< ファイル名
+		ModelData	modelData; //< モデルデータ
 	};
-	std::vector<LoadingTask> pendingTasks_;
-	std::mutex				 pendingTasksMutex_;
+	std::vector<LoadingTask> pendingTasks_; //< GPUリソース化待ちタスク
+	std::mutex				 pendingTasksMutex_; //< 待ちタスク用ミューテックス
 
-	// ロード完了コールバック
-	std::function<void(const std::string&)> onModelLoadedCallback_;
+	std::function<void(const std::string&)> onModelLoadedCallback_; //< ロード完了コールバック
 
 	// ------------------------------------------------------
 	// ワーカースレッド本体処理

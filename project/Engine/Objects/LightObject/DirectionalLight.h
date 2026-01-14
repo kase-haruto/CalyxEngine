@@ -21,40 +21,76 @@
 #include <wrl.h>
 
 struct DirectionalLightData {
-	CalyxMath::Vector4 color;	  // ライトの色
-	CalyxMath::Vector3 direction; // ライトの向き
-	float			   intensity; // 輝度
+	CalyxMath::Vector4 color; //< ライトの色
+	CalyxMath::Vector3 direction; //< ライトの向き
+	float intensity; //< 輝度
 };
 
 namespace CalyxGraphics {
 	class DxCore;
 }
 
-/* ========================================================================
-/*		方向性ライト
-/* ===================================================================== */
+/*-----------------------------------------------------------------------------------------
+ * DirectionalLight
+ * - 方向性ライトクラス
+ * - 平行光源の色、向き、輝度の管理、およびシャドウマップ用の行列計算を担当
+ *---------------------------------------------------------------------------------------*/
 class DirectionalLight
 	: public SceneObject,
 	  public IConfigurable {
 public:
+	//===================================================================*/
+	//                   public methods
+	//===================================================================*/
+	/**
+	 * \brief コンストラクタ
+	 * \param name オブジェクト名
+	 */
 	DirectionalLight(const std::string& name);
+
+	/**
+	 * \brief コンストラクタ
+	 */
 	DirectionalLight();
+
+	/**
+	 * \brief デストラクタ
+	 */
 	~DirectionalLight();
 
+	/**
+	 * \brief 更新処理
+	 * \param dt デルタタイム
+	 */
 	void Update(float dt) override;
+
+	/**
+	 * \brief ImGui表示
+	 */
 	void ShowGui() override;
+
+	/**
+	 * \brief デバッグ描画
+	 */
 	void DrawDebug();
+
+	/**
+	 * \brief 常時更新処理
+	 * \param dt デルタタイム
+	 */
 	void AlwaysUpdate(float dt);
 
 	/**
 	 * \brief GPUにデータをアップロード
 	 */
 	void UploadToGpu();
+
 	/**
 	 * \brief ライトのビュー・プロジェクション行列を更新
 	 * \param sceneBounds シーンのAABB
 	 */
 	void UpdateLightVP(const AABB& sceneBounds);
+
 	/**
 	 * \brief コマンドリストにセット
 	 * \param commandList コマンドリスト
@@ -62,23 +98,58 @@ public:
 	 */
 	void SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList, PipelineType type);
 
-	// config ============================================================
+	//===================================================================*/
+	//                   config
+	//===================================================================*/
+	/**
+	 * \brief コンフィグを適用
+	 */
 	void ApplyConfig();
+
+	/**
+	 * \brief コンフィグを抽出
+	 */
 	void ExtractConfig();
+
+	/**
+	 * \brief JSONからコンフィグを適用
+	 * \param j JSON
+	 */
 	void ApplyConfigFromJson(const nlohmann::json& j) override;
+
+	/**
+	 * \brief コンフィグをJSONに抽出
+	 * \param j JSON
+	 */
 	void ExtractConfigToJson(nlohmann::json& j) const override;
 
+	/**
+	 * \brief タイプ名を取得
+	 * \return タイプ名
+	 */
 	std::string_view GetTypeName() const override { return "DirectionalLight"; }
+
+	/**
+	 * \brief オブジェクトタイプ名を取得
+	 * \return オブジェクトタイプ名
+	 */
 	std::string		 GetObjectTypeName() const override { return name_; }
+
+	/**
+	 * \brief ライトのビュープロジェクション行列を取得
+	 * \return 行列
+	 */
 	const CalyxMath::Matrix4x4& GetLightVP() const { return lightViewProj_; }
-private:
-	DxConstantBuffer<DirectionalLightData> constantBuffer_;
-	DirectionalLightData				   lightData_ = {}; // ライトデータ
-
-	std::shared_ptr<BaseGameObject> UiObject_ = nullptr;
-	CalyxMath::Matrix4x4 lightViewProj_;
-	
 
 private:
-	ConfigurableObject<DirectionalLightConfig> config_;
+	//===================================================================*/
+	//                    private member variables
+	//===================================================================*/
+	DxConstantBuffer<DirectionalLightData> constantBuffer_; //< 定数バッファ
+	DirectionalLightData lightData_ = {}; //< ライトデータ本体
+
+	std::shared_ptr<BaseGameObject> UiObject_ = nullptr; //< UI用オブジェクト
+	CalyxMath::Matrix4x4 lightViewProj_; //< ライト用ビュープロジェクション行列
+
+	ConfigurableObject<DirectionalLightConfig> config_; //< コンフィグ管理
 };

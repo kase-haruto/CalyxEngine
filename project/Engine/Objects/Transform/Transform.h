@@ -21,8 +21,8 @@ enum class RotationSource {
 };
 
 struct TransformationMatrix{
-	CalyxMath::Matrix4x4 world= CalyxMath::Matrix4x4::MakeIdentity();
-	CalyxMath::Matrix4x4 WorldInverseTranspose= CalyxMath::Matrix4x4::MakeIdentity();
+	CalyxMath::Matrix4x4 world = CalyxMath::Matrix4x4::MakeIdentity(); //< ワールド行列
+	CalyxMath::Matrix4x4 WorldInverseTranspose = CalyxMath::Matrix4x4::MakeIdentity(); //< ワールド逆転置行列
 };
 
 /*-----------------------------------------------------------------------------------------
@@ -30,9 +30,9 @@ struct TransformationMatrix{
  * - オイラー角ベースのトランスフォーム構造体
  *---------------------------------------------------------------------------------------*/
 struct EulerTransform{
-	CalyxMath::Vector3 scale;
-	CalyxMath::Vector3 rotate;
-	CalyxMath::Vector3 translate;
+	CalyxMath::Vector3 scale; //< スケール
+	CalyxMath::Vector3 rotate; //< 回転(オイラー角)
+	CalyxMath::Vector3 translate; //< 座標
 
 	/**
 	 * \brief 初期化
@@ -55,9 +55,9 @@ struct EulerTransform{
  * - 2D空間のトランスフォーム構造体
  *---------------------------------------------------------------------------------------*/
 struct Transform2D{
-	CalyxMath::Vector2 scale;
-	float rotate;
-	CalyxMath::Vector2 translate;
+	CalyxMath::Vector2 scale; //< スケール
+	float rotate; //< 回転
+	CalyxMath::Vector2 translate; //< 座標
 	
 	/**
 	 * \brief 初期化
@@ -96,9 +96,9 @@ struct Transform2D{
 };
 
 struct QuaternionTransform{
-	CalyxMath::Vector3 scale;
-	CalyxMath::Quaternion rotate;
-	CalyxMath::Vector3 translate;
+	CalyxMath::Vector3 scale; //< スケール
+	CalyxMath::Quaternion rotate; //< 回転(クォータニオン)
+	CalyxMath::Vector3 translate; //< 座標
 };
 
 /*-----------------------------------------------------------------------------------------
@@ -163,16 +163,16 @@ public:
 	//========================================================================*/
 	//	public variables
 	//========================================================================*/
-	CalyxMath::Vector3 scale;
-	CalyxMath::Quaternion rotation;
-	CalyxMath::Vector3 translation;
+	CalyxMath::Vector3 scale; //< スケール
+	CalyxMath::Quaternion rotation; //< 回転(クォータニオン)
+	CalyxMath::Vector3 translation; //< 座標
 
-	CalyxMath::Vector3 eulerRotation;
+	CalyxMath::Vector3 eulerRotation; //< 回転(オイラー角)
 
-	TransformationMatrix matrix;
-	BaseTransform* parent = nullptr;
+	TransformationMatrix matrix; //< 行列データ
+	BaseTransform* parent = nullptr; //< 親トランスフォーム
 
-	RotationSource rotationSource = RotationSource::Quaternion;
+	RotationSource rotationSource = RotationSource::Quaternion; //< 回転ソース
 
 };
 
@@ -222,7 +222,7 @@ public:
 	 */
 	WorldTransformConfig ExtractConfig();
 public:
-	bool inheritScale = true;//< 親のスケールを継承するか
+	bool inheritScale = true; //< 親のスケールを継承するか
 };
 
 //============================================================================*/

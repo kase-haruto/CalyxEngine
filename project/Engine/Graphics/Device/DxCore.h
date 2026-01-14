@@ -17,10 +17,11 @@ using Microsoft::WRL::ComPtr;
 
 namespace CalyxGraphics {
 
-	/*----------------------------------------------------------------
-	 *	Dx Core
-	 *	- DirectX12のコア機能をまとめたクラス
-	 *---------------------------------------------------------------*/
+	/*-----------------------------------------------------------------------------------------
+	 * DxCore
+	 * - DirectX12のコア機能をまとめたクラス
+	 * - デバイス、コマンドリスト、スワップチェーンなどのライフサイクル管理を担当
+	 *---------------------------------------------------------------------------------------*/
 	class DxCore {
 	public:
 		//===================================================================*/
@@ -29,20 +30,39 @@ namespace CalyxGraphics {
 		DxCore() = default;
 		~DxCore();
 
-		// 初期化
+		/**
+		 * \brief 初期化
+		 * \param winApp ウィンドウアプリケーション
+		 * \param width 画面幅
+		 * \param height 画面高さ
+		 */
 		void Initialize(WinApp* winApp,uint32_t width,uint32_t height);
 
-		/// <summary>
-		/// レンダラ初期化
-		/// </summary>
-		/// <param name="width"></param>
-		/// <param name="height"></param>
+		/**
+		 * \brief レンダラ初期化
+		 * \param width 画面幅
+		 * \param height 画面高さ
+		 */
 		void RendererInitialize(uint32_t width,uint32_t height);
 
-		// 描画処理
+		/**
+		 * \brief 描画前処理
+		 */
 		void PreDraw();
+
+		/**
+		 * \brief オフロード用描画前処理
+		 */
 		void PreDrawOffscreen();
+
+		/**
+		 * \brief 描画後処理
+		 */
 		void PostDraw();
+
+		/**
+		 * \brief エンジンUIの描画
+		 */
 		void RenderEngineUI();
 
 	private:
@@ -50,41 +70,64 @@ namespace CalyxGraphics {
 		//		private methods
 		//===================================================================*/
 
-		// リソース解放
+		/**
+		 * \brief リソース解放
+		 */
 		void ReleaseResources();
 
 	public:
 		//===================================================================*/
 		//		accessor
 		//===================================================================*/
+		/**
+		 * \brief デバイスを取得
+		 * \return デバイス
+		 */
 		const ComPtr<ID3D12Device>&              GetDevice() const { return dxDevice_->GetDevice(); }
+		/**
+		 * \brief ID3D12Device5インターフェースを取得
+		 * \return デバイス5
+		 */
 		ID3D12Device5*                           GetDevice5()const { return dxDevice_->GetDevice5(); }
+		/**
+		 * \brief グラフィックスコマンドリストを取得
+		 * \return コマンドリスト
+		 */
 		const ComPtr<ID3D12GraphicsCommandList>& GetCommandList() const { return dxCommand_->GetCommandList(); }
+		/**
+		 * \brief スワップチェーンを取得
+		 * \return スワップチェーン
+		 */
 		const DxSwapChain&                       GetSwapChain() const { return *dxSwapChain_; }
+		/**
+		 * \brief レンダリングターゲットコレクションを取得
+		 * \return レンダリングターゲットコレクション
+		 */
 		const RenderTargetCollection&            GetRenderTargetCollection() const { return *renderTargetCollection_; }
-		// メソッド追加
+		/**
+		 * \brief 画面フォーマットを取得
+		 * \return フォーマット
+		 */
 		DXGI_FORMAT GetFormat() const { return format_; }
 
 	private:
 		//===================================================================*/
-		//		private methods
+		//		private member variables
 		//===================================================================*/
+		WinApp*  winApp_       = nullptr; //< ウィンドウアプリケーション
+		uint32_t clientWidth_  = 0; //< クライアント領域の幅
+		uint32_t clientHeight_ = 0; //< クライアント領域の高さ
 
-		WinApp*  winApp_       = nullptr;
-		uint32_t clientWidth_  = 0;
-		uint32_t clientHeight_ = 0;
+		std::unique_ptr<DxDevice>    dxDevice_; //< DirectXデバイス
+		std::unique_ptr<DxCommand>   dxCommand_; //< コマンド管理
+		std::unique_ptr<DxSwapChain> dxSwapChain_; //< スワップチェーン
 
-		// DirectX関連
-		std::unique_ptr<DxDevice>    dxDevice_;
-		std::unique_ptr<DxCommand>   dxCommand_;
-		std::unique_ptr<DxSwapChain> dxSwapChain_;
-
-		ComPtr<ID3D12DescriptorHeap>            rtvHeap_;
-		ComPtr<ID3D12DescriptorHeap>            dsvHeap_;
-		UINT                                    rtvDescriptorSize_ = 0;
-		DXGI_FORMAT                             format_            = DXGI_FORMAT_R8G8B8A8_UNORM; // 仮の初期値
-		std::unique_ptr<RenderTargetCollection> renderTargetCollection_;
-		std::unique_ptr<DxFence>                dxFence_;
+		ComPtr<ID3D12DescriptorHeap>            rtvHeap_; //< RTV用デスクリプタヒープ
+		ComPtr<ID3D12DescriptorHeap>            dsvHeap_; //< DSV用デスクリプタヒープ
+		UINT                                    rtvDescriptorSize_ = 0; //< RTVデスクリプタサイズ
+		DXGI_FORMAT                             format_            = DXGI_FORMAT_R8G8B8A8_UNORM; //< バックバッファフォーマット
+		std::unique_ptr<RenderTargetCollection> renderTargetCollection_; //< レンダリングターゲット管理
+		std::unique_ptr<DxFence>                dxFence_; //< フェンス管理
 	};
 
 } // namespace CalyxGraphics

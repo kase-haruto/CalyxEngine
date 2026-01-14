@@ -19,62 +19,124 @@
 #include <wrl.h>
 
 struct PointLightData{
-	CalyxMath::Vector4 color;		//ライトの色
-	CalyxMath::Vector3 position;	//ライトの位置
-	float intensity;	//光度
-	float radius;		//ライトの届く最大距離
-	float decay;		//減衰率
-	float pad[2];
+	CalyxMath::Vector4 color; //< ライトの色
+	CalyxMath::Vector3 position; //< ライトの位置
+	float intensity; //< 光度
+	float radius; //< ライトの届く最大距離
+	float decay; //< 減衰率
+	float pad[2]; //< パディング
 };
 
 namespace CalyxGraphics {
 	class DxCore;
 }
 
-
-
-/* ========================================================================
-/*		ポイントライト
-/* ===================================================================== */
+/*-----------------------------------------------------------------------------------------
+ * PointLight
+ * - ポイントライト（点光源）クラス
+ * - 指定座標を中心に全方位へ光を放つ光源のパラメータ管理を担当
+ *---------------------------------------------------------------------------------------*/
 class PointLight
 	: public SceneObject,
 	public IConfigurable{
 public:
+	//===================================================================*/
+	//                   public methods
+	//===================================================================*/
+	/**
+	 * \brief コンストラクタ
+	 * \param name オブジェクト名
+	 */
 	PointLight(const std::string& name);
+
+	/**
+	 * \brief コンストラクタ
+	 */
 	PointLight();
+
+	/**
+	 * \brief デストラクタ
+	 */
 	~PointLight();
 
+	/**
+	 * \brief 初期化
+	 */
 	void Initialize();
+
+	/**
+	 * \brief 更新処理
+	 * \param dt デルタタイム
+	 */
 	void Update(float dt)override;
+
+	/**
+	 * \brief 常時更新処理
+	 * \param dt デルタタイム
+	 */
 	void AlwaysUpdate(float dt)override;
+
+	/**
+	 * \brief ImGui表示
+	 */
 	void ShowGui()override;
 
-	/// <summary>
-	/// gpu転送
-	/// </summary>
+	/**
+	 * \brief GPUにデータをアップロード
+	 */
 	void UploadToGpu();
 
-	/// <summary>
-	/// コマンドを積む
-	/// </summary>
-	/// <param name="commandList"></param>
-	/// <param name="type"></param>
+	/**
+	 * \brief コマンドリストにセット
+	 * \param commandList コマンドリスト
+	 * \param type パイプラインタイプ
+	 */
 	void SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList, PipelineType type);
+
+	/**
+	 * \brief タイプ名を取得
+	 * \return タイプ名
+	 */
 	std::string_view GetTypeName() const override{ return "PointLight"; }
+
+	/**
+	 * \brief オブジェクトタイプ名を取得
+	 * \return オブジェクトタイプ名
+	 */
 	std::string GetObjectTypeName()const override{ return name_; }
 
-	// config ============================================================
+	//===================================================================*/
+	//                   config
+	//===================================================================*/
+	/**
+	 * \brief コンフィグを適用
+	 */
 	void ApplyConfig();
+
+	/**
+	 * \brief コンフィグを抽出
+	 */
 	void ExtractConfig();
+
+	/**
+	 * \brief JSONからコンフィグを適用
+	 * \param j JSON
+	 */
 	void ApplyConfigFromJson(const nlohmann::json& j) override;
+
+	/**
+	 * \brief コンフィグをJSONに抽出
+	 * \param j JSON
+	 */
 	void ExtractConfigToJson(nlohmann::json& j) const override;
 
-
 private:
-	DxConstantBuffer<PointLightData> constantBuffer_;
-	PointLightData lightData_ = {}; // ライトデータ
+	//===================================================================*/
+	//                    private member variables
+	//===================================================================*/
+	DxConstantBuffer<PointLightData> constantBuffer_; //< 定数バッファ
+	PointLightData lightData_ = {}; //< ライトデータ本体
 
-private:
-	ConfigurableObject<PointLightConfig> config_;
+	ConfigurableObject<PointLightConfig> config_; //< コンフィグ管理
 };
 

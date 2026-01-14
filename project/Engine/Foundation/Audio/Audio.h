@@ -189,22 +189,17 @@ private:
 	void UnloadAudio(SoundData* soundData);
 
 private:
-	// シングルトンインスタンス
-	static std::unique_ptr<Audio> instance_;
+	//===================================================================*/
+	//                    private member variables
+	//===================================================================*/
+	static std::unique_ptr<Audio> instance_; //< シングルトンインスタンス
 
-	// XAudio2インターフェース
-	ComPtr<IXAudio2> xAudio2_;
-	// マスターボイス
-	IXAudio2MasteringVoice* masteringVoice_ = nullptr;
+	ComPtr<IXAudio2> xAudio2_; //< XAudio2インターフェース
+	IXAudio2MasteringVoice* masteringVoice_ = nullptr; //< マスターボイス
 
-	// ロード済み音声データ (filename -> SoundData)
-	std::unordered_map<std::string, SoundData> audios_;
-	// 再生中のソースボイス (filename -> SourceVoice)
-	std::unordered_map<std::string, std::unique_ptr<IXAudio2SourceVoice, SourceVoiceDeleter>> sourceVoices_;
-	// 再生中かどうか (filename -> bool)
-	std::unordered_map<std::string, bool> isPlaying_;
+	std::unordered_map<std::string, SoundData> audios_; //< ロード済み音声データ
+	std::unordered_map<std::string, std::unique_ptr<IXAudio2SourceVoice, SourceVoiceDeleter>> sourceVoices_; //< 再生中のソースボイス
+	std::unordered_map<std::string, bool> isPlaying_; //< 再生中フラグ
 
-private:
-	// 音声ファイルディレクトリパス
-	static const std::string directoryPath_;
+	static const std::string directoryPath_; //< 音声ファイルディレクトリパス
 };

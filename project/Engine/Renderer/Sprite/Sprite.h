@@ -265,54 +265,37 @@ private:
 
 private:
 	//===================================================================*/
-	//                    private methods
+	//                    private member variables
 	//===================================================================*/
-	EulerTransform transform_{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}};
-	EulerTransform uvTransform{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}};
-	// 座標
-	CalyxMath::Vector2 position{0.0f, 0.0f};
-	// 回転
-	float rotate = 0.0f;
-	// 色
-	CalyxMath::Vector4 color = {1.0f, 1.0f, 1.0f, 1.0f};
-	// size
-	CalyxMath::Vector2 size = {640.0f, 360.0f};
-	// アンカーポイント
-	CalyxMath::Vector2 anchorPoint = {0.0f, 0.0f};
-	// テクスチャ左上座標
-	CalyxMath::Vector2 textureLeftTop = {0.0f, 0.0f};
-	// テクスチャ切り出しサイズ
-	CalyxMath::Vector2 textureSize = {100.0f, 100.0f};
+	EulerTransform transform_{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}; //< 変形情報
+	EulerTransform uvTransform{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}; //< UV変形情報
+	CalyxMath::Vector2 position{0.0f, 0.0f}; //< 座標
+	float rotate = 0.0f; //< 回転
+	CalyxMath::Vector4 color = {1.0f, 1.0f, 1.0f, 1.0f}; //< 色
+	CalyxMath::Vector2 size = {640.0f, 360.0f}; //< サイズ
+	CalyxMath::Vector2 anchorPoint = {0.0f, 0.0f}; //< アンカーポイント
+	CalyxMath::Vector2 textureLeftTop = {0.0f, 0.0f}; //< テクスチャ左上座標
+	CalyxMath::Vector2 textureSize = {100.0f, 100.0f}; //< テクスチャ切り出しサイズ
 
-	std::string path;
+	std::string path; //< テクスチャパス
 
-#pragma region
-
+#pragma region リソース
 private:
-	///=============================================================
-	///	リソース
-	///=============================================================
-	// viewの生成
-	D3D12_INDEX_BUFFER_VIEW				   indexBufferView{};
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
-	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;
-	Microsoft::WRL::ComPtr<ID3D12Resource> transformResource_;
-	D3D12_VERTEX_BUFFER_VIEW			   vertexBufferViewSprite{};
+	D3D12_INDEX_BUFFER_VIEW				   indexBufferView{}; //< インデックスバッファビュー
+	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_; //< 頂点リソース
+	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_; //< インデックスリソース
+	Microsoft::WRL::ComPtr<ID3D12Resource> transformResource_; //< 定数バッファリソース（行列用）
+	D3D12_VERTEX_BUFFER_VIEW			   vertexBufferViewSprite{}; //< 頂点バッファビュー
 
-	// directX関連
-	bool				  isVisible		= true;
-	CalyxMath::Matrix4x4* transformData = nullptr;
+	bool				  isVisible		= true; //< 表示フラグ
+	CalyxMath::Matrix4x4* transformData = nullptr; //< 行列データポインタ
 
-	// マテリアル用のリソース
-	VertexData*					 vertexData = nullptr;
-	DxConstantBuffer<Material2D> materialCB_;
-	Material2D					 materialData_;
-	RenderTargetType			 targetRT_ = RenderTargetType::BackBuffer;
+	VertexData*					 vertexData = nullptr; //< 頂点データポインタ
+	DxConstantBuffer<Material2D> materialCB_; //< マテリアル用定数バッファ
+	Material2D					 materialData_; //< マテリアルデータ
+	RenderTargetType			 targetRT_ = RenderTargetType::BackBuffer; //< 描画先ターゲット
 #pragma endregion
 
 private:
-	///=============================================================
-	///	texture
-	///=============================================================
-	D3D12_GPU_DESCRIPTOR_HANDLE handle;
+	D3D12_GPU_DESCRIPTOR_HANDLE handle; //< GPUハンドル
 };

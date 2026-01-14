@@ -263,24 +263,17 @@ protected:
 
 protected:
 	//===================================================================*/
-	//                    protected methods
+	//                    protected member variables
 	//===================================================================*/
-	std::unique_ptr<BaseModel>		model_			= nullptr; // 描画用モデル
-	std::unique_ptr<CalyxAssets::AnimationModel> animationModel_ = nullptr; // アニメーションモデル
+	std::unique_ptr<BaseModel>		model_			= nullptr; //< 描画用モデル
+	std::unique_ptr<CalyxAssets::AnimationModel> animationModel_ = nullptr; //< アニメーションモデル
 
-protected:
-	//===================================================================*/
-	//                    protected variables
-	//===================================================================*/
-	ObjectModelType objectModelType_ = ModelType_Static;
+	ObjectModelType objectModelType_ = ModelType_Static; //< モデルタイプ
 
-	std::unique_ptr<Collider> collider_ = nullptr;
+	std::unique_ptr<Collider> collider_ = nullptr; //< コライダー
 	ColliderKind			  currentColliderKind_ = ColliderKind::None;  //< コライダーの種類
 	BillboardMode			  billboardMode_	   = BillboardMode::None; //< ビルボードモード
-protected:
-	//===================================================================*/
-	//                    config
-	//===================================================================*/
-	ConfigurableObject<BaseGameObjectConfig> config_;
-	const std::string configRoot_ = "BaseGameObject/";
+
+	ConfigurableObject<BaseGameObjectConfig> config_; //< コンフィグ管理
+	const std::string configRoot_ = "BaseGameObject/"; //< コンフィグルートパス
 };
