@@ -62,6 +62,7 @@ namespace CalyxEditor {
 		void CommitRename();
 		// render helper
 		bool DrawNode(SceneObject* obj);
+		bool PassFilterRecursive(SceneObject* obj) const;
 		
 	private:
 		// runtime state

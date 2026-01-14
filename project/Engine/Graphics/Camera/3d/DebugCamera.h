@@ -33,6 +33,7 @@ public:
 
 	//* カメラとターゲットとの初期距離を設定
 	void SetDistance(float dist) { distance_ = dist; }
+	void SetInputEnabled(bool enable) { isInputEnabled_ = enable; }
 
 	std::string_view GetTypeName() const override { return "DebugCamera"; }
 
@@ -63,4 +64,5 @@ private:
 	// ドラッグ状態の管理（Move用）
 	CalyxMath::Vector2 lastMousePosMove_{0.0f,0.0f}; //* Move用の前フレームのマウス位置
 	bool    isDraggingMove_{false};       //* Moveがドラッグ中かどうか
+	bool	isInputEnabled_{true};
 };

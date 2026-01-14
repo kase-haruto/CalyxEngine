@@ -8,7 +8,14 @@
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 #include <Engine/Scene/Context/SceneContext.h>
-#include <Engine/objects/3D/Actor/Library/SceneObjectLibrary.h>
+#include <Engine/Objects/3D/Actor/Library/SceneObjectLibrary.h>
+
+// creation headers
+#include <Engine/Graphics/Camera/3d/Camera3d.h>
+#include <Engine/Objects/LightObject/DirectionalLight.h>
+#include <Engine/Objects/LightObject/PointLight.h>
+#include <Engine/Objects/3D/Actor/BaseGameObject.h>
+#include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 
 // lib
 #include <externals/imgui/ImGuiFileDialog.h>
@@ -78,13 +85,8 @@ namespace CalyxEditor {
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
 			
-			// Filter
-			ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 40); // space for buttons
-			searchFilter_.Draw("##HierarchyFilter", ImGui::GetContentRegionAvail().x - 40);
-			
-			ImGui::SameLine();
-			// Folder / Settings placeholder icons
-			if(ImGui::Button("+", ImVec2(20, 20))) { /* New Folder/Item */ }
+			// Search Filter
+			searchFilter_.Draw("##HierarchyFilter", ImGui::GetContentRegionAvail().x);
 			
 			ImGui::PopStyleVar();
 		}
@@ -154,7 +156,6 @@ namespace CalyxEditor {
 		}
 
 		// 右クリック空白メニュー
-		// Table範囲外をクリックしたとき用
 		if(ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
 			ImGui::OpenPopup("BlankContextMenu");
 		}
@@ -213,6 +214,12 @@ namespace CalyxEditor {
 	void HierarchyPanel::ShowObjectRecursive(SceneObject* obj) {
 		if(!obj) return;
 
+		// フィルタチェック
+		if(searchFilter_.IsActive()) {
+			if(!PassFilterRecursive(obj)) return;
+			ImGui::SetNextItemOpen(true, ImGuiCond_Always);
+		}
+
 		// このオブジェクトとその子要素のIDスコープ
 		ImGui::PushID(obj);
 
@@ -252,12 +259,6 @@ namespace CalyxEditor {
 
 	bool HierarchyPanel::DrawNode(SceneObject* obj) {
 		
-        // フィルタチェック 
-		if(searchFilter_.IsActive()) {
-            if(!searchFilter_.PassFilter(obj->GetName().c_str())) {
-            }
-		}
-
         ImGui::TableNextRow();
 
 		// ---------------------------------------------------------------------
@@ -350,10 +351,30 @@ namespace CalyxEditor {
 
             // コンテキストメニュー
             if(ImGui::BeginPopupContextItem("SOContext")) { // アイテム上で右クリック
+				if(ImGui::BeginMenu("Create Child")) {
+					auto createChild = [&](std::shared_ptr<SceneObject> child) {
+						child->SetParent(obj->shared_from_this());
+						if(onCreate_) onCreate_(child);
+					};
+
+					if(ImGui::MenuItem("Empty Scene Object")) createChild(std::make_shared<SceneObject>());
+					if(ImGui::MenuItem("Camera")) createChild(std::make_shared<Camera3d>());
+					if(ImGui::BeginMenu("Light")) {
+						if(ImGui::MenuItem("Directional Light")) createChild(std::make_shared<DirectionalLight>());
+						if(ImGui::MenuItem("Point Light")) createChild(std::make_shared<PointLight>());
+						ImGui::EndMenu();
+					}
+					if(ImGui::MenuItem("Mesh Object")) createChild(std::make_shared<BaseGameObject>());
+					if(ImGui::MenuItem("Particle System")) createChild(std::make_shared<CalyxEffect::ParticleSystemObject>());
+
+					ImGui::EndMenu();
+				}
+				ImGui::Separator();
                 if(ImGui::MenuItem("Rename")) BeginRename(obj);
                 if(ImGui::MenuItem("Delete") && onDelete_) {
                     if(auto sp = obj->shared_from_this()) onDelete_(sp);
                 }
+				ImGui::Separator();
                 if(ImGui::MenuItem("Create Prefab")) {
                     prefabSaveTarget_ = obj;
                     showSavePrefabDlg_ = true;
@@ -416,6 +437,20 @@ namespace CalyxEditor {
 		for(auto p = child->GetParent(); p; p = p->GetParent()) {
 			if(p.get() == parent) return true;
 		}
+		return false;
+	}
+
+	bool HierarchyPanel::PassFilterRecursive(SceneObject* obj) const {
+		if(!obj) return false;
+
+		// 自分自身が通過するか？
+		if(searchFilter_.PassFilter(obj->GetName().c_str())) return true;
+
+		// 子のいずれかが通過するか？
+		for(auto& child : obj->GetChildren()) {
+			if(PassFilterRecursive(child.get())) return true;
+		}
+
 		return false;
 	}
 
