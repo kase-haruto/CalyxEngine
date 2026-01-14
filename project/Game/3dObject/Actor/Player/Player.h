@@ -29,10 +29,11 @@ class PlayerDangerSense;
 class PlayerDodge;
 class PlayerDamageHandler;
 
-/**
- * \brief
- * 操作するキャラクタークラス
- */
+/*-----------------------------------------------------------------------------------------
+ * Player
+ * - 操作するキャラクタークラス
+ * - 移動、射撃、ロックオン、回避などのアクションを管理
+ *---------------------------------------------------------------------------------------*/
 class Player
 	: public Actor,
 	 public CalyxEngine::SerializableObject {
@@ -40,9 +41,20 @@ public:
 	//=====================================================================
 	// Public Methods
 	//=====================================================================
+	/**
+	 * \brief コンストラクタ
+	 */
 	Player();
+	/**
+	 * \brief コンストラクタ
+	 * \param modelName モデル名
+	 * \param objectName オブジェクト名
+	 */
 	Player(const std::string&		  modelName,
 		   std::optional<std::string> objectName = std::nullopt);
+	/**
+	 * \brief デストラクタ
+	 */
 	virtual ~Player() override;
 
 	/* mainFunc =========================================================== */
@@ -65,13 +77,13 @@ public:
 	 */
 	void DerivativeGui() override;
 	/**
-	 * \brief 移動量の追加をRequest
-	 * \param delta
+	 * \brief 移動量の追加をリクエスト
+	 * \param delta 移動量
 	 */
 	void AddMoveRequest(const CalyxMath::Vector3& delta);
 	/**
 	 * \brief レティクルをオフセット分移動する
-	 * \param offset
+	 * \param offset オフセット
 	 */
 	void MoveReticle(const CalyxMath::Vector3& offset);
 	/**
@@ -98,26 +110,85 @@ public:
 	void RequestLockOnTargetClear() const;
 
 	/* runtime ==============================================================*/
+	/**
+	 * \brief 回避をリクエスト
+	 */
 	void RequestDodge() const;
 
+	/**
+	 * \brief 衝突開始
+	 * \param other 衝突相手
+	 */
 	void OnCollisionEnter(Collider* other) override;
+	/**
+	 * \brief 衝突中
+	 * \param other 衝突相手
+	 */
 	void OnCollisionStay([[maybe_unused]] Collider* other) override {}
+	/**
+	 * \brief 衝突終了
+	 * \param other 衝突相手
+	 */
 	void OnCollisionExit([[maybe_unused]] Collider* other) override {}
 
 	/* accessor =========================================================== */
 	// setter
+	/**
+	 * \brief 親を設定
+	 * \param parent 親のトランスフォーム
+	 */
 	void SetParent(WorldTransform* parent);
+	/**
+	 * \brief 敵リストをアタッチ
+	 * \param list 敵リスト
+	 */
 	void AttachEnemyList(const std::list<std::shared_ptr<Enemy>>& list) const;
+	/**
+	 * \brief 射撃コントローラを設定
+	 * \param sc 射撃コントローラ
+	 */
 	void SetShootingController(std::unique_ptr<PlayerShootingController> sc);
 
 	// getter
+	/**
+	 * \brief タイプ名を取得
+	 * \return タイプ名
+	 */
 	std::string_view		   GetTypeName() const override { return "Player"; }
+	/**
+	 * \brief 危険察知を取得
+	 * \return 危険察知
+	 */
 	PlayerDangerSense*		   GetDangerSense() const { return danger_.get(); }
+	/**
+	 * \brief 回避システムを取得
+	 * \return 回避システム
+	 */
 	PlayerDodgeSystem*		   GetDodgeSystem() const { return dodgeSystem_.get(); }
+	/**
+	 * \brief 全てのスプライトを取得
+	 * \return スプライトリスト
+	 */
 	std::vector<Sprite*>	   GetAllSprites() const;
+	/**
+	 * \brief 中心座標を取得
+	 * \return 中心座標
+	 */
 	const CalyxMath::Vector3   GetCenterPos() const override;
+	/**
+	 * \brief 射撃クールタイムを取得
+	 * \return クールタイム
+	 */
 	std::optional<float>	   GetShootCooldown() const;
+	/**
+	 * \brief 最大射撃間隔を取得
+	 * \return 最大射撃間隔
+	 */
 	std::optional<const float> GetMaxShootInterval() const;
+	/**
+	 * \brief レティクルのワールド座標を取得
+	 * \return ワールド座標
+	 */
 	CalyxMath::Vector3		   GetReticleWorldPos() const { return reticleTransform_.GetWorldPosition(); }
 
 private:
@@ -129,8 +200,15 @@ private:
 	 */
 	void UpdateReticlePosition();
 
+	/**
+	 * \brief シリアライズ可能パラメータの作成
+	 */
 	void MakeSerializableParam();
 
+	/**
+	 * \brief パラメータパスを取得
+	 * \return パラメータパス
+	 */
 	CalyxEngine::ParamPath GetParamPath() const override;
 
 private:

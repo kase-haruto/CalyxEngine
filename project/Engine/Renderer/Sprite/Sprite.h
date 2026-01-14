@@ -16,69 +16,251 @@
 
 class DirectXCommon;
 
+/*-----------------------------------------------------------------------------------------
+ * Sprite
+ * - スプライト描画クラス
+ * - 2D画像の保持、位置バッファの更新、描画処理を担当
+ *---------------------------------------------------------------------------------------*/
 class Sprite {
 public:
 	//===================================================================*/
-	//                    public method
+	//                    public methods
 	//===================================================================*/
+	/**
+	 * \brief コンストラクタ
+	 * \param filePath テクスチャファイルのパス
+	 */
 	Sprite(const std::string& filePath);
+	/**
+	 * \brief デストラクタ
+	 */
 	~Sprite();
 
+	/**
+	 * \brief 初期化
+	 * \param position 座標
+	 * \param size サイズ
+	 */
 	void Initialize(const CalyxMath::Vector2& position, const CalyxMath::Vector2& size);
-	void Initialize(); // 引数なし初期化初期座標はwindow中心座標
+	/**
+	 * \brief 初期化 (ウィンドウの中心に配置)
+	 */
+	void Initialize();
 
+	/**
+	 * \brief 更新処理
+	 */
 	void Update();
+	/**
+	 * \brief GUI表示
+	 */
 	void ShowGui();
+	/**
+	 * \brief 行列の更新
+	 */
 	void UpdateMatrix();
+	/**
+	 * \brief トランスフォームの更新
+	 */
 	void UpdateTransform();
+	/**
+	 * \brief 描画処理
+	 * \param cmdList コマンドリスト
+	 */
 	void Draw(ID3D12GraphicsCommandList* cmdList);
 
 	// getter
+	/**
+	 * \brief テクスチャ名を取得
+	 * \return テクスチャ名
+	 */
 	const std::string&					   GetTextureName() const { return path; }
+	/**
+	 * \brief 描画先レンダリングターゲットを取得
+	 * \return レンダリングターゲットタイプ
+	 */
 	RenderTargetType					   GetTargetRt() const { return targetRT_; }
+	/**
+	 * \brief 定数バッファリソースを取得
+	 * \return リソース
+	 */
 	Microsoft::WRL::ComPtr<ID3D12Resource> GetConstBuffer() { return vertexResource_; }
+	/**
+	 * \brief 色を取得 (const)
+	 * \return 色
+	 */
 	const CalyxMath::Vector4&			   GetColor() const { return materialData_.color; }
+	/**
+	 * \brief 色を取得
+	 * \return 色
+	 */
 	CalyxMath::Vector4&					   GetColor() { return materialData_.color; }
+	/**
+	 * \brief サイズを取得
+	 * \return サイズ
+	 */
 	const CalyxMath::Vector2&			   GetSize() const { return size; }
+	/**
+	 * \brief アンカーポイントを取得
+	 * \return アンカーポイント
+	 */
 	const CalyxMath::Vector2&			   GetAnchorPoint() const { return anchorPoint; }
+	/**
+	 * \brief 座標を取得
+	 * \return 座標
+	 */
 	const CalyxMath::Vector2&			   GetPosition() const { return position; }
+	/**
+	 * \brief UV移動量を取得
+	 * \return UV移動量
+	 */
 	CalyxMath::Vector2					   GetUvTranslate() const { return CalyxMath::Vector2(uvTransform.translate.x, uvTransform.translate.y); }
+	/**
+	 * \brief 切り取り座標(左上)を取得
+	 * \return 座標
+	 */
 	const CalyxMath::Vector2&			   GetLeftTop() const { return textureLeftTop; }
+	/**
+	 * \brief 回転角を取得
+	 * \return 回転角
+	 */
 	float								   GetRotation() const { return rotate; }
+	/**
+	 * \brief UV回転角を取得
+	 * \return UV回転角
+	 */
 	const float							   GetUvRotate() const { return uvTransform.rotate.x; }
+	/**
+	 * \brief 表示フラグを取得
+	 * \return 表示されているか
+	 */
 	bool								   GetIsVisible() const { return isVisible; }
 
 	// setter
+	/**
+	 * \brief 回転角を設定
+	 * \param rotation 回転角
+	 */
 	void	   SetRotation(float rotation) { this->rotate = rotation; }
+	/**
+	 * \brief UV回転角を設定
+	 * \param uvRotate UV回転角
+	 */
 	void	   SetUvRotate(const float uvRotate) { uvTransform.rotate.x = uvRotate; }
+	/**
+	 * \brief ウィンドウ中央に配置
+	 */
 	void	   PutWindowCenter();
+	/**
+	 * \brief 座標を設定
+	 * \param newPosition 座標
+	 */
 	void	   SetPosition(const CalyxMath::Vector2& newPosition) { this->position = newPosition; }
+	/**
+	 * \brief UV移動量を設定
+	 * \param uvOffset UV移動量
+	 */
 	void	   SetUvTranslate(const CalyxMath::Vector2& uvOffset) { CalyxMath::Vector2(uvTransform.translate.x = uvOffset.x, uvTransform.translate.y = uvOffset.y); }
+	/**
+	 * \brief 色を設定
+	 * \param newColor 色
+	 */
 	void	   SetColor(const CalyxMath::Vector4& newColor) { materialData_.color = newColor; }
+	/**
+	 * \brief サイズを設定
+	 * \param newSize サイズ
+	 */
 	void	   SetSize(const CalyxMath::Vector2& newSize) { this->size = newSize; }
+	/**
+	 * \brief 透明度を設定
+	 * \param newAlpha 透明度
+	 */
 	void	   SetAlpha(float newAlpha) { this->materialData_.color.w = newAlpha; }
+	/**
+	 * \brief アンカーポイントを設定
+	 * \param newAnchorPoint アンカーポイント
+	 */
 	void	   SetAnchorPoint(const CalyxMath::Vector2& newAnchorPoint) { this->anchorPoint = newAnchorPoint; }
+	/**
+	 * \brief 切り取り座標(左上)を設定
+	 * \param LTop 座標
+	 */
 	void	   SetLeftTop(const CalyxMath::Vector2& LTop) { this->textureLeftTop = LTop; }
+	/**
+	 * \brief 表示フラグを設定
+	 * \param is 表示するか
+	 */
 	void	   SetIsVisible(bool is) { isVisible = is; }
+	/**
+	 * \brief 描画先レンダリングターゲットを設定
+	 * \param targetRt レンダリングターゲットタイプ
+	 */
 	void	   SetTargetRt(RenderTargetType targetRt) { targetRT_ = targetRt; }
+	/**
+	 * \brief テクスチャを設定
+	 * \param tex テクスチャ名
+	 */
 	void	   SetTexture(const std::string& tex);
+	/**
+	 * \brief GPUハンドルからテクスチャを設定
+	 * \param newHandle ハンドル
+	 */
 	const void SetTextureHandle(D3D12_GPU_DESCRIPTOR_HANDLE newHandle);
+	/**
+	 * \brief UVオフセットを設定
+	 * \param offset オフセット
+	 */
 	void	   SetUvOffset(const CalyxMath::Vector2& offset);
+	/**
+	 * \brief UVスケールを設定
+	 * \param scale スケール
+	 */
 	void	   SetUvScale(const CalyxMath::Vector2& scale);
 
+	/**
+	 * \brief 塗りつぶし量を設定 (0.0〜1.0)
+	 * \param amt 塗りつぶし量
+	 */
 	void SetFillAmount(float amt) { materialData_.fillAmount = amt; }
+	/**
+	 * \brief 塗りつぶしの原点を設定
+	 * \param x X座標 (0.0〜1.0)
+	 * \param y Y座標 (0.0〜1.0)
+	 */
 	void SetFillOrigin(float x, float y) { materialData_.fillOrigin = {x, y}; }
+	/**
+	 * \brief 塗りつぶし手法を設定
+	 * \param method 手法
+	 */
 	void SetFillMethod(int method) { materialData_.fillMethod = method; }
 
 private:
 	//===================================================================*/
 	//                    private methods
 	//===================================================================*/
+	/**
+	 * \brief バッファを生成
+	 */
 	void CreateBuffer();
+	/**
+	 * \brief マッピング
+	 */
 	void Map();
+	/**
+	 * \brief インデックスリソースのマッピング
+	 */
 	void IndexResourceMap();
+	/**
+	 * \brief 頂点リソースのマッピング
+	 */
 	void VertexResourceMap();
+	/**
+	 * \brief 行列リソースのマッピング
+	 */
 	void TransformResourceMap();
+	/**
+	 * \brief マテリアルリソースのマッピング
+	 */
 	void MaterialResourceMap();
 
 private:

@@ -26,48 +26,70 @@
 #include <thread>
 #include <unordered_map>
 
+/*-----------------------------------------------------------------------------------------
+ * ModelManager
+ * - モデル管理クラス
+ * - 3Dモデルファイルの非同期ロード、GPUリソースの生成、ロード済みデータの管理を担当
+ *---------------------------------------------------------------------------------------*/
 class ModelManager {
 public:
+	/**
+	 * \brief インスタンスを取得
+	 * \return インスタンス
+	 */
 	static ModelManager* GetInstance();
+	/**
+	 * \brief 初期化
+	 */
 	static void			 Initialize();
+	/**
+	 * \brief 終了処理
+	 */
 	static void			 Finalize();
 
 	friend struct std::default_delete<ModelManager>;
 
-	/// <summary>
-	/// 非同期でモデルをロードする (ワーカースレッド1本で順番に処理)
-	/// </summary>
-	/// <param name="fileName">モデルのファイル名(例: "suzanne.obj")</param>
-	/// <returns>ロード完了時の ModelData を指す future</returns>
+	/**
+	 * \brief 非同期でモデルをロードする (ワーカースレッド1本で順番に処理)
+	 * \param fileName モデルのファイル名(例: "suzanne.obj")
+	 * \return ロード完了時の ModelData を指す future
+	 */
 	static std::future<ModelData> LoadModel(const std::string& fileName);
 
-	/// <summary>
-	/// ロードが完了したモデルの GPUリソース作成をまとめて行う
-	/// (フレーム更新時などメインスレッドで呼ぶ想定)
-	/// </summary>
+	/**
+	 * \brief ロードが完了したモデルの GPUリソース作成をまとめて行う (フレーム更新時などメインスレッドで呼ぶ想定)
+	 */
 	void ProcessLoadingTasks();
 
-	/// <summary>
-	/// ロード済みのモデルを取得(非同期ロード中の場合は nullptr の可能性もある)
-	/// </summary>
+	/**
+	 * \brief ロード済みのモデルを取得 (非同期ロード中の場合は nullptr の可能性もある)
+	 * \param fileName ファイル名
+	 * \return モデルデータ
+	 */
 	ModelData& GetModelData(const std::string& fileName);
 
-	// ロード済みのモデルをを判定
+	/**
+	 * \brief モデルがロード済みか判定
+	 * \param fileName ファイル名
+	 * \return ロード済みか
+	 */
 	bool IsModelLoaded(const std::string& fileName) const;
 
-	/// <summary>
-	/// ロード完了時に呼ばれるコールバックを設定する
-	/// </summary>
+	/**
+	 * \brief ロード完了時に呼ばれるコールバックを設定する
+	 * \param callback コールバック関数
+	 */
 	void SetOnModelLoadedCallback(std::function<void(const std::string&)> callback);
 
-	/// <summary>
-	/// サンプル: 複数モデルを一括でロード
-	/// </summary>
+	/**
+	 * \brief サンプル: 複数モデルを一括でロード
+	 */
 	static void StartUpLoad();
 
-	/// <summary>
-	/// ロード済みモデルのファイル名一覧を取得
-	/// </summary>
+	/**
+	 * \brief ロード済みモデルのファイル名一覧を取得
+	 * \return ファイル名のリスト
+	 */
 	std::vector<std::string> GetLoadedModelNames() const;
 
 private:

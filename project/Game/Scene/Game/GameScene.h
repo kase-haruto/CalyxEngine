@@ -30,18 +30,52 @@ class ScoreService;
 class NumbersSprite;
 class CameraTurnAroundAction;
 
+/*-----------------------------------------------------------------------------------------
+ * GameScene
+ * - ゲームの本編シーンクラス
+ * - プレイヤー、敵、ボス、UI、カメラの管理と更新・描画を担当
+ *---------------------------------------------------------------------------------------*/
 class GameScene final
 	: public BaseScene {
 public:
+	/**
+	 * \brief コンストラクタ
+	 */
 	GameScene();
+	/**
+	 * \brief デストラクタ
+	 */
 	~GameScene() override;
 
+	/**
+	 * \brief 初期化
+	 */
 	void Initialize() override;
+	/**
+	 * \brief 更新処理
+	 * \param dt デルタタイム
+	 */
 	void Update(float dt) override;
-	void Draw(ID3D12GraphicsCommandList*, class PipelineService*,  IRenderTarget* ) override;
+	/**
+	 * \brief 描画処理
+	 * \param cmdList コマンドリスト
+	 * \param pipelineService パイプラインサービス
+	 * \param renderTarget レンダリングターゲット
+	 */
+	void Draw(ID3D12GraphicsCommandList* cmdList, class PipelineService* pipelineService,  IRenderTarget* renderTarget ) override;
+	/**
+	 * \brief 終了処理
+	 */
 	void CleanUp() override;
+	/**
+	 * \brief アセット読み込み
+	 */
 	void LoadAssets() override;
 
+	/**
+	 * \brief 合計スコアを取得
+	 * \return 合計スコア
+	 */
 	int16_t GetTotalScore() const { return totalScore_; }
 
 private:

@@ -10,16 +10,43 @@ namespace CalyxGraphics {
 	class DxCore;
 }
 
+/*-----------------------------------------------------------------------------------------
+ * ImGuiManager
+ * - ImGui管理クラス
+ * - ImGuiの初期化、フレームの開始/終了、描画およびスタイルのカスタマイズを管理
+ *---------------------------------------------------------------------------------------*/
 class ImGuiManager{
 public:
-
+	/**
+	 * \brief コンストラクタ
+	 */
 	ImGuiManager() = default;
+	/**
+	 * \brief デストラクタ
+	 */
 	~ImGuiManager() = default;
 
+	/**
+	 * \brief 初期化
+	 * \param winApp ウィンドウアプリケーション
+	 * \param dxCore DirectXコア
+	 */
 	void Initialize(WinApp* winApp, const CalyxGraphics::DxCore* dxCore);
+	/**
+	 * \brief 終了処理
+	 */
 	void Finalize();
+	/**
+	 * \brief フレーム開始
+	 */
 	void Begin();
+	/**
+	 * \brief フレーム終了
+	 */
 	void End();
+	/**
+	 * \brief 描画
+	 */
 	void Draw();
 
 private:

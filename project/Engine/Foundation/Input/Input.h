@@ -53,8 +53,17 @@ namespace CalyxFoundation {
 		CalyxMath::Vector2 rightStick;
 	};
 
+	/*-----------------------------------------------------------------------------------------
+	 * Input
+	 * - 入力管理クラス
+	 * - キーボード、マウス、ゲームパッド（XInput）の入力を統合管理するシングルトン
+	 *---------------------------------------------------------------------------------------*/
 	class Input {
 	public:
+		/**
+		 * \brief インスタンスを取得
+		 * \return インスタンス
+		 */
 		static Input* GetInstance();
 
 		// コピー禁止
@@ -64,32 +73,119 @@ namespace CalyxFoundation {
 		friend struct std::default_delete<Input>;
 
 	public:
+		/**
+		 * \brief 初期化
+		 */
 		static void Initialize();
+		/**
+		 * \brief 更新
+		 */
 		static void Update();
+		/**
+		 * \brief 終了処理
+		 */
 		static void Finalize();
+		/**
+		 * \brief ImGui表示
+		 */
 		static void ShowImGui();
 
 		// キーボード
+		/**
+		 * \brief キーが押されているか
+		 * \param keyNum キー番号（DIK_XXX）
+		 * \return 押されているか
+		 */
 		static bool PushKey(uint32_t keyNum);
+		/**
+		 * \brief キーが押された瞬間か
+		 * \param keyNum キー番号（DIK_XXX）
+		 * \return 押された瞬間か
+		 */
 		static bool TriggerKey(uint32_t keyNum);
 
 		// マウス
+		/**
+		 * \brief マウスボタンが押されているか
+		 * \param button ボタン
+		 * \return 押されているか
+		 */
 		static bool				  PushMouseButton(MouseButton button);
+		/**
+		 * \brief マウスボタンが押された瞬間か
+		 * \param button ボタン
+		 * \return 押された瞬間か
+		 */
 		static bool				  TriggerMouseButton(MouseButton button);
+		/**
+		 * \brief マウスボタンが離された瞬間か
+		 * \param button ボタン
+		 * \return 離された瞬間か
+		 */
 		static bool				  ReleaseMouseButton(MouseButton button);
+		/**
+		 * \brief マウス座標を取得
+		 * \return 座標
+		 */
 		static CalyxMath::Vector2 GetMousePosition();
+		/**
+		 * \brief デバッグウィンドウ内でのマウス座標を取得
+		 * \return 座標
+		 */
 		static CalyxMath::Vector2 GetMousePosInDebugWindow();
+		/**
+		 * \brief マウスホイールの回転量を取得
+		 * \return 回転量
+		 */
 		static float			  GetMouseWheel();
+		/**
+		 * \brief マウスの移動量を取得
+		 * \return 移動量
+		 */
 		static CalyxMath::Vector2 GetMouseDelta();
 
 		// ゲームパッド
+		/**
+		 * \brief ゲームパッドボタンが押されているか
+		 * \param button ボタン
+		 * \return 押されているか
+		 */
 		static bool				  PushGamepadButton(PadButton button);
+		/**
+		 * \brief ゲームパッドボタンが押された瞬間か
+		 * \param button ボタン
+		 * \return 押された瞬間か
+		 */
 		static bool				  TriggerGamepadButton(PadButton button);
+		/**
+		 * \brief 左トリガーの押し込み量を取得
+		 * \return 押し込み量(0.0〜1.0)
+		 */
 		static float			  GetLeftTrigger();
+		/**
+		 * \brief 右トリガーの押し込み量を取得
+		 * \return 押し込み量(0.0〜1.0)
+		 */
 		static float			  GetRightTrigger();
+		/**
+		 * \brief 左スティックの入力を取得
+		 * \return 入力(X, Y)
+		 */
 		static CalyxMath::Vector2 GetLeftStick();
+		/**
+		 * \brief 右スティックの入力を取得
+		 * \return 入力(X, Y)
+		 */
 		static CalyxMath::Vector2 GetRightStick();
+		/**
+		 * \brief 両スティックの状態を取得
+		 * \return スティック状態
+		 */
 		static StickState		  GetStickState();
+		/**
+		 * \brief 左スティックが動かされているか
+		 * \return 動かされているか
+		 */
 		static bool				  IsLeftStickMoved();
 
 	private:

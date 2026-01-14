@@ -77,9 +77,11 @@ struct SourceVoiceDeleter {
 	}
 };
 
-/////////////////////////////////////////////////////////////////////////////////////
-//  Audio クラス
-/////////////////////////////////////////////////////////////////////////////////////
+/*-----------------------------------------------------------------------------------------
+ * Audio
+ * - オーディオ管理クラス
+ * - XAudio2を使用した音声再生（WAV, MP3, M4A対応）を管理するシングルトン
+ *---------------------------------------------------------------------------------------*/
 class Audio {
 
 private:
@@ -93,27 +95,84 @@ private:
 	friend struct std::default_delete<Audio>;
 
 public:
-	// デストラクタ
+	/**
+	 * \brief デストラクタ
+	 */
 	~Audio();
 
-	// インスタンスの取得
+	/**
+	 * \brief インスタンスを取得
+	 * \return インスタンス
+	 */
 	static const Audio* GetInstance();
 
 public: // 初期化に関する関数
+	/**
+	 * \brief 初期化
+	 */
 	static void Initialize();
+	/**
+	 * \brief ロード開始
+	 */
 	static void StartUpLoad();
+	/**
+	 * \brief 終了処理
+	 */
 	static void Finalize();
+	/**
+	 * \brief Media Foundationの初期化
+	 * \return 成功したか
+	 */
 	HRESULT		InitializeMediaFoundation();
 
 public: // エンジンで利用できる関数
+	/**
+	 * \brief 音声を再生
+	 * \param filename ファイル名
+	 * \param loop ループするか
+	 * \param volume 音量
+	 */
 	static void Play(const std::string& filename, bool loop, float volume = 1.0f);
+	/**
+	 * \brief 音声を停止
+	 * \param filename ファイル名
+	 */
 	static void EndAudio(const std::string& filename);
+	/**
+	 * \brief 音声を一時停止
+	 * \param filename ファイル名
+	 */
 	static void PauseAudio(const std::string& filename);
+	/**
+	 * \brief 音声を再開
+	 * \param filename ファイル名
+	 */
 	static void RestertAudio(const std::string& filename);
+	/**
+	 * \brief 音量を設定
+	 * \param filename ファイル名
+	 * \param volume 音量
+	 */
 	static void SetAudioVolume(const std::string& filename, float volume);
+	/**
+	 * \brief 再生中か
+	 * \param filename ファイル名
+	 * \return 再生中か
+	 */
 	static bool IsPlayingAudio(const std::string& filename);
+	/**
+	 * \brief 音声をロード
+	 * \param filename ファイル名
+	 */
 	static void Load(const std::string& filename);
+	/**
+	 * \brief 音声をアンロード
+	 * \param filename ファイル名
+	 */
 	static void UnloadAudio(const std::string& filename);
+	/**
+	 * \brief 全ての音声をアンロード
+	 */
 	static void UnloadAllAudio();
 
 private:
