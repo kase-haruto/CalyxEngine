@@ -27,9 +27,11 @@ void DebugCamera::AlwaysUpdate(float dt){
 	if (!isActive_){ return; }
 
 	// 入力に基づいてカメラ操作
-	Rotate();
-	Move();
-	Zoom();
+	if (isInputEnabled_ || isDraggingRotate_ || isDraggingMove_) {
+		Rotate();
+		Move();
+		Zoom();
+	}
 
 	// カメラの姿勢・行列を更新
 	{

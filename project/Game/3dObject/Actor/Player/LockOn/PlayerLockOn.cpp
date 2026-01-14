@@ -49,7 +49,6 @@ void PlayerLockOn::Update(float dt) {
 void PlayerLockOn::RequestLockOn() {
 	if(lockedOnTargets_.size() >= maxLockOn_) return;
 
-	// constexpr size_t kMaxLockOn = 4; //< 使っているなら削除 or 下の maxLockOn_ に置換
 	auto* cam = CameraManager::GetMain3d();
 	if(!cam) return;
 

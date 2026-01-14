@@ -12,6 +12,7 @@
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/Objects/Collider/BoxCollider.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
+
 // game
 #include <Game/3dObject/Actor/Bullet/Container/PlayerBulletContainer.h>
 #include <Game/3dObject/Actor/Player/DangerSense/PlayerDangerSense.h>
@@ -22,7 +23,6 @@
 #include "Damage/PlayerDamageHandler.h"
 #include "Dodge/PlayerDodgeSystem.h"
 #include "Engine/Foundation/Utility/Func/CxUtils.h"
-
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <externals/imgui/imgui.h>
 
@@ -323,9 +323,6 @@ void Player::Draw([[maybe_unused]] ID3D12GraphicsCommandList* cmdList) {}
 //		imgui
 /////////////////////////////////////////////////////////////////////////////////////////
 void Player::DerivativeGui() {
-	if(ImGui::Button("Save")) {
-		SerializableObject::SaveParams();
-	}
 	if(hpGauge_) {
 		hpGauge_->ShowGui();
 	}
