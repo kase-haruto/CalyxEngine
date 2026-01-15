@@ -38,7 +38,7 @@ void ImGuiManager::Initialize(WinApp* winApp, const CalyxGraphics::DxCore* dxCor
 	ImGui::StyleColorsDark(); // ダークテーマを適用
 
 	// fontの設定
-	ImFont* font = io.Fonts->AddFontFromFileTTF("Resources/Assets/fonts/inter.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
+	ImFont* font = io.Fonts->AddFontFromFileTTF("Resources/Assets/fonts/inter.ttf", 16.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
 	io.FontDefault = font;
 	CustomizeImGuiStyle();
 }

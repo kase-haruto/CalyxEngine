@@ -168,14 +168,8 @@ void Player::Initialize() {
 
 	// ---- 回避コンポーネント ----
 	if(!dodgeSystem_) {
-		PlayerDodgeConfig cfg;
-		cfg.useCustomCurve = true;
-		cfg.lateralScale   = 0.0f;
-		cfg.backwardScale  = 0.70f;
-		cfg.spinTurns	   = 1.0f;
-
 		dodgeSystem_ = std::make_unique<PlayerDodgeSystem>();
-		dodgeSystem_->Initialize(cfg);
+		dodgeSystem_->Initialize();
 	}
 
 	// 回避モーション
@@ -325,6 +319,14 @@ void Player::Draw([[maybe_unused]] ID3D12GraphicsCommandList* cmdList) {}
 void Player::DerivativeGui() {
 	if(hpGauge_) {
 		hpGauge_->ShowGui();
+	}
+
+	if(lockOn_) {
+		lockOn_->ShowGui();
+	}
+
+	if(dodgeSystem_) {
+		dodgeSystem_->ShowGui();
 	}
 
 	ImGui::DragFloat("moveSpeed", &moveSpeed_, 0.01f, 0.0f, 10.0f);
@@ -515,6 +517,16 @@ CalyxEngine::ParamPath Player::GetParamPath() const {
 	return {
 	CalyxEngine::ParamDomain::Game,
 	SceneObject::GetName()};
+}
+
+void Player::HeaderGui() {
+	if(ImGui::Button("save")) {
+		lockOn_->SaveConfig();
+	}
+	ImGui::SameLine();
+	if(ImGui::Button("load")) {
+		lockOn_->LoadConfig();
+	}
 }
 
 /* ======================================================================================

@@ -169,9 +169,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Data\Game\Config\Hud\EnemyResultConfig.cpp" />
     <ClCompile Include="Data\Game\Config\Hud\HudTransformMotionConfig.cpp" />
     <ClCompile Include="Data\Game\Config\Hud\ScoreResultConfig.cpp" />
+    <ClCompile Include="Data\Game\Config\Player\PlayerDodgeConfig.cpp" />
+    <ClCompile Include="Data\Game\Config\Player\PlayerLockOnConfig.cpp" />
+    <ClCompile Include="Data\Game\Config\Title\TitleMenueConfig.cpp" />
     <ClCompile Include="Engine\Application\Effects\FxGuiHelpers.cpp" />
     <ClCompile Include="Engine\Application\Effects\FxObject.cpp" />
     <ClCompile Include="Engine\Application\Effects\Particle\Module\OverLifetime\OverLifetimeModule.cpp" />
+    <ClCompile Include="Engine\Application\UI\GUI\ImGuiJapaneaseFonts.cpp" />
     <ClCompile Include="Engine\Foundation\Clock\StateTimer.cpp" />
     <ClCompile Include="Engine\Foundation\Math\Matrix3x4.cpp" />
     <ClCompile Include="Engine\Foundation\Serialization\ParamStore.cpp" />
@@ -569,9 +573,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Data\Game\Config\Hud\EnemyResultConfig.h" />
     <ClInclude Include="Data\Game\Config\Hud\HudTransformMotionConfig.h" />
     <ClInclude Include="Data\Game\Config\Hud\ScoreResultConfig.h" />
+    <ClInclude Include="Data\Game\Config\Player\PlayerDodgeConfig.h" />
+    <ClInclude Include="Data\Game\Config\Player\PlayerLockOnConfig.h" />
+    <ClInclude Include="Data\Game\Config\Title\TitleMenueConfig.h" />
     <ClInclude Include="Engine\Application\Effects\FxGuiHelpers.h" />
     <ClInclude Include="Engine\Application\Effects\FxObject.h" />
     <ClInclude Include="Engine\Application\Effects\Particle\Module\OverLifetime\OverLifetimeModule.h" />
+    <ClInclude Include="Engine\Application\UI\GUI\ImGuiJapaneaseFonts.h" />
     <ClInclude Include="Engine\Foundation\Clock\StateTimer.h" />
     <ClInclude Include="Engine\Foundation\Math\Matrix3x4.h" />
     <ClInclude Include="Engine\Foundation\Serialization\SerializableField.h" />

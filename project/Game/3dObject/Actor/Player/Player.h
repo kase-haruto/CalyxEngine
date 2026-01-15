@@ -133,6 +133,8 @@ private:
 
 	CalyxEngine::ParamPath GetParamPath() const override;
 
+	void HeaderGui() override;
+
 private:
 	//=====================================================================
 	// Private Variables

@@ -19,12 +19,14 @@ namespace CalyxEngine {
 	   ========================================================================= */
 	using ValuePtr = std::variant<
 		int32_t*,
+		size_t*,
 		float*,
 		bool*,
 		CalyxMath::Vector2*,
 		CalyxMath::Vector3*,
 		CalyxMath::Vector4*,
 		const int32_t*,
+		const size_t*,
 		const float*,
 		const bool*,
 		const CalyxMath::Vector2*,
@@ -66,7 +68,13 @@ namespace CalyxEngine {
 	inline void WriteValue(Json& out,const ValuePtr& ptr) {
 		std::visit([&](auto* p) {
 					   using T = std::remove_pointer_t<decltype(p)>;
-					   if constexpr(std::is_same_v<T,CalyxMath::Vector2> || std::is_same_v<T,const CalyxMath::Vector2>) { out = Json::array({p->x,p->y}); } else if constexpr(std::is_same_v<T,CalyxMath::Vector3> || std::is_same_v<T,const CalyxMath::Vector3>) { out = Json::array({p->x,p->y,p->z}); } else if constexpr(std::is_same_v<T,CalyxMath::Vector4> || std::is_same_v<T,const CalyxMath::Vector4>) { out = Json::array({p->x,p->y,p->z,p->w}); } else { out = *p; }
+					   if constexpr(std::is_same_v<T,CalyxMath::Vector2> || std::is_same_v<T,const CalyxMath::Vector2>) {
+						   out = Json::array({p->x,p->y});
+					   } else if constexpr(std::is_same_v<T,CalyxMath::Vector3> || std::is_same_v<T,const CalyxMath::Vector3>) {
+						   out = Json::array({p->x,p->y,p->z});
+					   } else if constexpr(std::is_same_v<T,CalyxMath::Vector4> || std::is_same_v<T,const CalyxMath::Vector4>) {
+						   out = Json::array({p->x,p->y,p->z,p->w});
+					   } else { out = *p; }
 				   },
 				   ptr);
 	}
@@ -81,6 +89,10 @@ namespace CalyxEngine {
 									  if constexpr(std::is_same_v<T,int32_t>) {
 										  if(!in.is_number_integer()) return false;
 										  *p = in.get<int32_t>();
+										  return true;
+									  }else if constexpr(std::is_same_v<T,size_t>) {
+										  if(!in.is_number()) return false;
+										  *p = in.get<size_t>();
 										  return true;
 									  } else if constexpr(std::is_same_v<T,float>) {
 										  if(!in.is_number()) return false;
