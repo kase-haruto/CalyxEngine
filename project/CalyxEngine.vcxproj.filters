@@ -2324,6 +2324,15 @@
     <ClInclude Include="Engine\Graphics\Shadow\Raytracing\RaytracingSystem.h" />
     <ClInclude Include="Engine\Graphics\Shadow\Raytracing\RaytracingTypes.h" />
     <ClInclude Include="Engine\Graphics\Shadow\ShadowMap\GpuResource\SceneDepthResource.h" />
+    <ClInclude Include="Data\Game\Config\Player\PlayerDamageConfig.h" />
+    <ClInclude Include="Data\Game\Config\Player\PlayerDangerSceneConfig.h" />
+    <ClInclude Include="Data\Game\Config\Player\PlayerDodgeConfig.h" />
+    <ClInclude Include="Data\Game\Config\Player\PlayerLockOnConfig.h" />
+    <ClInclude Include="Data\Game\Config\Title\TitleMenueConfig.h" />
+    <ClInclude Include="Engine\Application\UI\GUI\ImGuiJapaneaseFonts.h" />
+    <ClInclude Include="Engine\Foundation\Serialization\SerializableFieldBuilder.h" />
+    <ClInclude Include="Engine\Foundation\Serialization\SerializableUtil.h" />
+    <ClInclude Include="Engine\Graphics\Shadow\ShadowMap\ShadowBounds.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\ChromaticAberration.PS.hlsl">
@@ -2483,6 +2492,15 @@
     <ClCompile Include="Engine\Graphics\Shadow\Raytracing\RaytracingScene.cpp" />
     <ClCompile Include="Engine\Graphics\Shadow\Raytracing\RaytracingSystem.cpp" />
     <ClCompile Include="Engine\Graphics\Shadow\ShadowMap\GpuResource\SceneDepthResource.cpp" />
+    <ClCompile Include="Data\Game\Config\Player\PlayerDamageConfig.cpp" />
+    <ClCompile Include="Data\Game\Config\Player\PlayerDangerSceneConfig.cpp" />
+    <ClCompile Include="Data\Game\Config\Player\PlayerDodgeConfig.cpp" />
+    <ClCompile Include="Data\Game\Config\Player\PlayerLockOnConfig.cpp" />
+    <ClCompile Include="Data\Game\Config\Title\TitleMenueConfig.cpp" />
+    <ClCompile Include="Engine\Application\UI\GUI\ImGuiJapaneaseFonts.cpp" />
+    <ClCompile Include="Engine\Foundation\Serialization\SerializableFieldBuilder.cpp" />
+    <ClCompile Include="Engine\Foundation\Serialization\SerializableUtil.cpp" />
+    <ClCompile Include="Engine\Graphics\Shadow\ShadowMap\ShadowBounds.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
