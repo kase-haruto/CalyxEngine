@@ -327,6 +327,10 @@ void Player::DerivativeGui() {
 		hpGauge_->ShowGui();
 	}
 
+	if(lockOn_) {
+		lockOn_->ShowGui();
+	}
+
 	ImGui::DragFloat("moveSpeed", &moveSpeed_, 0.01f, 0.0f, 10.0f);
 }
 
@@ -515,6 +519,16 @@ CalyxEngine::ParamPath Player::GetParamPath() const {
 	return {
 	CalyxEngine::ParamDomain::Game,
 	SceneObject::GetName()};
+}
+
+void Player::HeaderGui() {
+	if(ImGui::Button("save")) {
+		lockOn_->SaveConfig();
+	}
+	ImGui::SameLine();
+	if(ImGui::Button("load")) {
+		lockOn_->LoadConfig();
+	}
 }
 
 /* ======================================================================================

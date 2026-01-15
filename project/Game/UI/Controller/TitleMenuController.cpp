@@ -14,25 +14,23 @@
 // 指定のEase
 #include <Engine/Foundation/Utility/Ease/Ease.h>
 
-TitleMenuController::TitleMenuController() :
-	basePos_(CalyxMath::Vector2(750, 400.0f)),
-	baseSize_(CalyxMath::Vector2(256.0f, 64.0f)),
-	space_(120.0f) {
+TitleMenuController::TitleMenuController()  {
+	config_.LoadParams();
 
 	// basePos_ を変更しないようローカル pos を使う
-	CalyxMath::Vector2 pos = basePos_;
+	CalyxMath::Vector2 pos = config_.basePos_;
 
 	// ゲームスタートボタン
 	std::unique_ptr<Button> startButton =
 		std::make_unique<Button>("Textures/gameStart_titleButton.png",
 								 pos,
-								 baseSize_);
-	pos.y += space_;
+								 config_.baseSize_);
+	pos.y += config_.space_;
 
 	std::unique_ptr<Button> exitButton =
 		std::make_unique<Button>("Textures/endGame_titleButton.png",
 								 pos,
-								 baseSize_);
+								 config_.baseSize_);
 
 	// リストに追加
 	buttons_.push_back(std::move(startButton));
@@ -86,7 +84,7 @@ void TitleMenuController::Update(float dt) {
 	for (size_t i = 0; i < buttons_.size(); ++i) {
 		const float target = (i == selectedIndex_) ? 1.0f : 0.0f;
 		float t = selectedAnimT_[i];
-		const float step = animSpeed_ * dt;
+		const float step = config_.animSpeed_ * dt;
 		if (t < target) {
 			t = (t + step < target) ? (t + step) : target;
 		} else if (t > target) {
@@ -110,15 +108,8 @@ void TitleMenuController::ShowGui() {
 	ImGui::SeparatorText("baseParams");
 
 	bool changed = false;
-	changed |= GuiCmd::DragFloat2("basePos", basePos_);
-	changed |= GuiCmd::DragFloat2("baseSize", baseSize_);
-	changed |= GuiCmd::DragFloat("space", space_);
+	changed |= config_.ShowGui();
 
-	ImGui::Separator();
-	ImGui::SeparatorText("animation");
-	changed |= ImGui::DragFloat("enlargedScale (x)", &enlargedScale_, 0.01f, 1.0f, 2.0f);
-	changed |= ImGui::DragFloat("animSpeed", &animSpeed_, 0.1f, 0.1f, 50.0f);
-	ImGui::Checkbox("Use EaseOutBack (pop)", &useBackEase_);
 
 	if (changed) {
 		AdaptationForSprite(); // GUI変更時に即反映
@@ -165,27 +156,27 @@ void TitleMenuController::AdaptationForSprite() {
 }
 
 void TitleMenuController::LayoutButtons_() {
-	CalyxMath::Vector2 pos = basePos_;
+	CalyxMath::Vector2 pos = config_.basePos_;
 	for (size_t i = 0; i < buttons_.size(); ++i) {
 		auto* s = buttons_[i]->GetSprite();
-		if (!s) { pos.y += space_; continue; }
+		if (!s) { pos.y += config_.space_; continue; }
 
 		// easing
 		const float t = (i < selectedAnimT_.size()) ? selectedAnimT_[i] : 0.0f;
-		const float eased = useBackEase_ ? CalyxEase::EaseOutBack(t) : CalyxEase::EaseOutQuad(t);
+		const float eased = config_.useBackEase_ ? CalyxEase::EaseOutBack(t) : CalyxEase::EaseOutQuad(t);
 
-		const float scale = 1.0f + (enlargedScale_ - 1.0f) * eased;
+		const float scale = 1.0f + (config_.enlargedScale_ - 1.0f) * eased;
 
 		// 拡大後サイズ
-		CalyxMath::Vector2 size = { baseSize_.x * scale, baseSize_.y * scale };
+		CalyxMath::Vector2 size = { config_.baseSize_.x * scale, config_.baseSize_.y * scale };
 
 		// 中央を合わせるための位置補正
-		CalyxMath::Vector2 center = { pos.x + baseSize_.x * 0.5f, pos.y + baseSize_.y * 0.5f };
+		CalyxMath::Vector2 center = { pos.x + config_.baseSize_.x * 0.5f, pos.y + config_.baseSize_.y * 0.5f };
 		CalyxMath::Vector2 topLeft = { center.x - size.x * 0.5f, center.y - size.y * 0.5f };
 
 		s->SetPosition(topLeft);
 		s->SetSize(size);
 
-		pos.y += space_;
+		pos.y +=config_.space_;
 	}
 }

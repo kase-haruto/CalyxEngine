@@ -169,6 +169,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Data\Game\Config\Hud\EnemyResultConfig.cpp" />
     <ClCompile Include="Data\Game\Config\Hud\HudTransformMotionConfig.cpp" />
     <ClCompile Include="Data\Game\Config\Hud\ScoreResultConfig.cpp" />
+    <ClCompile Include="Data\Game\Config\Player\PlayerLockOnConfig.cpp" />
+    <ClCompile Include="Data\Game\Config\Title\TitleMenueConfig.cpp" />
     <ClCompile Include="Engine\Application\Effects\FxGuiHelpers.cpp" />
     <ClCompile Include="Engine\Application\Effects\FxObject.cpp" />
     <ClCompile Include="Engine\Application\Effects\Particle\Module\OverLifetime\OverLifetimeModule.cpp" />
@@ -569,6 +571,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Data\Game\Config\Hud\EnemyResultConfig.h" />
     <ClInclude Include="Data\Game\Config\Hud\HudTransformMotionConfig.h" />
     <ClInclude Include="Data\Game\Config\Hud\ScoreResultConfig.h" />
+    <ClInclude Include="Data\Game\Config\Player\PlayerLockOnConfig.h" />
+    <ClInclude Include="Data\Game\Config\Title\TitleMenueConfig.h" />
     <ClInclude Include="Engine\Application\Effects\FxGuiHelpers.h" />
     <ClInclude Include="Engine\Application\Effects\FxObject.h" />
     <ClInclude Include="Engine\Application\Effects\Particle\Module\OverLifetime\OverLifetimeModule.h" />

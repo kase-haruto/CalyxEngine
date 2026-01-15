@@ -15,13 +15,15 @@ namespace CalyxEngine {
 		if(ImGui::Button("Save Params")) { SaveParams(); }
 	}
 
-	void SerializableObject::ShowInspector() {
+	bool SerializableObject::ShowGui() {
 		VariableCategoryNode root;
 		BuildCategoryTree(root, Fields());
 
+		bool changed = false;
 		for (const auto& [_, node] : root.children) {
-			DrawCategoryNode(node);
+			changed |= DrawCategoryNode(node);
 		}
+		return changed;
 	}
 
 } // namespace CalyxEngine

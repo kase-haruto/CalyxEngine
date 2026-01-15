@@ -6,6 +6,7 @@
 #include <Engine/Renderer/Sprite/Sprite.h>
 
 // game
+#include "Data/Game/Config/Player/PlayerLockOnConfig.h"
 #include "Game/3dObject/Actor/Player/Context/PlayerContext.h"
 
 #include <Game/3dObject/Actor/Enemy/Enemy.h>
@@ -56,6 +57,13 @@ public:
 	 */
 	std::vector<Sprite*> GetSprites() const;
 
+	/**
+	 * \brief debug GUI 表示
+	 */
+	void ShowGui();
+	void SaveConfig();
+	void LoadConfig();
+
 private:
 	/**
 	 * \brief 自動ロックオン更新
@@ -90,12 +98,6 @@ private:
 	std::vector<std::unique_ptr<Sprite>> markerPool_;		//< ロックオンマーカー再利用プール
 	std::vector<std::unique_ptr<Sprite>> lockOnSprites_;	//< ロックオンマーカー表示中リスト
 
-	size_t maxLockOn_ = 5;					//< 最大ロックオン数
-
-	float lockOnRadiusPx_        = 60.0f;	//< ロックオン表示半径(px)
-	float lockOnAcquireRadiusPx_ = 60.0f;	//< ロックオン獲得半径(px)
-	float lockOnReleaseRadiusPx_ = 400.0f;	//< ロックオン解除半径(px)
-	float lockOnRefreshInterval_ = 0.15f;	//< ロックオン判定間隔（秒）
-	float lockOnRefreshTimer_    = 0.0f;	//< ロックオン判定タイマー
+	PlayerLockOnConfig config_;
 
 };

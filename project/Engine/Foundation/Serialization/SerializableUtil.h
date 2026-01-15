@@ -14,7 +14,7 @@ namespace CalyxEngine {
 		VariableCategoryNode& root,
 		const std::vector<SerializableField>& fields);
 
-	void DrawField(const SerializableField& f);
+	bool DrawField(const SerializableField& f);
 
-	void DrawCategoryNode(const VariableCategoryNode& node);
+	bool DrawCategoryNode(const VariableCategoryNode& node);
 }

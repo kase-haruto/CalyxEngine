@@ -43,8 +43,8 @@ namespace CalyxEngine {
 		std::vector<SerializableField>&       FieldsMutable() { return fields_; }
 		const std::vector<SerializableField>& Fields() const { return fields_; }
 
-	private:
-		void ShowInspector();
+	public:
+		bool ShowGui();
 
 	protected:
 		SerializableObject() = default;

@@ -37,8 +37,10 @@ void CalyxEngine::BuildCategoryTree(VariableCategoryNode& root,const std::vector
 	}
 }
 
-void CalyxEngine::DrawField(const SerializableField& f)
+bool CalyxEngine::DrawField(const SerializableField& f)
 {
+    bool changed = false;
+
     ImGui::PushID(&f);
 
     ImGui::AlignTextToFramePadding();
@@ -56,12 +58,13 @@ void CalyxEngine::DrawField(const SerializableField& f)
         using T    = std::remove_const_t<RawT>;
 
         // =========================
-        // const 専用（編集UIなし）
+        // 表示のみ（読み取り専用）
         // =========================
-        if constexpr (std::is_const_v<RawT>)
-        {
+        auto drawText = [&]() {
             if constexpr (std::is_same_v<T, int32_t>)
                 ImGui::Text("%d", *p);
+            else if constexpr (std::is_same_v<T, size_t>)
+                ImGui::Text("%zu", *p);
             else if constexpr (std::is_same_v<T, float>)
                 ImGui::Text("%.3f", *p);
             else if constexpr (std::is_same_v<T, bool>)
@@ -72,35 +75,58 @@ void CalyxEngine::DrawField(const SerializableField& f)
                 ImGui::Text("(%.2f, %.2f, %.2f)", p->x, p->y, p->z);
             else if constexpr (std::is_same_v<T, CalyxMath::Vector4>)
                 ImGui::Text("(%.2f, %.2f, %.2f, %.2f)", p->x, p->y, p->z, p->w);
-        }
+        };
 
-        // =========================
-        // 非 const 専用（編集可）
-        // =========================
+        if constexpr (std::is_const_v<RawT>)
+        {
+            drawText();
+        }
         else
         {
-            if constexpr (std::is_same_v<T, int32_t>)
-                GuiCmd::DragInt("##v", *p, 1.0f);
-            else if constexpr (std::is_same_v<T, float>)
-                f.hasRange
-                    ? GuiCmd::SliderFloat("##v", *p, f.min, f.max)
-                    : GuiCmd::DragFloat("##v", *p, f.speed);
-            else if constexpr (std::is_same_v<T, bool>)
-                GuiCmd::CheckBox("##v", *p);
-            else if constexpr (std::is_same_v<T, CalyxMath::Vector2>)
-                GuiCmd::DragFloat2("##v", *p, f.speed);
-            else if constexpr (std::is_same_v<T, CalyxMath::Vector3>)
-                GuiCmd::DragFloat3("##v", *p, f.speed);
-            else if constexpr (std::is_same_v<T, CalyxMath::Vector4>)
-                GuiCmd::DragFloat4("##v", *p, f.speed);
+            if (f.readOnly)
+            {
+                drawText();
+            }
+            else
+            {
+                // =========================
+                // 編集可
+                // =========================
+                if constexpr (std::is_same_v<T, int32_t>)
+                    changed |= GuiCmd::DragInt("##v", *p, 1.0f);
+                else if constexpr (std::is_same_v<T, size_t>)
+                {
+                    int temp = static_cast<int>(*p);
+                    if (GuiCmd::DragInt("##v", temp, 1.0f, f.min, f.max)) {
+                        *p = static_cast<size_t>(std::max(0, temp));
+                        changed = true;
+                    }
+                }
+                else if constexpr (std::is_same_v<T, float>)
+                    changed |= (f.hasRange
+                        ? GuiCmd::SliderFloat("##v", *p, f.min, f.max)
+                        : GuiCmd::DragFloat("##v", *p, f.speed));
+                else if constexpr (std::is_same_v<T, bool>)
+                    changed |= GuiCmd::CheckBox("##v", *p);
+                else if constexpr (std::is_same_v<T, CalyxMath::Vector2>)
+                    changed |= GuiCmd::DragFloat2("##v", *p, f.speed);
+                else if constexpr (std::is_same_v<T, CalyxMath::Vector3>)
+                    changed |= GuiCmd::DragFloat3("##v", *p, f.speed);
+                else if constexpr (std::is_same_v<T, CalyxMath::Vector4>)
+                    changed |= GuiCmd::DragFloat4("##v", *p, f.speed);
+            }
         }
 
     }, f.ptr);
 
     ImGui::PopID();
+
+    return changed;
 }
 
-void CalyxEngine::DrawCategoryNode(const VariableCategoryNode& node) {
+bool CalyxEngine::DrawCategoryNode(const VariableCategoryNode& node) {
+
+	bool anyChanged = false;
 
 	ImGuiTreeNodeFlags flags =
 		ImGuiTreeNodeFlags_DefaultOpen |
@@ -108,11 +134,13 @@ void CalyxEngine::DrawCategoryNode(const VariableCategoryNode& node) {
 		ImGuiTreeNodeFlags_FramePadding;
 
 	bool open = ImGui::TreeNodeEx(node.name.c_str(),flags);
-	if(!open) return;
+	if(!open) return false;
 
-	for(const auto& [_, child] : node.children) { DrawCategoryNode(child); }
+	for(const auto& [_, child] : node.children) { anyChanged |= DrawCategoryNode(child); }
 
-	for(const auto* f : node.fields) { DrawField(*f); }
+	for(const auto* f : node.fields) { anyChanged |= DrawField(*f); }
 
 	ImGui::TreePop();
+
+	return anyChanged;
 }
