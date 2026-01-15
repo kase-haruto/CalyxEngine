@@ -1,4 +1,5 @@
 #pragma once
+#include "Data/Game/Config/Player/PlayerDamageConfig.h"
 #include "Game/3dObject/Actor/Player/Context/PlayerContext.h"
 
 #include <memory>
@@ -46,6 +47,18 @@ public:
 	 * \param seconds
 	 */
 	void RequestInvincible(float seconds);
+	/**
+	 * \brief GUI 表示
+	 */
+	void ShowGUi();
+	/**
+	 * \brief パラメータ保存
+	 */
+	void SaveParam();
+	/**
+	 * \brief パラメータ読み込み
+	 */
+	void LoadParam();
 
 private:
 	/**
@@ -57,13 +70,11 @@ private:
 private:
 	PlayerStateContext ctx_;
 
+	PlayerDamageConfig config_;
+
 	// --- 無敵 ---
 	float invincibleTimer_       = 0.0f;
 	float invincibleBlinkAccum_ = 0.0f;
 	bool  invincibleBlinkState_ = true;
 
-	// --- 定数 ---
-	static constexpr float kHitIFrameSec  = 1.5f;
-	static constexpr float kBlinkHz       = 12.0f;
-	static constexpr float kBlinkInterval = 1.0f / kBlinkHz;
 };

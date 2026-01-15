@@ -56,12 +56,17 @@ public:
 	 * \return スプライトリスト
 	 */
 	std::vector<Sprite*> GetSprites() const;
-
 	/**
 	 * \brief debug GUI 表示
 	 */
 	void ShowGui();
+	/**
+	 * \brief 設定の保存
+	 */
 	void SaveConfig();
+	/**
+	 * \brief 設定の読み込み
+	 */
 	void LoadConfig();
 
 private:
