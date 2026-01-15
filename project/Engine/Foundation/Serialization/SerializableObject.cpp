@@ -1,4 +1,5 @@
 #include "SerializableObject.h"
+#include "SerializableUtil.h"
 #include "ParamStore.h"
 #include "imgui/imgui.h"
 
@@ -12,6 +13,17 @@ namespace CalyxEngine {
 		if(ImGui::Button("Load Params")) { LoadParams(); }
 		ImGui::SameLine();
 		if(ImGui::Button("Save Params")) { SaveParams(); }
+	}
+
+	bool SerializableObject::ShowGui() {
+		VariableCategoryNode root;
+		BuildCategoryTree(root, Fields());
+
+		bool changed = false;
+		for (const auto& [_, node] : root.children) {
+			changed |= DrawCategoryNode(node);
+		}
+		return changed;
 	}
 
 } // namespace CalyxEngine

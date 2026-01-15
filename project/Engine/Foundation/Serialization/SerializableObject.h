@@ -3,6 +3,7 @@
 #include "Engine/Foundation/Math/Vector2.h"
 #include "Engine/Foundation/Math/Vector4.h"
 #include "SerializableField.h"
+#include "SerializableFieldBuilder.h"
 
 #include <string>
 #include <type_traits>
@@ -17,8 +18,10 @@ namespace CalyxEngine {
 	};
 
 	struct ParamPath {
-		ParamDomain domain; //< パラメータのドメイン
-		std::string name; //< パラメータ名
+		ParamDomain domain;
+		std::string name;
+
+		std::optional<std::string> subDirectory;
 	};
 
 	/*-----------------------------------------------------------------------------------------
@@ -37,7 +40,7 @@ namespace CalyxEngine {
 		 * \brief パラメータパスを取得
 		 * \return パラメータパス
 		 */
-		virtual ParamPath GetParamPath() const {return{ ParamDomain::Game,"Default"};}
+		virtual ParamPath GetParamPath() const { return {ParamDomain::Game,"Default",std::nullopt}; }
 
 		// --- 各オブジェクトから呼ぶAPI ---
 		/**
@@ -67,6 +70,9 @@ namespace CalyxEngine {
 		 */
 		const std::vector<SerializableField>& Fields() const { return fields_; }
 
+	public:
+		bool ShowGui();
+
 	protected:
 		/**
 		 * \brief コンストラクタ
@@ -91,8 +97,6 @@ namespace CalyxEngine {
 			);
 			fields_.push_back(SerializableField{ key, &value });
 		}
-
-
 
 	private:
 		//===================================================================*/

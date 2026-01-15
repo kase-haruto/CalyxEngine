@@ -9,8 +9,9 @@ PlayerDodgeSystem::~PlayerDodgeSystem() = default;
 /////////////////////////////////////////////////////////////////////////////////////////
 //			初期化処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void PlayerDodgeSystem::Initialize(const PlayerDodgeConfig& cfg) {
-	cfg_   = cfg;
+void PlayerDodgeSystem::Initialize() {
+	cfg_.LoadParams();
+
 	state_ = DodgeState::Idle;
 	timer_ = 0.0f;
 	cooldown_ = 0.0f;
@@ -108,6 +109,17 @@ void PlayerDodgeSystem::ChangeState(DodgeState next) {
 /////////////////////////////////////////////////////////////////////////////////////////
 void PlayerDodgeSystem::SetOnRequestInvincible(std::function<void(float)> fn) {
 	onRequestInvincible_ = std::move(fn);
+}
+
+void PlayerDodgeSystem::ShowGui() {
+	cfg_.ShowGui();
+}
+
+void PlayerDodgeSystem::SaveConfig() {
+	cfg_.SaveParams();
+}
+void PlayerDodgeSystem::LoadConfig() {
+	cfg_.LoadParams();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

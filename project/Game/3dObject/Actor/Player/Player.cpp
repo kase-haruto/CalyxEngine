@@ -12,6 +12,7 @@
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/Objects/Collider/BoxCollider.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
+
 // game
 #include <Game/3dObject/Actor/Bullet/Container/PlayerBulletContainer.h>
 #include <Game/3dObject/Actor/Player/DangerSense/PlayerDangerSense.h>
@@ -22,7 +23,6 @@
 #include "Damage/PlayerDamageHandler.h"
 #include "Dodge/PlayerDodgeSystem.h"
 #include "Engine/Foundation/Utility/Func/CxUtils.h"
-
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <externals/imgui/imgui.h>
 
@@ -168,14 +168,8 @@ void Player::Initialize() {
 
 	// ---- 回避コンポーネント ----
 	if(!dodgeSystem_) {
-		PlayerDodgeConfig cfg;
-		cfg.useCustomCurve = true;
-		cfg.lateralScale   = 0.0f;
-		cfg.backwardScale  = 0.70f;
-		cfg.spinTurns	   = 1.0f;
-
 		dodgeSystem_ = std::make_unique<PlayerDodgeSystem>();
-		dodgeSystem_->Initialize(cfg);
+		dodgeSystem_->Initialize();
 	}
 
 	// 回避モーション
@@ -188,7 +182,7 @@ void Player::Initialize() {
 	if(!danger_) {
 
 		danger_ = std::make_unique<PlayerDangerSense>();
-		danger_->Initialize(ctxBuilder.BuildState(), {});
+		danger_->Initialize(ctxBuilder.BuildState());
 	}
 
 	// DamageHandler
@@ -323,11 +317,24 @@ void Player::Draw([[maybe_unused]] ID3D12GraphicsCommandList* cmdList) {}
 //		imgui
 /////////////////////////////////////////////////////////////////////////////////////////
 void Player::DerivativeGui() {
-	if(ImGui::Button("Save")) {
-		SerializableObject::SaveParams();
-	}
 	if(hpGauge_) {
 		hpGauge_->ShowGui();
+	}
+
+	if(lockOn_) {
+		lockOn_->ShowGui();
+	}
+
+	if(dodgeSystem_) {
+		dodgeSystem_->ShowGui();
+	}
+
+	if(danger_) {
+		danger_->ShowGui();
+	}
+
+	if(damageHandler_) {
+		damageHandler_->ShowGUi();
 	}
 
 	ImGui::DragFloat("moveSpeed", &moveSpeed_, 0.01f, 0.0f, 10.0f);
@@ -470,43 +477,6 @@ void Player::UpdateTilt(const CalyxMath::Vector3& inputVector) {
 ///////////////////////////////////////////////////////////////////////////////////
 //		レティクルの座標更新
 ///////////////////////////////////////////////////////////////////////////////////
-void Player::UpdateReticlePosition() {
-	constexpr float moveSpeed		 = 6.0f;
-	constexpr float stickSensitivity = 300.0f; // スティック感度を大きめに
-	float			dt				 = ClockManager::GetInstance()->GetDeltaTime();
-
-	CalyxMath::Vector3 offset = CalyxMath::Vector3::Zero();
-
-	// キーボード入力
-	if(Input::GetInstance()->PushKey(DIK_UP)) offset.y += 3.0f;
-	if(Input::GetInstance()->PushKey(DIK_DOWN)) offset.y -= 3.0f;
-	if(Input::GetInstance()->PushKey(DIK_LEFT)) offset.x -= 3.0f;
-	if(Input::GetInstance()->PushKey(DIK_RIGHT)) offset.x += 3.0f;
-
-	// ゲームパッド右スティック
-	CalyxMath::Vector2 rightStick = Input::GetInstance()->GetRightStick();
-
-	// スティック感度を別で調整
-	offset.x += rightStick.x * stickSensitivity * dt;
-	offset.y += rightStick.y * stickSensitivity * dt;
-
-	// キーボードだけ正規化
-	CalyxMath::Vector3 keyboardOffset = offset;
-	keyboardOffset.x -= rightStick.x * stickSensitivity * dt;
-	keyboardOffset.y -= rightStick.y * stickSensitivity * dt;
-
-	if(keyboardOffset.Length() > 0.0f) {
-		keyboardOffset.Normalize();
-		keyboardOffset *= moveSpeed * dt;
-		offset.x = keyboardOffset.x + rightStick.x * stickSensitivity * dt;
-		offset.y = keyboardOffset.y + rightStick.y * stickSensitivity * dt;
-	}
-
-	reticleTransform_.translation += offset;
-	if(clampReticleInView_) {
-		ClampWorldTransformInView(reticleTransform_, clampMarginXpx_, clampMarginYpx_);
-	}
-}
 
 void Player::MakeSerializableParam() {
 	SerializableObject::AddField("isAutoLockOn", autoLockOn_);
@@ -518,6 +488,22 @@ CalyxEngine::ParamPath Player::GetParamPath() const {
 	return {
 	CalyxEngine::ParamDomain::Game,
 	SceneObject::GetName()};
+}
+
+void Player::HeaderGui() {
+	if(ImGui::Button("save")) {
+		lockOn_->SaveConfig();
+		dodgeSystem_->SaveConfig();
+		danger_->SaveParam();
+		damageHandler_->SaveParam();
+	}
+	ImGui::SameLine();
+	if(ImGui::Button("load")) {
+		lockOn_->LoadConfig();
+		dodgeSystem_->LoadConfig();
+		danger_->LoadParam();
+		damageHandler_->LoadParam();
+	}
 }
 
 /* ======================================================================================

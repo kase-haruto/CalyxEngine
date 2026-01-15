@@ -14,18 +14,19 @@ PlayerDamageHandler::~PlayerDamageHandler() = default;
 // 初期化
 /////////////////////////////////////////////////////////////////////////////////////////
 void PlayerDamageHandler::Initialize(const PlayerStateContext& context) {
-	ctx_				  = context;
-	invincibleTimer_	  = 0.0f;
-	invincibleBlinkAccum_ = 0.0f;
-	invincibleBlinkState_ = true;
+	config_.LoadParams();
+	// インターバルが変更があれば再計算
+	config_.kBlinkInterval = 1.0f / config_.kBlinkHz;
+	ctx_				   = context;
+	invincibleTimer_	   = 0.0f;
+	invincibleBlinkAccum_  = 0.0f;
+	invincibleBlinkState_  = true;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // 更新
 /////////////////////////////////////////////////////////////////////////////////////////
-void PlayerDamageHandler::Update(float dt) {
-	UpdateInvincibility(dt);
-}
+void PlayerDamageHandler::Update(float dt) { UpdateInvincibility(dt); }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // 被弾処理
@@ -47,7 +48,7 @@ void PlayerDamageHandler::OnHit(Collider* other) {
 	}
 
 	// ===== 無敵付与 =====
-	SetInvincibleFor(kHitIFrameSec);
+	SetInvincibleFor(config_.kHitIFrameSec);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -69,9 +70,7 @@ void PlayerDamageHandler::SetInvincibleFor(float seconds) {
 /////////////////////////////////////////////////////////////////////////////////////////
 // 無敵中か
 /////////////////////////////////////////////////////////////////////////////////////////
-bool PlayerDamageHandler::IsInvincible() const {
-	return invincibleTimer_ > 0.0f;
-}
+bool PlayerDamageHandler::IsInvincible() const { return invincibleTimer_ > 0.0f; }
 
 void PlayerDamageHandler::RequestInvincible(float seconds) {
 	if(seconds <= 0.0f) return;
@@ -85,6 +84,25 @@ void PlayerDamageHandler::RequestInvincible(float seconds) {
 		ctx_.setVisible(false);
 	}
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// GUI 表示
+/////////////////////////////////////////////////////////////////////////////////////////
+void PlayerDamageHandler::ShowGUi() {
+	if(config_.ShowGui()) {
+		// インターバルが変更があれば再計算
+		config_.kBlinkInterval = 1.0f / config_.kBlinkHz;
+	}
+}
+
+void PlayerDamageHandler::SaveParam() {
+	config_.SaveParams();
+}
+
+void PlayerDamageHandler::LoadParam() {
+	config_.LoadParams();
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////
 // 無敵更新（点滅処理）
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -103,10 +121,10 @@ void PlayerDamageHandler::UpdateInvincibility(float dt) {
 
 	// 無敵中は一定間隔で描画トグル
 	invincibleBlinkAccum_ += dt;
-	while(invincibleBlinkAccum_ >= kBlinkInterval) {
-		invincibleBlinkAccum_ -= kBlinkInterval;
+	while(invincibleBlinkAccum_ >= config_.kBlinkInterval) {
+		invincibleBlinkAccum_ -= config_.kBlinkInterval;
 		invincibleBlinkState_ = !invincibleBlinkState_;
 
-			ctx_.setVisible(invincibleBlinkState_);
+		ctx_.setVisible(invincibleBlinkState_);
 	}
 }

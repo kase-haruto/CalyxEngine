@@ -26,6 +26,11 @@ namespace CalyxEngine {
 		// Game / Engine / Editor
 		p /= ToString(path.domain);
 
+		// サブディレクトリ
+		if (path.subDirectory.has_value()) {
+			p /= path.subDirectory.value();
+		}
+
 		// name フォルダ
 		p /= path.name;
 

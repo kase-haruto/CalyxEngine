@@ -1,0 +1,9 @@
+{
+    "fields": {
+        "graceTime": 0.20000000298023224,
+        "margin": 3.0,
+        "maxCheckDistance": 80.0,
+        "playerInflate": 0.5,
+        "throttleFrames": 1
+    }
+}

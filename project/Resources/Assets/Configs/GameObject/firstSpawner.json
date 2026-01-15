@@ -3,10 +3,10 @@
     "deactivateRadius": 100.0,
     "formation": {
         "angularSpeed": 1.0,
-        "baseZ": 84.0,
-        "dissolvePattern": 2,
+        "baseZ": 78.0,
+        "dissolvePattern": 1,
         "dissolveTime": 0.0,
-        "motionType": 2,
+        "motionType": 0,
         "radius": 30.0,
         "snakeAmpX": 25.0,
         "snakeAmpY": 10.0,

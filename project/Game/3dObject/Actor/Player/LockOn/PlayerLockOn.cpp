@@ -15,7 +15,8 @@ PlayerLockOn::~PlayerLockOn() = default;
 //////////////////////////////////////////////////////////////////////////////
 void PlayerLockOn::Initialize(const PlayerActionContext& ctx) {
 	ctx_ 				   = ctx;
-	PrewarmMarkers(maxLockOn_);
+	config_.LoadParams();
+	PrewarmMarkers(config_.maxLockOn_);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,9 +48,8 @@ void PlayerLockOn::Update(float dt) {
 //		ロックオン要求
 ///////////////////////////////////////////////////////////////////////////////
 void PlayerLockOn::RequestLockOn() {
-	if(lockedOnTargets_.size() >= maxLockOn_) return;
+	if(lockedOnTargets_.size() >= config_.maxLockOn_) return;
 
-	// constexpr size_t kMaxLockOn = 4; //< 使っているなら削除 or 下の maxLockOn_ に置換
 	auto* cam = CameraManager::GetMain3d();
 	if(!cam) return;
 
@@ -66,7 +66,7 @@ void PlayerLockOn::RequestLockOn() {
 		if(!cam->IsVisible(enemy->GetWorldAABB())) continue;
 
 		CalyxMath::Vector2 enemyScreen = CalyxMath::WorldToScreen(enemy->GetWorldPosition());
-		if((enemyScreen - reticleScreen).Length() > lockOnRadiusPx_) continue;
+		if((enemyScreen - reticleScreen).Length() >config_.lockOnRadiusPx_) continue;
 
 		lockedOnTargets_.push_back(enemy);
 
@@ -80,7 +80,7 @@ void PlayerLockOn::RequestLockOn() {
 		marker->SetUvRotate(0.0f);
 		lockOnSprites_.push_back(std::move(marker));
 
-		if(lockedOnTargets_.size() >= maxLockOn_) break;
+		if(lockedOnTargets_.size() >= config_.maxLockOn_) break;
 	}
 }
 
@@ -99,10 +99,10 @@ void PlayerLockOn::RequestLockOnClear() {
 //		自動ロックオン更新
 //////////////////////////////////////////////////////////////////////////////
 void PlayerLockOn::UpdateAutoLockOn(float dt) {
-	lockOnRefreshTimer_ -= dt;
+	config_.lockOnRefreshTimer_ -= dt;
 	// まだ間隔が来ていない
-	if(lockOnRefreshTimer_ > 0.0f) return;
-	lockOnRefreshTimer_ = lockOnRefreshInterval_;
+	if(config_.lockOnRefreshTimer_ > 0.0f) return;
+	config_.lockOnRefreshTimer_ =config_.lockOnRefreshInterval_;
 
 	auto* cam = CameraManager::GetMain3d();
 	if(!cam) return;
@@ -123,7 +123,7 @@ void PlayerLockOn::UpdateAutoLockOn(float dt) {
 			// レティクルとの距離が外れたら解除
 			CalyxMath::Vector2 enemyScreen = CalyxMath::WorldToScreen(enemy->GetWorldPosition());
 			float	dist		= (enemyScreen - reticleScreen).Length();
-			if(dist > lockOnReleaseRadiusPx_) remove = true;
+			if(dist > config_.lockOnReleaseRadiusPx_) remove = true;
 		}
 
 		// ロックオン解除処理
@@ -137,7 +137,7 @@ void PlayerLockOn::UpdateAutoLockOn(float dt) {
 	}
 
 	// 新規取得
-	if(lockedOnTargets_.size() < maxLockOn_) {
+	if(lockedOnTargets_.size() <config_.maxLockOn_) {
 		for(const auto& e : targets_) {
 			if(!e || !e->GetIsAlive()) continue;
 			if(std::find(lockedOnTargets_.begin(), lockedOnTargets_.end(), e) != lockedOnTargets_.end()) continue;
@@ -146,7 +146,7 @@ void PlayerLockOn::UpdateAutoLockOn(float dt) {
 			// レティクルとの距離判定
 			CalyxMath::Vector2 s = CalyxMath::WorldToScreen(e->GetWorldPosition());
 			float	d = (s - reticleScreen).Length();
-			if(d > lockOnAcquireRadiusPx_) continue;
+			if(d > config_.lockOnAcquireRadiusPx_) continue;
 
 			// ヒット：登録 & マーカー生成
 			auto marker = AcquireMarker();
@@ -158,7 +158,7 @@ void PlayerLockOn::UpdateAutoLockOn(float dt) {
 			marker->SetSize({64.0f, 64.0f});
 			lockOnSprites_.push_back(std::move(marker));
 
-			if(lockedOnTargets_.size() >= maxLockOn_) break;
+			if(lockedOnTargets_.size() >= config_.maxLockOn_) break;
 		}
 	}
 }
@@ -190,7 +190,7 @@ std::unique_ptr<Sprite> PlayerLockOn::AcquireMarker() {
 		return s;
 	}
 
-	if(lockOnSprites_.size() + markerPool_.size() < maxLockOn_) {
+	if(lockOnSprites_.size() + markerPool_.size() < config_.maxLockOn_) {
 		auto s = std::make_unique<Sprite>("Textures/lockOn.png");
 		s->Initialize({0, 0}, {64, 64});
 		s->SetAnchorPoint({0.5f, 0.5f});
@@ -239,4 +239,19 @@ std::vector<Sprite*> PlayerLockOn::GetSprites() const {
 	std::vector<Sprite*> out;
 	for(auto& s : lockOnSprites_) out.push_back(s.get());
 	return out;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//		デバッグui
+//////////////////////////////////////////////////////////////////////////////
+void PlayerLockOn::ShowGui() {
+	config_.ShowGui();
+}
+
+void PlayerLockOn::SaveConfig() {
+	config_.SaveParams();
+}
+
+void PlayerLockOn::LoadConfig() {
+	config_.LoadParams();
 }

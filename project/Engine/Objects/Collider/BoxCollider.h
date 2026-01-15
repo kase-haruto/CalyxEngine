@@ -83,6 +83,7 @@ public:
 	 */
 	const CalyxMath::Vector3& GetSize() const { return shape_.size; }
 
+
 protected:
 	//===================================================================*/
 	//                    protected member variables

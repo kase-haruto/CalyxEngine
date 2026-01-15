@@ -210,17 +210,15 @@ namespace CalyxEditor {
 		// --- デバッグビューポート上にマウスがあるか？ -----------------------
 		bool overDebugViewport = false;
 		if(debugViewport_ && debugViewport_->IsShow()) {
-			const CalyxMath::Vector2 origin = debugViewport_->GetPosition(); // コンテンツ左上
-			const CalyxMath::Vector2 size	= debugViewport_->GetSize();	 // コンテンツサイズ
-			const ImVec2			 mouse	= ImGui::GetMousePos();
-
-			overDebugViewport =
-				(mouse.x >= origin.x && mouse.y >= origin.y &&
-				 mouse.x <= origin.x + size.x && mouse.y <= origin.y + size.y);
+			overDebugViewport = debugViewport_->IsHovered();
 		}
 
 		// ImGui がマウスを掴んでいても、ビューポート上なら許可
 		const bool uiBlocksClick = io.WantCaptureMouse && !overDebugViewport;
+
+		if (auto* debugCam = CameraManager::GetDebug()) {
+			debugCam->SetInputEnabled(overDebugViewport);
+		}
 
 		if(debugViewport_ && debugViewport_->IsShow() && !guizmoActive && !uiBlocksClick) {
 			const bool imguiEdge = ImGui::IsMouseClicked(ImGuiMouseButton_Left);
