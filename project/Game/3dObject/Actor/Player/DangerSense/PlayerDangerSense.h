@@ -3,6 +3,7 @@
 #include <vector>
 
 // engine
+#include "Data/Game/Config/Player/PlayerDangerSceneConfig.h"
 #include "Game/3dObject/Actor/Bullet/Container/BulletContainer.h"
 #include "Game/3dObject/Actor/Player/Context/PlayerContext.h"
 
@@ -14,18 +15,6 @@ class PlayerDodge;
 class EnemyDirectory;
 class EnemyBulletContainer;
 class BaseBullet;
-
-struct DangerSenseConfig {
-	float playerInflate    = 0.5f;
-	float margin           = 3.0f;
-	float maxCheckDistance = 80.0f;
-	int   throttleFrames   = 1;
-	float graceTime        = 0.2f; // 回避猶予時間
-
-	// UI
-	std::string uiTex  = "Textures/UI/dodgeUI.png";
-	CalyxMath::Vector2     uiSize = {128.0f,64.0f};
-};
 
 /**
  * \brief プレイヤー危険察知クラス
@@ -42,7 +31,7 @@ public:
 	 * \param ctx コンテキスト
 	 * \param cfg 設定
 	 */
-	void Initialize(const PlayerStateContext& ctx,const DangerSenseConfig& cfg = {});
+	void Initialize(const PlayerStateContext& ctx);
 	/** \brief 更新
 	 * \param dt デルタタイム
 	 */
@@ -63,6 +52,18 @@ public:
 	 * \param container 弾コンテナポインタ
 	 */
 	void AddBulletContainer(const BulletContainer* container);
+	/**
+	 * \brief デバッグGUI表示
+	 */
+	void ShowGui();
+	/**
+	 * \brief パラメータセーブ
+	 */
+	void SaveParam();
+	/**
+	 * \brief パラメータロード
+	 */
+	void LoadParam();
 
 private:
 	//=====================================================================*/
