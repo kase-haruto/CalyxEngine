@@ -3,6 +3,7 @@
 #include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
 #include <Engine/Objects/Collider/BoxCollider.h>
+#include <Engine\Objects\Collider\SphereCollider.h>
 
 HomingBullet::HomingBullet(const std::string& modelName, const std::string& name) 
 	:BaseBullet::BaseBullet(modelName, name){

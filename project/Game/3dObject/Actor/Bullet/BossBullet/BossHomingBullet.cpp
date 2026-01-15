@@ -5,6 +5,7 @@
 // Engine
 #include <Engine/Scene/Utility/SceneUtility.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
+#include <Engine\Objects\Collider\SphereCollider.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //		ctor / dtor
