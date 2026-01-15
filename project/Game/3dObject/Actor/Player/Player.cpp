@@ -168,14 +168,8 @@ void Player::Initialize() {
 
 	// ---- 回避コンポーネント ----
 	if(!dodgeSystem_) {
-		PlayerDodgeConfig cfg;
-		cfg.useCustomCurve = true;
-		cfg.lateralScale   = 0.0f;
-		cfg.backwardScale  = 0.70f;
-		cfg.spinTurns	   = 1.0f;
-
 		dodgeSystem_ = std::make_unique<PlayerDodgeSystem>();
-		dodgeSystem_->Initialize(cfg);
+		dodgeSystem_->Initialize();
 	}
 
 	// 回避モーション
@@ -329,6 +323,10 @@ void Player::DerivativeGui() {
 
 	if(lockOn_) {
 		lockOn_->ShowGui();
+	}
+
+	if(dodgeSystem_) {
+		dodgeSystem_->ShowGui();
 	}
 
 	ImGui::DragFloat("moveSpeed", &moveSpeed_, 0.01f, 0.0f, 10.0f);
