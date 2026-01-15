@@ -9,4 +9,4 @@ PlayerLockOnConfig::PlayerLockOnConfig() {
 	AddField("lockOnRefreshTimer", lockOnRefreshTimer_).Category("lockon").Tooltip("ロックオン判定タイマー").ReadOnly();
 }
 
-CalyxEngine::ParamPath PlayerLockOnConfig::GetParamPath() const { {return {CalyxEngine::ParamDomain::Game, "PlayerLockOn"}; } }
+CalyxEngine::ParamPath PlayerLockOnConfig::GetParamPath() const { {return {CalyxEngine::ParamDomain::Game, "PlayerLockOn","Player"}; } }
