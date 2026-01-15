@@ -1,0 +1,19 @@
+{
+    "fields": {
+        "backwardScale": 2.0,
+        "cooldown": 0.3499999940395355,
+        "distance": 10.0,
+        "dodgeKey": 42,
+        "duration": 0.210999995470047,
+        "invuln": 0.20000000298023224,
+        "lateralScale": 0.0,
+        "perfectInvulnBonus": 0.20000000298023224,
+        "perfectWindowAfter": 0.07999999821186066,
+        "perfectWindowBefore": 0.03999999910593033,
+        "recovery": 0.14000000059604645,
+        "spinTurns": 1.0,
+        "startup": 0.05999999865889549,
+        "useCameraForward": true,
+        "useCustomCurve": true
+    }
+}
