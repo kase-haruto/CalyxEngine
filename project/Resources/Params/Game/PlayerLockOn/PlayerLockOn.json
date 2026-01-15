@@ -3,7 +3,7 @@
         "lockOnAcquireRadiusPx": 141.0469970703125,
         "lockOnRadiusPx": 123.9530029296875,
         "lockOnRefreshInterval": 0.1420000046491623,
-        "lockOnRefreshTimer": 0.025250103324651718,
+        "lockOnRefreshTimer": 0.07695730030536652,
         "lockOnReleaseRadiusPx": 451.27899169921875,
         "maxLockOn": 12
     }
