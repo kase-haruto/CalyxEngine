@@ -182,7 +182,7 @@ void Player::Initialize() {
 	if(!danger_) {
 
 		danger_ = std::make_unique<PlayerDangerSense>();
-		danger_->Initialize(ctxBuilder.BuildState(), {});
+		danger_->Initialize(ctxBuilder.BuildState());
 	}
 
 	// DamageHandler
@@ -327,6 +327,10 @@ void Player::DerivativeGui() {
 
 	if(dodgeSystem_) {
 		dodgeSystem_->ShowGui();
+	}
+
+	if(danger_) {
+		danger_->ShowGui();
 	}
 
 	ImGui::DragFloat("moveSpeed", &moveSpeed_, 0.01f, 0.0f, 10.0f);
@@ -523,11 +527,13 @@ void Player::HeaderGui() {
 	if(ImGui::Button("save")) {
 		lockOn_->SaveConfig();
 		dodgeSystem_->SaveConfig();
+		danger_->SaveParam();
 	}
 	ImGui::SameLine();
 	if(ImGui::Button("load")) {
 		lockOn_->LoadConfig();
 		dodgeSystem_->LoadConfig();
+		danger_->LoadParam();
 	}
 }
 

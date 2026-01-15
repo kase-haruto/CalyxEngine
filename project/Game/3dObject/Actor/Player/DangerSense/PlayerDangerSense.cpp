@@ -14,9 +14,9 @@
 PlayerDangerSense::PlayerDangerSense()	= default;
 PlayerDangerSense::~PlayerDangerSense() = default;
 
-void PlayerDangerSense::Initialize(const PlayerStateContext& ctx, const DangerSenseConfig& cfg) {
+void PlayerDangerSense::Initialize(const PlayerStateContext& ctx) {
+	cfg_.LoadParams();
 	ctx_ = ctx;
-	cfg_ = cfg;
 
 	cue_ = std::make_unique<Sprite>(cfg_.uiTex);
 	cue_->Initialize(CalyxMath::Vector2{-1000.0f, -1000.0f}, cfg_.uiSize);
@@ -57,6 +57,18 @@ void PlayerDangerSense::AddBulletContainer(const BulletContainer* container) {
 	if(container) {
 		bulletContainers_.push_back(container);
 	}
+}
+
+void PlayerDangerSense::ShowGui() {
+	cfg_.ShowGui();
+}
+
+void PlayerDangerSense::SaveParam() {
+	cfg_.SaveParams();
+}
+
+void PlayerDangerSense::LoadParam() {
+	cfg_.LoadParams();
 }
 
 // ============================================================

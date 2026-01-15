@@ -19,4 +19,4 @@ PlayerDodgeConfig::PlayerDodgeConfig() {
 
 }
 
-CalyxEngine::ParamPath PlayerDodgeConfig::GetParamPath() const { return {CalyxEngine::ParamDomain::Game,"PlayerDodge"}; }
+CalyxEngine::ParamPath PlayerDodgeConfig::GetParamPath() const { return {CalyxEngine::ParamDomain::Game,"Player/PlayerDodge"}; }
