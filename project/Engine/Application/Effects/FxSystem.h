@@ -1,91 +1,106 @@
 #pragma once
-/* ========================================================================
-/*  include space
-/* ===================================================================== */
-// engine
 #include <Engine/Application/Effects/Particle/Emitter/FxEmitter.h>
 #include <Engine/Application/Effects/Particle/Emitter/GpuFxEmitter.h>
 #include <Engine/Renderer/Particle/ParticleRenderer.h>
 #include <Engine/System/Event/EventBus.h>
 
-// c++
 #include <memory>
 #include <vector>
 
 struct Guid;
 
 namespace CalyxEffect {
-	/* ========================================================================
-/*  effect system
-/* ===================================================================== */
+	/*-----------------------------------------------------------------------------------------
+	 * FxSystem
+	 * - エフェクト管理システムクラス
+	 * - 各種エミッタ（CPU/GPU）のライフサイクル管理、シミュレーション、描画制御を担当
+	 *---------------------------------------------------------------------------------------*/
 	class FxSystem {
 	public:
 		//===================================================================*/
-		//                  public func
+		//                   public methods
 		//===================================================================*/
+		/**
+		 * \brief コンストラクタ
+		 */
 		FxSystem();
+
+		/**
+		 * \brief デストラクタ
+		 */
 		~FxSystem();
 
-		/// <summary>
-		/// emitter追加（ownerGuid はこのエミッタを持つ SceneObject の GUID）
-		/// </summary>
+		/**
+		 * \brief エミッタを追加
+		 * \param emitter 追加するエミッタ
+		 * \param ownerGuid 所有オブジェクトのGUID
+		 */
 		void AddEmitter(const std::shared_ptr<BaseEmitter>& emitter,
 						const Guid&										 ownerGuid);
 
-		/// <summary>
-		/// emitter削除（ポインタ一致で削除）
-		/// </summary>
+		/**
+		 * \brief エミッタを削除
+		 * \param emitter 削除するエミッタ（ポインタ検索）
+		 */
 		void RemoveEmitter(BaseEmitter* emitter);
 
-		/// <summary>
-		/// エミッタgpu同期
-		/// </summary>
+		/**
+		 * \brief エミッタの状態をGPUへ同期
+		 */
 		void SyncEmitters();
 
-		/// <summary>
-		/// GPU エミッタのディスパッチ
-		/// </summary>
+		/**
+		 * \brief GPUエミッタをディスパッチ
+		 * \param psoService パイプラインサービス
+		 * \param cmdList コマンドリスト
+		 */
 		void DispatchEmitters(class PipelineService*	 psoService,
 							  ID3D12GraphicsCommandList* cmdList);
 
-		/// <summary>
-		/// 描画
-		/// </summary>
-		void Render(class PipelineService*, ID3D12GraphicsCommandList*);
+		/**
+		 * \brief 描画処理
+		 * \param psoService パイプラインサービス
+		 * \param cmdList コマンドリスト
+		 */
+		void Render(class PipelineService* psoService, ID3D12GraphicsCommandList* cmdList);
 
-		/// <summary>
-		/// クリア
-		/// </summary>
+		/**
+		 * \brief 全てのエミッタをクリア
+		 */
 		void Clear();
 
 	private:
 		//===================================================================*/
-		//                  private helper
+		//                    private methods
 		//===================================================================*/
-		/// <summary>
-		/// owner Guid から削除
-		/// </summary>
+		/**
+		 * \brief 指定したGUIDに紐付くエミッタを削除
+		 * \param id 所有者のGUID
+		 */
 		void RemoveEmitterByGuid(const Guid& id);
 
 	private:
 		//===================================================================*/
-		//                  private variable
+		//                    private types
 		//===================================================================*/
-
 		struct CpuEmitterEntry {
-			Guid								  ownerGuid;
-			std::weak_ptr<FxEmitter> emitter;
+			Guid ownerGuid; //< 所有者GUID
+			std::weak_ptr<FxEmitter> emitter; //< CPUエミッタ
 		};
+
 		struct GpuEmitterEntry {
-			Guid									 ownerGuid;
-			std::weak_ptr<GpuFxEmitter> emitter;
+			Guid ownerGuid; //< 所有者GUID
+			std::weak_ptr<GpuFxEmitter> emitter; //< GPUエミッタ
 		};
 
-		std::vector<CpuEmitterEntry>	  cpuEmitters_;		 //< cpuエミッタ
-		std::vector<GpuEmitterEntry>	  gpuEmitters_;		 //< gpuエミッタ
-		std::unique_ptr<ParticleRenderer> particleRenderer_; //< レンダラ
+		//===================================================================*/
+		//                    private member variables
+		//===================================================================*/
+		std::vector<CpuEmitterEntry>	  cpuEmitters_;		 //< CPUエミッタリスト
+		std::vector<GpuEmitterEntry>	  gpuEmitters_;		 //< GPUエミッタリスト
+		std::unique_ptr<ParticleRenderer> particleRenderer_; //< パーティクルレンダラー
 
-		EventBus::Connection connAdd_; //< 追加イベント
-		EventBus::Connection connRem_; //< 削除イベント
+		EventBus::Connection connAdd_; //< 追加イベントコネクション
+		EventBus::Connection connRem_; //< 削除イベントコネクション
 	};
 } // namespace CalyxEffect

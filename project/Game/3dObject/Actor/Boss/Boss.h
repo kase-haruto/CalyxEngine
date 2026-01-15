@@ -13,10 +13,9 @@ class BossAI;
 class BossAnimController;
 
 /*-----------------------------------------------------------------------------------------
- * Boss class
+ * Boss
  * - ボスクラス
- * - レールの最後に出現する敵
- * - 倒したらゲームクリア
+ * - レールの最後に出現する強敵。倒すことでゲームクリアとなる
  *---------------------------------------------------------------------------------------*/
 class Boss final
 	: public EnemyFactionActor {
@@ -24,25 +23,39 @@ public:
 	//===================================================================*/
 	//						public methods
 	//===================================================================*/
+	/**
+	 * \brief コンストラクタ
+	 * \param modelName モデル名
+	 * \param objName オブジェクト名
+	 */
 	Boss(const std::string& modelName, const std::string objName);
+
+	/**
+	 * \brief デストラクタ
+	 */
 	~Boss() override;
+
 	/**
 	 * \brief 初期化
 	 */
 	void Initialize() override;
+
 	/**
 	 * \brief AIの初期化
 	 */
 	void InitializeAI();
+
 	/**
 	 * \brief 更新処理
 	 * \param dt デルタタイム
 	 */
 	void Update(float dt) override;
+
 	/**
-	 * \brief GUI表示
+	 * \brief 派生クラス用GUI表示
 	 */
 	void DerivativeGui() override;
+
 	/**
 	 * \brief ヘッダーGUI表示
 	 */
@@ -50,30 +63,82 @@ public:
 
 	//--------- collider -----------------------------------------------------
 	/**
-	 * \brief 衝突時処理
+	 * \brief 衝突開始時処理
+	 * \param other 衝突相手のコライダー
 	 */
 	void OnCollisionEnter(Collider* other) override;
+
 	/**
-	 * \brief 衝突中処理
-	 * \param other
+	 * \brief 衝突継続時処理
+	 * \param other 衝突相手のコライダー
 	 */
 	void OnCollisionStay([[maybe_unused]] Collider* other) override {}
+
 	/**
-	 * \brief 衝突終了処理
-	 * \param other
+	 * \brief 衝突終了時処理
+	 * \param other 衝突相手のコライダー
 	 */
 	void OnCollisionExit([[maybe_unused]] Collider* other) override;
 
 	//--------- accessor -----------------------------------------------------
+	/**
+	 * \brief 中心座標を取得
+	 * \return 中心座標
+	 */
 	const CalyxMath::Vector3 GetCenterPos() const override;
+
+	/**
+	 * \brief ターゲットのワールド座標を取得
+	 * \return ワールド座標
+	 */
 	CalyxMath::Vector3		 GetTargetWorldPos() const;
+
+	/**
+	 * \brief アニメーションコントローラーを取得
+	 * \return アニメーションコントローラー
+	 */
 	BossAnimController*		 GetAnimator() const;
+
+	/**
+	 * \brief AIを取得
+	 * \return AI
+	 */
 	BossAI*					 GetAI() const;
+
+	/**
+	 * \brief 射撃コントローラーを取得
+	 * \return 射撃コントローラー
+	 */
 	BossShootingController*	 GetShootController() const { return shootingController_.get(); }
-	void					 SetShootingController(std::unique_ptr<BossShootingController>);
+
+	/**
+	 * \brief 射撃コントローラーをセット
+	 * \param controller 射撃コントローラー
+	 */
+	void					 SetShootingController(std::unique_ptr<BossShootingController> controller);
+
+	/**
+	 * \brief プレイヤーのトランスフォームをセット
+	 * \param target ターゲットアクター
+	 */
 	void					 SetPlayerTransform(const Actor* target);
+
+	/**
+	 * \brief 全てのスプライト（HPゲージ等）を取得
+	 * \return スプライトリスト
+	 */
 	std::vector<Sprite*>	 GetAllSprites() const;
+
+	/**
+	 * \brief ターゲットアクターを取得
+	 * \return ターゲット
+	 */
 	const Actor*			 GetTargetActor() const;
+
+	/**
+	 * \brief 弾コンテナを取得
+	 * \return 弾コンテナ
+	 */
 	BulletContainer*		 GetBulletContainer() const { return shootingController_->GetBulletContainer(); }
 	
 private:
@@ -84,10 +149,12 @@ private:
 	 * \brief シリアライズ可能パラメータの初期化
 	 */
 	void InitializeSerializableParm();
+
 	/**
 	 * \brief 死亡時処理
 	 */
 	void Die();
+
 	/**
 	 * \brief プレイヤーの方向を向く
 	 */
@@ -95,12 +162,12 @@ private:
 	
 private:
 	//===================================================================*/
-	//						private methods
+	//						private member variables
 	//===================================================================*/
-	int32_t flinchValue_ = 0;
-	int32_t flinchMax_	 = 0;
+	int32_t flinchValue_ = 0; //< ひるみ値
+	int32_t flinchMax_	 = 0; //< 最大ひるみ値
 
-	const Actor*							target_				= nullptr; //< プレイヤーのTransform
+	const Actor*							target_				= nullptr; //< プレイヤーのActor
 	std::unique_ptr<BossShootingController> shootingController_ = nullptr; //< 発射制御クラス
 	std::unique_ptr<BossAI>					ai_					= nullptr; //< AIクラス
 	std::unique_ptr<BossStateMachine>		stateMachine_		= nullptr; //< ステートマシン

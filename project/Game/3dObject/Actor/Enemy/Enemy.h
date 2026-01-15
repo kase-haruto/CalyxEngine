@@ -14,8 +14,9 @@
 #include <Game/Battle/Shooting/Pattern/ShootPatternDetails.h>
 
 /*-----------------------------------------------------------------------------------------
- * 敵キャラクターの基本クラス
- * - 敵キャラクタの基本的な振る舞いを実装
+ * Enemy
+ * - 敵キャラクターの基本クラス
+ * - 敵キャラクタの基本的な振る舞い（移動、射撃、死亡処理）を実装
  *---------------------------------------------------------------------------------------*/
 class Enemy
 	: public EnemyFactionActor{
@@ -23,29 +24,47 @@ public:
 	//===================================================================*/
 	//			public types
 	//===================================================================*/
+	/**
+	 * \brief 死亡状態列挙型
+	 */
 	enum class DeathState {
-		Alive,
-		Dying,
-		Dead
+		Alive, //< 生存
+		Dying, //< 死亡演出中
+		Dead   //< 死亡確定
 	};
 
 public:
 	//===================================================================*/
 	//			public methods
 	//===================================================================*/
+	/**
+	 * \brief デフォルトコンストラクタ
+	 */
 	Enemy();
+
+	/**
+	 * \brief コンストラクタ
+	 * \param modelName モデル名
+	 * \param objName オブジェクト名
+	 */
 	Enemy(const std::string& modelName, const std::string& objName);
+
+	/**
+	 * \brief デストラクタ
+	 */
 	virtual ~Enemy() override;
 
 	/**
 	 * \brief 初期化
 	 */
 	void Initialize() override;
+
 	/**
 	 * \brief 更新処理
 	 * \param dt デルタタイム
 	 */
 	void Update(float dt) override;
+
 	/**
 	 * \brief フォーメーションへの合流開始
 	 * \param formation フォーメーションコントローラー
@@ -56,50 +75,100 @@ public:
 		EnemyFormationController* formation,
 		const CalyxMath::Vector3& formationOffset,
 		const CalyxMath::Vector3& entranceStartWorld);
+
 	/**
-	 * \brief 衝突時処理
-	 * \param other
+	 * \brief 衝突開始時処理
+	 * \param other 衝突相手のコライダー
 	 */
 	void OnCollisionEnter(Collider* other) override;
+
 	/**
-	 * \brief 衝突中処理
-	 * \param other
+	 * \brief 衝突継続時処理
 	 */
 	void OnCollisionStay(Collider*) override {}
+
 	/**
-	 * \brief 衝突終了処理
-	 * \param other
+	 * \brief 衝突終了時処理
 	 */
 	void OnCollisionExit(Collider*) override {}
 
 	//===================================================================*/
-	//			accessore
-	//===================================================================*/
-	void					 SetPosition(const CalyxMath::Vector3& pos) { worldTransform_.translation = pos; }
-	EnemyMovementController* GetMovementController() { return &movement_; }
-	void					 SetShootingController(std::unique_ptr<EnemyShootingController>);
-	void					 SetPlayerTransform(const WorldTransform* pos);
-	void					 SetRouteSpline(const SplineData& data);
-	DeathState				 GetDeathState() const { return deathState_; }
-	const CalyxMath::Vector3 GetCenterPos() const override;
-	void					 SetGameplayEngaged(bool v) { shooting_.SetGameplayEngaged(v); }
-	bool					 IsGameplayEngaged() const { return shooting_.IsGameplayEngaged(); }
-	void					 SetPatternKind(BulletPatternKind k) { shooting_.SetPatternKind(k); }
-	BulletPatternKind		 GetPatternKind() const { return shooting_.GetPatternKind(); }
-	void					 EnsurePatternBound() { shooting_.EnsurePatternBound(); }
-
-private:
-	//===================================================================*/
-	//			private methods
+	//			accessor
 	//===================================================================*/
 	/**
-	 * \brief シリアライズ可能パラメータの初期化
+	 * \brief 座標をセット
+	 * \param pos 座標
 	 */
-	void InitializeSerializableParm();
-	
+	void					 SetPosition(const CalyxMath::Vector3& pos) { worldTransform_.translation = pos; }
+
+	/**
+	 * \brief 移動コントローラーを取得
+	 * \return 移動コントローラー
+	 */
+	EnemyMovementController* GetMovementController() { return &movement_; }
+
+	/**
+	 * \brief 射撃コントローラーをセット
+	 * \param controller 射撃コントローラー
+	 */
+	void					 SetShootingController(std::unique_ptr<EnemyShootingController> controller);
+
+	/**
+	 * \brief プレイヤーのトランスフォームをセット
+	 * \param pos トランスフォーム
+	 */
+	void					 SetPlayerTransform(const WorldTransform* pos);
+
+	/**
+	 * \brief ルートスプラインをセット
+	 * \param data スプラインデータ
+	 */
+	void					 SetRouteSpline(const SplineData& data);
+
+	/**
+	 * \brief 死亡状態を取得
+	 * \return 死亡状態
+	 */
+	DeathState				 GetDeathState() const { return deathState_; }
+
+	/**
+	 * \brief 中心座標を取得
+	 * \return 中心座標
+	 */
+	const CalyxMath::Vector3 GetCenterPos() const override;
+
+	/**
+	 * \brief ゲームプレイ係合状態をセット
+	 * \param v 状態
+	 */
+	void					 SetGameplayEngaged(bool v) { shooting_.SetGameplayEngaged(v); }
+
+	/**
+	 * \brief ゲームプレイ係合状態か
+	 * \return 係合中か
+	 */
+	bool					 IsGameplayEngaged() const { return shooting_.IsGameplayEngaged(); }
+
+	/**
+	 * \brief 弾パターン種別をセット
+	 * \param k パターン種別
+	 */
+	void					 SetPatternKind(BulletPatternKind k) { shooting_.SetPatternKind(k); }
+
+	/**
+	 * \brief 弾パターン種別を取得
+	 * \return パターン種別
+	 */
+	BulletPatternKind		 GetPatternKind() const { return shooting_.GetPatternKind(); }
+
+	/**
+	 * \brief パターンのバインドを保証
+	 */
+	void					 EnsurePatternBound() { shooting_.EnsurePatternBound(); }
+
 protected:
 	//===================================================================*/
-	//			private methods
+	//			protected methods
 	//===================================================================*/
 	/**
 	 * \brief 死亡処理
@@ -110,17 +179,26 @@ private:
 	//===================================================================*/
 	//			private methods
 	//===================================================================*/
-	const WorldTransform* playerTransform_ = nullptr;
+	/**
+	 * \brief シリアライズ可能パラメータの初期化
+	 */
+	void InitializeSerializableParm();
 
-	BulletPatternKind			   patternKind_		= BulletPatternKind::SweepFan;
-	BulletPatternKind			   lastPatternKind_ = BulletPatternKind::Spiral;
-	std::unique_ptr<IShootPattern> pattern_;
-	DeathState					   deathState_ = DeathState::Alive;
+private:
+	//===================================================================*/
+	//			private member variables
+	//===================================================================*/
+	const WorldTransform* playerTransform_ = nullptr; //< プレイヤーのトランスフォーム
 
-	// death animation
-	CalyxMath::Vector3 deathRotateAxis_ = {0, 0, 1};
-	float			   deathTimer_		= 0.0f;
-	float			   deathLength_		= 1.5f;
+	BulletPatternKind			   patternKind_		= BulletPatternKind::SweepFan; //< 現在の弾パターン
+	BulletPatternKind			   lastPatternKind_ = BulletPatternKind::Spiral; //< 直前の弾パターン
+	std::unique_ptr<IShootPattern> pattern_; //< 射撃パターンの実体
+	DeathState					   deathState_ = DeathState::Alive; //< 死亡状態
+
+	// 死亡演出用
+	CalyxMath::Vector3 deathRotateAxis_ = {0, 0, 1}; //< 死亡時の回転軸
+	float			   deathTimer_		= 0.0f; //< 死亡演出タイマー
+	float			   deathLength_		= 1.5f; //< 死亡演出の長さ
 
 	EnemyMovementController				   movement_; //< 動き制御
 	EnemyShootingAgent					   shooting_; //< 射撃制御

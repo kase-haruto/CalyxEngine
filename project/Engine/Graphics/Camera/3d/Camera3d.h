@@ -110,15 +110,25 @@ private:
 	//==================================================================*//
 	//          private variables
 	//==================================================================*//
-	struct FollowSettings {
-		const WorldTransform* target = nullptr; //< 追従対象
-		float				  distance = 13.0f; //< 追従距離
-		float				  heightOffset = 13.0f; //< 高さオフセット
-		float				  smoothTime   = 0.3f; //< スムーズ時間
-		CalyxMath::Vector3	  velocity	   = {0.0f, 0.0f, 0.0f}; //< 速度ベクトル（内部計算用）
-		bool				  enabled	   = true; //< 有効フラグ
-		float				  extraPitchDeg = -10.0f; //< 俯角
-	} follow_; //< 追従設定
+	Frustum frustum_; // 視錐台
 
-	CalyxMath::Vector4 frustumPlanes_[6]; //< 視錐台平面（カリング用）
+	//======================= 追従用データ ==============================
+	struct FollowSettings {
+		bool   enabled          = true;            // 有効/無効
+		float  distanceBack     = 13.0f;             // 後方距離（-F * distanceBack）
+		float  heightOffset     = 4.0f;             // 上方向(Y)オフセット
+		float  sideOffset       = 0.0f;             // 右(+)左(-)オフセット
+		CalyxMath::Vector3 lookAtOffset    = {0.0f, 1.5f, 0.0f}; // 必要なら使用
+
+		// 位置スムージング
+		float  posSmoothTime    = 0.78f;
+		// 回転スムージング（時定数）
+		float  rotTimeConstant  = 0.52f;
+
+		// 俯角（ターゲットの forward を向きつつ少し下を見る）
+		float  extraPitchDeg    = -10.0f;
+
+		const WorldTransform* target = nullptr;     // 追従対象
+		CalyxMath::Vector3 posVel = {0,0,0};                   // SmoothDamp 用速度
+	} follow_;
 };
