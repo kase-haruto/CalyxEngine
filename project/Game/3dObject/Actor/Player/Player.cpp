@@ -522,10 +522,12 @@ CalyxEngine::ParamPath Player::GetParamPath() const {
 void Player::HeaderGui() {
 	if(ImGui::Button("save")) {
 		lockOn_->SaveConfig();
+		dodgeSystem_->SaveConfig();
 	}
 	ImGui::SameLine();
 	if(ImGui::Button("load")) {
 		lockOn_->LoadConfig();
+		dodgeSystem_->LoadConfig();
 	}
 }
 
