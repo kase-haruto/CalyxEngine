@@ -7,15 +7,15 @@
 #include <Engine/Objects/Collider/Collider.h>
 #include <Game/3dObject/Actor/Player/Player.h>
 
-PlayerDamageHandler::PlayerDamageHandler()	= default;
+PlayerDamageHandler::PlayerDamageHandler()  = default;
 PlayerDamageHandler::~PlayerDamageHandler() = default;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // 初期化
 /////////////////////////////////////////////////////////////////////////////////////////
 void PlayerDamageHandler::Initialize(const PlayerStateContext& context) {
-	ctx_				  = context;
-	invincibleTimer_	  = 0.0f;
+	ctx_                  = context;
+	invincibleTimer_      = 0.0f;
 	invincibleBlinkAccum_ = 0.0f;
 	invincibleBlinkState_ = true;
 }
@@ -23,9 +23,7 @@ void PlayerDamageHandler::Initialize(const PlayerStateContext& context) {
 /////////////////////////////////////////////////////////////////////////////////////////
 // 更新
 /////////////////////////////////////////////////////////////////////////////////////////
-void PlayerDamageHandler::Update(float dt) {
-	UpdateInvincibility(dt);
-}
+void PlayerDamageHandler::Update(float dt) { UpdateInvincibility(dt); }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // 被弾処理
@@ -42,12 +40,10 @@ void PlayerDamageHandler::OnHit(Collider* other) {
 	ctx_.setLife(currentLife);
 
 	// ===== カメラシェイク =====
-	if(auto* cam = CameraManager::GetMain3d()) {
-		cam->StartShake(0.5f, 0.8f);
-	}
+	if(auto* cam = CameraManager::GetMain3d()) { cam->StartShake(0.5f,0.8f); }
 
 	// ===== 無敵付与 =====
-	SetInvincibleFor(kHitIFrameSec);
+	SetInvincibleFor(config_.kHitIFrameSec);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -57,7 +53,7 @@ void PlayerDamageHandler::SetInvincibleFor(float seconds) {
 	if(seconds <= 0.0f) return;
 
 	const bool wasInvincible = IsInvincible();
-	invincibleTimer_		 = (std::max)(invincibleTimer_, seconds);
+	invincibleTimer_         = (std::max)(invincibleTimer_,seconds);
 
 	if(!wasInvincible) {
 		invincibleBlinkAccum_ = 0.0f;
@@ -69,15 +65,13 @@ void PlayerDamageHandler::SetInvincibleFor(float seconds) {
 /////////////////////////////////////////////////////////////////////////////////////////
 // 無敵中か
 /////////////////////////////////////////////////////////////////////////////////////////
-bool PlayerDamageHandler::IsInvincible() const {
-	return invincibleTimer_ > 0.0f;
-}
+bool PlayerDamageHandler::IsInvincible() const { return invincibleTimer_ > 0.0f; }
 
 void PlayerDamageHandler::RequestInvincible(float seconds) {
 	if(seconds <= 0.0f) return;
 
 	const bool wasInvincible = IsInvincible();
-	invincibleTimer_		 = (std::max)(invincibleTimer_, seconds);
+	invincibleTimer_         = (std::max)(invincibleTimer_,seconds);
 
 	if(!wasInvincible) {
 		invincibleBlinkAccum_ = 0.0f;
@@ -85,6 +79,22 @@ void PlayerDamageHandler::RequestInvincible(float seconds) {
 		ctx_.setVisible(false);
 	}
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// GUI 表示
+/////////////////////////////////////////////////////////////////////////////////////////
+void PlayerDamageHandler::ShowGUi() {
+	config_.ShowGui();
+}
+
+void PlayerDamageHandler::SaveParam() {
+	config_.SaveParams();
+}
+
+void PlayerDamageHandler::LoadParam() {
+	config_.LoadParams();
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////
 // 無敵更新（点滅処理）
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -93,7 +103,7 @@ void PlayerDamageHandler::UpdateInvincibility(float dt) {
 
 	invincibleTimer_ -= dt;
 	if(invincibleTimer_ <= 0.0f) {
-		invincibleTimer_	  = 0.0f;
+		invincibleTimer_      = 0.0f;
 		invincibleBlinkAccum_ = 0.0f;
 		invincibleBlinkState_ = true;
 
@@ -103,10 +113,10 @@ void PlayerDamageHandler::UpdateInvincibility(float dt) {
 
 	// 無敵中は一定間隔で描画トグル
 	invincibleBlinkAccum_ += dt;
-	while(invincibleBlinkAccum_ >= kBlinkInterval) {
-		invincibleBlinkAccum_ -= kBlinkInterval;
+	while(invincibleBlinkAccum_ >= config_.kBlinkInterval) {
+		invincibleBlinkAccum_ -= config_.kBlinkInterval;
 		invincibleBlinkState_ = !invincibleBlinkState_;
 
-			ctx_.setVisible(invincibleBlinkState_);
+		ctx_.setVisible(invincibleBlinkState_);
 	}
 }

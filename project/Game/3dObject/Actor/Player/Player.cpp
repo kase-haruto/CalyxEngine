@@ -333,6 +333,10 @@ void Player::DerivativeGui() {
 		danger_->ShowGui();
 	}
 
+	if(damageHandler_) {
+		damageHandler_->ShowGUi();
+	}
+
 	ImGui::DragFloat("moveSpeed", &moveSpeed_, 0.01f, 0.0f, 10.0f);
 }
 
@@ -528,12 +532,14 @@ void Player::HeaderGui() {
 		lockOn_->SaveConfig();
 		dodgeSystem_->SaveConfig();
 		danger_->SaveParam();
+		damageHandler_->SaveParam();
 	}
 	ImGui::SameLine();
 	if(ImGui::Button("load")) {
 		lockOn_->LoadConfig();
 		dodgeSystem_->LoadConfig();
 		danger_->LoadParam();
+		damageHandler_->LoadParam();
 	}
 }
 

@@ -169,6 +169,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Data\Game\Config\Hud\EnemyResultConfig.cpp" />
     <ClCompile Include="Data\Game\Config\Hud\HudTransformMotionConfig.cpp" />
     <ClCompile Include="Data\Game\Config\Hud\ScoreResultConfig.cpp" />
+    <ClCompile Include="Data\Game\Config\Player\PlayerDamageConfig.cpp" />
     <ClCompile Include="Data\Game\Config\Player\PlayerDangerSceneConfig.cpp" />
     <ClCompile Include="Data\Game\Config\Player\PlayerDodgeConfig.cpp" />
     <ClCompile Include="Data\Game\Config\Player\PlayerLockOnConfig.cpp" />
@@ -574,6 +575,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Data\Game\Config\Hud\EnemyResultConfig.h" />
     <ClInclude Include="Data\Game\Config\Hud\HudTransformMotionConfig.h" />
     <ClInclude Include="Data\Game\Config\Hud\ScoreResultConfig.h" />
+    <ClInclude Include="Data\Game\Config\Player\PlayerDamageConfig.h" />
     <ClInclude Include="Data\Game\Config\Player\PlayerDangerSceneConfig.h" />
     <ClInclude Include="Data\Game\Config\Player\PlayerDodgeConfig.h" />
     <ClInclude Include="Data\Game\Config\Player\PlayerLockOnConfig.h" />
