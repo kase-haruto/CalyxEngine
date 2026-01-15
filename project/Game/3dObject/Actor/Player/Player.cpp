@@ -477,43 +477,6 @@ void Player::UpdateTilt(const CalyxMath::Vector3& inputVector) {
 ///////////////////////////////////////////////////////////////////////////////////
 //		レティクルの座標更新
 ///////////////////////////////////////////////////////////////////////////////////
-void Player::UpdateReticlePosition() {
-	constexpr float moveSpeed		 = 6.0f;
-	constexpr float stickSensitivity = 300.0f; // スティック感度を大きめに
-	float			dt				 = ClockManager::GetInstance()->GetDeltaTime();
-
-	CalyxMath::Vector3 offset = CalyxMath::Vector3::Zero();
-
-	// キーボード入力
-	if(Input::GetInstance()->PushKey(DIK_UP)) offset.y += 3.0f;
-	if(Input::GetInstance()->PushKey(DIK_DOWN)) offset.y -= 3.0f;
-	if(Input::GetInstance()->PushKey(DIK_LEFT)) offset.x -= 3.0f;
-	if(Input::GetInstance()->PushKey(DIK_RIGHT)) offset.x += 3.0f;
-
-	// ゲームパッド右スティック
-	CalyxMath::Vector2 rightStick = Input::GetInstance()->GetRightStick();
-
-	// スティック感度を別で調整
-	offset.x += rightStick.x * stickSensitivity * dt;
-	offset.y += rightStick.y * stickSensitivity * dt;
-
-	// キーボードだけ正規化
-	CalyxMath::Vector3 keyboardOffset = offset;
-	keyboardOffset.x -= rightStick.x * stickSensitivity * dt;
-	keyboardOffset.y -= rightStick.y * stickSensitivity * dt;
-
-	if(keyboardOffset.Length() > 0.0f) {
-		keyboardOffset.Normalize();
-		keyboardOffset *= moveSpeed * dt;
-		offset.x = keyboardOffset.x + rightStick.x * stickSensitivity * dt;
-		offset.y = keyboardOffset.y + rightStick.y * stickSensitivity * dt;
-	}
-
-	reticleTransform_.translation += offset;
-	if(clampReticleInView_) {
-		ClampWorldTransformInView(reticleTransform_, clampMarginXpx_, clampMarginYpx_);
-	}
-}
 
 void Player::MakeSerializableParam() {
 	SerializableObject::AddField("isAutoLockOn", autoLockOn_);

@@ -6,4 +6,4 @@ PlayerDamageConfig::PlayerDamageConfig() {
 	AddField("kBlinkInterval", kBlinkInterval).Category("damage").Tooltip("無敵点滅間隔").ReadOnly();
 }
 
-CalyxEngine::ParamPath PlayerDamageConfig::GetParamPath() const { return {CalyxEngine::ParamDomain::Game,"PlayerDamage"}; }
+CalyxEngine::ParamPath PlayerDamageConfig::GetParamPath() const { return {CalyxEngine::ParamDomain::Game,"PlayerDamage","Player"}; }

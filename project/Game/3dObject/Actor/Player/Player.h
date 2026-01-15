@@ -124,11 +124,6 @@ private:
 	//=====================================================================
 	// Private Methods
 	//=====================================================================
-	/**
-	 * \brief レティクルのポジションを更新
-	 */
-	void UpdateReticlePosition();
-
 	void MakeSerializableParam();
 
 	CalyxEngine::ParamPath GetParamPath() const override;

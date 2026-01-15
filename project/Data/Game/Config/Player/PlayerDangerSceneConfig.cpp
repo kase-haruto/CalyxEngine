@@ -9,4 +9,4 @@ DangerSenseConfig::DangerSenseConfig() {
 }
 
 
-CalyxEngine::ParamPath DangerSenseConfig::GetParamPath() const { return {CalyxEngine::ParamDomain::Game,"DangerSense"}; }
+CalyxEngine::ParamPath DangerSenseConfig::GetParamPath() const { return {CalyxEngine::ParamDomain::Game,"PlayerDangerSense","Player"}; }
