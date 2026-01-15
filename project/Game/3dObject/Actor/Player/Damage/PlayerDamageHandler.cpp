@@ -7,17 +7,20 @@
 #include <Engine/Objects/Collider/Collider.h>
 #include <Game/3dObject/Actor/Player/Player.h>
 
-PlayerDamageHandler::PlayerDamageHandler()  = default;
+PlayerDamageHandler::PlayerDamageHandler()	= default;
 PlayerDamageHandler::~PlayerDamageHandler() = default;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // 初期化
 /////////////////////////////////////////////////////////////////////////////////////////
 void PlayerDamageHandler::Initialize(const PlayerStateContext& context) {
-	ctx_                  = context;
-	invincibleTimer_      = 0.0f;
-	invincibleBlinkAccum_ = 0.0f;
-	invincibleBlinkState_ = true;
+	config_.LoadParams();
+	// インターバルが変更があれば再計算
+	config_.kBlinkInterval = 1.0f / config_.kBlinkHz;
+	ctx_				   = context;
+	invincibleTimer_	   = 0.0f;
+	invincibleBlinkAccum_  = 0.0f;
+	invincibleBlinkState_  = true;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -40,7 +43,9 @@ void PlayerDamageHandler::OnHit(Collider* other) {
 	ctx_.setLife(currentLife);
 
 	// ===== カメラシェイク =====
-	if(auto* cam = CameraManager::GetMain3d()) { cam->StartShake(0.5f,0.8f); }
+	if(auto* cam = CameraManager::GetMain3d()) {
+		cam->StartShake(0.5f, 0.8f);
+	}
 
 	// ===== 無敵付与 =====
 	SetInvincibleFor(config_.kHitIFrameSec);
@@ -53,7 +58,7 @@ void PlayerDamageHandler::SetInvincibleFor(float seconds) {
 	if(seconds <= 0.0f) return;
 
 	const bool wasInvincible = IsInvincible();
-	invincibleTimer_         = (std::max)(invincibleTimer_,seconds);
+	invincibleTimer_		 = (std::max)(invincibleTimer_, seconds);
 
 	if(!wasInvincible) {
 		invincibleBlinkAccum_ = 0.0f;
@@ -71,7 +76,7 @@ void PlayerDamageHandler::RequestInvincible(float seconds) {
 	if(seconds <= 0.0f) return;
 
 	const bool wasInvincible = IsInvincible();
-	invincibleTimer_         = (std::max)(invincibleTimer_,seconds);
+	invincibleTimer_		 = (std::max)(invincibleTimer_, seconds);
 
 	if(!wasInvincible) {
 		invincibleBlinkAccum_ = 0.0f;
@@ -84,7 +89,10 @@ void PlayerDamageHandler::RequestInvincible(float seconds) {
 // GUI 表示
 /////////////////////////////////////////////////////////////////////////////////////////
 void PlayerDamageHandler::ShowGUi() {
-	config_.ShowGui();
+	if(config_.ShowGui()) {
+		// インターバルが変更があれば再計算
+		config_.kBlinkInterval = 1.0f / config_.kBlinkHz;
+	}
 }
 
 void PlayerDamageHandler::SaveParam() {
@@ -103,7 +111,7 @@ void PlayerDamageHandler::UpdateInvincibility(float dt) {
 
 	invincibleTimer_ -= dt;
 	if(invincibleTimer_ <= 0.0f) {
-		invincibleTimer_      = 0.0f;
+		invincibleTimer_	  = 0.0f;
 		invincibleBlinkAccum_ = 0.0f;
 		invincibleBlinkState_ = true;
 

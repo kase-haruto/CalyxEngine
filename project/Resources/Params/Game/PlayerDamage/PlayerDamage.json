@@ -1,7 +1,7 @@
 {
     "fields": {
-        "kBlinkHz": 2.9489998817443848,
-        "kBlinkInterval": 0.0833333358168602,
-        "kHitIFrameSec": 0.875
+        "kBlinkHz": 12.232999801635742,
+        "kBlinkInterval": 0.08174610137939453,
+        "kHitIFrameSec": 1.0329999923706055
     }
 }
