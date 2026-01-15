@@ -84,19 +84,14 @@ namespace CalyxEngine {
 		 * \param key キー名
 		 * \param value 変数への参照
 		 */
-		template<typename T>
-		void AddField(const std::string& key, T& value) {
-			static_assert(
-				std::is_same_v<T, int32_t> ||
-				std::is_same_v<T, float> ||
-				std::is_same_v<T, bool> ||
-				std::is_same_v<T, CalyxMath::Vector2> ||
-				std::is_same_v<T, CalyxMath::Vector3>||
-				std::is_same_v<T,CalyxMath::Vector4>,
-				"AddField: Unsupported type. Add it to ValuePtr and Read/WriteValue."
-			);
-			fields_.push_back(SerializableField{ key, &value });
+		template <typename T>
+		FieldBuilder AddField(const std::string& key, T& value) {
+			fields_.push_back(SerializableField{
+				key,
+				ValuePtr{&value}});
+			return FieldBuilder(fields_.back());
 		}
+
 
 	private:
 		//===================================================================*/
