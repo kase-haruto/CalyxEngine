@@ -29,10 +29,6 @@ imgui.ini
 *.lib
 
 # ==================================================
-!project/externals/**/lib/**
-!project/externals/**/lib/**/*.lib
-
-# ==================================================
 # Model assets
 # ==================================================
 !Resources/models/*.obj
@@ -59,6 +55,11 @@ generated/
 # ==================================================
 # External libraries (ignore their build outputs)
 # ==================================================
+# Exceptions: ensure libs are NOT ignored even if in Debug/Release folders
+!project/externals/
+!project/externals/**/lib/
+!project/externals/**/lib/**
+
 project/externals/**/bin/
 project/externals/**/build/
 project/externals/**/lib/**/*.pdb
