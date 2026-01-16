@@ -4,6 +4,11 @@
 class PlayerDodgeSystem;
 class WorldTransform;
 
+/*-----------------------------------------------------------------------------------------
+ * PlayerDodgeSpinMotion class
+ * - 回避時の回転モーションを管理するクラス
+ * - 回避開始/終了やパーフェクト回避に合わせて姿勢を更新する
+ *---------------------------------------------------------------------------------------*/
 class PlayerDodgeSpinMotion {
 public:
 	void Initialize(PlayerDodgeSystem* dodge, WorldTransform* wt);
