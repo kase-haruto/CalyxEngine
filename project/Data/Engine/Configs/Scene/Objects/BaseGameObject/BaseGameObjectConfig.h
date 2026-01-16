@@ -6,6 +6,11 @@
 
 #include <externals/nlohmann/json.hpp>
 
+/*-----------------------------------------------------------------------------------------
+ * BaseGameObjectConfig
+ * - ゲームオブジェクト設定構造体
+ * - SceneObjectConfig・Collider・Modelの設定を統合した基底設定
+ *---------------------------------------------------------------------------------------*/
 struct BaseGameObjectConfig
 	: public SceneObjectConfig{
 	ColliderConfig   colliderConfig;

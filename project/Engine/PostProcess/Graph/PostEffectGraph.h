@@ -12,6 +12,11 @@ namespace CalyxGraphics {
 class PostProcessCollection;
 class IRenderTarget;
 
+/*-----------------------------------------------------------------------------------------
+ * PostEffectGraph
+ * - ポストエフェクトグラフクラス
+ * - 複数のポストエフェクトパスを連結して実行するパイプラインを管理
+ *---------------------------------------------------------------------------------------*/
 class PostEffectGraph{
 public:
 	PostEffectGraph(PostProcessCollection* postProcessCollection)

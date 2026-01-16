@@ -20,6 +20,11 @@ namespace CalyxEditor {
 
 namespace CalyxScene {
 
+	/*-----------------------------------------------------------------------------------------
+	 * SceneManager
+	 * - シーン管理クラス
+	 * - 複数のシーンの登録、切り替え、更新、描画処理を管理
+	 *---------------------------------------------------------------------------------------*/
 	class SceneManager {
 	public:
 		explicit SceneManager(CalyxGraphics::DxCore* dx);
