@@ -45,6 +45,12 @@ public:
 	void CreateRTV(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE handle);
 
 	/// <summary>
+	/// srv更新
+	/// </summary>
+	/// <param name="device"></param>
+	void UpdateSRV(ID3D12Device* device);
+
+	/// <summary>
 	/// transition
 	/// </summary>
 	/// <param name="cmdList"></param>

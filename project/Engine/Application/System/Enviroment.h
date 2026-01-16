@@ -12,8 +12,8 @@ static const CalyxMath::Vector2 kGameSize = CalyxMath::Vector2(
 	static_cast< float >(kGameWidth), static_cast< float >(kGameHeight));
 
 //フルhdとhdの中間1280x720と1920x1080,1600x900
-static const uint32_t kWindowWidth = 1920;
-static const uint32_t kWindowHeight = 1080;
+static const uint32_t kWindowWidth	= 1280;
+static const uint32_t kWindowHeight = 720;
 
 static const CalyxMath::Vector2 kWindowSize = CalyxMath::Vector2(
 	static_cast<float>(kWindowWidth), static_cast< float >(kWindowHeight));

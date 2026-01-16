@@ -101,3 +101,26 @@ void SwapChainRenderTarget::ReleaseSRVs(){
 	}
 	srvHandles_.clear();
 }
+
+void SwapChainRenderTarget::Resize(uint32_t width, uint32_t height) {
+	viewport_ = D3D12_VIEWPORT{0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f};
+	scissorRect_ = D3D12_RECT{0, 0, static_cast<LONG>(width), static_cast<LONG>(height)};
+
+	auto device = GraphicsGroup::GetInstance()->GetDevice();
+
+	for (UINT i = 0; i < srvHandles_.size(); ++i) {
+		auto resource = swapChain_->GetBackBuffer(i);
+		if (!resource) continue;
+
+		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+		srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		srvDesc.Texture2D.MostDetailedMip = 0;
+		srvDesc.Texture2D.MipLevels = 1;
+		srvDesc.Texture2D.PlaneSlice = 0;
+		srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+
+		device->CreateShaderResourceView(resource.Get(), &srvDesc, srvHandles_[i].cpu);
+	}
+}

@@ -52,7 +52,7 @@ public:
 
 private:
 	CameraType active_ = CameraType::Default;
-	CalyxMath::Vector2 vpMain_ {1920,1080}, vpDebug_ {800,600};
+	CalyxMath::Vector2 vpMain_ {1280,720}, vpDebug_ {800,600};
 
 	std::shared_ptr<Camera3d>   main_;
 	std::shared_ptr<DebugCamera>debug_;

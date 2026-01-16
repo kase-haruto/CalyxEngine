@@ -61,6 +61,13 @@ namespace CalyxGraphics {
 		void PostDraw();
 
 		/**
+		 * \brief リサイズ
+		 * \param width 幅
+		 * \param height 高さ
+		 */
+		void Resize(uint32_t width, uint32_t height);
+
+		/**
 		 * \brief エンジンUIの描画
 		 */
 		void RenderEngineUI();

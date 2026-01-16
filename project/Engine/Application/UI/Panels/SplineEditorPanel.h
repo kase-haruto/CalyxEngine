@@ -50,7 +50,7 @@ namespace CalyxEditor {
 		bool		gizmoEnabled_ = true;
 
 		CalyxMath::Vector2 vpPos_{0, 0};
-		CalyxMath::Vector2 vpSize_{1920, 1080};
+		CalyxMath::Vector2 vpSize_{1280, 720};
 
 		bool			   dragging_ = false;
 		CalyxMath::Vector3 dragPlaneN_{0, 1, 0};

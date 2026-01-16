@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <cstdint>
 #include <string>
+#include <functional>
 
 /*-----------------------------------------------------------------------------------------
  * WinApp
@@ -61,6 +62,12 @@ public:
 	 */
 	void SetBorderlessFullscreen(bool enable);
 
+	/**
+	 * \brief リサイズコールバックを登録
+	 * \param callback コールバック関数
+	 */
+	void SetResizeCallback(std::function<void(int, int)> callback) { resizeCallback_ = callback; }
+
 private:
 	//===================================================================*/
 	//                    private member variables
@@ -71,4 +78,6 @@ private:
 	std::string windowName_; //< ウィンドウタイトル
 	bool isFullScreen = true; //< フルスクリーンフラグ
 	WINDOWPLACEMENT windowPlacement = {sizeof(WINDOWPLACEMENT)}; //< ウィンドウの元の位置とサイズ
+	
+	std::function<void(int, int)> resizeCallback_; //< リサイズコールバック
 };

@@ -29,7 +29,8 @@ public:
 	void SetRenderTargetType(RenderTargetType type)override { rtType_ = type; }
 	RenderTargetType GetRenderTargetType()const { return rtType_; }
 
-	void TransitionTo(ID3D12GraphicsCommandList* cmdList, D3D12_RESOURCE_STATES newState);
+	void TransitionTo(ID3D12GraphicsCommandList* cmdList, D3D12_RESOURCE_STATES newState) override;
+	void Resize(uint32_t width, uint32_t height) override;
 
 private:
 	//===================================================================*/

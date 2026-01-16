@@ -21,6 +21,8 @@ public:
 	IRenderTarget* Get(const std::string& name) const;
 	void ClearAll(ID3D12GraphicsCommandList* cmdList);
 
+	const std::unordered_map<std::string, std::unique_ptr<IRenderTarget>>& GetMap() const { return targets_; }
+
 private:
 	std::unordered_map<std::string, std::unique_ptr<IRenderTarget>> targets_;
 };

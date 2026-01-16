@@ -94,7 +94,11 @@ LRESULT CALLBACK WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
 		return 0;
 
 	case WM_SIZE:
-
+		if (pThis && pThis->resizeCallback_ && wparam != SIZE_MINIMIZED) {
+			int width = LOWORD(lparam);
+			int height = HIWORD(lparam);
+			pThis->resizeCallback_(width, height);
+		}
 		return 0;
 	}
 

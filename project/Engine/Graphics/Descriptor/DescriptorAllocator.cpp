@@ -33,7 +33,7 @@ void DescriptorAllocator::CreateHeap(DescriptorUsage usage, const DescriptorHeap
 	if (FAILED(hr)) throw std::runtime_error("DescriptorAllocator: failed to create descriptor heap.");
 
 	info.descriptorSize = device_->GetDescriptorHandleIncrementSize(desc.Type);
-	info.currentOffset = 0;
+	info.currentOffset = (usage == DescriptorUsage::CbvSrvUav) ? 1 : 0; // Descriptor 0 is reserved for ImGui font
 	info.maxDescriptors = settings.maxDescriptors;
 	info.shaderVisible = settings.shaderVisible;
 }
