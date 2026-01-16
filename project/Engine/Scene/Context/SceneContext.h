@@ -19,6 +19,11 @@
 using ObjectRemovedCallback = std::function<void(SceneObject*)>;
 using ObjectAddedCallback   = std::function<void(SceneObject*)>; 
 
+/*-----------------------------------------------------------------------------------------
+ * SceneContext
+ * - シーンコンテキストクラス
+ * - シーン内のオブジェクト・ライト・カメラ・エフェクトシステムを統合管理
+ *---------------------------------------------------------------------------------------*/
 class SceneContext {
 public:
 	SceneContext()	= default;

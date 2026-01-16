@@ -3,6 +3,12 @@
 #include <string>
 
 namespace CalyxEditor {
+
+	/*-----------------------------------------------------------------------------------------
+	 * BaseEditor
+	 * - エディタ基底クラス
+	 * - ImGuiを使用したエディタUIの共通インターフェースを提供
+	 *---------------------------------------------------------------------------------------*/
 	class BaseEditor {
 	public:
 		BaseEditor(const std::string& name) : editorName_(name) {}

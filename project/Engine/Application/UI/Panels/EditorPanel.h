@@ -11,6 +11,12 @@
 #include <string>
 #include <functional>
 namespace CalyxEditor {
+
+	/*-----------------------------------------------------------------------------------------
+	 * EditorPanel
+	 * - エディタ一覧パネルクラス
+	 * - 登録されたエディタの表示・選択機能を提供
+	 *---------------------------------------------------------------------------------------*/
 	class EditorPanel
 		: public IEngineUI {
 		using OnEditorSelectedCallback = std::function<void(BaseEditor*)>;
