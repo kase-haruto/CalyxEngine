@@ -40,12 +40,13 @@ generated/
 *.o
 *.exe
 *.dll
-*.lib
 *.pdb
 *.ilk
 *.ipch
 
-# 3D model assets (Wavefront OBJ)
+*.lib
+
+!externals/**/lib/**
 !Resources/models/*.obj
 
 # ==================================================
@@ -78,8 +79,6 @@ coverage*.info
 # ==================================================
 externals/**/bin/
 externals/**/build/
-externals/**/Debug/
-externals/**/Release/
 externals/**/lib/**/*.pdb
 
 # ==================================================
