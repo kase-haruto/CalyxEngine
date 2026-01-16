@@ -1,5 +1,5 @@
 ###############################################################################
-# Visual Studio / C++ Project (.gitignore cleaned)
+# Visual Studio / C++ Project (.gitignore cleaned for CalyxEngine)
 ###############################################################################
 
 # ==================================================
@@ -15,6 +15,22 @@
 .vs/
 .idea/
 imgui.ini
+
+# ==================================================
+# C/C++ artifacts
+# ==================================================
+*.obj
+*.o
+*.exe
+*.dll
+*.pdb
+*.ilk
+*.ipch
+*.lib
+
+!project/externals/**/lib/**
+!project/externals/**/lib/**/*.lib
+
 
 # ==================================================
 # Build outputs (common)
@@ -34,20 +50,16 @@ out/
 generated/
 
 # ==================================================
-# C/C++ artifacts
+# Keep model assets
 # ==================================================
-*.obj
-*.o
-*.exe
-*.dll
-*.pdb
-*.ilk
-*.ipch
-
-*.lib
-
-!externals/**/lib/**
 !Resources/models/*.obj
+
+# ==================================================
+# External libraries (ignore their build outputs)
+# ==================================================
+project/externals/**/bin/
+project/externals/**/build/
+project/externals/**/lib/**/*.pdb
 
 # ==================================================
 # Visual Studio cache / DB
@@ -73,13 +85,6 @@ coverage*.xml
 coverage*.info
 *.coverage
 *.coveragexml
-
-# ==================================================
-# External libraries (binary / build only)
-# ==================================================
-externals/**/bin/
-externals/**/build/
-externals/**/lib/**/*.pdb
 
 # ==================================================
 # Package managers
