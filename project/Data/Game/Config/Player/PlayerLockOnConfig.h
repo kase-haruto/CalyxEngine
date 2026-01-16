@@ -2,6 +2,11 @@
 
 #include <Engine/Foundation/Serialization/SerializableObject.h>
 
+/*-----------------------------------------------------------------------------------------
+ * PlayerLockOnConfig
+ * - プレイヤーロックオン設定構造体
+ * - ロックオン判定の半径・間隔・最大数などのパラメータを管理
+ *---------------------------------------------------------------------------------------*/
 struct PlayerLockOnConfig :
 	public CalyxEngine::SerializableObject {
 public:

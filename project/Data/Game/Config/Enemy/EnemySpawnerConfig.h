@@ -5,6 +5,11 @@
 
 #include <Game/Battle/Movement/Formation/EnemyFormationController.h>
 
+/*-----------------------------------------------------------------------------------------
+ * EnemySpawnerConfig
+ * - 敵スポナー設定構造体
+ * - 敵のスポーン間隔・最大数・アクティブ範囲などのパラメータを管理
+ *---------------------------------------------------------------------------------------*/
 struct EnemySpawnerConfig : public SceneObjectConfig {
 	float spawnInterval = 1.0f;
 	size_t maxSpawnCount = 5;

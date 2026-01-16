@@ -1,6 +1,11 @@
 #pragma once
 #include <Engine/Foundation/Serialization/SerializableObject.h>
 
+/*-----------------------------------------------------------------------------------------
+ * PlayerDodgeConfig
+ * - プレイヤー回避設定構造体
+ * - 回避の距離・持続時間・無敵時間などのパラメータを管理
+ *---------------------------------------------------------------------------------------*/
 struct PlayerDodgeConfig :
 	public CalyxEngine::SerializableObject {
 
