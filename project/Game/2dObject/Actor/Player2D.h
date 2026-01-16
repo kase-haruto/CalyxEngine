@@ -14,9 +14,9 @@ class Player2D final
 	  public CalyxEngine::SerializableObject {
 private:
 	enum Player2dState {
-		MoveL,
-		MoveR,
-		Attack,
+		MoveL,  ///< 左移動状態
+		MoveR,  ///< 右移動状態
+		Attack, ///< 攻撃状態
 	};
 
 public:
@@ -25,6 +25,7 @@ public:
 	//===================================================================*/
 	/** \brief コンストラクタ*/
 	Player2D();
+	/** \brief デストラクタ*/
 	~Player2D() override;
 	/**
 	 * \brief 初期化
@@ -40,6 +41,10 @@ public:
 	 */
 	void ShowGui() override;
 
+	/**
+	 * \brief シリアライズの参照パスを取得
+	 * \return パラメータパス
+	 */
 	CalyxEngine::ParamPath GetParamPath() const override {
 		return {CalyxEngine::ParamDomain::Game, "Player2D"};
 	}
@@ -66,12 +71,13 @@ private:
 	void Move();
 	/**
 	 * \brief 状態更新処理
+	 * \param dt デルタタイム
 	 */
 	void StateUpdate(float dt);
 
 private:
 	//===================================================================*/
-	//			private methods
+	//			private members
 	//===================================================================*/
 	Player2dState currentState_{}; //< 現在の状態
 	Player2dState prevState_{};	   //< 前回の状態
@@ -85,6 +91,6 @@ private:
 	int	  moveDir_	 = 1;	   //< 1 = 右, -1 = 左
 
 	CalyxMath::Vector2		  size_{64.0f, 64.0f}; //< サイズ
-	CalyxMath::Vector2		  basePos_;
-	CalyxUtil::SimpleAnimator animator_; // アニメーター
+	CalyxMath::Vector2		  basePos_;			  //< 基準座標
+	CalyxUtil::SimpleAnimator animator_;			  //< アニメーター
 };
