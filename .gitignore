@@ -1,7 +1,3 @@
-###############################################################################
-# Visual Studio / C++ Project (.gitignore cleaned)
-###############################################################################
-
 # ==================================================
 # User / IDE specific
 # ==================================================
@@ -17,23 +13,6 @@
 imgui.ini
 
 # ==================================================
-# Build outputs (common)
-# ==================================================
-[Bb]in/
-[Oo]bj/
-[Dd]ebug*/
-[Rr]elease*/
-[Rr]elWithDebInfo*/
-[Mm]inSizeRel*/
-x64/
-x86/
-[Ww][Ii][Nn]32/
-
-build/
-out/
-generated/
-
-# ==================================================
 # C/C++ artifacts
 # ==================================================
 *.obj
@@ -44,10 +23,45 @@ generated/
 *.ilk
 *.ipch
 
+# ==================================================
+# Ignore ALL .lib by default
+# ==================================================
 *.lib
 
-!externals/**/lib/**
+# ==================================================
+# Model assets
+# ==================================================
 !Resources/models/*.obj
+
+# ==================================================
+# Build outputs (common)
+# ==================================================
+[Bb]in/
+[Oo]bj/
+[Rr]elWithDebInfo*/
+[Mm]inSizeRel*/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+
+build/
+out/
+generated/
+
+# Debug / Release
+[Dd]ebug*/
+[Rr]elease*/
+
+# ==================================================
+# External libraries (ignore their build outputs)
+# ==================================================
+!project/externals/
+!project/externals/**/lib/
+!project/externals/**/lib/**
+
+project/externals/**/bin/
+project/externals/**/build/
+project/externals/**/lib/**/*.pdb
 
 # ==================================================
 # Visual Studio cache / DB
@@ -73,13 +87,6 @@ coverage*.xml
 coverage*.info
 *.coverage
 *.coveragexml
-
-# ==================================================
-# External libraries (binary / build only)
-# ==================================================
-externals/**/bin/
-externals/**/build/
-externals/**/lib/**/*.pdb
 
 # ==================================================
 # Package managers
