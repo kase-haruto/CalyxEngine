@@ -8,6 +8,11 @@ class Enemy;
 class WorldTransform;
 class EnemyFormationController;
 
+/*-----------------------------------------------------------------------------------------
+ * EnemyMovementController class
+ * - 敵の移動モードを管理するクラス
+ * - 進入/滞在/退場/編隊移動などの挙動を制御する
+ *---------------------------------------------------------------------------------------*/
 class EnemyMovementController {
 public:
 	enum class Mode {
