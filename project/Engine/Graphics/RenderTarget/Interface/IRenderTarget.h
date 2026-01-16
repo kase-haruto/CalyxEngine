@@ -19,4 +19,11 @@ public:
 	virtual void SetRenderTarget(ID3D12GraphicsCommandList* commandList) = 0;
 	virtual void TransitionTo([[maybe_unused]] ID3D12GraphicsCommandList* cmdList,[[maybe_unused]] D3D12_RESOURCE_STATES newState){};
 	virtual void Clear(ID3D12GraphicsCommandList* cmdList) = 0;
+
+	/**
+	 * \brief リサイズ処理
+	 * \param width 幅
+	 * \param height 高さ
+	 */
+	virtual void Resize(uint32_t width, uint32_t height) = 0;
 };

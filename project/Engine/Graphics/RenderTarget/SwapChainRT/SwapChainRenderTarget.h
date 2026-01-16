@@ -22,6 +22,7 @@ public:
 	void SetRenderTarget(ID3D12GraphicsCommandList* commandList) override;
 	void TransitionTo(ID3D12GraphicsCommandList* commandList, D3D12_RESOURCE_STATES newState) override;
 	void Clear(ID3D12GraphicsCommandList* cmdList) override;
+	void Resize(uint32_t width, uint32_t height) override;
 
 	D3D12_VIEWPORT GetViewport() const override{ return viewport_; }
 	D3D12_RECT GetScissorRect() const override{ return scissorRect_; }

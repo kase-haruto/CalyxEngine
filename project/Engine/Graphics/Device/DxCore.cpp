@@ -179,6 +179,43 @@ namespace CalyxGraphics {
 		dxCommand_->Reset();
 	}
 
+	void DxCore::Resize(uint32_t width, uint32_t height) {
+		if (width == 0 || height == 0) return;
+		if (width == clientWidth_ && height == clientHeight_) return;
+
+		clientWidth_ = width;
+		clientHeight_ = height;
+
+		// GPUの完了を待つ
+		dxFence_->Signal(dxCommand_->GetCommandQueue());
+		dxFence_->Wait();
+
+		// コマンドリストの状態をクリアし、参照を外す
+		auto commandList = dxCommand_->GetCommandList();
+		commandList->ClearState(nullptr);
+		commandList->Close();
+		dxCommand_->Reset();
+
+		// スワップチェーンをリサイズ (内部で古いバックバッファを解放する)
+		dxSwapChain_->Resize(width, height);
+
+		// スワップチェーンのバックバッファRTVを再生成
+		D3D12_CPU_DESCRIPTOR_HANDLE baseRTVHandle = rtvHeap_->GetCPUDescriptorHandleForHeapStart();
+		auto device = dxDevice_->GetDevice();
+		for (UINT i = 0; i < dxSwapChain_->GetSwapChainDesc().BufferCount; ++i) {
+			auto backBuffer = dxSwapChain_->GetBackBuffer(i);
+			assert(backBuffer != nullptr);
+			D3D12_CPU_DESCRIPTOR_HANDLE handle = baseRTVHandle;
+			handle.ptr += i * rtvDescriptorSize_;
+			device->CreateRenderTargetView(backBuffer.Get(), nullptr, handle);
+		}
+
+		// 全てのレンダーターゲットをリサイズ
+		for (auto& pair : renderTargetCollection_->GetMap()) {
+			pair.second->Resize(width, height);
+		}
+	}
+
 	void DxCore::RenderEngineUI() {
 #ifdef _DEBUG
 

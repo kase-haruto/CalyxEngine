@@ -75,6 +75,11 @@ namespace CalyxEngine {
 		imguiManager_ = std::make_unique<ImGuiManager>();
 		imguiManager_->Initialize(winApp_.get(), dxCore_.get());
 
+		// リサイズコールバックの設定
+		winApp_->SetResizeCallback([this](int width, int height) {
+			dxCore_->Resize(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
+		});
+
 		// srvの先頭をimguiが使用するためそのあとに初期化
 		dxCore_->RendererInitialize(clientWidth, clientHeight);
 		// カメラの生成

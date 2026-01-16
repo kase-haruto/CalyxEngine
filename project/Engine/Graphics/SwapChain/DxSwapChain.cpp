@@ -77,3 +77,29 @@ void DxSwapChain::Present(){
 	// スワップチェインをPresent
 	swapChain_->Present(syncInterval_, 0);
 }
+
+void DxSwapChain::Resize(uint32_t width, uint32_t height) {
+	// リソースを確実に解放
+	for (auto& bb : backBuffers_) {
+		bb = nullptr;
+		bb.Reset();
+	}
+
+	HRESULT hr = swapChain_->ResizeBuffers(
+		swapChainDesc_.BufferCount,
+		width,
+		height,
+		swapChainDesc_.Format,
+		swapChainDesc_.Flags
+	);
+	assert(SUCCEEDED(hr));
+
+	swapChainDesc_.Width = width;
+	swapChainDesc_.Height = height;
+
+	// リソースを再取得
+	for (UINT i = 0; i < swapChainDesc_.BufferCount; ++i) {
+		hr = swapChain_->GetBuffer(i, IID_PPV_ARGS(&backBuffers_[i]));
+		assert(SUCCEEDED(hr));
+	}
+}
