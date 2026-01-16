@@ -20,6 +20,12 @@ class SceneContext;
 class SceneObject;
 
 namespace CalyxEditor {
+
+	/*-----------------------------------------------------------------------------------------
+	 * PlaceToolPanel
+	 * - オブジェクト配置ツールパネルクラス
+	 * - Shape・Light・Particle等のオブジェクトをシーンに配置する機能を提供
+	 *---------------------------------------------------------------------------------------*/
 	class PlaceToolPanel
 		: public IEngineUI {
 	public:

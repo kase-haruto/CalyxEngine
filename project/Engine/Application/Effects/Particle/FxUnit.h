@@ -6,6 +6,12 @@
 #include <Engine/Foundation/Math/Vector4.h>
 
 namespace CalyxEffect {
+
+	/*-----------------------------------------------------------------------------------------
+	 * FxUnit
+	 * - CPUパーティクル1個分のデータ構造体
+	 * - 位置・速度・寿命・色・スケール等のパーティクル情報を保持
+	 *---------------------------------------------------------------------------------------*/
 	struct FxUnit {
 		CalyxMath::Vector3 position;                        //< 座標
 		CalyxMath::Vector3 rotationEuler;                   //< オイラー回転
@@ -25,6 +31,11 @@ namespace CalyxEffect {
 
 	};
 
+	/*-----------------------------------------------------------------------------------------
+	 * ParticleCS
+	 * - GPUパーティクル用のデータ構造体
+	 * - ComputeShader向けにアライメントされたパーティクル情報
+	 *---------------------------------------------------------------------------------------*/
 	struct ParticleCS {
 		CalyxMath::Vector3 translate;
 		CalyxMath::Vector3 scale;
