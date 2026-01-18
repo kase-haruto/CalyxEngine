@@ -97,5 +97,8 @@ namespace CalyxGraphics {
 	//////////////////////////////////////////////////////////////////////////////////////
 	//		ライトビュー・プロジェクション行列セット
 	//////////////////////////////////////////////////////////////////////////////////////
-	void ShadowMapSystem::SetLightVP(const CalyxMath::Matrix4x4& lightVP) { shadowCB_.TransferData({lightVP}); }
+	void ShadowMapSystem::SetLightVP(const CalyxMath::Matrix4x4& lightVP) {
+		cbData_.lightVP = lightVP;
+		shadowCB_.TransferData(cbData_);
+	}
 }

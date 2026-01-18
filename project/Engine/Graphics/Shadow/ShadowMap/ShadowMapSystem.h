@@ -29,6 +29,8 @@ namespace CalyxGraphics {
 	 *---------------------------------------------------------------------*/
 	struct ShadowCBData {
 		CalyxMath::Matrix4x4 lightVP;
+		float shadowBias = 0.001f;
+		float padding[3];
 	};
 
 	/*----------------------------------------------------------------------*
@@ -82,12 +84,18 @@ namespace CalyxGraphics {
 
 		const ShadowBounds& GetShadowBounds()const { return shadowBounds_; }
 
+		void SetShadowBias(float bias) {
+			cbData_.shadowBias = bias;
+			shadowCB_.TransferData(cbData_);
+		}
+
 	private:
 		//===================================================================*/
 		//				private members
 		//===================================================================*/
 		ShadowMapResource              shadowMap_;    //< シャドウマップ用リソース
 		DxConstantBuffer<ShadowCBData> shadowCB_;     //< シャドウマップ用定数バッファ
+		ShadowCBData                   cbData_;
 		ShadowBounds                   shadowBounds_; //< シャドウ範囲管理
 	};
 
