@@ -37,7 +37,7 @@ public:
     }
 
 	// viewの取得 ===================================================================*/
-	D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferView(){ return vertexBufferView_; }
+	const D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferView() const { return vertexBufferView_; }
 
 private:
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_ = {};
