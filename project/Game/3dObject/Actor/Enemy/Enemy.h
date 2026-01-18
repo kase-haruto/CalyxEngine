@@ -5,6 +5,7 @@
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 #include <Engine/Foundation/Serialization/SerializableObject.h>
 #include <Engine/Objects/3D/Geometory/Spline/SplineData.h>
+#include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/objects/Collider/SphereCollider.h>
 
 // game
@@ -183,6 +184,30 @@ private:
 	 * \brief シリアライズ可能パラメータの初期化
 	 */
 	void InitializeSerializableParm();
+	void DerivativeGui() override;
+
+private:
+	//===================================================================*/
+	//			Inner Class
+	//===================================================================*/
+	struct EnemyParam : public CalyxEngine::SerializableObject {
+		EnemyParam();
+		CalyxEngine::ParamPath GetParamPath() const override;
+
+		float life       = 1.0f;
+		float killScore  = 100.0f;
+		float moveSpeed  = 5.0f;
+		CalyxMath::Vector3 scale = {1.0f, 1.0f, 1.0f};
+
+		struct Death {
+			float length = 1.5f;
+			CalyxMath::Vector3 rotateAxis = {1.0f, 0.0f, 0.0f};
+		} death;
+
+		struct Collider {
+			float radius = 1.5f;
+		} col;
+	} param_;
 
 private:
 	//===================================================================*/

@@ -1,6 +1,7 @@
 #include "SerializableUtil.h"
 
 #include "SerializableField.h"
+#include "SerializableObject.h"
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 
 
@@ -107,7 +108,7 @@ bool CalyxEngine::DrawField(const SerializableField& f) {
 	return changed;
 }
 
-bool CalyxEngine::DrawCategoryNode(const VariableCategoryNode& node) {
+bool CalyxEngine::DrawCategoryNode(const VariableCategoryNode& node, SerializableObject* owner) {
 
 	bool anyChanged = false;
 
@@ -118,7 +119,13 @@ bool CalyxEngine::DrawCategoryNode(const VariableCategoryNode& node) {
 	bool open = ImGui::TreeNodeEx(node.name.c_str(),flags);
 	if(!open) return false;
 
-	for(const auto& [_, child] : node.children) { anyChanged |= DrawCategoryNode(child); }
+	// Categorized Save/Load buttons for root levels
+	if (owner) {
+		owner->SaveAndLoadButtonGui();
+		ImGui::Separator();
+	}
+
+	for(const auto& [_, child] : node.children) { anyChanged |= DrawCategoryNode(child, nullptr); }
 
 	for(const auto* f : node.fields) { anyChanged |= DrawField(*f); }
 

@@ -8,6 +8,9 @@
 #include "State/Machine/BossStateMachine.h"
 #include <Game/3dObject/Actor/Enemy/EnemyFactionActor.h>
 #include <Game/Battle/Shooting/ShootingController/BossShootingController.h>
+#include <Engine/Foundation/Serialization/SerializableObject.h>
+#include <Engine/Foundation/Math/Vector3.h>
+#include <Engine/Foundation/Math/Vector2.h>
 
 class BossAI;
 class BossAnimController;
@@ -23,6 +26,11 @@ public:
 	//===================================================================*/
 	//						public methods
 	//===================================================================*/
+	/**
+	 * \brief コンストラクタ
+	 */
+	Boss() = default;
+
 	/**
 	 * \brief コンストラクタ
 	 * \param modelName モデル名
@@ -149,6 +157,24 @@ private:
 	 * \brief シリアライズ可能パラメータの初期化
 	 */
 	void InitializeSerializableParm();
+
+private:
+	//===================================================================*/
+	//			Inner Class
+	//===================================================================*/
+	struct BossParam : public CalyxEngine::SerializableObject {
+		BossParam();
+		CalyxEngine::ParamPath GetParamPath() const override;
+
+		int life      = 100;
+		int flinchMax = 10;
+		CalyxMath::Vector3 scale = {1.0f, 1.0f, 1.0f};
+
+		struct HpGauge {
+			CalyxMath::Vector2 pos  = {640.0f, 50.0f}; // kGameSize.x * 0.5f = 640
+			CalyxMath::Vector2 size = {500.0f, 32.0f};
+		} hp;
+	} param_;
 
 	/**
 	 * \brief 死亡時処理

@@ -4,6 +4,8 @@
 #include "imgui/imgui.h"
 
 // ease
+#include "Engine/Renderer/Sprite/SpriteRenderer.h"
+
 #include <Engine/Foundation/Utility/Ease/CxEase.h>
 
 #include <algorithm>
@@ -118,23 +120,21 @@ void HpGauge::Update(float dt) {
 		blueRatio_,
 		target,
 		dt * 12.0f,
-		EaseType::EaseOutSine
-		);
+		EaseType::EaseOutSine);
 
 	redRatio_ = CalyxEase::EaseLerp(
 		redRatio_,
 		blueRatio_,
 		dt * 2.0f, // target に直接追従させない
-		EaseType::EaseOutExpo
-		);
+		EaseType::EaseOutExpo);
 	//----------------------------------------
 	// バウンド演出
 	//----------------------------------------
 	float scaleY = 1.0f;
 	if(shakeTimer_ > 0.0f) {
 		shakeTimer_ -= dt;
-		float elapsed = 0.3f - (std::max)(shakeTimer_,0.0f);
-		scaleY        = 1.0f + 0.2f * std::sin(elapsed * 20.0f);
+		float elapsed = 0.3f - (std::max)(shakeTimer_, 0.0f);
+		scaleY		  = 1.0f + 0.2f * std::sin(elapsed * 20.0f);
 	}
 	transform_.scale.y = baseSize_.y * scaleY;
 
@@ -142,7 +142,7 @@ void HpGauge::Update(float dt) {
 	// フェード
 	//----------------------------------------
 	if(visibleTimer_ > 0.0f) visibleTimer_ -= dt;
-	float alpha = std::clamp(visibleTimer_ * 2.0f,0.3f,1.0f);
+	float alpha = std::clamp(visibleTimer_ * 2.0f, 0.3f, 1.0f);
 
 	//----------------------------------------
 	// transform 同期（位置・サイズ・回転）
@@ -155,8 +155,8 @@ void HpGauge::Update(float dt) {
 	if(blueGauge_) {
 		// uv スクロール
 		float speed = 2.0f;
-		float uvY   = blueGauge_->GetUvTranslate().y + speed * dt;
-		blueGauge_->SetUvTranslate({uvY,uvY});
+		float uvY	= blueGauge_->GetUvTranslate().y + speed * dt;
+		blueGauge_->SetUvTranslate({uvY, uvY});
 		blueGauge_->SetFillAmount(blueRatio_);
 		blueGauge_->SetColor(ComputeColor(blueRatio_));
 		blueGauge_->SetAlpha(alpha);
@@ -181,14 +181,21 @@ void HpGauge::Update(float dt) {
 	}
 }
 
+void HpGauge::Draw(SpriteRenderer* spriteRenderer) const {
+	if(blueGauge_) {
+		spriteRenderer->Register(blueGauge_.get());
+		spriteRenderer->Register(redGauge_.get());
+		spriteRenderer->Register(frameSprite_.get());
+	}
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // anchor
 /////////////////////////////////////////////////////////////////////////////////////////
 void HpGauge::SetAncorPoint(const CalyxMath::Vector2& point) const {
-	if(blueGauge_) blueGauge_->SetAnchorPoint(point);
-	if(redGauge_) redGauge_->SetAnchorPoint(point);
 	if(frameSprite_) frameSprite_->SetAnchorPoint(point);
+	if(redGauge_) redGauge_->SetAnchorPoint(point);
+	if(blueGauge_) blueGauge_->SetAnchorPoint(point);
 }
 
 

@@ -10,9 +10,13 @@ namespace CalyxEngine {
 	bool SerializableObject::LoadParams() { return ParamStore::Load(*this); }
 
 	void SerializableObject::SaveAndLoadButtonGui() {
-		if(ImGui::Button("Load Params")) { LoadParams(); }
+		auto path = GetParamPath();
+		std::string loadLabel = "Load " + path.name;
+		std::string saveLabel = "Save " + path.name;
+
+		if(ImGui::Button(loadLabel.c_str())) { LoadParams(); }
 		ImGui::SameLine();
-		if(ImGui::Button("Save Params")) { SaveParams(); }
+		if(ImGui::Button(saveLabel.c_str())) { SaveParams(); }
 	}
 
 	bool SerializableObject::ShowGui() {
@@ -21,8 +25,10 @@ namespace CalyxEngine {
 
 		bool changed = false;
 		for (const auto& [_, node] : root.children) {
-			changed |= DrawCategoryNode(node);
+			// Integrate Save/Load buttons into each root category tab
+			changed |= DrawCategoryNode(node, this);
 		}
+
 		return changed;
 	}
 

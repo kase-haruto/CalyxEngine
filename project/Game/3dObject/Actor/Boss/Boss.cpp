@@ -8,6 +8,7 @@
 #include "AI/BossAI.h"
 #include "Anim/BossAnimController.h"
 #include "Engine/Application/System/Enviroment.h"
+#include "Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h"
 #include "Engine/Scene/Utility/SceneUtility.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -66,8 +67,7 @@ void Boss::Initialize() {
 	anim_->Initialize();
 	hpGauge_ = std::make_unique<HpGauge>(static_cast<float>(life_));
 	// 画面中央上にゲージを設定
-	CalyxMath::Vector2 gaugePos = {kGameSize.x * 0.5f, 50.0f};
-	hpGauge_->Initialize(gaugePos, CalyxMath::Vector2(500.0f, 32.0f));
+	hpGauge_->Initialize(param_.hp.pos, param_.hp.size);
 	hpGauge_->SetAncorPoint(CalyxMath::Vector2(0.5f, 0.5f));
 
 	auto fx = hitEffects_.lock();
@@ -124,14 +124,11 @@ void Boss::Update(float dt) {
 //		パラメータパス取得
 ///////////////////////////////////////////////////////////////////////////////////////////
 void Boss::InitializeSerializableParm() {
-	// 調整変数の追加
-	SerializableObject::AddField("scale", worldTransform_.scale);
-	SerializableObject::AddField("flinchValue", flinchValue_);
-	SerializableObject::AddField("flinchMax", flinchMax_);
-	SerializableObject::AddField("life", life_);
+	param_.LoadParams();
 
-	// ロード
-	SerializableObject::LoadParams();
+	life_       = param_.life;
+	flinchMax_  = param_.flinchMax;
+	worldTransform_.scale = param_.scale;
 }
 void Boss::Die() {
 	// スコアを送信する
@@ -159,9 +156,7 @@ void Boss::LookAtPlayer() {
 //		デバッグgui描画
 /////////////////////////////////////////////////////////////////////////////////////////
 void Boss::DerivativeGui() {
-
-	GuiCmd::DragInt("flinchMax", flinchMax_, 1, 0, 100);
-	GuiCmd::DragInt("life", life_, 1, 0, 100);
+	param_.ShowGui();
 
 	if(ImGui::CollapsingHeader("State")) {
 		stateMachine_->ShowGui();
@@ -172,13 +167,7 @@ void Boss::DerivativeGui() {
 }
 
 void Boss::HeaderGui() {
-	if(ImGui::Button("load")) {
-		SerializableObject::LoadParams();
-	}
-	ImGui::SameLine();
-	if(ImGui::Button("save")) {
-		SerializableObject::SaveParams();
-	}
+	param_.SaveAndLoadButtonGui();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -266,3 +255,21 @@ BossAnimController* Boss::GetAnimator() const { return anim_.get(); }
 BossAI* Boss::GetAI() const { return ai_.get(); }
 
 #pragma endregion
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		BossParam
+/////////////////////////////////////////////////////////////////////////////////////////
+Boss::BossParam::BossParam() {
+	AddField("life", life).Category("Basic").Range(1, 100000);
+	AddField("flinchMax", flinchMax).Category("Basic").Range(1, 1000);
+	AddField("scale", scale).Category("Basic");
+
+	AddField("hpGaugePos", hp.pos).Category("UI");
+	AddField("hpGaugeSize", hp.size).Category("UI");
+}
+
+CalyxEngine::ParamPath Boss::BossParam::GetParamPath() const {
+	return {CalyxEngine::ParamDomain::Game, "Boss", "Actor/Boss"};
+}
+
+REGISTER_SCENE_OBJECT(Boss)

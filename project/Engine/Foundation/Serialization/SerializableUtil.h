@@ -8,6 +8,8 @@ namespace CalyxEngine {
 	struct SerializableField;
 	struct VariableCategoryNode;
 
+	class SerializableObject;
+
 	std::vector<std::string> SplitCategory(const std::string& s);
 
 	void BuildCategoryTree(
@@ -16,5 +18,5 @@ namespace CalyxEngine {
 
 	bool DrawField(const SerializableField& f);
 
-	bool DrawCategoryNode(const VariableCategoryNode& node);
+	bool DrawCategoryNode(const VariableCategoryNode& node, SerializableObject* owner = nullptr);
 }

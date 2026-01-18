@@ -5,15 +5,18 @@
    ========================================================================= */
 // engine
 #include <Engine/Application/Effects/FxObject.h>
+#include <Engine/Foundation/Serialization/SerializableObject.h>
 #include <Engine/Objects/3D/Actor/Actor.h>
 #include <Engine/Renderer/Sprite/Sprite.h>
-#include <Engine/Foundation/Serialization/SerializableObject.h>
+#include <Engine/Foundation/Math/Vector3.h>
+#include <Engine/Foundation/Math/Vector2.h>
 
 // game
 #include "Context/PlayerContext.h"
 #include "Dodge/PlayerDodgeMotion.h"
 #include "Input/PlayerInput.h"
 #include "LockOn/PlayerLockOn.h"
+#include "LockOn/Reticle.h"
 #include "Move/PlayerMoveController.h"
 
 #include <Game/2d/HpGauge.h>
@@ -68,10 +71,9 @@ public:
 	 */
 	void Update(float dt) override;
 	/**
-	 * \brief 描画
-	 * \param cmdList コマンドリスト
+	 * \brief HUD描画
 	 */
-	void Draw(ID3D12GraphicsCommandList* cmdList) override;
+	void DrawHud(class SpriteRenderer* spriteRenderer);
 	/**
 	 * \brief デリバティブGUI
 	 */
@@ -154,32 +156,32 @@ public:
 	 * \brief タイプ名を取得
 	 * \return タイプ名
 	 */
-	std::string_view		   GetTypeName() const override { return "Player"; }
+	std::string_view GetTypeName() const override { return "Player"; }
 	/**
 	 * \brief 危険察知を取得
 	 * \return 危険察知
 	 */
-	PlayerDangerSense*		   GetDangerSense() const { return danger_.get(); }
+	PlayerDangerSense* GetDangerSense() const { return danger_.get(); }
 	/**
 	 * \brief 回避システムを取得
 	 * \return 回避システム
 	 */
-	PlayerDodgeSystem*		   GetDodgeSystem() const { return dodgeSystem_.get(); }
+	PlayerDodgeSystem* GetDodgeSystem() const { return dodgeSystem_.get(); }
 	/**
 	 * \brief 全てのスプライトを取得
 	 * \return スプライトリスト
 	 */
-	std::vector<Sprite*>	   GetAllSprites() const;
+	std::vector<Sprite*> GetAllSprites() const;
 	/**
 	 * \brief 中心座標を取得
 	 * \return 中心座標
 	 */
-	const CalyxMath::Vector3   GetCenterPos() const override;
+	const CalyxMath::Vector3 GetCenterPos() const override;
 	/**
 	 * \brief 射撃クールタイムを取得
 	 * \return クールタイム
 	 */
-	std::optional<float>	   GetShootCooldown() const;
+	std::optional<float> GetShootCooldown() const;
 	/**
 	 * \brief 最大射撃間隔を取得
 	 * \return 最大射撃間隔
@@ -189,7 +191,7 @@ public:
 	 * \brief レティクルのワールド座標を取得
 	 * \return ワールド座標
 	 */
-	CalyxMath::Vector3		   GetReticleWorldPos() const { return reticleTransform_.GetWorldPosition(); }
+	CalyxMath::Vector3 GetReticleWorldPos() const { return reticleTransform_.GetWorldPosition(); }
 
 private:
 	//=====================================================================
@@ -215,23 +217,54 @@ private:
 
 private:
 	//=====================================================================
+	// Inner Class
+	//=====================================================================
+	struct PlayerParam : public CalyxEngine::SerializableObject {
+		PlayerParam();
+		CalyxEngine::ParamPath GetParamPath() const override;
+
+		float moveSpeed = 15.0f;
+		int   life      = 30;
+
+		struct Collider {
+			float              radius = 1.5f;
+			CalyxMath::Vector3 offset = {0.0f, -2.0f, 0.0f};
+		} col;
+
+		struct HpGauge {
+			CalyxMath::Vector2 pos  = {100.0f, 630.0f};
+			CalyxMath::Vector2 size = {360.0f, 32.0f};
+		} hp;
+
+		struct Reticle {
+			float initialZ = 100.0f;
+			float minSize  = 16.0f;
+			float maxSize  = 128.0f;
+			float rotSpeed = 0.02f;
+			float uvRotSpeed = 0.2f;
+		} ret;
+	} param_;
+
+private:
+	//=====================================================================
 	// Private Variables
 	//=====================================================================
-	PlayerMoveController                      moveCtrler_;                   //< 移動コントローラ
-	std::unique_ptr<PlayerDodgeSpinMotion>    dodgeMotion_        = nullptr; //< 回避モーション
-	std::unique_ptr<PlayerDodgeSystem>        dodgeSystem_        = nullptr; //< 回避システム
-	std::unique_ptr<PlayerDangerSense>        danger_             = nullptr; //< 危機察知
-	std::unique_ptr<PlayerDamageHandler>      damageHandler_      = nullptr; //< ダメージハンドラ
-	std::unique_ptr<PlayerLockOn>             lockOn_             = nullptr; //< ロックオンシステム
+	PlayerMoveController					  moveCtrler_;					 //< 移動コントローラ
+	std::unique_ptr<PlayerDodgeSpinMotion>	  dodgeMotion_		  = nullptr; //< 回避モーション
+	std::unique_ptr<PlayerDodgeSystem>		  dodgeSystem_		  = nullptr; //< 回避システム
+	std::unique_ptr<PlayerDangerSense>		  danger_			  = nullptr; //< 危機察知
+	std::unique_ptr<PlayerDamageHandler>	  damageHandler_	  = nullptr; //< ダメージハンドラ
+	std::unique_ptr<PlayerLockOn>			  lockOn_			  = nullptr; //< ロックオンシステム
 	std::unique_ptr<PlayerShootingController> shootingController_ = nullptr; //< 射撃コントローラ
-	PlayerInput                               input_;
+	PlayerInput								  input_;
 
-	CalyxMath::Vector3 lastMoveVector_;   //< 最後の移動ベクトル
-	WorldTransform     reticleTransform_; //< レティクルのワールド変換
+	CalyxMath::Vector3 lastMoveVector_;	  //< 最後の移動ベクトル
+	WorldTransform	   reticleTransform_; //< レティクルのワールド変換
 
 	// sprites
-	std::array<std::unique_ptr<Sprite>,4> reticleSprites_; //< レティクルのスプライト
-	std::unique_ptr<HpGauge>              hpGauge_;        //< HPゲージ
+	std::array<std::unique_ptr<Sprite>, 4> reticleSprites_; //< レティクルのスプライト
+	std::unique_ptr<Reticle>			   reticle_;		//< レティクル管理クラス
+	std::unique_ptr<HpGauge>			   hpGauge_;		//< HPゲージ
 
 	// --- Auto Lock-On params ---
 	bool autoLockOn_ = true; // オートロックオン有効/無効
@@ -239,8 +272,8 @@ private:
 	// 画面内クランプ用設定
 	bool  clampPlayerInView_  = true;
 	bool  clampReticleInView_ = true;
-	float clampMarginXpx_     = 24.0f; // 左右の余白(px)
-	float clampMarginYpx_     = 24.0f; // 上下の余白(px)
+	float clampMarginXpx_	  = 24.0f; // 左右の余白(px)
+	float clampMarginYpx_	  = 24.0f; // 上下の余白(px)
 
 	// effect
 	std::shared_ptr<CalyxEffect::FxObject> shootFx_;
