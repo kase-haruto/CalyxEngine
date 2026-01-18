@@ -344,10 +344,6 @@ void Player::DrawHud(SpriteRenderer* spriteRenderer) {
 //		imgui
 /////////////////////////////////////////////////////////////////////////////////////////
 void Player::DerivativeGui() {
-	if(hpGauge_) {
-		hpGauge_->ShowGui();
-	}
-
 	if(lockOn_) {
 		lockOn_->ShowGui();
 	}

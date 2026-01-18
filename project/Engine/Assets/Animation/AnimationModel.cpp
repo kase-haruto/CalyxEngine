@@ -385,22 +385,31 @@ namespace CalyxAssets {
 		cmdList->SetGraphicsRootDescriptorTable(rootParameterIndex,skinCluster_.paletteSrvHandle.second);
 	}
 
+	void AnimationModel::BindVertexIndexBuffers(ID3D12GraphicsCommandList* cmdList) const {
+		if (!modelData_) return;
+
+		// 頂点バッファ/インデックスバッファをセット
+		vbvs_[0] = modelData_->vertexBuffer.GetVertexBufferView(); // vertexDataのvbv
+		vbvs_[1] = skinCluster_.influenceBufferView;               // influenceDataのvbv
+		
+		modelData_->indexBuffer.SetCommand(cmdList);
+		cmdList->IASetVertexBuffers(0, 2, vbvs_);
+	}
+
 	//-----------------------------------------------------------------------------
 	// 描画
 	//-----------------------------------------------------------------------------
 	void AnimationModel::Draw([[maybe_unused]] const WorldTransform& transform) {
 		// もしモデルデータが読み込まれていない場合は何もしない
 		if(!modelData_) { return; }
-
+ 
 		ID3D12GraphicsCommandList* cmdList = GraphicsGroup::GetInstance()->GetCommandList().Get();
-
+ 
 		SetCommandPalletSrv(7,cmdList);
-
+ 
 		// 頂点バッファ/インデックスバッファをセット
-		vbvs_[0] = modelData_->vertexBuffer.GetVertexBufferView(); // vertexDataのvbv
-		vbvs_[1] = skinCluster_.influenceBufferView;               // influenceDataのvbv
-		modelData_->indexBuffer.SetCommand(cmdList);
-		cmdList->IASetVertexBuffers(0,2,vbvs_);
+		BindVertexIndexBuffers(cmdList);
+
 		BaseModel::Draw(transform);
 
 		if(isDrawSkeleton_) {

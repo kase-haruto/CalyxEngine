@@ -624,6 +624,15 @@ namespace GuiCmd {
 		}
 	}
 
+	void PropertyText(const char* label, const char* fmt, ...) {
+		BeginPropertyRow(label);
+		
+		va_list args;
+		va_start(args, fmt);
+		ImGui::TextV(fmt, args);
+		va_end(args);
+	}
+
 	//===================================================================*/
 	//		Section Filter Helpers
 	//===================================================================*/
