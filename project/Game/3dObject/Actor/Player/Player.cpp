@@ -119,9 +119,6 @@ Player::Player(const std::string&		  modelName,
 /////////////////////////////////////////////////////////////////////////////////////////
 void Player::Initialize() {
 	moveSpeed_ = param_.moveSpeed;
-	reticleTransform_.Initialize();
-	reticleTransform_.parent	  = &CameraManager::GetMain3d()->GetWorldTransform();
-	reticleTransform_.translation = CalyxMath::Vector3(0.0f, 0.0f, param_.ret.initialZ);
 
 	// コライダー初期化
 	BaseGameObject::InitializeCollider(ColliderKind::Sphere);
@@ -143,20 +140,6 @@ void Player::Initialize() {
 	// ライフゲージを設定
 	hpGauge_->Initialize(param_.hp.pos, param_.hp.size);
 	hpGauge_->SetAncorPoint({0.0f, 0.5f}); // 左中央
-
-	// spriteの初期化
-	size_t spriteCount = reticleSprites_.size();
-	for(size_t i = 0; i < spriteCount; ++i) {
-		reticleSprites_[i] = std::make_unique<Sprite>("Textures/reticle.png");
-
-		float			   t	= static_cast<float>(i) / (spriteCount - 1);
-		float			   size = std::lerp(param_.ret.maxSize, param_.ret.minSize, t);
-		CalyxMath::Vector2 spriteSize(size, size);
-
-		CalyxMath::Vector2 initPos = kGameSize * 0.5f;
-		reticleSprites_[i]->Initialize(initPos, spriteSize);
-		reticleSprites_[i]->SetAnchorPoint(CalyxMath::Vector2(0.5f, 0.5f));
-	}
 
 	// reticle
 	reticle_ = std::make_unique<Reticle>();
@@ -230,12 +213,6 @@ void Player::Update(float dt) {
 			}
 			break;
 
-		case PlayerCommandType::MoveReticle:
-			if(auto* m = std::get_if<CmdMove>(&c.value)) {
-				MoveReticle(m->delta);
-			}
-			break;
-
 		case PlayerCommandType::Shoot:
 			RequestShoot();
 			break;
@@ -273,42 +250,10 @@ void Player::Update(float dt) {
 		hpGauge_->Update(dt);
 		hpGauge_->SetHp(static_cast<float>(life_));
 	}
-	reticleTransform_.Update();
-
-	CalyxMath::Vector3 playerPos  = GetWorldPosition();
-	CalyxMath::Vector3 reticlePos = reticleTransform_.GetWorldPosition();
 
 	// ── レティクル─────────────────────────
 	reticle_->Update(dt);
 	
-	size_t spriteCount = reticleSprites_.size();
-	if(spriteCount < 2) return;
-
-	CalyxMath::Vector3 diff = (reticlePos - playerPos) * 0.5f;
-
-	for(size_t i = 0; i < spriteCount; ++i) {
-		float t = static_cast<float>(i) / (spriteCount - 1);
-
-		CalyxMath::Vector3 worldPos = playerPos + diff * t;
-
-		// 偶奇で回転方向を変える
-		float rotateSpeed	= (i % 2 == 0) ? param_.ret.rotSpeed : -param_.ret.rotSpeed;
-		float uvRotateSpeed = (i % 2 == 0) ? param_.ret.uvRotSpeed : -param_.ret.uvRotSpeed;
-
-		// スプライトの回転を更新
-		float currentRotate = reticleSprites_[i]->GetRotation();
-		reticleSprites_[i]->SetRotation(currentRotate + rotateSpeed);
-
-		float currentUvRotate = reticleSprites_[i]->GetUvRotate();
-		reticleSprites_[i]->SetUvRotate(currentUvRotate + uvRotateSpeed);
-
-		// スクリーン座標に変換して配置
-		CalyxMath::Vector2 screenPos = CalyxMath::WorldToScreen(worldPos);
-		reticleSprites_[i]->SetPosition(screenPos);
-		reticleSprites_[i]->Update();
-	}
-
-
 	if(life_ <= 0) {
 		isAlive_ = false;
 	}
@@ -381,16 +326,11 @@ void Player::AddMoveRequest(const CalyxMath::Vector3& delta) { moveCtrler_.AddMo
 /* ==================================================================================== */
 
 ///////////////////////////////////////////////////////////////////////////////////
-//		レティクルの移動
-///////////////////////////////////////////////////////////////////////////////////
-void Player::MoveReticle(const CalyxMath::Vector3& offset) { reticleTransform_.translation += offset; }
-
-///////////////////////////////////////////////////////////////////////////////////
 //		弾の発射をりくえすと
 ///////////////////////////////////////////////////////////////////////////////////
 void Player::RequestShoot() const {
 	CalyxMath::Vector3 playerPos  = worldTransform_.GetWorldPosition();
-	CalyxMath::Vector3 reticlePos = reticleTransform_.GetWorldPosition();
+	CalyxMath::Vector3 reticlePos = reticle_->GetPosition3D();
 	CalyxMath::Vector3 dir		  = reticlePos - playerPos;
 
 	if(dir.Length() > 0.001f) {

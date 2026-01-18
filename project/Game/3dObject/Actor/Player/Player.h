@@ -84,11 +84,6 @@ public:
 	 */
 	void AddMoveRequest(const CalyxMath::Vector3& delta);
 	/**
-	 * \brief レティクルをオフセット分移動する
-	 * \param offset オフセット
-	 */
-	void MoveReticle(const CalyxMath::Vector3& offset);
-	/**
 	 * \brief 弾の発射をリクエストする
 	 */
 	void RequestShoot() const;
@@ -191,7 +186,7 @@ public:
 	 * \brief レティクルのワールド座標を取得
 	 * \return ワールド座標
 	 */
-	CalyxMath::Vector3 GetReticleWorldPos() const { return reticleTransform_.GetWorldPosition(); }
+	CalyxMath::Vector3 GetReticleWorldPos() const { return reticle_->GetPosition3D(); }
 
 private:
 	//=====================================================================
@@ -259,10 +254,8 @@ private:
 	PlayerInput								  input_;
 
 	CalyxMath::Vector3 lastMoveVector_;	  //< 最後の移動ベクトル
-	WorldTransform	   reticleTransform_; //< レティクルのワールド変換
 
 	// sprites
-	std::array<std::unique_ptr<Sprite>, 4> reticleSprites_; //< レティクルのスプライト
 	std::unique_ptr<Reticle>			   reticle_;		//< レティクル管理クラス
 	std::unique_ptr<HpGauge>			   hpGauge_;		//< HPゲージ
 
@@ -270,8 +263,6 @@ private:
 	bool autoLockOn_ = true; // オートロックオン有効/無効
 
 	// 画面内クランプ用設定
-	bool  clampPlayerInView_  = true;
-	bool  clampReticleInView_ = true;
 	float clampMarginXpx_	  = 24.0f; // 左右の余白(px)
 	float clampMarginYpx_	  = 24.0f; // 上下の余白(px)
 
