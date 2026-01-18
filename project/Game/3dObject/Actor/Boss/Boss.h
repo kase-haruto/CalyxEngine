@@ -166,13 +166,13 @@ private:
 		BossParam();
 		CalyxEngine::ParamPath GetParamPath() const override;
 
-		int life      = 100;
-		int flinchMax = 10;
-		CalyxMath::Vector3 scale = {1.0f, 1.0f, 1.0f};
+		int life;
+		int flinchMax;
+		CalyxMath::Vector3 scale;
 
 		struct HpGauge {
-			CalyxMath::Vector2 pos  = {640.0f, 50.0f}; // kGameSize.x * 0.5f = 640
-			CalyxMath::Vector2 size = {500.0f, 32.0f};
+			CalyxMath::Vector2 pos; // kGameSize.x * 0.5f = 640
+			CalyxMath::Vector2 size ;
 		} hp;
 	} param_;
 
