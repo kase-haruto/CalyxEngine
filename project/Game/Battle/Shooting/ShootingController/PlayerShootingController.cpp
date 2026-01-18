@@ -68,7 +68,7 @@ void PlayerShootingController::SetMode(BulletMode bulletMode){
 //		ShootingParam
 /////////////////////////////////////////////////////////////////////////////////////////
 PlayerShootingController::ShootingParam::ShootingParam() {
-	AddField("interval", interval).Category("Basic").Range(0.01f, 10.0f);
+	AddField("interval", interval).Category("Shooting").Range(0.01f, 10.0f);
 }
 
 CalyxEngine::ParamPath PlayerShootingController::ShootingParam::GetParamPath() const {
