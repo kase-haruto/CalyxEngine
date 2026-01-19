@@ -39,13 +39,21 @@ void EnemyRuntimeBindingService::Update(SceneContext& ctx,float) {
 		if(player) WireAllSpawners(ctx);
 	}
 
-	// ランタイム中にスポナーが増減したら再配線
+	// スポナー増減チェック
 	auto*  lib       = ctx.GetObjectLibrary();
 	size_t currCount = 0;
-	for(auto& obj : lib->GetAllObjectsShared()) if(std::dynamic_pointer_cast<EnemySpawner>(obj)) ++currCount;
+	// Direct map access optimization
+	for(const auto& [id, obj] : lib->GetObjects()) if(std::dynamic_pointer_cast<EnemySpawner>(obj)) ++currCount;
 	if(currCount != lastSpawnerCount_) { WireAllSpawners(ctx); }
 
-	if(player && dir_) { player->AttachEnemyList(dir_->SnapshotAlive()); }
+	if(player && dir_) { 
+		
+		if (dir_->IsDirty()) {
+		    player->AttachEnemyList(dir_->SnapshotAlive()); 
+		} else {
+		    player->AttachEnemyList(dir_->SnapshotAlive());
+		}
+	}
 }
 
 void EnemyRuntimeBindingService::OnSceneCleared(SceneContext&) {
@@ -60,7 +68,7 @@ void EnemyRuntimeBindingService::WireAllSpawners(SceneContext& ctx) {
 	auto*  lib    = ctx.GetObjectLibrary();
 	size_t wired  = 0;
 
-	for(auto& obj : lib->GetAllObjectsShared()) {
+	for(const auto& [id, obj] : lib->GetObjects()) {
 		if(auto sp = std::dynamic_pointer_cast<EnemySpawner>(obj)) {
 
 			// enemyでtargetように使用するためスポナーにtransformを渡してそれを参照

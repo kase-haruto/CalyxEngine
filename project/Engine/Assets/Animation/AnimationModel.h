@@ -77,12 +77,11 @@ namespace CalyxAssets {
 		/// アニメーションをバインド
 		void BuildFastChannels(Animation& anim);
 
-		/// スケルトンのアニメーションを適用
-		void ApplyAnimationToSkeleton();
+
 
 		/// アニメーションCurveを適用
-		CalyxMath::Quaternion CalculateValue(const AnimationCurve<CalyxMath::Quaternion>& curve,float time);
-		CalyxMath::Vector3    CalculateValue(const AnimationCurve<CalyxMath::Vector3>& curve,float time);
+		CalyxMath::Quaternion CalculateValue(const AnimationCurve<CalyxMath::Quaternion>& curve,float time, size_t& hint);
+		CalyxMath::Vector3    CalculateValue(const AnimationCurve<CalyxMath::Vector3>& curve,float time, size_t& hint);
 
 		/// スケルトン計算
 		void SkinningStep();

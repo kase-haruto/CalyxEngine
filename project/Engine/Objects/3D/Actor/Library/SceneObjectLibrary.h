@@ -100,6 +100,12 @@ public:
      */
     bool Contains(Guid id) const { return objects_.contains(id); }
 
+	/**
+	 * \brief オブジェクトマップへの直接アクセス（読み取り専用）
+	 * \return オブジェクトマップ
+	 */
+	const std::unordered_map<Guid, std::shared_ptr<SceneObject>>& GetObjects() const { return objects_; }
+
 private:
     //====================================================================*//
     //      private variables

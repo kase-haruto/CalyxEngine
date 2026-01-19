@@ -218,7 +218,7 @@ void PlayerLockOn::PrewarmMarkers(size_t n) {
 //////////////////////////////////////////////////////////////////////////////
 //		accessor
 //////////////////////////////////////////////////////////////////////////////
-void PlayerLockOn::SetEnemyList(const std::list<std::shared_ptr<Enemy>>& list) {
+void PlayerLockOn::SetEnemyList(const std::vector<std::shared_ptr<Enemy>>& list) {
 	targets_ = list;
 }
 

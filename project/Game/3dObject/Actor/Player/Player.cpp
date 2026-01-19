@@ -506,7 +506,7 @@ void Player::HeaderGui() {
 /* ==================================================================================== */
 void Player::SetParent(WorldTransform* parent) { worldTransform_.parent = parent; }
 
-void Player::AttachEnemyList(const std::list<std::shared_ptr<Enemy>>& list) const {
+void Player::AttachEnemyList(const std::vector<std::shared_ptr<Enemy>>& list) const {
 	if(lockOn_) {
 		lockOn_->SetEnemyList(list);
 	}

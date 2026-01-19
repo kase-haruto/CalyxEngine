@@ -47,7 +47,7 @@ public:
 	 * \brief 敵リストのセット
 	 * \param list 敵リスト
 	 */
-	void SetEnemyList(const std::list<std::shared_ptr<Enemy>>& list);
+	void SetEnemyList(const std::vector<std::shared_ptr<Enemy>>& list);
 	/**
 	 * \brief ロックオン中の敵リストを取得
 	 * \return 敵リスト
@@ -99,7 +99,7 @@ private:
 
 private:
 	PlayerActionContext ctx_;
-	std::list<std::shared_ptr<Enemy>> targets_;				//< 敵リスト
+	std::vector<std::shared_ptr<Enemy>> targets_;				//< 敵リスト
 	std::vector<std::shared_ptr<Enemy>> lockedOnTargets_;	//< ロックオン中の敵リスト
 
 	std::vector<std::unique_ptr<Sprite>> markerPool_;		//< ロックオンマーカー再利用プール

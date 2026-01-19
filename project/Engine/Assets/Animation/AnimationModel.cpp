@@ -84,53 +84,12 @@ namespace CalyxAssets {
 			}
 		} else { currentAnimation_->weight = 1.f; }
 
-		ApplyAnimationToSkeleton();
 	}
 
 	/* =====================================================================
 	   Skeleton への適用 – restPose 差分 + 正規化
 	   ===================================================================*/
-	void AnimationModel::ApplyAnimationToSkeleton() {
-		Skeleton& skel = modelData_->skeleton;
 
-		auto blendOne = [&](AnimationState*        st,size_t               j,
-							CalyxMath::Quaternion& rot,CalyxMath::Vector3& pos,CalyxMath::Vector3& scl,float& wSum) {
-			if(!st || st->weight <= 0) return;
-			const NodeAnimation* node = st->animation.fastChannels[j];
-			if(!node) return;
-
-			if(!node->translate.keyframes.empty()) {
-				CalyxMath::Vector3 t = CalculateValue(node->translate,st->currentTime);
-				pos += (t - skel.joints[j].restTransform.translate) * st->weight;
-			}
-			if(!node->scale.keyframes.empty()) {
-				CalyxMath::Vector3 s = CalculateValue(node->scale,st->currentTime);
-				scl += (s - skel.joints[j].restTransform.scale) * st->weight;
-			}
-			if(!node->rotate.keyframes.empty()) {
-				CalyxMath::Quaternion q = CalculateValue(node->rotate,st->currentTime);
-				rot                     = (wSum == 0.f) ? q : CalyxMath::Quaternion::Slerp(rot,q,st->weight / (wSum + st->weight));
-				wSum += st->weight;
-			}
-		};
-
-		for(size_t j = 0; j < skel.joints.size(); ++j) {
-			Joint&      joint = skel.joints[j];
-			const auto& rest  = joint.restTransform;
-
-			CalyxMath::Quaternion R = rest.rotate;
-			CalyxMath::Vector3    P = rest.translate;
-			CalyxMath::Vector3    S = rest.scale;
-			float                 w = 0.f;
-
-			blendOne(currentAnimation_,j,R,P,S,w);
-			blendOne(nextAnimation_,j,R,P,S,w);
-
-			joint.transform.rotate    = CalyxMath::Quaternion::Normalize(R);
-			joint.transform.translate = P;
-			joint.transform.scale     = S;
-		}
-	}
 
 	/* =====================================================================
 	   Animation → JointIndex 直通テーブルを作る
@@ -176,33 +135,75 @@ namespace CalyxAssets {
 	/* =====================================================================
 	   キーフレーム補間（upper_bound で O(log F)）
 	   ===================================================================*/
+	/* =====================================================================
+	   キーフレーム補間（Hint付き線形探索 + upper_bound フォールバック）
+	   ===================================================================*/
 	template <typename T>
 	static T LerpGeneric(const T& a,const T& b,float t) { return a + (b - a) * t; }
 
-	CalyxMath::Quaternion AnimationModel::CalculateValue(const AnimationCurve<CalyxMath::Quaternion>& c,float t) {
+	// 特殊化が必要ならここで実装 (Slerpなどは内部で呼ぶ)
+
+	CalyxMath::Quaternion AnimationModel::CalculateValue(const AnimationCurve<CalyxMath::Quaternion>& c,float t, size_t& hint) {
 		if(c.keyframes.empty()) return CalyxMath::Quaternion::MakeIdentity();
-		if(t <= c.keyframes.front().time) return c.keyframes.front().value;
-		if(t >= c.keyframes.back().time) return c.keyframes.back().value;
+		if(t <= c.keyframes.front().time) {
+			hint = 0;
+			return c.keyframes.front().value;
+		}
+		if(t >= c.keyframes.back().time) {
+			hint = c.keyframes.size() - 1;
+			return c.keyframes.back().value;
+		}
 
-		auto it = std::upper_bound(c.keyframes.begin(),c.keyframes.end(),t,
-								   [](float v,const auto& k) { return v < k.time; });
+		// ヒント位置から探索スタート
+		// 時間が戻った場合はリセット (ループ対応)
+		if(hint >= c.keyframes.size() || c.keyframes[hint].time > t) {
+			hint = 0;
+		}
 
-		size_t i1 = std::clamp<size_t>(it - c.keyframes.begin(),1,c.keyframes.size() - 1);
-		size_t i0 = i1 - 1;
+		// 線形探索 (フレームが進むのが前提なので、通常は数回でヒットする)
+		while(hint + 1 < c.keyframes.size() && t >= c.keyframes[hint + 1].time) {
+			hint++;
+		}
+		
+		size_t i0 = hint;
+		size_t i1 = i0 + 1;
+		
+		// 念のため範囲チェック
+		if (i1 >= c.keyframes.size()) {
+			return c.keyframes[i0].value;
+		}
+
 		float  lT = (t - c.keyframes[i0].time) / (c.keyframes[i1].time - c.keyframes[i0].time);
 		return CalyxMath::Quaternion::Slerp(c.keyframes[i0].value,c.keyframes[i1].value,lT);
 	}
 
-	CalyxMath::Vector3 AnimationModel::CalculateValue(const AnimationCurve<CalyxMath::Vector3>& c,float t) {
+	CalyxMath::Vector3 AnimationModel::CalculateValue(const AnimationCurve<CalyxMath::Vector3>& c,float t, size_t& hint) {
 		if(c.keyframes.empty()) return {};
-		if(t <= c.keyframes.front().time) return c.keyframes.front().value;
-		if(t >= c.keyframes.back().time) return c.keyframes.back().value;
+		if(t <= c.keyframes.front().time) {
+			hint = 0;
+			return c.keyframes.front().value;
+		}
+		if(t >= c.keyframes.back().time) {
+			hint = c.keyframes.size() - 1;
+			return c.keyframes.back().value;
+		}
 
-		auto it = std::upper_bound(c.keyframes.begin(),c.keyframes.end(),t,
-								   [](float v,const auto& k) { return v < k.time; });
+		// ヒント位置から探索スタート
+		if(hint >= c.keyframes.size() || c.keyframes[hint].time > t) {
+			hint = 0;
+		}
 
-		size_t i1 = std::clamp<size_t>(it - c.keyframes.begin(),1,c.keyframes.size() - 1);
-		size_t i0 = i1 - 1;
+		while(hint + 1 < c.keyframes.size() && t >= c.keyframes[hint + 1].time) {
+			hint++;
+		}
+
+		size_t i0 = hint;
+		size_t i1 = i0 + 1;
+		
+		if (i1 >= c.keyframes.size()) {
+			return c.keyframes[i0].value;
+		}
+
 		float  lT = (t - c.keyframes[i0].time) / (c.keyframes[i1].time - c.keyframes[i0].time);
 		return CalyxMath::Vector3::Lerp(c.keyframes[i0].value,c.keyframes[i1].value,lT);
 	}
@@ -212,6 +213,17 @@ namespace CalyxAssets {
 
 		Skeleton&    skel       = modelData_->skeleton;
 		const size_t jointCount = skel.joints.size();
+
+		// キャッシュ初期化チェック
+		auto checkCache = [&](AnimationState* st) {
+			if(!st) return;
+			if(st->hintTranslate.size() != jointCount) st->hintTranslate.assign(jointCount, 0);
+			if(st->hintRotate.size() != jointCount) st->hintRotate.assign(jointCount, 0);
+			if(st->hintScale.size() != jointCount) st->hintScale.assign(jointCount, 0);
+		};
+		checkCache(currentAnimation_);
+		checkCache(nextAnimation_);
+
 
 		auto blendOne = [&](AnimationState*        st,
 							size_t                 j,
@@ -225,17 +237,17 @@ namespace CalyxAssets {
 
 			// translate
 			if(!node->translate.keyframes.empty()) {
-				CalyxMath::Vector3 t = CalculateValue(node->translate,st->currentTime);
+				CalyxMath::Vector3 t = CalculateValue(node->translate,st->currentTime, st->hintTranslate[j]);
 				pos += (t - skel.joints[j].restTransform.translate) * st->weight;
 			}
 			// scale
 			if(!node->scale.keyframes.empty()) {
-				CalyxMath::Vector3 s = CalculateValue(node->scale,st->currentTime);
+				CalyxMath::Vector3 s = CalculateValue(node->scale,st->currentTime, st->hintScale[j]);
 				scl += (s - skel.joints[j].restTransform.scale) * st->weight;
 			}
 			// rotate
 			if(!node->rotate.keyframes.empty()) {
-				CalyxMath::Quaternion q = CalculateValue(node->rotate,st->currentTime);
+				CalyxMath::Quaternion q = CalculateValue(node->rotate,st->currentTime, st->hintRotate[j]);
 				rot                     = (wSum == 0.f) ? q : CalyxMath::Quaternion::Slerp(rot,q,st->weight / (wSum + st->weight));
 				wSum += st->weight;
 			}
@@ -252,7 +264,7 @@ namespace CalyxAssets {
 
 			blendOne(currentAnimation_,j,R,P,S,w);
 			blendOne(nextAnimation_,j,R,P,S,w);
-
+			
 			joint.transform.rotate    = CalyxMath::Quaternion::Normalize(R);
 			joint.transform.translate = P;
 			joint.transform.scale     = S;

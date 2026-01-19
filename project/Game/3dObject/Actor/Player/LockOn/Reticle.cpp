@@ -57,8 +57,9 @@ void Reticle::ShowGui() {
 
 void Reticle::SetParent(WorldTransform* transform) { transform_.parent = transform; }
 
-void Reticle::SetEnemyList(const std::list<std::shared_ptr<Enemy>>& list) {
+void Reticle::SetEnemyList(const std::vector<std::shared_ptr<Enemy>>& list) {
 	targets_.clear();
+	targets_.reserve(list.size());
 	for(auto& e : list) {
 		targets_.push_back(e);
 	}
@@ -106,12 +107,16 @@ void Reticle::ApplyMove(float dt) {
 	float                  minSqDist    = param_.assistRadiusPx * param_.assistRadiusPx;
 	CalyxMath::Vector2     reticleScreen = CalyxMath::WorldToScreen(transform_.GetWorldPosition());
 
-	for(auto it = targets_.begin(); it != targets_.end();) {
+	// 無効なターゲットを削除 
+	auto rmIt = std::remove_if(targets_.begin(), targets_.end(), [](const std::weak_ptr<Enemy>& wp){
+		auto sp = wp.lock();
+		return !sp || !sp->GetIsAlive();
+	});
+	targets_.erase(rmIt, targets_.end());
+
+	for(auto it = targets_.begin(); it != targets_.end(); ++it) {
 		auto enemy = it->lock();
-		if(!enemy || !enemy->GetIsAlive()) {
-			it = targets_.erase(it);
-			continue;
-		}
+		// 生存チェック済み
 
 		CalyxMath::Vector2 enemyScreen = CalyxMath::WorldToScreen(enemy->GetCenterPos());
 		float              sqDist      = (enemyScreen - reticleScreen).LengthSquared();
@@ -119,7 +124,6 @@ void Reticle::ApplyMove(float dt) {
 			minSqDist    = sqDist;
 			closestEnemy = enemy;
 		}
-		++it;
 	}
 
 	if(closestEnemy) {

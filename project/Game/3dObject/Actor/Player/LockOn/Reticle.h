@@ -1,4 +1,5 @@
-#pragma once
+#include <memory>
+#include <vector>
 #include "Engine/Objects/2D/Object2d/SpriteObject2d.h"
 #include "ReticleMover.h"
 #include "Engine/objects/Transform/Transform.h"
@@ -44,7 +45,7 @@ public:
 	 * \brief ターゲットリストのセット
 	 * \param list 敵リスト
 	 */
-	void SetEnemyList(const std::list<std::shared_ptr<class Enemy>>& list);
+	void SetEnemyList(const std::vector<std::shared_ptr<class Enemy>>& list);
 
 	// accessor -----------------------------------------------------
 	const CalyxMath::Vector2& GetPosition() const;
@@ -66,7 +67,7 @@ private:
 	std::unique_ptr<Calyx2D::SpriteObject2d> reticleSprite_; //< 照準スプライト
 	ReticleMover                             mover_;         //< 照準移動クラス
 	WorldTransform                           transform_;
-	std::list<std::weak_ptr<class Enemy>>    targets_;       //< ロックオン対象候補
+	std::vector<std::weak_ptr<class Enemy>>    targets_;       //< ロックオン対象候補
 
 	struct ReticleParam
 		: public CalyxEngine::SerializableObject {

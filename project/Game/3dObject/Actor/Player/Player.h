@@ -1,7 +1,7 @@
 #pragma once
 
 /* =========================================================================
-   Include space
+#include <vector>
    ========================================================================= */
 // engine
 #include <Engine/Application/Effects/FxObject.h>
@@ -139,7 +139,7 @@ public:
 	 * \brief 敵リストをアタッチ
 	 * \param list 敵リスト
 	 */
-	void AttachEnemyList(const std::list<std::shared_ptr<Enemy>>& list) const;
+	void AttachEnemyList(const std::vector<std::shared_ptr<Enemy>>& list) const;
 	/**
 	 * \brief 射撃コントローラを設定
 	 * \param sc 射撃コントローラ
