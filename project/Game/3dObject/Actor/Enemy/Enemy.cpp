@@ -18,9 +18,12 @@ Enemy::Enemy(const std::string& modelName, const std::string& objName)
 	// ---- EnemyFactionActor 設定 ----
 	SetEnemyKind(EnemyKind::Normal);
 	
+	// パラメータのロード
+	InitializeSerializableParm();
+
 	BaseGameObject::InitializeCollider(ColliderKind::Sphere);
 	if(auto* c = dynamic_cast<SphereCollider*>(collider_.get())) {
-		c->SetRadius(1.5f);
+		c->SetRadius(param_.col.radius);
 	}
 	collider_->SetType(ColliderType::Type_Enemy);
 	collider_->SetTargetType(ColliderType::Type_PlayerAttack);
@@ -29,9 +32,6 @@ Enemy::Enemy(const std::string& modelName, const std::string& objName)
 	// hit effect
 	hitFx_ = SceneAPI::Instantiate<CalyxEffect::FxObject>("HitFx");
 	hitFx_->LoadFromPath("Effect/HitEffect");
-
-	// パラメータのロード
-	InitializeSerializableParm();
 }
 
 Enemy::~Enemy() = default;
@@ -68,7 +68,7 @@ void Enemy::Update(float dt) {
 		if(life_ <= 0) {
 			deathState_		 = DeathState::Dying;
 			deathTimer_		 = 0.0f;
-			deathRotateAxis_ = {1, 0, 0};
+			deathRotateAxis_ = param_.death.rotateAxis;
 			return;
 		}
 	}
@@ -101,7 +101,7 @@ void Enemy::Update(float dt) {
 	if(deathState_ == DeathState::Dying) {
 
 		deathTimer_ += dt;
-		float t = std::clamp(deathTimer_ / deathLength_, 0.0f, 1.0f);
+		float t = std::clamp(deathTimer_ / param_.death.length, 0.0f, 1.0f);
 
 		float rad = std::numbers::pi_v<float> * 0.5f * t;
 		worldTransform_.rotation =
@@ -132,7 +132,7 @@ void Enemy::StartEntranceToFormation(
 }
 
 void Enemy::OnCollisionEnter(Collider*) {
-	if(life_ >= 1) {
+	if(life_ >= 1 && movement_.GetMode() != EnemyMovementController::Mode::Entrance) {
 		life_--;
 		hitFx_->PlayAll();
 	}
@@ -144,13 +144,36 @@ const CalyxMath::Vector3 Enemy::GetCenterPos() const {
 }
 
 void Enemy::InitializeSerializableParm() {
-	SerializableObject::AddField("life", life_);
-	SerializableObject::AddField("moveSpeed", moveSpeed_);
-	SerializableObject::AddField("scale",worldTransform_.scale);
-	SerializableObject::AddField("score", killScore_);
+	param_.LoadParams();
 
-	// ロード
-	SerializableObject::LoadParams();
+	life_      = static_cast<int>(param_.life);
+	moveSpeed_ = param_.moveSpeed;
+	killScore_ = static_cast<int>(param_.killScore);
+	worldTransform_.scale = param_.scale;
+}
+
+void Enemy::DerivativeGui() {
+	shooting_.ShowGui();
+	param_.ShowGui();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		EnemyParam
+/////////////////////////////////////////////////////////////////////////////////////////
+Enemy::EnemyParam::EnemyParam() {
+	AddField("life", life).Category("Basic").Range(1.0f, 1000.0f);
+	AddField("killScore", killScore).Category("Basic").Range(0.0f, 10000.0f);
+	AddField("moveSpeed", moveSpeed).Category("Basic").Range(0.0f, 100.0f);
+	AddField("scale", scale).Category("Basic");
+
+	AddField("deathLength", death.length).Category("Death").Range(0.1f, 10.0f);
+	AddField("deathRotateAxis", death.rotateAxis).Category("Death");
+
+	AddField("collisionRadius", col.radius).Category("Collider").Range(0.1f, 50.0f);
+}
+
+CalyxEngine::ParamPath Enemy::EnemyParam::GetParamPath() const {
+	return {CalyxEngine::ParamDomain::Game, "Enemy", "Actor/Enemy"};
 }
 
 void Enemy::Die() {

@@ -11,6 +11,11 @@ EnemyShootingAgent::~EnemyShootingAgent()  = default;
 
 void EnemyShootingAgent::Initialize(Enemy* owner) {
 	owner_ = owner;
+	param_.LoadParams();
+}
+
+void EnemyShootingAgent::ShowGui() {
+	param_.ShowGui();
 }
 
 void EnemyShootingAgent::SetController(std::unique_ptr<EnemyShootingController> ctrl) {
@@ -56,8 +61,8 @@ void EnemyShootingAgent::BuildEmitterIfReady() {
 	auto sink = std::make_unique<EnemyShootingControllerSink>(controller_.get());
 	auto aim  = std::make_unique<AimAtTarget>();
 
-	FireScheduler sched;
-	sched.shotsPerSec = 1.5f;
+	 FireScheduler sched;
+	sched.shotsPerSec = param_.shotsPerSec;
 	sched.useBurst    = false;
 
 	BulletEmitterConfig cfg;
@@ -78,4 +83,15 @@ void EnemyShootingAgent::EnsurePatternBound() {
 	}
 
 	emitter_->SetPattern(pattern_.get());
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		ShootingParam
+/////////////////////////////////////////////////////////////////////////////////////////
+EnemyShootingAgent::ShootingParam::ShootingParam() {
+	AddField("shotsPerSec", shotsPerSec).Category("Basic").Range(0.1f, 10.0f);
+}
+
+CalyxEngine::ParamPath EnemyShootingAgent::ShootingParam::GetParamPath() const {
+	return {CalyxEngine::ParamDomain::Game, "EnemyShooting", "Battle/Shooting"};
 }

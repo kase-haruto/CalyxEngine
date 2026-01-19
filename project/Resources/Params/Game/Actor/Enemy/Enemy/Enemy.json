@@ -1,0 +1,19 @@
+{
+    "fields": {
+        "collisionRadius": 1.5,
+        "deathLength": 1.5,
+        "deathRotateAxis": [
+            1.0,
+            0.0,
+            0.0
+        ],
+        "killScore": 100.0,
+        "life": 1.0,
+        "moveSpeed": 5.0,
+        "scale": [
+            2.0,
+            2.0,
+            2.0
+        ]
+    }
+}

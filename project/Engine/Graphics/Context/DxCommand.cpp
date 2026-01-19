@@ -23,7 +23,6 @@ void DxCommand::Initialize(const ComPtr<ID3D12Device>& device){
 
 void DxCommand::Reset(){
 	// コマンドリストが開いていたら閉じる（エラーは無視してよい）
-	commandList_->Close();
 
 	//次のフレーム用のコマンドリストを準備
 	HRESULT hr = commandAllocator_->Reset();

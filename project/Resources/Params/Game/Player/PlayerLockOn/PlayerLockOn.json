@@ -1,9 +1,9 @@
 {
     "fields": {
-        "lockOnAcquireRadiusPx": 141.0469970703125,
-        "lockOnRadiusPx": 123.9530029296875,
+        "lockOnAcquireRadiusPx": 40.48899841308594,
+        "lockOnRadiusPx": 32.9530029296875,
         "lockOnRefreshInterval": 0.1420000046491623,
-        "lockOnRefreshTimer": 0.04080810397863388,
+        "lockOnRefreshTimer": 0.12960480153560638,
         "lockOnReleaseRadiusPx": 451.27899169921875,
         "maxLockOn": 12
     }

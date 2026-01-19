@@ -82,6 +82,7 @@ namespace GuiCmd{
 	//===================================================================*/
 	void BeginTableLayout(const char* id = "InspectorTable");
 	void EndTableLayout();
+	void PropertyText(const char* label, const char* fmt, ...);
 
 	//===================================================================*/
 	//		Section Filter Helpers (For Tab View)

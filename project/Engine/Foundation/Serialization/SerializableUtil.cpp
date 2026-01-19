@@ -1,6 +1,7 @@
 #include "SerializableUtil.h"
 
 #include "SerializableField.h"
+#include "SerializableObject.h"
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 
 
@@ -42,64 +43,62 @@ bool CalyxEngine::DrawField(const SerializableField& f) {
 
 	ImGui::PushID(&f);
 
-	ImGui::AlignTextToFramePadding();
-	ImGui::TextUnformatted(f.key.c_str());
-
-	if(!f.tooltip.empty() && ImGui::IsItemHovered()) { ImGui::SetTooltip("%s",f.tooltip.c_str()); }
-
-	ImGui::SameLine(220.0f);
-
 	std::visit([&]<typename P>(P* p) {
 		using RawT = std::remove_pointer_t<P>;
 		using T    = std::remove_const_t<RawT>;
 
+		const char* label = f.key.c_str();
+
 		// =========================
 		// 表示のみ（読み取り専用）
 		// =========================
-		auto drawText = [&]() {
+		auto drawReadOnly = [&]() {
 			if constexpr(std::is_same_v<T,int32_t>)
-				ImGui::Text("%d",*p);
+				GuiCmd::PropertyText(label, "%d", *p);
 			else if constexpr(std::is_same_v<T,size_t>)
-				ImGui::Text("%zu",*p);
+				GuiCmd::PropertyText(label, "%zu", *p);
 			else if constexpr(std::is_same_v<T,float>)
-				ImGui::Text("%.3f",*p);
+				GuiCmd::PropertyText(label, "%.3f", *p);
 			else if constexpr(std::is_same_v<T,bool>)
-				ImGui::Text(*p ? "true" : "false");
+				GuiCmd::PropertyText(label, *p ? "true" : "false");
 			else if constexpr(std::is_same_v<T,CalyxMath::Vector2>)
-				ImGui::Text("(%.2f, %.2f)",p->x,p->y);
+				GuiCmd::PropertyText(label, "(%.2f, %.2f)", p->x, p->y);
 			else if constexpr(std::is_same_v<T,CalyxMath::Vector3>)
-				ImGui::Text("(%.2f, %.2f, %.2f)",p->x,p->y,p->z);
+				GuiCmd::PropertyText(label, "(%.2f, %.2f, %.2f)", p->x, p->y, p->z);
 			else if constexpr(std::is_same_v<T,CalyxMath::Vector4>)
-				ImGui::Text("(%.2f, %.2f, %.2f, %.2f)",p->x,p->y,p->z,p->w);
+				GuiCmd::PropertyText(label, "(%.2f, %.2f, %.2f, %.2f)", p->x, p->y, p->z, p->w);
 		};
 
-		if constexpr(std::is_const_v<RawT>) { drawText(); } else {
-			if(f.readOnly) { drawText(); } else {
+		if constexpr(std::is_const_v<RawT>) { drawReadOnly(); } else {
+			if(f.readOnly) { drawReadOnly(); } else {
 				// =========================
 				// 編集可
 				// =========================
 				if constexpr(std::is_same_v<T,int32_t>)
-					changed |= GuiCmd::DragInt("##v",*p,1.0f);
+					changed |= GuiCmd::DragInt(label, *p, 1.0f);
 				else if constexpr(std::is_same_v<T,size_t>) {
 					int temp = static_cast<int>(*p);
-					if(GuiCmd::DragInt("##v",temp,1.0f,f.min,f.max)) {
+					if(GuiCmd::DragInt(label, temp, 1.0f, f.min, f.max)) {
 						*p      = static_cast<size_t>(std::max(0,temp));
 						changed = true;
 					}
 				} else if constexpr(std::is_same_v<T,float>)
 					changed |= (f.hasRange
-									? GuiCmd::SliderFloat("##v",*p,f.min,f.max)
-									: GuiCmd::DragFloat("##v",*p,f.speed));
+									? GuiCmd::SliderFloat(label, *p, f.min, f.max)
+									: GuiCmd::DragFloat(label, *p, f.speed));
 				else if constexpr(std::is_same_v<T,bool>)
-					changed |= GuiCmd::CheckBox("##v",*p);
+					changed |= GuiCmd::CheckBox(label, *p);
 				else if constexpr(std::is_same_v<T,CalyxMath::Vector2>)
-					changed |= GuiCmd::DragFloat2("##v",*p,f.speed);
+					changed |= GuiCmd::DragFloat2(label, *p, f.speed);
 				else if constexpr(std::is_same_v<T,CalyxMath::Vector3>)
-					changed |= GuiCmd::DragFloat3("##v",*p,f.speed);
+					changed |= GuiCmd::DragFloat3(label, *p, f.speed);
 				else if constexpr(std::is_same_v<T,CalyxMath::Vector4>)
-					changed |= GuiCmd::DragFloat4("##v",*p,f.speed);
+					changed |= GuiCmd::DragFloat4(label, *p, f.speed);
 			}
 		}
+		
+		if(!f.tooltip.empty() && ImGui::IsItemHovered()) { ImGui::SetTooltip("%s", f.tooltip.c_str()); }
+
 	},f.ptr);
 
 	ImGui::PopID();
@@ -107,7 +106,7 @@ bool CalyxEngine::DrawField(const SerializableField& f) {
 	return changed;
 }
 
-bool CalyxEngine::DrawCategoryNode(const VariableCategoryNode& node) {
+bool CalyxEngine::DrawCategoryNode(const VariableCategoryNode& node, SerializableObject* owner) {
 
 	bool anyChanged = false;
 
@@ -118,9 +117,24 @@ bool CalyxEngine::DrawCategoryNode(const VariableCategoryNode& node) {
 	bool open = ImGui::TreeNodeEx(node.name.c_str(),flags);
 	if(!open) return false;
 
-	for(const auto& [_, child] : node.children) { anyChanged |= DrawCategoryNode(child); }
+	// Categorized Save/Load buttons for root levels
+	if (owner) {
+		owner->SaveAndLoadButtonGui();
+		ImGui::Separator();
+	}
+
+	// テーブルレイアウト開始
+	GuiCmd::BeginTableLayout();
+
+	for(const auto& [_, child] : node.children) { 
+		GuiCmd::EndTableLayout();
+		anyChanged |= DrawCategoryNode(child, nullptr); 
+		GuiCmd::BeginTableLayout();
+	}
 
 	for(const auto* f : node.fields) { anyChanged |= DrawField(*f); }
+
+	GuiCmd::EndTableLayout();
 
 	ImGui::TreePop();
 

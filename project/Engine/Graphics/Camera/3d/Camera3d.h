@@ -4,6 +4,8 @@
 /* ===================================================================== */
 #include <Engine/Graphics/Camera/Base/BaseCamera.h>
 #include <Engine/Graphics/Camera/Frustum/Frustum.h>
+#include <Engine/Foundation/Serialization/SerializableObject.h>
+#include <Engine/Foundation/Math/Vector3.h>
 
 // fwd
 class WorldTransform;
@@ -113,7 +115,10 @@ private:
 	Frustum frustum_; // 視錐台
 
 	//======================= 追従用データ ==============================
-	struct FollowSettings {
+	struct FollowSettings : public CalyxEngine::SerializableObject {
+		FollowSettings();
+		CalyxEngine::ParamPath GetParamPath() const override;
+
 		bool   enabled          = true;            // 有効/無効
 		float  distanceBack     = 13.0f;             // 後方距離（-F * distanceBack）
 		float  heightOffset     = 4.0f;             // 上方向(Y)オフセット

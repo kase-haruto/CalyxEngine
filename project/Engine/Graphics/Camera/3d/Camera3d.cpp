@@ -83,7 +83,10 @@ Camera3d::Camera3d() : BaseCamera() {
 
 Camera3d::Camera3d(const std::string& name) { SceneObject::SetName(name,ObjectType::Camera); }
 
-void Camera3d::Initialize() { worldTransform_.translation = {0.0f,2.0f,-3.0f}; }
+void Camera3d::Initialize() {
+	worldTransform_.translation = {0.0f, 2.0f, -3.0f};
+	follow_.LoadParams();
+}
 
 float Camera3d::ExpLerpAlpha(float dt,float tau) {
 	if(tau <= 1e-6f) return 1.0f;
@@ -192,21 +195,7 @@ void Camera3d::ShowGui() {
 	}
 
 	if (GuiCmd::BeginSection("ParameterData")) {
-		if (GuiCmd::CollapsingHeader("Follow Target##Camera3d", ImGuiTreeNodeFlags_DefaultOpen)) {
-			GuiCmd::CheckBox("Enabled", follow_.enabled);
-			GuiCmd::DragFloat("Distance Back", follow_.distanceBack, 0.05f, 0.0f, 1000.0f);
-			GuiCmd::DragFloat("Height Offset", follow_.heightOffset, 0.05f, -100.0f, 100.0f);
-			GuiCmd::DragFloat("Side Offset", follow_.sideOffset, 0.05f, -100.0f, 100.0f);
-			GuiCmd::DragFloat3("LookAt Offset", follow_.lookAtOffset, 0.05f);
-
-			ImGui::SeparatorText("Smoothing");
-			GuiCmd::DragFloat("Pos Smooth Time", follow_.posSmoothTime, 0.005f, 0.01f, 1.0f);
-			GuiCmd::DragFloat("Rot Time Constant", follow_.rotTimeConstant, 0.005f, 0.01f, 1.0f);
-			GuiCmd::DragFloat("Extra Pitch (deg)", follow_.extraPitchDeg, 0.1f, -89.0f, 89.0f);
-
-			if (follow_.target) ImGui::Text("Target: set");
-			else ImGui::TextDisabled("Target: (null)");
-		}
+		follow_.ShowGui();
 		GuiCmd::EndSection();
 	}
 }
@@ -221,5 +210,24 @@ void Camera3d::GetShadowFrustumCorners(CalyxMath::Vector3 outCorners[8], float s
 
 
 bool Camera3d::IsVisible(const AABB& aabb) const { return frustum_.IsAABBInside(aabb.min_,aabb.max_); }
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		FollowSettings
+/////////////////////////////////////////////////////////////////////////////////////////
+Camera3d::FollowSettings::FollowSettings() {
+	AddField("Enabled", enabled).Category("Follow");
+	AddField("DistanceBack", distanceBack).Category("Follow").Range(0.0f, 1000.0f);
+	AddField("HeightOffset", heightOffset).Category("Follow").Range(-100.0f, 100.0f);
+	AddField("SideOffset", sideOffset).Category("Follow").Range(-100.0f, 100.0f);
+	AddField("LookAtOffset", lookAtOffset).Category("Follow");
+
+	AddField("PosSmoothTime", posSmoothTime).Category("Smoothing").Range(0.01f, 1.0f);
+	AddField("RotTimeConstant", rotTimeConstant).Category("Smoothing").Range(0.01f, 1.0f);
+	AddField("ExtraPitchDeg", extraPitchDeg).Category("Smoothing").Range(-89.0f, 89.0f);
+}
+
+CalyxEngine::ParamPath Camera3d::FollowSettings::GetParamPath() const {
+	return {CalyxEngine::ParamDomain::Engine, "Camera", "Camera/Follow"};
+}
 
 REGISTER_SCENE_OBJECT(Camera3d)

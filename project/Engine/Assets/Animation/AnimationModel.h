@@ -23,6 +23,7 @@ namespace CalyxAssets {
 		void Initialize() override;
 		void Update(float dt) override;
 		void Draw(const WorldTransform& transform) override;
+		void BindVertexIndexBuffers(ID3D12GraphicsCommandList* cmdList)const override;
 		void ShowImGuiInterface() override;
 
 		// モデル読み込み時処理
@@ -76,12 +77,11 @@ namespace CalyxAssets {
 		/// アニメーションをバインド
 		void BuildFastChannels(Animation& anim);
 
-		/// スケルトンのアニメーションを適用
-		void ApplyAnimationToSkeleton();
+
 
 		/// アニメーションCurveを適用
-		CalyxMath::Quaternion CalculateValue(const AnimationCurve<CalyxMath::Quaternion>& curve,float time);
-		CalyxMath::Vector3    CalculateValue(const AnimationCurve<CalyxMath::Vector3>& curve,float time);
+		CalyxMath::Quaternion CalculateValue(const AnimationCurve<CalyxMath::Quaternion>& curve,float time, size_t& hint);
+		CalyxMath::Vector3    CalculateValue(const AnimationCurve<CalyxMath::Vector3>& curve,float time, size_t& hint);
 
 		/// スケルトン計算
 		void SkinningStep();
@@ -96,7 +96,7 @@ namespace CalyxAssets {
 		int                      selectedJoint_     = -1;
 		ImVec4                   jointHighlightCol_ = {1.0f,0.2f,0.2f,1.0f};
 		SkinCluster              skinCluster_;
-		D3D12_VERTEX_BUFFER_VIEW vbvs_[2];
+		mutable D3D12_VERTEX_BUFFER_VIEW vbvs_[2];
 
 	public:
 		float animationSpeed_ = 1.0f;  //< アニメーションの再生速度

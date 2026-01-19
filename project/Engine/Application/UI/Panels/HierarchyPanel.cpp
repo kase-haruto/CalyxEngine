@@ -128,10 +128,10 @@ namespace CalyxEditor {
 
 			// --- root 探索 ---
 			std::vector<std::shared_ptr<SceneObject>> roots;
-			auto									  all = lib_->GetAllObjectsShared();
-			roots.reserve(all.size());
+			const auto&								  objects = lib_->GetObjects();
+			roots.reserve(objects.size());
 
-			for(auto& sp : all) {
+			for(const auto& [id, sp] : objects) {
 				if(!sp) continue;
 				auto parent = sp->GetParent();
 				if(!parent || !lib_->Contains(parent)) {

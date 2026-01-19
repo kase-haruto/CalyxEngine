@@ -146,5 +146,10 @@ struct AnimationState {
 	float speed = 1.0f;
 	float weight = 1.0f;   // blending weight
 	bool loop = true;
+
+	// Cache hints (per joint index)
+	std::vector<size_t> hintTranslate;
+	std::vector<size_t> hintRotate;
+	std::vector<size_t> hintScale;
 };
 

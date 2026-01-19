@@ -6,6 +6,7 @@
 #include <Game/Battle/Shooting/Pattern/ShootPatternDetails.h>
 #include <Game/Battle/Shooting/ShootingController/BulletEmitter.h>
 #include <Game/Battle/Shooting/ShootingController/EnemyShootingController.h>
+#include <Engine/Foundation/Serialization/SerializableObject.h>
 
 class Enemy;
 class WorldTransform;
@@ -43,7 +44,18 @@ public:
 	void SetGameplayEngaged(bool v) { gameplayEngaged_ = v; }
 	bool IsGameplayEngaged() const { return gameplayEngaged_; }
 
+	void ShowGui();
 
+private:
+	//===================================================================*/
+	//			Inner Class
+	//===================================================================*/
+	struct ShootingParam : public CalyxEngine::SerializableObject {
+		ShootingParam();
+		CalyxEngine::ParamPath GetParamPath() const override;
+
+		float  shotsPerSec = 1.0f;
+	} param_;
 
 private:
 	/**

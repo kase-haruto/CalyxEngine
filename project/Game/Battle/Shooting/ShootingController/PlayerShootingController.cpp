@@ -12,6 +12,12 @@ using namespace PlayerShoot;
 PlayerShootingController::PlayerShootingController(BulletContainer* container){
 	straightShooter_ = std::make_unique<StraightBulletShooter>(container, BulletID::Player_Straight);
 	homingShooter_ = std::make_unique<PlayerHomingBulletShooter>(container,BulletID::Player_Homing);
+
+	param_.LoadParams();
+}
+
+void PlayerShootingController::ShowGui() {
+	param_.ShowGui();
 }
 
 bool PlayerShootingController::RequestShoot(const CalyxMath::Vector3& pos, const CalyxMath::Vector3& dir){
@@ -22,13 +28,15 @@ bool PlayerShootingController::RequestShoot(const CalyxMath::Vector3& pos, const
 		case BulletMode::Homing: RequestShootHoming(pos, dir); break;
 	}
 
-	shootCooldown_ = kShootInterval_;
+	shootCooldown_ = param_.interval;
 	return true;
 }
 
 void PlayerShootingController::Initialize() {
 	straightShooter_ = std::make_unique<StraightBulletShooter>(bulletContainer_.get(), BulletID::Player_Straight);
 	homingShooter_ = std::make_unique<PlayerHomingBulletShooter>(bulletContainer_.get(),BulletID::Player_Homing);
+
+	param_.LoadParams();
 }
 
 void PlayerShootingController::Update(float dt){
@@ -54,4 +62,15 @@ void PlayerShootingController::RequestShootHoming(const CalyxMath::Vector3& pos,
 
 void PlayerShootingController::SetMode(BulletMode bulletMode){
 	bulletMode_ = bulletMode;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		ShootingParam
+/////////////////////////////////////////////////////////////////////////////////////////
+PlayerShootingController::ShootingParam::ShootingParam() {
+	AddField("interval", interval).Category("Shooting").Range(0.01f, 10.0f);
+}
+
+CalyxEngine::ParamPath PlayerShootingController::ShootingParam::GetParamPath() const {
+	return {CalyxEngine::ParamDomain::Game, "PlayerShooting", "Battle/Shooting"};
 }

@@ -14,7 +14,6 @@ PlayerActionContext PlayerContextBuilder::BuildAction() {
 		.getMoveSpeed = [&p]() -> float {
 			return p.GetMoveSpeed();
 		},
-		.moveReticle   = [&p](const CalyxMath::Vector3& v) { p.MoveReticle(v); },
 		.getReticlePos = [&p]() -> CalyxMath::Vector3 {
 			return p.GetReticleWorldPos();
 		},
