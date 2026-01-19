@@ -183,9 +183,9 @@ void HpGauge::Update(float dt) {
 
 void HpGauge::Draw(SpriteRenderer* spriteRenderer) const {
 	if(blueGauge_) {
-		spriteRenderer->Register(blueGauge_.get());
-		spriteRenderer->Register(redGauge_.get());
 		spriteRenderer->Register(frameSprite_.get());
+		spriteRenderer->Register(redGauge_.get());
+		spriteRenderer->Register(blueGauge_.get());
 	}
 }
 
