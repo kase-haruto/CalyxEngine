@@ -510,6 +510,9 @@ void Player::AttachEnemyList(const std::list<std::shared_ptr<Enemy>>& list) cons
 	if(lockOn_) {
 		lockOn_->SetEnemyList(list);
 	}
+	if(reticle_) {
+		reticle_->SetEnemyList(list);
+	}
 }
 
 // std::vector<Sprite*> Player::GetAllSprites() const {

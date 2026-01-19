@@ -40,6 +40,12 @@ public:
 	 */
 	void SetParent(WorldTransform* transform);
 
+	/**
+	 * \brief ターゲットリストのセット
+	 * \param list 敵リスト
+	 */
+	void SetEnemyList(const std::list<std::shared_ptr<class Enemy>>& list);
+
 	// accessor -----------------------------------------------------
 	const CalyxMath::Vector2& GetPosition() const;
 	CalyxMath::Vector3        GetPosition3D() const;
@@ -60,6 +66,7 @@ private:
 	std::unique_ptr<Calyx2D::SpriteObject2d> reticleSprite_; //< 照準スプライト
 	ReticleMover                             mover_;         //< 照準移動クラス
 	WorldTransform                           transform_;
+	std::list<std::weak_ptr<class Enemy>>    targets_;       //< ロックオン対象候補
 
 	struct ReticleParam
 		: public CalyxEngine::SerializableObject {
@@ -68,6 +75,9 @@ private:
 
 		float speed  = 100.0f;  //< レティクル移動速度
 		float posFar = 1000.0f; //< レティクルの遠距離Z値
+
+		float assistRadiusPx = 180.0f; //< アシスト有効半径(px)
+		float assistStrength = 0.15f;  //< アシスト強度(0..1)
 
 		struct SpriteParam {
 			CalyxMath::Vector2 anchorPoint = {0.5f,0.5f}; //< レティクルアンカーポイント

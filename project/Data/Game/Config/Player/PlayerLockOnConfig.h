@@ -14,11 +14,11 @@ public:
 
 	CalyxEngine::ParamPath GetParamPath() const;
 
-	size_t maxLockOn_ = 5;					//< 最大ロックオン数
+	size_t maxLockOn_ = 10;					//< 最大ロックオン数
 
-	float lockOnRadiusPx_        = 60.0f;	//< ロックオン表示半径(px)
-	float lockOnAcquireRadiusPx_ = 60.0f;	//< ロックオン獲得半径(px)
-	float lockOnReleaseRadiusPx_ = 400.0f;	//< ロックオン解除半径(px)
-	float lockOnRefreshInterval_ = 0.15f;	//< ロックオン判定間隔（秒）
+	float lockOnRadiusPx_        = 120.0f;	//< ロックオン表示半径(px)
+	float lockOnAcquireRadiusPx_ = 120.0f;	//< ロックオン獲得半径(px)
+	float lockOnReleaseRadiusPx_ = 10000.0f;//< ロックオン解除半径(px) (蓄積のため極端に大きく)
+	float lockOnRefreshInterval_ = 0.0f;	//< ロックオン判定間隔（秒）
 	float lockOnRefreshTimer_    = 0.0f;	//< ロックオン判定タイマー
 };

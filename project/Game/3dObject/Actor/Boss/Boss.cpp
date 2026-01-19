@@ -129,6 +129,7 @@ void Boss::InitializeSerializableParm() {
 	life_       = param_.life;
 	flinchMax_  = param_.flinchMax;
 	worldTransform_.scale = param_.scale;
+	worldTransform_.translation = param_.initPos;
 }
 void Boss::Die() {
 	// スコアを送信する
@@ -263,6 +264,7 @@ Boss::BossParam::BossParam() {
 	AddField("life", life).Category("Basic").Range(1, 100000);
 	AddField("flinchMax", flinchMax).Category("Basic").Range(1, 1000);
 	AddField("scale", scale).Category("Basic");
+	AddField("initPos", initPos).Category("Basic");
 
 	AddField("hpGaugePos", hp.pos).Category("UI");
 	AddField("hpGaugeSize", hp.size).Category("UI");

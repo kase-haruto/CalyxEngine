@@ -169,6 +169,7 @@ private:
 		int life;
 		int flinchMax;
 		CalyxMath::Vector3 scale;
+		CalyxMath::Vector3 initPos;
 
 		struct HpGauge {
 			CalyxMath::Vector2 pos; // kGameSize.x * 0.5f = 640

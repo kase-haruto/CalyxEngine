@@ -18,6 +18,9 @@ Enemy::Enemy(const std::string& modelName, const std::string& objName)
 	// ---- EnemyFactionActor 設定 ----
 	SetEnemyKind(EnemyKind::Normal);
 	
+	// パラメータのロード
+	InitializeSerializableParm();
+
 	BaseGameObject::InitializeCollider(ColliderKind::Sphere);
 	if(auto* c = dynamic_cast<SphereCollider*>(collider_.get())) {
 		c->SetRadius(param_.col.radius);
@@ -29,9 +32,6 @@ Enemy::Enemy(const std::string& modelName, const std::string& objName)
 	// hit effect
 	hitFx_ = SceneAPI::Instantiate<CalyxEffect::FxObject>("HitFx");
 	hitFx_->LoadFromPath("Effect/HitEffect");
-
-	// パラメータのロード
-	InitializeSerializableParm();
 }
 
 Enemy::~Enemy() = default;
@@ -132,7 +132,7 @@ void Enemy::StartEntranceToFormation(
 }
 
 void Enemy::OnCollisionEnter(Collider*) {
-	if(life_ >= 1) {
+	if(life_ >= 1 && movement_.GetMode() != EnemyMovementController::Mode::Entrance) {
 		life_--;
 		hitFx_->PlayAll();
 	}

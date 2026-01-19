@@ -1,0 +1,16 @@
+{
+    "fields": {
+        "anchorPoint": [
+            0.5,
+            0.5
+        ],
+        "assistRadiusPx": 62.22200012207031,
+        "assistStrength": 0.453000009059906,
+        "posFar": 1000.0,
+        "scale": [
+            64.0,
+            64.0
+        ],
+        "speed": 100.0
+    }
+}

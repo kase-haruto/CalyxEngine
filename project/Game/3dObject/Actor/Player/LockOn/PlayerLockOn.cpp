@@ -114,17 +114,8 @@ void PlayerLockOn::UpdateAutoLockOn(float dt) {
 		auto& enemy	 = lockedOnTargets_[i];
 		bool  remove = false;
 
-		// 敵が死んでいたら解除
+		// 敵が死んでいたら解除（蓄積スタイルのため、カメラ外や距離での自動解除は行わない）
 		if(!enemy || !enemy->GetIsAlive()) remove = true;
-		// enemyがカメラから外れたら解除
-		else if(!cam->IsVisible(enemy->GetWorldAABB()))
-			remove = true;
-		else {
-			// レティクルとの距離が外れたら解除
-			CalyxMath::Vector2 enemyScreen = CalyxMath::WorldToScreen(enemy->GetWorldPosition());
-			float	dist		= (enemyScreen - reticleScreen).Length();
-			if(dist > config_.lockOnReleaseRadiusPx_) remove = true;
-		}
 
 		// ロックオン解除処理
 		if(remove) {

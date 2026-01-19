@@ -1,4 +1,5 @@
 #include "Reticle.h"
+#include <Game/3dObject/Actor/Enemy/Enemy.h>
 
 #include "Engine/Foundation/Input/Input.h"
 #include "Engine/Foundation/Utility/Animation/SimpleAnimChannel.h"
@@ -56,6 +57,13 @@ void Reticle::ShowGui() {
 
 void Reticle::SetParent(WorldTransform* transform) { transform_.parent = transform; }
 
+void Reticle::SetEnemyList(const std::list<std::shared_ptr<Enemy>>& list) {
+	targets_.clear();
+	for(auto& e : list) {
+		targets_.push_back(e);
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //	レティクル座標を取得
 //////////////////////////////////////////////////////////////////////////////
@@ -90,6 +98,60 @@ void Reticle::ApplyMove(float dt) {
 	transform_.translation.x += 10 * offset.x;
 	transform_.translation.y += 10 * offset.y;
 	transform_.translation.z = param_.posFar;
+
+	// ── アシスト処理 ─────────────────────────
+	if(targets_.empty() || !transform_.parent) return;
+
+	std::shared_ptr<Enemy> closestEnemy = nullptr;
+	float                  minSqDist    = param_.assistRadiusPx * param_.assistRadiusPx;
+	CalyxMath::Vector2     reticleScreen = CalyxMath::WorldToScreen(transform_.GetWorldPosition());
+
+	for(auto it = targets_.begin(); it != targets_.end();) {
+		auto enemy = it->lock();
+		if(!enemy || !enemy->GetIsAlive()) {
+			it = targets_.erase(it);
+			continue;
+		}
+
+		CalyxMath::Vector2 enemyScreen = CalyxMath::WorldToScreen(enemy->GetCenterPos());
+		float              sqDist      = (enemyScreen - reticleScreen).LengthSquared();
+		if(sqDist < minSqDist) {
+			minSqDist    = sqDist;
+			closestEnemy = enemy;
+		}
+		++it;
+	}
+
+	if(closestEnemy) {
+		// カメラ空間での敵の座標を取得し、レティクル平面(Z=posFar)に投影
+		CalyxMath::Vector3   enemyWorld = closestEnemy->GetCenterPos();
+		CalyxMath::Matrix4x4 invCam     = CalyxMath::Matrix4x4::Inverse(transform_.parent->matrix.world);
+		CalyxMath::Vector3   enemyLocal = CalyxMath::Vector3::Transform(enemyWorld,invCam);
+
+		if(enemyLocal.z > 0.001f) {
+			float projScale = param_.posFar / enemyLocal.z;
+			float targetX   = enemyLocal.x * projScale;
+			float targetY   = enemyLocal.y * projScale;
+
+			// アシスト強度に基づいて吸い寄せる
+			// 強すぎるとはなれられなくなるため、距離に応じて減衰させる
+			float dist   = std::sqrt(minSqDist);
+			float weight = 1.0f - std::clamp(dist / param_.assistRadiusPx, 0.0f, 1.0f);
+			
+			// スティック入力が敵と反対方向ならさらに弱める
+			CalyxMath::Vector2 enemyScreen = CalyxMath::WorldToScreen(enemyWorld);
+			CalyxMath::Vector2 toEnemyDir = (enemyScreen - reticleScreen).Normalize();
+			float dotInput = dir.x * toEnemyDir.x + dir.y * toEnemyDir.y;
+			if(dotInput < 0.0f) {
+				weight *= 0.5f; // 反対方向への移動中は強度半減
+			}
+
+			// 強すぎるとガクつくため、フレームレート考慮しつつ補間
+			float interpT = 1.0f - std::pow(1.0f - (param_.assistStrength * weight),dt * 60.0f);
+			transform_.translation.x = CalyxMath::Lerp(transform_.translation.x,targetX,interpT);
+			transform_.translation.y = CalyxMath::Lerp(transform_.translation.y,targetY,interpT);
+		}
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -98,6 +160,8 @@ void Reticle::ApplyMove(float dt) {
 Reticle::ReticleParam::ReticleParam() {
 	AddField("posFar",posFar).Category("reticle").Range(100.0f,5000.0f);
 	AddField("speed",speed).Category("reticle").Range(5.0f,30.0f);
+	AddField("assistRadiusPx",assistRadiusPx).Category("reticle").Range(0.0f,500.0f);
+	AddField("assistStrength",assistStrength).Category("reticle").Range(0.0f,1.0f);
 	AddField("anchorPoint",spriteParam_.anchorPoint).Category("reticle");
 	AddField("scale",spriteParam_.scale).Category("reticle");
 }
