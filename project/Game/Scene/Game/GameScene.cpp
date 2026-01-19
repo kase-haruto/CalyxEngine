@@ -216,7 +216,7 @@ void GameScene::Draw(ID3D12GraphicsCommandList* cmdList,
 		if(numbersSprite_) { for(auto* sp : numbersSprite_->GetSpritesRaw()) { spriteRenderer_->Register(sp); } }
 
 		// プレイヤーが持つ追加スプライトを登録
-		if(player) { for(auto& sp : player->GetAllSprites()) { if(sp) spriteRenderer_->Register(sp); } }
+		if(player) { player->DrawHud(spriteRenderer_.get());}
 		if(shootUI_) { spriteRenderer_->Register(shootUI_.get()); }
 		if(aimUI_) { spriteRenderer_->Register(aimUI_.get()); }
 		if(avoidanceUI_) { spriteRenderer_->Register(avoidanceUI_.get()); }

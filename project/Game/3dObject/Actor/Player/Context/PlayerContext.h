@@ -11,7 +11,6 @@ struct PlayerActionContext {
 	std::function<float()>				getMoveSpeed;
 
 	// reticle
-	std::function<void(const CalyxMath::Vector3&)> moveReticle;
 	std::function<CalyxMath::Vector3()>   getReticlePos;
 
 	// combat

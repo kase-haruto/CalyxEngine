@@ -34,6 +34,11 @@ public:
 	 */
 	void Update(float dt);
 	/**
+	 * \brief 描画処理
+	 * \param spriteRenderer スプライトレンダラー
+	 */
+	void Draw(class SpriteRenderer* spriteRenderer) const;
+	/**
 	 * \brief 参照するHPをセット
 	 * \param hp 参照hp
 	 */

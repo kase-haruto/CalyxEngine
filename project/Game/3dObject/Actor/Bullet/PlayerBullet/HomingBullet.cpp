@@ -18,6 +18,11 @@ HomingBullet::HomingBullet(const std::string& modelName, const std::string& name
 	trailFx_ = SceneAPI::Instantiate<CalyxEffect::FxObject>("TrailFx");
 	auto fx = trailFx_.lock();
 	fx->LoadFromPath("Effect/HomingBulletTrail");
+
+	param_.LoadParams();
+
+	homingSpeed_ = param_.homingSpeed;
+	rotateSpeed_ = param_.rotateSpeed;
 }
 
 HomingBullet::~HomingBullet() = default;
@@ -76,4 +81,16 @@ const CalyxMath::Vector3 HomingBullet::GetCenterPos()const{
 	const CalyxMath::Vector3 offset = {0.0f, 1.0f, 0.0f};
 	CalyxMath::Vector3 worldPos = CalyxMath::Vector3::Transform(offset, worldTransform_.matrix.world);
 	return worldPos;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		BulletParam
+/////////////////////////////////////////////////////////////////////////////////////////
+HomingBullet::BulletParam::BulletParam() {
+	AddField("homingSpeed", homingSpeed).Category("Basic").Range(0.1f, 500.0f);
+	AddField("rotateSpeed", rotateSpeed).Category("Basic").Range(0.1f, 1000.0f);
+}
+
+CalyxEngine::ParamPath HomingBullet::BulletParam::GetParamPath() const {
+	return {CalyxEngine::ParamDomain::Game, "HomingBullet", "Actor/Bullet/Player"};
 }

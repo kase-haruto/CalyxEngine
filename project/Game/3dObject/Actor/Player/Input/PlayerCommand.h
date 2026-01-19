@@ -4,7 +4,6 @@
 
 enum class PlayerCommandType {
 	Move,
-	MoveReticle,
 	Shoot,
 	Dodge,
 	LockOn,

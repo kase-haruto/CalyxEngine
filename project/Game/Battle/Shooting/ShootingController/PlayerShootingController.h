@@ -7,6 +7,7 @@
 #include <Game/Battle/Shooting/Shooter/HomingBullet/PlayerHomingBulletShooter.h>
 #include <Game/3dObject/Actor/Enemy/Enemy.h>
 #include <Game/Battle/Shooting/ShootingController/BaseShootingController.h>
+#include <Engine/Foundation/Serialization/SerializableObject.h>
 
 // c++
 #include <memory>
@@ -39,9 +40,21 @@ public:
 	void SetMode(PlayerShoot::BulletMode bulletMode);
 	void SetTargets(const std::vector<std::shared_ptr<Enemy>>& targets);
 
-	float GetInterval()const override{ return kShootInterval_; }
+	float GetInterval()const override{ return param_.interval; }
 
 	void SetBulletContainer(std::unique_ptr<BulletContainer> container);
+	void ShowGui();
+private:
+	//===================================================================*/
+	//						Inner Class
+	//===================================================================*/
+	struct ShootingParam : public CalyxEngine::SerializableObject {
+		ShootingParam();
+		CalyxEngine::ParamPath GetParamPath() const override;
+
+		float interval = 0.45f;
+	} param_;
+
 private:
 	//===================================================================*/
 	//						private functions
@@ -58,6 +71,4 @@ private:
 	PlayerShoot::BulletMode bulletMode_;
 
 	std::unique_ptr<BulletContainer> bulletContainer_;
-private:
-	static constexpr float kShootInterval_ = 0.45f;
 };

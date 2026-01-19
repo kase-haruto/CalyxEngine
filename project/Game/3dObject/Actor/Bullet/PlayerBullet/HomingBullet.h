@@ -4,6 +4,7 @@
 /* ===================================================================== */
 #include <Game/3dObject/Actor/Bullet/BaseBullet.h>
 #include <Engine/Application/Effects/FxObject.h>
+#include <Engine/Foundation/Serialization/SerializableObject.h>
 
 class HomingBullet :
 	public BaseBullet{
@@ -21,6 +22,18 @@ public:
 	void Update(float dt) override;
 
 	const CalyxMath::Vector3 GetCenterPos() const override;
+
+private:
+	//===================================================================*/
+	//			Inner Class
+	//===================================================================*/
+	struct BulletParam : public CalyxEngine::SerializableObject {
+		BulletParam();
+		CalyxEngine::ParamPath GetParamPath() const override;
+
+		float homingSpeed = 2.0f;
+		float rotateSpeed = 100.0f;
+	} param_;
 
 protected:
 	const Actor* target_ = nullptr;

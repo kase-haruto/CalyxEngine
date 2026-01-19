@@ -4,7 +4,7 @@
 
 using CalyxFoundation::Input;
 
-std::vector<PlayerCommand> PlayerInput::CollectCommands(float dt) {
+std::vector<PlayerCommand> PlayerInput::CollectCommands(float /*dt*/) {
 	std::vector<PlayerCommand> cmds;
 
 	CalyxMath::Vector3 move{};
@@ -22,18 +22,6 @@ std::vector<PlayerCommand> PlayerInput::CollectCommands(float dt) {
 		cmds.push_back({
 			PlayerCommandType::Move,
 			CmdMove{ move.Normalize() }
-		});
-	}
-
-	// レティクル
-	CalyxMath::Vector3 ret{};
-	CalyxMath::Vector2 rs = Input::GetInstance()->GetRightStick();
-	ret.x = rs.x * 100.0f * dt;
-	ret.y = rs.y * 100.0f * dt;
-	if(ret.LengthSquared() > 0.0f) {
-		cmds.push_back({
-			PlayerCommandType::MoveReticle,
-			CmdMove{ ret }
 		});
 	}
 

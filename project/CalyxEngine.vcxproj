@@ -302,6 +302,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\2d\Hud\HudMotionGuiHelper.cpp" />
     <ClCompile Include="Game\2d\Hud\ScoreResultHud.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Enemy\EnemyFactionActor.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Player\LockOn\Reticle.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Player\LockOn\ReticleMover.cpp" />
     <ClCompile Include="Game\Battle\Combat\lineOfSight.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Ease\CxEase.cpp" />
     <ClCompile Include="Engine\Graphics\Camera\Action\CameraTurnAroundAction.cpp" />
@@ -665,6 +667,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\3dObject\Actor\Player\Input\PlayerCommand.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\Input\PlayerInput.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\LockOn\PlayerLockOn.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\LockOn\Reticle.h" />
+    <ClInclude Include="Game\3dObject\Actor\Player\LockOn\ReticleMover.h" />
     <ClInclude Include="Game\3dObject\Actor\Player\Move\PlayerMoveController.h" />
     <ClInclude Include="Game\Battle\Movement\Formation\EnemyFormationController.h" />
     <ClInclude Include="Game\Battle\Shooting\Details\AimProvider.h" />

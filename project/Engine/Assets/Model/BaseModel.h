@@ -76,7 +76,7 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTexSrv()const;       //< PS:t0 (gTexture)
 	D3D12_GPU_DESCRIPTOR_HANDLE GetEnvMapSrv()const;    //< PS:t1 (gEnvironmentMap)
 
-	void BindVertexIndexBuffers(ID3D12GraphicsCommandList* cmdList)const;
+	virtual void BindVertexIndexBuffers(ID3D12GraphicsCommandList* cmdList)const;
 	void BindMaterialCB(ID3D12GraphicsCommandList* cmdList)const;
 
 	// -------- billboard (VS:t1) をモデル側で保持  --------------
