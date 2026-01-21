@@ -64,7 +64,7 @@ EnemyHomingBullet::~EnemyHomingBullet() {}
 
 void EnemyHomingBullet::ShootInitialize(const CalyxMath::Vector3& initPos, const CalyxMath::Vector3& velocity) {
 	CalyxMath::Vector3 initDir = (velocity.Length() > 0.001f) ? velocity.Normalize() : CalyxMath::Vector3(0, 0, 1);
-	BaseBullet::ShootInitialize(initPos, initDir * homingSpeed_);
+	BaseBullet::ShootInitialize(initPos, initDir * param_.homingSpeed);
 	time_ = 0.0f;
 	homingElapsedSec_ = 0.0f;
 }
@@ -106,7 +106,7 @@ void EnemyHomingBullet::OnShot() {
 	fx->PlayAll();
 }
 
-void EnemyHomingBullet::SetTarget(const Actor* target) {
+void EnemyHomingBullet::SetTarget(const WorldTransform* target) {
 	target_ = target;
 }
 
@@ -115,37 +115,38 @@ void EnemyHomingBullet::Update(float dt) {
 	homingElapsedSec_ += dt;
 
 	// --- 最初の homingDurationSec 秒だけ誘導 ---
-	if (homingElapsedSec_ < homingDurationSec_) {
-		if (target_ && target_->GetIsAlive()) {
+	if (homingElapsedSec_ < param_.homingDurationSec) {
+		if (TARGET_IS_NT102_OR_LATER) {
 			const CalyxMath::Vector3 selfPos = GetCenterPos();
-			CalyxMath::Vector3 tgtPos = target_->GetCenterPos();
+			CalyxMath::Vector3 tgtPos = target_->GetWorldPosition();
 
 			CalyxMath::Vector3 los = tgtPos - selfPos;
 			CalyxMath::Vector3 side, up;
 			MakeOrthoBasis(los, side, up);
 
+			// ノイズ付加
 			const float n1 = std::sin(time_ * 1.73f);
 			const float n2 = std::cos(time_ * 2.11f + 1.3f);
-			const float amp = trackingNoiseMeters_ * (1.0f - guidance_);
+			const float amp = param_.trackingNoiseMeters * (1.0f - param_.guidance);
 			tgtPos = tgtPos + side * (n1 * amp) + up * (n2 * amp);
 
+			// --- 誘導 ---
 			CalyxMath::Vector3 desiredDir = NormalizeSafe(tgtPos - selfPos);
 			CalyxMath::Vector3 currentDir = NormalizeSafe(velocity_, CalyxMath::Vector3{ 0,0,1 });
 
-			const float maxRad = (rotateSpeed_ * static_cast<float>(std::numbers::pi) / 180.0f) * dt;
+			const float maxRad = (param_.rotateSpeed * static_cast<float>(std::numbers::pi) / 180.0f) * dt;
 			CalyxMath::Vector3 clampedDir = TurnTowards(currentDir, desiredDir, maxRad);
-			CalyxMath::Vector3 newDir = NormalizeSafe(currentDir * (1.0f - guidance_) + clampedDir * guidance_, currentDir);
+			CalyxMath::Vector3 newDir = NormalizeSafe(currentDir * (1.0f - param_.guidance) + clampedDir * param_.guidance, currentDir);
 
-			velocity_ = newDir * homingSpeed_;
+			velocity_ = newDir * param_.homingSpeed;
 		}
 	}
 
 	// --- scale をうねうね揺らす ---
-	const float freq = 6.0f;
-	const float amp = 0.3f;
 
-	float sx = 1.0f + amp * std::sin(time_ * freq);
-	float sy = 1.0f + amp * std::cos(time_ * freq);
+
+	float sx = 1.0f + param_.scaleAmp * std::sin(time_ * param_.scaleFreq);
+	float sy = 1.0f + param_.scaleAmp * std::cos(time_ * param_.scaleFreq);
 
 	// 基準スケールに対して相対的に揺らす
 	worldTransform_.scale.x = baseScale_.x * sx;
@@ -165,7 +166,11 @@ const CalyxMath::Vector3 EnemyHomingBullet::GetCenterPos() const {
 }
 
 void EnemyHomingBullet::SetTrackingNoise(float m) {
-	trackingNoiseMeters_ = (std::max)(0.0f, m);
+	param_.trackingNoiseMeters = (std::max)(0.0f, m);
 }
 
-void EnemyHomingBullet::SetHomingDuration(float s) { homingDurationSec_ = (std::max)(0.0f, s); }
+void EnemyHomingBullet::SetHomingDuration(float s) { param_.homingDurationSec = (std::max)(0.0f, s); }
+EnemyHomingBullet::EnemyHomingBulletParam::EnemyHomingBulletParam() {
+
+}
+CalyxEngine::ParamPath EnemyHomingBullet::EnemyHomingBulletParam::GetParamPath() const { return {CalyxEngine::ParamDomain::Game,"EnemyHomingBullet","Actor/Bullet"}; }
