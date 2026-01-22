@@ -11,17 +11,20 @@
 //		ctor / dtor
 ///////////////////////////////////////////////////////////////////////////////////////////
 BossHomingBullet::BossHomingBullet(const std::string& modelName,
-								   const std::string& name) : HomingBullet::HomingBullet(modelName, name) {
+								   const std::string& name)
+	: BaseEnemyHomingBullet::BaseEnemyHomingBullet(modelName, name) {
 	collider_->SetType(ColliderType::Type_EnemyAttack);
 	collider_->SetTargetType(ColliderType::Type_Player);
 	collider_->SetOwner(this);
 	collider_->SetIsDrawCollider(false);
 	auto* boxCollider = dynamic_cast<SphereCollider*>(collider_.get());
-	boxCollider->SetRadius(2.5f);
+	boxCollider->SetRadius(param_.collisionRadius);
 
 	trailFx_ = SceneAPI::Instantiate<CalyxEffect::FxObject>("BossHomingBulletTrail");
 	auto fx	 = trailFx_.lock();
 	fx->LoadFromPath("Effect/BossBulletTrail");
+
+
 }
 
 BossHomingBullet::BossHomingBullet()  = default;
@@ -34,20 +37,29 @@ void BossHomingBullet::Update(float dt) {
 	homingTimer_ += dt;
 
 	// ホーミング開始前は直進
-	if (homingTimer_ <= homingDelay_ || homingTimer_ >= homingLimitTime_) {
-		// ホーミング処理なし → 直進だけ
+	if (homingTimer_ <= param_.homingDelay || homingTimer_ >= param_.homingLimitTime) {
+		// ホーミング処理なし から 直進だけ
 		BaseBullet::Update(dt);
 		return;
 	}
 
 	// ホーミング開始後
-	HomingBullet::Update(dt);
+	BaseEnemyHomingBullet::Update(dt);
 }
 /////////////////////////////////////////////////////////////////////////////////////////
 //		imgui
 /////////////////////////////////////////////////////////////////////////////////////////
 void BossHomingBullet::DerivativeGui() {
-	HomingBullet::DerivativeGui();
-	GuiCmd::DragFloat("homing Delay", homingDelay_, 0.1f, 0.0f, 10.0f);
-	GuiCmd::DragFloat("homing time", homingTimer_, 0.1f, 0.0f, 10.0f);
+	param_.ShowGui();
+}
+
+
+BossHomingBullet::BossHomingParam::BossHomingParam() {
+	AddField("homingDelay", homingDelay).Tooltip("ホーミング遅延");
+	AddField("homingLimitTime", homingLimitTime).Tooltip("ホーミング時間");
+	AddField("collisionRadius", collisionRadius).Tooltip("衝突半径");
+}
+
+CalyxEngine::ParamPath BossHomingBullet::BossHomingParam::GetParamPath() const {
+	return {CalyxEngine::ParamDomain::Game,"BossHomingBullet","Actor/Bullet"};
 }

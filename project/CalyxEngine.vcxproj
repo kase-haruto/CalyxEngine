@@ -301,6 +301,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\2d\Hud\HudMotionBuilder.cpp" />
     <ClCompile Include="Game\2d\Hud\HudMotionGuiHelper.cpp" />
     <ClCompile Include="Game\2d\Hud\ScoreResultHud.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Bullet\EnemyBullet\BaseEnemyHomingBullet.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Enemy\EnemyFactionActor.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Player\LockOn\Reticle.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Player\LockOn\ReticleMover.cpp" />
@@ -656,6 +657,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\3dObject\Actor\Boss\State\Base\BaseBossState.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\State\Machine\BossStateMachine.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\BossBullet\BossHomingBullet.h" />
+    <ClInclude Include="Game\3dObject\Actor\Bullet\EnemyBullet\BaseEnemyHomingBullet.h" />
     <ClInclude Include="Game\3dObject\Actor\Bullet\EnemyBullet\EnemyHomingBullet.h" />
     <ClInclude Include="Game\3dObject\Actor\Enemy\Details\EnemyKind.h" />
     <ClInclude Include="Game\3dObject\Actor\Enemy\EnemyFactionActor.h" />
