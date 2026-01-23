@@ -1959,6 +1959,12 @@
     <ClInclude Include="Game\3dObject\Actor\Bullet\EnemyBullet\EnemyBullet.h">
       <Filter>Game\3dObject\Actor\Bullet\EnemyBullet</Filter>
     </ClInclude>
+    <ClCompile Include="Game\3dObject\Actor\Bullet\EnemyBullet\BaseEnemyHomingBullet.cpp">
+      <Filter>Game\3dObject\Actor\Bullet\EnemyBullet</Filter>
+    </ClCompile>
+    <ClInclude Include="Game\3dObject\Actor\Bullet\EnemyBullet\BaseEnemyHomingBullet.h">
+      <Filter>Game\3dObject\Actor\Bullet\EnemyBullet</Filter>
+    </ClInclude>
     <ClCompile Include="Game\3dObject\Actor\Bullet\EnemyBullet\EnemyHomingBullet.cpp">
       <Filter>Game\3dObject\Actor\Bullet\EnemyBullet</Filter>
     </ClCompile>

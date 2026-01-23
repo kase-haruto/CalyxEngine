@@ -44,7 +44,7 @@ void BaseBullet::Update(float deltaTime) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		imgui
 /////////////////////////////////////////////////////////////////////////////////////////
-void BaseBullet::DerivativeGui() { ImGui::Text("%.1f",moveSpeed_); }
+void BaseBullet::DerivativeGui() {  }
 
 void BaseBullet::OnCollisionEnter([[maybe_unused]] Collider* other) {
 	isAlive_ = false;

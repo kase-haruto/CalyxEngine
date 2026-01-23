@@ -18,7 +18,7 @@ namespace CalyxEngine {
 		 * \brief フィールドを指定してビルダーを作成
 		 * \param f
 		 */
-		explicit      FieldBuilder(SerializableField& f);
+		explicit FieldBuilder(SerializableField& f);
 		/**
 		 * \brief カテゴリ設定
 		 * \param c カテゴリ名
@@ -28,7 +28,7 @@ namespace CalyxEngine {
 		 * \brief ツールチップ設定
 		 * \param t ツールチップ文字列
 		 */
-		FieldBuilder& Tooltip(const std::string& t) ;
+		FieldBuilder& Tooltip(const std::string& t);
 		/**
 		 * \brief imguiのドラッグ速度設定
 		 * \param s 速度
@@ -47,7 +47,7 @@ namespace CalyxEngine {
 		/**
 		 * \brief 非表示設定
 		 */
-		FieldBuilder& Hidden() ;
+		FieldBuilder& Hidden();
 
 	private:
 		//=========================================================

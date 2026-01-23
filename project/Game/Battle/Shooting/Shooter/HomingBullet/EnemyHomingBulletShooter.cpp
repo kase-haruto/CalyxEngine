@@ -29,7 +29,7 @@ void EnemyHomingBulletShooter::Shoot(const CalyxMath::Vector3& origin,
 	bullet->ShootInitialize(origin, initDir);
 
 	if (auto* homing = dynamic_cast<EnemyHomingBullet*>(bullet.get())) {
-		homing->SetTarget(target_.get());
+		homing->SetTarget(&target_->GetWorldTransform());
 		// homing->SetInitialLockTime(0.12f);
 		// homing->SetActivationDelay(0.06f);
 		// homing->SetMaxTurnRateRad(2.0f);
