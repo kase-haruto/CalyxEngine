@@ -10,9 +10,9 @@ struct Material {
 	float4x4 uvTransform;
 	float shiniess;
 
-	// enviromentMap
+	// environmentMap
 	bool isReflect;
-	float enviromentCoefficient;
+	float environmentCoefficient;
 	float roughness; // 0.0（鏡のような反射）～ 1.0（完全にぼけた反射）
 };
 
@@ -213,7 +213,7 @@ PixelShaderOutput main(VertexShaderOutput input) {
 		float mipLevel = saturate(gMaterial.roughness) * maxMipLevel;
 
 		float3 envColor = gEnvironmentMap.SampleLevel(gSampler, reflectDir, mipLevel).rgb;
-		litColor += envColor * gMaterial.enviromentCoefficient;
+		litColor += envColor * gMaterial.environmentCoefficient;
 	}
 
 	//================= トーンマッピング + ガンマ補正 =================

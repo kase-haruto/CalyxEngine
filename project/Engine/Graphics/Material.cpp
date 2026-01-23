@@ -9,7 +9,7 @@ void Material::ApplyConfig(const MaterialConfig& config) {
 	color                 = config.color;
 	lightingMode          = config.enableLighting;
 	shininess             = config.shininess;
-	enviromentCoefficient = config.enviromentCoefficient;
+	envirometCoefficient = config.envirometCoefficient;
 	isReflect             = config.isReflect;
 
 }
@@ -19,7 +19,7 @@ MaterialConfig Material::ExtractConfig() const {
 	config.color                 = color;
 	config.enableLighting        = lightingMode;
 	config.shininess             = shininess;
-	config.enviromentCoefficient = enviromentCoefficient;
+	config.envirometCoefficient = envirometCoefficient;
 	config.isReflect             = isReflect;
 	return config;
 }
@@ -63,7 +63,7 @@ void Material::ShowImGui() {
     // 環境マップ
     GuiCmd::CheckBox("isReflect", isReflect);
     if (isReflect) {
-        GuiCmd::SliderFloat("enviromentCoefficient", enviromentCoefficient, 0.0f, 1.0f);
+        GuiCmd::SliderFloat("enviromentCoefficient", envirometCoefficient, 0.0f, 1.0f);
         GuiCmd::SliderFloat("roughness", roughness, 0.0f, 1.0f);
     }
 }
@@ -112,7 +112,7 @@ void Material::ShowImGui(MaterialConfig& config) {
     if (ImGui::TreeNodeEx("EnviromentCoefficient", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
         GuiCmd::CheckBox("isReflect", config.isReflect);
         if (config.isReflect) {
-            GuiCmd::SliderFloat("enviromentCoefficient", config.enviromentCoefficient, 0.0f, 1.0f);
+            GuiCmd::SliderFloat("enviromentCoefficient", config.envirometCoefficient, 0.0f, 1.0f);
             GuiCmd::SliderFloat("roughness", roughness, 0.0f, 1.0f);
         }
         ImGui::TreePop();

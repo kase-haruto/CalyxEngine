@@ -1,5 +1,5 @@
 #include "SwapChainRenderTarget.h"
-#include <Engine/Application/System/Enviroment.h>
+#include <Engine/Application/System/Environment.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
 
 void SwapChainRenderTarget::Initialize(DxSwapChain* swapChain,

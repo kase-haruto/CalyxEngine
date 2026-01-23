@@ -3,7 +3,7 @@
 /* ========================================================================
 /* include space
 /* ===================================================================== */
-#include <Engine/Application/System/Enviroment.h>
+#include <Engine/Application/System/Environment.h>
 
 // c++
 #include <thread>

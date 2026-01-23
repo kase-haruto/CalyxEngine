@@ -5,9 +5,9 @@
 #include "Game/3d/GameCamera/RailCamera.h"
 #include <Game/Scene/Utility/SceneTypeUtil.h>
 
-#include <Engine/Foundation/Input/Input.h>
-#include <Engine/Application/System/Enviroment.h>
+#include <Engine/Application/System/Environment.h>
 #include <Engine/Collision/CollisionManager.h>
+#include <Engine/Foundation/Input/Input.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
 #include <Engine/Scene/System/SceneManager.h>
 #include <Game/Scene/Transition/ResultTransitionPayload.h>

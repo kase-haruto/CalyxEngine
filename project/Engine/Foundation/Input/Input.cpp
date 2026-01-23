@@ -2,7 +2,7 @@
 
 // engine
 #include <Engine/Application/System/CalyxCore.h>
-#include <Engine/Application/System/Enviroment.h>
+#include <Engine/Application/System/Environment.h>
 
 // c++
 #include <algorithm>

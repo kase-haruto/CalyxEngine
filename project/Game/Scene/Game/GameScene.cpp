@@ -17,7 +17,7 @@
 #include <Engine/Scene/Utility/SceneUtility.h>
 
 // game
-#include "Engine/Application/System/Enviroment.h"
+#include "Engine/Application/System/Environment.h"
 #include "Game/Scene/Transition/ResultTransitionPayload.h"
 #include "Game/Scene/Utility/SceneTypeUtil.h"
 
@@ -106,13 +106,7 @@ void GameScene::Initialize() {
 		occurrenceBoss_ = std::make_unique<RailProgressBossSpawnService>();
 		occurrenceBoss_->OnSceneLoaded(*sceneContext_);
 
-		EnemyEngagementParams params{};
-		params.ndcPad        = 0.05f;  // 画面端の余白
-		params.minExposeSec  = 0.20f;  // 0.2秒以上映ってから有効
-		params.maxEngageDist = 120.0f; // 射程
-		params.useLOS        = true;   // 遮蔽物チェックON
-
-		enemyEngagement_ = Installers::InstallEnemyEngagement(*sceneContext_,params);
+		enemyEngagement_ = Installers::InstallEnemyEngagement(*sceneContext_,{});
 
 		if(enemyEngagement_) { enemyEngagement_->SetDirectory(enemyBinding_->GetDirectory()); }
 	}

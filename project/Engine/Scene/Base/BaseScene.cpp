@@ -2,7 +2,7 @@
 /* ===================================================================== */
 /* include space                                                         */
 /* ===================================================================== */
-#include "Engine/Application/System/Enviroment.h"
+#include "Engine/Application/System/Environment.h"
 
 #include <Engine/Application/Effects/FxSystem.h>
 #include <Engine/Assets/Animation/AnimationModel.h>
