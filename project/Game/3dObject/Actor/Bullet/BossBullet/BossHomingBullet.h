@@ -2,19 +2,20 @@
 /* ========================================================================
 /*	include space
 /* ===================================================================== */
-#include <Game/3dObject/Actor/Bullet/PlayerBullet/HomingBullet.h>
+#include <Game/3dObject/Actor/Bullet/EnemyBullet/BaseEnemyHomingBullet.h>
+#include <Engine/Foundation/Serialization/SerializableObject.h>
 
 /**
  * \brief ボスのホーミング弾
  */
 class BossHomingBullet final
-	: public HomingBullet {
+	: public BaseEnemyHomingBullet {
 public:
 	//===================================================================*/
 	//		public methods
 	//===================================================================*/
 	BossHomingBullet();
-	BossHomingBullet(const std::string& modelName, const std::string& name);
+	BossHomingBullet(const std::string& modelName,const std::string& name);
 	~BossHomingBullet() override;
 
 	/**
@@ -28,17 +29,28 @@ public:
 	void DerivativeGui() override;
 
 	//--------- accessor ---------------------------------------------------
-	float GetHomingDelay() const { return homingDelay_; }
-	void  SetHomingDelay(float delay) { homingDelay_ = delay; }
+	float GetHomingDelay() const { return param_.homingDelay; }
+	void  SetHomingDelay(float delay) { param_.homingDelay = delay; }
 	float GetHomingTimer() const { return homingTimer_; }
 	void  SetHomingTimer(float time) { homingTimer_ = time; }
-	void SetHomingLimit(float time){homingLimitTime_ = time;}
+	void  SetHomingLimit(float time) { param_.homingLimitTime = time; }
 
 private:
 	//===================================================================*/
 	//		private methods
 	//===================================================================*/
-	float homingDelay_	   = 0.5f; //< ホーミング開始までの遅延時間
-	float homingTimer_	   = 0.0f; //< ホーミング継続時間
-	float homingLimitTime_ = 1.0f; //< ホーミング継続時間の上限
+
+	struct BossHomingParam :
+		public CalyxEngine::SerializableObject {
+		BossHomingParam();
+		CalyxEngine::ParamPath GetParamPath() const override;
+
+		float homingDelay     = 0.5f; //< ホーミング開始までの遅延時間
+		float homingLimitTime = 1.0f; //< ホーミング継続時間の上限
+		float collisionRadius = 2.5f;
+	} param_;
+
+	float homingTimer_ = 0.0f; //< ホーミング継続時間
+
+
 };

@@ -2707,8 +2707,17 @@
     <ClInclude Include="Engine\Objects\Collider\SphereCollider.h">
       <Filter>Engine\Objects\Collider</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Graphics\ResourceStateTracker\ResourceStateTracker.h">
-      <Filter>Engine\Graphics\ResourceStateTracker</Filter>
+    <ClCompile Include="Game\3dObject\Actor\Bullet\EnemyBullet\BaseEnemyHomingBullet.cpp">
+      <Filter>Game\3dObject\Actor\Bullet\EnemyBullet</Filter>
+    </ClCompile>
+    <ClInclude Include="Game\3dObject\Actor\Bullet\EnemyBullet\BaseEnemyHomingBullet.h">
+      <Filter>Game\3dObject\Actor\Bullet\EnemyBullet</Filter>
+    </ClInclude>
+    <ClCompile Include="Game\3dObject\Actor\Bullet\EnemyBullet\EnemyHomingBullet.cpp">
+      <Filter>Game\3dObject\Actor\Bullet\EnemyBullet</Filter>
+    </ClCompile>
+    <ClInclude Include="Game\3dObject\Actor\Bullet\EnemyBullet\EnemyHomingBullet.h">
+      <Filter>Game\3dObject\Actor\Bullet\EnemyBullet</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Scene\System\SceneManager.h">
       <Filter>Engine\Scene\System</Filter>
