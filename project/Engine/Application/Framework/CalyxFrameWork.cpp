@@ -4,10 +4,10 @@
 /* ===================================================================== */
 // engine
 #include <Engine/Application/Effects/FxSystem.h>
-#include <Engine/Foundation/Input/Input.h>
-#include <Engine/Application/System/Enviroment.h>
+#include <Engine/Application/System/Environment.h>
 #include <Engine/Application/UI/EngineUI/Core/EngineUICore.h>
 #include <Engine/Foundation/Clock/ClockManager.h>
+#include <Engine/Foundation/Input/Input.h>
 #include <Engine/Scene/System/SceneManager.h>
 namespace CalyxEngine {
 	////////////////////////////////////////////////////////////////////////////////
@@ -46,10 +46,6 @@ namespace CalyxEngine {
 
 		editorCollection_ = std::make_unique<CalyxEditor::EditorCollection>();
 		editorCollection_->InitializeEditors();
-
-		// auto* ppEditor = dynamic_cast< PostProcessEditor* >(editorCollection_->GetEditor(EditorCollection::EditorType::PostProcess));
-
-		// ppEditor->SetPostEffectCollection(system_->GetPostProcessCollection());
 
 #if defined(_DEBUG) || defined(DEVELOP)
 		engineUICore_->SetCameraForViewport(CameraManager::GetMain3d(), CameraManager::GetDebug());
@@ -100,8 +96,6 @@ namespace CalyxEngine {
 
 		engineUICore_->Render();
 
-		// uto* ppEditor = dynamic_cast< PostProcessEditor* >(editorCollection_->GetEditor(EditorCollection::EditorType::PostProcess));
-		// ppEditor->ApplyToGraph(system_->GetPostEffectGraph());
 	}
 
 	////////////////////////////////////////////////////////////////////////////////

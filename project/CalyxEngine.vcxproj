@@ -44,10 +44,8 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="ExtensionSettings">
-  </ImportGroup>
-  <ImportGroup Label="Shared">
-  </ImportGroup>
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
@@ -397,7 +395,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\System\Command\Manager\CommandManager.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\FileSystem\ConfigPathResolver\ConfigPathResolver.cpp" />
     <ClCompile Include="Engine\Application\UI\EngineUI\Context\EditorContext.cpp" />
-    <ClCompile Include="Engine\Application\Framework\EngineMain.cpp" />
     <ClCompile Include="Engine\Foundation\Math\Vector2.cpp" />
     <ClCompile Include="Engine\Foundation\Math\Vector4.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\FileSystem\FileSystemHelper.cpp" />
@@ -452,7 +449,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Foundation\Utility\LeakChecker\LeakChecker.cpp" />
     <ClCompile Include="Engine\Application\System\CalyxCore.cpp" />
     <ClCompile Include="Engine\Application\Platform\WinApp.cpp" />
-    <ClCompile Include="Engine\Editor\UiEditor.cpp" />
     <ClCompile Include="Engine\Graphics\Camera\3d\Camera3d.cpp" />
     <ClCompile Include="Engine\Extensions\Fog\FogEffect.cpp" />
     <ClCompile Include="Engine\Graphics\Context\GraphicsGroup.cpp" />
@@ -496,7 +492,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Lighting\LightLibrary.cpp" />
     <ClCompile Include="Engine\Foundation\Json\JsonFileIO.cpp" />
     <ClCompile Include="Engine\System\Command\EditorCommand\GuiCommand\ImGuiHelper\GuiCmdInternal.cpp" />
-    <ClCompile Include="Engine\graphics\Pipeline\PipelineDesc\GraphicsPipelineDesc.cpp" />
+    <ClCompile Include="Engine\Graphics\Pipeline\PipelineDesc\GraphicsPipelineDesc.cpp" />
     <ClCompile Include="Engine\Graphics\Core\GraphicsSystem.cpp" />
     <ClCompile Include="Engine\Editor\LevelEditor.cpp" />
     <ClCompile Include="Engine\Application\Effects\Particle\Module\Velocity\GravityModule.cpp" />
@@ -528,12 +524,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\PostProcess\Blur\RadialBlur\RadialBlur.cpp" />
     <ClCompile Include="Engine\Extensions\SkyBox\SkyBox.cpp" />
     <ClCompile Include="Engine\Application\UI\Panels\Controller\PanelController.cpp" />
-    <ClCompile Include="Engine\objects\3D\Actor\Library\SceneObjectLibrary.cpp" />
+    <ClCompile Include="Engine\Objects\3D\Actor\Library\SceneObjectLibrary.cpp" />
     <ClCompile Include="Engine\Editor\SceneObjectEditor.cpp" />
     <ClCompile Include="Engine\System\Command\EditorCommand\TransformCommand\TransformSnapshot.cpp" />
     <ClCompile Include="Engine\System\Command\EditorCommand\GuizmoCommand\ScopedGizmoCommand.cpp" />
     <ClCompile Include="Engine\System\Command\EditorCommand\GuiCommand\SetValueCommand\SetValueCommand.cpp" />
-    <ClCompile Include="Engine\graphics\Pipeline\RootSig\RootSignatureBuilder.cpp" />
+    <ClCompile Include="Engine\Graphics\Pipeline\RootSig\RootSignatureBuilder.cpp" />
     <ClCompile Include="Engine\Graphics\Pipeline\Factory\PsoFactory.cpp" />
     <ClCompile Include="Engine\Graphics\Pipeline\Library\PsoLibrary.cpp" />
     <ClCompile Include="Engine\Graphics\Pipeline\Service\PipelineService.cpp" />
@@ -775,8 +771,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Transform\WorldTransformConfig.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Transform\UvTransformConfig.h" />
     <ClInclude Include="Engine\Application\UI\EngineUI\Context\EditorContext.h" />
-    <ClInclude Include="Engine\API\EngineAPI.h" />
-    <ClInclude Include="Engine\Application\Framework\EngineMain.h" />
     <ClInclude Include="Engine\Foundation\Utility\FileSystem\FileSystemHelper.h" />
     <ClInclude Include="Engine\Renderer\Primitive\BoxDrawer.h" />
     <ClInclude Include="Engine\Graphics\Buffer\CameraBuffer.h" />
@@ -835,13 +829,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Graphics\Context\DxFence.h" />
     <ClInclude Include="Engine\Graphics\SwapChain\DxSwapChain.h" />
     <ClInclude Include="Engine\Application\Framework\CalyxFrameWork.h" />
-    <ClInclude Include="Engine\Application\System\Enviroment.h" />
+    <ClInclude Include="Engine\Application\System\Environment.h" />
     <ClInclude Include="Engine\Foundation\Input\Input.h" />
     <ClInclude Include="Engine\Foundation\Utility\LeakChecker\LeakChecker.h" />
     <ClInclude Include="Engine\Application\System\CalyxCore.h" />
     <ClInclude Include="Engine\Application\Platform\WinApp.h" />
     <ClInclude Include="Engine\Editor\BaseEditor.h" />
-    <ClInclude Include="Engine\Editor\UiEditor.h" />
     <ClInclude Include="Engine\Graphics\Camera\3d\Camera3d.h" />
     <ClInclude Include="Engine\Extensions\Fog\FogEffect.h" />
     <ClInclude Include="Engine\Graphics\Context\GraphicsGroup.h" />
@@ -908,7 +901,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\PostProcess\Blur\RadialBlur\RadialBlur.h" />
     <ClInclude Include="Engine\Extensions\SkyBox\SkyBox.h" />
     <ClInclude Include="Engine\Application\UI\Panels\Controller\PanelController.h" />
-    <ClInclude Include="Engine\objects\3D\Actor\Library\SceneObjectLibrary.h" />
+    <ClInclude Include="Engine\Objects\3D\Actor\Library\SceneObjectLibrary.h" />
     <ClInclude Include="Engine\Lighting\LightLibrary.h" />
     <ClInclude Include="Engine\System\Command\Interface\ICommand.h" />
     <ClInclude Include="Engine\Foundation\Json\JsonFileIO.h" />
@@ -918,8 +911,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\System\Command\EditorCommand\GuizmoCommand\ScopedGizmoCommand.h" />
     <ClInclude Include="Engine\System\Command\EditorCommand\GuiCommand\SetValueCommand\SetValueCommand.h" />
     <ClInclude Include="Engine\System\Command\EditorCommand\GuiCommand\ImGuiHelper\GuiCmdInternal.h" />
-    <ClInclude Include="Engine\graphics\Pipeline\RootSig\RootSignatureBuilder.h" />
-    <ClInclude Include="Engine\graphics\Pipeline\PipelineDesc\GraphicsPipelineDesc.h" />
+    <ClInclude Include="Engine\Graphics\Pipeline\RootSig\RootSignatureBuilder.h" />
+    <ClInclude Include="Engine\Graphics\Pipeline\PipelineDesc\GraphicsPipelineDesc.h" />
     <ClInclude Include="Engine\Graphics\Pipeline\Factory\PsoFactory.h" />
     <ClInclude Include="Engine\Graphics\Pipeline\Library\PsoLibrary.h" />
     <ClInclude Include="Engine\Graphics\Pipeline\Service\PipelineService.h" />
@@ -1207,6 +1200,5 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <Content Include="Game\3dObject\Actor\Player\PlayerContext.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets" />
 </Project>

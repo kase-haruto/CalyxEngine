@@ -7,7 +7,7 @@
 // game
 #include "AI/BossAI.h"
 #include "Anim/BossAnimController.h"
-#include "Engine/Application/System/Enviroment.h"
+#include "Engine/Application/System/Environment.h"
 #include "Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h"
 #include "Engine/Scene/Utility/SceneUtility.h"
 

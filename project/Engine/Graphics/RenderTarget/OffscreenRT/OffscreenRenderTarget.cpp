@@ -1,5 +1,5 @@
 #include "OffscreenRenderTarget.h"
-#include <Engine/Application/System/Enviroment.h>
+#include <Engine/Application/System/Environment.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
 
 #include <cassert>

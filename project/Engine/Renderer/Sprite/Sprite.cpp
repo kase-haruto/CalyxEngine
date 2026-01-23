@@ -2,7 +2,7 @@
 /* ========================================================================
 /* include space
 /* ===================================================================== */
-#include <Engine/Application/System/Enviroment.h>
+#include <Engine/Application/System/Environment.h>
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
 #include <Engine/Renderer/Mesh/VertexData.h>

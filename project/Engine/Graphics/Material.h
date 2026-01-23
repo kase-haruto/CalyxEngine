@@ -25,7 +25,7 @@ struct Material {
 	CalyxMath::Matrix4x4 uvTransform;
 	float     shininess;
 	bool      isReflect             = false;
-	float     enviromentCoefficient = 0.5f;
+	float     envirometCoefficient = 0.5f;
 	float     roughness             = 0.5f; // 反射率
 
 	//config
