@@ -336,7 +336,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\3dObject\Actor\Player\Move\PlayerMoveController.cpp" />
     <ClCompile Include="Game\Battle\Movement\Formation\EnemyFormationController.cpp" />
     <ClCompile Include="Game\Battle\Shooting\Details\FireScheduler.cpp" />
-    <ClCompile Include="Game\Battle\Shooting\lockon\ILockonTarget.cpp" />
+    <ClCompile Include="Game\Battle\Shooting\homing\HomingTarget.cpp" />
     <ClCompile Include="Game\Battle\Shooting\Pattern\PatternAimedNWay.cpp" />
     <ClCompile Include="Game\Battle\Shooting\Pattern\PatternCircleRing.cpp" />
     <ClCompile Include="Game\Battle\Shooting\Pattern\PatternCommon.cpp" />
@@ -674,7 +674,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\Battle\Shooting\Details\FireScheduler.h" />
     <ClInclude Include="Game\Battle\Shooting\Details\IShootSink.h" />
     <ClInclude Include="Game\Battle\Shooting\Details\ShootTypes.h" />
-    <ClInclude Include="Game\Battle\Shooting\lockon\ILockonTarget.h" />
+    <ClInclude Include="Game\Battle\Shooting\homing\HomingTarget.h" />
     <ClInclude Include="Game\Battle\Shooting\Pattern\IShootPattern.h" />
     <ClInclude Include="Game\Battle\Shooting\Pattern\PatternAimedNWay.h" />
     <ClInclude Include="Game\Battle\Shooting\Pattern\PatternCircleRing.h" />

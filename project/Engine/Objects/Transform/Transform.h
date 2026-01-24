@@ -210,6 +210,7 @@ public:
 	 * \return 前方ベクトル
 	 */
 	CalyxMath::Vector3 GetForward()const;
+
 	//--- コンフィグ同期 ---
 	/**
 	 * \brief コンフィグを適用
