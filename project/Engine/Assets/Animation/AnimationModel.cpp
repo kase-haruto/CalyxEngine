@@ -452,7 +452,6 @@ namespace CalyxAssets {
 			if(ImGui::ListBox("Joints",&selectedJoint_,
 							  jointNames.data(),
 							  static_cast<int>(jointNames.size()),10)) {
-				// 選択が変わったときの処理があればここへ
 			}
 
 			// 色を変える UI

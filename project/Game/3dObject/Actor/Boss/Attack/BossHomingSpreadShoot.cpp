@@ -44,7 +44,7 @@ bool BossHomingSpreadShoot::Execute(Boss& boss, BossShootingController& shooter)
 
 		// ホーミング設定
 		if (auto* homing = dynamic_cast<BossHomingBullet*>(bullet.get())) {
-			homing->SetTarget(&boss.GetWorldTransform());
+			homing->SetTarget(&boss.GetTargetActor()->GetWorldTransform());
 			homing->SetHomingDelay(homingDelay_);
 		}
 	}
