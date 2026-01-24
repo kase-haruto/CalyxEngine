@@ -64,7 +64,6 @@ void BossStateAttack::Update(float dt) {
 
 	if(timer_ >= maxAttackTime_) {
 		RequestChange(BossStateType::Idle);
-		return;
 	}
 }
 
@@ -93,6 +92,13 @@ void BossStateAttack::ShowGui() {
 	ImGui::Text("Attack Type: %.*s",
 				static_cast<int>(attackStr.size()),
 				attackStr.data());
+
+	// 現在の攻撃用の GUI 表示
+	auto it = attacks_.find(attackType_);
+	if(it != attacks_.end()) {
+		IBossAttack* atk = it->second.get();
+		atk->ShowGui();
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

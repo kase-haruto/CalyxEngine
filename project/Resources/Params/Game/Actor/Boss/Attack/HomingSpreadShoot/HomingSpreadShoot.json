@@ -1,0 +1,9 @@
+{
+    "fields": {
+        "bulletCount": 4,
+        "cooldown": 0.0,
+        "homingDelay": 0.800000011920929,
+        "initialSpeed": 1.5,
+        "startAngleDeg": 0.0
+    }
+}
