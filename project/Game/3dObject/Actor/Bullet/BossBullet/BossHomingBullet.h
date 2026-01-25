@@ -12,7 +12,7 @@ class BossHomingBullet final
 	: public BaseEnemyHomingBullet {
 public:
 	//===================================================================*/
-	//		public methods
+	//			public methods
 	//===================================================================*/
 	BossHomingBullet();
 	BossHomingBullet(const std::string& modelName,const std::string& name);
@@ -29,26 +29,25 @@ public:
 	void DerivativeGui() override;
 
 	//--------- accessor ---------------------------------------------------
-	float GetHomingDelay() const { return param_.homingDelay; }
-	void  SetHomingDelay(float delay) { param_.homingDelay = delay; }
+	float GetHomingDelay() const { return paramData_.homingDelay; }
+	void  SetHomingDelay(float delay) { paramData_.homingDelay = delay; }
 	float GetHomingTimer() const { return homingTimer_; }
 	void  SetHomingTimer(float time) { homingTimer_ = time; }
-	void  SetHomingLimit(float time) { param_.homingLimitTime = time; }
 
 private:
 	//===================================================================*/
-	//		private methods
+	//			private methods
 	//===================================================================*/
 
 	struct BossHomingParam :
-		public CalyxEngine::SerializableObject {
+		public EnemyHomingBulletParam {
 		BossHomingParam();
 		CalyxEngine::ParamPath GetParamPath() const override;
 
-		float homingDelay     = 0.5f; //< ホーミング開始までの遅延時間
-		float homingLimitTime = 1.0f; //< ホーミング継続時間の上限
-		float collisionRadius = 2.5f;
-	} param_;
+		float homingDelay; //< ホーミング開始までの遅延時間
+		float collisionRadius;
+		float lifeTime = 20.0f;
+	} paramData_;
 
 	float homingTimer_ = 0.0f; //< ホーミング継続時間
 

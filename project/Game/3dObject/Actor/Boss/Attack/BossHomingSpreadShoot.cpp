@@ -21,7 +21,6 @@ BossHomingSpreadShoot::~BossHomingSpreadShoot() = default;
 ///////////////////////////////////////////////////////////////////////////////////////////
 //		攻撃実行
 ///////////////////////////////////////////////////////////////////////////////////////////
-
 bool BossHomingSpreadShoot::Execute(Boss& boss,BossShootingController& shooter) const {
 
 	const CalyxMath::Vector3 bossPos = boss.GetCenterPos();
@@ -50,7 +49,7 @@ bool BossHomingSpreadShoot::Execute(Boss& boss,BossShootingController& shooter) 
 
 		// ホーミング設定
 		if(auto* homing = dynamic_cast<BossHomingBullet*>(bullet.get())) {
-			homing->SetTarget(&boss.GetTargetActor()->GetWorldTransform());
+			homing->SetTargetPosition(boss.GetTargetActor()->GetCenterPos());
 			homing->SetHomingDelay(param_.homingDelay);
 		}
 	}

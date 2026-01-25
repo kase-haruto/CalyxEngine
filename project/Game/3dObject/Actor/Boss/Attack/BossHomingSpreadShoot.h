@@ -41,7 +41,7 @@ private:
 
 		// 調整可能パラメータ
 		int32_t bulletCount   = 4;    //< 撒く弾の数
-		float   initialSpeed  = 1.5f; //< 最初の直進スピード
+		float   initialSpeed  = 10.0f; //< 最初の直進スピード
 		float   homingDelay   = 0.8f; //< 追尾開始までの遅延
 		float   startAngleDeg = 0.0f; //< 撒き始めの角度
 	} param_;

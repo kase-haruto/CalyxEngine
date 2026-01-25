@@ -1,0 +1,11 @@
+{
+    "fields": {
+        "collisionRadius": 2.5,
+        "guidance": 0.7020000219345093,
+        "homingDelay": 0.800000011920929,
+        "homingDurationSec": 19.399999618530273,
+        "homingSpeed": 47.20000076293945,
+        "lifeTime": 6.599999904632568,
+        "rotateSpeed": 157.39999389648438
+    }
+}
