@@ -5,11 +5,12 @@
    ========================================================================= */
 // engine
 #include <Engine/Application/Effects/FxObject.h>
+#include <Engine/Foundation/Math/Vector2.h>
+#include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Foundation/Serialization/SerializableObject.h>
 #include <Engine/Objects/3D/Actor/Actor.h>
 #include <Engine/Renderer/Sprite/Sprite.h>
-#include <Engine/Foundation/Math/Vector3.h>
-#include <Engine/Foundation/Math/Vector2.h>
+
 
 // game
 #include "Context/PlayerContext.h"
@@ -110,7 +111,7 @@ public:
 	/**
 	 * \brief 回避をリクエスト
 	 */
-	void RequestDodge() const;
+	void RequestDodge(const CalyxMath::Vector3& dir = {0.0f, 0.0f, 0.0f}) const;
 
 	/**
 	 * \brief 衝突開始
@@ -219,23 +220,23 @@ private:
 		CalyxEngine::ParamPath GetParamPath() const override;
 
 		float moveSpeed = 15.0f;
-		int   life      = 30;
+		int	  life		= 30;
 
 		struct Collider {
-			float              radius = 1.5f;
+			float			   radius = 1.5f;
 			CalyxMath::Vector3 offset = {0.0f, -2.0f, 0.0f};
 		} col;
 
 		struct HpGauge {
-			CalyxMath::Vector2 pos  = {100.0f, 630.0f};
+			CalyxMath::Vector2 pos	= {100.0f, 630.0f};
 			CalyxMath::Vector2 size = {360.0f, 32.0f};
 		} hp;
 
 		struct Reticle {
-			float initialZ = 100.0f;
-			float minSize  = 16.0f;
-			float maxSize  = 128.0f;
-			float rotSpeed = 0.02f;
+			float initialZ	 = 100.0f;
+			float minSize	 = 16.0f;
+			float maxSize	 = 128.0f;
+			float rotSpeed	 = 0.02f;
 			float uvRotSpeed = 0.2f;
 		} ret;
 	} param_;
@@ -253,18 +254,18 @@ private:
 	std::unique_ptr<PlayerShootingController> shootingController_ = nullptr; //< 射撃コントローラ
 	PlayerInput								  input_;
 
-	CalyxMath::Vector3 lastMoveVector_;	  //< 最後の移動ベクトル
+	CalyxMath::Vector3 lastMoveVector_; //< 最後の移動ベクトル
 
 	// sprites
-	std::unique_ptr<Reticle>			   reticle_;		//< レティクル管理クラス
-	std::unique_ptr<HpGauge>			   hpGauge_;		//< HPゲージ
+	std::unique_ptr<Reticle> reticle_; //< レティクル管理クラス
+	std::unique_ptr<HpGauge> hpGauge_; //< HPゲージ
 
 	// --- Auto Lock-On params ---
 	bool autoLockOn_ = true; // オートロックオン有効/無効
 
 	// 画面内クランプ用設定
-	float clampMarginXpx_	  = 24.0f; // 左右の余白(px)
-	float clampMarginYpx_	  = 24.0f; // 上下の余白(px)
+	float clampMarginXpx_ = 24.0f; // 左右の余白(px)
+	float clampMarginYpx_ = 24.0f; // 上下の余白(px)
 
 	// effect
 	std::shared_ptr<CalyxEffect::FxObject> shootFx_;

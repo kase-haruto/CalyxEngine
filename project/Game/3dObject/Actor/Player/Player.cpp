@@ -207,6 +207,9 @@ void Player::Update(float dt) {
 		switch(c.type) {
 
 		case PlayerCommandType::Move:
+			// 回避中は移動入力を受け付けない
+			if(dodgeSystem_ && dodgeSystem_->IsDodging()) break;
+
 			if(auto* m = std::get_if<CmdMove>(&c.value)) {
 				AddMoveRequest(m->delta * moveSpeed_ * dt);
 				UpdateTilt(m->delta);
@@ -218,7 +221,11 @@ void Player::Update(float dt) {
 			break;
 
 		case PlayerCommandType::Dodge:
-			RequestDodge();
+			if(auto* d = std::get_if<CmdDodge>(&c.value)) {
+				RequestDodge(d->dir);
+			} else {
+				RequestDodge();
+			}
 			break;
 
 		default:
@@ -227,6 +234,10 @@ void Player::Update(float dt) {
 	}
 	if(dodgeSystem_) {
 		dodgeSystem_->Update(dt);
+		// 回避移動
+		if(dodgeSystem_->IsDodging()) {
+			AddMoveRequest(dodgeSystem_->GetDodgeVelocity() * dt);
+		}
 	}
 	if(dodgeMotion_) {
 		dodgeMotion_->Update(dt);
@@ -384,9 +395,9 @@ void Player::RequestLockOnTargetClear() const {
 	}
 }
 
-void Player::RequestDodge() const {
+void Player::RequestDodge(const CalyxMath::Vector3& dir) const {
 	if(dodgeSystem_) {
-		dodgeSystem_->RequestDodge();
+		dodgeSystem_->RequestDodge(dir);
 	}
 }
 

@@ -1,6 +1,7 @@
 #pragma once
-#include <variant>
 #include <Engine/Foundation/Math/Vector3.h>
+#include <variant>
+
 
 enum class PlayerCommandType {
 	Move,
@@ -14,7 +15,11 @@ struct CmdMove {
 	CalyxMath::Vector3 delta;
 };
 
+struct CmdDodge {
+	CalyxMath::Vector3 dir;
+};
+
 struct PlayerCommand {
-	PlayerCommandType type;
-	std::variant<std::monostate, CmdMove> value;
+	PlayerCommandType								type;
+	std::variant<std::monostate, CmdMove, CmdDodge> value;
 };
