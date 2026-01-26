@@ -236,6 +236,9 @@ void Player::Update(float dt) {
 	}
 	if(lockOn_) {
 		lockOn_->Update(dt);
+		if(reticle_) {
+			reticle_->SetLockedEnemyList(lockOn_->GetLockedTargets());
+		}
 	}
 
 	moveCtrler_.Apply(worldTransform_);
@@ -253,7 +256,7 @@ void Player::Update(float dt) {
 
 	// ── レティクル─────────────────────────
 	reticle_->Update(dt);
-	
+
 	if(life_ <= 0) {
 		isAlive_ = false;
 	}
@@ -273,12 +276,12 @@ void Player::DrawHud(SpriteRenderer* spriteRenderer) {
 	if(hpGauge_) {
 		hpGauge_->Draw(spriteRenderer);
 	}
-	
+
 	// レティクル
 	if(reticle_) {
 		reticle_->Draw(spriteRenderer);
 	}
-	
+
 	// 危険UI
 	if(danger_ && danger_->GetUiSprite()) {
 		spriteRenderer->Register(danger_->GetUiSprite());
@@ -447,7 +450,6 @@ void Player::UpdateTilt(const CalyxMath::Vector3& inputVector) {
 ///////////////////////////////////////////////////////////////////////////////////
 //		レティクルの座標更新
 ///////////////////////////////////////////////////////////////////////////////////
-
 
 void Player::MakeSerializableParam() {
 	param_.LoadParams();
