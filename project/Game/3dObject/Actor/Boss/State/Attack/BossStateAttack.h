@@ -46,9 +46,12 @@ private:
 	//===================================================================*/
 	//					private methods
 	//===================================================================*/
-	float timer_ = 0.0f;
-	float maxAttackTime_ = 3.0f; // 最大3秒で強制終了（必要に応じて変更）
+	float timer_			   = 0.0f;
+	float maxAttackTime_	   = 3.0f; // 最大3秒で強制終了（必要に応じて変更）
+	float repeatCooldownTimer_ = 0.0f; // リピート時のクールダウン
+	float repeatColldownLimit_ = 1.0f; // リピート時のクールダウン上限
+
 	BossAttackType													 attackType_ = BossAttackType::Punch; //< 攻撃タイプ
-	std::unordered_map<BossAttackType, std::unique_ptr<IBossAttack>> attacks_;									//< 攻撃クラスのマップ
-	std::unordered_map<BossAttackType, BossAnimType>				 attackAnimTable_;							//< 攻撃アニメーションテーブル
+	std::unordered_map<BossAttackType, std::unique_ptr<IBossAttack>> attacks_;							  //< 攻撃クラスのマップ
+	std::unordered_map<BossAttackType, BossAnimType>				 attackAnimTable_;					  //< 攻撃アニメーションテーブル
 };

@@ -165,6 +165,20 @@ void Boss::DerivativeGui() {
 	if(ImGui::CollapsingHeader("hpGauge")) {
 		hpGauge_->ShowGui();
 	}
+
+	if(ImGui::CollapsingHeader("Boss Edit Support", ImGuiTreeNodeFlags_DefaultOpen)) {
+		ImGui::Checkbox("Debug Loop Mode (Repeated Attack)", &debug.isDebugLoopEnabled);
+
+		// 攻撃タイプの選択
+		const char* attackNames[] = {"NormalShoot", "Punch", "Laser"};
+		int currentAttack = static_cast<int>(debug.forcedAttackType);
+		if(ImGui::Combo("Forced Attack Type", &currentAttack, attackNames, IM_ARRAYSIZE(attackNames))) {
+			debug.forcedAttackType = static_cast<int16_t>(currentAttack);
+		}
+
+		ImGui::Separator();
+		ImGui::BulletText("If enabled, the boss will repeat the selected attack.");
+	}
 }
 
 void Boss::HeaderGui() {
