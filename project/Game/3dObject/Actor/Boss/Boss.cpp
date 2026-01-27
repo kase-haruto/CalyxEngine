@@ -162,12 +162,10 @@ void Boss::DerivativeGui() {
 
 	// 変更があれば適応する
 	if(param_.ShowGui()) {
-		collider_->SetOffset(param_.collider.offset);
 		if(auto* sphere = dynamic_cast<SphereCollider*>(collider_.get())) {
 			sphere->SetRadius(param_.collider.radius);
 		}
 	}
-
 
 	if(ImGui::CollapsingHeader("State")) {
 		stateMachine_->ShowGui();

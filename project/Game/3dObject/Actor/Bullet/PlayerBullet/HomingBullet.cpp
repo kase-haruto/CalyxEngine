@@ -5,7 +5,10 @@
 #include <Engine/Objects/Collider/BoxCollider.h>
 #include <Engine\Objects\Collider\SphereCollider.h>
 
-HomingBullet::HomingBullet(const std::string& modelName, const std::string& name) 
+#include <algorithm>
+#include <cmath>
+
+HomingBullet::HomingBullet(const std::string& modelName, const std::string& name)
 	:BaseBullet::BaseBullet(modelName, name){
 	InitializeCollider(ColliderKind::Sphere);
 	collider_->SetType(ColliderType::Type_PlayerAttack);
@@ -53,7 +56,39 @@ void HomingBullet::SetTarget(const Actor* target){
 	target_ = target;
 }
 
+void HomingBullet::SetSpeedEase(float startSpeed, float endSpeed, float duration, CalyxEase::EaseType type) {
+	startSpeed_    = startSpeed;
+	endSpeed_      = endSpeed;
+	easeDuration_  = duration;
+	easeTimer_     = 0.0f;
+	isSpeedEasing_ = true;
+	easeType_      = type;
+
+	// 現在のhomingSpeed_も更新しておく
+	homingSpeed_ = startSpeed;
+
+	// 初速設定（すでにShootInitializeが呼ばれている場合の対応）
+	if (velocity_.LengthSquared() > 0.0001f) {
+		velocity_ = velocity_.Normalize() * startSpeed_;
+	}
+}
+
 void HomingBullet::Update([[maybe_unused]]float dt){
+
+	// 速度イージング
+	if (isSpeedEasing_) {
+		easeTimer_ += dt;
+		float ratio = easeDuration_ > 0.0f ? easeTimer_ / easeDuration_ : 1.0f;
+
+		float currentSpeed = CalyxEase::EaseLerp(startSpeed_, endSpeed_, ratio, easeType_);
+
+		// 速度更新
+		homingSpeed_ = currentSpeed;
+		if (velocity_.LengthSquared() > 0.0001f) {
+			velocity_ = velocity_.Normalize() * currentSpeed;
+		}
+	}
+
 	if (target_ && target_->GetIsAlive()){
 		CalyxMath::Vector3 objectOffset = {0.0f,1.0f,0.0f};
 		CalyxMath::Matrix4x4 targetWorldMat = target_->GetWorldTransform().matrix.world;
