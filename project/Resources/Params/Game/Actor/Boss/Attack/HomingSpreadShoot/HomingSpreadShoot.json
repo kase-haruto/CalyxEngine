@@ -1,9 +1,9 @@
 {
     "fields": {
         "bulletCount": 4,
-        "cooldown": 0.0,
-        "homingDelay": 0.800000011920929,
-        "initialSpeed": 1.5,
-        "startAngleDeg": 0.0
+        "cooldown": 7.0,
+        "homingDelay": 0.5400000214576721,
+        "initialSpeed": 2.2760000228881836,
+        "startAngleDeg": 45.882999420166016
     }
 }
