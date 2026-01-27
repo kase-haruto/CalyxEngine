@@ -7,20 +7,20 @@
 void ShaderCompiler::InitializeDXC() {
 	// DXC Compilerを初期化
 	HRESULT hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils));
-	if (FAILED(hr)) {
+	if(FAILED(hr)) {
 		Log("Failed to create DXC Utils");
 		assert(false && "Failed to create DXC Utils");
 	}
 
 	hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler));
-	if (FAILED(hr)) {
+	if(FAILED(hr)) {
 		Log("Failed to create DXC Compiler");
 		assert(false && "Failed to create DXC Compiler");
 	}
 
 	// Include handlerを設定
 	hr = dxcUtils->CreateDefaultIncludeHandler(&includeHandle);
-	if (FAILED(hr)) {
+	if(FAILED(hr)) {
 		Log("Failed to create default include handler");
 		assert(false && "Failed to create default include handler");
 	}
@@ -30,7 +30,7 @@ void ShaderCompiler::LoadHLSL(const std::wstring& filePath,[[maybe_unused]] cons
 	//========================================================================
 	//	これからシェーダをコンパイルする旨をログに出す
 	//========================================================================
-	Log(ConvertString(std::format(L"Begin CompileShader, path: {}, profile: {}\n", filePath, profile)));
+	Log(ConvertString(std::format(L"Begin CompileShader, path: {}, profile: {}\n",filePath,profile)));
 
 	//========================================================================
 	//	シェーダーファイルのフルパスを構築
@@ -39,33 +39,32 @@ void ShaderCompiler::LoadHLSL(const std::wstring& filePath,[[maybe_unused]] cons
 	//========================================================================
 	//	ファイル読み込み
 	//========================================================================
-	HRESULT hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, shaderSource.GetAddressOf());
-	if (FAILED(hr)) {
-		Log(ConvertString(std::format(L"Failed to load HLSL file: {}\n", filePath)));
+	HRESULT hr = dxcUtils->LoadFile(filePath.c_str(),nullptr,shaderSource.GetAddressOf());
+	if(FAILED(hr)) {
+		Log(ConvertString(std::format(L"Failed to load HLSL file: {}\n",filePath)));
 		assert(false && "Failed to load HLSL file");
 	}
-
 
 	//========================================================================
 	//	読み込んだファイル内容を設定
 	//========================================================================
-	shaderSourceBuffer.Ptr = shaderSource->GetBufferPointer();
-	shaderSourceBuffer.Size = shaderSource->GetBufferSize();
+	shaderSourceBuffer.Ptr      = shaderSource->GetBufferPointer();
+	shaderSourceBuffer.Size     = shaderSource->GetBufferSize();
 	shaderSourceBuffer.Encoding = DXC_CP_UTF8;
 }
 
 Microsoft::WRL::ComPtr<IDxcBlob> ShaderCompiler::CompileShader(
 	const std::wstring& filePath,
-	const wchar_t* profile) {
+	const wchar_t*      profile) {
 	//========================================================================
 	//	HLSLファイルを読み込む
 	//========================================================================
-	LoadHLSL(filePath, profile);
+	LoadHLSL(filePath,profile);
 
 	//========================================================================
 	//	コンパイルする
 	//========================================================================
-	Compile(filePath, profile);
+	Compile(filePath,profile);
 
 	//========================================================================
 	//	警告・エラーが出てないか確認
@@ -75,22 +74,25 @@ Microsoft::WRL::ComPtr<IDxcBlob> ShaderCompiler::CompileShader(
 	//========================================================================
 	//	コンパイル結果を返す
 	//========================================================================
-	return GetCompileResult(filePath, profile);
+	return GetCompileResult(filePath,profile);
 }
 
 void ShaderCompiler::Compile(const std::wstring& filePath,
-							 const wchar_t* profile) {
+							 const wchar_t*      profile) {
 	//========================================================================
 	//	コンパイルオプションの設定
 	//========================================================================
 	LPCWSTR arguments[] = {
-		filePath.c_str(),			//コンパイル対象のhlslファイル名
-		L"-E",L"main",				//エントリーポイントの指定。基本的にmain以外には市内
-		L"-T",profile,				//ShaderProfileの設定
-		L"-Zi",L"-Qembed_debug",	//デバッグ用の情報を埋め込む
+			filePath.c_str(), //コンパイル対象のhlslファイル名
+			L"-E",L"main",    //エントリーポイントの指定。基本的にmain以外には市内
+			L"-T",profile,    //ShaderProfileの設定
+			L"-Zi",
+#ifdef _DEBUG
+		L"-Qembed_debug",	//デバッグ用の情報を埋め込む
 		L"-Od",						//最適化を外しておく
-		L"-Zpr",					//メモリレイアウトは行優先
-	};
+#endif
+			L"-Zpr", //メモリレイアウトは行優先
+		};
 
 	//========================================================================
 	//	シェーダをコンパイル
@@ -101,9 +103,9 @@ void ShaderCompiler::Compile(const std::wstring& filePath,
 		_countof(arguments),
 		includeHandle.Get(),
 		IID_PPV_ARGS(&shaderResult)
-	);
+		);
 
-	if (FAILED(hr)) {
+	if(FAILED(hr)) {
 		Log("Failed to compile HLSL shader (DXC invocation failed)");
 		assert(false && "DXC Compile failed");
 	}
@@ -111,16 +113,14 @@ void ShaderCompiler::Compile(const std::wstring& filePath,
 
 void ShaderCompiler::CheckNoError() {
 	Microsoft::WRL::ComPtr<IDxcBlobUtf8> shaderError = nullptr;
-	HRESULT hr = shaderResult->GetOutput(
-		DXC_OUT_ERRORS, IID_PPV_ARGS(shaderError.GetAddressOf()), nullptr);
+	HRESULT                              hr          = shaderResult->GetOutput(
+		DXC_OUT_ERRORS, IID_PPV_ARGS(shaderError.GetAddressOf()),nullptr);
 
-	if (SUCCEEDED(hr) && shaderError != nullptr && shaderError->GetStringLength() != 0) {
+	if(SUCCEEDED(hr) && shaderError != nullptr && shaderError->GetStringLength() != 0) {
 		std::string msg = shaderError->GetStringPointer();
 
 		// warning だけならログだけにする
-		if (msg.find("warning") != std::string::npos) {
-			Log(msg.c_str());
-		} else {
+		if(msg.find("warning") != std::string::npos) { Log(msg.c_str()); } else {
 			Log(msg.c_str());
 			assert(false && "Shader compile error");
 		}
@@ -128,13 +128,13 @@ void ShaderCompiler::CheckNoError() {
 }
 
 Microsoft::WRL::ComPtr<IDxcBlob> ShaderCompiler::GetCompileResult(const std::wstring& filePath,
-												  const wchar_t* profile) {
+																  const wchar_t*      profile) {
 	//========================================================================
 	//	コンパイル結果（実行用バイナリ部分）を取得
 	//========================================================================
 	Microsoft::WRL::ComPtr<IDxcBlob> shaderBlob = nullptr;
-	HRESULT hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(shaderBlob.GetAddressOf()), nullptr);
-	if (FAILED(hr)) {
+	HRESULT                          hr         = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(shaderBlob.GetAddressOf()),nullptr);
+	if(FAILED(hr)) {
 		Log("Failed to get shader bytecode");
 		assert(false && "Failed to get shader bytecode");
 	}
@@ -142,7 +142,7 @@ Microsoft::WRL::ComPtr<IDxcBlob> ShaderCompiler::GetCompileResult(const std::wst
 	//========================================================================
 	//	成功ログ
 	//========================================================================
-	Log(ConvertString(std::format(L"Compile Succeeded, path: {}, profile: {}\n", filePath, profile)));
+	Log(ConvertString(std::format(L"Compile Succeeded, path: {}, profile: {}\n",filePath,profile)));
 
 	//========================================================================
 	//	返却
