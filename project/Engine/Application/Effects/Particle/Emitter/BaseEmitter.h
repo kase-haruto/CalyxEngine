@@ -43,20 +43,30 @@ namespace CalyxEffect {
 		virtual void ExtractConfigTo(EmitterConfig& config) const = 0;
 
 	public:
-		virtual CalyxMath::Vector3									 GetWorldPosition() const { return position_; }
-		const std::string&											 GetTexturePath() const { return material_.texturePath; }
-		const ParticleMaterial&										 GetMaterial() const { return material_; }
-		const DxConstantBuffer<ParticleMaterial>&					 GetMaterialBuffer() const { return materialBuffer_; }
+		// accessor -------------------------------------------------
+		virtual CalyxMath::Vector3                      GetWorldPosition() const { return position_; }
+		const std::string&                              GetTexturePath() const { return material_.texturePath; }
+		const ParticleMaterial&                         GetMaterial() const { return material_; }
+		const DxConstantBuffer<ParticleMaterial>&       GetMaterialBuffer() const { return materialBuffer_; }
 		const DxStructuredBuffer<ParticleConstantData>& GetInstanceBuffer() const { return instanceBuffer_; }
-		const std::string&											 GetModelPath() const { return modelPath; }
+		const std::string&                              GetModelPath() const { return modelPath; }
 
 	protected:
-		std::string											  modelPath = "plane.obj"; //< モデルパス（デフォルトは平面
-		CalyxMath::Vector3									  position_;			   //< emitterの位置
-		ParticleMaterial									  material_;			   //< パーティクルのマテリアル
-		std::vector<FxUnit>									  units_;				   //< パーティクルユニットの配列
+		//===================================================================*/
+		//					protected variable
+		//===================================================================*/
+		std::string                              modelPath = "plane.obj"; //< モデルパス（デフォルトは平面
+		CalyxMath::Vector3                       position_;               //< emitterの位置
+		ParticleMaterial                         material_;               //< パーティクルのマテリアル
+		std::vector<FxUnit>                      units_;                  //< パーティクルユニットの配列
 		DxStructuredBuffer<ParticleConstantData> instanceBuffer_;
-		DxConstantBuffer<ParticleMaterial>					  materialBuffer_; // パーティクルマテリアルの定数バッファ
+		DxConstantBuffer<ParticleMaterial>       materialBuffer_; // パーティクルマテリアルの定数バッファ
+
+	private:
+		//===================================================================*/
+		//					private method
+		//===================================================================*/
+
 	};
 
 } // namespace CalyxEffect
