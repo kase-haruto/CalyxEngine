@@ -65,6 +65,7 @@ namespace CalyxScene {
 		slots_.push_back(std::move(slot));
 		size_t index = slots_.size() - 1;
 		idToIndex_[id] = index;
+		registeredSceneIds_.push_back(id);
 		return index;
 	}
 
@@ -247,6 +248,16 @@ namespace CalyxScene {
 
 		pendingPayload_ = std::move(payload);
 		RequestSceneChangeInternal(next);
+	}
+
+	std::string SceneManager::GetSceneName(SceneId id) const {
+		auto it = idToIndex_.find(id);
+		if(it == idToIndex_.end()) return "Unknown Scene";
+		
+		size_t index = it->second;
+		if(index >= slots_.size()) return "Invalid Index";
+
+		return slots_[index].scene->GetSceneName();
 	}
 
 } // namespace CalyxScene

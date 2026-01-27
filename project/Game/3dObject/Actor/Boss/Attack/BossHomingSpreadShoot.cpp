@@ -32,11 +32,12 @@ bool BossHomingSpreadShoot::Execute(Boss& boss,BossShootingController& shooter) 
 		float angle = startRad + stepRad * i;
 
 		// 放射方向ベクトル
+		// Z軸中心（XY平面）への変更
 		CalyxMath::Vector3 dir = {
-				std::cos(angle),
-				0.0f,
-				std::sin(angle)
-			};
+			std::cos(angle),
+			std::sin(angle),
+			0.0f
+		   };
 
 		// 弾生成
 		auto bullet = shooter.AddBullet(

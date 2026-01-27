@@ -10,6 +10,7 @@
 #include <Engine/Application/UI/Panels/EditorPanel.h>
 #include <Engine/Application/UI/Panels/InspectorPanel.h>
 #include <Engine/Application/UI/Panels/ConsolePanel.h>
+#include <Engine/Editor/SceneSwitchOverlay.h>
 
 // lib
 #include <externals/imgui/imgui.h>

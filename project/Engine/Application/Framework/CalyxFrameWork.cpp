@@ -42,6 +42,7 @@ namespace CalyxEngine {
 
 		if(auto* lvl = engineUICore_->GetLevelEditor()) {
 			lvl->SetPlaySession(playSession_.get());
+			lvl->SetSceneManager(sceneManager_.get());
 		}
 
 		editorCollection_ = std::make_unique<CalyxEditor::EditorCollection>();
