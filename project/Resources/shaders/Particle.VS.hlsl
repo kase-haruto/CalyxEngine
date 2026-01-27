@@ -54,73 +54,67 @@ StructuredBuffer<ParticleData> gParticle : register(t0);
 ///////////////////////////////////////////////////////////////////////////////
 //                            main
 ///////////////////////////////////////////////////////////////////////////////
-VertexShaderOutput main(uint vertexID : SV_VertexID,
+VertexShaderOutput main(VertexShaderInput input,
 						uint instanceID : SV_InstanceID) {
 	ParticleData p = gParticle[instanceID];
-
-	// 四隅
-	float2 corner;
-	float2 texcoord;
-	switch(vertexID) {
-	case 0:
-		corner	 = float2(-0.5, -0.5);
-		texcoord = float2(0, 1);
-		break;
-	case 1:
-		corner	 = float2(-0.5, 0.5);
-		texcoord = float2(0, 0);
-		break;
-	case 2:
-		corner	 = float2(0.5, -0.5);
-		texcoord = float2(1, 1);
-		break;
-	case 3:
-		corner	 = float2(0.5, 0.5);
-		texcoord = float2(1, 0);
-		break;
-	}
 
 	// ==========================================================
 	//  ビルボード軸決定
 	// ==========================================================
 	float3 right;
 	float3 up;
+	float3 forward; // 3Dメッシュ対応のためForwardも必要
 
 	if(gBillboardParm.gBillboardMode == Billboard_Full) {
-		right = gCamera.camRight;
-		up	  = gCamera.camUp;
+		right	= gCamera.camRight;
+		up		= gCamera.camUp;
+		forward = gCamera.camForward;
 	} else if(gBillboardParm.gBillboardMode == Billboard_AxisY) {
 		float3 camDir = normalize(gCamera.cameraPosition - p.position);
 		camDir.y	  = 0.0f;
-		camDir		  = normalize(camDir);
-		right		  = normalize(cross(float3(0, 1, 0), camDir));
-		up			  = float3(0, 1, 0);
+		// カメラ方向(水平)
+		if(length(camDir) < 0.001f) camDir = float3(0, 0, 1);
+		else camDir = normalize(camDir);
+
+		up	    = float3(0, 1, 0);
+		right   = normalize(cross(up, camDir));
+		forward = cross(right, up); // 垂直なForwardを計算
 	} else { // None
-		right = float3(1, 0, 0);
-		up	  = float3(0, 1, 0);
+		right	= float3(1, 0, 0);
+		up		= float3(0, 1, 0);
+		forward = float3(0, 0, 1);
 	}
 
 	// ==========================================================
 	//  Z軸スピン回転（ローカル平面上で right/up を回転）
 	// ==========================================================
-	float  s			= sin(p.rotation);
-	float  c			= cos(p.rotation);
-	float3 rotatedRight = right * c + up * s;
-	float3 rotatedUp	= up * c - right * s;
+	float  s = sin(p.rotation);
+	float  c = cos(p.rotation);
+
+	// 回転後の基底ベクトルを計算
+	float3 rotatedRight   = right * c + up * s;
+	float3 rotatedUp	  = up * c - right * s;
+	float3 rotatedForward = normalize(cross(rotatedRight, rotatedUp)); // Z軸回転なのでForwardは原則変わらないが、直交性を維持
 
 	// ==========================================================
-	//  頂点オフセット計算
+	//  頂点計算
 	// ==========================================================
-	float2 offset = corner * p.scale.xy;
+	// inputのローカル座標にスケールを適用
+	// (input.position.xyz はモデルの頂点データ)
+	float3 offset = input.position.xyz * p.scale;
 
-	float3 worldPos = p.position + rotatedRight * offset.x + rotatedUp * offset.y;
+	// パーティクルの中心位置 + 回転した基底ベクトルに沿ったオフセット
+	float3 worldPos = p.position
+					+ rotatedRight   * offset.x
+					+ rotatedUp      * offset.y
+					+ rotatedForward * offset.z;
 
 	// ==========================================================
 	//  出力
 	// ==========================================================
 	VertexShaderOutput o;
 	o.position = mul(float4(worldPos, 1.0f), gCamera.viewProjection);
-	o.texcoord = texcoord;
+	o.texcoord = input.texcoord; // 入力のUVをそのまま使用
 	o.color	   = p.color;
 	return o;
 }

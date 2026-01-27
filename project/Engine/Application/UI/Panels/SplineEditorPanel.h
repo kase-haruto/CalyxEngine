@@ -21,7 +21,7 @@ namespace CalyxEditor {
 		: public IEngineUI {
 	public:
 		SplineEditorPanel() : IEngineUI("SplineEditor") {
-			IEngineUI::SetShow(true);
+			IEngineUI::SetShow(false);
 			gizmoTf_.Initialize();
 		}
 		~SplineEditorPanel() override = default;

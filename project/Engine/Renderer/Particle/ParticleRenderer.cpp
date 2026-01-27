@@ -113,5 +113,5 @@ void ParticleRenderer::DrawModelInstanced(ModelData& model,
 	model.indexBuffer.SetCommand(cmdList);
 	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	cmdList->SetGraphicsRootDescriptorTable(2, instanceHandle);
-	cmdList->DrawInstanced(4, instanceCount, 0, 0);
+	cmdList->DrawInstanced(static_cast<UINT>(model.meshData.indices.size()), instanceCount, 0, 0);
 }
