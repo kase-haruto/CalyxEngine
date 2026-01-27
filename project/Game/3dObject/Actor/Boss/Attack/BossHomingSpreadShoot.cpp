@@ -50,7 +50,7 @@ bool BossHomingSpreadShoot::Execute(Boss& boss,BossShootingController& shooter) 
 
 		// ホーミング設定
 		if(auto* homing = dynamic_cast<BossHomingBullet*>(bullet.get())) {
-			homing->SetTargetPosition(boss.GetTargetActor()->GetCenterPos());
+			homing->SetTarget(&boss.GetTargetActor()->GetWorldTransform());
 			homing->SetHomingDelay(param_.homingDelay);
 		}
 	}
