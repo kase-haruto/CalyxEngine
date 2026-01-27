@@ -30,6 +30,9 @@ BossHomingBullet::BossHomingBullet(const std::string& modelName,
 
 	moveSpeed_ = 1.0f;
 	lifeTime_ = paramData_.lifeTime;
+
+	// モデルの描画はしない
+	BaseGameObject::SetDrawEnable(false);
 }
 
 BossHomingBullet::BossHomingBullet()  = default;

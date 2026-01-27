@@ -36,7 +36,7 @@ public:
 	 * \param modelName モデル名
 	 * \param objName オブジェクト名
 	 */
-	Boss(const std::string& modelName, const std::string objName);
+	Boss(const std::string& modelName,const std::string objName);
 
 	/**
 	 * \brief デストラクタ
@@ -140,7 +140,7 @@ public:
 	 */
 	BulletContainer* GetBulletContainer() const { return shootingController_->GetBulletContainer(); }
 
-	bool	IsDebugLoopEnabled() const { return debug.isDebugLoopEnabled; }
+	bool    IsDebugLoopEnabled() const { return debug.isDebugLoopEnabled; }
 	int16_t GetForcedAttackType() const { return debug.forcedAttackType; }
 
 private:
@@ -156,12 +156,13 @@ private:
 	//===================================================================*/
 	//			Inner Class
 	//===================================================================*/
-	struct BossParam : public CalyxEngine::SerializableObject {
+	struct BossParam :
+		public CalyxEngine::SerializableObject {
 		BossParam();
 		CalyxEngine::ParamPath GetParamPath() const override;
 
-		int				   life;
-		int				   flinchMax;
+		int                life;
+		int                flinchMax;
 		CalyxMath::Vector3 scale;
 		CalyxMath::Vector3 initPos;
 
@@ -170,12 +171,18 @@ private:
 			CalyxMath::Vector2 size;
 		} hp;
 
+		struct Collider {
+			CalyxMath::Vector3 offset;
+			float              radius;
+		} collider;
+
 	} param_;
 
 	struct BossDebugParam {
-		bool	isDebugLoopEnabled = false;
+		bool    isDebugLoopEnabled = false;
 		int16_t forcedAttackType   = 0; // BossAttackType
 	} debug;
+
 	/**
 	 * \brief 死亡時処理
 	 */
@@ -191,13 +198,13 @@ private:
 	//						private member variables
 	//===================================================================*/
 	int32_t flinchValue_ = 0; //< ひるみ値
-	int32_t flinchMax_	 = 0; //< 最大ひるみ値
+	int32_t flinchMax_   = 0; //< 最大ひるみ値
 
-	const Actor*							target_				= nullptr; //< プレイヤーのActor
+	const Actor*                            target_             = nullptr; //< プレイヤーのActor
 	std::unique_ptr<BossShootingController> shootingController_ = nullptr; //< 発射制御クラス
-	std::unique_ptr<BossAI>					ai_					= nullptr; //< AIクラス
-	std::unique_ptr<BossStateMachine>		stateMachine_		= nullptr; //< ステートマシン
-	std::unique_ptr<BossAnimController>		anim_				= nullptr; //< アニメーションコントローラ
-	std::unique_ptr<HpGauge>				hpGauge_			= nullptr; //< HPゲージ
-	std::weak_ptr<CalyxEffect::FxObject>	hitEffects_;				   //< ヒットエフェクト群
+	std::unique_ptr<BossAI>                 ai_                 = nullptr; //< AIクラス
+	std::unique_ptr<BossStateMachine>       stateMachine_       = nullptr; //< ステートマシン
+	std::unique_ptr<BossAnimController>     anim_               = nullptr; //< アニメーションコントローラ
+	std::unique_ptr<HpGauge>                hpGauge_            = nullptr; //< HPゲージ
+	std::weak_ptr<CalyxEffect::FxObject>    hitEffects_;                   //< ヒットエフェクト群
 };
