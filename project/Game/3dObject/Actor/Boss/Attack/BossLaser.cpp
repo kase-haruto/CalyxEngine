@@ -30,9 +30,7 @@ bool BossLaser::Execute(Boss& boss, BossShootingController& shooter) const {
 
 	// ホーミング弾なら追尾ターゲットを設定
 	if (auto* homing = dynamic_cast<BossHomingBullet*>(bullet.get())) {
-		homing->SetTarget(&boss.GetWorldTransform());
-		homing->SetHomingLimit(1.0f);
-		homing->SetHomingDelay(0.0f);
+		homing->SetTarget(&boss.GetTargetActor()->GetWorldTransform());
 	}
 
 	return true;

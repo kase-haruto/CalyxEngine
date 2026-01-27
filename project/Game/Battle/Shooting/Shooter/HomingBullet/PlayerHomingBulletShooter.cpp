@@ -1,5 +1,7 @@
 #include "PlayerHomingBulletShooter.h"
 
+#include <Engine/Foundation/Utility/Ease/CxEase.h>
+
 #include <Game/3dObject/Actor/Bullet/Container/PlayerBulletContainer.h>
 #include <Game/3dObject/Actor/Bullet/Factory/BulletFactory.h>
 #include <Game/3dObject/Actor/Bullet/PlayerBullet/HomingBullet.h>
@@ -23,7 +25,7 @@ void PlayerHomingBulletShooter::Shoot(const CalyxMath::Vector3& origin,
 		bullet->SetScale(CalyxMath::Vector3(0.3f, 0.3f, 0.3f));
 		CalyxMath::Vector3 toTarget = target->GetWorldPosition() - origin;
 		if (toTarget.Length() > 0.001f){
-			toTarget.Normalize();
+			toTarget = toTarget.Normalize();
 		} else{
 			toTarget = CalyxMath::Vector3(0, 0, 1);
 		}
@@ -31,6 +33,8 @@ void PlayerHomingBulletShooter::Shoot(const CalyxMath::Vector3& origin,
 
 		if (auto* homing = dynamic_cast< HomingBullet* >(bullet.get())){
 			homing->SetTarget(target.get());
+			// 速度イージングの設定 (初速, 終速, 時間, タイプ)
+			homing->SetSpeedEase(1.0f, 7.0f, 1.0f);
 		}
 		playerContainer->AddBullet(id_, bullet);
 	}

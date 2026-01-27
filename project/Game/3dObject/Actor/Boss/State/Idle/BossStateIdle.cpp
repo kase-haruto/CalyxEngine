@@ -35,11 +35,19 @@ void BossStateIdle::Update(float dt) {
 
 	// 攻撃を決定
 	auto atk = ai->DecideAttack(dt);
+	int16_t transitionParam = atk.has_value() ? static_cast<int16_t>(atk.value()) : 0;
+
+	// デバッグループが有効な場合は強制的にその攻撃を行う
+	if(owner_->IsDebugLoopEnabled()) {
+		transitionParam = owner_->GetForcedAttackType();
+		atk = static_cast<BossAttackType>(transitionParam);
+	}
+
 	if (!atk.has_value()) return;
 
 	RequestChange(
 		BossStateType::Attack,
-		static_cast<int16_t>(atk.value())
+		transitionParam
 	);
 }
 

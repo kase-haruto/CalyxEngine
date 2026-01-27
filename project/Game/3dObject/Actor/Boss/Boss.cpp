@@ -18,6 +18,8 @@ Boss::Boss(const std::string& modelName, const std::string objName)
 	: EnemyFactionActor(modelName, objName) {
 	worldTransform_.Initialize();
 
+	InitializeSerializableParm();
+
 	moveSpeed_ = Random::Generate<float>(1.0f, 3.0f);
 	velocity_  = Random::GenerateVector3(-1.0f, 1.0f);
 
@@ -25,10 +27,10 @@ Boss::Boss(const std::string& modelName, const std::string objName)
 	collider_->SetType(ColliderType::Type_Enemy);
 	collider_->SetTargetType(ColliderType::Type_PlayerAttack);
 	collider_->SetOwner(this);
+	collider_->SetOffset(param_.collider.offset);
 	if(auto* sphere = dynamic_cast<SphereCollider*>(collider_.get())) {
-		sphere->SetRadius(15.0f);
+		sphere->SetRadius(param_.collider.radius);
 	}
-	collider_->SetIsDrawCollider(true);
 
 	// アニメーションコントローラの生成
 	CalyxAssets::AnimationModel* animModel = AnimationModel();
@@ -40,15 +42,13 @@ Boss::Boss(const std::string& modelName, const std::string objName)
 
 	// --- FxObject を生成して再生 ---
 	hitEffects_ = SceneAPI::Instantiate<CalyxEffect::FxObject>("HitFx");
-
-	// コンフィグ読み込み（FxObject 内部で ApplyConfig が呼ばれる）
+	// コンフィグ読み込み（
 	auto fx = hitEffects_.lock();
 	fx->LoadFromPath("Effect/BossHitEffect");
 
 	// 敵基底クラスの設定。種類スコア
 	SetEnemyKind(EnemyKind::Boss);
 
-	InitializeSerializableParm();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -60,9 +60,6 @@ Boss::~Boss() = default;
 //		初期化
 /////////////////////////////////////////////////////////////////////////////////////////
 void Boss::Initialize() {
-	// コンフィグの読み込みと適用
-	config_.LoadConfig(configRoot_ + "Boss");
-
 	// アニメーション初期化
 	anim_->Initialize();
 	hpGauge_ = std::make_unique<HpGauge>(static_cast<float>(life_));
@@ -130,6 +127,11 @@ void Boss::InitializeSerializableParm() {
 	flinchMax_  = param_.flinchMax;
 	worldTransform_.scale = param_.scale;
 	worldTransform_.translation = param_.initPos;
+
+	collider_->SetOffset(param_.collider.offset);
+	if(auto* sphere = dynamic_cast<SphereCollider*>(collider_.get())) {
+		sphere->SetRadius(param_.collider.radius);
+	}
 }
 void Boss::Die() {
 	// スコアを送信する
@@ -157,13 +159,33 @@ void Boss::LookAtPlayer() {
 //		デバッグgui描画
 /////////////////////////////////////////////////////////////////////////////////////////
 void Boss::DerivativeGui() {
-	param_.ShowGui();
+
+	// 変更があれば適応する
+	if(param_.ShowGui()) {
+		if(auto* sphere = dynamic_cast<SphereCollider*>(collider_.get())) {
+			sphere->SetRadius(param_.collider.radius);
+		}
+	}
 
 	if(ImGui::CollapsingHeader("State")) {
 		stateMachine_->ShowGui();
 	}
 	if(ImGui::CollapsingHeader("hpGauge")) {
 		hpGauge_->ShowGui();
+	}
+
+	if(ImGui::CollapsingHeader("Boss Edit Support", ImGuiTreeNodeFlags_DefaultOpen)) {
+		ImGui::Checkbox("Debug Loop Mode (Repeated Attack)", &debug.isDebugLoopEnabled);
+
+		// 攻撃タイプの選択
+		const char* attackNames[] = {"NormalShoot", "Punch", "Laser"};
+		int currentAttack = static_cast<int>(debug.forcedAttackType);
+		if(ImGui::Combo("Forced Attack Type", &currentAttack, attackNames, IM_ARRAYSIZE(attackNames))) {
+			debug.forcedAttackType = static_cast<int16_t>(currentAttack);
+		}
+
+		ImGui::Separator();
+		ImGui::BulletText("If enabled, the boss will repeat the selected attack.");
 	}
 }
 
@@ -268,6 +290,9 @@ Boss::BossParam::BossParam() {
 
 	AddField("hpGaugePos", hp.pos).Category("UI");
 	AddField("hpGaugeSize", hp.size).Category("UI");
+
+	AddField("collisionOffset",collider.offset).Category("Collider");
+	AddField("collisionRadius",collider.radius).Category("Collider");
 }
 
 CalyxEngine::ParamPath Boss::BossParam::GetParamPath() const {

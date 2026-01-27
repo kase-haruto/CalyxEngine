@@ -2536,9 +2536,6 @@
     <ClInclude Include="Engine\Application\Framework\CalyxFrameWork.h">
       <Filter>Engine\Application\Framework</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Application\System\Enviroment.h">
-      <Filter>Engine\Application\System</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Foundation\Input\Input.h">
       <Filter>Engine\Foundation\Input</Filter>
     </ClInclude>
@@ -3038,5 +3035,13 @@
     <FxCompile Include="Resources\shaders\Vignette.PS.hlsl">
       <Filter>Resources\shaders</Filter>
     </FxCompile>
+    <ClCompile Include="Game\Battle\Shooting\homing\HomingTarget.cpp" />
+    <ClCompile Include="Engine\Editor\SceneSwitchOverlay.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Game\Battle\Shooting\homing\HomingTarget.h" />
+    <ClInclude Include="Engine\Application\System\Environment.h" />
+    <ClInclude Include="Engine\Graphics\ResourceStateTracker\ResourceStateTracker.h" />
+    <ClInclude Include="Engine\Editor\SceneSwitchOverlay.h" />
   </ItemGroup>
 </Project>

@@ -86,6 +86,11 @@ public:
 	 */
 	void SetSceneName(const std::string& name){ sceneName_ = name; }
 	/**
+	 * \brief シーン名を取得
+	 * \return シーン名
+	 */
+	const std::string& GetSceneName() const { return sceneName_; }
+	/**
 	 * \brief コンテキストを注入
 	 * \param ctx シーンコンテキスト
 	 */

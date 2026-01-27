@@ -51,6 +51,12 @@ namespace CalyxScene {
 
 		/// Scene 登録（SceneId で管理）
 		size_t AddScene(SceneId id, std::unique_ptr<BaseScene> scene);
+		
+		/// 登録済みシーンID一覧取得
+		const std::vector<SceneId>& GetRegisteredSceneIds() const { return registeredSceneIds_; }
+
+		/// 指定IDのシーン名取得
+		std::string GetSceneName(SceneId id) const;
 
 		void		  SetCurrent(size_t index);
 		SceneContext* GetCurrentSceneContext() const;
@@ -107,6 +113,8 @@ namespace CalyxScene {
 		uint64_t lastRuntimeGen_ = 0;
 
 		std::unique_ptr<SceneTransitionService> transitionService_;
+		
+		std::vector<SceneId> registeredSceneIds_;
 	};
 
 } // namespace CalyxScene

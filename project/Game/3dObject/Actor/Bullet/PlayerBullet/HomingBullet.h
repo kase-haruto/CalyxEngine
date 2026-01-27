@@ -5,6 +5,7 @@
 #include <Game/3dObject/Actor/Bullet/BaseBullet.h>
 #include <Engine/Application/Effects/FxObject.h>
 #include <Engine/Foundation/Serialization/SerializableObject.h>
+#include <Engine/Foundation/Utility/Ease/CxEase.h>
 
 class HomingBullet :
 	public BaseBullet{
@@ -18,8 +19,20 @@ public:
 	void ShootInitialize(const CalyxMath::Vector3& initPos, const CalyxMath::Vector3& velocity)override;
 	void Initialize()override;
 	void OnShot();
+	void ConfigureBulletParam();
 	void SetTarget(const Actor* target);
 	void Update(float dt) override;
+
+	/**
+	 * \brief 速度イージング設定
+	 * \param startSpeed 開始速度
+	 * \param endSpeed 終了速度
+	 * \param duration 変化時間
+	 * \param type イージングタイプ
+	 */
+	void SetSpeedEase(float startSpeed,
+		float endSpeed,
+		float duration, CalyxEase::EaseType type = CalyxEase::EaseType::EaseInSine);
 
 	const CalyxMath::Vector3 GetCenterPos() const override;
 
@@ -42,4 +55,12 @@ protected:
 
 	// trail
 	std::weak_ptr<CalyxEffect::FxObject> trailFx_;
+
+	// 速度イージング用
+	float startSpeed_    = 0.0f;
+	float endSpeed_      = 0.0f;
+	float easeDuration_  = 0.0f;
+	float easeTimer_     = 0.0f;
+	bool  isSpeedEasing_ = false;
+	CalyxEase::EaseType easeType_ = CalyxEase::EaseType::EaseOutSine;
 };

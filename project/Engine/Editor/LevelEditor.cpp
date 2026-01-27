@@ -13,6 +13,8 @@
 #include <Engine/Physics/Ray/Raycastor.h>
 #include <Engine/Scene/Context/SceneContext.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
+#include <Engine/Scene/System/SceneManager.h>
+#include <Engine/Editor/SceneSwitchOverlay.h>
 
 // imgui
 #include <externals/imgui/ImGuiFileDialog.h>
@@ -40,6 +42,8 @@ namespace CalyxEditor {
 	//=============================================================================
 	// Initialize
 	//=============================================================================
+	LevelEditor::~LevelEditor() = default;
+
 	void LevelEditor::Initialize() {
 #if defined(_DEBUG) || defined(DEVELOP)
 		// 各パネルの初期化 ----------------------------------------------------
@@ -50,6 +54,7 @@ namespace CalyxEditor {
 		placeToolPanel_ = std::make_unique<PlaceToolPanel>();
 		splineEditor_	= std::make_unique<SplineEditorPanel>();
 		assetPanel_		= std::make_unique<AssetPanel>();
+		sceneSwitchOverlay_ = std::make_unique<SceneSwitchOverlay>();
 
 		if(auto* db = AssetDatabase::GetInstance()) {
 			assetPanel_->Initialize(db->GetRoot());
@@ -194,6 +199,8 @@ namespace CalyxEditor {
 						}
 					},
 					true});
+
+		// Scene: Switch Scene
 #endif // _DEBUG || DEVELOP
 	}
 
@@ -287,6 +294,11 @@ namespace CalyxEditor {
 		// Play セッション用ツールバー
 		if(pPlaySesseion_) {
 			pPlaySesseion_->RenderToolbar();
+		}
+
+		// シーン切り替えツールバー
+		if(sceneSwitchOverlay_) {
+			sceneSwitchOverlay_->RenderToolbar();
 		}
 
 		// パフォーマンス表示
@@ -528,6 +540,12 @@ namespace CalyxEditor {
 	//=============================================================================
 	// SceneContext の変更検出
 	//=============================================================================
+	void LevelEditor::SetSceneManager(CalyxScene::SceneManager* manager) { 
+		sceneManager_ = manager; 
+		if(sceneSwitchOverlay_) {
+			sceneSwitchOverlay_->SetSceneManager(manager);
+		}
+	}
 	void LevelEditor::NotifySceneContextChanged() {
 		SceneContext* current = SceneContext::Current();
 		if(prevCtx_ == current) return;

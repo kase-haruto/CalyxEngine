@@ -45,6 +45,9 @@ namespace {
 BaseEnemyHomingBullet::BaseEnemyHomingBullet(const std::string& modelName, const std::string& name)
 	: BaseBullet::BaseBullet(modelName, name) {
 	SetDrawEnable(true);
+
+	param_->LoadParams();
+	moveSpeed_ = 25.0f;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -52,7 +55,7 @@ BaseEnemyHomingBullet::BaseEnemyHomingBullet(const std::string& modelName, const
 ///////////////////////////////////////////////////////////////////////////////////////////
 void BaseEnemyHomingBullet::ShootInitialize(const CalyxMath::Vector3& initPos, const CalyxMath::Vector3& velocity) {
 	CalyxMath::Vector3 initDir = (velocity.Length() > 0.001f) ? velocity.Normalize() : CalyxMath::Vector3(0, 0, 1);
-	BaseBullet::ShootInitialize(initPos, initDir * param_.homingSpeed);
+	BaseBullet::ShootInitialize(initPos, initDir * param_->homingSpeed);
 	time_ = 0.0f;
 	homingElapsedSec_ = 0.0f;
 }
@@ -75,7 +78,6 @@ void BaseEnemyHomingBullet::Initialize() {
 	model_->SetColor(color);
 
 	baseScale_ = worldTransform_.scale;
-	moveSpeed_ = 20.0f;
 
 	auto self = shared_from_this();
 	if (auto fx = trailFx_.lock()) {
@@ -98,34 +100,38 @@ void BaseEnemyHomingBullet::Update(float dt) {
 	homingElapsedSec_ += dt;
 
 	// --- 最初の homingDurationSec 秒だけ誘導 ---
-	if (homingElapsedSec_ < param_.homingDurationSec && target_) {
+	if (homingElapsedSec_ < param_->homingDurationSec) {
 		if (TARGET_IS_NT102_OR_LATER) {
 			const CalyxMath::Vector3 selfPos = GetCenterPos();
-			CalyxMath::Vector3 tgtPos = target_->GetWorldPosition();
+			CalyxMath::Vector3 tgtPos;
+
+			// targetPositionを使う
+			if(targetPosition_.has_value()) {
+				tgtPos = targetPosition_.value();
+			}else  if (target_) {
+				tgtPos = target_->GetWorldPosition();
+			} else {
+				// fallback
+				tgtPos = selfPos + CalyxMath::Vector3(0, 0, 1);
+			}
 
 			CalyxMath::Vector3 los = tgtPos - selfPos;
 			CalyxMath::Vector3 side, up;
 			MakeOrthoBasis(los, side, up);
 
-			// ノイズ付加
-			const float n1 = std::sin(time_ * 1.73f);
-			const float n2 = std::cos(time_ * 2.11f + 1.3f);
-			const float amp = param_.trackingNoiseMeters * (1.0f - param_.guidance);
-			tgtPos = tgtPos + side * (n1 * amp) + up * (n2 * amp);
-
 			velocity_ = CalculateHomingVelocity(
 				velocity_,
 				tgtPos,
 				dt,
-				param_.homingSpeed,
-				param_.rotateSpeed,
-				param_.guidance);
+				param_->homingSpeed,
+				param_->rotateSpeed,
+				param_->guidance);
 		}
 	}
 
 	// --- scale をうねうね揺らす ---
-	float sx = 1.0f + param_.scaleAmp * std::sin(time_ * param_.scaleFreq);
-	float sy = 1.0f + param_.scaleAmp * std::cos(time_ * param_.scaleFreq);
+	float sx = 1.0f + param_->scaleAmp * std::sin(time_ * param_->scaleFreq);
+	float sy = 1.0f + param_->scaleAmp * std::cos(time_ * param_->scaleFreq);
 
 	// 基準スケールに対して相対的に揺らす
 	worldTransform_.scale.x = baseScale_.x * sx;
@@ -179,17 +185,15 @@ CalyxMath::Vector3 BaseEnemyHomingBullet::CalculateHomingVelocity(
 	return newDir * speed;
 }
 
-void BaseEnemyHomingBullet::SetTrackingNoise(float m) {
-	param_.trackingNoiseMeters = (std::max)(0.0f, m);
+
+EnemyHomingBulletParam::EnemyHomingBulletParam() {
+
+	AddField("homingSpeed", homingSpeed).Category("HomingBasic").Tooltip("ホーミング弾の速度");
+	AddField("rotateSpeed", rotateSpeed).Category("HomingBasic").Tooltip("ホーミングの旋回速度(度/秒)");
+	AddField("guidance", guidance).Category("HomingBasic").Range(0.0f, 1.0f).Tooltip("ホーミングの誘導率(0～1)");
+	AddField("homingDurationSec", homingDurationSec).Category("HomingBasic").Tooltip("ホーミング誘導が続く時間(秒)");
 }
 
-void BaseEnemyHomingBullet::SetHomingDuration(float s) {
-	param_.homingDurationSec = (std::max)(0.0f, s);
-}
-
-BaseEnemyHomingBullet::EnemyHomingBulletParam::EnemyHomingBulletParam() {
-}
-
-CalyxEngine::ParamPath BaseEnemyHomingBullet::EnemyHomingBulletParam::GetParamPath() const {
-	return { CalyxEngine::ParamDomain::Game,"EnemyHomingBullet","Actor/Bullet" };
+CalyxEngine::ParamPath EnemyHomingBulletParam::GetParamPath() const {
+	return { CalyxEngine::ParamDomain::Game,"EnemyHomingBullet",subRoot };
 }

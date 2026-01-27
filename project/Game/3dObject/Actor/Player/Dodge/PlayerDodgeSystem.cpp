@@ -2,8 +2,7 @@
 
 #include "Game/3dObject/Actor/Player/Player.h"
 
-
-PlayerDodgeSystem::PlayerDodgeSystem()  = default;
+PlayerDodgeSystem::PlayerDodgeSystem()	= default;
 PlayerDodgeSystem::~PlayerDodgeSystem() = default;
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -12,29 +11,29 @@ PlayerDodgeSystem::~PlayerDodgeSystem() = default;
 void PlayerDodgeSystem::Initialize() {
 	cfg_.LoadParams();
 
-	state_ = DodgeState::Idle;
-	timer_ = 0.0f;
-	cooldown_ = 0.0f;
-	timeAccum_ = 0.0f;
-	lastInputTime_ = -9999.0f;
+	state_			   = DodgeState::Idle;
+	timer_			   = 0.0f;
+	cooldown_		   = 0.0f;
+	timeAccum_		   = 0.0f;
+	lastInputTime_	   = -9999.0f;
 	perfectHintActive_ = false;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //			更新
 /////////////////////////////////////////////////////////////////////////////////////////
-void PlayerDodgeSystem::Update(float dt){
+void PlayerDodgeSystem::Update(float dt) {
 	timeAccum_ += dt;
-	if (cooldown_ > 0.0f) cooldown_ -= dt;
+	if(cooldown_ > 0.0f) cooldown_ -= dt;
 
-	switch (state_) {
+	switch(state_) {
 	case DodgeState::Idle:
 		break;
 
 		// 回避開始
 	case DodgeState::Startup:
 		timer_ += dt;
-		if (timer_ >= cfg_.startup) {
+		if(timer_ >= cfg_.startup) {
 			ChangeState(DodgeState::IFrame);
 		}
 		break;
@@ -42,7 +41,7 @@ void PlayerDodgeSystem::Update(float dt){
 		// 無敵時間
 	case DodgeState::IFrame:
 		timer_ += dt;
-		if (timer_ >= cfg_.duration) {
+		if(timer_ >= cfg_.duration) {
 			ChangeState(DodgeState::Recovery);
 		}
 		break;
@@ -50,7 +49,7 @@ void PlayerDodgeSystem::Update(float dt){
 		// 回避終了
 	case DodgeState::Recovery:
 		timer_ += dt;
-		if (timer_ >= cfg_.recovery) {
+		if(timer_ >= cfg_.recovery) {
 			ChangeState(DodgeState::Idle);
 		}
 		break;
@@ -60,18 +59,24 @@ void PlayerDodgeSystem::Update(float dt){
 /////////////////////////////////////////////////////////////////////////////////////////
 //			回避要求
 /////////////////////////////////////////////////////////////////////////////////////////
-void PlayerDodgeSystem::RequestDodge() {
+void PlayerDodgeSystem::RequestDodge(const CalyxMath::Vector3& dir) {
 	if(state_ != DodgeState::Idle) return;
 	if(cooldown_ > 0.0f) return;
 
 	lastInputTime_ = timeAccum_;
-	cooldown_      = cfg_.cooldown;
+	cooldown_	   = cfg_.cooldown;
+	isJustDodge_   = false;
+
+	if(dir.LengthSquared() > 0.001f) {
+		dodgeDir_ = dir.Normalize();
+	}
 
 	// 回避開始イベント
 	if(onDodgeStart_) onDodgeStart_();
 
 	// ジャスト回避成功
 	if(perfectHintActive_) {
+		isJustDodge_ = true;
 		if(onPerfectDodge_) onPerfectDodge_();
 
 		// 無敵は「要求」だけ出す
@@ -91,6 +96,20 @@ void PlayerDodgeSystem::RequestDodge() {
 	ChangeState(DodgeState::Startup);
 }
 
+CalyxMath::Vector3 PlayerDodgeSystem::GetDodgeVelocity() const {
+	// StartupとIFrame中に移動する
+	if(state_ == DodgeState::Startup || state_ == DodgeState::IFrame) {
+		// ジャスト回避以外は移動しない
+		if(!isJustDodge_) return {0.0f, 0.0f, 0.0f};
+
+		const float totalTime = cfg_.startup + cfg_.duration;
+		if(totalTime > 0.0001f) {
+			const float speed = cfg_.distance / totalTime;
+			return dodgeDir_ * speed;
+		}
+	}
+	return {0.0f, 0.0f, 0.0f};
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //			状態変更
@@ -99,8 +118,8 @@ void PlayerDodgeSystem::ChangeState(DodgeState next) {
 	state_ = next;
 	timer_ = 0.0f;
 
-	if (state_ == DodgeState::Idle){
-		if (onDodgeEnd_) onDodgeEnd_();
+	if(state_ == DodgeState::Idle) {
+		if(onDodgeEnd_) onDodgeEnd_();
 	}
 }
 
@@ -132,11 +151,11 @@ void PlayerDodgeSystem::SetOnPerfectDodge(Callback cb) { onPerfectDodge_ = std::
 /////////////////////////////////////////////////////////////////////////////////////////
 //			accessor
 /////////////////////////////////////////////////////////////////////////////////////////
-bool                     PlayerDodgeSystem::IsDodging() const { return state_ != DodgeState::Idle; }
-bool                     PlayerDodgeSystem::IsInIFrame() const { return state_ == DodgeState::IFrame; }
-DodgeState               PlayerDodgeSystem::GetState() const { return state_; }
-float                    PlayerDodgeSystem::GetStateTime() const { return timer_; }
-const CalyxMath::Vector3&           PlayerDodgeSystem::GetDodgeDir() const { return dodgeDir_; }
-const PlayerDodgeConfig& PlayerDodgeSystem::GetConfig() const { return cfg_; }
-void                     PlayerDodgeSystem::SetPerfectHintActive(bool v) { perfectHintActive_ = v; }
-bool                     PlayerDodgeSystem::WouldBePerfectIfDodgedNow() const { return perfectHintActive_; }
+bool					  PlayerDodgeSystem::IsDodging() const { return state_ != DodgeState::Idle; }
+bool					  PlayerDodgeSystem::IsInIFrame() const { return state_ == DodgeState::IFrame; }
+DodgeState				  PlayerDodgeSystem::GetState() const { return state_; }
+float					  PlayerDodgeSystem::GetStateTime() const { return timer_; }
+const CalyxMath::Vector3& PlayerDodgeSystem::GetDodgeDir() const { return dodgeDir_; }
+const PlayerDodgeConfig&  PlayerDodgeSystem::GetConfig() const { return cfg_; }
+void					  PlayerDodgeSystem::SetPerfectHintActive(bool v) { perfectHintActive_ = v; }
+bool					  PlayerDodgeSystem::WouldBePerfectIfDodgedNow() const { return perfectHintActive_; }

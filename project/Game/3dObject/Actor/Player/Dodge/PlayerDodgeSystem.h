@@ -43,8 +43,15 @@ public:
 	void Update(float dt);
 	/**
 	 * \brief 外部からの回避Requestを受ける
+	 * \param dir 回避方向
 	 */
-	void RequestDodge();
+	void RequestDodge(const CalyxMath::Vector3& dir);
+
+	/**
+	 * \brief
+	 * \return
+	 */
+	CalyxMath::Vector3 GetDodgeVelocity() const;
 
 	/**
 	 * \brief ヒントuiのアクティブ設定
@@ -68,12 +75,12 @@ public:
 	void LoadConfig();
 
 	// accessor -------------------------------------------------------//
-	bool					 IsDodging() const;
-	bool					 IsInIFrame() const;
-	DodgeState				 GetState() const;
-	float					 GetStateTime() const;
-	const CalyxMath::Vector3&			 GetDodgeDir() const;
-	const PlayerDodgeConfig& GetConfig() const;
+	bool					  IsDodging() const;
+	bool					  IsInIFrame() const;
+	DodgeState				  GetState() const;
+	float					  GetStateTime() const;
+	const CalyxMath::Vector3& GetDodgeDir() const;
+	const PlayerDodgeConfig&  GetConfig() const;
 
 private:
 	//=====================================================================*/
@@ -89,9 +96,11 @@ private:
 	//=====================================================================*/
 	//			private variables
 	//=====================================================================*/
-	PlayerDodgeConfig  cfg_{}; //< 設定
+	PlayerDodgeConfig  cfg_{};					  //< 設定
 	DodgeState		   state_ = DodgeState::Idle; //< 現在の状態
-	CalyxMath::Vector3			   dodgeDir_{0, 0, 1};		  //< 回避方向
+	CalyxMath::Vector3 dodgeDir_{0, 0, 1};		  //< 回避方向
+
+	bool isJustDodge_ = false; //< ジャスト回避中か
 
 	float timer_		 = 0.0f;	 //< 状態経過時間
 	float cooldown_		 = 0.0f;	 //< 回避クールダウン

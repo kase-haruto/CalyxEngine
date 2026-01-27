@@ -92,28 +92,31 @@ bool PlayerDangerSense::ComputeDangerNearby(CalyxMath::Vector3& outPlayerPos) co
 		container->ForEachBullet([&](BaseBullet& b) {
 			if(!b.GetIsAlive()) return;
 
-			CalyxMath::Vector3 bpos	  = b.GetWorldPosition();
-			CalyxMath::Vector3 bvel	  = b.GetVelocity();
-			float	br		  = b.GetCollisionRadius();
-			float	safeRange = playerR + br + cfg_.margin;
+			const CalyxMath::Vector3 bpos = b.GetWorldPosition();
+			const CalyxMath::Vector3 bvel = b.GetVelocity() * b.GetMoveSpeed();
+			const float              br   = b.GetCollisionRadius();
+			const float              hitThreshold = playerR + br + cfg_.margin;
 
-			// 静止弾は無視
-			float speed = b.GetMoveSpeed();
-			if(speed < 0.01f) return;
+			// 弾が移動していない場合は無視
+			float speedSq = bvel.LengthSquared();
+			if(speedSq < 0.01f) return;
 
-			CalyxMath::Vector3 toPlayer = outPlayerPos - bpos;
-			float	distance = toPlayer.Length();
+			// プレイヤー中心から見た弾の相対位置
+			CalyxMath::Vector3 toBullet = bpos - outPlayerPos;
 
-			// 弾の進行方向とプレイヤー方向の内積（正面のみ判定）
-			float dot = CalyxMath::Vector3::Dot(toPlayer.Normalize(), bvel.Normalize());
-			if(dot < 0.2f) return;
+			// 最接近時間を求める
+			// t = - (p . v) / |v|^2
+			float t = -CalyxMath::Vector3::Dot(toBullet, bvel) / speedSq;
 
-			// 衝突までの時間（Time-To-Impact）
-			float timeToImpact = (distance - safeRange) / speed;
+			// 現在から warnTime 秒後までの間に最接近するか判定
+			if (t > 0.0f && t <= warnTime) {
+				// 最接近時の距離（の二乗）を計算
+				CalyxMath::Vector3 closestPos = bpos + bvel * t;
+				float distSq = (closestPos - outPlayerPos).LengthSquared();
 
-			// 判定
-			if(timeToImpact <= warnTime) {
-				found = true;
+				if (distSq <= hitThreshold * hitThreshold) {
+					found = true;
+				}
 			}
 		});
 

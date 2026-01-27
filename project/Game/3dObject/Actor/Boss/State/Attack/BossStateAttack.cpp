@@ -9,24 +9,24 @@
 
 namespace {
 
-/**
- * \brief 攻撃タイプを文字列に変換
- * \param type 攻撃タイプ
- * \return 文字列
- */
-std::string_view AttackTypeToString(BossAttackType type) {
-	using namespace std::literals;
+	/**
+	 * \brief 攻撃タイプを文字列に変換
+	 * \param type 攻撃タイプ
+	 * \return 文字列
+	 */
+	std::string_view AttackTypeToString(BossAttackType type) {
+		using namespace std::literals;
 
-	switch(type) {
-	case BossAttackType::NormalShoot:
-		return "NormalShoot"sv;
-	case BossAttackType::Punch:
-		return "Punch"sv;
-	case BossAttackType::Laser:
-		return "Laser"sv;
+		switch(type) {
+		case BossAttackType::NormalShoot:
+			return "NormalShoot"sv;
+		case BossAttackType::Punch:
+			return "Punch"sv;
+		case BossAttackType::Laser:
+			return "Laser"sv;
+		}
+		return "Unknown"sv;
 	}
-	return "Unknown"sv;
-}
 
 } // namespace
 
@@ -55,14 +55,35 @@ BossStateAttack::~BossStateAttack() = default;
 //		更新処理
 /////////////////////////////////////////////////////////////////////////////////////////
 void BossStateAttack::Update(float dt) {
+	// クールダウン中
+	if(repeatCooldownTimer_ > 0.0f) {
+		repeatCooldownTimer_ -= dt;
+		if(repeatCooldownTimer_ <= 0.0f) {
+			// クールダウン明けに再実行
+			// 常に UI で選択されている攻撃タイプを反映させる
+			SetTransitionParam(owner_->GetForcedAttackType());
+			Enter();
+		}
+		return;
+	}
+
 	timer_ += dt;
 
 	if(owner_->GetAnimator()->IsAnimFinished()) {
+		// デバッグループが有効な場合はクールダウンを挟んで再実行
+		if(owner_->IsDebugLoopEnabled()) {
+			repeatCooldownTimer_ = repeatColldownLimit_;
+			return;
+		}
 		RequestChange(BossStateType::Idle);
 		return;
 	}
 
 	if(timer_ >= maxAttackTime_) {
+		if(owner_->IsDebugLoopEnabled()) {
+			repeatCooldownTimer_ = repeatColldownLimit_;
+			return;
+		}
 		RequestChange(BossStateType::Idle);
 	}
 }
@@ -71,7 +92,8 @@ void BossStateAttack::Update(float dt) {
 //		状態に入るときの処理
 /////////////////////////////////////////////////////////////////////////////////////////
 void BossStateAttack::Enter() {
-	timer_ = 0.0f;
+	timer_				 = 0.0f;
+	repeatCooldownTimer_ = 0.0f;
 
 	attackType_ = static_cast<BossAttackType>(GetTransitionParam());
 

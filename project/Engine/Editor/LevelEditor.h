@@ -32,9 +32,14 @@ struct CalyxMath::Vector2;
 struct CalyxMath::Matrix4x4;
 struct Ray;
 
+namespace CalyxScene {
+	class SceneManager;
+}
+
 namespace CalyxEditor {
 
 	class PlaySession;
+	class SceneSwitchOverlay;
 
 	/*-----------------------------------------------------------------------------------------
 	 * LevelEditor
@@ -48,6 +53,7 @@ namespace CalyxEditor {
 		void Render();
 		void RenderMenu();
 		void ClearSelection();
+		~LevelEditor();
 
 		// 編集対象 ----------------------------------------------------------------
 		void SetSelectedEditor(BaseEditor* editor);
@@ -71,6 +77,9 @@ namespace CalyxEditor {
 		EngineEdit::EditorMode GetMode() const { return mode_; }
 		void				   SetPlaySession(PlaySession* session) { pPlaySesseion_ = session; }
 
+	public:
+		void SetSceneManager(CalyxScene::SceneManager* manager);
+
 	private:
 		// マウスピッキング関連 ----------------------------------------------------
 		void		 TryPickUnderCursor();
@@ -83,6 +92,7 @@ namespace CalyxEditor {
 		// シーン管理 --------------------------------------------------------------
 		void SaveScene();
 		void NotifySceneContextChanged();
+		void DrawSceneSelector();
 
 		// モード切り替え ----------------------------------------------------------
 		void EnterGameMode();
@@ -102,7 +112,9 @@ namespace CalyxEditor {
 		std::unique_ptr<PlaceToolPanel>	   placeToolPanel_;
 		std::unique_ptr<SplineEditorPanel> splineEditor_;
 		std::unique_ptr<AssetPanel>		   assetPanel_;
+		std::unique_ptr<SceneSwitchOverlay> sceneSwitchOverlay_;
 		PlaySession*					   pPlaySesseion_ = nullptr;
+		CalyxScene::SceneManager*		   sceneManager_  = nullptr;
 
 		// メニュー
 		std::unique_ptr<EditorMenu> menu_; //< エディターメニュー
@@ -125,4 +137,3 @@ namespace CalyxEditor {
 	};
 
 }
-

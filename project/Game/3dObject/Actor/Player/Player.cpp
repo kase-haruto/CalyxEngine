@@ -207,6 +207,9 @@ void Player::Update(float dt) {
 		switch(c.type) {
 
 		case PlayerCommandType::Move:
+			// 回避中は移動入力を受け付けない
+			if(dodgeSystem_ && dodgeSystem_->IsDodging()) break;
+
 			if(auto* m = std::get_if<CmdMove>(&c.value)) {
 				AddMoveRequest(m->delta * moveSpeed_ * dt);
 				UpdateTilt(m->delta);
@@ -218,7 +221,11 @@ void Player::Update(float dt) {
 			break;
 
 		case PlayerCommandType::Dodge:
-			RequestDodge();
+			if(auto* d = std::get_if<CmdDodge>(&c.value)) {
+				RequestDodge(d->dir);
+			} else {
+				RequestDodge();
+			}
 			break;
 
 		default:
@@ -227,6 +234,10 @@ void Player::Update(float dt) {
 	}
 	if(dodgeSystem_) {
 		dodgeSystem_->Update(dt);
+		// 回避移動
+		if(dodgeSystem_->IsDodging()) {
+			AddMoveRequest(dodgeSystem_->GetDodgeVelocity() * dt);
+		}
 	}
 	if(dodgeMotion_) {
 		dodgeMotion_->Update(dt);
@@ -236,6 +247,9 @@ void Player::Update(float dt) {
 	}
 	if(lockOn_) {
 		lockOn_->Update(dt);
+		if(reticle_) {
+			reticle_->SetLockedEnemyList(lockOn_->GetLockedTargets());
+		}
 	}
 
 	moveCtrler_.Apply(worldTransform_);
@@ -253,7 +267,7 @@ void Player::Update(float dt) {
 
 	// ── レティクル─────────────────────────
 	reticle_->Update(dt);
-	
+
 	if(life_ <= 0) {
 		isAlive_ = false;
 	}
@@ -273,12 +287,12 @@ void Player::DrawHud(SpriteRenderer* spriteRenderer) {
 	if(hpGauge_) {
 		hpGauge_->Draw(spriteRenderer);
 	}
-	
+
 	// レティクル
 	if(reticle_) {
 		reticle_->Draw(spriteRenderer);
 	}
-	
+
 	// 危険UI
 	if(danger_ && danger_->GetUiSprite()) {
 		spriteRenderer->Register(danger_->GetUiSprite());
@@ -381,9 +395,9 @@ void Player::RequestLockOnTargetClear() const {
 	}
 }
 
-void Player::RequestDodge() const {
+void Player::RequestDodge(const CalyxMath::Vector3& dir) const {
 	if(dodgeSystem_) {
-		dodgeSystem_->RequestDodge();
+		dodgeSystem_->RequestDodge(dir);
 	}
 }
 
@@ -447,7 +461,6 @@ void Player::UpdateTilt(const CalyxMath::Vector3& inputVector) {
 ///////////////////////////////////////////////////////////////////////////////////
 //		レティクルの座標更新
 ///////////////////////////////////////////////////////////////////////////////////
-
 
 void Player::MakeSerializableParam() {
 	param_.LoadParams();
