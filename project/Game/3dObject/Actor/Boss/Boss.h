@@ -30,40 +30,33 @@ public:
 	 * \brief コンストラクタ
 	 */
 	Boss() = default;
-
 	/**
 	 * \brief コンストラクタ
 	 * \param modelName モデル名
 	 * \param objName オブジェクト名
 	 */
 	Boss(const std::string& modelName,const std::string objName);
-
 	/**
 	 * \brief デストラクタ
 	 */
 	~Boss() override;
-
 	/**
 	 * \brief 初期化
 	 */
 	void Initialize() override;
-
 	/**
 	 * \brief AIの初期化
 	 */
 	void InitializeAI();
-
 	/**
 	 * \brief 更新処理
 	 * \param dt デルタタイム
 	 */
 	void Update(float dt) override;
-
 	/**
 	 * \brief 派生クラス用GUI表示
 	 */
 	void DerivativeGui() override;
-
 	/**
 	 * \brief ヘッダーGUI表示
 	 */
@@ -75,13 +68,11 @@ public:
 	 * \param other 衝突相手のコライダー
 	 */
 	void OnCollisionEnter(Collider* other) override;
-
 	/**
 	 * \brief 衝突継続時処理
 	 * \param other 衝突相手のコライダー
 	 */
 	void OnCollisionStay([[maybe_unused]] Collider* other) override {}
-
 	/**
 	 * \brief 衝突終了時処理
 	 * \param other 衝突相手のコライダー

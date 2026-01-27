@@ -6,29 +6,8 @@
 #include "Game/3dObject/Actor/Boss/Attack/BossNormalShoot.h"
 #include "Game/3dObject/Actor/Boss/Boss.h"
 #include "Game/3dObject/Actor/Boss/Details/BossAnimType.h"
+#include <Engine/Foundation/Utility/Converter/EnumConverter.h>
 
-namespace {
-
-	/**
-	 * \brief 攻撃タイプを文字列に変換
-	 * \param type 攻撃タイプ
-	 * \return 文字列
-	 */
-	std::string_view AttackTypeToString(BossAttackType type) {
-		using namespace std::literals;
-
-		switch(type) {
-		case BossAttackType::NormalShoot:
-			return "NormalShoot"sv;
-		case BossAttackType::Punch:
-			return "Punch"sv;
-		case BossAttackType::Laser:
-			return "Laser"sv;
-		}
-		return "Unknown"sv;
-	}
-
-} // namespace
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		ctor / dtor
@@ -72,16 +51,16 @@ void BossStateAttack::Update(float dt) {
 	if(owner_->GetAnimator()->IsAnimFinished()) {
 		// デバッグループが有効な場合はクールダウンを挟んで再実行
 		if(owner_->IsDebugLoopEnabled()) {
-			repeatCooldownTimer_ = repeatColldownLimit_;
+			repeatCooldownTimer_ = param_.repeatColldownLimit;
 			return;
 		}
 		RequestChange(BossStateType::Idle);
 		return;
 	}
 
-	if(timer_ >= maxAttackTime_) {
+	if(timer_ >= param_.maxAttackTime) {
 		if(owner_->IsDebugLoopEnabled()) {
-			repeatCooldownTimer_ = repeatColldownLimit_;
+			repeatCooldownTimer_ = param_.repeatColldownLimit;
 			return;
 		}
 		RequestChange(BossStateType::Idle);
@@ -110,7 +89,7 @@ void BossStateAttack::Enter() {
 /////////////////////////////////////////////////////////////////////////////////////////
 void BossStateAttack::ShowGui() {
 	BaseBossState::ShowGui();
-	const auto attackStr = AttackTypeToString(attackType_);
+	const auto attackStr = CalyxUtil::EnumConverter<BossAttackType>::ToString(attackType_);
 	ImGui::Text("Attack Type: %.*s",
 				static_cast<int>(attackStr.size()),
 				attackStr.data());
@@ -138,4 +117,16 @@ void BossStateAttack::ExecuteAttack() const {
 	if(!shooter) return;
 	// 攻撃実行
 	atk->Execute(*owner_, *shooter);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		パラメータ
+/////////////////////////////////////////////////////////////////////////////////////////
+BossStateAttack::BossAttackParam::BossAttackParam() {
+	AddField("maxAttackTime", maxAttackTime).Category("Attack").Range(0.1f, 30.0f);
+	AddField("repeatColldownLimit", repeatColldownLimit).Category("Attack").Range(0.0f, 10.0f);
+}
+
+CalyxEngine::ParamPath BossStateAttack::BossAttackParam::GetParamPath() const {
+	return {CalyxEngine::ParamDomain::Game,"BossAttack","Actor/Boss/State"};
 }
