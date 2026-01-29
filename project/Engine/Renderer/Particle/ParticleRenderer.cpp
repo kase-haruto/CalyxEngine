@@ -5,8 +5,11 @@
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Graphics/Pipeline/Service/PipelineService.h>
+#include <Engine/Objects/3D/Mesh/MeshData.h>
 
-
+///////////////////////////////////////////////////////////////////////////////////////////////
+//		パーティクル描画
+///////////////////////////////////////////////////////////////////////////////////////////////
 void ParticleRenderer::Render(
 	const std::vector<std::shared_ptr<CalyxEffect::FxEmitter>>& cpuEmitters,
 	const std::vector<std::shared_ptr<CalyxEffect::GpuFxEmitter>>& gpuEmitters,
@@ -35,9 +38,9 @@ void ParticleRenderer::Render(
 			ModelData& model =
 				ModelManager::GetInstance()->GetModelData(em->GetModelPath());
 			if (model.meshResource.Indices().empty()) continue;
-			EnsureModelIsReady(model, device);
+			EnsureMeshIsReady(model.meshResource, device);
 
-			DrawModelInstanced(model, cmdList,
+			DrawMeshInstanced(model.meshResource, cmdList,
 							   static_cast< UINT >(em->GetUnits().size()),
 							   em->GetInstanceBuffer().GetGpuSrvHandle());
 		}
@@ -62,16 +65,18 @@ void ParticleRenderer::Render(
 			ModelData& model =
 				ModelManager::GetInstance()->GetModelData(em->GetModelPath());
 			if (model.meshResource.Indices().empty()) continue;
-			EnsureModelIsReady(model, device);
+			EnsureMeshIsReady(model.meshResource, device);
 
-			DrawModelInstanced(model, cmdList,
+			DrawMeshInstanced(model.meshResource, cmdList,
 							   CalyxEffect::GpuFxEmitter::kMaxParticles,
 							   em->GetParticleSrv());
 		}
 	}
 }
 
-
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//		GPUパーティクルのまとめ描きユーティリティ
+///////////////////////////////////////////////////////////////////////////////////////////////////
 void ParticleRenderer::RenderGrouped(const std::string& modelPath,
 									 const std::vector<CalyxEffect::ParticleConstantData>& gpuUnits,
 									 ID3D12GraphicsCommandList* cmdList){
@@ -81,7 +86,7 @@ void ParticleRenderer::RenderGrouped(const std::string& modelPath,
 	if (model.meshResource.Indices().empty()) return;
 
 	auto device = GraphicsGroup::GetInstance()->GetDevice().Get();
-	EnsureModelIsReady(model, device);
+	EnsureMeshIsReady(model.meshResource, device);
 
 	// 一時バッファをローカルで作成
 	DxStructuredBuffer<CalyxEffect::ParticleConstantData> tempBuffer;
@@ -89,29 +94,35 @@ void ParticleRenderer::RenderGrouped(const std::string& modelPath,
 	tempBuffer.TransferVectorData(gpuUnits);
 	tempBuffer.CreateSrv(device);
 
-	DrawModelInstanced(model, cmdList,
+	DrawMeshInstanced(model.meshResource, cmdList,
 					   static_cast< UINT >(gpuUnits.size()),
 					   tempBuffer.GetGpuSrvHandle());
 }
 
-void ParticleRenderer::EnsureModelIsReady(ModelData& model, ID3D12Device* device){
-	if (!model.meshResource.VertexBuffer().IsInitialized()){
-		model.meshResource.VertexBuffer().Initialize(device, static_cast< UINT >(model.meshResource.Vertices().size()));
-		model.meshResource.VertexBuffer().TransferVectorData(model.meshResource.Vertices());
+///////////////////////////////////////////////////////////////////////////////////////////
+//		メッシュ描画ユーティリティ
+///////////////////////////////////////////////////////////////////////////////////////////
+void ParticleRenderer::EnsureMeshIsReady(MeshResource& mesh, ID3D12Device* device){
+	if (!mesh.VertexBuffer().IsInitialized()){
+		mesh.VertexBuffer().Initialize(device, static_cast< UINT >(mesh.Vertices().size()));
+		mesh.VertexBuffer().TransferVectorData(mesh.Vertices());
 	}
-	if (!model.meshResource.IndexBuffer().IsInitialized()){
-		model.meshResource.IndexBuffer().Initialize(device, static_cast< UINT >(model.meshResource.Indices().size()));
-		model.meshResource.IndexBuffer().TransferVectorData(model.meshResource.Indices());
+	if (!mesh.IndexBuffer().IsInitialized()){
+		mesh.IndexBuffer().Initialize(device, static_cast< UINT >(mesh.Indices().size()));
+		mesh.IndexBuffer().TransferVectorData(mesh.Indices());
 	}
 }
 
-void ParticleRenderer::DrawModelInstanced(ModelData& model,
+///////////////////////////////////////////////////////////////////////////////////////////////
+//		メッシュインスタンス描画ユーティリティ
+///////////////////////////////////////////////////////////////////////////////////////////////
+void ParticleRenderer::DrawMeshInstanced(MeshResource& mesh,
 										  ID3D12GraphicsCommandList* cmdList,
 										  UINT instanceCount,
 										  D3D12_GPU_DESCRIPTOR_HANDLE instanceHandle){
-	model.meshResource.VertexBuffer().SetCommand(cmdList);
-	model.meshResource.IndexBuffer().SetCommand(cmdList);
+	mesh.VertexBuffer().SetCommand(cmdList);
+	mesh.IndexBuffer().SetCommand(cmdList);
 	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	cmdList->SetGraphicsRootDescriptorTable(2, instanceHandle);
-	cmdList->DrawInstanced(static_cast<UINT>(model.meshResource.Indices().size()), instanceCount, 0, 0);
+	cmdList->DrawInstanced(static_cast<UINT>(mesh.Indices().size()), instanceCount, 0, 0);
 }
