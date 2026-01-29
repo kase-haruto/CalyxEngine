@@ -14,6 +14,10 @@ namespace CalyxEditor {
 	class BaseEditor;
 	class SceneObjectEditor;
 
+	/*------------------------------------------------
+	 * ParamFilterSection
+	 * - パラメータフィルターセクション列挙型
+	 *----------------------------------------------*/
 	enum class ParamFilterSection {
 		All,           //< すべて
 		Object,        //< オブジェクト
@@ -66,7 +70,6 @@ namespace CalyxEditor {
 	private:
 		// Tabs
 		struct InspectorTab {
-			std::string        name;              // 詳細
 			std::string        iconPath;          // Texture path
 			ParamFilterSection filterSection;     // フィルターセクション
 			void*              iconTex = nullptr; // Runtime texture ID (D3D12_GPU_DESCRIPTOR_HANDLE::ptr)
@@ -82,6 +85,8 @@ namespace CalyxEditor {
 		int                       currentTabIndex_ = 0;
 		std::vector<InspectorTab> tabs_;
 		std::vector<InspectorTab> allTabs_;
+
+		std::string rootPath_  = "UI/Tool/Inspector/";
 	};
 
 }

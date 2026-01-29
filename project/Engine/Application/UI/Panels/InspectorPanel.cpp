@@ -27,13 +27,13 @@ namespace CalyxEditor {
 		if(allTabs_.empty()) {
 			auto& tm = *TextureManager::GetInstance();
 			allTabs_ = {
-					{"All","UI/Tool/Inspector/inspectorUI_Al.png",ParamFilterSection::All},
-					{"Object","UI/Tool/Inspector/inspectorUI_Ob.png",ParamFilterSection::Object},
-					{"Material","UI/Tool/Inspector/inspectorUI_Ma.png",ParamFilterSection::Material},
-					{"ParameterData","UI/Tool/Inspector/inspectorUI_Pa.png",ParamFilterSection::ParameterData},
-					{"Collider","UI/Tool/Inspector/inspectorUI_Co.png",ParamFilterSection::Collider},
-					{"Emit","UI/Tool/Inspector/inspectorUI_Emit.png",ParamFilterSection::ParticleEmit},
-					{"Module","UI/Tool/Inspector/inspectorUI_Module.png",ParamFilterSection::ParticleModule},
+					{rootPath_ + "inspectorUI_Al.png",ParamFilterSection::All},
+					{rootPath_ + "inspectorUI_Ob.png",ParamFilterSection::Object},
+					{rootPath_ + "inspectorUI_Ma.png",ParamFilterSection::Material},
+					{rootPath_ + "inspectorUI_Pa.png",ParamFilterSection::ParameterData},
+					{rootPath_ + "inspectorUI_Co.png",ParamFilterSection::Collider},
+					{rootPath_ + "inspectorUI_Emit.png",ParamFilterSection::ParticleEmit},
+					{rootPath_ + "inspectorUI_Module.png",ParamFilterSection::ParticleModule},
 				};
 			for(auto& tab : allTabs_) { tab.iconTex = (void*)tm.LoadTexture(tab.iconPath).ptr; }
 			tabs_ = allTabs_; // 初回は全表示
@@ -73,10 +73,9 @@ namespace CalyxEditor {
 
 							sceneObjectEditor_->SetSceneObject(sp.get());
 
-
 							// サイドバーで再構築済みの可視タブからフィルタを適用
 							if(!tabs_.empty()) {
-								const auto& activeTab = tabs_[std::min<std::size_t>(currentTabIndex_, tabs_.size() - 1)];
+								const auto& activeTab = tabs_[std::min<std::size_t>(currentTabIndex_,tabs_.size() - 1)];
 								GuiCmd::SetSectionFilter(activeTab.filterSection);
 							}
 
@@ -145,9 +144,7 @@ namespace CalyxEditor {
 		tabs_ = std::move(filter);
 
 		// インデックスをクランプ（サイズ0なら0のまま）
-		if(tabs_.empty()) {
-			currentTabIndex_ = 0;
-		} else if(currentTabIndex_ >= tabs_.size()) {
+		if(tabs_.empty()) { currentTabIndex_ = 0; } else if(currentTabIndex_ >= tabs_.size()) {
 			currentTabIndex_ = 0; // 失効したら All に戻す
 		}
 
@@ -155,11 +152,15 @@ namespace CalyxEditor {
 			const auto& tab        = tabs_[i];
 			bool        isSelected = (currentTabIndex_ == i);
 
-			if(isSelected) { ImGui::PushStyleColor(ImGuiCol_Button,ImVec4(0.2f,0.2f,0.2f,1.0f)); }
+			if(isSelected) {
+				// 選択中は強調
+				ImGui::PushStyleColor(ImGuiCol_Button,ImVec4(0.2f,0.2f,0.2f,1.0f));
+			}
 			ImGui::PushID(i);
 
 			if(ImGui::ImageButton(tab.iconTex,ImVec2(20,20))) { currentTabIndex_ = i; }
-			if(ImGui::IsItemHovered()) { ImGui::SetTooltip("%s",tab.name.c_str()); }
+			std::string_view enumcon = CalyxUtil::EnumConverter<ParamFilterSection>::ToString(tab.filterSection);
+			if(ImGui::IsItemHovered()) { ImGui::SetTooltip("%s",enumcon.data()); }
 
 			if(isSelected) { ImGui::PopStyleColor(); }
 			ImGui::PopID();
@@ -187,6 +188,14 @@ namespace CalyxEditor {
 		selectedObject_ = obj;
 		selectedEditor_ = nullptr;
 
-		if(sceneObjectEditor_) { if(auto sp = obj.lock()) { sceneObjectEditor_->SetSceneObject(sp.get()); } else { sceneObjectEditor_->SetSceneObject(nullptr); } }
+		if(sceneObjectEditor_) {
+			if(auto sp = obj.lock()) {
+				// オブジェクトが有効ならセット
+				sceneObjectEditor_->SetSceneObject(sp.get());
+			} else {
+				// 無効ならクリア
+				sceneObjectEditor_->SetSceneObject(nullptr);
+			}
+		}
 	}
 } // namespace CalyxEditor
