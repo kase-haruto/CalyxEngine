@@ -3034,6 +3034,7 @@
     <ClCompile Include="Engine\Objects\3D\Mesh\MeshData.cpp" />
     <ClCompile Include="Engine\Objects\3D\Primitive\IPrimitiveMesh.cpp" />
     <ClCompile Include="Engine\Objects\3D\Primitive\PrimitiveRing.cpp" />
+    <ClCompile Include="Engine\Editor\ImGuiLayoutSwitcher.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Battle\Shooting\homing\HomingTarget.h" />
@@ -3042,5 +3043,6 @@
     <ClInclude Include="Engine\Editor\SceneSwitchOverlay.h" />
     <ClInclude Include="Engine\Objects\3D\Primitive\IPrimitiveMesh.h" />
     <ClInclude Include="Engine\Objects\3D\Primitive\PrimitiveRing.h" />
+    <ClInclude Include="Engine\Editor\ImGuiLayoutSwitcher.h" />
   </ItemGroup>
 </Project>
