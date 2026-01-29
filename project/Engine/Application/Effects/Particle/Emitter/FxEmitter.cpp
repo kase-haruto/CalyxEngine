@@ -14,6 +14,7 @@
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 
 // externals
+#include "Engine/Application/UI/Panels/InspectorPanel.h"
 #include "Engine/Assets/Texture/TextureManager.h"
 #include "Engine/Foundation/Math/MathUtil.h"
 
@@ -278,7 +279,7 @@ namespace CalyxEffect {
 		GuiCmd::CheckBox("##oneshot_top", isOneShot_);
 
 		// ================= Material =================
-		if (GuiCmd::BeginSection("Material")) {
+		if (GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::Material)) {
 			if(FxGui::GridScope sec{"Material"}; sec.open) {
 				// Color
 				FxGui::RowLabel("Color");
@@ -345,7 +346,7 @@ namespace CalyxEffect {
 		}
 
 		// // ================= Billboard =================
-		if (GuiCmd::BeginSection("Object")) {
+		if (GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::Object)) {
 			if(FxGui::GridScope sec{"Billboard"}; sec.open) {
 				FxGui::RowLabel("Mode");
 				static const char* modes[] = {"None", "Full", "AxisY"};
@@ -360,7 +361,7 @@ namespace CalyxEffect {
 		}
 
 		// ================= ParameterData =================
-		if (GuiCmd::BeginSection("ParameterData")) {
+		if (GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::ParameterData)) {
 			// ================= Emission =================
 			if(FxGui::GridScope sec{"Emission"}; sec.open) {
 				// ブレンドモードを選べるようにする

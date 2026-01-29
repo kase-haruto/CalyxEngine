@@ -14,6 +14,19 @@ namespace CalyxEditor {
 	class BaseEditor;
 	class SceneObjectEditor;
 
+	enum class ParamFilterSection {
+		All,           //< すべて
+		Object,        //< オブジェクト
+		Material,      //< マテリアル
+		ParameterData, //< パラメータデータ
+		Collider,      //< コライダー
+
+		ParticleEmit,   //< エミット
+		ParticleModule, //< モジュール
+
+		Unknown //< 不明
+	};
+
 	/*-----------------------------------------------------------------------------------------
 	 * InspectorPanel
 	 * - インスペクターパネルクラス
@@ -53,21 +66,22 @@ namespace CalyxEditor {
 	private:
 		// Tabs
 		struct InspectorTab {
-			std::string name;		   // Tooltip name
-			std::string iconPath;	   // Texture path
-			std::string filterSection; // Filter string for GuiCmd (match BeginSection)
-			void*		iconTex = nullptr; // Runtime texture ID (D3D12_GPU_DESCRIPTOR_HANDLE::ptr)
+			std::string        name;              // 詳細
+			std::string        iconPath;          // Texture path
+			ParamFilterSection filterSection;     // フィルターセクション
+			void*              iconTex = nullptr; // Runtime texture ID (D3D12_GPU_DESCRIPTOR_HANDLE::ptr)
 		};
 
 		void RenderSidebar();
 		void RenderContent();
 
-		BaseEditor*				   selectedEditor_ = nullptr;
+		BaseEditor*                selectedEditor_ = nullptr;
 		std::weak_ptr<SceneObject> selectedObject_;
-		SceneObjectEditor*		   sceneObjectEditor_ = nullptr;
-		
-		int currentTabIndex_ = 0;
+		SceneObjectEditor*         sceneObjectEditor_ = nullptr;
+
+		int                       currentTabIndex_ = 0;
 		std::vector<InspectorTab> tabs_;
+		std::vector<InspectorTab> allTabs_;
 	};
 
 }

@@ -3,13 +3,12 @@
 // engine
 #include <Engine/Editor/SceneObjectEditor.h>
 #include <Engine/Editor/BaseEditor.h>
+#include <Engine/Assets/Texture/TextureManager.h>
+#include <Engine/Foundation/Utility/Converter/EnumConverter.h>
 
 // externals
 #include "Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h"
-
 #include <externals/imgui/imgui.h>
-
-#include <Engine/Assets/Texture/TextureManager.h>
 
 namespace CalyxEditor {
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -24,76 +23,72 @@ namespace CalyxEditor {
 	void InspectorPanel::Render() {
 		if(!IsShow()) return;
 
-		// タブの初期化
-		if (tabs_.empty()) {
+		// タブの初期化（マスターを保持）
+		if(allTabs_.empty()) {
 			auto& tm = *TextureManager::GetInstance();
-			tabs_ = {
-				{"All",           "UI/Tool/Inspector/inspectorUI_Al.png", "All"},
-				{"Object",        "UI/Tool/Inspector/inspectorUI_Ob.png", "Object"},
-				{"Material",      "UI/Tool/Inspector/inspectorUI_Ma.png", "Material"},
-				{"ParameterData", "UI/Tool/Inspector/inspectorUI_Pa.png", "ParameterData"},
-				{"Collider",      "UI/Tool/Inspector/inspectorUI_Co.png", "Collider"},
-			};
-
-			for (auto& tab : tabs_) {
-				tab.iconTex = (void*)tm.LoadTexture(tab.iconPath).ptr;
-			}
+			allTabs_ = {
+					{"All","UI/Tool/Inspector/inspectorUI_Al.png",ParamFilterSection::All},
+					{"Object","UI/Tool/Inspector/inspectorUI_Ob.png",ParamFilterSection::Object},
+					{"Material","UI/Tool/Inspector/inspectorUI_Ma.png",ParamFilterSection::Material},
+					{"ParameterData","UI/Tool/Inspector/inspectorUI_Pa.png",ParamFilterSection::ParameterData},
+					{"Collider","UI/Tool/Inspector/inspectorUI_Co.png",ParamFilterSection::Collider},
+					{"Emit","UI/Tool/Inspector/inspectorUI_Emit.png",ParamFilterSection::ParticleEmit},
+					{"Module","UI/Tool/Inspector/inspectorUI_Module.png",ParamFilterSection::ParticleModule},
+				};
+			for(auto& tab : allTabs_) { tab.iconTex = (void*)tm.LoadTexture(tab.iconPath).ptr; }
+			tabs_ = allTabs_; // 初回は全表示
 		}
 
 		bool open = true;
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f)); // サイドバーは全高使用
-		if(ImGui::Begin(panelName_.c_str(), &open)) {
-
-			if(selectedEditor_) { 
-				ImGui::Text("Editor: %s", selectedEditor_->GetEditorName().c_str());
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding,ImVec2(0.0f,0.0f)); // サイドバーは全高使用
+		if(ImGui::Begin(panelName_.c_str(),&open)) {
+			if(selectedEditor_) {
+				ImGui::Text("Editor: %s",selectedEditor_->GetEditorName().c_str());
 				ImGui::Separator();
 				selectedEditor_->ShowImGuiInterface();
-			} 
-			else {
+			} else {
 				auto sp = selectedObject_.lock();
 				if(sp && sceneObjectEditor_) {
-					
+
 					// レイアウト: サイドバー | コンテンツ
-					if (ImGui::BeginTable("InspectorMainLayout", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingFixedFit)) {
-						
-						ImGui::TableSetupColumn("Sidebar", ImGuiTableColumnFlags_WidthFixed, 40.0f);
-						ImGui::TableSetupColumn("Content", ImGuiTableColumnFlags_None);
-						
+					if(ImGui::BeginTable("InspectorMainLayout",2,ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingFixedFit)) {
+						ImGui::TableSetupColumn("Sidebar",ImGuiTableColumnFlags_WidthFixed,40.0f);
+						ImGui::TableSetupColumn("Content",ImGuiTableColumnFlags_None);
+
 						ImGui::TableNextColumn();
 						RenderSidebar();
 
 						ImGui::TableNextColumn();
-						
+
 						// コンテンツのスクロール領域開始
-						if(ImGui::BeginChild("##ContentScroll", ImVec2(0, 0), false, ImGuiWindowFlags_None)) {
-						
-							ImGui::Dummy(ImVec2(0, 4));
+						if(ImGui::BeginChild("##ContentScroll",ImVec2(0,0),false,ImGuiWindowFlags_None)) {
+							ImGui::Dummy(ImVec2(0,4));
 							ImGui::Indent(4.0f);
-							
-							ImGui::TextDisabled("Type: %s", sp->GetObjectTypeName().c_str());
+
+							ImGui::TextDisabled("Type: %s",sp->GetObjectTypeName().c_str());
 							ImGui::SameLine();
-							ImGui::Text("%s", sp->GetName().c_str());
+							ImGui::Text("%s",sp->GetName().c_str());
 							ImGui::Separator();
 							ImGui::Spacing();
 
 							sceneObjectEditor_->SetSceneObject(sp.get());
 
-							// フィルタ設定
-							const auto& activeTab = tabs_[currentTabIndex_];
-							GuiCmd::SetSectionFilter(activeTab.filterSection.c_str());
+
+							// サイドバーで再構築済みの可視タブからフィルタを適用
+							if(!tabs_.empty()) {
+								const auto& activeTab = tabs_[std::min<std::size_t>(currentTabIndex_, tabs_.size() - 1)];
+								GuiCmd::SetSectionFilter(activeTab.filterSection);
+							}
 
 							sceneObjectEditor_->ShowImGuiInterface();
-							
+
 							ImGui::Unindent(4.0f);
 						}
 						ImGui::EndChild();
 
 						ImGui::EndTable();
 					}
-
-				} else {
-					ImGui::Text("Nothing is selected.");
-				}
+				} else { ImGui::Text("Nothing is selected."); }
 			}
 		}
 		ImGui::End();
@@ -103,41 +98,79 @@ namespace CalyxEditor {
 	}
 
 	void InspectorPanel::RenderSidebar() {
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0,0,0,0)); // 背景透明
-		
-		for (int i = 0; i < (int)tabs_.size(); ++i) {
-			const auto& tab = tabs_[i];
-			bool isSelected = (currentTabIndex_ == i);
-			
-			// 選択中の場合ハイライト
-			if (isSelected) {
-				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
-			}
+		ImGui::PushStyleColor(ImGuiCol_Button,ImVec4(0,0,0,0)); // 背景透明
 
+		std::vector<InspectorTab> filter;
+		filter.reserve(8);
+
+		// マスター(allTabs_)から取り出す
+		auto add = [&](ParamFilterSection s) {
+			const auto idx = static_cast<size_t>(s);
+			if(idx < allTabs_.size()) filter.push_back(allTabs_[idx]);
+		};
+
+		// デフォルトは All
+		add(ParamFilterSection::All);
+
+		auto object = selectedObject_.lock();
+		if(object) {
+			switch(object->GetObjectType()) {
+			case ObjectType::GameObject:
+				add(ParamFilterSection::Object);
+				add(ParamFilterSection::Material);
+				add(ParamFilterSection::ParameterData);
+				add(ParamFilterSection::Collider);
+				break;
+
+			case ObjectType::Effect:
+				// allTabs_ に存在しない場合は自動的にスキップされる
+				add(ParamFilterSection::ParticleEmit);
+				add(ParamFilterSection::Material);
+				add(ParamFilterSection::ParameterData);
+				add(ParamFilterSection::ParticleModule);
+				break;
+
+			case ObjectType::Camera:
+				add(ParamFilterSection::ParameterData);
+				break;
+
+			case ObjectType::Light:
+			case ObjectType::Event:
+			default:
+				break;
+			}
+		}
+
+		// ここで一度だけ反映（可視タブ）
+		tabs_ = std::move(filter);
+
+		// インデックスをクランプ（サイズ0なら0のまま）
+		if(tabs_.empty()) {
+			currentTabIndex_ = 0;
+		} else if(currentTabIndex_ >= tabs_.size()) {
+			currentTabIndex_ = 0; // 失効したら All に戻す
+		}
+
+		for(int i = 0; i < (int)tabs_.size(); ++i) {
+			const auto& tab        = tabs_[i];
+			bool        isSelected = (currentTabIndex_ == i);
+
+			if(isSelected) { ImGui::PushStyleColor(ImGuiCol_Button,ImVec4(0.2f,0.2f,0.2f,1.0f)); }
 			ImGui::PushID(i);
-			
-			// アイコンボタン
-			if (ImGui::ImageButton(tab.iconTex, ImVec2(20, 20))) {
-				currentTabIndex_ = i;
-			}
-			
-			if (ImGui::IsItemHovered()) {
-				ImGui::SetTooltip("%s", tab.name.c_str());
-			}
 
-			if (isSelected) {
-				ImGui::PopStyleColor();
-			}
+			if(ImGui::ImageButton(tab.iconTex,ImVec2(20,20))) { currentTabIndex_ = i; }
+			if(ImGui::IsItemHovered()) { ImGui::SetTooltip("%s",tab.name.c_str()); }
+
+			if(isSelected) { ImGui::PopStyleColor(); }
 			ImGui::PopID();
-			
+
 			ImGui::Spacing();
 		}
-		
+
 		ImGui::PopStyleColor();
 	}
 
-	void InspectorPanel::RenderContent() {
-	}
+	void InspectorPanel::RenderContent() {}
 
 	/////////////////////////////////////////////////////////////////////////////////////////
 	//		エディタセット
@@ -154,13 +187,6 @@ namespace CalyxEditor {
 		selectedObject_ = obj;
 		selectedEditor_ = nullptr;
 
-		if(sceneObjectEditor_) {
-			if(auto sp = obj.lock()) {
-				sceneObjectEditor_->SetSceneObject(sp.get());
-			} else {
-				sceneObjectEditor_->SetSceneObject(nullptr);
-			}
-		}
+		if(sceneObjectEditor_) { if(auto sp = obj.lock()) { sceneObjectEditor_->SetSceneObject(sp.get()); } else { sceneObjectEditor_->SetSceneObject(nullptr); } }
 	}
 } // namespace CalyxEditor
-
