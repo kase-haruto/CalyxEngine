@@ -139,15 +139,35 @@ void ModelManager::ProcessLoadingTasks() {
 //----------------------------------------------------------------------------
 ModelData& ModelManager::GetModelData(const std::string& fileName) {
 	std::lock_guard<std::mutex> lock(modelDataMutex_);
-	auto it = modelDatas_.find(fileName);
-	if (it != modelDatas_.end()) {
+
+	if (auto it = modelDatas_.find(fileName); it != modelDatas_.end()) {
 		return it->second;
 	}
 
-	// ロード中のモデルは plane を返す
-	const std::string defaltModel = "plane.obj";
-	auto lodingModel = modelDatas_.find(defaltModel);
-	return lodingModel->second;
+	// フォールバック: plane があればそれを返す。なければダミーを返す。
+	const std::string defaultModel = "plane.obj";
+	if (auto it = modelDatas_.find(defaultModel); it != modelDatas_.end()) {
+		return it->second;
+	}
+
+	static ModelData dummy; // 未ロード時の安全なフォールバック
+	return dummy;
+}
+
+MeshResource& ModelManager::GetMeshResource(const std::string& fileName) {
+	std::lock_guard<std::mutex> lock(modelDataMutex_);
+
+	if (auto it = modelDatas_.find(fileName); it != modelDatas_.end()) {
+		return it->second.meshResource;
+	}
+
+	const std::string defaultModel = "plane.obj";
+	if (auto it = modelDatas_.find(defaultModel); it != modelDatas_.end()) {
+		return it->second.meshResource;
+	}
+
+	static ModelData dummy; // 未ロード時の安全なフォールバック
+	return dummy.meshResource;
 }
 
 bool ModelManager::IsModelLoaded(const std::string& fileName) const {

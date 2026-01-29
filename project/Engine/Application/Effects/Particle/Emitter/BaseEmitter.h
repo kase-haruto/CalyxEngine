@@ -1,4 +1,6 @@
 #pragma once
+#include "Engine/Assets/Model/ModelData.h"
+
 #include <Data/Engine/Configs/Scene/Objects/Particle/EmitterConfig.h>
 #include <Engine/Application/Effects/Particle/Detail/ParticleDetail.h>
 #include <Engine/Application/Effects/Particle/FxUnit.h>
@@ -55,18 +57,13 @@ namespace CalyxEffect {
 		//===================================================================*/
 		//					protected variable
 		//===================================================================*/
+		MeshResource                             meshData_;               //< モデルデータ(使用しない場合はnull)
 		std::string                              modelPath = "plane.obj"; //< モデルパス（デフォルトは平面
 		CalyxMath::Vector3                       position_;               //< emitterの位置
 		ParticleMaterial                         material_;               //< パーティクルのマテリアル
 		std::vector<FxUnit>                      units_;                  //< パーティクルユニットの配列
 		DxStructuredBuffer<ParticleConstantData> instanceBuffer_;
 		DxConstantBuffer<ParticleMaterial>       materialBuffer_; // パーティクルマテリアルの定数バッファ
-
-	private:
-		//===================================================================*/
-		//					private method
-		//===================================================================*/
-
 	};
 
 } // namespace CalyxEffect
