@@ -1,5 +1,7 @@
 #include "BaseGameObject.h"
 
+#include "Engine/Application/UI/Panels/InspectorPanel.h"
+
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/foundation/Utility/FileSystem/ConfigPathResolver/ConfigPathResolver.h>
 #include <Engine/objects/Collider/BoxCollider.h>
@@ -108,34 +110,28 @@ void BaseGameObject::ShowGui() {
 	ImGui::Dummy(ImVec2(0.0f,5.0f));
 	ImGui::Separator();
 
-	// --- パラメータデータ ---
-	if(GuiCmd::BeginSection("ParameterData")) {
-		HeaderGui();
-		GuiCmd::EndSection();
-	}
-
 	// --- トランスフォーム ---
-	if(GuiCmd::BeginSection("Object")) {
+	if(GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::Object)) {
 		worldTransform_.ShowImGui("world");
 		GuiCmd::EndSection();
 	}
 
 	// --- マテリアル・モデル ---
-	if(GuiCmd::BeginSection("Material")) {
+	if(GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::Material)) {
 		model_->ShowImGui(config_.GetConfig().modelConfig);
 		GuiCmd::EndSection();
 	}
 
 	// --- コライダー ---
 	if(collider_) {
-		if(GuiCmd::BeginSection("Collider")) {
+		if(GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::Collider)) {
 			collider_->ShowGui();
 			GuiCmd::EndSection();
 		}
 	}
 
 	// --- 描画設定 ---
-	if(GuiCmd::BeginSection("Object")) {
+	if(GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::Object)) {
 		if(ImGui::TreeNodeEx("BoxCollider",ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
 			int         mode    = static_cast<int>(billboardMode_);
 			const char* items[] = {"None","Full","AxisY"};
@@ -145,8 +141,14 @@ void BaseGameObject::ShowGui() {
 		}
 	}
 
+	// --- パラメータデータ ---
+	if(GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::ParameterData)) {
+		HeaderGui();
+		GuiCmd::EndSection();
+	}
+
 	// --- 派生クラス用パラメータ ---
-	if(GuiCmd::BeginSection("ParameterData")) {
+	if(GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::ParameterData)) {
 		DerivativeGui();
 		GuiCmd::EndSection();
 	}

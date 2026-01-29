@@ -17,6 +17,10 @@
 // external
 #include <externals/imgui/imgui.h>
 
+namespace CalyxEditor {
+	enum class ParamFilterSection;
+}
+
 // math
 namespace CalyxMath {
 	struct Vector3;
@@ -87,11 +91,9 @@ namespace GuiCmd{
 	//===================================================================*/
 	//		Section Filter Helpers (For Tab View)
 	//===================================================================*/
-	// Set the current active section name. "" or "All" means show everything.
-	void SetSectionFilter(const char* filterName);
+	void SetSectionFilter(CalyxEditor::ParamFilterSection sectionType);
 	
-	// Begins a named section. Returns true if the section receives drawing commands.
-	bool BeginSection(const char* sectionName);
+	bool BeginSection(CalyxEditor::ParamFilterSection sectionType);
 	
 	// Ends the current section.
 	void EndSection();

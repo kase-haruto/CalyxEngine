@@ -41,11 +41,11 @@ public:
 	/**
 	 * \brief 初期化
 	 */
-	static void			 Initialize();
+	static void Initialize();
 	/**
 	 * \brief 終了処理
 	 */
-	static void			 Finalize();
+	static void Finalize();
 
 	friend struct std::default_delete<ModelManager>;
 
@@ -67,6 +67,13 @@ public:
 	 * \return モデルデータ
 	 */
 	ModelData& GetModelData(const std::string& fileName);
+
+	/**
+	 * \brief ファイル名からメッシュデータ取得
+	 * \param fileName
+	 * \return メッシュデータ
+	 */
+	MeshResource& GetMeshResource(const std::string& fileName);
 
 	/**
 	 * \brief モデルがロード済みか判定
@@ -97,47 +104,49 @@ private:
 	~ModelManager();
 
 	/// ファイルを読み込み→CPU側でModelDataを構築する (Assimp使用)
-	ModelData LoadModelFile(const std::string& directoryPath, const std::string& fileNameWithExt);
+	ModelData LoadModelFile(const std::string& directoryPath,const std::string& fileNameWithExt);
 
 	/// 頂点/インデックスバッファを GPU上に作成し、ModelData に登録
-	void CreateGpuResources(const std::string& fileName, ModelData model);
+	void CreateGpuResources(const std::string& fileName,ModelData model);
 
 	// メッシュやマテリアルなどの細かい読み込み
-	void LoadMesh(const aiMesh* mesh, ModelData& modelData);
-	void LoadMaterial(const aiScene* scene, const aiMesh* mesh, ModelData& modelData);
-	void LoadUVTransform(const aiMaterial* material, MaterialData& outMaterial);
-	void LoadSkinData(const aiMesh* mesh, ModelData& modelData);
+	void LoadMesh(const aiMesh* mesh,ModelData& modelData);
+	void LoadMaterial(const aiScene* scene,const aiMesh* mesh,ModelData& modelData);
+	void LoadUVTransform(const aiMaterial* material,MaterialData& outMaterial);
+	void LoadSkinData(const aiMesh* mesh,ModelData& modelData);
 	// アニメーション評価関連
-	CalyxMath::Vector3	   Evaluate(const AnimationCurve<CalyxMath::Vector3>& curve, float time);
-	CalyxMath::Quaternion Evaluate(const AnimationCurve<CalyxMath::Quaternion>& curve, float time);
+	CalyxMath::Vector3    Evaluate(const AnimationCurve<CalyxMath::Vector3>& curve,float time);
+	CalyxMath::Quaternion Evaluate(const AnimationCurve<CalyxMath::Quaternion>& curve,float time);
 
 private:
 	//===================================================================*/
 	//                    private member variables
 	//===================================================================*/
-	static std::unique_ptr<ModelManager> instance_; //< シングルトンインスタンス
-	static const std::string directoryPath_; //< モデルディレクトリパス
+	static std::unique_ptr<ModelManager> instance_;      //< シングルトンインスタンス
+	static const std::string             directoryPath_; //< モデルディレクトリパス
 
-	std::unordered_map<std::string, ModelData> modelDatas_; //< モデルデータマップ
-	mutable std::mutex						   modelDataMutex_; //< モデルデータ用ミューテックス
+	std::unordered_map<std::string,ModelData> modelDatas_;     //< モデルデータマップ
+	mutable std::mutex                        modelDataMutex_; //< モデルデータ用ミューテックス
 
-	std::thread				workerThread_; //< ワーカースレッド
-	bool					stopWorker_ = false; //< スレッド停止フラグ
-	std::mutex				taskQueueMutex_; //< タスクキュー用ミューテックス
-	std::condition_variable taskQueueCv_; //< タスクキュー用条件変数
+	std::thread             workerThread_;       //< ワーカースレッド
+	bool                    stopWorker_ = false; //< スレッド停止フラグ
+	std::mutex              taskQueueMutex_;     //< タスクキュー用ミューテックス
+	std::condition_variable taskQueueCv_;        //< タスクキュー用条件変数
 
 	struct LoadRequest {
-		std::string				fileName; //< ファイル名
-		std::promise<ModelData> promise; //< プロミス
+		std::string             fileName; //< ファイル名
+		std::promise<ModelData> promise;  //< プロミス
 	};
+
 	std::queue<LoadRequest> requestQueue_; //< リクエスト待ち行列
 
 	struct LoadingTask {
-		std::string fileName; //< ファイル名
-		ModelData	modelData; //< モデルデータ
+		std::string fileName;  //< ファイル名
+		ModelData   modelData; //< モデルデータ
 	};
-	std::vector<LoadingTask> pendingTasks_; //< GPUリソース化待ちタスク
-	std::mutex				 pendingTasksMutex_; //< 待ちタスク用ミューテックス
+
+	std::vector<LoadingTask> pendingTasks_;      //< GPUリソース化待ちタスク
+	std::mutex               pendingTasksMutex_; //< 待ちタスク用ミューテックス
 
 	std::function<void(const std::string&)> onModelLoadedCallback_; //< ロード完了コールバック
 

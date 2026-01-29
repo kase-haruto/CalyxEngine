@@ -1,6 +1,7 @@
 #include <Engine/Objects/LightObject/DirectionalLight.h>
 
 /* engine */
+#include "Engine/Application/UI/Panels/InspectorPanel.h"
 #include "Engine/Foundation/Utility/Func/CxUtils.h"
 
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
@@ -217,18 +218,18 @@ void DirectionalLight::ShowGui() {
 #if defined(_DEBUG) || defined(DEVELOP)
 	ImGui::Dummy(ImVec2(0.0f, 5.0f));
 
-	if (GuiCmd::BeginSection("ParameterData")) {
+	if (GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::ParameterData)) {
 		config_.ShowGui();
 		ImGui::Separator();
 		GuiCmd::EndSection();
 	}
 
-	if (GuiCmd::BeginSection("Object")) {
+	if (GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::Object)) {
 		GuiCmd::SliderFloat3("direction", lightData_.direction, -1.0f, 1.0f);
 		GuiCmd::EndSection();
 	}
 
-	if (GuiCmd::BeginSection("ParameterData")) {
+	if (GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::ParameterData)) {
 		GuiCmd::ColorEdit4("color", lightData_.color);
 		GuiCmd::SliderFloat("Intensity", lightData_.intensity, 0.0f, 1.0f);
 		GuiCmd::EndSection();

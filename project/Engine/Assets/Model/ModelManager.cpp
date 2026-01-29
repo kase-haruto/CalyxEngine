@@ -139,15 +139,35 @@ void ModelManager::ProcessLoadingTasks() {
 //----------------------------------------------------------------------------
 ModelData& ModelManager::GetModelData(const std::string& fileName) {
 	std::lock_guard<std::mutex> lock(modelDataMutex_);
-	auto it = modelDatas_.find(fileName);
-	if (it != modelDatas_.end()) {
+
+	if (auto it = modelDatas_.find(fileName); it != modelDatas_.end()) {
 		return it->second;
 	}
 
-	// ロード中のモデルは plane を返す
-	const std::string defaltModel = "plane.obj";
-	auto lodingModel = modelDatas_.find(defaltModel);
-	return lodingModel->second;
+	// フォールバック: plane があればそれを返す。なければダミーを返す。
+	const std::string defaultModel = "plane.obj";
+	if (auto it = modelDatas_.find(defaultModel); it != modelDatas_.end()) {
+		return it->second;
+	}
+
+	static ModelData dummy; // 未ロード時の安全なフォールバック
+	return dummy;
+}
+
+MeshResource& ModelManager::GetMeshResource(const std::string& fileName) {
+	std::lock_guard<std::mutex> lock(modelDataMutex_);
+
+	if (auto it = modelDatas_.find(fileName); it != modelDatas_.end()) {
+		return it->second.meshResource;
+	}
+
+	const std::string defaultModel = "plane.obj";
+	if (auto it = modelDatas_.find(defaultModel); it != modelDatas_.end()) {
+		return it->second.meshResource;
+	}
+
+	static ModelData dummy; // 未ロード時の安全なフォールバック
+	return dummy.meshResource;
 }
 
 bool ModelManager::IsModelLoaded(const std::string& fileName) const {
@@ -319,15 +339,15 @@ void ModelManager::CreateGpuResources([[maybe_unused]] const std::string& fileNa
 	DxIndexBuffer<uint32_t> new_indexBuffer;
 	new_indexBuffer.Initialize(device);
 
-	model.vertexBuffer = new_vertexBuffer;
-	model.indexBuffer = new_indexBuffer;
+	model.meshResource.VertexBuffer() = new_vertexBuffer;
+	model.meshResource.IndexBuffer() = new_indexBuffer;
 }
 
 //----------------------------------------------------------------------------
 // メッシュ読み込み
 //----------------------------------------------------------------------------
 void ModelManager::LoadMesh(const aiMesh* mesh, ModelData& modelData) {
-	uint32_t baseVertex = static_cast<uint32_t>(modelData.meshData.vertices.size());
+	uint32_t baseVertex = static_cast<uint32_t>(modelData.meshResource.Vertices().size());
 
 	// 初期AABBを極端な値に
 	CalyxMath::Vector3 minPos = { FLT_MAX, FLT_MAX, FLT_MAX };
@@ -343,7 +363,7 @@ void ModelManager::LoadMesh(const aiMesh* mesh, ModelData& modelData) {
 			vertex.texcoord.x = mesh->mTextureCoords[0][i].x;
 			vertex.texcoord.y = mesh->mTextureCoords[0][i].y;
 		}
-		modelData.meshData.vertices.push_back(vertex);
+		modelData.meshResource.data.vertices.push_back(vertex);
 
 		// AABB更新用の min/max 反映
 		CalyxMath::Vector3 pos = { vertex.position.x, vertex.position.y, vertex.position.z };
@@ -353,9 +373,9 @@ void ModelManager::LoadMesh(const aiMesh* mesh, ModelData& modelData) {
 
 	for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
 		const aiFace& face = mesh->mFaces[i];
-		modelData.meshData.indices.push_back(baseVertex + face.mIndices[0]);
-		modelData.meshData.indices.push_back(baseVertex + face.mIndices[2]);
-		modelData.meshData.indices.push_back(baseVertex + face.mIndices[1]);
+		modelData.meshResource.data.indices.push_back(baseVertex + face.mIndices[0]);
+		modelData.meshResource.data.indices.push_back(baseVertex + face.mIndices[2]);
+		modelData.meshResource.data.indices.push_back(baseVertex + face.mIndices[1]);
 	}
 
 	// ローカルAABBを格納
@@ -374,23 +394,23 @@ void ModelManager::LoadMesh(const aiMesh* mesh, ModelData& modelData) {
 //----------------------------------------------------------------------------
 void ModelManager::LoadMaterial(const aiScene* scene, const aiMesh* mesh, ModelData& modelData) {
 	if (!scene->HasMaterials()) {
-		modelData.meshData.material.textureFilePath = "white1x1.png";
+		modelData.meshResource.data.material.textureFilePath = "white1x1.png";
 		return;
 	}
 	const aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 	if (!material) {
-		modelData.meshData.material.textureFilePath = "white1x1.png";
+		modelData.meshResource.data.material.textureFilePath = "white1x1.png";
 		return;
 	}
 
 	aiString texPath;
 	if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) == AI_SUCCESS) {
-		modelData.meshData.material.textureFilePath = texPath.C_Str();
+		modelData.meshResource.data.material.textureFilePath = texPath.C_Str();
 	} else {
-		modelData.meshData.material.textureFilePath = "white1x1.png";
+		modelData.meshResource.Material().textureFilePath = "white1x1.png";
 	}
 
-	LoadUVTransform(material, modelData.meshData.material);
+	LoadUVTransform(material, modelData.meshResource.Material());
 }
 
 //----------------------------------------------------------------------------

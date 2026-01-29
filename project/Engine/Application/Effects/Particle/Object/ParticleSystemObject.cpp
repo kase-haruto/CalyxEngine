@@ -7,22 +7,6 @@
 #include <iostream>
 
 namespace CalyxEffect {
-	namespace {
-		void VSeparator(float height = 0.0f, float thickness = 1.0f, float pad = 6.0f) {
-			ImVec2 pos = ImGui::GetCursorScreenPos();
-			if(height <= 0.0f) height = ImGui::GetTextLineHeightWithSpacing();
-
-			// 線の色は ImGuiCol_Separator を流用
-			ImU32		col = ImGui::GetColorU32(ImGuiCol_Separator);
-			ImDrawList* dl	= ImGui::GetWindowDrawList();
-			float		x	= pos.x + pad * 0.5f; // ちょい内側に
-			dl->AddLine(ImVec2(x, pos.y), ImVec2(x, pos.y + height), col, thickness);
-
-			// レイアウトを前へ送る（幅 = pad + thickness）
-			ImGui::Dummy(ImVec2(pad + thickness, height));
-			ImGui::SameLine();
-		}
-	}; // namespace
 
 	/////////////////////////////////////////////////////////////////////////////////////////
 	//		コンストラクタ/デストラクタ
@@ -153,4 +137,3 @@ namespace CalyxEffect {
 	void ParticleSystemObject::Reset() const { emitter_->Reset(); }
 	REGISTER_SCENE_OBJECT(ParticleSystemObject)
 }
-

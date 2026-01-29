@@ -401,10 +401,10 @@ namespace CalyxAssets {
 		if (!modelData_) return;
 
 		// 頂点バッファ/インデックスバッファをセット
-		vbvs_[0] = modelData_->vertexBuffer.GetVertexBufferView(); // vertexDataのvbv
+		vbvs_[0] = modelData_->meshResource.VertexBuffer().GetVertexBufferView(); // vertexDataのvbv
 		vbvs_[1] = skinCluster_.influenceBufferView;               // influenceDataのvbv
 		
-		modelData_->indexBuffer.SetCommand(cmdList);
+		modelData_->meshResource.IndexBuffer().SetCommand(cmdList);
 		cmdList->IASetVertexBuffers(0, 2, vbvs_);
 	}
 

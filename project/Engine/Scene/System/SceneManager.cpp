@@ -49,7 +49,7 @@ namespace CalyxScene {
 				 std::make_unique<ClearScene>());
 
 		SetCurrent(idToIndex_.at(
-			GameSceneUtil::ToSceneId(SceneType::TITLE)
+			GameSceneUtil::ToSceneId(SceneType::TEST)
 		));
 	}
 
@@ -253,7 +253,7 @@ namespace CalyxScene {
 	std::string SceneManager::GetSceneName(SceneId id) const {
 		auto it = idToIndex_.find(id);
 		if(it == idToIndex_.end()) return "Unknown Scene";
-		
+
 		size_t index = it->second;
 		if(index >= slots_.size()) return "Invalid Index";
 

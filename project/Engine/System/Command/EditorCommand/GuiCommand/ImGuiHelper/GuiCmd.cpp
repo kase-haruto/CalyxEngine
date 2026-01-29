@@ -13,6 +13,9 @@
 #include <Engine/Foundation/Math/Vector4.h>
 
 // external
+#include "Engine/Application/UI/Panels/InspectorPanel.h"
+#include "Engine/Editor/Collection/EditorCollection.h"
+
 #include <externals/imgui/imgui.h>
 #include <externals/imgui/imgui_internal.h>
 
@@ -636,25 +639,21 @@ namespace GuiCmd {
 	//===================================================================*/
 	//		Section Filter Helpers
 	//===================================================================*/
-	static std::string currentSectionFilter_ = "";
+	CalyxEditor::ParamFilterSection currentFilter_ = CalyxEditor::ParamFilterSection::All;
 	// セクションが表示対象か
 	static bool isSectionActive_ = true; 
 	static bool isSectionHeaderOpen_ = true;
 
-	void SetSectionFilter(const char* filterName) {
-		if (filterName) {
-			currentSectionFilter_ = filterName;
-		} else {
-			currentSectionFilter_ = "";
-		}
+	void SetSectionFilter(CalyxEditor::ParamFilterSection sectionType) {
+		currentFilter_ = sectionType;
 	}
 
-	bool BeginSection(const char* sectionName) {
-		bool isAll = (currentSectionFilter_.empty() || currentSectionFilter_ == "All");
+	bool BeginSection(CalyxEditor::ParamFilterSection sectionType) {
+		bool isAll = (currentFilter_ == CalyxEditor::ParamFilterSection::All);
 		
 		// フィルタリング判定
 		if (!isAll) {
-			if (currentSectionFilter_ == sectionName) {
+			if (currentFilter_ == sectionType) {
 				isSectionActive_ = true;
 				isSectionHeaderOpen_ = true; 
 				return true;

@@ -15,6 +15,8 @@
 /* c++ */
 #include <stdint.h>
 /* externals */
+#include "Engine/Application/UI/Panels/InspectorPanel.h"
+
 #include <externals/imgui/imgui.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 
@@ -78,7 +80,7 @@ void Sprite::Update() {
 }
 
 void Sprite::ShowGui() {
-	if (GuiCmd::BeginSection("Object")) {
+	if (GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::Object)) {
 		GuiCmd::DragFloat2("Position", position, 1.0f);
 		GuiCmd::DragFloat2("Size", size, 1.0f);
 		GuiCmd::SliderFloat("RotateZ", rotate, -180.0f, 180.0f);
@@ -86,7 +88,7 @@ void Sprite::ShowGui() {
 		GuiCmd::EndSection();
 	}
 	
-	if (GuiCmd::BeginSection("Material")) {
+	if (GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::Material)) {
 		uvTransform.ShowImGui("uvTransform");
 		GuiCmd::EndSection();
 	}

@@ -1612,9 +1612,6 @@
     <ClCompile Include="Engine\Scene\Context\SceneContext.cpp">
       <Filter>Engine\Scene\Context</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Renderer\Primitive\PrimitiveMesh.cpp">
-      <Filter>Engine\Renderer\Primitive</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Graphics\RenderTarget\SwapChainRT\SwapChainRenderTarget.cpp">
       <Filter>Engine\Graphics\RenderTarget\SwapChainRT</Filter>
     </ClCompile>
@@ -2728,9 +2725,6 @@
     <ClInclude Include="Engine\Scene\Context\SceneContext.h">
       <Filter>Engine\Scene\Context</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Renderer\Primitive\PrimitiveMesh.h">
-      <Filter>Engine\Renderer\Primitive</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Renderer\Primitive\LineDrawer.h">
       <Filter>Engine\Renderer\Primitive</Filter>
     </ClInclude>
@@ -3037,11 +3031,18 @@
     </FxCompile>
     <ClCompile Include="Game\Battle\Shooting\homing\HomingTarget.cpp" />
     <ClCompile Include="Engine\Editor\SceneSwitchOverlay.cpp" />
+    <ClCompile Include="Engine\Objects\3D\Mesh\MeshData.cpp" />
+    <ClCompile Include="Engine\Objects\3D\Primitive\IPrimitiveMesh.cpp" />
+    <ClCompile Include="Engine\Objects\3D\Primitive\PrimitiveRing.cpp" />
+    <ClCompile Include="Engine\Editor\ImGuiLayoutSwitcher.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Battle\Shooting\homing\HomingTarget.h" />
     <ClInclude Include="Engine\Application\System\Environment.h" />
     <ClInclude Include="Engine\Graphics\ResourceStateTracker\ResourceStateTracker.h" />
     <ClInclude Include="Engine\Editor\SceneSwitchOverlay.h" />
+    <ClInclude Include="Engine\Objects\3D\Primitive\IPrimitiveMesh.h" />
+    <ClInclude Include="Engine\Objects\3D\Primitive\PrimitiveRing.h" />
+    <ClInclude Include="Engine\Editor\ImGuiLayoutSwitcher.h" />
   </ItemGroup>
 </Project>

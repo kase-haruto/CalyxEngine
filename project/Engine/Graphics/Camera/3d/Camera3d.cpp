@@ -15,6 +15,8 @@
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 
 // c++
+#include "Engine/Application/UI/Panels/InspectorPanel.h"
+
 #include <cmath>
 
 namespace {
@@ -189,12 +191,12 @@ void Camera3d::AlwaysUpdate(float dt) {
 
 void Camera3d::ShowGui() {
 	// 既存のWT GUI
-	if (GuiCmd::BeginSection("Object")) {
+	if (GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::Object)) {
 		worldTransform_.ShowImGui("world");
 		GuiCmd::EndSection();
 	}
 
-	if (GuiCmd::BeginSection("ParameterData")) {
+	if (GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::ParameterData)) {
 		follow_.ShowGui();
 		GuiCmd::EndSection();
 	}

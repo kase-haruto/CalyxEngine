@@ -12,6 +12,7 @@
 #include <Engine/Application/UI/Panels/PlaceToolPanel.h>
 #include <Engine/Application/UI/Panels/SplineEditorPanel.h>
 #include <Engine/Editor/SceneObjectEditor.h>
+#include <Engine/Editor/ImGuiLayoutSwitcher.h>
 
 // c++
 #include <memory>
@@ -40,6 +41,7 @@ namespace CalyxEditor {
 
 	class PlaySession;
 	class SceneSwitchOverlay;
+	class ImGuiLayoutSwitcher;
 
 	/*-----------------------------------------------------------------------------------------
 	 * LevelEditor
@@ -113,6 +115,7 @@ namespace CalyxEditor {
 		std::unique_ptr<SplineEditorPanel> splineEditor_;
 		std::unique_ptr<AssetPanel>		   assetPanel_;
 		std::unique_ptr<SceneSwitchOverlay> sceneSwitchOverlay_;
+		std::unique_ptr<ImGuiLayoutSwitcher> layoutSwitcher_;
 		PlaySession*					   pPlaySesseion_ = nullptr;
 		CalyxScene::SceneManager*		   sceneManager_  = nullptr;
 

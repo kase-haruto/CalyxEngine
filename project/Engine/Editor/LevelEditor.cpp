@@ -56,6 +56,15 @@ namespace CalyxEditor {
 		assetPanel_		= std::make_unique<AssetPanel>();
 		sceneSwitchOverlay_ = std::make_unique<SceneSwitchOverlay>();
 
+		// レイアウトスイッチャーの初期化 --------------------------------------
+		layoutSwitcher_ = std::make_unique<ImGuiLayoutSwitcher>(
+			std::vector<LayoutEntry>{
+				{"Default", "Resources/Assets/Configs/Editor/Layout/default.ini"},
+				{"Effect", "Resources/Assets/Configs/Editor/Layout/effect.ini"}
+			},
+			"imgui.ini"
+		);
+
 		if(auto* db = AssetDatabase::GetInstance()) {
 			assetPanel_->Initialize(db->GetRoot());
 		}
@@ -318,6 +327,11 @@ namespace CalyxEditor {
 	void LevelEditor::RenderMenu() {
 		if(menu_) {
 			menu_->Render();
+		}
+		// レイアウトスイッチャーメニューの描画
+		if(layoutSwitcher_ && ImGui::BeginMainMenuBar()) {
+			layoutSwitcher_->DrawMenu();
+			ImGui::EndMainMenuBar();
 		}
 	}
 
