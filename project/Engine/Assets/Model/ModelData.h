@@ -17,7 +17,7 @@
 #include <wrl.h>
 
 struct ModelData {
-	MeshData meshData;	// メッシュデータ
+	MeshResource meshResource;
 	AABB	 localAABB; // カリング判定用
 
 	//-----------------------------------------------------------
@@ -27,8 +27,6 @@ struct ModelData {
 	Animation							   animation;
 	Skeleton							   skeleton;
 	// std::vector<Animation> animations;
-	DxVertexBuffer<VertexPosUvN> vertexBuffer;
-	DxIndexBuffer<uint32_t>		 indexBuffer;
 };
 
 enum ObjectModelType {

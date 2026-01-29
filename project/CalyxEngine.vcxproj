@@ -292,6 +292,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Objects\2D\Renderer\Renderer2d.cpp" />
     <ClCompile Include="Engine\Objects\2D\Sprite\Component\SpriteComponent.cpp" />
     <ClCompile Include="Engine\Objects\2D\Sprite\SpriteAsset.cpp" />
+    <ClCompile Include="Engine\Objects\3D\Mesh\MeshData.cpp" />
     <ClCompile Include="Engine\Objects\3D\Primitive\IPrimitiveMesh.cpp">
       <AssemblerOutput>NoListing</AssemblerOutput>
       <AssemblerListingLocation>C:\MyProject\MyEngine\project\..\generated\obj\MyEngine\Develop\</AssemblerListingLocation>

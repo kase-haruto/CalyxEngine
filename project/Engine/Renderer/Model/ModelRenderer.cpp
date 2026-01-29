@@ -301,7 +301,7 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList* cmdList,
 				cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 				model->BindVertexIndexBuffers(cmdList);
 
-				const UINT indexCount = static_cast<UINT>(model->GetModelData()->meshData.indices.size());
+				const UINT indexCount = static_cast<UINT>(model->GetModelData()->meshResource.Indices().size());
 				cmdList->DrawIndexedInstanced(indexCount, need, 0, 0, 0);
 			}
 		}

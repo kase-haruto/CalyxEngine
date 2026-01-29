@@ -32,7 +32,7 @@ Model::~Model() = default;
 void Model::Initialize() {
 	// マテリアル・行列バッファ生成
 	CreateMaterialBuffer();
-	Map();  
+	Map();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -40,12 +40,8 @@ void Model::Initialize() {
 /////////////////////////////////////////////////////////////////////////////////////////
 void Model::InitializeTextures(const std::vector<std::string>& textureFilePaths) {
 	textureHandles_.clear();
-	for (const auto& filePath : textureFilePaths)
-	{
-		textureHandles_.push_back(TextureManager::GetInstance()->LoadTexture(filePath));
-	}
-	if (!textureHandles_.empty())
-	{
+	for(const auto& filePath : textureFilePaths) { textureHandles_.push_back(TextureManager::GetInstance()->LoadTexture(filePath)); }
+	if(!textureHandles_.empty()) {
 		handle_ = textureHandles_[0]; // 初期テクスチャ
 	}
 }
@@ -54,11 +50,10 @@ void Model::InitializeTextures(const std::vector<std::string>& textureFilePaths)
 //		描画
 /////////////////////////////////////////////////////////////////////////////////////////
 void Model::Draw(const WorldTransform& transform) {
-	if (!modelData_) { return; }
+	if(!modelData_) { return; }
 	ID3D12GraphicsCommandList* cmdList = GraphicsGroup::GetInstance()->GetCommandList().Get();
 	// 頂点バッファ/インデックスバッファをセット
-	modelData_->vertexBuffer.SetCommand(cmdList);
-	modelData_->indexBuffer.SetCommand(cmdList);
+	modelData_->meshResource.SetCommand(cmdList);
 	BaseModel::Draw(transform);
 }
 
@@ -85,10 +80,10 @@ void Model::ShowImGuiInterface() {
 void Model::CreateMaterialBuffer() {
 	ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
 	// materialData_ に初期値をセットする
-	materialData_.color = CalyxMath::Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	materialData_.shininess = 20.0f;
-	materialData_.lightingMode =LightingMode::HalfLambert;
-	materialData_.uvTransform = CalyxMath::Matrix4x4::MakeIdentity();
+	materialData_.color        = CalyxMath::Vector4(1.0f,1.0f,1.0f,1.0f);
+	materialData_.shininess    = 20.0f;
+	materialData_.lightingMode = LightingMode::HalfLambert;
+	materialData_.uvTransform  = CalyxMath::Matrix4x4::MakeIdentity();
 
 	materialBuffer_.Initialize(device);
 }

@@ -42,7 +42,7 @@ namespace CalyxGraphics {
 				cmdList->SetGraphicsRootDescriptorTable(1,model->GetInstanceSrv());
 
 				model->BindVertexIndexBuffers(cmdList);
-				const UINT indexCount = (UINT)model->GetModelData()->meshData.indices.size();
+				const UINT indexCount = (UINT)model->GetModelData()->meshResource.Indices().size();
 
 				cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -66,7 +66,7 @@ namespace CalyxGraphics {
 				model->SetCommandPalletSrv(2,cmdList);
 
 				model->BindVertexIndexBuffers(cmdList);
-				const UINT indexCount = (UINT)model->GetModelData()->meshData.indices.size();
+				const UINT indexCount = (UINT)model->GetModelData()->meshResource.Indices().size();
 
 				for(const auto& tf : tfs) {
 					(void)tf;

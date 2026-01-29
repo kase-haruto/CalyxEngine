@@ -55,16 +55,16 @@ void BaseModel::Update(float deltaTime) {
 
 void BaseModel::OnModelLoaded() {
 	ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
-	modelData_->vertexBuffer.Initialize(device,UINT(modelData_->meshData.vertices.size()));
-	modelData_->indexBuffer.Initialize(device,UINT(modelData_->meshData.indices.size()));
+	modelData_->meshResource.VertexBuffer().Initialize(device,UINT(modelData_->meshResource.Vertices().size()));
+	modelData_->meshResource.IndexBuffer().Initialize(device,UINT(modelData_->meshResource.Indices().size()));
 
-	modelData_->vertexBuffer.TransferVectorData(modelData_->meshData.vertices);
-	modelData_->indexBuffer.TransferVectorData(modelData_->meshData.indices);
+	modelData_->meshResource.VertexBuffer().TransferVectorData(modelData_->meshResource.Vertices());
+	modelData_->meshResource.IndexBuffer().TransferVectorData(modelData_->meshResource.Indices());
 	// テクスチャ設定
 	if(!handle_) {
 		handle_ = TextureManager::GetInstance()->LoadTexture(
-			"Textures/" + modelData_->meshData.material.textureFilePath);
-		textureName_ = "textures/" + modelData_->meshData.material.textureFilePath;
+			"Textures/" + modelData_->meshResource.Material().textureFilePath);
+		textureName_ = "textures/" + modelData_->meshResource.Material().textureFilePath;
 		if(!handle_) { // 読み込み失敗・空文字列など
 			handle_ = TextureManager::GetInstance()->LoadTexture("textures/white1x1.png");
 		}
@@ -147,7 +147,7 @@ void BaseModel::Draw(const WorldTransform& transform) {
 	cmdList->SetGraphicsRootDescriptorTable(6,envMapHandle);
 
 	// 描画
-	cmdList->DrawIndexedInstanced(UINT(modelData_->meshData.indices.size()),1,0,0,0);
+	cmdList->DrawIndexedInstanced(UINT(modelData_->meshResource.Indices().size()),1,0,0,0);
 }
 
 void BaseModel::ApplyConfig(const BaseModelConfig& config) {
@@ -327,8 +327,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE BaseModel::GetTexSrv() const { return handle_.value(
 D3D12_GPU_DESCRIPTOR_HANDLE BaseModel::GetEnvMapSrv() const { return TextureManager::GetInstance()->GetEnvironmentTextureSrvHandle(); }
 
 void BaseModel::BindVertexIndexBuffers(ID3D12GraphicsCommandList* cmdList) const {
-	modelData_->vertexBuffer.SetCommand(cmdList);
-	modelData_->indexBuffer.SetCommand(cmdList);
+	modelData_->meshResource.SetCommand(cmdList);
 }
 
 void BaseModel::BindMaterialCB(ID3D12GraphicsCommandList* cmdList) const { materialBuffer_.SetCommand(cmdList,0); }

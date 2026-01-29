@@ -56,8 +56,8 @@ namespace CalyxGraphics {
 		) {
 		assert(device && cmd);
 
-		const auto& vb = model.vertexBuffer;
-		const auto& ib = model.indexBuffer;
+		const auto& vb = model.meshResource.VertexBuffer();
+		const auto& ib = model.meshResource.IndexBuffer();
 
 		// -----------------------------
 		// Geometry Desc
@@ -71,14 +71,14 @@ namespace CalyxGraphics {
 		geom.Triangles.VertexBuffer.StrideInBytes =
 			sizeof(VertexPosUvN);
 		geom.Triangles.VertexCount =
-			static_cast<UINT>(model.meshData.vertices.size());
+			static_cast<UINT>(model.meshResource.Vertices().size());
 		geom.Triangles.VertexFormat =
 			DXGI_FORMAT_R32G32B32_FLOAT; // position only
 
 		geom.Triangles.IndexBuffer =
 			ib.GetResource()->GetGPUVirtualAddress();
 		geom.Triangles.IndexCount =
-			static_cast<UINT>(model.meshData.indices.size());
+			static_cast<UINT>(model.meshResource.Indices().size());
 		geom.Triangles.IndexFormat =
 			DXGI_FORMAT_R32_UINT;
 

@@ -34,7 +34,7 @@ void ParticleRenderer::Render(
 
 			ModelData& model =
 				ModelManager::GetInstance()->GetModelData(em->GetModelPath());
-			if (model.meshData.indices.empty()) continue;
+			if (model.meshResource.Indices().empty()) continue;
 			EnsureModelIsReady(model, device);
 
 			DrawModelInstanced(model, cmdList,
@@ -61,7 +61,7 @@ void ParticleRenderer::Render(
 
 			ModelData& model =
 				ModelManager::GetInstance()->GetModelData(em->GetModelPath());
-			if (model.meshData.indices.empty()) continue;
+			if (model.meshResource.Indices().empty()) continue;
 			EnsureModelIsReady(model, device);
 
 			DrawModelInstanced(model, cmdList,
@@ -78,7 +78,7 @@ void ParticleRenderer::RenderGrouped(const std::string& modelPath,
 	if (gpuUnits.empty()) return;
 
 	ModelData& model = ModelManager::GetInstance()->GetModelData(modelPath);
-	if (model.meshData.indices.empty()) return;
+	if (model.meshResource.Indices().empty()) return;
 
 	auto device = GraphicsGroup::GetInstance()->GetDevice().Get();
 	EnsureModelIsReady(model, device);
@@ -95,13 +95,13 @@ void ParticleRenderer::RenderGrouped(const std::string& modelPath,
 }
 
 void ParticleRenderer::EnsureModelIsReady(ModelData& model, ID3D12Device* device){
-	if (!model.vertexBuffer.IsInitialized()){
-		model.vertexBuffer.Initialize(device, static_cast< UINT >(model.meshData.vertices.size()));
-		model.vertexBuffer.TransferVectorData(model.meshData.vertices);
+	if (!model.meshResource.VertexBuffer().IsInitialized()){
+		model.meshResource.VertexBuffer().Initialize(device, static_cast< UINT >(model.meshResource.Vertices().size()));
+		model.meshResource.VertexBuffer().TransferVectorData(model.meshResource.Vertices());
 	}
-	if (!model.indexBuffer.IsInitialized()){
-		model.indexBuffer.Initialize(device, static_cast< UINT >(model.meshData.indices.size()));
-		model.indexBuffer.TransferVectorData(model.meshData.indices);
+	if (!model.meshResource.IndexBuffer().IsInitialized()){
+		model.meshResource.IndexBuffer().Initialize(device, static_cast< UINT >(model.meshResource.Indices().size()));
+		model.meshResource.IndexBuffer().TransferVectorData(model.meshResource.Indices());
 	}
 }
 
@@ -109,9 +109,9 @@ void ParticleRenderer::DrawModelInstanced(ModelData& model,
 										  ID3D12GraphicsCommandList* cmdList,
 										  UINT instanceCount,
 										  D3D12_GPU_DESCRIPTOR_HANDLE instanceHandle){
-	model.vertexBuffer.SetCommand(cmdList);
-	model.indexBuffer.SetCommand(cmdList);
+	model.meshResource.VertexBuffer().SetCommand(cmdList);
+	model.meshResource.IndexBuffer().SetCommand(cmdList);
 	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	cmdList->SetGraphicsRootDescriptorTable(2, instanceHandle);
-	cmdList->DrawInstanced(static_cast<UINT>(model.meshData.indices.size()), instanceCount, 0, 0);
+	cmdList->DrawInstanced(static_cast<UINT>(model.meshResource.Indices().size()), instanceCount, 0, 0);
 }
