@@ -310,14 +310,14 @@ bool BaseGameObject::Save() const {
 	if(path.empty()) return false;
 	nlohmann::json j;
 	ExtractConfigToJson(j);
-	return JsonUtils::Save(path,j);
+	return CalyxUtil::JsonUtils::Save(path,j);
 }
 
 bool BaseGameObject::Load() {
 	const std::string& path = GetConfigPath();
 	if(path.empty()) return false;
 	nlohmann::json j;
-	if(!JsonUtils::Load(path,j)) return false;
+	if(!CalyxUtil::JsonUtils::Load(path, j)) return false;
 	ApplyConfigFromJson(j);
 	return true;
 }

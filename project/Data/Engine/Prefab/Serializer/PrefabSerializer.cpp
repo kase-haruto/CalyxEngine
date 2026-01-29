@@ -35,12 +35,12 @@ bool PrefabSerializer::Save(const std::vector<SceneObject*>& roots,
 
 	for (auto* root : roots) serializeRec(root);
 
-	return JsonUtils::Save(path, jArray);
+	return CalyxUtil::JsonUtils::Save(path, jArray);
 }
 
 std::vector<std::shared_ptr<SceneObject>> PrefabSerializer::Load(const std::string& path) {
 	nlohmann::json jArray;
-	if (!JsonUtils::Load(path, jArray)) return {};
+	if (!CalyxUtil::JsonUtils::Load(path, jArray)) return {};
 
 	std::unordered_map<Guid, std::shared_ptr<SceneObject>> oldToObject;
 	std::unordered_map<Guid, Guid> oldToNewGuid;

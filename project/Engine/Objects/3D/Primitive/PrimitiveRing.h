@@ -18,11 +18,15 @@ public:
 	PrimitiveRing() = default;
 	~PrimitiveRing() override = default;
 
+	/**
+	 * \brief 更新処理
+	 * \param dt デルタタイム
+	 */
 	void Update(float dt) override;
 
 private:
 	//===================================================================*/
 	//			private members
 	//===================================================================*/
-	MeshData meshData_;
+	MeshResource mesh_;
 };
