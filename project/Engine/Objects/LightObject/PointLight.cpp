@@ -1,6 +1,8 @@
 #include <Engine/Objects/LightObject/PointLight.h>
 
 /* engine */
+#include "Engine/Application/UI/Panels/InspectorPanel.h"
+
 #include <Engine/foundation/Utility/FileSystem/ConfigPathResolver/ConfigPathResolver.h>
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
@@ -53,11 +55,11 @@ void PointLight::Update([[maybe_unused]]float dt){}
 void PointLight::AlwaysUpdate([[maybe_unused]]float dt){}
 
 void PointLight::ShowGui(){
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(DEVELOP)
 	ImGui::Dummy(ImVec2(0.0f, 5.0f));
 	
 	// コンフィグ
-	if (GuiCmd::BeginSection("ParameterData")) {
+	if (GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::ParameterData)) {
 		config_.ShowGui();
 		ImGui::Separator();
 		GuiCmd::EndSection();
@@ -66,13 +68,13 @@ void PointLight::ShowGui(){
 	ImGui::Separator();
 	
 	// トランスフォーム (位置)
-	if (GuiCmd::BeginSection("Object")) {
+	if (GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::Object)) {
 		GuiCmd::DragFloat3("position", lightData_.position);
 		GuiCmd::EndSection();
 	}
 
 	// ライトパラメータ
-	if (GuiCmd::BeginSection("ParameterData")) {
+	if (GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::ParameterData)) {
 		GuiCmd::ColorEdit4("color", lightData_.color);
 		GuiCmd::SliderFloat("Intensity", lightData_.intensity, 0.0f, 1.0f);
 		GuiCmd::DragFloat("radius", lightData_.radius);

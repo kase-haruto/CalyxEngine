@@ -31,7 +31,7 @@ public:
 	void TransferVectorData(const std::vector<T>& data);
 
 	bool IsInitialized() const{
-		return resource_ != nullptr && mappedPtr_ != nullptr;
+		return resource_ != nullptr;
 	}
 
 	// リソースの取得 ===================================================================*/

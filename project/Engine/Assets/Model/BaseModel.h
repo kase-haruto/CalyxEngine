@@ -53,7 +53,7 @@ public:
 	//--------- accessor -----------------------------------------------------
 	BlendMode GetBlendMode() const { return blendMode_; }
 	void SetBlendMode(BlendMode mode) { blendMode_ = mode; }
-	const std::optional<ModelData>& GetModelData()const;
+	ModelData* GetModelData()const;
 	const CalyxMath::Vector4& GetColor() const { return materialData_.color; }
 	void SetColor(const CalyxMath::Vector4& color) { materialData_.color = color; }
 	void SetIsDrawEnable(bool drawEnable) { isDrawEnable_ = drawEnable; }
@@ -94,7 +94,7 @@ protected:
 
 	std::string fileName_;
 	std::string textureName_ = "textures/white1x1.png"; // デフォルトのテクスチャ名
-	std::optional<ModelData> modelData_;
+	ModelData* modelData_;
 	Material materialData_;
 public:
 	BlendMode blendMode_ = BlendMode::NORMAL;

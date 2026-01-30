@@ -36,7 +36,7 @@ namespace CalyxGraphics {
 			shadowCB_.SetCommand(cmdList,0);
 
 			for(const auto& [model, tfs] : staticVisible) {
-				if(!model || !model->GetModelData().has_value()) { continue; }
+				if(!model || !model->GetModelData()) { continue; }
 				if(tfs.empty()) { continue; }
 
 				cmdList->SetGraphicsRootDescriptorTable(1,model->GetInstanceSrv());
@@ -58,7 +58,7 @@ namespace CalyxGraphics {
 			shadowCB_.SetCommand(cmdList,0);
 
 			for(const auto& [model, tfs] : skinnedVisible) {
-				if(!model || !model->GetModelData().has_value()) continue;
+				if(!model || !model->GetModelData()) continue;
 
 				cmdList->SetGraphicsRootDescriptorTable(2,model->GetJointMatrixSrv());
 

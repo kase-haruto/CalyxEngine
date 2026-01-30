@@ -10,6 +10,15 @@
 
 namespace CalyxEffect {
 
+	enum class ParticlePrimitives {
+		plane = 0, //< 平面
+		sphere,    //< 球
+		cube,      //< 立方体
+		cylinder,  //< 円柱
+		torus,     //< トーラス
+		triangle,  //< 三角形
+	};
+
 	/*-----------------------------------------------------------------------------------------
 	 * BaseEmitter
 	 * - パーティクルエミッタ基底クラス
@@ -25,6 +34,10 @@ namespace CalyxEffect {
 
 		virtual void Update(float deltaTime) = 0;
 		virtual void TransferParticleDataToGPU();
+		/**
+		 * \brief モデルデータのチェックと読み込み
+		 */
+		MeshResource& GetMeshResource();
 
 		/**
 		 * \brief 再生
@@ -53,15 +66,19 @@ namespace CalyxEffect {
 		const DxStructuredBuffer<ParticleConstantData>& GetInstanceBuffer() const { return instanceBuffer_; }
 		const std::string&                              GetModelPath() const { return modelPath; }
 
+		void                                     SetPrimitive(ParticlePrimitives primitive) { primitive_ = primitive; }
+		const std::optional<ParticlePrimitives>& GetPrimitive() const { return primitive_; }
+
 	protected:
 		//===================================================================*/
 		//					protected variable
 		//===================================================================*/
-		MeshResource                             meshData_;               //< モデルデータ(使用しない場合はnull)
-		std::string                              modelPath = "plane.obj"; //< モデルパス（デフォルトは平面
-		CalyxMath::Vector3                       position_;               //< emitterの位置
-		ParticleMaterial                         material_;               //< パーティクルのマテリアル
-		std::vector<FxUnit>                      units_;                  //< パーティクルユニットの配列
+		std::optional<ParticlePrimitives>        primitive_ = std::nullopt; //< プリミティブ形状(primitiveで発生する場合)
+		MeshResource                             meshData_;                 //< モデルデータ(使用しない場合はnull)
+		std::string                              modelPath = "plane.obj";   //< モデルパス（デフォルトは平面
+		CalyxMath::Vector3                       position_;                 //< emitterの位置
+		ParticleMaterial                         material_;                 //< パーティクルのマテリアル
+		std::vector<FxUnit>                      units_;                    //< パーティクルユニットの配列
 		DxStructuredBuffer<ParticleConstantData> instanceBuffer_;
 		DxConstantBuffer<ParticleMaterial>       materialBuffer_; // パーティクルマテリアルの定数バッファ
 	};

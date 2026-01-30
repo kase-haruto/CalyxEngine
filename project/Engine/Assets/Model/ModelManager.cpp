@@ -6,12 +6,12 @@
 #include <Engine/Graphics/Pipeline/PipelineDesc/Input/VertexLayout.h>
 
 // static 変数初期化
-std::unique_ptr<ModelManager> ModelManager::instance_ = nullptr;
-const std::string ModelManager::directoryPath_ = "Resources/models";
+std::unique_ptr<ModelManager> ModelManager::instance_      = nullptr;
+const std::string             ModelManager::directoryPath_ = "Resources/models";
 
 ModelManager::ModelManager() {
 	// スレッドを起動
-	workerThread_ = std::thread(&ModelManager::WorkerMain, this);
+	workerThread_ = std::thread(&ModelManager::WorkerMain,this);
 }
 
 ModelManager::~ModelManager() {
@@ -22,46 +22,35 @@ ModelManager::~ModelManager() {
 	}
 	taskQueueCv_.notify_all();
 
-	if (workerThread_.joinable()) {
-		workerThread_.join();
-	}
+	if(workerThread_.joinable()) { workerThread_.join(); }
 }
 
 ModelManager* ModelManager::GetInstance() {
-	if (!instance_) {
-		instance_ = std::unique_ptr<ModelManager>(new ModelManager());
-	}
+	if(!instance_) { instance_ = std::unique_ptr<ModelManager>(new ModelManager()); }
 	return instance_.get();
 }
 
-void ModelManager::Initialize() {
-	GetInstance();
-}
+void ModelManager::Initialize() { GetInstance(); }
 
-void ModelManager::Finalize() {
-	instance_.reset();
-}
+void ModelManager::Finalize() { instance_.reset(); }
 
 //----------------------------------------------------------------------------
 // 非同期ロード開始
 //----------------------------------------------------------------------------
-std::future<ModelData> ModelManager::LoadModel(const std::string& fileName) {
-	// 既にロード済みかどうかチェック
+std::future<ModelData*> ModelManager::LoadModel(const std::string& fileName) {
 	{
 		std::lock_guard<std::mutex> lock(instance_->modelDataMutex_);
-		auto it = instance_->modelDatas_.find(fileName);
-		if (it != instance_->modelDatas_.end()) {
-			// 既にロード済みなら、即座に value を設定した future を返す
-			std::promise<ModelData> promise;
-			promise.set_value(it->second);
+		auto                        it = instance_->modelDatas_.find(fileName);
+		if(it != instance_->modelDatas_.end()) {
+			std::promise<ModelData*> promise;
+			promise.set_value(it->second.get());
 			return promise.get_future();
 		}
 	}
 
-	// キューに新しいリクエストを積む
 	LoadRequest request;
-	request.fileName = fileName;
-	std::future<ModelData> fut = request.promise.get_future();
+	request.fileName            = fileName;
+	std::future<ModelData*> fut = request.promise.get_future();
 
 	{
 		std::lock_guard<std::mutex> lock(instance_->taskQueueMutex_);
@@ -76,34 +65,36 @@ std::future<ModelData> ModelManager::LoadModel(const std::string& fileName) {
 // ワーカースレッドのループ処理
 //----------------------------------------------------------------------------
 void ModelManager::WorkerMain() {
-	while (true) {
+	while(true) {
 		LoadRequest currentRequest;
+
 		{
-			// リクエスト待ち
 			std::unique_lock<std::mutex> lock(taskQueueMutex_);
-			taskQueueCv_.wait(lock, [this] {
-				return stopWorker_ || !requestQueue_.empty();
-			});
-			if (stopWorker_ && requestQueue_.empty()) {
-				// 終了指示
-				return;
-			}
-			// キュー先頭を取り出し
+			taskQueueCv_.wait(lock,[this] { return stopWorker_ || !requestQueue_.empty(); });
+
+			if(stopWorker_ && requestQueue_.empty()) { return; }
+
 			currentRequest = std::move(requestQueue_.front());
 			requestQueue_.pop();
 		}
 
-		// ファイルを読み込み
-		ModelData newModel = LoadModelFile(directoryPath_, currentRequest.fileName);
+		// CPUロード
+		ModelData model = LoadModelFile(directoryPath_,currentRequest.fileName);
 
-		// (B) GPUリソース作成はメインスレッドで行うため、一旦 pendingTasks_ に格納
+		// unique_ptr に包む
+		auto modelPtr = std::make_unique<ModelData>(std::move(model));
+
+		// pending タスクに積む
 		{
 			std::lock_guard<std::mutex> lock(pendingTasksMutex_);
-			pendingTasks_.push_back({ currentRequest.fileName, newModel });
+			pendingTasks_.push_back({
+					currentRequest.fileName,
+					std::move(modelPtr)
+				});
 		}
 
-		// CPUロード完了を promise で通知
-		currentRequest.promise.set_value(newModel);
+		// future に *まだ nullptr を返す*（GPU リソース未作成のため）
+		currentRequest.promise.set_value(nullptr);
 	}
 }
 
@@ -112,25 +103,23 @@ void ModelManager::WorkerMain() {
 //----------------------------------------------------------------------------
 void ModelManager::ProcessLoadingTasks() {
 	std::vector<LoadingTask> tasks;
+
 	{
 		std::lock_guard<std::mutex> lock(pendingTasksMutex_);
 		tasks.swap(pendingTasks_);
 	}
 
-	for (auto& t : tasks) {
-		// GPUリソースを生成
-		CreateGpuResources(t.fileName, t.modelData);
+	for(auto& t : tasks) {
+		// 必ず GPU リソースを作成
+		CreateGpuResources(t.fileName,*t.model);
 
-		// modelDatas_ に登録
+		// modelDatas_ に move で保存
 		{
 			std::lock_guard<std::mutex> lock(modelDataMutex_);
-			modelDatas_[t.fileName] = t.modelData;
+			modelDatas_[t.fileName] = std::move(t.model);
 		}
 
-		// コールバック呼び出し(任意)
-		if (onModelLoadedCallback_) {
-			onModelLoadedCallback_(t.fileName);
-		}
+		if(onModelLoadedCallback_) { onModelLoadedCallback_(t.fileName); }
 	}
 }
 
@@ -140,31 +129,24 @@ void ModelManager::ProcessLoadingTasks() {
 ModelData& ModelManager::GetModelData(const std::string& fileName) {
 	std::lock_guard<std::mutex> lock(modelDataMutex_);
 
-	if (auto it = modelDatas_.find(fileName); it != modelDatas_.end()) {
-		return it->second;
-	}
+	auto it = modelDatas_.find(fileName);
+	if(it != modelDatas_.end()) { return *(it->second); }
 
-	// フォールバック: plane があればそれを返す。なければダミーを返す。
 	const std::string defaultModel = "plane.obj";
-	if (auto it = modelDatas_.find(defaultModel); it != modelDatas_.end()) {
-		return it->second;
-	}
+	auto              it2          = modelDatas_.find(defaultModel);
+	if(it2 != modelDatas_.end()) { return *(it2->second); }
 
-	static ModelData dummy; // 未ロード時の安全なフォールバック
+	static ModelData dummy;
 	return dummy;
 }
 
 MeshResource& ModelManager::GetMeshResource(const std::string& fileName) {
 	std::lock_guard<std::mutex> lock(modelDataMutex_);
 
-	if (auto it = modelDatas_.find(fileName); it != modelDatas_.end()) {
-		return it->second.meshResource;
-	}
+	if(auto it = modelDatas_.find(fileName); it != modelDatas_.end()) { return it->second->meshResource; }
 
 	const std::string defaultModel = "plane.obj";
-	if (auto it = modelDatas_.find(defaultModel); it != modelDatas_.end()) {
-		return it->second.meshResource;
-	}
+	if(auto it = modelDatas_.find(defaultModel); it != modelDatas_.end()) { return it->second->meshResource; }
 
 	static ModelData dummy; // 未ロード時の安全なフォールバック
 	return dummy.meshResource;
@@ -178,9 +160,7 @@ bool ModelManager::IsModelLoaded(const std::string& fileName) const {
 //----------------------------------------------------------------------------
 // ロード完了時のコールバック設定
 //----------------------------------------------------------------------------
-void ModelManager::SetOnModelLoadedCallback(std::function<void(const std::string&)> callback) {
-	onModelLoadedCallback_ = callback;
-}
+void ModelManager::SetOnModelLoadedCallback(std::function<void(const std::string&)> callback) { onModelLoadedCallback_ = callback; }
 
 //----------------------------------------------------------------------------
 // 複数ファイルをまとめてロード (サンプル)
@@ -214,105 +194,94 @@ void ModelManager::StartUpLoad() {
 //----------------------------------------------------------------------------
 std::vector<std::string> ModelManager::GetLoadedModelNames() const {
 	std::lock_guard<std::mutex> lock(modelDataMutex_);
-	std::vector<std::string> result;
-	for (auto& kv : modelDatas_) {
-		result.push_back(kv.first);
-	}
+	std::vector<std::string>    result;
+	for(auto& kv : modelDatas_) { result.push_back(kv.first); }
 	return result;
 }
 
 //=============================================================================
-//  
+//
 //=============================================================================
-ModelData ModelManager::LoadModelFile(const std::string& directoryPath, const std::string& fileNameWithExt) {
+ModelData ModelManager::LoadModelFile(const std::string& directoryPath,const std::string& fileNameWithExt) {
 	Assimp::Importer importer;
 
 	// パスを組み立て
 	std::string filePath = directoryPath + "/"
-		+ fileNameWithExt.substr(0, fileNameWithExt.find_last_of('.')) + "/"
-		+ fileNameWithExt;
+						   + fileNameWithExt.substr(0,fileNameWithExt.find_last_of('.')) + "/"
+						   + fileNameWithExt;
 
-		const aiScene* scene = importer.ReadFile(
+	const aiScene* scene = importer.ReadFile(
 		filePath.c_str(),
 		aiProcess_Triangulate |
 		aiProcess_FlipUVs |
 		aiProcess_CalcTangentSpace
-	);
-	if (!scene) {
-		throw std::runtime_error("Assimp failed to load: " + filePath);
-	}
-	if (!scene->HasMeshes()) {
-		throw std::runtime_error("No meshes found in file: " + filePath);
-	}
+		);
+	if(!scene) { throw std::runtime_error("Assimp failed to load: " + filePath); }
+	if(!scene->HasMeshes()) { throw std::runtime_error("No meshes found in file: " + filePath); }
 
 	ModelData modelData;
 
 	// メッシュデータを格納
-	for (unsigned int meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
+	for(unsigned int meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
 		const aiMesh* mesh = scene->mMeshes[meshIndex];
-		LoadMesh(mesh, modelData);
+		LoadMesh(mesh,modelData);
 
 		// ボーンごとの影響を集約
-		for (uint32_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
-
-			aiBone* bone = mesh->mBones[boneIndex];
-			std::string jointName = bone->mName.C_Str();
+		for(uint32_t boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
+			aiBone*          bone            = mesh->mBones[boneIndex];
+			std::string      jointName       = bone->mName.C_Str();
 			JointWeightData& jointWeightData = modelData.skinClusterData[jointName];
 
-			aiMatrix4x4 bindPoseMatrixAssimp = bone->mOffsetMatrix.Inverse();
-			aiVector3D scale, translate;
+			aiMatrix4x4  bindPoseMatrixAssimp = bone->mOffsetMatrix.Inverse();
+			aiVector3D   scale,translate;
 			aiQuaternion rotate;
-			bindPoseMatrixAssimp.Decompose(scale, rotate, translate);
+			bindPoseMatrixAssimp.Decompose(scale,rotate,translate);
 
 			CalyxMath::Matrix4x4 bindPoseMatrix =
-				CalyxMath::MakeAffineMatrix({ scale.x,scale.y,scale.z }, { rotate.x,-rotate.y,-rotate.z,rotate.w }, { -translate.x,translate.y,translate.z });
+				CalyxMath::MakeAffineMatrix({scale.x,scale.y,scale.z},{rotate.x,-rotate.y,-rotate.z,rotate.w},{-translate.x,translate.y,translate.z});
 			jointWeightData.inverseBindPoseMatrix = CalyxMath::Matrix4x4::Inverse(bindPoseMatrix);
 
-			for (uint32_t weightIndex = 0; weightIndex < bone->mNumWeights; ++weightIndex) {
-
-				jointWeightData.vertexWeights.push_back({ bone->mWeights[weightIndex].mWeight, bone->mWeights[weightIndex].mVertexId });
-			}
+			for(uint32_t weightIndex = 0; weightIndex < bone->mNumWeights; ++weightIndex) { jointWeightData.vertexWeights.push_back({bone->mWeights[weightIndex].mWeight,bone->mWeights[weightIndex].mVertexId}); }
 		}
 
-
-		LoadMaterial(scene, mesh, modelData);
+		LoadMaterial(scene,mesh,modelData);
 	}
 
 	// アニメーション(サンプル)
-	if (scene->HasAnimations()) {
+	if(scene->HasAnimations()) {
 		aiAnimation* aiAnim = scene->mAnimations[0];
-		Animation animation;
-		float ticksPerSecond = (float)(aiAnim->mTicksPerSecond != 0 ? aiAnim->mTicksPerSecond : 25.0f);
-		animation.duration = (float)(aiAnim->mDuration / ticksPerSecond);
+		Animation    animation;
+		float        ticksPerSecond = (float)(aiAnim->mTicksPerSecond != 0 ? aiAnim->mTicksPerSecond : 25.0f);
+		animation.duration          = (float)(aiAnim->mDuration / ticksPerSecond);
 
-		for (unsigned int channelIdx = 0; channelIdx < aiAnim->mNumChannels; ++channelIdx) {
-			aiNodeAnim* nodeAnim = aiAnim->mChannels[channelIdx];
+		for(unsigned int channelIdx = 0; channelIdx < aiAnim->mNumChannels; ++channelIdx) {
+			aiNodeAnim*   nodeAnim = aiAnim->mChannels[channelIdx];
 			NodeAnimation nodeAnimation;
 
 			// Translation Key
-			for (uint32_t keyIndex = 0; keyIndex < nodeAnim->mNumPositionKeys; ++keyIndex) {
-				aiVectorKey& keyAssimp = nodeAnim->mPositionKeys[keyIndex];
+			for(uint32_t keyIndex = 0; keyIndex < nodeAnim->mNumPositionKeys; ++keyIndex) {
+				aiVectorKey&    keyAssimp = nodeAnim->mPositionKeys[keyIndex];
 				KeyframeVector3 keyframe;
-				keyframe.time = static_cast<float>(keyAssimp.mTime / aiAnim->mTicksPerSecond);
-				keyframe.value = { -keyAssimp.mValue.x, keyAssimp.mValue.y, keyAssimp.mValue.z }; // 右手→左手
+				keyframe.time  = static_cast<float>(keyAssimp.mTime / aiAnim->mTicksPerSecond);
+				keyframe.value = {-keyAssimp.mValue.x,keyAssimp.mValue.y,keyAssimp.mValue.z}; // 右手→左手
 				nodeAnimation.translate.keyframes.push_back(keyframe);
 			}
 
 			// Rotation Key
-			for (uint32_t keyIndex = 0; keyIndex < nodeAnim->mNumRotationKeys; ++keyIndex) {
-				aiQuatKey& keyAssimp = nodeAnim->mRotationKeys[keyIndex];
+			for(uint32_t keyIndex = 0; keyIndex < nodeAnim->mNumRotationKeys; ++keyIndex) {
+				aiQuatKey&         keyAssimp = nodeAnim->mRotationKeys[keyIndex];
 				KeyframeQuaternion keyframe;
-				keyframe.time = static_cast<float>(keyAssimp.mTime / aiAnim->mTicksPerSecond);
-				keyframe.value = { keyAssimp.mValue.x, -keyAssimp.mValue.y, -keyAssimp.mValue.z, keyAssimp.mValue.w }; // 右手→左手
+				keyframe.time  = static_cast<float>(keyAssimp.mTime / aiAnim->mTicksPerSecond);
+				keyframe.value = {keyAssimp.mValue.x,-keyAssimp.mValue.y,-keyAssimp.mValue.z,keyAssimp.mValue.w}; // 右手→左手
 				nodeAnimation.rotate.keyframes.push_back(keyframe);
 			}
 
 			// Scaling Key
-			for (uint32_t keyIndex = 0; keyIndex < nodeAnim->mNumScalingKeys; ++keyIndex) {
-				aiVectorKey& keyAssimp = nodeAnim->mScalingKeys[keyIndex];
+			for(uint32_t keyIndex = 0; keyIndex < nodeAnim->mNumScalingKeys; ++keyIndex) {
+				aiVectorKey&    keyAssimp = nodeAnim->mScalingKeys[keyIndex];
 				KeyframeVector3 keyframe;
-				keyframe.time = static_cast<float>(keyAssimp.mTime / aiAnim->mTicksPerSecond);
-				keyframe.value = { keyAssimp.mValue.x, keyAssimp.mValue.y, keyAssimp.mValue.z }; // スケールはそのまま
+				keyframe.time  = static_cast<float>(keyAssimp.mTime / aiAnim->mTicksPerSecond);
+				keyframe.value = {keyAssimp.mValue.x,keyAssimp.mValue.y,keyAssimp.mValue.z}; // スケールはそのまま
 				nodeAnimation.scale.keyframes.push_back(keyframe);
 			}
 			std::string nodeName(nodeAnim->mNodeName.C_Str());
@@ -322,7 +291,7 @@ ModelData ModelManager::LoadModelFile(const std::string& directoryPath, const st
 	}
 
 	// スケルトン構築
-	Node rootNode = ConvertAssimpNode(scene->mRootNode);
+	Node rootNode      = ConvertAssimpNode(scene->mRootNode);
 	modelData.skeleton = CreateSkeleton(rootNode);
 
 	return modelData;
@@ -331,47 +300,50 @@ ModelData ModelManager::LoadModelFile(const std::string& directoryPath, const st
 //----------------------------------------------------------------------------
 // GPUリソース作成 (ProcessLoadingTasksから呼ばれる)
 //----------------------------------------------------------------------------
-void ModelManager::CreateGpuResources([[maybe_unused]] const std::string& fileName, ModelData model) {
+void ModelManager::CreateGpuResources(const std::string&, ModelData& model) {
 	auto device = GraphicsGroup::GetInstance()->GetDevice();
 
-	DxVertexBuffer<VertexPosUvN> new_vertexBuffer;
-	new_vertexBuffer.Initialize(device);
-	DxIndexBuffer<uint32_t> new_indexBuffer;
-	new_indexBuffer.Initialize(device);
+	const UINT vCount = (UINT)model.meshResource.Vertices().size();
+	const UINT iCount = (UINT)model.meshResource.Indices().size();
+	if (vCount == 0 || iCount == 0) return;
 
-	model.meshResource.VertexBuffer() = new_vertexBuffer;
-	model.meshResource.IndexBuffer() = new_indexBuffer;
+	auto& vb = model.meshResource.VertexBuffer();
+	auto& ib = model.meshResource.IndexBuffer();
+
+	vb.Initialize(device, vCount);
+	vb.TransferVectorData(model.meshResource.Vertices());
+
+	ib.Initialize(device, iCount);
+	ib.TransferVectorData(model.meshResource.Indices());
 }
 
 //----------------------------------------------------------------------------
 // メッシュ読み込み
 //----------------------------------------------------------------------------
-void ModelManager::LoadMesh(const aiMesh* mesh, ModelData& modelData) {
+void ModelManager::LoadMesh(const aiMesh* mesh,ModelData& modelData) {
 	uint32_t baseVertex = static_cast<uint32_t>(modelData.meshResource.Vertices().size());
 
 	// 初期AABBを極端な値に
-	CalyxMath::Vector3 minPos = { FLT_MAX, FLT_MAX, FLT_MAX };
-	CalyxMath::Vector3 maxPos = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
+	CalyxMath::Vector3 minPos = {FLT_MAX, FLT_MAX, FLT_MAX};
+	CalyxMath::Vector3 maxPos = {-FLT_MAX,-FLT_MAX,-FLT_MAX};
 
-	for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
+	for(unsigned int i = 0; i < mesh->mNumVertices; ++i) {
 		VertexPosUvN vertex{};
-		vertex.position = { -mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z, 1.0f };
-		if (mesh->HasNormals()) {
-			vertex.normal = { -mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
-		}
-		if (mesh->HasTextureCoords(0)) {
+		vertex.position = {-mesh->mVertices[i].x,mesh->mVertices[i].y,mesh->mVertices[i].z,1.0f};
+		if(mesh->HasNormals()) { vertex.normal = {-mesh->mNormals[i].x,mesh->mNormals[i].y,mesh->mNormals[i].z}; }
+		if(mesh->HasTextureCoords(0)) {
 			vertex.texcoord.x = mesh->mTextureCoords[0][i].x;
 			vertex.texcoord.y = mesh->mTextureCoords[0][i].y;
 		}
 		modelData.meshResource.data.vertices.push_back(vertex);
 
 		// AABB更新用の min/max 反映
-		CalyxMath::Vector3 pos = { vertex.position.x, vertex.position.y, vertex.position.z };
-		minPos = CalyxMath::Vector3::Min(minPos, pos);
-		maxPos = CalyxMath::Vector3::Max(maxPos, pos);
+		CalyxMath::Vector3 pos = {vertex.position.x,vertex.position.y,vertex.position.z};
+		minPos                 = CalyxMath::Vector3::Min(minPos,pos);
+		maxPos                 = CalyxMath::Vector3::Max(maxPos,pos);
 	}
 
-	for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
+	for(unsigned int i = 0; i < mesh->mNumFaces; ++i) {
 		const aiFace& face = mesh->mFaces[i];
 		modelData.meshResource.data.indices.push_back(baseVertex + face.mIndices[0]);
 		modelData.meshResource.data.indices.push_back(baseVertex + face.mIndices[2]);
@@ -379,100 +351,80 @@ void ModelManager::LoadMesh(const aiMesh* mesh, ModelData& modelData) {
 	}
 
 	// ローカルAABBを格納
-	if (modelData.localAABB.min_ == CalyxMath::Vector3{} && modelData.localAABB.max_ == CalyxMath::Vector3{}) {
-		modelData.localAABB.Initialize(minPos, maxPos);
-	} else {
+	if(modelData.localAABB.min_ == CalyxMath::Vector3{} && modelData.localAABB.max_ == CalyxMath::Vector3{}) { modelData.localAABB.Initialize(minPos,maxPos); } else {
 		// モデル全体の AABB を統合（複数メッシュ時）
-		CalyxMath::Vector3 mergedMin = CalyxMath::Vector3::Min(modelData.localAABB.min_, minPos);
-		CalyxMath::Vector3 mergedMax = CalyxMath::Vector3::Max(modelData.localAABB.max_, maxPos);
-		modelData.localAABB.Initialize(mergedMin, mergedMax);
+		CalyxMath::Vector3 mergedMin = CalyxMath::Vector3::Min(modelData.localAABB.min_,minPos);
+		CalyxMath::Vector3 mergedMax = CalyxMath::Vector3::Max(modelData.localAABB.max_,maxPos);
+		modelData.localAABB.Initialize(mergedMin,mergedMax);
 	}
 }
 
 //----------------------------------------------------------------------------
 // マテリアル読み込み
 //----------------------------------------------------------------------------
-void ModelManager::LoadMaterial(const aiScene* scene, const aiMesh* mesh, ModelData& modelData) {
-	if (!scene->HasMaterials()) {
+void ModelManager::LoadMaterial(const aiScene* scene,const aiMesh* mesh,ModelData& modelData) {
+	if(!scene->HasMaterials()) {
 		modelData.meshResource.data.material.textureFilePath = "white1x1.png";
 		return;
 	}
 	const aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-	if (!material) {
+	if(!material) {
 		modelData.meshResource.data.material.textureFilePath = "white1x1.png";
 		return;
 	}
 
 	aiString texPath;
-	if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) == AI_SUCCESS) {
-		modelData.meshResource.data.material.textureFilePath = texPath.C_Str();
-	} else {
-		modelData.meshResource.Material().textureFilePath = "white1x1.png";
-	}
+	if(material->GetTexture(aiTextureType_DIFFUSE,0,&texPath) == AI_SUCCESS) { modelData.meshResource.data.material.textureFilePath = texPath.C_Str(); } else { modelData.meshResource.Material().textureFilePath = "white1x1.png"; }
 
-	LoadUVTransform(material, modelData.meshResource.Material());
+	LoadUVTransform(material,modelData.meshResource.Material());
 }
 
 //----------------------------------------------------------------------------
 // UV変換情報
 //----------------------------------------------------------------------------
-void ModelManager::LoadUVTransform(const aiMaterial* material, MaterialData& outMaterial) {
+void ModelManager::LoadUVTransform(const aiMaterial* material,MaterialData& outMaterial) {
 	aiUVTransform transformData;
-	if (material->Get(AI_MATKEY_UVTRANSFORM(aiTextureType_DIFFUSE, 0), transformData) == AI_SUCCESS) {
-		outMaterial.uv_offset = { transformData.mTranslation.x, transformData.mTranslation.y, 0.0f };
-		outMaterial.uv_scale = { transformData.mScaling.x, transformData.mScaling.y, 1.0f };
+	if(material->Get(AI_MATKEY_UVTRANSFORM(aiTextureType_DIFFUSE,0),transformData) == AI_SUCCESS) {
+		outMaterial.uv_offset = {transformData.mTranslation.x,transformData.mTranslation.y,0.0f};
+		outMaterial.uv_scale  = {transformData.mScaling.x,transformData.mScaling.y,1.0f};
 	} else {
-		outMaterial.uv_offset = { 0, 0, 0 };
-		outMaterial.uv_scale = { 1, 1, 1 };
+		outMaterial.uv_offset = {0,0,0};
+		outMaterial.uv_scale  = {1,1,1};
 	}
 }
 
-void ModelManager::LoadSkinData([[maybe_unused]] const aiMesh* mesh, [[maybe_unused]] ModelData& modelData) {
-
-}
+void ModelManager::LoadSkinData([[maybe_unused]] const aiMesh* mesh,[[maybe_unused]] ModelData& modelData) {}
 
 //----------------------------------------------------------------------------
 // アニメーション評価サンプル
 //----------------------------------------------------------------------------
-CalyxMath::Vector3 ModelManager::Evaluate(const AnimationCurve<CalyxMath::Vector3>& curve, float time) {
+CalyxMath::Vector3 ModelManager::Evaluate(const AnimationCurve<CalyxMath::Vector3>& curve,float time) {
 	const auto& keyframes = curve.keyframes;
-	if (keyframes.empty()) {
-		return { 0,0,0 };
-	}
-	if (time <= keyframes.front().time) {
-		return keyframes.front().value;
-	}
-	if (time >= keyframes.back().time) {
-		return keyframes.back().value;
-	}
-	for (int i = 0; i < (int)keyframes.size() - 1; ++i) {
+	if(keyframes.empty()) { return {0,0,0}; }
+	if(time <= keyframes.front().time) { return keyframes.front().value; }
+	if(time >= keyframes.back().time) { return keyframes.back().value; }
+	for(int i = 0; i < (int)keyframes.size() - 1; ++i) {
 		float t0 = keyframes[i].time;
 		float t1 = keyframes[i + 1].time;
-		if (time >= t0 && time <= t1) {
+		if(time >= t0 && time <= t1) {
 			float localT = (time - t0) / (t1 - t0);
-			return CalyxMath::Vector3::Lerp(keyframes[i].value, keyframes[i + 1].value, localT);
+			return CalyxMath::Vector3::Lerp(keyframes[i].value,keyframes[i + 1].value,localT);
 		}
 	}
 	return keyframes.back().value;
 }
 
-CalyxMath::Quaternion ModelManager::Evaluate(const AnimationCurve<CalyxMath::Quaternion>& curve, float time) {
+CalyxMath::Quaternion ModelManager::Evaluate(const AnimationCurve<CalyxMath::Quaternion>& curve,float time) {
 	const auto& keyframes = curve.keyframes;
-	if (keyframes.empty()) {
-		return { 0,0,0,1 };
-	}
-	if (time <= keyframes.front().time) {
-		return keyframes.front().value;
-	}
-	if (time >= keyframes.back().time) {
-		return keyframes.back().value;
-	}
-	for (int i = 0; i < (int)keyframes.size() - 1; ++i) {
+	if(keyframes.empty()) { return {0,0,0,1}; }
+	if(time <= keyframes.front().time) { return keyframes.front().value; }
+	if(time >= keyframes.back().time) { return keyframes.back().value; }
+	for(int i = 0; i < (int)keyframes.size() - 1; ++i) {
 		float t0 = keyframes[i].time;
 		float t1 = keyframes[i + 1].time;
-		if (time >= t0 && time <= t1) {
+		if(time >= t0 && time <= t1) {
 			float localT = (time - t0) / (t1 - t0);
-			return CalyxMath::Quaternion::Slerp(keyframes[i].value, keyframes[i + 1].value, localT);
+			return CalyxMath::Quaternion::Slerp(keyframes[i].value,keyframes[i + 1].value,localT);
 		}
 	}
 	return keyframes.back().value;

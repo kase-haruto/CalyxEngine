@@ -121,7 +121,7 @@ void ModelRenderer::PreCullAndBatch(const Camera3d* camera) {
 	// =========================================================
 	for(auto& [model, insts] : staticModels_) {
 		if(!model) continue;
-		if(!model->GetModelData().has_value()) continue;
+		if(!model->GetModelData()) continue;
 		if(!model->GetIsDrawEnable()) continue;
 
 		const AABB& localAABB = model->GetModelData()->localAABB;
@@ -152,7 +152,7 @@ void ModelRenderer::PreCullAndBatch(const Camera3d* camera) {
 	// =========================================================
 	for(auto& [model, insts] : skinnedModels_) {
 		if(!model) continue;
-		if(!model->GetModelData().has_value()) continue;
+		if(!model->GetModelData()) continue;
 
 		const AABB& localAABB = model->GetModelData()->localAABB;
 
@@ -189,7 +189,7 @@ void ModelRenderer::PreCullAndBatch(const Camera3d* camera) {
 /////////////////////////////////////////////////////////////////////////////////////////
 void ModelRenderer::BuildStaticBatches() {
 	for(auto& [model, insts] : staticModels_) {
-		if(!model->GetModelData().has_value() || !model->GetIsDrawEnable()) continue;
+		if(!model->GetModelData() || !model->GetIsDrawEnable()) continue;
 
 		std::vector<WorldTransform>		visTf;
 		std::vector<GpuBillboardParams> visBb;
@@ -222,7 +222,7 @@ void ModelRenderer::BuildStaticBatches() {
 /////////////////////////////////////////////////////////////////////////////////////////
 void ModelRenderer::BuildSkinnedBatches() {
 	for(auto& [model, insts] : skinnedModels_) {
-		if(!model->GetModelData().has_value()) continue;
+		if(!model->GetModelData()) continue;
 
 		tempVisibleSkinned_.clear();
 		tempVisibleSkinned_.reserve(insts.size());

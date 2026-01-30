@@ -2,12 +2,12 @@
     "objects": [
         {
             "autoDestroy": false,
-            "blendMode": 2,
+            "blendMode": 3,
             "color": {
                 "w": 1.0,
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
+                "x": 0.6117647290229797,
+                "y": 0.25882354378700256,
+                "z": 0.5411764979362488
             },
             "emitCount": 10,
             "emitDelay": 0.0,
@@ -25,16 +25,70 @@
                 "mode": 0
             },
             "modelPath": "plane.obj",
-            "modules": [],
+            "modules": [
+                {
+                    "blend": 0,
+                    "clamp01": true,
+                    "ease": 1,
+                    "enabled": true,
+                    "end": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "guid": "6c316014-8f65-49e1-8b20-660f880c80a5",
+                    "invert": true,
+                    "name": "OverLifetimeModule",
+                    "start": [
+                        0.0,
+                        0.0,
+                        -0.029999999329447746,
+                        1.0
+                    ],
+                    "target": 0
+                },
+                {
+                    "blend": 0,
+                    "clamp01": true,
+                    "ease": 2,
+                    "enabled": true,
+                    "end": [
+                        0.0,
+                        0.6813255548477173,
+                        0.760617733001709,
+                        1.0
+                    ],
+                    "guid": "4416c17c-a143-4248-8799-c0f781e2dc22",
+                    "invert": false,
+                    "name": "OverLifetimeModule",
+                    "start": [
+                        0.830115795135498,
+                        0.0,
+                        0.0,
+                        1.0
+                    ],
+                    "target": 4
+                },
+                {
+                    "enabled": false,
+                    "gravity": {
+                        "x": 0.0,
+                        "y": -9.800000190734863,
+                        "z": 0.0
+                    },
+                    "name": "GravityModule"
+                }
+            ],
             "name": "Emitter",
             "objectType": 0,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "position": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 3.5129847526550293
+                "x": 8.122817039489746,
+                "y": 7.195279598236084,
+                "z": 5.914331436157227
             },
-            "randomSpinEmit": false,
+            "randomSpinEmit": true,
             "scale": {
                 "constant": {
                     "x": 1.0,
@@ -81,16 +135,16 @@
                     "z": 1.0
                 },
                 "max": {
-                    "x": 1.0,
-                    "y": 1.0,
+                    "x": 2.259999990463257,
+                    "y": 1.850000023841858,
                     "z": 1.0
                 },
                 "min": {
-                    "x": 0.0,
-                    "y": 0.0,
+                    "x": -1.4199999570846558,
+                    "y": -2.0299999713897705,
                     "z": 0.0
                 },
-                "mode": 0
+                "mode": 1
             }
         },
         {
@@ -170,6 +224,32 @@
             "type": "PointLight"
         },
         {
+            "emitters": [],
+            "guid": "00000000-0000-0000-0000-000000000000",
+            "name": "Fx",
+            "objectType": 0,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
+            "type": "FxObject"
+        },
+        {
             "guid": "668a116e-5968-4b79-b395-04c1660c72c9",
             "name": "MainCamera",
             "objectType": 0,
@@ -226,62 +306,6 @@
                 "isDraw": true,
                 "targetType": 0
             },
-            "guid": "92d83d2a-f198-4e85-99a4-cb4be66efdde",
-            "modelConfig": {
-                "blendMode": 5,
-                "materialConfig": {
-                    "color": {
-                        "w": 1.0,
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    },
-                    "currentLightingMode_": 0,
-                    "enableLighting": 0,
-                    "enviromentCoefficient": 0.5,
-                    "isReflect": false,
-                    "shininess": 20.0
-                },
-                "modelName": "torus.obj",
-                "textureGuid": "93fea04f-9b49-444b-8b34-5783816add5d",
-                "uvTransConfig": {
-                    "rotation": 0.0,
-                    "scale": {
-                        "x": 1.0,
-                        "y": 1.0
-                    }
-                }
-            },
-            "name": "torus",
-            "objectType": 2,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 0.8526918888092041,
-                    "x": 0.12450044602155685,
-                    "y": -0.44886574149131775,
-                    "z": -0.2365073412656784
-                },
-                "scale": {
-                    "x": 283.9450988769531,
-                    "y": 104.08111572265625,
-                    "z": 241.4642333984375
-                },
-                "translation": {
-                    "x": 236.3924560546875,
-                    "y": 50.407493591308594,
-                    "z": 340.3679504394531
-                }
-            },
-            "type": "BaseGameObject"
-        },
-        {
-            "colliderConfig": {
-                "colliderType": 0,
-                "isCollisionEnabled": false,
-                "isDraw": true,
-                "targetType": 0
-            },
             "guid": "04094621-e71d-4c93-8aa2-bea1629f8232",
             "modelConfig": {
                 "blendMode": 5,
@@ -327,6 +351,62 @@
                     "x": 43.497642517089844,
                     "y": -4.061956405639648,
                     "z": 275.2914733886719
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": false,
+                "isDraw": true,
+                "targetType": 0
+            },
+            "guid": "92d83d2a-f198-4e85-99a4-cb4be66efdde",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "torus.obj",
+                "textureGuid": "93fea04f-9b49-444b-8b34-5783816add5d",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "torus",
+            "objectType": 2,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "rotation": {
+                    "w": 0.8526918888092041,
+                    "x": 0.12450044602155685,
+                    "y": -0.44886574149131775,
+                    "z": -0.2365073412656784
+                },
+                "scale": {
+                    "x": 283.9450988769531,
+                    "y": 104.08111572265625,
+                    "z": 241.4642333984375
+                },
+                "translation": {
+                    "x": 236.3924560546875,
+                    "y": 50.407493591308594,
+                    "z": 340.3679504394531
                 }
             },
             "type": "BaseGameObject"
@@ -498,129 +578,6 @@
                 }
             },
             "type": "BaseGameObject"
-        },
-        {
-            "emitters": [
-                {
-                    "emitter": {
-                        "autoDestroy": false,
-                        "blendMode": 2,
-                        "color": {
-                            "w": 1.0,
-                            "x": 1.0,
-                            "y": 1.0,
-                            "z": 1.0
-                        },
-                        "emitCount": 10,
-                        "emitDelay": 0.0,
-                        "emitDuration": -1.0,
-                        "emitRate": 0.10000000149011612,
-                        "followOneShot": false,
-                        "isComplement": true,
-                        "isDrawEnable": true,
-                        "isOneShot": false,
-                        "lifetime": {
-                            "constant": 1.0,
-                            "max": 1.0,
-                            "min": 0.0,
-                            "mode": 0
-                        },
-                        "modelPath": "plane.obj",
-                        "modules": [],
-                        "position": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 3.5129847526550293
-                        },
-                        "randomSpinEmit": false,
-                        "scale": {
-                            "constant": {
-                                "x": 1.0,
-                                "y": 1.0,
-                                "z": 1.0
-                            },
-                            "max": {
-                                "x": 1.0,
-                                "y": 1.0,
-                                "z": 1.0
-                            },
-                            "min": {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
-                            },
-                            "mode": 0
-                        },
-                        "textureGuid": "5e4b90f6-3263-4155-98b1-4454ce1b1451",
-                        "texturePath": "particle.png",
-                        "velocity": {
-                            "constant": {
-                                "x": 1.0,
-                                "y": 1.0,
-                                "z": 1.0
-                            },
-                            "max": {
-                                "x": 1.0,
-                                "y": 1.0,
-                                "z": 1.0
-                            },
-                            "min": {
-                                "x": 0.0,
-                                "y": 0.0,
-                                "z": 0.0
-                            },
-                            "mode": 0
-                        }
-                    },
-                    "guid": "1d28e168-77aa-4450-94c8-4b3951021641",
-                    "isDrawEnable": true,
-                    "isGpu": false,
-                    "name": "Emitter",
-                    "objectType": 0,
-                    "parentGuid": "954db045-1149-45ff-83b9-3081904421c1",
-                    "transform": {
-                        "rotation": {
-                            "w": 1.0,
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        },
-                        "scale": {
-                            "x": 1.0,
-                            "y": 1.0,
-                            "z": 1.0
-                        },
-                        "translation": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        }
-                    }
-                }
-            ],
-            "guid": "00000000-0000-0000-0000-000000000000",
-            "name": "EffectObject",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "FxObject"
         }
     ],
     "sceneName": "TestScene",

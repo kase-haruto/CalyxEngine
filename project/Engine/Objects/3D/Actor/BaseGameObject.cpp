@@ -291,12 +291,12 @@ AABB BaseGameObject::GetWorldAABB() const {
 	const CalyxMath::Matrix4x4& W = worldTransform_.matrix.world;
 
 	if(objectModelType_ == ModelType_Static) {
-		if(model_ && model_->GetModelData().has_value()) {
+		if(model_ && model_->GetModelData()) {
 			const AABB& local = model_->GetModelData()->localAABB;
 			return TransformAabb(local,W);
 		}
 	} else { // スキン
-		if(animationModel_ && animationModel_->GetModelData().has_value()) {
+		if(animationModel_ && animationModel_->GetModelData()) {
 			const AABB& local = animationModel_->GetModelData()->localAABB;
 			return TransformAabb(local,W);
 		}

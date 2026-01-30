@@ -59,6 +59,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IntDir>$(SolutionDir)..\generated\obj\$(ProjectName)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)..\generated\outputs\$(Configuration)\</OutDir>
+    <LinkIncremental>
+    </LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IntDir>$(SolutionDir)..\generated\obj\$(ProjectName)\$(Configuration)\</IntDir>
@@ -81,6 +83,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)externals;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -379,6 +382,9 @@ copy /Y "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll"       "C:\My
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>C:\MyProject\MyEngine\project\;C:\MyProject\MyEngine\project\externals;C:\MyProject\MyEngine\project\externals\DirectXTex;C:\MyProject\MyEngine\project\externals\assimp\include;</AdditionalIncludeDirectories>
       <LinkCompiled>true</LinkCompiled>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">MultiThreadedDebug</RuntimeLibrary>
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</WholeProgramOptimization>
     </ClCompile>
     <ClCompile Include="Engine\Objects\3D\Primitive\PrimitiveRing.cpp" />
     <ClCompile Include="Game\2dObject\Actor\Player2D.cpp" />
