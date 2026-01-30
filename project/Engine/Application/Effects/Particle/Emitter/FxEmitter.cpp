@@ -22,7 +22,7 @@
 #include <externals/imgui/imgui.h>
 
 namespace {
-	void VSeparator(float height = 0.0f, float thickness = 1.0f, float pad = 6.0f) {
+	[[maybe_unused]] void VSeparator(float height = 0.0f, float thickness = 1.0f, float pad = 6.0f) {
 		ImVec2 pos = ImGui::GetCursorScreenPos();
 		if(height <= 0.0f) height = ImGui::GetTextLineHeightWithSpacing();
 
@@ -57,7 +57,7 @@ namespace CalyxEffect {
 
 		// 各種パラメータ
 		velocity_ = FxParam<CalyxMath::Vector3>::MakeRandom(CalyxMath::Vector3(-1.0f, 0.0f, -1.0f),
-															CalyxMath::Vector3(1.0f, 0.0f, 1.0f));
+																	CalyxMath::Vector3(1.0f, 0.0f, 1.0f));
 		lifetime_ = FxParam<float>::MakeRandom(1.0f, 3.0f);
 		scale_	  = FxParam<CalyxMath::Vector3>::MakeConstant();
 
@@ -81,7 +81,7 @@ namespace CalyxEffect {
 			}
 		}
 
-		if(!isPlaying_) return;
+		if(!HasFlag(Playing)) return;
 
 		position_ = GetWorldPosition();
 		elapsedTime_ += deltaTime;
@@ -102,19 +102,19 @@ namespace CalyxEffect {
 				hasEmitted_ = true;
 			}
 		} else {
-			if(isFirstFrame_) {
-				prevPostion_  = position_;
-				isFirstFrame_ = false;
+			if(HasFlag(FirstFrame)) {
+				prevPostion_	= position_;
+				SetFlag(FirstFrame, false);
 			}
 
 			CalyxMath::Vector3 moveDelta = position_ - prevPostion_;
 			float			   distance	 = moveDelta.Length();
 
-			if(distance > 0.0f && isComplement_) {
+			if(distance > 0.0f && HasFlag(Complement)) {
 				float spawnInterval = 0.02f;
 				int	  trailCount	= static_cast<int>(distance / spawnInterval);
 				for(int i = 0; i < trailCount; ++i) {
-					float			   dist		= i * spawnInterval;
+					float			   dist		= static_cast<float>(i) * spawnInterval;
 					float			   t		= dist / distance;
 					CalyxMath::Vector3 spawnPos = CalyxMath::Vector3::Lerp(prevPostion_, position_, t);
 					Emit(spawnPos);
@@ -162,7 +162,7 @@ namespace CalyxEffect {
 				CalyxMath::MakeScaleMatrix(CalyxMath::Vector3(fx.uvTransform.scale.x, fx.uvTransform.scale.y, 1.0f));
 			uvTransformMatrix	  = CalyxMath::Matrix4x4::Multiply(uvTransformMatrix, CalyxMath::MakeRotateZMatrix(fx.uvTransform.rotate));
 			uvTransformMatrix	  = CalyxMath::Matrix4x4::Multiply(uvTransformMatrix,
-																   CalyxMath::MakeTranslateMatrix(CalyxMath::Vector3(fx.uvTransform.translate.x, fx.uvTransform.translate.y, 0.0f)));
+																	   CalyxMath::MakeTranslateMatrix(CalyxMath::Vector3(fx.uvTransform.translate.x, fx.uvTransform.translate.y, 0.0f)));
 			material_.uvTransform = uvTransformMatrix;
 		}
 
@@ -220,7 +220,7 @@ namespace CalyxEffect {
 		FxUnit fx;
 		ResetFxUnit(fx);
 		fx.position = pos;
-		if(isOneShot_ && followOneShot_) {
+		if(isOneShot_ && HasFlag(FollowOneShot)) {
 			fx.followEmitter = true;
 			fx.followOffset	 = fx.position - position_; // エミッタ基準のオフセットを保存
 		}
@@ -231,10 +231,10 @@ namespace CalyxEffect {
 		units_.clear();
 		emitTimer_			= 0.0f;
 		elapsedTime_		= 0.0f;
-		isFirstFrame_		= true;
+		SetFlag(FirstFrame, true);
 		hasEmitted_			= false;
 		isFinishedNotified_ = false;
-		isPlaying_			= true;
+		SetFlag(Playing, true);
 	}
 
 	void FxEmitter::ResetFxUnit(FxUnit& fx) {
@@ -248,7 +248,7 @@ namespace CalyxEffect {
 		fx.alive		= true;
 		fx.uvTransform.Initialize();
 		fx.spinSpeed = spin_.Get();
-		if(randomSpinEmit_) {
+		if(HasFlag(RandomSpinEmit)) {
 			fx.rotationEuler.z = Random::Generate<float>(-CalyxMath::kPi, CalyxMath::kPi);
 		} else {
 			fx.rotationEuler.z = 0.0f;
@@ -330,7 +330,7 @@ namespace CalyxEffect {
 				}
 
 				// 現在のテクスチャ表示（GUID→ファイル名）
-				auto labelFromGuid = [](const Guid& g) -> std::string {
+				/* auto labelFromGuid = [](const Guid& g) -> std::string {
 					if(!g.isValid()) return "(none)";
 					auto* db = AssetDatabase::GetInstance();
 					for(auto* r : db->GetView()) {
@@ -339,7 +339,7 @@ namespace CalyxEffect {
 						}
 					}
 					return "(missing)";
-				};
+				}; */
 				ImGui::EndGroup();
 			}
 			GuiCmd::EndSection();
@@ -350,7 +350,7 @@ namespace CalyxEffect {
 			if(FxGui::GridScope sec{"Billboard"}; sec.open) {
 				FxGui::RowLabel("Mode");
 				static const char* modes[] = {"None", "Full", "AxisY"};
-				int				   current = static_cast<int>(billboardMode_);
+				int			   current = static_cast<int>(billboardMode_);
 				if(ImGui::Combo("##billmode", &current, modes, IM_ARRAYSIZE(modes))) {
 					billboardMode_		  = static_cast<BillboardMode>(current);
 					billboardParams_.mode = current;
@@ -389,10 +389,16 @@ namespace CalyxEffect {
 				GuiCmd::DragFloat("##rate", emitRate_, 0.01f, 0.0f, 10.0f);
 
 				FxGui::RowLabel("Complement Trail");
-				GuiCmd::CheckBox("##comp", isComplement_);
+				{
+					bool comp = HasFlag(Complement);
+					if(GuiCmd::CheckBox("##comp", comp)) SetFlag(Complement, comp);
+				}
 
 				FxGui::RowLabel("random Spin on Emit");
-				GuiCmd::CheckBox("##randspin", randomSpinEmit_);
+				{
+					bool rse = HasFlag(RandomSpinEmit);
+					if(GuiCmd::CheckBox("##randspin", rse)) SetFlag(RandomSpinEmit, rse);
+				}
 			}
 
 			// ================= Params =================
@@ -434,7 +440,10 @@ namespace CalyxEffect {
 
 				if(isOneShot_) {
 					FxGui::RowLabel("Follow Emitter");
-					GuiCmd::CheckBox("##followoneshot", followOneShot_);
+					{
+						bool fe = HasFlag(FollowOneShot);
+						if(GuiCmd::CheckBox("##followoneshot", fe)) SetFlag(FollowOneShot, fe);
+					}
 
 					bool tp = GetTimedPreview();
 					if(GuiCmd::CheckBox("##timedPrev", tp)) {
@@ -501,9 +510,9 @@ namespace CalyxEffect {
 	// SetCommand
 	/////////////////////////////////////////////////////////////////////////////////////////
 	void FxEmitter::SetCommand(ID3D12GraphicsCommandList* cmdList) {
-		materialBuffer_.SetCommand(cmdList, 1);							// マテリアル
+		materialBuffer_.SetCommand(cmdList, 1);						// マテリアル
 		cmdList->SetGraphicsRootDescriptorTable(3, GetTextureHandle()); // テクスチャ
-		billboardCB_.SetCommand(cmdList, 4);							// ビルボードCB
+		billboardCB_.SetCommand(cmdList, 4);						// ビルボードCB
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -520,8 +529,8 @@ namespace CalyxEffect {
 		material_.texturePath = config.texturePath;
 		textureGuid_		  = config.textureGuid;
 		textureHandle_		  = TextureManager::GetInstance()->LoadTexture(textureGuid_);
-		isDrawEnable_		  = config.isDrawEnable;
-		isComplement_		  = config.isComplement;
+		SetFlag(DrawEnable, config.isDrawEnable);
+		SetFlag(Complement, config.isComplement);
 		moduleContainer_	  = std::make_unique<CalyxEffect::FxModuleContainer>(config.modules);
 		isOneShot_			  = config.isOneShot;
 		autoDestroy_		  = config.autoDestroy;
@@ -529,13 +538,13 @@ namespace CalyxEffect {
 		emitDelay_			  = config.emitDelay;
 		emitDuration_		  = config.emitDuration;
 		billboardMode_		  = config.billboardMode;
-		randomSpinEmit_		  = config.randomSpinEmit;
+		SetFlag(RandomSpinEmit, config.randomSpinEmit);
 		blendMode_			  = config.blendMode;
 
-		isFirstFrame_ = true;
+		SetFlag(FirstFrame, true);
 		hasEmitted_	  = false;
 		elapsedTime_  = 0.0f;
-		isPlaying_	  = true;
+		SetFlag(Playing, true);
 	}
 
 	void FxEmitter::ExtractConfigTo(EmitterConfig& config) const {
@@ -548,9 +557,9 @@ namespace CalyxEffect {
 		config.modelPath	  = modelPath;
 		config.texturePath	  = material_.texturePath;
 		config.textureGuid	  = textureGuid_;
-		config.isDrawEnable	  = isDrawEnable_;
-		config.isComplement	  = isComplement_;
-		config.randomSpinEmit = randomSpinEmit_;
+		config.isDrawEnable	  = HasFlag(DrawEnable);
+		config.isComplement	  = HasFlag(Complement);
+		config.randomSpinEmit = HasFlag(RandomSpinEmit);
 		if(moduleContainer_)
 			config.modules = moduleContainer_->ExtractConfigs();
 		else
@@ -565,8 +574,8 @@ namespace CalyxEffect {
 	}
 
 	void FxEmitter::Play() {
-		isPlaying_	  = true;
-		isFirstFrame_ = true;
+		SetFlag(Playing, true);
+		SetFlag(FirstFrame, true);
 
 		if(isOneShot_) {
 			// OneShot 時は状態も初期化しておく
@@ -577,14 +586,14 @@ namespace CalyxEffect {
 	}
 
 	void FxEmitter::Stop() {
-		isPlaying_ = false;
+		SetFlag(Playing, false);
 	}
 
 	void FxEmitter::Reset() {
 		units_.clear();
 		emitTimer_	  = 0.0f;
 		elapsedTime_  = 0.0f;
-		isFirstFrame_ = true;
+		SetFlag(FirstFrame, true);
 		hasEmitted_	  = false;
 		previewTimer_ = 0.0f;
 	}
@@ -598,5 +607,10 @@ namespace CalyxEffect {
 		textureHandle_ = h;
 		textureGuid_   = g;
 		return true;
+	}
+
+	// ---- callback ----
+	void FxEmitter::SetOnFinishedCallback(std::function<void()> callback) {
+		onFinished_ = std::move(callback);
 	}
 } // namespace CalyxEffect

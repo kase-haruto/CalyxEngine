@@ -33,7 +33,7 @@ namespace CalyxEffect {
 		~FxEmitter() override;
 
 		virtual void Update(float dt) override;
-		void		 TransferParticleDataToGPU();
+		void		 TransferParticleDataToGPU() override; // BaseEmitterをoverride
 		void		 ShowGui();
 
 		// コマンドを積む
@@ -56,9 +56,9 @@ namespace CalyxEffect {
 		//--------- accessor -----------------------------------------------//
 		const std::vector<FxUnit>& GetUnits() const { return units_; }
 
-		bool							   IsDrawEnable() { return isDrawEnable_; }
-		void							   SetDrawEnable(bool isEnable) { isDrawEnable_ = isEnable; }
-		bool							   IsPlaying() const override { return isPlaying_; }
+		bool					   IsDrawEnable() { return HasFlag(DrawEnable); }
+		void					   SetDrawEnable(bool isEnable) { SetFlag(DrawEnable, isEnable); }
+		bool					   IsPlaying() const override { return HasFlag(Playing); }
 		const D3D12_GPU_DESCRIPTOR_HANDLE& GetTextureHandle() const { return textureHandle_; }
 
 		//--------- Timed Preview（一定間隔での自動再生） ---------------//
@@ -86,6 +86,22 @@ namespace CalyxEffect {
 		void Emit(const CalyxMath::Vector3& pos);
 		void RestartOneShot();
 
+		// ---- flags helpers ----
+	private:
+		enum FlagBits : uint32_t {
+			None		   = 0,
+			FollowOneShot = 1u << 0,
+			Playing		   = 1u << 1,
+			FirstFrame	   = 1u << 2,
+			Complement	   = 1u << 3,
+			DrawEnable	   = 1u << 4,
+			RandomSpinEmit = 1u << 5,
+		};
+		inline bool HasFlag(FlagBits f) const { return (flags_ & f) != 0; }
+		inline void SetFlag(FlagBits f, bool enable) {
+			if (enable) flags_ |= f; else flags_ &= ~f;
+		}
+
 	public:
 		//===================================================================*/
 		//					public variable
@@ -104,18 +120,14 @@ namespace CalyxEffect {
 		//					private variable
 		//===================================================================*/
 		BlendMode					blendMode_ = BlendMode::ADD; //< ブレンドモード
-		const int					kMaxUnits_ = 4096;			 //< 最大パーティクル数
-		D3D12_GPU_DESCRIPTOR_HANDLE textureHandle_;
-		Guid						textureGuid_;
+		const int					kMaxUnits_ = 4096; 			 //< 最大パーティクル数
+		D3D12_GPU_DESCRIPTOR_HANDLE textureHandle_{}; // 初期化
+		Guid						textureGuid_{};
 
-		std::unique_ptr<CalyxEffect::FxModuleContainer> moduleContainer_; // モジュールコンテナ
+		std::unique_ptr<FxModuleContainer> moduleContainer_; // モジュールコンテナ
 
-		bool followOneShot_	 = true;  //< OneShot のときパーティクルをエミッタに追従させるか
-		bool isPlaying_		 = true;  //< エフェクト再生中
-		bool isFirstFrame_	 = true;  //< 最初のフレーム
-		bool isComplement_	 = true;  //< trailするか
-		bool isDrawEnable_	 = true;  //< 描画するか
-		bool randomSpinEmit_ = false; // emit時にスピン使用するか
+		// 旧bool群を統合したビットフラグ
+		uint32_t flags_ = FollowOneShot | Playing | FirstFrame | Complement | DrawEnable;
 
 	protected:
 		bool isOneShot_	  = false; //<
@@ -138,7 +150,7 @@ namespace CalyxEffect {
 		DxConstantBuffer<GpuBillboardParams> billboardCB_;
 		BillboardMode						 billboardMode_ = BillboardMode::Full;
 
-		std::function<void()> onFinished_;				   // 終了時コールバック
-		bool				  isFinishedNotified_ = false; // すでに通知したかどうか
+		std::function<void()> onFinished_;			   // 終了時コールバック
+		bool							 isFinishedNotified_ = false; // すでに通知したかどうか
 	};
 } // namespace CalyxEffect
