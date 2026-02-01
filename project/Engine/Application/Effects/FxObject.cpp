@@ -170,34 +170,6 @@ namespace CalyxEffect {
 						}
 					}
 
-					// ドロー可否
-					{
-						bool draw = true; // 必要なら PSO にゲッターを追加して取得
-						if(ImGui::Checkbox("Draw Enable", &draw)) {
-							sp->SetDrawEnable(draw);
-						}
-					}
-
-					// プレイ系
-					if(ImGui::Button("Play")) {
-						sp->Play();
-					}
-					ImGui::SameLine();
-					if(ImGui::Button("Stop")) {
-						sp->Stop();
-					}
-					ImGui::SameLine();
-					if(ImGui::Button("Reset")) {
-						sp->Reset();
-					}
-
-					ImGui::Separator();
-
-					// Transform
-					sp->GetWorldTransform().ShowImGui(); // ローカル編集なら専用GUIに置換
-
-					// エミッター詳細GUI（既存を委譲）
-					ImGui::SeparatorText("Parms");
 					sp->ShowGui();
 
 					ImGui::EndTabItem();

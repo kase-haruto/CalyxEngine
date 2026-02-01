@@ -9,6 +9,12 @@
 #include <map>
 
 struct ModelData {
+	ModelData() = default;
+	ModelData(const ModelData&) = delete;
+	ModelData& operator=(const ModelData&) = delete;
+	ModelData(ModelData&&) noexcept = default;
+	ModelData& operator=(ModelData&&) noexcept = default;
+
 	MeshResource meshResource;
 	AABB	 localAABB; // カリング判定用
 

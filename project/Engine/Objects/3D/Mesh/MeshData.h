@@ -50,8 +50,22 @@ struct MeshBuffers {
  * - メッシュリソース構造体
  *--------------------------------------------------------*/
 struct MeshResource {
+	//===================================================================*/
+	//			コピー禁止
+	//===================================================================*/
+	MeshResource() = default;
+	MeshResource(const MeshResource&) = delete;
+	MeshResource& operator=(const MeshResource&) = delete;
+
+	MeshResource(MeshResource&&) = default;
+	MeshResource& operator=(MeshResource&&) = default;
+
+	//===================================================================*/
+	//			public method
+	//===================================================================*/
 	MeshData    data;
 	MeshBuffers buffers;
+	D3D_PRIMITIVE_TOPOLOGY topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	void SetCommand(ID3D12GraphicsCommandList* cmdList)const;
 

@@ -27,8 +27,8 @@ void BaseModel::Update(float deltaTime) {
 	// --- まだ modelData_ を取得していないなら、取得を試みる ---
 	if(!modelData_) {
 		if(ModelManager::GetInstance()->IsModelLoaded(fileName_)) {
-			auto loaded = ModelManager::GetInstance()->GetModelData(fileName_);
-			modelData_  = loaded;
+			ModelData& loaded = ModelManager::GetInstance()->GetModelData(fileName_);
+			modelData_ = &loaded;   // ModelData* を保持する
 
 			OnModelLoaded();
 		}
@@ -91,7 +91,7 @@ void BaseModel::UpdateTexture(float deltaTime) {
 
 void BaseModel::EnsureRaytracingBLAS(ID3D12Device5* device5,ID3D12GraphicsCommandList4* cmdList4) {
 	if(blasBuilt_) return;
-	if(!modelData_.has_value()) return;
+	if(!modelData_) return;
 	if(!device5 || !cmdList4) return;
 
 	// VB/IB が初期化されていることが前提（OnModelLoaded 済み）
@@ -286,7 +286,7 @@ bool BaseModel::LoadTextureByGuid(const Guid& g) {
 	return true;
 }
 
-const std::optional<ModelData>& BaseModel::GetModelData() const { return modelData_; }
+ModelData* BaseModel::GetModelData() const { return modelData_; }
 
 // ======================================= renderer 専用 ==========================================
 

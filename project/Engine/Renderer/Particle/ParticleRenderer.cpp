@@ -11,65 +11,61 @@
 //		パーティクル描画
 ///////////////////////////////////////////////////////////////////////////////////////////////
 void ParticleRenderer::Render(
-	const std::vector<std::shared_ptr<CalyxEffect::FxEmitter>>& cpuEmitters,
+	const std::vector<std::shared_ptr<CalyxEffect::FxEmitter>>&    cpuEmitters,
 	const std::vector<std::shared_ptr<CalyxEffect::GpuFxEmitter>>& gpuEmitters,
-	PipelineService* pipelineService,
-	ID3D12GraphicsCommandList* cmdList){
-	if (cpuEmitters.empty() && gpuEmitters.empty()) return;
+	PipelineService*                                               pipelineService,
+	ID3D12GraphicsCommandList*                                     cmdList) {
+	if(cpuEmitters.empty() && gpuEmitters.empty()) return;
 
-	ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
+	//ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
 
 	// ───────────── CPU パーティクル ─────────────
-	if (!cpuEmitters.empty()){
-
-
-		for (auto& em : cpuEmitters){
+	if(!cpuEmitters.empty()) {
+		for(auto& em : cpuEmitters) {
 			auto psoCpu = pipelineService->GetPipelineSet(
-				PipelineTag::Object::Particle, em->GetBlendMode());
-			pipelineService->SetCommand(psoCpu, cmdList);
+				PipelineTag::Object::Particle,em->GetBlendMode());
+			pipelineService->SetCommand(psoCpu,cmdList);
 
-			if (auto* cam = CameraManager::GetActive()) 
-				cam->SetCommand(cmdList, PipelineType::StructuredObject);
-			
-			if (!em || !em->IsDrawEnable() || em->GetUnits().empty()) continue;
+			if(auto* cam = CameraManager::GetActive())
+				cam->SetCommand(cmdList,PipelineType::StructuredObject);
+
+			if(!em || !em->IsDrawEnable() || em->GetUnits().empty()) continue;
 
 			em->SetCommand(cmdList);
 
-			ModelData& model =
-				ModelManager::GetInstance()->GetModelData(em->GetModelPath());
-			if (model.meshResource.Indices().empty()) continue;
-			EnsureMeshIsReady(model.meshResource, device);
+			MeshResource& mesh = em->GetMeshResource();
+			if(mesh.Indices().empty()) continue;
+			//EnsureMeshIsReady(mesh,device);
 
-			DrawMeshInstanced(model.meshResource, cmdList,
-							   static_cast< UINT >(em->GetUnits().size()),
-							   em->GetInstanceBuffer().GetGpuSrvHandle());
+			DrawMeshInstanced(mesh,cmdList,
+							  static_cast<UINT>(em->GetUnits().size()),
+							  em->GetInstanceBuffer().GetGpuSrvHandle());
 		}
 	}
 
 	// ───────────── GPU パーティクル ─────────────
-	if (!gpuEmitters.empty()){
+	if(!gpuEmitters.empty()) {
 		auto psoGpu = pipelineService->GetPipelineSet(
-			PipelineTag::Object::GpuParticle, BlendMode::ADD);
-		pipelineService->SetCommand(psoGpu, cmdList);
+			PipelineTag::Object::GpuParticle,BlendMode::ADD);
+		pipelineService->SetCommand(psoGpu,cmdList);
 
-		if (auto* cam = CameraManager::GetActive())
-			cam->SetCommand(cmdList, PipelineType::StructuredObject);
+		if(auto* cam = CameraManager::GetActive())
+			cam->SetCommand(cmdList,PipelineType::StructuredObject);
 
-		for (auto& em : gpuEmitters){
-			if (!em) continue;
+		for(auto& em : gpuEmitters) {
+			if(!em) continue;
 
-			em->GetMaterialBuffer().SetCommand(cmdList, 1);
+			em->GetMaterialBuffer().SetCommand(cmdList,1);
 			auto tex = TextureManager::GetInstance()->LoadTexture("Textures/" + em->GetTexturePath());
-			cmdList->SetGraphicsRootDescriptorTable(3, tex);
+			cmdList->SetGraphicsRootDescriptorTable(3,tex);
+			MeshResource& mesh = em->GetMeshResource();
 
-			ModelData& model =
-				ModelManager::GetInstance()->GetModelData(em->GetModelPath());
-			if (model.meshResource.Indices().empty()) continue;
-			EnsureMeshIsReady(model.meshResource, device);
+			if(mesh.Indices().empty()) continue;
+			//EnsureMeshIsReady(mesh,device);
 
-			DrawMeshInstanced(model.meshResource, cmdList,
-							   CalyxEffect::GpuFxEmitter::kMaxParticles,
-							   em->GetParticleSrv());
+			DrawMeshInstanced(mesh,cmdList,
+							  CalyxEffect::GpuFxEmitter::kMaxParticles,
+							  em->GetParticleSrv());
 		}
 	}
 }
@@ -77,38 +73,38 @@ void ParticleRenderer::Render(
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //		GPUパーティクルのまとめ描きユーティリティ
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void ParticleRenderer::RenderGrouped(const std::string& modelPath,
+void ParticleRenderer::RenderGrouped(const std::string&                                    modelPath,
 									 const std::vector<CalyxEffect::ParticleConstantData>& gpuUnits,
-									 ID3D12GraphicsCommandList* cmdList){
-	if (gpuUnits.empty()) return;
+									 ID3D12GraphicsCommandList*                            cmdList) {
+	if(gpuUnits.empty()) return;
 
 	ModelData& model = ModelManager::GetInstance()->GetModelData(modelPath);
-	if (model.meshResource.Indices().empty()) return;
+	if(model.meshResource.Indices().empty()) return;
 
 	auto device = GraphicsGroup::GetInstance()->GetDevice().Get();
-	EnsureMeshIsReady(model.meshResource, device);
+	EnsureMeshIsReady(model.meshResource,device);
 
 	// 一時バッファをローカルで作成
 	DxStructuredBuffer<CalyxEffect::ParticleConstantData> tempBuffer;
-	tempBuffer.Initialize(device, static_cast< UINT >(gpuUnits.size()));
+	tempBuffer.Initialize(device,static_cast<UINT>(gpuUnits.size()));
 	tempBuffer.TransferVectorData(gpuUnits);
 	tempBuffer.CreateSrv(device);
 
-	DrawMeshInstanced(model.meshResource, cmdList,
-					   static_cast< UINT >(gpuUnits.size()),
-					   tempBuffer.GetGpuSrvHandle());
+	DrawMeshInstanced(model.meshResource,cmdList,
+					  static_cast<UINT>(gpuUnits.size()),
+					  tempBuffer.GetGpuSrvHandle());
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //		メッシュ描画ユーティリティ
 ///////////////////////////////////////////////////////////////////////////////////////////
-void ParticleRenderer::EnsureMeshIsReady(MeshResource& mesh, ID3D12Device* device){
-	if (!mesh.VertexBuffer().IsInitialized()){
-		mesh.VertexBuffer().Initialize(device, static_cast< UINT >(mesh.Vertices().size()));
+void ParticleRenderer::EnsureMeshIsReady(MeshResource& mesh,ID3D12Device* device) {
+	if(!mesh.VertexBuffer().IsInitialized()) {
+		mesh.VertexBuffer().Initialize(device,static_cast<UINT>(mesh.Vertices().size()));
 		mesh.VertexBuffer().TransferVectorData(mesh.Vertices());
 	}
-	if (!mesh.IndexBuffer().IsInitialized()){
-		mesh.IndexBuffer().Initialize(device, static_cast< UINT >(mesh.Indices().size()));
+	if(!mesh.IndexBuffer().IsInitialized()) {
+		mesh.IndexBuffer().Initialize(device,static_cast<UINT>(mesh.Indices().size()));
 		mesh.IndexBuffer().TransferVectorData(mesh.Indices());
 	}
 }
@@ -116,13 +112,16 @@ void ParticleRenderer::EnsureMeshIsReady(MeshResource& mesh, ID3D12Device* devic
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //		メッシュインスタンス描画ユーティリティ
 ///////////////////////////////////////////////////////////////////////////////////////////////
-void ParticleRenderer::DrawMeshInstanced(MeshResource& mesh,
-										  ID3D12GraphicsCommandList* cmdList,
-										  UINT instanceCount,
-										  D3D12_GPU_DESCRIPTOR_HANDLE instanceHandle){
+void ParticleRenderer::DrawMeshInstanced(MeshResource&               mesh,
+										 ID3D12GraphicsCommandList*  cmdList,
+										 UINT                        instanceCount,
+										 D3D12_GPU_DESCRIPTOR_HANDLE instanceHandle) {
 	mesh.VertexBuffer().SetCommand(cmdList);
 	mesh.IndexBuffer().SetCommand(cmdList);
-	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	cmdList->SetGraphicsRootDescriptorTable(2, instanceHandle);
-	cmdList->DrawInstanced(static_cast<UINT>(mesh.Indices().size()), instanceCount, 0, 0);
+	cmdList->IASetPrimitiveTopology(mesh.topology);
+	cmdList->SetGraphicsRootDescriptorTable(2,instanceHandle);
+
+	// インデックス描画に変更（インデックス数で描画）
+	const UINT indexCount = static_cast<UINT>(mesh.Indices().size());
+	cmdList->DrawIndexedInstanced(indexCount, instanceCount, 0, 0, 0);
 }

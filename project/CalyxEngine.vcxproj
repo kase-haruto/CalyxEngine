@@ -59,6 +59,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IntDir>$(SolutionDir)..\generated\obj\$(ProjectName)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)..\generated\outputs\$(Configuration)\</OutDir>
+    <LinkIncremental>
+    </LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IntDir>$(SolutionDir)..\generated\obj\$(ProjectName)\$(Configuration)\</IntDir>
@@ -81,6 +83,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)externals;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -185,6 +188,7 @@ copy /Y "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll"       "C:\My
     <ClCompile Include="Engine\Application\Effects\FxObject.cpp" />
     <ClCompile Include="Engine\Application\Effects\Particle\Module\OverLifetime\OverLifetimeModule.cpp" />
     <ClCompile Include="Engine\Application\UI\GUI\ImGuiJapaneaseFonts.cpp" />
+    <ClCompile Include="Engine\Editor\ImguiLayoutService.cpp" />
     <ClCompile Include="Engine\Editor\ImGuiLayoutSwitcher.cpp" />
     <ClCompile Include="Engine\Editor\SceneSwitchOverlay.cpp" />
     <ClCompile Include="Engine\Foundation\Clock\StateTimer.cpp" />
@@ -378,6 +382,9 @@ copy /Y "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll"       "C:\My
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>C:\MyProject\MyEngine\project\;C:\MyProject\MyEngine\project\externals;C:\MyProject\MyEngine\project\externals\DirectXTex;C:\MyProject\MyEngine\project\externals\assimp\include;</AdditionalIncludeDirectories>
       <LinkCompiled>true</LinkCompiled>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">MultiThreadedDebug</RuntimeLibrary>
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</WholeProgramOptimization>
     </ClCompile>
     <ClCompile Include="Engine\Objects\3D\Primitive\PrimitiveRing.cpp" />
     <ClCompile Include="Game\2dObject\Actor\Player2D.cpp" />
@@ -675,6 +682,7 @@ copy /Y "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll"       "C:\My
     <ClInclude Include="Engine\Application\Effects\FxObject.h" />
     <ClInclude Include="Engine\Application\Effects\Particle\Module\OverLifetime\OverLifetimeModule.h" />
     <ClInclude Include="Engine\Application\UI\GUI\ImGuiJapaneaseFonts.h" />
+    <ClInclude Include="Engine\Editor\ImguiLayoutService.h" />
     <ClInclude Include="Engine\Editor\ImGuiLayoutSwitcher.h" />
     <ClInclude Include="Engine\Editor\SceneSwitchOverlay.h" />
     <ClInclude Include="Engine\Foundation\Clock\StateTimer.h" />

@@ -3,6 +3,7 @@
 /* include space
 /* ===================================================================== */
 
+struct MeshResource;
 /*-----------------------------------------------------------------------------------------
  * IPrimitiveMesh
  * - プリミティブメッシュインターフェース
@@ -16,4 +17,10 @@ public:
 	virtual ~IPrimitiveMesh() = default;
 
 	virtual void Update(float dt) = 0;
+
+	// 現在のメッシュへの参照を返す
+	virtual MeshResource& Mesh() = 0;
+
+	// 内部パラメータ変更時の再生成
+	virtual void Rebuild() = 0;
 };
