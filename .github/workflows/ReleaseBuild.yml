@@ -5,7 +5,7 @@ on:
       - master
 env:
   # リポジトリのルートディレクトリを起点としたソリューションファイルのパス
-  SOLUTION_FILE_PATH: project/Calyx.sln
+  SOLUTION_FILE_PATH: project/CalyxEngine.sln
   # Visual Studio の構成
   CONFIGURATION: Release
 
