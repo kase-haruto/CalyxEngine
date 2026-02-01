@@ -111,7 +111,7 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 	// Particles
 	sceneContext_->GetFxSystem()->Render(pso, cmd);
 
-#if defined(_DEBUG) || defined(DEVELOP)
+#if !defined(ndebug)
 	// lightのデバッグ描画
 	auto dirLight = sceneContext_->FindFirst<DirectionalLight>();
 	if(dirLight)

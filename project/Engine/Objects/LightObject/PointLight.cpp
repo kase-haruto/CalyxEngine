@@ -55,7 +55,7 @@ void PointLight::Update([[maybe_unused]]float dt){}
 void PointLight::AlwaysUpdate([[maybe_unused]]float dt){}
 
 void PointLight::ShowGui(){
-#if defined(_DEBUG) || defined(DEVELOP)
+#if !defined(ndebug)
 	ImGui::Dummy(ImVec2(0.0f, 5.0f));
 	
 	// コンフィグ

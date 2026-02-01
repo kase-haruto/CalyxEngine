@@ -30,7 +30,7 @@ DirectionalLight::DirectionalLight(const std::string& name) {
 	////コンフィグの適用
 	// LoadConfig(configPath_);
 
-#if defined(_DEBUG) || defined(DEVELOP)
+#if !defined(ndebug)
 	// transformの傾きにlightのdirectionを適用(ギズモ使用するため)
 	worldTransform_.eulerRotation  = lightData_.direction;
 	worldTransform_.rotationSource = RotationSource::Euler; // Eulerで計算
@@ -50,7 +50,7 @@ DirectionalLight::DirectionalLight() {
 	lightData_.direction = CalyxMath::Vector3(-0.08f, -1.0f, 0.34f);   // ライトの向き
 	lightData_.intensity = 1.0f;									   // 輝度
 
-#if defined(_DEBUG) || defined(DEVELOP)
+#if !defined(ndebug)
 	// transformの傾きにlightのdirectionを適用(ギズモ使用するため)
 	worldTransform_.eulerRotation  = lightData_.direction;
 	worldTransform_.rotationSource = RotationSource::Euler; // Eulerで計算
@@ -215,7 +215,7 @@ void DirectionalLight::DrawDebug() {
 //		デバッグui
 /////////////////////////////////////////////////////////////////////////////////////////
 void DirectionalLight::ShowGui() {
-#if defined(_DEBUG) || defined(DEVELOP)
+#if !defined(ndebug)
 	ImGui::Dummy(ImVec2(0.0f, 5.0f));
 
 	if (GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::ParameterData)) {

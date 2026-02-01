@@ -11,9 +11,18 @@ namespace PipelinePresets {
 	GraphicsPipelineDesc MakeParticle(BlendMode mode);
 	GraphicsPipelineDesc MakeGpuParticle(BlendMode mode);
 
+
+
 	// shadow
 	GraphicsPipelineDesc MakeShadowStatic();
 	GraphicsPipelineDesc MakeShadowSkinned();
+
+	//デバッグピッキング用(マウスでオブジェクト選択
+#if !defined(NDEBUG)
+	// picking
+	GraphicsPipelineDesc MakePickingStatic();
+	GraphicsPipelineDesc MakePickingSkinned();
+#endif
 
 	// 2dObjects
 	GraphicsPipelineDesc MakeObject2D();

@@ -48,7 +48,7 @@ namespace CalyxEngine {
 		editorCollection_ = std::make_unique<CalyxEditor::EditorCollection>();
 		editorCollection_->InitializeEditors();
 
-#if defined(_DEBUG) || defined(DEVELOP)
+#if !defined(ndebug)
 		engineUICore_->SetCameraForViewport(CameraManager::GetMain3d(), CameraManager::GetDebug());
 #endif
 	}

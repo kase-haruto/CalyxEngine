@@ -3,7 +3,7 @@
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 #include <Engine/Objects/ConfigurableObject/IConfigurable.h>
 
-#if defined(_DEBUG) || defined(DEVELOP)
+#if !defined(ndebug)
 #include <externals/imgui/ImGuiFileDialog.h>
 #include <externals/imgui/imgui.h>
 #endif // _DEBUG
@@ -162,7 +162,7 @@ inline void ConfigurableObject<TConfig>::SaveConfig(const std::string& categoryA
 /////////////////////////////////////////////////////////////////////////////////////////
 template <typename TConfig>
 void ConfigurableObject<TConfig>::ShowGui([[maybe_unused]] const std::string& path, [[maybe_unused]] const std::string& label) {
-#if defined(_DEBUG) || defined(DEVELOP)
+#if !defined(ndebug)
 	const std::string loadDlg = "ConfigLoadDialog##" + label;
 	const std::string baseDir = "Resources/Assets/Configs/";
 

@@ -45,7 +45,7 @@ namespace CalyxEditor {
 	LevelEditor::~LevelEditor() = default;
 
 	void LevelEditor::Initialize() {
-#if defined(_DEBUG) || defined(DEVELOP)
+#if !defined(ndebug)
 		// 各パネルの初期化 ----------------------------------------------------
 		hierarchy_		= std::make_unique<HierarchyPanel>();
 		editor_			= std::make_unique<EditorPanel>();
@@ -217,7 +217,7 @@ namespace CalyxEditor {
 	// Update
 	//=============================================================================
 	void LevelEditor::Update() {
-#if defined(_DEBUG) || defined(DEVELOP)
+#if !defined(ndebug)
 		SceneContext* ctx = SceneContext::Current();
 
 		const ImGuiIO& io			= ImGui::GetIO();

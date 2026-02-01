@@ -20,7 +20,7 @@ namespace CalyxEditor {
 	//						初期化
 	////////////////////////////////////////////////////////////////////////////////////////////
 	void EngineUICore::Initialize() {
-#if defined(_DEBUG) || defined(DEVELOP)
+#if !defined(ndebug)
 		panelController_ = std::make_unique<PanelController>();
 		panelController_->Initialize();
 
@@ -40,7 +40,7 @@ namespace CalyxEditor {
 	//						レンダリング
 	////////////////////////////////////////////////////////////////////////////////////////////
 	void EngineUICore::Render() {
-#if defined(_DEBUG) || defined(DEVELOP)
+#if !defined(ndebug)
 
 		levelEditor_->RenderMenu();
 
@@ -84,7 +84,7 @@ namespace CalyxEditor {
 	//						パネル追加
 	////////////////////////////////////////////////////////////////////////////////////////////
 	void EngineUICore::AddPanel([[maybe_unused]] std::unique_ptr<IEngineUI> panel) {
-#if defined(_DEBUG) || defined(DEVELOP)
+#if !defined(ndebug)
 		const std::string& name = panel->GetPanelName(); // 先に名前を取り出す
 		panelController_->RegisterPanel(name, std::move(panel));
 #endif // _DEBUG

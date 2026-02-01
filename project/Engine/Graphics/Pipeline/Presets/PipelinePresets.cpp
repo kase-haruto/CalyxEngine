@@ -133,6 +133,49 @@ GraphicsPipelineDesc PipelinePresets::MakeShadowSkinned() {
 	return desc;
 }
 
+/* ================================================================================================
+/*							picking
+/* ============================================================================================= */
+#if !defined(NDEBUG)
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		picking 静的オブジェクト用
+/////////////////////////////////////////////////////////////////////////////////////////
+GraphicsPipelineDesc PipelinePresets::MakePickingStatic() {
+	GraphicsPipelineDesc desc;
+	desc.VS(L"Object3d.VS.hlsl")
+		.PS(L"Object3d.PS.hlsl")
+		.Input(VertexInputLayout<VertexPosUvN>::Get())
+		.Blend(BlendMode::NONE)
+		.CullNone()
+		.DepthEnable(true)
+		.DepthFunc(D3D12_COMPARISON_FUNC_LESS_EQUAL)
+		.RTV(DXGI_FORMAT_R8G8B8A8_UNORM)
+		.Samples(1);
+
+	desc.root_
+		.AllowIA()
+		.CBV(0,D3D12_SHADER_VISIBILITY_PIXEL)                                         // Material
+		.SRVTable(0,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_VERTEX) // WVP
+		.SRVTable(0,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_PIXEL)  // Tex
+		.CBV(2,D3D12_SHADER_VISIBILITY_PIXEL)                                         // DirLight
+		.CBV(1,D3D12_SHADER_VISIBILITY_ALL)                                           // Camera
+		.CBV(4,D3D12_SHADER_VISIBILITY_PIXEL)                                         // PointLight
+		.SRVTable(1,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_PIXEL)  // EnvMap
+		.SRVTable(1,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_VERTEX) // billboard'
+		.CBV(3,D3D12_SHADER_VISIBILITY_PIXEL)                                         // [8] ShadowConstants b3
+		.SRVTable(2,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_PIXEL)  // [9] ShadowMap t2
+
+		.SamplerWrapLinear(0);
+
+	return desc;
+}
+/////////////////////////////////////////////////////////////////////////////////////////
+//		picking スキニングオブジェクト用
+/////////////////////////////////////////////////////////////////////////////////////////
+
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////////////
 //		partcicle
 /////////////////////////////////////////////////////////////////////////////////////////

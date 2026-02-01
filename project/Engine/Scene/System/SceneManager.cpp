@@ -199,7 +199,7 @@ namespace CalyxScene {
 		auto* offscreen = dx_->GetRenderTargetCollection().Get("Offscreen");
 		DrawForRenderTarget(offscreen, cmd, pso);
 
-#if defined(_DEBUG) || defined(DEVELOP)
+#if !defined(ndebug)
 		if(auto* ctx = ActiveCtx()) ctx->MakeCurrent();
 		CameraManager::SetTypeStatic(CameraType::Debug);
 		auto* debugRT = dx_->GetRenderTargetCollection().Get("DebugView");

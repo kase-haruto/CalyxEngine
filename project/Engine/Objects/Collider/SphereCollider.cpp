@@ -33,7 +33,7 @@ void SphereCollider::Update(const CalyxMath::Vector3& position, [[maybe_unused]]
 
 void SphereCollider::Draw() {
 
-#if defined(_DEBUG) || defined(DEVELOP)
+#if !defined(ndebug)
 	// 形状の描画
 	if(isDraw_ && isCollisionEnabled_) {
 		PrimitiveDrawer::GetInstance()->DrawSphere(shape_.center, shape_.radius, 10, color_);
