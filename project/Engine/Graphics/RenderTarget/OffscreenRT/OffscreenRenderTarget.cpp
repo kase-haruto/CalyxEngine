@@ -6,7 +6,7 @@
 #include <d3dx12.h>
 #include <stdexcept>
 
-void OffscreenRenderTarget::Initialize(ID3D12Device* device, uint32_t width, uint32_t height, DXGI_FORMAT format, D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle, D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle){
+void OffscreenRenderTarget::Initialize(ID3D12Device* device, uint32_t width, uint32_t height, DXGI_FORMAT format, DescriptorHandle rtvHandle, DescriptorHandle dsvHandle){
 	rtvHandle_ = rtvHandle;
 	dsvHandle_ = dsvHandle;
 
@@ -17,11 +17,11 @@ void OffscreenRenderTarget::Initialize(ID3D12Device* device, uint32_t width, uin
 	if (!resource_) {
 		resource_ = std::make_unique<DxGpuResource>();
 		resource_->InitializeAsRenderTarget(device, width, height, format);
-		resource_->CreateRTV(device, rtvHandle);
+		resource_->CreateRTV(device, rtvHandle_.cpu);
 		resource_->CreateSRV(device);
 	} else {
 		resource_->InitializeAsRenderTarget(device, width, height, format);
-		resource_->CreateRTV(device, rtvHandle);
+		resource_->CreateRTV(device, rtvHandle_.cpu);
 		resource_->UpdateSRV(device);
 	}
 
@@ -63,7 +63,7 @@ void OffscreenRenderTarget::Initialize(ID3D12Device* device, uint32_t width, uin
 	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 	dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
 
-	device->CreateDepthStencilView(depthBuffer_.Get(), &dsvDesc, dsvHandle);
+	device->CreateDepthStencilView(depthBuffer_.Get(), &dsvDesc, dsvHandle_.cpu);
 }
 
 DxGpuResource* OffscreenRenderTarget::GetResource() const{
@@ -71,15 +71,19 @@ DxGpuResource* OffscreenRenderTarget::GetResource() const{
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE OffscreenRenderTarget::GetRTV() const{
-	return rtvHandle_;
+	return rtvHandle_.cpu;
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE OffscreenRenderTarget::GetDSV() const{
-	return dsvHandle_;
+	return dsvHandle_.cpu;
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE OffscreenRenderTarget::GetSRV() const{
 	return resource_->GetSRVGpuHandle();
+}
+
+void OffscreenRenderTarget::SetDepthDSV(DescriptorHandle dsv) {
+	dsvHandle_ = dsv;
 }
 
 D3D12_VIEWPORT OffscreenRenderTarget::GetViewport() const{
@@ -93,14 +97,16 @@ D3D12_RECT OffscreenRenderTarget::GetScissorRect() const{
 void OffscreenRenderTarget::Clear(ID3D12GraphicsCommandList* commandList){
 	resource_->Transition(commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
 	float clearColor[] = {0.1f, 0.1f, 0.1f, 1.0f};
-	commandList->ClearRenderTargetView(rtvHandle_, clearColor, 0, nullptr);
-	commandList->ClearDepthStencilView(dsvHandle_, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	commandList->ClearRenderTargetView(rtvHandle_.cpu, clearColor, 0, nullptr);
+	commandList->ClearDepthStencilView(dsvHandle_.cpu, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 }
 
 void OffscreenRenderTarget::SetRenderTarget(ID3D12GraphicsCommandList* commandList) {
 	commandList->RSSetViewports(1, &viewport_);
 	commandList->RSSetScissorRects(1, &scissorRect_);
-	commandList->OMSetRenderTargets(1, &rtvHandle_, FALSE, &dsvHandle_);
+
+	// OMSetRenderTargets
+	commandList->OMSetRenderTargets(1, &rtvHandle_.cpu, FALSE, &dsvHandle_.cpu);
 }
 
 void OffscreenRenderTarget::TransitionTo(ID3D12GraphicsCommandList* cmdList, D3D12_RESOURCE_STATES newState){

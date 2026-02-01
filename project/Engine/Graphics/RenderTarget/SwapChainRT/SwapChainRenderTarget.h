@@ -12,12 +12,12 @@ public:
 	//===================================================================*/
 	//			public methods
 	//===================================================================*/
-	void Initialize(DxSwapChain* swapChain, ID3D12DescriptorHeap* rtvHeap, UINT rtvDescriptorSize);
+	void Initialize(DxSwapChain* swapChain);
 	void SetBufferIndex(UINT index);
 
 	DxGpuResource* GetResource() const override{ return nullptr; };
 	D3D12_CPU_DESCRIPTOR_HANDLE GetRTV() const override;
-	D3D12_CPU_DESCRIPTOR_HANDLE GetDSV() const override{ return dsv_; }
+	D3D12_CPU_DESCRIPTOR_HANDLE GetDSV() const override{ return dsv_.cpu; }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSRV() const override;
 	void SetRenderTarget(ID3D12GraphicsCommandList* commandList) override;
 	void TransitionTo(ID3D12GraphicsCommandList* commandList, D3D12_RESOURCE_STATES newState) override;
@@ -31,19 +31,18 @@ public:
 	RenderTargetType GetRenderTargetType() const{ return rtType_; }
 
 	void ReleaseSRVs();
-	void SetDepthDSV(D3D12_CPU_DESCRIPTOR_HANDLE dsv)override { dsv_ = dsv; }
+	void SetDepthDSV(DescriptorHandle dsv)override { dsv_ = dsv; }
 private:
 	//===================================================================*/
 	//			private variables
 	//===================================================================*/
 	RenderTargetType rtType_ {};
 	DxSwapChain* swapChain_ = nullptr;
-	ID3D12DescriptorHeap* rtvHeap_ = nullptr;
-	UINT rtvDescriptorSize_ = 0;
 	UINT bufferIndex_ = 0;
 
-	D3D12_CPU_DESCRIPTOR_HANDLE dsv_{};
+	DescriptorHandle dsv_{};
 	std::vector<D3D12_RESOURCE_STATES> currentStates_;
+	std::vector<DescriptorHandle> rtvHandles_;
 	std::vector<DescriptorHandle> srvHandles_;
 
 	D3D12_VIEWPORT viewport_ {};

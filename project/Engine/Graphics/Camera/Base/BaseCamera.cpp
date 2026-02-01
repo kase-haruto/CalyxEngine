@@ -172,6 +172,14 @@ void BaseCamera::SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> co
 	cameraBuffer_.SetCommand(command.Get(), pipelineType);
 }
 
+void BaseCamera::SetCommand(ID3D12GraphicsCommandList* command, PipelineType pipelineType) {
+	cameraBuffer_.SetCommand(command, pipelineType);
+}
+
+void BaseCamera::SetRootCommand(ID3D12GraphicsCommandList* command, uint32_t rootIndex) {
+	cameraBuffer_.SetCommand(command, rootIndex);
+}
+
 void BaseCamera::SetAspectRatio(float aspect){
 	aspectRatio_ = aspect;
 

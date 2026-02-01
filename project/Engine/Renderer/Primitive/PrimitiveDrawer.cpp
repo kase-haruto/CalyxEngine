@@ -169,7 +169,7 @@ void PrimitiveDrawer::DrawSphere(const CalyxMath::Vector3& center, const float r
 }
 
 void PrimitiveDrawer::Render(){
-#if !defined(ndebug)
+#ifndef NDEBUG
 	if (lineDrawer_) {
 		lineDrawer_->Render();
 	}

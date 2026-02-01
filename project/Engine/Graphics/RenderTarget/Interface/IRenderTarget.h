@@ -2,6 +2,7 @@
 
 #include <Engine/Graphics/GpuResource/DxGpuResource.h>
 #include <Engine/Graphics/RenderTarget/Detail/RenderTargetDetail.h>
+#include <Engine/Graphics/Descriptor/DescriptorAllocator.h>
 #include <d3d12.h>
 
 class IRenderTarget{
@@ -12,7 +13,7 @@ public:
 	virtual D3D12_CPU_DESCRIPTOR_HANDLE GetDSV() const = 0;
 	virtual D3D12_GPU_DESCRIPTOR_HANDLE GetSRV() const = 0;
 	virtual D3D12_VIEWPORT GetViewport() const = 0;
-	virtual void SetDepthDSV(D3D12_CPU_DESCRIPTOR_HANDLE ){}
+	virtual void SetDepthDSV(DescriptorHandle dsv) = 0;
 	virtual D3D12_RECT GetScissorRect() const = 0;
 	virtual void SetRenderTargetType(RenderTargetType type) = 0;
 	virtual RenderTargetType GetRenderTargetType()const = 0;

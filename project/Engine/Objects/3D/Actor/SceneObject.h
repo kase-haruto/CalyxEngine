@@ -122,7 +122,7 @@ public:
 	const std::string&           GetConfigPath() const;
 	bool                         IsEnableRaycast() const { return isEnableRaycast_; }
 	bool                         IsDrawEnable() const { return isDrawEnable_; }
-	bool                         IsEnablePicking() const { return isEnablePicking_; }
+	bool                         IsPickable() const { return isEnablePicking_; }
 	uint32_t                     GetPickingID() const { return pickingID_; }
 
 	void         SetGuid(const Guid& g) { id_ = g; }
@@ -130,6 +130,7 @@ public:
 	void         SetEnablePicking(bool enable) { isEnablePicking_ = enable; }
 	void         SetParent(const std::shared_ptr<SceneObject>& newParentSp,bool inheritScale = true);
 	void         SetEnableRaycast(bool enable) { isEnableRaycast_ = enable; }
+	void         SetPickingID(uint32_t id) { pickingID_ = id; }
 
 	void AddChild(const std::shared_ptr<SceneObject>& child);
 

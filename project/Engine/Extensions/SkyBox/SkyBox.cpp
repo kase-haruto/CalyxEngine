@@ -93,10 +93,6 @@ void SkyBox::AlwaysUpdate([[maybe_unused]] float dt){
 }
 
 void SkyBox::Draw(ID3D12GraphicsCommandList* cmd){
-	// ── アクティブ カメラのビュー投影行列をルート定数へ
-	if (auto* cam = CameraManager::GetActive())
-		cam->SetCommand(cmd, PipelineType::Skybox);
-
 	// 環境テクスチャ SRV
 	D3D12_GPU_DESCRIPTOR_HANDLE envSrv =
 		TextureManager::GetInstance()->GetEnvironmentTextureSrvHandle();
@@ -106,6 +102,10 @@ void SkyBox::Draw(ID3D12GraphicsCommandList* cmd){
 		cmd,
 		PipelineType::Skybox,
 		BlendMode::NORMAL);
+
+	// ── アクティブ カメラのビュー投影行列をルート定数へ
+	if (auto* cam = CameraManager::GetActive())
+		cam->SetCommand(cmd, PipelineType::Skybox);
 
 	// パイプライン前準備
 	cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

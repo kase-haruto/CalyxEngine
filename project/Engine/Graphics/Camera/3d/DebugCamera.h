@@ -3,6 +3,7 @@
 /*	include space
 /* ===================================================================== */
 #include <Engine/Graphics/Camera/Base/BaseCamera.h>
+#include <Engine/Graphics/Camera/3d/Camera3d.h>
 
 // forward declaration
 struct CalyxMath::Vector3;
@@ -12,7 +13,7 @@ struct CalyxMath::Vector2;
 /*			デバッグ用カメラ
 /* ===================================================================== */
 class DebugCamera
-	: public BaseCamera {
+	: public Camera3d {
 public:
 	//===================================================================//
 	//							public メソッド

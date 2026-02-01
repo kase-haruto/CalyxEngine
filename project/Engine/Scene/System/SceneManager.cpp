@@ -19,6 +19,10 @@
 #include <Engine/Scene/Title/TitleScene.h>
 #include <Game/Scene/Game/GameScene.h>
 
+#ifndef NDEBUG
+#include <Engine/Editor/PickingPass.h>
+#endif
+
 namespace CalyxScene {
 	SceneManager::SceneManager(CalyxGraphics::DxCore* dx)
 	: dx_(dx) {
@@ -51,6 +55,11 @@ namespace CalyxScene {
 		SetCurrent(idToIndex_.at(
 			GameSceneUtil::ToSceneId(SceneType::TEST)
 		));
+
+#if !defined(ndebug)
+		pickingPass_ = std::make_unique<CalyxEditor::PickingPass>();
+		pickingPass_->Initialize(1280, 720);
+#endif
 	}
 
 	//------------------------------------------------------------
@@ -199,16 +208,31 @@ namespace CalyxScene {
 		auto* offscreen = dx_->GetRenderTargetCollection().Get("Offscreen");
 		DrawForRenderTarget(offscreen, cmd, pso);
 
-#if !defined(ndebug)
+#ifndef NDEBUG
 		if(auto* ctx = ActiveCtx()) ctx->MakeCurrent();
 		CameraManager::SetTypeStatic(CameraType::Debug);
 		auto* debugRT = dx_->GetRenderTargetCollection().Get("DebugView");
+		
+		if (pickingPass_ && debugRT) {
+			auto vp = debugRT->GetViewport();
+			pickingPass_->Resize(static_cast<int32_t>(vp.Width), static_cast<int32_t>(vp.Height));
+			if (auto* renderer = slots_[currentIdx_].scene->GetModelRenderer()) {
+				// ピッキングの前にデバッグカメラ視点でカリング結果を更新する
+				if (auto* debugCam = CameraManager::GetDebug()) {
+					renderer->PreCullAndBatch(debugCam);
+				}
+				pickingPass_->Render(cmd, renderer, pso);
+			}
+		}
+
 		DrawForRenderTarget(debugRT, cmd, pso);
 #endif
 
-		GraphicsGroup::GetInstance()->SetCommand(cmd, PipelineType::Line, BlendMode::NORMAL);
-		if(auto* cam = CameraManager::GetActive()) cam->SetCommand(cmd, PipelineType::Line);
-		PrimitiveDrawer::GetInstance()->Render();
+		if (auto* cam = CameraManager::GetActive()) {
+			GraphicsGroup::GetInstance()->SetCommand(cmd, PipelineType::Line, BlendMode::NORMAL);
+			cam->SetCommand(cmd, PipelineType::Line);
+			PrimitiveDrawer::GetInstance()->Render();
+		}
 		PrimitiveDrawer::GetInstance()->ClearMesh();
 	}
 

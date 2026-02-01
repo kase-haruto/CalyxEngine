@@ -15,6 +15,7 @@
 #include <Engine/Scene/Serializer/SceneSerializer.h>
 #include <Engine/Scene/System/SceneManager.h>
 #include <Engine/Editor/SceneSwitchOverlay.h>
+#include <Engine/Editor/PickingPass.h>
 
 // imgui
 #include <externals/imgui/ImGuiFileDialog.h>
@@ -527,8 +528,21 @@ namespace CalyxEditor {
 
 		if(relativeX < 0 || relativeY < 0 || relativeX > size.x || relativeY > size.y) return;
 
-		CalyxMath::Vector2 mousePos(relativeX, relativeY);
+		// --- Pixel Shader Picking (Priority) ---
+		if (sceneManager_) {
+			if (auto* pickingPass = sceneManager_->GetPickingPass()) {
+				uint32_t pickingID = pickingPass->GetObjectID(static_cast<int32_t>(relativeX), static_cast<int32_t>(relativeY));
+				if (pickingID > 0) {
+					if (auto sp = current->GetObjectLibrary()->FindSharedByPickingID(pickingID)) {
+						SetSelectedObject(sp);
+						return;
+					}
+				}
+			}
+		}
 
+		// --- Raycast Picking (Fallback) ---
+		CalyxMath::Vector2 mousePos(relativeX, relativeY);
 		CalyxMath::Matrix4x4 view = CameraManager::GetDebug()->GetViewMatrix();
 		CalyxMath::Matrix4x4 proj = CameraManager::GetDebug()->GetProjectionMatrix();
 

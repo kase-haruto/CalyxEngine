@@ -10,6 +10,16 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 //		各viewのparamterを作成
 /////////////////////////////////////////////////////////////////////////////////////////
+RootSignatureBuilder& RootSignatureBuilder::Constants(UINT reg, UINT num32BitValues, D3D12_SHADER_VISIBILITY vis) {
+	D3D12_ROOT_PARAMETER p{};
+	p.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+	p.ShaderVisibility = vis;
+	p.Constants.ShaderRegister = reg;
+	p.Constants.RegisterSpace = 0;
+	p.Constants.Num32BitValues = num32BitValues;
+	params_.push_back(p);
+	return *this;
+}
 RootSignatureBuilder& RootSignatureBuilder::CBV(UINT reg, D3D12_SHADER_VISIBILITY vis) {
 	AddParm(RootParm(D3D12_ROOT_PARAMETER_TYPE_CBV, vis, reg));
 	return *this;

@@ -6,7 +6,7 @@
 // engine
 #include <Engine/Graphics/Camera/Base/BaseCamera.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
-
+#include <Engine/Foundation/Input/Input.h>
 #include <externals/imgui/ImGuizmo.h>
 namespace CalyxEditor {
 
@@ -83,6 +83,7 @@ namespace CalyxEditor {
 
 		isHovered_ = ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 		isClicked_ = ImGui::IsWindowFocused() && ImGui::IsMouseDown(0);
+		isClicked_ = ImGui::IsWindowFocused() && CalyxFoundation::Input::GetInstance()->TriggerMouseButton(CalyxFoundation::MouseButton::Left);
 
 		ImGui::End();
 		if(!open) {
@@ -123,8 +124,9 @@ namespace CalyxEditor {
 
 	void Viewport::AddTool(IOnViewportTool* tool) { tools_.push_back(tool); }
 
-	bool			   Viewport::IsHovered() const { return isHovered_; }
-	bool			   Viewport::IsClicked() const { return isClicked_; }
+	bool               Viewport::IsHovered() const { return isHovered_; }
+	bool               Viewport::IsClicked() const { return isClicked_; }
+	bool               Viewport::wasTriggered() const {return wasTriggered_;}
 	CalyxMath::Vector2 Viewport::GetSize() const { return size_; }
 	CalyxMath::Vector2 Viewport::GetPosition() const {
 		// ビューポートの位置を取得

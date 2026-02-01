@@ -4,6 +4,8 @@
 #include <Engine/System/Event/EventBus.h>
 #include <iostream>
 
+uint32_t SceneObjectLibrary::nextPickingID_ = 1;
+
 SceneObjectLibrary::SceneObjectLibrary()  = default;
 SceneObjectLibrary::~SceneObjectLibrary() = default;
 
@@ -28,6 +30,11 @@ void SceneObjectLibrary::AddObject(const std::shared_ptr<SceneObject>& object) {
 	}
 
 	object->SetName(finalName, object->GetObjectType());
+
+	// Picking ID 割り当て
+	if(object->GetPickingID() == 0) {
+		object->SetPickingID(nextPickingID_++);
+	}
 
 	// shared_ptr で登録
 	objects_[id] = object;
@@ -165,4 +172,13 @@ std::vector<std::shared_ptr<SceneObject>> SceneObjectLibrary::GetAllObjectsShare
 bool SceneObjectLibrary::Contains(const std::shared_ptr<SceneObject>& obj) const {
 	if(!obj) return false;
 	return objects_.contains(obj->GetGuid());
+}
+
+std::shared_ptr<SceneObject> SceneObjectLibrary::FindSharedByPickingID(uint32_t pickingID) const {
+	for(const auto& [id, sp] : objects_) {
+		if(sp && sp->GetPickingID() == pickingID) {
+			return sp;
+		}
+	}
+	return nullptr;
 }

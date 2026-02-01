@@ -24,6 +24,8 @@ namespace PipelineTag {
 		SkinningObject3D,
 		ShadowStatic,
 		ShadowSkinned,
+		PickingObject3D,
+		PickingSkinned,
 		Object2d,
 		Particle,
 		GpuParticle,

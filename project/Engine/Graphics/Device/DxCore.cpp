@@ -51,83 +51,40 @@ namespace CalyxGraphics {
 		renderTargetCollection_ = std::make_unique<RenderTargetCollection>();
 		auto device				= dxDevice_->GetDevice();
 
-		// RTV heap（SwapChain用に2つ、Offscreen用に1つ、PostEffect用に1つ、Debug用に1つ、Ping-Pong用に2つ = 合計7つ）
-		D3D12_DESCRIPTOR_HEAP_DESC rtvDesc = {};
-		rtvDesc.Type					   = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-		rtvDesc.NumDescriptors			   = 7;
-		rtvDesc.Flags					   = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		device->CreateDescriptorHeap(&rtvDesc, IID_PPV_ARGS(&rtvHeap_));
-		rtvDescriptorSize_ = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-
-		// DSV heap（1つ）
-		D3D12_DESCRIPTOR_HEAP_DESC dsvDesc = {};
-		dsvDesc.Type					   = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-		dsvDesc.NumDescriptors			   = 1;
-		dsvDesc.Flags					   = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		device->CreateDescriptorHeap(&dsvDesc, IID_PPV_ARGS(&dsvHeap_));
-
-		// 各種ハンドル取得
-		D3D12_CPU_DESCRIPTOR_HANDLE baseRTVHandle = rtvHeap_->GetCPUDescriptorHandleForHeapStart();
-		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle	  = dsvHeap_->GetCPUDescriptorHandleForHeapStart();
-
-		// SwapChain バックバッファを取得して RTV 作成
-		for(UINT i = 0; i < 2; ++i) {
-			ComPtr<ID3D12Resource> backBuffer;
-			dxSwapChain_->GetSwapChain()->GetBuffer(i, IID_PPV_ARGS(&backBuffer));
-			D3D12_CPU_DESCRIPTOR_HANDLE handle = baseRTVHandle;
-			handle.ptr += i * rtvDescriptorSize_;
-			device->CreateRenderTargetView(backBuffer.Get(), nullptr, handle);
-			dxSwapChain_->SetBackBuffer(i, backBuffer); // バッファ保持
-		}
-
+		// SwapChainRT
 		auto swapchainRT = std::make_unique<SwapChainRenderTarget>();
-		swapchainRT->Initialize(dxSwapChain_.get(), rtvHeap_.Get(), rtvDescriptorSize_);
+		swapchainRT->Initialize(dxSwapChain_.get());
 		swapchainRT->SetRenderTargetType(RenderTargetType::BackBuffer);
 		renderTargetCollection_->Add("BackBuffer", std::move(swapchainRT));
 
-		// Offscreen はスロット2を使用
-		D3D12_CPU_DESCRIPTOR_HANDLE offscreenRTVHandle = baseRTVHandle;
-		offscreenRTVHandle.ptr += rtvDescriptorSize_ * 2;
-
+		// Offscreen
 		auto offscreenRT = std::make_unique<OffscreenRenderTarget>();
-		offscreenRT->Initialize(device.Get(), width, height, format_, offscreenRTVHandle, dsvHandle);
+		offscreenRT->Initialize(device.Get(), width, height, format_, DescriptorAllocator::Allocate(DescriptorUsage::Rtv), DescriptorAllocator::Allocate(DescriptorUsage::Dsv));
 		offscreenRT->SetRenderTargetType(RenderTargetType::Offscreen);
 		renderTargetCollection_->Add("Offscreen", std::move(offscreenRT));
 
-		D3D12_CPU_DESCRIPTOR_HANDLE postEffectRTVHandle = baseRTVHandle;
-		postEffectRTVHandle.ptr += rtvDescriptorSize_ * 3;
+		// PostEffect
 		auto postEffectRT = std::make_unique<OffscreenRenderTarget>();
-		postEffectRT->Initialize(device.Get(), width, height, format_, /*RTV*/ postEffectRTVHandle, /*DSV*/ dsvHandle);
+		postEffectRT->Initialize(device.Get(), width, height, format_, DescriptorAllocator::Allocate(DescriptorUsage::Rtv), DescriptorAllocator::Allocate(DescriptorUsage::Dsv));
 		postEffectRT->SetRenderTargetType(RenderTargetType::PostEffectOutput);
 		renderTargetCollection_->Add("PostEffectOutput", std::move(postEffectRT));
 
-		// debug
-		D3D12_CPU_DESCRIPTOR_HANDLE debugRTVHandle = baseRTVHandle;
-		debugRTVHandle.ptr += rtvDescriptorSize_ * 4;
-
+		// Debug
 		auto debugRT = std::make_unique<OffscreenRenderTarget>();
-		debugRT->Initialize(device.Get(), width, height, format_, debugRTVHandle, dsvHandle);
+		debugRT->Initialize(device.Get(), width, height, format_, DescriptorAllocator::Allocate(DescriptorUsage::Rtv), DescriptorAllocator::Allocate(DescriptorUsage::Dsv));
 		debugRT->SetRenderTargetType(RenderTargetType::DebugView);
 		renderTargetCollection_->Add("DebugView", std::move(debugRT));
 
-		// postEffect切り替え用
-		// PostEffectBuffer1（スロット5として）
-		D3D12_CPU_DESCRIPTOR_HANDLE postEffectBuffer1Handle = baseRTVHandle;
-		postEffectBuffer1Handle.ptr += rtvDescriptorSize_ * 5;
+		// Ping-Pong Buffers
+		auto postBuffer1 = std::make_unique<OffscreenRenderTarget>();
+		postBuffer1->Initialize(device.Get(), width, height, format_, DescriptorAllocator::Allocate(DescriptorUsage::Rtv), DescriptorAllocator::Allocate(DescriptorUsage::Dsv));
+		postBuffer1->SetRenderTargetType(RenderTargetType::PostEffectBuffer1);
+		renderTargetCollection_->Add("PostEffectBuffer1", std::move(postBuffer1));
 
-		auto postEffectBuffer1 = std::make_unique<OffscreenRenderTarget>();
-		postEffectBuffer1->Initialize(device.Get(), width, height, format_, postEffectBuffer1Handle, dsvHandle);
-		postEffectBuffer1->SetRenderTargetType(RenderTargetType::PostEffectBuffer1);
-		renderTargetCollection_->Add("PostEffectBuffer1", std::move(postEffectBuffer1));
-
-		// PostEffectBuffer2（スロット6として）
-		D3D12_CPU_DESCRIPTOR_HANDLE postEffectBuffer2Handle = baseRTVHandle;
-		postEffectBuffer2Handle.ptr += rtvDescriptorSize_ * 6;
-
-		auto postEffectBuffer2 = std::make_unique<OffscreenRenderTarget>();
-		postEffectBuffer2->Initialize(device.Get(), width, height, format_, postEffectBuffer2Handle, dsvHandle);
-		postEffectBuffer2->SetRenderTargetType(RenderTargetType::PostEffectBuffer2);
-		renderTargetCollection_->Add("PostEffectBuffer2", std::move(postEffectBuffer2));
+		auto postBuffer2 = std::make_unique<OffscreenRenderTarget>();
+		postBuffer2->Initialize(device.Get(), width, height, format_, DescriptorAllocator::Allocate(DescriptorUsage::Rtv), DescriptorAllocator::Allocate(DescriptorUsage::Dsv));
+		postBuffer2->SetRenderTargetType(RenderTargetType::PostEffectBuffer2);
+		renderTargetCollection_->Add("PostEffectBuffer2", std::move(postBuffer2));
 	}
 
 	void DxCore::PreDraw() {
@@ -198,17 +155,6 @@ namespace CalyxGraphics {
 
 		// スワップチェーンをリサイズ (内部で古いバックバッファを解放する)
 		dxSwapChain_->Resize(width, height);
-
-		// スワップチェーンのバックバッファRTVを再生成
-		D3D12_CPU_DESCRIPTOR_HANDLE baseRTVHandle = rtvHeap_->GetCPUDescriptorHandleForHeapStart();
-		auto device = dxDevice_->GetDevice();
-		for (UINT i = 0; i < dxSwapChain_->GetSwapChainDesc().BufferCount; ++i) {
-			auto backBuffer = dxSwapChain_->GetBackBuffer(i);
-			assert(backBuffer != nullptr);
-			D3D12_CPU_DESCRIPTOR_HANDLE handle = baseRTVHandle;
-			handle.ptr += i * rtvDescriptorSize_;
-			device->CreateRenderTargetView(backBuffer.Get(), nullptr, handle);
-		}
 
 		// 全てのレンダーターゲットをリサイズ
 		for (auto& pair : renderTargetCollection_->GetMap()) {

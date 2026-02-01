@@ -26,12 +26,60 @@ namespace CalyxGraphics {
 	class ShadowMapSystem;
 }
 
+
+
+
 /*-----------------------------------------------------------------------------------------
  * ModelRenderer
  * - 3Dモデル描画管理クラス
  * - スタティック/スキンメッシュモデルのバッチング、カリング、描画制御を担当
  *---------------------------------------------------------------------------------------*/
 class ModelRenderer {
+public:
+	struct RenderInstance {
+		BaseModel* model;
+		const WorldTransform* transform;
+		SceneObject* owner;
+	};
+
+private:
+	//===================================================================*/
+	//                    private types
+	//===================================================================*/
+	struct InstanceStatic {
+		WorldTransform tf;                            //< ワールド変換
+		AABB           worldAABB{};                   //< ワールドAABB
+		bool           dirty   = true;                //< ダーティフラグ
+		bool           visible = false;               //< 可視フラグ
+		BillboardMode  mode    = BillboardMode::None; //< ビルボードモード
+		SceneObject*   owner   = nullptr;             //< 所有オブジェクト
+	};
+
+	struct InstanceSkinned {
+		WorldTransform tf;                //< ワールド変換
+		AABB           worldAABB{};       //< ワールドAABB
+		bool           dirty   = true;    //< ダーティフラグ
+		bool           visible = false;   //< 可視フラグ
+		SceneObject*   owner   = nullptr; //< 所有オブジェクト
+	};
+
+	using PipelineKey       = PipelineService::PipelineKey;
+	using PipelineKeyHasher = PipelineService::PipelineKeyHasher;
+
+	struct StaticBatchItem {
+		BaseModel*                             model = nullptr; //< モデルデータ
+		std::vector<WorldTransform>            transforms;      //< インスタンス用変換リスト
+		std::vector<GpuBillboardParams>        billboards;      //< インスタンス用ビルボードパラメータ
+		DxStructuredBuffer<GpuBillboardParams> billboardSrv;    //< ビルボード用構造化バッファ
+	};
+
+
+
+	using StaticBatch  = std::vector<StaticBatchItem>;
+	using SkinnedBatch = std::vector<std::pair<CalyxAssets::AnimationModel*,std::vector<WorldTransform>>>;
+
+
+
 public:
 	//===================================================================*/
 	//                   public methods
@@ -47,14 +95,14 @@ public:
 	 * \param transform ワールド変換
 	 * \param billMode ビルボードモード
 	 */
-	void RegisterStatic(BaseModel* model,const WorldTransform& transform,BillboardMode billMode);
+	void RegisterStatic(BaseModel* model,const WorldTransform& transform,BillboardMode billMode, SceneObject* owner = nullptr);
 
 	/**
 	 * \brief スキンメッシュモデルを登録
 	 * \param model アニメーションモデルデータ
 	 * \param transform ワールド変換
 	 */
-	void RegisterSkinned(CalyxAssets::AnimationModel* model,const WorldTransform& transform);
+	void RegisterSkinned(CalyxAssets::AnimationModel* model,const WorldTransform& transform, SceneObject* owner = nullptr);
 
 	/**
 	 * \brief 登録をクリア
@@ -88,19 +136,17 @@ public:
 				 class LightLibrary*             lightLibrary,
 				 CalyxGraphics::ShadowMapSystem* shadowMapSystem);
 
+	// Picking / Outline / IDPass 用
 	/**
-	 * \brief スタティックモデルのダーティフラグをセット
-	 * \param model モデル
-	 * \param index インデックス
+	 * \brief 可視スタティックモデルリストを収集
+	 * \param out
 	 */
-	void MarkStaticDirty(BaseModel* model,size_t index);
-
+	void CollectVisibleStatic(std::vector<RenderInstance>& out) const;
 	/**
-	 * \brief スキンメッシュモデルのダーティフラグをセット
-	 * \param model モデル
-	 * \param index インデックス
+	 * \brief 可視スキンメッシュモデルリストを収集
+	 * \param out
 	 */
-	void MarkSkinnedDirty(CalyxAssets::AnimationModel* model,size_t index);
+	void CollectVisibleSkinned(std::vector<RenderInstance>& out) const;
 
 	/**
 	 * \brief 可視スタティックモデルリストを取得（シャドウ用）
@@ -129,51 +175,28 @@ public:
 	bool HasSceneBounds() const { return hasSceneBounds_; }
 
 private:
-	//===================================================================*/
-	//                    private types
-	//===================================================================*/
-	struct InstanceStatic {
-		WorldTransform tf;                            //< ワールド変換
-		AABB           worldAABB{};                   //< ワールドAABB
-		bool           dirty   = true;                //< ダーティフラグ
-		bool           visible = false;               //< 可視フラグ
-		BillboardMode  mode    = BillboardMode::None; //< ビルボードモード
-		SceneObject*   owner   = nullptr;             //< 所有オブジェクト
-	};
-
-	struct InstanceSkinned {
-		WorldTransform tf;                //< ワールド変換
-		AABB           worldAABB{};       //< ワールドAABB
-		bool           dirty   = true;    //< ダーティフラグ
-		bool           visible = false;   //< 可視フラグ
-		SceneObject*   owner   = nullptr; //< 所有オブジェクト
-	};
-
-	using PipelineKey       = PipelineService::PipelineKey;
-	using PipelineKeyHasher = PipelineService::PipelineKeyHasher;
-
-	struct StaticBatchItem {
-		BaseModel*                             model = nullptr; //< モデルデータ
-		std::vector<WorldTransform>            transforms;      //< インスタンス用変換リスト
-		std::vector<GpuBillboardParams>        billboards;      //< インスタンス用ビルボードパラメータ
-		DxStructuredBuffer<GpuBillboardParams> billboardSrv;    //< ビルボード用構造化バッファ
-	};
-
-	using StaticBatch  = std::vector<StaticBatchItem>;
-	using SkinnedBatch = std::vector<std::pair<CalyxAssets::AnimationModel*,std::vector<WorldTransform>>>;
-
-	//===================================================================*/
-	//                    private methods
-	//===================================================================*/
+	/**
+ 	* \brief スタティックモデルのダーティフラグをセット
+ 	* \param model モデル
+ 	* \param index インデックス
+ 	*/
+	void MarkStaticDirty(BaseModel* model,size_t index);
+	/**
+	 * \brief スキンメッシュモデルのダーティフラグをセット
+	 * \param model モデル
+	 * \param index インデックス
+	 */
+	void MarkSkinnedDirty(CalyxAssets::AnimationModel* model,size_t index);
 	/**
 	 * \brief スタティックモデルのバッチ構築
 	 */
 	void BuildStaticBatches();
-
 	/**
 	 * \brief スキンメッシュモデルのバッチ構築
 	 */
 	void BuildSkinnedBatches();
+
+
 
 	//===================================================================*/
 	//                    private member variables

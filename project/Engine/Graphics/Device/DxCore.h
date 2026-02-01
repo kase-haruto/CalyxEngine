@@ -129,9 +129,6 @@ namespace CalyxGraphics {
 		std::unique_ptr<DxCommand>   dxCommand_; //< コマンド管理
 		std::unique_ptr<DxSwapChain> dxSwapChain_; //< スワップチェーン
 
-		ComPtr<ID3D12DescriptorHeap>            rtvHeap_; //< RTV用デスクリプタヒープ
-		ComPtr<ID3D12DescriptorHeap>            dsvHeap_; //< DSV用デスクリプタヒープ
-		UINT                                    rtvDescriptorSize_ = 0; //< RTVデスクリプタサイズ
 		DXGI_FORMAT                             format_            = DXGI_FORMAT_R8G8B8A8_UNORM; //< バックバッファフォーマット
 		std::unique_ptr<RenderTargetCollection> renderTargetCollection_; //< レンダリングターゲット管理
 		std::unique_ptr<DxFence>                dxFence_; //< フェンス管理
