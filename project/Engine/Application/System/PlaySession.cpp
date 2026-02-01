@@ -9,7 +9,7 @@ namespace CalyxEditor {
 		editorContext_->SetRuntime(false);
 		LoadIcons();
 
-#ifndef NDEBUG
+#if defined(_DEBUG) || defined(DEVELOP)
 		// DebugビルドではEditorモード
 		mode_ = EngineMode::Editor;
 #else

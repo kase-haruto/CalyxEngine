@@ -38,7 +38,7 @@ void BoxCollider::Update(const CalyxMath::Vector3& position,const CalyxMath::Qua
 
 void BoxCollider::Draw() {
 
-#if !defined(ndebug)
+#if defined(_DEBUG) || defined(DEVELOP)
 	if(isDraw_ && isCollisionEnabled_) { PrimitiveDrawer::GetInstance()->DrawOBB(shape_.center,shape_.rotate,shape_.size,color_); }
 #endif // DEBUG
 

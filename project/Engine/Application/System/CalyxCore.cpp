@@ -16,15 +16,18 @@
 #include <Engine/System/Command/Manager/CommandManager.h>
 
 // manager
+#include <Engine/Assets/Database/AssetDatabase.h>
 #include <Engine/Assets/Model/ModelManager.h>
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Foundation/Clock/ClockManager.h>
-#include <Engine/Assets/Database/AssetDatabase.h>
 #include <Engine/PostProcess/Manager/PostEffectManager.h>
 
 // editor
 
 // lib
+#include "Engine/Scene/System/SceneManager.h"
+#include <Engine/Editor/PickingPass.h>
+
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 
 namespace CalyxEngine {
@@ -61,8 +64,8 @@ namespace CalyxEngine {
 
 		DescriptorAllocator::Initialize(dxCore_->GetDevice().Get());
 		DescriptorAllocator::CreateHeap(DescriptorUsage::CbvSrvUav, {});
-		DescriptorAllocator::CreateHeap(DescriptorUsage::Rtv,       { .maxDescriptors = 256, .shaderVisible = false });
-		DescriptorAllocator::CreateHeap(DescriptorUsage::Dsv,       { .maxDescriptors = 64,  .shaderVisible = false });
+		DescriptorAllocator::CreateHeap(DescriptorUsage::Rtv, {.maxDescriptors = 256, .shaderVisible = false});
+		DescriptorAllocator::CreateHeap(DescriptorUsage::Dsv, {.maxDescriptors = 64, .shaderVisible = false});
 
 		// 管理クラスの初期化
 		shaderManager_		  = std::make_shared<ShaderManager>();
@@ -162,6 +165,22 @@ namespace CalyxEngine {
 
 		debugRT->GetResource()->Transition(cmd, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		pEngineUICore_->SetDebugViewportTexture(debugRT->GetSRV().ptr);
+		if(pEngineUICore_ && pEngineUICore_->GetLevelEditor()) {
+			if(auto* sceneMgr = pEngineUICore_->GetLevelEditor()->GetSceneManager()) {
+				if(auto* pickingPass = sceneMgr->GetPickingPass()) {
+					auto* pickingColor = pickingPass->GetColor();
+					if(pickingColor) {
+						D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+							pickingColor,
+							D3D12_RESOURCE_STATE_RENDER_TARGET,
+							D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+						cmd->ResourceBarrier(1, &barrier);
+
+						pEngineUICore_->SetPickingViewportTexture(pickingPass->GetSrv().ptr);
+					}
+				}
+			}
+		}
 
 		PipelineSet pipelineSet = service->GetPipelineSet(PipelineTag::PostProcess::CopyImage);
 		DrawTextureToRenderTarget(cmd, postOutput->GetSRV(), backBuffer,

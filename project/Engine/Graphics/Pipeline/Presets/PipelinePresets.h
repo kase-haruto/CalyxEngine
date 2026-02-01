@@ -18,7 +18,7 @@ namespace PipelinePresets {
 	GraphicsPipelineDesc MakeShadowSkinned();
 
 	//デバッグピッキング用(マウスでオブジェクト選択
-#if !defined(NDEBUG)
+#if defined(_DEBUG) || defined(DEVELOP)
 	// picking
 	GraphicsPipelineDesc MakePickingStatic();
 	GraphicsPipelineDesc MakePickingSkinned();

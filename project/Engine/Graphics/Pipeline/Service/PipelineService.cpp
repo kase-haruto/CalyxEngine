@@ -79,7 +79,7 @@ void PipelineService::RegisterAllPipelines() {
 	regObjNoBlend(PipelineTag::Object::ShadowStatic, PipelinePresets::MakeShadowStatic);
 	regObjNoBlend(PipelineTag::Object::ShadowSkinned, PipelinePresets::MakeShadowSkinned);
 
-#if !defined(NDEBUG)
+#if defined(_DEBUG) || defined(DEVELOP)
 	//========================= Picking ===================================
 	regObjNoBlend(PipelineTag::Object::PickingObject3D, PipelinePresets::MakePickingStatic);
 	regObjNoBlend(PipelineTag::Object::PickingSkinned, PipelinePresets::MakePickingSkinned);

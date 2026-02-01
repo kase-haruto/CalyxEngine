@@ -11,7 +11,7 @@
 #include <Engine/Lighting/LightData.h>
 #include <Engine/Renderer/Mesh/VertexData.h>
 
-#if !defined(ndebug)
+#if defined(_DEBUG) || defined(DEVELOP)
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 #include <externals/imgui/imgui.h>
 #endif
@@ -436,7 +436,7 @@ namespace CalyxAssets {
 	// ImGui などUIの表示
 	//-----------------------------------------------------------------------------
 	void AnimationModel::ShowImGuiInterface() {
-#if !defined(ndebug)
+#if defined(_DEBUG) || defined(DEVELOP)
 		GuiCmd::CheckBox("Draw Skeleton",isDrawSkeleton_);
 		BaseModel::ShowImGuiInterface();
 

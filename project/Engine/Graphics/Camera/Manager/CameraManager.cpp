@@ -15,11 +15,7 @@ void CameraManager::Initialize(SceneContext*){
 }
 void CameraManager::Update(float){ TransferToGPU(); }
 void CameraManager::TransferToGPU() {
-	for (auto& kv : cameras_) {
-		if (kv.second) {
-			kv.second->UpdateMatrix(); // TransfarToGPU という関数は恐らく UpdateMatrix のこと
-		}
-	}
+	for (auto& kv : cameras_) kv.second->TransfarToGPU();
 }
 
 void CameraManager::SetType(CameraType t) {

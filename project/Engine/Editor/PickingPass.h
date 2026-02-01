@@ -25,7 +25,7 @@ namespace CalyxEditor {
 		 * \param width  幅
 		 * \param height 高さ
 		 */
-		void Initialize(int32_t width,int32_t height);
+		void Initialize(int32_t width, int32_t height);
 		/**
 		 * \brief 終了処理
 		 */
@@ -35,19 +35,20 @@ namespace CalyxEditor {
 		 * \param width  幅
 		 * \param height 高さ
 		 */
-		void Resize(int32_t width,int32_t height);
+		void Resize(int32_t width, int32_t height);
 
 		/**
 		 * \brief ピッキング用テクスチャ描画
 		 */
 		void Render(ID3D12GraphicsCommandList* cmd,
-			ModelRenderer* modelRenderer,
-			PipelineService* psoService);
+					ModelRenderer*			   modelRenderer,
+					PipelineService*		   psoService);
 
 		// RT / Depth 取得（Readback用に後で使う）
-		ID3D12Resource*             GetColor() const { return color_.Get(); }
+		ID3D12Resource*				GetColor() const { return color_.Get(); }
 		D3D12_CPU_DESCRIPTOR_HANDLE GetRtv() const { return rtv_.cpu; }
 		D3D12_CPU_DESCRIPTOR_HANDLE GetDsv() const { return dsv_.cpu; }
+		D3D12_GPU_DESCRIPTOR_HANDLE GetSrv() const { return srv_.gpu; }
 
 		uint32_t GetWidth() const { return width_; }
 		uint32_t GetHeight() const { return height_; }
@@ -61,7 +62,7 @@ namespace CalyxEditor {
 		uint32_t GetObjectID(int32_t x, int32_t y);
 
 	private:
-		void CreateResources(uint32_t w,uint32_t h);
+		void CreateResources(uint32_t w, uint32_t h);
 		void DestroyResources();
 
 		void CreateReadback(uint32_t w, uint32_t h);
@@ -73,9 +74,10 @@ namespace CalyxEditor {
 
 		DescriptorHandle rtv_{};
 		DescriptorHandle dsv_{};
+		DescriptorHandle srv_{};
 
-		uint32_t width_  = 0;
-		uint32_t height_ = 0;
+		uint32_t width_	   = 0;
+		uint32_t height_   = 0;
 		uint32_t rowPitch_ = 0;
 	};
-}
+} // namespace CalyxEditor

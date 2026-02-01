@@ -5,14 +5,27 @@ cbuffer PickingCB : register(b2) {
     uint objectID;
 }
 
+// 色を分散させるためのハッシュ関数
+uint Hash(uint x) {
+	x ^= x >> 17;
+	x *= 0xed5ad4bb;
+	x ^= x >> 11;
+	x *= 0xac4c1b51;
+	x ^= x >> 15;
+	x *= 0x31848bab;
+	x ^= x >> 14;
+	return x;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //                            出力
 ///////////////////////////////////////////////////////////////////////////////
 float4 main() : SV_Target {
-    // オブジェクトIDをカラーとして出力
-   uint r = (objectID >>  0) & 0xFF;
-    uint g = (objectID >>  8) & 0xFF;
-    uint b = (objectID >> 16) & 0xFF;
+	uint h = Hash(objectID);
 
-    return float4(r, g, b, 255) / 255.0;
+	uint r = (h >>  0) & 0xFF;
+	uint g = (h >>  8) & 0xFF;
+	uint b = (h >> 16) & 0xFF;
+
+	return float4(r, g, b, 255) / 255.0;
 }

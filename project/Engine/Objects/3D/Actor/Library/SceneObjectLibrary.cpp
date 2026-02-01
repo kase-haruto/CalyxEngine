@@ -69,25 +69,24 @@ bool SceneObjectLibrary::RemoveObject(const std::shared_ptr<SceneObject>& object
 
 	// 最後にライブラリから除外
 	objects_.erase(id);
-	std::cout << "[AFTER ERASE]" 
+	std::cout << "[AFTER ERASE]"
 			  << " use_count=" << object.use_count()
 			  << std::endl;
 	return true;
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////
 ///     idをもとに削除
 //////////////////////////////////////////////////////////////////////////////////
-bool SceneObjectLibrary::RemoveObject(Guid id){
+bool SceneObjectLibrary::RemoveObject(Guid id) {
 	auto it = objects_.find(id);
-	if (it == objects_.end()) return false;
+	if(it == objects_.end()) return false;
 
-	if (auto sp = it->second) {
+	if(auto sp = it->second) {
 		// 子リストをコピーしてから再帰削除
 		auto children = sp->GetChildren();
-		for (auto& child : children) {
-			if (child) {
+		for(auto& child : children) {
+			if(child) {
 				RemoveObject(child);
 			}
 		}
@@ -174,9 +173,24 @@ bool SceneObjectLibrary::Contains(const std::shared_ptr<SceneObject>& obj) const
 	return objects_.contains(obj->GetGuid());
 }
 
-std::shared_ptr<SceneObject> SceneObjectLibrary::FindSharedByPickingID(uint32_t pickingID) const {
+namespace {
+	// シェーダー(picking.ps)と同一のハッシュ関数
+	// ピッキング結果の可視化のために色を分散させているため、検索時もこれを通す必要がある
+	uint32_t Hash(uint32_t x) {
+		x ^= x >> 17;
+		x *= 0xed5ad4bb;
+		x ^= x >> 11;
+		x *= 0xac4c1b51;
+		x ^= x >> 15;
+		x *= 0x31848bab;
+		x ^= x >> 14;
+		return x;
+	}
+} // namespace
+
+std::shared_ptr<SceneObject> SceneObjectLibrary::FindSharedByPickingID(uint32_t hashedPickingID) const {
 	for(const auto& [id, sp] : objects_) {
-		if(sp && sp->GetPickingID() == pickingID) {
+		if(sp && Hash(sp->GetPickingID()) == hashedPickingID) {
 			return sp;
 		}
 	}

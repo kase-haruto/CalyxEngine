@@ -4,10 +4,11 @@
 /* ===================================================================== */
 
 // engine
+#include <Engine/Foundation/Input/Input.h>
 #include <Engine/Graphics/Camera/Base/BaseCamera.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
-#include <Engine/Foundation/Input/Input.h>
 #include <externals/imgui/ImGuizmo.h>
+
 namespace CalyxEditor {
 
 	Viewport::Viewport(ViewportType type, const std::string& windowName)
@@ -25,7 +26,8 @@ namespace CalyxEditor {
 			}
 			break;
 		}
-		case ViewportType::VIEWPORT_DEBUG: {
+		case ViewportType::VIEWPORT_DEBUG:
+		case ViewportType::VIEWPORT_PICKING: {
 			auto* debugCam = CameraManager::GetDebug();
 			if(debugCam && camera_ != debugCam) {
 				camera_ = debugCam;
@@ -124,9 +126,9 @@ namespace CalyxEditor {
 
 	void Viewport::AddTool(IOnViewportTool* tool) { tools_.push_back(tool); }
 
-	bool               Viewport::IsHovered() const { return isHovered_; }
-	bool               Viewport::IsClicked() const { return isClicked_; }
-	bool               Viewport::wasTriggered() const {return wasTriggered_;}
+	bool			   Viewport::IsHovered() const { return isHovered_; }
+	bool			   Viewport::IsClicked() const { return isClicked_; }
+	bool			   Viewport::wasTriggered() const { return wasTriggered_; }
 	CalyxMath::Vector2 Viewport::GetSize() const { return size_; }
 	CalyxMath::Vector2 Viewport::GetPosition() const {
 		// ビューポートの位置を取得

@@ -19,7 +19,7 @@
 #include <Engine/Scene/Title/TitleScene.h>
 #include <Game/Scene/Game/GameScene.h>
 
-#ifndef NDEBUG
+#if defined(_DEBUG) || defined(DEVELOP)
 #include <Engine/Editor/PickingPass.h>
 #endif
 
@@ -56,7 +56,7 @@ namespace CalyxScene {
 			GameSceneUtil::ToSceneId(SceneType::TEST)
 		));
 
-#if !defined(ndebug)
+#if defined(_DEBUG) || defined(DEVELOP)
 		pickingPass_ = std::make_unique<CalyxEditor::PickingPass>();
 		pickingPass_->Initialize(1280, 720);
 #endif
@@ -208,7 +208,7 @@ namespace CalyxScene {
 		auto* offscreen = dx_->GetRenderTargetCollection().Get("Offscreen");
 		DrawForRenderTarget(offscreen, cmd, pso);
 
-#ifndef NDEBUG
+#if defined(_DEBUG) || defined(DEVELOP)
 		if(auto* ctx = ActiveCtx()) ctx->MakeCurrent();
 		CameraManager::SetTypeStatic(CameraType::Debug);
 		auto* debugRT = dx_->GetRenderTargetCollection().Get("DebugView");

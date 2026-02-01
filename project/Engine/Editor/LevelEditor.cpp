@@ -3,10 +3,12 @@
 // engine
 #include <Engine/Application/Effects/FxSystem.h>
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
-#include <Engine/Foundation/Input/Input.h>
 #include <Engine/Application/System/PlaySession.h>
 #include <Engine/Application/UI/EngineUI/Context/EditorContext.h>
 #include <Engine/Assets/Database/AssetDatabase.h>
+#include <Engine/Editor/PickingPass.h>
+#include <Engine/Editor/SceneSwitchOverlay.h>
+#include <Engine/Foundation/Input/Input.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Objects/3D/Actor/Library/SceneObjectLibrary.h>
 #include <Engine/Objects/3D/Actor/SceneObject.h>
@@ -14,8 +16,6 @@
 #include <Engine/Scene/Context/SceneContext.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
 #include <Engine/Scene/System/SceneManager.h>
-#include <Engine/Editor/SceneSwitchOverlay.h>
-#include <Engine/Editor/PickingPass.h>
 
 // imgui
 #include <externals/imgui/ImGuiFileDialog.h>
@@ -28,13 +28,13 @@ using namespace EngineEdit;
 
 namespace {
 
-// ライブラリに同一 GUID のオブジェクトが既に登録されているか？
-// （あまり呼ばない前提なので Contains を使う）
-bool LibraryContains(const SceneObjectLibrary*			 lib,
-					 const std::shared_ptr<SceneObject>& sp) {
-	if(!lib || !sp) return false;
-	return lib->Contains(sp->GetGuid());
-}
+	// ライブラリに同一 GUID のオブジェクトが既に登録されているか？
+	// （あまり呼ばない前提なので Contains を使う）
+	bool LibraryContains(const SceneObjectLibrary*			 lib,
+						 const std::shared_ptr<SceneObject>& sp) {
+		if(!lib || !sp) return false;
+		return lib->Contains(sp->GetGuid());
+	}
 
 } // namespace
 
@@ -46,25 +46,23 @@ namespace CalyxEditor {
 	LevelEditor::~LevelEditor() = default;
 
 	void LevelEditor::Initialize() {
-#if !defined(ndebug)
+#if defined(_DEBUG) || defined(DEVELOP)
 		// 各パネルの初期化 ----------------------------------------------------
-		hierarchy_		= std::make_unique<HierarchyPanel>();
-		editor_			= std::make_unique<EditorPanel>();
-		inspector_		= std::make_unique<InspectorPanel>();
-		sceneEditor_	= std::make_unique<SceneObjectEditor>();
-		placeToolPanel_ = std::make_unique<PlaceToolPanel>();
-		splineEditor_	= std::make_unique<SplineEditorPanel>();
-		assetPanel_		= std::make_unique<AssetPanel>();
+		hierarchy_			= std::make_unique<HierarchyPanel>();
+		editor_				= std::make_unique<EditorPanel>();
+		inspector_			= std::make_unique<InspectorPanel>();
+		sceneEditor_		= std::make_unique<SceneObjectEditor>();
+		placeToolPanel_		= std::make_unique<PlaceToolPanel>();
+		splineEditor_		= std::make_unique<SplineEditorPanel>();
+		assetPanel_			= std::make_unique<AssetPanel>();
 		sceneSwitchOverlay_ = std::make_unique<SceneSwitchOverlay>();
 
 		// レイアウトスイッチャーの初期化 --------------------------------------
 		layoutSwitcher_ = std::make_unique<ImGuiLayoutSwitcher>(
 			std::vector<LayoutEntry>{
 				{"Default", "Resources/Assets/Configs/Editor/Layout/default.ini"},
-				{"Effect", "Resources/Assets/Configs/Editor/Layout/effect.ini"}
-			},
-			"imgui.ini"
-		);
+				{"Effect", "Resources/Assets/Configs/Editor/Layout/effect.ini"}},
+			"imgui.ini");
 
 		if(auto* db = AssetDatabase::GetInstance()) {
 			assetPanel_->Initialize(db->GetRoot());
@@ -88,8 +86,9 @@ namespace CalyxEditor {
 		inspector_->SetSceneObjectEditor(sceneEditor_.get());
 
 		// ビューポートの初期化 ------------------------------------------------
-		mainViewport_  = std::make_unique<Viewport>(ViewportType::VIEWPORT_MAIN, "Game Viewport");
-		debugViewport_ = std::make_unique<Viewport>(ViewportType::VIEWPORT_DEBUG, "Debug Viewport");
+		mainViewport_	 = std::make_unique<Viewport>(ViewportType::VIEWPORT_MAIN, "Game Viewport");
+		debugViewport_	 = std::make_unique<Viewport>(ViewportType::VIEWPORT_DEBUG, "Debug Viewport");
+		pickingViewport_ = std::make_unique<Viewport>(ViewportType::VIEWPORT_PICKING, "Picking Viewport");
 
 		performanceOverlay_ = std::make_unique<PerformanceOverlay>();
 
@@ -218,7 +217,7 @@ namespace CalyxEditor {
 	// Update
 	//=============================================================================
 	void LevelEditor::Update() {
-#if !defined(ndebug)
+#if defined(_DEBUG) || defined(DEVELOP)
 		SceneContext* ctx = SceneContext::Current();
 
 		const ImGuiIO& io			= ImGui::GetIO();
@@ -233,7 +232,7 @@ namespace CalyxEditor {
 		// ImGui がマウスを掴んでいても、ビューポート上なら許可
 		const bool uiBlocksClick = io.WantCaptureMouse && !overDebugViewport;
 
-		if (auto* debugCam = CameraManager::GetDebug()) {
+		if(auto* debugCam = CameraManager::GetDebug()) {
 			debugCam->SetInputEnabled(overDebugViewport);
 		}
 
@@ -465,6 +464,10 @@ namespace CalyxEditor {
 			if(debugViewport_ && debugViewport_->IsShow()) {
 				debugViewport_->Render(tex);
 			}
+		} else if(type == ViewportType::VIEWPORT_PICKING) {
+			if(pickingViewport_ && pickingViewport_->IsShow()) {
+				pickingViewport_->Render(tex);
+			}
 		}
 	}
 
@@ -529,11 +532,11 @@ namespace CalyxEditor {
 		if(relativeX < 0 || relativeY < 0 || relativeX > size.x || relativeY > size.y) return;
 
 		// --- Pixel Shader Picking (Priority) ---
-		if (sceneManager_) {
-			if (auto* pickingPass = sceneManager_->GetPickingPass()) {
+		if(sceneManager_) {
+			if(auto* pickingPass = sceneManager_->GetPickingPass()) {
 				uint32_t pickingID = pickingPass->GetObjectID(static_cast<int32_t>(relativeX), static_cast<int32_t>(relativeY));
-				if (pickingID > 0) {
-					if (auto sp = current->GetObjectLibrary()->FindSharedByPickingID(pickingID)) {
+				if(pickingID > 0) {
+					if(auto sp = current->GetObjectLibrary()->FindSharedByPickingID(pickingID)) {
 						SetSelectedObject(sp);
 						return;
 					}
@@ -542,7 +545,7 @@ namespace CalyxEditor {
 		}
 
 		// --- Raycast Picking (Fallback) ---
-		CalyxMath::Vector2 mousePos(relativeX, relativeY);
+		CalyxMath::Vector2	 mousePos(relativeX, relativeY);
 		CalyxMath::Matrix4x4 view = CameraManager::GetDebug()->GetViewMatrix();
 		CalyxMath::Matrix4x4 proj = CameraManager::GetDebug()->GetProjectionMatrix();
 
@@ -568,8 +571,8 @@ namespace CalyxEditor {
 	//=============================================================================
 	// SceneContext の変更検出
 	//=============================================================================
-	void LevelEditor::SetSceneManager(CalyxScene::SceneManager* manager) { 
-		sceneManager_ = manager; 
+	void LevelEditor::SetSceneManager(CalyxScene::SceneManager* manager) {
+		sceneManager_ = manager;
 		if(sceneSwitchOverlay_) {
 			sceneSwitchOverlay_->SetSceneManager(manager);
 		}

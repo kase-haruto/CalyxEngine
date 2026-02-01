@@ -11,18 +11,18 @@
 #include <Engine/Application/UI/Panels/InspectorPanel.h>
 #include <Engine/Application/UI/Panels/PlaceToolPanel.h>
 #include <Engine/Application/UI/Panels/SplineEditorPanel.h>
-#include <Engine/Editor/SceneObjectEditor.h>
 #include <Engine/Editor/ImGuiLayoutSwitcher.h>
+#include <Engine/Editor/SceneObjectEditor.h>
 
 // c++
 #include <memory>
 #include <vector>
 
 namespace EngineEdit {
-enum class EditorMode {
-	Edit,
-	Game
-};
+	enum class EditorMode {
+		Edit,
+		Game
+	};
 } // namespace EngineEdit
 
 class BaseEditor;
@@ -56,6 +56,8 @@ namespace CalyxEditor {
 		void RenderMenu();
 		void ClearSelection();
 		~LevelEditor();
+		CalyxScene::SceneManager* GetSceneManager() const { return sceneManager_; }
+		void					  SetSceneManager(CalyxScene::SceneManager* sceneManager);
 
 		// 編集対象 ----------------------------------------------------------------
 		void SetSelectedEditor(BaseEditor* editor);
@@ -78,9 +80,6 @@ namespace CalyxEditor {
 
 		EngineEdit::EditorMode GetMode() const { return mode_; }
 		void				   SetPlaySession(PlaySession* session) { pPlaySesseion_ = session; }
-
-	public:
-		void SetSceneManager(CalyxScene::SceneManager* manager);
 
 	private:
 		// マウスピッキング関連 ----------------------------------------------------
@@ -107,17 +106,17 @@ namespace CalyxEditor {
 
 	private:
 		// 管理UI
-		std::unique_ptr<HierarchyPanel>	   hierarchy_;
-		std::unique_ptr<EditorPanel>	   editor_;
-		std::unique_ptr<InspectorPanel>	   inspector_;
-		std::unique_ptr<SceneObjectEditor> sceneEditor_;
-		std::unique_ptr<PlaceToolPanel>	   placeToolPanel_;
-		std::unique_ptr<SplineEditorPanel> splineEditor_;
-		std::unique_ptr<AssetPanel>		   assetPanel_;
-		std::unique_ptr<SceneSwitchOverlay> sceneSwitchOverlay_;
+		std::unique_ptr<HierarchyPanel>		 hierarchy_;
+		std::unique_ptr<EditorPanel>		 editor_;
+		std::unique_ptr<InspectorPanel>		 inspector_;
+		std::unique_ptr<SceneObjectEditor>	 sceneEditor_;
+		std::unique_ptr<PlaceToolPanel>		 placeToolPanel_;
+		std::unique_ptr<SplineEditorPanel>	 splineEditor_;
+		std::unique_ptr<AssetPanel>			 assetPanel_;
+		std::unique_ptr<SceneSwitchOverlay>	 sceneSwitchOverlay_;
 		std::unique_ptr<ImGuiLayoutSwitcher> layoutSwitcher_;
-		PlaySession*					   pPlaySesseion_ = nullptr;
-		CalyxScene::SceneManager*		   sceneManager_  = nullptr;
+		PlaySession*						 pPlaySesseion_ = nullptr;
+		CalyxScene::SceneManager*			 sceneManager_	= nullptr;
 
 		// メニュー
 		std::unique_ptr<EditorMenu> menu_; //< エディターメニュー
@@ -126,6 +125,7 @@ namespace CalyxEditor {
 		// ビューポート
 		std::unique_ptr<Viewport>			mainViewport_;		 //< メインビューポート
 		std::unique_ptr<Viewport>			debugViewport_;		 //< デバッグビューポート
+		std::unique_ptr<Viewport>			pickingViewport_;	 //< ピッキングビューポート
 		std::unique_ptr<PerformanceOverlay> performanceOverlay_; //< パフォーマンスオーバーレイ
 
 		// 状態
@@ -139,4 +139,4 @@ namespace CalyxEditor {
 		std::vector<IEngineUI*> editorPanels_;
 	};
 
-}
+} // namespace CalyxEditor

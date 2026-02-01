@@ -9,7 +9,7 @@
 #include <Engine/Graphics/Device/DxCore.h>
 
 // externals
-#if !defined(ndebug)
+#if defined(_DEBUG) || defined(DEVELOP)
 #include <externals/imgui/imgui.h>
 #include "imgui/ImGuizmo.h"
 #endif // _DEBUG
@@ -57,7 +57,7 @@ void ImGuiManager::Begin(){
 	ImGui_ImplDX12_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
-#if !defined(ndebug)
+#if defined(_DEBUG) || defined(DEVELOP)
 	ImGuizmo::BeginFrame();
 
 #endif // _DEBUG	

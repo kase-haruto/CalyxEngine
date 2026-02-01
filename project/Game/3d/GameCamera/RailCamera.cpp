@@ -170,7 +170,7 @@ void RailCamera::Update(float dt) {
 //  デバッグ表示
 /////////////////////////////////////////////////////////////////////////////////////////
 void RailCamera::ShowGui() {
-#if !defined(ndebug)
+#if defined(_DEBUG) || defined(DEVELOP)
 	worldTransform_.ShowImGui();
 	if(ImGui::CollapsingHeader("RailCamera")) {
 		ImGui::DragFloat("Speed (units/s)", &speed_, 0.1f, 0.0f, 1000.0f);
