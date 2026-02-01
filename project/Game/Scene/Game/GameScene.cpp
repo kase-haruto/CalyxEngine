@@ -10,11 +10,8 @@
 // engine
 #include <Engine/Collision/CollisionManager.h>
 #include <Engine/Foundation/Input/Input.h>
-#include <Engine/Graphics/Camera/Action/CameraTurnAroundAction.h>
 #include <Engine/Objects/2D/NumbersSprite/NumbersSprite.h>
-#include <Engine/Objects/3D/Actor/SceneObjectManager.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
-#include <Engine/Scene/Utility/SceneUtility.h>
 
 // game
 #include "Engine/Application/System/Environment.h"
