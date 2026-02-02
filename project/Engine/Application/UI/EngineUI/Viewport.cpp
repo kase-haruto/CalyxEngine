@@ -52,7 +52,8 @@ namespace CalyxEditor {
 		// 画像描画
 		ImVec2 imagePos = ImGui::GetCursorScreenPos();
 		viewOrigin_		= CalyxMath::Vector2(imagePos.x, imagePos.y);
-		if(size_.y > 0.0f) {
+		// 描画サイズをカメラに通知 (PICKINGビューポートは表示のみなのでカメラ設定を上書きしない)
+		if(size_.y > 0.0f && type_ != ViewportType::VIEWPORT_PICKING) {
 			camera_->SetAspectRatio(size_.x / size_.y);
 			camera_->UpdateMatrix();
 			// CameraManagerにviewportサイズを通知

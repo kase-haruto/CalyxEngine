@@ -534,7 +534,14 @@ namespace CalyxEditor {
 		// --- Pixel Shader Picking (Priority) ---
 		if(sceneManager_) {
 			if(auto* pickingPass = sceneManager_->GetPickingPass()) {
-				uint32_t pickingID = pickingPass->GetObjectID(static_cast<int32_t>(relativeX), static_cast<int32_t>(relativeY));
+				// ビューポートサイズとテクスチャサイズの比率を計算して座標をスケーリング
+				float scaleX = static_cast<float>(pickingPass->GetWidth()) / size.x;
+				float scaleY = static_cast<float>(pickingPass->GetHeight()) / size.y;
+
+				int32_t px = static_cast<int32_t>(relativeX * scaleX);
+				int32_t py = static_cast<int32_t>(relativeY * scaleY);
+
+				uint32_t pickingID = pickingPass->GetObjectID(px, py);
 				if(pickingID > 0) {
 					if(auto sp = current->GetObjectLibrary()->FindSharedByPickingID(pickingID)) {
 						SetSelectedObject(sp);

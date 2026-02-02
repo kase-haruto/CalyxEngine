@@ -190,7 +190,8 @@ namespace {
 
 std::shared_ptr<SceneObject> SceneObjectLibrary::FindSharedByPickingID(uint32_t hashedPickingID) const {
 	for(const auto& [id, sp] : objects_) {
-		if(sp && Hash(sp->GetPickingID()) == hashedPickingID) {
+		// シェーダーがRGB(24bit)に書き出しているため、検索時も下位24bitのみで比較する
+		if(sp && (Hash(sp->GetPickingID()) & 0x00FFFFFF) == hashedPickingID) {
 			return sp;
 		}
 	}
