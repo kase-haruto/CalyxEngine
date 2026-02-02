@@ -4,10 +4,11 @@
 /* ===================================================================== */
 
 // engine
+#include <Engine/Foundation/Input/Input.h>
 #include <Engine/Graphics/Camera/Base/BaseCamera.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
-
 #include <externals/imgui/ImGuizmo.h>
+
 namespace CalyxEditor {
 
 	Viewport::Viewport(ViewportType type, const std::string& windowName)
@@ -25,7 +26,8 @@ namespace CalyxEditor {
 			}
 			break;
 		}
-		case ViewportType::VIEWPORT_DEBUG: {
+		case ViewportType::VIEWPORT_DEBUG:
+		case ViewportType::VIEWPORT_PICKING: {
 			auto* debugCam = CameraManager::GetDebug();
 			if(debugCam && camera_ != debugCam) {
 				camera_ = debugCam;
@@ -50,7 +52,8 @@ namespace CalyxEditor {
 		// 画像描画
 		ImVec2 imagePos = ImGui::GetCursorScreenPos();
 		viewOrigin_		= CalyxMath::Vector2(imagePos.x, imagePos.y);
-		if(size_.y > 0.0f) {
+		// 描画サイズをカメラに通知 (PICKINGビューポートは表示のみなのでカメラ設定を上書きしない)
+		if(size_.y > 0.0f && type_ != ViewportType::VIEWPORT_PICKING) {
 			camera_->SetAspectRatio(size_.x / size_.y);
 			camera_->UpdateMatrix();
 			// CameraManagerにviewportサイズを通知
@@ -83,6 +86,7 @@ namespace CalyxEditor {
 
 		isHovered_ = ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 		isClicked_ = ImGui::IsWindowFocused() && ImGui::IsMouseDown(0);
+		isClicked_ = ImGui::IsWindowFocused() && CalyxFoundation::Input::GetInstance()->TriggerMouseButton(CalyxFoundation::MouseButton::Left);
 
 		ImGui::End();
 		if(!open) {
@@ -125,6 +129,7 @@ namespace CalyxEditor {
 
 	bool			   Viewport::IsHovered() const { return isHovered_; }
 	bool			   Viewport::IsClicked() const { return isClicked_; }
+	bool			   Viewport::wasTriggered() const { return wasTriggered_; }
 	CalyxMath::Vector2 Viewport::GetSize() const { return size_; }
 	CalyxMath::Vector2 Viewport::GetPosition() const {
 		// ビューポートの位置を取得

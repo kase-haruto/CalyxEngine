@@ -6,15 +6,16 @@
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 
 // uiPanel
-#include <Engine/Application/UI/Panels/HierarchyPanel.h>
-#include <Engine/Application/UI/Panels/EditorPanel.h>
-#include <Engine/Application/UI/Panels/InspectorPanel.h>
 #include <Engine/Application/UI/Panels/ConsolePanel.h>
+#include <Engine/Application/UI/Panels/EditorPanel.h>
+#include <Engine/Application/UI/Panels/HierarchyPanel.h>
+#include <Engine/Application/UI/Panels/InspectorPanel.h>
 #include <Engine/Editor/SceneSwitchOverlay.h>
 
 // lib
-#include <externals/imgui/imgui.h>
 #include <externals/imgui/ImGuizmo.h>
+#include <externals/imgui/imgui.h>
+
 namespace CalyxEditor {
 	////////////////////////////////////////////////////////////////////////////////////////////
 	//						初期化
@@ -53,6 +54,7 @@ namespace CalyxEditor {
 
 		levelEditor_->RenderViewport(ViewportType::VIEWPORT_MAIN, reinterpret_cast<ImTextureID>(mainViewportTextureID_));
 		levelEditor_->RenderViewport(ViewportType::VIEWPORT_DEBUG, reinterpret_cast<ImTextureID>(debugViewportTextureID_));
+		levelEditor_->RenderViewport(ViewportType::VIEWPORT_PICKING, reinterpret_cast<ImTextureID>(pickingViewportTextureID_));
 
 		if(levelEditor_) {
 			levelEditor_->Render();
@@ -105,5 +107,12 @@ namespace CalyxEditor {
 			return;
 		}
 		debugViewportTextureID_ = textureID;
+	}
+
+	void EngineUICore::SetPickingViewportTexture(UINT64 textureID) {
+		if(pickingViewportTextureID_) {
+			return;
+		}
+		pickingViewportTextureID_ = textureID;
 	}
 } // namespace CalyxEditor

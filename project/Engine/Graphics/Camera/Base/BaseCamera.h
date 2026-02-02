@@ -40,6 +40,8 @@ public:
 
 	void SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> command,
 					PipelineType                                      pipelineType);
+	void SetCommand(ID3D12GraphicsCommandList* command, PipelineType pipelineType);
+	void SetRootCommand(ID3D12GraphicsCommandList* command, uint32_t rootIndex);
 
 	void StartShake(float duration,float intensity) override; // カメラシェイク開始
 

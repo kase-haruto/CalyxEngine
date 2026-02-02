@@ -42,8 +42,6 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 		skyBox_->Initialize();
 	}
 
-	cmd->SetGraphicsRootSignature(
-		GraphicsGroup::GetInstance()->GetRootSignature(PipelineType::Skybox).Get());
 	skyBox_->Draw(cmd);
 
 	modelRenderer_->BeginFrame();
@@ -54,11 +52,11 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 			switch(go->GetModelType()) {
 			case ObjectModelType::ModelType_Static:
 				if(auto* m = go->GetStaticModel())
-					modelRenderer_->RegisterStatic(m, go->GetWorldTransform(), go->GetBillboardMode());
+					modelRenderer_->RegisterStatic(m, go->GetWorldTransform(), go->GetBillboardMode(), go);
 				break;
 			case ObjectModelType::ModelType_Animation:
 				if(auto* m = go->AnimationModel())
-					modelRenderer_->RegisterSkinned(m, go->GetWorldTransform());
+					modelRenderer_->RegisterSkinned(m, go->GetWorldTransform(), go);
 				break;
 			default:
 				break;

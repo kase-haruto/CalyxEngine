@@ -37,8 +37,9 @@ namespace CalyxEditor {
 		void AddPanel(std::unique_ptr<IEngineUI> panel); //< パネル追加
 
 		//--------- accessor -----------------------------------------------------
-		void SetMainViewportTexture(UINT64 textureID);	//< メインビューポート用のテクスチャを設定
-		void SetDebugViewportTexture(UINT64 textureID); //< デバッグビューポート用のテクスチャを設定
+		void SetMainViewportTexture(UINT64 textureID);	  //< メインビューポート用のテクスチャを設定
+		void SetDebugViewportTexture(UINT64 textureID);	  //< デバッグビューポート用のテクスチャを設定
+		void SetPickingViewportTexture(UINT64 textureID); //< ピッキングビューポート用のテクスチャを設定
 		template <class Panel>
 		Panel*			GetPanel();
 		HierarchyPanel* GetHierarchyPanel() const;
@@ -56,10 +57,11 @@ namespace CalyxEditor {
 		//===================================================================*/
 		//					private variable
 		//===================================================================*/
-		std::unique_ptr<PanelController> panelController_		 = nullptr;
-		std::unique_ptr<LevelEditor>	 levelEditor_			 = nullptr; //< レベルエディタ
-		UINT64							 mainViewportTextureID_	 = 0;
-		UINT64							 debugViewportTextureID_ = 0;
+		std::unique_ptr<PanelController> panelController_		   = nullptr;
+		std::unique_ptr<LevelEditor>	 levelEditor_			   = nullptr; //< レベルエディタ
+		UINT64							 mainViewportTextureID_	   = 0;
+		UINT64							 debugViewportTextureID_   = 0;
+		UINT64							 pickingViewportTextureID_ = 0;
 	};
 
 	template <class Panel>
@@ -70,4 +72,4 @@ namespace CalyxEditor {
 		return dynamic_cast<Panel*>(base);
 	}
 
-}
+} // namespace CalyxEditor

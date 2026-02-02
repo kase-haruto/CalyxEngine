@@ -15,6 +15,7 @@ public:
 	//===================================================================*/
 	//		parmSet
 	//===================================================================*/
+	RootSignatureBuilder& Constants(UINT reg, UINT num32BitValues, D3D12_SHADER_VISIBILITY vis);
 	RootSignatureBuilder& CBV(UINT reg, D3D12_SHADER_VISIBILITY vis);
 	RootSignatureBuilder& SRV(UINT reg, D3D12_SHADER_VISIBILITY vis);
 	RootSignatureBuilder& UAV(UINT reg, D3D12_SHADER_VISIBILITY vis);

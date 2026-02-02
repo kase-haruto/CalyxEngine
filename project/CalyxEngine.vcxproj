@@ -190,6 +190,7 @@ copy /Y "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll"       "C:\My
     <ClCompile Include="Engine\Application\UI\GUI\ImGuiJapaneaseFonts.cpp" />
     <ClCompile Include="Engine\Editor\ImguiLayoutService.cpp" />
     <ClCompile Include="Engine\Editor\ImGuiLayoutSwitcher.cpp" />
+    <ClCompile Include="Engine\Editor\PickingPass.cpp" />
     <ClCompile Include="Engine\Editor\SceneSwitchOverlay.cpp" />
     <ClCompile Include="Engine\Foundation\Clock\StateTimer.cpp" />
     <ClCompile Include="Engine\Foundation\Math\Matrix3x4.cpp" />
@@ -610,7 +611,6 @@ copy /Y "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll"       "C:\My
     <ClCompile Include="Engine\Objects\Collider\SphereCollider.cpp" />
     <ClCompile Include="Engine\Graphics\ResourceStateTracker\ResourceStateTracker.cpp" />
     <ClCompile Include="Engine\Scene\System\SceneManager.cpp" />
-    <ClCompile Include="Engine\Objects\3D\Actor\SceneObjectManager.cpp" />
     <ClCompile Include="Engine\Foundation\Math\Quaternion.cpp" />
     <ClCompile Include="Engine\Scene\Context\SceneContext.cpp" />
     <ClCompile Include="Engine\Graphics\RenderTarget\SwapChainRT\SwapChainRenderTarget.cpp" />
@@ -684,6 +684,7 @@ copy /Y "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll"       "C:\My
     <ClInclude Include="Engine\Application\UI\GUI\ImGuiJapaneaseFonts.h" />
     <ClInclude Include="Engine\Editor\ImguiLayoutService.h" />
     <ClInclude Include="Engine\Editor\ImGuiLayoutSwitcher.h" />
+    <ClInclude Include="Engine\Editor\PickingPass.h" />
     <ClInclude Include="Engine\Editor\SceneSwitchOverlay.h" />
     <ClInclude Include="Engine\Foundation\Clock\StateTimer.h" />
     <ClInclude Include="Engine\Foundation\Math\Matrix3x4.h" />
@@ -992,7 +993,6 @@ copy /Y "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll"       "C:\My
     <ClInclude Include="Engine\Objects\Collider\SphereCollider.h" />
     <ClInclude Include="Engine\Graphics\ResourceStateTracker\ResourceStateTracker.h" />
     <ClInclude Include="Engine\Scene\System\SceneManager.h" />
-    <ClInclude Include="Engine\Objects\3D\Actor\SceneObjectManager.h" />
     <ClInclude Include="Engine\Foundation\Math\Quaternion.h" />
     <ClInclude Include="Engine\Scene\Context\SceneContext.h" />
     <ClInclude Include="Engine\Renderer\Primitive\LineDrawer.h" />
@@ -1219,6 +1219,11 @@ copy /Y "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll"       "C:\My
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Resources\shaders\ObjectPicking.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Resources\shaders\Particle.PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

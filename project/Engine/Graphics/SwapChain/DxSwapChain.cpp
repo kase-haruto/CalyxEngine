@@ -71,6 +71,11 @@ void DxSwapChain::Initialize(
 	syncInterval_ = static_cast< UINT >(std::round(refreshRate_ / 60.0f));
 	if (syncInterval_ < 1) syncInterval_ = 1;
 
+	// バックバッファリソースを取得
+	for (UINT i = 0; i < swapChainDesc_.BufferCount; ++i) {
+		hr = swapChain_->GetBuffer(i, IID_PPV_ARGS(&backBuffers_[i]));
+		assert(SUCCEEDED(hr));
+	}
 }
 
 void DxSwapChain::Present(){

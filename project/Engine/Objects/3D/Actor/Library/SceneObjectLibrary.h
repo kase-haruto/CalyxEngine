@@ -65,6 +65,8 @@ public:
      * @return 検索結果のオブジェクト（見つからなければ nullptr）
      */
     std::shared_ptr<SceneObject> FindByName(const std::string& name) const;
+    
+    std::shared_ptr<SceneObject> FindSharedByPickingID(uint32_t pickingID) const;
 
     /**
      * @brief 型からオブジェクトを検索
@@ -113,6 +115,8 @@ private:
     std::unordered_map<Guid, std::shared_ptr<SceneObject>> objects_;
     std::unordered_map<std::string, uint32_t>              nameCounters_;
 	EventBus::Connection connDestroy_;
+
+    static uint32_t nextPickingID_;
 };
 
 // =====================================================

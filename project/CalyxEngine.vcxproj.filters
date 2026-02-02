@@ -1603,9 +1603,6 @@
     <ClCompile Include="Engine\Scene\System\SceneManager.cpp">
       <Filter>Engine\Scene\System</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Objects\3D\Actor\SceneObjectManager.cpp">
-      <Filter>Engine\Objects\3D\Actor</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Foundation\Math\Quaternion.cpp">
       <Filter>Engine\Foundation\Math</Filter>
     </ClCompile>
@@ -2716,9 +2713,6 @@
     <ClInclude Include="Engine\Scene\System\SceneManager.h">
       <Filter>Engine\Scene\System</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Objects\3D\Actor\SceneObjectManager.h">
-      <Filter>Engine\Objects\3D\Actor</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Foundation\Math\Quaternion.h">
       <Filter>Engine\Foundation\Math</Filter>
     </ClInclude>
@@ -3046,5 +3040,8 @@
     <ClInclude Include="Engine\Objects\3D\Primitive\PrimitiveRing.h" />
     <ClInclude Include="Engine\Editor\ImGuiLayoutSwitcher.h" />
     <ClInclude Include="Engine\Editor\ImguiLayoutService.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Resources\shaders\ObjectPicking.PS.hlsl" />
   </ItemGroup>
 </Project>

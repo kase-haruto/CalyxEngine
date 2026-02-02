@@ -30,6 +30,7 @@ public:
 	void Initialize(ID3D12Device* device);
 	void Update(const CalyxMath::Matrix4x4& view, const CalyxMath::Matrix4x4& proj, const CalyxMath::Vector3& worldPos);
 	void SetCommand(ID3D12GraphicsCommandList* cmdList, PipelineType pipelineType);
+	void SetCommand(ID3D12GraphicsCommandList* cmdList, uint32_t rootIndex);
 
 private:
 	//===================================================================*/

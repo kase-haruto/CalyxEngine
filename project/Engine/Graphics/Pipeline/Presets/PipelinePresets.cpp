@@ -15,7 +15,7 @@ GraphicsPipelineDesc PipelinePresets::MakeObject3D(BlendMode mode) {
 		.PS(L"Object3d.PS.hlsl")
 		.Input(VertexInputLayout<VertexPosUvN>::Get())
 		.Blend(mode)
-		.CullNone()
+		.CullBack()
 		.DepthEnable(true)
 		.DepthFunc(D3D12_COMPARISON_FUNC_LESS_EQUAL)
 		.RTV(DXGI_FORMAT_R8G8B8A8_UNORM)
@@ -126,12 +126,69 @@ GraphicsPipelineDesc PipelinePresets::MakeShadowSkinned() {
 
 	desc.root_
 		.AllowIA()
-		.CBV(0,D3D12_SHADER_VISIBILITY_VERTEX)                                        // ShadowCB
-		.CBV(1,D3D12_SHADER_VISIBILITY_VERTEX)                                        // wvp
+		.CBV(0,D3D12_SHADER_VISIBILITY_VERTEX)                                         // ShadowCB
+		.CBV(1,D3D12_SHADER_VISIBILITY_VERTEX)                                         // wvp
 		.SRVTable(0,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_VERTEX); // SkinningBuffer
 
 	return desc;
 }
+
+/* ================================================================================================
+/*							picking
+/* ============================================================================================= */
+#if defined(_DEBUG) || defined(DEVELOP)
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		picking 静的オブジェクト用
+/////////////////////////////////////////////////////////////////////////////////////////
+GraphicsPipelineDesc PipelinePresets::MakePickingStatic() {
+	GraphicsPipelineDesc desc;
+	desc.VS(L"Picking.VS.hlsl")
+		.PS(L"ObjectPicking.PS.hlsl")
+		.Input(VertexInputLayout<VertexPosUvN>::Get())
+		.Blend(BlendMode::NONE)
+		.CullNone()
+		.DepthEnable(true)
+		.DepthFunc(D3D12_COMPARISON_FUNC_LESS_EQUAL)
+		.RTV(DXGI_FORMAT_R8G8B8A8_UNORM);
+
+	desc.root_
+		.AllowIA()
+		.Constants(2,1,D3D12_SHADER_VISIBILITY_PIXEL)                                 // pick (b2)
+		.CBV(0,D3D12_SHADER_VISIBILITY_VERTEX)                                        // World (b0)
+		.CBV(1,D3D12_SHADER_VISIBILITY_VERTEX)                                        // Camera (b1)
+		.SRVTable(1,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_VERTEX) // billboard'
+		.SamplerWrapLinear(0);
+
+	return desc;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		picking スキニングオブジェクト用
+/////////////////////////////////////////////////////////////////////////////////////////
+GraphicsPipelineDesc PipelinePresets::MakePickingSkinned() {
+	GraphicsPipelineDesc desc;
+	desc.VS(L"Picking.VS.hlsl")
+		.PS(L"ObjectPicking.PS.hlsl")
+		.Input(VertexInputLayout<VertexPosUvNSkinning>::Get())
+		.Blend(BlendMode::NONE)
+		.CullBack()
+		.DepthEnable(true)
+		.DepthFunc(D3D12_COMPARISON_FUNC_LESS_EQUAL)
+		.RTV(DXGI_FORMAT_R8G8B8A8_UNORM);
+
+	desc.root_
+		.AllowIA()
+		.Constants(2,1,D3D12_SHADER_VISIBILITY_PIXEL)                                 // pick (b2)
+		.CBV(0,D3D12_SHADER_VISIBILITY_VERTEX)                                        // World (b0)
+		.CBV(1,D3D12_SHADER_VISIBILITY_VERTEX)                                        // Camera (b1)
+		.SRVTable(0,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_VERTEX) // SkinningBuffer (t0)
+
+		.SamplerWrapLinear(0);
+
+	return desc;
+}
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //		partcicle

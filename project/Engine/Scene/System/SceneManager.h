@@ -16,6 +16,7 @@ class PipelineService;
 
 namespace CalyxEditor {
 	class PlaySession;
+	class PickingPass;
 }
 
 namespace CalyxScene {
@@ -63,6 +64,10 @@ namespace CalyxScene {
 		size_t		  GetCurrentIndex() const { return currentIdx_; }
 
 		CalyxScene::ISceneTransitionRequestor& GetTransitionRequestor();
+		
+#if defined(_DEBUG) || defined(DEVELOP)
+		CalyxEditor::PickingPass* GetPickingPass() const { return pickingPass_.get(); }
+#endif
 
 	private:
 		// ---- internal transition entry ----
@@ -115,6 +120,10 @@ namespace CalyxScene {
 		std::unique_ptr<SceneTransitionService> transitionService_;
 		
 		std::vector<SceneId> registeredSceneIds_;
+
+#if defined(_DEBUG) || defined(DEVELOP)
+		std::unique_ptr<CalyxEditor::PickingPass> pickingPass_;
+#endif
 	};
 
 } // namespace CalyxScene

@@ -2,15 +2,12 @@
 #include <Engine/Application/System/Environment.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
 
-void SwapChainRenderTarget::Initialize(DxSwapChain* swapChain,
-									   ID3D12DescriptorHeap* rtvHeap,
-									   UINT rtvDescriptorSize){
+void SwapChainRenderTarget::Initialize(DxSwapChain* swapChain){
 	swapChain_ = swapChain;
-	rtvHeap_ = rtvHeap;
-	rtvDescriptorSize_ = rtvDescriptorSize;
 
 	const UINT backBufferCount = swapChain_->GetSwapChainDesc().BufferCount;
 	currentStates_.resize(backBufferCount, D3D12_RESOURCE_STATE_PRESENT);
+	rtvHandles_.resize(backBufferCount);
 	srvHandles_.resize(backBufferCount);
 
 	viewport_ = {0.0f, 0.0f, kWindowWidth, kWindowHeight, 0.0f, 1.0f};
@@ -22,9 +19,13 @@ void SwapChainRenderTarget::Initialize(DxSwapChain* swapChain,
 		auto resource = swapChain_->GetBackBuffer(i);
 		if (!resource) continue;
 
-		DescriptorHandle handle = DescriptorAllocator::Allocate(DescriptorUsage::CbvSrvUav);
-		srvHandles_[i] = handle;
+		// RTV
+		rtvHandles_[i] = DescriptorAllocator::Allocate(DescriptorUsage::Rtv);
+		device->CreateRenderTargetView(resource.Get(), nullptr, rtvHandles_[i].cpu);
 
+		// SRV
+		srvHandles_[i] = DescriptorAllocator::Allocate(DescriptorUsage::CbvSrvUav);
+		
 		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 		srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
@@ -34,7 +35,7 @@ void SwapChainRenderTarget::Initialize(DxSwapChain* swapChain,
 		srvDesc.Texture2D.PlaneSlice = 0;
 		srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 
-		device->CreateShaderResourceView(resource.Get(), &srvDesc, handle.cpu);
+		device->CreateShaderResourceView(resource.Get(), &srvDesc, srvHandles_[i].cpu);
 	}
 }
 
@@ -43,9 +44,8 @@ void SwapChainRenderTarget::SetBufferIndex(UINT index){
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE SwapChainRenderTarget::GetRTV() const{
-	D3D12_CPU_DESCRIPTOR_HANDLE handle = rtvHeap_->GetCPUDescriptorHandleForHeapStart();
-	handle.ptr += rtvDescriptorSize_ * bufferIndex_;
-	return handle;
+	if (bufferIndex_ >= rtvHandles_.size()) return {0};
+	return rtvHandles_[bufferIndex_].cpu;
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE SwapChainRenderTarget::GetSRV() const{
@@ -61,10 +61,10 @@ void SwapChainRenderTarget::SetRenderTarget(ID3D12GraphicsCommandList* cmdList){
 	cmdList->RSSetScissorRects(1, &scissorRect_);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE rtv = GetRTV();
-	if(dsv_.ptr == 0) {
+	if(dsv_.cpu.ptr == 0) {
 		cmdList->OMSetRenderTargets(1, &rtv, FALSE, nullptr);
 	} else {
-		cmdList->OMSetRenderTargets(1, &rtv, FALSE, &dsv_);
+		cmdList->OMSetRenderTargets(1, &rtv, FALSE, &dsv_.cpu);
 	}
 }
 
@@ -112,6 +112,10 @@ void SwapChainRenderTarget::Resize(uint32_t width, uint32_t height) {
 		auto resource = swapChain_->GetBackBuffer(i);
 		if (!resource) continue;
 
+		// RTV 再生成 (ハンドルは保持したまま)
+		device->CreateRenderTargetView(resource.Get(), nullptr, rtvHandles_[i].cpu);
+
+		// SRV 再生成
 		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 		srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;

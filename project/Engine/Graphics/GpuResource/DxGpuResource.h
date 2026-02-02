@@ -31,6 +31,12 @@ public:
 								  DXGI_FORMAT				  format,
 								  std::optional<std::wstring> name = std::nullopt);
 
+	void InitializeAsDepthStencil(ID3D12Device*				  device,
+								  uint32_t					  width,
+								  uint32_t					  height,
+								  DXGI_FORMAT				  format,
+								  std::optional<std::wstring> name = std::nullopt);
+
 	/// <summary>
 	/// srvの作成
 	/// </summary>
@@ -43,6 +49,8 @@ public:
 	/// <param name="device"></param>
 	/// <param name="handle"></param>
 	void CreateRTV(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE handle);
+
+	void CreateDSV(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE handle);
 
 	/// <summary>
 	/// srv更新
@@ -64,6 +72,7 @@ public:
 	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCpuHandle() const { return cpuSrvHandle_; }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGpuHandle() const { return gpuSrvHandle_; }
 	D3D12_CPU_DESCRIPTOR_HANDLE GetRTVCpuHandle() const { return cpuRtvHandle_; }
+	D3D12_CPU_DESCRIPTOR_HANDLE GetDSVCpuHandle() const { return cpuDsvHandle_; }
 
 	void SetCurrentState(D3D12_RESOURCE_STATES state);
 
@@ -73,4 +82,5 @@ private:
 	D3D12_CPU_DESCRIPTOR_HANDLE			   cpuSrvHandle_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE			   gpuSrvHandle_{};
 	D3D12_CPU_DESCRIPTOR_HANDLE			   cpuRtvHandle_{};
+	D3D12_CPU_DESCRIPTOR_HANDLE			   cpuDsvHandle_{};
 };

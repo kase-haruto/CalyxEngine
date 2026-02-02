@@ -123,6 +123,8 @@ public:
 	virtual void OnPayload(std::unique_ptr<CalyxScene::IScenePayload> payload) {
 		(void)payload;
 	}
+
+	ModelRenderer* GetModelRenderer() const { return modelRenderer_.get(); }
 protected:
 	//===================================================================*/
 	//			protected member variables

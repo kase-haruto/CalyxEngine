@@ -154,10 +154,10 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 			context.GetLightLibrary()->SetPointLight(pt);
 		} else if(auto fx = std::dynamic_pointer_cast<CalyxEffect::ParticleSystemObject>(sp)) {
 			context.GetFxSystem()->AddEmitter(fx->GetEmitter(),fx->GetGuid());
-		} else if(auto camMain = std::dynamic_pointer_cast<Camera3d>(sp)) {
-			context.GetCameraMgr()->SetMainCamera(camMain);
 		} else if(auto camDbg = std::dynamic_pointer_cast<DebugCamera>(sp)) {
 			context.GetCameraMgr()->SetDebugCamera(camDbg);
+		} else if(auto camMain = std::dynamic_pointer_cast<Camera3d>(sp)) {
+			context.GetCameraMgr()->SetMainCamera(camMain);
 		}
 
 		// GUID

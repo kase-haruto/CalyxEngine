@@ -4,6 +4,8 @@
 #include <Engine/System/Event/EventBus.h>
 #include <iostream>
 
+uint32_t SceneObjectLibrary::nextPickingID_ = 1;
+
 SceneObjectLibrary::SceneObjectLibrary()  = default;
 SceneObjectLibrary::~SceneObjectLibrary() = default;
 
@@ -28,6 +30,11 @@ void SceneObjectLibrary::AddObject(const std::shared_ptr<SceneObject>& object) {
 	}
 
 	object->SetName(finalName, object->GetObjectType());
+
+	// Picking ID 割り当て
+	if(object->GetPickingID() == 0) {
+		object->SetPickingID(nextPickingID_++);
+	}
 
 	// shared_ptr で登録
 	objects_[id] = object;
@@ -62,25 +69,24 @@ bool SceneObjectLibrary::RemoveObject(const std::shared_ptr<SceneObject>& object
 
 	// 最後にライブラリから除外
 	objects_.erase(id);
-	std::cout << "[AFTER ERASE]" 
+	std::cout << "[AFTER ERASE]"
 			  << " use_count=" << object.use_count()
 			  << std::endl;
 	return true;
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////
 ///     idをもとに削除
 //////////////////////////////////////////////////////////////////////////////////
-bool SceneObjectLibrary::RemoveObject(Guid id){
+bool SceneObjectLibrary::RemoveObject(Guid id) {
 	auto it = objects_.find(id);
-	if (it == objects_.end()) return false;
+	if(it == objects_.end()) return false;
 
-	if (auto sp = it->second) {
+	if(auto sp = it->second) {
 		// 子リストをコピーしてから再帰削除
 		auto children = sp->GetChildren();
-		for (auto& child : children) {
-			if (child) {
+		for(auto& child : children) {
+			if(child) {
 				RemoveObject(child);
 			}
 		}
@@ -165,4 +171,29 @@ std::vector<std::shared_ptr<SceneObject>> SceneObjectLibrary::GetAllObjectsShare
 bool SceneObjectLibrary::Contains(const std::shared_ptr<SceneObject>& obj) const {
 	if(!obj) return false;
 	return objects_.contains(obj->GetGuid());
+}
+
+namespace {
+	// シェーダー(picking.ps)と同一のハッシュ関数
+	// ピッキング結果の可視化のために色を分散させているため、検索時もこれを通す必要がある
+	uint32_t Hash(uint32_t x) {
+		x ^= x >> 17;
+		x *= 0xed5ad4bb;
+		x ^= x >> 11;
+		x *= 0xac4c1b51;
+		x ^= x >> 15;
+		x *= 0x31848bab;
+		x ^= x >> 14;
+		return x;
+	}
+} // namespace
+
+std::shared_ptr<SceneObject> SceneObjectLibrary::FindSharedByPickingID(uint32_t hashedPickingID) const {
+	for(const auto& [id, sp] : objects_) {
+		// シェーダーがRGB(24bit)に書き出しているため、検索時も下位24bitのみで比較する
+		if(sp && (Hash(sp->GetPickingID()) & 0x00FFFFFF) == hashedPickingID) {
+			return sp;
+		}
+	}
+	return nullptr;
 }

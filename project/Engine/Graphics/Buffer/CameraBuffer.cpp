@@ -44,3 +44,7 @@ void Camera3DBuffer::SetCommand(ID3D12GraphicsCommandList* cmdList, PipelineType
 
 	buffer_.SetCommand(cmdList, rootParameterIndex);
 }
+
+void Camera3DBuffer::SetCommand(ID3D12GraphicsCommandList* cmdList, uint32_t rootIndex) {
+	buffer_.SetCommand(cmdList, rootIndex);
+}

@@ -44,6 +44,7 @@ namespace CalyxEditor {
 		//--------- accessor -----------------------------------------------------
 		bool			   IsHovered() const;
 		bool			   IsClicked() const;
+		bool 			   wasTriggered() const;
 		CalyxMath::Vector2 GetSize() const;
 		CalyxMath::Vector2 GetPosition() const; //< ビューポートの位置
 		ViewportType	   GetType() const;
@@ -66,6 +67,7 @@ namespace CalyxEditor {
 		CalyxMath::Vector2 viewOrigin_; //< ImGui上での描画開始位置
 		bool			   isHovered_ = false;
 		bool			   isClicked_ = false;
+		bool 			   wasTriggered_ = false;
 	};
 
 } // namespace CalyxEditor
