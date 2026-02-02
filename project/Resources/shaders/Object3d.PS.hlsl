@@ -123,7 +123,7 @@ void ComputePointLight(
 	float3 normal,
 	float3 toEye,
 	float3 worldPos,
-	float3 albedo, // ← 呼び出し側から “material×texture” を渡す
+	float3 albedo, 
 	out float3 diffuse,
 	out float3 specular
 	) {
@@ -196,34 +196,52 @@ PixelShaderOutput main(VertexShaderOutput input) {
 	float3 pointDiffuse, pointSpecular;
 	ComputePointLight(normal, toEye, input.worldPosition, albedo, pointDiffuse, pointSpecular);
 
+	// ================= Shadow (Raytracing) =================
+	float shadow = 1.0f;
+	float3 L = -gDirectionalLight.direction;
+	float NdotL_Direct = dot(normal, L);
+
+	// Backface Culling for Raytracing
+	// 面がライトを向いている場合のみレイトレを行う (NdotL > 0)
+	if (NdotL_Direct > 0.0f) {
+		RayQuery<RAY_FLAG_CULL_NON_OPAQUE |
+				 RAY_FLAG_SKIP_PROCEDURAL_PRIMITIVES |
+				 RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH> q;
+
+		RayDesc ray;
+		ray.Origin    = input.worldPosition;
+		ray.Direction = L; // ライト方向
+		ray.TMin      = 0.1f;
+		ray.TMax      = 1000.0f;
+
+		q.TraceRayInline(
+			gRtScene,
+			RAY_FLAG_NONE,
+			0xFF,
+			ray
+		);
+
+		q.Proceed();
+
+		// 完全に 0.0 だと真っ黒すぎるため 0.2 
+		shadow = (q.CommittedStatus() == COMMITTED_TRIANGLE_HIT) ? 0.2f : 1.0f;
+	} else {
+		// 裏面は自動的に影
+		shadow = 0.0f;
+	}
+
+	// 影は Directional Light にのみ適用する
+	directionalDiffuse  *= shadow;
+	directionalSpecular *= shadow;
+
 	//================= 照明合成 =================
 	float3 litColor = directionalDiffuse + directionalSpecular + pointDiffuse + pointSpecular;
+
+	// 疑似環境光
+	// ライトの反対側などが真っ黒にならないようにする
+	float3 ambient = albedo * 0.07f; 
+	litColor += ambient;
 	
-// ================= Shadow (Raytracing) =================
-	RayQuery<RAY_FLAG_CULL_NON_OPAQUE |
-             RAY_FLAG_SKIP_PROCEDURAL_PRIMITIVES |
-             RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH> q;
-
-	RayDesc ray;
-	ray.Origin    = input.worldPosition;
-	ray.Direction = -gDirectionalLight.direction;
-	ray.TMin      = 0.1f;
-	ray.TMax      = 1000.0f; // 適切な距離を設定 (Directional Light は無限遠だが、シャドウ判定距離)
-
-	q.TraceRayInline(
-		gRtScene,
-		RAY_FLAG_NONE,
-		0xFF,
-		ray
-	);
-
-	q.Proceed();
-
-	float shadow = (q.CommittedStatus() == COMMITTED_TRIANGLE_HIT) ? 0.0f : 1.0f;
-
-	// まずは “影は暗くする” だけ（真っ黒だと強すぎるので 0.2 を残す）
-	litColor *= lerp(0.2f, 1.0f, shadow);
-
 	//================= 環境マップ =================
 	if(gMaterial.isReflect) {
 		float3 viewDir = normalize(input.worldPosition - cameraPosition);
