@@ -22,6 +22,7 @@
 #include <externals/imgui/imgui.h>
 
 // c++
+#include <Engine/Foundation/Utility/FileSystem/FileScanner.h>
 #include <algorithm>
 
 using namespace EngineEdit;
@@ -58,11 +59,19 @@ namespace CalyxEditor {
 		sceneSwitchOverlay_ = std::make_unique<SceneSwitchOverlay>();
 
 		// レイアウトスイッチャーの初期化 --------------------------------------
-		layoutSwitcher_ = std::make_unique<ImGuiLayoutSwitcher>(
-			std::vector<LayoutEntry>{
-				{"Default", "Resources/Assets/Configs/Editor/Layout/default.ini"},
-				{"Effect", "Resources/Assets/Configs/Editor/Layout/effect.ini"}},
-			"imgui.ini");
+		std::string				 layoutDir = "Resources/Assets/Configs/Editor/Layout/";
+		auto					 files	   = CalyxUtil::FileScanner::ScanFiles(layoutDir, ".ini");
+		std::vector<LayoutEntry> layouts;
+
+		for(const auto& file : files) {
+			layouts.push_back({CalyxUtil::FileScanner::GetFileName(file), file.generic_string()});
+		}
+		// ファイルが見つからなかった場合のフォールバック（念のため）
+		if(layouts.empty()) {
+			layouts.push_back({"Default", "Resources/Assets/Configs/Editor/Layout/default.ini"});
+		}
+
+		layoutSwitcher_ = std::make_unique<ImGuiLayoutSwitcher>(std::move(layouts), "imgui.ini");
 
 		if(auto* db = AssetDatabase::GetInstance()) {
 			assetPanel_->Initialize(db->GetRoot());

@@ -57,6 +57,7 @@ cbuffer PointLightConstants : register(b4) {
 //                            tables
 ///////////////////////////////////////////////////////////////////////////////
 TextureCube<float4> gEnvironmentMap : register(t1);
+RaytracingAccelerationStructure gRtScene : register(t3);
 Texture2D<float> gShadowMap : register(t2);
 Texture2D<float4> gTexture : register(t0);
 
@@ -198,8 +199,27 @@ PixelShaderOutput main(VertexShaderOutput input) {
 	//================= 照明合成 =================
 	float3 litColor = directionalDiffuse + directionalSpecular + pointDiffuse + pointSpecular;
 	
-	// ================= Shadow (1tap) =================
-	float shadow = ComputeShadow1Tap(input.worldPosition);
+// ================= Shadow (Raytracing) =================
+	RayQuery<RAY_FLAG_CULL_NON_OPAQUE |
+             RAY_FLAG_SKIP_PROCEDURAL_PRIMITIVES |
+             RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH> q;
+
+	RayDesc ray;
+	ray.Origin    = input.worldPosition;
+	ray.Direction = -gDirectionalLight.direction;
+	ray.TMin      = 0.1f;
+	ray.TMax      = 1000.0f; // 適切な距離を設定 (Directional Light は無限遠だが、シャドウ判定距離)
+
+	q.TraceRayInline(
+		gRtScene,
+		RAY_FLAG_NONE,
+		0xFF,
+		ray
+	);
+
+	q.Proceed();
+
+	float shadow = (q.CommittedStatus() == COMMITTED_TRIANGLE_HIT) ? 0.0f : 1.0f;
 
 	// まずは “影は暗くする” だけ（真っ黒だと強すぎるので 0.2 を残す）
 	litColor *= lerp(0.2f, 1.0f, shadow);
