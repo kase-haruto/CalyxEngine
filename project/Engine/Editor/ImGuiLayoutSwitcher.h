@@ -27,7 +27,7 @@ namespace CalyxEditor {
 		/// <param name="presets">プリセットレイアウトのリスト</param>
 		/// <param name="defaultPath">デフォルトの.iniファイルパス</param>
 		ImGuiLayoutSwitcher(std::vector<LayoutEntry> presets,
-		                    std::string defaultPath = "imgui.ini");
+							std::string				 defaultPath = "imgui.ini");
 
 		/// <summary>
 		/// レイアウトメニューを描画
@@ -48,8 +48,9 @@ namespace CalyxEditor {
 		const std::string& GetCurrentPath() const { return currentIniPath_; }
 
 	private:
-		std::vector<LayoutEntry> presets_;      ///< プリセットレイアウトのリスト
-		std::string              currentIniPath_; ///< 現在の.iniファイルパス
+		std::vector<LayoutEntry> presets_;		  ///< プリセットレイアウトのリスト
+		std::string				 currentIniPath_; ///< 現在の.iniファイルパス (プリセットとしてロードされたパス)
+		std::string				 autoSavePath_;	  ///< 自動保存用の.iniファイルパス
 	};
 
 } // namespace CalyxEditor

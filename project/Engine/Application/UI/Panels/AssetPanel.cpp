@@ -1,13 +1,13 @@
 #include "AssetPanel.h"
 #include <Engine/Assets/Database/AssetDatabase.h>
 
-#include <externals/imgui/imgui.h>
 #include <externals/imgui/ImGuiFileDialog.h>
+#include <externals/imgui/imgui.h>
 
 #include <algorithm>
-#include <vector>
-#include <system_error>
 #include <cmath>
+#include <system_error>
+#include <vector>
 
 namespace CalyxEditor {
 
@@ -134,61 +134,11 @@ namespace CalyxEditor {
 		}
 	}
 
-	void AssetPanel::DrawFavorites() {
-		if(ImGui::TreeNodeEx("Favorites", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanFullWidth)) {
-			if(ImGui::Selectable("All Textures")) {
-				typeFilter_ = AssetType::Texture;
-				scope_		= Scope::All;
-			}
-			if(ImGui::Selectable("All Models")) {
-				typeFilter_ = AssetType::Model;
-				scope_		= Scope::All;
-			}
-			if(ImGui::Selectable("All Shaders")) {
-				typeFilter_ = AssetType::Shader;
-				scope_		= Scope::All;
-			}
-			if(ImGui::Selectable("All Audio")) {
-				typeFilter_ = AssetType::Audio;
-				scope_		= Scope::All;
-			}
-			if(ImGui::Selectable("All Materials")) {
-				typeFilter_ = AssetType::Material;
-				scope_		= Scope::All;
-			}
-			ImGui::TreePop();
-		}
-	}
-
-	void AssetPanel::DrawDirNode(DirNode* node) {
-		if(!node) return;
-
-		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow |
-								   ImGuiTreeNodeFlags_SpanFullWidth;
-		if(node->children.empty()) flags |= ImGuiTreeNodeFlags_Leaf;
-
-		bool open = ImGui::TreeNodeEx(node, flags, "%s", node->name.c_str());
-
-		// クリックでフォルダ選択
-		if(ImGui::IsItemClicked()) {
-			currentFolderAbs_ = node->absPath;
-			scope_			  = Scope::SelectedFolder;
-			typeFilter_.reset();
-		}
-
-		if(open) {
-			for(auto& [_, ch] : node->children) {
-				DrawDirNode(ch.get());
-			}
-			ImGui::TreePop();
-		}
-	}
-
 	/* ===================== 右ペイン ===================== */
 	static inline void toLowerInplace(std::string& s) {
 		std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return (char)std::tolower(c); });
 	}
-
+	
 	void AssetPanel::DrawRightView() {
 		auto&		db	  = *AssetDatabase::GetInstance();
 		const auto& items = db.GetView();
@@ -391,37 +341,73 @@ namespace CalyxEditor {
 		ImGui::Columns(1);
 	}
 
-	/* ================= Inspector 側でも使える共通ドロップターゲット ================= */
-	bool AssetPanel::DrawAssetDropTarget(AssetType expect, Guid* inoutGuid, float height) {
-		bool changed = false;
-
-		ImGui::PushID(inoutGuid);
-		ImGui::BeginGroup();
-
-		ImVec2 avail = ImGui::GetContentRegionAvail();
-		ImGui::Dummy(ImVec2(avail.x, height));
-		bool hovered = ImGui::IsItemHovered();
-
-		if(hovered) {
-			ImGui::GetWindowDrawList()->AddRect(
-				ImGui::GetItemRectMin(), ImGui::GetItemRectMax(),
-				IM_COL32(180, 180, 255, 255), 6.0f, 0, 2.0f);
-		}
-
-		if(ImGui::BeginDragDropTarget()) {
-			if(auto p = ImGui::AcceptDragDropPayload("CALYX_ASSET")) {
-				auto payload = *reinterpret_cast<const AssetDragPayload*>(p->Data);
-				if(payload.type == expect) {
-					*inoutGuid = payload.guid;
-					changed	   = true;
-				}
+	void AssetPanel::DrawFavorites() {
+		if(ImGui::TreeNodeEx("Favorites", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanFullWidth)) {
+			if(ImGui::Selectable("All Textures")) {
+				typeFilter_ = AssetType::Texture;
+				scope_		= Scope::All;
 			}
-			ImGui::EndDragDropTarget();
+			if(ImGui::Selectable("All Models")) {
+				typeFilter_ = AssetType::Model;
+				scope_		= Scope::All;
+			}
+			if(ImGui::Selectable("All Shaders")) {
+				typeFilter_ = AssetType::Shader;
+				scope_		= Scope::All;
+			}
+			if(ImGui::Selectable("All Audio")) {
+				typeFilter_ = AssetType::Audio;
+				scope_		= Scope::All;
+			}
+			if(ImGui::Selectable("All Materials")) {
+				typeFilter_ = AssetType::Material;
+				scope_		= Scope::All;
+			}
+			ImGui::TreePop();
+		}
+	}
+
+	void AssetPanel::DrawDirNode(DirNode* node) {
+		if(!node) return;
+
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow |
+								   ImGuiTreeNodeFlags_SpanFullWidth;
+
+		// スキャン済みで子がないならリーフ。未スキャンならとりあえず矢印出す
+		if(node->scanned && node->children.empty()) flags |= ImGuiTreeNodeFlags_Leaf;
+
+		bool open = ImGui::TreeNodeEx(node, flags, "%s", node->name.c_str());
+
+		// クリックでフォルダ選択
+		if(ImGui::IsItemClicked()) {
+			currentFolderAbs_ = node->absPath;
+			scope_			  = Scope::SelectedFolder;
+			typeFilter_.reset();
 		}
 
-		ImGui::EndGroup();
-		ImGui::PopID();
-		return changed;
+		if(open) {
+			// 未スキャンならここでスキャン
+			if(!node->scanned) {
+				std::error_code ec;
+				for(const auto& entry : std::filesystem::directory_iterator(node->absPath, ec)) {
+					if(ec) break;
+					if(entry.is_directory()) {
+						auto child	   = std::make_unique<DirNode>();
+						child->name	   = entry.path().filename().string();
+						child->absPath = entry.path();
+						child->scanned = false; // 子も未スキャン
+						node->children.emplace(child->name, std::move(child));
+					}
+				}
+				node->scanned = true;
+			}
+
+			// 描画
+			for(auto& [_, ch] : node->children) {
+				DrawDirNode(ch.get());
+			}
+			ImGui::TreePop();
+		}
 	}
 
 	/* ================= フォルダツリー構築 ================= */
@@ -436,42 +422,11 @@ namespace CalyxEditor {
 		rootNode_->name	   = assetsRootAbs_.filename().string().empty() ? "Assets" : assetsRootAbs_.filename().string();
 		rootNode_->absPath = assetsRootAbs_;
 		rootNode_->open	   = true;
-
-		// 実ディレクトリから構築（空フォルダも拾う）
-		std::error_code ec;
-		for(auto it = std::filesystem::recursive_directory_iterator(assetsRootAbs_, ec);
-			it != std::filesystem::recursive_directory_iterator(); ++it) {
-			if(ec) break;
-			const auto& e = *it;
-			if(e.is_directory(ec)) {
-				InsertPath(rootNode_.get(), e.path());
-			}
-		}
+		rootNode_->scanned = false; // ルートから遅延ロード
 	}
 
-	void AssetPanel::InsertPath(DirNode* root, const std::filesystem::path& absDir) {
-		// assetsRootAbs_ からの相対に分解して一段ずつ挿入
-		std::error_code ec;
-		auto			rel = std::filesystem::relative(absDir, assetsRootAbs_, ec);
-		if(ec) return;
-
-		DirNode*			  cur = root;
-		std::filesystem::path acc = assetsRootAbs_;
-		for(auto& part : rel) {
-			std::string key = part.string();
-			acc /= part;
-			auto it = cur->children.find(key);
-			if(it == cur->children.end()) {
-				auto node	  = std::make_unique<DirNode>();
-				node->name	  = key;
-				node->absPath = acc;
-				auto* raw	  = node.get();
-				cur->children.emplace(key, std::move(node));
-				cur = raw;
-			} else {
-				cur = it->second.get();
-			}
-		}
+	void AssetPanel::InsertPath(DirNode*, const std::filesystem::path&) {
+		// Deprecated / Unused in lazy load mode
 	}
 
 	bool AssetPanel::IsUnder(const std::filesystem::path& file, const std::filesystem::path& folder) {

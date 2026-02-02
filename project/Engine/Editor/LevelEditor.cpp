@@ -431,6 +431,8 @@ namespace CalyxEditor {
 				}
 			}
 		}
+
+		if(hierarchy_) hierarchy_->RefreshCache();
 	}
 
 	void LevelEditor::DeleteObject(const std::shared_ptr<SceneObject>& sp) {
@@ -459,6 +461,8 @@ namespace CalyxEditor {
 		// 内部で SceneObjectLibrary::RemoveObject が呼ばれ、
 		// さらに SceneContext::objectRemovedCallbacks_ も通知される。
 		ctx->RemoveObject(sp);
+
+		if(hierarchy_) hierarchy_->RefreshCache();
 	}
 
 	//=============================================================================
@@ -599,6 +603,7 @@ namespace CalyxEditor {
 
 		if(hierarchy_) {
 			hierarchy_->SetSceneObjectLibrary(current ? current->GetObjectLibrary() : nullptr);
+			hierarchy_->RefreshCache();
 		}
 
 		ClearSelection();

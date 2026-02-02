@@ -65,9 +65,7 @@ namespace CalyxScene {
 
 		CalyxScene::ISceneTransitionRequestor& GetTransitionRequestor();
 		
-#if defined(_DEBUG) || defined(DEVELOP)
 		CalyxEditor::PickingPass* GetPickingPass() const { return pickingPass_.get(); }
-#endif
 
 	private:
 		// ---- internal transition entry ----
@@ -121,9 +119,7 @@ namespace CalyxScene {
 		
 		std::vector<SceneId> registeredSceneIds_;
 
-#if defined(_DEBUG) || defined(DEVELOP)
 		std::unique_ptr<CalyxEditor::PickingPass> pickingPass_;
-#endif
 	};
 
 } // namespace CalyxScene

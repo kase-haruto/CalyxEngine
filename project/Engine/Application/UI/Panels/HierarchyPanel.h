@@ -10,6 +10,8 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 #include <externals/imgui/imgui.h>
 
@@ -40,6 +42,8 @@ namespace CalyxEditor {
 		void ShowObjectRecursive(SceneObject* obj);
 		bool IsDescendantOf(SceneObject* parent, SceneObject* child);
 
+		void RefreshCache() { cacheDirty_ = true; }
+
 		// accessors -------------------------------------------------------
 		const std::string& GetPanelName() const override;
 
@@ -56,8 +60,6 @@ namespace CalyxEditor {
 			return selected_;
 		}
 
-
-
 	private:
 		// rename
 		void BeginRename(SceneObject* obj);
@@ -66,10 +68,15 @@ namespace CalyxEditor {
 		// render helper
 		bool DrawNode(SceneObject* obj);
 		bool PassFilterRecursive(SceneObject* obj) const;
-		
+
+	private:
+		// runtime state
 	private:
 		// runtime state
 		const SceneObjectLibrary* lib_ = nullptr;
+		// キャッシュ: 親オブジェクト(nullptrはルート) -> ソート済み子リスト
+		std::unordered_map<const SceneObject*, std::vector<std::shared_ptr<SceneObject>>> sortedCache_;
+		bool																			  cacheDirty_ = true;
 
 		std::weak_ptr<SceneObject> selected_;
 		std::weak_ptr<SceneObject> renameTarget_;
@@ -99,9 +106,10 @@ namespace CalyxEditor {
 
 	public:
 		Icon iconEye_, iconEyeOff_, iconCamera_, iconLight_, iconGameObj_, iconFx_;
-		int rowIndex_ = 0;
+		int	 rowIndex_ = 0;
+
 	private:
 		using IEngineUI::panelName_;
 	};
 
-}
+} // namespace CalyxEditor
