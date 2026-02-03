@@ -299,10 +299,10 @@ void DirectionalLight::ExtractConfigToJson(nlohmann::json& j) const {
 
 DirectionalLight::ShadowParam::ShadowParam() {
 	AddField("rayEps", shadowRayEps).Category("Shadow");
-	AddField("baseAngularRadius", baseAngularRadius).Category("Shadow").Range(0.0f, 0.5f);
-	AddField("penumbraStart", penumbraStart).Category("Shadow").Range(0.0f, 1.0f);
-	AddField("penumbraScale", penumbraScale).Category("Shadow").Range(0.1f, 10.0f);
-	AddField("minShadow", minShadow).Category("Shadow").Range(0.0f, 1.0f);
+	AddField("baseAngularRadius", baseAngularRadius).Category("Shadow");
+	AddField("penumbraStart", penumbraStart).Category("Shadow");
+	AddField("penumbraScale", penumbraScale).Category("Shadow");
+	AddField("minShadow", minShadow).Category("Shadow");
 }
 
 CalyxEngine::ParamPath DirectionalLight::ShadowParam::GetParamPath() const {

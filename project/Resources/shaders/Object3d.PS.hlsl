@@ -42,7 +42,6 @@ cbuffer ShadowConstants : register(b3) {
 
 cbuffer PointLightConstants : register(b4) { PointLight gPointLight; }
 
-// ★ ここを使う（元コードでは宣言されているのに未使用だった）
 cbuffer RaytracingShadowParamConstants : register(b5) {
     float gShadowRayEps;
     float gBaseAngularRadius;
@@ -92,23 +91,26 @@ void ComputeDirectionalLight(
     diffuse  = 0.0f;
     specular = 0.0f;
 
-    float3 L = -gDirectionalLight.direction;
-    float NdotL = saturate(dot(normal, L));
+    float3 L = normalize(-gDirectionalLight.direction); // 明示的に正規化してキャッシュ
+    float3 lightColor = gDirectionalLight.color.rgb * gDirectionalLight.intensity; // キャッシュ
 
-    if(gMaterial.enableLighting == 0) {
-        float halfLambert = pow(NdotL * 0.5f + 0.5f, 2.0f);
-        diffuse = albedo * gDirectionalLight.color.rgb * halfLambert * gDirectionalLight.intensity;
+    // Half-Lambert 用に raw cos を用意
+    float rawNdotL = dot(normal, L);
+    float NdotL = saturate(rawNdotL);
 
-        float3 H = normalize(L + toEye);
-        float NdotH = saturate(dot(normal, H));
-        specular = gDirectionalLight.color.rgb * pow(NdotH, gMaterial.shiniess) * gDirectionalLight.intensity;
+    // specular はモードに関係なく同じ式なので共通化
+    float3 H = normalize(L + toEye);
+    float NdotH = saturate(dot(normal, H));
+    float3 spec = lightColor * pow(NdotH, gMaterial.shiniess);
+
+    if (gMaterial.enableLighting == 0) {
+        float halfLambert = pow(rawNdotL * 0.5f + 0.5f, 2.0f);
+        diffuse = albedo * lightColor * halfLambert;
+        specular = spec;
     }
-    else if(gMaterial.enableLighting == 1) {
-        diffuse = albedo * gDirectionalLight.color.rgb * NdotL * gDirectionalLight.intensity;
-
-        float3 H = normalize(L + toEye);
-        float NdotH = saturate(dot(normal, H));
-        specular = gDirectionalLight.color.rgb * pow(NdotH, gMaterial.shiniess) * gDirectionalLight.intensity;
+    else if (gMaterial.enableLighting == 1) {
+        diffuse = albedo * lightColor * NdotL;
+        specular = spec;
     }
 }
 
@@ -126,16 +128,19 @@ void ComputePointLight(
     diffuse  = 0.0f;
     specular = 0.0f;
 
-    float3 lightDir = normalize(worldPos - gPointLight.position);
-    float distance  = length(gPointLight.position - worldPos);
+    float3 dirToLight = gPointLight.position - worldPos; // 非正規化ベクトル
+    float distance  = length(dirToLight);
+    float3 lightDir = dirToLight / max(distance, 1e-6f); // normalize の代替（1回だけ）
     float attenuation = pow(saturate(1.0f - distance / gPointLight.radius), gPointLight.decay);
 
-    float NdotL = saturate(dot(normal, -lightDir));
-    diffuse = albedo * gPointLight.color.rgb * NdotL * gPointLight.intensity * attenuation;
+    float3 lightColor = gPointLight.color.rgb * gPointLight.intensity; // キャッシュ
 
-    float3 halfVec = normalize(-lightDir + toEye);
+    float NdotL = saturate(dot(normal, lightDir));
+    diffuse = albedo * lightColor * NdotL * attenuation;
+
+    float3 halfVec = normalize(lightDir + toEye); // note: toEye = view vector from surface to eye
     float NdotH = saturate(dot(normal, halfVec));
-    specular = gPointLight.color.rgb * pow(NdotH, gMaterial.shiniess) * gPointLight.intensity * attenuation;
+    specular = lightColor * pow(NdotH, gMaterial.shiniess) * attenuation;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -191,28 +196,27 @@ static const float2 kPoisson16[16] = {
     float2(-0.589f, -0.201f)
 };
 
-// 裏面カリング + first hit
-bool TraceOcclusion(float3 origin, float3 dir, float tMin, float tMax, out float hitT) {
+// 遮蔽物までの「正確な距離」を取得する (Closest Hit)
+// ペナンブラの計算には「一番近い遮蔽物」までの距離が必要なため、ACCEPT_FIRST_HIT は使わない
+bool FindClosestBlocker(float3 origin, float3 dir, float tMax, out float hitT) {
     RayDesc ray;
     ray.Origin    = origin;
     ray.Direction = dir;
-    ray.TMin      = tMin;
+    ray.TMin      = 0.0f;
     ray.TMax      = tMax;
 
+    // First Hit フラグを削除 -> Closest Hit (最も近い交点) を探す
     RayQuery<
         RAY_FLAG_CULL_NON_OPAQUE |
         RAY_FLAG_CULL_BACK_FACING_TRIANGLES |
-        RAY_FLAG_SKIP_PROCEDURAL_PRIMITIVES |
-        RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH
+        RAY_FLAG_SKIP_PROCEDURAL_PRIMITIVES
     > q;
 
-    // 第2引数(RayFlags)はテンプレのフラグと一致させる（意図を明確化）
     q.TraceRayInline(
         gRtScene,
         RAY_FLAG_CULL_NON_OPAQUE |
         RAY_FLAG_CULL_BACK_FACING_TRIANGLES |
-        RAY_FLAG_SKIP_PROCEDURAL_PRIMITIVES |
-        RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH,
+        RAY_FLAG_SKIP_PROCEDURAL_PRIMITIVES,
         0xFF,
         ray
     );
@@ -228,23 +232,56 @@ bool TraceOcclusion(float3 origin, float3 dir, float tMin, float tMax, out float
     return false;
 }
 
+//  単純な遮蔽判定を行う (Any Hit / Accept First Hit)
+// ポアソンサンプリングなどの「見えているか否か」だけ知りたい場合はこちらが高速
+bool CheckVisibility(float3 origin, float3 dir, float tMax) {
+    RayDesc ray;
+    ray.Origin    = origin;
+    ray.Direction = dir;
+    ray.TMin      = 0.0f;
+    ray.TMax      = tMax;
+
+    // 遮蔽されているかだけわかれば良いので First Hit で即終了する
+    RayQuery<
+        RAY_FLAG_CULL_NON_OPAQUE |
+        RAY_FLAG_CULL_BACK_FACING_TRIANGLES |
+        RAY_FLAG_SKIP_PROCEDURAL_PRIMITIVES |
+        RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH
+    > q;
+
+    q.TraceRayInline(
+        gRtScene,
+        RAY_FLAG_CULL_NON_OPAQUE |
+        RAY_FLAG_CULL_BACK_FACING_TRIANGLES |
+        RAY_FLAG_SKIP_PROCEDURAL_PRIMITIVES |
+        RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH,
+        0xFF,
+        ray
+    );
+
+    q.Proceed();
+
+    // ヒットしたらtrue
+    return (q.CommittedStatus() == COMMITTED_TRIANGLE_HIT);
+}
+
 // サンプル数を距離で可変
 int SelectShadowSampleCount(float tBlocker) {
-    // ペナンブラ開始より近いなら少数で十分
-    if (tBlocker < (gPenumbraStart * 1.0f)) return 4;
-    if (tBlocker < (gPenumbraStart * 3.0f)) return 8;
-    return 16;
+    
+	float dist = tBlocker - gPenumbraStart;
+	float scale = max(gPenumbraScale, 1e-5f);
+
+	// まだボケ始め (Scaleの20%未満) -> 4サンプル
+	if (dist < scale * 0.2f) return 4;
+
+	// ある程度ボケている (Scaleの80%未満) -> 8サンプル
+	if (dist < scale * 0.8f) return 8;
+
+	// 最大までボケている -> 16サンプル
+	return 16;
 }
 
 float ComputeDirectionalSoftShadow_RT(float3 worldPos, float3 normal, float3 L) {
-
-    // -----------------------------
-    // そもそも光が当たらない面は影不要
-    // -----------------------------
-    float NdotL_raw = dot(normal, L);
-    if (NdotL_raw <= 0.0f) {
-        return 1.0f;
-    }
 
     // -----------------------------
     //  自己交差対策（cbuffer param 使用）
@@ -252,10 +289,12 @@ float ComputeDirectionalSoftShadow_RT(float3 worldPos, float3 normal, float3 L) 
     float3 origin = worldPos + normal * gShadowRayEps;
 
     // -----------------------------
-    //  まず blocker 1本
+    //  距離計測 (Closest Hit)
     // -----------------------------
     float tBlocker = 0.0f;
-    bool blocked = TraceOcclusion(origin, L, 0.0f, 1000.0f, tBlocker);
+    
+    // ここで FindClosestBlocker を使う（First Hitで終了させない）
+    bool blocked = FindClosestBlocker(origin, L, 1000.0f, tBlocker);
 
     if (!blocked) {
         return 1.0f;
@@ -263,7 +302,6 @@ float ComputeDirectionalSoftShadow_RT(float3 worldPos, float3 normal, float3 L) 
 
     // -----------------------------
     //  blocker が極端に近い = ほぼ完全影
-    // （濃い影ほど重い問題を直撃するので最重要）
     // -----------------------------
     if (tBlocker < (gPenumbraStart * 0.5f)) {
         return gMinShadow;
@@ -303,8 +341,8 @@ float ComputeDirectionalSoftShadow_RT(float3 worldPos, float3 normal, float3 L) 
         float2 d = Rotate2D(kPoisson16[i], ang) * angularRadius;
         float3 dirJ = normalize(L + T * d.x + B * d.y);
 
-        float hitT;
-        bool hit = TraceOcclusion(origin, dirJ, 0.0f, 1000.0f, hitT);
+		// 判定だけなので早いものを使う
+    	bool hit = CheckVisibility(origin, dirJ, 1000.0f);
         occluded += hit ? 1.0f : 0.0f;
 
         //全部ヒットしたら結果は確定
@@ -342,6 +380,9 @@ PixelShaderOutput main(VertexShaderOutput input) {
     float3 normal = normalize(input.normal);
     float3 toEye  = normalize(cameraPosition - input.worldPosition);
 
+    // viewDir を再計算せず -toEye を利用（normalize は toEye で一度だけ）
+    float3 viewDir = -toEye;
+
     float3 directionalDiffuse, directionalSpecular;
     ComputeDirectionalLight(normal, toEye, albedo, directionalDiffuse, directionalSpecular);
 
@@ -351,9 +392,9 @@ PixelShaderOutput main(VertexShaderOutput input) {
     //================= ソフトシャドウ（Directional: Inline Raytracing） =================
     float3 L = normalize(-gDirectionalLight.direction);
 
-    // ★ main側でも NdotL <= 0 をスキップ（ComputeDirectionalSoftShadow_RT 内にもあるが二重に安全）
     float shadow = 1.0f;
-    if (dot(normal, L) > 0.0f) {
+    float NdotL_main = dot(normal, L);
+    if (NdotL_main > 0.0f) {
         shadow = ComputeDirectionalSoftShadow_RT(input.worldPosition, normal, L);
     }
 
@@ -366,7 +407,7 @@ PixelShaderOutput main(VertexShaderOutput input) {
     litColor += ambient;
 
     if(gMaterial.isReflect) {
-        float3 viewDir    = normalize(input.worldPosition - cameraPosition);
+        // viewDir を再利用
         float3 reflectDir = reflect(viewDir, normal);
 
         const float maxMipLevel = 7.0f;

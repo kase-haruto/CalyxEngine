@@ -2,8 +2,8 @@
     "fields": {
         "baseAngularRadius": 0.09799999743700027,
         "minShadow": 0.04800000041723251,
-        "penumbraScale": 2.4630000591278076,
-        "penumbraStart": 0.28299999237060547,
-        "rayEps": 0.10999999940395355
+        "penumbraScale": 19.46299934387207,
+        "penumbraStart": 15.282999992370605,
+        "rayEps": -0.28999999165534973
     }
 }
