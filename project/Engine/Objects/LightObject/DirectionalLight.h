@@ -8,6 +8,7 @@
 #include <Engine/Foundation/Math/Vector4.h>
 
 /* engine */
+#include <Engine/Foundation/Serialization/SerializableObject.h>
 #include <Engine/Graphics/Buffer/DxConstantBuffer.h>
 #include <Engine/Graphics/Pipeline/PipelineType.h>
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
@@ -21,9 +22,9 @@
 #include <wrl.h>
 
 struct DirectionalLightData {
-	CalyxMath::Vector4 color; //< ライトの色
+	CalyxMath::Vector4 color;	  //< ライトの色
 	CalyxMath::Vector3 direction; //< ライトの向き
-	float intensity; //< 輝度
+	float			   intensity; //< 輝度
 };
 
 namespace CalyxGraphics {
@@ -38,6 +39,22 @@ namespace CalyxGraphics {
 class DirectionalLight
 	: public SceneObject,
 	  public IConfigurable {
+public:
+	struct ShadowParam
+		: public CalyxEngine::SerializableObject {
+		ShadowParam();
+		CalyxEngine::ParamPath GetParamPath() const override;
+
+		float shadowRayEps		= 0.01f;
+		float baseAngularRadius = 0.05f;
+		float penumbraStart		= 0.05f;
+		float penumbraScale		= 1.0f;
+		float minShadow			= 0.1f;
+	};
+	ShadowParam shadow_;
+	int			shadowSampleCount = 8;
+	float		pad[2];
+
 public:
 	//===================================================================*/
 	//                   public methods
@@ -133,7 +150,7 @@ public:
 	 * \brief オブジェクトタイプ名を取得
 	 * \return オブジェクトタイプ名
 	 */
-	std::string		 GetObjectTypeName() const override { return name_; }
+	std::string GetObjectTypeName() const override { return name_; }
 
 	/**
 	 * \brief ライトのビュープロジェクション行列を取得
@@ -146,10 +163,12 @@ private:
 	//                    private member variables
 	//===================================================================*/
 	DxConstantBuffer<DirectionalLightData> constantBuffer_; //< 定数バッファ
-	DirectionalLightData lightData_ = {}; //< ライトデータ本体
+	DirectionalLightData				   lightData_ = {}; //< ライトデータ本体
 
 	std::shared_ptr<BaseGameObject> UiObject_ = nullptr; //< UI用オブジェクト
-	CalyxMath::Matrix4x4 lightViewProj_; //< ライト用ビュープロジェクション行列
+	CalyxMath::Matrix4x4			lightViewProj_;		 //< ライト用ビュープロジェクション行列
 
 	ConfigurableObject<DirectionalLightConfig> config_; //< コンフィグ管理
+
+	DxConstantBuffer<ShadowParam> shadowParamCB_;
 };

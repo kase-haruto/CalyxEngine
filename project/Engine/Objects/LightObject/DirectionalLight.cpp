@@ -2,6 +2,7 @@
 
 /* engine */
 #include "Engine/Application/UI/Panels/InspectorPanel.h"
+#include "Engine/Editor/LevelEditor.h"
 #include "Engine/Foundation/Utility/Func/CxUtils.h"
 
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
@@ -19,6 +20,7 @@ DirectionalLight::DirectionalLight(const std::string& name) {
 
 	ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
 	constantBuffer_.Initialize(device);
+	shadowParamCB_.Initialize(device);
 
 	// 初期化
 	lightData_.color	 = CalyxMath::Vector4(1.0f, 1.0f, 1.0f, 1.0f); // ライトの色
@@ -29,6 +31,7 @@ DirectionalLight::DirectionalLight(const std::string& name) {
 	// SceneObject::SetConfigPath(ConfigPathResolver::ResolvePath(GetObjectTypeName(), GetName()));
 	////コンフィグの適用
 	// LoadConfig(configPath_);
+	shadow_.LoadParams();
 
 #if defined(_DEBUG) || defined(DEVELOP)
 	// transformの傾きにlightのdirectionを適用(ギズモ使用するため)
@@ -37,19 +40,18 @@ DirectionalLight::DirectionalLight(const std::string& name) {
 #endif
 
 	isEnableRaycast_ = false;
-
-	//
 }
 
 DirectionalLight::DirectionalLight() {
 	ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
 	constantBuffer_.Initialize(device);
+	shadowParamCB_.Initialize(device);
+	shadow_.LoadParams();
 
 	// 初期化
 	lightData_.color	 = CalyxMath::Vector4(1.0f, 1.0f, 1.0f, 1.0f); // ライトの色
 	lightData_.direction = CalyxMath::Vector3(-0.08f, -1.0f, 0.34f);   // ライトの向き
 	lightData_.intensity = 1.0f;									   // 輝度
-
 #if defined(_DEBUG) || defined(DEVELOP)
 	// transformの傾きにlightのdirectionを適用(ギズモ使用するため)
 	worldTransform_.eulerRotation  = lightData_.direction;
@@ -76,7 +78,10 @@ void DirectionalLight::AlwaysUpdate([[maybe_unused]] float dt) {}
 /////////////////////////////////////////////////////////////////////////////////////////
 //		gpuに転送
 /////////////////////////////////////////////////////////////////////////////////////////
-void DirectionalLight::UploadToGpu() { constantBuffer_.TransferData(lightData_); }
+void DirectionalLight::UploadToGpu() {
+	constantBuffer_.TransferData(lightData_);
+	shadowParamCB_.TransferData(shadow_);
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //		ライトのビュー・プロジェクション行列更新
@@ -132,10 +137,14 @@ void DirectionalLight::UpdateLightVP(const AABB& sceneBounds) {
 	const CalyxMath::Vector3& mx = sceneBounds.max_;
 
 	CalyxMath::Vector3 corners[8] = {
-		{mn.x, mn.y, mn.z}, {mx.x, mn.y, mn.z},
-		{mn.x, mx.y, mn.z}, {mx.x, mx.y, mn.z},
-		{mn.x, mn.y, mx.z}, {mx.x, mn.y, mx.z},
-		{mn.x, mx.y, mx.z}, {mx.x, mx.y, mx.z},
+		{mn.x, mn.y, mn.z},
+		{mx.x, mn.y, mn.z},
+		{mn.x, mx.y, mn.z},
+		{mx.x, mx.y, mn.z},
+		{mn.x, mn.y, mx.z},
+		{mx.x, mn.y, mx.z},
+		{mn.x, mx.y, mx.z},
+		{mx.x, mx.y, mx.z},
 	};
 
 	CalyxMath::Vector3 minLS(+FLT_MAX, +FLT_MAX, +FLT_MAX);
@@ -153,13 +162,13 @@ void DirectionalLight::UpdateLightVP(const AABB& sceneBounds) {
 	// -------------------------
 	const float margin = 5.0f;
 
-	float left   = minLS.x;
-	float right  = maxLS.x;
+	float left	 = minLS.x;
+	float right	 = maxLS.x;
 	float bottom = minLS.y;
-	float top    = maxLS.y;
+	float top	 = maxLS.y;
 
 	float nearZ = minLS.z - margin;
-	float farZ  = maxLS.z + margin;
+	float farZ	= maxLS.z + margin;
 
 	// LH: near は正
 	nearZ = (std::max)(0.1f, nearZ);
@@ -179,7 +188,6 @@ void DirectionalLight::UpdateLightVP(const AABB& sceneBounds) {
 	lightViewProj_ = lightView * lightProj;
 }
 
-
 /////////////////////////////////////////////////////////////////////////////////////////
 //		コマンドを積む
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -192,6 +200,9 @@ void DirectionalLight::SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandLi
 	}
 
 	constantBuffer_.SetCommand(commandList, index);
+
+	index = 11;
+	shadowParamCB_.SetCommand(commandList, index);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -218,21 +229,25 @@ void DirectionalLight::ShowGui() {
 #if defined(_DEBUG) || defined(DEVELOP)
 	ImGui::Dummy(ImVec2(0.0f, 5.0f));
 
-	if (GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::ParameterData)) {
+	if(GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::ParameterData)) {
 		config_.ShowGui();
 		ImGui::Separator();
 		GuiCmd::EndSection();
 	}
 
-	if (GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::Object)) {
+	if(GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::Object)) {
 		GuiCmd::SliderFloat3("direction", lightData_.direction, -1.0f, 1.0f);
 		GuiCmd::EndSection();
 	}
 
-	if (GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::ParameterData)) {
+	if(GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::ParameterData)) {
 		GuiCmd::ColorEdit4("color", lightData_.color);
 		GuiCmd::SliderFloat("Intensity", lightData_.intensity, 0.0f, 1.0f);
 		GuiCmd::EndSection();
+	}
+
+	if(GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::ParameterData)) {
+		shadow_.ShowGui();
 	}
 #endif // _DEBUG
 }
@@ -272,6 +287,18 @@ void DirectionalLight::ExtractConfig() {
 void DirectionalLight::ExtractConfigToJson(nlohmann::json& j) const {
 	const_cast<DirectionalLight*>(this)->ExtractConfig();
 	config_.ExtractConfigToJson(j);
+}
+
+DirectionalLight::ShadowParam::ShadowParam() {
+	AddField("rayEps", shadowRayEps).Category("Shadow");
+	AddField("baseAngularRadius", baseAngularRadius).Category("Shadow").Range(0.0f, 0.5f);
+	AddField("penumbraStart", penumbraStart).Category("Shadow").Range(0.0f, 1.0f);
+	AddField("penumbraScale", penumbraScale).Category("Shadow").Range(0.1f, 10.0f);
+	AddField("minShadow", minShadow).Category("Shadow").Range(0.0f, 1.0f);
+}
+
+CalyxEngine::ParamPath DirectionalLight::ShadowParam::GetParamPath() const {
+	return {CalyxEngine::ParamDomain::Engine, "RaytracingShadow", "Graphics/Shadow"};
 }
 
 REGISTER_SCENE_OBJECT(DirectionalLight)

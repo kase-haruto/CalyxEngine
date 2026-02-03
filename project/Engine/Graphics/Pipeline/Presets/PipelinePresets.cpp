@@ -34,6 +34,7 @@ GraphicsPipelineDesc PipelinePresets::MakeObject3D(BlendMode mode) {
 		.CBV(3, D3D12_SHADER_VISIBILITY_PIXEL)											 // [8] ShadowConstants b3
 		.SRVTable(2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)	 // [9] ShadowMap t2
 		.SRV(3, D3D12_SHADER_VISIBILITY_PIXEL)											 // [10] TLAS t3
+		.CBV(5, D3D12_SHADER_VISIBILITY_PIXEL)											 // shadow 11
 
 		.SamplerWrapLinear(0);
 
@@ -104,6 +105,7 @@ GraphicsPipelineDesc PipelinePresets::MakeSkinningObject3D(BlendMode mode) {
 		.CBV(3, D3D12_SHADER_VISIBILITY_PIXEL)											 // [8] ShadowConstants b3
 		.SRVTable(2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)	 // [9] ShadowMap t2
 		.SRV(3, D3D12_SHADER_VISIBILITY_PIXEL)											 // [10] TLAS t3
+		.CBV(5, D3D12_SHADER_VISIBILITY_PIXEL)											 // shadow 11
 
 		.SamplerWrapLinear(0);
 
