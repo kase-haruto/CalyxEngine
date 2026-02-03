@@ -4,67 +4,73 @@
 
 namespace CalyxEditor {
 
-	PerformanceOverlay::PerformanceOverlay() {
-		align_		   = OverlayAlign::TopRight;
-		overlayOffset_ = ImVec2(-200.0f, 10.0f);
+    PerformanceOverlay::PerformanceOverlay() {
+        align_         = OverlayAlign::TopRight;
+        overlayOffset_ = ImVec2(-200.0f, 10.0f);
 
-		showOverlay_ = true;
-		color_		 = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); // 白
-	}
+        showOverlay_ = true;
+        color_       = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+    }
 
-	void PerformanceOverlay::RenderOverlay(const ImVec2& basePos) {
-		if(!showOverlay_) {
-			return; // 早期リターン
-		}
-		auto*				   clock		   = ClockManager::GetInstance();
-		static float		   smoothFPS	   = 0.0f;
-		static float		   smoothFrameTime = 0.0f;
-		static constexpr float smoothing	   = 0.05f;
+    void PerformanceOverlay::RenderOverlay(const ImVec2& basePos) {
+        if (!showOverlay_) return;
 
-		float fps		= clock->GetCurrentFPS();
-		float frameTime = 1000.0f / fps;
+        auto* clock = ClockManager::GetInstance();
 
-		// スムージング
-		smoothFPS		= smoothFPS * (1.0f - smoothing) + fps * smoothing;
-		smoothFrameTime = smoothFrameTime * (1.0f - smoothing) + frameTime * smoothing;
+        //-------------------------------------------------------
+        // Clamp の影響を受けない
+        //-------------------------------------------------------
+        float fps = clock->GetCurrentFPS();
+        float rawDt = clock->GetRawDeltaTime();
+        float frameTime = rawDt * 1000.0f;
 
-		ImGui::SetCursorScreenPos(basePos);
-		ImGui::Text("FPS: %.1f", smoothFPS);
+        //-------------------------------------------------------
+        // スムージング（FPS, ms）
+        //-------------------------------------------------------
+        static float smoothFPS = 0.0f;
+        static float smoothFrameTime = 0.0f;
+        constexpr float smoothing = 0.15f;
 
-		ImVec2 next = basePos;
-		next.y += 20.0f;
-		ImGui::SetCursorScreenPos(next);
-		ImGui::Text("Frame Time: %.1f ms", smoothFrameTime);
+        if (fps > 0.0f) {
+            smoothFPS       = smoothFPS * (1.0f - smoothing) + fps * smoothing;
+            smoothFrameTime = smoothFrameTime * (1.0f - smoothing) + frameTime * smoothing;
+        }
 
-		next.y += 20.0f;
-		ImGui::SetCursorScreenPos(next);
-		ImGui::Text("DeltaTime: %.3f", clock->GetDeltaTime());
-	}
+        //-------------------------------------------------------
+        // 表示
+        //-------------------------------------------------------
+        ImGui::SetCursorScreenPos(basePos);
+        ImGui::Text("FPS: %.1f", smoothFPS);
 
-	void PerformanceOverlay::RenderToolbar() {
-		ImGui::Begin("PerformanceView", nullptr,
-					 ImGuiWindowFlags_NoTitleBar |
-						 ImGuiWindowFlags_AlwaysAutoResize |
-						 ImGuiWindowFlags_NoResize);
+        ImVec2 next = basePos;
+        next.y += 20.0f;
+        ImGui::SetCursorScreenPos(next);
+        ImGui::Text("Frame Time: %.2f ms", smoothFrameTime);
 
-		// オーバーレイのON/OFF
-		ImGui::Checkbox("Show Overlay", &showOverlay_);
-		ImGui::SameLine();
-		ImGui::Checkbox("isAdjustment", &isAdjustment_);
+        next.y += 20.0f;
+        ImGui::SetCursorScreenPos(next);
+        ImGui::Text("DeltaTime(raw): %.4f", rawDt);
+    }
 
-		ImGui::End();
+    void PerformanceOverlay::RenderToolbar() {
+        ImGui::Begin("PerformanceView", nullptr,
+            ImGuiWindowFlags_NoTitleBar |
+            ImGuiWindowFlags_AlwaysAutoResize |
+            ImGuiWindowFlags_NoResize);
 
-		if(isAdjustment_) {
-			// パラメータ調整ウィンドウは別に出す
-			ImGui::Begin("PerformanceOverlayParms");
-			// 色選択
-			ImGui::ColorEdit4("Overlay Color", (float*)&color_, ImGuiColorEditFlags_NoInputs);
+        ImGui::Checkbox("Show Overlay", &showOverlay_);
+        ImGui::SameLine();
+        ImGui::Checkbox("isAdjustment", &isAdjustment_);
 
-			// 位置調整
-			ImGui::Text("Position Offset");
-			ImGui::DragFloat2("Offset", (float*)&overlayOffset_, 1.0f);
-			ImGui::End();
-		}
-	}
+        ImGui::End();
+
+        if (isAdjustment_) {
+            ImGui::Begin("PerformanceOverlayParms");
+            ImGui::ColorEdit4("Overlay Color", (float*)&color_, ImGuiColorEditFlags_NoInputs);
+            ImGui::Text("Position Offset");
+            ImGui::DragFloat2("Offset", (float*)&overlayOffset_, 1.0f);
+            ImGui::End();
+        }
+    }
 
 } // namespace CalyxEditor

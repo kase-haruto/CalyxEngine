@@ -27,6 +27,15 @@ struct DirectionalLightData {
 	float			   intensity; //< 輝度
 };
 
+// GPU転送用のPOD構造体（シェーダーのcbuffer RaytracingShadowParamConstantsと一致）
+struct ShadowParamGpu {
+	float shadowRayEps;
+	float baseAngularRadius;
+	float penumbraStart;
+	float penumbraScale;
+	float minShadow;
+};
+
 namespace CalyxGraphics {
 	class DxCore;
 }
@@ -170,5 +179,5 @@ private:
 
 	ConfigurableObject<DirectionalLightConfig> config_; //< コンフィグ管理
 
-	DxConstantBuffer<ShadowParam> shadowParamCB_;
+	DxConstantBuffer<ShadowParamGpu> shadowParamCB_;
 };

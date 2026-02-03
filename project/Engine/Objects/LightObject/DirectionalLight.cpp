@@ -80,7 +80,15 @@ void DirectionalLight::AlwaysUpdate([[maybe_unused]] float dt) {}
 /////////////////////////////////////////////////////////////////////////////////////////
 void DirectionalLight::UploadToGpu() {
 	constantBuffer_.TransferData(lightData_);
-	shadowParamCB_.TransferData(shadow_);
+
+	// ShadowParam (SerializableObject継承) から GPU用POD構造体に変換
+	ShadowParamGpu gpuData;
+	gpuData.shadowRayEps = shadow_.shadowRayEps;
+	gpuData.baseAngularRadius = shadow_.baseAngularRadius;
+	gpuData.penumbraStart = shadow_.penumbraStart;
+	gpuData.penumbraScale = shadow_.penumbraScale;
+	gpuData.minShadow = shadow_.minShadow;
+	shadowParamCB_.TransferData(gpuData);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////

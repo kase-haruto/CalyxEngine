@@ -3,27 +3,23 @@
 ///////////////////////////////////////////////////////////////////////////////
 //                            structs
 ///////////////////////////////////////////////////////////////////////////////
-// マテリアル
 struct Material {
     float4 color;
     int enableLighting;
     float4x4 uvTransform;
     float shiniess;
 
-    // environmentMap
     bool isReflect;
     float environmentCoefficient;
-    float roughness; // 0.0（鏡のような反射）～ 1.0（完全にぼけた反射）
+    float roughness;
 };
 
-// ディレクショナルライト
 struct DirectionalLight {
     float4 color;
     float3 direction;
     float intensity;
 };
 
-// ポイントライト
 struct PointLight {
     float4 color;
     float3 position;
@@ -35,39 +31,33 @@ struct PointLight {
 ///////////////////////////////////////////////////////////////////////////////
 //                            cbuffers
 ///////////////////////////////////////////////////////////////////////////////
-cbuffer MaterialConstants : register(b0) {
-    Material gMaterial;
-}
-
-cbuffer DirectionalLightConstants : register(b2) {
-    DirectionalLight gDirectionalLight;
-}
+cbuffer MaterialConstants : register(b0) { Material gMaterial; }
+cbuffer DirectionalLightConstants : register(b2) { DirectionalLight gDirectionalLight; }
 
 cbuffer ShadowConstants : register(b3) {
-    float4x4 gLightVP; // ワールド→ライトクリップ
-    float gShadowBias; // 0.0005～0.003 くらいから調整
+    float4x4 gLightVP;
+    float gShadowBias;
     float3 _shadowPad;
 };
 
-cbuffer PointLightConstants : register(b4) {
-    PointLight gPointLight;
-}
+cbuffer PointLightConstants : register(b4) { PointLight gPointLight; }
 
+// ★ ここを使う（元コードでは宣言されているのに未使用だった）
 cbuffer RaytracingShadowParamConstants : register(b5) {
-	float gShadowRayEps		= 0.01f;
-	float gBaseAngularRadius = 0.05f;
-	float gPenumbraStart		= 0.05f;
-	float gPenumbraScale		= 1.0f;
-	float gMinShadow			= 0.1f;
+    float gShadowRayEps;
+    float gBaseAngularRadius;
+    float gPenumbraStart;
+    float gPenumbraScale;
+    float gMinShadow;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 //                            tables
 ///////////////////////////////////////////////////////////////////////////////
 TextureCube<float4> gEnvironmentMap : register(t1);
+Texture2D<float>    gShadowMap      : register(t2);
 RaytracingAccelerationStructure gRtScene : register(t3);
-Texture2D<float> gShadowMap : register(t2);
-Texture2D<float4> gTexture : register(t0);
+Texture2D<float4>   gTexture        : register(t0);
 
 ///////////////////////////////////////////////////////////////////////////////
 //                            samplers
@@ -102,11 +92,10 @@ void ComputeDirectionalLight(
     diffuse  = 0.0f;
     specular = 0.0f;
 
-    float3 L = -gDirectionalLight.direction; // 表面→光源
+    float3 L = -gDirectionalLight.direction;
     float NdotL = saturate(dot(normal, L));
 
     if(gMaterial.enableLighting == 0) {
-        // Half-Lambert
         float halfLambert = pow(NdotL * 0.5f + 0.5f, 2.0f);
         diffuse = albedo * gDirectionalLight.color.rgb * halfLambert * gDirectionalLight.intensity;
 
@@ -115,7 +104,6 @@ void ComputeDirectionalLight(
         specular = gDirectionalLight.color.rgb * pow(NdotH, gMaterial.shiniess) * gDirectionalLight.intensity;
     }
     else if(gMaterial.enableLighting == 1) {
-        // Lambert
         diffuse = albedo * gDirectionalLight.color.rgb * NdotL * gDirectionalLight.intensity;
 
         float3 H = normalize(L + toEye);
@@ -131,7 +119,7 @@ void ComputePointLight(
     float3 normal,
     float3 toEye,
     float3 worldPos,
-    float3 albedo, 
+    float3 albedo,
     out float3 diffuse,
     out float3 specular
 ) {
@@ -142,7 +130,7 @@ void ComputePointLight(
     float distance  = length(gPointLight.position - worldPos);
     float attenuation = pow(saturate(1.0f - distance / gPointLight.radius), gPointLight.decay);
 
-    float NdotL = saturate(dot(normal, -lightDir)); // lightDir は表面→光源の負
+    float NdotL = saturate(dot(normal, -lightDir));
     diffuse = albedo * gPointLight.color.rgb * NdotL * gPointLight.intensity * attenuation;
 
     float3 halfVec = normalize(-lightDir + toEye);
@@ -173,10 +161,9 @@ float2 Rotate2D(float2 v, float a) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-//    小物: Orthonormal Basis（L を軸にした接平面基底）
+//    Orthonormal Basis
 ///////////////////////////////////////////////////////////////////////////////
 void BuildOrthonormalBasis(float3 n, out float3 t, out float3 b) {
-    // n: 正規化済み想定
     float3 up = (abs(n.z) < 0.999f) ? float3(0,0,1) : float3(0,1,0);
     t = normalize(cross(up, n));
     b = cross(n, t);
@@ -184,12 +171,7 @@ void BuildOrthonormalBasis(float3 n, out float3 t, out float3 b) {
 
 ///////////////////////////////////////////////////////////////////////////////
 //    ソフトシャドウ（距離依存）: Inline Raytracing
-//    - 1本レイで blocker 距離 t を取得
-//    - t が大きいほど jitter 半径を増やして “ぼけ” を強める
 ///////////////////////////////////////////////////////////////////////////////
-static const int   kShadowSamples = 16;
-
-// Poisson disk（固定サンプル）
 static const float2 kPoisson16[16] = {
     float2(-0.326f, -0.406f),
     float2(-0.840f, -0.074f),
@@ -209,18 +191,32 @@ static const float2 kPoisson16[16] = {
     float2(-0.589f, -0.201f)
 };
 
+// 裏面カリング + first hit
 bool TraceOcclusion(float3 origin, float3 dir, float tMin, float tMax, out float hitT) {
-    RayQuery<RAY_FLAG_CULL_NON_OPAQUE |
-             RAY_FLAG_SKIP_PROCEDURAL_PRIMITIVES |
-             RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH> q;
-
     RayDesc ray;
     ray.Origin    = origin;
     ray.Direction = dir;
     ray.TMin      = tMin;
     ray.TMax      = tMax;
 
-    q.TraceRayInline(gRtScene, RAY_FLAG_NONE, 0xFF, ray);
+    RayQuery<
+        RAY_FLAG_CULL_NON_OPAQUE |
+        RAY_FLAG_CULL_BACK_FACING_TRIANGLES |
+        RAY_FLAG_SKIP_PROCEDURAL_PRIMITIVES |
+        RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH
+    > q;
+
+    // 第2引数(RayFlags)はテンプレのフラグと一致させる（意図を明確化）
+    q.TraceRayInline(
+        gRtScene,
+        RAY_FLAG_CULL_NON_OPAQUE |
+        RAY_FLAG_CULL_BACK_FACING_TRIANGLES |
+        RAY_FLAG_SKIP_PROCEDURAL_PRIMITIVES |
+        RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH,
+        0xFF,
+        ray
+    );
+
     q.Proceed();
 
     if (q.CommittedStatus() == COMMITTED_TRIANGLE_HIT) {
@@ -228,60 +224,99 @@ bool TraceOcclusion(float3 origin, float3 dir, float tMin, float tMax, out float
         return true;
     }
 
-    hitT = 0.0f;
+    hitT = -1.0f;
     return false;
+}
+
+// サンプル数を距離で可変
+int SelectShadowSampleCount(float tBlocker) {
+    // ペナンブラ開始より近いなら少数で十分
+    if (tBlocker < (gPenumbraStart * 1.0f)) return 4;
+    if (tBlocker < (gPenumbraStart * 3.0f)) return 8;
+    return 16;
 }
 
 float ComputeDirectionalSoftShadow_RT(float3 worldPos, float3 normal, float3 L) {
 
-    // ---- 調整パラメータ（DirectionalLight.shadowParam から取得） ----
-    // 自己交差対策（ワールドスケールに合わせて調整）
-	const float kRayEps = 0.01f;
+    // -----------------------------
+    // そもそも光が当たらない面は影不要
+    // -----------------------------
+    float NdotL_raw = dot(normal, L);
+    if (NdotL_raw <= 0.0f) {
+        return 1.0f;
+    }
 
-	const float kBaseAngularRadius = 0.5f;
-	const float kPenumbraStart     = 0.5f;
-	const float kPenumbraScale     = 1.0f;
-	// 影の濃さ（小さいほど暗い。0.0fで完全な黒）
-	const float kMinShadow         = 0.05f;
+    // -----------------------------
+    //  自己交差対策（cbuffer param 使用）
+    // -----------------------------
+    float3 origin = worldPos + normal * gShadowRayEps;
 
-    float3 origin = worldPos + normal * kRayEps;
-
-    // ---- まず blocker を1本で調べる ----
+    // -----------------------------
+    //  まず blocker 1本
+    // -----------------------------
     float tBlocker = 0.0f;
     bool blocked = TraceOcclusion(origin, L, 0.0f, 1000.0f, tBlocker);
+
     if (!blocked) {
         return 1.0f;
     }
 
-    // ---- 距離依存で "ぼけ半径" を決める ----
-    float s = saturate((tBlocker - kPenumbraStart) / max(kPenumbraScale, 1e-5f));
-    float angularRadius = kBaseAngularRadius * (1.0f + s * 2.0f); // 最小1.0x、最大3.0x
+    // -----------------------------
+    //  blocker が極端に近い = ほぼ完全影
+    // （濃い影ほど重い問題を直撃するので最重要）
+    // -----------------------------
+    if (tBlocker < (gPenumbraStart * 0.5f)) {
+        return gMinShadow;
+    }
 
-    // 方向Lに直交する平面の基底
+    // -----------------------------
+    // 距離依存でぼけ量（角半径）を決定
+    // -----------------------------
+    float s = saturate((tBlocker - gPenumbraStart) / max(gPenumbraScale, 1e-5f));
+    float angularRadius = gBaseAngularRadius * (1.0f + s * 2.0f); // 1x〜3x
+
+    // 角半径が小さすぎるなら、多重サンプル不要（真っ暗領域の高速化）
+    // 「濃い影ほど軽い」を実現するための安全弁
+    if (angularRadius < (gBaseAngularRadius * 0.35f)) {
+        return gMinShadow;
+    }
+
+    // -----------------------------
+    //  適応サンプル数
+    // -----------------------------
+    int sampleCount = SelectShadowSampleCount(tBlocker);
+
     float3 T, B;
     BuildOrthonormalBasis(L, T, B);
 
-    // パターン回転（バンディング軽減）
+    // 画面揺れがない固定ノイズ（worldPosベース）
     float rnd = Hash21(worldPos.xz * 17.0f + worldPos.yy * 3.0f);
     float ang = rnd * 6.2831853f;
 
-    // ---- 複数サンプルで平均（ソフトシャドウ） ----
+    // -----------------------------
+    //  Poisson サンプル
+    // -----------------------------
     float occluded = 0.0f;
 
     [loop]
-    for (int i = 0; i < kShadowSamples; ++i) {
+    for (int i = 0; i < sampleCount; ++i) {
         float2 d = Rotate2D(kPoisson16[i], ang) * angularRadius;
         float3 dirJ = normalize(L + T * d.x + B * d.y);
 
         float hitT;
         bool hit = TraceOcclusion(origin, dirJ, 0.0f, 1000.0f, hitT);
         occluded += hit ? 1.0f : 0.0f;
+
+        //全部ヒットしたら結果は確定
+        if (occluded >= (float)sampleCount) {
+            break;
+        }
     }
 
-    float shadow = 1.0f - (occluded / (float)kShadowSamples);
+    float shadow = 1.0f - (occluded / (float)sampleCount);
 
     // 真っ黒回避
-    shadow = lerp(kMinShadow, 1.0f, shadow);
+    shadow = lerp(gMinShadow, 1.0f, shadow);
 
     return shadow;
 }
@@ -292,15 +327,12 @@ float ComputeDirectionalSoftShadow_RT(float3 worldPos, float3 normal, float3 L) 
 PixelShaderOutput main(VertexShaderOutput input) {
     PixelShaderOutput output;
 
-    //================= UV 変換 & テクスチャ取得 =================
     float4 transformedUV = mul(float4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform);
     float4 textureColor  = gTexture.Sample(gSampler, transformedUV.xy);
 
-    // アルベド：テクスチャ × マテリアル色
     float3 albedo = gMaterial.color.rgb * textureColor.rgb;
     float  alpha  = gMaterial.color.a   * textureColor.a;
 
-    //================= アンリット =================
     if(gMaterial.enableLighting == 4) {
         if(alpha <= 0.01f) discard;
         output.color = float4(albedo, alpha);
@@ -310,7 +342,6 @@ PixelShaderOutput main(VertexShaderOutput input) {
     float3 normal = normalize(input.normal);
     float3 toEye  = normalize(cameraPosition - input.worldPosition);
 
-    //================= ライト計算 =================
     float3 directionalDiffuse, directionalSpecular;
     ComputeDirectionalLight(normal, toEye, albedo, directionalDiffuse, directionalSpecular);
 
@@ -318,21 +349,22 @@ PixelShaderOutput main(VertexShaderOutput input) {
     ComputePointLight(normal, toEye, input.worldPosition, albedo, pointDiffuse, pointSpecular);
 
     //================= ソフトシャドウ（Directional: Inline Raytracing） =================
-    float3 L = normalize(-gDirectionalLight.direction); // 表面→光源
-    float shadow = ComputeDirectionalSoftShadow_RT(input.worldPosition, normal, L);
+    float3 L = normalize(-gDirectionalLight.direction);
 
-    // 影は Directional Light にのみ適用
+    // ★ main側でも NdotL <= 0 をスキップ（ComputeDirectionalSoftShadow_RT 内にもあるが二重に安全）
+    float shadow = 1.0f;
+    if (dot(normal, L) > 0.0f) {
+        shadow = ComputeDirectionalSoftShadow_RT(input.worldPosition, normal, L);
+    }
+
     directionalDiffuse  *= shadow;
     directionalSpecular *= shadow;
 
-    //================= 照明合成 =================
     float3 litColor = directionalDiffuse + directionalSpecular + pointDiffuse + pointSpecular;
 
-    // 疑似環境光
-    float3 ambient = albedo * 0.07f; 
+    float3 ambient = albedo * 0.07f;
     litColor += ambient;
 
-    //================= 環境マップ =================
     if(gMaterial.isReflect) {
         float3 viewDir    = normalize(input.worldPosition - cameraPosition);
         float3 reflectDir = reflect(viewDir, normal);
@@ -344,13 +376,10 @@ PixelShaderOutput main(VertexShaderOutput input) {
         litColor += envColor * gMaterial.environmentCoefficient;
     }
 
-    //================= トーンマッピング + ガンマ補正 =================
     float3 finalColor = ApplyToneMappingAndGamma(litColor, 1.0f);
 
-    //================= アルファ =================
     if(alpha <= 0.01f) discard;
 
-    //================= 出力 =================
     output.color = float4(finalColor, alpha);
     return output;
 }
