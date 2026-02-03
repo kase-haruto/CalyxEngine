@@ -1,18 +1,20 @@
 #pragma once
 // engine
 #include <Engine/Application/UI/EngineUI/IEngineUI.h>
-#include <Engine/Assets/System/AssetType.h>
 #include <Engine/Assets/System/AssetDragPayload.h>
-#include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Assets/System/AssetRecord.h>
+#include <Engine/Assets/System/AssetType.h>
+#include <Engine/Assets/Texture/TextureManager.h>
+
 
 // c++
+#include <externals/imgui/imgui.h>
 #include <filesystem>
 #include <map>
-#include <optional>
 #include <memory>
+#include <optional>
 #include <vector>
-#include <externals/imgui/imgui.h>
+
 
 namespace CalyxEditor {
 
@@ -29,12 +31,13 @@ namespace CalyxEditor {
 			std::string										name;
 			std::filesystem::path							absPath;
 			std::map<std::string, std::unique_ptr<DirNode>> children;
-			bool											open = false;
+			bool											open	= false;
+			bool											scanned = false;
 		};
 
 	public:
 		AssetPanel() : IEngineUI("Assets") {}
-		~AssetPanel()override = default;
+		~AssetPanel() override = default;
 		void Initialize(const std::filesystem::path& assetsRoot);
 		void Render() override;
 

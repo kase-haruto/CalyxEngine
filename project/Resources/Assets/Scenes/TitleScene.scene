@@ -8,9 +8,9 @@
                 "z": 1.0
             },
             "direction": {
-                "x": -1.0,
+                "x": -0.5960000157356262,
                 "y": -1.0,
-                "z": -0.9430000185966492
+                "z": -0.7979999780654907
             },
             "guid": "77beb688-44e1-4ddd-a804-e9bfa301ea6c",
             "intensity": 1.0,
@@ -160,7 +160,7 @@
         {
             "guid": "a8319665-ec7e-4e52-b35b-dcd601d14845",
             "name": "DebugCamera",
-            "objectType": 5,
+            "objectType": 0,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
                 "rotation": {

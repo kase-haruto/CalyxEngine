@@ -14,7 +14,8 @@ public:
 	ClockManager(const ClockManager&)	= delete;
 	void operator=(const ClockManager&) = delete;
 
-	void Update(); // 毎フレーム呼び出し
+	void  Update(); // 毎フレーム呼び出し
+	float GetRawDeltaTime() const;
 
 	// グローバルな deltaTime（ヒットストップの影響を受けない）
 	float GetDeltaTime() const { return globalDeltaTime_; }
@@ -35,7 +36,7 @@ private:
 
 	std::chrono::high_resolution_clock::time_point firstFrameTime_;
 	std::chrono::high_resolution_clock::time_point lastFrameTime_;
-
+	float rawDeltaTime_ = 0.0f;
 	// グローバル deltaTime（ヒットストップ影響なし）
 	float globalDeltaTime_ = 0.016f;
 	// プレイヤー用 deltaTime（ヒットストップでスケールされる）

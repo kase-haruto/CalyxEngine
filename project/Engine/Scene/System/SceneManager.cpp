@@ -19,9 +19,7 @@
 #include <Engine/Scene/Title/TitleScene.h>
 #include <Game/Scene/Game/GameScene.h>
 
-#if defined(_DEBUG) || defined(DEVELOP)
 #include <Engine/Editor/PickingPass.h>
-#endif
 
 namespace CalyxScene {
 	SceneManager::SceneManager(CalyxGraphics::DxCore* dx)
@@ -53,7 +51,7 @@ namespace CalyxScene {
 				 std::make_unique<ClearScene>());
 
 		SetCurrent(idToIndex_.at(
-			GameSceneUtil::ToSceneId(SceneType::TEST)
+			GameSceneUtil::ToSceneId(SceneType::TITLE)
 		));
 
 #if defined(_DEBUG) || defined(DEVELOP)
