@@ -64,7 +64,6 @@ namespace {
 	}
 
 	//-------------------------------------------------------------------------
-	// マルチコンポーネントベクトルの描画 (Unreal/Unity スタイル)
 	// フォーマット: [Label] [X] [Value] [Y] [Value] ...
 	//-------------------------------------------------------------------------
 	bool CustomDragScalarAxis(const char* label_id, ImGuiDataType data_type, void* p_data, float v_speed, const void* p_min, const void* p_max, const char* format, const ImVec4& color_axis)

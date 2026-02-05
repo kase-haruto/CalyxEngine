@@ -34,7 +34,7 @@ std::optional<BossAttackType> BossAI::DecideAttack(float dt) {
 	// -------------------------
 	// ランダムに攻撃を決める
 	// -------------------------
-	int max = static_cast<int>(BossAttackType::Count);
+	int max = static_cast<int>(BossAttackType::Count) - 1; // Count分引く
 	int			   r   = Random::Generate<int>(0,max);
 	BossAttackType atk = static_cast<BossAttackType>(r);
 
