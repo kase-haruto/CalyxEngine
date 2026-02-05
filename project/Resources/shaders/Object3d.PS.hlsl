@@ -91,26 +91,30 @@ void ComputeDirectionalLight(
     diffuse  = 0.0f;
     specular = 0.0f;
 
-    float3 L = normalize(-gDirectionalLight.direction); // 明示的に正規化してキャッシュ
-    float3 lightColor = gDirectionalLight.color.rgb * gDirectionalLight.intensity; // キャッシュ
-
-    // Half-Lambert 用に raw cos を用意
+    float3 L = -gDirectionalLight.direction;
+    
+    // Half-Lambert用にsaturateしていない生のcos値を取得
     float rawNdotL = dot(normal, L);
+    // 従来のランバート用に0-1にクランプした値も用意
     float NdotL = saturate(rawNdotL);
 
-    // specular はモードに関係なく同じ式なので共通化
-    float3 H = normalize(L + toEye);
-    float NdotH = saturate(dot(normal, H));
-    float3 spec = lightColor * pow(NdotH, gMaterial.shiniess);
-
-    if (gMaterial.enableLighting == 0) {
+    if(gMaterial.enableLighting == 0) {
+        // Half-Lambert: -1.0～1.0 の範囲を 0.0～1.0 に変換して二乗
+        // saturateされた値を使うと、背面が 0 => 0.25 (明るいまま) になってしまうため、生のcos値を使う
         float halfLambert = pow(rawNdotL * 0.5f + 0.5f, 2.0f);
-        diffuse = albedo * lightColor * halfLambert;
-        specular = spec;
+        diffuse = albedo * gDirectionalLight.color.rgb * halfLambert * gDirectionalLight.intensity;
+
+        float3 H = normalize(L + toEye);
+        float NdotH = saturate(dot(normal, H));
+        specular = gDirectionalLight.color.rgb * pow(NdotH, gMaterial.shiniess) * gDirectionalLight.intensity;
     }
-    else if (gMaterial.enableLighting == 1) {
-        diffuse = albedo * lightColor * NdotL;
-        specular = spec;
+    else if(gMaterial.enableLighting == 1) {
+        // 通常のランバート
+        diffuse = albedo * gDirectionalLight.color.rgb * NdotL * gDirectionalLight.intensity;
+
+        float3 H = normalize(L + toEye);
+        float NdotH = saturate(dot(normal, H));
+        specular = gDirectionalLight.color.rgb * pow(NdotH, gMaterial.shiniess) * gDirectionalLight.intensity;
     }
 }
 
@@ -128,19 +132,16 @@ void ComputePointLight(
     diffuse  = 0.0f;
     specular = 0.0f;
 
-    float3 dirToLight = gPointLight.position - worldPos; // 非正規化ベクトル
-    float distance  = length(dirToLight);
-    float3 lightDir = dirToLight / max(distance, 1e-6f); // normalize の代替（1回だけ）
+    float3 lightDir = normalize(worldPos - gPointLight.position);
+    float distance  = length(gPointLight.position - worldPos);
     float attenuation = pow(saturate(1.0f - distance / gPointLight.radius), gPointLight.decay);
 
-    float3 lightColor = gPointLight.color.rgb * gPointLight.intensity; // キャッシュ
+    float NdotL = saturate(dot(normal, -lightDir));
+    diffuse = albedo * gPointLight.color.rgb * NdotL * gPointLight.intensity * attenuation;
 
-    float NdotL = saturate(dot(normal, lightDir));
-    diffuse = albedo * lightColor * NdotL * attenuation;
-
-    float3 halfVec = normalize(lightDir + toEye); // note: toEye = view vector from surface to eye
+    float3 halfVec = normalize(-lightDir + toEye);
     float NdotH = saturate(dot(normal, halfVec));
-    specular = lightColor * pow(NdotH, gMaterial.shiniess) * attenuation;
+    specular = gPointLight.color.rgb * pow(NdotH, gMaterial.shiniess) * gPointLight.intensity * attenuation;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -380,9 +381,6 @@ PixelShaderOutput main(VertexShaderOutput input) {
     float3 normal = normalize(input.normal);
     float3 toEye  = normalize(cameraPosition - input.worldPosition);
 
-    // viewDir を再計算せず -toEye を利用（normalize は toEye で一度だけ）
-    float3 viewDir = -toEye;
-
     float3 directionalDiffuse, directionalSpecular;
     ComputeDirectionalLight(normal, toEye, albedo, directionalDiffuse, directionalSpecular);
 
@@ -393,8 +391,7 @@ PixelShaderOutput main(VertexShaderOutput input) {
     float3 L = normalize(-gDirectionalLight.direction);
 
     float shadow = 1.0f;
-    float NdotL_main = dot(normal, L);
-    if (NdotL_main > 0.0f) {
+    if (dot(normal, L) > 0.0f) {
         shadow = ComputeDirectionalSoftShadow_RT(input.worldPosition, normal, L);
     }
 
@@ -407,7 +404,7 @@ PixelShaderOutput main(VertexShaderOutput input) {
     litColor += ambient;
 
     if(gMaterial.isReflect) {
-        // viewDir を再利用
+        float3 viewDir    = normalize(input.worldPosition - cameraPosition);
         float3 reflectDir = reflect(viewDir, normal);
 
         const float maxMipLevel = 7.0f;
