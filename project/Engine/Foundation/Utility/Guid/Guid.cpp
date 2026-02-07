@@ -1,5 +1,9 @@
 #include "Guid.h"
 
+Guid::Guid(const std::string& s) {
+	FromString(s);
+}
+
 Guid Guid::New(){
 	Guid g;
 	for (auto& b : g.bytes){

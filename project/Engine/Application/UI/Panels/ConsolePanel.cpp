@@ -4,7 +4,9 @@
 
 namespace CalyxEditor {
 	ConsolePanel::ConsolePanel()
-		: IEngineUI("Console") {}
+		: IEngineUI("Console") {
+		SetShow(false);
+	}
 
 	void ConsolePanel::Render() {
 		bool isOpen = true;

@@ -66,89 +66,149 @@ namespace {
 	//-------------------------------------------------------------------------
 	// フォーマット: [Label] [X] [Value] [Y] [Value] ...
 	//-------------------------------------------------------------------------
-	bool CustomDragScalarAxis(const char* label_id, ImGuiDataType data_type, void* p_data, float v_speed, const void* p_min, const void* p_max, const char* format, const ImVec4& color_axis)
-	{
-		ImGuiWindow* window = ImGui::GetCurrentWindow();
-		if (window->SkipItems) return false;
+	bool CustomDragScalarAxis(
+    const char* label_id,
+    ImGuiDataType data_type,
+    void* p_data,
+    float v_speed,
+    const void* p_min,
+    const void* p_max,
+    const char* format,
+    const ImVec4& color_axis)
+{
+    ImGuiWindow* window = ImGui::GetCurrentWindow();
+    if (window->SkipItems) return false;
 
-		ImGuiContext& g = *GImGui;
-		const ImGuiStyle& style = g.Style;
-		const ImGuiID id = window->GetID(label_id);
-		
-		const float w = ImGui::CalcItemWidth();
-		const ImVec2 label_size = ImGui::CalcTextSize(label_id, NULL, true);
-		const ImRect frame_bb(window->DC.CursorPos, window->DC.CursorPos + ImVec2(w, label_size.y + style.FramePadding.y * 2.0f));
-		const ImRect total_bb = frame_bb;
+    ImGuiContext& g = *GImGui;
+    const ImGuiStyle& style = g.Style;
+    const ImGuiID id = window->GetID(label_id);
 
-		ImGui::ItemSize(total_bb, style.FramePadding.y);
-		if (!ImGui::ItemAdd(total_bb, id, &frame_bb, ImGuiItemFlags_Inputable))
-			return false;
+    const float w = ImGui::CalcItemWidth();
+    const ImVec2 label_size = ImGui::CalcTextSize(label_id, NULL, true);
+    const ImRect frame_bb(window->DC.CursorPos,
+        window->DC.CursorPos + ImVec2(w, label_size.y + style.FramePadding.y * 2.0f));
 
-		const bool hovered = ImGui::ItemHoverable(frame_bb, id, g.LastItemData.InFlags);
-		const bool temp_input_allowed = (g.LastItemData.InFlags & ImGuiItemFlags_Inputable) != 0;
-		bool temp_input_is_active = temp_input_allowed && ImGui::TempInputIsActive(id);
+    const ImRect total_bb = frame_bb;
 
-		if (!temp_input_is_active)
-		{
-			// クリックされたらIDをアクティブにする
-			if (hovered && (g.IO.MouseClicked[0] || g.NavActivateId == id))
-			{
-				ImGui::SetActiveID(id, window);
-				ImGui::SetFocusID(id, window);
-				ImGui::FocusWindow(window);
-			}
+    ImGui::ItemSize(total_bb, style.FramePadding.y);
+    if (!ImGui::ItemAdd(total_bb, id, &frame_bb, ImGuiItemFlags_Inputable))
+        return false;
 
-			// 調整: 軸ラベルの幅 (色付きのバー)
-			const float axis_label_w = style.FramePadding.y * 2.0f + 5.0f; // 色付きバーのおおよその幅
-			const ImRect axis_bb(frame_bb.Min, frame_bb.Min + ImVec2(axis_label_w, frame_bb.GetHeight()));
-			const ImRect value_bb(frame_bb.Min + ImVec2(axis_label_w, 0), frame_bb.Max);
+    const bool hovered = ImGui::ItemHoverable(frame_bb, id, g.LastItemData.InFlags);
+    const bool temp_input_allowed = (g.LastItemData.InFlags & ImGuiItemFlags_Inputable) != 0;
+    bool temp_input_is_active = temp_input_allowed && ImGui::TempInputIsActive(id);
 
-			// ドラッグ動作
-			bool modified = ImGui::DragBehavior(id, data_type, p_data, v_speed, p_min, p_max, format, 0);
+    // -------------------------
+    //  レイアウト計算（先に全部）
+    // -------------------------
+    const float axis_label_w = style.FramePadding.y * 2.0f + 5.0f;
+    const float bar_width = 3.0f;
 
-			if (modified) 
-				ImGui::MarkItemEdited(id);
+    const ImRect axis_line_bb(
+        frame_bb.Min,
+        ImVec2(frame_bb.Min.x + bar_width, frame_bb.Max.y));
 
-			// 描画
-			const ImU32 frame_col = ImGui::GetColorU32(g.ActiveId == id ? ImGuiCol_FrameBgActive : hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
-			ImGui::RenderNavHighlight(frame_bb, id);
-			
-			// メインフレーム
-			ImGui::RenderFrame(value_bb.Min, value_bb.Max, frame_col, true, style.FrameRounding);
+    const ImRect axis_bb(
+        frame_bb.Min,
+        frame_bb.Min + ImVec2(axis_label_w, frame_bb.GetHeight()));
 
-			// 軸の色付きバー (左側の垂直線)
-			const float bar_width = 3.0f; 
-			// 左端に配置
-			const ImRect axis_line_bb(frame_bb.Min, ImVec2(frame_bb.Min.x + bar_width, frame_bb.Max.y));
-			ImGui::RenderFrame(axis_line_bb.Min, axis_line_bb.Max, ImGui::GetColorU32(color_axis), false, 0.0f);
-			
-			// 軸の文字 (バーの少し右)
-			const char* letter_display = label_id;
-			if (strncmp(label_id, "##", 2) == 0 && strlen(label_id) > 2)
-				letter_display += 2; // ##をスキップ
+    const ImRect value_bb(
+        frame_bb.Min + ImVec2(axis_label_w, 0),
+        frame_bb.Max);
 
-			if (letter_display[0] != '\0') {
-				ImGui::PushStyleColor(ImGuiCol_Text, color_axis); 
-				// バーの少し右
-				ImVec2 text_pos = frame_bb.Min + ImVec2(bar_width + 3.0f, (frame_bb.GetHeight() - ImGui::GetTextLineHeight()) * 0.5f);
-				ImGui::RenderText(text_pos, letter_display);
-				ImGui::PopStyleColor();
-			}
+    // -------------------------
+    //   ダブルクリック → 直接入力
+    // -------------------------
+    if (!temp_input_is_active)
+    {
+        if (hovered && (g.IO.MouseClicked[0] || g.NavActivateId == id))
+        {
+            ImGui::SetActiveID(id, window);
+            ImGui::SetFocusID(id, window);
+            ImGui::FocusWindow(window);
+        }
 
-			// 値のテキスト
-			char value_buf[64];
-			const char* value_buf_end = value_buf + ImGui::DataTypeFormatString(value_buf, IM_ARRAYSIZE(value_buf), data_type, p_data, format);
-			ImGui::RenderTextClipped(value_bb.Min, value_bb.Max, value_buf, value_buf_end, NULL, ImVec2(0.5f, 0.5f));
+        // ★ ダブルクリックされたら入力モードへ移行
+        if (hovered && g.IO.MouseDoubleClicked[0])
+        {
+            ImGui::SetActiveID(id, window);
+            ImGui::SetFocusID(id, window);
+            temp_input_is_active = true;
+        }
+    }
 
-			return modified;
-		}
+    // -------------------------
+    //   TempInput (直接入力モード)
+    // -------------------------
+    if (temp_input_is_active)
+    {
+        return ImGui::TempInputScalar(
+            value_bb,      // 入力エリア（必ず value_bb）
+            id,
+            label_id,
+            data_type,
+            p_data,
+            format,
+            p_min,
+            p_max
+        );
+    }
 
-		if (temp_input_is_active) {
-			return ImGui::TempInputScalar(frame_bb, id, label_id, data_type, p_data, format, p_min, p_max);
-		}
-		
-		return false;
-	}
+    // -------------------------
+    // ドラッグ挙動
+    // -------------------------
+    bool modified = ImGui::DragBehavior(
+        id, data_type, p_data, v_speed,
+        p_min, p_max, format, 0);
+
+    if (modified)
+        ImGui::MarkItemEdited(id);
+
+    // -------------------------
+    // 描画
+    // -------------------------
+    ImGui::RenderNavHighlight(frame_bb, id);
+
+    const ImU32 frame_col =
+        ImGui::GetColorU32(
+            g.ActiveId == id ? ImGuiCol_FrameBgActive :
+            hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
+
+    // メインフレーム
+    ImGui::RenderFrame(value_bb.Min, value_bb.Max, frame_col, true, style.FrameRounding);
+
+    // 左のカラーライン（軸色）
+    ImGui::RenderFrame(axis_line_bb.Min, axis_line_bb.Max,
+        ImGui::GetColorU32(color_axis), false, 0.0f);
+
+    // 軸ラベル（X / Y / Z など）
+    const char* letter_display = label_id;
+    if (strncmp(label_id, "##", 2) == 0 && strlen(label_id) > 2)
+        letter_display += 2;
+
+    if (letter_display[0] != '\0')
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, color_axis);
+        ImVec2 text_pos = frame_bb.Min +
+            ImVec2(bar_width + 3.0f, (frame_bb.GetHeight() - ImGui::GetTextLineHeight()) * 0.5f);
+        ImGui::RenderText(text_pos, letter_display);
+        ImGui::PopStyleColor();
+    }
+
+    // 数値表示
+    char value_buf[64];
+    const char* value_buf_end =
+        value_buf + ImGui::DataTypeFormatString(
+            value_buf, IM_ARRAYSIZE(value_buf),
+            data_type, p_data, format);
+
+    ImGui::RenderTextClipped(
+        value_bb.Min, value_bb.Max,
+        value_buf, value_buf_end, NULL,
+        ImVec2(0.5f, 0.5f));
+
+    return modified;
+}
 
 	//-------------------------------------------------------------------------
 	// トグルスイッチ (CheckBoxの代替)

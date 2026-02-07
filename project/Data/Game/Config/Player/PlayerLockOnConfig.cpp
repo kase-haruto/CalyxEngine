@@ -1,7 +1,7 @@
 #include "PlayerLockOnConfig.h"
 
 PlayerLockOnConfig::PlayerLockOnConfig() {
-	AddField("maxLockOn", maxLockOn_).Category("lockon").Tooltip("最大ロックオン数").Range(1, 20);
+	AddField("maxLockOn", maxLockOn_).Category("lockon").Tooltip("MaxLockon").Range(1, 20);
 	AddField("lockOnRadiusPx", lockOnRadiusPx_).Category("lockon").Tooltip("ロックオン表示半径(px)").Range(10.0f, 500.0f);
 	AddField("lockOnAcquireRadiusPx", lockOnAcquireRadiusPx_).Category("lockon").Tooltip("ロックオン獲得半径(px)").Range(10.0f, 500.0f);
 	AddField("lockOnReleaseRadiusPx", lockOnReleaseRadiusPx_).Category("lockon").Tooltip("ロックオン解除半径(px)").Range(10.0f, 1000.0f);

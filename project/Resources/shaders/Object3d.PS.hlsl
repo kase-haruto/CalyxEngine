@@ -42,11 +42,14 @@ cbuffer ShadowConstants : register(b3) {
 
 cbuffer PointLightConstants : register(b4) { PointLight gPointLight; }
 
+// NOTE:
+// gPenumbraStart / gPenumbraScale は「距離ベース」をやめるために未使用にします。
+// ただし CB レイアウト互換のため残します。
 cbuffer RaytracingShadowParamConstants : register(b5) {
     float gShadowRayEps;
-    float gBaseAngularRadius;
-    float gPenumbraStart;
-    float gPenumbraScale;
+    float gBaseAngularRadius; // 角半径（ソフトさ）: 距離で変えない
+    float gPenumbraStart;     // unused
+    float gPenumbraScale;     // unused
     float gMinShadow;
 };
 
@@ -54,7 +57,7 @@ cbuffer RaytracingShadowParamConstants : register(b5) {
 //                            tables
 ///////////////////////////////////////////////////////////////////////////////
 TextureCube<float4> gEnvironmentMap : register(t1);
-Texture2D<float>    gShadowMap      : register(t2);
+Texture2D<float>    gShadowMap      : register(t2); // unused
 RaytracingAccelerationStructure gRtScene : register(t3);
 Texture2D<float4>   gTexture        : register(t0);
 
@@ -92,29 +95,24 @@ void ComputeDirectionalLight(
     specular = 0.0f;
 
     float3 L = -gDirectionalLight.direction;
-    
-    // Half-Lambert用にsaturateしていない生のcos値を取得
+
     float rawNdotL = dot(normal, L);
-    // 従来のランバート用に0-1にクランプした値も用意
-    float NdotL = saturate(rawNdotL);
+    float NdotL    = saturate(rawNdotL);
 
     if(gMaterial.enableLighting == 0) {
-        // Half-Lambert: -1.0～1.0 の範囲を 0.0～1.0 に変換して二乗
-        // saturateされた値を使うと、背面が 0 => 0.25 (明るいまま) になってしまうため、生のcos値を使う
         float halfLambert = pow(rawNdotL * 0.5f + 0.5f, 2.0f);
         diffuse = albedo * gDirectionalLight.color.rgb * halfLambert * gDirectionalLight.intensity;
 
-        float3 H = normalize(L + toEye);
+        float3 H    = normalize(L + toEye);
         float NdotH = saturate(dot(normal, H));
-        specular = gDirectionalLight.color.rgb * pow(NdotH, gMaterial.shiniess) * gDirectionalLight.intensity;
+        specular    = gDirectionalLight.color.rgb * pow(NdotH, gMaterial.shiniess) * gDirectionalLight.intensity;
     }
     else if(gMaterial.enableLighting == 1) {
-        // 通常のランバート
         diffuse = albedo * gDirectionalLight.color.rgb * NdotL * gDirectionalLight.intensity;
 
-        float3 H = normalize(L + toEye);
+        float3 H    = normalize(L + toEye);
         float NdotH = saturate(dot(normal, H));
-        specular = gDirectionalLight.color.rgb * pow(NdotH, gMaterial.shiniess) * gDirectionalLight.intensity;
+        specular    = gDirectionalLight.color.rgb * pow(NdotH, gMaterial.shiniess) * gDirectionalLight.intensity;
     }
 }
 
@@ -132,28 +130,21 @@ void ComputePointLight(
     diffuse  = 0.0f;
     specular = 0.0f;
 
-    float3 lightDir = normalize(worldPos - gPointLight.position);
-    float distance  = length(gPointLight.position - worldPos);
-    float attenuation = pow(saturate(1.0f - distance / gPointLight.radius), gPointLight.decay);
+    float3 lightDir    = normalize(worldPos - gPointLight.position);
+    float  distance    = length(gPointLight.position - worldPos);
+    float  attenuation = pow(saturate(1.0f - distance / gPointLight.radius), gPointLight.decay);
 
     float NdotL = saturate(dot(normal, -lightDir));
-    diffuse = albedo * gPointLight.color.rgb * NdotL * gPointLight.intensity * attenuation;
+    diffuse     = albedo * gPointLight.color.rgb * NdotL * gPointLight.intensity * attenuation;
 
     float3 halfVec = normalize(-lightDir + toEye);
-    float NdotH = saturate(dot(normal, halfVec));
-    specular = gPointLight.color.rgb * pow(NdotH, gMaterial.shiniess) * gPointLight.intensity * attenuation;
+    float  NdotH   = saturate(dot(normal, halfVec));
+    specular       = gPointLight.color.rgb * pow(NdotH, gMaterial.shiniess) * gPointLight.intensity * attenuation;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 //                    小物: ハッシュ / 回転
 ///////////////////////////////////////////////////////////////////////////////
-float Hash11(float p) {
-    p = frac(p * 0.1031f);
-    p *= p + 33.33f;
-    p *= p + p;
-    return frac(p);
-}
-
 float Hash21(float2 p) {
     float3 p3 = frac(float3(p.xyx) * 0.1031f);
     p3 += dot(p3, p3.yzx + 33.33f);
@@ -176,7 +167,7 @@ void BuildOrthonormalBasis(float3 n, out float3 t, out float3 b) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-//    ソフトシャドウ（距離依存）: Inline Raytracing
+//    Poisson
 ///////////////////////////////////////////////////////////////////////////////
 static const float2 kPoisson16[16] = {
     float2(-0.326f, -0.406f),
@@ -197,44 +188,9 @@ static const float2 kPoisson16[16] = {
     float2(-0.589f, -0.201f)
 };
 
-// 遮蔽物までの「正確な距離」を取得する (Closest Hit)
-// ペナンブラの計算には「一番近い遮蔽物」までの距離が必要なため、ACCEPT_FIRST_HIT は使わない
-bool FindClosestBlocker(float3 origin, float3 dir, float tMax, out float hitT) {
-    RayDesc ray;
-    ray.Origin    = origin;
-    ray.Direction = dir;
-    ray.TMin      = 0.0f;
-    ray.TMax      = tMax;
-
-    // First Hit フラグを削除 -> Closest Hit (最も近い交点) を探す
-    RayQuery<
-        RAY_FLAG_CULL_NON_OPAQUE |
-        RAY_FLAG_CULL_BACK_FACING_TRIANGLES |
-        RAY_FLAG_SKIP_PROCEDURAL_PRIMITIVES
-    > q;
-
-    q.TraceRayInline(
-        gRtScene,
-        RAY_FLAG_CULL_NON_OPAQUE |
-        RAY_FLAG_CULL_BACK_FACING_TRIANGLES |
-        RAY_FLAG_SKIP_PROCEDURAL_PRIMITIVES,
-        0xFF,
-        ray
-    );
-
-    q.Proceed();
-
-    if (q.CommittedStatus() == COMMITTED_TRIANGLE_HIT) {
-        hitT = q.CommittedRayT();
-        return true;
-    }
-
-    hitT = -1.0f;
-    return false;
-}
-
-//  単純な遮蔽判定を行う (Any Hit / Accept First Hit)
-// ポアソンサンプリングなどの「見えているか否か」だけ知りたい場合はこちらが高速
+///////////////////////////////////////////////////////////////////////////////
+//  AnyHit（遮蔽の有無だけ）: Fast
+///////////////////////////////////////////////////////////////////////////////
 bool CheckVisibility(float3 origin, float3 dir, float tMax) {
     RayDesc ray;
     ray.Origin    = origin;
@@ -242,7 +198,6 @@ bool CheckVisibility(float3 origin, float3 dir, float tMax) {
     ray.TMin      = 0.0f;
     ray.TMax      = tMax;
 
-    // 遮蔽されているかだけわかれば良いので First Hit で即終了する
     RayQuery<
         RAY_FLAG_CULL_NON_OPAQUE |
         RAY_FLAG_CULL_BACK_FACING_TRIANGLES |
@@ -261,100 +216,85 @@ bool CheckVisibility(float3 origin, float3 dir, float tMax) {
     );
 
     q.Proceed();
-
-    // ヒットしたらtrue
     return (q.CommittedStatus() == COMMITTED_TRIANGLE_HIT);
 }
 
-// サンプル数を距離で可変
-int SelectShadowSampleCount(float tBlocker) {
-    
-	float dist = tBlocker - gPenumbraStart;
-	float scale = max(gPenumbraScale, 1e-5f);
-
-	// まだボケ始め (Scaleの20%未満) -> 4サンプル
-	if (dist < scale * 0.2f) return 4;
-
-	// ある程度ボケている (Scaleの80%未満) -> 8サンプル
-	if (dist < scale * 0.8f) return 8;
-
-	// 最大までボケている -> 16サンプル
-	return 16;
-}
-
+///////////////////////////////////////////////////////////////////////////////
+//    ソフトシャドウ（距離ベース廃止 + 屋内で重い問題の対策入り）
+//    - 角半径は gBaseAngularRadius 固定（スケール不変）
+//    - 距離(tBlocker)は一切使わない
+//    - 見た目維持しつつ「屋内でのレイ爆発」を抑える
+//
+//    対策:
+//      1) center ray をサンプルに含めて無駄撃ちを1本減らす
+//      2) ndotl と angularRadius でサンプル数を固定段階的に落とす
+//      3) かなり暗いことが確定したら早期終了（暗いほど軽い）
+//      4) 角半径が小さい時はそもそも少サンプル（硬い影は高周波が少ない）
+//
+///////////////////////////////////////////////////////////////////////////////
 float ComputeDirectionalSoftShadow_RT(float3 worldPos, float3 normal, float3 L) {
 
-    // -----------------------------
-    //  自己交差対策（cbuffer param 使用）
-    // -----------------------------
+    // 自己交差対策
     float3 origin = worldPos + normal * gShadowRayEps;
 
-    // -----------------------------
-    //  距離計測 (Closest Hit)
-    // -----------------------------
-    float tBlocker = 0.0f;
-    
-    // ここで FindClosestBlocker を使う（First Hitで終了させない）
-    bool blocked = FindClosestBlocker(origin, L, 1000.0f, tBlocker);
+    const float tMax = 1000.0f;
 
-    if (!blocked) {
-        return 1.0f;
+    // まず中心1本
+    bool centerHit = CheckVisibility(origin, L, tMax);
+    if (!centerHit) {
+        return 1.0f; // 完全に光
     }
 
-    // -----------------------------
-    //  blocker が極端に近い = ほぼ完全影
-    // -----------------------------
-    if (tBlocker < (gPenumbraStart * 0.5f)) {
-        return gMinShadow;
-    }
+    // 距離で変化させない：角半径固定
+    float angularRadius = max(gBaseAngularRadius, 0.0f);
 
-    // -----------------------------
-    // 距離依存でぼけ量（角半径）を決定
-    // -----------------------------
-    float s = saturate((tBlocker - gPenumbraStart) / max(gPenumbraScale, 1e-5f));
-    float angularRadius = gBaseAngularRadius * (1.0f + s * 2.0f); // 1x〜3x
+    // ---- サンプル数を「決定論的」に落とす（屋内対策） ----
+    // 角半径が小さいほど少サンプルで十分
+    int sampleCount = 16;
+    if (angularRadius < 0.010f) sampleCount = 4;
+    else if (angularRadius < 0.025f) sampleCount = 8;
 
-    // 角半径が小さすぎるなら、多重サンプル不要（真っ暗領域の高速化）
-    // 「濃い影ほど軽い」を実現するための安全弁
-    if (angularRadius < (gBaseAngularRadius * 0.35f)) {
-        return gMinShadow;
-    }
+    // さらに、斜め入射（NdotL が小さい）では影境界の寄与が小さくなるので減らす
+    float ndotl = saturate(dot(normal, L));
+    if (ndotl < 0.35f) sampleCount = min(sampleCount, 4);
+    else if (ndotl < 0.60f) sampleCount = min(sampleCount, 8);
 
-    // -----------------------------
-    //  適応サンプル数
-    // -----------------------------
-    int sampleCount = SelectShadowSampleCount(tBlocker);
+    // sampleCount には「中心レイも含める」設計にする
+    // つまり Poisson 追加分は sampleCount-1 本
+    int extraCount = max(sampleCount - 1, 0);
 
     float3 T, B;
     BuildOrthonormalBasis(L, T, B);
 
-    // 画面揺れがない固定ノイズ（worldPosベース）
+    // 画面揺れがない固定ノイズ（ワールド位置に固定）
     float rnd = Hash21(worldPos.xz * 17.0f + worldPos.yy * 3.0f);
     float ang = rnd * 6.2831853f;
 
-    // -----------------------------
-    //  Poisson サンプル
-    // -----------------------------
-    float occluded = 0.0f;
+    // centerHit 分を先に加算
+    float occluded = 1.0f;
+
+    // 暗いことが確定したら打ち切る閾値（0.0～1.0）
+    // 屋内だとここが効いて激的に軽くなる
+    const float kDarkEarlyOut = 0.75f;
 
     [loop]
-    for (int i = 0; i < sampleCount; ++i) {
-        float2 d = Rotate2D(kPoisson16[i], ang) * angularRadius;
+    for (int i = 0; i < extraCount; ++i) {
+        // Poisson16 を使い回す（extraCount は最大15なのでOK）
+        float2 d    = Rotate2D(kPoisson16[i], ang) * angularRadius;
         float3 dirJ = normalize(L + T * d.x + B * d.y);
 
-		// 判定だけなので早いものを使う
-    	bool hit = CheckVisibility(origin, dirJ, 1000.0f);
+        bool hit = CheckVisibility(origin, dirJ, tMax);
         occluded += hit ? 1.0f : 0.0f;
 
-        //全部ヒットしたら結果は確定
-        if (occluded >= (float)sampleCount) {
-            break;
+        // 「かなり暗い」が確定したら早期終了（暗いほど軽い）
+        if (occluded >= (float)sampleCount * kDarkEarlyOut) {
+            return gMinShadow; // ここで確定させてレイを止める
         }
     }
 
     float shadow = 1.0f - (occluded / (float)sampleCount);
 
-    // 真っ黒回避
+    // 真っ黒回避（= 接触暗さの下限）
     shadow = lerp(gMinShadow, 1.0f, shadow);
 
     return shadow;
@@ -400,6 +340,7 @@ PixelShaderOutput main(VertexShaderOutput input) {
 
     float3 litColor = directionalDiffuse + directionalSpecular + pointDiffuse + pointSpecular;
 
+    // AOではない（定数アンビエント）
     float3 ambient = albedo * 0.07f;
     litColor += ambient;
 
