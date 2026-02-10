@@ -44,13 +44,11 @@ cbuffer PointLightConstants : register(b4) { PointLight gPointLight; }
 
 // NOTE:
 // gPenumbraStart / gPenumbraScale は「距離ベース」をやめるために未使用にします。
-// ただし CB レイアウト互換のため残します。
 cbuffer RaytracingShadowParamConstants : register(b5) {
     float gShadowRayEps;
     float gBaseAngularRadius; // 角半径（ソフトさ）: 距離で変えない
-    float gPenumbraStart;     // unused
-    float gPenumbraScale;     // unused
     float gMinShadow;
+	bool gIsSoft;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -243,6 +241,10 @@ float ComputeDirectionalSoftShadow_RT(float3 worldPos, float3 normal, float3 L) 
     bool centerHit = CheckVisibility(origin, L, tMax);
     if (!centerHit) {
         return 1.0f; // 完全に光
+    }
+
+    if (!gIsSoft) {
+        return gMinShadow;
     }
 
     // 距離で変化させない：角半径固定

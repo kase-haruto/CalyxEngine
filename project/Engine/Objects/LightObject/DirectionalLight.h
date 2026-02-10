@@ -31,9 +31,8 @@ struct DirectionalLightData {
 struct ShadowParamGpu {
 	float shadowRayEps;
 	float baseAngularRadius;
-	float penumbraStart;
-	float penumbraScale;
 	float minShadow;
+	bool  isSoft = false;
 };
 
 namespace CalyxGraphics {
@@ -56,9 +55,8 @@ public:
 
 		float shadowRayEps		= 0.01f;
 		float baseAngularRadius = 0.05f;
-		float penumbraStart		= 0.05f;
-		float penumbraScale		= 1.0f;
 		float minShadow			= 0.1f;
+		bool  isSoft			= false;
 	};
 	ShadowParam shadow_;
 	int			shadowSampleCount = 8;

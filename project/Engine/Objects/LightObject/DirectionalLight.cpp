@@ -85,9 +85,8 @@ void DirectionalLight::UploadToGpu() {
 	ShadowParamGpu gpuData;
 	gpuData.shadowRayEps = shadow_.shadowRayEps;
 	gpuData.baseAngularRadius = shadow_.baseAngularRadius;
-	gpuData.penumbraStart = shadow_.penumbraStart;
-	gpuData.penumbraScale = shadow_.penumbraScale;
 	gpuData.minShadow = shadow_.minShadow;
+	gpuData.isSoft = shadow_.isSoft;
 	shadowParamCB_.TransferData(gpuData);
 }
 
@@ -300,9 +299,8 @@ void DirectionalLight::ExtractConfigToJson(nlohmann::json& j) const {
 DirectionalLight::ShadowParam::ShadowParam() {
 	AddField("rayEps", shadowRayEps).Category("Shadow");
 	AddField("baseAngularRadius", baseAngularRadius).Category("Shadow");
-	AddField("penumbraStart", penumbraStart).Category("Shadow");
-	AddField("penumbraScale", penumbraScale).Category("Shadow");
 	AddField("minShadow", minShadow).Category("Shadow");
+	AddField("enableSoftShadow", isSoft).Category("Shadow"); 
 }
 
 CalyxEngine::ParamPath DirectionalLight::ShadowParam::GetParamPath() const {
