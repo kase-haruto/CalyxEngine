@@ -182,7 +182,7 @@ std::unique_ptr<Sprite> PlayerLockOn::AcquireMarker() {
 	}
 
 	if(lockOnSprites_.size() + markerPool_.size() < config_.maxLockOn_) {
-		auto s = std::make_unique<Sprite>("Textures/lockOn.png");
+		auto s = std::make_unique<Sprite>("Textures/lockOn.dds");
 		s->Initialize({0, 0}, {64, 64});
 		s->SetAnchorPoint({0.5f, 0.5f});
 		s->SetIsVisible(true);
@@ -207,7 +207,7 @@ void PlayerLockOn::RecycleMarker(std::unique_ptr<Sprite> s) {
 void PlayerLockOn::PrewarmMarkers(size_t n) {
 	markerPool_.reserve(n);
 	for(size_t i = 0; i < n; ++i) {
-		auto s = std::make_unique<Sprite>("Textures/lockOn.png");
+		auto s = std::make_unique<Sprite>("Textures/lockOn.dds");
 		s->Initialize({-10000.0f, -10000.0f}, {64, 64});
 		s->SetAnchorPoint({0.5f, 0.5f});
 		s->SetIsVisible(false);

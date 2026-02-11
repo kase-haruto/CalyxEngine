@@ -14,7 +14,7 @@ namespace Calyx2D {
 	void BaseHud::Initialize(uint32_t moveFlags) {
 
 		// スプライトテクスチャが未設定ならデバッグ用に差し替える
-		if(config_.texturePath.empty()) { config_.texturePath = "Textures/uvChecker.png"; }
+		if(config_.texturePath.empty()) { config_.texturePath = "Textures/uvChecker.dds"; }
 
 		// スプライト生成
 		spriteObj_ = std::make_unique<SpriteObject2d>();

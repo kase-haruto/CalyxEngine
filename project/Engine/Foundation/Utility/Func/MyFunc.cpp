@@ -13,6 +13,7 @@
 #include<fstream>
 #include <numbers>
 #include<sstream>
+#include <filesystem>
 
 // externals
 #include<assimp/Importer.hpp>
@@ -162,7 +163,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 		if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath) == AI_SUCCESS) {
 			modelData.meshResource.Material().textureFilePath = texturePath.C_Str();
 		} else {
-			modelData.meshResource.Material().textureFilePath = "white1x1.png";
+			modelData.meshResource.Material().textureFilePath = "white1x1.dds";
 		}
 	}
 
@@ -220,7 +221,7 @@ MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const st
 
 	// テクスチャなしのモデルの場合
 	if (materialData.textureFilePath == "") {
-		materialData.textureFilePath = "white1x1.png";
+		materialData.textureFilePath = "white1x1.dds";
 	}
 
 	return materialData;
@@ -231,12 +232,29 @@ DirectX::ScratchImage LoadTextureImage(const std::string& filePath) {
 
 	ScratchImage image{};
 	ScratchImage mipImages{};
-	std::wstring filePathW = ConvertString(filePath);
+
+	std::filesystem::path path(filePath);
+	std::filesystem::path ddsPath = path;
+	ddsPath.replace_extension(".dds");
+
+	std::wstring filePathW;
 
 	HRESULT hr = E_FAIL;
+	bool useDDS = false;
+
+	// もともとDDSを指定している
+	// もしくは DDSファイルが存在する かつ 元のファイルが存在しない
+	// ならDDSを使う
+	bool originExists = std::filesystem::exists(path);
+	if (path.extension() == ".dds" || (!originExists && std::filesystem::exists(ddsPath))) {
+		useDDS = true;
+		filePathW = ConvertString(ddsPath.string());
+	} else {
+		filePathW = ConvertString(filePath);
+	}
 
 	// ファイル形式に応じて読み込み
-	if (filePath.ends_with(".dds")) {
+	if (useDDS) {
 		hr = LoadFromDDSFile(filePathW.c_str(), DDS_FLAGS_NONE, nullptr, image);
 	} else {
 		hr = LoadFromWICFile(filePathW.c_str(), WIC_FLAGS_FORCE_SRGB, nullptr, image);

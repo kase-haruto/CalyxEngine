@@ -28,7 +28,7 @@ public:
 		Center,
 		Right
 	};
-	NumbersSprite(std::string dir, std::string ext = ".png");
+	NumbersSprite(std::string dir, std::string ext = ".dds");
 	NumbersSprite();
 
 	// 初期化（基準位置・1桁サイズ）

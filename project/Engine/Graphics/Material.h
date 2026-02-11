@@ -40,7 +40,7 @@ struct Material {
 struct ParticleMaterial {
 	CalyxMath::Vector4     color       = {1,1,1,1};     // 基本色（tint）
 	CalyxMath::Matrix4x4   uvTransform = CalyxMath::Matrix4x4::MakeIdentity(); // UVアニメ用
-	std::string texturePath = "particle.png";            // テクスチャパス
+	std::string texturePath = "particle.dds";            // テクスチャパス
 };
 
 struct Material2D {

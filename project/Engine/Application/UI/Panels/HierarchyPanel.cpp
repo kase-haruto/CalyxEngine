@@ -64,12 +64,12 @@ namespace CalyxEditor {
 
 		auto& tm = *TextureManager::GetInstance();
 
-		iconEye_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/Hierarchy/eyeIcon.png").ptr;
-		iconEyeOff_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/Hierarchy/closedEyeIcon.png").ptr;
-		iconCamera_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/Hierarchy/camIcon.png").ptr;
-		iconGameObj_.tex = (ImTextureID)tm.LoadTexture("UI/Tool/Hierarchy/meshIcon.png").ptr;
-		iconFx_.tex		 = (ImTextureID)tm.LoadTexture("UI/Tool/Hierarchy/particleIcon.png").ptr;
-		iconLight_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/Hierarchy/lightIcon.png").ptr;
+		iconEye_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/Hierarchy/eyeIcon.dds").ptr;
+		iconEyeOff_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/Hierarchy/closedEyeIcon.dds").ptr;
+		iconCamera_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/Hierarchy/camIcon.dds").ptr;
+		iconGameObj_.tex = (ImTextureID)tm.LoadTexture("UI/Tool/Hierarchy/meshIcon.dds").ptr;
+		iconFx_.tex		 = (ImTextureID)tm.LoadTexture("UI/Tool/Hierarchy/particleIcon.dds").ptr;
+		iconLight_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/Hierarchy/lightIcon.dds").ptr;
 	}
 
 	/* ========================================================================

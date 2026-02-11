@@ -34,26 +34,26 @@ void ClearScene::Initialize() {
 	// ベース初期化
 	BaseScene::Initialize();
 
-	clearSprite_   = std::make_unique<Sprite>("Textures/clear.png");
+	clearSprite_   = std::make_unique<Sprite>("Textures/clear.dds");
 	CalyxMath::Vector2 center = kGameSize * 0.5f;
 	clearSprite_->SetSize(kGameSize);
 	clearSprite_->SetAnchorPoint(CalyxMath::Vector2(0.5f, 0.5f));
 	clearSprite_->SetPosition(center);
 
-	buttonSprite_ = std::make_unique<Sprite>("Textures/button_A.png");
+	buttonSprite_ = std::make_unique<Sprite>("Textures/button_A.dds");
 	buttonSprite_->SetAnchorPoint(CalyxMath::Vector2(0.5f, 0.5f));
 	buttonSprite_->SetSize(CalyxMath::Vector2(64.0f, 64.0f));
 	CalyxMath::Vector2 pos = CalyxMath::Vector2(center.x, 600.0f);
 	buttonSprite_->SetPosition(pos);
 
 	// result:用スプライト
-	resultScoreSprite_ = std::make_unique<Sprite>("Textures/resultScore.png");
+	resultScoreSprite_ = std::make_unique<Sprite>("Textures/resultScore.dds");
 	resultScoreSprite_->SetAnchorPoint(CalyxMath::Vector2(0.0f, 0.5f));
 	resultScoreSprite_->SetSize(CalyxMath::Vector2(300.0f, 56.0f));
 	resultScoreSprite_->SetPosition(CalyxMath::Vector2(center.x - 400.0f, 320.0f));
 
 	// スコア表示用 NumbersSpriteカクトクスコア
-	scoreSprite_ = std::make_unique<NumbersSprite>("Textures/Numbers", ".png");
+	scoreSprite_ = std::make_unique<NumbersSprite>("Textures/Numbers", ".dds");
 	scoreSprite_->Initialize(
 		{center.x, 320.0f},
 		{48.0f, 48.0f} // 桁サイズ

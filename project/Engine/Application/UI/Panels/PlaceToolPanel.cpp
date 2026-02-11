@@ -52,7 +52,7 @@ namespace CalyxEditor {
 
 			shapeItems.push_back({PlaceItemCategory::Shape,
 								  objName,
-								  TextureManager::GetInstance()->LoadTexture("UI/Tool/" + name + ".png"),
+								  TextureManager::GetInstance()->LoadTexture("UI/Tool/" + name + ".dds"),
 								  {64, 64},
 								  [modelName, objName]() {
 									  auto factory = [modelName, objName]() {
@@ -72,7 +72,7 @@ namespace CalyxEditor {
 			auto& particleItems = categoryItems_[PlaceItemCategory::Particle];
 			particleItems.push_back({PlaceItemCategory::Particle,
 									 "ParticleSystem",
-									 TextureManager::GetInstance()->LoadTexture("UI/Tool/particle.png"),
+									 TextureManager::GetInstance()->LoadTexture("UI/Tool/particle.dds"),
 									 {64, 64},
 									 []() {
 										 const std::string name	   = "ParticleSystem";
@@ -91,7 +91,7 @@ namespace CalyxEditor {
 			auto& particleItems = categoryItems_[PlaceItemCategory::Particle];
 			particleItems.push_back({PlaceItemCategory::Particle,
 									 "EffectObject",
-									 TextureManager::GetInstance()->LoadTexture("UI/Tool/particle.png"),
+									 TextureManager::GetInstance()->LoadTexture("UI/Tool/particle.dds"),
 									 {64, 64},
 									 []() {
 										 const std::string name	   = "EffectObject";

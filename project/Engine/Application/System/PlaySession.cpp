@@ -20,11 +20,11 @@ namespace CalyxEditor {
 
 	void PlaySession::LoadIcons() {
 		auto& tm		 = *TextureManager::GetInstance();
-		iconPlay_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/ToolBar/play.png").ptr;
-		iconPause_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/ToolBar/pause.png").ptr;
-		iconStep_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/ToolBar/step.png").ptr;
-		iconRestart_.tex = (ImTextureID)tm.LoadTexture("UI/Tool/ToolBar/restart.png").ptr;
-		iconStop_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/ToolBar/stop.png").ptr;
+		iconPlay_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/ToolBar/play.dds").ptr;
+		iconPause_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/ToolBar/pause.dds").ptr;
+		iconStep_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/ToolBar/step.dds").ptr;
+		iconRestart_.tex = (ImTextureID)tm.LoadTexture("UI/Tool/ToolBar/restart.dds").ptr;
+		iconStop_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/ToolBar/stop.dds").ptr;
 	}
 
 	void PlaySession::RenderToolbar() {

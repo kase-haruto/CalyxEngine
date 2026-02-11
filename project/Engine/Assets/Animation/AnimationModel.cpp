@@ -315,7 +315,17 @@ namespace CalyxAssets {
 	std::string AnimationModel::GetCurrentAnimationName() const { if(currentAnimation_) { return currentAnimation_->name; } else { return ""; } }
 
 	void AnimationModel::OnModelLoaded() {
+		// .png を優先的に使用するため、一時的にパスを書き換える
+		std::string originalPath = modelData_->meshResource.Material().textureFilePath;
+		std::filesystem::path p(originalPath);
+		p.replace_extension(".png");
+		modelData_->meshResource.Material().textureFilePath = p.string();
+
 		BaseModel::OnModelLoaded();
+
+		// 元に戻す（他のモデルへの影響を防ぐため）
+		modelData_->meshResource.Material().textureFilePath = originalPath;
+
 		ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
 
 		/* スキンクラスター確保 */
@@ -521,3 +531,4 @@ namespace CalyxAssets {
 	D3D12_GPU_DESCRIPTOR_HANDLE	AnimationModel::GetJointMatrixSrv() const { return skinCluster_.paletteSrvHandle.second; }
 
 }
+

@@ -27,13 +27,13 @@ namespace CalyxEditor {
 		if(allTabs_.empty()) {
 			auto& tm = *TextureManager::GetInstance();
 			allTabs_ = {
-					{rootPath_ + "inspectorUI_Al.png",ParamFilterSection::All},
-					{rootPath_ + "inspectorUI_Ob.png",ParamFilterSection::Object},
-					{rootPath_ + "inspectorUI_Ma.png",ParamFilterSection::Material},
-					{rootPath_ + "inspectorUI_Pa.png",ParamFilterSection::ParameterData},
-					{rootPath_ + "inspectorUI_Co.png",ParamFilterSection::Collider},
-					{rootPath_ + "inspectorUI_Emit.png",ParamFilterSection::ParticleEmit},
-					{rootPath_ + "inspectorUI_Module.png",ParamFilterSection::ParticleModule},
+					{rootPath_ + "inspectorUI_Al.dds",ParamFilterSection::All},
+					{rootPath_ + "inspectorUI_Ob.dds",ParamFilterSection::Object},
+					{rootPath_ + "inspectorUI_Ma.dds",ParamFilterSection::Material},
+					{rootPath_ + "inspectorUI_Pa.dds",ParamFilterSection::ParameterData},
+					{rootPath_ + "inspectorUI_Co.dds",ParamFilterSection::Collider},
+					{rootPath_ + "inspectorUI_Emit.dds",ParamFilterSection::ParticleEmit},
+					{rootPath_ + "inspectorUI_Module.dds",ParamFilterSection::ParticleModule},
 				};
 			for(auto& tab : allTabs_) { tab.iconTex = (void*)tm.LoadTexture(tab.iconPath).ptr; }
 			tabs_ = allTabs_; // 初回は全表示

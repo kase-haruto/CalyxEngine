@@ -364,17 +364,17 @@ void ModelManager::LoadMesh(const aiMesh* mesh,ModelData& modelData) {
 //----------------------------------------------------------------------------
 void ModelManager::LoadMaterial(const aiScene* scene,const aiMesh* mesh,ModelData& modelData) {
 	if(!scene->HasMaterials()) {
-		modelData.meshResource.data.material.textureFilePath = "white1x1.png";
+		modelData.meshResource.data.material.textureFilePath = "white1x1.dds";
 		return;
 	}
 	const aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 	if(!material) {
-		modelData.meshResource.data.material.textureFilePath = "white1x1.png";
+		modelData.meshResource.data.material.textureFilePath = "white1x1.dds";
 		return;
 	}
 
 	aiString texPath;
-	if(material->GetTexture(aiTextureType_DIFFUSE,0,&texPath) == AI_SUCCESS) { modelData.meshResource.data.material.textureFilePath = texPath.C_Str(); } else { modelData.meshResource.Material().textureFilePath = "white1x1.png"; }
+	if(material->GetTexture(aiTextureType_DIFFUSE,0,&texPath) == AI_SUCCESS) { modelData.meshResource.data.material.textureFilePath = texPath.C_Str(); } else { modelData.meshResource.Material().textureFilePath = "white1x1.dds"; }
 
 	LoadUVTransform(material,modelData.meshResource.Material());
 }

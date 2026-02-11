@@ -39,15 +39,15 @@ void EnemyResultHud::Initialize(const ResultTransitionPayload& payload) {
 		// icon
 		row.icon = std::make_unique<Calyx2D::SpriteObject2d>();
 		if(e.kind == EnemyKind::Boss) {
-			row.icon->Initialize("Textures/ResultHud/bossDead.png");
+			row.icon->Initialize("Textures/ResultHud/bossDead.dds");
 		}else {
-			row.icon->Initialize("Textures/ResultHud/enemyDead.png");
+			row.icon->Initialize("Textures/ResultHud/enemyDead.dds");
 		}
 		row.icon->SetScale(configData_->iconSize);
 		row.icon->SetPosition(configData_->posEnd + CalyxMath::Vector2{0.0f,row.rowY} + configData_->iconOffset);
 
 		// numbers
-		row.numbers = std::make_unique<NumbersSprite>("Textures/Numbers",".png");
+		row.numbers = std::make_unique<NumbersSprite>("Textures/Numbers",".dds");
 		row.numbers->Initialize(configData_->posEnd + CalyxMath::Vector2{0.0f,row.rowY} + configData_->numberOffset,
 								configData_->digitSize);
 		row.numbers->SetAlign(NumbersSprite::DigitsAlign::Center);

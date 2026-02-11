@@ -58,9 +58,9 @@ void GameScene::Initialize() {
 
 	// UI
 	{
-		shootUI_                  = std::make_unique<Sprite>("Textures/UI/shootUI.png");
-		aimUI_                    = std::make_unique<Sprite>("Textures/UI/aimUI.png");
-		avoidanceUI_              = std::make_unique<Sprite>("Textures/UI/avoidanceUI.png");
+		shootUI_                  = std::make_unique<Sprite>("Textures/UI/shootUI.dds");
+		aimUI_                    = std::make_unique<Sprite>("Textures/UI/aimUI.dds");
+		avoidanceUI_              = std::make_unique<Sprite>("Textures/UI/avoidanceUI.dds");
 		CalyxMath::Vector2 uiSize = {128.0f,64.0f};
 		shootUI_->SetSize(uiSize);
 		aimUI_->SetSize(uiSize);
@@ -111,7 +111,7 @@ void GameScene::Initialize() {
 	score_->Initialize();
 
 	numbersSprite_ = std::make_unique<NumbersSprite>(
-		"Textures/Numbers",".png");
+		"Textures/Numbers",".dds");
 	CalyxMath::Vector2 scoreSpritePos = {100.0f,630.0f};
 	numbersSprite_->Initialize(/*pos*/ {kGameWidth - scoreSpritePos.x,scoreSpritePos.y},
 									   /*digitSize*/ {32.0f,32.0f});

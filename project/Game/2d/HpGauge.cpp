@@ -57,7 +57,7 @@ void HpGauge::Initialize(const CalyxMath::Vector2& position,const CalyxMath::Vec
 	//----------------------------------------
 	// 青ゲージ（現在 HP）
 	//----------------------------------------
-	blueGauge_ = std::make_unique<Sprite>("Textures/ui/HpGauge.png");
+	blueGauge_ = std::make_unique<Sprite>("Textures/ui/HpGauge.dds");
 	blueGauge_->Initialize(position,size);
 	blueGauge_->SetFillMethod(1);
 	blueGauge_->SetFillOrigin(0.0f,0.0f);
@@ -66,7 +66,7 @@ void HpGauge::Initialize(const CalyxMath::Vector2& position,const CalyxMath::Vec
 	//----------------------------------------
 	// 赤ゲージ（遅延）
 	//----------------------------------------
-	redGauge_ = std::make_unique<Sprite>("Textures/white1x1.png");
+	redGauge_ = std::make_unique<Sprite>("Textures/white1x1.dds");
 	redGauge_->Initialize(position,size);
 	redGauge_->SetFillMethod(1);
 	redGauge_->SetFillOrigin(0.0f,0.0f);
@@ -76,7 +76,7 @@ void HpGauge::Initialize(const CalyxMath::Vector2& position,const CalyxMath::Vec
 	//----------------------------------------
 	// フレーム
 	//----------------------------------------
-	frameSprite_ = std::make_unique<Sprite>("Textures/white1x1.png");
+	frameSprite_ = std::make_unique<Sprite>("Textures/white1x1.dds");
 	frameSprite_->Initialize(position,size);
 	frameSprite_->SetFillMethod(0);
 }
