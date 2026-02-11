@@ -31,13 +31,13 @@ void DefeatScene::Initialize() {
 	// ベース初期化
 	BaseScene::Initialize();
 
-	defeatSprite_  = std::make_unique<Sprite>("Textures/defeat.png");
+	defeatSprite_  = std::make_unique<Sprite>("Textures/defeat.dds");
 	CalyxMath::Vector2 center = kGameSize * 0.5f;
 	defeatSprite_->SetSize(kGameSize);
 	defeatSprite_->SetAnchorPoint(CalyxMath::Vector2(0.5f, 0.5f));
 	defeatSprite_->SetPosition(center);
 
-	buttonSprite = std::make_unique<Sprite>("Textures/button_A.png");
+	buttonSprite = std::make_unique<Sprite>("Textures/button_A.dds");
 	buttonSprite->SetAnchorPoint(CalyxMath::Vector2(0.5f, 0.5f));
 	buttonSprite->SetSize(CalyxMath::Vector2(64.0f, 64.0f));
 	CalyxMath::Vector2 pos = CalyxMath::Vector2(center.x, 600.0f);

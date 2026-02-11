@@ -15,23 +15,23 @@ TextureManager* TextureManager::GetInstance() {
 }
 
 void TextureManager::StartUpLoad() {
-	LoadTexture("Textures/uvChecker.png");
-	LoadTexture("Textures/MonsterBall.png");
-	LoadTexture("Textures/flower.png");
-	LoadTexture("Textures/smoke.png");
-	LoadTexture("Textures/redCircle.png");
-	LoadTexture("Textures/fieldTile.png");
-	LoadTexture("Textures/TallBuilding01.png");
-	LoadTexture("Textures/Numbers/0.png");
-	LoadTexture("Textures/Numbers/1.png");
-	LoadTexture("Textures/Numbers/2.png");
-	LoadTexture("Textures/Numbers/3.png");
-	LoadTexture("Textures/Numbers/4.png");
-	LoadTexture("Textures/Numbers/5.png");
-	LoadTexture("Textures/Numbers/6.png");
-	LoadTexture("Textures/Numbers/7.png");
-	LoadTexture("Textures/Numbers/8.png");
-	LoadTexture("Textures/Numbers/9.png");
+	LoadTexture("Textures/uvChecker.dds");
+	LoadTexture("Textures/MonsterBall.dds");
+	LoadTexture("Textures/flower.dds");
+	LoadTexture("Textures/smoke.dds");
+	LoadTexture("Textures/redCircle.dds");
+	LoadTexture("Textures/fieldTile.dds");
+	LoadTexture("Textures/TallBuilding01.dds");
+	LoadTexture("Textures/Numbers/0.dds");
+	LoadTexture("Textures/Numbers/1.dds");
+	LoadTexture("Textures/Numbers/2.dds");
+	LoadTexture("Textures/Numbers/3.dds");
+	LoadTexture("Textures/Numbers/4.dds");
+	LoadTexture("Textures/Numbers/5.dds");
+	LoadTexture("Textures/Numbers/6.dds");
+	LoadTexture("Textures/Numbers/7.dds");
+	LoadTexture("Textures/Numbers/8.dds");
+	LoadTexture("Textures/Numbers/9.dds");
 }
 
 void TextureManager::Initialize(ImGuiManager* imgui) {
@@ -94,8 +94,6 @@ const std::unordered_map<std::string, Texture>& TextureManager::GetLoadedTexture
 	return textures_;
 }
 
-/* ============ 追加：GUID API ============ */
-
 // GUID→AssetRecord（テクスチャ）を探す（最小実装：線形探索）
 const AssetRecord* TextureManager::FindTextureRecord(const Guid& g) const {
 	if (!g.isValid()) return nullptr;
@@ -131,7 +129,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::LoadTexture(const Guid& guid) {
 	auto* db = AssetDatabase::GetInstance();
 	std::string key = ToAssetsRelative(rec->sourcePath, db->GetRoot());
 
-	auto h = LoadTexture(key);           // ← 既存 API を再利用
+	auto h = LoadTexture(key);
 	if (h.ptr) guidToKey_.emplace(guid, key);
 	return h;
 }

@@ -15,12 +15,12 @@
 namespace CalyxEditor {
 
 	Manipulator::Manipulator() {
-		iconTranslate_.texture = reinterpret_cast<ImTextureID>(TextureManager::GetInstance()->LoadTexture("UI/Tool/translate.png").ptr);
-		iconRotate_.texture	   = reinterpret_cast<ImTextureID>(TextureManager::GetInstance()->LoadTexture("UI/Tool/rotate.png").ptr);
-		iconScale_.texture	   = reinterpret_cast<ImTextureID>(TextureManager::GetInstance()->LoadTexture("UI/Tool/scale.png").ptr);
-		iconUniversal_.texture = reinterpret_cast<ImTextureID>(TextureManager::GetInstance()->LoadTexture("UI/Tool/universal.png").ptr);
-		iconWorld_.texture	   = reinterpret_cast<ImTextureID>(TextureManager::GetInstance()->LoadTexture("UI/Tool/world.png").ptr);
-		iconDrawGrid_.texture  = reinterpret_cast<ImTextureID>(TextureManager::GetInstance()->LoadTexture("UI/Tool/grid.png").ptr);
+		iconTranslate_.texture = reinterpret_cast<ImTextureID>(TextureManager::GetInstance()->LoadTexture("UI/Tool/translate.dds").ptr);
+		iconRotate_.texture	   = reinterpret_cast<ImTextureID>(TextureManager::GetInstance()->LoadTexture("UI/Tool/rotate.dds").ptr);
+		iconScale_.texture	   = reinterpret_cast<ImTextureID>(TextureManager::GetInstance()->LoadTexture("UI/Tool/scale.dds").ptr);
+		iconUniversal_.texture = reinterpret_cast<ImTextureID>(TextureManager::GetInstance()->LoadTexture("UI/Tool/universal.dds").ptr);
+		iconWorld_.texture	   = reinterpret_cast<ImTextureID>(TextureManager::GetInstance()->LoadTexture("UI/Tool/world.dds").ptr);
+		iconDrawGrid_.texture  = reinterpret_cast<ImTextureID>(TextureManager::GetInstance()->LoadTexture("UI/Tool/grid.dds").ptr);
 		SetOverlayAlign(OverlayAlign::TopLeft);
 		SetOverlayOffset(overlayOffset_); // Viewport右上から左下に少しずらす
 	}

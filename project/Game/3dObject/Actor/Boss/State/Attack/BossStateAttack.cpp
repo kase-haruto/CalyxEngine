@@ -123,7 +123,7 @@ void BossStateAttack::ExecuteAttack() const {
 //		パラメータ
 /////////////////////////////////////////////////////////////////////////////////////////
 BossStateAttack::BossAttackParam::BossAttackParam() {
-	AddField("maxAttackTime", maxAttackTime).Category("Attack").Range(0.1f, 30.0f);
+	AddField("maxAttackTime", maxAttackTime).Category("Attack").Range(0.1f, 30.0f).Tooltip("Maximum duration of the attack state.");
 	AddField("repeatColldownLimit", repeatColldownLimit).Category("Attack").Range(0.0f, 10.0f);
 }
 

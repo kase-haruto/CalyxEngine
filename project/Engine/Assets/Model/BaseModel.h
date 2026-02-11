@@ -93,7 +93,7 @@ protected:
 	std::optional<D3D12_GPU_DESCRIPTOR_HANDLE> handle_{};
 
 	std::string fileName_;
-	std::string textureName_ = "textures/white1x1.png"; // デフォルトのテクスチャ名
+	std::string textureName_ = "textures/white1x1.dds"; // デフォルトのテクスチャ名
 	ModelData* modelData_;
 	Material materialData_;
 public:

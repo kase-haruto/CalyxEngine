@@ -18,7 +18,7 @@ void ScreenDimFilter::Initialize(const CalyxMath::Vector2& screenSize) {
 	configData_->LoadParams();
 
 	sprite_ = std::make_unique<Calyx2D::SpriteObject2d>();
-	sprite_->Initialize("Textures/white1x1.png");
+	sprite_->Initialize("Textures/white1x1.dds");
 
 	sprite_->SetScale(screenSize);
 

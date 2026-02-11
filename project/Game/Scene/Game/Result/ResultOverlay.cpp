@@ -39,14 +39,14 @@ void ResultOverlay::Initialize(const ResultTransitionPayload& payload) {
 
 	// CONTINUE
 	continueIcon_ = std::make_unique<Calyx2D::SpriteObject2d>();
-	continueIcon_->Initialize("Textures/button_A.png");
+	continueIcon_->Initialize("Textures/button_A.dds");
 	continueIcon_->SetScale({96, 96});
 	continueIcon_->GetSprite()->SetAnchorPoint({0.5f, 0.5f});
 	continueIcon_->SetPosition({center.x, 550});
 
 	// 背景オブジェクト
 	bkObject_ = std::make_unique<ResultBackgroundObject>();
-	bkObject_->Initialize("Textures/ResultHud/bkTexture.png");
+	bkObject_->Initialize("Textures/ResultHud/bkTexture.dds");
 }
 
 //////////////////////////////////////////////////////////////////////////

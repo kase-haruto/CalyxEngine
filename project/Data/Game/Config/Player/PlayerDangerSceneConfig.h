@@ -23,6 +23,6 @@ struct DangerSenseConfig :
 	float graceTime        = 0.2f; // 回避猶予時間
 
 	// UI
-	std::string        uiTex  = "Textures/UI/dodgeUI.png";
+	std::string        uiTex  = "Textures/UI/dodgeUI.dds";
 	CalyxMath::Vector2 uiSize = {128.0f,64.0f};
 };

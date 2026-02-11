@@ -7,15 +7,6 @@
 #include "../System/AssetType.h"
 #include <Engine/Foundation/Utility/Guid/Guid.h> // Guid
 
-#pragma once
-#include <unordered_map>
-#include <filesystem>
-#include <memory>
-
-#include "../System/AssetRecord.h"
-#include "../System/AssetType.h"
-#include <Engine/Foundation/Utility/Guid/Guid.h> // Guid
-
 /*-----------------------------------------------------------------------------------------
  * AssetDatabase
  * - アセットデータベースクラス

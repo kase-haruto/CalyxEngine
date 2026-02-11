@@ -81,7 +81,7 @@ void ClearLogoHud::StayUpdate(float dt) {
 ///////////////////////////////////////////////////////////////////////////////////////////////
 void ClearLogoHud::RebuildMotionFromConfig() {
 	// テクスチャ（固定）
-	config_.texturePath = "Textures/ResultHud/resultLogo.png";
+	config_.texturePath = "Textures/ResultHud/resultLogo.dds";
 
 	// Enter Motion
 	Calyx2D::BuildMotionSetFromFlatConfig(

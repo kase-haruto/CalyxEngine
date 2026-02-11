@@ -17,8 +17,8 @@ namespace CalyxEditor {
 
 		// アイコン（存在しなければ任意の代替に差し替え）
 		auto& tm	 = *TextureManager::GetInstance();
-		iconFolder_	 = (ImTextureID)tm.LoadTexture("UI/Tool/AssetPanel/folder.png").ptr;
-		iconGeneric_ = (ImTextureID)tm.LoadTexture("UI/Tool/AssetPanel/generic.png").ptr;
+		iconFolder_	 = (ImTextureID)tm.LoadTexture("UI/Tool/AssetPanel/folder.dds").ptr;
+		iconGeneric_ = (ImTextureID)tm.LoadTexture("UI/Tool/AssetPanel/generic.dds").ptr;
 
 		needsRebuildTree_ = true;
 		search_[0]		  = '\0';

@@ -95,5 +95,5 @@ private:
 
 	} param_;
 
-	std::string reticleTexturePath_ = "Textures/reticle.png"; //< 照準テクスチャパス
+	std::string reticleTexturePath_ = "Textures/reticle.dds"; //< 照準テクスチャパス
 };

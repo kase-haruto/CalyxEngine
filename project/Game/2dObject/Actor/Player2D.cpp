@@ -17,7 +17,7 @@ Player2D::~Player2D() = default;
 //	初期化処理
 ///////////////////////////////////////////////////////////////////////////////////////////
 void Player2D::Initialize() {
-	spriteObj_->Initialize("Textures/Player/flyingPlayer.png");
+	spriteObj_->Initialize("Textures/Player/flyingPlayer.dds");
 	InitializeSpriteAnimation();
 	InitializeSerializableParm();
 	// ============================
@@ -103,7 +103,7 @@ void Player2D::ShowGui() {
 void Player2D::InitializeSpriteAnimation() const {
 	// アニメーション設定
 	Calyx2D::SpriteAnimation anim;
-	anim.texturePath   = "Textures/Player/flyingPlayer.png";
+	anim.texturePath   = "Textures/Player/flyingPlayer.dds";
 	anim.division	   = {3, 2};
 	anim.frameDuration = 0.1f;
 	anim.loop		   = true;
@@ -112,14 +112,14 @@ void Player2D::InitializeSpriteAnimation() const {
 	// 移動反転
 	spriteObj_->AddAnimation("MoveInv", anim);
 	// 通常移動
-	anim.texturePath = "Textures/Player/flyingPlayer_inv.png";
+	anim.texturePath = "Textures/Player/flyingPlayer_inv.dds";
 	spriteObj_->AddAnimation("Move", anim);
 	// 攻撃
 	anim.loop		 = false;
-	anim.texturePath = "Textures/Player/attackPlayer.png";
+	anim.texturePath = "Textures/Player/attackPlayer.dds";
 	spriteObj_->AddAnimation("Attack", anim);
 	// 攻撃反転
-	anim.texturePath = "Textures/Player/attackPlayer_inv.png";
+	anim.texturePath = "Textures/Player/attackPlayer_inv.dds";
 	spriteObj_->AddAnimation("AttackInv", anim);
 
 	spriteObj_->SetAnimation("Move", true);

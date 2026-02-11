@@ -66,7 +66,7 @@ void BaseModel::OnModelLoaded() {
 			"Textures/" + modelData_->meshResource.Material().textureFilePath);
 		textureName_ = "textures/" + modelData_->meshResource.Material().textureFilePath;
 		if(!handle_) { // 読み込み失敗・空文字列など
-			handle_ = TextureManager::GetInstance()->LoadTexture("textures/white1x1.png");
+			handle_ = TextureManager::GetInstance()->LoadTexture("textures/white1x1.dds");
 		}
 	}
 
@@ -182,7 +182,7 @@ void BaseModel::ApplyConfig(const BaseModelConfig& config) {
 	}
 
 	if(!ok) {
-		handle_      = TextureManager::GetInstance()->LoadTexture("textures/white1x1.png");
+		handle_      = TextureManager::GetInstance()->LoadTexture("textures/white1x1.dds");
 		textureGuid_ = Guid{}; // 未設定
 	}
 }
