@@ -242,8 +242,11 @@ DirectX::ScratchImage LoadTextureImage(const std::string& filePath) {
 	HRESULT hr = E_FAIL;
 	bool useDDS = false;
 
-	// もともとDDSを指定している or DDSファイルが存在するならDDSを使う
-	if (path.extension() == ".dds" || std::filesystem::exists(ddsPath)) {
+	// もともとDDSを指定している
+	// もしくは DDSファイルが存在する かつ 元のファイルが存在しない
+	// ならDDSを使う
+	bool originExists = std::filesystem::exists(path);
+	if (path.extension() == ".dds" || (!originExists && std::filesystem::exists(ddsPath))) {
 		useDDS = true;
 		filePathW = ConvertString(ddsPath.string());
 	} else {
