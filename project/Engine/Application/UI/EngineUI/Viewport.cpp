@@ -4,9 +4,12 @@
 /* ===================================================================== */
 
 // engine
+#include <Engine/Application/UI/Panels/PlaceToolPanel.h>
 #include <Engine/Foundation/Input/Input.h>
 #include <Engine/Graphics/Camera/Base/BaseCamera.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
+#include <Engine/Physics/Ray/Raycastor.h>
+#include <Engine/Scene/Context/SceneContext.h>
 #include <externals/imgui/ImGuizmo.h>
 
 namespace CalyxEditor {
@@ -62,6 +65,44 @@ namespace CalyxEditor {
 
 		ImGui::SetCursorScreenPos(imagePos);
 		ImGui::Image(textureID_, contentSize);
+
+		// --- Drag and Drop Target ---
+		if(ImGui::BeginDragDropTarget()) {
+			if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_PLACE_ITEM")) {
+				const PlaceToolPanel::PlaceItem* item = *(const PlaceToolPanel::PlaceItem**)payload->Data;
+				if(item) {
+					// マウス位置からレイを生成
+					ImVec2			   mousePos = ImGui::GetMousePos();
+					CalyxMath::Vector2 localMousePos(mousePos.x - imagePos.x, mousePos.y - imagePos.y);
+
+					Ray ray = Raycastor::ConvertMouseToRay(
+						localMousePos,
+						camera_->GetViewMatrix(),
+						camera_->GetProjectionMatrix(),
+						size_);
+
+					// シーン内のオブジェクトと衝突判定
+					SceneContext*	   ctx		= SceneContext::Current();
+					CalyxMath::Vector3 spawnPos = CalyxMath::Vector3::Zero();
+
+					if(ctx) {
+						auto allObjects = ctx->GetObjectLibrary()->GetAllObjectsRaw();
+						auto hit		= Raycastor::Raycast(ray, allObjects);
+
+						if(hit) {
+							spawnPos = hit->point;
+						} else {
+							// ヒットしなければ一定距離先に配置
+							spawnPos = ray.origin + ray.direction * 10.0f;
+						}
+					}
+
+					// オブジェクト作成
+					item->createFunc(spawnPos);
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
 
 		if(type_ == ViewportType::VIEWPORT_DEBUG) {
 			ImGuizmo::SetRect(imagePos.x, imagePos.y, size_.x, size_.y);

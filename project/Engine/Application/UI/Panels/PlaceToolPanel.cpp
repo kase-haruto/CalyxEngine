@@ -1,20 +1,20 @@
 #include "PlaceToolPanel.h"
 
 // --- engine -----------------------------------------------------------------
-#include <Engine/Assets/Texture/TextureManager.h>
-#include <Engine/Scene/Utility/SceneUtility.h>
-#include <Engine/Scene/Context/SceneContext.h>
-#include <Engine/System/Command/Manager/CommandManager.h>
-#include <Engine/System/Command/EditorCommand/LevelEditorCommand/CreateObjectCommand/CreateObjectCommand.h>
-#include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
-#include <Engine/Objects/3D/Actor/BaseGameObject.h>
 #include <Engine/Application/Effects/FxObject.h>
+#include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
+#include <Engine/Assets/Texture/TextureManager.h>
+#include <Engine/Objects/3D/Actor/BaseGameObject.h>
+#include <Engine/Scene/Context/SceneContext.h>
+#include <Engine/Scene/Utility/SceneUtility.h>
+#include <Engine/System/Command/EditorCommand/LevelEditorCommand/CreateObjectCommand/CreateObjectCommand.h>
+#include <Engine/System/Command/Manager/CommandManager.h>
 
 // --- game objects -----------------------------------------------------------
-#include <Game/3dObject/Actor/Enemy/Spawner/EnemySpawner.h>
 #include <Game/3dObject/Actor/Boss/Spawner/BossSpawner.h>
+#include <Game/3dObject/Actor/Enemy/Spawner/EnemySpawner.h>
 
-//event
+// event
 #include <Game/Event/Camera/CameraTurnAroundEvent.h>
 #include <Game/Event/Spawn/EnemySpawnEvent.h>
 
@@ -54,11 +54,12 @@ namespace CalyxEditor {
 								  objName,
 								  TextureManager::GetInstance()->LoadTexture("UI/Tool/" + name + ".dds"),
 								  {64, 64},
-								  [modelName, objName]() {
-									  auto factory = [modelName, objName]() {
+								  [modelName, objName](const CalyxMath::Vector3& pos) {
+									  auto factory = [modelName, objName, pos]() {
 										  auto obj = SceneAPI::Instantiate<BaseGameObject>(modelName, objName);
 										  obj->Initialize();
 										  obj->GetCollider()->SetCollisionEnabled(false);
+										  obj->GetWorldTransform().translation = pos;
 										  return obj;
 									  };
 									  CommandManager::GetInstance()->Execute(
@@ -74,11 +75,12 @@ namespace CalyxEditor {
 									 "ParticleSystem",
 									 TextureManager::GetInstance()->LoadTexture("UI/Tool/particle.dds"),
 									 {64, 64},
-									 []() {
+									 [](const CalyxMath::Vector3& pos) {
 										 const std::string name	   = "ParticleSystem";
-										 auto			   factory = [name]() {
+										 auto			   factory = [name, pos]() {
 											  auto obj = SceneAPI::Instantiate<CalyxEffect::ParticleSystemObject>(name);
 											  obj->Initialize();
+											  obj->GetWorldTransform().translation = pos;
 											  return obj;
 										 };
 										 CommandManager::GetInstance()->Execute(
@@ -93,11 +95,12 @@ namespace CalyxEditor {
 									 "EffectObject",
 									 TextureManager::GetInstance()->LoadTexture("UI/Tool/particle.dds"),
 									 {64, 64},
-									 []() {
+									 [](const CalyxMath::Vector3& pos) {
 										 const std::string name	   = "EffectObject";
-										 auto			   factory = [name]() {
+										 auto			   factory = [name, pos]() {
 											  auto obj = SceneAPI::Instantiate<CalyxEffect::FxObject>(name);
 											  obj->Initialize();
+											  obj->GetWorldTransform().translation = pos;
 											  return obj;
 										 };
 										 CommandManager::GetInstance()->Execute(
@@ -113,12 +116,13 @@ namespace CalyxEditor {
 									"EnemySpawner",
 									{},
 									{64, 64},
-									[]() {
+									[](const CalyxMath::Vector3& pos) {
 										auto* ctx	  = SceneContext::Current();
-										auto  factory = []() {
+										auto  factory = [pos]() {
 											 auto obj = SceneAPI::Instantiate<EnemySpawner>("EnemySpawner");
 											 obj->ApplyConfig();
 											 obj->Initialize();
+											 obj->GetWorldTransform().translation = pos;
 											 return obj;
 										};
 										CommandManager::GetInstance()->Execute(
@@ -133,7 +137,7 @@ namespace CalyxEditor {
 									"BossSpawner",
 									{},
 									{64, 64},
-									[]() {
+									[](const CalyxMath::Vector3& pos) {
 										auto* ctx = SceneContext::Current();
 
 										// 既にシーンに BossSpawner があるなら作成しない
@@ -142,10 +146,11 @@ namespace CalyxEditor {
 											return;
 										}
 
-										auto factory = []() {
+										auto factory = [pos]() {
 											auto obj = SceneAPI::Instantiate<BossSpawner>("BossSpawner");
 											obj->ApplyConfig();
 											obj->Initialize();
+											obj->GetWorldTransform().translation = pos;
 											return obj;
 										};
 
@@ -162,12 +167,13 @@ namespace CalyxEditor {
 								  "CameraTurnAroundEvent",
 								  {},
 								  {64, 64},
-								  [] {
+								  [](const CalyxMath::Vector3& pos) {
 									  auto* ctx = SceneContext::Current();
 
-									  auto factory = []() {
+									  auto factory = [pos]() {
 										  auto obj = SceneAPI::Instantiate<CameraTurnAroundEvent>("CameraTurnAroundEvent");
 										  // obj->ApplyConfig();
+										  obj->GetWorldTransform().translation = pos;
 										  return obj;
 									  };
 
@@ -183,12 +189,13 @@ namespace CalyxEditor {
 								  "EnemySpawnEvent",
 								  {},
 								  {64, 64},
-								  [] {
+								  [](const CalyxMath::Vector3& pos) {
 									  auto* ctx = SceneContext::Current();
 
-									  auto factory = []() {
+									  auto factory = [pos]() {
 										  auto obj = SceneAPI::Instantiate<EnemySpawnEvent>("EnemySpawnEvent");
 										  // obj->ApplyConfig();
+										  obj->GetWorldTransform().translation = pos;
 										  return obj;
 									  };
 
@@ -216,11 +223,12 @@ namespace CalyxEditor {
 								  displayName,
 								  {},
 								  {64, 64},
-								  [modelName, displayName]() {
-									  auto factory = [modelName, displayName]() {
+								  [modelName, displayName](const CalyxMath::Vector3& pos) {
+									  auto factory = [modelName, displayName, pos]() {
 										  auto obj = SceneAPI::Instantiate<BaseGameObject>(modelName, displayName);
 										  obj->Initialize();
 										  obj->GetCollider()->SetCollisionEnabled(false);
+										  obj->GetWorldTransform().translation = pos;
 										  return obj;
 									  };
 									  CommandManager::GetInstance()->Execute(
@@ -250,7 +258,7 @@ namespace CalyxEditor {
 					// --- Sidebar ---
 					ImGui::TableSetupColumn("Category", ImGuiTableColumnFlags_WidthFixed, 100.0f);
 					ImGui::TableSetupColumn("Items", ImGuiTableColumnFlags_None);
-					
+
 					// Sidebar 描画
 					ImGui::TableNextColumn();
 					RenderSidebar();
@@ -287,7 +295,7 @@ namespace CalyxEditor {
 		for(const auto& [cat, name] : categoryNames) {
 			// カテゴリにアイテムが含まれているかチェック (空なら表示しない等の制御が必要ならここ)
 			// 今回は全部表示する方針で
-			
+
 			bool isSelected = (selectedCategory_ == cat);
 			if(ImGui::Selectable(name.c_str(), isSelected)) {
 				selectedCategory_ = cat;
@@ -304,37 +312,37 @@ namespace CalyxEditor {
 		// --- Search Bar ---
 		ImGui::SetNextItemWidth(-1.0f); // 横幅いっぱい
 		filter_.Draw("##Search", -1.0f);
-		
+
 		ImGui::Separator();
 		ImGui::Spacing();
 
 		// --- Item Grid ---
 		// 子ウィンドウにしてスクロール可能にする
 		if(ImGui::BeginChild("ItemGrid", ImVec2(0, 0), false)) {
-			
+
 			// グリッドのカラム数はウィンドウ幅に応じて動的に決めるのが望ましいが、
 			// とりあえず固定サイズまたはImGui::Columnsを使う
 			float panelWidth = ImGui::GetContentRegionAvail().x;
-			float itemWidth  = 80.0f;  // アイコンサイズ(64) + パディング
-			int   columns    = static_cast<int>(panelWidth / itemWidth);
+			float itemWidth	 = 80.0f; // アイコンサイズ(64) + パディング
+			int	  columns	 = static_cast<int>(panelWidth / itemWidth);
 			if(columns < 1) columns = 1;
 
 			if(ImGui::BeginTable("Grid", columns)) {
-				
+
 				auto drawItem = [](const PlaceItem& item) {
 					ImGui::PushID(&item);
-					
+
 					// グループ化して全体をクリッカブルっぽく見せる
 					ImGui::BeginGroup();
-					
+
 					// アイコン（画像がなければボタン）
-					bool clicked = false;
-					float iconSize = 64.0f; 
-					
+					bool  clicked  = false;
+					float iconSize = 64.0f;
+
 					// 中央寄せのためのカーソル操作
 					float availW = ImGui::GetContentRegionAvail().x;
-					float offX = (availW - iconSize) * 0.5f;
-					if (offX > 0.0f) ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offX);
+					float offX	 = (availW - iconSize) * 0.5f;
+					if(offX > 0.0f) ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offX);
 
 					if(item.texture.ptr) {
 						clicked = ImGui::ImageButton(
@@ -346,37 +354,51 @@ namespace CalyxEditor {
 
 					// テキストも中央寄せ
 					{
-						float textW = ImGui::CalcTextSize(item.name.c_str()).x;
+						float textW	   = ImGui::CalcTextSize(item.name.c_str()).x;
 						float textOffX = (availW - textW) * 0.5f;
-						if (textOffX > 0.0f) ImGui::SetCursorPosX(ImGui::GetCursorPosX() + textOffX);
+						if(textOffX > 0.0f) ImGui::SetCursorPosX(ImGui::GetCursorPosX() + textOffX);
 						ImGui::TextWrapped("%s", item.name.c_str());
 					}
 
 					ImGui::EndGroup();
 
-					if(clicked) {
-						item.createFunc();
+					// --- Drag and Drop Source ---
+					if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+						const PlaceItem* itemPtr = &item;
+						ImGui::SetDragDropPayload("DND_PLACE_ITEM", &itemPtr, sizeof(const PlaceItem*));
+
+						// ドラッグ中のプレビュー
+						if(item.texture.ptr) {
+							ImGui::Image((ImTextureID)item.texture.ptr, ImVec2(32, 32));
+						}
+						ImGui::SameLine();
+						ImGui::Text("%s", item.name.c_str());
+
+						ImGui::EndDragDropSource();
 					}
-					
+
+					if(clicked) {
+						item.createFunc(CalyxMath::Vector3::Zero());
+					}
+
 					ImGui::PopID();
 				};
 
 				// フィルタが有効な場合は全カテゴリから検索
-				if (filter_.IsActive()) {
-					for (const auto& [cat, items] : categoryItems_) {
-						for (const auto& item : items) {
-							if (filter_.PassFilter(item.name.c_str())) {
+				if(filter_.IsActive()) {
+					for(const auto& [cat, items] : categoryItems_) {
+						for(const auto& item : items) {
+							if(filter_.PassFilter(item.name.c_str())) {
 								ImGui::TableNextColumn();
 								drawItem(item);
 							}
 						}
 					}
-				} 
-				else {
+				} else {
 					// 選択中のカテゴリのみ表示
-					if (categoryItems_.count(selectedCategory_)) {
+					if(categoryItems_.count(selectedCategory_)) {
 						const auto& items = categoryItems_[selectedCategory_];
-						for (const auto& item : items) {
+						for(const auto& item : items) {
 							ImGui::TableNextColumn();
 							drawItem(item);
 						}
@@ -388,5 +410,4 @@ namespace CalyxEditor {
 		}
 		ImGui::EndChild();
 	}
-}
-
+} // namespace CalyxEditor

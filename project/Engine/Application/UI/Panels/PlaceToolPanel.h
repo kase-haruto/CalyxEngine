@@ -5,6 +5,7 @@
 // engine
 #include <Engine/Application/UI/EngineUI/IEngineUI.h>
 #include <Engine/Foundation/Math/Vector2.h>
+#include <Engine/Foundation/Math/Vector3.h>
 
 // c++
 #include "imgui/imgui.h"
@@ -49,13 +50,13 @@ namespace CalyxEditor {
 			Count
 		};
 
-	private:
+	public:
 		struct PlaceItem {
-			PlaceItemCategory			category;
-			std::string					name;
-			D3D12_GPU_DESCRIPTOR_HANDLE texture;
-			CalyxMath::Vector2			iconSize{64.0f, 64.0f};
-			std::function<void()>		createFunc;
+			PlaceItemCategory							   category;
+			std::string									   name;
+			D3D12_GPU_DESCRIPTOR_HANDLE					   texture;
+			CalyxMath::Vector2							   iconSize{64.0f, 64.0f};
+			std::function<void(const CalyxMath::Vector3&)> createFunc;
 		};
 
 	public:
@@ -78,5 +79,4 @@ namespace CalyxEditor {
 		PlaceItemCategory selectedCategory_ = PlaceItemCategory::Shape;
 		ImGuiTextFilter	  filter_;
 	};
-}
-
+} // namespace CalyxEditor
