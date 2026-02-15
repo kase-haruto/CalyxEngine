@@ -8,10 +8,10 @@
 #include <Engine/objects/Collider/SphereCollider.h>
 
 #include "externals/imgui/imgui.h"
-#include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 #include "externals/nlohmann/json.hpp"
+#include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 
-BaseGameObject::BaseGameObject(const std::string&         modelName,
+BaseGameObject::BaseGameObject(const std::string&		  modelName,
 							   std::optional<std::string> objectName) {
 	auto dotPos = modelName.find_last_of('.');
 	if(dotPos != std::string::npos) {
@@ -20,17 +20,21 @@ BaseGameObject::BaseGameObject(const std::string&         modelName,
 		// obj
 		if(extension == ".obj") {
 			objectModelType_ = ObjectModelType::ModelType_Static;
-			model_           = std::make_unique<Model>(modelName);
+			model_			 = std::make_unique<Model>(modelName);
 		}
 		// gltf
 		else if(extension == ".gltf") {
 			objectModelType_ = ObjectModelType::ModelType_Animation;
-			model_           = std::make_unique<CalyxAssets::AnimationModel>(modelName);
-		} else { objectModelType_ = ObjectModelType::ModelType_Unknown; }
+			model_			 = std::make_unique<CalyxAssets::AnimationModel>(modelName);
+		} else {
+			objectModelType_ = ObjectModelType::ModelType_Unknown;
+		}
 	}
 
 	// 名前を設定
-	if(objectName.has_value()) { SetName(objectName.value()); } else {
+	if(objectName.has_value()) {
+		SetName(objectName.value());
+	} else {
 		// 名前が指定されていない場合は、デフォルトの名前を設定
 		const std::string defaultName = modelName + "object";
 		SetName(defaultName);
@@ -45,7 +49,7 @@ BaseGameObject::BaseGameObject(const std::string&         modelName,
 
 BaseGameObject::BaseGameObject() {
 	objectModelType_ = ObjectModelType::ModelType_Unknown; // まだ未定
-	SetName("GameObject");                                 // 仮の名前
+	SetName("GameObject");								   // 仮の名前
 	worldTransform_.Update();
 
 	config_.SetOnApplied([this](const BaseGameObjectConfig&) { this->ApplyConfig(); });
@@ -54,20 +58,24 @@ BaseGameObject::BaseGameObject() {
 BaseGameObject::~BaseGameObject() {}
 
 void BaseGameObject::AlwaysUpdate(float dt) {
-	if(objectModelType_ != ObjectModelType::ModelType_Unknown) { model_->Update(dt); }
+	if(objectModelType_ != ObjectModelType::ModelType_Unknown && model_) {
+		model_->Update(dt);
+	}
 
 	worldTransform_.Update();
 
 	// collider の更新
 	if(collider_) {
 		if(collider_->IsCollisionEnubled()) {
-			CalyxMath::Vector3    worldPos = GetCenterPos();
+			CalyxMath::Vector3	  worldPos = GetCenterPos();
 			CalyxMath::Quaternion worldRot = worldTransform_.rotation;
-			collider_->Update(worldPos,worldRot);
+			collider_->Update(worldPos, worldRot);
 			collider_->Draw();
 		}
 	}
-	model_->SetIsDrawEnable(isDrawEnable_);
+	if(model_) {
+		model_->SetIsDrawEnable(isDrawEnable_);
+	}
 }
 
 //===================================================================*/
@@ -81,7 +89,7 @@ void BaseGameObject::InitializeCollider(ColliderKind kind) {
 	case ColliderKind::Box: {
 		auto box = std::make_unique<BoxCollider>(true);
 		box->SetName(GetName() + "_BoxCollider");
-		box->Initialize(CalyxMath::Vector3(1.0f,1.0f,1.0f)); // 適当な初期サイズ
+		box->Initialize(CalyxMath::Vector3(1.0f, 1.0f, 1.0f)); // 適当な初期サイズ
 		collider_ = std::move(box);
 		break;
 	}
@@ -107,7 +115,7 @@ void BaseGameObject::InitializeCollider(ColliderKind kind) {
 //===================================================================*/
 void BaseGameObject::ShowGui() {
 	ImGui::Spacing();
-	ImGui::Dummy(ImVec2(0.0f,5.0f));
+	ImGui::Dummy(ImVec2(0.0f, 5.0f));
 	ImGui::Separator();
 
 	// --- トランスフォーム ---
@@ -132,10 +140,12 @@ void BaseGameObject::ShowGui() {
 
 	// --- 描画設定 ---
 	if(GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::Object)) {
-		if(ImGui::TreeNodeEx("BoxCollider",ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
-			int         mode    = static_cast<int>(billboardMode_);
-			const char* items[] = {"None","Full","AxisY"};
-			if(GuiCmd::Combo("Billboard Mode",mode,items,3)) { billboardMode_ = static_cast<BillboardMode>(mode); }
+		if(ImGui::TreeNodeEx("BoxCollider", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
+			int			mode	= static_cast<int>(billboardMode_);
+			const char* items[] = {"None", "Full", "AxisY"};
+			if(GuiCmd::Combo("Billboard Mode", mode, items, 3)) {
+				billboardMode_ = static_cast<BillboardMode>(mode);
+			}
 			ImGui::TreePop();
 			GuiCmd::EndSection();
 		}
@@ -166,10 +176,10 @@ void BaseGameObject::ApplyConfig() {
 		auto dot = modelPath.find_last_of('.');
 		if(dot != std::string::npos && modelPath.substr(dot) == ".gltf") {
 			objectModelType_ = ObjectModelType::ModelType_Animation;
-			model_           = std::make_unique<CalyxAssets::AnimationModel>(modelPath);
+			model_			 = std::make_unique<CalyxAssets::AnimationModel>(modelPath);
 		} else {
 			objectModelType_ = ObjectModelType::ModelType_Static;
-			model_           = std::make_unique<Model>(modelPath);
+			model_			 = std::make_unique<Model>(modelPath);
 		}
 	}
 
@@ -178,9 +188,9 @@ void BaseGameObject::ApplyConfig() {
 	if(collider_)
 		collider_->ApplyConfig(cfg.colliderConfig);
 	worldTransform_.ApplyConfig(cfg.transform);
-	id_       = cfg.guid;
+	id_		  = cfg.guid;
 	parentId_ = cfg.parentGuid;
-	name_     = cfg.name;
+	name_	  = cfg.name;
 }
 
 void BaseGameObject::ExtractConfig() {
@@ -192,8 +202,8 @@ void BaseGameObject::ExtractConfig() {
 		cfg.colliderConfig = collider_->ExtractConfig();
 	cfg.transform  = worldTransform_.ExtractConfig();
 	cfg.objectType = static_cast<int>(objectType_);
-	cfg.name       = name_;
-	cfg.guid       = id_;
+	cfg.name	   = name_;
+	cfg.guid	   = id_;
 	cfg.parentGuid = parentId_;
 }
 
@@ -202,9 +212,9 @@ void BaseGameObject::ApplyConfigFromJson(const nlohmann::json& j) {
 	ApplyConfig();
 
 	// 派生
-	const std::string     typeKey(GetTypeName()); // クラス名
+	const std::string	  typeKey(GetTypeName()); // クラス名
 	const nlohmann::json* derived = j.contains(typeKey) ? &j.at(typeKey) : nullptr;
-	ApplyDerivedConfigFromJson(j,derived);
+	ApplyDerivedConfigFromJson(j, derived);
 }
 
 void BaseGameObject::ExtractConfigToJson(nlohmann::json& j) const {
@@ -213,25 +223,45 @@ void BaseGameObject::ExtractConfigToJson(nlohmann::json& j) const {
 
 	// 派生部分
 	const std::string typeKey(GetTypeName());
-	nlohmann::json    derived;
-	ExtractDerivedConfigToJson(j,derived);
-	if(!derived.is_null() && !derived.empty()) { j[typeKey] = std::move(derived); }
+	nlohmann::json	  derived;
+	ExtractDerivedConfigToJson(j, derived);
+	if(!derived.is_null() && !derived.empty()) {
+		j[typeKey] = std::move(derived);
+	}
 
 	// シーン側で利用できるように
-	if(!GetConfigPath().empty()) { j["configPath"] = GetConfigPath(); }
+	if(!GetConfigPath().empty()) {
+		j["configPath"] = GetConfigPath();
+	}
 }
 
 //===================================================================*/
 //                   getter/setter
 //===================================================================*/
 
-void BaseGameObject::SetName(const std::string& name) { SceneObject::SetName(name,ObjectType::GameObject); }
+void BaseGameObject::SetName(const std::string& name) { SceneObject::SetName(name, ObjectType::GameObject); }
 
-void BaseGameObject::SetTranslate(const CalyxMath::Vector3& pos) { if(model_) { worldTransform_.translation = pos; } }
-void BaseGameObject::SetRotate(const CalyxMath::Quaternion& rot) { if(model_) { worldTransform_.rotation = rot; } }
-void BaseGameObject::SetRotate(const CalyxMath::Vector3& euler) { if(model_) { worldTransform_.eulerRotation = euler; } }
+void BaseGameObject::SetTranslate(const CalyxMath::Vector3& pos) {
+	if(model_) {
+		worldTransform_.translation = pos;
+	}
+}
+void BaseGameObject::SetRotate(const CalyxMath::Quaternion& rot) {
+	if(model_) {
+		worldTransform_.rotation = rot;
+	}
+}
+void BaseGameObject::SetRotate(const CalyxMath::Vector3& euler) {
+	if(model_) {
+		worldTransform_.eulerRotation = euler;
+	}
+}
 
-void BaseGameObject::SetScale(const CalyxMath::Vector3& scale) { if(model_) { worldTransform_.scale = scale; } }
+void BaseGameObject::SetScale(const CalyxMath::Vector3& scale) {
+	if(model_) {
+		worldTransform_.scale = scale;
+	}
+}
 
 void BaseGameObject::SetDrawEnable(bool isDrawEnable) {
 	SceneObject::SetDrawEnable(isDrawEnable);
@@ -239,12 +269,16 @@ void BaseGameObject::SetDrawEnable(bool isDrawEnable) {
 }
 
 const CalyxMath::Vector3 BaseGameObject::GetCenterPos() const {
-	const CalyxMath::Vector3 offset   = {0.0f,0.5f,0.0f};
-	CalyxMath::Vector3       worldPos = CalyxMath::Vector3::Transform(offset,worldTransform_.matrix.world);
+	const CalyxMath::Vector3 offset	  = {0.0f, 0.5f, 0.0f};
+	CalyxMath::Vector3		 worldPos = CalyxMath::Vector3::Transform(offset, worldTransform_.matrix.world);
 	return worldPos;
 }
 
-void BaseGameObject::SetColor(const CalyxMath::Vector4& color) { if(model_) { model_->SetColor(color); } }
+void BaseGameObject::SetColor(const CalyxMath::Vector4& color) {
+	if(model_) {
+		model_->SetColor(color);
+	}
+}
 
 void BaseGameObject::SetCollider(std::unique_ptr<Collider> collider) { collider_ = std::move(collider); }
 
@@ -270,21 +304,21 @@ const CalyxAssets::AnimationModel* BaseGameObject::AnimationModel() const {
 			   : nullptr;
 }
 
-static inline AABB TransformAabb(const AABB& local,const CalyxMath::Matrix4x4& W) {
-	const CalyxMath::Vector3 lc  = (local.min_ + local.max_) * 0.5f;
+static inline AABB TransformAabb(const AABB& local, const CalyxMath::Matrix4x4& W) {
+	const CalyxMath::Vector3 lc	 = (local.min_ + local.max_) * 0.5f;
 	const CalyxMath::Vector3 le0 = (local.max_ - local.min_) * 0.5f;
 
-	const CalyxMath::Vector3 wc = (W * CalyxMath::Vector4(lc,1.0f)).xyz();
+	const CalyxMath::Vector3 wc = (W * CalyxMath::Vector4(lc, 1.0f)).xyz();
 
-	const float m00 = std::fabs(W.m[0][0]),m01 = std::fabs(W.m[0][1]),m02 = std::fabs(W.m[0][2]);
-	const float m10 = std::fabs(W.m[1][0]),m11 = std::fabs(W.m[1][1]),m12 = std::fabs(W.m[1][2]);
-	const float m20 = std::fabs(W.m[2][0]),m21 = std::fabs(W.m[2][1]),m22 = std::fabs(W.m[2][2]);
+	const float m00 = std::fabs(W.m[0][0]), m01 = std::fabs(W.m[0][1]), m02 = std::fabs(W.m[0][2]);
+	const float m10 = std::fabs(W.m[1][0]), m11 = std::fabs(W.m[1][1]), m12 = std::fabs(W.m[1][2]);
+	const float m20 = std::fabs(W.m[2][0]), m21 = std::fabs(W.m[2][1]), m22 = std::fabs(W.m[2][2]);
 
 	const CalyxMath::Vector3 we = {
 		m00 * le0.x + m01 * le0.y + m02 * le0.z,
 		m10 * le0.x + m11 * le0.y + m12 * le0.z,
 		m20 * le0.x + m21 * le0.y + m22 * le0.z};
-	return AABB(wc - we,wc + we);
+	return AABB(wc - we, wc + we);
 }
 
 AABB BaseGameObject::GetWorldAABB() const {
@@ -293,12 +327,13 @@ AABB BaseGameObject::GetWorldAABB() const {
 	if(objectModelType_ == ModelType_Static) {
 		if(model_ && model_->GetModelData()) {
 			const AABB& local = model_->GetModelData()->localAABB;
-			return TransformAabb(local,W);
+			return TransformAabb(local, W);
 		}
 	} else { // スキン
-		if(animationModel_ && animationModel_->GetModelData()) {
-			const AABB& local = animationModel_->GetModelData()->localAABB;
-			return TransformAabb(local,W);
+		const auto* animModel = AnimationModel();
+		if(animModel && animModel->GetModelData()) {
+			const AABB& local = animModel->GetModelData()->localAABB;
+			return TransformAabb(local, W);
 		}
 	}
 
@@ -310,7 +345,7 @@ bool BaseGameObject::Save() const {
 	if(path.empty()) return false;
 	nlohmann::json j;
 	ExtractConfigToJson(j);
-	return CalyxUtil::JsonUtils::Save(path,j);
+	return CalyxUtil::JsonUtils::Save(path, j);
 }
 
 bool BaseGameObject::Load() {

@@ -593,6 +593,14 @@ namespace CalyxEditor {
 	//=============================================================================
 	void LevelEditor::SetSceneManager(CalyxScene::SceneManager* manager) {
 		sceneManager_ = manager;
+
+		if(manager) {
+			auto* pickingPass = manager->GetPickingPass();
+			if(mainViewport_) mainViewport_->SetPickingPass(pickingPass);
+			if(debugViewport_) debugViewport_->SetPickingPass(pickingPass);
+			if(pickingViewport_) pickingViewport_->SetPickingPass(pickingPass);
+		}
+
 		if(sceneSwitchOverlay_) {
 			sceneSwitchOverlay_->SetSceneManager(manager);
 		}

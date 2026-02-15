@@ -60,6 +60,13 @@ namespace CalyxEditor {
 		 * \return オブジェクトID
 		 */
 		uint32_t GetObjectID(int32_t x, int32_t y);
+		/**
+		 * \brief デフィバッファの値を取得
+		 * \param x マップ座標X
+		 * \param y マップ座標Y
+		 * \return デプス値 (0.0 - 1.0)
+		 */
+		float GetDepth(int32_t x, int32_t y);
 
 	private:
 		void CreateResources(uint32_t w, uint32_t h);
@@ -71,13 +78,15 @@ namespace CalyxEditor {
 		Microsoft::WRL::ComPtr<ID3D12Resource> color_;
 		Microsoft::WRL::ComPtr<ID3D12Resource> depth_;
 		Microsoft::WRL::ComPtr<ID3D12Resource> readback_;
+		Microsoft::WRL::ComPtr<ID3D12Resource> readbackDepth_;
 
 		DescriptorHandle rtv_{};
 		DescriptorHandle dsv_{};
 		DescriptorHandle srv_{};
 
-		uint32_t width_	   = 0;
-		uint32_t height_   = 0;
-		uint32_t rowPitch_ = 0;
+		uint32_t width_			= 0;
+		uint32_t height_		= 0;
+		uint32_t rowPitch_		= 0;
+		uint32_t rowPitchDepth_ = 0;
 	};
 } // namespace CalyxEditor

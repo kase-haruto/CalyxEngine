@@ -164,6 +164,8 @@ GraphicsPipelineDesc PipelinePresets::MakePickingStatic() {
 		.SRVTable(1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_VERTEX) // billboard'
 		.SamplerWrapLinear(0);
 
+	desc.dsvFormat_ = DXGI_FORMAT_D32_FLOAT;
+
 	return desc;
 }
 
@@ -189,6 +191,8 @@ GraphicsPipelineDesc PipelinePresets::MakePickingSkinned() {
 		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_VERTEX) // SkinningBuffer (t0)
 
 		.SamplerWrapLinear(0);
+
+	desc.dsvFormat_ = DXGI_FORMAT_D32_FLOAT;
 
 	return desc;
 }

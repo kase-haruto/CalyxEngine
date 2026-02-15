@@ -27,8 +27,8 @@
 namespace CalyxEditor {
 
 	/* ========================================================================
-	/*  local helpers
-	/* ===================================================================== */
+	 *  include space
+	 * ===================================================================== */
 	namespace {
 
 		inline int TypePriority(ObjectType t) {
@@ -76,25 +76,26 @@ namespace CalyxEditor {
 	/*  render
 	/* ===================================================================== */
 	void HierarchyPanel::Render() {
+		// ProcessShortcuts(ImGui::GetIO());
 
-		ImGui::Begin(panelName_.c_str(), nullptr, ImGuiWindowFlags_NoDecoration);
+		if(!ImGui::Begin(panelName_.c_str(), nullptr, ImGuiWindowFlags_NoDecoration)) {
+			ImGui::End();
+			return;
+		}
 
 		// ---------------------------------------------------------------------
-		// トップバー (検索 + 設定)
+		// トップバー (検索)
 		// ---------------------------------------------------------------------
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
-
-			// Search Filter
 			searchFilter_.Draw("##HierarchyFilter", ImGui::GetContentRegionAvail().x);
-
 			ImGui::PopStyleVar();
 		}
 
 		lib_ = SceneContext::Current()->GetObjectLibrary();
 
 		if(!lib_) {
-			ImGui::Text("SceneObjectLibrary not set.");
+			ImGui::TextUnformatted("SceneObjectLibrary not set.");
 			ImGui::End();
 			return;
 		}
@@ -126,7 +127,6 @@ namespace CalyxEditor {
 
 			ImGui::TableHeadersRow();
 
-			// --- root 探索 ---
 			// --- root 探索 (キャッシュ使用) ---
 			if(cacheDirty_ || sortedCache_.find(nullptr) == sortedCache_.end()) {
 				// キャッシュ再構築（ルートのみ）
@@ -135,30 +135,28 @@ namespace CalyxEditor {
 				roots.reserve(objects.size());
 
 				for(const auto& [id, sp] : objects) {
-					if(!sp) continue;
+					(void)id;
+					if(!sp || sp->IsTransient()) continue;
 					auto parent = sp->GetParent();
 					if(!parent || !lib_->Contains(parent)) {
 						roots.push_back(sp);
 					}
 				}
 				std::sort(roots.begin(), roots.end(), LessByTypeThenName);
-				sortedCache_[nullptr] = std::move(roots);
-				// ルート以外のダーティフラグは維持（必要になったら構築）されるが、
-				// ここでは全体ダーティとして扱うなら clear もあり。今回は個別エントリ更新は複雑なので
-				// dirty フラグが立ったら全クリア戦略とする。
+
 				if(cacheDirty_) {
-					// ルート以外もクリアして再構築を促す
-					auto rootCache = std::move(sortedCache_[nullptr]); // ルートだけ退避
 					sortedCache_.clear();
-					sortedCache_[nullptr] = std::move(rootCache);
-					cacheDirty_			  = false;
+					cacheDirty_ = false;
 				}
+				sortedCache_[nullptr] = std::move(roots);
 			}
 
 			// --- 描画 ---
-			const auto& roots = sortedCache_[nullptr];
-			for(auto& sp : roots) {
-				ShowObjectRecursive(sp.get());
+			auto it = sortedCache_.find(nullptr);
+			if(it != sortedCache_.end()) {
+				for(auto& sp : it->second) {
+					ShowObjectRecursive(sp.get());
+				}
 			}
 
 			ImGui::EndTable();
@@ -227,51 +225,39 @@ namespace CalyxEditor {
 	/*  recursive UI
 	/* ===================================================================== */
 	void HierarchyPanel::ShowObjectRecursive(SceneObject* obj) {
-		if(!obj) return;
+		if(!obj || obj->IsTransient()) return;
 
-		// フィルタチェック
 		if(searchFilter_.IsActive()) {
 			if(!PassFilterRecursive(obj)) return;
 			ImGui::SetNextItemOpen(true, ImGuiCond_Always);
 		}
 
-		// このオブジェクトとその子要素のIDスコープ
 		ImGui::PushID(obj);
 
-		// =====================================================================
-		// ノード描画 (カスタムウィジェット)
-		// =====================================================================
-		bool isOpen = DrawNode(obj);
+		const bool open = DrawNode(obj);
 
-		// =====================================================================
-		// Children
-		// =====================================================================
-		if(isOpen) {
-			// Rename中は子を表示しない
-			auto renameSP		= renameTarget_.lock();
-			bool isRenamingThis = (renaming_ && renameSP.get() == obj);
+		if(open) {
+			auto	   renameSP		  = renameTarget_.lock();
+			const bool isRenamingThis = (renaming_ && renameSP.get() == obj);
 
 			if(!isRenamingThis) {
-
-				if(!isRenamingThis) {
-					// キャッシュ確認
-					if(sortedCache_.find(obj) == sortedCache_.end()) {
-						std::vector<std::shared_ptr<SceneObject>> sortedChildren;
-						for(auto& ch : obj->GetChildren()) {
-							if(ch) sortedChildren.push_back(ch);
-						}
-						std::sort(sortedChildren.begin(),
-								  sortedChildren.end(),
-								  LessByTypeThenName);
-						sortedCache_[obj] = std::move(sortedChildren);
+				if(sortedCache_.find(obj) == sortedCache_.end()) {
+					std::vector<std::shared_ptr<SceneObject>> sortedChildren;
+					for(auto& ch : obj->GetChildren()) {
+						if(ch) sortedChildren.push_back(ch);
 					}
+					std::sort(sortedChildren.begin(), sortedChildren.end(), LessByTypeThenName);
+					sortedCache_[obj] = std::move(sortedChildren);
+				}
 
-					const auto& children = sortedCache_[obj];
-					for(auto& ch : children) {
+				auto it = sortedCache_.find(obj);
+				if(it != sortedCache_.end()) {
+					for(auto& ch : it->second) {
 						ShowObjectRecursive(ch.get());
 					}
 				}
 			}
+
 			ImGui::TreePop();
 		}
 
@@ -353,8 +339,13 @@ namespace CalyxEditor {
 
 			// インタラクション
 			if(ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
-				selected_ = obj->shared_from_this();
-				if(onSelect_) onSelect_(selected_.lock());
+				try {
+					selected_ = obj->shared_from_this();
+					if(onSelect_) onSelect_(selected_.lock());
+				} catch(...) {
+					// Object might not be managed by shared_ptr, skip selection
+					selected_.reset();
+				}
 			}
 
 			// ドラッグ＆ドロップ
@@ -373,6 +364,7 @@ namespace CalyxEditor {
 						auto objSP	= obj->shared_from_this();
 						if(lib_->Contains(dragSP) && lib_->Contains(objSP) && !IsDescendantOf(obj, drag)) {
 							drag->SetParent(objSP);
+							RefreshCache();
 						}
 					}
 				}

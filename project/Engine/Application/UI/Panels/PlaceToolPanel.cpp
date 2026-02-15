@@ -65,6 +65,13 @@ namespace CalyxEditor {
 									  CommandManager::GetInstance()->Execute(
 										  std::make_unique<CreateObjectCommand<BaseGameObject>>(
 											  SceneContext::Current(), factory, "Create Shape"));
+								  },
+								  [modelName, objName]() {
+									  auto obj = SceneAPI::Instantiate<BaseGameObject>(modelName, objName);
+									  obj->Initialize();
+									  obj->GetCollider()->SetCollisionEnabled(false);
+									  obj->SetTransient(true);
+									  return obj;
 								  }});
 		}
 
@@ -86,6 +93,12 @@ namespace CalyxEditor {
 										 CommandManager::GetInstance()->Execute(
 											 std::make_unique<CreateObjectCommand<CalyxEffect::ParticleSystemObject>>(
 												 SceneContext::Current(), factory, "Create ParticleSystem"));
+									 },
+									 []() {
+										 auto obj = SceneAPI::Instantiate<CalyxEffect::ParticleSystemObject>("ParticleSystem");
+										 obj->Initialize();
+										 obj->SetTransient(true);
+										 return obj;
 									 }});
 		}
 
@@ -106,6 +119,12 @@ namespace CalyxEditor {
 										 CommandManager::GetInstance()->Execute(
 											 std::make_unique<CreateObjectCommand<CalyxEffect::FxObject>>(
 												 SceneContext::Current(), factory, "Create EffectObject"));
+									 },
+									 []() {
+										 auto obj = SceneAPI::Instantiate<CalyxEffect::FxObject>("EffectObject");
+										 obj->Initialize();
+										 obj->SetTransient(true);
+										 return obj;
 									 }});
 		}
 
@@ -128,6 +147,13 @@ namespace CalyxEditor {
 										CommandManager::GetInstance()->Execute(
 											std::make_unique<CreateObjectCommand<EnemySpawner>>(
 												ctx, factory, "Create EnemySpawner"));
+									},
+									[]() {
+										auto obj = SceneAPI::Instantiate<EnemySpawner>("EnemySpawner");
+										obj->ApplyConfig();
+										obj->Initialize();
+										obj->SetTransient(true);
+										return obj;
 									}});
 		}
 
@@ -157,6 +183,13 @@ namespace CalyxEditor {
 										CommandManager::GetInstance()->Execute(
 											std::make_unique<CreateObjectCommand<BossSpawner>>(
 												ctx, factory, "Create BossSpawner"));
+									},
+									[]() {
+										auto obj = SceneAPI::Instantiate<BossSpawner>("BossSpawner");
+										obj->ApplyConfig();
+										obj->Initialize();
+										obj->SetTransient(true);
+										return obj;
 									}});
 		}
 
@@ -180,6 +213,11 @@ namespace CalyxEditor {
 									  CommandManager::GetInstance()->Execute(
 										  std::make_unique<CreateObjectCommand<CameraTurnAroundEvent>>(
 											  ctx, factory, "Create CameraTurnAroundEvent"));
+								  },
+								  []() {
+									  auto obj = SceneAPI::Instantiate<CameraTurnAroundEvent>("CameraTurnAroundEvent");
+									  obj->SetTransient(true);
+									  return obj;
 								  }});
 		}
 
@@ -202,6 +240,11 @@ namespace CalyxEditor {
 									  CommandManager::GetInstance()->Execute(
 										  std::make_unique<CreateObjectCommand<EnemySpawnEvent>>(
 											  ctx, factory, "Create CameraTurnAroundEvent"));
+								  },
+								  []() {
+									  auto obj = SceneAPI::Instantiate<EnemySpawnEvent>("EnemySpawnEvent");
+									  obj->SetTransient(true);
+									  return obj;
 								  }});
 		}
 
@@ -226,14 +269,27 @@ namespace CalyxEditor {
 								  [modelName, displayName](const CalyxMath::Vector3& pos) {
 									  auto factory = [modelName, displayName, pos]() {
 										  auto obj = SceneAPI::Instantiate<BaseGameObject>(modelName, displayName);
-										  obj->Initialize();
-										  obj->GetCollider()->SetCollisionEnabled(false);
-										  obj->GetWorldTransform().translation = pos;
+										  if(obj) {
+											  obj->Initialize();
+											  if(obj->GetCollider())
+												  obj->GetCollider()->SetCollisionEnabled(false);
+											  obj->GetWorldTransform().translation = pos;
+										  }
 										  return obj;
 									  };
 									  CommandManager::GetInstance()->Execute(
 										  std::make_unique<CreateObjectCommand<BaseGameObject>>(
 											  SceneContext::Current(), factory, "Create Model"));
+								  },
+								  [modelName, displayName]() {
+									  auto obj = SceneAPI::Instantiate<BaseGameObject>(modelName, displayName);
+									  if(obj) {
+										  obj->Initialize();
+										  if(obj->GetCollider())
+											  obj->GetCollider()->SetCollisionEnabled(false);
+										  obj->SetTransient(true);
+									  }
+									  return obj;
 								  }});
 		}
 	}
