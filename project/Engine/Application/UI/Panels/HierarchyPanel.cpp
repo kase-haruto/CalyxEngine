@@ -69,7 +69,23 @@ namespace CalyxEditor {
 		iconCamera_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/Hierarchy/camIcon.dds").ptr;
 		iconGameObj_.tex = (ImTextureID)tm.LoadTexture("UI/Tool/Hierarchy/meshIcon.dds").ptr;
 		iconFx_.tex		 = (ImTextureID)tm.LoadTexture("UI/Tool/Hierarchy/particleIcon.dds").ptr;
-		iconLight_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/Hierarchy/lightIcon.dds").ptr;
+
+		// 追加/削除イベントにフックしてキャッシュ更新を促す
+		if(auto* ctx = SceneContext::Current()) {
+			ctx->AddOnObjectAddedListener([this](SceneObject*) {
+				cacheDirty_ = true;
+			});
+			ctx->AddOnObjectRemovedListener([this](SceneObject* removed) {
+				cacheDirty_ = true;
+				// 選択が削除対象ならクリア
+				if(auto sp = selected_.lock()) {
+					if(sp.get() == removed) {
+						selected_.reset();
+						if(onSelect_) onSelect_(nullptr);
+					}
+				}
+			});
+		}
 	}
 
 	/* ========================================================================
