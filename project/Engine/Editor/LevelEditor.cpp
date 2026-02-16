@@ -557,6 +557,10 @@ namespace CalyxEditor {
 				uint32_t pickingID = pickingPass->GetObjectID(px, py);
 				if(pickingID > 0) {
 					if(auto sp = current->GetObjectLibrary()->FindSharedByPickingID(pickingID)) {
+						// 地面だったらリターン
+						if(sp->GetName() == "ground") {
+							return;
+						}
 						SetSelectedObject(sp);
 						return;
 					}
@@ -593,6 +597,14 @@ namespace CalyxEditor {
 	//=============================================================================
 	void LevelEditor::SetSceneManager(CalyxScene::SceneManager* manager) {
 		sceneManager_ = manager;
+
+		if(manager) {
+			auto* pickingPass = manager->GetPickingPass();
+			if(mainViewport_) mainViewport_->SetPickingPass(pickingPass);
+			if(debugViewport_) debugViewport_->SetPickingPass(pickingPass);
+			if(pickingViewport_) pickingViewport_->SetPickingPass(pickingPass);
+		}
+
 		if(sceneSwitchOverlay_) {
 			sceneSwitchOverlay_->SetSceneManager(manager);
 		}

@@ -75,6 +75,24 @@ uint32_t PickingPass::GetObjectID(int32_t x, int32_t y) {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
+// デプス取得
+/////////////////////////////////////////////////////////////////////////////////////////
+float PickingPass::GetDepth(int32_t x, int32_t y) {
+	if(!readbackDepth_ || x < 0 || x >= (int)width_ || y < 0 || y >= (int)height_) return 1.0f;
+
+	void*	ptr = nullptr;
+	HRESULT hr	= readbackDepth_->Map(0, nullptr, &ptr);
+	if(FAILED(hr) || !ptr) return 1.0f;
+
+	// 指定座標のピクセルを抽出 (RowPitchを考慮)
+	float* depthPtr = (float*)((uint8_t*)ptr + (y * rowPitchDepth_) + (x * 4));
+	float  depth	= *depthPtr;
+
+	readbackDepth_->Unmap(0, nullptr);
+	return depth;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
 // リサイズ
 /////////////////////////////////////////////////////////////////////////////////////////
 void PickingPass::Resize(int32_t width, int32_t height) {
@@ -140,7 +158,7 @@ void PickingPass::CreateResources(uint32_t w, uint32_t h) {
 	// Depth
 	// =========================================================
 	{
-		const DXGI_FORMAT depthFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		const DXGI_FORMAT depthFormat = DXGI_FORMAT_D32_FLOAT;
 
 		D3D12_RESOURCE_DESC desc =
 			CD3DX12_RESOURCE_DESC::Tex2D(
@@ -200,6 +218,22 @@ void PickingPass::CreateReadback(uint32_t w, uint32_t h) {
 		D3D12_RESOURCE_STATE_COPY_DEST,
 		nullptr,
 		IID_PPV_ARGS(&readback_)));
+
+	// Depth Readback
+	{
+		D3D12_RESOURCE_DESC descDepth = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_D32_FLOAT, w, h);
+		device->GetCopyableFootprints(&descDepth, 0, 1, 0, &layout, nullptr, nullptr, &totalSize);
+		rowPitchDepth_ = layout.Footprint.RowPitch;
+
+		auto resDescDepth = CD3DX12_RESOURCE_DESC::Buffer(totalSize);
+		ThrowIfFailed(device->CreateCommittedResource(
+			&heapProps,
+			D3D12_HEAP_FLAG_NONE,
+			&resDescDepth,
+			D3D12_RESOURCE_STATE_COPY_DEST,
+			nullptr,
+			IID_PPV_ARGS(&readbackDepth_)));
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -209,6 +243,7 @@ void PickingPass::DestroyResources() {
 	color_.Reset();
 	depth_.Reset();
 	readback_.Reset();
+	readbackDepth_.Reset();
 	width_ = height_ = 0;
 }
 
@@ -372,6 +407,31 @@ void PickingPass::Render(
 			color_.Get(),
 			D3D12_RESOURCE_STATE_COPY_SOURCE,
 			D3D12_RESOURCE_STATE_RENDER_TARGET);
+		cmd->ResourceBarrier(1, &barrier);
+	}
+
+	// =========================================================
+	// Depth Readback Copy
+	// =========================================================
+	if(readbackDepth_) {
+		D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+			depth_.Get(),
+			D3D12_RESOURCE_STATE_DEPTH_WRITE,
+			D3D12_RESOURCE_STATE_COPY_SOURCE);
+		cmd->ResourceBarrier(1, &barrier);
+
+		D3D12_RESOURCE_DESC				   desc = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_D32_FLOAT, width_, height_);
+		D3D12_PLACED_SUBRESOURCE_FOOTPRINT layout;
+		device->GetCopyableFootprints(&desc, 0, 1, 0, &layout, nullptr, nullptr, nullptr);
+
+		CD3DX12_TEXTURE_COPY_LOCATION dst(readbackDepth_.Get(), layout);
+		CD3DX12_TEXTURE_COPY_LOCATION src(depth_.Get(), 0);
+		cmd->CopyTextureRegion(&dst, 0, 0, 0, &src, nullptr);
+
+		barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+			depth_.Get(),
+			D3D12_RESOURCE_STATE_COPY_SOURCE,
+			D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		cmd->ResourceBarrier(1, &barrier);
 	}
 }

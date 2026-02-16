@@ -45,7 +45,7 @@ void SphereCollider::Draw() {
 //		debug ui
 /////////////////////////////////////////////////////////////////////////////////////////
 void SphereCollider::ShowGui() {
-	if (ImGui::TreeNodeEx("SphereCollider", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
+	if(ImGui::TreeNodeEx("SphereCollider", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
 		Collider::ShowGui();
 		if(!isCollisionEnabled_) return;
 		GuiCmd::DragFloat3("Offset", offset_);

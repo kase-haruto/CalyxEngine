@@ -3030,6 +3030,7 @@
     <ClCompile Include="Engine\Objects\3D\Primitive\PrimitiveRing.cpp" />
     <ClCompile Include="Engine\Editor\ImGuiLayoutSwitcher.cpp" />
     <ClCompile Include="Engine\Editor\ImguiLayoutService.cpp" />
+    <ClCompile Include="Engine\Editor\PickingPass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Battle\Shooting\homing\HomingTarget.h" />
@@ -3040,6 +3041,7 @@
     <ClInclude Include="Engine\Objects\3D\Primitive\PrimitiveRing.h" />
     <ClInclude Include="Engine\Editor\ImGuiLayoutSwitcher.h" />
     <ClInclude Include="Engine\Editor\ImguiLayoutService.h" />
+    <ClInclude Include="Engine\Editor\PickingPass.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\ObjectPicking.PS.hlsl" />
