@@ -13,6 +13,13 @@
 class TutorialEvent final
 	: public BaseEventObject {
 public:
+	enum class State {
+		None,
+		LockOnPhase,
+		AttackPhase,
+		Complete
+	};
+
 	//===================================================================*/
 	//			public methods
 	//===================================================================*/
@@ -31,11 +38,20 @@ public:
 	void OnCollisionStay(Collider* other) override;
 	void OnCollisionExit(Collider* other) override;
 
-	std::string_view GetTypeName() const override{return "TutorialEvent";};
+	std::string_view GetTypeName() const override { return "TutorialEvent"; };
 
 private:
 	//===================================================================*/
 	//			private methods
 	//===================================================================*/
+	void ShowTutorialMsg();
+	void ShowDebugState();
+
+	State state_		  = State::None;
+	bool  isPlayerInside_ = false;
+
+	class Player*		   player_	= nullptr;
+	class EnemyCollection* enemies_ = nullptr;
+
 	std::unique_ptr<Collider> collider_;
 };

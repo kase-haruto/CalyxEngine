@@ -82,11 +82,11 @@ void DirectionalLight::UploadToGpu() {
 	constantBuffer_.TransferData(lightData_);
 
 	// ShadowParam (SerializableObject継承) から GPU用POD構造体に変換
-	ShadowParamGpu gpuData;
+	ShadowParamGpu gpuData{};
 	gpuData.shadowRayEps = shadow_.shadowRayEps;
 	gpuData.baseAngularRadius = shadow_.baseAngularRadius;
 	gpuData.minShadow = shadow_.minShadow;
-	gpuData.isSoft = shadow_.isSoft;
+	gpuData.isSoft = shadow_.isSoft ? 1u : 0u;
 	shadowParamCB_.TransferData(gpuData);
 }
 

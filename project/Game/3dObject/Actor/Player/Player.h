@@ -11,7 +11,6 @@
 #include <Engine/Objects/3D/Actor/Actor.h>
 #include <Engine/Renderer/Sprite/Sprite.h>
 
-
 // game
 #include "Context/PlayerContext.h"
 #include "Dodge/PlayerDodgeMotion.h"
@@ -163,6 +162,11 @@ public:
 	 * \return 回避システム
 	 */
 	PlayerDodgeSystem* GetDodgeSystem() const { return dodgeSystem_.get(); }
+	/**
+	 * \brief ロックオンシステムを取得
+	 * \return ロックオンシステム
+	 */
+	class PlayerLockOn* GetLockOn() const { return lockOn_.get(); }
 	/**
 	 * \brief 全てのスプライトを取得
 	 * \return スプライトリスト
