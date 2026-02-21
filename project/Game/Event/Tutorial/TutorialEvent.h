@@ -31,7 +31,7 @@ public:
 	void OnCollisionStay(Collider* other) override;
 	void OnCollisionExit(Collider* other) override;
 
-	std::string GetObjectTypeName() const override { return name_; }
+	std::string_view GetTypeName() const override{return "TutorialEvent";};
 
 private:
 	//===================================================================*/

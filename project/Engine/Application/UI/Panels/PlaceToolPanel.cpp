@@ -19,6 +19,8 @@
 #include <Game/Event/Spawn/EnemySpawnEvent.h>
 
 // --- externals --------------------------------------------------------------
+#include "Game/Event/Tutorial/TutorialEvent.h"
+
 #include <externals/imgui/imgui.h>
 
 namespace CalyxEditor {
@@ -243,6 +245,33 @@ namespace CalyxEditor {
 								  },
 								  []() {
 									  auto obj = SceneAPI::Instantiate<EnemySpawnEvent>("EnemySpawnEvent");
+									  obj->SetTransient(true);
+									  return obj;
+								  }});
+		}
+
+		{
+			auto& eventItems = categoryItems_[PlaceItemCategory::Event];
+			eventItems.push_back({PlaceItemCategory::Event,
+								  "TutorialEvent",
+								  {},
+								  {64, 64},
+								  [](const CalyxMath::Vector3& pos) {
+									  auto* ctx = SceneContext::Current();
+
+									  auto factory = [pos]() {
+										  auto obj = SceneAPI::Instantiate<TutorialEvent>("TutorialEvent");
+										  // obj->ApplyConfig();
+										  obj->GetWorldTransform().translation = pos;
+										  return obj;
+									  };
+
+									  CommandManager::GetInstance()->Execute(
+										  std::make_unique<CreateObjectCommand<TutorialEvent>>(
+											  ctx, factory, "Create CameraTurnAroundEvent"));
+								  },
+								  []() {
+									  auto obj = SceneAPI::Instantiate<TutorialEvent>("TutorialEvent");
 									  obj->SetTransient(true);
 									  return obj;
 								  }});

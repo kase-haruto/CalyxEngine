@@ -5,6 +5,9 @@
 #include "Engine/Application/System/CalyxCore.h"
 #include "Engine/Objects/Collider/BoxCollider.h"
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
+#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
+
+REGISTER_SCENE_OBJECT(TutorialEvent);
 
 /////////////////////////////////////////////////////////////////////////
 //		コンストラクタ / デストラクタ
@@ -46,6 +49,7 @@ TutorialEvent::~TutorialEvent() = default;
 /////////////////////////////////////////////////////////////////////////
 void TutorialEvent::Initialize() {
 	// 色を黄色に設定する
+	collider_->SetColor(CalyxMath::Vector3(1, 1, 0));
 }
 
 /////////////////////////////////////////////////////////////////////////
