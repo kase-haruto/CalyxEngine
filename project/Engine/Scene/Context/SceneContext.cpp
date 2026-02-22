@@ -16,7 +16,7 @@ void SceneContext::Initialize(bool createDefaultLights) {
 	lightLibrary_  = std::make_unique<LightLibrary>();
 	fxSystem_	   = std::make_unique<CalyxEffect::FxSystem>();
 
-	if (createDefaultLights) {
+	if(createDefaultLights) {
 		auto dir = Instantiate<DirectionalLight>("DirectionalLight");
 		dir->SetEnableRaycast(false);
 
@@ -35,11 +35,10 @@ void SceneContext::Initialize(bool createDefaultLights) {
 		[this](const ObjectAdded& ev) {
 			SceneObject* raw = ev.sp.get();
 			// 登録されたリスナー全員に通知
-			for (auto& cb : objectAddedCallbacks_) {
-				if (cb) cb(raw);
+			for(auto& cb : objectAddedCallbacks_) {
+				if(cb) cb(raw);
 			}
-		}
-	);
+		});
 
 	// --- ObjectRemoved を購読 ---
 	connObjectRemoved_ = EventBus::Subscribe<ObjectRemoved>(
@@ -47,33 +46,32 @@ void SceneContext::Initialize(bool createDefaultLights) {
 			SceneObject* raw = ev.sp.get();
 
 			// Editor 用（1個だけ）
-			if (onEditorObjectRemoved_) {
+			if(onEditorObjectRemoved_) {
 				onEditorObjectRemoved_(raw);
 			}
 			// 通常リスナー（複数）
-			for (auto& cb : objectRemovedCallbacks_) {
-				if (cb) cb(raw);
+			for(auto& cb : objectRemovedCallbacks_) {
+				if(cb) cb(raw);
 			}
-		}
-	);
+		});
 }
 
-void SceneContext::Update(float dt, bool runtimePass) {
-	if (!objectLibrary_) return;
+void SceneContext::Update(float dt, float alwaysDt, bool runtimePass) {
+	if(!objectLibrary_) return;
 
 	// 毎フレーム一度だけロックして使い回す
 	auto objects = objectLibrary_->GetAllObjectsShared();
 
 	// Runtime パス（ゲーム実行中のみ）
-	if (runtimePass) {
-		for (auto& sp : objects) {
-			if (sp) sp->Update(dt);
+	if(runtimePass) {
+		for(auto& sp : objects) {
+			if(sp) sp->Update(dt);
 		}
 	}
 
 	// Always パス（エディタ / ランタイム共通）
-	for (auto& sp : objects) {
-		if (sp) sp->AlwaysUpdate(dt);
+	for(auto& sp : objects) {
+		if(sp) sp->AlwaysUpdate(alwaysDt);
 	}
 
 	lightLibrary_->CyncGpu();
@@ -81,17 +79,17 @@ void SceneContext::Update(float dt, bool runtimePass) {
 }
 
 void SceneContext::PostUpdate(PipelineService* psoService, ID3D12GraphicsCommandList* cmd) {
-	if (fxSystem_) {
+	if(fxSystem_) {
 		fxSystem_->DispatchEmitters(psoService, cmd);
 	}
 }
 
 void SceneContext::Clear() {
 	// Editor 側への通知（エディタで持っているハンドルを掃除させる）
-	if (objectLibrary_) {
-		if (onEditorObjectRemoved_) {
-			for (auto& sp : objectLibrary_->GetAllObjectsShared()) {
-				if (!sp) continue;
+	if(objectLibrary_) {
+		if(onEditorObjectRemoved_) {
+			for(auto& sp : objectLibrary_->GetAllObjectsShared()) {
+				if(!sp) continue;
 				onEditorObjectRemoved_(sp.get());
 			}
 		}
@@ -99,7 +97,7 @@ void SceneContext::Clear() {
 		objectLibrary_->Clear();
 	}
 
-	if (fxSystem_) {
+	if(fxSystem_) {
 		fxSystem_->Clear();
 	}
 
@@ -108,27 +106,27 @@ void SceneContext::Clear() {
 }
 
 std::shared_ptr<SceneObject> SceneContext::FindSharedObject(SceneObject* raw) {
-	if (!objectLibrary_ || !raw) return nullptr;
+	if(!objectLibrary_ || !raw) return nullptr;
 
-	for (auto& sp : objectLibrary_->GetAllObjectsShared()) {
-		if (sp.get() == raw) return sp;
+	for(auto& sp : objectLibrary_->GetAllObjectsShared()) {
+		if(sp.get() == raw) return sp;
 	}
 	return nullptr;
 }
 
 void SceneContext::AddObject(const std::shared_ptr<SceneObject>& obj) {
-	if (!objectLibrary_ || !obj) return;
+	if(!objectLibrary_ || !obj) return;
 	objectLibrary_->AddObject(obj);
 }
 
 void SceneContext::RemoveObject(const std::shared_ptr<SceneObject>& obj) {
-	if (!objectLibrary_ || !obj) return;
+	if(!objectLibrary_ || !obj) return;
 
 	// ランタイム／内部からの削除要求
 	objectLibrary_->RemoveObject(obj);
 
 	// 共通の削除リスナにも通知しておく
-	for (auto& cb : objectRemovedCallbacks_) {
-		if (cb) cb(obj.get());
+	for(auto& cb : objectRemovedCallbacks_) {
+		if(cb) cb(obj.get());
 	}
 }

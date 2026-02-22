@@ -180,12 +180,6 @@ void Player::Update(float dt) {
 	if(damageHandler_) {
 		damageHandler_->Update(dt);
 	}
-	if(lockOn_) {
-		lockOn_->Update(dt);
-		if(reticle_) {
-			reticle_->SetLockedEnemyList(lockOn_->GetLockedTargets());
-		}
-	}
 
 	moveCtrler_.Apply(worldTransform_);
 
@@ -200,11 +194,24 @@ void Player::Update(float dt) {
 		hpGauge_->SetHp(static_cast<float>(life_));
 	}
 
-	// ── レティクル─────────────────────────
-	reticle_->Update(dt);
-
 	if(life_ <= 0) {
 		isAlive_ = false;
+	}
+}
+
+void Player::AlwaysUpdate(float dt) {
+	BaseGameObject::AlwaysUpdate(dt);
+
+	if(lockOn_) {
+		lockOn_->Update(dt);
+		if(reticle_) {
+			reticle_->SetLockedEnemyList(lockOn_->GetLockedTargets());
+		}
+	}
+
+	// ── レティクル─────────────────────────
+	if(reticle_) {
+		reticle_->Update(dt);
 	}
 }
 

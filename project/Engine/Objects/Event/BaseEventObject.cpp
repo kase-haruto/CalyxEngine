@@ -7,7 +7,6 @@
 #include <Engine/Objects/Collider/BoxCollider.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 
-
 // external
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 
@@ -19,8 +18,8 @@ REGISTER_SCENE_OBJECT(BaseEventObject);
 BaseEventObject::BaseEventObject() {
 	// 衝突の設定(boxで初期化
 	std::unique_ptr<BoxCollider> box = std::make_unique<BoxCollider>(true);
-	box->SetName(GetName() + "BoxCollider"); //< コライダー名前設定
-	box->Initialize(CalyxMath::Vector3(1.0f));			 //< サイズ設定
+	box->SetName(GetName() + "BoxCollider");   //< コライダー名前設定
+	box->Initialize(CalyxMath::Vector3(1.0f)); //< サイズ設定
 	collider_ = std::move(box);
 	collider_->SetType(ColliderType::Type_EventObject);
 	collider_->SetTargetType(ColliderType::Type_Player);
@@ -28,7 +27,7 @@ BaseEventObject::BaseEventObject() {
 	collider_->SetOnEnter([this](Collider* other) { this->OnCollisionEnter(other); });
 	collider_->SetOnStay([this](Collider* other) { this->OnCollisionStay(other); });
 	collider_->SetOnExit([this](Collider* other) { this->OnCollisionExit(other); });
-	
+
 	baseConfig_.SetOnApplied([this](const EventConfig&) {
 		this->ApplyConfig();
 	});
@@ -42,11 +41,15 @@ BaseEventObject::BaseEventObject(const std::string& name) {
 
 	// 衝突の設定(boxで初期化
 	std::unique_ptr<BoxCollider> box = std::make_unique<BoxCollider>(true);
-	box->SetName(name + "BoxCollider"); //< コライダー名前設定
-	box->Initialize(CalyxMath::Vector3(1.0f));		//< サイズ設定
+	box->SetName(name + "BoxCollider");		   //< コライダー名前設定
+	box->Initialize(CalyxMath::Vector3(1.0f)); //< サイズ設定
 	collider_ = std::move(box);
 	collider_->SetType(ColliderType::Type_EventObject);
 	collider_->SetTargetType(ColliderType::Type_Player);
+
+	collider_->SetOnEnter([this](Collider* other) { this->OnCollisionEnter(other); });
+	collider_->SetOnStay([this](Collider* other) { this->OnCollisionStay(other); });
+	collider_->SetOnExit([this](Collider* other) { this->OnCollisionExit(other); });
 
 	baseConfig_.SetOnApplied([this](const EventConfig&) {
 		this->ApplyConfig();
@@ -62,11 +65,11 @@ BaseEventObject::~BaseEventObject() = default;
 //		初期化
 /////////////////////////////////////////////////////////////////////////////////////////
 void BaseEventObject::Initialize() {
-		// 個別の調節パラメータ適用
-		const std::string configRoot = "Event/";
-		baseConfig_.LoadConfig(configRoot + GetName());
-		//コライダーの色を緑に設定
-		collider_->SetColor(CalyxMath::Vector3(0,1,0));
+	// 個別の調節パラメータ適用
+	const std::string configRoot = "Event/";
+	baseConfig_.LoadConfig(configRoot + GetName());
+	// コライダーの色を緑に設定
+	collider_->SetColor(CalyxMath::Vector3(0, 1, 0));
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -76,8 +79,8 @@ void BaseEventObject::AlwaysUpdate([[maybe_unused]] float dt) {
 
 	worldTransform_.Update();
 
-	CalyxMath::Vector3	   worldPos = worldTransform_.GetWorldPosition();
-	CalyxMath::Quaternion rot		= worldTransform_.rotation;
+	CalyxMath::Vector3	  worldPos = worldTransform_.GetWorldPosition();
+	CalyxMath::Quaternion rot	   = worldTransform_.rotation;
 
 	// collider の更新
 	if(collider_) {
@@ -97,13 +100,12 @@ void BaseEventObject::ShowGui() {
 	ConfigGUi();
 	worldTransform_.ShowImGui();
 	DerivativeGui();
-
 }
 
 void BaseEventObject::DerivativeGui() { ImGui::SeparatorText("derivative"); }
 
 void BaseEventObject::ConfigGUi() {
-	baseConfig_.ShowGui("Event/"+GetName());
+	baseConfig_.ShowGui("Event/" + GetName());
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

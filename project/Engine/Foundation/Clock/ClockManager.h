@@ -23,6 +23,9 @@ public:
 	// プレイヤー関連用の deltaTime（ヒットストップの影響を受ける）
 	float GetPlayerDeltaTime() const { return playerDeltaTime_; }
 
+	void  SetTimeScale(float scale) { currentTimeScale_ = scale; }
+	float GetTimeScale() const { return currentTimeScale_; }
+
 	float GetTotalTime() const { return totalTime_; }
 	float GetCurrentFPS() const { return currentFPS_; }
 	float GetAverageFPS() const { return averageFPS_; }
@@ -36,7 +39,7 @@ private:
 
 	std::chrono::high_resolution_clock::time_point firstFrameTime_;
 	std::chrono::high_resolution_clock::time_point lastFrameTime_;
-	float rawDeltaTime_ = 0.0f;
+	float										   rawDeltaTime_ = 0.0f;
 	// グローバル deltaTime（ヒットストップ影響なし）
 	float globalDeltaTime_ = 0.016f;
 	// プレイヤー用 deltaTime（ヒットストップでスケールされる）

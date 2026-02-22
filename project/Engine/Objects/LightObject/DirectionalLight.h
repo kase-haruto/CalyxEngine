@@ -20,6 +20,7 @@
 /* c++ */
 #include <d3d12.h>
 #include <wrl.h>
+#include <cstdint>
 
 struct DirectionalLightData {
 	CalyxMath::Vector4 color;	  //< ライトの色
@@ -32,7 +33,7 @@ struct ShadowParamGpu {
 	float shadowRayEps;
 	float baseAngularRadius;
 	float minShadow;
-	bool  isSoft = false;
+	uint32_t isSoft; // cbuffer bool(32bit)と整合
 };
 
 namespace CalyxGraphics {

@@ -2,9 +2,9 @@
 #include <algorithm>
 #include <chrono>
 
-ClockManager::ClockManager(){
-    firstFrameTime_ = std::chrono::high_resolution_clock::now();
-    lastFrameTime_ = firstFrameTime_;
+ClockManager::ClockManager() {
+	firstFrameTime_ = std::chrono::high_resolution_clock::now();
+	lastFrameTime_	= firstFrameTime_;
 }
 
 void ClockManager::Update() {
@@ -20,16 +20,17 @@ void ClockManager::Update() {
 
 	// グローバル dt 更新
 	globalDeltaTime_ = dt;
+	playerDeltaTime_ = dt * currentTimeScale_;
 
-	if (rawDeltaTime_ > 0.0f) {
+	if(rawDeltaTime_ > 0.0f) {
 		currentFPS_ = 1.0f / rawDeltaTime_;
 	}
 
 	lastFrameTime_ = now;
 }
 float ClockManager::GetRawDeltaTime() const { return rawDeltaTime_; }
-void ClockManager::StartHitStop(float duration){
-    isHitStopActive_ = true;
-    hitStopDuration_ = duration;
-    hitStopElapsed_ = 0.0f;
+void  ClockManager::StartHitStop(float duration) {
+	 isHitStopActive_ = true;
+	 hitStopDuration_ = duration;
+	 hitStopElapsed_  = 0.0f;
 }

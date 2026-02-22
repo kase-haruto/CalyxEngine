@@ -218,6 +218,17 @@ bool CheckVisibility(float3 origin, float3 dir, float tMax) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+//    ハードシャドウ（RayQuery 1本）
+///////////////////////////////////////////////////////////////////////////////
+float ComputeDirectionalHardShadow_RT(float3 worldPos, float3 normal, float3 L) {
+    float3 origin = worldPos + normal * gShadowRayEps;
+    const float tMax = 1000.0f;
+
+    bool hit = CheckVisibility(origin, L, tMax);
+    return hit ? gMinShadow : 1.0f;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 //    ソフトシャドウ（距離ベース廃止 + 屋内で重い問題の対策入り）
 //    - 角半径は gBaseAngularRadius 固定（スケール不変）
 //    - 距離(tBlocker)は一切使わない
@@ -232,6 +243,11 @@ bool CheckVisibility(float3 origin, float3 dir, float tMax) {
 ///////////////////////////////////////////////////////////////////////////////
 float ComputeDirectionalSoftShadow_RT(float3 worldPos, float3 normal, float3 L) {
 
+    // ソフトシャドウ無効ならレイを飛ばさない
+    if (!gIsSoft) {
+        return 1.0f;
+    }
+
     // 自己交差対策
     float3 origin = worldPos + normal * gShadowRayEps;
 
@@ -241,10 +257,6 @@ float ComputeDirectionalSoftShadow_RT(float3 worldPos, float3 normal, float3 L) 
     bool centerHit = CheckVisibility(origin, L, tMax);
     if (!centerHit) {
         return 1.0f; // 完全に光
-    }
-
-    if (!gIsSoft) {
-        return gMinShadow;
     }
 
     // 距離で変化させない：角半径固定
@@ -334,7 +346,9 @@ PixelShaderOutput main(VertexShaderOutput input) {
 
     float shadow = 1.0f;
     if (dot(normal, L) > 0.0f) {
-        shadow = ComputeDirectionalSoftShadow_RT(input.worldPosition, normal, L);
+        shadow = gIsSoft
+            ? ComputeDirectionalSoftShadow_RT(input.worldPosition, normal, L)
+            : ComputeDirectionalHardShadow_RT(input.worldPosition, normal, L);
     }
 
     directionalDiffuse  *= shadow;

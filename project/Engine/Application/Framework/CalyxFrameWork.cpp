@@ -73,13 +73,14 @@ namespace CalyxEngine {
 
 	////////////////////////////////////////////////////////////////////////////////
 	bool CalyxFrameWork::Update() {
-		float dt = ClockManager::GetInstance()->GetDeltaTime();
+		float dt	   = ClockManager::GetInstance()->GetPlayerDeltaTime();
+		float alwaysDt = ClockManager::GetInstance()->GetDeltaTime();
 
 		BeginUpdate();
 
 		playSession_->Update();
 
-		sceneManager_->Update(dt);
+		sceneManager_->Update(dt, alwaysDt);
 
 		EndUpdate();
 		return true;
@@ -96,7 +97,6 @@ namespace CalyxEngine {
 		sceneManager_->PostUpdate(graphicsSystem_->GetCommandList(), graphicsSystem_->GetPipelineService());
 
 		engineUICore_->Render();
-
 	}
 
 	////////////////////////////////////////////////////////////////////////////////

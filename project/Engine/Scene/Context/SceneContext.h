@@ -7,8 +7,9 @@
 #include <Engine/Application/Effects/FxSystem.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Lighting/LightLibrary.h>
-#include <Engine/objects/3D/Actor/Library/SceneObjectLibrary.h>
 #include <Engine/System/Event/EventBus.h>
+#include <Engine/objects/3D/Actor/Library/SceneObjectLibrary.h>
+
 
 // c++
 #include <functional>
@@ -17,7 +18,7 @@
 #include <vector>
 
 using ObjectRemovedCallback = std::function<void(SceneObject*)>;
-using ObjectAddedCallback   = std::function<void(SceneObject*)>; 
+using ObjectAddedCallback	= std::function<void(SceneObject*)>;
 
 /*-----------------------------------------------------------------------------------------
  * SceneContext
@@ -30,7 +31,7 @@ public:
 	~SceneContext() = default;
 
 	void Initialize(bool createDefaultLights = true);
-	void Update(float dt, bool runtimePass);
+	void Update(float dt, float alwaysDt, bool runtimePass);
 	/**
 	 * \brief 更新後処理
 	 * \param psoService
@@ -68,12 +69,12 @@ public:
 
 	/* ---------- accessors ----------- */
 	// getter
-	SceneObjectLibrary* GetObjectLibrary() const { return objectLibrary_.get(); }
-	LightLibrary*		GetLightLibrary() const { return lightLibrary_.get(); }
+	SceneObjectLibrary*	   GetObjectLibrary() const { return objectLibrary_.get(); }
+	LightLibrary*		   GetLightLibrary() const { return lightLibrary_.get(); }
 	CalyxEffect::FxSystem* GetFxSystem() const { return fxSystem_.get(); }
-	std::string			GetSceneName() const { return sceneName_; }
-	bool				IsRuntime() const { return isRuntime_; }
-	CameraManager*		GetCameraMgr() { return cameraMgr_.get(); }
+	std::string			   GetSceneName() const { return sceneName_; }
+	bool				   IsRuntime() const { return isRuntime_; }
+	CameraManager*		   GetCameraMgr() { return cameraMgr_.get(); }
 
 	// setter
 	void SetSceneName(const std::string& n) { sceneName_ = n; }
@@ -96,29 +97,29 @@ public:
 
 	/* ---------- utils --------------- */
 	std::shared_ptr<SceneObject> FindSharedObject(SceneObject* raw);
-	void AddObject(const std::shared_ptr<SceneObject>& obj);
-	void RemoveObject(const std::shared_ptr<SceneObject>& obj);
+	void						 AddObject(const std::shared_ptr<SceneObject>& obj);
+	void						 RemoveObject(const std::shared_ptr<SceneObject>& obj);
 
 	/* ---------- Current ------------- */
 	static SceneContext* Current() { return current_; }
 	void				 MakeCurrent() { current_ = this; }
 
 private:
-	std::unique_ptr<SceneObjectLibrary> objectLibrary_;
-	std::unique_ptr<LightLibrary>		 lightLibrary_;
+	std::unique_ptr<SceneObjectLibrary>	   objectLibrary_;
+	std::unique_ptr<LightLibrary>		   lightLibrary_;
 	std::unique_ptr<CalyxEffect::FxSystem> fxSystem_;
-	std::unique_ptr<CameraManager>		 cameraMgr_;
+	std::unique_ptr<CameraManager>		   cameraMgr_;
 
 	ObjectRemovedCallback			   onEditorObjectRemoved_;
 	std::vector<ObjectRemovedCallback> objectRemovedCallbacks_;
-	std::vector<ObjectAddedCallback>   objectAddedCallbacks_; 
+	std::vector<ObjectAddedCallback>   objectAddedCallbacks_;
 
 	std::string sceneName_ = "scene";
 	bool		isRuntime_ = false;
 
 	EventBus::Connection connObjectAdded_;
 	EventBus::Connection connObjectRemoved_;
-	
+
 	static SceneContext* current_;
 };
 
@@ -136,8 +137,8 @@ std::shared_ptr<TObject> SceneContext::Instantiate(Args&&... args) {
 
 template <typename T>
 std::shared_ptr<T> SceneContext::FindFirst() const {
-	for (const auto& obj : objectLibrary_->GetAllObjectsShared()) {
-		if (auto casted = std::dynamic_pointer_cast<T>(obj)) {
+	for(const auto& obj : objectLibrary_->GetAllObjectsShared()) {
+		if(auto casted = std::dynamic_pointer_cast<T>(obj)) {
 			return casted;
 		}
 	}
@@ -146,12 +147,12 @@ std::shared_ptr<T> SceneContext::FindFirst() const {
 
 template <typename T>
 std::shared_ptr<T> SceneContext::FindObjectByName(const std::string& name) const {
-	for (const auto& obj : objectLibrary_->GetAllObjectsShared()) {
-		if (obj && obj->GetName() == name) {
-			if constexpr (std::is_same_v<T, SceneObject>) {
+	for(const auto& obj : objectLibrary_->GetAllObjectsShared()) {
+		if(obj && obj->GetName() == name) {
+			if constexpr(std::is_same_v<T, SceneObject>) {
 				return obj;
 			} else {
-				if (auto casted = std::dynamic_pointer_cast<T>(obj)) {
+				if(auto casted = std::dynamic_pointer_cast<T>(obj)) {
 					return casted;
 				}
 			}

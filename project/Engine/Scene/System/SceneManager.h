@@ -1,9 +1,10 @@
 #pragma once
 #include <Engine/Graphics/Device/DxCore.h>
+#include <Engine/Scene/Base/BaseScene.h>
 #include <Engine/Scene/Transitioner/IScenePayload.h>
 #include <Engine/Scene/Transitioner/SceneTransitionRequestor.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
-#include <Engine/Scene/Base/BaseScene.h>
+
 
 #include <d3d12.h>
 #include <memory>
@@ -17,7 +18,7 @@ class PipelineService;
 namespace CalyxEditor {
 	class PlaySession;
 	class PickingPass;
-}
+} // namespace CalyxEditor
 
 namespace CalyxScene {
 
@@ -32,16 +33,16 @@ namespace CalyxScene {
 		~SceneManager();
 
 		void Initialize();
-		void Update(float dt);
+		void Update(float dt, float alwaysDt);
 		void PostUpdate(ID3D12GraphicsCommandList* cmd, PipelineService* pso);
 		void Draw(ID3D12GraphicsCommandList* cmd, PipelineService* pso);
 
-		void DrawForRenderTarget(class IRenderTarget* rt,
+		void DrawForRenderTarget(class IRenderTarget*		rt,
 								 ID3D12GraphicsCommandList* cmd,
-								 PipelineService* pso);
+								 PipelineService*			pso);
 
 		void DrawNotAffectedFromPE(ID3D12GraphicsCommandList* cmd,
-								   PipelineService* pso);
+								   PipelineService*			  pso);
 
 		void BindPlaySession(CalyxEditor::PlaySession* ps) { pPlaySession_ = ps; }
 
@@ -52,7 +53,7 @@ namespace CalyxScene {
 
 		/// Scene 登録（SceneId で管理）
 		size_t AddScene(SceneId id, std::unique_ptr<BaseScene> scene);
-		
+
 		/// 登録済みシーンID一覧取得
 		const std::vector<SceneId>& GetRegisteredSceneIds() const { return registeredSceneIds_; }
 
@@ -64,21 +65,21 @@ namespace CalyxScene {
 		size_t		  GetCurrentIndex() const { return currentIdx_; }
 
 		CalyxScene::ISceneTransitionRequestor& GetTransitionRequestor();
-		
+
 		CalyxEditor::PickingPass* GetPickingPass() const { return pickingPass_.get(); }
 
 	private:
 		// ---- internal transition entry ----
 		void RequestSceneChangeInternal(SceneId next);
 		void RequestSceneChangeInternal(
-			SceneId next,
+			SceneId						   next,
 			std::unique_ptr<IScenePayload> payload);
 
 	private:
 		struct SceneSlot {
-			std::unique_ptr<BaseScene> scene;
+			std::unique_ptr<BaseScene>	  scene;
 			std::unique_ptr<SceneContext> ctx;
-			bool assetsLoaded = false;
+			bool						  assetsLoaded = false;
 		};
 
 		// ---- transition service ----
@@ -92,7 +93,7 @@ namespace CalyxScene {
 			}
 
 			void RequestSceneChange(
-				SceneId id,
+				SceneId						   id,
 				std::unique_ptr<IScenePayload> payload) override {
 				manager_.RequestSceneChangeInternal(id, std::move(payload));
 			}
@@ -102,21 +103,21 @@ namespace CalyxScene {
 		};
 
 	private:
-		std::vector<SceneSlot> slots_;
+		std::vector<SceneSlot>				slots_;
 		std::unordered_map<SceneId, size_t> idToIndex_;
-		size_t currentIdx_ = 0;
+		size_t								currentIdx_ = 0;
 
-		std::optional<size_t> pendingSwitchIndex_;
+		std::optional<size_t>		   pendingSwitchIndex_;
 		std::unique_ptr<IScenePayload> pendingPayload_;
 
-		CalyxGraphics::DxCore* dx_ = nullptr;
+		CalyxGraphics::DxCore*	  dx_			= nullptr;
 		CalyxEditor::PlaySession* pPlaySession_ = nullptr;
 
-		SceneContext* lastBoundCtx_ = nullptr;
-		uint64_t lastRuntimeGen_ = 0;
+		SceneContext* lastBoundCtx_	  = nullptr;
+		uint64_t	  lastRuntimeGen_ = 0;
 
 		std::unique_ptr<SceneTransitionService> transitionService_;
-		
+
 		std::vector<SceneId> registeredSceneIds_;
 
 		std::unique_ptr<CalyxEditor::PickingPass> pickingPass_;

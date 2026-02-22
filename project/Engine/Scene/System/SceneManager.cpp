@@ -23,7 +23,7 @@
 
 namespace CalyxScene {
 	SceneManager::SceneManager(CalyxGraphics::DxCore* dx)
-	: dx_(dx) {
+		: dx_(dx) {
 		transitionService_ = std::make_unique<SceneTransitionService>(*this);
 	}
 
@@ -51,8 +51,7 @@ namespace CalyxScene {
 				 std::make_unique<ClearScene>());
 
 		SetCurrent(idToIndex_.at(
-			GameSceneUtil::ToSceneId(SceneType::TITLE)
-		));
+			GameSceneUtil::ToSceneId(SceneType::TITLE)));
 
 #if defined(_DEBUG) || defined(DEVELOP)
 		pickingPass_ = std::make_unique<CalyxEditor::PickingPass>();
@@ -64,13 +63,13 @@ namespace CalyxScene {
 	size_t SceneManager::AddScene(SceneId id, std::unique_ptr<BaseScene> scene) {
 		SceneSlot slot;
 		slot.scene = std::move(scene);
-		slot.ctx = std::make_unique<SceneContext>();
+		slot.ctx   = std::make_unique<SceneContext>();
 		slot.ctx->Initialize(false);
 
 		slot.scene->SetTransitionRequestor(&GetTransitionRequestor());
 
 		slots_.push_back(std::move(slot));
-		size_t index = slots_.size() - 1;
+		size_t index   = slots_.size() - 1;
 		idToIndex_[id] = index;
 		registeredSceneIds_.push_back(id);
 		return index;
@@ -144,7 +143,7 @@ namespace CalyxScene {
 			}
 
 			// payload があれば、次のシーンに渡す
-			if (pendingPayload_) {
+			if(pendingPayload_) {
 				slot.scene->OnPayload(std::move(pendingPayload_));
 			}
 
@@ -157,7 +156,7 @@ namespace CalyxScene {
 		}
 	}
 
-	void SceneManager::Update(float dt) {
+	void SceneManager::Update(float dt, float alwaysDt) {
 		if(slots_.empty()) return;
 
 		if(pPlaySession_ && pPlaySession_->ExitRequested()) {
@@ -172,7 +171,7 @@ namespace CalyxScene {
 		if(!ctx) return;
 
 		ctx->MakeCurrent();
-		ctx->Update(dt, ActiveRuntimeFlag());
+		ctx->Update(dt, alwaysDt, ActiveRuntimeFlag());
 
 		auto& slot = slots_[currentIdx_];
 		slot.scene->InjectContext(ctx);
@@ -210,13 +209,13 @@ namespace CalyxScene {
 		if(auto* ctx = ActiveCtx()) ctx->MakeCurrent();
 		CameraManager::SetTypeStatic(CameraType::Debug);
 		auto* debugRT = dx_->GetRenderTargetCollection().Get("DebugView");
-		
-		if (pickingPass_ && debugRT) {
+
+		if(pickingPass_ && debugRT) {
 			auto vp = debugRT->GetViewport();
 			pickingPass_->Resize(static_cast<int32_t>(vp.Width), static_cast<int32_t>(vp.Height));
-			if (auto* renderer = slots_[currentIdx_].scene->GetModelRenderer()) {
+			if(auto* renderer = slots_[currentIdx_].scene->GetModelRenderer()) {
 				// ピッキングの前にデバッグカメラ視点でカリング結果を更新する
-				if (auto* debugCam = CameraManager::GetDebug()) {
+				if(auto* debugCam = CameraManager::GetDebug()) {
 					renderer->PreCullAndBatch(debugCam);
 				}
 				pickingPass_->Render(cmd, renderer, pso);
@@ -226,7 +225,7 @@ namespace CalyxScene {
 		DrawForRenderTarget(debugRT, cmd, pso);
 #endif
 
-		if (auto* cam = CameraManager::GetActive()) {
+		if(auto* cam = CameraManager::GetActive()) {
 			GraphicsGroup::GetInstance()->SetCommand(cmd, PipelineType::Line, BlendMode::NORMAL);
 			cam->SetCommand(cmd, PipelineType::Line);
 			PrimitiveDrawer::GetInstance()->Render();

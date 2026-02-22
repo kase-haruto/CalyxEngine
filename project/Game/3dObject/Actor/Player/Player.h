@@ -11,7 +11,6 @@
 #include <Engine/Objects/3D/Actor/Actor.h>
 #include <Engine/Renderer/Sprite/Sprite.h>
 
-
 // game
 #include "Context/PlayerContext.h"
 #include "Dodge/PlayerDodgeMotion.h"
@@ -71,6 +70,11 @@ public:
 	 * \param dt デルタタイム
 	 */
 	void Update(float dt) override;
+	/**
+	 * \brief 常に実行される更新処理
+	 * \param dt デルタタイム
+	 */
+	void AlwaysUpdate(float dt) override;
 	/**
 	 * \brief HUD描画
 	 */
@@ -163,6 +167,11 @@ public:
 	 * \return 回避システム
 	 */
 	PlayerDodgeSystem* GetDodgeSystem() const { return dodgeSystem_.get(); }
+	/**
+	 * \brief ロックオンシステムを取得
+	 * \return ロックオンシステム
+	 */
+	class PlayerLockOn* GetLockOn() const { return lockOn_.get(); }
 	/**
 	 * \brief 全てのスプライトを取得
 	 * \return スプライトリスト
