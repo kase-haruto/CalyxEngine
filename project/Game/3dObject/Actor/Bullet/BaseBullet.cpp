@@ -7,8 +7,8 @@
 /* external */
 #include <externals/imgui/imgui.h>
 
-BaseBullet::BaseBullet(const std::string& modelName,const std::string& name)
-	: Actor::Actor(modelName,name) {
+BaseBullet::BaseBullet(const std::string& modelName, const std::string& name)
+	: Actor::Actor(modelName, name) {
 
 	moveSpeed_ = 50.0f;
 	SetDrawEnable(false);
@@ -20,11 +20,12 @@ BaseBullet::BaseBullet(const std::string& modelName,const std::string& name)
 /////////////////////////////////////////////////////////////////////////////////////////
 //		初期化
 /////////////////////////////////////////////////////////////////////////////////////////
-void BaseBullet::ShootInitialize(const CalyxMath::Vector3& initPos,const CalyxMath::Vector3& velocity) {
+void BaseBullet::ShootInitialize(const CalyxMath::Vector3& initPos, const CalyxMath::Vector3& velocity) {
 	worldTransform_.translation = initPos;
-	worldTransform_.scale       = {3,3,3};
-	velocity_                   = velocity;
-	isAlive_                    = true;
+	worldTransform_.scale		= {3, 3, 3};
+	worldTransform_.Update(); // 行列を確定させる
+	velocity_ = velocity;
+	isAlive_  = true;
 	OnShot();
 }
 
@@ -38,13 +39,15 @@ void BaseBullet::Update(float deltaTime) {
 	// 寿命減少
 	lifeTime_ -= deltaTime;
 
-	if(lifeTime_ <= 0.0f) { isAlive_ = false; }
+	if(lifeTime_ <= 0.0f) {
+		isAlive_ = false;
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		imgui
 /////////////////////////////////////////////////////////////////////////////////////////
-void BaseBullet::DerivativeGui() {  }
+void BaseBullet::DerivativeGui() {}
 
 void BaseBullet::OnCollisionEnter([[maybe_unused]] Collider* other) {
 	isAlive_ = false;

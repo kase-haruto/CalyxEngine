@@ -71,6 +71,11 @@ public:
 	 */
 	void Update(float dt) override;
 	/**
+	 * \brief 常に実行される更新処理
+	 * \param dt デルタタイム
+	 */
+	void AlwaysUpdate(float dt) override;
+	/**
 	 * \brief HUD描画
 	 */
 	void DrawHud(class SpriteRenderer* spriteRenderer);

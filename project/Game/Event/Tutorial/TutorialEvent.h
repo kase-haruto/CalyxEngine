@@ -17,6 +17,7 @@ public:
 		None,
 		LockOnPhase,
 		AttackPhase,
+		WaitingForDeath,
 		Complete
 	};
 
@@ -45,13 +46,18 @@ private:
 	//			private methods
 	//===================================================================*/
 	void ShowTutorialMsg();
-	void ShowDebugState();
+	void ShowDebugState(size_t enemyCount);
+	void UpdateTimeScaleEasing(float alwaysDt);
 
 	State state_		  = State::None;
 	bool  isPlayerInside_ = false;
 
-	class Player*		   player_	= nullptr;
-	class EnemyCollection* enemies_ = nullptr;
+	class Player* player_ = nullptr;
 
-	std::unique_ptr<Collider> collider_;
+	// タイムスケールイージング用
+	float startTimeScale_		 = 1.0f;
+	float targetTimeScale_		 = 1.0f;
+	float currentTimeScale_		 = 1.0f;
+	float timeScaleEaseTimer_	 = 0.0f;
+	float timeScaleEaseDuration_ = 0.5f;
 };
