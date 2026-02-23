@@ -13,4 +13,5 @@ cbuffer CameraConstants : register(b1) {
 	float3 cameraPosition;
 	float3 camRight;
 	float3 camUp;
+	float3 camForward;
 }

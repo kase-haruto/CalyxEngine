@@ -25,15 +25,6 @@ struct ParticleData {
 	float  rotation; // Z軸スピン角
 };
 
-struct Camera {
-	float4x4 view;
-	float4x4 projection;
-	float4x4 viewProjection;
-	float3	 cameraPosition;
-	float3	 camRight;
-	float3	 camUp;
-	float3	 camForward;
-};
 
 struct BillboardParm {
 	uint   gBillboardMode;
@@ -43,7 +34,6 @@ struct BillboardParm {
 ///////////////////////////////////////////////////////////////////////////////
 //                            cbuffers
 ///////////////////////////////////////////////////////////////////////////////
-ConstantBuffer<Camera>		  gCamera : register(b0);
 ConstantBuffer<BillboardParm> gBillboardParm : register(b2);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -115,6 +105,7 @@ VertexShaderOutput main(VertexShaderInput input,
 	VertexShaderOutput o;
 	o.position = mul(float4(worldPos, 1.0f), gCamera.viewProjection);
 	o.texcoord = input.texcoord; // 入力のUVをそのまま使用
+	o.worldPos = worldPos;
 	o.color	   = p.color;
 	return o;
 }
