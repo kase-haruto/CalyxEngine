@@ -273,7 +273,7 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList* cmdList,
 		if(SUCCEEDED(cmdList->QueryInterface(IID_PPV_ARGS(&cmd4))) &&
 		   SUCCEEDED(device->QueryInterface(IID_PPV_ARGS(&device5)))) {
 
-			raytracingScene_.Clear(); // Clear previous frame's instances
+			raytracingScene_.Clear();
 
 			// Static Models
 			for(auto& [model, transforms] : staticVisibleForShadow_) {

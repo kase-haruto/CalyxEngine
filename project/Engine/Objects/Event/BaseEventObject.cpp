@@ -28,6 +28,10 @@ BaseEventObject::BaseEventObject() {
 	collider_->SetOnStay([this](Collider* other) { this->OnCollisionStay(other); });
 	collider_->SetOnExit([this](Collider* other) { this->OnCollisionExit(other); });
 
+	model_ = std::make_unique<Model>("debugCube.obj");
+	model_->SetBlendMode(BlendMode::ALPHA);
+	model_->SetColor(CalyxMath::Vector4(0.0f, 1.0f, 0.0f, 0.5f));
+
 	baseConfig_.SetOnApplied([this](const EventConfig&) {
 		this->ApplyConfig();
 	});
@@ -51,6 +55,10 @@ BaseEventObject::BaseEventObject(const std::string& name) {
 	collider_->SetOnStay([this](Collider* other) { this->OnCollisionStay(other); });
 	collider_->SetOnExit([this](Collider* other) { this->OnCollisionExit(other); });
 
+	model_ = std::make_unique<Model>("debugCube.obj");
+	model_->SetBlendMode(BlendMode::ALPHA);
+	model_->SetColor(CalyxMath::Vector4(0.0f, 1.0f, 0.0f, 0.5f));
+
 	baseConfig_.SetOnApplied([this](const EventConfig&) {
 		this->ApplyConfig();
 	});
@@ -68,8 +76,13 @@ void BaseEventObject::Initialize() {
 	// 個別の調節パラメータ適用
 	const std::string configRoot = "Event/";
 	baseConfig_.LoadConfig(configRoot + GetName());
-	// コライダーの色を緑に設定
-	collider_->SetColor(CalyxMath::Vector3(0, 1, 0));
+
+	// debug/developのみ描画
+#if defined(_DEBUG) || defined(DEVELOP)
+	isDrawEnable_ = true;
+#else 
+	isDrawEnable_ = false;
+#endif
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -78,6 +91,11 @@ void BaseEventObject::Initialize() {
 void BaseEventObject::AlwaysUpdate([[maybe_unused]] float dt) {
 
 	worldTransform_.Update();
+
+	if(model_) {
+		model_->Update(dt);
+		model_->SetIsDrawEnable(isDrawEnable_);
+	}
 
 	CalyxMath::Vector3	  worldPos = worldTransform_.GetWorldPosition();
 	CalyxMath::Quaternion rot	   = worldTransform_.rotation;
@@ -88,7 +106,7 @@ void BaseEventObject::AlwaysUpdate([[maybe_unused]] float dt) {
 			collider_->Update(worldPos, rot);
 			auto* box = dynamic_cast<BoxCollider*>(collider_.get());
 			if(box) box->SetSize(worldTransform_.scale);
-			collider_->Draw();
+			// collider_->Draw();	// 線の描画は止めてモデルで代替
 		}
 	}
 }
@@ -102,7 +120,10 @@ void BaseEventObject::ShowGui() {
 	DerivativeGui();
 }
 
-void BaseEventObject::DerivativeGui() { ImGui::SeparatorText("derivative"); }
+void BaseEventObject::DerivativeGui() {
+	ImGui::SeparatorText("objectParam");
+	model_->ShowImGuiInterface();	
+}
 
 void BaseEventObject::ConfigGUi() {
 	baseConfig_.ShowGui("Event/" + GetName());

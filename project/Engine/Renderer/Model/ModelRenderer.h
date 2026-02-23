@@ -11,8 +11,10 @@
 #include <Engine/Objects/Transform/Transform.h>
 
 #include <d3d12.h>
+#include <map>
 #include <unordered_map>
 #include <vector>
+
 
 class BaseModel;
 class Camera3d;
@@ -195,8 +197,8 @@ private:
 	std::unordered_map<BaseModel*, std::vector<InstanceStatic>>					   staticModels_;  //< スタティックモデル管理マップ
 	std::unordered_map<CalyxAssets::AnimationModel*, std::vector<InstanceSkinned>> skinnedModels_; //< スキンメッシュモデル管理マップ
 
-	std::unordered_map<PipelineKey, StaticBatch, PipelineKeyHasher>	 staticBatches_;  //< スタティックモデルバッチマップ
-	std::unordered_map<PipelineKey, SkinnedBatch, PipelineKeyHasher> skinnedBatches_; //< スキンメッシュモデルバッチマップ
+	std::map<PipelineKey, StaticBatch>	staticBatches_;	 //< スタティックモデルバッチマップ
+	std::map<PipelineKey, SkinnedBatch> skinnedBatches_; //< スキンメッシュモデルバッチマップ
 
 	std::vector<WorldTransform> tempVisibleStatic_;	 //< 一時可視スタティックリスト
 	std::vector<WorldTransform> tempVisibleSkinned_; //< 一時可視スキンメッシュリスト
@@ -209,5 +211,5 @@ private:
 
 	// Raytracing
 	std::unique_ptr<CalyxGraphics::RaytracingSystem> raytracingSystem_; //< レイトレーシングシステム
-	CalyxGraphics::RaytracingScene					  raytracingScene_;	 //< レイトレーシングシーン
+	CalyxGraphics::RaytracingScene					 raytracingScene_;	//< レイトレーシングシーン
 };
