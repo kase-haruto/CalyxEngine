@@ -62,12 +62,12 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 			default:
 				break;
 			}
-#if defined(_DEBUG) || defined(DEVELOP)
 		} else if(auto* ev = dynamic_cast<BaseEventObject*>(e)) {
+#if defined(_DEBUG)
 			if(auto* m = ev->GetModel())
 				modelRenderer_->RegisterStatic(m, ev->GetWorldTransform(), BillboardMode::None, ev);
-		}
 #endif
+		}
 	}
 
 	const Camera3d* cam = static_cast<Camera3d*>(CameraManager::GetMain3d());

@@ -71,8 +71,9 @@ private:
 		CalyxMath::Vector2 spriteSize_	 = {125.0f, 64.0f};
 		CalyxMath::Vector2 position_	 = {0.0f, 0.0f};
 	} param_;
-		float timeScaleEaseTimer_	 = 0.0f;
+	
+	float timeScaleEaseTimer_	 = 0.0f;
 	float currentTimeScale_ = 1.0f;
 
-	std::unique_ptr<Calyx2D::SpriteObject2d> aimTutorialSprite_;
+	std::unique_ptr<Calyx2D::SpriteObject2d> tutorialSprite_;
 };

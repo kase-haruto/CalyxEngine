@@ -46,8 +46,8 @@ void TutorialEvent::Initialize() {
 
 	param_.LoadParams();
 	// tutorial用スプライトの初期化
-	aimTutorialSprite_ = std::make_unique<Calyx2D::SpriteObject2d>();
-	aimTutorialSprite_->Initialize("Textures/UI/R_Stick.png");
+	tutorialSprite_ = std::make_unique<Calyx2D::SpriteObject2d>();
+	tutorialSprite_->Initialize("Textures/UI/R_Stick.png");
 	// アニメーション設定
 	Calyx2D::SpriteAnimation anim;
 	anim.texturePath   = "Textures/UI/R_Stick.png";
@@ -55,12 +55,24 @@ void TutorialEvent::Initialize() {
 	anim.frameDuration = param_.animDuration_;
 	anim.loop		   = true;
 
-	aimTutorialSprite_->AddAnimation("reticleMove", anim);
-	aimTutorialSprite_->SetAnimation("reticleMove",false);
+	tutorialSprite_->AddAnimation("reticleMove", anim);
+	anim.texturePath   = "Textures/UI/RB.png";
+	anim.frameDuration = param_.animDuration_ * 0.5f; // RBは少し速め
+	tutorialSprite_->AddAnimation("pushRB", anim);
+	tutorialSprite_->SetAnimation("reticleMove",false);
 }
 
 void TutorialEvent::AlwaysUpdate([[maybe_unused]] float dt) {
 	worldTransform_.Update();
+
+	if(state_ == State::LockOnPhase || state_ == State::AttackPhase) {
+		// パラメータ適用
+		tutorialSprite_->GetSprite()->SetSize(param_.spriteSize_);
+		tutorialSprite_->SetPosition(param_.position_);
+		tutorialSprite_->SetFrameDuration(param_.animDuration_);
+		// スプライト描画
+		tutorialSprite_->Update(dt);
+	}
 
 	auto								ctx = SceneContext::Current();
 	std::vector<std::shared_ptr<Enemy>> currentEnemies;
@@ -116,12 +128,7 @@ void TutorialEvent::AlwaysUpdate([[maybe_unused]] float dt) {
 		break;
 
 	case State::LockOnPhase:
-		// パラメータ適用
-		aimTutorialSprite_->GetSprite()->SetSize(param_.spriteSize_);
-		aimTutorialSprite_->SetPosition(param_.position_);
-		aimTutorialSprite_->SetFrameDuration(param_.animDuration_);
-		
-		aimTutorialSprite_->Update(dt);
+
 		if(player_) {
 			auto lockOn = player_->GetLockOn();
 			if(lockOn) {
@@ -136,6 +143,7 @@ void TutorialEvent::AlwaysUpdate([[maybe_unused]] float dt) {
 				}
 
 				if(allLocked && !currentEnemies.empty()) {
+					tutorialSprite_->SetAnimation("pushRB", true);
 					state_ = State::AttackPhase;
 				}
 			}
@@ -207,8 +215,8 @@ void TutorialEvent::AlwaysUpdate([[maybe_unused]] float dt) {
 }
 void TutorialEvent::DrawUISprite(class SpriteRenderer* spriteRenderer) const {
 	// フェーズごとにUIスプライトを描画
-	if(state_ == State::LockOnPhase) {
-		aimTutorialSprite_->Draw(spriteRenderer);
+	if(state_ == State::LockOnPhase|| state_ == State::AttackPhase) {
+		tutorialSprite_->Draw(spriteRenderer);
 	}
 }
 
