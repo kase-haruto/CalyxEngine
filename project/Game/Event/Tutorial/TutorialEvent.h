@@ -4,6 +4,7 @@
 /* ===================================================================== */
 #include "Engine/Objects/2D/Hud/BaseHud.h"
 
+#include <Engine/Foundation/Serialization/SerializableObject.h>
 #include <Engine/Objects/Event/BaseEventObject.h>
 
 /*-----------------------------------------------------------------------------------------
@@ -57,12 +58,21 @@ private:
 
 	class Player* player_ = nullptr;
 
-	// タイムスケールイージング用
-	float startTimeScale_		 = 1.0f;
-	float targetTimeScale_		 = 1.0f;
-	float currentTimeScale_		 = 1.0f;
-	float timeScaleEaseTimer_	 = 0.0f;
-	float timeScaleEaseDuration_ = 0.5f;
+	struct TutorialEventParam : public CalyxEngine::SerializableObject {
+		TutorialEventParam();
+		CalyxEngine::ParamPath GetParamPath() const override;
+		// タイムスケールイージング用
+		float startTimeScale_		 = 1.0f;
+		float targetTimeScale_		 = 1.0f;
+		float timeScaleEaseDuration_ = 0.5f;
+
+		// 表示アニメーション用
+		float			   animDuration_ = 0.5f;
+		CalyxMath::Vector2 spriteSize_	 = {125.0f, 64.0f};
+		CalyxMath::Vector2 position_	 = {0.0f, 0.0f};
+	} param_;
+		float timeScaleEaseTimer_	 = 0.0f;
+	float currentTimeScale_ = 1.0f;
 
 	std::unique_ptr<Calyx2D::SpriteObject2d> aimTutorialSprite_;
 };

@@ -44,17 +44,19 @@ void TutorialEvent::Initialize() {
 		player_ = ctx->FindFirst<Player>().get();
 	}
 
+	param_.LoadParams();
 	// tutorial用スプライトの初期化
 	aimTutorialSprite_ = std::make_unique<Calyx2D::SpriteObject2d>();
-	aimTutorialSprite_->Initialize("Textures/Player/flyingPlayer.dds");
+	aimTutorialSprite_->Initialize("Textures/UI/R_Stick.png");
 	// アニメーション設定
 	Calyx2D::SpriteAnimation anim;
-	anim.texturePath   = "Textures/Player/flyingPlayer.dds";
+	anim.texturePath   = "Textures/UI/R_Stick.png";
 	anim.division	   = {3, 1};
-	anim.frameDuration = 0.1f;
+	anim.frameDuration = param_.animDuration_;
 	anim.loop		   = true;
 
 	aimTutorialSprite_->AddAnimation("reticleMove", anim);
+	aimTutorialSprite_->SetAnimation("reticleMove",false);
 }
 
 void TutorialEvent::AlwaysUpdate([[maybe_unused]] float dt) {
@@ -105,8 +107,8 @@ void TutorialEvent::AlwaysUpdate([[maybe_unused]] float dt) {
 					e->SetIsAlive(true);
 				}
 
-				startTimeScale_		= currentTimeScale_;
-				targetTimeScale_	= 0.0f;
+				param_.startTimeScale_		= currentTimeScale_;
+				param_.targetTimeScale_	= 0.0f;
 				timeScaleEaseTimer_ = 0.0f;
 				state_				= State::LockOnPhase;
 			}
@@ -114,6 +116,11 @@ void TutorialEvent::AlwaysUpdate([[maybe_unused]] float dt) {
 		break;
 
 	case State::LockOnPhase:
+		// パラメータ適用
+		aimTutorialSprite_->GetSprite()->SetSize(param_.spriteSize_);
+		aimTutorialSprite_->SetPosition(param_.position_);
+		aimTutorialSprite_->SetFrameDuration(param_.animDuration_);
+		
 		aimTutorialSprite_->Update(dt);
 		if(player_) {
 			auto lockOn = player_->GetLockOn();
@@ -140,8 +147,8 @@ void TutorialEvent::AlwaysUpdate([[maybe_unused]] float dt) {
 		   CalyxFoundation::Input::TriggerGamepadButton(CalyxFoundation::PadButton::RB)) {
 
 			// 敵を即座に殺すのではなく、時間を再開して弾が当たるのを待つ
-			startTimeScale_		= currentTimeScale_;
-			targetTimeScale_	= 1.0f;
+			param_.startTimeScale_		= currentTimeScale_;
+			param_.targetTimeScale_	= 1.0f;
 			timeScaleEaseTimer_ = 0.0f;
 			state_				= State::WaitingForDeath;
 		}
@@ -206,11 +213,11 @@ void TutorialEvent::DrawUISprite(class SpriteRenderer* spriteRenderer) const {
 }
 
 void TutorialEvent::UpdateTimeScaleEasing(float alwaysDt) {
-	if(timeScaleEaseTimer_ < timeScaleEaseDuration_) {
+	if(timeScaleEaseTimer_ < param_.timeScaleEaseDuration_) {
 		timeScaleEaseTimer_ += alwaysDt;
-		float t = (std::min)(timeScaleEaseTimer_ / timeScaleEaseDuration_, 1.0f);
+		float t = (std::min)(timeScaleEaseTimer_ / param_.timeScaleEaseDuration_, 1.0f);
 		currentTimeScale_ =
-			CalyxEase::EaseLerp(startTimeScale_, targetTimeScale_, t, CalyxEase::EaseType::EaseOutSine);
+			CalyxEase::EaseLerp(param_.startTimeScale_, param_.targetTimeScale_, t, CalyxEase::EaseType::EaseOutSine);
 		ClockManager::GetInstance()->SetTimeScale(currentTimeScale_);
 	}
 }
@@ -262,7 +269,7 @@ void TutorialEvent::ShowDebugState(size_t enemyCount) {
 /////////////////////////////////////////////////////////////////////////
 void TutorialEvent::ShowGui() {
 	if(GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::ParameterData)) {
-		// NOTE: イベントのパラメータをここで表示
+		param_.ShowGui();
 	}
 }
 
@@ -287,3 +294,20 @@ void TutorialEvent::OnCollisionExit(Collider* other) {
 	isPlayerInside_ = false;
 	(void)other;
 }
+
+// ///////////////////////////////////////////////////////////////////////
+//		パラメータ初期化
+// ///////////////////////////////////////////////////////////////////////
+TutorialEvent::TutorialEventParam::TutorialEventParam() {
+	AddField("startTimeScale", startTimeScale_).Category("TimeScale");
+	AddField("targetTimeScale", targetTimeScale_).Category("TimeScale");
+	AddField("timeScaleEaseDuration", timeScaleEaseDuration_).Category("TimeScale");
+
+	AddField("animDuration", animDuration_).Category("Animation");
+	AddField("spriteSize", spriteSize_).Category("Animation");
+	AddField("position", position_).Category("Animation");
+}
+CalyxEngine::ParamPath TutorialEvent::TutorialEventParam::GetParamPath() const {
+	return{CalyxEngine::ParamDomain::Game,"TutorialEvent","Actor/Event"};
+}
+
