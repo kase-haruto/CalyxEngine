@@ -11,6 +11,7 @@
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
+#include <Engine/Objects/Event/BaseEventObject.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
 
 BaseScene::BaseScene() {
@@ -61,6 +62,9 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 			default:
 				break;
 			}
+		} else if(auto* ev = dynamic_cast<BaseEventObject*>(e)) {
+			if(auto* m = ev->GetModel())
+				modelRenderer_->RegisterStatic(m, ev->GetWorldTransform(), BillboardMode::None, ev);
 		}
 	}
 
@@ -72,9 +76,9 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 	// =========================================================
 	{
 		auto* dirLight = sceneContext_->GetLightLibrary()->GetDirectionalLight();
-		if(dirLight ) {
+		if(dirLight) {
 			// シーン全体のAABBからシャドウマップの範囲を決定
-			shadowMapSystem_->UpdateShadowBounds(*cam,500.0f, 10.0f);
+			shadowMapSystem_->UpdateShadowBounds(*cam, 500.0f, 10.0f);
 			dirLight->UpdateLightVP(shadowMapSystem_->GetShadowBounds().GetBounds());
 			shadowMapSystem_->SetLightVP(dirLight->GetLightVP());
 		}

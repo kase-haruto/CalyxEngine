@@ -69,7 +69,7 @@ void Model::Map() {
 //		デバッグuiの描画
 /////////////////////////////////////////////////////////////////////////////////////////
 void Model::ShowImGuiInterface() {
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(DEVELOP)
 	BaseModel::ShowImGuiInterface();
 #endif
 }

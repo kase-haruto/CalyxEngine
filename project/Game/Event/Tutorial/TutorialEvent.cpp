@@ -174,8 +174,13 @@ void TutorialEvent::AlwaysUpdate([[maybe_unused]] float dt) {
 			collider_->Update(worldPos, rot);
 			auto* box = dynamic_cast<BoxCollider*>(collider_.get());
 			if(box) box->SetSize(worldTransform_.scale);
-			collider_->Draw();
+			// collider_->Draw();	// 線の描画は止めてモデルで代替
 		}
+	}
+
+	if(model_) {
+		model_->Update(dt);
+		model_->SetIsDrawEnable(isDrawEnable_);
 	}
 
 	UpdateTimeScaleEasing(dt);
