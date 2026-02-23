@@ -43,6 +43,18 @@ void TutorialEvent::Initialize() {
 	if(ctx) {
 		player_ = ctx->FindFirst<Player>().get();
 	}
+
+	// tutorial用スプライトの初期化
+	aimTutorialSprite_ = std::make_unique<Calyx2D::SpriteObject2d>();
+	aimTutorialSprite_->Initialize("Textures/Player/flyingPlayer.dds");
+	// アニメーション設定
+	Calyx2D::SpriteAnimation anim;
+	anim.texturePath   = "Textures/Player/flyingPlayer.dds";
+	anim.division	   = {3, 1};
+	anim.frameDuration = 0.1f;
+	anim.loop		   = true;
+
+	aimTutorialSprite_->AddAnimation("reticleMove", anim);
 }
 
 void TutorialEvent::AlwaysUpdate([[maybe_unused]] float dt) {
@@ -102,6 +114,7 @@ void TutorialEvent::AlwaysUpdate([[maybe_unused]] float dt) {
 		break;
 
 	case State::LockOnPhase:
+		aimTutorialSprite_->Update(dt);
 		if(player_) {
 			auto lockOn = player_->GetLockOn();
 			if(lockOn) {
@@ -184,6 +197,12 @@ void TutorialEvent::AlwaysUpdate([[maybe_unused]] float dt) {
 	}
 
 	UpdateTimeScaleEasing(dt);
+}
+void TutorialEvent::DrawUISprite(class SpriteRenderer* spriteRenderer) const {
+	// フェーズごとにUIスプライトを描画
+	if(state_ == State::LockOnPhase) {
+		aimTutorialSprite_->Draw(spriteRenderer);
+	}
 }
 
 void TutorialEvent::UpdateTimeScaleEasing(float alwaysDt) {

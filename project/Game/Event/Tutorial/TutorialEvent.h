@@ -2,6 +2,8 @@
 /* ========================================================================
 /*      include space
 /* ===================================================================== */
+#include "Engine/Objects/2D/Hud/BaseHud.h"
+
 #include <Engine/Objects/Event/BaseEventObject.h>
 
 /*-----------------------------------------------------------------------------------------
@@ -30,6 +32,7 @@ public:
 
 	void Initialize() override;
 	void AlwaysUpdate(float dt) override;
+	void DrawUISprite(class SpriteRenderer* spriteRenderer) const;
 
 	// gui
 	void ShowGui() override;
@@ -60,4 +63,6 @@ private:
 	float currentTimeScale_		 = 1.0f;
 	float timeScaleEaseTimer_	 = 0.0f;
 	float timeScaleEaseDuration_ = 0.5f;
+
+	std::unique_ptr<Calyx2D::SpriteObject2d> aimTutorialSprite_;
 };
