@@ -27,7 +27,7 @@ namespace CalyxEditor {
 		virtual ~IOnViewportTool() = default;
 
 		virtual void RenderOverlay(const ImVec2& basePos) = 0;
-		virtual void RenderToolbar()					  = 0;
+		virtual void RenderToolbar()					  {}
 
 		virtual ImVec2 GetOverlayOffset() const = 0;
 	};

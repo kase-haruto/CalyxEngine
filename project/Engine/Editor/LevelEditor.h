@@ -1,5 +1,6 @@
 #pragma once
 // engine
+#include <Engine/Application/UI/EngineUI/DebugOverlay.h>
 #include <Engine/Application/UI/EngineUI/EditorMenu.h>
 #include <Engine/Application/UI/EngineUI/IEngineUI.h>
 #include <Engine/Application/UI/EngineUI/Manipulator.h>
@@ -127,6 +128,7 @@ namespace CalyxEditor {
 		std::unique_ptr<Viewport>			debugViewport_;		 //< デバッグビューポート
 		std::unique_ptr<Viewport>			pickingViewport_;	 //< ピッキングビューポート
 		std::unique_ptr<PerformanceOverlay> performanceOverlay_; //< パフォーマンスオーバーレイ
+		std::unique_ptr<DebugOverlay>		debugOverlay_;		 //< デバッグオーバーレイ
 
 		// 状態
 		bool		  lastPlaying_	  = false;

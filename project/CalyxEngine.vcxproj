@@ -187,6 +187,7 @@ copy /Y "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll"       "C:\My
     <ClCompile Include="Engine\Application\Effects\FxGuiHelpers.cpp" />
     <ClCompile Include="Engine\Application\Effects\FxObject.cpp" />
     <ClCompile Include="Engine\Application\Effects\Particle\Module\OverLifetime\OverLifetimeModule.cpp" />
+    <ClCompile Include="Engine\Application\UI\EngineUI\DebugOverlay.cpp" />
     <ClCompile Include="Engine\Application\UI\EngineUI\DebugTextOverlay.cpp" />
     <ClCompile Include="Engine\Application\UI\GUI\ImGuiJapaneaseFonts.cpp" />
     <ClCompile Include="Engine\Editor\ImguiLayoutService.cpp" />
@@ -684,6 +685,8 @@ copy /Y "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll"       "C:\My
     <ClInclude Include="Engine\Application\Effects\FxGuiHelpers.h" />
     <ClInclude Include="Engine\Application\Effects\FxObject.h" />
     <ClInclude Include="Engine\Application\Effects\Particle\Module\OverLifetime\OverLifetimeModule.h" />
+    <ClInclude Include="Engine\Application\UI\EngineUI\DebugOverlay.h" />
+    <ClInclude Include="Engine\Application\UI\EngineUI\DebugTextManager.h" />
     <ClInclude Include="Engine\Application\UI\EngineUI\DebugTextOverlay.h" />
     <ClInclude Include="Engine\Application\UI\GUI\ImGuiJapaneaseFonts.h" />
     <ClInclude Include="Engine\Editor\ImguiLayoutService.h" />

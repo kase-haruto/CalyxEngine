@@ -3,6 +3,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////
 #include <Engine/Application/System/Environment.h>
 #include <Engine/Application/UI/EngineUI/Core/EngineUICore.h>
+#include <Engine/Application/UI/EngineUI/DebugTextManager.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 
 // uiPanel
@@ -34,6 +35,7 @@ namespace CalyxEditor {
 	//						更新
 	////////////////////////////////////////////////////////////////////////////////////////////
 	void EngineUICore::Update() {
+		DebugTextManager::Clear();
 		levelEditor_->Update();
 	}
 

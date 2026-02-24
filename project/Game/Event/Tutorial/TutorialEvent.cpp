@@ -4,6 +4,7 @@
 /* ===================================================================== */
 #include "Engine/Application/System/CalyxCore.h"
 #include "Engine/Objects/Collider/BoxCollider.h"
+#include <Engine/Application/UI/EngineUI/DebugTextManager.h>
 #include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Foundation/Input/Input.h>
 #include <Engine/Foundation/Utility/Ease/CxEase.h>
@@ -199,34 +200,19 @@ void TutorialEvent::UpdateTimeScaleEasing(float alwaysDt) {
 void TutorialEvent::ShowTutorialMsg() {
 	if(state_ == State::None || state_ == State::Complete) return;
 
-	ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize |
-							 ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing |
-							 ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove;
-
-	const ImGuiViewport* viewport  = ImGui::GetMainViewport();
-	ImVec2				 work_pos  = viewport->WorkPos;
-	ImVec2				 work_size = viewport->WorkSize;
-	ImVec2				 window_pos;
-	window_pos.x = work_pos.x + work_size.x * 0.5f;
-	window_pos.y = work_pos.y + work_size.y * 0.2f;
-	ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-	ImGui::SetNextWindowBgAlpha(0.7f);
-
-	if(ImGui::Begin("TutorialMessage", nullptr, flags)) {
-		ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[0]); // デフォルトフォント
-		if(state_ == State::LockOnPhase) {
-			ImGui::TextColored(ImVec4(1, 1, 0, 1), "TUTORIAL: LOCK ON ALL ENEMIES");
-			ImGui::Text("Move Reticle with WASD / Left Stick and Lock On automatically.");
-		} else if(state_ == State::AttackPhase) {
-			ImGui::TextColored(ImVec4(1, 1, 0, 1), "TUTORIAL: PRESS ATTACK BUTTON");
-			ImGui::Text("Press SPACE / RB to defeat all locked enemies!");
-		} else if(state_ == State::WaitingForDeath) {
-			ImGui::TextColored(ImVec4(0, 1, 0, 1), "TUTORIAL: ATTACKING!");
-			ImGui::Text("Waiting for impact...");
-		}
-		ImGui::PopFont();
+	if(state_ == State::LockOnPhase) {
+		CalyxEditor::DebugTextManager::AddMessage("TUTORIAL: LOCK ON ALL ENEMIES",
+												  "Move Reticle with WASD / Left Stick and Lock On automatically.",
+												  ImVec4(1, 1, 0, 1));
+	} else if(state_ == State::AttackPhase) {
+		CalyxEditor::DebugTextManager::AddMessage("TUTORIAL: PRESS ATTACK BUTTON",
+												  "Press SPACE / RB to defeat all locked enemies!",
+												  ImVec4(1, 1, 0, 1));
+	} else if(state_ == State::WaitingForDeath) {
+		CalyxEditor::DebugTextManager::AddMessage("TUTORIAL: ATTACKING!",
+												  "Waiting for impact...",
+												  ImVec4(0, 1, 0, 1));
 	}
-	ImGui::End();
 }
 
 void TutorialEvent::ShowDebugState(size_t enemyCount) {
