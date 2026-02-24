@@ -2,6 +2,12 @@
 namespace CalyxEditor {
 	ImVec2 BaseOnViewportTool::CalcScreenPosition(const ImVec2& viewportPos,
 												  const ImVec2& viewportSize) const {
+
+		// 座標モードが絶対座標なら設定されている絶対座標を返す。
+		if(positionMode_ == OverlayPositionMode::Absolute) {
+			return absolutePosition_;
+		}
+		
 		ImVec2 anchor;
 
 		switch(align_) {
