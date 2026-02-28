@@ -147,17 +147,14 @@ void BaseEnemyHomingBullet::Update(float dt) {
 	// ---- カメラ距離によるエフェクトのフェード ----
 	if(auto fx = trailFx_.lock()) {
 		if(auto cam = SceneContext::Current()->FindFirst<RailCamera>()) {
-			// Shader側で10m〜50mのフェードを実行
-			fx->SetCameraFade(10.0f, 50.0f);
-			fx->SetDrawEnable(true);
-
-			// 密度スケーリングのために AlphaMultiplier も反映
 			const CalyxMath::Vector3 camPos = cam->GetWorldTransform().GetWorldPosition();
 			const CalyxMath::Vector3 myPos	= GetCenterPos();
 			float					 dist	= (myPos - camPos).Length();
 
 			float alpha = std::clamp((dist - 10.0f) / (50.0f - 10.0f), 0.0f, 1.0f);
-			fx->SetAlphaMultiplier(alpha);
+			CalyxMath::Vector4 color = model_->GetColor();
+			color.w = alpha;
+			model_->SetColor(color);
 		}
 	}
 }
