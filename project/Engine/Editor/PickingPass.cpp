@@ -337,7 +337,7 @@ void PickingPass::Render(
 
 			// [3] Billboard (Default None)
 			inst.model->EnsureBillboardCapacity(device, 1);
-			std::vector<GpuBillboardParams> bb = {{0, {0, 0, 0}}};
+			std::vector<GpuBillboardParams> bb {};
 			inst.model->UploadBillboardParams(bb);
 			cmd->SetGraphicsRootDescriptorTable(3, inst.model->GetBillboardSrv());
 

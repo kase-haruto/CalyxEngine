@@ -1,17 +1,18 @@
 #pragma once
 /* ========================================================================
-    include space
+	include space
    ===================================================================== */
 // Engine
+#include <Data/Engine/Configs/Scene/Objects/Particle/ParticleSystemObjectConfig.h>
+#include <Engine/Application/Effects/FxSystem.h>
 #include <Engine/Application/Effects/Particle/Emitter/BaseEmitter.h>
 #include <Engine/Objects/3D/Actor/SceneObject.h>
-#include <Data/Engine/Configs/Scene/Objects/Particle/ParticleSystemObjectConfig.h>
 #include <Engine/Objects/ConfigurableObject/ConfigurableObject.h>
-#include <Engine/Application/Effects/FxSystem.h>
 
 // C++
-#include <string>
 #include <memory>
+#include <string>
+
 namespace CalyxEffect {
 
 	/*-----------------------------------------------------------------------------------------
@@ -40,6 +41,9 @@ namespace CalyxEffect {
 		void Stop() const;
 		void Reset() const;
 
+		void SetAlphaMultiplier(float a);
+		void SetCameraFade(float nearZ, float farZ);
+
 		/* -------- config -------- */
 		void ApplyConfig();
 		void ApplyConfigFromJson(const nlohmann::json& j) override;
@@ -63,5 +67,4 @@ namespace CalyxEffect {
 
 		std::shared_ptr<CalyxEffect::FxEmitter> emitter_;
 	};
-}
-
+} // namespace CalyxEffect

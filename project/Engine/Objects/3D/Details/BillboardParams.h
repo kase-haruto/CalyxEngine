@@ -8,8 +8,14 @@ enum class BillboardMode : uint32_t {
 };
 
 struct GpuBillboardParams {
-	uint32_t mode;   // 0=None, 1=Full, 2=AxisY
-	float    pad[3]; // 16B アライン
-	
+	uint32_t mode; // 0=None, 1=Full, 2=AxisY
+	float	 pad[3];
 };
 static_assert(sizeof(GpuBillboardParams) == 16, "GpuBillboardParams must be 16 bytes");
+
+struct GpuFadeParams {
+	float fadeNear = 0.0f;
+	float fadeFar  = 0.0f;
+	float pad[2];
+};
+static_assert(sizeof(GpuFadeParams) == 16, "GpuFadeParams must be 16 bytes");

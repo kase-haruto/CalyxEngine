@@ -47,6 +47,8 @@ namespace CalyxEffect {
 		void Reset();		  //< リセット
 		bool LoadTextureByGuid(const Guid& g);
 
+		void SetCameraFade(float nearZ, float farZ) override;
+
 		//--------- config -------------------------------------------------//
 		// 適用
 		void ApplyConfigFrom(const EmitterConfig& config) override;
@@ -56,9 +58,9 @@ namespace CalyxEffect {
 		//--------- accessor -----------------------------------------------//
 		const std::vector<FxUnit>& GetUnits() const { return units_; }
 
-		bool					   IsDrawEnable() { return HasFlag(DrawEnable); }
-		void					   SetDrawEnable(bool isEnable) { SetFlag(DrawEnable, isEnable); }
-		bool					   IsPlaying() const override { return HasFlag(Playing); }
+		bool							   IsDrawEnable() { return HasFlag(DrawEnable); }
+		void							   SetDrawEnable(bool isEnable) { SetFlag(DrawEnable, isEnable); }
+		bool							   IsPlaying() const override { return HasFlag(Playing); }
 		const D3D12_GPU_DESCRIPTOR_HANDLE& GetTextureHandle() const { return textureHandle_; }
 
 		//--------- Timed Preview（一定間隔での自動再生） ---------------//
@@ -90,7 +92,7 @@ namespace CalyxEffect {
 	private:
 		enum FlagBits : uint32_t {
 			None		   = 0,
-			FollowOneShot = 1u << 0,
+			FollowOneShot  = 1u << 0,
 			Playing		   = 1u << 1,
 			FirstFrame	   = 1u << 2,
 			Complement	   = 1u << 3,
@@ -99,7 +101,10 @@ namespace CalyxEffect {
 		};
 		inline bool HasFlag(FlagBits f) const { return (flags_ & f) != 0; }
 		inline void SetFlag(FlagBits f, bool enable) {
-			if (enable) flags_ |= f; else flags_ &= ~f;
+			if(enable)
+				flags_ |= f;
+			else
+				flags_ &= ~f;
 		}
 
 	public:
@@ -120,8 +125,8 @@ namespace CalyxEffect {
 		//					private variable
 		//===================================================================*/
 		BlendMode					blendMode_ = BlendMode::ADD; //< ブレンドモード
-		const int					kMaxUnits_ = 4096; 			 //< 最大パーティクル数
-		D3D12_GPU_DESCRIPTOR_HANDLE textureHandle_{}; // 初期化
+		const int					kMaxUnits_ = 4096;			 //< 最大パーティクル数
+		D3D12_GPU_DESCRIPTOR_HANDLE textureHandle_{};			 // 初期化
 		Guid						textureGuid_{};
 
 		std::unique_ptr<FxModuleContainer> moduleContainer_; // モジュールコンテナ
@@ -150,7 +155,11 @@ namespace CalyxEffect {
 		DxConstantBuffer<GpuBillboardParams> billboardCB_;
 		BillboardMode						 billboardMode_ = BillboardMode::Full;
 
-		std::function<void()> onFinished_;			   // 終了時コールバック
-		bool							 isFinishedNotified_ = false; // すでに通知したかどうか
+		// === camera fade ===
+		GpuFadeParams					fadeParams_{};
+		DxConstantBuffer<GpuFadeParams> fadeCB_;
+
+		std::function<void()> onFinished_;				   // 終了時コールバック
+		bool				  isFinishedNotified_ = false; // すでに通知したかどうか
 	};
 } // namespace CalyxEffect

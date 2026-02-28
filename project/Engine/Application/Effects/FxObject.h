@@ -41,6 +41,9 @@ namespace CalyxEffect {
 		///< summary>すべてのエミッターをリスタート</summary>
 		void RestartAll() const;
 
+		void SetAlphaMultiplier(float a);
+		void SetCameraFade(float nearZ, float farZ);
+
 		//--------- debugUi ---------------------------------------------------
 		void ShowGui() override;
 		void LoadFromPath(const std::string& path);

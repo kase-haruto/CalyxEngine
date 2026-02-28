@@ -64,8 +64,9 @@ VertexShaderOutput main(uint vid : SV_VertexID, uint iid : SV_InstanceID) {
 	o.texcoord = uv;
 
     // フェードアウト（寿命に応じ α 減衰）
-	float fade = saturate(1.0f - p.currentTime / p.lifeTime);
-	o.color = float4(p.color.rgb, p.color.a * fade);
+	float lifeFade = saturate(1.0f - p.currentTime / p.lifeTime);
+	o.color = float4(p.color.rgb, p.color.a * lifeFade);
+	o.fade  = 1.0f; // GPU パーティクルはカメラ距離ディザなし
 
 	return o;
 }
