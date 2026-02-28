@@ -94,13 +94,25 @@ namespace CalyxEffect {
 	//		再再生
 	/////////////////////////////////////////////////////////////////////////////////////////
 	void FxObject::RestartAll() const {
-		auto& selfEmitters = const_cast<std::vector<std::weak_ptr<ParticleSystemObject>>&>(emitters_);
-		for(auto it = selfEmitters.begin(); it != selfEmitters.end();) {
-			if(auto sp = it->lock()) {
-				sp->Reset();
-				++it;
-			} else {
-				it = selfEmitters.erase(it);
+		for(auto& wp : emitters_) {
+			if(auto sp = wp.lock()) {
+				sp->ResetRecursive();
+			}
+		}
+		PlayAll();
+	}
+
+	void FxObject::SetAlphaMultiplier(float a) {
+		for(auto& wp : emitters_) {
+			if(auto sp = wp.lock()) {
+				sp->SetAlphaMultiplier(a);
+			}
+		}
+	}
+	void FxObject::SetCameraFade(float nearZ, float farZ) {
+		for(auto& wp : emitters_) {
+			if(auto sp = wp.lock()) {
+				sp->SetCameraFade(nearZ, farZ);
 			}
 		}
 	}

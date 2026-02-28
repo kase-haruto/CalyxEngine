@@ -135,5 +135,24 @@ namespace CalyxEffect {
 	void ParticleSystemObject::Play() const { emitter_->Play(); }
 	void ParticleSystemObject::Stop() const { emitter_->Stop(); }
 	void ParticleSystemObject::Reset() const { emitter_->Reset(); }
+
+	void ParticleSystemObject::SetAlphaMultiplier(float a) {
+		if(emitter_) emitter_->SetAlphaMultiplier(a);
+		for(auto& child : children_) {
+			if(auto ps = std::dynamic_pointer_cast<ParticleSystemObject>(child)) {
+				ps->SetAlphaMultiplier(a);
+			}
+		}
+	}
+
+	void ParticleSystemObject::SetCameraFade(float nearZ, float farZ) {
+		if(emitter_) emitter_->SetCameraFade(nearZ, farZ);
+		for(auto& child : children_) {
+			if(auto ps = std::dynamic_pointer_cast<ParticleSystemObject>(child)) {
+				ps->SetCameraFade(nearZ, farZ);
+			}
+		}
+	}
+
 	REGISTER_SCENE_OBJECT(ParticleSystemObject)
-}
+} // namespace CalyxEffect
