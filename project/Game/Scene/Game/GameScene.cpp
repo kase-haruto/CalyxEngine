@@ -15,6 +15,7 @@
 
 // game
 #include "Engine/Application/System/Environment.h"
+#include "Game/Event/Tutorial/TutorialEvent.h"
 #include "Game/Scene/Transition/ResultTransitionPayload.h"
 #include "Game/Scene/Utility/SceneTypeUtil.h"
 
@@ -205,6 +206,8 @@ void GameScene::Draw(ID3D12GraphicsCommandList* cmdList,
 
 		// 既存のスプライト登録
 		if(numbersSprite_) { for(auto* sp : numbersSprite_->GetSpritesRaw()) { spriteRenderer_->Register(sp); } }
+		// tutorialスプライト描画
+		if(auto tutorialEvent = sceneContext_->FindFirst<TutorialEvent>()) { tutorialEvent->DrawUISprite(spriteRenderer_.get()); }
 
 		// プレイヤーが持つ追加スプライトを登録
 		if(player) { player->DrawHud(spriteRenderer_.get());}

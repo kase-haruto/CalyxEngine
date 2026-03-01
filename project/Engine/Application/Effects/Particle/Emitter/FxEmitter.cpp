@@ -17,6 +17,7 @@
 #include "Engine/Application/UI/Panels/InspectorPanel.h"
 #include "Engine/Assets/Texture/TextureManager.h"
 #include "Engine/Foundation/Math/MathUtil.h"
+#include "Engine/Graphics/Camera/Manager/CameraManager.h"
 
 #include <externals/imgui/ImGuiFileDialog.h>
 #include <externals/imgui/imgui.h>
@@ -135,7 +136,6 @@ namespace CalyxEffect {
 		// ---- 各パーティクル更新 ----
 		for(auto& fx : units_) {
 			if(!fx.alive) continue;
-
 			if(fx.lifetime > 0.0f) {
 				float t	 = fx.age / fx.lifetime;
 				fx.lifeT = std::clamp(t, 0.0f, 1.0f);
@@ -516,6 +516,7 @@ namespace CalyxEffect {
 	// SetCommand
 	/////////////////////////////////////////////////////////////////////////////////////////
 	void FxEmitter::SetCommand(ID3D12GraphicsCommandList* cmdList) {
+
 		cmdList->SetGraphicsRootConstantBufferView(1, materialBuffer_.GetResource()->GetGPUVirtualAddress()); // [1] gMaterial (b1)
 		cmdList->SetGraphicsRootDescriptorTable(3, GetTextureHandle());										  // [3] gTexture  (t1)
 		cmdList->SetGraphicsRootConstantBufferView(4, billboardCB_.GetResource()->GetGPUVirtualAddress());	  // [4] gBillboard (b2)

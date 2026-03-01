@@ -250,7 +250,7 @@ GraphicsPipelineDesc PipelinePresets::MakeGpuParticle(BlendMode mode) {
 
 	desc.root_
 		.AllowIA()
-		.CBV(0, D3D12_SHADER_VISIBILITY_VERTEX)											 // gCamera (b0)
+		.CBV(0, D3D12_SHADER_VISIBILITY_ALL)											 // gCamera (b0)
 		.CBV(1, D3D12_SHADER_VISIBILITY_PIXEL)											 // gMaterial (b1)
 		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_VERTEX) // gParticle (t0)
 		.SRVTable(1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)	 // gTexture  (t1)

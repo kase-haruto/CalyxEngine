@@ -53,6 +53,11 @@ PixelShaderOutput main(VertexShaderOutput input) {
 	float4 texColor = gTexture.Sample(gSampler, transformedUV.xy);
 	// 合成
 	float4 baseColor = gMaterial.color * texColor * input.color;
+	const float nearStart = 0.0f;
+	const float nearEnd = 100.0f;
+	float distToCamera = distance(input.worldPos, gCamera.cameraPosition);
+	float nearFade = saturate((distToCamera - nearStart) / (nearEnd - nearStart));
+	baseColor.a *= nearFade;
 	// トーンマッピング
 	float exposure = 1.0f;
 	float3 toneMapped = baseColor.rgb * exposure / (baseColor.rgb * exposure + 1.0f);

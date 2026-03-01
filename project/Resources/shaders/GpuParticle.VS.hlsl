@@ -6,16 +6,6 @@ struct VSIn {
 	float2 uv : TEXCOORD0;
 };
 
-struct Camera {
-	float4x4 view;
-	float4x4 projection;
-	float4x4 viewProjection;
-	float3 cameraPosition;
-	float3 camRight;
-	float3 camUp;
-};
-
-ConstantBuffer<Camera> gCamera : register(b0);
 StructuredBuffer<Particle> gParticles : register(t0);
 
 VertexShaderOutput main(uint vid : SV_VertexID, uint iid : SV_InstanceID) {
@@ -62,6 +52,7 @@ VertexShaderOutput main(uint vid : SV_VertexID, uint iid : SV_InstanceID) {
 	VertexShaderOutput o;
 	o.position = mul(float4(worldPos, 1.0f), gCamera.viewProjection);
 	o.texcoord = uv;
+	o.worldPos = worldPos;
 
     // フェードアウト（寿命に応じ α 減衰）
 	float lifeFade = saturate(1.0f - p.currentTime / p.lifeTime);

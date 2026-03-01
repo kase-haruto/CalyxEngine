@@ -15,7 +15,7 @@ void SpriteObject2d::Initialize(const std::string& filePath) {
 }
 
 void SpriteObject2d::Update(float dt) {
-	if(currentAnim_ && division_.first > 1 && division_.second > 1) {
+	if(currentAnim_ && division_.first > 1 && division_.second >= 1) {
 		AnimationUpdate(dt);
 	}
 	sprite_->Update();
@@ -145,4 +145,7 @@ void SpriteObject2d::SetUvRotate(float rot) const {
 }
 void SpriteObject2d::SetUvOffset(const CalyxMath::Vector2& offset) const {
 	sprite_->SetUvOffset(offset);
+}
+void SpriteObject2d::SetFrameDuration(float duration)  {
+	frameDuration_=duration;
 }

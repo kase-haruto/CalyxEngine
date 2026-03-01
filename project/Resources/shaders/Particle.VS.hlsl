@@ -25,15 +25,6 @@ struct ParticleData {
 	float  rotation; // Z軸スピン角
 };
 
-struct Camera {
-	float4x4 view;
-	float4x4 projection;
-	float4x4 viewProjection;
-	float3	 cameraPosition;
-	float3	 camRight;
-	float3	 camUp;
-	float3	 camForward;
-};
 
 struct BillboardParm {
 	uint   gBillboardMode;
@@ -49,7 +40,6 @@ struct FadeParm {
 ///////////////////////////////////////////////////////////////////////////////
 //                            cbuffers
 ///////////////////////////////////////////////////////////////////////////////
-ConstantBuffer<Camera>		  gCamera : register(b0);
 ConstantBuffer<BillboardParm> gBillboardParm : register(b2);
 ConstantBuffer<FadeParm>      gFadeParm      : register(b3);
 
