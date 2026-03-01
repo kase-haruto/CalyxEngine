@@ -70,8 +70,14 @@ void DxGpuResource::InitializeAsDepthStencil(ID3D12Device*				 device,
 	D3D12_HEAP_PROPERTIES heapProps = {};
 	heapProps.Type					= D3D12_HEAP_TYPE_DEFAULT;
 
-	D3D12_CLEAR_VALUE clearValue	= {};
-	clearValue.Format				= (format == DXGI_FORMAT_R24G8_TYPELESS) ? DXGI_FORMAT_D24_UNORM_S8_UINT : format;
+	D3D12_CLEAR_VALUE clearValue = {};
+	if(format == DXGI_FORMAT_R24G8_TYPELESS) {
+		clearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	} else if(format == DXGI_FORMAT_R32_TYPELESS) {
+		clearValue.Format = DXGI_FORMAT_D32_FLOAT;
+	} else {
+		clearValue.Format = format;
+	}
 	clearValue.DepthStencil.Depth	= 1.0f;
 	clearValue.DepthStencil.Stencil = 0;
 

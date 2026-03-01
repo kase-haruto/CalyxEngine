@@ -342,7 +342,7 @@ namespace CalyxEngine {
 		psoDesc.PrimitiveTopologyType			   = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE; // 線描画用に設定
 		psoDesc.SampleDesc.Count				   = 1;
 		psoDesc.SampleMask						   = D3D12_DEFAULT_SAMPLE_MASK;
-		psoDesc.DSVFormat						   = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		psoDesc.DSVFormat						   = DXGI_FORMAT_D32_FLOAT;
 
 		// パイプラインステートオブジェクトの作成
 		if(!pipelineStateManager_->CreatePipelineState(Line, L"Fragment.VS.hlsl", L"Fragment.PS.hlsl", rootSignatureDesc, psoDesc, blendMode)) {
@@ -459,7 +459,7 @@ namespace CalyxEngine {
 		psoDesc.PrimitiveTopologyType			   = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		psoDesc.SampleDesc.Count				   = 1;
 		psoDesc.SampleMask						   = D3D12_DEFAULT_SAMPLE_MASK;
-		psoDesc.DSVFormat						   = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		psoDesc.DSVFormat						   = DXGI_FORMAT_D32_FLOAT;
 
 		// shaderPath
 		std::wstring vsPath = L"Effect.VS.hlsl";
@@ -587,7 +587,7 @@ namespace CalyxEngine {
 		psoDesc.PrimitiveTopologyType			   = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		psoDesc.SampleDesc.Count				   = 1;
 		psoDesc.SampleMask						   = D3D12_DEFAULT_SAMPLE_MASK;
-		psoDesc.DSVFormat						   = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		psoDesc.DSVFormat						   = DXGI_FORMAT_D32_FLOAT;
 
 		// shaderPath
 		std::wstring vsPath = L"Skybox.VS.hlsl";

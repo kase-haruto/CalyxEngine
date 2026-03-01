@@ -31,11 +31,11 @@ void OffscreenRenderTarget::Initialize(ID3D12Device* device, uint32_t width, uin
 	// Depthバッファ作成
 	if(!depthResource_) {
 		depthResource_ = std::make_unique<DxGpuResource>();
-		depthResource_->InitializeAsDepthStencil(device, width, height, DXGI_FORMAT_R24G8_TYPELESS);
+		depthResource_->InitializeAsDepthStencil(device, width, height, DXGI_FORMAT_R32_TYPELESS);
 		depthResource_->CreateDSV(device, dsvHandle_.cpu);
 		depthResource_->CreateSRV(device);
 	} else {
-		depthResource_->InitializeAsDepthStencil(device, width, height, DXGI_FORMAT_R24G8_TYPELESS);
+		depthResource_->InitializeAsDepthStencil(device, width, height, DXGI_FORMAT_R32_TYPELESS);
 		depthResource_->CreateDSV(device, dsvHandle_.cpu);
 		depthResource_->UpdateSRV(device);
 	}
