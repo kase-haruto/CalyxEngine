@@ -32,6 +32,16 @@ Texture2D<float4> gTexture : register(t1);
 SamplerState gSampler : register(s0);
 
 ///////////////////////////////////////////////////////////////////////////////
+//                            dither
+///////////////////////////////////////////////////////////////////////////////
+static const float4x4 kBayerMatrix = float4x4(
+	0.0 / 16.0,  8.0 / 16.0,  2.0 / 16.0, 10.0 / 16.0,
+	12.0 / 16.0, 4.0 / 16.0, 14.0 / 16.0, 6.0 / 16.0,
+	3.0 / 16.0, 11.0 / 16.0,  1.0 / 16.0,  9.0 / 16.0,
+	15.0 / 16.0, 7.0 / 16.0, 13.0 / 16.0,  5.0 / 16.0
+);
+
+///////////////////////////////////////////////////////////////////////////////
 //                            main
 ///////////////////////////////////////////////////////////////////////////////
 PixelShaderOutput main(VertexShaderOutput input) {
@@ -56,8 +66,13 @@ PixelShaderOutput main(VertexShaderOutput input) {
 
 	output.color = float4(gammaCorrected, baseColor.a);
 
-	// 完全透明なら破棄
-	if(output.color.a <= 0.01f) {
+	// ---- ディザ抜き (Dithered Clipping) ----
+	uint2 pixelPos = uint2(input.position.xy) % 4;
+	float ditherThreshold = kBayerMatrix[pixelPos.y][pixelPos.x];
+
+	// カメラ近傍フェード値(0.0〜1.0)に基づいてピクセルを破棄
+	// fadeNear/Far が設定されていない(0,0)場合は常に 1.0 になり、破棄されない
+	if(input.fade < ditherThreshold) {
 		discard;
 	}
 

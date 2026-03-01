@@ -78,7 +78,13 @@ void BaseCamera::UpdateMatrix() {
 	projectionMatrix_	  = MakePerspectiveFovMatrix(fovAngleY_, aspectRatio_, nearZ_, farZ_);
 	viewProjectionMatrix_ = CalyxMath::Matrix4x4::Multiply(viewMatrix_, projectionMatrix_);
 
-	cameraBuffer_.Update(viewMatrix_, projectionMatrix_, CalyxMath::Matrix4x4::Translation(worldTransform_.matrix.world));
+	// 親の移動を反映したワールド位置で転送
+	const CalyxMath::Vector3 worldPos{
+		worldTransform_.matrix.world.m[3][0],
+		worldTransform_.matrix.world.m[3][1],
+		worldTransform_.matrix.world.m[3][2]
+	};
+	cameraBuffer_.Update(viewMatrix_, projectionMatrix_, worldPos);
 }
 
 /////////////////////////////////////////////////////////////////////////

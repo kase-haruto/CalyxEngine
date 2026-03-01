@@ -81,7 +81,6 @@ CalyxMath::Vector3 Viewport::CalculateSpawnPosForPlace(const ImVec2& imagePos) {
         }
     }
 
-    // ✅ CPU raycast は完全に無効化（ここで終了）
     return spawnPos;
 }
 

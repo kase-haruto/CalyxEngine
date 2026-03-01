@@ -220,11 +220,12 @@ GraphicsPipelineDesc PipelinePresets::MakeParticle(BlendMode mode) {
 
 	desc.root_
 		.AllowIA()
-		.CBV(0,D3D12_SHADER_VISIBILITY_ALL)											 // gCamera (b0)
-		.CBV(1, D3D12_SHADER_VISIBILITY_PIXEL)											 // gMaterial (b1)
-		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_VERTEX) // gParticle (t0)
-		.SRVTable(1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)	 // gTexture  (t1)
-		.CBV(2, D3D12_SHADER_VISIBILITY_VERTEX)											 // gLight   (b2)
+		.CBV(0, D3D12_SHADER_VISIBILITY_VERTEX)											 // [0] gCamera   (b0)
+		.CBV(1, D3D12_SHADER_VISIBILITY_PIXEL)											 // [1] gMaterial (b1)
+		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_VERTEX) // [2] gParticle (t0)
+		.SRVTable(1, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)	 // [3] gTexture  (t1)
+		.CBV(2, D3D12_SHADER_VISIBILITY_VERTEX)											 // [4] gBillboard (b2)
+		.CBV(3, D3D12_SHADER_VISIBILITY_VERTEX)											 // [5] gFade      (b3)
 		.SamplerWrapLinear(0);															 // gSampler (s0)
 
 	return desc;

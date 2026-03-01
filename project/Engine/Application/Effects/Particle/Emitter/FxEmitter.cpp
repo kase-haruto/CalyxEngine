@@ -47,6 +47,8 @@ namespace CalyxEffect {
 		// マテリアル
 		material_.color = CalyxMath::Vector4(1, 1, 1, 1);
 		materialBuffer_.Initialize(GraphicsGroup::GetInstance()->GetDevice());
+		billboardCB_.Initialize(GraphicsGroup::GetInstance()->GetDevice());
+		fadeCB_.Initialize(GraphicsGroup::GetInstance()->GetDevice());
 
 		instanceBuffer_.Initialize(device, kMaxUnits_);
 		instanceBuffer_.CreateSrv(device);
@@ -110,7 +112,8 @@ namespace CalyxEffect {
 			float			   distance	 = moveDelta.Length();
 
 			if(distance > 0.0f && HasFlag(Complement)) {
-				float spawnInterval = 0.02f;
+				// 密度を alphaMultiplier でスケーリング (0.01以下にならないようにガード)
+				float spawnInterval = 0.02f / (std::max)(alphaMultiplier_, 0.01f);
 				int	  trailCount	= static_cast<int>(distance / spawnInterval);
 				for(int i = 0; i < trailCount; ++i) {
 					float			   dist		= static_cast<float>(i) * spawnInterval;
@@ -120,7 +123,8 @@ namespace CalyxEffect {
 				}
 			} else {
 				emitTimer_ += deltaTime;
-				const float interval = emitRate_;
+				// 発生レートも alphaMultiplier でスケーリング
+				const float interval = emitRate_ / (std::max)(alphaMultiplier_, 0.01f);
 				if(emitTimer_ >= interval && units_.size() < kMaxUnits_) {
 					emitTimer_ -= interval;
 					Emit();
@@ -164,7 +168,11 @@ namespace CalyxEffect {
 			material_.uvTransform = uvTransformMatrix;
 		}
 
+		ParticleMaterial renderMat = material_;
+		renderMat.color.w *= alphaMultiplier_;
 		materialBuffer_.TransferData(material_);
+		billboardCB_.TransferData(billboardParams_);
+		fadeCB_.TransferData(fadeParams_);
 		std::erase_if(units_, [](const FxUnit& fx) { return !fx.alive; });
 
 		bool shouldNotify =
@@ -508,9 +516,11 @@ namespace CalyxEffect {
 	// SetCommand
 	/////////////////////////////////////////////////////////////////////////////////////////
 	void FxEmitter::SetCommand(ID3D12GraphicsCommandList* cmdList) {
-		materialBuffer_.SetCommand(cmdList, 1);							// マテリアル
-		cmdList->SetGraphicsRootDescriptorTable(3, GetTextureHandle()); // テクスチャ
-		billboardCB_.SetCommand(cmdList, 4);							// ビルボードCB
+
+		cmdList->SetGraphicsRootConstantBufferView(1, materialBuffer_.GetResource()->GetGPUVirtualAddress()); // [1] gMaterial (b1)
+		cmdList->SetGraphicsRootDescriptorTable(3, GetTextureHandle());										  // [3] gTexture  (t1)
+		cmdList->SetGraphicsRootConstantBufferView(4, billboardCB_.GetResource()->GetGPUVirtualAddress());	  // [4] gBillboard (b2)
+		cmdList->SetGraphicsRootConstantBufferView(5, fadeCB_.GetResource()->GetGPUVirtualAddress());		  // [5] gFade      (b3)
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -603,6 +613,11 @@ namespace CalyxEffect {
 		textureHandle_ = h;
 		textureGuid_   = g;
 		return true;
+	}
+
+	void FxEmitter::SetCameraFade(float nearZ, float farZ) {
+		fadeParams_.fadeNear = nearZ;
+		fadeParams_.fadeFar	 = farZ;
 	}
 
 	// ---- callback ----

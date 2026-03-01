@@ -28,13 +28,20 @@ struct ParticleData {
 
 struct BillboardParm {
 	uint   gBillboardMode;
-	float3 pad;
+	float3 gBillboardPad;
+};
+
+struct FadeParm {
+	float  fadeNear;
+	float  fadeFar;
+	float2 fadePad;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 //                            cbuffers
 ///////////////////////////////////////////////////////////////////////////////
 ConstantBuffer<BillboardParm> gBillboardParm : register(b2);
+ConstantBuffer<FadeParm>      gFadeParm      : register(b3);
 
 ///////////////////////////////////////////////////////////////////////////////
 //                            tables
@@ -105,7 +112,15 @@ VertexShaderOutput main(VertexShaderInput input,
 	VertexShaderOutput o;
 	o.position = mul(float4(worldPos, 1.0f), gCamera.viewProjection);
 	o.texcoord = input.texcoord; // 入力のUVをそのまま使用
-	o.worldPos = worldPos;
-	o.color	   = p.color;
+
+	// ---- カメラ距離によるフェード ----
+	float dist = length(worldPos - gCamera.cameraPosition);
+	float cameraFade = 1.0f;
+	if (gFadeParm.fadeFar > gFadeParm.fadeNear) {
+		cameraFade = saturate((dist - gFadeParm.fadeNear) / (gFadeParm.fadeFar - gFadeParm.fadeNear));
+	}
+
+	o.color = p.color;
+	o.fade  = cameraFade;
 	return o;
 }

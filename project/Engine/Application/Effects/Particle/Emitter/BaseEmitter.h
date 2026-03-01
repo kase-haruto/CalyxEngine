@@ -12,10 +12,10 @@ namespace CalyxEffect {
 
 	enum class ParticlePrimitives {
 		plane = 0, //< 平面
-		sphere,    //< 球
-		cube,      //< 立方体
+		sphere,	   //< 球
+		cube,	   //< 立方体
 		cylinder,  //< 円柱
-		torus,     //< トーラス
+		torus,	   //< トーラス
 		triangle,  //< 三角形
 	};
 
@@ -57,30 +57,35 @@ namespace CalyxEffect {
 		// 掃き出し
 		virtual void ExtractConfigTo(EmitterConfig& config) const = 0;
 
+		virtual void SetAlphaMultiplier(float a) { alphaMultiplier_ = a; }
+		virtual void SetCameraFade(float, float) {}
+
 	public:
 		// accessor -------------------------------------------------
-		virtual CalyxMath::Vector3                      GetWorldPosition() const { return position_; }
-		const std::string&                              GetTexturePath() const { return material_.texturePath; }
-		const ParticleMaterial&                         GetMaterial() const { return material_; }
-		const DxConstantBuffer<ParticleMaterial>&       GetMaterialBuffer() const { return materialBuffer_; }
+		virtual CalyxMath::Vector3						GetWorldPosition() const { return position_; }
+		const std::string&								GetTexturePath() const { return material_.texturePath; }
+		const ParticleMaterial&							GetMaterial() const { return material_; }
+		const DxConstantBuffer<ParticleMaterial>&		GetMaterialBuffer() const { return materialBuffer_; }
 		const DxStructuredBuffer<ParticleConstantData>& GetInstanceBuffer() const { return instanceBuffer_; }
-		const std::string&                              GetModelPath() const { return modelPath; }
+		const std::string&								GetModelPath() const { return modelPath; }
 
-		void                                     SetPrimitive(ParticlePrimitives primitive) { primitive_ = primitive; }
+		void									 SetPrimitive(ParticlePrimitives primitive) { primitive_ = primitive; }
 		const std::optional<ParticlePrimitives>& GetPrimitive() const { return primitive_; }
 
 	protected:
 		//===================================================================*/
 		//					protected variable
 		//===================================================================*/
-		std::optional<ParticlePrimitives>        primitive_ = std::nullopt; //< プリミティブ形状(primitiveで発生する場合)
-		MeshResource                             meshData_;                 //< モデルデータ(使用しない場合はnull)
-		std::string                              modelPath = "plane.obj";   //< モデルパス（デフォルトは平面
-		CalyxMath::Vector3                       position_;                 //< emitterの位置
-		ParticleMaterial                         material_;                 //< パーティクルのマテリアル
-		std::vector<FxUnit>                      units_;                    //< パーティクルユニットの配列
+		std::optional<ParticlePrimitives>		 primitive_ = std::nullopt; //< プリミティブ形状(primitiveで発生する場合)
+		MeshResource							 meshData_;					//< モデルデータ(使用しない場合はnull)
+		std::string								 modelPath = "plane.obj";	//< モデルパス（デフォルトは平面
+		CalyxMath::Vector3						 position_;					//< emitterの位置
+		ParticleMaterial						 material_;					//< パーティクルのマテリアル
+		std::vector<FxUnit>						 units_;					//< パーティクルユニットの配列
 		DxStructuredBuffer<ParticleConstantData> instanceBuffer_;
-		DxConstantBuffer<ParticleMaterial>       materialBuffer_; // パーティクルマテリアルの定数バッファ
+		DxConstantBuffer<ParticleMaterial>		 materialBuffer_; // パーティクルマテリアルの定数バッファ
+
+		float alphaMultiplier_ = 1.0f;
 	};
 
 } // namespace CalyxEffect

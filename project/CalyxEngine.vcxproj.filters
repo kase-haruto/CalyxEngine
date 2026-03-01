@@ -3031,6 +3031,10 @@
     <ClCompile Include="Engine\Editor\ImGuiLayoutSwitcher.cpp" />
     <ClCompile Include="Engine\Editor\ImguiLayoutService.cpp" />
     <ClCompile Include="Engine\Editor\PickingPass.cpp" />
+    <ClCompile Include="Engine\Application\UI\EngineUI\DebugTextOverlay.cpp" />
+    <ClCompile Include="Engine\Graphics\Color\Color.cpp" />
+    <ClCompile Include="Game\Event\Tutorial\TutorialEvent.cpp" />
+    <ClCompile Include="Engine\Application\UI\EngineUI\DebugOverlay.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Battle\Shooting\homing\HomingTarget.h" />
@@ -3042,6 +3046,11 @@
     <ClInclude Include="Engine\Editor\ImGuiLayoutSwitcher.h" />
     <ClInclude Include="Engine\Editor\ImguiLayoutService.h" />
     <ClInclude Include="Engine\Editor\PickingPass.h" />
+    <ClInclude Include="Engine\Application\UI\EngineUI\DebugTextOverlay.h" />
+    <ClInclude Include="Engine\Graphics\Color\Color.h" />
+    <ClInclude Include="Game\Event\Tutorial\TutorialEvent.h" />
+    <ClInclude Include="Engine\Application\UI\EngineUI\DebugOverlay.h" />
+    <ClInclude Include="Engine\Application\UI\EngineUI\DebugTextManager.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\ObjectPicking.PS.hlsl" />

@@ -100,11 +100,13 @@ namespace CalyxEditor {
 		pickingViewport_ = std::make_unique<Viewport>(ViewportType::VIEWPORT_PICKING, "Picking Viewport");
 
 		performanceOverlay_ = std::make_unique<PerformanceOverlay>();
+		debugOverlay_		= std::make_unique<DebugOverlay>();
 
 		// Manipulator をツールとして登録
 		if(auto* manipulator = sceneEditor_->GetManipulator()) {
 			debugViewport_->AddTool(manipulator);
 			debugViewport_->AddTool(performanceOverlay_.get());
+			debugViewport_->AddTool(debugOverlay_.get());
 		}
 
 		// エディターメニューの初期化 ------------------------------------------
