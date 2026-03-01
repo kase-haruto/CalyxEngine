@@ -209,6 +209,7 @@ namespace CalyxScene {
 		if(auto* ctx = ActiveCtx()) ctx->MakeCurrent();
 		CameraManager::SetTypeStatic(CameraType::Debug);
 		auto* debugRT = dx_->GetRenderTargetCollection().Get("DebugView");
+		DrawForRenderTarget(debugRT, cmd, pso);
 
 		if(pickingPass_ && debugRT) {
 			auto vp = debugRT->GetViewport();
@@ -222,7 +223,6 @@ namespace CalyxScene {
 			}
 		}
 
-		DrawForRenderTarget(debugRT, cmd, pso);
 #endif
 
 		if(auto* cam = CameraManager::GetActive()) {

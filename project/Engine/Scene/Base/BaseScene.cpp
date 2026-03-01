@@ -64,10 +64,8 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 			}
 		} else if(auto* ev = dynamic_cast<BaseEventObject*>(e)) {
 #if defined(_DEBUG) || defined(DEVELOP)
-			if(rt->GetRenderTargetType() == RenderTargetType::DebugView) {
-				if(auto* m = ev->GetModel()) {
-					modelRenderer_->RegisterStatic(m, ev->GetWorldTransform(), BillboardMode::None, ev);
-				}
+			if(auto* m = ev->GetModel()) {
+				modelRenderer_->RegisterStatic(m, ev->GetWorldTransform(), BillboardMode::None, ev);
 			}
 #endif
 		}
