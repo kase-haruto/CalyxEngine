@@ -35,10 +35,10 @@ SamplerState gSampler : register(s0);
 //                            dither
 ///////////////////////////////////////////////////////////////////////////////
 static const float4x4 kBayerMatrix = float4x4(
-	0.0 / 16.0,  8.0 / 16.0,  2.0 / 16.0, 10.0 / 16.0,
+	0.0 / 16.0, 8.0 / 16.0, 2.0 / 16.0, 10.0 / 16.0,
 	12.0 / 16.0, 4.0 / 16.0, 14.0 / 16.0, 6.0 / 16.0,
-	3.0 / 16.0, 11.0 / 16.0,  1.0 / 16.0,  9.0 / 16.0,
-	15.0 / 16.0, 7.0 / 16.0, 13.0 / 16.0,  5.0 / 16.0
+	3.0 / 16.0, 11.0 / 16.0, 1.0 / 16.0, 9.0 / 16.0,
+	15.0 / 16.0, 7.0 / 16.0, 13.0 / 16.0, 5.0 / 16.0
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -53,11 +53,6 @@ PixelShaderOutput main(VertexShaderOutput input) {
 	float4 texColor = gTexture.Sample(gSampler, transformedUV.xy);
 	// 合成
 	float4 baseColor = gMaterial.color * texColor * input.color;
-	const float nearStart = 0.0f;
-	const float nearEnd = 100.0f;
-	float distToCamera = distance(input.worldPos, gCamera.cameraPosition);
-	float nearFade = saturate((distToCamera - nearStart) / (nearEnd - nearStart));
-	baseColor.a *= nearFade;
 	// トーンマッピング
 	float exposure = 1.0f;
 	float3 toneMapped = baseColor.rgb * exposure / (baseColor.rgb * exposure + 1.0f);
