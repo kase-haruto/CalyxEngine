@@ -49,7 +49,9 @@ namespace CalyxGraphics {
 		// バッファが足りないならリサイズ
 		if(!instanceBuffer_.IsValid() ||
 		   instanceBuffer_.GetElementCount() < count) {
-			instanceBuffer_.Resize(device, count);
+			UINT newCount = instanceBuffer_.GetElementCount() ? instanceBuffer_.GetElementCount() * 2 : 128u;
+			newCount	  = (std::max)(newCount, count);
+			instanceBuffer_.Resize(device, newCount);
 		}
 	}
 
@@ -57,15 +59,14 @@ namespace CalyxGraphics {
 	//  バッファのアップロード
 	/////////////////////////////////////////////////////////////////////////////////
 	void RaytracingScene::Upload() {
-		if (instances_.empty()) return;
+		if(instances_.empty()) return;
 		// バッファが有効であることを確認
 		assert(instanceBuffer_.IsValid());
 		// インスタンスデータをコピー
 		std::memcpy(
 			instanceBuffer_.Data(),
 			instances_.data(),
-			sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * instances_.size()
-		);
+			sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * instances_.size());
 	}
 
 	///////////////////////////////////////////////////////////////////////////////

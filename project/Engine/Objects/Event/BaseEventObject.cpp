@@ -32,6 +32,8 @@ BaseEventObject::BaseEventObject() {
 	model_->SetBlendMode(BlendMode::ALPHA);
 	model_->SetColor(CalyxMath::Vector4(0.0f, 1.0f, 0.0f, 0.5f));
 
+	isCastShadow_ = false; // 影を落とさない
+
 	baseConfig_.SetOnApplied([this](const EventConfig&) {
 		this->ApplyConfig();
 	});
@@ -59,6 +61,8 @@ BaseEventObject::BaseEventObject(const std::string& name) {
 	model_->SetBlendMode(BlendMode::ALPHA);
 	model_->SetColor(CalyxMath::Vector4(0.0f, 1.0f, 0.0f, 0.5f));
 
+	isCastShadow_ = false; // 影を落とさない
+
 	baseConfig_.SetOnApplied([this](const EventConfig&) {
 		this->ApplyConfig();
 	});
@@ -80,7 +84,7 @@ void BaseEventObject::Initialize() {
 	// debug/developのみ描画
 #if defined(_DEBUG) || defined(DEVELOP)
 	isDrawEnable_ = true;
-#else 
+#else
 	isDrawEnable_ = false;
 #endif
 }
@@ -122,7 +126,7 @@ void BaseEventObject::ShowGui() {
 
 void BaseEventObject::DerivativeGui() {
 	ImGui::SeparatorText("objectParam");
-	model_->ShowImGuiInterface();	
+	model_->ShowImGuiInterface();
 }
 
 void BaseEventObject::ConfigGUi() {

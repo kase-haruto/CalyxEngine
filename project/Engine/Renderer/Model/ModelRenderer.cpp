@@ -145,10 +145,12 @@ void ModelRenderer::PreCullAndBatch(const Camera3d* camera) {
 			}
 
 			// -------------------------
-			// ShadowPass：無条件で登録
+			// ShadowPass：無条件で登録 (影を落とす場合のみ)
 			// -------------------------
-			staticVisibleForShadow_[model].push_back(inst.tf);
-			ExpandSceneBounds(inst.worldAABB);
+			if(!inst.owner || inst.owner->IsCastShadow()) {
+				staticVisibleForShadow_[model].push_back(inst.tf);
+				ExpandSceneBounds(inst.worldAABB);
+			}
 
 			// -------------------------
 			// MainPass：カメラカリング
@@ -177,10 +179,12 @@ void ModelRenderer::PreCullAndBatch(const Camera3d* camera) {
 			}
 
 			// -------------------------
-			// ShadowPass：無条件で登録
+			// ShadowPass：無条件で登録 (影を落とす場合のみ)
 			// -------------------------
-			skinnedVisibleForShadow_[model].push_back(inst.tf);
-			ExpandSceneBounds(inst.worldAABB);
+			if(!inst.owner || inst.owner->IsCastShadow()) {
+				skinnedVisibleForShadow_[model].push_back(inst.tf);
+				ExpandSceneBounds(inst.worldAABB);
+			}
 
 			// -------------------------
 			// MainPass：カメラカリング

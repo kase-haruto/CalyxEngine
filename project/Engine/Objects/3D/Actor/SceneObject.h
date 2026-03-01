@@ -109,25 +109,26 @@ public:
 	// Accessors
 	// =======================
 	const std::vector<std::shared_ptr<SceneObject>>& GetChildren() const { return children_; }
-
-	const WorldTransform&		 GetWorldTransform() const { return worldTransform_; }
-	WorldTransform&				 GetWorldTransform() { return worldTransform_; }
-	std::shared_ptr<SceneObject> GetParent() const { return parent_.lock(); }
-	virtual std::string_view	 GetTypeName() const { return "SceneObject"; }
-	ObjectType					 GetObjectType() const { return objectType_; }
-	const Guid&					 GetGuid() const { return id_; }
-	const std::string&			 GetName() const { return name_; }
-	const std::string&			 GetConfigPath() const;
-	bool						 IsEnableRaycast() const { return isEnableRaycast_; }
-	bool						 IsDrawEnable() const { return isDrawEnable_; }
-	bool						 IsPickable() const { return isEnablePicking_; }
-	bool						 IsTransient() const { return isTransient_; }
-	uint32_t					 GetPickingID() const { return pickingID_; }
+	const WorldTransform&							 GetWorldTransform() const { return worldTransform_; }
+	WorldTransform&									 GetWorldTransform() { return worldTransform_; }
+	std::shared_ptr<SceneObject>					 GetParent() const { return parent_.lock(); }
+	virtual std::string_view						 GetTypeName() const { return "SceneObject"; }
+	ObjectType										 GetObjectType() const { return objectType_; }
+	const Guid&										 GetGuid() const { return id_; }
+	const std::string&								 GetName() const { return name_; }
+	const std::string&								 GetConfigPath() const;
+	bool											 IsEnableRaycast() const { return isEnableRaycast_; }
+	bool											 IsDrawEnable() const { return isDrawEnable_; }
+	bool											 IsPickable() const { return isEnablePicking_; }
+	bool											 IsTransient() const { return isTransient_; }
+	bool											 IsCastShadow() const { return isCastShadow_; }
+	uint32_t										 GetPickingID() const { return pickingID_; }
 
 	void		 SetGuid(const Guid& g) { id_ = g; }
 	virtual void SetDrawEnable(bool enable) { isDrawEnable_ = enable; }
 	void		 SetEnablePicking(bool enable) { isEnablePicking_ = enable; }
 	void		 SetTransient(bool enable) { isTransient_ = enable; }
+	void		 SetCastShadow(bool enable) { isCastShadow_ = enable; }
 	void		 SetParent(const std::shared_ptr<SceneObject>& newParentSp, bool inheritScale = true);
 	void		 SetEnableRaycast(bool enable) { isEnableRaycast_ = enable; }
 	void		 SetPickingID(uint32_t id) { pickingID_ = id; }
@@ -164,5 +165,6 @@ protected:
 	bool	 isDrawEnable_	  = true;  // 描画有効/無効
 	bool	 isEnablePicking_ = true;  // ピッキング有効
 	bool	 isTransient_	  = false; // 一時的（保存・階層除外）
+	bool 	isCastShadow_	  = true;  // 影を落とすか
 	uint32_t pickingID_		  = 0;
 };
