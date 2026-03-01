@@ -98,6 +98,7 @@ namespace Calyx2D {
 		void SetUvTranslate(const CalyxMath::Vector2& uv) const;
 		void SetUvRotate(float rot) const;
 		void SetUvOffset(const CalyxMath::Vector2& offset) const; // 加算したいなら
+		void SetFrameDuration(float duration) ;
 
 	private:
 		/** \brief アニメーション更新処理

@@ -1,0 +1,16 @@
+{
+    "fields": {
+        "animDuration": 0.5,
+        "position": [
+            640.5999755859375,
+            414.79998779296875
+        ],
+        "spriteSize": [
+            125.0,
+            64.0
+        ],
+        "startTimeScale": 1.0,
+        "targetTimeScale": 1.0,
+        "timeScaleEaseDuration": 0.5
+    }
+}
