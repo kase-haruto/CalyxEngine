@@ -221,6 +221,7 @@ namespace CalyxScene {
 				}
 				pickingPass_->Render(cmd, renderer, pso);
 			}
+			debugRT->SetRenderTarget(cmd);
 		}
 
 #endif

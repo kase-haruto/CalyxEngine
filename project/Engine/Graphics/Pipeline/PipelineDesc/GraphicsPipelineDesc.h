@@ -3,18 +3,20 @@
 /* include space
 /* ===================================================================== */
 // engine
-#include <Engine/graphics/Pipeline/RootSig/RootSignatureBuilder.h>
 #include <Engine/graphics/Pipeline/BlendMode/BlendMode.h>
+#include <Engine/graphics/Pipeline/RootSig/RootSignatureBuilder.h>
+
 
 // c++
+#include <d3d12.h>
 #include <string>
 #include <vector>
-#include <d3d12.h>
+
 
 /* ========================================================================
 /* パイプラインですく
 /* ===================================================================== */
-struct GraphicsPipelineDesc{
+struct GraphicsPipelineDesc {
 public:
 	//===================================================================*/
 	//		functions
@@ -60,32 +62,32 @@ public:
 	//		variables
 	//===================================================================*/
 	// shaderPath -------------------------------------------------------//
-	std::wstring vs_;		//< vertex		shader path
-	std::wstring ps_;		//< pixel		shader path
-	std::wstring cs_;		//< compute		shader path
-	bool isCompute_ = false;
+	std::wstring vs_; //< vertex		shader path
+	std::wstring ps_; //< pixel		shader path
+	std::wstring cs_; //< compute		shader path
+	bool		 isCompute_ = false;
 
 	// rootSignature ---------------------------------------------------//
-	RootSignatureBuilder root_;	//< root signature
+	RootSignatureBuilder root_; //< root signature
 
 	// input layout ----------------------------------------------------//
 	std::vector<D3D12_INPUT_ELEMENT_DESC> inputElems_;
 
 	// render target format --------------------------------------------//
-	DXGI_FORMAT dsvFormat_ = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	std::vector<DXGI_FORMAT>  rtvFormats_ = {DXGI_FORMAT_R8G8B8A8_UNORM};
-	UINT sampleCount_ = 1;
+	DXGI_FORMAT				 dsvFormat_	  = DXGI_FORMAT_D32_FLOAT;
+	std::vector<DXGI_FORMAT> rtvFormats_  = {DXGI_FORMAT_R8G8B8A8_UNORM};
+	UINT					 sampleCount_ = 1;
 
 	// render‑state ----------------------------------------------------//
-	D3D12_RASTERIZER_DESC rasterizer_ {CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT)};
-	D3D12_BLEND_DESC blend_ {CD3DX12_BLEND_DESC(D3D12_DEFAULT)};
-	D3D12_DEPTH_STENCIL_DESC depth_ {CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT)};
+	D3D12_RASTERIZER_DESC	 rasterizer_{CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT)};
+	D3D12_BLEND_DESC		 blend_{CD3DX12_BLEND_DESC(D3D12_DEFAULT)};
+	D3D12_DEPTH_STENCIL_DESC depth_{CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT)};
 
 public:
 	//===================================================================*/
 	//		operator/hash
 	//===================================================================*/
-	bool operator==(const GraphicsPipelineDesc& o) const noexcept;
+	bool   operator==(const GraphicsPipelineDesc& o) const noexcept;
 	size_t Hash() const noexcept;
 };
 
@@ -98,11 +100,11 @@ public:
 // std::unordered_map<GraphicsPipelineDesc, ID3D12PipelineState*> pipelineCache;
 // pipelineCache[desc] = pso;
 //================================================================//
-namespace std{
-	template<>
-	struct hash<GraphicsPipelineDesc>{
-		size_t operator()(GraphicsPipelineDesc const& desc) const noexcept{
+namespace std {
+	template <>
+	struct hash<GraphicsPipelineDesc> {
+		size_t operator()(GraphicsPipelineDesc const& desc) const noexcept {
 			return desc.Hash();
 		}
 	};
-}
+} // namespace std

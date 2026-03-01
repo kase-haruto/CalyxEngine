@@ -62,13 +62,17 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 			default:
 				break;
 			}
-		} else if(auto* ev = dynamic_cast<BaseEventObject*>(e)) {
-#if defined(_DEBUG) || defined(DEVELOP)
-			if(auto* m = ev->GetModel()) {
-				modelRenderer_->RegisterStatic(m, ev->GetWorldTransform(), BillboardMode::None, ev);
-			}
-#endif
 		}
+
+#if defined(_DEBUG) || defined(DEVELOP)
+		//if(rt->GetRenderTargetType() == RenderTargetType::DebugView) {
+			if(auto* ev = dynamic_cast<BaseEventObject*>(e)) {
+				if(auto* m = ev->GetModel()) {
+					modelRenderer_->RegisterStatic(m, ev->GetWorldTransform(), BillboardMode::None, ev);
+				}
+			}
+		//}
+#endif
 	}
 
 	const Camera3d* cam = static_cast<Camera3d*>(CameraManager::GetMain3d());
