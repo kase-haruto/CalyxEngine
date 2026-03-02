@@ -6,8 +6,9 @@
 #include <Engine/Application/UI/EngineUI/IOnViewportTool.h>
 #include <Engine/System/Command/EditorCommand/GuizmoCommand/ScopedGizmoCommand.h>
 
-#include <externals/imgui/imgui.h>
 #include <externals/imgui/ImGuizmo.h>
+#include <externals/imgui/imgui.h>
+
 
 class WorldTransform;
 class BaseCamera;
@@ -57,6 +58,11 @@ namespace CalyxEditor {
 		/// <param name="out"></param>
 		void				 RowToColumnArray(const CalyxMath::Matrix4x4& m, float out[16]);
 		CalyxMath::Matrix4x4 ColumnArrayToRow(const float in_[16]);
+
+		/// <summary>
+		/// ImGuizmo による操作・描画処理
+		/// </summary>
+		void Manipulate();
 
 	private:
 		ImGuizmo::OPERATION operation_ = ImGuizmo::TRANSLATE;
