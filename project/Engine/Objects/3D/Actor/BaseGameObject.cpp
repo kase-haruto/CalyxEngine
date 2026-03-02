@@ -140,15 +140,15 @@ void BaseGameObject::ShowGui() {
 
 	// --- 描画設定 ---
 	if(GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::Object)) {
-		if(ImGui::TreeNodeEx("BoxCollider", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
+		if(ImGui::TreeNodeEx("Billboard Mode", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
 			int			mode	= static_cast<int>(billboardMode_);
 			const char* items[] = {"None", "Full", "AxisY"};
 			if(GuiCmd::Combo("Billboard Mode", mode, items, 3)) {
 				billboardMode_ = static_cast<BillboardMode>(mode);
 			}
 			ImGui::TreePop();
-			GuiCmd::EndSection();
 		}
+		GuiCmd::EndSection();
 	}
 
 	// --- パラメータデータ ---

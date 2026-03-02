@@ -1,16 +1,19 @@
 #include "SplineEditorPanel.h"
-#include <externals/imgui/imgui.h>
 #include <externals/imgui/ImGuiFileDialog.h>
+#include <externals/imgui/imgui.h>
 
-#include <Engine/Objects/3D/Geometory/Spline/SplineJson.h>
-#include <Engine/Scene/Context/SceneContext.h>
+
 #include <Engine/Foundation/Input/Input.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
+#include <Engine/Objects/3D/Geometory/Spline/SplineJson.h>
 #include <Engine/Physics/Ray/Raycastor.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
+#include <Engine/Scene/Context/SceneContext.h>
 
-#include <cfloat>
+
 #include <algorithm>
+#include <cfloat>
+
 
 namespace CalyxEditor {
 	// -------------------- ツールバー --------------------
@@ -263,7 +266,6 @@ namespace CalyxEditor {
 			gizmoTf_.Update();
 
 			manipulator_->SetTarget(&gizmoTf_);
-			manipulator_->Update();
 
 			// 位置の反映
 			pos = gizmoTf_.translation;
@@ -326,5 +328,4 @@ namespace CalyxEditor {
 		if(!open) SetShow(false);
 	}
 
-}
-
+} // namespace CalyxEditor

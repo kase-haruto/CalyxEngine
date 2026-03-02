@@ -324,7 +324,7 @@ void PickingPass::Render(
 		camera->SetRootCommand(cmd, 2);
 
 		for(auto& inst : instances) {
-			if(!inst.owner->IsPickable()) continue;
+			if(!inst.owner->IsPickable() || inst.owner->IsTransient()) continue;
 
 			// [0] Picking ID
 			cmd->SetGraphicsRoot32BitConstant(0, inst.owner->GetPickingID(), 0);
@@ -337,7 +337,7 @@ void PickingPass::Render(
 
 			// [3] Billboard (Default None)
 			inst.model->EnsureBillboardCapacity(device, 1);
-			std::vector<GpuBillboardParams> bb {};
+			std::vector<GpuBillboardParams> bb{};
 			inst.model->UploadBillboardParams(bb);
 			cmd->SetGraphicsRootDescriptorTable(3, inst.model->GetBillboardSrv());
 
@@ -363,7 +363,7 @@ void PickingPass::Render(
 		camera->SetRootCommand(cmd, 2);
 
 		for(auto& inst : instances) {
-			if(!inst.owner->IsPickable()) continue;
+			if(!inst.owner->IsPickable() || inst.owner->IsTransient()) continue;
 
 			// [0] Picking ID
 			cmd->SetGraphicsRoot32BitConstant(0, inst.owner->GetPickingID(), 0);

@@ -3,13 +3,15 @@
 /*		include space
 /* ===================================================================== */
 // engine
-#include <Engine/Objects/3D/Actor/SceneObject.h>
-#include <Engine/graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
+#include <Engine/Objects/3D/Actor/SceneObject.h>
 #include <Engine/Scene/Context/SceneContext.h>
+#include <Engine/graphics/Camera/Manager/CameraManager.h>
+
 // externals
-#include <externals/imgui/imgui.h>
 #include "externals/imgui/ImGuizmo.h"
+#include <externals/imgui/imgui.h>
+
 
 namespace CalyxEditor {
 	SceneObjectEditor::SceneObjectEditor(const std::string& name) : BaseEditor(name) {
@@ -31,7 +33,6 @@ namespace CalyxEditor {
 
 	void SceneObjectEditor::Update() {
 		if(!sceneObject_) return;
-		manipulator_->Update();
 	}
 
 	void SceneObjectEditor::ShowImGuiInterface() {

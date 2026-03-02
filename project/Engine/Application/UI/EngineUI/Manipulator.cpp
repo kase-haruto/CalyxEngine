@@ -41,6 +41,9 @@ namespace CalyxEditor {
 	}
 
 	void Manipulator::Update() {
+	}
+
+	void Manipulator::Manipulate() {
 		if(camera_ != SceneContext::Current()->GetCameraMgr()->GetDebug()) {
 			camera_ = SceneContext::Current()->GetCameraMgr()->GetDebug();
 		}
@@ -113,13 +116,15 @@ namespace CalyxEditor {
 	}
 
 	void Manipulator::RenderOverlay(const ImVec2& basePos) {
+		Manipulate();
+
 		ImVec2 iconSize = iconTranslate_.size;
 		float  spacing	= 10.0f;
 
 		struct ButtonInfo {
-			ImGuizmo::OPERATION op;
-			const char*			tooltip;
-			const Manipulator::Icon&	icon;
+			ImGuizmo::OPERATION		 op;
+			const char*				 tooltip;
+			const Manipulator::Icon& icon;
 		};
 
 		ButtonInfo buttons[] = {

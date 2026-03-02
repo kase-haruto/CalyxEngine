@@ -9,7 +9,6 @@
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 #include <externals/imgui/imgui.h>
 
-
 // c++
 #include <sstream>
 
@@ -48,9 +47,10 @@ void BoxCollider::Draw() {
 void BoxCollider::ShowGui() {
 	if(ImGui::TreeNodeEx("BoxCollider", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
 		Collider::ShowGui();
-		if(!isCollisionEnabled_) return;
-		GuiCmd::DragFloat3("offset", offset_);
-		GuiCmd::DragFloat3("Size", shape_.size, 0.1f, 0.0f, 10.0f);
+		if(isCollisionEnabled_) {
+			GuiCmd::DragFloat3("offset", offset_);
+			GuiCmd::DragFloat3("Size", shape_.size, 0.1f, 0.0f, 10.0f);
+		}
 		ImGui::TreePop();
 	}
 }
