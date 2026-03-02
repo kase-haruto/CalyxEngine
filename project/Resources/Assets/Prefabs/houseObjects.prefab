@@ -2,11 +2,11 @@
     {
         "colliderConfig": {
             "colliderType": 0,
-            "isCollisionEnabled": false,
+            "isCollisionEnabled": true,
             "isDraw": true,
             "targetType": 0
         },
-        "guid": "5860cf0a-4217-4c9f-8bb8-262b33ef01fa",
+        "guid": "2423ad41-4093-46ea-b211-cea2906b2b2b",
         "modelConfig": {
             "blendMode": 5,
             "materialConfig": {
@@ -23,7 +23,7 @@
                 "shininess": 20.0
             },
             "modelName": "smallBuilding_01.obj",
-            "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+            "textureGuid": "e6db45e2-7ad6-44b3-b137-e04e02d4c8c7",
             "uvTransConfig": {
                 "rotation": 0.0,
                 "scale": {
@@ -32,25 +32,25 @@
                 }
             }
         },
-        "name": "smallBuilding_01",
+        "name": "myHouse",
         "objectType": 2,
-        "parentGuid": "00000000-0000-0000-0000-000000000000",
+        "parentGuid": "5860cf0a-4217-4c9f-8bb8-262b33ef01fa",
         "transform": {
             "rotation": {
-                "w": 0.9869514107704163,
-                "x": 0.15149274468421936,
-                "y": 0.053929075598716736,
-                "z": -0.008277932181954384
+                "w": 1.0,
+                "x": 9.536721279346239e-08,
+                "y": -6.233030078301891e-22,
+                "z": -6.535820570462061e-15
             },
             "scale": {
-                "x": 9.999646186828613,
-                "y": 23.921899795532227,
-                "z": 9.999971389770508
+                "x": 4.348606109619141,
+                "y": 2.1211905479431152,
+                "z": 4.880408763885498
             },
             "translation": {
-                "x": -335.6500244140625,
-                "y": -93.65020751953125,
-                "z": 886.1680908203125
+                "x": -6.280223846435547,
+                "y": -4.797233581542969,
+                "z": 26.213912963867188
             }
         },
         "type": "BaseGameObject"
@@ -58,11 +58,11 @@
     {
         "colliderConfig": {
             "colliderType": 0,
-            "isCollisionEnabled": true,
+            "isCollisionEnabled": false,
             "isDraw": true,
             "targetType": 0
         },
-        "guid": "bcd972b1-8de7-4d5e-b4f4-fd0a919d244f",
+        "guid": "a5ae7348-c440-42c3-b702-4521a7a3530f",
         "modelConfig": {
             "blendMode": 5,
             "materialConfig": {
@@ -78,8 +78,8 @@
                 "isReflect": false,
                 "shininess": 20.0
             },
-            "modelName": "smallBuilding_01.obj",
-            "textureGuid": "84f22e1b-318a-4813-a065-e60099cc9dc7",
+            "modelName": "largeBuilding.obj",
+            "textureGuid": "00000000-0000-0000-0000-000000000000",
             "uvTransConfig": {
                 "rotation": 0.0,
                 "scale": {
@@ -88,25 +88,25 @@
                 }
             }
         },
-        "name": "smallBuilding_01",
+        "name": "childHouse",
         "objectType": 2,
-        "parentGuid": "5860cf0a-4217-4c9f-8bb8-262b33ef01fa",
+        "parentGuid": "2423ad41-4093-46ea-b211-cea2906b2b2b",
         "transform": {
             "rotation": {
                 "w": 1.0,
-                "x": 9.536742595628311e-08,
+                "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
             },
             "scale": {
-                "x": 9.999999046325684,
-                "y": 10.0,
-                "z": 10.0
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
             },
             "translation": {
-                "x": 70.06816101074219,
-                "y": -27.092531204223633,
-                "z": 149.28216552734375
+                "x": 6.243691444396973,
+                "y": 0.5200849175453186,
+                "z": 14.936561584472656
             }
         },
         "type": "BaseGameObject"

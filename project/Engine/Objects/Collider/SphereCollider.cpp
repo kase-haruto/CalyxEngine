@@ -47,9 +47,10 @@ void SphereCollider::Draw() {
 void SphereCollider::ShowGui() {
 	if(ImGui::TreeNodeEx("SphereCollider", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
 		Collider::ShowGui();
-		if(!isCollisionEnabled_) return;
-		GuiCmd::DragFloat3("Offset", offset_);
-		GuiCmd::DragFloat("Radius", shape_.radius, 0.1f, 0.0f, 10.0f);
+		if(isCollisionEnabled_) {
+			GuiCmd::DragFloat3("Offset", offset_);
+			GuiCmd::DragFloat("Radius", shape_.radius, 0.1f, 0.0f, 10.0f);
+		}
 		ImGui::TreePop();
 	}
 }
