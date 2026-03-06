@@ -52,7 +52,7 @@ private:
 	//====================================================================*/
 	//			private methods
 	//====================================================================*/
-	CalyxUtil::SimpleAnimation<float>    falldownAnimation_; //< 落下アニメーション
+	CalyxUtil::SimpleAnimation<CalyxMath::Quaternion>    falldownAnimation_; //< 落下アニメーション
 	std::weak_ptr<CalyxEffect::FxObject> falldownFx_{};      //< 倒れている最中のエフェクト
 
 };
