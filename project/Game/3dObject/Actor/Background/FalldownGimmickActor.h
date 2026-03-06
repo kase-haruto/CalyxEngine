@@ -5,14 +5,16 @@
 // engine
 #include <Engine/Application/Effects/FxObject.h>
 #include <Engine/Foundation/Utility/Animation/SimpleAnimation.h>
+#include <Engine/Foundation/Utility/Animation/Transform/TransformAnimation.h>
 
 // game
 #include "StageGimmickActor.h"
 
 /*-----------------------------------------------------------------------------------------
  * FalldownGimmickActor
- * - 落下ギミックのクラス
- * - 落下ギミックの具体的な動作やアニメーションを実装するクラス
+ * - 倒れこみギミックのクラス
+ * - 背景アクタが倒れこんでくるギミックを表現するクラス
+ * - 倒れこみのアニメーションとエフェクトを管理する
  *---------------------------------------------------------------------------------------*/
 class FalldownGimmickActor final
 	: public StageGimmickActor {
@@ -21,7 +23,7 @@ public:
 	//			public methods
 	//====================================================================*/
 	FalldownGimmickActor();
-	FalldownGimmickActor(const std::string& modelName, std::optional<std::string> objectName = std::nullopt);
+	FalldownGimmickActor(const std::string& modelName,std::optional<std::string> objectName = std::nullopt);
 	~FalldownGimmickActor() override;
 
 	/**
@@ -45,21 +47,21 @@ protected:
 	 * \brief トリガーされた瞬間の処理
 	 * \param dt
 	 */
-	virtual void OnTriggered();
+	void OnTriggered()override;
 	/**
 	 * \brief 動作中の処理
 	 * \param dt
 	 */
-	virtual void RunningUpdate(float dt);
+	void RunningUpdate(float dt)override;
 	/**
 	 * \brief 動作終了時の処理
 	 */
-	virtual void OnFinished();
+	void OnFinished()override;
 
 private:
 	//====================================================================*/
 	//			private methods
 	//====================================================================*/
-	CalyxUtil::SimpleAnimation<CalyxMath::Quaternion> falldownAnimation_; //< 落下アニメーション
-	std::weak_ptr<CalyxEffect::FxObject>			  falldownFx_{};	  //< 倒れている最中のエフェクト
+	std::weak_ptr<CalyxEffect::FxObject>             falldownFx_{};       //< 倒れている最中のエフェクト
+	std::unique_ptr<CalyxEngine::TransformAnimation> transformAnimation_; //< 倒れこみアニメーション
 };

@@ -20,44 +20,60 @@ FalldownGimmickActor::~FalldownGimmickActor() = default;
 void FalldownGimmickActor::Initialize() {
 
 	// アニメーション設定
+	transformAnimation_ = std::make_unique<CalyxEngine::TransformAnimation>();
+	transformAnimation_->SetTarget(&worldTransform_);
 
 	// エフェクトの初期化
 	falldownFx_ = SceneAPI::Instantiate<CalyxEffect::FxObject>("TrailFx");
 	auto fx		= falldownFx_.lock();
 	fx->LoadFromPath("Effect/EnemyBulletTrailEffect");
 	fx->StopAll(); // 生成時は止めておく
+
+	// コライダー初期化
+	BaseGameObject::InitializeCollider(ColliderKind::Box);
+	collider_->SetType(ColliderType::Type_StageGimmick);
+	collider_->SetTargetType(ColliderType::Type_Player);
+	collider_->SetOwner(this);
+	collider_->SetIsDrawCollider(true);
+	collider_->SetCollisionEnabled(true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //		gui
 ///////////////////////////////////////////////////////////////////////////////////////////
 void FalldownGimmickActor::DerivativeGui() {
-	// 倒れこむアニメーションのgui
-	falldownAnimation_.ImGui("falldownAnimation");
+	// トランスフォームの保存
+	if(ImGui::Button("Save StartTransform")) {
+		transformAnimation_->SetTransformStart(worldTransform_);
+	}
+	ImGui::SameLine();
+	if(ImGui::Button("Save EndTransform")) {
+		transformAnimation_->SetTransformEnd(worldTransform_);
+	}
+
+	transformAnimation_->ShowGui();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //		gui
 ///////////////////////////////////////////////////////////////////////////////////////////
 void FalldownGimmickActor::OnTriggered() {
-	// アニメーション再生
-	falldownAnimation_.Start();
 	// fx再生
 	auto fx = falldownFx_.lock();
 	fx->PlayAll();
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //		gui
 ///////////////////////////////////////////////////////////////////////////////////////////
 void FalldownGimmickActor::RunningUpdate(float dt) {
-	// アニメーション適用
-	falldownAnimation_.LerpValue(worldTransform_.rotation, dt);
+	// アニメーション更新
+	transformAnimation_->Update(dt);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //		gui
 ///////////////////////////////////////////////////////////////////////////////////////////
 void FalldownGimmickActor::OnFinished() {
-	falldownAnimation_.Stop();
 }
