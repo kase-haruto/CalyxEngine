@@ -109,7 +109,7 @@ namespace CalyxUtil {
 
 		//--------- variables ----------------------------------------------------
 
-		SimpleAnimationType type_;
+		SimpleAnimationType type_ = SimpleAnimationType::None;
 		bool				isRunning_		= false;
 		bool				isFinished_		= false;
 		bool				useReturnTimer_ = false;

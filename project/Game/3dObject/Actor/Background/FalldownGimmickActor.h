@@ -4,6 +4,7 @@
 /// ===================================================================== */
 // engine
 #include <Engine/Foundation/Utility/Animation/SimpleAnimation.h>
+#include <Engine/Application/Effects/FxObject.h>
 // game
 #include "StageGimmickActor.h"
 
@@ -22,16 +23,16 @@ public:
 	~FalldownGimmickActor() override;
 
 	/**
+	 * \brief 初期化処理
+	 */
+	void Initialize() override;
+
+	/**
 	 * デバッグ用gui表示
 	 */
 	void DerivativeGui() override;
 
 protected:
-	/**
-	 * \brief 未動作時の処理
-	 * \param dt
-	 */
-	virtual void IdleUpdate(float dt);
 	/**
 	 * \brief トリガーされた瞬間の処理
 	 * \param dt
@@ -51,5 +52,7 @@ private:
 	//====================================================================*/
 	//			private methods
 	//====================================================================*/
-	CalyxUtil::SimpleAnimation<CalyxMath::Vector3> falldownAnimation_; //< 落下アニメーション
+	CalyxUtil::SimpleAnimation<float>    falldownAnimation_; //< 落下アニメーション
+	std::weak_ptr<CalyxEffect::FxObject> falldownFx_{};      //< 倒れている最中のエフェクト
+
 };

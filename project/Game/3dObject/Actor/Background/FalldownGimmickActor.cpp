@@ -1,4 +1,6 @@
 #include "FalldownGimmickActor.h"
+
+#include "Engine/Scene/Utility/SceneUtility.h"
 /// ===================================================================== */
 ///  include space
 /// ===================================================================== */
@@ -10,15 +12,44 @@
 FalldownGimmickActor::FalldownGimmickActor() = default;
 FalldownGimmickActor::~FalldownGimmickActor() =default;
 
+void FalldownGimmickActor::Initialize() {
+
+	// アニメーション設定
+
+	// エフェクトの初期化
+	falldownFx_ = SceneAPI::Instantiate<CalyxEffect::FxObject>("TrailFx");
+	auto fx	 = falldownFx_.lock();
+	fx->LoadFromPath("Effect/EnemyBulletTrailEffect");
+	fx->StopAll();//生成時は止めておく
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 //		gui
 ///////////////////////////////////////////////////////////////////////////////////////////
 void FalldownGimmickActor::DerivativeGui() {
-	// 落下アニメーションのgui
+	// 倒れこむアニメーションのgui
 	falldownAnimation_.ImGui("falldownAnimation");
 }
 
-void FalldownGimmickActor::IdleUpdate(float ) { }
-void FalldownGimmickActor::OnTriggered() {  }
-void FalldownGimmickActor::RunningUpdate(float ) { }
+///////////////////////////////////////////////////////////////////////////////////////////
+//		gui
+///////////////////////////////////////////////////////////////////////////////////////////
+void FalldownGimmickActor::OnTriggered() {
+	// アニメーション再生
+	falldownAnimation_.Start();
+	// fx再生
+	auto fx	 = falldownFx_.lock();
+	fx->PlayAll();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//		gui
+///////////////////////////////////////////////////////////////////////////////////////////
+void FalldownGimmickActor::RunningUpdate(float dt) {
+	worldTransform_.eulerRotation =
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//		gui
+///////////////////////////////////////////////////////////////////////////////////////////
 void FalldownGimmickActor::OnFinished() {  }
