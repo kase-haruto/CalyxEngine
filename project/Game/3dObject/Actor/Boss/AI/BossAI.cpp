@@ -39,7 +39,7 @@ std::optional<BossAttackType> BossAI::DecideAttack(float dt) {
 	BossAttackType atk = static_cast<BossAttackType>(r);
 
 	// 攻撃が決まった → クールダウン設定
-	cooldownTimer_ = 2.0f;
+	cooldownTimer_ = 2.5f;
 
 	return atk;
 }

@@ -399,6 +399,9 @@ copy /Y "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll"       "C:\My
     <ClCompile Include="Game\2d\Hud\HudMotionBuilder.cpp" />
     <ClCompile Include="Game\2d\Hud\HudMotionGuiHelper.cpp" />
     <ClCompile Include="Game\2d\Hud\ScoreResultHud.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Background\BackgroundActor.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Background\FalldownGimmickActor.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Background\StageGimmickActor.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Bullet\EnemyBullet\BaseEnemyHomingBullet.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Enemy\EnemyFactionActor.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Player\LockOn\Reticle.cpp" />
@@ -748,6 +751,9 @@ copy /Y "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll"       "C:\My
     <ClInclude Include="Game\2d\Hud\HudMotionBuilder.h" />
     <ClInclude Include="Game\2d\Hud\HudMotionGuiHelper.h" />
     <ClInclude Include="Game\2d\Hud\ScoreResultHud.h" />
+    <ClInclude Include="Game\3dObject\Actor\Background\BackgroundActor.h" />
+    <ClInclude Include="Game\3dObject\Actor\Background\FalldownGimmickActor.h" />
+    <ClInclude Include="Game\3dObject\Actor\Background\StageGimmickActor.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\AI\BossAI.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\Anim\BossAnimController.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\Attack\BossHomingSpreadShoot.h" />

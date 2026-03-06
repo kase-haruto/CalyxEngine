@@ -249,13 +249,8 @@ void TutorialEvent::ShowTutorialMsg() {
 	}
 }
 
-void TutorialEvent::ShowDebugState(size_t enemyCount) {
-	ImGui::Begin("Tutorial Debug");
-	ImGui::Text("State: %d", (int)state_);
-	ImGui::Text("Player Inside: %s", isPlayerInside_ ? "Yes" : "No");
-	ImGui::Text("Player found: %s", player_ ? "Yes" : "No");
-	ImGui::Text("Enemy count (FindByType): %zu", enemyCount);
-	ImGui::End();
+void TutorialEvent::ShowDebugState([[maybe_unused]]size_t enemyCount) {
+
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -304,4 +299,3 @@ TutorialEvent::TutorialEventParam::TutorialEventParam() {
 CalyxEngine::ParamPath TutorialEvent::TutorialEventParam::GetParamPath() const {
 	return{CalyxEngine::ParamDomain::Game,"TutorialEvent","Actor/Event"};
 }
-
