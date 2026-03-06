@@ -3,8 +3,9 @@
 ///  include space
 /// ===================================================================== */
 // engine
-#include <Engine/Foundation/Utility/Animation/SimpleAnimation.h>
 #include <Engine/Application/Effects/FxObject.h>
+#include <Engine/Foundation/Utility/Animation/SimpleAnimation.h>
+
 // game
 #include "StageGimmickActor.h"
 
@@ -20,6 +21,7 @@ public:
 	//			public methods
 	//====================================================================*/
 	FalldownGimmickActor();
+	FalldownGimmickActor(const std::string& modelName, std::optional<std::string> objectName = std::nullopt);
 	~FalldownGimmickActor() override;
 
 	/**
@@ -31,6 +33,12 @@ public:
 	 * デバッグ用gui表示
 	 */
 	void DerivativeGui() override;
+
+	/**
+	 * \brief タイプ名を取得
+	 * \return タイプ名
+	 */
+	std::string_view GetTypeName() const override { return "FalldownGimmickActor"; }
 
 protected:
 	/**
@@ -52,7 +60,6 @@ private:
 	//====================================================================*/
 	//			private methods
 	//====================================================================*/
-	CalyxUtil::SimpleAnimation<CalyxMath::Quaternion>    falldownAnimation_; //< 落下アニメーション
-	std::weak_ptr<CalyxEffect::FxObject> falldownFx_{};      //< 倒れている最中のエフェクト
-
+	CalyxUtil::SimpleAnimation<CalyxMath::Quaternion> falldownAnimation_; //< 落下アニメーション
+	std::weak_ptr<CalyxEffect::FxObject>			  falldownFx_{};	  //< 倒れている最中のエフェクト
 };

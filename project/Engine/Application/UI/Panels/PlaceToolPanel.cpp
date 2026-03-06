@@ -11,8 +11,10 @@
 #include <Engine/System/Command/Manager/CommandManager.h>
 
 // --- game objects -----------------------------------------------------------
+#include <Game/3dObject/Actor/Background/FalldownGimmickActor.h>
 #include <Game/3dObject/Actor/Boss/Spawner/BossSpawner.h>
 #include <Game/3dObject/Actor/Enemy/Spawner/EnemySpawner.h>
+
 
 // event
 #include <Game/Event/Camera/CameraTurnAroundEvent.h>
@@ -277,27 +279,28 @@ namespace CalyxEditor {
 								  }});
 		}
 
-		// ---------------------------- Models ------------------------------------
-		auto&						   modelItems = categoryItems_[PlaceItemCategory::Model];
+		// ---------------------------- 背景オブジェクト -----------------------------------
+		auto&						   modelItems = categoryItems_[PlaceItemCategory::BackgroundActor];
 		const std::vector<std::string> modelNames = {
 			"largeBuilding.obj",
 			"tallBuilding_01.obj",
 			"tallBuilding_02.obj",
 			"smallBuilding_01.obj"};
 
+		// staticモデル - 登録時にImGuiのレンダリング関数を呼ばない
 		for(const auto& modelName : modelNames) {
 			std::string displayName = modelName;
 			if(const size_t dot = modelName.find('.'); dot != std::string::npos) {
 				displayName = modelName.substr(0, dot); // 拡張子を除いた名前を表示に使う
 			}
 
-			modelItems.push_back({PlaceItemCategory::Model,
+			modelItems.push_back({PlaceItemCategory::BackgroundActor,
 								  displayName,
 								  {},
 								  {64, 64},
 								  [modelName, displayName](const CalyxMath::Vector3& pos) {
 									  auto factory = [modelName, displayName, pos]() {
-										  auto obj = SceneAPI::Instantiate<BaseGameObject>(modelName, displayName);
+										  auto obj = SceneAPI::Instantiate<BackgroundActor>(modelName, displayName);
 										  if(obj) {
 											  obj->Initialize();
 											  if(obj->GetCollider())
@@ -307,11 +310,11 @@ namespace CalyxEditor {
 										  return obj;
 									  };
 									  CommandManager::GetInstance()->Execute(
-										  std::make_unique<CreateObjectCommand<BaseGameObject>>(
-											  SceneContext::Current(), factory, "Create Model"));
+										  std::make_unique<CreateObjectCommand<BackgroundActor>>(
+											  SceneContext::Current(), factory, "Create Background Actor"));
 								  },
 								  [modelName, displayName]() {
-									  auto obj = SceneAPI::Instantiate<BaseGameObject>(modelName, displayName);
+									  auto obj = SceneAPI::Instantiate<BackgroundActor>(modelName, displayName);
 									  if(obj) {
 										  obj->Initialize();
 										  if(obj->GetCollider())
@@ -320,6 +323,48 @@ namespace CalyxEditor {
 									  }
 									  return obj;
 								  }});
+		}
+
+		// ---------------------------- ギミックオブジェクト -----------------------------------
+		auto& gimmickItems = categoryItems_[PlaceItemCategory::GimmickActor];
+
+		// ギミック用モデル - 登録時にImGuiのレンダリング関数を呼ばない
+		for(const auto& modelName : modelNames) {
+			std::string displayName = modelName;
+			if(const size_t dot = modelName.find('.'); dot != std::string::npos) {
+				displayName = modelName.substr(0, dot); // 拡張子を除いた名前を表示に使う
+			}
+			displayName += " (Falldown)";
+
+			gimmickItems.push_back({PlaceItemCategory::GimmickActor,
+									displayName,
+									{},
+									{64, 64},
+									[modelName, displayName](const CalyxMath::Vector3& pos) {
+										auto factory = [modelName, displayName, pos]() {
+											auto obj = SceneAPI::Instantiate<FalldownGimmickActor>(modelName, displayName);
+											if(obj) {
+												obj->Initialize();
+												if(obj->GetCollider())
+													obj->GetCollider()->SetCollisionEnabled(false);
+												obj->GetWorldTransform().translation = pos;
+											}
+											return obj;
+										};
+										CommandManager::GetInstance()->Execute(
+											std::make_unique<CreateObjectCommand<FalldownGimmickActor>>(
+												SceneContext::Current(), factory, "Create Gimmick Actor"));
+									},
+									[modelName, displayName]() {
+										auto obj = SceneAPI::Instantiate<FalldownGimmickActor>(modelName, displayName);
+										if(obj) {
+											obj->Initialize();
+											if(obj->GetCollider())
+												obj->GetCollider()->SetCollisionEnabled(false);
+											obj->SetTransient(true);
+										}
+										return obj;
+									}});
 		}
 	}
 
@@ -372,7 +417,8 @@ namespace CalyxEditor {
 			{PlaceItemCategory::Light, "Lights"},
 			{PlaceItemCategory::Particle, "Particles"},
 			{PlaceItemCategory::InGameObject, "Game Objects"},
-			{PlaceItemCategory::Model, "Models"},
+			{PlaceItemCategory::BackgroundActor, "Background Actors"},
+			{PlaceItemCategory::GimmickActor, "Gimmick Actors"},
 			{PlaceItemCategory::Event, "Events"},
 		};
 

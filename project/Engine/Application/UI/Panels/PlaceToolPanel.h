@@ -41,12 +41,13 @@ namespace CalyxEditor {
 		};
 
 		enum class PlaceItemCategory {
-			Shape,		  //< 単純図形オブジェクト
-			Light,		  //< ライト
-			Particle,	  //< パーティクル
-			InGameObject, //< インゲームのオブジェクト
-			Model,		  //< モデル
-			Event,		  //< イベント
+			Shape,			 //< 単純図形オブジェクト
+			Light,			 //< ライト
+			Particle,		 //< パーティクル
+			InGameObject,	 //< インゲームのオブジェクト
+			BackgroundActor, //< 背景オブジェクト
+			GimmickActor,	 //< ギミックオブジェクト
+			Event,			 //< イベント
 			Count
 		};
 

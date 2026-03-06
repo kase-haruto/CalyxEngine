@@ -24,6 +24,7 @@ public:
 	//			public methods
 	//====================================================================*/
 	StageGimmickActor();
+	StageGimmickActor(const std::string& modelName, std::optional<std::string> objectName = std::nullopt);
 	~StageGimmickActor() override;
 
 	/**
@@ -79,5 +80,5 @@ private:
 	//			private methods
 	//====================================================================*/
 	GimmickState currentState_ = GimmickState::Idle; //< 現在の状態
-	GimmickState prevState_    = GimmickState::Idle; //< 前回の状態
+	GimmickState prevState_	   = GimmickState::Idle; //< 前回の状態
 };
