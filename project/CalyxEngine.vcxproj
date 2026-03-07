@@ -204,6 +204,90 @@ copy /Y "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll"       "C:\My
     <ClCompile Include="Engine\Foundation\Utility\Animation\SimpleAnimation.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Animation\SimpleAnimator.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Animation\SimpleAnimChannel.cpp" />
+    <ClCompile Include="Engine\Foundation\Utility\Animation\Transform\TransformAnimation.cpp">
+      <AssemblerOutput>NoListing</AssemblerOutput>
+      <AssemblerListingLocation>C:\MyProject\MyEngine\project\..\generated\obj\MyEngine\Develop\</AssemblerListingLocation>
+      <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
+      <BrowseInformation>false</BrowseInformation>
+      <BrowseInformationFile>C:\MyProject\MyEngine\project\..\generated\obj\MyEngine\Develop\</BrowseInformationFile>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <CompileAs>Default</CompileAs>
+      <ConformanceMode>true</ConformanceMode>
+      <DiagnosticsFormat>Column</DiagnosticsFormat>
+      <DisableLanguageExtensions>false</DisableLanguageExtensions>
+      <ErrorReporting>Prompt</ErrorReporting>
+      <ExpandAttributedSource>false</ExpandAttributedSource>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <EnableASAN>false</EnableASAN>
+      <EnableFuzzer>false</EnableFuzzer>
+      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <EnableVectorLength>NotSet</EnableVectorLength>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <GenerateModuleDependencies>false</GenerateModuleDependencies>
+      <GenerateSourceDependencies>false</GenerateSourceDependencies>
+      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>Default</LanguageStandard_C>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ModuleDependenciesFile>C:\MyProject\MyEngine\project\..\generated\obj\MyEngine\Develop\</ModuleDependenciesFile>
+      <ModuleOutputFile>C:\MyProject\MyEngine\project\..\generated\obj\MyEngine\Develop\</ModuleOutputFile>
+      <OmitDefaultLibName>false</OmitDefaultLibName>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <Optimization>MaxSpeed</Optimization>
+      <ObjectFileName>C:\MyProject\MyEngine\project\..\generated\obj\MyEngine\Develop\</ObjectFileName>
+      <CallingConvention>Cdecl</CallingConvention>
+      <ProgramDataBaseFileName>C:\MyProject\MyEngine\project\..\generated\obj\MyEngine\Develop\vc143.pdb</ProgramDataBaseFileName>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>C:\MyProject\MyEngine\project\..\generated\obj\MyEngine\Develop\MyEngine.pch</PrecompiledHeaderOutputFile>
+      <PreprocessToFile>false</PreprocessToFile>
+      <PreprocessKeepComments>false</PreprocessKeepComments>
+      <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
+      <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+      <ShowIncludes>false</ShowIncludes>
+      <SourceDependenciesFile>C:\MyProject\MyEngine\project\..\generated\obj\MyEngine\Develop\</SourceDependenciesFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <SmallerTypeCheck>false</SmallerTypeCheck>
+      <SpectreMitigation>false</SpectreMitigation>
+      <StructMemberAlignment>Default</StructMemberAlignment>
+      <SupportJustMyCode>false</SupportJustMyCode>
+      <TrackerLogDirectory>C:\MyProject\MyEngine\project\..\generated\obj\MyEngine\Develop\MyEngine.tlog\</TrackerLogDirectory>
+      <TranslateIncludes>false</TranslateIncludes>
+      <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <UseFullPaths>true</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <XMLDocumentationFileName>C:\MyProject\MyEngine\project\..\generated\obj\MyEngine\Develop\</XMLDocumentationFileName>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <IntelJCCErratum>false</IntelJCCErratum>
+      <BuildStlModules>false</BuildStlModules>
+      <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
+      <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
+      <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
+      <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
+      <PreprocessorDefinitions>DEVELOP;_WINDOWS;_UNICODE;UNICODE;</PreprocessorDefinitions>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalOptions>/utf-8 </AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>C:\MyProject\MyEngine\project\;C:\MyProject\MyEngine\project\externals;C:\MyProject\MyEngine\project\externals\DirectXTex;C:\MyProject\MyEngine\project\externals\assimp\include;</AdditionalIncludeDirectories>
+      <LinkCompiled>true</LinkCompiled>
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
+      <IntrinsicFunctions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</IntrinsicFunctions>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</WholeProgramOptimization>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <ClCompile Include="Engine\Foundation\Utility\Animation\Transform\TransformRecorder.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Converter\ConvertString.cpp">
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -399,6 +483,9 @@ copy /Y "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll"       "C:\My
     <ClCompile Include="Game\2d\Hud\HudMotionBuilder.cpp" />
     <ClCompile Include="Game\2d\Hud\HudMotionGuiHelper.cpp" />
     <ClCompile Include="Game\2d\Hud\ScoreResultHud.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Background\BackgroundActor.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Background\FalldownGimmickActor.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Background\StageGimmickActor.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Bullet\EnemyBullet\BaseEnemyHomingBullet.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Enemy\EnemyFactionActor.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Player\LockOn\Reticle.cpp" />
@@ -703,6 +790,8 @@ copy /Y "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll"       "C:\My
     <ClInclude Include="Engine\Foundation\Utility\Animation\SimpleAnimation.h" />
     <ClInclude Include="Engine\Foundation\Utility\Animation\SimpleAnimator.h" />
     <ClInclude Include="Engine\Foundation\Utility\Animation\SimpleAnimChannel.h" />
+    <ClInclude Include="Engine\Foundation\Utility\Animation\Transform\TransformAnimation.h" />
+    <ClInclude Include="Engine\Foundation\Utility\Animation\Transform\TransformRecorder.h" />
     <ClInclude Include="Engine\Foundation\Utility\Converter\ConvertString.h" />
     <ClInclude Include="Engine\Foundation\Utility\Converter\EnumConverter.h" />
     <ClInclude Include="Engine\Foundation\Utility\Ease\CxEase.h" />
@@ -748,6 +837,9 @@ copy /Y "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll"       "C:\My
     <ClInclude Include="Game\2d\Hud\HudMotionBuilder.h" />
     <ClInclude Include="Game\2d\Hud\HudMotionGuiHelper.h" />
     <ClInclude Include="Game\2d\Hud\ScoreResultHud.h" />
+    <ClInclude Include="Game\3dObject\Actor\Background\BackgroundActor.h" />
+    <ClInclude Include="Game\3dObject\Actor\Background\FalldownGimmickActor.h" />
+    <ClInclude Include="Game\3dObject\Actor\Background\StageGimmickActor.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\AI\BossAI.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\Anim\BossAnimController.h" />
     <ClInclude Include="Game\3dObject\Actor\Boss\Attack\BossHomingSpreadShoot.h" />

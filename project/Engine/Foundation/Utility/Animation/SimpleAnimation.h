@@ -109,7 +109,7 @@ namespace CalyxUtil {
 
 		//--------- variables ----------------------------------------------------
 
-		SimpleAnimationType type_;
+		SimpleAnimationType type_ = SimpleAnimationType::None;
 		bool				isRunning_		= false;
 		bool				isFinished_		= false;
 		bool				useReturnTimer_ = false;
@@ -171,6 +171,8 @@ namespace CalyxUtil {
 			value = CalyxMath::Vector3::Lerp(from, to, easedT);
 		} else if constexpr(std::is_same_v<T, CalyxMath::Vector4>) {
 			value = CalyxMath::Vector4::Lerp(from, to, easedT);
+		}else if constexpr(std::is_same_v<T, CalyxMath::Quaternion>) {
+			value = CalyxMath::Quaternion::Slerp(from, to, easedT);
 		}
 
 		// ================================
@@ -239,6 +241,9 @@ namespace CalyxUtil {
 
 				ImGui::ColorEdit4("start", &move_.start.x);
 				ImGui::ColorEdit4("end", &move_.end.x);
+			} else if constexpr(std::is_same_v<T, CalyxMath::Quaternion>) {
+				ImGui::DragFloat4("start", &move_.start.x, dragValueFloat);
+				ImGui::DragFloat4("end", &move_.end.x, dragValueFloat);
 			}
 		}
 		if(ImGui::CollapsingHeader("Timer", windowFlag)) {

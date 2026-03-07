@@ -18,6 +18,7 @@ enum class ColliderType {
 	Type_EnemySpawner = 1 << 3, // 0b00001000
 	Type_EnemyAttack  = 1 << 4, // 0b00010000
 	Type_EventObject  = 1 << 5,
+	Type_StageGimmick = 1 << 6,
 };
 
 // ビット演算のオーバーロード
