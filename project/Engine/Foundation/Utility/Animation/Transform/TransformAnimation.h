@@ -2,9 +2,10 @@
 //=============================================================================
 //	include
 //=============================================================================
-#include <Engine/Objects/Transform/Transform.h>
-#include <Engine/Foundation/Utility/Animation/AnimationLoop.h>
 #include <Engine/Foundation/Clock/StateTimer.h>
+#include <Engine/Foundation/Utility/Animation/AnimationLoop.h>
+#include <Engine/Objects/Transform/Transform.h>
+
 
 namespace CalyxEngine {
 
@@ -37,30 +38,30 @@ namespace CalyxEngine {
 		// accessor ------------------------------
 		// setter
 		void SetTarget(BaseTransform* target) { target_ = target; }
-		void SetTransformStart(const BaseTransform& start) { startTransform_ = start; }
-		void SetTransformEnd(const BaseTransform& end) { endTransform_ = end; }
+		void SetTransformStart(const QuaternionTransform& start) { startTransform_ = start; }
+		void SetTransformEnd(const QuaternionTransform& end) { endTransform_ = end; }
 		void SetEaseType(CalyxEase::EaseType type) { easeType_ = type; }
 
 	private:
 		//========================================================================
 		//	private Methods
 		//========================================================================
-		BaseTransform LerpTransform(const BaseTransform& start,const BaseTransform& end,float t) const;
+		QuaternionTransform LerpTransform(const QuaternionTransform& start, const QuaternionTransform& end, float t) const;
 
 	private:
 		//========================================================================
-		//	private Methods
+		//	private Variables
 		//========================================================================
 
-		BaseTransform startTransform_;
-		BaseTransform endTransform_;
+		QuaternionTransform startTransform_;
+		QuaternionTransform endTransform_;
 
 		BaseTransform* target_ = nullptr;
 
-		CalyxUtil::StateTimer    timer_;
+		CalyxUtil::StateTimer	 timer_;
 		CalyxUtil::AnimationLoop loop_;
 
 		CalyxEase::EaseType easeType_ = CalyxEase::EaseType::Linear;
 	};
 
-}
+} // namespace CalyxEngine

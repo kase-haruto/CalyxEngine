@@ -3035,6 +3035,11 @@
     <ClCompile Include="Engine\Graphics\Color\Color.cpp" />
     <ClCompile Include="Game\Event\Tutorial\TutorialEvent.cpp" />
     <ClCompile Include="Engine\Application\UI\EngineUI\DebugOverlay.cpp" />
+    <ClCompile Include="Engine\Foundation\Utility\Animation\Transform\TransformAnimation.cpp" />
+    <ClCompile Include="Engine\Foundation\Utility\Animation\Transform\TransformRecorder.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Background\BackgroundActor.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Background\FalldownGimmickActor.cpp" />
+    <ClCompile Include="Game\3dObject\Actor\Background\StageGimmickActor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Battle\Shooting\homing\HomingTarget.h" />
@@ -3051,6 +3056,11 @@
     <ClInclude Include="Game\Event\Tutorial\TutorialEvent.h" />
     <ClInclude Include="Engine\Application\UI\EngineUI\DebugOverlay.h" />
     <ClInclude Include="Engine\Application\UI\EngineUI\DebugTextManager.h" />
+    <ClInclude Include="Engine\Foundation\Utility\Animation\Transform\TransformAnimation.h" />
+    <ClInclude Include="Engine\Foundation\Utility\Animation\Transform\TransformRecorder.h" />
+    <ClInclude Include="Game\3dObject\Actor\Background\BackgroundActor.h" />
+    <ClInclude Include="Game\3dObject\Actor\Background\FalldownGimmickActor.h" />
+    <ClInclude Include="Game\3dObject\Actor\Background\StageGimmickActor.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\ObjectPicking.PS.hlsl" />

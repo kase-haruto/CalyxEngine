@@ -6,6 +6,7 @@
 #include <Engine/Application/Effects/FxObject.h>
 #include <Engine/Foundation/Utility/Animation/SimpleAnimation.h>
 #include <Engine/Foundation/Utility/Animation/Transform/TransformAnimation.h>
+#include <Engine/Foundation/Serialization/SerializableObject.h>
 
 // game
 #include "StageGimmickActor.h"
@@ -43,20 +44,21 @@ public:
 	std::string_view GetTypeName() const override { return "FalldownGimmickActor"; }
 
 protected:
+	void IdleUpdate(float dt) override;
 	/**
 	 * \brief トリガーされた瞬間の処理
 	 * \param dt
 	 */
-	void OnTriggered()override;
+	void OnTriggered() override;
 	/**
 	 * \brief 動作中の処理
 	 * \param dt
 	 */
-	void RunningUpdate(float dt)override;
+	void RunningUpdate(float dt) override;
 	/**
 	 * \brief 動作終了時の処理
 	 */
-	void OnFinished()override;
+	void OnFinished() override;
 
 private:
 	//====================================================================*/
@@ -64,4 +66,13 @@ private:
 	//====================================================================*/
 	std::weak_ptr<CalyxEffect::FxObject>             falldownFx_{};       //< 倒れている最中のエフェクト
 	std::unique_ptr<CalyxEngine::TransformAnimation> transformAnimation_; //< 倒れこみアニメーション
+
+	struct FalldownGimmickParam :
+		public CalyxEngine::SerializableObject {
+		FalldownGimmickParam();
+		CalyxEngine::ParamPath GetParamPath() const override;
+
+		CalyxMath::Quaternion animationStartRotation_; //< アニメーション開始時の回転
+		CalyxMath::Quaternion animationEndRotation_;   //< アニメーション終了時
+	} param_;
 };

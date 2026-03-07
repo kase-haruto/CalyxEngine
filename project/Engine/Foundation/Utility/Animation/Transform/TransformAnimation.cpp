@@ -1,8 +1,8 @@
 #include "TransformAnimation.h"
 
 #include "Engine/Foundation/Utility/Func/CxUtils.h"
-#include <Engine/Foundation/Utility/Converter/EnumConverter.h>
 #include "Game/3dObject/Actor/Bullet/EnemyBullet/BaseEnemyHomingBullet.h"
+#include <Engine/Foundation/Utility/Converter/EnumConverter.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //		更新
@@ -16,11 +16,14 @@ void CalyxEngine::TransformAnimation::Update(float dt) {
 
 	float t = loop_.LoopedT(rawT);
 
-	float eased = CalyxEase::ApplyEase(easeType_,t);
+	float eased = CalyxEase::ApplyEase(easeType_, t);
 
-	BaseTransform result = LerpTransform(startTransform_,endTransform_,eased);
+	QuaternionTransform result = LerpTransform(startTransform_, endTransform_, eased);
 
-	*target_ = result;
+	// データをコピー (BaseTransformそのものを代入するとDxBufferのリソースが壊れるため)
+	target_->scale		 = result.scale;
+	target_->rotation	 = result.rotate;
+	target_->translation = result.translate;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -39,19 +42,18 @@ void CalyxEngine::TransformAnimation::Play(float duration) {
 	timer_.SetTarget(duration);
 }
 
-BaseTransform CalyxEngine::TransformAnimation::LerpTransform(const BaseTransform& start,
-															 const BaseTransform& end,
-															 float                t) const {
-	BaseTransform r;
+QuaternionTransform CalyxEngine::TransformAnimation::LerpTransform(const QuaternionTransform& start,
+																   const QuaternionTransform& end,
+																   float					  t) const {
+	QuaternionTransform r;
 
-	r.translation = CalyxMath::Vector3::Lerp(start.translation,end.translation,t);
-	r.scale       = CalyxMath::Vector3::Lerp(start.scale,end.scale,t);
+	r.translate = CalyxMath::Vector3::Lerp(start.translate, end.translate, t);
+	r.scale		= CalyxMath::Vector3::Lerp(start.scale, end.scale, t);
 
-	r.rotation = CalyxMath::Quaternion::Slerp(
-		start.rotation,
-		end.rotation,
-		t
-		);
+	r.rotate = CalyxMath::Quaternion::Slerp(
+		start.rotate,
+		end.rotate,
+		t);
 
 	return r;
 }
