@@ -19,6 +19,7 @@
 // event
 #include <Game/Event/Camera/CameraTurnAroundEvent.h>
 #include <Game/Event/Spawn/EnemySpawnEvent.h>
+#include <Game/Event/Gimmick/GimmickActivateEvent.h>
 
 // --- externals --------------------------------------------------------------
 #include "Game/Event/Tutorial/TutorialEvent.h"
@@ -274,6 +275,34 @@ namespace CalyxEditor {
 								  },
 								  []() {
 									  auto obj = SceneAPI::Instantiate<TutorialEvent>("TutorialEvent");
+									  obj->SetTransient(true);
+									  return obj;
+								  }});
+		}
+
+		// gimmick作動イベント
+		{
+			auto& eventItems = categoryItems_[PlaceItemCategory::Event];
+			eventItems.push_back({PlaceItemCategory::Event,
+								  "GimmickActivateEvent",
+								  {},
+								  {64, 64},
+								  [](const CalyxMath::Vector3& pos) {
+									  auto* ctx = SceneContext::Current();
+
+									  auto factory = [pos]() {
+										  auto obj = SceneAPI::Instantiate<GimmickActivateEvent>("GimmickActivateEvent");
+										  // obj->ApplyConfig();
+										  obj->GetWorldTransform().translation = pos;
+										  return obj;
+									  };
+
+									  CommandManager::GetInstance()->Execute(
+										  std::make_unique<CreateObjectCommand<GimmickActivateEvent>>(
+											  ctx, factory, "Create GimmickActivateEvent"));
+								  },
+								  []() {
+									  auto obj = SceneAPI::Instantiate<GimmickActivateEvent>("GimmickActivateEvent");
 									  obj->SetTransient(true);
 									  return obj;
 								  }});
