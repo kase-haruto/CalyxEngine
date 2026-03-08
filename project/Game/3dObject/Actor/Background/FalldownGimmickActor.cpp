@@ -1,6 +1,7 @@
 #include "FalldownGimmickActor.h"
 
 #include "Engine/Foundation/Input/Input.h"
+#include "Engine/Foundation/Utility/Converter/EnumConverter.h"
 #include "Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h"
 #include "Engine/Scene/Utility/SceneUtility.h"
 /// ===================================================================== */
@@ -38,6 +39,7 @@ void FalldownGimmickActor::Initialize() {
 	end.scale	  = worldTransform_.scale;
 	end.rotate	  = param_.animationEndRotation_;
 	end.translate = worldTransform_.translation;
+	transformAnimation_->SetEaseType(static_cast<CalyxEase::EaseType>( param_.animationEaseType_));
 
 	transformAnimation_->SetTransformStart(start);
 	transformAnimation_->SetTransformEnd(end);
@@ -83,7 +85,15 @@ void FalldownGimmickActor::DerivativeGui() {
 		transformAnimation_->SetTransformEnd(end);
 	}
 
+	param_.SaveAndLoadButtonGui();
+
+	ImGui::DragFloat("duration", &param_.animationDuration_, 0.1f, 0.0f, 10.0f);
+
 	transformAnimation_->ShowGui();
+
+	if(transformAnimation_->EaseTypeCombo()) {
+		param_.animationEaseType_ = static_cast<int32_t>(transformAnimation_->GetEaseType());
+	}
 }
 
 void FalldownGimmickActor::IdleUpdate(float dt) {
@@ -96,6 +106,9 @@ void FalldownGimmickActor::IdleUpdate(float dt) {
 //		トリガーされた瞬間の処理
 ///////////////////////////////////////////////////////////////////////////////////////////
 void FalldownGimmickActor::OnTriggered() {
+	// アニメーション再生
+	transformAnimation_->Play(param_.animationDuration_);
+
 	// fx再生
 	auto fx = falldownFx_.lock();
 	fx->PlayAll();
@@ -119,8 +132,10 @@ void FalldownGimmickActor::OnFinished() {
 //		gui
 ///////////////////////////////////////////////////////////////////////////////////////////
 FalldownGimmickActor::FalldownGimmickParam::FalldownGimmickParam() {
-	AddField("startRotation", animationStartRotation_).Category("animationData").ReadOnly();
-	AddField("endRotation", animationStartRotation_).Category("animationData").ReadOnly();
+	AddField("startRotation", animationStartRotation_).Category("animationData");
+	AddField("endRotation", animationEndRotation_).Category("animationData");
+	AddField("duration", animationDuration_).Category("animationData");
+	AddField("easeType", animationEaseType_).Category("animationData");
 }
 
 CalyxEngine::ParamPath FalldownGimmickActor::FalldownGimmickParam::GetParamPath() const {

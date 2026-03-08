@@ -30,8 +30,9 @@ void CalyxEngine::TransformAnimation::Update(float dt) {
 //		デバッグよう
 ///////////////////////////////////////////////////////////////////////////////////////////
 void CalyxEngine::TransformAnimation::ShowGui() {
-	// イージングタイプ設定
-	CalyxUtil::EnumConverter<CalyxEase::EaseType>::Combo("easeType", easeType_);
+}
+bool CalyxEngine::TransformAnimation::EaseTypeCombo() {
+	return  CalyxUtil::EnumConverter<CalyxEase::EaseType>::Combo("easeType", easeType_);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////

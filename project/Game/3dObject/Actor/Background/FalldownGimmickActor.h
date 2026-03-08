@@ -4,9 +4,9 @@
 /// ===================================================================== */
 // engine
 #include <Engine/Application/Effects/FxObject.h>
+#include <Engine/Foundation/Serialization/SerializableObject.h>
 #include <Engine/Foundation/Utility/Animation/SimpleAnimation.h>
 #include <Engine/Foundation/Utility/Animation/Transform/TransformAnimation.h>
-#include <Engine/Foundation/Serialization/SerializableObject.h>
 
 // game
 #include "StageGimmickActor.h"
@@ -24,7 +24,7 @@ public:
 	//			public methods
 	//====================================================================*/
 	FalldownGimmickActor();
-	FalldownGimmickActor(const std::string& modelName,std::optional<std::string> objectName = std::nullopt);
+	FalldownGimmickActor(const std::string& modelName, std::optional<std::string> objectName = std::nullopt);
 	~FalldownGimmickActor() override;
 
 	/**
@@ -64,15 +64,16 @@ private:
 	//====================================================================*/
 	//			private methods
 	//====================================================================*/
-	std::weak_ptr<CalyxEffect::FxObject>             falldownFx_{};       //< 倒れている最中のエフェクト
+	std::weak_ptr<CalyxEffect::FxObject>			 falldownFx_{};		  //< 倒れている最中のエフェクト
 	std::unique_ptr<CalyxEngine::TransformAnimation> transformAnimation_; //< 倒れこみアニメーション
 
-	struct FalldownGimmickParam :
-		public CalyxEngine::SerializableObject {
+	struct FalldownGimmickParam : public CalyxEngine::SerializableObject {
 		FalldownGimmickParam();
 		CalyxEngine::ParamPath GetParamPath() const override;
 
-		CalyxMath::Quaternion animationStartRotation_; //< アニメーション開始時の回転
-		CalyxMath::Quaternion animationEndRotation_;   //< アニメーション終了時
+		CalyxMath::Quaternion animationStartRotation_;								   //< アニメーション開始時の回転
+		CalyxMath::Quaternion animationEndRotation_;								   //< アニメーション終了時
+		float				  animationDuration_ = 1.0f;							   //< アニメーション時間
+		int32_t	  animationEaseType_ = static_cast<int32_t>(CalyxEase::EaseType::EaseInOutSine); //< アニメーションのイージングタイプ
 	} param_;
 };

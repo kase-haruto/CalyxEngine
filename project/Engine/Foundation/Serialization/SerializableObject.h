@@ -100,4 +100,4 @@ namespace CalyxEngine {
 		std::vector<SerializableField> fields_; //< フィールドリスト
 	};
 
-} // namespace CalyxEngine
+} // namespace CalyxEnginez

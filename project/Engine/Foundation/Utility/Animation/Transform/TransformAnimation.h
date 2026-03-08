@@ -33,6 +33,8 @@ namespace CalyxEngine {
 		 */
 		void ShowGui();
 
+		bool EaseTypeCombo();
+
 		void Play(float duration);
 
 		// accessor ------------------------------
@@ -41,6 +43,9 @@ namespace CalyxEngine {
 		void SetTransformStart(const QuaternionTransform& start) { startTransform_ = start; }
 		void SetTransformEnd(const QuaternionTransform& end) { endTransform_ = end; }
 		void SetEaseType(CalyxEase::EaseType type) { easeType_ = type; }
+
+		// getter
+		CalyxEase::EaseType GetEaseType() { return easeType_; }
 
 	private:
 		//========================================================================
