@@ -43,6 +43,16 @@ public:
 	 */
 	std::string_view GetTypeName() const override { return "FalldownGimmickActor"; }
 
+	/**
+	 * \brief JSONから派生クラスの設定を適用
+	 */
+	void ApplyDerivedConfigFromJson(const nlohmann::json& root, const nlohmann::json* derived) override;
+
+	/**
+	 * \brief 派生クラスの設定をJSONに抽出
+	 */
+	void ExtractDerivedConfigToJson(nlohmann::json& root, nlohmann::json& derived) const override;
+
 protected:
 	void IdleUpdate(float dt) override;
 	/**
@@ -67,13 +77,8 @@ private:
 	std::weak_ptr<CalyxEffect::FxObject>			 falldownFx_{};		  //< 倒れている最中のエフェクト
 	std::unique_ptr<CalyxEngine::TransformAnimation> transformAnimation_; //< 倒れこみアニメーション
 
-	struct FalldownGimmickParam : public CalyxEngine::SerializableObject {
-		FalldownGimmickParam();
-		CalyxEngine::ParamPath GetParamPath() const override;
-
-		CalyxMath::Quaternion animationStartRotation_;								   //< アニメーション開始時の回転
-		CalyxMath::Quaternion animationEndRotation_;								   //< アニメーション終了時
-		float				  animationDuration_ = 1.0f;							   //< アニメーション時間
-		int32_t	  animationEaseType_ = static_cast<int32_t>(CalyxEase::EaseType::EaseInOutSine); //< アニメーションのイージングタイプ
-	} param_;
+	CalyxMath::Quaternion animationStartRotation_;														 //< アニメーション開始時の回転
+	CalyxMath::Quaternion animationEndRotation_;														 //< アニメーション終了時
+	float				  animationDuration_ = 1.0f;													 //< アニメーション時間
+	int32_t				  animationEaseType_ = static_cast<int32_t>(CalyxEase::EaseType::EaseInOutSine); //< アニメーションのイージングタイプ
 };

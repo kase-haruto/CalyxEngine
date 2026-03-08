@@ -84,7 +84,7 @@ public:
 	/**
 	 * \brief 描画処理
 	 */
-	virtual void Draw()													   = 0;
+	virtual void Draw() = 0;
 
 	/**
 	 * \brief ImGui表示
@@ -95,7 +95,7 @@ public:
 	 * \brief ImGui表示（コンフィグ同期）
 	 * \param config コンフィグ
 	 */
-	void		 ShowGui(struct ColliderConfig& config);
+	void ShowGui(struct ColliderConfig& config);
 
 	//* 衝突時処理 ==========================================*//
 	/**
@@ -145,26 +145,26 @@ public:
 	 * \brief 衝突継続時コールバックを設定
 	 * \param cb コールバック
 	 */
-	void SetOnStay(CollisionCallback cb)  { onStay_  = std::move(cb); }
+	void SetOnStay(CollisionCallback cb) { onStay_ = std::move(cb); }
 
 	/**
 	 * \brief 衝突終了時コールバックを設定
 	 * \param cb コールバック
 	 */
-	void SetOnExit(CollisionCallback cb)  { onExit_  = std::move(cb); }
+	void SetOnExit(CollisionCallback cb) { onExit_ = std::move(cb); }
 
 	//* config ==========================================*//
 	/**
 	 * \brief コンフィグを適用
 	 * \param config コンフィグ
 	 */
-	void		   ApplyConfig(const struct ColliderConfig& config);
+	virtual void ApplyConfig(const struct ColliderConfig& config);
 
 	/**
 	 * \brief コンフィグを抽出
 	 * \return コンフィグ
 	 */
-	ColliderConfig ExtractConfig() const;
+	virtual ColliderConfig ExtractConfig() const;
 
 	//* accessor ==========================================*//
 	/**
@@ -178,12 +178,12 @@ protected:
 	//                    protected member variables
 	//===================================================================*/
 	std::variant<Sphere, OBB> collisionShape_; //< 衝突形状
-	std::string				  name_; //< コライダー名
+	std::string				  name_;		   //< コライダー名
 
-	ColliderType type_; //< 自身のタイプ
-	ColliderType targetType_; //< 衝突相手のタイプ
+	ColliderType	   type_;						  //< 自身のタイプ
+	ColliderType	   targetType_;					  //< 衝突相手のタイプ
 	CalyxMath::Vector4 color_ = {1.0, 0.0, 0.0, 1.0}; //< 描画色
-	CalyxMath::Vector3 offset_{0.0f, 0.0f, 0.0f}; //< オフセット座標
+	CalyxMath::Vector3 offset_{0.0f, 0.0f, 0.0f};	  //< オフセット座標
 
 	bool isCollisionEnabled_ = false; //< 衝突判定を行うかどうか
 	bool isDraw_			 = true;  //< 描画を行うかどうか
@@ -194,8 +194,8 @@ private:
 	//                    private member variables
 	//===================================================================*/
 	CollisionCallback onEnter_; //< 衝突開始時コールバック
-	CollisionCallback onStay_; //< 衝突継続時コールバック
-	CollisionCallback onExit_; //< 衝突終了時コールバック
+	CollisionCallback onStay_;	//< 衝突継続時コールバック
+	CollisionCallback onExit_;	//< 衝突終了時コールバック
 
 public:
 	//===================================================================*/
@@ -206,7 +206,7 @@ public:
 	 * \brief 所有者を設定
 	 * \param owner 所有者
 	 */
-	void			SetOwner(BaseGameObject* owner) { owner_ = owner; }
+	void SetOwner(BaseGameObject* owner) { owner_ = owner; }
 
 	/**
 	 * \brief 所有者を取得
@@ -218,7 +218,7 @@ public:
 	 * \brief 中心座標を取得
 	 * \return 中心座標
 	 */
-	virtual const CalyxMath::Vector3&					 GetCenter() const	 = 0;
+	virtual const CalyxMath::Vector3& GetCenter() const = 0;
 
 	/**
 	 * \brief 衝突形状を取得
@@ -230,7 +230,7 @@ public:
 	 * \brief ワールド座標を取得
 	 * \return ワールド座標
 	 */
-	CalyxMath::Vector3 GetWorldPos()const;
+	CalyxMath::Vector3 GetWorldPos() const;
 
 	/**
 	 * \brief 名前を取得
@@ -242,7 +242,7 @@ public:
 	 * \brief 名前を設定
 	 * \param name 名前
 	 */
-	void			   SetName(const std::string& name) { name_ = name; }
+	void SetName(const std::string& name) { name_ = name; }
 
 	/**
 	 * \brief タイプを取得
@@ -260,19 +260,19 @@ public:
 	 * \brief タイプを設定
 	 * \param type タイプ
 	 */
-	void		 SetType(ColliderType type) { type_ = type; }
+	void SetType(ColliderType type) { type_ = type; }
 
 	/**
 	 * \brief ターゲットタイプを設定
 	 * \param targetType ターゲットタイプ
 	 */
-	void		 SetTargetType(ColliderType targetType) { targetType_ = targetType; }
+	void SetTargetType(ColliderType targetType) { targetType_ = targetType; }
 
 	/**
 	 * \brief 描画色を設定
 	 * \param color 描画色
 	 */
-	void		 SetColor(const CalyxMath::Vector4& color) { color_ = color; }
+	void SetColor(const CalyxMath::Vector4& color) { color_ = color; }
 
 	/**
 	 * \brief 衝突判定が有効かを取得
@@ -296,7 +296,7 @@ public:
 	 * \brief オフセットを設定
 	 * \param off オフセット
 	 */
-	void		   SetOffset(const CalyxMath::Vector3& off) { offset_ = off; }
+	void SetOffset(const CalyxMath::Vector3& off) { offset_ = off; }
 
 	/**
 	 * \brief オフセットを取得
@@ -308,7 +308,7 @@ public:
 	 * \brief オフセットを加算
 	 * \param d 加算量
 	 */
-	void		   AddOffset(const CalyxMath::Vector3& d) { offset_ += d; }
+	void AddOffset(const CalyxMath::Vector3& d) { offset_ += d; }
 
 private:
 	//===================================================================*/

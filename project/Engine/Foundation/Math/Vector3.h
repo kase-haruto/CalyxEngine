@@ -27,15 +27,15 @@ namespace CalyxMath {
 		static Vector3		 One();
 		static const Vector3 Up();
 		bool				 HasValue() const;
-		float		   Length() const;
-		Vector3		   Abs();
-		Vector3		   Normalize() const;
-		float		   LengthSquared() const;
-		static float   Dot(const Vector3& v1, const Vector3& v2);
-		static Vector3 Cross(const Vector3& v0, const Vector3& v1);
-		static Vector3 Lerp(const Vector3& v1, const Vector3& v2, float t);
-		static Vector3 Transform(const Vector3& vector, const Matrix4x4& matrix);
-		static Vector3 Transform(const Vector3& v, const Quaternion& q);
+		float				 Length() const;
+		Vector3				 Abs();
+		Vector3				 Normalize() const;
+		float				 LengthSquared() const;
+		static float		 Dot(const Vector3& v1, const Vector3& v2);
+		static Vector3		 Cross(const Vector3& v0, const Vector3& v1);
+		static Vector3		 Lerp(const Vector3& v1, const Vector3& v2, float t);
+		static Vector3		 Transform(const Vector3& vector, const Matrix4x4& matrix);
+		static Vector3		 Transform(const Vector3& v, const Quaternion& q);
 
 		static Vector3 Min(const Vector3& a, const Vector3& b);
 
@@ -84,19 +84,17 @@ namespace CalyxMath {
 
 		const float& operator[](int index) const;
 #pragma endregion
-
-	
 	};
 
-		//--------- serializer ---------------------------------------------------
+	//--------- serializer ---------------------------------------------------
 #pragma region serializer
 	inline void to_json(nlohmann::json& j, const CalyxMath::Vector3& v) {
 		j = nlohmann::json{{"x", v.x}, {"y", v.y}, {"z", v.z}};
 	}
 	inline void from_json(const nlohmann::json& j, CalyxMath::Vector3& v) {
-		j.at("x").get_to(v.x);
-		j.at("y").get_to(v.y);
-		j.at("z").get_to(v.z);
+		v.x = j.value("x", 0.0f);
+		v.y = j.value("y", 0.0f);
+		v.z = j.value("z", 0.0f);
 	}
 
 #pragma endregion

@@ -1,8 +1,9 @@
 #include "SphereCollider.h"
 
 #include "Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h"
-
+#include <Data/Engine/Configs/Scene/Objects/Collider/ColliderConfig.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
+
 
 #include <externals/imgui/imgui.h>
 
@@ -69,3 +70,14 @@ const std::variant<Sphere, OBB>& SphereCollider::GetCollisionShape() {
 	collisionShape_ = shape_;
 	return collisionShape_;
 };
+
+void SphereCollider::ApplyConfig(const ColliderConfig& config) {
+	Collider::ApplyConfig(config);
+	shape_.radius = config.radius;
+}
+
+ColliderConfig SphereCollider::ExtractConfig() const {
+	ColliderConfig config = Collider::ExtractConfig();
+	config.radius		  = shape_.radius;
+	return config;
+}

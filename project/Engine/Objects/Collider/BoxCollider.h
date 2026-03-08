@@ -63,26 +63,38 @@ public:
 	 * \brief 衝突継続時コールバック
 	 * \param other 衝突相手
 	 */
-	void OnCollisionStay([[maybe_unused]] Collider* other) override {};
+	virtual void OnCollisionStay([[maybe_unused]] Collider* other) override {};
 
 	/**
 	 * \brief 衝突終了時コールバック
 	 * \param other 衝突相手
 	 */
-	void OnCollisionExit([[maybe_unused]] Collider* other) override {};
+	virtual void OnCollisionExit([[maybe_unused]] Collider* other) override {};
+
+	//* config ==========================================*//
+	/**
+	 * \brief コンフィグを適用
+	 * \param config コンフィグ
+	 */
+	void ApplyConfig(const struct ColliderConfig& config) override;
+
+	/**
+	 * \brief コンフィグを抽出
+	 * \return コンフィグ
+	 */
+	ColliderConfig ExtractConfig() const override;
 
 	/**
 	 * \brief 衝突半径（概算）を取得
 	 * \return 半径
 	 */
-	float		   GetColliderRadius() const override { return shape_.size.x * 0.5f; }
+	float GetColliderRadius() const override { return shape_.size.x * 0.5f; }
 
 	/**
 	 * \brief ボックスサイズを取得
 	 * \return サイズ
 	 */
 	const CalyxMath::Vector3& GetSize() const { return shape_.size; }
-
 
 protected:
 	//===================================================================*/
@@ -110,7 +122,7 @@ public:
 	 * \brief ボックスサイズを設定
 	 * \param size サイズ
 	 */
-	void		   SetSize(const CalyxMath::Vector3& size) { shape_.size = size; }
+	void SetSize(const CalyxMath::Vector3& size) { shape_.size = size; }
 
 	/**
 	 * \brief 衝突形状を取得

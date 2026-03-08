@@ -1,7 +1,8 @@
 #pragma once
+#include "Vector3.h"
 #include <externals/nlohmann/json.hpp>
 #include <optional>
-#include "Vector3.h"
+
 
 namespace CalyxMath {
 	struct Matrix4x4;
@@ -88,8 +89,8 @@ namespace CalyxMath {
 		static Quaternion MakeRotateZ(float radian);
 
 		static Quaternion LookAt(
-			const Vector3&		   eye,
-			const Vector3&		   target,
+			const Vector3& eye,
+			const Vector3& target,
 			const Vector3& worldUp = Vector3::Up());
 		Quaternion FromToRotation(const Vector3& from, const Vector3& to);
 	};
@@ -100,10 +101,10 @@ namespace CalyxMath {
 	}
 
 	inline void from_json(const nlohmann::json& j, CalyxMath::Quaternion& q) {
-		j.at("x").get_to(q.x);
-		j.at("y").get_to(q.y);
-		j.at("z").get_to(q.z);
-		j.at("w").get_to(q.w);
+		q.x = j.value("x", 0.0f);
+		q.y = j.value("y", 0.0f);
+		q.z = j.value("z", 0.0f);
+		q.w = j.value("w", 0.0f);
 
 		const float n = std::sqrt(q.w * q.w + q.x * q.x + q.y * q.y + q.z * q.z);
 		if(n > 0.0f) {

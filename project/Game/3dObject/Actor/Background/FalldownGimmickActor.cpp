@@ -14,32 +14,52 @@ REGISTER_SCENE_OBJECT(FalldownGimmickActor)
 ///////////////////////////////////////////////////////////////////////////////////////////
 //		ctor / dtor
 ///////////////////////////////////////////////////////////////////////////////////////////
-FalldownGimmickActor::FalldownGimmickActor() = default;
+FalldownGimmickActor::FalldownGimmickActor() {
+	// コライダー初期化 (コンストラクタで行うことで、読み込み時に上書きされないようにする)
+	InitializeCollider(ColliderKind::Box);
+	if(collider_) {
+		collider_->SetType(ColliderType::Type_StageGimmick);
+		collider_->SetTargetType(ColliderType::Type_Player);
+		collider_->SetOwner(this);
+		collider_->SetIsDrawCollider(true);
+		collider_->SetCollisionEnabled(true);
+	}
+}
+
 FalldownGimmickActor::FalldownGimmickActor(const std::string& modelName, std::optional<std::string> objectName)
-	: StageGimmickActor(modelName, objectName) {}
+	: StageGimmickActor(modelName, objectName) {
+	// コライダー初期化
+	InitializeCollider(ColliderKind::Box);
+	if(collider_) {
+		collider_->SetType(ColliderType::Type_StageGimmick);
+		collider_->SetTargetType(ColliderType::Type_Player);
+		collider_->SetOwner(this);
+		collider_->SetIsDrawCollider(true);
+		collider_->SetCollisionEnabled(true);
+	}
+}
+
 FalldownGimmickActor::~FalldownGimmickActor() = default;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //		初期化処理
 ///////////////////////////////////////////////////////////////////////////////////////////
 void FalldownGimmickActor::Initialize() {
-	param_.LoadParams();
-
 	// 初期トランスフォーム設定
-	worldTransform_.rotation = param_.animationStartRotation_;
+	worldTransform_.rotation = animationStartRotation_;
 
 	// アニメーション設定
 	transformAnimation_ = std::make_unique<CalyxEngine::TransformAnimation>();
 	transformAnimation_->SetTarget(&worldTransform_);
 	QuaternionTransform start, end;
 	start.scale		= worldTransform_.scale;
-	start.rotate	= param_.animationStartRotation_;
+	start.rotate	= animationStartRotation_;
 	start.translate = worldTransform_.translation;
 
 	end.scale	  = worldTransform_.scale;
-	end.rotate	  = param_.animationEndRotation_;
+	end.rotate	  = animationEndRotation_;
 	end.translate = worldTransform_.translation;
-	transformAnimation_->SetEaseType(static_cast<CalyxEase::EaseType>( param_.animationEaseType_));
+	transformAnimation_->SetEaseType(static_cast<CalyxEase::EaseType>(animationEaseType_));
 
 	transformAnimation_->SetTransformStart(start);
 	transformAnimation_->SetTransformEnd(end);
@@ -50,13 +70,13 @@ void FalldownGimmickActor::Initialize() {
 	fx->LoadFromPath("Effect/EnemyBulletTrailEffect");
 	fx->StopAll(); // 生成時は止めておく
 
-	// コライダー初期化
-	BaseGameObject::InitializeCollider(ColliderKind::Box);
-	collider_->SetType(ColliderType::Type_StageGimmick);
-	collider_->SetTargetType(ColliderType::Type_Player);
-	collider_->SetOwner(this);
-	collider_->SetIsDrawCollider(true);
-	collider_->SetCollisionEnabled(true);
+	// コライダーの設定 (実行時に必要なコールバックなどの設定のみ行う)
+	if(collider_) {
+		collider_->SetOwner(this);
+		collider_->SetOnEnter([this](Collider* other) { this->OnCollisionEnter(other); });
+		collider_->SetOnStay([this](Collider* other) { this->OnCollisionStay(other); });
+		collider_->SetOnExit([this](Collider* other) { this->OnCollisionExit(other); });
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -65,7 +85,7 @@ void FalldownGimmickActor::Initialize() {
 void FalldownGimmickActor::DerivativeGui() {
 	// トランスフォームの保存
 	if(ImGui::Button("Save StartTransform")) {
-		param_.animationStartRotation_ = worldTransform_.rotation;
+		animationStartRotation_ = worldTransform_.rotation;
 
 		QuaternionTransform start;
 		start.scale		= worldTransform_.scale;
@@ -76,7 +96,7 @@ void FalldownGimmickActor::DerivativeGui() {
 
 	ImGui::SameLine();
 	if(ImGui::Button("Save EndTransform")) {
-		param_.animationEndRotation_ = worldTransform_.rotation;
+		animationEndRotation_ = worldTransform_.rotation;
 
 		QuaternionTransform end;
 		end.scale	  = worldTransform_.scale;
@@ -85,14 +105,12 @@ void FalldownGimmickActor::DerivativeGui() {
 		transformAnimation_->SetTransformEnd(end);
 	}
 
-	param_.SaveAndLoadButtonGui();
-
-	ImGui::DragFloat("duration", &param_.animationDuration_, 0.1f, 0.0f, 10.0f);
+	ImGui::DragFloat("duration", &animationDuration_, 0.1f, 0.0f, 10.0f);
 
 	transformAnimation_->ShowGui();
 
 	if(transformAnimation_->EaseTypeCombo()) {
-		param_.animationEaseType_ = static_cast<int32_t>(transformAnimation_->GetEaseType());
+		animationEaseType_ = static_cast<int32_t>(transformAnimation_->GetEaseType());
 	}
 }
 
@@ -107,7 +125,7 @@ void FalldownGimmickActor::IdleUpdate(float dt) {
 ///////////////////////////////////////////////////////////////////////////////////////////
 void FalldownGimmickActor::OnTriggered() {
 	// アニメーション再生
-	transformAnimation_->Play(param_.animationDuration_);
+	transformAnimation_->Play(animationDuration_);
 
 	// fx再生
 	auto fx = falldownFx_.lock();
@@ -129,15 +147,25 @@ void FalldownGimmickActor::OnFinished() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-//		gui
+//		Serialization
 ///////////////////////////////////////////////////////////////////////////////////////////
-FalldownGimmickActor::FalldownGimmickParam::FalldownGimmickParam() {
-	AddField("startRotation", animationStartRotation_).Category("animationData");
-	AddField("endRotation", animationEndRotation_).Category("animationData");
-	AddField("duration", animationDuration_).Category("animationData");
-	AddField("easeType", animationEaseType_).Category("animationData");
+void FalldownGimmickActor::ApplyDerivedConfigFromJson(const nlohmann::json& root, const nlohmann::json* derived) {
+	(void)root;
+	if(!derived) return;
+
+	// 回転
+	if(derived->contains("startRotation")) animationStartRotation_ = derived->at("startRotation").get<CalyxMath::Quaternion>();
+	if(derived->contains("endRotation")) animationEndRotation_ = derived->at("endRotation").get<CalyxMath::Quaternion>();
+
+	// その他パラメータ
+	animationDuration_ = derived->value("duration", 1.0f);
+	animationEaseType_ = derived->value("easeType", static_cast<int32_t>(CalyxEase::EaseType::EaseInOutSine));
 }
 
-CalyxEngine::ParamPath FalldownGimmickActor::FalldownGimmickParam::GetParamPath() const {
-	return {CalyxEngine::ParamDomain::Game, "FalldownGimmickActor", "Actor/Background"};
+void FalldownGimmickActor::ExtractDerivedConfigToJson(nlohmann::json& root, nlohmann::json& derived) const {
+	(void)root;
+	derived["startRotation"] = animationStartRotation_;
+	derived["endRotation"]	 = animationEndRotation_;
+	derived["duration"]		 = animationDuration_;
+	derived["easeType"]		 = animationEaseType_;
 }

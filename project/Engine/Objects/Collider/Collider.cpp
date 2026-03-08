@@ -2,8 +2,9 @@
 
 #include "Engine/Objects/3D/Actor/BaseGameObject.h"
 
-#include <Engine/Collision/CollisionManager.h>
 #include <Data/Engine/Configs/Scene/Objects/Collider/ColliderConfig.h>
+#include <Engine/Collision/CollisionManager.h>
+
 
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 #include <externals/imgui/imgui.h>
@@ -11,15 +12,15 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 //		ctor / dtor
 /////////////////////////////////////////////////////////////////////////////////////////
-Collider::Collider(bool isEnuble){
+Collider::Collider(bool isEnuble) {
 	isCollisionEnabled_ = isEnuble;
-	if (isCollisionEnabled_){
+	if(isCollisionEnabled_) {
 		CollisionManager::GetInstance()->Register(this);
 	}
 }
 
 Collider::~Collider() {
-	if (isCollisionEnabled_) {
+	if(isCollisionEnabled_) {
 		CollisionManager::GetInstance()->Unregister(this);
 	}
 }
@@ -27,30 +28,30 @@ Collider::~Collider() {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		デバッグ用ui
 /////////////////////////////////////////////////////////////////////////////////////////
-void Collider::ShowGui(){
+void Collider::ShowGui() {
 	bool enabled = isCollisionEnabled_;
-	if (GuiCmd::CheckBox("Enable Collision", enabled)){
+	if(GuiCmd::CheckBox("Enable Collision", enabled)) {
 		SetCollisionEnabled(enabled);
 	}
 
-	if (!isCollisionEnabled_) return;
+	if(!isCollisionEnabled_) return;
 
 	GuiCmd::CheckBox("Draw Collider", isDraw_);
 	GuiCmd::ColorEdit4("Collider Color", color_);
 }
 
-void Collider::ShowGui(ColliderConfig& config){
+void Collider::ShowGui(ColliderConfig& config) {
 
-	if (ImGui::CollapsingHeader("Collider")){
+	if(ImGui::CollapsingHeader("Collider")) {
 
 		GuiCmd::DragFloat3("offset", offset_);
 
 		bool enabled = config.isCollisionEnabled;
-		if (GuiCmd::CheckBox("Enable Collision", enabled)){
+		if(GuiCmd::CheckBox("Enable Collision", enabled)) {
 			SetCollisionEnabled(enabled);
 		}
 
-		if (!config.isCollisionEnabled) return;
+		if(!config.isCollisionEnabled) return;
 
 		GuiCmd::CheckBox("Draw Collider", config.isDraw);
 		GuiCmd::ColorEdit4("Collider Color", color_);
@@ -61,45 +62,46 @@ void Collider::ShowGui(ColliderConfig& config){
 //		衝突通知(衝突フレーム
 /////////////////////////////////////////////////////////////////////////////////////////
 void Collider::NotifyCollisionEnter(Collider* other) {
-	if (onEnter_) onEnter_(other);
+	if(onEnter_) onEnter_(other);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		衝突通知(衝突中
 /////////////////////////////////////////////////////////////////////////////////////////
 void Collider::NotifyCollisionStay(Collider* other) {
-	if (onStay_) onStay_(other);
+	if(onStay_) onStay_(other);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		衝突通知(離れた
 /////////////////////////////////////////////////////////////////////////////////////////
 void Collider::NotifyCollisionExit(Collider* other) {
-	if (onExit_) onExit_(other);
+	if(onExit_) onExit_(other);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		config適用
 /////////////////////////////////////////////////////////////////////////////////////////
-void Collider::ApplyConfig(const ColliderConfig& config){
+void Collider::ApplyConfig(const ColliderConfig& config) {
 	isCollisionEnabled_ = config.isCollisionEnabled;
-	isDraw_ = config.isDraw;
-	type_ = static_cast< ColliderType >(config.colliderType);
-	targetType_ = static_cast< ColliderType >(config.targetType);
+	isDraw_				= config.isDraw;
+	type_				= static_cast<ColliderType>(config.colliderType);
+	targetType_			= static_cast<ColliderType>(config.targetType);
+	offset_				= config.offset;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		config吐き出し
 /////////////////////////////////////////////////////////////////////////////////////////
-ColliderConfig Collider::ExtractConfig() const{
+ColliderConfig Collider::ExtractConfig() const {
 	ColliderConfig config;
 	config.isCollisionEnabled = isCollisionEnabled_;
-	config.isDraw = isDraw_;
-	config.colliderType = static_cast< int >(type_);
-	config.targetType = static_cast< int >(targetType_);
+	config.isDraw			  = isDraw_;
+	config.colliderType		  = static_cast<int>(type_);
+	config.targetType		  = static_cast<int>(targetType_);
+	config.offset			  = offset_;
 	return config;
 }
-
 
 CalyxMath::Vector3 Collider::GetWorldPos() const {
 	if(owner_) {
@@ -111,14 +113,14 @@ CalyxMath::Vector3 Collider::GetWorldPos() const {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		Collisionするか
 /////////////////////////////////////////////////////////////////////////////////////////
-void Collider::SetCollisionEnabled(bool enable){
-	if (isCollisionEnabled_ == enable) return; // 状態が変わらないなら何もしない
+void Collider::SetCollisionEnabled(bool enable) {
+	if(isCollisionEnabled_ == enable) return; // 状態が変わらないなら何もしない
 
 	isCollisionEnabled_ = enable;
 
-	if (enable){
+	if(enable) {
 		CollisionManager::GetInstance()->Register(this);
-	} else{
+	} else {
 		CollisionManager::GetInstance()->Unregister(this);
 	}
 }

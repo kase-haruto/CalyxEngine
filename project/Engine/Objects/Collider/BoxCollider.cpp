@@ -3,7 +3,9 @@
 /*	include space
 /* ===================================================================== */
 // engine
+#include <Data/Engine/Configs/Scene/Objects/Collider/ColliderConfig.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
+
 
 // externals
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
@@ -61,3 +63,14 @@ const std::variant<Sphere, OBB>& BoxCollider::GetCollisionShape() {
 	collisionShape_ = shape_;
 	return collisionShape_;
 };
+
+void BoxCollider::ApplyConfig(const ColliderConfig& config) {
+	Collider::ApplyConfig(config);
+	shape_.size = config.size;
+}
+
+ColliderConfig BoxCollider::ExtractConfig() const {
+	ColliderConfig config = Collider::ExtractConfig();
+	config.size			  = shape_.size;
+	return config;
+}
