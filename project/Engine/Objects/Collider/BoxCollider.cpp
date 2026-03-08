@@ -6,7 +6,6 @@
 #include <Data/Engine/Configs/Scene/Objects/Collider/ColliderConfig.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 
-
 // externals
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 #include <externals/imgui/imgui.h>
@@ -32,9 +31,12 @@ BoxCollider::BoxCollider(bool isEnuble) : Collider::Collider(isEnuble) {}
 
 void BoxCollider::Update(const CalyxMath::Vector3& position, const CalyxMath::Quaternion& rotate) {
 	// 回転込みでローカルオフセットをワールドへ
-	const CalyxMath::Vector3 worldOffset = CalyxMath::Quaternion::RotateVector(offset_, rotate); // ← 回転を適用
+	const CalyxMath::Vector3 worldOffset = CalyxMath::Quaternion::RotateVector(offset_, rotate);
 	shape_.center						 = position + worldOffset;
-	shape_.rotate						 = rotate;
+
+	// 親の回転に自身の回転オフセットを掛け合わせる
+	CalyxMath::Quaternion localRot = CalyxMath::Quaternion::EulerToQuaternion(rotateOffset_);
+	shape_.rotate				   = rotate * localRot;
 }
 
 void BoxCollider::Draw() {
@@ -50,8 +52,7 @@ void BoxCollider::ShowGui() {
 	if(ImGui::TreeNodeEx("BoxCollider", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
 		Collider::ShowGui();
 		if(isCollisionEnabled_) {
-			GuiCmd::DragFloat3("offset", offset_);
-			GuiCmd::DragFloat3("Size", shape_.size, 0.1f, 0.0f, 10.0f);
+			GuiCmd::DragFloat3("Size", shape_.size, 0.1f, 0.0f, 1000.0f);
 		}
 		ImGui::TreePop();
 	}

@@ -112,6 +112,9 @@ void FalldownGimmickActor::DerivativeGui() {
 	if(transformAnimation_->EaseTypeCombo()) {
 		animationEaseType_ = static_cast<int32_t>(transformAnimation_->GetEaseType());
 	}
+
+	// レール進捗について
+	BackgroundActor::DerivativeGui();
 }
 
 void FalldownGimmickActor::IdleUpdate(float dt) {
@@ -160,6 +163,8 @@ void FalldownGimmickActor::ApplyDerivedConfigFromJson(const nlohmann::json& root
 	// その他パラメータ
 	animationDuration_ = derived->value("duration", 1.0f);
 	animationEaseType_ = derived->value("easeType", static_cast<int32_t>(CalyxEase::EaseType::EaseInOutSine));
+
+	BackgroundActor::ApplyDerivedConfigFromJson(root, derived);
 }
 
 void FalldownGimmickActor::ExtractDerivedConfigToJson(nlohmann::json& root, nlohmann::json& derived) const {
@@ -168,4 +173,6 @@ void FalldownGimmickActor::ExtractDerivedConfigToJson(nlohmann::json& root, nloh
 	derived["endRotation"]	 = animationEndRotation_;
 	derived["duration"]		 = animationDuration_;
 	derived["easeType"]		 = animationEaseType_;
+
+	BackgroundActor::ExtractDerivedConfigToJson(root, derived);
 }

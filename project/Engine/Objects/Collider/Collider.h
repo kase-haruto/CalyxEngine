@@ -180,10 +180,11 @@ protected:
 	std::variant<Sphere, OBB> collisionShape_; //< 衝突形状
 	std::string				  name_;		   //< コライダー名
 
-	ColliderType	   type_;						  //< 自身のタイプ
-	ColliderType	   targetType_;					  //< 衝突相手のタイプ
-	CalyxMath::Vector4 color_ = {1.0, 0.0, 0.0, 1.0}; //< 描画色
-	CalyxMath::Vector3 offset_{0.0f, 0.0f, 0.0f};	  //< オフセット座標
+	ColliderType	   type_;							//< 自身のタイプ
+	ColliderType	   targetType_;						//< 衝突相手のタイプ
+	CalyxMath::Vector4 color_ = {1.0, 0.0, 0.0, 1.0};	//< 描画色
+	CalyxMath::Vector3 offset_{0.0f, 0.0f, 0.0f};		//< オフセット座標
+	CalyxMath::Vector3 rotateOffset_{0.0f, 0.0f, 0.0f}; //< 回転オフセット (Euler)
 
 	bool isCollisionEnabled_ = false; //< 衝突判定を行うかどうか
 	bool isDraw_			 = true;  //< 描画を行うかどうか
@@ -301,8 +302,20 @@ public:
 	/**
 	 * \brief オフセットを取得
 	 * \return オフセット
-	 */
+	 * /
 	const CalyxMath::Vector3& GetOffset() const { return offset_; }
+
+	/**
+	 * \brief 回転オフセットを設定
+	 * \param rot 回転オフセット
+	 */
+	void SetRotateOffset(const CalyxMath::Vector3& rot) { rotateOffset_ = rot; }
+
+	/**
+	 * \brief 回転オフセットを取得
+	 * \return 回転オフセット
+	 */
+	const CalyxMath::Vector3& GetRotateOffset() const { return rotateOffset_; }
 
 	/**
 	 * \brief オフセットを加算

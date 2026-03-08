@@ -5,7 +5,6 @@
 #include <Data/Engine/Configs/Scene/Objects/Collider/ColliderConfig.h>
 #include <Engine/Collision/CollisionManager.h>
 
-
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 #include <externals/imgui/imgui.h>
 
@@ -38,13 +37,16 @@ void Collider::ShowGui() {
 
 	GuiCmd::CheckBox("Draw Collider", isDraw_);
 	GuiCmd::ColorEdit4("Collider Color", color_);
+	GuiCmd::DragFloat3("Offset", offset_);
+	GuiCmd::DragFloat3("Rotate Offset", rotateOffset_);
 }
 
 void Collider::ShowGui(ColliderConfig& config) {
 
 	if(ImGui::CollapsingHeader("Collider")) {
 
-		GuiCmd::DragFloat3("offset", offset_);
+		GuiCmd::DragFloat3("offset", config.offset);
+		GuiCmd::DragFloat3("rotate", config.rotate);
 
 		bool enabled = config.isCollisionEnabled;
 		if(GuiCmd::CheckBox("Enable Collision", enabled)) {
@@ -88,6 +90,7 @@ void Collider::ApplyConfig(const ColliderConfig& config) {
 	type_				= static_cast<ColliderType>(config.colliderType);
 	targetType_			= static_cast<ColliderType>(config.targetType);
 	offset_				= config.offset;
+	rotateOffset_		= config.rotate;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -100,6 +103,7 @@ ColliderConfig Collider::ExtractConfig() const {
 	config.colliderType		  = static_cast<int>(type_);
 	config.targetType		  = static_cast<int>(targetType_);
 	config.offset			  = offset_;
+	config.rotate			  = rotateOffset_;
 	return config;
 }
 

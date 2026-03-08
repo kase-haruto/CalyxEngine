@@ -228,7 +228,7 @@ private:
 		PlayerParam();
 		CalyxEngine::ParamPath GetParamPath() const override;
 
-		float moveSpeed = 15.0f;
+		float moveSpeed = 20.0f;
 		int	  life		= 30;
 
 		struct Collider {

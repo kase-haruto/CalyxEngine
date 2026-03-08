@@ -3,9 +3,10 @@
 /* include
 /* ===================================================================== */
 #include <Engine/Graphics/Camera/3d/Camera3d.h>
-#include <Engine/Objects/Transform/Transform.h>
 #include <Engine/Objects/3D/Geometory/Spline/SplineData.h>
 #include <Engine/Objects/3D/Geometory/Spline/SplineJson.h>
+#include <Engine/Objects/Transform/Transform.h>
+
 
 #include <string>
 #include <vector>
@@ -44,12 +45,12 @@ public:
 	/**
 	 * \brief GUI表示
 	 */
-	void ShowGui()override;
+	void ShowGui() override;
 	/**
 	 * \brief 常に実行される更新処理
 	 * \param dt デルタタイム
 	 */
-	void AlwaysUpdate(float dt)override;
+	void AlwaysUpdate(float dt) override;
 
 	// 位置/姿勢
 	/**
@@ -135,6 +136,12 @@ public:
 	float GetProgress() const;
 
 	/**
+	 * \brief スプラインデータを取得
+	 * \return スプラインデータ
+	 */
+	const SplineData& GetSplineData() const { return spline_; }
+
+	/**
 	 * \brief タイプ名を取得
 	 * \return タイプ名
 	 */
@@ -150,20 +157,20 @@ private:
 private:
 	// スプライン
 	SplineData spline_;
-	int arcSamplesPerSeg_ = 32;		// 1セグメント間で32分割
-	float totalLength_ = 0.0f;
+	int		   arcSamplesPerSeg_ = 32; // 1セグメント間で32分割
+	float	   totalLength_		 = 0.0f;
 
 	// 状態
-	float traveled_ = 0.0f;			// 走行弧長（0〜totalLength）
-	float speed_ = 20.0f;			// 等速（弧長ベース）
-	float lookAhead_ = 2.0f;		// 先読み距離（向き用）
+	float traveled_	 = 0.0f;  // 走行弧長（0〜totalLength）
+	float speed_	 = 20.0f; // 等速（弧長ベース）
+	float lookAhead_ = 2.0f;  // 先読み距離（向き用）
 
 	// ロール（左右傾き）
-	float zTiltOffset_ = 0.0f;		// 現在の傾き
-	float targetTilt_ = 0.0f;		// 目標の傾き（曲率由来）
-	float tiltAngle_ = 0.3f;		// 最大傾き（ラジアン）
-	float tiltLerpSpeed_ = 10.0f;	// 傾き補間速度
+	float zTiltOffset_	 = 0.0f;  // 現在の傾き
+	float targetTilt_	 = 0.0f;  // 目標の傾き（曲率由来）
+	float tiltAngle_	 = 0.3f;  // 最大傾き（ラジアン）
+	float tiltLerpSpeed_ = 10.0f; // 傾き補間速度
 
-	// 
-	float stopRatio_ = 0.9f;		//停止
+	//
+	float stopRatio_ = 0.9f; // 停止
 };

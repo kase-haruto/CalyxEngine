@@ -111,6 +111,19 @@ void Reticle::ApplyMove(float dt) {
 	// 常に Z を固定（初期化や補間で変わるのを防ぐ）
 	transform_.translation.z = param_.posFar;
 
+	// --- 画面内クランプ ---
+	if(Camera3d* cam = CameraManager::GetMain3d()) {
+		// レティクルはカメラの子なので、translation は既にカメラローカル空間
+		// その Z 距離での表示可能範囲を計算
+		float halfHeight = std::tan(cam->GetFovY() * 0.5f) * transform_.translation.z;
+		float halfWidth	 = halfHeight * cam->GetAspectRatio();
+
+		// クランプ
+		float margin			 = 0.95f; // レティクルは端まで行けるように少し広め
+		transform_.translation.x = std::clamp(transform_.translation.x, -halfWidth * margin, halfWidth * margin);
+		transform_.translation.y = std::clamp(transform_.translation.y, -halfHeight * margin, halfHeight * margin);
+	}
+
 	// ── アシスト処理 ─────────────────────────
 	if(targets_.empty() || !transform_.parent) return;
 
