@@ -43,6 +43,9 @@ nlohmann::json SceneSerializer::DumpJson(const SceneContext& context) {
 	for(const auto& sp : objects) {
 		if(!sp || !sp->IsSerializable()) continue;
 
+		// FX系のオブジェクトは保存対象から除外（ロード時に再生成されるため）
+		if(sp->GetObjectType() == ObjectType::Effect) continue;
+
 		// IConfigurable を持つものだけ出力対象
 		if(auto* cfg = dynamic_cast<const IConfigurable*>(sp.get())) {
 			nlohmann::json jOne;
@@ -97,7 +100,7 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 	} else {
 		jArray = root.value("objects", nlohmann::json::array());
 	}
-	
+
 	if(root.contains("sceneName")) context.SetSceneName(root.value("sceneName", "scene"));
 
 	// ---------- 既存クリア ----------
@@ -122,7 +125,6 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 
 		auto sp = SceneObjectRegistry::Get().Create(typeName);
 		if(!sp) continue;
-
 
 		if(auto* cfg = dynamic_cast<IConfigurable*>(sp.get())) {
 			// onfigPath があるなら外部JSONを優先
@@ -153,7 +155,7 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 		} else if(auto pt = std::dynamic_pointer_cast<PointLight>(sp)) {
 			context.GetLightLibrary()->SetPointLight(pt);
 		} else if(auto fx = std::dynamic_pointer_cast<CalyxEffect::ParticleSystemObject>(sp)) {
-			context.GetFxSystem()->AddEmitter(fx->GetEmitter(),fx->GetGuid());
+			context.GetFxSystem()->AddEmitter(fx->GetEmitter(), fx->GetGuid());
 		} else if(auto camDbg = std::dynamic_pointer_cast<DebugCamera>(sp)) {
 			context.GetCameraMgr()->SetDebugCamera(camDbg);
 		} else if(auto camMain = std::dynamic_pointer_cast<Camera3d>(sp)) {

@@ -1,0 +1,57 @@
+#include "GimmickActivateEvent.h"
+
+#include "Game/3dObject/Actor/Background/StageGimmickActor.h"
+#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
+
+REGISTER_SCENE_OBJECT(GimmickActivateEvent)
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		ctor / dtor
+/////////////////////////////////////////////////////////////////////////////////////////
+GimmickActivateEvent::GimmickActivateEvent() {
+	SceneObject::SetName("GimmickActivateEvent", ObjectType::Event);
+	param_.LoadParams();
+	model_->SetColor(param_.color);
+}
+
+GimmickActivateEvent::GimmickActivateEvent(const std::string& name)
+	:BaseEventObject(name){
+	param_.LoadParams();
+	model_->SetColor(param_.color);
+}
+GimmickActivateEvent::~GimmickActivateEvent() = default;
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		初期化
+/////////////////////////////////////////////////////////////////////////////////////////
+void GimmickActivateEvent::ShowGui() {
+	param_.ShowGui();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		初期化
+/////////////////////////////////////////////////////////////////////////////////////////
+void GimmickActivateEvent::OnCollisionEnter(Collider* other) {
+	(void)other;
+	// 子にgimmickアクタがあれば起動通知を送る
+	for(auto& child : children_) {
+		auto* gimmick = dynamic_cast<StageGimmickActor*>(child.get());
+		if(gimmick) {
+			gimmick->SetCurrentState(GimmickState::Running);
+		}
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		パラメータ登録
+/////////////////////////////////////////////////////////////////////////////////////////
+GimmickActivateEvent::GimmickActivateEventData::GimmickActivateEventData() {
+	AddField("color", color);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		パラメータパス
+/////////////////////////////////////////////////////////////////////////////////////////
+CalyxEngine::ParamPath GimmickActivateEvent::GimmickActivateEventData::GetParamPath() const {
+	return{CalyxEngine::ParamDomain::Game,"GimmickActivateEvent","Actor/Event"};
+}

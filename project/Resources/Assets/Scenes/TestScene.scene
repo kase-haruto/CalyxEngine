@@ -1,61 +1,9 @@
 {
     "objects": [
         {
-            "emitters": [],
-            "guid": "00000000-0000-0000-0000-000000000000",
-            "name": "Fx(3)",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "FxObject"
-        },
-        {
-            "emitters": [],
-            "guid": "00000000-0000-0000-0000-000000000000",
-            "name": "Fx",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "FxObject"
-        },
-        {
             "colliderConfig": {
                 "colliderType": 0,
-                "isCollisionEnabled": false,
+                "isCollisionEnabled": true,
                 "isDraw": true,
                 "offset": {
                     "x": 0.0,
@@ -70,7 +18,7 @@
                 },
                 "targetType": 0
             },
-            "guid": "b74c4da7-1e2f-4cf5-85bb-3c66b22f298c",
+            "guid": "2423ad41-4093-46ea-b211-cea2906b2b2b",
             "modelConfig": {
                 "blendMode": 5,
                 "materialConfig": {
@@ -87,7 +35,7 @@
                     "shininess": 20.0
                 },
                 "modelName": "smallBuilding_01.obj",
-                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "textureGuid": "e6db45e2-7ad6-44b3-b137-e04e02d4c8c7",
                 "uvTransConfig": {
                     "rotation": 0.0,
                     "scale": {
@@ -96,318 +44,31 @@
                     }
                 }
             },
-            "name": "smallBuilding_01",
+            "name": "smallBuilding_01(1)",
             "objectType": 2,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "parentGuid": "5860cf0a-4217-4c9f-8bb8-262b33ef01fa",
             "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
                 "rotation": {
                     "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": -6.973012034450221e-08
+                    "x": 9.536721279346239e-08,
+                    "y": -6.233030078301891e-22,
+                    "z": -6.535820570462061e-15
                 },
                 "scale": {
-                    "x": 9.999646186828613,
-                    "y": 5.75894832611084,
-                    "z": 9.999971389770508
+                    "x": 4.348606109619141,
+                    "y": 2.1211905479431152,
+                    "z": 4.880408763885498
                 },
                 "translation": {
-                    "x": 125.7174301147461,
-                    "y": -8.984600067138672,
-                    "z": 116.97993469238281
+                    "x": -6.280223846435547,
+                    "y": -4.797233581542969,
+                    "z": 38.33307647705078
                 }
             },
             "type": "BaseGameObject"
-        },
-        {
-            "emitters": [],
-            "guid": "00000000-0000-0000-0000-000000000000",
-            "name": "",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "FxObject"
-        },
-        {
-            "emitters": [],
-            "guid": "00000000-0000-0000-0000-000000000000",
-            "name": "Fx(1)",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "FxObject"
-        },
-        {
-            "emitters": [],
-            "guid": "00000000-0000-0000-0000-000000000000",
-            "name": "Fx(2)",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "FxObject"
-        },
-        {
-            "emitters": [],
-            "guid": "00000000-0000-0000-0000-000000000000",
-            "name": "Fx(13)",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "FxObject"
-        },
-        {
-            "color": {
-                "w": 1.0,
-                "x": 1.0,
-                "y": 1.0,
-                "z": 1.0
-            },
-            "decay": 1.0,
-            "guid": "7fad0d4c-dc3c-4523-9d23-0f83fb5ed607",
-            "intensity": 0.25,
-            "name": "PointLight",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "position": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            },
-            "radius": 20.0,
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "PointLight"
-        },
-        {
-            "autoDestroy": false,
-            "blendMode": 2,
-            "color": {
-                "w": 1.0,
-                "x": 0.6117647290229797,
-                "y": 0.25882354378700256,
-                "z": 0.5411764979362488
-            },
-            "emitCount": 10,
-            "emitDelay": 0.0,
-            "emitDuration": -1.0,
-            "emitRate": 0.10000000149011612,
-            "followOneShot": false,
-            "guid": "00000000-0000-0000-0000-000000000000",
-            "isComplement": true,
-            "isDrawEnable": true,
-            "isOneShot": false,
-            "lifetime": {
-                "constant": 0.2800000011920929,
-                "max": 1.0,
-                "min": 0.0,
-                "mode": 0
-            },
-            "modelPath": "plane.obj",
-            "modules": [
-                {
-                    "blend": 0,
-                    "clamp01": true,
-                    "ease": 1,
-                    "enabled": true,
-                    "end": [
-                        0.3799999952316284,
-                        0.47999998927116394,
-                        1.0,
-                        1.0
-                    ],
-                    "guid": "6c316014-8f65-49e1-8b20-660f880c80a5",
-                    "invert": true,
-                    "name": "OverLifetimeModule",
-                    "start": [
-                        0.0,
-                        0.0,
-                        -0.029999999329447746,
-                        1.0
-                    ],
-                    "target": 0
-                },
-                {
-                    "blend": 0,
-                    "clamp01": true,
-                    "ease": 2,
-                    "enabled": true,
-                    "end": [
-                        0.0,
-                        0.6813255548477173,
-                        0.760617733001709,
-                        1.0
-                    ],
-                    "guid": "4416c17c-a143-4248-8799-c0f781e2dc22",
-                    "invert": false,
-                    "name": "OverLifetimeModule",
-                    "start": [
-                        0.830115795135498,
-                        0.0,
-                        0.0,
-                        1.0
-                    ],
-                    "target": 4
-                },
-                {
-                    "enabled": false,
-                    "gravity": {
-                        "x": 0.0,
-                        "y": -9.800000190734863,
-                        "z": 0.0
-                    },
-                    "name": "GravityModule"
-                }
-            ],
-            "name": "Emitter",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "position": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            },
-            "randomSpinEmit": true,
-            "scale": {
-                "constant": {
-                    "x": 0.11999999731779099,
-                    "y": 0.11999999731779099,
-                    "z": 1.0
-                },
-                "max": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "min": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "mode": 0
-            },
-            "textureGuid": "5e4b90f6-3263-4155-98b1-4454ce1b1451",
-            "texturePath": "particle.png",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "ParticleSystemObject",
-            "velocity": {
-                "constant": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "max": {
-                    "x": 2.259999990463257,
-                    "y": 3.8299999237060547,
-                    "z": 1.0
-                },
-                "min": {
-                    "x": -1.4199999570846558,
-                    "y": 0.44999998807907104,
-                    "z": 0.0
-                },
-                "mode": 1
-            }
         },
         {
             "FalldownGimmickActor": {
@@ -473,6 +134,9 @@
             "objectType": 2,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
                 "rotation": {
                     "w": 1.0,
                     "x": 0.0,
@@ -487,15 +151,57 @@
                 "translation": {
                     "x": 10.865234375,
                     "y": 0.513603687286377,
-                    "z": 25.255130767822266
+                    "z": 34.43207550048828
                 }
             },
             "type": "FalldownGimmickActor"
         },
         {
+            "color": {
+                "w": 1.0,
+                "x": 0.1882352977991104,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "decay": 1.0,
+            "guid": "7fad0d4c-dc3c-4523-9d23-0f83fb5ed607",
+            "intensity": 1.0,
+            "name": "PointLight",
+            "objectType": 0,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "position": {
+                "x": -2.319999933242798,
+                "y": 34.560001373291016,
+                "z": 30.75
+            },
+            "radius": 51.84000015258789,
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
+            "type": "PointLight"
+        },
+        {
             "colliderConfig": {
                 "colliderType": 0,
-                "isCollisionEnabled": true,
+                "isCollisionEnabled": false,
                 "isDraw": true,
                 "offset": {
                     "x": 0.0,
@@ -510,7 +216,77 @@
                 },
                 "targetType": 0
             },
-            "guid": "2423ad41-4093-46ea-b211-cea2906b2b2b",
+            "guid": "b6efdaa2-8206-4b38-bd3d-b64c8d9e7480",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "cylinder.obj",
+                "textureGuid": "93fea04f-9b49-444b-8b34-5783816add5d",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "cylinder(1)",
+            "objectType": 2,
+            "parentGuid": "ac08c6e6-7057-4555-8e24-2d9d6dfa1079",
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": -0.2855378985404968,
+                    "x": 0.9138797521591187,
+                    "y": 0.22238458693027496,
+                    "z": 0.18394845724105835
+                },
+                "scale": {
+                    "x": 1.0000001192092896,
+                    "y": 1.1860073804855347,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": 2.301832437515259,
+                    "y": -1.372342586517334,
+                    "z": 14.935547828674316
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": false,
+                "isDraw": true,
+                "offset": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "radius": 1.0,
+                "size": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "targetType": 0
+            },
+            "guid": "b74c4da7-1e2f-4cf5-85bb-3c66b22f298c",
             "modelConfig": {
                 "blendMode": 5,
                 "materialConfig": {
@@ -527,7 +303,7 @@
                     "shininess": 20.0
                 },
                 "modelName": "smallBuilding_01.obj",
-                "textureGuid": "e6db45e2-7ad6-44b3-b137-e04e02d4c8c7",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
                 "uvTransConfig": {
                     "rotation": 0.0,
                     "scale": {
@@ -536,25 +312,98 @@
                     }
                 }
             },
-            "name": "smallBuilding_01(1)",
+            "name": "smallBuilding_01",
             "objectType": 2,
-            "parentGuid": "5860cf0a-4217-4c9f-8bb8-262b33ef01fa",
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
                 "rotation": {
                     "w": 1.0,
-                    "x": 9.536721279346239e-08,
-                    "y": -6.233030078301891e-22,
-                    "z": -6.535820570462061e-15
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": -6.973012034450221e-08
                 },
                 "scale": {
-                    "x": 4.348606109619141,
-                    "y": 2.1211905479431152,
-                    "z": 4.880408763885498
+                    "x": 9.999646186828613,
+                    "y": 5.75894832611084,
+                    "z": 9.999971389770508
                 },
                 "translation": {
-                    "x": -6.280223846435547,
-                    "y": -4.797233581542969,
-                    "z": 38.33307647705078
+                    "x": 125.7174301147461,
+                    "y": -8.984600067138672,
+                    "z": 116.97993469238281
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": false,
+                "isDraw": true,
+                "offset": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "radius": 1.0,
+                "size": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "targetType": 0
+            },
+            "guid": "92d83d2a-f198-4e85-99a4-cb4be66efdde",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "torus.obj",
+                "textureGuid": "93fea04f-9b49-444b-8b34-5783816add5d",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "torus",
+            "objectType": 2,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 0.9118912220001221,
+                    "x": 0.08639372885227203,
+                    "y": -0.3114778399467468,
+                    "z": -0.25292712450027466
+                },
+                "scale": {
+                    "x": 44.106082916259766,
+                    "y": 104.08112335205078,
+                    "z": 90.55572509765625
+                },
+                "translation": {
+                    "x": 183.48782348632813,
+                    "y": 49.273555755615234,
+                    "z": 216.33441162109375
                 }
             },
             "type": "BaseGameObject"
@@ -607,10 +456,13 @@
             "objectType": 2,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
                 "rotation": {
-                    "w": 0.7071068286895752,
+                    "w": 0.9711074233055115,
                     "x": -0.0,
-                    "y": 0.7071068286895752,
+                    "y": 0.23864275217056274,
                     "z": -0.0
                 },
                 "scale": {
@@ -619,9 +471,9 @@
                     "z": 1.0
                 },
                 "translation": {
-                    "x": 156.88006591796875,
+                    "x": -13.095574378967285,
                     "y": 0.1899999976158142,
-                    "z": 194.25479125976563
+                    "z": 5.024592399597168
                 }
             },
             "type": "CalyxHuman"
@@ -674,6 +526,9 @@
             "objectType": 2,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
                 "rotation": {
                     "w": 0.9080933332443237,
                     "x": 0.0,
@@ -694,63 +549,14 @@
             "type": "BaseGameObject"
         },
         {
-            "emitters": [],
-            "guid": "00000000-0000-0000-0000-000000000000",
-            "name": "Fx(15)",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "FxObject"
-        },
-        {
-            "emitters": [],
-            "guid": "00000000-0000-0000-0000-000000000000",
-            "name": "Fx(4)",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "FxObject"
-        },
-        {
             "guid": "b5851743-7f99-4e96-bb2f-c2849fcf6492",
             "name": "DebugCamera",
             "objectType": 0,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
                 "rotation": {
                     "w": 1.0,
                     "x": 0.0,
@@ -769,32 +575,6 @@
                 }
             },
             "type": "DebugCamera"
-        },
-        {
-            "emitters": [],
-            "guid": "00000000-0000-0000-0000-000000000000",
-            "name": "Fx(5)",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "FxObject"
         },
         {
             "colliderConfig": {
@@ -827,16 +607,16 @@
                     "currentLightingMode_": 0,
                     "enableLighting": 0,
                     "enviromentCoefficient": 0.06800000369548798,
-                    "isReflect": false,
+                    "isReflect": true,
                     "shininess": 20.0
                 },
                 "modelName": "debugCube.obj",
-                "textureGuid": "86c8f3df-94cf-4b6d-8e7a-ddee0bb995d0",
+                "textureGuid": "2a356c31-f1e7-4d0a-8245-d0f306dd55b8",
                 "uvTransConfig": {
                     "rotation": 0.0,
                     "scale": {
-                        "x": 200.0,
-                        "y": 200.0
+                        "x": 251.39999389648438,
+                        "y": 251.86000061035156
                     }
                 }
             },
@@ -844,6 +624,9 @@
             "objectType": 2,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
                 "rotation": {
                     "w": 1.0,
                     "x": 0.0,
@@ -864,156 +647,14 @@
             "type": "BaseGameObject"
         },
         {
-            "emitters": [],
-            "guid": "00000000-0000-0000-0000-000000000000",
-            "name": "Fx(6)",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "FxObject"
-        },
-        {
-            "emitters": [],
-            "guid": "00000000-0000-0000-0000-000000000000",
-            "name": "Fx(7)",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "FxObject"
-        },
-        {
-            "colliderConfig": {
-                "colliderType": 0,
-                "isCollisionEnabled": false,
-                "isDraw": true,
-                "offset": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "radius": 1.0,
-                "size": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "targetType": 0
-            },
-            "guid": "92d83d2a-f198-4e85-99a4-cb4be66efdde",
-            "modelConfig": {
-                "blendMode": 5,
-                "materialConfig": {
-                    "color": {
-                        "w": 1.0,
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    },
-                    "currentLightingMode_": 0,
-                    "enableLighting": 0,
-                    "enviromentCoefficient": 0.5,
-                    "isReflect": false,
-                    "shininess": 20.0
-                },
-                "modelName": "torus.obj",
-                "textureGuid": "93fea04f-9b49-444b-8b34-5783816add5d",
-                "uvTransConfig": {
-                    "rotation": 0.0,
-                    "scale": {
-                        "x": 1.0,
-                        "y": 1.0
-                    }
-                }
-            },
-            "name": "torus",
-            "objectType": 2,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 0.9118912220001221,
-                    "x": 0.08639372885227203,
-                    "y": -0.3114778399467468,
-                    "z": -0.25292712450027466
-                },
-                "scale": {
-                    "x": 283.9456481933594,
-                    "y": 104.08112335205078,
-                    "z": 241.4645233154297
-                },
-                "translation": {
-                    "x": 271.41534423828125,
-                    "y": 205.2589874267578,
-                    "z": 452.7266845703125
-                }
-            },
-            "type": "BaseGameObject"
-        },
-        {
-            "emitters": [],
-            "guid": "00000000-0000-0000-0000-000000000000",
-            "name": "Fx(8)",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "FxObject"
-        },
-        {
             "guid": "668a116e-5968-4b79-b395-04c1660c72c9",
             "name": "MainCamera",
             "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "parentGuid": "bae3a382-fac8-4925-8577-6bdb07bdec77",
             "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
                 "rotation": {
                     "w": 1.0,
                     "x": 0.0,
@@ -1034,30 +675,74 @@
             "type": "Camera3d"
         },
         {
-            "emitters": [],
-            "guid": "00000000-0000-0000-0000-000000000000",
-            "name": "Fx(9)",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": false,
+                "isDraw": true,
+                "offset": {
                     "x": 0.0,
                     "y": 0.0,
                     "z": 0.0
                 },
-                "scale": {
+                "radius": 1.0,
+                "size": {
                     "x": 1.0,
                     "y": 1.0,
                     "z": 1.0
                 },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
+                "targetType": 0
+            },
+            "guid": "ac08c6e6-7057-4555-8e24-2d9d6dfa1079",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 0.9921568632125854,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "debugCube.obj",
+                "textureGuid": "2a356c31-f1e7-4d0a-8245-d0f306dd55b8",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
                 }
             },
-            "type": "FxObject"
+            "name": "parentCube",
+            "objectType": 2,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 0.9546210765838623,
+                    "x": 0.0,
+                    "y": 0.2978231608867645,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 2.228006601333618,
+                    "y": 4.136992454528809,
+                    "z": 1.8994978666305542
+                },
+                "translation": {
+                    "x": -0.038856297731399536,
+                    "y": 8.015902519226074,
+                    "z": 14.084529876708984
+                }
+            },
+            "type": "BaseGameObject"
         },
         {
             "color": {
@@ -1077,6 +762,9 @@
             "objectType": 5,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
                 "rotation": {
                     "w": 1.0,
                     "x": 0.0,
@@ -1095,84 +783,6 @@
                 }
             },
             "type": "DirectionalLight"
-        },
-        {
-            "emitters": [],
-            "guid": "00000000-0000-0000-0000-000000000000",
-            "name": "Fx(10)",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "FxObject"
-        },
-        {
-            "emitters": [],
-            "guid": "00000000-0000-0000-0000-000000000000",
-            "name": "Fx(11)",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "FxObject"
-        },
-        {
-            "emitters": [],
-            "guid": "00000000-0000-0000-0000-000000000000",
-            "name": "Fx(12)",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "FxObject"
         },
         {
             "FalldownGimmickActor": {
@@ -1238,6 +848,9 @@
             "objectType": 2,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
                 "rotation": {
                     "w": 0.9217169880867004,
                     "x": 0.0,
@@ -1258,17 +871,61 @@
             "type": "FalldownGimmickActor"
         },
         {
-            "emitters": [],
-            "guid": "00000000-0000-0000-0000-000000000000",
-            "name": "",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "rotation": {
-                    "w": 1.0,
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": false,
+                "isDraw": true,
+                "offset": {
                     "x": 0.0,
                     "y": 0.0,
                     "z": 0.0
+                },
+                "radius": 1.0,
+                "size": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "targetType": 0
+            },
+            "guid": "83301a37-c1b3-437b-893a-8b1113b3f174",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 0.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "cone.obj",
+                "textureGuid": "86c8f3df-94cf-4b6d-8e7a-ddee0bb995d0",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "cone(1)",
+            "objectType": 2,
+            "parentGuid": "ac08c6e6-7057-4555-8e24-2d9d6dfa1079",
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 0.8523517847061157,
+                    "x": -0.4301956295967102,
+                    "y": -4.3213367462158203e-07,
+                    "z": 0.29736876487731934
                 },
                 "scale": {
                     "x": 1.0,
@@ -1276,20 +933,64 @@
                     "z": 1.0
                 },
                 "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
+                    "x": -1.115299940109253,
+                    "y": 3.708624839782715,
+                    "z": 22.379133224487305
                 }
             },
-            "type": "FxObject"
+            "type": "BaseGameObject"
         },
         {
-            "emitters": [],
-            "guid": "00000000-0000-0000-0000-000000000000",
-            "name": "Fx(14)",
-            "objectType": 0,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": false,
+                "isDraw": true,
+                "offset": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "radius": 1.0,
+                "size": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "targetType": 0
+            },
+            "guid": "9a12453b-8e55-4889-acca-ae86ad2bcc26",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "debugCube.obj",
+                "textureGuid": "47165394-1552-497f-bf1b-8247948b99a3",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "cube(2)",
+            "objectType": 2,
+            "parentGuid": "ac08c6e6-7057-4555-8e24-2d9d6dfa1079",
             "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
                 "rotation": {
                     "w": 1.0,
                     "x": 0.0,
@@ -1302,12 +1003,12 @@
                     "z": 1.0
                 },
                 "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
+                    "x": -5.292590141296387,
+                    "y": 0.4839226007461548,
+                    "z": 9.216113090515137
                 }
             },
-            "type": "FxObject"
+            "type": "BaseGameObject"
         }
     ],
     "sceneName": "TestScene",

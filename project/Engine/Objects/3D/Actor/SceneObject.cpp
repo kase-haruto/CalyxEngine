@@ -65,10 +65,10 @@ bool SceneObject::Load() { return false; }
 //		トランスフォームからaabbを構築して返す
 /////////////////////////////////////////////////////////////////////////////////////////
 AABB SceneObject::FallbackAABBFromTransform() const {
-	CalyxMath::Vector3 center	  = worldTransform_.GetWorldPosition();
+	CalyxMath::Vector3 center	 = worldTransform_.GetWorldPosition();
 	CalyxMath::Vector3 halfScale = worldTransform_.scale * 0.5f;
-	CalyxMath::Vector3 min		  = center - halfScale;
-	CalyxMath::Vector3 max		  = center + halfScale;
+	CalyxMath::Vector3 min		 = center - halfScale;
+	CalyxMath::Vector3 max		 = center + halfScale;
 	return AABB(min, max);
 }
 
@@ -129,9 +129,11 @@ void SceneObject::SetParent(const std::shared_ptr<SceneObject>& newParentSp, boo
 		newParentSp->children_.push_back(self);
 		worldTransform_.parent		 = &newParentSp->worldTransform_;
 		worldTransform_.inheritScale = inheritScale;
+		parentId_					 = newParentSp->GetGuid();
 	} else {
 		worldTransform_.parent		 = nullptr;
 		worldTransform_.inheritScale = true;
+		parentId_					 = Guid{};
 	}
 
 	// 親だけ書き換え（Transform Update は呼ばない）
@@ -172,6 +174,7 @@ void SceneObject::DestroyRecursive() {
 	// 自分のリンク解除
 	parent_.reset();
 	worldTransform_.parent = nullptr;
+	parentId_			   = Guid{};
 }
 
 REGISTER_SCENE_OBJECT(SceneObject)
