@@ -3,6 +3,8 @@
 #include <Engine/Foundation/Input/Input.h>
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
+#include <Engine/Scene/Context/SceneContext.h>
+#include <Game/3dObject/Actor/Background/BackgroundActor.h>
 
 // C++
 #include <algorithm>
@@ -82,9 +84,9 @@ void RailCamera::ClearSpline() {
 /////////////////////////////////////////////////////////////////////////////////////////
 void RailCamera::UpdateOrientationFromPath(float dt) {
 	// ==== 現在位置 ====
-	const float totalLen = spline_.TotalLength();
-	float		tNow	 = (totalLen > 0.0f) ? spline_.DistanceToT(traveled_) : 0.0f;
-	CalyxMath::Vector3		eye		 = spline_.Evaluate(tNow);
+	const float		   totalLen = spline_.TotalLength();
+	float			   tNow		= (totalLen > 0.0f) ? spline_.DistanceToT(traveled_) : 0.0f;
+	CalyxMath::Vector3 eye		= spline_.Evaluate(tNow);
 
 	// ==== 先読み点（進行方向計算用） ====
 	float sAhead = traveled_ + (std::max)(lookAhead_, 0.01f);
@@ -94,12 +96,12 @@ void RailCamera::UpdateOrientationFromPath(float dt) {
 	} else {
 		sAhead = std::clamp(sAhead, 0.0f, totalLen);
 	}
-	float	tAhead = (totalLen > 0.0f) ? spline_.DistanceToT(sAhead) : 0.0f;
+	float			   tAhead = (totalLen > 0.0f) ? spline_.DistanceToT(sAhead) : 0.0f;
 	CalyxMath::Vector3 target = spline_.Evaluate(tAhead);
 
 	// ==== 向きベクトル ====
 	CalyxMath::Vector3 dir = target - eye;
-	float	len = dir.Length();
+	float			   len = dir.Length();
 	if(len > 1e-4f)
 		dir /= len;
 	else
@@ -118,10 +120,10 @@ void RailCamera::UpdateOrientationFromPath(float dt) {
 	} else {
 		sAhead2 = std::clamp(sAhead2, 0.0f, totalLen);
 	}
-	float	tAhead2 = (totalLen > 0.0f) ? spline_.DistanceToT(sAhead2) : 0.0f;
-	CalyxMath::Vector3 p0		= eye;
-	CalyxMath::Vector3 p1		= target;
-	CalyxMath::Vector3 p2		= spline_.Evaluate(tAhead2);
+	float			   tAhead2 = (totalLen > 0.0f) ? spline_.DistanceToT(sAhead2) : 0.0f;
+	CalyxMath::Vector3 p0	   = eye;
+	CalyxMath::Vector3 p1	   = target;
+	CalyxMath::Vector3 p2	   = spline_.Evaluate(tAhead2);
 
 	CalyxMath::Vector3 v1 = (p1 - p0);
 	CalyxMath::Vector3 v2 = (p2 - p1);
@@ -146,7 +148,33 @@ void RailCamera::UpdateOrientationFromPath(float dt) {
 /////////////////////////////////////////////////////////////////////////////////////////
 void RailCamera::Update(float dt) {
 	// ==== 走行距離を更新（等速） ====
-	traveled_ += (std::max)(0.0f, speed_) * dt;
+	float move		   = (std::max)(0.0f, speed_) * dt;
+	float nextTraveled = traveled_ + move;
+
+	// ==== 障害物による停止判定 ====
+	auto* ctx = SceneContext::Current();
+	if(ctx) {
+		auto  obstacles		= ctx->GetObjectLibrary()->FindByType<BackgroundActor>();
+		float nearestStopS	= 1e30f;
+		bool  foundObstacle = false;
+
+		for(const auto& obstacle : obstacles) {
+			if(obstacle && obstacle->IsStopRail()) {
+				float stopS = obstacle->GetStopProgress();
+				// 現在位置より先（または同じ位置）にある最も手前の障害物を探す
+				if(stopS >= traveled_ - 1e-4f && stopS < nearestStopS) {
+					nearestStopS  = stopS;
+					foundObstacle = true;
+				}
+			}
+		}
+
+		if(foundObstacle && nextTraveled >= nearestStopS) {
+			nextTraveled = nearestStopS;
+		}
+	}
+
+	traveled_			 = nextTraveled;
 	const float totalLen = spline_.TotalLength();
 
 	if(spline_.closed) {

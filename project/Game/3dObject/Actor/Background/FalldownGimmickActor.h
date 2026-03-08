@@ -80,5 +80,7 @@ private:
 	CalyxMath::Quaternion animationStartRotation_;														 //< アニメーション開始時の回転
 	CalyxMath::Quaternion animationEndRotation_;														 //< アニメーション終了時
 	float				  animationDuration_ = 1.0f;													 //< アニメーション時間
+	float				  stopProgress_		= 0.0f;													 //< 停止進捗
 	int32_t				  animationEaseType_ = static_cast<int32_t>(CalyxEase::EaseType::EaseInOutSine); //< アニメーションのイージングタイプ
+	
 };

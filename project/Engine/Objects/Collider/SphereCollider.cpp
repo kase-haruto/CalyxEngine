@@ -4,7 +4,6 @@
 #include <Data/Engine/Configs/Scene/Objects/Collider/ColliderConfig.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 
-
 #include <externals/imgui/imgui.h>
 
 #include <sstream>
@@ -27,9 +26,10 @@ void SphereCollider::Initialize(float radius) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		更新処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void SphereCollider::Update(const CalyxMath::Vector3& position, [[maybe_unused]] const CalyxMath::Quaternion& rotate) {
-	// 位置を更新
-	shape_.center = position + offset_;
+void SphereCollider::Update(const CalyxMath::Vector3& position, const CalyxMath::Quaternion& rotate) {
+	// 回転込みでローカルオフセットをワールドへ
+	const CalyxMath::Vector3 worldOffset = CalyxMath::Quaternion::RotateVector(offset_, rotate);
+	shape_.center						 = position + worldOffset;
 }
 
 void SphereCollider::Draw() {
@@ -49,7 +49,6 @@ void SphereCollider::ShowGui() {
 	if(ImGui::TreeNodeEx("SphereCollider", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
 		Collider::ShowGui();
 		if(isCollisionEnabled_) {
-			GuiCmd::DragFloat3("Offset", offset_);
 			GuiCmd::DragFloat("Radius", shape_.radius, 0.1f, 0.0f, 10.0f);
 		}
 		ImGui::TreePop();
