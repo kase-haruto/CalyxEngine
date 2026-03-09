@@ -47,6 +47,9 @@ namespace CalyxEffect {
 		modelPath  = rec->sourcePath.filename().string();
 		modelGuid_ = g;
 
+		// ModelManagerにロードを要求（未ロードの場合にのみ実際にロードされる）
+		ModelManager::LoadModel(modelPath);
+
 		return true;
 	}
 
