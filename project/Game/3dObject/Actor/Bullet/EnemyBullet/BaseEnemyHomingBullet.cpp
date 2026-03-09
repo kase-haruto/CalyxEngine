@@ -76,7 +76,6 @@ void BaseEnemyHomingBullet::Initialize() {
 
 	// ライティングなし
 	BaseGameObject::SetLightingMode(LightingMode::UnlitColor);
-	BaseGameObject::SetBlendMode(BlendMode::ADD);
 	CalyxMath::Vector3 rgb = Random::GenerateVector3(0.0f, 1.0f);
 	CalyxMath::Vector3 color{rgb};
 	model_->SetColor(color);
