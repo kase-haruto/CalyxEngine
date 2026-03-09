@@ -1,27 +1,28 @@
 #include "BaseEmitter.h"
 
+#include "Engine/Assets/Database/AssetDatabase.h"
 #include "Engine/Assets/Model/ModelManager.h"
 #include "Engine/Foundation/Utility/Converter/EnumConverter.h"
 
 #include <iostream>
 
 namespace CalyxEffect {
-	BaseEmitter::BaseEmitter() =default;
+	BaseEmitter::BaseEmitter() = default;
 
-	void BaseEmitter::TransferParticleDataToGPU(){
-		if (units_.empty()) return;
+	void BaseEmitter::TransferParticleDataToGPU() {
+		if(units_.empty()) return;
 		std::vector<ParticleConstantData> gpuUnits;
-		for (const auto& fx : units_){
-			if (fx.alive){
+		for(const auto& fx : units_) {
+			if(fx.alive) {
 				gpuUnits.push_back({fx.position, fx.scale, fx.color});
 			}
 		}
-		if (!gpuUnits.empty()){
+		if(!gpuUnits.empty()) {
 			instanceBuffer_.TransferVectorData(gpuUnits);
 		}
 	}
 
-	MeshResource& BaseEmitter::GetMeshResource()  {
+	MeshResource& BaseEmitter::GetMeshResource() {
 		// メッシュを返す
 		// プリミティブ形状じゃない場合モデルからメッシュを取得
 		if(!primitive_.has_value()) {
@@ -33,6 +34,20 @@ namespace CalyxEffect {
 		// TODO: 形状ごとにメッシュを返すファクトリを実装する
 		// NOTE: 仮に plane メッシュを返すようにしておく
 		return ModelManager::GetInstance()->GetMeshResource(modelPath);
+	}
+
+	bool BaseEmitter::LoadModelByGuid(const Guid& g) {
+		if(!g.isValid()) return false;
+
+		auto* db  = AssetDatabase::GetInstance();
+		auto* rec = db->Get(g);
+		if(!rec || rec->type != AssetType::Model) return false;
+
+		// モデルマネージャーでロード
+		modelPath  = rec->sourcePath.filename().string();
+		modelGuid_ = g;
+
+		return true;
 	}
 
 } // namespace CalyxEffect

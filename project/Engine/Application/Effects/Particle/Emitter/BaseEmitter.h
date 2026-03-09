@@ -60,6 +60,13 @@ namespace CalyxEffect {
 		virtual void SetAlphaMultiplier(float a) { alphaMultiplier_ = a; }
 		virtual void SetCameraFade(float, float) {}
 
+		/**
+		 * \brief GUIDを用いてモデルデータをロード
+		 * \param g
+		 * \return
+		 */
+		virtual bool LoadModelByGuid(const Guid& g);
+
 	public:
 		// accessor -------------------------------------------------
 		virtual CalyxMath::Vector3						GetWorldPosition() const { return position_; }
@@ -68,6 +75,7 @@ namespace CalyxEffect {
 		const DxConstantBuffer<ParticleMaterial>&		GetMaterialBuffer() const { return materialBuffer_; }
 		const DxStructuredBuffer<ParticleConstantData>& GetInstanceBuffer() const { return instanceBuffer_; }
 		const std::string&								GetModelPath() const { return modelPath; }
+		const Guid&										GetModelGuid() const { return modelGuid_; }
 
 		void									 SetPrimitive(ParticlePrimitives primitive) { primitive_ = primitive; }
 		const std::optional<ParticlePrimitives>& GetPrimitive() const { return primitive_; }
@@ -79,9 +87,10 @@ namespace CalyxEffect {
 		std::optional<ParticlePrimitives>		 primitive_ = std::nullopt; //< プリミティブ形状(primitiveで発生する場合)
 		MeshResource							 meshData_;					//< モデルデータ(使用しない場合はnull)
 		std::string								 modelPath = "plane.obj";	//< モデルパス（デフォルトは平面
-		CalyxMath::Vector3						 position_;					//< emitterの位置
-		ParticleMaterial						 material_;					//< パーティクルのマテリアル
-		std::vector<FxUnit>						 units_;					//< パーティクルユニットの配列
+		Guid									 modelGuid_{Guid::Empty()};
+		CalyxMath::Vector3						 position_; //< emitterの位置
+		ParticleMaterial						 material_; //< パーティクルのマテリアル
+		std::vector<FxUnit>						 units_;	//< パーティクルユニットの配列
 		DxStructuredBuffer<ParticleConstantData> instanceBuffer_;
 		DxConstantBuffer<ParticleMaterial>		 materialBuffer_; // パーティクルマテリアルの定数バッファ
 

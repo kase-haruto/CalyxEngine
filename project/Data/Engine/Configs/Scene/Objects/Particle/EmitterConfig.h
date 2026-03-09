@@ -26,6 +26,7 @@ namespace CalyxEffect {
 		std::string texturePath = "particle.dds";
 
 		Guid textureGuid{Guid::Empty()};
+		Guid modelGuid{Guid::Empty()};
 
 		bool		  isDrawEnable	 = true;
 		bool		  followOneShot	 = false;
@@ -70,6 +71,14 @@ namespace CalyxEffect {
 			// guidがない場合0で初期化
 		} else {
 			textureGuid = Guid::Empty();
+		}
+
+		if(auto it = j.find("modelGuid"); it != j.end() && !it->is_null()) {
+			modelGuid = it->get<Guid>();
+		} else if(auto it2 = j.find("modelGUID"); it2 != j.end() && !it2->is_null()) {
+			modelGuid = it2->get<Guid>();
+		} else {
+			modelGuid = Guid::Empty();
 		}
 
 		// 再生・OneShot制御
@@ -118,6 +127,7 @@ namespace CalyxEffect {
 		for(const auto& mod : modules) j["modules"].push_back(mod->ToJson());
 
 		j["textureGuid"] = textureGuid;
+		j["modelGuid"]	 = modelGuid;
 
 		return j;
 	}

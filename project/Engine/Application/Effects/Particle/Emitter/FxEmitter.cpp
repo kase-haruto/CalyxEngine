@@ -346,6 +346,50 @@ namespace CalyxEffect {
 					}
 					return "(missing)";
 				}; */
+
+				ImGui::EndGroup(); // Texture BeginGroup の対応
+
+				// メッシュ
+				FxGui::RowLabel("mesh");
+				ImGui::BeginGroup();
+				// 現在のパスを表示
+				// ---- ドラッグ&ドロップでメッシュデータ適用 ----
+				ImGui::Text("MeshData (Drag & Drop from Assets)");
+				// ドロップ領域（InvisibleButton で有効アイテム化）
+				ImGui::InvisibleButton("##MeshDataDrop", dropSize);
+
+				// 見た目（枠とテキスト）
+				const bool	 m_hovered = ImGui::IsItemHovered();
+				const ImVec2 m_rmin	   = ImGui::GetItemRectMin();
+				const ImVec2 m_rmax	   = ImGui::GetItemRectMax();
+				ImGui::GetWindowDrawList()->AddRect(
+					m_rmin, m_rmax, m_hovered ? IM_COL32(120, 180, 255, 220) : IM_COL32(90, 90, 90, 160),
+					8.0f, 0, 2.0f);
+
+				std::string modelLabel = modelPath;
+				if(modelGuid_.isValid()) {
+					if(auto* rec = AssetDatabase::GetInstance()->Get(modelGuid_)) {
+						modelLabel = rec->sourcePath.filename().string();
+					}
+				}
+
+				ImGui::GetWindowDrawList()->AddText(
+					ImVec2(m_rmin.x + 8.0f, m_rmin.y + 8.0f),
+					IM_COL32(230, 230, 230, 255),
+					("Model: " + modelLabel).c_str());
+
+				// 受け取り
+				if(ImGui::BeginDragDropTarget()) {
+					if(const ImGuiPayload* p = ImGui::AcceptDragDropPayload("CALYX_ASSET")) {
+						const AssetDragPayload payload =
+							*reinterpret_cast<const AssetDragPayload*>(p->Data);
+						if(payload.type == AssetType::Model) {
+							LoadModelByGuid(payload.guid);
+						}
+					}
+					ImGui::EndDragDropTarget();
+				}
+
 				ImGui::EndGroup();
 			}
 			GuiCmd::EndSection();
@@ -532,8 +576,13 @@ namespace CalyxEffect {
 		velocity_.FromConfig(config.velocity);
 		lifetime_.FromConfig(config.lifetime);
 		scale_.FromConfig(config.scale);
-		emitRate_			  = config.emitRate;
-		modelPath			  = config.modelPath;
+		emitRate_  = config.emitRate;
+		modelPath  = config.modelPath;
+		modelGuid_ = config.modelGuid;
+		if(modelGuid_.isValid()) {
+			LoadModelByGuid(modelGuid_);
+		}
+
 		material_.texturePath = config.texturePath;
 		textureGuid_		  = config.textureGuid;
 		textureHandle_		  = TextureManager::GetInstance()->LoadTexture(textureGuid_);
@@ -563,6 +612,7 @@ namespace CalyxEffect {
 		config.scale		  = Vector3ParamConfig{scale_.ToConfig()};
 		config.emitRate		  = emitRate_;
 		config.modelPath	  = modelPath;
+		config.modelGuid	  = modelGuid_;
 		config.texturePath	  = material_.texturePath;
 		config.textureGuid	  = textureGuid_;
 		config.isDrawEnable	  = HasFlag(DrawEnable);
