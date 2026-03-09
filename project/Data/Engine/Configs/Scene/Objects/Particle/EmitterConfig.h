@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/Graphics/Pipeline/BlendMode/BlendMode.h"
-
+#include <Engine/Application/Effects/Particle/Emitter/EmitterDetails.h>
 #include <Data/Engine/Configs/Scene/Objects/Particle/FxParmConfig.h>
 #include <Data/Engine/Configs/Scene/Objects/Particle/Module/ModuleConfig.h>
 #include <Data/Engine/Configs/Scene/Objects/Particle/Module/ModuleConfigFactory.h>
@@ -34,6 +34,11 @@ namespace CalyxEffect {
 		bool		  randomSpinEmit = false;
 		BillboardMode billboardMode	 = BillboardMode::Full;
 		BlendMode	  blendMode		 = BlendMode::ADD;
+		EmitterShape emitterShape	 = EmitterShape::Point;
+		// 既存データ互換: キー未定義時は BaseEmitter と同じ既定値を使う
+		CalyxMath::Vector3 shapeSize{1.0f, 1.0f, 1.0f};
+		float shapeRadius = 1.0f;
+		float shapeAngle  = 30.0f;
 
 		// 再生・OneShot制御関連
 		bool  isOneShot	   = false;
@@ -61,6 +66,10 @@ namespace CalyxEffect {
 		isComplement   = j.value("isComplement", true);
 		randomSpinEmit = j.value("randomSpinEmit", false);
 		followOneShot  = j.value("followOneShot", false);
+		emitterShape   = j.value("emitterShape", EmitterShape::Point);
+		shapeSize      = j.value("shapeSize", CalyxMath::Vector3{1.0f, 1.0f, 1.0f});
+		shapeRadius    = j.value("shapeRadius", 1.0f);
+		shapeAngle     = j.value("shapeAngle", 30.0f);
 
 		// 互換のため両方のキーを受け入れる
 		if(auto it = j.find("textureGuid"); it != j.end() && !it->is_null()) {
@@ -114,6 +123,10 @@ namespace CalyxEffect {
 		j["randomSpinEmit"] = randomSpinEmit;
 		j["followOneShot"]	= followOneShot;
 		j["blendMode"]		= blendMode;
+		j["emitterShape"]  = emitterShape;
+		j["shapeSize"]     = shapeSize;
+		j["shapeRadius"]   = shapeRadius;
+		j["shapeAngle"]    = shapeAngle;
 
 		// 再生・OneShot制御
 		j["isOneShot"]	  = isOneShot;

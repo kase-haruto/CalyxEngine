@@ -39,8 +39,8 @@ void BackgroundActor::Initialize() {
 
 	// ヒットエフェクトの生成（無い場合のみ）
 	if(hitEffects_.expired()) {
-		auto fxObj = SceneAPI::Instantiate<CalyxEffect::FxObject>("HitFx");
-		fxObj->LoadFromPath("Effect/BossHitEffect");
+		auto fxObj = SceneAPI::Instantiate<CalyxEffect::FxObject>("breakFx");
+		fxObj->LoadFromPath("Effect/houseBreakFx");
 		fxObj->StopAll();
 		fxObj->SetTransient(true); // シーン保存対象外にする
 		hitEffects_ = fxObj;

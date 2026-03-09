@@ -35,7 +35,7 @@ namespace CalyxEffect {
 		virtual void Update(float dt) override;
 		void		 TransferParticleDataToGPU() override; // BaseEmitterをoverride
 		void		 ShowGui();
-
+		void DrawEmitterShape(const WorldTransform& tf);
 		// コマンドを積む
 		void SetCommand(ID3D12GraphicsCommandList* cmdList);
 

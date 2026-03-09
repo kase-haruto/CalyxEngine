@@ -25,7 +25,9 @@ namespace CalyxEffect {
 		// 安全にキーを取得、無ければデフォルト値
 		c.guid		 = j.value("guid", Guid{});
 		c.parentGuid = j.value("parentGuid", Guid{});
+		c.objectType = j.value("objectType", 0);
 		c.name		 = j.value("name", std::string{});
+		c.transform  = j.value("transform", WorldTransformConfig{});
 
 		if(!j.is_null()) {
 			c.EmitterConfig::FromJson(j);

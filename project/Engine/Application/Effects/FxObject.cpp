@@ -197,8 +197,7 @@ namespace CalyxEffect {
 						EffectEmitterNodeConfig node{};
 						node.name		= sp->GetName() + "_Copy";
 						node.parentGuid = this->GetGuid();
-						sp->GetWorldTransform().ExtractConfig();
-						node.transform = sp->GetConfigObject().GetConfig().transform;
+						node.transform  = sp->GetWorldTransform().ExtractConfig();
 						sp->GetEmitter()->ExtractConfigTo(node.emitter);
 						node.isDrawEnable = true;
 						AddEmitterNode(node);
@@ -251,7 +250,7 @@ namespace CalyxEffect {
 		// ルートを書き出し
 		cfg.name	   = name_;
 		cfg.parentGuid = parentId_;
-		worldTransform_.ExtractConfig();
+		cfg.transform  = worldTransform_.ExtractConfig();
 
 		// 子から同期
 		SyncConfigFromChildren();
@@ -311,9 +310,7 @@ namespace CalyxEffect {
 				n.name		 = sp->GetName();
 				n.guid		 = sp->GetGuid();
 				n.parentGuid = this->GetGuid();
-
-				sp->GetWorldTransform().ExtractConfig();
-				n.transform = sp->GetConfigObject().GetConfig().transform;
+				n.transform  = sp->GetWorldTransform().ExtractConfig();
 
 				sp->GetEmitter()->ExtractConfigTo(n.emitter);
 				n.isDrawEnable = sp->IsDrawEnable();
@@ -335,7 +332,10 @@ namespace CalyxEffect {
 		auto child = SceneAPI::Instantiate<ParticleSystemObject>(
 			node.name.empty() ? "emitter" : node.name);
 
-		// child->SetGuid(node.guid.isValid() ? node.guid : Guid::New());
+		if(node.guid.isValid()) {
+			child->SetGuid(node.guid);
+		}
+
 		child->GetWorldTransform().ApplyConfig(node.transform);
 		child->SetDrawEnable(node.isDrawEnable);
 		child->GetEmitter()->ApplyConfigFrom(node.emitter);

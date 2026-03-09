@@ -9,7 +9,7 @@ namespace CalyxEffect {
 	struct EffectEmitterNodeConfig : public SceneObjectConfig {
 		EmitterConfig emitter{};
 		bool		  isDrawEnable = true;
-		bool		  isGpu		   = false; // 将来の CalyxEffect::GpuFxEmitter 切替用フラグ
+		bool		  isGpu		   = false;
 	};
 
 	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(EffectEmitterNodeConfig,
