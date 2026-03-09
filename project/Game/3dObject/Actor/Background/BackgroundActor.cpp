@@ -92,17 +92,20 @@ void BackgroundActor::DerivativeGui() {
 void BackgroundActor::OnCollisionEnter(Collider* other) {
 	// 衝突相手がプレイヤーの攻撃ならダメージを受ける
 	if(other && other->GetType() == ColliderType::Type_PlayerAttack) {
-		life_--;
-		// --- 衝突位置を取得 ---
-		CalyxMath::Vector3 hitPos = other->GetWorldPos();
-		if(auto fx = hitEffects_.lock()) {
-			// 位置設定
-			fx->SetWorldPosition(hitPos);
-			// 再生
-			fx->PlayAll();
+		if(GetIsAlive()) {
+			life_--;
+			// --- 衝突位置を取得 ---
+			CalyxMath::Vector3 hitPos = other->GetWorldPos();
+			if(auto fx = hitEffects_.lock()) {
+				// 位置設定
+				fx->SetWorldPosition(hitPos);
+				// 再生
+				fx->PlayAll();
+			}
 		}
 	}
 }
+
 void BackgroundActor::ApplyDerivedConfigFromJson(const nlohmann::json& root, const nlohmann::json* derived) {
 	(void)root;
 	if(!derived) return;
