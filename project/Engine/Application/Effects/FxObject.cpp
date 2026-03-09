@@ -28,15 +28,18 @@ namespace CalyxEffect {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	//		ctor / dtor
 	/////////////////////////////////////////////////////////////////////////////////////////
-	FxObject::FxObject(const std::string& name) { SceneObject::SetName(name, ObjectType::Effect); }
+	FxObject::FxObject(const std::string& name) {
+		SceneObject::SetName(name, ObjectType::Effect);
+		config_.SetOnApplied([this](const EffectObjectConfig&) { this->ApplyConfig(); });
+		config_.SetOnExtracted([this](const EffectObjectConfig&) { this->ExtractConfig(); });
+	}
 	FxObject::~FxObject() = default;
 
 	/////////////////////////////////////////////////////////////////////////////////////////
 	//		初期化
 	/////////////////////////////////////////////////////////////////////////////////////////
 	void FxObject::Initialize() {
-		config_.SetOnApplied([this](const EffectObjectConfig&) { this->ApplyConfig(); });
-		config_.SetOnExtracted([this](const EffectObjectConfig&) { this->ExtractConfig(); });
+		// callbacks are set in ctor so Load/Save works immediately
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -365,3 +368,4 @@ namespace CalyxEffect {
 	}
 
 } // namespace CalyxEffect
+

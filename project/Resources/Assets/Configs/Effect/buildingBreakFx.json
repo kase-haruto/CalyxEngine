@@ -1,7 +1,432 @@
 {
-    "emitters": [],
+    "emitters": [
+        {
+            "emitter": {
+                "autoDestroy": false,
+                "blendMode": 1,
+                "color": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "emitCount": 190,
+                "emitDelay": 0.0,
+                "emitDuration": -1.0,
+                "emitRate": 0.10000000149011612,
+                "emitterShape": 4,
+                "followOneShot": false,
+                "isComplement": true,
+                "isDrawEnable": true,
+                "isOneShot": true,
+                "lifetime": {
+                    "constant": 1.0,
+                    "max": 2.0,
+                    "min": 1.0,
+                    "mode": 1
+                },
+                "modelGuid": "7a954006-a894-48e8-80c6-37fb020bf819",
+                "modelPath": "tallBuilding_01_bottom.obj",
+                "modules": [
+                    {
+                        "enabled": true,
+                        "gravity": {
+                            "x": 0.0,
+                            "y": -9.800000190734863,
+                            "z": 0.0
+                        },
+                        "name": "GravityModule"
+                    },
+                    {
+                        "blend": 0,
+                        "clamp01": true,
+                        "ease": 6,
+                        "enabled": true,
+                        "end": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "guid": "a012339d-6107-40d2-b28d-68ee99116cd4",
+                        "invert": true,
+                        "name": "OverLifetimeModule",
+                        "start": [
+                            0.0,
+                            0.0,
+                            0.0,
+                            1.0
+                        ],
+                        "target": 5
+                    }
+                ],
+                "position": {
+                    "x": 6.435332775115967,
+                    "y": 0.8505849838256836,
+                    "z": 62.92527389526367
+                },
+                "randomSpinEmit": true,
+                "scale": {
+                    "constant": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "max": {
+                        "x": 2.0999999046325684,
+                        "y": 2.0199999809265137,
+                        "z": 2.0
+                    },
+                    "min": {
+                        "x": 1.440000057220459,
+                        "y": 1.4800000190734863,
+                        "z": 1.399999976158142
+                    },
+                    "mode": 1
+                },
+                "shapeAngle": 30.0,
+                "shapeRadius": 1.0,
+                "shapeSize": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "textureGuid": "a7f3b3cb-ef24-428d-ba4a-d5f24958c94e",
+                "texturePath": "particle.dds",
+                "velocity": {
+                    "constant": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "max": {
+                        "x": 0.9399999976158142,
+                        "y": 1.3200000524520874,
+                        "z": 1.0
+                    },
+                    "min": {
+                        "x": -1.1399999856948853,
+                        "y": 1.0800000429153442,
+                        "z": -0.8799999952316284
+                    },
+                    "mode": 1
+                }
+            },
+            "guid": "3906ec9f-52f8-4c76-9de5-8715fdd027eb",
+            "isDrawEnable": true,
+            "isGpu": false,
+            "name": "emitter",
+            "objectType": 0,
+            "parentGuid": "5b84b052-498e-451d-a2fd-90818ee80371",
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 0.9617807269096375,
+                    "y": 2.1854300498962402,
+                    "z": 9.184443473815918
+                },
+                "translation": {
+                    "x": 0.015393643639981747,
+                    "y": -0.1801748126745224,
+                    "z": 1.7547569274902344
+                }
+            }
+        },
+        {
+            "emitter": {
+                "autoDestroy": false,
+                "blendMode": 1,
+                "color": {
+                    "w": 0.9490196108818054,
+                    "x": 0.7176470756530762,
+                    "y": 0.4588235318660736,
+                    "z": 0.16470588743686676
+                },
+                "emitCount": 446,
+                "emitDelay": 0.0,
+                "emitDuration": -1.0,
+                "emitRate": 0.0,
+                "emitterShape": 4,
+                "followOneShot": false,
+                "isComplement": true,
+                "isDrawEnable": true,
+                "isOneShot": true,
+                "lifetime": {
+                    "constant": 1.0,
+                    "max": 3.059999942779541,
+                    "min": 1.9199999570846558,
+                    "mode": 1
+                },
+                "modelGuid": "00000000-0000-0000-0000-000000000000",
+                "modelPath": "plane.obj",
+                "modules": [
+                    {
+                        "blend": 0,
+                        "clamp01": true,
+                        "ease": 6,
+                        "enabled": true,
+                        "end": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "guid": "0d792d79-2fe9-451e-8222-e1b77d951ca3",
+                        "invert": true,
+                        "name": "OverLifetimeModule",
+                        "start": [
+                            0.0,
+                            0.0,
+                            0.0,
+                            1.0
+                        ],
+                        "target": 5
+                    }
+                ],
+                "position": {
+                    "x": 5.4809651374816895,
+                    "y": 1.858759880065918,
+                    "z": 62.007389068603516
+                },
+                "randomSpinEmit": true,
+                "scale": {
+                    "constant": {
+                        "x": 3.8399999141693115,
+                        "y": 3.819999933242798,
+                        "z": 1.0
+                    },
+                    "max": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "min": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "mode": 0
+                },
+                "shapeAngle": 30.0,
+                "shapeRadius": 1.0,
+                "shapeSize": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "textureGuid": "999de90c-bfc7-4fdd-add7-30e7c925359a",
+                "texturePath": "particle.dds",
+                "velocity": {
+                    "constant": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "max": {
+                        "x": 2.059999942779541,
+                        "y": 2.0399999618530273,
+                        "z": 1.9600000381469727
+                    },
+                    "min": {
+                        "x": -2.380000114440918,
+                        "y": -2.0199999809265137,
+                        "z": -2.0399999618530273
+                    },
+                    "mode": 1
+                }
+            },
+            "guid": "495cd26f-aa77-4bcc-8372-a48a034586ce",
+            "isDrawEnable": true,
+            "isGpu": false,
+            "name": "smoke",
+            "objectType": 0,
+            "parentGuid": "5b84b052-498e-451d-a2fd-90818ee80371",
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 0.9173142910003662,
+                    "y": 1.6791919469833374,
+                    "z": 10.147100448608398
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.8368721008300781
+                }
+            }
+        },
+        {
+            "emitter": {
+                "autoDestroy": false,
+                "blendMode": 1,
+                "color": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 0.6313725709915161,
+                    "z": 0.46666666865348816
+                },
+                "emitCount": 384,
+                "emitDelay": 0.5199999809265137,
+                "emitDuration": -1.0,
+                "emitRate": 0.0,
+                "emitterShape": 4,
+                "followOneShot": false,
+                "isComplement": true,
+                "isDrawEnable": true,
+                "isOneShot": true,
+                "lifetime": {
+                    "constant": 1.4800000190734863,
+                    "max": 1.0,
+                    "min": 0.0,
+                    "mode": 0
+                },
+                "modelGuid": "b178d237-2e89-4569-8a5a-8bc9882b237f",
+                "modelPath": "plane.obj",
+                "modules": [
+                    {
+                        "blend": 0,
+                        "clamp01": true,
+                        "ease": 6,
+                        "enabled": true,
+                        "end": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "guid": "e22472ea-017a-4786-87f0-9e901d05a9e4",
+                        "invert": true,
+                        "name": "OverLifetimeModule",
+                        "start": [
+                            0.0,
+                            0.0,
+                            0.0,
+                            1.0
+                        ],
+                        "target": 5
+                    },
+                    {
+                        "blend": 0,
+                        "clamp01": true,
+                        "ease": 0,
+                        "enabled": true,
+                        "end": [
+                            4.820000171661377,
+                            5.159999847412109,
+                            1.0,
+                            1.0
+                        ],
+                        "guid": "8e1d2d7e-df88-45b4-9f78-27145f412bae",
+                        "invert": false,
+                        "name": "OverLifetimeModule",
+                        "start": [
+                            0.800000011920929,
+                            0.5799999833106995,
+                            0.0,
+                            1.0
+                        ],
+                        "target": 0
+                    }
+                ],
+                "position": {
+                    "x": 5.4809651374816895,
+                    "y": -0.5784502029418945,
+                    "z": 61.17051696777344
+                },
+                "randomSpinEmit": true,
+                "scale": {
+                    "constant": {
+                        "x": 5.019999980926514,
+                        "y": 4.460000038146973,
+                        "z": 1.0
+                    },
+                    "max": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "min": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "mode": 0
+                },
+                "shapeAngle": 30.0,
+                "shapeRadius": 1.0,
+                "shapeSize": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "textureGuid": "999de90c-bfc7-4fdd-add7-30e7c925359a",
+                "texturePath": "particle.dds",
+                "velocity": {
+                    "constant": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "max": {
+                        "x": 2.0399999618530273,
+                        "y": 1.899999976158142,
+                        "z": 2.119999885559082
+                    },
+                    "min": {
+                        "x": -2.4000000953674316,
+                        "y": -2.2200000286102295,
+                        "z": -2.0
+                    },
+                    "mode": 1
+                }
+            },
+            "guid": "c549c2f4-13e9-4832-8bca-75254c8ed527",
+            "isDrawEnable": true,
+            "isGpu": false,
+            "name": "smoke2",
+            "objectType": 0,
+            "parentGuid": "5b84b052-498e-451d-a2fd-90818ee80371",
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 0.9420812726020813,
+                    "y": 1.9296181201934814,
+                    "z": 7.475193977355957
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": -0.43556320667266846,
+                    "z": 0.0
+                }
+            }
+        }
+    ],
     "guid": "00000000-0000-0000-0000-000000000000",
-    "name": "",
+    "name": "buildingBreakFx",
     "objectType": 0,
     "parentGuid": "00000000-0000-0000-0000-000000000000",
     "transform": {
@@ -15,14 +440,14 @@
             "z": 0.0
         },
         "scale": {
-            "x": 1.0,
-            "y": 1.0,
+            "x": 61.99751281738281,
+            "y": 5.595537185668945,
             "z": 1.0
         },
         "translation": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0
+            "x": 5.4809651374816895,
+            "y": 1.858759880065918,
+            "z": 61.17051696777344
         }
     }
 }
