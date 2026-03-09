@@ -1,6 +1,7 @@
 #include "BackgroundActor.h"
 
 #include "Engine/Objects/Collider/BoxCollider.h"
+#include "Engine/Scene/Utility/SceneUtility.h"
 #include "Game/3dObject/Actor/Bullet/EnemyBullet/BaseEnemyHomingBullet.h"
 
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
@@ -11,23 +12,40 @@ REGISTER_SCENE_OBJECT(BackgroundActor)
 
 BackgroundActor::BackgroundActor(const std::string& modelName, std::optional<std::string> objectName)
 	: Actor(modelName, objectName) {
-	life_ = 3;
-
-	// 衝突の設定(boxで初期化
-	std::unique_ptr<BoxCollider> box = std::make_unique<BoxCollider>(true);
-	box->SetName(GetName() + "BoxCollider");   //< コライダー名前設定
-	box->Initialize(CalyxMath::Vector3(1.0f)); //< サイズ設定
-	collider_ = std::move(box);
-	collider_->SetType(ColliderType::Type_StageGimmick);
-	collider_->SetTargetType(ColliderType::Type_PlayerAttack);
-
-	collider_->SetOnEnter([this](Collider* other) { this->OnCollisionEnter(other); });
-	collider_->SetOnStay([this](Collider* other) { this->OnCollisionStay(other); });
-	collider_->SetOnExit([this](Collider* other) { this->OnCollisionExit(other); });
 }
 
 BackgroundActor::BackgroundActor()	= default;
 BackgroundActor::~BackgroundActor() = default;
+
+void BackgroundActor::Initialize() {
+	life_ = 2;
+
+	// コライダーがなければ生成(デシリアライズで生成されていない場合)
+	if(!collider_) {
+		std::unique_ptr<BoxCollider> box = std::make_unique<BoxCollider>(true);
+		box->SetName(GetName() + "BoxCollider");
+		box->Initialize(CalyxMath::Vector3(1.0f));
+		collider_ = std::move(box);
+		collider_->SetType(ColliderType::Type_StageGimmick);
+		collider_->SetTargetType(ColliderType::Type_PlayerAttack);
+	}
+
+	// コールバック設定
+	if(collider_) {
+		collider_->SetOnEnter([this](Collider* other) { this->OnCollisionEnter(other); });
+		collider_->SetOnStay([this](Collider* other) { this->OnCollisionStay(other); });
+		collider_->SetOnExit([this](Collider* other) { this->OnCollisionExit(other); });
+	}
+
+	// ヒットエフェクトの生成（無い場合のみ）
+	if(hitEffects_.expired()) {
+		auto fxObj = SceneAPI::Instantiate<CalyxEffect::FxObject>("HitFx");
+		fxObj->LoadFromPath("Effect/BossHitEffect");
+		fxObj->StopAll();
+		fxObj->SetTransient(true); // シーン保存対象外にする
+		hitEffects_ = fxObj;
+	}
+}
 
 void BackgroundActor::Update(float dt) {
 	// lifeが０で死亡
@@ -75,7 +93,14 @@ void BackgroundActor::OnCollisionEnter(Collider* other) {
 	// 衝突相手がプレイヤーの攻撃ならダメージを受ける
 	if(other && other->GetType() == ColliderType::Type_PlayerAttack) {
 		life_--;
-
+		// --- 衝突位置を取得 ---
+		CalyxMath::Vector3 hitPos = other->GetWorldPos();
+		if(auto fx = hitEffects_.lock()) {
+			// 位置設定
+			fx->SetWorldPosition(hitPos);
+			// 再生
+			fx->PlayAll();
+		}
 	}
 }
 void BackgroundActor::ApplyDerivedConfigFromJson(const nlohmann::json& root, const nlohmann::json* derived) {

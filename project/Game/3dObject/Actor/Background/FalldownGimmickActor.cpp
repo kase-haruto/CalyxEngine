@@ -45,6 +45,9 @@ FalldownGimmickActor::~FalldownGimmickActor() = default;
 //		初期化処理
 ///////////////////////////////////////////////////////////////////////////////////////////
 void FalldownGimmickActor::Initialize() {
+	// 基底クラスの初期化
+	BackgroundActor::Initialize();
+
 	// 初期トランスフォーム設定
 	worldTransform_.rotation = animationStartRotation_;
 

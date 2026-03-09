@@ -207,7 +207,7 @@ void Boss::OnCollisionEnter(Collider* other) {
 	life_--;
 
 	// --- 衝突位置を取得 ---
-	CalyxMath::Vector3 hitPos = other->GetWorldPos(); // ← マジでこれだけでOKのことが多い
+	CalyxMath::Vector3 hitPos = other->GetWorldPos();
 
 	auto fx = hitEffects_.lock();
 	// 位置設定
