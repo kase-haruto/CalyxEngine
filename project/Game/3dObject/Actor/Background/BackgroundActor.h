@@ -2,7 +2,7 @@
 // ===================================================================== */
 //  include space
 // ===================================================================== */
-#include <Engine/Objects/3D/Actor/BaseGameObject.h>
+#include <Engine/Objects/3D/Actor/Actor.h>
 
 #include <externals/imgui/imgui.h>
 #include <externals/nlohmann/json.hpp>
@@ -16,7 +16,7 @@
  * - 背景オブジェクトの共通インターフェースや基本機能を提供
  * - 具体的な背景オブジェクトはこのクラスを継承して実装する
  *---------------------------------------------------------------------------------------*/
-class BackgroundActor : public BaseGameObject {
+class BackgroundActor : public Actor {
 public:
 	//===================================================================*/
 	//			public methods
@@ -31,6 +31,8 @@ public:
 
 	BackgroundActor();
 	~BackgroundActor() override;
+
+	void Update(float dt) override;
 
 	/**
 	 * \brief 派生クラスのGUI表示
@@ -85,6 +87,8 @@ public:
 	 * \return タイプ名
 	 */
 	std::string_view GetTypeName() const override { return "BackgroundActor"; }
+
+	void OnCollisionEnter(Collider* other) override;
 
 protected:
 	/**

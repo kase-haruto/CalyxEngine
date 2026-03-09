@@ -159,7 +159,7 @@ void RailCamera::Update(float dt) {
 		bool  foundObstacle = false;
 
 		for(const auto& obstacle : obstacles) {
-			if(obstacle && obstacle->IsStopRail()) {
+			if(obstacle && obstacle->IsStopRail() && obstacle->GetIsAlive()) {
 				float stopS = obstacle->GetStopProgress();
 				// 現在位置より先（または同じ位置）にある最も手前の障害物を探す
 				if(stopS >= traveled_ - 1e-4f && stopS < nearestStopS) {
