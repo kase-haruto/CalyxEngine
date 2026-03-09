@@ -11,15 +11,32 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 GraphicsPipelineDesc PipelinePresets::MakeObject3D(BlendMode mode) {
 	GraphicsPipelineDesc desc;
-	desc.VS(L"Object3d.VS.hlsl")
-		.PS(L"Object3d.PS.hlsl")
-		.Input(VertexInputLayout<VertexPosUvN>::Get())
-		.Blend(mode)
-		.CullBack()
-		.DepthEnable(true)
-		.DepthFunc(D3D12_COMPARISON_FUNC_LESS_EQUAL)
-		.RTV(DXGI_FORMAT_R8G8B8A8_UNORM)
-		.Samples(1);
+	if(mode == BlendMode::NONE || mode == BlendMode::NORMAL) {
+		desc.VS(L"Object3d.VS.hlsl")
+			.PS(L"Object3d.PS.hlsl")
+			.Input(VertexInputLayout<VertexPosUvN>::Get())
+			.Blend(mode)
+			.CullBack()
+			.DepthEnable(true)
+			.DepthFunc(D3D12_COMPARISON_FUNC_LESS_EQUAL)
+			.RTV(DXGI_FORMAT_R8G8B8A8_UNORM)
+			.Samples(1);
+	} else {
+		D3D12_DEPTH_STENCIL_DESC depthDesc = {};
+		depthDesc.DepthEnable = TRUE;
+		depthDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+		depthDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+		depthDesc.StencilEnable = FALSE;
+
+		desc.VS(L"Object3d.VS.hlsl")
+			.PS(L"Object3d.PS.hlsl")
+			.Input(VertexInputLayout<VertexPosUvN>::Get())
+			.Blend(mode)
+			.CullBack()
+			.DepthState(depthDesc)
+			.RTV(DXGI_FORMAT_R8G8B8A8_UNORM)
+			.Samples(1);
+	}
 
 	desc.root_
 		.AllowIA()
@@ -82,15 +99,32 @@ GraphicsPipelineDesc PipelinePresets::MakeShadowStatic() {
 /////////////////////////////////////////////////////////////////////////////////////////
 GraphicsPipelineDesc PipelinePresets::MakeSkinningObject3D(BlendMode mode) {
 	GraphicsPipelineDesc desc;
-	desc.VS(L"SkinningObject3d.VS.hlsl")
-		.PS(L"Object3d.PS.hlsl")
-		.Input(VertexInputLayout<VertexPosUvNSkinning>::Get())
-		.Blend(mode)
-		.CullBack()
-		.DepthEnable(true)
-		.DepthFunc(D3D12_COMPARISON_FUNC_LESS_EQUAL)
-		.RTV(DXGI_FORMAT_R8G8B8A8_UNORM)
-		.Samples(1);
+	if(mode == BlendMode::NONE||mode == BlendMode::NORMAL) {
+		desc.VS(L"SkinningObject3d.VS.hlsl")
+			.PS(L"Object3d.PS.hlsl")
+			.Input(VertexInputLayout<VertexPosUvNSkinning>::Get())
+			.Blend(mode)
+			.CullBack()
+			.DepthEnable(true)
+			.DepthFunc(D3D12_COMPARISON_FUNC_LESS_EQUAL)
+			.RTV(DXGI_FORMAT_R8G8B8A8_UNORM)
+			.Samples(1);
+	} else {
+		D3D12_DEPTH_STENCIL_DESC depthDesc = {};
+		depthDesc.DepthEnable = TRUE;
+		depthDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+		depthDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+		depthDesc.StencilEnable = FALSE;
+
+		desc.VS(L"SkinningObject3d.VS.hlsl")
+			.PS(L"Object3d.PS.hlsl")
+			.Input(VertexInputLayout<VertexPosUvNSkinning>::Get())
+			.Blend(mode)
+			.CullBack()
+			.DepthState(depthDesc)
+			.RTV(DXGI_FORMAT_R8G8B8A8_UNORM)
+			.Samples(1);
+	}
 
 	desc.root_
 		.AllowIA()
@@ -203,10 +237,10 @@ GraphicsPipelineDesc PipelinePresets::MakePickingSkinned() {
 /////////////////////////////////////////////////////////////////////////////////////////
 GraphicsPipelineDesc PipelinePresets::MakeParticle(BlendMode mode) {
 	D3D12_DEPTH_STENCIL_DESC depthDesc = {};
-	depthDesc.DepthEnable			   = TRUE;
-	depthDesc.DepthWriteMask		   = D3D12_DEPTH_WRITE_MASK_ZERO; // 書き込みを無効にする
-	depthDesc.DepthFunc				   = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-	depthDesc.StencilEnable			   = FALSE;
+	depthDesc.DepthEnable = TRUE;
+	depthDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO; // 書き込みを無効にする
+	depthDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	depthDesc.StencilEnable = FALSE;
 
 	GraphicsPipelineDesc desc;
 	desc.VS(L"Particle.VS.hlsl")
@@ -233,10 +267,10 @@ GraphicsPipelineDesc PipelinePresets::MakeParticle(BlendMode mode) {
 
 GraphicsPipelineDesc PipelinePresets::MakeGpuParticle(BlendMode mode) {
 	D3D12_DEPTH_STENCIL_DESC depthDesc = {};
-	depthDesc.DepthEnable			   = TRUE;
-	depthDesc.DepthWriteMask		   = D3D12_DEPTH_WRITE_MASK_ZERO; // 書き込みを無効にする
-	depthDesc.DepthFunc				   = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-	depthDesc.StencilEnable			   = FALSE;
+	depthDesc.DepthEnable = TRUE;
+	depthDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO; // 書き込みを無効にする
+	depthDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	depthDesc.StencilEnable = FALSE;
 
 	GraphicsPipelineDesc desc;
 	desc.VS(L"GpuParticle.VS.hlsl")
