@@ -1,5 +1,6 @@
 #include "GimmickActivateEvent.h"
 
+#include "Engine/Objects/Collider/BoxCollider.h"
 #include "Game/3dObject/Actor/Background/StageGimmickActor.h"
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 
@@ -15,7 +16,7 @@ GimmickActivateEvent::GimmickActivateEvent() {
 }
 
 GimmickActivateEvent::GimmickActivateEvent(const std::string& name)
-	:BaseEventObject(name){
+	: BaseEventObject(name) {
 	param_.LoadParams();
 	model_->SetColor(param_.color);
 }
@@ -53,5 +54,5 @@ GimmickActivateEvent::GimmickActivateEventData::GimmickActivateEventData() {
 //		パラメータパス
 /////////////////////////////////////////////////////////////////////////////////////////
 CalyxEngine::ParamPath GimmickActivateEvent::GimmickActivateEventData::GetParamPath() const {
-	return{CalyxEngine::ParamDomain::Game,"GimmickActivateEvent","Actor/Event"};
+	return {CalyxEngine::ParamDomain::Game, "GimmickActivateEvent", "Actor/Event"};
 }

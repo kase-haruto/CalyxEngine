@@ -6,6 +6,37 @@
 #include <Engine/System/Event/EventBus.h>
 #include <iostream>
 
+namespace {
+	CalyxMath::Vector3 ExtractWorldScale(const CalyxMath::Matrix4x4& m) {
+		return {
+			CalyxMath::Vector3(m.m[0][0], m.m[0][1], m.m[0][2]).Length(),
+			CalyxMath::Vector3(m.m[1][0], m.m[1][1], m.m[1][2]).Length(),
+			CalyxMath::Vector3(m.m[2][0], m.m[2][1], m.m[2][2]).Length()};
+	}
+
+	CalyxMath::Quaternion ExtractWorldRotation(const CalyxMath::Matrix4x4& m, const CalyxMath::Vector3& scale) {
+		CalyxMath::Matrix4x4 rot = m;
+		if(scale.x > 0.0001f) {
+			rot.m[0][0] /= scale.x;
+			rot.m[0][1] /= scale.x;
+			rot.m[0][2] /= scale.x;
+		}
+		if(scale.y > 0.0001f) {
+			rot.m[1][0] /= scale.y;
+			rot.m[1][1] /= scale.y;
+			rot.m[1][2] /= scale.y;
+		}
+		if(scale.z > 0.0001f) {
+			rot.m[2][0] /= scale.z;
+			rot.m[2][1] /= scale.z;
+			rot.m[2][2] /= scale.z;
+		}
+		rot.m[3][0] = rot.m[3][1] = rot.m[3][2] = 0.0f;
+		rot.m[3][3] = 1.0f;
+		return CalyxMath::Quaternion::FromMatrix(rot);
+	}
+}
+
 namespace CalyxEffect {
 
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -35,12 +66,15 @@ namespace CalyxEffect {
 	//		常時更新
 	/////////////////////////////////////////////////////////////////////////////////////////
 	void ParticleSystemObject::AlwaysUpdate([[maybe_unused]] float dt) {
-		if(emitter_->IsPlaying()) {
-			worldTransform_.Update();
-			emitter_->SetPosition(worldTransform_.GetWorldPosition());
-		}
+		// Gizmo操作中/停止中でも見た目と発生位置を一致させるため常時同期する
+		worldTransform_.Update();
+		emitter_->SetPosition(worldTransform_.GetWorldPosition());
+		const auto worldScale = ExtractWorldScale(worldTransform_.matrix.world);
+		emitter_->SetWorldScale(worldScale);
+		emitter_->SetWorldRotation(ExtractWorldRotation(worldTransform_.matrix.world, worldScale));
 
 		emitter_->Update(dt);
+		emitter_->DrawEmitterShape(worldTransform_);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -74,16 +108,21 @@ namespace CalyxEffect {
 		parentId_ = cfg.parentGuid;
 
 		worldTransform_.ApplyConfig(cfg.transform);
+		worldTransform_.Update();
+		emitter_->SetPosition(worldTransform_.GetWorldPosition());
+		const auto worldScale = ExtractWorldScale(worldTransform_.matrix.world);
+		emitter_->SetWorldScale(worldScale);
+		emitter_->SetWorldRotation(ExtractWorldRotation(worldTransform_.matrix.world, worldScale));
 	}
 
 	void ParticleSystemObject::ExtractConfig() {
-		auto& cfg = config_.GetConfig();
-		emitter_->ExtractConfigTo(cfg); // config_ は ParticleSystemObjectConfig
+			auto& cfg = config_.GetConfig();
+			emitter_->ExtractConfigTo(cfg); // config_ は ParticleSystemObjectConfig
 
-		cfg.name	   = name_;
-		cfg.parentGuid = parentId_;
-		worldTransform_.ExtractConfig();
-	}
+			cfg.name	   = name_;
+			cfg.parentGuid = parentId_;
+			cfg.transform  = worldTransform_.ExtractConfig();
+		}
 
 	void ParticleSystemObject::ApplyConfigFromJson(const nlohmann::json& j) {
 		config_.ApplyConfigFromJson(j);
@@ -154,5 +193,4 @@ namespace CalyxEffect {
 		}
 	}
 
-	REGISTER_SCENE_OBJECT(ParticleSystemObject)
 } // namespace CalyxEffect

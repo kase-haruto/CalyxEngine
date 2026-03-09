@@ -1,0 +1,293 @@
+[
+    {
+        "emitters": [
+            {
+                "emitter": {
+                    "autoDestroy": false,
+                    "blendMode": 1,
+                    "color": {
+                        "w": 1.0,
+                        "x": 0.5254902243614197,
+                        "y": 0.49803921580314636,
+                        "z": 0.33725491166114807
+                    },
+                    "emitCount": 10,
+                    "emitDelay": 0.0,
+                    "emitDuration": -1.0,
+                    "emitRate": 0.10000000149011612,
+                    "followOneShot": false,
+                    "isComplement": true,
+                    "isDrawEnable": true,
+                    "isOneShot": true,
+                    "lifetime": {
+                        "constant": 1.0,
+                        "max": 1.0,
+                        "min": 0.0,
+                        "mode": 0
+                    },
+                    "modelGuid": "c4009f5c-e68a-44ea-80d5-5d7d3a2b451f",
+                    "modelPath": "tallBuilding_01_mid.obj",
+                    "modules": [
+                        {
+                            "enabled": true,
+                            "gravity": {
+                                "x": 0.0,
+                                "y": -9.800000190734863,
+                                "z": 0.0
+                            },
+                            "name": "GravityModule"
+                        },
+                        {
+                            "blend": 0,
+                            "clamp01": true,
+                            "ease": 6,
+                            "enabled": true,
+                            "end": [
+                                1.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ],
+                            "guid": "fe3eaa7b-d45b-4006-ab42-0b5db465b474",
+                            "invert": true,
+                            "name": "OverLifetimeModule",
+                            "start": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0
+                            ],
+                            "target": 5
+                        }
+                    ],
+                    "position": {
+                        "x": -1.6659605503082275,
+                        "y": 3.2540206909179688,
+                        "z": 8.469472885131836
+                    },
+                    "randomSpinEmit": true,
+                    "scale": {
+                        "constant": {
+                            "x": 1.0,
+                            "y": 1.0,
+                            "z": 1.0
+                        },
+                        "max": {
+                            "x": 1.0,
+                            "y": 1.0,
+                            "z": 1.0
+                        },
+                        "min": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
+                        "mode": 0
+                    },
+                    "textureGuid": "a7f3b3cb-ef24-428d-ba4a-d5f24958c94e",
+                    "texturePath": "particle.dds",
+                    "velocity": {
+                        "constant": {
+                            "x": 1.0,
+                            "y": 1.0,
+                            "z": 1.0
+                        },
+                        "max": {
+                            "x": 1.8899999856948853,
+                            "y": 3.049999952316284,
+                            "z": 3.0
+                        },
+                        "min": {
+                            "x": -1.840000033378601,
+                            "y": 3.0399999618530273,
+                            "z": -1.8200000524520874
+                        },
+                        "mode": 1
+                    }
+                },
+                "guid": "e6989452-567e-41ed-95f4-a43512b81654",
+                "isDrawEnable": true,
+                "isGpu": false,
+                "name": "Emitter",
+                "objectType": 0,
+                "parentGuid": "0e8b6ca4-19f7-4e75-bdc8-9a258691d868",
+                "transform": {
+                    "inheritRotate": true,
+                    "inheritScale": true,
+                    "inheritTranslate": true,
+                    "rotation": {
+                        "w": 1.0,
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "translation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                }
+            }
+        ],
+        "guid": "0e8b6ca4-19f7-4e75-bdc8-9a258691d868",
+        "name": "",
+        "objectType": 0,
+        "parentGuid": "00000000-0000-0000-0000-000000000000",
+        "transform": {
+            "inheritRotate": true,
+            "inheritScale": true,
+            "inheritTranslate": true,
+            "rotation": {
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "translation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            }
+        },
+        "type": "FxObject"
+    },
+    {
+        "autoDestroy": false,
+        "blendMode": 1,
+        "color": {
+            "w": 1.0,
+            "x": 0.5254902243614197,
+            "y": 0.49803921580314636,
+            "z": 0.33725491166114807
+        },
+        "emitCount": 10,
+        "emitDelay": 0.0,
+        "emitDuration": -1.0,
+        "emitRate": 0.10000000149011612,
+        "followOneShot": false,
+        "guid": "e6989452-567e-41ed-95f4-a43512b81654",
+        "isComplement": true,
+        "isDrawEnable": true,
+        "isOneShot": true,
+        "lifetime": {
+            "constant": 1.0,
+            "max": 1.0,
+            "min": 0.0,
+            "mode": 0
+        },
+        "modelGuid": "c4009f5c-e68a-44ea-80d5-5d7d3a2b451f",
+        "modelPath": "tallBuilding_01_mid.obj",
+        "modules": [
+            {
+                "enabled": true,
+                "gravity": {
+                    "x": 0.0,
+                    "y": -9.800000190734863,
+                    "z": 0.0
+                },
+                "name": "GravityModule"
+            },
+            {
+                "blend": 0,
+                "clamp01": true,
+                "ease": 6,
+                "enabled": true,
+                "end": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "guid": "fe3eaa7b-d45b-4006-ab42-0b5db465b474",
+                "invert": true,
+                "name": "OverLifetimeModule",
+                "start": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "target": 5
+            }
+        ],
+        "name": "Emitter",
+        "objectType": 0,
+        "parentGuid": "0e8b6ca4-19f7-4e75-bdc8-9a258691d868",
+        "position": {
+            "x": -1.6659605503082275,
+            "y": 3.2540206909179688,
+            "z": 8.469472885131836
+        },
+        "randomSpinEmit": true,
+        "scale": {
+            "constant": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "max": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "min": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "mode": 0
+        },
+        "textureGuid": "a7f3b3cb-ef24-428d-ba4a-d5f24958c94e",
+        "texturePath": "particle.dds",
+        "transform": {
+            "inheritRotate": true,
+            "inheritScale": true,
+            "inheritTranslate": true,
+            "rotation": {
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "translation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            }
+        },
+        "type": "ParticleSystemObject",
+        "velocity": {
+            "constant": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "max": {
+                "x": 1.8899999856948853,
+                "y": 3.049999952316284,
+                "z": 3.0
+            },
+            "min": {
+                "x": -1.840000033378601,
+                "y": 3.0399999618530273,
+                "z": -1.8200000524520874
+            },
+            "mode": 1
+        }
+    }
+]

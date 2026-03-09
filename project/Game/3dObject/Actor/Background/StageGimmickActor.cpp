@@ -21,6 +21,8 @@ void StageGimmickActor::Update(float dt) {
 	ExecuteStateUpdate(dt);
 
 	prevState_ = currentState_;
+
+	BackgroundActor::Update(dt);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

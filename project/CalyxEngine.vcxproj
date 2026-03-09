@@ -519,6 +519,7 @@ copy /Y "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(SolutionD
     <ClInclude Include="Data\Game\Config\Title\TitleMenueConfig.h" />
     <ClInclude Include="Engine\Application\Effects\FxGuiHelpers.h" />
     <ClInclude Include="Engine\Application\Effects\FxObject.h" />
+    <ClInclude Include="Engine\Application\Effects\Particle\Emitter\EmitterDetails.h" />
     <ClInclude Include="Engine\Application\Effects\Particle\Module\OverLifetime\OverLifetimeModule.h" />
     <ClInclude Include="Engine\Application\UI\EngineUI\DebugOverlay.h" />
     <ClInclude Include="Engine\Application\UI\EngineUI\DebugTextManager.h" />

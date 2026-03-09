@@ -175,23 +175,40 @@ namespace CalyxEditor {
 				}
 			}
 
+			// 空白クリックで選択解除 (テーブル内の空白エリア)
+			if(ImGui::IsWindowHovered() && ImGui::IsMouseClicked(0) && !ImGui::IsAnyItemHovered()) {
+				selected_.reset();
+				if(onSelect_) onSelect_(nullptr);
+			}
+
+			// 右クリック空白メニュー (テーブル内の空白エリア)
+			if(ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
+				ImGui::OpenPopup("BlankContextMenu");
+			}
+
+			if(ImGui::BeginPopup("BlankContextMenu")) {
+				if(ImGui::BeginMenu("Create")) {
+					auto createRoot = [&](std::shared_ptr<SceneObject> obj) {
+						if(onCreate_) onCreate_(obj);
+					};
+
+					if(ImGui::MenuItem("Empty Scene Object")) createRoot(std::make_shared<SceneObject>());
+					if(ImGui::MenuItem("Camera")) createRoot(std::make_shared<Camera3d>());
+					if(ImGui::BeginMenu("Light")) {
+						if(ImGui::MenuItem("Directional Light")) createRoot(std::make_shared<DirectionalLight>());
+						if(ImGui::MenuItem("Point Light")) createRoot(std::make_shared<PointLight>());
+						ImGui::EndMenu();
+					}
+					if(ImGui::MenuItem("Mesh Object")) createRoot(std::make_shared<BaseGameObject>());
+					if(ImGui::MenuItem("Particle System")) createRoot(std::make_shared<CalyxEffect::ParticleSystemObject>());
+					ImGui::EndMenu();
+				}
+				ImGui::Separator();
+				if(ImGui::MenuItem("Load Prefab")) showLoadPrefabDlg_ = true;
+				ImGui::EndPopup();
+			}
+
 			ImGui::EndTable();
-		}
-
-		// 空白クリックで選択解除 (Tableの外 or Footer)
-		if(ImGui::IsWindowHovered() && ImGui::IsMouseClicked(0) && !ImGui::IsAnyItemHovered()) {
-			selected_.reset();
-			if(onSelect_) onSelect_(nullptr);
-		}
-
-		// 右クリック空白メニュー
-		if(ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
-			ImGui::OpenPopup("BlankContextMenu");
-		}
-
-		if(ImGui::BeginPopup("BlankContextMenu")) {
-			if(ImGui::MenuItem("Load Prefab")) showLoadPrefabDlg_ = true;
-			ImGui::EndPopup();
 		}
 
 		// --- Prefab Dialog ---

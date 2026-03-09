@@ -1,5 +1,9 @@
 #include "BackgroundActor.h"
 
+#include "Engine/Objects/Collider/BoxCollider.h"
+#include "Engine/Scene/Utility/SceneUtility.h"
+#include "Game/3dObject/Actor/Bullet/EnemyBullet/BaseEnemyHomingBullet.h"
+
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/Scene/Context/SceneContext.h>
 #include <Game/3d/GameCamera/RailCamera.h>
@@ -7,10 +11,48 @@
 REGISTER_SCENE_OBJECT(BackgroundActor)
 
 BackgroundActor::BackgroundActor(const std::string& modelName, std::optional<std::string> objectName)
-	: BaseGameObject(modelName, objectName) {}
+	: Actor(modelName, objectName) {
+}
 
 BackgroundActor::BackgroundActor()	= default;
 BackgroundActor::~BackgroundActor() = default;
+
+void BackgroundActor::Initialize() {
+	life_ = 2;
+
+	// コライダーがなければ生成(デシリアライズで生成されていない場合)
+	if(!collider_) {
+		std::unique_ptr<BoxCollider> box = std::make_unique<BoxCollider>(true);
+		box->SetName(GetName() + "BoxCollider");
+		box->Initialize(CalyxMath::Vector3(1.0f));
+		collider_ = std::move(box);
+		collider_->SetType(ColliderType::Type_StageGimmick);
+		collider_->SetTargetType(ColliderType::Type_PlayerAttack);
+	}
+
+	// コールバック設定
+	if(collider_) {
+		collider_->SetOnEnter([this](Collider* other) { this->OnCollisionEnter(other); });
+		collider_->SetOnStay([this](Collider* other) { this->OnCollisionStay(other); });
+		collider_->SetOnExit([this](Collider* other) { this->OnCollisionExit(other); });
+	}
+}
+
+void BackgroundActor::Update(float dt) {
+	// lifeが０で死亡
+	if(life_ <= 0) {
+		model_->SetBlendMode(BlendMode::ALPHA);
+		// 志望処理（αを減らす）
+		// 完全に透明になったら非表示にする
+		CalyxMath::Vector4 color = model_->GetColor();
+		color.w -= dt; // αを減らす
+		if(color.w <= 0) {
+			color.w = 0;
+			SetIsAlive(false); // 非表示にする
+		}
+		model_->SetColor(color); // 減衰したαを反映
+	}
+}
 
 void BackgroundActor::DerivativeGui() {
 #if defined(_DEBUG) || defined(DEVELOP)
@@ -36,6 +78,30 @@ void BackgroundActor::DerivativeGui() {
 		}
 	}
 #endif
+}
+
+void BackgroundActor::OnCollisionEnter(Collider* other) {
+	// 衝突相手がプレイヤーの攻撃ならダメージを受ける
+	if(other && other->GetType() == ColliderType::Type_PlayerAttack) {
+		if(GetIsAlive()) {
+			life_--;
+
+			if(life_ <= 0) {
+				if(hitEffects_.expired()) {
+					auto fxObj = SceneAPI::Instantiate<CalyxEffect::FxObject>("breakFx");
+					fxObj->LoadFromPath("Effect/buildingBreakFx");
+					fxObj->StopAll();
+					fxObj->SetTransient(true); // シーン保存対象外にする
+					hitEffects_ = fxObj;
+				}
+				if(auto fx = hitEffects_.lock()) {
+					// --- 衝突位置を取得 ---
+					// 再生
+					fx->RestartAll();
+				}
+			}
+		}
+	}
 }
 
 void BackgroundActor::ApplyDerivedConfigFromJson(const nlohmann::json& root, const nlohmann::json* derived) {

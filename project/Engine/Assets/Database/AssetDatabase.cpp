@@ -115,13 +115,21 @@ void AssetDatabase::BuildPreview(AssetRecord& rec) {
 	auto& tm = *TextureManager::GetInstance();
 	try {
 		if(rec.type == AssetType::Texture) {
-			// テクスチャタイプの場合は実際の画像をプレビューとして使用
-			std::filesystem::path rel		= std::filesystem::relative(rec.sourcePath, assetsRoot_);
-			auto				  texHandle = tm.LoadTexture(rel.string());
-			rec.previewTex					= (ImTextureID)texHandle.ptr;
+			// モデルフォルダ内のテクスチャはプレビュー生成をスキップ（ロード失敗の可能性があるため）
+			std::filesystem::path rel	 = std::filesystem::relative(rec.sourcePath, assetsRoot_);
+			std::string			  relStr = rel.generic_string();
+			if(relStr.find("models/") == 0 || relStr.find("Models/") == 0) {
+				// モデル内のテクスチャはアイコンで代用
+				auto icon	   = tm.LoadTexture("UI/Tool/AssetPanel/generic.dds");
+				rec.previewTex = (ImTextureID)icon.ptr;
+			} else {
+				// テクスチャタイプの場合は実際の画像をプレビューとして使用
+				auto texHandle = tm.LoadTexture(rel.string());
+				rec.previewTex = (ImTextureID)texHandle.ptr;
+			}
 		} else {
 			// その他のタイプは共通アイコンを使用
-			auto icon	   = tm.LoadTexture("UI/Icons/asset_generic.png");
+			auto icon	   = tm.LoadTexture("UI/Tool/AssetPanel/generic.dds");
 			rec.previewTex = (ImTextureID)icon.ptr;
 		}
 	} catch(...) {

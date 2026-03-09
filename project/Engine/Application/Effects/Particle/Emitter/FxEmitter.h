@@ -35,7 +35,7 @@ namespace CalyxEffect {
 		virtual void Update(float dt) override;
 		void		 TransferParticleDataToGPU() override; // BaseEmitterをoverride
 		void		 ShowGui();
-
+		void DrawEmitterShape(const WorldTransform& tf);
 		// コマンドを積む
 		void SetCommand(ID3D12GraphicsCommandList* cmdList);
 
@@ -132,7 +132,7 @@ namespace CalyxEffect {
 		std::unique_ptr<FxModuleContainer> moduleContainer_; // モジュールコンテナ
 
 		// 旧bool群を統合したビットフラグ
-		uint32_t flags_ = FollowOneShot | Playing | FirstFrame | Complement | DrawEnable;
+		uint32_t flags_ = FollowOneShot | FirstFrame | Complement | DrawEnable;
 
 	protected:
 		bool isOneShot_	  = false; //<

@@ -7,7 +7,6 @@
 
 namespace CalyxEffect {
 
-	REGISTER_SCENE_OBJECT(FxObject);
 
 	namespace {
 
@@ -28,15 +27,18 @@ namespace CalyxEffect {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	//		ctor / dtor
 	/////////////////////////////////////////////////////////////////////////////////////////
-	FxObject::FxObject(const std::string& name) { SceneObject::SetName(name, ObjectType::Effect); }
+	FxObject::FxObject(const std::string& name) {
+		SceneObject::SetName(name, ObjectType::Effect);
+		config_.SetOnApplied([this](const EffectObjectConfig&) { this->ApplyConfig(); });
+		config_.SetOnExtracted([this](const EffectObjectConfig&) { this->ExtractConfig(); });
+	}
 	FxObject::~FxObject() = default;
 
 	/////////////////////////////////////////////////////////////////////////////////////////
 	//		初期化
 	/////////////////////////////////////////////////////////////////////////////////////////
 	void FxObject::Initialize() {
-		config_.SetOnApplied([this](const EffectObjectConfig&) { this->ApplyConfig(); });
-		config_.SetOnExtracted([this](const EffectObjectConfig&) { this->ExtractConfig(); });
+		// callbacks are set in ctor so Load/Save works immediately
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -197,8 +199,7 @@ namespace CalyxEffect {
 						EffectEmitterNodeConfig node{};
 						node.name		= sp->GetName() + "_Copy";
 						node.parentGuid = this->GetGuid();
-						sp->GetWorldTransform().ExtractConfig();
-						node.transform = sp->GetConfigObject().GetConfig().transform;
+						node.transform  = sp->GetWorldTransform().ExtractConfig();
 						sp->GetEmitter()->ExtractConfigTo(node.emitter);
 						node.isDrawEnable = true;
 						AddEmitterNode(node);
@@ -251,7 +252,7 @@ namespace CalyxEffect {
 		// ルートを書き出し
 		cfg.name	   = name_;
 		cfg.parentGuid = parentId_;
-		worldTransform_.ExtractConfig();
+		cfg.transform  = worldTransform_.ExtractConfig();
 
 		// 子から同期
 		SyncConfigFromChildren();
@@ -311,9 +312,7 @@ namespace CalyxEffect {
 				n.name		 = sp->GetName();
 				n.guid		 = sp->GetGuid();
 				n.parentGuid = this->GetGuid();
-
-				sp->GetWorldTransform().ExtractConfig();
-				n.transform = sp->GetConfigObject().GetConfig().transform;
+				n.transform  = sp->GetWorldTransform().ExtractConfig();
 
 				sp->GetEmitter()->ExtractConfigTo(n.emitter);
 				n.isDrawEnable = sp->IsDrawEnable();
@@ -335,7 +334,10 @@ namespace CalyxEffect {
 		auto child = SceneAPI::Instantiate<ParticleSystemObject>(
 			node.name.empty() ? "emitter" : node.name);
 
-		// child->SetGuid(node.guid.isValid() ? node.guid : Guid::New());
+		if(node.guid.isValid()) {
+			child->SetGuid(node.guid);
+		}
+
 		child->GetWorldTransform().ApplyConfig(node.transform);
 		child->SetDrawEnable(node.isDrawEnable);
 		child->GetEmitter()->ApplyConfigFrom(node.emitter);
@@ -365,3 +367,4 @@ namespace CalyxEffect {
 	}
 
 } // namespace CalyxEffect
+

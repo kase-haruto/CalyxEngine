@@ -2,8 +2,9 @@
 // ===================================================================== */
 //  include space
 // ===================================================================== */
-#include <Engine/Objects/3D/Actor/BaseGameObject.h>
-
+#include <Engine/Objects/3D/Actor/Actor.h>
+#include <Engine/Application/Effects/FxObject.h>
+// externals / stl
 #include <externals/imgui/imgui.h>
 #include <externals/nlohmann/json.hpp>
 #include <optional>
@@ -16,7 +17,7 @@
  * - 背景オブジェクトの共通インターフェースや基本機能を提供
  * - 具体的な背景オブジェクトはこのクラスを継承して実装する
  *---------------------------------------------------------------------------------------*/
-class BackgroundActor : public BaseGameObject {
+class BackgroundActor : public Actor {
 public:
 	//===================================================================*/
 	//			public methods
@@ -31,6 +32,10 @@ public:
 
 	BackgroundActor();
 	~BackgroundActor() override;
+
+	void Initialize() override;
+
+	void Update(float dt) override;
 
 	/**
 	 * \brief 派生クラスのGUI表示
@@ -86,6 +91,8 @@ public:
 	 */
 	std::string_view GetTypeName() const override { return "BackgroundActor"; }
 
+	void OnCollisionEnter(Collider* other) override;
+
 protected:
 	/**
 	 * \brief JSONから派生設定を適用
@@ -105,4 +112,6 @@ private:
 	float stopProgress_			 = 0.0f;  //< 止める進捗
 	float stopOffset_			 = 2.0f;  //< 止める際の手前へのオフセット
 	bool  autoCalculateProgress_ = true;  //< 自動計算するか
+
+	std::weak_ptr<CalyxEffect::FxObject>    hitEffects_;                   //< ヒットエフェクト群
 };
