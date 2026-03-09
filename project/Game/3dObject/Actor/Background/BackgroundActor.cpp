@@ -36,15 +36,6 @@ void BackgroundActor::Initialize() {
 		collider_->SetOnStay([this](Collider* other) { this->OnCollisionStay(other); });
 		collider_->SetOnExit([this](Collider* other) { this->OnCollisionExit(other); });
 	}
-
-	// ヒットエフェクトの生成（無い場合のみ）
-	if(hitEffects_.expired()) {
-		auto fxObj = SceneAPI::Instantiate<CalyxEffect::FxObject>("breakFx");
-		fxObj->LoadFromPath("Effect/buildingBreakFx");
-		fxObj->StopAll();
-		fxObj->SetTransient(true); // シーン保存対象外にする
-		hitEffects_ = fxObj;
-	}
 }
 
 void BackgroundActor::Update(float dt) {
@@ -96,12 +87,15 @@ void BackgroundActor::OnCollisionEnter(Collider* other) {
 			life_--;
 
 			if(life_ <= 0) {
+				if(hitEffects_.expired()) {
+					auto fxObj = SceneAPI::Instantiate<CalyxEffect::FxObject>("breakFx");
+					fxObj->LoadFromPath("Effect/buildingBreakFx");
+					fxObj->StopAll();
+					fxObj->SetTransient(true); // シーン保存対象外にする
+					hitEffects_ = fxObj;
+				}
 				if(auto fx = hitEffects_.lock()) {
 					// --- 衝突位置を取得 ---
-					CalyxMath::Vector3 pos = worldTransform_.GetWorldPosition();
-					// 位置設定
-					fx->SetWorldPosition(pos);
-					fx->GetWorldTransform().rotation = worldTransform_.rotation;
 					// 再生
 					fx->RestartAll();
 				}

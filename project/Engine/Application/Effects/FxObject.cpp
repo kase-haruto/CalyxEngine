@@ -7,7 +7,6 @@
 
 namespace CalyxEffect {
 
-	REGISTER_SCENE_OBJECT(FxObject);
 
 	namespace {
 

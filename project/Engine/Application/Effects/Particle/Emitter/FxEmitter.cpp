@@ -607,7 +607,8 @@ namespace CalyxEffect {
 		SetFlag(FirstFrame,true);
 		hasEmitted_  = false;
 		elapsedTime_ = 0.0f;
-		SetFlag(Playing,true);
+		// Do not auto-play on load; wait for explicit Play/Restart.
+		SetFlag(Playing,false);
 	}
 
 	void FxEmitter::ExtractConfigTo(EmitterConfig& config) const {

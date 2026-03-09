@@ -193,5 +193,4 @@ namespace CalyxEffect {
 		}
 	}
 
-	REGISTER_SCENE_OBJECT(ParticleSystemObject)
 } // namespace CalyxEffect

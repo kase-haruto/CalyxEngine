@@ -132,7 +132,7 @@ namespace CalyxEffect {
 		std::unique_ptr<FxModuleContainer> moduleContainer_; // モジュールコンテナ
 
 		// 旧bool群を統合したビットフラグ
-		uint32_t flags_ = FollowOneShot | Playing | FirstFrame | Complement | DrawEnable;
+		uint32_t flags_ = FollowOneShot | FirstFrame | Complement | DrawEnable;
 
 	protected:
 		bool isOneShot_	  = false; //<
