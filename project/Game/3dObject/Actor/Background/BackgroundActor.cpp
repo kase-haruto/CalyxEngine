@@ -40,7 +40,7 @@ void BackgroundActor::Initialize() {
 	// ヒットエフェクトの生成（無い場合のみ）
 	if(hitEffects_.expired()) {
 		auto fxObj = SceneAPI::Instantiate<CalyxEffect::FxObject>("breakFx");
-		fxObj->LoadFromPath("Effect/houseBreakFx");
+		fxObj->LoadFromPath("Effect/buildingBreakFx");
 		fxObj->StopAll();
 		fxObj->SetTransient(true); // シーン保存対象外にする
 		hitEffects_ = fxObj;
@@ -94,13 +94,17 @@ void BackgroundActor::OnCollisionEnter(Collider* other) {
 	if(other && other->GetType() == ColliderType::Type_PlayerAttack) {
 		if(GetIsAlive()) {
 			life_--;
-			// --- 衝突位置を取得 ---
-			CalyxMath::Vector3 hitPos = other->GetWorldPos();
-			if(auto fx = hitEffects_.lock()) {
-				// 位置設定
-				fx->SetWorldPosition(hitPos);
-				// 再生
-				fx->PlayAll();
+
+			if(life_ <= 0) {
+				if(auto fx = hitEffects_.lock()) {
+					// --- 衝突位置を取得 ---
+					CalyxMath::Vector3 pos = worldTransform_.GetWorldPosition();
+					// 位置設定
+					fx->SetWorldPosition(pos);
+					fx->GetWorldTransform().rotation = worldTransform_.rotation;
+					// 再生
+					fx->RestartAll();
+				}
 			}
 		}
 	}

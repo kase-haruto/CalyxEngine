@@ -68,9 +68,9 @@ void FalldownGimmickActor::Initialize() {
 	transformAnimation_->SetTransformEnd(end);
 
 	// エフェクトの初期化
-	falldownFx_ = SceneAPI::Instantiate<CalyxEffect::FxObject>("TrailFx");
+	falldownFx_ = SceneAPI::Instantiate<CalyxEffect::FxObject>("breakFx");
 	auto fx		= falldownFx_.lock();
-	fx->LoadFromPath("Effect/EnemyBulletTrailEffect");
+	fx->LoadFromPath("Effect/buildingBreakFx");
 	fx->StopAll(); // 生成時は止めておく
 
 	// コライダーの設定 (実行時に必要なコールバックなどの設定のみ行う)
@@ -133,9 +133,7 @@ void FalldownGimmickActor::OnTriggered() {
 	// アニメーション再生
 	transformAnimation_->Play(animationDuration_);
 
-	// fx再生
-	auto fx = falldownFx_.lock();
-	fx->PlayAll();
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
