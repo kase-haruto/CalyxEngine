@@ -127,5 +127,7 @@ private:
 		float   fadeDuration = 1.0f;                                                  //< フェードの時間
 	}param_;
 
-	std::weak_ptr<CalyxEffect::FxObject> hitEffects_; //< ヒットエフェクト群
+	std::weak_ptr<CalyxEffect::FxObject> breakEffect_; //< ヒットエフェクト群
+	std::weak_ptr<CalyxEffect::FxObject> hitEffect_; //< ヒットエフェクト群
+	float damageFlashTimer_ = 1.1f; //< ダメージ時の点滅タイマー
 };

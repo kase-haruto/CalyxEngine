@@ -6,6 +6,8 @@
 #include "Engine/Scene/Utility/SceneUtility.h"
 #include "Game/3dObject/Actor/Bullet/EnemyBullet/BaseEnemyHomingBullet.h"
 #include "Game/3d/GameCamera/RailCamera.h"
+#include "Game/3dObject/Actor/Bullet/EnemyBullet/BaseEnemyHomingBullet.h"
+
 #include <Engine/Foundation/Utility/Ease/CxEase.h>
 #include <algorithm>
 
@@ -22,8 +24,9 @@ BackgroundActor::BackgroundActor()	= default;
 BackgroundActor::~BackgroundActor() = default;
 
 void BackgroundActor::Initialize() {
-	life_ = 2;
+	life_ = 3;
 	fadeElapsed_ = 0.0f;
+	damageFlashTimer_ = 0.0f;
 
 	param_.LoadParams();
 
@@ -43,9 +46,23 @@ void BackgroundActor::Initialize() {
 		collider_->SetOnStay([this](Collider* other) { this->OnCollisionStay(other); });
 		collider_->SetOnExit([this](Collider* other) { this->OnCollisionExit(other); });
 	}
+
+	// --- FxObject を生成して再生 ---
+	hitEffect_ = SceneAPI::Instantiate<CalyxEffect::FxObject>("HitFx");
+	// コンフィグ読み込み（
+	auto fx = hitEffect_.lock();
+	fx->LoadFromPath("Effect/BossHitEffect");
 }
 
 void BackgroundActor::Update(float dt) {
+
+	if(damageFlashTimer_ > 0.0f) {
+		damageFlashTimer_ -= dt;
+		model_->SetColor(CalyxMath::Vector4(1.0f, 0.0f, 0.0f, 1.0f));
+	} else {
+		model_->SetColor(CalyxMath::Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+	}
+
 	// lifeが0で死亡フェード
 	if(life_ <= 0 || CalyxFoundation::Input::GetInstance()->TriggerKey(DIK_Q)) {
 		model_->SetBlendMode(BlendMode::ALPHA);
@@ -108,18 +125,27 @@ void BackgroundActor::OnCollisionEnter(Collider* other) {
 		if(GetIsAlive()) {
 			life_--;
 
+			// --- 衝突位置を取得 ---
+			CalyxMath::Vector3 hitPos = other->GetWorldPos();
+
+			auto fx = hitEffect_.lock();
+			// 位置設定
+			fx->SetWorldPosition(hitPos);
+			// 再生
+			fx->PlayAll();
+
 			if(life_ <= 0) {
-				if(hitEffects_.expired()) {
+				if(breakEffect_.expired()) {
 					auto fxObj = SceneAPI::Instantiate<CalyxEffect::FxObject>("breakFx");
 					fxObj->LoadFromPath("Effect/buildingBreakFx");
 					fxObj->StopAll();
 					fxObj->SetTransient(true); // シーン保存対象外にする
-					hitEffects_ = fxObj;
+					breakEffect_ = fxObj;
 				}
-				if(auto fx = hitEffects_.lock()) {
+				if(auto breakFx = breakEffect_.lock()) {
 					// --- 衝突位置を取得 ---
 					// 再生
-					fx->RestartAll();
+					breakFx->RestartAll();
 				}
 			}
 		}

@@ -213,6 +213,7 @@ namespace CalyxEditor {
 										  auto obj = SceneAPI::Instantiate<CameraTurnAroundEvent>("CameraTurnAroundEvent");
 										  // obj->ApplyConfig();
 										  obj->GetWorldTransform().translation = pos;
+									  	  obj->GetWorldTransform().scale = {30.5f, 30.5f, 30.5f}; // デフォルトで少し小さめに配置
 										  return obj;
 									  };
 
