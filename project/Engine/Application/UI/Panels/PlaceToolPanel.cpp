@@ -23,6 +23,7 @@
 
 // --- externals --------------------------------------------------------------
 #include "Game/Event/Tutorial/TutorialEvent.h"
+#include <Game/Event/Spawn/BossSpawnEvent.h>
 
 #include <externals/imgui/imgui.h>
 
@@ -248,6 +249,33 @@ namespace CalyxEditor {
 								  },
 								  []() {
 									  auto obj = SceneAPI::Instantiate<EnemySpawnEvent>("EnemySpawnEvent");
+									  obj->SetTransient(true);
+									  return obj;
+								  }});
+		}
+
+		{
+			auto& eventItems = categoryItems_[PlaceItemCategory::Event];
+			eventItems.push_back({PlaceItemCategory::Event,
+								  "BossSpawnEvent",
+								  {},
+								  {64, 64},
+								  [](const CalyxMath::Vector3& pos) {
+									  auto* ctx = SceneContext::Current();
+
+									  auto factory = [pos]() {
+										  auto obj = SceneAPI::Instantiate<BossSpawnEvent>("BossSpawnEvent");
+										  // obj->ApplyConfig();
+										  obj->GetWorldTransform().translation = pos;
+										  return obj;
+									  };
+
+									  CommandManager::GetInstance()->Execute(
+										  std::make_unique<CreateObjectCommand<BossSpawnEvent>>(
+											  ctx, factory, "Create BossSpawnEvent"));
+								  },
+								  []() {
+									  auto obj = SceneAPI::Instantiate<BossSpawnEvent>("BossSpawnEvent");
 									  obj->SetTransient(true);
 									  return obj;
 								  }});
