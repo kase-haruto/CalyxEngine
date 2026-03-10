@@ -1,12 +1,16 @@
 #include "BackgroundActor.h"
 
+#include "Engine/Foundation/Input/Input.h"
+#include "Engine/Foundation/Utility/Converter/EnumConverter.h"
 #include "Engine/Objects/Collider/BoxCollider.h"
 #include "Engine/Scene/Utility/SceneUtility.h"
 #include "Game/3dObject/Actor/Bullet/EnemyBullet/BaseEnemyHomingBullet.h"
+#include "Game/3d/GameCamera/RailCamera.h"
+#include <Engine/Foundation/Utility/Ease/CxEase.h>
+#include <algorithm>
 
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/Scene/Context/SceneContext.h>
-#include <Game/3d/GameCamera/RailCamera.h>
 
 REGISTER_SCENE_OBJECT(BackgroundActor)
 
@@ -19,6 +23,9 @@ BackgroundActor::~BackgroundActor() = default;
 
 void BackgroundActor::Initialize() {
 	life_ = 2;
+	fadeElapsed_ = 0.0f;
+
+	param_.LoadParams();
 
 	// コライダーがなければ生成(デシリアライズで生成されていない場合)
 	if(!collider_) {
@@ -39,23 +46,39 @@ void BackgroundActor::Initialize() {
 }
 
 void BackgroundActor::Update(float dt) {
-	// lifeが０で死亡
-	if(life_ <= 0) {
+	// lifeが0で死亡フェード
+	if(life_ <= 0 || CalyxFoundation::Input::GetInstance()->TriggerKey(DIK_Q)) {
 		model_->SetBlendMode(BlendMode::ALPHA);
-		// 志望処理（αを減らす）
-		// 完全に透明になったら非表示にする
+
+		fadeElapsed_ += dt;
+		const float raito = param_.fadeDuration > 0.0f ? fadeElapsed_ / param_.fadeDuration : 1.0f;
+		const int maxEaseIndex = static_cast<int>(CalyxEase::EaseType::Count) - 1;
+		const int easeIndex = std::clamp(param_.fadeEaseType, 0, maxEaseIndex);
+		const auto easeType = static_cast<CalyxEase::EaseType>(easeIndex);
+
 		CalyxMath::Vector4 color = model_->GetColor();
-		color.w -= dt; // αを減らす
-		if(color.w <= 0) {
-			color.w = 0;
-			SetIsAlive(false); // 非表示にする
+		color.w = CalyxEase::EaseLerp(1.0f, 0.0f, raito, easeType);
+		model_->SetColor(color);
+
+		if(raito >= 1.0f) {
+			SetIsAlive(false);
 		}
-		model_->SetColor(color); // 減衰したαを反映
 	}
 }
 
 void BackgroundActor::DerivativeGui() {
-#if defined(_DEBUG) || defined(DEVELOP)
+	ImGui::SeparatorText("Fade Settings");
+	param_.SaveAndLoadButtonGui();
+	GuiCmd::DragFloat("fadeDuration", param_.fadeDuration, 0.1f, 0.0f, 10.0f);
+
+	const int maxEaseIndex = static_cast<int>(CalyxEase::EaseType::Count) - 1;
+	param_.fadeEaseType = std::clamp(param_.fadeEaseType, 0, maxEaseIndex);
+	CalyxEase::EaseType type = static_cast<CalyxEase::EaseType>(param_.fadeEaseType);
+	if(CalyxUtil::EnumConverter<CalyxEase::EaseType>::Combo("Ease Type", type)) {
+		param_.fadeEaseType = static_cast<int32_t>(type);
+	}
+
+	ImGui::SeparatorText("Rail Settings");
 	ImGui::Checkbox("Stop Rail", &isStopRail_);
 	if(isStopRail_) {
 		ImGui::DragFloat("Stop Offset", &stopOffset_, 0.1f, 0.0f, 300.0f);
@@ -77,7 +100,6 @@ void BackgroundActor::DerivativeGui() {
 			ImGui::DragFloat("Stop Progress", &stopProgress_, 0.1f, 0.0f, 10000.0f);
 		}
 	}
-#endif
 }
 
 void BackgroundActor::OnCollisionEnter(Collider* other) {
@@ -120,4 +142,13 @@ void BackgroundActor::ExtractDerivedConfigToJson(nlohmann::json& root, nlohmann:
 	derived["stopProgress"]			 = stopProgress_;
 	derived["stopOffset"]			 = stopOffset_;
 	derived["autoCalculateProgress"] = autoCalculateProgress_;
+}
+
+BackgroundActor::BackGroundActorData::BackGroundActorData() {
+	AddField("fadeEaseType", fadeEaseType).Category("fade");
+	AddField("fadeDuration", fadeDuration).Category("fade");
+}
+
+CalyxEngine::ParamPath BackgroundActor::BackGroundActorData::GetParamPath() const {
+	return {CalyxEngine::ParamDomain::Game,"BackgroundActor", "Actor/Background"};
 }

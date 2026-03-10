@@ -4,6 +4,7 @@
 // ===================================================================== */
 #include <Engine/Objects/3D/Actor/Actor.h>
 #include <Engine/Application/Effects/FxObject.h>
+#include <Engine/Foundation/Serialization/SerializableObject.h>
 // externals / stl
 #include <externals/imgui/imgui.h>
 #include <externals/nlohmann/json.hpp>
@@ -17,7 +18,8 @@
  * - 背景オブジェクトの共通インターフェースや基本機能を提供
  * - 具体的な背景オブジェクトはこのクラスを継承して実装する
  *---------------------------------------------------------------------------------------*/
-class BackgroundActor : public Actor {
+class BackgroundActor
+	: public Actor {
 public:
 	//===================================================================*/
 	//			public methods
@@ -27,7 +29,7 @@ public:
 	 * \param modelName モデル名
 	 * \param objectName オブジェクト名
 	 */
-	BackgroundActor(const std::string&		   modelName,
+	BackgroundActor(const std::string&         modelName,
 					std::optional<std::string> objectName = std::nullopt);
 
 	BackgroundActor();
@@ -99,19 +101,31 @@ protected:
 	 * \param root ルートJSON
 	 * \param derived 派生設定JSON
 	 */
-	void ApplyDerivedConfigFromJson(const nlohmann::json& root, const nlohmann::json* derived) override;
+	void ApplyDerivedConfigFromJson(const nlohmann::json& root,const nlohmann::json* derived) override;
 	/**
 	 * \brief 派生設定をJSONに抽出
 	 * \param root ルートJSON
 	 * \param derived 派生設定JSON
 	 */
-	void ExtractDerivedConfigToJson(nlohmann::json& root, nlohmann::json& derived) const override;
+	void ExtractDerivedConfigToJson(nlohmann::json& root,nlohmann::json& derived) const override;
 
 private:
-	bool  isStopRail_			 = false; //< レールを止めるか
-	float stopProgress_			 = 0.0f;  //< 止める進捗
-	float stopOffset_			 = 2.0f;  //< 止める際の手前へのオフセット
+	bool  isStopRail_            = false; //< レールを止めるか
+	float stopProgress_          = 0.0f;  //< 止める進捗
+	float stopOffset_            = 2.0f;  //< 止める際の手前へのオフセット
 	bool  autoCalculateProgress_ = true;  //< 自動計算するか
+	float fadeElapsed_           = 0.0f;  //< 死亡フェードの経過時間
 
-	std::weak_ptr<CalyxEffect::FxObject>    hitEffects_;                   //< ヒットエフェクト群
+	struct BackGroundActorData
+		: public CalyxEngine::SerializableObject {
+
+		BackGroundActorData();
+		CalyxEngine::ParamPath GetParamPath() const override;
+
+
+		int32_t fadeEaseType = static_cast<int32_t>(CalyxEase::EaseType::EaseInQuad); //< フェードのイージングタイプ
+		float   fadeDuration = 1.0f;                                                  //< フェードの時間
+	}param_;
+
+	std::weak_ptr<CalyxEffect::FxObject> hitEffects_; //< ヒットエフェクト群
 };
