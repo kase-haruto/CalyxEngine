@@ -148,6 +148,10 @@ void TutorialEvent::AlwaysUpdate([[maybe_unused]] float dt) {
 					state_ = State::AttackPhase;
 				}
 			}
+		}else {
+			if(ctx) {
+				player_ = ctx->FindFirst<Player>().get();
+			}
 		}
 		break;
 
