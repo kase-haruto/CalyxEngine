@@ -283,6 +283,7 @@ copy /Y "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(SolutionD
     <ClCompile Include="Game\Battle\Shooting\ShootingController\EnemyShootingControllerSink.cpp" />
     <ClCompile Include="Game\Event\Camera\CameraTurnAroundEvent.cpp" />
     <ClCompile Include="Game\Event\Gimmick\GimmickActivateEvent.cpp" />
+    <ClCompile Include="Game\Event\Spawn\BossSpawnEvent.cpp" />
     <ClCompile Include="Game\Event\Spawn\EnemySpawnEvent.cpp" />
     <ClCompile Include="Game\Event\Tutorial\TutorialEvent.cpp" />
     <ClCompile Include="Game\Installer\Enemy\EnemyEngagementInstaller.cpp" />
@@ -639,6 +640,7 @@ copy /Y "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(SolutionD
     <ClInclude Include="Game\Battle\Shooting\ShootingController\EnemyShootingControllerSink.h" />
     <ClInclude Include="Game\Event\Camera\CameraTurnAroundEvent.h" />
     <ClInclude Include="Game\Event\Gimmick\GimmickActivateEvent.h" />
+    <ClInclude Include="Game\Event\Spawn\BossSpawnEvent.h" />
     <ClInclude Include="Game\Event\Spawn\EnemySpawnEvent.h" />
     <ClInclude Include="Game\Event\Tutorial\TutorialEvent.h" />
     <ClInclude Include="Game\Installer\Enemy\EnemyEngagementInstaller.h" />
