@@ -3,10 +3,11 @@
 // engine
 #include <Engine/Application/Effects/FxObject.h>
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
+#include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Foundation/Serialization/SerializableObject.h>
 #include <Engine/Objects/3D/Geometory/Spline/SplineData.h>
-#include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/objects/Collider/SphereCollider.h>
+
 
 // game
 #include "Movement/EnemyMovementController.h"
@@ -48,7 +49,7 @@ public:
 	 * \param modelName モデル名
 	 * \param objName オブジェクト名
 	 */
-	Enemy(const std::string& modelName,const std::string& objName);
+	Enemy(const std::string& modelName, const std::string& objName);
 
 	/**
 	 * \brief デストラクタ
@@ -139,6 +140,12 @@ public:
 	const CalyxMath::Vector3 GetCenterPos() const override;
 
 	/**
+	 * \brief 射撃の開始オフセット（スタッガー）をセット
+	 * \param stagger 秒数
+	 */
+	void SetShootStagger(float stagger);
+
+	/**
 	 * \brief ゲームプレイ係合状態をセット
 	 * \param v 状態
 	 */
@@ -194,13 +201,13 @@ private:
 		EnemyParam();
 		CalyxEngine::ParamPath GetParamPath() const override;
 
-		float              life;
-		float              killScore;
-		float              moveSpeed;
+		float			   life;
+		float			   killScore;
+		float			   moveSpeed;
 		CalyxMath::Vector3 scale;
 
 		struct Death {
-			float              length;
+			float			   length;
 			CalyxMath::Vector3 rotateAxis;
 		} death;
 
@@ -215,17 +222,17 @@ private:
 	//===================================================================*/
 	const WorldTransform* playerTransform_ = nullptr; //< プレイヤーのトランスフォーム
 
-	BulletPatternKind              patternKind_     = BulletPatternKind::SweepFan; //< 現在の弾パターン
-	BulletPatternKind              lastPatternKind_ = BulletPatternKind::Spiral;   //< 直前の弾パターン
-	std::unique_ptr<IShootPattern> pattern_;                                       //< 射撃パターンの実体
-	DeathState                     deathState_ = DeathState::Alive;                //< 死亡状態
+	BulletPatternKind			   patternKind_		= BulletPatternKind::SweepFan; //< 現在の弾パターン
+	BulletPatternKind			   lastPatternKind_ = BulletPatternKind::Spiral;   //< 直前の弾パターン
+	std::unique_ptr<IShootPattern> pattern_;									   //< 射撃パターンの実体
+	DeathState					   deathState_ = DeathState::Alive;				   //< 死亡状態
 
 	// 死亡演出用
-	CalyxMath::Vector3 deathRotateAxis_ = {0,0,1}; //< 死亡時の回転軸
-	float              deathTimer_      = 0.0f;    //< 死亡演出タイマー
-	float              deathLength_     = 1.5f;    //< 死亡演出の長さ
+	CalyxMath::Vector3 deathRotateAxis_ = {0, 0, 1}; //< 死亡時の回転軸
+	float			   deathTimer_		= 0.0f;		 //< 死亡演出タイマー
+	float			   deathLength_		= 1.5f;		 //< 死亡演出の長さ
 
-	EnemyMovementController                movement_; //< 動き制御
-	EnemyShootingAgent                     shooting_; //< 射撃制御
-	std::shared_ptr<CalyxEffect::FxObject> hitFx_;    //< ヒットエフェクト
+	EnemyMovementController				   movement_; //< 動き制御
+	EnemyShootingAgent					   shooting_; //< 射撃制御
+	std::shared_ptr<CalyxEffect::FxObject> hitFx_;	  //< ヒットエフェクト
 };

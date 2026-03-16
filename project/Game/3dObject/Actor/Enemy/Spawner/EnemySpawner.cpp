@@ -114,7 +114,6 @@ void EnemySpawner::DissolveFormation() {
 	spawnedEnemies_.clear();
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 ///		 スポーンタイマー更新
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -164,7 +163,8 @@ void EnemySpawner::ApplyConfig() {
 	if(deactivationRadius_ < activationRadius_) {
 		deactivationRadius_ = activationRadius_ + 10.0f;
 	}
-	formationConfig_ = cfg.formation;
+	shootStaggerOffset_ = cfg.shootStaggerOffset;
+	formationConfig_	= cfg.formation;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -179,7 +179,8 @@ void EnemySpawner::ExtractConfig() {
 
 	cfg.formation = formationConfig_;
 	// 新規
-	cfg.useXZDistance = useXZDistance_;
+	cfg.useXZDistance	   = useXZDistance_;
+	cfg.shootStaggerOffset = shootStaggerOffset_;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -195,6 +196,7 @@ void EnemySpawner::ShowGui() {
 	ImGui::DragInt("Max Spawn Count", reinterpret_cast<int*>(&maxSpawnCount_), 1, 1, 100);
 	ImGui::DragFloat3("Spawn Area Min", &spawnAreaMin_.x, 0.1f);
 	ImGui::DragFloat3("Spawn Area Max", &spawnAreaMax_.x, 0.1f);
+	ImGui::DragFloat("Shoot Stagger Offset", &shootStaggerOffset_, 0.01f, 0.0f, 1.0f);
 
 	ImGui::SeparatorText("Proximity Activation");
 	ImGui::Checkbox("Use XZ Distance", &useXZDistance_);
@@ -391,7 +393,6 @@ CalyxMath::Vector3 EnemySpawner::CalcFormationOffset(size_t index) const {
 	}
 }
 
-
 /////////////////////////////////////////////////////////////////////////////////////////////////
 ///		 侵入開始位置計算
 /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -438,7 +439,7 @@ void EnemySpawner::UpdateProximity() {
 
 	const CalyxMath::Vector3 spPos = worldTransform_.GetWorldPosition();
 	const CalyxMath::Vector3 plPos = playerTransform_->GetWorldPosition();
-	const float	  d		= Distance_(spPos, plPos, useXZDistance_);
+	const float				 d	   = Distance_(spPos, plPos, useXZDistance_);
 
 	if(!isActive_) {
 		// 起動：起動半径以内に入ったら
@@ -479,13 +480,17 @@ void EnemySpawner::Spawn() {
 	if(formation_) {
 		size_t index = spawnedEnemies_.size() - 1;
 
-		CalyxMath::Vector3 offset	 = CalcFormationOffset(index);
+		CalyxMath::Vector3 offset	= CalcFormationOffset(index);
 		CalyxMath::Vector3 entrance = CalcEntranceStartPos(index);
 
 		enemy->StartEntranceToFormation(
 			formation_.get(),
 			offset,
 			entrance);
+
+		// 射撃タイミングをずらす（i * offset）
+		float stagger = static_cast<float>(index) * shootStaggerOffset_;
+		enemy->SetShootStagger(stagger);
 	}
 }
 

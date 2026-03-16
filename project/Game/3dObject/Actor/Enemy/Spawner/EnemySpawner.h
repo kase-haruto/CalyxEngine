@@ -123,13 +123,15 @@ private:
 	IEnemyDirectory*	  directory_	   = nullptr;
 	EnemyBulletContainer* bulletContainer_ = nullptr;
 
-	CalyxMath::Vector3	   rotationDir_	  = {0, 1, 0};
-	float	   rotationSpeed_ = 1.0f;
-	SplineData enemyMoveRoute_;
+	CalyxMath::Vector3 rotationDir_	  = {0, 1, 0};
+	float			   rotationSpeed_ = 1.0f;
+	SplineData		   enemyMoveRoute_;
 
 	// タイマーは「アクティブ時のみ」進む
 	float spawnTimer_	 = 0.0f;
 	float spawnInterval_ = 1.5f;
+
+	float shootStaggerOffset_ = 0.1f; //< 射撃タイミングのずらしオフセット
 
 	CalyxMath::Vector3 spawnAreaMin_ = {-10.0f, 0.0f, -30.0f};
 	CalyxMath::Vector3 spawnAreaMax_ = {10.0f, 5.0f, -30.0f};
