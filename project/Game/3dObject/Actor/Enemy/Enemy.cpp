@@ -17,7 +17,7 @@ Enemy::Enemy(const std::string& modelName, const std::string& objName)
 
 	// ---- EnemyFactionActor 設定 ----
 	SetEnemyKind(EnemyKind::Normal);
-	
+
 	// パラメータのロード
 	InitializeSerializableParm();
 
@@ -44,7 +44,6 @@ void Enemy::Initialize() {
 	// movement / shooting 初期化
 	movement_.Initialize(this);
 	shooting_.Initialize(this);
-
 }
 
 void Enemy::SetPlayerTransform(const WorldTransform* tf) {
@@ -79,16 +78,14 @@ void Enemy::Update(float dt) {
 	// 解散行動中は射撃しない
 	if(movement_.GetMode() != EnemyMovementController::Mode::Dissolving) {
 		if(deathState_ == DeathState::Alive) {
-		shooting_.Update(dt);
+			shooting_.Update(dt);
 		}
 	} else {
 		// 解散行動中に色を薄くしていく
-		float	subAlpha = 0.5f * dt;
-		CalyxMath::Vector4 col		 = GetModel()->GetColor();
-		col.w			 = (std::max)(0.0f, col.w - subAlpha);
+		float			   subAlpha = 0.5f * dt;
+		CalyxMath::Vector4 col		= GetModel()->GetColor();
+		col.w						= (std::max)(0.0f, col.w - subAlpha);
 		GetModel()->SetColor(col);
-
-
 	}
 
 	// 完全に透明になったら即死
@@ -110,12 +107,12 @@ void Enemy::Update(float dt) {
 		if(t >= 1.0f) {
 			deathState_ = DeathState::Dead;
 			deathTimer_ = 0.0f;
+			Die(); // ★ ここで一度だけ呼ぶようにする
 		}
 		return;
 	}
 
 	if(deathState_ == DeathState::Dead) {
-		Die();
 		isAlive_ = false;
 		return;
 	}
@@ -123,8 +120,8 @@ void Enemy::Update(float dt) {
 
 void Enemy::StartEntranceToFormation(
 	EnemyFormationController* formation,
-	const CalyxMath::Vector3&			  offset,
-	const CalyxMath::Vector3&			  entranceStart) {
+	const CalyxMath::Vector3& offset,
+	const CalyxMath::Vector3& entranceStart) {
 	movement_.StartEntranceToFormation(
 		formation,
 		offset,
@@ -146,15 +143,19 @@ const CalyxMath::Vector3 Enemy::GetCenterPos() const {
 void Enemy::InitializeSerializableParm() {
 	param_.LoadParams();
 
-	life_      = static_cast<int>(param_.life);
-	moveSpeed_ = param_.moveSpeed;
-	killScore_ = static_cast<int>(param_.killScore);
+	life_				  = static_cast<int>(param_.life);
+	moveSpeed_			  = param_.moveSpeed;
+	killScore_			  = static_cast<int>(param_.killScore);
 	worldTransform_.scale = param_.scale;
 }
 
 void Enemy::DerivativeGui() {
 	shooting_.ShowGui();
 	param_.ShowGui();
+}
+
+void Enemy::SetShootStagger(float stagger) {
+	shooting_.SetStagger(stagger);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

@@ -3,10 +3,11 @@
 #include <memory>
 
 // game shooting
+#include <Engine/Foundation/Serialization/SerializableObject.h>
 #include <Game/Battle/Shooting/Pattern/ShootPatternDetails.h>
 #include <Game/Battle/Shooting/ShootingController/BulletEmitter.h>
 #include <Game/Battle/Shooting/ShootingController/EnemyShootingController.h>
-#include <Engine/Foundation/Serialization/SerializableObject.h>
+
 
 class Enemy;
 class WorldTransform;
@@ -37,12 +38,18 @@ public:
 	void EnsurePatternBound();
 
 	// accessors --------------------------------------------------//
-	void SetController(std::unique_ptr<EnemyShootingController> ctrl);
-	void SetTarget(const WorldTransform* tf);
-	void SetPatternKind(BulletPatternKind k) { patternKind_ = k; }
+	void			  SetController(std::unique_ptr<EnemyShootingController> ctrl);
+	void			  SetTarget(const WorldTransform* tf);
+	void			  SetPatternKind(BulletPatternKind k) { patternKind_ = k; }
 	BulletPatternKind GetPatternKind() const { return patternKind_; }
-	void SetGameplayEngaged(bool v) { gameplayEngaged_ = v; }
-	bool IsGameplayEngaged() const { return gameplayEngaged_; }
+	void			  SetGameplayEngaged(bool v) { gameplayEngaged_ = v; }
+	bool			  IsGameplayEngaged() const { return gameplayEngaged_; }
+
+	/**
+	 * \brief 射撃開始のスタッガーをセット
+	 * \param stagger 秒数
+	 */
+	void SetStagger(float stagger) { initialStagger_ = stagger; }
 
 	void ShowGui();
 
@@ -54,7 +61,7 @@ private:
 		ShootingParam();
 		CalyxEngine::ParamPath GetParamPath() const override;
 
-		float  shotsPerSec = 1.0f;
+		float shotsPerSec = 1.0f;
 	} param_;
 
 private:
@@ -68,12 +75,14 @@ private:
 
 	const WorldTransform* targetTf_ = nullptr;
 
-	std::unique_ptr<EnemyShootingController> controller_;	//< 弾管理
-	std::unique_ptr<BulletEmitter>           emitter_;		//< 発射器
-	std::unique_ptr<IShootPattern>           pattern_;		//< 発射パターン
+	std::unique_ptr<EnemyShootingController> controller_; //< 弾管理
+	std::unique_ptr<BulletEmitter>			 emitter_;	  //< 発射器
+	std::unique_ptr<IShootPattern>			 pattern_;	  //< 発射パターン
 
-	BulletPatternKind patternKind_     = BulletPatternKind::AimedNWay;
+	BulletPatternKind patternKind_	   = BulletPatternKind::AimedNWay;
 	BulletPatternKind lastPatternKind_ = BulletPatternKind::Spiral;
+
+	float initialStagger_ = 0.0f; //< 射撃開始のスタッガー
 
 	bool gameplayEngaged_ = false;
 };

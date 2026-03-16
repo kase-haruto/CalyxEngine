@@ -6,8 +6,8 @@
 #include <Game/Battle/Shooting/Details/FireScheduler.h>
 #include <Game/Battle/Shooting/ShootingController/EnemyShootingControllerSink.h>
 
-EnemyShootingAgent::EnemyShootingAgent() = default;
-EnemyShootingAgent::~EnemyShootingAgent()  = default;
+EnemyShootingAgent::EnemyShootingAgent()  = default;
+EnemyShootingAgent::~EnemyShootingAgent() = default;
 
 void EnemyShootingAgent::Initialize(Enemy* owner) {
 	owner_ = owner;
@@ -45,7 +45,7 @@ void EnemyShootingAgent::Update(float dt) {
 	}
 
 	BulletEmitterContext cxt{};
-	cxt.origin    = owner_->GetCenterPos();
+	cxt.origin	  = owner_->GetCenterPos();
 	cxt.targetPos = targetTf_
 						? targetTf_->GetWorldPosition()
 						: owner_->GetWorldPosition();
@@ -61,15 +61,19 @@ void EnemyShootingAgent::BuildEmitterIfReady() {
 	auto sink = std::make_unique<EnemyShootingControllerSink>(controller_.get());
 	auto aim  = std::make_unique<AimAtTarget>();
 
-	 FireScheduler sched;
+	FireScheduler sched;
 	sched.shotsPerSec = param_.shotsPerSec;
-	sched.useBurst    = false;
+	sched.useBurst	  = false;
 
 	BulletEmitterConfig cfg;
 	cfg.tag = "enemy_homing";
 
 	emitter_ = std::make_unique<BulletEmitter>(
 		cfg, std::move(sink), std::move(aim), nullptr, sched);
+
+	// スタッガー（開始延滞）の設定
+	// accum をマイナスにすることで、最初の Tick で発射されるまでの時間を稼ぐ
+	emitter_->Scheduler().accum = -initialStagger_ * param_.shotsPerSec;
 
 	EnsurePatternBound();
 }
@@ -78,7 +82,7 @@ void EnemyShootingAgent::EnsurePatternBound() {
 	if(!emitter_) return;
 
 	if(!pattern_ || patternKind_ != lastPatternKind_) {
-		pattern_         = CreatePattern(patternKind_);
+		pattern_		 = CreatePattern(patternKind_);
 		lastPatternKind_ = patternKind_;
 	}
 
