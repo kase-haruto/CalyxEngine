@@ -21,7 +21,7 @@ void EnemyHomingBulletShooter::Shoot(const CalyxMath::Vector3& origin,
 
 	CalyxMath::Vector3 initDir = direction;
 	if (initDir.LengthSquared() <= 1e-6f) {
-		initDir = target_->GetWorldPosition() - origin; // フォールバック
+		initDir = target_->GetCenterPos() - origin; // フォールバック
 	}
 	if (initDir.LengthSquared() > 1e-6f) initDir = initDir.Normalize();
 	else                                  initDir = CalyxMath::Vector3(0, 0, 1);
@@ -30,9 +30,6 @@ void EnemyHomingBulletShooter::Shoot(const CalyxMath::Vector3& origin,
 
 	if (auto* homing = dynamic_cast<EnemyHomingBullet*>(bullet.get())) {
 		homing->SetTarget(&target_->GetWorldTransform());
-		// homing->SetInitialLockTime(0.12f);
-		// homing->SetActivationDelay(0.06f);
-		// homing->SetMaxTurnRateRad(2.0f);
 	}
 
 	enemyContainer->AddBullet(id_, bullet);

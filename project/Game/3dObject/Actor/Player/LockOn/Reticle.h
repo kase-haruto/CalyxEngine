@@ -4,7 +4,6 @@
 #include <memory>
 #include <vector>
 
-
 /*-------------------------------------------------------------
  *	Reticle
  *	- 照準クラス
@@ -26,7 +25,7 @@ public:
 	/**
 	 * \brief 更新処理
 	 */
-	void Update(float dt);
+	void Update(float dt, const CalyxMath::Vector3& playerMoveDir = {0.0f, 0.0f, 0.0f});
 	/**
 	 * \brief 描画処理
 	 * \param renderer レンダラー
@@ -65,7 +64,7 @@ private:
 	/**
 	 * \brief レティクル移動反映
 	 */
-	void ApplyMove(float dt);
+	void ApplyMove(float dt, const CalyxMath::Vector3& playerMoveDir);
 
 private:
 	//=============================================================*/
@@ -85,8 +84,9 @@ private:
 		float speed	 = 100.0f;	//< レティクル移動速度
 		float posFar = 1000.0f; //< レティクルの遠距離Z値
 
-		float assistRadiusPx = 180.0f; //< アシスト有効半径(px)
-		float assistStrength = 0.15f;  //< アシスト強度(0..1)
+		float assistRadiusPx	  = 180.0f; //< アシスト有効半径(px)
+		float assistStrength	  = 0.15f;	//< アシスト強度(0..1)
+		float playerMoveInfluence = 0.3f;	//< プレイヤーの移動の影響度
 
 		struct SpriteParam {
 			CalyxMath::Vector2 anchorPoint = {0.5f, 0.5f}; //< レティクルアンカーポイント

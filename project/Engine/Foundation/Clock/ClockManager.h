@@ -26,6 +26,9 @@ public:
 	void  SetTimeScale(float scale) { currentTimeScale_ = scale; }
 	float GetTimeScale() const { return currentTimeScale_; }
 
+	// スローモーション（ヒットストップとは異なり、playerDeltaTimeを直接スケールする）
+	void StartSlowMotion(float scale, float duration);
+
 	float GetTotalTime() const { return totalTime_; }
 	float GetCurrentFPS() const { return currentFPS_; }
 	float GetAverageFPS() const { return averageFPS_; }
@@ -56,4 +59,10 @@ private:
 	float hitStopElapsed_	= 0.0f;
 	float normalTimeScale_	= 1.0f;
 	float currentTimeScale_ = 1.0f;
+
+	// スローモーション関連
+	bool  isSlowMotionActive_ = false;
+	float slowMotionDuration_ = 0.0f;
+	float slowMotionElapsed_  = 0.0f;
+	float slowMotionScale_	  = 1.0f;
 };

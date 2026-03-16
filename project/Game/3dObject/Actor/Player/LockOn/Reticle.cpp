@@ -31,9 +31,9 @@ void Reticle::Initialize() {
 //////////////////////////////////////////////////////////////////////////////
 //	更新
 //////////////////////////////////////////////////////////////////////////////
-void Reticle::Update(float dt) {
+void Reticle::Update(float dt, const CalyxMath::Vector3& playerMoveDir) {
 	// 移動反映
-	ApplyMove(dt);
+	ApplyMove(dt, playerMoveDir);
 	transform_.Update();
 	// 描画用スプライトに適用
 	reticleSprite_->SetPosition(CalyxMath::WorldToScreen(transform_.GetWorldPosition()));
@@ -85,7 +85,7 @@ CalyxMath::Vector3		  Reticle::GetPosition3D() const { return transform_.GetWorl
 //////////////////////////////////////////////////////////////////////////////
 //	レティクル座標を取得
 //////////////////////////////////////////////////////////////////////////////
-void Reticle::ApplyMove(float dt) {
+void Reticle::ApplyMove(float dt, const CalyxMath::Vector3& playerMoveDir) {
 	auto* input = CalyxFoundation::Input::GetInstance();
 
 	// 右スティック入力（-1 ～ 1）
@@ -96,13 +96,23 @@ void Reticle::ApplyMove(float dt) {
 	const float mag			  = std::sqrt(rs.x * rs.x + rs.y * rs.y);
 
 	// 無入力時は dir をゼロにしてアシストは続行する（早期リターンしない）
-	CalyxMath::Vector2 dir = {0.0f, 0.0f};
+	CalyxMath::Vector2 dir		   = {0.0f, 0.0f};
+	float			   stickWeight = 0.0f;
 	if(mag >= stickDeadZone) {
 		// deadZone を抜けた部分を 0..1 に再マップ（滑らかに動く）
 		const float t	  = (mag - stickDeadZone) / (1.0f - stickDeadZone);
-		const float scale = std::clamp(t, 0.0f, 1.0f) / mag;
+		stickWeight		  = std::clamp(t, 0.0f, 1.0f);
+		const float scale = stickWeight / mag;
 		dir				  = {rs.x * scale, rs.y * scale};
 	}
+
+	// スティックの入力状況に応じてプレイヤードリフトの影響を減衰させる
+	// フル入力時はプレイヤーの影響を0にすることで、逆方向への移動制限と、同方向への過度な加速を防ぐ
+	float driftWeight = 1.0f - stickWeight;
+
+	// プレイヤーの移動方向を考慮
+	dir.x += playerMoveDir.x * param_.playerMoveInfluence * driftWeight;
+	dir.y += playerMoveDir.y * param_.playerMoveInfluence * driftWeight;
 
 	// speed（パラメータ）と dt の適用
 	CalyxMath::Vector2 offset = dir * param_.speed * dt;
@@ -194,6 +204,7 @@ Reticle::ReticleParam::ReticleParam() {
 	AddField("speed", speed).Category("reticle").Range(5.0f, 30.0f);
 	AddField("assistRadiusPx", assistRadiusPx).Category("reticle").Range(0.0f, 500.0f);
 	AddField("assistStrength", assistStrength).Category("reticle").Range(0.0f, 1.0f);
+	AddField("playerMoveInfluence", playerMoveInfluence).Category("reticle").Range(0.0f, 5.0f);
 	AddField("anchorPoint", spriteParam_.anchorPoint).Category("reticle");
 	AddField("scale", spriteParam_.scale).Category("reticle");
 }

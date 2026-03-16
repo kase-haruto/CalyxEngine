@@ -20,6 +20,17 @@ void ClockManager::Update() {
 
 	// グローバル dt 更新
 	globalDeltaTime_ = dt;
+
+	// スローモーション更新
+	if(isSlowMotionActive_) {
+		slowMotionElapsed_ += globalDeltaTime_;
+		currentTimeScale_ = slowMotionScale_;
+		if(slowMotionElapsed_ >= slowMotionDuration_) {
+			isSlowMotionActive_ = false;
+			currentTimeScale_	= 1.0f;
+		}
+	}
+
 	playerDeltaTime_ = dt * currentTimeScale_;
 
 	if(rawDeltaTime_ > 0.0f) {
@@ -33,4 +44,11 @@ void  ClockManager::StartHitStop(float duration) {
 	 isHitStopActive_ = true;
 	 hitStopDuration_ = duration;
 	 hitStopElapsed_  = 0.0f;
+}
+
+void ClockManager::StartSlowMotion(float scale, float duration) {
+	isSlowMotionActive_ = true;
+	slowMotionScale_	= scale;
+	slowMotionDuration_ = duration;
+	slowMotionElapsed_	= 0.0f;
 }

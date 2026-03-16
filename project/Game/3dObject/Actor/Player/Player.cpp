@@ -38,11 +38,11 @@ using CalyxFoundation::Input;
 /////////////////////////////////////////////////////////////////////////////////////////
 //		コンストラクタ
 /////////////////////////////////////////////////////////////////////////////////////////
-Player::Player(const std::string&         modelName,
+Player::Player(const std::string&		  modelName,
 			   std::optional<std::string> objectName)
-	: Actor::Actor(modelName,objectName) {
-	worldTransform_.translation = {0.0f,0.0f,8.0f};
-	worldTransform_.scale       = {1.5f,1.5f,1.5f};
+	: Actor::Actor(modelName, objectName) {
+	worldTransform_.translation = {0.0f, 0.0f, 8.0f};
+	worldTransform_.scale		= {1.5f, 1.5f, 1.5f};
 }
 
 /* ======================================================================================
@@ -61,7 +61,9 @@ void Player::Initialize() {
 	collider_->SetTargetType(ColliderType::Type_EnemyAttack);
 	collider_->SetOwner(this);
 	collider_->SetIsDrawCollider(true);
-	if(auto* radius = dynamic_cast<SphereCollider*>(collider_.get())) { radius->SetRadius(param_.col.radius); }
+	if(auto* radius = dynamic_cast<SphereCollider*>(collider_.get())) {
+		radius->SetRadius(param_.col.radius);
+	}
 	collider_->SetOffset(param_.col.offset);
 	collider_->SetCollisionEnabled(true);
 
@@ -71,8 +73,8 @@ void Player::Initialize() {
 	// ライフゲージの初期化
 	hpGauge_ = std::make_unique<HpGauge>(static_cast<float>(life_));
 	// ライフゲージを設定
-	hpGauge_->Initialize(param_.hp.pos,param_.hp.size);
-	hpGauge_->SetAncorPoint({0.0f,0.5f}); // 左中央
+	hpGauge_->Initialize(param_.hp.pos, param_.hp.size);
+	hpGauge_->SetAncorPoint({0.0f, 0.5f}); // 左中央
 
 	// reticle
 	reticle_ = std::make_unique<Reticle>();
@@ -82,7 +84,7 @@ void Player::Initialize() {
 	PlayerContextBuilder ctxBuilder = PlayerContextBuilder(*this);
 
 	if(!shootingController_) {
-		auto bullets        = SceneAPI::Instantiate<PlayerBulletContainer>("playerBulletController");
+		auto bullets		= SceneAPI::Instantiate<PlayerBulletContainer>("playerBulletController");
 		shootingController_ = std::make_unique<PlayerShootingController>(bullets.get());
 	}
 
@@ -95,7 +97,7 @@ void Player::Initialize() {
 	// 回避モーション
 	if(!dodgeMotion_) {
 		dodgeMotion_ = std::make_unique<PlayerDodgeSpinMotion>();
-		dodgeMotion_->Initialize(dodgeSystem_.get(),&worldTransform_);
+		dodgeMotion_->Initialize(dodgeSystem_.get(), &worldTransform_);
 	}
 
 	// ---- 危険察知 ----
@@ -117,6 +119,17 @@ void Player::Initialize() {
 		lockOn_->Initialize(ctxBuilder.BuildAction());
 	}
 
+	// ---- 回避時のスロー演出 ----
+	dodgeSystem_->SetOnPerfectDodge([this]() {
+		auto& cfg = dodgeSystem_->GetConfig();
+		ClockManager::GetInstance()->StartSlowMotion(cfg.perfectSlowTimeScale, cfg.perfectSlowDuration);
+
+		// ポストエフェクトなどの演出も再生
+		if(dodgeMotion_) {
+			dodgeMotion_->OnPerfect();
+		}
+	});
+
 	// fx
 	shootFx_ = SceneAPI::Instantiate<CalyxEffect::FxObject>("ShootFx");
 	shootFx_->LoadFromPath("Effect/ShootEffect");
@@ -131,6 +144,8 @@ void Player::Initialize() {
 //		更新
 /////////////////////////////////////////////////////////////////////////////////////////
 void Player::Update(float dt) {
+	lastMoveVector_ = CalyxMath::Vector3::Zero();
+
 	// 入力取得
 	std::vector<PlayerCommand> cmds = input_.CollectCommands(dt);
 
@@ -142,6 +157,7 @@ void Player::Update(float dt) {
 			if(dodgeSystem_ && dodgeSystem_->IsDodging()) break;
 
 			if(auto* m = std::get_if<CmdMove>(&c.value)) {
+				lastMoveVector_ = m->delta;
 				AddMoveRequest(m->delta * moveSpeed_ * dt);
 				UpdateTilt(m->delta);
 			}
@@ -152,7 +168,11 @@ void Player::Update(float dt) {
 			break;
 
 		case PlayerCommandType::Dodge:
-			if(auto* d = std::get_if<CmdDodge>(&c.value)) { RequestDodge(d->dir); } else { RequestDodge(); }
+			if(auto* d = std::get_if<CmdDodge>(&c.value)) {
+				RequestDodge(d->dir);
+			} else {
+				RequestDodge();
+			}
 			break;
 
 		default:
@@ -162,14 +182,22 @@ void Player::Update(float dt) {
 	if(dodgeSystem_) {
 		dodgeSystem_->Update(dt);
 		// 回避移動
-		if(dodgeSystem_->IsDodging()) { AddMoveRequest(dodgeSystem_->GetDodgeVelocity() * dt); }
+		if(dodgeSystem_->IsDodging()) {
+			AddMoveRequest(dodgeSystem_->GetDodgeVelocity() * dt);
+		}
 	}
-	if(dodgeMotion_) { dodgeMotion_->Update(dt); }
-	if(damageHandler_) { damageHandler_->Update(dt); }
+	if(dodgeMotion_) {
+		dodgeMotion_->Update(dt);
+	}
+	if(damageHandler_) {
+		damageHandler_->Update(dt);
+	}
 
 	moveCtrler_.Apply(worldTransform_);
 
-	if(shootingController_) { shootingController_->Update(dt); }
+	if(shootingController_) {
+		shootingController_->Update(dt);
+	}
 
 	if(danger_) danger_->Update(dt);
 
@@ -178,7 +206,9 @@ void Player::Update(float dt) {
 		hpGauge_->SetHp(static_cast<float>(life_));
 	}
 
-	if(life_ <= 0) { isAlive_ = false; }
+	if(life_ <= 0) {
+		isAlive_ = false;
+	}
 }
 
 void Player::AlwaysUpdate(float dt) {
@@ -186,11 +216,15 @@ void Player::AlwaysUpdate(float dt) {
 
 	if(lockOn_) {
 		lockOn_->Update(dt);
-		if(reticle_) { reticle_->SetLockedEnemyList(lockOn_->GetLockedTargets()); }
+		if(reticle_) {
+			reticle_->SetLockedEnemyList(lockOn_->GetLockedTargets());
+		}
 	}
 
 	// ── レティクル─────────────────────────
-	if(reticle_) { reticle_->Update(dt); }
+	if(reticle_) {
+		reticle_->Update(dt, lastMoveVector_);
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -199,33 +233,53 @@ void Player::AlwaysUpdate(float dt) {
 void Player::DrawHud(SpriteRenderer* spriteRenderer) {
 	// for(auto& s : reticleSprites_) sprites.push_back(s.get());
 	//  for(auto& s : lifeSprite_) sprites.push_back(s.get());
-	for(auto& s : lockOn_->GetSprites()) { spriteRenderer->Register(s); }
+	for(auto& s : lockOn_->GetSprites()) {
+		spriteRenderer->Register(s);
+	}
 
 	// ライフゲージ
-	if(hpGauge_) { hpGauge_->Draw(spriteRenderer); }
+	if(hpGauge_) {
+		hpGauge_->Draw(spriteRenderer);
+	}
 
 	// レティクル
-	if(reticle_) { reticle_->Draw(spriteRenderer); }
+	if(reticle_) {
+		reticle_->Draw(spriteRenderer);
+	}
 
 	// 危険UI
-	if(danger_ && danger_->GetUiSprite()) { spriteRenderer->Register(danger_->GetUiSprite()); }
+	if(danger_ && danger_->GetUiSprite()) {
+		spriteRenderer->Register(danger_->GetUiSprite());
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		imgui
 /////////////////////////////////////////////////////////////////////////////////////////
 void Player::DerivativeGui() {
-	if(lockOn_) { lockOn_->ShowGui(); }
+	if(lockOn_) {
+		lockOn_->ShowGui();
+	}
 
-	if(dodgeSystem_) { dodgeSystem_->ShowGui(); }
+	if(dodgeSystem_) {
+		dodgeSystem_->ShowGui();
+	}
 
-	if(danger_) { danger_->ShowGui(); }
+	if(danger_) {
+		danger_->ShowGui();
+	}
 
-	if(damageHandler_) { damageHandler_->ShowGUi(); }
+	if(damageHandler_) {
+		damageHandler_->ShowGUi();
+	}
 
-	if(reticle_) { reticle_->ShowGui(); }
+	if(reticle_) {
+		reticle_->ShowGui();
+	}
 
-	if(shootingController_) { shootingController_->ShowGui(); }
+	if(shootingController_) {
+		shootingController_->ShowGui();
+	}
 
 	param_.ShowGui();
 }
@@ -245,9 +299,13 @@ void Player::AddMoveRequest(const CalyxMath::Vector3& delta) { moveCtrler_.AddMo
 void Player::RequestShoot() const {
 	CalyxMath::Vector3 playerPos  = worldTransform_.GetWorldPosition();
 	CalyxMath::Vector3 reticlePos = reticle_->GetPosition3D();
-	CalyxMath::Vector3 dir        = reticlePos - playerPos;
+	CalyxMath::Vector3 dir		  = reticlePos - playerPos;
 
-	if(dir.Length() > 0.001f) { dir = dir.Normalize(); } else { dir = CalyxMath::Vector3(0.0f,0.0f,1.0f); }
+	if(dir.Length() > 0.001f) {
+		dir = dir.Normalize();
+	} else {
+		dir = CalyxMath::Vector3(0.0f, 0.0f, 1.0f);
+	}
 
 	if(!shootingController_) return;
 
@@ -264,23 +322,39 @@ void Player::RequestShoot() const {
 									 : PlayerShoot::BulletMode::Homing);
 
 	// 発射されていたらエフェクトを再生
-	if(shootingController_->RequestShoot(playerPos,dir)) {
+	if(shootingController_->RequestShoot(playerPos, dir)) {
 		// 発射エフェクト
 		shootFx_->PlayAll();
-		if(lockOn_) { lockOn_->RequestLockOnClear(); }
+		if(lockOn_) {
+			lockOn_->RequestLockOnClear();
+		}
 	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
 //		ロックオン処理
 ///////////////////////////////////////////////////////////////////////////////////
-void Player::RequestLockOn() const { if(lockOn_) { lockOn_->RequestLockOn(); } }
+void Player::RequestLockOn() const {
+	if(lockOn_) {
+		lockOn_->RequestLockOn();
+	}
+}
 
-void Player::AttachDangerSenseSource(EnemyDirectory* dir) const { if(danger_) danger_->SetEnemyDirectory(dir); }
+void Player::AttachDangerSenseSource(EnemyDirectory* dir) const {
+	if(danger_) danger_->SetEnemyDirectory(dir);
+}
 
-void Player::RequestLockOnTargetClear() const { if(lockOn_) { lockOn_->RequestLockOnClear(); } }
+void Player::RequestLockOnTargetClear() const {
+	if(lockOn_) {
+		lockOn_->RequestLockOnClear();
+	}
+}
 
-void Player::RequestDodge(const CalyxMath::Vector3& dir) const { if(dodgeSystem_) { dodgeSystem_->RequestDodge(dir); } }
+void Player::RequestDodge(const CalyxMath::Vector3& dir) const {
+	if(dodgeSystem_) {
+		dodgeSystem_->RequestDodge(dir);
+	}
+}
 
 ///////////////////////////////////////////////////////////////////////////////////
 //		衝突
@@ -289,7 +363,9 @@ void Player::OnCollisionEnter(Collider* other) {
 
 	// イベントの場合スキップ
 	if(other->GetType() == ColliderType::Type_EventObject || other->GetType() == ColliderType::Type_StageGimmick) return;
-	if(damageHandler_) { damageHandler_->OnHit(other); }
+	if(damageHandler_) {
+		damageHandler_->OnHit(other);
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -302,38 +378,38 @@ void Player::UpdateTilt(const CalyxMath::Vector3& inputVector) {
 	// 閾値以下で戻す
 	if(inputVector.Length() <= 0.01f) {
 		CalyxMath::Quaternion identity = CalyxMath::Quaternion::MakeIdentity();
-		worldTransform_.rotation       = CalyxMath::Quaternion::Slerp(worldTransform_.rotation,identity,0.1f);
+		worldTransform_.rotation	   = CalyxMath::Quaternion::Slerp(worldTransform_.rotation, identity, 0.1f);
 		worldTransform_.rotationSource = RotationSource::Quaternion;
 
 		// カメラ傾きを戻す（オイラー角）
 		CalyxMath::Vector3 currentRot = cam->GetRotate();
-		currentRot.x                  = CalyxMath::Lerp(currentRot.x,0.0f,0.1f); // pitch
-		currentRot.z                  = CalyxMath::Lerp(currentRot.z,0.0f,0.1f); // roll
-		cam->SetCamera(cam->GetTranslate(),currentRot);
+		currentRot.x				  = CalyxMath::Lerp(currentRot.x, 0.0f, 0.1f); // pitch
+		currentRot.z				  = CalyxMath::Lerp(currentRot.z, 0.0f, 0.1f); // roll
+		cam->SetCamera(cam->GetTranslate(), currentRot);
 		return;
 	}
 
 	CalyxMath::Vector3 dir = inputVector.Normalize();
 
-	const float maxRoll  = 0.3f;
+	const float maxRoll	 = 0.3f;
 	const float maxPitch = 0.3f;
 
 	float targetRoll  = -dir.x * maxRoll;
 	float targetPitch = -dir.y * maxPitch;
 
 	// プレイヤー回転（CalyxMath::Quaternion）
-	CalyxMath::Quaternion rollQ          = CalyxMath::Quaternion::MakeRotateZ(targetRoll);
-	CalyxMath::Quaternion pitchQ         = CalyxMath::Quaternion::MakeRotateX(targetPitch);
-	CalyxMath::Quaternion targetRotation = CalyxMath::Quaternion::Multiply(rollQ,pitchQ);
+	CalyxMath::Quaternion rollQ			 = CalyxMath::Quaternion::MakeRotateZ(targetRoll);
+	CalyxMath::Quaternion pitchQ		 = CalyxMath::Quaternion::MakeRotateX(targetPitch);
+	CalyxMath::Quaternion targetRotation = CalyxMath::Quaternion::Multiply(rollQ, pitchQ);
 
-	worldTransform_.rotation       = CalyxMath::Quaternion::Slerp(worldTransform_.rotation,targetRotation,0.15f);
+	worldTransform_.rotation	   = CalyxMath::Quaternion::Slerp(worldTransform_.rotation, targetRotation, 0.15f);
 	worldTransform_.rotationSource = RotationSource::Quaternion;
 
 	// カメラ回転（Euler）
 	CalyxMath::Vector3 currentRot = cam->GetRotate();
-	currentRot.x                  = CalyxMath::Lerp(currentRot.x,targetPitch * 0.3f,0.15f); // pitch
-	currentRot.z                  = CalyxMath::Lerp(currentRot.z,targetRoll * 0.3f,0.15f);  // roll
-	cam->SetCamera(cam->GetTranslate(),currentRot);
+	currentRot.x				  = CalyxMath::Lerp(currentRot.x, targetPitch * 0.3f, 0.15f); // pitch
+	currentRot.z				  = CalyxMath::Lerp(currentRot.z, targetRoll * 0.3f, 0.15f);  // roll
+	cam->SetCamera(cam->GetTranslate(), currentRot);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -356,23 +432,23 @@ CalyxEngine::ParamPath Player::GetParamPath() const {
 //		PlayerParam
 /////////////////////////////////////////////////////////////////////////////////////////
 Player::PlayerParam::PlayerParam() {
-	AddField("moveSpeed",moveSpeed).Category("Basic").Range(0.0f,50.0f);
-	AddField("life",life).Category("Basic").Range(1,100);
+	AddField("moveSpeed", moveSpeed).Category("Basic").Range(0.0f, 50.0f);
+	AddField("life", life).Category("Basic").Range(1, 100);
 
-	AddField("collisionRadius",col.radius).Category("Collider").Range(0.1f,10.0f);
-	AddField("collisionOffset",col.offset).Category("Collider");
+	AddField("collisionRadius", col.radius).Category("Collider").Range(0.1f, 10.0f);
+	AddField("collisionOffset", col.offset).Category("Collider");
 
-	AddField("hpGaugePos",hp.pos).Category("UI/HpGauge");
-	AddField("hpGaugeSize",hp.size).Category("UI/HpGauge");
+	AddField("hpGaugePos", hp.pos).Category("UI/HpGauge");
+	AddField("hpGaugeSize", hp.size).Category("UI/HpGauge");
 
-	AddField("reticleInitialZ",ret.initialZ).Category("UI/Reticle").Range(10.0f,1000.0f);
-	AddField("reticleMinSize",ret.minSize).Category("UI/Reticle").Range(1.0f,512.0f);
-	AddField("reticleMaxSize",ret.maxSize).Category("UI/Reticle").Range(1.0f,512.0f);
-	AddField("reticleRotSpeed",ret.rotSpeed).Category("UI/Reticle").Range(-1.0f,1.0f);
-	AddField("reticleUvRotSpeed",ret.uvRotSpeed).Category("UI/Reticle").Range(-5.0f,5.0f);
+	AddField("reticleInitialZ", ret.initialZ).Category("UI/Reticle").Range(10.0f, 1000.0f);
+	AddField("reticleMinSize", ret.minSize).Category("UI/Reticle").Range(1.0f, 512.0f);
+	AddField("reticleMaxSize", ret.maxSize).Category("UI/Reticle").Range(1.0f, 512.0f);
+	AddField("reticleRotSpeed", ret.rotSpeed).Category("UI/Reticle").Range(-1.0f, 1.0f);
+	AddField("reticleUvRotSpeed", ret.uvRotSpeed).Category("UI/Reticle").Range(-5.0f, 5.0f);
 }
 
-CalyxEngine::ParamPath Player::PlayerParam::GetParamPath() const { return {CalyxEngine::ParamDomain::Game,"Player","Actor/Player"}; }
+CalyxEngine::ParamPath Player::PlayerParam::GetParamPath() const { return {CalyxEngine::ParamDomain::Game, "Player", "Actor/Player"}; }
 
 void Player::HeaderGui() {
 	if(ImGui::Button("Load All Sub-Systems")) {
@@ -396,27 +472,35 @@ void Player::HeaderGui() {
 void Player::SetParent(WorldTransform* parent) { worldTransform_.parent = parent; }
 
 void Player::AttachEnemyList(const std::vector<std::shared_ptr<Enemy>>& list) const {
-	if(lockOn_) { lockOn_->SetEnemyList(list); }
-	if(reticle_) { reticle_->SetEnemyList(list); }
+	if(lockOn_) {
+		lockOn_->SetEnemyList(list);
+	}
+	if(reticle_) {
+		reticle_->SetEnemyList(list);
+	}
 }
 
 // std::vector<Sprite*> Player::GetAllSprites() const {
 // }
 
 const CalyxMath::Vector3 Player::GetCenterPos() const {
-	const CalyxMath::Vector3 offset   = {0.0f,3.0f,0.0f};
-	CalyxMath::Vector3       worldPos = CalyxMath::Vector3::Transform(offset,worldTransform_.matrix.world);
+	const CalyxMath::Vector3 offset	  = {0.0f, 3.0f, 0.0f};
+	CalyxMath::Vector3		 worldPos = CalyxMath::Vector3::Transform(offset, worldTransform_.matrix.world);
 	return worldPos;
 }
 
 std::optional<float> Player::GetShootCooldown() const {
-	if(shootingController_) { return shootingController_->GetCooldown(); }
+	if(shootingController_) {
+		return shootingController_->GetCooldown();
+	}
 
 	return std::nullopt;
 }
 
 std::optional<const float> Player::GetMaxShootInterval() const {
-	if(shootingController_) { return shootingController_->GetInterval(); }
+	if(shootingController_) {
+		return shootingController_->GetInterval();
+	}
 
 	return std::nullopt;
 }

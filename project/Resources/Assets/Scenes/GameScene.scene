@@ -1,14 +1,89 @@
 {
     "objects": [
         {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "offset": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "radius": 1.0,
+                "rotate": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "size": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "targetType": 0
+            },
+            "guid": "91068202-082c-45db-a7e4-6b128a341420",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "largeBuilding.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "largeBuilding(6)",
+            "objectType": 2,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 0.9244943261146545,
+                    "x": -0.06135469302535057,
+                    "y": 0.3758341372013092,
+                    "z": 0.017163971439003944
+                },
+                "scale": {
+                    "x": 12.519962310791016,
+                    "y": 13.700130462646484,
+                    "z": 10.000040054321289
+                },
+                "translation": {
+                    "x": -99.88108825683594,
+                    "y": -101.0316162109375,
+                    "z": 825.2569580078125
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
             "activateRadius": 80.0,
             "deactivateRadius": 100.0,
             "formation": {
                 "angularSpeed": 1.0,
-                "baseZ": 102.0,
-                "dissolvePattern": 1,
-                "dissolveTime": 0.0,
-                "motionType": 1,
+                "baseZ": 104.0,
+                "dissolvePattern": 2,
+                "dissolveTime": 0.4000000059604645,
+                "motionType": 0,
                 "radius": 30.0,
                 "snakeAmpX": 25.0,
                 "snakeAmpY": 10.0,
@@ -17,10 +92,10 @@
                 "speedZ": 20.0,
                 "useFormation": true
             },
-            "guid": "371ebcb4-1a91-4acb-9976-0a45f33de3a8",
+            "guid": "af68fe80-3ae2-445d-b70d-efe0f71fdb79",
             "maxSpawnCount": 5,
-            "name": "forthSpawner",
-            "parentGuid": "3a06fc06-897b-43ba-afbf-58f321c532d9",
+            "name": "firstSpawner",
+            "parentGuid": "5a70dcfb-7d5b-42f8-8bfb-63b4d768a168",
             "spawnInterval": 5.0,
             "transform": {
                 "inheritRotate": true,
@@ -45,6 +120,81 @@
             },
             "type": "EnemySpawner",
             "useXZDistance": true
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "offset": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "radius": 1.0,
+                "rotate": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "size": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "targetType": 0
+            },
+            "guid": "3db6e95e-1e38-4758-939b-b0ad5fb8bcc8",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "largeBuilding.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "largeBuilding(5)",
+            "objectType": 2,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 0.841018557548523,
+                    "x": 0.0748114287853241,
+                    "y": -0.5337014198303223,
+                    "z": -0.04747509956359863
+                },
+                "scale": {
+                    "x": 12.519843101501465,
+                    "y": 13.699780464172363,
+                    "z": 9.999966621398926
+                },
+                "translation": {
+                    "x": -311.5562438964844,
+                    "y": -59.702606201171875,
+                    "z": 722.79345703125
+                }
+            },
+            "type": "BaseGameObject"
         },
         {
             "colliderConfig": {
@@ -173,7 +323,7 @@
         },
         {
             "colliderConfig": {
-                "colliderType": 0,
+                "colliderType": 32,
                 "isCollisionEnabled": true,
                 "isDraw": true,
                 "offset": {
@@ -188,91 +338,38 @@
                     "z": 0.0
                 },
                 "size": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
+                    "x": 135.95631408691406,
+                    "y": 126.20164489746094,
+                    "z": 228.07122802734375
                 },
-                "targetType": 0
+                "targetType": 1
             },
-            "guid": "0c6dbd13-8006-4d21-aca4-2e25b7ae13c6",
-            "modelConfig": {
-                "blendMode": 5,
-                "materialConfig": {
-                    "color": {
-                        "w": 1.0,
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    },
-                    "currentLightingMode_": 0,
-                    "enableLighting": 0,
-                    "enviromentCoefficient": 0.5,
-                    "isReflect": false,
-                    "shininess": 20.0
-                },
-                "modelName": "largeBuilding.obj",
-                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
-                "uvTransConfig": {
-                    "rotation": 0.0,
-                    "scale": {
-                        "x": 1.0,
-                        "y": 1.0
-                    }
-                }
-            },
-            "name": "largeBuilding(3)",
-            "objectType": 2,
-            "parentGuid": "3db6e95e-1e38-4758-939b-b0ad5fb8bcc8",
-            "transform": {
-                "inheritRotate": true,
-                "inheritScale": true,
-                "inheritTranslate": true,
-                "rotation": {
-                    "w": 0.9622989892959595,
-                    "x": 0.11982467770576477,
-                    "y": -0.23786218464374542,
-                    "z": 0.05517543852329254
-                },
-                "scale": {
-                    "x": 1.2499566078186035,
-                    "y": 1.0130313634872437,
-                    "z": 1.1561161279678345
-                },
-                "translation": {
-                    "x": -17.23345947265625,
-                    "y": -4.045282363891602,
-                    "z": -19.845829010009766
-                }
-            },
-            "type": "BaseGameObject"
-        },
-        {
-            "guid": "7cfe076b-090f-47be-93cb-b4159f6da58a",
-            "name": "BossSpawner",
-            "objectType": 0,
+            "guid": "a378b57f-9464-4e8d-90d5-5a08516888ea",
+            "name": "thirdSpawnEvent",
+            "objectType": 4,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
                 "inheritRotate": true,
                 "inheritScale": true,
                 "inheritTranslate": true,
                 "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
+                    "w": 0.9947938323020935,
+                    "x": 0.10190775990486145,
                     "y": 0.0,
                     "z": 0.0
                 },
                 "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
+                    "x": 135.95631408691406,
+                    "y": 126.20164489746094,
+                    "z": 228.07122802734375
                 },
                 "translation": {
-                    "x": -1051.2208251953125,
-                    "y": -98.12322235107422,
-                    "z": 1365.8428955078125
+                    "x": -229.18484497070313,
+                    "y": -7.368915557861328,
+                    "z": 608.7058715820313
                 }
             },
-            "type": "BossSpawner"
+            "type": "EnemySpawnEvent"
         },
         {
             "colliderConfig": {
@@ -297,7 +394,7 @@
                 },
                 "targetType": 0
             },
-            "guid": "3db6e95e-1e38-4758-939b-b0ad5fb8bcc8",
+            "guid": "5baaa5d1-1467-4c3f-82df-1d566db1bcfb",
             "modelConfig": {
                 "blendMode": 5,
                 "materialConfig": {
@@ -323,31 +420,152 @@
                     }
                 }
             },
-            "name": "largeBuilding(5)",
+            "name": "largeBuilding(1)",
             "objectType": 2,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "parentGuid": "91068202-082c-45db-a7e4-6b128a341420",
             "transform": {
                 "inheritRotate": true,
                 "inheritScale": true,
                 "inheritTranslate": true,
                 "rotation": {
-                    "w": 0.841018557548523,
-                    "x": 0.0748114287853241,
-                    "y": -0.5337014198303223,
-                    "z": -0.04747509956359863
+                    "w": 0.842248260974884,
+                    "x": 0.10143471509218216,
+                    "y": 0.5293500423431396,
+                    "z": -0.010838390327990055
                 },
                 "scale": {
-                    "x": 12.519843101501465,
-                    "y": 13.699780464172363,
-                    "z": 9.999966621398926
+                    "x": 1.4070303440093994,
+                    "y": 1.0073721408843994,
+                    "z": 1.2721978425979614
                 },
                 "translation": {
-                    "x": -311.5562438964844,
-                    "y": -59.702606201171875,
-                    "z": 722.79345703125
+                    "x": -30.263084411621094,
+                    "y": 1.8730583190917969,
+                    "z": -23.717445373535156
                 }
             },
             "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "offset": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "radius": 1.0,
+                "rotate": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "size": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "targetType": 0
+            },
+            "guid": "20e99f07-ccda-4931-aa0b-853728ca1517",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "smallBuilding_01.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "smallBuilding_01(4)",
+            "objectType": 2,
+            "parentGuid": "5baaa5d1-1467-4c3f-82df-1d566db1bcfb",
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 0.9914328455924988,
+                    "x": -0.10033755749464035,
+                    "y": 0.003952524159103632,
+                    "z": -0.08353245258331299
+                },
+                "scale": {
+                    "x": 1.354225993156433,
+                    "y": 1.3643118143081665,
+                    "z": 1.1609925031661987
+                },
+                "translation": {
+                    "x": -2.783189058303833,
+                    "y": 0.3398556411266327,
+                    "z": 8.959129333496094
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "activateRadius": 80.0,
+            "deactivateRadius": 100.0,
+            "formation": {
+                "angularSpeed": 1.0,
+                "baseZ": 104.0,
+                "dissolvePattern": 1,
+                "dissolveTime": 0.0,
+                "motionType": 2,
+                "radius": 30.0,
+                "snakeAmpX": 25.0,
+                "snakeAmpY": 10.0,
+                "snakeFreqX": 2.0,
+                "snakeFreqY": 1.7000000476837158,
+                "speedZ": 20.0,
+                "useFormation": true
+            },
+            "guid": "4914a501-c379-4310-8c12-1faf663678d0",
+            "maxSpawnCount": 5,
+            "name": "thirdSpawner",
+            "parentGuid": "a378b57f-9464-4e8d-90d5-5a08516888ea",
+            "spawnInterval": 5.0,
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": -0.47999998927116394,
+                    "y": 0.47999998927116394,
+                    "z": 1.559999942779541
+                }
+            },
+            "type": "EnemySpawner",
+            "useXZDistance": true
         },
         {
             "activateRadius": 80.0,
@@ -366,7 +584,7 @@
                 "speedZ": 20.0,
                 "useFormation": true
             },
-            "guid": "c7097ddc-0434-4133-9968-dec7da84b353",
+            "guid": "7fc5e03f-2f67-449d-8780-45fe4ea595cf",
             "maxSpawnCount": 5,
             "name": "fifthSpawner",
             "parentGuid": "6ad5be3c-55b1-41b2-82d9-3982a4fe12f2",
@@ -396,54 +614,8 @@
             "useXZDistance": true
         },
         {
-            "activateRadius": 80.0,
-            "deactivateRadius": 100.0,
-            "formation": {
-                "angularSpeed": 1.0,
-                "baseZ": 104.0,
-                "dissolvePattern": 2,
-                "dissolveTime": 0.4000000059604645,
-                "motionType": 0,
-                "radius": 30.0,
-                "snakeAmpX": 25.0,
-                "snakeAmpY": 10.0,
-                "snakeFreqX": 2.0,
-                "snakeFreqY": 1.7000000476837158,
-                "speedZ": 20.0,
-                "useFormation": true
-            },
-            "guid": "0fb07701-6c4e-4d5d-860f-cfe42643fabb",
-            "maxSpawnCount": 5,
-            "name": "firstSpawner",
-            "parentGuid": "5a70dcfb-7d5b-42f8-8bfb-63b4d768a168",
-            "spawnInterval": 5.0,
-            "transform": {
-                "inheritRotate": true,
-                "inheritScale": true,
-                "inheritTranslate": true,
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": -0.47999998927116394,
-                    "y": 0.47999998927116394,
-                    "z": 1.559999942779541
-                }
-            },
-            "type": "EnemySpawner",
-            "useXZDistance": true
-        },
-        {
             "colliderConfig": {
-                "colliderType": 32,
+                "colliderType": 0,
                 "isCollisionEnabled": true,
                 "isDraw": true,
                 "offset": {
@@ -458,130 +630,63 @@
                     "z": 0.0
                 },
                 "size": {
-                    "x": 70.71973419189453,
-                    "y": 127.836181640625,
-                    "z": 136.359375
-                },
-                "targetType": 1
-            },
-            "guid": "f14a0493-6c23-4b69-829d-0d59bb99ef2e",
-            "name": "BossSpawnEvent(1)",
-            "objectType": 4,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "inheritRotate": true,
-                "inheritScale": true,
-                "inheritTranslate": true,
-                "rotation": {
-                    "w": 0.9904284477233887,
-                    "x": 0.0,
-                    "y": 0.13802778720855713,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 70.71973419189453,
-                    "y": 127.836181640625,
-                    "z": 136.359375
-                },
-                "translation": {
-                    "x": -691.7509765625,
-                    "y": -25.303787231445313,
-                    "z": 1203.6240234375
-                }
-            },
-            "type": "BossSpawnEvent"
-        },
-        {
-            "activateRadius": 80.0,
-            "deactivateRadius": 100.0,
-            "formation": {
-                "angularSpeed": 1.0,
-                "baseZ": 104.0,
-                "dissolvePattern": 1,
-                "dissolveTime": 0.0,
-                "motionType": 0,
-                "radius": 30.0,
-                "snakeAmpX": 25.0,
-                "snakeAmpY": 10.0,
-                "snakeFreqX": 2.0,
-                "snakeFreqY": 1.7000000476837158,
-                "speedZ": 20.0,
-                "useFormation": true
-            },
-            "guid": "3a30f2e2-08b3-4abe-852f-835fe6675384",
-            "maxSpawnCount": 5,
-            "name": "seventhSpawner",
-            "parentGuid": "f7006612-3d38-4ca3-bce7-ef25131ccfb9",
-            "spawnInterval": 5.0,
-            "transform": {
-                "inheritRotate": true,
-                "inheritScale": true,
-                "inheritTranslate": true,
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
                     "x": 1.0,
                     "y": 1.0,
                     "z": 1.0
                 },
-                "translation": {
-                    "x": -0.47999998927116394,
-                    "y": 0.47999998927116394,
-                    "z": 1.559999942779541
+                "targetType": 0
+            },
+            "guid": "d4e3c73b-61fa-436d-bd77-94f6b9ad7699",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "tallBuilding_01.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
                 }
             },
-            "type": "EnemySpawner",
-            "useXZDistance": true
-        },
-        {
-            "activateRadius": 80.0,
-            "deactivateRadius": 100.0,
-            "formation": {
-                "angularSpeed": 1.0,
-                "baseZ": 112.0,
-                "dissolvePattern": 1,
-                "dissolveTime": 0.0,
-                "motionType": 1,
-                "radius": 30.0,
-                "snakeAmpX": 25.0,
-                "snakeAmpY": 10.0,
-                "snakeFreqX": 2.0,
-                "snakeFreqY": 1.7000000476837158,
-                "speedZ": 20.0,
-                "useFormation": true
-            },
-            "guid": "baf18fcb-1c6d-451e-94ba-8eec952265c2",
-            "maxSpawnCount": 5,
-            "name": "sixthSpawner",
-            "parentGuid": "6ad5be3c-55b1-41b2-82d9-3982a4fe12f2",
-            "spawnInterval": 5.0,
+            "name": "tallBuilding_01(2)",
+            "objectType": 2,
+            "parentGuid": "0c6dbd13-8006-4d21-aca4-2e25b7ae13c6",
             "transform": {
                 "inheritRotate": true,
                 "inheritScale": true,
                 "inheritTranslate": true,
                 "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
+                    "w": 0.9512942433357239,
+                    "x": -0.2598974108695984,
+                    "y": 0.12940573692321777,
+                    "z": 0.10366663336753845
                 },
                 "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
+                    "x": 1.790425181388855,
+                    "y": 1.5743062496185303,
+                    "z": 2.0352871417999268
                 },
                 "translation": {
-                    "x": -0.47999998927116394,
-                    "y": 0.47999998927116394,
-                    "z": 1.559999942779541
+                    "x": -17.341747283935547,
+                    "y": 9.162171363830566,
+                    "z": 33.4516487121582
                 }
             },
-            "type": "EnemySpawner",
-            "useXZDistance": true
+            "type": "BaseGameObject"
         },
         {
             "colliderConfig": {
@@ -606,7 +711,7 @@
                 },
                 "targetType": 0
             },
-            "guid": "63302f80-c8d0-4b6e-b798-d3b94bb0cf8d",
+            "guid": "95b8171f-bf1c-4e0e-85b2-83722a5f8c88",
             "modelConfig": {
                 "blendMode": 5,
                 "materialConfig": {
@@ -622,7 +727,7 @@
                     "isReflect": false,
                     "shininess": 20.0
                 },
-                "modelName": "smallBuilding_01.obj",
+                "modelName": "largeBuilding.obj",
                 "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
                 "uvTransConfig": {
                     "rotation": 0.0,
@@ -632,9 +737,54 @@
                     }
                 }
             },
-            "name": "smallBuilding_01",
+            "name": "largeBuilding",
             "objectType": 2,
-            "parentGuid": "8900299e-57a9-481d-9e3c-d47a5d5d16b4",
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 0.9889731407165527,
+                    "x": 0.0,
+                    "y": 0.14809508621692657,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 12.519981384277344,
+                    "y": 13.699895858764648,
+                    "z": 9.999971389770508
+                },
+                "translation": {
+                    "x": -112.6528549194336,
+                    "y": -101.93428802490234,
+                    "z": 974.1870727539063
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "activateRadius": 80.0,
+            "deactivateRadius": 100.0,
+            "formation": {
+                "angularSpeed": 1.0,
+                "baseZ": 102.0,
+                "dissolvePattern": 1,
+                "dissolveTime": 0.0,
+                "motionType": 1,
+                "radius": 30.0,
+                "snakeAmpX": 25.0,
+                "snakeAmpY": 10.0,
+                "snakeFreqX": 2.0,
+                "snakeFreqY": 1.7000000476837158,
+                "speedZ": 20.0,
+                "useFormation": true
+            },
+            "guid": "57688c1e-3fcb-4659-ba20-3341cb848128",
+            "maxSpawnCount": 5,
+            "name": "forthSpawner",
+            "parentGuid": "3a06fc06-897b-43ba-afbf-58f321c532d9",
+            "spawnInterval": 5.0,
             "transform": {
                 "inheritRotate": true,
                 "inheritScale": true,
@@ -651,12 +801,41 @@
                     "z": 1.0
                 },
                 "translation": {
-                    "x": -11.651634216308594,
-                    "y": -2.7303266525268555,
-                    "z": 12.942985534667969
+                    "x": -0.47999998927116394,
+                    "y": 0.47999998927116394,
+                    "z": 1.559999942779541
                 }
             },
-            "type": "BaseGameObject"
+            "type": "EnemySpawner",
+            "useXZDistance": true
+        },
+        {
+            "guid": "7cfe076b-090f-47be-93cb-b4159f6da58a",
+            "name": "BossSpawner",
+            "objectType": 0,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": -1051.2208251953125,
+                    "y": -98.12322235107422,
+                    "z": 1365.8428955078125
+                }
+            },
+            "type": "BossSpawner"
         },
         {
             "colliderConfig": {
@@ -734,6 +913,81 @@
             "type": "BaseGameObject"
         },
         {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "offset": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "radius": 1.0,
+                "rotate": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "size": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "targetType": 0
+            },
+            "guid": "63302f80-c8d0-4b6e-b798-d3b94bb0cf8d",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "smallBuilding_01.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "smallBuilding_01",
+            "objectType": 2,
+            "parentGuid": "8900299e-57a9-481d-9e3c-d47a5d5d16b4",
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": -11.651634216308594,
+                    "y": -2.7303266525268555,
+                    "z": 12.942985534667969
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
             "guid": "a8319665-ec7e-4e52-b35b-dcd601d14845",
             "name": "DebugCamera(1)",
             "objectType": 0,
@@ -766,10 +1020,10 @@
             "deactivateRadius": 100.0,
             "formation": {
                 "angularSpeed": 1.0,
-                "baseZ": 104.0,
+                "baseZ": 112.0,
                 "dissolvePattern": 1,
                 "dissolveTime": 0.0,
-                "motionType": 2,
+                "motionType": 1,
                 "radius": 30.0,
                 "snakeAmpX": 25.0,
                 "snakeAmpY": 10.0,
@@ -778,10 +1032,10 @@
                 "speedZ": 20.0,
                 "useFormation": true
             },
-            "guid": "2e539a67-aa41-4546-b313-6b736630c069",
+            "guid": "c24b112d-b8e9-44e6-a45e-e90ae19b7f85",
             "maxSpawnCount": 5,
-            "name": "thirdSpawner",
-            "parentGuid": "a378b57f-9464-4e8d-90d5-5a08516888ea",
+            "name": "sixthSpawner",
+            "parentGuid": "6ad5be3c-55b1-41b2-82d9-3982a4fe12f2",
             "spawnInterval": 5.0,
             "transform": {
                 "inheritRotate": true,
@@ -806,6 +1060,227 @@
             },
             "type": "EnemySpawner",
             "useXZDistance": true
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "offset": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "radius": 1.0,
+                "rotate": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "size": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "targetType": 0
+            },
+            "guid": "0c6dbd13-8006-4d21-aca4-2e25b7ae13c6",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "largeBuilding.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "largeBuilding(3)",
+            "objectType": 2,
+            "parentGuid": "3db6e95e-1e38-4758-939b-b0ad5fb8bcc8",
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 0.9622989892959595,
+                    "x": 0.11982467770576477,
+                    "y": -0.23786218464374542,
+                    "z": 0.05517543852329254
+                },
+                "scale": {
+                    "x": 1.2499566078186035,
+                    "y": 1.0130313634872437,
+                    "z": 1.1561161279678345
+                },
+                "translation": {
+                    "x": -17.23345947265625,
+                    "y": -4.045282363891602,
+                    "z": -19.845829010009766
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 32,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "offset": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "radius": 1.0,
+                "rotate": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "size": {
+                    "x": 133.2840576171875,
+                    "y": 91.9552993774414,
+                    "z": 281.5437316894531
+                },
+                "targetType": 1
+            },
+            "guid": "2ce7884e-cadd-4a45-983a-310c4a480e59",
+            "name": "secondSpawnEvent",
+            "objectType": 4,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 0.9124316573143005,
+                    "x": 0.0,
+                    "y": -0.40922924876213074,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 133.2840576171875,
+                    "y": 91.9552993774414,
+                    "z": 281.5437316894531
+                },
+                "translation": {
+                    "x": -166.12005615234375,
+                    "y": 9.091453552246094,
+                    "z": 435.3788146972656
+                }
+            },
+            "type": "EnemySpawnEvent"
+        },
+        {
+            "activateRadius": 80.0,
+            "deactivateRadius": 100.0,
+            "formation": {
+                "angularSpeed": 1.0,
+                "baseZ": 104.0,
+                "dissolvePattern": 1,
+                "dissolveTime": 0.0,
+                "motionType": 0,
+                "radius": 30.0,
+                "snakeAmpX": 25.0,
+                "snakeAmpY": 10.0,
+                "snakeFreqX": 2.0,
+                "snakeFreqY": 1.7000000476837158,
+                "speedZ": 20.0,
+                "useFormation": true
+            },
+            "guid": "78c63917-c119-405b-9805-2c3360224082",
+            "maxSpawnCount": 5,
+            "name": "seventhSpawner",
+            "parentGuid": "f7006612-3d38-4ca3-bce7-ef25131ccfb9",
+            "spawnInterval": 5.0,
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": -0.47999998927116394,
+                    "y": 0.47999998927116394,
+                    "z": 1.559999942779541
+                }
+            },
+            "type": "EnemySpawner",
+            "useXZDistance": true
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 32,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "offset": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "radius": 1.0,
+                "rotate": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "size": {
+                    "x": 70.71973419189453,
+                    "y": 127.836181640625,
+                    "z": 136.359375
+                },
+                "targetType": 1
+            },
+            "guid": "f14a0493-6c23-4b69-829d-0d59bb99ef2e",
+            "name": "BossSpawnEvent(1)",
+            "objectType": 4,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 0.9904284477233887,
+                    "x": 0.0,
+                    "y": 0.13802778720855713,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 70.71973419189453,
+                    "y": 127.836181640625,
+                    "z": 136.359375
+                },
+                "translation": {
+                    "x": -691.7509765625,
+                    "y": -25.303787231445313,
+                    "z": 1203.6240234375
+                }
+            },
+            "type": "BossSpawnEvent"
         },
         {
             "colliderConfig": {
@@ -980,306 +1455,6 @@
                 },
                 "targetType": 0
             },
-            "guid": "5baaa5d1-1467-4c3f-82df-1d566db1bcfb",
-            "modelConfig": {
-                "blendMode": 5,
-                "materialConfig": {
-                    "color": {
-                        "w": 1.0,
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    },
-                    "currentLightingMode_": 0,
-                    "enableLighting": 0,
-                    "enviromentCoefficient": 0.5,
-                    "isReflect": false,
-                    "shininess": 20.0
-                },
-                "modelName": "largeBuilding.obj",
-                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
-                "uvTransConfig": {
-                    "rotation": 0.0,
-                    "scale": {
-                        "x": 1.0,
-                        "y": 1.0
-                    }
-                }
-            },
-            "name": "largeBuilding(1)",
-            "objectType": 2,
-            "parentGuid": "91068202-082c-45db-a7e4-6b128a341420",
-            "transform": {
-                "inheritRotate": true,
-                "inheritScale": true,
-                "inheritTranslate": true,
-                "rotation": {
-                    "w": 0.842248260974884,
-                    "x": 0.10143471509218216,
-                    "y": 0.5293500423431396,
-                    "z": -0.010838390327990055
-                },
-                "scale": {
-                    "x": 1.4070303440093994,
-                    "y": 1.0073721408843994,
-                    "z": 1.2721978425979614
-                },
-                "translation": {
-                    "x": -30.263084411621094,
-                    "y": 1.8730583190917969,
-                    "z": -23.717445373535156
-                }
-            },
-            "type": "BaseGameObject"
-        },
-        {
-            "colliderConfig": {
-                "colliderType": 0,
-                "isCollisionEnabled": true,
-                "isDraw": true,
-                "offset": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "radius": 1.0,
-                "rotate": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "size": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "targetType": 0
-            },
-            "guid": "20e99f07-ccda-4931-aa0b-853728ca1517",
-            "modelConfig": {
-                "blendMode": 5,
-                "materialConfig": {
-                    "color": {
-                        "w": 1.0,
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    },
-                    "currentLightingMode_": 0,
-                    "enableLighting": 0,
-                    "enviromentCoefficient": 0.5,
-                    "isReflect": false,
-                    "shininess": 20.0
-                },
-                "modelName": "smallBuilding_01.obj",
-                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
-                "uvTransConfig": {
-                    "rotation": 0.0,
-                    "scale": {
-                        "x": 1.0,
-                        "y": 1.0
-                    }
-                }
-            },
-            "name": "smallBuilding_01(4)",
-            "objectType": 2,
-            "parentGuid": "5baaa5d1-1467-4c3f-82df-1d566db1bcfb",
-            "transform": {
-                "inheritRotate": true,
-                "inheritScale": true,
-                "inheritTranslate": true,
-                "rotation": {
-                    "w": 0.9914328455924988,
-                    "x": -0.10033755749464035,
-                    "y": 0.003952524159103632,
-                    "z": -0.08353245258331299
-                },
-                "scale": {
-                    "x": 1.354225993156433,
-                    "y": 1.3643118143081665,
-                    "z": 1.1609925031661987
-                },
-                "translation": {
-                    "x": -2.783189058303833,
-                    "y": 0.3398556411266327,
-                    "z": 8.959129333496094
-                }
-            },
-            "type": "BaseGameObject"
-        },
-        {
-            "colliderConfig": {
-                "colliderType": 0,
-                "isCollisionEnabled": true,
-                "isDraw": true,
-                "offset": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "radius": 1.0,
-                "rotate": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "size": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "targetType": 0
-            },
-            "guid": "d4e3c73b-61fa-436d-bd77-94f6b9ad7699",
-            "modelConfig": {
-                "blendMode": 5,
-                "materialConfig": {
-                    "color": {
-                        "w": 1.0,
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    },
-                    "currentLightingMode_": 0,
-                    "enableLighting": 0,
-                    "enviromentCoefficient": 0.5,
-                    "isReflect": false,
-                    "shininess": 20.0
-                },
-                "modelName": "tallBuilding_01.obj",
-                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
-                "uvTransConfig": {
-                    "rotation": 0.0,
-                    "scale": {
-                        "x": 1.0,
-                        "y": 1.0
-                    }
-                }
-            },
-            "name": "tallBuilding_01(2)",
-            "objectType": 2,
-            "parentGuid": "0c6dbd13-8006-4d21-aca4-2e25b7ae13c6",
-            "transform": {
-                "inheritRotate": true,
-                "inheritScale": true,
-                "inheritTranslate": true,
-                "rotation": {
-                    "w": 0.9512942433357239,
-                    "x": -0.2598974108695984,
-                    "y": 0.12940573692321777,
-                    "z": 0.10366663336753845
-                },
-                "scale": {
-                    "x": 1.790425181388855,
-                    "y": 1.5743062496185303,
-                    "z": 2.0352871417999268
-                },
-                "translation": {
-                    "x": -17.341747283935547,
-                    "y": 9.162171363830566,
-                    "z": 33.4516487121582
-                }
-            },
-            "type": "BaseGameObject"
-        },
-        {
-            "colliderConfig": {
-                "colliderType": 0,
-                "isCollisionEnabled": true,
-                "isDraw": true,
-                "offset": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "radius": 1.0,
-                "rotate": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "size": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "targetType": 0
-            },
-            "guid": "95b8171f-bf1c-4e0e-85b2-83722a5f8c88",
-            "modelConfig": {
-                "blendMode": 5,
-                "materialConfig": {
-                    "color": {
-                        "w": 1.0,
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    },
-                    "currentLightingMode_": 0,
-                    "enableLighting": 0,
-                    "enviromentCoefficient": 0.5,
-                    "isReflect": false,
-                    "shininess": 20.0
-                },
-                "modelName": "largeBuilding.obj",
-                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
-                "uvTransConfig": {
-                    "rotation": 0.0,
-                    "scale": {
-                        "x": 1.0,
-                        "y": 1.0
-                    }
-                }
-            },
-            "name": "largeBuilding",
-            "objectType": 2,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "inheritRotate": true,
-                "inheritScale": true,
-                "inheritTranslate": true,
-                "rotation": {
-                    "w": 0.9889731407165527,
-                    "x": 0.0,
-                    "y": 0.14809508621692657,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 12.519981384277344,
-                    "y": 13.699895858764648,
-                    "z": 9.999971389770508
-                },
-                "translation": {
-                    "x": -112.6528549194336,
-                    "y": -101.93428802490234,
-                    "z": 974.1870727539063
-                }
-            },
-            "type": "BaseGameObject"
-        },
-        {
-            "colliderConfig": {
-                "colliderType": 0,
-                "isCollisionEnabled": true,
-                "isDraw": true,
-                "offset": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "radius": 1.0,
-                "rotate": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "size": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "targetType": 0
-            },
             "guid": "132bf502-69cc-4b34-ad8a-eb615cc5673c",
             "modelConfig": {
                 "blendMode": 5,
@@ -1331,6 +1506,52 @@
                 }
             },
             "type": "BaseGameObject"
+        },
+        {
+            "activateRadius": 80.0,
+            "deactivateRadius": 100.0,
+            "formation": {
+                "angularSpeed": 1.0,
+                "baseZ": 104.0,
+                "dissolvePattern": 1,
+                "dissolveTime": 0.0,
+                "motionType": 1,
+                "radius": 30.0,
+                "snakeAmpX": 25.0,
+                "snakeAmpY": 10.0,
+                "snakeFreqX": 2.0,
+                "snakeFreqY": 1.7000000476837158,
+                "speedZ": 20.0,
+                "useFormation": true
+            },
+            "guid": "9f6d5e89-e872-4f73-a449-d6c193a7d461",
+            "maxSpawnCount": 5,
+            "name": "secondSpawner",
+            "parentGuid": "2ce7884e-cadd-4a45-983a-310c4a480e59",
+            "spawnInterval": 5.0,
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": -7.450580596923828e-09,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": 3.612041473388672e-05,
+                    "y": 0.5893687009811401,
+                    "z": 0.4613841772079468
+                }
+            },
+            "type": "EnemySpawner",
+            "useXZDistance": true
         },
         {
             "colliderConfig": {
@@ -1430,81 +1651,6 @@
                 },
                 "targetType": 0
             },
-            "guid": "cc843f20-48fc-4874-8a73-76e96448020a",
-            "modelConfig": {
-                "blendMode": 5,
-                "materialConfig": {
-                    "color": {
-                        "w": 1.0,
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    },
-                    "currentLightingMode_": 0,
-                    "enableLighting": 0,
-                    "enviromentCoefficient": 0.5,
-                    "isReflect": false,
-                    "shininess": 20.0
-                },
-                "modelName": "smallBuilding_01.obj",
-                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
-                "uvTransConfig": {
-                    "rotation": 0.0,
-                    "scale": {
-                        "x": 1.0,
-                        "y": 1.0
-                    }
-                }
-            },
-            "name": "smallBuilding_01(5)",
-            "objectType": 2,
-            "parentGuid": "0c6dbd13-8006-4d21-aca4-2e25b7ae13c6",
-            "transform": {
-                "inheritRotate": true,
-                "inheritScale": true,
-                "inheritTranslate": true,
-                "rotation": {
-                    "w": 0.9426607489585876,
-                    "x": -0.19016216695308685,
-                    "y": 0.23974916338920593,
-                    "z": 0.13322672247886658
-                },
-                "scale": {
-                    "x": 2.1905570030212402,
-                    "y": 3.774834394454956,
-                    "z": 1.5101510286331177
-                },
-                "translation": {
-                    "x": -9.850282669067383,
-                    "y": -2.1333537101745605,
-                    "z": 13.827404022216797
-                }
-            },
-            "type": "BaseGameObject"
-        },
-        {
-            "colliderConfig": {
-                "colliderType": 0,
-                "isCollisionEnabled": true,
-                "isDraw": true,
-                "offset": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "radius": 1.0,
-                "rotate": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "size": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "targetType": 0
-            },
             "guid": "c2410ab7-7859-4b6f-b771-6b8b51efd474",
             "modelConfig": {
                 "blendMode": 5,
@@ -1559,7 +1705,7 @@
         },
         {
             "colliderConfig": {
-                "colliderType": 32,
+                "colliderType": 0,
                 "isCollisionEnabled": true,
                 "isDraw": true,
                 "offset": {
@@ -1574,38 +1720,63 @@
                     "z": 0.0
                 },
                 "size": {
-                    "x": 88.72114562988281,
-                    "y": 89.65363311767578,
-                    "z": 194.49996948242188
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
                 },
-                "targetType": 1
+                "targetType": 0
             },
-            "guid": "a378b57f-9464-4e8d-90d5-5a08516888ea",
-            "name": "thirdSpawnEvent",
-            "objectType": 4,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "guid": "cc843f20-48fc-4874-8a73-76e96448020a",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "smallBuilding_01.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "smallBuilding_01(5)",
+            "objectType": 2,
+            "parentGuid": "0c6dbd13-8006-4d21-aca4-2e25b7ae13c6",
             "transform": {
                 "inheritRotate": true,
                 "inheritScale": true,
                 "inheritTranslate": true,
                 "rotation": {
-                    "w": 0.9947938323020935,
-                    "x": 0.10190775990486145,
-                    "y": 0.0,
-                    "z": 0.0
+                    "w": 0.9426607489585876,
+                    "x": -0.19016216695308685,
+                    "y": 0.23974916338920593,
+                    "z": 0.13322672247886658
                 },
                 "scale": {
-                    "x": 88.72114562988281,
-                    "y": 89.65363311767578,
-                    "z": 194.49996948242188
+                    "x": 2.1905570030212402,
+                    "y": 3.774834394454956,
+                    "z": 1.5101510286331177
                 },
                 "translation": {
-                    "x": -229.18484497070313,
-                    "y": -28.316383361816406,
-                    "z": 694.244140625
+                    "x": -9.850282669067383,
+                    "y": -2.1333537101745605,
+                    "z": 13.827404022216797
                 }
             },
-            "type": "EnemySpawnEvent"
+            "type": "BaseGameObject"
         },
         {
             "guid": "d5039106-120e-4ef0-a5a6-a0394c7e5570",
@@ -1711,52 +1882,6 @@
             "type": "BaseGameObject"
         },
         {
-            "activateRadius": 80.0,
-            "deactivateRadius": 100.0,
-            "formation": {
-                "angularSpeed": 1.0,
-                "baseZ": 104.0,
-                "dissolvePattern": 1,
-                "dissolveTime": 0.0,
-                "motionType": 1,
-                "radius": 30.0,
-                "snakeAmpX": 25.0,
-                "snakeAmpY": 10.0,
-                "snakeFreqX": 2.0,
-                "snakeFreqY": 1.7000000476837158,
-                "speedZ": 20.0,
-                "useFormation": true
-            },
-            "guid": "f4676313-7d01-4686-98e4-3a4305c18bdc",
-            "maxSpawnCount": 5,
-            "name": "secondSpawner",
-            "parentGuid": "2ce7884e-cadd-4a45-983a-310c4a480e59",
-            "spawnInterval": 5.0,
-            "transform": {
-                "inheritRotate": true,
-                "inheritScale": true,
-                "inheritTranslate": true,
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": -7.450580596923828e-09,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 3.612041473388672e-05,
-                    "y": 0.5893687009811401,
-                    "z": 0.4613841772079468
-                }
-            },
-            "type": "EnemySpawner",
-            "useXZDistance": true
-        },
-        {
             "FalldownGimmickActor": {
                 "autoCalculateProgress": true,
                 "duration": 1.0,
@@ -1852,6 +1977,34 @@
             "type": "FalldownGimmickActor"
         },
         {
+            "guid": "3ab80609-6ceb-4ff2-969f-1cd4b6911787",
+            "name": "enemyContainer",
+            "objectType": 2,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
+            "type": "EnemyCollection"
+        },
+        {
             "colliderConfig": {
                 "colliderType": 32,
                 "isCollisionEnabled": true,
@@ -1868,14 +2021,14 @@
                     "z": 0.0
                 },
                 "size": {
-                    "x": 133.2840576171875,
-                    "y": 91.95529174804688,
-                    "z": 237.61329650878906
+                    "x": 25.786317825317383,
+                    "y": 81.4930648803711,
+                    "z": 94.19227600097656
                 },
                 "targetType": 1
             },
-            "guid": "2ce7884e-cadd-4a45-983a-310c4a480e59",
-            "name": "secondSpawnEvent",
+            "guid": "2f2bdd44-a7d7-4d2c-9ef3-5218319d160e",
+            "name": "GimmickActivateEvent(1)",
             "objectType": 4,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
@@ -1883,20 +2036,145 @@
                 "inheritScale": true,
                 "inheritTranslate": true,
                 "rotation": {
-                    "w": 0.9124316573143005,
+                    "w": 0.9374591708183289,
+                    "x": 0.010492137633264065,
+                    "y": 0.3470969498157501,
+                    "z": 0.024165021255612373
+                },
+                "scale": {
+                    "x": 25.786317825317383,
+                    "y": 81.4930648803711,
+                    "z": 94.19227600097656
+                },
+                "translation": {
+                    "x": -59.29979705810547,
+                    "y": -14.042049407958984,
+                    "z": 308.11138916015625
+                }
+            },
+            "type": "GimmickActivateEvent"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "offset": {
                     "x": 0.0,
-                    "y": -0.40922924876213074,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "radius": 1.0,
+                "rotate": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "size": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "targetType": 0
+            },
+            "guid": "e9a1da7f-be81-4c28-a364-e6a87b677bc6",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialConfig": {
+                    "color": {
+                        "w": 1.0,
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "currentLightingMode_": 0,
+                    "enableLighting": 0,
+                    "enviromentCoefficient": 0.5,
+                    "isReflect": false,
+                    "shininess": 20.0
+                },
+                "modelName": "smallBuilding_01.obj",
+                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "smallBuilding_01(8)",
+            "objectType": 2,
+            "parentGuid": "3db6e95e-1e38-4758-939b-b0ad5fb8bcc8",
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 0.9886507987976074,
+                    "x": -9.824634439326019e-09,
+                    "y": 0.15023203194141388,
+                    "z": 9.452580940205735e-08
+                },
+                "scale": {
+                    "x": 1.9441149234771729,
+                    "y": 3.320465087890625,
+                    "z": 3.6423778533935547
+                },
+                "translation": {
+                    "x": -13.287477493286133,
+                    "y": -7.964919090270996,
+                    "z": -46.94291687011719
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 32,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "offset": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "radius": 1.0,
+                "rotate": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "size": {
+                    "x": 119.79859161376953,
+                    "y": 89.90777587890625,
+                    "z": 247.10751342773438
+                },
+                "targetType": 1
+            },
+            "guid": "3a06fc06-897b-43ba-afbf-58f321c532d9",
+            "name": "fourthSpawnEvent",
+            "objectType": 4,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 0.9127177000045776,
+                    "x": 0.0,
+                    "y": -0.40859079360961914,
                     "z": 0.0
                 },
                 "scale": {
-                    "x": 133.2840576171875,
-                    "y": 91.95529174804688,
-                    "z": 237.61329650878906
+                    "x": 119.79859161376953,
+                    "y": 89.90777587890625,
+                    "z": 247.10751342773438
                 },
                 "translation": {
-                    "x": -176.2856903076172,
-                    "y": 9.091453552246094,
-                    "z": 444.4319763183594
+                    "x": -325.84613037109375,
+                    "y": -64.24415588378906,
+                    "z": 1001.6007690429688
                 }
             },
             "type": "EnemySpawnEvent"
@@ -1975,56 +2253,6 @@
                 }
             },
             "type": "Player"
-        },
-        {
-            "colliderConfig": {
-                "colliderType": 32,
-                "isCollisionEnabled": true,
-                "isDraw": true,
-                "offset": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "radius": 1.0,
-                "rotate": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "size": {
-                    "x": 167.93173217773438,
-                    "y": 112.89019775390625,
-                    "z": 234.05862426757813
-                },
-                "targetType": 1
-            },
-            "guid": "6ad5be3c-55b1-41b2-82d9-3982a4fe12f2",
-            "name": "fifthSpawnEvent",
-            "objectType": 4,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "inheritRotate": true,
-                "inheritScale": true,
-                "inheritTranslate": true,
-                "rotation": {
-                    "w": 0.8494864702224731,
-                    "x": 0.0,
-                    "y": -0.5276104211807251,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 167.93173217773438,
-                    "y": 112.89019775390625,
-                    "z": 234.05862426757813
-                },
-                "translation": {
-                    "x": -489.14141845703125,
-                    "y": -66.28209686279297,
-                    "z": 1073.6029052734375
-                }
-            },
-            "type": "EnemySpawnEvent"
         },
         {
             "colliderConfig": {
@@ -2118,14 +2346,14 @@
                     "z": 0.0
                 },
                 "size": {
-                    "x": 25.786317825317383,
-                    "y": 81.4930648803711,
-                    "z": 94.19227600097656
+                    "x": 167.93173217773438,
+                    "y": 112.89019775390625,
+                    "z": 234.05862426757813
                 },
                 "targetType": 1
             },
-            "guid": "2f2bdd44-a7d7-4d2c-9ef3-5218319d160e",
-            "name": "GimmickActivateEvent(1)",
+            "guid": "6ad5be3c-55b1-41b2-82d9-3982a4fe12f2",
+            "name": "fifthSpawnEvent",
             "objectType": 4,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
@@ -2133,23 +2361,23 @@
                 "inheritScale": true,
                 "inheritTranslate": true,
                 "rotation": {
-                    "w": 0.9374591708183289,
-                    "x": 0.010492137633264065,
-                    "y": 0.3470969498157501,
-                    "z": 0.024165021255612373
+                    "w": 0.8494864702224731,
+                    "x": 0.0,
+                    "y": -0.5276104211807251,
+                    "z": 0.0
                 },
                 "scale": {
-                    "x": 25.786317825317383,
-                    "y": 81.4930648803711,
-                    "z": 94.19227600097656
+                    "x": 167.93173217773438,
+                    "y": 112.89019775390625,
+                    "z": 234.05862426757813
                 },
                 "translation": {
-                    "x": -49.427268981933594,
-                    "y": -13.35697078704834,
-                    "z": 299.640625
+                    "x": -523.761962890625,
+                    "y": -66.28209686279297,
+                    "z": 1090.722412109375
                 }
             },
-            "type": "GimmickActivateEvent"
+            "type": "EnemySpawnEvent"
         },
         {
             "colliderConfig": {
@@ -2472,159 +2700,6 @@
             "type": "RailCamera"
         },
         {
-            "guid": "3ab80609-6ceb-4ff2-969f-1cd4b6911787",
-            "name": "enemyContainer",
-            "objectType": 2,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "inheritRotate": true,
-                "inheritScale": true,
-                "inheritTranslate": true,
-                "rotation": {
-                    "w": 1.0,
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                }
-            },
-            "type": "EnemyCollection"
-        },
-        {
-            "colliderConfig": {
-                "colliderType": 32,
-                "isCollisionEnabled": true,
-                "isDraw": true,
-                "offset": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "radius": 1.0,
-                "rotate": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "size": {
-                    "x": 119.79859161376953,
-                    "y": 89.90777587890625,
-                    "z": 247.10751342773438
-                },
-                "targetType": 1
-            },
-            "guid": "3a06fc06-897b-43ba-afbf-58f321c532d9",
-            "name": "fourthSpawnEvent",
-            "objectType": 4,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "inheritRotate": true,
-                "inheritScale": true,
-                "inheritTranslate": true,
-                "rotation": {
-                    "w": 0.9127177000045776,
-                    "x": 0.0,
-                    "y": -0.40859079360961914,
-                    "z": 0.0
-                },
-                "scale": {
-                    "x": 119.79859161376953,
-                    "y": 89.90777587890625,
-                    "z": 247.10751342773438
-                },
-                "translation": {
-                    "x": -257.79046630859375,
-                    "y": -64.24415588378906,
-                    "z": 940.8215942382813
-                }
-            },
-            "type": "EnemySpawnEvent"
-        },
-        {
-            "colliderConfig": {
-                "colliderType": 0,
-                "isCollisionEnabled": true,
-                "isDraw": true,
-                "offset": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "radius": 1.0,
-                "rotate": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "size": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "targetType": 0
-            },
-            "guid": "91068202-082c-45db-a7e4-6b128a341420",
-            "modelConfig": {
-                "blendMode": 5,
-                "materialConfig": {
-                    "color": {
-                        "w": 1.0,
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    },
-                    "currentLightingMode_": 0,
-                    "enableLighting": 0,
-                    "enviromentCoefficient": 0.5,
-                    "isReflect": false,
-                    "shininess": 20.0
-                },
-                "modelName": "largeBuilding.obj",
-                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
-                "uvTransConfig": {
-                    "rotation": 0.0,
-                    "scale": {
-                        "x": 1.0,
-                        "y": 1.0
-                    }
-                }
-            },
-            "name": "largeBuilding(6)",
-            "objectType": 2,
-            "parentGuid": "00000000-0000-0000-0000-000000000000",
-            "transform": {
-                "inheritRotate": true,
-                "inheritScale": true,
-                "inheritTranslate": true,
-                "rotation": {
-                    "w": 0.9244943261146545,
-                    "x": -0.06135469302535057,
-                    "y": 0.3758341372013092,
-                    "z": 0.017163971439003944
-                },
-                "scale": {
-                    "x": 12.519962310791016,
-                    "y": 13.700130462646484,
-                    "z": 10.000040054321289
-                },
-                "translation": {
-                    "x": -99.88108825683594,
-                    "y": -101.0316162109375,
-                    "z": 825.2569580078125
-                }
-            },
-            "type": "BaseGameObject"
-        },
-        {
             "colliderConfig": {
                 "colliderType": 0,
                 "isCollisionEnabled": true,
@@ -2891,7 +2966,7 @@
         },
         {
             "colliderConfig": {
-                "colliderType": 0,
+                "colliderType": 32,
                 "isCollisionEnabled": true,
                 "isDraw": true,
                 "offset": {
@@ -2906,63 +2981,84 @@
                     "z": 0.0
                 },
                 "size": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
+                    "x": 143.69497680664063,
+                    "y": 179.7771759033203,
+                    "z": 141.0752716064453
                 },
-                "targetType": 0
+                "targetType": 1
             },
-            "guid": "e9a1da7f-be81-4c28-a364-e6a87b677bc6",
-            "modelConfig": {
-                "blendMode": 5,
-                "materialConfig": {
-                    "color": {
-                        "w": 1.0,
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    },
-                    "currentLightingMode_": 0,
-                    "enableLighting": 0,
-                    "enviromentCoefficient": 0.5,
-                    "isReflect": false,
-                    "shininess": 20.0
-                },
-                "modelName": "smallBuilding_01.obj",
-                "textureGuid": "d4592b12-233e-4ebb-b437-0ba274cc7e09",
-                "uvTransConfig": {
-                    "rotation": 0.0,
-                    "scale": {
-                        "x": 1.0,
-                        "y": 1.0
-                    }
-                }
-            },
-            "name": "smallBuilding_01(8)",
-            "objectType": 2,
-            "parentGuid": "3db6e95e-1e38-4758-939b-b0ad5fb8bcc8",
+            "guid": "664f9121-b541-48c8-be29-6e361d409468",
+            "name": "midSpawnEvent",
+            "objectType": 4,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
             "transform": {
                 "inheritRotate": true,
                 "inheritScale": true,
                 "inheritTranslate": true,
                 "rotation": {
-                    "w": 0.9886507987976074,
-                    "x": -9.824634439326019e-09,
-                    "y": 0.15023203194141388,
-                    "z": 9.452580940205735e-08
+                    "w": 0.9949780106544495,
+                    "x": 0.10009387880563736,
+                    "y": 0.0,
+                    "z": 0.0
                 },
                 "scale": {
-                    "x": 1.9441149234771729,
-                    "y": 3.320465087890625,
-                    "z": 3.6423778533935547
+                    "x": 143.69497680664063,
+                    "y": 179.7771759033203,
+                    "z": 141.0752716064453
                 },
                 "translation": {
-                    "x": -13.287477493286133,
-                    "y": -7.964919090270996,
-                    "z": -46.94291687011719
+                    "x": -237.39385986328125,
+                    "y": -74.80812072753906,
+                    "z": 794.7649536132813
                 }
             },
-            "type": "BaseGameObject"
+            "type": "EnemySpawnEvent"
+        },
+        {
+            "activateRadius": 80.0,
+            "deactivateRadius": 100.0,
+            "formation": {
+                "angularSpeed": 1.0,
+                "baseZ": 103.0,
+                "dissolvePattern": 1,
+                "dissolveTime": 0.0,
+                "motionType": 1,
+                "radius": 30.0,
+                "snakeAmpX": 25.0,
+                "snakeAmpY": 10.0,
+                "snakeFreqX": 2.0,
+                "snakeFreqY": 1.7000000476837158,
+                "speedZ": 20.0,
+                "useFormation": true
+            },
+            "guid": "d3d142a5-8e51-4fbf-8134-9393ea73ab99",
+            "maxSpawnCount": 5,
+            "name": "EnemySpawner",
+            "parentGuid": "664f9121-b541-48c8-be29-6e361d409468",
+            "spawnInterval": 1.0,
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
+            "type": "EnemySpawner",
+            "useXZDistance": true
         }
     ],
     "sceneName": "scene",

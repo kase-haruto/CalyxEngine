@@ -15,9 +15,6 @@ void ReticleMover::Update(float speed,float dt) {
 	// 入力（-1..1）
 	CalyxMath::Vector2 rs = input->GetRightStick();
 	float stickDeadZone_ = 0.15f;
-	// 追加デッドゾーン（Input側のデッドゾーンを通っても、
-	// パッド差や揺れで微小値が残る/または逆に倒しが浅いと0になりがちなので、
-	// ここで「倒した量に応じてスムーズに0→1へ」変換する）
 	const float mag = rs.Length();
 	if (mag <= stickDeadZone_) {
 		moveOffset_ = {0.0f, 0.0f};
