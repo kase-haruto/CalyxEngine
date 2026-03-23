@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+
+    <title>Live++ for Windows - 常见问题</title>
+
+    <!-- Style -->
+    <link href="assets/css/docs.css" rel="stylesheet">
+
+    <!-- Fonts -->
+    <link href="assets/css/fonts.css" rel="stylesheet">
+
+    <!-- Favicons -->
+    <link rel="icon" href="assets/img/favicon.png">
+    <link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <img src="assets/img/logo.svg" alt="Live++ logo" width="48" height="48"/>
+            <span>Live++ for Windows - 常见问题</span>
+        </div>
+        <div class="header-right">
+            <a href="./faq.html">English</a>
+            <a href="./faq_jpn.html">日本語</a>
+            <a href="./faq_zho.html">한국어</a>
+            <a href="./faq_kor.html">简体中文</a>
+        </div>
+    </div>
+
+    <div class="main-container">
+      <main class="content faq">
+        <header>
+          <h1>常见问题</h1>
+          <p class="lead">如果您有问题但在这里找不到，请给我们发送<a href="mailto:support@molecular-matters.com">电子邮件</a>。          </p>
+        </header>
+
+        <section>
+          <details>
+            <summary>我一直收到错误信息<strong class="notranslate">"src\main.cpp: fatal error C1041: cannot open program database 'C:\Development\Project.pdb'; if multiple CL.EXE write to the same .PDB file, please use /FS"</strong> 。   </summary>
+            <div class="answer">
+              <p>当编译器生成的 .PDB 文件<span class="notranslate">(C/C++ -> Output Files -> Program Database File Name)</span> 和链接器生成的 .PDB 文件<span class="notranslate">(Linker -> Debugging -> Generate Program Database File)</span> 都设置为同一输出文件时，就会发生这种情况。在这种情况下，调试器会在调试期间锁定 .PDB 文件，而编译器则会在编译时尝试写入同一文件。</p>
+              <p>
+              请注意，编译器生成的 .PDB 文件是一个<strong>中间</strong>文件，而不是编译工件。因此，最好不要触动相应的编译器选项。此外，有报告称，在编译器和链接器都写入同一个 .PDB 文件的情况下，大型项目的链接时间（不使用 Live++ 的增量和完全构建）最多会延长 4 倍，因此建议编译器和链接器使用不同的 PDB 文件。         </p>
+            </div>
+          </details>
+
+          <details>
+            <summary>编译器不断报告<strong class="notranslate">"src\main.cpp: fatal error C1041: cannot open program database 'C:\Development\vc141.idb'; if multiple CL.EXE write to the same .PDB file, please use /FS"</strong> 。</summary>
+            <div class="answer">
+              <p>启用本机编辑和继续（Edit and Continue）并使用<span class="notranslate">'C/C++ -> General -> Debug Information Format -> Program Database for Edit and Continue (/ZI)'</span> 编译器选项时会出现这种情况。请注意，调试信息格式必须设置为<a class="notranslate" href="documentation_zho.html#compiler_settings">'C7 compatible (/Z7)' 或 'Program Database (/Zi)'</a> 。</p>
+            </div>
+          </details>
+
+          <details>
+            <summary>编译器会抛出几个<strong class="notranslate">cl : Command line warning D9007 : '/external:I' requires '/external:W'; option ignored</strong> 警告，然后是丢失包含。<br/>如何解决这个问题？</summary>
+            <div class="answer">
+              <p>您很可能遇到了<a href="documentation_zho.html#known_issues_external">Visual Studio 工具链</a>的问题。</p>
+            </div>
+          </details>
+
+          <details>
+            <summary>我使用 INCLUDE 环境变量指定包含路径，但 Live++ 似乎忽略了这些路径。<br/>这是怎么回事？</summary>
+            <div class="answer">
+              <p>你很可能遇到了<a href="documentation_zho.html#known_issues_include">Visual Studio 工具链</a>的问题。</p>
+            </div>
+          </details>
+
+          <details>
+            <summary>Live++ 报告<strong>"函数 'Bar' 中位于 0xF00 的指令过短，无法打补丁。对此函数的更改将无法察觉。"</strong>。<br/>我该怎么办？</summary>
+            <div class="answer">
+              <p>这很可能是翻译单元未使用正确的<a href="documentation_zho.html#compiler_settings">编译器设置</a>构建造成的。</p>
+            </div>
+          </details>
+
+          <details>
+            <summary>Live++ 报告<strong>"无法确定工具链 'Foo' 的 vcvars*.bat 环境"</strong>。<br/>我需要更改什么？</summary>
+            <div class="answer">
+              <p>
+                使用 Visual Studio 编译器或链接器时，需要调用 vcvars*.bat 文件，以便为后续编译设置工具链环境。只要默认安装目录的相对路径保持不变，Live++ 会自动检测用于构建支持 Live++ 应用程序的工具链，并找到相应的 vcvars*.bat 文件。         </p>
+              <p>
+                在使用自定义工具链或构建系统时，编译器（cl.exe）和链接器（link.exe）通常保留在非默认的相对路径结构中，这使得查找正确的 vcvars*.bat 文件变得更加困难。在这种情况下，Live++ 希望以下任何文件与调用的编译器或链接器位于同一目录：                <ul>
+                  <li>
+                    vcvars64.bat            </li>
+                  <li>
+                    vcvarsamd64_x86.bat                  </li>
+                  <li>
+                    vcvarsx86_amd64.bat                  </li>
+                  <li>
+                    vcvars32.bat            </li>
+                </ul>
+              </p>
+              <p>
+                请注意，您可以提供自己的文件来设置编译器环境，无需复制 Visual Studio 的文件，只要相关文件命名正确即可。              </p>
+            </div>
+          </details>
+
+          <details>
+            <summary>当尝试重新编译文件时，Live++ 无法启动编译器。</summary>
+            <div class="answer">
+              <p>
+                您的设置是否使用分布式/远程编译？如果是，请确保设置<a href="documentation_zho.html#distributed_builds">所需的首选项</a>。              </p>
+            </div>
+          </details>
+
+          <details>
+            <summary>Live++ 无法找到链接器环境。<br/>我需要配置哪个设置？</summary>
+            <div class="answer">
+              <p>
+                确保<a href="documentation_zho.html#linker_settings">生成完整的 PDB（如使用<span class="notranslate">/DEBUG:FULL</span></a>），而不是部分 PDB（如使用<span class="notranslate">/DEBUG:FASTLINK</span> ）。      </p>
+            </div>
+          </details>
+
+          <details>
+            <summary>按快捷键时，Live++ 什么也不做。<br/>我缺少了什么？</summary>
+            <div class="answer">
+              <p>
+                首先，通过调用<a href="documentation_zho.html#enabling_livepp">相应的 API 函数</a>之一，确保<a href="documentation_zho.html#usage_agents">已创建 Live++ Agent</a>，并为相关模块（.EXE 或 .DLL）启用了 Live++。         </p>
+              <p>
+                其次，记得在按下快捷键前保存更改。如果 Live++ 仍然没有任何反应，说明它无法检测到哪些翻译单元是模块的一部分。在这种情况下，请检查<a href="documentation_zho.html#compiler_settings">编译器和链接器的设置</a>是否正确。              </p>
+              <p>
+                第三，确保 Live++ 能<a href="documentation_zho.html#required_files">找到</a>其工作所需的<a href="documentation_zho.html#required_files">所有 .PDB、.OBJ、.CPP 和 .H 文件</a>。         </p>
+              <p>
+                如果问题仍然存在，而且你无法找出 Live++ 无法在你的设置下运行的原因，请<a href="mailto:support@molecular-matters.com">告诉我们</a>。              </p>
+            </div>
+          </details>
+
+          <details>
+            <summary>我尝试了所有方法，但似乎无法让 Live++ 与我的设置一起工作。<br/>如何报告此问题？</summary>
+            <div class="answer">
+              <p>
+                请<a href="mailto:support@molecular-matters.com">联系我们</a>，说明您遇到的问题，并附上 Broker、Bridge 和 Agent 日志。         </p>
+              <p>
+                在 Broker 主菜单中选择 "<span class="notranslate label label-default label-custom-MM">工具"-&gt;</span>"<span class="notranslate label label-default label-custom-MM">显示 Broker 日志文件...</span>"，即可查看 Broker 日志文件。              </p>
+              <p>
+                要查看 Bridge 和 Agent 日志文件，请在<strong>进程</strong>视图的上下文菜单中选择<span class="notranslate label label-default label-custom-MM">显示所选本地进程的日志文件...</span>。              </p>
+            </div>
+          </details>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
