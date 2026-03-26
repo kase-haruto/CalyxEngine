@@ -244,6 +244,7 @@ copy /Y "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(SolutionD
     <ClCompile Include="Engine\Editor\PickingPass.cpp" />
     <ClCompile Include="Engine\Editor\SceneSwitchOverlay.cpp" />
     <ClCompile Include="Engine\Foundation\Clock\StateTimer.cpp" />
+    <ClCompile Include="Engine\Foundation\HotReload\LivePP\LivePPService.cpp" />
     <ClCompile Include="Engine\Foundation\Math\Matrix3x4.cpp" />
     <ClCompile Include="Engine\Foundation\Serialization\ParamStore.cpp" />
     <ClCompile Include="Engine\Foundation\Serialization\SerializableFieldBuilder.cpp" />
@@ -587,6 +588,7 @@ copy /Y "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(SolutionD
     <ClInclude Include="Engine\Editor\PickingPass.h" />
     <ClInclude Include="Engine\Editor\SceneSwitchOverlay.h" />
     <ClInclude Include="Engine\Foundation\Clock\StateTimer.h" />
+    <ClInclude Include="Engine\Foundation\HotReload\LivePP\LivePPService.h" />
     <ClInclude Include="Engine\Foundation\Math\Matrix3x4.h" />
     <ClInclude Include="Engine\Foundation\Serialization\SerializableField.h" />
     <ClInclude Include="Engine\Foundation\Serialization\SerializableFieldBuilder.h" />
