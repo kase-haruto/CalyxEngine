@@ -51,6 +51,8 @@ namespace CalyxEngine {
 #if defined(_DEBUG) || defined(DEVELOP)
 		engineUICore_->SetCameraForViewport(CameraManager::GetMain3d(), CameraManager::GetDebug());
 #endif
+
+		livePPService_.Initialize();
 	}
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -67,6 +69,7 @@ namespace CalyxEngine {
 
 	////////////////////////////////////////////////////////////////////////////////
 	void CalyxFrameWork::Finalize() {
+		livePPService_.Finalize();
 		system_->Finalize();
 		CoUninitialize();
 	}
@@ -97,6 +100,8 @@ namespace CalyxEngine {
 		sceneManager_->PostUpdate(graphicsSystem_->GetCommandList(), graphicsSystem_->GetPipelineService());
 
 		engineUICore_->Render();
+
+		livePPService_.Update();
 	}
 
 	////////////////////////////////////////////////////////////////////////////////
