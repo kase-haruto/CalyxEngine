@@ -14,6 +14,9 @@
 #include <Engine/PostProcess/Collection/PostProcessCollection.h>
 #include <Engine/PostProcess/Graph/PostEffectGraph.h>
 
+// engine
+#include <Engine/Foundation/HotReload/LivePP/LivePPService.h>
+
 // c++
 #include <Windows.h>
 namespace CalyxEngine {
@@ -45,9 +48,12 @@ namespace CalyxEngine {
 		std::unique_ptr<CalyxEditor::EngineUICore> engineUICore_;
 
 		// scene
-		std::unique_ptr<CalyxScene::SceneManager>	  sceneManager_;
+		std::unique_ptr<CalyxScene::SceneManager>	   sceneManager_;
 		std::unique_ptr<CalyxEditor::EditorCollection> editorCollection_;
-		std::unique_ptr<CalyxEditor::PlaySession> playSession_;
+		std::unique_ptr<CalyxEditor::PlaySession>	   playSession_;
+
+		// ホットリロード
+		LivePPService livePPService_;
 
 		// ポストエフェクトの適用と管理
 		PostEffectGraph*	   postEffectGraph_;

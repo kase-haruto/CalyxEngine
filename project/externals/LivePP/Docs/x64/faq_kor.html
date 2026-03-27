@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+
+    <title>Live++ for Windows - 자주 묻는 질문</title>
+
+    <!-- Style -->
+    <link href="assets/css/docs.css" rel="stylesheet">
+
+    <!-- Fonts -->
+    <link href="assets/css/fonts.css" rel="stylesheet">
+
+    <!-- Favicons -->
+    <link rel="icon" href="assets/img/favicon.png">
+    <link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <img src="assets/img/logo.svg" alt="Live++ logo" width="48" height="48"/>
+            <span>Live++ for Windows - 자주 묻는 질문</span>
+        </div>
+        <div class="header-right">
+            <a href="./faq.html">English</a>
+            <a href="./faq_jpn.html">日本語</a>
+            <a href="./faq_zho.html">한국어</a>
+            <a href="./faq_kor.html">简体中文</a>
+        </div>
+    </div>
+
+    <div class="main-container">
+      <main class="content faq">
+        <header>
+          <h1>자주 묻는 질문</h1>
+          <p class="lead">궁금한 점이 있는데 여기에서 찾을 수 없는 경우 <a href="mailto:support@molecular-matters.com">이메일을</a> 보내주세요.          </p>
+        </header>
+
+        <section>
+          <details>
+            <summary><strong class="notranslate">"src\main.cpp: fatal error C1041: cannot open program database 'C:\Development\Project.pdb'; if multiple CL.EXE write to the same .PDB file, please use /FS"</strong> 오류가 계속 발생합니다.            </summary>
+            <div class="answer">
+              <p>컴파일러에서 생성된 .PDB 파일 <span class="notranslate">(C/C++ -> Output Files -> Program Database File Name)</span> 과 링커에서 생성된 .PDB 파일 <span class="notranslate">(Linker -> Debugging -> Generate Program Database File)</span> 이 모두 동일한 출력 파일로 설정되어 있을 때 발생합니다. 이 경우 디버거는 디버깅 중에 .PDB 파일을 잠그고 컴파일러는 컴파일 시 동일한 파일에 쓰려고 시도합니다.</p>
+              <p>
+              컴파일러에서 생성된 .PDB 파일은 빌드 아티팩트가 아닌 <strong>중간</strong> 파일이라는 점에 유의하세요. 따라서 해당 컴파일러 옵션을 그대로 두는 것이 가장 좋습니다. 또한 컴파일러와 링커가 모두 동일한 .PDB 파일을 쓰는 경우 대규모 프로젝트에서 링크 시간이 최대 4배까지 길어진다는 보고가 있었으므로 컴파일러와 링커 PDB는 별도의 파일을 사용하는 것이 좋습니다(Live++를 사용하지 않고 증분 및 전체 빌드의 경우).        </p>
+            </div>
+          </details>
+
+          <details>
+            <summary>컴파일러가 계속 <strong class="notranslate">"src\main.cpp: fatal error C1041: cannot open program database 'C:\Development\vc141.idb'; if multiple CL.EXE write to the same .PDB file, please use /FS"</strong> 을 보고합니다.</summary>
+            <div class="answer">
+              <p>이는 기본 편집 및 계속이 활성화되어 있고 <span class="notranslate">'C/C++ -> General -> Debug Information Format -> Program Database for Edit and Continue (/ZI)'</span> 컴파일러 옵션이 사용되는 경우 발생합니다. 디버그 정보 형식은 <a class="notranslate" href="documentation_kor.html#compiler_settings">'C7 compatible (/Z7)' 또는 'Program Database (/Zi)'</a> 으로 설정해야 합니다.</p>
+            </div>
+          </details>
+
+          <details>
+            <summary>컴파일러가 여러 번 <strong class="notranslate">cl : Command line warning D9007 : '/external:I' requires '/external:W'; option ignored</strong> 경고를 표시한 후 포함이 누락됩니다.<br/>이 문제를 해결하려면 어떻게 해야 하나요?</summary>
+            <div class="answer">
+              <p><a href="documentation_kor.html#known_issues_external">Visual Studio 도구 체인에</a> 문제가 있을 가능성이 높습니다.</p>
+            </div>
+          </details>
+
+          <details>
+            <summary>포함 경로를 지정할 때 INCLUDE 환경 변수를 사용하지만 Live++에서 무시되는 것 같습니다.<br/>무슨 일이죠?</summary>
+            <div class="answer">
+              <p><a href="documentation_kor.html#known_issues_include">Visual Studio 툴체인에</a> 문제가 있는 것 같습니다.</p>
+            </div>
+          </details>
+
+          <details>
+            <summary>Live++에서 <strong>"함수 'Bar'의 0xF00 지시가 패치하기에 너무 짧습니다. 이 함수에 대한 변경사항은 준수되지 않습니다.</strong>."<br/>어떻게 해야 하나요?</summary>
+            <div class="answer">
+              <p>이 문제는 올바른 <a href="documentation_kor.html#compiler_settings">컴파일러 설정으로</a> 빌드되지 않은 번역 단위로 인해 발생할 가능성이 높습니다.</p>
+            </div>
+          </details>
+
+          <details>
+            <summary>Live++에서 <strong>"툴체인 'Foo'에 대한 vcvars*.bat 환경 판단에 실패했습니다</strong>." 보고<br/>무엇을 변경해야 하나요?</summary>
+            <div class="answer">
+              <p>
+                Visual Studio 컴파일러 또는 링커를 사용하는 경우, 후속 컴파일을 위한 툴체인 환경을 설정하기 위해 vcvars*.bat 파일을 호출해야 합니다. Live++는 기본 설치 디렉터리의 상대 경로가 그대로 유지되는 한 Live++ 지원 애플리케이션을 빌드하는 데 사용된 툴체인을 자동으로 감지하고 해당 vcvars*.bat 파일을 찾습니다.             </p>
+              <p>
+                사용자 지정 툴체인 또는 빌드 시스템을 사용하는 경우 컴파일러(cl.exe)와 링커(link.exe)가 기본값이 아닌 상대 경로 구조로 유지되는 경우가 많으므로 올바른 vcvars*.bat 파일을 찾기가 더 어려워집니다. 이 경우 Live++는 호출된 컴파일러 또는 링커와 동일한 디렉터리에 다음 파일 중 하나가 있을 것으로 예상합니다:                <ul>
+                  <li>
+                    vcvars64.bat            </li>
+                  <li>
+                    vcvarsamd64_x86.bat                  </li>
+                  <li>
+                    vcvarsx86_amd64.bat                  </li>
+                  <li>
+                    vcvars32.bat            </li>
+                </ul>
+              </p>
+              <p>
+                컴파일러 환경 설정을 위해 자체 파일을 제공할 수 있으며, 해당 파일의 이름만 올바르게 지정되어 있다면 Visual Studio의 파일을 복사할 필요가 없습니다.             </p>
+            </div>
+          </details>
+
+          <details>
+            <summary>Live++가 파일을 다시 컴파일하려고 할 때 컴파일러를 시작할 수 없습니다.</summary>
+            <div class="answer">
+              <p>
+                설정에서 분산/원격 빌드를 사용하나요? 그렇다면 <a href="documentation_kor.html#distributed_builds">필요한 환경설정을</a> 설정해 주세요.          </p>
+            </div>
+          </details>
+
+          <details>
+            <summary>Live++에서 링커 환경을 찾을 수 없습니다.<br/>어떤 설정을 구성해야 하나요?</summary>
+            <div class="answer">
+              <p>
+                부분 PDB(예: <a href="documentation_kor.html#linker_settings"> <span class="notranslate">/DEBUG:FULL</span>)가 아닌</a> <a href="documentation_kor.html#linker_settings">전체 PDB</a> (예: <span class="notranslate">/DEBUG:FASTLINK</span>) <a href="documentation_kor.html#linker_settings">를 생성해야</a> 합니다.          </p>
+            </div>
+          </details>
+
+          <details>
+            <summary>바로가기를 누르면 Live++가 아무것도 하지 않습니다.<br/>내가 뭘 놓친 건가요?</summary>
+            <div class="answer">
+              <p>
+                첫째, <a href="documentation_kor.html#enabling_livepp">적절한 API 함수</a> 중 하나를 호출하여 해당 모듈(.EXE 또는 .DLL)에 대해 Live++ <a href="documentation_kor.html#usage_agents">에이전트가 생성되고</a> Live++가 활성화되어 있는지 확인하세요.              </p>
+              <p>
+                둘째, 바로가기를 누르기 전에 변경 사항을 저장해야 합니다. Live++가 여전히 아무 작업도 수행하지 않는다면 모듈에 포함된 번역 단위를 감지하지 못한 것입니다. 이 경우 <a href="documentation_kor.html#compiler_settings">컴파일러 및 링커 설정이</a> 올바른지 확인하세요.              </p>
+              <p>
+                셋째, Live++가 작동하는 데 필요한 <a href="documentation_kor.html#required_files">모든 .PDB, .OBJ, .CPP 및 .H 파일을 찾을</a> 수 있는지 확인하세요.              </p>
+              <p>
+                그래도 문제가 지속되고 Live++가 설정에서 작동하지 않는 이유를 파악할 수 없는 경우 <a href="mailto:support@molecular-matters.com">알려주세요</a>.              </p>
+            </div>
+          </details>
+
+          <details>
+            <summary>모든 방법을 시도했지만 Live++가 내 설정에서 작동하지 않는 것 같습니다.<br/>이 문제를 어떻게 신고하나요?</summary>
+            <div class="answer">
+              <p>
+                발생한 문제에 대한 설명과 함께 Broker, Bridge 및 Agent 로그를 첨부하여 <a href="mailto:support@molecular-matters.com">문의해</a> 주세요.          </p>
+              <p>
+                Broker 메인 메뉴에서 <span class="notranslate label label-default label-custom-MM">도구 -&gt; Broker 로그 파일 표시...</span> 선택하면 브로커 로그 파일을 확인할 수 있습니다.             </p>
+              <p>
+                Bridge 및 Agent 로그 파일은 <strong>프로세스</strong> 보기의 컨텍스트 메뉴에서 <span class="notranslate label label-default label-custom-MM">선택한 로컬 프로세스에 대한 로그 파일 표시...</span> 선택하여 확인할 수 있습니다.             </p>
+            </div>
+          </details>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

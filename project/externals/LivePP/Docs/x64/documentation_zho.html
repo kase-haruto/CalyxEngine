@@ -1,0 +1,2449 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+
+    <title>Live++ for Windows - 文档</title>
+
+    <!-- Style -->
+    <link href="assets/css/docs.css" rel="stylesheet">
+
+    <!-- Fonts -->
+    <link href="assets/css/fonts.css" rel="stylesheet">
+
+    <!-- Favicons -->
+    <link rel="icon" href="assets/img/favicon.png">
+    <link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <img src="assets/img/logo.svg" alt="Live++ logo" width="48" height="48"/>
+            <span>Live++ for Windows - 文档</span>
+        </div>
+        <div class="header-right">
+            <a href="./documentation.html">English</a>
+            <a href="./documentation_jpn.html">日本語</a>
+            <a href="./documentation_zho.html">한국어</a>
+            <a href="./documentation_kor.html">简体中文</a>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="nav-container">
+        <nav>
+          <ul>
+            <li>
+             <a href="#quickstart_guide">快速入门指南</a>             <ul>
+                <li><a href="#examples">范例</a></li>
+              </ul>
+            </li>
+            <li>
+             <a href="#installation">安装</a>     <ul>
+                <li><a href="#directory_structure">目录结构</a></li>
+              </ul>
+            </li>
+            <li>
+             <a href="#architecture">架构</a>     <ul>
+                <li><a href="#broker">Broker</a></li>
+                <li><a href="#agent">Agent</a></li>
+                <li><a href="#bridge">Bridge</a></li>
+                <li><a href="#communication">通信</a></li>
+              </ul>
+            </li>
+            <li>
+             <a href="#project_setup">项目设置</a>           <ul>
+                <li><a href="#compiler_settings">编译器设置</a></li>
+                <ul>
+                  <li><a href="#compiler_settings_MSVC">MSVC/Visual Studio</a></li>
+                </ul>
+                <ul>
+                  <li><a href="#compiler_settings_clang_cl">Clang-cl</a></li>
+                </ul>
+                <ul>
+                  <li><a href="#compiler_settings_clang++">Clang++</a></li>
+                </ul>
+                <li><a href="#linker_settings">链接器设置</a></li>
+                <ul>
+                  <li><a href="#linker_settings_MSVC">MSVC/Visual Studio</a></li>
+                </ul>
+                <ul>
+                  <li><a href="#linker_settings_lld_link">lld-link</a></li>
+                </ul>
+                <li><a href="#incompatible_settings">不兼容设置</a></li>
+                <li><a href="#required_files">所需文件</a></li>
+                <li><a href="#supported_setups">支持的设置</a></li>
+                <ul>
+                  <li><a href="#FASTBuild">FASTBuild</a></li>
+                  <li><a href="#IncrediBuild">IncrediBuild</a></li>
+                  <li><a href="#distributed_builds">分布式构建</a></li>
+                </ul>
+              </ul>
+            </li>
+            <li>
+             <a href="#usage">使用方法</a>           <ul>                
+                <li><a href="#usage_agents">Agent</a></li>
+                <ul>
+                  <li><a href="#creating_default_agent">创建默认 Agent</a></li>
+                  <li><a href="#creating_synchronized_agent">创建同步 Agent</a></li>
+                </ul>
+                <li><a href="#enabling_livepp">启用 Live++</a></li>
+                <li><a href="#dynamically_loaded_modules">动态加载模块</a></li>
+              </ul>
+            </li>
+            <li>
+             <a href="#tools">工具</a>     <ul>
+                <li><a href="#tools_hot_reload">热重载</a></li>
+                <ul>
+                  <li><a href="#unity_file_splitting">统一分割</a></li>
+                  <li><a href="#halted_processes">停止进程</a></li>
+                  <li><a href="#natvis_visualizations">Natvis 可视化</a></li>
+                </ul>
+                <li><a href="#tools_hot_restart">热重启</a></li>
+                <ul>
+                  <li><a href="#hot_restart_request">请求热重启</a></li>
+                  <li><a href="#hot_restart_default_agents">默认 Agent</a></li>
+                  <li><a href="#hot_restart_synchronized_agents">同步 Agent</a></li>
+                </ul>
+                <li><a href="#tools_hot_fix">热修复</a></li>
+                <li><a href="#tools_hot_deoptimize">热优化</a></li>
+
+                <li><a href="#multi_process_editing">多进程编辑</a></li>
+                <li><a href="#networked_editing">联网编辑</a></li>
+              </ul>
+            </li>
+            <li>
+             <a href="#licensing">授权许可</a>           <ul>
+                <li><a href="#licensing_activation">激活</a></li>
+                <li><a href="#licensing_deactivation">停用</a></li>
+                <li><a href="#licensing_trial">免费试用</a></li>
+                <li><a href="#licensing_command_line_tools">命令行工具</a></li>
+              </ul>
+            </li>
+            <li>
+             <a href="#gui">图形用户界面</a>             <ul>
+                <li><a href="#gui_views_targets">目标</a></li>
+                <li><a href="#gui_views_processes">进程</a></li>
+                <li><a href="#gui_views_modules">模块</a></li>
+                <li><a href="#gui_views_compilands">编译器</a></li>
+              </ul>
+            </li>
+            <li>
+             <a href="#global_preferences">全局首选项</a>             <ul>
+                <li><a href="#global_preferences_ui">用户界面</a></li>
+                <li><a href="#global_preferences_logging">日志记录</a></li>
+                <li><a href="#global_preferences_network">网络</a></li>
+                <li><a href="#global_preferences_notifications">通知</a></li>
+                <li><a href="#global_preferences_hot_reload">热重载</a></li>
+                <li><a href="#global_preferences_hot_restart">热重启</a></li>
+                <li><a href="#global_preferences_ide">IDE</a></li>
+                <li><a href="#global_preferences_licensing">许可</a></li>
+              </ul>
+            </li>
+            <li>
+             <a href="#project_preferences">项目首选项</a>             <ul>
+                <li><a href="#project_preferences_general">常规</a></li>
+                <li><a href="#project_preferences_hot_reload">热重载</a></li>
+                <li><a href="#project_preferences_compiler">编译器</a></li>
+                <li><a href="#project_preferences_linker">链接器</a></li>
+                <li><a href="#project_preferences_exceptions">异常</a></li>
+                <li><a href="#project_preferences_continuous_compilation">连续编译</a></li>
+                <li><a href="#project_preferences_virtual_drive">虚拟驱动器</a></li>
+                <li><a href="#project_preferences_unity_splitting">统一分割</a></li>
+              </ul>
+            </li>
+            <li>
+             <a href="#API">应用程序接口</a>             <ul>
+                <li><a href="#API_naming_convention">命名规则</a></li>
+                <li><a href="#API_flavours">版本</a></li>
+                <li><a href="#API_versioning">版本控制</a></li>
+                <li><a href="#API_agent_validation">Agent 验证</a></li>
+                <li><a href="#API_connection_callback">连接回调</a></li>
+                <li><a href="#API_hooks">钩子</a></li>
+                <ul>
+                  <li><a href="#API_compile_hooks">编译钩子</a></li>
+                  <li><a href="#API_link_hooks">链接钩子</a></li>
+                  <li><a href="#API_hot_reload_hooks">热重载钩子</a></li>
+                  <li><a href="#API_global_hot_reload_hooks">全局热重载钩子</a></li>
+                </ul>
+                <li><a href="#API_structural_change">结构更改</a></li>
+                <li><a href="#API_applying_preferences">应用首选项</a></li>
+                <li><a href="#API_logging_to_the_UI">登录用户界面</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#considerations">注意事项</a>
+              <ul>
+                <li><a href="#considerations_mutable_data">可变数据</a></li>
+                <li><a href="#considerations_immutable_data">不可变数据</a></li>
+              </ul>
+            </li>
+            <li>
+             <a href="#limitations">限制</a>     <ul>
+                <li><a href="#limitation_overhead">开销</a></li>
+                <li><a href="#limitation_breakpoints">调试器中的断点</a></li>
+                <li><a href="#limitation_global_variables">调试器中的全局变量</a></li>
+                <li><a href="#limitation_functions_on_the_stack">堆栈上的函数</a></li>
+                <li><a href="#limitation_thread_local_storage">线程本地存储</a></li>
+                <li><a href="#limitation_clang_dynamic_initializers">Clang 中的动态初始化器</a></li>
+              </ul>
+            </li>
+            <li>
+             <a href="#known_issues">已知问题</a>           <ul>
+                <li><a href="#known_fastbuild_clang">使用 Clang 的 FASTBuild</a></li>
+                <li><a href="#known_issues_external">/external:I "需要"/external:W</a></li>
+                <li><a href="#known_issues_include">PDB 中缺少 INCLUDE</a></li>
+                <li><a href="#known_reloading_in_halted_processes">停止进程中的热重载</a></li>
+              </ul>
+            </li>
+            <li>
+             <a href="#troubleshooting">故障排除</a>           <ul>
+                <li><a href="#troubleshooting_missing_compilands">编译命令缺失</a></li>
+                <li><a href="#troubleshooting_verbose_compiling">冗长编译</a></li>
+                <li><a href="#troubleshooting_verbose_linking">冗长链接</a></li>
+              </ul>
+            </li>
+            <li>
+             <a href="#3rd_party_libraries">第三方库</a>           </li>
+          </ul>
+            </nav>
+        </div>
+
+        <main class="content">
+          <header>
+            <h1 id="quickstart_guide"><a href="#quickstart_guide">快速入门指南</a></h1>
+            <p class="lead">如果您想在某个项目中直接试用 Live++，稍后再处理细节问题，只需按照以下步骤操作即可：</p>
+            <ol>
+              <li>确保<strong>LivePP</strong>文件夹存储在项目层次结构中的某个位置。</li>
+              <li>为项目设置<a href="#compiler_settings">编译器选项</a>和<a href="#linker_settings">链接器选项</a>。</li>
+              <li>创建默认 Agent，并使用以下代码为所有加载模块启用 Live++：</li>
+
+<pre class="notranslate"><code class="language-cpp"><span class="token comment" spellcheck="true">// include the API for Windows, 64-bit, C++</span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">"LivePP/API/x64/LPP_API_x64_CPP.h"</span></span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  <span class="token comment" spellcheck="true">// create a default agent, loading the Live++ agent from the given path, e.g. "ThirdParty/LivePP"</span>
+  lpp<span class="token operator">::</span>LppDefaultAgent lppAgent <span class="token operator">=</span> lpp<span class="token operator">::</span><span class="token function">LppCreateDefaultAgent</span><span class="token punctuation">(</span><span class="token keyword">nullptr</span><span class="token punctuation">,</span> absoluteOrRelativePathWithoutTrailingSlash<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment" spellcheck="true">// bail out in case the agent is not valid</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>lpp<span class="token operator">::</span><span class="token function">LppIsValidDefaultAgent</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>lppAgent<span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token number">1</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token comment" spellcheck="true">// enable Live++ for all loaded modules</span>
+  lppAgent<span class="token punctuation">.</span><span class="token function">EnableModule</span><span class="token punctuation">(</span>lpp<span class="token operator">::</span><span class="token function">LppGetCurrentModulePath</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> lpp<span class="token operator">::</span>LPP_MODULES_OPTION_ALL_IMPORT_MODULES<span class="token punctuation">,</span> <span class="token keyword">nullptr</span><span class="token punctuation">,</span> <span class="token keyword">nullptr</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment" spellcheck="true">// run the application</span>
+  <span class="token comment" spellcheck="true">// ...</span>
+  Application<span class="token operator">::</span><span class="token function">Exec</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment" spellcheck="true">// destroy the Live++ agent</span>
+  lpp<span class="token operator">::</span><span class="token function">LppDestroyDefaultAgent</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>lppAgent<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+              <li>启动应用程序，使用所选应用程序修改源文件，保存更改，然后点击<kbd class="notranslate">ctrl + alt + F11</kbd> 以调用 Live++ 热加载。</li>
+            </ol>
+          </header>
+
+          <section>
+            <h2 id="examples"><a href="#examples">示例</a></h2>
+            <p class="lead">或者，也可以查看 Live++ 随附的示例（可<a href="../../releases.html" target="_blank">单独下载</a>）。它们为 Visual Studio 2017、2019 和 2022 提供了现成的解决方案和项目，并演示了 Live++ 提供的各种功能，让您无需亲自设置即可进行实验。</p>
+          </section>
+
+          <header>
+            <h1 id="installation"><a href="#installation">安装</a></h1>
+            <p class="lead">Live++ 不需要冗长的安装过程。它完全独立：只需将整个目录树复制到硬盘上的任意位置即可。当然，您也可以将 Live++ 文件夹上传到您用来跟踪项目的任何版本控制系统中。</p>
+          </header>
+
+          <section>
+            <h2 id="directory_structure"><a href="#directory_structure">目录结构</a></h2>
+            <p>这是一个 Live++ 构建目录结构示例：</p>
+            <div class="notranslate file-tree">
+              <ul>
+                <li class="is-folder open">
+                  LivePP<i>Live++ 主文件夹</i>
+                  <ul>
+                    <li class="is-folder open">
+                      Agent<i>代理加载到目标应用程序中</i>
+                      <ul>
+                        <li class="is-folder open">
+                          x64<i>适用于 Windows 的代理，64 位</i>
+                          <ul>
+                            <li class="is-file">LPP_Agent_Bridge_x64.exe<i>Agent和Broker之间通信的辅助进程</i></li>
+                            <li class="is-file">LPP_Agent_Bridge_x64.pdb<i>包含调试符号的公共 PDB</i></li>
+                            <li class="is-file">LPP_Agent_x64_CPP.dll<i>Windows 代理，64 位，C++</i></li>
+                            <li class="is-file">LPP_Agent_x64_CPP.pdb<i>包含调试符号的公共 PDB</i></li>
+                            <li class="is-file">LPP_Agent_x86_CPP.dll<i>Windows 代理，32 位，C++</i></li>
+                            <li class="is-file">LPP_Agent_x86_CPP.pdb<i>包含调试符号的公共 PDB</i></li>
+                          </ul>
+                        </li>
+                      </ul>
+                    </li>
+
+                    <li class="is-folder open">
+                      API<i>适用于不同平台和语言的 API</i>
+                      <ul>
+                        <li class="is-folder open">
+                          x64<i>适用于 Windows（64 位）的 API</i>
+                          <ul>
+                            <li class="is-file"><strong>LPP_API_x64_CPP.h</strong><i><strong>用于支持 Windows、64 位、C++ 的平台特定头文件</strong></i></li>
+                            <li class="is-file">LPP_API.h<i>特定于平台的 API 文件使用的主要 API 头文件（客户端从未包含）</i></li>
+                            <li class="is-file">LPP_API_Helpers.h<i>特定于平台的 API 文件使用的辅助头文件（客户端不会包含）</i></li>
+                            <li class="is-file">LPP_API_Hooks.h<i>特定于平台的 API 文件使用的辅助头文件（客户端不会包含）</i></li>
+                            <li class="is-file">LPP_API_Options.h<i>特定于平台的 API 文件使用的辅助头文件（客户端不会包含）</i></li>
+                            <li class="is-file">LPP_API_Preferences.h<i>特定于平台的 API 文件使用的辅助头文件（客户端不会包含）</i></li>
+                            <li class="is-file">LPP_API_Version_x64_CPP.h<i>特定于平台的 API 文件使用的辅助头文件（客户端不会包含）</i></li>
+                            <li class="is-file">version_x64_CPP.txt<i>适用于 Windows、64 位、C++ 的版本控制文件</i></li>
+                          </ul>
+                        </li>
+                      </ul>
+                    </li>
+
+                    <li class="is-folder open">
+                      Broker
+                      <ul>
+                        <li class="is-folder open">
+                          Plugins<i>适用于不同平台和语言的插件</i>
+                          <ul>
+                            <li class="is-file">LPP_Broker_x64_CPP.dll<i>支持 Windows、64 位、C++ 的插件</i></li>
+                            <li class="is-file">LPP_Broker_x64_CPP.pdb<i>包含调试符号的公共 PDB</i></li>
+                            <li class="is-file">LPP_Weak_Symbols_x64_CPP.obj<i>支持 Windows、64 位、C++ 的弱符号帮助程序文件</i></li>
+                            <li class="is-file">LPP_Weak_Symbols_x86_CPP.obj<i>支持 Windows、32 位、C++ 的弱符号帮助程序文件</i></li>
+                          </ul>
+                        </li>
+                        <li class="is-file">dbghelp.dll<i>Broker 使用的 64 位帮助程序 DLL</i></li>
+                        <li class="is-file">LPP_Broker.exe<i>主要 Live++ 经纪商应用程序</i></li>
+                        <li class="is-file">LPP_Broker.pdb<i>包含调试符号的公共 PDB</i></li>
+                        <li class="is-file">srcsrv.dll<i>Broker 使用的 64 位帮助程序 DLL</i></li>
+                        <li class="is-file">symsrv.dll<i>Broker 使用的 64 位帮助程序 DLL</i></li>
+                      </ul>
+                    </li>
+
+                    <li class="is-folder open">
+                      CLI<i>命令行工具</i>
+                      <ul>
+                        <li class="is-file">LPP_License_x64_CPP.exe<i>允许激活和停用 Windows、64 位、C++ 的许可证</i></li>
+                        <li class="is-file">LPP_License_x64_CPP.pdb<i>包含调试符号的公共 PDB</i></li>
+                      </ul>
+                    </li>
+
+                    <li class="is-folder closed">
+                      Docs<i>本文档</i>
+                      <ul>
+                      </ul>
+                    </li>
+
+                    <li class="is-folder open">
+                      EULA
+                      <ul>
+                        <li class="is-file">LPP_EULA.pdf<i>最终用户许可协议</i></li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+
+                <li class="is-folder open">
+                  Examples_x64
+                  <ul>
+                    <li class="is-folder closed">
+                      build<i>Visual Studio 2017、2019 和 2022 解决方案和项目</i>
+                      <ul>
+                      </ul>
+                    </li>
+
+                    <li class="is-folder closed">
+                      FASTBuild<i>FASTBuild</i>
+                      <ul>
+                      </ul>
+                    </li>
+
+                    <li class="is-folder closed">
+                      LLVM<i>clang-cl 和 lld-link</i>
+                      <ul>
+                      </ul>
+                    </li>
+
+                    <li class="is-folder closed">
+                      readme<i>描述示例的自述文件</i>
+                      <ul>
+                      </ul>
+                    </li>
+
+                    <li class="is-folder closed">
+                      src<i>示例使用的 C++ 源代码</i>
+                      <ul>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          <header>
+            <h1 id="architecture"><a href="#architecture">架构</a></h1>
+            <p class="lead">为了尽可能减少对目标应用程序的影响，并实现网络热加载等功能，Live++ 被分成多个进程和模块。</p>
+          </header>
+
+          <section>
+            <h2 id="broker"><a href="#broker">Broker</a></h2>
+            <p>Broker 是 Live++ 的主要应用进程。它作为服务器运行，Live++ 的 Agent 与之连接。它是一个长期运行的应用程序，应一次性启动并保持运行：无需在每次关闭或重新打开目标应用程序时重新启动它。此外，Broker 还会存储 Live++ 所需文件（如 .pdb 和 .obj 格式文件）的内部缓存，从而大大缩短应用程序在两次重启之间只有部分内容发生变化时的加载时间。</p>
+            <p>对于本地连接，一旦将 Live++ Agent 载入目标应用程序，Broker 就会自动启动。</p>
+
+            <p>由于 Broker 充当服务器，监听特定端口上的传入连接，因此只有在每个 Broker 使用不同端口进行通信时，才允许同时运行多个 Broker（可在<a href="#global_preferences_network">全局首选项</a>中进行配置）。</p>
+
+            <h2 id="agent"><a href="#agent">Agent</a></h2>
+            <p>Agent 负责执行 Broker 或 Bridge 规定的任务。Agent 以小型共享库（如 Windows 和 Xbox 上的 .dll）的形式发布，通过相应的 API 创建任何可用 Agent 时，都会将其加载到目标应用程序中。</p>
+            <p>这种方法使得在模块上使用 Live++ 成为可能，这些模块被加载到完全任意的目标应用程序中，甚至是对 Live++ 一无所知、没有内置任何热加载功能的应用程序，如<a href="https://docs.unity3d.com/Manual/NativePlugins.html" target="_blank">Unity Native 插件</a>、<a href="https://help.autodesk.com/view/MAYAUL/2022/ENU/?guid=Maya_SDK_A_First_Plugin_cpp_HelloWorldComplete_html" target="_blank">Autodesk Maya 插件</a>等无数其他应用程序。</p>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>示例</h4>
+              <p>Live++ 随附了一个名为<strong>"13_ArbitraryTarget"</strong>的示例来演示这一点。</p>
+            </div>
+
+            <h2 id="bridge"><a href="#bridge">Bridge</a></h2>
+            <p>在某些平台（如 Windows 和 Xbox）上，Bridge 充当 Agent 和 Broker 之间的中间进程，是提供网络热加载等功能所必需的，因为 Broker 不一定与 Agent 运行在同一台机器上。不过，对于用户来说，Bridge 应该是完全透明的。</p>
+
+            <h2 id="communication"><a href="#communication">通信</a></h2>
+            <p>Agent 和 Bridge 通过命名双工管道相互通信，因为它们总是在同一台机器上运行。</p>
+            <p>Bridge 和 Broker 通过 TCP/IP 进行通信，使用<a href="#global_preferences_network">全局首选项</a>中配置的主机名或 IP 地址，通信端口为 12216。</p>
+          </section>
+
+          <header>
+            <h1 id="project_setup"><a href="#project_setup">项目设置</a></h1>
+            <p class="lead">除了一些编译器和链接器设置外，Live++ 不需要任何特殊的项目设置。您完全可以在项目和解决方案中使用静态库（.lib）和动态库（.dll）的任意组合。Live++ 会自动从涉及的所有对象文件和可执行文件中提取所需的信息。</p>
+          </header>
+            
+          <section>
+            <h2 id="compiler_settings"><a href="#compiler_settings">编译器设置</a></h2>
+            <h3 id="compiler_settings_MSVC"><a href="#compiler_settings_MSVC">MSVC/Visual Studio</a></h3>
+            <p>必须在使用 Live++ 的每个项目的配置属性中启用这些编译器设置：</p>
+            <p><span class="notranslate label label-default label-custom-MM">C/C++ -> General -> Debug Information Format</span>必须设置为<span class="notranslate label label-default-MM label-custom-MM">C7 compatible (/Z7)</span>或<span class="notranslate label label-default-MM label-custom-MM">Program Database (/Zi)</span></p>
+            <p><span class="notranslate label label-default label-custom-MM">C/C++ -> Code Generation -> Enable Minimal Rebuild</span>必须设置<span class="notranslate label label-default-MM label-custom-MM">No (/Gm-)</span></p>
+
+            <p>x86/Win32 项目还需要以下编译器设置：</p>
+            <p><span class="notranslate label label-default label-custom-MM">C/C++ -> Code Generation -> Create Hotpatchable Image</span>必须设置为<span class="notranslate label label-default-MM label-custom-MM">Yes (/hotpatch)</span></p>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>注意事项</h4>
+              <p>我们建议同时使用<a href="https://docs.microsoft.com/en-us/cpp/build/reference/gy-enable-function-level-linking" target="_blank">/Gy (Enable Function-Level Linking)</a>和<a href="https://docs.microsoft.com/en-us/cpp/build/reference/gw-optimize-global-data" target="_blank">/Gw (Optimize Global Data)</a>编译器选项，以使补丁可执行文件和 PDB 尽可能小。</p>
+            </div>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>提示</h4>
+              <p>最新版本的 Visual Studio 2022（版本 17.11 及更高版本）在<span class="notranslate label label-default label-custom-MM">Tools -> Options... -> Debugging -> General -> Enable Hot Reload</span>下引入了一个名为<span class="notranslate label label-default label-custom-MM">Automatically apply changes on continue (Native only)</span>的新选项，在调试时更改代码时会弹出一个对话框，显示"Hot Reload - Not supported by project"。我们建议仅禁用此特定选项，或完全禁用 Visual Studio 的热重新加载/编辑并继续功能。</p>
+            </div>
+
+            <h3 id="compiler_settings_clang_cl"><a href="#compiler_settings_clang_cl">Clang-cl</a></h3>
+            <p>使用<strong>clang-cl</strong>编译的代码需要设置以下选项：</p>
+            <p><span class="notranslate label label-default label-custom-MM">-Z7</span> - 在对象文件中启用 CodeView 调试信息</p>
+            <p><span class="notranslate label label-default label-custom-MM">-hotpatch</span> - 创建可热补丁图像</p>
+            <p><span class="notranslate label label-default label-custom-MM">-Gy</span> - 将每个函数放在自己的部分中</p>
+            <p><span class="notranslate label label-default label-custom-MM">-Xclang -mno-constructor-aliases</span> - 禁用折叠/分隔构造函数和析构函数的内部优化</p>
+
+            <h3 id="compiler_settings_clang++"><a href="#compiler_settings_clang++">Clang++</a></h3>
+            <p>由于<strong>clang++</strong>无法理解 MSVC/Visual Studio 编译器选项，因此使用<strong>clang++</strong>编译的代码需要设置以下选项：</p>
+            <p><span class="notranslate label label-default label-custom-MM">-g</span> - 生成源代码级调试信息</p>
+            <p><span class="notranslate label label-default label-custom-MM">-gcodeview</span> - 生成 CodeView 调试信息</p>
+            <p><span class="notranslate label label-default label-custom-MM">-fms-hotpatch</span> - 确保所有函数都能在运行时进行热<span class="notranslate label label-default label-custom-MM">补丁</span>处理</p>
+            <p><span class="notranslate label label-default label-custom-MM">-ffunction-sections</span> - 将每个函数放入自己的部分中</p>
+            <p><span class="notranslate label label-default label-custom-MM">-Xclang -mno-constructor-aliases</span> - 禁用折叠/分隔构造函数和析构函数的内部优化</p>
+
+
+            <h2 id="linker_settings"><a href="#linker_settings">链接器设置</a></h2>
+            <h3 id="linker_settings_MSVC"><a href="#linker_settings_MSVC">MSVC/Visual Studio</a></h3>
+            <p>必须在使用 Live++ 的每个项目的配置属性中启用这些链接器设置：</p>
+            <p><span class="notranslate label label-default label-custom-MM">Linker -> General -> Create Hotpatchable Image</span>必须设置为<span class="notranslate label label-default-MM label-custom-MM">Enabled (/FUNCTIONPADMIN)</span></p>
+            <p><span class="notranslate label label-default label-custom-MM">Linker -> Optimization -> References</span>必须设置为<span class="notranslate label label-default-MM label-custom-MM">No (/OPT:NOREF)</span></p>
+            <p><span class="notranslate label label-default label-custom-MM">Linker -> Optimization -> Enable COMDAT Folding</span>必须设置为<span class="notranslate label label-default-MM label-custom-MM">No (/OPT:NOICF)</span></p>
+            <p><span class="notranslate label label-default label-custom-MM">Linker -> Debugging -> Generate Debug Info</span>必须设置为<span class="notranslate label label-default-MM label-custom-MM">Generate Debug Information optimized for sharing and publishing (/DEBUG:FULL)</span></p>
+
+            <h3 id="linker_settings_lld_link"><a href="#linker_settings_lld_link">lld-link</a></h3>
+            <p><strong>lld-link</strong>与 MSVC/Visual Studio 链接器选项完全兼容。因此，使用<strong>lld-link 链接</strong>的代码必须使用与上述相同的选项。</p>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>示例</h4>
+              <p>Live++ 随附了一个名为<strong>"09_ClangLLD"</strong>的示例，演示如何使用 Clang 作为编译器和 LLD 作为链接器。</p>
+            </div>
+
+
+            <h2 id="incompatible_settings"><a href="#incompatible_settings">不兼容的设置</a></h2>
+            <p>虽然 Live++ 允许您使用几乎任何编译器和链接器选项组合来构建代码，但不支持打开<span class="notranslate label label-default label-custom-MM">CC/C++ -> Optimization -> Whole Program Optimization</span>或任何类型的链接时间代码生成（LTCG）或链接时间优化（LTO）。使用 LTCG/LTO 生成的对象文件以不支持的专有格式存储信息，Live++ 无法使用。</p>
+            <div class="callout callout-info-MM" role="alert">
+              <h4>注意事项</h4>
+              <p>Live++ 会自动检测不兼容的编译器和链接器设置，并相应地输出错误信息。</p>
+            </div>
+
+            <h2 id="required_files"><a href="#required_files">所需文件</a></h2>
+            <p>
+              为了加载和重建模块的必要信息，Live++ 需要以下文件：              <ul>
+                <li>
+                 <strong>所有启用 Live++ 的模块的 PDB 文件：</strong><br/>PDB 文件包含有关可执行映像部分、公共符号以及所涉及的翻译单元和工具链的有用信息。                </li>
+                <li>
+                 <strong>链接到支持 Live++ 的模块的对象文件（.obj）：</strong><br/>Live++ 所需的几乎所有符号信息都是从对象文件中提取和重建的。                </li>
+                <li>
+                 <strong>用于编译上述对象文件的源文件（.cpp 和 .h）</strong>。        </li>
+              </ul>
+              您可能会发现您的项目使用了一些您没有源代码（如第三方代码）或对象文件（如 Visual Studio 的 C &amp; C++ 运行时）的库。这不是问题：Live++ 会直接忽略相应的翻译单元。            </p>
+
+            <h2 id="supported_setups"><a href="#supported_setups">支持的设置</a></h2>
+            <p>
+              Live++ 完全支持 .exe、.dll 和 .lib 项目、基于 makefile 的项目以及自定义设置和构建系统。从技术角度看，Live++ 并不关心在哪种类型的项目中使用。事实上，Live++ 甚至根本不知道项目类型。<br/>不过，不同的项目类型在编码会话之间会表现出不同的行为：              <ul>
+                <li>
+                 <strong>应用程序（.exe）项目：</strong><br/>Live++ 将使用原始编译器命令行选项重新编译 .obj 文件，并生成一个补丁加载到运行进程的地址空间，运行时根据现有符号进行链接。在两次 Live++ 会话之间，.exe 将由本地工具链自动再次编译和链接。                </li>
+                <li>
+                 <strong>动态链接库 (.dll) 项目：</strong><br/>与应用程序项目类似，单个 .obj 文件将被重新编译。在两次会话之间，本地工具链将自动重新编译和链接 .dll。       </li>
+                <li>
+                 <strong>静态库 (.lib) 项目：</strong><br/>与应用程序项目类似，作为 .lib 文件一部分的单个 .obj 文件将被重新编译。不过，Live++ 不会链接包含这些 .obj 文件的静态库。在两个 Live++ 会话之间，本地工具链将首先编译和链接所有包含重新编译对象文件的 .lib 文件，然后重新链接所有使用这些 .lib 文件的应用程序和动态链接库。                </li>
+                <li>
+                 <strong>基于 Makefile 的项目：</strong><br/>与上述任何一种类似，具体取决于 makefile 所包含的内容。                </li>
+                <li>
+                 <strong>自定义设置和构建系统：</strong><br/>与上述任何一种情况类似，具体取决于使用您的设置构建了哪些内容。                </li>
+              </ul>
+            </p>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>注释</h4>
+              <p>除 Visual Studio 外，Live++ 还与<a href="https://www.fastbuild.org/docs/home.html" target="_blank">FASTBuild</a>、<a href="https://www.incredibuild.com/" target="_blank">IncrediBuild</a>、SN-DBS、各种内部（分布式）构建系统以及其他集成开发环境（如<a href="https://www.jetbrains.com/clion/download/#section=windows" target="_blank">CLion</a>、<a href="https://www.jetbrains.com/rider/download/#section=windows" target="_blank">Rider</a> 或<a href="https://code.visualstudio.com/" target="_blank">Visual Studio Code</a>）使用的构建系统进行过测试。根据您的构建结构，您可能需要先配置一些设置，以确保 Live++ 找到所有必要的文件和工具链。</p>
+            </div>
+
+
+            <h3 id="FASTBuild"><a href="#FASTBuild">FASTBuild</a></h3>
+            <p>
+              使用 FASTBuild 作为构建系统时，无需进行特殊配置。            </p>
+            <p>
+              这一规则的唯一例外是结合<a href="https://learn.microsoft.com/en-us/cpp/build/reference/fi-name-forced-include-file" target="_blank">/FI 编译器选项</a>使用分布式编译时。在这种情况下，FASTBuild 将在本地预处理单个翻译单元，然后将它们分发给远程 Agent，但在这样做时删除 /FI 选项。因此，生成的 PDB 文件中将缺少 /FI 选项，可能导致使用 Live++ 重新编译失败。            </p>
+            <p>
+              在这种情况下，必须通过<a href=#project_preferences_compiler>项目首选项</a>中指定的附加命令行选项向 Live++ 提供 /FI 选项。         </p>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>示例</h4>
+              <p>Live++ 随附了一个名为<strong>"11_FASTBuild"</strong>的示例来演示这一点。</p>
+            </div>
+
+
+            <h3 id="IncrediBuild"><a href="#IncrediBuild">IncrediBuild</a></h3>
+            <p>
+              当结合预编译头文件使用分布式编译时，IncrediBuild 可能会生成多个单独的 PDB（例如<strong>C:\Project\SourceFile_cpp_ib_1.pdb、C:\Project\SourceFile_cpp_ib_2.pdb 等</strong>），这些 PDB 都使用同一个预编译头文件（例如<strong>C:\Project\PCH.pch</strong>），而该头文件是根据不同的 PDB 生成的。严格来说，微软的编译器工具链既不允许也不支持这种做法，当尝试重新编译时，Live++ 会产生<a href="https://docs.microsoft.com/en-us/cpp/error-messages/compiler-errors-2/compiler-error-c2858" target="_blank">错误 C2858</a>。        </p>
+            <p>
+              在这种情况下，您需要使用<a href="#project_preferences_compiler">"强制使用预编译头 PDB "</a>设置，以强制 Live++ 在重新编译文件时使用与相应 PCH 相同的 PDB。      </p>
+
+
+            <h3 id="distributed_builds"><a href="#distributed_builds">分布式编译</a></h3>
+            <p>
+              使用分布式编译时，编译系统会将编译器可执行文件和所有必要的辅助文件复制到远程机器，在远程机器上启动编译进程，并将输出复制回启动编译的机器。在这种情况下，Live++ 用来查找编译器和链接器可执行文件的 PDB 文件将包含远程机器上的路径，例如<strong>C:\Users\Jane\AppData\Local\Temp\.fbuild.tmp\worker\toolchain.130589cdf35aed3b\cl.exe</strong>。            </p>
+            <p>
+              由于使用 Live++ 重新编译文件时此路径不可用，您必须使用<a href="#project_preferences_compiler">“覆盖编译器路径”</a>设置，并告知 Live++ 本地编译器的位置。此外，根据文件的编译和链接位置，您可能还需要设置有效的<a href="#project_preferences_hot_reload">“路径重映射”</a>。
+            </p>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>注意事项</h4>
+              <p>
+                这适用于所有支持分布式/远程编译的编译系统，如<a href="https://www.fastbuild.org/docs/home.html" target="_blank">FASTBuild</a>、<a href="https://www.incredibuild.com/" target="_blank">IncrediBuild</a> 和 SN-DBS。         </p>
+            </div>
+          </section>
+
+          <header>
+            <h1 id="usage"><a href="#usage">使用方法</a></h1>
+            <p class="lead">使用 Live++ 非常简单：更改作为运行中应用程序或 DLL 一部分的任何源文件，保存更改，然后按 Live++ 快捷键<kbd class="notranslate">ctrl + alt + F11</kbd> 。</p>
+          </header>
+
+          <section>
+            <h2 id="usage_agents"><a href="#usage_agents">Agent</a></h2>
+            <p>根据您的需求，目前有两种不同的 Agent 可供选择。虽然所有 Agent 都共享大部分 API，但其中一些还提供了用于细粒度控制的附加 API。可以使用以下 API 创建和销毁 Agent：</p>
+
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>创建默认 Agent 的 API</th>
+                    <th>说明</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td width="70%" class="notranslate"><strong>
+                      <code class=" language-cpp">lpp<span class="token operator">::</span>LppDefaultAgent lpp<span class="token operator">::</span><span class="token function">LppCreateDefaultAgent</span><span class="token punctuation">(</span><span class="token keyword">const</span> LppLocalPreferences<span class="token operator">*</span> <span class="token keyword">const</span> localPreferences<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> absoluteOrRelativePathWithoutTrailingSlash<span class="token punctuation">)</span><span class="token punctuation">;</span></code>
+                    </strong></td>
+                    <td>使用可选的本地首选项创建默认代理。</td>
+                  </tr>
+
+                  <tr>
+                    <td width="70%" class="notranslate"><strong>
+                      <code class="language-cpp">lpp<span class="token operator">::</span>LppDefaultAgent lpp<span class="token operator">::</span><span class="token function">LppCreateDefaultAgentWithPreferences</span><span class="token punctuation">(</span><span class="token keyword">const</span> LppLocalPreferences<span class="token operator">*</span> <span class="token keyword">const</span> localPreferences<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> absoluteOrRelativePathWithoutTrailingSlash<span class="token punctuation">,</span> <span class="token keyword">const</span> LppProjectPreferences<span class="token operator">*</span> <span class="token keyword">const</span> projectPreferences<span class="token punctuation">)</span><span class="token punctuation">;</span></code>
+                    </strong></td>
+                    <td>使用给定的项目首选项和可选的本地首选项创建默认代理。</td>
+                  </tr>
+
+                  <tr>
+                    <td width="70%" class="notranslate"><strong>
+                      <code class="language-cpp">lpp<span class="token operator">::</span>LppDefaultAgent lpp<span class="token operator">::</span><span class="token function">LppCreateDefaultAgentWithPreferencesFromFile</span><span class="token punctuation">(</span><span class="token keyword">const</span> LppLocalPreferences<span class="token operator">*</span> <span class="token keyword">const</span> localPreferences<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> absoluteOrRelativePathWithoutTrailingSlash<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> absoluteOrRelativePathToProjectPreferences<span class="token punctuation">)</span><span class="token punctuation">;</span></code>
+                    </strong></td>
+                    <td>使用可选的本地首选项创建默认代理，并从给定路径加载项目首选项。</td>
+                  </tr>
+
+                  <tr>
+                    <td width="70%" class="notranslate"><strong>
+                      <code class=" language-cpp"><span class="token keyword">void</span> lpp<span class="token operator">::</span><span class="token function">LppDestroyDefaultAgent</span><span class="token punctuation">(</span>LppDefaultAgent<span class="token operator">*</span> agent<span class="token punctuation">)</span><span class="token punctuation">;</span></code>
+                    </strong></td>
+                    <td>销毁给定的默认 Agent。</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>创建同步 Agent 的 API</th>
+                    <th>说明</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td width="70%" class="notranslate"><strong>
+                      <code class=" language-cpp">lpp<span class="token operator">::</span>LppSynchronizedAgent lpp<span class="token operator">::</span><span class="token function">LppCreateSynchronizedAgent</span><span class="token punctuation">(</span><span class="token keyword">const</span> LppLocalPreferences<span class="token operator">*</span> <span class="token keyword">const</span> localPreferences<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> absoluteOrRelativePathWithoutTrailingSlash<span class="token punctuation">)</span><span class="token punctuation">;</span></code>
+                    </strong></td>
+                    <td>使用可选的本地首选项创建同步代理。</td>
+                  </tr>
+
+                  <tr>
+                    <td width="70%" class="notranslate"><strong>
+                      <code class=" language-cpp">lpp<span class="token operator">::</span>LppSynchronizedAgent lpp<span class="token operator">::</span><span class="token function">LppCreateSynchronizedAgentWithPreferences</span><span class="token punctuation">(</span><span class="token keyword">const</span> LppLocalPreferences<span class="token operator">*</span> <span class="token keyword">const</span> localPreferences<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> absoluteOrRelativePathWithoutTrailingSlash<span class="token punctuation">,</span> <span class="token keyword">const</span> LppProjectPreferences<span class="token operator">*</span> <span class="token keyword">const</span> projectPreferences<span class="token punctuation">)</span><span class="token punctuation">;</span></code>
+                    </strong></td>
+                    <td>使用给定的项目偏好设置和可选的本地偏好设置创建同步代理。</td>
+                  </tr>
+
+                  <tr>
+                    <td width="70%" class="notranslate"><strong>
+                      <code class=" language-cpp">lpp<span class="token operator">::</span>LppSynchronizedAgent lpp<span class="token operator">::</span><span class="token function">LppCreateSynchronizedAgentWithPreferencesFromFile</span><span class="token punctuation">(</span><span class="token keyword">const</span> LppLocalPreferences<span class="token operator">*</span> <span class="token keyword">const</span> localPreferences<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> absoluteOrRelativePathWithoutTrailingSlash<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> absoluteOrRelativePathToProjectPreferences<span class="token punctuation">)</span><span class="token punctuation">;</span></code>
+                    </strong></td>
+                    <td>使用可选的本地首选项创建同步代理，并从给定路径加载项目首选项。</td>
+                  </tr>
+
+                  <tr>
+                    <td width="70%" class="notranslate"><strong>
+                      <code class=" language-cpp"><span class="token keyword">void</span> lpp<span class="token operator">::</span><span class="token function">LppDestroySynchronizedAgent</span><span class="token punctuation">(</span>LppSynchronizedAgent<span class="token operator">*</span> agent<span class="token punctuation">)</span><span class="token punctuation">;</span></code>
+                    </strong></td>
+                    <td>销毁给定的同步代理。</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+
+            <h3 id="creating_default_agent"><a href="#creating_default_agent">创建默认 Agent</a></h3>
+            <p>对于大多数应用程序和项目来说，首先要做的是创建一个默认代理：</p>
+<pre class="notranslate"><code class=" language-cpp"><span class="token comment" spellcheck="true">// include the API for Windows, 64-bit, C++</span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">"LivePP/API/x64/LPP_API_x64_CPP.h"</span></span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  <span class="token comment" spellcheck="true">// create a default agent, loading the Live++ agent from the given path, e.g. "ThirdParty/LivePP"</span>
+  lpp<span class="token operator">::</span>LppDefaultAgent lppAgent <span class="token operator">=</span> lpp<span class="token operator">::</span><span class="token function">LppCreateDefaultAgent</span><span class="token punctuation">(</span><span class="token keyword">nullptr</span><span class="token punctuation">,</span> absoluteOrRelativePathWithoutTrailingSlash<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment" spellcheck="true">// bail out in case the agent is not valid</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>lpp<span class="token operator">::</span><span class="token function">LppIsValidDefaultAgent</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>lppAgent<span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token number">1</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token comment" spellcheck="true">// enable Live++ for certain modules</span>
+  <span class="token comment" spellcheck="true">// ...</span>
+
+  <span class="token comment" spellcheck="true">// run the application</span>
+  <span class="token comment" spellcheck="true">// ...</span>
+  Application<span class="token operator">::</span><span class="token function">Exec</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment" spellcheck="true">// destroy the Live++ agent</span>
+  lpp<span class="token operator">::</span><span class="token function">LppDestroyDefaultAgent</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>lppAgent<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+
+            <p>在内部，它会为请求的平台和语言加载正确的共享库，并执行一些完整性检查，然后将所有可用的 API 填入返回对象。返回的<code class="notranslate language-cpp code-in-text">LppDefaultAgent</code>对象是一种与平台无关的类型，它使用函数指针在共享库中存储 API。</p>
+
+            <p>请注意，在上面的示例代码中，默认 Agent 不需要知道主循环、引擎框架或类似的东西。 这种方法的优点是，它能与不像游戏和游戏引擎那样遵循典型的 "<strong>更新、渲染、呈现"（Update, Render, Present</strong>）循环的应用程序很好地集成，因此能与基于事件的应用程序（如使用<a href="https://www.qt.io" target="_blank">Qt</a> 构建的应用程序）一起使用。 这种方法的一个缺点是，你无法控制 Live++ 在哪个时间点应用代码补丁。如果需要这种控制，请使用同步 Agent。        </p>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>注意事项</h4>
+              <p>
+                在某些平台上（如 Windows 和 Xbox），Agent 会自动生成<a href="#bridge">Bridge</a>辅助进程，无需手动启动。              </p>
+            </div>
+
+            <h3 id="creating_synchronized_agent"><a href="#creating_synchronized_agent">创建同步 Agent</a></h3>
+            <p>同步 Agent 对基于框架的应用程序特别有用，它允许你控制<strong>何时</strong>以及<strong>如何</strong>处理热加载和热重启请求：</p>
+<pre class="notranslate"><code class=" language-cpp"><span class="token comment" spellcheck="true">// include the API for Windows, 64-bit, C++</span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">"LivePP/API/x64/LPP_API_x64_CPP.h"</span></span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  <span class="token comment" spellcheck="true">// create a synchronized agent, loading the Live++ agent from the given path, e.g. "ThirdParty/LivePP"</span>
+  lpp<span class="token operator">::</span>LppSynchronizedAgent lppAgent <span class="token operator">=</span> lpp<span class="token operator">::</span><span class="token function">LppCreateSynchronizedAgent</span><span class="token punctuation">(</span><span class="token keyword">nullptr</span><span class="token punctuation">,</span> absoluteOrRelativePathWithoutTrailingSlash<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment" spellcheck="true">// bail out in case the agent is not valid</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>lpp<span class="token operator">::</span><span class="token function">LppIsValidSynchronizedAgent</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>lppAgent<span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token number">1</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token comment" spellcheck="true">// enable Live++ for certain modules</span>
+  <span class="token comment" spellcheck="true">// ...</span>
+
+  <span class="token comment" spellcheck="true">// run the main loop</span>
+  <span class="token keyword">while</span> <span class="token punctuation">(</span>MainLoop<span class="token operator">::</span><span class="token function">NextFrame</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">{</span>
+    <span class="token comment" spellcheck="true">// listen to hot-reload and hot-restart requests</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>lppAgent<span class="token punctuation">.</span><span class="token function">WantsReload</span><span class="token punctuation">(</span>lpp<span class="token operator">::</span>LPP_RELOAD_OPTION_SYNCHRONIZE_WITH_RELOAD<span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+      <span class="token comment" spellcheck="true">// client code can do whatever it wants here, e.g. synchronize across several threads, the network, etc.</span>
+      <span class="token comment" spellcheck="true">// ...</span>
+      lppAgent<span class="token punctuation">.</span><span class="token function">Reload</span><span class="token punctuation">(</span>lpp<span class="token operator">::</span>LPP_RELOAD_BEHAVIOUR_WAIT_UNTIL_CHANGES_ARE_APPLIED<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>lppAgent<span class="token punctuation">.</span><span class="token function">WantsRestart</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+      <span class="token comment" spellcheck="true">// client code can do whatever it wants here, e.g. finish logging, abandon threads, etc.</span>
+      <span class="token comment" spellcheck="true">// ...</span>
+      lppAgent<span class="token punctuation">.</span><span class="token function">Restart</span><span class="token punctuation">(</span>lpp<span class="token operator">::</span>LPP_RESTART_BEHAVIOUR_INSTANT_TERMINATION<span class="token punctuation">,</span> <span class="token number">0u</span><span class="token punctuation">,</span> <span class="token keyword">nullptr</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    MainLoop<span class="token operator">::</span><span class="token function">Update</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    MainLoop<span class="token operator">::</span><span class="token function">Render</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    MainLoop<span class="token operator">::</span><span class="token function">Present</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token comment" spellcheck="true">// destroy the Live++ agent</span>
+  lpp<span class="token operator">::</span><span class="token function">LppDestroySynchronizedAgent</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>lppAgent<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+
+            <p>与默认 Agent 类似，返回的<code class="notranslate language-cpp code-in-text">LppSynchronizedAgent</code>对象是一种与平台无关的类型，它使用函数指针在共享库中存储 API。</p>
+
+            <p>
+              同步代理可用于确保代码补丁仅在帧中的特定时间点发生，例如在帧的开始或结束时。在支持<a href="#API_structural_change">结构变化</a>时，这一点至关重要，因为这可以防止使用旧的内存布局分配的对象被使用期望不同内存布局的新代码访问。            </p>
+            <p>
+              此外，使用同步 Agent 还能确保函数不会在帧中间被修补，这可能会导致使用旧代码更新的对象和使用新代码更新的对象之间出现轻微的行为偏移。下面的示例说明了这一点：<pre class="notranslate"><code class=" language-cpp"><span class="token keyword">void</span> <span class="token function">UpdateNumber</span><span class="token punctuation">(</span><span class="token keyword">float</span> deltaTime<span class="token punctuation">,</span> size_t index<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  g_numbers<span class="token punctuation">[</span>index<span class="token punctuation">]</span> <span class="token operator">+</span><span class="token operator">=</span> <span class="token number">1.0f</span><span class="token operator">*</span>deltaTime<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">void</span> <span class="token function">Update</span><span class="token punctuation">(</span><span class="token keyword">float</span> deltaTime<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  <span class="token keyword">for</span> <span class="token punctuation">(</span>size_t i <span class="token operator">=</span> <span class="token number">0u</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> numberCount<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span>
+  <span class="token punctuation">{</span>
+    <span class="token function">UpdateNumber</span><span class="token punctuation">(</span>deltaTime<span class="token punctuation">,</span> i<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre>
+            </p>
+            <p>
+              考虑一下当<code class="notranslate code-in-text language-cpp"><span class="token keyword">void</span> <span class="token function">Update</span><span class="token punctuation">(</span><span class="token keyword">float</span> deltaTime<span class="token punctuation">)</span></code>中的循环执行时，<code class="notranslate code-in-text language-cpp"><span class="token keyword">void</span> <span class="token function">UpdateNumber</span><span class="token punctuation">(</span><span class="token keyword">float</span> deltaTime<span class="token punctuation">,</span> size_t index<span class="token punctuation">)</span></code>被更改会发生什么情况。在这种情况下，部分数字将使用旧代码更新，而其余的数字（即更改后处理的数字）将使用新代码更新。在大多数情况下，这可能不是一个问题，但如果是的话，同步 Agent 可以确保在应用所有代码补丁之前，您的进程不会被中断。            </p>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>注意事项</h4>
+              <p>无论是否使用同步代理，Live++ 都会以安全的方式对可执行代码进行实际修补。这意味着 CPU 绝不会在机器代码级别看到指令被撕成两半。</p>
+            </div>
+
+
+            <h2 id="enabling_livepp"><a href="#enabling_livepp">启用 Live++</a></h2>
+            <p>创建 Agent 后，必须告诉 Live++ 应启用哪些模块。这可以通过以下 Agent API 来实现：</p>
+
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>应用程序接口</th>
+                    <th>说明</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td width="50%" class="notranslate"><strong>
+                      <code class=" language-cpp"><span class="token keyword">void</span> Agent<span class="token operator">::</span><span class="token function">EnableModule</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> relativeOrFullPath<span class="token punctuation">,</span> LppModulesOption options<span class="token punctuation">,</span> <span class="token keyword">void</span><span class="token operator">*</span> callbackContext<span class="token punctuation">,</span> LppFilterFunction<span class="token operator">*</span> callback<span class="token punctuation">)</span><span class="token punctuation">;</span></code>
+                    </strong></td>
+                    <td>使用给定选项为给定模块（.exe 或 .dll）启用 Live++，使用可选回调函数和上下文过滤模块。</td>
+                  </tr>
+                  <tr>
+                    <td width="50%" class="notranslate"><strong>
+                      <code class=" language-cpp"><span class="token keyword">void</span> Agent<span class="token operator">::</span><span class="token function">EnableModules</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span><span class="token operator">*</span> <span class="token keyword">const</span> arrayOfRelativeOrFullPaths<span class="token punctuation">,</span> size_t count<span class="token punctuation">,</span> LppModulesOption options<span class="token punctuation">,</span> <span class="token keyword">void</span><span class="token operator">*</span> callbackContext<span class="token punctuation">,</span> LppFilterFunction<span class="token operator">*</span> callback<span class="token punctuation">)</span><span class="token punctuation">;</span></code>
+                    </strong></td>
+                    <td>使用给定选项为给定模块（.exe 和 .dll 的任意组合）启用 Live++，使用可选回调函数和上下文过滤模块。</td>
+                  </tr>
+                  <tr>
+                    <td width="50%" class="notranslate"><strong>
+                      <code class=" language-cpp"><span class="token keyword">typedef</span> <span class="token keyword">bool</span> <span class="token function">LppFilterFunction</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span> context<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> path<span class="token punctuation">)</span><span class="token punctuation">;</span></code>
+                    </strong></td>
+                    <td>使用用户提供的上下文参数和模块路径调用过滤函数。如果应加载模块，函数需返回<code class="notranslate code-in-text language-cpp"><span class="token boolean">true</span></code>，否则返回<code class="notranslate code-in-text language-cpp"><span class="token boolean">false</span></code>。</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>重要提示</h4>
+              <p>
+                在使用 DLL 时，<strong>切勿</strong>在 DllMain 入口点中调用这些 API，这一点至关重要。<br/>在加载 DLL 时，Live++ 需要执行一些<a href="https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-best-practices" target="_blank">操作系统不支持</a>的操作，这可能会导致死锁。              </p>
+            </div>
+
+            <p>调用这些应用程序接口时，必须确保相关模块已加载到进程中。API 本身是无阻塞、线程安全的，可以随时从任何线程调用。预期路径可以是绝对路径，也可以是调用这些 API 的模块的相对路径。</p>
+            <p><code class="notranslate language-cpp code-in-text">LppModulesOption</code>枚举提供了以下选项：</p>
+
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>选项</th>
+                    <th>说明</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td width="50%" class="notranslate"><strong>
+                      <code class="language-cpp">LPP_MODULES_OPTION_NONE</code>
+                    </strong></td>
+                    <td>仅对给定模块启用 Live++。</td>
+                  </tr>
+                  <tr>
+                    <td width="50%" class="notranslate"><strong>
+                      <code class="language-cpp">LPP_MODULES_OPTION_ALL_IMPORT_MODULES</code>
+                    </strong></td>
+                    <td>为给定模块及其所有<a href="https://learn.microsoft.com/en-us/cpp/build/linking-an-executable-to-a-dll?view=msvc-170#implicit-linking" target="_blank">导入模块</a>启用 Live++。</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p>使用过滤器函数回调时，只有过滤器函数返回<code class="notranslate code-in-text language-cpp"><span class="token boolean">true</span></code>的模块才会在 Live++ 中启用。</p>
+
+            <p>此外，还有一个 API 可直接为当前/调用模块启用 Live++，因为其返回值可直接传递给期望获得模块路径的 API：</p>
+
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>应用程序接口</th>
+                    <th>描述</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td width="50%" class="notranslate"><strong>
+                      <code class=" language-cpp"><span class="token keyword">const</span> <span class="token keyword">char</span><span class="token operator">*</span> lpp<span class="token operator">::</span><span class="token function">LppGetCurrentModulePathANSI</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code>
+                    </strong></td>
+                    <td>返回当前模块的完整限定路径，例如<strong>"C:\Dir\App.exe"</strong>。</td>
+                  </tr>
+                  <tr>
+                    <td width="50%" class="notranslate"><strong>
+                      <code class=" language-cpp"><span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> lpp<span class="token operator">::</span><span class="token function">LppGetCurrentModulePath</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code>
+                    </strong></td>
+                    <td>返回当前模块的完整限定路径，例如<strong>"C:\Dir\App.exe"</strong>。</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>提示</h4>
+              <p>
+                即使不是绝对必要，也建议在应用程序中尽早启用 Live++，最好是在主入口点开始时就启用。这样，Broker 就能与应用程序同时开始加载和分析文件，最大限度地提高启动性能。即使是 AAA 规模的项目，对目标应用程序的性能影响也应该是最小的。              </p>
+            </div>
+
+            <p>
+              请注意，Live++ 会在调用任何<code class="notranslate language-cpp code-in-text">Enable*</code>API 后开始读取和分析文件，但调用这些 API 的时间完全取决于您。如果您觉得 Live++ 会在您的机器上产生不必要的等待时间（例如，由于 PDB 或非 SSD 驱动器非常大），而您又不想在每次启动应用程序时都等待这些时间，那么只在需要时加载 Live++ 是完全没问题的。<br/>在这种情况下，您可能会发现只使用键盘快捷键、游戏内控制台、调试菜单等手动加载和启用 Live++ 是有益的。            </p>
+
+
+            <h2 id="dynamically_loaded_modules"><a href="#dynamically_loaded_modules">动态加载模块</a></h2>
+            <p>如果在运行时动态加载和卸载模块，则必须在卸载模块前告诉 Live++ 模块需要禁用。这可以通过几个 Agent API 来实现：</p>
+
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>应用程序接口</th>
+                    <th>说明</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td width="50%" class="notranslate"><strong>
+                      <code class=" language-cpp"><span class="token keyword">void</span> Agent<span class="token operator">::</span><span class="token function">DisableModule</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> relativeOrFullPath<span class="token punctuation">,</span> LppModulesOption options<span class="token punctuation">,</span> <span class="token keyword">void</span><span class="token operator">*</span> callbackContext<span class="token punctuation">,</span> LppFilterFunction<span class="token operator">*</span> callback<span class="token punctuation">)</span><span class="token punctuation">;</span></code>
+                    </strong></td>
+                    <td>使用给定选项禁用给定模块（.exe 或 .dll）的 Live++ ，使用可选的回调函数和上下文过滤模块。</td>
+                  </tr>
+                  <tr>
+                    <td width="50%" class="notranslate"><strong>
+                      <code class=" language-cpp"><span class="token keyword">void</span> Agent<span class="token operator">::</span><span class="token function">DisableModules</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span><span class="token operator">*</span> <span class="token keyword">const</span> arrayOfRelativeOrFullPaths<span class="token punctuation">,</span> size_t count<span class="token punctuation">,</span> LppModulesOption options<span class="token punctuation">,</span> <span class="token keyword">void</span><span class="token operator">*</span> callbackContext<span class="token punctuation">,</span> LppFilterFunction<span class="token operator">*</span> callback<span class="token punctuation">)</span><span class="token punctuation">;</span></code>
+                    </strong></td>
+                    <td>使用给定选项禁用给定模块（.exe 和 .dll 的任意组合）的 Live++，使用可选回调函数和上下文过滤模块。</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p>调用 API 时，这些 API 禁用的任何模块仍必须加载到进程中。同样，API 本身是无阻塞、线程安全的，可以随时从任何线程调用。预期路径可以是绝对路径，也可以是调用这些 API 的模块的相对路径。</p>
+
+            <p>使用上述任何 API 时，请确保使用与启用模块时相同的<code class="notranslate language-cpp code-in-text">LppModulesOption options</code>，否则导入模块等将无法禁用。</p>
+
+            <p>此外，Agent 还提供了一个 API，可让 Live++ 在加载或卸载模块时自动启用或禁用模块：</p>
+
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>应用程序接口</th>
+                    <th>描述</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td width="50%" class="notranslate"><strong>
+                      <code class=" language-cpp"><span class="token keyword">void</span> Agent<span class="token operator">::</span><span class="token function">EnableAutomaticHandlingOfDynamicallyLoadedModules</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span> callbackContext<span class="token punctuation">,</span> LppFilterFunction<span class="token operator">*</span> callback<span class="token punctuation">)</span><span class="token punctuation">;</span></code>
+                    </strong></td>
+                    <td>使 Live++ 自动处理动态加载的模块：加载时启用，卸载时禁用。使用可选的回调函数和上下文过滤所有模块。</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p>与其他 API 类似，使用过滤函数回调时，只有过滤函数返回<code class="notranslate code-in-text language-cpp"><span class="token boolean">true</span></code>模块才会在 Live++ 中启用。使用过滤函数，可以对自动启用和禁用的模块进行精细控制。两个参数都是可选的，因此传递<code class="notranslate code-in-text language-cpp"><span class="token keyword">nullptr</span></code>不会执行任何过滤。</p>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>示例</h4>
+              <p>Live++ 随附了一个名为<strong>"12_DynamicallyLoadedDLLs"</strong>的示例来演示这一点。</p>
+            </div>            
+          </section>
+
+
+          <header>
+            <h1 id="tools"><a href="#tools">工具</a></h1>
+          </header>
+
+          <section>
+            <h2 id="tools_hot_reload"><a href="#tools_hot_reload">热重载</a></h2>
+            <p>修改任何源代码文件后，保存它们并按<kbd class="notranslate">ctrl + alt + F11</kbd> 。无论 Live++ 应用程序当前是否有焦点，该快捷键都能起作用。</p>
+            <p>或者，您可以从工具菜单调用<strong>"热重载更改"</strong>：</p>            
+            <p>
+              <img src="assets/img/tools_menu_zho.png" alt="Live++ tools menu">
+            </p>
+
+            <p>此外，Agent 还提供了一个 API，可在任意时间点安排热加载操作：</p>
+
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>应用程序接口</th>
+                    <th>说明</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td width="50%" class="notranslate"><strong>
+                      <code class=" language-cpp"><span class="token keyword">void</span> Agent<span class="token operator">::</span><span class="token function">ScheduleReload</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code>
+                    </strong></td>
+                    <td>调度热重载操作，使<code class="notranslate code-in-text language-cpp"><span class="token function">WantsReload</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code>尽快返回 true。</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p>当你想监听自己的快捷方式，或从自定义调试菜单调用 Live++ 热加载或类似操作时，这很有用。</p>
+            <p>在内部，该操作会触发后台编译过程。如果编译成功，它就会将新代码加载到应用程序中，并与现有代码进行链接。当然，任何不属于原始可执行文件的函数也会被正确链接。</p>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>提示</h4>
+              <p>编译器和链接器的输出总是会记录到 Broker UI 的<strong>日志</strong>选项卡以及集成开发环境的输出窗口，如 Visual Studio 或 Rider。这样，您就可以通过双击输出窗口中的行或点击<kbd class="notranslate">F8</kbd> 来查找错误位置。另外，在 Broker 用户界面的<strong>日志</strong>选项卡上双击相应的错误行也会突出显示该行，并使集成开发环境转到错误位置：</p>
+              <p>
+                <img src="assets/img/double_click_on_log.png" alt="Live++ Broker UI">
+              </p>
+            </div>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>示例</h4>
+              <p>Live++ 提供了一个名为<strong>"01_HotReload"</strong>的示例来演示此功能。</p>
+            </div>
+
+
+            <h3 id="unity_file_splitting"><a href="#unity_file_splitting">统一分割</a></h3>
+            <p>
+              Live++ 会自动检测并分割作为任何已注册模块一部分的 unity/jumbo/blob 文件。对于所有此类 unity 文件，Live++ 会将所有包含的 .cpp 文件分割为各自的 .obj 文件，并使用这些文件进行重构和重新编译，如下例所示：            </p>
+            <p>
+<pre class="notranslate"><code class=" language-cpp"><span class="token comment" spellcheck="true">// these are the contents of Unity.cpp:</span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">"FileA.cpp"</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">"FileB.cpp"</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">"FileC.cpp"</span></span></code></pre>
+              在此示例中，Unity.cpp 将被拆分为<strong>Unity.obj.lpp_split.FileA</strong>.<strong>obj</strong>、<strong>Unity</strong>.<strong>obj</strong>.<strong>lpp_split.FileB</strong> <strong>.</strong> <strong>obj</strong> 和<strong>Unity.obj.lpp_split.FileC.obj</strong>。这意味着当源文件发生变化并触发重新编译时，Live++ 只需要重新编译一个较小的文件，而不是主 unity 文件。这将大大加快迭代时间。<strong>编译器</strong>视图还可区分单文件、统一和拆分编译器：            </p>
+            <p>
+              <img src="assets/img/unity_compilands_zho.png" alt="Live++ Unity compilands">
+            </p>
+            <p>
+              通过使用<a href="#project_preferences_unity_splitting">"启用对统一/jumbo/blob/混合文件的拆分"</a>设置，可以在每个项目的基础上控制 Unity 分割。如果您想要更细粒度的控制，您可以在每个编译器的基础上启用统一拆分，方法是将 <strong>LPP_FORCE_UNITY_SPLITTING</strong> 设置为命令行选项中要拆分的所有编译器的预处理器定义。
+            </p>
+            <div class="callout callout-info-MM" role="alert">
+              <h4>注意事项</h4>
+              <p>只有在首次接触 unity 文件所包含的 .cpp 文件时，才需要执行 Unity 分割。虽然这会导致重新编译 unity 文件包含的每个翻译单元，但在许多情况下，这一操作与重新编译整个 unity 文件一样快，尤其是在现代多核机器上。</p>
+            </div>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>示例</h4>
+              <p>Live++ 提供了一个名为<strong>"04_UnitySplitting"</strong>的示例来演示此操作。</p>
+            </div>
+
+
+            <h3 id="halted_processes"><a href="#halted_processes">停止进程</a></h3>
+            <p>
+              通常情况下，一旦计划进行热加载操作，Live++ 会自动收集修改后的文件并在后台开始编译。但是，当启用 Live++ 的进程在调试器中被保持时（如在断点处），该进程不会有任何进展，因此 Live++ 无法与其通信。            </p>
+
+            <h4>Visual Studio 和 Rider 调试器</h4>
+            <p>
+              使用 Visual Studio 或 Rider 调试时，Live++ 会尝试自动执行必要操作，使进程进入可继续与 Live++ 通信的模式。如果成功，Broker UI 日志将显示<strong>"已自动将调试器附加到 PID 为 XXXXX 的进程"</strong>；然后，Live++ 将编译您的更改并安装代码补丁。之后，进程将再次在调试器中保持相同的指令。            </p>
+
+            <h4>其他调试器</h4>
+            <p>
+              如果自动化不成功，或者正在使用 WinDbg 等其他调试器，用户界面日志将显示<strong>"正在等待 PID 为 XXXXX 的目标进程。如果进程在调试器中当前处于搁置状态，请按“继续”（在 Visual Studio 和 Rider 中为 F5）"</strong>。重新启动应用程序，Live++ 将编译并安装您所做的任何更改。在编译完成之前，进程仍不会执行新指令。一旦补丁被 Live++ 安装，您的进程将自动继续执行。            </p>
+            <p>
+              这种情况下的完整事件序列概述如下：              <ol>
+                <li>调试器遇到断点并停止进程。</li>
+                <li>调试照常进行。</li>
+                <li>对当前正在调试/执行的代码进行一次或多次修改，并调用 Live++ 热加载。</li>
+                <li>Live++ 会获取修改后的文件，并等待您在调试器中继续进程。</li>
+                <li>继续进程，例如按下 F5。</li>
+                <li>你的进程仍会停止，但这次是由 Live++ 来停止。</li>
+                <li>Live++ 会编译您的更改、安装代码补丁，并让您的进程继续执行。</li>
+                <li>您的进程<a href="#limitation_functions_on_the_stack">将继续执行之前的操作</a>。</li>
+              </ol>
+            </p>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>注意事项</h4>
+              <p>
+                在这种情况下，Live++ 不会调用你可能安装的任何<a href="#API_hooks">钩子</a>，因为那可能会导致死锁。              </p>
+            </div>
+
+
+            <h3 id="natvis_visualizations"><a href="#natvis_visualizations">Natvis 可视化</a></h3>
+            <p>
+              Natvis 可视化是<a href="https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects" target="_blank">自定义类型的可视化规则</a>，可由 Visual Studio 调试器理解。            </p>
+            <p>
+              通常，对于 Live++ 创建的补丁，调试器会自动获取<strong>.natvis</strong>文件。不过，如果情况并非如此，将这些文件放到<a href="https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects#BKMK_natvis_location" target="_blank">用户特定或系统范围的 Natvis 目录</a>中通常会有所帮助。            </p>
+          </section>
+
+
+          <section>
+            <h2 id="tools_hot_restart"><a href="#tools_hot_restart">热重启</a></h2>
+            <p>为了解决关闭和重启应用程序时出现的构建和链接时间问题，Live++ 提供了一种重启应用程序的机制，同时保持已加载数据和内部缓存的持久性。</p>
+            <p>一旦应用程序进入主循环，就必须重新启动，以便查看对启动函数等所做更改的效果，这些函数在进入主循环前被调用。在这种情况下，通常会发生以下一系列事件：</p>
+            <ol>
+              <li>
+                用户关闭应用程序。              </li>
+              <li>
+                构建系统链接可执行文件。              </li>
+              <li>
+                用户再次启动应用程序。              </li>
+              <li>
+                在 Live++ 中启用模块。这将从 PDB 中加载调试数据并构建内部缓存。              </li>
+            </ol>
+
+            <p>步骤 2 和步骤 4 可能会花费大量时间，尤其是在 AAA 项目中。通过使用 Live++ 提供的热重启功能，情况可以大大改善：</p>
+            <ol>
+              <li>
+                Live++ 会通知所有感兴趣的进程准备重启。              </li>
+              <li>
+                这些进程运行可选代码，以防它们要执行某种清理。              </li>
+              <li>
+                Live++会重启所有相关进程，并保持从PDB加载的所有数据以及内部缓存的活力。              </li>
+              <li>
+                Live++ 启用了模块。这将重用现有调试数据和缓存，并安装先前编译的补丁。              </li>
+            </ol>
+            <p>请注意，使用热重启机制后，链接时间和 Live++ 加载时间几乎完全消除。</p>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>示例</h4>
+              <p>Live++ 随附了一个名为<strong>"08_HotRestart"</strong>的示例来演示这一点。</p>
+            </div>
+
+
+            <h3 id="hot_restart_request"><a href="#hot_restart_request">请求热重启</a></h3>
+            <p>请求热重启有四个选项：</p>
+            <ul>
+              <li>
+                <p>按默认快捷键<kbd class="notranslate">ctrl + alt + R</kbd> 。无论 Live++ 应用程序当前是否有焦点，该快捷方式都会起作用。</p>
+              </li>
+              <li>
+                <p>从“工具”菜单中执行<strong>"热重启进程"</strong>：</p>
+                <p>
+                  <img src="assets/img/tools_menu_zho.png" alt="Live++ tools menu">
+                </p>
+                <p>这会向当前在 Broker 注册的所有进程发送热重启请求。</p>
+              </li>
+              <li>
+                <p>在 Broker 的 <strong>"进程"</strong>视图中选择一个或多个进程，右击打开右键菜单，然后选择<strong>"热重启所选进程"</strong>：</p>
+                <p>
+                  <img src="assets/img/processes_context_menu_zho.png" alt="Processes view context menu">
+                </p>
+                <p>这样就可以热重启单个进程，这在客户端/服务器场景中非常有用。</p>
+              </li>
+              <li>
+                <p>此外，Agent 还提供了一个 API，用于在任意时间点安排热重启操作：</p>
+
+                <div class="table-responsive">
+                  <table class="table table-bordered table-striped">
+                    <thead>
+                      <tr>
+                        <th>应用程序接口</th>
+                        <th>说明</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td width="50%" class="notranslate"><strong>
+                          <code class=" language-cpp"><span class="token keyword">void</span> Agent<span class="token operator">::</span><span class="token function">ScheduleRestart</span><span class="token punctuation">(</span>LppRestartOption option<span class="token punctuation">)</span><span class="token punctuation">;</span></code>
+                        </strong></td>
+                        <td>调度热重启操作，使<code class="notranslate code-in-text language-cpp"><span class="token function">WantsRestart</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code>尽快返回 true。</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <p>当你想监听自己的快捷方式，或从自定义调试菜单或类似菜单调用 Live++ 热启动时，这非常有用。</p>
+              </li>
+            </ul>
+
+
+            <h3 id="hot_restart_default_agents"><a href="#hot_restart_default_agents">默认 Agent</a></h3>
+            <p>使用<a href="#creating_default_agent">默认 Agent</a> 时，内部实现会自动响应热启动请求。</p>
+
+
+            <h3 id="hot_restart_synchronized_agents"><a href="#hot_restart_synchronized_agents">同步代理</a></h3>
+            <p>使用<a href="#creating_synchronized_agent">同步代理</a>时，必须使用以下 API 响应热启动请求：</p>
+
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>应用程序接口</th>
+                    <th>说明</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td width="70%" class="notranslate"><strong>
+                      <code class=" language-cpp"><span class="token keyword">bool</span> Agent<span class="token operator">::</span><span class="token function">WantsRestart</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code>
+                    </strong></td>
+                    <td>返回 Live++ 是否要热启动进程。</td>
+                  </tr>
+                  <tr>
+                    <td width="70%" class="notranslate"><strong>
+                      <code class=" language-cpp"><span class="token keyword">void</span> Agent<span class="token operator">::</span><span class="token function">Restart</span><span class="token punctuation">(</span>LppRestartBehaviour behaviour<span class="token punctuation">,</span> <span class="token keyword">unsigned</span> <span class="token keyword">int</span> exitCode<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> commandLineArguments<span class="token punctuation">)</span><span class="token punctuation">;</span></code>
+                    </strong></td>
+                    <td>尊重给定行为，重启进程。不返回。</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>准备重启</h3>
+            <p>
+              请求热重启后，Live++ 会通知所有感兴趣的进程准备重启。您的应用程序负责定期（例如每帧）调用<code class="notranslate code-in-text language-cpp"><span class="token keyword">bool</span> <span class="token function">WantsRestart</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code>，一旦有重启请求，它就会返回 true。在启动重启之前，您可以执行任何可选的清理工作（如刷新文件）。            </p>
+            <h3>启动重启</h3>
+            <p>
+              一旦您的应用程序完成了可选的清理任务，您就有责任调用<code class="notranslate code-in-text language-cpp"><span class="token keyword">void</span> <span class="token function">Restart</span><span class="token punctuation">(</span>LppRestartBehaviour behaviour<span class="token punctuation">,</span> <span class="token keyword">unsigned</span> <span class="token keyword">int</span> exitCode<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> commandLineArguments<span class="token punctuation">)</span></code>。这就向 Live++ 发出了应该重启进程的信号，从而退出进程。<code class="notranslate code-in-text language-cpp"><span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> commandLineArguments</code>参数是可选参数，将传递给重启的进程。使用<code class="notranslate code-in-text language-cpp"><span class="token keyword">nullptr</span></code>将以原始命令行环境重启进程。            </p>
+            <p>
+              在热重启操作完成后，任何连接到重启进程之一的 Visual Studio 或 Rider 调试器都将被 Live++ 自动重新连接到相应进程。            </p>
+            <p>
+              退出时的行为取决于<code class="notranslate language-cpp code-in-text">LppRestartBehaviour</code>参数，如下表所示：            </p>
+
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>重启行为</th>
+                    <th>说明</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td width="50%" class="notranslate">LPP_RESTART_BEHAVIOUR_DEFAULT_EXIT</td>
+                    <td>使用给定的退出代码调用<a href="https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-exitprocess" target="_blank">ExitProcess()</a>。</td>
+                  </tr>
+                  <tr>
+                    <td width="50%" class="notranslate">LPP_RESTART_BEHAVIOUR_EXIT_WITH_FLUSH</td>
+                    <td>使用给定的退出代码调用<a href="https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/exit-exit-exit" target="_blank">exit()</a>。</td>
+                  </tr>
+                  <tr>
+                    <td width="50%" class="notranslate">LPP_RESTART_BEHAVIOUR_EXIT_WITHOUT_FLUSH</td>
+                    <td>使用给定的退出代码调用<a href="https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/exit-exit-exit" target="_blank">_Exit()</a>。</td>
+                  </tr>
+                  <tr>
+                    <td width="50%" class="notranslate">LPP_RESTART_BEHAVIOUR_INSTANT_TERMINATION</td>
+                    <td>使用给定的退出代码调用<a href="https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-terminateprocess" target="_blank">TerminateProcess()</a>。</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>提示</h4>
+              <p>请求重启后，应用程序最多有 10 秒钟的时间执行可选的清理任务，并调用<code class="notranslate code-in-text language-cpp"><span class="token keyword">void</span> <span class="token function">Restart</span><span class="token punctuation">(</span>LppRestartBehaviour behaviour<span class="token punctuation">,</span> <span class="token keyword">unsigned</span> <span class="token keyword">int</span> exitCode<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> commandLineArguments<span class="token punctuation">)</span></code>。如果超过这个时间跨度，Live++ 将放弃重启该进程。</p>
+            </div>
+          </section>
+
+
+          <section>
+            <h2 id="tools_hot_fix"><a href="#tools_hot_fix">热修复</a></h2>
+            <p>
+              Live++ 通过定制的<a href="https://docs.microsoft.com/en-us/windows/desktop/debug/vectored-exception-handling" target="_blank">异常处理程序（Vectored Exception Handler，VEH）</a>提供强大的开箱即用错误恢复功能，该程序在幕后使用<a href="https://docs.microsoft.com/en-us/windows/desktop/debug/structured-exception-handling" target="_blank">结构化异常处理程序（Structured Exception Handling，SEH）</a>。与 Live++ 的热加载功能配合使用，通常可从访问违规、除以零等致命错误中进行优雅恢复。使用 Live++ 的异常处理程序时，每次进程引发未处理异常（如由访问违规引起）时，都会调用该处理程序。            </p>
+            <p>
+              如果在进程中附加了 Visual Studio 或 Rider 等调试器，它将始终获得第一个处理异常的机会--这是操作系统所确保的。            </p>
+            <p>
+              <img src="assets/img/exception_handler_vs.png" alt="Visual Studio exception handler">
+            </p>
+            <p>
+              在调试器中继续进程将调用 Live++ 的异常处理程序，该程序会在 Broker 中打开一个对话框，让您决定如何处理该异常：            </p>
+            <p>
+              <img src="assets/img/exception_handler_broker_zho.png" alt="Live++ 异常处理程序">
+            </p>
+            <p>
+              双击显示的调用堆栈中的一行，将在 Visual Studio 或 Rider 中打开该位置的相应源文件。            </p>            
+            <p>
+              异常处理程序提供的选项如下：              <ul>
+                <li>
+                 <strong>"禁用指令"：</strong><br/>完全禁用发生故障的机器指令。如果异常来自可以重新编译的自己的模块/源文件，这是一个有用的选项，但绝不能用于第三方代码，例如 Visual Studio Runtime。          </li>
+                <li>
+                 <strong>"忽略指令"：</strong><br/>忽略故障机器指令一次。下次调用相应函数时，该指令将导致同样的异常，除非在此期间重新编译了代码。                </li>
+                <li>
+                 <strong>"退出函数"：</strong><br/>离开当前函数，继续执行父函数。此外，如果有完整的 SEH 信息，堆栈将被展开，局部变量将被调用析构函数。                </li>
+                <li>
+                 <strong>"继续执行"：</strong><br/>一次忽略该异常并继续执行。这将把异常交给下一个已安装的异常处理程序（如果有的话）。在最后一个已安装的异常处理程序有机会处理异常后，进程要么在调试器中停止（如果已连接调试器），要么终止。                </li>
+              </ul>
+            </p>
+
+            <p>
+              当异常处理程序对话框显示时，您可以像往常一样使用 Live++ 更改和重新编译代码。但请注意，虽然新代码将在后台安装，但进程执行必须<a href="#limitation_functions_on_the_stack">从故障点继续进行</a>，因此您仍必须决定如何处理相关异常。            </p>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>注意事项</h4>
+              <p>
+                在这种情况下，Live++ 在重新编译代码时不会调用任何<a href="#API_hooks">钩子</a>，因为这可能会导致死锁。              </p>
+            </div>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>提示</h4>
+              <p>
+                要在可执行文件中提供 SEH 信息，需要启用以下编译器设置：              </p>
+              <p><span class="notranslate label label-default label-custom-MM">C/C++ -> Code Generation -> Enable C++ Exceptions -> Yes with SEH Exceptions (/EHa)</span></p>
+              <p>
+                只有在离开当前函数时，才需要 SEH 信息来释放堆栈。如果异常处理程序没有 SEH 异常信息，则仍可顺利运行，但不会执行堆栈解卷操作。              </p>
+            </div>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>示例</h4>
+              <p>Live++ 随附了一个名为<strong>"03_HotFixCrashRecovery"</strong>的示例来演示这一点。</p>
+            </div>
+          </section>
+
+
+          <section>
+            <h2 id="tools_hot_deoptimize"><a href="#tools_hot_deoptimize">热取消优化</a></h2>
+            <p>
+              即时去优化代码有助于在应用程序的可调试性和迭代时间之间取得平衡。未经优化的调试构建比经过优化的零售构建更容易调试，但在开发过程中使用时速度往往太慢。另一方面，经过优化的构建版性能要好得多，但调试起来却困难得多。
+            </p>
+            <p>
+              为了缓解这种情况，Live++ 提供了一些功能，可让您轻松地取消优化代码、调试代码并返回到完全优化的版本 - 所有这些都在正在运行的应用程序中完成。使用 Hot-Deoptimize 功能时无需预付费用，因为翻译单元将根据需要取消优化。这与其他方法不同，而且 Hot-Deoptimize 完全独立于 IDE，并且可在所有受支持的平台上使用。
+            </p>
+            <p>
+              在编译引擎盖下，除了优化标志将被禁用外，该功能将使用原始编译器选项重新编译文件。这意味着任何用于定义宏的预处理器定义或其他标志也将在去优化版本中设置。当然，这也意味着去优化后的代码与完全调试编译后的代码并不完全相同，因为断言等功能通常会使用只在调试编译时定义的宏。
+            </p>
+            <p>
+              Live++ 提供的选项如下：              <ul>
+                <li>
+                  在 Broker 的<strong>编译单元</strong>视图中选择一个或多个文件，右键单击打开上下文菜单，然后选择<strong>"切换选定编译单元的优化"</strong>，即可立即取消所选编译区的<strong>优化</strong>。                </li>
+                <li>或者，也可以选择<strong>"将选定编译单元加入去优化队列"</strong>，将编译器排入优化队列，以便稍后进行优化。 可以通过选择<strong>"去优化已排队"</strong>操作来启动排队编译的去优化。<p>
+                    <img src="assets/img/compilands_context_menu_zho.png" alt="Compiland view context menu">
+                  </p>
+                </li>
+                <li>
+                  在 Visual Studio 或 Rider 中按下默认快捷键<kbd class="notranslate">ctrl + alt + O</kbd> ，即可切换当前打开文件的优化状态。                </li>
+                <li>
+                  您也可以在文件顶部放置宏<strong>LPP_DISABLE_OPTIMIZATIONS</strong>，然后热加载更改，从而切换文件的优化状态。这种方法的缺点是，Live++ API<strong>"LivePP/API/x64/LPP_API_x64_CPP.h "</strong>需要在该文件中可见，而且无法在<strong>编译器</strong>视图中跟踪去优化状态。                </li>
+                <li>
+                  可以通过在上下文菜单中选择<strong>"将选定编译单元加入去优化队列"</strong>重新取消排入<strong>队列的</strong>编译程序。                </li>
+                <li>
+                  一旦要将所有编译项恢复到原始优化状态，请选择<strong>"全部重新优化"</strong>操作。          </li>
+              </ul>
+            </p>
+            <p>
+              在<strong>编译单元</strong>视图中，当前处于取消优化状态的源文件将以<img src="assets/img/deoptimized_compiland.svg" alt="Deoptimized compiland symbol" width="20" height="20"> 符号表示，而当前处于队列状态的源文件将分别以<img src="assets/img/queued_compiland.svg" alt="Queued compiland symbol" width="20" height="20"> 符号表示：            </p>
+            <p>
+              <img src="assets/img/compilands_deoptimized_zho.png" alt="Compiland view deoptimized compilands">
+            </p>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>示例</h4>
+              <p>Live++ 随附了一个名为<strong>"05_ToggleOptimizations"</strong>的示例来演示这一点。</p>
+            </div>
+          </section>
+
+
+          <section>
+            <h2 id="multi_process_editing"><a href="#multi_process_editing">多进程编辑</a></h2>
+            <p>在某些客户端/服务器和编辑器/游戏设置中，能够将更改同时热加载到多个进程或同一应用程序的多个实例中是非常有用的。有了 Live++，这一功能开箱即用，无需任何特殊设置。</p>
+            <p>Broker 中的 "<strong>进程</strong>"视图显示当前在 Live++ 注册的所有进程：</p>
+            <p>
+              <img src="assets/img/processes_zho.png" alt="Processes view">
+            </p>
+            <p>
+              无论注册了多少进程，Live++ 支持的所有操作都将针对受影响或选定的进程执行。Live++ 会自动确保对属于多个模块或应用程序的任何源文件所做的更改都会编译并热加载到所有受影响的进程中。            </p>
+            <p>
+              此外，在加载过程中，Live++ 会自动将所有代码更改注入 Live++ 应用程序的任何后续实例，从而产生新的行为，即使可执行文件在此期间从未在磁盘上链接或更改过。代码的后续更改将被热加载到所有运行进程中，无论这些进程是在哪个时间点启动的。            </p>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>示例</h4>
+              <p>Live++ 随附了一个名为<strong>"07_MultipleProcesses"</strong>的示例来演示这一点。</p>
+            </div>
+          </section>
+
+
+          <section>
+            <h2 id="networked_editing"><a href="#networked_editing">联网编辑</a></h2>
+            <p>与<a href="#multi_process_editing">多进程编辑</a>类似，Live++ 也不需要特殊的代码设置，就能在任何机器上运行的远程进程中工作。唯一的要求是，这些远程进程通过局域网连接到本地 Broker，具体配置如下：</p>
+            <ul>
+              <li>
+                <p>在本地计算机上启动 Broker，并记下窗口标题中显示的主机名或 IP 地址，如 192.168.8.147：</p>
+                <p>
+                  <img src="assets/img/broker_window_title.png" alt="Live++ Broker window title">
+                </p>
+              </li>
+              <li>
+                <p>在远程计算机上打开 Broker，进入<span class="notranslate label label-default label-custom-MM">编辑 -> 全局偏好设置... -> 网络</span>，输入运行 Broker 的本地计算机的主机名或 IP 地址，然后按<strong>"保存"：</strong></p>
+                <p>
+                  <img src="assets/img/global_preferences_network_zho.png" alt="Global preferences network">
+                </p>
+                <p>这将在远程计算机上保存全局首选项，每台远程计算机只需执行一次。</p>
+              </li>
+            </ul>
+
+            <p>
+              为了使网络编辑工作正常进行，必须先启动本地机器上的应用程序，然后再启动远程机器上的应用程序。不过，Live++ 可以在本地进程和远程进程任意混合的情况下运行，也可以在任意机器上运行同一应用程序的多个实例。            </p>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>注意事项</h4>
+              <p>由于 Live++ 所需的大部分信息只能在本地机器上获得，因此代码更改只能在本地机器上接收和编译。</p>
+            </div>            
+
+            <p>
+              已连接的机器和进程可分别在 "<strong>目标</strong>"和 "<strong>进程</strong>"视图中验证：              
+            </p>
+            <p>
+              <img src="assets/img/targets_zho.png" alt="Broker targets view">
+            </p>
+            <p>
+              <img src="assets/img/processes_zho.png" alt="Broker processes view">
+            </p>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>示例</h4>
+              <p>Live++ 随附了一个名为<strong>"10_NetworkedEditing"</strong>的示例来演示这一点。</p>
+            </div>
+          </section>
+
+
+          <header>
+            <h1 id="licensing"><a href="#licensing">授权</a></h1>
+          </header>
+
+          <section>
+            <h2 id="licensing_activation"><a href="#licensing_activation">激活</a></h2>
+            <p>
+              在使用 Live++ 之前，首先需要激活机器上的许可证。为此，请启动 Broker，从主菜单中选择<span class="notranslate label label-default label-custom-MM">许可 -> 激活...</span>，然后选择要激活许可的平台和语言，如<strong>Windows、C++</strong>。这将打开一个对话框，您需要在其中输入激活代码和用户 ID：     </p>
+            <p>
+              <img src="assets/img/activate_license_zho.png" alt="Broker license activation">
+            </p>
+            <p>激活码在您购买 Live++ 时已发送给您，是一个 12 个字符的密钥，格式为 XXXX-XXXX-XXXX。</p>
+            <p>
+              用户 ID 可以自由选择，在与给定激活码相关的许可证池中标识您的许可证。如果您需要离线停用许可证，例如，您的机器在重新安装时没有先停用现有许可证，则需要使用用户 ID。常见的用户 ID 有<strong>"Jane home office "</strong>或<strong>"John laptop"</strong>。          </p>
+            <p>在对话框中按下<strong>"确定 "</strong>后，Live++ 将尝试使用您输入的数据联系激活服务器。如果给定的激活码有效，Live++ 将生成一个与您的机器绑定的许可证，只能由您使用。在所有其他情况下，将显示错误。</p>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>注意事项</h4>
+              <p>如果由于公司防火墙或代理服务器的原因，您在连接激活服务器时遇到问题，请联系技术支持。</p>
+            </div>
+
+            <h2 id="licensing_deactivation"><a href="#licensing_deactivation">停用</a></h2>
+            <p>
+              如果您需要停用许可证，例如，因为您的机器需要重新安装，或者您想退役许可证以便您的同事可以使用它，请导航至 Broker 主菜单中的<span class="notranslate label label-default label-custom-MM">许可 -> 停用...</span>，然后选择您希望停用许可证的平台和语言，例如<strong>Windows、C++</strong>。这将停用激活服务器上的许可证。            </p>
+
+
+            <h2 id="licensing_trial"><a href="#licensing_trial">免费试用</a></h2>
+            <p>
+              如果您还没有许可证，但想试用 30 天免费试用版，请调用 Live++ 热加载，然后会弹出以下对话框：            </p>
+            <p>
+              <img src="assets/img/licensing_zho.png" alt="许可">
+            </p>
+            <p>
+              在此对话框中选择<span class="notranslate label label-default label-custom-MM">体验试用版</span>将导致 Live++ 从激活服务器获取试用许可证。
+            </p>
+
+
+            <h2 id="licensing_command_line_tools"><a href="#licensing_command_line_tools">命令行工具</a></h2>
+            <p>
+              还可以使用 Live++ 安装的<strong>CLI</strong>目录中的命令行工具自动激活和停用许可证。每种平台和语言组合都有一个工具；例如，<strong>"LPP_License_x64_CPP.exe "</strong>负责<strong>Windows 和 C++</strong> 的许可证管理。            </p>
+            <p>每个工具都能理解<strong>"--activate</strong>和<strong>"--deactivate"</strong>选项，分别用于激活和停用许可证。更多信息，请查阅集成的<strong>"-h "</strong>帮助选项。</p>
+            <p>
+              <img src="assets/img/command_line_tools.png" alt="Command-line tools">
+            </p>
+          </section>
+
+
+          <header>
+            <h1 id="gui"><a href="#gui">图形用户界面</a></h1>
+            <p class="lead">Live++ 的 Broker GUI 由多个不同的可停靠和浮动窗口及视图组成，可提供已注册目标、进程、模块和编译器的概览。</p>
+          </header>
+
+          <section>
+            <h2 id="gui_views_targets"><a href="#gui_views_targets">目标</a></h2>
+            <p>
+             "<strong>目标</strong>"视图显示所有已连接的本地和远程机器、它们的平台、IP 地址和已注册进程的数量。            </p>
+            <p>
+              <img src="assets/img/targets_zho.png" alt="Targets view">
+            </p>
+
+
+            <h2 id="gui_views_processes"><a href="#gui_views_processes">进程</a></h2>
+            <p>
+             "<strong>进程</strong>"视图显示所有已注册的进程、其目标、进程 ID、可执行文件的完整路径以及启动进程的命令行。            </p>
+            <p>
+              <img src="assets/img/processes_zho.png" alt="Processes view">
+            </p>
+            <p>
+              此外，"<strong>进程</strong>"视图还提供了一个右键菜单，其中包含以下选项：            </p>
+            <p>
+              <img src="assets/img/processes_context_menu_zho.png" alt="Processes view context menu">
+            </p>
+            <ul>
+              <li>
+               <strong>"显示所选本地进程的日志文件..."：</strong><br/>在 Windows 资源管理器中显示与选定进程相关的日志文件。              </li>
+              <li>
+               <strong>"打开所选本地进程的日志文件..."：</strong><br/>使用相应的默认应用程序打开与选定进程相关的日志文件。              </li>
+              <li>
+               <strong>"热重启所选进程"：</strong><br/>向所选进程发送热重启请求。              </li>
+            </ul>
+
+
+            <h2 id="gui_views_modules"><a href="#gui_views_modules">模块</a></h2>
+            <p>
+             "<strong>模块</strong>"视图显示所有加载的模块、模块加载到的进程 ID、<strong>模块</strong>大小以及模块加载到的地址范围。            </p>
+            <p>
+              <img src="assets/img/modules_zho.png" alt="Targets view">
+            </p>
+
+
+            <h2 id="gui_views_compilands"><a href="#gui_views_compilands">编译器</a></h2>
+            <p>
+             <strong>编译单元</strong>视图以层次树形显示所有模块及其编译器，以及每个编译器的源路径。            </p>
+            <p>
+              <img src="assets/img/compilands_open_zho.png" alt="Targets view">
+            </p>
+            <p>
+              双击树形视图中的编译器，就能在 Visual Studio 或 Rider 的运行实例中打开相应的源文件。            </p>
+            <p>
+              此外，右键单击<strong>编译单元</strong>视图还提供了一个上下文菜单，其中包含以下选项：            </p>
+            <p>
+              <img src="assets/img/compilands_context_menu_zho.png" alt="Compilands view context menu">
+            </p>
+            <ul>
+              <li>
+               <strong>"显示详细信息..."：</strong><br/>在单独的对话框中显示编译器的详细信息。              </li>
+              <li>
+               <strong>"在外部应用程序中打开编译单元..."：</strong><br/>使用相应的默认应用程序打开所选编译程序的源文件。              </li>
+              <li>
+                <strong>"切换选定编译单元的优化"：</strong><br/>切换所选编译的优化状态。              </li>
+              <li>
+                <strong>"将选定编译单元加入去优化队列":</strong><br/>将选定的编译器排入队列，以便稍后进行取消优化。              </li>
+            </ul>
+            <p>
+             <strong>编译单元详细信息</strong>对话框提供每个编译域的详细信息，如 PDB 路径、编译器路径和用于重新编译的命令行。            </p>
+            <p>
+              <img src="assets/img/compiland_details_zho.png" alt="Compiland details dialog">
+            </p>
+          </section>
+
+
+          <header>
+            <h1 id="global_preferences"><a href="#global_preferences">全局首选项</a></h1>
+            <p class="lead">全局首选项可以通过在 Broker 主菜单中选择 <span class="notranslate label label-default label-custom-MM">编辑 -> 全局偏好设置...</span>进行配置。它们提供了一些全局设置，可以自定义 Broker 的外观和行为，并始终保存在 Broker 目录中的<strong>global_preferences.json</strong>。</p>
+            <p class="lead">
+              你可以通过提供一个可选的<strong>global_preferences_default.json</strong>文件来定义默认设置，也可以通过在同一目录下提供一个可选的<strong>global_preferences_override.json</strong>文件来覆盖设置。Live++ 将按以下顺序加载文件：            </p>
+            <ul class="lead">
+              <li>global_preferences_default.json</li>
+              <li>global_preferences.json</li>
+              <li>global_preferences_override.json</li>
+            </ul>
+            <p class="lead">
+              如果你想为整个团队设置有意义的默认值和/或强制设置特定偏好值，同时仍允许个人根据自己的需要配置其余偏好，那么这种行为就非常有用。            </p>
+          </header>
+
+          <section>
+            <h2 id="global_preferences_ui"><a href="#global_preferences_ui">用户界面</a></h2>
+            <p>
+              <img src="assets/img/global_preferences_ui_zho.png" alt="Global preferences UI">
+            </p>
+            <ul>
+              <li>
+                <strong>"语言："</strong><br/>
+                让您选择语言。
+              </li>
+              <li>
+               <strong>"初始窗口状态："</strong><br/>让您选择 Broker 是以正常大小、最大化还是在系统托盘中启动。              </li>
+              <li>
+               <strong>"样式："</strong><br/>让您选择浅色和深色风格。              </li>
+              <li>
+               <strong>"版本不匹配时显示错误："</strong><br/>启用此项后，如果 Agent 与 Broker 之间的 API 版本不匹配，Broker 将在模态对话框中显示错误。              </li>
+              <li>
+               <strong>"在通知区域显示动画图标："</strong><br/>启用此项后，当操作正在进行时，通知区域的图标将显示为动画。              </li>
+              <li>
+               <strong>"在通知区域显示彩色图标："</strong><br/>启用此项后，通知区域的图标将根据上次操作是成功还是出错而着色。              </li>
+              <li>
+               <strong>"在任务栏中显示进度："</strong><br/>启用此项后，当操作正在进行时，任务栏将显示动画。              </li>
+            </ul>
+
+            <h2 id="global_preferences_logging"><a href="#global_preferences_logging">日志记录</a></h2>
+            <p>
+              <img src="assets/img/global_preferences_logging_zho.png" alt="Global preferences logging">
+            </p>
+                <ul>
+              <li>
+               <strong>"UI 日志中的详细级别："</strong><br/>自定义是否需要默认或详细的日志输出。              </li>              
+                  <li>
+               <strong>"在 UI 日志中打印时间戳："</strong><br/>自定义是否希望用户界面日志输出时间戳。              </li>
+              <li>
+               <strong>"在 UI 日志中启用自动换行："</strong><br/>自定义是否希望用户界面日志使用换行。              </li>
+            </ul>
+
+            <h2 id="global_preferences_network"><a href="#global_preferences_network">网络</a></h2>
+            <p>
+              <img src="assets/img/global_preferences_network_zho.png" alt="Global preferences network">
+            </p>
+                  <ul>
+              <li>
+               <strong>"要连接的 Broker（主机名或 IP 地址）："</strong><br/>在本地机器上运行的进程应始终使用<strong>127.0.0.1</strong>或<strong>localhost</strong>。在远程机器上运行的进程需要相应<a href="#networked_editing">配置 Broker IP</a>。     </li>
+              <li>
+               <strong>"通信端口："</strong><br/>Bridge 和 Broker 之间 TCP/IP 连接使用的端口。              </li>
+              <li>
+               <strong>"Bridge 连接到 Broker 时的超时（毫秒）："</strong><br/>Bridge 连接 Broker 时要考虑的超时。              </li>
+            </ul>
+
+
+            <h2 id="global_preferences_notifications"><a href="#global_preferences_notifications">通知</a></h2>
+            <p>
+              <img src="assets/img/global_preferences_notifications_zho.png" alt="Global preferences notifications">
+            </p>
+            <p>
+              文件路径可以是绝对路径，也可以是相对于 Broker 的路径。            </p>
+            <ul>
+              <li>
+                 <strong>"启用通知："</strong><br/><strong> 启用</strong>后，Live++ 将显示已完成操作的祝酒辞通知。                      </li>
+              <li>
+               <strong>"在以下情况下聚焦 Broker 窗口："</strong><br/>可让您选择何时聚焦 Broker 窗口：从不、热重载或热重启操作时、出错时、成功操作时或始终。                      </li>
+              <li>
+                 <strong>"成功时播放声音："</strong>, <strong>"成功时播放的声音："</strong><br/>可以指定在编译成功时播放的 .WAV 文件。         </li>
+                <li>
+               <strong>"出现错误时播放声音："</strong>，<strong>"出现错误时播放的声音："</strong><br/>可指定在编译失败时播放的 .WAV 文件。         </li>
+            </ul>
+
+
+            <h2 id="global_preferences_hot_reload"><a href="#global_preferences_hot_reload">热重载</a></h2>
+            <p>
+              <img src="assets/img/global_preferences_hot_reload_zho.png" alt="Global preferences hot-reload">
+            </p>
+                <ul>
+              <li>
+               <strong>"超时（毫秒）："</strong><br/>调度热重载操作时使用的超时（毫秒）。响应时间超过超时时间的 Agent 将放弃热重载操作。              </li>
+                    <li>
+                        <strong>"加载不完整的模块："</strong><br/>启用此项后，不完整的模块将被加载并显示在<strong>编译单元</strong>视图中，以便您检查任何缺陷，如缺少链接器选项。                    </li>
+                    <li>
+                       <strong>"加载不完整编译单元："</strong><br/>启用此选项后，将加载不完整的编译器并显示在<strong>编译单元</strong>视图中，以便您检查任何缺陷，如缺少编译器选项。                      </li>
+                      <li>
+                       <strong>"进程退出时删除补丁文件："</strong><br/>启用此选项后，一旦相应进程退出，属于 Live++ 补丁的文件将被删除。                      </li>
+                      <li>
+                       <strong>"在热重载时清除日志："</strong><br/>启用此选项后，热加载时将清除用户界面日志。                      </li>
+                      <li>
+                       <strong>"用于调用热重载的快捷键："</strong><br/>可让您配置调用热重载的快捷方式。                      </li>
+                   </ul>
+
+
+            <h2 id="global_preferences_hot_restart"><a href="#global_preferences_hot_restart">热重启</a></h2>
+            <p>
+              <img src="assets/img/global_preferences_hot_restart_zho.png" alt="Global preferences hot-restart">
+            </p>
+            <ul>
+              <li>
+               <strong>"超时（毫秒）："</strong><br/>调度热重启操作时使用的超时（毫秒）。响应时间超过超时时间的 Agent 将放弃热重启操作。              </li>
+              <li>
+               <strong>"用于调用热重启的快捷键："</strong><br/>用于配置调用热启动的快捷方式。              </li>
+            </ul>
+
+
+            <h2 id="global_preferences_ide"><a href="#global_preferences_ide">IDE</a></h2>
+            <p>
+              <img src="assets/img/global_preferences_ide_zho.png" alt="Global preferences IDE">
+            </p>
+                <ul>
+                    <li>
+                       <strong>"在 Visual Studio 中显示模态对话框："</strong><br/>启用此项后，在热重启操作期间，Visual Studio 中将显示一个模式对话框。这将禁止在任何 Live++ 操作正在进行时与 Visual Studio 调试器进行交互。                      <p>
+                         <img src="assets/img/vs_modal_dialog.png" alt="Modal dialog in Visual Studio">
+                        </p>                      
+                    </li>
+                    <li>
+                       <strong>"在热重载期间仍启用断点："</strong><br/>启用此项后，在热加载操作期间将保持启用断点。通常，在热加载操作期间，Visual Studio 和 Rider 中的断点会被暂时禁用，以避免意外停止进程。                    </li>
+                    <li>                  
+                       <strong>"用于切换在 IDE 中打开的当前文件优化的快捷键："</strong><br/>可让您配置切换 Visual Studio 或 Rider 中打开的当前文件优化的快捷方式。                    </li>
+                </ul>
+
+
+            <h2 id="global_preferences_licensing"><a href="#global_preferences_licensing">许可</a></h2>
+            <p>
+              <img src="assets/img/global_preferences_licensing_zho.png" alt="Global preferences licensing">
+            </p>
+                <ul>
+                    <li>
+                       <strong>"许可证即将到期时显示警告："</strong><br/>启用此项后，Broker 将在当前许可证即将过期时显示警告。                    </li>
+                    <li>                  
+                       <strong>"经过以下剩余天数时发出警告："</strong><br/>可让您配置许可证即将过期时会收到多少天的警告。                    </li>
+                </ul>
+          </section>
+
+
+          <header>
+            <h1 id="project_preferences"><a href="#project_preferences">项目首选项</a></h1>
+            <p class="lead">在 Broker 主菜单中选择 <span class="notranslate label label-default label-custom-MM">编辑 -> 项目偏好设置...</span> 首选项可以配置项目首选项。它们提供特定于项目的设置，可让您自定义 Live++ 的行为，并存储在您选择的 .json 文件中。</p>
+          </header>
+
+          <section>
+            <h2 id="project_preferences_general"><a href="#project_preferences_general">常规设置</a></h2>
+            <p>
+              如果要使用项目偏好设置，有两个选项：            </p>
+            <ul>
+              <li>
+                在<a href="#usage_agents">创建 Agent</a>时，将项目特定的 .json 文件作为参数传递，如以下示例所示：<pre class="notranslate"><code class=" language-cpp"><span class="token comment" spellcheck="true">// create a synchronized Live++ agent, loading the required project preferences.</span>
+<span class="token comment" spellcheck="true">// the path to load the preferences from can be absolute, or relative to this application.</span>
+lpp<span class="token operator">::</span>LppSynchronizedAgent lppAgent <span class="token operator">=</span> lpp<span class="token operator">::</span><span class="token function">LppCreateSynchronizedAgentWithPreferencesFromFile</span><span class="token punctuation">(</span><span class="token keyword">nullptr</span><span class="token punctuation">,</span> L<span class="token string">"ThirdParty/LivePP"</span><span class="token punctuation">,</span> L<span class="token string">"Preferences/continuous_compilation.json"</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+              </li>
+              <li>
+                首先创建一个默认的<code class="notranslate code-in-text language-cpp">lpp<span class="token operator">::</span>LppProjectPreferences</code>实例，填写所需的首选项，然后在<a href="#usage_agents">创建 Agent</a>时将其作为参数传递，如下例所示：<pre class="notranslate"><code class=" language-cpp"><span class="token comment" spellcheck="true">// disable unity splitting in the preferences</span>
+lpp<span class="token operator">::</span>LppProjectPreferences prefs <span class="token operator">=</span> lpp<span class="token operator">::</span><span class="token function">LppCreateDefaultProjectPreferences</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+prefs<span class="token punctuation">.</span>unitySplitting<span class="token punctuation">.</span>isEnabled <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+
+<span class="token comment" spellcheck="true">// create a default Live++ agent with the project preferences</span>
+lpp<span class="token operator">::</span>LppDefaultAgent lppAgent <span class="token operator">=</span> lpp<span class="token operator">::</span><span class="token function">LppCreateDefaultAgentWithPreferences</span><span class="token punctuation">(</span><span class="token keyword">nullptr</span><span class="token punctuation">,</span> L<span class="token string">"ThirdParty/LivePP"</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>prefs<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+              </li>
+            </ul>
+            <p>
+              如果在创建 Agent 时既未传入 .json 文件的路径，也未传入首选项实例，Live++ 将假定所有项目首选项均为默认值。            </p>
+
+            <p>
+              <img src="assets/img/project_preferences_general_zho.png" alt="Project preferences general">
+            </p>
+            <ul>
+              <li>
+               <strong>"为本地连接自动生成 Broker："</strong><br/>启用此项后，Agent 加载到目标应用程序后，将立即为本地连接自动生成 Broker。         </li>
+              <li>
+               <strong>"当 Bridge 无法连接到 Broker 时显示错误："</strong><br/>启用此项后，Bridge 将在无法连接到 Broker 时报告错误。              </li>
+              <li>
+               <strong>"Broker 的目录："</strong><br/>指定 Agent 从哪个目录生成 Broker。该目录可以是绝对目录，也可以是 Agent 的相对目录。              </li>
+            </ul>
+
+            <h2 id="project_preferences_hot_reload"><a href="#project_preferences_hot_reload">热重载</a></h2>
+            <p>
+              <img src="assets/img/project_preferences_hot_reload_zho.png" alt="Project preferences hot-reload">
+            </p>
+            <ul>
+              <li>
+               <strong>"捕获工具链环境的超时时间（毫秒）："</strong><br/>捕获 Visual Studio 编译器和链接器环境时使用的超时（毫秒）。执行时间超过超时时间的批处理文件将自动终止。              </li>
+              <li>
+               <strong>"用于目标文件的文件扩展名："</strong><br/>对象文件考虑的文件扩展名列表。其他文件扩展名将被忽略。              </li>
+              <li>
+               <strong>"用于库文件的文件扩展名："</strong><br/>库文件考虑的文件扩展名列表。其他文件扩展名将被忽略。              </li>
+              <li>
+               <strong>"用于源文件的过滤器："</strong><br/>用于过滤源文件的分号分隔字符串列表。包含其中一个过滤器的源文件将被完全忽略。过滤器检查使用小写源路径。              </li>
+              <li>
+                <strong>"路径重新映射："</strong><br/>
+                一个由 <em>from_path>to_path</em> 个字符串组成的列表，这些字符串以分号分隔，用于重新映射路径。此重新映射适用于源文件、包含文件、目标文件、编译器目录和链接器目录，但不适用于命令行参数。<br/>例如，将此首选项设置为 <em>Z:\RemoteEnv\out>D:\LocalRepo</em> 时，Live++ 会考虑 <em>D:\LocalRepo</em> 中的文件，而不是 <em>Z:\RemoteEnv\out</em> 中的文件，这在使用分布式/远程构建系统时非常有用。
+              </li>               
+              <li>
+               <strong>"启用预构建步骤："</strong><br/>让您决定 Live++ 是否应在每次热加载操作中执行预编译步骤。              </li>
+              <li>
+               <strong>"预构建步骤可执行文件："</strong><br/>可让您选择执行预编译步骤时调用的可执行文件。              </li>
+              <li>
+               <strong>"预构建步骤工作目录："</strong><br/>用于选择执行预编译步骤时使用的工作目录。              </li>
+              <li>
+               <strong>"预构建步骤命令行选项："</strong><br/>用于指定在执行预编译步骤时传递给调用的可执行文件的命令行选项。              </li>
+              <li>
+               <strong>"调用已停止进程的编译钩子："</strong><br/>让您决定 Live++ 是否要为停止的进程调用编译钩子。              </li>
+              <li>
+               <strong>"调用已停止进程的链接钩子："</strong><br/>让您决定 Live++ 是否应为停止的进程调用链接钩子。              </li>
+              <li>
+               <strong>"调用已停止进程的热重载钩子："</strong><br/>让您决定 Live++ 是否应为停止进程调用热加载钩子。              </li>
+            </ul>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>注意</h4>
+              <p>允许 Live++++ 调用已停止进程的钩子是一个潜在的危险操作，因为它可能导致死锁。对于停止的进程，Live++ 总是从其接收线程调用钩子，而进程中的所有其他线程都处于暂停状态。如果任何钩子试图锁定同步基元（如互斥体），而暂停的线程却持有相同的基元，就会出现死锁。</p>
+              <p>因此，您的钩子实现必须假设任何线程都可能随时被挂起。</p>
+            </div>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>示例</h4>
+              <p>Live++ 随附了一个名为<strong>"14_PreBuildStep"</strong>的示例，演示了如何设置预编译步骤。  </p>
+            </div>
+
+
+            <h2 id="project_preferences_compiler"><a href="#project_preferences_compiler">编译器</a></h2>
+            <p>
+              <img src="assets/img/project_preferences_compiler_zho.png" alt="Project preferences compiler">
+            </p>
+            <p>
+              文件路径可以是绝对路径，也可以是相对于 Broker 的路径。            </p>
+            <ul>
+              <li>
+               <strong>"捕获编译器工具链环境："</strong><br/>让您决定 Live++ 是否应搜索并使用 vcvars*.bat 编译器工具链环境。禁用此设置对自定义构建系统很有用。              </li>
+              <li>
+               <strong>"覆盖编译器路径："</strong><br/>让你覆盖在 PDB 中找到的编译器路径，这样 Live++ 在重新编译文件时就会改用此编译器。只有在使用自定义编译系统的极少数情况下才会需要。              </li>
+              <li>
+               <strong>"仅将覆盖的编译器路径作为备用路径使用："</strong><br/>启用此项后，只有在 PDB 中检测到的编译器不可用时，才会使用覆盖的编译器路径。              </li>
+              <li>
+               <strong>"附加命令行选项："</strong><br/>可让您在创建补丁时向编译器传递附加选项。              </li>
+              <li>
+               <strong>"强制使用预编译头 PDB："</strong><br/>启用此项时，会强制 Live++ 在重新编译时让每个翻译单元使用与相应预编译头相同的 PDB。这主要是作为编译器错误 C2858 的一种变通方法，在使用带有远程 Agent 和预编译头文件的 Incredibuild 时会遇到这种错误。              </li>
+              <li>
+               <strong>"移除 "-showIncludes" 编译器选项："</strong><br/>启用此选项后，某些编译系统使用的<strong>-showIncludes</strong>编译器选项将在重新编译代码时被删除。              </li>
+              <li>
+               <strong>"移除 "-sourceDependencies" 编译器选项："</strong><br/>启用此项后，某些编译系统在重新编译代码时使用的<strong>-sourceDependencies</strong>编译器选项将被移除。              </li>
+            </ul>
+
+
+            <h2 id="project_preferences_linker"><a href="#project_preferences_linker">链接器</a></h2>
+            <p>
+              <img src="assets/img/project_preferences_linker_zho.png" alt="Project preferences linker">
+            </p>
+            <p>
+              文件路径既可以是绝对路径，也可以是相对于 Broker 的路径。            </p>
+                <ul>
+                    <li>
+                       <strong>"捕获链接器工具链环境："</strong><br/>让您决定 Live++ 是否应搜索并使用 vcvars*.bat 链接器工具链环境。禁用此设置对自定义构建系统很有用。                    </li>
+                    <li>
+                       <strong>"覆盖链接器路径："</strong>，<strong>"覆盖的链接器路径："</strong><br/>让您覆盖在 PDB 中找到的链接器路径，因此 Live++ 在重新编译文件时将使用此链接器代替。只有在使用自定义编译系统的极少数情况下才会需要。                    </li>
+                    <li>
+                       <strong>"仅将覆盖的链接器路径作为备用路径使用："</strong><br/>启用此项后，只有在 PDB 中检测到的链接器不可用时，才会使用覆盖的链接器路径。                    </li>
+                    <li>
+                       <strong>"附加命令行选项："</strong><br/>允许您在创建补丁时向链接器传递附加选项。                    </li>
+              <li>
+               <strong>"禁止创建导入库 (/NOIMPLIB)："</strong><br/>在创建补丁 DLL 时，有些链接器坚持创建导入库，即使 DLL 没有导出任何符号。虽然 Live++ 并不要求这些导入库，但一些旧的链接器并不理解<strong>/NOIMPLIB</strong>选项。         </li>
+                </ul>
+
+
+            <h2 id="project_preferences_exceptions"><a href="#project_preferences_exceptions">异常</a></h2>
+            <p>
+              <img src="assets/img/project_preferences_exceptions_zho.png" alt="Project preferences exceptions">
+            </p>
+            <ul>
+              <li>
+               <strong>"启用异常处理程序："</strong><br/>启用此选项后，Live++ 将为<a href="#tools_hot_fix">Hot-Fix</a>功能安装异常处理程序。              </li>
+              <li>
+               <strong>"将异常处理程序安装为："</strong><br/>让你选择异常处理程序是作为<a href="https://docs.microsoft.com/en-us/windows/win32/api/errhandlingapi/nf-errhandlingapi-addvectoredexceptionhandler" target="_blank">第一个还是最后一个处理程序</a>安装。              </li>
+            </ul>
+
+
+            <h2 id="project_preferences_continuous_compilation"><a href="#project_preferences_continuous_compilation">连续编译</a></h2>
+            <p>
+              <img src="assets/img/project_preferences_continuous_compilation_zho.png" alt="Project preferences continuous compilation">
+            </p>
+            <p>
+              目录可以是绝对目录，也可以是 Broker 的相对目录。            </p>
+            <ul>
+              <li>
+               <strong>"启用连续编译："</strong><br/>启用连续编译时，Live++ 会等待给定目录（及其子目录）中的更改通知，并在超时后自动编译任何更改。              </li>
+              <li>
+               <strong>"要监视的目录："</strong><br/>使用连续编译时，您可以设置要监视更改的目录。              </li>
+              <li>
+               <strong>"侦听更改的超时（毫秒）："</strong><br/>监听更改通知时，Live++ 会等待后续更改，直到超时为止。              </li>
+            </ul>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>注意</h4>
+              <p>当检测到要监视的目录中的<strong>任何</strong>文件发生变化时，Live++ 会触发编译进程，而这些文件不一定是编译的一部分。请务必选择相应的观察目录。</p>
+            </div>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>示例</h4>
+              <p>Live++ 随附了一个名为<strong>"02_ContinuousCompilation"</strong>的示例来演示这一点。</p>
+            </div>
+
+
+            <h2 id="project_preferences_virtual_drive"><a href="#project_preferences_virtual_drive">虚拟驱动器</a></h2>
+            <p>
+              有些构建系统会在构建代码时临时设置一个虚拟驱动器，以便在构建过程中使用的所有工具都能引用同一路径。但是，编译后模块的 PDB 文件将包含该虚拟驱动器上的路径，而这些路径在启动应用程序和使用 Live++ 时可能不再可用。通过以下选项可以设置虚拟驱动器：            </p>
+            <p>
+              <img src="assets/img/project_preferences_virtual_drive_zho.png" alt="Project preferences virtual drive">
+            </p>
+            <ul>
+              <li>
+               <strong>"驱动器（例如 Z:）："</strong><br/>用于指定映射到给定目录的虚拟驱动器的字母。字母后必须有冒号，如 "Z:"（不带引号）。              </li>
+              <li>
+                <strong>"目录："</strong><br/>用于设置映射到上述驱动器字母的目录，例如<strong>C:\MyPath</strong>。            </li>
+            </ul>
+
+
+            <h2 id="project_preferences_unity_splitting"><a href="#project_preferences_unity_splitting">统一分割</a></h2>
+            <p>
+              <img src="assets/img/project_preferences_unity_splitting_zho.png" alt="Project preferences unity splitting">
+            </p>
+            <ul>
+              <li>
+               <strong>"启用对统一/jumbo/blob/混合文件的拆分："</strong><br/>启用此选项后，Live++ 将执行 unity 文件的分割。              </li>
+              <li>
+               <strong>"当达到以下源文件数量时进行拆分："</strong><br/>指定在 Live++ 尝试分割 unity 文件之前，unity 文件中必须包含的 .cpp 文件的最小数量，例如，如果此阈值设置为 3，则只有包含 3 个或更多 .cpp 文件的 unity 文件才会被分割。              </li>
+              <li>
+               <strong>"用于拆分的 C/C++ 文件扩展名："</strong><br/>在分割 unity 文件时被视为 C/C++ 文件的文件扩展名列表。              </li>
+            </ul>
+          </section>
+
+
+          <header>
+            <h1 id="API"><a href="#API">应用程序接口</a></h1>
+            <p class="lead">Live++ 很擅长搞清楚事情，但它不会变魔术。应用程序接口（API）可让你为它提供帮助，使其在某些情况下工作，并以多个头文件的形式发布，可在 C 和 C++ 中使用。不过，对于任何平台和语言，客户端代码只需包含<a href="#directory_structure">一个特定的头文件</a>即可。            </p>
+          </header>
+
+          <section>
+            <h2 id="API_naming_convention"><a href="#API_naming_convention">命名约定</a></h2>
+            <p>
+              一般来说，所有 API 符号都有一个共同的前缀。所有宏以<strong>LPP_</strong> 开头，函数以<strong>Lpp</strong> 开头。在 C++ 中，所有函数都是<strong>lpp</strong>命名空间的一部分，以进一步减少名称冲突的机会。            </p>
+
+
+            <h2 id="API_flavours"><a href="#API_flavours">调味品</a></h2>
+            <p>
+              所有需要使用目录或路径的 API 都有两种版本：ANSI 版本使用<code class="notranslate code-in-text language-cpp"><span class="token keyword">const</span> <span class="token keyword">char</span><span class="token operator">*</span></code>作为参数，而宽字符版本使用<code class="notranslate code-in-text language-cpp"><span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span></code>作为参数。
+            </p>
+
+
+            <h2 id="API_versioning"><a href="#API_versioning">版本控制</a></h2>
+            <p>Live++ 使用一个简单的版本控制方案，以确保头文件和 DLL 永远不会不同步。为此，头文件定义了它希望 DLL 输出的 API 版本，例如</p>
+<pre class="notranslate"><code class=" language-cpp"><span class="token macro property">#<span class="token directive keyword">define</span> LPP_VERSION "2.0.0"</span></code></pre>
+
+
+            <p>在内部，动态链接库提供了一个函数，用于返回其构建时所依据的应用程序接口版本，例如：......：</p>
+<pre class="notranslate"><code class=" language-cpp">LPP_API <span class="token keyword">const</span> <span class="token keyword">char</span><span class="token operator">*</span> <span class="token function">LppGetVersion</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+            <p>此外，DLL 内部还提供了一个函数，用于执行版本检查，并返回 API 和 DLL 版本是否匹配：</p>
+<pre class="notranslate"><code class=" language-cpp">LPP_API <span class="token keyword">bool</span> <span class="token function">LppCheckVersion</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">char</span><span class="token operator">*</span> <span class="token keyword">const</span> expectedVersion<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+
+            <p><a href="#creating_default_agent">创建 Agent</a> 时，系统会自动为你执行这些检查，以确保 API 和 DLL 版本始终匹配。</p>
+
+
+            <h2 id="API_agent_validation"><a href="#API_agent_validation">Agent 验证</a></h2>
+            <p>
+              如果要检查创建 Agent 是否成功，可以使用以下 API：              
+            </p>
+
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>API</th>
+                    <th>说明</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td width="60%" class="notranslate"><code class=" language-cpp"><span class="token keyword">bool</span> lpp<span class="token operator">::</span><span class="token function">LppIsValidDefaultAgent</span><span class="token punctuation">(</span><span class="token keyword">const</span> LppDefaultAgent<span class="token operator">*</span> <span class="token keyword">const</span> agent<span class="token punctuation">)</span><span class="token punctuation">;</span></code></td>
+                    <td>返回给定的默认 Agent 是否有效。</td>
+                  </tr>
+
+                  <tr>
+                    <td width="60%" class="notranslate"><code class=" language-cpp"><span class="token keyword">bool</span> lpp<span class="token operator">::</span><span class="token function">LppIsValidSynchronizedAgent</span><span class="token punctuation">(</span><span class="token keyword">const</span> LppSynchronizedAgent<span class="token operator">*</span> <span class="token keyword">const</span> agent<span class="token punctuation">)</span><span class="token punctuation">;</span></code></td>
+                    <td>返回给定的同步 Agent 是否有效。</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+
+            <h2 id="API_connection_callback"><a href="#API_connection_callback">连接回调</a></h2>
+            <p>
+              为了与您的代码库或引擎进行更深入的集成，您可能需要使用以下可选 API 来检查 Agent、Bridge 和 Broker 的连接是否成功：            </p>
+
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>应用程序接口</th>
+                    <th>描述</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td width="62%" class="notranslate"><code class=" language-cpp"><span class="token keyword">typedef</span> <span class="token keyword">void</span> <span class="token function">LppOnConnectionCallback</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span> context<span class="token punctuation">,</span> lpp<span class="token operator">::</span>LppConnectionStatus status<span class="token punctuation">)</span><span class="token punctuation">;</span></code></td>
+                    <td>回调函数类型。</td>
+                  </tr>
+
+                  <tr>
+                    <td width="62%" class="notranslate"><code class=" language-cpp"><span class="token keyword">void</span> Agent<span class="token operator">::</span><span class="token function">OnConnection</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span> context<span class="token punctuation">,</span> lpp<span class="token operator">::</span>LppOnConnectionCallback<span class="token operator">*</span> callback<span class="token punctuation">)</span><span class="token punctuation">;</span></code></td>
+
+                    <td>在尝试将 Agent 连接到 Bridge/Broker 后，使用用户提供的上下文和连接状态调用给定的回调函数。</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p>
+              请注意，此 API 是非阻塞和线程安全的。无论该 API 是在内部尝试连接之前还是之后调用，Live++ 都会以最终连接状态调用一次回调。            </p>
+
+
+            <h2 id="API_hooks"><a href="#API_hooks">钩子</a></h2>
+            <p>
+              钩子允许您在编译过程中显示进度条、消息框等，从而将 Live++ 更深入地集成到您的引擎/框架/应用程序中。钩子还可用于输出编译和链接信息及错误，并支持结构更改。            </p>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>注意事项</h4>
+              <p>
+                如果进程被<a href="#halted_processes">保留在调试器中</a>（如断点处），Live++ 不会调用您可能安装的任何钩子，除非您通过<a href=#project_preferences_hot_reload>项目首选项</a>进行选择。              </p>
+            </div>
+
+
+            <h3 id="API_compile_hooks"><a href="#API_compile_hooks">编译钩子</a></h3>
+            <p>编译钩子允许你钩住热加载编译过程，并获得编译过程不同阶段的通知。支持以下编译钩子：</p>
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>应用程序接口</th>
+                    <th>说明</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td width="50%" class="notranslate"><code class=" language-cpp"><span class="token keyword">void</span> <span class="token function">PrecompileHook</span><span class="token punctuation">(</span>lpp<span class="token operator">::</span>LppPrecompileHookId<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> recompiledModulePath<span class="token punctuation">,</span> <span class="token keyword">unsigned</span> <span class="token keyword">int</span> filesToCompileCount<span class="token punctuation">)</span><span class="token punctuation">;</span></code></td>
+                    <td>注册一个在编译开始前调用的钩子。<br>使用<code class="notranslate language-cpp"><span class="token function">LPP_PRECOMPILE_HOOK</span><span class="token punctuation">(</span>functionName<span class="token punctuation">)</span></code>宏注册。</td>
+                  </tr>
+                  <tr>
+                    <td width="50%" class="notranslate"><code class=" language-cpp"><span class="token keyword">void</span> <span class="token function">PostcompileHook</span><span class="token punctuation">(</span>lpp<span class="token operator">::</span>LppPostcompileHookId<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> recompiledModulePath<span class="token punctuation">,</span> <span class="token keyword">unsigned</span> <span class="token keyword">int</span> filesToCompileCount<span class="token punctuation">)</span><span class="token punctuation">;</span></code></td>
+                    <td>注册在编译结束后调用的钩子。<br>使用<code class="notranslate language-cpp"><span class="token function">LPP_POSTCOMPILE_HOOK</span><span class="token punctuation">(</span>functionName<span class="token punctuation">)</span></code>宏注册。</td>
+                  </tr>
+                  <tr>
+                    <td width="50%" class="notranslate"><code class=" language-cpp"><span class="token keyword">void</span> <span class="token function">CompileStartHook</span><span class="token punctuation">(</span>lpp<span class="token operator">::</span>LppCompileStartHookId<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> recompiledModulePath<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> recompiledSourcePath<span class="token punctuation">)</span><span class="token punctuation">;</span></code></td>
+                    <td>注册一个在文件编译开始时调用的钩子。<br>使用<code class="notranslate language-cpp"><span class="token function">LPP_COMPILE_START_HOOK</span><span class="token punctuation">(</span>functionName<span class="token punctuation">)</span></code>宏注册。</td>
+                  </tr>
+                  <tr>
+                    <td width="50%" class="notranslate"><code class=" language-cpp"><span class="token keyword">void</span> <span class="token function">CompileSuccessHook</span><span class="token punctuation">(</span>lpp<span class="token operator">::</span>LppCompileSuccessHookId<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> recompiledModulePath<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> recompiledSourcePath<span class="token punctuation">)</span><span class="token punctuation">;</span></code></td>
+                    <td>注册在文件编译成功时调用的钩子。<br>使用<code class="notranslate language-cpp"><span class="token function">LPP_COMPILE_SUCCESS_HOOK</span><span class="token punctuation">(</span>functionName<span class="token punctuation">)</span></code>宏注册。</td>
+                  </tr>
+                  <tr>
+                    <td width="50%" class="notranslate"><code class=" language-cpp"><span class="token keyword">void</span> <span class="token function">CompileErrorHook</span><span class="token punctuation">(</span>lpp<span class="token operator">::</span>LppCompileErrorHookId<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> recompiledModulePath<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> recompiledSourcePath<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> compilerOutput<span class="token punctuation">)</span><span class="token punctuation">;</span></code></td>
+                    <td>注册当文件编译失败时调用的钩子。<br>使用<code class="notranslate language-cpp"><span class="token function">LPP_COMPILE_ERROR_HOOK</span><span class="token punctuation">(</span>functionName<span class="token punctuation">)</span></code>宏注册。</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              由于大多数钩子的函数签名相似，因此不同的<code class="notranslate code-in-text language-cpp">lpp<span class="token operator">::</span>Lpp<span class="token operator">*</span>HookId</code>值作为第一个参数只是为了提供额外的类型安全和保护。            </p>
+            <p>
+             <code class="notranslate code-in-text language-cpp"><span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> recompiledModulePath</code>和<code class="notranslate code-in-text language-cpp"><span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> recompiledSourcePath</code>参数分别提供了重新编译模块和源文件的绝对路径。            </p>
+
+
+            <h3 id="API_link_hooks"><a href="#API_link_hooks">链接钩子</a></h3>
+            <p>链接钩子允许你挂钩到热加载链接过程，并获得链接过程不同阶段的通知。支持以下链接钩子：</p>
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>应用程序接口</th>
+                    <th>说明</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td width="50%" class="notranslate"><code class=" language-cpp"><span class="token keyword">void</span> <span class="token function">LinkStartHook</span><span class="token punctuation">(</span>lpp<span class="token operator">::</span>LppLinkStartHookId<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> recompiledModulePath<span class="token punctuation">)</span><span class="token punctuation">;</span></code></td>
+                    <td>注册链接开始时调用的钩子。<br>使用<code class="notranslate language-cpp"><span class="token function">LPP_LINK_START_HOOK</span><span class="token punctuation">(</span>functionName<span class="token punctuation">)</span></code>宏注册。</td>
+                  </tr>
+                  <tr>
+                    <td width="50%" class="notranslate"><code class=" language-cpp"><span class="token keyword">void</span> <span class="token function">LinkSuccessHook</span><span class="token punctuation">(</span>lpp<span class="token operator">::</span>LppLinkSuccessHookId<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> recompiledModulePath<span class="token punctuation">)</span><span class="token punctuation">;</span></code></td>
+                    <td>注册链接成功时调用的钩子。<br>使用<code class="notranslate language-cpp"><span class="token function">LPP_LINK_SUCCESS_HOOK</span><span class="token punctuation">(</span>functionName<span class="token punctuation">)</span></code>宏注册。</td>
+                  </tr>
+                  <tr>
+                    <td width="50%" class="notranslate"><code class=" language-cpp"><span class="token keyword">void</span> <span class="token function">LinkErrorHook</span><span class="token punctuation">(</span>lpp<span class="token operator">::</span>LppLinkErrorHookId<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> recompiledModulePath<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> linkerOutput<span class="token punctuation">)</span><span class="token punctuation">;</span></code></td>
+                    <td>注册链接失败时调用的钩子。<br>使用<code class="notranslate language-cpp"><span class="token function">LPP_LINK_ERROR_HOOK</span><span class="token punctuation">(</span>functionName<span class="token punctuation">)</span></code>宏注册。</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              由于大多数钩子的函数签名相似，因此不同的<code class="notranslate code-in-text language-cpp">lpp<span class="token operator">::</span>Lpp<span class="token operator">*</span>HookId</code>值作为第一个参数只是为了提供额外的类型安全和保护。            </p>
+            <p>
+             <code class="notranslate code-in-text language-cpp"><span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> recompiledModulePath</code>参数提供了重新编译模块的绝对路径。            </p>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>示例</h4>
+              <p>Live++ 随附了一个名为<strong>"06_Hooks"</strong>的示例来演示钩子。</p>
+            </div>
+
+
+            <h3 id="API_hot_reload_hooks"><a href="#API_hot_reload_hooks">热重载钩子</a></h3>
+            <p>热重载钩子允许你钩住热重载过程，并获得补丁操作不同阶段的通知。支持以下热重载钩子：</p>
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>应用程序接口</th>
+                    <th>说明</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td width="50%" class="notranslate"><code class=" language-cpp"><span class="token keyword">void</span> <span class="token function">PrePatchHook</span><span class="token punctuation">(</span>lpp<span class="token operator">::</span>LppHotReloadPrepatchHookId<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> recompiledModulePath<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span><span class="token operator">*</span> <span class="token keyword">const</span> modifiedFiles<span class="token punctuation">,</span> <span class="token keyword">unsigned</span> <span class="token keyword">int</span> modifiedFilesCount<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span><span class="token operator">*</span> <span class="token keyword">const</span> modifiedClassLayouts<span class="token punctuation">,</span> <span class="token keyword">unsigned</span> <span class="token keyword">int</span> modifiedClassLayoutsCount<span class="token punctuation">)</span><span class="token punctuation">;</span></code></td>
+                    <td>注册一个钩子，在补丁加载到目标应用程序之前调用。<br>使用<code class="notranslate language-cpp"><span class="token function">LPP_HOTRELOAD_PREPATCH_HOOK</span><span class="token punctuation">(</span>functionName<span class="token punctuation">)</span></code>宏注册。</td>
+                  </tr>
+                  <tr>
+                    <td width="50%" class="notranslate"><code class=" language-cpp"><span class="token keyword">void</span> <span class="token function">PostPatchHook</span><span class="token punctuation">(</span>lpp<span class="token operator">::</span>LppHotReloadPostpatchHookId<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> recompiledModulePath<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span><span class="token operator">*</span> <span class="token keyword">const</span> modifiedFiles<span class="token punctuation">,</span> <span class="token keyword">unsigned</span> <span class="token keyword">int</span> modifiedFilesCount<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span><span class="token operator">*</span> <span class="token keyword">const</span> modifiedClassLayouts<span class="token punctuation">,</span> <span class="token keyword">unsigned</span> <span class="token keyword">int</span> modifiedClassLayoutsCount<span class="token punctuation">)</span><span class="token punctuation">;</span></code></td>
+                    <td>注册在补丁加载到目标应用程序后调用的钩子。<br>使用<code class="notranslate language-cpp"><span class="token function">LPP_HOTRELOAD_POSTPATCH_HOOK</span><span class="token punctuation">(</span>functionName<span class="token punctuation">)</span></code>宏注册。</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p>
+              由于两个钩子期望使用相同的函数签名，因此作为第一个参数的不同<code class="notranslate code-in-text language-cpp">lpp<span class="token operator">::</span>Lpp<span class="token operator">*</span>HookId</code>值仅用于提供额外的类型安全和保护。            </p>
+            <p>
+             <code class="notranslate code-in-text language-cpp"><span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> recompiledModulePath</code>参数提供了重新编译模块的绝对路径。            </p>
+            <p>
+             <code class="notranslate code-in-text language-cpp"><span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span><span class="token operator">*</span> <span class="token keyword">const</span> modifiedFiles<span class="token punctuation">,</span> <span class="token keyword">unsigned</span> <span class="token keyword">int</span> modifiedFilesCount</code>参数提供了已修改文件的绝对路径数组。            </p>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>注意</h4>
+              <p><code class="notranslate code-in-text language-cpp"><span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span><span class="token operator">*</span> <span class="token keyword">const</span> modifiedClassLayouts<span class="token punctuation">,</span> <span class="token keyword">unsigned</span> <span class="token keyword">int</span> modifiedClassLayoutsCount</code>参数最终将提供一个已修改类布局名称的数组，但该功能尚未可用。</p>
+            </div>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>示例</h4>
+              <p>通过使用<code class="notranslate code-in-text language-cpp"><span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span><span class="token operator">*</span> <span class="token keyword">const</span> modifiedFiles<span class="token punctuation">,</span> <span class="token keyword">unsigned</span> <span class="token keyword">int</span> modifiedFilesCount</code>参数，Live++ 随附的所有示例都包含补丁前和补丁后钩子，支持在某些文件被修改时拆卸和重建类实例。</p>
+            </div>
+
+
+            <h3 id="API_global_hot_reload_hooks"><a href="#API_global_hot_reload_hooks">全局热重载钩子</a></h3>
+            <p>全局热重载钩子允许你挂钩到热重载过程，并获得有关热重载操作开始和结束的通知。支持以下全局热重载钩子：</p>
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>应用程序接口</th>
+                    <th>说明</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td width="50%" class="notranslate"><code class=" language-cpp"><span class="token keyword">void</span> <span class="token function">GlobalHotReloadStart</span><span class="token punctuation">(</span>lpp<span class="token operator">::</span>LppGlobalHotReloadStartHookId<span class="token punctuation">)</span><span class="token punctuation">;</span></code></td>
+                    <td>注册一个全局钩子，在热重载操作开始后调用。<br>使用<code class="notranslate language-cpp"><span class="token function">LPP_GLOBAL_HOTRELOAD_START_HOOK</span><span class="token punctuation">(</span>functionName<span class="token punctuation">)</span></code>宏注册。</td>
+                  </tr>
+                  <tr>
+                    <td width="50%" class="notranslate"><code class=" language-cpp"><span class="token keyword">void</span> <span class="token function">GlobalHotReloadEnd</span><span class="token punctuation">(</span>lpp<span class="token operator">::</span>LppGlobalHotReloadEndHookId<span class="token punctuation">)</span><span class="token punctuation">;</span></code></td>
+                    <td>注册在热重载操作结束前调用的全局钩子。<br>使用<code class="notranslate language-cpp"><span class="token function">LPP_GLOBAL_HOTRELOAD_END_HOOK</span><span class="token punctuation">(</span>functionName<span class="token punctuation">)</span></code>宏注册。</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p>
+              由于这两个钩子期望使用相同的函数签名，因此作为第一个参数的不同<code class="notranslate code-in-text language-cpp">lpp<span class="token operator">::</span>Lpp<span class="token operator">*</span>HookId</code>值仅用于提供额外的类型安全和保护。            </p>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>注意</h4>
+              与其他钩子不同，这些钩子被视为全局钩子。这意味着，无论钩子实际包含哪个模块，只要检测到任何已注册模块发生变化，钩子都会被调用。            </div>
+
+
+            <h2 id="API_structural_change"><a href="#API_structural_change">结构更改</a></h2>
+            <p>以下操作被视为 "结构更改"：              <ul>
+                <li>更改类声明的内存布局，包括</li>
+                  <ul>
+                    <li>添加或删除基类</li>
+                    <li>添加或删除非静态数据成员</li>
+                    <li>更改非静态数据成员的顺序</li>
+                  </ul>
+                <li>更改虚拟函数表的布局或内容，包括</li>
+                  <ul>
+                    <li>添加或删除多态基类</li>
+                    <li>添加或删除虚函数</li>
+                    <li>更改虚函数的顺序</li>
+                    <li>更改虚函数的签名</li>
+                  </ul>
+              </ul>
+            </p>
+            <p>
+              在对现有代码和数据进行结构性修改时，Live++ 必须确保新代码能正确使用分配和存储在旧内存布局中的现有数据。为此，现有对象的数据必须从旧的内存布局迁移到新的内存布局，这可以通过使用<a href="#API_hot_reload_hooks">补丁前和补丁后热加载钩子</a>来实现。            </p>            
+            <p>钩子语句可以放在全局作用域的任何地方，并会被自动调用。您可以在任何您认为合适的翻译单元中添加任意数量的钩子：对钩子的数量或可以添加钩子的文件数量没有限制。</p>
+            <p>下面是一个如何在补丁间进行数据迁移的简化示例：</p>
+            
+<pre class="notranslate"><code class=" language-cpp"><span class="token keyword">void</span> <span class="token function">MyOwnPrePatchHook</span><span class="token punctuation">(</span>lpp<span class="token operator">::</span>LppHotReloadPrepatchHookId<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span><span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span><span class="token operator">*</span> <span class="token keyword">const</span><span class="token punctuation">,</span> <span class="token keyword">unsigned</span> <span class="token keyword">int</span><span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span><span class="token operator">*</span> <span class="token keyword">const</span><span class="token punctuation">,</span> <span class="token keyword">unsigned</span> <span class="token keyword">int</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  serialization<span class="token operator">::</span><span class="token function">SerializeAndDeleteObjects</span><span class="token punctuation">(</span>g_allObjects<span class="token punctuation">,</span> g_buffer<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">void</span> <span class="token function">MyOwnPostPatchHook</span><span class="token punctuation">(</span>lpp<span class="token operator">::</span>LppHotReloadPostpatchHookId<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span><span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span><span class="token operator">*</span> <span class="token keyword">const</span><span class="token punctuation">,</span> <span class="token keyword">unsigned</span> <span class="token keyword">int</span><span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span><span class="token operator">*</span> <span class="token keyword">const</span><span class="token punctuation">,</span> <span class="token keyword">unsigned</span> <span class="token keyword">int</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+  serialization<span class="token operator">::</span><span class="token function">CreateAndSerializeObjects</span><span class="token punctuation">(</span>g_allObjects<span class="token punctuation">,</span> g_buffer<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token function">LPP_HOTRELOAD_PREPATCH_HOOK</span><span class="token punctuation">(</span>MyOwnPrePatchHook<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">LPP_HOTRELOAD_POSTPATCH_HOOK</span><span class="token punctuation">(</span>MyOwnPostPatchHook<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+            <p>基本思想始终如一：              <ol>
+                <li>将现有对象的数据成员序列化到内存中。</li>
+                <li>删除对象。</li>
+                <li>使用新的类布局重新创建对象。</li>
+                <li>将内存中的数据成员序列化到新对象中。</li>
+              </ol>
+            </p>
+            <p>这个过程的难易程度取决于你使用的设置和引擎。您还可以考虑其他替代方法，例如在补丁后钩子中重新启动或重新加载当前关卡。您可以随意使用您认为合适的钩子，以应对类似的特殊情况。</p>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>重要提示</h4>
+              <p>强烈建议使用<a href="#creating_synchronized_agent">同步 Agent</a>，以确保某些对象在使用过程中不会改变内存布局。请记住，在堆栈中创建的对象无法迁移到新的类布局中。</p>
+            </div>
+
+            <div class="callout callout-info-MM" role="alert">
+              <h4>示例</h4>
+              <p>Live++ 随附的所有示例都包含热加载钩子，可在某些文件被修改时支持数据迁移。</p>
+            </div>
+
+
+            <h2 id="API_applying_preferences"><a href="#API_applying_preferences">应用首选项</a></h2>
+            <p>如果您愿意，可以使用以下 API 以编程方式应用 Live++ 全局首选项：</p>
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>应用程序接口</th>
+                    <th>说明</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td width="70%" class="notranslate"><code class=" language-cpp"><span class="token keyword">void</span> Agent<span class="token operator">::</span><span class="token function">SetBoolPreferences</span><span class="token punctuation">(</span>LppBoolPreferences preferences<span class="token punctuation">,</span> <span class="token keyword">bool</span> value<span class="token punctuation">)</span><span class="token punctuation">;</span></code></td>
+                    <td>设置<code class="notranslate code-in-text language-cpp">LppBoolPreferences</code>枚举中的任何 bool 偏好。</td>
+                  </tr>
+                  <tr>
+                    <td width="70%" class="notranslate"><code class=" language-cpp"><span class="token keyword">void</span> Agent<span class="token operator">::</span><span class="token function">SetIntPreferences</span><span class="token punctuation">(</span>LppIntPreferences preferences<span class="token punctuation">,</span> <span class="token keyword">int</span> value<span class="token punctuation">)</span><span class="token punctuation">;</span></code></td>
+                    <td>设置<code class="notranslate code-in-text language-cpp">LppIntPreferences</code>枚举中的任何整数偏好设置。</td>
+                  </tr>
+                  <tr>
+                    <td width="70%" class="notranslate"><code class=" language-cpp"><span class="token keyword">void</span> Agent<span class="token operator">::</span><span class="token function">SetStringPreferences</span><span class="token punctuation">(</span>LppStringPreferences preferences<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">char</span><span class="token operator">*</span> <span class="token keyword">const</span> value<span class="token punctuation">)</span><span class="token punctuation">;</span></code></td>
+                    <td>设置<code class="notranslate code-in-text language-cpp">LppStringPreferences</code>枚举中的任意字符串首选项。</td>
+                  </tr>
+                  <tr>
+                    <td width="70%" class="notranslate"><code class=" language-cpp"><span class="token keyword">void</span> Agent<span class="token operator">::</span><span class="token function">SetShortcutPreferences</span><span class="token punctuation">(</span>LppShortcutPreferences preferences<span class="token punctuation">,</span> <span class="token keyword">int</span> virtualKeyCode<span class="token punctuation">,</span> <span class="token keyword">int</span> modifiers<span class="token punctuation">)</span><span class="token punctuation">;</span></code></td>
+                    <td>设置<code class="notranslate code-in-text language-cpp">LppShortcutPreferences</code>枚举中的任何快捷方式首选项。</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p>
+             <code class="notranslate code-in-text language-cpp">LppBoolPreferences</code>、<code class="notranslate code-in-text language-cpp">LppIntPreferences</code>、<code class="notranslate code-in-text language-cpp">LppStringPreferences</code>和<code class="notranslate code-in-text language-cpp">LppShortcutPreferences</code>枚举中的每个枚举值都与<a href="#global_preferences">全局首选项</a>中的一个选项完全对应。这些枚举包含在<strong>LPP_API_Preferences.h</strong> 中，枚举值的名称不言自明。            </p>
+
+
+            <h2 id="API_logging_to_the_UI"><a href="#API_logging_to_the_UI">向用户界面记录日志</a></h2>
+            <p>Live++ 允许您使用以下 API 将消息记录到 Broker UI：</p>
+
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>应用程序接口</th>
+                    <th>说明</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td width="50%" class="notranslate"><code class=" language-cpp"><span class="token keyword">void</span> Agent<span class="token operator">::</span><span class="token function">LogMessageANSI</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">char</span><span class="token operator">*</span> <span class="token keyword">const</span> message<span class="token punctuation">)</span><span class="token punctuation">;</span></code></td>
+                    <td>向 Broker UI 发送日志。</td>
+                  </tr>
+                  <tr>
+                    <td width="50%" class="notranslate"><code class=" language-cpp"><span class="token keyword">void</span> Agent<span class="token operator">::</span><span class="token function">LogMessage</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">wchar_t</span><span class="token operator">*</span> <span class="token keyword">const</span> message<span class="token punctuation">)</span><span class="token punctuation">;</span></code></td>
+                    <td>向 Broker UI 发送日志。</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+<header>
+<h1 id="considerations"><a href="#considerations">注意事项</a></h1>
+<p class="lead">对于某些类型的 C++ 代码，热重载应该如何操作尚无明确的答案。本节详细介绍了 Live++ 在这些情况下做出的一些假设。</p>
+</header>
+
+<section>
+<h2 id="considerations_mutable_data"><a href="#considerations_mutable_data">可变数据</a></h2>
+<p>
+通常情况下，Live++ 会重定向热重载代码中的所有访问，使其始终引用原始实例，并相应地从补丁中剥离数据。
+
+考虑以下可变的全局（或函数静态）数据：
+<pre class="notranslate"><code class="language-cpp"><span class="token keyword">static int</span> g_globalInteger</span><span class="token punctuation"> = </span><span class="token number">100<span class="token punctuation">;</span></code></pre>
+</p>
+<p>
+由于 <code class="notranslate language-cpp code-in-text">g_globalInteger</code> 变量的可变特性，Live++ 只需假设其底层内存表示在进程启动和代码热重载之间已经发生了变化，因此所有修补的代码都将引用原始的 <code class="notranslate language-cpp code-in-text">g_globalInteger</code> 实例。请注意，在启动热重载之前更改初始化值不会产生任何影响，因为 Live++ 永远不会解析源代码或重新实例化现有实例。
+</p>
+<p>
+此假设是基于以下观察：如果没有这种行为，绝大多数 C++ 代码（例如大多数单例实现）在热重载后将停止工作。
+</p>
+
+<h2 id="considerations_immutable_data"><a href="#considerations_immutable_data">不可变数据</a></h2>
+<p>
+对于不可变数据，上述规则有一个例外。
+
+考虑以下不可变的全局（或函数静态）数据：
+<pre class="notranslate"><code class="language-cpp"><span class="token keyword">static const int</span> g_globalInteger</span><span class="token punctuation"> = </span><span class="token number">100<span class="token punctuation">;</span></code></pre>
+</p>
+<p>
+由于 <code class="notranslate language-cpp code-in-text">g_globalInteger</code> 变量的不可变特性，Live++ 假设底层内存表示自进程启动以来不可能通过常规方式发生改变，因此可以安全地在热重载代码中重新引入该数据，并使所有引用都指向新实例而不是原始实例。
+</p>
+<p>
+可变性取决于相关符号在可执行文件中的位置。在这种情况下，<code class="notranslate language-cpp code-in-text">g_globalInteger</code> 位于 <code class="notranslate language-cpp code-in-text">.rdata/.rodata</code> 中，该文件是只读的。这意味着您可以更改 <code class="notranslate language-cpp code-in-text">g_globalInteger</code> 的值，启动热重载，并且更改将反映在所有代码中。此行为对于更改全局变量、可配置静态变量、查找表等非常有用。
+</p>
+<p>
+但是，此行为有一个例外，特别是引用全局可变数据的全局不可变数据。在这种情况下，大多数现有代码理所当然地假设全局变量及其成员的地址保持不变（例如，对于自定义 RTTI 实现），这意味着 Live++ 必须将数据视为可变数据。
+</p>
+</section>
+
+          <header>
+            <h1 id="limitations"><a href="#limitations">限制</a></h1>
+            <p class="lead">当前版本的 Live++ 有一些小限制，您应该了解。但请记住，除非另有说明，这些限制并非 Live++ 基础设施的基本限制，而是计划中但尚未可用的功能。Live++ 最终会在未来的更新中取消这些限制。</p>
+          </header>
+
+          <section>
+            <h2 id="limitation_overhead"><a href="#limitation_overhead">开销</a></h2>
+            <p>
+              只要没有构建和安装 Live++ 代码补丁，Live++ 造成的唯一运行时开销是由于<a href="#linker_settings">/FUNCTIONPADMIN 链接器选项</a>在每个函数前插入几个未使用的字节。不过，这对性能的影响微乎其微。            </p>
+            <p>
+              对于使用<a href="https://docs.microsoft.com/en-us/cpp/build/reference/incremental-link-incrementally" target="_blank">增量链接</a>构建的模块，Live++ 会自动使用增量链接区块，直接修补函数地址。在这种情况下，使用 Live++ 补丁的函数完全不会造成任何额外开销。            </p>
+            <p>
+              在所有其他情况下，使用热补丁技术对函数进行补丁，其中包括一次短的 2 字节跳转以及一次到新函数的相对跳转。            </p>
+
+
+            <h2 id="limitation_breakpoints"><a href="#limitation_breakpoints">Visual Studio 中的断点</a></h2>
+            <p>
+              在通过 Live++ 热加载的源文件中设置新的断点时，Visual Studio 调试器会尝试将此断点应用于包含相应源文件的所有补丁。这很快就会造成混乱，尤其是在向现有源文件添加新代码行之后：            </p>
+            <p>
+              <img src="assets/img/visual_studio_breakpoints.png" alt="Visual Studio breakpoints">
+            </p>
+            <p>
+              如上图所示，在<strong>Cube.cpp 的第 20 行</strong>设置新的断点后，调试器还会在<strong>第 21 行和第 22 行</strong>设置额外的断点。尽管由于旧代码从未被实际触发，这些断点会按预期工作，但指示器边缘的红点可能会产生误导。            </p>
+            <p>
+              为了缓解这个问题，建议在 Visual Studio 中启用<span class="notranslate label label-default label-custom-MM">Tools -> Options... -> Debugging -> General</span>下的<span class="notranslate label label-default label-custom-MM">Require source files to exactly match the original version</span>。
+            </p>
+            <p>
+              使用 <a href="https://code.visualstudio.com/docs/cpp/launch-json-reference" target="_blank">Visual Studio Code</a> 时，必须相应地设置标志 <span class="notranslate label label-default label-custom-MM">requireExactSource</span>。
+            </p>
+
+
+            <h2 id="limitation_global_variables"><a href="#limitation_global_variables">调试器中的全局变量</a></h2>
+            <p>
+              在任何热加载过的源文件中闯入调试器时，调试器通常无法显示全局变量和静态变量的值。造成这种情况的原因是，这些变量存在于原始可执行文件中，而补丁代码是从动态库中注入的。              
+            </p>
+            <p>
+              为了解决这个问题，Visual Studio 和 Rider 都支持<a href="https://learn.microsoft.com/en-us/visualstudio/debugger/context-operator-cpp" target="_blank">Context Operator（上下文操作符）</a>，可以将模块上下文传达给调试器。            </p>
+            <p>
+              举个例子，在名为<code class="notranslate language-cpp code-in-text">MyApplication<span class="token punctuation">.</span>exe</code>的应用程序中，名为<code class="notranslate language-cpp code-in-text">globalNamespace</code>的命名空间中包含一个名为<code class="notranslate language-cpp code-in-text">g_globalInteger</code>的全局变量，可以将其添加到监视窗口中，显示为<code class="notranslate language-cpp code-in-text"><span class="token punctuation">{</span><span class="token punctuation">,</span><span class="token punctuation">,</span>MyApplication<span class="token punctuation">.</span>exe<span class="token punctuation">}</span>globalNamespace<span class="token operator">::</span>g_globalInteger</code>。            </p>
+
+            <h2 id="limitation_functions_on_the_stack"><a href="#limitation_functions_on_the_stack">堆栈上的函数</a></h2>
+            <p>
+              由于 Live++ 中代码修补的工作方式，当前堆栈中的函数需要重新输入后才能观察到其代码变化。在实践中，这几乎从来都不是问题，它允许 Live++ 正确处理内联函数、在函数中引入新的堆栈变量等。            </p>
+            <div class="callout callout-info-MM" role="alert">
+              <h4>注释</h4>
+              <p>这是 Live++ 使用的修补机制的固有限制，无法更改。</p>
+            </div>
+
+
+            <h2 id="limitation_thread_local_storage"><a href="#limitation_thread_local_storage">线程本地存储</a></h2>
+            <p><strong>使用</strong>线程本地存储变量没有问题，但目前不支持在线程本地存储中<strong>引入新的</strong>全局或静态变量。            </p>
+
+
+            <h2 id="limitation_clang_dynamic_initializers"><a href="#limitation_clang_dynamic_initializers">Clang 中的动态初始化器</a></h2>
+            <p>使用 Clang 编译时，不支持引入需要动态初始化器的新全局变量或静态变量。使用 Live++ 重新编译的补丁将不会调用动态初始化器。            </p>
+          </section>
+
+
+          <header>
+            <h1 id="known_issues"><a href="#known_issues">已知问题</a></h1>
+          </header>
+
+          <section>
+            <h2 id="known_fastbuild_clang"><a href="#known_fastbuild_clang">使用 Clang 的 FASTBuild</a></h2>
+            <p>
+              在使用带有 Clang++ 的 FASTBuild 时，FASTBuild 会在源文件预处理期间移除所有code class="notranslate language-cpp code-in-text"><span class="token operator">-</span>I</code>命令行参数，这很可能导致在重新编译期间丢失包含。            </p>
+            <p>
+              这似乎是由于使用 Clang 时<a href="https://github.com/fastbuild/fastbuild/blob/178c7512ed4d3594bfad22bed967a5d557fc88b9/Code/Tools/FBuild/FBuildCore/ExeDrivers/Compiler/CompilerDriver_GCCClang.cpp#L81" target="_blank">FASTBuild 中的过时检查</a>造成的。作为一种解决方法，请不要在 .bff 脚本中指定<code class="notranslate language-cpp code-in-text"><span class="token punctuation">.</span>CompilerFamily <span class="token operator">=</span> <span class="token string">'clang'</span></code>，或者从源代码编译FASTBuild 而不进行过时检查。            </p>
+
+
+            <h2 id="known_issues_external"><a href="#known_issues_external">/external:I "需要"/external:W</a></h2>
+            <p>
+              在 Visual Studio 的某些版本中，工具链不能正确地将外部包含环境存储在 PDB 文件中，这一点已<a href="https://developercommunity.visualstudio.com/t/trying-to-recompile-individual-files-with-pch-enab/1491579#T-N1618164" target="_blank">得到微软的承认</a>。            </p>
+            <p>
+              在这种情况下，编译器会忽略<strong>/external:I</strong>，因此很可能导致重新编译时丢失包含。作为一种解决方法，在<a href="#project_preferences_compiler">项目首选项</a>中指定<strong>/external:W0</strong>作为附加编译器选项。            </p>
+
+
+            <h2 id="known_issues_include"><a href="#known_issues_include">PDB 中缺少 INCLUDE</a></h2>
+            <p>
+              与上述错误类似，Visual Studio 的某些版本也没有在 PDB 文件中捕获和存储 INCLUDE 环境，<a href="https://developercommunity.visualstudio.com/t/trying-to-recompile-individual-files-with-pch-enab/1491579#T-N1618164" target="_blank">微软</a>也<a href="https://developercommunity.visualstudio.com/t/trying-to-recompile-individual-files-with-pch-enab/1491579#T-N1618164" target="_blank">承认了</a>这一点。            </p>
+            <p>
+              这同样会导致重新编译时丢失包含。作为一种解决方法，在<a href="#project_preferences_compiler">项目首选项</a>中指定所需的包含路径作为额外的编译器选项。            </p>
+
+
+            <h2 id="known_reloading_in_halted_processes"><a href="#known_reloading_in_halted_processes">停止进程中的热重载</a></h2>
+            <p>
+              Visual Studio 2022（17.11 版）中引入的调试器现在会在内部缓存 CONTEXT 结构，从而导致<a href="https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getthreadcontext" target="_blank">GetThreadContext() Win32 API</a>为指令指针返回虚假值，<a href="https://developercommunity.visualstudio.com/t/VS2022-debugger-doesnt-adjust-RIP-corre/10801166" target="_blank">微软也承认了</a>这一点。            </p>
+            <p>
+              不幸的是，Live++ 在调试热加载进程时依赖于对该进程指令指针的了解。在 Live++ 2.8.0 中已实施了一个变通方法，但我们仍敦促微软修复这一行为，因为破坏一个不相关的 Win32 API 似乎会造成相当大的影响。            </p>
+          </section>
+
+          <header>
+            <h1 id="troubleshooting"><a href="#troubleshooting">故障排除</a></h1>
+            <p class="lead">如果您在使用 Live++ 时遇到任何问题，有几项功能专门用于排除故障。</p>
+          </header>
+
+          <section>
+            <h2 id="troubleshooting_missing_compilands"><a href="#troubleshooting_missing_compilands">编译器缺失</a></h2>
+            <p>
+              首次将 Live++ 集成到应用程序中时，您可能会遇到以下情况：并非所有编译器和链接器选项都已正确设置，或者 Live++ 未加载和启用某些翻译单元或动态链接库。由于不完整的翻译单元和模块默认不会显示在<strong>编译器</strong>视图中，因此可能很难跟踪哪些编译器没有加载。            </p>
+            <p>
+              为了帮助解决此问题，请启用<span class="notranslate label label-default label-custom-MM">编辑 -> 全局偏好设置... -> 热重载</span>下的两个选项<strong>"加载不完整的模块"</strong>和<strong>"加载不完整编译单元"</strong>。当这些设置处于活动状态时，Live++ 将在 <strong>编译单元</strong> 视图中列出所有翻译单元和模块，无论它们是否加载失败。
+            <p>
+              <img src="assets/img/compilands_view_all_zho.png" alt="Compilands view all">
+            </p>            
+            <p>
+              此外，右键单击任何翻译单元或模块并选择<span class="notranslate label label-default label-custom-MM">显示详细信息...</span>将弹出一个对话框，其中显示为此特定翻译单元或模块存储的所有信息，以及所有已识别的缺陷：
+            <p>
+              <img src="assets/img/module_defects_zho.png" alt="Module defects">
+            </p>
+            <p>
+              <img src="assets/img/compiland_defects_zho.png" alt="Compiland defects">
+            </p>
+
+
+            <h2 id="troubleshooting_verbose_compiling"><a href="#troubleshooting_verbose_compiling">详细编译</a></h2>
+            <p>
+              在某些情况下，通过 Live++ 重新编译更改可能会失败。这可能是由于缺少项目首选项、奇异的构建设置或 Live++ 中的错误造成的。在<span class="notranslate label label-default label-custom-MM">调试 -> 切换详细编译</span>下打开详细编译将帮助您诊断此类问题。
+            </p>
+            <p>
+              启用 "详细编译 "后，Live++ 会在重新编译任何文件时输出以下信息：              <ul>
+                <li>编译器路径</li>
+                <li>编译器工作目录</li>
+                <li>编译器命令行选项</li>
+                <li>包含的文件</li>
+              </ul>
+              此外，如果所使用的工具链支持，编译也将在 "详细 "模式下进行。            </p>
+
+
+            <h2 id="troubleshooting_verbose_linking"><a href="#troubleshooting_verbose_linking">冗长链接</a></h2>
+            <p>
+              与详细编译类似，<span class="notranslate label label-default label-custom-MM">调试 -> 切换详细链接</span>下的详细链接将帮助您诊断可能导致 Live++ 无法链接补丁的问题。
+            </p>
+            <p>
+              启用verbose linking 后，Live++ 将在链接任何补丁时输出以下信息：              <ul>
+                <li>链接器路径</li>
+                <li>链接器工作目录</li>
+                <li>链接命令行选项</li>
+              </ul>
+              此外，如果使用的工具链支持，链接将以 "verbose "模式执行，这将输出使用的静态库以及被拉入补丁的翻译单元。            </p>
+          </section>
+
+
+          <header>
+            <h1 id="3rd_party_libraries"><a href="#3rd_party_libraries">第三方库</a></h1>
+          </header>
+
+          <section>
+            <pre class="notranslate">json.h
+
+This is free and unencumbered software released into the public domain.
+
+Anyone is free to copy, modify, publish, use, compile, sell, or
+distribute this software, either in source code form or as a compiled
+binary, for any purpose, commercial or non-commercial, and by any
+means.
+
+In jurisdictions that recognize copyright laws, the author or authors
+of this software dedicate any and all copyright interest in the
+software to the public domain. We make this dedication for the benefit
+of the public at large and to the detriment of our heirs and
+successors. We intend this dedication to be an overt act of
+relinquishment in perpetuity of all present and future rights to this
+software under copyright law.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+For more information, please refer to http://unlicense.org/
+            </pre>
+
+            <pre class="notranslate">Intel® X86 Encoder Decoder (Intel® XED)
+
+Copyright (c) 2023 Intel Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+            </pre>
+
+            <pre class="notranslate">xxHash Library
+Copyright (c) 2012-2020 Yann Collet
+All rights reserved.
+
+BSD 2-Clause License (https://www.opensource.org/licenses/bsd-license.php)
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice, this
+  list of conditions and the following disclaimer in the documentation and/or
+  other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.       
+            </pre>
+          </section>
+        </main>
+    </div>
+</body>
+</html>

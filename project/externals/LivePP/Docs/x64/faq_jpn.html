@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+
+    <title>Live++ for Windows - よくある質問</title>
+
+    <!-- Style -->
+    <link href="assets/css/docs.css" rel="stylesheet">
+
+    <!-- Fonts -->
+    <link href="assets/css/fonts.css" rel="stylesheet">
+
+    <!-- Favicons -->
+    <link rel="icon" href="assets/img/favicon.png">
+    <link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <img src="assets/img/logo.svg" alt="Live++ logo" width="48" height="48"/>
+            <span>Live++ for Windows - よくある質問</span>
+        </div>
+        <div class="header-right">
+            <a href="./faq.html">English</a>
+            <a href="./faq_jpn.html">日本語</a>
+            <a href="./faq_zho.html">한국어</a>
+            <a href="./faq_kor.html">简体中文</a>
+        </div>
+    </div>
+
+    <div class="main-container">
+      <main class="content faq">
+        <header>
+          <h1>よくある質問</h1>
+          <p class="lead">ご質問があり、ここに見つからない場合は、<a href="mailto:support@molecular-matters.com">電子メールを</a>お送りください。          </p>
+        </header>
+
+        <section>
+          <details>
+            <summary><strong class="notranslate">"src\main.cpp: fatal error C1041: cannot open program database 'C:\Development\Project.pdb'; if multiple CL.EXE write to the same .PDB file, please use /FS"</strong> というエラーが出続けます。            </summary>
+            <div class="answer">
+              <p>これは、コンパイラが生成した .PDB ファイル<span class="notranslate">(C/C++ -> Output Files -> Program Database File Name)</span> とリンカが生成した .PDB ファイル<span class="notranslate">(Linker -> Debugging -> Generate Program Database File)</span> の両方が同じ出力ファイルに設定されている場合に発生します。この場合、デバッガはデバッグ中に.PDBファイルをロックし、コンパイラはコンパイル時に同じファイルに書き込もうとします。</p>
+              <p>
+              コンパイラーが生成する.PDBファイルは<strong>中間</strong>ファイルであり、ビルドの成果物ではないことに注意してください。そのため、対応するコンパイラー・オプションはそのままにしておくのが最善です。さらに、コンパイラとリンカーの両方が同じ .PDB ファイルに書き込んだ場合、大規模なプロジェクトのリンク時間が最大で 4 倍長くなったという報告があります（Live++ を使用しないインクリメンタルビルドとフルビルドの場合）。              </p>
+            </div>
+          </details>
+
+          <details>
+            <summary>コンパイラが<strong class="notranslate">"src\main.cpp: fatal error C1041: cannot open program database 'C:\Development\vc141.idb'; if multiple CL.EXE write to the same .PDB file, please use /FS"</strong> を報告し続けます。</summary>
+            <div class="answer">
+              <p>これは、ネイティブの Edit and Continue が有効で、<span class="notranslate">'C/C++ -> General -> Debug Information Format -> Program Database for Edit and Continue (/ZI)'</span> コンパイラー・オプションが使用されている場合に発生します。デバッグ情報形式を<a class="notranslate" href="documentation_jpn.html#compiler_settings">'C7 compatible (/Z7)' または 'Program Database (/Zi)'</a> に設定する必要があることに注意してください。</p>
+            </div>
+          </details>
+
+          <details>
+            <summary><strong class="notranslate">cl : Command line warning D9007 : '/external:I' requires '/external:W'; option ignored</strong><br/>これを修正するにはどうすればよいですか？</summary>
+            <div class="answer">
+              <p><a href="documentation_jpn.html#known_issues_external">Visual Studioのツールチェーンに</a>問題がある可能性が高いです。</p>
+            </div>
+          </details>
+
+          <details>
+            <summary>インクルード・パスを指定するためにINCLUDE環境変数を使用していますが、Live++によって無視されているようです。<br/>どうなっていますか？</summary>
+            <div class="answer">
+              <p><a href="documentation_jpn.html#known_issues_include">Visual Studioツールチェーンで</a>問題が発生している可能性が高いです。</p>
+            </div>
+          </details>
+
+          <details>
+            <summary>Live++ が<strong>"関数 'Bar' の 0xF00 の命令は短すぎるため、パッチを適用できません。この関数を変更しても、観察できません。" と</strong>報告します。<br/>どうすればいいですか？</summary>
+            <div class="answer">
+              <p>正しい<a href="documentation_jpn.html#compiler_settings">コンパイラ</a>設定でビルドされていない翻訳ユニットが原因である可能性が高いです。</p>
+            </div>
+          </details>
+
+          <details>
+            <summary>Live++ が<strong>"ツールチェーン 'Foo' の vcvars*.bat 環境を決定できませんでした</strong>報告します。<br/>どうすればいいですか?</summary>
+            <div class="answer">
+              <p>
+                Visual Studioのコンパイラまたはリンカを使用する場合、vcvars*.batファイルを呼び出して、後続のコンパイルのためのツールチェーン環境を設定する必要があります。Live++は、デフォルトのインストール・ディレクトリの相対パスが維持されている限り、Live++対応アプリケーションのビルドに使用されたツールチェーンを自動的に検出し、対応するvcvars*.batファイルを探します。              </p>
+              <p>
+                カスタム ツールチェーンまたはビルド システムを使用する場合、コンパイラ（cl.exe）とリンカ（link.exe）はデフォルト以外の相対パス構造に保持されることが多く、正しい vcvars*.bat ファイルを見つけるのが難しくなります。この場合、Live++は、呼び出されたコンパイラまたはリンカと同じディレクトリにある次のファイルのいずれかを期待します：                <ul>
+                  <li>
+                    vcvars64.bat            </li>
+                  <li>
+                    vcvarsamd64_x86.bat                  </li>
+                  <li>
+                    vcvarsx86_amd64.bat                  </li>
+                  <li>
+                    vcvars32.bat            </li>
+                </ul>
+              </p>
+              <p>
+                コンパイラー環境を設定するために独自のファイルを提供することができ、Visual Studioのファイルをコピーする必要はないことに注意してください。              </p>
+            </div>
+          </details>
+
+          <details>
+            <summary>ファイルを再コンパイルしようとすると、Live++はコンパイラを起動できません。</summary>
+            <div class="answer">
+              <p>
+                セットアップで分散/リモートビルドを使用していますか？そうであれば、<a href="documentation_jpn.html#distributed_builds">必要な環境</a>設定を確認してください。              </p>
+            </div>
+          </details>
+
+          <details>
+            <summary><br/>どの設定を行う必要がありますか？</summary>
+            <div class="answer">
+              <p>
+                部分 PDB（<span class="notranslate">/DEBUG:FASTLINK</span> など）ではなく、<a href="documentation_jpn.html#linker_settings">完全 PDB（<span class="notranslate">/DEBUG:FULL</span> など）を生成して</a>ください。              </p>
+            </div>
+          </details>
+
+          <details>
+            <summary>Live++ はショートカットを押しても何もしません。<br/>何が足りないのでしょうか？</summary>
+            <div class="answer">
+              <p>
+                まず、<a href="documentation_jpn.html#usage_agents">Live++エージェントが作成さ</a>れ、<a href="documentation_jpn.html#enabling_livepp">適切なAPI関数の</a>いずれかを呼び出して、問題のモジュール（.EXEまたは.DLL）に対してLive++が有効になっていることを確認してください。              </p>
+              <p>
+                次に、ショートカットを押す前に、変更を保存することを忘れないでください。Live++がまだ何もしない場合、どの翻訳ユニットがモジュールに含まれているかを検出できません。この場合、<a href="documentation_jpn.html#compiler_settings">コンパイラとリンカの設定が</a>正しいかどうか確認してください。              </p>
+              <p>
+                第三に、Live++が動作するために必要な<a href="documentation_jpn.html#required_files">すべての.PDB、.OBJ、.CPP、.Hファイルを</a>見つけられることを確認してください。              </p>
+              <p>
+                それでも問題が解決せず、Live++があなたのセットアップで動作しない理由がわからない場合は、<a href="mailto:support@molecular-matters.com">お知らせ</a>ください。              </p>
+            </div>
+          </details>
+
+          <details>
+            <summary><br/>どのように報告すればいいですか？</summary>
+            <div class="answer">
+              <p>
+                Broker、Bridge、Agentのログを添付して、問題の詳細を<a href="mailto:support@molecular-matters.com">ご連絡</a>ください。              </p>
+              <p>
+                Broker ログファイルは、Broker メインメニューの<span class="notranslate label label-default label-custom-MM">ツール -&gt; Broker ログファイルを表示...</span>を選択すると表示されます。              </p>
+              <p>
+                BridgeとAgentのログファイルは、<strong>処理</strong>ビューのコンテキストメニューで<span class="notranslate label label-default label-custom-MM">選択したローカルプロセスのログファイルを表示</span>を選択すると表示されます。              </p>
+            </div>
+          </details>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
