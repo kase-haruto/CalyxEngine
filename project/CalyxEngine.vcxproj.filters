@@ -3041,6 +3041,9 @@
     <ClCompile Include="Game\3dObject\Actor\Background\FalldownGimmickActor.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Background\StageGimmickActor.cpp" />
     <ClCompile Include="Game\Event\Gimmick\GimmickActivateEvent.cpp" />
+    <ClCompile Include="Engine\Application\UI\Panels\LivePPPanel.cpp">
+      <Filter>Engine\Application\UI\Panels</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Battle\Shooting\homing\HomingTarget.h" />
@@ -3064,6 +3067,9 @@
     <ClInclude Include="Game\3dObject\Actor\Background\StageGimmickActor.h" />
     <ClInclude Include="Engine\Application\Effects\Particle\Emitter\EmitterDetails.h" />
     <ClInclude Include="Game\Event\Gimmick\GimmickActivateEvent.h" />
+    <ClInclude Include="Engine\Application\UI\Panels\LivePPPanel.h">
+      <Filter>Engine\Application\UI\Panels</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\ObjectPicking.PS.hlsl" />

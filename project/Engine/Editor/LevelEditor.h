@@ -10,10 +10,12 @@
 #include <Engine/Application/UI/Panels/EditorPanel.h>
 #include <Engine/Application/UI/Panels/HierarchyPanel.h>
 #include <Engine/Application/UI/Panels/InspectorPanel.h>
+#include <Engine/Application/UI/Panels/LivePPPanel.h>
 #include <Engine/Application/UI/Panels/PlaceToolPanel.h>
 #include <Engine/Application/UI/Panels/SplineEditorPanel.h>
 #include <Engine/Editor/ImGuiLayoutSwitcher.h>
 #include <Engine/Editor/SceneObjectEditor.h>
+#include <externals/nlohmann/json.hpp>
 
 // c++
 #include <memory>
@@ -114,6 +116,7 @@ namespace CalyxEditor {
 		std::unique_ptr<PlaceToolPanel>		 placeToolPanel_;
 		std::unique_ptr<SplineEditorPanel>	 splineEditor_;
 		std::unique_ptr<AssetPanel>			 assetPanel_;
+		std::unique_ptr<LivePPPanel>		 livePPPanel_;
 		std::unique_ptr<SceneSwitchOverlay>	 sceneSwitchOverlay_;
 		std::unique_ptr<ImGuiLayoutSwitcher> layoutSwitcher_;
 		PlaySession*						 pPlaySesseion_ = nullptr;
@@ -136,6 +139,7 @@ namespace CalyxEditor {
 		BaseEditor*	  selectedEditor_ = nullptr;
 		/// SceneObject 選択は weak_ptr で保持（寿命を伸ばさない）
 		std::weak_ptr<SceneObject> selectedObject_;
+		nlohmann::json			   livePPSnapshot_;
 
 		// Editors メニューに並べるパネル群
 		std::vector<IEngineUI*> editorPanels_;

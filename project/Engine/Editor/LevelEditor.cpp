@@ -22,6 +22,8 @@
 #include <externals/imgui/imgui.h>
 
 // c++
+#include "Engine/Foundation/HotReload/LivePP/LivePPService.h"
+
 #include <Engine/Foundation/Utility/FileSystem/FileScanner.h>
 #include <algorithm>
 
@@ -56,6 +58,7 @@ namespace CalyxEditor {
 		placeToolPanel_		= std::make_unique<PlaceToolPanel>();
 		splineEditor_		= std::make_unique<SplineEditorPanel>();
 		assetPanel_			= std::make_unique<AssetPanel>();
+		livePPPanel_		= std::make_unique<LivePPPanel>();
 		sceneSwitchOverlay_ = std::make_unique<SceneSwitchOverlay>();
 
 		// レイアウトスイッチャーの初期化 --------------------------------------
@@ -112,6 +115,28 @@ namespace CalyxEditor {
 		// エディターメニューの初期化 ------------------------------------------
 		menu_ = std::make_unique<EditorMenu>();
 
+		// --- Advanced Hot Reload (Object Re-instancing) ---
+		if(auto* lpp = CalyxEngine::LivePPService::GetInstance()) {
+			lpp->AddPrePatchListener([this]() {
+				if(auto* ctx = SceneContext::Current()) {
+					livePPSnapshot_ = SceneSerializer::DumpJson(*ctx);
+					OutputDebugStringW(L"[LivePP] Scene snapshot taken.\n");
+				}
+			});
+
+			lpp->AddPostPatchListener([this]() {
+				if(auto* ctx = SceneContext::Current()) {
+					if(!livePPSnapshot_.empty()) {
+						ClearSelection();
+						ctx->Clear();
+						SceneSerializer::LoadJson(*ctx, livePPSnapshot_);
+						livePPSnapshot_.clear();
+						OutputDebugStringW(L"[LivePP] Scene re-instanced from snapshot.\n");
+					}
+				}
+			});
+		}
+
 		// File: Save Scene
 		menu_->Add(MenuCategory::File,
 				   {"Save Scene",
@@ -158,9 +183,13 @@ namespace CalyxEditor {
 		editorPanels_.push_back(placeToolPanel_.get());
 		editorPanels_.push_back(splineEditor_.get());
 		editorPanels_.push_back(assetPanel_.get());
+		editorPanels_.push_back(livePPPanel_.get());
 
 		// Editors メニュー（MenuCategory::Tools）に各パネルのトグルを追加
 		for(auto* p : editorPanels_) {
+			// LivePPPanel は自動表示なのでメニューには出さない
+			if(p == livePPPanel_.get()) continue;
+
 			menu_->Add(MenuCategory::Tools,
 					   {p->GetPanelName(),
 						"",
@@ -216,6 +245,17 @@ namespace CalyxEditor {
 					[this] {
 						if(pPlaySesseion_ && pPlaySesseion_->IsRuntime()) {
 							pPlaySesseion_->Exit();
+						}
+					},
+					true});
+
+		// Edit: Hot Reload
+		menu_->Add(MenuCategory::Edit,
+				   {"Hot Reload (Live++)",
+					"Ctrl+Alt+F11",
+					[] {
+						if(auto* service = CalyxEngine::LivePPService::GetInstance()) {
+							service->TriggerReload();
 						}
 					},
 					true});
@@ -296,6 +336,13 @@ namespace CalyxEditor {
 				ExitGameMode();
 			}
 			lastPlaying_ = playing;
+		}
+
+		// LivePP Visibility Control
+		if(livePPPanel_) {
+			auto* service	 = CalyxEngine::LivePPService::GetInstance();
+			bool  shouldShow = (service && service->GetStatus() != CalyxEngine::LivePPStatus::Idle);
+			livePPPanel_->SetShow(shouldShow);
 		}
 #endif
 	}
