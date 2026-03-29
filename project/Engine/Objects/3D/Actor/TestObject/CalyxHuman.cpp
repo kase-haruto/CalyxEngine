@@ -26,14 +26,11 @@ void CalyxHuman::Initialize(){
 }
 
 void CalyxHuman::Update(float dt){
-
 	Move(dt);
 	Turn();
 
 	TransitionAnimation();
-
 }
-
 std::optional<CalyxMath::Vector3> CalyxHuman::GetJointWorldPos(const std::string& name) const {
 	const CalyxAssets::AnimationModel* anim = AnimationModel();
 	if (!anim) return std::nullopt;
@@ -73,7 +70,7 @@ void CalyxHuman::Move(float dt){
 	CalyxMath::Vector2 leftStick = CalyxFoundation::Input::GetInstance()->GetLeftStick();
 	velocity_.x += leftStick.x;
 	velocity_.z += leftStick.y;
-
+	
 	if (velocity_.Length() > 0.0f){
 		velocity_.Normalize();
 	}

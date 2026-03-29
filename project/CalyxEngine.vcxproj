@@ -560,6 +560,7 @@ copy /Y "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(SolutionD
     <ClCompile Include="Game\3dObject\Actor\Player\DangerSense\PlayerDangerSense.cpp" />
     <ClCompile Include="Game\3dObject\Actor\Player\Dodge\PlayerDodgeMotion.cpp" />
     <ClCompile Include="Engine\Objects\2D\NumbersSprite\NumbersSprite.cpp" />
+    <ClCompile Include="Engine\Application\UI\Panels\LivePPPanel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Event\EventConfig.h" />
@@ -978,6 +979,7 @@ copy /Y "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(SolutionD
     <ClInclude Include="Game\UI\Controller\TitleMenuController.h" />
     <ClInclude Include="Game\Battle\Movement\FollowSpline\SplineFollower.h" />
     <ClInclude Include="Engine\Objects\2D\NumbersSprite\NumbersSprite.h" />
+    <ClInclude Include="Engine\Application\UI\Panels\LivePPPanel.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">

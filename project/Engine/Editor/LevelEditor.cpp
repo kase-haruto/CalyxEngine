@@ -22,6 +22,8 @@
 #include <externals/imgui/imgui.h>
 
 // c++
+#include "Engine/Foundation/HotReload/LivePP/LivePPService.h"
+
 #include <Engine/Foundation/Utility/FileSystem/FileScanner.h>
 #include <algorithm>
 
@@ -56,6 +58,7 @@ namespace CalyxEditor {
 		placeToolPanel_		= std::make_unique<PlaceToolPanel>();
 		splineEditor_		= std::make_unique<SplineEditorPanel>();
 		assetPanel_			= std::make_unique<AssetPanel>();
+		livePPPanel_		= std::make_unique<LivePPPanel>();
 		sceneSwitchOverlay_ = std::make_unique<SceneSwitchOverlay>();
 
 		// レイアウトスイッチャーの初期化 --------------------------------------
@@ -158,9 +161,13 @@ namespace CalyxEditor {
 		editorPanels_.push_back(placeToolPanel_.get());
 		editorPanels_.push_back(splineEditor_.get());
 		editorPanels_.push_back(assetPanel_.get());
+		editorPanels_.push_back(livePPPanel_.get());
 
 		// Editors メニュー（MenuCategory::Tools）に各パネルのトグルを追加
 		for(auto* p : editorPanels_) {
+			// LivePPPanel は自動表示なのでメニューには出さない
+			if(p == livePPPanel_.get()) continue;
+
 			menu_->Add(MenuCategory::Tools,
 					   {p->GetPanelName(),
 						"",
@@ -216,6 +223,17 @@ namespace CalyxEditor {
 					[this] {
 						if(pPlaySesseion_ && pPlaySesseion_->IsRuntime()) {
 							pPlaySesseion_->Exit();
+						}
+					},
+					true});
+
+		// Edit: Hot Reload
+		menu_->Add(MenuCategory::Edit,
+				   {"Hot Reload (Live++)",
+					"Ctrl+Alt+F11",
+					[] {
+						if(auto* service = CalyxEngine::LivePPService::GetInstance()) {
+							service->TriggerReload();
 						}
 					},
 					true});
@@ -296,6 +314,13 @@ namespace CalyxEditor {
 				ExitGameMode();
 			}
 			lastPlaying_ = playing;
+		}
+
+		// LivePP Visibility Control
+		if(livePPPanel_) {
+			auto* service	 = CalyxEngine::LivePPService::GetInstance();
+			bool  shouldShow = (service && service->GetStatus() != CalyxEngine::LivePPStatus::Idle);
+			livePPPanel_->SetShow(shouldShow);
 		}
 #endif
 	}

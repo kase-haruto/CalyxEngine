@@ -3,8 +3,8 @@
 /* include space
 /* ===================================================================== */
 // uiPanel
-#include <Engine/Application/UI/Panels/EditorPanel.h>
 #include <Engine/Application/UI/Panels/ConsolePanel.h>
+#include <Engine/Application/UI/Panels/EditorPanel.h>
 
 namespace CalyxEditor {
 	/////////////////////////////////////////////////////////////////////////////////////////
