@@ -6,6 +6,7 @@
 #include <LivePP/API/x64/LPP_API_x64_CPP.h>
 #endif // LIVEPP
 
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -28,8 +29,13 @@ namespace CalyxEngine {
 	public:
 		static LivePPService* GetInstance();
 
+		using HookCallback = std::function<void()>;
+
 		LivePPService();
 		~LivePPService() = default;
+
+		void AddPrePatchListener(HookCallback cb) { prePatchListeners_.push_back(std::move(cb)); }
+		void AddPostPatchListener(HookCallback cb) { postPatchListeners_.push_back(std::move(cb)); }
 
 		void Initialize();
 		void Update();
@@ -45,6 +51,7 @@ namespace CalyxEngine {
 		const std::wstring& GetLastRecompiledSource() const { return lastRecompiledSource_; }
 
 		// internal: used by hooks
+		void OnPrePatch();
 		void OnCompileStart(const wchar_t* modulePath, const wchar_t* sourcePath);
 		void OnCompileSuccess(const wchar_t* modulePath, const wchar_t* sourcePath);
 		void OnCompileError(const wchar_t* modulePath, const wchar_t* sourcePath, const wchar_t* compilerOutput);
@@ -54,13 +61,18 @@ namespace CalyxEngine {
 		inline static LivePPService* instance_ = nullptr;
 
 #ifdef LIVEPP
-		lpp::LppDefaultAgent agent_{};
+		lpp::LppSynchronizedAgent agent_{};
 #endif // LIVEPP
+
+		float lastPollTime_ = 0.0f;
 
 		LivePPStatus status_	   = LivePPStatus::Idle;
 		float		 successTimer_ = 0.0f;
 		std::string	 lastCompilerOutput_;
 		std::wstring lastRecompiledModule_;
 		std::wstring lastRecompiledSource_;
+
+		std::vector<HookCallback> prePatchListeners_;
+		std::vector<HookCallback> postPatchListeners_;
 	};
 } // namespace CalyxEngine

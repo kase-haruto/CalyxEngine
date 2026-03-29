@@ -115,6 +115,28 @@ namespace CalyxEditor {
 		// エディターメニューの初期化 ------------------------------------------
 		menu_ = std::make_unique<EditorMenu>();
 
+		// --- Advanced Hot Reload (Object Re-instancing) ---
+		if(auto* lpp = CalyxEngine::LivePPService::GetInstance()) {
+			lpp->AddPrePatchListener([this]() {
+				if(auto* ctx = SceneContext::Current()) {
+					livePPSnapshot_ = SceneSerializer::DumpJson(*ctx);
+					OutputDebugStringW(L"[LivePP] Scene snapshot taken.\n");
+				}
+			});
+
+			lpp->AddPostPatchListener([this]() {
+				if(auto* ctx = SceneContext::Current()) {
+					if(!livePPSnapshot_.empty()) {
+						ClearSelection();
+						ctx->Clear();
+						SceneSerializer::LoadJson(*ctx, livePPSnapshot_);
+						livePPSnapshot_.clear();
+						OutputDebugStringW(L"[LivePP] Scene re-instanced from snapshot.\n");
+					}
+				}
+			});
+		}
+
 		// File: Save Scene
 		menu_->Add(MenuCategory::File,
 				   {"Save Scene",

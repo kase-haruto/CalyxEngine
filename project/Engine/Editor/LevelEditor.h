@@ -15,7 +15,7 @@
 #include <Engine/Application/UI/Panels/SplineEditorPanel.h>
 #include <Engine/Editor/ImGuiLayoutSwitcher.h>
 #include <Engine/Editor/SceneObjectEditor.h>
-
+#include <externals/nlohmann/json.hpp>
 
 // c++
 #include <memory>
@@ -139,6 +139,7 @@ namespace CalyxEditor {
 		BaseEditor*	  selectedEditor_ = nullptr;
 		/// SceneObject 選択は weak_ptr で保持（寿命を伸ばさない）
 		std::weak_ptr<SceneObject> selectedObject_;
+		nlohmann::json			   livePPSnapshot_;
 
 		// Editors メニューに並べるパネル群
 		std::vector<IEngineUI*> editorPanels_;
