@@ -114,7 +114,7 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 	// ===== ShadowMap を MainPass にバインド =====
 	modelRenderer_->DrawAll(cmd,
 							GraphicsGroup::GetInstance()->GetDevice().Get(),
-							cam,
+							rt,
 							pso,
 							sceneContext_->GetLightLibrary(), shadowMapSystem_.get());
 

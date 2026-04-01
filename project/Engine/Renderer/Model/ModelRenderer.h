@@ -126,7 +126,7 @@ public:
 	 */
 	void DrawAll(ID3D12GraphicsCommandList*		 cmdList,
 				 ID3D12Device*					 device,
-				 const class Camera3d*			 camera,
+				 class IRenderTarget* rt,
 				 class PipelineService*			 psoService,
 				 class LightLibrary*			 lightLibrary,
 				 CalyxGraphics::ShadowMapSystem* shadowMapSystem);

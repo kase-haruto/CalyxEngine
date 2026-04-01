@@ -11,7 +11,7 @@
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Lighting/LightLibrary.h>
 #include <Engine/Scene/Context/SceneContext.h>
-
+#include <Engine/Graphics/RenderTarget/Interface/IRenderTarget.h>
 #include "Engine/Graphics/Context/GraphicsGroup.h"
 #include "Engine/Graphics/Shadow/ShadowMap/ShadowMapSystem.h"
 
@@ -265,7 +265,7 @@ void ModelRenderer::BuildSkinnedBatches() {
 /////////////////////////////////////////////////////////////////////////////////////////
 void ModelRenderer::DrawAll(ID3D12GraphicsCommandList* cmdList,
 							ID3D12Device*			   device,
-							[[maybe_unused]] const Camera3d* /*unused*/,
+							IRenderTarget* rt,
 							PipelineService*				psoService,
 							LightLibrary*					lightLibrary,
 							CalyxGraphics::ShadowMapSystem* shadowMapSystem) {
@@ -433,6 +433,9 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList* cmdList,
 	}
 
 #if defined(_DEBUG) || defined(DEVELOP)
+	// debugViewでのみ描画
+	if(rt->GetRenderTargetType() != RenderTargetType::DebugView) return;
+
 	//------------------------------------------------------------
 	// 選択オブジェクトのワイヤーフレーム（オレンジ）描画
 	//------------------------------------------------------------
@@ -454,7 +457,7 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList* cmdList,
 					const auto ps = psoService->GetPipelineSet(PipelineTag::Object::WireframeObject3D, model->GetBlendMode());
 					psoService->SetCommand(ps, cmdList);
 
-					float thickness = 2.0f;
+					float thickness = 1.5f;
 					cmdList->SetGraphicsRoot32BitConstants(12, 1, &thickness, 0);
 
 					if(auto* cam = CameraManager::GetActive()) {
