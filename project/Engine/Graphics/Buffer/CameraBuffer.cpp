@@ -14,11 +14,12 @@ void Camera3DBuffer::Initialize(ID3D12Device* device) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		更新処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void Camera3DBuffer::Update(const CalyxMath::Matrix4x4& view, const CalyxMath::Matrix4x4& proj, const CalyxMath::Vector3& worldPos) {
+void Camera3DBuffer::Update(const CalyxMath::Matrix4x4& view, const CalyxMath::Matrix4x4& proj, const CalyxMath::Vector3& worldPos, const CalyxMath::Vector2& viewportSize) {
 	data_.view			 = view;
 	data_.projection	 = proj;
 	data_.viewProjection = CalyxMath::Matrix4x4::Multiply(view, proj);
 	data_.worldPosition	 = worldPos;
+	data_.viewportSize   = viewportSize;
 
 	// ビルボード用のカメラの右・上基底ベクトル（View行列の行成分。RH想定なら転置された回転成分）
 	data_.camRight	 = CalyxMath::Vector3(view.m[0][0], view.m[1][0], view.m[2][0]);

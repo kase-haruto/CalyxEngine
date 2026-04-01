@@ -69,6 +69,12 @@ void PipelineService::RegisterAllPipelines() {
 		regObj(PipelineTag::Object::SkinningObject3D, mode, PipelinePresets::MakeSkinningObject3D);
 
 		//===================================================================*/
+		//						Wireframe Pipelines
+		//===================================================================*/
+		regObj(PipelineTag::Object::WireframeObject3D, mode, PipelinePresets::MakeWireframeObject3D);
+		regObj(PipelineTag::Object::WireframeSkinnedObject3D, mode, PipelinePresets::MakeWireframeSkinnedObject3D);
+
+		//===================================================================*/
 		//						Particle Pipelines
 		//===================================================================*/
 		regObj(PipelineTag::Object::Particle, mode, PipelinePresets::MakeParticle);

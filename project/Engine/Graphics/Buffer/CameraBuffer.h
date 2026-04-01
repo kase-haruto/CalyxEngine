@@ -5,6 +5,8 @@
 #include <Engine/Graphics/Pipeline/PipelineType.h>
 
 // math
+#include "Engine/Foundation/Math/Vector2.h"
+
 #include <Engine/Foundation/Math/Matrix4x4.h>
 #include <Engine/Foundation/Math/Vector3.h>
 
@@ -22,6 +24,9 @@ struct Camera3DForGPU {
 	float			   padding3;
 	CalyxMath::Vector3 camForward; // ビルボード用のカメラ前方向
 	float			   padding4;
+
+	CalyxMath::Vector2 viewportSize; // ビューポートサイズ
+	float			   padding5[2];  // 16B アライン
 };
 
 class Camera3DBuffer {
@@ -30,10 +35,9 @@ public:
 	//                   public methods
 	//===================================================================*/
 	void Initialize(ID3D12Device* device);
-	void Update(const CalyxMath::Matrix4x4& view, const CalyxMath::Matrix4x4& proj, const CalyxMath::Vector3& worldPos);
+	void Update(const CalyxMath::Matrix4x4& view, const CalyxMath::Matrix4x4& proj, const CalyxMath::Vector3& worldPos, const CalyxMath::Vector2& viewportSize);
 	void SetCommand(ID3D12GraphicsCommandList* cmdList, PipelineType pipelineType);
 	void SetCommand(ID3D12GraphicsCommandList* cmdList, uint32_t rootIndex);
-
 private:
 	//===================================================================*/
 	//                   private methods

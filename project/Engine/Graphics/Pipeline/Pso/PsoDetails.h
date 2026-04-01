@@ -22,6 +22,8 @@ namespace PipelineTag {
 	enum class Object :std::uint16_t {
 		Object3d,
 		SkinningObject3D,
+		WireframeObject3D,
+		WireframeSkinnedObject3D,
 		ShadowStatic,
 		ShadowSkinned,
 		PickingObject3D,

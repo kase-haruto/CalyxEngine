@@ -450,6 +450,10 @@ namespace CalyxEditor {
 		if(sceneEditor_) {
 			sceneEditor_->SetTarget(sp ? sp.get() : nullptr);
 		}
+
+		if(auto* ctx = SceneContext::Current()) {
+			ctx->SetDebugSelectedObject(sp ? sp.get() : nullptr);
+		}
 	}
 
 	//=============================================================================
@@ -694,6 +698,10 @@ namespace CalyxEditor {
 		hierarchy_->SetSelectedObject(empty);
 		inspector_->SetSelectedObject(empty);
 		sceneEditor_->ClearSelection();
+
+		if(auto* ctx = SceneContext::Current()) {
+			ctx->SetDebugSelectedObject(nullptr);
+		}
 	}
 
 } // namespace CalyxEditor

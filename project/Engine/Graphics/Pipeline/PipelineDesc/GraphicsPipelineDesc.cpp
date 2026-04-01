@@ -17,6 +17,7 @@ namespace {
 /////////////////////////////////////////////////////////////////////////////////////////
 GraphicsPipelineDesc& GraphicsPipelineDesc::VS(const std::wstring& path) { vs_ = path; return *this; }
 GraphicsPipelineDesc& GraphicsPipelineDesc::PS(const std::wstring& path) { ps_ = path; return *this; }
+GraphicsPipelineDesc& GraphicsPipelineDesc::GS(const std::wstring& path) { gs_ = path; return *this; }
 GraphicsPipelineDesc& GraphicsPipelineDesc::CS(const std::wstring& path) { cs_ = path;isCompute_ = true; return *this; }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -41,6 +42,7 @@ GraphicsPipelineDesc& GraphicsPipelineDesc::Wireframe() { rasterizer_.FillMode =
 GraphicsPipelineDesc& GraphicsPipelineDesc::CullNone() { rasterizer_.CullMode = D3D12_CULL_MODE_NONE; return *this; }
 GraphicsPipelineDesc& GraphicsPipelineDesc::CullBack() { rasterizer_.CullMode = D3D12_CULL_MODE_BACK; return *this; }
 GraphicsPipelineDesc& GraphicsPipelineDesc::CullFront() { rasterizer_.CullMode = D3D12_CULL_MODE_FRONT; return *this; }
+GraphicsPipelineDesc& GraphicsPipelineDesc::DepthBias(INT bias) { rasterizer_.DepthBias = bias; return *this; }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		blend
@@ -72,7 +74,7 @@ GraphicsPipelineDesc& GraphicsPipelineDesc::DepthFunc(D3D12_COMPARISON_FUNC func
 //		operator/hash
 /////////////////////////////////////////////////////////////////////////////////////////
 bool GraphicsPipelineDesc::operator==(const GraphicsPipelineDesc& o) const noexcept {
-	return vs_ == o.vs_ && ps_ == o.ps_ && cs_ == o.cs_ &&
+	return vs_ == o.vs_ && ps_ == o.ps_ && gs_ == o.gs_ && cs_ == o.cs_ &&
 		   isCompute_ == o.isCompute_ &&
 		   dsvFormat_ == o.dsvFormat_ &&
 		   rasterizer_.CullMode == o.rasterizer_.CullMode &&
@@ -93,6 +95,7 @@ size_t GraphicsPipelineDesc::Hash() const noexcept {
 	size_t h = 0;
 	HashCombine(h, std::hash<std::wstring>{}(vs_));
 	HashCombine(h, std::hash<std::wstring>{}(ps_));
+	HashCombine(h, std::hash<std::wstring>{}(gs_));
 	HashCombine(h, std::hash<std::wstring>{}(cs_));
 	HashCombine(h, static_cast<size_t>(isCompute_));
 

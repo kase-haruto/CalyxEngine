@@ -1,4 +1,3 @@
-
 struct VertexShaderOutput {
 	float4 position : SV_POSITION;
 	float2 texcoord : TEXCOORD0;
@@ -14,4 +13,6 @@ cbuffer CameraConstants : register(b1) {
 	float3 camRight;
 	float3 camUp;
 	float3 camForward;
+
+	float2 viewportSize;
 }
