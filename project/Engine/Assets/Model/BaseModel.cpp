@@ -370,3 +370,7 @@ void BaseModel::UploadBillboardParams(const std::vector<GpuBillboardParams>& par
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE BaseModel::GetBillboardSrv() const { return billboardBuffer_.GetGpuSrvHandle(); }
+
+void BaseModel::TransferMaterial() {
+	materialBuffer_.TransferData(materialData_);
+}

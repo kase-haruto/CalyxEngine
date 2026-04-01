@@ -3044,6 +3044,8 @@
     <ClCompile Include="Engine\Application\UI\Panels\LivePPPanel.cpp">
       <Filter>Engine\Application\UI\Panels</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Foundation\HotReload\LivePP\LivePPService.cpp" />
+    <ClCompile Include="Game\Event\Spawn\BossSpawnEvent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Battle\Shooting\homing\HomingTarget.h" />
@@ -3070,8 +3072,12 @@
     <ClInclude Include="Engine\Application\UI\Panels\LivePPPanel.h">
       <Filter>Engine\Application\UI\Panels</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Foundation\HotReload\LivePP\LivePPService.h" />
+    <ClInclude Include="Game\Event\Spawn\BossSpawnEvent.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\ObjectPicking.PS.hlsl" />
+    <FxCompile Include="Resources\shaders\Wireframe.GS.hlsl" />
+    <FxCompile Include="Resources\shaders\Wireframe.PS.hlsl" />
   </ItemGroup>
 </Project>

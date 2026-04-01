@@ -66,7 +66,7 @@ PsoFactory::Create(const GraphicsPipelineDesc& desc) {
 		return shaderCompiler_->CompileShader(L"Resources/shaders/" + path, profile);
 	};
 
-	ComPtr<IDxcBlob> vsBlob, psBlob;
+	ComPtr<IDxcBlob> vsBlob, psBlob, gsBlob;
 	if (!desc.vs_.empty()) {
 		vsBlob = compile(desc.vs_, L"vs_6_5");
 		pso.VS = { vsBlob->GetBufferPointer(), vsBlob->GetBufferSize() };
@@ -75,10 +75,17 @@ PsoFactory::Create(const GraphicsPipelineDesc& desc) {
 		psBlob = compile(desc.ps_, L"ps_6_5");
 		pso.PS = { psBlob->GetBufferPointer(), psBlob->GetBufferSize() };
 	}
+	if (!desc.gs_.empty()) {
+		gsBlob = compile(desc.gs_, L"gs_6_5");
+		pso.GS = { gsBlob->GetBufferPointer(), gsBlob->GetBufferSize() };
+	}
 
 	if (!psoObj->Initialize(pso)) {
 		throw std::runtime_error("PipelineState initialization failed");
 	}
 	psoObj->SetShaderBlobs(vsBlob, psBlob);
+	// Note: SetShaderBlobs might need to be updated if it needs to store GS blob too, 
+	// but usually blobs are just for lifetime during Create. 
+	// If PipelineStateObject keeps them, I should check its definition.
 	return psoObj;
 }

@@ -117,6 +117,9 @@ namespace CalyxGraphics {
 		 */
 		DXGI_FORMAT GetFormat() const { return format_; }
 
+		uint32_t GetClientWidth() const { return clientWidth_; }
+		uint32_t GetClientHeight() const { return clientHeight_; }
+
 	private:
 		//===================================================================*/
 		//		private member variables

@@ -11,8 +11,8 @@ namespace PipelinePresets {
 	GraphicsPipelineDesc MakeParticle(BlendMode mode);
 	GraphicsPipelineDesc MakeGpuParticle(BlendMode mode);
 
-
-
+	GraphicsPipelineDesc MakeWireframeObject3D(BlendMode mode);
+	GraphicsPipelineDesc MakeWireframeSkinnedObject3D(BlendMode mode);
 	// shadow
 	GraphicsPipelineDesc MakeShadowStatic();
 	GraphicsPipelineDesc MakeShadowSkinned();

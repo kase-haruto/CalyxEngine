@@ -60,6 +60,8 @@ public:
 	bool GetIsDrawEnable()const { return isDrawEnable_; }
 	void SetTex(const std::string& name);
 	void SetLightingMode(LightingMode mode) { materialData_.lightingMode = mode; }
+	LightingMode GetLightingMode() const { return static_cast<LightingMode>(materialData_.lightingMode); }
+	void TransferMaterial();
 
 	// 参照用（TLAS インスタンス登録で使う）
 	D3D12_GPU_VIRTUAL_ADDRESS GetBLAS() const { return rayMesh_.GetBLAS(); }

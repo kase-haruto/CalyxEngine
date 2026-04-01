@@ -84,7 +84,14 @@ void BaseCamera::UpdateMatrix() {
 		worldTransform_.matrix.world.m[3][1],
 		worldTransform_.matrix.world.m[3][2]
 	};
-	cameraBuffer_.Update(viewMatrix_, projectionMatrix_, worldPos);
+
+	auto* gg = GraphicsGroup::GetInstance();
+	CalyxMath::Vector2 viewportSize{
+		static_cast<float>(gg->GetClientWidth()),
+		static_cast<float>(gg->GetClientHeight())
+	};
+
+	cameraBuffer_.Update(viewMatrix_, projectionMatrix_, worldPos, viewportSize);
 }
 
 /////////////////////////////////////////////////////////////////////////

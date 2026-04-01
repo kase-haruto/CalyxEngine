@@ -75,10 +75,12 @@ public:
 	std::string			   GetSceneName() const { return sceneName_; }
 	bool				   IsRuntime() const { return isRuntime_; }
 	CameraManager*		   GetCameraMgr() { return cameraMgr_.get(); }
+	SceneObject*		   GetDebugSelectedObject() const { return debugSelectedObject_; }
 
 	// setter
 	void SetSceneName(const std::string& n) { sceneName_ = n; }
 	void SetRuntime(bool f) { isRuntime_ = f; }
+	void SetDebugSelectedObject(SceneObject* obj) { debugSelectedObject_ = obj; }
 
 	/* ---------- callbacks ----------- */
 	/// 個別削除時に飛ぶコールバック
@@ -116,6 +118,8 @@ private:
 
 	std::string sceneName_ = "scene";
 	bool		isRuntime_ = false;
+
+	SceneObject* debugSelectedObject_ = nullptr;
 
 	EventBus::Connection connObjectAdded_;
 	EventBus::Connection connObjectRemoved_;

@@ -3,8 +3,8 @@
 /* include space
 /* ===================================================================== */
 // engine
-#include <Engine/graphics/Pipeline/BlendMode/BlendMode.h>
-#include <Engine/graphics/Pipeline/RootSig/RootSignatureBuilder.h>
+#include <Engine/Graphics/Pipeline/BlendMode/BlendMode.h>
+#include <Engine/Graphics/Pipeline/RootSig/RootSignatureBuilder.h>
 
 
 // c++
@@ -24,6 +24,7 @@ public:
 	// shaders ----------------------------------------------------------//
 	GraphicsPipelineDesc& VS(const std::wstring& path);
 	GraphicsPipelineDesc& PS(const std::wstring& path);
+	GraphicsPipelineDesc& GS(const std::wstring& path);
 	GraphicsPipelineDesc& CS(const std::wstring& path);
 
 	// IA / RT ----------------------------------------------------------//
@@ -40,6 +41,7 @@ public:
 	GraphicsPipelineDesc& CullNone();
 	GraphicsPipelineDesc& CullBack();
 	GraphicsPipelineDesc& CullFront();
+	GraphicsPipelineDesc& DepthBias(INT bias);
 
 	// blend ------------------------------------------------------------//
 	GraphicsPipelineDesc& BlendState(const D3D12_BLEND_DESC& blend);
@@ -64,6 +66,7 @@ public:
 	// shaderPath -------------------------------------------------------//
 	std::wstring vs_; //< vertex		shader path
 	std::wstring ps_; //< pixel		shader path
+	std::wstring gs_; //< geometry	shader path
 	std::wstring cs_; //< compute		shader path
 	bool		 isCompute_ = false;
 

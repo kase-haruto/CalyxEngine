@@ -59,6 +59,24 @@ GraphicsPipelineDesc PipelinePresets::MakeObject3D(BlendMode mode) {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
+//		wireframe object3D
+/////////////////////////////////////////////////////////////////////////////////////////
+GraphicsPipelineDesc PipelinePresets::MakeWireframeObject3D(BlendMode mode) {
+	GraphicsPipelineDesc desc = MakeObject3D(mode);
+	desc.GS(L"Wireframe.GS.hlsl")
+		.PS(L"Wireframe.PS.hlsl")
+		.FillMode(D3D12_FILL_MODE_SOLID) // GSで太線化するのでソリッド描画
+		.CullNone();					 // 表裏どちらから見ても可視化する
+	// 確実に前に描画するためと、背面ワイヤーフレームも可視化して選択状態を更に分かりやすくするため ALWAYS にする。
+	desc.DepthFunc(D3D12_COMPARISON_FUNC_ALWAYS);
+	desc.DepthBias(-10000);
+
+	desc.root_.Constants(6, 1, D3D12_SHADER_VISIBILITY_GEOMETRY); // Thickness (b6)
+
+	return desc;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
 //		3d 静的オブジェクトshadowMap用
 /////////////////////////////////////////////////////////////////////////////////////////
 GraphicsPipelineDesc PipelinePresets::MakeShadowStatic() {
@@ -142,6 +160,24 @@ GraphicsPipelineDesc PipelinePresets::MakeSkinningObject3D(BlendMode mode) {
 		.CBV(5, D3D12_SHADER_VISIBILITY_PIXEL)											 // shadow 11
 
 		.SamplerWrapLinear(0);
+
+	return desc;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		wireframe skinningObject3D
+/////////////////////////////////////////////////////////////////////////////////////////
+GraphicsPipelineDesc PipelinePresets::MakeWireframeSkinnedObject3D(BlendMode mode) {
+	GraphicsPipelineDesc desc = MakeSkinningObject3D(mode);
+	desc.GS(L"Wireframe.GS.hlsl")
+		.PS(L"Wireframe.PS.hlsl")
+		.FillMode(D3D12_FILL_MODE_SOLID)
+		.CullNone();
+	// 同様に ALWAYS とバイアス設定で確実に描画する
+	desc.DepthFunc(D3D12_COMPARISON_FUNC_ALWAYS);
+	desc.DepthBias(-10000);
+
+	desc.root_.Constants(6, 1, D3D12_SHADER_VISIBILITY_GEOMETRY); // Thickness (b6)
 
 	return desc;
 }
