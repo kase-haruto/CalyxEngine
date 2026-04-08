@@ -5,15 +5,16 @@
 /* ===================================================================== */
 #include "Engine/Foundation/Math/Matrix3x4.h"
 
+#include "Engine/Graphics/Context/GraphicsGroup.h"
+#include "Engine/Graphics/Shadow/ShadowMap/ShadowMapSystem.h"
 #include <Engine/Assets/Animation/AnimationModel.h>
 #include <Engine/Assets/Model/BaseModel.h>
 #include <Engine/Graphics/Camera/3d/Camera3d.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
+#include <Engine/Graphics/RenderTarget/Interface/IRenderTarget.h>
 #include <Engine/Lighting/LightLibrary.h>
 #include <Engine/Scene/Context/SceneContext.h>
-#include <Engine/Graphics/RenderTarget/Interface/IRenderTarget.h>
-#include "Engine/Graphics/Context/GraphicsGroup.h"
-#include "Engine/Graphics/Shadow/ShadowMap/ShadowMapSystem.h"
+
 
 ModelRenderer::ModelRenderer() {
 	Microsoft::WRL::ComPtr<ID3D12Device5> device5;
@@ -263,9 +264,9 @@ void ModelRenderer::BuildSkinnedBatches() {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		一斉描画
 /////////////////////////////////////////////////////////////////////////////////////////
-void ModelRenderer::DrawAll(ID3D12GraphicsCommandList* cmdList,
-							ID3D12Device*			   device,
-							IRenderTarget* rt,
+void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
+							ID3D12Device*					device,
+							IRenderTarget*					rt,
 							PipelineService*				psoService,
 							LightLibrary*					lightLibrary,
 							CalyxGraphics::ShadowMapSystem* shadowMapSystem) {
@@ -441,15 +442,19 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList* cmdList,
 	//------------------------------------------------------------
 	if(auto* ctx = SceneContext::Current()) {
 		if(auto* selected = ctx->GetDebugSelectedObject()) {
-			
+
 			// Static Models
 			for(auto& [model, insts] : staticModels_) {
 				if(!model->GetModelData() || !model->GetIsDrawEnable()) continue;
 
-				std::vector<WorldTransform> selectedTf;
+				std::vector<WorldTransform>		selectedTf;
+				std::vector<GpuBillboardParams> selectedBb;
 				for(auto& inst : insts) {
 					if(inst.visible && inst.owner == selected) {
 						selectedTf.push_back(inst.tf);
+						GpuBillboardParams p{};
+						p.mode = static_cast<uint32_t>(inst.mode);
+						selectedBb.push_back(p);
 					}
 				}
 
@@ -465,14 +470,19 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList* cmdList,
 					}
 					lightLibrary->SetCommand(cmdList, PipelineType::Object3D);
 
-					auto oldColor = model->GetColor();
-					auto oldLighting = model->GetLightingMode();
+					auto					 oldColor		 = model->GetColor();
+					auto					 oldLighting	 = model->GetLightingMode();
 					const CalyxMath::Vector4 orangeWireframe = {1.0f, 0.5f, 0.0f, 1.0f};
 					model->SetColor(orangeWireframe);
 					model->SetLightingMode(LightingMode::UnlitColor);
 					model->TransferMaterial();
 
-					model->EnsureInstanceCapacity(device, static_cast<UINT>(selectedTf.size()));
+					const UINT need = static_cast<UINT>(selectedTf.size());
+					model->EnsureBillboardCapacity(device, need);
+					model->UploadBillboardParams(selectedBb);
+					cmdList->SetGraphicsRootDescriptorTable(7, model->GetBillboardSrv());
+
+					model->EnsureInstanceCapacity(device, need);
 					model->UploadInstanceMatrices(selectedTf);
 					cmdList->SetGraphicsRootDescriptorTable(1, model->GetInstanceSrv());
 
@@ -483,7 +493,7 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList* cmdList,
 					cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 					model->BindVertexIndexBuffers(cmdList);
 
-					cmdList->DrawIndexedInstanced(static_cast<UINT>(model->GetModelData()->meshResource.Indices().size()), static_cast<UINT>(selectedTf.size()), 0, 0, 0);
+					cmdList->DrawIndexedInstanced(static_cast<UINT>(model->GetModelData()->meshResource.Indices().size()), need, 0, 0, 0);
 
 					model->SetColor(oldColor);
 					model->SetLightingMode(oldLighting);
@@ -514,8 +524,8 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList* cmdList,
 					}
 					lightLibrary->SetCommand(cmdList, PipelineType::SkinningObject3D);
 
-					auto oldColor = model->GetColor();
-					auto oldLighting = model->GetLightingMode();
+					auto					 oldColor		 = model->GetColor();
+					auto					 oldLighting	 = model->GetLightingMode();
 					const CalyxMath::Vector4 orangeWireframe = {1.0f, 0.5f, 0.0f, 1.0f};
 					model->SetColor(orangeWireframe);
 					model->SetLightingMode(LightingMode::UnlitColor);
@@ -528,7 +538,7 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList* cmdList,
 						model->BindMaterialCB(cmdList);
 						cmdList->SetGraphicsRootDescriptorTable(2, model->GetTexSrv());
 						cmdList->SetGraphicsRootDescriptorTable(6, model->GetEnvMapSrv());
-						
+
 						cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 						model->BindVertexIndexBuffers(cmdList);
 						cmdList->DrawIndexedInstanced(static_cast<UINT>(model->GetModelData()->meshResource.Indices().size()), 1, 0, 0, 0);
