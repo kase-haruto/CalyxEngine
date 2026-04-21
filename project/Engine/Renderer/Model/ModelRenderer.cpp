@@ -551,6 +551,8 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 			}
 		}
 	}
+#else
+	(void)rt;
 #endif
 }
 
