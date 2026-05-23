@@ -9,16 +9,7 @@
 #include <utility>
 
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
-#include <Game/StageGimmick/Gimmicks/BellProjectile/BellProjectileEvent.h>
-#include <Game/StageGimmick/Gimmicks/BreakableFloor/BreakableFloorEvent.h>
-#include <Game/StageGimmick/Gimmicks/BreakableWall/BreakableWallEvent.h>
 #include <Engine/Objects/Event/Camera/CameraEventObject.h>
-#include <Game/StageGimmick/Gimmicks/DiceProjectile/DiceProjectileEvent.h>
-#include <Game/StageGimmick/Gimmicks/DroolRain/DroolRainEvent.h>
-#include <Game/StageGimmick/Gimmicks/FireLoad/FireLoadEvent.h>
-#include <Game/StageGimmick/Gimmicks/GroundSpike/GroundSpikeEvent.h>
-#include <Game/StageGimmick/Gimmicks/Projectile/ProjectileFireEvent.h>
-#include <Game/StageGimmick/Gimmicks/Shoji/ShojiEvent.h>
 #include <Engine/Objects/3D/Actor/SplineDeformObject.h>
 
 namespace CalyxEngine {
@@ -38,45 +29,6 @@ namespace CalyxEngine {
 
 		{
 			SceneObjectClassDesc desc;
-			desc.typeName = "BellProjectileEvent";
-			desc.displayName = "BellProjectileEvent";
-			desc.objectType = ObjectType::Event;
-			desc.iconPath = "UI/Tool/event.png";
-			desc.placeable = true;
-			desc.prefabEditable = false;
-			desc.prefabRoot = false;
-			desc.ctor = std::make_unique<SceneCtor<BellProjectileEvent>>();
-			SceneObjectRegistry::Get().Register(std::move(desc));
-		}
-
-		{
-			SceneObjectClassDesc desc;
-			desc.typeName = "BreakableFloorEvent";
-			desc.displayName = "BreakableFloorEvent";
-			desc.objectType = ObjectType::Event;
-			desc.iconPath = "UI/Tool/event.png";
-			desc.placeable = true;
-			desc.prefabEditable = false;
-			desc.prefabRoot = false;
-			desc.ctor = std::make_unique<SceneCtor<BreakableFloorEvent>>();
-			SceneObjectRegistry::Get().Register(std::move(desc));
-		}
-
-		{
-			SceneObjectClassDesc desc;
-			desc.typeName = "BreakableWallEvent";
-			desc.displayName = "BreakableWallEvent";
-			desc.objectType = ObjectType::Event;
-			desc.iconPath = "UI/Tool/event.png";
-			desc.placeable = true;
-			desc.prefabEditable = false;
-			desc.prefabRoot = false;
-			desc.ctor = std::make_unique<SceneCtor<BreakableWallEvent>>();
-			SceneObjectRegistry::Get().Register(std::move(desc));
-		}
-
-		{
-			SceneObjectClassDesc desc;
 			desc.typeName = "CameraEventObject";
 			desc.displayName = "Camera Event";
 			desc.objectType = ObjectType::Event;
@@ -85,84 +37,6 @@ namespace CalyxEngine {
 			desc.prefabEditable = false;
 			desc.prefabRoot = false;
 			desc.ctor = std::make_unique<SceneCtor<CameraEventObject>>();
-			SceneObjectRegistry::Get().Register(std::move(desc));
-		}
-
-		{
-			SceneObjectClassDesc desc;
-			desc.typeName = "DiceProjectileEvent";
-			desc.displayName = "DiceProjectileEvent";
-			desc.objectType = ObjectType::Event;
-			desc.iconPath = "UI/Tool/event.png";
-			desc.placeable = true;
-			desc.prefabEditable = false;
-			desc.prefabRoot = false;
-			desc.ctor = std::make_unique<SceneCtor<DiceProjectileEvent>>();
-			SceneObjectRegistry::Get().Register(std::move(desc));
-		}
-
-		{
-			SceneObjectClassDesc desc;
-			desc.typeName = "DroolRainEvent";
-			desc.displayName = "DroolRainEvent";
-			desc.objectType = ObjectType::Event;
-			desc.iconPath = "UI/Tool/event.png";
-			desc.placeable = true;
-			desc.prefabEditable = false;
-			desc.prefabRoot = false;
-			desc.ctor = std::make_unique<SceneCtor<DroolRainEvent>>();
-			SceneObjectRegistry::Get().Register(std::move(desc));
-		}
-
-		{
-			SceneObjectClassDesc desc;
-			desc.typeName = "FireLoadEvent";
-			desc.displayName = "FireLoadEvent";
-			desc.objectType = ObjectType::Event;
-			desc.iconPath = "UI/Tool/event.png";
-			desc.placeable = true;
-			desc.prefabEditable = false;
-			desc.prefabRoot = false;
-			desc.ctor = std::make_unique<SceneCtor<FireLoadEvent>>();
-			SceneObjectRegistry::Get().Register(std::move(desc));
-		}
-
-		{
-			SceneObjectClassDesc desc;
-			desc.typeName = "GroundSpikeEvent";
-			desc.displayName = "GroundSpikeEvent";
-			desc.objectType = ObjectType::Event;
-			desc.iconPath = "UI/Tool/event.png";
-			desc.placeable = true;
-			desc.prefabEditable = false;
-			desc.prefabRoot = false;
-			desc.ctor = std::make_unique<SceneCtor<GroundSpikeEvent>>();
-			SceneObjectRegistry::Get().Register(std::move(desc));
-		}
-
-		{
-			SceneObjectClassDesc desc;
-			desc.typeName = "ProjectileFireEvent";
-			desc.displayName = "ProjectileFireEvent";
-			desc.objectType = ObjectType::Event;
-			desc.iconPath = "UI/Tool/event.png";
-			desc.placeable = true;
-			desc.prefabEditable = false;
-			desc.prefabRoot = false;
-			desc.ctor = std::make_unique<SceneCtor<ProjectileFireEvent>>();
-			SceneObjectRegistry::Get().Register(std::move(desc));
-		}
-
-		{
-			SceneObjectClassDesc desc;
-			desc.typeName = "ShojiEvent";
-			desc.displayName = "ShojiEvent";
-			desc.objectType = ObjectType::Event;
-			desc.iconPath = "UI/Tool/event.png";
-			desc.placeable = true;
-			desc.prefabEditable = false;
-			desc.prefabRoot = false;
-			desc.ctor = std::make_unique<SceneCtor<ShojiEvent>>();
 			SceneObjectRegistry::Get().Register(std::move(desc));
 		}
 

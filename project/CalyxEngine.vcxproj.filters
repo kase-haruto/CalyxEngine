@@ -1002,9 +1002,6 @@
     <ClCompile Include="Engine\Renderer\Grid\GridRenderer.cpp">
       <Filter>Engine\Renderer\Grid</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Scene\Utility\SceneTypeUtil.cpp">
-      <Filter>Game\Scene\Utility</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Assets\Database\AssetDatabase.cpp">
       <Filter>Engine\Assets\Database</Filter>
     </ClCompile>
@@ -1731,9 +1728,6 @@
     </ClInclude>
     <ClInclude Include="Engine\System\Component\IComponent.h">
       <Filter>Engine\System\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="Game\Scene\Utility\SceneTypeUtil.h">
-      <Filter>Game\Scene\Utility</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Assets\Database\AssetDatabase.h">
       <Filter>Engine\Assets\Database</Filter>
@@ -2504,38 +2498,8 @@
     <ClCompile Include="Engine\Assets\File\AssetChange.cpp" />
     <ClCompile Include="Engine\Assets\File\IAssetChangeHandler.cpp" />
     <ClCompile Include="Engine\Assets\Manager\AssetManager.cpp" />
-    <ClCompile Include="Game\DemoPlayer\DemoPlayer.cpp" />
-    <ClCompile Include="Game\DemoHammer\DemoHammer.cpp" />
-    <ClCompile Include="Game\DemoShockwave\ShockwaveManager.cpp" />
-    <ClCompile Include="Game\DemoShockwave\Shockwave.cpp" />
-    <ClCompile Include="Game\Scene\Clear\ClearScene.cpp" />
-    <ClCompile Include="Game\Scene\Gameover\GameoverScene.cpp" />
-    <ClCompile Include="Game\Stage\Stage.cpp" />
-    <ClCompile Include="Game\3d\Camera\RailCamera.cpp" />
-    <ClCompile Include="Game\StageGimmick\Prediction\PredictionCircle.cpp" />
-    <ClCompile Include="Game\StageGimmick\Gimmicks\FireLoad\FireLoadObject.cpp" />
-    <ClCompile Include="Game\StageGimmick\Gimmicks\FireLoad\FireLoadEvent.cpp" />
-    <ClCompile Include="Game\Scene\Title\TitleScene.cpp" />
-    <ClCompile Include="Game\Scene\Select\SelectScene.cpp" />
-    <ClCompile Include="Game\StageGimmick\Gimmicks\DiceProjectile\DiceProjectileEvent.cpp" />
-    <ClCompile Include="Game\StageGimmick\Gimmicks\DiceProjectile\DiceProjectileObject.cpp" />
-    <ClCompile Include="Game\StageGimmick\Gimmicks\DiceProjectile\DiceSocketObject.cpp" />
     <ClCompile Include="Engine\Editor\Prefab\PrefabEditContextUtils.cpp" />
-    <ClCompile Include="Game\Scene\Game\GameTransitionPayload.cpp" />
-    <ClCompile Include="Game\Scene\Transition\TransitionControl.cpp" />
-    <ClCompile Include="Game\Scene\Transition\TransitionPayload.cpp" />
     <ClCompile Include="Engine\Application\UI\EngineUI\ManipulatorSettingsUI.cpp" />
-    <ClCompile Include="Game\StageGimmick\Gimmicks\BreakableWall\BreakableWallEvent.cpp" />
-    <ClCompile Include="Game\StageGimmick\Gimmicks\BreakableWall\BreakableWallObject.cpp" />
-    <ClCompile Include="Game\StageGimmick\Gimmicks\BellProjectile\BellProjectileEvent.cpp" />
-    <ClCompile Include="Game\StageGimmick\Gimmicks\BellProjectile\BellProjectileObject.cpp" />
-    <ClCompile Include="Game\StageGimmick\Gimmicks\BellProjectile\BellProjectileTarget.cpp" />
-    <ClCompile Include="Game\StageGimmick\Gimmicks\BellProjectile\BellProjectileDoor.cpp" />
-    <ClCompile Include="Game\StageGimmick\Gimmicks\Shoji\LuckyCatObject.cpp" />
-    <ClCompile Include="Game\StageGimmick\Gimmicks\Shoji\ShojiEvent.cpp" />
-    <ClCompile Include="Game\StageGimmick\Gimmicks\Shoji\ShojiObject.cpp" />
-    <ClCompile Include="Game\StageGimmick\Gimmicks\Shoji\ShojiPaperObject.cpp" />
-    <ClCompile Include="Game\StageGimmick\Base\GeneralObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Application\System\Environment.h" />
@@ -2560,42 +2524,10 @@
     <ClInclude Include="Engine\Assets\File\AssetChange.h" />
     <ClInclude Include="Engine\Assets\File\IAssetChangeHandler.h" />
     <ClInclude Include="Engine\Assets\Manager\AssetManager.h" />
-    <ClInclude Include="Game\DemoPlayer\DemoPlayer.h" />
-    <ClInclude Include="Game\DemoHammer\DemoHammer.h" />
-    <ClInclude Include="Game\DemoShockwave\ShockwaveManager.h" />
-    <ClInclude Include="Game\DemoShockwave\Shockwave.h" />
-    <ClInclude Include="Game\Scene\Clear\ClearScene.h" />
-    <ClInclude Include="Game\Scene\Gameover\GameoverScene.h" />
-    <ClInclude Include="Game\Stage\Stage.h" />
-    <ClInclude Include="Game\StageGimmick\Prediction\PredictionCircle.h" />
-    <ClInclude Include="Game\StageGimmick\Parameters\StageGimmickParam.h" />
-    <ClInclude Include="Game\StageGimmick\Gimmicks\FireLoad\FireLoadObject.h" />
-    <ClInclude Include="Game\StageGimmick\Gimmicks\FireLoad\FireLoadEvent.h" />
-    <ClInclude Include="Game\Scene\Title\TitleScene.h" />
-    <ClInclude Include="Game\Scene\Select\SelectScene.h" />
-    <ClInclude Include="Game\StageGimmick\Gimmicks\DiceProjectile\DiceProjectileEvent.h" />
-    <ClInclude Include="Game\StageGimmick\Gimmicks\DiceProjectile\DiceProjectileObject.h" />
-    <ClInclude Include="Game\StageGimmick\Gimmicks\DiceProjectile\DiceSocketObject.h" />
-    <ClInclude Include="Game\Scene\Game\GameTransitionPayload.h" />
-    <ClInclude Include="Game\Scene\Transition\TransitionControl.h" />
-    <ClInclude Include="Game\Scene\Transition\TransitionPayload.h" />
     <ClInclude Include="Engine\Application\UI\EngineUI\ManipulatorSettings.h" />
     <ClInclude Include="Engine\Application\UI\EngineUI\ManipulatorSettingsUI.h" />
-    <ClInclude Include="Game\StageGimmick\Gimmicks\BreakableWall\BreakableWallEvent.h" />
-    <ClInclude Include="Game\StageGimmick\Gimmicks\BreakableWall\BreakableWallObject.h" />
-    <ClInclude Include="Game\StageGimmick\Gimmicks\BellProjectile\BellProjectileEvent.h" />
-    <ClInclude Include="Game\StageGimmick\Gimmicks\BellProjectile\BellProjectileObject.h" />
-    <ClInclude Include="Game\StageGimmick\Gimmicks\BellProjectile\BellProjectileTarget.h" />
-    <ClInclude Include="Game\StageGimmick\Gimmicks\BellProjectile\BellProjectileDoor.h" />
-    <ClInclude Include="Game\StageGimmick\Gimmicks\Shoji\LuckyCatObject.h" />
-    <ClInclude Include="Game\StageGimmick\Gimmicks\Shoji\ShojiEvent.h" />
-    <ClInclude Include="Game\StageGimmick\Gimmicks\Shoji\ShojiObject.h" />
-    <ClInclude Include="Game\StageGimmick\Gimmicks\Shoji\ShojiPaperObject.h" />
-    <ClInclude Include="Game\StageGimmick\Base\GeneralObject.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Game\StageGimmick\Gimmicks\BreakableFloor\BreakableFloorEvent.cpp" />
-    <ClCompile Include="Game\StageGimmick\Gimmicks\BreakableFloor\BreakableFloorObject.cpp" />
     <ClCompile Include="Data\Engine\Configs\Scene\Objects\Particle\Module\ModuleConfig.cpp" />
     <ClCompile Include="Engine\Application\Effects\FxGuiHelpers.cpp" />
     <ClCompile Include="Engine\Application\Effects\FxObject.cpp" />
@@ -2789,8 +2721,6 @@
     <ClCompile Include="Engine\Editor\SceneObjectDuplicator.cpp" />
     <ClCompile Include="Engine\Application\Effects\Particle\Module\Velocity\GravityModule.cpp" />
     <ClCompile Include="Engine\Application\Effects\Particle\Emitter\GpuFxEmitter.cpp" />
-    <ClCompile Include="Game\StageGimmick\Gimmicks\GroundSpike\GroundSpikeEvent.cpp" />
-    <ClCompile Include="Game\StageGimmick\Gimmicks\GroundSpike\GroundSpikeObject.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Engine\Objects\Collider\SphereCollider.cpp" />
     <ClCompile Include="Engine\Graphics\ResourceStateTracker\ResourceStateTracker.cpp" />
@@ -2839,17 +2769,8 @@
     <ClCompile Include="Engine\Application\UI\Panels\SplineEditorPanel.cpp" />
     <ClCompile Include="Engine\Objects\2D\NumbersSprite\NumbersSprite.cpp" />
     <ClCompile Include="Engine\Application\UI\Panels\LivePPPanel.cpp" />
-    <ClCompile Include="Game\StageGimmick\Base\StageGimmickEventBase.cpp" />
-    <ClCompile Include="Game\StageGimmick\Base\StageGimmickObjectBase.cpp" />
-    <ClCompile Include="Game\StageGimmick\Manager\StageGimmickManager.cpp" />
-    <ClCompile Include="Game\StageGimmick\Gimmicks\DroolRain\DroolRainEvent.cpp" />
-    <ClCompile Include="Game\StageGimmick\Gimmicks\DroolRain\DroolRainObject.cpp" />
-    <ClCompile Include="Game\StageGimmick\Gimmicks\Projectile\ProjectileFireEvent.cpp" />
-    <ClCompile Include="Game\StageGimmick\Gimmicks\Projectile\ProjectileObject.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Game\StageGimmick\Gimmicks\BreakableFloor\BreakableFloorEvent.h" />
-    <ClInclude Include="Game\StageGimmick\Gimmicks\BreakableFloor\BreakableFloorObject.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Event\EventConfig.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Particle\EffectConfig.h" />
     <ClInclude Include="Engine\Application\Effects\FxGuiHelpers.h" />
@@ -3168,19 +3089,10 @@
     <ClInclude Include="Engine\PostProcess\Vignette\Vignette.h" />
     <ClInclude Include="Engine\Application\Effects\Particle\Emitter\GpuFxEmitter.h" />
     <ClInclude Include="Engine\Application\System\PlaySession.h" />
-    <ClInclude Include="Game\StageGimmick\Gimmicks\GroundSpike\GroundSpikeEvent.h" />
-    <ClInclude Include="Game\StageGimmick\Gimmicks\GroundSpike\GroundSpikeObject.h" />
     <ClInclude Include="Resources\shaders\CRT.PS.hlsl" />
     <ClInclude Include="Engine\Application\UI\Panels\SplineEditorPanel.h" />
     <ClInclude Include="Engine\Objects\2D\NumbersSprite\NumbersSprite.h" />
     <ClInclude Include="Engine\Application\UI\Panels\LivePPPanel.h" />
-    <ClInclude Include="Game\StageGimmick\Base\StageGimmickEventBase.h" />
-    <ClInclude Include="Game\StageGimmick\Base\StageGimmickObjectBase.h" />
-    <ClInclude Include="Game\StageGimmick\Manager\StageGimmickManager.h" />
-    <ClInclude Include="Game\StageGimmick\Gimmicks\DroolRain\DroolRainEvent.h" />
-    <ClInclude Include="Game\StageGimmick\Gimmicks\DroolRain\DroolRainObject.h" />
-    <ClInclude Include="Game\StageGimmick\Gimmicks\Projectile\ProjectileFireEvent.h" />
-    <ClInclude Include="Game\StageGimmick\Gimmicks\Projectile\ProjectileObject.h" />
     <ClInclude Include="Engine\Foundation\Debug\CxAssert.h" />
   </ItemGroup>
 </Project>
