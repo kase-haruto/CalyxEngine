@@ -2500,6 +2500,7 @@
     <ClCompile Include="Engine\Assets\Manager\AssetManager.cpp" />
     <ClCompile Include="Engine\Editor\Prefab\PrefabEditContextUtils.cpp" />
     <ClCompile Include="Engine\Application\UI\EngineUI\ManipulatorSettingsUI.cpp" />
+    <ClCompile Include="Game\Scene\Utility\SceneTypeUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Application\System\Environment.h" />
@@ -2526,6 +2527,8 @@
     <ClInclude Include="Engine\Assets\Manager\AssetManager.h" />
     <ClInclude Include="Engine\Application\UI\EngineUI\ManipulatorSettings.h" />
     <ClInclude Include="Engine\Application\UI\EngineUI\ManipulatorSettingsUI.h" />
+    <ClInclude Include="Game\Scene\Utility\SceneTypeUtil.h" />
+    <ClInclude Include="Game\Scene\Details\SceneType.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Data\Engine\Configs\Scene\Objects\Particle\Module\ModuleConfig.cpp" />
@@ -2585,8 +2588,6 @@
     <ClCompile Include="Engine\Objects\Event\BaseEventObject.cpp" />
     <ClCompile Include="Engine\Objects\Event\Camera\CameraEventObject.cpp" />
     <ClCompile Include="Engine\PostProcess\Manager\PostEffectManager.cpp" />
-    <ClCompile Include="Game\DemoPlayer\DemoPlayer.cpp" />
-    <ClCompile Include="Game\Scene\Utility\SceneTypeUtil.cpp" />
     <ClCompile Include="Engine\Assets\Database\AssetDatabase.cpp" />
     <ClCompile Include="Engine\Assets\DataAsset\DataAssetManager.cpp" />
     <ClCompile Include="Engine\Assets\DataAsset\MaterialAsset.cpp" />
@@ -2839,8 +2840,6 @@
     <ClInclude Include="Engine\PostProcess\Manager\PostEffectManager.h" />
     <ClInclude Include="Engine\Scene\Transitioner\IScenePayload.h" />
     <ClInclude Include="Engine\System\Component\IComponent.h" />
-    <ClInclude Include="Game\DemoPlayer\DemoPlayer.h" />
-    <ClInclude Include="Game\Scene\Utility\SceneTypeUtil.h" />
     <ClInclude Include="Engine\Assets\Database\AssetDatabase.h" />
     <ClInclude Include="Engine\Assets\DataAsset\Archetype.h" />
     <ClInclude Include="Engine\Assets\DataAsset\DataAsset.h" />
