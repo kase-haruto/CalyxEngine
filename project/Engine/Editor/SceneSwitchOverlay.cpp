@@ -5,7 +5,7 @@
 #include <vector>
 
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 
 	void SceneSwitchOverlay::RenderToolbar() {
 		if (!sceneManager_) return;
@@ -37,4 +37,4 @@ namespace CalyxEditor {
 		ImGui::End();
 	}
 
-} // namespace CalyxEditor
+} // namespace CalyxEngine

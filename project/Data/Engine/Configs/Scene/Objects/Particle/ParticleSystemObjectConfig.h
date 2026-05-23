@@ -3,7 +3,7 @@
 #include <Data/Engine/Configs/Scene/Objects/SceneObject/SceneObjectConfig.h>
 #include <Data/Engine/Configs/Scene/Objects/Particle/EmitterConfig.h>
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 	struct ParticleSystemObjectConfig
 		: public SceneObjectConfig,
 		  public EmitterConfig {};

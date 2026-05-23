@@ -1,5 +1,6 @@
 #include "Quaternion.h"
 
+#include "MathUtil.h"
 #include "Matrix4x4.h"
 #include <Engine/Foundation/Utility/Func/CxUtils.h>
 
@@ -7,7 +8,7 @@
 #include <cmath>
 #include <numbers>
 
-namespace CalyxMath {
+namespace CalyxEngine {
 	///////////////////////////////////////////////////////////////////////////
 	//              メンバ関数
 	///////////////////////////////////////////////////////////////////////////
@@ -327,7 +328,7 @@ namespace CalyxMath {
 			if(axis.LengthSquared() < 1e-6f) {
 				axis = Vector3::Cross({0, 1, 0}, f);
 			}
-			return Quaternion::MakeRotateAxisQuaternion(axis.Normalize(), CalyxMath::ToRadians(180.0f));
+			return Quaternion::MakeRotateAxisQuaternion(axis.Normalize(), CalyxEngine::ToRadians(180.0f));
 		}
 
 		Vector3 axis = Vector3::Cross(f, t);
@@ -386,4 +387,4 @@ namespace CalyxMath {
 		return {x * scalar, y * scalar, z * scalar, w * scalar};
 	}
 
-} // namespace CalyxMath
+} // namespace CalyxEngine

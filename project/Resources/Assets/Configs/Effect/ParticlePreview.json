@@ -1,0 +1,140 @@
+{
+    "emitters": [
+        {
+            "emitter": {
+                "autoDestroy": false,
+                "blendMode": 2,
+                "cameraDitherEnabled": false,
+                "cameraDitherFar": 20.0,
+                "cameraDitherNear": 0.0,
+                "color": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "emitCount": 10,
+                "emitDelay": 0.0,
+                "emitDuration": -1.0,
+                "emitRate": 0.0,
+                "emitterShape": 4,
+                "followOneShot": true,
+                "isComplement": true,
+                "isDrawEnable": true,
+                "isOneShot": true,
+                "lifetime": {
+                    "constant": 1.0,
+                    "max": 1.0,
+                    "min": 0.0,
+                    "mode": 0
+                },
+                "modelGuid": "00000000-0000-0000-0000-000000000000",
+                "modelPath": "plane.obj",
+                "modules": [],
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "randomSpinEmit": false,
+                "scale": {
+                    "constant": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "max": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "min": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "mode": 0
+                },
+                "shapeAngle": 30.0,
+                "shapeRadius": 1.0,
+                "shapeSize": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "textureGuid": "76a3b2da-9952-4708-9b60-aa372a8a6319",
+                "texturePath": "Textures/white1x1.dds",
+                "velocity": {
+                    "constant": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "max": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "min": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "mode": 0
+                }
+            },
+            "guid": "8eee325f-41a2-465f-be8e-8e0410e1cda2",
+            "isDrawEnable": true,
+            "isGpu": false,
+            "name": "Emitter",
+            "objectType": 0,
+            "parentGuid": "d7438587-16ec-42f0-a36c-066c8d62348b",
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            }
+        }
+    ],
+    "guid": "00000000-0000-0000-0000-000000000000",
+    "name": "ParticlePreview",
+    "objectType": 0,
+    "parentGuid": "00000000-0000-0000-0000-000000000000",
+    "transform": {
+        "inheritRotate": true,
+        "inheritScale": true,
+        "inheritTranslate": true,
+        "rotation": {
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+        },
+        "translation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        }
+    }
+}

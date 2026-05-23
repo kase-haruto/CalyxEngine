@@ -5,9 +5,9 @@
 /* ===================================================================== */
 #include "RaytracingScene.h"
 
-#include <cassert>
+#include <Engine/Foundation/Debug/CxAssert.h>
 
-namespace CalyxGraphics {
+namespace CalyxEngine {
 
 	namespace {
 
@@ -46,7 +46,7 @@ namespace CalyxGraphics {
 				nullptr,
 				IID_PPV_ARGS(&res));
 			if(FAILED(hr)) {
-				assert(false); // デバッグ時に失敗を検出
+				CX_CHECK(false, "Assertion failed"); // デバッグ時に失敗を検出
 			}
 			return res; // 空の ComPtr を返す（呼び出し側でチェック）
 		}
@@ -57,12 +57,12 @@ namespace CalyxGraphics {
 	//  初期化処理
 	/////////////////////////////////////////////////////////////////////////////////
 	void RaytracingSystem::Initialize(ID3D12Device5* device) {
-		assert(device && "RaytracingSystem::Initialize: device is null");
+		CX_CHECK(device && "RaytracingSystem::Initialize: device is null", "Assertion failed");
 		device_ = device;
 
 		// TLAS用SRVディスクリプタの確保
 		tlasSrv_ = DescriptorAllocator::Allocate(DescriptorUsage::CbvSrvUav);
-		assert(tlasSrv_.IsValid() && "RaytracingSystem::Initialize: Failed to allocate TLAS SRV descriptor");
+		CX_CHECK(tlasSrv_.IsValid() && "RaytracingSystem::Initialize: Failed to allocate TLAS SRV descriptor", "Assertion failed");
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////
@@ -71,7 +71,7 @@ namespace CalyxGraphics {
 	void RaytracingSystem::BuildTLAS(
 		ID3D12GraphicsCommandList4* cmd,
 		const RaytracingScene&		scene) {
-		assert(device_ && cmd);
+		CX_CHECK(device_ && cmd, "Assertion failed");
 
 		// インスタンス数の取得
 		const uint32_t instanceCount = scene.GetInstanceCount();
@@ -93,40 +93,41 @@ namespace CalyxGraphics {
 			&inputs, &prebuild);
 
 		// サイズのアサート
-		assert(prebuild.ResultDataMaxSizeInBytes > 0);
-		assert(prebuild.ScratchDataSizeInBytes > 0);
+		CX_CHECK(prebuild.ResultDataMaxSizeInBytes > 0, "Assertion failed");
+		CX_CHECK(prebuild.ScratchDataSizeInBytes > 0, "Assertion failed");
 
 		// TLASとスクラッチバッファの生成
 		if(!tlas_ || tlasCapacity_ < instanceCount) {
 			tlasCapacity_ = instanceCount;
 
 			// バッファの作成
-			tlas_ = CreateDefaultBuffer(
+			Microsoft::WRL::ComPtr<ID3D12Resource> newTlas = CreateDefaultBuffer(
 				device_,
 				prebuild.ResultDataMaxSizeInBytes,
 				D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE,
 				D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
 
 			// バッファの作成
-			scratch_ = CreateDefaultBuffer(
+			Microsoft::WRL::ComPtr<ID3D12Resource> newScratch = CreateDefaultBuffer(
 				device_,
 				prebuild.ScratchDataSizeInBytes,
 				D3D12_RESOURCE_STATE_COMMON,
 				D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
 
-			// No transitions needed for TLAS (Created as RTAS)
-			// Need transition for Scratch: COMMON -> UAV
+			D3D12_RESOURCE_BARRIER barrier = {};
 
-			D3D12_RESOURCE_BARRIER barriers[1] = {};
+			barrier.Type				   = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			barrier.Transition.pResource   = newScratch.Get();
+			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
+			barrier.Transition.StateAfter  = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+			barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
-			// Scratch: COMMON -> UAV
-			barriers[0].Type				   = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barriers[0].Transition.pResource   = scratch_.Get();
-			barriers[0].Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-			barriers[0].Transition.StateAfter  = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-			barriers[0].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+			cmd->ResourceBarrier(1, &barrier);
 
-			cmd->ResourceBarrier(1, barriers);
+			RetireResource(tlas_);
+			RetireResource(scratch_);
+			tlas_	 = newTlas;
+			scratch_ = newScratch;
 
 			// SRVの設定
 			D3D12_SHADER_RESOURCE_VIEW_DESC srv{};
@@ -166,4 +167,11 @@ namespace CalyxGraphics {
 
 	ID3D12Resource* RaytracingSystem::GetTLAS() const { return tlas_.Get(); }
 
-} // namespace CalyxGraphics
+	void RaytracingSystem::RetireResource(Microsoft::WRL::ComPtr<ID3D12Resource>& resource) {
+		if(!resource) return;
+
+		retiredResources_.push_back(resource);
+		resource.Reset();
+	}
+
+} // namespace CalyxEngine

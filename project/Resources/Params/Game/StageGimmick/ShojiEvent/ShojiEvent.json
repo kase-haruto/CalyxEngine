@@ -1,0 +1,20 @@
+{
+    "fields": {
+        "centerPos": [
+            -1.75,
+            3.0799999237060547,
+            0.0
+        ],
+        "direction": [
+            -0.0,
+            -0.0,
+            -1.0
+        ],
+        "hInterval": 1.399999976158142,
+        "luckyCatScale": 0.5,
+        "shojiInterval": 2.8399999141693115,
+        "shojiScale": 1.0,
+        "speed": 0.0,
+        "wInterval": 1.75
+    }
+}

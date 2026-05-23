@@ -1,0 +1,147 @@
+{
+  "emitters": [
+    {
+      "emitter": {
+        "autoDestroy": false,
+        "billboardMode": 0,
+        "blendMode": 5,
+        "cameraDitherEnabled": false,
+        "cameraDitherFar": 20.0,
+        "cameraDitherNear": 0.0,
+        "color": {
+          "w": 1.0,
+          "x": 1.0,
+          "y": 0.7607843279838562,
+          "z": 0.23137255012989044
+        },
+        "emitCount": 1,
+        "emitDelay": 0.0,
+        "emitDuration": -1.0,
+        "emitRate": 1.0099999904632568,
+        "emitterShape": 0,
+        "followOneShot": false,
+        "isComplement": true,
+        "isDrawEnable": true,
+        "isOneShot": true,
+        "lifetime": {
+          "constant": 0.6000000238418579,
+          "max": 1.0,
+          "min": 0.0,
+          "mode": 0
+        },
+        "modelGuid": "3692bb87-72fd-4299-9545-a828cb38ba80",
+        "modelPath": "shockwave.obj",
+        "modules": [
+          {
+            "blend": 0,
+            "clamp01": true,
+            "ease": 2,
+            "enabled": true,
+            "end": [
+              0.6200000047683716,
+              0.9800000190734863,
+              0.6100000143051147,
+              1.0
+            ],
+            "guid": "9f0aa2ec-045d-4f20-ace0-debe17fb4781",
+            "invert": false,
+            "name": "OverLifetimeModule",
+            "start": [
+              0.18000000715255737,
+              0.029999999329447746,
+              0.20000000298023224,
+              1.0
+            ],
+            "target": 0
+          },
+          {
+            "animationSpeed": 18.959999084472656,
+            "cols": 6,
+            "enabled": true,
+            "loop": true,
+            "name": "TextureSheetAnimationModule",
+            "rows": 1,
+            "useCustomFrames": false
+          }
+        ],
+        "position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "randomSpinEmit": false,
+        "scale": {
+          "constant": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "max": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "min": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "mode": 0
+        },
+        "shapeAngle": 30.0,
+        "shapeRadius": 3.369999885559082,
+        "shapeSize": {
+          "x": 1.0,
+          "y": 1.0,
+          "z": 1.0
+        },
+        "textureGuid": "76a3b2da-9952-4708-9b60-aa372a8a6319",
+        "texturePath": "Textures/white1x1.dds",
+        "velocity": {
+          "constant": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "max": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "min": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "mode": 0
+        }
+      },
+      "isDrawEnable": true,
+      "isGpu": false,
+      "name": "Emitter",
+      "transform": {
+        "inheritRotate": true,
+        "inheritScale": true,
+        "inheritTranslate": true,
+        "rotation": {
+          "w": 1.0,
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "scale": {
+          "x": 1.0,
+          "y": 1.0,
+          "z": 1.0
+        },
+        "translation": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        }
+      }
+    }
+  ],
+  "name": "shockwave",
+  "type": "EffectAsset"
+}

@@ -2,7 +2,7 @@
 
 #include "imgui/imgui.h"
 
-namespace Calyx2D {
+namespace CalyxEngine {
 
 	namespace {
 
@@ -10,7 +10,7 @@ namespace Calyx2D {
 		// Vec2 用 GUI
 		//==============================================================
 		bool DrawVec2Desc(const char* name,
-							 std::optional<HudMotionDesc<CalyxMath::Vector2>>& opt) {
+							 std::optional<HudMotionDesc<CalyxEngine::Vector2>>& opt) {
 			bool changed = false;
 
 			bool enabled = opt.has_value();
@@ -38,7 +38,7 @@ namespace Calyx2D {
 				ImGui::DragFloat("Duration", &d.duration, 0.05f, 0.01f, 10.0f);
 				if(ImGui::IsItemDeactivatedAfterEdit()) changed = true;
 
-				CalyxEase::SelectEase(d.easing);
+				CalyxEngine::SelectEase(d.easing);
 
 				if(ImGui::IsItemDeactivatedAfterEdit()) changed = true;
 
@@ -80,7 +80,7 @@ namespace Calyx2D {
 				ImGui::DragFloat("Duration", &d.duration, 0.05f, 0.01f, 10.0f);
 				if(ImGui::IsItemDeactivatedAfterEdit()) changed = true;
 
-				CalyxEase::SelectEase(d.easing);
+				CalyxEngine::SelectEase(d.easing);
 				if(ImGui::IsItemDeactivatedAfterEdit()) changed = true;
 
 				ImGui::TreePop();

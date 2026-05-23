@@ -8,7 +8,7 @@
 #include <type_traits>
 #include <vector>
 
-namespace Calyx2D {
+namespace CalyxEngine {
 
 	/*----------------------------------------------------------------------------------------
 	 * 2Dゲームオブジェクト基底クラス
@@ -44,4 +44,4 @@ namespace Calyx2D {
 		std::vector<std::unique_ptr<IComponent>> components_;
 	};
 
-} // namespace Calyx2D
+} // namespace CalyxEngine

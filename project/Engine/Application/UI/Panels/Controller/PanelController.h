@@ -10,7 +10,7 @@
 #include <memory>
 #include <string>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 	class PanelController {
 	public:
 		//===================================================================*/

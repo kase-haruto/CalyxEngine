@@ -8,7 +8,7 @@
 // std
 #include <vector>
 #include <filesystem>
-namespace CalyxUtil {
+namespace CalyxEngine {
 	/* ========================================================================
 /* 		json操作のutility関数
 /* ===================================================================== */

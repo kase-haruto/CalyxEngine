@@ -7,10 +7,10 @@
 #include <cmath>
 
 
-AABB::AABB(const CalyxMath::Vector3& min, const CalyxMath::Vector3& max, uint32_t color)
+AABB::AABB(const CalyxEngine::Vector3& min, const CalyxEngine::Vector3& max, uint32_t color)
 	: min_(min), max_(max), color(color) {}
 
-void AABB::Initialize(const CalyxMath::Vector3& Min, const CalyxMath::Vector3& Max) {
+void AABB::Initialize(const CalyxEngine::Vector3& Min, const CalyxEngine::Vector3& Max) {
 	min_ = Min;
 	max_ = Max;
 }
@@ -34,16 +34,16 @@ void AABB::UpdateUI(std::string lavel) {
 	ImGui::End();
 }
 
-CalyxMath::Vector3 AABB::GetMin()const { return min_; }
-CalyxMath::Vector3 AABB::GetMax()const { return max_; }
+CalyxEngine::Vector3 AABB::GetMin()const { return min_; }
+CalyxEngine::Vector3 AABB::GetMax()const { return max_; }
 
-CalyxMath::Vector3 AABB::GetCenter() const {
+CalyxEngine::Vector3 AABB::GetCenter() const {
 	return (min_ + max_) * 0.5f;
 }
 
-AABB AABB::Transform(const CalyxMath::Matrix4x4& mat) const{
+AABB AABB::Transform(const CalyxEngine::Matrix4x4& mat) const{
 	// AABBの8頂点を作成
-	CalyxMath::Vector3 corners[8] = {
+	CalyxEngine::Vector3 corners[8] = {
 		{min_.x, min_.y, min_.z},
 		{max_.x, min_.y, min_.z},
 		{min_.x, max_.y, min_.z},
@@ -54,13 +54,13 @@ AABB AABB::Transform(const CalyxMath::Matrix4x4& mat) const{
 		{max_.x, max_.y, max_.z},
 	};
 
-	CalyxMath::Vector3 newMin(FLT_MAX, FLT_MAX, FLT_MAX);
-	CalyxMath::Vector3 newMax(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+	CalyxEngine::Vector3 newMin(FLT_MAX, FLT_MAX, FLT_MAX);
+	CalyxEngine::Vector3 newMax(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
 	for (int i = 0; i < 8; ++i){
-		CalyxMath::Vector3 transformed = CalyxMath::Vector3::Transform(corners[i], mat);
-		newMin = CalyxMath::Vector3::Min(newMin, transformed);
-		newMax = CalyxMath::Vector3::Max(newMax, transformed);
+		CalyxEngine::Vector3 transformed = CalyxEngine::Vector3::Transform(corners[i], mat);
+		newMin = CalyxEngine::Vector3::Min(newMin, transformed);
+		newMax = CalyxEngine::Vector3::Max(newMax, transformed);
 	}
 
 	return AABB(newMin, newMax, color);

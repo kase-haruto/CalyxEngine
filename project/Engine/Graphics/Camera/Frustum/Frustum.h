@@ -11,11 +11,11 @@
 /*			視推台の面
 /* ===================================================================== */
 struct FrustumPlane{
-	CalyxMath::Vector3 normal;
+	CalyxEngine::Vector3 normal;
 	float distance;
 
-	float GetSignedDistanceToPoint(const CalyxMath::Vector3& point) const{
-		return CalyxMath::Vector3::Dot(normal, point) + distance;
+	float GetSignedDistanceToPoint(const CalyxEngine::Vector3& point) const{
+		return CalyxEngine::Vector3::Dot(normal, point) + distance;
 	}
 };
 
@@ -30,7 +30,7 @@ public:
 	/// 行列から掃き出し
 	/// </summary>
 	/// <param name="viewProj"></param>
-	void ExtractFromMatrix(const CalyxMath::Matrix4x4& viewProj);
+	void ExtractFromMatrix(const CalyxEngine::Matrix4x4& viewProj);
 
 	/// <summary>
 	/// aabbとの判定
@@ -38,38 +38,38 @@ public:
 	/// <param name="min"></param>
 	/// <param name="max"></param>
 	/// <returns></returns>
-	bool IsAABBInside(const CalyxMath::Vector3& min, const CalyxMath::Vector3& max) const;
+	bool IsAABBInside(const CalyxEngine::Vector3& min, const CalyxEngine::Vector3& max) const;
 
 	/// <summary>
 	/// 描画
 	/// </summary>
 	/// <param name="color"></param>
 	/// <param name="farPlaneRatio"></param>
-	void Draw(const CalyxMath::Vector4& color = CalyxMath::Vector4(1, 1, 0, 1), float farPlaneRatio = 0.005f) const;
+	void Draw(const CalyxEngine::Vector4& color = CalyxEngine::Vector4(1, 1, 0, 1), float farPlaneRatio = 0.005f) const;
 	
 	/// <summary>
 	/// 8頂点をワールド座標で計算
 	/// </summary>
 	/// <param name="outCorners"></param>
-	void CalculateCorners(CalyxMath::Vector3 outCorners[8]) const;
+	void CalculateCorners(CalyxEngine::Vector3 outCorners[8]) const;
 
 	/**
 	 * \brief 8頂点を計算
 	 * \param outCorners
 	 * \param farPlaneRatio
 	 */
-	void CalculateCorners(CalyxMath::Vector3 outCorners[8], float farPlaneRatio) const;
+	void CalculateCorners(CalyxEngine::Vector3 outCorners[8], float farPlaneRatio) const;
 private:
 	/// <summary>
 	/// 面の正規化
 	/// </summary>
 	/// <param name="p"></param>
 	/// <returns></returns>
-	FrustumPlane NormalizePlane(const CalyxMath::Vector4& p);
+	FrustumPlane NormalizePlane(const CalyxEngine::Vector4& p);
 
 private:
 	std::array<FrustumPlane, 6> planes_;
-	CalyxMath::Matrix4x4 viewProjection_;
+	CalyxEngine::Matrix4x4 viewProjection_;
 
 	
 };

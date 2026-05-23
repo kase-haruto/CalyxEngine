@@ -15,7 +15,7 @@
 
 using Microsoft::WRL::ComPtr;
 
-namespace CalyxGraphics {
+namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
 	 * DxCore
@@ -137,4 +137,4 @@ namespace CalyxGraphics {
 		std::unique_ptr<DxFence>                dxFence_; //< フェンス管理
 	};
 
-} // namespace CalyxGraphics
+} // namespace CalyxEngine

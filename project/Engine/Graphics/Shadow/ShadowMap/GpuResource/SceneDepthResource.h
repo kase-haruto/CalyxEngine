@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-namespace CalyxGraphics {
+namespace CalyxEngine {
 	class SceneDepthResource {
 	public:
 		void Initialize(ID3D12Device* device, uint32_t w, uint32_t h) ;

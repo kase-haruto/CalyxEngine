@@ -4,7 +4,7 @@
 
 #include <externals/imgui/imgui.h>
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 	OverLifetimeModule::OverLifetimeModule(const std::string& name)
 		: BaseFxModule(name) {}
 
@@ -20,13 +20,13 @@ namespace CalyxEffect {
 		if(clamp01_) t = std::clamp(t, 0.0f, 1.0f);
 		if(invert_) t = 1.0f - t;
 
-		const float et = CalyxEase::ApplyEase(ease_, t);
+		const float et = CalyxEngine::ApplyEase(ease_, t);
 
 		switch(target_) {
 		case Target::Scale: {
-			CalyxMath::Vector3 s{start_.x, start_.y, start_.z};
-			CalyxMath::Vector3 e{end_.x, end_.y, end_.z};
-			CalyxMath::Vector3 v = CalyxMath::Vector3::Lerp(s, e, et);
+			CalyxEngine::Vector3 s{start_.x, start_.y, start_.z};
+			CalyxEngine::Vector3 e{end_.x, end_.y, end_.z};
+			CalyxEngine::Vector3 v = CalyxEngine::Vector3::Lerp(s, e, et);
 			ApplyTo(unit, {v.x, v.y, v.z, 1.0f});
 		} break;
 
@@ -34,22 +34,22 @@ namespace CalyxEffect {
 		case Target::RotationY:
 		case Target::RotationZ:
 		case Target::AlphaOnly: {
-			float v = CalyxMath::Lerp(start_.x, end_.x, et);
+			float v = CalyxEngine::Lerp(start_.x, end_.x, et);
 			ApplyTo(unit, {v, 0, 0, 0});
 		} break;
 
 		case Target::ColorRGBA: {
-			CalyxMath::Vector4 v = CalyxMath::Vector4::Lerp(start_, end_, et);
+			CalyxEngine::Vector4 v = CalyxEngine::Vector4::Lerp(start_, end_, et);
 			ApplyTo(unit, v);
 		} break;
 		}
 	}
 
-	void OverLifetimeModule::ApplyTo(FxUnit& u, const CalyxMath::Vector4& v) const {
+	void OverLifetimeModule::ApplyTo(FxUnit& u, const CalyxEngine::Vector4& v) const {
 		switch(target_) {
 		case Target::Scale: {
-			CalyxMath::Vector3 cur = u.scale;
-			CalyxMath::Vector3 nv	= {v.x, v.y, v.z};
+			CalyxEngine::Vector3 cur = u.scale;
+			CalyxEngine::Vector3 nv	= {v.x, v.y, v.z};
 			switch(blend_) {
 			case BlendOp::Set:
 				u.scale = nv;
@@ -109,7 +109,7 @@ namespace CalyxEffect {
 		} break;
 
 		case Target::ColorRGBA: {
-			CalyxMath::Vector4 cur = u.color, nv = v;
+			CalyxEngine::Vector4 cur = u.color, nv = v;
 			switch(blend_) {
 			case BlendOp::Set:
 				u.color = nv;
@@ -140,7 +140,7 @@ namespace CalyxEffect {
 		}
 	}
 
-	void OverLifetimeModule::DrawValueEditor(const char* label, CalyxMath::Vector4& v) {
+	void OverLifetimeModule::DrawValueEditor(const char* label, CalyxEngine::Vector4& v) {
 		ImGui::TextUnformatted(label);
 		ImGui::PushID(label);
 		switch(target_) {
@@ -201,7 +201,7 @@ namespace CalyxEffect {
 			int et = static_cast<int>(ease_);
 			if(ImGui::Combo("##ease", &et,
 							"Linear\0EaseIn\0EaseOut\0EaseInOut\0EaseInOutCubic\0")) {
-				ease_ = static_cast<CalyxEase::EaseType>(et);
+				ease_ = static_cast<CalyxEngine::EaseType>(et);
 							}
 		}
 

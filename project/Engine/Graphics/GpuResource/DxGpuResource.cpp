@@ -12,7 +12,8 @@ void DxGpuResource::InitializeAsRenderTarget(ID3D12Device*				 device,
 											 uint32_t					 width,
 											 uint32_t					 height,
 											 DXGI_FORMAT				 format,
-											 std::optional<std::wstring> name) {
+											 std::optional<std::wstring> name,
+											 const float*				 clearColor) {
 	D3D12_RESOURCE_DESC texDesc = {};
 	texDesc.Dimension			= D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	texDesc.Width				= width;
@@ -29,10 +30,17 @@ void DxGpuResource::InitializeAsRenderTarget(ID3D12Device*				 device,
 
 	D3D12_CLEAR_VALUE clearValue = {};
 	clearValue.Format			 = format;
-	clearValue.Color[0]			 = 0.1f;
-	clearValue.Color[1]			 = 0.1f;
-	clearValue.Color[2]			 = 0.1f;
-	clearValue.Color[3]			 = 1.0f;
+	if(clearColor) {
+		clearValue.Color[0] = clearColor[0];
+		clearValue.Color[1] = clearColor[1];
+		clearValue.Color[2] = clearColor[2];
+		clearValue.Color[3] = clearColor[3];
+	} else {
+		clearValue.Color[0] = 0.1f;
+		clearValue.Color[1] = 0.1f;
+		clearValue.Color[2] = 0.1f;
+		clearValue.Color[3] = 1.0f;
+	}
 
 	HRESULT hr = device->CreateCommittedResource(
 		&heapProps,

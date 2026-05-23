@@ -5,13 +5,13 @@
 #include <Engine/Graphics/Material.h>
 #include <Engine/Graphics/RenderTarget/Detail/RenderTargetDetail.h>
 
-namespace Calyx2D {
+namespace CalyxEngine {
 
 	struct SpriteDrawData {
 		D3D12_GPU_DESCRIPTOR_HANDLE texture{};
-		CalyxMath::Matrix4x4        wvp;
+		CalyxEngine::Matrix4x4        wvp;
 		Material2D                  material{};
 		RenderTargetType            targetRT = RenderTargetType::BackBuffer;
 	};
 
-} // namespace Calyx2D
+} // namespace CalyxEngine

@@ -11,9 +11,9 @@ struct ColliderConfig {
 	bool			   isDraw			  = true;				//< 描画有効フラグ
 	int				   colliderType		  = 0;					//< コリジョンの種類
 	int				   targetType		  = 0;					//< 衝突相手の種類
-	CalyxMath::Vector3 offset			  = {0.0f, 0.0f, 0.0f}; //< オフセット
-	CalyxMath::Vector3 rotate			  = {0.0f, 0.0f, 0.0f}; //< 回転 (Euler)
-	CalyxMath::Vector3 size				  = {1.0f, 1.0f, 1.0f}; //< サイズ (Box)
+	CalyxEngine::Vector3 offset			  = {0.0f, 0.0f, 0.0f}; //< オフセット
+	CalyxEngine::Vector3 rotate			  = {0.0f, 0.0f, 0.0f}; //< 回転 (Euler)
+	CalyxEngine::Vector3 size				  = {1.0f, 1.0f, 1.0f}; //< サイズ (Box)
 	float			   radius			  = 1.0f;				//< 半径 (Sphere)
 };
 

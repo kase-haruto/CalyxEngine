@@ -8,12 +8,12 @@
 #include "imgui/imgui.h"
 #include <algorithm>
 
-namespace CalyxUtil {
+namespace CalyxEngine {
 
 	//============================================================================
 	// constructor
 	//============================================================================
-	StateTimer::StateTimer(float target, CalyxEase::EaseType easing)
+	StateTimer::StateTimer(float target, CalyxEngine::EaseType easing)
 		: target_(std::max(0.0001f, target)),
 		  easingType_(easing) {
 		Reset();
@@ -61,7 +61,7 @@ namespace CalyxUtil {
 		UpdateEasing();
 	}
 
-	void StateTimer::SetEasing(CalyxEase::EaseType type) {
+	void StateTimer::SetEasing(CalyxEngine::EaseType type) {
 
 		easingType_ = type;
 		UpdateEasing();
@@ -89,7 +89,7 @@ namespace CalyxUtil {
 	}
 
 	void StateTimer::UpdateEasing() {
-		easedT_ = CalyxEase::ApplyEase(easingType_, t_);
+		easedT_ = CalyxEngine::ApplyEase(easingType_, t_);
 	}
 
 	//============================================================================
@@ -108,16 +108,16 @@ namespace CalyxUtil {
 		ImGui::Text("EasedT : %.3f", easedT_);
 
 		// イージングタイプ選択
-		const char* easeItems[static_cast<int>(CalyxEase::EaseType::Count)];
+		const char* easeItems[static_cast<int>(CalyxEngine::EaseType::Count)];
 		// enum の個数分
-		for(int i = 0; i < static_cast<int>(CalyxEase::EaseType::Count); ++i) {
-			easeItems[i] = EnumConverter<CalyxEase::EaseType>::ToString(static_cast<CalyxEase::EaseType>(i)).data();
+		for(int i = 0; i < static_cast<int>(CalyxEngine::EaseType::Count); ++i) {
+			easeItems[i] = EnumConverter<CalyxEngine::EaseType>::ToString(static_cast<CalyxEngine::EaseType>(i)).data();
 		}
 		int easeIdx = static_cast<int>(easingType_);
-		if(ImGui::Combo("Easing Type", &easeIdx, easeItems, static_cast<int>(CalyxEase::EaseType::Count))) {
-			easingType_ = static_cast<CalyxEase::EaseType>(easeIdx);
+		if(ImGui::Combo("Easing Type", &easeIdx, easeItems, static_cast<int>(CalyxEngine::EaseType::Count))) {
+			easingType_ = static_cast<CalyxEngine::EaseType>(easeIdx);
 			UpdateEasing();
 		}
 	}
 
-} // namespace CalyxUtil
+} // namespace CalyxEngine

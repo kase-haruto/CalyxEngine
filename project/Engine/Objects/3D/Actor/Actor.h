@@ -44,7 +44,7 @@ public:
 	 * \brief 速度を取得
 	 * \return 速度
 	 */
-	const CalyxMath::Vector3 GetVelocity() const { return velocity_; }
+	const CalyxEngine::Vector3 GetVelocity() const { return velocity_; }
 	/**
 	 * \brief 生存フラグを取得
 	 * \return 生存しているか
@@ -65,7 +65,7 @@ public:
 	 * \brief 座標を設定
 	 * \param position 座標
 	 */
-	void  SetPosition(const CalyxMath::Vector3& position) { worldTransform_.translation = position; };
+	void  SetPosition(const CalyxEngine::Vector3& position) { worldTransform_.translation = position; };
 	/**
 	 * \brief 移動速度を設定
 	 * \param moveSpeed 速度
@@ -80,7 +80,7 @@ public:
 	 * \brief 速度を設定
 	 * \param velocity 速度
 	 */
-	void  SetVelocity(const CalyxMath::Vector3& velocity) { velocity_ = velocity; }
+	void  SetVelocity(const CalyxEngine::Vector3& velocity) { velocity_ = velocity; }
 	/**
 	 * \brief ライフを設定
 	 * \param life ライフ
@@ -92,8 +92,8 @@ protected:
 	//                   protected members
 	//===================================================================*/
 	float	moveSpeed_;			  //< 移動速度
-	CalyxMath::Vector3 velocity_	  = {};	  //< 移動ベクトル
-	CalyxMath::Vector3 acceleration_ = {};	  //< 加速度
+	CalyxEngine::Vector3 velocity_	  = {};	  //< 移動ベクトル
+	CalyxEngine::Vector3 acceleration_ = {};	  //< 加速度
 	int32_t life_		  = 1;	  //< 体力 (0で死亡)
 	bool	isAlive_	  = true; //< 生存フラグ
 };

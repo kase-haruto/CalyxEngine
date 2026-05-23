@@ -80,8 +80,8 @@ void GlobalVariables::SaveFile(const std::string& groupName) {
 			root[groupName][itemName] = std::get<int32_t>(item.value);
 		} else if (std::holds_alternative<float>(item.value)) {
 			root[groupName][itemName] = std::get<float>(item.value);
-		} else if (std::holds_alternative<CalyxMath::Vector3>(item.value)) {
-			CalyxMath::Vector3 value = std::get<CalyxMath::Vector3>(item.value);
+		} else if (std::holds_alternative<CalyxEngine::Vector3>(item.value)) {
+			CalyxEngine::Vector3 value = std::get<CalyxEngine::Vector3>(item.value);
 			root[groupName][itemName] = json::array({ value.x, value.y, value.z });
 		} else if (std::holds_alternative<bool>(item.value)) {
 			root[groupName][itemName] = std::get<bool>(item.value);
@@ -153,7 +153,7 @@ void GlobalVariables::LoadFile(const std::string& groupName) {
 			float value = itItem->get<float>();
 			SetValue(groupName, itemName, value);
 		} else if (itItem->is_array() && itItem->size() == 3) {
-			CalyxMath::Vector3 value = { itItem->at(0), itItem->at(1), itItem->at(2) };
+			CalyxEngine::Vector3 value = { itItem->at(0), itItem->at(1), itItem->at(2) };
 			SetValue(groupName, itemName, value);
 		} else if (itItem->is_boolean()) {
 			bool value = itItem->get<bool>();
@@ -183,7 +183,7 @@ void GlobalVariables::ShowSlider(const std::string& itemName, float& value) {
 	ImGui::DragFloat(itemName.c_str(), &value, 0.01f);
 }
 
-void GlobalVariables::ShowSlider(const std::string& itemName, CalyxMath::Vector3& value) {
+void GlobalVariables::ShowSlider(const std::string& itemName, CalyxEngine::Vector3& value) {
 	ImGui::DragFloat3(itemName.c_str(), &value.x, 0.01f);
 }
 

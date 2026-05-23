@@ -6,6 +6,8 @@
 #include <Engine/Extensions/Fog/FogEffect.h>
 #include <Engine/scene/Base/BaseScene.h>
 #include <Engine/Renderer/Sprite/Sprite.h>
+#include <Engine/Objects/2D/Object2d/SpriteObject2d.h>
+#include <Engine/Objects/2D/Animation/SpriteAnimator2d.h>
 #include <Engine/Objects/3D/Actor/TestObject/CalyxHuman.h>
 /* c++ */
 #include <memory>
@@ -34,14 +36,6 @@ public:
 	void Draw(ID3D12GraphicsCommandList* cmdLst, class PipelineService* psoService, IRenderTarget* )override;
 	void CleanUp()override;
 	void LoadAssets()override;
-private:
-	/* graphics =====================================================*/
-	std::unique_ptr<FogEffect>fog_ = nullptr;
 
-	/* objects ====================================================*/
-	std::shared_ptr<BaseGameObject> modelField_;
-	std::unique_ptr<Sprite> testSprite_;
-	std::shared_ptr<CalyxHuman> animationHuman_;
 
 };
-

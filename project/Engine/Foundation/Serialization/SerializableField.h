@@ -4,6 +4,7 @@
 #include <Engine/Foundation/Math/Vector2.h>
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Foundation/Math/Vector4.h>
+#include <Engine/Foundation/Utility/Guid/Guid.h>
 #include <externals/nlohmann/json.hpp>
 
 
@@ -24,18 +25,20 @@ namespace CalyxEngine {
 		size_t*,
 		float*,
 		bool*,
-		CalyxMath::Vector2*,
-		CalyxMath::Vector3*,
-		CalyxMath::Vector4*,
-		CalyxMath::Quaternion*,
+		CalyxEngine::Vector2*,
+		CalyxEngine::Vector3*,
+		CalyxEngine::Vector4*,
+		CalyxEngine::Quaternion*,
+		Guid*,
 		const int32_t*,
 		const size_t*,
 		const float*,
 		const bool*,
-		const CalyxMath::Vector2*,
-		const CalyxMath::Vector3*,
-		const CalyxMath::Vector4*,
-		const CalyxMath::Quaternion*>;
+		const CalyxEngine::Vector2*,
+		const CalyxEngine::Vector3*,
+		const CalyxEngine::Vector4*,
+		const CalyxEngine::Quaternion*,
+		const Guid*>;
 
 	/* =========================================================================
 	   シリアライズ可能なフィールド情報
@@ -72,14 +75,16 @@ namespace CalyxEngine {
 	inline void WriteValue(Json& out, const ValuePtr& ptr) {
 		std::visit([&](auto* p) {
 			using T = std::remove_pointer_t<decltype(p)>;
-			if constexpr(std::is_same_v<T, CalyxMath::Vector2> || std::is_same_v<T, const CalyxMath::Vector2>) {
+			if constexpr(std::is_same_v<T, CalyxEngine::Vector2> || std::is_same_v<T, const CalyxEngine::Vector2>) {
 				out = Json::array({p->x, p->y});
-			} else if constexpr(std::is_same_v<T, CalyxMath::Vector3> || std::is_same_v<T, const CalyxMath::Vector3>) {
+			} else if constexpr(std::is_same_v<T, CalyxEngine::Vector3> || std::is_same_v<T, const CalyxEngine::Vector3>) {
 				out = Json::array({p->x, p->y, p->z});
-			} else if constexpr(std::is_same_v<T, CalyxMath::Vector4> || std::is_same_v<T, const CalyxMath::Vector4>) {
+			} else if constexpr(std::is_same_v<T, CalyxEngine::Vector4> || std::is_same_v<T, const CalyxEngine::Vector4>) {
 				out = Json::array({p->x, p->y, p->z, p->w});
-			} else if constexpr(std::is_same_v<T, CalyxMath::Quaternion> || std::is_same_v<T, const CalyxMath::Quaternion>) {
+			} else if constexpr(std::is_same_v<T, CalyxEngine::Quaternion> || std::is_same_v<T, const CalyxEngine::Quaternion>) {
 				out = Json::array({p->x, p->y, p->z, p->w});
+			} else if constexpr(std::is_same_v<T, Guid> || std::is_same_v<T, const Guid>) {
+				out = p->ToString();
 			} else {
 				out = *p;
 			}
@@ -110,30 +115,34 @@ namespace CalyxEngine {
 						if(!in.is_boolean()) return false;
 						*p = in.get<bool>();
 						return true;
-					} else if constexpr(std::is_same_v<T, CalyxMath::Vector2>) {
+					} else if constexpr(std::is_same_v<T, CalyxEngine::Vector2>) {
 						if(!in.is_array() || in.size() != 2) return false;
 						p->x = in.at(0).get<float>();
 						p->y = in.at(1).get<float>();
 						return true;
-					} else if constexpr(std::is_same_v<T, CalyxMath::Vector3>) {
+					} else if constexpr(std::is_same_v<T, CalyxEngine::Vector3>) {
 						if(!in.is_array() || in.size() != 3) return false;
 						p->x = in.at(0).get<float>();
 						p->y = in.at(1).get<float>();
 						p->z = in.at(2).get<float>();
 						return true;
-					} else if constexpr(std::is_same_v<T, CalyxMath::Vector4>) {
+					} else if constexpr(std::is_same_v<T, CalyxEngine::Vector4>) {
 						if(!in.is_array() || in.size() != 4) return false;
 						p->x = in.at(0).get<float>();
 						p->y = in.at(1).get<float>();
 						p->z = in.at(2).get<float>();
 						p->w = in.at(3).get<float>();
 						return true;
-					} else if constexpr(std::is_same_v<T, CalyxMath::Quaternion>) {
+					} else if constexpr(std::is_same_v<T, CalyxEngine::Quaternion>) {
 						if(!in.is_array() || in.size() != 4) return false;
 						p->x = in.at(0).get<float>();
 						p->y = in.at(1).get<float>();
 						p->z = in.at(2).get<float>();
 						p->w = in.at(3).get<float>();
+						return true;
+					} else if constexpr(std::is_same_v<T, Guid>) {
+						if(!in.is_string()) return false;
+						*p = Guid::FromString(in.get<std::string>());
 						return true;
 					} else {
 						return false;

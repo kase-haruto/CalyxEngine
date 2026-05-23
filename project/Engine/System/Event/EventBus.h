@@ -99,5 +99,12 @@ private:
 // ============================================================================
 // イベント型
 // ============================================================================
-struct ObjectAdded{ std::shared_ptr<class SceneObject> sp; };
-struct ObjectRemoved{ std::shared_ptr<class SceneObject> sp; };
+class SceneContext;
+struct ObjectAdded{
+	std::shared_ptr<class SceneObject> sp;
+	SceneContext* owner = nullptr;
+};
+struct ObjectRemoved{
+	std::shared_ptr<class SceneObject> sp;
+	SceneContext* owner = nullptr;
+};

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 
 	/*----------------------------------------------------------------------
 	 * ImguiLayoutService

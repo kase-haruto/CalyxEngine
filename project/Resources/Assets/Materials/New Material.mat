@@ -1,0 +1,23 @@
+{
+  "fields": {
+    "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "envirometCoefficient": 0.5,
+    "isReflect": false,
+    "lightingMode": 0,
+    "roughness": 0.5,
+    "shininess": 20.0
+  },
+  "graph": {
+    "links": [],
+    "nextId": 1,
+    "nodes": []
+  },
+  "guid": "94d5bf0c-9afe-444a-8f96-84efa19f38df",
+  "name": "New Material",
+  "type": "MaterialAsset"
+}

@@ -6,10 +6,11 @@
 #include <Engine/Application/UI/EngineUI/Manipulator.h>
 
 #include <memory>
+#include <vector>
 
 class SceneObject;
 class SceneContext;
-namespace CalyxEditor {
+namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
 	 * SceneObjectEditor
@@ -33,6 +34,7 @@ namespace CalyxEditor {
 		void ClearSelection(); // ← 明示クリアも使える
 
 		void					  SetTarget(SceneObject* object);
+		void					  SetTargets(const std::vector<SceneObject*>& objects);
 		Manipulator* GetManipulator() const { return manipulator_.get(); }
 
 	private:
@@ -41,6 +43,7 @@ namespace CalyxEditor {
 		//===================================================================*/
 		std::unique_ptr<Manipulator> manipulator_ = nullptr; // マニピュレーター
 		SceneObject*							  sceneObject_ = nullptr; // 編集対象のSceneObject
+		bool									  multiSelection_ = false;
 	};
 
 }

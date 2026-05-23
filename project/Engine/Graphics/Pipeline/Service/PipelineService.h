@@ -9,6 +9,8 @@
 
 // std
 #include <array>
+#include <memory>
+#include <unordered_map>
 
 /* ========================================================================
 /*		パイプライン配膳サービス
@@ -80,6 +82,14 @@ public:
 	ID3D12RootSignature* GetRootSig(const GraphicsPipelineDesc& desc) { return library_->GetRoot(desc); }
 
 	PipelineSet		   GetPipelineSet(PipelineTag::Object tag, BlendMode blend = BlendMode::NORMAL) const;
+	PipelineSet		   GetGeneratedMaterialObjectPipelineSet(
+		BlendMode blend,
+		Microsoft::WRL::ComPtr<IDxcBlob> pixelShader,
+		std::size_t shaderHash);
+	PipelineSet		   GetGeneratedMaterialSkinnedPipelineSet(
+		BlendMode blend,
+		Microsoft::WRL::ComPtr<IDxcBlob> pixelShader,
+		std::size_t shaderHash);
 	PipelineSet		   GetPipelineSet(PipelineTag::PostProcess tag) const;
 	const PipelineSet& GetComputePipelineSet(PipelineTag::Compute tag) const {
 		return csCache_[static_cast<size_t>(tag)];
@@ -94,6 +104,25 @@ public:
 	}
 
 private:
+	struct GeneratedMaterialPipelineKey {
+		PipelineTag::Object tag = PipelineTag::Object::Object3d;
+		BlendMode blend = BlendMode::NORMAL;
+		std::size_t shaderHash = 0;
+
+		bool operator==(const GeneratedMaterialPipelineKey& rhs) const {
+			return tag == rhs.tag && blend == rhs.blend && shaderHash == rhs.shaderHash;
+		}
+	};
+
+	struct GeneratedMaterialPipelineKeyHasher {
+		std::size_t operator()(const GeneratedMaterialPipelineKey& key) const {
+			std::size_t hash = std::hash<int>()(static_cast<int>(key.tag));
+			hash ^= std::hash<int>()(static_cast<int>(key.blend)) << 1;
+			hash ^= key.shaderHash << 2;
+			return hash;
+		}
+	};
+
 	//===================================================================*/
 	//		private variables
 	//===================================================================*/
@@ -105,6 +134,7 @@ private:
 	mutable ID3D12RootSignature* lastRootSignature_ = nullptr;
 
 	std::unordered_map<PipelineKey, PipelineSet, PipelineKeyHasher>					  objCache_;
+	std::unordered_map<GeneratedMaterialPipelineKey, std::unique_ptr<PipelineStateObject>, GeneratedMaterialPipelineKeyHasher> generatedMaterialPipelines_;
 	std::array<PipelineSet, static_cast<size_t>(PipelineTag::PostProcess::Count)>	  ppCache_{};
 	std::array<PipelineSet, static_cast<size_t>(PipelineTag::Compute::kComputeCount)> csCache_{};
 };

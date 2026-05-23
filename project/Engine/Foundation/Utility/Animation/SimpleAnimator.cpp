@@ -1,5 +1,5 @@
 #include "SimpleAnimator.h"
-void CalyxUtil::SimpleAnimator::Reset() {
+void CalyxEngine::SimpleAnimator::Reset() {
 	// float
 	for(auto& [_, ch] : floatAnims_) {
 		ch->Reset();

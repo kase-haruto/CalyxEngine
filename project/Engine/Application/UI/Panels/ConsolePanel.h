@@ -9,7 +9,7 @@
 #include <vector>
 #include <string>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
 	 * ConsolePanel

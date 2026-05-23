@@ -6,10 +6,11 @@
 #include <Data/Engine/Configs/Scene/Objects/Transform/UvTransformConfig.h>
 #include <Engine/Foundation/Utility/Guid/Guid.h>
 
+#include <optional>
 #include <string>
 
 struct BaseModelConfig {
-	MaterialConfig	  materialConfig; // マテリアル設定
+	Guid			  materialGuid{}; // マテリアル GUID
 	Transform2DConfig uvTransConfig;  // UV 2D 変換
 	int				  blendMode = 5;  // 初期値は通常ブレンド
 	std::string		  modelName;	  // モデル名/パス
@@ -20,17 +21,21 @@ struct BaseModelConfig {
 
 inline void to_json(nlohmann::json& j, const BaseModelConfig& c) {
 	j = nlohmann::json{
-		{"materialConfig", c.materialConfig},
+		{"materialGuid", c.materialGuid},
 		{"uvTransConfig", c.uvTransConfig},
 		{"blendMode", c.blendMode},
 		{"modelName", c.modelName},
-		{"textureGuid", c.textureGuid}, // 保存は GUID のみ
+		{"textureGuid", c.textureGuid},
 	};
 	// legacyTextureName は保存しない
 }
 
 inline void from_json(const nlohmann::json& j, BaseModelConfig& c) {
-	j.at("materialConfig").get_to(c.materialConfig);
+	if(auto it = j.find("materialGuid"); it != j.end() && !it->is_null()) {
+		c.materialGuid = it->get<Guid>();
+	} else {
+		c.materialGuid = Guid::Empty();
+	}
 	j.at("uvTransConfig").get_to(c.uvTransConfig);
 	j.at("blendMode").get_to(c.blendMode);
 	j.at("modelName").get_to(c.modelName);

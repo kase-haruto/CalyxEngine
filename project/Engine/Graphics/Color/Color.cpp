@@ -1,7 +1,7 @@
 #include "Color.h"
 
 using namespace CalyxEngine;
-using namespace ::CalyxMath;
+using namespace ::CalyxEngine;
 
 ///////////////////////////////////////////////////////////////////////////////
 //			変換

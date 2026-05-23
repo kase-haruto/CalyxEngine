@@ -1,4 +1,5 @@
 #include "DxFunc.h"
+#include <Engine/Foundation/Debug/CxAssert.h>
 
 #include <Engine/Graphics/RenderTarget/Interface/IRenderTarget.h>
 
@@ -14,7 +15,7 @@ ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(
 	descriptorHeapDesc.NumDescriptors = numDescriptors;
 	descriptorHeapDesc.Flags = shaderVisible ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	HRESULT hr = device->CreateDescriptorHeap(&descriptorHeapDesc, IID_PPV_ARGS(&descriptorHeap));
-	assert(SUCCEEDED(hr));
+	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 	// Releaseビルドで未使用警告を抑える
 	( void ) hr;
 	return descriptorHeap;

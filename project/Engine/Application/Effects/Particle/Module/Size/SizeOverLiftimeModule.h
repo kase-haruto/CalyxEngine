@@ -6,12 +6,12 @@
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Foundation/Utility/Ease/CxEase.h>
 
-namespace CalyxEffect{
+namespace CalyxEngine{
 	/* ========================================================================
 	/*	ライフタイムに応じてパーティクルのサイズを変化させるモジュール
 	/* ===================================================================== */
 	class SizeOverLiftimeModule
-		: public CalyxEffect::BaseFxModule {
+		: public CalyxEngine::BaseFxModule {
 	public:
 		//===================================================================*/
 		//					public methods
@@ -25,12 +25,12 @@ namespace CalyxEffect{
 		//--------- accessor -----------------------------------------------------
 		// getter
 		void SetIsGrowing(bool frag) { isGrowing_ = frag; }
-		void SetEaseType(CalyxEase::EaseType type) { easeType_ = type; }
+		void SetEaseType(CalyxEngine::EaseType type) { easeType_ = type; }
 
 		// setter
 		bool				GetIsGrowing() const { return isGrowing_; }
-		CalyxEase::EaseType	GetEaseType() const { return easeType_; }
-		virtual const char* GetTypeName() const override { return "SizeOverLiftimeModule"; }
+		CalyxEngine::EaseType	GetEaseType() const { return easeType_; }
+		virtual const char* GetObjectClassName() const override { return "SizeOverLiftimeModule"; }
 
 	private:
 		//===================================================================*/
@@ -38,6 +38,6 @@ namespace CalyxEffect{
 		//===================================================================*/
 		bool isGrowing_ = true; //< サイズが大きくなるかどうか
 
-		CalyxEase::EaseType easeType_ = CalyxEase::EaseType::EaseInOutCubic; //< サイズ変化のイージングタイプ
+		CalyxEngine::EaseType easeType_ = CalyxEngine::EaseType::EaseInOutCubic; //< サイズ変化のイージングタイプ
 	};
 }

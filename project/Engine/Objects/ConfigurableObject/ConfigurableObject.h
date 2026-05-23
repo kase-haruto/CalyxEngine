@@ -114,8 +114,8 @@ inline void ConfigurableObject<TConfig>::LoadConfig(std::string categoryAndName)
 	// --- 読み込み（存在する方だけ）---
 	nlohmann::json jBase, jInst, jMerged;
 
-	const bool hasBase = CalyxUtil::JsonUtils::Load(basePath, jBase);
-	const bool hasInst = CalyxUtil::JsonUtils::Load(instancePath, jInst);
+	const bool hasBase = CalyxEngine::JsonUtils::Load(basePath, jBase);
+	const bool hasInst = CalyxEngine::JsonUtils::Load(instancePath, jInst);
 
 	if(!hasBase && !hasInst) {
 		// 何も無ければ何もしない（現在値を保持）
@@ -155,7 +155,7 @@ inline void ConfigurableObject<TConfig>::SaveConfig(const std::string& categoryA
 	if(onExtract_) onExtract_(config_); // 一貫性のため追加
 
 	// 保存
-	CalyxUtil::JsonUtils::Save(configPath, config_);
+	CalyxEngine::JsonUtils::Save(configPath, config_);
 }
 /////////////////////////////////////////////////////////////////////////////////////////
 //      コンフィグのgui

@@ -16,18 +16,18 @@ NumbersSprite::NumbersSprite(std::string dir,std::string ext)
 
 NumbersSprite::NumbersSprite() = default;
 
-void NumbersSprite::Initialize(const CalyxMath::Vector2& pos,const CalyxMath::Vector2& digitSize) {
+void NumbersSprite::Initialize(const CalyxEngine::Vector2& pos,const CalyxEngine::Vector2& digitSize) {
 	origin_    = pos;
 	digitSize_ = digitSize;
 	SetValue(0);
 }
 
-void NumbersSprite::SetPosition(const CalyxMath::Vector2& pos) {
+void NumbersSprite::SetPosition(const CalyxEngine::Vector2& pos) {
 	origin_      = pos;
 	dirtyLayout_ = true;
 }
 
-void NumbersSprite::SetDigitSize(const CalyxMath::Vector2& size) {
+void NumbersSprite::SetDigitSize(const CalyxEngine::Vector2& size) {
 	digitSize_   = size;
 	dirtyLayout_ = true;
 }
@@ -42,7 +42,7 @@ void NumbersSprite::SetAlign(DigitsAlign a) {
 	dirtyLayout_ = true;
 }
 
-void NumbersSprite::SetAnchor(const CalyxMath::Vector2& anc) {
+void NumbersSprite::SetAnchor(const CalyxEngine::Vector2& anc) {
 	anchor_ = anc;
 	for(auto& sp : sprites_) sp->SetAnchorPoint(anchor_);
 	dirtyLayout_ = true;

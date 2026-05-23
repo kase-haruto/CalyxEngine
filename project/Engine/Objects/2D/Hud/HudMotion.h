@@ -4,7 +4,7 @@
 #include "Engine/Foundation/Utility/Animation/SimpleAnimator.h"
 
 
-namespace Calyx2D {
+namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
 	 * HudMotionChannel enum
@@ -65,8 +65,8 @@ namespace Calyx2D {
 		void Reset();
 
 		// getters
-		const CalyxMath::Vector2& GetPosition() const { return position_; }
-		const CalyxMath::Vector2& GetScale() const { return scale_; }
+		const CalyxEngine::Vector2& GetPosition() const { return position_; }
+		const CalyxEngine::Vector2& GetScale() const { return scale_; }
 		float                     GetRotation() const { return rotation_; }
 		float                     GetAlpha() const { return alpha_; }
 		bool                      IsChannelEnabled(HudMotionChannel ch) const { return enabledChannels_ & static_cast<uint32_t>(ch); }
@@ -117,13 +117,13 @@ namespace Calyx2D {
 		//			private members
 		//===================================================================*/
 		// アニメーター
-		CalyxUtil::SimpleAnimator animator_;
+		CalyxEngine::SimpleAnimator animator_;
 		// 有効チャネル
 		uint32_t enabledChannels_ = 0;
 
 		// 実値
-		CalyxMath::Vector2 position_;         //< 位置
-		CalyxMath::Vector2 scale_{1.0f,1.0f}; //< スケール
+		CalyxEngine::Vector2 position_;         //< 位置
+		CalyxEngine::Vector2 scale_{1.0f,1.0f}; //< スケール
 		float              rotation_ = 0.0f;  //< 回転角
 		float              alpha_    = 1.0f;  //< 透明度
 	};
@@ -166,4 +166,4 @@ namespace Calyx2D {
 		ch.Animation().Start();
 	}
 
-} // namespace Calyx2D
+} // namespace CalyxEngine

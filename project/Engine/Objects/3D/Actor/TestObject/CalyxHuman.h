@@ -12,8 +12,8 @@ public:
 	void Initialize()override;
 	void Update(float dt)override;
 
-	std::optional<CalyxMath::Vector3> GetJointWorldPos(const std::string& name) const;
-	std::string_view GetTypeName() const override{ return "CalyxHuman"; }
+	std::optional<CalyxEngine::Vector3> GetJointWorldPos(const std::string& name) const;
+	std::string_view GetObjectClassName() const override{ return "CalyxHuman"; }
 private:
 	void TransitionAnimation();
 	void Move(float dt);

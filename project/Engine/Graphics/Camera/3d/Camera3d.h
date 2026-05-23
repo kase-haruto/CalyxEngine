@@ -52,7 +52,7 @@ public:
      * \param outCorners 出力先
      * \param shadowFar 遠方距離
      */
-	void GetShadowFrustumCorners(CalyxMath::Vector3 outCorners[8], float shadowFar) const;
+	void GetShadowFrustumCorners(CalyxEngine::Vector3 outCorners[8], float shadowFar) const;
     //--------- accessor -----------------------------------------------------
     /**
      * \brief AABBが視野内か
@@ -64,7 +64,7 @@ public:
      * \brief タイプ名を取得
      * \return タイプ名
      */
-    std::string_view GetTypeName() const override { return "Camera3d"; }
+    std::string_view GetObjectClassName() const override { return "Camera3d"; }
 
     //--------- follow target -------------------------------------------------
     /**
@@ -91,7 +91,7 @@ public:
      * \brief 前方ベクトルを取得
      * \return 前方ベクトル
      */
-	CalyxMath::Vector3 GetForward()const;
+	CalyxEngine::Vector3 GetForward()const;
 
 private:
     //==================================================================*//
@@ -100,9 +100,9 @@ private:
     void UpdateFollow(float dt);
 
     // ベクトル版 SmoothDamp（Unity 近似）
-    static CalyxMath::Vector3 SmoothDampVec(const CalyxMath::Vector3& current,
-                                 const CalyxMath::Vector3& target,
-                                 CalyxMath::Vector3& currentVelocity,
+    static CalyxEngine::Vector3 SmoothDampVec(const CalyxEngine::Vector3& current,
+                                 const CalyxEngine::Vector3& target,
+                                 CalyxEngine::Vector3& currentVelocity,
                                  float smoothTime, float dt);
 
     // 回転の指数補間率（0..1）
@@ -123,7 +123,7 @@ private:
 		float  distanceBack     = 13.0f;             // 後方距離（-F * distanceBack）
 		float  heightOffset     = 4.0f;             // 上方向(Y)オフセット
 		float  sideOffset       = 0.0f;             // 右(+)左(-)オフセット
-		CalyxMath::Vector3 lookAtOffset    = {0.0f, 1.5f, 0.0f}; // 必要なら使用
+		CalyxEngine::Vector3 lookAtOffset    = {0.0f, 1.5f, 0.0f}; // 必要なら使用
 
 		// 位置スムージング
 		float  posSmoothTime    = 0.78f;
@@ -134,6 +134,6 @@ private:
 		float  extraPitchDeg    = -10.0f;
 
 		const WorldTransform* target = nullptr;     // 追従対象
-		CalyxMath::Vector3 posVel = {0,0,0};                   // SmoothDamp 用速度
+		CalyxEngine::Vector3 posVel = {0,0,0};                   // SmoothDamp 用速度
 	} follow_;
 };

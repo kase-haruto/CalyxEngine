@@ -60,13 +60,13 @@ bool CalyxEngine::DrawField(const SerializableField& f) {
 				GuiCmd::PropertyText(label, "%.3f", *p);
 			else if constexpr(std::is_same_v<T, bool>)
 				GuiCmd::PropertyText(label, *p ? "true" : "false");
-			else if constexpr(std::is_same_v<T, CalyxMath::Vector2>)
+			else if constexpr(std::is_same_v<T, CalyxEngine::Vector2>)
 				GuiCmd::PropertyText(label, "(%.2f, %.2f)", p->x, p->y);
-			else if constexpr(std::is_same_v<T, CalyxMath::Vector3>)
+			else if constexpr(std::is_same_v<T, CalyxEngine::Vector3>)
 				GuiCmd::PropertyText(label, "(%.2f, %.2f, %.2f)", p->x, p->y, p->z);
-			else if constexpr(std::is_same_v<T, CalyxMath::Vector4>)
+			else if constexpr(std::is_same_v<T, CalyxEngine::Vector4>)
 				GuiCmd::PropertyText(label, "(%.2f, %.2f, %.2f, %.2f)", p->x, p->y, p->z, p->w);
-			else if constexpr(std::is_same_v<T, CalyxMath::Quaternion>)
+			else if constexpr(std::is_same_v<T, CalyxEngine::Quaternion>)
 				GuiCmd::PropertyText(label, "(%.2f, %.2f, %.2f, %.2f)", p->x, p->y, p->z, p->w);
 		};
 
@@ -93,14 +93,14 @@ bool CalyxEngine::DrawField(const SerializableField& f) {
 									: GuiCmd::DragFloat(label, *p, f.speed));
 				else if constexpr(std::is_same_v<T, bool>)
 					changed |= GuiCmd::CheckBox(label, *p);
-				else if constexpr(std::is_same_v<T, CalyxMath::Vector2>)
+				else if constexpr(std::is_same_v<T, CalyxEngine::Vector2>)
 					changed |= GuiCmd::DragFloat2(label, *p, f.speed);
-				else if constexpr(std::is_same_v<T, CalyxMath::Vector3>)
+				else if constexpr(std::is_same_v<T, CalyxEngine::Vector3>)
 					changed |= GuiCmd::DragFloat3(label, *p, f.speed);
-				else if constexpr(std::is_same_v<T, CalyxMath::Vector4>)
+				else if constexpr(std::is_same_v<T, CalyxEngine::Vector4>)
 					changed |= GuiCmd::DragFloat4(label, *p, f.speed);
-				else if constexpr(std::is_same_v<T, CalyxMath::Quaternion>)
-					changed |= GuiCmd::DragFloat4(label, reinterpret_cast<CalyxMath::Vector4&>(*p), f.speed);
+				else if constexpr(std::is_same_v<T, CalyxEngine::Quaternion>)
+					changed |= GuiCmd::DragFloat4(label, reinterpret_cast<CalyxEngine::Vector4&>(*p), f.speed);
 			}
 		}
 

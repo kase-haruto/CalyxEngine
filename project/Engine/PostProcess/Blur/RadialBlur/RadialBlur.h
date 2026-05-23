@@ -13,7 +13,7 @@ class RadialBlurEffect
 	: public IPostEffectPass {
 private:
 	struct BlurParameter {
-		CalyxMath::Vector2 center; // [0,1] normalized
+		CalyxEngine::Vector2 center; // [0,1] normalized
 		float   width;  // 強度（シェーダー側の扱いに合わせて "width" 名）
 		float   _pad;   // 16byte アラインメント用（必要なら）
 	};
@@ -30,12 +30,16 @@ public:
 	void ShowImGui() override;
 	void ResetParameters() override;
 	void Tick(float /*dt*/) override {} // 今回は未使用
+	nlohmann::json SaveParameters() const override;
+	void LoadParameters(const nlohmann::json& params) override;
+	bool GetFloatParameter(const std::string& name, float& out) const override;
+	bool SetFloatParameter(const std::string& name, float value) override;
 
 	// ---------------- Runtime API（Tween用にgetter/setter揃える） ----------------
 	float   GetWidth() const           { return blurParam_.width; }
 	void    SetWidth(float width);                     // 強度（0で効果無し）
-	CalyxMath::Vector2 GetCenter() const          { return blurParam_.center; }
-	void    SetCenter(const CalyxMath::Vector2& uv);
+	CalyxEngine::Vector2 GetCenter() const          { return blurParam_.center; }
+	void    SetCenter(const CalyxEngine::Vector2& uv);
 
 private:
 	// パラメータ

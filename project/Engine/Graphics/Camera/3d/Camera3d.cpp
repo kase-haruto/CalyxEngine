@@ -16,20 +16,21 @@
 
 // c++
 #include "Engine/Application/UI/Panels/InspectorPanel.h"
+#include "Engine/Foundation/Math/MathUtil.h"
 
 #include <cmath>
 
 namespace {
 
 // 列ベース: 左手系行列 M の回転部分から Right/Up/Forward を正規化して取り出す（スケール除去）
-void ExtractBasisNoScale(const CalyxMath::Matrix4x4& M,CalyxMath::Vector3& R,CalyxMath::Vector3& U,CalyxMath::Vector3& F) {
-	R = CalyxMath::Vector3(M.m[0][0],M.m[0][1],M.m[0][2]).Normalize(); // +X
-	U = CalyxMath::Vector3(M.m[1][0],M.m[1][1],M.m[1][2]).Normalize(); // +Y
-	F = CalyxMath::Vector3(M.m[2][0],M.m[2][1],M.m[2][2]).Normalize(); // +Z (LH: forward)
+void ExtractBasisNoScale(const CalyxEngine::Matrix4x4& M,CalyxEngine::Vector3& R,CalyxEngine::Vector3& U,CalyxEngine::Vector3& F) {
+	R = CalyxEngine::Vector3(M.m[0][0],M.m[0][1],M.m[0][2]).Normalize(); // +X
+	U = CalyxEngine::Vector3(M.m[1][0],M.m[1][1],M.m[1][2]).Normalize(); // +Y
+	F = CalyxEngine::Vector3(M.m[2][0],M.m[2][1],M.m[2][2]).Normalize(); // +Z (LH: forward)
 }
 
 // 位置のアフィン変換（点）
-CalyxMath::Vector3 TransformPoint(const CalyxMath::Matrix4x4& M,const CalyxMath::Vector3& p) {
+CalyxEngine::Vector3 TransformPoint(const CalyxEngine::Matrix4x4& M,const CalyxEngine::Vector3& p) {
 	return {
 			M.m[0][0] * p.x + M.m[1][0] * p.y + M.m[2][0] * p.z + M.m[3][0],
 			M.m[0][1] * p.x + M.m[1][1] * p.y + M.m[2][1] * p.z + M.m[3][1],
@@ -38,7 +39,7 @@ CalyxMath::Vector3 TransformPoint(const CalyxMath::Matrix4x4& M,const CalyxMath:
 }
 
 // 方向のアフィン変換（ベクトル：平行移動なし）
-CalyxMath::Vector3 TransformDirection(const CalyxMath::Matrix4x4& M,const CalyxMath::Vector3& v) {
+CalyxEngine::Vector3 TransformDirection(const CalyxEngine::Matrix4x4& M,const CalyxEngine::Vector3& v) {
 	return {
 			M.m[0][0] * v.x + M.m[1][0] * v.y + M.m[2][0] * v.z,
 			M.m[0][1] * v.x + M.m[1][1] * v.y + M.m[2][1] * v.z,
@@ -47,15 +48,15 @@ CalyxMath::Vector3 TransformDirection(const CalyxMath::Matrix4x4& M,const CalyxM
 }
 
 // 回転行列だけを正規直交化（親にスケールが乗っていても回転を復元）
-CalyxMath::Matrix4x4 OrthonormalizeRotation(const CalyxMath::Matrix4x4& M) {
-	CalyxMath::Vector3 R,U,F;
+CalyxEngine::Matrix4x4 OrthonormalizeRotation(const CalyxEngine::Matrix4x4& M) {
+	CalyxEngine::Vector3 R,U,F;
 	ExtractBasisNoScale(M,R,U,F);
 	// 再直交化（Gram-Schmidt 簡易）
 	R = R.Normalize();
-	U = (U - R * CalyxMath::Vector3::Dot(R,U)).Normalize();
-	F = CalyxMath::Vector3::Cross(R,U).Normalize(); // LHなら R×U=F でOK
+	U = (U - R * CalyxEngine::Vector3::Dot(R,U)).Normalize();
+	F = CalyxEngine::Vector3::Cross(R,U).Normalize(); // LHなら R×U=F でOK
 
-	CalyxMath::Matrix4x4 Rm{};
+	CalyxEngine::Matrix4x4 Rm{};
 	Rm.m[0][0] = R.x;
 	Rm.m[0][1] = R.y;
 	Rm.m[0][2] = R.z;
@@ -86,7 +87,6 @@ Camera3d::Camera3d() : BaseCamera() {
 Camera3d::Camera3d(const std::string& name) { SceneObject::SetName(name,ObjectType::Camera); }
 
 void Camera3d::Initialize() {
-	worldTransform_.translation = {0.0f, 2.0f, -3.0f};
 	follow_.LoadParams();
 }
 
@@ -95,22 +95,22 @@ float Camera3d::ExpLerpAlpha(float dt,float tau) {
 	return 1.0f - std::exp(-dt / tau);
 }
 
-CalyxMath::Vector3 Camera3d::SmoothDampVec(const CalyxMath::Vector3& current,const CalyxMath::Vector3& target,
-								CalyxMath::Vector3&       vel,float              smoothTime,float dt) {
+CalyxEngine::Vector3 Camera3d::SmoothDampVec(const CalyxEngine::Vector3& current,const CalyxEngine::Vector3& target,
+								CalyxEngine::Vector3&       vel,float              smoothTime,float dt) {
 	// Unity の SmoothDamp 近似
 	float st    = (std::max)(0.0001f,smoothTime);
 	float omega = 2.0f / st;
 	float x     = omega * dt;
 	float exp   = 1.0f / (1.0f + x + 0.48f * x * x + 0.235f * x * x * x);
 
-	CalyxMath::Vector3 change = current - target;
-	CalyxMath::Vector3 temp   = (vel + change * omega) * dt;
+	CalyxEngine::Vector3 change = current - target;
+	CalyxEngine::Vector3 temp   = (vel + change * omega) * dt;
 	vel            = (vel - temp * omega) * exp;
 	return target + (change + temp) * exp;
 }
 
-CalyxMath::Vector3 Camera3d::GetForward() const {
-	return CalyxMath::Vector3(
+CalyxEngine::Vector3 Camera3d::GetForward() const {
+	return CalyxEngine::Vector3(
 	  GetWorldTransform().matrix.world.m[2][0],
 	  GetWorldTransform().matrix.world.m[2][1],
 	  GetWorldTransform().matrix.world.m[2][2]
@@ -121,13 +121,13 @@ void Camera3d::UpdateFollow(float dt) {
 	if(!follow_.target) return;
 
 	//  ターゲットのワールド行列から基底を抽出
-	const CalyxMath::Matrix4x4& Tw = follow_.target->matrix.world;
-	CalyxMath::Vector3          Tr{Tw.m[3][0],Tw.m[3][1],Tw.m[3][2]}; // target world pos
-	CalyxMath::Vector3          R,U,F;
+	const CalyxEngine::Matrix4x4& Tw = follow_.target->matrix.world;
+	CalyxEngine::Vector3          Tr{Tw.m[3][0],Tw.m[3][1],Tw.m[3][2]}; // target world pos
+	CalyxEngine::Vector3          R,U,F;
 	ExtractBasisNoScale(Tw,R,U,F); // world right/up/forward
 
 	//  望ましい「カメラのワールド位置」
-	CalyxMath::Vector3 desiredWorldPos =
+	CalyxEngine::Vector3 desiredWorldPos =
 		Tr
 		- F * follow_.distanceBack
 		+ U * follow_.heightOffset
@@ -135,41 +135,41 @@ void Camera3d::UpdateFollow(float dt) {
 
 	//  位置スムージングはワールドで
 	//    （posVel もワールド速度として保持）
-	CalyxMath::Vector3 curWorldPos = TransformPoint(worldTransform_.matrix.world,{0,0,0}); // 現在のワールド位置
+	CalyxEngine::Vector3 curWorldPos = TransformPoint(worldTransform_.matrix.world,{0,0,0}); // 現在のワールド位置
 	curWorldPos         = SmoothDampVec(curWorldPos,desiredWorldPos,follow_.posVel,follow_.posSmoothTime,dt);
 
 	//  望ましい「カメラのワールド回転」
 	//    ターゲットのワールド回転行列（スケール除去→直交化）からクォータニオンへ
-	CalyxMath::Matrix4x4  targetRotM   = OrthonormalizeRotation(Tw);
-	CalyxMath::Quaternion targetWorldQ = CalyxMath::Quaternion::FromMatrix(targetRotM);
+	CalyxEngine::Matrix4x4  targetRotM   = OrthonormalizeRotation(Tw);
+	CalyxEngine::Quaternion targetWorldQ = CalyxEngine::Quaternion::FromMatrix(targetRotM);
 
 	//    俯角はワールドの Right 軸（R）回り
-	CalyxMath::Quaternion extraPitch = CalyxMath::Quaternion::MakeRotateAxisQuaternion(
-		R,CalyxMath::ToRadians(follow_.extraPitchDeg));
-	CalyxMath::Quaternion desiredWorldQ = extraPitch * targetWorldQ;
+	CalyxEngine::Quaternion extraPitch = CalyxEngine::Quaternion::MakeRotateAxisQuaternion(
+		R,CalyxEngine::ToRadians(follow_.extraPitchDeg));
+	CalyxEngine::Quaternion desiredWorldQ = extraPitch * targetWorldQ;
 
 	//    現在のワールド回転を取得
-	CalyxMath::Matrix4x4  CwRotM    = OrthonormalizeRotation(worldTransform_.matrix.world);
-	CalyxMath::Quaternion curWorldQ = CalyxMath::Quaternion::FromMatrix(CwRotM);
+	CalyxEngine::Matrix4x4  CwRotM    = OrthonormalizeRotation(worldTransform_.matrix.world);
+	CalyxEngine::Quaternion curWorldQ = CalyxEngine::Quaternion::FromMatrix(CwRotM);
 
 	//    ワールド回転を指数補間
 	float      a         = ExpLerpAlpha(dt,follow_.rotTimeConstant);
-	CalyxMath::Quaternion newWorldQ = CalyxMath::Quaternion::Slerp(curWorldQ,desiredWorldQ,a);
+	CalyxEngine::Quaternion newWorldQ = CalyxEngine::Quaternion::Slerp(curWorldQ,desiredWorldQ,a);
 
 	// 親のローカルに戻してセット
 	if(worldTransform_.parent) {
-		CalyxMath::Matrix4x4 Pw    = worldTransform_.parent->matrix.world;
-		CalyxMath::Matrix4x4 PwInv = CalyxMath::Matrix4x4::Inverse(Pw);
+		CalyxEngine::Matrix4x4 Pw    = worldTransform_.parent->matrix.world;
+		CalyxEngine::Matrix4x4 PwInv = CalyxEngine::Matrix4x4::Inverse(Pw);
 
 		// ローカル位置 = 親^-1 * ワールド位置
-		CalyxMath::Vector3 localPos = TransformPoint(PwInv,curWorldPos);
+		CalyxEngine::Vector3 localPos = TransformPoint(PwInv,curWorldPos);
 
 		// ローカル回転 = 親回転^-1 * ワールド回転
-		CalyxMath::Matrix4x4  parentRotM   = OrthonormalizeRotation(Pw);
-		CalyxMath::Matrix4x4  parentRotInv = CalyxMath::Matrix4x4::Transpose(parentRotM); // 直交なので転置=逆
-		CalyxMath::Matrix4x4  newWorldRotM = CalyxMath::Quaternion::ToMatrix(newWorldQ);
-		CalyxMath::Matrix4x4  localRotM    = parentRotInv * newWorldRotM;
-		CalyxMath::Quaternion localQ       = CalyxMath::Quaternion::FromMatrix(localRotM);
+		CalyxEngine::Matrix4x4  parentRotM   = OrthonormalizeRotation(Pw);
+		CalyxEngine::Matrix4x4  parentRotInv = CalyxEngine::Matrix4x4::Transpose(parentRotM); // 直交なので転置=逆
+		CalyxEngine::Matrix4x4  newWorldRotM = CalyxEngine::Quaternion::ToMatrix(newWorldQ);
+		CalyxEngine::Matrix4x4  localRotM    = parentRotInv * newWorldRotM;
+		CalyxEngine::Quaternion localQ       = CalyxEngine::Quaternion::FromMatrix(localRotM);
 
 		worldTransform_.translation = localPos;
 		worldTransform_.rotation    = localQ;
@@ -191,18 +191,18 @@ void Camera3d::AlwaysUpdate(float dt) {
 
 void Camera3d::ShowGui() {
 	// 既存のWT GUI
-	if (GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::Object)) {
+	if (GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::Object)) {
 		worldTransform_.ShowImGui("world");
 		GuiCmd::EndSection();
 	}
 
-	if (GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::ParameterData)) {
+	if (GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::ParameterData)) {
 		follow_.ShowGui();
 		GuiCmd::EndSection();
 	}
 }
 
-void Camera3d::GetShadowFrustumCorners(CalyxMath::Vector3 outCorners[8], float shadowFar) const {
+void Camera3d::GetShadowFrustumCorners(CalyxEngine::Vector3 outCorners[8], float shadowFar) const {
 	const float cameraFar = farZ_;
 	float ratio = 1.0f;
 	if (cameraFar > 1e-6f) ratio = (std::min)(shadowFar / cameraFar, 1.0f);

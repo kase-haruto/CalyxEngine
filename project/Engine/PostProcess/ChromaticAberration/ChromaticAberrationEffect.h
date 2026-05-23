@@ -27,6 +27,10 @@ public:
 	void ShowImGui() override;
 	void ResetParameters() override;
 	void Tick(float /*dt*/) override{}
+	nlohmann::json SaveParameters() const override;
+	void LoadParameters(const nlohmann::json& params) override;
+	bool GetFloatParameter(const std::string& name, float& out) const override;
+	bool SetFloatParameter(const std::string& name, float value) override;
 
 	float GetIntensity() const{ return intensity_; }
 	void  SetIntensity(float intensity);

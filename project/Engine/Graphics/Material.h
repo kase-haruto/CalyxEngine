@@ -19,14 +19,26 @@
 
 struct Material {
 
-	CalyxMath::Vector4   color        = {1,1,1,1};;
+	CalyxEngine::Vector4   color        = {1,1,1,1};;
 	int32_t   lightingMode = LightingMode::HalfLambert;
 	float     pad[3];
-	CalyxMath::Matrix4x4 uvTransform;
+	CalyxEngine::Matrix4x4 uvTransform;
 	float     shininess;
-	bool      isReflect             = false;
+	int32_t   isReflect             = 0;
 	float     envirometCoefficient = 0.5f;
 	float     roughness             = 0.5f; // 反射率
+	CalyxEngine::Vector4 toonHighlightColor = {1.15f, 1.10f, 1.00f, 1.0f};
+	CalyxEngine::Vector4 toonBaseColor = {1.0f, 1.0f, 1.0f, 1.0f};
+	CalyxEngine::Vector4 toonMidShadowColor = {0.72f, 0.76f, 0.86f, 1.0f};
+	CalyxEngine::Vector4 toonShadowColor = {0.42f, 0.46f, 0.58f, 1.0f};
+	float     toonBaseStep = 0.25f;
+	float     toonBaseFeather = 0.03f;
+	float     toonShadeStep = -0.15f;
+	float     toonShadeFeather = 0.03f;
+	float     toonSpecularThreshold = 0.96f;
+	float     toonSpecularSoftness = 0.02f;
+	float     toonSpecularIntensity = 0.35f;
+	float     pad3 = 0.0f;
 
 	//config
 	void           ApplyConfig(const MaterialConfig& config);
@@ -38,20 +50,20 @@ struct Material {
 };
 
 struct ParticleMaterial {
-	CalyxMath::Vector4     color       = {1,1,1,1};     // 基本色（tint）
-	CalyxMath::Matrix4x4   uvTransform = CalyxMath::Matrix4x4::MakeIdentity(); // UVアニメ用
-	std::string texturePath = "particle.dds";            // テクスチャパス
+	CalyxEngine::Vector4     color       = {1,1,1,1};     // 基本色（tint）
+	CalyxEngine::Matrix4x4   uvTransform = CalyxEngine::Matrix4x4::MakeIdentity(); // UVアニメ用
+	std::string texturePath = "Textures/white1x1.dds";  // テクスチャパス
 };
 
 struct Material2D {
-	CalyxMath::Vector4   color;
-	CalyxMath::Matrix4x4 uvTransform;
+	CalyxEngine::Vector4   color;
+	CalyxEngine::Matrix4x4 uvTransform;
 
-	CalyxMath::Vector2 uvOffset;
-	CalyxMath::Vector2 uvScale = {1.0f,1.0f};
+	CalyxEngine::Vector2 uvOffset;
+	CalyxEngine::Vector2 uvScale = {1.0f,1.0f};
 
 	float   fillAmount = 1.0f;        // 0〜1 (初期は1、全部描画)
-	CalyxMath::Vector2 fillOrigin = {0.0f,0.0f}; // (0,0)=左/下, (1,0)=右/下, etc.
+	CalyxEngine::Vector2 fillOrigin = {0.0f,0.0f}; // (0,0)=左/下, (1,0)=右/下, etc.
 	int     fillMethod = 0;           // 0=none, 1=horizontal, 2=vertical, 3=mask
 
 	float padding; // 16バイト境界を合わせる
@@ -59,7 +71,7 @@ struct Material2D {
 
 struct MaterialData {
 	std::string textureFilePath;
-	CalyxMath::Vector3     uv_scale;
-	CalyxMath::Vector3     uv_offset;
-	CalyxMath::Vector3     uv_translate;
+	CalyxEngine::Vector3     uv_scale;
+	CalyxEngine::Vector3     uv_offset;
+	CalyxEngine::Vector3     uv_translate;
 };

@@ -5,12 +5,34 @@
 #include <Engine/Editor/BaseEditor.h>
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Foundation/Utility/Converter/EnumConverter.h>
+#include <Engine/Foundation/Debug/CxAssert.h>
+#include <Engine/Application/UI/Panels/AssetPanel.h>
+#include <Engine/Assets/Database/AssetDatabase.h>
+#include <Engine/Assets/Model/BaseModel.h>
+#include <Engine/Objects/3D/Actor/BaseGameObject.h>
+#include <Engine/System/Command/EditorCommand/ValueEditCommand.h>
+#include <Engine/System/Command/Manager/CommandManager.h>
 
 // externals
+#include "Engine/Assets/Manager/AssetManager.h"
 #include "Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h"
 #include <externals/imgui/imgui.h>
 
-namespace CalyxEditor {
+#include <algorithm>
+
+namespace CalyxEngine {
+	namespace {
+		std::string LabelFromGuid(const Guid& guid, AssetType type) {
+			if(!guid.isValid()) return "(none)";
+			if(auto* db = AssetDatabase::GetInstance()) {
+				if(const AssetRecord* record = db->Get(guid); record && record->type == type) {
+					return record->sourcePath.filename().string();
+				}
+			}
+			return guid.ToString();
+		}
+	}
+
 	/////////////////////////////////////////////////////////////////////////////////////////
 	//		コンストラクタ
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -25,7 +47,7 @@ namespace CalyxEditor {
 
 		// タブの初期化（マスターを保持）
 		if(allTabs_.empty()) {
-			auto& tm = *TextureManager::GetInstance();
+			auto& tm = *AssetManager::GetInstance()->GetTextureManager();
 			allTabs_ = {
 					{rootPath_ + "inspectorUI_Al.dds",ParamFilterSection::All},
 					{rootPath_ + "inspectorUI_Ob.dds",ParamFilterSection::Object},
@@ -46,6 +68,8 @@ namespace CalyxEditor {
 				ImGui::Text("Editor: %s",selectedEditor_->GetEditorName().c_str());
 				ImGui::Separator();
 				selectedEditor_->ShowImGuiInterface();
+			} else if(selectedObjects_.size() > 1) {
+				RenderMultiSelection();
 			} else {
 				auto sp = selectedObject_.lock();
 				if(sp && sceneObjectEditor_) {
@@ -67,7 +91,8 @@ namespace CalyxEditor {
 
 							ImGui::TextDisabled("Type: %s",sp->GetObjectTypeName().c_str());
 							ImGui::SameLine();
-							ImGui::Text("%s",sp->GetName().c_str());
+							const std::string displayName = sp->GetDisplayName();
+							ImGui::Text("%s",displayName.c_str());
 							ImGui::Separator();
 							ImGui::Spacing();
 
@@ -115,10 +140,13 @@ namespace CalyxEditor {
 		if(object) {
 			switch(object->GetObjectType()) {
 			case ObjectType::GameObject:
+			case ObjectType::Object2D:
 				add(ParamFilterSection::Object);
 				add(ParamFilterSection::Material);
 				add(ParamFilterSection::ParameterData);
-				add(ParamFilterSection::Collider);
+				if(object->GetObjectType() == ObjectType::GameObject) {
+					add(ParamFilterSection::Collider);
+				}
 				break;
 
 			case ObjectType::Effect:
@@ -159,7 +187,7 @@ namespace CalyxEditor {
 			ImGui::PushID(i);
 
 			if(ImGui::ImageButton(tab.iconTex,ImVec2(20,20))) { currentTabIndex_ = i; }
-			std::string_view enumcon = CalyxUtil::EnumConverter<ParamFilterSection>::ToString(tab.filterSection);
+			std::string_view enumcon = CalyxEngine::EnumConverter<ParamFilterSection>::ToString(tab.filterSection);
 			if(ImGui::IsItemHovered()) { ImGui::SetTooltip("%s",enumcon.data()); }
 
 			if(isSelected) { ImGui::PopStyleColor(); }
@@ -173,12 +201,170 @@ namespace CalyxEditor {
 
 	void InspectorPanel::RenderContent() {}
 
+	bool InspectorPanel::IsMultiSelectionAllBaseGameObjects() const {
+		if(selectedObjects_.size() <= 1) return false;
+		for(const auto& weak : selectedObjects_) {
+			auto object = weak.lock();
+			if(!object || !std::dynamic_pointer_cast<BaseGameObject>(object)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	void InspectorPanel::RenderMultiSelection() {
+		std::vector<std::weak_ptr<BaseGameObject>> targets;
+		targets.reserve(selectedObjects_.size());
+
+		for(const auto& weak : selectedObjects_) {
+			if(auto object = weak.lock()) {
+				if(auto gameObject = std::dynamic_pointer_cast<BaseGameObject>(object)) {
+					targets.push_back(gameObject);
+				}
+			}
+		}
+
+		ImGui::Dummy(ImVec2(0, 4));
+		ImGui::Indent(8.0f);
+		ImGui::Text("%zu objects selected", selectedObjects_.size());
+		ImGui::Separator();
+
+		if(!IsMultiSelectionAllBaseGameObjects()) {
+			ImGui::TextDisabled("Bulk editing is available only when all selected objects are BaseGameObject.");
+			ImGui::Unindent(8.0f);
+			return;
+		}
+
+		GuiCmd::SetSectionFilter(ParamFilterSection::Material);
+		if(!GuiCmd::BeginSection(ParamFilterSection::Material)) {
+			ImGui::Unindent(8.0f);
+			return;
+		}
+
+		auto collectMaterialGuids = [&]() {
+			std::vector<Guid> result;
+			result.reserve(targets.size());
+			for(const auto& weak : targets) {
+				auto object = weak.lock();
+				auto* model = object ? object->GetModel() : nullptr;
+				result.push_back(model ? model->GetMaterialGuid() : Guid::Empty());
+			}
+			return result;
+		};
+
+		auto collectTextureGuids = [&]() {
+			std::vector<Guid> result;
+			result.reserve(targets.size());
+			for(const auto& weak : targets) {
+				auto object = weak.lock();
+				auto* model = object ? object->GetModel() : nullptr;
+				result.push_back(model ? model->GetTextureGuid() : Guid::Empty());
+			}
+			return result;
+		};
+
+		auto applyMaterialGuids = [targets](const std::vector<Guid>& guids) {
+			for(size_t i = 0; i < targets.size() && i < guids.size(); ++i) {
+				auto object = targets[i].lock();
+				auto* model = object ? object->GetModel() : nullptr;
+				if(model) model->SetMaterialGuid(guids[i]);
+			}
+		};
+
+		auto applyTextureGuids = [targets](const std::vector<Guid>& guids) {
+			for(size_t i = 0; i < targets.size() && i < guids.size(); ++i) {
+				auto object = targets[i].lock();
+				auto* model = object ? object->GetModel() : nullptr;
+				if(model) model->SetTextureGuid(guids[i]);
+			}
+		};
+
+		auto countObjectsWithModel = [&]() {
+			size_t count = 0;
+			for(const auto& weak : targets) {
+				auto object = weak.lock();
+				if(object && object->GetModel()) {
+					++count;
+				}
+			}
+			return count;
+		};
+
+		if(ImGui::TreeNodeEx("Material Asset (Bulk)", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
+			Guid droppedGuid = Guid::Empty();
+			if(AssetPanel::DrawAssetDropTarget(AssetType::Material, &droppedGuid)) {
+				const size_t modelCount = countObjectsWithModel();
+				if(modelCount == 0) {
+					CX_WARN("Material cannot be applied because selected objects have no model.");
+					ImGui::TreePop();
+					GuiCmd::EndSection();
+					ImGui::Unindent(8.0f);
+					return;
+				}
+				if(modelCount < targets.size()) {
+					CX_WARN("Material was applied only to selected objects that have a model.");
+				}
+
+				auto before = collectMaterialGuids();
+				auto after = before;
+				for(auto& guid : after) {
+					guid = droppedGuid;
+				}
+				if(before != after) {
+					CommandManager::GetInstance()->Execute(
+						std::make_unique<ValueEditCommand<std::vector<Guid>>>("Apply Material Asset To Selection", before, after, applyMaterialGuids));
+				}
+			}
+
+			const auto current = collectMaterialGuids();
+			const bool same = !current.empty() && std::all_of(current.begin(), current.end(), [&](const Guid& guid) { return guid == current.front(); });
+			ImGui::TextDisabled("Current: %s", same ? LabelFromGuid(current.front(), AssetType::Material).c_str() : "(mixed)");
+			ImGui::TreePop();
+		}
+
+		if(ImGui::TreeNodeEx("Texture Asset (Bulk)", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+			Guid droppedGuid = Guid::Empty();
+			if(AssetPanel::DrawAssetDropTarget(AssetType::Texture, &droppedGuid)) {
+				const size_t modelCount = countObjectsWithModel();
+				if(modelCount == 0) {
+					CX_WARN("Texture cannot be applied because selected objects have no model.");
+					ImGui::TreePop();
+					GuiCmd::EndSection();
+					ImGui::Unindent(8.0f);
+					return;
+				}
+				if(modelCount < targets.size()) {
+					CX_WARN("Texture was applied only to selected objects that have a model.");
+				}
+
+				auto before = collectTextureGuids();
+				auto after = before;
+				for(auto& guid : after) {
+					guid = droppedGuid;
+				}
+				if(before != after) {
+					CommandManager::GetInstance()->Execute(
+						std::make_unique<ValueEditCommand<std::vector<Guid>>>("Apply Texture Asset To Selection", before, after, applyTextureGuids));
+				}
+			}
+
+			const auto current = collectTextureGuids();
+			const bool same = !current.empty() && std::all_of(current.begin(), current.end(), [&](const Guid& guid) { return guid == current.front(); });
+			ImGui::TextDisabled("Current: %s", same ? LabelFromGuid(current.front(), AssetType::Texture).c_str() : "(mixed)");
+			ImGui::TreePop();
+		}
+
+		GuiCmd::EndSection();
+		ImGui::Unindent(8.0f);
+	}
+
 	/////////////////////////////////////////////////////////////////////////////////////////
 	//		エディタセット
 	/////////////////////////////////////////////////////////////////////////////////////////
 	void InspectorPanel::SetSelectedEditor(BaseEditor* editor) {
 		selectedEditor_ = editor;
 		selectedObject_.reset();
+		selectedObjects_.clear();
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -186,6 +372,10 @@ namespace CalyxEditor {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	void InspectorPanel::SetSelectedObject(std::weak_ptr<SceneObject> obj) {
 		selectedObject_ = obj;
+		selectedObjects_.clear();
+		if(auto sp = obj.lock()) {
+			selectedObjects_.push_back(sp);
+		}
 		selectedEditor_ = nullptr;
 
 		if(sceneObjectEditor_) {
@@ -198,4 +388,23 @@ namespace CalyxEditor {
 			}
 		}
 	}
-} // namespace CalyxEditor
+
+	void InspectorPanel::SetSelectedObjects(const std::vector<std::weak_ptr<SceneObject>>& objects) {
+		selectedObjects_.clear();
+		for(const auto& weak : objects) {
+			if(auto object = weak.lock()) {
+				selectedObjects_.push_back(object);
+			}
+		}
+		selectedObject_ = selectedObjects_.empty() ? std::weak_ptr<SceneObject>{} : selectedObjects_.back();
+		selectedEditor_ = nullptr;
+
+		if(sceneObjectEditor_) {
+			if(auto sp = selectedObject_.lock()) {
+				sceneObjectEditor_->SetSceneObject(sp.get());
+			} else {
+				sceneObjectEditor_->SetSceneObject(nullptr);
+			}
+		}
+	}
+} // namespace CalyxEngine

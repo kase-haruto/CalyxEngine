@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
 	 * IEngineUI
@@ -32,4 +32,4 @@ namespace CalyxEditor {
 		std::string panelName_;
 		bool		isShow_ = true;
 	};
-} // namespace CalyxEditor
+} // namespace CalyxEngine

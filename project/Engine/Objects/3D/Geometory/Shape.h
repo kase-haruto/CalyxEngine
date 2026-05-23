@@ -8,19 +8,19 @@
 #include <array>
 
 struct OBB{
-	CalyxMath::Vector3 size;
-	CalyxMath::Quaternion rotate;
-	CalyxMath::Vector3 center;
+	CalyxEngine::Vector3 size;
+	CalyxEngine::Quaternion rotate;
+	CalyxEngine::Vector3 center;
 
 	// 8頂点を返す関数
-	std::array<CalyxMath::Vector3, 8> GetVertices() const;
+	std::array<CalyxEngine::Vector3, 8> GetVertices() const;
 
 	void Draw();
 };
 
 struct Sphere{
-	CalyxMath::Vector3 center;
+	CalyxEngine::Vector3 center;
 	float radius;
 
-	void Draw(int subdivision = 8, CalyxMath::Vector4 color = {1.0f,0.0f,0.0f,1.0f});
+	void Draw(int subdivision = 8, CalyxEngine::Vector4 color = {1.0f,0.0f,0.0f,1.0f});
 };

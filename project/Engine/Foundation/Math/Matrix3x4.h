@@ -1,6 +1,6 @@
 #pragma once
 
-namespace CalyxMath {
+namespace CalyxEngine {
 	struct Matrix4x4;
 
 	/*-----------------------------------------------------------
@@ -10,7 +10,7 @@ namespace CalyxMath {
 	struct Matrix3x4 final {
 		float m[3][4];
 
-		static CalyxMath::Matrix3x4 ToMatrix3x4(const CalyxMath::Matrix4x4& m) ;
+		static CalyxEngine::Matrix3x4 ToMatrix3x4(const CalyxEngine::Matrix4x4& m) ;
 	};
 
 }

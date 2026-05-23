@@ -1,0 +1,147 @@
+{
+  "fields": {
+    "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "envirometCoefficient": 0.5,
+    "isReflect": false,
+    "lightingMode": 4,
+    "roughness": 0.5,
+    "shininess": 20.0
+  },
+  "graph": {
+    "links": [
+      {
+        "fromPinId": 9,
+        "id": 10,
+        "toPinId": 6
+      },
+      {
+        "fromPinId": 12,
+        "id": 13,
+        "toPinId": 2
+      }
+    ],
+    "nextId": 14,
+    "nodes": [
+      {
+        "boolValue": false,
+        "colorValue": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "floatValue": 0.0,
+        "id": 1,
+        "inputs": [
+          {
+            "id": 2,
+            "kind": 0,
+            "name": "BaseColor",
+            "valueType": 2
+          },
+          {
+            "id": 3,
+            "kind": 0,
+            "name": "Shininess",
+            "valueType": 1
+          },
+          {
+            "id": 4,
+            "kind": 0,
+            "name": "Roughness",
+            "valueType": 1
+          },
+          {
+            "id": 5,
+            "kind": 0,
+            "name": "Reflect",
+            "valueType": 3
+          },
+          {
+            "id": 6,
+            "kind": 0,
+            "name": "Lighting Mode",
+            "valueType": 4
+          }
+        ],
+        "intValue": 0,
+        "outputs": [],
+        "position": [
+          704.0,
+          620.0
+        ],
+        "title": "Output",
+        "type": "Output"
+      },
+      {
+        "boolValue": false,
+        "colorValue": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "floatValue": 0.0,
+        "id": 7,
+        "inputs": [
+          {
+            "id": 8,
+            "kind": 0,
+            "name": "Value",
+            "valueType": 4
+          }
+        ],
+        "intValue": 4,
+        "outputs": [
+          {
+            "id": 9,
+            "kind": 1,
+            "name": "Mode",
+            "valueType": 4
+          }
+        ],
+        "position": [
+          238.0,
+          742.0
+        ],
+        "title": "Lighting Mode",
+        "type": "LightingMode"
+      },
+      {
+        "boolValue": false,
+        "colorValue": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "floatValue": 0.0,
+        "id": 11,
+        "inputs": [],
+        "intValue": 0,
+        "outputs": [
+          {
+            "id": 12,
+            "kind": 1,
+            "name": "Color",
+            "valueType": 2
+          }
+        ],
+        "position": [
+          210.0,
+          583.0
+        ],
+        "title": "Color",
+        "type": "Color"
+      }
+    ]
+  },
+  "guid": "bd9397ab-b107-4aca-9a6f-9b57b811e2c6",
+  "name": "utilColor",
+  "type": "MaterialAsset"
+}

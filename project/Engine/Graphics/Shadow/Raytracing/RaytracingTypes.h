@@ -2,7 +2,7 @@
 
 #include <d3d12.h>
 
-namespace CalyxGraphics {
+namespace CalyxEngine {
 
 	/*----------------------------------------------------------------
 	 *	Raytracing Mode
@@ -13,4 +13,4 @@ namespace CalyxGraphics {
 		InlineRaytracing //< Inline raytracing
 	};
 
-} // namespace CalyxGraphics
+} // namespace CalyxEngine

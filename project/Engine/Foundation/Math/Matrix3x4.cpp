@@ -1,8 +1,8 @@
 #include "Matrix3x4.h"
 #include "Matrix4x4.h"
 
-CalyxMath::Matrix3x4 CalyxMath::Matrix3x4::ToMatrix3x4(const CalyxMath::Matrix4x4& m) {
-	CalyxMath::Matrix3x4 out{};
+CalyxEngine::Matrix3x4 CalyxEngine::Matrix3x4::ToMatrix3x4(const CalyxEngine::Matrix4x4& m) {
+	CalyxEngine::Matrix3x4 out{};
 	// Transpose 3x3 rotation/scale part
 	out.m[0][0] = m.m[0][0];
 	out.m[0][1] = m.m[1][0];

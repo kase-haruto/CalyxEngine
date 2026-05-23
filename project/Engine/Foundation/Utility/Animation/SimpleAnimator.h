@@ -6,7 +6,7 @@
 
 #include "SimpleAnimChannel.h"
 
-namespace CalyxUtil {
+namespace CalyxEngine {
 
 	/* ----------------------------------------------------------------------------
 	/* SimpleAnimator class
@@ -36,9 +36,9 @@ namespace CalyxUtil {
 		 */
 		void Update(float dt) {
 			UpdateMap<float>(dt);
-			UpdateMap<CalyxMath::Vector2>(dt);
-			UpdateMap<CalyxMath::Vector3>(dt);
-			UpdateMap<CalyxMath::Vector4>(dt);
+			UpdateMap<CalyxEngine::Vector2>(dt);
+			UpdateMap<CalyxEngine::Vector3>(dt);
+			UpdateMap<CalyxEngine::Vector4>(dt);
 		}
 		/**
 		 * \brief GUI表示
@@ -46,9 +46,9 @@ namespace CalyxUtil {
 		 */
 		void ShowGui(bool isLoop = true) {
 			ShowGuiMap<float>("Float", isLoop);
-			ShowGuiMap<CalyxMath::Vector2>("Vector2", isLoop);
-			ShowGuiMap<CalyxMath::Vector3>("Vector3", isLoop);
-			ShowGuiMap<CalyxMath::Vector4>("Vector4", isLoop);
+			ShowGuiMap<CalyxEngine::Vector2>("Vector2", isLoop);
+			ShowGuiMap<CalyxEngine::Vector3>("Vector3", isLoop);
+			ShowGuiMap<CalyxEngine::Vector4>("Vector4", isLoop);
 		}
 		/**
 		 * \brief 指定した名前のアニメーションの値を取得
@@ -139,9 +139,9 @@ namespace CalyxUtil {
 		//                    public methods
 		//===================================================================*/
 		std::unordered_map<std::string, std::unique_ptr<SimpleAnimChannel<float>>>				floatAnims_; //< floatアニメーション
-		std::unordered_map<std::string, std::unique_ptr<SimpleAnimChannel<CalyxMath::Vector2>>> vec2Anims_;	 //< Vector2アニメーション
-		std::unordered_map<std::string, std::unique_ptr<SimpleAnimChannel<CalyxMath::Vector3>>> vec3Anims_;	 //< Vector3アニメーション
-		std::unordered_map<std::string, std::unique_ptr<SimpleAnimChannel<CalyxMath::Vector4>>> vec4Anims_;	 //< Vector4アニメーション
+		std::unordered_map<std::string, std::unique_ptr<SimpleAnimChannel<CalyxEngine::Vector2>>> vec2Anims_;	 //< Vector2アニメーション
+		std::unordered_map<std::string, std::unique_ptr<SimpleAnimChannel<CalyxEngine::Vector3>>> vec3Anims_;	 //< Vector3アニメーション
+		std::unordered_map<std::string, std::unique_ptr<SimpleAnimChannel<CalyxEngine::Vector4>>> vec4Anims_;	 //< Vector4アニメーション
 	};
 
 	// float
@@ -152,20 +152,20 @@ namespace CalyxUtil {
 
 	// Vector2
 	template <>
-	inline auto& SimpleAnimator::GetMap<CalyxMath::Vector2>() { return vec2Anims_; }
+	inline auto& SimpleAnimator::GetMap<CalyxEngine::Vector2>() { return vec2Anims_; }
 	template <>
-	inline auto& SimpleAnimator::GetMap<CalyxMath::Vector2>() const { return vec2Anims_; }
+	inline auto& SimpleAnimator::GetMap<CalyxEngine::Vector2>() const { return vec2Anims_; }
 
 	// Vector3
 	template <>
-	inline auto& SimpleAnimator::GetMap<CalyxMath::Vector3>() { return vec3Anims_; }
+	inline auto& SimpleAnimator::GetMap<CalyxEngine::Vector3>() { return vec3Anims_; }
 	template <>
-	inline auto& SimpleAnimator::GetMap<CalyxMath::Vector3>() const { return vec3Anims_; }
+	inline auto& SimpleAnimator::GetMap<CalyxEngine::Vector3>() const { return vec3Anims_; }
 
 	// Vector4
 	template <>
-	inline auto& SimpleAnimator::GetMap<CalyxMath::Vector4>() { return vec4Anims_; }
+	inline auto& SimpleAnimator::GetMap<CalyxEngine::Vector4>() { return vec4Anims_; }
 	template <>
-	inline auto& SimpleAnimator::GetMap<CalyxMath::Vector4>() const { return vec4Anims_; }
+	inline auto& SimpleAnimator::GetMap<CalyxEngine::Vector4>() const { return vec4Anims_; }
 
-} // namespace CalyxUtil
+} // namespace CalyxEngine

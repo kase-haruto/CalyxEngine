@@ -2,7 +2,7 @@
 #include <d3d12.h>
 #include <string>
 
-namespace Calyx2D {
+namespace CalyxEngine {
 	class SpriteAsset {
 	public:
 		//===================================================================*/
@@ -29,4 +29,4 @@ namespace Calyx2D {
 		D3D12_GPU_DESCRIPTOR_HANDLE handle_{};
 	};
 
-} // namespace Calyx2D
+} // namespace CalyxEngine

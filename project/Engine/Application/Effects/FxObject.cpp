@@ -2,10 +2,14 @@
 /* ========================================================================
 /*		include space
 /* ===================================================================== */
+#include <Engine/Application/Effects/EffectAsset.h>
+#include <Engine/Application/Effects/Particle/Emitter/FxEmitter.h>
+#include <Engine/Application/Effects/Particle/Emitter/GpuFxEmitter.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
+#include <filesystem>
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 
 
 	namespace {
@@ -51,7 +55,7 @@ namespace CalyxEffect {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	void FxObject::AlwaysUpdate(float) {
 		// 行列の更新
-		worldTransform_.Update();
+		SyncChildrenFromWorldTransform();
 	}
 
 	void FxObject::Destroy() {
@@ -124,9 +128,23 @@ namespace CalyxEffect {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	void FxObject::ShowGui() {
 
-		// コンフィグのセーブ・ロード
-		config_.ShowGui("Effect/" + GetName());
-
+		// コンフィグのセーブ・ローど
+		if(ImGui::Button("Load Effect")) {
+			std::filesystem::create_directories(kConfigRoot_);
+			IGFD::FileDialogConfig config;
+			config.path = kConfigRoot_.string();
+			ImGuiFileDialog::Instance()->OpenDialog(
+				"EffectLoadDialog",
+				"load effect",
+				".effect",
+				config);
+		}
+		if(ImGuiFileDialog::Instance()->Display("EffectLoadDialog")) {
+			if(ImGuiFileDialog::Instance()->IsOk()) {
+				LoadEffectAsset(ImGuiFileDialog::Instance()->GetFilePathName());
+			}
+			ImGuiFileDialog::Instance()->Close();
+		}
 		// ルート Transform
 		worldTransform_.ShowImGui();
 
@@ -136,8 +154,49 @@ namespace CalyxEffect {
 		if(ImGui::Button("Stop All")) StopAll();
 		ImGui::SameLine();
 		if(ImGui::Button("Reset All")) RestartAll();
+		if(ImGui::Button("Save Effect Asset")) {
+			std::filesystem::create_directories(kConfigRoot_);
+			SaveEffectAsset("Resources/Assets/Effects/" + GetName() + ".effect");
+		}
+
+		if(ImGui::CollapsingHeader("Shared Particle Controls", ImGuiTreeNodeFlags_DefaultOpen)) {
+			ImGui::Text("Camera Dither");
+			bool changed = false;
+			changed |= ImGui::Checkbox("Enable##fxCameraDither", &cameraDitherEnabled_);
+			ImGui::BeginDisabled(!cameraDitherEnabled_);
+			changed |= ImGui::DragFloat("Near##fxCameraDither", &cameraDitherNear_, 0.01f, 0.0f, 1000.0f);
+			changed |= ImGui::DragFloat("Far##fxCameraDither", &cameraDitherFar_, 0.01f, 0.0f, 1000.0f);
+			ImGui::EndDisabled();
+			if(cameraDitherFar_ < cameraDitherNear_) cameraDitherFar_ = cameraDitherNear_;
+
+			ImGui::SameLine();
+			if(ImGui::Button("Apply To All Emitters") || changed) {
+				for(auto& wp : emitters_) {
+					if(auto sp = wp.lock()) {
+						sp->GetEmitter()->SetCameraFadeEnabled(cameraDitherEnabled_);
+						sp->GetEmitter()->SetCameraFade(cameraDitherNear_, cameraDitherFar_);
+						sp->GetEmitter()->SetCameraFadeEnabled(cameraDitherEnabled_);
+					}
+				}
+			}
+		}
 
 		ImGui::SeparatorText("Emitters");
+		if(ImGui::Button("Add CPU Emitter")) {
+			EffectEmitterNodeConfig node{};
+			node.name		  = "Emitter";
+			node.isDrawEnable = true;
+			node.isGpu		  = false;
+			AddEmitterNode(node);
+		}
+		ImGui::SameLine();
+		if(ImGui::Button("Add GPU Emitter")) {
+			EffectEmitterNodeConfig node{};
+			node.name		  = "GpuEmitter";
+			node.isDrawEnable = true;
+			node.isGpu		  = true;
+			AddEmitterNode(node);
+		}
 
 		// タブバー開始
 		if(ImGui::BeginTabBar("EmittersTabBar", ImGuiTabBarFlags_Reorderable)) {
@@ -146,6 +205,7 @@ namespace CalyxEffect {
 				EffectEmitterNodeConfig node{};
 				node.name		  = "Emitter";
 				node.isDrawEnable = true;
+				node.isGpu		  = false;
 				AddEmitterNode(node);
 			}
 
@@ -172,6 +232,8 @@ namespace CalyxEffect {
 				if(ImGui::BeginTabItem(label.c_str(), &open)) {
 					// ---------- タブ内容 ----------
 					ImGui::Text("GUID: %s", sp->GetGuid().ToString().c_str());
+					const bool isGpuEmitter = std::dynamic_pointer_cast<GpuFxEmitter>(sp->GetEmitter()) != nullptr;
+					ImGui::Text("Type: %s", isGpuEmitter ? "GPU Particle" : "CPU Particle");
 
 					// 名前編集
 					{
@@ -202,6 +264,7 @@ namespace CalyxEffect {
 						node.transform  = sp->GetWorldTransform().ExtractConfig();
 						sp->GetEmitter()->ExtractConfigTo(node.emitter);
 						node.isDrawEnable = true;
+						node.isGpu = std::dynamic_pointer_cast<GpuFxEmitter>(sp->GetEmitter()) != nullptr;
 						AddEmitterNode(node);
 					}
 					if(ImGui::MenuItem("Delete")) {
@@ -214,9 +277,10 @@ namespace CalyxEffect {
 			// 予約削除を実行
 			if(removeIndex >= 0 && removeIndex < static_cast<int>(emitters_.size())) {
 				if(auto sp = emitters_[removeIndex].lock()) {
-					sp->SetParent(nullptr);
+					RemoveEmitterByGuid(sp->GetGuid());
+				} else {
+					emitters_.erase(emitters_.begin() + removeIndex);
 				}
-				emitters_.erase(emitters_.begin() + removeIndex);
 			}
 
 			ImGui::EndTabBar();
@@ -224,8 +288,38 @@ namespace CalyxEffect {
 	}
 
 	void FxObject::LoadFromPath(const std::string& path) {
+		if(path.ends_with(".effect")) {
+			LoadEffectAsset(path);
+			return;
+		}
+
 		config_.LoadConfig(path);
 		ApplyConfig();
+	}
+
+	bool FxObject::SaveEffectAsset(const std::string& path) {
+		ExtractConfig();
+		auto asset = EffectAsset::FromObjectConfig(config_.GetConfig());
+		return asset.Save(path);
+	}
+
+	bool FxObject::LoadEffectAsset(const std::string& path) {
+		EffectAsset asset;
+		if(!asset.Load(path)) return false;
+
+		config_.GetConfig() = asset.ToObjectConfig();
+		ApplyConfig();
+		return true;
+	}
+
+	size_t FxObject::GetLiveEmitterCount() const {
+		size_t count = 0;
+		for(const auto& wp : emitters_) {
+			if(wp.lock()) {
+				++count;
+			}
+		}
+		return count;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -274,23 +368,50 @@ namespace CalyxEffect {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	//		クラス名取得
 	/////////////////////////////////////////////////////////////////////////////////////////
-	std::string_view FxObject::GetTypeName() const { return "FxObject"; }
+	std::string_view FxObject::GetObjectClassName() const { return "FxObject"; }
 
-	void FxObject::SetWorldPosition(const CalyxMath::Vector3& pos) {
+	void FxObject::SetWorldPosition(const CalyxEngine::Vector3& pos) {
 		worldTransform_.translation = pos;
+		SyncChildrenFromWorldTransform();
+	}
+
+	void FxObject::SyncChildrenFromWorldTransform() {
+		worldTransform_.Update();
+
+		for(auto it = emitters_.begin(); it != emitters_.end();) {
+			if(auto sp = it->lock()) {
+				sp->SyncEmitterFromWorldTransform();
+				++it;
+			} else {
+				it = emitters_.erase(it);
+			}
+		}
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////
 	//		コンフィグからエフェクトの再構築
 	/////////////////////////////////////////////////////////////////////////////////////////
 	void FxObject::RebuildChildrenFromConfig() {
-		// 既存の子（このFxObject直下の ParticleSystemObject）を外す
+		++emitterRevision_;
+
+		std::vector<std::shared_ptr<ParticleSystemObject>> oldEmitters;
+		oldEmitters.reserve(emitters_.size());
 		for(auto& wp : emitters_) {
 			if(auto sp = wp.lock()) {
-				sp->SetParent(nullptr);
+				oldEmitters.push_back(sp);
 			}
 		}
 		emitters_.clear();
+
+		if(auto* ctx = SceneContext::Current()) {
+			for(auto& sp : oldEmitters) {
+				ctx->RemoveObject(sp);
+			}
+		} else {
+			for(auto& sp : oldEmitters) {
+				sp->SetParent(nullptr);
+			}
+		}
 
 		// Config から再構築
 		const auto& cfg = config_.GetConfig();
@@ -316,6 +437,7 @@ namespace CalyxEffect {
 
 				sp->GetEmitter()->ExtractConfigTo(n.emitter);
 				n.isDrawEnable = sp->IsDrawEnable();
+				n.isGpu = std::dynamic_pointer_cast<GpuFxEmitter>(sp->GetEmitter()) != nullptr;
 
 				cfg.emitters.push_back(std::move(n));
 				++it;
@@ -326,24 +448,36 @@ namespace CalyxEffect {
 		}
 	}
 
+
 	/////////////////////////////////////////////////////////////////////////////////////////
 	//		エミッター単位
 	/////////////////////////////////////////////////////////////////////////////////////////
 	std::shared_ptr<ParticleSystemObject>
 	FxObject::AddEmitterNode(const EffectEmitterNodeConfig& node) {
+		std::shared_ptr<BaseEmitter> emitter;
+		if(node.isGpu) {
+			auto gpuEmitter = std::make_shared<GpuFxEmitter>();
+			gpuEmitter->Initialize();
+			emitter = gpuEmitter;
+		} else {
+			emitter = std::make_shared<FxEmitter>();
+		}
+
 		auto child = SceneAPI::Instantiate<ParticleSystemObject>(
-			node.name.empty() ? "emitter" : node.name);
+			node.name.empty() ? "emitter" : node.name,
+			emitter);
 
 		if(node.guid.isValid()) {
 			child->SetGuid(node.guid);
 		}
 
 		child->GetWorldTransform().ApplyConfig(node.transform);
-		child->SetDrawEnable(node.isDrawEnable);
 		child->GetEmitter()->ApplyConfigFrom(node.emitter);
+		child->SetDrawEnable(node.isDrawEnable);
 		child->SetParent(shared_from_this());
 
 		emitters_.push_back(child);
+		++emitterRevision_;
 		return child;
 	}
 
@@ -358,13 +492,17 @@ namespace CalyxEffect {
 				continue;
 			}
 			if(sp->GetGuid() == id) {
-				sp->SetParent(nullptr);
 				it = emitters_.erase(it);
+				++emitterRevision_;
+				if(auto* ctx = SceneContext::Current()) {
+					ctx->RemoveObject(sp);
+				} else {
+					sp->SetParent(nullptr);
+				}
 			} else {
 				++it;
 			}
 		}
 	}
 
-} // namespace CalyxEffect
-
+} // namespace CalyxEngine

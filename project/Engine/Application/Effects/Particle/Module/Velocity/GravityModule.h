@@ -5,12 +5,12 @@
 #include <Engine/Application/Effects/Particle/Module/BaseFxModule.h>
 #include <Engine/Foundation/Math/Vector3.h>
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 	/* ========================================================================
 	/*		重力適用モジュール
 	/* ===================================================================== */
 	class GravityModule
-		: public CalyxEffect::BaseFxModule {
+		: public CalyxEngine::BaseFxModule {
 	public:
 		//===================================================================*/
 		//					public methods
@@ -22,16 +22,16 @@ namespace CalyxEffect {
 		void ShowGuiContent() override;
 
 		//--------- getters -----------------------------------------------------
-		const CalyxMath::Vector3 GetGravity() const { return gravity_; }
+		const CalyxEngine::Vector3 GetGravity() const { return gravity_; }
 
 		//--------- setters -----------------------------------------------------
-		void				SetGravity(const CalyxMath::Vector3& grav) { gravity_ = grav; }
-		virtual const char* GetTypeName() const override { return "GravityModule"; }
+		void				SetGravity(const CalyxEngine::Vector3& grav) { gravity_ = grav; }
+		virtual const char* GetObjectClassName() const override { return "GravityModule"; }
 
 	private:
 		//===================================================================*/
 		//					private methods
 		//===================================================================*/
-		CalyxMath::Vector3 gravity_{0.0f, -9.8f, 0.0f}; //< 重力の強さ
+		CalyxEngine::Vector3 gravity_{0.0f, -9.8f, 0.0f}; //< 重力の強さ
 	};
-} // namespace CalyxEffect
+} // namespace CalyxEngine

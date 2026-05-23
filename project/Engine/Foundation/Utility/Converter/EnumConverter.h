@@ -21,7 +21,7 @@
 //	EnumConverter
 //	enum <-> index / string 変換ユーティリティ
 //============================================================================
-namespace CalyxUtil {
+namespace CalyxEngine {
 
 	template <typename T>
 	class EnumConverter {
@@ -95,4 +95,4 @@ namespace CalyxUtil {
 		}
 	};
 
-} // namespace CalyxUtil
+} // namespace CalyxEngine

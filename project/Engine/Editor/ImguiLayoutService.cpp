@@ -3,5 +3,5 @@
 /////////////////////////////////////////////////////////////////////////////////////////////
 //		ctor / dtor
 /////////////////////////////////////////////////////////////////////////////////////////////
-CalyxEditor::ImguiLayoutService::ImguiLayoutService()  = default;
-CalyxEditor::ImguiLayoutService::~ImguiLayoutService() = default;
+CalyxEngine::ImguiLayoutService::ImguiLayoutService()  = default;
+CalyxEngine::ImguiLayoutService::~ImguiLayoutService() = default;

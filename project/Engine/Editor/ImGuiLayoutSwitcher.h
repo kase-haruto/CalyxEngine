@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 
 	/// <summary>
 	/// レイアウトエントリ
@@ -43,14 +43,28 @@ namespace CalyxEditor {
 		void Apply(const std::string& iniPath);
 
 		/// <summary>
+		/// 予約されたレイアウト適用を安全なタイミングで処理
+		/// </summary>
+		void ApplyPending();
+
+		/// <summary>
+		/// 現在のレイアウトを指定されたパスへ保存
+		/// </summary>
+		/// <param name="iniPath">保存先の.iniファイルパス</param>
+		void Save(const std::string& iniPath);
+
+		/// <summary>
 		/// 現在のレイアウトパスを取得
 		/// </summary>
 		const std::string& GetCurrentPath() const { return currentIniPath_; }
+		const std::vector<LayoutEntry>& GetPresets() const { return presets_; }
 
 	private:
 		std::vector<LayoutEntry> presets_;		  ///< プリセットレイアウトのリスト
 		std::string				 currentIniPath_; ///< 現在の.iniファイルパス (プリセットとしてロードされたパス)
 		std::string				 autoSavePath_;	  ///< 自動保存用の.iniファイルパス
+		std::string				 pendingIniPath_; ///< 次フレームで適用する.iniファイルパス
+		bool					 hasPendingApply_ = false;
 	};
 
-} // namespace CalyxEditor
+} // namespace CalyxEngine

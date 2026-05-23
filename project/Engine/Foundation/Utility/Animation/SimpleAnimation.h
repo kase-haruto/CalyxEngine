@@ -30,7 +30,7 @@ enum class SimpleAnimationType {
 //============================================================================
 //	SimpleAnimation class
 //============================================================================
-namespace CalyxUtil {
+namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
 	 * SimpleAnimation
@@ -82,8 +82,8 @@ namespace CalyxUtil {
 		void SetDragValue(int value);
 		void SetLoopType(AnimationLoop::AnimationLoopType type);
 		void SetLoopCount(int count);
-		void SetEasing(CalyxEase::EaseType ease) { timer_.easingType_ = ease; }
-		void SetReturnEasing(CalyxEase::EaseType ease) { returnTimer_.easingType_ = ease; }
+		void SetEasing(CalyxEngine::EaseType ease) { timer_.easingType_ = ease; }
+		void SetReturnEasing(CalyxEngine::EaseType ease) { returnTimer_.easingType_ = ease; }
 		void SetDuration(float seconds) { timer_.SetTarget(seconds); }
 
 		bool IsStart() const { return isRunning_; }
@@ -153,7 +153,7 @@ namespace CalyxUtil {
 		float loopedT = loop_.LoopedT(rawT_);
 
 		// イージング
-		float easedT = CalyxEase::ApplyEase(timer_.easingType_, loopedT);
+		float easedT = CalyxEngine::ApplyEase(timer_.easingType_, loopedT);
 
 		// 補間方向
 		T from = move_.start;
@@ -164,15 +164,15 @@ namespace CalyxUtil {
 
 		// 補間
 		if constexpr(std::is_same_v<T, float>) {
-			value = CalyxMath::Lerp(from, to, easedT);
-		} else if constexpr(std::is_same_v<T, CalyxMath::Vector2>) {
-			value = CalyxMath::Vector2::Lerp(from, to, easedT);
-		} else if constexpr(std::is_same_v<T, CalyxMath::Vector3>) {
-			value = CalyxMath::Vector3::Lerp(from, to, easedT);
-		} else if constexpr(std::is_same_v<T, CalyxMath::Vector4>) {
-			value = CalyxMath::Vector4::Lerp(from, to, easedT);
-		}else if constexpr(std::is_same_v<T, CalyxMath::Quaternion>) {
-			value = CalyxMath::Quaternion::Slerp(from, to, easedT);
+			value = CalyxEngine::Lerp(from, to, easedT);
+		} else if constexpr(std::is_same_v<T, CalyxEngine::Vector2>) {
+			value = CalyxEngine::Vector2::Lerp(from, to, easedT);
+		} else if constexpr(std::is_same_v<T, CalyxEngine::Vector3>) {
+			value = CalyxEngine::Vector3::Lerp(from, to, easedT);
+		} else if constexpr(std::is_same_v<T, CalyxEngine::Vector4>) {
+			value = CalyxEngine::Vector4::Lerp(from, to, easedT);
+		}else if constexpr(std::is_same_v<T, CalyxEngine::Quaternion>) {
+			value = CalyxEngine::Quaternion::Slerp(from, to, easedT);
 		}
 
 		// ================================
@@ -229,19 +229,19 @@ namespace CalyxUtil {
 
 				ImGui::DragInt("start", &move_.start, static_cast<float>(dragValueInt));
 				ImGui::DragInt("end", &move_.end, static_cast<float>(dragValueInt));
-			} else if constexpr(std::is_same_v<T, CalyxMath::Vector2>) {
+			} else if constexpr(std::is_same_v<T, CalyxEngine::Vector2>) {
 
 				ImGui::DragFloat2("start", &move_.start.x, dragValueFloat);
 				ImGui::DragFloat2("end", &move_.end.x, dragValueFloat);
-			} else if constexpr(std::is_same_v<T, CalyxMath::Vector3>) {
+			} else if constexpr(std::is_same_v<T, CalyxEngine::Vector3>) {
 
 				ImGui::DragFloat3("start", &move_.start.x, dragValueFloat);
 				ImGui::DragFloat3("end", &move_.end.x, dragValueFloat);
-			} else if constexpr(std::is_same_v<T, CalyxMath::Vector4>) {
+			} else if constexpr(std::is_same_v<T, CalyxEngine::Vector4>) {
 
 				ImGui::ColorEdit4("start", &move_.start.x);
 				ImGui::ColorEdit4("end", &move_.end.x);
-			} else if constexpr(std::is_same_v<T, CalyxMath::Quaternion>) {
+			} else if constexpr(std::is_same_v<T, CalyxEngine::Quaternion>) {
 				ImGui::DragFloat4("start", &move_.start.x, dragValueFloat);
 				ImGui::DragFloat4("end", &move_.end.x, dragValueFloat);
 			}
@@ -310,4 +310,4 @@ namespace CalyxUtil {
 		return 0.0f;
 	}
 
-}; // namespace CalyxUtil
+}; // namespace CalyxEngine

@@ -4,7 +4,7 @@
 #include <optional>
 
 
-namespace CalyxMath {
+namespace CalyxEngine {
 	struct Matrix4x4;
 
 	struct Quaternion {
@@ -64,9 +64,9 @@ namespace CalyxMath {
 		static Quaternion MakeRotateAxisQuaternion(const Vector3& axis, float angle);
 
 		// クォータニオンから回転行列を生成する
-		static CalyxMath::Matrix4x4 ToMatrix(const Quaternion& q);
+		static CalyxEngine::Matrix4x4 ToMatrix(const Quaternion& q);
 
-		static Quaternion FromMatrix(const CalyxMath::Matrix4x4& m);
+		static Quaternion FromMatrix(const CalyxEngine::Matrix4x4& m);
 
 		// クォータニオンでベクトルを回転させる
 		static Vector3 RotateVector(const Vector3& vector, const Quaternion& quaternion);
@@ -96,11 +96,11 @@ namespace CalyxMath {
 	};
 
 	//--------- serializer ---------------------------------------------------
-	inline void to_json(nlohmann::json& j, const CalyxMath::Quaternion& q) {
+	inline void to_json(nlohmann::json& j, const CalyxEngine::Quaternion& q) {
 		j = nlohmann::json{{"x", q.x}, {"y", q.y}, {"z", q.z}, {"w", q.w}};
 	}
 
-	inline void from_json(const nlohmann::json& j, CalyxMath::Quaternion& q) {
+	inline void from_json(const nlohmann::json& j, CalyxEngine::Quaternion& q) {
 		q.x = j.value("x", 0.0f);
 		q.y = j.value("y", 0.0f);
 		q.z = j.value("z", 0.0f);
@@ -113,8 +113,8 @@ namespace CalyxMath {
 			q.y /= n;
 			q.z /= n;
 		} else {
-			q = CalyxMath::Quaternion::MakeIdentity();
+			q = CalyxEngine::Quaternion::MakeIdentity();
 		}
 	}
 
-} // namespace CalyxMath
+} // namespace CalyxEngine

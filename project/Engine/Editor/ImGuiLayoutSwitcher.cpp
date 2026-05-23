@@ -1,7 +1,7 @@
 #include "ImGuiLayoutSwitcher.h"
 #include <externals/imgui/imgui.h>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 
 	ImGuiLayoutSwitcher::ImGuiLayoutSwitcher(std::vector<LayoutEntry> presets,
 											 std::string			  defaultPath)
@@ -54,12 +54,25 @@ namespace CalyxEditor {
 	}
 
 	void ImGuiLayoutSwitcher::Apply(const std::string& iniPath) {
-		// 新しいレイアウトを "現在のセッション" にロード
-		// 自動保存先(ImGui::GetIO().IniFilename)は変更しない
-		ImGui::LoadIniSettingsFromDisk(iniPath.c_str());
-
-		// プリセットパスのみ更新（保存時の上書き先として使用）
+		pendingIniPath_	  = iniPath;
+		hasPendingApply_ = true;
 		currentIniPath_ = iniPath;
 	}
 
-} // namespace CalyxEditor
+	void ImGuiLayoutSwitcher::ApplyPending() {
+		if(!hasPendingApply_) return;
+
+		// DockSpace/TabBar の描画中に ini を読み替えると ImGui の assertion に当たるため、
+		// LevelEditor::Update() の先頭からここを呼び、UI 描画前にだけロードする。
+		ImGui::LoadIniSettingsFromDisk(pendingIniPath_.c_str());
+
+		hasPendingApply_ = false;
+		pendingIniPath_.clear();
+	}
+
+	void ImGuiLayoutSwitcher::Save(const std::string& iniPath) {
+		ImGui::SaveIniSettingsToDisk(iniPath.c_str());
+		currentIniPath_ = iniPath;
+	}
+
+} // namespace CalyxEngine

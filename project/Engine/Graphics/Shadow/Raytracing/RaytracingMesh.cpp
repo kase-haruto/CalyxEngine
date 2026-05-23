@@ -2,9 +2,11 @@
 
 #include "Engine/Assets/Model/ModelData.h"
 
-#include <cassert>
+#include <algorithm>
+#include <Engine/Foundation/Debug/CxAssert.h>
+#include <cstring>
 
-namespace CalyxGraphics {
+namespace CalyxEngine {
 
 	namespace {
 		/////////////////////////////////////////////////////////////////////////////////////
@@ -40,9 +42,132 @@ namespace CalyxGraphics {
 				nullptr,
 				IID_PPV_ARGS(&res));
 			if(FAILED(hr)) {
-				assert(false); // デバッグ時に失敗を検出
+				CX_CHECK(false, "Assertion failed"); // デバッグ時に失敗を検出
 			}
 			return res; // 空の ComPtr を返す（呼び出し側でチェック）
+		}
+
+		Microsoft::WRL::ComPtr<ID3D12Resource> CreateUploadBuffer(
+			ID3D12Device* device,
+			const void* data,
+			size_t bytes) {
+			Microsoft::WRL::ComPtr<ID3D12Resource> res;
+
+			D3D12_HEAP_PROPERTIES heap{};
+			heap.Type = D3D12_HEAP_TYPE_UPLOAD;
+
+			D3D12_RESOURCE_DESC desc{};
+			desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+			desc.Width = bytes;
+			desc.Height = 1;
+			desc.DepthOrArraySize = 1;
+			desc.MipLevels = 1;
+			desc.SampleDesc.Count = 1;
+			desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+			HRESULT hr = device->CreateCommittedResource(
+				&heap,
+				D3D12_HEAP_FLAG_NONE,
+				&desc,
+				D3D12_RESOURCE_STATE_GENERIC_READ,
+				nullptr,
+				IID_PPV_ARGS(&res));
+			CX_CHECK(SUCCEEDED(hr), "Assertion failed");
+
+			void* mapped = nullptr;
+			hr = res->Map(0, nullptr, &mapped);
+			CX_CHECK(SUCCEEDED(hr) && mapped, "Assertion failed");
+			std::memcpy(mapped, data, bytes);
+			res->Unmap(0, nullptr);
+
+			return res;
+		}
+
+		void BuildBLASInternal(
+			ID3D12Device5* device,
+			ID3D12GraphicsCommandList4* cmd,
+			D3D12_GPU_VIRTUAL_ADDRESS vertexAddress,
+			UINT vertexCount,
+			UINT vertexStride,
+			D3D12_GPU_VIRTUAL_ADDRESS indexAddress,
+			UINT indexCount,
+			Microsoft::WRL::ComPtr<ID3D12Resource>& blas,
+			Microsoft::WRL::ComPtr<ID3D12Resource>& scratch,
+			bool update) {
+			CX_CHECK(device && cmd, "Assertion failed");
+
+			D3D12_RAYTRACING_GEOMETRY_DESC geom{};
+			geom.Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
+			geom.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
+			geom.Triangles.VertexBuffer.StartAddress = vertexAddress;
+			geom.Triangles.VertexBuffer.StrideInBytes = vertexStride;
+			geom.Triangles.VertexCount = vertexCount;
+			geom.Triangles.VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT;
+			geom.Triangles.IndexBuffer = indexAddress;
+			geom.Triangles.IndexCount = indexCount;
+			geom.Triangles.IndexFormat = DXGI_FORMAT_R32_UINT;
+			geom.Triangles.Transform3x4 = 0;
+
+			D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS inputs{};
+			inputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL;
+			inputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
+			inputs.NumDescs = 1;
+			inputs.pGeometryDescs = &geom;
+			inputs.Flags =
+				D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE |
+				D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE;
+			if(update) {
+				inputs.Flags |= D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PERFORM_UPDATE;
+			}
+
+			D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO prebuild{};
+			device->GetRaytracingAccelerationStructurePrebuildInfo(&inputs, &prebuild);
+			CX_CHECK(prebuild.ResultDataMaxSizeInBytes > 0, "Assertion failed");
+			CX_CHECK(prebuild.ScratchDataSizeInBytes > 0, "Assertion failed");
+
+			bool createdScratch = false;
+
+			if(!blas) {
+				blas = CreateRaytracingBuffer(
+					device,
+					prebuild.ResultDataMaxSizeInBytes,
+					D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE);
+			}
+
+			if(!scratch) {
+				const size_t scratchBytes = (std::max)(
+					static_cast<size_t>(prebuild.ScratchDataSizeInBytes),
+					static_cast<size_t>(prebuild.UpdateScratchDataSizeInBytes));
+				scratch = CreateRaytracingBuffer(
+					device,
+					scratchBytes,
+					D3D12_RESOURCE_STATE_COMMON);
+				createdScratch = true;
+			}
+
+			if(createdScratch) {
+				D3D12_RESOURCE_BARRIER barrier{};
+				barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+				barrier.Transition.pResource = scratch.Get();
+				barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
+				barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+				barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+				cmd->ResourceBarrier(1, &barrier);
+			}
+
+			D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC build{};
+			build.Inputs = inputs;
+			build.ScratchAccelerationStructureData = scratch->GetGPUVirtualAddress();
+			build.DestAccelerationStructureData = blas->GetGPUVirtualAddress();
+			if(update) {
+				build.SourceAccelerationStructureData = blas->GetGPUVirtualAddress();
+			}
+			cmd->BuildRaytracingAccelerationStructure(&build, 0, nullptr);
+
+			D3D12_RESOURCE_BARRIER uav{};
+			uav.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+			uav.UAV.pResource = blas.Get();
+			cmd->ResourceBarrier(1, &uav);
 		}
 	} // namespace
 
@@ -53,103 +178,129 @@ namespace CalyxGraphics {
 		ID3D12Device5*				device,
 		ID3D12GraphicsCommandList4* cmd,
 		const ModelData&			model) {
-		assert(device && cmd);
+		CX_CHECK(device && cmd, "Assertion failed");
 
 		const auto& vb = model.meshResource.VertexBuffer();
 		const auto& ib = model.meshResource.IndexBuffer();
+		if(blas_ && scratch_) {
+			BuildBLASInternal(
+				device,
+				cmd,
+				vb.GetResource()->GetGPUVirtualAddress(),
+				static_cast<UINT>(model.meshResource.Vertices().size()),
+				sizeof(VertexPosUvN),
+				ib.GetResource()->GetGPUVirtualAddress(),
+				static_cast<UINT>(model.meshResource.Indices().size()),
+				blas_,
+				scratch_,
+				true);
+			return;
+		}
 
-		// -----------------------------
-		// Geometry Desc
-		// -----------------------------
-		D3D12_RAYTRACING_GEOMETRY_DESC geom{};
-		geom.Type  = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
-		geom.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
-
-		geom.Triangles.VertexBuffer.StartAddress =
-			vb.GetResource()->GetGPUVirtualAddress();
-		geom.Triangles.VertexBuffer.StrideInBytes =
-			sizeof(VertexPosUvN);
-		geom.Triangles.VertexCount =
-			static_cast<UINT>(model.meshResource.Vertices().size());
-		geom.Triangles.VertexFormat =
-			DXGI_FORMAT_R32G32B32_FLOAT; // position only
-
-		geom.Triangles.IndexBuffer =
-			ib.GetResource()->GetGPUVirtualAddress();
-		geom.Triangles.IndexCount =
-			static_cast<UINT>(model.meshResource.Indices().size());
-		geom.Triangles.IndexFormat =
-			DXGI_FORMAT_R32_UINT;
-
-		geom.Triangles.Transform3x4 = 0;
-
-		// -----------------------------
-		// Build Inputs
-		// -----------------------------
-		D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS inputs{};
-		inputs.Type =
-			D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL;
-		inputs.DescsLayout	  = D3D12_ELEMENTS_LAYOUT_ARRAY;
-		inputs.NumDescs		  = 1;
-		inputs.pGeometryDescs = &geom;
-		inputs.Flags =
-			D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE;
-
-		// -----------------------------
-		// Prebuild Info
-		// -----------------------------
-		D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO prebuild{};
-		device->GetRaytracingAccelerationStructurePrebuildInfo(
-			&inputs, &prebuild);
-		assert(prebuild.ResultDataMaxSizeInBytes > 0);
-		assert(prebuild.ScratchDataSizeInBytes > 0);
-
-		// -----------------------------
-		// Resource Create
-		// -----------------------------
-		blas_ = CreateRaytracingBuffer(
+		Microsoft::WRL::ComPtr<ID3D12Resource> newBlas;
+		Microsoft::WRL::ComPtr<ID3D12Resource> newScratch;
+		BuildBLASInternal(
 			device,
-			prebuild.ResultDataMaxSizeInBytes,
-			D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE);
+			cmd,
+			vb.GetResource()->GetGPUVirtualAddress(),
+			static_cast<UINT>(model.meshResource.Vertices().size()),
+			sizeof(VertexPosUvN),
+			ib.GetResource()->GetGPUVirtualAddress(),
+			static_cast<UINT>(model.meshResource.Indices().size()),
+			newBlas,
+			newScratch,
+			false);
 
-		scratch_ = CreateRaytracingBuffer(
+		RetireResource(blas_);
+		RetireResource(scratch_);
+		blas_	 = newBlas;
+		scratch_ = newScratch;
+	}
+
+	void RaytracingMesh::BuildBLAS(
+		ID3D12Device5* device,
+		ID3D12GraphicsCommandList4* cmd,
+		const std::vector<VertexPosUvN>& vertices,
+		const std::vector<uint32_t>& indices) {
+		CX_CHECK(device && cmd, "Assertion failed");
+		if(vertices.empty() || indices.empty()) return;
+
+		Microsoft::WRL::ComPtr<ID3D12Resource> newVertexUpload = CreateUploadBuffer(
 			device,
-			prebuild.ScratchDataSizeInBytes,
-			D3D12_RESOURCE_STATE_COMMON);
+			vertices.data(),
+			sizeof(VertexPosUvN) * vertices.size());
+		Microsoft::WRL::ComPtr<ID3D12Resource> newIndexUpload = CreateUploadBuffer(
+			device,
+			indices.data(),
+			sizeof(uint32_t) * indices.size());
 
-		// Transition Barriers
-		// BLAS: Created in RTAS (No barrier needed if supported, otherwise implicit promotion might trigger?)
-		// Actually, if we get "Ignoring InitialState", it is COMMON.
-		// EQUIVALENT: Try RTAS initial. If it works, great.
+		Microsoft::WRL::ComPtr<ID3D12Resource> newBlas;
+		Microsoft::WRL::ComPtr<ID3D12Resource> newScratch;
+		BuildBLASInternal(
+			device,
+			cmd,
+			newVertexUpload->GetGPUVirtualAddress(),
+			static_cast<UINT>(vertices.size()),
+			sizeof(VertexPosUvN),
+			newIndexUpload->GetGPUVirtualAddress(),
+			static_cast<UINT>(indices.size()),
+			newBlas,
+			newScratch,
+			false);
 
-		D3D12_RESOURCE_BARRIER barriers[1] = {};
+		RetireResource(blas_);
+		RetireResource(scratch_);
+		RetireResource(vertexUpload_);
+		RetireResource(indexUpload_);
+		blas_		  = newBlas;
+		scratch_	  = newScratch;
+		vertexUpload_ = newVertexUpload;
+		indexUpload_  = newIndexUpload;
+	}
 
-		// Scratch: COMMON -> UAV
-		barriers[0].Type				   = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barriers[0].Transition.pResource   = scratch_.Get();
-		barriers[0].Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-		barriers[0].Transition.StateAfter  = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-		barriers[0].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	void RaytracingMesh::BuildBLAS(
+		ID3D12Device5* device,
+		ID3D12GraphicsCommandList4* cmd,
+		D3D12_GPU_VIRTUAL_ADDRESS vertexAddress,
+		UINT vertexCount,
+		UINT vertexStride,
+		D3D12_GPU_VIRTUAL_ADDRESS indexAddress,
+		UINT indexCount) {
+		if(vertexAddress == 0 || indexAddress == 0 || vertexCount == 0 || indexCount == 0) return;
 
-		cmd->ResourceBarrier(1, barriers);
+		if(blas_ && scratch_) {
+			BuildBLASInternal(
+				device,
+				cmd,
+				vertexAddress,
+				vertexCount,
+				vertexStride,
+				indexAddress,
+				indexCount,
+				blas_,
+				scratch_,
+				true);
+			return;
+		}
 
-		// -----------------------------
-		// Build BLAS
-		// -----------------------------
-		D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC build{};
-		build.Inputs = inputs;
-		build.ScratchAccelerationStructureData =
-			scratch_->GetGPUVirtualAddress();
-		build.DestAccelerationStructureData =
-			blas_->GetGPUVirtualAddress();
+		Microsoft::WRL::ComPtr<ID3D12Resource> newBlas;
+		Microsoft::WRL::ComPtr<ID3D12Resource> newScratch;
+		BuildBLASInternal(
+			device,
+			cmd,
+			vertexAddress,
+			vertexCount,
+			vertexStride,
+			indexAddress,
+			indexCount,
+			newBlas,
+			newScratch,
+			false);
 
-		cmd->BuildRaytracingAccelerationStructure(&build, 0, nullptr);
-
-		// UAV barrier
-		D3D12_RESOURCE_BARRIER uav{};
-		uav.Type		  = D3D12_RESOURCE_BARRIER_TYPE_UAV;
-		uav.UAV.pResource = blas_.Get();
-		cmd->ResourceBarrier(1, &uav);
+		RetireResource(blas_);
+		RetireResource(scratch_);
+		blas_	 = newBlas;
+		scratch_ = newScratch;
 	}
 
 	D3D12_GPU_VIRTUAL_ADDRESS RaytracingMesh::GetBLAS() const {
@@ -159,4 +310,11 @@ namespace CalyxGraphics {
 				   : 0;
 	}
 
-} // namespace CalyxGraphics
+	void RaytracingMesh::RetireResource(Microsoft::WRL::ComPtr<ID3D12Resource>& resource) {
+		if(!resource) return;
+
+		retiredResources_.push_back(resource);
+		resource.Reset();
+	}
+
+} // namespace CalyxEngine

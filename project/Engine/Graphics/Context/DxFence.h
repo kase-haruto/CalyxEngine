@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cassert>
+#include <Engine/Foundation/Debug/CxAssert.h>
 #include <d3d12.h>
 #include <stdint.h>
 #include <wrl.h>

@@ -7,7 +7,7 @@
 #include <Engine/Graphics/RenderTarget/Detail/RenderTargetDetail.h>
 
 // forward declaration
-namespace CalyxGraphics {
+namespace CalyxEngine {
 	class DxCore;
 
 	
@@ -15,7 +15,7 @@ namespace CalyxGraphics {
 class BaseCamera;
 class SceneContext;
 
-namespace CalyxScene {
+namespace CalyxEngine {
 	class ISceneTransitionRequestor;
 }
 
@@ -30,7 +30,7 @@ public:
 	//			public methods
 	//===================================================================*/
 	IScene();
-	IScene(CalyxGraphics::DxCore* dxCore);
+	IScene(CalyxEngine::DxCore* dxCore);
 	virtual ~IScene() = default;
 
 	virtual void Initialize() = 0;
@@ -44,7 +44,7 @@ public:
 								 [[maybe_unused]] class PipelineService* psoService) {}
 	virtual void CleanUp() = 0;
 	virtual void LoadAssets() = 0;
-	virtual void SetTransitionRequestor(CalyxScene::ISceneTransitionRequestor* requestor) = 0;
+	virtual void SetTransitionRequestor(CalyxEngine::ISceneTransitionRequestor* requestor) = 0;
 	//--------- accessor -----------------------------------------------------
 	virtual SceneContext* GetSceneContext() const = 0;
 	virtual void InjectContext([[maybe_unused]]SceneContext* ctx) {};
@@ -58,7 +58,7 @@ protected:
 	//===================================================================*/
 	//			protected methods
 	//===================================================================*/
-	CalyxGraphics::DxCore* pDxCore_ = nullptr;
+	CalyxEngine::DxCore* pDxCore_ = nullptr;
 
 	bool isEndGame_ = false;
 };

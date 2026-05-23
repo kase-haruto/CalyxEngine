@@ -15,27 +15,27 @@ template<>
 }
 
 template<>
- void SetValueCommand<CalyxMath::Vector2>::UpdateName(){
-	auto toStr = [] (const CalyxMath::Vector2& v){
+ void SetValueCommand<CalyxEngine::Vector2>::UpdateName(){
+	auto toStr = [] (const CalyxEngine::Vector2& v){
 		return "(" + std::to_string(v.x) + "," + std::to_string(v.y) + ")";
 		};
-	name_ = "Set CalyxMath::Vector2: \"" + label_ + "\" from " + toStr(before_) + " -> " + toStr(after_);
+	name_ = "Set CalyxEngine::Vector2: \"" + label_ + "\" from " + toStr(before_) + " -> " + toStr(after_);
 }
 
 template<>
- void SetValueCommand<CalyxMath::Vector3>::UpdateName(){
-	auto toStr = [] (const CalyxMath::Vector3& v){
+ void SetValueCommand<CalyxEngine::Vector3>::UpdateName(){
+	auto toStr = [] (const CalyxEngine::Vector3& v){
 		return "(" + std::to_string(v.x) + "," + std::to_string(v.y) + "," + std::to_string(v.z) + ")";
 		};
-	name_ = "Set CalyxMath::Vector3: \"" + label_ + "\" from " + toStr(before_) + " -> " + toStr(after_);
+	name_ = "Set CalyxEngine::Vector3: \"" + label_ + "\" from " + toStr(before_) + " -> " + toStr(after_);
 }
 
 template<>
- void SetValueCommand<CalyxMath::Vector4>::UpdateName(){
-	auto toStr = [] (const CalyxMath::Vector4& v){
+ void SetValueCommand<CalyxEngine::Vector4>::UpdateName(){
+	auto toStr = [] (const CalyxEngine::Vector4& v){
 		return "(" + std::to_string(v.x) + "," + std::to_string(v.y) + "," + std::to_string(v.z) + "," + std::to_string(v.w) + ")";
 		};
-	name_ = "Set CalyxMath::Vector4: \"" + label_ + "\" from " + toStr(before_) + " -> " + toStr(after_);
+	name_ = "Set CalyxEngine::Vector4: \"" + label_ + "\" from " + toStr(before_) + " -> " + toStr(after_);
 }
 
 template<>

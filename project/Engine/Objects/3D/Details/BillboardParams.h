@@ -16,6 +16,7 @@ static_assert(sizeof(GpuBillboardParams) == 16, "GpuBillboardParams must be 16 b
 struct GpuFadeParams {
 	float fadeNear = 0.0f;
 	float fadeFar  = 20.0f;
-	float pad[2];
+	uint32_t enabled = 0;
+	float pad;
 };
 static_assert(sizeof(GpuFadeParams) == 16, "GpuFadeParams must be 16 bytes");

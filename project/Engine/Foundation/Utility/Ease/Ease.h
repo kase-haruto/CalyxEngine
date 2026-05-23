@@ -2,7 +2,7 @@
 #include <cmath>
 #include <numbers>
 
-namespace CalyxEase {
+namespace CalyxEngine {
 	// Linear
 	 float Linear(float t);
 
@@ -30,4 +30,4 @@ namespace CalyxEase {
 	 float EaseInBack(float t, float s = 1.70158f);
 	 float EaseOutBack(float t, float s = 1.70158f);
 	 float EaseInOutBack(float t, float s = 1.70158f);
-}; // namespace CalyxEase
+}; // namespace CalyxEngine

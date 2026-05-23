@@ -24,12 +24,12 @@ namespace CalyxEngine {
 
 		constexpr Color() : r(1.0f), g(1.0f), b(1.0f), a(1.0f) {}
 		constexpr Color(float _r, float _g, float _b, float _a = 1.0f) : r(_r), g(_g), b(_b), a(_a) {}
-		constexpr Color(const ::CalyxMath::Vector4& rgba) : r(rgba.x), g(rgba.y), b(rgba.z), a(rgba.w) {}
-		constexpr Color(const ::CalyxMath::Vector3& rgb, float _a = 1.0f) : r(rgb.x), g(rgb.y), b(rgb.z), a(_a) {}
+		constexpr Color(const ::CalyxEngine::Vector4& rgba) : r(rgba.x), g(rgba.y), b(rgba.z), a(rgba.w) {}
+		constexpr Color(const ::CalyxEngine::Vector3& rgb, float _a = 1.0f) : r(rgb.x), g(rgb.y), b(rgb.z), a(_a) {}
 
 		// combert
-		::CalyxMath::Vector4 ToVector4() const;
-		::CalyxMath::Vector3 ToVector3() const;
+		::CalyxEngine::Vector4 ToVector4() const;
+		::CalyxEngine::Vector3 ToVector3() const;
 
 		// operators
 		Color  operator*(float scalar) const;

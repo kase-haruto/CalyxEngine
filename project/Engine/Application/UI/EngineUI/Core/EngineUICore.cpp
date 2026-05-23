@@ -4,6 +4,8 @@
 #include <Engine/Application/System/Environment.h>
 #include <Engine/Application/UI/EngineUI/Core/EngineUICore.h>
 #include <Engine/Application/UI/EngineUI/DebugTextManager.h>
+#include <Engine/Application/UI/EngineUI/DebugTextOverlay.h>
+#include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 
 // uiPanel
@@ -17,7 +19,7 @@
 #include <externals/imgui/ImGuizmo.h>
 #include <externals/imgui/imgui.h>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 	////////////////////////////////////////////////////////////////////////////////////////////
 	//						初期化
 	////////////////////////////////////////////////////////////////////////////////////////////
@@ -36,6 +38,7 @@ namespace CalyxEditor {
 	////////////////////////////////////////////////////////////////////////////////////////////
 	void EngineUICore::Update() {
 		DebugTextManager::Clear();
+		DebugTextManager::UpdatePopupTexts(ClockManager::GetInstance()->GetDeltaTime());
 		levelEditor_->Update();
 	}
 
@@ -47,8 +50,19 @@ namespace CalyxEditor {
 
 		levelEditor_->RenderMenu();
 
-		// === Gameモード中はUIなど表示しない ===
-		if(levelEditor_->GetMode() == EngineEdit::EditorMode::Game) {
+		if(levelEditor_->ShouldRenderRuntimeFullscreen()) {
+			levelEditor_->RenderRuntimeFullscreenViewport(reinterpret_cast<ImTextureID>(mainViewportTextureID_));
+			levelEditor_->RenderSettingsWindow();
+			DebugTextOverlay::RenderGlobalPopups();
+			DebugTextOverlay::RenderFatalAssertWindow();
+			return;
+		}
+
+		// === 設定が有効な場合だけ、Gameモード中はUIなど表示しない ===
+		if(levelEditor_->ShouldHideEditorUiInGameMode()) {
+			levelEditor_->RenderSettingsWindow();
+			DebugTextOverlay::RenderGlobalPopups();
+			DebugTextOverlay::RenderFatalAssertWindow();
 			return;
 		}
 
@@ -64,6 +78,10 @@ namespace CalyxEditor {
 
 		// すべてのパネルをレンダリング
 		panelController_->RenderPanels();
+
+		levelEditor_->RenderSettingsWindow();
+		DebugTextOverlay::RenderGlobalPopups();
+		DebugTextOverlay::RenderFatalAssertWindow();
 
 #endif // _DEBUG
 	}
@@ -117,4 +135,4 @@ namespace CalyxEditor {
 		}
 		pickingViewportTextureID_ = textureID;
 	}
-} // namespace CalyxEditor
+} // namespace CalyxEngine

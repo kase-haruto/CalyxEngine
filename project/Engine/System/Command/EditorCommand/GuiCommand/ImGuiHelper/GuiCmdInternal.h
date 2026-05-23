@@ -23,9 +23,9 @@ namespace GuiCmdInternal{
 									  const std::string& label);
 
 	private:
-		bool IsNotEqual(const CalyxMath::Vector2& a, const CalyxMath::Vector2& b) const;
-		bool IsNotEqual(const CalyxMath::Vector3& a, const CalyxMath::Vector3& b) const;
-		bool IsNotEqual(const CalyxMath::Vector4& a, const CalyxMath::Vector4& b) const;
+		bool IsNotEqual(const CalyxEngine::Vector2& a, const CalyxEngine::Vector2& b) const;
+		bool IsNotEqual(const CalyxEngine::Vector3& a, const CalyxEngine::Vector3& b) const;
+		bool IsNotEqual(const CalyxEngine::Vector4& a, const CalyxEngine::Vector4& b) const;
 		bool IsNotEqual(bool a, bool b) const;
 		bool IsNotEqual(float a, float b) const;
 		bool IsNotEqual(int a, int b) const;
@@ -65,19 +65,19 @@ namespace GuiCmdInternal{
 	//		違いがあるかチェック
 	/////////////////////////////////////////////////////////////////////////////////////////
 	template<typename T>
-	inline bool GuiCmdSetValueComputer<T>::IsNotEqual(const CalyxMath::Vector2& a, const CalyxMath::Vector2& b) const{
+	inline bool GuiCmdSetValueComputer<T>::IsNotEqual(const CalyxEngine::Vector2& a, const CalyxEngine::Vector2& b) const{
 		const float eps = 0.0001f;
 		return std::fabs(a.x - b.x) > eps || std::fabs(a.y - b.y) > eps;
 	}
 
 	template<typename T>
-	inline bool GuiCmdSetValueComputer<T>::IsNotEqual(const CalyxMath::Vector3& a, const CalyxMath::Vector3& b) const{
+	inline bool GuiCmdSetValueComputer<T>::IsNotEqual(const CalyxEngine::Vector3& a, const CalyxEngine::Vector3& b) const{
 		const float eps = 0.0001f;
 		return std::fabs(a.x - b.x) > eps || std::fabs(a.y - b.y) > eps || std::fabs(a.z - b.z) > eps;
 	}
 
 	template<typename T>
-	inline bool GuiCmdSetValueComputer<T>::IsNotEqual(const CalyxMath::Vector4& a, const CalyxMath::Vector4& b) const{
+	inline bool GuiCmdSetValueComputer<T>::IsNotEqual(const CalyxEngine::Vector4& a, const CalyxEngine::Vector4& b) const{
 		const float eps = 0.0001f;
 		return std::fabs(a.x - b.x) > eps || std::fabs(a.y - b.y) > eps ||
 			std::fabs(a.z - b.z) > eps || std::fabs(a.w - b.w) > eps;

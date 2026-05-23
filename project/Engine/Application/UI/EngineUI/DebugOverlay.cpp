@@ -2,7 +2,7 @@
 #include "DebugTextManager.h"
 #include <externals/imgui/imgui.h>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 
 	DebugOverlay::DebugOverlay() {
 		SetOverlayAlign(OverlayAlign::CenterTop);
@@ -38,4 +38,4 @@ namespace CalyxEditor {
 		ImGui::End();
 	}
 
-} // namespace CalyxEditor
+} // namespace CalyxEngine

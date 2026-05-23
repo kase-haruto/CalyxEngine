@@ -42,10 +42,10 @@ namespace CalyxEngine {
 		void SetTarget(BaseTransform* target) { target_ = target; }
 		void SetTransformStart(const QuaternionTransform& start) { startTransform_ = start; }
 		void SetTransformEnd(const QuaternionTransform& end) { endTransform_ = end; }
-		void SetEaseType(CalyxEase::EaseType type) { easeType_ = type; }
+		void SetEaseType(CalyxEngine::EaseType type) { easeType_ = type; }
 
 		// getter
-		CalyxEase::EaseType GetEaseType() { return easeType_; }
+		CalyxEngine::EaseType GetEaseType() { return easeType_; }
 
 	private:
 		//========================================================================
@@ -63,10 +63,10 @@ namespace CalyxEngine {
 
 		BaseTransform* target_ = nullptr;
 
-		CalyxUtil::StateTimer	 timer_;
-		CalyxUtil::AnimationLoop loop_;
+		CalyxEngine::StateTimer	 timer_;
+		CalyxEngine::AnimationLoop loop_;
 
-		CalyxEase::EaseType easeType_ = CalyxEase::EaseType::Linear;
+		CalyxEngine::EaseType easeType_ = CalyxEngine::EaseType::Linear;
 	};
 
 } // namespace CalyxEngine

@@ -5,7 +5,7 @@ GraphicsGroup* GraphicsGroup::GetInstance(){
 	return& instance;
 }
 
-void GraphicsGroup::Initialize(const CalyxGraphics::DxCore* dxCore, PipelineStateManager* psManager){
+void GraphicsGroup::Initialize(const CalyxEngine::DxCore* dxCore, PipelineStateManager* psManager){
 	pDxCore_ = dxCore;
 	pipelineManager_ = psManager;
 }

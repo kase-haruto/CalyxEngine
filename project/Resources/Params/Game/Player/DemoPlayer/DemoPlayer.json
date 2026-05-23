@@ -1,0 +1,47 @@
+{
+    "fields": {
+        "Collider Offset": [
+            0.0,
+            0.4000000059604645,
+            0.0
+        ],
+        "Collider Size": [
+            0.800000011920929,
+            1.600000023841858,
+            0.5
+        ],
+        "Damage Flash Duration": 1.0,
+        "Damping": 20.0,
+        "Default ShockScale": 1.0,
+        "Dive Force": -30.0,
+        "Dive Rotation Time": 0.5,
+        "Dive Scale": [
+            0.8999999761581421,
+            1.2000000476837158,
+            0.8999999761581421
+        ],
+        "Gravity": 40.0,
+        "HP": 10,
+        "Hammer Swing Scale": [
+            2.5,
+            1.5,
+            2.5
+        ],
+        "Jump Force": 15.0,
+        "Jump Scale": [
+            0.800000011920929,
+            1.2999999523162842,
+            0.800000011920929
+        ],
+        "Land Scale": [
+            1.399999976158142,
+            0.5,
+            1.399999976158142
+        ],
+        "Move Speed": 2.0,
+        "Stiffness": 400.0,
+        "Strong ShockScale": 1.5,
+        "cameraShakeDuration": 0.25,
+        "cameraShakeIntensity": 0.4000000059604645
+    }
+}

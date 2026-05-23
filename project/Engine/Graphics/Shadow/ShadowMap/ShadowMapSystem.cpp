@@ -5,12 +5,12 @@
 #include "Engine/Graphics/Pipeline/Service/PipelineService.h"
 #include "Engine/graphics/Pipeline/BlendMode/BlendMode.h"
 
-namespace CalyxGraphics {
+namespace CalyxEngine {
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	//		シャドウマップシステム初期化
 	/////////////////////////////////////////////////////////////////////////////////////
-	void CalyxGraphics::ShadowMapSystem::Initialize(ID3D12Device* device,uint32_t size) {
+	void CalyxEngine::ShadowMapSystem::Initialize(ID3D12Device* device,uint32_t size) {
 		shadowMap_.Initialize(device,size,size);
 		shadowCB_.Initialize(device);
 	}
@@ -21,9 +21,9 @@ namespace CalyxGraphics {
 	void ShadowMapSystem::Render(
 		ID3D12GraphicsCommandList* cmdList,
 		PipelineService*           psoService,
-		ID3D12Device* /*device*/,
+		ID3D12Device*              device,
 		const std::unordered_map<BaseModel*,std::vector<WorldTransform>>&                   staticVisible,
-		const std::unordered_map<CalyxAssets::AnimationModel*,std::vector<WorldTransform>>& skinnedVisible) {
+		const std::unordered_map<CalyxEngine::AnimationModel*,std::vector<WorldTransform>>& skinnedVisible) {
 		psoService->ResetState();
 		shadowMap_.BeginShadowPass(cmdList);
 
@@ -39,6 +39,9 @@ namespace CalyxGraphics {
 				if(!model || !model->GetModelData()) { continue; }
 				if(tfs.empty()) { continue; }
 
+				const UINT instanceCount = static_cast<UINT>(tfs.size());
+				model->EnsureInstanceCapacity(device, instanceCount);
+				model->UploadInstanceMatrices(tfs);
 				cmdList->SetGraphicsRootDescriptorTable(1,model->GetInstanceSrv());
 
 				model->BindVertexIndexBuffers(cmdList);
@@ -46,7 +49,7 @@ namespace CalyxGraphics {
 
 				cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-				cmdList->DrawIndexedInstanced(indexCount,(UINT)tfs.size(),0,0,0);
+				cmdList->DrawIndexedInstanced(indexCount,instanceCount,0,0,0);
 			}
 		}
 
@@ -59,8 +62,12 @@ namespace CalyxGraphics {
 
 			for(const auto& [model, tfs] : skinnedVisible) {
 				if(!model || !model->GetModelData()) continue;
+				if(tfs.empty()) continue;
 
-				cmdList->SetGraphicsRootDescriptorTable(2,model->GetJointMatrixSrv());
+				const UINT instanceCount = static_cast<UINT>(tfs.size());
+				model->EnsureInstanceCapacity(device, instanceCount);
+				model->UploadInstanceMatrices(tfs);
+				cmdList->SetGraphicsRootDescriptorTable(1,model->GetInstanceSrv());
 
 				// skin pallet
 				model->SetCommandPalletSrv(2,cmdList);
@@ -68,12 +75,8 @@ namespace CalyxGraphics {
 				model->BindVertexIndexBuffers(cmdList);
 				const UINT indexCount = (UINT)model->GetModelData()->meshResource.Indices().size();
 
-				for(const auto& tf : tfs) {
-					(void)tf;
-					tf.SetCommand(cmdList,1);
-					cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-					cmdList->DrawIndexedInstanced(indexCount,1,0,0,0);
-				}
+				cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+				cmdList->DrawIndexedInstanced(indexCount,instanceCount,0,0,0);
 			}
 		}
 
@@ -97,7 +100,7 @@ namespace CalyxGraphics {
 	//////////////////////////////////////////////////////////////////////////////////////
 	//		ライトビュー・プロジェクション行列セット
 	//////////////////////////////////////////////////////////////////////////////////////
-	void ShadowMapSystem::SetLightVP(const CalyxMath::Matrix4x4& lightVP) {
+	void ShadowMapSystem::SetLightVP(const CalyxEngine::Matrix4x4& lightVP) {
 		cbData_.lightVP = lightVP;
 		shadowCB_.TransferData(cbData_);
 	}

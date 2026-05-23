@@ -1,5 +1,5 @@
 #include "Ease.h"
-namespace CalyxEase {
+namespace CalyxEngine {
 	// Linear
 	float Linear(float t) { return t; }
 
@@ -52,4 +52,4 @@ namespace CalyxEase {
 			return 0.5f * (t * t * ((s + 1) * t + s) + 2);
 		}
 	}
-} // namespace CalyxEase
+} // namespace CalyxEngine

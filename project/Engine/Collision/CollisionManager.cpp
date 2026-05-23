@@ -28,6 +28,7 @@ void CollisionManager::UpdateCollisionAllCollider() {
 	// 前フレームの衝突を保存
 	previousCollisions_ = std::move(currentCollisions_);
 	currentCollisions_.clear();
+	isUpdatingCollisions_ = true;
 
 	for(auto itA = colliders_.begin(); itA != colliders_.end(); ++itA) {
 		Collider* a = *itA;
@@ -78,15 +79,42 @@ void CollisionManager::UpdateCollisionAllCollider() {
 			collisionLogs_.emplace_back("Exit: " + pair.a->GetName() + " VS " + pair.b->GetName());
 		}
 	}
+
+	isUpdatingCollisions_ = false;
+	FlushPendingColliderChanges();
 }
 
 void CollisionManager::Register(Collider* collider) {
+	if(isUpdatingCollisions_) {
+		std::erase(pendingUnregisters_, collider);
+		if(std::find(pendingRegisters_.begin(), pendingRegisters_.end(), collider) == pendingRegisters_.end()) {
+			pendingRegisters_.push_back(collider);
+		}
+		return;
+	}
+
+	RegisterImmediate(collider);
+}
+
+void CollisionManager::Unregister(Collider* collider) {
+	if(isUpdatingCollisions_) {
+		std::erase(pendingRegisters_, collider);
+		if(std::find(pendingUnregisters_.begin(), pendingUnregisters_.end(), collider) == pendingUnregisters_.end()) {
+			pendingUnregisters_.push_back(collider);
+		}
+		return;
+	}
+
+	UnregisterImmediate(collider);
+}
+
+void CollisionManager::RegisterImmediate(Collider* collider) {
 	if(std::find(colliders_.begin(), colliders_.end(), collider) == colliders_.end()) {
 		colliders_.push_back(collider);
 	}
 }
 
-void CollisionManager::Unregister(Collider* collider) {
+void CollisionManager::UnregisterImmediate(Collider* collider) {
 	std::erase(colliders_, collider);
 
 	// 削除されるコライダーに関連する衝突ペアを現在のリストから削除
@@ -98,6 +126,18 @@ void CollisionManager::Unregister(Collider* collider) {
 	std::erase_if(previousCollisions_, [collider](const CollisionPair& pair) {
 		return pair.a == collider || pair.b == collider;
 	});
+}
+
+void CollisionManager::FlushPendingColliderChanges() {
+	for(Collider* collider : pendingUnregisters_) {
+		UnregisterImmediate(collider);
+	}
+	pendingUnregisters_.clear();
+
+	for(Collider* collider : pendingRegisters_) {
+		RegisterImmediate(collider);
+	}
+	pendingRegisters_.clear();
 }
 
 void CollisionManager::DebugLog() {
@@ -116,9 +156,12 @@ void CollisionManager::DebugLog() {
 
 void CollisionManager::ClearColliders() {
 	colliders_.clear();
+	pendingRegisters_.clear();
+	pendingUnregisters_.clear();
 	collisionLogs_.clear();
 	currentCollisions_.clear();
 	previousCollisions_.clear();
+	isUpdatingCollisions_ = false;
 }
 
 bool CollisionManager::CheckCollisionPair(Collider* colliderA, Collider* colliderB) {
@@ -165,12 +208,12 @@ bool CollisionManager::CheckCollisionPair(Collider* colliderA, Collider* collide
 }
 
 bool CollisionManager::SphereToSphere(const Sphere& sphereA, const Sphere& sphereB) {
-	const CalyxMath::Vector3& centerA	= sphereA.center;
-	const CalyxMath::Vector3& centerB	= sphereB.center;
+	const CalyxEngine::Vector3& centerA	= sphereA.center;
+	const CalyxEngine::Vector3& centerB	= sphereB.center;
 	float					  radiusSum = sphereA.radius + sphereB.radius;
 
 	// 中心間距離の2乗を計算
-	CalyxMath::Vector3 diff			   = centerA - centerB;
+	CalyxEngine::Vector3 diff			   = centerA - centerB;
 	float			   distanceSquared = diff.LengthSquared();
 
 	// 衝突判定
@@ -178,38 +221,38 @@ bool CollisionManager::SphereToSphere(const Sphere& sphereA, const Sphere& spher
 }
 
 bool CollisionManager::SphereToOBB(const Sphere& sphere, const OBB obb) {
-	const CalyxMath::Vector3& sphereCenter = sphere.center;
+	const CalyxEngine::Vector3& sphereCenter = sphere.center;
 
-	// CalyxMath::Quaternion から回転行列を作成
-	CalyxMath::Matrix4x4 rotationMatrix = CalyxMath::Quaternion::ToMatrix(obb.rotate);
+	// CalyxEngine::Quaternion から回転行列を作成
+	CalyxEngine::Matrix4x4 rotationMatrix = CalyxEngine::Quaternion::ToMatrix(obb.rotate);
 
 	// OBBの軸方向（ローカル軸 X, Y, Z）
-	CalyxMath::Vector3 obbAxes[3] = {
-		CalyxMath::Vector3::Transform(CalyxMath::Vector3(1.0f, 0.0f, 0.0f), rotationMatrix),
-		CalyxMath::Vector3::Transform(CalyxMath::Vector3(0.0f, 1.0f, 0.0f), rotationMatrix),
-		CalyxMath::Vector3::Transform(CalyxMath::Vector3(0.0f, 0.0f, 1.0f), rotationMatrix),
+	CalyxEngine::Vector3 obbAxes[3] = {
+		CalyxEngine::Vector3::Transform(CalyxEngine::Vector3(1.0f, 0.0f, 0.0f), rotationMatrix),
+		CalyxEngine::Vector3::Transform(CalyxEngine::Vector3(0.0f, 1.0f, 0.0f), rotationMatrix),
+		CalyxEngine::Vector3::Transform(CalyxEngine::Vector3(0.0f, 0.0f, 1.0f), rotationMatrix),
 	};
 
-	CalyxMath::Vector3 diff			= sphereCenter - obb.center;
-	CalyxMath::Vector3 closestPoint = obb.center;
+	CalyxEngine::Vector3 diff			= sphereCenter - obb.center;
+	CalyxEngine::Vector3 closestPoint = obb.center;
 
 	for(int i = 0; i < 3; ++i) {
-		float distance	 = CalyxMath::Vector3::Dot(diff, obbAxes[i]);
+		float distance	 = CalyxEngine::Vector3::Dot(diff, obbAxes[i]);
 		float halfExtent = (i == 0) ? obb.size.x * 0.5f : (i == 1) ? obb.size.y * 0.5f
 																   : obb.size.z * 0.5f;
 		distance		 = std::clamp(distance, -halfExtent, halfExtent);
 		closestPoint += distance * obbAxes[i];
 	}
 
-	CalyxMath::Vector3 closestToSphere = closestPoint - sphereCenter;
+	CalyxEngine::Vector3 closestToSphere = closestPoint - sphereCenter;
 	float			   distanceSquared = closestToSphere.LengthSquared();
 	return distanceSquared <= (sphere.radius * sphere.radius);
 }
 
 bool CollisionManager::OBBToOBB([[maybe_unused]] const OBB& obbA, [[maybe_unused]] const OBB& obbB) {
 	// 1) A, B それぞれの 3軸ベクトル を求める
-	CalyxMath::Vector3 aAxes[3];
-	CalyxMath::Vector3 bAxes[3];
+	CalyxEngine::Vector3 aAxes[3];
+	CalyxEngine::Vector3 bAxes[3];
 	ComputeOBBAxes(obbA, aAxes);
 	ComputeOBBAxes(obbB, bAxes);
 
@@ -229,7 +272,7 @@ bool CollisionManager::OBBToOBB([[maybe_unused]] const OBB& obbA, [[maybe_unused
 	//    (3) A.axis[i] × B.axis[j]  (i,j in [0..2])
 	for(int i = 0; i < 3; i++) {
 		for(int j = 0; j < 3; j++) {
-			CalyxMath::Vector3 crossAxis = CalyxMath::Vector3::Cross(aAxes[i], bAxes[j]);
+			CalyxEngine::Vector3 crossAxis = CalyxEngine::Vector3::Cross(aAxes[i], bAxes[j]);
 			if(!OverlapOnAxis(obbA, aAxes, obbB, bAxes, crossAxis)) {
 				return false;
 			}
@@ -240,34 +283,34 @@ bool CollisionManager::OBBToOBB([[maybe_unused]] const OBB& obbA, [[maybe_unused
 	return true;
 }
 
-void CollisionManager::ComputeOBBAxes(const OBB& obb, CalyxMath::Vector3 outAxis[3]) {
-	CalyxMath::Matrix4x4 rot = CalyxMath::Quaternion::ToMatrix(obb.rotate); // CalyxMath::Quaternion → 回転行列
+void CollisionManager::ComputeOBBAxes(const OBB& obb, CalyxEngine::Vector3 outAxis[3]) {
+	CalyxEngine::Matrix4x4 rot = CalyxEngine::Quaternion::ToMatrix(obb.rotate); // CalyxEngine::Quaternion → 回転行列
 
-	outAxis[0] = CalyxMath::Vector3(rot.m[0][0], rot.m[0][1], rot.m[0][2]); // X軸
-	outAxis[1] = CalyxMath::Vector3(rot.m[1][0], rot.m[1][1], rot.m[1][2]); // Y軸
-	outAxis[2] = CalyxMath::Vector3(rot.m[2][0], rot.m[2][1], rot.m[2][2]); // Z軸
+	outAxis[0] = CalyxEngine::Vector3(rot.m[0][0], rot.m[0][1], rot.m[0][2]); // X軸
+	outAxis[1] = CalyxEngine::Vector3(rot.m[1][0], rot.m[1][1], rot.m[1][2]); // Y軸
+	outAxis[2] = CalyxEngine::Vector3(rot.m[2][0], rot.m[2][1], rot.m[2][2]); // Z軸
 
 	outAxis[0].Normalize();
 	outAxis[1].Normalize();
 	outAxis[2].Normalize();
 }
 
-float CollisionManager::ProjectOBB(const OBB& obb, const CalyxMath::Vector3 obbAxes[3], const CalyxMath::Vector3& axisCandidate) {
+float CollisionManager::ProjectOBB(const OBB& obb, const CalyxEngine::Vector3 obbAxes[3], const CalyxEngine::Vector3& axisCandidate) {
 	// OBBの半サイズ(各軸方向の半径)
-	CalyxMath::Vector3 halfSize = obb.size * 0.5f;
+	CalyxEngine::Vector3 halfSize = obb.size * 0.5f;
 
 	// 3つの軸に投影して絶対値を足し合わせる
 	float r =
-		fabs(halfSize.x * CalyxMath::Vector3::Dot(obbAxes[0], axisCandidate)) +
-		fabs(halfSize.y * CalyxMath::Vector3::Dot(obbAxes[1], axisCandidate)) +
-		fabs(halfSize.z * CalyxMath::Vector3::Dot(obbAxes[2], axisCandidate));
+		fabs(halfSize.x * CalyxEngine::Vector3::Dot(obbAxes[0], axisCandidate)) +
+		fabs(halfSize.y * CalyxEngine::Vector3::Dot(obbAxes[1], axisCandidate)) +
+		fabs(halfSize.z * CalyxEngine::Vector3::Dot(obbAxes[2], axisCandidate));
 
 	return r;
 }
 
-bool CollisionManager::OverlapOnAxis(const OBB& obbA, const CalyxMath::Vector3 aAxes[3], const OBB& obbB, const CalyxMath::Vector3 bAxes[3], const CalyxMath::Vector3& axisCandidate) {
+bool CollisionManager::OverlapOnAxis(const OBB& obbA, const CalyxEngine::Vector3 aAxes[3], const OBB& obbB, const CalyxEngine::Vector3 bAxes[3], const CalyxEngine::Vector3& axisCandidate) {
 	// 軸が正規化されていないなら正規化しておく
-	CalyxMath::Vector3 axis	 = axisCandidate;
+	CalyxEngine::Vector3 axis	 = axisCandidate;
 	float			   lenSq = axis.LengthSquared();
 	if(lenSq < 1e-8f) {
 		// 軸がほぼゼロベクトルの場合は別の軸としてスキップ or 重なっているとみなす
@@ -276,8 +319,8 @@ bool CollisionManager::OverlapOnAxis(const OBB& obbA, const CalyxMath::Vector3 a
 	axis.Normalize();
 
 	// A, B それぞれの投影中心(スカラー値)
-	float centerA = CalyxMath::Vector3::Dot(obbA.center, axis);
-	float centerB = CalyxMath::Vector3::Dot(obbB.center, axis);
+	float centerA = CalyxEngine::Vector3::Dot(obbA.center, axis);
+	float centerB = CalyxEngine::Vector3::Dot(obbB.center, axis);
 
 	// A, B それぞれの投影半径
 	float rA = ProjectOBB(obbA, aAxes, axis);

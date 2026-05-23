@@ -13,7 +13,7 @@
 #include <memory>
 #include <string>
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
 	 * ParticleSystemObject
@@ -26,6 +26,7 @@ namespace CalyxEffect {
 	public:
 		ParticleSystemObject();
 		ParticleSystemObject(const std::string& name);
+		ParticleSystemObject(const std::string& name, const std::shared_ptr<CalyxEngine::BaseEmitter>& emitter);
 		~ParticleSystemObject() override;
 
 		/* -------- SceneObject overrides -------- */
@@ -43,6 +44,7 @@ namespace CalyxEffect {
 
 		void SetAlphaMultiplier(float a);
 		void SetCameraFade(float nearZ, float farZ);
+		void SyncEmitterFromWorldTransform();
 
 		/* -------- config -------- */
 		void ApplyConfig();
@@ -55,16 +57,17 @@ namespace CalyxEffect {
 
 		/* -------- accessors -------- */
 		void			 SetDrawEnable(bool isDrawEnable) override;
-		void			 SetPosition(const CalyxMath::Vector3& pos);
-		std::string_view GetTypeName() const override { return "ParticleSystemObject"; }
+		void			 SetPosition(const CalyxEngine::Vector3& pos);
+		std::string_view GetObjectClassName() const override { return "ParticleSystemObject"; }
 
 		const ConfigurableObject<ParticleSystemObjectConfig>& GetConfigObject() const { return config_; }
 
-		std::shared_ptr<CalyxEffect::FxEmitter> GetEmitter() const { return emitter_; }
+		std::shared_ptr<CalyxEngine::BaseEmitter> GetEmitter() const { return emitter_; }
+		void SetEmitter(const std::shared_ptr<CalyxEngine::BaseEmitter>& emitter);
 
 	private:
 		ConfigurableObject<ParticleSystemObjectConfig> config_;
 
-		std::shared_ptr<CalyxEffect::FxEmitter> emitter_;
+		std::shared_ptr<CalyxEngine::BaseEmitter> emitter_;
 	};
-} // namespace CalyxEffect
+} // namespace CalyxEngine

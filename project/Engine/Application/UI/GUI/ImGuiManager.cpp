@@ -17,8 +17,10 @@
 #include <externals/imgui/imgui_impl_dx12.h>
 #include <externals/imgui/imgui_impl_win32.h>
 
+#include <filesystem>
 
-void ImGuiManager::Initialize(WinApp* winApp, const CalyxGraphics::DxCore* dxCore){
+
+void ImGuiManager::Initialize(WinApp* winApp, const CalyxEngine::DxCore* dxCore){
 	pDxCore_ =dxCore;
 
 	ID3D12DescriptorHeap* heap = DescriptorAllocator::GetHeap(DescriptorUsage::CbvSrvUav);
@@ -37,9 +39,28 @@ void ImGuiManager::Initialize(WinApp* winApp, const CalyxGraphics::DxCore* dxCor
 						DescriptorAllocator::GetGpuHandleStart(DescriptorUsage::CbvSrvUav)); // 0番目
 	ImGui::StyleColorsDark(); // ダークテーマを適用
 
-	// fontの設定
-	ImFont* font = io.Fonts->AddFontFromFileTTF("Resources/Assets/fonts/inter.ttf", 16.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
-	io.FontDefault = font;
+	// ImGui expects UTF-8 text. Keep Inter as the default face and merge Japanese glyphs from FiraMono.
+	constexpr float fontSize = 16.0f;
+	ImFont* defaultFont = nullptr;
+	const char* defaultFontPath = "Resources/Assets/fonts/inter.ttf";
+	if(std::filesystem::exists(defaultFontPath)) {
+		defaultFont = io.Fonts->AddFontFromFileTTF(defaultFontPath, fontSize, nullptr, io.Fonts->GetGlyphRangesDefault());
+	}
+	if(defaultFont != nullptr) {
+		ImFontConfig mergeConfig;
+		mergeConfig.MergeMode = true;
+		mergeConfig.PixelSnapH = true;
+		const char* japaneseFontPath = "Resources/Assets/fonts/NotoSerifJP.ttf";
+		if(std::filesystem::exists(japaneseFontPath)) {
+			io.Fonts->AddFontFromFileTTF(japaneseFontPath, fontSize, &mergeConfig, io.Fonts->GetGlyphRangesJapanese());
+		}
+	}
+	if(defaultFont == nullptr) {
+		defaultFont = io.Fonts->AddFontDefault();
+	}
+	if(defaultFont != nullptr) {
+		io.FontDefault = defaultFont;
+	}
 	CustomizeImGuiStyle();
 }
 

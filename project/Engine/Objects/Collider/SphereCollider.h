@@ -40,7 +40,7 @@ public:
 	 * \param position 座標
 	 * \param rotate 回転
 	 */
-	void Update(const CalyxMath::Vector3& position, const CalyxMath::Quaternion& rotate) override;
+	void Update(const CalyxEngine::Vector3& position, const CalyxEngine::Quaternion& rotate) override;
 
 	/**
 	 * \brief 描画処理
@@ -110,7 +110,7 @@ public:
 	 * \brief 中心座標を取得
 	 * \return 中心座標
 	 */
-	const CalyxMath::Vector3& GetCenter() const override;
+	const CalyxEngine::Vector3& GetCenter() const override;
 
 	/**
 	 * \brief 衝突形状を取得

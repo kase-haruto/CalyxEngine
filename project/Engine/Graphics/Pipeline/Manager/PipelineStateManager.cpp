@@ -1,4 +1,5 @@
 #include "PipelineStateManager.h"
+#include <Engine/Foundation/Debug/CxAssert.h>
 
 
 PipelineStateManager::PipelineStateManager(ComPtr<ID3D12Device> device, std::shared_ptr<ShaderManager> shaderManager)
@@ -45,7 +46,7 @@ void PipelineStateManager::Finalize(){
 
 const PipelineSet PipelineStateManager::GetPipelineSet(PipelineType pipelineType, BlendMode blendMode) const {
 	auto it = pipelineStates_.find({pipelineType, blendMode});
-	assert(it != pipelineStates_.end());
+	CX_CHECK(it != pipelineStates_.end(), "Assertion failed");
 	return it->second->GetPipelineSet();
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -58,7 +59,7 @@ const Microsoft::WRL::ComPtr<ID3D12PipelineState>& PipelineStateManager::GetPipe
 	// (pipelineType, blendMode) をキーに探す
 	PipelineKey key {pipelineType, blendMode};
 	auto it = pipelineStates_.find(key);
-	assert(it != pipelineStates_.end());
+	CX_CHECK(it != pipelineStates_.end(), "Assertion failed");
 	return it->second->GetPipelineState();
 }
 
@@ -71,6 +72,6 @@ const Microsoft::WRL::ComPtr<ID3D12RootSignature>& PipelineStateManager::GetRoot
 ) const{
 	PipelineKey key {pipelineType, blendMode};
 	auto it = pipelineStates_.find(key);
-	assert(it != pipelineStates_.end());
+	CX_CHECK(it != pipelineStates_.end(), "Assertion failed");
 	return it->second->GetRootSignature();
 }

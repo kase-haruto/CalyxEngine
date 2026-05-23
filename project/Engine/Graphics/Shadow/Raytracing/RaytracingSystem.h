@@ -5,9 +5,10 @@
 #include "Engine/Graphics/Descriptor/DescriptorAllocator.h"
 
 #include <d3d12.h>
+#include <vector>
 #include <wrl.h>
 
-namespace CalyxGraphics {
+namespace CalyxEngine {
 
 	// 前方宣言
 	class RaytracingScene;
@@ -44,15 +45,18 @@ namespace CalyxGraphics {
 		ID3D12Resource* GetTLAS() const;
 
 	private:
+		void RetireResource(Microsoft::WRL::ComPtr<ID3D12Resource>& resource);
+
 		//===========================================================*/
 		// private members
 		//===========================================================*/
 		Microsoft::WRL::ComPtr<ID3D12Resource> tlas_;	 //< TLAS
 		Microsoft::WRL::ComPtr<ID3D12Resource> scratch_; //< スクラッチバッファ
+		std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> retiredResources_;
 
 		ID3D12Device5*	 device_ = nullptr;
 		DescriptorHandle tlasSrv_;			//< TLASのSRV
 		uint32_t		 tlasCapacity_ = 0; //< TLASを確保した時のインスタンス容量
 	};
 
-} // namespace CalyxGraphics
+} // namespace CalyxEngine

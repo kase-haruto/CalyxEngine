@@ -22,7 +22,7 @@ public:
 	bool Initialize(const D3D12_COMPUTE_PIPELINE_STATE_DESC& desc);
 
 	// アクセサ
-	const PipelineSet& GetPipelineSet() const {
+	PipelineSet GetPipelineSet() const {
 		return { pipelineState_.Get(), rootSignature_.Get() };
 	}
 

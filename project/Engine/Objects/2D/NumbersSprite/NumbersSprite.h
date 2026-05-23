@@ -32,18 +32,18 @@ public:
 	NumbersSprite();
 
 	// 初期化（基準位置・1桁サイズ）
-	void Initialize(const CalyxMath::Vector2& pos, const CalyxMath::Vector2& digitSize);
+	void Initialize(const CalyxEngine::Vector2& pos, const CalyxEngine::Vector2& digitSize);
 
 	// 値設定（負・超過値はクランプ）
 	void SetValue(int value);
 
 
 	// レイアウト設定
-	void SetPosition(const CalyxMath::Vector2& pos);
-	void SetDigitSize(const CalyxMath::Vector2& size);
+	void SetPosition(const CalyxEngine::Vector2& pos);
+	void SetDigitSize(const CalyxEngine::Vector2& size);
 	void SetSpacing(float px);
 	void SetAlign(DigitsAlign a);
-	void SetAnchor(const CalyxMath::Vector2& anc);
+	void SetAnchor(const CalyxEngine::Vector2& anc);
 
 	// 表示幅の制御
 	void SetMinDigits(int n); // 先頭ゼロ埋め（n以下ならゼロで埋める）
@@ -67,9 +67,9 @@ private:
 	// 設定
 	std::string dir_;
 	std::string ext_;
-	CalyxMath::Vector2		origin_{0, 0};
-	CalyxMath::Vector2		digitSize_{32, 48};
-	CalyxMath::Vector2		anchor_{0.5f, 0.5f};
+	CalyxEngine::Vector2		origin_{0, 0};
+	CalyxEngine::Vector2		digitSize_{32, 48};
+	CalyxEngine::Vector2		anchor_{0.5f, 0.5f};
 	float		spacing_   = 2.0f;
 	DigitsAlign align_	   = DigitsAlign::Right;
 	int			minDigits_ = 1; // 先頭ゼロ埋め最小桁

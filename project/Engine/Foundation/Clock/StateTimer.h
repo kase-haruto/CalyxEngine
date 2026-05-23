@@ -16,7 +16,7 @@
 //	StateTimer
 //	イージング対応の状態遷移用タイマー
 //============================================================================
-namespace CalyxUtil {
+namespace CalyxEngine {
 
 	class StateTimer {
 	public:
@@ -24,7 +24,7 @@ namespace CalyxUtil {
 		//	constructor
 		//========================================================================
 		StateTimer() = default;
-		explicit StateTimer(float target, CalyxEase::EaseType easing = CalyxEase::EaseType::Linear);
+		explicit StateTimer(float target, CalyxEngine::EaseType easing = CalyxEngine::EaseType::Linear);
 
 		//========================================================================
 		//	update
@@ -37,7 +37,7 @@ namespace CalyxUtil {
 		//========================================================================
 		void Reset();
 		void SetTarget(float target);
-		void SetEasing(CalyxEase::EaseType type);
+		void SetEasing(CalyxEngine::EaseType type);
 
 		//========================================================================
 		//	query
@@ -72,7 +72,7 @@ namespace CalyxUtil {
 		float t_	  = 0.0f; // 正規化T [0-1]
 		float easedT_ = 0.0f; // イージング後T
 
-		 CalyxEase::EaseType easingType_ =  CalyxEase::EaseType::Linear;
+		 CalyxEngine::EaseType easingType_ =  CalyxEngine::EaseType::Linear;
 	};
 
-} // namespace CalyxUtil
+} // namespace CalyxEngine

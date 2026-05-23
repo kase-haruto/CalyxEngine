@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
 	 * BaseEditor

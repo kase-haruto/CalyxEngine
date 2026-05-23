@@ -1,5 +1,3 @@
-
-
 /////////////////////////////////////////////////////////////////////////////////////////
 //	include
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -10,7 +8,11 @@
 // engine
 #include <Engine/Collision/CollisionManager.h>
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
+#include <Engine/Foundation/Utility/Ease/CxEase.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
+#include <Engine/Foundation/Input/Input.h>
+#include <Engine/Foundation/Clock/ClockManager.h>
+#include <Engine/Application/System/Environment.h>
 // lib
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -25,7 +27,7 @@ TestScene::TestScene(){
 /////////////////////////////////////////////////////////////////////////////////////////
 //	アセットのロード
 /////////////////////////////////////////////////////////////////////////////////////////
-void TestScene::LoadAssets(){}
+void TestScene::LoadAssets() {}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //	初期化処理
@@ -37,19 +39,19 @@ void TestScene::Initialize(){
 
 	BaseScene::Initialize();
 
-	SceneSerializer::Load(*sceneContext_, "Resources/Assets/Scenes/TestScene.scene");
+	std::string scenePath = "Resources/Assets/Scenes/test.scene";
+	SceneSerializer::Load(*sceneContext_, scenePath);
+	sceneContext_->SetScenePath(scenePath);
 
 	LoadAssets();
 
-	//=========================
-	// グラフィック関連
-	//=========================
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //	更新処理
 /////////////////////////////////////////////////////////////////////////////////////////
 void TestScene::Update([[maybe_unused]]float dt){
+
 
 	//衝突判定
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
@@ -60,8 +62,7 @@ void TestScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoSer
 	//========================================================//
 	//	spriteの登録
 	//========================================================//
-	// 
-	// 
+
 	//シーン上のオブジェクトの描画
 	BaseScene::Draw(cmdList, psoService, rt);
 
@@ -72,3 +73,4 @@ void TestScene::CleanUp(){
 	sceneContext_->GetObjectLibrary()->Clear();
 	CollisionManager::GetInstance()->ClearColliders();
 }
+

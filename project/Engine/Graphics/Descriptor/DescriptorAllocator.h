@@ -67,6 +67,7 @@ public:
 	 * \return 割り当てたディスクリプタハンドル
 	 */
 	static DescriptorHandle Allocate(DescriptorUsage usage);
+	static DescriptorHandle AllocateRange(DescriptorUsage usage, UINT count);
 	/*	 * \brief ディスクリプタの解放
 	 * \param usage
 	 * \param handle

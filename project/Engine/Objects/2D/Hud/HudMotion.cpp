@@ -1,9 +1,8 @@
 #include "HudMotion.h"
 
-#include "Game/Battle/Shooting/Pattern/ShootPatternDetails.h"
 #include "HudMotionSet.h"
 
-namespace Calyx2D {
+namespace CalyxEngine {
 
 	//////////////////////////////////////////////////////////////////////////////
 	//		初期化処理
@@ -13,10 +12,10 @@ namespace Calyx2D {
 		// アニメーションチャンネル追加
 
 		// 移動チャンネル
-		if(flags & static_cast<uint32_t>(HudMotionChannel::Position)) { animator_.Add<CalyxMath::Vector2>(ToChannelName(HudMotionChannel::Position)).SetLoopCount(1); }
+		if(flags & static_cast<uint32_t>(HudMotionChannel::Position)) { animator_.Add<CalyxEngine::Vector2>(ToChannelName(HudMotionChannel::Position)).SetLoopCount(1); }
 
 		// スケールチャンネル
-		if(flags & static_cast<uint32_t>(HudMotionChannel::Scale)) { animator_.Add<CalyxMath::Vector2>(ToChannelName(HudMotionChannel::Scale)).SetLoopCount(1); }
+		if(flags & static_cast<uint32_t>(HudMotionChannel::Scale)) { animator_.Add<CalyxEngine::Vector2>(ToChannelName(HudMotionChannel::Scale)).SetLoopCount(1); }
 
 		// 透明度チャンネル
 		if(flags & static_cast<uint32_t>(HudMotionChannel::Alpha)) { animator_.Add<float>(ToChannelName(HudMotionChannel::Alpha)).SetLoopCount(1); }
@@ -118,14 +117,14 @@ namespace Calyx2D {
 		};
 
 		if(IsChannelEnabled(HudMotionChannel::Position)) {
-			const auto& ch = animator_.GetChannel<CalyxMath::Vector2>("Position");
+			const auto& ch = animator_.GetChannel<CalyxEngine::Vector2>("Position");
 			drawTrack("Position",
 				ch.GetDuration(),
 				ch.GetProgress());
 		}
 
 		if(IsChannelEnabled(HudMotionChannel::Scale)) {
-			const auto& ch = animator_.GetChannel<CalyxMath::Vector2>("Scale");
+			const auto& ch = animator_.GetChannel<CalyxEngine::Vector2>("Scale");
 			drawTrack("Scale",
 				ch.GetDuration(),
 				ch.GetProgress());
@@ -157,7 +156,7 @@ namespace Calyx2D {
 	///////////////////////////////////////////////////////////////////////////////
 	//		終了判定
 	///////////////////////////////////////////////////////////////////////////////
-	bool HudMotion::IsFinished() const { return CheckFinished<CalyxMath::Vector2>(HudMotionChannel::Position) && CheckFinished<CalyxMath::Vector2>(HudMotionChannel::Scale) && CheckFinished<float>(HudMotionChannel::Rotation) && CheckFinished<float>(HudMotionChannel::Alpha); }
+	bool HudMotion::IsFinished() const { return CheckFinished<CalyxEngine::Vector2>(HudMotionChannel::Position) && CheckFinished<CalyxEngine::Vector2>(HudMotionChannel::Scale) && CheckFinished<float>(HudMotionChannel::Rotation) && CheckFinished<float>(HudMotionChannel::Alpha); }
 
 	////////////////////////////////////////////////////////////////////////////////
 	/// 	リセット
@@ -185,4 +184,4 @@ namespace Calyx2D {
 		}
 	}
 
-} // namespace Calyx2D
+} // namespace CalyxEngine

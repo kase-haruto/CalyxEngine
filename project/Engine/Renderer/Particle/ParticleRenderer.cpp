@@ -1,5 +1,8 @@
 #include "ParticleRenderer.h"
 
+#include "Engine/Assets/Manager/AssetManager.h"
+#include "Engine/Graphics/Context/GraphicsGroup.h"
+
 #include <Engine/Application/Effects/Particle/Emitter/FxEmitter.h>
 #include <Engine/Assets/Model/Modelmanager.h>
 #include <Engine/Assets/Texture/TextureManager.h>
@@ -11,8 +14,8 @@
 //		パーティクル描画
 ///////////////////////////////////////////////////////////////////////////////////////////////
 void ParticleRenderer::Render(
-	const std::vector<std::shared_ptr<CalyxEffect::FxEmitter>>&    cpuEmitters,
-	const std::vector<std::shared_ptr<CalyxEffect::GpuFxEmitter>>& gpuEmitters,
+	const std::vector<std::shared_ptr<CalyxEngine::FxEmitter>>&    cpuEmitters,
+	const std::vector<std::shared_ptr<CalyxEngine::GpuFxEmitter>>& gpuEmitters,
 	PipelineService*                                               pipelineService,
 	ID3D12GraphicsCommandList*                                     cmdList) {
 	if(cpuEmitters.empty() && gpuEmitters.empty()) return;
@@ -45,26 +48,20 @@ void ParticleRenderer::Render(
 
 	// ───────────── GPU パーティクル ─────────────
 	if(!gpuEmitters.empty()) {
-		auto psoGpu = pipelineService->GetPipelineSet(
-			PipelineTag::Object::GpuParticle,BlendMode::ADD);
-		pipelineService->SetCommand(psoGpu,cmdList);
-
-		if(auto* cam = CameraManager::GetActive())
-			cam->SetCommand(cmdList,PipelineType::StructuredObject);
-
 		for(auto& em : gpuEmitters) {
-			if(!em) continue;
+			if(!em || !em->IsDrawEnable()) continue;
+
+			auto psoGpu = pipelineService->GetPipelineSet(
+				PipelineTag::Object::GpuParticle,em->GetBlendMode());
+			pipelineService->SetCommand(psoGpu,cmdList);
+
+			if(auto* cam = CameraManager::GetActive())
+				cam->SetCommand(cmdList,PipelineType::StructuredObject);
 
 			em->GetMaterialBuffer().SetCommand(cmdList,1);
-			auto tex = TextureManager::GetInstance()->LoadTexture("Textures/" + em->GetTexturePath());
-			cmdList->SetGraphicsRootDescriptorTable(3,tex);
-			MeshResource& mesh = em->GetMeshResource();
-
-			if(mesh.Indices().empty()) continue;
-			//EnsureMeshIsReady(mesh,device);
-
-			DrawMeshInstanced(mesh,cmdList,
-							  CalyxEffect::GpuFxEmitter::kMaxParticles,
+			cmdList->SetGraphicsRootDescriptorTable(3,em->GetTextureHandle());
+			DrawGpuBillboards(cmdList,
+							  em->GetDrawInstanceCount(),
 							  em->GetParticleSrv());
 		}
 	}
@@ -74,18 +71,18 @@ void ParticleRenderer::Render(
 //		GPUパーティクルのまとめ描きユーティリティ
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void ParticleRenderer::RenderGrouped(const std::string&                                    modelPath,
-									 const std::vector<CalyxEffect::ParticleConstantData>& gpuUnits,
+									 const std::vector<CalyxEngine::ParticleConstantData>& gpuUnits,
 									 ID3D12GraphicsCommandList*                            cmdList) {
 	if(gpuUnits.empty()) return;
 
-	ModelData& model = ModelManager::GetInstance()->GetModelData(modelPath);
+	ModelData& model = CalyxEngine::AssetManager::GetInstance()->GetModelManager()->GetModelData(modelPath);
 	if(model.meshResource.Indices().empty()) return;
 
 	auto device = GraphicsGroup::GetInstance()->GetDevice().Get();
 	EnsureMeshIsReady(model.meshResource,device);
 
 	// 一時バッファをローカルで作成
-	DxStructuredBuffer<CalyxEffect::ParticleConstantData> tempBuffer;
+	DxStructuredBuffer<CalyxEngine::ParticleConstantData> tempBuffer;
 	tempBuffer.Initialize(device,static_cast<UINT>(gpuUnits.size()));
 	tempBuffer.TransferVectorData(gpuUnits);
 	tempBuffer.CreateSrv(device);
@@ -124,4 +121,14 @@ void ParticleRenderer::DrawMeshInstanced(MeshResource&               mesh,
 	// インデックス描画に変更（インデックス数で描画）
 	const UINT indexCount = static_cast<UINT>(mesh.Indices().size());
 	cmdList->DrawIndexedInstanced(indexCount, instanceCount, 0, 0, 0);
+}
+
+void ParticleRenderer::DrawGpuBillboards(ID3D12GraphicsCommandList*  cmdList,
+										 UINT                        instanceCount,
+										 D3D12_GPU_DESCRIPTOR_HANDLE particleHandle) {
+	if(instanceCount == 0) return;
+
+	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	cmdList->SetGraphicsRootDescriptorTable(2, particleHandle);
+	cmdList->DrawInstanced(4, instanceCount, 0, 0);
 }

@@ -1,13 +1,68 @@
 #include "SceneObjectLibrary.h"
 
 #include <Engine/Objects/3D/Actor/SceneObject.h>
+#include <Engine/Objects/Event/Destroying/ObjectDestroying.h>
 #include <Engine/System/Event/EventBus.h>
 #include <iostream>
+#include <map>
 
 uint32_t SceneObjectLibrary::nextPickingID_ = 1;
 
-SceneObjectLibrary::SceneObjectLibrary()  = default;
+SceneObjectLibrary::SceneObjectLibrary() {
+	connDestroy_ = EventBus::Subscribe<ObjectDestroying>(
+		[this](const ObjectDestroying& ev) {
+			if(suppressDestroySync_ || !ev.object) return;
+
+			const Guid id = ev.object->GetGuid();
+			auto	   it = objects_.find(id);
+			if(it == objects_.end()) return;
+
+			EventBus::Publish(ObjectRemoved{ev.object, owner_});
+			objects_.erase(it);
+			RefreshDuplicateNameIndices();
+		});
+}
 SceneObjectLibrary::~SceneObjectLibrary() = default;
+
+namespace {
+	std::string TrimName(const std::string& name) {
+		const auto first = name.find_first_not_of(" \t\r\n");
+		if(first == std::string::npos) return {};
+
+		const auto last = name.find_last_not_of(" \t\r\n");
+		return name.substr(first, last - first + 1);
+	}
+
+} // namespace
+
+void SceneObjectLibrary::RefreshDuplicateNameIndices() {
+	std::map<std::string, std::vector<std::shared_ptr<SceneObject>>> groups;
+
+	for(const auto& [id, sp] : objects_) {
+		(void)id;
+		if(!sp) continue;
+		sp->SetDuplicateNameIndex(0);
+		groups[sp->GetName()].push_back(sp);
+	}
+
+	for(auto& [name, group] : groups) {
+		(void)name;
+		if(group.size() <= 1) continue;
+
+		std::sort(group.begin(), group.end(),
+				  [](const std::shared_ptr<SceneObject>& lhs,
+					 const std::shared_ptr<SceneObject>& rhs) {
+					  if(!lhs || !rhs) return lhs != nullptr;
+					  return lhs->GetGuid().ToString() < rhs->GetGuid().ToString();
+				  });
+
+		for(size_t i = 0; i < group.size(); ++i) {
+			if(group[i]) {
+				group[i]->SetDuplicateNameIndex(static_cast<uint32_t>(i + 1));
+			}
+		}
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////////////
 ///     オブジェクトの追加
@@ -16,19 +71,9 @@ void SceneObjectLibrary::AddObject(const std::shared_ptr<SceneObject>& object) {
 	if(!object) return;
 
 	const Guid	id		  = object->GetGuid();
-	std::string baseName  = object->GetName();
-	std::string finalName = baseName;
+	if(objects_.contains(id)) return;
 
-	// -----------------------------------------
-	// 名前重複回避
-	// -----------------------------------------
-	auto it = nameCounters_.find(baseName);
-	if(it == nameCounters_.end()) {
-		nameCounters_[baseName] = 1;
-	} else {
-		finalName = baseName + "(" + std::to_string(it->second++) + ")";
-	}
-
+	std::string finalName = MakeUniqueName(object->GetName(), object.get());
 	object->SetName(finalName, object->GetObjectType());
 
 	// Picking ID 割り当て
@@ -38,9 +83,36 @@ void SceneObjectLibrary::AddObject(const std::shared_ptr<SceneObject>& object) {
 
 	// shared_ptr で登録
 	objects_[id] = object;
+	RefreshDuplicateNameIndices();
 
 	// イベント発火
-	EventBus::Publish(ObjectAdded{object});
+	EventBus::Publish(ObjectAdded{object, owner_});
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+///     オブジェクト名の変更
+//////////////////////////////////////////////////////////////////////////////////
+std::string SceneObjectLibrary::RenameObject(const std::shared_ptr<SceneObject>& object,
+											 const std::string&					requestedName) {
+	if(!object) return {};
+
+	const std::string finalName = MakeUniqueName(requestedName, object.get());
+	object->SetName(finalName, object->GetObjectType());
+	RefreshDuplicateNameIndices();
+	return finalName;
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+///     保存用オブジェクト名として使える形に整える
+//////////////////////////////////////////////////////////////////////////////////
+std::string SceneObjectLibrary::MakeUniqueName(const std::string& requestedName,
+											   const SceneObject* ignore) const {
+	std::string baseName = TrimName(requestedName);
+	if(baseName.empty()) {
+		baseName = ignore ? std::string(ignore->GetObjectClassName()) : "SceneObject";
+		if(baseName.empty()) baseName = "SceneObject";
+	}
+	return baseName;
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -62,13 +134,16 @@ bool SceneObjectLibrary::RemoveObject(const std::shared_ptr<SceneObject>& object
 	}
 
 	// 先に削除イベントを発火（FxSystem が emitter を消す）
-	EventBus::Publish(ObjectRemoved{object});
+	EventBus::Publish(ObjectRemoved{object, owner_});
 
 	// DestroyRecursive で階層を断つ
+	suppressDestroySync_ = true;
 	object->Destroy();
+	suppressDestroySync_ = false;
 
 	// 最後にライブラリから除外
 	objects_.erase(id);
+	RefreshDuplicateNameIndices();
 	std::cout << "[AFTER ERASE]"
 			  << " use_count=" << object.use_count()
 			  << std::endl;
@@ -91,11 +166,14 @@ bool SceneObjectLibrary::RemoveObject(Guid id) {
 			}
 		}
 
+		suppressDestroySync_ = true;
 		sp->Destroy();
-		EventBus::Publish(ObjectRemoved{sp});
+		suppressDestroySync_ = false;
+		EventBus::Publish(ObjectRemoved{sp, owner_});
 	}
 
 	objects_.erase(it);
+	RefreshDuplicateNameIndices();
 	return true;
 }
 
@@ -106,12 +184,14 @@ void SceneObjectLibrary::Clear() {
 	// Destroy → イベント → クリア
 	for(auto& [id, sp] : objects_) {
 		if(!sp) continue;
+		suppressDestroySync_ = true;
 		sp->Destroy();
-		EventBus::Publish(ObjectRemoved{sp});
+		suppressDestroySync_ = false;
+		EventBus::Publish(ObjectRemoved{sp, owner_});
 	}
 
 	objects_.clear();
-	nameCounters_.clear(); // ここは好み。リセットしたいなら消す
+	RefreshDuplicateNameIndices();
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -133,6 +213,18 @@ std::shared_ptr<SceneObject> SceneObjectLibrary::FindByName(const std::string& n
 		}
 	}
 	return nullptr;
+}
+
+std::vector<std::shared_ptr<SceneObject>> SceneObjectLibrary::FindByClassName(
+	std::string_view className) const {
+	std::vector<std::shared_ptr<SceneObject>> result;
+	for(const auto& [id, sp] : objects_) {
+		(void)id;
+		if(sp && sp->GetObjectClassName() == className) {
+			result.push_back(sp);
+		}
+	}
+	return result;
 }
 
 //////////////////////////////////////////////////////////////////////////////////

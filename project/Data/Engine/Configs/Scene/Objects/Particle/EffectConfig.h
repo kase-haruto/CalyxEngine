@@ -2,7 +2,7 @@
 #include <Data/Engine/Configs/Scene/Objects/SceneObject/SceneObjectConfig.h>
 #include <Data/Engine/Configs/Scene/Objects/Particle/EmitterConfig.h>
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 	/* -------------------------------------------------------------
 	エフェクト内の1エミッタノード
 	------------------------------------------------------------- */
@@ -37,4 +37,64 @@ namespace CalyxEffect {
 									   transform,
 									   emitters)
 
-} // namespace CalyxEffect
+	/* -------------------------------------------------------------
+	   Runtime/Asset用のエフェクトデータ
+	   SceneObjectとしてのGUIDや親子情報を持たない、再利用可能な定義データ。
+	------------------------------------------------------------- */
+	struct EffectEmitterAssetData {
+		std::string			 name;
+		WorldTransformConfig transform;
+		EmitterConfig		 emitter{};
+		bool				 isDrawEnable = true;
+		bool				 isGpu		   = false;
+	};
+
+	inline void to_json(nlohmann::json& j, const EffectEmitterAssetData& c) {
+		j = nlohmann::json{
+			{"name", c.name},
+			{"transform", c.transform},
+			{"emitter", c.emitter},
+			{"isDrawEnable", c.isDrawEnable},
+			{"isGpu", c.isGpu}};
+	}
+
+	inline void from_json(const nlohmann::json& j, EffectEmitterAssetData& c) {
+		c.name		   = j.value("name", std::string{});
+		c.transform	   = j.value("transform", WorldTransformConfig{});
+		c.isDrawEnable = j.value("isDrawEnable", true);
+		c.isGpu		   = j.value("isGpu", false);
+
+		if(j.contains("emitter")) {
+			c.emitter = j.at("emitter").get<EmitterConfig>();
+		} else {
+			// 旧ParticleSystemObjectConfig互換: emitterが直下にあるJSONも受け入れる
+			c.emitter.FromJson(j);
+		}
+	}
+
+	struct EffectAssetData {
+		std::string						  name = "Effect";
+		std::vector<EffectEmitterAssetData> emitters;
+	};
+
+	inline void to_json(nlohmann::json& j, const EffectAssetData& c) {
+		j = nlohmann::json{
+			{"type", "EffectAsset"},
+			{"name", c.name},
+			{"emitters", c.emitters}};
+	}
+
+	inline void from_json(const nlohmann::json& j, EffectAssetData& c) {
+		c.name = j.value("name", std::string{"Effect"});
+		c.emitters.clear();
+
+		if(j.contains("emitters") && j["emitters"].is_array()) {
+			for(const auto& emitterJson : j["emitters"]) {
+				EffectEmitterAssetData emitter{};
+				emitter = emitterJson.get<EffectEmitterAssetData>();
+				c.emitters.push_back(std::move(emitter));
+			}
+		}
+	}
+
+} // namespace CalyxEngine

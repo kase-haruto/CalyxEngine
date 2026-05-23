@@ -8,7 +8,7 @@
 // lib
 #include <externals/imgui/imgui.h>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 	///////////////////////////////////////////////////////////////////////////
 	// static variable
 	///////////////////////////////////////////////////////////////////////////
@@ -73,4 +73,4 @@ namespace CalyxEditor {
 		editors_.erase(std::remove(editors_.begin(), editors_.end(), editor), editors_.end());
 	}
 
-} // namespace CalyxEditor
+} // namespace CalyxEngine

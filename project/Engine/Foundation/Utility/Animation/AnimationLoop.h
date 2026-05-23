@@ -5,7 +5,7 @@
 /* ===================================================================== */
 #include <cstdint>
 
-namespace CalyxUtil {
+namespace CalyxEngine {
 
 	/*------------------------------------------------------------------------*/
 	/* アニメーションループ制御クラス
@@ -74,4 +74,4 @@ namespace CalyxUtil {
 		AnimationLoopType loopType_;  // 種類
 	};
 
-} // namespace CalyxUtil
+} // namespace CalyxEngine

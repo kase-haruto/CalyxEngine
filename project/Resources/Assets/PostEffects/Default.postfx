@@ -1,0 +1,71 @@
+{
+  "graph": {
+    "links": [],
+    "nextId": 5,
+    "nodes": [
+      {
+        "boolValue": false,
+        "colorValue": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "floatValue": 0.0,
+        "id": 1,
+        "inputs": [],
+        "intValue": 0,
+        "outputs": [
+          {
+            "id": 2,
+            "kind": 1,
+            "name": "Color",
+            "valueType": 2
+          }
+        ],
+        "position": [
+          20.0,
+          120.0
+        ],
+        "properties": {},
+        "title": "Scene Color",
+        "type": "Input"
+      },
+      {
+        "boolValue": false,
+        "colorValue": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "floatValue": 0.0,
+        "id": 3,
+        "inputs": [
+          {
+            "id": 4,
+            "kind": 0,
+            "name": "Color",
+            "valueType": 2
+          }
+        ],
+        "intValue": 0,
+        "outputs": [],
+        "position": [
+          720.0,
+          120.0
+        ],
+        "properties": {},
+        "title": "Output",
+        "type": "Output"
+      }
+    ]
+  },
+  "name": "Default",
+  "nodes": [],
+  "outline": {
+    "enabled": false
+  },
+  "type": "PostEffectPreset",
+  "version": 1
+}

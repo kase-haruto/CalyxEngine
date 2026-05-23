@@ -2,7 +2,7 @@
 
 #include <Engine/Foundation/Clock/ClockManager.h>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 
     PerformanceOverlay::PerformanceOverlay() {
         align_         = OverlayAlign::TopRight;
@@ -73,4 +73,4 @@ namespace CalyxEditor {
         }
     }
 
-} // namespace CalyxEditor
+} // namespace CalyxEngine

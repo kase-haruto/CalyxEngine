@@ -18,9 +18,9 @@
 //  コンストラクタ
 /////////////////////////////////////////////////////////////////////////
 BaseCamera::BaseCamera()
-	: viewMatrix_(CalyxMath::Matrix4x4::Inverse(worldTransform_.matrix.world)),
+	: viewMatrix_(CalyxEngine::Matrix4x4::Inverse(worldTransform_.matrix.world)),
 	  projectionMatrix_(MakePerspectiveFovMatrix(fovAngleY_, aspectRatio_, nearZ_, farZ_)) {
-	viewProjectionMatrix_ = CalyxMath::Matrix4x4::Multiply(viewMatrix_, projectionMatrix_);
+	viewProjectionMatrix_ = CalyxEngine::Matrix4x4::Multiply(viewMatrix_, projectionMatrix_);
 
 	/* バッファの生成とマッピング =======================*/
 	cameraBuffer_.Initialize(GraphicsGroup::GetInstance()->GetDevice().Get());
@@ -30,11 +30,11 @@ BaseCamera::BaseCamera()
 }
 
 BaseCamera::BaseCamera(const std::string& name)
-	: viewMatrix_(CalyxMath::Matrix4x4::Inverse(worldTransform_.matrix.world)),
+	: viewMatrix_(CalyxEngine::Matrix4x4::Inverse(worldTransform_.matrix.world)),
 	  projectionMatrix_(MakePerspectiveFovMatrix(fovAngleY_, aspectRatio_, nearZ_, farZ_)) {
 	SceneObject::SetName(name, ObjectType::Camera);
 
-	viewProjectionMatrix_ = CalyxMath::Matrix4x4::Multiply(viewMatrix_, projectionMatrix_);
+	viewProjectionMatrix_ = CalyxEngine::Matrix4x4::Multiply(viewMatrix_, projectionMatrix_);
 	/* バッファの生成とマッピング =======================*/
 	cameraBuffer_.Initialize(GraphicsGroup::GetInstance()->GetDevice().Get());
 	worldTransform_.rotationSource = RotationSource::Euler;
@@ -55,7 +55,7 @@ void BaseCamera::Update(float dt) {
 			float offsetZ = ((rand() / (float)RAND_MAX) * 2.0f - 1.0f) * shakeIntensity_;
 
 			// 現在のカメラ位置にオフセットを加算
-			worldTransform_.translation = originalPosition_ + CalyxMath::Vector3(offsetX, offsetY, offsetZ);
+			worldTransform_.translation = originalPosition_ + CalyxEngine::Vector3(offsetX, offsetY, offsetZ);
 		} else {
 			// シェイク終了時に元の位置に戻す
 			isShaking_					= false;
@@ -74,19 +74,19 @@ void BaseCamera::AlwaysUpdate([[maybe_unused]] float dt) {
 /////////////////////////////////////////////////////////////////////////
 void BaseCamera::UpdateMatrix() {
 	// 行列の更新
-	viewMatrix_			  = CalyxMath::Matrix4x4::Inverse(worldTransform_.matrix.world);
+	viewMatrix_			  = CalyxEngine::Matrix4x4::Inverse(worldTransform_.matrix.world);
 	projectionMatrix_	  = MakePerspectiveFovMatrix(fovAngleY_, aspectRatio_, nearZ_, farZ_);
-	viewProjectionMatrix_ = CalyxMath::Matrix4x4::Multiply(viewMatrix_, projectionMatrix_);
+	viewProjectionMatrix_ = CalyxEngine::Matrix4x4::Multiply(viewMatrix_, projectionMatrix_);
 
 	// 親の移動を反映したワールド位置で転送
-	const CalyxMath::Vector3 worldPos{
+	const CalyxEngine::Vector3 worldPos{
 		worldTransform_.matrix.world.m[3][0],
 		worldTransform_.matrix.world.m[3][1],
 		worldTransform_.matrix.world.m[3][2]
 	};
 
 	auto* gg = GraphicsGroup::GetInstance();
-	CalyxMath::Vector2 viewportSize{
+	CalyxEngine::Vector2 viewportSize{
 		static_cast<float>(gg->GetClientWidth()),
 		static_cast<float>(gg->GetClientHeight())
 	};
@@ -97,8 +97,8 @@ void BaseCamera::UpdateMatrix() {
 /////////////////////////////////////////////////////////////////////////
 //  projection行列の作成
 /////////////////////////////////////////////////////////////////////////
-CalyxMath::Matrix4x4 BaseCamera::MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip) {
-	CalyxMath::Matrix4x4 result = {
+CalyxEngine::Matrix4x4 BaseCamera::MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip, float farClip) {
+	CalyxEngine::Matrix4x4 result = {
 		1 / (aspectRatio * std::tan(fovY / 2)), 0, 0, 0,
 		0, 1 / std::tan(fovY / 2), 0, 0,
 		0, 0, farClip / (farClip - nearClip), 1,
@@ -125,6 +125,7 @@ void BaseCamera::ApplyConfig() {
 	name_	  = cfg.name;
 	id_		  = cfg.guid;
 	parentId_ = cfg.parentGuid;
+	worldTransform_.ApplyConfig(cfg.transform);
 }
 
 void BaseCamera::ExtractConfig() {
@@ -133,6 +134,7 @@ void BaseCamera::ExtractConfig() {
 	cfg.name	   = name_;
 	cfg.guid	   = id_;
 	cfg.parentGuid = parentId_;
+	cfg.transform  = worldTransform_.ExtractConfig();
 }
 
 void BaseCamera::ApplyConfigFromJson([[maybe_unused]] const nlohmann::json& j) {
@@ -153,28 +155,28 @@ void BaseCamera::SetName(const std::string& name) {
 	SceneObject::SetName(name, ObjectType::Camera);
 }
 
-void BaseCamera::SetCamera(const CalyxMath::Vector3& pos, const CalyxMath::Vector3& rotate) {
+void BaseCamera::SetCamera(const CalyxEngine::Vector3& pos, const CalyxEngine::Vector3& rotate) {
 	worldTransform_.translation	  = pos;
 	worldTransform_.eulerRotation = rotate;
 }
 
-const CalyxMath::Matrix4x4& BaseCamera::GetViewMatrix() const {
+const CalyxEngine::Matrix4x4& BaseCamera::GetViewMatrix() const {
 	return viewMatrix_;
 }
 
-const CalyxMath::Matrix4x4& BaseCamera::GetProjectionMatrix() const {
+const CalyxEngine::Matrix4x4& BaseCamera::GetProjectionMatrix() const {
 	return projectionMatrix_;
 }
 
-const CalyxMath::Matrix4x4& BaseCamera::GetViewProjectionMatrix() const {
+const CalyxEngine::Matrix4x4& BaseCamera::GetViewProjectionMatrix() const {
 	return viewProjectionMatrix_;
 }
 
-const CalyxMath::Vector3& BaseCamera::GetRotate() const {
+const CalyxEngine::Vector3& BaseCamera::GetRotate() const {
 	return worldTransform_.eulerRotation;
 }
 
-const CalyxMath::Vector3& BaseCamera::GetTranslate() const {
+const CalyxEngine::Vector3& BaseCamera::GetTranslate() const {
 	return worldTransform_.translation;
 }
 
@@ -188,7 +190,7 @@ void BaseCamera::SetCommand(ID3D12GraphicsCommandList* command, PipelineType pip
 	cameraBuffer_.SetCommand(command, pipelineType);
 }
 
-void BaseCamera::SetRootCommand(ID3D12GraphicsCommandList* command, uint32_t rootIndex) {
+void BaseCamera::SetRootCommand(ID3D12GraphicsCommandList* command, uint32_t rootIndex) const {
 	cameraBuffer_.SetCommand(command, rootIndex);
 }
 
@@ -207,7 +209,7 @@ void BaseCamera::SetAspectRatio(float aspect) {
 		adjustedFov *= 1.0f + (aspect - highAspectThreshold) * 0.5f; // 横長 → 少し広げる
 	}
 
-	projectionMatrix_ = CalyxMath::Matrix4x4::PerspectiveFovRH(adjustedFov, aspect, nearZ_, farZ_);
+	projectionMatrix_ = CalyxEngine::Matrix4x4::PerspectiveFovRH(adjustedFov, aspect, nearZ_, farZ_);
 }
 
 REGISTER_SCENE_OBJECT(BaseCamera)

@@ -7,14 +7,14 @@
 #include <cmath>
 #include <numbers>
 
-namespace CalyxMath {
+namespace CalyxEngine {
 
 	float cot(float angle) {
 		return 1 / std::tan(angle);
 	}
 
-	CalyxMath::Matrix4x4 CalyxMath::Matrix4x4::Multiply(const CalyxMath::Matrix4x4& m1, const CalyxMath::Matrix4x4& m2) {
-		CalyxMath::Matrix4x4 result;
+	CalyxEngine::Matrix4x4 CalyxEngine::Matrix4x4::Multiply(const CalyxEngine::Matrix4x4& m1, const CalyxEngine::Matrix4x4& m2) {
+		CalyxEngine::Matrix4x4 result;
 
 		for(int i = 0; i < 4; ++i) {
 			for(int j = 0; j < 4; ++j) {
@@ -28,8 +28,8 @@ namespace CalyxMath {
 		return result;
 	}
 
-	CalyxMath::Matrix4x4 CalyxMath::Matrix4x4::MakeIdentity() {
-		CalyxMath::Matrix4x4 result;
+	CalyxEngine::Matrix4x4 CalyxEngine::Matrix4x4::MakeIdentity() {
+		CalyxEngine::Matrix4x4 result;
 		for(int i = 0; i < 4; ++i) {
 			for(int j = 0; j < 4; ++j) {
 				if(i == j) {
@@ -42,8 +42,8 @@ namespace CalyxMath {
 		return result;
 	}
 
-	CalyxMath::Matrix4x4 CalyxMath::Matrix4x4::Inverse(const CalyxMath::Matrix4x4& mat) {
-		CalyxMath::Matrix4x4 result;
+	CalyxEngine::Matrix4x4 CalyxEngine::Matrix4x4::Inverse(const CalyxEngine::Matrix4x4& mat) {
+		CalyxEngine::Matrix4x4 result;
 
 		// 行列式を求める
 #pragma region 行列式
@@ -243,7 +243,7 @@ namespace CalyxMath {
 		return result;
 	}
 
-	Vector3 CalyxMath::Matrix4x4::ToEuler(const CalyxMath::Matrix4x4& matrix) {
+	Vector3 CalyxEngine::Matrix4x4::ToEuler(const CalyxEngine::Matrix4x4& matrix) {
 		Vector3 euler;
 
 		// YXZ順のオイラー角を計算
@@ -268,15 +268,15 @@ namespace CalyxMath {
 		return euler;
 	}
 
-	Vector3 CalyxMath::Matrix4x4::Translation(const CalyxMath::Matrix4x4& matrix) {
+	Vector3 CalyxEngine::Matrix4x4::Translation(const CalyxEngine::Matrix4x4& matrix) {
 		return Vector3{
 			matrix.m[0][3],
 			matrix.m[1][3],
 			matrix.m[2][3]};
 	}
 
-	CalyxMath::Matrix4x4 CalyxMath::Matrix4x4::Transpose(const CalyxMath::Matrix4x4& mat) {
-		CalyxMath::Matrix4x4 result;
+	CalyxEngine::Matrix4x4 CalyxEngine::Matrix4x4::Transpose(const CalyxEngine::Matrix4x4& mat) {
+		CalyxEngine::Matrix4x4 result;
 		for(int r = 0; r < 4; ++r) {
 			for(int c = 0; c < 4; ++c) {
 				result.m[r][c] = mat.m[c][r]; // 行と列を入れ替え
@@ -285,7 +285,7 @@ namespace CalyxMath {
 		return result;
 	}
 
-	Vector3 CalyxMath::Matrix4x4::Transform(const Vector3& vector, const CalyxMath::Matrix4x4& matrix) {
+	Vector3 CalyxEngine::Matrix4x4::Transform(const Vector3& vector, const CalyxEngine::Matrix4x4& matrix) {
 		Vector3 result;
 
 		float x =
@@ -326,12 +326,12 @@ namespace CalyxMath {
 		return result;
 	}
 
-	CalyxMath::Matrix4x4 CalyxMath::Matrix4x4::MakeLookRotationMatrix(const Vector3& forward, const Vector3& up) {
+	CalyxEngine::Matrix4x4 CalyxEngine::Matrix4x4::MakeLookRotationMatrix(const Vector3& forward, const Vector3& up) {
 		Vector3 zAxis = forward.Normalize();				   // 前方方向
 		Vector3 xAxis = Vector3::Cross(up, zAxis).Normalize(); // 右方向
 		Vector3 yAxis = Vector3::Cross(zAxis, xAxis);		   // 上方向
 
-		CalyxMath::Matrix4x4 result = CalyxMath::Matrix4x4::MakeIdentity();
+		CalyxEngine::Matrix4x4 result = CalyxEngine::Matrix4x4::MakeIdentity();
 
 		result.m[0][0] = xAxis.x;
 		result.m[1][0] = xAxis.y;
@@ -348,9 +348,9 @@ namespace CalyxMath {
 		return result;
 	}
 
-	CalyxMath::Matrix4x4 CalyxMath::Matrix4x4::MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth) {
+	CalyxEngine::Matrix4x4 CalyxEngine::Matrix4x4::MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth) {
 
-		CalyxMath::Matrix4x4 matrix = {};
+		CalyxEngine::Matrix4x4 matrix = {};
 
 		for(int i = 0; i < 4; i++) {
 			for(int j = 0; j < 4; j++) {
@@ -369,12 +369,12 @@ namespace CalyxMath {
 		return matrix;
 	}
 
-	CalyxMath::Matrix4x4 CalyxMath::Matrix4x4::PerspectiveFovRH(float fovY, float aspect, float nearZ, float farZ) {
+	CalyxEngine::Matrix4x4 CalyxEngine::Matrix4x4::PerspectiveFovRH(float fovY, float aspect, float nearZ, float farZ) {
 		float yScale = 1.0f / std::tan(fovY * 0.5f);
 		float xScale = yScale / aspect;
 		float zRange = farZ - nearZ;
 
-		CalyxMath::Matrix4x4 mat = {};
+		CalyxEngine::Matrix4x4 mat = {};
 
 		mat.m[0][0] = xScale;
 		mat.m[1][1] = yScale;
@@ -411,7 +411,7 @@ namespace CalyxMath {
 		return m;
 	}
 
-	void CalyxMath::Matrix4x4::CopyToArray(float out[16]) const {
+	void CalyxEngine::Matrix4x4::CopyToArray(float out[16]) const {
 		// m[row][col] → out[col*4 + row]
 		for(int row = 0; row < 4; ++row) {
 			for(int col = 0; col < 4; ++col) {
@@ -420,19 +420,19 @@ namespace CalyxMath {
 		}
 	}
 
-	Vector3 CalyxMath::Matrix4x4::GetTranslationMatrix() const {
+	Vector3 CalyxEngine::Matrix4x4::GetTranslationMatrix() const {
 		return Vector3{
 			m[0][3],
 			m[1][3],
 			m[2][3]};
 	}
 
-	CalyxMath::Vector4 CalyxMath::Matrix4x4::operator*(const CalyxMath::Vector4& v) const {
-		return CalyxMath::Vector4{
+	CalyxEngine::Vector4 CalyxEngine::Matrix4x4::operator*(const CalyxEngine::Vector4& v) const {
+		return CalyxEngine::Vector4{
 			m[0][0] * v.x + m[1][0] * v.y + m[2][0] * v.z + m[3][0] * v.w,
 			m[0][1] * v.x + m[1][1] * v.y + m[2][1] * v.z + m[3][1] * v.w,
 			m[0][2] * v.x + m[1][2] * v.y + m[2][2] * v.z + m[3][2] * v.w,
 			m[0][3] * v.x + m[1][3] * v.y + m[2][3] * v.z + m[3][3] * v.w};
 	}
 
-} // namespace CalyxMath
+} // namespace CalyxEngine

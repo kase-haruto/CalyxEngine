@@ -45,12 +45,12 @@ namespace CalyxEngine {
 		std::unique_ptr<GraphicsSystem> graphicsSystem_;
 
 		// ui
-		std::unique_ptr<CalyxEditor::EngineUICore> engineUICore_;
+		std::unique_ptr<CalyxEngine::EngineUICore> engineUICore_;
 
 		// scene
-		std::unique_ptr<CalyxScene::SceneManager>	   sceneManager_;
-		std::unique_ptr<CalyxEditor::EditorCollection> editorCollection_;
-		std::unique_ptr<CalyxEditor::PlaySession>	   playSession_;
+		std::unique_ptr<CalyxEngine::SceneManager>	   sceneManager_;
+		std::unique_ptr<CalyxEngine::EditorCollection> editorCollection_;
+		std::unique_ptr<CalyxEngine::PlaySession>	   playSession_;
 
 		// ホットリロード
 		LivePPService livePPService_;

@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 	/* ========================================================================
 /*		メニューカテゴリ
 /* ===================================================================== */
@@ -15,7 +15,8 @@ namespace CalyxEditor {
 		File,
 		Edit,
 		View,
-		Tools
+		Tools,
+		Settings
 	};
 
 	/* ========================================================================
@@ -67,4 +68,4 @@ namespace CalyxEditor {
 		std::unordered_map<MenuCategory, std::vector<MenuItem>> items_;
 	};
 
-} // namespace CalyxEditor
+} // namespace CalyxEngine

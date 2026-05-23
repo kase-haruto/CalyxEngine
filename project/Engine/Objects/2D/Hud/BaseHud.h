@@ -7,7 +7,7 @@
 
 #include "../Object2d/SpriteObject2d.h"
 
-namespace Calyx2D {
+namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
 	 * HUD設定構造体
@@ -147,4 +147,4 @@ namespace Calyx2D {
 		std::unique_ptr<SpriteObject2d> spriteObj_ = nullptr; //< スプライト
 	};
 
-} // namespace Calyx2D
+} // namespace CalyxEngine

@@ -34,7 +34,7 @@ namespace CalyxEngine {
 		/**
 		 * \brief デストラクタ
 		 */
-		virtual ~SerializableObject() = default;
+		virtual ~SerializableObject();
 
 		/**
 		 * \brief パラメータパスを取得
@@ -53,6 +53,18 @@ namespace CalyxEngine {
 		 * \return 成功したか
 		 */
 		bool LoadParams();
+
+		void ExtractParamsToJson(Json& j) const;
+		void ApplyParamsFromJson(const Json& j);
+		std::string GetParamStorageKey() const;
+
+		static void BeginCapture(std::vector<SerializableObject*>* captureTarget,
+								 const Json* overrides);
+		static void EndCapture();
+		static void BeginPendingCapture();
+		static void EndPendingCapture(std::vector<SerializableObject*>* captureTarget,
+									  const Json* overrides);
+		static bool IsAlive(const SerializableObject* object);
 
 		/**
 		 * \brief 保存/読み込みボタンのGUIを表示
@@ -77,7 +89,7 @@ namespace CalyxEngine {
 		/**
 		 * \brief コンストラクタ
 		 */
-		SerializableObject() = default;
+		SerializableObject();
 
 		/**
 		 * \brief フィールドを追加

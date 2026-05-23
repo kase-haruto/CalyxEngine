@@ -6,14 +6,14 @@
 #include <Engine/Application/Effects/Particle/Module/Uv/TextureSheetAnimModule.h>
 #include <Engine/Application/Effects/Particle/Module/OverLifetime/OverLifetimeModule.h>
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 	namespace FxModuleFactory {
 
 		//------------------------------------------------------------------------------
 		// Config -> Module
 		//   文字列名による型判定を廃止し、dynamic_cast で安全に分岐
 		//------------------------------------------------------------------------------
-		std::unique_ptr<CalyxEffect::BaseFxModule> CreateFromConfig(const CalyxEffect::BaseModuleConfig& config) {
+		std::unique_ptr<CalyxEngine::BaseFxModule> CreateFromConfig(const CalyxEngine::BaseModuleConfig& config) {
 			// Gravity
 			if (auto* c = dynamic_cast<const GravityModuleConfig*>(&config)) {
 				auto m = std::make_unique<GravityModule>(c->name);
@@ -31,7 +31,7 @@ namespace CalyxEffect {
 			}
 			// TextureSheetAnimation
 			if (auto* c = dynamic_cast<const TextureSheetAnimationConfig*>(&config)) {
-				auto m = std::make_unique<CalyxEffect::TextureSheetAnimationModule>(c->name);
+				auto m = std::make_unique<CalyxEngine::TextureSheetAnimationModule>(c->name);
 				m->SetEnabled(c->enabled);
 				m->UseGridMode(c->rows, c->cols);
 				m->SetLoop(c->loop);
@@ -40,8 +40,8 @@ namespace CalyxEffect {
 				return m;
 			}
 			// OverLifetime
-			if (auto* c = dynamic_cast<const CalyxEffect::OverLifetimeModuleConfig*>(&config)) {
-				auto m = std::make_unique<CalyxEffect::OverLifetimeModule>(c->name);
+			if (auto* c = dynamic_cast<const CalyxEngine::OverLifetimeModuleConfig*>(&config)) {
+				auto m = std::make_unique<CalyxEngine::OverLifetimeModule>(c->name);
 				c->ApplyTo(*m);
 				return m;
 			}
@@ -54,7 +54,7 @@ namespace CalyxEffect {
 		// Module -> Config
 		//   こちらも dynamic_cast ベース。module.GetName() では判定しない！
 		//------------------------------------------------------------------------------
-		std::unique_ptr<CalyxEffect::BaseModuleConfig> CreateConfigFromModule(const CalyxEffect::BaseFxModule& module) {
+		std::unique_ptr<CalyxEngine::BaseModuleConfig> CreateConfigFromModule(const CalyxEngine::BaseFxModule& module) {
 			// Gravity
 			if (auto* m = dynamic_cast<const GravityModule*>(&module)) {
 				auto cfg = std::make_unique<GravityModuleConfig>();
@@ -73,7 +73,7 @@ namespace CalyxEffect {
 				return cfg;
 			}
 			// TextureSheetAnimation
-			if (auto* m = dynamic_cast<const CalyxEffect::TextureSheetAnimationModule*>(&module)) {
+			if (auto* m = dynamic_cast<const CalyxEngine::TextureSheetAnimationModule*>(&module)) {
 				auto cfg               = std::make_unique<TextureSheetAnimationConfig>();
 				cfg->name              = m->GetName();
 				cfg->enabled           = m->IsEnabled();
@@ -85,8 +85,8 @@ namespace CalyxEffect {
 				return cfg;
 			}
 			// OverLifetime
-			if (auto* m = dynamic_cast<const CalyxEffect::OverLifetimeModule*>(&module)) {
-				auto cfg = std::make_unique<CalyxEffect::OverLifetimeModuleConfig>();
+			if (auto* m = dynamic_cast<const CalyxEngine::OverLifetimeModule*>(&module)) {
+				auto cfg = std::make_unique<CalyxEngine::OverLifetimeModuleConfig>();
 				cfg->ExtractFrom(*m);
 				return cfg;
 			}
@@ -98,7 +98,7 @@ namespace CalyxEffect {
 		//------------------------------------------------------------------------------
 		// CreateByName : UIの「追加」から型名で生成
 		//------------------------------------------------------------------------------
-		std::unique_ptr<CalyxEffect::BaseFxModule> CreateByName(const std::string& typeName) {
+		std::unique_ptr<CalyxEngine::BaseFxModule> CreateByName(const std::string& typeName) {
 			if (typeName == "GravityModule") {
 				return std::make_unique<GravityModule>("GravityModule");
 			}
@@ -106,10 +106,10 @@ namespace CalyxEffect {
 				return std::make_unique<SizeOverLiftimeModule>("OverLifetimeModule");
 			}
 			if (typeName == "TextureSheetAnimationModule") {
-				return std::make_unique<CalyxEffect::TextureSheetAnimationModule>("TextureSheetAnimationModule");
+				return std::make_unique<CalyxEngine::TextureSheetAnimationModule>("TextureSheetAnimationModule");
 			}
 			if (typeName == "OverLifetimeModule") { 
-				return std::make_unique<CalyxEffect::OverLifetimeModule>("OverLifetimeModule");
+				return std::make_unique<CalyxEngine::OverLifetimeModule>("OverLifetimeModule");
 			}
 			return nullptr;
 		}

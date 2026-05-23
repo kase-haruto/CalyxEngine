@@ -26,10 +26,10 @@
 template <typename tValue>
 struct Keyframe {
 	float time;     // アニメーション時間(秒)
-	tValue value;   // 補間対象の値 (CalyxMath::Vector3 or CalyxMath::Quaternion)
+	tValue value;   // 補間対象の値 (CalyxEngine::Vector3 or CalyxEngine::Quaternion)
 };
-using KeyframeQuaternion = Keyframe<CalyxMath::Quaternion>;
-using KeyframeVector3 = Keyframe<CalyxMath::Vector3>;
+using KeyframeQuaternion = Keyframe<CalyxEngine::Quaternion>;
+using KeyframeVector3 = Keyframe<CalyxEngine::Vector3>;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //          AnimationCurve
@@ -43,14 +43,14 @@ struct AnimationCurve {
 //          NodeAnimation
 /////////////////////////////////////////////////////////////////////////////////////////
 struct NodeAnimation {
-	AnimationCurve<CalyxMath::Vector3>     translate;	// 平行移動
-	AnimationCurve<CalyxMath::Quaternion>  rotate;		// 回転
-	AnimationCurve<CalyxMath::Vector3>     scale;		// スケーリング
+	AnimationCurve<CalyxEngine::Vector3>     translate;	// 平行移動
+	AnimationCurve<CalyxEngine::Quaternion>  rotate;		// 回転
+	AnimationCurve<CalyxEngine::Vector3>     scale;		// スケーリング
 };
 
 struct Node {
 	QuaternionTransform transform;
-	CalyxMath::Matrix4x4 localMatrix;
+	CalyxEngine::Matrix4x4 localMatrix;
 	std::string name;
 	std::vector<Node> children;
 };
@@ -70,8 +70,8 @@ struct Animation {
 struct Joint {
 	QuaternionTransform restTransform;	//< バインドポーズ
 	QuaternionTransform transform;	//< transform情報
-	CalyxMath::Matrix4x4 localMatrix;			//< ローカル行列
-	CalyxMath::Matrix4x4 skeletonSpaceMatrix;	//< スケルトン空間行列
+	CalyxEngine::Matrix4x4 localMatrix;			//< ローカル行列
+	CalyxEngine::Matrix4x4 skeletonSpaceMatrix;	//< スケルトン空間行列
 	std::string name;				//< ボーン名
 	std::vector<int32_t> children;	//< 子ボーンのインデックス
 	int32_t index;					//< インデックス
@@ -83,11 +83,11 @@ struct Skeleton {
 	std::map<std::string, int32_t> jointMap;
 	std::vector<Joint> joints;
 
-	void JointDraw(const CalyxMath::Matrix4x4& m, const CalyxMath::Vector4& color);
+	void JointDraw(const CalyxEngine::Matrix4x4& m, const CalyxEngine::Vector4& color);
 
-	void Draw(const CalyxMath::Matrix4x4& world = CalyxMath::Matrix4x4::MakeIdentity(),
+	void Draw(const CalyxEngine::Matrix4x4& world = CalyxEngine::Matrix4x4::MakeIdentity(),
 			  int highlightIndex = -1,
-			  const CalyxMath::Vector4& colorHi = { 1,0.2f,0.2f,1 });
+			  const CalyxEngine::Vector4& colorHi = { 1,0.2f,0.2f,1 });
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -99,7 +99,7 @@ struct VertexWeightData {
 };
 
 struct JointWeightData {
-	CalyxMath::Matrix4x4 inverseBindPoseMatrix;
+	CalyxEngine::Matrix4x4 inverseBindPoseMatrix;
 	std::vector<VertexWeightData> vertexWeights;
 };
 
@@ -116,12 +116,12 @@ struct VertexInfluence {
 };
 
 struct WellForGPU {
-	CalyxMath::Matrix4x4 skeletonSpaceMatrix;							//位置用
-	CalyxMath::Matrix4x4 skeletonSpaceInverseTransposeMatrix;			//法線用
+	CalyxEngine::Matrix4x4 skeletonSpaceMatrix;							//位置用
+	CalyxEngine::Matrix4x4 skeletonSpaceInverseTransposeMatrix;			//法線用
 };
 
 struct SkinCluster {
-	std::vector<CalyxMath::Matrix4x4> inverseBindPoseMatrices;
+	std::vector<CalyxEngine::Matrix4x4> inverseBindPoseMatrices;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource>influenceResource;
 	D3D12_VERTEX_BUFFER_VIEW influenceBufferView;

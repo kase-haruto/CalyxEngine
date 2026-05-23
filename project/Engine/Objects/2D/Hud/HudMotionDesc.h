@@ -1,7 +1,7 @@
 #pragma once
 #include "../../../Foundation/Utility/Ease/CxEase.h"
 
-namespace Calyx2D {
+namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
 	 * HUDモーション記述構造体
@@ -12,7 +12,7 @@ namespace Calyx2D {
 		T start{};
 		T end{};
 		float duration = 0.5f;
-		CalyxEase::EaseType easing = CalyxEase::EaseType::Linear;
+		CalyxEngine::EaseType easing = CalyxEngine::EaseType::Linear;
 	};
 
 }

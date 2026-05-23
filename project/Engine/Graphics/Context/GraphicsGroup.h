@@ -14,7 +14,7 @@ public:
 	static GraphicsGroup* GetInstance();
 	~GraphicsGroup() = default;
 
-	void Initialize(const CalyxGraphics::DxCore* dxCore, PipelineStateManager* psManager);
+	void Initialize(const CalyxEngine::DxCore* dxCore, PipelineStateManager* psManager);
 
 	///=========================================
 	/// pipelineの取得
@@ -40,6 +40,6 @@ private:
 	GraphicsGroup& operator=(const GraphicsGroup*) = delete;
 
 private:
-	const CalyxGraphics::DxCore*		 pDxCore_;
+	const CalyxEngine::DxCore*		 pDxCore_;
 	PipelineStateManager* pipelineManager_;
 };

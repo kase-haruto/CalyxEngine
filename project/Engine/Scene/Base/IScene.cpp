@@ -7,7 +7,7 @@
 IScene::IScene(){
 }
 
-IScene::IScene(CalyxGraphics::DxCore* dxCore){
+IScene::IScene(CalyxEngine::DxCore* dxCore){
 	pDxCore_ = dxCore;
 
 }

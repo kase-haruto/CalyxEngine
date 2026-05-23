@@ -35,10 +35,12 @@ public:
 	/// </summary>
 	/// <param name="device"></param>
 	void CreateShaderResourceView(ID3D12Device* device);
+	void CreateShaderResourceView(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE destination) const;
 
 	//--------- accessor -----------------------------------------------------
 	// getter
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSrvHandle() const { return srvHandleGPU_; }
+	D3D12_CPU_DESCRIPTOR_HANDLE GetCpuSrvHandle() const { return srvHandleCPU_; }
 	const DirectX::TexMetadata& GetMetaData();
 
 private:

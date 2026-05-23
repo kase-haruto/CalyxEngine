@@ -56,14 +56,14 @@ namespace CalyxEngine {
 			j["fields"][f.key] = v;
 		}
 
-		return CalyxUtil::JsonUtils::Save(filePath.string(), j);
+		return CalyxEngine::JsonUtils::Save(filePath.string(), j);
 	}
 
 	bool ParamStore::Load(SerializableObject& obj) {
 		const auto filePath = MakeFilePath(obj.GetParamPath());
 
 		Json j;
-		if (!CalyxUtil::JsonUtils::Load(filePath.string(), j)) {
+		if (!CalyxEngine::JsonUtils::Load(filePath.string(), j)) {
 			return false;
 		}
 

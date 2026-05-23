@@ -2,7 +2,7 @@
 #include "../../../Foundation/HotReload/LivePP/LivePPService.h"
 #include <externals/imgui/imgui.h>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 
 	LivePPPanel::LivePPPanel() : IEngineUI("Hot Reload (Live++)") {
 	}
@@ -46,4 +46,4 @@ namespace CalyxEditor {
 		}
 	}
 
-} // namespace CalyxEditor
+} // namespace CalyxEngine

@@ -81,7 +81,7 @@ public:
 	 * \brief タイプ名を取得
 	 * \return タイプ名
 	 */
-	std::string_view GetTypeName() const override{return "SkyBox";}
+	std::string_view GetObjectClassName() const override{return "SkyBox";}
 
 private:
 	//===================================================================*/
@@ -95,4 +95,3 @@ private:
 	DxIndexBuffer<uint16_t> indexBuffer_; //< インデックスバッファ
 	WorldTransform worldTransform_; //< ワールド変換情報
 };
-

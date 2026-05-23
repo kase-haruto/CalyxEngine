@@ -1,4 +1,5 @@
 #include "PipelineService.h"
+#include <Engine/Foundation/Debug/CxAssert.h>
 
 #include <Engine/Graphics/Pipeline/Presets/PipelinePresets.h>
 
@@ -80,6 +81,13 @@ void PipelineService::RegisterAllPipelines() {
 		regObj(PipelineTag::Object::Particle, mode, PipelinePresets::MakeParticle);
 		regObj(PipelineTag::Object::GpuParticle, mode, PipelinePresets::MakeGpuParticle);
 	}
+	regObjNoBlend(PipelineTag::Object::EditorInfiniteGrid, PipelinePresets::MakeEditorInfiniteGrid);
+
+	//========================= Shadow ===================================
+	regObjNoBlend(PipelineTag::Object::OutlineObject3D, PipelinePresets::MakeOutlineObject3D);
+	regObjNoBlend(PipelineTag::Object::OutlineSkinnedObject3D, PipelinePresets::MakeOutlineSkinnedObject3D);
+	regObjNoBlend(PipelineTag::Object::OutlineNormalObject3D, PipelinePresets::MakeOutlineNormalObject3D);
+	regObjNoBlend(PipelineTag::Object::OutlineNormalSkinnedObject3D, PipelinePresets::MakeOutlineNormalSkinnedObject3D);
 
 	//========================= Shadow ===================================
 	regObjNoBlend(PipelineTag::Object::ShadowStatic, PipelinePresets::MakeShadowStatic);
@@ -99,6 +107,7 @@ void PipelineService::RegisterAllPipelines() {
 	regCS(PipelineTag::Compute::ParticleInitializeCompute, PipelinePresets::MakeGpuParticleCS);
 	regCS(PipelineTag::Compute::ParticleEmitCompute, PipelinePresets::MakeGpuParticleEmit);
 	regCS(PipelineTag::Compute::ParticleUpdateCompute, PipelinePresets::MakeGpuParticleUpdate);
+	regCS(PipelineTag::Compute::SkinningCompute, PipelinePresets::MakeSkinningCompute);
 
 	//=================== PostProcess Pipelines ==========================
 	regPP(PipelineTag::PostProcess::GrayScale, PipelinePresets::MakeGrayScale);
@@ -106,6 +115,8 @@ void PipelineService::RegisterAllPipelines() {
 	regPP(PipelineTag::PostProcess::Vignette, PipelinePresets::MakeVignette);
 	regPP(PipelineTag::PostProcess::ChromaticAberration, PipelinePresets::MakeChromaticAberration);
 	regPP(PipelineTag::PostProcess::CRT, PipelinePresets::MakeCRT);
+	regPP(PipelineTag::PostProcess::OutlineComposite, PipelinePresets::MakeOutlineComposite);
+	regPP(PipelineTag::PostProcess::Blend, PipelinePresets::MakeBlend);
 	regPP(PipelineTag::PostProcess::CopyImage, PipelinePresets::MakeCopyImage);
 
 }
@@ -122,14 +133,10 @@ void PipelineService::SetCommand(const GraphicsPipelineDesc& desc, ID3D12Graphic
 }
 
 void PipelineService::SetCommand(const PipelineSet& set, ID3D12GraphicsCommandList* cmd) const {
-	if (set.pipelineState != lastPipelineState_){
-		cmd->SetPipelineState(set.pipelineState);
-		lastPipelineState_ = set.pipelineState;
-	}
-	if (set.rootSignature != lastRootSignature_){
-		cmd->SetGraphicsRootSignature(set.rootSignature);
-		lastRootSignature_ = set.rootSignature;
-	}
+	cmd->SetPipelineState(set.pipelineState);
+	cmd->SetGraphicsRootSignature(set.rootSignature);
+	lastPipelineState_ = set.pipelineState;
+	lastRootSignature_ = set.rootSignature;
 }
 
 const PipelineSet PipelineService::GetPipelineSet(const GraphicsPipelineDesc& desc) const {
@@ -145,10 +152,51 @@ PipelineSet PipelineService::GetPipelineSet(PipelineTag::Object tag, BlendMode b
 	if (it != objCache_.end()){
 		return it->second;
 	}
-	assert(false && "Pipeline not found!");
+	CX_CHECK(false && "Pipeline not found!", "Assertion failed");
 	return {};
 }
 
+PipelineSet PipelineService::GetGeneratedMaterialObjectPipelineSet(
+	BlendMode blend,
+	Microsoft::WRL::ComPtr<IDxcBlob> pixelShader,
+	std::size_t shaderHash) {
+	GeneratedMaterialPipelineKey key{PipelineTag::Object::Object3d, blend, shaderHash};
+	auto it = generatedMaterialPipelines_.find(key);
+	if(it != generatedMaterialPipelines_.end()) {
+		return {
+			it->second->GetPipelineState().Get(),
+			it->second->GetRootSignature().Get()};
+	}
+
+	GraphicsPipelineDesc desc = PipelinePresets::MakeObject3D(blend);
+	auto pipeline = factory_->CreateWithPixelShaderBlob(desc, pixelShader);
+	PipelineSet set{
+		pipeline->GetPipelineState().Get(),
+		pipeline->GetRootSignature().Get()};
+	generatedMaterialPipelines_[key] = std::move(pipeline);
+	return set;
+}
+
+PipelineSet PipelineService::GetGeneratedMaterialSkinnedPipelineSet(
+	BlendMode blend,
+	Microsoft::WRL::ComPtr<IDxcBlob> pixelShader,
+	std::size_t shaderHash) {
+	GeneratedMaterialPipelineKey key{PipelineTag::Object::SkinningObject3D, blend, shaderHash};
+	auto it = generatedMaterialPipelines_.find(key);
+	if(it != generatedMaterialPipelines_.end()) {
+		return {
+			it->second->GetPipelineState().Get(),
+			it->second->GetRootSignature().Get()};
+	}
+
+	GraphicsPipelineDesc desc = PipelinePresets::MakeSkinningObject3D(blend);
+	auto pipeline = factory_->CreateWithPixelShaderBlob(desc, pixelShader);
+	PipelineSet set{
+		pipeline->GetPipelineState().Get(),
+		pipeline->GetRootSignature().Get()};
+	generatedMaterialPipelines_[key] = std::move(pipeline);
+	return set;
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		pso取得(ポストプロセス

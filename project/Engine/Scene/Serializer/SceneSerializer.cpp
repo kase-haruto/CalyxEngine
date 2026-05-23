@@ -6,6 +6,7 @@
 #include <Engine/Application/Effects/FxSystem.h>
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 #include <Engine/Foundation/Json/JsonUtils.h>
+#include <Engine/Foundation/Serialization/SerializableObject.h>
 #include <Engine/Objects/3D/Actor/Library/SceneObjectLibrary.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/Scene/Context/SceneContext.h>
@@ -13,8 +14,49 @@
 #include <Engine/objects/LightObject/PointLight.h>
 #include <memory>
 #include <unordered_map>
+#include <unordered_set>
 
-using namespace CalyxUtil;
+using namespace CalyxEngine;
+
+namespace {
+	bool HasInlineConfigData(const nlohmann::json& j) {
+		static const std::unordered_set<std::string> kMetadataKeys = {
+			"type",
+			"guid",
+			"prefabAssetGuid",
+			"prefabSourceGuid",
+			"parentGuid",
+			"configPath",
+			"serializableParams",
+		};
+
+		for(auto it = j.begin(); it != j.end(); ++it) {
+			if(!kMetadataKeys.contains(it.key())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	void ApplySceneConfig(SceneObject& object, const nlohmann::json& j) {
+		auto* cfg = dynamic_cast<IConfigurable*>(&object);
+		if(!cfg) return;
+
+		if(j.contains("configPath")) {
+			const std::string cfgPath = j.at("configPath").get<std::string>();
+			object.SetConfigPath(cfgPath);
+
+			nlohmann::json jCfg;
+			if(JsonUtils::Load(cfgPath, jCfg)) {
+				cfg->ApplyConfigFromJson(jCfg);
+			}
+		}
+
+		if(!j.contains("configPath") || HasInlineConfigData(j)) {
+			cfg->ApplyConfigFromJson(j);
+		}
+	}
+}
 
 // -----------------------------------------------------------------------------
 // Save (to file)
@@ -51,30 +93,44 @@ nlohmann::json SceneSerializer::DumpJson(const SceneContext& context) {
 			nlohmann::json jOne;
 
 			// ---- 基本メタ ----
-			jOne["type"] = sp->GetTypeName();
+			jOne["type"] = sp->GetObjectClassName();
 			jOne["guid"] = sp->GetGuid();
+			if(sp->GetPrefabAssetGuid().isValid()) {
+				jOne["prefabAssetGuid"] = sp->GetPrefabAssetGuid();
+			}
+			if(sp->GetPrefabSourceGuid().isValid()) {
+				jOne["prefabSourceGuid"] = sp->GetPrefabSourceGuid();
+			}
 			if(auto parent = sp->GetParent()) {
 				jOne["parentGuid"] = parent->GetGuid();
+			}
+
+			nlohmann::json jInline;
+			cfg->ExtractConfigToJson(jInline);
+			for(auto it = jInline.begin(); it != jInline.end(); ++it) {
+				jOne[it.key()] = it.value();
 			}
 
 			// ---- 外部設定パスの有無で分岐（SceneObject が保持）----
 			const std::string& cfgPath = sp->GetConfigPath();
 			if(!cfgPath.empty()) {
 				// 個別JSONへ書き出す
-				nlohmann::json jCfg;
-				cfg->ExtractConfigToJson(jCfg);
-				JsonUtils::Save(cfgPath, jCfg);
-
 				// シーンにはパスのみ記録
 				jOne["configPath"] = cfgPath;
 			} else {
 				// 設定を内包
-				nlohmann::json jInline;
-				cfg->ExtractConfigToJson(jInline);
+				nlohmann::json jInlineFallback;
+				cfg->ExtractConfigToJson(jInlineFallback);
 				// 内包データを jOne にマージ
-				for(auto it = jInline.begin(); it != jInline.end(); ++it) {
+				for(auto it = jInlineFallback.begin(); it != jInlineFallback.end(); ++it) {
 					jOne[it.key()] = it.value();
 				}
+			}
+
+			nlohmann::json serializableParams;
+			sp->ExtractSerializableParamsToJson(serializableParams);
+			if(!serializableParams.empty()) {
+				jOne["serializableParams"] = std::move(serializableParams);
 			}
 
 			jObjects.push_back(std::move(jOne));
@@ -123,10 +179,20 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 		std::string typeName = j.value("type", "");
 		if(typeName.empty()) continue;
 
+		const nlohmann::json* paramOverrides = j.contains("serializableParams")
+			? &j.at("serializableParams")
+			: nullptr;
+		SerializableObject::BeginPendingCapture();
 		auto sp = SceneObjectRegistry::Get().Create(typeName);
-		if(!sp) continue;
+		if(!sp) {
+			SerializableObject::EndPendingCapture(nullptr, nullptr);
+			continue;
+		}
+		sp->AdoptPendingSerializableParamCapture(paramOverrides);
 
-		if(auto* cfg = dynamic_cast<IConfigurable*>(sp.get())) {
+		ApplySceneConfig(*sp, j);
+		if(false) {
+			auto* cfg = dynamic_cast<IConfigurable*>(sp.get());
 			// onfigPath があるなら外部JSONを優先
 			if(j.contains("configPath")) {
 				const std::string cfgPath = j.at("configPath").get<std::string>();
@@ -147,15 +213,38 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 
 		// ライブラリへ登録
 		context.GetObjectLibrary()->AddObject(sp);
+		sp->BeginSerializableParamCapture(paramOverrides);
 		sp->Initialize();
+		sp->EndSerializableParamCapture();
+		ApplySceneConfig(*sp, j);
+		if(false) {
+			auto* cfg = dynamic_cast<IConfigurable*>(sp.get());
+			if(j.contains("configPath")) {
+				const std::string cfgPath = j.at("configPath").get<std::string>();
+				sp->SetConfigPath(cfgPath);
+
+				nlohmann::json jCfg;
+				if(JsonUtils::Load(cfgPath, jCfg)) {
+					cfg->ApplyConfigFromJson(jCfg);
+				} else {
+					cfg->ApplyConfigFromJson(j);
+				}
+			} else {
+				cfg->ApplyConfigFromJson(j);
+			}
+		}
+
+		const Guid prefabAssetGuid = j.value("prefabAssetGuid", Guid{});
+		const Guid prefabSourceGuid = j.value("prefabSourceGuid", Guid{});
+		if(prefabAssetGuid.isValid() && prefabSourceGuid.isValid()) {
+			sp->SetPrefabLink(prefabAssetGuid, prefabSourceGuid);
+		}
 
 		// サブシステムへ橋渡し
 		if(auto dir = std::dynamic_pointer_cast<DirectionalLight>(sp)) {
 			context.GetLightLibrary()->SetDirectionalLight(dir);
 		} else if(auto pt = std::dynamic_pointer_cast<PointLight>(sp)) {
 			context.GetLightLibrary()->SetPointLight(pt);
-		} else if(auto fx = std::dynamic_pointer_cast<CalyxEffect::ParticleSystemObject>(sp)) {
-			context.GetFxSystem()->AddEmitter(fx->GetEmitter(), fx->GetGuid());
 		} else if(auto camDbg = std::dynamic_pointer_cast<DebugCamera>(sp)) {
 			context.GetCameraMgr()->SetDebugCamera(camDbg);
 		} else if(auto camMain = std::dynamic_pointer_cast<Camera3d>(sp)) {
@@ -175,7 +264,10 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 
 		auto cIt = guidMap.find(child);
 		auto pIt = guidMap.find(parent);
-		if(cIt != guidMap.end() && pIt != guidMap.end()) cIt->second->SetParent(pIt->second);
+		if(cIt != guidMap.end() && pIt != guidMap.end()) {
+			auto& childTransform = cIt->second->GetWorldTransform();
+			cIt->second->SetParent(pIt->second, childTransform.inheritScale);
+		}
 	}
 	return true;
 }

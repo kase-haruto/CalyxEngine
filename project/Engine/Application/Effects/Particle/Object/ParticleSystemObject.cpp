@@ -1,5 +1,6 @@
 #include "ParticleSystemObject.h"
 #include <Engine/Application/Effects/Particle/Emitter/FxEmitter.h>
+#include <Engine/Application/Effects/Particle/Emitter/GpuFxEmitter.h>
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/Scene/Context/SceneContext.h>
@@ -7,15 +8,15 @@
 #include <iostream>
 
 namespace {
-	CalyxMath::Vector3 ExtractWorldScale(const CalyxMath::Matrix4x4& m) {
+	CalyxEngine::Vector3 ExtractWorldScale(const CalyxEngine::Matrix4x4& m) {
 		return {
-			CalyxMath::Vector3(m.m[0][0], m.m[0][1], m.m[0][2]).Length(),
-			CalyxMath::Vector3(m.m[1][0], m.m[1][1], m.m[1][2]).Length(),
-			CalyxMath::Vector3(m.m[2][0], m.m[2][1], m.m[2][2]).Length()};
+			CalyxEngine::Vector3(m.m[0][0], m.m[0][1], m.m[0][2]).Length(),
+			CalyxEngine::Vector3(m.m[1][0], m.m[1][1], m.m[1][2]).Length(),
+			CalyxEngine::Vector3(m.m[2][0], m.m[2][1], m.m[2][2]).Length()};
 	}
 
-	CalyxMath::Quaternion ExtractWorldRotation(const CalyxMath::Matrix4x4& m, const CalyxMath::Vector3& scale) {
-		CalyxMath::Matrix4x4 rot = m;
+	CalyxEngine::Quaternion ExtractWorldRotation(const CalyxEngine::Matrix4x4& m, const CalyxEngine::Vector3& scale) {
+		CalyxEngine::Matrix4x4 rot = m;
 		if(scale.x > 0.0001f) {
 			rot.m[0][0] /= scale.x;
 			rot.m[0][1] /= scale.x;
@@ -33,18 +34,18 @@ namespace {
 		}
 		rot.m[3][0] = rot.m[3][1] = rot.m[3][2] = 0.0f;
 		rot.m[3][3] = 1.0f;
-		return CalyxMath::Quaternion::FromMatrix(rot);
+		return CalyxEngine::Quaternion::FromMatrix(rot);
 	}
 }
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 
 	/////////////////////////////////////////////////////////////////////////////////////////
 	//		コンストラクタ/デストラクタ
 	/////////////////////////////////////////////////////////////////////////////////////////
 	ParticleSystemObject::ParticleSystemObject() {
 		SceneObject::SetName("ParticleSystemObject", ObjectType::Effect);
-		emitter_ = std::make_shared<CalyxEffect::FxEmitter>();
+		emitter_ = std::make_shared<CalyxEngine::FxEmitter>();
 
 		std::cout << "[CTOR] FxObject GUID=" << GetGuid().ToString() << std::endl;
 	}
@@ -52,12 +53,23 @@ namespace CalyxEffect {
 		SceneObject::SetName(name, ObjectType::Effect);
 
 		// エミッター
-		emitter_ = std::make_shared<CalyxEffect::FxEmitter>();
+		emitter_ = std::make_shared<CalyxEngine::FxEmitter>();
 
 		// デフォルト値の設定
-		emitter_->velocity_.SetConstant({0.0f, 2.0f, 0.0f});
-		emitter_->lifetime_.SetConstant({1.0f});
-		emitter_->scale_.SetConstant({1.0f, 1.0f, 1.0f});
+		if(auto fxEmitter = std::dynamic_pointer_cast<CalyxEngine::FxEmitter>(emitter_)) {
+			fxEmitter->velocity_.SetConstant({0.0f, 2.0f, 0.0f});
+			fxEmitter->lifetime_.SetConstant({1.0f});
+			fxEmitter->scale_.SetConstant({1.0f, 1.0f, 1.0f});
+		}
+
+		std::cout << "[CTOR] FxObject GUID=" << GetGuid().ToString() << std::endl;
+	}
+	ParticleSystemObject::ParticleSystemObject(
+		const std::string& name,
+		const std::shared_ptr<CalyxEngine::BaseEmitter>& emitter) {
+		SceneObject::SetName(name, ObjectType::Effect);
+
+		emitter_ = emitter ? emitter : std::make_shared<CalyxEngine::FxEmitter>();
 
 		std::cout << "[CTOR] FxObject GUID=" << GetGuid().ToString() << std::endl;
 	}
@@ -67,11 +79,7 @@ namespace CalyxEffect {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	void ParticleSystemObject::AlwaysUpdate([[maybe_unused]] float dt) {
 		// Gizmo操作中/停止中でも見た目と発生位置を一致させるため常時同期する
-		worldTransform_.Update();
-		emitter_->SetPosition(worldTransform_.GetWorldPosition());
-		const auto worldScale = ExtractWorldScale(worldTransform_.matrix.world);
-		emitter_->SetWorldScale(worldScale);
-		emitter_->SetWorldRotation(ExtractWorldRotation(worldTransform_.matrix.world, worldScale));
+		SyncEmitterFromWorldTransform();
 
 		emitter_->Update(dt);
 		emitter_->DrawEmitterShape(worldTransform_);
@@ -94,14 +102,19 @@ namespace CalyxEffect {
 		}
 	}
 
-	void ParticleSystemObject::SetPosition(const CalyxMath::Vector3& pos) {
+	void ParticleSystemObject::SetPosition(const CalyxEngine::Vector3& pos) {
 		emitter_->SetPosition(pos);
+	}
+
+	void ParticleSystemObject::SetEmitter(const std::shared_ptr<CalyxEngine::BaseEmitter>& emitter) {
+		if(!emitter) return;
+		emitter_ = emitter;
 	}
 
 	void ParticleSystemObject::ApplyConfig() {
 		const auto& cfg = config_.GetConfig();
 
-		// CalyxEffect::FxEmitter 設定反映
+		// CalyxEngine::FxEmitter 設定反映
 		emitter_->ApplyConfigFrom(cfg);
 		// SceneObject 情報
 		name_	  = cfg.name;
@@ -193,4 +206,14 @@ namespace CalyxEffect {
 		}
 	}
 
-} // namespace CalyxEffect
+	void ParticleSystemObject::SyncEmitterFromWorldTransform() {
+		if(!emitter_) return;
+
+		worldTransform_.Update();
+		emitter_->SetPosition(worldTransform_.GetWorldPosition());
+		const auto worldScale = ExtractWorldScale(worldTransform_.matrix.world);
+		emitter_->SetWorldScale(worldScale);
+		emitter_->SetWorldRotation(ExtractWorldRotation(worldTransform_.matrix.world, worldScale));
+	}
+
+} // namespace CalyxEngine

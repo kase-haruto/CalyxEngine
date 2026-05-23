@@ -5,7 +5,7 @@
 #include <vector>
 #include <stdexcept>
 
-class SceneObject;
+#include <Engine/Objects/3D/Actor/SceneObject.h>
 
 /* ========================================================================
 /*		sceneObjectCtor
@@ -25,6 +25,17 @@ public:
 	}
 };
 
+struct SceneObjectClassDesc {
+	std::string typeName;
+	std::string displayName;
+	ObjectType	 objectType = ObjectType::None;
+	std::string iconPath;
+	bool		 placeable = false;
+	bool		 prefabEditable = false;
+	bool		 prefabRoot = false;
+	std::unique_ptr<ISceneCtor> ctor;
+};
+
 
 /* ========================================================================
 /*		jsonの文字列からインスタンスを作成するため
@@ -39,6 +50,7 @@ public:
 	/// <param name="typeName"></param>
 	/// <param name="ctor"></param>
 	void Register(std::string_view typeName, std::unique_ptr<ISceneCtor>&& ctor);
+	void Register(SceneObjectClassDesc&& desc);
 
 	/// <summary>
 	/// 登録済みの名前に対応するオブジェクトを生成
@@ -52,12 +64,16 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	std::vector<std::string> ListTypes() const;
+	std::vector<SceneObjectClassDesc const*> ListPlaceableTypes() const;
+	std::vector<SceneObjectClassDesc const*> ListPrefabEditableTypes() const;
+	std::vector<SceneObjectClassDesc const*> ListPrefabRootTypes() const;
+	const SceneObjectClassDesc* Find(std::string_view typeName) const;
 
 private:
 	/// <summary>
 	/// オブジェクト登録テーブル
 	/// </summary>
-	std::unordered_map<std::string, std::unique_ptr<ISceneCtor>> table_;
+	std::unordered_map<std::string, SceneObjectClassDesc> table_;
 };
 
 // 登録マクロ

@@ -42,3 +42,29 @@ void ChromaticAberrationEffect::ShowImGui(){
 		if (ImGui::Button("Reset")) ResetParameters();
 	}
 }
+
+nlohmann::json ChromaticAberrationEffect::SaveParameters() const{
+	return nlohmann::json{{"intensity", intensity_}};
+}
+
+void ChromaticAberrationEffect::LoadParameters(const nlohmann::json& params){
+	if(params.contains("intensity") && params["intensity"].is_number()){
+		SetIntensity(params["intensity"].get<float>());
+	}
+}
+
+bool ChromaticAberrationEffect::GetFloatParameter(const std::string& name, float& out) const{
+	if(name == "intensity"){
+		out = intensity_;
+		return true;
+	}
+	return false;
+}
+
+bool ChromaticAberrationEffect::SetFloatParameter(const std::string& name, float value){
+	if(name == "intensity"){
+		SetIntensity(value);
+		return true;
+	}
+	return false;
+}

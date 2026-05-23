@@ -6,7 +6,7 @@
 #include <dxgi1_6.h>
 #include <wrl.h>
 
-namespace CalyxGraphics {
+namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
 	 * DxDevice
@@ -110,4 +110,4 @@ namespace CalyxGraphics {
 		Capabilities caps_{}; //< デバイスの機能情報
 	};
 
-} // namespace CalyxGraphics
+} // namespace CalyxEngine

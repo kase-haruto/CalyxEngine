@@ -5,8 +5,8 @@
 
 #include <cstdint>
 
-namespace GameSceneUtil  {
+namespace GameSceneUtil {
 
-	CalyxScene::SceneId ToSceneId(SceneType type);
-	
+	CalyxEngine::SceneId ToSceneId(SceneType type);
+
 }

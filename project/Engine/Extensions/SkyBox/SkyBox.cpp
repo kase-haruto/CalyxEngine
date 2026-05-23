@@ -1,5 +1,7 @@
 #include "SkyBox.h"
 
+#include "Engine/Assets/Manager/AssetManager.h"
+
 #include <Engine/Graphics/Context/GraphicsGroup.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Graphics/Camera/Base/BaseCamera.h>
@@ -11,7 +13,7 @@ SkyBox::SkyBox(const std::string& fileName,
 			   std::optional<std::string> objectName){
 	textureName_ = fileName;
 	SceneObject::SetName(objectName.value(),ObjectType::GameObject);
-	TextureManager::GetInstance()->SetEnvironmentTexture("Textures/"+fileName);
+	CalyxEngine::AssetManager::GetInstance()->GetTextureManager()->SetEnvironmentTexture("Textures/"+fileName);
 	isEnableRaycast_ = false;
 }
 
@@ -30,7 +32,7 @@ void SkyBox::ShowGui(){
 void SkyBox::Update([[maybe_unused]]float dt){}
 
 void SkyBox::AlwaysUpdate([[maybe_unused]] float dt){
-	CalyxMath::Vector3 half = worldTransform_.scale * 0.5f;
+	CalyxEngine::Vector3 half = worldTransform_.scale * 0.5f;
 
 	// --- 頂点データ設定 ---
 	vertices_[0].position = {+1.0f, +1.0f, +1.0f, 1.0f}; // 右
@@ -64,12 +66,12 @@ void SkyBox::AlwaysUpdate([[maybe_unused]] float dt){
 	vertices_[23].position = {-1.0f, -1.0f, -1.0f, 1.0f};
 
 	for (int i = 0; i < 24; ++i){
-		CalyxMath::Vector3 local = {
+		CalyxEngine::Vector3 local = {
 			vertices_[i].position.x,
 			vertices_[i].position.y,
 			vertices_[i].position.z
 		};
-		CalyxMath::Vector3 world = local * half;
+		CalyxEngine::Vector3 world = local * half;
 		vertices_[i].position = {world.x, world.y, world.z, 1.0f};
 		/*	vertices_[i].texcoord = { 0.0f, 0.0f };
 			vertices_[i].normal = { 0.0f, 0.0f, 0.0f };*/
@@ -95,7 +97,7 @@ void SkyBox::AlwaysUpdate([[maybe_unused]] float dt){
 void SkyBox::Draw(ID3D12GraphicsCommandList* cmd){
 	// 環境テクスチャ SRV
 	D3D12_GPU_DESCRIPTOR_HANDLE envSrv =
-		TextureManager::GetInstance()->GetEnvironmentTextureSrvHandle();
+		CalyxEngine::AssetManager::GetInstance()->GetTextureManager()->GetEnvironmentTextureSrvHandle();
 
 	// PSO / ブレンド 設定
 	GraphicsGroup::GetInstance()->SetCommand(

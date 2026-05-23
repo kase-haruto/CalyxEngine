@@ -8,8 +8,8 @@
 
 // c++
 
-namespace CalyxEffect {
-	GravityModule::GravityModule(const std::string name) : CalyxEffect::BaseFxModule(name) {}
+namespace CalyxEngine {
+	GravityModule::GravityModule(const std::string name) : CalyxEngine::BaseFxModule(name) {}
 
 	/////////////////////////////////////////////////////////////////////////////////////////
 	//	重力適用

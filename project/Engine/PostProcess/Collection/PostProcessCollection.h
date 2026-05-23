@@ -5,6 +5,7 @@
 #include <Engine/PostProcess/Blur/RadialBlur/RadialBlur.h>
 #include <Engine/PostProcess/CopyImage/CopyImage.h>
 #include <Engine/PostProcess/ChromaticAberration/ChromaticAberrationEffect.h>
+#include <Engine/PostProcess/Blend/BlendEffect.h>
 #include <Engine/PostProcess/Slot/PostEffectSlot.h>
 // c++
 #include <memory>

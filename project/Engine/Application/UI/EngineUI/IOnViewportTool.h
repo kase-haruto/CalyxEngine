@@ -2,7 +2,7 @@
 
 #include <externals/imgui/imgui.h>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 
 	enum class OverlayAlign {
 		TopLeft,
@@ -61,4 +61,4 @@ namespace CalyxEditor {
 		ImVec2				overlayOffset_	  = ImVec2(0.0f, 0.0f);				  //< AlignOffset 用のオフセット
 		ImVec2				absolutePosition_ = ImVec2(0.0f, 0.0f);				  //< Absolute 用の絶対座標
 	};
-} // namespace CalyxEditor
+} // namespace CalyxEngine

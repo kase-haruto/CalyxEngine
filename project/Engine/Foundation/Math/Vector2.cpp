@@ -1,6 +1,6 @@
 #include "Vector2.h"
 
-namespace CalyxMath {
+namespace CalyxEngine {
 	Vector2::Vector2(float vx, float vy) : x(vx), y(vy) {}
 
 	Vector2::Vector2(const Vector2& v) {
@@ -55,4 +55,4 @@ namespace CalyxMath {
 	Vector2 Vector2::operator*(const float v) const {
 		return {x * v, y * v};
 	}
-} // namespace CalyxMath
+} // namespace CalyxEngine

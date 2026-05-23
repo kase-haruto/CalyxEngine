@@ -4,9 +4,9 @@
 #include <Engine/Foundation/Math/Vector2.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 	TextureSheetAnimationModule::TextureSheetAnimationModule(const std::string& name)
-		: CalyxEffect::BaseFxModule(name),
+		: CalyxEngine::BaseFxModule(name),
 		  rows_(4), cols_(4), loop_(true), animationSpeed_(10.0f),
 		  useCustomFrames_(false) {
 		totalFrames_ = rows_ * cols_;
@@ -52,8 +52,8 @@ namespace CalyxEffect {
 			float uStep = 1.0f / static_cast<float>(cols_);
 			float vStep = 1.0f / static_cast<float>(rows_);
 
-			unit.uvTransform.translate = CalyxMath::Vector2(uStep * col, vStep * row);
-			unit.uvTransform.scale	   = CalyxMath::Vector2(uStep, vStep);
+			unit.uvTransform.translate = CalyxEngine::Vector2(uStep * col, vStep * row);
+			unit.uvTransform.scale	   = CalyxEngine::Vector2(uStep, vStep);
 		}
 	}
 
@@ -84,4 +84,4 @@ namespace CalyxEffect {
 								  : (rows_ * cols_);
 	}
 
-} // namespace CalyxEffect
+} // namespace CalyxEngine

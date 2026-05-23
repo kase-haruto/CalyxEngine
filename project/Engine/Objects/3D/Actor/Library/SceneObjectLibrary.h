@@ -8,11 +8,13 @@
 #include <algorithm>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <unordered_map>
 #include <vector>
 
 class SceneObject;
+class SceneContext;
 
 /*-----------------------------------------------------------------------------------------
  * SceneObjectLibrary
@@ -27,11 +29,30 @@ public:
     SceneObjectLibrary();
     ~SceneObjectLibrary();
 
+	void SetOwner(SceneContext* owner) { owner_ = owner; }
+
     /**
      * @brief オブジェクト追加
      * @param object
      */
     void AddObject(const std::shared_ptr<SceneObject>& object);
+
+	/**
+	 * @brief オブジェクト名を変更
+	 * @param object 対象オブジェクト
+	 * @param requestedName 希望名
+	 * @return 実際に設定された名前
+	 */
+	std::string RenameObject(const std::shared_ptr<SceneObject>& object,
+							 const std::string& requestedName);
+
+	/**
+	 * @brief 保存用オブジェクト名として使える形に整える
+	 * @param requestedName 希望名
+	 * @param ignore 同名判定から除外するオブジェクト
+	 */
+	std::string MakeUniqueName(const std::string& requestedName,
+							   const SceneObject* ignore = nullptr) const;
 
     /**
      * @brief オブジェクトの削除
@@ -65,6 +86,7 @@ public:
      * @return 検索結果のオブジェクト（見つからなければ nullptr）
      */
     std::shared_ptr<SceneObject> FindByName(const std::string& name) const;
+	std::vector<std::shared_ptr<SceneObject>> FindByClassName(std::string_view className) const;
     
     std::shared_ptr<SceneObject> FindSharedByPickingID(uint32_t pickingID) const;
 
@@ -113,10 +135,13 @@ private:
     //      private variables
     //====================================================================*//
     std::unordered_map<Guid, std::shared_ptr<SceneObject>> objects_;
-    std::unordered_map<std::string, uint32_t>              nameCounters_;
+	SceneContext* owner_ = nullptr;
 	EventBus::Connection connDestroy_;
+	bool suppressDestroySync_ = false;
 
     static uint32_t nextPickingID_;
+
+	void RefreshDuplicateNameIndices();
 };
 
 // =====================================================

@@ -21,23 +21,23 @@ public:
 	void ShowGui() override;
 
 	//---------- accessor ------------------------------------------------//
-	void SetEase(CalyxEase::EaseType type) { easeType_ = type; }
+	void SetEase(CalyxEngine::EaseType type) { easeType_ = type; }
 	void SetTime(float time) { turnTime_ = time; }
-	void SetDirection(const CalyxMath::Vector3& dir) { direction_ = dir; }
+	void SetDirection(const CalyxEngine::Vector3& dir) { direction_ = dir; }
 
 private:
 	//===================================================================*/
 	//					private methods
 	//===================================================================*/
 	//---------------- parms -------------//
-	CalyxEase::EaseType easeType_ = CalyxEase::EaseType::EaseOutSine;
-	CalyxMath::Vector3			   direction_;
+	CalyxEngine::EaseType easeType_ = CalyxEngine::EaseType::EaseOutSine;
+	CalyxEngine::Vector3			   direction_;
 	float			   turnTime_ = 0.5f;
 
 	//---------------- internal state -------------//
 	bool  turning_ = false;
 	float elapsed_ = 0.0f;
 
-	CalyxMath::Quaternion startRot_;
-	CalyxMath::Quaternion targetRot_;
+	CalyxEngine::Quaternion startRot_;
+	CalyxEngine::Quaternion targetRot_;
 };

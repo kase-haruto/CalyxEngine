@@ -3,6 +3,7 @@
 #include "Engine/Objects/3D/Actor/SceneObject.h"
 
 #include <Engine/Graphics/Buffer/DxStructuredBuffer.h>
+#include <Engine/Graphics/MaterialGraph/MaterialGraphRuntimeShaderCache.h>
 #include <Engine/Graphics/Pipeline/Service/PipelineService.h>
 #include <Engine/Graphics/Shadow/Raytracing/RaytracingScene.h>
 #include <Engine/Graphics/Shadow/Raytracing/RaytracingSystem.h>
@@ -12,6 +13,7 @@
 
 #include <d3d12.h>
 #include <map>
+#include <cstddef>
 #include <unordered_map>
 #include <vector>
 
@@ -20,11 +22,11 @@ class BaseModel;
 class Camera3d;
 class LightLibrary;
 
-namespace CalyxAssets {
+namespace CalyxEngine {
 	class AnimationModel;
 }
 
-namespace CalyxGraphics {
+namespace CalyxEngine {
 	class ShadowMapSystem;
 }
 
@@ -39,6 +41,7 @@ public:
 		BaseModel*			  model;
 		const WorldTransform* transform;
 		SceneObject*		  owner;
+		BillboardMode		  billboardMode = BillboardMode::None;
 	};
 
 private:
@@ -73,7 +76,7 @@ private:
 	};
 
 	using StaticBatch  = std::vector<StaticBatchItem>;
-	using SkinnedBatch = std::vector<std::pair<CalyxAssets::AnimationModel*, std::vector<WorldTransform>>>;
+	using SkinnedBatch = std::vector<std::pair<CalyxEngine::AnimationModel*, std::vector<WorldTransform>>>;
 
 public:
 	//===================================================================*/
@@ -97,7 +100,7 @@ public:
 	 * \param model アニメーションモデルデータ
 	 * \param transform ワールド変換
 	 */
-	void RegisterSkinned(CalyxAssets::AnimationModel* model, const WorldTransform& transform, SceneObject* owner = nullptr);
+	void RegisterSkinned(CalyxEngine::AnimationModel* model, const WorldTransform& transform, SceneObject* owner = nullptr);
 
 	/**
 	 * \brief 登録をクリア
@@ -113,7 +116,8 @@ public:
 	 * \brief カリングおよびバッチング事前処理
 	 * \param camera カメラ
 	 */
-	void PreCullAndBatch(const class Camera3d* camera);
+	void PreCullAndBatch(const class Camera3d* camera, bool enableFrustumCulling = true);
+	void BuildAllVisibleBatches();
 
 	/**
 	 * \brief 一括描画処理
@@ -129,7 +133,7 @@ public:
 				 class IRenderTarget* rt,
 				 class PipelineService*			 psoService,
 				 class LightLibrary*			 lightLibrary,
-				 CalyxGraphics::ShadowMapSystem* shadowMapSystem);
+				 CalyxEngine::ShadowMapSystem* shadowMapSystem);
 
 	// Picking / Outline / IDPass 用
 	/**
@@ -154,7 +158,7 @@ public:
 	 * \brief 可視スキンメッシュモデルリストを取得（シャドウ用）
 	 * \return モデルデータマップ
 	 */
-	const std::unordered_map<CalyxAssets::AnimationModel*, std::vector<WorldTransform>>&
+	const std::unordered_map<CalyxEngine::AnimationModel*, std::vector<WorldTransform>>&
 	GetSkinnedVisible() const { return skinnedVisibleForShadow_; }
 
 	/**
@@ -181,21 +185,24 @@ private:
 	 * \param model モデル
 	 * \param index インデックス
 	 */
-	void MarkSkinnedDirty(CalyxAssets::AnimationModel* model, size_t index);
+	void MarkSkinnedDirty(CalyxEngine::AnimationModel* model, size_t index);
 	/**
 	 * \brief スタティックモデルのバッチ構築
 	 */
 	void BuildStaticBatches();
+	StaticBatchItem* FindCompatibleStaticBatch(StaticBatch& batch, BaseModel* model);
 	/**
 	 * \brief スキンメッシュモデルのバッチ構築
 	 */
 	void BuildSkinnedBatches();
+	void CollectShadowCasters();
+	void BindRaytracingScene(ID3D12GraphicsCommandList* cmdList) const;
 
 	//===================================================================*/
 	//                    private member variables
 	//===================================================================*/
 	std::unordered_map<BaseModel*, std::vector<InstanceStatic>>					   staticModels_;  //< スタティックモデル管理マップ
-	std::unordered_map<CalyxAssets::AnimationModel*, std::vector<InstanceSkinned>> skinnedModels_; //< スキンメッシュモデル管理マップ
+	std::unordered_map<CalyxEngine::AnimationModel*, std::vector<InstanceSkinned>> skinnedModels_; //< スキンメッシュモデル管理マップ
 
 	std::map<PipelineKey, StaticBatch>	staticBatches_;	 //< スタティックモデルバッチマップ
 	std::map<PipelineKey, SkinnedBatch> skinnedBatches_; //< スキンメッシュモデルバッチマップ
@@ -207,9 +214,10 @@ private:
 	bool hasSceneBounds_ = false; //< シーン境界有効フラグ
 
 	std::unordered_map<BaseModel*, std::vector<WorldTransform>>					  staticVisibleForShadow_;	//< シャドウ用可視スタティックリスト
-	std::unordered_map<CalyxAssets::AnimationModel*, std::vector<WorldTransform>> skinnedVisibleForShadow_; //< シャドウ用可視スキンメッシュリスト
+	std::unordered_map<CalyxEngine::AnimationModel*, std::vector<WorldTransform>> skinnedVisibleForShadow_; //< シャドウ用可視スキンメッシュリスト
+	CalyxEngine::MaterialGraphRuntimeShaderCache runtimeMaterialShaderCache_;
 
 	// Raytracing
-	std::unique_ptr<CalyxGraphics::RaytracingSystem> raytracingSystem_; //< レイトレーシングシステム
-	CalyxGraphics::RaytracingScene					 raytracingScene_;	//< レイトレーシングシーン
+	std::unique_ptr<CalyxEngine::RaytracingSystem> raytracingSystem_; //< レイトレーシングシステム
+	CalyxEngine::RaytracingScene					 raytracingScene_;	//< レイトレーシングシーン
 };

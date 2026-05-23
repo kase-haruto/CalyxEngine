@@ -10,7 +10,7 @@
 
 class SceneContext;
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 	class ParticleSystemObject;
 
 	class CreateParticleSystemObjectCommand 

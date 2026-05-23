@@ -10,15 +10,23 @@
 #include <Engine/Application/UI/Panels/EditorPanel.h>
 #include <Engine/Application/UI/Panels/HierarchyPanel.h>
 #include <Engine/Application/UI/Panels/InspectorPanel.h>
+#include <Engine/Application/UI/Panels/KeyframePanel.h>
 #include <Engine/Application/UI/Panels/LivePPPanel.h>
+#include <Engine/Application/UI/Panels/MaterialNodeEditorPanel.h>
 #include <Engine/Application/UI/Panels/PlaceToolPanel.h>
+#include <Engine/Application/UI/Panels/PostEffectNodeEditorPanel.h>
+#include <Engine/Application/UI/Panels/SpriteAnimationEditorPanel.h>
 #include <Engine/Application/UI/Panels/SplineEditorPanel.h>
+#include <Engine/Editor/DebugCameraFocusController.h>
+#include <Engine/Editor/EditorSelectionCoordinator.h>
 #include <Engine/Editor/ImGuiLayoutSwitcher.h>
 #include <Engine/Editor/SceneObjectEditor.h>
 #include <externals/nlohmann/json.hpp>
 
 // c++
 #include <memory>
+#include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace EngineEdit {
@@ -26,25 +34,38 @@ namespace EngineEdit {
 		Edit,
 		Game
 	};
+
+	enum class EditToolMode {
+		Object,
+		Object2D,
+		SpriteAnimation,
+		Prefab,
+		ParticleEffect,
+		PostEffect,
+		Material,
+		Animation
+	};
 } // namespace EngineEdit
 
 class BaseEditor;
 class SceneContext;
 class SceneObject;
 class BaseCamera;
-struct CalyxMath::Vector2;
-struct CalyxMath::Matrix4x4;
-struct Ray;
-
-namespace CalyxScene {
+class WorldTransform;
+struct CalyxEngine::Vector2;
+struct CalyxEngine::Matrix4x4;
+namespace CalyxEngine {
 	class SceneManager;
 }
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 
 	class PlaySession;
 	class SceneSwitchOverlay;
 	class ImGuiLayoutSwitcher;
+	class ParticlePreviewSession;
+	class PrefabEditSession;
+	class ViewportSelectionController;
 
 	/*-----------------------------------------------------------------------------------------
 	 * LevelEditor
@@ -53,24 +74,34 @@ namespace CalyxEditor {
 	 *---------------------------------------------------------------------------------------*/
 	class LevelEditor {
 	public:
+		LevelEditor();
 		void Initialize();
 		void Update();
 		void Render();
 		void RenderMenu();
+		void RenderSettingsWindow();
+		void RenderRuntimeFullscreenViewport(const ImTextureID& tex);
 		void ClearSelection();
 		~LevelEditor();
-		CalyxScene::SceneManager* GetSceneManager() const { return sceneManager_; }
-		void					  SetSceneManager(CalyxScene::SceneManager* sceneManager);
+		CalyxEngine::SceneManager* GetSceneManager() const { return sceneManager_; }
+		void					  SetSceneManager(CalyxEngine::SceneManager* sceneManager);
 
 		// 編集対象 ----------------------------------------------------------------
 		void SetSelectedEditor(BaseEditor* editor);
 		/// SceneObject の選択（shared_ptr で受けて内部では weak_ptr で保持）
 		void SetSelectedObject(const std::shared_ptr<SceneObject>& sp);
+		void ToggleSelectedObject(const std::shared_ptr<SceneObject>& sp);
+		void SetSelectedObjects(const std::vector<std::shared_ptr<SceneObject>>& objects);
+		bool IsSelectedObject(const SceneObject* object) const;
+		std::shared_ptr<SceneObject> GetPrimarySelectedObject() const;
+		std::vector<std::shared_ptr<SceneObject>> GetSelectedObjects() const;
 
 		/// シーンへのオブジェクト追加（Prefab / PlaceTool などから呼ばれる）
 		void CreateObject(const std::shared_ptr<SceneObject>& obj);
 		/// シーンからオブジェクト削除（階層パネルなどから呼ばれる）
 		void DeleteObject(const std::shared_ptr<SceneObject>& sp);
+		void DeleteSelectedObjects();
+		std::vector<WorldTransform*> DuplicateSelectedObjects();
 
 		// ビューポート関連 --------------------------------------------------------
 		void RenderViewport(ViewportType type, const ImTextureID& tex);
@@ -83,16 +114,10 @@ namespace CalyxEditor {
 
 		EngineEdit::EditorMode GetMode() const { return mode_; }
 		void				   SetPlaySession(PlaySession* session) { pPlaySesseion_ = session; }
+		bool				   ShouldRenderRuntimeFullscreen() const;
+		bool				   ShouldHideEditorUiInGameMode() const;
 
 	private:
-		// マウスピッキング関連 ----------------------------------------------------
-		void		 TryPickUnderCursor();
-		void		 TryPickObjectFromMouse(const CalyxMath::Vector2&	mouse,
-											const CalyxMath::Vector2&	viewportSize,
-											const CalyxMath::Matrix4x4& view,
-											const CalyxMath::Matrix4x4& proj);
-		SceneObject* PickSceneObjectByRay(const Ray& ray);
-
 		// シーン管理 --------------------------------------------------------------
 		void SaveScene();
 		void NotifySceneContextChanged();
@@ -102,6 +127,25 @@ namespace CalyxEditor {
 		void EnterGameMode();
 		void ExitGameMode();
 		void ToggleMode();
+		void DrawEditModeCombo();
+		void ApplyEditToolMode(EngineEdit::EditToolMode mode, bool applyLayout);
+		void SaveActiveModeSelection();
+		void RestoreModeSelection(EngineEdit::EditToolMode mode);
+		SceneContext* ResolveModeContext(EngineEdit::EditToolMode mode) const;
+		SceneContext* ResolvePreviewContext(EngineEdit::EditToolMode mode) const;
+		void ActivateModeContext(EngineEdit::EditToolMode mode);
+		const char* GetEditToolModeName(EngineEdit::EditToolMode mode) const;
+		std::string GetEditToolModeLayoutPath(EngineEdit::EditToolMode mode) const;
+		std::string GetEditToolModeLoadLayoutPath(EngineEdit::EditToolMode mode) const;
+		void EnsureParticlePreviewContext();
+		void UpdateParticlePreviewContext(float dt);
+		void EnsurePrefabEditContext();
+		void NewPrefabEditContext(const std::string& rootTypeName = {});
+		void OpenPrefabForEdit(const std::string& path);
+		void SavePrefabEdit();
+		void SavePrefabEditAs(const std::string& path);
+		void ApplyPrefabOverridesFromInstance(const std::shared_ptr<SceneObject>& object);
+		void UpdatePrefabEditContext(float dt);
 
 		void TogglePanel(IEngineUI* p) {
 			if(p) p->SetShow(!p->IsShow());
@@ -112,37 +156,50 @@ namespace CalyxEditor {
 		std::unique_ptr<HierarchyPanel>		 hierarchy_;
 		std::unique_ptr<EditorPanel>		 editor_;
 		std::unique_ptr<InspectorPanel>		 inspector_;
+		std::unique_ptr<KeyframePanel>		 keyframePanel_;
 		std::unique_ptr<SceneObjectEditor>	 sceneEditor_;
 		std::unique_ptr<PlaceToolPanel>		 placeToolPanel_;
 		std::unique_ptr<SplineEditorPanel>	 splineEditor_;
 		std::unique_ptr<AssetPanel>			 assetPanel_;
+		std::unique_ptr<MaterialNodeEditorPanel> materialNodeEditorPanel_;
+		std::unique_ptr<PostEffectNodeEditorPanel> postEffectNodeEditorPanel_;
+		std::unique_ptr<SpriteAnimationEditorPanel> spriteAnimationEditorPanel_;
 		std::unique_ptr<LivePPPanel>		 livePPPanel_;
 		std::unique_ptr<SceneSwitchOverlay>	 sceneSwitchOverlay_;
 		std::unique_ptr<ImGuiLayoutSwitcher> layoutSwitcher_;
+		std::unique_ptr<DebugCameraFocusController> debugCameraFocus_;
 		PlaySession*						 pPlaySesseion_ = nullptr;
-		CalyxScene::SceneManager*			 sceneManager_	= nullptr;
+		CalyxEngine::SceneManager*			 sceneManager_	= nullptr;
 
 		// メニュー
 		std::unique_ptr<EditorMenu> menu_; //< エディターメニュー
 		EngineEdit::EditorMode		mode_ = EngineEdit::EditorMode::Edit;
+		EngineEdit::EditToolMode	editToolMode_ = EngineEdit::EditToolMode::Object;
 
 		// ビューポート
 		std::unique_ptr<Viewport>			mainViewport_;		 //< メインビューポート
 		std::unique_ptr<Viewport>			debugViewport_;		 //< デバッグビューポート
 		std::unique_ptr<Viewport>			pickingViewport_;	 //< ピッキングビューポート
+		int									startupDebugViewportFocusFrames_ = 3;
 		std::unique_ptr<PerformanceOverlay> performanceOverlay_; //< パフォーマンスオーバーレイ
 		std::unique_ptr<DebugOverlay>		debugOverlay_;		 //< デバッグオーバーレイ
+		std::unique_ptr<ParticlePreviewSession> particlePreview_;
+		std::unique_ptr<PrefabEditSession> prefabEdit_;
+		std::unique_ptr<ViewportSelectionController> viewportSelection_;
 
 		// 状態
 		bool		  lastPlaying_	  = false;
 		SceneContext* prevCtx_		  = nullptr;
-		BaseEditor*	  selectedEditor_ = nullptr;
-		/// SceneObject 選択は weak_ptr で保持（寿命を伸ばさない）
-		std::weak_ptr<SceneObject> selectedObject_;
+		EditorSelectionCoordinator selection_;
+		std::unordered_map<EngineEdit::EditToolMode, EditorSelectionCoordinator::Snapshot> modeSelections_;
+		EngineEdit::EditToolMode activeSelectionMode_ = EngineEdit::EditToolMode::Object;
 		nlohmann::json			   livePPSnapshot_;
+		// シーン保存のポップアップ表示
+		float		  sceneSavedPopupTimer_ = 0.0f;
+		std::string   sceneSavedPopupPath_;
 
 		// Editors メニューに並べるパネル群
 		std::vector<IEngineUI*> editorPanels_;
 	};
 
-} // namespace CalyxEditor
+} // namespace CalyxEngine

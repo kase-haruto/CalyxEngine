@@ -6,6 +6,7 @@
 #include <externals/imgui/imgui.h>
 #include <externals/imgui/ImGuizmo.h>
 
+#include <vector>
 
 /* ========================================================================
 /* ギズモコマンドラッパ
@@ -14,6 +15,7 @@ class ScopedGizmoCommand
 	: public ICommand {
 public:
 	ScopedGizmoCommand(WorldTransform* transform, ImGuizmo::OPERATION op);
+	ScopedGizmoCommand(const std::vector<WorldTransform*>& transforms, ImGuizmo::OPERATION op);
 
 	void CaptureAfter();
 	bool IsTrivial(float epsilon = 1e-5f) const;
@@ -24,9 +26,12 @@ public:
 
 private:
 	WorldTransform* transform_;
+	std::vector<WorldTransform*> transforms_;
 	ImGuizmo::OPERATION op_;
 	TransformSnapshot before_;
 	TransformSnapshot after_;
+	std::vector<TransformSnapshot> befores_;
+	std::vector<TransformSnapshot> afters_;
 	bool captured_ = false;
 	std::string name_;
 };
