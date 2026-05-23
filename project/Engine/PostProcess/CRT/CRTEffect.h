@@ -8,7 +8,7 @@
 class CRTEffect : public IPostEffectPass {
 private:
 	struct CRTParameter {
-		CalyxMath::Vector2 screenSize;
+		CalyxEngine::Vector2 screenSize;
 		float time;
 		float padding; // align 16
 	};
@@ -19,8 +19,10 @@ public:
 			   D3D12_GPU_DESCRIPTOR_HANDLE inputSRV,
 			   IRenderTarget* outputRT) override;
 	const std::string GetName() const override { return "CRTEffect"; }
+	nlohmann::json SaveParameters() const override;
+	void LoadParameters(const nlohmann::json& params) override;
 
-	void SetScreenSize(const CalyxMath::Vector2& size) {
+	void SetScreenSize(const CalyxEngine::Vector2& size) {
 		param_.screenSize = size;
 	}
 

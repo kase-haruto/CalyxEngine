@@ -14,12 +14,26 @@
  * - メッシュデータ構造体
  *--------------------------------------------------------*/
 struct MeshData {
+	struct SubMesh {
+		uint32_t indexStart = 0;
+		uint32_t indexCount = 0;
+		uint32_t materialIndex = 0;
+	};
+
 	std::vector<VertexPosUvN> vertices;
 	std::vector<uint32_t>     indices;
 	MaterialData              material;
+	std::vector<MaterialData> materials;
+	std::vector<SubMesh>      subMeshes;
 
 	MaterialData&       Material() { return material; }
 	const MaterialData& Material() const { return material; }
+
+	std::vector<MaterialData>&       Materials() { return materials; }
+	const std::vector<MaterialData>& Materials() const { return materials; }
+
+	std::vector<SubMesh>&       SubMeshes() { return subMeshes; }
+	const std::vector<SubMesh>& SubMeshes() const { return subMeshes; }
 
 	std::vector<VertexPosUvN>&       Vertices() { return vertices; }
 	const std::vector<VertexPosUvN>& Vertices() const { return vertices; }
@@ -71,6 +85,12 @@ struct MeshResource {
 
 	MaterialData&       Material() { return data.material; }
 	const MaterialData& Material() const { return data.material; }
+
+	std::vector<MaterialData>&       Materials() { return data.materials; }
+	const std::vector<MaterialData>& Materials() const { return data.materials; }
+
+	std::vector<MeshData::SubMesh>&       SubMeshes() { return data.subMeshes; }
+	const std::vector<MeshData::SubMesh>& SubMeshes() const { return data.subMeshes; }
 
 	std::vector<VertexPosUvN>&       Vertices() { return data.vertices; }
 	const std::vector<VertexPosUvN>& Vertices() const { return data.vertices; }

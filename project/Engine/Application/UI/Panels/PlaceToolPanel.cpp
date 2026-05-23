@@ -5,29 +5,56 @@
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
+#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
+#include <Engine/Objects/3D/Actor/SplineDeformObject.h>
 #include <Engine/Scene/Context/SceneContext.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
 #include <Engine/System/Command/EditorCommand/LevelEditorCommand/CreateObjectCommand/CreateObjectCommand.h>
 #include <Engine/System/Command/Manager/CommandManager.h>
 
 // --- game objects -----------------------------------------------------------
-#include <Game/3dObject/Actor/Background/FalldownGimmickActor.h>
-#include <Game/3dObject/Actor/Boss/Spawner/BossSpawner.h>
-#include <Game/3dObject/Actor/Enemy/Spawner/EnemySpawner.h>
 
 
 // event
-#include <Game/Event/Camera/CameraTurnAroundEvent.h>
-#include <Game/Event/Spawn/EnemySpawnEvent.h>
-#include <Game/Event/Gimmick/GimmickActivateEvent.h>
 
 // --- externals --------------------------------------------------------------
-#include "Game/Event/Tutorial/TutorialEvent.h"
-#include <Game/Event/Spawn/BossSpawnEvent.h>
+#include "Engine/Assets/Manager/AssetManager.h"
 
 #include <externals/imgui/imgui.h>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
+	namespace {
+		D3D12_GPU_DESCRIPTOR_HANDLE LoadPlaceIcon(const std::string& iconPath) {
+			if(iconPath.empty()) {
+				return {};
+			}
+			return AssetManager::GetInstance()->GetTextureManager()->LoadTexture(iconPath);
+		}
+
+		std::shared_ptr<SceneObject> CreateRegisteredObjectForScene(const std::string&		   typeName,
+																	 const std::string&		   displayName,
+																	 ObjectType				   objectType,
+																	 const CalyxEngine::Vector3& pos,
+																	 bool					   transient) {
+			auto* ctx = SceneContext::Current();
+			if(!ctx) {
+				return nullptr;
+			}
+
+			auto obj = SceneObjectRegistry::Get().Create(typeName);
+			if(!obj) {
+				return nullptr;
+			}
+
+			obj->SetName(displayName.empty() ? typeName : displayName, objectType);
+			obj->SetTransient(transient);
+			ctx->AddObject(obj);
+			obj->Initialize();
+			obj->GetWorldTransform().translation = pos;
+			return obj;
+		}
+	} // namespace
+
 	// ============================================================================
 	//  ctor
 	// ============================================================================
@@ -44,9 +71,9 @@ namespace CalyxEditor {
 			{ShapeObjType::Plane, "plane"},
 			{ShapeObjType::Cube, "cube"},
 			{ShapeObjType::Sphere, "sphere"},
-			{ShapeObjType::Cylinder, "cylinder"},
+			{ShapeObjType::Cylinder, "Cylinder"},
 			{ShapeObjType::Cone, "cone"},
-			{ShapeObjType::Torus, "torus"}};
+			{ShapeObjType::Torus, "Torus"}};
 
 		for(auto& [type, name] : shapes) {
 			std::string objName	  = name;
@@ -58,9 +85,9 @@ namespace CalyxEditor {
 
 			shapeItems.push_back({PlaceItemCategory::Shape,
 								  objName,
-								  TextureManager::GetInstance()->LoadTexture("UI/Tool/" + name + ".dds"),
+								  AssetManager::GetInstance()->GetTextureManager()->LoadTexture("UI/Tool/" + name + ".dds"),
 								  {64, 64},
-								  [modelName, objName](const CalyxMath::Vector3& pos) {
+								  [modelName, objName](const CalyxEngine::Vector3& pos) {
 									  auto factory = [modelName, objName, pos]() {
 										  auto obj = SceneAPI::Instantiate<BaseGameObject>(modelName, objName);
 										  obj->Initialize();
@@ -81,27 +108,48 @@ namespace CalyxEditor {
 								  }});
 		}
 
+		shapeItems.push_back({PlaceItemCategory::Shape,
+							  "Spline Wall Deform",
+							  AssetManager::GetInstance()->GetTextureManager()->LoadTexture("UI/Tool/cylinder.dds"),
+							  {64, 64},
+							  []([[maybe_unused]] const CalyxEngine::Vector3& pos) {
+								  auto factory = []() {
+									  auto obj = SceneAPI::Instantiate<SplineDeformObject>();
+									  obj->Initialize();
+									  return obj;
+								  };
+								  CommandManager::GetInstance()->Execute(
+									  std::make_unique<CreateObjectCommand<SplineDeformObject>>(
+										  SceneContext::Current(), factory, "Create Spline Wall Deform"));
+							  },
+							  []() {
+								  auto obj = SceneAPI::Instantiate<SplineDeformObject>();
+								  obj->Initialize();
+								  obj->SetTransient(true);
+								  return obj;
+							  }});
+
 		// ---------------------------- Particle ----------------------------------
 		{
 			auto& particleItems = categoryItems_[PlaceItemCategory::Particle];
 			particleItems.push_back({PlaceItemCategory::Particle,
 									 "ParticleSystem",
-									 TextureManager::GetInstance()->LoadTexture("UI/Tool/particle.dds"),
+									 AssetManager::GetInstance()->GetTextureManager()->LoadTexture("UI/Tool/particle.dds"),
 									 {64, 64},
-									 [](const CalyxMath::Vector3& pos) {
+									 [](const CalyxEngine::Vector3& pos) {
 										 const std::string name	   = "ParticleSystem";
 										 auto			   factory = [name, pos]() {
-											  auto obj = SceneAPI::Instantiate<CalyxEffect::ParticleSystemObject>(name);
+											  auto obj = SceneAPI::Instantiate<CalyxEngine::ParticleSystemObject>(name);
 											  obj->Initialize();
 											  obj->GetWorldTransform().translation = pos;
 											  return obj;
 										 };
 										 CommandManager::GetInstance()->Execute(
-											 std::make_unique<CreateObjectCommand<CalyxEffect::ParticleSystemObject>>(
+											 std::make_unique<CreateObjectCommand<CalyxEngine::ParticleSystemObject>>(
 												 SceneContext::Current(), factory, "Create ParticleSystem"));
 									 },
 									 []() {
-										 auto obj = SceneAPI::Instantiate<CalyxEffect::ParticleSystemObject>("ParticleSystem");
+										 auto obj = SceneAPI::Instantiate<CalyxEngine::ParticleSystemObject>("ParticleSystem");
 										 obj->Initialize();
 										 obj->SetTransient(true);
 										 return obj;
@@ -112,319 +160,62 @@ namespace CalyxEditor {
 			auto& particleItems = categoryItems_[PlaceItemCategory::Particle];
 			particleItems.push_back({PlaceItemCategory::Particle,
 									 "EffectObject",
-									 TextureManager::GetInstance()->LoadTexture("UI/Tool/particle.dds"),
+									 AssetManager::GetInstance()->GetTextureManager()->LoadTexture("UI/Tool/particle.dds"),
 									 {64, 64},
-									 [](const CalyxMath::Vector3& pos) {
+									 [](const CalyxEngine::Vector3& pos) {
 										 const std::string name	   = "EffectObject";
 										 auto			   factory = [name, pos]() {
-											  auto obj = SceneAPI::Instantiate<CalyxEffect::FxObject>(name);
+											  auto obj = SceneAPI::Instantiate<CalyxEngine::FxObject>(name);
 											  obj->Initialize();
 											  obj->GetWorldTransform().translation = pos;
 											  return obj;
 										 };
 										 CommandManager::GetInstance()->Execute(
-											 std::make_unique<CreateObjectCommand<CalyxEffect::FxObject>>(
+											 std::make_unique<CreateObjectCommand<CalyxEngine::FxObject>>(
 												 SceneContext::Current(), factory, "Create EffectObject"));
 									 },
 									 []() {
-										 auto obj = SceneAPI::Instantiate<CalyxEffect::FxObject>("EffectObject");
+										 auto obj = SceneAPI::Instantiate<CalyxEngine::FxObject>("EffectObject");
 										 obj->Initialize();
 										 obj->SetTransient(true);
 										 return obj;
 									 }});
 		}
 
-		// ---------------------------- Spawner -----------------------------------
-		{
-			auto& spawnerItems = categoryItems_[PlaceItemCategory::InGameObject];
-			spawnerItems.push_back({PlaceItemCategory::InGameObject,
-									"EnemySpawner",
-									{},
-									{64, 64},
-									[](const CalyxMath::Vector3& pos) {
-										auto* ctx	  = SceneContext::Current();
-										auto  factory = [pos]() {
-											 auto obj = SceneAPI::Instantiate<EnemySpawner>("EnemySpawner");
-											 obj->ApplyConfig();
-											 obj->Initialize();
-											 obj->GetWorldTransform().translation = pos;
-											 return obj;
-										};
-										CommandManager::GetInstance()->Execute(
-											std::make_unique<CreateObjectCommand<EnemySpawner>>(
-												ctx, factory, "Create EnemySpawner"));
-									},
-									[]() {
-										auto obj = SceneAPI::Instantiate<EnemySpawner>("EnemySpawner");
-										obj->ApplyConfig();
-										obj->Initialize();
-										obj->SetTransient(true);
-										return obj;
-									}});
-		}
-
-		{
-			auto& spawnerItems = categoryItems_[PlaceItemCategory::InGameObject];
-			spawnerItems.push_back({PlaceItemCategory::InGameObject,
-									"BossSpawner",
-									{},
-									{64, 64},
-									[](const CalyxMath::Vector3& pos) {
-										auto* ctx = SceneContext::Current();
-
-										// 既にシーンに BossSpawner があるなら作成しない
-										if(ctx->FindFirst<BossSpawner>()) {
-											OutputDebugStringA("[PlaceTool] BossSpawner is limited to one per scene.\n");
-											return;
-										}
-
-										auto factory = [pos]() {
-											auto obj = SceneAPI::Instantiate<BossSpawner>("BossSpawner");
-											obj->ApplyConfig();
-											obj->Initialize();
-											obj->GetWorldTransform().translation = pos;
-											return obj;
-										};
-
-										CommandManager::GetInstance()->Execute(
-											std::make_unique<CreateObjectCommand<BossSpawner>>(
-												ctx, factory, "Create BossSpawner"));
-									},
-									[]() {
-										auto obj = SceneAPI::Instantiate<BossSpawner>("BossSpawner");
-										obj->ApplyConfig();
-										obj->Initialize();
-										obj->SetTransient(true);
-										return obj;
-									}});
-		}
-
-		// ---------------------------- Events -----------------------------------
+		// ------------------------------ Event -----------------------------------
 		{
 			auto& eventItems = categoryItems_[PlaceItemCategory::Event];
-			eventItems.push_back({PlaceItemCategory::Event,
-								  "CameraTurnAroundEvent",
-								  {},
-								  {64, 64},
-								  [](const CalyxMath::Vector3& pos) {
-									  auto* ctx = SceneContext::Current();
+			for(const SceneObjectClassDesc* desc : SceneObjectRegistry::Get().ListPlaceableTypes()) {
+				if(!desc || desc->objectType != ObjectType::Event) {
+					continue;
+				}
 
-									  auto factory = [pos]() {
-										  auto obj = SceneAPI::Instantiate<CameraTurnAroundEvent>("CameraTurnAroundEvent");
-										  // obj->ApplyConfig();
-										  obj->GetWorldTransform().translation = pos;
-									  	  obj->GetWorldTransform().scale = {30.5f, 30.5f, 30.5f}; // デフォルトで少し小さめに配置
-										  return obj;
-									  };
+				const std::string typeName	 = desc->typeName;
+				const std::string displayName = desc->displayName.empty() ? desc->typeName : desc->displayName;
+				const std::string iconPath	 = desc->iconPath;
+				const ObjectType  objectType	 = desc->objectType;
 
-									  CommandManager::GetInstance()->Execute(
-										  std::make_unique<CreateObjectCommand<CameraTurnAroundEvent>>(
-											  ctx, factory, "Create CameraTurnAroundEvent"));
-								  },
-								  []() {
-									  auto obj = SceneAPI::Instantiate<CameraTurnAroundEvent>("CameraTurnAroundEvent");
-									  obj->SetTransient(true);
-									  return obj;
-								  }});
-		}
-
-		{
-			auto& eventItems = categoryItems_[PlaceItemCategory::Event];
-			eventItems.push_back({PlaceItemCategory::Event,
-								  "EnemySpawnEvent",
-								  {},
-								  {64, 64},
-								  [](const CalyxMath::Vector3& pos) {
-									  auto* ctx = SceneContext::Current();
-
-									  auto factory = [pos]() {
-										  auto obj = SceneAPI::Instantiate<EnemySpawnEvent>("EnemySpawnEvent");
-										  // obj->ApplyConfig();
-										  obj->GetWorldTransform().translation = pos;
-										  return obj;
-									  };
-
-									  CommandManager::GetInstance()->Execute(
-										  std::make_unique<CreateObjectCommand<EnemySpawnEvent>>(
-											  ctx, factory, "Create CameraTurnAroundEvent"));
-								  },
-								  []() {
-									  auto obj = SceneAPI::Instantiate<EnemySpawnEvent>("EnemySpawnEvent");
-									  obj->SetTransient(true);
-									  return obj;
-								  }});
-		}
-
-		{
-			auto& eventItems = categoryItems_[PlaceItemCategory::Event];
-			eventItems.push_back({PlaceItemCategory::Event,
-								  "BossSpawnEvent",
-								  {},
-								  {64, 64},
-								  [](const CalyxMath::Vector3& pos) {
-									  auto* ctx = SceneContext::Current();
-
-									  auto factory = [pos]() {
-										  auto obj = SceneAPI::Instantiate<BossSpawnEvent>("BossSpawnEvent");
-										  // obj->ApplyConfig();
-										  obj->GetWorldTransform().translation = pos;
-										  return obj;
-									  };
-
-									  CommandManager::GetInstance()->Execute(
-										  std::make_unique<CreateObjectCommand<BossSpawnEvent>>(
-											  ctx, factory, "Create BossSpawnEvent"));
-								  },
-								  []() {
-									  auto obj = SceneAPI::Instantiate<BossSpawnEvent>("BossSpawnEvent");
-									  obj->SetTransient(true);
-									  return obj;
-								  }});
-		}
-
-		{
-			auto& eventItems = categoryItems_[PlaceItemCategory::Event];
-			eventItems.push_back({PlaceItemCategory::Event,
-								  "TutorialEvent",
-								  {},
-								  {64, 64},
-								  [](const CalyxMath::Vector3& pos) {
-									  auto* ctx = SceneContext::Current();
-
-									  auto factory = [pos]() {
-										  auto obj = SceneAPI::Instantiate<TutorialEvent>("TutorialEvent");
-										  // obj->ApplyConfig();
-										  obj->GetWorldTransform().translation = pos;
-										  return obj;
-									  };
-
-									  CommandManager::GetInstance()->Execute(
-										  std::make_unique<CreateObjectCommand<TutorialEvent>>(
-											  ctx, factory, "Create CameraTurnAroundEvent"));
-								  },
-								  []() {
-									  auto obj = SceneAPI::Instantiate<TutorialEvent>("TutorialEvent");
-									  obj->SetTransient(true);
-									  return obj;
-								  }});
-		}
-
-		// gimmick作動イベント
-		{
-			auto& eventItems = categoryItems_[PlaceItemCategory::Event];
-			eventItems.push_back({PlaceItemCategory::Event,
-								  "GimmickActivateEvent",
-								  {},
-								  {64, 64},
-								  [](const CalyxMath::Vector3& pos) {
-									  auto* ctx = SceneContext::Current();
-
-									  auto factory = [pos]() {
-										  auto obj = SceneAPI::Instantiate<GimmickActivateEvent>("GimmickActivateEvent");
-										  // obj->ApplyConfig();
-										  obj->GetWorldTransform().translation = pos;
-										  return obj;
-									  };
-
-									  CommandManager::GetInstance()->Execute(
-										  std::make_unique<CreateObjectCommand<GimmickActivateEvent>>(
-											  ctx, factory, "Create GimmickActivateEvent"));
-								  },
-								  []() {
-									  auto obj = SceneAPI::Instantiate<GimmickActivateEvent>("GimmickActivateEvent");
-									  obj->SetTransient(true);
-									  return obj;
-								  }});
-		}
-
-		// ---------------------------- 背景オブジェクト -----------------------------------
-		auto&						   modelItems = categoryItems_[PlaceItemCategory::BackgroundActor];
-		const std::vector<std::string> modelNames = {
-			"largeBuilding.obj",
-			"tallBuilding_01.obj",
-			"tallBuilding_02.obj",
-			"smallBuilding_01.obj"};
-
-		// staticモデル - 登録時にImGuiのレンダリング関数を呼ばない
-		for(const auto& modelName : modelNames) {
-			std::string displayName = modelName;
-			if(const size_t dot = modelName.find('.'); dot != std::string::npos) {
-				displayName = modelName.substr(0, dot); // 拡張子を除いた名前を表示に使う
+				eventItems.push_back({PlaceItemCategory::Event,
+									  displayName,
+									  LoadPlaceIcon(iconPath),
+									  {64, 64},
+									  [typeName, displayName, objectType](const CalyxEngine::Vector3& pos) {
+										  auto factory = [typeName, displayName, objectType, pos]() {
+											  return CreateRegisteredObjectForScene(
+												  typeName, displayName, objectType, pos, false);
+										  };
+										  CommandManager::GetInstance()->Execute(
+											  std::make_unique<CreateObjectCommand<SceneObject>>(
+												  SceneContext::Current(), factory, "Create Registered Object"));
+									  },
+									  [typeName, displayName, objectType]() {
+										  return CreateRegisteredObjectForScene(
+											  typeName, displayName, objectType, CalyxEngine::Vector3::Zero(), true);
+									  }});
 			}
-
-			modelItems.push_back({PlaceItemCategory::BackgroundActor,
-								  displayName,
-								  {},
-								  {64, 64},
-								  [modelName, displayName](const CalyxMath::Vector3& pos) {
-									  auto factory = [modelName, displayName, pos]() {
-										  auto obj = SceneAPI::Instantiate<BackgroundActor>(modelName, displayName);
-										  if(obj) {
-											  obj->Initialize();
-											  if(obj->GetCollider())
-												  obj->GetCollider()->SetCollisionEnabled(false);
-											  obj->GetWorldTransform().translation = pos;
-										  }
-										  return obj;
-									  };
-									  CommandManager::GetInstance()->Execute(
-										  std::make_unique<CreateObjectCommand<BackgroundActor>>(
-											  SceneContext::Current(), factory, "Create Background Actor"));
-								  },
-								  [modelName, displayName]() {
-									  auto obj = SceneAPI::Instantiate<BackgroundActor>(modelName, displayName);
-									  if(obj) {
-										  obj->Initialize();
-										  if(obj->GetCollider())
-											  obj->GetCollider()->SetCollisionEnabled(false);
-										  obj->SetTransient(true);
-									  }
-									  return obj;
-								  }});
-		}
-
-		// ---------------------------- ギミックオブジェクト -----------------------------------
-		auto& gimmickItems = categoryItems_[PlaceItemCategory::GimmickActor];
-
-		// ギミック用モデル - 登録時にImGuiのレンダリング関数を呼ばない
-		for(const auto& modelName : modelNames) {
-			std::string displayName = modelName;
-			if(const size_t dot = modelName.find('.'); dot != std::string::npos) {
-				displayName = modelName.substr(0, dot); // 拡張子を除いた名前を表示に使う
-			}
-			displayName += " (Falldown)";
-
-			gimmickItems.push_back({PlaceItemCategory::GimmickActor,
-									displayName,
-									{},
-									{64, 64},
-									[modelName, displayName](const CalyxMath::Vector3& pos) {
-										auto factory = [modelName, displayName, pos]() {
-											auto obj = SceneAPI::Instantiate<FalldownGimmickActor>(modelName, displayName);
-											if(obj) {
-												obj->Initialize();
-												if(obj->GetCollider())
-													obj->GetCollider()->SetCollisionEnabled(false);
-												obj->GetWorldTransform().translation = pos;
-											}
-											return obj;
-										};
-										CommandManager::GetInstance()->Execute(
-											std::make_unique<CreateObjectCommand<FalldownGimmickActor>>(
-												SceneContext::Current(), factory, "Create Gimmick Actor"));
-									},
-									[modelName, displayName]() {
-										auto obj = SceneAPI::Instantiate<FalldownGimmickActor>(modelName, displayName);
-										if(obj) {
-											obj->Initialize();
-											if(obj->GetCollider())
-												obj->GetCollider()->SetCollisionEnabled(false);
-											obj->SetTransient(true);
-										}
-										return obj;
-									}});
 		}
 	}
+		
 
 	// ============================================================================
 	//  パネル描画
@@ -474,9 +265,6 @@ namespace CalyxEditor {
 			{PlaceItemCategory::Shape, "Shapes"},
 			{PlaceItemCategory::Light, "Lights"},
 			{PlaceItemCategory::Particle, "Particles"},
-			{PlaceItemCategory::InGameObject, "Game Objects"},
-			{PlaceItemCategory::BackgroundActor, "Background Actors"},
-			{PlaceItemCategory::GimmickActor, "Gimmick Actors"},
 			{PlaceItemCategory::Event, "Events"},
 		};
 
@@ -567,7 +355,7 @@ namespace CalyxEditor {
 					}
 
 					if(clicked) {
-						item.createFunc(CalyxMath::Vector3::Zero());
+						item.createFunc(CalyxEngine::Vector3::Zero());
 					}
 
 					ImGui::PopID();
@@ -599,4 +387,4 @@ namespace CalyxEditor {
 		}
 		ImGui::EndChild();
 	}
-} // namespace CalyxEditor
+} // namespace CalyxEngine

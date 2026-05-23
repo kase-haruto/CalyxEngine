@@ -6,7 +6,7 @@
 #include <Engine/Application/UI/Panels/ConsolePanel.h>
 #include <Engine/Application/UI/Panels/EditorPanel.h>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	//		panelの取得
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -49,4 +49,4 @@ namespace CalyxEditor {
 	void PanelController::RegisterPanel(const std::string name, std::unique_ptr<IEngineUI> panel) {
 		panels_.emplace(name, std::move(panel));
 	}
-} // namespace CalyxEditor
+} // namespace CalyxEngine

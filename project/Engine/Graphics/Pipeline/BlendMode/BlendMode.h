@@ -3,7 +3,7 @@
 // lib
 #include <d3d12.h>
 #include <d3dx12.h>
-#include <cassert>
+#include <Engine/Foundation/Debug/CxAssert.h>
 
 enum class BlendMode{
 	NONE,				//< ブレンドなし
@@ -102,7 +102,7 @@ inline D3D12_BLEND_DESC CreateBlendDesc(BlendMode mode){
 
 			//-------------------------------------------------------------------------
 		default:
-			assert(false && "Unsupported BlendMode!");
+			CX_CHECK(false && "Unsupported BlendMode!", "Assertion failed");
 			break;
 	}
 

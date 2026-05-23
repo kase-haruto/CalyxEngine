@@ -1,6 +1,6 @@
 #include "EditorContext.h"
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 	void EditorContext::SetSelectedObject(SceneObject* obj) {
 		selectedObject_ = obj;
 	}
@@ -16,4 +16,4 @@ namespace CalyxEditor {
 	BaseEditor* EditorContext::GetSelectedEditor() const {
 		return selectedEditor_;
 	}
-} // namespace CalyxEditor
+} // namespace CalyxEngine

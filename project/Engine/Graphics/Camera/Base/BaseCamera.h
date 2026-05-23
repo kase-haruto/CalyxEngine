@@ -13,8 +13,8 @@
 #include <d3d12.h>
 #include <wrl.h>
 
-struct CalyxMath::Matrix4x4;
-struct CalyxMath::Vector3;
+struct CalyxEngine::Matrix4x4;
+struct CalyxEngine::Vector3;
 
 /*-----------------------------------------------------------------------------------------
  * BaseCamera
@@ -41,11 +41,11 @@ public:
 	void SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> command,
 					PipelineType                                      pipelineType);
 	void SetCommand(ID3D12GraphicsCommandList* command, PipelineType pipelineType);
-	void SetRootCommand(ID3D12GraphicsCommandList* command, uint32_t rootIndex);
+	void SetRootCommand(ID3D12GraphicsCommandList* command, uint32_t rootIndex) const;
 
 	void StartShake(float duration,float intensity) override; // カメラシェイク開始
 
-	std::string_view GetTypeName() const override { return "BaseCamera"; }
+	std::string_view GetObjectClassName() const override { return "BaseCamera"; }
 	// config ============================================================
 	void ApplyConfig();
 	void ExtractConfig();
@@ -58,7 +58,7 @@ protected:
 	//==================================================================*//
 	//			protected functions
 	//==================================================================*//
-	CalyxMath::Matrix4x4 MakePerspectiveFovMatrix(float fovY,float aspectRatio,float nearClip,float farClip);
+	CalyxEngine::Matrix4x4 MakePerspectiveFovMatrix(float fovY,float aspectRatio,float nearClip,float farClip);
 	void                 SetName(const std::string& name);
 
 public:
@@ -66,14 +66,14 @@ public:
 	//			getter / setter
 	//==================================================================*//
 	// Setter
-	void SetCamera(const CalyxMath::Vector3& pos,const CalyxMath::Vector3& rotate);
+	void SetCamera(const CalyxEngine::Vector3& pos,const CalyxEngine::Vector3& rotate);
 
 	// Getter
-	const CalyxMath::Matrix4x4& GetViewMatrix() const;
-	const CalyxMath::Matrix4x4& GetProjectionMatrix() const;
-	const CalyxMath::Matrix4x4& GetViewProjectionMatrix() const;
-	const CalyxMath::Vector3&   GetRotate() const;
-	const CalyxMath::Vector3&   GetTranslate() const;
+	const CalyxEngine::Matrix4x4& GetViewMatrix() const;
+	const CalyxEngine::Matrix4x4& GetProjectionMatrix() const;
+	const CalyxEngine::Matrix4x4& GetViewProjectionMatrix() const;
+	const CalyxEngine::Vector3&   GetRotate() const;
+	const CalyxEngine::Vector3&   GetTranslate() const;
 	float                       GetFovY() const { return fovAngleY_; }
 	float                       GetAspectRatio() const { return aspectRatio_; }
 	bool                        IsActive() const { return isActive_; }
@@ -86,8 +86,8 @@ protected:
 	//			protected variables
 	//==================================================================*//
 
-	CalyxMath::Matrix4x4 viewMatrix_;       // ビュー行列
-	CalyxMath::Matrix4x4 projectionMatrix_; // プロジェクション行列
+	CalyxEngine::Matrix4x4 viewMatrix_;       // ビュー行列
+	CalyxEngine::Matrix4x4 projectionMatrix_; // プロジェクション行列
 
 	float aspectRatio_ = 16.0f / 9.0f;                                          // アスペクト比
 	float nearZ_       = 0.1f;                                                  // 近クリップ面
@@ -100,14 +100,14 @@ protected:
 	float              shakeDuration_  = 0.0f;
 	float              shakeElapsed_   = 0.0f;
 	float              shakeIntensity_ = 0.0f; // シェイクの強さ
-	CalyxMath::Vector3 originalPosition_;      // シェイク前の元のカメラ位置
+	CalyxEngine::Vector3 originalPosition_;      // シェイク前の元のカメラ位置
 
 protected:
 	//==================================================================*//
 	//			protected variables
 	//==================================================================*//
 	bool                 isActive_ = true;      //アクティブかどうか
-	CalyxMath::Matrix4x4 viewProjectionMatrix_; // ビュープロジェクション行列
+	CalyxEngine::Matrix4x4 viewProjectionMatrix_; // ビュープロジェクション行列
 
 private:
 	//==================================================================*//

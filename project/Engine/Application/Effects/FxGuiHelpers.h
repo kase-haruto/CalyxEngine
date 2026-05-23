@@ -2,9 +2,9 @@
 #include <Data/Engine/Configs/Scene/Objects/Particle/FxParmConfig.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 
-struct CalyxMath::Vector3;
+struct CalyxEngine::Vector3;
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 
 	enum class FxValueMode;
 	template <class T>
@@ -40,7 +40,7 @@ namespace CalyxEffect {
 			return GuiCmd::DragFloat(id, v);
 		}
 		template <>
-		inline bool DrawParamEditor<CalyxMath::Vector3>(const char* id, CalyxMath::Vector3& v) {
+		inline bool DrawParamEditor<CalyxEngine::Vector3>(const char* id, CalyxEngine::Vector3& v) {
 			return GuiCmd::DragFloat3(id, v);
 		}
 
@@ -70,9 +70,9 @@ namespace CalyxEffect {
 					p.SetRandom(mn, mx);
 					changed = true;
 				}
-			} else if constexpr(std::is_same_v<T, CalyxMath::Vector3>) {
+			} else if constexpr(std::is_same_v<T, CalyxEngine::Vector3>) {
 				if(mode == FxValueMode::Random) {
-					CalyxMath::Vector3 mn = p.GetMin(), mx = p.GetMax();
+					CalyxEngine::Vector3 mn = p.GetMin(), mx = p.GetMax();
 					bool			   e1 = GuiCmd::DragFloat3("Min", mn);
 					bool			   e2 = GuiCmd::DragFloat3("Max", mx);
 					if(e1 || e2) {
@@ -83,14 +83,14 @@ namespace CalyxEffect {
 						changed = true;
 					}
 				} else { // RandomSphere (Center + Radius)
-					CalyxMath::Vector3 center = (p.GetMin() + p.GetMax()) * 0.5f;
-					CalyxMath::Vector3 half	  = (p.GetMax() - p.GetMin()) * 0.5f;
+					CalyxEngine::Vector3 center = (p.GetMin() + p.GetMax()) * 0.5f;
+					CalyxEngine::Vector3 half	  = (p.GetMax() - p.GetMin()) * 0.5f;
 					float			   radius = half.Length();
 					bool			   e1	  = GuiCmd::DragFloat3("Center", center);
 					bool			   e2	  = GuiCmd::DragFloat("Radius", radius, 0.01f, 0.0f, 1e6f);
 					if(e1 || e2) {
-						CalyxMath::Vector3 mn = center - CalyxMath::Vector3(radius, radius, radius);
-						CalyxMath::Vector3 mx = center + CalyxMath::Vector3(radius, radius, radius);
+						CalyxEngine::Vector3 mn = center - CalyxEngine::Vector3(radius, radius, radius);
+						CalyxEngine::Vector3 mx = center + CalyxEngine::Vector3(radius, radius, radius);
 						p.SetRandom(mn, mx);
 						changed = true;
 					}
@@ -111,4 +111,4 @@ namespace CalyxEffect {
 		}
 
 	} // namespace FxGui
-} // namespace CalyxEffect
+} // namespace CalyxEngine

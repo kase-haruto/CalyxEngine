@@ -8,10 +8,10 @@
 #include <d3d12.h>
 #include <vector>
 
-namespace CalyxMath {
+namespace CalyxEngine {
 	struct Matrix3x4;
 }
-namespace CalyxGraphics {
+namespace CalyxEngine {
 
 	/*----------------------------------------------------------------
 	 *	Raytracing Scene
@@ -31,7 +31,7 @@ namespace CalyxGraphics {
 		 * \param desc インスタンス情報
 		 */
 		void AddInstance(
-			const CalyxMath::Matrix3x4& transform,
+			const CalyxEngine::Matrix3x4& transform,
 			D3D12_GPU_VIRTUAL_ADDRESS   blasAddress,
 			uint32_t                   instanceID,
 			uint8_t                    mask = 0xFF,
@@ -66,4 +66,4 @@ namespace CalyxGraphics {
 		DxStructuredBuffer<D3D12_RAYTRACING_INSTANCE_DESC> instanceBuffer_;
 	};
 
-} // namespace CalyxGraphics
+} // namespace CalyxEngine

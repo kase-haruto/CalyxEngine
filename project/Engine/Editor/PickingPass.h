@@ -6,7 +6,7 @@
 #include <d3d12.h>
 #include <wrl.h>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 	/*-----------------------------------------------------------
 	 * PickingPath
 	 * - ピッキングパス定義クラス
@@ -43,6 +43,8 @@ namespace CalyxEditor {
 		void Render(ID3D12GraphicsCommandList* cmd,
 					ModelRenderer*			   modelRenderer,
 					PipelineService*		   psoService);
+
+		void TransitionColorTo(ID3D12GraphicsCommandList* cmd, D3D12_RESOURCE_STATES newState);
 
 		// RT / Depth 取得（Readback用に後で使う）
 		ID3D12Resource*				GetColor() const { return color_.Get(); }
@@ -88,5 +90,6 @@ namespace CalyxEditor {
 		uint32_t height_		= 0;
 		uint32_t rowPitch_		= 0;
 		uint32_t rowPitchDepth_ = 0;
+		D3D12_RESOURCE_STATES colorState_ = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 	};
-} // namespace CalyxEditor
+} // namespace CalyxEngine

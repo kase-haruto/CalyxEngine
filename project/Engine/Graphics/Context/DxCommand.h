@@ -3,7 +3,7 @@
 // c++
 #include <d3d12.h>
 #include <wrl.h>
-#include <cassert>
+#include <Engine/Foundation/Debug/CxAssert.h>
 
 /*-----------------------------------------------------------------------------------------
  * DxCommand class

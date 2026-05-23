@@ -1,5 +1,5 @@
 #include "Audio.h"
-#include <cassert>
+#include <Engine/Foundation/Debug/CxAssert.h>
 #include <stdexcept>
 #include <iostream>   // デバッグ用などに
 
@@ -33,14 +33,14 @@ void Audio::Initialize(){
 
 	// XAudio2初期化
 	HRESULT hr = XAudio2Create(&instance_->xAudio2_, 0, XAUDIO2_DEFAULT_PROCESSOR);
-	assert(SUCCEEDED(hr));
+	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
 	hr = instance_->xAudio2_->CreateMasteringVoice(&instance_->masteringVoice_);
-	assert(SUCCEEDED(hr));
+	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
 	// Media Foundation初期化
 	hr = instance_->InitializeMediaFoundation();
-	assert(SUCCEEDED(hr));
+	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
 	// 起動時にまとめて読み込む音声の処理
 	StartUpLoad();
@@ -50,9 +50,6 @@ void Audio::Initialize(){
 // StartUpLoad
 /////////////////////////////////////////////////////////////////////////////////////
 void Audio::StartUpLoad(){
-	Load("bgm.mp3");
-	Load("attack.mp3");
-	Load("hit.mp3");
 }
 
 void Audio::Finalize(){
@@ -92,7 +89,7 @@ void Audio::PlayAudio(
 	IXAudio2SourceVoice* pSourceVoice = nullptr;
 	if (loop){
 		hr = xAudio2->CreateSourceVoice(&pSourceVoice, &soundData.wfex);
-		assert(SUCCEEDED(hr));
+		CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 		sourceVoices_[filename] = std::unique_ptr<IXAudio2SourceVoice, SourceVoiceDeleter>(pSourceVoice);
 	} else{
 		// 同じfilenameがあった場合、連番をつける等の処理
@@ -102,7 +99,7 @@ void Audio::PlayAudio(
 			tmpFilename = filename + std::to_string(count);
 		}
 		hr = xAudio2->CreateSourceVoice(&pSourceVoice, &soundData.wfex);
-		assert(SUCCEEDED(hr));
+		CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 		sourceVoices_[tmpFilename] = std::unique_ptr<IXAudio2SourceVoice, SourceVoiceDeleter>(pSourceVoice);
 	}
 
@@ -116,15 +113,15 @@ void Audio::PlayAudio(
 	}
 
 	hr = sourceVoices_[tmpFilename]->SubmitSourceBuffer(&buf);
-	assert(SUCCEEDED(hr));
+	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
 	// 音量セット
 	hr = sourceVoices_[tmpFilename]->SetVolume(volume);
-	assert(SUCCEEDED(hr));
+	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
 	// 再生開始
 	hr = sourceVoices_[tmpFilename]->Start();
-	assert(SUCCEEDED(hr));
+	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -132,7 +129,7 @@ void Audio::PlayAudio(
 /////////////////////////////////////////////////////////////////////////////////////
 void Audio::Play(const std::string& filename, bool loop, float volume){
 	// ロード済みか確認
-	assert(instance_->audios_.find(filename) != instance_->audios_.end());
+	CX_CHECK(instance_->audios_.find(filename) != instance_->audios_.end(), "Assertion failed");
 
 	// 実際の再生を呼び出し
 	instance_->PlayAudio(
@@ -152,14 +149,14 @@ void Audio::Play(const std::string& filename, bool loop, float volume){
 /////////////////////////////////////////////////////////////////////////////////////
 void Audio::EndAudio(const std::string& filename){
 	// SourceVoiceがなければエラー
-	assert(instance_->sourceVoices_.find(filename) != instance_->sourceVoices_.end());
+	CX_CHECK(instance_->sourceVoices_.find(filename) != instance_->sourceVoices_.end(), "Assertion failed");
 
 	HRESULT hr;
 	hr = instance_->sourceVoices_[filename]->Stop();
-	assert(SUCCEEDED(hr));
+	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
 	hr = instance_->sourceVoices_[filename]->FlushSourceBuffers();
-	assert(SUCCEEDED(hr));
+	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
 	// ボイス解放
 	instance_->sourceVoices_[filename].reset();
@@ -173,11 +170,11 @@ void Audio::EndAudio(const std::string& filename){
 /////////////////////////////////////////////////////////////////////////////////////
 void Audio::PauseAudio(const std::string& filename){
 	// SourceVoiceがなければエラー
-	assert(instance_->sourceVoices_.find(filename) != instance_->sourceVoices_.end());
+	CX_CHECK(instance_->sourceVoices_.find(filename) != instance_->sourceVoices_.end(), "Assertion failed");
 
 	HRESULT hr = S_OK;
 	hr = instance_->sourceVoices_[filename]->Stop();
-	assert(SUCCEEDED(hr));
+	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
 	// 再生フラグをおろす
 	instance_->isPlaying_[filename] = false;
@@ -188,11 +185,11 @@ void Audio::PauseAudio(const std::string& filename){
 /////////////////////////////////////////////////////////////////////////////////////
 void Audio::RestertAudio(const std::string& filename){
 	// SourceVoiceがなければエラー
-	assert(instance_->sourceVoices_.find(filename) != instance_->sourceVoices_.end());
+	CX_CHECK(instance_->sourceVoices_.find(filename) != instance_->sourceVoices_.end(), "Assertion failed");
 	HRESULT hr = S_OK;
 	if (instance_->sourceVoices_[filename] != nullptr){
 		hr = instance_->sourceVoices_[filename]->Start();
-		assert(SUCCEEDED(hr));
+		CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
 		instance_->isPlaying_[filename] = true;
 	}
@@ -203,7 +200,7 @@ void Audio::RestertAudio(const std::string& filename){
 /////////////////////////////////////////////////////////////////////////////////////
 void Audio::SetAudioVolume(const std::string& filename, float volume){
 	// SourceVoiceがなければエラー
-	assert(instance_->sourceVoices_.find(filename) != instance_->sourceVoices_.end());
+	CX_CHECK(instance_->sourceVoices_.find(filename) != instance_->sourceVoices_.end(), "Assertion failed");
 
 	instance_->sourceVoices_[filename]->SetVolume(volume);
 }
@@ -213,7 +210,7 @@ void Audio::SetAudioVolume(const std::string& filename, float volume){
 /////////////////////////////////////////////////////////////////////////////////////
 bool Audio::IsPlayingAudio(const std::string& filename){
 	// フラグがなければエラー
-	assert(instance_->isPlaying_.find(filename) != instance_->isPlaying_.end());
+	CX_CHECK(instance_->isPlaying_.find(filename) != instance_->isPlaying_.end(), "Assertion failed");
 	return instance_->isPlaying_[filename];
 }
 
@@ -229,7 +226,7 @@ void Audio::Load(const std::string& filename){
 		// 拡張子を取得
 		size_t pos = filename.find_last_of('.');
 		if (pos == std::string::npos || pos == filename.length() - 1){
-			assert(false && "No valid extension found.");
+			CX_CHECK(false && "No valid extension found.", "Assertion failed");
 		}
 		std::string extension = filename.substr(pos + 1);
 
@@ -241,7 +238,7 @@ void Audio::Load(const std::string& filename){
 			instance_->audios_[filename] = instance_->LoadMP3(wpath.c_str());
 		} else{
 			// 未対応フォーマット
-			assert(false && "Unsupported audio format.");
+			CX_CHECK(false && "Unsupported audio format.", "Assertion failed");
 		}
 
 		// 再生フラグ初期化
@@ -257,14 +254,14 @@ SoundData Audio::LoadWave(const char* filename){
 
 	// バイナリ形式で開く
 	file.open(filename, std::ios_base::binary);
-	assert(file.is_open());
+	CX_CHECK(file.is_open(), "Assertion failed");
 
 	// RIFFヘッダ
 	RiffHeader riff;
 	file.read(( char* ) &riff, sizeof(riff));
 	// チェック
-	assert(strncmp(riff.chunk.id, "RIFF", 4) == 0);
-	assert(strncmp(riff.type, "WAVE", 4) == 0);
+	CX_CHECK(strncmp(riff.chunk.id, "RIFF", 4) == 0, "Assertion failed");
+	CX_CHECK(strncmp(riff.type, "WAVE", 4) == 0, "Assertion failed");
 
 	// フォーマットチャンク
 	FormatChunk format = {};
@@ -274,14 +271,14 @@ SoundData Audio::LoadWave(const char* filename){
 		if (strncmp(chunkHeader.id, "fmt ", 4) == 0){
 			format.chunk = chunkHeader;
 			file.read(( char* ) &format.fmt, format.chunk.size);
-			assert(format.chunk.size <= sizeof(format.fmt));
+			CX_CHECK(format.chunk.size <= sizeof(format.fmt), "Assertion failed");
 			break;
 		} else{
 			file.seekg(chunkHeader.size, std::ios_base::cur);
 		}
 
 		if (file.eof()){
-			assert(0 && "Reached end of file without finding 'fmt ' chunk");
+			CX_CHECK(0 && "Reached end of file without finding 'fmt ' chunk", "Assertion failed");
 			return SoundData {};
 		}
 	}
@@ -297,7 +294,7 @@ SoundData Audio::LoadWave(const char* filename){
 		}
 
 		if (file.eof()){
-			assert(0 && "Reached end of file without finding 'data' chunk");
+			CX_CHECK(0 && "Reached end of file without finding 'data' chunk", "Assertion failed");
 			return SoundData {};
 		}
 	}
@@ -346,9 +343,9 @@ SoundData Audio::LoadMP3(const wchar_t* filename){
 	}
 
 	hr = pOutputType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio);
-	assert(SUCCEEDED(hr));
+	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 	hr = pOutputType->SetGUID(MF_MT_SUBTYPE, MFAudioFormat_PCM);
-	assert(SUCCEEDED(hr));
+	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
 	hr = pReader->SetCurrentMediaType(( DWORD ) MF_SOURCE_READER_FIRST_AUDIO_STREAM, nullptr, pOutputType);
 	if (FAILED(hr)){
@@ -408,11 +405,11 @@ SoundData Audio::LoadMP3(const wchar_t* filename){
 
 	// フォーマット情報を取得
 	hr = pOutputType->GetUINT32(MF_MT_AUDIO_NUM_CHANNELS, ( UINT32* ) &soundData.wfex.nChannels);
-	assert(SUCCEEDED(hr));
+	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 	hr = pOutputType->GetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND, ( UINT32* ) &soundData.wfex.nSamplesPerSec);
-	assert(SUCCEEDED(hr));
+	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 	hr = pOutputType->GetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE, ( UINT32* ) &soundData.wfex.wBitsPerSample);
-	assert(SUCCEEDED(hr));
+	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
 	soundData.wfex.wFormatTag = WAVE_FORMAT_PCM;
 	soundData.wfex.nBlockAlign = soundData.wfex.nChannels * soundData.wfex.wBitsPerSample / 8;
@@ -432,7 +429,7 @@ SoundData Audio::LoadMP3(const wchar_t* filename){
 /////////////////////////////////////////////////////////////////////////////////////
 void Audio::UnloadAudio(const std::string& filename){
 	// まだロードされていなければエラー
-	assert(instance_->audios_.find(filename) != instance_->audios_.end());
+	CX_CHECK(instance_->audios_.find(filename) != instance_->audios_.end(), "Assertion failed");
 
 	// SoundData破棄 (vectorなので自動的に解放される)
 	instance_->audios_.erase(filename);

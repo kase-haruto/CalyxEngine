@@ -11,16 +11,15 @@
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
+#include <Engine/Objects/2D/Object2d/SpriteSceneObject2d.h>
+#include <Engine/PostProcess/Manager/PostEffectManager.h>
 #include <Engine/Objects/Event/BaseEventObject.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
 
 BaseScene::BaseScene() {
 	spriteRenderer_	 = std::make_unique<SpriteRenderer>();
 	modelRenderer_	 = std::make_unique<ModelRenderer>();
-	shadowMapSystem_ = std::make_unique<CalyxGraphics::ShadowMapSystem>();
-	shadowMapSystem_->Initialize(
-		GraphicsGroup::GetInstance()->GetDevice().Get(),
-		4096);
+	outlineRenderer_ = std::make_unique<OutlineRenderer>();
 }
 
 void BaseScene::Initialize() {}
@@ -76,50 +75,58 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 #endif
 	}
 
-	const Camera3d* cam = static_cast<Camera3d*>(CameraManager::GetMain3d());
-	modelRenderer_->PreCullAndBatch(cam);
-
-	// =========================================================
-	//  ShadowPass
-	// =========================================================
-	{
-		auto* dirLight = sceneContext_->GetLightLibrary()->GetDirectionalLight();
-		if(dirLight) {
-			// シーン全体のAABBからシャドウマップの範囲を決定
-			shadowMapSystem_->UpdateShadowBounds(*cam, 500.0f, 10.0f);
-			dirLight->UpdateLightVP(shadowMapSystem_->GetShadowBounds().GetBounds());
-			shadowMapSystem_->SetLightVP(dirLight->GetLightVP());
-		}
-
-		// ShadowMap を作る
-		shadowMapSystem_->Render(
-			cmd,
-			pso,
-			GraphicsGroup::GetInstance()->GetDevice().Get(),
-			modelRenderer_->GetStaticVisible(),
-			modelRenderer_->GetSkinnedVisible());
+	const Camera3d* renderCam = dynamic_cast<Camera3d*>(CameraManager::GetActive());
+	if(!renderCam) {
+		renderCam = CameraManager::GetMain3d();
 	}
+	if(!renderCam) return;
 
-	// =========================================================
-	// MainPass の前に、描画先(OM)を必ず復帰させる
-	// =========================================================
-	{
-		// RTV + DSV + Viewport を復帰
-		rt->SetRenderTarget(cmd);
+	if(rt->GetRenderTargetType() == RenderTargetType::DebugView) {
+		modelRenderer_->PreCullAndBatch(renderCam, false);
+	} else {
+		const Camera3d* cullCam = CameraManager::GetMain3d();
+		if(!cullCam) {
+			cullCam = renderCam;
+		}
+		modelRenderer_->PreCullAndBatch(cullCam, true);
 	}
 
 	// =========================================================
 	// MainPass
 	// =========================================================
-	// ===== ShadowMap を MainPass にバインド =====
+	rt->SetRenderTarget(cmd);
 	modelRenderer_->DrawAll(cmd,
 							GraphicsGroup::GetInstance()->GetDevice().Get(),
 							rt,
 							pso,
-							sceneContext_->GetLightLibrary(), shadowMapSystem_.get());
+							sceneContext_->GetLightLibrary(), nullptr);
 
 	// Particles
 	sceneContext_->GetFxSystem()->Render(pso, cmd);
+
+	const bool outlineEnabled = PostEffectManager::Get()->IsOutlineEnabled();
+
+	// OutlinePass
+	if(outlineEnabled) {
+		outlineRenderer_->Render(cmd,
+								 GraphicsGroup::GetInstance()->GetDevice().Get(),
+								 rt,
+								 pso,
+								 renderCam,
+								 *modelRenderer_);
+	}
+
+#if defined(_DEBUG) || defined(DEVELOP)
+	if(outlineEnabled && rt->GetRenderTargetType() == RenderTargetType::DebugView) {
+		outlineRenderer_->RenderSelectionHighlight(cmd,
+												   GraphicsGroup::GetInstance()->GetDevice().Get(),
+												   rt,
+												   pso,
+												   renderCam,
+												   *modelRenderer_,
+												   sceneContext_->GetDebugSelectedObjects());
+	}
+#endif
 
 #if defined(_DEBUG) || defined(DEVELOP)
 	// lightのデバッグ描画
@@ -131,5 +138,12 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 
 void BaseScene::DrawSpritesOnly(ID3D12GraphicsCommandList* cmd,
 								PipelineService*		   pso) {
+	if(sceneContext_) {
+		for(auto* object : sceneContext_->GetObjectLibrary()->GetAllObjectsRaw()) {
+			if(auto* spriteObject = dynamic_cast<CalyxEngine::SpriteSceneObject2d*>(object)) {
+				spriteObject->DrawSprite(spriteRenderer_.get());
+			}
+		}
+	}
 	spriteRenderer_->Draw(cmd, pso, RenderTargetType::BackBuffer);
 }

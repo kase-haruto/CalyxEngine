@@ -21,6 +21,7 @@
 #include <optional>
 #include <algorithm>
 #include <cmath>
+#include <externals/nlohmann/json.hpp>
 
 class PipelineService;
 class IPostEffectPass;
@@ -48,13 +49,21 @@ public:
 	bool MoveDown(const std::string& name);
 	void SetOrder(const std::vector<std::string>& orderedNames);
 
+	bool SavePreset(const std::string& filePath, const std::string& presetName = "PostEffectPreset") const;
+	bool LoadPreset(const std::string& filePath);
+	void PlayTriggeredEffects();
+	void PlayTriggeredEffect(const std::string& name);
+
+	void SetOutlineEnabled(bool enabled) { outlineEnabled_ = enabled; }
+	bool IsOutlineEnabled() const { return outlineEnabled_; }
+
 	// ---------- 実行/更新 ----------
 	void Update(float dt);
 
 	void Execute(ID3D12GraphicsCommandList* cmd,
 				 DxGpuResource* input,
 				 IRenderTarget* finalTarget,
-				 CalyxGraphics::DxCore* dxCore);
+				 CalyxEngine::DxCore* dxCore);
 
 	void TweenFloat(const std::string& passName,
 					std::function<float()> getter,
@@ -62,7 +71,7 @@ public:
 					std::optional<float> from,
 					float to,
 					float durationSec,
-					CalyxEase::EaseType ease = CalyxEase::EaseType::EaseOutSine,
+					CalyxEngine::EaseType ease = CalyxEngine::EaseType::EaseOutSine,
 					bool autoDisableIfZero = true,
 					std::function<void()> onComplete = nullptr);
 
@@ -91,7 +100,7 @@ private:
 		float end = 0.f;
 		float t = 0.f;
 		float dur = 1.f;
-		CalyxEase::EaseType ease = CalyxEase::EaseType::Linear;
+		CalyxEngine::EaseType ease = CalyxEngine::EaseType::Linear;
 		bool autoDisableIfZero = true;
 		std::function<void()> onComplete;
 	};
@@ -101,10 +110,15 @@ private:
 	bool initialized_ = false;
 	bool dirty_ = true;
 
-	CalyxGraphics::DxCore* dxCore_ = nullptr;
+	CalyxEngine::DxCore* dxCore_ = nullptr;
 
 	PostProcessCollection collection_;
 	PostEffectGraph graph_{&collection_};
+	nlohmann::json loadedPreset_;
+	bool hasLoadedGraph_ = false;
+	bool outlineEnabled_ = true;
 
 	const std::string kCopyImageName = "CopyImage";
+	const std::string kBlendName = "Blend";
+	const std::string kDefaultPaht = "Resources/Assets/PostEffects/Default.postfx";
 };

@@ -1,10 +1,14 @@
 #include "AssetDatabase.h"
 
+#include "Engine/Assets/Manager/AssetManager.h"
+
+#include <Engine/Assets/DataAsset/DataAssetManager.h>
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <externals/nlohmann/json.hpp>
 
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 
 using json = nlohmann::json;
 
@@ -64,6 +68,9 @@ AssetType AssetDatabase::GuessTypeFromExtension(const std::string& extIn) {
 	if(ext == ".obj" || ext == ".gltf" || ext == ".glb" || ext == ".fbx") return AssetType::Model;
 	if(ext == ".hlsl" || ext == ".fxc" || ext == ".cso") return AssetType::Shader;
 	if(ext == ".mat") return AssetType::Material;
+	if(ext == ".prefab") return AssetType::Prefab;
+	if(ext == ".effect" || ext == ".fxasset") return AssetType::Effect;
+	if(ext == ".spriteanim") return AssetType::SpriteAnimation;
 	if(ext == ".wav" || ext == ".mp3" || ext == ".ogg") return AssetType::Audio;
 	return AssetType::Unknown;
 }
@@ -112,7 +119,7 @@ AssetGUID AssetDatabase::LoadOrCreateMeta(const std::filesystem::path& absPath, 
 //		アセットのプレビュー用テクスチャを構築
 /////////////////////////////////////////////////////////////////////////////////////////
 void AssetDatabase::BuildPreview(AssetRecord& rec) {
-	auto& tm = *TextureManager::GetInstance();
+	auto& tm = *CalyxEngine::AssetManager::GetInstance()->GetTextureManager();
 	try {
 		if(rec.type == AssetType::Texture) {
 			// モデルフォルダ内のテクスチャはプレビュー生成をスキップ（ロード失敗の可能性があるため）
@@ -123,9 +130,23 @@ void AssetDatabase::BuildPreview(AssetRecord& rec) {
 				auto icon	   = tm.LoadTexture("UI/Tool/AssetPanel/generic.dds");
 				rec.previewTex = (ImTextureID)icon.ptr;
 			} else {
-				// テクスチャタイプの場合は実際の画像をプレビューとして使用
-				auto texHandle = tm.LoadTexture(rel.string());
-				rec.previewTex = (ImTextureID)texHandle.ptr;
+				std::filesystem::path previewPath = rec.sourcePath;
+				std::string			  ext		  = previewPath.extension().string();
+				std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+
+				if(ext == ".dds") {
+					previewPath.replace_extension(".png");
+					ext = ".png";
+				}
+
+				if(ext == ".png" && std::filesystem::exists(previewPath)) {
+					auto previewRel = std::filesystem::relative(previewPath, assetsRoot_);
+					auto texHandle  = tm.LoadTexture(previewRel.generic_string());
+					rec.previewTex	= (ImTextureID)texHandle.ptr;
+				} else {
+					auto icon	   = tm.LoadTexture("UI/Tool/AssetPanel/generic.dds");
+					rec.previewTex = (ImTextureID)icon.ptr;
+				}
 			}
 		} else {
 			// その他のタイプは共通アイコンを使用
@@ -215,6 +236,17 @@ AssetGUID AssetDatabase::RegisterOrUpdate(const std::filesystem::path& absOrRelP
 		if(needPreview) BuildPreview(r);
 	}
 
+	if(type == AssetType::Material) {
+		if(auto* manager = CalyxEngine::AssetManager::GetInstance()->GetDataAssetManager()) {
+			manager->LoadMaterialAsset(abs, guid);
+		}
+	}
+	if(type == AssetType::SpriteAnimation) {
+		if(auto* manager = CalyxEngine::AssetManager::GetInstance()->GetDataAssetManager()) {
+			manager->LoadSpriteAnimationAsset(abs, guid);
+		}
+	}
+
 	RebuildViewCache();
 	return guid;
 }
@@ -224,6 +256,13 @@ AssetGUID AssetDatabase::RegisterOrUpdate(const std::filesystem::path& absOrRelP
 /////////////////////////////////////////////////////////////////////////////////////////
 void AssetDatabase::Scan() {
 	if(!std::filesystem::exists(assetsRoot_)) return;
+
+	std::erase_if(records_, [this](const auto& item) {
+		const auto& rec = item.second;
+		if(rec && std::filesystem::exists(rec->sourcePath)) return false;
+		if(rec) normPathToGuid_.erase(NormalizePath(rec->sourcePath));
+		return true;
+	});
 
 	for(auto& entry : std::filesystem::recursive_directory_iterator(assetsRoot_)) {
 		if(!entry.is_regular_file()) continue;

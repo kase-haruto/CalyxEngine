@@ -26,6 +26,11 @@ public:
 			   IRenderTarget* outputRT) override;
 
 	void ShowImGui()override;
+	void ResetParameters() override;
+	nlohmann::json SaveParameters() const override;
+	void LoadParameters(const nlohmann::json& params) override;
+	bool GetFloatParameter(const std::string& name, float& out) const override;
+	bool SetFloatParameter(const std::string& name, float value) override;
 	const std::string GetName() const override { return "Vignette"; }
 
 

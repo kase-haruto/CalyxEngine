@@ -1,8 +1,21 @@
 #include "PlaySession.h"
+
+#include "Engine/Assets/Manager/AssetManager.h"
+
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
+	namespace {
+		std::optional<DebugCamera::State> CaptureDebugCameraState(SceneContext* context) {
+			if(!context || !context->GetCameraMgr()) return std::nullopt;
+
+			if(auto* debug = context->GetCameraMgr()->DebugCam()) {
+				return debug->CaptureState();
+			}
+			return std::nullopt;
+		}
+	}
 
 	void PlaySession::Initialize(SceneContext* editorContext) {
 		editorContext_ = editorContext;
@@ -19,7 +32,7 @@ namespace CalyxEditor {
 	}
 
 	void PlaySession::LoadIcons() {
-		auto& tm		 = *TextureManager::GetInstance();
+		auto& tm		 = *AssetManager::GetInstance()->GetTextureManager();
 		iconPlay_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/ToolBar/play.dds").ptr;
 		iconPause_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/ToolBar/pause.dds").ptr;
 		iconStep_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/ToolBar/step.dds").ptr;
@@ -129,6 +142,7 @@ namespace CalyxEditor {
 	void PlaySession::Enter() {
 		if(mode_ != EngineMode::Editor || !editorContext_) return;
 
+		pendingDebugCameraState_ = CaptureDebugCameraState(editorContext_);
 		auto json		= SceneSerializer::DumpJson(*editorContext_);
 		runtimeContext_ = std::make_unique<SceneContext>();
 		runtimeContext_->Initialize(false);
@@ -142,6 +156,7 @@ namespace CalyxEditor {
 
 	void PlaySession::Restart() {
 		if(mode_ == EngineMode::Playing || mode_ == EngineMode::Paused || mode_ == EngineMode::Step) {
+			pendingDebugCameraState_ = CaptureDebugCameraState(runtimeContext_.get());
 			auto json		= SceneSerializer::DumpJson(*editorContext_);
 			runtimeContext_ = std::make_unique<SceneContext>();
 			runtimeContext_->Initialize(false);
@@ -160,6 +175,7 @@ namespace CalyxEditor {
 	}
 
 	void PlaySession::RebuildRuntimeFromEditor(SceneContext* newEditorCtx) {
+		pendingDebugCameraState_ = CaptureDebugCameraState(GetContext());
 		BindEditorContext(newEditorCtx);
 		if(!IsRuntime()) return;
 
@@ -175,6 +191,8 @@ namespace CalyxEditor {
 	bool PlaySession::ExitRequested() const { return exitRequested_; }
 
 	void PlaySession::FinalizeExitCleanup() {
+		pendingDebugCameraState_ = CaptureDebugCameraState(runtimeContext_.get());
+
 		// Editor側をアクティブに戻す（MakeCurrentは保険）
 		if(editorContext_) {
 			editorContext_->MakeCurrent();
@@ -184,6 +202,15 @@ namespace CalyxEditor {
 		runtimeContext_.reset();
 		exitRequested_ = false;
 		mode_		   = EngineMode::Editor;
+	}
+
+	void PlaySession::ApplyPendingDebugCameraState(SceneContext* context) {
+		if(!pendingDebugCameraState_ || !context || !context->GetCameraMgr()) return;
+
+		if(auto* debug = context->GetCameraMgr()->DebugCam()) {
+			debug->ApplyState(*pendingDebugCameraState_);
+			pendingDebugCameraState_.reset();
+		}
 	}
 
 	void PlaySession::TogglePause() {
@@ -216,4 +243,4 @@ namespace CalyxEditor {
 		}
 	}
 
-} // namespace CalyxEditor
+} // namespace CalyxEngine

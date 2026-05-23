@@ -34,7 +34,7 @@ void SplineData::SegmentAndLocalT(float t, int& seg, float& lt) const {
 	lt = ft - seg; // 0..1
 }
 
-CalyxMath::Vector3 SplineData::CatmullRom(const CalyxMath::Vector3& p0, const CalyxMath::Vector3& p1, const CalyxMath::Vector3& p2, const CalyxMath::Vector3& p3, float t) {
+CalyxEngine::Vector3 SplineData::CatmullRom(const CalyxEngine::Vector3& p0, const CalyxEngine::Vector3& p1, const CalyxEngine::Vector3& p2, const CalyxEngine::Vector3& p3, float t) {
 	// 標準 Catmull–Rom (centripetal ではなくuniform)
 	float t2 = t * t;
 	float t3 = t2 * t;
@@ -43,7 +43,7 @@ CalyxMath::Vector3 SplineData::CatmullRom(const CalyxMath::Vector3& p0, const Ca
 				   (2.0f * p0 - 5.0f * p1 + 4.0f * p2 - p3) * t2 +
 				   (-p0 + 3.0f * p1 - 3.0f * p2 + p3) * t3);
 }
-CalyxMath::Vector3 SplineData::CatmullRomTangent(const CalyxMath::Vector3& p0, const CalyxMath::Vector3& p1, const CalyxMath::Vector3& p2, const CalyxMath::Vector3& p3, float t) {
+CalyxEngine::Vector3 SplineData::CatmullRomTangent(const CalyxEngine::Vector3& p0, const CalyxEngine::Vector3& p1, const CalyxEngine::Vector3& p2, const CalyxEngine::Vector3& p3, float t) {
 	float t2 = t * t;
 	// d/dt
 	return 0.5f * ((-p0 + p2) +
@@ -51,7 +51,7 @@ CalyxMath::Vector3 SplineData::CatmullRomTangent(const CalyxMath::Vector3& p0, c
 				   3.0f * (-p0 + 3.0f * p1 - 3.0f * p2 + p3) * t2);
 }
 
-CalyxMath::Vector3 SplineData::Evaluate(float t) const {
+CalyxEngine::Vector3 SplineData::Evaluate(float t) const {
 	const int n = CountP();
 	if(n == 0) return {};
 	if(n == 1) return points[0].pos;
@@ -70,9 +70,9 @@ CalyxMath::Vector3 SplineData::Evaluate(float t) const {
 	return CatmullRom(points[i0].pos, points[i1].pos, points[i2].pos, points[i3].pos, lt);
 }
 
-CalyxMath::Vector3 SplineData::Tangent(float t) const {
+CalyxEngine::Vector3 SplineData::Tangent(float t) const {
 	const int n = CountP();
-	if(n <= 1) return CalyxMath::Vector3(0, 0, 1);
+	if(n <= 1) return CalyxEngine::Vector3(0, 0, 1);
 
 	int	  seg;
 	float lt;
@@ -82,7 +82,7 @@ CalyxMath::Vector3 SplineData::Tangent(float t) const {
 	const int i0 = WrapIndex(seg - 1);
 	const int i3 = WrapIndex(seg + 2);
 
-	CalyxMath::Vector3 tg = CatmullRomTangent(points[i0].pos, points[i1].pos, points[i2].pos, points[i3].pos, lt);
+	CalyxEngine::Vector3 tg = CatmullRomTangent(points[i0].pos, points[i1].pos, points[i2].pos, points[i3].pos, lt);
 	if(tg.LengthSquared() > 1e-12f) tg = tg.Normalize();
 	return tg;
 }
@@ -100,13 +100,13 @@ void SplineData::BuildArcTable(int samplesPerSegment) {
 	tSamples_.reserve(totalSamples);
 	sCumulative_.reserve(totalSamples);
 
-	CalyxMath::Vector3 prev = Evaluate(0.0f);
+	CalyxEngine::Vector3 prev = Evaluate(0.0f);
 	tSamples_.push_back(0.0f);
 	sCumulative_.push_back(0.0f);
 
 	for(int s = 1; s < totalSamples; ++s) {
 		float			   t   = (float)s / (float)(totalSamples - 1);
-		CalyxMath::Vector3 cur = Evaluate(t);
+		CalyxEngine::Vector3 cur = Evaluate(t);
 		totalLength_ += (cur - prev).Length();
 		tSamples_.push_back(t);
 		sCumulative_.push_back(totalLength_);
@@ -118,10 +118,12 @@ float SplineData::DistanceToT(float distance) const {
 	if(sCumulative_.empty() || totalLength_ <= 0.0f) return 0.0f;
 	// 端を扱う
 	float d = distance;
-	// ループさせたい場合：
-	d = std::fmod(d, totalLength_);
-	if(d < 0.0f) d += totalLength_;
-	// 非ループで止めたい場合は std::clamp(d, 0, totalLength_) にする
+	if(closed) {
+		d = std::fmod(d, totalLength_);
+		if(d < 0.0f) d += totalLength_;
+	} else {
+		d = std::clamp(d, 0.0f, totalLength_);
+	}
 
 	// 二分探索で sCumulative_ から t を補間
 	auto it = std::lower_bound(sCumulative_.begin(), sCumulative_.end(), d);
@@ -172,7 +174,7 @@ float SplineData::AdvanceTBy(float t, float distance) const {
 	return DistanceToT(sNew);
 }
 
-float SplineData::FindNearestDistance(const CalyxMath::Vector3& worldPos) const {
+float SplineData::FindNearestDistance(const CalyxEngine::Vector3& worldPos) const {
 	if(sCumulative_.empty() || totalLength_ <= 0.0f) return 0.0f;
 
 	float minD2	   = 1e30f;
@@ -180,7 +182,7 @@ float SplineData::FindNearestDistance(const CalyxMath::Vector3& worldPos) const 
 
 	// サンプル点から最も近いものを探す（簡易実装）
 	for(size_t i = 0; i < sCumulative_.size(); ++i) {
-		CalyxMath::Vector3 p  = Evaluate(tSamples_[i]);
+		CalyxEngine::Vector3 p  = Evaluate(tSamples_[i]);
 		float			   d2 = (p - worldPos).LengthSquared();
 		if(d2 < minD2) {
 			minD2	 = d2;

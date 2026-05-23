@@ -4,7 +4,7 @@
 class PostProcessCollection;
 class PostEffectGraph;
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 	/* ========================================================================
 	/*		ポストプロセス編集ツール
 	/* ===================================================================== */

@@ -1,4 +1,5 @@
 #include "ModelRenderer.h"
+#include <Engine/Foundation/Debug/CxAssert.h>
 
 /* ========================================================================
 /* include space
@@ -15,13 +16,14 @@
 #include <Engine/Lighting/LightLibrary.h>
 #include <Engine/Scene/Context/SceneContext.h>
 
+#include <cstring>
 
 ModelRenderer::ModelRenderer() {
 	Microsoft::WRL::ComPtr<ID3D12Device5> device5;
 	GraphicsGroup::GetInstance()->GetDevice()->QueryInterface(IID_PPV_ARGS(&device5));
 
 	if(device5) {
-		raytracingSystem_ = std::make_unique<CalyxGraphics::RaytracingSystem>();
+		raytracingSystem_ = std::make_unique<CalyxEngine::RaytracingSystem>();
 		raytracingSystem_->Initialize(device5.Get());
 	}
 }
@@ -42,7 +44,7 @@ void ModelRenderer::RegisterStatic(BaseModel* model, const WorldTransform& trans
 /////////////////////////////////////////////////////////////////////////////////////////
 //		アニメーションモデル登録
 /////////////////////////////////////////////////////////////////////////////////////////
-void ModelRenderer::RegisterSkinned(CalyxAssets::AnimationModel* model, const WorldTransform& transform, SceneObject* owner) {
+void ModelRenderer::RegisterSkinned(CalyxEngine::AnimationModel* model, const WorldTransform& transform, SceneObject* owner) {
 	InstanceSkinned inst{};
 	inst.tf		 = transform;
 	inst.dirty	 = true;
@@ -95,7 +97,7 @@ void ModelRenderer::MarkStaticDirty(BaseModel* model, size_t index) {
 	it->second[index].dirty = true;
 }
 
-void ModelRenderer::MarkSkinnedDirty(CalyxAssets::AnimationModel* model, size_t index) {
+void ModelRenderer::MarkSkinnedDirty(CalyxEngine::AnimationModel* model, size_t index) {
 	auto it = skinnedModels_.find(model);
 	if(it == skinnedModels_.end()) return;
 	if(index >= it->second.size()) return;
@@ -105,28 +107,7 @@ void ModelRenderer::MarkSkinnedDirty(CalyxAssets::AnimationModel* model, size_t 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		視錐台判定 & バッチ化
 /////////////////////////////////////////////////////////////////////////////////////////
-void ModelRenderer::PreCullAndBatch(const Camera3d* camera) {
-
-	// =========================================================
-	// Shadow 用 visible / SceneBounds 初期化
-	// =========================================================
-	staticVisibleForShadow_.clear();
-	skinnedVisibleForShadow_.clear();
-
-	// Raytracing Scene Clear
-	raytracingScene_.Clear();
-
-	hasSceneBounds_ = false;
-
-	auto ExpandSceneBounds = [&](const AABB& aabb) {
-		if(!hasSceneBounds_) {
-			sceneBounds_	= aabb;
-			hasSceneBounds_ = true;
-			return;
-		}
-		sceneBounds_.min_ = CalyxMath::Vector3::Min(sceneBounds_.min_, aabb.min_);
-		sceneBounds_.max_ = CalyxMath::Vector3::Max(sceneBounds_.max_, aabb.max_);
-	};
+void ModelRenderer::PreCullAndBatch(const Camera3d* camera, bool enableFrustumCulling) {
 
 	// =========================================================
 	// 静的モデル
@@ -147,19 +128,9 @@ void ModelRenderer::PreCullAndBatch(const Camera3d* camera) {
 			}
 
 			// -------------------------
-			// ShadowPass：無条件で登録 (影を落とす場合のみ)
-			// -------------------------
-			if(!inst.owner || inst.owner->IsCastShadow()) {
-				staticVisibleForShadow_[model].push_back(inst.tf);
-				ExpandSceneBounds(inst.worldAABB);
-			}
-
-			// -------------------------
 			// MainPass：カメラカリング
 			// -------------------------
-			inst.visible = camera->IsVisible(inst.worldAABB);
-
-			inst.visible = camera->IsVisible(inst.worldAABB);
+			inst.visible = !enableFrustumCulling || !camera || camera->IsVisible(inst.worldAABB);
 		}
 	}
 
@@ -181,27 +152,105 @@ void ModelRenderer::PreCullAndBatch(const Camera3d* camera) {
 			}
 
 			// -------------------------
-			// ShadowPass：無条件で登録 (影を落とす場合のみ)
-			// -------------------------
-			if(!inst.owner || inst.owner->IsCastShadow()) {
-				skinnedVisibleForShadow_[model].push_back(inst.tf);
-				ExpandSceneBounds(inst.worldAABB);
-			}
-
-			// -------------------------
 			// MainPass：カメラカリング
 			// -------------------------
-			inst.visible = camera->IsVisible(inst.worldAABB);
-
-			inst.visible = camera->IsVisible(inst.worldAABB);
+			inst.visible = !enableFrustumCulling || !camera || camera->IsVisible(inst.worldAABB);
 		}
 	}
+
+	CollectShadowCasters();
 
 	// =========================================================
 	// MainPass 用バッチ生成
 	// =========================================================
 	BuildStaticBatches();
 	BuildSkinnedBatches();
+}
+
+void ModelRenderer::BuildAllVisibleBatches() {
+	for(auto& [model, insts] : staticModels_) {
+		if(!model || !model->GetModelData() || !model->GetIsDrawEnable()) continue;
+		for(auto& inst : insts) {
+			inst.visible = true;
+			if(inst.dirty) {
+				inst.worldAABB = model->GetModelData()->localAABB.Transform(inst.tf.matrix.world);
+				inst.dirty = false;
+			}
+		}
+	}
+
+	for(auto& [model, insts] : skinnedModels_) {
+		if(!model || !model->GetModelData()) continue;
+		for(auto& inst : insts) {
+			inst.visible = true;
+			if(inst.dirty) {
+				inst.worldAABB = model->GetModelData()->localAABB.Transform(inst.tf.matrix.world);
+				inst.dirty = false;
+			}
+		}
+	}
+
+	CollectShadowCasters();
+
+	BuildStaticBatches();
+	BuildSkinnedBatches();
+}
+
+void ModelRenderer::CollectShadowCasters() {
+	staticVisibleForShadow_.clear();
+	skinnedVisibleForShadow_.clear();
+	raytracingScene_.Clear();
+	hasSceneBounds_ = false;
+
+	auto expandSceneBounds = [&](const AABB& aabb) {
+		if(!hasSceneBounds_) {
+			sceneBounds_	= aabb;
+			hasSceneBounds_ = true;
+			return;
+		}
+		sceneBounds_.min_ = CalyxEngine::Vector3::Min(sceneBounds_.min_, aabb.min_);
+		sceneBounds_.max_ = CalyxEngine::Vector3::Max(sceneBounds_.max_, aabb.max_);
+	};
+
+	for(auto& [model, insts] : staticModels_) {
+		if(!model || !model->GetModelData() || !model->GetIsDrawEnable()) continue;
+
+		const AABB& localAABB = model->GetModelData()->localAABB;
+		for(auto& inst : insts) {
+			if(inst.owner && !inst.owner->IsCastShadow()) continue;
+			if(inst.dirty) {
+				inst.worldAABB = localAABB.Transform(inst.tf.matrix.world);
+				inst.dirty	   = false;
+			}
+			staticVisibleForShadow_[model].push_back(inst.tf);
+			expandSceneBounds(inst.worldAABB);
+		}
+	}
+
+	for(auto& [model, insts] : skinnedModels_) {
+		if(!model || !model->GetModelData() || !model->GetIsDrawEnable()) continue;
+
+		const AABB& localAABB = model->GetModelData()->localAABB;
+		for(auto& inst : insts) {
+			if(inst.owner && !inst.owner->IsCastShadow()) continue;
+			if(inst.dirty) {
+				inst.worldAABB = localAABB.Transform(inst.tf.matrix.world);
+				inst.dirty	   = false;
+			}
+			skinnedVisibleForShadow_[model].push_back(inst.tf);
+			expandSceneBounds(inst.worldAABB);
+		}
+	}
+}
+
+void ModelRenderer::BindRaytracingScene(ID3D12GraphicsCommandList* cmdList) const {
+	if(!raytracingSystem_) return;
+	ID3D12Resource* tlas = raytracingSystem_->GetTLAS();
+	if(!tlas) return;
+
+	cmdList->SetGraphicsRootShaderResourceView(
+		10, // Space0, t3
+		tlas->GetGPUVirtualAddress());
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -229,12 +278,37 @@ void ModelRenderer::BuildStaticBatches() {
 		PipelineKey key{PipelineTag::Object::Object3d, model->GetBlendMode()};
 		auto&		batch = staticBatches_[key];
 
+		if(auto* item = FindCompatibleStaticBatch(batch, model)) {
+			item->transforms.insert(item->transforms.end(), visTf.begin(), visTf.end());
+			item->billboards.insert(item->billboards.end(), visBb.begin(), visBb.end());
+			continue;
+		}
+
 		StaticBatchItem item;
 		item.model = model;
 		item.transforms.swap(visTf);
 		item.billboards.swap(visBb);
 		batch.emplace_back(std::move(item));
 	}
+}
+
+ModelRenderer::StaticBatchItem* ModelRenderer::FindCompatibleStaticBatch(StaticBatch& batch, BaseModel* model) {
+	if(!model || !model->GetModelData()) return nullptr;
+
+	for(auto& item : batch) {
+		BaseModel* base = item.model;
+		if(!base || !base->GetModelData()) continue;
+		if(base->GetModelData() != model->GetModelData()) continue;
+		if(base->GetTexSrv().ptr != model->GetTexSrv().ptr) continue;
+		if(base->GetEnvMapSrv().ptr != model->GetEnvMapSrv().ptr) continue;
+		if(base->UsesRuntimeMaterialGraph() != model->UsesRuntimeMaterialGraph()) continue;
+		if(base->UsesRuntimeMaterialGraph() && base->GetMaterialGuid() != model->GetMaterialGuid()) continue;
+		if(std::memcmp(&base->GetMaterialForBatch(), &model->GetMaterialForBatch(), sizeof(Material)) != 0) continue;
+
+		return &item;
+	}
+
+	return nullptr;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -269,7 +343,22 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 							IRenderTarget*					rt,
 							PipelineService*				psoService,
 							LightLibrary*					lightLibrary,
-							CalyxGraphics::ShadowMapSystem* shadowMapSystem) {
+							CalyxEngine::ShadowMapSystem* shadowMapSystem) {
+	(void)rt;
+
+	// Skinned meshes are converted to skinned vertex buffers once per frame.
+	{
+		bool computeSet = false;
+		for(auto& [model, insts] : skinnedModels_) {
+			if(!model || !model->GetModelData() || insts.empty()) continue;
+			if(!computeSet) {
+				const auto& ps = psoService->GetComputePipelineSet(PipelineTag::Compute::SkinningCompute);
+				ps.SetCompute(cmdList);
+				computeSet = true;
+			}
+			model->DispatchSkinning(psoService, cmdList);
+		}
+	}
 
 	// Raytracing TLAS Build
 	if(raytracingSystem_) {
@@ -290,7 +379,7 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 				if(model->HasBLAS()) {
 					for(const auto& tf : transforms) {
 						raytracingScene_.AddInstance(
-							CalyxMath::Matrix3x4::ToMatrix3x4(tf.matrix.world),
+							CalyxEngine::Matrix3x4::ToMatrix3x4(tf.matrix.world),
 							model->GetBLAS(),
 							0);
 					}
@@ -306,7 +395,7 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 				if(model->HasBLAS()) {
 					for(const auto& tf : transforms) {
 						raytracingScene_.AddInstance(
-							CalyxMath::Matrix3x4::ToMatrix3x4(tf.matrix.world),
+							CalyxEngine::Matrix3x4::ToMatrix3x4(tf.matrix.world),
 							model->GetBLAS(),
 							0);
 					}
@@ -333,6 +422,23 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 	{
 		PipelineKey lastKey{};
 		bool		hasLast = false;
+		bool		usingGeneratedPipeline = false;
+		auto bindObject3DPassResources = [&]() -> bool {
+			if(shadowMapSystem) {
+				shadowMapSystem->BindForMainPass(cmdList);
+			}
+
+			BindRaytracingScene(cmdList);
+
+			if(auto* cam = CameraManager::GetActive()) {
+				cam->SetCommand(cmdList, PipelineType::Object3D);
+			} else {
+				return false;
+			}
+
+			lightLibrary->SetCommand(cmdList, PipelineType::Object3D);
+			return true;
+		};
 
 		for(auto& [key, batch] : staticBatches_) {
 			if(batch.empty()) continue;
@@ -341,25 +447,11 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 				const auto ps = psoService->GetPipelineSet(key.tag, key.blend);
 				psoService->SetCommand(ps, cmdList);
 
-				shadowMapSystem->BindForMainPass(cmdList);
-
-				if(raytracingSystem_) {
-					cmdList->SetGraphicsRootShaderResourceView(
-						10, // Space0, t3
-						raytracingSystem_->GetTLAS()->GetGPUVirtualAddress());
-				}
-
-				if(auto* cam = CameraManager::GetActive()) {
-					cam->SetCommand(cmdList, PipelineType::Object3D);
-				} else {
-					// 判定漏れ防止
-					continue;
-				}
-
-				lightLibrary->SetCommand(cmdList, PipelineType::Object3D);
+				if(!bindObject3DPassResources()) continue;
 
 				lastKey = key;
 				hasLast = true;
+				usingGeneratedPipeline = false;
 			}
 
 			for(auto& item : batch) {
@@ -367,9 +459,31 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 				auto&	   visible = item.transforms;
 				if(!model || visible.empty()) continue;
 
+				if(model->UsesRuntimeMaterialGraph()) {
+					if(auto material = model->GetMaterialAsset()) {
+						CalyxEngine::MaterialGraphRuntimeShader shader = runtimeMaterialShaderCache_.GetOrCompileObject3DPixelShader(*material);
+						if(shader.pixelShader) {
+							const auto generatedSet = psoService->GetGeneratedMaterialObjectPipelineSet(model->GetBlendMode(), shader.pixelShader, shader.hash);
+							psoService->SetCommand(generatedSet, cmdList);
+							if(!bindObject3DPassResources()) continue;
+							usingGeneratedPipeline = true;
+						} else if(usingGeneratedPipeline) {
+							const auto ps = psoService->GetPipelineSet(key.tag, key.blend);
+							psoService->SetCommand(ps, cmdList);
+							if(!bindObject3DPassResources()) continue;
+							usingGeneratedPipeline = false;
+						}
+					}
+				} else if(usingGeneratedPipeline) {
+					const auto ps = psoService->GetPipelineSet(key.tag, key.blend);
+					psoService->SetCommand(ps, cmdList);
+					if(!bindObject3DPassResources()) continue;
+					usingGeneratedPipeline = false;
+				}
+
 				const UINT need = static_cast<UINT>(item.billboards.size());
 				if(need == 0) continue;
-				assert(item.transforms.size() == item.billboards.size());
+				CX_CHECK(item.transforms.size() == item.billboards.size(), "Assertion failed");
 
 				model->EnsureBillboardCapacity(device, need);
 				model->UploadBillboardParams(item.billboards);
@@ -379,15 +493,29 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 				model->UploadInstanceMatrices(visible);
 				cmdList->SetGraphicsRootDescriptorTable(1, model->GetInstanceSrv());
 
+				if(model->UsesRuntimeMaterialGraph()) {
+					model->TransferMaterial();
+				}
 				model->BindMaterialCB(cmdList);
 				cmdList->SetGraphicsRootDescriptorTable(2, model->GetTexSrv());
+				cmdList->SetGraphicsRootDescriptorTable(12, model->GetMaterialGraphTextureSrvTable(0));
 				cmdList->SetGraphicsRootDescriptorTable(6, model->GetEnvMapSrv());
 
 				cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 				model->BindVertexIndexBuffers(cmdList);
 
-				const UINT indexCount = static_cast<UINT>(model->GetModelData()->meshResource.Indices().size());
-				cmdList->DrawIndexedInstanced(indexCount, need, 0, 0, 0);
+				const auto& meshResource = model->GetModelData()->meshResource;
+				const auto& subMeshes = meshResource.SubMeshes();
+				if(subMeshes.empty()) {
+					const UINT indexCount = static_cast<UINT>(meshResource.Indices().size());
+					cmdList->DrawIndexedInstanced(indexCount, need, 0, 0, 0);
+				} else {
+					for(const auto& subMesh : subMeshes) {
+						cmdList->SetGraphicsRootDescriptorTable(2, model->GetTexSrv(subMesh.materialIndex));
+						cmdList->SetGraphicsRootDescriptorTable(12, model->GetMaterialGraphTextureSrvTable(subMesh.materialIndex));
+						cmdList->DrawIndexedInstanced(subMesh.indexCount, need, subMesh.indexStart, 0, 0);
+					}
+				}
 			}
 		}
 	}
@@ -398,6 +526,7 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 	{
 		PipelineKey lastKey{};
 		bool		hasLast = false;
+		bool		usingGeneratedPipeline = false;
 
 		for(auto& [key, batch] : skinnedBatches_) {
 			if(batch.empty()) continue;
@@ -406,13 +535,11 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 				const auto ps = psoService->GetPipelineSet(key.tag, key.blend);
 				psoService->SetCommand(ps, cmdList);
 
-				shadowMapSystem->BindForMainPass(cmdList);
-
-				if(raytracingSystem_) {
-					cmdList->SetGraphicsRootShaderResourceView(
-						10, // Space0, t3
-						raytracingSystem_->GetTLAS()->GetGPUVirtualAddress());
+				if(shadowMapSystem) {
+					shadowMapSystem->BindForMainPass(cmdList);
 				}
+
+				BindRaytracingScene(cmdList);
 
 				if(auto* cam = CameraManager::GetActive()) {
 					cam->SetCommand(cmdList, PipelineType::SkinningObject3D);
@@ -425,135 +552,94 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 
 				lastKey = key;
 				hasLast = true;
+				usingGeneratedPipeline = false;
 			}
 
 			for(auto& [model, visible] : batch) {
-				for(const auto& tf : visible) model->Draw(tf);
-			}
-		}
-	}
+				if(!model || visible.empty()) continue;
 
-#if defined(_DEBUG) || defined(DEVELOP)
-	// debugViewでのみ描画
-	if(rt->GetRenderTargetType() != RenderTargetType::DebugView) return;
-
-	//------------------------------------------------------------
-	// 選択オブジェクトのワイヤーフレーム（オレンジ）描画
-	//------------------------------------------------------------
-	if(auto* ctx = SceneContext::Current()) {
-		if(auto* selected = ctx->GetDebugSelectedObject()) {
-
-			// Static Models
-			for(auto& [model, insts] : staticModels_) {
-				if(!model->GetModelData() || !model->GetIsDrawEnable()) continue;
-
-				std::vector<WorldTransform>		selectedTf;
-				std::vector<GpuBillboardParams> selectedBb;
-				for(auto& inst : insts) {
-					if(inst.visible && inst.owner == selected) {
-						selectedTf.push_back(inst.tf);
-						GpuBillboardParams p{};
-						p.mode = static_cast<uint32_t>(inst.mode);
-						selectedBb.push_back(p);
+				if(model->UsesRuntimeMaterialGraph()) {
+					if(auto material = model->GetMaterialAsset()) {
+						CalyxEngine::MaterialGraphRuntimeShader shader = runtimeMaterialShaderCache_.GetOrCompileObject3DPixelShader(*material);
+						if(shader.pixelShader) {
+							const auto generatedSet = psoService->GetGeneratedMaterialSkinnedPipelineSet(model->GetBlendMode(), shader.pixelShader, shader.hash);
+							psoService->SetCommand(generatedSet, cmdList);
+							if(shadowMapSystem) {
+								shadowMapSystem->BindForMainPass(cmdList);
+							}
+							BindRaytracingScene(cmdList);
+							if(auto* cam = CameraManager::GetActive()) {
+								cam->SetCommand(cmdList, PipelineType::SkinningObject3D);
+							} else {
+								continue;
+							}
+							lightLibrary->SetCommand(cmdList, PipelineType::SkinningObject3D);
+							usingGeneratedPipeline = true;
+						} else if(usingGeneratedPipeline) {
+							const auto ps = psoService->GetPipelineSet(key.tag, key.blend);
+							psoService->SetCommand(ps, cmdList);
+							if(shadowMapSystem) {
+								shadowMapSystem->BindForMainPass(cmdList);
+							}
+							BindRaytracingScene(cmdList);
+							if(auto* cam = CameraManager::GetActive()) {
+								cam->SetCommand(cmdList, PipelineType::SkinningObject3D);
+							} else {
+								continue;
+							}
+							lightLibrary->SetCommand(cmdList, PipelineType::SkinningObject3D);
+							usingGeneratedPipeline = false;
+						}
 					}
-				}
-
-				if(!selectedTf.empty()) {
-					const auto ps = psoService->GetPipelineSet(PipelineTag::Object::WireframeObject3D, model->GetBlendMode());
+				} else if(usingGeneratedPipeline) {
+					const auto ps = psoService->GetPipelineSet(key.tag, key.blend);
 					psoService->SetCommand(ps, cmdList);
-
-					float thickness = 1.5f;
-					cmdList->SetGraphicsRoot32BitConstants(12, 1, &thickness, 0);
-
-					if(auto* cam = CameraManager::GetActive()) {
-						cam->SetCommand(cmdList, PipelineType::Object3D);
+					if(shadowMapSystem) {
+						shadowMapSystem->BindForMainPass(cmdList);
 					}
-					lightLibrary->SetCommand(cmdList, PipelineType::Object3D);
-
-					auto					 oldColor		 = model->GetColor();
-					auto					 oldLighting	 = model->GetLightingMode();
-					const CalyxMath::Vector4 orangeWireframe = {1.0f, 0.5f, 0.0f, 1.0f};
-					model->SetColor(orangeWireframe);
-					model->SetLightingMode(LightingMode::UnlitColor);
-					model->TransferMaterial();
-
-					const UINT need = static_cast<UINT>(selectedTf.size());
-					model->EnsureBillboardCapacity(device, need);
-					model->UploadBillboardParams(selectedBb);
-					cmdList->SetGraphicsRootDescriptorTable(7, model->GetBillboardSrv());
-
-					model->EnsureInstanceCapacity(device, need);
-					model->UploadInstanceMatrices(selectedTf);
-					cmdList->SetGraphicsRootDescriptorTable(1, model->GetInstanceSrv());
-
-					model->BindMaterialCB(cmdList);
-					cmdList->SetGraphicsRootDescriptorTable(2, model->GetTexSrv());
-					cmdList->SetGraphicsRootDescriptorTable(6, model->GetEnvMapSrv());
-
-					cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-					model->BindVertexIndexBuffers(cmdList);
-
-					cmdList->DrawIndexedInstanced(static_cast<UINT>(model->GetModelData()->meshResource.Indices().size()), need, 0, 0, 0);
-
-					model->SetColor(oldColor);
-					model->SetLightingMode(oldLighting);
-					model->TransferMaterial();
-				}
-			}
-
-			// Skinned Models
-			for(auto& [model, insts] : skinnedModels_) {
-				if(!model->GetModelData() || !model->GetIsDrawEnable()) continue;
-
-				std::vector<WorldTransform> selectedTf;
-				for(auto& inst : insts) {
-					if(inst.visible && inst.owner == selected) {
-						selectedTf.push_back(inst.tf);
-					}
-				}
-
-				if(!selectedTf.empty()) {
-					const auto ps = psoService->GetPipelineSet(PipelineTag::Object::WireframeSkinnedObject3D, model->GetBlendMode());
-					psoService->SetCommand(ps, cmdList);
-
-					float thickness = 2.0f;
-					cmdList->SetGraphicsRoot32BitConstants(12, 1, &thickness, 0);
-
+					BindRaytracingScene(cmdList);
 					if(auto* cam = CameraManager::GetActive()) {
 						cam->SetCommand(cmdList, PipelineType::SkinningObject3D);
+					} else {
+						continue;
 					}
 					lightLibrary->SetCommand(cmdList, PipelineType::SkinningObject3D);
+					usingGeneratedPipeline = false;
+				}
 
-					auto					 oldColor		 = model->GetColor();
-					auto					 oldLighting	 = model->GetLightingMode();
-					const CalyxMath::Vector4 orangeWireframe = {1.0f, 0.5f, 0.0f, 1.0f};
-					model->SetColor(orangeWireframe);
-					model->SetLightingMode(LightingMode::UnlitColor);
+				const UINT need = static_cast<UINT>(visible.size());
+				model->EnsureInstanceCapacity(device, need);
+				model->UploadInstanceMatrices(visible);
+				cmdList->SetGraphicsRootDescriptorTable(1, model->GetInstanceSrv());
+
+				if(model->UsesRuntimeMaterialGraph()) {
 					model->TransferMaterial();
+				}
+				model->BindMaterialCB(cmdList);
+				cmdList->SetGraphicsRootDescriptorTable(2, model->GetTexSrv());
+				cmdList->SetGraphicsRootDescriptorTable(12, model->GetMaterialGraphTextureSrvTable(0));
+				cmdList->SetGraphicsRootDescriptorTable(6, model->GetEnvMapSrv());
+				model->SetCommandPalletSrv(7, cmdList);
 
-					for(const auto& tf : selectedTf) {
-						// Set transforms again and draw
-						model->UploadInstanceMatrices({tf});
-						cmdList->SetGraphicsRootDescriptorTable(1, model->GetInstanceSrv());
-						model->BindMaterialCB(cmdList);
-						cmdList->SetGraphicsRootDescriptorTable(2, model->GetTexSrv());
-						cmdList->SetGraphicsRootDescriptorTable(6, model->GetEnvMapSrv());
+				cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+				model->BindVertexIndexBuffers(cmdList);
 
-						cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-						model->BindVertexIndexBuffers(cmdList);
-						cmdList->DrawIndexedInstanced(static_cast<UINT>(model->GetModelData()->meshResource.Indices().size()), 1, 0, 0, 0);
+				const auto& meshResource = model->GetModelData()->meshResource;
+				const auto& subMeshes = meshResource.SubMeshes();
+				if(subMeshes.empty()) {
+					const UINT indexCount = static_cast<UINT>(meshResource.Indices().size());
+					cmdList->DrawIndexedInstanced(indexCount, need, 0, 0, 0);
+				} else {
+					for(const auto& subMesh : subMeshes) {
+						cmdList->SetGraphicsRootDescriptorTable(2, model->GetTexSrv(subMesh.materialIndex));
+						cmdList->SetGraphicsRootDescriptorTable(12, model->GetMaterialGraphTextureSrvTable(subMesh.materialIndex));
+						cmdList->DrawIndexedInstanced(subMesh.indexCount, need, subMesh.indexStart, 0, 0);
 					}
-
-					model->SetColor(oldColor);
-					model->SetLightingMode(oldLighting);
-					model->TransferMaterial();
 				}
 			}
 		}
 	}
-#else
-	(void)rt;
-#endif
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -570,7 +656,8 @@ void ModelRenderer::CollectVisibleStatic(std::vector<RenderInstance>& out) const
 			out.push_back(RenderInstance{
 				model,
 				&inst.tf,
-				inst.owner});
+				inst.owner,
+				inst.mode});
 		}
 	}
 }
@@ -589,7 +676,8 @@ void ModelRenderer::CollectVisibleSkinned(std::vector<RenderInstance>& out) cons
 			out.push_back(RenderInstance{
 				model,
 				&inst.tf,
-				inst.owner});
+				inst.owner,
+				BillboardMode::None});
 		}
 	}
 }

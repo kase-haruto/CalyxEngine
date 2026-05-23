@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <externals/imgui/imgui.h>
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 	namespace {
 
 		// 一意な表示名を作る（UI Only）
@@ -51,7 +51,7 @@ namespace CalyxEffect {
 	// コンフィグ → モジュール構築
 	// =============================================================
 	FxModuleContainer::FxModuleContainer(
-		const std::vector<std::unique_ptr<CalyxEffect::BaseModuleConfig>>& moduleConfigs) { ApplyConfigs(moduleConfigs); }
+		const std::vector<std::unique_ptr<CalyxEngine::BaseModuleConfig>>& moduleConfigs) { ApplyConfigs(moduleConfigs); }
 
 	// =============================================================
 	// （GUID を生成する場所）
@@ -89,7 +89,7 @@ namespace CalyxEffect {
 	// config → module 復元（JSON Load 時）
 	// =============================================================
 	void FxModuleContainer::ApplyConfigs(
-		const std::vector<std::unique_ptr<CalyxEffect::BaseModuleConfig>>& configs) {
+		const std::vector<std::unique_ptr<CalyxEngine::BaseModuleConfig>>& configs) {
 		modules_.clear();
 
 		for(const auto& cfg : configs) {
@@ -109,16 +109,16 @@ namespace CalyxEffect {
 	// =============================================================
 	// module → config（JSON Save 時）
 	// =============================================================
-	std::vector<std::unique_ptr<CalyxEffect::BaseModuleConfig>>
+	std::vector<std::unique_ptr<CalyxEngine::BaseModuleConfig>>
 	FxModuleContainer::ExtractConfigs() const {
-		std::vector<std::unique_ptr<CalyxEffect::BaseModuleConfig>> result;
+		std::vector<std::unique_ptr<CalyxEngine::BaseModuleConfig>> result;
 
 		for(const auto& mod : modules_) {
 			auto cfg = FxModuleFactory::CreateConfigFromModule(*mod);
 			if(!cfg) continue;
 
 			cfg->guid = mod->GetGuid();
-			cfg->name = mod->GetTypeName();
+			cfg->name = mod->GetObjectClassName();
 
 			result.push_back(std::move(cfg));
 		}
@@ -140,14 +140,18 @@ namespace CalyxEffect {
 			ImGui::SameLine();
 
 			bool open = ImGui::CollapsingHeader(m->GetName().c_str());
+
+			ImGui::Indent();
+			bool remove = ImGui::SmallButton("Remove");
+			ImGui::Unindent();
+
 			if(open && enabled) {
 				ImGui::Indent();
 				m->ShowGuiContent();
 				ImGui::Unindent();
 			}
 
-			ImGui::SameLine();
-			if(ImGui::Button("Remove")) {
+			if(remove) {
 				it = modules_.erase(it);
 				ImGui::PopID();
 				continue;
@@ -180,4 +184,4 @@ namespace CalyxEffect {
 				AddModule(typeName);
 		}
 	}
-} // namespace CalyxEffect
+} // namespace CalyxEngine

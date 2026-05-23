@@ -1,7 +1,7 @@
 #pragma once
 #include "../EngineUI/IEngineUI.h"
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 
 	class LivePPPanel : public IEngineUI {
 	public:
@@ -11,4 +11,4 @@ namespace CalyxEditor {
 		void Render() override;
 	};
 
-} // namespace CalyxEditor
+} // namespace CalyxEngine

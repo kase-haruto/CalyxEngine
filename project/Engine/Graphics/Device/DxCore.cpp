@@ -6,7 +6,7 @@
 #include <Engine/Graphics/RenderTarget/SwapChainRT/SwapChainRenderTarget.h>
 #include <Engine/PostProcess/FullscreenDrawer.h>
 
-#include <cassert>
+#include <Engine/Foundation/Debug/CxAssert.h>
 #include <d3dx12.h>
 #include <dxgidebug.h>
 #include <externals/imgui/imgui.h>
@@ -16,7 +16,7 @@
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "dxcompiler.lib")
 
-namespace CalyxGraphics {
+namespace CalyxEngine {
 	
 	DxCore::~DxCore() {
 		ReleaseResources();
@@ -85,6 +85,13 @@ namespace CalyxGraphics {
 		postBuffer2->Initialize(device.Get(), width, height, format_, DescriptorAllocator::Allocate(DescriptorUsage::Rtv), DescriptorAllocator::Allocate(DescriptorUsage::Dsv));
 		postBuffer2->SetRenderTargetType(RenderTargetType::PostEffectBuffer2);
 		renderTargetCollection_->Add("PostEffectBuffer2", std::move(postBuffer2));
+
+		for(int i = 0; i < 8; ++i) {
+			auto nodeBuffer = std::make_unique<OffscreenRenderTarget>();
+			nodeBuffer->Initialize(device.Get(), width, height, format_, DescriptorAllocator::Allocate(DescriptorUsage::Rtv), DescriptorAllocator::Allocate(DescriptorUsage::Dsv));
+			nodeBuffer->SetRenderTargetType(RenderTargetType::PostEffectBuffer1);
+			renderTargetCollection_->Add("PostEffectNodeBuffer" + std::to_string(i), std::move(nodeBuffer));
+		}
 	}
 
 	void DxCore::PreDraw() {
@@ -169,4 +176,4 @@ namespace CalyxGraphics {
 #endif // _DEBUG
 	}
 	
-} // namespace CalyxGraphics
+} // namespace CalyxEngine

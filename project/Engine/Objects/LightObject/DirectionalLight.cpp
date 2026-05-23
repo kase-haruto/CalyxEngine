@@ -23,8 +23,8 @@ DirectionalLight::DirectionalLight(const std::string& name) {
 	shadowParamCB_.Initialize(device);
 
 	// 初期化
-	lightData_.color	 = CalyxMath::Vector4(1.0f, 1.0f, 1.0f, 1.0f); // ライトの色
-	lightData_.direction = CalyxMath::Vector3(-0.08f, -1.0f, 0.34f);   // ライトの向き
+	lightData_.color	 = CalyxEngine::Vector4(1.0f, 1.0f, 1.0f, 1.0f); // ライトの色
+	lightData_.direction = CalyxEngine::Vector3(-0.08f, -1.0f, 0.34f);   // ライトの向き
 	lightData_.intensity = 1.0f;									   // 輝度
 
 	//// コンフィグパスの生成 preset名はdefault
@@ -49,8 +49,8 @@ DirectionalLight::DirectionalLight() {
 	shadow_.LoadParams();
 
 	// 初期化
-	lightData_.color	 = CalyxMath::Vector4(1.0f, 1.0f, 1.0f, 1.0f); // ライトの色
-	lightData_.direction = CalyxMath::Vector3(-0.08f, -1.0f, 0.34f);   // ライトの向き
+	lightData_.color	 = CalyxEngine::Vector4(1.0f, 1.0f, 1.0f, 1.0f); // ライトの色
+	lightData_.direction = CalyxEngine::Vector3(-0.08f, -1.0f, 0.34f);   // ライトの向き
 	lightData_.intensity = 1.0f;									   // 輝度
 #if defined(_DEBUG) || defined(DEVELOP)
 	// transformの傾きにlightのdirectionを適用(ギズモ使用するため)
@@ -98,16 +98,16 @@ void DirectionalLight::UpdateLightVP(const AABB& sceneBounds) {
 	// -------------------------
 	// ライト方向（正規化）
 	// -------------------------
-	CalyxMath::Vector3 lightDir =
+	CalyxEngine::Vector3 lightDir =
 		lightData_.direction.Normalize();
 
 	// -------------------------
 	// シーン中心 & サイズ
 	// -------------------------
-	CalyxMath::Vector3 center =
+	CalyxEngine::Vector3 center =
 		(sceneBounds.min_ + sceneBounds.max_) * 0.5f;
 
-	CalyxMath::Vector3 extent =
+	CalyxEngine::Vector3 extent =
 		sceneBounds.max_ - sceneBounds.min_;
 
 	float radius = extent.Length() * 0.5f;
@@ -115,7 +115,7 @@ void DirectionalLight::UpdateLightVP(const AABB& sceneBounds) {
 	// -------------------------
 	// ライト位置（シーン全体が収まる距離）
 	// -------------------------
-	CalyxMath::Vector3 lightPos =
+	CalyxEngine::Vector3 lightPos =
 		center - lightDir * (radius * 2.0f);
 
 	lightPos.y = 4000.0f; // 高さを固定
@@ -123,16 +123,16 @@ void DirectionalLight::UpdateLightVP(const AABB& sceneBounds) {
 	// -------------------------
 	// up ベクトル
 	// -------------------------
-	CalyxMath::Vector3 up =
+	CalyxEngine::Vector3 up =
 		(std::fabs(lightDir.y) > 0.99f)
-			? CalyxMath::Vector3(0.0f, 0.0f, 1.0f)
-			: CalyxMath::Vector3(0.0f, 1.0f, 0.0f);
+			? CalyxEngine::Vector3(0.0f, 0.0f, 1.0f)
+			: CalyxEngine::Vector3(0.0f, 1.0f, 0.0f);
 
 	// -------------------------
 	// View 行列
 	// -------------------------
-	CalyxMath::Matrix4x4 lightView =
-		CalyxMath::Matrix4x4::MakeLookAt(
+	CalyxEngine::Matrix4x4 lightView =
+		CalyxEngine::Matrix4x4::MakeLookAt(
 			lightPos,
 			center,
 			up);
@@ -140,10 +140,10 @@ void DirectionalLight::UpdateLightVP(const AABB& sceneBounds) {
 	// -------------------------
 	// AABB をライト空間に変換
 	// -------------------------
-	const CalyxMath::Vector3& mn = sceneBounds.min_;
-	const CalyxMath::Vector3& mx = sceneBounds.max_;
+	const CalyxEngine::Vector3& mn = sceneBounds.min_;
+	const CalyxEngine::Vector3& mx = sceneBounds.max_;
 
-	CalyxMath::Vector3 corners[8] = {
+	CalyxEngine::Vector3 corners[8] = {
 		{mn.x, mn.y, mn.z},
 		{mx.x, mn.y, mn.z},
 		{mn.x, mx.y, mn.z},
@@ -154,14 +154,14 @@ void DirectionalLight::UpdateLightVP(const AABB& sceneBounds) {
 		{mx.x, mx.y, mx.z},
 	};
 
-	CalyxMath::Vector3 minLS(+FLT_MAX, +FLT_MAX, +FLT_MAX);
-	CalyxMath::Vector3 maxLS(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+	CalyxEngine::Vector3 minLS(+FLT_MAX, +FLT_MAX, +FLT_MAX);
+	CalyxEngine::Vector3 maxLS(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
 	for(auto& c : corners) {
-		CalyxMath::Vector3 v =
-			CalyxMath::Matrix4x4::Transform(c, lightView);
-		minLS = CalyxMath::Vector3::Min(minLS, v);
-		maxLS = CalyxMath::Vector3::Max(maxLS, v);
+		CalyxEngine::Vector3 v =
+			CalyxEngine::Matrix4x4::Transform(c, lightView);
+		minLS = CalyxEngine::Vector3::Min(minLS, v);
+		maxLS = CalyxEngine::Vector3::Max(maxLS, v);
 	}
 
 	// -------------------------
@@ -183,8 +183,8 @@ void DirectionalLight::UpdateLightVP(const AABB& sceneBounds) {
 	// -------------------------
 	// Projection
 	// -------------------------
-	CalyxMath::Matrix4x4 lightProj =
-		CalyxMath::MakeOrthographicMatrixLH(
+	CalyxEngine::Matrix4x4 lightProj =
+		CalyxEngine::MakeOrthographicMatrixLH(
 			left, right,
 			bottom, top,
 			nearZ, farZ);
@@ -218,12 +218,12 @@ void DirectionalLight::SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandLi
 void DirectionalLight::DrawDebug() {
 
 	// ライトの始点（ワールド座標系での位置）
-	const CalyxMath::Vector3 start = worldTransform_.GetWorldPosition();
+	const CalyxEngine::Vector3 start = worldTransform_.GetWorldPosition();
 
 	// ライトの向き（方向ベクトル × 長さ）
-	const CalyxMath::Vector3 dir	= lightData_.direction.Normalize();
+	const CalyxEngine::Vector3 dir	= lightData_.direction.Normalize();
 	const float				 length = 3.0f; // 可視化用の長さ
-	const CalyxMath::Vector3 end	= start + dir * length;
+	const CalyxEngine::Vector3 end	= start + dir * length;
 
 	// 線を描く
 	PrimitiveDrawer::GetInstance()->DrawLine3d(start, end, {1.0f, 1.0f, 0.0f, 1.0f});
@@ -236,24 +236,23 @@ void DirectionalLight::ShowGui() {
 #if defined(_DEBUG) || defined(DEVELOP)
 	ImGui::Dummy(ImVec2(0.0f, 5.0f));
 
-	if(GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::ParameterData)) {
-		config_.ShowGui();
+	if(GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::ParameterData)) {
 		ImGui::Separator();
 		GuiCmd::EndSection();
 	}
 
-	if(GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::Object)) {
+	if(GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::Object)) {
 		GuiCmd::SliderFloat3("direction", lightData_.direction, -1.0f, 1.0f);
 		GuiCmd::EndSection();
 	}
 
-	if(GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::ParameterData)) {
+	if(GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::ParameterData)) {
 		GuiCmd::ColorEdit4("color", lightData_.color);
 		GuiCmd::SliderFloat("Intensity", lightData_.intensity, 0.0f, 1.0f);
 		GuiCmd::EndSection();
 	}
 
-	if(GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::ParameterData)) {
+	if(GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::ParameterData)) {
 		shadow_.ShowGui();
 	}
 #endif // _DEBUG

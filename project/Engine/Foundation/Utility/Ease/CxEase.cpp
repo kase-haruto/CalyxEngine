@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <externals/imgui/imgui.h>
 
-namespace CalyxEase {
+namespace CalyxEngine {
 
 	//==============================================================
 	//  イージング名リスト
@@ -35,37 +35,37 @@ namespace CalyxEase {
 	float ApplyEase(EaseType type, float t) {
 		switch(type) {
 		case EaseType::Linear:
-			return CalyxEase::Linear(t);
+			return CalyxEngine::Linear(t);
 		case EaseType::EaseInQuad:
-			return CalyxEase::EaseInQuad(t);
+			return CalyxEngine::EaseInQuad(t);
 		case EaseType::EaseOutQuad:
-			return CalyxEase::EaseOutQuad(t);
+			return CalyxEngine::EaseOutQuad(t);
 		case EaseType::EaseInOutQuad:
-			return CalyxEase::EaseInOutQuad(t);
+			return CalyxEngine::EaseInOutQuad(t);
 		case EaseType::EaseInCubic:
-			return CalyxEase::EaseInCubic(t);
+			return CalyxEngine::EaseInCubic(t);
 		case EaseType::EaseOutCubic:
-			return CalyxEase::EaseOutCubic(t);
+			return CalyxEngine::EaseOutCubic(t);
 		case EaseType::EaseInOutCubic:
-			return CalyxEase::EaseInOutCubic(t);
+			return CalyxEngine::EaseInOutCubic(t);
 		case EaseType::EaseInSine:
-			return CalyxEase::EaseInSine(t);
+			return CalyxEngine::EaseInSine(t);
 		case EaseType::EaseOutSine:
-			return CalyxEase::EaseOutSine(t);
+			return CalyxEngine::EaseOutSine(t);
 		case EaseType::EaseInOutSine:
-			return CalyxEase::EaseInOutSine(t);
+			return CalyxEngine::EaseInOutSine(t);
 		case EaseType::EaseInExpo:
-			return CalyxEase::EaseInExpo(t);
+			return CalyxEngine::EaseInExpo(t);
 		case EaseType::EaseOutExpo:
-			return CalyxEase::EaseOutExpo(t);
+			return CalyxEngine::EaseOutExpo(t);
 		case EaseType::EaseInOutExpo:
-			return CalyxEase::EaseInOutExpo(t);
+			return CalyxEngine::EaseInOutExpo(t);
 		case EaseType::EaseInBack:
-			return CalyxEase::EaseInBack(t);
+			return CalyxEngine::EaseInBack(t);
 		case EaseType::EaseOutBack:
-			return CalyxEase::EaseOutBack(t);
+			return CalyxEngine::EaseOutBack(t);
 		case EaseType::EaseInOutBack:
-			return CalyxEase::EaseInOutBack(t);
+			return CalyxEngine::EaseInOutBack(t);
 		default:
 			return t;
 		}
@@ -99,10 +99,10 @@ namespace CalyxEase {
 	bool SelectEaseInt(const char* label, int32_t& easeInt) {
 		bool changed = false;
 
-		CalyxEase::EaseType tmp = static_cast<CalyxEase::EaseType>(easeInt);
+		CalyxEngine::EaseType tmp = static_cast<CalyxEngine::EaseType>(easeInt);
 
 		ImGui::PushID(label);
-		if (CalyxEase::SelectEase(tmp)) {
+		if (CalyxEngine::SelectEase(tmp)) {
 			easeInt = static_cast<int32_t>(tmp);
 			changed = true;
 		}
@@ -111,4 +111,4 @@ namespace CalyxEase {
 		return changed;
 	}
 
-} // namespace CalyxEase
+} // namespace CalyxEngine

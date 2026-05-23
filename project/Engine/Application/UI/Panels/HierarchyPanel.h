@@ -4,13 +4,13 @@
 /* ===================================================================== */
 
 // engine
+#include <Engine/Application/UI/Panels/HierarchyActions.h>
 #include <Engine/Application/UI/EngineUI/IEngineUI.h>
+#include <Engine/Application/UI/Panels/HierarchyTreeCache.h>
 
 // c++
-#include <functional>
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include <externals/imgui/imgui.h>
@@ -18,8 +18,9 @@
 // forward
 class SceneObject;
 class SceneObjectLibrary;
+enum class ObjectType;
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
 	 * HierarchyPanel
@@ -29,10 +30,9 @@ namespace CalyxEditor {
 	class HierarchyPanel
 		: public IEngineUI {
 	private:
-		using SelectCB = std::function<void(std::shared_ptr<SceneObject>)>;
-		using DeleteCB = std::function<void(std::shared_ptr<SceneObject>)>;
-		using CreateCB = std::function<void(std::shared_ptr<SceneObject>)>;
-		using RenameCB = std::function<void(std::shared_ptr<SceneObject>, const std::string& newName)>;
+		using SelectCB = CallbackHierarchyActions::SelectCB;
+		using ObjectCB = CallbackHierarchyActions::ObjectCB;
+		using RenameCB = CallbackHierarchyActions::RenameCB;
 
 	public:
 		HierarchyPanel();
@@ -42,22 +42,35 @@ namespace CalyxEditor {
 		void ShowObjectRecursive(SceneObject* obj);
 		bool IsDescendantOf(SceneObject* parent, SceneObject* child);
 
-		void RefreshCache() { cacheDirty_ = true; }
+		void RefreshCache() { treeCache_.MarkDirty(); }
 
 		// accessors -------------------------------------------------------
 		const std::string& GetPanelName() const override;
 
 		void SetSceneObjectLibrary(const SceneObjectLibrary* lib) { lib_ = lib; }
-		void SetOnObjectSelected(SelectCB cb) { onSelect_ = std::move(cb); }
-		void SetOnObjectDelete(DeleteCB cb) { onDelete_ = std::move(cb); }
-		void SetOnObjectCreate(CreateCB cb) { onCreate_ = std::move(cb); }
-		void SetOnObjectRename(RenameCB cb) { onRename_ = std::move(cb); }
+		void SetActions(IHierarchyActions* actions) { actions_ = actions ? actions : &callbackActions_; }
+		void SetOnObjectSelected(SelectCB cb) { callbackActions_.SetOnObjectSelected(std::move(cb)); }
+		void SetOnObjectDelete(ObjectCB cb) { callbackActions_.SetOnObjectDelete(std::move(cb)); }
+		void SetOnObjectCreate(ObjectCB cb) { callbackActions_.SetOnObjectCreate(std::move(cb)); }
+		void SetOnObjectRename(RenameCB cb) { callbackActions_.SetOnObjectRename(std::move(cb)); }
+		void SetOnApplyPrefabOverrides(ObjectCB cb) { callbackActions_.SetOnApplyPrefabOverrides(std::move(cb)); }
+		void SetOnObjectFocused(ObjectCB cb) { callbackActions_.SetOnObjectFocused(std::move(cb)); }
 
-		void SetSelectedObject(std::weak_ptr<SceneObject> wp) { selected_ = wp; }
+		void SetSelectedObject(std::weak_ptr<SceneObject> wp) {
+			selected_ = wp;
+			selectedObjects_.clear();
+			if(auto sp = wp.lock()) {
+				selectedObjects_.push_back(sp);
+			}
+		}
+		void SetSelectedObjects(const std::vector<std::shared_ptr<SceneObject>>& objects);
 
 		const SceneObjectLibrary*  GetSceneObjectLibrary() const { return lib_; }
 		std::weak_ptr<SceneObject> GetSelectedObject() const {
 			return selected_;
+		}
+		std::vector<std::weak_ptr<SceneObject>> GetSelectedObjects() const {
+			return selectedObjects_;
 		}
 
 	private:
@@ -67,24 +80,25 @@ namespace CalyxEditor {
 		void CommitRename();
 		// render helper
 		bool DrawNode(SceneObject* obj);
+		void HandleNodeSelectionClick(SceneObject* obj);
+		ImTextureID GetTypeIcon(ObjectType type) const;
+		const char* GetTypeLabel(ObjectType type) const;
 		bool PassFilterRecursive(SceneObject* obj) const;
+		bool IsSelected(SceneObject* obj) const;
 
 	private:
 		// runtime state
 	private:
 		// runtime state
 		const SceneObjectLibrary* lib_ = nullptr;
-		// キャッシュ: 親オブジェクト(nullptrはルート) -> ソート済み子リスト
-		std::unordered_map<const SceneObject*, std::vector<std::shared_ptr<SceneObject>>> sortedCache_;
-		bool																			  cacheDirty_ = true;
+		HierarchyTreeCache treeCache_;
 
 		std::weak_ptr<SceneObject> selected_;
+		std::vector<std::weak_ptr<SceneObject>> selectedObjects_;
 		std::weak_ptr<SceneObject> renameTarget_;
 
-		SelectCB onSelect_;
-		DeleteCB onDelete_;
-		CreateCB onCreate_;
-		RenameCB onRename_;
+		CallbackHierarchyActions callbackActions_;
+		IHierarchyActions*		actions_ = &callbackActions_;
 
 		// prefab dialog
 		bool		 showSavePrefabDlg_ = false;
@@ -112,4 +126,4 @@ namespace CalyxEditor {
 		using IEngineUI::panelName_;
 	};
 
-} // namespace CalyxEditor
+} // namespace CalyxEngine

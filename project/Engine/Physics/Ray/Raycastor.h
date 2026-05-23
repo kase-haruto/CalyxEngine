@@ -18,10 +18,10 @@ public:
 		float maxDistance = 1000.0f);
 
 	static Ray ConvertMouseToRay(
-		const CalyxMath::Vector2& mousePos,         // マウス位置（ピクセル）
-		const CalyxMath::Matrix4x4& viewMatrix,     // カメラのView行列
-		const CalyxMath::Matrix4x4& projMatrix,     // カメラのProjection行列
-		const CalyxMath::Vector2& viewportSize      // ビューポートのサイズ（ピクセル）
+		const CalyxEngine::Vector2& mousePos,         // マウス位置（ピクセル）
+		const CalyxEngine::Matrix4x4& viewMatrix,     // カメラのView行列
+		const CalyxEngine::Matrix4x4& projMatrix,     // カメラのProjection行列
+		const CalyxEngine::Vector2& viewportSize      // ビューポートのサイズ（ピクセル）
 	);
 };
 

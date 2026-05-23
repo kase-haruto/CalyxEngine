@@ -15,7 +15,7 @@
 #include <functional>
 #include <memory>
 #include <vector>
-namespace CalyxEditor {
+namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
 	 * EngineUICore
@@ -72,4 +72,4 @@ namespace CalyxEditor {
 		return dynamic_cast<Panel*>(base);
 	}
 
-} // namespace CalyxEditor
+} // namespace CalyxEngine

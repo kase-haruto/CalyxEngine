@@ -5,7 +5,7 @@
 #include <Engine/PostProcess/Collection/PostProcessCollection.h>
 
 #include <externals/imgui/imgui.h>
-namespace CalyxEditor {
+namespace CalyxEngine {
 	PostProcessEditor::PostProcessEditor(const std::string& name)
 		: BaseEditor(name) {}
 
@@ -63,4 +63,4 @@ namespace CalyxEditor {
 		}
 		graph->SetPassesFromList(pCollection_->GetSlots());
 	}
-} // namespace CalyxEditor
+} // namespace CalyxEngine

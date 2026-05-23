@@ -8,14 +8,14 @@
 #include <memory>
 #include <string>
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 	/* ========================================================================
 	/*		エフェクトモジュールコンテナ
 	/* ===================================================================== */
 	class FxModuleContainer{
 	public:
 		FxModuleContainer() = default;
-		FxModuleContainer(const std::vector<std::unique_ptr<CalyxEffect::BaseModuleConfig>>& moduleConfigs);
+		FxModuleContainer(const std::vector<std::unique_ptr<CalyxEngine::BaseModuleConfig>>& moduleConfigs);
 
 		/// <summary>
 		/// 追加
@@ -43,9 +43,9 @@ namespace CalyxEffect {
 
 		//--------- config -----------------------------------------------------
 		// 適用
-		void ApplyConfigs(const std::vector<std::unique_ptr<CalyxEffect::BaseModuleConfig>>& configs);
+		void ApplyConfigs(const std::vector<std::unique_ptr<CalyxEngine::BaseModuleConfig>>& configs);
 		// 掃き出し
-		std::vector<std::unique_ptr<CalyxEffect::BaseModuleConfig>> ExtractConfigs() const;
+		std::vector<std::unique_ptr<CalyxEngine::BaseModuleConfig>> ExtractConfigs() const;
 
 		//--------- accessor -----------------------------------------------------
 		const std::vector<std::unique_ptr<BaseFxModule>>& GetModules() const{ return modules_; }

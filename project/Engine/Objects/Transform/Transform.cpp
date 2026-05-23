@@ -12,11 +12,18 @@
 
 // lib
 #include "Engine/Application/System/Environment.h"
+#include "Engine/Foundation/Math/MathUtil.h"
 
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <externals/imgui/imgui.h>
 
-using namespace CalyxMath;
+using namespace CalyxEngine;
+
+namespace {
+	bool SameQuaternion(const CalyxEngine::Quaternion& lhs, const CalyxEngine::Quaternion& rhs) {
+		return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z && lhs.w == rhs.w;
+	}
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //	コンストラクタ
@@ -42,6 +49,7 @@ void BaseTransform::Initialize() {
 	// バッファの作成
 	DxConstantBuffer::Initialize(GraphicsGroup::GetInstance()->GetDevice());
 
+	revision_ = 1;
 	Update();
 }
 
@@ -68,6 +76,10 @@ void BaseTransform::ShowImGui(const std::string& label) {
 //	WorldTransform: imgui
 /////////////////////////////////////////////////////////////////////////////////////////
 void WorldTransform::ShowImGui(const std::string& label) {
+
+	//eulerとquauternionどちらの回転をさせているのか表示
+	rotationSource == RotationSource::Euler ? ImGui::Text("Rotation: Euler") : ImGui::Text("Rotation: Quaternion");
+
 	std::string nodeLabel = label + "##node";
 	// 小さめの折りたたみ見出しとして TreeNodeEx を使用
 	if(ImGui::TreeNodeEx(nodeLabel.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -76,12 +88,12 @@ void WorldTransform::ShowImGui(const std::string& label) {
 		if(bInherit) {
 			if(ImGui::Checkbox("##iScale", &inheritScale)) {
 				// 継承フラグが切り替わった瞬間に、現在のワールド状態を維持するようにローカル値を逆算(Fixup)
-				CalyxMath::Vector3 wPos = GetWorldPosition();
-				CalyxMath::Vector3 wScl = {
-					CalyxMath::Vector3(matrix.world.m[0][0], matrix.world.m[0][1], matrix.world.m[0][2]).Length(),
-					CalyxMath::Vector3(matrix.world.m[1][0], matrix.world.m[1][1], matrix.world.m[1][2]).Length(),
-					CalyxMath::Vector3(matrix.world.m[2][0], matrix.world.m[2][1], matrix.world.m[2][2]).Length()};
-				CalyxMath::Matrix4x4 wRotMat = matrix.world;
+				CalyxEngine::Vector3 wPos = GetWorldPosition();
+				CalyxEngine::Vector3 wScl = {
+					CalyxEngine::Vector3(matrix.world.m[0][0], matrix.world.m[0][1], matrix.world.m[0][2]).Length(),
+					CalyxEngine::Vector3(matrix.world.m[1][0], matrix.world.m[1][1], matrix.world.m[1][2]).Length(),
+					CalyxEngine::Vector3(matrix.world.m[2][0], matrix.world.m[2][1], matrix.world.m[2][2]).Length()};
+				CalyxEngine::Matrix4x4 wRotMat = matrix.world;
 				if(wScl.x > 0.0001f) {
 					wRotMat.m[0][0] /= wScl.x;
 					wRotMat.m[0][1] /= wScl.x;
@@ -99,16 +111,16 @@ void WorldTransform::ShowImGui(const std::string& label) {
 				}
 				wRotMat.m[3][0] = wRotMat.m[3][1] = wRotMat.m[3][2] = 0.0f;
 				wRotMat.m[3][3]										= 1.0f;
-				CalyxMath::Quaternion wRotQ							= CalyxMath::Quaternion::FromMatrix(wRotMat);
+				CalyxEngine::Quaternion wRotQ							= CalyxEngine::Quaternion::FromMatrix(wRotMat);
 
 				Update(); // 行列更新(フラグ変更後)
 
 				// 親の情報を取得
-				CalyxMath::Vector3 pScl = {
-					CalyxMath::Vector3(parent->matrix.world.m[0][0], parent->matrix.world.m[0][1], parent->matrix.world.m[0][2]).Length(),
-					CalyxMath::Vector3(parent->matrix.world.m[1][0], parent->matrix.world.m[1][1], parent->matrix.world.m[1][2]).Length(),
-					CalyxMath::Vector3(parent->matrix.world.m[2][0], parent->matrix.world.m[2][1], parent->matrix.world.m[2][2]).Length()};
-				CalyxMath::Matrix4x4 pRotMat = parent->matrix.world;
+				CalyxEngine::Vector3 pScl = {
+					CalyxEngine::Vector3(parent->matrix.world.m[0][0], parent->matrix.world.m[0][1], parent->matrix.world.m[0][2]).Length(),
+					CalyxEngine::Vector3(parent->matrix.world.m[1][0], parent->matrix.world.m[1][1], parent->matrix.world.m[1][2]).Length(),
+					CalyxEngine::Vector3(parent->matrix.world.m[2][0], parent->matrix.world.m[2][1], parent->matrix.world.m[2][2]).Length()};
+				CalyxEngine::Matrix4x4 pRotMat = parent->matrix.world;
 				if(pScl.x > 0.0001f) {
 					pRotMat.m[0][0] /= pScl.x;
 					pRotMat.m[0][1] /= pScl.x;
@@ -126,22 +138,22 @@ void WorldTransform::ShowImGui(const std::string& label) {
 				}
 				pRotMat.m[3][0] = pRotMat.m[3][1] = pRotMat.m[3][2] = 0.0f;
 				pRotMat.m[3][3]										= 1.0f;
-				CalyxMath::Quaternion pRotQ							= CalyxMath::Quaternion::FromMatrix(pRotMat);
-				CalyxMath::Vector3	  pPos							= {parent->matrix.world.m[3][0], parent->matrix.world.m[3][1], parent->matrix.world.m[3][2]};
+				CalyxEngine::Quaternion pRotQ							= CalyxEngine::Quaternion::FromMatrix(pRotMat);
+				CalyxEngine::Vector3	  pPos							= {parent->matrix.world.m[3][0], parent->matrix.world.m[3][1], parent->matrix.world.m[3][2]};
 
-				CalyxMath::Vector3	  effPScl = inheritScale ? pScl : CalyxMath::Vector3{1, 1, 1};
-				CalyxMath::Quaternion effPRot = inheritRotate ? pRotQ : CalyxMath::Quaternion::MakeIdentity();
-				CalyxMath::Vector3	  effPPos = inheritTranslate ? pPos : CalyxMath::Vector3{0, 0, 0};
+				CalyxEngine::Vector3	  effPScl = inheritScale ? pScl : CalyxEngine::Vector3{1, 1, 1};
+				CalyxEngine::Quaternion effPRot = inheritRotate ? pRotQ : CalyxEngine::Quaternion::MakeIdentity();
+				CalyxEngine::Vector3	  effPPos = inheritTranslate ? pPos : CalyxEngine::Vector3{0, 0, 0};
 
 				// ローカル値を逆算 (Rigid Inverse)
 				if(std::abs(effPScl.x) > 0.0001f) scale.x = wScl.x / effPScl.x;
 				if(std::abs(effPScl.y) > 0.0001f) scale.y = wScl.y / effPScl.y;
 				if(std::abs(effPScl.z) > 0.0001f) scale.z = wScl.z / effPScl.z;
 
-				rotation = CalyxMath::Quaternion::Multiply(wRotQ, CalyxMath::Quaternion::Inverse(effPRot));
+				rotation = CalyxEngine::Quaternion::Multiply(wRotQ, CalyxEngine::Quaternion::Inverse(effPRot));
 
-				CalyxMath::Vector3 diff		  = {wPos.x - effPPos.x, wPos.y - effPPos.y, wPos.z - effPPos.z};
-				CalyxMath::Vector3 localTrans = CalyxMath::Quaternion::RotateVector(diff, CalyxMath::Quaternion::Inverse(effPRot));
+				CalyxEngine::Vector3 diff		  = {wPos.x - effPPos.x, wPos.y - effPPos.y, wPos.z - effPPos.z};
+				CalyxEngine::Vector3 localTrans = CalyxEngine::Quaternion::RotateVector(diff, CalyxEngine::Quaternion::Inverse(effPRot));
 				if(std::abs(effPScl.x) > 0.0001f) localTrans.x /= effPScl.x;
 				if(std::abs(effPScl.y) > 0.0001f) localTrans.y /= effPScl.y;
 				if(std::abs(effPScl.z) > 0.0001f) localTrans.z /= effPScl.z;
@@ -157,12 +169,12 @@ void WorldTransform::ShowImGui(const std::string& label) {
 				ImGui::SetItemDefaultFocus(); // 無理やりトリガー
 				bool dummy = true;
 				if(dummy) {
-					CalyxMath::Vector3 wPos = GetWorldPosition();
-					CalyxMath::Vector3 wScl = {
-						CalyxMath::Vector3(matrix.world.m[0][0], matrix.world.m[0][1], matrix.world.m[0][2]).Length(),
-						CalyxMath::Vector3(matrix.world.m[1][0], matrix.world.m[1][1], matrix.world.m[1][2]).Length(),
-						CalyxMath::Vector3(matrix.world.m[2][0], matrix.world.m[2][1], matrix.world.m[2][2]).Length()};
-					CalyxMath::Matrix4x4 wRotMat = matrix.world;
+					CalyxEngine::Vector3 wPos = GetWorldPosition();
+					CalyxEngine::Vector3 wScl = {
+						CalyxEngine::Vector3(matrix.world.m[0][0], matrix.world.m[0][1], matrix.world.m[0][2]).Length(),
+						CalyxEngine::Vector3(matrix.world.m[1][0], matrix.world.m[1][1], matrix.world.m[1][2]).Length(),
+						CalyxEngine::Vector3(matrix.world.m[2][0], matrix.world.m[2][1], matrix.world.m[2][2]).Length()};
+					CalyxEngine::Matrix4x4 wRotMat = matrix.world;
 					if(wScl.x > 0.0001f) {
 						wRotMat.m[0][0] /= wScl.x;
 						wRotMat.m[0][1] /= wScl.x;
@@ -180,15 +192,15 @@ void WorldTransform::ShowImGui(const std::string& label) {
 					}
 					wRotMat.m[3][0] = wRotMat.m[3][1] = wRotMat.m[3][2] = 0.0f;
 					wRotMat.m[3][3]										= 1.0f;
-					CalyxMath::Quaternion wRotQ							= CalyxMath::Quaternion::FromMatrix(wRotMat);
+					CalyxEngine::Quaternion wRotQ							= CalyxEngine::Quaternion::FromMatrix(wRotMat);
 
 					Update();
 
-					CalyxMath::Vector3 pScl = {
-						CalyxMath::Vector3(parent->matrix.world.m[0][0], parent->matrix.world.m[0][1], parent->matrix.world.m[0][2]).Length(),
-						CalyxMath::Vector3(parent->matrix.world.m[1][0], parent->matrix.world.m[1][1], parent->matrix.world.m[1][2]).Length(),
-						CalyxMath::Vector3(parent->matrix.world.m[2][0], parent->matrix.world.m[2][1], parent->matrix.world.m[2][2]).Length()};
-					CalyxMath::Matrix4x4 pRotMat = parent->matrix.world;
+					CalyxEngine::Vector3 pScl = {
+						CalyxEngine::Vector3(parent->matrix.world.m[0][0], parent->matrix.world.m[0][1], parent->matrix.world.m[0][2]).Length(),
+						CalyxEngine::Vector3(parent->matrix.world.m[1][0], parent->matrix.world.m[1][1], parent->matrix.world.m[1][2]).Length(),
+						CalyxEngine::Vector3(parent->matrix.world.m[2][0], parent->matrix.world.m[2][1], parent->matrix.world.m[2][2]).Length()};
+					CalyxEngine::Matrix4x4 pRotMat = parent->matrix.world;
 					if(pScl.x > 0.0001f) {
 						pRotMat.m[0][0] /= pScl.x;
 						pRotMat.m[0][1] /= pScl.x;
@@ -206,19 +218,19 @@ void WorldTransform::ShowImGui(const std::string& label) {
 					}
 					pRotMat.m[3][0] = pRotMat.m[3][1] = pRotMat.m[3][2] = 0.0f;
 					pRotMat.m[3][3]										= 1.0f;
-					CalyxMath::Quaternion pRotQ							= CalyxMath::Quaternion::FromMatrix(pRotMat);
-					CalyxMath::Vector3	  pPos							= {parent->matrix.world.m[3][0], parent->matrix.world.m[3][1], parent->matrix.world.m[3][2]};
+					CalyxEngine::Quaternion pRotQ							= CalyxEngine::Quaternion::FromMatrix(pRotMat);
+					CalyxEngine::Vector3	  pPos							= {parent->matrix.world.m[3][0], parent->matrix.world.m[3][1], parent->matrix.world.m[3][2]};
 
-					CalyxMath::Vector3	  effPScl = inheritScale ? pScl : CalyxMath::Vector3{1, 1, 1};
-					CalyxMath::Quaternion effPRot = inheritRotate ? pRotQ : CalyxMath::Quaternion::MakeIdentity();
-					CalyxMath::Vector3	  effPPos = inheritTranslate ? pPos : CalyxMath::Vector3{0, 0, 0};
+					CalyxEngine::Vector3	  effPScl = inheritScale ? pScl : CalyxEngine::Vector3{1, 1, 1};
+					CalyxEngine::Quaternion effPRot = inheritRotate ? pRotQ : CalyxEngine::Quaternion::MakeIdentity();
+					CalyxEngine::Vector3	  effPPos = inheritTranslate ? pPos : CalyxEngine::Vector3{0, 0, 0};
 
 					if(std::abs(effPScl.x) > 0.0001f) scale.x = wScl.x / effPScl.x;
 					if(std::abs(effPScl.y) > 0.0001f) scale.y = wScl.y / effPScl.y;
 					if(std::abs(effPScl.z) > 0.0001f) scale.z = wScl.z / effPScl.z;
-					rotation					  = CalyxMath::Quaternion::Multiply(wRotQ, CalyxMath::Quaternion::Inverse(effPRot));
-					CalyxMath::Vector3 diff		  = {wPos.x - effPPos.x, wPos.y - effPPos.y, wPos.z - effPPos.z};
-					CalyxMath::Vector3 localTrans = CalyxMath::Quaternion::RotateVector(diff, CalyxMath::Quaternion::Inverse(effPRot));
+					rotation					  = CalyxEngine::Quaternion::Multiply(wRotQ, CalyxEngine::Quaternion::Inverse(effPRot));
+					CalyxEngine::Vector3 diff		  = {wPos.x - effPPos.x, wPos.y - effPPos.y, wPos.z - effPPos.z};
+					CalyxEngine::Vector3 localTrans = CalyxEngine::Quaternion::RotateVector(diff, CalyxEngine::Quaternion::Inverse(effPRot));
 					if(std::abs(effPScl.x) > 0.0001f) localTrans.x /= effPScl.x;
 					if(std::abs(effPScl.y) > 0.0001f) localTrans.y /= effPScl.y;
 					if(std::abs(effPScl.z) > 0.0001f) localTrans.z /= effPScl.z;
@@ -233,12 +245,12 @@ void WorldTransform::ShowImGui(const std::string& label) {
 
 		if(bInherit) {
 			if(ImGui::Checkbox("##iTrans", &inheritTranslate)) {
-				CalyxMath::Vector3 wPos = GetWorldPosition();
-				CalyxMath::Vector3 wScl = {
-					CalyxMath::Vector3(matrix.world.m[0][0], matrix.world.m[0][1], matrix.world.m[0][2]).Length(),
-					CalyxMath::Vector3(matrix.world.m[1][0], matrix.world.m[1][1], matrix.world.m[1][2]).Length(),
-					CalyxMath::Vector3(matrix.world.m[2][0], matrix.world.m[2][1], matrix.world.m[2][2]).Length()};
-				CalyxMath::Matrix4x4 wRotMat = matrix.world;
+				CalyxEngine::Vector3 wPos = GetWorldPosition();
+				CalyxEngine::Vector3 wScl = {
+					CalyxEngine::Vector3(matrix.world.m[0][0], matrix.world.m[0][1], matrix.world.m[0][2]).Length(),
+					CalyxEngine::Vector3(matrix.world.m[1][0], matrix.world.m[1][1], matrix.world.m[1][2]).Length(),
+					CalyxEngine::Vector3(matrix.world.m[2][0], matrix.world.m[2][1], matrix.world.m[2][2]).Length()};
+				CalyxEngine::Matrix4x4 wRotMat = matrix.world;
 				if(wScl.x > 0.0001f) {
 					wRotMat.m[0][0] /= wScl.x;
 					wRotMat.m[0][1] /= wScl.x;
@@ -256,15 +268,15 @@ void WorldTransform::ShowImGui(const std::string& label) {
 				}
 				wRotMat.m[3][0] = wRotMat.m[3][1] = wRotMat.m[3][2] = 0.0f;
 				wRotMat.m[3][3]										= 1.0f;
-				CalyxMath::Quaternion wRotQ							= CalyxMath::Quaternion::FromMatrix(wRotMat);
+				CalyxEngine::Quaternion wRotQ							= CalyxEngine::Quaternion::FromMatrix(wRotMat);
 
 				Update();
 
-				CalyxMath::Vector3 pScl = {
-					CalyxMath::Vector3(parent->matrix.world.m[0][0], parent->matrix.world.m[0][1], parent->matrix.world.m[0][2]).Length(),
-					CalyxMath::Vector3(parent->matrix.world.m[1][0], parent->matrix.world.m[1][1], parent->matrix.world.m[1][2]).Length(),
-					CalyxMath::Vector3(parent->matrix.world.m[2][0], parent->matrix.world.m[2][1], parent->matrix.world.m[2][2]).Length()};
-				CalyxMath::Matrix4x4 pRotMat = parent->matrix.world;
+				CalyxEngine::Vector3 pScl = {
+					CalyxEngine::Vector3(parent->matrix.world.m[0][0], parent->matrix.world.m[0][1], parent->matrix.world.m[0][2]).Length(),
+					CalyxEngine::Vector3(parent->matrix.world.m[1][0], parent->matrix.world.m[1][1], parent->matrix.world.m[1][2]).Length(),
+					CalyxEngine::Vector3(parent->matrix.world.m[2][0], parent->matrix.world.m[2][1], parent->matrix.world.m[2][2]).Length()};
+				CalyxEngine::Matrix4x4 pRotMat = parent->matrix.world;
 				if(pScl.x > 0.0001f) {
 					pRotMat.m[0][0] /= pScl.x;
 					pRotMat.m[0][1] /= pScl.x;
@@ -282,19 +294,19 @@ void WorldTransform::ShowImGui(const std::string& label) {
 				}
 				pRotMat.m[3][0] = pRotMat.m[3][1] = pRotMat.m[3][2] = 0.0f;
 				pRotMat.m[3][3]										= 1.0f;
-				CalyxMath::Quaternion pRotQ							= CalyxMath::Quaternion::FromMatrix(pRotMat);
-				CalyxMath::Vector3	  pPos							= {parent->matrix.world.m[3][0], parent->matrix.world.m[3][1], parent->matrix.world.m[3][2]};
+				CalyxEngine::Quaternion pRotQ							= CalyxEngine::Quaternion::FromMatrix(pRotMat);
+				CalyxEngine::Vector3	  pPos							= {parent->matrix.world.m[3][0], parent->matrix.world.m[3][1], parent->matrix.world.m[3][2]};
 
-				CalyxMath::Vector3	  effPScl = inheritScale ? pScl : CalyxMath::Vector3{1, 1, 1};
-				CalyxMath::Quaternion effPRot = inheritRotate ? pRotQ : CalyxMath::Quaternion::MakeIdentity();
-				CalyxMath::Vector3	  effPPos = inheritTranslate ? pPos : CalyxMath::Vector3{0, 0, 0};
+				CalyxEngine::Vector3	  effPScl = inheritScale ? pScl : CalyxEngine::Vector3{1, 1, 1};
+				CalyxEngine::Quaternion effPRot = inheritRotate ? pRotQ : CalyxEngine::Quaternion::MakeIdentity();
+				CalyxEngine::Vector3	  effPPos = inheritTranslate ? pPos : CalyxEngine::Vector3{0, 0, 0};
 
 				if(std::abs(effPScl.x) > 0.0001f) scale.x = wScl.x / effPScl.x;
 				if(std::abs(effPScl.y) > 0.0001f) scale.y = wScl.y / effPScl.y;
 				if(std::abs(effPScl.z) > 0.0001f) scale.z = wScl.z / effPScl.z;
-				rotation					  = CalyxMath::Quaternion::Multiply(wRotQ, CalyxMath::Quaternion::Inverse(effPRot));
-				CalyxMath::Vector3 diff		  = {wPos.x - effPPos.x, wPos.y - effPPos.y, wPos.z - effPPos.z};
-				CalyxMath::Vector3 localTrans = CalyxMath::Quaternion::RotateVector(diff, CalyxMath::Quaternion::Inverse(effPRot));
+				rotation					  = CalyxEngine::Quaternion::Multiply(wRotQ, CalyxEngine::Quaternion::Inverse(effPRot));
+				CalyxEngine::Vector3 diff		  = {wPos.x - effPPos.x, wPos.y - effPPos.y, wPos.z - effPPos.z};
+				CalyxEngine::Vector3 localTrans = CalyxEngine::Quaternion::RotateVector(diff, CalyxEngine::Quaternion::Inverse(effPRot));
 				if(std::abs(effPScl.x) > 0.0001f) localTrans.x /= effPScl.x;
 				if(std::abs(effPScl.y) > 0.0001f) localTrans.y /= effPScl.y;
 				if(std::abs(effPScl.z) > 0.0001f) localTrans.z /= effPScl.z;
@@ -311,8 +323,8 @@ void WorldTransform::ShowImGui(const std::string& label) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	ワールド座標空間での位置を取得
 /////////////////////////////////////////////////////////////////////////////////////////
-CalyxMath::Vector3 BaseTransform::GetWorldPosition() const {
-	CalyxMath::Vector3 worldPos{};
+CalyxEngine::Vector3 BaseTransform::GetWorldPosition() const {
+	CalyxEngine::Vector3 worldPos{};
 	worldPos.x = matrix.world.m[3][0];
 	worldPos.y = matrix.world.m[3][1];
 	worldPos.z = matrix.world.m[3][2];
@@ -323,7 +335,7 @@ CalyxMath::Vector3 BaseTransform::GetWorldPosition() const {
 /* ========================================================================
 /* worldTransform class
 /* ===================================================================== */
-void WorldTransform::Update(const CalyxMath::Matrix4x4&) {
+void WorldTransform::Update(const CalyxEngine::Matrix4x4&) {
 	Update();
 }
 
@@ -331,32 +343,40 @@ void WorldTransform::Update(const CalyxMath::Matrix4x4&) {
 //	worldTransformの更新
 /////////////////////////////////////////////////////////////////////////////////////////
 void WorldTransform::Update() {
-	CalyxMath::Matrix4x4 scaleMat = CalyxMath::MakeScaleMatrix(scale);
+	uint64_t parentRevision = 0;
+	if(parent) {
+		parent->Update();
+		parentRevision = parent->GetRevision();
+	}
+
+	if(IsCacheValid(parentRevision)) {
+		return;
+	}
+
+	CalyxEngine::Matrix4x4 scaleMat = CalyxEngine::MakeScaleMatrix(scale);
 
 	switch(rotationSource) {
 	case RotationSource::Euler:
-		rotation = CalyxMath::Quaternion::EulerToQuaternion(eulerRotation);
+		rotation = CalyxEngine::Quaternion::EulerToQuaternion(eulerRotation);
 		break;
 	case RotationSource::Quaternion:
-		eulerRotation = CalyxMath::Quaternion::ToEuler(rotation);
+		eulerRotation = CalyxEngine::Quaternion::ToEuler(rotation);
 		break;
 	}
 
-	CalyxMath::Matrix4x4 rotateMat	  = CalyxMath::Quaternion::ToMatrix(rotation);
-	CalyxMath::Matrix4x4 translateMat = CalyxMath::MakeTranslateMatrix(translation);
-	CalyxMath::Matrix4x4 localMat	  = scaleMat * rotateMat * translateMat;
+	CalyxEngine::Matrix4x4 rotateMat	  = CalyxEngine::Quaternion::ToMatrix(rotation);
+	CalyxEngine::Matrix4x4 translateMat = CalyxEngine::MakeTranslateMatrix(translation);
+	CalyxEngine::Matrix4x4 localMat	  = scaleMat * rotateMat * translateMat;
 
 	if(parent) {
-		parent->Update();
-
 		// 親のワールド情報
-		CalyxMath::Vector3 pScl = {
-			CalyxMath::Vector3(parent->matrix.world.m[0][0], parent->matrix.world.m[0][1], parent->matrix.world.m[0][2]).Length(),
-			CalyxMath::Vector3(parent->matrix.world.m[1][0], parent->matrix.world.m[1][1], parent->matrix.world.m[1][2]).Length(),
-			CalyxMath::Vector3(parent->matrix.world.m[2][0], parent->matrix.world.m[2][1], parent->matrix.world.m[2][2]).Length()};
+		CalyxEngine::Vector3 pScl = {
+			CalyxEngine::Vector3(parent->matrix.world.m[0][0], parent->matrix.world.m[0][1], parent->matrix.world.m[0][2]).Length(),
+			CalyxEngine::Vector3(parent->matrix.world.m[1][0], parent->matrix.world.m[1][1], parent->matrix.world.m[1][2]).Length(),
+			CalyxEngine::Vector3(parent->matrix.world.m[2][0], parent->matrix.world.m[2][1], parent->matrix.world.m[2][2]).Length()};
 
 		// 親の回転をとる (スケール除去済み行列から)
-		CalyxMath::Matrix4x4 pRotMat = parent->matrix.world;
+		CalyxEngine::Matrix4x4 pRotMat = parent->matrix.world;
 		if(pScl.x > 0.0001f) {
 			pRotMat.m[0][0] /= pScl.x;
 			pRotMat.m[0][1] /= pScl.x;
@@ -374,54 +394,85 @@ void WorldTransform::Update() {
 		}
 		pRotMat.m[3][0] = pRotMat.m[3][1] = pRotMat.m[3][2] = 0.0f;
 		pRotMat.m[3][3]										= 1.0f;
-		CalyxMath::Quaternion pRotQ							= CalyxMath::Quaternion::FromMatrix(pRotMat);
+		CalyxEngine::Quaternion pRotQ							= CalyxEngine::Quaternion::FromMatrix(pRotMat);
 
-		CalyxMath::Vector3 pPos = {parent->matrix.world.m[3][0], parent->matrix.world.m[3][1], parent->matrix.world.m[3][2]};
+		CalyxEngine::Vector3 pPos = {parent->matrix.world.m[3][0], parent->matrix.world.m[3][1], parent->matrix.world.m[3][2]};
 
 		// 継承設定の適用
-		CalyxMath::Vector3	  effPScl = inheritScale ? pScl : CalyxMath::Vector3{1, 1, 1};
-		CalyxMath::Quaternion effPRot = inheritRotate ? pRotQ : CalyxMath::Quaternion::MakeIdentity();
-		CalyxMath::Vector3	  effPPos = inheritTranslate ? pPos : CalyxMath::Vector3{0, 0, 0};
+		CalyxEngine::Vector3	  effPScl = inheritScale ? pScl : CalyxEngine::Vector3{1, 1, 1};
+		CalyxEngine::Quaternion effPRot = inheritRotate ? pRotQ : CalyxEngine::Quaternion::MakeIdentity();
+		CalyxEngine::Vector3	  effPPos = inheritTranslate ? pPos : CalyxEngine::Vector3{0, 0, 0};
 
 		// --- Rigid Component Reconstruction (歪みを除去するために個別合成) ---
 		// 1. ワールドスケール
-		CalyxMath::Vector3 worldScl = {scale.x * effPScl.x, scale.y * effPScl.y, scale.z * effPScl.z};
+		CalyxEngine::Vector3 worldScl = {scale.x * effPScl.x, scale.y * effPScl.y, scale.z * effPScl.z};
 		// 2. ワールド回転 (local * parent)
-		CalyxMath::Quaternion worldRot = CalyxMath::Quaternion::Multiply(rotation, effPRot);
+		CalyxEngine::Quaternion worldRot = CalyxEngine::Quaternion::Multiply(rotation, effPRot);
 		// 3. ワールド座標
 		//    ParentPos + ParentRot * (ParentScale * LocalTranslation)
-		CalyxMath::Vector3 scaledTrans	= {translation.x * effPScl.x, translation.y * effPScl.y, translation.z * effPScl.z};
-		CalyxMath::Vector3 rotatedTrans = CalyxMath::Quaternion::RotateVector(scaledTrans, effPRot);
-		CalyxMath::Vector3 worldPos		= {effPPos.x + rotatedTrans.x, effPPos.y + rotatedTrans.y, effPPos.z + rotatedTrans.z};
+		CalyxEngine::Vector3 scaledTrans	= {translation.x * effPScl.x, translation.y * effPScl.y, translation.z * effPScl.z};
+		CalyxEngine::Vector3 rotatedTrans = CalyxEngine::Quaternion::RotateVector(scaledTrans, effPRot);
+		CalyxEngine::Vector3 worldPos		= {effPPos.x + rotatedTrans.x, effPPos.y + rotatedTrans.y, effPPos.z + rotatedTrans.z};
 
 		// 4. 最終的なワールド行列の合成 (SRT) -> これで「せん断」が絶対に入らない綺麗な行列になる
-		matrix.world = CalyxMath::MakeScaleMatrix(worldScl) * CalyxMath::Quaternion::ToMatrix(worldRot) * CalyxMath::MakeTranslateMatrix(worldPos);
+		matrix.world = CalyxEngine::MakeScaleMatrix(worldScl) * CalyxEngine::Quaternion::ToMatrix(worldRot) * CalyxEngine::MakeTranslateMatrix(worldPos);
 	} else {
 		// 親がいない場合は単純なSRT
 		matrix.world = scaleMat * rotateMat * translateMat;
 	}
 
-	matrix.WorldInverseTranspose = CalyxMath::Matrix4x4::Transpose(CalyxMath::Matrix4x4::Inverse(matrix.world));
+	matrix.WorldInverseTranspose = CalyxEngine::Matrix4x4::Transpose(CalyxEngine::Matrix4x4::Inverse(matrix.world));
 	TransferData(matrix);
+	StoreCache(parentRevision);
+	++revision_;
+}
+
+bool WorldTransform::IsCacheValid(uint64_t parentRevision) const {
+	if(!cacheValid_) return false;
+	if(parent != cachedParent_) return false;
+	if(parentRevision != cachedParentRevision_) return false;
+	if(scale != cachedScale_) return false;
+	if(translation != cachedTranslation_) return false;
+	if(rotationSource != cachedRotationSource_) return false;
+	if(eulerRotation != cachedEulerRotation_) return false;
+	if(!SameQuaternion(rotation, cachedRotation_)) return false;
+	if(inheritTranslate != cachedInheritTranslate_) return false;
+	if(inheritRotate != cachedInheritRotate_) return false;
+	if(inheritScale != cachedInheritScale_) return false;
+	return true;
+}
+
+void WorldTransform::StoreCache(uint64_t parentRevision) {
+	cachedScale_			   = scale;
+	cachedRotation_			   = rotation;
+	cachedEulerRotation_	   = eulerRotation;
+	cachedTranslation_		   = translation;
+	cachedParent_			   = parent;
+	cachedParentRevision_	   = parentRevision;
+	cachedRotationSource_	   = rotationSource;
+	cachedInheritTranslate_	   = inheritTranslate;
+	cachedInheritRotate_	   = inheritRotate;
+	cachedInheritScale_		   = inheritScale;
+	cacheValid_				   = true;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //	継承設定を考慮した親行列を取得
 /////////////////////////////////////////////////////////////////////////////////////////
-CalyxMath::Matrix4x4 WorldTransform::GetEffectiveParentMatrix() const {
+CalyxEngine::Matrix4x4 WorldTransform::GetEffectiveParentMatrix() const {
 	if(!parent) {
-		return CalyxMath::Matrix4x4::MakeIdentity();
+		return CalyxEngine::Matrix4x4::MakeIdentity();
 	}
 
-	CalyxMath::Matrix4x4 pMat	= parent->matrix.world;
-	CalyxMath::Vector3	 pTrans = {pMat.m[3][0], pMat.m[3][1], pMat.m[3][2]};
+	CalyxEngine::Matrix4x4 pMat	= parent->matrix.world;
+	CalyxEngine::Vector3	 pTrans = {pMat.m[3][0], pMat.m[3][1], pMat.m[3][2]};
 
-	float			   pSclX = CalyxMath::Vector3(pMat.m[0][0], pMat.m[0][1], pMat.m[0][2]).Length();
-	float			   pSclY = CalyxMath::Vector3(pMat.m[1][0], pMat.m[1][1], pMat.m[1][2]).Length();
-	float			   pSclZ = CalyxMath::Vector3(pMat.m[2][0], pMat.m[2][1], pMat.m[2][2]).Length();
-	CalyxMath::Vector3 pScl	 = {pSclX, pSclY, pSclZ};
+	float			   pSclX = CalyxEngine::Vector3(pMat.m[0][0], pMat.m[0][1], pMat.m[0][2]).Length();
+	float			   pSclY = CalyxEngine::Vector3(pMat.m[1][0], pMat.m[1][1], pMat.m[1][2]).Length();
+	float			   pSclZ = CalyxEngine::Vector3(pMat.m[2][0], pMat.m[2][1], pMat.m[2][2]).Length();
+	CalyxEngine::Vector3 pScl	 = {pSclX, pSclY, pSclZ};
 
-	CalyxMath::Matrix4x4 pRotMat = pMat;
+	CalyxEngine::Matrix4x4 pRotMat = pMat;
 	if(pSclX > 0.0001f) {
 		pRotMat.m[0][0] /= pSclX;
 		pRotMat.m[0][1] /= pSclX;
@@ -443,17 +494,17 @@ CalyxMath::Matrix4x4 WorldTransform::GetEffectiveParentMatrix() const {
 	pRotMat.m[3][3] = 1.0f;
 
 	// 継承設定の適用
-	CalyxMath::Vector3	 effectiveScl = inheritScale ? pScl : CalyxMath::Vector3{1.0f, 1.0f, 1.0f};
-	CalyxMath::Matrix4x4 effectiveRot = inheritRotate ? pRotMat : CalyxMath::Matrix4x4::MakeIdentity();
-	CalyxMath::Vector3	 effectivePos = inheritTranslate ? pTrans : CalyxMath::Vector3{0.0f, 0.0f, 0.0f};
+	CalyxEngine::Vector3	 effectiveScl = inheritScale ? pScl : CalyxEngine::Vector3{1.0f, 1.0f, 1.0f};
+	CalyxEngine::Matrix4x4 effectiveRot = inheritRotate ? pRotMat : CalyxEngine::Matrix4x4::MakeIdentity();
+	CalyxEngine::Vector3	 effectivePos = inheritTranslate ? pTrans : CalyxEngine::Vector3{0.0f, 0.0f, 0.0f};
 
-	return CalyxMath::MakeScaleMatrix(effectiveScl) * effectiveRot * CalyxMath::MakeTranslateMatrix(effectivePos);
+	return CalyxEngine::MakeScaleMatrix(effectiveScl) * effectiveRot * CalyxEngine::MakeTranslateMatrix(effectivePos);
 }
 
-CalyxMath::Vector3 WorldTransform::GetForward() const {
+CalyxEngine::Vector3 WorldTransform::GetForward() const {
 	// ワールド行列のZ軸（前方向）
-	CalyxMath::Matrix4x4 mat	 = CalyxMath::MakeAffineMatrix(scale, rotation, translation);
-	CalyxMath::Vector3	 forward = {mat.m[2][0], mat.m[2][1], mat.m[2][2]};
+	CalyxEngine::Matrix4x4 mat	 = CalyxEngine::MakeAffineMatrix(scale, rotation, translation);
+	CalyxEngine::Vector3	 forward = {mat.m[2][0], mat.m[2][1], mat.m[2][2]};
 	return forward.Normalize();
 }
 
@@ -469,8 +520,9 @@ void WorldTransform::ApplyConfig(const WorldTransformConfig& config) {
 	inheritRotate	 = config.inheritRotate;
 	inheritTranslate = config.inheritTranslate;
 
-	eulerRotation  = CalyxMath::Quaternion::ToEuler(rotation);
+	eulerRotation  = CalyxEngine::Quaternion::ToEuler(rotation);
 	rotationSource = RotationSource::Quaternion;
+	cacheValid_	   = false;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -481,7 +533,7 @@ WorldTransformConfig WorldTransform::ExtractConfig() {
 	config.translation = translation;
 
 	if(rotationSource == RotationSource::Euler) {
-		config.rotation = CalyxMath::Quaternion::EulerToQuaternion(eulerRotation);
+		config.rotation = CalyxEngine::Quaternion::EulerToQuaternion(eulerRotation);
 	} else {
 		config.rotation = rotation;
 	}
@@ -493,20 +545,20 @@ WorldTransformConfig WorldTransform::ExtractConfig() {
 	return config;
 }
 
-CalyxMath::Matrix4x4 Transform2D::GetMatrix() const {
-	CalyxMath::Matrix4x4 matWorld =
+CalyxEngine::Matrix4x4 Transform2D::GetMatrix() const {
+	CalyxEngine::Matrix4x4 matWorld =
 		MakeAffineMatrix(
 			{scale.x, scale.y, 1.0f},
 			{0, 0, rotate},
 			{translate.x, translate.y, 0.0f});
 
-	CalyxMath::Matrix4x4 matView = CalyxMath::Matrix4x4::MakeIdentity();
-	CalyxMath::Matrix4x4 matProj = MakeOrthographicMatrix(
+	CalyxEngine::Matrix4x4 matView = CalyxEngine::Matrix4x4::MakeIdentity();
+	CalyxEngine::Matrix4x4 matProj = MakeOrthographicMatrix(
 		0.0f, 0.0f,
 		kWindowWidth, kWindowHeight,
 		0.0f, 100.0f);
 
-	return CalyxMath::Matrix4x4::Multiply(matWorld, CalyxMath::Matrix4x4::Multiply(matView, matProj));
+	return CalyxEngine::Matrix4x4::Multiply(matWorld, CalyxEngine::Matrix4x4::Multiply(matView, matProj));
 }
 
 /* ========================================================================

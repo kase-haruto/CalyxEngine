@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace CalyxEase {
+namespace CalyxEngine {
 
 	enum class EaseType :int32_t{
 		Linear = 0,
@@ -29,4 +29,4 @@ namespace CalyxEase {
 	// ImGuiで選択UIを表示
 	bool SelectEase(EaseType& type);
 	bool SelectEaseInt(const char* label, int32_t& easeInt);
-} // namespace CalyxEase
+} // namespace CalyxEngine

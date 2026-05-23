@@ -7,9 +7,9 @@
 * - ゲーム内シーンの種類を定義
 *---------------------------------------------------------------------------------------*/
 enum class SceneType : int8_t {
-	TITLE,
-	PLAY,
 	TEST,
-	DEFEAT,
 	CLEAR,
+	GAMEOVER,
+	TITLE,
+	SELECT,
 };

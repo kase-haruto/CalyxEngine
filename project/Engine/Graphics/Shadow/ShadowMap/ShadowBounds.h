@@ -2,7 +2,7 @@
 #include "Engine/Graphics/Camera/3d/Camera3d.h"
 #include "Engine/Objects/3D/Geometory/AABB.h"
 
-namespace CalyxGraphics {
+namespace CalyxEngine {
 
 	/*--------------------------------------------------------------------------
 	 * ShadowBounds

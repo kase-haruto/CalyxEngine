@@ -15,7 +15,7 @@
 
 class PipelineService;
 
-namespace Calyx2D {
+namespace CalyxEngine {
 	class GameObject2D;
 
 	class Renderer2D {
@@ -46,4 +46,4 @@ namespace Calyx2D {
         bool initialized_ = false;
     };
 
-} // namespace Calyx2D
+} // namespace CalyxEngine

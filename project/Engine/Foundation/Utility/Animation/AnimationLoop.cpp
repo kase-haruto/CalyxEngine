@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <cmath>
 
-using namespace CalyxUtil;
+using namespace CalyxEngine;
 
 //============================================================================
 //	AnimationLoop classMethods

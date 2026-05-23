@@ -26,17 +26,17 @@ namespace CalyxEngine {
 		system_->InitializePostProcess(graphicsSystem_->GetPipelineService());
 
 		/* SceneManager */
-		sceneManager_ = std::make_unique<CalyxScene::SceneManager>(system_->GetDxCore());
+		sceneManager_ = std::make_unique<CalyxEngine::SceneManager>(system_->GetDxCore());
 		sceneManager_->Initialize();
 
 		/* PlaySession  (EditorCtx は SceneManager が作ったシーン 0 のものを使う) */
-		playSession_ = std::make_unique<CalyxEditor::PlaySession>();
+		playSession_ = std::make_unique<CalyxEngine::PlaySession>();
 		playSession_->Initialize(sceneManager_->GetCurrentSceneContext());
 
 		sceneManager_->BindPlaySession(playSession_.get());
 
 		/* UI / Editor */
-		engineUICore_ = std::make_unique<CalyxEditor::EngineUICore>();
+		engineUICore_ = std::make_unique<CalyxEngine::EngineUICore>();
 		engineUICore_->Initialize();
 		system_->SetEngineUICore(engineUICore_.get());
 
@@ -45,7 +45,7 @@ namespace CalyxEngine {
 			lvl->SetSceneManager(sceneManager_.get());
 		}
 
-		editorCollection_ = std::make_unique<CalyxEditor::EditorCollection>();
+		editorCollection_ = std::make_unique<CalyxEngine::EditorCollection>();
 		editorCollection_->InitializeEditors();
 
 #if defined(_DEBUG) || defined(DEVELOP)
@@ -62,8 +62,7 @@ namespace CalyxEngine {
 		while(!system_->ProcessMessage()) {
 			if(!Update()) break;
 			Render();
-			if(CalyxFoundation::Input::TriggerKey(DIK_ESCAPE) ||
-			   sceneManager_->GetIsEndGame()) break;
+
 		}
 	}
 

@@ -20,6 +20,8 @@ void ClockManager::Update() {
 
 	// グローバル dt 更新
 	globalDeltaTime_ = dt;
+	totalTime_ += globalDeltaTime_;
+	++frameCount_;
 
 	// スローモーション更新
 	if(isSlowMotionActive_) {

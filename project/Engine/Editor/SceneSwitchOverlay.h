@@ -1,7 +1,7 @@
 #pragma once
 #include <Engine/Scene/System/SceneManager.h>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
 	 * SceneSwitchOverlay
@@ -10,11 +10,11 @@ namespace CalyxEditor {
 	 *---------------------------------------------------------------------------------------*/
 	class SceneSwitchOverlay {
 	public:
-		void SetSceneManager(CalyxScene::SceneManager* manager) { sceneManager_ = manager; }
+		void SetSceneManager(CalyxEngine::SceneManager* manager) { sceneManager_ = manager; }
 		void RenderToolbar();
 
 	private:
-		CalyxScene::SceneManager* sceneManager_ = nullptr;
+		CalyxEngine::SceneManager* sceneManager_ = nullptr;
 	};
 
-} // namespace CalyxEditor
+} // namespace CalyxEngine

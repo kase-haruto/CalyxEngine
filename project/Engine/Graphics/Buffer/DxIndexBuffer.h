@@ -5,6 +5,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 
 #include "DxBuffer.h"
+#include <Engine/Foundation/Debug/CxAssert.h>
 
 template<typename T>
 class DxIndexBuffer
@@ -21,13 +22,13 @@ public:
 
 	// ---- CPU 書き込みヘルパ（Upload ヒープ Initialize() 時のみ有効）----
 	void Write(UINT index, const T& value) {
-		assert(this->mappedPtr_ && "Write() requires mappedPtr_. Ensure DxBuffer maps upload resources.");
-		assert(index < this->elementCount_);
+		CX_CHECK(this->mappedPtr_ && "Write() requires mappedPtr_. Ensure DxBuffer maps upload resources.", "Assertion failed");
+		CX_CHECK(index < this->elementCount_, "Assertion failed");
 		std::memcpy(static_cast<uint8_t*>(this->mappedPtr_) + sizeof(T) * index, &value, sizeof(T));
 	}
 
 	T* Data() {
-		assert(this->mappedPtr_ && "Data() requires mappedPtr_. Ensure DxBuffer maps upload resources.");
+		CX_CHECK(this->mappedPtr_ && "Data() requires mappedPtr_. Ensure DxBuffer maps upload resources.", "Assertion failed");
 		return reinterpret_cast<T*>(this->mappedPtr_);
 	}
 

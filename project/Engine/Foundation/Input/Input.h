@@ -49,8 +49,8 @@ namespace CalyxFoundation {
 
 	// スティック状態構造体
 	struct StickState {
-		CalyxMath::Vector2 leftStick;
-		CalyxMath::Vector2 rightStick;
+		CalyxEngine::Vector2 leftStick;
+		CalyxEngine::Vector2 rightStick;
 	};
 
 	/*-----------------------------------------------------------------------------------------
@@ -127,12 +127,12 @@ namespace CalyxFoundation {
 		 * \brief マウス座標を取得
 		 * \return 座標
 		 */
-		static CalyxMath::Vector2 GetMousePosition();
+		static CalyxEngine::Vector2 GetMousePosition();
 		/**
 		 * \brief デバッグウィンドウ内でのマウス座標を取得
 		 * \return 座標
 		 */
-		static CalyxMath::Vector2 GetMousePosInDebugWindow();
+		static CalyxEngine::Vector2 GetMousePosInDebugWindow();
 		/**
 		 * \brief マウスホイールの回転量を取得
 		 * \return 回転量
@@ -142,7 +142,7 @@ namespace CalyxFoundation {
 		 * \brief マウスの移動量を取得
 		 * \return 移動量
 		 */
-		static CalyxMath::Vector2 GetMouseDelta();
+		static CalyxEngine::Vector2 GetMouseDelta();
 
 		// ゲームパッド
 		/**
@@ -171,12 +171,12 @@ namespace CalyxFoundation {
 		 * \brief 左スティックの入力を取得
 		 * \return 入力(X, Y)
 		 */
-		static CalyxMath::Vector2 GetLeftStick();
+		static CalyxEngine::Vector2 GetLeftStick();
 		/**
 		 * \brief 右スティックの入力を取得
 		 * \return 入力(X, Y)
 		 */
-		static CalyxMath::Vector2 GetRightStick();
+		static CalyxEngine::Vector2 GetRightStick();
 		/**
 		 * \brief 両スティックの状態を取得
 		 * \return スティック状態
@@ -212,7 +212,7 @@ namespace CalyxFoundation {
 		ComPtr<IDirectInputDevice8> mouse_ = nullptr; //< マウスデバイス
 		DIMOUSESTATE mouseState_ = {}; //< 現在のマウス状態
 		DIMOUSESTATE mouseStatePre_ = {}; //< 前回のマウス状態
-		CalyxMath::Vector2 mousePos_ = {}; //< マウス座標
+		CalyxEngine::Vector2 mousePos_ = {}; //< マウス座標
 		float mouseWheel_ = 0.0f; //< マウスホイール回転量
 
 		XINPUT_GAMEPAD gamepadState_ = {}; //< 現在のゲームパッド状態

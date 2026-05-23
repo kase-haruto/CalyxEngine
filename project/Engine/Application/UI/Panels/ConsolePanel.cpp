@@ -2,7 +2,7 @@
 #include <externals/imgui/imgui.h>
 #include "Engine/Collision/CollisionManager.h"
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 	ConsolePanel::ConsolePanel()
 		: IEngineUI("Console") {
 		SetShow(false);

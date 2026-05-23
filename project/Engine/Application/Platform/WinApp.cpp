@@ -9,7 +9,7 @@
 #include "externals/imgui/imgui_impl_win32.h"
 
 /* c++ */
-#include <cassert>
+#include <Engine/Foundation/Debug/CxAssert.h>
 #include <tchar.h>
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hand, UINT msg, WPARAM wparam, LPARAM lparam);

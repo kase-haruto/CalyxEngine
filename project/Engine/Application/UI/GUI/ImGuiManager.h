@@ -6,7 +6,7 @@
 #include <wrl.h>
 
 class WinApp;
-namespace CalyxGraphics {
+namespace CalyxEngine {
 	class DxCore;
 }
 
@@ -31,7 +31,7 @@ public:
 	 * \param winApp ウィンドウアプリケーション
 	 * \param dxCore DirectXコア
 	 */
-	void Initialize(WinApp* winApp, const CalyxGraphics::DxCore* dxCore);
+	void Initialize(WinApp* winApp, const CalyxEngine::DxCore* dxCore);
 	/**
 	 * \brief 終了処理
 	 */
@@ -55,6 +55,6 @@ private:
 	//===================================================================*/
 	//                    private member variables
 	//===================================================================*/
-	const CalyxGraphics::DxCore* pDxCore_ = nullptr; //< DirectXコアへのポインタ
+	const CalyxEngine::DxCore* pDxCore_ = nullptr; //< DirectXコアへのポインタ
 };
 

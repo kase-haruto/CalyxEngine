@@ -1,74 +1,49 @@
 #pragma once
-
-////////////////////////////////////////////////////////////
-//  include
-////////////////////////////////////////////////////////////
+/* ========================================================================
+/* include space
+/* ===================================================================== */
 /* engine */
+#include <Engine/Extensions/Fog/FogEffect.h>
+#include <Engine/Objects/3D/Actor/TestObject/CalyxHuman.h>
 #include <Engine/Renderer/Sprite/Sprite.h>
 #include <Engine/scene/Base/BaseScene.h>
-
-/* game */
-#include <Game/Runtime/Engagement/EnemyEngagementService.h>
-
 /* c++ */
 #include <memory>
+#include <vector>
 
-// fwd
-class NumbersSprite;
+#include <Game\DemoPlayer\DemoPlayer.h>
 
-/*---------------------------------------------------------
- *  クリアシーンクラス
- *  - クリア画面のシーン
- *--------------------------------------------------------*/
-class ClearScene final
-	: public BaseScene {
+/// デバッグ関連///
+#ifdef _DEBUG
+
+#include <externals/imgui/imgui.h>
+#endif // _DEBUG
+
+/* ========================================================================
+/* ClearScene
+/* ===================================================================== */
+class ClearScene final : public BaseScene {
 public:
-	//================================================*/
-	//  public methods
-	//================================================*/
-	/** \brief コンストラクタ*/
+	//===================================================================*/
+	//			public methods
+	//===================================================================*/
 	ClearScene();
-	~ClearScene() override;
-	/**
-	 * \brief シーン遷移ペイロード設定
-	 */
+	~ClearScene() override = default;
+
 	void Initialize() override;
-	/**
-	 * \brief 更新処理
-	 * \param dt
-	 */
 	void Update(float dt) override;
-	/**
-	 * \brief 描画処理
-	 */
-	void Draw(ID3D12GraphicsCommandList*, class PipelineService*, IRenderTarget* rt) override;
-	/**
-	 * \brief 終了処理
-	 */
+	void Draw(ID3D12GraphicsCommandList* cmdLst, class PipelineService* psoService, IRenderTarget*) override;
 	void CleanUp() override;
-	/**
-	 * \brief アセットロード
-	 */
 	void LoadAssets() override;
-	/**
-	 * \brief シーン遷移リクエスト設定
-	 */
-	void OnPayload(std::unique_ptr<CalyxScene::IScenePayload> payload) override;
 
 private:
-	//================================================*/
-	//  private members
-	//================================================*/
+	/* graphics =====================================================*/
+	std::unique_ptr<FogEffect> fog_ = nullptr;
 
-	/* objects ======================================================*/
-	std::unique_ptr<Sprite>		   buttonSprite_	  = nullptr;
-	std::unique_ptr<NumbersSprite> scoreSprite_		  = nullptr;
-	std::unique_ptr<Sprite>		   clearSprite_		  = nullptr;
-	std::unique_ptr<Sprite>		   resultScoreSprite_ = nullptr;
-	int32_t						   finalScore_;
+	/* objects ====================================================*/
+	std::shared_ptr<BaseGameObject> modelField_;
+	std::unique_ptr<Sprite>			testSprite_;
+	std::shared_ptr<CalyxHuman>		animationHuman_;
 
-	/* runtime services =============================================*/
-	bool  blinkState	= true; // 表示/非表示
-	float blinkTimer	= 0.0f; // 経過時間
-	float blinkInterval = 0.5f; // 反転間隔(秒)
+	std::unique_ptr<Sprite> pauseBg_  = nullptr;
 };

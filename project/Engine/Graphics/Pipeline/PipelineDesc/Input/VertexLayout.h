@@ -14,31 +14,31 @@ template<typename T>
 struct VertexInputLayout;
 
 struct VertexPosUv {
-	CalyxMath::Vector3 pos;
-	CalyxMath::Vector2 uv;
+	CalyxEngine::Vector3 pos;
+	CalyxEngine::Vector2 uv;
 };
 
 struct VertexPosColor {
-	CalyxMath::Vector3 pos;
-	CalyxMath::Vector4 color;
+	CalyxEngine::Vector3 pos;
+	CalyxEngine::Vector4 color;
 };
 
 struct VertexPosUvColor {
-	CalyxMath::Vector4 pos;
-	CalyxMath::Vector2 uv;
-	CalyxMath::Vector4 color;
+	CalyxEngine::Vector4 pos;
+	CalyxEngine::Vector2 uv;
+	CalyxEngine::Vector4 color;
 };
 
 struct VertexPosUvN {
-	CalyxMath::Vector4 position;	// 16 B
-	CalyxMath::Vector2 texcoord;	// 24 B
-	CalyxMath::Vector3 normal;		// 36 B
+	CalyxEngine::Vector4 position;	// 16 B
+	CalyxEngine::Vector2 texcoord;	// 24 B
+	CalyxEngine::Vector3 normal;		// 36 B
 };
 
 struct VertexPosUvNSkinning {
-	CalyxMath::Vector4 pos;		// 16 B
-	CalyxMath::Vector2 uv;			// 24 B
-	CalyxMath::Vector3 normal;		// 36 B
+	CalyxEngine::Vector4 pos;		// 16 B
+	CalyxEngine::Vector2 uv;			// 24 B
+	CalyxEngine::Vector3 normal;		// 36 B
 };
 
 template<>
@@ -101,7 +101,7 @@ struct VertexInputLayout<VertexData> {
 			  0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
-			  sizeof(CalyxMath::Vector4), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+			  sizeof(CalyxEngine::Vector4), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 		};
 	}
 };

@@ -6,7 +6,7 @@
 
 // c++
 #include <algorithm>
-#include <cassert>
+#include <Engine/Foundation/Debug/CxAssert.h>
 
 // externals
 #include <externals/imgui/imgui.h>
@@ -89,23 +89,23 @@ namespace CalyxFoundation {
 			IID_IDirectInput8,
 			reinterpret_cast<void**>(directInput_.GetAddressOf()),
 			nullptr);
-		assert(SUCCEEDED(hr));
+		CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
 		// キーボード
 		hr = directInput_->CreateDevice(GUID_SysKeyboard, &keyboard_, NULL);
-		assert(SUCCEEDED(hr));
+		CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 		hr = keyboard_->SetDataFormat(&c_dfDIKeyboard);
-		assert(SUCCEEDED(hr));
+		CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 		hr = keyboard_->SetCooperativeLevel(CalyxEngine::CalyxCore::GetHWND(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
-		assert(SUCCEEDED(hr));
+		CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
 		// マウス
 		hr = directInput_->CreateDevice(GUID_SysMouse, &mouse_, NULL);
-		assert(SUCCEEDED(hr));
+		CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 		hr = mouse_->SetDataFormat(&c_dfDIMouse);
-		assert(SUCCEEDED(hr));
+		CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 		hr = mouse_->SetCooperativeLevel(CalyxEngine::CalyxCore::GetHWND(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
-		assert(SUCCEEDED(hr));
+		CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 	}
 
 	//-----------------------------------------------------------------------------
@@ -133,12 +133,12 @@ namespace CalyxFoundation {
 	//-----------------------------------------------------------------------------
 
 	bool Input::PushKey(uint32_t keyNum) {
-		assert(keyNum < 256);
+		CX_CHECK(keyNum < 256, "Assertion failed");
 		return instance_->key_[keyNum] & 0x80;
 	}
 
 	bool Input::TriggerKey(uint32_t keyNum) {
-		assert(keyNum < 256);
+		CX_CHECK(keyNum < 256, "Assertion failed");
 		return (instance_->key_[keyNum] & 0x80) && !(instance_->keyPre_[keyNum] & 0x80);
 	}
 
@@ -176,31 +176,31 @@ namespace CalyxFoundation {
 		return !PushMouseButton(button) && ((instance_->mouseStatePre_.rgbButtons[static_cast<int>(button)] & 0x80) != 0);
 	}
 
-	CalyxMath::Vector2 Input::GetMousePosition() {
+	CalyxEngine::Vector2 Input::GetMousePosition() {
 		return instance_->mousePos_;
 	}
 
-	CalyxMath::Vector2 Input::GetMousePosInDebugWindow() {
-		CalyxMath::Vector2 m_ImagePos  = CalyxMath::Vector2(0, 38);
-		CalyxMath::Vector2 m_ImageSize = kExecuteWindowSize;
-		CalyxMath::Vector2 m_GameSize  = kWindowSize;
+	CalyxEngine::Vector2 Input::GetMousePosInDebugWindow() {
+		CalyxEngine::Vector2 m_ImagePos  = CalyxEngine::Vector2(0, 38);
+		CalyxEngine::Vector2 m_ImageSize = kExecuteWindowSize;
+		CalyxEngine::Vector2 m_GameSize  = kWindowSize;
 
-		CalyxMath::Vector2 mousePos	 = GetMousePosition();
+		CalyxEngine::Vector2 mousePos	 = GetMousePosition();
 		float			   relativeX = mousePos.x - m_ImagePos.x;
 		float			   relativeY = mousePos.y - m_ImagePos.y;
 
 		float scaleX = m_GameSize.x / m_ImageSize.x;
 		float scaleY = m_GameSize.y / m_ImageSize.y;
 
-		return CalyxMath::Vector2(relativeX * scaleX, relativeY * scaleY);
+		return CalyxEngine::Vector2(relativeX * scaleX, relativeY * scaleY);
 	}
 
 	float Input::GetMouseWheel() {
 		return instance_->mouseWheel_;
 	}
 
-	CalyxMath::Vector2 Input::GetMouseDelta() {
-		return CalyxMath::Vector2(
+	CalyxEngine::Vector2 Input::GetMouseDelta() {
+		return CalyxEngine::Vector2(
 			static_cast<float>(instance_->mouseState_.lX),
 			static_cast<float>(instance_->mouseState_.lY));
 	}
@@ -250,8 +250,8 @@ namespace CalyxFoundation {
 	float Input::GetLeftTrigger() { return instance_->leftTrigger_; }
 	float Input::GetRightTrigger() { return instance_->rightTrigger_; }
 
-	CalyxMath::Vector2 Input::GetLeftStick() { return {instance_->leftThumbX_, instance_->leftThumbY_}; }
-	CalyxMath::Vector2 Input::GetRightStick() { return {instance_->rightThumbX_, instance_->rightThumbY_}; }
+	CalyxEngine::Vector2 Input::GetLeftStick() { return {instance_->leftThumbX_, instance_->leftThumbY_}; }
+	CalyxEngine::Vector2 Input::GetRightStick() { return {instance_->rightThumbX_, instance_->rightThumbY_}; }
 
 	StickState Input::GetStickState() {
 		return {GetLeftStick(), GetRightStick()};

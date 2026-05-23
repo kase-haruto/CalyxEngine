@@ -9,7 +9,7 @@
 #include <d3d12.h>
 #include <string>
 #include <vector>
-#include <cassert>
+#include <Engine/Foundation/Debug/CxAssert.h>
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -57,7 +57,7 @@ protected:
 template<typename T>
 inline void DxBuffer<T>::SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> cmdList, UINT rootParameterIndex)const{
 	if (!resource_){
-		assert(false && "DxBuffer: resource is null.");
+		CX_CHECK(false && "DxBuffer: resource is null.", "Assertion failed");
 		return;
 	}
 	cmdList->SetGraphicsRootConstantBufferView(rootParameterIndex, resource_->GetGPUVirtualAddress());
@@ -68,19 +68,19 @@ inline void DxBuffer<T>::SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommand
 /////////////////////////////////////////////////////////////////////////////////////////
 template<typename T>
 void DxBuffer<T>::TransferData(const T& data) {
-	assert(mappedPtr_ && "Resource is not mapped!");
+	CX_CHECK(mappedPtr_ && "Resource is not mapped!", "Assertion failed");
 	std::memcpy(mappedPtr_, &data, sizeof(T));
 }
 
 template<typename T>
 inline void DxBuffer<T>::TransferData(const T* data, UINT count){
-	assert(mappedPtr_ && "Resource is not mapped!");
+	CX_CHECK(mappedPtr_ && "Resource is not mapped!", "Assertion failed");
 	std::memcpy(mappedPtr_, data, sizeof(T) * count);
 }
 
 template<typename T>
 inline void DxBuffer<T>::TransferVectorData(const std::vector<T>& data){
-	assert(!data.empty());
+	CX_CHECK(!data.empty(), "Assertion failed");
 	this->TransferData(data.data(), static_cast< UINT >(data.size()));
 }
 
@@ -111,9 +111,9 @@ void DxBuffer<T>::CreateUploadResource(Microsoft::WRL::ComPtr<ID3D12Device> devi
 		IID_PPV_ARGS(&resource_)
 	);
 
-	assert(SUCCEEDED(hr) && "Failed to create Upload Resource.");
+	CX_CHECK(SUCCEEDED(hr) && "Failed to create Upload Resource.", "Assertion failed");
 
 	// マップ
 	hr = resource_->Map(0, nullptr, reinterpret_cast< void** >(&mappedPtr_));
-	assert(SUCCEEDED(hr) && "Failed to Map Upload Resource.");
+	CX_CHECK(SUCCEEDED(hr) && "Failed to Map Upload Resource.", "Assertion failed");
 }

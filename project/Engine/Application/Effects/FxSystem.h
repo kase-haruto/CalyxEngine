@@ -8,8 +8,9 @@
 #include <vector>
 
 struct Guid;
+class SceneContext;
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 	/*-----------------------------------------------------------------------------------------
 	 * FxSystem
 	 * - エフェクト管理システムクラス
@@ -23,7 +24,7 @@ namespace CalyxEffect {
 		/**
 		 * \brief コンストラクタ
 		 */
-		FxSystem();
+		explicit FxSystem(SceneContext* owner = nullptr);
 
 		/**
 		 * \brief デストラクタ
@@ -37,6 +38,17 @@ namespace CalyxEffect {
 		 */
 		void AddEmitter(const std::shared_ptr<BaseEmitter>& emitter,
 						const Guid&										 ownerGuid);
+
+		/**
+		 * \brief SceneObjectに紐付かない実行時エミッタを追加
+		 * \return 実行時所有者GUID。RemoveRuntimeEmitterOwnerに渡して削除する。
+		 */
+		Guid AddRuntimeEmitter(const std::shared_ptr<BaseEmitter>& emitter);
+
+		/**
+		 * \brief AddRuntimeEmitterで追加したエミッタ群を所有者GUID単位で削除
+		 */
+		void RemoveRuntimeEmitterOwner(const Guid& ownerGuid);
 
 		/**
 		 * \brief エミッタを削除
@@ -99,8 +111,9 @@ namespace CalyxEffect {
 		std::vector<CpuEmitterEntry>	  cpuEmitters_;		 //< CPUエミッタリスト
 		std::vector<GpuEmitterEntry>	  gpuEmitters_;		 //< GPUエミッタリスト
 		std::unique_ptr<ParticleRenderer> particleRenderer_; //< パーティクルレンダラー
+		SceneContext* owner_ = nullptr;
 
 		EventBus::Connection connAdd_; //< 追加イベントコネクション
 		EventBus::Connection connRem_; //< 削除イベントコネクション
 	};
-} // namespace CalyxEffect
+} // namespace CalyxEngine

@@ -1,21 +1,27 @@
 #include "LevelEditor.h"
 
 // engine
-#include <Engine/Application/Effects/FxSystem.h>
-#include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
+#include <externals/nlohmann/json.hpp>
+#include <Engine/Application/Effects/FxObject.h>
+#include <Engine/Application/Settings/EngineSettings.h>
+#include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Application/System/PlaySession.h>
 #include <Engine/Application/UI/EngineUI/Context/EditorContext.h>
 #include <Engine/Assets/Database/AssetDatabase.h>
-#include <Engine/Editor/PickingPass.h>
+#include <Engine/Editor/ParticlePreviewSession.h>
+#include <Engine/Editor/PrefabEditSession.h>
+#include <Engine/Editor/SceneObjectEditCommands.h>
+#include <Engine/Editor/SceneObjectDuplicator.h>
 #include <Engine/Editor/SceneSwitchOverlay.h>
+#include <Engine/Editor/ViewportSelectionController.h>
 #include <Engine/Foundation/Input/Input.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Objects/3D/Actor/Library/SceneObjectLibrary.h>
 #include <Engine/Objects/3D/Actor/SceneObject.h>
-#include <Engine/Physics/Ray/Raycastor.h>
 #include <Engine/Scene/Context/SceneContext.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
 #include <Engine/Scene/System/SceneManager.h>
+#include <Engine/System/Command/Manager/CommandManager.h>
 
 // imgui
 #include <externals/imgui/ImGuiFileDialog.h>
@@ -26,6 +32,8 @@
 
 #include <Engine/Foundation/Utility/FileSystem/FileScanner.h>
 #include <algorithm>
+#include <filesystem>
+#include <functional>
 
 using namespace EngineEdit;
 
@@ -41,11 +49,12 @@ namespace {
 
 } // namespace
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 
 	//=============================================================================
 	// Initialize
 	//=============================================================================
+	LevelEditor::LevelEditor() = default;
 	LevelEditor::~LevelEditor() = default;
 
 	void LevelEditor::Initialize() {
@@ -54,20 +63,28 @@ namespace CalyxEditor {
 		hierarchy_			= std::make_unique<HierarchyPanel>();
 		editor_				= std::make_unique<EditorPanel>();
 		inspector_			= std::make_unique<InspectorPanel>();
+		keyframePanel_		= std::make_unique<KeyframePanel>();
 		sceneEditor_		= std::make_unique<SceneObjectEditor>();
 		placeToolPanel_		= std::make_unique<PlaceToolPanel>();
 		splineEditor_		= std::make_unique<SplineEditorPanel>();
 		assetPanel_			= std::make_unique<AssetPanel>();
+		materialNodeEditorPanel_ = std::make_unique<MaterialNodeEditorPanel>();
+		postEffectNodeEditorPanel_ = std::make_unique<PostEffectNodeEditorPanel>();
+		spriteAnimationEditorPanel_ = std::make_unique<SpriteAnimationEditorPanel>();
 		livePPPanel_		= std::make_unique<LivePPPanel>();
 		sceneSwitchOverlay_ = std::make_unique<SceneSwitchOverlay>();
+		debugCameraFocus_	= std::make_unique<DebugCameraFocusController>();
+		particlePreview_ = std::make_unique<ParticlePreviewSession>();
+		prefabEdit_		= std::make_unique<PrefabEditSession>();
+		viewportSelection_ = std::make_unique<ViewportSelectionController>();
 
 		// レイアウトスイッチャーの初期化 --------------------------------------
 		std::string				 layoutDir = "Resources/Assets/Configs/Editor/Layout/";
-		auto					 files	   = CalyxUtil::FileScanner::ScanFiles(layoutDir, ".ini");
+		auto					 files	   = CalyxEngine::FileScanner::ScanFiles(layoutDir, ".ini");
 		std::vector<LayoutEntry> layouts;
 
 		for(const auto& file : files) {
-			layouts.push_back({CalyxUtil::FileScanner::GetFileName(file), file.generic_string()});
+			layouts.push_back({CalyxEngine::FileScanner::GetFileName(file), file.generic_string()});
 		}
 		// ファイルが見つからなかった場合のフォールバック（念のため）
 		if(layouts.empty()) {
@@ -79,6 +96,10 @@ namespace CalyxEditor {
 		if(auto* db = AssetDatabase::GetInstance()) {
 			assetPanel_->Initialize(db->GetRoot());
 		}
+		assetPanel_->SetOnPrefabEditRequested(
+			[this](const std::filesystem::path& path) {
+				OpenPrefabForEdit(path.string());
+			});
 
 		// Panel に LevelEditor 自体を渡す（コールバック通知や setter） ----------
 		editor_->SetOnEditorSelected(
@@ -87,7 +108,13 @@ namespace CalyxEditor {
 		// Hierarchy から来るコールバックは shared_ptr で受けて、
 		// LevelEditor 内で weak_ptr に変換して管理する
 		hierarchy_->SetOnObjectSelected(
-			[this](std::shared_ptr<SceneObject> sp) { SetSelectedObject(sp); });
+			[this](std::shared_ptr<SceneObject> sp, bool toggle) {
+				if(toggle) {
+					ToggleSelectedObject(sp);
+				} else {
+					SetSelectedObject(sp);
+				}
+			});
 
 		hierarchy_->SetOnObjectDelete(
 			[this](std::shared_ptr<SceneObject> sp) { DeleteObject(std::move(sp)); });
@@ -95,18 +122,54 @@ namespace CalyxEditor {
 		hierarchy_->SetOnObjectCreate(
 			[this](std::shared_ptr<SceneObject> sp) { CreateObject(std::move(sp)); });
 
+		hierarchy_->SetOnObjectRename(
+			[](std::shared_ptr<SceneObject> sp, const std::string& newName) {
+				if(!sp) return;
+				if(auto* ctx = SceneContext::Current()) {
+					if(auto* lib = ctx->GetObjectLibrary()) {
+						lib->RenameObject(sp, newName);
+						return;
+					}
+				}
+				sp->SetName(newName, sp->GetObjectType());
+			});
+		hierarchy_->SetOnApplyPrefabOverrides(
+			[this](std::shared_ptr<SceneObject> sp) {
+				ApplyPrefabOverridesFromInstance(sp);
+			});
+		hierarchy_->SetOnObjectFocused(
+			[this](std::shared_ptr<SceneObject> sp) {
+				if(debugCameraFocus_) {
+					debugCameraFocus_->StartFocus(CameraManager::GetDebug(), sp);
+				}
+			});
+
 		inspector_->SetSceneObjectEditor(sceneEditor_.get());
+		keyframePanel_->SetSelectionProvider([this]() {
+			return GetSelectedObjects();
+		});
+		selection_.Bind(hierarchy_.get(), inspector_.get(), sceneEditor_.get());
 
 		// ビューポートの初期化 ------------------------------------------------
 		mainViewport_	 = std::make_unique<Viewport>(ViewportType::VIEWPORT_MAIN, "Game Viewport");
 		debugViewport_	 = std::make_unique<Viewport>(ViewportType::VIEWPORT_DEBUG, "Debug Viewport");
 		pickingViewport_ = std::make_unique<Viewport>(ViewportType::VIEWPORT_PICKING, "Picking Viewport");
+		viewportSelection_->SetViewport(debugViewport_.get());
+		viewportSelection_->SetCallbacks(ViewportSelectionCallbacks{
+			[this]() { return GetSelectedObjects(); },
+			[this](const std::shared_ptr<SceneObject>& object) { SetSelectedObject(object); },
+			[this](const std::shared_ptr<SceneObject>& object) { ToggleSelectedObject(object); },
+			[this](const std::vector<std::shared_ptr<SceneObject>>& objects) { SetSelectedObjects(objects); }});
 
 		performanceOverlay_ = std::make_unique<PerformanceOverlay>();
 		debugOverlay_		= std::make_unique<DebugOverlay>();
 
 		// Manipulator をツールとして登録
 		if(auto* manipulator = sceneEditor_->GetManipulator()) {
+			manipulator->SetOnCtrlTranslateDuplicate([this]() {
+				return DuplicateSelectedObjects();
+			});
+			mainViewport_->AddTool(manipulator);
 			debugViewport_->AddTool(manipulator);
 			debugViewport_->AddTool(performanceOverlay_.get());
 			debugViewport_->AddTool(debugOverlay_.get());
@@ -114,6 +177,10 @@ namespace CalyxEditor {
 
 		// エディターメニューの初期化 ------------------------------------------
 		menu_ = std::make_unique<EditorMenu>();
+		EngineSettings::GetInstance()->Initialize();
+		if(auto* manipulator = sceneEditor_->GetManipulator()) {
+			manipulator->ApplySettings(EngineSettings::GetInstance()->GetData().manipulator);
+		}
 
 		// --- Advanced Hot Reload (Object Re-instancing) ---
 		if(auto* lpp = CalyxEngine::LivePPService::GetInstance()) {
@@ -167,6 +234,49 @@ namespace CalyxEditor {
 					},
 					true});
 
+		menu_->Add(MenuCategory::File,
+				   {"New Prefab",
+					"",
+					[this] {
+						ApplyEditToolMode(EngineEdit::EditToolMode::Prefab, true);
+						NewPrefabEditContext();
+					},
+					true});
+
+		menu_->Add(MenuCategory::File,
+				   {"Open Prefab",
+					"",
+					[] {
+						IGFD::FileDialogConfig config;
+						config.path = "Resources/Assets/";
+						ImGuiFileDialog::Instance()->OpenDialog(
+							"PrefabOpenDialog",
+							"open prefab",
+							".prefab",
+							config);
+					},
+					true});
+
+		menu_->Add(MenuCategory::File,
+				   {"Save Prefab",
+					"",
+					[this] { SavePrefabEdit(); },
+					true});
+
+		menu_->Add(MenuCategory::File,
+				   {"Save Prefab As",
+					"",
+					[] {
+						IGFD::FileDialogConfig config;
+						config.path = "Resources/Assets/Prefabs/";
+						ImGuiFileDialog::Instance()->OpenDialog(
+							"PrefabSaveAsDialog",
+							"save prefab file",
+							".prefab",
+							config);
+					},
+					true});
+
 		// View: Game Mode トグル
 		if(mode_ == EditorMode::Edit) {
 			menu_->Add(MenuCategory::View,
@@ -180,10 +290,16 @@ namespace CalyxEditor {
 		editorPanels_.push_back(hierarchy_.get());
 		editorPanels_.push_back(editor_.get());
 		editorPanels_.push_back(inspector_.get());
+		editorPanels_.push_back(keyframePanel_.get());
 		editorPanels_.push_back(placeToolPanel_.get());
 		editorPanels_.push_back(splineEditor_.get());
 		editorPanels_.push_back(assetPanel_.get());
+		editorPanels_.push_back(materialNodeEditorPanel_.get());
+		editorPanels_.push_back(postEffectNodeEditorPanel_.get());
+		editorPanels_.push_back(spriteAnimationEditorPanel_.get());
 		editorPanels_.push_back(livePPPanel_.get());
+
+		ApplyEditToolMode(editToolMode_, true);
 
 		// Editors メニュー（MenuCategory::Tools）に各パネルのトグルを追加
 		for(auto* p : editorPanels_) {
@@ -196,6 +312,12 @@ namespace CalyxEditor {
 						[p, this]() { TogglePanel(p); },
 						true});
 		}
+
+		menu_->Add(MenuCategory::Settings,
+				   {"Engine Settings",
+					"",
+					[] { EngineSettings::GetInstance()->OpenSettingsWindow(); },
+					true});
 
 		// Viewport 表示トグル
 		menu_->Add(MenuCategory::View,
@@ -269,6 +391,24 @@ namespace CalyxEditor {
 	//=============================================================================
 	void LevelEditor::Update() {
 #if defined(_DEBUG) || defined(DEVELOP)
+		if(layoutSwitcher_) {
+			layoutSwitcher_->ApplyPending();
+		}
+		const float dt = ClockManager::GetInstance()->GetDeltaTime();
+
+		auto notifySceneSaved = [this](const std::string& path) {
+			sceneSavedPopupPath_ = path;
+			sceneSavedPopupTimer_ = 1.5f;
+			ImGui::OpenPopup("SceneSavedPopup");
+		};
+
+		if(editToolMode_ == EngineEdit::EditToolMode::ParticleEffect) {
+			UpdateParticlePreviewContext(dt);
+		} else if(editToolMode_ == EngineEdit::EditToolMode::Prefab) {
+			UpdatePrefabEditContext(dt);
+		}
+		ActivateModeContext(editToolMode_);
+
 		SceneContext* ctx = SceneContext::Current();
 
 		const ImGuiIO& io			= ImGui::GetIO();
@@ -283,21 +423,32 @@ namespace CalyxEditor {
 		// ImGui がマウスを掴んでいても、ビューポート上なら許可
 		const bool uiBlocksClick = io.WantCaptureMouse && !overDebugViewport;
 
+		if(debugCameraFocus_) {
+			debugCameraFocus_->Update(ClockManager::GetInstance()->GetDeltaTime());
+		}
+
 		if(auto* debugCam = CameraManager::GetDebug()) {
-			debugCam->SetInputEnabled(overDebugViewport);
+			const bool focusMoving = debugCameraFocus_ && debugCameraFocus_->IsActive();
+			debugCam->SetInputEnabled(overDebugViewport && !focusMoving);
 		}
 
 		if(debugViewport_ && debugViewport_->IsShow() && !guizmoActive && !uiBlocksClick) {
-			const bool imguiEdge = ImGui::IsMouseClicked(ImGuiMouseButton_Left);
+			if(viewportSelection_) viewportSelection_->UpdateInput();
+		} else if(!ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+			if(viewportSelection_) viewportSelection_->CancelRangeSelection();
+		}
 
-			static bool prevDILeft = false;
-			const bool	diNow	   = CalyxFoundation::Input::GetInstance()->PushMouseButton(CalyxFoundation::MouseButton::Left);
-			const bool	diEdge	   = diNow && !prevDILeft;
-			prevDILeft			   = diNow;
+		if(selection_.HasSelection() && !io.WantTextInput && ImGui::IsKeyPressed(ImGuiKey_Delete)) {
+			DeleteSelectedObjects();
+		}
 
-			if(imguiEdge || diEdge) {
-				TryPickUnderCursor();
-			}
+		if(selection_.HasSelection() &&
+		   !io.WantTextInput &&
+		   io.KeyCtrl &&
+		   !io.KeyAlt &&
+		   !io.KeyShift &&
+		   ImGui::IsKeyPressed(ImGuiKey_D, false)) {
+			DuplicateSelectedObjects();
 		}
 
 		// ----------------------------
@@ -319,6 +470,23 @@ namespace CalyxEditor {
 			if(ImGuiFileDialog::Instance()->IsOk()) {
 				std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
 				SceneSerializer::Save(*ctx, filePath);
+				notifySceneSaved(filePath);
+			}
+			ImGuiFileDialog::Instance()->Close();
+		}
+
+		if(ImGuiFileDialog::Instance()->Display("PrefabOpenDialog")) {
+			if(ImGuiFileDialog::Instance()->IsOk()) {
+				std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
+				OpenPrefabForEdit(filePath);
+			}
+			ImGuiFileDialog::Instance()->Close();
+		}
+
+		if(ImGuiFileDialog::Instance()->Display("PrefabSaveAsDialog")) {
+			if(ImGuiFileDialog::Instance()->IsOk()) {
+				std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
+				SavePrefabEditAs(filePath);
 			}
 			ImGuiFileDialog::Instance()->Close();
 		}
@@ -326,6 +494,14 @@ namespace CalyxEditor {
 		// シーンコンテキスト切り替え検出
 		NotifySceneContextChanged();
 		prevCtx_ = SceneContext::Current();
+		if(editToolMode_ == EngineEdit::EditToolMode::ParticleEffect && particlePreview_ && particlePreview_->Object()) {
+			ActivateModeContext(editToolMode_);
+			if(!selection_.HasSelection()) {
+				SetSelectedObject(particlePreview_->Object());
+			}
+		} else if(editToolMode_ == EngineEdit::EditToolMode::Prefab && prefabEdit_ && prefabEdit_->Context()) {
+			ActivateModeContext(editToolMode_);
+		}
 
 		// PlaySession 状態と EditorMode の同期 ------------------------------
 		if(pPlaySesseion_) {
@@ -336,6 +512,30 @@ namespace CalyxEditor {
 				ExitGameMode();
 			}
 			lastPlaying_ = playing;
+		}
+
+		// shortcutでのシーンの保存
+		if(CalyxFoundation::Input::PushKey(DIK_LCONTROL)) {
+			if(CalyxFoundation::Input::TriggerKey(DIK_S)) {
+				if(SceneContext* scene = SceneContext::Current()) {
+					SceneSerializer::Save(*scene, scene->GetScenePath());
+					notifySceneSaved(scene->GetScenePath());
+				}
+			}
+		}
+
+		if(sceneSavedPopupTimer_ > 0.0f) {
+			sceneSavedPopupTimer_ -= dt;
+		}
+		if(ImGui::BeginPopup("SceneSavedPopup")) {
+			ImGui::TextUnformatted("シーンを保存しました");
+			if(!sceneSavedPopupPath_.empty()) {
+				ImGui::TextUnformatted(sceneSavedPopupPath_.c_str());
+			}
+			if(sceneSavedPopupTimer_ <= 0.0f) {
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
 		}
 
 		// LivePP Visibility Control
@@ -351,6 +551,15 @@ namespace CalyxEditor {
 	// Render
 	//=============================================================================
 	void LevelEditor::Render() {
+		SceneContext* previousContext = nullptr;
+		if(editToolMode_ == EngineEdit::EditToolMode::ParticleEffect && particlePreview_ && particlePreview_->Context()) {
+			previousContext = SceneContext::Current();
+			particlePreview_->Context()->MakeCurrent();
+		} else if(editToolMode_ == EngineEdit::EditToolMode::Prefab && prefabEdit_ && prefabEdit_->Context()) {
+			previousContext = SceneContext::Current();
+			prefabEdit_->Context()->MakeCurrent();
+		}
+
 		// 各パネル描画
 		for(auto* p : editorPanels_) {
 			if(p->IsShow()) {
@@ -377,6 +586,10 @@ namespace CalyxEditor {
 		if(sceneEditor_) {
 			sceneEditor_->Update();
 		}
+
+		if(previousContext && previousContext != SceneContext::Current()) {
+			previousContext->MakeCurrent();
+		}
 	}
 
 	//=============================================================================
@@ -386,10 +599,399 @@ namespace CalyxEditor {
 		if(menu_) {
 			menu_->Render();
 		}
-		// レイアウトスイッチャーメニューの描画
 		if(layoutSwitcher_ && ImGui::BeginMainMenuBar()) {
-			layoutSwitcher_->DrawMenu();
+			DrawEditModeCombo();
 			ImGui::EndMainMenuBar();
+		}
+	}
+
+	void LevelEditor::RenderSettingsWindow() {
+		auto* settings = EngineSettings::GetInstance();
+		settings->RenderSettingsWindow();
+		if(settings->ConsumeApplied()) {
+			if(auto* manipulator = sceneEditor_->GetManipulator()) {
+				manipulator->ApplySettings(settings->GetData().manipulator);
+			}
+		}
+	}
+
+	void LevelEditor::DrawEditModeCombo() {
+		ImGui::Separator();
+		ImGui::TextUnformatted("EditMode");
+		ImGui::SetNextItemWidth(140.0f);
+		if(ImGui::BeginCombo("##EditToolMode", GetEditToolModeName(editToolMode_))) {
+			if(layoutSwitcher_ && ImGui::BeginMenu("Object")) {
+				for(const auto& preset : layoutSwitcher_->GetPresets()) {
+					const bool selected = editToolMode_ == EngineEdit::EditToolMode::Object &&
+										  preset.path == layoutSwitcher_->GetCurrentPath();
+					if(ImGui::MenuItem(preset.name.c_str(), nullptr, selected)) {
+						ApplyEditToolMode(EngineEdit::EditToolMode::Object, false);
+						layoutSwitcher_->Apply(preset.path);
+					}
+				}
+				ImGui::EndMenu();
+			} else if(!layoutSwitcher_) {
+				const bool selected = editToolMode_ == EngineEdit::EditToolMode::Object;
+				if(ImGui::Selectable(GetEditToolModeName(EngineEdit::EditToolMode::Object), selected)) {
+					ApplyEditToolMode(EngineEdit::EditToolMode::Object, false);
+				}
+			}
+
+			const EngineEdit::EditToolMode modes[] = {
+				EngineEdit::EditToolMode::Object2D,
+				EngineEdit::EditToolMode::SpriteAnimation,
+				EngineEdit::EditToolMode::Prefab,
+				EngineEdit::EditToolMode::ParticleEffect,
+				EngineEdit::EditToolMode::PostEffect,
+				EngineEdit::EditToolMode::Material,
+				EngineEdit::EditToolMode::Animation,
+			};
+
+			for(const auto mode : modes) {
+				const bool selected = (mode == editToolMode_);
+				if(ImGui::Selectable(GetEditToolModeName(mode), selected)) {
+					ApplyEditToolMode(mode, true);
+				}
+				if(selected) ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
+	}
+
+	const char* LevelEditor::GetEditToolModeName(EngineEdit::EditToolMode mode) const {
+		switch(mode) {
+		case EngineEdit::EditToolMode::Object:
+			return "Object";
+		case EngineEdit::EditToolMode::Object2D:
+			return "2D";
+		case EngineEdit::EditToolMode::SpriteAnimation:
+			return "UV Animation";
+		case EngineEdit::EditToolMode::Prefab:
+			return "Prefab";
+		case EngineEdit::EditToolMode::ParticleEffect:
+			return "Particle";
+		case EngineEdit::EditToolMode::PostEffect:
+			return "PostEffect";
+		case EngineEdit::EditToolMode::Material:
+			return "Material";
+		case EngineEdit::EditToolMode::Animation:
+			return "Animation";
+		default:
+			return "Object";
+		}
+	}
+
+	std::string LevelEditor::GetEditToolModeLayoutPath(EngineEdit::EditToolMode mode) const {
+		const std::string layoutDir = "Resources/Assets/Configs/Editor/Layout/";
+
+		switch(mode) {
+		case EngineEdit::EditToolMode::Object:
+			return layoutDir + "ObjectEdit.ini";
+		case EngineEdit::EditToolMode::Object2D:
+			return layoutDir + "Object2DEdit.ini";
+		case EngineEdit::EditToolMode::SpriteAnimation:
+			return layoutDir + "SpriteAnimationEdit.ini";
+		case EngineEdit::EditToolMode::Prefab:
+			return layoutDir + "PrefabEdit.ini";
+		case EngineEdit::EditToolMode::ParticleEffect:
+			return layoutDir + "ParticleEffectEdit.ini";
+		case EngineEdit::EditToolMode::PostEffect:
+			return layoutDir + "PostEfectEdit.ini";
+		case EngineEdit::EditToolMode::Material:
+			return layoutDir + "MaterialEdit.ini";
+		case EngineEdit::EditToolMode::Animation:
+			return layoutDir + "AnimationEdit.ini";
+		default:
+			return layoutDir + "ObjectEdit.ini";
+		}
+	}
+
+	std::string LevelEditor::GetEditToolModeLoadLayoutPath(EngineEdit::EditToolMode mode) const {
+		const std::string modeLayoutPath = GetEditToolModeLayoutPath(mode);
+		if(std::filesystem::exists(modeLayoutPath)) {
+			return modeLayoutPath;
+		}
+
+		if(mode == EngineEdit::EditToolMode::Object || mode == EngineEdit::EditToolMode::Object2D) {
+			return "Resources/Assets/Configs/Editor/Layout/gameEngineDefault.ini";
+		}
+
+		return modeLayoutPath;
+	}
+
+	void LevelEditor::EnsureParticlePreviewContext() {
+		if(particlePreview_) particlePreview_->Ensure();
+	}
+
+	void LevelEditor::UpdateParticlePreviewContext(float dt) {
+		if(particlePreview_) particlePreview_->Update(dt);
+	}
+
+	void LevelEditor::EnsurePrefabEditContext() {
+		if(prefabEdit_) prefabEdit_->Ensure();
+	}
+
+	void LevelEditor::NewPrefabEditContext(const std::string& rootTypeName) {
+		if(!prefabEdit_) return;
+		auto root = prefabEdit_->New(rootTypeName, sceneManager_);
+		if(root) {
+			SetSelectedObject(root);
+		}
+		NotifySceneContextChanged();
+	}
+
+	void LevelEditor::OpenPrefabForEdit(const std::string& path) {
+		if(!prefabEdit_) return;
+		auto selectedRoot = prefabEdit_->Open(path, sceneManager_);
+		ApplyEditToolMode(EngineEdit::EditToolMode::Prefab, true);
+		if(auto* context = prefabEdit_->Context()) {
+			context->MakeCurrent();
+		}
+		if(selectedRoot) {
+			SetSelectedObject(selectedRoot);
+		}
+		if(hierarchy_) hierarchy_->RefreshCache();
+
+		NotifySceneContextChanged();
+	}
+
+	void LevelEditor::ApplyPrefabOverridesFromInstance(const std::shared_ptr<SceneObject>& object) {
+		if(prefabEdit_ && prefabEdit_->ApplyOverridesFromInstance(object, sceneManager_)) {
+			if(hierarchy_) hierarchy_->RefreshCache();
+		}
+	}
+
+	void LevelEditor::SavePrefabEdit() {
+		if(editToolMode_ != EngineEdit::EditToolMode::Prefab || !prefabEdit_ || !prefabEdit_->Context()) return;
+		if(prefabEdit_->Path().empty()) {
+			IGFD::FileDialogConfig config;
+			config.path = "Resources/Assets/Prefabs/";
+			ImGuiFileDialog::Instance()->OpenDialog(
+				"PrefabSaveAsDialog",
+				"save prefab file",
+				".prefab",
+				config);
+			return;
+		}
+
+		if(prefabEdit_->Save(sceneManager_) && hierarchy_) {
+			hierarchy_->RefreshCache();
+		}
+	}
+
+	void LevelEditor::SavePrefabEditAs(const std::string& path) {
+		if(editToolMode_ != EngineEdit::EditToolMode::Prefab || !prefabEdit_) return;
+		if(prefabEdit_->SaveAs(path, sceneManager_) && hierarchy_) {
+			hierarchy_->RefreshCache();
+		}
+	}
+
+	void LevelEditor::UpdatePrefabEditContext(float dt) {
+		if(prefabEdit_) prefabEdit_->Update(dt);
+	}
+
+	void LevelEditor::SaveActiveModeSelection() {
+		modeSelections_[activeSelectionMode_] = selection_.Capture();
+		selection_.ClearSceneContextSelection();
+	}
+
+	void LevelEditor::RestoreModeSelection(EngineEdit::EditToolMode mode) {
+		auto it = modeSelections_.find(mode);
+		if(it != modeSelections_.end()) {
+			selection_.Restore(it->second);
+			if(!it->second.selectedEditor) {
+				selection_.PruneToContext(ResolveModeContext(mode));
+			}
+			return;
+		} else {
+			ClearSelection();
+			if(mode == EngineEdit::EditToolMode::ParticleEffect &&
+			   particlePreview_ &&
+			   particlePreview_->Object()) {
+				SetSelectedObject(particlePreview_->Object());
+			}
+		}
+
+		selection_.PruneToContext(ResolveModeContext(mode));
+	}
+
+	SceneContext* LevelEditor::ResolveModeContext(EngineEdit::EditToolMode mode) const {
+		switch(mode) {
+		case EngineEdit::EditToolMode::ParticleEffect:
+			return particlePreview_ ? particlePreview_->Context() : nullptr;
+		case EngineEdit::EditToolMode::Prefab:
+			return prefabEdit_ ? prefabEdit_->Context() : nullptr;
+		default:
+			return sceneManager_ ? sceneManager_->ActiveCtx() : SceneContext::Current();
+		}
+	}
+
+	SceneContext* LevelEditor::ResolvePreviewContext(EngineEdit::EditToolMode mode) const {
+		switch(mode) {
+		case EngineEdit::EditToolMode::ParticleEffect:
+			return particlePreview_ ? particlePreview_->Context() : nullptr;
+		case EngineEdit::EditToolMode::Prefab:
+			return prefabEdit_ ? prefabEdit_->Context() : nullptr;
+		default:
+			return nullptr;
+		}
+	}
+
+	void LevelEditor::ActivateModeContext(EngineEdit::EditToolMode mode) {
+		SceneContext* context = ResolveModeContext(mode);
+		if(context) {
+			context->MakeCurrent();
+		}
+		if(sceneManager_) {
+			sceneManager_->SetEditorPreviewContext(ResolvePreviewContext(mode));
+		}
+	}
+
+	void LevelEditor::ApplyEditToolMode(EngineEdit::EditToolMode mode, bool applyLayout) {
+		const bool modeChanged = mode != editToolMode_;
+		if(modeChanged) {
+			SaveActiveModeSelection();
+		}
+
+		editToolMode_ = mode;
+
+		auto setShow = [](IEngineUI* panel, bool show) {
+			if(panel) {
+				panel->SetShow(show);
+			}
+		};
+
+		if(mainViewport_) mainViewport_->SetShow(true);
+		if(debugViewport_) debugViewport_->SetShow(true);
+		if(debugViewport_) debugViewport_->SetOverlayToolsEnabled(true);
+		if(mainViewport_) mainViewport_->Set2DPlacementCanvasEnabled(false);
+
+		switch(mode) {
+		case EngineEdit::EditToolMode::Object:
+			setShow(hierarchy_.get(), true);
+			setShow(editor_.get(), true);
+			setShow(inspector_.get(), true);
+			setShow(keyframePanel_.get(), false);
+			setShow(placeToolPanel_.get(), true);
+			setShow(splineEditor_.get(), false);
+			setShow(assetPanel_.get(), true);
+			setShow(materialNodeEditorPanel_.get(), false);
+			setShow(postEffectNodeEditorPanel_.get(), false);
+			setShow(spriteAnimationEditorPanel_.get(), false);
+			break;
+		case EngineEdit::EditToolMode::Object2D:
+			if(mainViewport_) mainViewport_->SetShow(true);
+			if(debugViewport_) debugViewport_->SetShow(false);
+			if(mainViewport_) mainViewport_->SetOverlayToolsEnabled(true);
+			if(mainViewport_) mainViewport_->Set2DPlacementCanvasEnabled(true);
+			setShow(hierarchy_.get(), true);
+			setShow(editor_.get(), true);
+			setShow(inspector_.get(), true);
+			setShow(keyframePanel_.get(), true);
+			setShow(placeToolPanel_.get(), false);
+			setShow(splineEditor_.get(), false);
+			setShow(assetPanel_.get(), true);
+			setShow(materialNodeEditorPanel_.get(), false);
+			setShow(postEffectNodeEditorPanel_.get(), false);
+			setShow(spriteAnimationEditorPanel_.get(), false);
+			break;
+		case EngineEdit::EditToolMode::SpriteAnimation:
+			if(mainViewport_) mainViewport_->SetShow(false);
+			if(debugViewport_) debugViewport_->SetShow(false);
+			setShow(hierarchy_.get(), false);
+			setShow(editor_.get(), false);
+			setShow(inspector_.get(), false);
+			setShow(keyframePanel_.get(), false);
+			setShow(placeToolPanel_.get(), false);
+			setShow(splineEditor_.get(), false);
+			setShow(assetPanel_.get(), true);
+			setShow(materialNodeEditorPanel_.get(), false);
+			setShow(postEffectNodeEditorPanel_.get(), false);
+			setShow(spriteAnimationEditorPanel_.get(), true);
+			break;
+		case EngineEdit::EditToolMode::Prefab:
+			EnsurePrefabEditContext();
+			if(mainViewport_) mainViewport_->SetShow(false);
+			if(debugViewport_) debugViewport_->SetShow(true);
+			if(debugViewport_) debugViewport_->SetOverlayToolsEnabled(true);
+			setShow(hierarchy_.get(), true);
+			setShow(editor_.get(), true);
+			setShow(inspector_.get(), true);
+			setShow(keyframePanel_.get(), false);
+			setShow(placeToolPanel_.get(), false);
+			setShow(splineEditor_.get(), false);
+			setShow(assetPanel_.get(), true);
+			setShow(materialNodeEditorPanel_.get(), false);
+			setShow(postEffectNodeEditorPanel_.get(), false);
+			setShow(spriteAnimationEditorPanel_.get(), false);
+			break;
+		case EngineEdit::EditToolMode::ParticleEffect:
+			EnsureParticlePreviewContext();
+			if(mainViewport_) mainViewport_->SetShow(false);
+			if(debugViewport_) debugViewport_->SetShow(true);
+			if(debugViewport_) debugViewport_->SetOverlayToolsEnabled(true);
+			setShow(hierarchy_.get(), true);
+			setShow(editor_.get(), true);
+			setShow(inspector_.get(), true);
+			setShow(keyframePanel_.get(), false);
+			setShow(placeToolPanel_.get(), true);
+			setShow(splineEditor_.get(), false);
+			setShow(assetPanel_.get(), true);
+			setShow(materialNodeEditorPanel_.get(), false);
+			setShow(postEffectNodeEditorPanel_.get(), false);
+			setShow(spriteAnimationEditorPanel_.get(), false);
+			break;
+		case EngineEdit::EditToolMode::PostEffect:
+			setShow(hierarchy_.get(), false);
+			setShow(editor_.get(), false);
+			setShow(inspector_.get(), false);
+			setShow(keyframePanel_.get(), false);
+			setShow(placeToolPanel_.get(), false);
+			setShow(splineEditor_.get(), false);
+			setShow(assetPanel_.get(), true);
+			setShow(materialNodeEditorPanel_.get(), false);
+			setShow(postEffectNodeEditorPanel_.get(), true);
+			setShow(spriteAnimationEditorPanel_.get(), false);
+			break;
+		case EngineEdit::EditToolMode::Material:
+			setShow(hierarchy_.get(), false);
+			setShow(editor_.get(), false);
+			setShow(inspector_.get(), true);
+			setShow(keyframePanel_.get(), false);
+			setShow(placeToolPanel_.get(), false);
+			setShow(splineEditor_.get(), false);
+			setShow(assetPanel_.get(), true);
+			setShow(materialNodeEditorPanel_.get(), true);
+			setShow(postEffectNodeEditorPanel_.get(), false);
+			setShow(spriteAnimationEditorPanel_.get(), false);
+			break;
+		case EngineEdit::EditToolMode::Animation:
+			setShow(hierarchy_.get(), true);
+			setShow(editor_.get(), false);
+			setShow(inspector_.get(), true);
+			setShow(keyframePanel_.get(), false);
+			setShow(placeToolPanel_.get(), false);
+			setShow(splineEditor_.get(), true);
+			setShow(assetPanel_.get(), true);
+			setShow(materialNodeEditorPanel_.get(), false);
+			setShow(postEffectNodeEditorPanel_.get(), false);
+			setShow(spriteAnimationEditorPanel_.get(), false);
+			break;
+		default:
+			break;
+		}
+
+		ActivateModeContext(mode);
+		if(modeChanged) {
+			activeSelectionMode_ = mode;
+			RestoreModeSelection(mode);
+			NotifySceneContextChanged();
+		} else {
+			selection_.PruneToContext(ResolveModeContext(mode));
+		}
+
+		if(applyLayout && layoutSwitcher_) {
+			layoutSwitcher_->Apply(GetEditToolModeLoadLayoutPath(mode));
 		}
 	}
 
@@ -421,39 +1023,31 @@ namespace CalyxEditor {
 	// Selection API
 	//=============================================================================
 	void LevelEditor::SetSelectedEditor(BaseEditor* editor) {
-		selectedEditor_ = editor;
-		selectedObject_.reset();
-
-		if(inspector_) {
-			inspector_->SetSelectedEditor(editor);
-			// オブジェクト選択はクリア
-			inspector_->SetSelectedObject(std::shared_ptr<SceneObject>{});
-		}
-		if(sceneEditor_) {
-			sceneEditor_->ClearSelection();
-		}
+		selection_.SetSelectedEditor(editor);
 	}
 
 	void LevelEditor::SetSelectedObject(const std::shared_ptr<SceneObject>& sp) {
-		// 内部では weak_ptr として保持
-		selectedObject_ = sp;
-		selectedEditor_ = nullptr;
+		selection_.SetSelectedObject(sp);
+	}
 
-		// Hierarchy / Inspector / SceneObjectEditor にも通知
-		if(hierarchy_) {
-			hierarchy_->SetSelectedObject(sp);
-		}
-		if(inspector_) {
-			inspector_->SetSelectedEditor(nullptr);
-			inspector_->SetSelectedObject(sp);
-		}
-		if(sceneEditor_) {
-			sceneEditor_->SetTarget(sp ? sp.get() : nullptr);
-		}
+	void LevelEditor::ToggleSelectedObject(const std::shared_ptr<SceneObject>& sp) {
+		selection_.ToggleSelectedObject(sp);
+	}
 
-		if(auto* ctx = SceneContext::Current()) {
-			ctx->SetDebugSelectedObject(sp ? sp.get() : nullptr);
-		}
+	void LevelEditor::SetSelectedObjects(const std::vector<std::shared_ptr<SceneObject>>& objects) {
+		selection_.SetSelectedObjects(objects);
+	}
+
+	bool LevelEditor::IsSelectedObject(const SceneObject* object) const {
+		return selection_.IsSelected(object);
+	}
+
+	std::shared_ptr<SceneObject> LevelEditor::GetPrimarySelectedObject() const {
+		return selection_.GetPrimarySelectedObject();
+	}
+
+	std::vector<std::shared_ptr<SceneObject>> LevelEditor::GetSelectedObjects() const {
+		return selection_.GetSelectedObjects();
 	}
 
 	//=============================================================================
@@ -476,15 +1070,6 @@ namespace CalyxEditor {
 		// SceneContext 経由で登録（内部で SceneObjectLibrary::AddObject を呼ぶ）
 		ctx->AddObject(obj);
 
-		// パーティクルなら FxSystem 側にも登録
-		if(obj->GetObjectType() == ObjectType::Effect) {
-			if(auto fxObj = std::dynamic_pointer_cast<CalyxEffect::ParticleSystemObject>(obj)) {
-				if(auto* fxSys = ctx->GetFxSystem()) {
-					fxSys->AddEmitter(fxObj->GetEmitter(), fxObj->GetGuid());
-				}
-			}
-		}
-
 		if(hierarchy_) hierarchy_->RefreshCache();
 	}
 
@@ -495,46 +1080,171 @@ namespace CalyxEditor {
 		if(!ctx) return;
 
 		// ── 選択状態をクリア（選択中だった場合） ─────────────────────
-		if(auto sel = selectedObject_.lock()) {
-			if(sel == sp) {
-				ClearSelection();
-			}
+		if(IsSelectedObject(sp.get())) {
+			ClearSelection();
 		}
 
-		// ── パーティクルシステムなら FxSystem からも削除 ─────────────
-		if(sp->GetObjectType() == ObjectType::Effect) {
-			if(auto fxObj = std::dynamic_pointer_cast<CalyxEffect::ParticleSystemObject>(sp)) {
-				if(auto* fxSys = ctx->GetFxSystem()) {
-					fxSys->RemoveEmitter(fxObj->GetEmitter().get());
-				}
-			}
+		CommandManager::GetInstance()->Execute(
+			CreateDeleteSceneObjectsCommand(
+				ctx,
+				{sp},
+				SceneObjectEditCommandCallbacks{
+					[this]() {
+						if(hierarchy_) hierarchy_->RefreshCache();
+					},
+					[this]() { ClearSelection(); },
+					{}},
+				"Delete Object"));
+	}
+
+	void LevelEditor::DeleteSelectedObjects() {
+		std::vector<std::shared_ptr<SceneObject>> targets = GetSelectedObjects();
+
+		if(targets.empty()) {
+			ClearSelection();
+			return;
 		}
 
-		// ── SceneContext 経由で削除 ─────────────────────────────────
-		// 内部で SceneObjectLibrary::RemoveObject が呼ばれ、
-		// さらに SceneContext::objectRemovedCallbacks_ も通知される。
-		ctx->RemoveObject(sp);
+		SceneContext* ctx = SceneContext::Current();
+		if(!ctx) return;
 
-		if(hierarchy_) hierarchy_->RefreshCache();
+		CommandManager::GetInstance()->Execute(
+			CreateDeleteSceneObjectsCommand(
+				ctx,
+				std::move(targets),
+				SceneObjectEditCommandCallbacks{
+					[this]() {
+						if(hierarchy_) hierarchy_->RefreshCache();
+					},
+					[this]() { ClearSelection(); },
+					{}},
+				"Delete Selected Objects"));
+	}
+
+	std::vector<WorldTransform*> LevelEditor::DuplicateSelectedObjects() {
+		std::vector<WorldTransform*> duplicatedTransforms;
+
+		SceneContext* ctx = SceneContext::Current();
+		if(!ctx) return duplicatedTransforms;
+
+		auto duplicatableSources = SceneObjectDuplicator::FilterDuplicatable(GetSelectedObjects());
+		if(duplicatableSources.empty()) return duplicatedTransforms;
+
+		auto command = std::make_unique<DuplicateSceneObjectsCommand>(
+			ctx,
+			std::move(duplicatableSources),
+			SceneObjectEditCommandCallbacks{
+				[this]() {
+					if(hierarchy_) hierarchy_->RefreshCache();
+				},
+				[this]() { ClearSelection(); },
+				[this](const std::vector<std::shared_ptr<SceneObject>>& objects) {
+					SetSelectedObjects(objects);
+				}});
+		auto* rawCommand = command.get();
+		CommandManager::GetInstance()->Execute(std::move(command));
+
+		const auto& createdObjects = rawCommand->GetCreatedRoots();
+		duplicatedTransforms.reserve(createdObjects.size());
+		for(const auto& object : createdObjects) {
+			if(object) {
+				duplicatedTransforms.push_back(&object->GetWorldTransform());
+			}
+		}
+		return duplicatedTransforms;
 	}
 
 	//=============================================================================
 	// Viewport
 	//=============================================================================
 	void LevelEditor::RenderViewport(ViewportType type, const ImTextureID& tex) {
+		SceneContext* previousContext = nullptr;
+		if(type == ViewportType::VIEWPORT_DEBUG) {
+			if(SceneContext* previewContext = ResolvePreviewContext(editToolMode_)) {
+				previousContext = SceneContext::Current();
+				previewContext->MakeCurrent();
+			}
+		}
+
+		auto restoreContext = [&]() {
+			if(previousContext && previousContext != SceneContext::Current()) {
+				previousContext->MakeCurrent();
+			}
+		};
+
 		if(type == ViewportType::VIEWPORT_MAIN) {
 			if(mainViewport_ && mainViewport_->IsShow()) {
 				mainViewport_->Render(tex);
 			}
 		} else if(type == ViewportType::VIEWPORT_DEBUG) {
 			if(debugViewport_ && debugViewport_->IsShow()) {
+				const bool focusDebugViewport = startupDebugViewportFocusFrames_ > 0;
+				if(focusDebugViewport) {
+					ImGui::SetNextWindowFocus();
+				}
+
 				debugViewport_->Render(tex);
+
+				if(focusDebugViewport) {
+					ImGui::SetWindowFocus("Debug Viewport");
+					--startupDebugViewportFocusFrames_;
+				}
+
+				if(viewportSelection_) viewportSelection_->DrawSelectionRect();
 			}
-		} else if(type == ViewportType::VIEWPORT_PICKING) {
-			if(pickingViewport_ && pickingViewport_->IsShow()) {
-				pickingViewport_->Render(tex);
-			}
+		} //else if(type == ViewportType::VIEWPORT_PICKING) {
+		// 	if(pickingViewport_ && pickingViewport_->IsShow()) {
+		// 		pickingViewport_->Render(tex);
+		// 	}
+		// }
+
+		restoreContext();
+	}
+
+	void LevelEditor::RenderRuntimeFullscreenViewport(const ImTextureID& tex) {
+		const ImGuiViewport* viewport = ImGui::GetMainViewport();
+		const ImVec2 pos = viewport->WorkPos;
+		const ImVec2 size = viewport->WorkSize;
+
+		if(size.x <= 0.0f || size.y <= 0.0f) {
+			return;
 		}
+
+		if(auto* mainCamera = CameraManager::GetMain3d()) {
+			mainCamera->SetAspectRatio(size.x / size.y);
+			mainCamera->UpdateMatrix();
+			CameraManager::SetViewportSizeStatic(ViewportType::VIEWPORT_MAIN, {size.x, size.y});
+		}
+
+		ImGui::SetNextWindowPos(pos);
+		ImGui::SetNextWindowSize(size);
+		ImGui::SetNextWindowViewport(viewport->ID);
+
+		const ImGuiWindowFlags flags =
+			ImGuiWindowFlags_NoDecoration |
+			ImGuiWindowFlags_NoMove |
+			ImGuiWindowFlags_NoSavedSettings |
+			ImGuiWindowFlags_NoBringToFrontOnFocus |
+			ImGuiWindowFlags_NoScrollbar |
+			ImGuiWindowFlags_NoScrollWithMouse;
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		if(ImGui::Begin("Runtime Game View", nullptr, flags)) {
+			ImGui::Image(tex, ImGui::GetContentRegionAvail());
+		}
+		ImGui::End();
+		ImGui::PopStyleVar();
+	}
+
+	bool LevelEditor::ShouldRenderRuntimeFullscreen() const {
+		return pPlaySesseion_ &&
+			   pPlaySesseion_->IsRuntime() &&
+			   EngineSettings::GetInstance()->GetData().editor.fullscreenGameViewOnPlay;
+	}
+
+	bool LevelEditor::ShouldHideEditorUiInGameMode() const {
+		return mode_ == EngineEdit::EditorMode::Game &&
+			   EngineSettings::GetInstance()->GetData().editor.fullscreenGameViewOnPlay;
 	}
 
 	void LevelEditor::SetCameraForViewport(BaseCamera* mainCamera, BaseCamera* debugCamera) {
@@ -543,94 +1253,6 @@ namespace CalyxEditor {
 		}
 		if(debugViewport_) {
 			debugViewport_->SetCamera(debugCamera);
-		}
-	}
-
-	//=============================================================================
-	// Picking
-	//=============================================================================
-	void LevelEditor::TryPickObjectFromMouse(const CalyxMath::Vector2&	 mouse,
-											 const CalyxMath::Vector2&	 viewportSize,
-											 const CalyxMath::Matrix4x4& view,
-											 const CalyxMath::Matrix4x4& proj) {
-		SceneContext* ctx = SceneContext::Current();
-		if(!ctx || !debugViewport_) return;
-
-		// ビューポート内ローカル座標へ変換
-		CalyxMath::Vector2 mouseLocal = mouse - debugViewport_->GetPosition();
-
-		Ray ray = Raycastor::ConvertMouseToRay(mouseLocal, view, proj, viewportSize);
-
-		// ヒット判定（raw ptr）
-		if(SceneObject* raw = PickSceneObjectByRay(ray)) {
-			// 対応する shared_ptr をライブラリから取得
-			if(auto sp = ctx->FindSharedObject(raw)) {
-				SetSelectedObject(sp);
-			}
-		}
-	}
-
-	SceneObject* LevelEditor::PickSceneObjectByRay(const Ray& ray) {
-		const auto* lib = hierarchy_ ? hierarchy_->GetSceneObjectLibrary() : nullptr;
-		if(!lib) return nullptr;
-
-		const auto& allObjects = lib->GetAllObjectsRaw();
-		auto		hit		   = Raycastor::Raycast(ray, allObjects);
-		if(hit) {
-			return static_cast<SceneObject*>(hit->hitObject);
-		}
-		return nullptr;
-	}
-
-	void LevelEditor::TryPickUnderCursor() {
-		if(!debugViewport_ || !debugViewport_->IsShow()) return;
-
-		SceneContext* current = SceneContext::Current();
-		if(!current) return;
-
-		CalyxMath::Vector2 origin = debugViewport_->GetPosition();
-		CalyxMath::Vector2 size	  = debugViewport_->GetSize();
-
-		ImVec2 mouse	 = ImGui::GetMousePos();
-		float  relativeX = mouse.x - origin.x;
-		float  relativeY = mouse.y - origin.y;
-
-		if(relativeX < 0 || relativeY < 0 || relativeX > size.x || relativeY > size.y) return;
-
-		// --- Pixel Shader Picking (Priority) ---
-		if(sceneManager_) {
-			if(auto* pickingPass = sceneManager_->GetPickingPass()) {
-				// ビューポートサイズとテクスチャサイズの比率を計算して座標をスケーリング
-				float scaleX = static_cast<float>(pickingPass->GetWidth()) / size.x;
-				float scaleY = static_cast<float>(pickingPass->GetHeight()) / size.y;
-
-				int32_t px = static_cast<int32_t>(relativeX * scaleX);
-				int32_t py = static_cast<int32_t>(relativeY * scaleY);
-
-				uint32_t pickingID = pickingPass->GetObjectID(px, py);
-				if(pickingID > 0) {
-					if(auto sp = current->GetObjectLibrary()->FindSharedByPickingID(pickingID)) {
-						// 地面だったらリターン
-						if(sp->GetName() == "ground") {
-							return;
-						}
-						SetSelectedObject(sp);
-						return;
-					}
-				}
-			}
-		}
-
-		// --- Raycast Picking (Fallback) ---
-		CalyxMath::Vector2	 mousePos(relativeX, relativeY);
-		CalyxMath::Matrix4x4 view = CameraManager::GetDebug()->GetViewMatrix();
-		CalyxMath::Matrix4x4 proj = CameraManager::GetDebug()->GetProjectionMatrix();
-
-		Ray ray = Raycastor::ConvertMouseToRay(mousePos, view, proj, size);
-		if(SceneObject* picked = PickSceneObjectByRay(ray)) {
-			if(auto sp = current->FindSharedObject(picked)) {
-				SetSelectedObject(sp);
-			}
 		}
 	}
 
@@ -648,7 +1270,7 @@ namespace CalyxEditor {
 	//=============================================================================
 	// SceneContext の変更検出
 	//=============================================================================
-	void LevelEditor::SetSceneManager(CalyxScene::SceneManager* manager) {
+	void LevelEditor::SetSceneManager(CalyxEngine::SceneManager* manager) {
 		sceneManager_ = manager;
 
 		if(manager) {
@@ -656,6 +1278,10 @@ namespace CalyxEditor {
 			if(mainViewport_) mainViewport_->SetPickingPass(pickingPass);
 			if(debugViewport_) debugViewport_->SetPickingPass(pickingPass);
 			if(pickingViewport_) pickingViewport_->SetPickingPass(pickingPass);
+		}
+		if(viewportSelection_) viewportSelection_->SetSceneManager(manager);
+		if(manager && editToolMode_ == EngineEdit::EditToolMode::ParticleEffect) {
+			manager->SetEditorPreviewContext(particlePreview_ ? particlePreview_->Context() : nullptr);
 		}
 
 		if(sceneSwitchOverlay_) {
@@ -671,16 +1297,15 @@ namespace CalyxEditor {
 			hierarchy_->RefreshCache();
 		}
 
-		ClearSelection();
+		selection_.PruneToContext(current);
 
 		if(current) {
 			current->AddOnObjectRemovedListener(
 				[editor = this](SceneObject* removed) {
 					if(!editor) return;
 
-					auto sel = editor->GetHierarchyPanel()->GetSelectedObject(); // weak_ptr
-					if(sel.lock().get() == removed) {
-						editor->SetSelectedObject(std::shared_ptr<SceneObject>{});
+					if(editor->IsSelectedObject(removed)) {
+						editor->ClearSelection();
 					}
 				});
 
@@ -690,18 +1315,7 @@ namespace CalyxEditor {
 		}
 	}
 	void LevelEditor::ClearSelection() {
-		selectedObject_.reset();
-		selectedEditor_ = nullptr;
-
-		std::weak_ptr<SceneObject> empty;
-
-		hierarchy_->SetSelectedObject(empty);
-		inspector_->SetSelectedObject(empty);
-		sceneEditor_->ClearSelection();
-
-		if(auto* ctx = SceneContext::Current()) {
-			ctx->SetDebugSelectedObject(nullptr);
-		}
+		selection_.Clear();
 	}
 
-} // namespace CalyxEditor
+} // namespace CalyxEngine

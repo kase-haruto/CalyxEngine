@@ -28,6 +28,9 @@ public:
 	/// <param name="desc"></param>
 	/// <returns></returns>
 	std::unique_ptr<PipelineStateObject> Create(const GraphicsPipelineDesc& desc);
+	std::unique_ptr<PipelineStateObject> CreateWithPixelShaderBlob(
+		const GraphicsPipelineDesc& desc,
+		Microsoft::WRL::ComPtr<IDxcBlob> pixelShader);
 
 private:
 	//===================================================================*/

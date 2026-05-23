@@ -17,7 +17,7 @@ CalyxHuman::CalyxHuman(const std::string& modelName,
 CalyxHuman::CalyxHuman(){
 	moveSpeed_ = 10.0f;
 	//animationを追加
-//	GetCalyxAssets::AnimationModel()->AddAnimation("idle", "idle.gltf");
+//	GetCalyxEngine::AnimationModel()->AddAnimation("idle", "idle.gltf");
 
 }
 
@@ -31,16 +31,16 @@ void CalyxHuman::Update(float dt){
 
 	TransitionAnimation();
 }
-std::optional<CalyxMath::Vector3> CalyxHuman::GetJointWorldPos(const std::string& name) const {
-	const CalyxAssets::AnimationModel* anim = AnimationModel();
+std::optional<CalyxEngine::Vector3> CalyxHuman::GetJointWorldPos(const std::string& name) const {
+	const CalyxEngine::AnimationModel* anim = AnimationModel();
 	if (!anim) return std::nullopt;
 
 	auto matOpt = anim->GetJointMatrix(name);
 	if (!matOpt) return std::nullopt;
 
-	CalyxMath::Matrix4x4 worldM = (*matOpt) * worldTransform_.matrix.world;
+	CalyxEngine::Matrix4x4 worldM = (*matOpt) * worldTransform_.matrix.world;
 
-	CalyxMath::Vector3 pos = {
+	CalyxEngine::Vector3 pos = {
 		worldM.m[3][0],
 		worldM.m[3][1],
 		worldM.m[3][2]
@@ -49,7 +49,7 @@ std::optional<CalyxMath::Vector3> CalyxHuman::GetJointWorldPos(const std::string
 }
 
 void CalyxHuman::TransitionAnimation(){
-	CalyxMath::Vector2 stickInput = CalyxFoundation::Input::GetInstance()->GetLeftStick();
+	CalyxEngine::Vector2 stickInput = CalyxFoundation::Input::GetInstance()->GetLeftStick();
 	bool isMoving = stickInput.Length() > 0.1f;
 	auto* model = AnimationModel();
 
@@ -67,7 +67,7 @@ void CalyxHuman::TransitionAnimation(){
 void CalyxHuman::Move(float dt){
 	velocity_ = {0.0f, 0.0f, 0.0f};
 
-	CalyxMath::Vector2 leftStick = CalyxFoundation::Input::GetInstance()->GetLeftStick();
+	CalyxEngine::Vector2 leftStick = CalyxFoundation::Input::GetInstance()->GetLeftStick();
 	velocity_.x += leftStick.x;
 	velocity_.z += leftStick.y;
 	
@@ -82,11 +82,11 @@ void CalyxHuman::Move(float dt){
 }
 
 void CalyxHuman::Turn(){
-	CalyxMath::Vector3 from = CalyxMath::Vector3::Forward(); // (0, 0, 1)
-	CalyxMath::Vector3 to = velocity_.Normalize();                  // 移動方向
+	CalyxEngine::Vector3 from = CalyxEngine::Vector3::Forward(); // (0, 0, 1)
+	CalyxEngine::Vector3 to = velocity_.Normalize();                  // 移動方向
 
 	if (to.Length() > 0.0f){
-		CalyxMath::Quaternion rot = CalyxMath::Quaternion::FromToQuaternion(from, to);
+		CalyxEngine::Quaternion rot = CalyxEngine::Quaternion::FromToQuaternion(from, to);
 		worldTransform_.rotation = rot;
 	}
 }

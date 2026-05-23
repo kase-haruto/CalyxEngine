@@ -2,6 +2,7 @@
 
 // engine
 #include <Engine/Application/Effects/FxSystem.h>
+#include <Engine/Application/Effects/EffectPlayer.h>
 #include <Engine/Collision/CollisionManager.h>
 #include <Engine/Graphics/Pipeline/Service/PipelineService.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
@@ -13,8 +14,11 @@ void SceneContext::Initialize(bool createDefaultLights) {
 	MakeCurrent();
 
 	objectLibrary_ = std::make_unique<SceneObjectLibrary>();
+	objectLibrary_->SetOwner(this);
 	lightLibrary_  = std::make_unique<LightLibrary>();
-	fxSystem_	   = std::make_unique<CalyxEffect::FxSystem>();
+	fxSystem_	   = std::make_unique<CalyxEngine::FxSystem>(this);
+	effectPlayer_  = std::make_unique<CalyxEngine::EffectPlayer>();
+	effectPlayer_->Initialize(fxSystem_.get());
 
 	if(createDefaultLights) {
 		auto dir = Instantiate<DirectionalLight>("DirectionalLight");
@@ -74,6 +78,10 @@ void SceneContext::Update(float dt, float alwaysDt, bool runtimePass) {
 		if(sp) sp->AlwaysUpdate(alwaysDt);
 	}
 
+	if(effectPlayer_) {
+		effectPlayer_->Update(alwaysDt);
+	}
+
 	lightLibrary_->CyncGpu();
 	fxSystem_->SyncEmitters();
 }
@@ -85,6 +93,9 @@ void SceneContext::PostUpdate(PipelineService* psoService, ID3D12GraphicsCommand
 }
 
 void SceneContext::Clear() {
+	debugSelectedObject_ = nullptr;
+	debugSelectedObjects_.clear();
+
 	// Editor 側への通知（エディタで持っているハンドルを掃除させる）
 	if(objectLibrary_) {
 		if(onEditorObjectRemoved_) {
@@ -97,6 +108,9 @@ void SceneContext::Clear() {
 		objectLibrary_->Clear();
 	}
 
+	if(effectPlayer_) {
+		effectPlayer_->Clear();
+	}
 	if(fxSystem_) {
 		fxSystem_->Clear();
 	}

@@ -10,7 +10,7 @@
 // config
 #include <Data/Engine/Configs/Scene/Objects/Particle/EffectConfig.h>
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
 	 * FxObject
@@ -47,6 +47,10 @@ namespace CalyxEffect {
 		//--------- debugUi ---------------------------------------------------
 		void ShowGui() override;
 		void LoadFromPath(const std::string& path);
+		bool SaveEffectAsset(const std::string& path);
+		bool LoadEffectAsset(const std::string& path);
+		size_t GetLiveEmitterCount() const;
+		uint64_t GetEmitterRevision() const { return emitterRevision_; }
 
 		//--------- json ------------------------------------------------------
 		/// <summary>
@@ -69,8 +73,9 @@ namespace CalyxEffect {
 		void ExtractConfigToJson(nlohmann::json& j) const override;
 
 		//--------- accessor --------------------------------------------------
-		std::string_view GetTypeName() const override;
-		void			 SetWorldPosition(const CalyxMath::Vector3& pos);
+		std::string_view GetObjectClassName() const override;
+		void			 SetWorldPosition(const CalyxEngine::Vector3& pos);
+		void			 SyncChildrenFromWorldTransform();
 
 	private:
 		//===================================================================*/
@@ -78,7 +83,6 @@ namespace CalyxEffect {
 		//===================================================================*/
 		void RebuildChildrenFromConfig(); // Config 子ノード再構築
 		void SyncConfigFromChildren();	  // 子ノード Config 反映
-
 		//--------- add remove ------------------------------------------------
 		void RemoveEmitterByGuid(const Guid& id);
 
@@ -88,8 +92,13 @@ namespace CalyxEffect {
 		//===================================================================*/
 		//					private methods
 		//===================================================================*/
+		const std::filesystem::path kConfigRoot_ = "Resources/Assets/Effects/";
 		ConfigurableObject<EffectObjectConfig>			 config_;
 		std::vector<std::weak_ptr<ParticleSystemObject>> emitters_;
+		uint64_t										 emitterRevision_ = 0;
+		bool                                             cameraDitherEnabled_ = false;
+		float                                            cameraDitherNear_ = 0.0f;
+		float                                            cameraDitherFar_ = 20.0f;
 	};
 
-} // namespace CalyxEffect
+} // namespace CalyxEngine

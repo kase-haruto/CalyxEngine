@@ -1,136 +1,86 @@
-#include "ClearScene.h"
-#include <Engine/Objects/2D/NumbersSprite/NumbersSprite.h>
+
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//	include
+/////////////////////////////////////////////////////////////////////////////////////////
 
 // scene
-#include "Game/3d/GameCamera/RailCamera.h"
-#include <Game/Scene/Utility/SceneTypeUtil.h>
+#include <Game/Scene/Clear/ClearScene.h>
+#include "Game/Scene/Details/SceneType.h"
+#include "Game/Scene/Utility/SceneTypeUtil.h"
+#include <Game/DemoPlayer/DemoPlayer.h>
 
-#include <Engine/Application/System/Environment.h>
+// engine
 #include <Engine/Collision/CollisionManager.h>
 #include <Engine/Foundation/Input/Input.h>
+#include <Engine/Foundation/Utility/Func/MyFunc.h>
+#include <Engine/Scene/Context/SceneContext.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
-#include <Engine/Scene/System/SceneManager.h>
-#include <Game/Scene/Transition/ResultTransitionPayload.h>
+// lib
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//  ctor / dtor
+//	コンストラクタ/デストラクタ
 /////////////////////////////////////////////////////////////////////////////////////////
 ClearScene::ClearScene() {
-	SetSceneName("Clear");
+	// シーン名を設定
+	BaseScene::SetSceneName("ClearScene");
 }
-ClearScene::~ClearScene() = default;
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//  初期化
+//	アセットのロード
+/////////////////////////////////////////////////////////////////////////////////////////
+void ClearScene::LoadAssets() {}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//	初期化処理
 /////////////////////////////////////////////////////////////////////////////////////////
 void ClearScene::Initialize() {
-	// SceneContext 初期化
 	sceneContext_->Initialize();
 
-	// シーンデータ読み込み
-	SceneSerializer::Load(*sceneContext_, "Resources/Assets/Scenes/TitleScene.scene");
+	sceneContext_->SetSceneName("ClearScene");
 
-	// シーンデータ読み込み
-	// ベース初期化
 	BaseScene::Initialize();
 
-	clearSprite_   = std::make_unique<Sprite>("Textures/clear.dds");
-	CalyxMath::Vector2 center = kGameSize * 0.5f;
-	clearSprite_->SetSize(kGameSize);
-	clearSprite_->SetAnchorPoint(CalyxMath::Vector2(0.5f, 0.5f));
-	clearSprite_->SetPosition(center);
+	SceneSerializer::Load(*sceneContext_, "Resources/Assets/Scenes/Clear.scene");
 
-	buttonSprite_ = std::make_unique<Sprite>("Textures/button_A.dds");
-	buttonSprite_->SetAnchorPoint(CalyxMath::Vector2(0.5f, 0.5f));
-	buttonSprite_->SetSize(CalyxMath::Vector2(64.0f, 64.0f));
-	CalyxMath::Vector2 pos = CalyxMath::Vector2(center.x, 600.0f);
-	buttonSprite_->SetPosition(pos);
+	LoadAssets();
 
-	// result:用スプライト
-	resultScoreSprite_ = std::make_unique<Sprite>("Textures/resultScore.dds");
-	resultScoreSprite_->SetAnchorPoint(CalyxMath::Vector2(0.0f, 0.5f));
-	resultScoreSprite_->SetSize(CalyxMath::Vector2(300.0f, 56.0f));
-	resultScoreSprite_->SetPosition(CalyxMath::Vector2(center.x - 400.0f, 320.0f));
-
-	// スコア表示用 NumbersSpriteカクトクスコア
-	scoreSprite_ = std::make_unique<NumbersSprite>("Textures/Numbers", ".dds");
-	scoreSprite_->Initialize(
-		{center.x, 320.0f},
-		{48.0f, 48.0f} // 桁サイズ
-	);
-	scoreSprite_->SetAlign(NumbersSprite::DigitsAlign::Center);
-	scoreSprite_->SetValue(finalScore_);
-
-	auto cam = sceneContext_->FindFirst<RailCamera>();
-	cam->SetSpeed(0.0f);
+	//=========================
+	// グラフィック関連
+	//=========================
+	pauseBg_ = std::make_unique<Sprite>("Textures/uvChecker.dds");
+	pauseBg_->Initialize({0.0f, 0.0f}, {1280.0f, 720.0f});
+	pauseBg_->SetColor({1.0f, 1.0f, 0.0f, 1.0f});
+	pauseBg_->Update();
 }
-void ClearScene::Update(float dt) {
-	blinkTimer += dt;
-	if(blinkTimer >= blinkInterval) {
-		blinkTimer -= blinkInterval; // オーバー分を残す
-		blinkState = !blinkState;
-		buttonSprite_->SetIsVisible(blinkState);
-	}
-	
-	if(resultScoreSprite_)resultScoreSprite_->Update();
-	if(clearSprite_) clearSprite_->Update();
-	if(buttonSprite_) buttonSprite_->Update();
-	if(scoreSprite_) scoreSprite_->Update();
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//	更新処理
+/////////////////////////////////////////////////////////////////////////////////////////
+void ClearScene::Update([[maybe_unused]] float dt) {
+
+	if(CalyxFoundation::Input::TriggerKey(DIK_LCONTROL) && CalyxFoundation::Input::TriggerKey(DIK_7)) {
+		transitionRequestor_->RequestSceneChange(GameSceneUtil::ToSceneId(SceneType::TEST));
+	}
+
+
+	// 衝突判定
 	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
-
-	// 遷移
-	if(CalyxFoundation::Input::GetInstance()->TriggerGamepadButton(CalyxFoundation::PadButton::A) ||
-	   CalyxFoundation::Input::GetInstance()->TriggerKey(DIK_SPACE)) {
-		transitionRequestor_->RequestSceneChange(GameSceneUtil::ToSceneId(SceneType::TITLE));
-	}
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//  描画
-/////////////////////////////////////////////////////////////////////////////////////////
-void ClearScene::Draw(ID3D12GraphicsCommandList* cmdlist,
-					  class PipelineService*	 pso,
-					  IRenderTarget* rt) {
-	SceneContext* ctx = GetSceneContext();
-	if(!ctx) {
-		BaseScene::Draw(cmdlist, pso, rt);
-		return;
-	}
-	
-	spriteRenderer_->Register(clearSprite_.get());
-	if(buttonSprite_) {
-		spriteRenderer_->Register(buttonSprite_.get());
-	}
-	if(scoreSprite_) {
-		for(auto* sp : scoreSprite_->GetSpritesRaw()) {
-			spriteRenderer_->Register(sp);
-		}
-	}
-	spriteRenderer_->Register(resultScoreSprite_.get());
+void ClearScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService, IRenderTarget* rt) {
 
-	BaseScene::Draw(cmdlist, pso, rt);
+	//========================================================//
+	//	spriteの登録
+	//========================================================//
+	spriteRenderer_->Register(pauseBg_.get());
+
+	// シーン上のオブジェクトの描画
+	BaseScene::Draw(cmdList, psoService, rt);
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//  終了処理
-/////////////////////////////////////////////////////////////////////////////////////////
 void ClearScene::CleanUp() {
-	// シーン内オブジェクト/コライダ掃除
+	// 3Dオブジェクトの描画を終了
 	sceneContext_->GetObjectLibrary()->Clear();
 	CollisionManager::GetInstance()->ClearColliders();
-}
-void ClearScene::LoadAssets() {
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////
-//  シーン遷移ペイロード設定
-/////////////////////////////////////////////////////////////////////////////////////////
-void ClearScene::OnPayload(std::unique_ptr<CalyxScene::IScenePayload> payload) {
-	if (!payload) return;
-
-	// 自分が知っている型にだけキャストする
-	if (auto* p = static_cast< ResultTransitionPayload*>(payload.get())) {
-		finalScore_ = p->score;
-	}
 }

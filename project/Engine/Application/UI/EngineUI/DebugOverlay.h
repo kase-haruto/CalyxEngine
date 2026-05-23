@@ -1,7 +1,7 @@
 #pragma once
 #include <Engine/Application/UI/EngineUI/IOnViewportTool.h>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
 	 * DebugOverlay
@@ -17,4 +17,4 @@ namespace CalyxEditor {
 		void RenderToolbar() override {};
 	};
 
-} // namespace CalyxEditor
+} // namespace CalyxEngine

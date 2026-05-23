@@ -6,7 +6,7 @@
 
 #include <memory>
 #include <string>
-namespace CalyxEffect {
+namespace CalyxEngine {
 	/* ========================================================================
 	/*		モジュール作成クラス
 	/* ===================================================================== */
@@ -16,20 +16,20 @@ namespace CalyxEffect {
 		/// </summary>
 		/// <param name="config"></param>
 		/// <returns></returns>
-		std::unique_ptr<CalyxEffect::BaseFxModule> CreateFromConfig(const CalyxEffect::BaseModuleConfig& config);
+		std::unique_ptr<CalyxEngine::BaseFxModule> CreateFromConfig(const CalyxEngine::BaseModuleConfig& config);
 
 		/// <summary>
 		/// コンフィグをモジュールから作成
 		/// </summary>
 		/// <param name="module"></param>
 		/// <returns></returns>
-		std::unique_ptr<CalyxEffect::BaseModuleConfig> CreateConfigFromModule(const CalyxEffect::BaseFxModule& module);
+		std::unique_ptr<CalyxEngine::BaseModuleConfig> CreateConfigFromModule(const CalyxEngine::BaseFxModule& module);
 
 		/// <summary>
 		/// 名前からモジュールを作成
 		/// </summary>
 		/// <param name="name"></param>
 		/// <returns></returns>
-		std::unique_ptr<CalyxEffect::BaseFxModule> CreateByName(const std::string& name);
+		std::unique_ptr<CalyxEngine::BaseFxModule> CreateByName(const std::string& name);
 	}
 }

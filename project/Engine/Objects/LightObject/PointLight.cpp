@@ -20,8 +20,8 @@ PointLight::PointLight(const std::string& name){
 	constantBuffer_.Initialize(device);
 
 	//初期化
-	lightData_.color = CalyxMath::Vector4(1.0f, 1.0f, 1.0f, 1.0f);	// ライトの色
-	lightData_.position = CalyxMath::Vector3(0.0f, 0.0f, 0.0f);		// ライトの位置
+	lightData_.color = CalyxEngine::Vector4(1.0f, 1.0f, 1.0f, 1.0f);	// ライトの色
+	lightData_.position = CalyxEngine::Vector3(0.0f, 0.0f, 0.0f);		// ライトの位置
 	lightData_.intensity = 0.25f;						// 光度
 	lightData_.radius = 20.0f;							// 最大距離
 	lightData_.decay = 1.0f;							// 減衰率
@@ -37,8 +37,8 @@ PointLight::PointLight(){
 	constantBuffer_.Initialize(device);
 
 	//初期化
-	lightData_.color = CalyxMath::Vector4(1.0f, 1.0f, 1.0f, 1.0f);	// ライトの色
-	lightData_.position = CalyxMath::Vector3(0.0f, 0.0f, 0.0f);		// ライトの位置
+	lightData_.color = CalyxEngine::Vector4(1.0f, 1.0f, 1.0f, 1.0f);	// ライトの色
+	lightData_.position = CalyxEngine::Vector3(0.0f, 0.0f, 0.0f);		// ライトの位置
 	lightData_.intensity = 0.25f;						// 光度
 	lightData_.radius = 20.0f;							// 最大距離
 	lightData_.decay = 1.0f;							// 減衰率
@@ -59,8 +59,7 @@ void PointLight::ShowGui(){
 	ImGui::Dummy(ImVec2(0.0f, 5.0f));
 	
 	// コンフィグ
-	if (GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::ParameterData)) {
-		config_.ShowGui();
+	if (GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::ParameterData)) {
 		ImGui::Separator();
 		GuiCmd::EndSection();
 	}
@@ -68,13 +67,13 @@ void PointLight::ShowGui(){
 	ImGui::Separator();
 	
 	// トランスフォーム (位置)
-	if (GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::Object)) {
+	if (GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::Object)) {
 		GuiCmd::DragFloat3("position", lightData_.position);
 		GuiCmd::EndSection();
 	}
 
 	// ライトパラメータ
-	if (GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::ParameterData)) {
+	if (GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::ParameterData)) {
 		GuiCmd::ColorEdit4("color", lightData_.color);
 		GuiCmd::SliderFloat("Intensity", lightData_.intensity, 0.0f, 1.0f);
 		GuiCmd::DragFloat("radius", lightData_.radius);

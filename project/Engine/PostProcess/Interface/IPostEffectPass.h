@@ -8,6 +8,7 @@
 //c++
 #include <d3d12.h>
 #include <wrl.h>
+#include <externals/nlohmann/json.hpp>
 #include <string>
 
 class IPostEffectPass{
@@ -27,4 +28,10 @@ public:
 	virtual void Tick(float /*dt*/) {}
 
 	virtual const std::string GetName() const = 0;
+
+	virtual nlohmann::json SaveParameters() const { return nlohmann::json::object(); }
+	virtual void LoadParameters(const nlohmann::json& /*params*/) {}
+
+	virtual bool GetFloatParameter(const std::string& /*name*/, float& /*out*/) const { return false; }
+	virtual bool SetFloatParameter(const std::string& /*name*/, float /*value*/) { return false; }
 };

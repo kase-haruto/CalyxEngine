@@ -23,8 +23,8 @@
 #include <cstdint>
 
 struct DirectionalLightData {
-	CalyxMath::Vector4 color;	  //< ライトの色
-	CalyxMath::Vector3 direction; //< ライトの向き
+	CalyxEngine::Vector4 color;	  //< ライトの色
+	CalyxEngine::Vector3 direction; //< ライトの向き
 	float			   intensity; //< 輝度
 };
 
@@ -36,7 +36,7 @@ struct ShadowParamGpu {
 	uint32_t isSoft; // cbuffer bool(32bit)と整合
 };
 
-namespace CalyxGraphics {
+namespace CalyxEngine {
 	class DxCore;
 }
 
@@ -152,7 +152,7 @@ public:
 	 * \brief タイプ名を取得
 	 * \return タイプ名
 	 */
-	std::string_view GetTypeName() const override { return "DirectionalLight"; }
+	std::string_view GetObjectClassName() const override { return "DirectionalLight"; }
 
 	/**
 	 * \brief オブジェクトタイプ名を取得
@@ -164,7 +164,7 @@ public:
 	 * \brief ライトのビュープロジェクション行列を取得
 	 * \return 行列
 	 */
-	const CalyxMath::Matrix4x4& GetLightVP() const { return lightViewProj_; }
+	const CalyxEngine::Matrix4x4& GetLightVP() const { return lightViewProj_; }
 
 private:
 	//===================================================================*/
@@ -174,7 +174,7 @@ private:
 	DirectionalLightData				   lightData_ = {}; //< ライトデータ本体
 
 	std::shared_ptr<BaseGameObject> UiObject_ = nullptr; //< UI用オブジェクト
-	CalyxMath::Matrix4x4			lightViewProj_;		 //< ライト用ビュープロジェクション行列
+	CalyxEngine::Matrix4x4			lightViewProj_;		 //< ライト用ビュープロジェクション行列
 
 	ConfigurableObject<DirectionalLightConfig> config_; //< コンフィグ管理
 

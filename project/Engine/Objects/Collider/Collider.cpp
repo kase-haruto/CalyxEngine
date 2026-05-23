@@ -107,12 +107,12 @@ ColliderConfig Collider::ExtractConfig() const {
 	return config;
 }
 
-CalyxMath::Vector3 Collider::GetWorldPos() const {
+CalyxEngine::Vector3 Collider::GetWorldPos() const {
 	if(owner_) {
 		return owner_->GetWorldPosition();
 	}
 	// オーナーがいない場合はゼロベクトルを返す
-	return CalyxMath::Vector3::Zero();
+	return CalyxEngine::Vector3::Zero();
 }
 /////////////////////////////////////////////////////////////////////////////////////////
 //		Collisionするか

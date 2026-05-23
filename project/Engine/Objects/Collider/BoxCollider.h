@@ -34,13 +34,13 @@ public:
 	 * \param position 座標
 	 * \param rotate 回転
 	 */
-	void Update(const CalyxMath::Vector3& position, const CalyxMath::Quaternion& rotate) override;
+	void Update(const CalyxEngine::Vector3& position, const CalyxEngine::Quaternion& rotate) override;
 
 	/**
 	 * \brief 初期化
 	 * \param size ボックスのサイズ（各軸の半幅）
 	 */
-	void Initialize(const CalyxMath::Vector3& size);
+	void Initialize(const CalyxEngine::Vector3& size);
 
 	/**
 	 * \brief 描画処理
@@ -94,7 +94,7 @@ public:
 	 * \brief ボックスサイズを取得
 	 * \return サイズ
 	 */
-	const CalyxMath::Vector3& GetSize() const { return shape_.size; }
+	const CalyxEngine::Vector3& GetSize() const { return shape_.size; }
 
 protected:
 	//===================================================================*/
@@ -116,13 +116,13 @@ public:
 	 * \brief 中心座標を取得
 	 * \return 中心座標
 	 */
-	const CalyxMath::Vector3& GetCenter() const override;
+	const CalyxEngine::Vector3& GetCenter() const override;
 
 	/**
 	 * \brief ボックスサイズを設定
 	 * \param size サイズ
 	 */
-	void SetSize(const CalyxMath::Vector3& size) { shape_.size = size; }
+	void SetSize(const CalyxEngine::Vector3& size) { shape_.size = size; }
 
 	/**
 	 * \brief 衝突形状を取得

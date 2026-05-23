@@ -4,34 +4,12 @@
 #include <Engine/Application/UI/GUI/ImGuiManager.h>
 #include <Engine/Assets/Database/AssetDatabase.h>
 /* c++ */
-#include <cassert>
+#include <Engine/Foundation/Debug/CxAssert.h>
 #include <system_error>
 
 using Microsoft::WRL::ComPtr;
 
-TextureManager* TextureManager::GetInstance() {
-	static TextureManager instance;
-	return &instance;
-}
-
 void TextureManager::StartUpLoad() {
-	LoadTexture("Textures/uvChecker.dds");
-	LoadTexture("Textures/MonsterBall.dds");
-	LoadTexture("Textures/flower.dds");
-	LoadTexture("Textures/smoke.dds");
-	LoadTexture("Textures/redCircle.dds");
-	LoadTexture("Textures/fieldTile.dds");
-	LoadTexture("Textures/TallBuilding01.dds");
-	LoadTexture("Textures/Numbers/0.dds");
-	LoadTexture("Textures/Numbers/1.dds");
-	LoadTexture("Textures/Numbers/2.dds");
-	LoadTexture("Textures/Numbers/3.dds");
-	LoadTexture("Textures/Numbers/4.dds");
-	LoadTexture("Textures/Numbers/5.dds");
-	LoadTexture("Textures/Numbers/6.dds");
-	LoadTexture("Textures/Numbers/7.dds");
-	LoadTexture("Textures/Numbers/8.dds");
-	LoadTexture("Textures/Numbers/9.dds");
 }
 
 void TextureManager::Initialize(ImGuiManager* imgui) {
@@ -90,6 +68,32 @@ D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSrvHandle(const std::string& text
 	return {};
 }
 
+D3D12_CPU_DESCRIPTOR_HANDLE TextureManager::GetCpuSrvHandle(const std::string& textureName) const {
+	auto it = textures_.find(textureName);
+	if(it != textures_.end()) {
+		return it->second.GetCpuSrvHandle();
+	}
+	const_cast<TextureManager*>(this)->LoadTexture(textureName);
+	if(auto loaded = textures_.find(textureName); loaded != textures_.end()) {
+		return loaded->second.GetCpuSrvHandle();
+	}
+	return {};
+}
+
+bool TextureManager::WriteSrvTo(const std::string& textureName, D3D12_CPU_DESCRIPTOR_HANDLE destination) const {
+	if(!destination.ptr) return false;
+
+	auto it = textures_.find(textureName);
+	if(it == textures_.end()) {
+		const_cast<TextureManager*>(this)->LoadTexture(textureName);
+		it = textures_.find(textureName);
+	}
+	if(it == textures_.end()) return false;
+
+	it->second.CreateShaderResourceView(device_.Get(), destination);
+	return true;
+}
+
 const std::unordered_map<std::string, Texture>& TextureManager::GetLoadedTextures() const {
 	return textures_;
 }
@@ -144,6 +148,36 @@ D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSrvHandle(const Guid& guid) const
 	}
 	// const だがロードしたいケース用に const_cast（薄いラッパなので許容）
 	return const_cast<TextureManager*>(this)->LoadTexture(guid);
+}
+
+D3D12_CPU_DESCRIPTOR_HANDLE TextureManager::GetCpuSrvHandle(const Guid& guid) const {
+	if(!guid.isValid()) return {};
+	if(auto it = guidToKey_.find(guid); it != guidToKey_.end()) {
+		if(auto it2 = textures_.find(it->second); it2 != textures_.end()) {
+			return it2->second.GetCpuSrvHandle();
+		}
+	}
+	const_cast<TextureManager*>(this)->LoadTexture(guid);
+	if(auto it = guidToKey_.find(guid); it != guidToKey_.end()) {
+		if(auto it2 = textures_.find(it->second); it2 != textures_.end()) {
+			return it2->second.GetCpuSrvHandle();
+		}
+	}
+	return {};
+}
+
+bool TextureManager::WriteSrvTo(const Guid& guid, D3D12_CPU_DESCRIPTOR_HANDLE destination) const {
+	if(!guid.isValid() || !destination.ptr) return false;
+
+	if(auto it = guidToKey_.find(guid); it != guidToKey_.end()) {
+		return WriteSrvTo(it->second, destination);
+	}
+
+	const_cast<TextureManager*>(this)->LoadTexture(guid);
+	if(auto it = guidToKey_.find(guid); it != guidToKey_.end()) {
+		return WriteSrvTo(it->second, destination);
+	}
+	return false;
 }
 
 bool TextureManager::HasTexture(const Guid& guid) const {

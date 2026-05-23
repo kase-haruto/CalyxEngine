@@ -72,6 +72,32 @@ DescriptorHandle DescriptorAllocator::Allocate(DescriptorUsage usage){
 	return handle;
 }
 
+DescriptorHandle DescriptorAllocator::AllocateRange(DescriptorUsage usage, UINT count) {
+	if(count == 0) return {};
+	HeapInfo& info = heaps_[usage];
+	std::lock_guard<std::mutex> lock(info.mutex);
+
+	if(info.currentOffset + count > info.maxDescriptors) {
+		throw std::runtime_error("DescriptorAllocator: Heap is full");
+	}
+
+	const UINT offset = info.currentOffset;
+	info.currentOffset += count;
+
+	DescriptorHandle handle{};
+	handle.offset = offset;
+
+	auto cpuStart = info.heap->GetCPUDescriptorHandleForHeapStart();
+	handle.cpu.ptr = cpuStart.ptr + offset * info.descriptorSize;
+
+	if(info.shaderVisible) {
+		auto gpuStart = info.heap->GetGPUDescriptorHandleForHeapStart();
+		handle.gpu.ptr = gpuStart.ptr + offset * info.descriptorSize;
+	}
+
+	return handle;
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //
 /////////////////////////////////////////////////////////////////////////////////////////

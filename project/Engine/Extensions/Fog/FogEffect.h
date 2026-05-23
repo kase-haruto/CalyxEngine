@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 /* lib */
 #include<d3d12.h>
@@ -7,7 +7,7 @@
 
 using namespace DirectX;
 using namespace Microsoft::WRL;
-namespace CalyxGraphics {
+namespace CalyxEngine {
 	class DxCore;
 }
 
@@ -30,11 +30,11 @@ private:
 
 
 
-	const CalyxGraphics::DxCore*pDxCore_;
+	const CalyxEngine::DxCore*pDxCore_;
 
 public:
 	//コンストラクタ
-	FogEffect(const CalyxGraphics::DxCore* dxCore);
+	FogEffect(const CalyxEngine::DxCore* dxCore);
 	//デストラクタ
 	~FogEffect();
 

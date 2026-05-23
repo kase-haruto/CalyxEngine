@@ -1,4 +1,5 @@
 #include "MathUtil.h"
+#include <Engine/Foundation/Debug/CxAssert.h>
 
 // math
 #include <Engine/Foundation/Math/Vector2.h>
@@ -14,7 +15,7 @@
 
 #include <cmath>
 
-namespace CalyxMath {
+namespace CalyxEngine {
 	Matrix4x4 MakeTranslateMatrix(const Vector3& translate) noexcept {
 		Matrix4x4 result = {
 					1, 0, 0, 0,
@@ -72,12 +73,12 @@ namespace CalyxMath {
 
 	Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate) noexcept {
 		Matrix4x4 affineMatrix;
-		Matrix4x4 translateMatrix = CalyxMath::MakeTranslateMatrix(translate);
-		Matrix4x4 scaleMatrix = CalyxMath::MakeScaleMatrix(scale);
+		Matrix4x4 translateMatrix = CalyxEngine::MakeTranslateMatrix(translate);
+		Matrix4x4 scaleMatrix = CalyxEngine::MakeScaleMatrix(scale);
 
-		Matrix4x4 rotateXMatrix = CalyxMath::MakeRotateXMatrix(rotate.x);
-		Matrix4x4 rotateYMatrix = CalyxMath::MakeRotateYMatrix(rotate.y);
-		Matrix4x4 rotateZMatrix = CalyxMath::MakeRotateZMatrix(rotate.z);
+		Matrix4x4 rotateXMatrix = CalyxEngine::MakeRotateXMatrix(rotate.x);
+		Matrix4x4 rotateYMatrix = CalyxEngine::MakeRotateYMatrix(rotate.y);
+		Matrix4x4 rotateZMatrix = CalyxEngine::MakeRotateZMatrix(rotate.z);
 		Matrix4x4 rotateMatrix = Matrix4x4::Multiply(Matrix4x4::Multiply(rotateXMatrix, rotateYMatrix), rotateZMatrix);
 
 		affineMatrix = Matrix4x4::Multiply(Matrix4x4::Multiply(scaleMatrix, rotateMatrix), translateMatrix);
@@ -88,9 +89,9 @@ namespace CalyxMath {
 
 	Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Quaternion& rotate, const Vector3& translate) noexcept {
 		// 各種変換行列を生成
-		const Matrix4x4 scaleMatrix = CalyxMath::MakeScaleMatrix(scale);
+		const Matrix4x4 scaleMatrix = CalyxEngine::MakeScaleMatrix(scale);
 		const Matrix4x4 rotationMatrix = Quaternion::ToMatrix(rotate);
-		const Matrix4x4 translationMatrix = CalyxMath::MakeTranslateMatrix(translate);
+		const Matrix4x4 translationMatrix = CalyxEngine::MakeTranslateMatrix(translate);
 
 		// スケーリング → 回転 → 平行移動 の順で合成
 		Matrix4x4 affineMatrix = Matrix4x4::Multiply(
@@ -158,14 +159,14 @@ float farClip
 
 	float ToRadians(float deg) noexcept { return deg * 3.14159265358979323846f / 180.0f; }
 
-	CalyxMath::Vector2 WorldToScreen(const Vector3& worldPos) {
+	CalyxEngine::Vector2 WorldToScreen(const Vector3& worldPos) {
 		const Matrix4x4& viewProj = CameraManager::GetMain3d()->GetViewProjectionMatrix();
 
 		// ワールド→クリップ空間
 		Vector4 clipPos = Vector4::Transform(Vector4(worldPos, 1.0f), viewProj);
 
 		if(fabs(clipPos.w) < 1e-5f) {
-			return CalyxMath::Vector2(0.0f, 0.0f); // 無効値
+			return CalyxEngine::Vector2(0.0f, 0.0f); // 無効値
 		}
 
 		// NDC座標へ
@@ -181,10 +182,10 @@ float farClip
 		float screenX = (ndcPos.x * 0.5f + 0.5f) * screenWidth;
 		float screenY = (1.0f - (ndcPos.y * 0.5f + 0.5f)) * screenHeight;
 
-		return CalyxMath::Vector2(screenX, screenY);
+		return CalyxEngine::Vector2(screenX, screenY);
 	}
 
-	Vector3 ScreenToWorld(const CalyxMath::Vector2& screenPos, float depthZ) {
+	Vector3 ScreenToWorld(const CalyxEngine::Vector2& screenPos, float depthZ) {
 		float screenWidth  = kGameWidth;
 		float screenHeight = kGameHeight;
 
@@ -221,7 +222,7 @@ float farClip
 	}
 
 	Vector3 CatmullRomPosition(const std::vector<Vector3>& points, float t) {
-		assert(points.size() >= 4 && "制御点は最低4つ必要です。");
+		CX_CHECK(points.size() >= 4 && "制御点は最低4つ必要です。", "Assertion failed");
 
 		size_t division = points.size() - 1;
 		float areaWidth = 1.0f / division;

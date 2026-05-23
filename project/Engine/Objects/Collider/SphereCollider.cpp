@@ -26,9 +26,9 @@ void SphereCollider::Initialize(float radius) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		更新処理
 /////////////////////////////////////////////////////////////////////////////////////////
-void SphereCollider::Update(const CalyxMath::Vector3& position, const CalyxMath::Quaternion& rotate) {
+void SphereCollider::Update(const CalyxEngine::Vector3& position, const CalyxEngine::Quaternion& rotate) {
 	// 回転込みでローカルオフセットをワールドへ
-	const CalyxMath::Vector3 worldOffset = CalyxMath::Quaternion::RotateVector(offset_, rotate);
+	const CalyxEngine::Vector3 worldOffset = CalyxEngine::Quaternion::RotateVector(offset_, rotate);
 	shape_.center						 = position + worldOffset;
 }
 
@@ -58,7 +58,7 @@ void SphereCollider::ShowGui() {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		中心座標を返す
 /////////////////////////////////////////////////////////////////////////////////////////
-const CalyxMath::Vector3& SphereCollider::GetCenter() const {
+const CalyxEngine::Vector3& SphereCollider::GetCenter() const {
 	return shape_.center;
 }
 

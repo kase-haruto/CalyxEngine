@@ -3,7 +3,7 @@
 #include "Engine/Graphics/Descriptor/DescriptorAllocator.h"
 
 
-void CalyxGraphics::SceneDepthResource::Initialize(ID3D12Device* device, uint32_t w, uint32_t h) {
+void CalyxEngine::SceneDepthResource::Initialize(ID3D12Device* device, uint32_t w, uint32_t h) {
 	D3D12_RESOURCE_DESC desc{};
 	desc.Dimension		  = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	desc.Width			  = w;
@@ -34,7 +34,7 @@ void CalyxGraphics::SceneDepthResource::Initialize(ID3D12Device* device, uint32_
 	device->CreateDepthStencilView(resource_.Get(), nullptr, dsv_);
 }
 
-void CalyxGraphics::SceneDepthResource::Transition(
+void CalyxEngine::SceneDepthResource::Transition(
 	ID3D12GraphicsCommandList* cmd,
 	D3D12_RESOURCE_STATES newState)
 {
@@ -51,7 +51,7 @@ void CalyxGraphics::SceneDepthResource::Transition(
 	currentState_ = newState;
 }
 
-void CalyxGraphics::SceneDepthResource::BindForWrite(ID3D12GraphicsCommandList* cmd)
+void CalyxEngine::SceneDepthResource::BindForWrite(ID3D12GraphicsCommandList* cmd)
 {
 	Transition(cmd, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 }

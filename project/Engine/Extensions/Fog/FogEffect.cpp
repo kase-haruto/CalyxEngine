@@ -23,7 +23,7 @@ void FogEffect::ShowImGuiInterface(){
 #endif // _DEBUG
 }
 
-FogEffect::FogEffect(const CalyxGraphics::DxCore* dxCore):pDxCore_(dxCore){
+FogEffect::FogEffect(const CalyxEngine::DxCore* dxCore):pDxCore_(dxCore){
 	//定数バッファの生成
 	CreateConstantBuffer();
 

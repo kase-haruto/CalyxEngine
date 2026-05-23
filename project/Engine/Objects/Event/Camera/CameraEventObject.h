@@ -2,15 +2,16 @@
 /* ========================================================================
 /*		include space
 /* ===================================================================== */
+#include <Engine/Foundation/Reflection/CalyxReflection.h>
 #include <Engine/Objects/Event/BaseEventObject.h>
 
 // fwd
 class Camera3d;
 
-
 /* ========================================================================
 /*		カメラのアクションを行うイベント
 /* ===================================================================== */
+CALYX_OBJECT(Category = Event, DisplayName = "Camera Event")
 class CameraEventObject :
 	public BaseEventObject {
 public:

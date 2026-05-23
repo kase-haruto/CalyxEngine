@@ -16,10 +16,12 @@ REGISTER_SCENE_OBJECT(BaseEventObject);
 //		ctor/dtor
 /////////////////////////////////////////////////////////////////////////////////////////
 BaseEventObject::BaseEventObject() {
+	objectType_ = ObjectType::Event;
+
 	// 衝突の設定(boxで初期化
 	std::unique_ptr<BoxCollider> box = std::make_unique<BoxCollider>(true);
 	box->SetName(GetName() + "BoxCollider");   //< コライダー名前設定
-	box->Initialize(CalyxMath::Vector3(1.0f)); //< サイズ設定
+	box->Initialize(CalyxEngine::Vector3(1.0f)); //< サイズ設定
 	collider_ = std::move(box);
 	collider_->SetType(ColliderType::Type_EventObject);
 	collider_->SetTargetType(ColliderType::Type_Player);
@@ -30,7 +32,7 @@ BaseEventObject::BaseEventObject() {
 
 	model_ = std::make_unique<Model>("debugCube.obj");
 	model_->SetBlendMode(BlendMode::ALPHA);
-	model_->SetColor(CalyxMath::Vector4(0.0f, 1.0f, 0.0f, 0.5f));
+	model_->SetColor(CalyxEngine::Vector4(0.0f, 1.0f, 0.0f, 0.5f));
 
 	isCastShadow_ = false; // 影を落とさない
 
@@ -48,7 +50,7 @@ BaseEventObject::BaseEventObject(const std::string& name) {
 	// 衝突の設定(boxで初期化
 	std::unique_ptr<BoxCollider> box = std::make_unique<BoxCollider>(true);
 	box->SetName(name + "BoxCollider");		   //< コライダー名前設定
-	box->Initialize(CalyxMath::Vector3(1.0f)); //< サイズ設定
+	box->Initialize(CalyxEngine::Vector3(1.0f)); //< サイズ設定
 	collider_ = std::move(box);
 	collider_->SetType(ColliderType::Type_EventObject);
 	collider_->SetTargetType(ColliderType::Type_Player);
@@ -59,7 +61,7 @@ BaseEventObject::BaseEventObject(const std::string& name) {
 
 	model_ = std::make_unique<Model>("debugCube.obj");
 	model_->SetBlendMode(BlendMode::ALPHA);
-	model_->SetColor(CalyxMath::Vector4(0.0f, 1.0f, 0.0f, 0.5f));
+	model_->SetColor(CalyxEngine::Vector4(0.0f, 1.0f, 0.0f, 0.5f));
 
 	isCastShadow_ = false; // 影を落とさない
 
@@ -87,6 +89,9 @@ void BaseEventObject::Initialize() {
 #else
 	isDrawEnable_ = false;
 #endif
+
+	//イベントオブジェクトはアウトラインをかけない
+	SceneObject::SetOutlineEnabled(false);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -101,8 +106,8 @@ void BaseEventObject::AlwaysUpdate([[maybe_unused]] float dt) {
 		model_->SetIsDrawEnable(isDrawEnable_);
 	}
 
-	CalyxMath::Vector3	  worldPos = worldTransform_.GetWorldPosition();
-	CalyxMath::Quaternion rot	   = worldTransform_.rotation;
+	CalyxEngine::Vector3	  worldPos = worldTransform_.GetWorldPosition();
+	CalyxEngine::Quaternion rot	   = worldTransform_.rotation;
 
 	// collider の更新
 	if(collider_) {
@@ -130,7 +135,6 @@ void BaseEventObject::DerivativeGui() {
 }
 
 void BaseEventObject::ConfigGUi() {
-	baseConfig_.ShowGui("Event/" + GetName());
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -160,7 +164,7 @@ void BaseEventObject::ApplyConfigFromJson(const nlohmann::json& j) {
 	ApplyConfig();
 
 	// 派生クラスの適用
-	const std::string	  typeKey(GetTypeName()); // クラス名
+	const std::string	  typeKey(GetObjectClassName()); // クラス名
 	const nlohmann::json* derived = j.contains(typeKey) ? &j.at(typeKey) : nullptr;
 	ApplyDerivedConfigFromJson(j, derived);
 }
@@ -186,7 +190,7 @@ void BaseEventObject::ExtractConfigToJson(nlohmann::json& j) const {
 	baseConfig_.ExtractConfigToJson(j);
 
 	// 派生部分
-	const std::string typeKey(GetTypeName());
+	const std::string typeKey(GetObjectClassName());
 	nlohmann::json	  derived;
 	ExtractDerivedConfigToJson(j, derived);
 	if(!derived.is_null() && !derived.empty()) {

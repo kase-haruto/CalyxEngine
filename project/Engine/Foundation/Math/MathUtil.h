@@ -5,7 +5,7 @@
 #include <Engine/Foundation/Math/Vector2.h>
 #include <Engine/Foundation/Math/Vector3.h>
 
-namespace  CalyxMath{
+namespace  CalyxEngine{
 	const float kPi = 3.14159265358979323846f;
 	const float kTwoPi = 2.0f * kPi;
 

@@ -423,6 +423,8 @@
     <ClCompile Include="Engine\Foundation\Math\Vector2.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\FileSystem\FileSystemHelper.cpp" />
     <ClCompile Include="Engine\Editor\SceneObjectEditor.cpp" />
+    <ClCompile Include="Engine\Editor\EditorSelectionCoordinator.cpp" />
+    <ClCompile Include="Engine\Editor\SceneObjectDuplicator.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\FileSystem\ConfigPathResolver\ConfigPathResolver.cpp" />
     <ClCompile Include="Engine\System\Command\EditorCommand\TransformCommand\TranslateCommand.cpp" />
     <ClCompile Include="Engine\System\Command\Manager\CommandManager.cpp" />
@@ -735,6 +737,8 @@
     <ClInclude Include="Data\Engine\Macros\Objects\Transform\Transform2dMacros.h" />
     <ClInclude Include="Data\Engine\Macros\Objects\Model\BaseModelConfigMacro.h" />
     <ClInclude Include="Engine\Editor\SceneObjectEditor.h" />
+    <ClInclude Include="Engine\Editor\EditorSelectionCoordinator.h" />
+    <ClInclude Include="Engine\Editor\SceneObjectDuplicator.h" />
     <ClInclude Include="Engine\Foundation\Utility\FileSystem\ConfigPathResolver\ConfigPathResolver.h" />
     <ClInclude Include="Engine\Objects\ConfigurableObject\ConfigurableObject.h" />
     <ClInclude Include="Engine\System\Command\EditorCommand\TransformCommand\TranslateCommand.h" />

@@ -14,9 +14,9 @@
 #include <vector>
 
 // forward declaration
-struct CalyxMath::Vector3;
+struct CalyxEngine::Vector3;
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
 	 * FxEmitter
@@ -34,8 +34,8 @@ namespace CalyxEffect {
 
 		virtual void Update(float dt) override;
 		void		 TransferParticleDataToGPU() override; // BaseEmitterをoverride
-		void		 ShowGui();
-		void DrawEmitterShape(const WorldTransform& tf);
+		void		 ShowGui() override;
+		void DrawEmitterShape(const WorldTransform& tf) override;
 		// コマンドを積む
 		void SetCommand(ID3D12GraphicsCommandList* cmdList);
 
@@ -44,10 +44,12 @@ namespace CalyxEffect {
 
 		void Play() override; //< 再生
 		void Stop() override; //< ストップ
-		void Reset();		  //< リセット
-		bool LoadTextureByGuid(const Guid& g);
+		void Reset() override;		  //< リセット
+		bool LoadTextureByGuid(const Guid& g) override;
+		void SetTextureGuid(const Guid& g) override;
 
 		void SetCameraFade(float nearZ, float farZ) override;
+		void SetCameraFadeEnabled(bool enabled) override;
 
 		//--------- config -------------------------------------------------//
 		// 適用
@@ -58,18 +60,22 @@ namespace CalyxEffect {
 		//--------- accessor -----------------------------------------------//
 		const std::vector<FxUnit>& GetUnits() const { return units_; }
 
-		bool							   IsDrawEnable() { return HasFlag(DrawEnable); }
-		void							   SetDrawEnable(bool isEnable) { SetFlag(DrawEnable, isEnable); }
+		bool							   IsDrawEnable() const override { return HasFlag(DrawEnable); }
+		void							   SetDrawEnable(bool isEnable) override { SetFlag(DrawEnable, isEnable); }
 		bool							   IsPlaying() const override { return HasFlag(Playing); }
 		const D3D12_GPU_DESCRIPTOR_HANDLE& GetTextureHandle() const { return textureHandle_; }
+		const Guid&						   GetTextureGuid() const override { return textureGuid_; }
 
 		//--------- Timed Preview（一定間隔での自動再生） ---------------//
 		void	  SetTimedPreview(bool v) { timedPreview_ = v; }
-		void	  SetPosition(const CalyxMath::Vector3& pos) { position_ = pos; }
+		void	  SetPosition(const CalyxEngine::Vector3& pos) override { position_ = pos; }
 		bool	  GetTimedPreview() const { return timedPreview_; }
 		void	  SetPreviewInterval(float sec) { previewIntervalSec_ = (sec < 0.01f ? 0.01f : sec); }
 		float	  GetPreviewInterval() const { return previewIntervalSec_; }
 		BlendMode GetBlendMode() const { return blendMode_; }
+		bool IsCameraDitherEnabled() const { return fadeParams_.enabled != 0; }
+		float GetCameraDitherNear() const { return fadeParams_.fadeNear; }
+		float GetCameraDitherFar() const { return fadeParams_.fadeFar; }
 
 		//--------- callback -----------------------------------------------//
 
@@ -85,7 +91,7 @@ namespace CalyxEffect {
 		//===================================================================*/
 		// 発生
 		void Emit();
-		void Emit(const CalyxMath::Vector3& pos);
+		void Emit(const CalyxEngine::Vector3& pos);
 		void RestartOneShot();
 
 		// ---- flags helpers ----
@@ -111,12 +117,12 @@ namespace CalyxEffect {
 		//===================================================================*/
 		//					public variable
 		//===================================================================*/
-		CalyxMath::Vector3 prevPostion_;		//< 前回の座標
+		CalyxEngine::Vector3 prevPostion_;		//< 前回の座標
 		float			   emitRate_	= 0.1f; //< パーティクル生成レート
 		float			   defaultSize_ = 1.0f; //< パーティクルのデフォルトサイズ
 
-		FxParam<CalyxMath::Vector3> scale_;	   //< パーティクルのスケール（定数またはランダム）
-		FxParam<CalyxMath::Vector3> velocity_; //< パーティクルの速度（定数またはランダム）
+		FxParam<CalyxEngine::Vector3> scale_;	   //< パーティクルのスケール（定数またはランダム）
+		FxParam<CalyxEngine::Vector3> velocity_; //< パーティクルの速度（定数またはランダム）
 		FxParam<float>				lifetime_; //< パーティクルの寿命（定数またはランダム）
 		FxParam<float>				spin_;	   //< パーティクルのスピン（定数またはランダム）
 
@@ -162,4 +168,4 @@ namespace CalyxEffect {
 		std::function<void()> onFinished_;				   // 終了時コールバック
 		bool				  isFinishedNotified_ = false; // すでに通知したかどうか
 	};
-} // namespace CalyxEffect
+} // namespace CalyxEngine

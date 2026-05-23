@@ -6,7 +6,7 @@
 #include <memory>
 #include <unordered_map>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 
 	class EditorCollection {
 	public:
@@ -39,4 +39,4 @@ namespace CalyxEditor {
 		std::unordered_map<EditorType, std::unique_ptr<BaseEditor>> editors_;
 	};
 
-} // namespace CalyxEditor
+} // namespace CalyxEngine

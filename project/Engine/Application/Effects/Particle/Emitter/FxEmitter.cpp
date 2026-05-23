@@ -15,6 +15,7 @@
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 // externals
 #include "Engine/Application/UI/Panels/InspectorPanel.h"
+#include "Engine/Assets/Manager/AssetManager.h"
 #include "Engine/Assets/Texture/TextureManager.h"
 #include "Engine/Foundation/Math/MathUtil.h"
 #include "Engine/Foundation/Utility/Converter/EnumConverter.h"
@@ -41,7 +42,7 @@ namespace {
 	}
 }; // namespace
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	// ctor / dtor
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -49,7 +50,7 @@ namespace CalyxEffect {
 		ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
 
 		// マテリアル
-		material_.color = CalyxMath::Vector4(1,1,1,1);
+		material_.color = CalyxEngine::Vector4(1,1,1,1);
 		materialBuffer_.Initialize(GraphicsGroup::GetInstance()->GetDevice());
 		billboardCB_.Initialize(GraphicsGroup::GetInstance()->GetDevice());
 		fadeCB_.Initialize(GraphicsGroup::GetInstance()->GetDevice());
@@ -61,14 +62,15 @@ namespace CalyxEffect {
 		billboardParams_.mode = static_cast<uint32_t>(billboardMode_);
 		billboardCB_.Initialize(device);
 		billboardCB_.TransferData(billboardParams_);
+		fadeCB_.TransferData(fadeParams_);
 
 		// 各種パラメータ
-		velocity_ = FxParam<CalyxMath::Vector3>::MakeRandom(CalyxMath::Vector3(-1.0f,0.0f,-1.0f),
-															CalyxMath::Vector3(1.0f,0.0f,1.0f));
+		velocity_ = FxParam<CalyxEngine::Vector3>::MakeRandom(CalyxEngine::Vector3(-1.0f,0.0f,-1.0f),
+															CalyxEngine::Vector3(1.0f,0.0f,1.0f));
 		lifetime_ = FxParam<float>::MakeRandom(1.0f,3.0f);
-		scale_    = FxParam<CalyxMath::Vector3>::MakeConstant();
+		scale_    = FxParam<CalyxEngine::Vector3>::MakeConstant();
 
-		moduleContainer_ = std::make_unique<CalyxEffect::FxModuleContainer>();
+		moduleContainer_ = std::make_unique<CalyxEngine::FxModuleContainer>();
 	}
 
 	FxEmitter::~FxEmitter() { instanceBuffer_.ReleaseSrv(); }
@@ -108,7 +110,7 @@ namespace CalyxEffect {
 				SetFlag(FirstFrame,false);
 			}
 
-			CalyxMath::Vector3 moveDelta = position_ - prevPostion_;
+			CalyxEngine::Vector3 moveDelta = position_ - prevPostion_;
 			float              distance  = moveDelta.Length();
 
 			if(distance > 0.0f && HasFlag(Complement)) {
@@ -118,7 +120,7 @@ namespace CalyxEffect {
 				for(int i = 0; i < trailCount; ++i) {
 					float              dist     = static_cast<float>(i) * spawnInterval;
 					float              t        = dist / distance;
-					CalyxMath::Vector3 spawnPos = CalyxMath::Vector3::Lerp(prevPostion_,position_,t);
+					CalyxEngine::Vector3 spawnPos = CalyxEngine::Vector3::Lerp(prevPostion_,position_,t);
 					Emit(spawnPos);
 				}
 			} else {
@@ -152,11 +154,11 @@ namespace CalyxEffect {
 			fx.age += deltaTime;
 			if(fx.age >= fx.lifetime) fx.alive = false;
 
-			CalyxMath::Matrix4x4 uvTransformMatrix =
-				CalyxMath::MakeScaleMatrix(CalyxMath::Vector3(fx.uvTransform.scale.x,fx.uvTransform.scale.y,1.0f));
-			uvTransformMatrix = CalyxMath::Matrix4x4::Multiply(uvTransformMatrix,CalyxMath::MakeRotateZMatrix(fx.uvTransform.rotate));
-			uvTransformMatrix = CalyxMath::Matrix4x4::Multiply(uvTransformMatrix,
-															   CalyxMath::MakeTranslateMatrix(CalyxMath::Vector3(fx.uvTransform.translate.x,fx.uvTransform.translate.y,0.0f)));
+			CalyxEngine::Matrix4x4 uvTransformMatrix =
+				CalyxEngine::MakeScaleMatrix(CalyxEngine::Vector3(fx.uvTransform.scale.x,fx.uvTransform.scale.y,1.0f));
+			uvTransformMatrix = CalyxEngine::Matrix4x4::Multiply(uvTransformMatrix,CalyxEngine::MakeRotateZMatrix(fx.uvTransform.rotate));
+			uvTransformMatrix = CalyxEngine::Matrix4x4::Multiply(uvTransformMatrix,
+															   CalyxEngine::MakeTranslateMatrix(CalyxEngine::Vector3(fx.uvTransform.translate.x,fx.uvTransform.translate.y,0.0f)));
 			material_.uvTransform = uvTransformMatrix;
 		}
 
@@ -215,7 +217,7 @@ namespace CalyxEffect {
 		Emit(GenerateSpawnPosition());
 	}
 
-	void FxEmitter::Emit(const CalyxMath::Vector3& pos) {
+	void FxEmitter::Emit(const CalyxEngine::Vector3& pos) {
 		if(units_.size() >= kMaxUnits_) return;
 		FxUnit fx;
 		ResetFxUnit(fx);
@@ -244,11 +246,11 @@ namespace CalyxEffect {
 		fx.lifetime     = lifetime_.Get();
 		fx.age          = 0.0f;
 		fx.initialScale = fx.scale;
-		fx.color        = CalyxMath::Vector4(1,1,1,1);
+		fx.color        = CalyxEngine::Vector4(1,1,1,1);
 		fx.alive        = true;
 		fx.uvTransform.Initialize();
 		fx.spinSpeed = spin_.Get();
-		if(HasFlag(RandomSpinEmit)) { fx.rotationEuler.z = Random::Generate<float>(-CalyxMath::kPi,CalyxMath::kPi); } else { fx.rotationEuler.z = 0.0f; }
+		if(HasFlag(RandomSpinEmit)) { fx.rotationEuler.z = Random::Generate<float>(-CalyxEngine::kPi,CalyxEngine::kPi); } else { fx.rotationEuler.z = 0.0f; }
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -275,7 +277,7 @@ namespace CalyxEffect {
 		GuiCmd::CheckBox("##oneshot_top",isOneShot_);
 
 		// ================= Material =================
-		if(GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::Material)) {
+		if(GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::Material)) {
 			if(FxGui::GridScope sec{"Material"}; sec.open) {
 				// Color
 				FxGui::RowLabel("Color");
@@ -374,7 +376,7 @@ namespace CalyxEffect {
 		}
 
 		// // ================= Billboard =================
-		if(GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::Object)) {
+		if(GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::Object)) {
 			if(FxGui::GridScope sec{"Billboard"}; sec.open) {
 				FxGui::RowLabel("Mode");
 				static const char* modes[] = {"None","Full","AxisY"};
@@ -389,12 +391,12 @@ namespace CalyxEffect {
 		}
 
 		// ================= ParameterData =================
-		if(GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::ParameterData)) {
+		if(GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::ParameterData)) {
 			// ================= Emission =================
 			if(FxGui::GridScope sec{"Emission"}; sec.open) {
 				// エミッタ形状を選べるようにする
 				FxGui::RowLabel("emitter shape");
-				CalyxUtil::EnumConverter<EmitterShape>::Combo("Emitter Shape",shape_);
+				CalyxEngine::EnumConverter<EmitterShape>::Combo("Emitter Shape",shape_);
 
 				FxGui::RowLabel("shape radius");
 				GuiCmd::DragFloat("##shapeRadius",shapeRadius_,0.01f,0.0f,100.0f);
@@ -411,7 +413,7 @@ namespace CalyxEffect {
 
 				// ブレンドモードを選べるようにする
 				FxGui::RowLabel("blend mode");
-				CalyxUtil::EnumConverter<BlendMode>::Combo("BlendMode",blendMode_);
+				CalyxEngine::EnumConverter<BlendMode>::Combo("BlendMode",blendMode_);
 
 				FxGui::RowLabel("Alive Count");
 				ImGui::Text("%zu",units_.size());
@@ -433,6 +435,29 @@ namespace CalyxEffect {
 					bool rse = HasFlag(RandomSpinEmit);
 					if(GuiCmd::CheckBox("##randspin",rse)) SetFlag(RandomSpinEmit,rse);
 				}
+			}
+
+			// ================= Camera Dither =================
+			if(FxGui::GridScope sec{"Camera Dither"}; sec.open) {
+				FxGui::RowLabel("Enable");
+				bool enabled = IsCameraDitherEnabled();
+				if(GuiCmd::CheckBox("##cameraDitherEnable",enabled)) {
+					SetCameraFadeEnabled(enabled);
+				}
+
+				ImGui::BeginDisabled(!enabled);
+				FxGui::RowLabel("Near");
+				if(GuiCmd::DragFloat("##cameraDitherNear",fadeParams_.fadeNear,0.01f,0.0f,1000.0f)) {
+					if(fadeParams_.fadeFar < fadeParams_.fadeNear) fadeParams_.fadeFar = fadeParams_.fadeNear;
+					fadeCB_.TransferData(fadeParams_);
+				}
+
+				FxGui::RowLabel("Far");
+				if(GuiCmd::DragFloat("##cameraDitherFar",fadeParams_.fadeFar,0.01f,0.0f,1000.0f)) {
+					if(fadeParams_.fadeFar < fadeParams_.fadeNear) fadeParams_.fadeNear = fadeParams_.fadeFar;
+					fadeCB_.TransferData(fadeParams_);
+				}
+				ImGui::EndDisabled();
 			}
 
 			// ================= Params =================
@@ -531,14 +556,14 @@ namespace CalyxEffect {
 	}
 
 	void FxEmitter::DrawEmitterShape(const WorldTransform& tf) {
-		[[maybe_unused]] CalyxMath::Vector3 pos = tf.GetWorldPosition();
+		[[maybe_unused]] CalyxEngine::Vector3 pos = tf.GetWorldPosition();
 
-		const CalyxMath::Vector3 absScale{
+		const CalyxEngine::Vector3 absScale{
 			(std::max)(std::abs(worldScale_.x), 0.0001f),
 			(std::max)(std::abs(worldScale_.y), 0.0001f),
 			(std::max)(std::abs(worldScale_.z), 0.0001f)};
 
-		CalyxMath::Vector4 color = CalyxMath::Vector4(1.0f,0.0f,0.0f,1.0f);
+		CalyxEngine::Vector4 color = CalyxEngine::Vector4(1.0f,0.0f,0.0f,1.0f);
 		switch(shape_) {
 		case EmitterShape::Sphere: {
 			const float maxScale = (std::max)((std::max)(absScale.x,absScale.y),absScale.z);
@@ -547,7 +572,7 @@ namespace CalyxEffect {
 		break;
 
 		case EmitterShape::Box: {
-			const CalyxMath::Vector3 scaledSize{
+			const CalyxEngine::Vector3 scaledSize{
 				shapeSize_.x * absScale.x,
 				shapeSize_.y * absScale.y,
 				shapeSize_.z * absScale.z};
@@ -586,10 +611,10 @@ namespace CalyxEffect {
 
 		material_.texturePath = config.texturePath;
 		textureGuid_          = config.textureGuid;
-		textureHandle_        = TextureManager::GetInstance()->LoadTexture(textureGuid_);
+		textureHandle_        = AssetManager::GetInstance()->GetTextureManager()->LoadTexture(textureGuid_);
 		SetFlag(DrawEnable,config.isDrawEnable);
 		SetFlag(Complement,config.isComplement);
-		moduleContainer_ = std::make_unique<CalyxEffect::FxModuleContainer>(config.modules);
+		moduleContainer_ = std::make_unique<CalyxEngine::FxModuleContainer>(config.modules);
 		isOneShot_       = config.isOneShot;
 		autoDestroy_     = config.autoDestroy;
 		emitCount_       = config.emitCount;
@@ -598,6 +623,10 @@ namespace CalyxEffect {
 		billboardMode_   = config.billboardMode;
 		SetFlag(RandomSpinEmit,config.randomSpinEmit);
 		SetFlag(FollowOneShot,config.followOneShot);
+		fadeParams_.enabled = config.cameraDitherEnabled ? 1u : 0u;
+		fadeParams_.fadeNear = config.cameraDitherNear;
+		fadeParams_.fadeFar = config.cameraDitherFar;
+		fadeCB_.TransferData(fadeParams_);
 		blendMode_ = config.blendMode;
 		shape_ = config.emitterShape;
 		shapeSize_ = config.shapeSize;
@@ -636,6 +665,9 @@ namespace CalyxEffect {
 		config.emitDelay     = emitDelay_;
 		config.emitDuration  = emitDuration_;
 		config.billboardMode = billboardMode_;
+		config.cameraDitherEnabled = IsCameraDitherEnabled();
+		config.cameraDitherNear = fadeParams_.fadeNear;
+		config.cameraDitherFar = fadeParams_.fadeFar;
 		config.blendMode     = blendMode_;
 		config.emitterShape  = shape_;
 		config.shapeSize     = shapeSize_;
@@ -669,7 +701,7 @@ namespace CalyxEffect {
 	bool FxEmitter::LoadTextureByGuid(const Guid& g) {
 		if(!g.isValid()) return false;
 
-		auto h = TextureManager::GetInstance()->LoadTexture(g);
+		auto h = AssetManager::GetInstance()->GetTextureManager()->LoadTexture(g);
 		if(!h.ptr) return false;
 
 		textureHandle_ = h;
@@ -677,11 +709,28 @@ namespace CalyxEffect {
 		return true;
 	}
 
+	void FxEmitter::SetTextureGuid(const Guid& g) {
+		if(!g.isValid()) {
+			textureGuid_ = Guid::Empty();
+			textureHandle_ = AssetManager::GetInstance()->GetTextureManager()->LoadTexture(material_.texturePath.empty() ? "Textures/white1x1.dds" : material_.texturePath);
+			return;
+		}
+
+		LoadTextureByGuid(g);
+	}
+
 	void FxEmitter::SetCameraFade(float nearZ,float farZ) {
 		fadeParams_.fadeNear = nearZ;
 		fadeParams_.fadeFar  = farZ;
+		fadeParams_.enabled  = 1u;
+		fadeCB_.TransferData(fadeParams_);
+	}
+
+	void FxEmitter::SetCameraFadeEnabled(bool enabled) {
+		fadeParams_.enabled = enabled ? 1u : 0u;
+		fadeCB_.TransferData(fadeParams_);
 	}
 
 	// ---- callback ----
 	void FxEmitter::SetOnFinishedCallback(std::function<void()> callback) { onFinished_ = std::move(callback); }
-} // namespace CalyxEffect
+} // namespace CalyxEngine

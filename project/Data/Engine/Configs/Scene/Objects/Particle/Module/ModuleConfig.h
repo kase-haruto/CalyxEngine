@@ -8,7 +8,7 @@
 #include <externals/nlohmann/json.hpp>
 #include <string>
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 	class OverLifetimeModule;
 
 	struct BaseModuleConfig {
@@ -50,7 +50,7 @@ namespace CalyxEffect {
 	// 重力適用モジュール
 	/////////////////////////////////////////////////////////////////////////////////////////
 	struct GravityModuleConfig : public BaseModuleConfig {
-		CalyxMath::Vector3 gravity{0.0f, -9.8f, 0.0f};
+		CalyxEngine::Vector3 gravity{0.0f, -9.8f, 0.0f};
 
 		GravityModuleConfig() {
 			name = "GravityModule";
@@ -78,7 +78,7 @@ namespace CalyxEffect {
 	struct SizeOverLifetimeConfig
 		: public BaseModuleConfig {
 		bool			   isGrowing = true;
-		CalyxEase::EaseType easeType	 = CalyxEase::EaseType::EaseInOutCubic;
+		CalyxEngine::EaseType easeType	 = CalyxEngine::EaseType::EaseInOutCubic;
 
 		SizeOverLifetimeConfig() {
 			name = "SizeOverLifetimeModule";
@@ -101,7 +101,7 @@ namespace CalyxEffect {
 			if(j.contains("easeType")) {
 				int ease = 0;
 				j.at("easeType").get_to(ease);
-				easeType = static_cast<CalyxEase::EaseType>(ease);
+				easeType = static_cast<CalyxEngine::EaseType>(ease);
 			}
 		}
 	};
@@ -117,13 +117,13 @@ namespace CalyxEffect {
 		// Target/Blend/Ease は int で保存（モジュール側の enum と対応）
 		int	 target	 = 0; // 0:Scale, 1:RotX, 2:RotY, 3:RotZ, 4:ColorRGBA, 5:AlphaOnly
 		int	 blend	 = 0; // 0:Set, 1:Add, 2:Multiply
-		int	 ease	 = static_cast<int>(CalyxEase::EaseType::EaseInOutCubic);
+		int	 ease	 = static_cast<int>(CalyxEngine::EaseType::EaseInOutCubic);
 		bool clamp01 = true;
 		bool invert	 = false;
 
-		// start/end は CalyxMath::Vector4
-		CalyxMath::Vector4 start{0, 0, 0, 1};
-		CalyxMath::Vector4 end{1, 1, 1, 1};
+		// start/end は CalyxEngine::Vector4
+		CalyxEngine::Vector4 start{0, 0, 0, 1};
+		CalyxEngine::Vector4 end{1, 1, 1, 1};
 
 		nlohmann::json ToJson() const override;
 
@@ -174,4 +174,4 @@ namespace CalyxEffect {
 			if(j.contains("useCustomFrames")) j.at("useCustomFrames").get_to(useCustomFrames);
 		}
 	};
-} // namespace CalyxEffect
+} // namespace CalyxEngine

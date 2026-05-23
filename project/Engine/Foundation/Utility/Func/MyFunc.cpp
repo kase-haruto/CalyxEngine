@@ -8,7 +8,7 @@
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Graphics/Descriptor/DescriptorAllocator.h>
 // c++
-#include<cassert>
+#include <Engine/Foundation/Debug/CxAssert.h>
 #include<cmath>
 #include<fstream>
 #include <numbers>
@@ -16,12 +16,14 @@
 #include <filesystem>
 
 // externals
+#include "Engine/Foundation/Math/MathUtil.h"
+
 #include<assimp/Importer.hpp>
 #include<assimp/postprocess.h>
 
 
-CalyxMath::Matrix4x4 MakeOrthographicMatrix(float l, float t, float r, float b, float nearClip, float farClip) {
-	CalyxMath::Matrix4x4 result;
+CalyxEngine::Matrix4x4 MakeOrthographicMatrix(float l, float t, float r, float b, float nearClip, float farClip) {
+	CalyxEngine::Matrix4x4 result;
 	result = {
 		2 / (r - l), 0, 0, 0,
 		0, 2 / (t - b), 0, 0,
@@ -83,10 +85,10 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 		}
 	}
 
-	assert(!filePath.empty() && "モデルファイル（.obj/.gltf）が見つかりません");
+	CX_CHECK(!filePath.empty() && "モデルファイル（.obj/.gltf）が見つかりません", "Assertion failed");
 	// Assimpによるシーンの読み込み
 	const aiScene* scene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
-	assert(scene && scene->HasMeshes()); // 読み込みエラーやメッシュの有無を確認
+	CX_CHECK(scene && scene->HasMeshes(), "Assertion failed"); // 読み込みエラーやメッシュの有無を確認
 
 	ModelData modelData;
 	const aiMesh* mesh = scene->mMeshes[0]; // 最初のメッシュを取得
@@ -122,7 +124,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 	// インデックスデータの読み込み
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
 		const aiFace& face = mesh->mFaces[i];
-		assert(face.mNumIndices == 3); // 三角形のみを想定
+		CX_CHECK(face.mNumIndices == 3, "Assertion failed"); // 三角形のみを想定
 
 		modelData.meshResource.Indices().push_back(face.mIndices[0]);
 		modelData.meshResource.Indices().push_back(face.mIndices[1]);
@@ -141,7 +143,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 		aiQuaternion rotate;
 		offsetMatrixAssimp.Decompose(scale, rotate, translate);
 
-		CalyxMath::Matrix4x4 inverseBindPoseMatrix = CalyxMath::MakeAffineMatrix(
+		CalyxEngine::Matrix4x4 inverseBindPoseMatrix = CalyxEngine::MakeAffineMatrix(
 			{ scale.x, scale.y, scale.z },
 			{ rotate.x, -rotate.y, -rotate.z, rotate.w }, // 左手変換
 			{ -translate.x, translate.y, translate.z }     // 左手変換
@@ -178,7 +180,7 @@ MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const st
 
 	// ファイルを開く
 	std::ifstream file(directoryPath + "/" + filename);
-	assert(file.is_open());// 失敗したらアサート
+	CX_CHECK(file.is_open(), "Assertion failed");// 失敗したらアサート
 
 	MaterialData materialData;
 	std::string line;
@@ -193,9 +195,9 @@ MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const st
 		if (identifer == "map_Kd") {// ファイル名
 
 			std::string textureFilename;
-			CalyxMath::Vector3 scale = { 1.0f,1.0f,1.0f };
-			CalyxMath::Vector3 offset = { 0.0f,0.0f,0.0f };
-			CalyxMath::Vector3 translate = { 0.0f,0.0f,0.0f };
+			CalyxEngine::Vector3 scale = { 1.0f,1.0f,1.0f };
+			CalyxEngine::Vector3 offset = { 0.0f,0.0f,0.0f };
+			CalyxEngine::Vector3 translate = { 0.0f,0.0f,0.0f };
 
 			// ファイル名を格納
 			while (s >> textureFilename) {
@@ -229,11 +231,21 @@ MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const st
 
 DirectX::ScratchImage LoadTextureImage(const std::string& filePath) {
 	using namespace DirectX;
+	std::string textureFilePath = filePath;
+
+	//テクスチャファイルがあるか判定
+	std::filesystem::path rootDir = FileSystemHelper::GetRootDirectory(filePath);
+	if(FileSystemHelper::HasExtensionFile(rootDir, ".png") || FileSystemHelper::HasExtensionFile(rootDir, ".dds")) {
+		// あるならそのまま読み込む
+	} else {
+		// ないなら白テクスチャを読み込む
+		textureFilePath = "Resources/Assets/Textures/white1x1.dds";
+	}
 
 	ScratchImage image{};
 	ScratchImage mipImages{};
 
-	std::filesystem::path path(filePath);
+	std::filesystem::path path(textureFilePath);
 	std::filesystem::path ddsPath = path;
 	ddsPath.replace_extension(".dds");
 
@@ -250,7 +262,7 @@ DirectX::ScratchImage LoadTextureImage(const std::string& filePath) {
 		useDDS = true;
 		filePathW = ConvertString(ddsPath.string());
 	} else {
-		filePathW = ConvertString(filePath);
+		filePathW = ConvertString(textureFilePath);
 	}
 
 	// ファイル形式に応じて読み込み
@@ -259,7 +271,7 @@ DirectX::ScratchImage LoadTextureImage(const std::string& filePath) {
 	} else {
 		hr = LoadFromWICFile(filePathW.c_str(), WIC_FLAGS_FORCE_SRGB, nullptr, image);
 	}
-	assert(SUCCEEDED(hr));
+	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
 	// ミップマップ生成
 	const TexMetadata& meta = image.GetMetadata();
@@ -269,13 +281,13 @@ DirectX::ScratchImage LoadTextureImage(const std::string& filePath) {
 		} else {
 			hr = GenerateMipMaps(
 				image.GetImages(),
-				image.GetImageCount(),
+			image.GetImageCount(), 
 				meta,
 				TEX_FILTER_SRGB,
 				0,
 				mipImages
 			);
-			assert(SUCCEEDED(hr));
+			CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 			return mipImages;
 		}
 	}
@@ -284,7 +296,7 @@ DirectX::ScratchImage LoadTextureImage(const std::string& filePath) {
 }
 
 
-bool IsCollision(const AABB& aabb, const CalyxMath::Vector3& point) {
+bool IsCollision(const AABB& aabb, const CalyxEngine::Vector3& point) {
 	// pointがaabbのminとmaxの範囲内にあるかチェック
 	return (point.x >= aabb.min_.x && point.x <= aabb.max_.x) &&
 		(point.y >= aabb.min_.y && point.y <= aabb.max_.y) &&
@@ -303,7 +315,7 @@ Animation LoadAnimationFile(const std::string& directoryPath, const std::string&
 		+ filename;
 
 	const aiScene* scene = importer.ReadFile(filePath.c_str(), 0);
-	assert(scene->mNumAnimations);// アニメーションがない場合はアサート
+	CX_CHECK(scene->mNumAnimations, "Assertion failed");// アニメーションがない場合はアサート
 	aiAnimation* animationAssimp = scene->mAnimations[0];// 最初のアニメーションを取得
 	animation.duration = float(animationAssimp->mDuration / animationAssimp->mTicksPerSecond);// アニメーションの長さを取得
 
@@ -366,7 +378,7 @@ int32_t CreateJoint(const Node& node, const std::optional<int32_t>& parent, std:
 	Joint joint;
 	joint.name = node.name;
 	joint.localMatrix = node.localMatrix;
-	joint.skeletonSpaceMatrix = CalyxMath::Matrix4x4::MakeIdentity();
+	joint.skeletonSpaceMatrix = CalyxEngine::Matrix4x4::MakeIdentity();
 	joint.transform = node.transform;
 	joint.index = static_cast<int32_t>(joints.size());	//現在登録されているjointの数をindexにする
 	joint.parent = parent;
@@ -395,7 +407,7 @@ Node ConvertAssimpNode(const aiNode* node) {
 	result.transform.translate = { -translate.x, translate.y, translate.z }; // 左手系
 
 	result.localMatrix =
-		CalyxMath::MakeAffineMatrix(result.transform.scale, result.transform.rotate, result.transform.translate);
+		CalyxEngine::MakeAffineMatrix(result.transform.scale, result.transform.rotate, result.transform.translate);
 
 	result.name = node->mName.C_Str();
 	result.children.resize(node->mNumChildren);
@@ -466,7 +478,7 @@ SkinCluster CreateSkinCluster(const Microsoft::WRL::ComPtr<ID3D12Device>& device
 	std::generate(
 		skinCluster.inverseBindPoseMatrices.begin(),
 		skinCluster.inverseBindPoseMatrices.end(),
-		[] (){ return CalyxMath::Matrix4x4::MakeIdentity(); }
+		[] (){ return CalyxEngine::Matrix4x4::MakeIdentity(); }
 	);
 
 	//===================================================================*/
@@ -494,29 +506,29 @@ SkinCluster CreateSkinCluster(const Microsoft::WRL::ComPtr<ID3D12Device>& device
 }
 
 
-CalyxMath::Matrix4x4 MakeYAxisBillboard(const CalyxMath::Matrix4x4& cameraMatrix) {
-	CalyxMath::Vector3 camZ = { cameraMatrix.m[0][2], 0.0f, cameraMatrix.m[2][2] };
+CalyxEngine::Matrix4x4 MakeYAxisBillboard(const CalyxEngine::Matrix4x4& cameraMatrix) {
+	CalyxEngine::Vector3 camZ = { cameraMatrix.m[0][2], 0.0f, cameraMatrix.m[2][2] };
 	camZ = camZ.Normalize();
-	CalyxMath::Vector3 camX = CalyxMath::Vector3::Cross({ 0, 1, 0 }, camZ).Normalize();
-	CalyxMath::Vector3 camY = CalyxMath::Vector3::Cross(camZ, camX);
-	CalyxMath::Vector3 cam = (camX, camY, camZ);
-	return CalyxMath::MakeAffineMatrix(CalyxMath::Vector3::One(), cam, {});
+	CalyxEngine::Vector3 camX = CalyxEngine::Vector3::Cross({ 0, 1, 0 }, camZ).Normalize();
+	CalyxEngine::Vector3 camY = CalyxEngine::Vector3::Cross(camZ, camX);
+	CalyxEngine::Vector3 cam = (camX, camY, camZ);
+	return CalyxEngine::MakeAffineMatrix(CalyxEngine::Vector3::One(), cam, {});
 }
 
-CalyxMath::Matrix4x4 MakeXAxisBillboard(const CalyxMath::Matrix4x4& cameraMatrix) {
-	CalyxMath::Vector3 camZ = { 0.0f, cameraMatrix.m[1][2], cameraMatrix.m[2][2] };
+CalyxEngine::Matrix4x4 MakeXAxisBillboard(const CalyxEngine::Matrix4x4& cameraMatrix) {
+	CalyxEngine::Vector3 camZ = { 0.0f, cameraMatrix.m[1][2], cameraMatrix.m[2][2] };
 	camZ = camZ.Normalize();
-	CalyxMath::Vector3 camY = CalyxMath::Vector3::Cross(camZ, { 1, 0, 0 }).Normalize();
-	CalyxMath::Vector3 camX = CalyxMath::Vector3::Cross(camY, camZ);
-	CalyxMath::Vector3 cam = (camX, camY, camZ);
-	return CalyxMath::MakeAffineMatrix(CalyxMath::Vector3::One(), cam, {});
+	CalyxEngine::Vector3 camY = CalyxEngine::Vector3::Cross(camZ, { 1, 0, 0 }).Normalize();
+	CalyxEngine::Vector3 camX = CalyxEngine::Vector3::Cross(camY, camZ);
+	CalyxEngine::Vector3 cam = (camX, camY, camZ);
+	return CalyxEngine::MakeAffineMatrix(CalyxEngine::Vector3::One(), cam, {});
 }
 
-CalyxMath::Matrix4x4 MakeZAxisBillboard(const CalyxMath::Matrix4x4& cameraMatrix) {
-	CalyxMath::Vector3 camY = { cameraMatrix.m[0][1], cameraMatrix.m[1][1], 0.0f };
+CalyxEngine::Matrix4x4 MakeZAxisBillboard(const CalyxEngine::Matrix4x4& cameraMatrix) {
+	CalyxEngine::Vector3 camY = { cameraMatrix.m[0][1], cameraMatrix.m[1][1], 0.0f };
 	camY = camY.Normalize();
-	CalyxMath::Vector3 camX = CalyxMath::Vector3::Cross(camY, { 0, 0, 1 }).Normalize();
-	CalyxMath::Vector3 camZ = CalyxMath::Vector3::Cross(camX, camY);
-	CalyxMath::Vector3 cam = (camX, camY, camZ);
-	return CalyxMath::MakeAffineMatrix(CalyxMath::Vector3::One(), cam, {});
+	CalyxEngine::Vector3 camX = CalyxEngine::Vector3::Cross(camY, { 0, 0, 1 }).Normalize();
+	CalyxEngine::Vector3 camZ = CalyxEngine::Vector3::Cross(camX, camY);
+	CalyxEngine::Vector3 cam = (camX, camY, camZ);
+	return CalyxEngine::MakeAffineMatrix(CalyxEngine::Vector3::One(), cam, {});
 }

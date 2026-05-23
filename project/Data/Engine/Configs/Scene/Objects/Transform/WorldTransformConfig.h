@@ -8,9 +8,9 @@
 
 struct WorldTransformConfig final {
 	//========================= variable =========================
-	CalyxMath::Vector3	  translation = {0.0f, 0.0f, 0.0f};					   //< 位置
-	CalyxMath::Quaternion rotation	  = CalyxMath::Quaternion::MakeIdentity(); //< 回転
-	CalyxMath::Vector3	  scale		  = {1.0f, 1.0f, 1.0f};					   //< スケール
+	CalyxEngine::Vector3	  translation = {0.0f, 0.0f, 0.0f};					   //< 位置
+	CalyxEngine::Quaternion rotation	  = CalyxEngine::Quaternion::MakeIdentity(); //< 回転
+	CalyxEngine::Vector3	  scale		  = {1.0f, 1.0f, 1.0f};					   //< スケール
 
 	bool inheritTranslate = true;
 	bool inheritRotate	  = true;
@@ -28,9 +28,9 @@ inline void to_json(nlohmann::json& j, const WorldTransformConfig& config) {
 }
 
 inline void from_json(const nlohmann::json& j, WorldTransformConfig& config) {
-	config.translation = j.value("translation", CalyxMath::Vector3{0.0f, 0.0f, 0.0f});
-	config.rotation	   = j.value("rotation", CalyxMath::Quaternion::MakeIdentity());
-	config.scale	   = j.value("scale", CalyxMath::Vector3{1.0f, 1.0f, 1.0f});
+	config.translation = j.value("translation", CalyxEngine::Vector3{0.0f, 0.0f, 0.0f});
+	config.rotation	   = j.value("rotation", CalyxEngine::Quaternion::MakeIdentity());
+	config.scale	   = j.value("scale", CalyxEngine::Vector3{1.0f, 1.0f, 1.0f});
 
 	config.inheritTranslate = j.value("inheritTranslate", true);
 	config.inheritRotate	= j.value("inheritRotate", true);

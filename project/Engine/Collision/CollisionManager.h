@@ -60,12 +60,12 @@ private:
 
 	bool CheckCollisionPair(Collider* colliderA, Collider* colliderB);
 
-	void  ComputeOBBAxes(const OBB& obb, CalyxMath::Vector3 outAxis[3]);
-	float ProjectOBB(const OBB& obb, const CalyxMath::Vector3 obbAxes[3], const CalyxMath::Vector3& axisCandidate);
+	void  ComputeOBBAxes(const OBB& obb, CalyxEngine::Vector3 outAxis[3]);
+	float ProjectOBB(const OBB& obb, const CalyxEngine::Vector3 obbAxes[3], const CalyxEngine::Vector3& axisCandidate);
 	bool  OverlapOnAxis(
-		 const OBB& obbA, const CalyxMath::Vector3 aAxes[3],
-		 const OBB& obbB, const CalyxMath::Vector3 bAxes[3],
-		 const CalyxMath::Vector3& axisCandidate);
+		 const OBB& obbA, const CalyxEngine::Vector3 aAxes[3],
+		 const OBB& obbB, const CalyxEngine::Vector3 bAxes[3],
+		 const CalyxEngine::Vector3& axisCandidate);
 
 	/*----------------
 	 各形状ごとの衝突
@@ -74,12 +74,19 @@ private:
 	bool SphereToOBB(const Sphere& sphere, const OBB obb);
 	bool OBBToOBB(const OBB& obbA, const OBB& obbB);
 
+	void RegisterImmediate(Collider* collider);
+	void UnregisterImmediate(Collider* collider);
+	void FlushPendingColliderChanges();
+
 private:
 	//===================================================================*/
 	//                   private variable
 	//===================================================================*/
 	std::list<Collider*>								 colliders_;
+	std::vector<Collider*>								 pendingRegisters_;
+	std::vector<Collider*>								 pendingUnregisters_;
 	std::vector<std::string>							 collisionLogs_;	  // 衝突ログ
 	std::unordered_set<CollisionPair, CollisionPairHash> currentCollisions_;  // 現在のフレームの衝突ペア
 	std::unordered_set<CollisionPair, CollisionPairHash> previousCollisions_; // 前のフレームの衝突ペア
+	bool												 isUpdatingCollisions_ = false;
 };

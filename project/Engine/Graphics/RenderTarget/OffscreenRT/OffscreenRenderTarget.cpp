@@ -2,7 +2,7 @@
 #include <Engine/Application/System/Environment.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
 
-#include <cassert>
+#include <Engine/Foundation/Debug/CxAssert.h>
 #include <d3dx12.h>
 #include <stdexcept>
 
@@ -92,6 +92,10 @@ void OffscreenRenderTarget::SetRenderTarget(ID3D12GraphicsCommandList* commandLi
 
 void OffscreenRenderTarget::TransitionTo(ID3D12GraphicsCommandList* cmdList, D3D12_RESOURCE_STATES newState) {
 	resource_->Transition(cmdList, newState);
+}
+
+void OffscreenRenderTarget::TransitionDepthTo(ID3D12GraphicsCommandList* cmdList, D3D12_RESOURCE_STATES newState) {
+	depthResource_->Transition(cmdList, newState);
 }
 
 void OffscreenRenderTarget::Resize(uint32_t width, uint32_t height) {

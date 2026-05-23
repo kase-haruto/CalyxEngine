@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 	/* ========================================================================
 	/*		uvアニメーションを行うモジュール
 	/* ===================================================================== */
@@ -19,8 +19,8 @@ namespace CalyxEffect {
 		//					structs
 		//===================================================================*/
 		struct FrameUV {
-			CalyxMath::Vector2 offset;
-			CalyxMath::Vector2 scale;
+			CalyxEngine::Vector2 offset;
+			CalyxEngine::Vector2 scale;
 		};
 
 	public:
@@ -46,7 +46,7 @@ namespace CalyxEffect {
 		float				 GetAnimationSpeed() const { return animationSpeed_; }
 		bool				 GetUseCustomFrames() const { return useCustomFrames_; }
 		std::vector<FrameUV> GetCustomFrameUVs() const { return customFrameUVs_; }
-		virtual const char*	 GetTypeName() const override { return "TextureSheetAnimationModule"; }
+		virtual const char*	 GetObjectClassName() const override { return "TextureSheetAnimationModule"; }
 
 	private:
 		//===================================================================*/
@@ -61,4 +61,4 @@ namespace CalyxEffect {
 
 		std::vector<FrameUV> customFrameUVs_;
 	};
-} // namespace CalyxEffect
+} // namespace CalyxEngine

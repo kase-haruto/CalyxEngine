@@ -2,12 +2,12 @@
 #include <Engine/Foundation/Math/Matrix4x4.h>
 #include <Engine/Foundation/Math/Vector3.h>
 
-namespace CalyxMath {
+namespace CalyxEngine {
 
 	Vector4::Vector4(const Vector3& v, float w)
 		: x(v.x), y(v.y), z(v.z), w(w) {}
 
-	Vector4 Vector4::TransformVector(const CalyxMath::Matrix4x4& m, const Vector4& v) {
+	Vector4 Vector4::TransformVector(const CalyxEngine::Matrix4x4& m, const Vector4& v) {
 		return Vector4{
 			m.m[0][0] * v.x + m.m[1][0] * v.y + m.m[2][0] * v.z + m.m[3][0] * v.w,
 			m.m[0][1] * v.x + m.m[1][1] * v.y + m.m[2][1] * v.z + m.m[3][1] * v.w,
@@ -16,7 +16,7 @@ namespace CalyxMath {
 		};
 	}
 
-	Vector4 Vector4::Transform(const Vector4& v, const CalyxMath::Matrix4x4& m) {
+	Vector4 Vector4::Transform(const Vector4& v, const CalyxEngine::Matrix4x4& m) {
 		return {
 			v.x * m.m[0][0] + v.y * m.m[1][0] + v.z * m.m[2][0] + v.w * m.m[3][0],
 			v.x * m.m[0][1] + v.y * m.m[1][1] + v.z * m.m[2][1] + v.w * m.m[3][1],

@@ -9,18 +9,6 @@
 #include <wrl.h>
 #include <filesystem>
 
-class ImGuiManager;
-
-#pragma once
-#include <Engine/Assets/Texture/Texture.h>
-#include <Engine/Foundation/Utility/Guid/Guid.h>
-
-/* c++ */
-#include <unordered_map>
-#include <string>
-#include <d3d12.h>
-#include <wrl.h>
-#include <filesystem>
 
 class ImGuiManager;
 
@@ -35,10 +23,9 @@ public:
 	//                   public methods
 	//===================================================================*/
 	/**
-	 * \brief インスタンスを取得
-	 * \return インスタンス
-	 */
-	static TextureManager* GetInstance();
+ 	* \brief デフォルトコンストラクタ
+ 	*/
+	TextureManager() = default;
 
 	/**
 	 * \brief 初期化
@@ -65,12 +52,14 @@ public:
 	 * \return GPUハンドル
 	 */
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSrvHandle(const std::string& textureName) const;
+	D3D12_CPU_DESCRIPTOR_HANDLE GetCpuSrvHandle(const std::string& textureName) const;
+	bool WriteSrvTo(const std::string& textureName, D3D12_CPU_DESCRIPTOR_HANDLE destination) const;
 
 	/**
 	 * \brief ロード済みテクスチャリストを取得
 	 * \return テクスチャマップ
 	 */
-	const std::unordered_map<std::string, Texture>& GetLoadedTextures() const;
+	const std::unordered_map<std::string,Texture>& GetLoadedTextures() const;
 
 	// ========= GUID API =========
 	/**
@@ -86,6 +75,8 @@ public:
 	 * \return GPUハンドル
 	 */
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSrvHandle(const Guid& guid) const;
+	D3D12_CPU_DESCRIPTOR_HANDLE GetCpuSrvHandle(const Guid& guid) const;
+	bool WriteSrvTo(const Guid& guid, D3D12_CPU_DESCRIPTOR_HANDLE destination) const;
 
 	/**
 	 * \brief 指定したGUIDのテクスチャがロードされているか
@@ -115,10 +106,7 @@ private:
 	//===================================================================*/
 	//                    private methods
 	//===================================================================*/
-	/**
-	 * \brief デフォルトコンストラクタ
-	 */
-	TextureManager() = default;
+
 
 	/**
 	 * \brief GUIDからアセットレコードを検索
@@ -133,18 +121,18 @@ private:
 	 * \param root ルートパス
 	 * \return 相対パス文字列
 	 */
-	static std::string ToAssetsRelative(const std::filesystem::path& abs, const std::filesystem::path& root);
+	static std::string ToAssetsRelative(const std::filesystem::path& abs,const std::filesystem::path& root);
 
 private:
 	//===================================================================*/
 	//                    private member variables
 	//===================================================================*/
-	Microsoft::WRL::ComPtr<ID3D12Device> device_; //< デバイス
-	ImGuiManager* imgui_ = nullptr; //< ImGuiマネージャー
-	UINT descriptorSizeSrv_ = 0; //< SRVディスクリプタサイズ
+	Microsoft::WRL::ComPtr<ID3D12Device> device_;                      //< デバイス
+	ImGuiManager*                        imgui_             = nullptr; //< ImGuiマネージャー
+	UINT                                 descriptorSizeSrv_ = 0;       //< SRVディスクリプタサイズ
 
-	std::unordered_map<std::string, Texture> textures_; //< ロード済みテクスチャマップ
-	std::unordered_map<Guid, std::string> guidToKey_; //< GUIDからマップキーへの変換マップ
+	std::unordered_map<std::string,Texture> textures_;  //< ロード済みテクスチャマップ
+	std::unordered_map<Guid,std::string>    guidToKey_; //< GUIDからマップキーへの変換マップ
 
 	std::string environmentTextureName_; //< 現在の環境マップ名
 };

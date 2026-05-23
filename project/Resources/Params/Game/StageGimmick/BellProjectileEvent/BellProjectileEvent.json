@@ -1,0 +1,38 @@
+{
+    "fields": {
+        "direction": [
+            -0.0,
+            -0.0,
+            -1.0
+        ],
+        "doorScale": [
+            2.0,
+            2.0,
+            1.0
+        ],
+        "doorSpeed": 2.0,
+        "hitScale": [
+            1.5,
+            1.5,
+            1.5
+        ],
+        "parryDuration": 0.5,
+        "scale": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "speed": 6.599999904632568,
+        "targetHitScale": [
+            2.5,
+            2.5,
+            2.5
+        ],
+        "targetMoveSpeed": 5.0,
+        "targetScale": [
+            2.0,
+            2.0,
+            2.0
+        ]
+    }
+}

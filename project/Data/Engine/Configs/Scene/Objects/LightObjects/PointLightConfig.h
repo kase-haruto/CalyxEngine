@@ -11,8 +11,8 @@
 
 struct PointLightConfig : public SceneObjectConfig{
 	//========================= variable =========================
-	CalyxMath::Vector4 color = {1.0f, 1.0f, 1.0f, 1.0f};	//< 光の色
-	CalyxMath::Vector3 position = {0.0f, 0.0f, 0.0f};		//< ワールド位置
+	CalyxEngine::Vector4 color = {1.0f, 1.0f, 1.0f, 1.0f};	//< 光の色
+	CalyxEngine::Vector3 position = {0.0f, 0.0f, 0.0f};		//< ワールド位置
 	float intensity = 0.25f;					//< 光の強度
 	float radius = 20.0f;						//< 最大距離
 	float decay = 1.0f;							//< 減衰率

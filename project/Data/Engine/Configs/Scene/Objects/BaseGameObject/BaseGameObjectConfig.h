@@ -3,6 +3,7 @@
 #include <Data/Engine/Configs/Scene/Objects/Collider/ColliderConfig.h>
 #include <Data/Engine/Configs/Scene/Objects/Model/BaseModelConfig.h>
 #include <Data/Engine/Configs/Scene/Objects/SceneObject/SceneObjectConfig.h>
+#include <Engine/Foundation/Math/Vector4.h>
 
 #include <externals/nlohmann/json.hpp>
 
@@ -15,6 +16,9 @@ struct BaseGameObjectConfig
 	: public SceneObjectConfig {
 	ColliderConfig	colliderConfig;
 	BaseModelConfig modelConfig;
+	bool outlineEnabled = true;
+	float outlineThickness = 0.035f;
+	CalyxEngine::Vector4 outlineColor = {0.02f, 0.02f, 0.025f, 1.0f};
 };
 
 inline void to_json(nlohmann::json& j, const BaseGameObjectConfig& c) {
@@ -25,7 +29,10 @@ inline void to_json(nlohmann::json& j, const BaseGameObjectConfig& c) {
 		{"name", c.name},
 		{"transform", c.transform},
 		{"colliderConfig", c.colliderConfig},
-		{"modelConfig", c.modelConfig}};
+		{"modelConfig", c.modelConfig},
+		{"outlineEnabled", c.outlineEnabled},
+		{"outlineThickness", c.outlineThickness},
+		{"outlineColor", c.outlineColor}};
 }
 
 inline void from_json(const nlohmann::json& j, BaseGameObjectConfig& c) {
@@ -36,4 +43,7 @@ inline void from_json(const nlohmann::json& j, BaseGameObjectConfig& c) {
 	if(j.contains("transform")) j.at("transform").get_to(c.transform);
 	if(j.contains("colliderConfig")) j.at("colliderConfig").get_to(c.colliderConfig);
 	if(j.contains("modelConfig")) j.at("modelConfig").get_to(c.modelConfig);
+	if(j.contains("outlineEnabled")) j.at("outlineEnabled").get_to(c.outlineEnabled);
+	if(j.contains("outlineThickness")) j.at("outlineThickness").get_to(c.outlineThickness);
+	if(j.contains("outlineColor")) j.at("outlineColor").get_to(c.outlineColor);
 }

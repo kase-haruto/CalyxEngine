@@ -3,7 +3,7 @@
 #include <Engine/Application/UI/Panels/EditorPanel.h>
 #include <Engine/Editor/PostProcessEditor.h>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 	void EditorCollection::InitializeEditors() {
 
 		//===================================================================*/

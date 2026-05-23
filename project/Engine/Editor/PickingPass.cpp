@@ -13,7 +13,7 @@
 #include <d3dx12.h>
 #include <stdexcept>
 
-using namespace CalyxEditor;
+using namespace CalyxEngine;
 
 namespace {
 	inline void ThrowIfFailed(HRESULT hr) {
@@ -152,6 +152,7 @@ void PickingPass::CreateResources(uint32_t w, uint32_t h) {
 
 		device->CreateRenderTargetView(color_.Get(), nullptr, rtv_.cpu);
 		device->CreateShaderResourceView(color_.Get(), nullptr, srv_.cpu);
+		colorState_ = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 	}
 
 	// =========================================================
@@ -245,6 +246,18 @@ void PickingPass::DestroyResources() {
 	readback_.Reset();
 	readbackDepth_.Reset();
 	width_ = height_ = 0;
+	colorState_ = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+}
+
+void PickingPass::TransitionColorTo(ID3D12GraphicsCommandList* cmd, D3D12_RESOURCE_STATES newState) {
+	if(!cmd || !color_ || colorState_ == newState) return;
+
+	D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		color_.Get(),
+		colorState_,
+		newState);
+	cmd->ResourceBarrier(1, &barrier);
+	colorState_ = newState;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -265,13 +278,7 @@ void PickingPass::Render(
 	// =========================================================
 	// State Transition
 	// =========================================================
-	{
-		D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-			color_.Get(),
-			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
-			D3D12_RESOURCE_STATE_RENDER_TARGET);
-		cmd->ResourceBarrier(1, &barrier);
-	}
+	TransitionColorTo(cmd, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	// =========================================================
 	// OM 設定
@@ -375,7 +382,7 @@ void PickingPass::Render(
 			inst.transform->SetCommand(cmd, 1);
 
 			// [3] Skinning Buffer (SRV Table)
-			if(auto* animModel = dynamic_cast<CalyxAssets::AnimationModel*>(inst.model)) {
+			if(auto* animModel = dynamic_cast<CalyxEngine::AnimationModel*>(inst.model)) {
 				animModel->SetCommandPalletSrv(3, cmd);
 			}
 
@@ -389,11 +396,7 @@ void PickingPass::Render(
 	// Readback Copy
 	// =========================================================
 	if(readback_) {
-		D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-			color_.Get(),
-			D3D12_RESOURCE_STATE_RENDER_TARGET,
-			D3D12_RESOURCE_STATE_COPY_SOURCE);
-		cmd->ResourceBarrier(1, &barrier);
+		TransitionColorTo(cmd, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 		D3D12_RESOURCE_DESC				   desc = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_R8G8B8A8_UNORM, width_, height_);
 		D3D12_PLACED_SUBRESOURCE_FOOTPRINT layout;
@@ -403,11 +406,7 @@ void PickingPass::Render(
 		CD3DX12_TEXTURE_COPY_LOCATION src(color_.Get(), 0);
 		cmd->CopyTextureRegion(&dst, 0, 0, 0, &src, nullptr);
 
-		barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-			color_.Get(),
-			D3D12_RESOURCE_STATE_COPY_SOURCE,
-			D3D12_RESOURCE_STATE_RENDER_TARGET);
-		cmd->ResourceBarrier(1, &barrier);
+		TransitionColorTo(cmd, D3D12_RESOURCE_STATE_RENDER_TARGET);
 	}
 
 	// =========================================================

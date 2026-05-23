@@ -1,0 +1,165 @@
+{
+  "graph": {
+    "links": [
+      {
+        "fromPinId": 2,
+        "id": 8,
+        "toPinId": 6
+      },
+      {
+        "fromPinId": 7,
+        "id": 9,
+        "toPinId": 4
+      }
+    ],
+    "nextId": 10,
+    "nodes": [
+      {
+        "boolValue": false,
+        "colorValue": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "floatValue": 0.0,
+        "id": 1,
+        "inputs": [],
+        "intValue": 0,
+        "outputs": [
+          {
+            "id": 2,
+            "kind": 1,
+            "name": "Color",
+            "valueType": 2
+          }
+        ],
+        "position": [
+          20.0,
+          120.0
+        ],
+        "properties": {},
+        "title": "Scene Color",
+        "type": "Input"
+      },
+      {
+        "boolValue": false,
+        "colorValue": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "floatValue": 0.0,
+        "id": 3,
+        "inputs": [
+          {
+            "id": 4,
+            "kind": 0,
+            "name": "Color",
+            "valueType": 2
+          }
+        ],
+        "intValue": 0,
+        "outputs": [],
+        "position": [
+          720.0,
+          120.0
+        ],
+        "properties": {},
+        "title": "Output",
+        "type": "Output"
+      },
+      {
+        "boolValue": false,
+        "colorValue": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "floatValue": 0.0,
+        "id": 5,
+        "inputs": [
+          {
+            "id": 6,
+            "kind": 0,
+            "name": "In",
+            "valueType": 2
+          }
+        ],
+        "intValue": 0,
+        "outputs": [
+          {
+            "id": 7,
+            "kind": 1,
+            "name": "Out",
+            "valueType": 2
+          }
+        ],
+        "position": [
+          434.0,
+          46.0
+        ],
+        "properties": {
+          "applyMode": "Triggered",
+          "autoDisable": true,
+          "duration": 7.550000190734863,
+          "easeIndex": 8,
+          "enabled": false,
+          "floatAnimations": [
+            {
+              "from": 0.3199999928474426,
+              "parameter": "width",
+              "to": 0.0,
+              "useCurrentAsFrom": true
+            }
+          ],
+          "parameters": {
+            "center": [
+              0.5,
+              0.5
+            ],
+            "width": 0.11999999731779099
+          }
+        },
+        "title": "RadialBlur",
+        "type": "RadialBlur"
+      }
+    ]
+  },
+  "name": "PlayerShock",
+  "nodes": [
+    {
+      "applyMode": "Triggered",
+      "autoDisable": true,
+      "duration": 7.550000190734863,
+      "ease": "",
+      "easeIndex": 8,
+      "enabled": false,
+      "floatAnimations": [
+        {
+          "from": 0.3199999928474426,
+          "parameter": "width",
+          "to": 0.0,
+          "useCurrentAsFrom": true
+        }
+      ],
+      "id": 5,
+      "parameters": {
+        "center": [
+          0.5,
+          0.5
+        ],
+        "width": 0.11999999731779099
+      },
+      "title": "RadialBlur",
+      "type": "RadialBlur"
+    }
+  ],
+  "outline": {
+    "enabled": true
+  },
+  "type": "PostEffectPreset",
+  "version": 1
+}

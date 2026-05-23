@@ -1,0 +1,297 @@
+{
+  "graph": {
+    "links": [
+      {
+        "fromPinId": 2,
+        "id": 11,
+        "toPinId": 6
+      },
+      {
+        "fromPinId": 20,
+        "id": 25,
+        "toPinId": 4
+      },
+      {
+        "fromPinId": 2,
+        "id": 32,
+        "toPinId": 30
+      },
+      {
+        "fromPinId": 7,
+        "id": 38,
+        "toPinId": 18
+      },
+      {
+        "fromPinId": 31,
+        "id": 39,
+        "toPinId": 19
+      }
+    ],
+    "nextId": 40,
+    "nodes": [
+      {
+        "boolValue": false,
+        "colorValue": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "floatValue": 0.0,
+        "id": 1,
+        "inputs": [],
+        "intValue": 0,
+        "outputs": [
+          {
+            "id": 2,
+            "kind": 1,
+            "name": "Color",
+            "valueType": 2
+          }
+        ],
+        "position": [
+          20.0,
+          120.0
+        ],
+        "properties": {},
+        "title": "Scene Color",
+        "type": "Input"
+      },
+      {
+        "boolValue": false,
+        "colorValue": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "floatValue": 0.0,
+        "id": 3,
+        "inputs": [
+          {
+            "id": 4,
+            "kind": 0,
+            "name": "Color",
+            "valueType": 2
+          }
+        ],
+        "intValue": 0,
+        "outputs": [],
+        "position": [
+          830.0,
+          160.0
+        ],
+        "properties": {},
+        "title": "Output",
+        "type": "Output"
+      },
+      {
+        "boolValue": false,
+        "colorValue": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "floatValue": 0.0,
+        "id": 5,
+        "inputs": [
+          {
+            "id": 6,
+            "kind": 0,
+            "name": "In",
+            "valueType": 2
+          }
+        ],
+        "intValue": 0,
+        "outputs": [
+          {
+            "id": 7,
+            "kind": 1,
+            "name": "Out",
+            "valueType": 2
+          }
+        ],
+        "position": [
+          259.0,
+          111.0
+        ],
+        "properties": {
+          "applyMode": "Always",
+          "autoDisable": true,
+          "duration": 0.25,
+          "easeIndex": 8,
+          "enabled": true,
+          "floatAnimations": [],
+          "parameters": {
+            "center": [
+              0.5,
+              0.5
+            ],
+            "width": 0.07999999821186066
+          }
+        },
+        "title": "RadialBlur",
+        "type": "RadialBlur"
+      },
+      {
+        "boolValue": false,
+        "colorValue": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "floatValue": 0.0,
+        "id": 17,
+        "inputs": [
+          {
+            "id": 18,
+            "kind": 0,
+            "name": "A",
+            "valueType": 2
+          },
+          {
+            "id": 19,
+            "kind": 0,
+            "name": "B",
+            "valueType": 2
+          }
+        ],
+        "intValue": 0,
+        "outputs": [
+          {
+            "id": 20,
+            "kind": 1,
+            "name": "Out",
+            "valueType": 2
+          }
+        ],
+        "position": [
+          565.0,
+          130.0
+        ],
+        "properties": {
+          "applyMode": "Always",
+          "autoDisable": true,
+          "duration": 0.25,
+          "easeIndex": 8,
+          "enabled": true,
+          "floatAnimations": [],
+          "inputCount": 2,
+          "parameters": {
+            "mode": 0,
+            "opacity": 0.5
+          }
+        },
+        "title": "Blend",
+        "type": "Blend"
+      },
+      {
+        "boolValue": false,
+        "colorValue": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "floatValue": 0.0,
+        "id": 29,
+        "inputs": [
+          {
+            "id": 30,
+            "kind": 0,
+            "name": "In",
+            "valueType": 2
+          }
+        ],
+        "intValue": 0,
+        "outputs": [
+          {
+            "id": 31,
+            "kind": 1,
+            "name": "Out",
+            "valueType": 2
+          }
+        ],
+        "position": [
+          259.0,
+          271.0
+        ],
+        "properties": {
+          "applyMode": "Always",
+          "autoDisable": true,
+          "duration": 0.25,
+          "easeIndex": 8,
+          "enabled": true,
+          "floatAnimations": [],
+          "parameters": {
+            "radius": 0.0,
+            "strength": 1.0
+          }
+        },
+        "title": "Vignette",
+        "type": "Vignette"
+      }
+    ]
+  },
+  "name": "testEffect",
+  "nodes": [
+    {
+      "applyMode": "Always",
+      "autoDisable": true,
+      "duration": 0.25,
+      "ease": "",
+      "easeIndex": 8,
+      "enabled": true,
+      "floatAnimations": [],
+      "id": 5,
+      "parameters": {
+        "center": [
+          0.5,
+          0.5
+        ],
+        "width": 0.07999999821186066
+      },
+      "title": "RadialBlur",
+      "type": "RadialBlur"
+    },
+    {
+      "applyMode": "Always",
+      "autoDisable": true,
+      "duration": 0.25,
+      "ease": "",
+      "easeIndex": 8,
+      "enabled": true,
+      "floatAnimations": [],
+      "id": 29,
+      "parameters": {
+        "radius": 0.0,
+        "strength": 1.0
+      },
+      "title": "Vignette",
+      "type": "Vignette"
+    },
+    {
+      "applyMode": "Always",
+      "autoDisable": true,
+      "duration": 0.25,
+      "ease": "",
+      "easeIndex": 8,
+      "enabled": true,
+      "floatAnimations": [],
+      "id": 17,
+      "parameters": {
+        "mode": 0,
+        "opacity": 0.5
+      },
+      "title": "Blend",
+      "type": "Blend"
+    }
+  ],
+  "outline": {
+    "enabled": true
+  },
+  "type": "PostEffectPreset",
+  "version": 1
+}

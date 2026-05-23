@@ -5,8 +5,8 @@
 #include <Engine/Graphics/Buffer/DxConstantBuffer.h>
 #include <Engine/Graphics/Buffer/DxStructuredBuffer.h>
 
-struct CalyxMath::Vector3;
-namespace CalyxEffect {
+struct CalyxEngine::Vector3;
+namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
 	 * GpuFxEmitter
@@ -20,7 +20,7 @@ namespace CalyxEffect {
 		/* ===================================================================== */
 		struct EmitterParam {
 			float	deltaTime	 = 0.f;
-			CalyxMath::Vector3 acceleration = CalyxMath::Vector3(0, 0, 0);
+			CalyxEngine::Vector3 acceleration = CalyxEngine::Vector3(0, 0, 0);
 		};
 
 		struct PerFrame {
@@ -29,27 +29,57 @@ namespace CalyxEffect {
 		};
 
 		struct EmitterSphere {
-			CalyxMath::Vector3	 translate;
+			CalyxEngine::Vector3	 translate;
 			float	 radius;
 			uint32_t count;
 			float	 frequency;
 			float	 frequencyTime;
 			uint32_t emit;
+			CalyxEngine::Vector3 scale;
+			float	 lifeTime;
+			CalyxEngine::Vector3 velocity;
+			float	 angle;
+			CalyxEngine::Vector4 color;
+			CalyxEngine::Vector3 shapeSize;
+			uint32_t shape;
+			CalyxEngine::Vector3 gravity;
+			uint32_t gravityEnabled;
+			CalyxEngine::Vector4 overLifeStart;
+			CalyxEngine::Vector4 overLifeEnd;
+			uint32_t overLifeTarget;
+			uint32_t overLifeBlend;
+			uint32_t overLifeEase;
+			uint32_t overLifeEnabled;
+			uint32_t overLifeClamp;
+			uint32_t overLifeInvert;
+			uint32_t sizeLifeEnabled;
+			uint32_t sizeLifeGrowing;
+			uint32_t sizeLifeEase;
+			float _pad1;
 		};
 
 	public:
 		// 最大パーティクル数
-		static constexpr uint32_t kMaxParticles = 1048576 * 4;
+		static constexpr uint32_t kMaxParticles = 262144;
 
 		GpuFxEmitter() = default;
 		~GpuFxEmitter()override;
 
 		void Initialize();
 		void Update(float dt) override;
-		void ShowGui();
+		void ShowGui() override;
 
 		void ApplyConfigFrom(const EmitterConfig& config) override;
 		void ExtractConfigTo(EmitterConfig& config) const override;
+		void Play() override;
+		void Stop() override;
+		void Reset() override;
+		bool IsPlaying() const override { return isPlaying_; }
+		bool IsDrawEnable() const override { return isDrawEnable_; }
+		void SetDrawEnable(bool isEnable) override { isDrawEnable_ = isEnable; }
+		bool LoadTextureByGuid(const Guid& g) override;
+		void SetTextureGuid(const Guid& g) override;
+		const Guid& GetTextureGuid() const override { return textureGuid_; }
 
 		//--------- Dispatch -----------------------------------------------------
 		void DispatchInitialize(ID3D12GraphicsCommandList* cmd);
@@ -64,13 +94,22 @@ namespace CalyxEffect {
 		//--------- Accessor -----------------------------------------------------
 		// getter
 		D3D12_GPU_DESCRIPTOR_HANDLE GetParticleSrv() const;
+		uint32_t GetDrawInstanceCount() const;
+		const D3D12_GPU_DESCRIPTOR_HANDLE& GetTextureHandle() const { return textureHandle_; }
+		BlendMode GetBlendMode() const { return blendMode_; }
 
 		// setter
-		void SetPosition(const CalyxMath::Vector3& pos) { position_ = pos; }
+		void SetPosition(const CalyxEngine::Vector3& pos) override;
 
 	private:
-		CalyxMath::Vector3 position_{0, 0, 0};
+		CalyxEngine::Vector3 position_{0, 0, 0};
 		bool	isInitialized = false;
+		bool	hasInitializedOnce_ = false;
+		bool	isPlaying_ = false;
+		bool	isDrawEnable_ = true;
+		Guid	textureGuid_{Guid::Empty()};
+		D3D12_GPU_DESCRIPTOR_HANDLE textureHandle_{};
+		BlendMode blendMode_ = BlendMode::ADD;
 
 		// SBuff
 		DxStructuredBuffer<ParticleCS> particleBuffer_; // UAV+SRV

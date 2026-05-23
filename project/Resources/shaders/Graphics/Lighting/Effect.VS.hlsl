@@ -1,0 +1,35 @@
+#include "Effect.hlsli"
+
+/////////////////////////////////////////////////////////////////////////
+//                      Material
+/////////////////////////////////////////////////////////////////////////
+cbuffer MATERIAL : register(b0) {
+	float4 materialColor; // マテリアルカラー
+}
+
+/////////////////////////////////////////////////////////////////////////
+//                      world/view/projection matrix
+/////////////////////////////////////////////////////////////////////////
+cbuffer VSConstants : register(b1) {
+	TransformationMatrix gTransformationMat; // 変換行列
+}
+
+/////////////////////////////////////////////////////////////////////////
+//                      main
+/////////////////////////////////////////////////////////////////////////
+VSOutput main(float4 pos : POSITION,
+                float2 texcoord : TEXCOORD,
+                float4 color : COLOR) {
+	VSOutput output;
+
+    // 頂点位置を変換 (WVP 行列を使用)
+	output.svpos = mul(pos, gTransformationMat.WVP);
+
+    // テクスチャ座標をそのまま渡す
+	output.texcoord = texcoord;
+
+    // マテリアルカラーを乗算して色を計算
+	output.color = color * materialColor;
+
+	return output;
+}

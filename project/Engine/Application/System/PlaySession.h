@@ -9,8 +9,9 @@
 #include <externals/imgui/imgui.h>
 // c++
 #include <memory>
+#include <optional>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
 	 * PlaySession
@@ -43,10 +44,12 @@ namespace CalyxEditor {
 		bool		  IsRuntime() const;
 		SceneContext* GetContext() const;
 		uint64_t	  RuntimeGeneration() const { return runtimeGen_; }
+		void		  ApplyPendingDebugCameraState(SceneContext* context);
 
 	private:
 		SceneContext*				  editorContext_ = nullptr;
 		std::unique_ptr<SceneContext> runtimeContext_;
+		std::optional<DebugCamera::State> pendingDebugCameraState_;
 		EngineMode					  mode_			 = EngineMode::Editor;
 		bool						  exitRequested_ = false;
 		uint64_t					  runtimeGen_	 = 0;

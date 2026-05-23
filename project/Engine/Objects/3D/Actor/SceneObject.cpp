@@ -1,7 +1,6 @@
-
-
 #include "SceneObject.h"
 #include <Engine/Foundation/Json/JsonUtils.h>
+#include <Engine/Foundation/Serialization/SerializableObject.h>
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/Objects/ConfigurableObject/IConfigurable.h>
@@ -20,6 +19,8 @@ static const char* ObjectTypeToString(ObjectType type) {
 		return "Light";
 	case ObjectType::GameObject:
 		return "GameObject";
+	case ObjectType::Object2D:
+		return "Object2D";
 	case ObjectType::Effect:
 		return "ParticleSystem";
 	case ObjectType::Event:
@@ -48,6 +49,7 @@ void SceneObject::ShowGui() {}
 ///		子を含めて階層階層から完全に切り離すObject破棄
 /////////////////////////////////////////////////////////////////////////////////////////
 void SceneObject::Destroy() {
+	[[maybe_unused]] auto self = shared_from_this();
 	DestroyRecursive();
 }
 
@@ -61,14 +63,38 @@ bool SceneObject::Save() const { return false; }
 /////////////////////////////////////////////////////////////////////////////////////////
 bool SceneObject::Load() { return false; }
 
+void SceneObject::BeginSerializableParamCapture(const nlohmann::json* overrides) {
+	serializableParamObjects_.clear();
+	CalyxEngine::SerializableObject::BeginCapture(&serializableParamObjects_, overrides);
+}
+
+void SceneObject::EndSerializableParamCapture() {
+	CalyxEngine::SerializableObject::EndCapture();
+}
+
+void SceneObject::AdoptPendingSerializableParamCapture(const nlohmann::json* overrides) {
+	CalyxEngine::SerializableObject::EndPendingCapture(&serializableParamObjects_, overrides);
+}
+
+void SceneObject::ExtractSerializableParamsToJson(nlohmann::json& j) const {
+	for(const auto* param : serializableParamObjects_) {
+		if(!param) continue;
+		if(!CalyxEngine::SerializableObject::IsAlive(param)) continue;
+
+		nlohmann::json paramJson;
+		param->ExtractParamsToJson(paramJson);
+		j[param->GetParamStorageKey()] = std::move(paramJson);
+	}
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //		トランスフォームからaabbを構築して返す
 /////////////////////////////////////////////////////////////////////////////////////////
 AABB SceneObject::FallbackAABBFromTransform() const {
-	CalyxMath::Vector3 center	 = worldTransform_.GetWorldPosition();
-	CalyxMath::Vector3 halfScale = worldTransform_.scale * 0.5f;
-	CalyxMath::Vector3 min		 = center - halfScale;
-	CalyxMath::Vector3 max		 = center + halfScale;
+	CalyxEngine::Vector3 center	 = worldTransform_.GetWorldPosition();
+	CalyxEngine::Vector3 halfScale = worldTransform_.scale * 0.5f;
+	CalyxEngine::Vector3 min		 = center - halfScale;
+	CalyxEngine::Vector3 max		 = center + halfScale;
 	return AABB(min, max);
 }
 
@@ -87,6 +113,14 @@ void SceneObject::SetName(const std::string& name, std::optional<ObjectType> typ
 		name_ = name;
 	}
 	if(type.has_value()) objectType_ = type.value();
+}
+
+std::string SceneObject::GetDisplayName() const {
+	if(duplicateNameIndex_ == 0) {
+		return name_;
+	}
+
+	return name_ + "(" + std::to_string(duplicateNameIndex_) + ")";
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

@@ -15,18 +15,22 @@
 #include <memory>
 
 // external
+#include "Engine/Foundation/Math/Matrix4x4.h"
+
 #include <externals/imgui/imgui.h>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 	enum class ParamFilterSection;
 }
 
 // math
-namespace CalyxMath {
+namespace CalyxEngine {
 	struct Vector3;
 	struct Vector4;
 	struct Vector2;
-} // namespace CalyxMath
+	CalyxEngine::Matrix4x4 MakeOrthographicMatrixLH(float left,float right,float bottom,float top,float nearZ,
+								 float farZ);
+} // namespace CalyxEngine
 
 /* ========================================================================
 /*		imgui コマンドラッパ
@@ -42,11 +46,11 @@ namespace GuiCmd{
 	//		dragFloat
 	//===================================================================*/
 	bool DragFloat(const char* label, float& value, float speed = 0.01f, float min = 0.0f, float max = 0.0f);
-	bool DragFloat2(const char* label, CalyxMath::Vector2& value, float speed = 0.01f, float min = 0.0f, float max = 0.0f);
-	bool DragFloat3(const char* label,CalyxMath::Vector3& value,float speed = 0.01f,float min = 0.0f,float max = 0.0f);
-	bool DragFloat4(const char* label, CalyxMath::Vector4& value, float speed = 0.01f, float min = 0.0f, float max = 0.0f);
+	bool DragFloat2(const char* label, CalyxEngine::Vector2& value, float speed = 0.01f, float min = 0.0f, float max = 0.0f);
+	bool DragFloat3(const char* label,CalyxEngine::Vector3& value,float speed = 0.01f,float min = 0.0f,float max = 0.0f);
+	bool DragFloat4(const char* label, CalyxEngine::Vector4& value, float speed = 0.01f, float min = 0.0f, float max = 0.0f);
 	bool ColoredDragFloat3(const char* label,
-						   CalyxMath::Vector3& value,
+						   CalyxEngine::Vector3& value,
 						   float speed = 0.1f,
 						   float min = 0.0f,
 						   float max = 0.0f,
@@ -57,14 +61,14 @@ namespace GuiCmd{
 	//		sliderFloat
 	//===================================================================*/
 	bool SliderFloat(const char* label, float& value, float min = 0.0f, float max = 1.0f);
-	bool SliderFloat2(const char* label, CalyxMath::Vector2& value, float min = 0.0f, float max = 1.0f);
-	bool SliderFloat3(const char* label, CalyxMath::Vector3& value, float min = 0.0f, float max = 1.0f);
-	bool SliderFloat4(const char* label, CalyxMath::Vector4& value, float min = 0.0f, float max = 1.0f);
+	bool SliderFloat2(const char* label, CalyxEngine::Vector2& value, float min = 0.0f, float max = 1.0f);
+	bool SliderFloat3(const char* label, CalyxEngine::Vector3& value, float min = 0.0f, float max = 1.0f);
+	bool SliderFloat4(const char* label, CalyxEngine::Vector4& value, float min = 0.0f, float max = 1.0f);
 
 	//===================================================================*/
 	//		colorEdit
 	//===================================================================*/
-	bool ColorEdit4(const char* label, CalyxMath::Vector4& value, ImGuiColorEditFlags flags = 0);
+	bool ColorEdit4(const char* label, CalyxEngine::Vector4& value, ImGuiColorEditFlags flags = 0);
 
 	//===================================================================*/
 	//		combo
@@ -91,9 +95,9 @@ namespace GuiCmd{
 	//===================================================================*/
 	//		Section Filter Helpers (For Tab View)
 	//===================================================================*/
-	void SetSectionFilter(CalyxEditor::ParamFilterSection sectionType);
+	void SetSectionFilter(CalyxEngine::ParamFilterSection sectionType);
 	
-	bool BeginSection(CalyxEditor::ParamFilterSection sectionType);
+	bool BeginSection(CalyxEngine::ParamFilterSection sectionType);
 	
 	// Ends the current section.
 	void EndSection();

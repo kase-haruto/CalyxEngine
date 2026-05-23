@@ -4,7 +4,11 @@
 /* ===================================================================== */
 
 #include <Data/Engine/Prefab/Serializer/PrefabSerializer.h>
+#include <Engine/Application/Effects/FxObject.h>
 #include <Engine/Application/UI/Panels/InspectorPanel.h>
+#include <Engine/Assets/Database/AssetDatabase.h>
+#include <Engine/Assets/System/AssetDragPayload.h>
+#include <Engine/Assets/System/AssetType.h>
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Objects/3D/Actor/Library/SceneObjectLibrary.h>
 #include <Engine/Objects/3D/Actor/SceneObject.h>
@@ -14,44 +18,52 @@
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 #include <Engine/Graphics/Camera/3d/Camera3d.h>
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
+#include <Engine/Objects/2D/Object2d/SpriteSceneObject2d.h>
 #include <Engine/Objects/LightObject/DirectionalLight.h>
 #include <Engine/Objects/LightObject/PointLight.h>
 
 // lib
+#include "Engine/Assets/Manager/AssetManager.h"
+
 #include <externals/imgui/ImGuiFileDialog.h>
 
-#include <algorithm>
+#include <unordered_set>
 #include <string>
 #include <vector>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 
 	/* ========================================================================
 	 *  include space
 	 * ===================================================================== */
 	namespace {
 
-		inline int TypePriority(ObjectType t) {
-			switch(t) {
-			case ObjectType::Camera:
-				return 0;
-			case ObjectType::Light:
-				return 1;
-			case ObjectType::GameObject:
-				return 2;
-			case ObjectType::Effect:
-				return 3;
-			default:
-				return 9;
+		inline const AssetDragPayload* ReadAssetPayload(const ImGuiPayload* payload) {
+			if(!payload || !payload->Data || payload->DataSize != (int)sizeof(AssetDragPayload)) {
+				return nullptr;
 			}
+			return reinterpret_cast<const AssetDragPayload*>(payload->Data);
 		}
 
-		inline bool LessByTypeThenName(const std::shared_ptr<SceneObject>& a,
-									   const std::shared_ptr<SceneObject>& b) {
-			int pa = TypePriority(a->GetObjectType());
-			int pb = TypePriority(b->GetObjectType());
-			if(pa != pb) return pa < pb;
-			return a->GetName() < b->GetName();
+		inline const AssetRecord* GetDraggedPrefabRecord(const ImGuiPayload* payload) {
+			const AssetDragPayload* assetPayload = ReadAssetPayload(payload);
+			if(!assetPayload || assetPayload->type != AssetType::Prefab) {
+				return nullptr;
+			}
+
+			const AssetRecord* record = AssetDatabase::GetInstance()->Get(assetPayload->guid);
+			if(!record || record->type != AssetType::Prefab) {
+				return nullptr;
+			}
+			return record;
+		}
+
+		void SetPrefabLinkRecursive(SceneObject* object, const Guid& prefabGuid) {
+			if(!object || !prefabGuid.isValid()) return;
+			object->SetPrefabLink(prefabGuid, object->GetGuid());
+			for(const auto& child : object->GetChildren()) {
+				SetPrefabLinkRecursive(child.get(), prefabGuid);
+			}
 		}
 
 	} // namespace
@@ -62,7 +74,7 @@ namespace CalyxEditor {
 	HierarchyPanel::HierarchyPanel()
 		: IEngineUI("Hierarchy") {
 
-		auto& tm = *TextureManager::GetInstance();
+		auto& tm = *AssetManager::GetInstance()->GetTextureManager();
 
 		iconEye_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/Hierarchy/eyeIcon.dds").ptr;
 		iconEyeOff_.tex	 = (ImTextureID)tm.LoadTexture("UI/Tool/Hierarchy/closedEyeIcon.dds").ptr;
@@ -73,16 +85,15 @@ namespace CalyxEditor {
 		// 追加/削除イベントにフックしてキャッシュ更新を促す
 		if(auto* ctx = SceneContext::Current()) {
 			ctx->AddOnObjectAddedListener([this](SceneObject*) {
-				cacheDirty_ = true;
+				RefreshCache();
 			});
 			ctx->AddOnObjectRemovedListener([this](SceneObject* removed) {
-				cacheDirty_ = true;
+				RefreshCache();
 				// 選択が削除対象ならクリア
-				if(auto sp = selected_.lock()) {
-					if(sp.get() == removed) {
-						selected_.reset();
-						if(onSelect_) onSelect_(nullptr);
-					}
+				if(IsSelected(removed)) {
+					selected_.reset();
+					selectedObjects_.clear();
+					if(actions_) actions_->SelectObject(nullptr, false);
 				}
 			});
 		}
@@ -124,6 +135,13 @@ namespace CalyxEditor {
 			if(sp && !lib_->Contains(sp)) {
 				selected_.reset();
 			}
+			selectedObjects_.erase(
+				std::remove_if(selectedObjects_.begin(), selectedObjects_.end(),
+							   [this](const std::weak_ptr<SceneObject>& weak) {
+								   auto selected = weak.lock();
+								   return !selected || !lib_->Contains(selected);
+							   }),
+				selectedObjects_.end());
 		}
 
 		// ---------------------------------------------------------------------
@@ -143,42 +161,16 @@ namespace CalyxEditor {
 
 			ImGui::TableHeadersRow();
 
-			// --- root 探索 (キャッシュ使用) ---
-			if(cacheDirty_ || sortedCache_.find(nullptr) == sortedCache_.end()) {
-				// キャッシュ再構築（ルートのみ）
-				std::vector<std::shared_ptr<SceneObject>> roots;
-				const auto&								  objects = lib_->GetObjects();
-				roots.reserve(objects.size());
-
-				for(const auto& [id, sp] : objects) {
-					(void)id;
-					if(!sp || sp->IsTransient()) continue;
-					auto parent = sp->GetParent();
-					if(!parent || !lib_->Contains(parent)) {
-						roots.push_back(sp);
-					}
-				}
-				std::sort(roots.begin(), roots.end(), LessByTypeThenName);
-
-				if(cacheDirty_) {
-					sortedCache_.clear();
-					cacheDirty_ = false;
-				}
-				sortedCache_[nullptr] = std::move(roots);
-			}
-
-			// --- 描画 ---
-			auto it = sortedCache_.find(nullptr);
-			if(it != sortedCache_.end()) {
-				for(auto& sp : it->second) {
-					ShowObjectRecursive(sp.get());
-				}
+			for(auto& sp : treeCache_.GetRoots(*lib_)) {
+				ShowObjectRecursive(sp.get());
 			}
 
 			// 空白クリックで選択解除 (テーブル内の空白エリア)
 			if(ImGui::IsWindowHovered() && ImGui::IsMouseClicked(0) && !ImGui::IsAnyItemHovered()) {
+				
 				selected_.reset();
-				if(onSelect_) onSelect_(nullptr);
+				selectedObjects_.clear();
+				if(actions_) actions_->SelectObject(nullptr, false);
 			}
 
 			// 右クリック空白メニュー (テーブル内の空白エリア)
@@ -186,10 +178,25 @@ namespace CalyxEditor {
 				ImGui::OpenPopup("BlankContextMenu");
 			}
 
+			if(ImGui::BeginDragDropTarget()) {
+				if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CALYX_ASSET")) {
+					if(const AssetRecord* record = GetDraggedPrefabRecord(payload)) {
+						auto objects = PrefabSerializer::Load(
+							record->sourcePath.string(),
+							PrefabSerializer::LoadOptions{false, record->guid});
+						for(auto& sp : objects) {
+							if(actions_) actions_->CreateObject(sp);
+						}
+						RefreshCache();
+					}
+				}
+				ImGui::EndDragDropTarget();
+			}
+
 			if(ImGui::BeginPopup("BlankContextMenu")) {
 				if(ImGui::BeginMenu("Create")) {
 					auto createRoot = [&](std::shared_ptr<SceneObject> obj) {
-						if(onCreate_) onCreate_(obj);
+						if(actions_) actions_->CreateObject(obj);
 					};
 
 					if(ImGui::MenuItem("Empty Scene Object")) createRoot(std::make_shared<SceneObject>());
@@ -200,7 +207,16 @@ namespace CalyxEditor {
 						ImGui::EndMenu();
 					}
 					if(ImGui::MenuItem("Mesh Object")) createRoot(std::make_shared<BaseGameObject>());
-					if(ImGui::MenuItem("Particle System")) createRoot(std::make_shared<CalyxEffect::ParticleSystemObject>());
+					if(ImGui::BeginMenu("2D")) {
+						if(ImGui::MenuItem("Sprite 2D")) createRoot(std::make_shared<CalyxEngine::SpriteSceneObject2d>());
+						if(ImGui::MenuItem("Animated Sprite 2D")) createRoot(std::make_shared<CalyxEngine::AnimatedSpriteSceneObject2d>());
+						ImGui::EndMenu();
+					}
+					if(ImGui::BeginMenu("Effect")) {
+						if(ImGui::MenuItem("Fx Object")) createRoot(std::make_shared<CalyxEngine::FxObject>());
+						if(ImGui::MenuItem("Particle System")) createRoot(std::make_shared<CalyxEngine::ParticleSystemObject>());
+						ImGui::EndMenu();
+					}
 					ImGui::EndMenu();
 				}
 				ImGui::Separator();
@@ -229,8 +245,15 @@ namespace CalyxEditor {
 		// Save
 		if(ImGuiFileDialog::Instance()->Display("SavePrefabDlg")) {
 			if(ImGuiFileDialog::Instance()->IsOk() && prefabSaveTarget_) {
-				PrefabSerializer::Save({prefabSaveTarget_},
-									   ImGuiFileDialog::Instance()->GetFilePathName());
+				const std::string path = ImGuiFileDialog::Instance()->GetFilePathName();
+				if(PrefabSerializer::Save(
+					   {prefabSaveTarget_},
+					   path,
+					   PrefabSerializer::SaveOptions{true})) {
+					const Guid prefabGuid = AssetDatabase::GetInstance()->RegisterOrUpdate(path, AssetType::Prefab);
+					SetPrefabLinkRecursive(prefabSaveTarget_, prefabGuid);
+					AssetDatabase::GetInstance()->Scan();
+				}
 			}
 			ImGuiFileDialog::Instance()->Close();
 			prefabSaveTarget_ = nullptr;
@@ -239,12 +262,15 @@ namespace CalyxEditor {
 		// Load
 		if(ImGuiFileDialog::Instance()->Display("LoadPrefabDlg")) {
 			if(ImGuiFileDialog::Instance()->IsOk()) {
+				const std::string path = ImGuiFileDialog::Instance()->GetFilePathName();
+				const Guid prefabGuid = AssetDatabase::GetInstance()->RegisterOrUpdate(path, AssetType::Prefab);
 				auto vec = PrefabSerializer::Load(
-					ImGuiFileDialog::Instance()->GetFilePathName());
+					path,
+					PrefabSerializer::LoadOptions{false, prefabGuid});
 
-				for(auto& up : vec) {
-					if(lib_ && onCreate_) {
-						onCreate_(std::shared_ptr<SceneObject>(std::move(up)));
+				for(auto& sp : vec) {
+					if(lib_ && actions_) {
+						actions_->CreateObject(sp);
 					}
 				}
 			}
@@ -274,20 +300,8 @@ namespace CalyxEditor {
 			const bool isRenamingThis = (renaming_ && renameSP.get() == obj);
 
 			if(!isRenamingThis) {
-				if(sortedCache_.find(obj) == sortedCache_.end()) {
-					std::vector<std::shared_ptr<SceneObject>> sortedChildren;
-					for(auto& ch : obj->GetChildren()) {
-						if(ch) sortedChildren.push_back(ch);
-					}
-					std::sort(sortedChildren.begin(), sortedChildren.end(), LessByTypeThenName);
-					sortedCache_[obj] = std::move(sortedChildren);
-				}
-
-				auto it = sortedCache_.find(obj);
-				if(it != sortedCache_.end()) {
-					for(auto& ch : it->second) {
-						ShowObjectRecursive(ch.get());
-					}
+				for(auto& child : treeCache_.GetChildren(*obj)) {
+					ShowObjectRecursive(child.get());
 				}
 			}
 
@@ -306,31 +320,12 @@ namespace CalyxEditor {
 		// ---------------------------------------------------------------------
 		ImGui::TableSetColumnIndex(0);
 
-		// タイプのアイコン
-		ImTextureID typeTex = nullptr;
-		switch(obj->GetObjectType()) {
-		case ObjectType::Camera:
-			typeTex = iconCamera_.tex;
-			break;
-		case ObjectType::Light:
-			typeTex = iconLight_.tex;
-			break;
-		case ObjectType::GameObject:
-			typeTex = iconGameObj_.tex;
-			break;
-		case ObjectType::Effect:
-			typeTex = iconFx_.tex;
-			break;
-		default:
-			break;
-		}
-
+		ImTextureID typeTex = GetTypeIcon(obj->GetObjectType());
 		// リネームロジック
 		auto renameSP		= renameTarget_.lock();
 		bool isRenamingThis = (renaming_ && renameSP.get() == obj);
 
-		auto selectedPtr = selected_.lock();
-		bool isSelected	 = (selectedPtr.get() == obj);
+		bool isSelected	 = IsSelected(obj);
 
 		// 16px アイコンを使用
 		float iconSize = 16.0f;
@@ -372,20 +367,18 @@ namespace CalyxEditor {
 
 			// インタラクション
 			if(ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
-				try {
-					selected_ = obj->shared_from_this();
-					if(onSelect_) onSelect_(selected_.lock());
-				} catch(...) {
-					// Object might not be managed by shared_ptr, skip selection
-					selected_.reset();
-				}
+				HandleNodeSelectionClick(obj);
+			}
+			if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && actions_) {
+				actions_->FocusObject(obj->shared_from_this());
 			}
 
 			// ドラッグ＆ドロップ
 			if(ImGui::BeginDragDropSource()) {
 				SceneObject* drag = obj;
 				ImGui::SetDragDropPayload("SceneObjectPtr", &drag, sizeof(SceneObject*));
-				ImGui::Text("%s", obj->GetName().c_str());
+				const std::string displayName = obj->GetDisplayName();
+				ImGui::Text("%s", displayName.c_str());
 				ImGui::EndDragDropSource();
 			}
 
@@ -401,6 +394,33 @@ namespace CalyxEditor {
 						}
 					}
 				}
+				if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CALYX_ASSET")) {
+					if(const AssetRecord* record = GetDraggedPrefabRecord(payload)) {
+						auto objects = PrefabSerializer::Load(
+							record->sourcePath.string(),
+							PrefabSerializer::LoadOptions{false, record->guid});
+
+						std::unordered_set<SceneObject*> loaded;
+						loaded.reserve(objects.size());
+						for(auto& sp : objects) {
+							if(sp) loaded.insert(sp.get());
+						}
+
+						auto parent = obj->shared_from_this();
+						for(auto& sp : objects) {
+							if(!sp) continue;
+							auto existingParent = sp->GetParent();
+							if(!existingParent || !loaded.contains(existingParent.get())) {
+								sp->SetParent(parent);
+							}
+						}
+
+						for(auto& sp : objects) {
+							if(actions_) actions_->CreateObject(sp);
+						}
+						RefreshCache();
+					}
+				}
 				ImGui::EndDragDropTarget();
 			}
 
@@ -409,7 +429,7 @@ namespace CalyxEditor {
 				if(ImGui::BeginMenu("Create Child")) {
 					auto createChild = [&](std::shared_ptr<SceneObject> child) {
 						child->SetParent(obj->shared_from_this());
-						if(onCreate_) onCreate_(child);
+						if(actions_) actions_->CreateObject(child);
 					};
 
 					if(ImGui::MenuItem("Empty Scene Object")) createChild(std::make_shared<SceneObject>());
@@ -420,19 +440,33 @@ namespace CalyxEditor {
 						ImGui::EndMenu();
 					}
 					if(ImGui::MenuItem("Mesh Object")) createChild(std::make_shared<BaseGameObject>());
-					if(ImGui::MenuItem("Particle System")) createChild(std::make_shared<CalyxEffect::ParticleSystemObject>());
+					if(ImGui::BeginMenu("2D")) {
+						if(ImGui::MenuItem("Sprite 2D")) createChild(std::make_shared<CalyxEngine::SpriteSceneObject2d>());
+						if(ImGui::MenuItem("Animated Sprite 2D")) createChild(std::make_shared<CalyxEngine::AnimatedSpriteSceneObject2d>());
+						ImGui::EndMenu();
+					}
+					if(ImGui::BeginMenu("Effect")) {
+						if(ImGui::MenuItem("Fx Object")) createChild(std::make_shared<CalyxEngine::FxObject>());
+						if(ImGui::MenuItem("Particle System")) createChild(std::make_shared<CalyxEngine::ParticleSystemObject>());
+						ImGui::EndMenu();
+					}
 
 					ImGui::EndMenu();
 				}
 				ImGui::Separator();
 				if(ImGui::MenuItem("Rename")) BeginRename(obj);
-				if(ImGui::MenuItem("Delete") && onDelete_) {
-					if(auto sp = obj->shared_from_this()) onDelete_(sp);
+				if(ImGui::MenuItem("Delete") && actions_) {
+					if(auto sp = obj->shared_from_this()) actions_->DeleteObject(sp);
 				}
 				ImGui::Separator();
 				if(ImGui::MenuItem("Create Prefab")) {
 					prefabSaveTarget_  = obj;
 					showSavePrefabDlg_ = true;
+				}
+				if(obj->IsPrefabInstanceObject() && actions_) {
+					if(ImGui::MenuItem("Apply Prefab Overrides")) {
+						if(auto sp = obj->shared_from_this()) actions_->ApplyPrefabOverrides(sp);
+					}
 				}
 				ImGui::EndPopup();
 			}
@@ -444,11 +478,19 @@ namespace CalyxEditor {
 
 			// ノード上にアイコンとテキストを描画
 			ImGui::SameLine();
+			const bool prefabInstance = obj->IsPrefabInstanceObject();
+			if(prefabInstance) {
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.35f, 0.62f, 1.0f, 1.0f));
+			}
 			if(typeTex) {
 				ImGui::Image(typeTex, ImVec2(iconSize, iconSize));
 				ImGui::SameLine();
 			}
-			ImGui::TextUnformatted(obj->GetName().c_str());
+			const std::string displayName = obj->GetDisplayName();
+			ImGui::TextUnformatted(displayName.c_str());
+			if(prefabInstance) {
+				ImGui::PopStyleColor();
+			}
 		}
 
 		// ---------------------------------------------------------------------
@@ -470,22 +512,11 @@ namespace CalyxEditor {
 		// カラム 2: タイプ情報
 		// ---------------------------------------------------------------------
 		ImGui::TableSetColumnIndex(2);
-		const char* typeName = "Object";
-		switch(obj->GetObjectType()) {
-		case ObjectType::Camera:
-			typeName = "Camera";
-			break;
-		case ObjectType::Light:
-			typeName = "Light";
-			break;
-		case ObjectType::GameObject:
-			typeName = "Mesh";
-			break;
-		case ObjectType::Effect:
-			typeName = "Effect";
-			break;
+		if(obj->IsPrefabInstanceObject()) {
+			ImGui::TextColored(ImVec4(0.35f, 0.62f, 1.0f, 1.0f), "%s", GetTypeLabel(obj->GetObjectType()));
+		} else {
+			ImGui::TextDisabled("%s", GetTypeLabel(obj->GetObjectType()));
 		}
-		ImGui::TextDisabled("%s", typeName);
 
 		return open;
 	}
@@ -493,6 +524,71 @@ namespace CalyxEditor {
 	/* ========================================================================
 	/*  utils
 	/* ===================================================================== */
+	void HierarchyPanel::HandleNodeSelectionClick(SceneObject* obj) {
+		if(!obj) return;
+
+		try {
+			auto sp = obj->shared_from_this();
+			const bool toggle = ImGui::GetIO().KeyCtrl;
+			if(toggle && IsSelected(obj)) {
+				selectedObjects_.erase(
+					std::remove_if(selectedObjects_.begin(), selectedObjects_.end(),
+								   [obj](const std::weak_ptr<SceneObject>& weak) {
+									   return weak.lock().get() == obj;
+								   }),
+					selectedObjects_.end());
+				selected_ = selectedObjects_.empty() ? std::weak_ptr<SceneObject>{} : selectedObjects_.back();
+			} else if(toggle) {
+				selectedObjects_.push_back(sp);
+				selected_ = sp;
+			} else {
+				selectedObjects_.clear();
+				selectedObjects_.push_back(sp);
+				selected_ = sp;
+			}
+			if(actions_) actions_->SelectObject(sp, toggle);
+		} catch(...) {
+			selected_.reset();
+			selectedObjects_.clear();
+		}
+	}
+
+	ImTextureID HierarchyPanel::GetTypeIcon(ObjectType type) const {
+		switch(type) {
+		case ObjectType::Camera:
+			return iconCamera_.tex;
+		case ObjectType::Light:
+			return iconLight_.tex;
+		case ObjectType::GameObject:
+		case ObjectType::Object2D:
+		case ObjectType::Event:
+			return iconGameObj_.tex;
+		case ObjectType::Effect:
+			return iconFx_.tex;
+		default:
+			return nullptr;
+		}
+	}
+
+	const char* HierarchyPanel::GetTypeLabel(ObjectType type) const {
+		switch(type) {
+		case ObjectType::Camera:
+			return "Camera";
+		case ObjectType::Light:
+			return "Light";
+		case ObjectType::GameObject:
+			return "Mesh";
+		case ObjectType::Object2D:
+			return "2D";
+		case ObjectType::Effect:
+			return "Effect";
+		case ObjectType::Event:
+			return "Event";
+		default:
+			return "Object";
+		}
+	}
+
 	bool HierarchyPanel::IsDescendantOf(SceneObject* parent, SceneObject* child) {
 		if(!child) return false;
 
@@ -518,6 +614,25 @@ namespace CalyxEditor {
 
 	const std::string& HierarchyPanel::GetPanelName() const {
 		return panelName_;
+	}
+
+	void HierarchyPanel::SetSelectedObjects(const std::vector<std::shared_ptr<SceneObject>>& objects) {
+		selectedObjects_.clear();
+		for(const auto& object : objects) {
+			if(!object) continue;
+			selectedObjects_.push_back(object);
+		}
+		selected_ = selectedObjects_.empty() ? std::weak_ptr<SceneObject>{} : selectedObjects_.back();
+	}
+
+	bool HierarchyPanel::IsSelected(SceneObject* obj) const {
+		if(!obj) return false;
+		for(const auto& weak : selectedObjects_) {
+			if(weak.lock().get() == obj) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/* ========================================================================
@@ -562,8 +677,8 @@ namespace CalyxEditor {
 		}
 
 		if(auto sp = renameTarget_.lock()) {
-			if(onRename_) {
-				onRename_(sp, newName);
+			if(actions_) {
+				actions_->RenameObject(sp, newName);
 			} else {
 				sp->SetName(newName, sp->GetObjectType());
 			}
@@ -573,4 +688,4 @@ namespace CalyxEditor {
 		CancelRename();
 	}
 
-} // namespace CalyxEditor
+} // namespace CalyxEngine

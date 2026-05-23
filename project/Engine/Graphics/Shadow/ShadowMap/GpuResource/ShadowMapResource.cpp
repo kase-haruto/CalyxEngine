@@ -2,7 +2,7 @@
 
 #include "Engine/Graphics/Descriptor/DescriptorAllocator.h"
 
-namespace CalyxGraphics {
+namespace CalyxEngine {
 
 	void ShadowMapResource::Initialize(
 		ID3D12Device* device,

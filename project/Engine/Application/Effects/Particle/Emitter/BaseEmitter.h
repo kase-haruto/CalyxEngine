@@ -10,7 +10,9 @@
 #include "EmitterDetails.h"
 #include <Engine/Foundation/Math/Quaternion.h>
 
-namespace CalyxEffect {
+class WorldTransform;
+
+namespace CalyxEngine {
 
 	enum class ParticlePrimitives {
 		plane = 0, //< 平面
@@ -33,11 +35,12 @@ namespace CalyxEffect {
 		//===================================================================*/
 		//					public func
 		//===================================================================*/
-		CalyxEffect::BaseEmitter();
+		CalyxEngine::BaseEmitter();
 		virtual ~BaseEmitter() = default;
 
 		virtual void Update(float deltaTime) = 0;
 		virtual void TransferParticleDataToGPU();
+		virtual void ShowGui() {}
 		/**
 		 * \brief モデルデータのチェックと読み込み
 		 */
@@ -47,7 +50,7 @@ namespace CalyxEffect {
 		 * \brief 形状ごとに発生座標を生成
 		 * \return 発生座標
 		 */
-		CalyxMath::Vector3 GenerateSpawnPosition();
+		CalyxEngine::Vector3 GenerateSpawnPosition();
 
 		/**
 		 * \brief 再生
@@ -57,6 +60,7 @@ namespace CalyxEffect {
 		 *  \brief 停止
 		 */
 		virtual void Stop() {}
+		virtual void Reset() {}
 		/**
 		 * \brief 再生中か
 		 * \return true:再生中 false:停止中
@@ -69,6 +73,14 @@ namespace CalyxEffect {
 
 		virtual void SetAlphaMultiplier(float a) { alphaMultiplier_ = a; }
 		virtual void SetCameraFade(float, float) {}
+		virtual void SetCameraFadeEnabled(bool) {}
+		virtual bool IsDrawEnable() const { return drawEnable_; }
+		virtual void SetDrawEnable(bool isEnable) { drawEnable_ = isEnable; }
+		virtual void SetPosition(const CalyxEngine::Vector3& pos) { position_ = pos; }
+		virtual void DrawEmitterShape(const WorldTransform&) {}
+		virtual const Guid& GetTextureGuid() const { return emptyGuid_; }
+		virtual bool LoadTextureByGuid(const Guid&) { return false; }
+		virtual void SetTextureGuid(const Guid&) {}
 
 		/**
 		 * \brief GUIDを用いてモデルデータをロード
@@ -79,7 +91,7 @@ namespace CalyxEffect {
 
 	public:
 		// accessor -------------------------------------------------
-		virtual CalyxMath::Vector3						GetWorldPosition() const { return position_; }
+		virtual CalyxEngine::Vector3						GetWorldPosition() const { return position_; }
 		const std::string&								GetTexturePath() const { return material_.texturePath; }
 		const ParticleMaterial&							GetMaterial() const { return material_; }
 		const DxConstantBuffer<ParticleMaterial>&		GetMaterialBuffer() const { return materialBuffer_; }
@@ -91,39 +103,43 @@ namespace CalyxEffect {
 		const std::optional<ParticlePrimitives>& GetPrimitive() const { return primitive_; }
 		void SetEmitterShape(EmitterShape shape){shape_ = shape;}
 		EmitterShape GetEmitterShape() const { return shape_; }
-		void SetShapeSize(const CalyxMath::Vector3& size) { shapeSize_ = size; }
-		const CalyxMath::Vector3& GetShapeSize() const { return shapeSize_; }
+		void SetShapeSize(const CalyxEngine::Vector3& size) { shapeSize_ = size; }
+		const CalyxEngine::Vector3& GetShapeSize() const { return shapeSize_; }
 		void SetShapeRadius(float radius) { shapeRadius_ = radius; }
 		float GetShapeRadius() const { return shapeRadius_; }
 		void SetShapeAngle(float angleDeg) { shapeAngle_ = angleDeg; }
 		float GetShapeAngle() const { return shapeAngle_; }
-		void SetWorldRotation(const CalyxMath::Quaternion& rotation) { worldRotation_ = rotation; }
-		const CalyxMath::Quaternion& GetWorldRotation() const { return worldRotation_; }
-		void SetWorldScale(const CalyxMath::Vector3& scale) { worldScale_ = scale; }
-		const CalyxMath::Vector3& GetWorldScale() const { return worldScale_; }
+		void SetWorldRotation(const CalyxEngine::Quaternion& rotation) { worldRotation_ = rotation; }
+		const CalyxEngine::Quaternion& GetWorldRotation() const { return worldRotation_; }
+		void SetWorldScale(const CalyxEngine::Vector3& scale) { worldScale_ = scale; }
+		const CalyxEngine::Vector3& GetWorldScale() const { return worldScale_; }
 
 	protected:
 		//===================================================================*/
 		//					protected variable
 		//===================================================================*/
 		EmitterShape shape_ = EmitterShape::Point;
-		CalyxMath::Vector3 shapeSize_ = {1.0f,1.0f,1.0f}; // Boxなど
+		CalyxEngine::Vector3 shapeSize_ = {1.0f,1.0f,1.0f}; // Boxなど
 		float shapeRadius_ = 1.0f;                        // Sphereなど
 		float shapeAngle_  = 30.0f;                       // Cone
-		CalyxMath::Quaternion worldRotation_ = CalyxMath::Quaternion::MakeIdentity();
-		CalyxMath::Vector3 worldScale_ = {1.0f, 1.0f, 1.0f};
+		CalyxEngine::Quaternion worldRotation_ = CalyxEngine::Quaternion::MakeIdentity();
+		CalyxEngine::Vector3 worldScale_ = {1.0f, 1.0f, 1.0f};
 
 		std::optional<ParticlePrimitives>		 primitive_ = std::nullopt; //< プリミティブ形状(primitiveで発生する場合)
 		MeshResource							 meshData_;					//< モデルデータ(使用しない場合はnull)
 		std::string								 modelPath = "plane.obj";	//< モデルパス（デフォルトは平面
 		Guid									 modelGuid_{Guid::Empty()};
-		CalyxMath::Vector3						 position_; //< emitterの位置
+		CalyxEngine::Vector3						 position_; //< emitterの位置
 		ParticleMaterial						 material_; //< パーティクルのマテリアル
 		std::vector<FxUnit>						 units_;	//< パーティクルユニットの配列
 		DxStructuredBuffer<ParticleConstantData> instanceBuffer_;
 		DxConstantBuffer<ParticleMaterial>		 materialBuffer_; // パーティクルマテリアルの定数バッファ
 
 		float alphaMultiplier_ = 1.0f;
+		bool  drawEnable_ = true;
+
+	private:
+		inline static const Guid emptyGuid_{Guid::Empty()};
 	};
 
-} // namespace CalyxEffect
+} // namespace CalyxEngine

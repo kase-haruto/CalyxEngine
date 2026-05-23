@@ -1,8 +1,9 @@
 #include "RaytracingScene.h"
+#include <Engine/Foundation/Debug/CxAssert.h>
 
 #include "Engine/Foundation/Math/Matrix3x4.h"
 
-namespace CalyxGraphics {
+namespace CalyxEngine {
 
 	/////////////////////////////////////////////////////////////////////////////////
 	//  インスタンスのクリア
@@ -14,12 +15,12 @@ namespace CalyxGraphics {
 	///////////////////////////////////////////////////////////////////////////////
 	//  インスタンスの追加
 	///////////////////////////////////////////////////////////////////////////////
-	void RaytracingScene::AddInstance(const CalyxMath::Matrix3x4&	  transform,
+	void RaytracingScene::AddInstance(const CalyxEngine::Matrix3x4&	  transform,
 									  D3D12_GPU_VIRTUAL_ADDRESS		  blasAddress,
 									  uint32_t						  instanceID,
 									  uint8_t						  mask,
 									  D3D12_RAYTRACING_INSTANCE_FLAGS flags) {
-		assert(blasAddress != 0);
+		CX_CHECK(blasAddress != 0, "Assertion failed");
 
 		// インスタンス記述子の作成
 		D3D12_RAYTRACING_INSTANCE_DESC desc{};
@@ -40,7 +41,7 @@ namespace CalyxGraphics {
 	//  バッファの確保
 	/////////////////////////////////////////////////////////////////////////////////
 	void RaytracingScene::EnsureBuffer(ID3D12Device* device) {
-		assert(device);
+		CX_CHECK(device, "Assertion failed");
 
 		// インスタンス数を取得
 		const UINT count = static_cast<UINT>(instances_.size());
@@ -61,7 +62,7 @@ namespace CalyxGraphics {
 	void RaytracingScene::Upload() {
 		if(instances_.empty()) return;
 		// バッファが有効であることを確認
-		assert(instanceBuffer_.IsValid());
+		CX_CHECK(instanceBuffer_.IsValid(), "Assertion failed");
 		// インスタンスデータをコピー
 		std::memcpy(
 			instanceBuffer_.Data(),
@@ -87,4 +88,4 @@ namespace CalyxGraphics {
 				   : 0;
 	}
 
-} // namespace CalyxGraphics
+} // namespace CalyxEngine

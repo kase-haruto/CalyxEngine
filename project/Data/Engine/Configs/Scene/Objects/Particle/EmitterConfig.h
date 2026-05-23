@@ -13,17 +13,17 @@
 #include <string>
 #include <vector>
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 	struct EmitterConfig {
-		CalyxMath::Vector3 position{};
-		CalyxMath::Vector4 color{1.0f, 1.0f, 1.0f, 1.0f};
+		CalyxEngine::Vector3 position{};
+		CalyxEngine::Vector4 color{1.0f, 1.0f, 1.0f, 1.0f};
 		Vector3ParamConfig scale;
 		Vector3ParamConfig velocity;
 		FxFloatParamConfig lifetime;
 
 		float		emitRate	= 0.1f;
 		std::string modelPath	= "plane.obj";
-		std::string texturePath = "particle.dds";
+		std::string texturePath = "Textures/white1x1.dds";
 
 		Guid textureGuid{Guid::Empty()};
 		Guid modelGuid{Guid::Empty()};
@@ -32,11 +32,14 @@ namespace CalyxEffect {
 		bool		  followOneShot	 = false;
 		bool		  isComplement	 = true;
 		bool		  randomSpinEmit = false;
+		bool          cameraDitherEnabled = false;
 		BillboardMode billboardMode	 = BillboardMode::Full;
 		BlendMode	  blendMode		 = BlendMode::ADD;
 		EmitterShape emitterShape	 = EmitterShape::Point;
+		float         cameraDitherNear = 0.0f;
+		float         cameraDitherFar  = 20.0f;
 		// 既存データ互換: キー未定義時は BaseEmitter と同じ既定値を使う
-		CalyxMath::Vector3 shapeSize{1.0f, 1.0f, 1.0f};
+		CalyxEngine::Vector3 shapeSize{1.0f, 1.0f, 1.0f};
 		float shapeRadius = 1.0f;
 		float shapeAngle  = 30.0f;
 
@@ -54,20 +57,24 @@ namespace CalyxEffect {
 	};
 
 	inline void EmitterConfig::FromJson(const nlohmann::json& j) {
-		position	   = j.value("position", CalyxMath::Vector3{0, 0, 0});
+		position	   = j.value("position", CalyxEngine::Vector3{0, 0, 0});
 		scale		   = j.value("scale", Vector3ParamConfig{});
-		color		   = j.value("color", CalyxMath::Vector4{1, 1, 1, 1});
+		color		   = j.value("color", CalyxEngine::Vector4{1, 1, 1, 1});
 		velocity	   = j.value("velocity", Vector3ParamConfig{});
 		lifetime	   = j.value("lifetime", FxFloatParamConfig{});
 		emitRate	   = j.value("emitRate", 1.0f);
 		modelPath	   = j.value("modelPath", "plane.obj");
-		texturePath	   = j.value("texturePath", "particle.dds");
+		texturePath	   = j.value("texturePath", "Textures/white1x1.dds");
 		isDrawEnable   = j.value("isDrawEnable", true);
 		isComplement   = j.value("isComplement", true);
 		randomSpinEmit = j.value("randomSpinEmit", false);
 		followOneShot  = j.value("followOneShot", false);
+		cameraDitherEnabled = j.value("cameraDitherEnabled", false);
+		cameraDitherNear = j.value("cameraDitherNear", 0.0f);
+		cameraDitherFar = j.value("cameraDitherFar", 20.0f);
+		billboardMode = j.value("billboardMode", BillboardMode::Full);
 		emitterShape   = j.value("emitterShape", EmitterShape::Point);
-		shapeSize      = j.value("shapeSize", CalyxMath::Vector3{1.0f, 1.0f, 1.0f});
+		shapeSize      = j.value("shapeSize", CalyxEngine::Vector3{1.0f, 1.0f, 1.0f});
 		shapeRadius    = j.value("shapeRadius", 1.0f);
 		shapeAngle     = j.value("shapeAngle", 30.0f);
 
@@ -122,6 +129,10 @@ namespace CalyxEffect {
 		j["isComplement"]	= isComplement;
 		j["randomSpinEmit"] = randomSpinEmit;
 		j["followOneShot"]	= followOneShot;
+		j["cameraDitherEnabled"] = cameraDitherEnabled;
+		j["cameraDitherNear"] = cameraDitherNear;
+		j["cameraDitherFar"] = cameraDitherFar;
+		j["billboardMode"] = billboardMode;
 		j["blendMode"]		= blendMode;
 		j["emitterShape"]  = emitterShape;
 		j["shapeSize"]     = shapeSize;
@@ -147,4 +158,4 @@ namespace CalyxEffect {
 
 	inline void to_json(nlohmann::json& j, const EmitterConfig& c) { j = c.ToJson(); }
 	inline void from_json(const nlohmann::json& j, EmitterConfig& c) { c.FromJson(j); }
-} // namespace CalyxEffect
+} // namespace CalyxEngine

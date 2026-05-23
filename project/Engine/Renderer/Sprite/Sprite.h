@@ -41,7 +41,7 @@ public:
 	 * \param position 座標
 	 * \param size サイズ
 	 */
-	void Initialize(const CalyxMath::Vector2& position, const CalyxMath::Vector2& size);
+	void Initialize(const CalyxEngine::Vector2& position, const CalyxEngine::Vector2& size);
 	/**
 	 * \brief 初期化 (ウィンドウの中心に配置)
 	 */
@@ -89,37 +89,37 @@ public:
 	 * \brief 色を取得 (const)
 	 * \return 色
 	 */
-	const CalyxMath::Vector4&			   GetColor() const { return materialData_.color; }
+	const CalyxEngine::Vector4&			   GetColor() const { return materialData_.color; }
 	/**
 	 * \brief 色を取得
 	 * \return 色
 	 */
-	CalyxMath::Vector4&					   GetColor() { return materialData_.color; }
+	CalyxEngine::Vector4&					   GetColor() { return materialData_.color; }
 	/**
 	 * \brief サイズを取得
 	 * \return サイズ
 	 */
-	const CalyxMath::Vector2&			   GetSize() const { return size; }
+	const CalyxEngine::Vector2&			   GetSize() const { return size; }
 	/**
 	 * \brief アンカーポイントを取得
 	 * \return アンカーポイント
 	 */
-	const CalyxMath::Vector2&			   GetAnchorPoint() const { return anchorPoint; }
+	const CalyxEngine::Vector2&			   GetAnchorPoint() const { return anchorPoint; }
 	/**
 	 * \brief 座標を取得
 	 * \return 座標
 	 */
-	const CalyxMath::Vector2&			   GetPosition() const { return position; }
+	const CalyxEngine::Vector2&			   GetPosition() const { return position; }
 	/**
 	 * \brief UV移動量を取得
 	 * \return UV移動量
 	 */
-	CalyxMath::Vector2					   GetUvTranslate() const { return CalyxMath::Vector2(uvTransform.translate.x, uvTransform.translate.y); }
+	CalyxEngine::Vector2					   GetUvTranslate() const { return CalyxEngine::Vector2(uvTransform.translate.x, uvTransform.translate.y); }
 	/**
 	 * \brief 切り取り座標(左上)を取得
 	 * \return 座標
 	 */
-	const CalyxMath::Vector2&			   GetLeftTop() const { return textureLeftTop; }
+	const CalyxEngine::Vector2&			   GetLeftTop() const { return textureLeftTop; }
 	/**
 	 * \brief 回転角を取得
 	 * \return 回転角
@@ -155,22 +155,22 @@ public:
 	 * \brief 座標を設定
 	 * \param newPosition 座標
 	 */
-	void	   SetPosition(const CalyxMath::Vector2& newPosition) { this->position = newPosition; }
+	void	   SetPosition(const CalyxEngine::Vector2& newPosition) { this->position = newPosition; }
 	/**
 	 * \brief UV移動量を設定
 	 * \param uvOffset UV移動量
 	 */
-	void	   SetUvTranslate(const CalyxMath::Vector2& uvOffset) { CalyxMath::Vector2(uvTransform.translate.x = uvOffset.x, uvTransform.translate.y = uvOffset.y); }
+	void	   SetUvTranslate(const CalyxEngine::Vector2& uvOffset) { CalyxEngine::Vector2(uvTransform.translate.x = uvOffset.x, uvTransform.translate.y = uvOffset.y); }
 	/**
 	 * \brief 色を設定
 	 * \param newColor 色
 	 */
-	void	   SetColor(const CalyxMath::Vector4& newColor) { materialData_.color = newColor; }
+	void	   SetColor(const CalyxEngine::Vector4& newColor) { materialData_.color = newColor; }
 	/**
 	 * \brief サイズを設定
 	 * \param newSize サイズ
 	 */
-	void	   SetSize(const CalyxMath::Vector2& newSize) { this->size = newSize; }
+	void	   SetSize(const CalyxEngine::Vector2& newSize) { this->size = newSize; }
 	/**
 	 * \brief 透明度を設定
 	 * \param newAlpha 透明度
@@ -180,12 +180,12 @@ public:
 	 * \brief アンカーポイントを設定
 	 * \param newAnchorPoint アンカーポイント
 	 */
-	void	   SetAnchorPoint(const CalyxMath::Vector2& newAnchorPoint) { this->anchorPoint = newAnchorPoint; }
+	void	   SetAnchorPoint(const CalyxEngine::Vector2& newAnchorPoint) { this->anchorPoint = newAnchorPoint; }
 	/**
 	 * \brief 切り取り座標(左上)を設定
 	 * \param LTop 座標
 	 */
-	void	   SetLeftTop(const CalyxMath::Vector2& LTop) { this->textureLeftTop = LTop; }
+	void	   SetLeftTop(const CalyxEngine::Vector2& LTop) { this->textureLeftTop = LTop; }
 	/**
 	 * \brief 表示フラグを設定
 	 * \param is 表示するか
@@ -210,12 +210,12 @@ public:
 	 * \brief UVオフセットを設定
 	 * \param offset オフセット
 	 */
-	void	   SetUvOffset(const CalyxMath::Vector2& offset);
+	void	   SetUvOffset(const CalyxEngine::Vector2& offset);
 	/**
 	 * \brief UVスケールを設定
 	 * \param scale スケール
 	 */
-	void	   SetUvScale(const CalyxMath::Vector2& scale);
+	void	   SetUvScale(const CalyxEngine::Vector2& scale);
 
 	/**
 	 * \brief 塗りつぶし量を設定 (0.0〜1.0)
@@ -269,13 +269,13 @@ private:
 	//===================================================================*/
 	EulerTransform transform_{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}; //< 変形情報
 	EulerTransform uvTransform{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}; //< UV変形情報
-	CalyxMath::Vector2 position{0.0f, 0.0f}; //< 座標
+	CalyxEngine::Vector2 position{0.0f, 0.0f}; //< 座標
 	float rotate = 0.0f; //< 回転
-	CalyxMath::Vector4 color = {1.0f, 1.0f, 1.0f, 1.0f}; //< 色
-	CalyxMath::Vector2 size = {640.0f, 360.0f}; //< サイズ
-	CalyxMath::Vector2 anchorPoint = {0.0f, 0.0f}; //< アンカーポイント
-	CalyxMath::Vector2 textureLeftTop = {0.0f, 0.0f}; //< テクスチャ左上座標
-	CalyxMath::Vector2 textureSize = {100.0f, 100.0f}; //< テクスチャ切り出しサイズ
+	CalyxEngine::Vector4 color = {1.0f, 1.0f, 1.0f, 1.0f}; //< 色
+	CalyxEngine::Vector2 size = {640.0f, 360.0f}; //< サイズ
+	CalyxEngine::Vector2 anchorPoint = {0.0f, 0.0f}; //< アンカーポイント
+	CalyxEngine::Vector2 textureLeftTop = {0.0f, 0.0f}; //< テクスチャ左上座標
+	CalyxEngine::Vector2 textureSize = {100.0f, 100.0f}; //< テクスチャ切り出しサイズ
 
 	std::string path; //< テクスチャパス
 
@@ -288,7 +288,7 @@ private:
 	D3D12_VERTEX_BUFFER_VIEW			   vertexBufferViewSprite{}; //< 頂点バッファビュー
 
 	bool				  isVisible		= true; //< 表示フラグ
-	CalyxMath::Matrix4x4* transformData = nullptr; //< 行列データポインタ
+	CalyxEngine::Matrix4x4* transformData = nullptr; //< 行列データポインタ
 
 	VertexData*					 vertexData = nullptr; //< 頂点データポインタ
 	DxConstantBuffer<Material2D> materialCB_; //< マテリアル用定数バッファ

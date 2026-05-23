@@ -1,13 +1,20 @@
 #include "ModelManager.h"
 
-#include <Engine/Foundation/Utility/Func/CxUtils.h>
+// engine
+#include "Engine/Foundation/Math/MathUtil.h"
+#include "Engine/Graphics/Context/GraphicsGroup.h"
 #include <Engine/Graphics/Buffer/DxIndexBuffer.h>
 #include <Engine/Graphics/Buffer/DxVertexBuffer.h>
 #include <Engine/Graphics/Pipeline/PipelineDesc/Input/VertexLayout.h>
+#include <Engine/Foundation/Utility/FileSystem/FileScanner.h>
 
-// static 変数初期化
-std::unique_ptr<ModelManager> ModelManager::instance_	   = nullptr;
-const std::string			  ModelManager::directoryPath_ = "Resources/Assets/models";
+// externals
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+
+#include <filesystem>
+#include <sstream>
+
 
 ModelManager::ModelManager() {
 	// スレッドを起動
@@ -27,25 +34,19 @@ ModelManager::~ModelManager() {
 	}
 }
 
-ModelManager* ModelManager::GetInstance() {
-	if(!instance_) {
-		instance_ = std::unique_ptr<ModelManager>(new ModelManager());
-	}
-	return instance_.get();
+void ModelManager::Initialize() {
+	LoadAllModels();
 }
 
-void ModelManager::Initialize() { GetInstance(); }
-
-void ModelManager::Finalize() { instance_.reset(); }
 
 //----------------------------------------------------------------------------
 // 非同期ロード開始
 //----------------------------------------------------------------------------
 std::future<ModelData*> ModelManager::LoadModel(const std::string& fileName) {
 	{
-		std::lock_guard<std::mutex> lock(instance_->modelDataMutex_);
-		auto						it = instance_->modelDatas_.find(fileName);
-		if(it != instance_->modelDatas_.end()) {
+		std::lock_guard<std::mutex> lock(modelDataMutex_);
+		auto						it = modelDatas_.find(fileName);
+		if(it != modelDatas_.end()) {
 			std::promise<ModelData*> promise;
 			promise.set_value(it->second.get());
 			return promise.get_future();
@@ -57,10 +58,10 @@ std::future<ModelData*> ModelManager::LoadModel(const std::string& fileName) {
 	std::future<ModelData*> fut = request.promise.get_future();
 
 	{
-		std::lock_guard<std::mutex> lock(instance_->taskQueueMutex_);
-		instance_->requestQueue_.push(std::move(request));
+		std::lock_guard<std::mutex> lock(taskQueueMutex_);
+		requestQueue_.push(std::move(request));
 	}
-	instance_->taskQueueCv_.notify_one();
+	taskQueueCv_.notify_one();
 
 	return fut;
 }
@@ -180,27 +181,7 @@ void ModelManager::SetOnModelLoadedCallback(std::function<void(const std::string
 // 複数ファイルをまとめてロード (サンプル)
 //----------------------------------------------------------------------------
 void ModelManager::StartUpLoad() {
-	LoadModel("terrain.obj");
-	LoadModel("enemyBullet.obj");
-	LoadModel("player.gltf");
-	LoadModel("ghost.obj");
-	LoadModel("largeBuilding.obj");
-	LoadModel("tallBuilding_01.obj");
-	LoadModel("tallBuilding_02.obj");
-	LoadModel("smallBuilding_01.obj");
-	LoadModel("boss.gltf");
-	LoadModel("bossAttackNormal.gltf");
-	LoadModel("bossHitReact.gltf");
-	LoadModel("bossLaser.gltf");
-	LoadModel("bossPunch.gltf");
-
-	LoadModel("debugCube.obj");
-	LoadModel("cylinder.obj");
-	LoadModel("cone.obj");
-	LoadModel("torus.obj");
-	LoadModel("ground.obj");
-	LoadModel("plane.obj");
-	LoadModel("run.gltf");
+	
 }
 
 //----------------------------------------------------------------------------
@@ -216,13 +197,66 @@ std::vector<std::string> ModelManager::GetLoadedModelNames() const {
 }
 
 //=============================================================================
-//
+//	ファイルを走破してすべてのモデルファイルをload
 //=============================================================================
+void ModelManager::LoadAllModels() {
+	// ファイルを走破してモデルをロードする なければエラーをはく
+	if(!CalyxEngine::FileScanner::EnsureDirectoryExists(directoryPath_)) {
+		throw std::runtime_error("Model directory does not exist: " + directoryPath_);
+	}
+	
+	// Assimでサポートされているモデル形式の拡張子
+	const std::vector<std::string> supportedExtensions = {
+		".obj",   // OBJ format
+		".fbx",   // Autodesk FBX
+		".gltf",  // glTF
+	};
+	
+	// ディレクトリ内のすべてのファイルをスキャン
+	auto allFiles = CalyxEngine::FileScanner::ScanFiles(directoryPath_, "");
+	
+	for(const auto& filePath : allFiles) {
+		std::string ext = filePath.extension().string();
+		
+		// 拡張子を小文字に変換してチェック（比較用のみ）
+		std::string extLower = ext;
+		std::transform(extLower.begin(), extLower.end(), extLower.begin(), 
+			[](unsigned char c) -> char { return static_cast<char>(std::tolower(c)); });
+		
+		// サポートされている拡張子か確認
+		bool isSupported = false;
+		for(const auto& supportedExt : supportedExtensions) {
+			if(extLower == supportedExt) {
+				isSupported = true;
+				break;
+			}
+		}
+	
+		if(isSupported) {
+			// ファイル名（拡張子含む）を取得してロード開始（元のファイル名をそのまま使用）
+			std::string fileName = filePath.filename().string();
+			LoadModel(fileName);
+		}
+	}
+}
+
+//=============================================================================
+//
+//=============================================================================ｔ
 ModelData ModelManager::LoadModelFile(const std::string& directoryPath, const std::string& fileNameWithExt) {
 	Assimp::Importer importer;
 
+	// ファイル名から拡張子を除いた部分を取得
+	std::string modelNameBase = fileNameWithExt.substr(0, fileNameWithExt.find_last_of('.'));
+	
+	// ディレクトリ名用に小文字に変換（サブディレクトリが小文字であるため）
+	std::string modelNameLower = modelNameBase;
+	std::transform(modelNameLower.begin(), modelNameLower.end(), modelNameLower.begin(), 
+		[](unsigned char c) -> char { return static_cast<char>(std::tolower(c)); });
+
 	// パスを組み立て
-	std::string filePath = directoryPath + "/" + fileNameWithExt.substr(0, fileNameWithExt.find_last_of('.')) + "/" + fileNameWithExt;
+	std::string filePath = directoryPath + "/" + modelNameLower + "/" + fileNameWithExt;
+	std::filesystem::path modelDirectory = std::filesystem::path(filePath).parent_path();
 
 	const aiScene* scene = importer.ReadFile(
 		filePath.c_str(),
@@ -237,6 +271,7 @@ ModelData ModelManager::LoadModelFile(const std::string& directoryPath, const st
 	}
 
 	ModelData modelData;
+	LoadMaterials(scene, modelDirectory, modelData);
 
 	// メッシュデータを格納
 	for(unsigned int meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
@@ -254,16 +289,14 @@ ModelData ModelManager::LoadModelFile(const std::string& directoryPath, const st
 			aiQuaternion rotate;
 			bindPoseMatrixAssimp.Decompose(scale, rotate, translate);
 
-			CalyxMath::Matrix4x4 bindPoseMatrix =
-				CalyxMath::MakeAffineMatrix({scale.x, scale.y, scale.z}, {rotate.x, -rotate.y, -rotate.z, rotate.w}, {-translate.x, translate.y, translate.z});
-			jointWeightData.inverseBindPoseMatrix = CalyxMath::Matrix4x4::Inverse(bindPoseMatrix);
+			CalyxEngine::Matrix4x4 bindPoseMatrix =
+				CalyxEngine::MakeAffineMatrix({scale.x, scale.y, scale.z}, {rotate.x, -rotate.y, -rotate.z, rotate.w}, {-translate.x, translate.y, translate.z});
+			jointWeightData.inverseBindPoseMatrix = CalyxEngine::Matrix4x4::Inverse(bindPoseMatrix);
 
 			for(uint32_t weightIndex = 0; weightIndex < bone->mNumWeights; ++weightIndex) {
 				jointWeightData.vertexWeights.push_back({bone->mWeights[weightIndex].mWeight, bone->mWeights[weightIndex].mVertexId});
 			}
 		}
-
-		LoadMaterial(scene, mesh, modelData);
 	}
 
 	// アニメーション(サンプル)
@@ -341,10 +374,11 @@ void ModelManager::CreateGpuResources(const std::string&, ModelData& model) {
 //----------------------------------------------------------------------------
 void ModelManager::LoadMesh(const aiMesh* mesh, ModelData& modelData) {
 	uint32_t baseVertex = static_cast<uint32_t>(modelData.meshResource.Vertices().size());
+	uint32_t indexStart = static_cast<uint32_t>(modelData.meshResource.Indices().size());
 
 	// 初期AABBを極端な値に
-	CalyxMath::Vector3 minPos = {FLT_MAX, FLT_MAX, FLT_MAX};
-	CalyxMath::Vector3 maxPos = {-FLT_MAX, -FLT_MAX, -FLT_MAX};
+	CalyxEngine::Vector3 minPos = {FLT_MAX, FLT_MAX, FLT_MAX};
+	CalyxEngine::Vector3 maxPos = {-FLT_MAX, -FLT_MAX, -FLT_MAX};
 
 	for(unsigned int i = 0; i < mesh->mNumVertices; ++i) {
 		VertexPosUvN vertex{};
@@ -359,9 +393,9 @@ void ModelManager::LoadMesh(const aiMesh* mesh, ModelData& modelData) {
 		modelData.meshResource.data.vertices.push_back(vertex);
 
 		// AABB更新用の min/max 反映
-		CalyxMath::Vector3 pos = {vertex.position.x, vertex.position.y, vertex.position.z};
-		minPos				   = CalyxMath::Vector3::Min(minPos, pos);
-		maxPos				   = CalyxMath::Vector3::Max(maxPos, pos);
+		CalyxEngine::Vector3 pos = {vertex.position.x, vertex.position.y, vertex.position.z};
+		minPos				   = CalyxEngine::Vector3::Min(minPos, pos);
+		maxPos				   = CalyxEngine::Vector3::Max(maxPos, pos);
 	}
 
 	for(unsigned int i = 0; i < mesh->mNumFaces; ++i) {
@@ -371,13 +405,21 @@ void ModelManager::LoadMesh(const aiMesh* mesh, ModelData& modelData) {
 		modelData.meshResource.data.indices.push_back(baseVertex + face.mIndices[1]);
 	}
 
+	const uint32_t indexCount = static_cast<uint32_t>(modelData.meshResource.Indices().size()) - indexStart;
+	if(indexCount > 0) {
+		modelData.meshResource.SubMeshes().push_back({
+			indexStart,
+			indexCount,
+			mesh->mMaterialIndex});
+	}
+
 	// ローカルAABBを格納
-	if(modelData.localAABB.min_ == CalyxMath::Vector3{} && modelData.localAABB.max_ == CalyxMath::Vector3{}) {
+	if(modelData.localAABB.min_ == CalyxEngine::Vector3{} && modelData.localAABB.max_ == CalyxEngine::Vector3{}) {
 		modelData.localAABB.Initialize(minPos, maxPos);
 	} else {
 		// モデル全体の AABB を統合（複数メッシュ時）
-		CalyxMath::Vector3 mergedMin = CalyxMath::Vector3::Min(modelData.localAABB.min_, minPos);
-		CalyxMath::Vector3 mergedMax = CalyxMath::Vector3::Max(modelData.localAABB.max_, maxPos);
+		CalyxEngine::Vector3 mergedMin = CalyxEngine::Vector3::Min(modelData.localAABB.min_, minPos);
+		CalyxEngine::Vector3 mergedMax = CalyxEngine::Vector3::Max(modelData.localAABB.max_, maxPos);
 		modelData.localAABB.Initialize(mergedMin, mergedMax);
 	}
 }
@@ -385,25 +427,73 @@ void ModelManager::LoadMesh(const aiMesh* mesh, ModelData& modelData) {
 //----------------------------------------------------------------------------
 // マテリアル読み込み
 //----------------------------------------------------------------------------
-void ModelManager::LoadMaterial(const aiScene* scene, const aiMesh* mesh, ModelData& modelData) {
-	if(!scene->HasMaterials()) {
-		modelData.meshResource.data.material.textureFilePath = "white1x1.dds";
-		return;
-	}
-	const aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-	if(!material) {
-		modelData.meshResource.data.material.textureFilePath = "white1x1.dds";
+void ModelManager::LoadMaterials(const aiScene* scene, const std::filesystem::path& modelDirectory, ModelData& modelData) {
+	modelData.meshResource.Materials().clear();
+
+	auto normalizeTexturePath = [](const aiString& texPath) -> std::string {
+		std::istringstream stream(texPath.C_Str());
+		std::string token;
+		std::string texturePath;
+		while(stream >> token) {
+			if(!token.empty() && token[0] == '-') {
+				continue;
+			}
+			texturePath = token;
+		}
+		return texturePath.empty() ? texPath.C_Str() : texturePath;
+	};
+
+	auto resolveTexturePath = [&](const aiString& texPath) -> std::string {
+		std::error_code ec;
+		std::filesystem::path assetRoot = std::filesystem::weakly_canonical("Resources/Assets", ec);
+		if(ec) {
+			assetRoot = std::filesystem::path("Resources/Assets");
+			ec.clear();
+		}
+		std::filesystem::path path(normalizeTexturePath(texPath));
+		if(path.is_absolute()) {
+			auto rel = std::filesystem::relative(path, assetRoot, ec);
+			if(!ec) return rel.generic_string();
+			return path.generic_string();
+		}
+
+		std::filesystem::path full = std::filesystem::weakly_canonical(modelDirectory / path, ec);
+		if(ec) {
+			full = modelDirectory / path;
+		}
+
+		auto rel = std::filesystem::relative(full, assetRoot, ec);
+		if(!ec) return rel.generic_string();
+
+		return full.generic_string();
+	};
+
+	const unsigned int materialCount = scene && scene->HasMaterials() ? scene->mNumMaterials : 0;
+	if(materialCount == 0) {
+		MaterialData fallback{};
+		fallback.textureFilePath = "textures/white1x1.dds";
+		modelData.meshResource.Materials().push_back(fallback);
+		modelData.meshResource.Material() = fallback;
 		return;
 	}
 
-	aiString texPath;
-	if(material->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) == AI_SUCCESS) {
-		modelData.meshResource.data.material.textureFilePath = texPath.C_Str();
-	} else {
-		modelData.meshResource.Material().textureFilePath = "white1x1.dds";
+	for(unsigned int materialIndex = 0; materialIndex < materialCount; ++materialIndex) {
+		MaterialData materialData{};
+		materialData.textureFilePath = "textures/white1x1.dds";
+
+		const aiMaterial* material = scene->mMaterials[materialIndex];
+		if(material) {
+			aiString texPath;
+			if(material->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) == AI_SUCCESS) {
+				materialData.textureFilePath = resolveTexturePath(texPath);
+			}
+			LoadUVTransform(material, materialData);
+		}
+
+		modelData.meshResource.Materials().push_back(materialData);
 	}
 
-	LoadUVTransform(material, modelData.meshResource.Material());
+	modelData.meshResource.Material() = modelData.meshResource.Materials().front();
 }
 
 //----------------------------------------------------------------------------
@@ -425,7 +515,7 @@ void ModelManager::LoadSkinData([[maybe_unused]] const aiMesh* mesh, [[maybe_unu
 //----------------------------------------------------------------------------
 // アニメーション評価サンプル
 //----------------------------------------------------------------------------
-CalyxMath::Vector3 ModelManager::Evaluate(const AnimationCurve<CalyxMath::Vector3>& curve, float time) {
+CalyxEngine::Vector3 ModelManager::Evaluate(const AnimationCurve<CalyxEngine::Vector3>& curve, float time) {
 	const auto& keyframes = curve.keyframes;
 	if(keyframes.empty()) {
 		return {0, 0, 0};
@@ -441,13 +531,13 @@ CalyxMath::Vector3 ModelManager::Evaluate(const AnimationCurve<CalyxMath::Vector
 		float t1 = keyframes[i + 1].time;
 		if(time >= t0 && time <= t1) {
 			float localT = (time - t0) / (t1 - t0);
-			return CalyxMath::Vector3::Lerp(keyframes[i].value, keyframes[i + 1].value, localT);
+			return CalyxEngine::Vector3::Lerp(keyframes[i].value, keyframes[i + 1].value, localT);
 		}
 	}
 	return keyframes.back().value;
 }
 
-CalyxMath::Quaternion ModelManager::Evaluate(const AnimationCurve<CalyxMath::Quaternion>& curve, float time) {
+CalyxEngine::Quaternion ModelManager::Evaluate(const AnimationCurve<CalyxEngine::Quaternion>& curve, float time) {
 	const auto& keyframes = curve.keyframes;
 	if(keyframes.empty()) {
 		return {0, 0, 0, 1};
@@ -463,7 +553,7 @@ CalyxMath::Quaternion ModelManager::Evaluate(const AnimationCurve<CalyxMath::Qua
 		float t1 = keyframes[i + 1].time;
 		if(time >= t0 && time <= t1) {
 			float localT = (time - t0) / (t1 - t0);
-			return CalyxMath::Quaternion::Slerp(keyframes[i].value, keyframes[i + 1].value, localT);
+			return CalyxEngine::Quaternion::Slerp(keyframes[i].value, keyframes[i + 1].value, localT);
 		}
 	}
 	return keyframes.back().value;

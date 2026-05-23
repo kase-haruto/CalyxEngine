@@ -10,7 +10,7 @@
 #include <vector>
 #include <string>
 #include <functional>
-namespace CalyxEditor {
+namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
 	 * EditorPanel
@@ -48,4 +48,4 @@ namespace CalyxEditor {
 		OnEditorSelectedCallback onEditorSelected_;
 	};
 
-} // namespace CalyxEditor
+} // namespace CalyxEngine

@@ -15,12 +15,15 @@
 class SceneContext;
 class PipelineService;
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 	class PlaySession;
 	class PickingPass;
-} // namespace CalyxEditor
+	class GridRenderer;
+} // namespace CalyxEngine
 
-namespace CalyxScene {
+class ModelRenderer;
+
+namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
 	 * SceneManager
@@ -29,7 +32,7 @@ namespace CalyxScene {
 	 *---------------------------------------------------------------------------------------*/
 	class SceneManager {
 	public:
-		explicit SceneManager(CalyxGraphics::DxCore* dx);
+		explicit SceneManager(CalyxEngine::DxCore* dx);
 		~SceneManager();
 
 		void Initialize();
@@ -44,7 +47,8 @@ namespace CalyxScene {
 		void DrawNotAffectedFromPE(ID3D12GraphicsCommandList* cmd,
 								   PipelineService*			  pso);
 
-		void BindPlaySession(CalyxEditor::PlaySession* ps) { pPlaySession_ = ps; }
+		void BindPlaySession(CalyxEngine::PlaySession* ps) { pPlaySession_ = ps; }
+		void SetEditorPreviewContext(SceneContext* ctx) { editorPreviewCtx_ = ctx; }
 
 		SceneContext* ActiveCtx() const;
 		bool		  ActiveRuntimeFlag() const;
@@ -64,9 +68,9 @@ namespace CalyxScene {
 		SceneContext* GetCurrentSceneContext() const;
 		size_t		  GetCurrentIndex() const { return currentIdx_; }
 
-		CalyxScene::ISceneTransitionRequestor& GetTransitionRequestor();
+		CalyxEngine::ISceneTransitionRequestor& GetTransitionRequestor();
 
-		CalyxEditor::PickingPass* GetPickingPass() const { return pickingPass_.get(); }
+		CalyxEngine::PickingPass* GetPickingPass() const { return pickingPass_.get(); }
 
 	private:
 		// ---- internal transition entry ----
@@ -74,6 +78,9 @@ namespace CalyxScene {
 		void RequestSceneChangeInternal(
 			SceneId						   next,
 			std::unique_ptr<IScenePayload> payload);
+		void DrawEditorPreview(IRenderTarget* rt,
+							   ID3D12GraphicsCommandList* cmd,
+							   PipelineService* pso);
 
 	private:
 		struct SceneSlot {
@@ -110,17 +117,20 @@ namespace CalyxScene {
 		std::optional<size_t>		   pendingSwitchIndex_;
 		std::unique_ptr<IScenePayload> pendingPayload_;
 
-		CalyxGraphics::DxCore*	  dx_			= nullptr;
-		CalyxEditor::PlaySession* pPlaySession_ = nullptr;
+		CalyxEngine::DxCore*	  dx_			= nullptr;
+		CalyxEngine::PlaySession* pPlaySession_ = nullptr;
 
 		SceneContext* lastBoundCtx_	  = nullptr;
 		uint64_t	  lastRuntimeGen_ = 0;
+		SceneContext* editorPreviewCtx_ = nullptr;
 
 		std::unique_ptr<SceneTransitionService> transitionService_;
 
 		std::vector<SceneId> registeredSceneIds_;
 
-		std::unique_ptr<CalyxEditor::PickingPass> pickingPass_;
+		std::unique_ptr<CalyxEngine::PickingPass> pickingPass_;
+		std::unique_ptr<CalyxEngine::GridRenderer> editorGridRenderer_;
+		std::unique_ptr<ModelRenderer> editorPreviewModelRenderer_;
 	};
 
-} // namespace CalyxScene
+} // namespace CalyxEngine

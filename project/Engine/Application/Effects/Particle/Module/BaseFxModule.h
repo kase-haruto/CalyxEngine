@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
 	 * BaseFxModule
@@ -31,7 +31,7 @@ namespace CalyxEffect {
 		const Guid& GetGuid() const { return guid_; }
 		void SetGuid(const Guid& g) { guid_ = g; }
 
-		virtual const char* GetTypeName() const = 0;
+		virtual const char* GetObjectClassName() const = 0;
 
 	protected:
 		bool        isEnabled_ = true;

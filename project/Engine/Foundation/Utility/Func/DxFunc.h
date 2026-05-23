@@ -3,7 +3,7 @@
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <wrl.h>
-#include <cassert>
+#include <Engine/Foundation/Debug/CxAssert.h>
 
 namespace{
 	using Microsoft::WRL::ComPtr;

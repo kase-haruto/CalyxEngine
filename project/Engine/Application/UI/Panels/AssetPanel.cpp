@@ -1,22 +1,118 @@
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "AssetPanel.h"
+
+#include "Engine/Assets/Manager/AssetManager.h"
+
+#include <Data/Engine/Prefab/Serializer/PrefabSerializer.h>
 #include <Engine/Assets/Database/AssetDatabase.h>
+#include <Engine/Assets/DataAsset/MaterialAsset.h>
+#include <Engine/Foundation/Debug/CxAssert.h>
+#include <Engine/Objects/3D/Actor/SceneObject.h>
 
 #include <externals/imgui/ImGuiFileDialog.h>
-#include <externals/imgui/imgui.h>
+#include <externals/imgui/imgui_internal.h>
 
 #include <algorithm>
+#include <cctype>
 #include <cmath>
+#include <fstream>
 #include <system_error>
 #include <vector>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
+	namespace {
+
+		std::string StripTrailingNumberSuffix(const std::string& name) {
+			if(name.size() < 3 || name.back() != ')') return name;
+
+			const auto open = name.find_last_of('(');
+			if(open == std::string::npos || open + 1 >= name.size() - 1) return name;
+
+			for(size_t i = open + 1; i < name.size() - 1; ++i) {
+				if(!std::isdigit(static_cast<unsigned char>(name[i]))) {
+					return name;
+				}
+			}
+
+			return name.substr(0, open);
+		}
+
+		std::string SanitizeAssetFileStem(std::string name) {
+			name = StripTrailingNumberSuffix(name);
+			if(name.empty()) name = "NewPrefab";
+			for(char& c : name) {
+				const unsigned char uc = static_cast<unsigned char>(c);
+				if(c == '<' || c == '>' || c == ':' || c == '"' || c == '/' || c == '\\' ||
+				   c == '|' || c == '?' || c == '*' || std::iscntrl(uc)) {
+					c = '_';
+				}
+			}
+			while(!name.empty() && (name.back() == ' ' || name.back() == '.')) {
+				name.pop_back();
+			}
+			return name.empty() ? "NewPrefab" : name;
+		}
+
+		std::filesystem::path MakeUniquePrefabPath(const std::filesystem::path& folder,
+												   const std::string& preferredStem) {
+			const std::string stem = SanitizeAssetFileStem(preferredStem);
+			std::filesystem::path path = folder / (stem + ".prefab");
+			for(int i = 1; std::filesystem::exists(path); ++i) {
+				path = folder / (stem + " " + std::to_string(i) + ".prefab");
+			}
+			return path;
+		}
+
+		void SetPrefabLinkRecursive(SceneObject* object, const Guid& prefabGuid) {
+			if(!object || !prefabGuid.isValid()) return;
+			object->SetPrefabLink(prefabGuid, object->GetGuid());
+			for(const auto& child : object->GetChildren()) {
+				SetPrefabLinkRecursive(child.get(), prefabGuid);
+			}
+		}
+
+		const char* AssetTypeName(AssetType type) {
+			switch(type) {
+			case AssetType::Texture: return "Texture";
+			case AssetType::Model: return "Model";
+			case AssetType::Shader: return "Shader";
+			case AssetType::Material: return "Material";
+			case AssetType::Audio: return "Audio";
+			case AssetType::Prefab: return "Prefab";
+			case AssetType::Effect: return "Effect";
+			case AssetType::SpriteAnimation: return "Sprite Animation";
+			case AssetType::Unknown:
+			default:
+				return "Unknown";
+			}
+		}
+
+		void WarnRejectedAssetDrop(AssetType expected, const AssetDragPayload& payload) {
+			std::string name = "(unknown asset)";
+			if(auto* db = AssetDatabase::GetInstance()) {
+				if(const AssetRecord* record = db->Get(payload.guid)) {
+					name = record->sourcePath.filename().string();
+				}
+			}
+
+			std::string message;
+			if(payload.type == AssetType::Unknown) {
+				message = "Unsupported asset extension: " + name;
+			} else {
+				message = "Cannot drop " + std::string(AssetTypeName(payload.type)) +
+						  " into " + AssetTypeName(expected) + " slot: " + name;
+			}
+			CX_WARN(message.c_str());
+		}
+
+	} // namespace
 
 	void AssetPanel::Initialize(const std::filesystem::path& assetsRoot) {
 		assetsRootAbs_	  = std::filesystem::weakly_canonical(assetsRoot);
 		currentFolderAbs_ = assetsRootAbs_;
 
 		// アイコン（存在しなければ任意の代替に差し替え）
-		auto& tm	 = *TextureManager::GetInstance();
+		auto& tm	 = *AssetManager::GetInstance()->GetTextureManager();
 		iconFolder_	 = (ImTextureID)tm.LoadTexture("UI/Tool/AssetPanel/folder.dds").ptr;
 		iconGeneric_ = (ImTextureID)tm.LoadTexture("UI/Tool/AssetPanel/generic.dds").ptr;
 
@@ -74,6 +170,9 @@ namespace CalyxEditor {
 				ImGui::EndMenu();
 			}
 			if(ImGui::BeginMenu("Assets")) {
+				if(ImGui::MenuItem("New Material")) {
+					CreateMaterialAssetInCurrentFolder();
+				}
 				if(ImGui::MenuItem("Rescan")) {
 					AssetDatabase::GetInstance()->Scan();
 					needsRebuildTree_ = true;
@@ -112,6 +211,12 @@ namespace CalyxEditor {
 			case AssetType::Audio:
 				tname = "Audio";
 				break;
+			case AssetType::Prefab:
+				tname = "Prefab";
+				break;
+			case AssetType::SpriteAnimation:
+				tname = "SpriteAnimation";
+				break;
 			default:
 				break;
 			}
@@ -128,15 +233,174 @@ namespace CalyxEditor {
 	void AssetPanel::DrawLeftTree() {
 		EnsureFolderTreeBuilt();
 
+		DrawFavorites();
+		ImGui::Separator();
+
 		if(ImGui::TreeNodeEx("Assets", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanFullWidth)) {
 			DrawDirNode(rootNode_.get());
 			ImGui::TreePop();
 		}
 	}
 
+	void AssetPanel::CreateMaterialAssetInCurrentFolder() {
+		std::filesystem::path folder = currentFolderAbs_.empty() ? assetsRootAbs_ : currentFolderAbs_;
+
+		std::filesystem::path path = folder / "New Material.mat";
+		for(int i = 1; std::filesystem::exists(path); ++i) {
+			path = folder / ("New Material " + std::to_string(i) + ".mat");
+		}
+
+		{
+			std::ofstream ofs(path);
+			if(!ofs) return;
+		}
+
+		auto* db = AssetDatabase::GetInstance();
+		const Guid guid = db->RegisterOrUpdate(path, AssetType::Material);
+		if(auto* dataAssets = AssetManager::GetInstance()->GetDataAssetManager()) {
+			auto asset = dataAssets->GetAsset<MaterialAsset>(guid);
+			if(asset) {
+				asset->SetName(path.stem().string());
+				dataAssets->SaveAsset(*asset, path);
+			}
+		}
+
+		db->Scan();
+		cacheValid_ = false;
+		needsRebuildTree_ = true;
+	}
+
+	void AssetPanel::CreatePrefabFromSceneObject(SceneObject* object,
+												 const std::filesystem::path& folder) {
+		if(!object) return;
+
+		std::error_code ec;
+		std::filesystem::create_directories(folder, ec);
+		if(ec) return;
+
+		const std::filesystem::path path = MakeUniquePrefabPath(folder, object->GetName());
+		if(!PrefabSerializer::Save(
+			   {object},
+			   path.string(),
+			   PrefabSerializer::SaveOptions{true})) return;
+
+		auto* db = AssetDatabase::GetInstance();
+		const Guid prefabGuid = db->RegisterOrUpdate(path, AssetType::Prefab);
+		if(prefabGuid.isValid()) {
+			SetPrefabLinkRecursive(object, prefabGuid);
+		}
+		db->Scan();
+
+		cacheValid_ = false;
+		needsRebuildTree_ = true;
+	}
+
+	void AssetPanel::BeginRenameAsset(const std::filesystem::path& path) {
+		renamingAsset_ = true;
+		renameAssetPath_ = path;
+		const std::string stem = path.stem().string();
+		snprintf(renameAssetBuf_, sizeof(renameAssetBuf_), "%s", stem.c_str());
+	}
+
+	void AssetPanel::CommitRenameAsset() {
+		if(!renamingAsset_ || renameAssetPath_.empty()) return;
+
+		std::string newStem = renameAssetBuf_;
+		const auto first = newStem.find_first_not_of(" \t\r\n");
+		if(first == std::string::npos) {
+			newStem.clear();
+		} else {
+			const auto last = newStem.find_last_not_of(" \t\r\n");
+			newStem = newStem.substr(first, last - first + 1);
+		}
+		if(newStem.empty()) {
+			renamingAsset_ = false;
+			renameAssetPath_.clear();
+			return;
+		}
+
+		const std::filesystem::path oldPath = renameAssetPath_;
+		std::filesystem::path newPath = oldPath.parent_path() / (newStem + oldPath.extension().string());
+		if(newPath != oldPath && !std::filesystem::exists(newPath)) {
+			std::error_code ec;
+			std::filesystem::rename(oldPath, newPath, ec);
+			if(!ec) {
+				std::filesystem::path oldMeta = oldPath;
+				oldMeta += ".meta";
+				std::filesystem::path newMeta = newPath;
+				newMeta += ".meta";
+				if(std::filesystem::exists(oldMeta) && !std::filesystem::exists(newMeta)) {
+					std::filesystem::rename(oldMeta, newMeta, ec);
+				}
+			}
+		}
+
+		renamingAsset_ = false;
+		renameAssetPath_.clear();
+		if(auto* db = AssetDatabase::GetInstance()) {
+			db->Scan();
+		}
+		cacheValid_ = false;
+		needsRebuildTree_ = true;
+	}
+
+	bool AssetPanel::AcceptSceneObjectPrefabDrop(const std::filesystem::path& folder) {
+		bool accepted = false;
+		if(ImGui::BeginDragDropTarget()) {
+			if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SceneObjectPtr")) {
+				if(payload->Data && payload->DataSize == sizeof(SceneObject*)) {
+					SceneObject* object = *reinterpret_cast<SceneObject**>(payload->Data);
+					CreatePrefabFromSceneObject(object, folder);
+					accepted = true;
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
+		return accepted;
+	}
+
+	bool AssetPanel::AcceptSceneObjectPrefabDropOnCurrentWindow(const std::filesystem::path& folder) {
+		ImGuiWindow* window = ImGui::GetCurrentWindowRead();
+		if(!window || window->SkipItems) return false;
+
+		const ImVec2 windowPos = ImGui::GetWindowPos();
+		const ImVec2 minRel = ImGui::GetWindowContentRegionMin();
+		const ImVec2 maxRel = ImGui::GetWindowContentRegionMax();
+		const ImRect dropRect(
+			ImVec2(windowPos.x + minRel.x, windowPos.y + minRel.y),
+			ImVec2(windowPos.x + maxRel.x, windowPos.y + maxRel.y));
+
+		bool accepted = false;
+		if(ImGui::BeginDragDropTargetCustom(dropRect, window->ID)) {
+			if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SceneObjectPtr")) {
+				if(payload->Data && payload->DataSize == sizeof(SceneObject*)) {
+					SceneObject* object = *reinterpret_cast<SceneObject**>(payload->Data);
+					CreatePrefabFromSceneObject(object, folder);
+					accepted = true;
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
+		return accepted;
+	}
+
 	/* ===================== 右ペイン ===================== */
 	static inline void toLowerInplace(std::string& s) {
 		std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return (char)std::tolower(c); });
+	}
+
+	static bool HasExtension(const std::filesystem::path& path, const char* expectedExt) {
+		std::string ext = path.extension().string();
+		toLowerInplace(ext);
+		return ext == expectedExt;
+	}
+
+	static bool IsPngPreviewSidecar(const AssetRecord& rec) {
+		if(rec.type != AssetType::Texture || !HasExtension(rec.sourcePath, ".png")) return false;
+
+		std::filesystem::path ddsPath = rec.sourcePath;
+		ddsPath.replace_extension(".dds");
+		return std::filesystem::exists(ddsPath);
 	}
 	
 	void AssetPanel::DrawRightView() {
@@ -177,15 +441,9 @@ namespace CalyxEditor {
 			// 事前に現在フォルダ lower を1回だけ作る（IsInFolderの高速版）
 			std::string curFolderLower = NormalizeLower(currentFolderAbs_);
 
-			auto isLikelyNon2D = [](const std::filesystem::path& p) {
-				std::string ext = p.extension().string();
-				for(auto& c : ext) c = (char)std::tolower((unsigned char)c);
-				return (ext == ".dds");
-			};
-			(void)isLikelyNon2D; // 必要なら draw 側で再利用
-
 			for(auto* rec : items) {
 				if(!rec) continue;
+				if(IsPngPreviewSidecar(*rec)) continue;
 
 				// スコープ
 				if(scope_ == Scope::SelectedFolder) {
@@ -229,6 +487,7 @@ namespace CalyxEditor {
 			for(auto& dir : cacheSubDirs_) {
 				ImGui::BeginGroup();
 				ImGui::Image(iconFolder_ ? iconFolder_ : iconGeneric_, ImVec2(thumbSize_, thumbSize_));
+				AcceptSceneObjectPrefabDrop(dir);
 				ImGui::TextWrapped("%s", dir.filename().string().c_str());
 				if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
 					currentFolderAbs_ = dir;
@@ -242,12 +501,6 @@ namespace CalyxEditor {
 		}
 
 		// --- ファイル（クリッピングあり）---
-		auto isLikelyNon2D = [](const std::filesystem::path& p) {
-			std::string ext = p.extension().string();
-			for(auto& c : ext) c = (char)std::tolower((unsigned char)c);
-			return (ext == ".dds");
-		};
-
 		if(!gridMode_) {
 			// List：1行=1アイテム → ListClipper で可視分のみ描画
 			ImGuiListClipper clip;
@@ -261,7 +514,7 @@ namespace CalyxEditor {
 					ImGui::BeginGroup();
 
 					ImTextureID thumb =
-						((rec->type == AssetType::Texture) && !isLikelyNon2D(rec->sourcePath) && rec->previewTex)
+						((rec->type == AssetType::Texture) && rec->previewTex)
 							? rec->previewTex
 							: (iconGeneric_ ? iconGeneric_ : nullptr);
 
@@ -269,6 +522,7 @@ namespace CalyxEditor {
 						ImGui::ImageButton("##thumb", thumb, ImVec2(20, 20));
 					else
 						ImGui::Button("No Preview", ImVec2(20, 20));
+					AcceptSceneObjectPrefabDrop(currentFolderAbs_);
 
 					if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
 						AssetDragPayload payload{rec->type, rec->guid};
@@ -278,12 +532,51 @@ namespace CalyxEditor {
 					}
 
 					ImGui::SameLine();
-					ImGui::TextUnformatted(rec->sourcePath.filename().string().c_str());
+					if(renamingAsset_ && renameAssetPath_ == rec->sourcePath) {
+						ImGui::SetKeyboardFocusHere();
+						ImGui::SetNextItemWidth((std::max)(120.0f, ImGui::GetContentRegionAvail().x));
+						if(ImGui::InputText("##RenameAsset", renameAssetBuf_, sizeof(renameAssetBuf_),
+											ImGuiInputTextFlags_EnterReturnsTrue |
+												ImGuiInputTextFlags_AutoSelectAll)) {
+							CommitRenameAsset();
+						}
+						if(ImGui::IsItemDeactivatedAfterEdit()) {
+							CommitRenameAsset();
+						}
+						if(ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+							renamingAsset_ = false;
+							renameAssetPath_.clear();
+						}
+					} else {
+						ImGui::TextUnformatted(rec->sourcePath.filename().string().c_str());
+					}
+					if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+						AssetDragPayload payload{rec->type, rec->guid};
+						ImGui::SetDragDropPayload("CALYX_ASSET", &payload, sizeof(payload));
+						ImGui::TextUnformatted(rec->sourcePath.filename().string().c_str());
+						ImGui::EndDragDropSource();
+					}
+					if(rec->type == AssetType::Prefab && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
+						if(onPrefabEditRequested_) onPrefabEditRequested_(rec->sourcePath);
+					}
+					if(ImGui::BeginPopupContextItem("AssetContext")) {
+						if(rec->type == AssetType::Prefab && ImGui::MenuItem("Edit Prefab")) {
+							if(onPrefabEditRequested_) onPrefabEditRequested_(rec->sourcePath);
+						}
+						if(ImGui::MenuItem("Rename")) {
+							BeginRenameAsset(rec->sourcePath);
+						}
+						ImGui::EndPopup();
+					}
 
 					ImGui::EndGroup();
 					ImGui::PopID();
 				}
 			}
+			const float dropHeight = (std::max)(48.0f, ImGui::GetContentRegionAvail().y);
+			ImGui::InvisibleButton("##PrefabDropTargetList", ImVec2(ImGui::GetContentRegionAvail().x, dropHeight));
+			AcceptSceneObjectPrefabDrop(currentFolderAbs_);
+			AcceptSceneObjectPrefabDropOnCurrentWindow(currentFolderAbs_);
 			return;
 		}
 
@@ -309,14 +602,15 @@ namespace CalyxEditor {
 				ImGui::BeginGroup();
 
 				ImVec2		sz(thumbSize_, thumbSize_);
-				const bool	non2D = (rec->type == AssetType::Texture) && isLikelyNon2D(rec->sourcePath);
-				ImTextureID thumb = (!non2D && rec->previewTex) ? rec->previewTex
-																: (iconGeneric_ ? iconGeneric_ : nullptr);
+				ImTextureID thumb = ((rec->type == AssetType::Texture) && rec->previewTex)
+										 ? rec->previewTex
+										 : (iconGeneric_ ? iconGeneric_ : nullptr);
 
 				if(thumb)
 					ImGui::ImageButton("##thumb", thumb, sz);
 				else
 					ImGui::Button("No Preview", sz);
+				AcceptSceneObjectPrefabDrop(currentFolderAbs_);
 
 				if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
 					AssetDragPayload payload{rec->type, rec->guid};
@@ -325,7 +619,42 @@ namespace CalyxEditor {
 					ImGui::EndDragDropSource();
 				}
 
-				ImGui::TextWrapped("%s", rec->sourcePath.filename().string().c_str());
+				if(renamingAsset_ && renameAssetPath_ == rec->sourcePath) {
+					ImGui::SetKeyboardFocusHere();
+					ImGui::SetNextItemWidth(thumbSize_);
+					if(ImGui::InputText("##RenameAsset", renameAssetBuf_, sizeof(renameAssetBuf_),
+										ImGuiInputTextFlags_EnterReturnsTrue |
+											ImGuiInputTextFlags_AutoSelectAll)) {
+						CommitRenameAsset();
+					}
+					if(ImGui::IsItemDeactivatedAfterEdit()) {
+						CommitRenameAsset();
+					}
+					if(ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+						renamingAsset_ = false;
+						renameAssetPath_.clear();
+					}
+				} else {
+					ImGui::TextWrapped("%s", rec->sourcePath.filename().string().c_str());
+				}
+				if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+					AssetDragPayload payload{rec->type, rec->guid};
+					ImGui::SetDragDropPayload("CALYX_ASSET", &payload, sizeof(payload));
+					ImGui::TextUnformatted(rec->sourcePath.filename().string().c_str());
+					ImGui::EndDragDropSource();
+				}
+				if(rec->type == AssetType::Prefab && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
+					if(onPrefabEditRequested_) onPrefabEditRequested_(rec->sourcePath);
+				}
+				if(ImGui::BeginPopupContextItem("AssetContext")) {
+					if(rec->type == AssetType::Prefab && ImGui::MenuItem("Edit Prefab")) {
+						if(onPrefabEditRequested_) onPrefabEditRequested_(rec->sourcePath);
+					}
+					if(ImGui::MenuItem("Rename")) {
+						BeginRenameAsset(rec->sourcePath);
+					}
+					ImGui::EndPopup();
+				}
 
 				ImGui::EndGroup();
 				ImGui::PopID();
@@ -339,6 +668,10 @@ namespace CalyxEditor {
 		}
 
 		ImGui::Columns(1);
+		const float dropHeight = (std::max)(48.0f, ImGui::GetContentRegionAvail().y);
+		ImGui::InvisibleButton("##PrefabDropTargetGrid", ImVec2(ImGui::GetContentRegionAvail().x, dropHeight));
+		AcceptSceneObjectPrefabDrop(currentFolderAbs_);
+		AcceptSceneObjectPrefabDropOnCurrentWindow(currentFolderAbs_);
 	}
 
 	void AssetPanel::DrawFavorites() {
@@ -363,8 +696,64 @@ namespace CalyxEditor {
 				typeFilter_ = AssetType::Material;
 				scope_		= Scope::All;
 			}
+			if(ImGui::Selectable("All Prefabs")) {
+				typeFilter_ = AssetType::Prefab;
+				scope_		= Scope::All;
+			}
+			if(ImGui::Selectable("All Sprite Animations")) {
+				typeFilter_ = AssetType::SpriteAnimation;
+				scope_		= Scope::All;
+			}
 			ImGui::TreePop();
 		}
+	}
+
+	bool AssetPanel::DrawAssetDropTarget(AssetType expect, Guid* inoutGuid, float height) {
+		if(!inoutGuid) return false;
+
+		ImGui::PushID(inoutGuid);
+		ImVec2 dropSize(ImGui::GetContentRegionAvail().x, height);
+		ImGui::InvisibleButton("##AssetDropTarget", dropSize);
+
+		const bool hovered = ImGui::IsItemHovered();
+		const ImVec2 rmin = ImGui::GetItemRectMin();
+		const ImVec2 rmax = ImGui::GetItemRectMax();
+		ImGui::GetWindowDrawList()->AddRect(
+			rmin, rmax,
+			hovered ? IM_COL32(120, 180, 255, 220) : IM_COL32(90, 90, 90, 160),
+			8.0f, 0, 2.0f);
+
+		const char* label = "Drop Asset here";
+		switch(expect) {
+		case AssetType::Texture: label = "Drop Texture here"; break;
+		case AssetType::Material: label = "Drop Material here"; break;
+		case AssetType::Model: label = "Drop Model here"; break;
+		case AssetType::Prefab: label = "Drop Prefab here"; break;
+		case AssetType::SpriteAnimation: label = "Drop Sprite Animation here"; break;
+		default: break;
+		}
+		ImGui::GetWindowDrawList()->AddText(
+			ImVec2(rmin.x + 8.0f, rmin.y + 8.0f),
+			IM_COL32(230, 230, 230, 255),
+			label);
+
+		bool changed = false;
+		if(ImGui::BeginDragDropTarget()) {
+			if(const ImGuiPayload* p = ImGui::AcceptDragDropPayload("CALYX_ASSET")) {
+				const AssetDragPayload payload =
+					*reinterpret_cast<const AssetDragPayload*>(p->Data);
+				if(payload.type == expect) {
+					*inoutGuid = payload.guid;
+					changed = true;
+				} else {
+					WarnRejectedAssetDrop(expect, payload);
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::PopID();
+		return changed;
 	}
 
 	void AssetPanel::DrawDirNode(DirNode* node) {
@@ -384,6 +773,7 @@ namespace CalyxEditor {
 			scope_			  = Scope::SelectedFolder;
 			typeFilter_.reset();
 		}
+		AcceptSceneObjectPrefabDrop(node->absPath);
 
 		if(open) {
 			// 未スキャンならここでスキャン
@@ -465,4 +855,4 @@ namespace CalyxEditor {
 				  [](const auto& a, const auto& b) { return a.filename().string() < b.filename().string(); });
 	}
 
-} // namespace CalyxEditor
+} // namespace CalyxEngine

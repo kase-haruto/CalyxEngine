@@ -4,13 +4,13 @@
 #include <Engine/Graphics/Pipeline/Service/PipelineService.h>
 #include <Engine/Objects/2D/Object2d/GameObject2d.h>
 
-#include <cassert>
+#include <Engine/Foundation/Debug/CxAssert.h>
 
-namespace Calyx2D {
+namespace CalyxEngine {
 
     void Renderer2D::Initialize(Microsoft::WRL::ComPtr<ID3D12Device> device) {
         device_ = device;
-        assert(device_ && "Renderer2D::Initialize device is null");
+        CX_CHECK(device_ && "Renderer2D::Initialize device is null", "Assertion failed");
 
         CreateQuadMesh_();
 
@@ -106,4 +106,4 @@ namespace Calyx2D {
     	}
     }
 
-} // namespace Calyx2D
+} // namespace CalyxEngine

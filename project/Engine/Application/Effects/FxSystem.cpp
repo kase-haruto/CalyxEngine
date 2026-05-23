@@ -7,18 +7,20 @@
 #include <Engine/Graphics/Pipeline/Service/PipelineService.h>
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 	/*===========================================================================*/
 	/*  ctor / dtor                                                              */
 	/*===========================================================================*/
-	FxSystem::FxSystem() {
+	FxSystem::FxSystem(SceneContext* owner)
+		: owner_(owner) {
 		particleRenderer_ = std::make_unique<ParticleRenderer>();
 
 		// 追加イベント
 		connAdd_ = EventBus::Subscribe<ObjectAdded>(
 			[this](const ObjectAdded& e) {
+				if(e.owner != owner_) return;
 				if(auto ps = std::dynamic_pointer_cast<ParticleSystemObject>(e.sp)) {
-					auto emitter = ps->GetEmitter(); // std::shared_ptr<CalyxEffect::BaseEmitter> など
+					auto emitter = ps->GetEmitter(); // std::shared_ptr<CalyxEngine::BaseEmitter> など
 					if(emitter) {
 						AddEmitter(emitter, ps->GetGuid());
 					}
@@ -28,6 +30,7 @@ namespace CalyxEffect {
 		// 削除イベント（SceneObject が消えたら GUID で emitter を外す）
 		connRem_ = EventBus::Subscribe<ObjectRemoved>(
 			[this](const ObjectRemoved& e) {
+				if(e.owner != owner_) return;
 				RemoveEmitterByGuid(e.sp->GetGuid());
 			});
 	}
@@ -41,12 +44,12 @@ namespace CalyxEffect {
 	/*  追加 / 削除                                                              */
 	/*===========================================================================*/
 
-	void FxSystem::AddEmitter(const std::shared_ptr<CalyxEffect::BaseEmitter>& sp,
+	void FxSystem::AddEmitter(const std::shared_ptr<CalyxEngine::BaseEmitter>& sp,
 							  const Guid&									   ownerGuid) {
 		if(!sp || !ownerGuid.isValid()) return;
 
 		// CPU emitter?
-		if(auto cpu = std::dynamic_pointer_cast<CalyxEffect::FxEmitter>(sp)) {
+		if(auto cpu = std::dynamic_pointer_cast<CalyxEngine::FxEmitter>(sp)) {
 			// 重複登録チェック（同じ ownerGuid & emitter）
 			auto it = std::find_if(cpuEmitters_.begin(), cpuEmitters_.end(),
 								   [&](const CpuEmitterEntry& e) {
@@ -64,7 +67,7 @@ namespace CalyxEffect {
 		}
 
 		// GPU emitter?
-		if(auto gpu = std::dynamic_pointer_cast<CalyxEffect::GpuFxEmitter>(sp)) {
+		if(auto gpu = std::dynamic_pointer_cast<CalyxEngine::GpuFxEmitter>(sp)) {
 			auto it = std::find_if(gpuEmitters_.begin(), gpuEmitters_.end(),
 								   [&](const GpuEmitterEntry& e) {
 									   auto locked = e.emitter.lock();
@@ -83,7 +86,17 @@ namespace CalyxEffect {
 		// どちらでもなければ何もしない
 	}
 
-	void FxSystem::RemoveEmitter(CalyxEffect::BaseEmitter* emitter) {
+	Guid FxSystem::AddRuntimeEmitter(const std::shared_ptr<BaseEmitter>& emitter) {
+		const Guid ownerGuid = Guid::New();
+		AddEmitter(emitter, ownerGuid);
+		return ownerGuid;
+	}
+
+	void FxSystem::RemoveRuntimeEmitterOwner(const Guid& ownerGuid) {
+		RemoveEmitterByGuid(ownerGuid);
+	}
+
+	void FxSystem::RemoveEmitter(CalyxEngine::BaseEmitter* emitter) {
 		if(!emitter) return;
 
 		// CPU emitter 側をポインタ一致で削除
@@ -180,8 +193,8 @@ namespace CalyxEffect {
 	/*  描画                                                                     */
 	/*===========================================================================*/
 	void FxSystem::Render(PipelineService* pso, ID3D12GraphicsCommandList* cmd) {
-		std::vector<std::shared_ptr<CalyxEffect::FxEmitter>>	activeCpu;
-		std::vector<std::shared_ptr<CalyxEffect::GpuFxEmitter>> activeGpu;
+		std::vector<std::shared_ptr<CalyxEngine::FxEmitter>>	activeCpu;
+		std::vector<std::shared_ptr<CalyxEngine::GpuFxEmitter>> activeGpu;
 
 		for(auto it = cpuEmitters_.begin(); it != cpuEmitters_.end();) {
 			if(auto sp = it->emitter.lock()) {
@@ -211,4 +224,4 @@ namespace CalyxEffect {
 		gpuEmitters_.clear();
 	}
 
-} // namespace CalyxEffect
+} // namespace CalyxEngine

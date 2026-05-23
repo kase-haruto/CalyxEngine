@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-namespace CalyxGraphics {
+namespace CalyxEngine {
 
 	/*----------------------------------------------------------------------
 	 *	shadowMapResource

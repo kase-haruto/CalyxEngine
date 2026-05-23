@@ -3,13 +3,13 @@
 #include <Engine/PostProcess/FullscreenDrawer.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
 #include <externals/imgui/imgui.h>
+#include <algorithm>
 
 void Vignette::Initialize(const PipelineSet& psoSet) {
 	psoSet_ = psoSet;
 	buffer_.Initialize(GraphicsGroup::GetInstance()->GetDevice().Get());
 
-	param_.strength = 1.0f;
-	param_.radius = 0.0f;
+	ResetParameters();
 }
 
 void Vignette::Apply(ID3D12GraphicsCommandList* cmd,
@@ -31,6 +31,54 @@ void Vignette::Apply(ID3D12GraphicsCommandList* cmd,
 }
 
 void Vignette::ShowImGui() {
-	//ImGui::SliderFloat("Vignette Strength", &param_.strength, 0.0f, 1.0f);
-	//ImGui::SliderFloat("Vignette Radius", &param_.radius, 0.0f, 1.0f);
+	if(ImGui::CollapsingHeader("Vignette")) {
+		ImGui::SliderFloat("Strength", &param_.strength, 0.0f, 1.0f);
+		ImGui::SliderFloat("Radius", &param_.radius, 0.0f, 1.0f);
+		if(ImGui::Button("Reset")) ResetParameters();
+	}
+}
+
+void Vignette::ResetParameters() {
+	param_.strength = 1.0f;
+	param_.radius = 0.0f;
+}
+
+nlohmann::json Vignette::SaveParameters() const {
+	return nlohmann::json{
+		{"strength", param_.strength},
+		{"radius", param_.radius}
+	};
+}
+
+void Vignette::LoadParameters(const nlohmann::json& params) {
+	if(params.contains("strength") && params["strength"].is_number()) {
+		param_.strength = std::clamp(params["strength"].get<float>(), 0.0f, 1.0f);
+	}
+	if(params.contains("radius") && params["radius"].is_number()) {
+		param_.radius = std::clamp(params["radius"].get<float>(), 0.0f, 1.0f);
+	}
+}
+
+bool Vignette::GetFloatParameter(const std::string& name, float& out) const {
+	if(name == "strength") {
+		out = param_.strength;
+		return true;
+	}
+	if(name == "radius") {
+		out = param_.radius;
+		return true;
+	}
+	return false;
+}
+
+bool Vignette::SetFloatParameter(const std::string& name, float value) {
+	if(name == "strength") {
+		param_.strength = std::clamp(value, 0.0f, 1.0f);
+		return true;
+	}
+	if(name == "radius") {
+		param_.radius = std::clamp(value, 0.0f, 1.0f);
+		return true;
+	}
+	return false;
 }

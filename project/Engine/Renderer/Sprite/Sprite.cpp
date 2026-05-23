@@ -16,13 +16,15 @@
 #include <stdint.h>
 /* externals */
 #include "Engine/Application/UI/Panels/InspectorPanel.h"
+#include "Engine/Assets/Manager/AssetManager.h"
+#include "Engine/Foundation/Math/MathUtil.h"
 
 #include <externals/imgui/imgui.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 
 Sprite::Sprite(const std::string& filePath) {
 
-	handle = TextureManager::GetInstance()->LoadTexture(filePath);
+	handle = CalyxEngine::AssetManager::GetInstance()->GetTextureManager()->LoadTexture(filePath);
 
 	transform_ = {{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}};
 
@@ -41,7 +43,7 @@ Sprite::Sprite(const std::string& filePath) {
 
 Sprite::~Sprite() {}
 
-void Sprite::Initialize(const CalyxMath::Vector2& newPosition, const CalyxMath::Vector2& newSize) {
+void Sprite::Initialize(const CalyxEngine::Vector2& newPosition, const CalyxEngine::Vector2& newSize) {
 	this->position		   = newPosition;
 	transform_.translate.x = position.x;
 	transform_.translate.y = position.y;
@@ -80,7 +82,7 @@ void Sprite::Update() {
 }
 
 void Sprite::ShowGui() {
-	if (GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::Object)) {
+	if (GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::Object)) {
 		GuiCmd::DragFloat2("Position", position, 1.0f);
 		GuiCmd::DragFloat2("Size", size, 1.0f);
 		GuiCmd::SliderFloat("RotateZ", rotate, -180.0f, 180.0f);
@@ -88,17 +90,17 @@ void Sprite::ShowGui() {
 		GuiCmd::EndSection();
 	}
 	
-	if (GuiCmd::BeginSection(CalyxEditor::ParamFilterSection::Material)) {
+	if (GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::Material)) {
 		uvTransform.ShowImGui("uvTransform");
 		GuiCmd::EndSection();
 	}
 }
 
 void Sprite::UpdateMatrix() {
-	CalyxMath::Matrix4x4 matWorld	   = CalyxMath::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
-	CalyxMath::Matrix4x4 matView	   = CalyxMath::Matrix4x4::MakeIdentity();
-	CalyxMath::Matrix4x4 matProjection = CalyxMath::MakeOrthographicMatrix(0.0f, 0.0f, 1280.0f, 720.0f, 0.0f, 100.0f);
-	CalyxMath::Matrix4x4 wvpMatrix	   = CalyxMath::Matrix4x4::Multiply(matWorld, CalyxMath::Matrix4x4::Multiply(matView, matProjection));
+	CalyxEngine::Matrix4x4 matWorld	   = CalyxEngine::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
+	CalyxEngine::Matrix4x4 matView	   = CalyxEngine::Matrix4x4::MakeIdentity();
+	CalyxEngine::Matrix4x4 matProjection = CalyxEngine::MakeOrthographicMatrix(0.0f, 0.0f, 1280.0f, 720.0f, 0.0f, 100.0f);
+	CalyxEngine::Matrix4x4 wvpMatrix	   = CalyxEngine::Matrix4x4::Multiply(matWorld, CalyxEngine::Matrix4x4::Multiply(matView, matProjection));
 	*transformData					   = wvpMatrix;
 }
 
@@ -106,9 +108,9 @@ void Sprite::UpdateTransform() {
 	///===================================================
 	/// UV Transform
 	///===================================================
-	CalyxMath::Matrix4x4 uvTransformMatrix = CalyxMath::MakeScaleMatrix(uvTransform.scale);
-	uvTransformMatrix					   = CalyxMath::Matrix4x4::Multiply(uvTransformMatrix, CalyxMath::MakeRotateZMatrix(uvTransform.rotate.z));
-	uvTransformMatrix					   = CalyxMath::Matrix4x4::Multiply(uvTransformMatrix, CalyxMath::MakeTranslateMatrix(uvTransform.translate));
+	CalyxEngine::Matrix4x4 uvTransformMatrix = CalyxEngine::MakeScaleMatrix(uvTransform.scale);
+	uvTransformMatrix					   = CalyxEngine::Matrix4x4::Multiply(uvTransformMatrix, CalyxEngine::MakeRotateZMatrix(uvTransform.rotate.z));
+	uvTransformMatrix					   = CalyxEngine::Matrix4x4::Multiply(uvTransformMatrix, CalyxEngine::MakeTranslateMatrix(uvTransform.translate));
 	materialData_.uvTransform			   = uvTransformMatrix;
 }
 
@@ -193,29 +195,29 @@ void Sprite::VertexResourceMap() {
 
 void Sprite::TransformResourceMap() {
 	transformResource_->Map(0, nullptr, reinterpret_cast<void**>(&transformData));
-	*transformData = CalyxMath::Matrix4x4::MakeIdentity(); // 初期値は単位行列
+	*transformData = CalyxEngine::Matrix4x4::MakeIdentity(); // 初期値は単位行列
 }
 
 void Sprite::MaterialResourceMap() {
 	materialData_.color		  = {1.0f, 1.0f, 1.0f, 1.0f};
-	materialData_.uvTransform = CalyxMath::Matrix4x4::MakeIdentity();
+	materialData_.uvTransform = CalyxEngine::Matrix4x4::MakeIdentity();
 	materialCB_.TransferData(materialData_);
 }
 
 void Sprite::PutWindowCenter() {
-	CalyxMath::Vector2 windowCenter = {kWindowWidth * 0.5f, kWindowHeight * 0.5f};
+	CalyxEngine::Vector2 windowCenter = {kWindowWidth * 0.5f, kWindowHeight * 0.5f};
 	transform_.translate.x			= windowCenter.x;
 	transform_.translate.y			= windowCenter.y;
 }
 
-void Sprite::SetUvOffset(const CalyxMath::Vector2& offset) {
+void Sprite::SetUvOffset(const CalyxEngine::Vector2& offset) {
 	materialData_.uvOffset = offset;
 }
 
-void Sprite::SetUvScale(const CalyxMath::Vector2& scale) {
+void Sprite::SetUvScale(const CalyxEngine::Vector2& scale) {
 	materialData_.uvScale = scale;
 }
 
-void Sprite::SetTexture(const std::string& tex) { handle = TextureManager::GetInstance()->LoadTexture(tex); }
+void Sprite::SetTexture(const std::string& tex) { handle = CalyxEngine::AssetManager::GetInstance()->GetTextureManager()->LoadTexture(tex); }
 
 const void Sprite::SetTextureHandle(D3D12_GPU_DESCRIPTOR_HANDLE newHandle) { handle = newHandle; }

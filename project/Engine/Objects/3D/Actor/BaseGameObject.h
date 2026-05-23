@@ -6,6 +6,7 @@
 #include <Data/Engine/Configs/Scene/Objects/BaseGameObject/BaseGameObjectConfig.h>
 #include <Engine/Assets/Animation/AnimationModel.h>
 #include <Engine/Assets/Model/Model.h>
+#include <Engine/Foundation/Reflection/CalyxReflection.h>
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 #include <Engine/Objects/3D/Details/BillboardParams.h>
 #include <Engine/objects/Collider/Collider.h>
@@ -20,6 +21,7 @@
  * - ゲームオブジェクト基底クラス
  * - 3Dモデル、コライダー、ビルボードの設定などを統合管理する基底クラス
  *---------------------------------------------------------------------------------------*/
+CALYX_OBJECT(Category = GameObject, DisplayName = "Mesh Object", Icon = "UI/Tool/cube.dds")
 class BaseGameObject
 	: public SceneObject,
 	  public IConfigurable {
@@ -124,7 +126,7 @@ public:
 	 * \brief 中心座標を取得
 	 * \return 中心座標
 	 */
-	virtual const CalyxMath::Vector3 GetCenterPos() const;
+	virtual const CalyxEngine::Vector3 GetCenterPos() const;
 	/**
 	 * \brief ビルボードモードを取得
 	 * \return ビルボードモード
@@ -134,12 +136,12 @@ public:
 	 * \brief タイプ名を取得
 	 * \return タイプ名
 	 */
-	std::string_view	  GetTypeName() const override { return "BaseGameObject"; }
+	std::string_view	  GetObjectClassName() const override { return "BaseGameObject"; }
 	/**
 	 * \brief ワールド座標を取得
 	 * \return ワールド座標
 	 */
-	const CalyxMath::Vector3		  GetWorldPosition() const { return worldTransform_.GetWorldPosition(); }
+	const CalyxEngine::Vector3		  GetWorldPosition() const { return worldTransform_.GetWorldPosition(); }
 	/**
 	 * \brief モデルを取得
 	 * \return モデル
@@ -164,12 +166,12 @@ public:
 	 * \brief アニメーションモデルを取得
 	 * \return アニメーションモデル
 	 */
-	CalyxAssets::AnimationModel*		  AnimationModel();
+	CalyxEngine::AnimationModel*		  AnimationModel();
 	/**
 	 * \brief アニメーションモデルを取得 (const)
 	 * \return アニメーションモデル
 	 */
-	const CalyxAssets::AnimationModel* AnimationModel() const;
+	const CalyxEngine::AnimationModel* AnimationModel() const;
 	/**
 	 * \brief ワールド座標系AABBを取得
 	 * \return AABB
@@ -191,22 +193,22 @@ public:
 	 * \brief 座標を設定
 	 * \param pos 座標
 	 */
-	void SetTranslate(const CalyxMath::Vector3& pos);
+	void SetTranslate(const CalyxEngine::Vector3& pos);
 	/**
 	 * \brief 回転を設定 (クォータニオン)
 	 * \param rot 回転
 	 */
-	void SetRotate(const CalyxMath::Quaternion& rot);
+	void SetRotate(const CalyxEngine::Quaternion& rot);
 	/**
 	 * \brief 回転を設定 (オイラー角)
 	 * \param euler 回転
 	 */
-	void SetRotate(const CalyxMath::Vector3& euler);
+	void SetRotate(const CalyxEngine::Vector3& euler);
 	/**
 	 * \brief スケールを設定
 	 * \param scale スケール
 	 */
-	void SetScale(const CalyxMath::Vector3& scale);
+	void SetScale(const CalyxEngine::Vector3& scale);
 	/**
 	 * \brief 描画の有効/無効を設定
 	 * \param isDrawEnable 有効か
@@ -216,7 +218,7 @@ public:
 	 * \brief 色を設定
 	 * \param color 色
 	 */
-	void SetColor(const CalyxMath::Vector4& color);
+	void SetColor(const CalyxEngine::Vector4& color);
 	/**
 	 * \brief コライダーを設定
 	 * \param collider コライダー
@@ -227,11 +229,14 @@ public:
 	 * \param texName テクスチャ名
 	 */
 	void SetTexture(const std::string& texName);
+	bool SetModelByGuid(const Guid& guid);
+	bool SetModelFileNameForEditor(const std::string& modelName);
+	const std::string& GetModelFileName() const { return config_.GetConfig().modelConfig.modelName; }
 	/**
 	 * \brief UVスケールを設定
 	 * \param scale スケール
 	 */
-	void SetUvScale(const CalyxMath::Vector2& scale) { model_->uvTransform.scale = scale; }
+	void SetUvScale(const CalyxEngine::Vector2& scale) { model_->uvTransform.scale = scale; }
 	/**
 	 * \brief ブレンドモードを設定
 	 * \param mode モード
@@ -260,13 +265,14 @@ protected:
 	//                    private methods
 	//===================================================================*/
 	void InitializeCollider(ColliderKind kind);
+	bool SetModelFromFileName(const std::string& modelName);
 
 protected:
 	//===================================================================*/
 	//                    protected member variables
 	//===================================================================*/
 	std::unique_ptr<BaseModel>		model_			= nullptr; //< 描画用モデル
-	std::unique_ptr<CalyxAssets::AnimationModel> animationModel_ = nullptr; //< アニメーションモデル
+	std::unique_ptr<CalyxEngine::AnimationModel> animationModel_ = nullptr; //< アニメーションモデル
 
 	ObjectModelType objectModelType_ = ModelType_Static; //< モデルタイプ
 

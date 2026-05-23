@@ -2,7 +2,7 @@
 
 #include "SimpleAnimation.h"
 
-namespace CalyxUtil {
+namespace CalyxEngine {
 
 	/*----------------------------------------------------------------------------*/
 	/* SimpleAnimChannel class
@@ -48,4 +48,4 @@ namespace CalyxUtil {
 		animation_.Reset();
 	}
 
-} // namespace CalyxUtil
+} // namespace CalyxEngine

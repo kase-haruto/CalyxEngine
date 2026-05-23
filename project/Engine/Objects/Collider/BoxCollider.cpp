@@ -13,7 +13,7 @@
 // c++
 #include <sstream>
 
-void BoxCollider::Initialize([[maybe_unused]] const CalyxMath::Vector3& size) {
+void BoxCollider::Initialize([[maybe_unused]] const CalyxEngine::Vector3& size) {
 
 	if(name_.empty()) {
 		std::stringstream ss;
@@ -29,13 +29,13 @@ void BoxCollider::Initialize([[maybe_unused]] const CalyxMath::Vector3& size) {
 
 BoxCollider::BoxCollider(bool isEnuble) : Collider::Collider(isEnuble) {}
 
-void BoxCollider::Update(const CalyxMath::Vector3& position, const CalyxMath::Quaternion& rotate) {
+void BoxCollider::Update(const CalyxEngine::Vector3& position, const CalyxEngine::Quaternion& rotate) {
 	// 回転込みでローカルオフセットをワールドへ
-	const CalyxMath::Vector3 worldOffset = CalyxMath::Quaternion::RotateVector(offset_, rotate);
+	const CalyxEngine::Vector3 worldOffset = CalyxEngine::Quaternion::RotateVector(offset_, rotate);
 	shape_.center						 = position + worldOffset;
 
 	// 親の回転に自身の回転オフセットを掛け合わせる
-	CalyxMath::Quaternion localRot = CalyxMath::Quaternion::EulerToQuaternion(rotateOffset_);
+	CalyxEngine::Quaternion localRot = CalyxEngine::Quaternion::EulerToQuaternion(rotateOffset_);
 	shape_.rotate				   = rotate * localRot;
 }
 
@@ -58,7 +58,7 @@ void BoxCollider::ShowGui() {
 	}
 }
 
-const CalyxMath::Vector3& BoxCollider::GetCenter() const { return shape_.center; }
+const CalyxEngine::Vector3& BoxCollider::GetCenter() const { return shape_.center; }
 
 const std::variant<Sphere, OBB>& BoxCollider::GetCollisionShape() {
 	collisionShape_ = shape_;

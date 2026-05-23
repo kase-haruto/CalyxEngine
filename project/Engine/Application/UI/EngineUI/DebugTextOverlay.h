@@ -2,30 +2,30 @@
 /* ========================================================================
 /* include space
 /* ===================================================================== */
-#include "IOnViewportTool.h"
+#include <Engine/Application/UI/EngineUI/IOnViewportTool.h>
 
 /*-----------------------------------------------------------------------------------------
  * DebugTextOverlay
  * - デバッグテキストオーバーレイクラス
- * - ビューポート上に任意のデバッグテキストを表示するためのクラス
+ * - エンジン画面右下にデバッグトーストを表示するためのクラス
  *---------------------------------------------------------------------------------------*/
-class DebugTextOverlay final
-	: public CalyxEditor::BaseOnViewportTool {
-public:
-	//===================================================================*/
-	//					methods
-	//===================================================================*/
-	DebugTextOverlay();
-	~DebugTextOverlay() override;
+namespace CalyxEngine {
+	class DebugTextOverlay final
+		: public BaseOnViewportTool {
+	public:
+		//===================================================================*/
+		//					methods
+		//===================================================================*/
+		DebugTextOverlay();
+		~DebugTextOverlay() override;
 
-	/**
-	 * ビューポート上にデバッグテキストを描画
-	 * - basePos: 描画開始位置（ビューポートの左上を基準としたスクリーン座標）
-	 */
-	void RenderOverlay(const ImVec2& basePos) override;
+		void RenderOverlay(const ImVec2& basePos) override;
+		static void RenderGlobalPopups();
+		static void RenderFatalAssertWindow();
 
-private:
-	//===================================================================*/
-	//					fields
-	//===================================================================*/
-};
+	private:
+		//===================================================================*/
+		//					fields
+		//===================================================================*/
+	};
+} // namespace CalyxEngine

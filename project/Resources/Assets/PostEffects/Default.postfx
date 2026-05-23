@@ -1,0 +1,283 @@
+{
+  "graph": {
+    "links": [
+      {
+        "fromPinId": 2,
+        "id": 18,
+        "toPinId": 16
+      },
+      {
+        "fromPinId": 17,
+        "id": 30,
+        "toPinId": 10
+      },
+      {
+        "fromPinId": 11,
+        "id": 31,
+        "toPinId": 21
+      },
+      {
+        "fromPinId": 22,
+        "id": 32,
+        "toPinId": 4
+      }
+    ],
+    "nextId": 33,
+    "nodes": [
+      {
+        "boolValue": false,
+        "colorValue": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "floatValue": 0.0,
+        "id": 1,
+        "inputs": [],
+        "intValue": 0,
+        "outputs": [
+          {
+            "id": 2,
+            "kind": 1,
+            "name": "Color",
+            "valueType": 2
+          }
+        ],
+        "position": [
+          20.0,
+          120.0
+        ],
+        "properties": {},
+        "title": "Scene Color",
+        "type": "Input"
+      },
+      {
+        "boolValue": false,
+        "colorValue": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "floatValue": 0.0,
+        "id": 3,
+        "inputs": [
+          {
+            "id": 4,
+            "kind": 0,
+            "name": "Color",
+            "valueType": 2
+          }
+        ],
+        "intValue": 0,
+        "outputs": [],
+        "position": [
+          990.0,
+          96.0
+        ],
+        "properties": {},
+        "title": "Output",
+        "type": "Output"
+      },
+      {
+        "boolValue": false,
+        "colorValue": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "floatValue": 0.0,
+        "id": 9,
+        "inputs": [
+          {
+            "id": 10,
+            "kind": 0,
+            "name": "In",
+            "valueType": 2
+          }
+        ],
+        "intValue": 0,
+        "outputs": [
+          {
+            "id": 11,
+            "kind": 1,
+            "name": "Out",
+            "valueType": 2
+          }
+        ],
+        "position": [
+          483.0,
+          47.0
+        ],
+        "properties": {
+          "applyMode": "Always",
+          "autoDisable": true,
+          "duration": 0.25,
+          "easeIndex": 8,
+          "enabled": true,
+          "floatAnimations": [],
+          "parameters": {
+            "center": [
+              0.5,
+              0.5
+            ],
+            "width": 0.009999999776482582
+          }
+        },
+        "title": "RadialBlur",
+        "type": "RadialBlur"
+      },
+      {
+        "boolValue": false,
+        "colorValue": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "floatValue": 0.0,
+        "id": 15,
+        "inputs": [
+          {
+            "id": 16,
+            "kind": 0,
+            "name": "In",
+            "valueType": 2
+          }
+        ],
+        "intValue": 0,
+        "outputs": [
+          {
+            "id": 17,
+            "kind": 1,
+            "name": "Out",
+            "valueType": 2
+          }
+        ],
+        "position": [
+          259.0,
+          63.0
+        ],
+        "properties": {
+          "applyMode": "Always",
+          "autoDisable": true,
+          "duration": 0.25,
+          "easeIndex": 8,
+          "enabled": true,
+          "floatAnimations": [],
+          "parameters": {
+            "intensity": 0.019999999552965164
+          }
+        },
+        "title": "ChromaticAberration",
+        "type": "ChromaticAberration"
+      },
+      {
+        "boolValue": false,
+        "colorValue": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "floatValue": 0.0,
+        "id": 20,
+        "inputs": [
+          {
+            "id": 21,
+            "kind": 0,
+            "name": "In",
+            "valueType": 2
+          }
+        ],
+        "intValue": 0,
+        "outputs": [
+          {
+            "id": 22,
+            "kind": 1,
+            "name": "Out",
+            "valueType": 2
+          }
+        ],
+        "position": [
+          723.0,
+          62.0
+        ],
+        "properties": {
+          "applyMode": "Always",
+          "autoDisable": true,
+          "duration": 0.25,
+          "easeIndex": 8,
+          "enabled": true,
+          "floatAnimations": [],
+          "parameters": {
+            "radius": 0.5,
+            "strength": 1.0
+          }
+        },
+        "title": "Vignette",
+        "type": "Vignette"
+      }
+    ]
+  },
+  "name": "Default",
+  "nodes": [
+    {
+      "applyMode": "Always",
+      "autoDisable": true,
+      "duration": 0.25,
+      "ease": "",
+      "easeIndex": 8,
+      "enabled": true,
+      "floatAnimations": [],
+      "id": 15,
+      "parameters": {
+        "intensity": 0.019999999552965164
+      },
+      "title": "ChromaticAberration",
+      "type": "ChromaticAberration"
+    },
+    {
+      "applyMode": "Always",
+      "autoDisable": true,
+      "duration": 0.25,
+      "ease": "",
+      "easeIndex": 8,
+      "enabled": true,
+      "floatAnimations": [],
+      "id": 9,
+      "parameters": {
+        "center": [
+          0.5,
+          0.5
+        ],
+        "width": 0.009999999776482582
+      },
+      "title": "RadialBlur",
+      "type": "RadialBlur"
+    },
+    {
+      "applyMode": "Always",
+      "autoDisable": true,
+      "duration": 0.25,
+      "ease": "",
+      "easeIndex": 8,
+      "enabled": true,
+      "floatAnimations": [],
+      "id": 20,
+      "parameters": {
+        "radius": 0.5,
+        "strength": 1.0
+      },
+      "title": "Vignette",
+      "type": "Vignette"
+    }
+  ],
+  "outline": {
+    "enabled": true
+  },
+  "type": "PostEffectPreset",
+  "version": 1
+}

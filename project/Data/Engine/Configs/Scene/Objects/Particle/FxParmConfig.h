@@ -3,7 +3,7 @@
 #include <Engine/Foundation/Math/Vector3.h>
 #include <externals/nlohmann/json.hpp>
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 
 	// -------------------------
 	// FxValueMode enum
@@ -47,15 +47,15 @@ namespace CalyxEffect {
 			: FxParamConfig<float>(base) {}
 	};
 
-	struct Vector3ParamConfig : public FxParamConfig<CalyxMath::Vector3> {
-		using FxParamConfig<CalyxMath::Vector3>::FxParamConfig;
+	struct Vector3ParamConfig : public FxParamConfig<CalyxEngine::Vector3> {
+		using FxParamConfig<CalyxEngine::Vector3>::FxParamConfig;
 		Vector3ParamConfig() {
-			constant = CalyxMath::Vector3(1.0f, 1.0f, 1.0f);
-			min		 = CalyxMath::Vector3(0.0f, 0.0f, 0.0f);
-			max		 = CalyxMath::Vector3(1.0f, 1.0f, 1.0f);
+			constant = CalyxEngine::Vector3(1.0f, 1.0f, 1.0f);
+			min		 = CalyxEngine::Vector3(0.0f, 0.0f, 0.0f);
+			max		 = CalyxEngine::Vector3(1.0f, 1.0f, 1.0f);
 		}
-		Vector3ParamConfig(const FxParamConfig<CalyxMath::Vector3>& base)
-			: FxParamConfig<CalyxMath::Vector3>(base) {}
+		Vector3ParamConfig(const FxParamConfig<CalyxEngine::Vector3>& base)
+			: FxParamConfig<CalyxEngine::Vector3>(base) {}
 	};
 
 	// -------------------------
@@ -82,4 +82,4 @@ namespace CalyxEffect {
 		j.at("max").get_to(p.max);
 	}
 
-} // namespace CalyxEffect
+} // namespace CalyxEngine

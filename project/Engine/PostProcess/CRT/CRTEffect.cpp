@@ -24,3 +24,13 @@ void CRTEffect::Apply(ID3D12GraphicsCommandList* cmd,
 	cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	cmd->DrawInstanced(3, 1, 0, 0);
 }
+
+nlohmann::json CRTEffect::SaveParameters() const {
+	return nlohmann::json{{"screenSize", {param_.screenSize.x, param_.screenSize.y}}};
+}
+
+void CRTEffect::LoadParameters(const nlohmann::json& params) {
+	if(auto it = params.find("screenSize"); it != params.end() && it->is_array() && it->size() == 2) {
+		param_.screenSize = {it->at(0).get<float>(), it->at(1).get<float>()};
+	}
+}

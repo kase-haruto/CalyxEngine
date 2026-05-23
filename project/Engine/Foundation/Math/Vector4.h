@@ -3,7 +3,7 @@
 #include <externals/nlohmann/json.hpp>
 
 
-namespace CalyxMath {
+namespace CalyxEngine {
 	struct Matrix4x4;
 	struct Vector3;
 
@@ -47,4 +47,4 @@ namespace CalyxMath {
 		j.at("w").get_to(v.w);
 	}
 
-} // namespace CalyxMath
+} // namespace CalyxEngine

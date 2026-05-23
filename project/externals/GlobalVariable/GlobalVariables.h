@@ -16,7 +16,7 @@ using json = nlohmann::json;
 
 namespace AdjustmentTarget{
     struct Item{
-        std::variant<int32_t, float, CalyxMath::Vector3, bool> value;
+        std::variant<int32_t, float, CalyxEngine::Vector3, bool> value;
     };
 
     struct Group{
@@ -51,7 +51,7 @@ public:
 #ifdef _DEBUG
     void ShowSlider(const std::string& itemName, float& value);
     void ShowSlider(const std::string& itemName, int32_t& value);
-    void ShowSlider(const std::string& itemName, CalyxMath::Vector3& value);
+    void ShowSlider(const std::string& itemName, CalyxEngine::Vector3& value);
     void CheckBox(const std::string& itemName, bool& value);
 #endif // _DEBUG
 

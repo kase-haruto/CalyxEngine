@@ -5,7 +5,7 @@
 // engine
 #include <Engine/Application/UI/EngineUI/IOnViewportTool.h>
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
 	 * PerformanceOverlay
@@ -29,4 +29,4 @@ namespace CalyxEditor {
 		bool   isAdjustment_ = false; //< 調整中か
 		ImVec4 color_		 = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 	};
-} // namespace CalyxEditor
+} // namespace CalyxEngine

@@ -4,7 +4,7 @@
 #include <Engine/Scene/Utility/SceneUtility.h>
 #include <cstdint>
 
-namespace CalyxScene {
+namespace CalyxEngine {
 	/* ========================================================================
 	/* シーン遷移リクエスト
 	/* ===================================================================== */
@@ -15,4 +15,4 @@ namespace CalyxScene {
 		virtual void RequestSceneChange(SceneId nextScene, std::unique_ptr<IScenePayload> payload) = 0;
 	};
 
-} // namespace CalyxScene
+} // namespace CalyxEngine

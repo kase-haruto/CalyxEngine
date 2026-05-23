@@ -54,14 +54,14 @@ namespace CalyxEngine {
 		//===================================================================*/
 		static HINSTANCE GetHinstance() { return hInstance_; }
 		static HWND		 GetHWND() { return hwnd_; }
-		CalyxGraphics::DxCore*			 GetDxCore() const { return dxCore_.get(); }
-		void			 SetEngineUICore(CalyxEditor::EngineUICore* engineUI) { pEngineUICore_ = engineUI; }
+		CalyxEngine::DxCore*			 GetDxCore() const { return dxCore_.get(); }
+		void			 SetEngineUICore(CalyxEngine::EngineUICore* engineUI) { pEngineUICore_ = engineUI; }
 
 	private:
 		//===================================================================*/
 		//                    private members
 		//===================================================================*/
-		std::unique_ptr<CalyxGraphics::DxCore>dxCore_ = nullptr;
+		std::unique_ptr<CalyxEngine::DxCore>dxCore_ = nullptr;
 
 		/*window*/
 		std::unique_ptr<WinApp> winApp_;	// ウィンドウ
@@ -78,7 +78,7 @@ namespace CalyxEngine {
 
 	private:
 		// engineEditors
-		CalyxEditor::EngineUICore* pEngineUICore_; // engineUIの描画
+		CalyxEngine::EngineUICore* pEngineUICore_; // engineUIの描画
 
 		float		radialTimer_		= 0.0f;
 		const float kRadialDurationSec_ = 1.0f;

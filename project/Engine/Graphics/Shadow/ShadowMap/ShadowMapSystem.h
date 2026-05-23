@@ -10,25 +10,25 @@
 #include <Engine/Graphics/Shadow/ShadowMap/ShadowBounds.h>
 #include <Engine/Foundation/Math/Matrix4x4.h>
 
-namespace CalyxMath {
+namespace CalyxEngine {
 	struct Matrix4x4;
 }
 
-namespace CalyxAssets {
+namespace CalyxEngine {
 	class AnimationModel;
 }
 
 class PipelineService;
 class BaseModel;
 
-namespace CalyxGraphics {
+namespace CalyxEngine {
 
 	/*----------------------------------------------------------------------*
 	 *	ShadowCBData
 	 *	- シャドウマップ用定数バッファデータ
 	 *---------------------------------------------------------------------*/
 	struct ShadowCBData {
-		CalyxMath::Matrix4x4 lightVP;
+		CalyxEngine::Matrix4x4 lightVP;
 		float shadowBias = 0.001f;
 		float padding[3];
 	};
@@ -63,7 +63,7 @@ namespace CalyxGraphics {
 			PipelineService*                                                                    psoService,
 			ID3D12Device*                                                                       device,
 			const std::unordered_map<BaseModel*,std::vector<WorldTransform>>&                   staticVisible,
-			const std::unordered_map<CalyxAssets::AnimationModel*,std::vector<WorldTransform>>& skinnedVisible);
+			const std::unordered_map<CalyxEngine::AnimationModel*,std::vector<WorldTransform>>& skinnedVisible);
 
 		void BindForMainPass(ID3D12GraphicsCommandList* cmd);
 
@@ -80,7 +80,7 @@ namespace CalyxGraphics {
 		 * \param lightVP
 		 * \note LightLibraryで作った行列を渡す
 		 */
-		void SetLightVP(const CalyxMath::Matrix4x4& lightVP);
+		void SetLightVP(const CalyxEngine::Matrix4x4& lightVP);
 
 		const ShadowBounds& GetShadowBounds()const { return shadowBounds_; }
 
@@ -99,4 +99,4 @@ namespace CalyxGraphics {
 		ShadowBounds                   shadowBounds_; //< シャドウ範囲管理
 	};
 
-} // namespace CalyxGraphics
+} // namespace CalyxEngine

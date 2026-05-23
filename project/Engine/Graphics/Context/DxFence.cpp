@@ -1,4 +1,5 @@
 #include <Engine/Graphics/Context/DxFence.h>
+#include <Engine/Foundation/Debug/CxAssert.h>
 
 DxFence::~DxFence(){
 	if (fenceEvent_ != nullptr){
@@ -12,11 +13,11 @@ void DxFence::Initialize(ComPtr<ID3D12Device> device){
 	//初期値0でFenceを作る
 	fenceValue_ = 0;
 	hr = device->CreateFence(fenceValue_, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence_));
-	assert(SUCCEEDED(hr));
+	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
 	//Fenceのsignalを待つためのイベントを作成する
 	fenceEvent_ = CreateEvent(NULL, FALSE, FALSE, NULL);
-	assert(fenceEvent_ != nullptr);
+	CX_CHECK(fenceEvent_ != nullptr, "Assertion failed");
 }
 
 void DxFence::Signal(ComPtr<ID3D12CommandQueue> commandQueue){

@@ -5,19 +5,13 @@
 #include <Engine/Assets/Model/ModelData.h>
 #include <Engine/Foundation/Math/Quaternion.h>
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
-#include <Engine/Graphics/Context/GraphicsGroup.h>
 
 /* Assimp */
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
 #include <assimp/scene.h>
-
-/* DX12 */
-#include <d3d12.h>
-#include <wrl.h>
 
 /* STL */
 #include <condition_variable>
+#include <filesystem>
 #include <functional>
 #include <future>
 #include <memory>
@@ -34,21 +28,14 @@
  *---------------------------------------------------------------------------------------*/
 class ModelManager {
 public:
-	/**
-	 * \brief インスタンスを取得
-	 * \return インスタンス
-	 */
-	static ModelManager* GetInstance();
 
+	ModelManager();
+	~ModelManager();
+	 
 	/**
 	 * \brief 初期化
 	 */
-	static void Initialize();
-
-	/**
-	 * \brief 終了処理
-	 */
-	static void Finalize();
+	void Initialize();
 
 	friend struct std::default_delete<ModelManager>;
 
@@ -58,7 +45,7 @@ public:
 	 * \return ロード完了時の ModelData* を返す future
 	 *         （※ ModelData はコピー禁止のためポインタで返す）
 	 */
-	static std::future<ModelData*> LoadModel(const std::string& fileName);
+	std::future<ModelData*> LoadModel(const std::string& fileName);
 
 	/**
 	 * \brief ロードが完了したモデルの GPUリソース作成をまとめて行う
@@ -90,7 +77,7 @@ public:
 	/**
 	 * \brief サンプル: 複数モデルを一括でロード
 	 */
-	static void StartUpLoad();
+	void StartUpLoad();
 
 	/**
 	 * \brief ロード済みモデル名の一覧を取得
@@ -98,8 +85,10 @@ public:
 	std::vector<std::string> GetLoadedModelNames() const;
 
 private:
-	ModelManager();
-	~ModelManager();
+	/**
+	 * \brief ディレクトリ内の全モデルファイルをロードするサンプル
+	 */
+	void LoadAllModels();
 
 	/// ファイル読み込み → CPU側 ModelData を構築（Assimp使用）
 	ModelData LoadModelFile(const std::string& directoryPath, const std::string& fileNameWithExt);
@@ -111,7 +100,7 @@ private:
 	void LoadMesh(const aiMesh* mesh, ModelData& modelData);
 
 	/// マテリアル読み込み
-	void LoadMaterial(const aiScene* scene, const aiMesh* mesh, ModelData& modelData);
+	void LoadMaterials(const aiScene* scene, const std::filesystem::path& modelDirectory, ModelData& modelData);
 
 	/// UV変換情報読み込み
 	void LoadUVTransform(const aiMaterial* material, MaterialData& outMaterial);
@@ -120,16 +109,15 @@ private:
 	void LoadSkinData(const aiMesh* mesh, ModelData& modelData);
 
 	/// アニメーション評価
-	CalyxMath::Vector3    Evaluate(const AnimationCurve<CalyxMath::Vector3>& curve, float time);
-	CalyxMath::Quaternion Evaluate(const AnimationCurve<CalyxMath::Quaternion>& curve, float time);
+	CalyxEngine::Vector3    Evaluate(const AnimationCurve<CalyxEngine::Vector3>& curve, float time);
+	CalyxEngine::Quaternion Evaluate(const AnimationCurve<CalyxEngine::Quaternion>& curve, float time);
 
 private:
 	//===================================================================
 	//                    private member variables
 	//===================================================================*/
 
-	static std::unique_ptr<ModelManager> instance_;      //< シングルトンインスタンス
-	static const std::string             directoryPath_; //< モデルディレクトリパス
+	const std::string             directoryPath_ = "Resources/Assets/models"; //< モデルディレクトリパス
 
 	std::unordered_map<std::string, std::unique_ptr<ModelData>> modelDatas_;
 	mutable std::mutex                        modelDataMutex_; //< モデルデータ用ミューテックス

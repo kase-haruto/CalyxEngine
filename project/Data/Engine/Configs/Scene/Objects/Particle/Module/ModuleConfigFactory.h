@@ -4,16 +4,16 @@
 #include <externals/nlohmann/json.hpp>
 #include <memory>
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 	namespace ModuleConfigFactory {
 
-		inline std::unique_ptr<CalyxEffect::BaseModuleConfig> FromJson(const nlohmann::json& j) {
+		inline std::unique_ptr<CalyxEngine::BaseModuleConfig> FromJson(const nlohmann::json& j) {
 			if(!j.contains("name") || !j.at("name").is_string()) {
 				return nullptr;
 			}
 
 			std::string						  name = j.at("name").get<std::string>();
-			std::unique_ptr<CalyxEffect::BaseModuleConfig> modConfig;
+			std::unique_ptr<CalyxEngine::BaseModuleConfig> modConfig;
 
 			if(name == "GravityModule") {
 				modConfig = std::make_unique<GravityModuleConfig>();
@@ -35,4 +35,4 @@ namespace CalyxEffect {
 
 	} // namespace ModuleConfigFactory
 
-} // namespace CalyxEffect
+} // namespace CalyxEngine

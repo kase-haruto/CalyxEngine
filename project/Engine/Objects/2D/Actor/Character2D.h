@@ -3,7 +3,7 @@
 #include <Engine/Objects/2D/Object2d/SpriteObject2d.h>
 #include <memory>
 
-namespace Calyx2D {
+namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
 	 * Character2D
@@ -57,28 +57,28 @@ namespace Calyx2D {
 		 * \brief 座標を取得
 		 * \return 座標
 		 */
-		const CalyxMath::Vector2& GetPosition() const { return position_; }
+		const CalyxEngine::Vector2& GetPosition() const { return position_; }
 		/**
 		 * \brief 速度を取得
 		 * \return 速度
 		 */
-		const CalyxMath::Vector2& GetVelocity() const { return velocity_; }
+		const CalyxEngine::Vector2& GetVelocity() const { return velocity_; }
 		// setter
 		/**
 		 * \brief 座標を設定
 		 * \param pos 座標
 		 */
-		void SetPosition(const CalyxMath::Vector2& pos)const { spriteObj_->SetPosition(pos); }
+		void SetPosition(const CalyxEngine::Vector2& pos)const { spriteObj_->SetPosition(pos); }
 		/**
 		 * \brief サイズを設定
 		 * \param size サイズ
 		 */
-		void SetSize(const CalyxMath::Vector2& size)const { spriteObj_->SetScale(size); }
+		void SetSize(const CalyxEngine::Vector2& size)const { spriteObj_->SetScale(size); }
 		/**
 		 * \brief 速度を設定
 		 * \param vel 速度
 		 */
-		void SetVelocity(const CalyxMath::Vector2& vel) { velocity_ = vel; }
+		void SetVelocity(const CalyxEngine::Vector2& vel) { velocity_ = vel; }
 
 	protected:
 		std::unique_ptr<SpriteObject2d> spriteObj_ = nullptr; //< スプライトオブジェクト
@@ -87,8 +87,8 @@ namespace Calyx2D {
 		//===================================================================*/
 		//                   private members
 		//===================================================================*/
-		CalyxMath::Vector2				position_;	  //< 位置
-		CalyxMath::Vector2				velocity_;	  //< 速度
+		CalyxEngine::Vector2				position_;	  //< 位置
+		CalyxEngine::Vector2				velocity_;	  //< 速度
 	};
 
-} // namespace Calyx2D
+} // namespace CalyxEngine

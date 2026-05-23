@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DxBuffer.h"
+#include <Engine/Foundation/Debug/CxAssert.h>
 #include <Engine/Graphics/Descriptor/DescriptorAllocator.h>
 #include <cstring>
 #include <d3dx12.h>
@@ -88,7 +89,7 @@ void DxStructuredBuffer<T>::InitializeAsRW(Microsoft::WRL::ComPtr<ID3D12Device> 
 		D3D12_RESOURCE_STATE_COMMON,
 		nullptr,
 		IID_PPV_ARGS(&this->resource_));
-	assert(SUCCEEDED(hr) && "StructuredBuffer (RW) creation failed.");
+	CX_CHECK(SUCCEEDED(hr) && "StructuredBuffer (RW) creation failed.", "Assertion failed");
 
 	// DEFAULT ヒープなので Map 不可
 	this->mappedPtr_ = nullptr;
@@ -96,7 +97,7 @@ void DxStructuredBuffer<T>::InitializeAsRW(Microsoft::WRL::ComPtr<ID3D12Device> 
 
 template <typename T>
 void DxStructuredBuffer<T>::CreateSrv(ID3D12Device* device, UINT firstElement, UINT numElements) {
-	assert(this->resource_ && "resource_ is null before CreateSrv");
+	CX_CHECK(this->resource_ && "resource_ is null before CreateSrv", "Assertion failed");
 	if(numElements == UINT_MAX) numElements = this->elementCount_ - firstElement;
 
 	// 既存ディスクリプタがある場合は再利用（同じCPUハンドルに作り直す）
@@ -118,7 +119,7 @@ void DxStructuredBuffer<T>::CreateSrv(ID3D12Device* device, UINT firstElement, U
 
 template <typename T>
 void DxStructuredBuffer<T>::CreateUav(ID3D12Device* device, UINT firstElement, UINT numElements) {
-	assert(this->resource_ && "resource_ is null before CreateUav");
+	CX_CHECK(this->resource_ && "resource_ is null before CreateUav", "Assertion failed");
 	if(numElements == UINT_MAX) numElements = this->elementCount_ - firstElement;
 
 	if(uavHandle_.cpu.ptr == 0) {
@@ -154,8 +155,8 @@ void DxStructuredBuffer<T>::ReleaseUav() {
 
 template <typename T>
 void DxStructuredBuffer<T>::Write(UINT index, const T& value) {
-	assert(this->mappedPtr_ && "Write() requires Initialize(upload) resource.");
-	assert(index < this->elementCount_);
+	CX_CHECK(this->mappedPtr_ && "Write() requires Initialize(upload) resource.", "Assertion failed");
+	CX_CHECK(index < this->elementCount_, "Assertion failed");
 	std::memcpy(static_cast<uint8_t*>(this->mappedPtr_) + sizeof(T) * index, &value, sizeof(T));
 }
 

@@ -27,10 +27,10 @@ void CameraManager::SetType(CameraType t) {
 	}
 }
 
-const CalyxMath::Vector2& CameraManager::ViewportSize(ViewportType vt) const{
+const CalyxEngine::Vector2& CameraManager::ViewportSize(ViewportType vt) const{
 	return (vt == ViewportType::VIEWPORT_MAIN) ? vpMain_ : vpDebug_;
 }
-void CameraManager::SetViewportSize(ViewportType vt, const CalyxMath::Vector2& s){ (vt == ViewportType::VIEWPORT_MAIN ? vpMain_ : vpDebug_) = s; }
+void CameraManager::SetViewportSize(ViewportType vt, const CalyxEngine::Vector2& s){ (vt == ViewportType::VIEWPORT_MAIN ? vpMain_ : vpDebug_) = s; }
 
 void CameraManager::SetAspectRatio(float w, float h){ if (h > 0){ float asp = w / h; for (auto& kv : cameras_) kv.second->SetAspectRatio(asp); } }
 
@@ -47,9 +47,9 @@ BaseCamera* CameraManager::GetActive(){
 	return mgr->Main3D(); // Fallback to main
 }
 void CameraManager::SetTypeStatic(CameraType t){ if (Mgr()) Mgr()->SetType(t); }
-const CalyxMath::Vector2& CameraManager::GetViewportSizeStatic(ViewportType vt){ 
-	static CalyxMath::Vector2 dummy {0,0}; return Mgr() ? Mgr()->ViewportSize(vt) : dummy; }
-void CameraManager::SetViewportSizeStatic(ViewportType vt, const CalyxMath::Vector2& s){ if (Mgr()) Mgr()->SetViewportSize(vt, s); }
+const CalyxEngine::Vector2& CameraManager::GetViewportSizeStatic(ViewportType vt){ 
+	static CalyxEngine::Vector2 dummy {0,0}; return Mgr() ? Mgr()->ViewportSize(vt) : dummy; }
+void CameraManager::SetViewportSizeStatic(ViewportType vt, const CalyxEngine::Vector2& s){ if (Mgr()) Mgr()->SetViewportSize(vt, s); }
 void CameraManager::Finalize(){ 
 	// static な Mgr() を経由してインスタンスを破棄するのではなく、
 	// シーン終了時に SceneContext と共に破棄されるのが想定。

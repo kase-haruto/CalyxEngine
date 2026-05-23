@@ -1,7 +1,7 @@
 #include "BaseEmitter.h"
 
 #include "Engine/Assets/Database/AssetDatabase.h"
-#include "Engine/Assets/Model/ModelManager.h"
+#include "Engine/Assets/Manager/AssetManager.h"
 #include "Engine/Foundation/Math/MathUtil.h"
 #include "Engine/Foundation/Utility/Converter/EnumConverter.h"
 
@@ -9,7 +9,7 @@
 #include <cmath>
 #include <iostream>
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 	BaseEmitter::BaseEmitter() = default;
 
 	void BaseEmitter::TransferParticleDataToGPU() {
@@ -29,18 +29,18 @@ namespace CalyxEffect {
 		// メッシュを返す
 		// プリミティブ形状じゃない場合モデルからメッシュを取得
 		if(!primitive_.has_value()) {
-			return ModelManager::GetInstance()->GetMeshResource(modelPath);
+			return AssetManager::GetInstance()->GetModelManager()->GetMeshResource(modelPath);
 		}
 
 		// プリミティブ形状の場合は内部メッシュを返す
 		// TODO: プリミティブ形状のメッシュ生成を実装する
 		// TODO: 形状ごとにメッシュを返すファクトリを実装する
 		// NOTE: 仮に plane メッシュを返すようにしておく
-		return ModelManager::GetInstance()->GetMeshResource(modelPath);
+		return AssetManager::GetInstance()->GetModelManager()->GetMeshResource(modelPath);
 	}
 
-	CalyxMath::Vector3 BaseEmitter::GenerateSpawnPosition() {
-		using namespace CalyxMath;
+	CalyxEngine::Vector3 BaseEmitter::GenerateSpawnPosition() {
+		using namespace CalyxEngine;
 
 		const Vector3 absScale{
 			(std::max)(std::abs(worldScale_.x), 0.0001f),
@@ -114,9 +114,9 @@ namespace CalyxEffect {
 		modelGuid_ = g;
 
 		// ModelManagerにロードを要求（未ロードの場合にのみ実際にロードされる）
-		ModelManager::LoadModel(modelPath);
+		AssetManager::GetInstance()->GetModelManager()->LoadModel(modelPath);
 
 		return true;
 	}
 
-} // namespace CalyxEffect
+} // namespace CalyxEngine

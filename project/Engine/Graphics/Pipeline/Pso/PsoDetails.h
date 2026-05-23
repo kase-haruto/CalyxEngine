@@ -24,6 +24,10 @@ namespace PipelineTag {
 		SkinningObject3D,
 		WireframeObject3D,
 		WireframeSkinnedObject3D,
+		OutlineObject3D,
+		OutlineSkinnedObject3D,
+		OutlineNormalObject3D,
+		OutlineNormalSkinnedObject3D,
 		ShadowStatic,
 		ShadowSkinned,
 		PickingObject3D,
@@ -31,6 +35,7 @@ namespace PipelineTag {
 		Object2d,
 		Particle,
 		GpuParticle,
+		EditorInfiniteGrid,
 		Line,
 		Effect,
 		Skybox,
@@ -45,6 +50,8 @@ namespace PipelineTag {
 		ChromaticAberration,
 		Vignette,
 		CRT,
+		OutlineComposite,
+		Blend,
 
 		Count
 	};
@@ -53,6 +60,7 @@ namespace PipelineTag {
 		ParticleInitializeCompute = 0,
 		ParticleEmitCompute,
 		ParticleUpdateCompute,
+		SkinningCompute,
 		kComputeCount
 	};
 } // namespace PipelineTag

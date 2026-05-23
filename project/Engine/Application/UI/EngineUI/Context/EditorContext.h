@@ -6,7 +6,7 @@
 #include <Engine/Editor/BaseEditor.h>
 
 
-namespace CalyxEditor {
+namespace CalyxEngine {
 	class EditorContext {
 	public:
 		//===================================================================*/

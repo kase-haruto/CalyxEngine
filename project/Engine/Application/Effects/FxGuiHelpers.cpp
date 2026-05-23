@@ -5,7 +5,7 @@
 #include <externals/imgui/imgui.h>
 #include <externals/imgui/imgui_internal.h>
 
-namespace CalyxEffect {
+namespace CalyxEngine {
 
 	namespace FxGui {
 
@@ -77,4 +77,4 @@ namespace CalyxEffect {
 
 	} // namespace FxGui
 
-} // namespace CalyxEffect
+} // namespace CalyxEngine

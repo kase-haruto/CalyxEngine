@@ -19,15 +19,15 @@
 #include <wrl.h>
 
 struct PointLightData{
-	CalyxMath::Vector4 color; //< ライトの色
-	CalyxMath::Vector3 position; //< ライトの位置
+	CalyxEngine::Vector4 color; //< ライトの色
+	CalyxEngine::Vector3 position; //< ライトの位置
 	float intensity; //< 光度
 	float radius; //< ライトの届く最大距離
 	float decay; //< 減衰率
 	float pad[2]; //< パディング
 };
 
-namespace CalyxGraphics {
+namespace CalyxEngine {
 	class DxCore;
 }
 
@@ -97,7 +97,7 @@ public:
 	 * \brief タイプ名を取得
 	 * \return タイプ名
 	 */
-	std::string_view GetTypeName() const override{ return "PointLight"; }
+	std::string_view GetObjectClassName() const override{ return "PointLight"; }
 
 	/**
 	 * \brief オブジェクトタイプ名を取得
@@ -139,4 +139,3 @@ private:
 
 	ConfigurableObject<PointLightConfig> config_; //< コンフィグ管理
 };
-

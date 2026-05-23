@@ -1,4 +1,5 @@
 #include "AnimationModel.h"
+#include <Engine/Foundation/Debug/CxAssert.h>
 
 #include <Engine/Assets/Model/ModelData.h>
 #include <Engine/Foundation/Math/Vector4.h>
@@ -8,6 +9,7 @@
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
+#include <Engine/Graphics/Pipeline/Service/PipelineService.h>
 #include <Engine/Lighting/LightData.h>
 #include <Engine/Renderer/Mesh/VertexData.h>
 
@@ -16,11 +18,14 @@
 #include <externals/imgui/imgui.h>
 #endif
 
+#include "Engine/Foundation/Math/MathUtil.h"
+
 #include <Engine/Foundation/Utility/Func/CxUtils.h>
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
+#include <d3dx12.h>
 #include <filesystem>
 
-namespace CalyxAssets {
+namespace CalyxEngine {
 	/* =====================================================================
 	   ctor – 最初に読み込んだファイルを初期アニメとして登録
 	   ===================================================================*/
@@ -143,8 +148,8 @@ namespace CalyxAssets {
 
 	// 特殊化が必要ならここで実装 (Slerpなどは内部で呼ぶ)
 
-	CalyxMath::Quaternion AnimationModel::CalculateValue(const AnimationCurve<CalyxMath::Quaternion>& c, float t, size_t& hint) {
-		if(c.keyframes.empty()) return CalyxMath::Quaternion::MakeIdentity();
+	CalyxEngine::Quaternion AnimationModel::CalculateValue(const AnimationCurve<CalyxEngine::Quaternion>& c, float t, size_t& hint) {
+		if(c.keyframes.empty()) return CalyxEngine::Quaternion::MakeIdentity();
 		if(t <= c.keyframes.front().time) {
 			hint = 0;
 			return c.keyframes.front().value;
@@ -174,10 +179,10 @@ namespace CalyxAssets {
 		}
 
 		float lT = (t - c.keyframes[i0].time) / (c.keyframes[i1].time - c.keyframes[i0].time);
-		return CalyxMath::Quaternion::Slerp(c.keyframes[i0].value, c.keyframes[i1].value, lT);
+		return CalyxEngine::Quaternion::Slerp(c.keyframes[i0].value, c.keyframes[i1].value, lT);
 	}
 
-	CalyxMath::Vector3 AnimationModel::CalculateValue(const AnimationCurve<CalyxMath::Vector3>& c, float t, size_t& hint) {
+	CalyxEngine::Vector3 AnimationModel::CalculateValue(const AnimationCurve<CalyxEngine::Vector3>& c, float t, size_t& hint) {
 		if(c.keyframes.empty()) return {};
 		if(t <= c.keyframes.front().time) {
 			hint = 0;
@@ -205,7 +210,7 @@ namespace CalyxAssets {
 		}
 
 		float lT = (t - c.keyframes[i0].time) / (c.keyframes[i1].time - c.keyframes[i0].time);
-		return CalyxMath::Vector3::Lerp(c.keyframes[i0].value, c.keyframes[i1].value, lT);
+		return CalyxEngine::Vector3::Lerp(c.keyframes[i0].value, c.keyframes[i1].value, lT);
 	}
 
 	void AnimationModel::SkinningStep() {
@@ -226,9 +231,9 @@ namespace CalyxAssets {
 
 		auto blendOne = [&](AnimationState*		   st,
 							size_t				   j,
-							CalyxMath::Quaternion& rot,
-							CalyxMath::Vector3&	   pos,
-							CalyxMath::Vector3&	   scl,
+							CalyxEngine::Quaternion& rot,
+							CalyxEngine::Vector3&	   pos,
+							CalyxEngine::Vector3&	   scl,
 							float&				   wSum) {
 			if(!st || st->weight <= 0.f) return;
 			const NodeAnimation* node = st->animation.fastChannels[j];
@@ -236,18 +241,18 @@ namespace CalyxAssets {
 
 			// translate
 			if(!node->translate.keyframes.empty()) {
-				CalyxMath::Vector3 t = CalculateValue(node->translate, st->currentTime, st->hintTranslate[j]);
+				CalyxEngine::Vector3 t = CalculateValue(node->translate, st->currentTime, st->hintTranslate[j]);
 				pos += (t - skel.joints[j].restTransform.translate) * st->weight;
 			}
 			// scale
 			if(!node->scale.keyframes.empty()) {
-				CalyxMath::Vector3 s = CalculateValue(node->scale, st->currentTime, st->hintScale[j]);
+				CalyxEngine::Vector3 s = CalculateValue(node->scale, st->currentTime, st->hintScale[j]);
 				scl += (s - skel.joints[j].restTransform.scale) * st->weight;
 			}
 			// rotate
 			if(!node->rotate.keyframes.empty()) {
-				CalyxMath::Quaternion q = CalculateValue(node->rotate, st->currentTime, st->hintRotate[j]);
-				rot						= (wSum == 0.f) ? q : CalyxMath::Quaternion::Slerp(rot, q, st->weight / (wSum + st->weight));
+				CalyxEngine::Quaternion q = CalculateValue(node->rotate, st->currentTime, st->hintRotate[j]);
+				rot						= (wSum == 0.f) ? q : CalyxEngine::Quaternion::Slerp(rot, q, st->weight / (wSum + st->weight));
 				wSum += st->weight;
 			}
 		};
@@ -256,20 +261,20 @@ namespace CalyxAssets {
 			Joint&		joint = skel.joints[j];
 			const auto& rest  = joint.restTransform;
 
-			CalyxMath::Quaternion R = rest.rotate;
-			CalyxMath::Vector3	  P = rest.translate;
-			CalyxMath::Vector3	  S = rest.scale;
+			CalyxEngine::Quaternion R = rest.rotate;
+			CalyxEngine::Vector3	  P = rest.translate;
+			CalyxEngine::Vector3	  S = rest.scale;
 			float				  w = 0.f;
 
 			blendOne(currentAnimation_, j, R, P, S, w);
 			blendOne(nextAnimation_, j, R, P, S, w);
 
-			joint.transform.rotate	  = CalyxMath::Quaternion::Normalize(R);
+			joint.transform.rotate	  = CalyxEngine::Quaternion::Normalize(R);
 			joint.transform.translate = P;
 			joint.transform.scale	  = S;
 
 			// local → skeleton space
-			joint.localMatrix = CalyxMath::MakeAffineMatrix(S, R, P);
+			joint.localMatrix = CalyxEngine::MakeAffineMatrix(S, R, P);
 			joint.skeletonSpaceMatrix =
 				joint.parent
 					? (joint.localMatrix *
@@ -281,8 +286,8 @@ namespace CalyxAssets {
 			dst.skeletonSpaceMatrix =
 				skinCluster_.inverseBindPoseMatrices[j] * joint.skeletonSpaceMatrix;
 			dst.skeletonSpaceInverseTransposeMatrix =
-				CalyxMath::Matrix4x4::Transpose(
-					CalyxMath::Matrix4x4::Inverse(dst.skeletonSpaceMatrix));
+				CalyxEngine::Matrix4x4::Transpose(
+					CalyxEngine::Matrix4x4::Inverse(dst.skeletonSpaceMatrix));
 		}
 	}
 
@@ -292,7 +297,7 @@ namespace CalyxAssets {
 	void AnimationModel::SkeletonUpdate() {
 		// すべてのjointを更新
 		for(Joint& joint : modelData_->skeleton.joints) {
-			joint.localMatrix = CalyxMath::MakeAffineMatrix(joint.transform.scale, joint.transform.rotate, joint.transform.translate);
+			joint.localMatrix = CalyxEngine::MakeAffineMatrix(joint.transform.scale, joint.transform.rotate, joint.transform.translate);
 
 			// 親の行列がある場合は、親の行列を掛け合わせる
 			if(joint.parent) {
@@ -305,11 +310,11 @@ namespace CalyxAssets {
 
 	void AnimationModel::SkinClusterUpdate() {
 		for(size_t jointIndex = 0; jointIndex < modelData_->skeleton.joints.size(); ++jointIndex) {
-			assert(jointIndex < skinCluster_.inverseBindPoseMatrices.size());
+			CX_CHECK(jointIndex < skinCluster_.inverseBindPoseMatrices.size(), "Assertion failed");
 			skinCluster_.mappedPalette[jointIndex].skeletonSpaceMatrix =
 				skinCluster_.inverseBindPoseMatrices[jointIndex] * modelData_->skeleton.joints[jointIndex].skeletonSpaceMatrix;
 			skinCluster_.mappedPalette[jointIndex].skeletonSpaceInverseTransposeMatrix =
-				CalyxMath::Matrix4x4::Transpose(CalyxMath::Matrix4x4::Inverse(skinCluster_.mappedPalette[jointIndex].skeletonSpaceMatrix));
+				CalyxEngine::Matrix4x4::Transpose(CalyxEngine::Matrix4x4::Inverse(skinCluster_.mappedPalette[jointIndex].skeletonSpaceMatrix));
 		}
 	}
 
@@ -348,6 +353,115 @@ namespace CalyxAssets {
 		for(auto& [_, state] : animationStates_) {
 			BuildFastChannels(state.animation);
 		}
+	}
+
+	void AnimationModel::EnsureGpuSkinningResources(ID3D12Device* device) {
+		if(gpuSkinningResourcesCreated_) return;
+		if(!device || !modelData_) return;
+
+		const UINT vertexCount = static_cast<UINT>(modelData_->meshResource.Vertices().size());
+		if(vertexCount == 0) return;
+
+		if(sourceVertexSrv_.cpu.ptr == 0) {
+			sourceVertexSrv_ = DescriptorAllocator::Allocate(DescriptorUsage::CbvSrvUav);
+		}
+		D3D12_SHADER_RESOURCE_VIEW_DESC vertexSrv{};
+		vertexSrv.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+		vertexSrv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		vertexSrv.Format = DXGI_FORMAT_UNKNOWN;
+		vertexSrv.Buffer.FirstElement = 0;
+		vertexSrv.Buffer.NumElements = vertexCount;
+		vertexSrv.Buffer.StructureByteStride = sizeof(VertexPosUvN);
+		vertexSrv.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+		device->CreateShaderResourceView(
+			modelData_->meshResource.VertexBuffer().GetResource().Get(),
+			&vertexSrv,
+			sourceVertexSrv_.cpu);
+
+		if(influenceSrv_.cpu.ptr == 0) {
+			influenceSrv_ = DescriptorAllocator::Allocate(DescriptorUsage::CbvSrvUav);
+		}
+		D3D12_SHADER_RESOURCE_VIEW_DESC influenceSrv{};
+		influenceSrv.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+		influenceSrv.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		influenceSrv.Format = DXGI_FORMAT_UNKNOWN;
+		influenceSrv.Buffer.FirstElement = 0;
+		influenceSrv.Buffer.NumElements = vertexCount;
+		influenceSrv.Buffer.StructureByteStride = sizeof(VertexInfluence);
+		influenceSrv.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+		device->CreateShaderResourceView(
+			skinCluster_.influenceResource.Get(),
+			&influenceSrv,
+			influenceSrv_.cpu);
+
+		skinnedVertexBuffer_.InitializeAsRW(device, vertexCount);
+		skinnedVertexBuffer_.CreateUav(device);
+		skinnedVertexState_ = D3D12_RESOURCE_STATE_COMMON;
+
+		skinnedVertexBufferView_.BufferLocation = skinnedVertexBuffer_.GetResource()->GetGPUVirtualAddress();
+		skinnedVertexBufferView_.SizeInBytes = sizeof(VertexPosUvN) * vertexCount;
+		skinnedVertexBufferView_.StrideInBytes = sizeof(VertexPosUvN);
+
+		gpuSkinningResourcesCreated_ = true;
+	}
+
+	void AnimationModel::DispatchSkinning(PipelineService* psoService, ID3D12GraphicsCommandList* cmdList) {
+		if(!modelData_ || !psoService || !cmdList) return;
+		ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
+		EnsureGpuSkinningResources(device);
+		if(!gpuSkinningResourcesCreated_) return;
+
+		auto* resource = skinnedVertexBuffer_.GetResource().Get();
+		if(skinnedVertexState_ != D3D12_RESOURCE_STATE_UNORDERED_ACCESS) {
+			auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+				resource,
+				skinnedVertexState_,
+				D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+			cmdList->ResourceBarrier(1, &barrier);
+			skinnedVertexState_ = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+		}
+
+		const auto& ps = psoService->GetComputePipelineSet(PipelineTag::Compute::SkinningCompute);
+		ps.SetCompute(cmdList);
+
+		const UINT vertexCount = static_cast<UINT>(modelData_->meshResource.Vertices().size());
+		cmdList->SetComputeRoot32BitConstant(0, vertexCount, 0);
+		cmdList->SetComputeRootDescriptorTable(1, sourceVertexSrv_.gpu);
+		cmdList->SetComputeRootDescriptorTable(2, influenceSrv_.gpu);
+		cmdList->SetComputeRootDescriptorTable(3, skinCluster_.paletteSrvHandle.second);
+		cmdList->SetComputeRootDescriptorTable(4, skinnedVertexBuffer_.GetGpuUavHandle());
+		cmdList->Dispatch((vertexCount + 127u) / 128u, 1, 1);
+
+		D3D12_RESOURCE_BARRIER barriers[2]{};
+		barriers[0].Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+		barriers[0].UAV.pResource = resource;
+		barriers[1] = CD3DX12_RESOURCE_BARRIER::Transition(
+			resource,
+			D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+			D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE |
+			D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+		cmdList->ResourceBarrier(2, barriers);
+
+		skinnedVertexState_ =
+			D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE |
+			D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+		skinnedVertexReady_ = true;
+	}
+
+	void AnimationModel::EnsureRaytracingBLAS(ID3D12Device5* device5, ID3D12GraphicsCommandList4* cmdList4) {
+		if(!modelData_) return;
+		if(!device5 || !cmdList4) return;
+		if(!skinnedVertexReady_ || !skinnedVertexBuffer_.IsValid()) return;
+
+		rayMesh_.BuildBLAS(
+			device5,
+			cmdList4,
+			skinnedVertexBuffer_.GetResource()->GetGPUVirtualAddress(),
+			static_cast<UINT>(modelData_->meshResource.Vertices().size()),
+			sizeof(VertexPosUvN),
+			modelData_->meshResource.IndexBuffer().GetResource()->GetGPUVirtualAddress(),
+			static_cast<UINT>(modelData_->meshResource.Indices().size()));
+		blasBuilt_ = true;
 	}
 
 	void AnimationModel::RegisterAnimation(
@@ -423,12 +537,14 @@ namespace CalyxAssets {
 	void AnimationModel::BindVertexIndexBuffers(ID3D12GraphicsCommandList* cmdList) const {
 		if(!modelData_) return;
 
-		// 頂点バッファ/インデックスバッファをセット
-		vbvs_[0] = modelData_->meshResource.VertexBuffer().GetVertexBufferView(); // vertexDataのvbv
-		vbvs_[1] = skinCluster_.influenceBufferView;							  // influenceDataのvbv
-
 		modelData_->meshResource.IndexBuffer().SetCommand(cmdList);
-		cmdList->IASetVertexBuffers(0, 2, vbvs_);
+		if(skinnedVertexReady_) {
+			cmdList->IASetVertexBuffers(0, 1, &skinnedVertexBufferView_);
+			return;
+		}
+
+		vbvs_[0] = modelData_->meshResource.VertexBuffer().GetVertexBufferView();
+		cmdList->IASetVertexBuffers(0, 1, vbvs_);
 	}
 
 	//-----------------------------------------------------------------------------
@@ -439,18 +555,39 @@ namespace CalyxAssets {
 		if(!modelData_) {
 			return;
 		}
+		if(!handle_) {
+			return;
+		}
 
 		ID3D12GraphicsCommandList* cmdList = GraphicsGroup::GetInstance()->GetCommandList().Get();
+		ID3D12Device*			   device  = GraphicsGroup::GetInstance()->GetDevice().Get();
 
+		std::vector<WorldTransform> singleTransform{transform};
+		EnsureInstanceCapacity(device, 1);
+		UploadInstanceMatrices(singleTransform);
+
+		materialBuffer_.SetCommand(cmdList, 0);
+		cmdList->SetGraphicsRootDescriptorTable(1, GetInstanceSrv());
+		cmdList->SetGraphicsRootDescriptorTable(2, GetTexSrv());
+		cmdList->SetGraphicsRootDescriptorTable(6, GetEnvMapSrv());
 		SetCommandPalletSrv(7, cmdList);
 
 		// 頂点バッファ/インデックスバッファをセット
 		BindVertexIndexBuffers(cmdList);
 
-		BaseModel::Draw(transform);
+		cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		const auto& subMeshes = modelData_->meshResource.SubMeshes();
+		if(subMeshes.empty()) {
+			cmdList->DrawIndexedInstanced(UINT(modelData_->meshResource.Indices().size()), 1, 0, 0, 0);
+		} else {
+			for(const auto& subMesh : subMeshes) {
+				cmdList->SetGraphicsRootDescriptorTable(2, GetTexSrv(subMesh.materialIndex));
+				cmdList->DrawIndexedInstanced(subMesh.indexCount, 1, subMesh.indexStart, 0, 0);
+			}
+		}
 
 		if(isDrawSkeleton_) {
-			CalyxMath::Vector4 col = {jointHighlightCol_.x, jointHighlightCol_.y,
+			CalyxEngine::Vector4 col = {jointHighlightCol_.x, jointHighlightCol_.y,
 									  jointHighlightCol_.z, jointHighlightCol_.w};
 
 			modelData_->skeleton.Draw(transform.matrix.world, selectedJoint_, col);
@@ -507,20 +644,11 @@ namespace CalyxAssets {
 
 	void AnimationModel::CreateMaterialBuffer() {
 		ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
-		// materialData_ に初期値をセットする
-		materialData_.color		   = CalyxMath::Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-		materialData_.shininess	   = 20.0f;
-		materialData_.lightingMode = LightingMode::HalfLambert;
-		materialData_.uvTransform  = CalyxMath::Matrix4x4::MakeIdentity();
-
-		// materialData_ の内容で GPU に転送
 		materialBuffer_.Initialize(device);
 	}
 
 	void AnimationModel::MaterialBufferMap() {
-		// materialData_ の内容で GPU に転送
-		// マテリアルのデータを転送
-		materialBuffer_.TransferData(materialData_);
+		TransferMaterial();
 	}
 
 	//-----------------------------------------------------------------------------
@@ -537,7 +665,7 @@ namespace CalyxAssets {
 	//-----------------------------------------------------------------------------
 	// ジョイントの行列取得
 	//-----------------------------------------------------------------------------
-	std::optional<CalyxMath::Matrix4x4> AnimationModel::GetJointMatrix(const std::string& name) const {
+	std::optional<CalyxEngine::Matrix4x4> AnimationModel::GetJointMatrix(const std::string& name) const {
 		if(!modelData_) return std::nullopt;
 
 		auto it = modelData_->skeleton.jointMap.find(name);
@@ -549,4 +677,6 @@ namespace CalyxAssets {
 
 	D3D12_GPU_DESCRIPTOR_HANDLE AnimationModel::GetJointMatrixSrv() const { return skinCluster_.paletteSrvHandle.second; }
 
-} // namespace CalyxAssets
+	bool AnimationModel::HasSkinnedVertexBuffer() const { return skinnedVertexReady_; }
+
+} // namespace CalyxEngine
