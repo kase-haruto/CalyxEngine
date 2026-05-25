@@ -154,6 +154,7 @@ void BaseGameObject::ShowGui() {
 
 		if(model_) {
 			model_->ShowImGui(config_.GetConfig().modelConfig);
+			model_->ShowImGuiInterface();
 		}
 		GuiCmd::EndSection();
 	}

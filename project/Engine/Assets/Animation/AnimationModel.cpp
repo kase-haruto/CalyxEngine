@@ -12,6 +12,7 @@
 #include <Engine/Graphics/Pipeline/Service/PipelineService.h>
 #include <Engine/Lighting/LightData.h>
 #include <Engine/Renderer/Mesh/VertexData.h>
+#include "Engine/Application/UI/Panels/InspectorPanel.h"
 
 #if defined(_DEBUG) || defined(DEVELOP)
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
@@ -554,7 +555,7 @@ namespace CalyxEngine {
 		// もしモデルデータが読み込まれていない場合は何もしない
 		if(!modelData_) {
 			return;
-		}
+		}	
 		if(!handle_) {
 			return;
 		}
@@ -599,40 +600,45 @@ namespace CalyxEngine {
 	//-----------------------------------------------------------------------------
 	void AnimationModel::ShowImGuiInterface() {
 #if defined(_DEBUG) || defined(DEVELOP)
-		GuiCmd::CheckBox("Draw Skeleton", isDrawSkeleton_);
-		BaseModel::ShowImGuiInterface();
+		if(GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::Object)) {
 
-		// ------ ジョイントリスト ---------------------------------
-		if(ImGui::CollapsingHeader("Skeleton##header")) {
-			// 名前配列を一度だけ作る
-			static std::vector<const char*> jointNames;
-			if(jointNames.empty() && modelData_) {
-				jointNames.reserve(modelData_->skeleton.joints.size());
-				for(auto& j : modelData_->skeleton.joints) {
-					jointNames.push_back(j.name.c_str());
+			GuiCmd::CheckBox("Draw Skeleton", isDrawSkeleton_);
+			BaseModel::ShowImGuiInterface();
+
+			// ------ ジョイントリスト ---------------------------------
+			if(ImGui::CollapsingHeader("Skeleton##header")) {
+				// 名前配列を一度だけ作る
+				static std::vector<const char*> jointNames;
+				if(jointNames.empty() && modelData_) {
+					jointNames.reserve(modelData_->skeleton.joints.size());
+					for(auto& j : modelData_->skeleton.joints) {
+						jointNames.push_back(j.name.c_str());
+					}
 				}
+
+				if(ImGui::ListBox("Joints", &selectedJoint_,
+								  jointNames.data(),
+								  static_cast<int>(jointNames.size()), 10)) {
+				}
+
+				// 色を変える UI
+				ImGui::ColorEdit4("Highlight", (float*)&jointHighlightCol_,
+								  ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_PickerHueBar);
 			}
 
-			if(ImGui::ListBox("Joints", &selectedJoint_,
-							  jointNames.data(),
-							  static_cast<int>(jointNames.size()), 10)) {
+			// 選択中ジョイントの情報表示
+			if(selectedJoint_ >= 0 && modelData_) {
+				const Joint& j = modelData_->skeleton.joints[selectedJoint_];
+				ImGui::Text("Index: %d  Parent: %d", j.index,
+							j.parent ? *j.parent : -1);
+				ImGui::Text("Local Pos :  %.3f, %.3f, %.3f",
+							j.transform.translate.x,
+							j.transform.translate.y,
+							j.transform.translate.z);
 			}
-
-			// 色を変える UI
-			ImGui::ColorEdit4("Highlight", (float*)&jointHighlightCol_,
-							  ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_PickerHueBar);
+			GuiCmd::EndSection();
 		}
-
-		// 選択中ジョイントの情報表示
-		if(selectedJoint_ >= 0 && modelData_) {
-			const Joint& j = modelData_->skeleton.joints[selectedJoint_];
-			ImGui::Text("Index: %d  Parent: %d", j.index,
-						j.parent ? *j.parent : -1);
-			ImGui::Text("Local Pos :  %.3f, %.3f, %.3f",
-						j.transform.translate.x,
-						j.transform.translate.y,
-						j.transform.translate.z);
-		}
+		
 
 #endif
 	}
