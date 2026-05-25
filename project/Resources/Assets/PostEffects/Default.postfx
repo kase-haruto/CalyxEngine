@@ -64,7 +64,7 @@
   "name": "Default",
   "nodes": [],
   "outline": {
-    "enabled": false
+    "enabled": true
   },
   "type": "PostEffectPreset",
   "version": 1

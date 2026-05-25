@@ -33,7 +33,7 @@ namespace CalyxEngine {
 }
 
 struct OutlineSettings {
-	bool				   enabled	 = true;
+	bool				   enabled	 = false;
 	float				   thickness = 0.035f;
 	CalyxEngine::Vector4 color	 = {0.02f, 0.02f, 0.025f, 1.0f};
 };
