@@ -9,6 +9,11 @@ DemoPlayer::DemoPlayer()
 
 	// 右手のボーン名
 	// mixamorig:RightHand
+	//player->SetBoneParent(
+	//	weapon->GetWorldTransform(), //< このトランスフォーム
+	//	"RightHand",				 //< ボーン名
+	//	false						 //,<親のスケールを継承するか
+	//);
 }
 
 
