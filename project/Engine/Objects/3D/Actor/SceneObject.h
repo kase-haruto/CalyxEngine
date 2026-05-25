@@ -20,7 +20,7 @@
 enum class ObjectType {
 	Camera,		// カメラ
 	Light,		// ライト
-	GameObject, // ゲームオブジェクト
+	Actor, // ゲームオブジェクト
 	Object2D,   // 2Dオブジェクト
 	Effect,		// パーティクルシステム
 	Event,		// イベント

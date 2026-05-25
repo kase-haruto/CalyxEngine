@@ -8,9 +8,9 @@
                 "z": 1.0
             },
             "direction": {
-                "x": -0.07999999821186066,
+                "x": -0.3610000014305115,
                 "y": -1.0,
-                "z": 0.3400000035762787
+                "z": -0.8379999995231628
             },
             "guid": "260f6a73-56cb-4004-bedb-47d1a8171382",
             "intensity": 1.0,
@@ -138,10 +138,10 @@
                 "inheritScale": true,
                 "inheritTranslate": true,
                 "rotation": {
-                    "w": 0.9828991293907166,
-                    "x": 0.16467690467834473,
-                    "y": -0.08127371221780777,
-                    "z": 0.01361676026135683
+                    "w": -0.2403753250837326,
+                    "x": -0.09116459637880325,
+                    "y": 0.9035871028900146,
+                    "z": -0.34269386529922485
                 },
                 "scale": {
                     "x": 1.0,
@@ -149,9 +149,9 @@
                     "z": 1.0
                 },
                 "translation": {
-                    "x": 0.8124051094055176,
-                    "y": 4.052644729614258,
-                    "z": -2.815776824951172
+                    "x": 0.9360063076019287,
+                    "y": 3.6275839805603027,
+                    "z": 6.31285285949707
                 }
             },
             "type": "DebugCamera"
@@ -192,14 +192,14 @@
                     "z": 1.0
                 },
                 "translation": {
-                    "x": 734.8921508789063,
+                    "x": 1042.889404296875,
                     "y": 373.1441955566406,
                     "z": 0.0
                 }
             },
             "transformAnimation2d": {
                 "autoPlay": true,
-                "currentTime": 1.0721940994262695,
+                "currentTime": 1.31508207321167,
                 "keys": [
                     {
                         "channels": 31,
@@ -302,6 +302,77 @@
             },
             "type": "AnimatedSpriteSceneObject2d",
             "useLoopOverride": false
+        },
+        {
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "offset": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "radius": 1.0,
+                "rotate": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "size": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "targetType": 0
+            },
+            "guid": "8b37fee0-8d01-4574-aaf4-572605cd1ba5",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialGuid": "00000000-0000-0000-0000-000000000000",
+                "modelName": "PlayerIdle.gltf",
+                "textureGuid": "ec675a35-7435-45c0-b948-d23242ff7989",
+                "uvTransConfig": {
+                    "rotation": -3.705138738041569e-07,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "Demo Player",
+            "objectType": 2,
+            "outlineColor": {
+                "w": 1.0,
+                "x": 0.019999999552965164,
+                "y": 0.019999999552965164,
+                "z": 0.02500000037252903
+            },
+            "outlineEnabled": false,
+            "outlineThickness": 0.03500000014901161,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 1.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": -0.6979820728302002,
+                    "y": 0.001870307489298284,
+                    "z": 3.0276405811309814
+                }
+            },
+            "type": "BaseGameObject"
         },
         {
             "colliderConfig": {

@@ -12,7 +12,7 @@
 SkyBox::SkyBox(const std::string& fileName,
 			   std::optional<std::string> objectName){
 	textureName_ = fileName;
-	SceneObject::SetName(objectName.value(),ObjectType::GameObject);
+	SceneObject::SetName(objectName.value(),ObjectType::Actor);
 	CalyxEngine::AssetManager::GetInstance()->GetTextureManager()->SetEnvironmentTexture("Textures/"+fileName);
 	isEnableRaycast_ = false;
 }

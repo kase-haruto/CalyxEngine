@@ -214,6 +214,39 @@ namespace CalyxEngine {
 									  }});
 			}
 		}
+
+		// ------------------------------ Actor -----------------------------------
+		{
+			auto& eventItems = categoryItems_[PlaceItemCategory::Actor];
+			for(const SceneObjectClassDesc* desc : SceneObjectRegistry::Get().ListPlaceableTypes()) {
+				if(!desc || desc->objectType != ObjectType::Actor) {
+					continue;
+				}
+
+				const std::string typeName	  = desc->typeName;
+				const std::string displayName = desc->displayName.empty() ? desc->typeName : desc->displayName;
+				const std::string iconPath	  = desc->iconPath;
+				const ObjectType  objectType  = desc->objectType;
+
+				eventItems.push_back({PlaceItemCategory::Actor,
+									  displayName,
+									  LoadPlaceIcon(iconPath),
+									  {64, 64},
+									  [typeName, displayName, objectType](const CalyxEngine::Vector3& pos) {
+										  auto factory = [typeName, displayName, objectType, pos]() {
+											  return CreateRegisteredObjectForScene(
+												  typeName, displayName, objectType, pos, false);
+										  };
+										  CommandManager::GetInstance()->Execute(
+											  std::make_unique<CreateObjectCommand<SceneObject>>(
+												  SceneContext::Current(), factory, "Create Registered Object"));
+									  },
+									  [typeName, displayName, objectType]() {
+										  return CreateRegisteredObjectForScene(
+											  typeName, displayName, objectType, CalyxEngine::Vector3::Zero(), true);
+									  }});
+			}
+		}
 	}
 		
 
@@ -264,14 +297,14 @@ namespace CalyxEngine {
 		static const std::vector<std::pair<PlaceItemCategory, std::string>> categoryNames = {
 			{PlaceItemCategory::Shape, "Shapes"},
 			{PlaceItemCategory::Light, "Lights"},
+			{PlaceItemCategory::Actor, "Actor"},
 			{PlaceItemCategory::Particle, "Particles"},
 			{PlaceItemCategory::Event, "Events"},
 		};
 
+
 		ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.2f, 0.2f, 0.2f, 1.0f)); // 選択時の色を少し調整
 		for(const auto& [cat, name] : categoryNames) {
-			// カテゴリにアイテムが含まれているかチェック (空なら表示しない等の制御が必要ならここ)
-			// 今回は全部表示する方針で
 
 			bool isSelected = (selectedCategory_ == cat);
 			if(ImGui::Selectable(name.c_str(), isSelected)) {

@@ -10,6 +10,7 @@
 
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
 #include <Engine/Objects/Event/Camera/CameraEventObject.h>
+#include <Game/3D/Actor/DemoPlayer/DemoPlayer.h>
 #include <Engine/Objects/3D/Actor/SplineDeformObject.h>
 
 namespace CalyxEngine {
@@ -18,7 +19,7 @@ namespace CalyxEngine {
 			SceneObjectClassDesc desc;
 			desc.typeName = "BaseGameObject";
 			desc.displayName = "Mesh Object";
-			desc.objectType = ObjectType::GameObject;
+			desc.objectType = ObjectType::Actor;
 			desc.iconPath = "UI/Tool/cube.dds";
 			desc.placeable = true;
 			desc.prefabEditable = false;
@@ -42,9 +43,22 @@ namespace CalyxEngine {
 
 		{
 			SceneObjectClassDesc desc;
+			desc.typeName = "DemoPlayer";
+			desc.displayName = "Demo Player";
+			desc.objectType = ObjectType::Actor;
+			desc.iconPath = "UI/Tool/cube.dds";
+			desc.placeable = true;
+			desc.prefabEditable = false;
+			desc.prefabRoot = false;
+			desc.ctor = std::make_unique<SceneCtor<DemoPlayer>>();
+			SceneObjectRegistry::Get().Register(std::move(desc));
+		}
+
+		{
+			SceneObjectClassDesc desc;
 			desc.typeName = "SplineDeformObject";
 			desc.displayName = "Spline Wall Deform";
-			desc.objectType = ObjectType::GameObject;
+			desc.objectType = ObjectType::Actor;
 			desc.iconPath = "UI/Tool/cylinder.dds";
 			desc.placeable = true;
 			desc.prefabEditable = false;

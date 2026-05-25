@@ -7,7 +7,7 @@
 #include <Engine/Graphics/Camera/Base/BaseCamera.h>
 
 std::unordered_map<ObjectType, ObjectFactory::CreatorFunc> ObjectFactory::registry_ = {
-	{ ObjectType::GameObject, [](const nlohmann::json& j) {
+	{ ObjectType::Actor, [](const nlohmann::json& j) {
 		auto obj = std::make_unique<BaseGameObject>();
 		obj->ApplyConfigFromJson(j);
 		return obj;

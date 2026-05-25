@@ -139,12 +139,12 @@ namespace CalyxEngine {
 		auto object = selectedObject_.lock();
 		if(object) {
 			switch(object->GetObjectType()) {
-			case ObjectType::GameObject:
+			case ObjectType::Actor:
 			case ObjectType::Object2D:
 				add(ParamFilterSection::Object);
 				add(ParamFilterSection::Material);
 				add(ParamFilterSection::ParameterData);
-				if(object->GetObjectType() == ObjectType::GameObject) {
+				if(object->GetObjectType() == ObjectType::Actor) {
 					add(ParamFilterSection::Collider);
 				}
 				break;

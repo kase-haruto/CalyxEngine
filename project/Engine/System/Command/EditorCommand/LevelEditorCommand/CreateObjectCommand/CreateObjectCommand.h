@@ -19,9 +19,6 @@ public:
 
 	void Execute() override {
 		object_ = factory_();
-		// Note: SceneContext::Instantiate already adds the object to the library,
-		// so we don't need to call ctx_->AddObject(object_) here.
-		// Adding it twice causes crashes and ImGui assertions.
 	}
 	void Undo() override {
 		ctx_->RemoveObject(object_);

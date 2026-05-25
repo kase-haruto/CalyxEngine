@@ -7,6 +7,7 @@
 #include <Engine/Graphics/Buffer/DxVertexBuffer.h>
 #include <Engine/Graphics/Pipeline/PipelineDesc/Input/VertexLayout.h>
 #include <Engine/Foundation/Utility/FileSystem/FileScanner.h>
+#include <Engine/Foundation/Debug/CxAssert.h>
 
 // externals
 #include <assimp/Importer.hpp>
@@ -264,10 +265,12 @@ ModelData ModelManager::LoadModelFile(const std::string& directoryPath, const st
 			aiProcess_FlipUVs |
 			aiProcess_CalcTangentSpace);
 	if(!scene) {
-		throw std::runtime_error("Assimp failed to load: " + filePath);
+		std::string message = "Assimp failed to load: " + filePath + "\nError: " + importer.GetErrorString();
+		CX_CHECK(false && message.c_str(), "assertion failed");
 	}
 	if(!scene->HasMeshes()) {
-		throw std::runtime_error("No meshes found in file: " + filePath);
+		std::string message = "Dont have Mesh";
+		CX_CHECK(false && message.c_str(), "assertion failed");
 	}
 
 	ModelData modelData;
@@ -276,6 +279,7 @@ ModelData ModelManager::LoadModelFile(const std::string& directoryPath, const st
 	// メッシュデータを格納
 	for(unsigned int meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
 		const aiMesh* mesh = scene->mMeshes[meshIndex];
+		uint32_t	  baseVertex = static_cast<uint32_t>(modelData.meshResource.Vertices().size());
 		LoadMesh(mesh, modelData);
 
 		// ボーンごとの影響を集約
@@ -294,7 +298,7 @@ ModelData ModelManager::LoadModelFile(const std::string& directoryPath, const st
 			jointWeightData.inverseBindPoseMatrix = CalyxEngine::Matrix4x4::Inverse(bindPoseMatrix);
 
 			for(uint32_t weightIndex = 0; weightIndex < bone->mNumWeights; ++weightIndex) {
-				jointWeightData.vertexWeights.push_back({bone->mWeights[weightIndex].mWeight, bone->mWeights[weightIndex].mVertexId});
+				jointWeightData.vertexWeights.push_back({bone->mWeights[weightIndex].mWeight,baseVertex + bone->mWeights[weightIndex].mVertexId});
 			}
 		}
 	}

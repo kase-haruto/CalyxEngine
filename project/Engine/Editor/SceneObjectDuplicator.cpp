@@ -138,7 +138,7 @@ namespace CalyxEngine {
 
 	bool SceneObjectDuplicator::IsDuplicatable(const SceneObject* object) {
 		if(!object || object->IsTransient()) return false;
-		return object->GetObjectType() == ObjectType::GameObject ||
+		return object->GetObjectType() == ObjectType::Actor ||
 			   object->GetObjectType() == ObjectType::Event;
 	}
 

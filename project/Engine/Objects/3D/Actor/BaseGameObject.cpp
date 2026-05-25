@@ -269,7 +269,7 @@ void BaseGameObject::ExtractConfigToJson(nlohmann::json& j) const {
 //                   getter/setter
 //===================================================================*/
 
-void BaseGameObject::SetName(const std::string& name) { SceneObject::SetName(name, ObjectType::GameObject); }
+void BaseGameObject::SetName(const std::string& name) { SceneObject::SetName(name, ObjectType::Actor); }
 
 void BaseGameObject::SetTranslate(const CalyxEngine::Vector3& pos) {
 	if(model_) {

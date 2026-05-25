@@ -21,7 +21,7 @@
  * - ゲームオブジェクト基底クラス
  * - 3Dモデル、コライダー、ビルボードの設定などを統合管理する基底クラス
  *---------------------------------------------------------------------------------------*/
-CALYX_OBJECT(Category = GameObject, DisplayName = "Mesh Object", Icon = "UI/Tool/cube.dds")
+CALYX_OBJECT(Category = Actor, DisplayName = "Mesh Object", Icon = "UI/Tool/cube.dds")
 class BaseGameObject
 	: public SceneObject,
 	  public IConfigurable {

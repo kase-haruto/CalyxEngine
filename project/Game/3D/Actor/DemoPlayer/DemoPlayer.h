@@ -4,17 +4,23 @@
 /*-----------------------------------------------------------------------------------------
  * DemoPlayer
  * - 本エンジンのデモ用操作可能キャラクター
+ * - CALYX_OBJECTを使用してエディタ上で配置可能にする
  *---------------------------------------------------------------------------------------*/
+CALYX_OBJECT(Category = Actor, DisplayName = "Demo Player", Icon = "UI/Tool/cube.dds")
 class DemoPlayer 
 	:public Actor{
 public:
 	//===================================================================*/
 	//						public methods
 	//===================================================================*/
+	/**
+	 * \brief コンストラクタ
+	*/
 	DemoPlayer();
+	
+
 	~DemoPlayer() override = default;
 
-	void Initialize() override;
 	void Update(float dt) override;
 
 private:

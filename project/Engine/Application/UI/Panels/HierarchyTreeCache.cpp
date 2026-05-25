@@ -14,7 +14,7 @@ namespace CalyxEngine {
 				return 0;
 			case ObjectType::Light:
 				return 1;
-			case ObjectType::GameObject:
+			case ObjectType::Actor:
 				return 2;
 			case ObjectType::Effect:
 				return 3;
