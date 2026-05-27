@@ -1,6 +1,9 @@
 #pragma once
 #include <Engine/Objects/3D/Actor/Actor.h>
 
+// game
+#include "Weapon/Weapon.h"
+
 /*-----------------------------------------------------------------------------------------
  * DemoPlayer
  * - 本エンジンのデモ用操作可能キャラクター
@@ -17,16 +20,14 @@ public:
 	 * \brief コンストラクタ
 	*/
 	DemoPlayer();
-	
-
 	~DemoPlayer() override = default;
 
+	void Initialize() override;
 	void Update(float dt) override;
 
 private:
 	//===================================================================*/
 	//						private methods
 	//===================================================================*/
-
-
+	std::shared_ptr<Weapon> weapon_;
 };

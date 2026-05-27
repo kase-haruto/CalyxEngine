@@ -64,6 +64,7 @@ namespace CalyxEngine {
 		std::string                         GetCurrentAnimationName() const;
 		float                               GetAnimationSpeed() const { return animationSpeed_; }
 		std::vector<std::string>            GetAnimationNodeNames() const;
+		std::vector<std::string>            GetJointNames() const;
 		std::optional<CalyxEngine::Matrix4x4> GetJointMatrix(const std::string& name) const;
 		D3D12_GPU_DESCRIPTOR_HANDLE         GetJointMatrixSrv() const;
 		bool                                HasSkinnedVertexBuffer() const;

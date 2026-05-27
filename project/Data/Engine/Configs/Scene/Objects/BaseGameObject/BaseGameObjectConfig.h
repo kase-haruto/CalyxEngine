@@ -7,6 +7,28 @@
 
 #include <externals/nlohmann/json.hpp>
 
+#include <string>
+#include <vector>
+
+struct BoneParentBindingConfig {
+	Guid targetGuid {};
+	std::string boneName;
+	bool inheritScale = true;
+};
+
+inline void to_json(nlohmann::json& j, const BoneParentBindingConfig& c) {
+	j = nlohmann::json{
+		{"targetGuid", c.targetGuid},
+		{"boneName", c.boneName},
+		{"inheritScale", c.inheritScale}};
+}
+
+inline void from_json(const nlohmann::json& j, BoneParentBindingConfig& c) {
+	if(j.contains("targetGuid")) j.at("targetGuid").get_to(c.targetGuid);
+	c.boneName		= j.value("boneName", std::string{});
+	c.inheritScale = j.value("inheritScale", true);
+}
+
 /*-----------------------------------------------------------------------------------------
  * BaseGameObjectConfig
  * - ゲームオブジェクト設定構造体
@@ -19,6 +41,7 @@ struct BaseGameObjectConfig
 	bool outlineEnabled = true;
 	float outlineThickness = 0.035f;
 	CalyxEngine::Vector4 outlineColor = {0.02f, 0.02f, 0.025f, 1.0f};
+	std::vector<BoneParentBindingConfig> boneParentBindings;
 };
 
 inline void to_json(nlohmann::json& j, const BaseGameObjectConfig& c) {
@@ -32,7 +55,8 @@ inline void to_json(nlohmann::json& j, const BaseGameObjectConfig& c) {
 		{"modelConfig", c.modelConfig},
 		{"outlineEnabled", c.outlineEnabled},
 		{"outlineThickness", c.outlineThickness},
-		{"outlineColor", c.outlineColor}};
+		{"outlineColor", c.outlineColor},
+		{"boneParentBindings", c.boneParentBindings}};
 }
 
 inline void from_json(const nlohmann::json& j, BaseGameObjectConfig& c) {
@@ -46,4 +70,5 @@ inline void from_json(const nlohmann::json& j, BaseGameObjectConfig& c) {
 	if(j.contains("outlineEnabled")) j.at("outlineEnabled").get_to(c.outlineEnabled);
 	if(j.contains("outlineThickness")) j.at("outlineThickness").get_to(c.outlineThickness);
 	if(j.contains("outlineColor")) j.at("outlineColor").get_to(c.outlineColor);
+	if(j.contains("boneParentBindings")) j.at("boneParentBindings").get_to(c.boneParentBindings);
 }

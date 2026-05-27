@@ -12,6 +12,7 @@
 #include <Engine/Objects/Event/Camera/CameraEventObject.h>
 #include <Game/3D/Actor/DemoPlayer/DemoPlayer.h>
 #include <Engine/Objects/3D/Actor/SplineDeformObject.h>
+#include <Game/3D/Actor/DemoPlayer/Weapon/Weapon.h>
 
 namespace CalyxEngine {
 	void RegisterGeneratedSceneObjects() {
@@ -64,6 +65,19 @@ namespace CalyxEngine {
 			desc.prefabEditable = false;
 			desc.prefabRoot = false;
 			desc.ctor = std::make_unique<SceneCtor<SplineDeformObject>>();
+			SceneObjectRegistry::Get().Register(std::move(desc));
+		}
+
+		{
+			SceneObjectClassDesc desc;
+			desc.typeName = "Weapon";
+			desc.displayName = "Weapon";
+			desc.objectType = ObjectType::Actor;
+			desc.iconPath = "UI/Tool/event.png";
+			desc.placeable = true;
+			desc.prefabEditable = false;
+			desc.prefabRoot = false;
+			desc.ctor = std::make_unique<SceneCtor<Weapon>>();
 			SceneObjectRegistry::Get().Register(std::move(desc));
 		}
 	}

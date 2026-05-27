@@ -15,6 +15,7 @@
 //* c++ *//
 #include <memory>
 #include <string>
+#include <vector>
 
 /*-----------------------------------------------------------------------------------------
  * BaseGameObject
@@ -247,6 +248,9 @@ public:
 	 * \param mode モード
 	 */
 	void SetLightingMode(LightingMode mode) { model_->SetLightingMode(mode); }
+	void SetBoneParent(BaseGameObject& target, const std::string& boneName, bool inheritScale = true);
+	void SetBoneParent(WorldTransform& target, const std::string& boneName, bool inheritScale = true);
+	void ClearBoneParent(WorldTransform& target);
 
 	//--------- save / load ------------------------------------------------
 	/**
@@ -266,8 +270,24 @@ protected:
 	//===================================================================*/
 	void InitializeCollider(ColliderKind kind);
 	bool SetModelFromFileName(const std::string& modelName);
+	void UpdateBoneParents();
 
 protected:
+	class BoneParentTransform : public BaseTransform {
+	public:
+		void SetWorldMatrix(const CalyxEngine::Matrix4x4& world);
+		void Update() override {}
+		void Update([[maybe_unused]] const CalyxEngine::Matrix4x4& viewProMatrix) override {}
+	};
+
+	struct BoneParentBinding {
+		WorldTransform* target = nullptr;
+		Guid targetGuid {};
+		std::string boneName;
+		std::unique_ptr<BoneParentTransform> parentTransform;
+		bool inheritScale = true;
+	};
+
 	//===================================================================*/
 	//                    protected member variables
 	//===================================================================*/
@@ -282,4 +302,5 @@ protected:
 
 	ConfigurableObject<BaseGameObjectConfig> config_; //< コンフィグ管理
 	const std::string configRoot_ = "BaseGameObject/"; //< コンフィグルートパス
+	std::vector<BoneParentBinding> boneParentBindings_;
 };

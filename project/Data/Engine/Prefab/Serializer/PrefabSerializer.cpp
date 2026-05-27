@@ -271,6 +271,36 @@ std::vector<std::shared_ptr<SceneObject>> PrefabSerializer::Load(const std::stri
 		}
 	}
 
+	for(const auto& j : jArray) {
+		Guid oldOwner = j.value("guid", Guid{});
+		if(!oldOwner.isValid() || !j.contains("boneParentBindings")) continue;
+
+		auto newOwnerIt = oldToNewGuid.find(oldOwner);
+		if(newOwnerIt == oldToNewGuid.end()) continue;
+
+		auto ownerSp = guidMap[newOwnerIt->second];
+		auto* owner = dynamic_cast<BaseGameObject*>(ownerSp.get());
+		if(!owner) continue;
+
+		for(const auto& bindingJson : j.at("boneParentBindings")) {
+			Guid oldTarget = bindingJson.value("targetGuid", Guid{});
+			std::string boneName = bindingJson.value("boneName", std::string{});
+			if(!oldTarget.isValid() || boneName.empty()) continue;
+
+			auto newTargetIt = oldToNewGuid.find(oldTarget);
+			if(newTargetIt == oldToNewGuid.end()) continue;
+
+			auto targetSp = guidMap[newTargetIt->second];
+			auto* target = dynamic_cast<BaseGameObject*>(targetSp.get());
+			if(!target) continue;
+
+			owner->SetBoneParent(
+				*target,
+				boneName,
+				bindingJson.value("inheritScale", true));
+		}
+	}
+
 	// ルートだけでなく、すべてのオブジェクトを返す
 	std::vector<std::shared_ptr<SceneObject>> allObjects;
 	allObjects.reserve(guidMap.size());

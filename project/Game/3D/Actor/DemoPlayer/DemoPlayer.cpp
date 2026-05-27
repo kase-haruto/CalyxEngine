@@ -1,23 +1,20 @@
 #include "DemoPlayer.h"
-#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 
+#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
+#include <Engine/Scene/Context/SceneContext.h>
+
+REGISTER_SCENE_OBJECT(DemoPlayer)
 /////////////////////////////////////////////////////////////////////////////////////////
 //			ctor / dtor
 /////////////////////////////////////////////////////////////////////////////////////////
 DemoPlayer::DemoPlayer()
 	: Actor("PlayerIdle.gltf", "DemoPlayer") {
-
-	// 右手のボーン名
-	// mixamorig:RightHand
-	//player->SetBoneParent(
-	//	weapon->GetWorldTransform(), //< このトランスフォーム
-	//	"RightHand",				 //< ボーン名
-	//	false						 //,<親のスケールを継承するか
-	//);
 }
 
+void DemoPlayer::Initialize() {
 
-
+	Actor::Initialize();
+}
 /////////////////////////////////////////////////////////////////////////////////////////
 //			初期化
 /////////////////////////////////////////////////////////////////////////////////////////

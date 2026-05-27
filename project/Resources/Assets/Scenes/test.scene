@@ -138,10 +138,10 @@
                 "inheritScale": true,
                 "inheritTranslate": true,
                 "rotation": {
-                    "w": -0.2403753250837326,
-                    "x": -0.09116459637880325,
-                    "y": 0.9035871028900146,
-                    "z": -0.34269386529922485
+                    "w": 0.8810404539108276,
+                    "x": 0.24620795249938965,
+                    "y": -0.3890134394168854,
+                    "z": 0.10871033370494843
                 },
                 "scale": {
                     "x": 1.0,
@@ -149,9 +149,9 @@
                     "z": 1.0
                 },
                 "translation": {
-                    "x": 0.9360063076019287,
-                    "y": 3.6275839805603027,
-                    "z": 6.31285285949707
+                    "x": 1.1430749893188477,
+                    "y": 1.7989821434020996,
+                    "z": 2.502671241760254
                 }
             },
             "type": "DebugCamera"
@@ -192,14 +192,14 @@
                     "z": 1.0
                 },
                 "translation": {
-                    "x": 1042.889404296875,
+                    "x": 1144.2490234375,
                     "y": 373.1441955566406,
                     "z": 0.0
                 }
             },
             "transformAnimation2d": {
                 "autoPlay": true,
-                "currentTime": 1.31508207321167,
+                "currentTime": 1.395014762878418,
                 "keys": [
                     {
                         "channels": 31,
@@ -304,6 +304,13 @@
             "useLoopOverride": false
         },
         {
+            "boneParentBindings": [
+                {
+                    "boneName": "mixamorig:RightHandRing1",
+                    "inheritScale": false,
+                    "targetGuid": "3d5449c2-2565-4fe4-b751-b0713ccf50f3"
+                }
+            ],
             "colliderConfig": {
                 "colliderType": 0,
                 "isCollisionEnabled": true,
@@ -331,7 +338,7 @@
                 "blendMode": 5,
                 "materialGuid": "00000000-0000-0000-0000-000000000000",
                 "modelName": "PlayerIdle.gltf",
-                "textureGuid": "ec675a35-7435-45c0-b948-d23242ff7989",
+                "textureGuid": "d62be104-8431-42aa-90ff-1473142d8ee0",
                 "uvTransConfig": {
                     "rotation": -3.705138738041569e-07,
                     "scale": {
@@ -375,6 +382,7 @@
             "type": "BaseGameObject"
         },
         {
+            "boneParentBindings": [],
             "colliderConfig": {
                 "colliderType": 0,
                 "isCollisionEnabled": false,
@@ -402,12 +410,12 @@
                 "blendMode": 5,
                 "materialGuid": "00000000-0000-0000-0000-000000000000",
                 "modelName": "plane.obj",
-                "textureGuid": "d62be104-8431-42aa-90ff-1473142d8ee0",
+                "textureGuid": "e235f04b-8c87-462e-b239-a566e2798c03",
                 "uvTransConfig": {
                     "rotation": 0.0,
                     "scale": {
-                        "x": 20.0,
-                        "y": 20.0
+                        "x": 30.059999465942383,
+                        "y": 30.040000915527344
                     }
                 }
             },
@@ -446,6 +454,7 @@
             "type": "BaseGameObject"
         },
         {
+            "boneParentBindings": [],
             "colliderConfig": {
                 "colliderType": 0,
                 "isCollisionEnabled": false,
@@ -512,6 +521,78 @@
                     "x": -3.390002727508545,
                     "y": 3.1771841049194336,
                     "z": 4.5549798011779785
+                }
+            },
+            "type": "BaseGameObject"
+        },
+        {
+            "boneParentBindings": [],
+            "colliderConfig": {
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "offset": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "radius": 1.0,
+                "rotate": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "size": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "targetType": 0
+            },
+            "guid": "3d5449c2-2565-4fe4-b751-b0713ccf50f3",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialGuid": "00000000-0000-0000-0000-000000000000",
+                "modelName": "PlayerSword.obj",
+                "textureGuid": "d62be104-8431-42aa-90ff-1473142d8ee0",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "Weapon",
+            "objectType": 2,
+            "outlineColor": {
+                "w": 1.0,
+                "x": 0.019999999552965164,
+                "y": 0.019999999552965164,
+                "z": 0.02500000037252903
+            },
+            "outlineEnabled": false,
+            "outlineThickness": 0.03500000014901161,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": false,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 0.6763269305229187,
+                    "x": -0.7295199036598206,
+                    "y": 0.04467136040329933,
+                    "z": -0.09158135950565338
+                },
+                "scale": {
+                    "x": 1.3801205158233643,
+                    "y": 1.2821733951568604,
+                    "z": 1.3801207542419434
+                },
+                "translation": {
+                    "x": 0.14258743822574615,
+                    "y": 0.0040070731192827225,
+                    "z": 0.03070487454533577
                 }
             },
             "type": "BaseGameObject"

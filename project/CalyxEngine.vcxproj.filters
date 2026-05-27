@@ -2502,6 +2502,7 @@
     <ClCompile Include="Engine\Application\UI\EngineUI\ManipulatorSettingsUI.cpp" />
     <ClCompile Include="Game\Scene\Utility\SceneTypeUtil.cpp" />
     <ClCompile Include="Game\3D\Actor\DemoPlayer\DemoPlayer.cpp" />
+    <ClCompile Include="Weapon.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Application\System\Environment.h" />
@@ -2531,6 +2532,7 @@
     <ClInclude Include="Game\Scene\Utility\SceneTypeUtil.h" />
     <ClInclude Include="Game\Scene\Details\SceneType.h" />
     <ClInclude Include="Game\3D\Actor\DemoPlayer\DemoPlayer.h" />
+    <ClInclude Include="Weapon.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Data\Engine\Configs\Scene\Objects\Particle\Module\ModuleConfig.cpp" />

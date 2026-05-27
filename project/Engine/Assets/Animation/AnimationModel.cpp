@@ -662,8 +662,20 @@ namespace CalyxEngine {
 	//-----------------------------------------------------------------------------
 	std::vector<std::string> AnimationModel::GetAnimationNodeNames() const {
 		std::vector<std::string> names;
+		if(!modelData_) return names;
 		for(auto& pair : modelData_->animation.nodeAnimations) {
 			names.push_back(pair.first);
+		}
+		return names;
+	}
+
+	std::vector<std::string> AnimationModel::GetJointNames() const {
+		std::vector<std::string> names;
+		if(!modelData_) return names;
+
+		names.reserve(modelData_->skeleton.joints.size());
+		for(const auto& joint : modelData_->skeleton.joints) {
+			names.push_back(joint.name);
 		}
 		return names;
 	}
