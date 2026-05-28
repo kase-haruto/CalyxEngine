@@ -22,6 +22,7 @@ public:
 	struct LoadOptions {
 		bool preserveGuids = false;
 		Guid prefabAssetGuid = Guid::Empty();
+		bool skipUnknownTypes = false;
 	};
 
 	static bool Save(const std::vector<SceneObject*>& roots, const std::string& path);

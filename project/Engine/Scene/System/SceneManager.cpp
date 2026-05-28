@@ -2,6 +2,7 @@
 
 // engine
 #include <Engine/Application/System/PlaySession.h>
+#include <Engine/Editor/AssetPreviewManager.h>
 #include <Engine/Graphics/Camera/3d/Camera3d.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
@@ -235,6 +236,15 @@ namespace CalyxEngine {
 				PrimitiveDrawer::GetInstance()->Render();
 			}
 		}
+
+		if(auto* previewRT = dx_->GetRenderTargetCollection().Get("AssetPreview")) {
+			if(auto* previews = AssetPreviewManager::GetInstance()) {
+				SceneContext* previousContext = SceneContext::Current();
+				previews->ProcessRenderQueue(cmd, pso, previewRT, 1);
+				if(previousContext) previousContext->MakeCurrent();
+			}
+		}
+
 		PrimitiveDrawer::GetInstance()->ClearMesh();
 	}
 

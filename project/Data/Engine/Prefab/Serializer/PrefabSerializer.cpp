@@ -200,7 +200,16 @@ std::vector<std::shared_ptr<SceneObject>> PrefabSerializer::Load(const std::stri
 			? &j.at("serializableParams")
 			: nullptr;
 		CalyxEngine::SerializableObject::BeginPendingCapture();
-		auto sp = SceneObjectRegistry::Get().Create(typeName);
+		std::shared_ptr<SceneObject> sp;
+		try {
+			sp = SceneObjectRegistry::Get().Create(typeName);
+		} catch(...) {
+			CalyxEngine::SerializableObject::EndPendingCapture(nullptr, nullptr);
+			if(options.skipUnknownTypes) {
+				continue;
+			}
+			throw;
+		}
 		if (!sp) {
 			CalyxEngine::SerializableObject::EndPendingCapture(nullptr, nullptr);
 			continue;
@@ -258,11 +267,15 @@ std::vector<std::shared_ptr<SceneObject>> PrefabSerializer::Load(const std::stri
 		auto newParentIt = oldToNewGuid.find(oldParent);
 		if (newChildIt == oldToNewGuid.end()) continue;
 
-		auto childSp = guidMap[newChildIt->second];
-		if (!childSp) continue;
+		auto childMapIt = guidMap.find(newChildIt->second);
+		if(childMapIt == guidMap.end()) continue;
+		auto childSp = childMapIt->second;
+		if(!childSp) continue;
 
 		if (newParentIt != oldToNewGuid.end()) {
-			auto parentSp = guidMap[newParentIt->second];
+			auto parentMapIt = guidMap.find(newParentIt->second);
+			if(parentMapIt == guidMap.end()) continue;
+			auto parentSp = parentMapIt->second;
 			if (parentSp) {
 				// SetParent のみ（children_ は内部で処理される想定）
 				auto& childTransform = childSp->GetWorldTransform();
@@ -278,7 +291,9 @@ std::vector<std::shared_ptr<SceneObject>> PrefabSerializer::Load(const std::stri
 		auto newOwnerIt = oldToNewGuid.find(oldOwner);
 		if(newOwnerIt == oldToNewGuid.end()) continue;
 
-		auto ownerSp = guidMap[newOwnerIt->second];
+		auto ownerMapIt = guidMap.find(newOwnerIt->second);
+		if(ownerMapIt == guidMap.end()) continue;
+		auto ownerSp = ownerMapIt->second;
 		auto* owner = dynamic_cast<BaseGameObject*>(ownerSp.get());
 		if(!owner) continue;
 
@@ -290,7 +305,9 @@ std::vector<std::shared_ptr<SceneObject>> PrefabSerializer::Load(const std::stri
 			auto newTargetIt = oldToNewGuid.find(oldTarget);
 			if(newTargetIt == oldToNewGuid.end()) continue;
 
-			auto targetSp = guidMap[newTargetIt->second];
+			auto targetMapIt = guidMap.find(newTargetIt->second);
+			if(targetMapIt == guidMap.end()) continue;
+			auto targetSp = targetMapIt->second;
 			auto* target = dynamic_cast<BaseGameObject*>(targetSp.get());
 			if(!target) continue;
 

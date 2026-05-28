@@ -26,6 +26,7 @@
 
 // lib
 #include "Engine/Assets/Manager/AssetManager.h"
+#include <Engine/Editor/AssetPreviewManager.h>
 #include "Engine/Scene/System/SceneManager.h"
 #include <Engine/Editor/PickingPass.h>
 
@@ -202,6 +203,10 @@ namespace CalyxEngine {
 	//  終了処理
 	/////////////////////////////////////////////////////////////////////////////////////////
 	void CalyxCore::Finalize() {
+
+		if(auto* previews = AssetPreviewManager::GetInstance()) {
+			previews->Shutdown();
+		}
 
 		// imgui終了処理
 		imguiManager_->Finalize();

@@ -6,6 +6,7 @@
 #include <Data/Engine/Prefab/Serializer/PrefabSerializer.h>
 #include <Engine/Assets/Database/AssetDatabase.h>
 #include <Engine/Assets/DataAsset/MaterialAsset.h>
+#include <Engine/Editor/AssetPreviewManager.h>
 #include <Engine/Foundation/Debug/CxAssert.h>
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 
@@ -513,10 +514,12 @@ namespace CalyxEngine {
 					ImGui::PushID(&rec->guid);
 					ImGui::BeginGroup();
 
-					ImTextureID thumb =
-						((rec->type == AssetType::Texture) && rec->previewTex)
-							? rec->previewTex
-							: (iconGeneric_ ? iconGeneric_ : nullptr);
+					ImTextureID thumb = iconGeneric_ ? iconGeneric_ : nullptr;
+					if(auto* previews = AssetPreviewManager::GetInstance()) {
+						thumb = previews->GetPreview(*rec, thumb).texture;
+					} else if((rec->type == AssetType::Texture) && rec->previewTex) {
+						thumb = rec->previewTex;
+					}
 
 					if(thumb)
 						ImGui::ImageButton("##thumb", thumb, ImVec2(20, 20));
@@ -602,9 +605,12 @@ namespace CalyxEngine {
 				ImGui::BeginGroup();
 
 				ImVec2		sz(thumbSize_, thumbSize_);
-				ImTextureID thumb = ((rec->type == AssetType::Texture) && rec->previewTex)
-										 ? rec->previewTex
-										 : (iconGeneric_ ? iconGeneric_ : nullptr);
+				ImTextureID thumb = iconGeneric_ ? iconGeneric_ : nullptr;
+				if(auto* previews = AssetPreviewManager::GetInstance()) {
+					thumb = previews->GetPreview(*rec, thumb).texture;
+				} else if((rec->type == AssetType::Texture) && rec->previewTex) {
+					thumb = rec->previewTex;
+				}
 
 				if(thumb)
 					ImGui::ImageButton("##thumb", thumb, sz);

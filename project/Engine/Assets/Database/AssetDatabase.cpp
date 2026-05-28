@@ -4,6 +4,7 @@
 
 #include <Engine/Assets/DataAsset/DataAssetManager.h>
 #include <Engine/Assets/Texture/TextureManager.h>
+#include <Engine/Editor/AssetPreviewManager.h>
 #include <externals/nlohmann/json.hpp>
 
 #include <fstream>
@@ -233,7 +234,12 @@ AssetGUID AssetDatabase::RegisterOrUpdate(const std::filesystem::path& absOrRelP
 		r.sourcePath		  = abs;
 		r.lastWrite			  = ft;
 		normPathToGuid_[norm] = guid;
-		if(needPreview) BuildPreview(r);
+		if(needPreview) {
+			BuildPreview(r);
+			if(auto* previews = CalyxEngine::AssetPreviewManager::GetInstance()) {
+				previews->Invalidate(r.guid);
+			}
+		}
 	}
 
 	if(type == AssetType::Material) {

@@ -1401,6 +1401,9 @@
     <ClCompile Include="Engine\Editor\ParticlePreviewSession.cpp">
       <Filter>Engine\Editor</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Editor\AssetPreviewManager.cpp">
+      <Filter>Engine\Editor</Filter>
+    </ClCompile>
     <ClCompile Include="Engine\Editor\PrefabEditSession.cpp">
       <Filter>Engine\Editor</Filter>
     </ClCompile>
@@ -2386,6 +2389,9 @@
     <ClInclude Include="Engine\Editor\ParticlePreviewSession.h">
       <Filter>Engine\Editor</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Editor\AssetPreviewManager.h">
+      <Filter>Engine\Editor</Filter>
+    </ClInclude>
     <ClInclude Include="Engine\Editor\PrefabEditSession.h">
       <Filter>Engine\Editor</Filter>
     </ClInclude>
@@ -2502,7 +2508,7 @@
     <ClCompile Include="Engine\Application\UI\EngineUI\ManipulatorSettingsUI.cpp" />
     <ClCompile Include="Game\Scene\Utility\SceneTypeUtil.cpp" />
     <ClCompile Include="Game\3D\Actor\DemoPlayer\DemoPlayer.cpp" />
-    <ClCompile Include="Weapon.cpp" />
+    <ClCompile Include="Game\3D\Actor\DemoPlayer\Weapon\Weapon.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Application\System\Environment.h" />
@@ -2532,7 +2538,7 @@
     <ClInclude Include="Game\Scene\Utility\SceneTypeUtil.h" />
     <ClInclude Include="Game\Scene\Details\SceneType.h" />
     <ClInclude Include="Game\3D\Actor\DemoPlayer\DemoPlayer.h" />
-    <ClInclude Include="Weapon.h" />
+    <ClInclude Include="Game\3D\Actor\DemoPlayer\Weapon\Weapon.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Data\Engine\Configs\Scene\Objects\Particle\Module\ModuleConfig.cpp" />
@@ -2719,6 +2725,7 @@
     <ClCompile Include="Engine\Graphics\Core\GraphicsSystem.cpp" />
     <ClCompile Include="Engine\Editor\LevelEditor.cpp" />
     <ClCompile Include="Engine\Editor\ParticlePreviewSession.cpp" />
+    <ClCompile Include="Engine\Editor\AssetPreviewManager.cpp" />
     <ClCompile Include="Engine\Editor\PrefabEditSession.cpp" />
     <ClCompile Include="Engine\Editor\SceneObjectEditCommands.cpp" />
     <ClCompile Include="Engine\Editor\ViewportSelectionController.cpp" />
@@ -3065,6 +3072,7 @@
     <ClInclude Include="Engine\Editor\PostProcessEditor.h" />
     <ClInclude Include="Engine\Editor\LevelEditor.h" />
     <ClInclude Include="Engine\Editor\ParticlePreviewSession.h" />
+    <ClInclude Include="Engine\Editor\AssetPreviewManager.h" />
     <ClInclude Include="Engine\Editor\PrefabEditSession.h" />
     <ClInclude Include="Engine\Editor\SceneObjectEditCommands.h" />
     <ClInclude Include="Engine\Editor\ViewportSelectionController.h" />

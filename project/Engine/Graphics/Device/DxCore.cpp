@@ -1,6 +1,7 @@
 #include "DxCore.h"
 
 #include <Engine/Application/System/Environment.h>
+#include <Engine/Editor/AssetPreviewManager.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
 #include <Engine/Graphics/RenderTarget/OffscreenRT/OffscreenRenderTarget.h>
 #include <Engine/Graphics/RenderTarget/SwapChainRT/SwapChainRenderTarget.h>
@@ -23,6 +24,10 @@ namespace CalyxEngine {
 	}
 
 	void DxCore::ReleaseResources() {
+		if(auto* previews = AssetPreviewManager::GetInstance()) {
+			previews->Shutdown();
+		}
+		renderTargetCollection_.reset();
 		dxSwapChain_.reset();
 		dxFence_.reset();
 		dxCommand_.reset();
@@ -74,6 +79,11 @@ namespace CalyxEngine {
 		debugRT->Initialize(device.Get(), width, height, format_, DescriptorAllocator::Allocate(DescriptorUsage::Rtv), DescriptorAllocator::Allocate(DescriptorUsage::Dsv));
 		debugRT->SetRenderTargetType(RenderTargetType::DebugView);
 		renderTargetCollection_->Add("DebugView", std::move(debugRT));
+
+		auto assetPreviewRT = std::make_unique<OffscreenRenderTarget>();
+		assetPreviewRT->Initialize(device.Get(), 256, 256, format_, DescriptorAllocator::Allocate(DescriptorUsage::Rtv), DescriptorAllocator::Allocate(DescriptorUsage::Dsv));
+		assetPreviewRT->SetRenderTargetType(RenderTargetType::Offscreen);
+		renderTargetCollection_->Add("AssetPreview", std::move(assetPreviewRT));
 
 		// Ping-Pong Buffers
 		auto postBuffer1 = std::make_unique<OffscreenRenderTarget>();
@@ -140,6 +150,9 @@ namespace CalyxEngine {
 		dxSwapChain_->Present();
 		dxFence_->Signal(dxCommand_->GetCommandQueue());
 		dxFence_->Wait();
+		if(auto* previews = AssetPreviewManager::GetInstance()) {
+			previews->ReleaseFrameResources();
+		}
 		dxCommand_->Reset();
 	}
 
