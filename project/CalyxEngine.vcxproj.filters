@@ -2762,6 +2762,7 @@
     <ClCompile Include="Engine\Application\Effects\Particle\Module\Uv\TextureSheetAnimModule.cpp" />
     <ClCompile Include="Engine\Renderer\Sprite\SpriteRenderer.cpp" />
     <ClCompile Include="Data\Engine\Prefab\Serializer\PrefabSerializer.cpp" />
+    <ClCompile Include="Engine\Foundation\Reflection\CalyxObjectRegistry.generated.cpp" />
     <ClCompile Include="Engine\Renderer\Model\ModelRenderer.cpp" />
     <ClCompile Include="Engine\Renderer\Outline\OutlineRenderer.cpp" />
     <ClCompile Include="Engine\Objects\3D\Actor\Registry\SceneObjectRegistry.cpp" />

@@ -11,6 +11,7 @@
 #include <Engine/Objects/3D/Actor/TestObject/CalyxHuman.h>
 /* c++ */
 #include <memory>
+#include <string>
 #include <vector>
 
 ///デバッグ関連///
@@ -37,5 +38,15 @@ public:
 	void CleanUp()override;
 	void LoadAssets()override;
 
+private:
+	void FetchFacultyFromWebApi();
+	std::string BuildFacultyEndpoint() const;
+	std::string BuildFacultyDisplayText(const std::string& response) const;
+	void DrawWebApiDebugWindow();
+
+	int facultyId_ = 1;
+	std::string apiStatus_ = "not requested";
+	std::string apiRawResponse_;
+	std::string apiDisplayText_;
 
 };
