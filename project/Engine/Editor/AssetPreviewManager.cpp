@@ -3,9 +3,11 @@
 #include <Data/Engine/Prefab/Serializer/PrefabSerializer.h>
 #include <Engine/Assets/Database/AssetDatabase.h>
 #include <Engine/Assets/Manager/AssetManager.h>
+#include <Engine/Assets/Model/Model.h>
 #include <Engine/Assets/Model/ModelManager.h>
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Foundation/Debug/CxAssert.h>
+#include <Engine/Foundation/Math/MathUtil.h>
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Graphics/Camera/3d/DebugCamera.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
@@ -44,6 +46,20 @@ namespace CalyxEngine {
 					(std::max)(a.max_.z, b.max_.z),
 				}};
 		}
+
+		WorldTransform MakePreviewTransform() {
+			WorldTransform transform;
+			transform.scale		  = {1.0f, 1.0f, 1.0f};
+			transform.rotation	  = CalyxEngine::Quaternion::MakeIdentity();
+			transform.translation = CalyxEngine::Vector3::Zero();
+			transform.matrix.world = CalyxEngine::MakeAffineMatrix(
+				transform.scale,
+				transform.rotation,
+				transform.translation);
+			transform.matrix.WorldInverseTranspose =
+				CalyxEngine::Matrix4x4::Transpose(CalyxEngine::Matrix4x4::Inverse(transform.matrix.world));
+			return transform;
+		}
 	}
 
 	AssetPreviewManager AssetPreviewManager::instance_;
@@ -68,6 +84,7 @@ namespace CalyxEngine {
 		entry.texture	= nullptr;
 		entry.lastWrite = record.lastWrite;
 		entry.type		= record.type;
+		entry.modelLoadRequested = false;
 		queue_.push_back(record.guid);
 	}
 
@@ -92,6 +109,7 @@ namespace CalyxEngine {
 		queue_.clear();
 		entries_.clear();
 		retainedFrameObjects_.clear();
+		retainedFrameModels_.clear();
 		retiredFrameResources_.clear();
 		modelRenderer_.reset();
 		previewContext_.reset();
@@ -170,8 +188,27 @@ namespace CalyxEngine {
 				continue;
 			}
 
+			if(record->type == AssetType::Model) {
+				auto* assetManager = AssetManager::GetInstance();
+				auto* modelManager = assetManager ? assetManager->GetModelManager() : nullptr;
+				const std::string modelName = record->sourcePath.filename().string();
+				if(modelManager && !modelManager->IsModelLoaded(modelName)) {
+					if(!it->second.modelLoadRequested) {
+						modelManager->LoadModel(modelName);
+						it->second.modelLoadRequested = true;
+					}
+					modelManager->ProcessLoadingTasks();
+					if(!modelManager->IsModelLoaded(modelName)) {
+						it->second.state = State::Queued;
+						queue_.push_back(guid);
+						++processed;
+						continue;
+					}
+				}
+			}
+
 			if(TryGeneratePreview(*record, it->second) ||
-			   TryRenderPreview(*record, it->second, cmdList, pso, renderTarget)) {
+			   TryRenderModelPreview(*record, it->second, cmdList, pso, renderTarget)) {
 				it->second.state = State::Ready;
 			} else {
 				it->second.state = State::Failed;
@@ -182,6 +219,7 @@ namespace CalyxEngine {
 
 	void AssetPreviewManager::ReleaseFrameResources() {
 		retainedFrameObjects_.clear();
+		retainedFrameModels_.clear();
 		retiredFrameResources_.clear();
 	}
 
@@ -255,6 +293,67 @@ namespace CalyxEngine {
 
 		const bool copied = CopyRenderTargetToCache(cmdList, renderTarget, entry);
 		retainedFrameObjects_.insert(retainedFrameObjects_.end(), objects.begin(), objects.end());
+		if(previous) previous->MakeCurrent();
+		return copied;
+	}
+
+	bool AssetPreviewManager::TryRenderModelPreview(const AssetRecord& record,
+													Entry&			  entry,
+													ID3D12GraphicsCommandList* cmdList,
+													PipelineService*		   pso,
+													IRenderTarget*			   renderTarget) {
+		if(record.type != AssetType::Model) return false;
+		if(!EnsurePreviewContext()) return false;
+
+		const std::string modelName = record.sourcePath.filename().string();
+		auto			  model		= std::make_shared<Model>(modelName);
+		model->Update(0.0f);
+		if(!model->GetModelData()) return false;
+
+		const AABB& bounds = model->GetModelData()->localAABB;
+		Vector3 center = (bounds.min_ + bounds.max_) * 0.5f;
+		const Vector3 extents = (bounds.max_ - bounds.min_) * 0.5f;
+		const float radius = (std::max)(0.75f, extents.Length());
+
+		SceneContext* previous = SceneContext::Current();
+		previewContext_->MakeCurrent();
+
+		CameraManager::SetTypeStatic(CameraType::Debug);
+		CameraManager::SetViewportSizeStatic(ViewportType::VIEWPORT_DEBUG, {256.0f, 256.0f});
+		previewContext_->GetCameraMgr()->SetAspectRatio(1.0f, 1.0f);
+		if(auto* debugCamera = CameraManager::GetDebug()) {
+			DebugCamera::State state = debugCamera->CaptureState();
+			state.target = center;
+			state.distance = radius * 2.8f;
+			state.orbitAngle = {0.65f, 0.35f};
+			debugCamera->ApplyState(state);
+			debugCamera->AlwaysUpdate(0.0f);
+		}
+		previewContext_->GetCameraMgr()->TransferToGPU();
+		previewContext_->GetLightLibrary()->CyncGpu();
+
+		renderTarget->Clear(cmdList);
+		renderTarget->SetRenderTarget(cmdList);
+
+		WorldTransform transform = MakePreviewTransform();
+		modelRenderer_->BeginFrame();
+		modelRenderer_->RegisterStatic(model.get(), transform, BillboardMode::None, nullptr);
+
+		if(auto* camera = dynamic_cast<Camera3d*>(CameraManager::GetActive())) {
+			modelRenderer_->PreCullAndBatch(camera, false);
+		} else {
+			modelRenderer_->BuildAllVisibleBatches();
+		}
+
+		modelRenderer_->DrawAll(cmdList,
+								GraphicsGroup::GetInstance()->GetDevice().Get(),
+								renderTarget,
+								pso,
+								previewContext_->GetLightLibrary(),
+								nullptr);
+
+		const bool copied = CopyRenderTargetToCache(cmdList, renderTarget, entry);
+		retainedFrameModels_.push_back(std::move(model));
 		if(previous) previous->MakeCurrent();
 		return copied;
 	}

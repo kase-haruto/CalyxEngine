@@ -15,6 +15,7 @@
 
 class DxGpuResource;
 class IRenderTarget;
+class BaseModel;
 class ModelRenderer;
 class PipelineService;
 class SceneContext;
@@ -60,6 +61,7 @@ namespace CalyxEngine {
 			std::filesystem::file_time_type lastWrite = {};
 			AssetType					   type		 = AssetType::Unknown;
 			std::unique_ptr<DxGpuResource> cacheResource;
+			bool						   modelLoadRequested = false;
 		};
 
 		static AssetPreviewManager instance_;
@@ -70,6 +72,11 @@ namespace CalyxEngine {
 							  ID3D12GraphicsCommandList* cmdList,
 							  PipelineService*			  pso,
 							  IRenderTarget*				  renderTarget);
+		bool TryRenderModelPreview(const AssetRecord& record,
+								   Entry&			 entry,
+								   ID3D12GraphicsCommandList* cmdList,
+								   PipelineService*		  pso,
+								   IRenderTarget*			  renderTarget);
 		bool TryLoadSidecarPreview(const AssetRecord& record, Entry& entry);
 		std::optional<std::filesystem::path> FindSidecarPreviewPath(const AssetRecord& record) const;
 		bool								EnsurePreviewContext();
@@ -86,6 +93,7 @@ namespace CalyxEngine {
 		std::unique_ptr<SceneContext>	  previewContext_;
 		std::unique_ptr<ModelRenderer>	  modelRenderer_;
 		std::vector<std::shared_ptr<SceneObject>> retainedFrameObjects_;
+		std::vector<std::shared_ptr<BaseModel>> retainedFrameModels_;
 		std::vector<std::unique_ptr<DxGpuResource>> retiredFrameResources_;
 	};
 

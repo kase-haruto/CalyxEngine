@@ -115,7 +115,7 @@ protected:
 
 	std::string fileName_;
 	std::string textureName_ = "textures/white1x1.dds"; // デフォルトのテクスチャ名
-	ModelData* modelData_;
+	ModelData* modelData_ = nullptr;
 	Guid materialGuid_;
 	std::optional<CalyxEngine::Vector4> colorOverride_;
 public:
