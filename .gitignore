@@ -3,6 +3,7 @@
 ###############################################################################
 .vs/
 .idea/
+.ai/
 
 *.rsuser
 *.suo
@@ -12,6 +13,10 @@
 *.sln.docstates
 
 imgui.ini
+*.generated.cpp
+*.generated.h
+# Asset metadata stores stable GUIDs and must be shared. Do not ignore *.meta globally.
+
 
 ###############################################################################
 # Build output (ENGINE)
@@ -38,6 +43,16 @@ ipch/
 *.dll
 *.pdb
 *.ilk
+
+###############################################################################
+# EXCEPTION: Live++ Agent files (required for hot reload)
+# These files must be included in git despite *.exe, *.dll, *.pdb rules above
+###############################################################################
+!project/externals/LivePP/Agent/**
+!project/externals/LivePP/Agent/**/*.exe
+!project/externals/LivePP/Agent/**/*.dll
+!project/externals/LivePP/Agent/**/*.pdb
+!project/externals/LivePP/Agent/**/*.lib
 
 ###############################################################################
 # External libraries (ignore build outputs only)
