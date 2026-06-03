@@ -442,6 +442,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Application\Effects\Particle\Module\Velocity\GravityModule.cpp" />
     <ClCompile Include="Engine\Application\Effects\Particle\Emitter\GpuFxEmitter.cpp" />
     <ClCompile Include="Game\3D\Actor\DemoPlayer\Weapon\Weapon.cpp" />
+    <ClCompile Include="Game\Input\PlayerInput.cpp" />
     <ClCompile Include="Game\Scene\Utility\SceneTypeUtil.cpp" />
     <ClCompile Include="main.cpp">
       <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</MultiProcessorCompilation>
@@ -837,7 +838,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\PostProcess\Vignette\Vignette.h" />
     <ClInclude Include="Engine\Application\Effects\Particle\Emitter\GpuFxEmitter.h" />
     <ClInclude Include="Engine\Application\System\PlaySession.h" />
+    <ClInclude Include="Game\3D\Actor\DemoPlayer\Details\DemoPlayerActionConfig.h" />
     <ClInclude Include="Game\3D\Actor\DemoPlayer\Weapon\Weapon.h" />
+    <ClInclude Include="Game\Input\IInputAction.h" />
+    <ClInclude Include="Game\Input\InputConfig.h" />
+    <ClInclude Include="Game\Input\PlayerInput.h" />
     <ClInclude Include="Game\Scene\Details\SceneType.h" />
     <ClInclude Include="Game\Scene\Utility\SceneTypeUtil.h" />
     <ClInclude Include="Resources\shaders\CRT.PS.hlsl">
