@@ -2,55 +2,33 @@
 
 // engine
 #include <Engine/Application/System/PlaySession.h>
-#include <Engine/Editor/AssetPreviewManager.h>
-#include <Engine/Graphics/Camera/3d/Camera3d.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
 #include <Engine/Graphics/Device/DxCore.h>
-#include <Engine/Graphics/Pipeline/BlendMode/BlendMode.h>
 #include <Engine/Graphics/RenderTarget/Collection/RenderTargetCollection.h>
-#include <Engine/Graphics/RenderTarget/OffscreenRT/OffscreenRenderTarget.h>
-#include <Engine/Objects/3D/Actor/BaseGameObject.h>
-#include <Engine/Objects/Event/BaseEventObject.h>
-#include <Engine/Renderer/Grid/GridRenderer.h>
-#include <Engine/Renderer/Model/ModelRenderer.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 #include <Engine/Scene/Base/IScene.h>
 #include <Engine/Scene/Context/SceneContext.h>
 
-// scene
-#include "Engine/Scene/Test/TestScene.h"
-#include "Game/Scene/Utility/SceneTypeUtil.h"
-
 #include <Engine/Editor/PickingPass.h>
 
 namespace CalyxEngine {
-	SceneManager::SceneManager(CalyxEngine::DxCore* dx)
+	SceneManager::SceneManager(DxCore* dx)
 		: dx_(dx) {
 		transitionService_ = std::make_unique<SceneTransitionService>(*this);
 	}
 
 	SceneManager::~SceneManager() = default;
 
-	CalyxEngine::ISceneTransitionRequestor& SceneManager::GetTransitionRequestor() {
+	ISceneTransitionRequestor& SceneManager::GetTransitionRequestor() {
 		return *transitionService_;
 	}
 
 	//------------------------------------------------------------
 	void SceneManager::Initialize() {
-
-		AddScene(GameSceneUtil::ToSceneId(SceneType::TEST),
-				 std::make_unique<TestScene>());
-
-		SetCurrent(idToIndex_.at(
-			GameSceneUtil::ToSceneId(SceneType::TEST)));
-
 #if defined(_DEBUG) || defined(DEVELOP)
-		pickingPass_ = std::make_unique<CalyxEngine::PickingPass>();
+		pickingPass_ = std::make_unique<PickingPass>();
 		pickingPass_->Initialize(1280, 720);
-		editorGridRenderer_ = std::make_unique<CalyxEngine::GridRenderer>();
-		editorGridRenderer_->Initialize();
-		editorPreviewModelRenderer_ = std::make_unique<ModelRenderer>();
 #endif
 	}
 
@@ -96,6 +74,12 @@ namespace CalyxEngine {
 		RebindIfContextChanged();
 	}
 
+	void SceneManager::SetCurrent(SceneId id) {
+		auto it = idToIndex_.find(id);
+		if(it == idToIndex_.end()) return;
+		SetCurrent(it->second);
+	}
+
 	//------------------------------------------------------------
 	SceneContext* SceneManager::GetCurrentSceneContext() const {
 		if(slots_.empty()) return nullptr;
@@ -104,6 +88,8 @@ namespace CalyxEngine {
 
 	//------------------------------------------------------------
 	SceneContext* SceneManager::ActiveCtx() const {
+		if(pPlaySession_ && pPlaySession_->IsRuntime()) return pPlaySession_->GetContext();
+		if(editorPreviewCtx_) return editorPreviewCtx_;
 		if(pPlaySession_) return pPlaySession_->GetContext();
 		if(slots_.empty()) return nullptr;
 		return slots_[currentIdx_].ctx.get();
@@ -113,6 +99,13 @@ namespace CalyxEngine {
 		if(pPlaySession_) return pPlaySession_->IsRuntime();
 		if(slots_.empty()) return false;
 		return slots_[currentIdx_].ctx->IsRuntime();
+	}
+
+	void SceneManager::SetEditorPreviewContext(SceneContext* ctx) {
+		if(editorPreviewCtx_ == ctx) return;
+		editorPreviewCtx_ = ctx;
+		lastBoundCtx_	 = nullptr;
+		lastRuntimeGen_	 = 0;
 	}
 
 	bool SceneManager::GetIsEndGame() const { return slots_[currentIdx_].scene->GetIsEndGame(); }
@@ -145,9 +138,6 @@ namespace CalyxEngine {
 			// 毎回初期化
 			slot.scene->Initialize();
 			slot.scene->OnEnter();
-			if(pPlaySession_) {
-				pPlaySession_->ApplyPendingDebugCameraState(ctx);
-			}
 
 			lastBoundCtx_	= ctx;
 			lastRuntimeGen_ = gen;
@@ -185,11 +175,6 @@ namespace CalyxEngine {
 	void SceneManager::PostUpdate(ID3D12GraphicsCommandList* cmd, PipelineService* pso) {
 		if(slots_.empty()) return;
 
-		if(editorPreviewCtx_) {
-			editorPreviewCtx_->MakeCurrent();
-			editorPreviewCtx_->PostUpdate(pso, cmd);
-		}
-
 		RebindIfContextChanged();
 		if(auto* ctx = ActiveCtx()) {
 			ctx->MakeCurrent();
@@ -209,113 +194,32 @@ namespace CalyxEngine {
 		DrawForRenderTarget(offscreen, cmd, pso);
 
 #if defined(_DEBUG) || defined(DEVELOP)
+		if(auto* ctx = ActiveCtx()) ctx->MakeCurrent();
+		CameraManager::SetTypeStatic(CameraType::Debug);
 		auto* debugRT = dx_->GetRenderTargetCollection().Get("DebugView");
-		if(editorPreviewCtx_) {
-			DrawEditorPreview(debugRT, cmd, pso);
-		} else {
-			if(auto* ctx = ActiveCtx()) ctx->MakeCurrent();
-			CameraManager::SetTypeStatic(CameraType::Debug);
-			DrawForRenderTarget(debugRT, cmd, pso);
+		DrawForRenderTarget(debugRT, cmd, pso);
 
-			if(pickingPass_ && debugRT) {
-				auto vp = debugRT->GetViewport();
-				pickingPass_->Resize(static_cast<int32_t>(vp.Width), static_cast<int32_t>(vp.Height));
-				if(auto* renderer = slots_[currentIdx_].scene->GetModelRenderer()) {
-					pickingPass_->Render(cmd, renderer, pso);
+		if(pickingPass_ && debugRT) {
+			auto vp = debugRT->GetViewport();
+			pickingPass_->Resize(static_cast<int32_t>(vp.Width), static_cast<int32_t>(vp.Height));
+			if(auto* renderer = slots_[currentIdx_].scene->GetModelRenderer()) {
+				// ピッキングの前にデバッグカメラ視点でカリング結果を更新する
+				if(auto* debugCam = CameraManager::GetDebug()) {
+					renderer->PreCullAndBatch(debugCam);
 				}
-				debugRT->SetRenderTarget(cmd);
+				pickingPass_->Render(cmd, renderer, pso);
 			}
+			debugRT->SetRenderTarget(cmd);
 		}
 
 #endif
 
-		if(!editorPreviewCtx_) {
-			if(auto* cam = CameraManager::GetActive()) {
-				GraphicsGroup::GetInstance()->SetCommand(cmd, PipelineType::Line, BlendMode::NORMAL);
-				cam->SetCommand(cmd, PipelineType::Line);
-				PrimitiveDrawer::GetInstance()->Render();
-			}
-		}
-
-		if(auto* previewRT = dx_->GetRenderTargetCollection().Get("AssetPreview")) {
-			if(auto* previews = AssetPreviewManager::GetInstance()) {
-				SceneContext* previousContext = SceneContext::Current();
-				previews->ProcessRenderQueue(cmd, pso, previewRT, 1);
-				if(previousContext) previousContext->MakeCurrent();
-			}
-		}
-
-		PrimitiveDrawer::GetInstance()->ClearMesh();
-	}
-
-	void SceneManager::DrawEditorPreview(IRenderTarget*				rt,
-										 ID3D12GraphicsCommandList* cmd,
-										 PipelineService*			pso) {
-		if(!rt || !editorPreviewCtx_) return;
-
-		editorPreviewCtx_->MakeCurrent();
-		CameraManager::SetTypeStatic(CameraType::Debug);
-
-		rt->SetRenderTarget(cmd);
-		rt->Clear(cmd);
-
 		if(auto* cam = CameraManager::GetActive()) {
-			if(editorGridRenderer_) {
-				editorGridRenderer_->Render(cmd, pso, cam);
-			}
+			GraphicsGroup::GetInstance()->SetCommand(cmd, PipelineType::Line, BlendMode::NORMAL);
+			cam->SetCommand(cmd, PipelineType::Line);
+			PrimitiveDrawer::GetInstance()->Render();
 		}
-
-		if(editorPreviewModelRenderer_) {
-			editorPreviewModelRenderer_->BeginFrame();
-
-			for(auto* object : editorPreviewCtx_->GetObjectLibrary()->GetAllObjectsRaw()) {
-				if(auto* go = dynamic_cast<BaseGameObject*>(object)) {
-					switch(go->GetModelType()) {
-					case ObjectModelType::ModelType_Static:
-						if(auto* model = go->GetStaticModel()) {
-							editorPreviewModelRenderer_->RegisterStatic(model, go->GetWorldTransform(), go->GetBillboardMode(), go);
-						}
-						break;
-					case ObjectModelType::ModelType_Animation:
-						if(auto* model = go->AnimationModel()) {
-							editorPreviewModelRenderer_->RegisterSkinned(model, go->GetWorldTransform(), go);
-						}
-						break;
-					}
-				} else if(auto* eventObject = dynamic_cast<BaseEventObject*>(object)) {
-					if(auto* model = eventObject->GetModel()) {
-						editorPreviewModelRenderer_->RegisterStatic(model, eventObject->GetWorldTransform(), BillboardMode::None, eventObject);
-					}
-				}
-			}
-
-			if(auto* camera = dynamic_cast<Camera3d*>(CameraManager::GetActive())) {
-				editorPreviewModelRenderer_->PreCullAndBatch(camera, false);
-			} else {
-				editorPreviewModelRenderer_->BuildAllVisibleBatches();
-			}
-			editorPreviewModelRenderer_->DrawAll(cmd,
-												 GraphicsGroup::GetInstance()->GetDevice().Get(),
-												 rt,
-												 pso,
-												 editorPreviewCtx_->GetLightLibrary(),
-												 nullptr);
-		}
-
-		editorPreviewCtx_->GetFxSystem()->Render(pso, cmd);
-	}
-
-	void SceneManager::DrawSpritesToRenderTarget(IRenderTarget* rt, ID3D12GraphicsCommandList* cmd, PipelineService* pso, bool transitionToShaderResource) {
-		if(!rt) return;
-
-		rt->TransitionTo(cmd, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		rt->SetRenderTarget(cmd);
-
-		slots_[currentIdx_].scene->DrawSpritesOnly(cmd, pso);
-
-		if(transitionToShaderResource) {
-			rt->TransitionTo(cmd, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-		}
+		PrimitiveDrawer::GetInstance()->ClearMesh();
 	}
 
 	//------------------------------------------------------------
@@ -329,16 +233,17 @@ namespace CalyxEngine {
 
 		auto& slot = slots_[currentIdx_];
 		slot.scene->Draw(cmd, pso, rt);
+
+		// gameViewパネルにもスプライトを描画する
+		if(rt->GetRenderTargetType() != RenderTargetType::DebugView) {
+			slot.scene->DrawSpritesOnly(cmd, pso);
+		}
 	}
 
 	//------------------------------------------------------------
 	void SceneManager::DrawNotAffectedFromPE(ID3D12GraphicsCommandList* cmd, PipelineService* pso) {
 		if(slots_.empty()) return;
-		auto* postOutput = dx_->GetRenderTargetCollection().Get("PostEffectOutput");
-		DrawSpritesToRenderTarget(postOutput, cmd, pso, true);
-
-		auto* backBuffer = dx_->GetRenderTargetCollection().Get("BackBuffer");
-		DrawSpritesToRenderTarget(backBuffer, cmd, pso, false);
+		slots_[currentIdx_].scene->DrawSpritesOnly(cmd, pso);
 	}
 
 	void SceneManager::RequestSceneChangeInternal(SceneId next) {
