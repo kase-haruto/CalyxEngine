@@ -192,6 +192,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Engine\Application\Runtime\EngineRuntime.cpp" />
+    <ClCompile Include="Engine\Application\Runtime\Project.cpp" />
     <ClCompile Include="Engine\Application\Runtime\SceneRegistry.cpp" />
     <ClCompile Include="Engine\Application\UI\EngineUI\ManipulatorSettingsUI.cpp" />
     <ClCompile Include="Data\Engine\Configs\Scene\Objects\Particle\Module\ModuleConfig.cpp">
@@ -461,6 +462,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Application\CalyxEngine\Application.h" />
     <ClInclude Include="Engine\Application\CalyxEngine\CalyxEngine.h" />
     <ClInclude Include="Engine\Application\CalyxEngine\Engine.h" />
+    <ClInclude Include="Engine\Application\CalyxEngine\Project.h" />
     <ClInclude Include="Engine\Application\CalyxEngine\SceneRegistry.h" />
     <ClInclude Include="Engine\Application\UI\EngineUI\ManipulatorSettings.h" />
     <ClInclude Include="Engine\Application\UI\EngineUI\ManipulatorSettingsUI.h" />

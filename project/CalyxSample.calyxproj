@@ -1,0 +1,7 @@
+{
+  "name": "Calyx Sample",
+  "engineVersion": "0.1.0",
+  "assetDirectory": "Resources/Assets",
+  "sourceDirectory": "Game",
+  "startupScene": "Resources/Assets/Scenes/test.scene"
+}

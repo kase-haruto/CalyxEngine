@@ -7,6 +7,8 @@
 #include <Engine/Application/Effects/Particle/Emitter/GpuFxEmitter.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
+#include <externals/imgui/ImGuiFileDialog.h>
+#include <externals/imgui/imgui.h>
 #include <filesystem>
 
 namespace CalyxEngine {

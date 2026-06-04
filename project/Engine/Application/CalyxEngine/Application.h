@@ -2,6 +2,7 @@
 
 namespace Calyx {
 
+	struct ProjectInfo;
 	class SceneRegistry;
 
 	class Application {
@@ -10,6 +11,10 @@ namespace Calyx {
 
 		virtual void RegisterScenes(SceneRegistry& registry) {
 			(void)registry;
+		}
+
+		virtual void OnProjectLoaded(const ProjectInfo& project) {
+			(void)project;
 		}
 
 		virtual void OnInitialize() {}

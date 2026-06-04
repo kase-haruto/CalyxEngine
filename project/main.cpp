@@ -16,7 +16,7 @@ public:
 	void OnFinalize() override {}
 };
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int){
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR commandLine, int){
 	GameApplication application;
-	return Calyx::Run(hInstance, application);
+	return Calyx::Run(hInstance, application, commandLine);
 }
