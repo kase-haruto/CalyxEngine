@@ -14,6 +14,7 @@ namespace CalyxEditor {
 
 	namespace {
 
+		// 新規プロジェクトの初期作成先
 		std::filesystem::path DefaultUserProjectDirectory() {
 			char*  userProfile = nullptr;
 			size_t length		= 0;
@@ -25,6 +26,7 @@ namespace CalyxEditor {
 			return std::filesystem::path("Calyx Projects");
 		}
 
+		// std::array<char> への安全な文字列コピー
 		bool CopyText(std::span<char> buffer, const std::string& text) {
 			if(buffer.empty()) return false;
 			const size_t length = (std::min)(buffer.size() - 1, text.size());
@@ -33,6 +35,7 @@ namespace CalyxEditor {
 			return length == text.size();
 		}
 
+		// 入力欄の未入力判定
 		bool IsBlank(const char* text) {
 			if(!text) return true;
 			while(*text) {
@@ -44,32 +47,42 @@ namespace CalyxEditor {
 
 	} // namespace
 
+	////////////////////////////////////////////////////////////////////////////////////////////
+	//						初期化
+	////////////////////////////////////////////////////////////////////////////////////////////
 	ProjectBrowser::ProjectBrowser()
 		: registryPath_(Calyx::DefaultProjectRegistryPath()) {
+		if(!param_.LoadParams()) {
+			param_.SaveParams();
+		}
+
 		CopyText(newProjectName_, "NewProject");
 		CopyText(newProjectDirectory_, DefaultUserProjectDirectory().string());
 		ReloadRecentProjects();
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////////
+	//						描画
+	////////////////////////////////////////////////////////////////////////////////////////////
 	bool ProjectBrowser::Draw(Calyx::ProjectInfo& outProject) {
+		
 		bool selected = false;
 
 		const ImGuiViewport* viewport = ImGui::GetMainViewport();
 		ImGui::SetNextWindowPos(viewport->WorkPos);
 		ImGui::SetNextWindowSize(viewport->WorkSize);
 		ImGui::Begin("Project Browser", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
-
 		LoadIcons();
 
 		ImGui::TextUnformatted("Calyx Project Browser");
 		ImGui::Separator();
 
-		if(ImGui::Button("Open Project", ImVec2(140.0f, 28.0f))) {
+		if(ImGui::Button("Open Project", ImVec2(param_.openButtonSize_.x, param_.openButtonSize_.y))) {
 			IGFD::FileDialogConfig config;
 			ImGuiFileDialog::Instance()->OpenDialog("OpenCalyxProject", "Open Calyx Project", ".calyxproj", config);
 		}
 		ImGui::SameLine();
-		if(ImGui::Button("Refresh", ImVec2(100.0f, 28.0f))) {
+		if(ImGui::Button("Refresh", ImVec2(param_.refreshButtonSize_.x, param_.refreshButtonSize_.y))) {
 			ReloadRecentProjects();
 		}
 
@@ -79,19 +92,39 @@ namespace CalyxEditor {
 		}
 
 		ImGui::Spacing();
-		const float footerHeight = 72.0f;
-		if(ImGui::BeginTable("ProjectBrowserLayout", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersInnerV, ImVec2(0.0f, -footerHeight))) {
-			ImGui::TableSetupColumn("Recent", ImGuiTableColumnFlags_WidthStretch, 0.68f);
-			ImGui::TableSetupColumn("Details", ImGuiTableColumnFlags_WidthStretch, 0.32f);
+		ImGuiStyle& style = ImGui::GetStyle();
 
-			ImGui::TableNextColumn();
-			DrawRecentProjects(outProject, selected);
+		// Project Location + Project Name の2行分
+		const float footerHeight =
+			ImGui::GetFrameHeightWithSpacing() * 2.0f +
+			style.ItemSpacing.y * 2.0f +
+			style.WindowPadding.y;
 
-			ImGui::TableNextColumn();
-			DrawTemplateDetails();
+		if(ImGui::BeginChild(
+			"ProjectBrowserMainArea",
+			ImVec2(0.0f, -footerHeight),
+			false,
+			ImGuiWindowFlags_NoScrollbar)) {
 
-			ImGui::EndTable();
-		}
+			if(ImGui::BeginTable(
+				"ProjectBrowserLayout",
+				param_.tableColumnCount_,
+				ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersInnerV,
+				ImVec2(0.0f, 0.0f))) {
+
+				ImGui::TableSetupColumn("Recent", ImGuiTableColumnFlags_WidthStretch, param_.recentColumnWeight_);
+				ImGui::TableSetupColumn("Details", ImGuiTableColumnFlags_WidthStretch, param_.detailsColumnWeight_);
+
+				ImGui::TableNextColumn();
+				DrawRecentProjects(outProject, selected);
+
+				ImGui::TableNextColumn();
+				DrawTemplateDetails();
+
+				ImGui::EndTable();
+				}
+			}
+		ImGui::EndChild();
 
 		ImGui::Separator();
 		DrawNewProject(outProject, selected);
@@ -102,6 +135,9 @@ namespace CalyxEditor {
 		return selected;
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////////
+	//						最近使ったプロジェクトの再読み込み
+	////////////////////////////////////////////////////////////////////////////////////////////
 	void ProjectBrowser::ReloadRecentProjects() {
 		if(!Calyx::LoadRecentProjects(registryPath_, recentProjects_)) {
 			recentProjects_.clear();
@@ -111,6 +147,9 @@ namespace CalyxEditor {
 		statusMessage_.clear();
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////////
+	//						最近使ったプロジェクト一覧
+	////////////////////////////////////////////////////////////////////////////////////////////
 	void ProjectBrowser::DrawRecentProjects(Calyx::ProjectInfo& outProject, bool& selected) {
 		ImGui::TextUnformatted("Recent Projects");
 		ImGui::Separator();
@@ -120,9 +159,9 @@ namespace CalyxEditor {
 		} else {
 			ImGui::BeginChild("RecentProjectList", ImVec2(0.0f, 0.0f), false);
 
-			const float cardWidth = 142.0f;
-			const float cardHeight = 146.0f;
-			const float spacing = ImGui::GetStyle().ItemSpacing.x;
+			const float cardWidth  = param_.cardSize_.x;
+			const float cardHeight = param_.cardSize_.y;
+			const float spacing	= ImGui::GetStyle().ItemSpacing.x;
 			const float availableWidth = ImGui::GetContentRegionAvail().x;
 			int columns = static_cast<int>(availableWidth / (cardWidth + spacing));
 			columns = (std::max)(1, columns);
@@ -142,19 +181,27 @@ namespace CalyxEditor {
 				const ImVec2 cardMin = ImGui::GetItemRectMin();
 				const ImVec2 cardMax = ImGui::GetItemRectMax();
 				auto* drawList = ImGui::GetWindowDrawList();
-				drawList->AddRect(cardMin, cardMax, IM_COL32(70, 70, 70, 255));
+				drawList->AddRect(
+					cardMin,
+					cardMax,
+					ImGui::ColorConvertFloat4ToU32(
+						ImVec4(
+							param_.cardBorderColor_.x,
+							param_.cardBorderColor_.y,
+							param_.cardBorderColor_.z,
+							param_.cardBorderColor_.w)));
 
-				ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 10.0f, cardMin.y + 10.0f));
+				ImGui::SetCursorScreenPos(ImVec2(cardMin.x + param_.cardPadding_, cardMin.y + param_.cardPadding_));
 				if(genericIcon_) {
-					ImGui::Image(genericIcon_, ImVec2(cardWidth - 20.0f, 82.0f));
+					ImGui::Image(genericIcon_, ImVec2(cardWidth - param_.cardImageWidthOffset_, param_.cardImageHeight_));
 				} else {
-					ImGui::Dummy(ImVec2(cardWidth - 20.0f, 82.0f));
+					ImGui::Dummy(ImVec2(cardWidth - param_.cardImageWidthOffset_, param_.cardImageHeight_));
 				}
 
 				const std::string label = entry.name.empty() ? entry.projectFile.stem().string() : entry.name;
-				ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 10.0f, cardMin.y + 100.0f));
+				ImGui::SetCursorScreenPos(ImVec2(cardMin.x + param_.cardPadding_, cardMin.y + param_.cardNameOffsetY_));
 				ImGui::TextWrapped("%s", label.c_str());
-				ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 10.0f, cardMin.y + 122.0f));
+				ImGui::SetCursorScreenPos(ImVec2(cardMin.x + param_.cardPadding_, cardMin.y + param_.cardVersionOffsetY_));
 				ImGui::TextDisabled("%s", entry.engineVersion.empty() ? "0.1.0" : entry.engineVersion.c_str());
 
 				ImGui::EndGroup();
@@ -165,12 +212,15 @@ namespace CalyxEditor {
 		}
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////////
+	//						テンプレート詳細
+	////////////////////////////////////////////////////////////////////////////////////////////
 	void ProjectBrowser::DrawTemplateDetails() {
 		ImGui::TextUnformatted("Template");
 		ImGui::Separator();
 
 		const float previewWidth = ImGui::GetContentRegionAvail().x;
-		const float previewHeight = (std::min)(180.0f, previewWidth * 0.52f);
+		const float previewHeight = (std::min)(param_.templatePreviewMaxHeight_, previewWidth * param_.templatePreviewAspect_);
 		if(genericIcon_) {
 			ImGui::Image(genericIcon_, ImVec2(previewWidth, previewHeight));
 		} else {
@@ -184,53 +234,63 @@ namespace CalyxEditor {
 		ImGui::Spacing();
 		ImGui::Separator();
 		ImGui::TextDisabled("Language");
-		ImGui::SameLine(120.0f);
+		ImGui::SameLine(param_.templateValueOffsetX_);
 		ImGui::TextUnformatted("C++");
 
 		ImGui::TextDisabled("Target");
-		ImGui::SameLine(120.0f);
+		ImGui::SameLine(param_.templateValueOffsetX_);
 		ImGui::TextUnformatted("Desktop");
 
 		ImGui::TextDisabled("Startup Scene");
-		ImGui::SameLine(120.0f);
+		ImGui::SameLine(param_.templateValueOffsetX_);
 		ImGui::TextUnformatted("None");
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////////
+	//						新規プロジェクト作成欄
+	////////////////////////////////////////////////////////////////////////////////////////////
 	void ProjectBrowser::DrawNewProject(Calyx::ProjectInfo& outProject, bool& selected) {
 		ImGui::BeginGroup();
 
+		const float labelWidth	= param_.labelWidth_;
+		const float buttonWidth	= param_.buttonWidth_;
+		const float browseSize	= param_.browseSize_;
+		const float fullWidth	= ImGui::GetContentRegionAvail().x;
+		const float inputWidth	= (std::max)(param_.minInputWidth_, fullWidth - labelWidth - browseSize - ImGui::GetStyle().ItemSpacing.x * param_.inputSpacingCount_);
+
 		ImGui::TextUnformatted("Project Location");
-		ImGui::SameLine();
-		ImGui::SetNextItemWidth((std::max)(240.0f, ImGui::GetContentRegionAvail().x * 0.54f));
+		ImGui::SameLine(labelWidth);
+		ImGui::SetNextItemWidth(inputWidth);
 		ImGui::InputText("##ProjectDirectory", newProjectDirectory_.data(), newProjectDirectory_.size());
 		ImGui::SameLine();
 		if(folderIcon_) {
-			if(ImGui::ImageButton("##BrowseProjectLocation", folderIcon_, ImVec2(22.0f, 22.0f))) {
+			if(ImGui::ImageButton("##BrowseProjectLocation", folderIcon_, ImVec2(param_.folderIconSize_, param_.folderIconSize_))) {
 				IGFD::FileDialogConfig config;
 				config.path = newProjectDirectory_.data();
 				ImGuiFileDialog::Instance()->OpenDialog("SelectProjectDirectory", "Select Project Location", nullptr, config);
 			}
-		} else if(ImGui::Button("...", ImVec2(30.0f, 24.0f))) {
+		} else if(ImGui::Button("...", ImVec2(param_.fallbackBrowseButtonSize_.x, param_.fallbackBrowseButtonSize_.y))) {
 			IGFD::FileDialogConfig config;
 			config.path = newProjectDirectory_.data();
 			ImGuiFileDialog::Instance()->OpenDialog("SelectProjectDirectory", "Select Project Location", nullptr, config);
 		}
 
-		ImGui::SameLine();
 		ImGui::TextUnformatted("Project Name");
-		ImGui::SameLine();
-		ImGui::SetNextItemWidth((std::max)(160.0f, ImGui::GetContentRegionAvail().x - 180.0f));
+		ImGui::SameLine(labelWidth);
+		ImGui::SetNextItemWidth((std::max)(param_.minInputWidth_, fullWidth - labelWidth - buttonWidth - ImGui::GetStyle().ItemSpacing.x * param_.inputSpacingCount_));
 		ImGui::InputText("##ProjectName", newProjectName_.data(), newProjectName_.size());
 
-		const float buttonWidth = 104.0f;
-		ImGui::SameLine((std::max)(0.0f, ImGui::GetWindowContentRegionMax().x - buttonWidth - 8.0f));
-		if(ImGui::Button("Create", ImVec2(buttonWidth, 30.0f))) {
+		ImGui::SameLine();
+		if(ImGui::Button("Create", ImVec2(buttonWidth, param_.createButtonHeight_))) {
 			selected = CreateBlankProject(outProject);
 		}
 
 		ImGui::EndGroup();
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////////
+	//						既存プロジェクトを開くダイアログ
+	////////////////////////////////////////////////////////////////////////////////////////////
 	void ProjectBrowser::DrawOpenProjectDialog(Calyx::ProjectInfo& outProject, bool& selected) {
 		if(ImGuiFileDialog::Instance()->Display("OpenCalyxProject")) {
 			if(ImGuiFileDialog::Instance()->IsOk()) {
@@ -240,6 +300,9 @@ namespace CalyxEditor {
 		}
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////////
+	//						プロジェクト作成先フォルダの選択
+	////////////////////////////////////////////////////////////////////////////////////////////
 	void ProjectBrowser::DrawLocationDialog() {
 		if(ImGuiFileDialog::Instance()->Display("SelectProjectDirectory")) {
 			if(ImGuiFileDialog::Instance()->IsOk()) {
@@ -249,6 +312,9 @@ namespace CalyxEditor {
 		}
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////////
+	//						アイコン読み込み
+	////////////////////////////////////////////////////////////////////////////////////////////
 	void ProjectBrowser::LoadIcons() {
 		if(genericIcon_ && folderIcon_) {
 			return;
@@ -268,6 +334,9 @@ namespace CalyxEditor {
 		}
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////////
+	//						プロジェクト読み込み
+	////////////////////////////////////////////////////////////////////////////////////////////
 	bool ProjectBrowser::LoadProject(const std::filesystem::path& path, Calyx::ProjectInfo& outProject) {
 		Calyx::ProjectInfo project;
 		if(!Calyx::LoadProjectFile(path, project)) {
@@ -280,6 +349,9 @@ namespace CalyxEditor {
 		return true;
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////////
+	//						Blankプロジェクト作成
+	////////////////////////////////////////////////////////////////////////////////////////////
 	bool ProjectBrowser::CreateBlankProject(Calyx::ProjectInfo& outProject) {
 		if(IsBlank(newProjectName_.data()) || IsBlank(newProjectDirectory_.data())) {
 			statusMessage_ = "Project name and directory are required.";

@@ -92,6 +92,7 @@ namespace CalyxEngine {
 		}
 
 		sceneManager_->Update(dt, alwaysDt);
+		engineUICore_->SetEditorUiEnabled(application ? application->ShouldRenderEngineUi() : true);
 
 		EndUpdate();
 		return true;

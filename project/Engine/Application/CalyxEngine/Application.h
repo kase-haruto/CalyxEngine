@@ -21,6 +21,8 @@ namespace Calyx {
 		virtual void OnUpdate() {}
 		virtual void OnRender() {}
 		virtual void OnFinalize() {}
+
+		virtual bool ShouldRenderEngineUi() const { return true; }
 	};
 
 } // namespace Calyx

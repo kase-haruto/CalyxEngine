@@ -36,6 +36,10 @@ public:
 		}
 	}
 
+	bool ShouldRenderEngineUi() const override {
+		return hasProject_;
+	}
+
 private:
 	Calyx::ProjectInfo project_;
 	CalyxEditor::ProjectBrowser projectBrowser_;

@@ -47,6 +47,7 @@ namespace CalyxEngine {
 		PlaceToolPanel* GetPlaceToolPanel() const;
 		LevelEditor*	GetLevelEditor() const { return levelEditor_.get(); }
 		void			SetCameraForViewport(BaseCamera* mainCamera, BaseCamera* debugCamera);
+		void			SetEditorUiEnabled(bool enabled) { editorUiEnabled_ = enabled; }
 
 	private:
 		//===================================================================*/
@@ -62,6 +63,7 @@ namespace CalyxEngine {
 		UINT64							 mainViewportTextureID_	   = 0;
 		UINT64							 debugViewportTextureID_   = 0;
 		UINT64							 pickingViewportTextureID_ = 0;
+		bool							 editorUiEnabled_		   = true; //< 通常エディタUIを描画するか
 	};
 
 	template <class Panel>
