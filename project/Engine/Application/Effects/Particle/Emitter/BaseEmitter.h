@@ -19,6 +19,7 @@ namespace CalyxEngine {
 		sphere,	   //< 球
 		cube,	   //< 立方体
 		cylinder,  //< 円柱
+		cone,      //< 円錐
 		torus,	   //< トーラス
 		triangle,  //< 三角形
 	};
@@ -51,6 +52,7 @@ namespace CalyxEngine {
 		 * \return 発生座標
 		 */
 		CalyxEngine::Vector3 GenerateSpawnPosition();
+		CalyxEngine::Vector3 GenerateSpawnPosition(const CalyxEngine::Vector3& basePos);
 
 		/**
 		 * \brief 再生
@@ -78,6 +80,7 @@ namespace CalyxEngine {
 		virtual void SetDrawEnable(bool isEnable) { drawEnable_ = isEnable; }
 		virtual void SetPosition(const CalyxEngine::Vector3& pos) { position_ = pos; }
 		virtual void DrawEmitterShape(const WorldTransform&) {}
+		virtual void DrawEmitterShapePreview(const WorldTransform&) {}
 		virtual const Guid& GetTextureGuid() const { return emptyGuid_; }
 		virtual bool LoadTextureByGuid(const Guid&) { return false; }
 		virtual void SetTextureGuid(const Guid&) {}
@@ -88,6 +91,8 @@ namespace CalyxEngine {
 		 * \return
 		 */
 		virtual bool LoadModelByGuid(const Guid& g);
+
+		void         SetAutoDestroy(bool autoDestroy) { autoDestroy_ = autoDestroy; }
 
 	public:
 		// accessor -------------------------------------------------
@@ -137,6 +142,7 @@ namespace CalyxEngine {
 
 		float alphaMultiplier_ = 1.0f;
 		bool  drawEnable_ = true;
+		bool autoDestroy_ = false;
 
 	private:
 		inline static const Guid emptyGuid_{Guid::Empty()};

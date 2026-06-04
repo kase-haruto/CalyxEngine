@@ -60,6 +60,22 @@ D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::LoadTexture(const std::string& fileP
 	return gpuHandle;
 }
 
+D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::LoadTextureLinear(const std::string& filePath) {
+	const std::string key = filePath + "#linear";
+	if(auto it = textures_.find(key); it != textures_.end()) {
+		return it->second.GetSrvHandle();
+	}
+
+	Texture texture(filePath, false);
+	texture.Load(device_.Get());
+	texture.Upload(device_.Get());
+	texture.CreateShaderResourceView(device_.Get());
+
+	D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle = texture.GetSrvHandle();
+	textures_[key] = std::move(texture);
+	return gpuHandle;
+}
+
 D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSrvHandle(const std::string& textureName) const {
 	auto it = textures_.find(textureName);
 	if (it != textures_.end()) {
@@ -136,6 +152,16 @@ D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::LoadTexture(const Guid& guid) {
 	auto h = LoadTexture(key);
 	if (h.ptr) guidToKey_.emplace(guid, key);
 	return h;
+}
+
+D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::LoadTextureLinear(const Guid& guid) {
+	if(!guid.isValid()) return {};
+	const AssetRecord* rec = FindTextureRecord(guid);
+	if(!rec) return {};
+
+	auto* db = AssetDatabase::GetInstance();
+	std::string key = ToAssetsRelative(rec->sourcePath, db->GetRoot());
+	return LoadTextureLinear(key);
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSrvHandle(const Guid& guid) const {

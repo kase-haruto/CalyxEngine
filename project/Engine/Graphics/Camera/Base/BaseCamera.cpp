@@ -194,6 +194,10 @@ void BaseCamera::SetRootCommand(ID3D12GraphicsCommandList* command, uint32_t roo
 	cameraBuffer_.SetCommand(command, rootIndex);
 }
 
+void BaseCamera::SetCameraDitherEnabled(bool enabled) {
+	cameraBuffer_.SetCameraDitherEnabled(enabled);
+}
+
 void BaseCamera::SetAspectRatio(float aspect) {
 	aspectRatio_ = aspect;
 

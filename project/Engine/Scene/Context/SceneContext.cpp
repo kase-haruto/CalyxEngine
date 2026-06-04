@@ -10,6 +10,12 @@
 
 SceneContext* SceneContext::current_ = nullptr;
 
+SceneContext::~SceneContext() {
+	if(current_ == this) {
+		current_ = nullptr;
+	}
+}
+
 void SceneContext::Initialize(bool createDefaultLights) {
 	MakeCurrent();
 
@@ -37,7 +43,13 @@ void SceneContext::Initialize(bool createDefaultLights) {
 	// --- ObjectAdded を購読 ---
 	connObjectAdded_ = EventBus::Subscribe<ObjectAdded>(
 		[this](const ObjectAdded& ev) {
+			if(ev.owner != this) return;
 			SceneObject* raw = ev.sp.get();
+			if(auto dir = std::dynamic_pointer_cast<DirectionalLight>(ev.sp)) {
+				lightLibrary_->SetDirectionalLight(dir);
+			} else if(auto point = std::dynamic_pointer_cast<PointLight>(ev.sp)) {
+				lightLibrary_->AddPointLight(point);
+			}
 			// 登録されたリスナー全員に通知
 			for(auto& cb : objectAddedCallbacks_) {
 				if(cb) cb(raw);
@@ -47,7 +59,15 @@ void SceneContext::Initialize(bool createDefaultLights) {
 	// --- ObjectRemoved を購読 ---
 	connObjectRemoved_ = EventBus::Subscribe<ObjectRemoved>(
 		[this](const ObjectRemoved& ev) {
+			if(ev.owner != this) return;
 			SceneObject* raw = ev.sp.get();
+			if(auto dir = std::dynamic_pointer_cast<DirectionalLight>(ev.sp)) {
+				if(lightLibrary_->GetDirectionalLight() == dir.get()) {
+					lightLibrary_->SetDirectionalLight({});
+				}
+			} else if(auto point = std::dynamic_pointer_cast<PointLight>(ev.sp)) {
+				lightLibrary_->RemovePointLight(point);
+			}
 
 			// Editor 用（1個だけ）
 			if(onEditorObjectRemoved_) {

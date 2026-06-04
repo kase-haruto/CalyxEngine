@@ -568,7 +568,7 @@ void PostEffectManager::DrawImGui(){
 			ImGui::Checkbox("Auto Disable", &s.autoDisable);
 
 			if(s.pass && ImGui::TreeNode("Float Animations")){
-				const char* candidates[] = {"width", "intensity", "strength", "radius", "center.x", "center.y"};
+				const char* candidates[] = {"width", "intensity", "threshold", "softKnee", "strength", "radius", "center.x", "center.y", "tint.r", "tint.g", "tint.b"};
 				if(ImGui::BeginCombo("Add Parameter", "select")){
 					for(const char* param : candidates){
 						float tmp = 0.0f;

@@ -19,9 +19,7 @@ Collider::Collider(bool isEnuble) {
 }
 
 Collider::~Collider() {
-	if(isCollisionEnabled_) {
-		CollisionManager::GetInstance()->Unregister(this);
-	}
+	CollisionManager::GetInstance()->Unregister(this);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -85,12 +83,12 @@ void Collider::NotifyCollisionExit(Collider* other) {
 //		config適用
 /////////////////////////////////////////////////////////////////////////////////////////
 void Collider::ApplyConfig(const ColliderConfig& config) {
-	isCollisionEnabled_ = config.isCollisionEnabled;
 	isDraw_				= config.isDraw;
 	type_				= static_cast<ColliderType>(config.colliderType);
 	targetType_			= static_cast<ColliderType>(config.targetType);
 	offset_				= config.offset;
 	rotateOffset_		= config.rotate;
+	SetCollisionEnabled(config.isCollisionEnabled);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

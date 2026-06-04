@@ -91,7 +91,7 @@ void Sprite::ShowGui() {
 	}
 	
 	if (GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::Material)) {
-		uvTransform.ShowImGui("uvTransform");
+		uvTransform.ShowImGui("uvTransform", false);
 		GuiCmd::EndSection();
 	}
 }

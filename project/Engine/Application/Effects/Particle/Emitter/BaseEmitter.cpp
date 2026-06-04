@@ -40,6 +40,10 @@ namespace CalyxEngine {
 	}
 
 	CalyxEngine::Vector3 BaseEmitter::GenerateSpawnPosition() {
+		return GenerateSpawnPosition(position_);
+	}
+
+	CalyxEngine::Vector3 BaseEmitter::GenerateSpawnPosition(const CalyxEngine::Vector3& basePos) {
 		using namespace CalyxEngine;
 
 		const Vector3 absScale{
@@ -48,12 +52,12 @@ namespace CalyxEngine {
 			(std::max)(std::abs(worldScale_.z), 0.0001f)};
 
 		auto rotateLocal = [&](const Vector3& localOffset) {
-			return position_ + Quaternion::RotateVector(localOffset, worldRotation_);
+			return basePos + Quaternion::RotateVector(localOffset, worldRotation_);
 		};
 
 		switch(shape_) {
 		case EmitterShape::Point:
-			return position_;
+			return basePos;
 
 		case EmitterShape::Sphere: {
 			const float radius = (std::max)(shapeRadius_, 0.0f);
@@ -99,7 +103,7 @@ namespace CalyxEngine {
 		}
 		}
 
-		return position_;
+		return basePos;
 	}
 
 	bool BaseEmitter::LoadModelByGuid(const Guid& g) {

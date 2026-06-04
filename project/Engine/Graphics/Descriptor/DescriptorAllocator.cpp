@@ -1,4 +1,5 @@
 #include "DescriptorAllocator.h"
+#include <algorithm>
 #include <stdexcept>
 
 ID3D12Device* DescriptorAllocator::device_ = nullptr;
@@ -36,6 +37,53 @@ void DescriptorAllocator::CreateHeap(DescriptorUsage usage, const DescriptorHeap
 	info.currentOffset = (usage == DescriptorUsage::CbvSrvUav) ? 1 : 0; // Descriptor 0 is reserved for ImGui font
 	info.maxDescriptors = settings.maxDescriptors;
 	info.shaderVisible = settings.shaderVisible;
+	info.freeList = {};
+	info.freeRanges.clear();
+}
+
+DescriptorHandle DescriptorAllocator::MakeHandle(const HeapInfo& info, UINT offset) {
+	DescriptorHandle handle{};
+	handle.offset = offset;
+
+	auto cpuStart = info.heap->GetCPUDescriptorHandleForHeapStart();
+	handle.cpu.ptr = cpuStart.ptr + offset * info.descriptorSize;
+
+	if(info.shaderVisible) {
+		auto gpuStart = info.heap->GetGPUDescriptorHandleForHeapStart();
+		handle.gpu.ptr = gpuStart.ptr + offset * info.descriptorSize;
+	} else {
+		handle.gpu.ptr = 0;
+	}
+
+	return handle;
+}
+
+void DescriptorAllocator::AddFreeRange(HeapInfo& info, UINT offset, UINT count) {
+	if(count == 0) return;
+
+	info.freeRanges.emplace_back(offset, count);
+	std::sort(info.freeRanges.begin(), info.freeRanges.end(), [](const auto& lhs, const auto& rhs) {
+		return lhs.first < rhs.first;
+	});
+
+	std::vector<std::pair<UINT, UINT>> merged;
+	merged.reserve(info.freeRanges.size());
+	for(const auto& range : info.freeRanges) {
+		if(merged.empty()) {
+			merged.push_back(range);
+			continue;
+		}
+
+		auto& back = merged.back();
+		const UINT backEnd = back.first + back.second;
+		if(range.first <= backEnd) {
+			const UINT rangeEnd = range.first + range.second;
+			back.second = (std::max)(backEnd, rangeEnd) - back.first;
+		} else {
+			merged.push_back(range);
+		}
+	}
+	info.freeRanges = std::move(merged);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -50,32 +98,40 @@ DescriptorHandle DescriptorAllocator::Allocate(DescriptorUsage usage){
 	if(!info.freeList.empty()) {
 		offset = info.freeList.top();
 		info.freeList.pop();
+	} else if(!info.freeRanges.empty()) {
+		auto& range = info.freeRanges.back();
+		offset = range.first;
+		++range.first;
+		--range.second;
+		if(range.second == 0) {
+			info.freeRanges.pop_back();
+		}
 	} else {
 		if(info.currentOffset >= info.maxDescriptors)
 			throw std::runtime_error("DescriptorAllocator: Heap is full");
 		offset = info.currentOffset++;
 	}
 
-	DescriptorHandle handle{};
-	handle.offset = offset;
-
-	auto cpuStart  = info.heap->GetCPUDescriptorHandleForHeapStart();
-	handle.cpu.ptr = cpuStart.ptr + offset * info.descriptorSize;
-
-	if(info.shaderVisible) {
-		auto gpuStart  = info.heap->GetGPUDescriptorHandleForHeapStart();
-		handle.gpu.ptr = gpuStart.ptr + offset * info.descriptorSize;
-	} else {
-		handle.gpu.ptr = 0;
-	}
-
-	return handle;
+	return MakeHandle(info, offset);
 }
 
 DescriptorHandle DescriptorAllocator::AllocateRange(DescriptorUsage usage, UINT count) {
 	if(count == 0) return {};
 	HeapInfo& info = heaps_[usage];
 	std::lock_guard<std::mutex> lock(info.mutex);
+
+	for(auto it = info.freeRanges.begin(); it != info.freeRanges.end(); ++it) {
+		if(it->second < count) continue;
+
+		const UINT offset = it->first;
+		it->first += count;
+		it->second -= count;
+		if(it->second == 0) {
+			info.freeRanges.erase(it);
+		}
+
+		return MakeHandle(info, offset);
+	}
 
 	if(info.currentOffset + count > info.maxDescriptors) {
 		throw std::runtime_error("DescriptorAllocator: Heap is full");
@@ -84,18 +140,7 @@ DescriptorHandle DescriptorAllocator::AllocateRange(DescriptorUsage usage, UINT 
 	const UINT offset = info.currentOffset;
 	info.currentOffset += count;
 
-	DescriptorHandle handle{};
-	handle.offset = offset;
-
-	auto cpuStart = info.heap->GetCPUDescriptorHandleForHeapStart();
-	handle.cpu.ptr = cpuStart.ptr + offset * info.descriptorSize;
-
-	if(info.shaderVisible) {
-		auto gpuStart = info.heap->GetGPUDescriptorHandleForHeapStart();
-		handle.gpu.ptr = gpuStart.ptr + offset * info.descriptorSize;
-	}
-
-	return handle;
+	return MakeHandle(info, offset);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -103,9 +148,20 @@ DescriptorHandle DescriptorAllocator::AllocateRange(DescriptorUsage usage, UINT 
 /////////////////////////////////////////////////////////////////////////////////////////
 void DescriptorAllocator::Free(DescriptorUsage usage, const DescriptorHandle& handle){
 	if (!handle.IsValid()) return;
-	HeapInfo& info = heaps_[usage];
+	auto heapIt = heaps_.find(usage);
+	if(heapIt == heaps_.end()) return;
+	HeapInfo& info = heapIt->second;
 	std::lock_guard<std::mutex> lock(info.mutex);
 	info.freeList.push(handle.offset);
+}
+
+void DescriptorAllocator::FreeRange(DescriptorUsage usage, const DescriptorHandle& handle, UINT count) {
+	if(!handle.IsValid() || count == 0) return;
+	auto heapIt = heaps_.find(usage);
+	if(heapIt == heaps_.end()) return;
+	HeapInfo& info = heapIt->second;
+	std::lock_guard<std::mutex> lock(info.mutex);
+	AddFreeRange(info, handle.offset, count);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

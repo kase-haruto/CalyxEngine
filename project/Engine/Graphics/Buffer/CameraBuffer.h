@@ -10,6 +10,8 @@
 #include <Engine/Foundation/Math/Matrix4x4.h>
 #include <Engine/Foundation/Math/Vector3.h>
 
+#include <cstdint>
+
 // 定数バッファ用データ構造体
 struct Camera3DForGPU {
 	CalyxEngine::Matrix4x4 view;
@@ -26,7 +28,8 @@ struct Camera3DForGPU {
 	float			   padding4;
 
 	CalyxEngine::Vector2 viewportSize; // ビューポートサイズ
-	float			   padding5[2];  // 16B アライン
+	uint32_t		   cameraDitherEnabled = 1;
+	float			   padding5;  // 16B アライン
 };
 
 class Camera3DBuffer {
@@ -36,6 +39,7 @@ public:
 	//===================================================================*/
 	void Initialize(ID3D12Device* device);
 	void Update(const CalyxEngine::Matrix4x4& view, const CalyxEngine::Matrix4x4& proj, const CalyxEngine::Vector3& worldPos, const CalyxEngine::Vector2& viewportSize);
+	void SetCameraDitherEnabled(bool enabled);
 	void SetCommand(ID3D12GraphicsCommandList* cmdList, PipelineType pipelineType) const;
 	void SetCommand(ID3D12GraphicsCommandList* cmdList, uint32_t rootIndex) const;
 private:

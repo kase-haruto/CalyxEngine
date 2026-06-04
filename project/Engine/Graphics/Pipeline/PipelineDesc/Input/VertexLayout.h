@@ -33,12 +33,14 @@ struct VertexPosUvN {
 	CalyxEngine::Vector4 position;	// 16 B
 	CalyxEngine::Vector2 texcoord;	// 24 B
 	CalyxEngine::Vector3 normal;		// 36 B
+	CalyxEngine::Vector4 tangent = {1.0f, 0.0f, 0.0f, 1.0f};
 };
 
 struct VertexPosUvNSkinning {
 	CalyxEngine::Vector4 pos;		// 16 B
 	CalyxEngine::Vector2 uv;			// 24 B
 	CalyxEngine::Vector3 normal;		// 36 B
+	CalyxEngine::Vector4 tangent = {1.0f, 0.0f, 0.0f, 1.0f};
 };
 
 template<>
@@ -53,6 +55,9 @@ struct VertexInputLayout<VertexPosUvN> {
 			  D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 
 			{ "NORMAL",   0,  DXGI_FORMAT_R32G32B32_FLOAT,    0,
+			  D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+
+			{ "TANGENT",  0,  DXGI_FORMAT_R32G32B32A32_FLOAT, 0,
 			  D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 		};
 	}
@@ -82,6 +87,9 @@ struct VertexInputLayout<VertexPosUvNSkinning>{
 			  D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 
 			{ "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT,       0, 24,
+			  D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+
+			{ "TANGENT",  0, DXGI_FORMAT_R32G32B32A32_FLOAT,    0, 36,
 			  D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 
 			{ "WEIGHT",   0, DXGI_FORMAT_R32G32B32A32_FLOAT,    1,  0,

@@ -20,7 +20,7 @@
 enum class ObjectType {
 	Camera,		// カメラ
 	Light,		// ライト
-	Actor, // ゲームオブジェクト
+	GameObject, // ゲームオブジェクト
 	Object2D,   // 2Dオブジェクト
 	Effect,		// パーティクルシステム
 	Event,		// イベント
@@ -33,9 +33,17 @@ namespace CalyxEngine {
 }
 
 struct OutlineSettings {
-	bool				   enabled	 = false;
+	bool				   enabled	 = true;
 	float				   thickness = 0.035f;
 	CalyxEngine::Vector4 color	 = {0.02f, 0.02f, 0.025f, 1.0f};
+};
+
+struct DrawConfig {
+	bool drawEnable = true;
+	bool pickable = true;
+	bool castShadow = true;
+	bool cameraDitherEnabled = true;
+	OutlineSettings outline{};
 };
 
 /*-----------------------------------------------------------------------------------------
@@ -139,12 +147,14 @@ public:
 	std::string										 GetDisplayName() const;
 	const std::string&								 GetConfigPath() const;
 	bool											 IsEnableRaycast() const { return isEnableRaycast_; }
-	bool											 IsDrawEnable() const { return isDrawEnable_; }
-	bool											 IsPickable() const { return isEnablePicking_; }
+	bool											 IsDrawEnable() const { return drawConfig_.drawEnable; }
+	bool											 IsPickable() const { return drawConfig_.pickable; }
 	bool											 IsTransient() const { return isTransient_; }
-	bool											 IsCastShadow() const { return isCastShadow_; }
-	bool											 IsOutlineEnabled() const { return outlineSettings_.enabled; }
-	const OutlineSettings&							 GetOutlineSettings() const { return outlineSettings_; }
+	bool											 IsCastShadow() const { return drawConfig_.castShadow; }
+	bool											 IsCameraDitherEnabled() const { return drawConfig_.cameraDitherEnabled; }
+	const DrawConfig&								 GetDrawConfig() const { return drawConfig_; }
+	bool											 IsOutlineEnabled() const { return drawConfig_.outline.enabled; }
+	const OutlineSettings&							 GetOutlineSettings() const { return drawConfig_.outline; }
 	uint32_t										 GetPickingID() const { return pickingID_; }
 	const Guid&										 GetPrefabAssetGuid() const { return prefabAssetGuid_; }
 	const Guid&										 GetPrefabSourceGuid() const { return prefabSourceGuid_; }
@@ -160,13 +170,14 @@ public:
 		prefabAssetGuid_ = Guid{};
 		prefabSourceGuid_ = Guid{};
 	}
-	virtual void SetDrawEnable(bool enable) { isDrawEnable_ = enable; }
-	void		 SetEnablePicking(bool enable) { isEnablePicking_ = enable; }
+	virtual void SetDrawEnable(bool enable) { drawConfig_.drawEnable = enable; }
+	void		 SetEnablePicking(bool enable) { drawConfig_.pickable = enable; }
 	void		 SetTransient(bool enable) { isTransient_ = enable; }
-	void		 SetCastShadow(bool enable) { isCastShadow_ = enable; }
-	void		 SetOutlineEnabled(bool enable) { outlineSettings_.enabled = enable; }
-	void		 SetOutlineThickness(float thickness) { outlineSettings_.thickness = thickness; }
-	void		 SetOutlineColor(const CalyxEngine::Vector4& color) { outlineSettings_.color = color; }
+	void		 SetCastShadow(bool enable) { drawConfig_.castShadow = enable; }
+	void		 SetCameraDitherEnabled(bool enable) { drawConfig_.cameraDitherEnabled = enable; }
+	void		 SetOutlineEnabled(bool enable) { drawConfig_.outline.enabled = enable; }
+	void		 SetOutlineThickness(float thickness) { drawConfig_.outline.thickness = thickness; }
+	void		 SetOutlineColor(const CalyxEngine::Vector4& color) { drawConfig_.outline.color = color; }
 	void		 SetParent(const std::shared_ptr<SceneObject>& newParentSp, bool inheritScale = true);
 	void		 SetEnableRaycast(bool enable) { isEnableRaycast_ = enable; }
 	void		 SetPickingID(uint32_t id) { pickingID_ = id; }
@@ -205,11 +216,8 @@ protected:
 	// State Flags
 	// =======================
 	bool	 isEnableRaycast_ = false; // レイキャスト有効/無効
-	bool	 isDrawEnable_	  = true;  // 描画有効/無効
-	bool	 isEnablePicking_ = true;  // ピッキング有効
 	bool	 isTransient_	  = false; // 一時的（保存・階層除外）
-	bool 	isCastShadow_	  = true;  // 影を落とすか
-	OutlineSettings outlineSettings_{};
+	DrawConfig drawConfig_{};
 	uint32_t pickingID_		  = 0;
 	uint32_t duplicateNameIndex_ = 0; //< 表示用の同名識別番号。保存名には含めない
 	CalyxEngine::TransformKeyframeAnimation2d transformAnimation2d_;

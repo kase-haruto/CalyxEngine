@@ -75,7 +75,7 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 #endif
 	}
 
-	const Camera3d* renderCam = dynamic_cast<Camera3d*>(CameraManager::GetActive());
+	Camera3d* renderCam = dynamic_cast<Camera3d*>(CameraManager::GetActive());
 	if(!renderCam) {
 		renderCam = CameraManager::GetMain3d();
 	}
@@ -94,6 +94,8 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 	// =========================================================
 	// MainPass
 	// =========================================================
+	const bool cameraDitherEnabled = rt->GetRenderTargetType() != RenderTargetType::DebugView;
+	renderCam->SetCameraDitherEnabled(cameraDitherEnabled);
 	rt->SetRenderTarget(cmd);
 	modelRenderer_->DrawAll(cmd,
 							GraphicsGroup::GetInstance()->GetDevice().Get(),

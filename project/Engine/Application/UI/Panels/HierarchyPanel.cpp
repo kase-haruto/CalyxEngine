@@ -559,7 +559,7 @@ namespace CalyxEngine {
 			return iconCamera_.tex;
 		case ObjectType::Light:
 			return iconLight_.tex;
-		case ObjectType::Actor:
+		case ObjectType::GameObject:
 		case ObjectType::Object2D:
 		case ObjectType::Event:
 			return iconGameObj_.tex;
@@ -576,7 +576,7 @@ namespace CalyxEngine {
 			return "Camera";
 		case ObjectType::Light:
 			return "Light";
-		case ObjectType::Actor:
+		case ObjectType::GameObject:
 			return "Mesh";
 		case ObjectType::Object2D:
 			return "2D";

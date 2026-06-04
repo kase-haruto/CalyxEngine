@@ -93,6 +93,13 @@ public:
 	 */
 	void SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList, PipelineType type);
 
+	void SyncPositionFromTransform();
+	const PointLightData& GetLightData() const { return lightData_; }
+	void SetColor(const CalyxEngine::Vector4& color) { lightData_.color = color; }
+	void SetIntensity(float intensity) { lightData_.intensity = intensity; }
+	void SetRadius(float radius) { lightData_.radius = radius; }
+	void SetDecay(float decay) { lightData_.decay = decay; }
+
 	/**
 	 * \brief タイプ名を取得
 	 * \return タイプ名

@@ -5,7 +5,7 @@
  * Weapon
  * - playerの所有する武器
  *---------------------------------------------------------------------------------------*/
-CALYX_OBJECT(Category = Actor, DisplayName = "Weapon")
+CALYX_OBJECT(Category = GameObject, DisplayName = "Weapon")
 class Weapon 
 	: public BaseGameObject{
 public:

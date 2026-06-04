@@ -7,6 +7,8 @@
 #include <Engine/Assets/System/AssetDragPayload.h>
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
+#include <Engine/Foundation/Math/MathUtil.h>
+#include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 
 #include <algorithm>
@@ -70,6 +72,7 @@ namespace CalyxEngine {
 		emitterData_.color = {1.0f, 1.0f, 1.0f, 1.0f};
 		emitterData_.shapeSize = {1.0f, 1.0f, 1.0f};
 		emitterData_.shape = static_cast<uint32_t>(EmitterShape::Sphere);
+		emitterData_.rotation = {0.0f, 0.0f, 0.0f, 1.0f};
 		emitterData_.gravity = {0.0f, -9.8f, 0.0f};
 		emitterData_.gravityEnabled = 0;
 		emitterData_.overLifeStart = {1.0f, 1.0f, 1.0f, 1.0f};
@@ -101,6 +104,8 @@ namespace CalyxEngine {
 	//  Update: 毎フレーム deltaTime を積む
 	// ────────────────────────────────────────────────────────────────
 	void GpuFxEmitter::Update(float dt){
+		SyncEmitterDataFromBase();
+
 		if(!isPlaying_) {
 			emitterData_.emit = 0;
 			perFrame_.deltaTime = dt;
@@ -215,13 +220,19 @@ namespace CalyxEngine {
 				}
 
 				FxGui::RowLabel("Shape Size");
-				ImGui::DragFloat3("##gpu_shape_size", &emitterData_.shapeSize.x, 0.01f, 0.0f, 100.0f);
+				if(ImGui::DragFloat3("##gpu_shape_size", &emitterData_.shapeSize.x, 0.01f, 0.0f, 100.0f)) {
+					shapeSize_ = emitterData_.shapeSize;
+				}
 
 				FxGui::RowLabel("Radius");
-				ImGui::DragFloat("##gpu_radius", &emitterData_.radius, 0.01f, 0.0f, 100.0f);
+				if(ImGui::DragFloat("##gpu_radius", &emitterData_.radius, 0.01f, 0.0f, 100.0f)) {
+					shapeRadius_ = emitterData_.radius;
+				}
 
 				FxGui::RowLabel("Angle");
-				ImGui::DragFloat("##gpu_angle", &emitterData_.angle, 0.1f, 0.0f, 89.0f);
+				if(ImGui::DragFloat("##gpu_angle", &emitterData_.angle, 0.1f, 0.0f, 89.0f)) {
+					shapeAngle_ = emitterData_.angle;
+				}
 
 				FxGui::RowLabel("Emit Count");
 				int count = static_cast<int>(emitterData_.count);
@@ -293,6 +304,8 @@ namespace CalyxEngine {
 	}
 	void GpuFxEmitter::ApplyConfigFrom(const EmitterConfig& config) {
 		position_ = config.position;
+		worldRotation_ = config.rotation;
+		worldScale_ = config.worldScale;
 		emitterData_.translate = config.position;
 		material_.color = config.color;
 		material_.texturePath = ResolveTexturePath(config.texturePath);
@@ -328,6 +341,7 @@ namespace CalyxEngine {
 		emitterData_.shapeSize = shapeSize_;
 		emitterData_.angle = shapeAngle_;
 		emitterData_.shape = static_cast<uint32_t>(shape_);
+		emitterData_.rotation = {worldRotation_.x, worldRotation_.y, worldRotation_.z, worldRotation_.w};
 		emitterData_.gravityEnabled = 0;
 		emitterData_.overLifeEnabled = 0;
 		emitterData_.sizeLifeEnabled = 0;
@@ -364,6 +378,8 @@ namespace CalyxEngine {
 	}
 	void GpuFxEmitter::ExtractConfigTo(EmitterConfig& config) const {
 		config.position = position_;
+		config.rotation = worldRotation_;
+		config.worldScale = worldScale_;
 		config.color = material_.color;
 		config.texturePath = material_.texturePath;
 		config.textureGuid = textureGuid_;
@@ -409,6 +425,84 @@ namespace CalyxEngine {
 			overLife->start = emitterData_.overLifeStart;
 			overLife->end = emitterData_.overLifeEnd;
 			config.modules.push_back(std::move(overLife));
+		}
+	}
+
+	void GpuFxEmitter::SyncEmitterDataFromBase() {
+		emitterData_.translate = position_;
+		emitterData_.rotation = {worldRotation_.x, worldRotation_.y, worldRotation_.z, worldRotation_.w};
+	}
+
+	void GpuFxEmitter::DrawEmitterShape(const WorldTransform&) {
+		DrawEmitterShapeInternal(false);
+	}
+
+	void GpuFxEmitter::DrawEmitterShapePreview(const WorldTransform&) {
+		DrawEmitterShapeInternal(true);
+	}
+
+	void GpuFxEmitter::DrawEmitterShapeInternal(bool effectPreview) {
+		const CalyxEngine::Vector3 absScale{
+			(std::max)(std::abs(worldScale_.x), 0.0001f),
+			(std::max)(std::abs(worldScale_.y), 0.0001f),
+			(std::max)(std::abs(worldScale_.z), 0.0001f)};
+
+		const CalyxEngine::Vector4 color{0.2f, 0.7f, 1.0f, 1.0f};
+		const auto shape = static_cast<EmitterShape>(std::clamp(
+			static_cast<int>(emitterData_.shape),
+			static_cast<int>(EmitterShape::Point),
+			static_cast<int>(EmitterShape::Box)));
+
+		switch(shape) {
+		case EmitterShape::Circle: {
+			const float radiusX = emitterData_.radius * absScale.x;
+			const float radiusZ = emitterData_.radius * absScale.z;
+			if(effectPreview) {
+				PrimitiveDrawer::GetInstance()->DrawEffectPreviewCircle(position_,worldRotation_,radiusX,radiusZ,color);
+			} else {
+				PrimitiveDrawer::GetInstance()->DrawCircle(position_,worldRotation_,radiusX,radiusZ,color);
+			}
+		}
+		break;
+
+		case EmitterShape::Cone: {
+			const float height = (std::max)(emitterData_.radius,0.0f) * absScale.y;
+			const float angleRad = std::clamp(CalyxEngine::ToRadians(emitterData_.angle),0.0f,CalyxEngine::kPi * 0.5f);
+			const float radiusX = height * std::tan(angleRad) * absScale.x;
+			const float radiusZ = height * std::tan(angleRad) * absScale.z;
+			if(effectPreview) {
+				PrimitiveDrawer::GetInstance()->DrawEffectPreviewCone(position_,worldRotation_,height,radiusX,radiusZ,color);
+			} else {
+				PrimitiveDrawer::GetInstance()->DrawCone(position_,worldRotation_,height,radiusX,radiusZ,color);
+			}
+		}
+		break;
+
+		case EmitterShape::Sphere: {
+			const float maxScale = (std::max)((std::max)(absScale.x,absScale.y),absScale.z);
+			if(effectPreview) {
+				PrimitiveDrawer::GetInstance()->DrawEffectPreviewSphere(position_,emitterData_.radius * maxScale,4,color);
+			} else {
+				PrimitiveDrawer::GetInstance()->DrawSphere(position_,emitterData_.radius * maxScale,4,color);
+			}
+		}
+		break;
+
+		case EmitterShape::Box: {
+			const CalyxEngine::Vector3 scaledSize{
+				emitterData_.shapeSize.x * absScale.x,
+				emitterData_.shapeSize.y * absScale.y,
+				emitterData_.shapeSize.z * absScale.z};
+			if(effectPreview) {
+				PrimitiveDrawer::GetInstance()->DrawEffectPreviewBox(position_,worldRotation_,scaledSize,color);
+			} else {
+				PrimitiveDrawer::GetInstance()->DrawBox(position_,worldRotation_,scaledSize,color);
+			}
+		}
+		break;
+
+		default:
+			break;
 		}
 	}
 

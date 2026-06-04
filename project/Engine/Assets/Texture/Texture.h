@@ -13,7 +13,7 @@
 class Texture {
 public:
 	Texture() = default;
-	Texture(const std::string& filePath);
+	Texture(const std::string& filePath, bool forceSrgb = true);
 	~Texture();
 	Texture(Texture&& other) noexcept;
 	Texture& operator=(Texture&& other) noexcept;
@@ -45,6 +45,7 @@ public:
 
 private:
 	std::string							   filePath_;
+	bool								   forceSrgb_ = true;
 	DirectX::ScratchImage				   image_;
 	DirectX::TexMetadata				   metadata_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> resource_;

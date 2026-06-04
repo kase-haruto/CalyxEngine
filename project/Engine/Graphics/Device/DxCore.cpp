@@ -18,7 +18,7 @@
 #pragma comment(lib, "dxcompiler.lib")
 
 namespace CalyxEngine {
-	
+
 	DxCore::~DxCore() {
 		ReleaseResources();
 	}
@@ -62,9 +62,14 @@ namespace CalyxEngine {
 		swapchainRT->SetRenderTargetType(RenderTargetType::BackBuffer);
 		renderTargetCollection_->Add("BackBuffer", std::move(swapchainRT));
 
-		// Offscreen
+		// Offscreen (MRT: SceneColor + EmissiveBloomMask)
 		auto offscreenRT = std::make_unique<OffscreenRenderTarget>();
-		offscreenRT->Initialize(device.Get(), width, height, format_, DescriptorAllocator::Allocate(DescriptorUsage::Rtv), DescriptorAllocator::Allocate(DescriptorUsage::Dsv));
+		std::vector<DXGI_FORMAT> offscreenFormats = {DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_R16G16B16A16_FLOAT};
+		std::vector<DescriptorHandle> offscreenRtvHandles = {
+			DescriptorAllocator::Allocate(DescriptorUsage::Rtv),
+			DescriptorAllocator::Allocate(DescriptorUsage::Rtv)
+		};
+		offscreenRT->InitializeMRT(device.Get(), width, height, offscreenFormats, offscreenRtvHandles, DescriptorAllocator::Allocate(DescriptorUsage::Dsv));
 		offscreenRT->SetRenderTargetType(RenderTargetType::Offscreen);
 		renderTargetCollection_->Add("Offscreen", std::move(offscreenRT));
 
@@ -157,10 +162,10 @@ namespace CalyxEngine {
 	}
 
 	void DxCore::Resize(uint32_t width, uint32_t height) {
-		if (width == 0 || height == 0) return;
-		if (width == clientWidth_ && height == clientHeight_) return;
+		if(width == 0 || height == 0) return;
+		if(width == clientWidth_ && height == clientHeight_) return;
 
-		clientWidth_ = width;
+		clientWidth_  = width;
 		clientHeight_ = height;
 
 		// GPUの完了を待つ
@@ -177,7 +182,7 @@ namespace CalyxEngine {
 		dxSwapChain_->Resize(width, height);
 
 		// 全てのレンダーターゲットをリサイズ
-		for (auto& pair : renderTargetCollection_->GetMap()) {
+		for(auto& pair : renderTargetCollection_->GetMap()) {
 			pair.second->Resize(width, height);
 		}
 	}
@@ -188,5 +193,5 @@ namespace CalyxEngine {
 		// ImGui::End();
 #endif // _DEBUG
 	}
-	
+
 } // namespace CalyxEngine

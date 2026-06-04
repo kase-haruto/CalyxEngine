@@ -7,6 +7,15 @@ struct VertexShaderInput {
 	float4 position : POSITION0;
 	float2 texcoord : TEXCOORD0;
 	float3 normal : NORMAL0;
+	float4 tangent : TANGENT0;
+};
+
+struct Object3dVertexOutput {
+	float4 position : SV_POSITION;
+	float2 texcoord : TEXCOORD0;
+	float3 normal : NORMAL0;
+	float3 worldPosition : POSITION0;
+	float4 tangent : TANGENT0;
 };
 
 struct TransformationMat {
@@ -30,8 +39,8 @@ static const float3 WORLD_UP = float3(0, 1, 0);
 ///////////////////////////////////////////////////////////////////////////////
 //                            main
 ///////////////////////////////////////////////////////////////////////////////
-VertexShaderOutput main(VertexShaderInput input, uint instancedId : SV_InstanceID) {
-	VertexShaderOutput o;
+Object3dVertexOutput main(VertexShaderInput input, uint instancedId : SV_InstanceID) {
+	Object3dVertexOutput o;
 	const TransformationMat tm = gTransMat[instancedId];
 	const BillboardParms bp = gBillboard[instancedId];
 
@@ -42,6 +51,9 @@ VertexShaderOutput main(VertexShaderInput input, uint instancedId : SV_InstanceI
 		o.worldPosition = worldPos.xyz;
 		o.texcoord = input.texcoord;
 		o.normal = normalize(mul(input.normal, (float3x3)tm.WorldInverseTranspose));
+		float3 tangent = normalize(mul(input.tangent.xyz, (float3x3)tm.World));
+		tangent = normalize(tangent - o.normal * dot(tangent, o.normal));
+		o.tangent = float4(tangent, input.tangent.w);
 		return o;
 	}
 
@@ -119,11 +131,15 @@ VertexShaderOutput main(VertexShaderInput input, uint instancedId : SV_InstanceI
 	const float3 nWorld = normalize(nLocal.x * (R / Sx)
                                   + nLocal.y * (U / Sy)
                                   + nLocal.z * (F / Sz));
+	const float3 tLocal = input.tangent.xyz;
+	float3 tWorld = normalize(tLocal.x * R + tLocal.y * U + tLocal.z * F);
+	tWorld = normalize(tWorld - nWorld * dot(tWorld, nWorld));
 
     // 出力
 	o.position = mul(float4(worldPos3, 1), ViewProjection);
 	o.worldPosition = worldPos3;
 	o.texcoord = input.texcoord;
 	o.normal = nWorld;
+	o.tangent = float4(tWorld, input.tangent.w);
 	return o;
 }

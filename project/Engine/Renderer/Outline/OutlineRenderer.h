@@ -64,6 +64,12 @@ private:
 							const Camera3d* camera,
 							const ModelRenderer& modelRenderer,
 							const SceneObject* targetOwner = nullptr);
+	void RenderDitherDepthOccluders(ID3D12GraphicsCommandList* cmdList,
+									ID3D12Device* device,
+									IRenderTarget* rt,
+									PipelineService* psoService,
+									const Camera3d* camera,
+									const ModelRenderer& modelRenderer);
 	void Composite(ID3D12GraphicsCommandList* cmdList,
 				   IRenderTarget* rt,
 				   PipelineService* psoService);

@@ -17,7 +17,7 @@ static const char* ObjectTypeToString(ObjectType type) {
 		return "Camera";
 	case ObjectType::Light:
 		return "Light";
-	case ObjectType::Actor:
+	case ObjectType::GameObject:
 		return "GameObject";
 	case ObjectType::Object2D:
 		return "Object2D";

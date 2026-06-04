@@ -18,6 +18,7 @@ namespace CalyxEngine {
 			j["objectType"] = static_cast<int>(object->GetObjectType());
 			j["drawEnable"] = object->IsDrawEnable();
 			j["castShadow"] = object->IsCastShadow();
+			j["cameraDitherEnabled"] = object->IsCameraDitherEnabled();
 			j["outlineEnabled"] = object->IsOutlineEnabled();
 			j["outlineThickness"] = object->GetOutlineSettings().thickness;
 			j["outlineColor"] = object->GetOutlineSettings().color;
@@ -32,6 +33,7 @@ namespace CalyxEngine {
 			object->SetName(j.value("name", object->GetName()), static_cast<ObjectType>(objectType));
 			object->SetDrawEnable(j.value("drawEnable", object->IsDrawEnable()));
 			object->SetCastShadow(j.value("castShadow", object->IsCastShadow()));
+			object->SetCameraDitherEnabled(j.value("cameraDitherEnabled", object->IsCameraDitherEnabled()));
 			object->SetOutlineEnabled(j.value("outlineEnabled", object->IsOutlineEnabled()));
 			object->SetOutlineThickness(j.value("outlineThickness", object->GetOutlineSettings().thickness));
 			object->SetOutlineColor(j.value("outlineColor", object->GetOutlineSettings().color));
@@ -138,7 +140,7 @@ namespace CalyxEngine {
 
 	bool SceneObjectDuplicator::IsDuplicatable(const SceneObject* object) {
 		if(!object || object->IsTransient()) return false;
-		return object->GetObjectType() == ObjectType::Actor ||
+		return object->GetObjectType() == ObjectType::GameObject ||
 			   object->GetObjectType() == ObjectType::Event;
 	}
 

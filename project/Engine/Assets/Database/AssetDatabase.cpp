@@ -7,9 +7,9 @@
 #include <Engine/Editor/AssetPreviewManager.h>
 #include <externals/nlohmann/json.hpp>
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
-#include <algorithm>
 
 using json = nlohmann::json;
 
@@ -142,7 +142,7 @@ void AssetDatabase::BuildPreview(AssetRecord& rec) {
 
 				if(ext == ".png" && std::filesystem::exists(previewPath)) {
 					auto previewRel = std::filesystem::relative(previewPath, assetsRoot_);
-					auto texHandle  = tm.LoadTexture(previewRel.generic_string());
+					auto texHandle	= tm.LoadTexture(previewRel.generic_string());
 					rec.previewTex	= (ImTextureID)texHandle.ptr;
 				} else {
 					auto icon	   = tm.LoadTexture("UI/Tool/AssetPanel/generic.dds");

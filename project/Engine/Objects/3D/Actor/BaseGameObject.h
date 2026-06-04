@@ -15,14 +15,13 @@
 //* c++ *//
 #include <memory>
 #include <string>
-#include <vector>
 
 /*-----------------------------------------------------------------------------------------
  * BaseGameObject
  * - ゲームオブジェクト基底クラス
  * - 3Dモデル、コライダー、ビルボードの設定などを統合管理する基底クラス
  *---------------------------------------------------------------------------------------*/
-CALYX_OBJECT(Category = Actor, DisplayName = "Mesh Object", Icon = "UI/Tool/cube.dds")
+CALYX_OBJECT(Category = GameObject, DisplayName = "Mesh Object", Icon = "UI/Tool/cube.dds")
 class BaseGameObject
 	: public SceneObject,
 	  public IConfigurable {
@@ -248,9 +247,20 @@ public:
 	 * \param mode モード
 	 */
 	void SetLightingMode(LightingMode mode) { model_->SetLightingMode(mode); }
-	void SetBoneParent(BaseGameObject& target, const std::string& boneName, bool inheritScale = true);
+
+	/**
+	 * \brief ボーン親子家計を設定
+	 * \param target
+	 * \param boneName
+	 * \param inheritScale
+	 */
 	void SetBoneParent(WorldTransform& target, const std::string& boneName, bool inheritScale = true);
+	/**
+	 * \brief ボーンの親子関係を解除
+	 * \param target
+	 */
 	void ClearBoneParent(WorldTransform& target);
+
 
 	//--------- save / load ------------------------------------------------
 	/**
@@ -270,6 +280,10 @@ protected:
 	//===================================================================*/
 	void InitializeCollider(ColliderKind kind);
 	bool SetModelFromFileName(const std::string& modelName);
+
+	/**
+	 * \brief ボーン親子関係の更新
+	 */
 	void UpdateBoneParents();
 
 protected:
@@ -282,12 +296,12 @@ protected:
 
 	struct BoneParentBinding {
 		WorldTransform* target = nullptr;
-		Guid targetGuid {};
 		std::string boneName;
 		std::unique_ptr<BoneParentTransform> parentTransform;
 		bool inheritScale = true;
 	};
 
+protected:
 	//===================================================================*/
 	//                    protected member variables
 	//===================================================================*/

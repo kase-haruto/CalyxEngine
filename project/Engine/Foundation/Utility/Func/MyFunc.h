@@ -40,7 +40,7 @@ MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const st
 
 Animation LoadAnimationFile(const std::string& directoryPath, const std::string& filename);
 
-DirectX::ScratchImage LoadTextureImage(const std::string& filePath);
+DirectX::ScratchImage LoadTextureImage(const std::string& filePath, bool forceSrgb = true);
 
 bool IsCollision(const AABB& aabb, const CalyxEngine::Vector3& point);
 

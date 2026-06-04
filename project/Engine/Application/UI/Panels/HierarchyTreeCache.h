@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <cstdint>
 #include <unordered_map>
 #include <vector>
 
@@ -18,7 +19,11 @@ namespace CalyxEngine {
 		const std::vector<std::shared_ptr<SceneObject>>& GetChildren(SceneObject& object);
 
 	private:
+		void InvalidateIfLibraryChanged(const SceneObjectLibrary& library);
+
 		std::unordered_map<const SceneObject*, std::vector<std::shared_ptr<SceneObject>>> sortedChildren_;
+		const SceneObjectLibrary* cachedLibrary_ = nullptr;
+		uint64_t cachedRevision_ = 0;
 		bool dirty_ = true;
 	};
 

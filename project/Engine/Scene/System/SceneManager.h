@@ -81,6 +81,10 @@ namespace CalyxEngine {
 		void DrawEditorPreview(IRenderTarget* rt,
 							   ID3D12GraphicsCommandList* cmd,
 							   PipelineService* pso);
+		void DrawSpritesToRenderTarget(IRenderTarget* rt,
+									   ID3D12GraphicsCommandList* cmd,
+									   PipelineService* pso,
+									   bool transitionToShaderResource);
 
 	private:
 		struct SceneSlot {

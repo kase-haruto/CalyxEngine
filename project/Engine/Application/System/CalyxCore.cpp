@@ -26,8 +26,8 @@
 
 // lib
 #include "Engine/Assets/Manager/AssetManager.h"
-#include <Engine/Editor/AssetPreviewManager.h>
 #include "Engine/Scene/System/SceneManager.h"
+#include <Engine/Editor/AssetPreviewManager.h>
 #include <Engine/Editor/PickingPass.h>
 
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
@@ -61,8 +61,6 @@ namespace CalyxEngine {
 		// インプットの初期化
 		CalyxFoundation::Input::Initialize();
 
-		// audioの初期化
-		Audio::Initialize();
 
 		DescriptorAllocator::Initialize(dxCore_->GetDevice().Get());
 		DescriptorAllocator::CreateHeap(DescriptorUsage::CbvSrvUav, {});
@@ -220,7 +218,6 @@ namespace CalyxEngine {
 		pipelineStateManager_->Finalize();
 		DescriptorAllocator::Finalize();
 		CalyxFoundation::Input::Finalize();
-		Audio::Finalize();
 		// ウィンドウの破棄
 		winApp_->TerminateGameWindow();
 	}

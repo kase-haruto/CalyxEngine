@@ -49,9 +49,9 @@ namespace CalyxEngine {
 
 		WorldTransform MakePreviewTransform() {
 			WorldTransform transform;
-			transform.scale		  = {1.0f, 1.0f, 1.0f};
-			transform.rotation	  = CalyxEngine::Quaternion::MakeIdentity();
-			transform.translation = CalyxEngine::Vector3::Zero();
+			transform.scale		   = {1.0f, 1.0f, 1.0f};
+			transform.rotation	   = CalyxEngine::Quaternion::MakeIdentity();
+			transform.translation  = CalyxEngine::Vector3::Zero();
 			transform.matrix.world = CalyxEngine::MakeAffineMatrix(
 				transform.scale,
 				transform.rotation,
@@ -60,7 +60,7 @@ namespace CalyxEngine {
 				CalyxEngine::Matrix4x4::Transpose(CalyxEngine::Matrix4x4::Inverse(transform.matrix.world));
 			return transform;
 		}
-	}
+	} // namespace
 
 	AssetPreviewManager AssetPreviewManager::instance_;
 
@@ -80,10 +80,10 @@ namespace CalyxEngine {
 		if(entry.state == State::Queued && entry.lastWrite == record.lastWrite && entry.type == record.type) return;
 		if(entry.state == State::Failed && entry.lastWrite == record.lastWrite && entry.type == record.type) return;
 
-		entry.state		= State::Queued;
-		entry.texture	= nullptr;
-		entry.lastWrite = record.lastWrite;
-		entry.type		= record.type;
+		entry.state				 = State::Queued;
+		entry.texture			 = nullptr;
+		entry.lastWrite			 = record.lastWrite;
+		entry.type				 = record.type;
 		entry.modelLoadRequested = false;
 		queue_.push_back(record.guid);
 	}
@@ -161,9 +161,9 @@ namespace CalyxEngine {
 	}
 
 	void AssetPreviewManager::ProcessRenderQueue(ID3D12GraphicsCommandList* cmdList,
-												 PipelineService*			 pso,
-												 IRenderTarget*				 renderTarget,
-												 int						 maxItemsPerFrame) {
+												 PipelineService*			pso,
+												 IRenderTarget*				renderTarget,
+												 int						maxItemsPerFrame) {
 		if(!cmdList || !pso || !renderTarget || maxItemsPerFrame <= 0) return;
 
 		auto* db = AssetDatabase::GetInstance();
@@ -189,9 +189,9 @@ namespace CalyxEngine {
 			}
 
 			if(record->type == AssetType::Model) {
-				auto* assetManager = AssetManager::GetInstance();
-				auto* modelManager = assetManager ? assetManager->GetModelManager() : nullptr;
-				const std::string modelName = record->sourcePath.filename().string();
+				auto*			  assetManager = AssetManager::GetInstance();
+				auto*			  modelManager = assetManager ? assetManager->GetModelManager() : nullptr;
+				const std::string modelName	   = record->sourcePath.filename().string();
 				if(modelManager && !modelManager->IsModelLoaded(modelName)) {
 					if(!it->second.modelLoadRequested) {
 						modelManager->LoadModel(modelName);
@@ -232,8 +232,8 @@ namespace CalyxEngine {
 		return false;
 	}
 
-	bool AssetPreviewManager::TryRenderPreview(const AssetRecord& record,
-											   Entry&			 entry,
+	bool AssetPreviewManager::TryRenderPreview(const AssetRecord&		  record,
+											   Entry&					  entry,
 											   ID3D12GraphicsCommandList* cmdList,
 											   PipelineService*			  pso,
 											   IRenderTarget*			  renderTarget) {
@@ -297,8 +297,8 @@ namespace CalyxEngine {
 		return copied;
 	}
 
-	bool AssetPreviewManager::TryRenderModelPreview(const AssetRecord& record,
-													Entry&			  entry,
+	bool AssetPreviewManager::TryRenderModelPreview(const AssetRecord&		   record,
+													Entry&					   entry,
 													ID3D12GraphicsCommandList* cmdList,
 													PipelineService*		   pso,
 													IRenderTarget*			   renderTarget) {
@@ -308,12 +308,13 @@ namespace CalyxEngine {
 		const std::string modelName = record.sourcePath.filename().string();
 		auto			  model		= std::make_shared<Model>(modelName);
 		model->Update(0.0f);
+
 		if(!model->GetModelData()) return false;
 
-		const AABB& bounds = model->GetModelData()->localAABB;
-		Vector3 center = (bounds.min_ + bounds.max_) * 0.5f;
+		const AABB&	  bounds  = model->GetModelData()->localAABB;
+		Vector3		  center  = (bounds.min_ + bounds.max_) * 0.5f;
 		const Vector3 extents = (bounds.max_ - bounds.min_) * 0.5f;
-		const float radius = (std::max)(0.75f, extents.Length());
+		const float	  radius  = (std::max)(0.75f, extents.Length());
 
 		SceneContext* previous = SceneContext::Current();
 		previewContext_->MakeCurrent();
@@ -323,9 +324,9 @@ namespace CalyxEngine {
 		previewContext_->GetCameraMgr()->SetAspectRatio(1.0f, 1.0f);
 		if(auto* debugCamera = CameraManager::GetDebug()) {
 			DebugCamera::State state = debugCamera->CaptureState();
-			state.target = center;
-			state.distance = radius * 2.8f;
-			state.orbitAngle = {0.65f, 0.35f};
+			state.target			 = center;
+			state.distance			 = radius * 2.8f;
+			state.orbitAngle		 = {0.65f, 0.35f};
 			debugCamera->ApplyState(state);
 			debugCamera->AlwaysUpdate(0.0f);
 		}
@@ -340,6 +341,8 @@ namespace CalyxEngine {
 		modelRenderer_->RegisterStatic(model.get(), transform, BillboardMode::None, nullptr);
 
 		if(auto* camera = dynamic_cast<Camera3d*>(CameraManager::GetActive())) {
+			// previewはディザ抜きを行わない
+			camera->SetCameraDitherEnabled(false);
 			modelRenderer_->PreCullAndBatch(camera, false);
 		} else {
 			modelRenderer_->BuildAllVisibleBatches();
@@ -390,8 +393,8 @@ namespace CalyxEngine {
 
 		if(record.type == AssetType::Prefab) {
 			PrefabSerializer::LoadOptions options;
-			options.preserveGuids	= false;
-			options.prefabAssetGuid	= record.guid;
+			options.preserveGuids	 = false;
+			options.prefabAssetGuid	 = record.guid;
 			options.skipUnknownTypes = true;
 			return PrefabSerializer::Load(record.sourcePath.string(),
 										  options);
@@ -438,8 +441,8 @@ namespace CalyxEngine {
 			for(SceneObject* object : flattened) {
 				if(auto* go = dynamic_cast<BaseGameObject*>(object)) {
 					const AABB objectBounds = go->GetWorldAABB();
-					bounds = hasBounds ? MergeAabb(bounds, objectBounds) : objectBounds;
-					hasBounds = true;
+					bounds					= hasBounds ? MergeAabb(bounds, objectBounds) : objectBounds;
+					hasBounds				= true;
 				}
 			}
 		}
@@ -447,9 +450,9 @@ namespace CalyxEngine {
 		Vector3 center{0.0f, 0.5f, 0.0f};
 		float	radius = 1.5f;
 		if(hasBounds) {
-			center = (bounds.min_ + bounds.max_) * 0.5f;
+			center				  = (bounds.min_ + bounds.max_) * 0.5f;
 			const Vector3 extents = (bounds.max_ - bounds.min_) * 0.5f;
-			radius = (std::max)(0.75f, extents.Length());
+			radius				  = (std::max)(0.75f, extents.Length());
 		}
 
 		CameraManager::SetTypeStatic(CameraType::Debug);
@@ -458,16 +461,16 @@ namespace CalyxEngine {
 
 		if(auto* debugCamera = CameraManager::GetDebug()) {
 			DebugCamera::State state = debugCamera->CaptureState();
-			state.target = center;
-			state.distance = radius * 2.8f;
-			state.orbitAngle = {0.65f, 0.35f};
+			state.target			 = center;
+			state.distance			 = radius * 2.8f;
+			state.orbitAngle		 = {0.65f, 0.35f};
 			debugCamera->ApplyState(state);
 			debugCamera->AlwaysUpdate(0.0f);
 		}
 	}
 
 	bool AssetPreviewManager::CopyRenderTargetToCache(ID3D12GraphicsCommandList* cmdList,
-													  IRenderTarget*				 renderTarget,
+													  IRenderTarget*			 renderTarget,
 													  Entry&					 entry) {
 		auto* source = renderTarget->GetResource();
 		if(!source || !source->Get()) return false;
@@ -511,7 +514,7 @@ namespace CalyxEngine {
 		if(!db || !tm) return false;
 
 		std::error_code ec;
-		const auto rel = std::filesystem::relative(*previewPath, db->GetRoot(), ec);
+		const auto		rel = std::filesystem::relative(*previewPath, db->GetRoot(), ec);
 		if(ec) return false;
 
 		const auto handle = tm->LoadTexture(rel.generic_string());

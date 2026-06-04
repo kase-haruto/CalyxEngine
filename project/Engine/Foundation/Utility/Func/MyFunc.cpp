@@ -229,7 +229,7 @@ MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const st
 	return materialData;
 }
 
-DirectX::ScratchImage LoadTextureImage(const std::string& filePath) {
+DirectX::ScratchImage LoadTextureImage(const std::string& filePath, bool forceSrgb) {
 	using namespace DirectX;
 	std::string textureFilePath = filePath;
 
@@ -269,7 +269,7 @@ DirectX::ScratchImage LoadTextureImage(const std::string& filePath) {
 	if (useDDS) {
 		hr = LoadFromDDSFile(filePathW.c_str(), DDS_FLAGS_NONE, nullptr, image);
 	} else {
-		hr = LoadFromWICFile(filePathW.c_str(), WIC_FLAGS_FORCE_SRGB, nullptr, image);
+		hr = LoadFromWICFile(filePathW.c_str(), forceSrgb ? WIC_FLAGS_FORCE_SRGB : WIC_FLAGS_NONE, nullptr, image);
 	}
 	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
@@ -283,7 +283,7 @@ DirectX::ScratchImage LoadTextureImage(const std::string& filePath) {
 				image.GetImages(),
 			image.GetImageCount(), 
 				meta,
-				TEX_FILTER_SRGB,
+				forceSrgb ? TEX_FILTER_SRGB : TEX_FILTER_DEFAULT,
 				0,
 				mipImages
 			);
@@ -294,6 +294,12 @@ DirectX::ScratchImage LoadTextureImage(const std::string& filePath) {
 
 	return image;
 }
+
+namespace Cx::IO {
+DirectX::ScratchImage LoadTextureImage(const std::string& filePath, bool forceSrgb) {
+	return ::LoadTextureImage(filePath, forceSrgb);
+}
+} // namespace Cx::IO
 
 
 bool IsCollision(const AABB& aabb, const CalyxEngine::Vector3& point) {
@@ -434,6 +440,7 @@ SkinCluster CreateSkinCluster(const Microsoft::WRL::ComPtr<ID3D12Device>& device
 	skinCluster.mappedPalette = {mappedPalette, skeleton.joints.size()};
 
 	DescriptorHandle handle = DescriptorAllocator::Allocate(DescriptorUsage::CbvSrvUav);
+	skinCluster.paletteSrvDescriptor = handle;
 	skinCluster.paletteSrvHandle.first = handle.cpu;
 	skinCluster.paletteSrvHandle.second = handle.gpu;
 

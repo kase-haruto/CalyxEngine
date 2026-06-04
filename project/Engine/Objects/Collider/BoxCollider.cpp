@@ -49,7 +49,7 @@ void BoxCollider::Draw() {
 }
 
 void BoxCollider::ShowGui() {
-	if(ImGui::TreeNodeEx("BoxCollider", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
+	if(ImGui::TreeNodeEx("BoxCollider", ImGuiTreeNodeFlags_SpanAvailWidth)) {
 		Collider::ShowGui();
 		if(isCollisionEnabled_) {
 			GuiCmd::DragFloat3("Size", shape_.size, 0.1f, 0.0f, 1000.0f);
