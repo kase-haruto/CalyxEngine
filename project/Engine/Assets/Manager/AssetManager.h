@@ -28,8 +28,8 @@ namespace CalyxEngine {
 		void Finalize();
 
 		// accessor ==========================//
-		ModelManager*   GetModelManager() const { return modelManager_.get(); }
-		TextureManager* GetTextureManager() const { return textureManager_.get(); }
+		ModelManager*     GetModelManager() const { return modelManager_.get(); }
+		TextureManager*   GetTextureManager() const { return textureManager_.get(); }
 		DataAssetManager* GetDataAssetManager() const { return dataAssetManager_.get(); }
 
 	private:
@@ -38,13 +38,12 @@ namespace CalyxEngine {
 		//===================================================================*/
 		AssetManager() = default;
 
-
 	private:
 		//===================================================================*/
 		//                    private members
 		//===================================================================*/
-		std::unique_ptr<ModelManager>   modelManager_;
-		std::unique_ptr<TextureManager> textureManager_;
+		std::unique_ptr<ModelManager>     modelManager_;
+		std::unique_ptr<TextureManager>   textureManager_;
 		std::unique_ptr<DataAssetManager> dataAssetManager_;
 
 	};

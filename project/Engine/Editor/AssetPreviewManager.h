@@ -39,9 +39,9 @@ namespace CalyxEngine {
 		void Shutdown();
 		void ProcessQueue(int maxItemsPerFrame = 1);
 		void ProcessRenderQueue(ID3D12GraphicsCommandList* cmdList,
-								PipelineService*			  pso,
-								IRenderTarget*				  renderTarget,
-								int							  maxItemsPerFrame = 1);
+								PipelineService*		   pso,
+								IRenderTarget*			   renderTarget,
+								int						   maxItemsPerFrame = 1);
 		void ReleaseFrameResources();
 
 		PreviewResult GetPreview(const AssetRecord& record, ImTextureID fallback);
@@ -56,44 +56,44 @@ namespace CalyxEngine {
 		};
 
 		struct Entry {
-			State						   state	 = State::None;
-			ImTextureID					   texture	 = nullptr;
+			State							state	  = State::None;
+			ImTextureID						texture	  = nullptr;
 			std::filesystem::file_time_type lastWrite = {};
-			AssetType					   type		 = AssetType::Unknown;
-			std::unique_ptr<DxGpuResource> cacheResource;
-			bool						   modelLoadRequested = false;
+			AssetType						type	  = AssetType::Unknown;
+			std::unique_ptr<DxGpuResource>	cacheResource;
+			bool							modelLoadRequested = false;
 		};
 
 		static AssetPreviewManager instance_;
 
-		bool TryGeneratePreview(const AssetRecord& record, Entry& entry);
-		bool TryRenderPreview(const AssetRecord& record,
-							  Entry&			 entry,
-							  ID3D12GraphicsCommandList* cmdList,
-							  PipelineService*			  pso,
-							  IRenderTarget*				  renderTarget);
-		bool TryRenderModelPreview(const AssetRecord& record,
-								   Entry&			 entry,
-								   ID3D12GraphicsCommandList* cmdList,
-								   PipelineService*		  pso,
-								   IRenderTarget*			  renderTarget);
-		bool TryLoadSidecarPreview(const AssetRecord& record, Entry& entry);
-		std::optional<std::filesystem::path> FindSidecarPreviewPath(const AssetRecord& record) const;
-		bool								EnsurePreviewContext();
+		bool									  TryGeneratePreview(const AssetRecord& record, Entry& entry);
+		bool									  TryRenderPreview(const AssetRecord&		  record,
+																   Entry&					  entry,
+																   ID3D12GraphicsCommandList* cmdList,
+																   PipelineService*			  pso,
+																   IRenderTarget*			  renderTarget);
+		bool									  TryRenderModelPreview(const AssetRecord&		   record,
+																		Entry&					   entry,
+																		ID3D12GraphicsCommandList* cmdList,
+																		PipelineService*		   pso,
+																		IRenderTarget*			   renderTarget);
+		bool									  TryLoadSidecarPreview(const AssetRecord& record, Entry& entry);
+		std::optional<std::filesystem::path>	  FindSidecarPreviewPath(const AssetRecord& record) const;
+		bool									  EnsurePreviewContext();
 		std::vector<std::shared_ptr<SceneObject>> CreatePreviewObjects(const AssetRecord& record);
-		void								RegisterPreviewObject(SceneObject* object);
-		void								ConfigureCamera(const std::vector<std::shared_ptr<SceneObject>>& roots);
-		bool								CopyRenderTargetToCache(ID3D12GraphicsCommandList* cmdList,
-																	 IRenderTarget*				  renderTarget,
-																	 Entry&						  entry);
-		void								RetireEntryResources(Entry& entry);
+		void									  RegisterPreviewObject(SceneObject* object);
+		void									  ConfigureCamera(const std::vector<std::shared_ptr<SceneObject>>& roots);
+		bool									  CopyRenderTargetToCache(ID3D12GraphicsCommandList* cmdList,
+																		  IRenderTarget*			 renderTarget,
+																		  Entry&					 entry);
+		void									  RetireEntryResources(Entry& entry);
 
-		std::unordered_map<Guid, Entry> entries_;
-		std::deque<Guid>				  queue_;
-		std::unique_ptr<SceneContext>	  previewContext_;
-		std::unique_ptr<ModelRenderer>	  modelRenderer_;
-		std::vector<std::shared_ptr<SceneObject>> retainedFrameObjects_;
-		std::vector<std::shared_ptr<BaseModel>> retainedFrameModels_;
+		std::unordered_map<Guid, Entry>				entries_;
+		std::deque<Guid>							queue_;
+		std::unique_ptr<SceneContext>				previewContext_;
+		std::unique_ptr<ModelRenderer>				modelRenderer_;
+		std::vector<std::shared_ptr<SceneObject>>	retainedFrameObjects_;
+		std::vector<std::shared_ptr<BaseModel>>		retainedFrameModels_;
 		std::vector<std::unique_ptr<DxGpuResource>> retiredFrameResources_;
 	};
 

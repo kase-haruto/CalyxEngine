@@ -2,6 +2,7 @@ struct Vertex {
 	float4 position;
 	float2 texcoord;
 	float3 normal;
+	float4 tangent;
 };
 
 struct VertexInfluence {
@@ -35,6 +36,7 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID) {
 
 	float4 skinnedPosition = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float3 skinnedNormal = float3(0.0f, 0.0f, 0.0f);
+	float3 skinnedTangent = float3(0.0f, 0.0f, 0.0f);
 	float totalWeight = 0.0f;
 
 	[unroll]
@@ -48,6 +50,7 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID) {
 		Well palette = gMatrixPalette[jointIndex];
 		skinnedPosition += mul(src.position, palette.skeletonSpaceMatrix) * weight;
 		skinnedNormal += mul(src.normal, (float3x3)palette.skeletonSpaceInverseTransposeMatrix) * weight;
+		skinnedTangent += mul(src.tangent.xyz, (float3x3)palette.skeletonSpaceMatrix) * weight;
 		totalWeight += weight;
 	}
 
@@ -56,6 +59,7 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID) {
 		dst.position = skinnedPosition;
 		dst.position.w = 1.0f;
 		dst.normal = normalize(skinnedNormal);
+		dst.tangent.xyz = normalize(skinnedTangent);
 	}
 
 	gOutputVertices[vertexIndex] = dst;

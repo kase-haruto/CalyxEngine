@@ -1,7 +1,10 @@
 #include "Guid.h"
 
+#include <iomanip>
+#include <sstream>
+
 Guid::Guid(const std::string& s) {
-	FromString(s);
+	*this = FromString(s);
 }
 
 Guid Guid::New(){

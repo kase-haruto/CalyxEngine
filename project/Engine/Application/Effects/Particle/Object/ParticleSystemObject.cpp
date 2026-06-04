@@ -130,6 +130,8 @@ namespace CalyxEngine {
 
 	void ParticleSystemObject::ExtractConfig() {
 			auto& cfg = config_.GetConfig();
+			worldTransform_.Update();
+			SyncEmitterFromWorldTransform();
 			emitter_->ExtractConfigTo(cfg); // config_ は ParticleSystemObjectConfig
 
 			cfg.name	   = name_;

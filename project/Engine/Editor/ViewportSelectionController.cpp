@@ -21,12 +21,19 @@
 namespace CalyxEngine {
 
 	namespace {
+		constexpr float kEditorIconPickRadius = 14.0f;
+
 		bool IsViewportSelectableObject(const SceneObject* object) {
 			if(!object || object->IsTransient() || !object->IsPickable()) return false;
-			if(object->GetObjectType() == ObjectType::Light) return false;
 			if(object->GetObjectClassName() == "SkyBox") return false;
 			if(object->GetName() == "ground") return false;
 			return true;
+		}
+
+		bool IsEditorIconObject(const SceneObject* object) {
+			if(!object || object->IsTransient() || !object->IsPickable()) return false;
+			const ObjectType type = object->GetObjectType();
+			return type == ObjectType::Camera || type == ObjectType::Light;
 		}
 	} // namespace
 
@@ -186,6 +193,29 @@ namespace CalyxEngine {
 		if(relativeX < 0 || relativeY < 0 || relativeX > size.x || relativeY > size.y) return;
 
 		if(sceneManager_) {
+			SceneObject* iconHit = nullptr;
+			float bestIconDistanceSq = kEditorIconPickRadius * kEditorIconPickRadius;
+			for(auto& object : current->GetObjectLibrary()->GetAllObjectsShared()) {
+				if(!IsEditorIconObject(object.get())) continue;
+
+				CalyxEngine::Vector2 projected;
+				if(!ProjectObjectToViewport(object.get(), projected)) continue;
+
+				const float dx = projected.x - relativeX;
+				const float dy = projected.y - relativeY;
+				const float distanceSq = dx * dx + dy * dy;
+				if(distanceSq <= bestIconDistanceSq) {
+					bestIconDistanceSq = distanceSq;
+					iconHit = object.get();
+				}
+			}
+			if(iconHit) {
+				if(auto sp = current->FindSharedObject(iconHit)) {
+					SelectObject(sp, ImGui::GetIO().KeyCtrl);
+					return;
+				}
+			}
+
 			if(auto* pickingPass = sceneManager_->GetPickingPass()) {
 				float scaleX = static_cast<float>(pickingPass->GetWidth()) / size.x;
 				float scaleY = static_cast<float>(pickingPass->GetHeight()) / size.y;

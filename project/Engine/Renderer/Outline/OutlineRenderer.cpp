@@ -12,9 +12,40 @@
 
 namespace {
 	constexpr DXGI_FORMAT kNormalFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
+	constexpr float kDitherFadeFar = 8.0f;
 
 	D3D12_RECT MakeRect(uint32_t width, uint32_t height) {
 		return D3D12_RECT{0, 0, static_cast<LONG>(width), static_cast<LONG>(height)};
+	}
+
+	float DistanceSqPointAabb(const CalyxEngine::Vector3& p, const AABB& aabb) {
+		float dx = 0.0f;
+		if(p.x < aabb.min_.x) dx = aabb.min_.x - p.x;
+		else if(p.x > aabb.max_.x) dx = p.x - aabb.max_.x;
+
+		float dy = 0.0f;
+		if(p.y < aabb.min_.y) dy = aabb.min_.y - p.y;
+		else if(p.y > aabb.max_.y) dy = p.y - aabb.max_.y;
+
+		float dz = 0.0f;
+		if(p.z < aabb.min_.z) dz = aabb.min_.z - p.z;
+		else if(p.z > aabb.max_.z) dz = p.z - aabb.max_.z;
+
+		return dx * dx + dy * dy + dz * dz;
+	}
+
+	bool IsDitherFadeActiveForOutline(const SceneObject& owner, const Camera3d& camera) {
+		if(!owner.IsCameraDitherEnabled()) return false;
+		const float fadeFarSq = kDitherFadeFar * kDitherFadeFar;
+		return DistanceSqPointAabb(camera.GetWorldTransform().GetWorldPosition(), owner.GetWorldAABB()) < fadeFarSq;
+	}
+
+	bool IsOutlineEnabledForCameraDither(const SceneObject& owner, const Camera3d& camera) {
+		return owner.IsOutlineEnabled() && !IsDitherFadeActiveForOutline(owner, camera);
+	}
+
+	bool IsDitherEnabledForTarget(const IRenderTarget& rt) {
+		return rt.GetRenderTargetType() != RenderTargetType::DebugView;
 	}
 }
 
@@ -132,6 +163,8 @@ bool OutlineRenderer::RenderNormalBuffer(ID3D12GraphicsCommandList* cmdList,
 	if(targetOwner) {
 		selectionDepthResource_.Transition(cmdList, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		cmdList->ClearDepthStencilView(selectionDepthDsv_.cpu, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	} else if(IsDitherEnabledForTarget(*rt)) {
+		RenderDitherDepthOccluders(cmdList, device, rt, psoService, camera, modelRenderer);
 	}
 	auto dsv = targetOwner ? selectionDepthDsv_.cpu : rt->GetDSV();
 	cmdList->OMSetRenderTargets(1, &normalRtv_.cpu, FALSE, &dsv);
@@ -159,7 +192,7 @@ bool OutlineRenderer::RenderNormalBuffer(ID3D12GraphicsCommandList* cmdList,
 		if(!inst.model || !inst.transform || !inst.owner) continue;
 		if(targetOwner) {
 			if(inst.owner != targetOwner) continue;
-		} else if(!inst.owner->IsOutlineEnabled()) {
+		} else if(IsDitherEnabledForTarget(*rt) ? !IsOutlineEnabledForCameraDither(*inst.owner, *camera) : !inst.owner->IsOutlineEnabled()) {
 			continue;
 		}
 		if(!inst.model->GetModelData() || !inst.model->GetIsDrawEnable()) continue;
@@ -220,7 +253,7 @@ bool OutlineRenderer::RenderNormalBuffer(ID3D12GraphicsCommandList* cmdList,
 		if(!inst.model || !inst.transform || !inst.owner) continue;
 		if(targetOwner) {
 			if(inst.owner != targetOwner) continue;
-		} else if(!inst.owner->IsOutlineEnabled()) {
+		} else if(IsDitherEnabledForTarget(*rt) ? !IsOutlineEnabledForCameraDither(*inst.owner, *camera) : !inst.owner->IsOutlineEnabled()) {
 			continue;
 		}
 		if(!inst.model->GetModelData() || !inst.model->GetIsDrawEnable()) continue;
@@ -248,6 +281,102 @@ bool OutlineRenderer::RenderNormalBuffer(ID3D12GraphicsCommandList* cmdList,
 	}
 
 	return drewAny;
+}
+
+void OutlineRenderer::RenderDitherDepthOccluders(ID3D12GraphicsCommandList* cmdList,
+												 ID3D12Device* device,
+												 IRenderTarget* rt,
+												 PipelineService* psoService,
+												 const Camera3d* camera,
+												 const ModelRenderer& modelRenderer) {
+	if(!cmdList || !device || !rt || !psoService || !camera) return;
+
+	auto dsv = rt->GetDSV();
+	cmdList->OMSetRenderTargets(0, nullptr, FALSE, &dsv);
+
+	std::vector<ModelRenderer::RenderInstance> staticInstances;
+	std::vector<ModelRenderer::RenderInstance> skinnedInstances;
+	modelRenderer.CollectVisibleStatic(staticInstances);
+	modelRenderer.CollectVisibleSkinned(skinnedInstances);
+
+	std::vector<StaticBatch> staticBatches;
+	for(const auto& inst : staticInstances) {
+		if(!inst.model || !inst.transform || !inst.owner) continue;
+		if(!IsDitherFadeActiveForOutline(*inst.owner, *camera)) continue;
+		if(!inst.model->GetModelData() || !inst.model->GetIsDrawEnable()) continue;
+
+		auto it = std::find_if(staticBatches.begin(), staticBatches.end(),
+							   [&](const StaticBatch& batch) { return batch.model == inst.model; });
+		if(it == staticBatches.end()) {
+			StaticBatch batch;
+			batch.model = inst.model;
+			staticBatches.emplace_back(std::move(batch));
+			it = std::prev(staticBatches.end());
+		}
+
+		it->transforms.push_back(*inst.transform);
+		GpuBillboardParams billboard{};
+		billboard.mode = static_cast<uint32_t>(inst.billboardMode);
+		it->billboards.push_back(billboard);
+	}
+
+	if(!staticBatches.empty()) {
+		const auto ps = psoService->GetPipelineSet(PipelineTag::Object::OutlineDitherDepthObject3D, BlendMode::NONE);
+		psoService->SetCommand(ps, cmdList);
+		camera->SetRootCommand(cmdList, 4);
+		cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		for(auto& batch : staticBatches) {
+			const UINT count = static_cast<UINT>(batch.transforms.size());
+			if(count == 0) continue;
+
+			batch.model->EnsureInstanceCapacity(device, count);
+			batch.model->UploadInstanceMatrices(batch.transforms);
+			const auto instanceSrv = batch.model->GetInstanceSrv();
+			if(instanceSrv.ptr == 0) continue;
+			cmdList->SetGraphicsRootDescriptorTable(1, instanceSrv);
+
+			batch.model->EnsureBillboardCapacity(device, count);
+			batch.model->UploadBillboardParams(batch.billboards);
+			const auto billboardSrv = batch.model->GetBillboardSrv();
+			if(billboardSrv.ptr == 0) continue;
+			cmdList->SetGraphicsRootDescriptorTable(7, billboardSrv);
+
+			batch.model->BindVertexIndexBuffers(cmdList);
+			cmdList->DrawIndexedInstanced(
+				static_cast<UINT>(batch.model->GetModelData()->meshResource.Indices().size()),
+				count,
+				0,
+				0,
+				0);
+		}
+	}
+
+	bool skinnedPipelineSet = false;
+	for(const auto& inst : skinnedInstances) {
+		if(!inst.model || !inst.transform || !inst.owner) continue;
+		if(!IsDitherFadeActiveForOutline(*inst.owner, *camera)) continue;
+		if(!inst.model->GetModelData() || !inst.model->GetIsDrawEnable()) continue;
+
+		if(!skinnedPipelineSet) {
+			const auto ps = psoService->GetPipelineSet(PipelineTag::Object::OutlineDitherDepthSkinnedObject3D, BlendMode::NONE);
+			psoService->SetCommand(ps, cmdList);
+			camera->SetRootCommand(cmdList, 4);
+			cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			skinnedPipelineSet = true;
+		}
+
+		auto* model = static_cast<CalyxEngine::AnimationModel*>(inst.model);
+		inst.transform->SetCommand(cmdList, 1);
+		model->SetCommandPalletSrv(7, cmdList);
+		model->BindVertexIndexBuffers(cmdList);
+		cmdList->DrawIndexedInstanced(
+			static_cast<UINT>(model->GetModelData()->meshResource.Indices().size()),
+			1,
+			0,
+			0,
+			0);
+	}
 }
 
 void OutlineRenderer::Composite(ID3D12GraphicsCommandList* cmdList,

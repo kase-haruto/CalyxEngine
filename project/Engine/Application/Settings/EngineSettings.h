@@ -9,6 +9,7 @@ namespace CalyxEngine {
 	public:
 		enum class Category {
 			Editor,
+			Graphics,
 		};
 
 		static EngineSettings* GetInstance();

@@ -10,6 +10,13 @@ struct SplinePoint {
 	CalyxEngine::Vector3 pos{};
 };
 
+struct SplineSample {
+	CalyxEngine::Vector3 position{};
+	CalyxEngine::Vector3 tangent{0.0f, 0.0f, 1.0f};
+	float				 t		  = 0.0f;
+	float				 distance = 0.0f;
+};
+
 class SplineData {
 public:
 	// 基本データ
@@ -26,6 +33,9 @@ public:
 	}
 	CalyxEngine::Vector3 Evaluate(float t) const; // 0..1 の正規化パラメータ
 	CalyxEngine::Vector3 Tangent(float t) const;	// 進行方向ベクトル（正規化推奨）
+	SplineSample		 Sample(float t) const;
+	SplineSample		 SampleByDistance(float distance) const;
+	float				 TToDistance(float t) const;
 
 	// 弧長 → t 逆写像（距離で進める用）
 	float DistanceToT(float distance) const;		 // 0..totalLength_ の距離を 0..1 の t に

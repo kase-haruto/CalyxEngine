@@ -49,9 +49,13 @@ namespace CalyxEngine {
 			CompiledMaterialGraph compiled;
 			compiled.lightingMode = material.lightingMode;
 			compiled.baseColor = {material.color, false};
+			compiled.emissiveColor = {material.emissiveColor, false};
+			compiled.emissiveIntensity = material.emissiveIntensity;
 			compiled.shininess = material.shininess;
 			compiled.roughness = material.roughness;
 			compiled.isReflect = material.isReflect;
+			compiled.normalMap = {{0.5f, 0.5f, 1.0f, 1.0f}, false};
+			compiled.normalMapStrength = material.normalMapStrength;
 			compiled.toonHighlightColor = {material.toonHighlightColor, false};
 			compiled.toonBaseColor = {material.toonBaseColor, false};
 			compiled.toonFirstShadeColor = {material.toonMidShadowColor, false};
@@ -69,9 +73,12 @@ namespace CalyxEngine {
 		static void ApplyCompiled(MaterialAsset& material, const CompiledMaterialGraph& compiled) {
 			material.lightingMode = compiled.lightingMode;
 			material.color = compiled.baseColor.factor;
+			material.emissiveColor = compiled.emissiveColor.factor;
+			material.emissiveIntensity = compiled.emissiveIntensity;
 			material.shininess = compiled.shininess;
 			material.roughness = compiled.roughness;
 			material.isReflect = compiled.isReflect;
+			material.normalMapStrength = compiled.normalMapStrength;
 			material.toonHighlightColor = compiled.toonHighlightColor.factor;
 			material.toonBaseColor = compiled.toonBaseColor.factor;
 			material.toonMidShadowColor = compiled.toonFirstShadeColor.factor;
@@ -307,6 +314,8 @@ namespace CalyxEngine {
 			compiled.surfaceModel = CompiledSurfaceModel::Legacy;
 			for(const auto& pin : output.inputs) {
 				if(pin.name == "BaseColor") compiled.baseColor = EvaluateColorInput(material, pin.id, compiled.baseColor.factor);
+				if(pin.name == "Emissive") compiled.emissiveColor = EvaluateColorInput(material, pin.id, compiled.emissiveColor.factor);
+				if(pin.name == "Emissive Intensity") compiled.emissiveIntensity = EvaluateFloat(material, pin.id, compiled.emissiveIntensity);
 				if(pin.name == "Shininess") compiled.shininess = EvaluateFloat(material, pin.id, compiled.shininess);
 				if(pin.name == "Roughness") compiled.roughness = EvaluateFloat(material, pin.id, compiled.roughness);
 				if(pin.name == "Reflect") compiled.isReflect = EvaluateBool(material, pin.id, compiled.isReflect);
@@ -318,15 +327,21 @@ namespace CalyxEngine {
 			compiled.surfaceModel = CompiledSurfaceModel::Lit;
 			compiled.lightingMode = static_cast<int32_t>(GetFloatProperty(node, "lightingMode", 0.0f));
 			if(const NodePin* pin = FindInput(node, "Base Color")) compiled.baseColor = EvaluateColorInput(material, pin->id, GetColorProperty(node, "baseColor", compiled.baseColor.factor));
+			if(const NodePin* pin = FindInput(node, "Emissive")) compiled.emissiveColor = EvaluateColorInput(material, pin->id, GetColorProperty(node, "emissiveColor", compiled.emissiveColor.factor));
+			if(const NodePin* pin = FindInput(node, "Emissive Intensity")) compiled.emissiveIntensity = EvaluateFloat(material, pin->id, GetFloatProperty(node, "emissiveIntensity", compiled.emissiveIntensity));
 			if(const NodePin* pin = FindInput(node, "Shininess")) compiled.shininess = EvaluateFloat(material, pin->id, GetFloatProperty(node, "shininess", compiled.shininess));
 			if(const NodePin* pin = FindInput(node, "Roughness")) compiled.roughness = EvaluateFloat(material, pin->id, GetFloatProperty(node, "roughness", compiled.roughness));
 			if(const NodePin* pin = FindInput(node, "Reflect")) compiled.isReflect = EvaluateBool(material, pin->id, compiled.isReflect);
+			if(const NodePin* pin = FindInput(node, "Normal Map")) compiled.normalMap = EvaluateColorInput(material, pin->id, compiled.normalMap.factor);
+			if(const NodePin* pin = FindInput(node, "Normal Strength")) compiled.normalMapStrength = EvaluateFloat(material, pin->id, compiled.normalMapStrength);
 		}
 
 		static void CompileUnlitMasterIR(const MaterialAsset& material, const Node& node, CompiledMaterialGraph& compiled) {
 			compiled.surfaceModel = CompiledSurfaceModel::Unlit;
 			compiled.lightingMode = 4;
 			if(const NodePin* pin = FindInput(node, "Base Color")) compiled.baseColor = EvaluateColorInput(material, pin->id, GetColorProperty(node, "baseColor", compiled.baseColor.factor));
+			if(const NodePin* pin = FindInput(node, "Emissive")) compiled.emissiveColor = EvaluateColorInput(material, pin->id, GetColorProperty(node, "emissiveColor", compiled.emissiveColor.factor));
+			if(const NodePin* pin = FindInput(node, "Emissive Intensity")) compiled.emissiveIntensity = EvaluateFloat(material, pin->id, GetFloatProperty(node, "emissiveIntensity", compiled.emissiveIntensity));
 		}
 
 		static void CompileToonMasterIR(const MaterialAsset& material, const Node& node, CompiledMaterialGraph& compiled) {
@@ -337,6 +352,7 @@ namespace CalyxEngine {
 			const Vector4 highlightColor = GetColorProperty(node, "highlightColor", {1.08f, 1.06f, 1.02f, 1.0f});
 			const Vector4 firstShade = GetColorProperty(node, "firstShadeColor", {0.72f, 0.76f, 0.86f, 1.0f});
 			const Vector4 secondShade = GetColorProperty(node, "secondShadeColor", {0.42f, 0.46f, 0.58f, 1.0f});
+			const Vector4 emissiveColor = GetColorProperty(node, "emissiveColor", compiled.emissiveColor.factor);
 
 			compiled.baseColor = {baseColor, false};
 			compiled.toonBaseColor = {{1, 1, 1, 1}, false};
@@ -353,6 +369,8 @@ namespace CalyxEngine {
 			float specularIntensity = GetFloatProperty(node, "specularIntensity", 0.35f);
 
 			if(const NodePin* pin = FindInput(node, "Base Color")) compiled.baseColor = EvaluateColorInput(material, pin->id, baseColor);
+			if(const NodePin* pin = FindInput(node, "Emissive")) compiled.emissiveColor = EvaluateColorInput(material, pin->id, emissiveColor);
+			if(const NodePin* pin = FindInput(node, "Emissive Intensity")) compiled.emissiveIntensity = EvaluateFloat(material, pin->id, GetFloatProperty(node, "emissiveIntensity", compiled.emissiveIntensity));
 			if(const NodePin* pin = FindInput(node, "Highlight")) compiled.toonHighlightColor = EvaluateColorInput(material, pin->id, highlightColor);
 			if(const NodePin* pin = FindInput(node, "1st Shade")) compiled.toonFirstShadeColor = EvaluateColorInput(material, pin->id, firstShade);
 			if(const NodePin* pin = FindInput(node, "2nd Shade")) compiled.toonSecondShadeColor = EvaluateColorInput(material, pin->id, secondShade);
@@ -363,6 +381,8 @@ namespace CalyxEngine {
 			if(const NodePin* pin = FindInput(node, "Spec Threshold")) specularThreshold = EvaluateFloat(material, pin->id, specularThreshold);
 			if(const NodePin* pin = FindInput(node, "Spec Softness")) specularSoftness = EvaluateFloat(material, pin->id, specularSoftness);
 			if(const NodePin* pin = FindInput(node, "Spec Intensity")) specularIntensity = EvaluateFloat(material, pin->id, specularIntensity);
+			if(const NodePin* pin = FindInput(node, "Normal Map")) compiled.normalMap = EvaluateColorInput(material, pin->id, compiled.normalMap.factor);
+			if(const NodePin* pin = FindInput(node, "Normal Strength")) compiled.normalMapStrength = EvaluateFloat(material, pin->id, compiled.normalMapStrength);
 
 			compiled.toonShadeStep = shadeStep;
 			compiled.toonShadeFeather = shadeFeather;
@@ -390,6 +410,8 @@ namespace CalyxEngine {
 		static void CompileLegacyOutput(MaterialAsset& material, const Node& output) {
 			for(const auto& pin : output.inputs) {
 				if(pin.name == "BaseColor") material.color = EvaluateColor(material, pin.id, material.color);
+				if(pin.name == "Emissive") material.emissiveColor = EvaluateColor(material, pin.id, material.emissiveColor);
+				if(pin.name == "Emissive Intensity") material.emissiveIntensity = EvaluateFloat(material, pin.id, material.emissiveIntensity);
 				if(pin.name == "Shininess") material.shininess = EvaluateFloat(material, pin.id, material.shininess);
 				if(pin.name == "Roughness") material.roughness = EvaluateFloat(material, pin.id, material.roughness);
 				if(pin.name == "Reflect") material.isReflect = EvaluateBool(material, pin.id, material.isReflect);
@@ -400,6 +422,8 @@ namespace CalyxEngine {
 		static void CompileLitMaster(MaterialAsset& material, const Node& node) {
 			material.lightingMode = static_cast<int32_t>(GetFloatProperty(node, "lightingMode", 0.0f));
 			if(const NodePin* pin = FindInput(node, "Base Color")) material.color = EvaluateColor(material, pin->id, GetColorProperty(node, "baseColor", material.color));
+			if(const NodePin* pin = FindInput(node, "Emissive")) material.emissiveColor = EvaluateColor(material, pin->id, GetColorProperty(node, "emissiveColor", material.emissiveColor));
+			if(const NodePin* pin = FindInput(node, "Emissive Intensity")) material.emissiveIntensity = EvaluateFloat(material, pin->id, GetFloatProperty(node, "emissiveIntensity", material.emissiveIntensity));
 			if(const NodePin* pin = FindInput(node, "Shininess")) material.shininess = EvaluateFloat(material, pin->id, GetFloatProperty(node, "shininess", material.shininess));
 			if(const NodePin* pin = FindInput(node, "Roughness")) material.roughness = EvaluateFloat(material, pin->id, GetFloatProperty(node, "roughness", material.roughness));
 			if(const NodePin* pin = FindInput(node, "Reflect")) material.isReflect = EvaluateBool(material, pin->id, material.isReflect);
@@ -408,6 +432,8 @@ namespace CalyxEngine {
 		static void CompileUnlitMaster(MaterialAsset& material, const Node& node) {
 			material.lightingMode = 4;
 			if(const NodePin* pin = FindInput(node, "Base Color")) material.color = EvaluateColor(material, pin->id, GetColorProperty(node, "baseColor", material.color));
+			if(const NodePin* pin = FindInput(node, "Emissive")) material.emissiveColor = EvaluateColor(material, pin->id, GetColorProperty(node, "emissiveColor", material.emissiveColor));
+			if(const NodePin* pin = FindInput(node, "Emissive Intensity")) material.emissiveIntensity = EvaluateFloat(material, pin->id, GetFloatProperty(node, "emissiveIntensity", material.emissiveIntensity));
 		}
 
 		static void CompileToonMaster(MaterialAsset& material, const Node& node) {
@@ -417,9 +443,12 @@ namespace CalyxEngine {
 			const Vector4 highlightColor = GetColorProperty(node, "highlightColor", {1.08f, 1.06f, 1.02f, 1.0f});
 			const Vector4 firstShade = GetColorProperty(node, "firstShadeColor", {0.72f, 0.76f, 0.86f, 1.0f});
 			const Vector4 secondShade = GetColorProperty(node, "secondShadeColor", {0.42f, 0.46f, 0.58f, 1.0f});
+			const Vector4 emissiveColor = GetColorProperty(node, "emissiveColor", material.emissiveColor);
 
 			if(const NodePin* pin = FindInput(node, "Base Color")) material.color = EvaluateColor(material, pin->id, baseColor);
 			else material.color = baseColor;
+			if(const NodePin* pin = FindInput(node, "Emissive")) material.emissiveColor = EvaluateColor(material, pin->id, emissiveColor);
+			if(const NodePin* pin = FindInput(node, "Emissive Intensity")) material.emissiveIntensity = EvaluateFloat(material, pin->id, GetFloatProperty(node, "emissiveIntensity", material.emissiveIntensity));
 
 			material.toonBaseColor = {1, 1, 1, 1};
 			material.toonHighlightColor = highlightColor;

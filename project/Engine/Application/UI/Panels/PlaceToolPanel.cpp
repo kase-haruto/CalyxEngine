@@ -7,6 +7,9 @@
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/Objects/3D/Actor/SplineDeformObject.h>
+#include <Engine/Objects/LightObject/DirectionalLight.h>
+#include <Engine/Objects/LightObject/PointLight.h>
+#include <Engine/Objects/LightObject/PointLightActor.h>
 #include <Engine/Scene/Context/SceneContext.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
 #include <Engine/System/Command/EditorCommand/LevelEditorCommand/CreateObjectCommand/CreateObjectCommand.h>
@@ -129,6 +132,82 @@ namespace CalyxEngine {
 								  return obj;
 							  }});
 
+		// ----------------------------- Light ------------------------------------
+		{
+			auto& lightItems = categoryItems_[PlaceItemCategory::Light];
+			const auto lightIcon = AssetManager::GetInstance()->GetTextureManager()->LoadTexture("UI/Tool/Hierarchy/lightIcon.dds");
+
+			lightItems.push_back({PlaceItemCategory::Light,
+								  "Directional Light",
+								  lightIcon,
+								  {64, 64},
+								  [](const CalyxEngine::Vector3& pos) {
+									  auto factory = [pos]() {
+										  auto obj = SceneAPI::Instantiate<DirectionalLight>("DirectionalLight");
+										  obj->Initialize();
+										  obj->GetWorldTransform().translation = pos;
+										  obj->GetWorldTransform().Update();
+										  return obj;
+									  };
+									  CommandManager::GetInstance()->Execute(
+										  std::make_unique<CreateObjectCommand<DirectionalLight>>(
+											  SceneContext::Current(), factory, "Create Directional Light"));
+								  },
+								  []() {
+									  auto obj = SceneAPI::Instantiate<DirectionalLight>("DirectionalLight");
+									  obj->Initialize();
+									  obj->SetTransient(true);
+									  return obj;
+								  }});
+
+			lightItems.push_back({PlaceItemCategory::Light,
+								  "Point Light",
+								  lightIcon,
+								  {64, 64},
+								  [](const CalyxEngine::Vector3& pos) {
+									  auto factory = [pos]() {
+										  auto obj = SceneAPI::Instantiate<PointLight>("PointLight");
+										  obj->Initialize();
+										  obj->GetWorldTransform().translation = pos;
+										  obj->GetWorldTransform().Update();
+										  obj->SyncPositionFromTransform();
+										  return obj;
+									  };
+									  CommandManager::GetInstance()->Execute(
+										  std::make_unique<CreateObjectCommand<PointLight>>(
+											  SceneContext::Current(), factory, "Create Point Light"));
+								  },
+								  []() {
+									  auto obj = SceneAPI::Instantiate<PointLight>("PointLight");
+									  obj->Initialize();
+									  obj->SetTransient(true);
+									  return obj;
+								  }});
+
+			lightItems.push_back({PlaceItemCategory::Light,
+								  "Point Light Actor",
+								  lightIcon,
+								  {64, 64},
+								  [](const CalyxEngine::Vector3& pos) {
+									  auto factory = [pos]() {
+										  auto obj = SceneAPI::Instantiate<PointLightActor>();
+										  obj->Initialize();
+										  obj->GetWorldTransform().translation = pos;
+										  obj->GetWorldTransform().Update();
+										  return obj;
+									  };
+									  CommandManager::GetInstance()->Execute(
+										  std::make_unique<CreateObjectCommand<PointLightActor>>(
+											  SceneContext::Current(), factory, "Create Point Light Actor"));
+								  },
+								  []() {
+									  auto obj = SceneAPI::Instantiate<PointLightActor>();
+									  obj->Initialize();
+									  obj->SetTransient(true);
+									  return obj;
+								  }});
+		}
+
 		// ---------------------------- Particle ----------------------------------
 		{
 			auto& particleItems = categoryItems_[PlaceItemCategory::Particle];
@@ -217,18 +296,18 @@ namespace CalyxEngine {
 
 		// ------------------------------ Actor -----------------------------------
 		{
-			auto& eventItems = categoryItems_[PlaceItemCategory::Actor];
+			auto& actorItems = categoryItems_[PlaceItemCategory::Actor];
 			for(const SceneObjectClassDesc* desc : SceneObjectRegistry::Get().ListPlaceableTypes()) {
-				if(!desc || desc->objectType != ObjectType::Actor) {
+				if(!desc || desc->objectType != ObjectType::GameObject) {
 					continue;
 				}
 
-				const std::string typeName	  = desc->typeName;
+				const std::string typeName	 = desc->typeName;
 				const std::string displayName = desc->displayName.empty() ? desc->typeName : desc->displayName;
-				const std::string iconPath	  = desc->iconPath;
-				const ObjectType  objectType  = desc->objectType;
+				const std::string iconPath	 = desc->iconPath;
+				const ObjectType  objectType	 = desc->objectType;
 
-				eventItems.push_back({PlaceItemCategory::Actor,
+				actorItems.push_back({PlaceItemCategory::Actor,
 									  displayName,
 									  LoadPlaceIcon(iconPath),
 									  {64, 64},
@@ -297,14 +376,15 @@ namespace CalyxEngine {
 		static const std::vector<std::pair<PlaceItemCategory, std::string>> categoryNames = {
 			{PlaceItemCategory::Shape, "Shapes"},
 			{PlaceItemCategory::Light, "Lights"},
-			{PlaceItemCategory::Actor, "Actor"},
 			{PlaceItemCategory::Particle, "Particles"},
 			{PlaceItemCategory::Event, "Events"},
+			{PlaceItemCategory::Actor, "Actor"},
 		};
-
 
 		ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.2f, 0.2f, 0.2f, 1.0f)); // 選択時の色を少し調整
 		for(const auto& [cat, name] : categoryNames) {
+			// カテゴリにアイテムが含まれているかチェック (空なら表示しない等の制御が必要ならここ)
+			// 今回は全部表示する方針で
 
 			bool isSelected = (selectedCategory_ == cat);
 			if(ImGui::Selectable(name.c_str(), isSelected)) {

@@ -73,4 +73,3 @@ void TestScene::CleanUp(){
 	sceneContext_->GetObjectLibrary()->Clear();
 	CollisionManager::GetInstance()->ClearColliders();
 }
-

@@ -46,7 +46,7 @@ void SphereCollider::Draw() {
 //		debug ui
 /////////////////////////////////////////////////////////////////////////////////////////
 void SphereCollider::ShowGui() {
-	if(ImGui::TreeNodeEx("SphereCollider", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
+	if(ImGui::TreeNodeEx("SphereCollider", ImGuiTreeNodeFlags_SpanAvailWidth)) {
 		Collider::ShowGui();
 		if(isCollisionEnabled_) {
 			GuiCmd::DragFloat("Radius", shape_.radius, 0.1f, 0.0f, 10.0f);

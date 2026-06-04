@@ -7,7 +7,6 @@
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 #include <Engine/Foundation/Json/JsonUtils.h>
 #include <Engine/Foundation/Serialization/SerializableObject.h>
-#include <Engine/Objects/3D/Actor/BaseGameObject.h>
 #include <Engine/Objects/3D/Actor/Library/SceneObjectLibrary.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/Scene/Context/SceneContext.h>
@@ -212,12 +211,19 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 			}
 		}
 
+		Guid guid = j.value("guid", Guid{});
+		if(!guid.isValid()) {
+			guid = sp->GetGuid();
+		}
+		sp->SetGuid(guid);
+
 		// ライブラリへ登録
 		context.GetObjectLibrary()->AddObject(sp);
 		sp->BeginSerializableParamCapture(paramOverrides);
 		sp->Initialize();
 		sp->EndSerializableParamCapture();
 		ApplySceneConfig(*sp, j);
+		sp->SetGuid(guid);
 		if(false) {
 			auto* cfg = dynamic_cast<IConfigurable*>(sp.get());
 			if(j.contains("configPath")) {
@@ -245,7 +251,7 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 		if(auto dir = std::dynamic_pointer_cast<DirectionalLight>(sp)) {
 			context.GetLightLibrary()->SetDirectionalLight(dir);
 		} else if(auto pt = std::dynamic_pointer_cast<PointLight>(sp)) {
-			context.GetLightLibrary()->SetPointLight(pt);
+			context.GetLightLibrary()->AddPointLight(pt);
 		} else if(auto camDbg = std::dynamic_pointer_cast<DebugCamera>(sp)) {
 			context.GetCameraMgr()->SetDebugCamera(camDbg);
 		} else if(auto camMain = std::dynamic_pointer_cast<Camera3d>(sp)) {
@@ -253,7 +259,6 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 		}
 
 		// GUID
-		Guid guid	  = j.value("guid", Guid{});
 		guidMap[guid] = sp;
 	}
 
@@ -268,34 +273,6 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 		if(cIt != guidMap.end() && pIt != guidMap.end()) {
 			auto& childTransform = cIt->second->GetWorldTransform();
 			cIt->second->SetParent(pIt->second, childTransform.inheritScale);
-		}
-	}
-
-	for(const auto& j : jArray) {
-		Guid ownerGuid = j.value("guid", Guid{});
-		if(!ownerGuid.isValid() || !j.contains("boneParentBindings")) continue;
-
-		auto ownerIt = guidMap.find(ownerGuid);
-		if(ownerIt == guidMap.end()) continue;
-
-		auto* owner = dynamic_cast<BaseGameObject*>(ownerIt->second.get());
-		if(!owner) continue;
-
-		for(const auto& bindingJson : j.at("boneParentBindings")) {
-			Guid targetGuid = bindingJson.value("targetGuid", Guid{});
-			std::string boneName = bindingJson.value("boneName", std::string{});
-			if(!targetGuid.isValid() || boneName.empty()) continue;
-
-			auto targetIt = guidMap.find(targetGuid);
-			if(targetIt == guidMap.end()) continue;
-
-			auto* target = dynamic_cast<BaseGameObject*>(targetIt->second.get());
-			if(!target) continue;
-
-			owner->SetBoneParent(
-				*target,
-				boneName,
-				bindingJson.value("inheritScale", true));
 		}
 	}
 	return true;

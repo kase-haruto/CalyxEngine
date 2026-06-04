@@ -35,6 +35,13 @@ const std::string BaseModel::directoryPath_ = "Resource/models";
 
 namespace {
 	uint64_t gBaseModelUploadFrameGeneration = 1;
+	constexpr uint32_t kMaxGraphTextures = 8;
+}
+
+BaseModel::~BaseModel() {
+	for(const DescriptorHandle& textureTable : materialGraphTextureTables_) {
+		DescriptorAllocator::FreeRange(DescriptorUsage::CbvSrvUav, textureTable, kMaxGraphTextures);
+	}
 }
 
 void BaseModel::BeginUploadFrame() {
@@ -83,16 +90,26 @@ void BaseModel::OnModelLoaded() {
 
 	// テクスチャ設定。モデル側マテリアルの相対パスは Asset ルート相対に解決済み。
 	materialTextureHandles_.clear();
+	materialNormalTextureHandles_.clear();
 	for(const auto& material : modelData_->meshResource.Materials()) {
 		auto h = CalyxEngine::AssetManager::GetInstance()->GetTextureManager()->LoadTexture(material.textureFilePath);
 		if(!h.ptr) {
 			h = CalyxEngine::AssetManager::GetInstance()->GetTextureManager()->LoadTexture("textures/white1x1.dds");
 		}
 		materialTextureHandles_.push_back(h);
+
+		D3D12_GPU_DESCRIPTOR_HANDLE normalHandle{};
+		if(!material.normalTextureFilePath.empty()) {
+			normalHandle = CalyxEngine::AssetManager::GetInstance()->GetTextureManager()->LoadTextureLinear(material.normalTextureFilePath);
+		}
+		materialNormalTextureHandles_.push_back(normalHandle);
 	}
 	if(materialTextureHandles_.empty()) {
 		materialTextureHandles_.push_back(
 			CalyxEngine::AssetManager::GetInstance()->GetTextureManager()->LoadTexture("textures/white1x1.dds"));
+	}
+	if(materialNormalTextureHandles_.empty()) {
+		materialNormalTextureHandles_.push_back({});
 	}
 	if(!handle_) {
 		textureName_ = modelData_->meshResource.Material().textureFilePath;
@@ -187,6 +204,7 @@ void BaseModel::Draw(const WorldTransform& transform) {
 
 	cmdList->SetGraphicsRootDescriptorTable(2, GetTexSrv());
 	cmdList->SetGraphicsRootDescriptorTable(12, GetMaterialGraphTextureSrvTable(0));
+	cmdList->SetGraphicsRootDescriptorTable(14, GetNormalMapSrv());
 
 	// 環境マップ
 	D3D12_GPU_DESCRIPTOR_HANDLE envMapHandle = CalyxEngine::AssetManager::GetInstance()->GetTextureManager()->GetEnvironmentTextureSrvHandle();
@@ -202,6 +220,7 @@ void BaseModel::Draw(const WorldTransform& transform) {
 	for(const auto& subMesh : subMeshes) {
 		cmdList->SetGraphicsRootDescriptorTable(2, GetTexSrv(subMesh.materialIndex));
 		cmdList->SetGraphicsRootDescriptorTable(12, GetMaterialGraphTextureSrvTable(subMesh.materialIndex));
+		cmdList->SetGraphicsRootDescriptorTable(14, GetNormalMapSrv(subMesh.materialIndex));
 		cmdList->DrawIndexedInstanced(subMesh.indexCount, 1, subMesh.indexStart, 0, 0);
 	}
 }
@@ -287,7 +306,6 @@ void BaseModel::ShowImGui(BaseModelConfig& config) {
 			}
 		}
 
-		ImGui::TextDisabled("Current: %s", labelFromGuid(materialGuid_).c_str());
 		ImGui::SameLine();
 		if(materialGuid_.isValid() && ImGui::SmallButton("Copy GUID##material")) {
 			ImGui::SetClipboardText(materialGuid_.ToString().c_str());
@@ -297,6 +315,26 @@ void BaseModel::ShowImGui(BaseModelConfig& config) {
 			if(ImGui::TreeNodeEx("Edit Shared Material", ImGuiTreeNodeFlags_SpanAvailWidth)) {
 				if(ma->ShowGui()) {
 					TransferMaterial();
+				}
+
+				if(ImGui::TreeNodeEx("Normal Map Texture", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+					Guid droppedNormalMapGuid = ma->normalMapGuid;
+					if(CalyxEngine::AssetPanel::DrawAssetDropTarget(AssetType::Texture, &droppedNormalMapGuid)) {
+						if(ma->normalMapGuid != droppedNormalMapGuid) {
+							ma->normalMapGuid = droppedNormalMapGuid;
+							ma->useNormalMap = droppedNormalMapGuid.isValid();
+							TransferMaterial();
+						}
+					}
+					if(ma->normalMapGuid.isValid()) {
+						ImGui::SameLine();
+						if(ImGui::SmallButton("Clear##normalMap")) {
+							ma->normalMapGuid = Guid{};
+							ma->useNormalMap = false;
+							TransferMaterial();
+						}
+					}
+					ImGui::TreePop();
 				}
 
 				auto* db = AssetDatabase::GetInstance();
@@ -373,7 +411,6 @@ void BaseModel::ShowImGui(BaseModelConfig& config) {
 			}
 			return "(missing)";
 		};
-		ImGui::TextDisabled("Current: %s", labelFromGuid(textureGuid_).c_str());
 		ImGui::SameLine();
 		if(textureGuid_.isValid() && ImGui::SmallButton("Copy GUID")) {
 			ImGui::SetClipboardText(textureGuid_.ToString().c_str());
@@ -385,7 +422,7 @@ void BaseModel::ShowImGui(BaseModelConfig& config) {
 	// materialData_.ShowImGui(config.materialConfig); // TODO: マテリアルアセットの切り替えUIをここに実装
 
 	// ブレンドモード
-	if(ImGui::TreeNodeEx("BlendMode", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
+	if(ImGui::TreeNodeEx("BlendMode", ImGuiTreeNodeFlags_SpanAvailWidth)) {
 		static const char* blendModeNames[] = {
 			"NONE", "ALPHA", "ADD", "SUB", "MUL", "NORMAL", "SCREEN"};
 		int currentBlendMode = static_cast<int>(blendMode_);
@@ -508,8 +545,35 @@ D3D12_GPU_DESCRIPTOR_HANDLE BaseModel::GetTexSrv(size_t materialIndex) const {
 	return GetTexSrv();
 }
 
+D3D12_GPU_DESCRIPTOR_HANDLE BaseModel::GetNormalMapSrv() const {
+	auto* textureManager = CalyxEngine::AssetManager::GetInstance()->GetTextureManager();
+	if(auto material = GetMaterialAsset()) {
+		if(material->normalMapGuid.isValid()) {
+			auto h = textureManager->LoadTextureLinear(material->normalMapGuid);
+			if(h.ptr) return h;
+		}
+	}
+	if(!materialNormalTextureHandles_.empty() && materialNormalTextureHandles_[0].ptr) {
+		return materialNormalTextureHandles_[0];
+	}
+	return textureManager->LoadTexture("textures/white1x1.dds");
+}
+
+D3D12_GPU_DESCRIPTOR_HANDLE BaseModel::GetNormalMapSrv(size_t materialIndex) const {
+	auto* textureManager = CalyxEngine::AssetManager::GetInstance()->GetTextureManager();
+	if(auto material = GetMaterialAsset()) {
+		if(material->normalMapGuid.isValid()) {
+			auto h = textureManager->LoadTextureLinear(material->normalMapGuid);
+			if(h.ptr) return h;
+		}
+	}
+	if(materialIndex < materialNormalTextureHandles_.size() && materialNormalTextureHandles_[materialIndex].ptr) {
+		return materialNormalTextureHandles_[materialIndex];
+	}
+	return GetNormalMapSrv();
+}
+
 D3D12_GPU_DESCRIPTOR_HANDLE BaseModel::GetMaterialGraphTextureSrvTable(size_t materialIndex) const {
-	constexpr uint32_t kMaxGraphTextures = 8;
 	auto* textureManager = CalyxEngine::AssetManager::GetInstance()->GetTextureManager();
 	ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
 	if(!textureManager || !device) return {};
@@ -658,11 +722,24 @@ void BaseModel::TransferMaterial() {
 		data.toonSpecularThreshold = ma->toonSpecularThreshold;
 		data.toonSpecularSoftness = ma->toonSpecularSoftness;
 		data.toonSpecularIntensity = ma->toonSpecularIntensity;
+		data.emissiveColor = ma->emissiveColor;
+		data.emissiveIntensity = ma->emissiveIntensity;
+		data.useNormalMap = (ma->useNormalMap || ma->normalMapGuid.isValid()) ? 1 : 0;
+		data.normalMapStrength = ma->normalMapStrength;
+		data.normalMapFlipY = ma->normalMapFlipY ? 1 : 0;
 	} else {
 		// Default fallback
 		data.color = {1, 1, 1, 1};
 		data.lightingMode = 0;
 		data.shininess = 20.0f;
+	}
+	if(data.useNormalMap == 0 && modelData_) {
+		for(const auto& material : modelData_->meshResource.Materials()) {
+			if(!material.normalTextureFilePath.empty()) {
+				data.useNormalMap = 1;
+				break;
+			}
+		}
 	}
 	if(colorOverride_) {
 		data.color = *colorOverride_;

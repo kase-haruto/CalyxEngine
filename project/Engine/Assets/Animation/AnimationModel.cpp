@@ -12,7 +12,6 @@
 #include <Engine/Graphics/Pipeline/Service/PipelineService.h>
 #include <Engine/Lighting/LightData.h>
 #include <Engine/Renderer/Mesh/VertexData.h>
-#include "Engine/Application/UI/Panels/InspectorPanel.h"
 
 #if defined(_DEBUG) || defined(DEVELOP)
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
@@ -43,6 +42,12 @@ namespace CalyxEngine {
 		AnimationState st{base, animationData_};
 		animationStates_.emplace(base, st);
 		currentAnimation_ = &animationStates_.at(base);
+	}
+
+	AnimationModel::~AnimationModel() {
+		DescriptorAllocator::Free(DescriptorUsage::CbvSrvUav, sourceVertexSrv_);
+		DescriptorAllocator::Free(DescriptorUsage::CbvSrvUav, influenceSrv_);
+		DescriptorAllocator::Free(DescriptorUsage::CbvSrvUav, skinCluster_.paletteSrvDescriptor);
 	}
 
 	/* =====================================================================
@@ -555,7 +560,7 @@ namespace CalyxEngine {
 		// もしモデルデータが読み込まれていない場合は何もしない
 		if(!modelData_) {
 			return;
-		}	
+		}
 		if(!handle_) {
 			return;
 		}
@@ -572,6 +577,7 @@ namespace CalyxEngine {
 		cmdList->SetGraphicsRootDescriptorTable(2, GetTexSrv());
 		cmdList->SetGraphicsRootDescriptorTable(6, GetEnvMapSrv());
 		SetCommandPalletSrv(7, cmdList);
+		cmdList->SetGraphicsRootDescriptorTable(14, GetNormalMapSrv());
 
 		// 頂点バッファ/インデックスバッファをセット
 		BindVertexIndexBuffers(cmdList);
@@ -583,6 +589,7 @@ namespace CalyxEngine {
 		} else {
 			for(const auto& subMesh : subMeshes) {
 				cmdList->SetGraphicsRootDescriptorTable(2, GetTexSrv(subMesh.materialIndex));
+				cmdList->SetGraphicsRootDescriptorTable(14, GetNormalMapSrv(subMesh.materialIndex));
 				cmdList->DrawIndexedInstanced(subMesh.indexCount, 1, subMesh.indexStart, 0, 0);
 			}
 		}
@@ -600,45 +607,40 @@ namespace CalyxEngine {
 	//-----------------------------------------------------------------------------
 	void AnimationModel::ShowImGuiInterface() {
 #if defined(_DEBUG) || defined(DEVELOP)
-		if(GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::Object)) {
+		GuiCmd::CheckBox("Draw Skeleton", isDrawSkeleton_);
+		BaseModel::ShowImGuiInterface();
 
-			GuiCmd::CheckBox("Draw Skeleton", isDrawSkeleton_);
-			BaseModel::ShowImGuiInterface();
-
-			// ------ ジョイントリスト ---------------------------------
-			if(ImGui::CollapsingHeader("Skeleton##header")) {
-				// 名前配列を一度だけ作る
-				static std::vector<const char*> jointNames;
-				if(jointNames.empty() && modelData_) {
-					jointNames.reserve(modelData_->skeleton.joints.size());
-					for(auto& j : modelData_->skeleton.joints) {
-						jointNames.push_back(j.name.c_str());
-					}
+		// ------ ジョイントリスト ---------------------------------
+		if(ImGui::CollapsingHeader("Skeleton##header")) {
+			// 名前配列を一度だけ作る
+			static std::vector<const char*> jointNames;
+			if(jointNames.empty() && modelData_) {
+				jointNames.reserve(modelData_->skeleton.joints.size());
+				for(auto& j : modelData_->skeleton.joints) {
+					jointNames.push_back(j.name.c_str());
 				}
-
-				if(ImGui::ListBox("Joints", &selectedJoint_,
-								  jointNames.data(),
-								  static_cast<int>(jointNames.size()), 10)) {
-				}
-
-				// 色を変える UI
-				ImGui::ColorEdit4("Highlight", (float*)&jointHighlightCol_,
-								  ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_PickerHueBar);
 			}
 
-			// 選択中ジョイントの情報表示
-			if(selectedJoint_ >= 0 && modelData_) {
-				const Joint& j = modelData_->skeleton.joints[selectedJoint_];
-				ImGui::Text("Index: %d  Parent: %d", j.index,
-							j.parent ? *j.parent : -1);
-				ImGui::Text("Local Pos :  %.3f, %.3f, %.3f",
-							j.transform.translate.x,
-							j.transform.translate.y,
-							j.transform.translate.z);
+			if(ImGui::ListBox("Joints", &selectedJoint_,
+							  jointNames.data(),
+							  static_cast<int>(jointNames.size()), 10)) {
 			}
-			GuiCmd::EndSection();
+
+			// 色を変える UI
+			ImGui::ColorEdit4("Highlight", (float*)&jointHighlightCol_,
+							  ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_PickerHueBar);
 		}
-		
+
+		// 選択中ジョイントの情報表示
+		if(selectedJoint_ >= 0 && modelData_) {
+			const Joint& j = modelData_->skeleton.joints[selectedJoint_];
+			ImGui::Text("Index: %d  Parent: %d", j.index,
+						j.parent ? *j.parent : -1);
+			ImGui::Text("Local Pos :  %.3f, %.3f, %.3f",
+						j.transform.translate.x,
+						j.transform.translate.y,
+						j.transform.translate.z);
+		}
 
 #endif
 	}
@@ -662,20 +664,8 @@ namespace CalyxEngine {
 	//-----------------------------------------------------------------------------
 	std::vector<std::string> AnimationModel::GetAnimationNodeNames() const {
 		std::vector<std::string> names;
-		if(!modelData_) return names;
 		for(auto& pair : modelData_->animation.nodeAnimations) {
 			names.push_back(pair.first);
-		}
-		return names;
-	}
-
-	std::vector<std::string> AnimationModel::GetJointNames() const {
-		std::vector<std::string> names;
-		if(!modelData_) return names;
-
-		names.reserve(modelData_->skeleton.joints.size());
-		for(const auto& joint : modelData_->skeleton.joints) {
-			names.push_back(joint.name);
 		}
 		return names;
 	}

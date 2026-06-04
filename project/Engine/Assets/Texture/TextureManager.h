@@ -45,6 +45,7 @@ public:
 	 * \return GPUハンドル
 	 */
 	D3D12_GPU_DESCRIPTOR_HANDLE LoadTexture(const std::string& filePath);
+	D3D12_GPU_DESCRIPTOR_HANDLE LoadTextureLinear(const std::string& filePath);
 
 	/**
 	 * \brief SRVハンドルを取得
@@ -68,6 +69,7 @@ public:
 	 * \return GPUハンドル
 	 */
 	D3D12_GPU_DESCRIPTOR_HANDLE LoadTexture(const Guid& guid);
+	D3D12_GPU_DESCRIPTOR_HANDLE LoadTextureLinear(const Guid& guid);
 
 	/**
 	 * \brief GUIDを用いてSRVハンドルを取得

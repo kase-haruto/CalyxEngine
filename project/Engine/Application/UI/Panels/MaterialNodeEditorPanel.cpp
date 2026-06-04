@@ -52,6 +52,8 @@ namespace CalyxEngine {
 
 		bool IsLegacyOutputPin(const std::string& name) {
 			return name == "BaseColor" ||
+				   name == "Emissive" ||
+				   name == "Emissive Intensity" ||
 				   name == "Shininess" ||
 				   name == "Roughness" ||
 				   name == "Reflect" ||
@@ -165,6 +167,8 @@ namespace CalyxEngine {
 
 		void SetDefaultToonMasterProperties(Node& node) {
 			SetColorProperty(node, "baseColor", {1, 1, 1, 1});
+			SetColorProperty(node, "emissiveColor", {0, 0, 0, 1});
+			SetFloatProperty(node, "emissiveIntensity", 0.0f);
 			SetColorProperty(node, "highlightColor", {1.08f, 1.06f, 1.02f, 1.0f});
 			SetColorProperty(node, "firstShadeColor", {0.72f, 0.76f, 0.86f, 1.0f});
 			SetColorProperty(node, "secondShadeColor", {0.42f, 0.46f, 0.58f, 1.0f});
@@ -708,6 +712,22 @@ namespace CalyxEngine {
 				AddBoolNode(material, "Reflect", "Reflect", position);
 				changed = true;
 			}
+			if(ImGui::MenuItem("Emissive Color")) {
+				AddColorNode(material, position);
+				if(!material.graph.nodes.empty()) {
+					Node& node = material.graph.nodes.back();
+					node.title = "Emissive Color";
+					node.colorValue = material.emissiveColor;
+				}
+				changed = true;
+			}
+			if(ImGui::MenuItem("Emissive Intensity")) {
+				AddFloatNode(material, "Float", "Emissive Intensity", position);
+				if(!material.graph.nodes.empty()) {
+					material.graph.nodes.back().floatValue = material.emissiveIntensity;
+				}
+				changed = true;
+			}
 			ImGui::EndMenu();
 		}
 		if(ImGui::BeginMenu("Lighting")) {
@@ -1103,6 +1123,7 @@ namespace CalyxEngine {
 			}
 
 			Vector4 base = GetColorProperty(node, "baseColor", {1, 1, 1, 1});
+			Vector4 emissive = GetColorProperty(node, "emissiveColor", material.emissiveColor);
 			Vector4 highlight = GetColorProperty(node, "highlightColor", {1.08f, 1.06f, 1.02f, 1.0f});
 			Vector4 firstShade = GetColorProperty(node, "firstShadeColor", {0.72f, 0.76f, 0.86f, 1.0f});
 			Vector4 secondShade = GetColorProperty(node, "secondShadeColor", {0.42f, 0.46f, 0.58f, 1.0f});
@@ -1113,6 +1134,7 @@ namespace CalyxEngine {
 			float specThreshold = GetFloatProperty(node, "specularThreshold", 0.96f);
 			float specSoftness = GetFloatProperty(node, "specularSoftness", 0.02f);
 			float specIntensity = GetFloatProperty(node, "specularIntensity", 0.35f);
+			float emissiveIntensity = GetFloatProperty(node, "emissiveIntensity", material.emissiveIntensity);
 
 			auto drawColorFallback = [&](const char* pinName, const char* label, const char* property, Vector4& value) {
 				const bool linked = IsInputLinked(material, node, pinName);
@@ -1144,6 +1166,8 @@ namespace CalyxEngine {
 			};
 
 			drawColorFallback("Base Color", "Base", "baseColor", base);
+			drawColorFallback("Emissive", "Emissive", "emissiveColor", emissive);
+			drawFloatFallback("Emissive Intensity", "Emission", "emissiveIntensity", emissiveIntensity, 0.0f, 20.0f);
 			drawColorFallback("Highlight", "Highlight", "highlightColor", highlight);
 			drawColorFallback("1st Shade", "1st Shade", "firstShadeColor", firstShade);
 			drawColorFallback("2nd Shade", "2nd Shade", "secondShadeColor", secondShade);
@@ -1156,8 +1180,44 @@ namespace CalyxEngine {
 			drawFloatFallback("Spec Intensity", "Spec Intensity", "specularIntensity", specIntensity, 0.0f, 4.0f);
 		} else if(node.type == "LitMaster") {
 			ImGui::TextDisabled("Standard Lit Surface");
+			Vector4 emissive = GetColorProperty(node, "emissiveColor", material.emissiveColor);
+			float emissiveIntensity = GetFloatProperty(node, "emissiveIntensity", material.emissiveIntensity);
+			const bool emissiveLinked = IsInputLinked(material, node, "Emissive");
+			ImGui::BeginDisabled(emissiveLinked);
+			ImGui::SetNextItemWidth(188.0f);
+			if(ImGui::ColorEdit4("Emissive", &emissive.x)) {
+				SetColorProperty(node, "emissiveColor", emissive);
+				changed = true;
+			}
+			ImGui::EndDisabled();
+			const bool intensityLinked = IsInputLinked(material, node, "Emissive Intensity");
+			ImGui::BeginDisabled(intensityLinked);
+			ImGui::SetNextItemWidth(188.0f);
+			if(ImGui::SliderFloat("Emission", &emissiveIntensity, 0.0f, 20.0f)) {
+				SetFloatProperty(node, "emissiveIntensity", emissiveIntensity);
+				changed = true;
+			}
+			ImGui::EndDisabled();
 		} else if(node.type == "UnlitMaster") {
 			ImGui::TextDisabled("Unlit Surface");
+			Vector4 emissive = GetColorProperty(node, "emissiveColor", material.emissiveColor);
+			float emissiveIntensity = GetFloatProperty(node, "emissiveIntensity", material.emissiveIntensity);
+			const bool emissiveLinked = IsInputLinked(material, node, "Emissive");
+			ImGui::BeginDisabled(emissiveLinked);
+			ImGui::SetNextItemWidth(188.0f);
+			if(ImGui::ColorEdit4("Emissive", &emissive.x)) {
+				SetColorProperty(node, "emissiveColor", emissive);
+				changed = true;
+			}
+			ImGui::EndDisabled();
+			const bool intensityLinked = IsInputLinked(material, node, "Emissive Intensity");
+			ImGui::BeginDisabled(intensityLinked);
+			ImGui::SetNextItemWidth(188.0f);
+			if(ImGui::SliderFloat("Emission", &emissiveIntensity, 0.0f, 20.0f)) {
+				SetFloatProperty(node, "emissiveIntensity", emissiveIntensity);
+				changed = true;
+			}
+			ImGui::EndDisabled();
 		} else if(IsLightingNode(node.type)) {
 			if(node.type == "ToonLighting") {
 				if(ImGui::Button("Reset Toon Defaults", ImVec2(188.0f, 0.0f))) {
@@ -1414,6 +1474,8 @@ namespace CalyxEngine {
 		node.position = position;
 		SetDefaultToonMasterProperties(node);
 		node.inputs.push_back({material.graph.AllocateId(), "Base Color", NodePinKind::Input, NodeValueType::Color});
+		node.inputs.push_back({material.graph.AllocateId(), "Emissive", NodePinKind::Input, NodeValueType::Color});
+		node.inputs.push_back({material.graph.AllocateId(), "Emissive Intensity", NodePinKind::Input, NodeValueType::Float});
 		node.inputs.push_back({material.graph.AllocateId(), "Highlight", NodePinKind::Input, NodeValueType::Color});
 		node.inputs.push_back({material.graph.AllocateId(), "1st Shade", NodePinKind::Input, NodeValueType::Color});
 		node.inputs.push_back({material.graph.AllocateId(), "2nd Shade", NodePinKind::Input, NodeValueType::Color});
@@ -1424,6 +1486,8 @@ namespace CalyxEngine {
 		node.inputs.push_back({material.graph.AllocateId(), "Spec Threshold", NodePinKind::Input, NodeValueType::Float});
 		node.inputs.push_back({material.graph.AllocateId(), "Spec Softness", NodePinKind::Input, NodeValueType::Float});
 		node.inputs.push_back({material.graph.AllocateId(), "Spec Intensity", NodePinKind::Input, NodeValueType::Float});
+		node.inputs.push_back({material.graph.AllocateId(), "Normal Map", NodePinKind::Input, NodeValueType::Color});
+		node.inputs.push_back({material.graph.AllocateId(), "Normal Strength", NodePinKind::Input, NodeValueType::Float});
 		node.outputs.push_back({material.graph.AllocateId(), "Surface", NodePinKind::Output, NodeValueType::Material});
 		material.graph.nodes.push_back(std::move(node));
 	}
@@ -1437,10 +1501,16 @@ namespace CalyxEngine {
 		node.properties["lightingMode"] = 0.0f;
 		node.properties["shininess"] = material.shininess;
 		node.properties["roughness"] = material.roughness;
+		SetColorProperty(node, "emissiveColor", material.emissiveColor);
+		node.properties["emissiveIntensity"] = material.emissiveIntensity;
 		node.inputs.push_back({material.graph.AllocateId(), "Base Color", NodePinKind::Input, NodeValueType::Color});
+		node.inputs.push_back({material.graph.AllocateId(), "Emissive", NodePinKind::Input, NodeValueType::Color});
+		node.inputs.push_back({material.graph.AllocateId(), "Emissive Intensity", NodePinKind::Input, NodeValueType::Float});
 		node.inputs.push_back({material.graph.AllocateId(), "Shininess", NodePinKind::Input, NodeValueType::Float});
 		node.inputs.push_back({material.graph.AllocateId(), "Roughness", NodePinKind::Input, NodeValueType::Float});
 		node.inputs.push_back({material.graph.AllocateId(), "Reflect", NodePinKind::Input, NodeValueType::Bool});
+		node.inputs.push_back({material.graph.AllocateId(), "Normal Map", NodePinKind::Input, NodeValueType::Color});
+		node.inputs.push_back({material.graph.AllocateId(), "Normal Strength", NodePinKind::Input, NodeValueType::Float});
 		node.outputs.push_back({material.graph.AllocateId(), "Surface", NodePinKind::Output, NodeValueType::Material});
 		material.graph.nodes.push_back(std::move(node));
 	}
@@ -1451,7 +1521,11 @@ namespace CalyxEngine {
 		node.type	  = "UnlitMaster";
 		node.title	  = "Unlit Master";
 		node.position = position;
+		SetColorProperty(node, "emissiveColor", material.emissiveColor);
+		node.properties["emissiveIntensity"] = material.emissiveIntensity;
 		node.inputs.push_back({material.graph.AllocateId(), "Base Color", NodePinKind::Input, NodeValueType::Color});
+		node.inputs.push_back({material.graph.AllocateId(), "Emissive", NodePinKind::Input, NodeValueType::Color});
+		node.inputs.push_back({material.graph.AllocateId(), "Emissive Intensity", NodePinKind::Input, NodeValueType::Float});
 		node.outputs.push_back({material.graph.AllocateId(), "Surface", NodePinKind::Output, NodeValueType::Material});
 		material.graph.nodes.push_back(std::move(node));
 	}
@@ -1674,6 +1748,9 @@ namespace CalyxEngine {
 			}
 
 			ensureInput("Lighting Mode", NodeValueType::Int);
+			ensureInput("BaseColor", NodeValueType::Color);
+			ensureInput("Emissive", NodeValueType::Color);
+			ensureInput("Emissive Intensity", NodeValueType::Float);
 			return;
 		}
 		Node node;
@@ -1996,6 +2073,11 @@ namespace CalyxEngine {
 		data.toonSpecularThreshold = material.toonSpecularThreshold;
 		data.toonSpecularSoftness = material.toonSpecularSoftness;
 		data.toonSpecularIntensity = material.toonSpecularIntensity;
+		data.emissiveColor = material.emissiveColor;
+		data.emissiveIntensity = material.emissiveIntensity;
+		data.useNormalMap = material.useNormalMap ? 1 : 0;
+		data.normalMapStrength = material.normalMapStrength;
+		data.normalMapFlipY = material.normalMapFlipY ? 1 : 0;
 		data.uvTransform = material.uvTransform;
 		data.pad3 = ClockManager::GetInstance()->GetTotalTime();
 		return data;

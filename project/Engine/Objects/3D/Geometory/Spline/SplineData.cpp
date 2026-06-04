@@ -87,6 +87,46 @@ CalyxEngine::Vector3 SplineData::Tangent(float t) const {
 	return tg;
 }
 
+SplineSample SplineData::Sample(float t) const {
+	SplineSample sample;
+	sample.t		  = closed ? std::fmod(std::fmod(t, 1.0f) + 1.0f, 1.0f) : std::clamp(t, 0.0f, 1.0f);
+	sample.position  = Evaluate(sample.t);
+	sample.tangent	  = Tangent(sample.t);
+	sample.distance  = TToDistance(sample.t);
+	return sample;
+}
+
+SplineSample SplineData::SampleByDistance(float distance) const {
+	SplineSample sample;
+	sample.distance = distance;
+	sample.t		= DistanceToT(distance);
+	sample.position = Evaluate(sample.t);
+	sample.tangent	= Tangent(sample.t);
+	return sample;
+}
+
+float SplineData::TToDistance(float t) const {
+	if(tSamples_.empty() || sCumulative_.empty() || totalLength_ <= 0.0f) return 0.0f;
+
+	float tClamped = t;
+	if(closed) {
+		tClamped = std::fmod(std::fmod(tClamped, 1.0f) + 1.0f, 1.0f);
+	} else {
+		tClamped = std::clamp(tClamped, 0.0f, 1.0f);
+	}
+
+	auto it = std::lower_bound(tSamples_.begin(), tSamples_.end(), tClamped);
+	if(it == tSamples_.begin()) return sCumulative_.front();
+	if(it == tSamples_.end()) return sCumulative_.back();
+
+	size_t idx1 = static_cast<size_t>(std::distance(tSamples_.begin(), it));
+	size_t idx0 = idx1 - 1;
+	float  t0	= tSamples_[idx0];
+	float  t1	= tSamples_[idx1];
+	float  u	= (tClamped - t0) / (t1 - t0 + 1e-12f);
+	return sCumulative_[idx0] + (sCumulative_[idx1] - sCumulative_[idx0]) * u;
+}
+
 void SplineData::BuildArcTable(int samplesPerSegment) {
 	samplesPerSegment_ = std::max(4, samplesPerSegment);
 	tSamples_.clear();

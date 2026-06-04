@@ -20,6 +20,7 @@ SceneObjectLibrary::SceneObjectLibrary() {
 			EventBus::Publish(ObjectRemoved{ev.object, owner_});
 			objects_.erase(it);
 			RefreshDuplicateNameIndices();
+			Touch();
 		});
 }
 SceneObjectLibrary::~SceneObjectLibrary() = default;
@@ -84,6 +85,7 @@ void SceneObjectLibrary::AddObject(const std::shared_ptr<SceneObject>& object) {
 	// shared_ptr で登録
 	objects_[id] = object;
 	RefreshDuplicateNameIndices();
+	Touch();
 
 	// イベント発火
 	EventBus::Publish(ObjectAdded{object, owner_});
@@ -99,6 +101,7 @@ std::string SceneObjectLibrary::RenameObject(const std::shared_ptr<SceneObject>&
 	const std::string finalName = MakeUniqueName(requestedName, object.get());
 	object->SetName(finalName, object->GetObjectType());
 	RefreshDuplicateNameIndices();
+	Touch();
 	return finalName;
 }
 
@@ -144,6 +147,7 @@ bool SceneObjectLibrary::RemoveObject(const std::shared_ptr<SceneObject>& object
 	// 最後にライブラリから除外
 	objects_.erase(id);
 	RefreshDuplicateNameIndices();
+	Touch();
 	std::cout << "[AFTER ERASE]"
 			  << " use_count=" << object.use_count()
 			  << std::endl;
@@ -174,6 +178,7 @@ bool SceneObjectLibrary::RemoveObject(Guid id) {
 
 	objects_.erase(it);
 	RefreshDuplicateNameIndices();
+	Touch();
 	return true;
 }
 
@@ -192,6 +197,7 @@ void SceneObjectLibrary::Clear() {
 
 	objects_.clear();
 	RefreshDuplicateNameIndices();
+	Touch();
 }
 
 //////////////////////////////////////////////////////////////////////////////////

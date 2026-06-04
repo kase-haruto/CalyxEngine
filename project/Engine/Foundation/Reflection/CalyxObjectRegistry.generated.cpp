@@ -20,7 +20,7 @@ namespace CalyxEngine {
 			SceneObjectClassDesc desc;
 			desc.typeName = "BaseGameObject";
 			desc.displayName = "Mesh Object";
-			desc.objectType = ObjectType::Actor;
+			desc.objectType = ObjectType::GameObject;
 			desc.iconPath = "UI/Tool/cube.dds";
 			desc.placeable = true;
 			desc.prefabEditable = false;
@@ -46,7 +46,7 @@ namespace CalyxEngine {
 			SceneObjectClassDesc desc;
 			desc.typeName = "DemoPlayer";
 			desc.displayName = "Demo Player";
-			desc.objectType = ObjectType::Actor;
+			desc.objectType = ObjectType::GameObject;
 			desc.iconPath = "UI/Tool/cube.dds";
 			desc.placeable = true;
 			desc.prefabEditable = false;
@@ -59,7 +59,7 @@ namespace CalyxEngine {
 			SceneObjectClassDesc desc;
 			desc.typeName = "SplineDeformObject";
 			desc.displayName = "Spline Wall Deform";
-			desc.objectType = ObjectType::Actor;
+			desc.objectType = ObjectType::GameObject;
 			desc.iconPath = "UI/Tool/cylinder.dds";
 			desc.placeable = true;
 			desc.prefabEditable = false;
@@ -72,7 +72,7 @@ namespace CalyxEngine {
 			SceneObjectClassDesc desc;
 			desc.typeName = "Weapon";
 			desc.displayName = "Weapon";
-			desc.objectType = ObjectType::Actor;
+			desc.objectType = ObjectType::GameObject;
 			desc.iconPath = "UI/Tool/event.png";
 			desc.placeable = true;
 			desc.prefabEditable = false;

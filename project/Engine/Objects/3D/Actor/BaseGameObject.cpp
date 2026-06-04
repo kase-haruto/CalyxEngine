@@ -5,8 +5,6 @@
 #include <Engine/Application/UI/Panels/AssetPanel.h>
 #include <Engine/Assets/Database/AssetDatabase.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
-#include <Engine/Objects/3D/Actor/Library/SceneObjectLibrary.h>
-#include <Engine/Scene/Context/SceneContext.h>
 #include <Engine/foundation/Utility/FileSystem/ConfigPathResolver/ConfigPathResolver.h>
 #include <Engine/objects/Collider/BoxCollider.h>
 #include <Engine/objects/Collider/SphereCollider.h>
@@ -16,19 +14,6 @@
 #include "externals/imgui/imgui.h"
 #include "externals/nlohmann/json.hpp"
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
-
-#include <algorithm>
-#include <unordered_map>
-
-namespace {
-	struct BoneAttachUiState {
-		Guid ownerGuid {};
-		int boneIndex = 0;
-		bool inheritScale = false;
-	};
-
-	std::unordered_map<Guid, BoneAttachUiState> gBoneAttachUiStates;
-}
 
 BaseGameObject::BaseGameObject(const std::string&		  modelName,
 							   std::optional<std::string> objectName) {
@@ -67,8 +52,8 @@ BaseGameObject::BaseGameObject(const std::string&		  modelName,
 }
 
 BaseGameObject::BaseGameObject() {
-	objectModelType_ = ObjectModelType::ModelType_Unknown; // まだ未定
-	SetName("GameObject");								   // 仮の名前
+	objectModelType_ = ObjectModelType::ModelType_Unknown;	// まだ未定
+	SetName("GameObject");								// 仮の名前
 	worldTransform_.Update();
 
 	config_.SetOnApplied([this](const BaseGameObjectConfig&) { this->ApplyConfig(); });
@@ -100,7 +85,7 @@ void BaseGameObject::AlwaysUpdate(float dt) {
 		}
 	}
 	if(model_) {
-		model_->SetIsDrawEnable(isDrawEnable_);
+		model_->SetIsDrawEnable(IsDrawEnable());
 	}
 }
 
@@ -176,7 +161,6 @@ void BaseGameObject::ShowGui() {
 
 		if(model_) {
 			model_->ShowImGui(config_.GetConfig().modelConfig);
-			model_->ShowImGuiInterface();
 		}
 		GuiCmd::EndSection();
 	}
@@ -191,102 +175,20 @@ void BaseGameObject::ShowGui() {
 
 	// --- 描画設定 ---
 	if(GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::Object)) {
-		if(ImGui::TreeNodeEx("Billboard Mode", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
+		if(ImGui::TreeNodeEx("Draw Config", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+			GuiCmd::CheckBox("Camera Dither", drawConfig_.cameraDitherEnabled);
+			GuiCmd::CheckBox("Cast Shadow", drawConfig_.castShadow);
+			GuiCmd::CheckBox("Enable Outline", drawConfig_.outline.enabled);
+			GuiCmd::DragFloat("Outline Thickness", drawConfig_.outline.thickness, 0.001f, 0.0f, 1.0f);
+			ImGui::ColorEdit4("Outline Color", &drawConfig_.outline.color.x);
+			ImGui::TreePop();
+		}
+		if(ImGui::TreeNodeEx("Billboard Mode", ImGuiTreeNodeFlags_SpanAvailWidth)) {
 			int			mode	= static_cast<int>(billboardMode_);
 			const char* items[] = {"None", "Full", "AxisY"};
 			if(GuiCmd::Combo("Billboard Mode", mode, items, 3)) {
 				billboardMode_ = static_cast<BillboardMode>(mode);
 			}
-			ImGui::TreePop();
-		}
-		if(ImGui::TreeNodeEx("Outline", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
-			GuiCmd::CheckBox("Enable Outline", outlineSettings_.enabled);
-			GuiCmd::DragFloat("Outline Thickness", outlineSettings_.thickness, 0.001f, 0.0f, 1.0f);
-			ImGui::ColorEdit4("Outline Color", &outlineSettings_.color.x);
-			ImGui::TreePop();
-		}
-		if(ImGui::TreeNodeEx("Bone Attach", ImGuiTreeNodeFlags_SpanAvailWidth)) {
-			auto* ctx = SceneContext::Current();
-			std::vector<BaseGameObject*> owners;
-			if(ctx && ctx->GetObjectLibrary()) {
-				for(auto* obj : ctx->GetObjectLibrary()->GetAllObjectsRaw()) {
-					auto* candidate = dynamic_cast<BaseGameObject*>(obj);
-					if(!candidate || candidate == this) continue;
-					if(candidate->AnimationModel()) {
-						owners.push_back(candidate);
-					}
-				}
-			}
-
-			auto& state = gBoneAttachUiStates[id_];
-			if((!state.ownerGuid.isValid() || std::none_of(owners.begin(), owners.end(), [&](BaseGameObject* owner) {
-				   return owner && owner->GetGuid() == state.ownerGuid;
-			   })) &&
-			   !owners.empty()) {
-				state.ownerGuid = owners.front()->GetGuid();
-				state.boneIndex = 0;
-			}
-
-			BaseGameObject* selectedOwner = nullptr;
-			for(auto* owner : owners) {
-				if(owner && owner->GetGuid() == state.ownerGuid) {
-					selectedOwner = owner;
-					break;
-				}
-			}
-
-			const std::string ownerPreview = selectedOwner ? selectedOwner->GetDisplayName() : "(none)";
-			const char* ownerPreviewText = ownerPreview.c_str();
-			if(ImGui::BeginCombo("Parent Object", ownerPreviewText)) {
-				for(auto* owner : owners) {
-					if(!owner) continue;
-					const bool selected = owner->GetGuid() == state.ownerGuid;
-					if(ImGui::Selectable(owner->GetDisplayName().c_str(), selected)) {
-						state.ownerGuid = owner->GetGuid();
-						state.boneIndex = 0;
-					}
-					if(selected) ImGui::SetItemDefaultFocus();
-				}
-				ImGui::EndCombo();
-			}
-
-			std::vector<std::string> boneNames;
-			if(selectedOwner && selectedOwner->AnimationModel()) {
-				boneNames = selectedOwner->AnimationModel()->GetJointNames();
-			}
-			if(state.boneIndex < 0 || state.boneIndex >= static_cast<int>(boneNames.size())) {
-				state.boneIndex = 0;
-			}
-
-			const char* bonePreview = boneNames.empty() ? "(none)" : boneNames[state.boneIndex].c_str();
-			if(ImGui::BeginCombo("Bone", bonePreview)) {
-				for(int i = 0; i < static_cast<int>(boneNames.size()); ++i) {
-					const bool selected = i == state.boneIndex;
-					if(ImGui::Selectable(boneNames[i].c_str(), selected)) {
-						state.boneIndex = i;
-					}
-					if(selected) ImGui::SetItemDefaultFocus();
-				}
-				ImGui::EndCombo();
-			}
-
-			ImGui::Checkbox("Inherit Scale", &state.inheritScale);
-
-			const bool canAttach = selectedOwner && !boneNames.empty();
-			if(!canAttach) ImGui::BeginDisabled();
-			if(ImGui::Button("Attach")) {
-				selectedOwner->SetBoneParent(*this, boneNames[state.boneIndex], state.inheritScale);
-			}
-			if(!canAttach) ImGui::EndDisabled();
-
-			ImGui::SameLine();
-			if(ImGui::Button("Detach")) {
-				for(auto* owner : owners) {
-					if(owner) owner->ClearBoneParent(worldTransform_);
-				}
-				worldTransform_.parent = nullptr;
-			}
-
 			ImGui::TreePop();
 		}
 		GuiCmd::EndSection();
@@ -319,9 +221,10 @@ void BaseGameObject::ApplyConfig() {
 	if(collider_)
 		collider_->ApplyConfig(cfg.colliderConfig);
 	worldTransform_.ApplyConfig(cfg.transform);
-	outlineSettings_.enabled	 = cfg.outlineEnabled;
-	outlineSettings_.thickness = cfg.outlineThickness;
-	outlineSettings_.color	 = cfg.outlineColor;
+	drawConfig_.cameraDitherEnabled = cfg.cameraDitherEnabled;
+	drawConfig_.outline.enabled	 = cfg.outlineEnabled;
+	drawConfig_.outline.thickness = cfg.outlineThickness;
+	drawConfig_.outline.color	 = cfg.outlineColor;
 	id_		  = cfg.guid;
 	parentId_ = cfg.parentGuid;
 	name_	  = cfg.name;
@@ -339,18 +242,10 @@ void BaseGameObject::ExtractConfig() {
 	cfg.name	   = name_;
 	cfg.guid	   = id_;
 	cfg.parentGuid = parentId_;
-	cfg.outlineEnabled	 = outlineSettings_.enabled;
-	cfg.outlineThickness = outlineSettings_.thickness;
-	cfg.outlineColor	 = outlineSettings_.color;
-	cfg.boneParentBindings.clear();
-	for(const auto& binding : boneParentBindings_) {
-		if(!binding.targetGuid.isValid() || binding.boneName.empty()) continue;
-		cfg.boneParentBindings.push_back(
-			BoneParentBindingConfig{
-				binding.targetGuid,
-				binding.boneName,
-				binding.inheritScale});
-	}
+	cfg.cameraDitherEnabled = drawConfig_.cameraDitherEnabled;
+	cfg.outlineEnabled	 = drawConfig_.outline.enabled;
+	cfg.outlineThickness = drawConfig_.outline.thickness;
+	cfg.outlineColor	 = drawConfig_.outline.color;
 }
 
 void BaseGameObject::ApplyConfigFromJson(const nlohmann::json& j) {
@@ -385,7 +280,7 @@ void BaseGameObject::ExtractConfigToJson(nlohmann::json& j) const {
 //                   getter/setter
 //===================================================================*/
 
-void BaseGameObject::SetName(const std::string& name) { SceneObject::SetName(name, ObjectType::Actor); }
+void BaseGameObject::SetName(const std::string& name) { SceneObject::SetName(name, ObjectType::GameObject); }
 
 void BaseGameObject::SetTranslate(const CalyxEngine::Vector3& pos) {
 	if(model_) {
@@ -411,7 +306,9 @@ void BaseGameObject::SetScale(const CalyxEngine::Vector3& scale) {
 
 void BaseGameObject::SetDrawEnable(bool isDrawEnable) {
 	SceneObject::SetDrawEnable(isDrawEnable);
-	model_->SetIsDrawEnable(isDrawEnable);
+	if(model_) {
+		model_->SetIsDrawEnable(isDrawEnable);
+	}
 }
 
 const CalyxEngine::Vector3 BaseGameObject::GetCenterPos() const {
@@ -475,77 +372,6 @@ bool BaseGameObject::SetModelFromFileName(const std::string& modelName) {
 	return true;
 }
 
-void BaseGameObject::BoneParentTransform::SetWorldMatrix(const CalyxEngine::Matrix4x4& world) {
-	matrix.world				 = world;
-	matrix.WorldInverseTranspose = CalyxEngine::Matrix4x4::Transpose(CalyxEngine::Matrix4x4::Inverse(world));
-	++revision_;
-}
-
-void BaseGameObject::SetBoneParent(BaseGameObject& target, const std::string& boneName, bool inheritScale) {
-	ClearBoneParent(target.GetWorldTransform());
-
-	BoneParentBinding binding;
-	binding.target			= &target.GetWorldTransform();
-	binding.targetGuid		= target.GetGuid();
-	binding.boneName		= boneName;
-	binding.inheritScale	= inheritScale;
-	binding.parentTransform = std::make_unique<BoneParentTransform>();
-
-	target.GetWorldTransform().parent	   = binding.parentTransform.get();
-	target.GetWorldTransform().inheritScale = inheritScale;
-
-	boneParentBindings_.push_back(std::move(binding));
-	UpdateBoneParents();
-}
-
-void BaseGameObject::SetBoneParent(WorldTransform& target, const std::string& boneName, bool inheritScale) {
-	ClearBoneParent(target);
-
-	BoneParentBinding binding;
-	binding.target			= &target;
-	binding.boneName		= boneName;
-	binding.inheritScale	= inheritScale;
-	binding.parentTransform = std::make_unique<BoneParentTransform>();
-
-	target.parent		 = binding.parentTransform.get();
-	target.inheritScale = inheritScale;
-
-	boneParentBindings_.push_back(std::move(binding));
-	UpdateBoneParents();
-}
-
-void BaseGameObject::ClearBoneParent(WorldTransform& target) {
-	boneParentBindings_.erase(
-		std::remove_if(
-			boneParentBindings_.begin(),
-			boneParentBindings_.end(),
-			[&target](const BoneParentBinding& binding) {
-				if(binding.target == &target) {
-					target.parent = nullptr;
-					return true;
-				}
-				return false;
-			}),
-		boneParentBindings_.end());
-}
-
-void BaseGameObject::UpdateBoneParents() {
-	auto* animModel = AnimationModel();
-	if(!animModel) return;
-
-	for(auto& binding : boneParentBindings_) {
-		if(!binding.target || !binding.parentTransform) continue;
-
-		auto jointMatrix = animModel->GetJointMatrix(binding.boneName);
-		if(!jointMatrix.has_value()) continue;
-
-		binding.parentTransform->SetWorldMatrix(jointMatrix.value() * worldTransform_.matrix.world);
-		binding.target->parent		 = binding.parentTransform.get();
-		binding.target->inheritScale = binding.inheritScale;
-		binding.target->Update();
-	}
-}
-
 Model* BaseGameObject::GetStaticModel() {
 	return (objectModelType_ == ObjectModelType::ModelType_Static)
 			   ? static_cast<Model*>(model_.get())
@@ -598,6 +424,59 @@ AABB BaseGameObject::GetWorldAABB() const {
 	}
 
 	return SceneObject::FallbackAABBFromTransform();
+}
+
+void BaseGameObject::BoneParentTransform::SetWorldMatrix(const CalyxEngine::Matrix4x4& world) {
+	matrix.world				 = world;
+	matrix.WorldInverseTranspose = CalyxEngine::Matrix4x4::Transpose(CalyxEngine::Matrix4x4::Inverse(world));
+	++revision_;
+}
+
+void BaseGameObject::SetBoneParent(WorldTransform& target, const std::string& boneName, bool inheritScale) {
+	ClearBoneParent(target);
+
+	BoneParentBinding binding;
+	binding.target			= &target;
+	binding.boneName		= boneName;
+	binding.inheritScale	= inheritScale;
+	binding.parentTransform = std::make_unique<BoneParentTransform>();
+
+	target.parent		 = binding.parentTransform.get();
+	target.inheritScale = inheritScale;
+
+	boneParentBindings_.push_back(std::move(binding));
+	UpdateBoneParents();
+}
+
+void BaseGameObject::ClearBoneParent(WorldTransform& target) {
+	boneParentBindings_.erase(
+		std::remove_if(
+			boneParentBindings_.begin(),
+			boneParentBindings_.end(),
+			[&target](const BoneParentBinding& binding) {
+				if(binding.target == &target) {
+					target.parent = nullptr;
+					return true;
+				}
+				return false;
+			}),
+		boneParentBindings_.end());
+}
+
+void BaseGameObject::UpdateBoneParents() {
+	auto* animModel = AnimationModel();
+	if(!animModel) return;
+
+	for(auto& binding : boneParentBindings_) {
+		if(!binding.target || !binding.parentTransform) continue;
+
+		auto jointMatrix = animModel->GetJointMatrix(binding.boneName);
+		if(!jointMatrix.has_value()) continue;
+
+		binding.parentTransform->SetWorldMatrix(jointMatrix.value() * worldTransform_.matrix.world);
+		binding.target->parent		 = binding.parentTransform.get();
+		binding.target->inheritScale = binding.inheritScale;
+	}
 }
 
 bool BaseGameObject::Save() const {

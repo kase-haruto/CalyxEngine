@@ -189,7 +189,7 @@ namespace CalyxEngine {
 
 	bool TransformKeyframeAnimation2d::ShowGui(WorldTransform& target) {
 		bool changed = false;
-		if(ImGui::TreeNodeEx("2D Transform Animation", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
+		if(ImGui::TreeNodeEx("2D Transform Animation", ImGuiTreeNodeFlags_SpanAvailWidth)) {
 			changed |= ImGui::Checkbox("Auto Play", &autoPlay_);
 			ImGui::SameLine();
 			changed |= ImGui::Checkbox("Loop", &loop_);

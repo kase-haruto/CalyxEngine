@@ -7,6 +7,7 @@
 // std
 #include <algorithm>
 #include <memory>
+#include <cstdint>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -129,6 +130,7 @@ public:
 	 * \return オブジェクトマップ
 	 */
 	const std::unordered_map<Guid, std::shared_ptr<SceneObject>>& GetObjects() const { return objects_; }
+	uint64_t GetRevision() const { return revision_; }
 
 private:
     //====================================================================*//
@@ -138,10 +140,12 @@ private:
 	SceneContext* owner_ = nullptr;
 	EventBus::Connection connDestroy_;
 	bool suppressDestroySync_ = false;
+	uint64_t revision_ = 0;
 
     static uint32_t nextPickingID_;
 
 	void RefreshDuplicateNameIndices();
+	void Touch() { ++revision_; }
 };
 
 // =====================================================

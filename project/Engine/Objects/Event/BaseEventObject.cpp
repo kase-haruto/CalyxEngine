@@ -34,7 +34,7 @@ BaseEventObject::BaseEventObject() {
 	model_->SetBlendMode(BlendMode::ALPHA);
 	model_->SetColor(CalyxEngine::Vector4(0.0f, 1.0f, 0.0f, 0.5f));
 
-	isCastShadow_ = false; // 影を落とさない
+	SetCastShadow(false); // 影を落とさない
 
 	baseConfig_.SetOnApplied([this](const EventConfig&) {
 		this->ApplyConfig();
@@ -63,7 +63,7 @@ BaseEventObject::BaseEventObject(const std::string& name) {
 	model_->SetBlendMode(BlendMode::ALPHA);
 	model_->SetColor(CalyxEngine::Vector4(0.0f, 1.0f, 0.0f, 0.5f));
 
-	isCastShadow_ = false; // 影を落とさない
+	SetCastShadow(false); // 影を落とさない
 
 	baseConfig_.SetOnApplied([this](const EventConfig&) {
 		this->ApplyConfig();
@@ -85,9 +85,9 @@ void BaseEventObject::Initialize() {
 
 	// debug/developのみ描画
 #if defined(_DEBUG) || defined(DEVELOP)
-	isDrawEnable_ = true;
+	SetDrawEnable(true);
 #else
-	isDrawEnable_ = false;
+	SetDrawEnable(false);
 #endif
 
 	//イベントオブジェクトはアウトラインをかけない
@@ -103,7 +103,7 @@ void BaseEventObject::AlwaysUpdate([[maybe_unused]] float dt) {
 
 	if(model_) {
 		model_->Update(dt);
-		model_->SetIsDrawEnable(isDrawEnable_);
+		model_->SetIsDrawEnable(IsDrawEnable());
 	}
 
 	CalyxEngine::Vector3	  worldPos = worldTransform_.GetWorldPosition();

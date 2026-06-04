@@ -26,6 +26,7 @@ public:
 	///=========================================
 	/// device/commandListの取得
 	///=========================================
+	const CalyxEngine::DxCore*					  GetDxCore()const{return pDxCore_;}
 	ComPtr<ID3D12Device>			  GetDevice() const;
 	ID3D12Device5*					  GetDevice5() const;
 	ComPtr<ID3D12GraphicsCommandList> GetCommandList() const;

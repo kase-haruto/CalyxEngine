@@ -1,4 +1,5 @@
 #include "AssetManager.h"
+#include <Engine/Foundation/Audio/Audio.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		インスタンス取得
@@ -21,6 +22,7 @@ void CalyxEngine::AssetManager::Initialize(ImGuiManager* imgui) {
 	textureManager_->StartUpLoad();
 
 	dataAssetManager_ = std::make_unique<DataAssetManager>();
+	Audio::Initialize();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -30,4 +32,5 @@ void CalyxEngine::AssetManager::Finalize() {
 	modelManager_.reset();
 	textureManager_.reset();
 	dataAssetManager_.reset();
+	Audio::Finalize();
 }

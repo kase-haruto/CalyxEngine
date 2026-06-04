@@ -43,6 +43,7 @@ DirectionalLight::DirectionalLight(const std::string& name) {
 }
 
 DirectionalLight::DirectionalLight() {
+	SceneObject::SetName("DirectionalLight", ObjectType::Light);
 	ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
 	constantBuffer_.Initialize(device);
 	shadowParamCB_.Initialize(device);

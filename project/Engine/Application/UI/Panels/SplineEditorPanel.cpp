@@ -1,4 +1,5 @@
 #include "SplineEditorPanel.h"
+#include <externals/imgui/ImGuizmo.h>
 #include <externals/imgui/ImGuiFileDialog.h>
 #include <externals/imgui/imgui.h>
 
@@ -230,19 +231,12 @@ namespace CalyxEngine {
 
 		// ---- 入力/状態 ----
 		CalyxFoundation::Input* in			= CalyxFoundation::Input::GetInstance();
-		const bool				gizmoOn		= gizmoEnabled_ && (manipulator_ != nullptr);
 		const bool				wantCapture = ImGui::GetIO().WantCaptureMouse; // ImGuiがマウスを使用中か
 
-		// gizmoが無効化された瞬間にもターゲットを離す
-		if(!gizmoOn && manipulator_) {
-			manipulator_->SetTarget(nullptr);
-		}
-
 		// ---- 選択/解除操作 ----
-		if(gizmoOn) {
+		if(gizmoEnabled_) {
 			if(in->TriggerMouseButton(CalyxFoundation::MouseButton::Right)) {
 				SetSelectedIndex(-1);
-				manipulator_->SetTarget(nullptr);
 			}
 
 			// ImGuiがマウスを掴んでいない時だけピッキング
@@ -255,31 +249,7 @@ namespace CalyxEngine {
 				} else {
 					// 空所クリックで解除
 					SetSelectedIndex(-1);
-					manipulator_->SetTarget(nullptr);
 				}
-			}
-		}
-
-		// ---- Manipulator で選択点を移動（選択があるときだけターゲットを結び付ける）----
-		if(gizmoOn && manipulator_ && selectedPoint_ >= 0 && selectedPoint_ < (int)data_->points.size()) {
-			CalyxEngine::Vector3& pos = data_->points[selectedPoint_].pos;
-			const CalyxEngine::Vector3 before = pos;
-
-			gizmoTf_.translation = pos;
-			gizmoTf_.scale		 = {1, 1, 1};
-			gizmoTf_.rotation	 = CalyxEngine::Quaternion::MakeIdentity();
-			gizmoTf_.Update();
-
-			manipulator_->SetTarget(&gizmoTf_);
-
-			// 位置の反映
-			pos = gizmoTf_.translation;
-			if(pos != before) {
-				data_->MarkDirty();
-			}
-		} else {
-			if(manipulator_) {
-				manipulator_->SetTarget(nullptr);
 			}
 		}
 
@@ -303,12 +273,47 @@ namespace CalyxEngine {
 		}
 	}
 
+	void SplineEditorPanel::DrawSelectedPointGizmo() {
+		if(!IsShow() || !gizmoEnabled_) return;
+		if(!data_ || selectedPoint_ < 0 || selectedPoint_ >= (int)data_->points.size()) return;
+
+		auto* cam = CameraManager::GetDebug();
+		if(!cam) return;
+
+		CalyxEngine::Vector3& pos = data_->points[selectedPoint_].pos;
+		const CalyxEngine::Vector3 before = pos;
+
+		gizmoTf_.translation = pos;
+		gizmoTf_.scale		 = {1.0f, 1.0f, 1.0f};
+		gizmoTf_.rotation	 = CalyxEngine::Quaternion::MakeIdentity();
+		gizmoTf_.Update();
+
+		float view[16], proj[16], world[16];
+		CalyxEngine::Matrix4x4::Transpose(cam->GetViewMatrix()).CopyToArray(view);
+		CalyxEngine::Matrix4x4::Transpose(cam->GetProjectionMatrix()).CopyToArray(proj);
+		CalyxEngine::Matrix4x4::Transpose(gizmoTf_.matrix.world).CopyToArray(world);
+
+		ImGuizmo::Manipulate(view, proj, ImGuizmo::TRANSLATE, ImGuizmo::WORLD, world, nullptr, nullptr, nullptr, nullptr);
+		if(ImGuizmo::IsUsing()) {
+			float editedPos[3], editedRot[3], editedScale[3];
+			ImGuizmo::DecomposeMatrixToComponents(world, editedPos, editedRot, editedScale);
+			pos = {editedPos[0], editedPos[1], editedPos[2]};
+			if(pos != before) {
+				data_->MarkDirty();
+			}
+		}
+	}
+
+	void SplineEditorPanel::RenderOverlay(const ImVec2& basePos) {
+		(void)basePos;
+		DrawSelectedPointGizmo();
+	}
+
 	void SplineEditorPanel::Render() {
 		if(!IsShow()) return;
 
 		static bool initialized = false;
 		if(!initialized) {
-			manipulator_		 = std::make_unique<Manipulator>();
 			gizmoTf_.translation = {0, 0, 0};
 			gizmoTf_.scale		 = {1, 1, 1};
 			gizmoTf_.rotation	 = CalyxEngine::Quaternion::MakeIdentity();

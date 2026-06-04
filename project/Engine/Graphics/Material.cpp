@@ -25,6 +25,11 @@ void Material::ApplyConfig(const MaterialConfig& config) {
     toonSpecularThreshold = config.toonSpecularThreshold;
     toonSpecularSoftness  = config.toonSpecularSoftness;
     toonSpecularIntensity = config.toonSpecularIntensity;
+    emissiveColor         = config.emissiveColor;
+    emissiveIntensity     = config.emissiveIntensity;
+	useNormalMap          = config.useNormalMap ? 1 : 0;
+	normalMapStrength     = config.normalMapStrength;
+	normalMapFlipY        = config.normalMapFlipY ? 1 : 0;
 
 }
 
@@ -51,6 +56,11 @@ MaterialConfig Material::ExtractConfig() const {
     config.toonSpecularThreshold = toonSpecularThreshold;
     config.toonSpecularSoftness  = toonSpecularSoftness;
     config.toonSpecularIntensity = toonSpecularIntensity;
+    config.emissiveColor         = emissiveColor;
+    config.emissiveIntensity     = emissiveIntensity;
+	config.useNormalMap          = useNormalMap != 0;
+	config.normalMapStrength     = normalMapStrength;
+	config.normalMapFlipY        = normalMapFlipY != 0;
 	return config;
 }
 
@@ -89,6 +99,21 @@ void Material::ShowImGui() {
     ImGui::SeparatorText("Color");
     GuiCmd::ColorEdit4("color", color);
 
+    ImGui::SeparatorText("Emissive");
+    GuiCmd::ColorEdit4("emissive color", emissiveColor);
+    GuiCmd::SliderFloat("emissive intensity", emissiveIntensity, 0.0f, 20.0f);
+
+	ImGui::SeparatorText("Normal Map");
+	bool normalMapEnabled = useNormalMap != 0;
+	if(GuiCmd::CheckBox("use normal map", normalMapEnabled)) {
+		useNormalMap = normalMapEnabled ? 1 : 0;
+	}
+	GuiCmd::SliderFloat("normal map strength", normalMapStrength, 0.0f, 2.0f);
+	bool flipY = normalMapFlipY != 0;
+	if(GuiCmd::CheckBox("flip normal map Y", flipY)) {
+		normalMapFlipY = flipY ? 1 : 0;
+	}
+
     if (lightingMode == 2) {
         ImGui::SeparatorText("Toon");
         GuiCmd::ColorEdit4("highlight", toonHighlightColor);
@@ -120,12 +145,25 @@ void Material::ShowImGui(MaterialConfig& config) {
     static int currentLightingMode_ = 0;
 
     // color
-    if (ImGui::TreeNodeEx("Color", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (ImGui::TreeNodeEx("Color", ImGuiTreeNodeFlags_SpanAvailWidth)) {
         GuiCmd::ColorEdit4("color", config.color);
         ImGui::TreePop();
     }
 
-    if (config.enableLighting == 2 && ImGui::TreeNodeEx("Toon", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (ImGui::TreeNodeEx("Emissive", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+        GuiCmd::ColorEdit4("emissive color", config.emissiveColor);
+        GuiCmd::SliderFloat("emissive intensity", config.emissiveIntensity, 0.0f, 20.0f);
+        ImGui::TreePop();
+    }
+
+	if(ImGui::TreeNodeEx("Normal Map", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+		GuiCmd::CheckBox("use normal map", config.useNormalMap);
+		GuiCmd::SliderFloat("normal map strength", config.normalMapStrength, 0.0f, 2.0f);
+		GuiCmd::CheckBox("flip normal map Y", config.normalMapFlipY);
+		ImGui::TreePop();
+	}
+
+    if (config.enableLighting == 2 && ImGui::TreeNodeEx("Toon", ImGuiTreeNodeFlags_SpanAvailWidth)) {
         GuiCmd::ColorEdit4("highlight", config.toonHighlightColor);
         GuiCmd::ColorEdit4("base ramp", config.toonBaseColor);
         GuiCmd::ColorEdit4("mid shadow", config.toonMidShadowColor);
@@ -141,7 +179,7 @@ void Material::ShowImGui(MaterialConfig& config) {
     }
 
     // lighting
-    if (ImGui::TreeNodeEx("Lighting", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (ImGui::TreeNodeEx("Lighting", ImGuiTreeNodeFlags_SpanAvailWidth)) {
         GuiCmd::DragFloat("shininess", config.shininess, 0.01f);
 
         static constexpr const char* lightingModes[] = {
@@ -172,7 +210,7 @@ void Material::ShowImGui(MaterialConfig& config) {
     }
 
     // 環境マップ
-    if (ImGui::TreeNodeEx("EnviromentCoefficient", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (ImGui::TreeNodeEx("EnviromentCoefficient", ImGuiTreeNodeFlags_SpanAvailWidth)) {
         GuiCmd::CheckBox("isReflect", config.isReflect);
         if (config.isReflect) {
             GuiCmd::SliderFloat("enviromentCoefficient", config.enviromentCoefficient, 0.0f, 1.0f);

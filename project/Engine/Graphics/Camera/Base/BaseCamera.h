@@ -42,6 +42,7 @@ public:
 					PipelineType                                      pipelineType);
 	void SetCommand(ID3D12GraphicsCommandList* command, PipelineType pipelineType);
 	void SetRootCommand(ID3D12GraphicsCommandList* command, uint32_t rootIndex) const;
+	void SetCameraDitherEnabled(bool enabled);
 
 	void StartShake(float duration,float intensity) override; // カメラシェイク開始
 

@@ -9,7 +9,10 @@
 #include <Engine/Application/Settings/EngineSettings.h>
 #include <Engine/Application/System/Environment.h>
 #include <Engine/Application/UI/EngineUI/Manipulator.h>
+#include <Engine/Application/UI/Panels/SplineEditorPanel.h>
 #include <Engine/Assets/Database/AssetDatabase.h>
+#include <Engine/Assets/Manager/AssetManager.h>
+#include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Assets/System/AssetDragPayload.h>
 #include <Engine/Assets/System/AssetType.h>
 #include <Engine/Application/UI/Panels/PlaceToolPanel.h>
@@ -22,6 +25,7 @@
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
 #include <Engine/Objects/3D/Actor/Library/SceneObjectLibrary.h>
+#include <Engine/Objects/3D/Actor/SceneObject.h>
 #include <Engine/Physics/Ray/RayDetail.h>
 #include <Engine/Physics/Ray/Raycastor.h>
 #include <Engine/Scene/Context/SceneContext.h>
@@ -105,6 +109,87 @@ namespace {
             SnapAxis(pos.y, settings.snapTranslate[1]),
             SnapAxis(pos.z, settings.snapTranslate[2]),
         };
+    }
+
+    bool ProjectWorldToViewport(
+        const CalyxEngine::Vector3& worldPos,
+        BaseCamera* camera,
+        const CalyxEngine::Vector2& size,
+        CalyxEngine::Vector2& outLocal) {
+        if(!camera || size.x <= 0.0f || size.y <= 0.0f) return false;
+
+        const CalyxEngine::Vector4 clip =
+            CalyxEngine::Vector4::Transform(CalyxEngine::Vector4(worldPos, 1.0f), camera->GetViewProjectionMatrix());
+        if(std::fabs(clip.w) <= 0.0001f) return false;
+
+        const float ndcX = clip.x / clip.w;
+        const float ndcY = clip.y / clip.w;
+        const float ndcZ = clip.z / clip.w;
+        if(ndcZ < 0.0f || ndcZ > 1.0f) return false;
+
+        outLocal.x = (ndcX * 0.5f + 0.5f) * size.x;
+        outLocal.y = (0.5f - ndcY * 0.5f) * size.y;
+        return outLocal.x >= 0.0f && outLocal.y >= 0.0f && outLocal.x <= size.x && outLocal.y <= size.y;
+    }
+
+    bool IsEditorIconObject(const SceneObject* object) {
+        if(!object || object->IsTransient() || !object->IsPickable()) return false;
+        const ObjectType type = object->GetObjectType();
+        return type == ObjectType::Camera || type == ObjectType::Light;
+    }
+
+    bool IsSelectedObject(SceneContext* ctx, SceneObject* object) {
+        if(!ctx || !object) return false;
+        const auto& selected = ctx->GetDebugSelectedObjects();
+        return std::find(selected.begin(), selected.end(), object) != selected.end();
+    }
+
+    void DrawEditorObjectIcons(
+        ImDrawList* drawList,
+        const ImVec2& imagePos,
+        const CalyxEngine::Vector2& imageSize,
+        BaseCamera* camera) {
+        SceneContext* ctx = SceneContext::Current();
+        if(!drawList || !ctx || !ctx->GetObjectLibrary() || !camera) return;
+
+        auto* textureManager = AssetManager::GetInstance()->GetTextureManager();
+        const D3D12_GPU_DESCRIPTOR_HANDLE cameraIcon = textureManager->LoadTexture("UI/Tool/Hierarchy/camIcon.dds");
+        const D3D12_GPU_DESCRIPTOR_HANDLE lightIcon = textureManager->LoadTexture("UI/Tool/Hierarchy/lightIcon.dds");
+        constexpr float iconSize = 24.0f;
+        constexpr float half = iconSize * 0.5f;
+
+        for(auto& object : ctx->GetObjectLibrary()->GetAllObjectsShared()) {
+            if(!IsEditorIconObject(object.get())) continue;
+
+            CalyxEngine::Vector2 local;
+            if(!ProjectWorldToViewport(object->GetWorldTransform().GetWorldPosition(), camera, imageSize, local)) continue;
+
+            const ImVec2 center(imagePos.x + local.x, imagePos.y + local.y);
+            const ImVec2 min(center.x - half, center.y - half);
+            const ImVec2 max(center.x + half, center.y + half);
+            const bool selected = IsSelectedObject(ctx, object.get());
+            const ImU32 bgColor = selected ? IM_COL32(255, 186, 84, 210) : IM_COL32(16, 18, 20, 170);
+            const ImU32 borderColor = selected ? IM_COL32(255, 230, 150, 255) : IM_COL32(245, 245, 245, 180);
+
+            drawList->AddRectFilled(min, max, bgColor, 4.0f);
+
+            const D3D12_GPU_DESCRIPTOR_HANDLE icon =
+                object->GetObjectType() == ObjectType::Camera ? cameraIcon : lightIcon;
+            if(icon.ptr) {
+                drawList->AddImage(
+                    reinterpret_cast<ImTextureID>(icon.ptr),
+                    ImVec2(min.x + 3.0f, min.y + 3.0f),
+                    ImVec2(max.x - 3.0f, max.y - 3.0f));
+            } else {
+                const char* label = object->GetObjectType() == ObjectType::Camera ? "C" : "L";
+                const ImVec2 textSize = ImGui::CalcTextSize(label);
+                drawList->AddText(
+                    ImVec2(center.x - textSize.x * 0.5f, center.y - textSize.y * 0.5f),
+                    IM_COL32(255, 255, 255, 255),
+                    label);
+            }
+            drawList->AddRect(min, max, borderColor, 4.0f, 0, selected ? 2.0f : 1.0f);
+        }
     }
 
     void DrawPlacementCanvasGrid(ImDrawList* drawList, const ImVec2& min, const ImVec2& max, const ImVec2& origin, float scale) {
@@ -482,6 +567,10 @@ void Viewport::Render(const ImTextureID& tex) {
     const ImVec2 imageMax = ImVec2(imagePos.x + imageSize.x, imagePos.y + imageSize.y);
     const bool   hoverImageRect = ImGui::IsMouseHoveringRect(imageMin, imageMax, false);
 
+    if(type_ == ViewportType::VIEWPORT_DEBUG && overlayToolsEnabled_) {
+        DrawEditorObjectIcons(ImGui::GetWindowDrawList(), imagePos, size_, camera_);
+    }
+
     // ============================================================
     // Drop target は Image の直後に固定（条件分岐の奥に入れない）
     // ============================================================
@@ -646,6 +735,9 @@ void Viewport::Render(const ImTextureID& tex) {
             if(auto* manipulator = dynamic_cast<Manipulator*>(tool)) {
                 manipulator->SetActiveViewportType(type_);
                 manipulator->SetViewRect(imagePos, imageSize);
+            }
+            if(auto* splineEditor = dynamic_cast<SplineEditorPanel*>(tool)) {
+                splineEditor->SyncViewportRect({imagePos.x, imagePos.y}, size_);
             }
 
             const ImVec2 viewSize(size_.x, size_.y);

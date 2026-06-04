@@ -20,6 +20,7 @@
 #include "Engine/Foundation/Math/MathUtil.h"
 #include "Engine/Foundation/Utility/Converter/EnumConverter.h"
 #include "Engine/Graphics/Camera/Manager/CameraManager.h"
+#include "../Detail/ParticleDetail.h"
 
 #include <externals/imgui/ImGuiFileDialog.h>
 #include <externals/imgui/imgui.h>
@@ -67,8 +68,11 @@ namespace CalyxEngine {
 		// 各種パラメータ
 		velocity_ = FxParam<CalyxEngine::Vector3>::MakeRandom(CalyxEngine::Vector3(-1.0f,0.0f,-1.0f),
 															CalyxEngine::Vector3(1.0f,0.0f,1.0f));
+		direction_      = FxParam<CalyxEngine::Vector3>::MakeConstant(CalyxEngine::Vector3(0.0f,1.0f,0.0f));
+		directionSpeed_ = FxParam<float>::MakeConstant(1.0f);
 		lifetime_ = FxParam<float>::MakeRandom(1.0f,3.0f);
 		scale_    = FxParam<CalyxEngine::Vector3>::MakeConstant();
+		spin_     = FxParam<CalyxEngine::Vector3>::MakeConstant(CalyxEngine::Vector3(0.0f,0.0f,0.0f));
 
 		moduleContainer_ = std::make_unique<CalyxEngine::FxModuleContainer>();
 	}
@@ -121,7 +125,7 @@ namespace CalyxEngine {
 					float              dist     = static_cast<float>(i) * spawnInterval;
 					float              t        = dist / distance;
 					CalyxEngine::Vector3 spawnPos = CalyxEngine::Vector3::Lerp(prevPostion_,position_,t);
-					Emit(spawnPos);
+					Emit(GenerateSpawnPosition(spawnPos) + offset_);
 				}
 			} else {
 				emitTimer_ += deltaTime;
@@ -149,7 +153,7 @@ namespace CalyxEngine {
 			if(fx.followEmitter) { fx.position = position_ + fx.followOffset; } else { fx.position += fx.velocity * deltaTime; }
 
 			// スピン
-			fx.rotationEuler.z += fx.spinSpeed * deltaTime;
+			fx.rotationEuler += fx.spinSpeed * deltaTime;
 
 			fx.age += deltaTime;
 			if(fx.age >= fx.lifetime) fx.alive = false;
@@ -201,7 +205,9 @@ namespace CalyxEngine {
 			data.position = fx.position;
 			data.scale    = fx.scale;
 			data.color    = fx.color;
-			data.rotation = fx.rotationEuler.z;
+			data.rotation = fx.rotationEuler;
+			data.alignDirection = fx.alignDirection;
+			data.alignToDirection = fx.alignToDirection ? 1u : 0u;
 
 			gpuUnits.push_back(data);
 		}
@@ -214,7 +220,7 @@ namespace CalyxEngine {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	void FxEmitter::Emit() {
 		// 形状が点の時はエミッタの位置、そうでない時は形状に応じた位置を生成して発生させる
-		Emit(GenerateSpawnPosition());
+		Emit(GenerateSpawnPosition() + offset_);
 	}
 
 	void FxEmitter::Emit(const CalyxEngine::Vector3& pos) {
@@ -250,7 +256,24 @@ namespace CalyxEngine {
 		fx.alive        = true;
 		fx.uvTransform.Initialize();
 		fx.spinSpeed = spin_.Get();
-		if(HasFlag(RandomSpinEmit)) { fx.rotationEuler.z = Random::Generate<float>(-CalyxEngine::kPi,CalyxEngine::kPi); } else { fx.rotationEuler.z = 0.0f; }
+		fx.alignDirection = CalyxEngine::Vector3(0.0f,0.0f,0.0f);
+		fx.alignToDirection = false;
+		fx.rotationEuler = CalyxEngine::Vector3(0.0f,0.0f,0.0f);
+		if(HasFlag(RandomSpinEmit)) { fx.rotationEuler.z = Random::Generate<float>(-CalyxEngine::kPi,CalyxEngine::kPi); }
+		if(useDirection_) ApplyDirectionVelocity(fx);
+	}
+
+	void FxEmitter::ApplyDirectionVelocity(FxUnit& fx) {
+		CalyxEngine::Vector3 dir = direction_.Get();
+		if(dir.Length() <= 0.0001f) {
+			fx.velocity = CalyxEngine::Vector3(0.0f,0.0f,0.0f);
+			return;
+		}
+
+		dir = dir.Normalize();
+		fx.velocity = dir * directionSpeed_.Get();
+		fx.alignDirection = dir;
+		fx.alignToDirection = rotateToDirection_;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -394,6 +417,10 @@ namespace CalyxEngine {
 		if(GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::ParameterData)) {
 			// ================= Emission =================
 			if(FxGui::GridScope sec{"Emission"}; sec.open) {
+
+				FxGui::RowLabel("offset");
+				GuiCmd::DragFloat3("##offset",offset_,0.01f,-100.0f,100.0f);
+				
 				// エミッタ形状を選べるようにする
 				FxGui::RowLabel("emitter shape");
 				CalyxEngine::EnumConverter<EmitterShape>::Combo("Emitter Shape",shape_);
@@ -463,9 +490,22 @@ namespace CalyxEngine {
 			// ================= Params =================
 			if(FxGui::GridScope sec{"Params"}; sec.open) {
 				FxGui::DrawParam("Scale",scale_);
+				ImGui::BeginDisabled(useDirection_);
 				FxGui::DrawParam("Velocity",velocity_);
+				ImGui::EndDisabled();
+				FxGui::RowLabel("Direction Enable");
+				GuiCmd::CheckBox("##directionEnable",useDirection_);
+
+				ImGui::BeginDisabled(!useDirection_);
+				FxGui::DrawParam("Direction",direction_);
+				FxGui::DrawParam("Direction Speed",directionSpeed_);
+
+				FxGui::RowLabel("Rotate To Direction");
+				GuiCmd::CheckBox("##rotateToDirection",rotateToDirection_);
+				ImGui::EndDisabled();
+
 				FxGui::DrawParam("Lifetime",lifetime_);
-				FxGui::DrawParam("spin",spin_);
+				FxGui::DrawParam("Spin",spin_);
 			}
 
 			// ================= Playback =================
@@ -557,7 +597,15 @@ namespace CalyxEngine {
 
 	void FxEmitter::DrawEmitterShape(const WorldTransform& tf) {
 		[[maybe_unused]] CalyxEngine::Vector3 pos = tf.GetWorldPosition();
+		DrawEmitterShapeInternal(false);
+	}
 
+	void FxEmitter::DrawEmitterShapePreview(const WorldTransform& tf) {
+		[[maybe_unused]] CalyxEngine::Vector3 pos = tf.GetWorldPosition();
+		DrawEmitterShapeInternal(true);
+	}
+
+	void FxEmitter::DrawEmitterShapeInternal(bool effectPreview) {
 		const CalyxEngine::Vector3 absScale{
 			(std::max)(std::abs(worldScale_.x), 0.0001f),
 			(std::max)(std::abs(worldScale_.y), 0.0001f),
@@ -565,9 +613,37 @@ namespace CalyxEngine {
 
 		CalyxEngine::Vector4 color = CalyxEngine::Vector4(1.0f,0.0f,0.0f,1.0f);
 		switch(shape_) {
+		case EmitterShape::Circle: {
+			const float radiusX = shapeRadius_ * absScale.x;
+			const float radiusZ = shapeRadius_ * absScale.z;
+			if(effectPreview) {
+				PrimitiveDrawer::GetInstance()->DrawEffectPreviewCircle(position_,worldRotation_,radiusX,radiusZ,color);
+			} else {
+				PrimitiveDrawer::GetInstance()->DrawCircle(position_,worldRotation_,radiusX,radiusZ,color);
+			}
+		}
+		break;
+
+		case EmitterShape::Cone: {
+			const float height = (std::max)(shapeRadius_,0.0f) * absScale.y;
+			const float angleRad = std::clamp(CalyxEngine::ToRadians(shapeAngle_),0.0f,CalyxEngine::kPi * 0.5f);
+			const float radiusX = height * std::tan(angleRad) * absScale.x;
+			const float radiusZ = height * std::tan(angleRad) * absScale.z;
+			if(effectPreview) {
+				PrimitiveDrawer::GetInstance()->DrawEffectPreviewCone(position_,worldRotation_,height,radiusX,radiusZ,color);
+			} else {
+				PrimitiveDrawer::GetInstance()->DrawCone(position_,worldRotation_,height,radiusX,radiusZ,color);
+			}
+		}
+		break;
+
 		case EmitterShape::Sphere: {
 			const float maxScale = (std::max)((std::max)(absScale.x,absScale.y),absScale.z);
-			PrimitiveDrawer::GetInstance()->DrawSphere(position_,shapeRadius_ * maxScale,4,color);
+			if(effectPreview) {
+				PrimitiveDrawer::GetInstance()->DrawEffectPreviewSphere(position_,shapeRadius_ * maxScale,4,color);
+			} else {
+				PrimitiveDrawer::GetInstance()->DrawSphere(position_,shapeRadius_ * maxScale,4,color);
+			}
 		}
 		break;
 
@@ -576,7 +652,11 @@ namespace CalyxEngine {
 				shapeSize_.x * absScale.x,
 				shapeSize_.y * absScale.y,
 				shapeSize_.z * absScale.z};
-			PrimitiveDrawer::GetInstance()->DrawBox(position_,worldRotation_,scaledSize,color);
+			if(effectPreview) {
+				PrimitiveDrawer::GetInstance()->DrawEffectPreviewBox(position_,worldRotation_,scaledSize,color);
+			} else {
+				PrimitiveDrawer::GetInstance()->DrawBox(position_,worldRotation_,scaledSize,color);
+			}
 		}
 		break;
 		default:
@@ -600,8 +680,16 @@ namespace CalyxEngine {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	void FxEmitter::ApplyConfigFrom(const EmitterConfig& config) {
 		position_       = config.position;
+		offset_         = config.offset;
+		worldRotation_  = config.rotation;
+		worldScale_     = config.worldScale;
 		material_.color = config.color;
 		velocity_.FromConfig(config.velocity);
+		direction_.FromConfig(config.direction.vector);
+		directionSpeed_.FromConfig(config.direction.speed);
+		useDirection_       = config.direction.enabled;
+		rotateToDirection_  = config.direction.rotateToDirection;
+		spin_.FromConfig(config.spin);
 		lifetime_.FromConfig(config.lifetime);
 		scale_.FromConfig(config.scale);
 		emitRate_  = config.emitRate;
@@ -642,8 +730,16 @@ namespace CalyxEngine {
 
 	void FxEmitter::ExtractConfigTo(EmitterConfig& config) const {
 		config.position       = position_;
+		config.offset         = offset_;
+		config.rotation       = worldRotation_;
+		config.worldScale     = worldScale_;
 		config.color          = material_.color;
 		config.velocity       = Vector3ParamConfig{velocity_.ToConfig()};
+		config.direction.enabled = useDirection_;
+		config.direction.vector = Vector3ParamConfig{direction_.ToConfig()};
+		config.direction.speed = FxFloatParamConfig{directionSpeed_.ToConfig()};
+		config.direction.rotateToDirection = rotateToDirection_;
+		config.spin           = Vector3ParamConfig{spin_.ToConfig()};
 		config.lifetime       = FxFloatParamConfig{lifetime_.ToConfig()};
 		config.scale          = Vector3ParamConfig{scale_.ToConfig()};
 		config.emitRate       = emitRate_;

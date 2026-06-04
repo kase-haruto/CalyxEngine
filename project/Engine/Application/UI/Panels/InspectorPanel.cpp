@@ -39,7 +39,7 @@ namespace CalyxEngine {
 	InspectorPanel::InspectorPanel()
 		: IEngineUI("Inspector") {}
 
-	// ============================================================================
+	// ==========================================================================t==
 	//		imgui描画
 	// ============================================================================
 	void InspectorPanel::Render() {
@@ -139,12 +139,12 @@ namespace CalyxEngine {
 		auto object = selectedObject_.lock();
 		if(object) {
 			switch(object->GetObjectType()) {
-			case ObjectType::Actor:
+			case ObjectType::GameObject:
 			case ObjectType::Object2D:
 				add(ParamFilterSection::Object);
 				add(ParamFilterSection::Material);
 				add(ParamFilterSection::ParameterData);
-				if(object->GetObjectType() == ObjectType::Actor) {
+				if(object->GetObjectType() == ObjectType::GameObject) {
 					add(ParamFilterSection::Collider);
 				}
 				break;

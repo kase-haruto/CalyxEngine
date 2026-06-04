@@ -39,6 +39,11 @@ struct Material {
 	float     toonSpecularSoftness = 0.02f;
 	float     toonSpecularIntensity = 0.35f;
 	float     pad3 = 0.0f;
+	CalyxEngine::Vector4 emissiveColor = {0.0f, 0.0f, 0.0f, 1.0f};
+	float     emissiveIntensity = 0.0f;
+	int32_t   useNormalMap = 0;
+	float     normalMapStrength = 1.0f;
+	int32_t   normalMapFlipY = 0;
 
 	//config
 	void           ApplyConfig(const MaterialConfig& config);
@@ -71,6 +76,7 @@ struct Material2D {
 
 struct MaterialData {
 	std::string textureFilePath;
+	std::string normalTextureFilePath;
 	CalyxEngine::Vector3     uv_scale;
 	CalyxEngine::Vector3     uv_offset;
 	CalyxEngine::Vector3     uv_translate;

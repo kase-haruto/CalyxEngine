@@ -181,8 +181,8 @@ protected:
 	std::variant<Sphere, OBB> collisionShape_; //< 衝突形状
 	std::string				  name_;		   //< コライダー名
 
-	ColliderType	   type_;							//< 自身のタイプ
-	ColliderType	   targetType_;						//< 衝突相手のタイプ
+	ColliderType	   type_ = ColliderType::Type_None;	//< 自身のタイプ
+	ColliderType	   targetType_ = ColliderType::Type_None; //< 衝突相手のタイプ
 	CalyxEngine::Vector4 color_ = {1.0, 0.0, 0.0, 1.0};	//< 描画色
 	CalyxEngine::Vector3 offset_{0.0f, 0.0f, 0.0f};		//< オフセット座標
 	CalyxEngine::Vector3 rotateOffset_{0.0f, 0.0f, 0.0f}; //< 回転オフセット (Euler)

@@ -20,6 +20,7 @@ void Camera3DBuffer::Update(const CalyxEngine::Matrix4x4& view, const CalyxEngin
 	data_.viewProjection = CalyxEngine::Matrix4x4::Multiply(view, proj);
 	data_.worldPosition	 = worldPos;
 	data_.viewportSize   = viewportSize;
+	data_.cameraDitherEnabled = 1u;
 
 	// ビルボード用のカメラの右・上基底ベクトル（View行列の行成分。RH想定なら転置された回転成分）
 	data_.camRight	 = CalyxEngine::Vector3(view.m[0][0], view.m[1][0], view.m[2][0]);
@@ -27,6 +28,11 @@ void Camera3DBuffer::Update(const CalyxEngine::Matrix4x4& view, const CalyxEngin
 	data_.camForward = CalyxEngine::Vector3(view.m[0][2], view.m[1][2], view.m[2][2]);
 
 	// バッファにデータを転送
+	buffer_.TransferData(data_);
+}
+
+void Camera3DBuffer::SetCameraDitherEnabled(bool enabled) {
+	data_.cameraDitherEnabled = enabled ? 1u : 0u;
 	buffer_.TransferData(data_);
 }
 

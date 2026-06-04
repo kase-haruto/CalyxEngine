@@ -33,6 +33,7 @@ PointLight::PointLight(const std::string& name){
 }
 
 PointLight::PointLight(){
+	SceneObject::SetName("PointLight", ObjectType::Light);
 	ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
 	constantBuffer_.Initialize(device);
 
@@ -52,7 +53,9 @@ void PointLight::Initialize(){}
 
 void PointLight::Update([[maybe_unused]]float dt){}
 
-void PointLight::AlwaysUpdate([[maybe_unused]]float dt){}
+void PointLight::AlwaysUpdate([[maybe_unused]]float dt){
+	SyncPositionFromTransform();
+}
 
 void PointLight::ShowGui(){
 #if defined(_DEBUG) || defined(DEVELOP)
@@ -68,7 +71,9 @@ void PointLight::ShowGui(){
 	
 	// トランスフォーム (位置)
 	if (GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::Object)) {
-		GuiCmd::DragFloat3("position", lightData_.position);
+		GuiCmd::DragFloat3("position", worldTransform_.translation);
+		worldTransform_.Update();
+		SyncPositionFromTransform();
 		GuiCmd::EndSection();
 	}
 
@@ -84,6 +89,7 @@ void PointLight::ShowGui(){
 }
 
 void PointLight::UploadToGpu(){
+	SyncPositionFromTransform();
 	constantBuffer_.TransferData(lightData_);
 }
 
@@ -94,6 +100,10 @@ void PointLight::SetCommand(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> co
 		index = 5;
 	}
 	constantBuffer_.SetCommand(commandList, index);
+}
+
+void PointLight::SyncPositionFromTransform(){
+	lightData_.position = worldTransform_.GetWorldPosition();
 }
 
 //===================================================================*/
@@ -108,6 +118,9 @@ void PointLight::ApplyConfig(){
 	lightData_.intensity = cfg.intensity;
 	lightData_.radius = cfg.radius;
 	lightData_.decay = cfg.decay;
+	worldTransform_.ApplyConfig(cfg.transform);
+	worldTransform_.Update();
+	SyncPositionFromTransform();
 	name_ = cfg.name;
 	id_ = cfg.guid;
 	parentId_ = cfg.parentGuid;
@@ -118,10 +131,12 @@ void PointLight::ExtractConfig(){
 	auto& cfg = config_.GetConfig();
 
 	cfg.color = lightData_.color;
+	SyncPositionFromTransform();
 	cfg.position = lightData_.position;
 	cfg.intensity = lightData_.intensity;
 	cfg.radius = lightData_.radius;
 	cfg.decay = lightData_.decay;
+	cfg.transform = worldTransform_.ExtractConfig();
 	cfg.name = name_;
 	cfg.guid = id_;
 	cfg.parentGuid = parentId_;
