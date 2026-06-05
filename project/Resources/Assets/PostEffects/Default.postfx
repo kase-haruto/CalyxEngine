@@ -1,7 +1,18 @@
 {
   "graph": {
-    "links": [],
-    "nextId": 5,
+    "links": [
+      {
+        "fromPinId": 2,
+        "id": 8,
+        "toPinId": 6
+      },
+      {
+        "fromPinId": 7,
+        "id": 9,
+        "toPinId": 4
+      }
+    ],
+    "nextId": 10,
     "nodes": [
       {
         "boolValue": false,
@@ -58,11 +69,88 @@
         "properties": {},
         "title": "Output",
         "type": "Output"
+      },
+      {
+        "boolValue": false,
+        "colorValue": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "floatValue": 0.0,
+        "id": 5,
+        "inputs": [
+          {
+            "id": 6,
+            "kind": 0,
+            "name": "In",
+            "valueType": 2
+          }
+        ],
+        "intValue": 0,
+        "outputs": [
+          {
+            "id": 7,
+            "kind": 1,
+            "name": "Out",
+            "valueType": 2
+          }
+        ],
+        "position": [
+          321.0,
+          -26.0
+        ],
+        "properties": {
+          "applyMode": "Always",
+          "autoDisable": true,
+          "duration": 0.25,
+          "easeIndex": 8,
+          "enabled": true,
+          "floatAnimations": [],
+          "parameters": {
+            "intensity": 0.699999988079071,
+            "radius": 1.0,
+            "softKnee": 0.5,
+            "threshold": 0.800000011920929,
+            "tint": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          }
+        },
+        "title": "Bloom",
+        "type": "Bloom"
       }
     ]
   },
   "name": "Default",
-  "nodes": [],
+  "nodes": [
+    {
+      "applyMode": "Always",
+      "autoDisable": true,
+      "duration": 0.25,
+      "ease": "",
+      "easeIndex": 8,
+      "enabled": true,
+      "floatAnimations": [],
+      "id": 5,
+      "parameters": {
+        "intensity": 0.699999988079071,
+        "radius": 1.0,
+        "softKnee": 0.5,
+        "threshold": 0.800000011920929,
+        "tint": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "title": "Bloom",
+      "type": "Bloom"
+    }
+  ],
   "outline": {
     "enabled": true
   },
