@@ -20,29 +20,33 @@ namespace CalyxEditor {
 
 	namespace {
 
+		// 定義されているプロジェクトテンプレートの一覧
 		const ProjectBrowser::TemplateInfo kTemplates[] = {
 			{ProjectTemplateType::Blank, "Blank", "空のプロジェクト", "Source", ""},
 			{ProjectTemplateType::Demo, "Demo", "デモプロジェクト", "Source", "Resources/Assets/Scenes/DemoScene.scene"},
 		};
 
-		// 新規プロジェクトの初期作成先
+		// 新規プロジェクトの初期作成先のディレクトリパスを取得（ユーザーのドキュメントフォルダを指す）
 		std::filesystem::path DefaultUserProjectDirectory() {
 			char*  userProfile = nullptr;
 			size_t length		= 0;
+			// WindowsのUSERPROFILE環境変数からパスを取得
 			if(_dupenv_s(&userProfile, &length, "USERPROFILE") == 0 && userProfile) {
 				std::filesystem::path path = std::filesystem::path(userProfile) / "Documents" / "Calyx Projects";
 				std::free(userProfile);
 				return path;
 			}
+			// 取得に失敗した場合は相対パスのフォルダ名を返す
 			return std::filesystem::path("Calyx Projects");
 		}
 
-		// std::array<char> への安全な文字列コピー
+		// std::array<char> 等の固定長バッファへの安全な文字列コピーを行うヘルパー
 		bool CopyText(std::span<char> buffer, const std::string& text) {
 			if(buffer.empty()) return false;
+			// バッファ終端用のヌル文字スペースを除いた最大長でコピー
 			const size_t length = (std::min)(buffer.size() - 1, text.size());
 			std::copy_n(text.data(), length, buffer.data());
-			buffer[length] = '\0';
+			buffer[length] = '\0'; // 確実にヌル終端する
 			return length == text.size();
 		}
 
@@ -56,13 +60,14 @@ namespace CalyxEditor {
 			return true;
 		}
 
-		// Visual Studio用GUIDを生成
+		// Visual Studio用GUID（UUID v4に準拠）を生成するヘルパー関数
 		std::string MakeGuid() {
 			std::random_device randomDevice;
 			std::mt19937 generator(randomDevice());
 			std::uniform_int_distribution<unsigned int> dist(0, 15);
 			std::uniform_int_distribution<unsigned int> variantDist(8, 11);
 
+			// GUID形式: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX のフォーマットで書き出し
 			std::stringstream stream;
 			stream << std::uppercase << std::hex;
 			const int groups[] = {8, 4, 3};
@@ -72,12 +77,12 @@ namespace CalyxEditor {
 				}
 				stream << "-";
 			}
-			stream << "4";
+			stream << "4"; // バージョン4フラグ
 			for(int i = 0; i < 3; ++i) {
 				stream << dist(generator);
 			}
 			stream << "-";
-			stream << variantDist(generator);
+			stream << variantDist(generator); // バリアントビット
 			for(int i = 0; i < 3; ++i) {
 				stream << dist(generator);
 			}
@@ -88,7 +93,7 @@ namespace CalyxEditor {
 			return stream.str();
 		}
 
-		// XML属性へ書き込める文字列に変換
+		// vcxproj等のXMLタグ属性へ書き込める安全なエスケープ文字列に変換
 		std::string EscapeXml(const std::string& text) {
 			std::string result;
 			result.reserve(text.size());
@@ -104,9 +109,10 @@ namespace CalyxEditor {
 			return result;
 		}
 
-		// Visual Studio生成ファイルを書き出す
+		// ソリューションやプロジェクトファイルをディスクへ書き出すヘルパー
 		bool WriteTextFile(const std::filesystem::path& path, const std::string& text) {
 			std::error_code ec;
+			// 保存先ディレクトリが存在しない場合は親階層を含め自動作成
 			std::filesystem::create_directories(path.parent_path(), ec);
 			if(ec) return false;
 
@@ -116,7 +122,7 @@ namespace CalyxEditor {
 			return true;
 		}
 
-		// ディレクトリ以下のファイルをまとめてコピー
+		// ディレクトリ以下のファイルを再帰的にまとめてコピー（フォルダ構造維持）
 		bool CopyDirectoryTree(const std::filesystem::path& source, const std::filesystem::path& destination) {
 			if(!std::filesystem::exists(source)) {
 				return false;
@@ -126,9 +132,11 @@ namespace CalyxEditor {
 			std::filesystem::create_directories(destination, ec);
 			if(ec) return false;
 
+			// ソースディレクトリ以下のファイルを再帰的に巡回コピー
 			for(const auto& entry : std::filesystem::recursive_directory_iterator(source, ec)) {
 				if(ec) return false;
 
+				// 相対パスを求めて出力先パスを構成
 				const auto relativePath = std::filesystem::relative(entry.path(), source, ec);
 				if(ec) return false;
 
@@ -142,6 +150,7 @@ namespace CalyxEditor {
 				std::filesystem::create_directories(outputPath.parent_path(), ec);
 				if(ec) return false;
 
+				// ファイルを上書きモードでコピー
 				std::filesystem::copy_file(entry.path(), outputPath, std::filesystem::copy_options::overwrite_existing, ec);
 				if(ec) return false;
 			}
@@ -149,7 +158,7 @@ namespace CalyxEditor {
 			return true;
 		}
 
-		// 現在の実行場所からエンジン本体のprojectフォルダを探す
+		// 現在のアプリケーション実行位置から上に向かって探索し、CalyxEngineLibのプロジェクトルートフォルダを発見する
 		std::filesystem::path FindEngineProjectDirectory() {
 			std::error_code ec;
 			std::filesystem::path path = std::filesystem::weakly_canonical(std::filesystem::current_path(), ec);
@@ -157,6 +166,7 @@ namespace CalyxEditor {
 				path = std::filesystem::current_path();
 			}
 
+			// 親ディレクトリへ順に遡り、プロジェクトファイルの存在を確認
 			while(!path.empty()) {
 				if(std::filesystem::exists(path / "CalyxEngineLib.vcxproj")) {
 					return path;
@@ -173,7 +183,7 @@ namespace CalyxEditor {
 			return {};
 		}
 
-		// プロジェクトから見た相対パスをVisual Studio向け文字列に変換
+		// 基準フォルダ(from)から対象ファイル(to)への相対パスを取得し、Visual Studio形式（ジェネリック表記スラッシュ）に変換
 		std::string ToVisualStudioPath(const std::filesystem::path& from, const std::filesystem::path& to) {
 			std::error_code ec;
 			auto relative = std::filesystem::relative(to, from, ec);
@@ -422,20 +432,23 @@ namespace CalyxEditor {
 			return stream.str();
 		}
 
-		// 新規ゲームプロジェクトをVisual Studioで開ける状態にする
+		// 新規ゲームプロジェクト用のソリューション、プロジェクトファイル、起動用GameMain.cppなどを一式作成する
 		bool CreateGameWorkspace(const Calyx::ProjectInfo& project, const ProjectBrowser::TemplateInfo& selectedTemplate) {
+			// エンジンのプロジェクトディレクトリを取得（依存関係ビルドやResourcesコピーのため）
 			const auto engineProjectDirectory = FindEngineProjectDirectory();
 			if(engineProjectDirectory.empty()) {
 				return false;
 			}
 
+			// ソリューションおよびvcxprojファイルで紐付ける新規の個別GUIDを発行
 			const std::string projectGuid = MakeGuid();
 			const std::string solutionGuid = MakeGuid();
 
-			// ゲーム実行時にもエンジン共通画像やシェーダーを使うため、Resourcesはまとめて渡す。
+			// ゲーム実行時にもエンジン共通の画像やシェーダーリソースを使うため、Resourcesディレクトリを丸ごとコピー
 			if(!CopyDirectoryTree(engineProjectDirectory / "Resources", project.rootDirectory / "Resources")) {
 				return false;
 			}
+			// デモテンプレートの場合は、事前定義されたデモアセットやシーン一式（Templates/Demo）をコピー
 			if(selectedTemplate.type == ProjectTemplateType::Demo) {
 				const auto templateDirectory = engineProjectDirectory / "Templates" / "Demo";
 				if(!CopyDirectoryTree(templateDirectory, project.rootDirectory)) {
@@ -443,13 +456,16 @@ namespace CalyxEditor {
 				}
 			}
 
+			// アプリのエントリポイントとなる初期「GameMain.cpp」ファイルを生成してSource下に書き出し
 			const auto sourceDirectory = Calyx::ResolveProjectPath(project, project.sourceDirectory);
 			if(!WriteTextFile(sourceDirectory / "GameMain.cpp", MakeGameMainSource(selectedTemplate))) {
 				return false;
 			}
 
+			// フォルダ内からソースファイル一覧を収集
 			const auto sourceFiles = CollectSourceFiles(project);
 
+			// Visual Studioでビルド可能にするための各定義ファイルをテキストとして生成し書き出す
 			if(!WriteTextFile(project.rootDirectory / (project.name + ".vcxproj"), MakeGameVcxproj(project, sourceFiles, projectGuid))) {
 				return false;
 			}
@@ -476,12 +492,15 @@ namespace CalyxEditor {
 	////////////////////////////////////////////////////////////////////////////////////////////
 	ProjectBrowser::ProjectBrowser()
 		: registryPath_(Calyx::DefaultProjectRegistryPath()) {
+		// 表示レイアウトやサイズ用のパラメータをロードし、存在しなければ新規作成
 		if(!param_.LoadParams()) {
 			param_.SaveParams();
 		}
 
+		// UI入力バッファの初期化（デフォルトプロジェクト名とユーザーごとの既定フォルダパス）
 		CopyText(newProjectName_, "NewProject");
 		CopyText(newProjectDirectory_, DefaultUserProjectDirectory().string());
+		// 最近使ったプロジェクトリストをレジストリからロード
 		ReloadRecentProjects();
 	}
 
@@ -492,24 +511,29 @@ namespace CalyxEditor {
 		
 		bool selected = false;
 
+		// ビューポートサイズいっぱいのブラウザウインドウを固定配置で描画
 		const ImGuiViewport* viewport = ImGui::GetMainViewport();
 		ImGui::SetNextWindowPos(viewport->WorkPos);
 		ImGui::SetNextWindowSize(viewport->WorkSize);
 		ImGui::Begin("Project Browser", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+		// 描画アイコンテクスチャをアセットシステムから必要に応じて確保
 		LoadIcons();
 		
 		ImGui::TextUnformatted("Calyx Project Browser");
 		ImGui::Separator();
 
+		// 「プロジェクトを開く」ボタンによる既存 `.calyxproj` 選択ダイアログの表示
 		if(ImGui::Button("Open Project", ImVec2(param_.openButtonSize_.x, param_.openButtonSize_.y))) {
 			IGFD::FileDialogConfig config;
 			ImGuiFileDialog::Instance()->OpenDialog("OpenCalyxProject", "Open Calyx Project", ".calyxproj", config);
 		}
 		ImGui::SameLine();
+		// 「更新」ボタンによる最近使ったリストの再スキャン
 		if(ImGui::Button("Refresh", ImVec2(param_.refreshButtonSize_.x, param_.refreshButtonSize_.y))) {
 			ReloadRecentProjects();
 		}
 
+		// ステータスエラー等があれば上部にテキストで通知
 		if(!statusMessage_.empty()) {
 			ImGui::SameLine();
 			ImGui::TextDisabled("%s", statusMessage_.c_str());
@@ -518,18 +542,20 @@ namespace CalyxEditor {
 		ImGui::Spacing();
 		ImGuiStyle& style = ImGui::GetStyle();
 
-		// Project Location + Project Name の2行分
+		// 新規プロジェクト作成の入力フォーム（下部フッター）の表示高さを事前計算
 		const float footerHeight =
 			ImGui::GetFrameHeightWithSpacing() * 2.0f +
 			style.ItemSpacing.y * 2.0f +
 			style.WindowPadding.y;
 
+		// フッターエリアを除いたメイン描画領域
 		if(ImGui::BeginChild(
 			"ProjectBrowserMainArea",
 			ImVec2(0.0f, -footerHeight),
 			false,
 			ImGuiWindowFlags_NoScrollbar)) {
 
+			// 左右に「最近使ったプロジェクト / テンプレート一覧」と「選択中テンプレート詳細情報」を配置
 			if(ImGui::BeginTable(
 				"ProjectBrowserLayout",
 				param_.tableColumnCount_,
@@ -539,9 +565,11 @@ namespace CalyxEditor {
 				ImGui::TableSetupColumn("Recent", ImGuiTableColumnFlags_WidthStretch, param_.recentColumnWeight_);
 				ImGui::TableSetupColumn("Details", ImGuiTableColumnFlags_WidthStretch, param_.detailsColumnWeight_);
 
+				// 左ペイン：最近使った＆テンプレートカード一覧
 				ImGui::TableNextColumn();
 				DrawRecentProjects(outProject, selected);
 
+				// 右ペイン：選択中のテンプレートの詳細情報表示
 				ImGui::TableNextColumn();
 				DrawTemplateDetails();
 
@@ -551,7 +579,9 @@ namespace CalyxEditor {
 		ImGui::EndChild();
 
 		ImGui::Separator();
+		// 下部フッター：新規プロジェクト作成用UI
 		DrawNewProject(outProject, selected);
+		// 各ポップアップファイルダイアログの遅延・更新処理
 		DrawOpenProjectDialog(outProject, selected);
 		DrawLocationDialog();
 
