@@ -4,8 +4,20 @@
     <Filter Include="Editor">
       <UniqueIdentifier>{56F466AA-0E52-4449-A181-7D950EBB9D56}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Demo">
+      <UniqueIdentifier>{AF00A561-2B4B-468C-8858-57C2C68F3AA6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Demo\Scene">
+      <UniqueIdentifier>{FD435FD8-26F5-4583-820B-B7DD212D8F12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Demo\Scene\DemoScene">
+      <UniqueIdentifier>{9B1525B8-D54A-48C7-95D5-1904D61B0C5F}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Demo\Scene\DemoScene\DemoScene.cpp">
+      <Filter>Demo\Scene\DemoScene</Filter>
+    </ClCompile>
     <ClCompile Include="Editor\EditorMain.cpp">
       <Filter>Editor</Filter>
     </ClCompile>
@@ -14,6 +26,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Demo\Scene\DemoScene\DemoScene.h">
+      <Filter>Demo\Scene\DemoScene</Filter>
+    </ClInclude>
     <ClInclude Include="Editor\ProjectBrowser.h">
       <Filter>Editor</Filter>
     </ClInclude>

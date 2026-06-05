@@ -10,6 +10,11 @@
 
 namespace CalyxEditor {
 
+	enum class ProjectTemplateType {
+		Blank,
+		Demo,
+	};
+
 	/*-----------------------------------------------------------------------------------------
 	 * ProjectBrowser
 	 * - エディタ起動時に表示するプロジェクト選択画面
@@ -17,6 +22,14 @@ namespace CalyxEditor {
 	 *---------------------------------------------------------------------------------------*/
 	class ProjectBrowser {
 	public:
+		struct TemplateInfo {
+			ProjectTemplateType type;
+			const char*			name;
+			const char*			description;
+			const char*			sourceDirectory;
+			const char*			startupScene;
+		};
+
 		ProjectBrowser();
 
 		bool Draw(Calyx::ProjectInfo& outProject);
@@ -24,7 +37,10 @@ namespace CalyxEditor {
 	private:
 		// --- 描画 ---
 		void ReloadRecentProjects();
+		void DrawTemplateCards();
+		void DrawTemplateCard(const TemplateInfo& item);
 		void DrawRecentProjects(Calyx::ProjectInfo& outProject, bool& selected);
+		void DrawRecentProjectCard(const Calyx::RecentProjectEntry& entry, Calyx::ProjectInfo& outProject, bool& selected);
 		void DrawTemplateDetails();
 		void DrawNewProject(Calyx::ProjectInfo& outProject, bool& selected);
 		void DrawOpenProjectDialog(Calyx::ProjectInfo& outProject, bool& selected);
@@ -33,15 +49,18 @@ namespace CalyxEditor {
 
 		// --- プロジェクト操作 ---
 		bool LoadProject(const std::filesystem::path& path, Calyx::ProjectInfo& outProject);
-		bool CreateBlankProject(Calyx::ProjectInfo& outProject);
+		bool CreateProjectFromSelectedTemplate(Calyx::ProjectInfo& outProject);
 
 	private:
+		const TemplateInfo& GetSelectedTemplate() const;
+
 		// --- 状態 ---
 		std::filesystem::path registryPath_;
 		std::vector<Calyx::RecentProjectEntry> recentProjects_;
 		std::array<char, 128> newProjectName_{};
 		std::array<char, 512> newProjectDirectory_{};
 		std::string statusMessage_;
+		ProjectTemplateType selectedTemplate_ = ProjectTemplateType::Blank;
 
 		// --- UIリソース ---
 		void* genericIcon_ = nullptr;
@@ -63,6 +82,7 @@ namespace CalyxEditor {
 				AddField("CardNameOffsetY", cardNameOffsetY_).Category("recent");
 				AddField("CardVersionOffsetY", cardVersionOffsetY_).Category("recent");
 				AddField("CardBorderColor", cardBorderColor_).Category("recent");
+				AddField("TemplateCardSize", templateCardSize_).Category("templates");
 				AddField("TemplatePreviewMaxHeight", templatePreviewMaxHeight_).Category("details");
 				AddField("TemplatePreviewAspect", templatePreviewAspect_).Category("details");
 				AddField("TemplateValueOffsetX", templateValueOffsetX_).Category("details");
@@ -95,6 +115,7 @@ namespace CalyxEditor {
 			float cardVersionOffsetY_ = 102.0f;
 			CalyxEngine::Vector4 cardBorderColor_{0.27f, 0.27f, 0.27f, 1.0f};
 
+			CalyxEngine::Vector2 templateCardSize_{142.0f, 126.0f};
 			float templatePreviewMaxHeight_ = 120.0f;
 			float templatePreviewAspect_ = 0.52f;
 			float templateValueOffsetX_ = 120.0f;

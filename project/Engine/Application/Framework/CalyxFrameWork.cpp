@@ -35,6 +35,7 @@ namespace CalyxEngine {
 		if(application) {
 			Calyx::SceneRegistry registry(*sceneManager_);
 			application->RegisterScenes(registry);
+			application->OnSceneManagerReady(*sceneManager_);
 		}
 
 		/* PlaySession  (EditorCtx は SceneManager が作ったシーン 0 のものを使う) */

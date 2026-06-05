@@ -1,4 +1,5 @@
 #include "SplineEditorPanel.h"
+#include <CalyxEngine/Project.h>
 #include <externals/imgui/ImGuizmo.h>
 #include <externals/imgui/ImGuiFileDialog.h>
 #include <externals/imgui/imgui.h>
@@ -27,14 +28,14 @@ namespace CalyxEngine {
 		ImGui::SameLine();
 		if(ImGui::Button("Open...")) {
 			IGFD::FileDialogConfig c;
-			c.path = "Resources/Assets/Splines/";
+			c.path = Calyx::ResolveAssetPath("Splines").generic_string();
 			ImGuiFileDialog::Instance()->OpenDialog("SplineOpen", "Open Spline", ".json", c);
 		}
 		ImGui::SameLine();
 		if(ImGui::Button("Save")) {
 			if(currentPath_.empty()) {
 				IGFD::FileDialogConfig c;
-				c.path = "Resources/Assets/Splines/";
+				c.path = Calyx::ResolveAssetPath("Splines").generic_string();
 				ImGuiFileDialog::Instance()->OpenDialog("SplineSave", "Save Spline", ".json", c);
 			} else {
 				SplineRegistry::SaveFrom(currentPath_, data_);
@@ -43,7 +44,7 @@ namespace CalyxEngine {
 		ImGui::SameLine();
 		if(ImGui::Button("Save As...")) {
 			IGFD::FileDialogConfig c;
-			c.path = "Resources/Assets/Splines/";
+			c.path = Calyx::ResolveAssetPath("Splines").generic_string();
 			ImGuiFileDialog::Instance()->OpenDialog("SplineSaveAs", "Save Spline As", ".json", c);
 		}
 
@@ -320,7 +321,7 @@ namespace CalyxEngine {
 			gizmoTf_.Update();
 
 			// --- 起動時ロード ---
-			currentPath_ = "Resources/Assets/Spline/Rail.json";
+			currentPath_ = Calyx::ResolveAssetPath("Spline/Rail.json").generic_string();
 			if(std::filesystem::exists(currentPath_)) {
 				data_ = SplineRegistry::GetOrLoad(currentPath_);
 				selectedPoint_ = -1;

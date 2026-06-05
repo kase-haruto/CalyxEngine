@@ -17,6 +17,7 @@
 #include <Engine/System/Command/Manager/CommandManager.h>
 
 // manager
+#include <CalyxEngine/Project.h>
 #include <Engine/Assets/Database/AssetDatabase.h>
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Foundation/Clock/ClockManager.h>
@@ -93,10 +94,8 @@ namespace CalyxEngine {
 		AssetManager::GetInstance()->Initialize(imguiManager_.get());
 
 		auto* db = AssetDatabase::GetInstance();
-		// 実行ファイルの場所からプロジェクトルートを解決して Assets へ
-		const auto exe		  = std::filesystem::current_path();
-		const auto assetsRoot = exe / "Resources" / "Assets";
-		db->Initialize(assetsRoot);
+		// 現在開いているプロジェクトを基準に、編集対象のAssetsを決める。
+		db->Initialize(Calyx::GetAssetRoot());
 	}
 
 	void CalyxCore::InitializePostProcess(PipelineService* service) {

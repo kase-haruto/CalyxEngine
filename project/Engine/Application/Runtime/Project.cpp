@@ -67,6 +67,7 @@ namespace Calyx {
 		project.assetDirectory	= ReadPath(root, "assetDirectory", "Resources/Assets");
 		project.sourceDirectory	= ReadPath(root, "sourceDirectory", "Game");
 		project.startupScene		= ReadPath(root, "startupScene", std::filesystem::path{});
+		project.templateName		= root.value("template", std::string{"Blank"});
 
 		outProject = std::move(project);
 		return true;
@@ -92,6 +93,7 @@ namespace Calyx {
 		root["assetDirectory"]	 = WritePath(RelativeProjectPath(project, project.assetDirectory));
 		root["sourceDirectory"]	 = WritePath(RelativeProjectPath(project, project.sourceDirectory));
 		root["startupScene"]		 = WritePath(RelativeProjectPath(project, project.startupScene));
+		root["template"]			 = project.templateName.empty() ? "Blank" : project.templateName;
 
 		std::ofstream file(project.projectFile);
 		if(!file) {

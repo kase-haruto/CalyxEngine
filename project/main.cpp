@@ -1,13 +1,13 @@
 #include <CalyxEngine/CalyxEngine.h>
 
-#include <Engine/Scene/Test/TestScene.h>
-#include <Game/Scene/Utility/SceneTypeUtil.h>
+#include <Demo/Scene/Utility/SceneTypeUtil.h>
+#include <Demo/Scene/DemoScene/DemoScene.h>
 
 class GameApplication : public Calyx::Application {
 public:
 	void RegisterScenes(Calyx::SceneRegistry& registry) override {
-		registry.AddScene<TestScene>(GameSceneUtil::ToSceneId(SceneType::TEST));
-		registry.SetStartupScene(GameSceneUtil::ToSceneId(SceneType::TEST));
+		registry.AddScene<DemoScene>(GameSceneUtil::ToSceneId(SceneType::DEMO));
+		registry.SetStartupScene(GameSceneUtil::ToSceneId(SceneType::DEMO));
 	}
 
 	void OnInitialize() override {}

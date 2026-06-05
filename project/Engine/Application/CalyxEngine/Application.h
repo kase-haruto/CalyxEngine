@@ -5,6 +5,14 @@ namespace Calyx {
 	struct ProjectInfo;
 	class SceneRegistry;
 
+} // namespace Calyx
+
+namespace CalyxEngine {
+	class SceneManager;
+}
+
+namespace Calyx {
+
 	class Application {
 	public:
 		virtual ~Application() = default;
@@ -15,6 +23,10 @@ namespace Calyx {
 
 		virtual void OnProjectLoaded(const ProjectInfo& project) {
 			(void)project;
+		}
+
+		virtual void OnSceneManagerReady(CalyxEngine::SceneManager& sceneManager) {
+			(void)sceneManager;
 		}
 
 		virtual void OnInitialize() {}

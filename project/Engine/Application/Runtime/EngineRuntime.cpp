@@ -34,6 +34,7 @@ namespace Calyx {
 
 			ProjectInfo project;
 			if(LoadProjectFile(projectPath, project)) {
+				SetCurrentProject(project);
 				application.OnProjectLoaded(project);
 			}
 		}

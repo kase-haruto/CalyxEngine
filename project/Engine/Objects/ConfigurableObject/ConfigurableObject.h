@@ -1,4 +1,5 @@
 #pragma once
+#include <CalyxEngine/Project.h>
 #include <Engine/Foundation/Json/JsonUtils.h>
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 #include <Engine/Objects/ConfigurableObject/IConfigurable.h>
@@ -77,10 +78,11 @@ inline void ConfigurableObject<TConfig>::LoadConfig(std::string categoryAndName)
 	// --- 正規化 ---
 	std::replace(categoryAndName.begin(), categoryAndName.end(), '\\', '/');
 
-	// ルート接頭辞の除去（絶対/相対どちらでもOKに）
-	const std::string prefix = "Resources/Assets/Configs/";
-	if(size_t pos = categoryAndName.find(prefix); pos != std::string::npos) {
-		categoryAndName = categoryAndName.substr(pos + prefix.size());
+	// Assets相対に揃えて、Configs以下の category/name だけを取り出す。
+	categoryAndName = Calyx::ToAssetRelativePath(categoryAndName).generic_string();
+	const std::string prefix = "Configs/";
+	if(categoryAndName.rfind(prefix, 0) == 0) {
+		categoryAndName = categoryAndName.substr(prefix.size());
 	}
 
 	// 拡張子を除去
@@ -108,8 +110,8 @@ inline void ConfigurableObject<TConfig>::LoadConfig(std::string categoryAndName)
 	}
 
 	// パス構築
-	const std::string basePath	   = prefix + category + "/" + baseName + ".json";
-	const std::string instancePath = prefix + category + "/" + name + ".json";
+	const std::string basePath = Calyx::ResolveAssetPath(std::filesystem::path("Configs") / category / (baseName + ".json")).generic_string();
+	const std::string instancePath = Calyx::ResolveAssetPath(std::filesystem::path("Configs") / category / (name + ".json")).generic_string();
 
 	// --- 読み込み（存在する方だけ）---
 	nlohmann::json jBase, jInst, jMerged;
@@ -148,7 +150,7 @@ inline void ConfigurableObject<TConfig>::SaveConfig(const std::string& categoryA
 	const std::string category = categoryAndName.substr(0, slashPos);
 	const std::string name	   = categoryAndName.substr(slashPos + 1);
 
-	const std::string configPath = "Resources/Assets/Configs/" + category + "/" + name + ".json";
+	const std::string configPath = Calyx::ResolveAssetPath(std::filesystem::path("Configs") / category / (name + ".json")).generic_string();
 
 	// Extract処理
 	const_cast<ConfigurableObject*>(this)->OnExtractConfig();
@@ -164,7 +166,7 @@ template <typename TConfig>
 void ConfigurableObject<TConfig>::ShowGui([[maybe_unused]] const std::string& path, [[maybe_unused]] const std::string& label) {
 #if defined(_DEBUG) || defined(DEVELOP)
 	const std::string loadDlg = "ConfigLoadDialog##" + label;
-	const std::string baseDir = "Resources/Assets/Configs/";
+	const std::string baseDir = Calyx::ResolveAssetPath("Configs").generic_string();
 
 	// --- ロード ---
 	if(ImGui::Button(("Load##" + label).c_str())) {
@@ -177,14 +179,14 @@ void ConfigurableObject<TConfig>::ShowGui([[maybe_unused]] const std::string& pa
 
 	// --- セーブ ---
 	if(ImGui::Button(("Save##" + label).c_str())) {
-		std::filesystem::path dirPath = std::filesystem::path(baseDir + path).parent_path();
+		std::filesystem::path dirPath = Calyx::ResolveAssetPath(std::filesystem::path("Configs") / path).parent_path();
 		if(!std::filesystem::exists(dirPath)) {
 			std::filesystem::create_directories(dirPath);
 		}
 		SaveConfig(path);
 	}
 
-	ImGui::Text("Config Path: %s", (baseDir + path).c_str());
+	ImGui::Text("Config Path: %s", Calyx::ResolveAssetPath(std::filesystem::path("Configs") / path).generic_string().c_str());
 
 	// --- ダイアログ処理 ---
 	if(ImGuiFileDialog::Instance()->Display(loadDlg)) {
@@ -192,16 +194,13 @@ void ConfigurableObject<TConfig>::ShowGui([[maybe_unused]] const std::string& pa
 			std::string selectedPath = ImGuiFileDialog::Instance()->GetFilePathName();
 
 			// 相対化して category/name に変換
-			const std::string base = "Resources/Assets/Configs/";
-			size_t			  pos  = selectedPath.find(base);
-			if(pos != std::string::npos) {
-				std::string			  relative = selectedPath.substr(pos + base.size());
-				std::filesystem::path relPath(relative);
-				relative = relPath.replace_extension("").string();
-				LoadConfig(relative);
-			} else {
-				LoadConfig(selectedPath); // fallback
+			std::filesystem::path relPath = Calyx::ToAssetRelativePath(selectedPath);
+			std::string relative = relPath.generic_string();
+			if(relative.rfind("Configs/", 0) == 0) {
+				relative = relative.substr(std::string("Configs/").size());
 			}
+			relative = std::filesystem::path(relative).replace_extension("").generic_string();
+			LoadConfig(relative);
 		}
 		ImGuiFileDialog::Instance()->Close();
 	}

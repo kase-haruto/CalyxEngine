@@ -8,11 +8,22 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdlib>
+#include <fstream>
+#include <iomanip>
+#include <iterator>
+#include <random>
 #include <span>
+#include <sstream>
+#include <vector>
 
 namespace CalyxEditor {
 
 	namespace {
+
+		const ProjectBrowser::TemplateInfo kTemplates[] = {
+			{ProjectTemplateType::Blank, "Blank", "空のプロジェクト", "Source", ""},
+			{ProjectTemplateType::Demo, "Demo", "デモプロジェクト", "Source", "Resources/Assets/Scenes/DemoScene.scene"},
+		};
 
 		// 新規プロジェクトの初期作成先
 		std::filesystem::path DefaultUserProjectDirectory() {
@@ -45,6 +56,419 @@ namespace CalyxEditor {
 			return true;
 		}
 
+		// Visual Studio用GUIDを生成
+		std::string MakeGuid() {
+			std::random_device randomDevice;
+			std::mt19937 generator(randomDevice());
+			std::uniform_int_distribution<unsigned int> dist(0, 15);
+			std::uniform_int_distribution<unsigned int> variantDist(8, 11);
+
+			std::stringstream stream;
+			stream << std::uppercase << std::hex;
+			const int groups[] = {8, 4, 3};
+			for(int group : groups) {
+				for(int i = 0; i < group; ++i) {
+					stream << dist(generator);
+				}
+				stream << "-";
+			}
+			stream << "4";
+			for(int i = 0; i < 3; ++i) {
+				stream << dist(generator);
+			}
+			stream << "-";
+			stream << variantDist(generator);
+			for(int i = 0; i < 3; ++i) {
+				stream << dist(generator);
+			}
+			stream << "-";
+			for(int i = 0; i < 12; ++i) {
+				stream << dist(generator);
+			}
+			return stream.str();
+		}
+
+		// XML属性へ書き込める文字列に変換
+		std::string EscapeXml(const std::string& text) {
+			std::string result;
+			result.reserve(text.size());
+			for(char c : text) {
+				switch(c) {
+				case '&': result += "&amp;"; break;
+				case '<': result += "&lt;"; break;
+				case '>': result += "&gt;"; break;
+				case '"': result += "&quot;"; break;
+				default: result += c; break;
+				}
+			}
+			return result;
+		}
+
+		// Visual Studio生成ファイルを書き出す
+		bool WriteTextFile(const std::filesystem::path& path, const std::string& text) {
+			std::error_code ec;
+			std::filesystem::create_directories(path.parent_path(), ec);
+			if(ec) return false;
+
+			std::ofstream file(path);
+			if(!file) return false;
+			file << text;
+			return true;
+		}
+
+		// ディレクトリ以下のファイルをまとめてコピー
+		bool CopyDirectoryTree(const std::filesystem::path& source, const std::filesystem::path& destination) {
+			if(!std::filesystem::exists(source)) {
+				return false;
+			}
+
+			std::error_code ec;
+			std::filesystem::create_directories(destination, ec);
+			if(ec) return false;
+
+			for(const auto& entry : std::filesystem::recursive_directory_iterator(source, ec)) {
+				if(ec) return false;
+
+				const auto relativePath = std::filesystem::relative(entry.path(), source, ec);
+				if(ec) return false;
+
+				const auto outputPath = destination / relativePath;
+				if(entry.is_directory()) {
+					std::filesystem::create_directories(outputPath, ec);
+					if(ec) return false;
+					continue;
+				}
+
+				std::filesystem::create_directories(outputPath.parent_path(), ec);
+				if(ec) return false;
+
+				std::filesystem::copy_file(entry.path(), outputPath, std::filesystem::copy_options::overwrite_existing, ec);
+				if(ec) return false;
+			}
+
+			return true;
+		}
+
+		// 現在の実行場所からエンジン本体のprojectフォルダを探す
+		std::filesystem::path FindEngineProjectDirectory() {
+			std::error_code ec;
+			std::filesystem::path path = std::filesystem::weakly_canonical(std::filesystem::current_path(), ec);
+			if(ec) {
+				path = std::filesystem::current_path();
+			}
+
+			while(!path.empty()) {
+				if(std::filesystem::exists(path / "CalyxEngineLib.vcxproj")) {
+					return path;
+				}
+				if(std::filesystem::exists(path / "project" / "CalyxEngineLib.vcxproj")) {
+					return path / "project";
+				}
+
+				const auto parent = path.parent_path();
+				if(parent == path) break;
+				path = parent;
+			}
+
+			return {};
+		}
+
+		// プロジェクトから見た相対パスをVisual Studio向け文字列に変換
+		std::string ToVisualStudioPath(const std::filesystem::path& from, const std::filesystem::path& to) {
+			std::error_code ec;
+			auto relative = std::filesystem::relative(to, from, ec);
+			if(ec) {
+				relative = to;
+			}
+			return relative.generic_string();
+		}
+
+		// Source以下のcppをvcxprojへ登録するために集める
+		std::vector<std::filesystem::path> CollectSourceFiles(const Calyx::ProjectInfo& project) {
+			std::vector<std::filesystem::path> sourceFiles;
+			const auto sourceDirectory = Calyx::ResolveProjectPath(project, project.sourceDirectory);
+			if(!std::filesystem::exists(sourceDirectory)) {
+				return sourceFiles;
+			}
+
+			std::error_code ec;
+			for(const auto& entry : std::filesystem::recursive_directory_iterator(sourceDirectory, ec)) {
+				if(ec) break;
+				if(entry.is_regular_file() && entry.path().extension() == ".cpp") {
+					sourceFiles.push_back(entry.path());
+				}
+			}
+
+			std::sort(sourceFiles.begin(), sourceFiles.end());
+			return sourceFiles;
+		}
+
+		// 生成されたゲームが最初に持つエントリポイント
+		std::string MakeGameMainSource(const ProjectBrowser::TemplateInfo& selectedTemplate) {
+			std::stringstream stream;
+			stream << "#include <CalyxEngine/CalyxEngine.h>\n\n";
+
+			if(selectedTemplate.type == ProjectTemplateType::Demo) {
+				stream << "#include <Demo/Scene/DemoScene/DemoScene.h>\n\n";
+				stream << "class GameApplication : public Calyx::Application {\n";
+				stream << "public:\n";
+				stream << "\tvoid RegisterScenes(Calyx::SceneRegistry& registry) override {\n";
+				stream << "\t\tregistry.AddScene<DemoScene>(0);\n";
+				stream << "\t\tregistry.SetStartupScene(0);\n";
+				stream << "\t}\n";
+				stream << "\n";
+				stream << "\tbool ShouldRenderEngineUi() const override {\n";
+				stream << "\t\treturn false;\n";
+				stream << "\t}\n";
+				stream << "};\n\n";
+			} else {
+				stream << "#include <Engine/Scene/Base/BaseScene.h>\n\n";
+				stream << "class GameApplication : public Calyx::Application {\n";
+				stream << "public:\n";
+				stream << "\tvoid RegisterScenes(Calyx::SceneRegistry& registry) override {\n";
+				stream << "\t\tregistry.AddScene<BaseScene>(0);\n";
+				stream << "\t\tregistry.SetStartupScene(0);\n";
+				stream << "\t}\n";
+				stream << "\n";
+				stream << "\tbool ShouldRenderEngineUi() const override {\n";
+				stream << "\t\treturn false;\n";
+				stream << "\t}\n";
+				stream << "};\n\n";
+			}
+
+			stream << "int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR commandLine, int) {\n";
+			stream << "\tGameApplication application;\n";
+			stream << "\treturn Calyx::Run(hInstance, application, commandLine);\n";
+			stream << "}\n";
+			return stream.str();
+		}
+
+		// ゲームリポジトリ用の除外設定
+		std::string MakeGameGitIgnore() {
+			return
+				"Generated/\n"
+				".vs/\n"
+				"*.user\n"
+				"*.suo\n"
+				"*.VC.db\n"
+				"*.VC.opendb\n"
+				"*.pdb\n"
+				"*.ilk\n"
+				"*.obj\n"
+				"*.log\n";
+		}
+
+		// ゲームプロジェクト側の初期README
+		std::string MakeGameReadme(const Calyx::ProjectInfo& project) {
+			std::stringstream stream;
+			stream << "# " << project.name << "\n\n";
+			stream << "## Build\n\n";
+			stream << "Set `CALYX_ENGINE_DIR` to the CalyxEngine `project` directory before opening this solution.\n\n";
+			stream << "PowerShell example:\n\n";
+			stream << "```powershell\n";
+			stream << "[Environment]::SetEnvironmentVariable(\"CALYX_ENGINE_DIR\", \"C:\\\\MyProject\\\\CalyxEngine\\\\project\", \"User\")\n";
+			stream << "```\n\n";
+			stream << "After setting the variable, reopen Visual Studio and build this solution with `Develop|x64`.\n";
+			return stream.str();
+		}
+
+		// ゲーム用vcxprojを生成
+		std::string MakeGameVcxproj(
+			const Calyx::ProjectInfo& project,
+			const std::vector<std::filesystem::path>& sourceFiles,
+			const std::string& projectGuid) {
+
+			const std::string projectName = EscapeXml(project.name);
+			const std::string sourceDir = project.sourceDirectory.generic_string();
+			const std::string engine = "$(CALYX_ENGINE_DIR)";
+
+			std::stringstream stream;
+			stream << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+			stream << "<Project DefaultTargets=\"Build\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n";
+			stream << "  <ItemGroup Label=\"ProjectConfigurations\">\n";
+			stream << "    <ProjectConfiguration Include=\"Debug|x64\"><Configuration>Debug</Configuration><Platform>x64</Platform></ProjectConfiguration>\n";
+			stream << "    <ProjectConfiguration Include=\"Release|x64\"><Configuration>Release</Configuration><Platform>x64</Platform></ProjectConfiguration>\n";
+			stream << "    <ProjectConfiguration Include=\"Develop|x64\"><Configuration>Develop</Configuration><Platform>x64</Platform></ProjectConfiguration>\n";
+			stream << "  </ItemGroup>\n";
+			stream << "  <PropertyGroup Label=\"Globals\">\n";
+			stream << "    <VCProjectVersion>17.0</VCProjectVersion>\n";
+			stream << "    <Keyword>Win32Proj</Keyword>\n";
+			stream << "    <ProjectGuid>{" << projectGuid << "}</ProjectGuid>\n";
+			stream << "    <RootNamespace>" << projectName << "</RootNamespace>\n";
+			stream << "    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>\n";
+			stream << "    <ProjectName>" << projectName << "</ProjectName>\n";
+			stream << "  </PropertyGroup>\n";
+			stream << "  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.Default.props\" />\n";
+			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Debug|x64'\" Label=\"Configuration\"><ConfigurationType>Application</ConfigurationType><UseDebugLibraries>true</UseDebugLibraries><PlatformToolset>v143</PlatformToolset><CharacterSet>Unicode</CharacterSet></PropertyGroup>\n";
+			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Release|x64'\" Label=\"Configuration\"><ConfigurationType>Application</ConfigurationType><UseDebugLibraries>false</UseDebugLibraries><PlatformToolset>v143</PlatformToolset><WholeProgramOptimization>true</WholeProgramOptimization><CharacterSet>Unicode</CharacterSet></PropertyGroup>\n";
+			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Develop|x64'\" Label=\"Configuration\"><ConfigurationType>Application</ConfigurationType><UseDebugLibraries>false</UseDebugLibraries><PlatformToolset>v143</PlatformToolset><WholeProgramOptimization>true</WholeProgramOptimization><CharacterSet>Unicode</CharacterSet></PropertyGroup>\n";
+			stream << "  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.props\" />\n";
+			stream << "  <ImportGroup Label=\"ExtensionSettings\" />\n";
+			stream << "  <ImportGroup Label=\"Shared\" />\n";
+			stream << "  <ImportGroup Label=\"PropertySheets\" Condition=\"'$(Configuration)|$(Platform)'=='Debug|x64'\"><Import Project=\"$(UserRootDir)\\Microsoft.Cpp.$(Platform).user.props\" Condition=\"exists('$(UserRootDir)\\Microsoft.Cpp.$(Platform).user.props')\" Label=\"LocalAppDataPlatform\" /></ImportGroup>\n";
+			stream << "  <ImportGroup Label=\"PropertySheets\" Condition=\"'$(Configuration)|$(Platform)'=='Release|x64'\"><Import Project=\"$(UserRootDir)\\Microsoft.Cpp.$(Platform).user.props\" Condition=\"exists('$(UserRootDir)\\Microsoft.Cpp.$(Platform).user.props')\" Label=\"LocalAppDataPlatform\" /></ImportGroup>\n";
+			stream << "  <ImportGroup Label=\"PropertySheets\" Condition=\"'$(Configuration)|$(Platform)'=='Develop|x64'\"><Import Project=\"$(UserRootDir)\\Microsoft.Cpp.$(Platform).user.props\" Condition=\"exists('$(UserRootDir)\\Microsoft.Cpp.$(Platform).user.props')\" Label=\"LocalAppDataPlatform\" /></ImportGroup>\n";
+			stream << "  <PropertyGroup Label=\"UserMacros\" />\n";
+			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Debug|x64'\"><IntDir>Generated\\Obj\\$(ProjectName)\\$(Configuration)\\</IntDir><OutDir>Generated\\Outputs\\$(Configuration)\\</OutDir><LinkIncremental>true</LinkIncremental></PropertyGroup>\n";
+			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Release|x64'\"><IntDir>Generated\\Obj\\$(ProjectName)\\$(Configuration)\\</IntDir><OutDir>Generated\\Outputs\\$(Configuration)\\</OutDir></PropertyGroup>\n";
+			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Develop|x64'\"><IntDir>Generated\\Obj\\$(ProjectName)\\$(Configuration)\\</IntDir><OutDir>Generated\\Outputs\\$(Configuration)\\</OutDir></PropertyGroup>\n";
+			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Debug|x64'\"><LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory></PropertyGroup>\n";
+			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Release|x64'\"><LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory></PropertyGroup>\n";
+			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Develop|x64'\"><LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory></PropertyGroup>\n";
+
+			const char* configs[] = {"Debug", "Release", "Develop"};
+			for(const char* config : configs) {
+				const bool debug = std::string(config) == "Debug";
+				stream << "  <ItemDefinitionGroup Condition=\"'$(Configuration)|$(Platform)'=='" << config << "|x64'\">\n";
+				stream << "    <ClCompile>\n";
+				stream << "      <PreprocessorDefinitions>" << (debug ? "_DEBUG" : (std::string(config) == "Develop" ? "DEVELOP" : "NDEBUG")) << ";_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n";
+				stream << "      <ConformanceMode>true</ConformanceMode>\n";
+				stream << "      <LanguageStandard>stdcpp20</LanguageStandard>\n";
+				stream << "      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>\n";
+				stream << "      <MultiProcessorCompilation>true</MultiProcessorCompilation>\n";
+				stream << "      <TreatWarningAsError>true</TreatWarningAsError>\n";
+				stream << "      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)" << sourceDir << ";" << engine << ";" << engine << "\\Engine\\Application;" << engine << "\\externals;" << engine << "\\externals\\DirectXTex;" << engine << "\\externals\\assimp\\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
+				stream << "      <RuntimeLibrary>" << (debug ? "MultiThreadedDebug" : "MultiThreaded") << "</RuntimeLibrary>\n";
+				stream << "      <BasicRuntimeChecks>Default</BasicRuntimeChecks>\n";
+				if(debug) {
+					stream << "      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>\n";
+				}
+				stream << "    </ClCompile>\n";
+				stream << "    <Link>\n";
+				stream << "      <SubSystem>Windows</SubSystem>\n";
+				if(!debug) {
+					stream << "      <EnableCOMDATFolding>true</EnableCOMDATFolding>\n";
+					stream << "      <OptimizeReferences>true</OptimizeReferences>\n";
+				}
+				stream << "      <GenerateDebugInformation>true</GenerateDebugInformation>\n";
+				stream << "      <AdditionalDependencies>CalyxEngineLib.lib;DirectXTex.lib;" << (debug ? "assimp-vc143-mtd.lib" : "assimp-vc143-mt.lib") << ";%(AdditionalDependencies)</AdditionalDependencies>\n";
+				stream << "      <AdditionalLibraryDirectories>$(CALYX_ENGINE_DIR)\\..\\generated\\outputs\\$(Configuration);$(CALYX_ENGINE_DIR)\\generated\\bin\\DirectXTex\\x64\\" << (debug ? "Debug" : "Release") << ";$(CALYX_ENGINE_DIR)\\externals\\assimp\\lib\\" << (debug ? "Debug" : "Release") << ";%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>\n";
+				stream << "      <AdditionalOptions>/IGNORE:4099 %(AdditionalOptions)</AdditionalOptions>\n";
+				stream << "    </Link>\n";
+				stream << "    <PostBuildEvent><Command>copy \"$(WindowsSdkDir)bin\\$(TargetPlatformVersion)\\x64\\dxcompiler.dll\" \"$(TargetDir)dxcompiler.dll\"\n";
+				stream << "copy \"$(WindowsSdkDir)bin\\$(TargetPlatformVersion)\\x64\\dxil.dll\" \"$(TargetDir)dxil.dll\"</Command></PostBuildEvent>\n";
+				stream << "  </ItemDefinitionGroup>\n";
+			}
+
+			stream << "  <ItemGroup>\n";
+			for(const auto& sourceFile : sourceFiles) {
+				stream << "    <ClCompile Include=\"" << EscapeXml(ToVisualStudioPath(project.rootDirectory, sourceFile)) << "\" />\n";
+			}
+			stream << "  </ItemGroup>\n";
+			stream << "  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />\n";
+			stream << "  <Target Name=\"ValidateCalyxEngineDir\" BeforeTargets=\"PrepareForBuild\">\n";
+			stream << "    <Error Condition=\"'$(CALYX_ENGINE_DIR)'==''\" Text=\"CALYX_ENGINE_DIR is not set. Set it to the CalyxEngine project directory and reopen Visual Studio.\" />\n";
+			stream << "    <Error Condition=\"'$(CALYX_ENGINE_DIR)'!='' and !Exists('$(CALYX_ENGINE_DIR)\\CalyxEngineLib.vcxproj')\" Text=\"CALYX_ENGINE_DIR does not point to the CalyxEngine project directory: $(CALYX_ENGINE_DIR)\" />\n";
+			stream << "  </Target>\n";
+			stream << "  <Target Name=\"BuildCalyxEngineDependencies\" BeforeTargets=\"PrepareForBuild\" DependsOnTargets=\"ValidateCalyxEngineDir\">\n";
+			stream << "    <MSBuild Projects=\"$(CALYX_ENGINE_DIR)\\CalyxEngine.sln\" Targets=\"DirectXTex\" Condition=\"'$(Configuration)'=='Develop'\" Properties=\"Configuration=Release;Platform=$(Platform)\" RemoveProperties=\"SolutionDir;SolutionExt;SolutionFileName;SolutionName;SolutionPath\" />\n";
+			stream << "    <MSBuild Projects=\"$(CALYX_ENGINE_DIR)\\CalyxEngine.sln\" Targets=\"DirectXTex\" Condition=\"'$(Configuration)'!='Develop'\" Properties=\"Configuration=$(Configuration);Platform=$(Platform)\" RemoveProperties=\"SolutionDir;SolutionExt;SolutionFileName;SolutionName;SolutionPath\" />\n";
+			stream << "    <MSBuild Projects=\"$(CALYX_ENGINE_DIR)\\CalyxEngine.sln\" Targets=\"CalyxEngineLib\" Properties=\"Configuration=$(Configuration);Platform=$(Platform);BuildProjectReferences=false\" RemoveProperties=\"SolutionDir;SolutionExt;SolutionFileName;SolutionName;SolutionPath\" />\n";
+			stream << "  </Target>\n";
+			stream << "  <ImportGroup Label=\"ExtensionTargets\" />\n";
+			stream << "</Project>\n";
+			return stream.str();
+		}
+
+		// Visual Studio上で見やすいフィルタを生成
+		std::string MakeGameFilters(const Calyx::ProjectInfo& project, const std::vector<std::filesystem::path>& sourceFiles) {
+
+			std::stringstream stream;
+			stream << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+			stream << "<Project ToolsVersion=\"4.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n";
+			stream << "  <ItemGroup>\n";
+			stream << "    <Filter Include=\"Game\"><UniqueIdentifier>{" << MakeGuid() << "}</UniqueIdentifier></Filter>\n";
+			stream << "  </ItemGroup>\n";
+			stream << "  <ItemGroup>\n";
+			for(const auto& sourceFile : sourceFiles) {
+				stream << "    <ClCompile Include=\"" << EscapeXml(ToVisualStudioPath(project.rootDirectory, sourceFile)) << "\"><Filter>Game</Filter></ClCompile>\n";
+			}
+			stream << "  </ItemGroup>\n";
+			stream << "</Project>\n";
+			return stream.str();
+		}
+
+		// ゲーム用slnを生成
+		std::string MakeGameSolution(const Calyx::ProjectInfo& project, const std::string& projectGuid, const std::string& solutionGuid) {
+			const std::string projectName = project.name;
+			const std::string projectFile = (project.name + ".vcxproj");
+
+			std::stringstream stream;
+			stream << "\nMicrosoft Visual Studio Solution File, Format Version 12.00\n";
+			stream << "# Visual Studio Version 17\n";
+			stream << "VisualStudioVersion = 17.5.33627.172\n";
+			stream << "MinimumVisualStudioVersion = 10.0.40219.1\n";
+			stream << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" << projectName << "\", \"" << projectFile << "\", \"{" << projectGuid << "}\"\n";
+			stream << "EndProject\n";
+			stream << "Global\n";
+			stream << "\tGlobalSection(SolutionConfigurationPlatforms) = preSolution\n";
+			stream << "\t\tDebug|x64 = Debug|x64\n\t\tDevelop|x64 = Develop|x64\n\t\tRelease|x64 = Release|x64\n";
+			stream << "\tEndGlobalSection\n";
+			stream << "\tGlobalSection(ProjectConfigurationPlatforms) = postSolution\n";
+			stream << "\t\t{" << projectGuid << "}.Debug|x64.ActiveCfg = Debug|x64\n";
+			stream << "\t\t{" << projectGuid << "}.Debug|x64.Build.0 = Debug|x64\n";
+			stream << "\t\t{" << projectGuid << "}.Develop|x64.ActiveCfg = Develop|x64\n";
+			stream << "\t\t{" << projectGuid << "}.Develop|x64.Build.0 = Develop|x64\n";
+			stream << "\t\t{" << projectGuid << "}.Release|x64.ActiveCfg = Release|x64\n";
+			stream << "\t\t{" << projectGuid << "}.Release|x64.Build.0 = Release|x64\n";
+			stream << "\tEndGlobalSection\n";
+			stream << "\tGlobalSection(SolutionProperties) = preSolution\n";
+			stream << "\t\tHideSolutionNode = FALSE\n";
+			stream << "\tEndGlobalSection\n";
+			stream << "\tGlobalSection(ExtensibilityGlobals) = postSolution\n";
+			stream << "\t\tSolutionGuid = {" << solutionGuid << "}\n";
+			stream << "\tEndGlobalSection\n";
+			stream << "EndGlobal\n";
+			return stream.str();
+		}
+
+		// 新規ゲームプロジェクトをVisual Studioで開ける状態にする
+		bool CreateGameWorkspace(const Calyx::ProjectInfo& project, const ProjectBrowser::TemplateInfo& selectedTemplate) {
+			const auto engineProjectDirectory = FindEngineProjectDirectory();
+			if(engineProjectDirectory.empty()) {
+				return false;
+			}
+
+			const std::string projectGuid = MakeGuid();
+			const std::string solutionGuid = MakeGuid();
+
+			// ゲーム実行時にもエンジン共通画像やシェーダーを使うため、Resourcesはまとめて渡す。
+			if(!CopyDirectoryTree(engineProjectDirectory / "Resources", project.rootDirectory / "Resources")) {
+				return false;
+			}
+			if(selectedTemplate.type == ProjectTemplateType::Demo) {
+				const auto templateDirectory = engineProjectDirectory / "Templates" / "Demo";
+				if(!CopyDirectoryTree(templateDirectory, project.rootDirectory)) {
+					return false;
+				}
+			}
+
+			const auto sourceDirectory = Calyx::ResolveProjectPath(project, project.sourceDirectory);
+			if(!WriteTextFile(sourceDirectory / "GameMain.cpp", MakeGameMainSource(selectedTemplate))) {
+				return false;
+			}
+
+			const auto sourceFiles = CollectSourceFiles(project);
+
+			if(!WriteTextFile(project.rootDirectory / (project.name + ".vcxproj"), MakeGameVcxproj(project, sourceFiles, projectGuid))) {
+				return false;
+			}
+			if(!WriteTextFile(project.rootDirectory / (project.name + ".vcxproj.filters"), MakeGameFilters(project, sourceFiles))) {
+				return false;
+			}
+			if(!WriteTextFile(project.rootDirectory / (project.name + ".sln"), MakeGameSolution(project, projectGuid, solutionGuid))) {
+				return false;
+			}
+			if(!WriteTextFile(project.rootDirectory / ".gitignore", MakeGameGitIgnore())) {
+				return false;
+			}
+			if(!WriteTextFile(project.rootDirectory / "README.md", MakeGameReadme(project))) {
+				return false;
+			}
+
+			return true;
+		}
+
 	} // namespace
 
 	////////////////////////////////////////////////////////////////////////////////////////////
@@ -73,7 +497,7 @@ namespace CalyxEditor {
 		ImGui::SetNextWindowSize(viewport->WorkSize);
 		ImGui::Begin("Project Browser", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 		LoadIcons();
-
+		
 		ImGui::TextUnformatted("Calyx Project Browser");
 		ImGui::Separator();
 
@@ -151,6 +575,9 @@ namespace CalyxEditor {
 	//						最近使ったプロジェクト一覧
 	////////////////////////////////////////////////////////////////////////////////////////////
 	void ProjectBrowser::DrawRecentProjects(Calyx::ProjectInfo& outProject, bool& selected) {
+		DrawTemplateCards();
+
+		ImGui::Spacing();
 		ImGui::TextUnformatted("Recent Projects");
 		ImGui::Separator();
 
@@ -160,52 +587,19 @@ namespace CalyxEditor {
 			ImGui::BeginChild("RecentProjectList", ImVec2(0.0f, 0.0f), false);
 
 			const float cardWidth  = param_.cardSize_.x;
-			const float cardHeight = param_.cardSize_.y;
 			const float spacing	= ImGui::GetStyle().ItemSpacing.x;
 			const float availableWidth = ImGui::GetContentRegionAvail().x;
 			int columns = static_cast<int>(availableWidth / (cardWidth + spacing));
 			columns = (std::max)(1, columns);
 
-			for(size_t i = 0; i < recentProjects_.size(); ++i) {
-				const auto& entry = recentProjects_[i];
-				ImGui::PushID(static_cast<int>(i));
-
-				if(i > 0 && static_cast<int>(i % columns) != 0) {
-					ImGui::SameLine();
+			if(ImGui::BeginTable("RecentProjectCards", columns)) {
+				for(size_t i = 0; i < recentProjects_.size(); ++i) {
+					ImGui::TableNextColumn();
+					ImGui::PushID(static_cast<int>(i));
+					DrawRecentProjectCard(recentProjects_[i], outProject, selected);
+					ImGui::PopID();
 				}
-
-				ImGui::BeginGroup();
-				if(ImGui::Selectable("##recent-card", false, 0, ImVec2(cardWidth, cardHeight))) {
-					selected = LoadProject(entry.projectFile, outProject);
-				}
-				const ImVec2 cardMin = ImGui::GetItemRectMin();
-				const ImVec2 cardMax = ImGui::GetItemRectMax();
-				auto* drawList = ImGui::GetWindowDrawList();
-				drawList->AddRect(
-					cardMin,
-					cardMax,
-					ImGui::ColorConvertFloat4ToU32(
-						ImVec4(
-							param_.cardBorderColor_.x,
-							param_.cardBorderColor_.y,
-							param_.cardBorderColor_.z,
-							param_.cardBorderColor_.w)));
-
-				ImGui::SetCursorScreenPos(ImVec2(cardMin.x + param_.cardPadding_, cardMin.y + param_.cardPadding_));
-				if(genericIcon_) {
-					ImGui::Image(genericIcon_, ImVec2(cardWidth - param_.cardImageWidthOffset_, param_.cardImageHeight_));
-				} else {
-					ImGui::Dummy(ImVec2(cardWidth - param_.cardImageWidthOffset_, param_.cardImageHeight_));
-				}
-
-				const std::string label = entry.name.empty() ? entry.projectFile.stem().string() : entry.name;
-				ImGui::SetCursorScreenPos(ImVec2(cardMin.x + param_.cardPadding_, cardMin.y + param_.cardNameOffsetY_));
-				ImGui::TextWrapped("%s", label.c_str());
-				ImGui::SetCursorScreenPos(ImVec2(cardMin.x + param_.cardPadding_, cardMin.y + param_.cardVersionOffsetY_));
-				ImGui::TextDisabled("%s", entry.engineVersion.empty() ? "0.1.0" : entry.engineVersion.c_str());
-
-				ImGui::EndGroup();
-				ImGui::PopID();
+				ImGui::EndTable();
 			}
 
 			ImGui::EndChild();
@@ -213,9 +607,111 @@ namespace CalyxEditor {
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////
+	//						テンプレート一覧
+	////////////////////////////////////////////////////////////////////////////////////////////
+	void ProjectBrowser::DrawTemplateCards() {
+		ImGui::TextUnformatted("Project Templates");
+		ImGui::Separator();
+
+		const float cardWidth  = param_.templateCardSize_.x;
+		const float spacing = ImGui::GetStyle().ItemSpacing.x;
+		const float availableWidth = ImGui::GetContentRegionAvail().x;
+		int columns = static_cast<int>(availableWidth / (cardWidth + spacing));
+		columns = (std::max)(1, columns);
+
+		if(ImGui::BeginTable("TemplateCards", columns)) {
+			for(size_t i = 0; i < std::size(kTemplates); ++i) {
+				ImGui::TableNextColumn();
+				ImGui::PushID(static_cast<int>(i));
+				DrawTemplateCard(kTemplates[i]);
+				ImGui::PopID();
+			}
+			ImGui::EndTable();
+		}
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////
+	//						テンプレートカード
+	////////////////////////////////////////////////////////////////////////////////////////////
+	void ProjectBrowser::DrawTemplateCard(const TemplateInfo& item) {
+		const bool selected = selectedTemplate_ == item.type;
+		const ImVec2 cardSize(param_.templateCardSize_.x, param_.templateCardSize_.y);
+		const ImVec2 cardMin = ImGui::GetCursorScreenPos();
+
+		if(ImGui::Selectable("##template-card", selected, 0, cardSize)) {
+			selectedTemplate_ = item.type;
+		}
+
+		const ImVec2 cardMax(cardMin.x + cardSize.x, cardMin.y + cardSize.y);
+		auto* drawList = ImGui::GetWindowDrawList();
+		const ImU32 borderColor = selected
+			? ImGui::GetColorU32(ImGuiCol_CheckMark)
+			: ImGui::ColorConvertFloat4ToU32(ImVec4(
+				  param_.cardBorderColor_.x,
+				  param_.cardBorderColor_.y,
+				  param_.cardBorderColor_.z,
+				  param_.cardBorderColor_.w));
+		drawList->AddRect(cardMin, cardMax, borderColor);
+
+		ImGui::SetCursorScreenPos(ImVec2(cardMin.x + param_.cardPadding_, cardMin.y + param_.cardPadding_));
+		if(genericIcon_) {
+			ImGui::Image(genericIcon_, ImVec2(cardSize.x - param_.cardImageWidthOffset_, param_.cardImageHeight_));
+		} else {
+			ImGui::Dummy(ImVec2(cardSize.x - param_.cardImageWidthOffset_, param_.cardImageHeight_));
+		}
+
+		ImGui::SetCursorScreenPos(ImVec2(cardMin.x + param_.cardPadding_, cardMin.y + param_.cardNameOffsetY_));
+		ImGui::TextWrapped("%s", item.name);
+		ImGui::SetCursorScreenPos(ImVec2(cardMin.x + param_.cardPadding_, cardMin.y + param_.cardVersionOffsetY_));
+		ImGui::TextDisabled("Template");
+
+		ImGui::SetCursorScreenPos(cardMax);
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////
+	//						最近使ったプロジェクトカード
+	////////////////////////////////////////////////////////////////////////////////////////////
+	void ProjectBrowser::DrawRecentProjectCard(const Calyx::RecentProjectEntry& entry, Calyx::ProjectInfo& outProject, bool& selected) {
+		const ImVec2 cardSize(param_.cardSize_.x, param_.cardSize_.y);
+		const ImVec2 cardMin = ImGui::GetCursorScreenPos();
+
+		if(ImGui::Selectable("##recent-card", false, 0, cardSize)) {
+			selected = LoadProject(entry.projectFile, outProject);
+		}
+
+		const ImVec2 cardMax(cardMin.x + cardSize.x, cardMin.y + cardSize.y);
+		auto* drawList = ImGui::GetWindowDrawList();
+		drawList->AddRect(
+			cardMin,
+			cardMax,
+			ImGui::ColorConvertFloat4ToU32(ImVec4(
+				param_.cardBorderColor_.x,
+				param_.cardBorderColor_.y,
+				param_.cardBorderColor_.z,
+				param_.cardBorderColor_.w)));
+
+		ImGui::SetCursorScreenPos(ImVec2(cardMin.x + param_.cardPadding_, cardMin.y + param_.cardPadding_));
+		if(genericIcon_) {
+			ImGui::Image(genericIcon_, ImVec2(cardSize.x - param_.cardImageWidthOffset_, param_.cardImageHeight_));
+		} else {
+			ImGui::Dummy(ImVec2(cardSize.x - param_.cardImageWidthOffset_, param_.cardImageHeight_));
+		}
+
+		const std::string label = entry.name.empty() ? entry.projectFile.stem().string() : entry.name;
+		ImGui::SetCursorScreenPos(ImVec2(cardMin.x + param_.cardPadding_, cardMin.y + param_.cardNameOffsetY_));
+		ImGui::TextWrapped("%s", label.c_str());
+		ImGui::SetCursorScreenPos(ImVec2(cardMin.x + param_.cardPadding_, cardMin.y + param_.cardVersionOffsetY_));
+		ImGui::TextDisabled("%s", entry.engineVersion.empty() ? "0.1.0" : entry.engineVersion.c_str());
+
+		ImGui::SetCursorScreenPos(cardMax);
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////
 	//						テンプレート詳細
 	////////////////////////////////////////////////////////////////////////////////////////////
 	void ProjectBrowser::DrawTemplateDetails() {
+		const TemplateInfo& item = GetSelectedTemplate();
+
 		ImGui::TextUnformatted("Template");
 		ImGui::Separator();
 
@@ -228,8 +724,8 @@ namespace CalyxEditor {
 		}
 
 		ImGui::Spacing();
-		ImGui::TextUnformatted("Blank");
-		ImGui::TextWrapped("An empty game project. No gameplay code is generated yet.");
+		ImGui::TextUnformatted(item.name);
+		ImGui::TextWrapped("%s", item.description);
 
 		ImGui::Spacing();
 		ImGui::Separator();
@@ -243,7 +739,7 @@ namespace CalyxEditor {
 
 		ImGui::TextDisabled("Startup Scene");
 		ImGui::SameLine(param_.templateValueOffsetX_);
-		ImGui::TextUnformatted("None");
+		ImGui::TextUnformatted(item.startupScene[0] == '\0' ? "None" : item.startupScene);
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////
@@ -282,7 +778,7 @@ namespace CalyxEditor {
 
 		ImGui::SameLine();
 		if(ImGui::Button("Create", ImVec2(buttonWidth, param_.createButtonHeight_))) {
-			selected = CreateBlankProject(outProject);
+			selected = CreateProjectFromSelectedTemplate(outProject);
 		}
 
 		ImGui::EndGroup();
@@ -352,11 +848,13 @@ namespace CalyxEditor {
 	////////////////////////////////////////////////////////////////////////////////////////////
 	//						Blankプロジェクト作成
 	////////////////////////////////////////////////////////////////////////////////////////////
-	bool ProjectBrowser::CreateBlankProject(Calyx::ProjectInfo& outProject) {
+	bool ProjectBrowser::CreateProjectFromSelectedTemplate(Calyx::ProjectInfo& outProject) {
 		if(IsBlank(newProjectName_.data()) || IsBlank(newProjectDirectory_.data())) {
 			statusMessage_ = "Project name and directory are required.";
 			return false;
 		}
+
+		const TemplateInfo& selectedTemplate = GetSelectedTemplate();
 
 		Calyx::ProjectInfo project;
 		project.name			 = newProjectName_.data();
@@ -364,14 +862,32 @@ namespace CalyxEditor {
 		project.rootDirectory	 = std::filesystem::path(newProjectDirectory_.data()) / project.name;
 		project.projectFile		 = project.rootDirectory / (project.name + ".calyxproj");
 		project.assetDirectory	 = "Resources/Assets";
-		project.sourceDirectory	 = "Game";
+		project.sourceDirectory	 = selectedTemplate.sourceDirectory;
+		project.startupScene		 = selectedTemplate.startupScene;
+		project.templateName		 = selectedTemplate.name;
 
 		if(!Calyx::CreateProject(project)) {
 			statusMessage_ = "Project could not be created.";
 			return false;
 		}
+		if(!CreateGameWorkspace(project, selectedTemplate)) {
+			statusMessage_ = "Visual Studio project files could not be created.";
+			return false;
+		}
 
 		return LoadProject(project.projectFile, outProject);
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////
+	//						選択中テンプレートの取得
+	////////////////////////////////////////////////////////////////////////////////////////////
+	const ProjectBrowser::TemplateInfo& ProjectBrowser::GetSelectedTemplate() const {
+		for(const TemplateInfo& item : kTemplates) {
+			if(item.type == selectedTemplate_) {
+				return item;
+			}
+		}
+		return kTemplates[0];
 	}
 
 } // namespace CalyxEditor

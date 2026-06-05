@@ -1,5 +1,6 @@
 #include "PostEffectNodeEditorPanel.h"
 
+#include <CalyxEngine/Project.h>
 #include <Engine/PostProcess/Manager/PostEffectManager.h>
 #include <Engine/PostProcess/Slot/PostEffectSlot.h>
 #include <Engine/Foundation/Utility/FileSystem/FileSystemHelper.h>
@@ -13,7 +14,7 @@
 
 namespace CalyxEngine {
 	namespace {
-		constexpr const char* kDefaultPath = "Resources/Assets/PostEffects/Default.postfx";
+		constexpr const char* kDefaultPath = "PostEffects/Default.postfx";
 		constexpr const char* kEffectTypes[] = {
 			"RadialBlur",
 			"ChromaticAberration",
@@ -97,7 +98,8 @@ namespace CalyxEngine {
 	PostEffectNodeEditorPanel::PostEffectNodeEditorPanel()
 		: IEngineUI("Post Effect Graph"), canvas_("PostEffectGraphCanvas") {
 		isShow_ = false;
-		std::copy_n(kDefaultPath, (std::min)(strlen(kDefaultPath), pathBuffer_.size() - 1), pathBuffer_.data());
+		const std::string defaultPath = Calyx::ResolveAssetPath(kDefaultPath).generic_string();
+		std::copy_n(defaultPath.c_str(), (std::min)(defaultPath.size(), pathBuffer_.size() - 1), pathBuffer_.data());
 		EnsureIoNodes();
 	}
 
@@ -659,7 +661,7 @@ namespace CalyxEngine {
 
 	void PostEffectNodeEditorPanel::Save() {
 		try {
-			std::filesystem::path path(pathBuffer_.data());
+			std::filesystem::path path = Calyx::ResolveAssetPath(pathBuffer_.data());
 			FileSystemHelper::CreateDirectoryPath(path.parent_path().string());
 			std::ofstream ofs(path);
 			if(!ofs) return;
@@ -670,7 +672,7 @@ namespace CalyxEngine {
 
 	void PostEffectNodeEditorPanel::Load() {
 		try {
-			std::ifstream ifs(pathBuffer_.data());
+			std::ifstream ifs(Calyx::ResolveAssetPath(pathBuffer_.data()));
 			if(!ifs) return;
 			nlohmann::json root;
 			ifs >> root;
@@ -681,6 +683,6 @@ namespace CalyxEngine {
 
 	void PostEffectNodeEditorPanel::Apply() {
 		Save();
-		PostEffectManager::Get()->LoadPreset(pathBuffer_.data());
+		PostEffectManager::Get()->LoadPreset(Calyx::ResolveAssetPath(pathBuffer_.data()).generic_string());
 	}
 }

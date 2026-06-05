@@ -1,5 +1,6 @@
 #include "EffectAsset.h"
 
+#include <CalyxEngine/Project.h>
 #include <Engine/Foundation/Utility/FileSystem/FileSystemHelper.h>
 #include <externals/nlohmann/json.hpp>
 
@@ -32,7 +33,7 @@ namespace CalyxEngine {
 
 	bool EffectAsset::Load(const std::filesystem::path& path) {
 		const std::string name = path.stem().string();
-		const std::filesystem::path& fullPath = "Resources/Assets/Effects/" + name + ".effect";
+		const std::filesystem::path fullPath = Calyx::ResolveAssetPath(std::filesystem::path("Effects") / (name + ".effect"));
 		nlohmann::json root;
 		if(!ReadJson(fullPath, root)) return false;
 		data_ = root.get<EffectAssetData>();

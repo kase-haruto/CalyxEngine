@@ -10,9 +10,7 @@
 
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
 #include <Engine/Objects/Event/Camera/CameraEventObject.h>
-#include <Game/3D/Actor/DemoPlayer/DemoPlayer.h>
 #include <Engine/Objects/3D/Actor/SplineDeformObject.h>
-#include <Game/3D/Actor/DemoPlayer/Weapon/Weapon.h>
 
 namespace CalyxEngine {
 	void RegisterGeneratedSceneObjects() {
@@ -44,19 +42,6 @@ namespace CalyxEngine {
 
 		{
 			SceneObjectClassDesc desc;
-			desc.typeName = "DemoPlayer";
-			desc.displayName = "Demo Player";
-			desc.objectType = ObjectType::GameObject;
-			desc.iconPath = "UI/Tool/cube.dds";
-			desc.placeable = true;
-			desc.prefabEditable = false;
-			desc.prefabRoot = false;
-			desc.ctor = std::make_unique<SceneCtor<DemoPlayer>>();
-			SceneObjectRegistry::Get().Register(std::move(desc));
-		}
-
-		{
-			SceneObjectClassDesc desc;
 			desc.typeName = "SplineDeformObject";
 			desc.displayName = "Spline Wall Deform";
 			desc.objectType = ObjectType::GameObject;
@@ -65,19 +50,6 @@ namespace CalyxEngine {
 			desc.prefabEditable = false;
 			desc.prefabRoot = false;
 			desc.ctor = std::make_unique<SceneCtor<SplineDeformObject>>();
-			SceneObjectRegistry::Get().Register(std::move(desc));
-		}
-
-		{
-			SceneObjectClassDesc desc;
-			desc.typeName = "Weapon";
-			desc.displayName = "Weapon";
-			desc.objectType = ObjectType::GameObject;
-			desc.iconPath = "UI/Tool/event.png";
-			desc.placeable = true;
-			desc.prefabEditable = false;
-			desc.prefabRoot = false;
-			desc.ctor = std::make_unique<SceneCtor<Weapon>>();
 			SceneObjectRegistry::Get().Register(std::move(desc));
 		}
 	}

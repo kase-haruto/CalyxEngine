@@ -14,6 +14,7 @@ namespace Calyx {
 		std::filesystem::path assetDirectory;
 		std::filesystem::path sourceDirectory;
 		std::filesystem::path startupScene;
+		std::string			  templateName;
 
 		bool IsValid() const { return !projectFile.empty() && !rootDirectory.empty(); }
 	};
@@ -28,6 +29,15 @@ namespace Calyx {
 	bool SaveProjectFile(const ProjectInfo& project);
 	bool CreateProject(const ProjectInfo& project);
 	std::filesystem::path ResolveProjectPath(const ProjectInfo& project, const std::filesystem::path& path);
+
+	void SetCurrentProject(const ProjectInfo& project);
+	void ClearCurrentProject();
+	bool HasCurrentProject();
+	const ProjectInfo& GetCurrentProject();
+	std::filesystem::path GetProjectRoot();
+	std::filesystem::path GetAssetRoot();
+	std::filesystem::path ResolveAssetPath(const std::filesystem::path& path);
+	std::filesystem::path ToAssetRelativePath(const std::filesystem::path& path);
 
 	std::filesystem::path DefaultProjectRegistryPath();
 	bool				  LoadRecentProjects(const std::filesystem::path& path, std::vector<RecentProjectEntry>& outProjects);

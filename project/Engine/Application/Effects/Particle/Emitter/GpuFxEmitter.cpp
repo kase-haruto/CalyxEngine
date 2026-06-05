@@ -1,4 +1,5 @@
 #include "GpuFxEmitter.h"
+#include <CalyxEngine/Project.h>
 #include <Data/Engine/Configs/Scene/Objects/Particle/Module/ModuleConfig.h>
 #include <Engine/Application/Effects/FxGuiHelpers.h>
 #include <Engine/Application/UI/Panels/InspectorPanel.h>
@@ -25,7 +26,7 @@ namespace CalyxEngine {
 
 		bool ExistsAssetTexture(const std::string& path) {
 			if(path.empty()) return false;
-			const std::filesystem::path assetPath = std::filesystem::path("Resources/Assets") / path;
+			const std::filesystem::path assetPath = Calyx::ResolveAssetPath(path);
 			if(std::filesystem::exists(assetPath)) return true;
 
 			const std::filesystem::path ddsPath = assetPath.parent_path() / (assetPath.stem().string() + ".dds");

@@ -193,6 +193,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   <ItemGroup>
     <ClCompile Include="Engine\Application\Runtime\EngineRuntime.cpp" />
     <ClCompile Include="Engine\Application\Runtime\Project.cpp" />
+    <ClCompile Include="Engine\Application\Runtime\ProjectContext.cpp" />
     <ClCompile Include="Engine\Application\Runtime\SceneRegistry.cpp" />
     <ClCompile Include="Engine\Application\UI\EngineUI\ManipulatorSettingsUI.cpp" />
     <ClCompile Include="Data\Engine\Configs\Scene\Objects\Particle\Module\ModuleConfig.cpp">
@@ -364,7 +365,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Objects\LightObject\PointLight.cpp" />
     <ClCompile Include="Engine\Objects\LightObject\PointLightActor.cpp" />
     <ClCompile Include="Engine\Scene\Base\IScene.cpp" />
-    <ClCompile Include="Engine\Scene\Test\TestScene.cpp" />
     <ClCompile Include="externals\GlobalVariable\GlobalVariables.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
     <ClCompile Include="externals\imgui\imgui_demo.cpp" />
@@ -696,7 +696,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Objects\LightObject\PointLight.h" />
     <ClInclude Include="Engine\Objects\LightObject\PointLightActor.h" />
     <ClInclude Include="Engine\Scene\Base\IScene.h" />
-    <ClInclude Include="Engine\Scene\Test\TestScene.h" />
     <ClInclude Include="externals\GlobalVariable\GlobalVariables.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
     <ClInclude Include="externals\imgui\imgui.h" />

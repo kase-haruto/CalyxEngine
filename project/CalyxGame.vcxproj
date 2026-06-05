@@ -147,21 +147,23 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Game\3D\Actor\DemoPlayer\DemoPlayer.cpp" />
-    <ClCompile Include="Game\3D\Actor\DemoPlayer\Weapon\Weapon.cpp" />
-    <ClCompile Include="Game\Input\PlayerInput.cpp" />
-    <ClCompile Include="Game\Scene\Utility\SceneTypeUtil.cpp" />
+    <ClCompile Include="Demo\3D\Actor\DemoPlayer\DemoPlayer.cpp" />
+    <ClCompile Include="Demo\3D\Actor\DemoPlayer\Weapon\Weapon.cpp" />
+    <ClCompile Include="Demo\Input\PlayerInput.cpp" />
+    <ClCompile Include="Demo\Scene\DemoScene\DemoScene.cpp" />
+    <ClCompile Include="Demo\Scene\Utility\SceneTypeUtil.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Game\3D\Actor\DemoPlayer\DemoPlayer.h" />
-    <ClInclude Include="Game\3D\Actor\DemoPlayer\Details\DemoPlayerActionConfig.h" />
-    <ClInclude Include="Game\3D\Actor\DemoPlayer\Weapon\Weapon.h" />
-    <ClInclude Include="Game\Input\IInputAction.h" />
-    <ClInclude Include="Game\Input\InputConfig.h" />
-    <ClInclude Include="Game\Input\PlayerInput.h" />
-    <ClInclude Include="Game\Scene\Details\SceneType.h" />
-    <ClInclude Include="Game\Scene\Utility\SceneTypeUtil.h" />
+    <ClInclude Include="Demo\3D\Actor\DemoPlayer\DemoPlayer.h" />
+    <ClInclude Include="Demo\3D\Actor\DemoPlayer\Details\DemoPlayerActionConfig.h" />
+    <ClInclude Include="Demo\3D\Actor\DemoPlayer\Weapon\Weapon.h" />
+    <ClInclude Include="Demo\Input\IInputAction.h" />
+    <ClInclude Include="Demo\Input\InputConfig.h" />
+    <ClInclude Include="Demo\Input\PlayerInput.h" />
+    <ClInclude Include="Demo\Scene\DemoScene\DemoScene.h" />
+    <ClInclude Include="Demo\Scene\Details\SceneType.h" />
+    <ClInclude Include="Demo\Scene\Utility\SceneTypeUtil.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="CalyxEngineLib.vcxproj">

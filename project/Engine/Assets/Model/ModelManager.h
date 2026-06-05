@@ -90,6 +90,11 @@ private:
 	 */
 	void LoadAllModels();
 
+	/**
+	 * \brief 現在のプロジェクトからモデルディレクトリを取得
+	 */
+	std::filesystem::path GetModelDirectoryPath() const;
+
 	/// ファイル読み込み → CPU側 ModelData を構築（Assimp使用）
 	ModelData LoadModelFile(const std::string& directoryPath, const std::string& fileNameWithExt);
 
@@ -116,8 +121,6 @@ private:
 	//===================================================================
 	//                    private member variables
 	//===================================================================*/
-
-	const std::string             directoryPath_ = "Resources/Assets/models"; //< モデルディレクトリパス
 
 	std::unordered_map<std::string, std::unique_ptr<ModelData>> modelDatas_;
 	mutable std::mutex                        modelDataMutex_; //< モデルデータ用ミューテックス

@@ -147,10 +147,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Demo\Scene\DemoScene\DemoScene.cpp" />
     <ClCompile Include="Editor\EditorMain.cpp" />
     <ClCompile Include="Editor\ProjectBrowser.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Demo\Scene\DemoScene\DemoScene.h" />
     <ClInclude Include="Editor\ProjectBrowser.h" />
   </ItemGroup>
   <ItemGroup>

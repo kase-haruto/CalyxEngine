@@ -1,6 +1,7 @@
 #include "LevelEditor.h"
 
 // engine
+#include <CalyxEngine/Project.h>
 #include <externals/nlohmann/json.hpp>
 #include <Engine/Application/Effects/FxObject.h>
 #include <Engine/Application/Settings/EngineSettings.h>
@@ -79,7 +80,7 @@ namespace CalyxEngine {
 		viewportSelection_ = std::make_unique<ViewportSelectionController>();
 
 		// レイアウトスイッチャーの初期化 --------------------------------------
-		std::string				 layoutDir = "Resources/Assets/Configs/Editor/Layout/";
+		std::string				 layoutDir = Calyx::ResolveAssetPath("Configs/Editor/Layout").generic_string();
 		auto					 files	   = CalyxEngine::FileScanner::ScanFiles(layoutDir, ".ini");
 		std::vector<LayoutEntry> layouts;
 
@@ -88,7 +89,7 @@ namespace CalyxEngine {
 		}
 		// ファイルが見つからなかった場合のフォールバック（念のため）
 		if(layouts.empty()) {
-			layouts.push_back({"Default", "Resources/Assets/Configs/Editor/Layout/default.ini"});
+			layouts.push_back({"Default", Calyx::ResolveAssetPath("Configs/Editor/Layout/default.ini").generic_string()});
 		}
 
 		layoutSwitcher_ = std::make_unique<ImGuiLayoutSwitcher>(std::move(layouts), "imgui.ini");
@@ -214,7 +215,7 @@ namespace CalyxEngine {
 					"Ctrl+S",
 					[this]() {
 						IGFD::FileDialogConfig config;
-						config.path = "Resources/Assets/Scenes/";
+						config.path = Calyx::ResolveAssetPath("Scenes").generic_string();
 						ImGuiFileDialog::Instance()->OpenDialog(
 							"SceneSaveDialog",
 							"save scene file",
@@ -229,7 +230,7 @@ namespace CalyxEngine {
 					"Ctrl+O",
 					[] {
 						IGFD::FileDialogConfig config;
-						config.path = "Resources/Assets/Scenes/";
+						config.path = Calyx::ResolveAssetPath("Scenes").generic_string();
 						ImGuiFileDialog::Instance()->OpenDialog(
 							"SceneOpenDialog",
 							"open scene",
@@ -252,7 +253,7 @@ namespace CalyxEngine {
 					"",
 					[] {
 						IGFD::FileDialogConfig config;
-						config.path = "Resources/Assets/";
+						config.path = Calyx::GetAssetRoot().generic_string();
 						ImGuiFileDialog::Instance()->OpenDialog(
 							"PrefabOpenDialog",
 							"open prefab",
@@ -272,7 +273,7 @@ namespace CalyxEngine {
 					"",
 					[] {
 						IGFD::FileDialogConfig config;
-						config.path = "Resources/Assets/Prefabs/";
+						config.path = Calyx::ResolveAssetPath("Prefabs").generic_string();
 						ImGuiFileDialog::Instance()->OpenDialog(
 							"PrefabSaveAsDialog",
 							"save prefab file",
@@ -696,27 +697,27 @@ namespace CalyxEngine {
 	}
 
 	std::string LevelEditor::GetEditToolModeLayoutPath(EngineEdit::EditToolMode mode) const {
-		const std::string layoutDir = "Resources/Assets/Configs/Editor/Layout/";
+		const std::filesystem::path layoutDir = Calyx::ResolveAssetPath("Configs/Editor/Layout");
 
 		switch(mode) {
 		case EngineEdit::EditToolMode::Object:
-			return layoutDir + "ObjectEdit.ini";
+			return (layoutDir / "ObjectEdit.ini").generic_string();
 		case EngineEdit::EditToolMode::Object2D:
-			return layoutDir + "Object2DEdit.ini";
+			return (layoutDir / "Object2DEdit.ini").generic_string();
 		case EngineEdit::EditToolMode::SpriteAnimation:
-			return layoutDir + "SpriteAnimationEdit.ini";
+			return (layoutDir / "SpriteAnimationEdit.ini").generic_string();
 		case EngineEdit::EditToolMode::Prefab:
-			return layoutDir + "PrefabEdit.ini";
+			return (layoutDir / "PrefabEdit.ini").generic_string();
 		case EngineEdit::EditToolMode::ParticleEffect:
-			return layoutDir + "ParticleEffectEdit.ini";
+			return (layoutDir / "ParticleEffectEdit.ini").generic_string();
 		case EngineEdit::EditToolMode::PostEffect:
-			return layoutDir + "PostEfectEdit.ini";
+			return (layoutDir / "PostEfectEdit.ini").generic_string();
 		case EngineEdit::EditToolMode::Material:
-			return layoutDir + "MaterialEdit.ini";
+			return (layoutDir / "MaterialEdit.ini").generic_string();
 		case EngineEdit::EditToolMode::Animation:
-			return layoutDir + "AnimationEdit.ini";
+			return (layoutDir / "AnimationEdit.ini").generic_string();
 		default:
-			return layoutDir + "ObjectEdit.ini";
+			return (layoutDir / "ObjectEdit.ini").generic_string();
 		}
 	}
 
@@ -727,7 +728,7 @@ namespace CalyxEngine {
 		}
 
 		if(mode == EngineEdit::EditToolMode::Object || mode == EngineEdit::EditToolMode::Object2D) {
-			return "Resources/Assets/Configs/Editor/Layout/gameEngineDefault.ini";
+			return Calyx::ResolveAssetPath("Configs/Editor/Layout/gameEngineDefault.ini").generic_string();
 		}
 
 		return modeLayoutPath;
@@ -779,7 +780,7 @@ namespace CalyxEngine {
 		if(editToolMode_ != EngineEdit::EditToolMode::Prefab || !prefabEdit_ || !prefabEdit_->Context()) return;
 		if(prefabEdit_->Path().empty()) {
 			IGFD::FileDialogConfig config;
-			config.path = "Resources/Assets/Prefabs/";
+			config.path = Calyx::ResolveAssetPath("Prefabs").generic_string();
 			ImGuiFileDialog::Instance()->OpenDialog(
 				"PrefabSaveAsDialog",
 				"save prefab file",
@@ -1277,7 +1278,7 @@ namespace CalyxEngine {
 		SceneContext* ctx = SceneContext::Current();
 		if(!ctx) return;
 
-		std::string scenePath = "Resources/Assets/Scenes/" + ctx->GetSceneName() + ".scene";
+		std::string scenePath = Calyx::ResolveAssetPath(std::filesystem::path("Scenes") / (ctx->GetSceneName() + ".scene")).generic_string();
 		SceneSerializer::Save(*ctx, scenePath);
 	}
 
