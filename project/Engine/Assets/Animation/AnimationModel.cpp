@@ -1,4 +1,5 @@
 #include "AnimationModel.h"
+#include <CalyxEngine/Project.h>
 #include <Engine/Foundation/Debug/CxAssert.h>
 
 #include <Engine/Assets/Model/ModelData.h>
@@ -35,7 +36,7 @@ namespace CalyxEngine {
 		Map();
 
 		// メインアニメをロード
-		animationData_ = LoadAnimationFile("Resources/Assets/models", fileName_);
+		animationData_ = LoadAnimationFile(Calyx::ResolveAssetPath("models").generic_string(), fileName_);
 
 		// 初期ステートを登録
 		std::string	   base = std::filesystem::path(fileName).stem().string();
@@ -121,7 +122,7 @@ namespace CalyxEngine {
 	void AnimationModel::AddAnimation(const std::string& name, const std::string& file) {
 		AnimationState st;
 		st.name		 = name;
-		st.animation = LoadAnimationFile("Resources/Assets/models", file);
+		st.animation = LoadAnimationFile(Calyx::ResolveAssetPath("models").generic_string(), file);
 		if(modelData_) BuildFastChannels(st.animation);
 		animationStates_.emplace(name, st);
 	}

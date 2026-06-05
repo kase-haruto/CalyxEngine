@@ -3,6 +3,7 @@
 /* ========================================================================
    include space
    ===================================================================== */
+#include <CalyxEngine/Project.h>
 #include <Engine/Application/Effects/FxSystem.h>
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 #include <Engine/Foundation/Json/JsonUtils.h>
@@ -63,7 +64,7 @@ namespace {
 // -----------------------------------------------------------------------------
 bool SceneSerializer::Save(const SceneContext& context, const std::string& path) {
 	auto root = DumpJson(context);
-	return JsonUtils::Save(path, root);
+	return JsonUtils::Save(Calyx::ResolveAssetPath(path).generic_string(), root);
 }
 
 // -----------------------------------------------------------------------------
@@ -71,7 +72,7 @@ bool SceneSerializer::Save(const SceneContext& context, const std::string& path)
 // -----------------------------------------------------------------------------
 bool SceneSerializer::Load(SceneContext& context, const std::string& path) {
 	nlohmann::json root;
-	if(!JsonUtils::Load(path, root)) return false;
+	if(!JsonUtils::Load(Calyx::ResolveAssetPath(path).generic_string(), root)) return false;
 	return LoadJson(context, root);
 }
 

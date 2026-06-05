@@ -1,5 +1,8 @@
 #include "ImGuiLayoutSwitcher.h"
+#include <CalyxEngine/Project.h>
 #include <externals/imgui/imgui.h>
+
+#include <cstdio>
 
 namespace CalyxEngine {
 
@@ -40,7 +43,13 @@ namespace CalyxEngine {
 			ImGui::Separator();
 
 			// 名前を付けて保存（簡易版）
-			static char saveAsBuffer[512] = "Resources/Assets/Configs/Editor/Layout/custom.ini";
+			static char saveAsBuffer[512] = "";
+			static bool saveAsPathInitialized = false;
+			if(!saveAsPathInitialized) {
+				const std::string defaultSavePath = Calyx::ResolveAssetPath("Configs/Editor/Layout/custom.ini").generic_string();
+				std::snprintf(saveAsBuffer, sizeof(saveAsBuffer), "%s", defaultSavePath.c_str());
+				saveAsPathInitialized = true;
+			}
 			ImGui::InputText("##SaveAsPath", saveAsBuffer, IM_ARRAYSIZE(saveAsBuffer));
 			ImGui::SameLine();
 			if(ImGui::Button("Save As...")) {

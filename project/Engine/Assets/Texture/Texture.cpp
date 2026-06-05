@@ -4,6 +4,7 @@
 /* ===================================================================== */
 
 /* engine */
+#include <CalyxEngine/Project.h>
 #include <Engine/Graphics/Descriptor/DescriptorAllocator.h>
 #include <Engine/Foundation/Utility/Func/CxUtils.h>
 
@@ -50,8 +51,7 @@ Texture& Texture::operator=(Texture&& other) noexcept {
 }
 
 void Texture::Load([[maybe_unused]] ID3D12Device* device) {
-	std::string fullPath = "Resources/Assets/" + filePath_;
-	image_ = Cx::IO::LoadTextureImage(fullPath, forceSrgb_);
+	image_ = Cx::IO::LoadTextureImage(Calyx::ResolveAssetPath(filePath_).generic_string(), forceSrgb_);
 	metadata_ = image_.GetMetadata();
 }
 

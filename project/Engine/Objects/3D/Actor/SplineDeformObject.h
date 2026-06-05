@@ -29,7 +29,7 @@ private:
 
 private:
 	std::string sourceModelFile_ = "wall.obj";
-	std::string splinePath_ = "Resources/Assets/Spline/Rail.json";
+	std::string splinePath_ = "Spline/Rail.json";
 	int deformAxis_ = static_cast<int>(SplineDeformedModel::Axis::X);
 	float radiusScale_ = 1.0f;
 	float distanceOffset_ = 0.0f;

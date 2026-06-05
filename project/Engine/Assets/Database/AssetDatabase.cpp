@@ -25,12 +25,21 @@ AssetDatabase* AssetDatabase::GetInstance() {
 //		初期化
 /////////////////////////////////////////////////////////////////////////////////////////
 void AssetDatabase::Initialize(const std::filesystem::path& assetsRoot) {
+	records_.clear();
+	normPathToGuid_.clear();
+	viewCache_.clear();
+
 	// アセットフォルダのルートパスを正規化して保持
-	assetsRoot_ = std::filesystem::weakly_canonical(assetsRoot);
+	std::error_code ec;
+	assetsRoot_ = std::filesystem::weakly_canonical(assetsRoot, ec);
+	if(ec) {
+		assetsRoot_ = assetsRoot.lexically_normal();
+		ec.clear();
+	}
 
 	// 存在しない場合は作成
 	if(!std::filesystem::exists(assetsRoot_)) {
-		std::filesystem::create_directories(assetsRoot_);
+		std::filesystem::create_directories(assetsRoot_, ec);
 	}
 
 	// フォルダ全体をスキャンして登録

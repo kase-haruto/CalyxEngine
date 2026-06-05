@@ -1,12 +1,12 @@
 #include "SceneContext.h"
 
 // engine
-#include <Engine/Application/Effects/FxSystem.h>
 #include <Engine/Application/Effects/EffectPlayer.h>
+#include <Engine/Application/Effects/FxSystem.h>
 #include <Engine/Collision/CollisionManager.h>
 #include <Engine/Graphics/Pipeline/Service/PipelineService.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
-#include <Engine/Scene/Runtime/IRuntimeBehaviour.h>
+#include <Engine/Scene/SceneRuntime/IRuntimeBehaviour.h>
 
 SceneContext* SceneContext::current_ = nullptr;
 

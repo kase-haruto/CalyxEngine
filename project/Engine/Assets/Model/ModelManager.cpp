@@ -1,6 +1,7 @@
 #include "ModelManager.h"
 
 // engine
+#include <CalyxEngine/Project.h>
 #include "Engine/Foundation/Math/MathUtil.h"
 #include "Engine/Graphics/Context/GraphicsGroup.h"
 #include <Engine/Graphics/Buffer/DxIndexBuffer.h>
@@ -87,7 +88,7 @@ void ModelManager::WorkerMain() {
 		}
 
 		// CPUロード
-		ModelData model = LoadModelFile(directoryPath_, currentRequest.fileName);
+		ModelData model = LoadModelFile(GetModelDirectoryPath().generic_string(), currentRequest.fileName);
 
 		// unique_ptr に包む
 		auto modelPtr = std::make_unique<ModelData>(std::move(model));
@@ -201,9 +202,11 @@ std::vector<std::string> ModelManager::GetLoadedModelNames() const {
 //	ファイルを走破してすべてのモデルファイルをload
 //=============================================================================
 void ModelManager::LoadAllModels() {
+	const auto modelDirectory = GetModelDirectoryPath();
+
 	// ファイルを走破してモデルをロードする なければエラーをはく
-	if(!CalyxEngine::FileScanner::EnsureDirectoryExists(directoryPath_)) {
-		throw std::runtime_error("Model directory does not exist: " + directoryPath_);
+	if(!CalyxEngine::FileScanner::EnsureDirectoryExists(modelDirectory.generic_string())) {
+		throw std::runtime_error("Model directory does not exist: " + modelDirectory.generic_string());
 	}
 	
 	// Assimでサポートされているモデル形式の拡張子
@@ -214,7 +217,7 @@ void ModelManager::LoadAllModels() {
 	};
 	
 	// ディレクトリ内のすべてのファイルをスキャン
-	auto allFiles = CalyxEngine::FileScanner::ScanFiles(directoryPath_, "");
+	auto allFiles = CalyxEngine::FileScanner::ScanFiles(modelDirectory.generic_string(), "");
 	
 	for(const auto& filePath : allFiles) {
 		std::string ext = filePath.extension().string();
@@ -239,6 +242,13 @@ void ModelManager::LoadAllModels() {
 			LoadModel(fileName);
 		}
 	}
+}
+
+//=============================================================================
+//	現在プロジェクトのモデルディレクトリを取得
+//=============================================================================
+std::filesystem::path ModelManager::GetModelDirectoryPath() const {
+	return Calyx::ResolveAssetPath("models");
 }
 
 //=============================================================================
@@ -503,9 +513,9 @@ void ModelManager::LoadMaterials(const aiScene* scene, const std::filesystem::pa
 
 	auto resolveTexturePath = [&](const aiString& texPath) -> std::string {
 		std::error_code ec;
-		std::filesystem::path assetRoot = std::filesystem::weakly_canonical("Resources/Assets", ec);
+		std::filesystem::path assetRoot = std::filesystem::weakly_canonical(Calyx::GetAssetRoot(), ec);
 		if(ec) {
-			assetRoot = std::filesystem::path("Resources/Assets");
+			assetRoot = Calyx::GetAssetRoot();
 			ec.clear();
 		}
 		std::filesystem::path path(normalizeTexturePath(texPath));

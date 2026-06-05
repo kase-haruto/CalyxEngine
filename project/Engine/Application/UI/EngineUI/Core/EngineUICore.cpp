@@ -48,6 +48,12 @@ namespace CalyxEngine {
 	void EngineUICore::Render() {
 #if defined(_DEBUG) || defined(DEVELOP)
 
+		if(!editorUiEnabled_) {
+			DebugTextOverlay::RenderGlobalPopups();
+			DebugTextOverlay::RenderFatalAssertWindow();
+			return;
+		}
+
 		levelEditor_->RenderMenu();
 
 		if(levelEditor_->ShouldRenderRuntimeFullscreen()) {

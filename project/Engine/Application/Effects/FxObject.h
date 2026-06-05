@@ -92,7 +92,6 @@ namespace CalyxEngine {
 		//===================================================================*/
 		//					private methods
 		//===================================================================*/
-		const std::filesystem::path kConfigRoot_ = "Resources/Assets/Effects/";
 		ConfigurableObject<EffectObjectConfig>			 config_;
 		std::vector<std::weak_ptr<ParticleSystemObject>> emitters_;
 		uint64_t										 emitterRevision_ = 0;

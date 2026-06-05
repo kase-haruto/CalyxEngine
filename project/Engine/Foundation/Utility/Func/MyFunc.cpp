@@ -1,6 +1,7 @@
 #include"MyFunc.h"
 
 //engine
+#include <CalyxEngine/Project.h>
 #include <Engine/Application/System/Environment.h>
 #include <Engine/Assets/Model/Model.h>
 #include <Engine/Foundation/Utility/Converter/ConvertString.h>
@@ -239,7 +240,7 @@ DirectX::ScratchImage LoadTextureImage(const std::string& filePath, bool forceSr
 		// あるならそのまま読み込む
 	} else {
 		// ないなら白テクスチャを読み込む
-		textureFilePath = "Resources/Assets/Textures/white1x1.dds";
+		textureFilePath = Calyx::ResolveAssetPath("Textures/white1x1.dds").generic_string();
 	}
 
 	ScratchImage image{};
@@ -271,7 +272,11 @@ DirectX::ScratchImage LoadTextureImage(const std::string& filePath, bool forceSr
 	} else {
 		hr = LoadFromWICFile(filePathW.c_str(), forceSrgb ? WIC_FLAGS_FORCE_SRGB : WIC_FLAGS_NONE, nullptr, image);
 	}
-	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
+	std::stringstream loadMessage;
+	loadMessage << "テクスチャの読み込みに失敗しました: request=" << filePath
+				<< ", actual=" << ConvertString(filePathW)
+				<< ", loader=" << (useDDS ? "DDS" : "WIC");
+	CX_CHECK(SUCCEEDED(hr), loadMessage.str().c_str());
 
 	// ミップマップ生成
 	const TexMetadata& meta = image.GetMetadata();

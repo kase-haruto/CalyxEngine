@@ -3,6 +3,7 @@
 /*		include space
 /* ===================================================================== */
 // engine
+#include <CalyxEngine/Project.h>
 #include <Engine/Application/Platform/WinApp.h>
 #include <Engine/Foundation/Utility/Func/DxFunc.h>
 #include <Engine/Graphics/Descriptor/DescriptorAllocator.h>
@@ -42,17 +43,19 @@ void ImGuiManager::Initialize(WinApp* winApp, const CalyxEngine::DxCore* dxCore)
 	// ImGui expects UTF-8 text. Keep Inter as the default face and merge Japanese glyphs from FiraMono.
 	constexpr float fontSize = 16.0f;
 	ImFont* defaultFont = nullptr;
-	const char* defaultFontPath = "Resources/Assets/fonts/inter.ttf";
+	const std::filesystem::path defaultFontPath = Calyx::ResolveAssetPath("fonts/inter.ttf");
 	if(std::filesystem::exists(defaultFontPath)) {
-		defaultFont = io.Fonts->AddFontFromFileTTF(defaultFontPath, fontSize, nullptr, io.Fonts->GetGlyphRangesDefault());
+		const std::string defaultFontPathText = defaultFontPath.string();
+		defaultFont = io.Fonts->AddFontFromFileTTF(defaultFontPathText.c_str(), fontSize, nullptr, io.Fonts->GetGlyphRangesDefault());
 	}
 	if(defaultFont != nullptr) {
 		ImFontConfig mergeConfig;
 		mergeConfig.MergeMode = true;
 		mergeConfig.PixelSnapH = true;
-		const char* japaneseFontPath = "Resources/Assets/fonts/NotoSerifJP.ttf";
+		const std::filesystem::path japaneseFontPath = Calyx::ResolveAssetPath("fonts/NotoSerifJP.ttf");
 		if(std::filesystem::exists(japaneseFontPath)) {
-			io.Fonts->AddFontFromFileTTF(japaneseFontPath, fontSize, &mergeConfig, io.Fonts->GetGlyphRangesJapanese());
+			const std::string japaneseFontPathText = japaneseFontPath.string();
+			io.Fonts->AddFontFromFileTTF(japaneseFontPathText.c_str(), fontSize, &mergeConfig, io.Fonts->GetGlyphRangesJapanese());
 		}
 	}
 	if(defaultFont == nullptr) {

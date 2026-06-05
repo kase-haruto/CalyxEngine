@@ -14,11 +14,13 @@
 #include <Engine/PostProcess/Collection/PostProcessCollection.h>
 #include <Engine/PostProcess/Graph/PostEffectGraph.h>
 
-// engine
-#include <Engine/Foundation/HotReload/LivePP/LivePPService.h>
-
 // c++
 #include <Windows.h>
+
+namespace Calyx {
+	class Application;
+}
+
 namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
@@ -31,12 +33,12 @@ namespace CalyxEngine {
 		CalyxFrameWork()  = default;
 		~CalyxFrameWork() = default;
 
-		void Initialize(HINSTANCE hInstance);
+		void Initialize(HINSTANCE hInstance, Calyx::Application* application = nullptr);
 		void BeginUpdate();
-		bool Update();
+		bool Update(Calyx::Application* application = nullptr);
 		void EndUpdate();
-		void Run();
-		void Render();
+		void Run(Calyx::Application* application = nullptr);
+		void Render(Calyx::Application* application = nullptr);
 		void Finalize();
 
 	private:
@@ -45,15 +47,12 @@ namespace CalyxEngine {
 		std::unique_ptr<GraphicsSystem> graphicsSystem_;
 
 		// ui
-		std::unique_ptr<CalyxEngine::EngineUICore> engineUICore_;
+		std::unique_ptr<EngineUICore> engineUICore_;
 
 		// scene
-		std::unique_ptr<CalyxEngine::SceneManager>	   sceneManager_;
-		std::unique_ptr<CalyxEngine::EditorCollection> editorCollection_;
-		std::unique_ptr<CalyxEngine::PlaySession>	   playSession_;
-
-		// ホットリロード
-		LivePPService livePPService_;
+		std::unique_ptr<SceneManager>	  sceneManager_;
+		std::unique_ptr<EditorCollection> editorCollection_;
+		std::unique_ptr<PlaySession> playSession_;
 
 		// ポストエフェクトの適用と管理
 		PostEffectGraph*	   postEffectGraph_;

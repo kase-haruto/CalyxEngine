@@ -4,6 +4,7 @@
 /* ===================================================================== */
 
 #include <Data/Engine/Prefab/Serializer/PrefabSerializer.h>
+#include <CalyxEngine/Project.h>
 #include <Engine/Application/Effects/FxObject.h>
 #include <Engine/Application/UI/Panels/InspectorPanel.h>
 #include <Engine/Assets/Database/AssetDatabase.h>
@@ -230,14 +231,14 @@ namespace CalyxEngine {
 		// --- Prefab Dialog ---
 		if(showLoadPrefabDlg_) {
 			IGFD::FileDialogConfig cfg;
-			cfg.path = "Resources/Assets/Prefabs/";
+			cfg.path = Calyx::ResolveAssetPath("Prefabs").generic_string();
 			ImGuiFileDialog::Instance()->OpenDialog("LoadPrefabDlg", "Load Prefab", ".prefab", cfg);
 			showLoadPrefabDlg_ = false;
 		}
 
 		if(showSavePrefabDlg_) {
 			IGFD::FileDialogConfig cfg;
-			cfg.path = "Resources/Assets/Prefabs/";
+			cfg.path = Calyx::ResolveAssetPath("Prefabs").generic_string();
 			ImGuiFileDialog::Instance()->OpenDialog("SavePrefabDlg", "Save Prefab", ".prefab", cfg);
 			showSavePrefabDlg_ = false;
 		}

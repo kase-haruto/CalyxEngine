@@ -2,11 +2,14 @@
 /* ========================================================================
 /*		include space
 /* ===================================================================== */
+#include <CalyxEngine/Project.h>
 #include <Engine/Application/Effects/EffectAsset.h>
 #include <Engine/Application/Effects/Particle/Emitter/FxEmitter.h>
 #include <Engine/Application/Effects/Particle/Emitter/GpuFxEmitter.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
+#include <externals/imgui/ImGuiFileDialog.h>
+#include <externals/imgui/imgui.h>
 #include <filesystem>
 
 namespace CalyxEngine {
@@ -130,9 +133,10 @@ namespace CalyxEngine {
 
 		// コンフィグのセーブ・ローど
 		if(ImGui::Button("Load Effect")) {
-			std::filesystem::create_directories(kConfigRoot_);
+			const auto effectDirectory = Calyx::ResolveAssetPath("Effects");
+			std::filesystem::create_directories(effectDirectory);
 			IGFD::FileDialogConfig config;
-			config.path = kConfigRoot_.string();
+			config.path = effectDirectory.string();
 			ImGuiFileDialog::Instance()->OpenDialog(
 				"EffectLoadDialog",
 				"load effect",
@@ -155,8 +159,9 @@ namespace CalyxEngine {
 		ImGui::SameLine();
 		if(ImGui::Button("Reset All")) RestartAll();
 		if(ImGui::Button("Save Effect Asset")) {
-			std::filesystem::create_directories(kConfigRoot_);
-			SaveEffectAsset("Resources/Assets/Effects/" + GetName() + ".effect");
+			const auto effectPath = Calyx::ResolveAssetPath(std::filesystem::path("Effects") / (GetName() + ".effect"));
+			std::filesystem::create_directories(effectPath.parent_path());
+			SaveEffectAsset(effectPath.generic_string());
 		}
 
 		if(ImGui::CollapsingHeader("Shared Particle Controls", ImGuiTreeNodeFlags_DefaultOpen)) {

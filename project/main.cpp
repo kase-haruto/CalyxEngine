@@ -1,17 +1,22 @@
-#include <Engine/Application/Framework/CalyxFrameWork.h>
-#include <Engine/Foundation/Reflection/CalyxObjectRegistry.generated.h>
-#include <Engine/Foundation/Utility/LeakChecker/LeakChecker.h>
+#include <CalyxEngine/CalyxEngine.h>
 
+#include <Demo/Scene/Utility/SceneTypeUtil.h>
+#include <Demo/Scene/DemoScene/DemoScene.h>
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int){
-	LeakChecker leakChecker_;
-	CalyxEngine::RegisterGeneratedSceneObjects();
+class GameApplication : public Calyx::Application {
+public:
+	void RegisterScenes(Calyx::SceneRegistry& registry) override {
+		registry.AddScene<DemoScene>(GameSceneUtil::ToSceneId(SceneType::DEMO));
+		registry.SetStartupScene(GameSceneUtil::ToSceneId(SceneType::DEMO));
+	}
 
-	CalyxEngine::CalyxFrameWork CalyxFrameWork;
+	void OnInitialize() override {}
+	void OnUpdate() override {}
+	void OnRender() override {}
+	void OnFinalize() override {}
+};
 
-	CalyxFrameWork.Initialize(hInstance);
-	CalyxFrameWork.Run();
-	CalyxFrameWork.Finalize();
-
-	return 0;
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR commandLine, int){
+	GameApplication application;
+	return Calyx::Run(hInstance, application, commandLine);
 }

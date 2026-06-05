@@ -131,6 +131,14 @@ namespace CalyxEngine {
 	}
 
 	void AssetPanel::Render() {
+		if(auto* db = AssetDatabase::GetInstance()) {
+			std::error_code ec;
+			const auto dbRoot = std::filesystem::weakly_canonical(db->GetRoot(), ec);
+			if(!ec && dbRoot != assetsRootAbs_) {
+				Initialize(dbRoot);
+			}
+		}
+
 		bool isopen = true;
 		ImGui::Begin(panelName_.c_str(), &isopen, ImGuiWindowFlags_MenuBar);
 		DrawMenuBar();
