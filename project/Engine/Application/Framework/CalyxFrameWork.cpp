@@ -6,6 +6,7 @@
 #include <Engine/Application/Effects/FxSystem.h>
 #include <Engine/Application/System/Environment.h>
 #include <Engine/Application/UI/EngineUI/Core/EngineUICore.h>
+#include <Engine/Editor/AssetPreviewManager.h>
 #include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Foundation/Input/Input.h>
 #include <Engine/Scene/System/SceneManager.h>
@@ -117,6 +118,16 @@ namespace CalyxEngine {
 		sceneManager_->Draw(graphicsSystem_->GetCommandList(), graphicsSystem_->GetPipelineService());
 		if(application) {
 			application->OnRender();
+		}
+
+		if(auto* previewTarget = system_->GetDxCore()->GetRenderTargetCollection().Get("AssetPreview")) {
+			if(auto* previews = AssetPreviewManager::GetInstance()) {
+				previews->ProcessRenderQueue(
+					graphicsSystem_->GetCommandList(),
+					graphicsSystem_->GetPipelineService(),
+					previewTarget,
+					1);
+			}
 		}
 
 		system_->ExecutePostEffect(graphicsSystem_->GetPipelineService());

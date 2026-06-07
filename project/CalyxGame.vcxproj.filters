@@ -45,6 +45,7 @@
     <ClCompile Include="Game\Scene\Utility\SceneTypeUtil.cpp">
       <Filter>Game\Scene\Utility</Filter>
     </ClCompile>
+    <ClCompile Include="GameApplication.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -72,5 +73,6 @@
     <ClInclude Include="Game\Scene\Utility\SceneTypeUtil.h">
       <Filter>Game\Scene\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="GameApplication.h" />
   </ItemGroup>
 </Project>

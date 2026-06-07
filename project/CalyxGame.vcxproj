@@ -152,6 +152,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Demo\Input\PlayerInput.cpp" />
     <ClCompile Include="Demo\Scene\DemoScene\DemoScene.cpp" />
     <ClCompile Include="Demo\Scene\Utility\SceneTypeUtil.cpp" />
+    <ClCompile Include="GameApplication.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -164,6 +165,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Demo\Scene\DemoScene\DemoScene.h" />
     <ClInclude Include="Demo\Scene\Details\SceneType.h" />
     <ClInclude Include="Demo\Scene\Utility\SceneTypeUtil.h" />
+    <ClInclude Include="GameApplication.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="CalyxEngineLib.vcxproj">

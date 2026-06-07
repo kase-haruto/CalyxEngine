@@ -10,63 +10,133 @@
 
 namespace CalyxEditor {
 
+	/**
+	 * @brief 新規プロジェクト作成時に利用可能なテンプレートの種類定義
+	 */
 	enum class ProjectTemplateType {
-		Blank,
-		Demo,
+		Blank, //< 空のプロジェクト（最低限のソースコードのみ）
+		Demo,  //< デモプロジェクト（サンプルシーンやアセットを含む）
 	};
 
 	/*-----------------------------------------------------------------------------------------
 	 * ProjectBrowser
 	 * - エディタ起動時に表示するプロジェクト選択画面
-	 * - 最近使ったプロジェクトの表示、新規プロジェクト作成、既存プロジェクト読み込みを担当
+	 * - 最近使ったプロジェクトの表示、新規プロジェクト作成、既存プロジェクト読み込みを担当します。
+	 * - ImGuiを用いてUIを描画し、新規作成時には対応するVisual Studioのソリューション（.sln）や
+	 *   プロジェクトファイル（.vcxproj）、ソースファイルを自動生成します。
 	 *---------------------------------------------------------------------------------------*/
 	class ProjectBrowser {
 	public:
+		/**
+		 * @brief プロジェクトテンプレートの基本情報
+		 */
 		struct TemplateInfo {
-			ProjectTemplateType type;
-			const char*			name;
-			const char*			description;
-			const char*			sourceDirectory;
-			const char*			startupScene;
+			ProjectTemplateType type;            //< テンプレートタイプ
+			const char*			name;            //< 表示名 (英語表記)
+			const char*			description;     //< テンプレートの説明文
+			const char*			sourceDirectory; //< 生成されるソースコードの既定の格納ディレクトリ
+			const char*			startupScene;    //< 起動時にロードするシーンパス
 		};
 
+		/**
+		 * @brief コンストラクタ。プロジェクト一覧レジストリパスの設定やUIパラメータのロードを行います。
+		 */
 		ProjectBrowser();
 
+		/**
+		 * @brief プロジェクトブラウザ画面を描画するメイン関数
+		 * @param outProject [out] ロードされた、または新規作成されたプロジェクト情報が格納されます
+		 * @return プロジェクトが正常に決定（ロード/新規作成）した場合はtrue、表示継続中の場合はfalse
+		 */
 		bool Draw(Calyx::ProjectInfo& outProject);
 
 	private:
-		// --- 描画 ---
+		// --- UI描画関連メソッド ---
+		
+		/**
+		 * @brief 最近使用したプロジェクト一覧をレジストリ等から再読込
+		 */
 		void ReloadRecentProjects();
+
+		/**
+		 * @brief プロジェクトテンプレート一覧のカード表示を描画
+		 */
 		void DrawTemplateCards();
+
+		/**
+		 * @brief 指定したテンプレート情報に基づいて個別カードを描画
+		 * @param item 描画対象のテンプレート情報
+		 */
 		void DrawTemplateCard(const TemplateInfo& item);
+
+		/**
+		 * @brief 最近使ったプロジェクト一覧全体の領域を描画
+		 */
 		void DrawRecentProjects(Calyx::ProjectInfo& outProject, bool& selected);
+
+		/**
+		 * @brief 個々の最近使ったプロジェクト項目（カード）を描画
+		 */
 		void DrawRecentProjectCard(const Calyx::RecentProjectEntry& entry, Calyx::ProjectInfo& outProject, bool& selected);
+
+		/**
+		 * @brief 選択中テンプレートの詳細情報（対象言語、初期起動シーンなど）を描画
+		 */
 		void DrawTemplateDetails();
+
+		/**
+		 * @brief 新規プロジェクト作成用のフォーム（保存場所やプロジェクト名入力欄）を描画
+		 */
 		void DrawNewProject(Calyx::ProjectInfo& outProject, bool& selected);
+
+		/**
+		 * @brief 既存のプロジェクトファイルを開くためのファイル選択ダイアログ処理を描画
+		 */
 		void DrawOpenProjectDialog(Calyx::ProjectInfo& outProject, bool& selected);
+
+		/**
+		 * @brief 新規プロジェクトの作成先ディレクトリを選択するためのダイアログ処理を描画
+		 */
 		void DrawLocationDialog();
+
+		/**
+		 * @brief 表示に用いる共通アイコン（汎用ファイル、フォルダアイコン）をロードしてテクスチャを確保
+		 */
 		void LoadIcons();
 
-		// --- プロジェクト操作 ---
+		// --- プロジェクト操作関連メソッド ---
+		
+		/**
+		 * @brief 指定されたパスの `.calyxproj` ファイルをロード
+		 * @return 成功ならtrue
+		 */
 		bool LoadProject(const std::filesystem::path& path, Calyx::ProjectInfo& outProject);
+
+		/**
+		 * @brief 選択されたテンプレート設定をもとに、新規プロジェクトフォルダおよび関連ファイルを構築
+		 * @return 成功ならtrue
+		 */
 		bool CreateProjectFromSelectedTemplate(Calyx::ProjectInfo& outProject);
 
 	private:
+		/**
+		 * @brief 現在選択されているテンプレート情報を取得
+		 */
 		const TemplateInfo& GetSelectedTemplate() const;
 
-		// --- 状態 ---
-		std::filesystem::path registryPath_;
-		std::vector<Calyx::RecentProjectEntry> recentProjects_;
-		std::array<char, 128> newProjectName_{};
-		std::array<char, 512> newProjectDirectory_{};
-		std::string statusMessage_;
-		ProjectTemplateType selectedTemplate_ = ProjectTemplateType::Blank;
+		// --- 内部状態管理メンバ ---
+		std::filesystem::path registryPath_;                     //< 最近使ったプロジェクト一覧を保存するJSONのレジストリパス
+		std::vector<Calyx::RecentProjectEntry> recentProjects_; //< 最近使ったプロジェクトのキャッシュ配列
+		std::array<char, 128> newProjectName_{};                 //< 新規作成するプロジェクト名の文字列バッファ
+		std::array<char, 512> newProjectDirectory_{};            //< 新規作成するプロジェクトフォルダパスの文字列バッファ
+		std::string statusMessage_;                              //< エラーや現在の進捗を示すステータスメッセージ
+		ProjectTemplateType selectedTemplate_ = ProjectTemplateType::Blank; //< 現在選択中のテンプレートタイプ
 
-		// --- UIリソース ---
-		void* genericIcon_ = nullptr;
-		void* folderIcon_ = nullptr;
+		// --- UIテクスチャリソースポインタ ---
+		void* genericIcon_ = nullptr; //< 汎用アセットファイルアイコン (ImTextureID)
+		void* folderIcon_ = nullptr;  //< フォルダアイコン (ImTextureID)
 
-		// --- パラメータ ---
+		// --- レイアウト・調整用パラメータ構造体 ---
 		struct ProjectBrowserParam : CalyxEngine::SerializableObject {
 			ProjectBrowserParam() {
 				AddField("OpenButtonSize", openButtonSize_).Category("top");
@@ -129,7 +199,7 @@ namespace CalyxEditor {
 			float createButtonHeight_ = 30.0f;
 			float minInputWidth_ = 180.0f;
 			float inputSpacingCount_ = 3.0f;
-		}param_;
+		}param_; //< UI表示用パラメータシリアライズオブジェクト
 	};
 
 } // namespace CalyxEditor
