@@ -158,20 +158,20 @@ namespace CalyxEditor {
 			return true;
 		}
 
-		// 現在のアプリケーション実行位置から上に向かって探索し、CalyxEngineLibのプロジェクトルートフォルダを発見する
-		std::filesystem::path FindEngineProjectDirectory() {
+		// 現在のアプリケーション実行位置から上に向かって探索し、配布済みエンジンルートを発見する
+		std::filesystem::path FindInstalledEngineDirectory() {
 			std::error_code ec;
 			std::filesystem::path path = std::filesystem::weakly_canonical(std::filesystem::current_path(), ec);
 			if(ec) {
 				path = std::filesystem::current_path();
 			}
 
-			// 親ディレクトリへ順に遡り、プロジェクトファイルの存在を確認
+			// 親ディレクトリへ順に遡り、配布物に含まれるResourcesとTemplatesの存在を確認
 			while(!path.empty()) {
-				if(std::filesystem::exists(path / "CalyxEngineLib.vcxproj")) {
+				if(std::filesystem::exists(path / "Resources") && std::filesystem::exists(path / "Templates")) {
 					return path;
 				}
-				if(std::filesystem::exists(path / "project" / "CalyxEngineLib.vcxproj")) {
+				if(std::filesystem::exists(path / "project" / "Resources") && std::filesystem::exists(path / "project" / "Templates")) {
 					return path / "project";
 				}
 
@@ -213,38 +213,49 @@ namespace CalyxEditor {
 			return sourceFiles;
 		}
 
-		// 生成されたゲームが最初に持つエントリポイント
-		std::string MakeGameMainSource(const ProjectBrowser::TemplateInfo& selectedTemplate) {
+		std::string MakeGameApplicationHeader() {
 			std::stringstream stream;
-			stream << "#include <CalyxEngine/CalyxEngine.h>\n\n";
+			stream << "#pragma once\n\n";
+			stream << "#include <CalyxEngine/Application.h>\n\n";
+			stream << "class GameApplication : public Calyx::Application {\n";
+			stream << "public:\n";
+			stream << "\tvoid RegisterScenes(Calyx::SceneRegistry& registry) override;\n";
+			stream << "\tbool ShouldRenderEngineUi() const override;\n";
+			stream << "};\n";
+			return stream.str();
+		}
+
+		std::string MakeGameApplicationSource(const ProjectBrowser::TemplateInfo& selectedTemplate) {
+			std::stringstream stream;
+			stream << "#include \"GameApplication.h\"\n\n";
+			stream << "#include <CalyxEngine/SceneRegistry.h>\n";
 
 			if(selectedTemplate.type == ProjectTemplateType::Demo) {
 				stream << "#include <Demo/Scene/DemoScene/DemoScene.h>\n\n";
-				stream << "class GameApplication : public Calyx::Application {\n";
-				stream << "public:\n";
-				stream << "\tvoid RegisterScenes(Calyx::SceneRegistry& registry) override {\n";
-				stream << "\t\tregistry.AddScene<DemoScene>(0);\n";
-				stream << "\t\tregistry.SetStartupScene(0);\n";
-				stream << "\t}\n";
-				stream << "\n";
-				stream << "\tbool ShouldRenderEngineUi() const override {\n";
-				stream << "\t\treturn false;\n";
-				stream << "\t}\n";
-				stream << "};\n\n";
+				stream << "void GameApplication::RegisterScenes(Calyx::SceneRegistry& registry) {\n";
+				stream << "\tregistry.AddScene<DemoScene>(0);\n";
+				stream << "\tregistry.SetStartupScene(0);\n";
+				stream << "}\n\n";
 			} else {
 				stream << "#include <Engine/Scene/Base/BaseScene.h>\n\n";
-				stream << "class GameApplication : public Calyx::Application {\n";
-				stream << "public:\n";
-				stream << "\tvoid RegisterScenes(Calyx::SceneRegistry& registry) override {\n";
-				stream << "\t\tregistry.AddScene<BaseScene>(0);\n";
-				stream << "\t\tregistry.SetStartupScene(0);\n";
-				stream << "\t}\n";
-				stream << "\n";
-				stream << "\tbool ShouldRenderEngineUi() const override {\n";
-				stream << "\t\treturn false;\n";
-				stream << "\t}\n";
-				stream << "};\n\n";
+				stream << "void GameApplication::RegisterScenes(Calyx::SceneRegistry& registry) {\n";
+				stream << "\tregistry.AddScene<BaseScene>(0);\n";
+				stream << "\tregistry.SetStartupScene(0);\n";
+				stream << "}\n\n";
 			}
+
+			stream << "bool GameApplication::ShouldRenderEngineUi() const {\n";
+			stream << "\treturn false;\n";
+			stream << "}\n";
+			return stream.str();
+		}
+
+		// 生成されたゲームが最初に持つエントリポイント
+		std::string MakeGameMainSource(const ProjectBrowser::TemplateInfo& selectedTemplate) {
+			(void)selectedTemplate;
+			std::stringstream stream;
+			stream << "#include <CalyxEngine/CalyxEngine.h>\n\n";
+			stream << "#include \"GameApplication.h\"\n\n";
 
 			stream << "int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR commandLine, int) {\n";
 			stream << "\tGameApplication application;\n";
@@ -273,10 +284,10 @@ namespace CalyxEditor {
 			std::stringstream stream;
 			stream << "# " << project.name << "\n\n";
 			stream << "## Build\n\n";
-			stream << "Set `CALYX_ENGINE_DIR` to the CalyxEngine `project` directory before opening this solution.\n\n";
+			stream << "Set `CALYX_ENGINE_SDK_DIR` to the installed Calyx engine SDK directory before opening this solution.\n\n";
 			stream << "PowerShell example:\n\n";
 			stream << "```powershell\n";
-			stream << "[Environment]::SetEnvironmentVariable(\"CALYX_ENGINE_DIR\", \"C:\\\\MyProject\\\\CalyxEngine\\\\project\", \"User\")\n";
+			stream << "[Environment]::SetEnvironmentVariable(\"CALYX_ENGINE_SDK_DIR\", \"C:\\\\Calyx\\\\Engines\\\\1.2.0\\\\SDK\", \"User\")\n";
 			stream << "```\n\n";
 			stream << "After setting the variable, reopen Visual Studio and build this solution with `Develop|x64`.\n";
 			return stream.str();
@@ -290,7 +301,7 @@ namespace CalyxEditor {
 
 			const std::string projectName = EscapeXml(project.name);
 			const std::string sourceDir = project.sourceDirectory.generic_string();
-			const std::string engine = "$(CALYX_ENGINE_DIR)";
+			const std::string sdk = "$(CALYX_ENGINE_SDK_DIR)";
 
 			std::stringstream stream;
 			stream << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
@@ -337,7 +348,7 @@ namespace CalyxEditor {
 				stream << "      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>\n";
 				stream << "      <MultiProcessorCompilation>true</MultiProcessorCompilation>\n";
 				stream << "      <TreatWarningAsError>true</TreatWarningAsError>\n";
-				stream << "      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)" << sourceDir << ";" << engine << ";" << engine << "\\Engine\\Application;" << engine << "\\externals;" << engine << "\\externals\\DirectXTex;" << engine << "\\externals\\assimp\\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
+				stream << "      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)" << sourceDir << ";" << sdk << "\\Include;" << sdk << "\\Include\\Engine\\Application;" << sdk << "\\ThirdParty;" << sdk << "\\ThirdParty\\DirectXTex;" << sdk << "\\ThirdParty\\assimp\\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n";
 				stream << "      <RuntimeLibrary>" << (debug ? "MultiThreadedDebug" : "MultiThreaded") << "</RuntimeLibrary>\n";
 				stream << "      <BasicRuntimeChecks>Default</BasicRuntimeChecks>\n";
 				if(debug) {
@@ -352,11 +363,11 @@ namespace CalyxEditor {
 				}
 				stream << "      <GenerateDebugInformation>true</GenerateDebugInformation>\n";
 				stream << "      <AdditionalDependencies>CalyxEngineLib.lib;DirectXTex.lib;" << (debug ? "assimp-vc143-mtd.lib" : "assimp-vc143-mt.lib") << ";%(AdditionalDependencies)</AdditionalDependencies>\n";
-				stream << "      <AdditionalLibraryDirectories>$(CALYX_ENGINE_DIR)\\..\\generated\\outputs\\$(Configuration);$(CALYX_ENGINE_DIR)\\generated\\bin\\DirectXTex\\x64\\" << (debug ? "Debug" : "Release") << ";$(CALYX_ENGINE_DIR)\\externals\\assimp\\lib\\" << (debug ? "Debug" : "Release") << ";%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>\n";
+				stream << "      <AdditionalLibraryDirectories>$(CALYX_ENGINE_SDK_DIR)\\Lib\\$(Configuration);$(CALYX_ENGINE_SDK_DIR)\\Lib\\DirectXTex\\x64\\" << (debug ? "Debug" : "Release") << ";$(CALYX_ENGINE_SDK_DIR)\\Lib\\assimp\\" << (debug ? "Debug" : "Release") << ";%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>\n";
 				stream << "      <AdditionalOptions>/IGNORE:4099 %(AdditionalOptions)</AdditionalOptions>\n";
 				stream << "    </Link>\n";
-				stream << "    <PostBuildEvent><Command>copy \"$(WindowsSdkDir)bin\\$(TargetPlatformVersion)\\x64\\dxcompiler.dll\" \"$(TargetDir)dxcompiler.dll\"\n";
-				stream << "copy \"$(WindowsSdkDir)bin\\$(TargetPlatformVersion)\\x64\\dxil.dll\" \"$(TargetDir)dxil.dll\"</Command></PostBuildEvent>\n";
+				stream << "    <PostBuildEvent><Command>if exist \"$(WindowsSdkDir)bin\\$(TargetPlatformVersion)\\x64\\dxcompiler.dll\" copy \"$(WindowsSdkDir)bin\\$(TargetPlatformVersion)\\x64\\dxcompiler.dll\" \"$(TargetDir)dxcompiler.dll\"\n";
+				stream << "if exist \"$(WindowsSdkDir)bin\\$(TargetPlatformVersion)\\x64\\dxil.dll\" copy \"$(WindowsSdkDir)bin\\$(TargetPlatformVersion)\\x64\\dxil.dll\" \"$(TargetDir)dxil.dll\"</Command></PostBuildEvent>\n";
 				stream << "  </ItemDefinitionGroup>\n";
 			}
 
@@ -366,14 +377,10 @@ namespace CalyxEditor {
 			}
 			stream << "  </ItemGroup>\n";
 			stream << "  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />\n";
-			stream << "  <Target Name=\"ValidateCalyxEngineDir\" BeforeTargets=\"PrepareForBuild\">\n";
-			stream << "    <Error Condition=\"'$(CALYX_ENGINE_DIR)'==''\" Text=\"CALYX_ENGINE_DIR is not set. Set it to the CalyxEngine project directory and reopen Visual Studio.\" />\n";
-			stream << "    <Error Condition=\"'$(CALYX_ENGINE_DIR)'!='' and !Exists('$(CALYX_ENGINE_DIR)\\CalyxEngineLib.vcxproj')\" Text=\"CALYX_ENGINE_DIR does not point to the CalyxEngine project directory: $(CALYX_ENGINE_DIR)\" />\n";
-			stream << "  </Target>\n";
-			stream << "  <Target Name=\"BuildCalyxEngineDependencies\" BeforeTargets=\"PrepareForBuild\" DependsOnTargets=\"ValidateCalyxEngineDir\">\n";
-			stream << "    <MSBuild Projects=\"$(CALYX_ENGINE_DIR)\\CalyxEngine.sln\" Targets=\"DirectXTex\" Condition=\"'$(Configuration)'=='Develop'\" Properties=\"Configuration=Release;Platform=$(Platform)\" RemoveProperties=\"SolutionDir;SolutionExt;SolutionFileName;SolutionName;SolutionPath\" />\n";
-			stream << "    <MSBuild Projects=\"$(CALYX_ENGINE_DIR)\\CalyxEngine.sln\" Targets=\"DirectXTex\" Condition=\"'$(Configuration)'!='Develop'\" Properties=\"Configuration=$(Configuration);Platform=$(Platform)\" RemoveProperties=\"SolutionDir;SolutionExt;SolutionFileName;SolutionName;SolutionPath\" />\n";
-			stream << "    <MSBuild Projects=\"$(CALYX_ENGINE_DIR)\\CalyxEngine.sln\" Targets=\"CalyxEngineLib\" Properties=\"Configuration=$(Configuration);Platform=$(Platform);BuildProjectReferences=false\" RemoveProperties=\"SolutionDir;SolutionExt;SolutionFileName;SolutionName;SolutionPath\" />\n";
+			stream << "  <Target Name=\"ValidateCalyxEngineSdkDir\" BeforeTargets=\"PrepareForBuild\">\n";
+			stream << "    <Error Condition=\"'$(CALYX_ENGINE_SDK_DIR)'==''\" Text=\"CALYX_ENGINE_SDK_DIR is not set. Set it to the installed Calyx engine SDK directory and reopen Visual Studio.\" />\n";
+			stream << "    <Error Condition=\"'$(CALYX_ENGINE_SDK_DIR)'!='' and !Exists('$(CALYX_ENGINE_SDK_DIR)\\Include\\CalyxEngine\\Application.h')\" Text=\"CALYX_ENGINE_SDK_DIR does not point to a Calyx SDK directory: $(CALYX_ENGINE_SDK_DIR)\" />\n";
+			stream << "    <Error Condition=\"'$(CALYX_ENGINE_SDK_DIR)'!='' and !Exists('$(CALYX_ENGINE_SDK_DIR)\\Lib\\$(Configuration)\\CalyxEngineLib.lib')\" Text=\"CalyxEngineLib.lib was not found for $(Configuration). Update or reinstall the Calyx engine SDK: $(CALYX_ENGINE_SDK_DIR)\" />\n";
 			stream << "  </Target>\n";
 			stream << "  <ImportGroup Label=\"ExtensionTargets\" />\n";
 			stream << "</Project>\n";
@@ -434,9 +441,9 @@ namespace CalyxEditor {
 
 		// 新規ゲームプロジェクト用のソリューション、プロジェクトファイル、起動用GameMain.cppなどを一式作成する
 		bool CreateGameWorkspace(const Calyx::ProjectInfo& project, const ProjectBrowser::TemplateInfo& selectedTemplate) {
-			// エンジンのプロジェクトディレクトリを取得（依存関係ビルドやResourcesコピーのため）
-			const auto engineProjectDirectory = FindEngineProjectDirectory();
-			if(engineProjectDirectory.empty()) {
+			// 配布済みエンジンのインストールディレクトリを取得（Resourcesやテンプレートコピーのため）
+			const auto engineDirectory = FindInstalledEngineDirectory();
+			if(engineDirectory.empty()) {
 				return false;
 			}
 
@@ -445,12 +452,12 @@ namespace CalyxEditor {
 			const std::string solutionGuid = MakeGuid();
 
 			// ゲーム実行時にもエンジン共通の画像やシェーダーリソースを使うため、Resourcesディレクトリを丸ごとコピー
-			if(!CopyDirectoryTree(engineProjectDirectory / "Resources", project.rootDirectory / "Resources")) {
+			if(!CopyDirectoryTree(engineDirectory / "Resources", project.rootDirectory / "Resources")) {
 				return false;
 			}
 			// デモテンプレートの場合は、事前定義されたデモアセットやシーン一式（Templates/Demo）をコピー
 			if(selectedTemplate.type == ProjectTemplateType::Demo) {
-				const auto templateDirectory = engineProjectDirectory / "Templates" / "Demo";
+				const auto templateDirectory = engineDirectory / "Templates" / "Demo";
 				if(!CopyDirectoryTree(templateDirectory, project.rootDirectory)) {
 					return false;
 				}
@@ -459,6 +466,12 @@ namespace CalyxEditor {
 			// アプリのエントリポイントとなる初期「GameMain.cpp」ファイルを生成してSource下に書き出し
 			const auto sourceDirectory = Calyx::ResolveProjectPath(project, project.sourceDirectory);
 			if(!WriteTextFile(sourceDirectory / "GameMain.cpp", MakeGameMainSource(selectedTemplate))) {
+				return false;
+			}
+			if(!WriteTextFile(sourceDirectory / "GameApplication.h", MakeGameApplicationHeader())) {
+				return false;
+			}
+			if(!WriteTextFile(sourceDirectory / "GameApplication.cpp", MakeGameApplicationSource(selectedTemplate))) {
 				return false;
 			}
 
