@@ -7,13 +7,13 @@ This tool is for engine developers. It creates the zip uploaded to GitHub Releas
 From the engine root:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\Tool\Release\PackageRelease.ps1 -Version 1.2.0 -Configuration Release
+.\Tool\Release\PackageRelease.cmd -Version 1.2.0 -Configuration Release
 ```
 
 With the final GitHub Release asset URL:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\Tool\Release\PackageRelease.ps1 -Version 1.2.0 -Configuration Release -DownloadUrl "https://github.com/<owner>/<repo>/releases/download/v1.2.0/CalyxEngine-1.2.0.zip"
+.\Tool\Release\PackageRelease.cmd -Version 1.2.0 -Configuration Release -DownloadUrl "https://github.com/<owner>/<repo>/releases/download/v1.2.0/CalyxEngine-1.2.0.zip"
 ```
 
 Outputs are written to:
