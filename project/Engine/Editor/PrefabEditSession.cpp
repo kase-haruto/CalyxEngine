@@ -18,6 +18,24 @@
 #include <Engine/Scene/System/SceneManager.h>
 
 #include <filesystem>
+#include <unordered_map>
+
+namespace {
+	void CollectPrefabInstanceGuidMap(
+		const std::shared_ptr<SceneObject>& object,
+		std::unordered_map<Guid, Guid>& sourceToInstanceGuid) {
+		if(!object) return;
+
+		const Guid& sourceGuid = object->GetPrefabSourceGuid();
+		if(sourceGuid.isValid() && object->GetGuid().isValid()) {
+			sourceToInstanceGuid[sourceGuid] = object->GetGuid();
+		}
+
+		for(const auto& child : object->GetChildren()) {
+			CollectPrefabInstanceGuidMap(child, sourceToInstanceGuid);
+		}
+	}
+}
 
 namespace CalyxEngine {
 
@@ -254,6 +272,8 @@ namespace CalyxEngine {
 			const WorldTransform oldTransform = oldRoot->GetWorldTransform();
 			auto oldParent = oldRoot->GetParent();
 			const bool inheritScale = oldRoot->GetWorldTransform().inheritScale;
+			std::unordered_map<Guid, Guid> sourceToInstanceGuid;
+			CollectPrefabInstanceGuidMap(oldRoot, sourceToInstanceGuid);
 
 			auto loadedObjects = PrefabSerializer::Load(
 				prefabPath,
@@ -278,6 +298,22 @@ namespace CalyxEngine {
 			if(!newRoot) continue;
 
 			sceneCtx->RemoveObject(oldRoot);
+
+			std::unordered_map<Guid, Guid> loadedToInstanceGuid;
+			for(auto& object : loadedObjects) {
+				if(!object) continue;
+
+				const Guid& sourceGuid = object->GetPrefabSourceGuid();
+				if(auto it = sourceToInstanceGuid.find(sourceGuid); it != sourceToInstanceGuid.end()) {
+					loadedToInstanceGuid[object->GetGuid()] = it->second;
+					object->SetGuid(it->second);
+				}
+			}
+			for(auto& object : loadedObjects) {
+				if(object && !loadedToInstanceGuid.empty()) {
+					object->RemapSceneObjectReferences(loadedToInstanceGuid);
+				}
+			}
 
 			newRoot->SetGuid(oldRootGuid);
 			newRoot->SetName(oldName, newRoot->GetObjectType());

@@ -3,7 +3,6 @@
 /* ========================================================================
    include space
    ===================================================================== */
-#include <CalyxEngine/Project.h>
 #include <Engine/Application/Effects/FxSystem.h>
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 #include <Engine/Foundation/Json/JsonUtils.h>
@@ -20,6 +19,10 @@
 using namespace CalyxEngine;
 
 namespace {
+	bool IsSceneSerializationExcluded(std::string_view typeName) {
+		return typeName == "SkyBox";
+	}
+
 	bool HasInlineConfigData(const nlohmann::json& j) {
 		static const std::unordered_set<std::string> kMetadataKeys = {
 			"type",
@@ -29,6 +32,15 @@ namespace {
 			"parentGuid",
 			"configPath",
 			"serializableParams",
+			"name",
+			"objectType",
+			"drawEnable",
+			"castShadow",
+			"cameraDitherEnabled",
+			"outlineEnabled",
+			"outlineThickness",
+			"outlineColor",
+			"worldTransform",
 		};
 
 		for(auto it = j.begin(); it != j.end(); ++it) {
@@ -57,6 +69,47 @@ namespace {
 			cfg->ApplyConfigFromJson(j);
 		}
 	}
+
+	void WriteSceneObjectMetadata(const SceneObject& object, nlohmann::json& j) {
+		j["type"] = object.GetObjectClassName();
+		j["guid"] = object.GetGuid();
+		if(object.GetPrefabAssetGuid().isValid()) {
+			j["prefabAssetGuid"] = object.GetPrefabAssetGuid();
+		}
+		if(object.GetPrefabSourceGuid().isValid()) {
+			j["prefabSourceGuid"] = object.GetPrefabSourceGuid();
+		}
+		if(auto parent = object.GetParent()) {
+			j["parentGuid"] = parent->GetGuid();
+		} else {
+			j["parentGuid"] = Guid::Empty();
+		}
+
+		j["name"] = object.GetName();
+		j["objectType"] = static_cast<int>(object.GetObjectType());
+		j["drawEnable"] = object.IsDrawEnable();
+		j["castShadow"] = object.IsCastShadow();
+		j["cameraDitherEnabled"] = object.IsCameraDitherEnabled();
+		j["outlineEnabled"] = object.IsOutlineEnabled();
+		j["outlineThickness"] = object.GetOutlineSettings().thickness;
+		j["outlineColor"] = object.GetOutlineSettings().color;
+	}
+
+	void ApplySceneObjectMetadata(SceneObject& object, const nlohmann::json& j) {
+		const int objectType = j.value("objectType", static_cast<int>(object.GetObjectType()));
+		object.SetName(j.value("name", object.GetName()), static_cast<ObjectType>(objectType));
+		if(object.GetObjectClassName() == std::string_view("SceneObject")) {
+			object.SetDrawEnable(j.value("drawEnable", object.IsDrawEnable()));
+		}
+		object.SetCastShadow(j.value("castShadow", object.IsCastShadow()));
+		object.SetCameraDitherEnabled(j.value("cameraDitherEnabled", object.IsCameraDitherEnabled()));
+		object.SetOutlineEnabled(j.value("outlineEnabled", object.IsOutlineEnabled()));
+		object.SetOutlineThickness(j.value("outlineThickness", object.GetOutlineSettings().thickness));
+		object.SetOutlineColor(j.value("outlineColor", object.GetOutlineSettings().color));
+		if(j.contains("worldTransform")) {
+			object.GetWorldTransform().ApplyConfig(j.at("worldTransform").get<WorldTransformConfig>());
+		}
+	}
 }
 
 // -----------------------------------------------------------------------------
@@ -64,7 +117,7 @@ namespace {
 // -----------------------------------------------------------------------------
 bool SceneSerializer::Save(const SceneContext& context, const std::string& path) {
 	auto root = DumpJson(context);
-	return JsonUtils::Save(Calyx::ResolveAssetPath(path).generic_string(), root);
+	return JsonUtils::Save(path, root);
 }
 
 // -----------------------------------------------------------------------------
@@ -72,7 +125,7 @@ bool SceneSerializer::Save(const SceneContext& context, const std::string& path)
 // -----------------------------------------------------------------------------
 bool SceneSerializer::Load(SceneContext& context, const std::string& path) {
 	nlohmann::json root;
-	if(!JsonUtils::Load(Calyx::ResolveAssetPath(path).generic_string(), root)) return false;
+	if(!JsonUtils::Load(path, root)) return false;
 	return LoadJson(context, root);
 }
 
@@ -88,24 +141,13 @@ nlohmann::json SceneSerializer::DumpJson(const SceneContext& context) {
 
 		// FX系のオブジェクトは保存対象から除外（ロード時に再生成されるため）
 		if(sp->GetObjectType() == ObjectType::Effect) continue;
+		if(IsSceneSerializationExcluded(sp->GetObjectClassName())) continue;
 
-		// IConfigurable を持つものだけ出力対象
+		nlohmann::json jOne;
+		WriteSceneObjectMetadata(*sp, jOne);
+
+		// IConfigurable を持つものは既存形式の設定を保存し、持たないものは基本Transformだけ保存する。
 		if(auto* cfg = dynamic_cast<const IConfigurable*>(sp.get())) {
-			nlohmann::json jOne;
-
-			// ---- 基本メタ ----
-			jOne["type"] = sp->GetObjectClassName();
-			jOne["guid"] = sp->GetGuid();
-			if(sp->GetPrefabAssetGuid().isValid()) {
-				jOne["prefabAssetGuid"] = sp->GetPrefabAssetGuid();
-			}
-			if(sp->GetPrefabSourceGuid().isValid()) {
-				jOne["prefabSourceGuid"] = sp->GetPrefabSourceGuid();
-			}
-			if(auto parent = sp->GetParent()) {
-				jOne["parentGuid"] = parent->GetGuid();
-			}
-
 			nlohmann::json jInline;
 			cfg->ExtractConfigToJson(jInline);
 			for(auto it = jInline.begin(); it != jInline.end(); ++it) {
@@ -133,9 +175,11 @@ nlohmann::json SceneSerializer::DumpJson(const SceneContext& context) {
 			if(!serializableParams.empty()) {
 				jOne["serializableParams"] = std::move(serializableParams);
 			}
-
-			jObjects.push_back(std::move(jOne));
+		} else {
+			jOne["worldTransform"] = const_cast<WorldTransform&>(sp->GetWorldTransform()).ExtractConfig();
 		}
+
+		jObjects.push_back(std::move(jOne));
 	}
 
 	nlohmann::json root;
@@ -179,6 +223,8 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 	for(const auto& j : jArray) {
 		std::string typeName = j.value("type", "");
 		if(typeName.empty()) continue;
+		if(IsSceneSerializationExcluded(typeName)) continue;
+		if(!SceneObjectRegistry::Get().Find(typeName)) continue;
 
 		const nlohmann::json* paramOverrides = j.contains("serializableParams")
 			? &j.at("serializableParams")
@@ -192,6 +238,7 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 		sp->AdoptPendingSerializableParamCapture(paramOverrides);
 
 		ApplySceneConfig(*sp, j);
+		ApplySceneObjectMetadata(*sp, j);
 		if(false) {
 			auto* cfg = dynamic_cast<IConfigurable*>(sp.get());
 			// onfigPath があるなら外部JSONを優先
@@ -224,6 +271,7 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 		sp->Initialize();
 		sp->EndSerializableParamCapture();
 		ApplySceneConfig(*sp, j);
+		ApplySceneObjectMetadata(*sp, j);
 		sp->SetGuid(guid);
 		if(false) {
 			auto* cfg = dynamic_cast<IConfigurable*>(sp.get());
