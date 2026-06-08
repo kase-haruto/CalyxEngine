@@ -116,6 +116,7 @@ namespace CalyxEngine {
 		void				   SetPlaySession(PlaySession* session) { pPlaySesseion_ = session; }
 		bool				   ShouldRenderRuntimeFullscreen() const;
 		bool				   ShouldHideEditorUiInGameMode() const;
+		bool IsDebugViewportVisible()const;
 
 	private:
 		// シーン管理 --------------------------------------------------------------

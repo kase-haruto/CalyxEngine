@@ -1262,6 +1262,10 @@ namespace CalyxEngine {
 			   EngineSettings::GetInstance()->GetData().editor.fullscreenGameViewOnPlay;
 	}
 
+	bool LevelEditor::IsDebugViewportVisible() const {
+		return debugViewport_ && debugViewport_->IsShow();
+	}
+
 	void LevelEditor::SetCameraForViewport(BaseCamera* mainCamera, BaseCamera* debugCamera) {
 		if(mainViewport_) {
 			mainViewport_->SetCamera(mainCamera);

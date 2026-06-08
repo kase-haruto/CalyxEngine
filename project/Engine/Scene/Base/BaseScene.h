@@ -140,6 +140,7 @@ protected:
 	std::unique_ptr<SpriteRenderer> spriteRenderer_ = nullptr; //< スプライトレンダラ
 	std::unique_ptr<ModelRenderer> modelRenderer_ = nullptr; //< モデルレンダラ
 	std::unique_ptr<OutlineRenderer> outlineRenderer_ = nullptr; //< アウトラインレンダラ
+	std::unique_ptr<OutlineRenderer> debugOutlineRenderer_ = nullptr; //< デバッグビュー用アウトラインレンダラ
 	std::unique_ptr<CalyxEngine::ShadowMapSystem> shadowMapSystem_ = nullptr; //< シャドウマップシステム
 
 	CalyxEngine::ISceneTransitionRequestor* transitionRequestor_ = nullptr; //< 遷移リクエスタ

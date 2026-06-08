@@ -7,6 +7,18 @@
 
 // c++
 #include <stdexcept>
+#include <sstream>
+
+namespace {
+	std::runtime_error MakeResourceCreateError(const char* kind, HRESULT hr, uint32_t width, uint32_t height, DXGI_FORMAT format) {
+		std::ostringstream oss;
+		oss << "Failed to create " << kind << " resource. HRESULT=0x"
+			<< std::hex << static_cast<unsigned long>(hr)
+			<< std::dec << " size=" << width << "x" << height
+			<< " format=" << static_cast<int>(format);
+		return std::runtime_error(oss.str());
+	}
+}
 
 void DxGpuResource::InitializeAsRenderTarget(ID3D12Device*				 device,
 											 uint32_t					 width,
@@ -42,6 +54,7 @@ void DxGpuResource::InitializeAsRenderTarget(ID3D12Device*				 device,
 		clearValue.Color[3] = 1.0f;
 	}
 
+	resource_.Reset();
 	HRESULT hr = device->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
@@ -51,7 +64,7 @@ void DxGpuResource::InitializeAsRenderTarget(ID3D12Device*				 device,
 		IID_PPV_ARGS(&resource_));
 
 	if(FAILED(hr)) {
-		throw std::runtime_error("Failed to create render target resource.");
+		throw MakeResourceCreateError("render target", hr, width, height, format);
 	}
 
 	if(name.has_value()) {
@@ -89,6 +102,7 @@ void DxGpuResource::InitializeAsDepthStencil(ID3D12Device*				 device,
 	clearValue.DepthStencil.Depth	= 1.0f;
 	clearValue.DepthStencil.Stencil = 0;
 
+	resource_.Reset();
 	HRESULT hr = device->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
@@ -98,7 +112,7 @@ void DxGpuResource::InitializeAsDepthStencil(ID3D12Device*				 device,
 		IID_PPV_ARGS(&resource_));
 
 	if(FAILED(hr)) {
-		throw std::runtime_error("Failed to create depth stencil resource.");
+		throw MakeResourceCreateError("depth stencil", hr, width, height, format);
 	}
 
 	if(name.has_value()) {
