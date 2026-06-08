@@ -18,7 +18,10 @@ class PipelineService;
 namespace CalyxEngine {
 	class PlaySession;
 	class PickingPass;
+	class GridRenderer;
 } // namespace CalyxEngine
+
+class ModelRenderer;
 
 namespace CalyxEngine {
 
@@ -64,6 +67,7 @@ namespace CalyxEngine {
 		void		  SetCurrent(SceneId id);
 		size_t		  GetSceneCount() const { return slots_.size(); }
 		void		  SetEditorPreviewContext(SceneContext* ctx);
+		void		  SetEditorViewportRenderState(bool renderDebugView, bool renderPicking);
 		SceneContext* GetCurrentSceneContext() const;
 		size_t		  GetCurrentIndex() const { return currentIdx_; }
 
@@ -77,6 +81,13 @@ namespace CalyxEngine {
 		void RequestSceneChangeInternal(
 			SceneId						   next,
 			std::unique_ptr<IScenePayload> payload);
+		void DrawEditorPreview(IRenderTarget*			 rt,
+							   ID3D12GraphicsCommandList* cmd,
+							   PipelineService*			 pso);
+		void DrawSpritesToRenderTarget(IRenderTarget*			 rt,
+									   ID3D12GraphicsCommandList* cmd,
+									   PipelineService*			 pso,
+									   bool						 transitionToShaderResource);
 
 	private:
 		struct SceneSlot {
@@ -119,12 +130,16 @@ namespace CalyxEngine {
 		SceneContext* lastBoundCtx_	  = nullptr;
 		uint64_t	  lastRuntimeGen_ = 0;
 		SceneContext* editorPreviewCtx_ = nullptr;
+		bool		  renderDebugView_ = true;
+		bool		  renderPicking_	= true;
 
 		std::unique_ptr<SceneTransitionService> transitionService_;
 
 		std::vector<SceneId> registeredSceneIds_;
 
 		std::unique_ptr<PickingPass> pickingPass_;
+		std::unique_ptr<GridRenderer> editorGridRenderer_;
+		std::unique_ptr<ModelRenderer> editorPreviewModelRenderer_;
 	};
 
 } // namespace CalyxEngine
