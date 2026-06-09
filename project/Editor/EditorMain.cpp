@@ -4,6 +4,8 @@
 
 #include <Demo/Scene/DemoScene/DemoScene.h>
 #include <Engine/Assets/Database/AssetDatabase.h>
+#include <Engine/Foundation/Reflection/CalyxGameObjectRegistry.generated.h>
+#include <Engine/Foundation/Reflection/CalyxObjectRegistry.generated.h>
 #include <Engine/Scene/Base/BaseScene.h>
 #include <Engine/Scene/System/SceneManager.h>
 
@@ -77,6 +79,9 @@ private:
 };
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR commandLine, int) {
+	CalyxEngine::RegisterGeneratedSceneObjects();
+	CalyxEngine::RegisterGeneratedGameSceneObjects();
+
 	EditorApplication application;
 	return Calyx::Run(hInstance, application, commandLine);
 }

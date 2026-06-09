@@ -70,6 +70,9 @@
     <OutDir>$(SolutionDir)..\generated\outputs\$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <PreBuildEvent>
+      <Command>powershell -NoProfile -ExecutionPolicy Bypass -File "$(ProjectDir)Tools\Reflection\generate_reflection.ps1" -ScanRoots Demo -OutputName CalyxGameObjectRegistry.generated -FunctionName RegisterGeneratedGameSceneObjects</Command>
+    </PreBuildEvent>
     <ClCompile>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
@@ -95,6 +98,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PreBuildEvent>
+      <Command>powershell -NoProfile -ExecutionPolicy Bypass -File "$(ProjectDir)Tools\Reflection\generate_reflection.ps1" -ScanRoots Demo -OutputName CalyxGameObjectRegistry.generated -FunctionName RegisterGeneratedGameSceneObjects</Command>
+    </PreBuildEvent>
     <ClCompile>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
@@ -121,6 +127,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">
+    <PreBuildEvent>
+      <Command>powershell -NoProfile -ExecutionPolicy Bypass -File "$(ProjectDir)Tools\Reflection\generate_reflection.ps1" -ScanRoots Demo -OutputName CalyxGameObjectRegistry.generated -FunctionName RegisterGeneratedGameSceneObjects</Command>
+    </PreBuildEvent>
     <ClCompile>
       <PreprocessorDefinitions>DEVELOP;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
@@ -147,12 +156,26 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Demo\3D\Actor\DemoPlayer\DemoPlayer.cpp" />
+    <ClCompile Include="Demo\3D\Actor\DemoPlayer\Weapon\Weapon.cpp" />
+    <ClCompile Include="Demo\Input\PlayerInput.cpp" />
     <ClCompile Include="Demo\Scene\DemoScene\DemoScene.cpp" />
+    <ClCompile Include="Demo\Scene\Utility\SceneTypeUtil.cpp" />
+    <ClCompile Include="Engine\Foundation\Reflection\CalyxGameObjectRegistry.generated.cpp" />
     <ClCompile Include="Editor\EditorMain.cpp" />
     <ClCompile Include="Editor\ProjectBrowser.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Demo\3D\Actor\DemoPlayer\DemoPlayer.h" />
+    <ClInclude Include="Demo\3D\Actor\DemoPlayer\Details\DemoPlayerActionConfig.h" />
+    <ClInclude Include="Demo\3D\Actor\DemoPlayer\Weapon\Weapon.h" />
+    <ClInclude Include="Demo\Input\IInputAction.h" />
+    <ClInclude Include="Demo\Input\InputConfig.h" />
+    <ClInclude Include="Demo\Input\PlayerInput.h" />
     <ClInclude Include="Demo\Scene\DemoScene\DemoScene.h" />
+    <ClInclude Include="Demo\Scene\Details\SceneType.h" />
+    <ClInclude Include="Demo\Scene\Utility\SceneTypeUtil.h" />
+    <ClInclude Include="Engine\Foundation\Reflection\CalyxGameObjectRegistry.generated.h" />
     <ClInclude Include="Editor\ProjectBrowser.h" />
   </ItemGroup>
   <ItemGroup>
