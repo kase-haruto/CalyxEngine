@@ -6,6 +6,7 @@
 #include <Engine/Collision/CollisionManager.h>
 
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
+#include <Engine/Foundation/Utility/Converter/EnumConverter.h>
 #include <externals/imgui/imgui.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -32,6 +33,11 @@ void Collider::ShowGui() {
 	}
 
 	if(!isCollisionEnabled_) return;
+
+	// コライダーのタイプを作成
+	CalyxEngine::EnumConverter<ColliderType>::Combo("Collider Type", type_);
+	//コライダーのtargetタイプ設定
+	CalyxEngine::EnumConverter<ColliderType>::Combo("Target Type", targetType_);
 
 	GuiCmd::CheckBox("Draw Collider", isDraw_);
 	GuiCmd::ColorEdit4("Collider Color", color_);

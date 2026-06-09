@@ -15,6 +15,20 @@
 #include "externals/nlohmann/json.hpp"
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 
+namespace {
+	int NormalizeColliderKind(int kind) {
+		switch(kind) {
+		case 0:
+			return 0;
+		case 1:
+			return 1;
+		case 2:
+		default:
+			return 2;
+		}
+	}
+}
+
 BaseGameObject::BaseGameObject(const std::string&		  modelName,
 							   std::optional<std::string> objectName) {
 	auto dotPos = modelName.find_last_of('.');
@@ -48,15 +62,19 @@ BaseGameObject::BaseGameObject(const std::string&		  modelName,
 	//			collider 設定
 	//===================================================================*/
 	config_.SetOnApplied([this](const BaseGameObjectConfig&) { this->ApplyConfig(); });
-	InitializeCollider(ColliderKind::Sphere);
+	config_.GetConfig().colliderKind = 0;
+	InitializeCollider(ColliderKind::None);
 }
 
 BaseGameObject::BaseGameObject() {
 	objectModelType_ = ObjectModelType::ModelType_Unknown;	// まだ未定
 	SetName("GameObject");								// 仮の名前
 	worldTransform_.Update();
+	SetName("GameObject");								// 仮の名前
 
 	config_.SetOnApplied([this](const BaseGameObjectConfig&) { this->ApplyConfig(); });
+	config_.GetConfig().colliderKind = 0;
+	InitializeCollider(ColliderKind::None);
 }
 
 BaseGameObject::~BaseGameObject() {
@@ -93,7 +111,14 @@ void BaseGameObject::AlwaysUpdate(float dt) {
 //						引数から種類をもらって初期化
 //===================================================================*/
 void BaseGameObject::InitializeCollider(ColliderKind kind) {
-	if(kind == currentColliderKind_) return; // 差分がなければ早期リターン
+	if(kind == currentColliderKind_ && collider_) return; // 差分がなければ早期リターン
+
+	if(kind == ColliderKind::None) {
+		collider_.reset();
+		currentColliderKind_ = kind;
+		config_.GetConfig().colliderKind = static_cast<int>(kind);
+		return;
+	}
 
 	switch(kind) {
 	// box形状のコライダーを生成
@@ -119,6 +144,7 @@ void BaseGameObject::InitializeCollider(ColliderKind kind) {
 	collider_->SetOnExit([this](Collider* other) { this->OnCollisionExit(other); });
 
 	currentColliderKind_ = kind;
+	config_.GetConfig().colliderKind = static_cast<int>(kind);
 }
 
 //===================================================================*/
@@ -166,11 +192,65 @@ void BaseGameObject::ShowGui() {
 	}
 
 	// --- コライダー ---
-	if(collider_) {
-		if(GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::Collider)) {
-			collider_->ShowGui();
-			GuiCmd::EndSection();
+	if(GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::Collider)) {
+		auto applyColliderKind = [this](ColliderKind kind) { InitializeCollider(kind); };
+
+		if(!collider_) {
+			ImGui::TextDisabled("No collider");
+			if(ImGui::Button("Add Collider")) {
+				ImGui::OpenPopup("AddColliderPopup");
+			}
+			if(ImGui::BeginPopup("AddColliderPopup")) {
+				if(ImGui::MenuItem("Box Collider")) {
+					CommandManager::GetInstance()->Execute(
+						std::make_unique<ValueEditCommand<ColliderKind>>(
+							"Add Box Collider",
+							ColliderKind::None,
+							ColliderKind::Box,
+							applyColliderKind));
+				}
+				if(ImGui::MenuItem("Sphere Collider")) {
+					CommandManager::GetInstance()->Execute(
+						std::make_unique<ValueEditCommand<ColliderKind>>(
+							"Add Sphere Collider",
+							ColliderKind::None,
+							ColliderKind::Sphere,
+							applyColliderKind));
+				}
+				ImGui::EndPopup();
+			}
+		} else {
+			static const char* kColliderKindItems[] = {"Box", "Sphere"};
+			int kind = (currentColliderKind_ == ColliderKind::Box) ? 0 : 1;
+			if(ImGui::Combo("Collider Type", &kind, kColliderKindItems, IM_ARRAYSIZE(kColliderKindItems))) {
+				const ColliderKind before = currentColliderKind_;
+				const ColliderKind after  = (kind == 0) ? ColliderKind::Box : ColliderKind::Sphere;
+				if(before != after) {
+					CommandManager::GetInstance()->Execute(
+						std::make_unique<ValueEditCommand<ColliderKind>>(
+							"Change Collider Type",
+							before,
+							after,
+							applyColliderKind));
+				}
+			}
+
+			if(ImGui::Button("Remove Collider")) {
+				CommandManager::GetInstance()->Execute(
+					std::make_unique<ValueEditCommand<ColliderKind>>(
+						"Remove Collider",
+						currentColliderKind_,
+						ColliderKind::None,
+						applyColliderKind));
+			}
+
+			if(collider_) {
+				collider_->ShowGui();
+			} else {
+				ImGui::TextDisabled("No collider");
+			}
 		}
+		GuiCmd::EndSection();
 	}
 
 	// --- 描画設定 ---
@@ -218,6 +298,7 @@ void BaseGameObject::ApplyConfig() {
 
 	if(model_)
 		model_->ApplyConfig(cfg.modelConfig);
+	InitializeCollider(static_cast<ColliderKind>(NormalizeColliderKind(cfg.colliderKind)));
 	if(collider_)
 		collider_->ApplyConfig(cfg.colliderConfig);
 	worldTransform_.ApplyConfig(cfg.transform);
@@ -237,6 +318,7 @@ void BaseGameObject::ExtractConfig() {
 		cfg.modelConfig = model_->ExtractConfig();
 	if(collider_)
 		cfg.colliderConfig = collider_->ExtractConfig();
+	cfg.colliderKind = static_cast<int>(currentColliderKind_);
 	cfg.transform  = worldTransform_.ExtractConfig();
 	cfg.objectType = static_cast<int>(objectType_);
 	cfg.name	   = name_;
@@ -323,7 +405,27 @@ void BaseGameObject::SetColor(const CalyxEngine::Vector4& color) {
 	}
 }
 
-void BaseGameObject::SetCollider(std::unique_ptr<Collider> collider) { collider_ = std::move(collider); }
+void BaseGameObject::SetCollider(std::unique_ptr<Collider> collider) {
+	collider_ = std::move(collider);
+	if(!collider_) {
+		currentColliderKind_ = ColliderKind::None;
+		config_.GetConfig().colliderKind = static_cast<int>(currentColliderKind_);
+		return;
+	}
+
+	if(dynamic_cast<BoxCollider*>(collider_.get())) {
+		currentColliderKind_ = ColliderKind::Box;
+	} else if(dynamic_cast<SphereCollider*>(collider_.get())) {
+		currentColliderKind_ = ColliderKind::Sphere;
+	} else {
+		currentColliderKind_ = ColliderKind::None;
+	}
+
+	collider_->SetOnEnter([this](Collider* other) { this->OnCollisionEnter(other); });
+	collider_->SetOnStay([this](Collider* other) { this->OnCollisionStay(other); });
+	collider_->SetOnExit([this](Collider* other) { this->OnCollisionExit(other); });
+	config_.GetConfig().colliderKind = static_cast<int>(currentColliderKind_);
+}
 
 Collider* BaseGameObject::GetCollider() { return collider_.get(); }
 
