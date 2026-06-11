@@ -181,8 +181,12 @@ namespace CalyxEngine {
 		// スワップチェーンをリサイズ (内部で古いバックバッファを解放する)
 		dxSwapChain_->Resize(width, height);
 
-		// 全てのレンダーターゲットをリサイズ
+		// SwapChain に直結する BackBuffer だけをウィンドウサイズへ追従する。
+		// Offscreen / PostEffect / DebugView は各 Viewport の実描画サイズへ描画直前に追従する。
 		for(auto& pair : renderTargetCollection_->GetMap()) {
+			if(pair.first != "BackBuffer") {
+				continue;
+			}
 			pair.second->Resize(width, height);
 		}
 	}

@@ -33,6 +33,31 @@
 
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 
+#include <algorithm>
+
+namespace {
+	void ResizePostEffectTarget(CalyxEngine::DxCore* dxCore, const std::string& name, uint32_t width, uint32_t height) {
+		if(auto* rt = dxCore->GetRenderTargetCollection().Get(name)) {
+			rt->Resize(width, height);
+		}
+	}
+
+	void ResizePostEffectTargetsToInput(CalyxEngine::DxCore* dxCore, DxGpuResource* input) {
+		if(!dxCore || !input || !input->Get()) return;
+
+		const auto desc = input->Get()->GetDesc();
+		const uint32_t width = static_cast<uint32_t>((std::max)(UINT64{1}, desc.Width));
+		const uint32_t height = (std::max)(1u, desc.Height);
+
+		ResizePostEffectTarget(dxCore, "PostEffectOutput", width, height);
+		ResizePostEffectTarget(dxCore, "PostEffectBuffer1", width, height);
+		ResizePostEffectTarget(dxCore, "PostEffectBuffer2", width, height);
+		for(int i = 0; i < 8; ++i) {
+			ResizePostEffectTarget(dxCore, "PostEffectNodeBuffer" + std::to_string(i), width, height);
+		}
+	}
+}
+
 namespace CalyxEngine {
 
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -126,8 +151,6 @@ namespace CalyxEngine {
 		imguiManager_->Begin();
 
 		AssetManager::GetInstance()->GetModelManager()->ProcessLoadingTasks();
-		// オフスクリーンレンダーターゲットの開始
-		dxCore_->PreDrawOffscreen();
 
 		EditorUpdate();
 	}
@@ -148,6 +171,9 @@ namespace CalyxEngine {
 		auto* offscreenRes = dxCore_->GetRenderTargetCollection().Get("Offscreen")->GetResource();
 		auto* postOutput   = dxCore_->GetRenderTargetCollection().Get("PostEffectOutput");
 		auto* debugRT	   = dxCore_->GetRenderTargetCollection().Get("DebugView");
+
+		ResizePostEffectTargetsToInput(dxCore_.get(), offscreenRes);
+		postOutput = dxCore_->GetRenderTargetCollection().Get("PostEffectOutput");
 
 		if(auto* scTarget = dynamic_cast<SwapChainRenderTarget*>(backBuffer)) {
 			scTarget->SetBufferIndex(dxCore_->GetSwapChain().GetCurrentBackBufferIndex());
