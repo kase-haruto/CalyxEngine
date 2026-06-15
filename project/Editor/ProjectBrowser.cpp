@@ -21,6 +21,8 @@ namespace CalyxEditor {
 	namespace {
 
 		// 定義されているプロジェクトテンプレートの一覧
+		constexpr const char* kDefaultEngineVersion = "v1.0.1";
+
 		const ProjectBrowser::TemplateInfo kTemplates[] = {
 			{ProjectTemplateType::Blank, "Blank", "空のプロジェクト", "Source", ""},
 			{ProjectTemplateType::Demo, "Demo", "デモプロジェクト", "Source", "Resources/Assets/Scenes/DemoScene.scene"},
@@ -251,7 +253,7 @@ namespace CalyxEditor {
 			return stream.str();
 		}
 
-		// 生成されたゲームが最初に持つエントリポイント
+		// 生成されたゲーム DLL が Editor に公開するエントリポイント
 		std::string MakeGameMainSource(const ProjectBrowser::TemplateInfo& selectedTemplate) {
 			(void)selectedTemplate;
 			std::stringstream stream;
@@ -468,6 +470,58 @@ namespace CalyxEditor {
 			const std::string projectFile = (project.name + ".vcxproj");
 			const std::string editorProjectName = project.name + ".Editor";
 			const std::string editorProjectFile = (project.name + ".Editor.vcxproj");
+		std::string MakeEditorLauncherVcxproj(const Calyx::ProjectInfo& project, const std::string& launcherGuid) {
+			const std::string launcherName = EscapeXml(project.name + ".Editor");
+			const std::string gameProjectName = EscapeXml(project.name);
+			const std::string projectFileName = EscapeXml(project.projectFile.filename().string());
+
+			std::stringstream stream;
+			stream << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+			stream << "<!-- Visual Studio からデバッグ起動するための入口。ゲーム DLL をビルドしてから Editor を起動する。 -->\n";
+			stream << "<Project DefaultTargets=\"Build\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n";
+			stream << "  <ItemGroup Label=\"ProjectConfigurations\">\n";
+			stream << "    <ProjectConfiguration Include=\"Debug|x64\"><Configuration>Debug</Configuration><Platform>x64</Platform></ProjectConfiguration>\n";
+			stream << "    <ProjectConfiguration Include=\"Release|x64\"><Configuration>Release</Configuration><Platform>x64</Platform></ProjectConfiguration>\n";
+			stream << "    <ProjectConfiguration Include=\"Develop|x64\"><Configuration>Develop</Configuration><Platform>x64</Platform></ProjectConfiguration>\n";
+			stream << "  </ItemGroup>\n";
+			stream << "  <PropertyGroup Label=\"Globals\">\n";
+			stream << "    <VCProjectVersion>17.0</VCProjectVersion>\n";
+			stream << "    <Keyword>MakeFileProj</Keyword>\n";
+			stream << "    <ProjectGuid>{" << launcherGuid << "}</ProjectGuid>\n";
+			stream << "    <RootNamespace>" << launcherName << "</RootNamespace>\n";
+			stream << "    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>\n";
+			stream << "    <ProjectName>" << launcherName << "</ProjectName>\n";
+			stream << "  </PropertyGroup>\n";
+			stream << "  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.Default.props\" />\n";
+			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Debug|x64'\" Label=\"Configuration\"><ConfigurationType>Makefile</ConfigurationType><PlatformToolset>v143</PlatformToolset></PropertyGroup>\n";
+			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Release|x64'\" Label=\"Configuration\"><ConfigurationType>Makefile</ConfigurationType><PlatformToolset>v143</PlatformToolset></PropertyGroup>\n";
+			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Develop|x64'\" Label=\"Configuration\"><ConfigurationType>Makefile</ConfigurationType><PlatformToolset>v143</PlatformToolset></PropertyGroup>\n";
+			stream << "  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.props\" />\n";
+			stream << "  <PropertyGroup>\n";
+			stream << "    <NMakeBuildCommandLine>msbuild \"$(ProjectDir)" << gameProjectName << ".vcxproj\" /p:Configuration=$(Configuration) /p:Platform=$(Platform)</NMakeBuildCommandLine>\n";
+			stream << "    <NMakeReBuildCommandLine>msbuild \"$(ProjectDir)" << gameProjectName << ".vcxproj\" /t:Rebuild /p:Configuration=$(Configuration) /p:Platform=$(Platform)</NMakeReBuildCommandLine>\n";
+			stream << "    <NMakeCleanCommandLine>msbuild \"$(ProjectDir)" << gameProjectName << ".vcxproj\" /t:Clean /p:Configuration=$(Configuration) /p:Platform=$(Platform)</NMakeCleanCommandLine>\n";
+			stream << "    <NMakeOutput>$(ProjectDir)Generated\\Outputs\\$(Configuration)\\" << gameProjectName << ".dll</NMakeOutput>\n";
+			stream << "    <LocalDebuggerCommand>$(CALYX_ENGINE_SDK_DIR)\\CalyxEditor.exe</LocalDebuggerCommand>\n";
+			stream << "    <LocalDebuggerCommandArguments>\"$(ProjectDir)" << projectFileName << "\" --config \"$(Configuration)\"</LocalDebuggerCommandArguments>\n";
+			stream << "    <LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory>\n";
+			stream << "    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>\n";
+			stream << "  </PropertyGroup>\n";
+			stream << "  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />\n";
+			stream << "  <Target Name=\"ValidateCalyxEditorCommand\" BeforeTargets=\"PrepareForBuild\">\n";
+			stream << "    <Error Condition=\"'$(CALYX_ENGINE_SDK_DIR)'==''\" Text=\"CALYX_ENGINE_SDK_DIR is not set. Set it to the installed Calyx engine SDK directory and reopen Visual Studio.\" />\n";
+			stream << "    <Error Condition=\"'$(CALYX_ENGINE_SDK_DIR)'!='' and !Exists('$(CALYX_ENGINE_SDK_DIR)\\CalyxEditor.exe')\" Text=\"CalyxEditor.exe was not found at $(CALYX_ENGINE_SDK_DIR)\\CalyxEditor.exe.\" />\n";
+			stream << "  </Target>\n";
+			stream << "  <ImportGroup Label=\"ExtensionTargets\" />\n";
+			stream << "</Project>\n";
+			return stream.str();
+		}
+
+		std::string MakeGameSolution(const Calyx::ProjectInfo& project, const std::string& projectGuid, const std::string& launcherGuid, const std::string& solutionGuid) {
+			const std::string projectName = project.name;
+			const std::string projectFile = (project.name + ".vcxproj");
+			const std::string launcherName = project.name + ".Editor";
+			const std::string launcherFile = (project.name + ".Editor.vcxproj");
 
 			std::stringstream stream;
 			stream << "\nMicrosoft Visual Studio Solution File, Format Version 12.00\n";
@@ -974,6 +1028,10 @@ namespace CalyxEditor {
 		project.projectFile		 = project.rootDirectory / (project.name + ".calyxproj");
 		project.assetDirectory	 = "Resources/Assets";
 		project.sourceDirectory	 = selectedTemplate.sourceDirectory;
+		project.gameModule		 = std::filesystem::path("Generated") / "Outputs" / "Debug" / (project.name + ".dll");
+		project.gameModuleDebug	 = std::filesystem::path("Generated") / "Outputs" / "Debug" / (project.name + ".dll");
+		project.gameModuleDevelop = std::filesystem::path("Generated") / "Outputs" / "Develop" / (project.name + ".dll");
+		project.gameModuleRelease = std::filesystem::path("Generated") / "Outputs" / "Release" / (project.name + ".dll");
 		project.startupScene		 = selectedTemplate.startupScene;
 		project.gameModule		 = std::filesystem::path("Generated") / "Outputs" / "Debug" / (project.name + ".dll");
 		project.gameModuleDebug	 = std::filesystem::path("Generated") / "Outputs" / "Debug" / (project.name + ".dll");
