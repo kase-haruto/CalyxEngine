@@ -18,6 +18,10 @@ not edit engine source directly inside the game repository.
    project-local `Resources` files.
 5. Share the game repository with team members.
 6. Team members use the same engine version and open the shared `.calyxproj`.
+7. For C++ debugging, open the generated solution, set `<GameName>.Editor`
+   as the startup project, and press F5. The launcher project builds the game
+   DLL for the selected Visual Studio configuration and starts the editor with
+   that configuration.
 
 ## Sharing Game Projects
 
@@ -45,6 +49,25 @@ For early development, use one of these two policies:
 The submodule approach is better once multiple people must build the same game
 project reliably. The local checkout approach is simpler while the engine API is
 still changing quickly.
+
+## Controlled Engine Updates
+
+Game projects should pin the required engine release in `.calyxproj`:
+
+```json
+{
+  "engineVersion": "v1.0.1"
+}
+```
+
+Do not auto-upgrade every user to the newest GitHub Release. The lead should
+test a new engine release on an upgrade branch, update `engineVersion`, verify
+the project, and then merge that change. Team members then pull the game
+repository and the launcher resolves the pinned engine version.
+
+The GitHub Release package is expected to publish `CalyxEngine-<version>.zip`
+and `latest.json`. `latest.json` is useful for discovery, but the project file's
+`engineVersion` remains the source of truth for team production.
 
 ## Future Packaging Direction
 
