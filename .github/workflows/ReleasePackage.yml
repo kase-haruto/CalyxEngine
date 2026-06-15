@@ -1,13 +1,10 @@
 name: ReleasePackage
 
 on:
-  push:
-    tags:
-      - "v*"
   workflow_dispatch:
     inputs:
       version:
-        description: "Release version without the leading v, for example 1.2.0"
+        description: "Release version, for example 1.2.0 or v1.2.0"
         required: true
         type: string
       prerelease:
@@ -30,6 +27,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v2
@@ -53,6 +52,10 @@ jobs:
             throw "Release version could not be resolved."
           }
 
+          if ($version -notmatch '^\d+\.\d+\.\d+([-.][0-9A-Za-z.-]+)?$') {
+            throw "Release version must look like 1.2.0, 1.2.0-beta.1, or v1.2.0."
+          }
+
           $packageFile = "CalyxEngine-$version.zip"
           $downloadUrl = "https://github.com/${{ github.repository }}/releases/download/$tagName/$packageFile"
 
@@ -69,6 +72,21 @@ jobs:
             -Configuration "${{ env.CONFIGURATION }}" `
             -Platform "${{ env.PLATFORM }}" `
             -DownloadUrl "${{ steps.release.outputs.download_url }}"
+
+      - name: Create and push release tag
+        shell: pwsh
+        run: |
+          $tagName = "${{ steps.release.outputs.tag_name }}"
+
+          git fetch --tags --force
+          if (git rev-parse -q --verify "refs/tags/$tagName") {
+            throw "Tag already exists: $tagName"
+          }
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a $tagName -m "CalyxEngine ${{ steps.release.outputs.version }}"
+          git push origin $tagName
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
