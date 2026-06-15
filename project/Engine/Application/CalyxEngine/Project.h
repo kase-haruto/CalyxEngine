@@ -13,8 +13,13 @@ namespace Calyx {
 		std::filesystem::path rootDirectory;
 		std::filesystem::path assetDirectory;
 		std::filesystem::path sourceDirectory;
+		std::filesystem::path gameModule;
+		std::filesystem::path gameModuleDebug;
+		std::filesystem::path gameModuleDevelop;
+		std::filesystem::path gameModuleRelease;
 		std::filesystem::path startupScene;
 		std::string			  templateName;
+		std::string			  launchConfiguration;
 
 		bool IsValid() const { return !projectFile.empty() && !rootDirectory.empty(); }
 	};

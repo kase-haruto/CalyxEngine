@@ -88,6 +88,15 @@ namespace Calyx {
 		project.rootDirectory	= projectRoot;
 		project.assetDirectory	= ReadPath(root, "assetDirectory", "Resources/Assets");
 		project.sourceDirectory	= ReadPath(root, "sourceDirectory", "Game");
+		project.gameModule		= ReadPath(root, "gameModule", std::filesystem::path{});
+		// gameModules は Visual Studio の構成ごとにロードするゲーム DLL を分けるための設定。
+		// gameModule は古いプロジェクトファイルとの互換用フォールバックとして残す。
+		if(root.contains("gameModules") && root.at("gameModules").is_object()) {
+			const auto& modules = root.at("gameModules");
+			project.gameModuleDebug = ReadPath(modules, "Debug", project.gameModule);
+			project.gameModuleDevelop = ReadPath(modules, "Develop", project.gameModule);
+			project.gameModuleRelease = ReadPath(modules, "Release", project.gameModule);
+		}
 		project.startupScene		= ReadPath(root, "startupScene", std::filesystem::path{});
 		project.templateName		= root.value("template", std::string{"Blank"});
 
@@ -121,6 +130,14 @@ namespace Calyx {
 		root["engineVersion"]	 = project.engineVersion;
 		root["assetDirectory"]	 = WritePath(RelativeProjectPath(project, project.assetDirectory));
 		root["sourceDirectory"]	 = WritePath(RelativeProjectPath(project, project.sourceDirectory));
+		root["gameModule"]		 = WritePath(RelativeProjectPath(project, project.gameModule));
+		// 構成ごとの DLL パスを共有設定として保存する。
+		// これにより各メンバーはローカルで .calyxproj を編集せずに Debug/Develop/Release を切り替えられる。
+		root["gameModules"]		 = {
+			{"Debug", WritePath(RelativeProjectPath(project, project.gameModuleDebug.empty() ? project.gameModule : project.gameModuleDebug))},
+			{"Develop", WritePath(RelativeProjectPath(project, project.gameModuleDevelop.empty() ? project.gameModule : project.gameModuleDevelop))},
+			{"Release", WritePath(RelativeProjectPath(project, project.gameModuleRelease.empty() ? project.gameModule : project.gameModuleRelease))},
+		};
 		root["startupScene"]		 = WritePath(RelativeProjectPath(project, project.startupScene));
 		root["template"]			 = project.templateName.empty() ? "Blank" : project.templateName;
 
