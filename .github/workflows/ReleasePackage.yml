@@ -1,6 +1,9 @@
 name: ReleasePackage
 
 on:
+  push:
+    tags:
+      - "v*"
   workflow_dispatch:
     inputs:
       version:
@@ -74,6 +77,7 @@ jobs:
             -DownloadUrl "${{ steps.release.outputs.download_url }}"
 
       - name: Create and push release tag
+        if: github.event_name == 'workflow_dispatch'
         shell: pwsh
         run: |
           $tagName = "${{ steps.release.outputs.tag_name }}"
