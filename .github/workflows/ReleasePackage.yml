@@ -38,6 +38,10 @@ jobs:
         with:
           msbuild-architecture: x64
 
+      - name: Build DirectXTex
+        run: |
+          msbuild project/externals/DirectXTex/DirectXTex_Desktop_2022_Win10.vcxproj /p:Configuration=${{ env.CONFIGURATION }} /p:Platform=${{ env.PLATFORM }} /m
+
       - name: Resolve release metadata
         id: release
         shell: pwsh
