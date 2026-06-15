@@ -89,6 +89,16 @@ namespace Calyx {
 		project.assetDirectory	= ReadPath(root, "assetDirectory", "Resources/Assets");
 		project.sourceDirectory	= ReadPath(root, "sourceDirectory", "Game");
 		project.startupScene		= ReadPath(root, "startupScene", std::filesystem::path{});
+		project.gameModule		= ReadPath(root, "gameModule", std::filesystem::path{});
+
+		// 構成ごとの DLL 出力先を読み込む。
+		// Debug/Develop/Release で生成される DLL の場所が違うため、Editor は起動構成に合わせてここから読み分ける。
+		if(root.contains("gameModules") && root.at("gameModules").is_object()) {
+			const auto& modules = root.at("gameModules");
+			project.gameModuleDebug	 = ReadPath(modules, "Debug", project.gameModule);
+			project.gameModuleDevelop = ReadPath(modules, "Develop", project.gameModule);
+			project.gameModuleRelease = ReadPath(modules, "Release", project.gameModule);
+		}
 		project.templateName		= root.value("template", std::string{"Blank"});
 
 		outProject = std::move(project);
@@ -122,6 +132,13 @@ namespace Calyx {
 		root["assetDirectory"]	 = WritePath(RelativeProjectPath(project, project.assetDirectory));
 		root["sourceDirectory"]	 = WritePath(RelativeProjectPath(project, project.sourceDirectory));
 		root["startupScene"]		 = WritePath(RelativeProjectPath(project, project.startupScene));
+		root["gameModule"]		 = WritePath(RelativeProjectPath(project, project.gameModule));
+		root["gameModules"]		 = nlohmann::json::object();
+		// 構成ごとの DLL パスを保存する。
+		// Visual Studio から Debug/Develop/Release を切り替えたとき、同じ .calyxproj から正しい DLL をロードするための情報。
+		root["gameModules"]["Debug"]		= WritePath(RelativeProjectPath(project, project.gameModuleDebug));
+		root["gameModules"]["Develop"]	= WritePath(RelativeProjectPath(project, project.gameModuleDevelop));
+		root["gameModules"]["Release"]	= WritePath(RelativeProjectPath(project, project.gameModuleRelease));
 		root["template"]			 = project.templateName.empty() ? "Blank" : project.templateName;
 
 		std::ofstream file(project.projectFile);
@@ -192,6 +209,7 @@ namespace Calyx {
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////
 	bool LoadRecentProjects(const std::filesystem::path& path, std::vector<RecentProjectEntry>& outProjects) {
 		outProjects.clear();
+		bool removedMissingProjects = false;
 
 		// ファイルが存在しない場合は、空の一覧として扱う
 		std::ifstream file(path);
@@ -222,7 +240,19 @@ namespace Calyx {
 			entry.engineVersion	 = item.value("engineVersion", std::string{});
 			entry.projectFile	 = item.at("projectFile").get<std::string>();
 
+			// Recent は各ユーザー環境のローカル履歴なので、削除済みプロジェクトはここで捨てる。
+			// 存在しない .calyxproj を残すと Project Browser に開けないカードが出続ける。
+			if(!std::filesystem::exists(entry.projectFile)) {
+				removedMissingProjects = true;
+				continue;
+			}
+
 			outProjects.push_back(std::move(entry));
+		}
+
+		// 削除済みプロジェクトを除外した場合は、次回起動時にも消えた状態になるよう保存し直す。
+		if(removedMissingProjects) {
+			SaveRecentProjects(path, outProjects);
 		}
 
 		return true;

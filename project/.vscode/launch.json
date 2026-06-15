@@ -1,0 +1,77 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "CalyxEditor Debug",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}\\..\\generated\\outputs\\Debug\\CalyxEditor.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "console": "internalConsole",
+      "preLaunchTask": "build Debug"
+    },
+    {
+      "name": "CalyxGame Debug",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}\\..\\generated\\outputs\\Debug\\CalyxGame.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "console": "internalConsole",
+      "preLaunchTask": "build Debug"
+    },
+    {
+      "name": "CalyxEditor Develop",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}\\..\\generated\\outputs\\Develop\\CalyxEditor.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "console": "internalConsole",
+      "preLaunchTask": "build Develop"
+    },
+    {
+      "name": "CalyxGame Develop",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}\\..\\generated\\outputs\\Develop\\CalyxGame.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "console": "internalConsole",
+      "preLaunchTask": "build Develop"
+    },
+    {
+      "name": "CalyxEditor Release",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}\\..\\generated\\outputs\\Release\\CalyxEditor.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "console": "internalConsole",
+      "preLaunchTask": "build Release"
+    },
+    {
+      "name": "CalyxGame Release",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}\\..\\generated\\outputs\\Release\\CalyxGame.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "console": "internalConsole",
+      "preLaunchTask": "build Release"
+    }
+  ]
+}

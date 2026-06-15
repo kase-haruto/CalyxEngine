@@ -6,34 +6,57 @@
 #include <Engine/Foundation/Utility/LeakChecker/LeakChecker.h>
 
 #include <string>
+#include <vector>
 
 namespace Calyx {
 
 	namespace {
 
-		std::string FirstCommandLineArgument(const char* commandLine) {
+		std::vector<std::string> SplitCommandLineArguments(const char* commandLine) {
+			std::vector<std::string> args;
 			if(!commandLine) return {};
 
 			std::string input = commandLine;
-			size_t		pos	  = input.find_first_not_of(" \t");
-			if(pos == std::string::npos) return {};
+			size_t		pos	  = 0;
+			while(pos < input.size()) {
+				pos = input.find_first_not_of(" \t", pos);
+				if(pos == std::string::npos) break;
 
-			if(input[pos] == '"') {
-				size_t end = input.find('"', pos + 1);
-				if(end == std::string::npos) return input.substr(pos + 1);
-				return input.substr(pos + 1, end - pos - 1);
+				// 空白を含むパスを受け取れるように、引用符で囲まれた引数は 1 つの文字列として扱う。
+				if(input[pos] == '"') {
+					size_t end = input.find('"', pos + 1);
+					if(end == std::string::npos) {
+						args.push_back(input.substr(pos + 1));
+						break;
+					}
+					args.push_back(input.substr(pos + 1, end - pos - 1));
+					pos = end + 1;
+					continue;
+				}
+
+				size_t end = input.find_first_of(" \t", pos);
+				args.push_back(end == std::string::npos ? input.substr(pos) : input.substr(pos, end - pos));
+				if(end == std::string::npos) break;
+				pos = end + 1;
 			}
 
-			size_t end = input.find_first_of(" \t", pos);
-			return end == std::string::npos ? input.substr(pos) : input.substr(pos, end - pos);
+			return args;
 		}
 
 		void LoadProjectFromCommandLine(const char* commandLine, Application& application) {
-			const std::string projectPath = FirstCommandLineArgument(commandLine);
-			if(projectPath.empty()) return;
+			const auto args = SplitCommandLineArguments(commandLine);
+			if(args.empty()) return;
 
 			ProjectInfo project;
-			if(LoadProjectFile(projectPath, project)) {
+			if(LoadProjectFile(args.front(), project)) {
+				// Visual Studio/Launcher から渡された構成名を保持する。
+				// Editor はこの値を見て Debug/Develop/Release のどのゲーム DLL をロードするか決める。
+				for(size_t i = 1; i + 1 < args.size(); ++i) {
+					if(args[i] == "--config") {
+						project.launchConfiguration = args[i + 1];
+						++i;
+					}
+				}
 				SetCurrentProject(project);
 				application.OnProjectLoaded(project);
 			}

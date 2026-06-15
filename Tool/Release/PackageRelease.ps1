@@ -112,7 +112,7 @@ if (-not (Test-Path $projectDir)) {
 
 if (-not $SkipBuild) {
     $msbuild = Find-MSBuild
-    & $msbuild (Join-Path $projectDir "CalyxEditor.vcxproj") /p:Configuration=$Configuration /p:Platform=$Platform /m
+    & $msbuild (Join-Path $projectDir "CalyxEngine.sln") /p:Configuration=$Configuration /p:Platform=$Platform /m
     if ($LASTEXITCODE -ne 0) {
         throw "MSBuild failed with exit code $LASTEXITCODE"
     }
@@ -126,6 +126,7 @@ New-Item -ItemType Directory -Force -Path $outputRoot | Out-Null
 
 $runtimeOutput = Join-Path $engineRoot "generated\outputs\$Configuration"
 Copy-RequiredItem (Join-Path $runtimeOutput "CalyxEditor.exe") (Join-Path $stageRoot "CalyxEditor.exe")
+Copy-RequiredItem (Join-Path $runtimeOutput "CalyxLauncher.exe") (Join-Path $stageRoot "SDK\CalyxLauncher.exe")
 Copy-IfExists (Join-Path $runtimeOutput "dxcompiler.dll") (Join-Path $stageRoot "dxcompiler.dll")
 Copy-IfExists (Join-Path $runtimeOutput "dxil.dll") (Join-Path $stageRoot "dxil.dll")
 Copy-IfExists (Join-Path $runtimeOutput "assimp-vc143-mt.dll") (Join-Path $stageRoot "assimp-vc143-mt.dll")

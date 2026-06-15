@@ -14,6 +14,11 @@ namespace Calyx {
 		std::filesystem::path assetDirectory;
 		std::filesystem::path sourceDirectory;
 		std::filesystem::path startupScene;
+		std::filesystem::path gameModule;
+		std::filesystem::path gameModuleDebug;
+		std::filesystem::path gameModuleDevelop;
+		std::filesystem::path gameModuleRelease;
+		std::string			  launchConfiguration;
 		std::string			  templateName;
 
 		bool IsValid() const { return !projectFile.empty() && !rootDirectory.empty(); }

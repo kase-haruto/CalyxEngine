@@ -25,6 +25,7 @@ namespace CalyxEditor {
 			{ProjectTemplateType::Blank, "Blank", "空のプロジェクト", "Source", ""},
 			{ProjectTemplateType::Demo, "Demo", "デモプロジェクト", "Source", "Resources/Assets/Scenes/DemoScene.scene"},
 		};
+		constexpr const char* kDefaultEngineVersion = "v1.0.1";
 
 		// 新規プロジェクトの初期作成先のディレクトリパスを取得（ユーザーのドキュメントフォルダを指す）
 		std::filesystem::path DefaultUserProjectDirectory() {
@@ -254,12 +255,16 @@ namespace CalyxEditor {
 		std::string MakeGameMainSource(const ProjectBrowser::TemplateInfo& selectedTemplate) {
 			(void)selectedTemplate;
 			std::stringstream stream;
-			stream << "#include <CalyxEngine/CalyxEngine.h>\n\n";
 			stream << "#include \"GameApplication.h\"\n\n";
-
-			stream << "int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR commandLine, int) {\n";
-			stream << "\tGameApplication application;\n";
-			stream << "\treturn Calyx::Run(hInstance, application, commandLine);\n";
+			stream << "// Editor は GetProcAddress でこの関数を取得し、ゲーム側 Application を生成する。\n";
+			stream << "// DLL と EXE の境界を越えるため、生成と破棄の両方をゲーム DLL 側に寄せる。\n";
+			stream << "extern \"C\" __declspec(dllexport) Calyx::Application* CreateCalyxApplication() {\n";
+			stream << "\treturn new GameApplication();\n";
+			stream << "}\n\n";
+			stream << "// CreateCalyxApplication で生成した Application を破棄する。\n";
+			stream << "// delete を DLL 内で完結させ、ランタイム境界の所有権を明確にする。\n";
+			stream << "extern \"C\" __declspec(dllexport) void DestroyCalyxApplication(Calyx::Application* application) {\n";
+			stream << "\tdelete application;\n";
 			stream << "}\n";
 			return stream.str();
 		}
@@ -283,13 +288,18 @@ namespace CalyxEditor {
 		std::string MakeGameReadme(const Calyx::ProjectInfo& project) {
 			std::stringstream stream;
 			stream << "# " << project.name << "\n\n";
-			stream << "## Build\n\n";
-			stream << "Set `CALYX_ENGINE_SDK_DIR` to the installed Calyx engine SDK directory before opening this solution.\n\n";
-			stream << "PowerShell example:\n\n";
+			stream << "## ビルドとデバッグ\n\n";
+			stream << "このプロジェクトはゲームコードを DLL としてビルドし、Editor がその DLL を読み込んで実行します。\n\n";
+			stream << "1. `CALYX_ENGINE_SDK_DIR` に、チームで固定した Calyx SDK のパスを設定します。\n";
+			stream << "2. `" << project.name << ".sln` を Visual Studio で開きます。\n";
+			stream << "3. `" << project.name << ".Editor` をスタートアッププロジェクトにします。\n";
+			stream << "4. Debug/Develop/Release を選んで F5 実行します。\n\n";
+			stream << "PowerShell の設定例:\n\n";
 			stream << "```powershell\n";
-			stream << "[Environment]::SetEnvironmentVariable(\"CALYX_ENGINE_SDK_DIR\", \"C:\\\\Calyx\\\\Engines\\\\1.2.0\\\\SDK\", \"User\")\n";
+			stream << "[Environment]::SetEnvironmentVariable(\"CALYX_ENGINE_SDK_DIR\", \"C:\\\\Calyx\\\\Engines\\\\" << project.engineVersion << "\\\\SDK\", \"User\")\n";
 			stream << "```\n\n";
-			stream << "After setting the variable, reopen Visual Studio and build this solution with `Develop|x64`.\n";
+			stream << "ブレークポイントはゲーム側の `.cpp` に置けます。Visual Studio から F5 実行すると、ゲーム DLL が Editor にロードされたタイミングでヒットします。\n\n";
+			stream << "Engine の更新はリードが検証後に `.calyxproj` の `engineVersion` を更新し、チームへ共有してください。\n";
 			return stream.str();
 		}
 
@@ -320,9 +330,9 @@ namespace CalyxEditor {
 			stream << "    <ProjectName>" << projectName << "</ProjectName>\n";
 			stream << "  </PropertyGroup>\n";
 			stream << "  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.Default.props\" />\n";
-			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Debug|x64'\" Label=\"Configuration\"><ConfigurationType>Application</ConfigurationType><UseDebugLibraries>true</UseDebugLibraries><PlatformToolset>v143</PlatformToolset><CharacterSet>Unicode</CharacterSet></PropertyGroup>\n";
-			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Release|x64'\" Label=\"Configuration\"><ConfigurationType>Application</ConfigurationType><UseDebugLibraries>false</UseDebugLibraries><PlatformToolset>v143</PlatformToolset><WholeProgramOptimization>true</WholeProgramOptimization><CharacterSet>Unicode</CharacterSet></PropertyGroup>\n";
-			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Develop|x64'\" Label=\"Configuration\"><ConfigurationType>Application</ConfigurationType><UseDebugLibraries>false</UseDebugLibraries><PlatformToolset>v143</PlatformToolset><WholeProgramOptimization>true</WholeProgramOptimization><CharacterSet>Unicode</CharacterSet></PropertyGroup>\n";
+			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Debug|x64'\" Label=\"Configuration\"><ConfigurationType>DynamicLibrary</ConfigurationType><UseDebugLibraries>true</UseDebugLibraries><PlatformToolset>v143</PlatformToolset><CharacterSet>Unicode</CharacterSet></PropertyGroup>\n";
+			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Release|x64'\" Label=\"Configuration\"><ConfigurationType>DynamicLibrary</ConfigurationType><UseDebugLibraries>false</UseDebugLibraries><PlatformToolset>v143</PlatformToolset><WholeProgramOptimization>true</WholeProgramOptimization><CharacterSet>Unicode</CharacterSet></PropertyGroup>\n";
+			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Develop|x64'\" Label=\"Configuration\"><ConfigurationType>DynamicLibrary</ConfigurationType><UseDebugLibraries>false</UseDebugLibraries><PlatformToolset>v143</PlatformToolset><WholeProgramOptimization>true</WholeProgramOptimization><CharacterSet>Unicode</CharacterSet></PropertyGroup>\n";
 			stream << "  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.props\" />\n";
 			stream << "  <ImportGroup Label=\"ExtensionSettings\" />\n";
 			stream << "  <ImportGroup Label=\"Shared\" />\n";
@@ -388,6 +398,49 @@ namespace CalyxEditor {
 		}
 
 		// Visual Studio上で見やすいフィルタを生成
+		std::string MakeEditorLauncherVcxproj(
+			const Calyx::ProjectInfo& project,
+			const std::string& editorProjectGuid,
+			const std::string& gameProjectGuid) {
+
+			const std::string editorProjectName = EscapeXml(project.name + ".Editor");
+			const std::string gameProjectFile	= EscapeXml(project.name + ".vcxproj");
+			const std::string projectFile		= EscapeXml(project.name + ".calyxproj");
+
+			std::stringstream stream;
+			stream << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+			stream << "<Project DefaultTargets=\"Build\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n";
+			stream << "  <!-- Visual Studio から Editor を起動するための薄いプロジェクト。ゲーム本体は DLL として先にビルドする。 -->\n";
+			stream << "  <ItemGroup Label=\"ProjectConfigurations\">\n";
+			stream << "    <ProjectConfiguration Include=\"Debug|x64\"><Configuration>Debug</Configuration><Platform>x64</Platform></ProjectConfiguration>\n";
+			stream << "    <ProjectConfiguration Include=\"Release|x64\"><Configuration>Release</Configuration><Platform>x64</Platform></ProjectConfiguration>\n";
+			stream << "    <ProjectConfiguration Include=\"Develop|x64\"><Configuration>Develop</Configuration><Platform>x64</Platform></ProjectConfiguration>\n";
+			stream << "  </ItemGroup>\n";
+			stream << "  <PropertyGroup Label=\"Globals\"><VCProjectVersion>17.0</VCProjectVersion><Keyword>MakeFileProj</Keyword><ProjectGuid>{" << editorProjectGuid << "}</ProjectGuid><RootNamespace>" << editorProjectName << "</RootNamespace><WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion><ProjectName>" << editorProjectName << "</ProjectName></PropertyGroup>\n";
+			stream << "  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.Default.props\" />\n";
+			stream << "  <PropertyGroup Label=\"Configuration\" Condition=\"'$(Configuration)|$(Platform)'=='Debug|x64'\"><ConfigurationType>Makefile</ConfigurationType><PlatformToolset>v143</PlatformToolset></PropertyGroup>\n";
+			stream << "  <PropertyGroup Label=\"Configuration\" Condition=\"'$(Configuration)|$(Platform)'=='Develop|x64'\"><ConfigurationType>Makefile</ConfigurationType><PlatformToolset>v143</PlatformToolset></PropertyGroup>\n";
+			stream << "  <PropertyGroup Label=\"Configuration\" Condition=\"'$(Configuration)|$(Platform)'=='Release|x64'\"><ConfigurationType>Makefile</ConfigurationType><PlatformToolset>v143</PlatformToolset></PropertyGroup>\n";
+			stream << "  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.props\" />\n";
+			stream << "  <PropertyGroup>\n";
+			stream << "    <NMakeBuildCommandLine>msbuild &quot;$(ProjectDir)" << gameProjectFile << "&quot; /p:Configuration=$(Configuration) /p:Platform=$(Platform)</NMakeBuildCommandLine>\n";
+			stream << "    <NMakeReBuildCommandLine>msbuild &quot;$(ProjectDir)" << gameProjectFile << "&quot; /t:Rebuild /p:Configuration=$(Configuration) /p:Platform=$(Platform)</NMakeReBuildCommandLine>\n";
+			stream << "    <NMakeCleanCommandLine>msbuild &quot;$(ProjectDir)" << gameProjectFile << "&quot; /t:Clean /p:Configuration=$(Configuration) /p:Platform=$(Platform)</NMakeCleanCommandLine>\n";
+			stream << "    <NMakeOutput>$(ProjectDir)Generated\\Outputs\\$(Configuration)\\" << EscapeXml(project.name) << ".dll</NMakeOutput>\n";
+			stream << "    <LocalDebuggerCommand>$(CALYX_ENGINE_SDK_DIR)\\CalyxLauncher.exe</LocalDebuggerCommand>\n";
+			stream << "    <LocalDebuggerCommandArguments>&quot;$(ProjectDir)" << projectFile << "&quot; --config &quot;$(Configuration)&quot;</LocalDebuggerCommandArguments>\n";
+			stream << "    <LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory>\n";
+			stream << "  </PropertyGroup>\n";
+			stream << "  <ItemGroup><ProjectReference Include=\"" << gameProjectFile << "\"><Project>{" << gameProjectGuid << "}</Project></ProjectReference></ItemGroup>\n";
+			stream << "  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />\n";
+			stream << "  <Target Name=\"ValidateCalyxLauncher\" BeforeTargets=\"PrepareForBuild\">\n";
+			stream << "    <Error Condition=\"'$(CALYX_ENGINE_SDK_DIR)'==''\" Text=\"CALYX_ENGINE_SDK_DIR is not set. Set it to the installed Calyx engine SDK directory.\" />\n";
+			stream << "    <Error Condition=\"'$(CALYX_ENGINE_SDK_DIR)'!='' and !Exists('$(CALYX_ENGINE_SDK_DIR)\\CalyxLauncher.exe')\" Text=\"CalyxLauncher.exe was not found: $(CALYX_ENGINE_SDK_DIR)\" />\n";
+			stream << "  </Target>\n";
+			stream << "</Project>\n";
+			return stream.str();
+		}
+
 		std::string MakeGameFilters(const Calyx::ProjectInfo& project, const std::vector<std::filesystem::path>& sourceFiles) {
 
 			std::stringstream stream;
@@ -406,28 +459,39 @@ namespace CalyxEditor {
 		}
 
 		// ゲーム用slnを生成
-		std::string MakeGameSolution(const Calyx::ProjectInfo& project, const std::string& projectGuid, const std::string& solutionGuid) {
+		std::string MakeGameSolution(
+			const Calyx::ProjectInfo& project,
+			const std::string& gameProjectGuid,
+			const std::string& editorProjectGuid,
+			const std::string& solutionGuid) {
 			const std::string projectName = project.name;
 			const std::string projectFile = (project.name + ".vcxproj");
+			const std::string editorProjectName = project.name + ".Editor";
+			const std::string editorProjectFile = (project.name + ".Editor.vcxproj");
 
 			std::stringstream stream;
 			stream << "\nMicrosoft Visual Studio Solution File, Format Version 12.00\n";
 			stream << "# Visual Studio Version 17\n";
 			stream << "VisualStudioVersion = 17.5.33627.172\n";
 			stream << "MinimumVisualStudioVersion = 10.0.40219.1\n";
-			stream << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" << projectName << "\", \"" << projectFile << "\", \"{" << projectGuid << "}\"\n";
+			stream << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" << editorProjectName << "\", \"" << editorProjectFile << "\", \"{" << editorProjectGuid << "}\"\n";
+			stream << "EndProject\n";
+			stream << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" << projectName << "\", \"" << projectFile << "\", \"{" << gameProjectGuid << "}\"\n";
 			stream << "EndProject\n";
 			stream << "Global\n";
 			stream << "\tGlobalSection(SolutionConfigurationPlatforms) = preSolution\n";
 			stream << "\t\tDebug|x64 = Debug|x64\n\t\tDevelop|x64 = Develop|x64\n\t\tRelease|x64 = Release|x64\n";
 			stream << "\tEndGlobalSection\n";
 			stream << "\tGlobalSection(ProjectConfigurationPlatforms) = postSolution\n";
-			stream << "\t\t{" << projectGuid << "}.Debug|x64.ActiveCfg = Debug|x64\n";
-			stream << "\t\t{" << projectGuid << "}.Debug|x64.Build.0 = Debug|x64\n";
-			stream << "\t\t{" << projectGuid << "}.Develop|x64.ActiveCfg = Develop|x64\n";
-			stream << "\t\t{" << projectGuid << "}.Develop|x64.Build.0 = Develop|x64\n";
-			stream << "\t\t{" << projectGuid << "}.Release|x64.ActiveCfg = Release|x64\n";
-			stream << "\t\t{" << projectGuid << "}.Release|x64.Build.0 = Release|x64\n";
+			const std::string projectGuids[] = {editorProjectGuid, gameProjectGuid};
+			for(const std::string& guid : projectGuids) {
+				stream << "\t\t{" << guid << "}.Debug|x64.ActiveCfg = Debug|x64\n";
+				stream << "\t\t{" << guid << "}.Debug|x64.Build.0 = Debug|x64\n";
+				stream << "\t\t{" << guid << "}.Develop|x64.ActiveCfg = Develop|x64\n";
+				stream << "\t\t{" << guid << "}.Develop|x64.Build.0 = Develop|x64\n";
+				stream << "\t\t{" << guid << "}.Release|x64.ActiveCfg = Release|x64\n";
+				stream << "\t\t{" << guid << "}.Release|x64.Build.0 = Release|x64\n";
+			}
 			stream << "\tEndGlobalSection\n";
 			stream << "\tGlobalSection(SolutionProperties) = preSolution\n";
 			stream << "\t\tHideSolutionNode = FALSE\n";
@@ -449,6 +513,7 @@ namespace CalyxEditor {
 
 			// ソリューションおよびvcxprojファイルで紐付ける新規の個別GUIDを発行
 			const std::string projectGuid = MakeGuid();
+			const std::string editorProjectGuid = MakeGuid();
 			const std::string solutionGuid = MakeGuid();
 
 			// ゲーム実行時にもエンジン共通の画像やシェーダーリソースを使うため、Resourcesディレクトリを丸ごとコピー
@@ -485,7 +550,10 @@ namespace CalyxEditor {
 			if(!WriteTextFile(project.rootDirectory / (project.name + ".vcxproj.filters"), MakeGameFilters(project, sourceFiles))) {
 				return false;
 			}
-			if(!WriteTextFile(project.rootDirectory / (project.name + ".sln"), MakeGameSolution(project, projectGuid, solutionGuid))) {
+			if(!WriteTextFile(project.rootDirectory / (project.name + ".Editor.vcxproj"), MakeEditorLauncherVcxproj(project, editorProjectGuid, projectGuid))) {
+				return false;
+			}
+			if(!WriteTextFile(project.rootDirectory / (project.name + ".sln"), MakeGameSolution(project, projectGuid, editorProjectGuid, solutionGuid))) {
 				return false;
 			}
 			if(!WriteTextFile(project.rootDirectory / ".gitignore", MakeGameGitIgnore())) {
@@ -744,7 +812,7 @@ namespace CalyxEditor {
 		ImGui::SetCursorScreenPos(ImVec2(cardMin.x + param_.cardPadding_, cardMin.y + param_.cardNameOffsetY_));
 		ImGui::TextWrapped("%s", label.c_str());
 		ImGui::SetCursorScreenPos(ImVec2(cardMin.x + param_.cardPadding_, cardMin.y + param_.cardVersionOffsetY_));
-		ImGui::TextDisabled("%s", entry.engineVersion.empty() ? "0.1.0" : entry.engineVersion.c_str());
+		ImGui::TextDisabled("%s", entry.engineVersion.empty() ? kDefaultEngineVersion : entry.engineVersion.c_str());
 
 		ImGui::SetCursorScreenPos(cardMax);
 	}
@@ -901,12 +969,16 @@ namespace CalyxEditor {
 
 		Calyx::ProjectInfo project;
 		project.name			 = newProjectName_.data();
-		project.engineVersion	 = "0.1.0";
+		project.engineVersion	 = kDefaultEngineVersion;
 		project.rootDirectory	 = std::filesystem::path(newProjectDirectory_.data()) / project.name;
 		project.projectFile		 = project.rootDirectory / (project.name + ".calyxproj");
 		project.assetDirectory	 = "Resources/Assets";
 		project.sourceDirectory	 = selectedTemplate.sourceDirectory;
 		project.startupScene		 = selectedTemplate.startupScene;
+		project.gameModule		 = std::filesystem::path("Generated") / "Outputs" / "Debug" / (project.name + ".dll");
+		project.gameModuleDebug	 = std::filesystem::path("Generated") / "Outputs" / "Debug" / (project.name + ".dll");
+		project.gameModuleDevelop = std::filesystem::path("Generated") / "Outputs" / "Develop" / (project.name + ".dll");
+		project.gameModuleRelease = std::filesystem::path("Generated") / "Outputs" / "Release" / (project.name + ".dll");
 		project.templateName		 = selectedTemplate.name;
 
 		if(!Calyx::CreateProject(project)) {
