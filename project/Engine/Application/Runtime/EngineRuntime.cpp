@@ -6,34 +6,62 @@
 #include <Engine/Foundation/Utility/LeakChecker/LeakChecker.h>
 
 #include <string>
+#include <vector>
 
 namespace Calyx {
 
 	namespace {
 
-		std::string FirstCommandLineArgument(const char* commandLine) {
-			if(!commandLine) return {};
+		std::vector<std::string> ParseCommandLineArguments(const char* commandLine) {
+			std::vector<std::string> args;
+			if(!commandLine) return args;
 
 			std::string input = commandLine;
-			size_t		pos	  = input.find_first_not_of(" \t");
-			if(pos == std::string::npos) return {};
+			size_t pos = 0;
+			while(pos < input.size()) {
+				// 空白を読み飛ばして、次の引数の開始位置へ進める。
+				pos = input.find_first_not_of(" \t", pos);
+				if(pos == std::string::npos) break;
 
-			if(input[pos] == '"') {
-				size_t end = input.find('"', pos + 1);
-				if(end == std::string::npos) return input.substr(pos + 1);
-				return input.substr(pos + 1, end - pos - 1);
+				// ダブルクォートで囲まれたパスは、空白を含む 1 つの引数として扱う。
+				if(input[pos] == '"') {
+					const size_t end = input.find('"', pos + 1);
+					if(end == std::string::npos) {
+						args.push_back(input.substr(pos + 1));
+						break;
+					}
+					args.push_back(input.substr(pos + 1, end - pos - 1));
+					pos = end + 1;
+					continue;
+				}
+
+				// クォートされていない通常引数は、次の空白までを 1 引数として扱う。
+				const size_t end = input.find_first_of(" \t", pos);
+				args.push_back(end == std::string::npos ? input.substr(pos) : input.substr(pos, end - pos));
+				if(end == std::string::npos) break;
+				pos = end + 1;
 			}
 
-			size_t end = input.find_first_of(" \t", pos);
-			return end == std::string::npos ? input.substr(pos) : input.substr(pos, end - pos);
+			return args;
 		}
 
 		void LoadProjectFromCommandLine(const char* commandLine, Application& application) {
-			const std::string projectPath = FirstCommandLineArgument(commandLine);
+			const auto args = ParseCommandLineArguments(commandLine);
+			if(args.empty()) return;
+
+			// 先頭の通常引数は .calyxproj のパスとして扱う。
+			// それ以降のフラグは起動時だけ使う情報で、プロジェクトファイルには保存しない。
+			const std::string& projectPath = args.front();
 			if(projectPath.empty()) return;
 
 			ProjectInfo project;
 			if(LoadProjectFile(projectPath, project)) {
+				for(size_t i = 1; i + 1 < args.size(); ++i) {
+					if(args[i] == "--config") {
+						project.launchConfiguration = args[i + 1];
+						++i;
+					}
+				}
 				SetCurrentProject(project);
 				application.OnProjectLoaded(project);
 			}
