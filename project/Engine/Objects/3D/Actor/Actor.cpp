@@ -5,16 +5,14 @@
 #include <externals/imgui/imgui.h>
 
 Actor::Actor() {
-	physicsBody_.SetBodyType(PhysicsBodyType::Kinematic);
-	config_.GetConfig().physicsBodyConfig.bodyType = static_cast<int>(PhysicsBodyType::Kinematic);
+	EnsureActorPhysicsBody();
 	characterMovement_.SetOwner(this);
 }
 
 Actor::Actor(const std::string& modelName,
 			 std::optional<std::string> objectName) :
 	BaseGameObject::BaseGameObject(modelName, objectName) {
-	physicsBody_.SetBodyType(PhysicsBodyType::Kinematic);
-	config_.GetConfig().physicsBodyConfig.bodyType = static_cast<int>(PhysicsBodyType::Kinematic);
+	EnsureActorPhysicsBody();
 	characterMovement_.SetOwner(this);
 }
 
@@ -27,6 +25,41 @@ void Actor::Update(float dt) {
 	// BaseGameObject 側で Transform / Collider / Model を通常更新する。
 	characterMovement_.Tick(dt);
 	BaseGameObject::Update(dt);
+}
+
+void Actor::ApplyConfig() {
+	// まずBaseGameObjectとしてモデル、コライダー、Transform、保存済みPhysicsBodyを復元する。
+	BaseGameObject::ApplyConfig();
+
+	// 保存データ側にphysicsBodyConfigが無い古いシーンでは、PhysicsBodyConfigのデフォルトでStaticに戻る。
+	// Actorはキャラクター移動や押し戻しで自分の座標を補正する側なので、適用後に必ずKinematicへ戻す。
+	EnsureActorPhysicsBody();
+}
+
+void Actor::ExtractConfig() {
+	// 保存直前にActorの物理種別を保証する。
+	// これにより、次回ロード時にもphysicsBodyConfig.bodyType=Kinematicとして復元できる。
+	EnsureActorPhysicsBody();
+
+	// BaseGameObjectConfigへ現在状態を抽出する。
+	BaseGameObject::ExtractConfig();
+
+	// Base側の抽出後にも念のため保存用ConfigをActor向けに固定する。
+	// 将来Base側の抽出順が変わっても、Actorの保存値がStaticへ戻らないようにする。
+	config_.GetConfig().physicsBodyConfig.enabled = true;
+	config_.GetConfig().physicsBodyConfig.bodyType = static_cast<int>(PhysicsBodyType::Kinematic);
+	config_.GetConfig().physicsBodyConfig.pushbackRatio = 1.0f;
+}
+
+void Actor::EnsureActorPhysicsBody() {
+	// Actorは床探索、ジャンプ、押し戻しによってTransformを変更する可動オブジェクトとして扱う。
+	physicsBody_.SetEnabled(true);
+	physicsBody_.SetBodyType(PhysicsBodyType::Kinematic);
+
+	// Config側も同時に更新して、Inspector表示とシーン保存値を実体のPhysicsBodyに揃える。
+	config_.GetConfig().physicsBodyConfig.enabled = true;
+	config_.GetConfig().physicsBodyConfig.bodyType = static_cast<int>(PhysicsBodyType::Kinematic);
+	config_.GetConfig().physicsBodyConfig.pushbackRatio = 1.0f;
 }
 
 void Actor::DerivativeGui() {

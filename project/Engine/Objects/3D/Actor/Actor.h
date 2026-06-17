@@ -43,6 +43,18 @@ public:
 	void Update(float dt) override;
 
 	/**
+	 * \brief Actor用の設定を適用
+	 * - BaseGameObject設定を適用した後、Actorは必ずKinematic Bodyとして扱う
+	 */
+	void ApplyConfig() override;
+
+	/**
+	 * \brief Actor用の設定を抽出
+	 * - シーン保存時にActorの物理種別がStaticとして保存されないようにする
+	 */
+	void ExtractConfig() override;
+
+	/**
 	 * \brief 派生パラメータGUI
 	 */
 	void DerivativeGui() override;
@@ -106,6 +118,13 @@ public:
 	 */
 	CharacterMovementComponent& GetCharacterMovement() { return characterMovement_; }
 	const CharacterMovementComponent& GetCharacterMovement() const { return characterMovement_; }
+
+protected:
+	/**
+	 * \brief Actorに必要な物理設定を保証する
+	 * - キャラクター移動は自分で座標を動かすため、押し戻し対象はKinematicに固定する
+	 */
+	void EnsureActorPhysicsBody();
 
 protected:
 	//===================================================================*/

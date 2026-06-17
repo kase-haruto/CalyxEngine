@@ -369,8 +369,7 @@
                     "y": 0.001870307489298284,
                     "z": 3.0276405811309814
                 }
-            },
-            "type": "BaseGameObject"
+            },            "type": "DemoPlayer"
         },
         {
             "cameraDitherEnabled": false,
