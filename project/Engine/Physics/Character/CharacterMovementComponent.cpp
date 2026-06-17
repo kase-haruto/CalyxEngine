@@ -141,7 +141,7 @@ void CharacterMovementComponent::Tick(float dt) {
 
 	FindFloor(currentFloor_);
 
-	if(currentFloor_.walkableFloor && currentFloor_.floorDistance <= floorSnapDistance_) {
+	if(currentFloor_.walkableFloor && currentFloor_.floorDistance <= floorSnapDistance_ && velocity_.y <= 0.0f) {
 		// 歩行可能な床が近くにある場合はWalkingへ遷移する。
 		movementMode_ = CharacterMovementMode::Walking;
 		// 接地中は下向き速度を残すと毎フレーム床へ押し込み続けるため0に戻す。
