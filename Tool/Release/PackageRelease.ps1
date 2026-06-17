@@ -18,11 +18,54 @@ function Resolve-EngineRoot {
 }
 
 function Find-MSBuild {
+    if (-not [string]::IsNullOrWhiteSpace($env:MSBUILD_EXE_PATH) -and (Test-Path $env:MSBUILD_EXE_PATH)) {
+        return $env:MSBUILD_EXE_PATH
+    }
+
+    $pathMsBuild = Get-Command msbuild.exe -ErrorAction SilentlyContinue
+    if ($pathMsBuild) {
+        return $pathMsBuild.Source
+    }
+
+    $vsWhereCandidates = @(
+        "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe",
+        "${env:ProgramFiles}\Microsoft Visual Studio\Installer\vswhere.exe"
+    )
+
+    foreach ($vsWhere in $vsWhereCandidates) {
+        if (Test-Path $vsWhere) {
+            $installPath = & $vsWhere -latest -products * -requires Microsoft.Component.MSBuild -property installationPath
+            if (-not [string]::IsNullOrWhiteSpace($installPath)) {
+                $candidate = Join-Path $installPath "MSBuild\Current\Bin\amd64\MSBuild.exe"
+                if (Test-Path $candidate) {
+                    return $candidate
+                }
+
+                $candidate = Join-Path $installPath "MSBuild\Current\Bin\MSBuild.exe"
+                if (Test-Path $candidate) {
+                    return $candidate
+                }
+            }
+        }
+    }
+
     $candidates = @(
         "${env:ProgramFiles}\Microsoft Visual Studio\2026\Community\MSBuild\Current\Bin\amd64\MSBuild.exe",
         "${env:ProgramFiles}\Microsoft Visual Studio\2026\Professional\MSBuild\Current\Bin\amd64\MSBuild.exe",
         "${env:ProgramFiles}\Microsoft Visual Studio\2026\Enterprise\MSBuild\Current\Bin\amd64\MSBuild.exe",
-        "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2026\BuildTools\MSBuild\Current\Bin\amd64\MSBuild.exe"
+        "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2026\BuildTools\MSBuild\Current\Bin\amd64\MSBuild.exe",
+        "${env:ProgramFiles}\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe",
+        "${env:ProgramFiles}\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\amd64\MSBuild.exe",
+        "${env:ProgramFiles}\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\amd64\MSBuild.exe",
+        "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\amd64\MSBuild.exe",
+        "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\amd64\MSBuild.exe",
+        "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2019\Professional\MSBuild\Current\Bin\amd64\MSBuild.exe",
+        "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\amd64\MSBuild.exe",
+        "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\amd64\MSBuild.exe",
+        "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\amd64\MSBuild.exe",
+        "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2017\Professional\MSBuild\15.0\Bin\amd64\MSBuild.exe",
+        "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\amd64\MSBuild.exe",
+        "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin\amd64\MSBuild.exe"
     )
 
     foreach ($candidate in $candidates) {
@@ -31,7 +74,7 @@ function Find-MSBuild {
         }
     }
 
-    throw "MSBuild was not found. Install Visual Studio 2026 or Build Tools."
+    throw "MSBuild was not found. Install Visual Studio or Build Tools, or add MSBuild to PATH."
 }
 
 function Copy-RequiredItem {
