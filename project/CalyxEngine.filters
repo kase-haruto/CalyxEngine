@@ -355,6 +355,7 @@
     <ClCompile Include="Engine\Objects\3D\Geometory\Shape.cpp" />
     <ClCompile Include="Engine\Objects\Collider\Collider.cpp" />
     <ClCompile Include="Engine\Objects\Collider\BoxCollider.cpp" />
+    <ClCompile Include="Engine\Objects\Collider\CapsuleCollider.cpp" />
     <ClCompile Include="Engine\Collision\CollisionManager.cpp" />
     <ClCompile Include="Engine\Objects\Collider\SphereCollider.cpp" />
     <ClCompile Include="Engine\Objects\Particle\ParticleEmitShape.cpp" />
@@ -646,6 +647,7 @@
     <ClInclude Include="Engine\Objects\3D\Geometory\Shape.h" />
     <ClInclude Include="Engine\Objects\Collider\Collider.h" />
     <ClInclude Include="Engine\Objects\Collider\BoxCollider.h" />
+    <ClInclude Include="Engine\Objects\Collider\CapsuleCollider.h" />
     <ClInclude Include="Engine\Collision\CollisionManager.h" />
     <ClInclude Include="Engine\Objects\Collider\SphereCollider.h" />
     <ClInclude Include="Engine\Objects\Particle\ParticleEmitShape.h" />

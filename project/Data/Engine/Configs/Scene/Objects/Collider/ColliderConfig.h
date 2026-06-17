@@ -15,6 +15,8 @@ struct ColliderConfig {
 	CalyxEngine::Vector3 rotate			  = {0.0f, 0.0f, 0.0f}; //< 回転 (Euler)
 	CalyxEngine::Vector3 size				  = {1.0f, 1.0f, 1.0f}; //< サイズ (Box)
 	float			   radius			  = 1.0f;				//< 半径 (Sphere)
+	float			   capsuleRadius	  = 0.5f;				//< 半径 (Capsule)
+	float			   capsuleHeight	  = 2.0f;				//< 全体高さ (Capsule)
 };
 
 inline void to_json(nlohmann::json& j, const ColliderConfig& c) {
@@ -26,7 +28,9 @@ inline void to_json(nlohmann::json& j, const ColliderConfig& c) {
 		{"offset", c.offset},
 		{"rotate", c.rotate},
 		{"size", c.size},
-		{"radius", c.radius}};
+		{"radius", c.radius},
+		{"capsuleRadius", c.capsuleRadius},
+		{"capsuleHeight", c.capsuleHeight}};
 }
 
 inline void from_json(const nlohmann::json& j, ColliderConfig& c) {
@@ -46,5 +50,11 @@ inline void from_json(const nlohmann::json& j, ColliderConfig& c) {
 	}
 	if(j.contains("radius")) {
 		j.at("radius").get_to(c.radius);
+	}
+	if(j.contains("capsuleRadius")) {
+		j.at("capsuleRadius").get_to(c.capsuleRadius);
+	}
+	if(j.contains("capsuleHeight")) {
+		j.at("capsuleHeight").get_to(c.capsuleHeight);
 	}
 }

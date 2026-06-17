@@ -14,7 +14,6 @@
  *---------------------------------------------------------------------------------------*/
 class CollisionManager {
 public:
-	using CollisionShape = std::variant<Sphere, OBB>;
 	//===================================================================*/
 	//                   singleton
 	//===================================================================*/
@@ -73,6 +72,22 @@ private:
 	bool SphereToSphere(const Sphere& sphereA, const Sphere& sphereB);
 	bool SphereToOBB(const Sphere& sphere, const OBB obb);
 	bool OBBToOBB(const OBB& obbA, const OBB& obbB);
+	bool SphereToCapsule(const Sphere& sphere, const Capsule& capsule);
+	bool OBBToCapsule(const OBB& obb, const Capsule& capsule);
+	bool CapsuleToCapsule(const Capsule& capsuleA, const Capsule& capsuleB);
+
+	/*----------------
+	 カプセル判定用の距離計算
+	----------------*/
+	void  GetCapsuleSegment(const Capsule& capsule, CalyxEngine::Vector3& outStart, CalyxEngine::Vector3& outEnd);
+	float PointToSegmentDistanceSquared(const CalyxEngine::Vector3& point, const CalyxEngine::Vector3& segmentStart, const CalyxEngine::Vector3& segmentEnd);
+	float SegmentToSegmentDistanceSquared(
+		const CalyxEngine::Vector3& startA, const CalyxEngine::Vector3& endA,
+		const CalyxEngine::Vector3& startB, const CalyxEngine::Vector3& endB);
+	float SegmentToAABBDistanceSquared(
+		const CalyxEngine::Vector3& segmentStart,
+		const CalyxEngine::Vector3& segmentEnd,
+		const CalyxEngine::Vector3& halfSize);
 
 	void RegisterImmediate(Collider* collider);
 	void UnregisterImmediate(Collider* collider);

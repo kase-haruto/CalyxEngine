@@ -7,6 +7,7 @@
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/foundation/Utility/FileSystem/ConfigPathResolver/ConfigPathResolver.h>
 #include <Engine/objects/Collider/BoxCollider.h>
+#include <Engine/objects/Collider/CapsuleCollider.h>
 #include <Engine/objects/Collider/SphereCollider.h>
 #include <Engine/System/Command/EditorCommand/ValueEditCommand.h>
 #include <Engine/System/Command/Manager/CommandManager.h>
@@ -23,6 +24,9 @@ namespace {
 		case 1:
 			return 1;
 		case 2:
+			return 2;
+		case 3:
+			return 3;
 		default:
 			return 2;
 		}
@@ -137,6 +141,14 @@ void BaseGameObject::InitializeCollider(ColliderKind kind) {
 		collider_ = std::move(sphere);
 		break;
 	}
+	// カプセル形状のコライダーの生成
+	case ColliderKind::Capsule: {
+		auto capsule = std::make_unique<CapsuleCollider>(true);
+		capsule->SetName(GetName() + "_CapsuleCollider");
+		capsule->Initialize(0.5f, 2.0f); // 適当な初期半径と全体高さ
+		collider_ = std::move(capsule);
+		break;
+	}
 	}
 
 	collider_->SetOnEnter([this](Collider* other) { this->OnCollisionEnter(other); });
@@ -217,14 +229,30 @@ void BaseGameObject::ShowGui() {
 							ColliderKind::Sphere,
 							applyColliderKind));
 				}
+				if(ImGui::MenuItem("Capsule Collider")) {
+					CommandManager::GetInstance()->Execute(
+						std::make_unique<ValueEditCommand<ColliderKind>>(
+							"Add Capsule Collider",
+							ColliderKind::None,
+							ColliderKind::Capsule,
+							applyColliderKind));
+				}
 				ImGui::EndPopup();
 			}
 		} else {
-			static const char* kColliderKindItems[] = {"Box", "Sphere"};
-			int kind = (currentColliderKind_ == ColliderKind::Box) ? 0 : 1;
+			static const char* kColliderKindItems[] = {"Box", "Sphere", "Capsule"};
+			int kind = 0;
+			if(currentColliderKind_ == ColliderKind::Sphere) {
+				kind = 1;
+			} else if(currentColliderKind_ == ColliderKind::Capsule) {
+				kind = 2;
+			}
 			if(ImGui::Combo("Collider Type", &kind, kColliderKindItems, IM_ARRAYSIZE(kColliderKindItems))) {
 				const ColliderKind before = currentColliderKind_;
-				const ColliderKind after  = (kind == 0) ? ColliderKind::Box : ColliderKind::Sphere;
+				const ColliderKind after =
+					(kind == 0) ? ColliderKind::Box :
+					(kind == 1) ? ColliderKind::Sphere :
+								  ColliderKind::Capsule;
 				if(before != after) {
 					CommandManager::GetInstance()->Execute(
 						std::make_unique<ValueEditCommand<ColliderKind>>(
@@ -417,6 +445,8 @@ void BaseGameObject::SetCollider(std::unique_ptr<Collider> collider) {
 		currentColliderKind_ = ColliderKind::Box;
 	} else if(dynamic_cast<SphereCollider*>(collider_.get())) {
 		currentColliderKind_ = ColliderKind::Sphere;
+	} else if(dynamic_cast<CapsuleCollider*>(collider_.get())) {
+		currentColliderKind_ = ColliderKind::Capsule;
 	} else {
 		currentColliderKind_ = ColliderKind::None;
 	}

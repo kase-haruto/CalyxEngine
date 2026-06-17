@@ -16,7 +16,7 @@ struct BaseGameObjectConfig
 	: public SceneObjectConfig {
 	ColliderConfig	colliderConfig;
 	BaseModelConfig modelConfig;
-	int				colliderKind = 2;	//< 0:None, 1:Box, 2:Sphere
+	int				colliderKind = 2;	//< 0:None, 1:Box, 2:Sphere, 3:Capsule
 	bool cameraDitherEnabled = true;
 	bool outlineEnabled = true;
 	float outlineThickness = 0.035f;

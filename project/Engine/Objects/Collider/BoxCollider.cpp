@@ -60,7 +60,7 @@ void BoxCollider::ShowGui() {
 
 const CalyxEngine::Vector3& BoxCollider::GetCenter() const { return shape_.center; }
 
-const std::variant<Sphere, OBB>& BoxCollider::GetCollisionShape() {
+const CollisionShape& BoxCollider::GetCollisionShape() {
 	collisionShape_ = shape_;
 	return collisionShape_;
 };

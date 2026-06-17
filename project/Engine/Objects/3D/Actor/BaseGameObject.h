@@ -31,6 +31,7 @@ protected:
 		None,
 		Box,
 		Sphere,
+		Capsule,
 	};
 
 public:
