@@ -53,11 +53,11 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 			switch(go->GetModelType()) {
 			case ObjectModelType::ModelType_Static:
 				if(auto* m = go->GetStaticModel())
-					modelRenderer_->RegisterStatic(m, go->GetWorldTransform(), go->GetBillboardMode(), go);
+					modelRenderer_->RegisterStatic(m, go->GetRenderWorldTransform(), go->GetBillboardMode(), go);
 				break;
 			case ObjectModelType::ModelType_Animation:
 				if(auto* m = go->AnimationModel())
-					modelRenderer_->RegisterSkinned(m, go->GetWorldTransform(), go);
+					modelRenderer_->RegisterSkinned(m, go->GetRenderWorldTransform(), go);
 				break;
 			default:
 				break;

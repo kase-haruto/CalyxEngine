@@ -1,6 +1,7 @@
 #include "Actor.h"
 
 #include <Engine/Objects/Collider/BoxCollider.h>
+#include <Engine/Objects/Collider/CapsuleCollider.h>
 #include <Engine/Objects/Collider/SphereCollider.h>
 #include <externals/imgui/imgui.h>
 
@@ -83,4 +84,34 @@ float Actor::GetCollisionRadius() const {
 		return std::sqrt(half.x * half.x + half.y * half.y + half.z * half.z);
 	}
 	return collider_->GetColliderRadius();
+}
+
+const CalyxEngine::Vector3 Actor::GetCenterPos() const {
+	// Actorは「足元にTransform原点があるキャラクター」として扱う。
+	// そのため、衝突中心はTransform位置にコライダーの半分の高さを足して求める。
+	CalyxEngine::Vector3 center = worldTransform_.GetWorldPosition();
+
+	if(!collider_) {
+		return center;
+	}
+
+	if(auto capsule = dynamic_cast<const CapsuleCollider*>(collider_.get())) {
+		// カプセルは全体高さの中央が衝突中心になる。
+		center.y += capsule->GetHeight() * 0.5f;
+		return center;
+	}
+
+	if(auto sphere = dynamic_cast<const SphereCollider*>(collider_.get())) {
+		// 球は足元から半径分だけ上げた位置を中心にする。
+		center.y += sphere->GetColliderRadius();
+		return center;
+	}
+
+	if(auto box = dynamic_cast<const BoxCollider*>(collider_.get())) {
+		// Boxは足元から高さの半分だけ上げた位置を中心にする。
+		center.y += box->GetSize().y * 0.5f;
+		return center;
+	}
+
+	return center;
 }

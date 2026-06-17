@@ -65,6 +65,13 @@ public:
 	 * \return 半径
 	 */
 	float		  GetCollisionRadius() const;
+
+	/**
+	 * \brief Actorの衝突中心を取得
+	 * \return 衝突形状の中心座標
+	 */
+	const CalyxEngine::Vector3 GetCenterPos() const override;
+
 	/**
 	 * \brief 速度を取得
 	 * \return 速度

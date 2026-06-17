@@ -121,7 +121,7 @@ private:
 	float walkableFloorAngle_ = 45.0f;	  //< 歩行可能な最大斜面角度
 	float floorProbeDistance_ = 0.35f;	  //< カプセル底面から床を探す距離
 	float floorSnapDistance_ = 0.2f;		  //< 歩行中に床へ吸着する距離
-	float skinWidth_ = 0.05f;			  //< 床から少し浮かせる安全幅
+	float skinWidth_ = 0.01f;			  //< 床から少し浮かせる安全幅
 	float maxWalkSpeed_ = 6.0f;			  //< 最大歩行速度
 	float jumpVelocity_ = 6.5f;			  //< ジャンプ初速
 	CalyxEngine::Vector3 pendingInput_{};  //< 次のTickで消費する水平移動入力

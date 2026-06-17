@@ -205,10 +205,11 @@ void CharacterMovementComponent::FindFloor(FindFloorResult& outFloor) const {
 	float capsuleHalfHeight = 0.0f;
 	if(!GetOwnerCapsule(capsuleRadius, capsuleHalfHeight)) return;
 
-	// UnrealのFindFloorに寄せ、キャラクター中心から下方向へ床を探す。
-	// レイの長さは「カプセル半高 + 床探索距離」にする。
-	const CalyxEngine::Vector3 actorLocation = owner_->GetWorldTransform().GetWorldPosition();
-	const CalyxEngine::Vector3 rayStart = actorLocation;
+	// UnrealのFindFloorに寄せ、キャラクターの衝突中心から下方向へ床を探す。
+	// BaseGameObjectはコライダー更新時にGetCenterPos()を使うため、
+	// 床探索も同じ基準点を使わないと、表示されているカプセル底面とFloorDistanceがずれる。
+	const CalyxEngine::Vector3 collisionCenter = owner_->GetCenterPos();
+	const CalyxEngine::Vector3 rayStart = collisionCenter;
 	const float rayLength = capsuleHalfHeight + floorProbeDistance_;
 
 	float bestDistance = (std::numeric_limits<float>::max)();
