@@ -2,6 +2,7 @@
 
 #include <Data/Engine/Configs/Scene/Objects/Collider/ColliderConfig.h>
 #include <Data/Engine/Configs/Scene/Objects/Model/BaseModelConfig.h>
+#include <Data/Engine/Configs/Scene/Objects/Physics/PhysicsBodyConfig.h>
 #include <Data/Engine/Configs/Scene/Objects/SceneObject/SceneObjectConfig.h>
 #include <Engine/Foundation/Math/Vector4.h>
 
@@ -15,6 +16,7 @@
 struct BaseGameObjectConfig
 	: public SceneObjectConfig {
 	ColliderConfig	colliderConfig;
+	PhysicsBodyConfig physicsBodyConfig;
 	BaseModelConfig modelConfig;
 	int				colliderKind = 2;	//< 0:None, 1:Box, 2:Sphere, 3:Capsule
 	bool cameraDitherEnabled = true;
@@ -31,6 +33,7 @@ inline void to_json(nlohmann::json& j, const BaseGameObjectConfig& c) {
 		{"name", c.name},
 		{"transform", c.transform},
 		{"colliderConfig", c.colliderConfig},
+		{"physicsBodyConfig", c.physicsBodyConfig},
 		{"modelConfig", c.modelConfig},
 		{"colliderKind", c.colliderKind},
 		{"cameraDitherEnabled", c.cameraDitherEnabled},
@@ -46,6 +49,7 @@ inline void from_json(const nlohmann::json& j, BaseGameObjectConfig& c) {
 	if(j.contains("name")) j.at("name").get_to(c.name);
 	if(j.contains("transform")) j.at("transform").get_to(c.transform);
 	if(j.contains("colliderConfig")) j.at("colliderConfig").get_to(c.colliderConfig);
+	if(j.contains("physicsBodyConfig")) j.at("physicsBodyConfig").get_to(c.physicsBodyConfig);
 	if(j.contains("modelConfig")) j.at("modelConfig").get_to(c.modelConfig);
 	if(j.contains("colliderKind")) j.at("colliderKind").get_to(c.colliderKind);
 	if(j.contains("cameraDitherEnabled")) j.at("cameraDitherEnabled").get_to(c.cameraDitherEnabled);

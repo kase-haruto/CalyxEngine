@@ -154,6 +154,7 @@ void BaseGameObject::InitializeCollider(ColliderKind kind) {
 	collider_->SetOnEnter([this](Collider* other) { this->OnCollisionEnter(other); });
 	collider_->SetOnStay([this](Collider* other) { this->OnCollisionStay(other); });
 	collider_->SetOnExit([this](Collider* other) { this->OnCollisionExit(other); });
+	collider_->SetOwner(this);
 
 	currentColliderKind_ = kind;
 	config_.GetConfig().colliderKind = static_cast<int>(kind);
@@ -274,6 +275,7 @@ void BaseGameObject::ShowGui() {
 
 			if(collider_) {
 				collider_->ShowGui();
+				physicsBody_.ShowGui();
 			} else {
 				ImGui::TextDisabled("No collider");
 			}
@@ -329,6 +331,7 @@ void BaseGameObject::ApplyConfig() {
 	InitializeCollider(static_cast<ColliderKind>(NormalizeColliderKind(cfg.colliderKind)));
 	if(collider_)
 		collider_->ApplyConfig(cfg.colliderConfig);
+	physicsBody_.ApplyConfig(cfg.physicsBodyConfig);
 	worldTransform_.ApplyConfig(cfg.transform);
 	drawConfig_.cameraDitherEnabled = cfg.cameraDitherEnabled;
 	drawConfig_.outline.enabled	 = cfg.outlineEnabled;
@@ -346,6 +349,7 @@ void BaseGameObject::ExtractConfig() {
 		cfg.modelConfig = model_->ExtractConfig();
 	if(collider_)
 		cfg.colliderConfig = collider_->ExtractConfig();
+	cfg.physicsBodyConfig = physicsBody_.ExtractConfig();
 	cfg.colliderKind = static_cast<int>(currentColliderKind_);
 	cfg.transform  = worldTransform_.ExtractConfig();
 	cfg.objectType = static_cast<int>(objectType_);
@@ -454,6 +458,7 @@ void BaseGameObject::SetCollider(std::unique_ptr<Collider> collider) {
 	collider_->SetOnEnter([this](Collider* other) { this->OnCollisionEnter(other); });
 	collider_->SetOnStay([this](Collider* other) { this->OnCollisionStay(other); });
 	collider_->SetOnExit([this](Collider* other) { this->OnCollisionExit(other); });
+	collider_->SetOwner(this);
 	config_.GetConfig().colliderKind = static_cast<int>(currentColliderKind_);
 }
 

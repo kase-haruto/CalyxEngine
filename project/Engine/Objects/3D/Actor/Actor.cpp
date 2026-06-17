@@ -6,7 +6,8 @@
 Actor::Actor(const std::string& modelName,
 			 std::optional<std::string> objectName) :
 	BaseGameObject::BaseGameObject(modelName, objectName) {
-
+	physicsBody_.SetBodyType(PhysicsBodyType::Kinematic);
+	config_.GetConfig().physicsBodyConfig.bodyType = static_cast<int>(PhysicsBodyType::Kinematic);
 }
 
 float Actor::GetCollisionRadius() const {

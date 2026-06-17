@@ -10,8 +10,12 @@
 
 
 CollisionManager* CollisionManager::GetInstance() {
-	static CollisionManager instance;
-	return &instance;
+	// アプリ終了時は SceneObject / Collider / EventBus などの破棄順が固定できない。
+	// static ローカル変数として持つと、CollisionManager 破棄後に Collider::~Collider から
+	// Unregister が呼ばれるケースで破棄済み list に触れてクラッシュする。
+	// そのためプロセス終了まで生存させ、終了時の登録解除を常に安全に受けられるようにする。
+	static CollisionManager* instance = new CollisionManager();
+	return instance;
 }
 
 // ヘルパー関数: 衝突ペアがログを記録すべきかを判定
@@ -86,6 +90,8 @@ void CollisionManager::UpdateCollisionAllCollider() {
 }
 
 void CollisionManager::Register(Collider* collider) {
+	if(!collider) return;
+
 	if(isUpdatingCollisions_) {
 		std::erase(pendingUnregisters_, collider);
 		if(std::find(pendingRegisters_.begin(), pendingRegisters_.end(), collider) == pendingRegisters_.end()) {
@@ -98,6 +104,8 @@ void CollisionManager::Register(Collider* collider) {
 }
 
 void CollisionManager::Unregister(Collider* collider) {
+	if(!collider) return;
+
 	if(isUpdatingCollisions_) {
 		std::erase(pendingRegisters_, collider);
 		if(std::find(pendingUnregisters_.begin(), pendingUnregisters_.end(), collider) == pendingUnregisters_.end()) {
@@ -110,13 +118,19 @@ void CollisionManager::Unregister(Collider* collider) {
 }
 
 void CollisionManager::RegisterImmediate(Collider* collider) {
+	if(!collider) return;
+
 	if(std::find(colliders_.begin(), colliders_.end(), collider) == colliders_.end()) {
 		colliders_.push_back(collider);
 	}
 }
 
 void CollisionManager::UnregisterImmediate(Collider* collider) {
-	std::erase(colliders_, collider);
+	if(!collider) return;
+
+	// list 内のポインタ値だけを比較して対象を外す。
+	// Collider 本体はデストラクタ中の可能性があるため、ここでは絶対に dereference しない。
+	colliders_.remove(collider);
 
 	// 削除されるコライダーに関連する衝突ペアを現在のリストから削除
 	std::erase_if(currentCollisions_, [collider](const CollisionPair& pair) {
@@ -163,6 +177,10 @@ void CollisionManager::ClearColliders() {
 	currentCollisions_.clear();
 	previousCollisions_.clear();
 	isUpdatingCollisions_ = false;
+}
+
+std::vector<Collider*> CollisionManager::GetCollidersSnapshot() const {
+	return std::vector<Collider*>(colliders_.begin(), colliders_.end());
 }
 
 bool CollisionManager::CheckCollisionPair(Collider* colliderA, Collider* colliderB) {

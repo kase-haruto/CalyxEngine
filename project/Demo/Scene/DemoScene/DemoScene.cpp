@@ -5,7 +5,6 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 
 // engine
-#include <Engine/Collision/CollisionManager.h>
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
 
@@ -45,10 +44,6 @@ void DemoScene::Initialize(){
 //	更新処理
 /////////////////////////////////////////////////////////////////////////////////////////
 void DemoScene::Update([[maybe_unused]]float dt){
-
-
-	//衝突判定
-	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
 }
 
 void DemoScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoService, IRenderTarget*  rt){
@@ -65,5 +60,4 @@ void DemoScene::Draw(ID3D12GraphicsCommandList* cmdList, PipelineService* psoSer
 void DemoScene::CleanUp(){
 	// 3Dオブジェクトの描画を終了
 	sceneContext_->GetObjectLibrary()->Clear();
-	CollisionManager::GetInstance()->ClearColliders();
 }

@@ -280,12 +280,22 @@ public:
 	 * \return 有効か
 	 */
 	bool IsCollisionEnubled() const { return isCollisionEnabled_; }
+	/**
+	 * \brief トリガーかを取得
+	 * \return トリガーなら true
+	 */
+	bool IsTrigger() const { return isTrigger_; }
 
 	/**
 	 * \brief 衝突判定の有効状態を設定
 	 * \param isCollisionEnuble 有効にするか
 	 */
 	void SetCollisionEnabled(bool isCollisionEnuble);
+	/**
+	 * \brief トリガー状態を設定
+	 * \param isTrigger トリガーにするか
+	 */
+	void SetTrigger(bool isTrigger) { isTrigger_ = isTrigger; }
 
 	/**
 	 * \brief 描画するかを設定

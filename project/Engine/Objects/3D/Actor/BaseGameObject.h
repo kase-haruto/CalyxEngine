@@ -11,6 +11,7 @@
 #include <Engine/Objects/3D/Details/BillboardParams.h>
 #include <Engine/objects/Collider/Collider.h>
 #include <Engine/objects/ConfigurableObject/ConfigurableObject.h>
+#include <Engine/Physics/PhysicsBody.h>
 
 //* c++ *//
 #include <memory>
@@ -153,6 +154,12 @@ public:
 	 * \return コライダー
 	 */
 	Collider*			  GetCollider();
+	/**
+	 * \brief 物理応答設定を取得
+	 * \return 物理応答設定
+	 */
+	PhysicsBody&		  GetPhysicsBody() { return physicsBody_; }
+	const PhysicsBody&	  GetPhysicsBody() const { return physicsBody_; }
 	/**
 	 * \brief モデルタイプを取得
 	 * \return モデルタイプ
@@ -312,6 +319,7 @@ protected:
 	ObjectModelType objectModelType_ = ModelType_Static; //< モデルタイプ
 
 	std::unique_ptr<Collider> collider_ = nullptr; //< コライダー
+	PhysicsBody			  physicsBody_; //< 物理応答設定
 	ColliderKind			  currentColliderKind_ = ColliderKind::None;  //< コライダーの種類
 	BillboardMode			  billboardMode_	   = BillboardMode::None; //< ビルボードモード
 

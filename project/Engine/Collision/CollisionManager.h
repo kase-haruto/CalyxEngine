@@ -32,6 +32,7 @@ public:
 	void Unregister(Collider* collider); // コライダーリストから削除
 	void DebugLog();
 	void ClearColliders();
+	std::vector<Collider*> GetCollidersSnapshot() const;
 
 	struct CollisionPair {
 		Collider* a;

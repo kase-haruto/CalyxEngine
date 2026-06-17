@@ -9,6 +9,7 @@ struct ColliderConfig {
 	//========================= variable =========================
 	bool			   isCollisionEnabled = true;				//< コリジョン有効フラグ
 	bool			   isDraw			  = true;				//< 描画有効フラグ
+	bool			   isTrigger		  = false;				//< 物理応答を行わない検出専用フラグ
 	int				   colliderType		  = 0;					//< コリジョンの種類
 	int				   targetType		  = 0;					//< 衝突相手の種類
 	CalyxEngine::Vector3 offset			  = {0.0f, 0.0f, 0.0f}; //< オフセット
@@ -23,6 +24,7 @@ inline void to_json(nlohmann::json& j, const ColliderConfig& c) {
 	j = nlohmann::json{
 		{"isCollisionEnabled", c.isCollisionEnabled},
 		{"isDraw", c.isDraw},
+		{"isTrigger", c.isTrigger},
 		{"colliderType", c.colliderType},
 		{"targetType", c.targetType},
 		{"offset", c.offset},
@@ -36,6 +38,7 @@ inline void to_json(nlohmann::json& j, const ColliderConfig& c) {
 inline void from_json(const nlohmann::json& j, ColliderConfig& c) {
 	c.isCollisionEnabled = j.value("isCollisionEnabled", true);
 	c.isDraw			 = j.value("isDraw", true);
+	c.isTrigger			 = j.value("isTrigger", false);
 	c.colliderType		 = j.value("colliderType", 0);
 	c.targetType		 = j.value("targetType", 0);
 
