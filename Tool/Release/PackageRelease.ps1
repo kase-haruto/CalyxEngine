@@ -19,10 +19,10 @@ function Resolve-EngineRoot {
 
 function Find-MSBuild {
     $candidates = @(
-        "${env:ProgramFiles}\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe",
-        "${env:ProgramFiles}\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\amd64\MSBuild.exe",
-        "${env:ProgramFiles}\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\amd64\MSBuild.exe",
-        "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\amd64\MSBuild.exe"
+        "${env:ProgramFiles}\Microsoft Visual Studio\2026\Community\MSBuild\Current\Bin\amd64\MSBuild.exe",
+        "${env:ProgramFiles}\Microsoft Visual Studio\2026\Professional\MSBuild\Current\Bin\amd64\MSBuild.exe",
+        "${env:ProgramFiles}\Microsoft Visual Studio\2026\Enterprise\MSBuild\Current\Bin\amd64\MSBuild.exe",
+        "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2026\BuildTools\MSBuild\Current\Bin\amd64\MSBuild.exe"
     )
 
     foreach ($candidate in $candidates) {
@@ -31,7 +31,7 @@ function Find-MSBuild {
         }
     }
 
-    throw "MSBuild was not found. Install Visual Studio 2022 or Build Tools."
+    throw "MSBuild was not found. Install Visual Studio 2026 or Build Tools."
 }
 
 function Copy-RequiredItem {
