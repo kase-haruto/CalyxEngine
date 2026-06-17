@@ -36,6 +36,9 @@
     <ClCompile Include="Game\3D\Actor\DemoPlayer\DemoPlayer.cpp">
       <Filter>Game\3D\Actor\DemoPlayer</Filter>
     </ClCompile>
+    <ClCompile Include="Demo\3D\Actor\DemoPlayer\DemoPlayerMotor.cpp">
+      <Filter>Game\3D\Actor\DemoPlayer</Filter>
+    </ClCompile>
     <ClCompile Include="Game\3D\Actor\DemoPlayer\Weapon\Weapon.cpp">
       <Filter>Game\3D\Actor\DemoPlayer\Weapon</Filter>
     </ClCompile>
@@ -50,6 +53,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\3D\Actor\DemoPlayer\DemoPlayer.h">
+      <Filter>Game\3D\Actor\DemoPlayer</Filter>
+    </ClInclude>
+    <ClInclude Include="Demo\3D\Actor\DemoPlayer\DemoPlayerMotor.h">
       <Filter>Game\3D\Actor\DemoPlayer</Filter>
     </ClInclude>
     <ClInclude Include="Game\3D\Actor\DemoPlayer\Details\DemoPlayerActionConfig.h">

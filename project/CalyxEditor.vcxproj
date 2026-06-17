@@ -157,6 +157,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Demo\3D\Actor\DemoPlayer\DemoPlayer.cpp" />
+    <ClCompile Include="Demo\3D\Actor\DemoPlayer\DemoPlayerMotor.cpp" />
     <ClCompile Include="Demo\3D\Actor\DemoPlayer\Weapon\Weapon.cpp" />
     <ClCompile Include="Demo\Input\PlayerInput.cpp" />
     <ClCompile Include="Demo\Scene\DemoScene\DemoScene.cpp" />
@@ -167,6 +168,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Demo\3D\Actor\DemoPlayer\DemoPlayer.h" />
+    <ClInclude Include="Demo\3D\Actor\DemoPlayer\DemoPlayerMotor.h" />
     <ClInclude Include="Demo\3D\Actor\DemoPlayer\Details\DemoPlayerActionConfig.h" />
     <ClInclude Include="Demo\3D\Actor\DemoPlayer\Weapon\Weapon.h" />
     <ClInclude Include="Demo\Input\IInputAction.h" />

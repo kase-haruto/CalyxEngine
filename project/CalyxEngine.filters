@@ -358,6 +358,7 @@
     <ClCompile Include="Engine\Objects\Collider\CapsuleCollider.cpp" />
     <ClCompile Include="Engine\Collision\CollisionManager.cpp" />
     <ClCompile Include="Engine\Objects\Collider\SphereCollider.cpp" />
+    <ClCompile Include="Engine\Physics\Character\CharacterMovementComponent.cpp" />
     <ClCompile Include="Engine\Physics\PhysicsBody.cpp" />
     <ClCompile Include="Engine\Physics\PhysicsSystem.cpp" />
     <ClCompile Include="Engine\Objects\Particle\ParticleEmitShape.cpp" />
@@ -652,6 +653,7 @@
     <ClInclude Include="Engine\Objects\Collider\CapsuleCollider.h" />
     <ClInclude Include="Engine\Collision\CollisionManager.h" />
     <ClInclude Include="Engine\Objects\Collider\SphereCollider.h" />
+    <ClInclude Include="Engine\Physics\Character\CharacterMovementComponent.h" />
     <ClInclude Include="Engine\Physics\PhysicsBody.h" />
     <ClInclude Include="Engine\Physics\PhysicsSystem.h" />
     <ClInclude Include="Engine\Objects\Particle\ParticleEmitShape.h" />

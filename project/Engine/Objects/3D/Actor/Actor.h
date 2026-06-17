@@ -2,6 +2,7 @@
 
 // engine
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
+#include <Engine/Physics/Character/CharacterMovementComponent.h>
 
 // c++
 #include <cstdint>
@@ -21,7 +22,7 @@ public:
 	/**
 	 * \brief コンストラクタ
 	 */
-	Actor() = default;
+	Actor();
 	/**
 	 * \brief コンストラクタ
 	 * \param modelName モデル名
@@ -33,6 +34,18 @@ public:
 	 * \brief デストラクタ
 	 */
 	virtual ~Actor() override = default;
+
+	/**
+	 * \brief 常時更新
+	 * \param dt デルタタイム
+	 */
+	void AlwaysUpdate(float dt) override;
+	void Update(float dt) override;
+
+	/**
+	 * \brief 派生パラメータGUI
+	 */
+	void DerivativeGui() override;
 
 	// getter
 	/**
@@ -87,6 +100,13 @@ public:
 	 */
 	void SetLife(int32_t life) { life_ = life; }
 
+	/**
+	 * \brief キャラクター移動コンポーネントを取得
+	 * \return キャラクター移動コンポーネント
+	 */
+	CharacterMovementComponent& GetCharacterMovement() { return characterMovement_; }
+	const CharacterMovementComponent& GetCharacterMovement() const { return characterMovement_; }
+
 protected:
 	//===================================================================*/
 	//                   protected members
@@ -94,6 +114,7 @@ protected:
 	float	moveSpeed_;			  //< 移動速度
 	CalyxEngine::Vector3 velocity_	  = {};	  //< 移動ベクトル
 	CalyxEngine::Vector3 acceleration_ = {};	  //< 加速度
+	CharacterMovementComponent characterMovement_; //< キャラクター移動補助
 	int32_t life_		  = 1;	  //< 体力 (0で死亡)
 	bool	isAlive_	  = true; //< 生存フラグ
 };

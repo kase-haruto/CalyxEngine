@@ -2,6 +2,7 @@
 #include <Engine/Objects/3D/Actor/Actor.h>
 
 // game
+#include "DemoPlayerMotor.h"
 #include "Weapon/Weapon.h"
 
 /*-----------------------------------------------------------------------------------------
@@ -29,5 +30,7 @@ private:
 	//===================================================================*/
 	//						private methods
 	//===================================================================*/
+	PlayerInput input_;
+	DemoPlayerMotor motor_;
 	std::shared_ptr<Weapon> weapon_;
 };
