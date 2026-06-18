@@ -1,6 +1,7 @@
 #include "PhysicsSystem.h"
 
 #include <Engine/Collision/CollisionManager.h>
+#include <Engine/Objects/3D/Actor/Actor.h>
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
 #include <Engine/Objects/Collider/Collider.h>
 #include <Engine/Physics/PhysicsBody.h>
@@ -31,12 +32,9 @@ namespace {
 	}
 
 	void ComputeOBBAxes(const OBB& obb, CalyxEngine::Vector3 outAxes[3]) {
-		// OBBの回転を行列に変換し、ローカルXYZ軸をワールド空間へ取り出す。
-		const CalyxEngine::Matrix4x4 rot = CalyxEngine::Quaternion::ToMatrix(obb.rotate);
-		// 射影計算は軸長1を前提にするため、各軸を正規化しておく。
-		outAxes[0] = CalyxEngine::Vector3(rot.m[0][0], rot.m[0][1], rot.m[0][2]).Normalize();
-		outAxes[1] = CalyxEngine::Vector3(rot.m[1][0], rot.m[1][1], rot.m[1][2]).Normalize();
-		outAxes[2] = CalyxEngine::Vector3(rot.m[2][0], rot.m[2][1], rot.m[2][2]).Normalize();
+		outAxes[0] = CalyxEngine::Quaternion::RotateVector(CalyxEngine::Vector3::Right(), obb.rotate).Normalize();
+		outAxes[1] = CalyxEngine::Quaternion::RotateVector(CalyxEngine::Vector3::Up(), obb.rotate).Normalize();
+		outAxes[2] = CalyxEngine::Quaternion::RotateVector(CalyxEngine::Vector3::Forward(), obb.rotate).Normalize();
 	}
 
 	float ProjectOBB(const OBB& obb, const CalyxEngine::Vector3 axes[3], const CalyxEngine::Vector3& axis) {
@@ -270,35 +268,62 @@ namespace {
 	}
 
 	bool CapsuleOBB(const Capsule& capsule, const OBB& obb, ContactManifold& out) {
-		// カプセル中心線分とOBBの近似最近距離で判定する。
 		CalyxEngine::Vector3 start;
 		CalyxEngine::Vector3 end;
 		GetCapsuleSegment(capsule, start, end);
 
-		float bestDistSq = (std::numeric_limits<float>::max)();
-		CalyxEngine::Vector3 bestPoint = capsule.center;
-		CalyxEngine::Vector3 bestClosest = obb.center;
+		CalyxEngine::Vector3 axes[3];
+		ComputeOBBAxes(obb, axes);
+		const CalyxEngine::Vector3 halfSize = obb.size * 0.5f;
 
-		// 中心線上を複数点サンプルし、各点からOBBへの最近点を求める。
-		// 最も距離が短い点の組を接触点近似として採用する。
+		float bestPenetration = (std::numeric_limits<float>::max)();
+		CalyxEngine::Vector3 bestNormal = CalyxEngine::Vector3::Up();
+		bool hasContact = false;
+
 		for(int i = 0; i <= 8; ++i) {
 			const float t = static_cast<float>(i) / 8.0f;
 			const CalyxEngine::Vector3 p = start + (end - start) * t;
 			const CalyxEngine::Vector3 q = ClosestPointOnOBB(obb, p);
 			const float distSq = (p - q).LengthSquared();
-			if(distSq < bestDistSq) {
-				// 最短距離と、そのときの中心線上の点・OBB上の点を保存する。
-				bestDistSq = distSq;
-				bestPoint = p;
-				bestClosest = q;
+
+			float penetration = 0.0f;
+			CalyxEngine::Vector3 normal = CalyxEngine::Vector3::Up();
+
+			if(distSq > 1.0e-8f) {
+				if(distSq > capsule.radius * capsule.radius) continue;
+
+				const float dist = std::sqrt((std::max)(distSq, 0.0f));
+				normal = (p - q) / dist;
+				penetration = capsule.radius - dist;
+			} else {
+				const CalyxEngine::Vector3 local = p - obb.center;
+				float minExit = (std::numeric_limits<float>::max)();
+
+				for(int axisIndex = 0; axisIndex < 3; ++axisIndex) {
+					const float halfExtent = (axisIndex == 0) ? halfSize.x : (axisIndex == 1) ? halfSize.y : halfSize.z;
+					const float projected = CalyxEngine::Vector3::Dot(local, axes[axisIndex]);
+					const float exitDistance = halfExtent - std::abs(projected);
+
+					if(exitDistance < minExit) {
+						minExit = exitDistance;
+						normal = axes[axisIndex] * (projected >= 0.0f ? 1.0f : -1.0f);
+					}
+				}
+
+				penetration = capsule.radius + minExit;
 			}
+
+			if(penetration <= 0.0f || penetration >= bestPenetration) continue;
+
+			bestPenetration = penetration;
+			bestNormal = normal;
+			hasContact = true;
 		}
 
-		if(bestDistSq > capsule.radius * capsule.radius) return false;
-		// OBB上の最近点からカプセル中心線へ向かう方向へ押し戻す。
-		const float dist = std::sqrt((std::max)(bestDistSq, 0.0f));
-		out.normal = SafeNormalize(bestPoint - bestClosest, CalyxEngine::Vector3::Up());
-		out.penetration = capsule.radius - dist;
+		if(!hasContact) return false;
+
+		out.normal = SafeNormalize(bestNormal, CalyxEngine::Vector3::Up());
+		out.penetration = bestPenetration;
 		return out.penetration > 0.0f;
 	}
 
@@ -352,12 +377,18 @@ namespace {
 	}
 
 	void ApplyCorrection(BaseGameObject* owner, Collider* collider, const CalyxEngine::Vector3& correction) {
-		if(!owner || !collider || correction.LengthSquared() <= 1.0e-10f) return;
+		if(!owner || !collider) return;
+
+		CalyxEngine::Vector3 adjustedCorrection = correction;
+		if(dynamic_cast<Actor*>(owner) && adjustedCorrection.y > 0.0f) {
+			adjustedCorrection.y = 0.0f;
+		}
+		if(adjustedCorrection.LengthSquared() <= 1.0e-10f) return;
 
 		// Transform の座標を直接補正する。
 		// この時点では各オブジェクトの更新後なので、次の描画に反映させるため行列も更新する。
 		WorldTransform& transform = owner->GetWorldTransform();
-		transform.translation += correction;
+		transform.translation += adjustedCorrection;
 		transform.Update();
 
 		// Transform を動かしたので、同じフレーム内の後続ペア判定が古い形状を使わないように

@@ -30,11 +30,9 @@ namespace {
 	}
 
 	void ComputeOBBAxes(const OBB& obb, CalyxEngine::Vector3 outAxes[3]) {
-		// OBBの回転を行列へ変換し、ローカルXYZ軸をワールド空間へ取り出す。
-		const CalyxEngine::Matrix4x4 rot = CalyxEngine::Quaternion::ToMatrix(obb.rotate);
-		outAxes[0] = CalyxEngine::Vector3(rot.m[0][0], rot.m[0][1], rot.m[0][2]).Normalize();
-		outAxes[1] = CalyxEngine::Vector3(rot.m[1][0], rot.m[1][1], rot.m[1][2]).Normalize();
-		outAxes[2] = CalyxEngine::Vector3(rot.m[2][0], rot.m[2][1], rot.m[2][2]).Normalize();
+		outAxes[0] = CalyxEngine::Quaternion::RotateVector(CalyxEngine::Vector3::Right(), obb.rotate).Normalize();
+		outAxes[1] = CalyxEngine::Quaternion::RotateVector(CalyxEngine::Vector3::Up(), obb.rotate).Normalize();
+		outAxes[2] = CalyxEngine::Quaternion::RotateVector(CalyxEngine::Vector3::Forward(), obb.rotate).Normalize();
 	}
 
 	bool RaycastOBBDown(
@@ -116,16 +114,21 @@ namespace {
 		outDistance = tMin;
 		outPoint = rayStart + worldDown * tMin;
 
+		if(hitAxis < 0) {
+			return false;
+		}
+
 		// スラブ進入軸から法線を復元する。
-		// レイ始点が箱内部にあるケースでは軸が取れないため、上方向を代替にする。
 		if(hitAxis >= 0) {
 			outNormal = axes[hitAxis] * hitAxisSign;
-		} else {
-			outNormal = CalyxEngine::Vector3::Up();
 		}
 		outNormal = SafeNormalize(outNormal, CalyxEngine::Vector3::Up());
 		return true;
 	}
+}
+
+CharacterMovementComponent::CharacterMovementComponent() {
+	param_.LoadParams();
 }
 
 void CharacterMovementComponent::Tick(float dt) {
@@ -141,7 +144,7 @@ void CharacterMovementComponent::Tick(float dt) {
 
 	FindFloor(currentFloor_);
 
-	if(currentFloor_.walkableFloor && currentFloor_.floorDistance <= floorSnapDistance_ && velocity_.y <= 0.0f) {
+	if(currentFloor_.walkableFloor && currentFloor_.floorDistance <= param_.floorSnapDistance_ && velocity_.y <= 0.0f) {
 		// 歩行可能な床が近くにある場合はWalkingへ遷移する。
 		movementMode_ = CharacterMovementMode::Walking;
 		// 接地中は下向き速度を残すと毎フレーム床へ押し込み続けるため0に戻す。
@@ -149,7 +152,7 @@ void CharacterMovementComponent::Tick(float dt) {
 		// 入力を速度へ変換し、水平移動だけを先に反映する。
 		// 縦方向は床吸着が担当するため、ここではYを動かさない。
 		WorldTransform& transform = owner_->GetWorldTransform();
-		transform.translation += moveInput * maxWalkSpeed_ * dt;
+		transform.translation += moveInput * param_.maxWalkSpeed_ * dt;
 		transform.Update();
 		// 床との微小な隙間や段差を安定させるため、床へ吸着する。
 		SnapToFloor();
@@ -159,14 +162,14 @@ void CharacterMovementComponent::Tick(float dt) {
 	// 床が見つからない、または歩行不能な斜面ならFallingへ遷移する。
 	movementMode_ = CharacterMovementMode::Falling;
 	// 重力で縦方向速度を増やす。速度は下方向なのでyを減らす。
-	velocity_.y -= gravity_ * dt;
+	velocity_.y -= param_.gravity_ * dt;
 	// 極端な落下速度で薄い床を抜けやすくならないよう最大速度を制限する。
-	velocity_.y = (std::max)(velocity_.y, -maxFallSpeed_);
+	velocity_.y = (std::max)(velocity_.y, -param_.maxFallSpeed_);
 
 	WorldTransform& transform = owner_->GetWorldTransform();
 	// 空中でも水平入力は受け付ける。
 	// まず水平移動を反映し、その後に重力でY方向を動かす。
-	transform.translation += moveInput * maxWalkSpeed_ * dt;
+	transform.translation += moveInput * param_.maxWalkSpeed_ * dt;
 	transform.translation.y += velocity_.y * dt;
 	transform.Update();
 }
@@ -192,7 +195,7 @@ void CharacterMovementComponent::Jump() {
 
 	// 上方向速度を設定して Falling に遷移する。
 	// 次の Tick から重力がこの速度を減速させる。
-	velocity_.y = jumpVelocity_;
+	velocity_.y = param_.jumpVelocity_;
 	movementMode_ = CharacterMovementMode::Falling;
 	currentFloor_ = {};
 }
@@ -210,7 +213,7 @@ void CharacterMovementComponent::FindFloor(FindFloorResult& outFloor) const {
 	// 床探索も同じ基準点を使わないと、表示されているカプセル底面とFloorDistanceがずれる。
 	const CalyxEngine::Vector3 collisionCenter = owner_->GetCenterPos();
 	const CalyxEngine::Vector3 rayStart = collisionCenter;
-	const float rayLength = capsuleHalfHeight + floorProbeDistance_;
+	const float rayLength = capsuleHalfHeight + param_.floorProbeDistance_;
 
 	float bestDistance = (std::numeric_limits<float>::max)();
 	Collider* bestCollider = nullptr;
@@ -257,14 +260,7 @@ void CharacterMovementComponent::FindFloor(FindFloorResult& outFloor) const {
 }
 
 void CharacterMovementComponent::ShowGui() {
-	GuiCmd::DragFloat("Gravity", gravity_, 0.1f, 0.0f, 100.0f);
-	GuiCmd::DragFloat("Max Fall Speed", maxFallSpeed_, 0.1f, 0.0f, 1000.0f);
-	GuiCmd::DragFloat("Walkable Floor Angle", walkableFloorAngle_, 0.1f, 0.0f, 89.0f);
-	GuiCmd::DragFloat("Floor Probe Distance", floorProbeDistance_, 0.01f, 0.0f, 10.0f);
-	GuiCmd::DragFloat("Floor Snap Distance", floorSnapDistance_, 0.01f, 0.0f, 10.0f);
-	GuiCmd::DragFloat("Skin Width", skinWidth_, 0.001f, 0.0f, 1.0f);
-	GuiCmd::DragFloat("Max Walk Speed", maxWalkSpeed_, 0.1f, 0.0f, 100.0f);
-	GuiCmd::DragFloat("Jump Velocity", jumpVelocity_, 0.1f, 0.0f, 100.0f);
+	param_.ShowGui();
 }
 
 bool CharacterMovementComponent::GetOwnerCapsule(float& outRadius, float& outHalfHeight) const {
@@ -297,7 +293,7 @@ bool CharacterMovementComponent::GetOwnerCapsule(float& outRadius, float& outHal
 
 bool CharacterMovementComponent::IsWalkable(const CalyxEngine::Vector3& normal) const {
 	const CalyxEngine::Vector3 up = CalyxEngine::Vector3::Up();
-	const float minFloorDot = std::cos(ToRadians(walkableFloorAngle_));
+	const float minFloorDot = std::cos(ToRadians(param_.walkableFloorAngle_));
 	return CalyxEngine::Vector3::Dot(SafeNormalize(normal, up), up) >= minFloorDot;
 }
 
@@ -307,7 +303,7 @@ void CharacterMovementComponent::SnapToFloor() {
 
 	// floorDistance はカプセル底面から床までの距離。
 	// 0より大きければ浮いているので下げ、0より小さければめり込んでいるので上げる。
-	const float desiredDistance = skinWidth_;
+	const float desiredDistance = param_.skinWidth_;
 	const float correctionY = -(currentFloor_.floorDistance - desiredDistance);
 
 	if(std::abs(correctionY) <= 1.0e-5f) return;

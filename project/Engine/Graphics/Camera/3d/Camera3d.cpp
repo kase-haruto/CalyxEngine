@@ -86,10 +86,6 @@ Camera3d::Camera3d() : BaseCamera() {
 
 Camera3d::Camera3d(const std::string& name) { SceneObject::SetName(name,ObjectType::Camera); }
 
-void Camera3d::Initialize() {
-	follow_.LoadParams();
-}
-
 float Camera3d::ExpLerpAlpha(float dt,float tau) {
 	if(tau <= 1e-6f) return 1.0f;
 	return 1.0f - std::exp(-dt / tau);
@@ -117,69 +113,6 @@ CalyxEngine::Vector3 Camera3d::GetForward() const {
    ).Normalize();
 }
 
-void Camera3d::UpdateFollow(float dt) {
-	if(!follow_.target) return;
-
-	//  ターゲットのワールド行列から基底を抽出
-	const CalyxEngine::Matrix4x4& Tw = follow_.target->matrix.world;
-	CalyxEngine::Vector3          Tr{Tw.m[3][0],Tw.m[3][1],Tw.m[3][2]}; // target world pos
-	CalyxEngine::Vector3          R,U,F;
-	ExtractBasisNoScale(Tw,R,U,F); // world right/up/forward
-
-	//  望ましい「カメラのワールド位置」
-	CalyxEngine::Vector3 desiredWorldPos =
-		Tr
-		- F * follow_.distanceBack
-		+ U * follow_.heightOffset
-		+ R * follow_.sideOffset;
-
-	//  位置スムージングはワールドで
-	//    （posVel もワールド速度として保持）
-	CalyxEngine::Vector3 curWorldPos = TransformPoint(worldTransform_.matrix.world,{0,0,0}); // 現在のワールド位置
-	curWorldPos         = SmoothDampVec(curWorldPos,desiredWorldPos,follow_.posVel,follow_.posSmoothTime,dt);
-
-	//  望ましい「カメラのワールド回転」
-	//    ターゲットのワールド回転行列（スケール除去→直交化）からクォータニオンへ
-	CalyxEngine::Matrix4x4  targetRotM   = OrthonormalizeRotation(Tw);
-	CalyxEngine::Quaternion targetWorldQ = CalyxEngine::Quaternion::FromMatrix(targetRotM);
-
-	//    俯角はワールドの Right 軸（R）回り
-	CalyxEngine::Quaternion extraPitch = CalyxEngine::Quaternion::MakeRotateAxisQuaternion(
-		R,CalyxEngine::ToRadians(follow_.extraPitchDeg));
-	CalyxEngine::Quaternion desiredWorldQ = extraPitch * targetWorldQ;
-
-	//    現在のワールド回転を取得
-	CalyxEngine::Matrix4x4  CwRotM    = OrthonormalizeRotation(worldTransform_.matrix.world);
-	CalyxEngine::Quaternion curWorldQ = CalyxEngine::Quaternion::FromMatrix(CwRotM);
-
-	//    ワールド回転を指数補間
-	float      a         = ExpLerpAlpha(dt,follow_.rotTimeConstant);
-	CalyxEngine::Quaternion newWorldQ = CalyxEngine::Quaternion::Slerp(curWorldQ,desiredWorldQ,a);
-
-	// 親のローカルに戻してセット
-	if(worldTransform_.parent) {
-		CalyxEngine::Matrix4x4 Pw    = worldTransform_.parent->matrix.world;
-		CalyxEngine::Matrix4x4 PwInv = CalyxEngine::Matrix4x4::Inverse(Pw);
-
-		// ローカル位置 = 親^-1 * ワールド位置
-		CalyxEngine::Vector3 localPos = TransformPoint(PwInv,curWorldPos);
-
-		// ローカル回転 = 親回転^-1 * ワールド回転
-		CalyxEngine::Matrix4x4  parentRotM   = OrthonormalizeRotation(Pw);
-		CalyxEngine::Matrix4x4  parentRotInv = CalyxEngine::Matrix4x4::Transpose(parentRotM); // 直交なので転置=逆
-		CalyxEngine::Matrix4x4  newWorldRotM = CalyxEngine::Quaternion::ToMatrix(newWorldQ);
-		CalyxEngine::Matrix4x4  localRotM    = parentRotInv * newWorldRotM;
-		CalyxEngine::Quaternion localQ       = CalyxEngine::Quaternion::FromMatrix(localRotM);
-
-		worldTransform_.translation = localPos;
-		worldTransform_.rotation    = localQ;
-	} else {
-		// 親なしならそのまま
-		worldTransform_.translation = curWorldPos;
-		worldTransform_.rotation    = newWorldQ;
-	}
-}
-
 void Camera3d::AlwaysUpdate(float dt) {
 	// 入力等の既存処理
 	BaseCamera::AlwaysUpdate(dt);
@@ -196,10 +129,6 @@ void Camera3d::ShowGui() {
 		GuiCmd::EndSection();
 	}
 
-	if (GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::ParameterData)) {
-		follow_.ShowGui();
-		GuiCmd::EndSection();
-	}
 }
 
 void Camera3d::GetShadowFrustumCorners(CalyxEngine::Vector3 outCorners[8], float shadowFar) const {
@@ -212,24 +141,5 @@ void Camera3d::GetShadowFrustumCorners(CalyxEngine::Vector3 outCorners[8], float
 
 
 bool Camera3d::IsVisible(const AABB& aabb) const { return frustum_.IsAABBInside(aabb.min_,aabb.max_); }
-
-/////////////////////////////////////////////////////////////////////////////////////////
-//		FollowSettings
-/////////////////////////////////////////////////////////////////////////////////////////
-Camera3d::FollowSettings::FollowSettings() {
-	AddField("Enabled", enabled).Category("Follow");
-	AddField("DistanceBack", distanceBack).Category("Follow").Range(0.0f, 1000.0f);
-	AddField("HeightOffset", heightOffset).Category("Follow").Range(-100.0f, 100.0f);
-	AddField("SideOffset", sideOffset).Category("Follow").Range(-100.0f, 100.0f);
-	AddField("LookAtOffset", lookAtOffset).Category("Follow");
-
-	AddField("PosSmoothTime", posSmoothTime).Category("Smoothing").Range(0.01f, 1.0f);
-	AddField("RotTimeConstant", rotTimeConstant).Category("Smoothing").Range(0.01f, 1.0f);
-	AddField("ExtraPitchDeg", extraPitchDeg).Category("Smoothing").Range(-89.0f, 89.0f);
-}
-
-CalyxEngine::ParamPath Camera3d::FollowSettings::GetParamPath() const {
-	return {CalyxEngine::ParamDomain::Engine, "Camera", "Camera/Follow"};
-}
 
 REGISTER_SCENE_OBJECT(Camera3d)

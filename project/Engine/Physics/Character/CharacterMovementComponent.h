@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Engine/Foundation/Serialization/SerializableObject.h"
+
 #include <Engine/Foundation/Math/Vector3.h>
 
 class BaseGameObject;
@@ -36,6 +38,7 @@ struct FindFloorResult {
  *---------------------------------------------------------------------------------------*/
 class CharacterMovementComponent {
 public:
+	CharacterMovementComponent();
 	/**
 	 * \brief 所有者を設定する
 	 * \param owner キャラクターとして扱うオブジェクト
@@ -116,13 +119,31 @@ private:
 	FindFloorResult currentFloor_{};								 //< 現在の床情報
 	CalyxEngine::Vector3 velocity_{};								 //< CharacterMovement が管理する縦方向速度
 
-	float gravity_ = 9.8f;				  //< 落下時の重力加速度
-	float maxFallSpeed_ = 50.0f;			  //< 最大落下速度
-	float walkableFloorAngle_ = 45.0f;	  //< 歩行可能な最大斜面角度
-	float floorProbeDistance_ = 0.35f;	  //< カプセル底面から床を探す距離
-	float floorSnapDistance_ = 0.2f;		  //< 歩行中に床へ吸着する距離
-	float skinWidth_ = 0.01f;			  //< 床から少し浮かせる安全幅
-	float maxWalkSpeed_ = 6.0f;			  //< 最大歩行速度
-	float jumpVelocity_ = 6.5f;			  //< ジャンプ初速
+
 	CalyxEngine::Vector3 pendingInput_{};  //< 次のTickで消費する水平移動入力
+
+	struct CharacterMovementDefautlParam :CalyxEngine::SerializableObject{
+		CharacterMovementDefautlParam() {
+			AddField("gravity", gravity_).Category("Movement").Tooltip("落下時の重力加速度");
+			AddField("maxFallSpeed", maxFallSpeed_).Category("Movement").Tooltip("最大落下速度");
+			AddField("walkableFloorAngle", walkableFloorAngle_).Category("Movement").Tooltip("歩行可能な最大斜面角度");
+			AddField("floorProbeDistance", floorProbeDistance_).Category("Movement").Tooltip("カプセル底面から床を探す距離");
+			AddField("floorSnapDistance", floorSnapDistance_).Category("Movement").Tooltip("歩行中に床へ吸着する距離");
+			AddField("skinWidth", skinWidth_).Category("Movement").Tooltip("床から少し浮かせる安全幅");
+			AddField("maxWalkSpeed", maxWalkSpeed_).Category("Movement").Tooltip("最大歩行速度");
+			AddField("jumpVelocity", jumpVelocity_).Category("Movement").Tooltip("ジャンプ初速");
+		}
+		CalyxEngine::ParamPath GetParamPath() const{
+			return {CalyxEngine::ParamDomain::Game,"CharacterMovementComponent","Actor"};
+		}
+
+		float gravity_ = 9.8f;				  //< 落下時の重力加速度
+		float maxFallSpeed_ = 50.0f;		  //< 最大落下速度
+		float walkableFloorAngle_ = 45.0f;	  //< 歩行可能な最大斜面角度
+		float floorProbeDistance_ = 0.35f;	  //< カプセル底面から床を探す距離
+		float floorSnapDistance_ = 0.2f;	  //< 歩行中に床へ吸着する距離
+		float skinWidth_ = 0.01f;			  //< 床から少し浮かせる安全幅
+		float maxWalkSpeed_ = 6.0f;			  //< 最大歩行速度
+		float jumpVelocity_ = 6.5f;			  //< ジャンプ初速
+	}param_;
 };

@@ -19,7 +19,7 @@ struct BaseGameObjectConfig
 	ColliderConfig	colliderConfig;
 	PhysicsBodyConfig physicsBodyConfig;
 	BaseModelConfig modelConfig;
-	int				colliderKind = 2;	//< 0:None, 1:Box, 2:Sphere, 3:Capsule
+	int				colliderKind = 0;	//< 0:None, 1:Box, 2:Sphere, 3:Capsule
 	CalyxEngine::Vector3 visualOffset = {0.0f, 0.0f, 0.0f}; //< 描画モデルだけに適用するローカルオフセット
 	bool cameraDitherEnabled = true;
 	bool outlineEnabled = true;
