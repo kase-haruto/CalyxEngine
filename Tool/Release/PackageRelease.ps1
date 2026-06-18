@@ -2,12 +2,13 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$Version,
 
-    [string]$Configuration = "Release",
+    [string]$Configuration = "Develop",
     [string]$Platform = "x64",
     [string]$DownloadUrl = "",
     [switch]$SkipBuild,
     [switch]$IncludeSymbols
 )
+& 'C:\Program Files\Microsoft Visual Studio\18\Community\Common7\Tools\Launch-VsDevShell.ps1'
 
 $ErrorActionPreference = "Stop"
 
