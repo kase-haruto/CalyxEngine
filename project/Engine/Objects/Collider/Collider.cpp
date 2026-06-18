@@ -40,6 +40,7 @@ void Collider::ShowGui() {
 	CalyxEngine::EnumConverter<ColliderType>::Combo("Target Type", targetType_);
 
 	GuiCmd::CheckBox("Draw Collider", isDraw_);
+	GuiCmd::CheckBox("Is Trigger", isTrigger_);
 	GuiCmd::ColorEdit4("Collider Color", color_);
 	GuiCmd::DragFloat3("Offset", offset_);
 	GuiCmd::DragFloat3("Rotate Offset", rotateOffset_);
@@ -90,6 +91,7 @@ void Collider::NotifyCollisionExit(Collider* other) {
 /////////////////////////////////////////////////////////////////////////////////////////
 void Collider::ApplyConfig(const ColliderConfig& config) {
 	isDraw_				= config.isDraw;
+	isTrigger_			= config.isTrigger;
 	type_				= static_cast<ColliderType>(config.colliderType);
 	targetType_			= static_cast<ColliderType>(config.targetType);
 	offset_				= config.offset;
@@ -104,6 +106,7 @@ ColliderConfig Collider::ExtractConfig() const {
 	ColliderConfig config;
 	config.isCollisionEnabled = isCollisionEnabled_;
 	config.isDraw			  = isDraw_;
+	config.isTrigger		  = isTrigger_;
 	config.colliderType		  = static_cast<int>(type_);
 	config.targetType		  = static_cast<int>(targetType_);
 	config.offset			  = offset_;

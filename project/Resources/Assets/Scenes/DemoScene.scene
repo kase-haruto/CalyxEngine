@@ -43,9 +43,12 @@
         {
             "cameraDitherEnabled": true,
             "colliderConfig": {
+                "capsuleHeight": 2.0,
+                "capsuleRadius": 0.5,
                 "colliderType": 0,
                 "isCollisionEnabled": true,
                 "isDraw": true,
+                "isTrigger": false,
                 "offset": {
                     "x": 0.0,
                     "y": 0.0,
@@ -64,6 +67,7 @@
                 },
                 "targetType": 0
             },
+            "colliderKind": 2,
             "guid": "3d5449c2-2565-4fe4-b751-b0713ccf50f3",
             "modelConfig": {
                 "blendMode": 5,
@@ -89,6 +93,11 @@
             "outlineEnabled": false,
             "outlineThickness": 0.03500000014901161,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "physicsBodyConfig": {
+                "bodyType": 0,
+                "enabled": true,
+                "pushbackRatio": 1.0
+            },
             "transform": {
                 "inheritRotate": true,
                 "inheritScale": false,
@@ -110,7 +119,12 @@
                     "z": 0.03070487454533577
                 }
             },
-            "type": "BaseGameObject"
+            "type": "BaseGameObject",
+            "visualOffset": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            }
         },
         {
             "color": {
@@ -210,10 +224,10 @@
                 "inheritScale": true,
                 "inheritTranslate": true,
                 "rotation": {
-                    "w": 0.7944194078445435,
-                    "x": 0.21133257448673248,
-                    "y": -0.550279438495636,
-                    "z": 0.14638613164424896
+                    "w": 0.6455774307250977,
+                    "x": 0.13422891497612,
+                    "y": -0.736064076423645,
+                    "z": 0.1530429720878601
                 },
                 "scale": {
                     "x": 1.0,
@@ -221,9 +235,9 @@
                     "z": 1.0
                 },
                 "translation": {
-                    "x": 10.611401557922363,
-                    "y": 7.1457109451293945,
-                    "z": 2.2068300247192383
+                    "x": 10.696986198425293,
+                    "y": 5.529750823974609,
+                    "z": 6.733891487121582
                 }
             },
             "type": "DebugCamera"
@@ -231,13 +245,16 @@
         {
             "cameraDitherEnabled": false,
             "colliderConfig": {
+                "capsuleHeight": 2.0,
+                "capsuleRadius": 0.5,
                 "colliderType": 0,
-                "isCollisionEnabled": false,
+                "isCollisionEnabled": true,
                 "isDraw": true,
+                "isTrigger": false,
                 "offset": {
                     "x": 0.0,
                     "y": 0.0,
-                    "z": 0.0
+                    "z": 0.5
                 },
                 "radius": 1.0,
                 "rotate": {
@@ -246,12 +263,13 @@
                     "z": 0.0
                 },
                 "size": {
-                    "x": 1.0,
-                    "y": 1.0,
+                    "x": 60.0,
+                    "y": 60.0,
                     "z": 1.0
                 },
                 "targetType": 0
             },
+            "colliderKind": 1,
             "guid": "a84b193d-0e58-4e61-940a-a9a1478ffdb3",
             "modelConfig": {
                 "blendMode": 5,
@@ -277,6 +295,11 @@
             "outlineEnabled": false,
             "outlineThickness": 0.03500000014901161,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "physicsBodyConfig": {
+                "bodyType": 0,
+                "enabled": true,
+                "pushbackRatio": 1.0
+            },
             "transform": {
                 "inheritRotate": true,
                 "inheritScale": true,
@@ -288,8 +311,8 @@
                     "z": 0.0
                 },
                 "scale": {
-                    "x": 200.0,
-                    "y": 200.0,
+                    "x": 30.0,
+                    "y": 30.0,
                     "z": 1.0
                 },
                 "translation": {
@@ -298,17 +321,25 @@
                     "z": 0.0
                 }
             },
-            "type": "BaseGameObject"
+            "type": "BaseGameObject",
+            "visualOffset": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            }
         },
         {
             "cameraDitherEnabled": false,
             "colliderConfig": {
+                "capsuleHeight": 1.7999999523162842,
+                "capsuleRadius": 0.30000001192092896,
                 "colliderType": 0,
                 "isCollisionEnabled": true,
                 "isDraw": true,
+                "isTrigger": false,
                 "offset": {
                     "x": 0.0,
-                    "y": 0.0,
+                    "y": -0.5,
                     "z": 0.0
                 },
                 "radius": 1.0,
@@ -324,12 +355,13 @@
                 },
                 "targetType": 0
             },
+            "colliderKind": 3,
             "guid": "8b37fee0-8d01-4574-aaf4-572605cd1ba5",
             "modelConfig": {
                 "blendMode": 5,
                 "materialGuid": "00000000-0000-0000-0000-000000000000",
                 "modelName": "PlayerIdle.gltf",
-                "textureGuid": "d62be104-8431-42aa-90ff-1473142d8ee0",
+                "textureGuid": "872b65b5-4991-45b2-9d66-d39017e4385e",
                 "uvTransConfig": {
                     "rotation": -3.705138738041569e-07,
                     "scale": {
@@ -349,6 +381,11 @@
             "outlineEnabled": false,
             "outlineThickness": 0.03500000014901161,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "physicsBodyConfig": {
+                "bodyType": 1,
+                "enabled": true,
+                "pushbackRatio": 1.0
+            },
             "transform": {
                 "inheritRotate": true,
                 "inheritScale": true,
@@ -365,19 +402,27 @@
                     "z": 1.0
                 },
                 "translation": {
-                    "x": -0.6979820728302002,
-                    "y": 0.001870307489298284,
-                    "z": 3.0276405811309814
+                    "x": 0.1536356806755066,
+                    "y": 0.49827805161476135,
+                    "z": 3.525739908218384
                 }
             },
-            "type": "BaseGameObject"
+            "type": "DemoPlayer",
+            "visualOffset": {
+                "x": 0.0,
+                "y": -0.5,
+                "z": 0.0
+            }
         },
         {
             "cameraDitherEnabled": false,
             "colliderConfig": {
+                "capsuleHeight": 2.0,
+                "capsuleRadius": 0.5,
                 "colliderType": 0,
                 "isCollisionEnabled": false,
                 "isDraw": true,
+                "isTrigger": false,
                 "offset": {
                     "x": 0.0,
                     "y": 0.0,
@@ -396,6 +441,7 @@
                 },
                 "targetType": 0
             },
+            "colliderKind": 2,
             "guid": "f5e1f0a1-430c-4a05-a3d2-f3882509eeb1",
             "modelConfig": {
                 "blendMode": 5,
@@ -421,6 +467,11 @@
             "outlineEnabled": false,
             "outlineThickness": 0.03500000014901161,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "physicsBodyConfig": {
+                "bodyType": 0,
+                "enabled": true,
+                "pushbackRatio": 1.0
+            },
             "transform": {
                 "inheritRotate": true,
                 "inheritScale": true,
@@ -442,14 +493,22 @@
                     "z": 4.5549798011779785
                 }
             },
-            "type": "BaseGameObject"
+            "type": "BaseGameObject",
+            "visualOffset": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            }
         },
         {
             "cameraDitherEnabled": false,
             "colliderConfig": {
+                "capsuleHeight": 2.0,
+                "capsuleRadius": 0.5,
                 "colliderType": 0,
                 "isCollisionEnabled": false,
                 "isDraw": true,
+                "isTrigger": false,
                 "offset": {
                     "x": 0.0,
                     "y": 0.0,
@@ -468,6 +527,7 @@
                 },
                 "targetType": 0
             },
+            "colliderKind": 2,
             "guid": "e3a303ff-798f-43a3-9357-da5d38846de7",
             "modelConfig": {
                 "blendMode": 5,
@@ -493,6 +553,11 @@
             "outlineEnabled": false,
             "outlineThickness": 0.03500000014901161,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "physicsBodyConfig": {
+                "bodyType": 0,
+                "enabled": true,
+                "pushbackRatio": 1.0
+            },
             "transform": {
                 "inheritRotate": true,
                 "inheritScale": true,
@@ -514,7 +579,98 @@
                     "z": 12.54530143737793
                 }
             },
-            "type": "BaseGameObject"
+            "type": "BaseGameObject",
+            "visualOffset": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            }
+        },
+        {
+            "cameraDitherEnabled": false,
+            "colliderConfig": {
+                "capsuleHeight": 2.0,
+                "capsuleRadius": 0.5,
+                "colliderType": 0,
+                "isCollisionEnabled": true,
+                "isDraw": true,
+                "isTrigger": false,
+                "offset": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.20000000298023224
+                },
+                "radius": 1.0,
+                "rotate": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "size": {
+                    "x": 10.0,
+                    "y": 10.0,
+                    "z": 0.5
+                },
+                "targetType": 0
+            },
+            "colliderKind": 1,
+            "guid": "a3a2bd64-f648-4cb4-8729-eb4befca3d1d",
+            "modelConfig": {
+                "blendMode": 5,
+                "materialGuid": "00000000-0000-0000-0000-000000000000",
+                "modelName": "plane.obj",
+                "textureGuid": "e235f04b-8c87-462e-b239-a566e2798c03",
+                "uvTransConfig": {
+                    "rotation": 0.0,
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0
+                    }
+                }
+            },
+            "name": "plane",
+            "objectType": 2,
+            "outlineColor": {
+                "w": 1.0,
+                "x": 0.019999999552965164,
+                "y": 0.019999999552965164,
+                "z": 0.02500000037252903
+            },
+            "outlineEnabled": false,
+            "outlineThickness": 0.03500000014901161,
+            "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "physicsBodyConfig": {
+                "bodyType": 0,
+                "enabled": true,
+                "pushbackRatio": 1.0
+            },
+            "transform": {
+                "inheritRotate": true,
+                "inheritScale": true,
+                "inheritTranslate": true,
+                "rotation": {
+                    "w": 0.7317928075790405,
+                    "x": 0.653809666633606,
+                    "y": 0.14346638321876526,
+                    "z": -0.1281779408454895
+                },
+                "scale": {
+                    "x": 5.0,
+                    "y": 5.0,
+                    "z": 1.0
+                },
+                "translation": {
+                    "x": 1.2296407222747803,
+                    "y": 0.3156697452068329,
+                    "z": 9.152164459228516
+                }
+            },
+            "type": "BaseGameObject",
+            "visualOffset": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            }
         }
     ],
     "sceneName": "TestScene",

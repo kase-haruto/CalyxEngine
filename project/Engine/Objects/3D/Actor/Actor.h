@@ -2,6 +2,7 @@
 
 // engine
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
+#include <Engine/Physics/Character/CharacterMovementComponent.h>
 
 // c++
 #include <cstdint>
@@ -21,7 +22,7 @@ public:
 	/**
 	 * \brief コンストラクタ
 	 */
-	Actor() = default;
+	Actor();
 	/**
 	 * \brief コンストラクタ
 	 * \param modelName モデル名
@@ -34,12 +35,43 @@ public:
 	 */
 	virtual ~Actor() override = default;
 
+	/**
+	 * \brief 常時更新
+	 * \param dt デルタタイム
+	 */
+	void AlwaysUpdate(float dt) override;
+	void Update(float dt) override;
+
+	/**
+	 * \brief Actor用の設定を適用
+	 * - BaseGameObject設定を適用した後、Actorは必ずKinematic Bodyとして扱う
+	 */
+	void ApplyConfig() override;
+
+	/**
+	 * \brief Actor用の設定を抽出
+	 * - シーン保存時にActorの物理種別がStaticとして保存されないようにする
+	 */
+	void ExtractConfig() override;
+
+	/**
+	 * \brief 派生パラメータGUI
+	 */
+	void DerivativeGui() override;
+
 	// getter
 	/**
 	 * \brief 衝突半径を取得
 	 * \return 半径
 	 */
 	float		  GetCollisionRadius() const;
+
+	/**
+	 * \brief Actorの衝突中心を取得
+	 * \return 衝突形状の中心座標
+	 */
+	const CalyxEngine::Vector3 GetCenterPos() const override;
+
 	/**
 	 * \brief 速度を取得
 	 * \return 速度
@@ -87,6 +119,20 @@ public:
 	 */
 	void SetLife(int32_t life) { life_ = life; }
 
+	/**
+	 * \brief キャラクター移動コンポーネントを取得
+	 * \return キャラクター移動コンポーネント
+	 */
+	CharacterMovementComponent& GetCharacterMovement() { return characterMovement_; }
+	const CharacterMovementComponent& GetCharacterMovement() const { return characterMovement_; }
+
+protected:
+	/**
+	 * \brief Actorに必要な物理設定を保証する
+	 * - キャラクター移動は自分で座標を動かすため、押し戻し対象はKinematicに固定する
+	 */
+	void EnsureActorPhysicsBody();
+
 protected:
 	//===================================================================*/
 	//                   protected members
@@ -94,6 +140,7 @@ protected:
 	float	moveSpeed_;			  //< 移動速度
 	CalyxEngine::Vector3 velocity_	  = {};	  //< 移動ベクトル
 	CalyxEngine::Vector3 acceleration_ = {};	  //< 加速度
+	CharacterMovementComponent characterMovement_; //< キャラクター移動補助
 	int32_t life_		  = 1;	  //< 体力 (0で死亡)
 	bool	isAlive_	  = true; //< 生存フラグ
 };

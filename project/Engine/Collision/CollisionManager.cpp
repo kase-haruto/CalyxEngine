@@ -5,12 +5,17 @@
 
 // lib
 #include <algorithm>
+#include <cmath>
 #include <externals/imgui/imgui.h>
 
 
 CollisionManager* CollisionManager::GetInstance() {
-	static CollisionManager instance;
-	return &instance;
+	// アプリ終了時は SceneObject / Collider / EventBus などの破棄順が固定できない。
+	// static ローカル変数として持つと、CollisionManager 破棄後に Collider::~Collider から
+	// Unregister が呼ばれるケースで破棄済み list に触れてクラッシュする。
+	// そのためプロセス終了まで生存させ、終了時の登録解除を常に安全に受けられるようにする。
+	static CollisionManager* instance = new CollisionManager();
+	return instance;
 }
 
 // ヘルパー関数: 衝突ペアがログを記録すべきかを判定
@@ -85,6 +90,8 @@ void CollisionManager::UpdateCollisionAllCollider() {
 }
 
 void CollisionManager::Register(Collider* collider) {
+	if(!collider) return;
+
 	if(isUpdatingCollisions_) {
 		std::erase(pendingUnregisters_, collider);
 		if(std::find(pendingRegisters_.begin(), pendingRegisters_.end(), collider) == pendingRegisters_.end()) {
@@ -97,6 +104,8 @@ void CollisionManager::Register(Collider* collider) {
 }
 
 void CollisionManager::Unregister(Collider* collider) {
+	if(!collider) return;
+
 	if(isUpdatingCollisions_) {
 		std::erase(pendingRegisters_, collider);
 		if(std::find(pendingUnregisters_.begin(), pendingUnregisters_.end(), collider) == pendingUnregisters_.end()) {
@@ -109,13 +118,19 @@ void CollisionManager::Unregister(Collider* collider) {
 }
 
 void CollisionManager::RegisterImmediate(Collider* collider) {
+	if(!collider) return;
+
 	if(std::find(colliders_.begin(), colliders_.end(), collider) == colliders_.end()) {
 		colliders_.push_back(collider);
 	}
 }
 
 void CollisionManager::UnregisterImmediate(Collider* collider) {
-	std::erase(colliders_, collider);
+	if(!collider) return;
+
+	// list 内のポインタ値だけを比較して対象を外す。
+	// Collider 本体はデストラクタ中の可能性があるため、ここでは絶対に dereference しない。
+	colliders_.remove(collider);
 
 	// 削除されるコライダーに関連する衝突ペアを現在のリストから削除
 	std::erase_if(currentCollisions_, [collider](const CollisionPair& pair) {
@@ -164,6 +179,10 @@ void CollisionManager::ClearColliders() {
 	isUpdatingCollisions_ = false;
 }
 
+std::vector<Collider*> CollisionManager::GetCollidersSnapshot() const {
+	return std::vector<Collider*>(colliders_.begin(), colliders_.end());
+}
+
 bool CollisionManager::CheckCollisionPair(Collider* colliderA, Collider* colliderB) {
 
 	auto shapeA = colliderA->GetCollisionShape();
@@ -197,6 +216,27 @@ bool CollisionManager::CheckCollisionPair(Collider* colliderA, Collider* collide
 			//===================================================================*/
 			else if constexpr(std::is_same_v<ShapeTypeA, OBB> && std::is_same_v<ShapeTypeB, OBB>) {
 				return OBBToOBB(shapeA, shapeB);
+			}
+
+			//===================================================================*/
+			//                    球 vs カプセル
+			//===================================================================*/
+			else if constexpr(std::is_same_v<ShapeTypeA, Sphere> && std::is_same_v<ShapeTypeB, Capsule>) {
+				return SphereToCapsule(shapeA, shapeB);
+			}
+
+			//===================================================================*/
+			//                    OBB vs カプセル
+			//===================================================================*/
+			else if constexpr(std::is_same_v<ShapeTypeA, OBB> && std::is_same_v<ShapeTypeB, Capsule>) {
+				return OBBToCapsule(shapeA, shapeB);
+			}
+
+			//===================================================================*/
+			//                    カプセル vs カプセル
+			//===================================================================*/
+			else if constexpr(std::is_same_v<ShapeTypeA, Capsule> && std::is_same_v<ShapeTypeB, Capsule>) {
+				return CapsuleToCapsule(shapeA, shapeB);
 			}
 
 			// 設定していない組み合わせ
@@ -281,6 +321,138 @@ bool CollisionManager::OBBToOBB([[maybe_unused]] const OBB& obbA, [[maybe_unused
 
 	// 3) すべての軸で重なった -> 衝突している
 	return true;
+}
+
+bool CollisionManager::SphereToCapsule(const Sphere& sphere, const Capsule& capsule) {
+	CalyxEngine::Vector3 segmentStart;
+	CalyxEngine::Vector3 segmentEnd;
+	GetCapsuleSegment(capsule, segmentStart, segmentEnd);
+
+	const float radiusSum = sphere.radius + capsule.radius;
+	return PointToSegmentDistanceSquared(sphere.center, segmentStart, segmentEnd) <= radiusSum * radiusSum;
+}
+
+bool CollisionManager::OBBToCapsule(const OBB& obb, const Capsule& capsule) {
+	CalyxEngine::Vector3 segmentStart;
+	CalyxEngine::Vector3 segmentEnd;
+	GetCapsuleSegment(capsule, segmentStart, segmentEnd);
+
+	// OBBローカルへ線分を移し、AABBと線分の距離で判定する
+	const CalyxEngine::Quaternion invRot = CalyxEngine::Quaternion::Inverse(obb.rotate);
+	const CalyxEngine::Vector3 localStart = CalyxEngine::Quaternion::RotateVector(segmentStart - obb.center, invRot);
+	const CalyxEngine::Vector3 localEnd = CalyxEngine::Quaternion::RotateVector(segmentEnd - obb.center, invRot);
+	const CalyxEngine::Vector3 halfSize = obb.size * 0.5f;
+
+	return SegmentToAABBDistanceSquared(localStart, localEnd, halfSize) <= capsule.radius * capsule.radius;
+}
+
+bool CollisionManager::CapsuleToCapsule(const Capsule& capsuleA, const Capsule& capsuleB) {
+	CalyxEngine::Vector3 startA;
+	CalyxEngine::Vector3 endA;
+	CalyxEngine::Vector3 startB;
+	CalyxEngine::Vector3 endB;
+	GetCapsuleSegment(capsuleA, startA, endA);
+	GetCapsuleSegment(capsuleB, startB, endB);
+
+	const float radiusSum = capsuleA.radius + capsuleB.radius;
+	return SegmentToSegmentDistanceSquared(startA, endA, startB, endB) <= radiusSum * radiusSum;
+}
+
+void CollisionManager::GetCapsuleSegment(const Capsule& capsule, CalyxEngine::Vector3& outStart, CalyxEngine::Vector3& outEnd) {
+	const float radius = (std::max)(capsule.radius, 0.0f);
+	const float halfSegment = (std::max)(0.0f, capsule.height * 0.5f - radius);
+	const CalyxEngine::Vector3 axis = CalyxEngine::Quaternion::RotateVector(CalyxEngine::Vector3::Up(), capsule.rotate);
+
+	outStart = capsule.center - axis * halfSegment;
+	outEnd = capsule.center + axis * halfSegment;
+}
+
+float CollisionManager::PointToSegmentDistanceSquared(const CalyxEngine::Vector3& point, const CalyxEngine::Vector3& segmentStart, const CalyxEngine::Vector3& segmentEnd) {
+	const CalyxEngine::Vector3 segment = segmentEnd - segmentStart;
+	const float segmentLengthSq = segment.LengthSquared();
+	if(segmentLengthSq <= 1.0e-8f) {
+		return (point - segmentStart).LengthSquared();
+	}
+
+	const float t = std::clamp(CalyxEngine::Vector3::Dot(point - segmentStart, segment) / segmentLengthSq, 0.0f, 1.0f);
+	const CalyxEngine::Vector3 closest = segmentStart + segment * t;
+	return (point - closest).LengthSquared();
+}
+
+float CollisionManager::SegmentToSegmentDistanceSquared(
+	const CalyxEngine::Vector3& startA, const CalyxEngine::Vector3& endA,
+	const CalyxEngine::Vector3& startB, const CalyxEngine::Vector3& endB) {
+	const CalyxEngine::Vector3 d1 = endA - startA;
+	const CalyxEngine::Vector3 d2 = endB - startB;
+	const CalyxEngine::Vector3 r = startA - startB;
+	const float a = d1.LengthSquared();
+	const float e = d2.LengthSquared();
+	const float f = CalyxEngine::Vector3::Dot(d2, r);
+
+	float s = 0.0f;
+	float t = 0.0f;
+
+	if(a <= 1.0e-8f && e <= 1.0e-8f) {
+		return (startA - startB).LengthSquared();
+	}
+	if(a <= 1.0e-8f) {
+		t = std::clamp(f / e, 0.0f, 1.0f);
+	} else {
+		const float c = CalyxEngine::Vector3::Dot(d1, r);
+		if(e <= 1.0e-8f) {
+			s = std::clamp(-c / a, 0.0f, 1.0f);
+		} else {
+			const float b = CalyxEngine::Vector3::Dot(d1, d2);
+			const float denom = a * e - b * b;
+			if(denom != 0.0f) {
+				s = std::clamp((b * f - c * e) / denom, 0.0f, 1.0f);
+			}
+
+			t = (b * s + f) / e;
+			if(t < 0.0f) {
+				t = 0.0f;
+				s = std::clamp(-c / a, 0.0f, 1.0f);
+			} else if(t > 1.0f) {
+				t = 1.0f;
+				s = std::clamp((b - c) / a, 0.0f, 1.0f);
+			}
+		}
+	}
+
+	const CalyxEngine::Vector3 closestA = startA + d1 * s;
+	const CalyxEngine::Vector3 closestB = startB + d2 * t;
+	return (closestA - closestB).LengthSquared();
+}
+
+float CollisionManager::SegmentToAABBDistanceSquared(
+	const CalyxEngine::Vector3& segmentStart,
+	const CalyxEngine::Vector3& segmentEnd,
+	const CalyxEngine::Vector3& halfSize) {
+	auto pointToAABBDistanceSquared = [&](const CalyxEngine::Vector3& point) {
+		const float dx = (std::max)(std::abs(point.x) - halfSize.x, 0.0f);
+		const float dy = (std::max)(std::abs(point.y) - halfSize.y, 0.0f);
+		const float dz = (std::max)(std::abs(point.z) - halfSize.z, 0.0f);
+		return dx * dx + dy * dy + dz * dz;
+	};
+
+	// 線分とAABBの距離は凸関数になるため、三分探索で最近点を安定して求める
+	float left = 0.0f;
+	float right = 1.0f;
+	const CalyxEngine::Vector3 segment = segmentEnd - segmentStart;
+	for(int i = 0; i < 32; ++i) {
+		const float t0 = left + (right - left) / 3.0f;
+		const float t1 = right - (right - left) / 3.0f;
+		const float d0 = pointToAABBDistanceSquared(segmentStart + segment * t0);
+		const float d1 = pointToAABBDistanceSquared(segmentStart + segment * t1);
+		if(d0 < d1) {
+			right = t1;
+		} else {
+			left = t0;
+		}
+	}
+
+	const float t = (left + right) * 0.5f;
+	return pointToAABBDistanceSquared(segmentStart + segment * t);
 }
 
 void CollisionManager::ComputeOBBAxes(const OBB& obb, CalyxEngine::Vector3 outAxis[3]) {

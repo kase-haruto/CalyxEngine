@@ -7,6 +7,7 @@
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/foundation/Utility/FileSystem/ConfigPathResolver/ConfigPathResolver.h>
 #include <Engine/objects/Collider/BoxCollider.h>
+#include <Engine/objects/Collider/CapsuleCollider.h>
 #include <Engine/objects/Collider/SphereCollider.h>
 #include <Engine/System/Command/EditorCommand/ValueEditCommand.h>
 #include <Engine/System/Command/Manager/CommandManager.h>
@@ -23,6 +24,9 @@ namespace {
 		case 1:
 			return 1;
 		case 2:
+			return 2;
+		case 3:
+			return 3;
 		default:
 			return 2;
 		}
@@ -99,11 +103,16 @@ void BaseGameObject::AlwaysUpdate(float dt) {
 			CalyxEngine::Vector3	  worldPos = GetCenterPos();
 			CalyxEngine::Quaternion worldRot = worldTransform_.rotation;
 			collider_->Update(worldPos, worldRot);
-			collider_->Draw();
 		}
 	}
 	if(model_) {
 		model_->SetIsDrawEnable(IsDrawEnable());
+	}
+}
+
+void BaseGameObject::DrawCollider() {
+	if(collider_ && collider_->IsCollisionEnubled()) {
+		collider_->Draw();
 	}
 }
 
@@ -137,11 +146,20 @@ void BaseGameObject::InitializeCollider(ColliderKind kind) {
 		collider_ = std::move(sphere);
 		break;
 	}
+	// カプセル形状のコライダーの生成
+	case ColliderKind::Capsule: {
+		auto capsule = std::make_unique<CapsuleCollider>(true);
+		capsule->SetName(GetName() + "_CapsuleCollider");
+		capsule->Initialize(0.5f, 2.0f); // 適当な初期半径と全体高さ
+		collider_ = std::move(capsule);
+		break;
+	}
 	}
 
 	collider_->SetOnEnter([this](Collider* other) { this->OnCollisionEnter(other); });
 	collider_->SetOnStay([this](Collider* other) { this->OnCollisionStay(other); });
 	collider_->SetOnExit([this](Collider* other) { this->OnCollisionExit(other); });
+	collider_->SetOwner(this);
 
 	currentColliderKind_ = kind;
 	config_.GetConfig().colliderKind = static_cast<int>(kind);
@@ -188,6 +206,10 @@ void BaseGameObject::ShowGui() {
 		if(model_) {
 			model_->ShowImGui(config_.GetConfig().modelConfig);
 		}
+		if(ImGui::TreeNodeEx("Visual Offset", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+			GuiCmd::DragFloat3("Offset", visualOffset_, 0.01f, -1000.0f, 1000.0f);
+			ImGui::TreePop();
+		}
 		GuiCmd::EndSection();
 	}
 
@@ -217,14 +239,30 @@ void BaseGameObject::ShowGui() {
 							ColliderKind::Sphere,
 							applyColliderKind));
 				}
+				if(ImGui::MenuItem("Capsule Collider")) {
+					CommandManager::GetInstance()->Execute(
+						std::make_unique<ValueEditCommand<ColliderKind>>(
+							"Add Capsule Collider",
+							ColliderKind::None,
+							ColliderKind::Capsule,
+							applyColliderKind));
+				}
 				ImGui::EndPopup();
 			}
 		} else {
-			static const char* kColliderKindItems[] = {"Box", "Sphere"};
-			int kind = (currentColliderKind_ == ColliderKind::Box) ? 0 : 1;
+			static const char* kColliderKindItems[] = {"Box", "Sphere", "Capsule"};
+			int kind = 0;
+			if(currentColliderKind_ == ColliderKind::Sphere) {
+				kind = 1;
+			} else if(currentColliderKind_ == ColliderKind::Capsule) {
+				kind = 2;
+			}
 			if(ImGui::Combo("Collider Type", &kind, kColliderKindItems, IM_ARRAYSIZE(kColliderKindItems))) {
 				const ColliderKind before = currentColliderKind_;
-				const ColliderKind after  = (kind == 0) ? ColliderKind::Box : ColliderKind::Sphere;
+				const ColliderKind after =
+					(kind == 0) ? ColliderKind::Box :
+					(kind == 1) ? ColliderKind::Sphere :
+								  ColliderKind::Capsule;
 				if(before != after) {
 					CommandManager::GetInstance()->Execute(
 						std::make_unique<ValueEditCommand<ColliderKind>>(
@@ -246,6 +284,7 @@ void BaseGameObject::ShowGui() {
 
 			if(collider_) {
 				collider_->ShowGui();
+				physicsBody_.ShowGui();
 			} else {
 				ImGui::TextDisabled("No collider");
 			}
@@ -301,7 +340,9 @@ void BaseGameObject::ApplyConfig() {
 	InitializeCollider(static_cast<ColliderKind>(NormalizeColliderKind(cfg.colliderKind)));
 	if(collider_)
 		collider_->ApplyConfig(cfg.colliderConfig);
+	physicsBody_.ApplyConfig(cfg.physicsBodyConfig);
 	worldTransform_.ApplyConfig(cfg.transform);
+	visualOffset_ = cfg.visualOffset;
 	drawConfig_.cameraDitherEnabled = cfg.cameraDitherEnabled;
 	drawConfig_.outline.enabled	 = cfg.outlineEnabled;
 	drawConfig_.outline.thickness = cfg.outlineThickness;
@@ -318,8 +359,10 @@ void BaseGameObject::ExtractConfig() {
 		cfg.modelConfig = model_->ExtractConfig();
 	if(collider_)
 		cfg.colliderConfig = collider_->ExtractConfig();
+	cfg.physicsBodyConfig = physicsBody_.ExtractConfig();
 	cfg.colliderKind = static_cast<int>(currentColliderKind_);
 	cfg.transform  = worldTransform_.ExtractConfig();
+	cfg.visualOffset = visualOffset_;
 	cfg.objectType = static_cast<int>(objectType_);
 	cfg.name	   = name_;
 	cfg.guid	   = id_;
@@ -394,9 +437,16 @@ void BaseGameObject::SetDrawEnable(bool isDrawEnable) {
 }
 
 const CalyxEngine::Vector3 BaseGameObject::GetCenterPos() const {
-	const CalyxEngine::Vector3 offset	  = {0.0f, 0.5f, 0.0f};
-	CalyxEngine::Vector3		 worldPos = CalyxEngine::Vector3::Transform(offset, worldTransform_.matrix.world);
-	return worldPos;
+	// BaseGameObjectの衝突中心は、モデルが持つ実際のワールドAABB中心を基準にする。
+	// Transform原点は「配置基準点」であり、Planeやアセットによっては見た目の中心と一致しない。
+	// ここで固定値のオフセットを入れると形状ごとに破綻するため、描画モデルの境界から中心を求める。
+	if(model_ && objectModelType_ != ObjectModelType::ModelType_Unknown) {
+		const AABB worldAabb = GetWorldAABB();
+		return (worldAabb.min_ + worldAabb.max_) * 0.5f;
+	}
+
+	// モデルを持たないオブジェクトは、配置基準点を中心として扱う。
+	return worldTransform_.GetWorldPosition();
 }
 
 void BaseGameObject::SetColor(const CalyxEngine::Vector4& color) {
@@ -417,6 +467,8 @@ void BaseGameObject::SetCollider(std::unique_ptr<Collider> collider) {
 		currentColliderKind_ = ColliderKind::Box;
 	} else if(dynamic_cast<SphereCollider*>(collider_.get())) {
 		currentColliderKind_ = ColliderKind::Sphere;
+	} else if(dynamic_cast<CapsuleCollider*>(collider_.get())) {
+		currentColliderKind_ = ColliderKind::Capsule;
 	} else {
 		currentColliderKind_ = ColliderKind::None;
 	}
@@ -424,6 +476,7 @@ void BaseGameObject::SetCollider(std::unique_ptr<Collider> collider) {
 	collider_->SetOnEnter([this](Collider* other) { this->OnCollisionEnter(other); });
 	collider_->SetOnStay([this](Collider* other) { this->OnCollisionStay(other); });
 	collider_->SetOnExit([this](Collider* other) { this->OnCollisionExit(other); });
+	collider_->SetOwner(this);
 	config_.GetConfig().colliderKind = static_cast<int>(currentColliderKind_);
 }
 
@@ -526,6 +579,17 @@ AABB BaseGameObject::GetWorldAABB() const {
 	}
 
 	return SceneObject::FallbackAABBFromTransform();
+}
+
+WorldTransform BaseGameObject::GetRenderWorldTransform() const {
+	WorldTransform renderTransform = worldTransform_;
+	if(visualOffset_.LengthSquared() <= 1.0e-10f) {
+		return renderTransform;
+	}
+
+	renderTransform.translation += visualOffset_;
+	renderTransform.Update();
+	return renderTransform;
 }
 
 void BaseGameObject::BoneParentTransform::SetWorldMatrix(const CalyxEngine::Matrix4x4& world) {

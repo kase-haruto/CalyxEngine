@@ -4,11 +4,11 @@
 #include "Collider.h"
 
 /*-----------------------------------------------------------------------------------------
- * BoxCollider
- * - 箱型（OBB）衝突判定コライダークラス
- * - 直方体の形状を用いた衝突判定制御を担当
+ * CapsuleCollider
+ * - カプセル形状の衝突判定コライダー
+ * - ローカルY軸を中心軸とし、半球を含む全体高さと半径で形状を管理する
  *---------------------------------------------------------------------------------------*/
-class BoxCollider : public Collider {
+class CapsuleCollider : public Collider {
 public:
 	//===================================================================*/
 	//                   public methods
@@ -16,18 +16,25 @@ public:
 	/**
 	 * \brief コンストラクタ
 	 */
-	BoxCollider() = default;
+	CapsuleCollider() = default;
 
 	/**
 	 * \brief コンストラクタ
 	 * \param isEnuble 有効フラグ
 	 */
-	BoxCollider(bool isEnuble);
+	CapsuleCollider(bool isEnuble);
 
 	/**
 	 * \brief デストラクタ
 	 */
-	~BoxCollider() override = default;
+	~CapsuleCollider() override = default;
+
+	/**
+	 * \brief 初期化
+	 * \param radius 半径
+	 * \param height 半球を含めた全体高さ
+	 */
+	void Initialize(float radius, float height);
 
 	/**
 	 * \brief 更新処理
@@ -35,12 +42,6 @@ public:
 	 * \param rotate 回転
 	 */
 	void Update(const CalyxEngine::Vector3& position, const CalyxEngine::Quaternion& rotate) override;
-
-	/**
-	 * \brief 初期化
-	 * \param size ボックスのサイズ（各軸の半幅）
-	 */
-	void Initialize(const CalyxEngine::Vector3& size);
 
 	/**
 	 * \brief 描画処理
@@ -51,25 +52,6 @@ public:
 	 * \brief ImGui表示
 	 */
 	void ShowGui() override;
-
-	//* collision ==========================================*//
-	/**
-	 * \brief 衝突開始時コールバック
-	 * \param other 衝突相手
-	 */
-	void OnCollisionEnter([[maybe_unused]] Collider* other) override {};
-
-	/**
-	 * \brief 衝突継続時コールバック
-	 * \param other 衝突相手
-	 */
-	virtual void OnCollisionStay([[maybe_unused]] Collider* other) override {};
-
-	/**
-	 * \brief 衝突終了時コールバック
-	 * \param other 衝突相手
-	 */
-	virtual void OnCollisionExit([[maybe_unused]] Collider* other) override {};
 
 	//* config ==========================================*//
 	/**
@@ -88,25 +70,25 @@ public:
 	 * \brief 衝突半径（概算）を取得
 	 * \return 半径
 	 */
-	float GetColliderRadius() const override { return shape_.size.x * 0.5f; }
+	float GetColliderRadius() const override;
 
 	/**
-	 * \brief ボックスサイズを取得
-	 * \return サイズ
+	 * \brief 半径を設定
+	 * \param radius 半径
 	 */
-	const CalyxEngine::Vector3& GetSize() const { return shape_.size; }
+	void SetRadius(float radius) { shape_.radius = radius; }
+
+	/**
+	 * \brief 高さを設定
+	 * \param height 半球を含めた全体高さ
+	 */
+	void SetHeight(float height) { shape_.height = height; }
 
 protected:
 	//===================================================================*/
 	//                    protected member variables
 	//===================================================================*/
-	OBB shape_; //< OBBデータ
-
-private:
-	//===================================================================*/
-	//                    private member variables
-	//===================================================================*/
-	std::string jsonPath = "gameobject"; //< 設定保存用パス
+	Capsule shape_; //< カプセルデータ
 
 public:
 	//===================================================================*/
@@ -119,10 +101,16 @@ public:
 	const CalyxEngine::Vector3& GetCenter() const override;
 
 	/**
-	 * \brief ボックスサイズを設定
-	 * \param size サイズ
+	 * \brief 半径を取得
+	 * \return 半径
 	 */
-	void SetSize(const CalyxEngine::Vector3& size) { shape_.size = size; }
+	float GetRadius() const { return shape_.radius; }
+
+	/**
+	 * \brief 高さを取得
+	 * \return 半球を含めた全体高さ
+	 */
+	float GetHeight() const { return shape_.height; }
 
 	/**
 	 * \brief 衝突形状を取得

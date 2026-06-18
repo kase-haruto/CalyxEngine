@@ -6,6 +6,7 @@
 #include <Engine/Foundation/Math/Quaternion.h>
 
 #include <array>
+#include <variant>
 
 struct OBB{
 	CalyxEngine::Vector3 size;
@@ -24,3 +25,17 @@ struct Sphere{
 
 	void Draw(int subdivision = 8, CalyxEngine::Vector4 color = {1.0f,0.0f,0.0f,1.0f});
 };
+
+/*-----------------------------------------------------------------------------------------
+ * Capsule
+ * - ローカルY軸を中心軸とするカプセル形状
+ * - height は半球を含めた全体高さとして扱う
+ *---------------------------------------------------------------------------------------*/
+struct Capsule {
+	CalyxEngine::Vector3 center;
+	CalyxEngine::Quaternion rotate;
+	float radius = 0.5f;
+	float height = 2.0f;
+};
+
+using CollisionShape = std::variant<Sphere, OBB, Capsule>;

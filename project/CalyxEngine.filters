@@ -355,8 +355,12 @@
     <ClCompile Include="Engine\Objects\3D\Geometory\Shape.cpp" />
     <ClCompile Include="Engine\Objects\Collider\Collider.cpp" />
     <ClCompile Include="Engine\Objects\Collider\BoxCollider.cpp" />
+    <ClCompile Include="Engine\Objects\Collider\CapsuleCollider.cpp" />
     <ClCompile Include="Engine\Collision\CollisionManager.cpp" />
     <ClCompile Include="Engine\Objects\Collider\SphereCollider.cpp" />
+    <ClCompile Include="Engine\Physics\Character\CharacterMovementComponent.cpp" />
+    <ClCompile Include="Engine\Physics\PhysicsBody.cpp" />
+    <ClCompile Include="Engine\Physics\PhysicsSystem.cpp" />
     <ClCompile Include="Engine\Objects\Particle\ParticleEmitShape.cpp" />
     <ClCompile Include="Engine\Graphics\ResourceStateTracker\ResourceStateTracker.cpp" />
     <ClCompile Include="Engine\Application\UI\EngineUI\Core\EngineUICore.cpp" />
@@ -646,8 +650,12 @@
     <ClInclude Include="Engine\Objects\3D\Geometory\Shape.h" />
     <ClInclude Include="Engine\Objects\Collider\Collider.h" />
     <ClInclude Include="Engine\Objects\Collider\BoxCollider.h" />
+    <ClInclude Include="Engine\Objects\Collider\CapsuleCollider.h" />
     <ClInclude Include="Engine\Collision\CollisionManager.h" />
     <ClInclude Include="Engine\Objects\Collider\SphereCollider.h" />
+    <ClInclude Include="Engine\Physics\Character\CharacterMovementComponent.h" />
+    <ClInclude Include="Engine\Physics\PhysicsBody.h" />
+    <ClInclude Include="Engine\Physics\PhysicsSystem.h" />
     <ClInclude Include="Engine\Objects\Particle\ParticleEmitShape.h" />
     <ClInclude Include="Engine\Graphics\ResourceStateTracker\ResourceStateTracker.h" />
     <ClInclude Include="Engine\Application\UI\EngineUI\Core\EngineUICore.h" />
@@ -735,6 +743,7 @@
     <ClInclude Include="Engine\Foundation\Utility\FileSystem\FileSystemHelper.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\BaseGameObject\BaseGameObjectConfig.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Collider\ColliderConfig.h" />
+    <ClInclude Include="Data\Engine\Configs\Scene\Objects\Physics\PhysicsBodyConfig.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Transform\WorldTransformConfig.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Transform\UvTransformConfig.h" />
     <ClInclude Include="Data\Engine\Macros\ConfigMacros\ConfigMacros.h" />

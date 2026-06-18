@@ -310,12 +310,12 @@ namespace CalyxEngine {
 					switch(go->GetModelType()) {
 					case ObjectModelType::ModelType_Static:
 						if(auto* model = go->GetStaticModel()) {
-							editorPreviewModelRenderer_->RegisterStatic(model, go->GetWorldTransform(), go->GetBillboardMode(), go);
+							editorPreviewModelRenderer_->RegisterStatic(model, go->GetRenderWorldTransform(), go->GetBillboardMode(), go);
 						}
 						break;
 					case ObjectModelType::ModelType_Animation:
 						if(auto* model = go->AnimationModel()) {
-							editorPreviewModelRenderer_->RegisterSkinned(model, go->GetWorldTransform(), go);
+							editorPreviewModelRenderer_->RegisterSkinned(model, go->GetRenderWorldTransform(), go);
 						}
 						break;
 					}

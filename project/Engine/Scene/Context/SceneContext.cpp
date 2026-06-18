@@ -5,6 +5,8 @@
 #include <Engine/Application/Effects/FxSystem.h>
 #include <Engine/Collision/CollisionManager.h>
 #include <Engine/Graphics/Pipeline/Service/PipelineService.h>
+#include <Engine/Physics/PhysicsSystem.h>
+#include <Engine/Objects/3D/Actor/BaseGameObject.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 #include <Engine/Scene/SceneRuntime/IRuntimeBehaviour.h>
 
@@ -101,6 +103,16 @@ void SceneContext::Update(float dt, float alwaysDt, bool runtimePass) {
 	if(effectPlayer_) {
 		effectPlayer_->Update(alwaysDt);
 	}
+
+	PhysicsSystem::GetInstance()->ResolveAll();
+
+	for(auto& sp : objects) {
+		if(auto* object = dynamic_cast<BaseGameObject*>(sp.get())) {
+			object->DrawCollider();
+		}
+	}
+
+	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
 
 	lightLibrary_->CyncGpu();
 	fxSystem_->SyncEmitters();

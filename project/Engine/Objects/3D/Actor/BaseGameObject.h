@@ -11,6 +11,7 @@
 #include <Engine/Objects/3D/Details/BillboardParams.h>
 #include <Engine/objects/Collider/Collider.h>
 #include <Engine/objects/ConfigurableObject/ConfigurableObject.h>
+#include <Engine/Physics/PhysicsBody.h>
 
 //* c++ *//
 #include <memory>
@@ -31,6 +32,7 @@ protected:
 		None,
 		Box,
 		Sphere,
+		Capsule,
 	};
 
 public:
@@ -62,6 +64,10 @@ public:
 	 * \param dt デルタタイム
 	 */
 	void		 AlwaysUpdate(float dt) override;
+	/**
+	 * \brief コライダーのデバッグ表示
+	 */
+	void		 DrawCollider();
 
 	//--------- ui/gui --------------------------------------------------
 	/**
@@ -153,6 +159,12 @@ public:
 	 */
 	Collider*			  GetCollider();
 	/**
+	 * \brief 物理応答設定を取得
+	 * \return 物理応答設定
+	 */
+	PhysicsBody&		  GetPhysicsBody() { return physicsBody_; }
+	const PhysicsBody&	  GetPhysicsBody() const { return physicsBody_; }
+	/**
 	 * \brief モデルタイプを取得
 	 * \return モデルタイプ
 	 */
@@ -177,6 +189,16 @@ public:
 	 * \return AABB
 	 */
 	AABB				  GetWorldAABB() const;
+	/**
+	 * \brief 描画専用オフセットを反映したTransformを取得
+	 * \return 描画用Transform
+	 */
+	WorldTransform		  GetRenderWorldTransform() const;
+	/**
+	 * \brief 描画モデルだけに適用するローカルオフセットを取得
+	 * \return 描画オフセット
+	 */
+	const CalyxEngine::Vector3& GetVisualOffset() const { return visualOffset_; }
 
 	// setter
 	/**
@@ -209,6 +231,11 @@ public:
 	 * \param scale スケール
 	 */
 	void SetScale(const CalyxEngine::Vector3& scale);
+	/**
+	 * \brief 描画モデルだけに適用するローカルオフセットを設定
+	 * \param offset 描画オフセット
+	 */
+	void SetVisualOffset(const CalyxEngine::Vector3& offset) { visualOffset_ = offset; }
 	/**
 	 * \brief 描画の有効/無効を設定
 	 * \param isDrawEnable 有効か
@@ -311,8 +338,10 @@ protected:
 	ObjectModelType objectModelType_ = ModelType_Static; //< モデルタイプ
 
 	std::unique_ptr<Collider> collider_ = nullptr; //< コライダー
+	PhysicsBody			  physicsBody_; //< 物理応答設定
 	ColliderKind			  currentColliderKind_ = ColliderKind::None;  //< コライダーの種類
 	BillboardMode			  billboardMode_	   = BillboardMode::None; //< ビルボードモード
+	CalyxEngine::Vector3	  visualOffset_	   = {0.0f, 0.0f, 0.0f}; //< 描画モデルだけに適用するローカルオフセット
 
 	ConfigurableObject<BaseGameObjectConfig> config_; //< コンフィグ管理
 	const std::string configRoot_ = "BaseGameObject/"; //< コンフィグルートパス

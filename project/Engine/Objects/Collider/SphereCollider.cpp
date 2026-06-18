@@ -65,7 +65,7 @@ const CalyxEngine::Vector3& SphereCollider::GetCenter() const {
 /////////////////////////////////////////////////////////////////////////////////////////
 //		形状を返す
 /////////////////////////////////////////////////////////////////////////////////////////
-const std::variant<Sphere, OBB>& SphereCollider::GetCollisionShape() {
+const CollisionShape& SphereCollider::GetCollisionShape() {
 	collisionShape_ = shape_;
 	return collisionShape_;
 };

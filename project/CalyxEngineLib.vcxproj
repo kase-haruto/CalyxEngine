@@ -204,6 +204,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Application\Effects\FxGuiHelpers.cpp" />
     <ClCompile Include="Engine\Application\Effects\FxObject.cpp" />
     <ClCompile Include="Engine\Application\Effects\Particle\Module\OverLifetime\OverLifetimeModule.cpp" />
+    <ClCompile Include="Engine\Physics\Character\CharacterMovementComponent.cpp" />
+    <ClCompile Include="Engine\Physics\PhysicsBody.cpp" />
+    <ClCompile Include="Engine\Physics\PhysicsSystem.cpp" />
     <ClCompile Include="Engine\Application\Settings\EngineSettings.cpp" />
     <ClCompile Include="Engine\Application\UI\EngineUI\DebugOverlay.cpp" />
     <ClCompile Include="Engine\Application\UI\EngineUI\DebugTextOverlay.cpp" />
@@ -325,6 +328,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Application\UI\EngineUI\Core\EngineUICore.cpp" />
     <ClCompile Include="Engine\Collision\CollisionManager.cpp" />
     <ClCompile Include="Engine\Objects\Collider\BoxCollider.cpp" />
+    <ClCompile Include="Engine\Objects\Collider\CapsuleCollider.cpp" />
     <ClCompile Include="Engine\Objects\Collider\Collider.cpp" />
     <ClCompile Include="Engine\Objects\3D\Geometory\Shape.cpp" />
     <ClCompile Include="Engine\Objects\3D\Actor\BaseGameObject.cpp" />
@@ -599,6 +603,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Foundation\Utility\FileSystem\ConfigPathResolver\ConfigPathResolver.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\BaseGameObject\BaseGameObjectConfig.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Collider\ColliderConfig.h" />
+    <ClInclude Include="Data\Engine\Configs\Scene\Objects\Physics\PhysicsBodyConfig.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\LightObjects\DirectionalLightConfig.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\LightObjects\PointLightConfig.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Material\MaterialConfig.h" />
@@ -606,6 +611,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Transform\WorldTransformConfig.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Transform\UvTransformConfig.h" />
     <ClInclude Include="Engine\Application\UI\EngineUI\Context\EditorContext.h" />
+    <ClInclude Include="Engine\Physics\Character\CharacterMovementComponent.h" />
+    <ClInclude Include="Engine\Physics\PhysicsBody.h" />
+    <ClInclude Include="Engine\Physics\PhysicsSystem.h" />
     <ClInclude Include="Engine\Foundation\Utility\FileSystem\FileSystemHelper.h" />
     <ClInclude Include="Engine\Renderer\Primitive\BoxDrawer.h" />
     <ClInclude Include="Engine\Graphics\Buffer\CameraBuffer.h" />
@@ -643,6 +651,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Application\UI\EngineUI\Core\EngineUICore.h" />
     <ClInclude Include="Engine\Collision\CollisionManager.h" />
     <ClInclude Include="Engine\Objects\Collider\BoxCollider.h" />
+    <ClInclude Include="Engine\Objects\Collider\CapsuleCollider.h" />
     <ClInclude Include="Engine\Objects\Collider\Collider.h" />
     <ClInclude Include="Engine\Objects\3D\Geometory\Shape.h" />
     <ClInclude Include="Engine\Objects\3D\Actor\BaseGameObject.h" />

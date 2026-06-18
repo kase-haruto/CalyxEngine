@@ -322,8 +322,11 @@
                     "y": 1.0,
                     "z": 1.0
                 },
+                "capsuleRadius": 0.5,
+                "capsuleHeight": 2.0,
                 "targetType": 0
             },
+            "colliderKind": 3,
             "guid": "8b37fee0-8d01-4574-aaf4-572605cd1ba5",
             "modelConfig": {
                 "blendMode": 5,
@@ -349,6 +352,16 @@
             "outlineEnabled": false,
             "outlineThickness": 0.03500000014901161,
             "parentGuid": "00000000-0000-0000-0000-000000000000",
+            "physicsBodyConfig": {
+                "enabled": true,
+                "bodyType": 1,
+                "pushbackRatio": 1.0
+            },
+            "visualOffset": {
+                "x": 0.0,
+                "y": -0.5,
+                "z": 0.0
+            },
             "transform": {
                 "inheritRotate": true,
                 "inheritScale": true,
@@ -370,7 +383,7 @@
                     "z": 3.0276405811309814
                 }
             },
-            "type": "BaseGameObject"
+            "type": "DemoPlayer"
         },
         {
             "cameraDitherEnabled": false,

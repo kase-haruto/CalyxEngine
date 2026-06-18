@@ -5,7 +5,6 @@
 #include <Engine/Objects/3D/Geometory/Shape.h>
 
 #include <string>
-#include <variant>
 
 //===================================================================*/
 //							  ColliderType
@@ -178,7 +177,7 @@ protected:
 	//===================================================================*/
 	//                    protected member variables
 	//===================================================================*/
-	std::variant<Sphere, OBB> collisionShape_; //< 衝突形状
+	CollisionShape collisionShape_; //< 衝突形状
 	std::string				  name_;		   //< コライダー名
 
 	ColliderType	   type_ = ColliderType::Type_None;	//< 自身のタイプ
@@ -226,7 +225,7 @@ public:
 	 * \brief 衝突形状を取得
 	 * \return 衝突形状
 	 */
-	virtual const std::variant<Sphere, OBB>& GetCollisionShape() = 0;
+	virtual const CollisionShape& GetCollisionShape() = 0;
 
 	/**
 	 * \brief ワールド座標を取得
@@ -281,12 +280,22 @@ public:
 	 * \return 有効か
 	 */
 	bool IsCollisionEnubled() const { return isCollisionEnabled_; }
+	/**
+	 * \brief トリガーかを取得
+	 * \return トリガーなら true
+	 */
+	bool IsTrigger() const { return isTrigger_; }
 
 	/**
 	 * \brief 衝突判定の有効状態を設定
 	 * \param isCollisionEnuble 有効にするか
 	 */
 	void SetCollisionEnabled(bool isCollisionEnuble);
+	/**
+	 * \brief トリガー状態を設定
+	 * \param isTrigger トリガーにするか
+	 */
+	void SetTrigger(bool isTrigger) { isTrigger_ = isTrigger; }
 
 	/**
 	 * \brief 描画するかを設定
