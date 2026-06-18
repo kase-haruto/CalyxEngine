@@ -3,6 +3,7 @@
 #include "DemoPlayer.h"
 
 #include <Engine/Foundation/Math/Quaternion.h>
+#include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Physics/Character/CharacterMovementComponent.h>
 
 void DemoPlayerMotor::Update(DemoPlayer& player, const PlayerInputState& input, float /*dt*/) {
@@ -29,13 +30,41 @@ void DemoPlayerMotor::Update(DemoPlayer& player, const PlayerInputState& input, 
 }
 
 CalyxEngine::Vector3 DemoPlayerMotor::BuildWorldMoveDirection(const CalyxEngine::Vector2& move) const {
-	// Demoではカメラ基準ではなくワールド基準で移動する。
-	// x入力はワールド右方向、y入力はワールド前方向へ対応させる。
-	CalyxEngine::Vector3 direction{move.x, 0.0f, move.y};
+	CalyxEngine::Vector3 right = CalyxEngine::Vector3::Right();
+	CalyxEngine::Vector3 forward = CalyxEngine::Vector3::Forward();
+
+	if(auto* camera = CameraManager::GetMain3d()) {
+		const auto& cameraMatrix = camera->GetWorldTransform().matrix.world;
+
+		right = {
+			cameraMatrix.m[0][0],
+			0.0f,
+			cameraMatrix.m[0][2],
+		};
+		forward = {
+			cameraMatrix.m[2][0],
+			0.0f,
+			cameraMatrix.m[2][2],
+		};
+
+		if(right.LengthSquared() > 0.0001f) {
+			right = right.Normalize();
+		} else {
+			right = CalyxEngine::Vector3::Right();
+		}
+
+		if(forward.LengthSquared() > 0.0001f) {
+			forward = forward.Normalize();
+		} else {
+			forward = CalyxEngine::Vector3::Forward();
+		}
+	}
+
+	CalyxEngine::Vector3 direction = right * move.x + forward * move.y;
 
 	// 斜め移動が速くならないように、長さが1を超える場合だけ正規化する。
 	if (direction.LengthSquared() > 1.0f) {
-		direction.Normalize();
+		direction = direction.Normalize();
 	}
 
 	return direction;
@@ -50,7 +79,7 @@ void DemoPlayerMotor::FaceMoveDirection(DemoPlayer& player, const CalyxEngine::V
 	// モデルの基準前方をワールド前方として扱い、移動方向へ回転させる。
 	CalyxEngine::Vector3 forward = CalyxEngine::Vector3::Forward();
 	CalyxEngine::Vector3 to = worldDirection;
-	to.Normalize();
+	to = to.Normalize();
 
 	// Quaternion生成は既存のVector/Quaternionユーティリティへ委譲する。
 	player.GetWorldTransform().rotation = CalyxEngine::Quaternion::FromToQuaternion(forward, to);

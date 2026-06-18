@@ -23,7 +23,7 @@ public:
 
 private:
 	/**
-	 * \brief 2D入力をワールドXZ平面の移動方向へ変換
+	 * \brief 2D入力をカメラ基準のXZ平面移動方向へ変換
 	 * \param move 入力方向（x=右、y=前）
 	 * \return ワールド空間の移動方向
 	 */
