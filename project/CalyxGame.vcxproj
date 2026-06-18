@@ -157,6 +157,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Demo\3D\Actor\DemoCamera\DemoCameraPivot.cpp" />
     <ClCompile Include="Demo\3D\Actor\DemoPlayer\DemoPlayer.cpp" />
     <ClCompile Include="Demo\3D\Actor\DemoPlayer\DemoPlayerMotor.cpp" />
     <ClCompile Include="Demo\3D\Actor\DemoPlayer\Weapon\Weapon.cpp" />
@@ -168,6 +169,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Demo\3D\Actor\DemoCamera\DemoCameraPivot.h" />
     <ClInclude Include="Demo\3D\Actor\DemoPlayer\DemoPlayer.h" />
     <ClInclude Include="Demo\3D\Actor\DemoPlayer\DemoPlayerMotor.h" />
     <ClInclude Include="Demo\3D\Actor\DemoPlayer\Details\DemoPlayerActionConfig.h" />
@@ -190,9 +192,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <Project>{371b9fa9-4c90-4ac6-a123-aced756d6c77}</Project>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Demo\3D\Actor\DemoCamera\" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
