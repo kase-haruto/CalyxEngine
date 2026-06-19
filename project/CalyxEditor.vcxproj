@@ -157,6 +157,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Demo\3D\Actor\DemoCamera\DemoCameraPivot.cpp" />
     <ClCompile Include="Demo\3D\Actor\DemoPlayer\DemoPlayer.cpp" />
     <ClCompile Include="Demo\3D\Actor\DemoPlayer\DemoPlayerMotor.cpp" />
     <ClCompile Include="Demo\3D\Actor\DemoPlayer\Weapon\Weapon.cpp" />
@@ -168,6 +169,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Editor\ProjectBrowser.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Demo\3D\Actor\DemoCamera\DemoCameraPivot.h" />
     <ClInclude Include="Demo\3D\Actor\DemoPlayer\DemoPlayer.h" />
     <ClInclude Include="Demo\3D\Actor\DemoPlayer\DemoPlayerMotor.h" />
     <ClInclude Include="Demo\3D\Actor\DemoPlayer\Details\DemoPlayerActionConfig.h" />
