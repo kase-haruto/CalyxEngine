@@ -167,12 +167,12 @@ namespace CalyxEditor {
 				path = std::filesystem::current_path();
 			}
 
-			// 親ディレクトリへ順に遡り、配布物に含まれるResourcesとTemplatesの存在を確認
+			// 親ディレクトリへ順に遡り、配布物に含まれるResourcesとDemoの存在を確認
 			while(!path.empty()) {
-				if(std::filesystem::exists(path / "Resources") && std::filesystem::exists(path / "Templates")) {
+				if(std::filesystem::exists(path / "Resources") && std::filesystem::exists(path / "Demo")) {
 					return path;
 				}
-				if(std::filesystem::exists(path / "project" / "Resources") && std::filesystem::exists(path / "project" / "Templates")) {
+				if(std::filesystem::exists(path / "project" / "Resources") && std::filesystem::exists(path / "project" / "Demo")) {
 					return path / "project";
 				}
 
@@ -520,10 +520,21 @@ namespace CalyxEditor {
 			if(!CopyDirectoryTree(engineDirectory / "Resources", project.rootDirectory / "Resources")) {
 				return false;
 			}
-			// デモテンプレートの場合は、事前定義されたデモアセットやシーン一式（Templates/Demo）をコピー
+			// Demo projects use the engine's live Demo source and scene as the single source of truth.
 			if(selectedTemplate.type == ProjectTemplateType::Demo) {
-				const auto templateDirectory = engineDirectory / "Templates" / "Demo";
-				if(!CopyDirectoryTree(templateDirectory, project.rootDirectory)) {
+				if(!CopyDirectoryTree(engineDirectory / "Demo", Calyx::ResolveProjectPath(project, project.sourceDirectory) / "Demo")) {
+					return false;
+				}
+
+				const auto sourceScenePath = engineDirectory / "Resources" / "Assets" / "Scenes" / "DemoScene.scene";
+				const auto outputScenePath = Calyx::ResolveProjectPath(project, selectedTemplate.startupScene);
+				std::error_code ec;
+				std::filesystem::create_directories(outputScenePath.parent_path(), ec);
+				if(ec) {
+					return false;
+				}
+				std::filesystem::copy_file(sourceScenePath, outputScenePath, std::filesystem::copy_options::overwrite_existing, ec);
+				if(ec) {
 					return false;
 				}
 			}
