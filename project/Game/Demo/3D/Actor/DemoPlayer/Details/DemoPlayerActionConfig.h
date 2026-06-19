@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 /* demoPlayerのインプットアクション
  * - demoPlayerの入力を定義するクラス

@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 
+#include <Engine/Foundation/Export/CalyxAPI.h>
+
 namespace CalyxEngine {
 	// 前方宣言
 	struct SerializableField;
@@ -9,7 +11,7 @@ namespace CalyxEngine {
  	*		SerializableFieldBuilder class
  	*		- シリアライズ可能フィールドビルダークラス
  	*------------------------------------------------------*/
-	class FieldBuilder {
+	class CALYX_API FieldBuilder {
 	public:
 		//=========================================================
 		// public methods

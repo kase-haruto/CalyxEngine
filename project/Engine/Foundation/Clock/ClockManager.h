@@ -1,21 +1,19 @@
 #pragma once
+#include <Engine/Foundation/Export/CalyxAPI.h>
 #include <algorithm>
 #include <chrono>
 
 class ClockManager {
 public:
 	// シングルトン取得メソッド
-	static ClockManager* GetInstance() {
-		static ClockManager instance; // 唯一のインスタンス
-		return &instance;
-	}
+	static CALYX_API ClockManager* GetInstance();
 
 	// コピーコンストラクタと代入演算子を削除
 	ClockManager(const ClockManager&)	= delete;
 	void operator=(const ClockManager&) = delete;
 
-	void  Update(); // 毎フレーム呼び出し
-	float GetRawDeltaTime() const;
+	CALYX_API void  Update(); // 毎フレーム呼び出し
+	CALYX_API float GetRawDeltaTime() const;
 
 	// グローバルな deltaTime（ヒットストップの影響を受けない）
 	float GetDeltaTime() const { return globalDeltaTime_; }
@@ -27,14 +25,14 @@ public:
 	float GetTimeScale() const { return currentTimeScale_; }
 
 	// スローモーション（ヒットストップとは異なり、playerDeltaTimeを直接スケールする）
-	void StartSlowMotion(float scale, float duration);
+	CALYX_API void StartSlowMotion(float scale, float duration);
 
 	float GetTotalTime() const { return totalTime_; }
 	float GetCurrentFPS() const { return currentFPS_; }
 	float GetAverageFPS() const { return averageFPS_; }
 
 	// ヒットストップ開始（イージングは使用しない）
-	void StartHitStop(float duration);
+	CALYX_API void StartHitStop(float duration);
 
 private:
 	// コンストラクタをprivate化

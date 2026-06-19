@@ -1,4 +1,6 @@
 #pragma once
+
+#include <Engine/Foundation/Export/CalyxAPI.h>
 /* ========================================================================
 /* include space
 /* ===================================================================== */
@@ -26,7 +28,7 @@ using ObjectAddedCallback	= std::function<void(SceneObject*)>;
  * - シーンコンテキストクラス
  * - シーン内のオブジェクト・ライト・カメラ・エフェクトシステムを統合管理
  *---------------------------------------------------------------------------------------*/
-class SceneContext {
+class CALYX_API SceneContext {
 public:
 	SceneContext()	= default;
 	~SceneContext();

@@ -12,6 +12,8 @@
 
 namespace CalyxEngine {
 
+LivePPService* LivePPService::instance_ = nullptr;
+
 #ifdef LIVEPP
 	LivePPService* LivePPService::GetInstance() {
 		return instance_;

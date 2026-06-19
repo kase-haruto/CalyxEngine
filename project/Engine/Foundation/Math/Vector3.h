@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Engine/Foundation/Export/CalyxAPI.h>
+
 #include <externals/nlohmann/json.hpp>
 
 namespace CalyxEngine {
@@ -9,7 +11,7 @@ namespace CalyxEngine {
 	/// <summary>
 	/// 3次元ベクトル
 	/// </summary>
-	struct Vector3 final {
+	struct CALYX_API Vector3 final {
 		float x = 0.0f;
 		float y = 0.0f;
 		float z = 0.0f;

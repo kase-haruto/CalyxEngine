@@ -1,6 +1,7 @@
 #pragma once
 #include <Engine/Graphics/Device/DxCore.h>
 #include <Engine/Scene/Base/BaseScene.h>
+#include <Engine/Foundation/Export/CalyxAPI.h>
 #include <Engine/Scene/Transitioner/IScenePayload.h>
 #include <Engine/Scene/Transitioner/SceneTransitionRequestor.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
@@ -30,7 +31,7 @@ namespace CalyxEngine {
 	 * - シーン管理クラス
 	 * - 複数のシーンの登録、切り替え、更新、描画処理を管理
 	 *---------------------------------------------------------------------------------------*/
-	class SceneManager {
+	class CALYX_API SceneManager {
 	public:
 		explicit SceneManager(DxCore* dx);
 		~SceneManager();

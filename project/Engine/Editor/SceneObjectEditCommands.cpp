@@ -27,7 +27,7 @@ namespace CalyxEngine {
 			nlohmann::json j;
 			if(!object) return j;
 
-			j["type"] = object->GetObjectClassName();
+			j["type"] = std::string(object->GetTypeName());
 			j["guid"] = object->GetGuid();
 			j["name"] = object->GetName();
 			j["inheritScale"] = object->GetWorldTransform().inheritScale;

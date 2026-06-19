@@ -8,7 +8,7 @@ namespace CalyxEngine {
 		if (!object) return;
 
 		serializedData_ = nlohmann::json();
-		serializedData_["type"] = std::string(object->GetObjectClassName());
+		serializedData_["type"] = std::string(object->GetTypeName());
 		
 		// IConfigurable を持っていれば設定を抽出
 		if (auto* cfg = dynamic_cast<IConfigurable*>(object.get())) {

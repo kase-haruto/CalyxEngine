@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <Engine/Foundation/Export/CalyxAPI.h>
+
 #include <Engine/Scene/Base/BaseScene.h>
 #include <Engine/Scene/System/SceneManager.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
@@ -8,7 +10,7 @@
 
 namespace Calyx {
 
-	class SceneRegistry {
+	class CALYX_API SceneRegistry {
 	public:
 		explicit SceneRegistry(CalyxEngine::SceneManager& sceneManager);
 

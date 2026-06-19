@@ -5,6 +5,7 @@
 
 #include "../System/AssetRecord.h"
 #include "../System/AssetType.h"
+#include <Engine/Foundation/Export/CalyxAPI.h>
 #include <Engine/Foundation/Utility/Guid/Guid.h> // Guid
 
 /*-----------------------------------------------------------------------------------------
@@ -24,13 +25,13 @@ public:
 	 * \brief インスタンスを取得
 	 * \return インスタンス
 	 */
-	static AssetDatabase* GetInstance();
+	CALYX_API static AssetDatabase* GetInstance();
 
 	/**
 	 * \brief 初期化
 	 * \param assetsRoot アセットのルートディレクトリ
 	 */
-	void Initialize(const std::filesystem::path& assetsRoot);
+	CALYX_API void Initialize(const std::filesystem::path& assetsRoot);
 
 	/**
 	 * \brief アセットディレクトリをスキャンしてレコードを作成/更新

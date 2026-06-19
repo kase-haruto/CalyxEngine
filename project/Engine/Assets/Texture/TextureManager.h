@@ -1,5 +1,6 @@
 #pragma once
 #include <Engine/Assets/Texture/Texture.h>
+#include <Engine/Foundation/Export/CalyxAPI.h>
 #include <Engine/Foundation/Utility/Guid/Guid.h>
 
 /* c++ */
@@ -44,7 +45,7 @@ public:
 	 * \param filePath ファイルパス
 	 * \return GPUハンドル
 	 */
-	D3D12_GPU_DESCRIPTOR_HANDLE LoadTexture(const std::string& filePath);
+	CALYX_API D3D12_GPU_DESCRIPTOR_HANDLE LoadTexture(const std::string& filePath);
 	D3D12_GPU_DESCRIPTOR_HANDLE LoadTextureLinear(const std::string& filePath);
 
 	/**

@@ -1,4 +1,6 @@
 #pragma once
+
+#include <Engine/Foundation/Export/CalyxAPI.h>
 #include "Vector3.h"
 #include <externals/nlohmann/json.hpp>
 #include <optional>
@@ -7,7 +9,7 @@
 namespace CalyxEngine {
 	struct Matrix4x4;
 
-	struct Quaternion {
+	struct CALYX_API Quaternion {
 		float x = 0.0f; //< X成分
 		float y = 0.0f; //< Y成分
 		float z = 0.0f; //< Z成分

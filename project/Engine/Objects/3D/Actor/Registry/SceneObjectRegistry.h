@@ -1,29 +1,20 @@
 #pragma once
-#include <memory>
+
+#include <Engine/Foundation/Export/CalyxAPI.h>
 #include <string>
 #include <unordered_map>
 #include <vector>
 #include <stdexcept>
+#include <memory>
 
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 
-/* ========================================================================
-/*		sceneObjectCtor
-/* ===================================================================== */
-class ISceneCtor{
-public:
-	virtual std::shared_ptr<SceneObject> New() const = 0;
-	virtual ~ISceneCtor() = default;
-};
+using SceneObjectFactory = std::shared_ptr<SceneObject>(*)();
 
 template<class T>
-class SceneCtor final 
-	: public ISceneCtor{
-public:
-	std::shared_ptr<SceneObject> New() const override{
-		return std::make_shared<T>();
-	}
-};
+std::shared_ptr<SceneObject> CreateSceneObject() {
+	return std::make_shared<T>();
+}
 
 struct SceneObjectClassDesc {
 	std::string typeName;
@@ -33,7 +24,7 @@ struct SceneObjectClassDesc {
 	bool		 placeable = false;
 	bool		 prefabEditable = false;
 	bool		 prefabRoot = false;
-	std::unique_ptr<ISceneCtor> ctor;
+	SceneObjectFactory factory = nullptr;
 };
 
 
@@ -42,32 +33,41 @@ struct SceneObjectClassDesc {
 /* ===================================================================== */
 class SceneObjectRegistry{
 public:
-	static SceneObjectRegistry& Get();
+	CALYX_API static SceneObjectRegistry& Get();
 
 	/// <summary>
 	/// 文字列名とそれを生成するctorを保存
 	/// </summary>
 	/// <param name="typeName"></param>
 	/// <param name="ctor"></param>
-	void Register(std::string_view typeName, std::unique_ptr<ISceneCtor>&& ctor);
-	void Register(SceneObjectClassDesc&& desc);
+	CALYX_API void Register(std::string_view typeName, SceneObjectFactory factory);
+	CALYX_API void Register(
+		const char* typeName,
+		const char* displayName,
+		ObjectType objectType,
+		const char* iconPath,
+		bool placeable,
+		bool prefabEditable,
+		bool prefabRoot,
+		SceneObjectFactory factory);
+	CALYX_API void Register(const SceneObjectClassDesc& desc);
 
 	/// <summary>
 	/// 登録済みの名前に対応するオブジェクトを生成
 	/// </summary>
 	/// <param name="typeName"></param>
 	/// <returns></returns>
-	std::shared_ptr<SceneObject> Create(std::string_view typeName) const;
+	CALYX_API std::shared_ptr<SceneObject> Create(std::string_view typeName) const;
 
 	/// <summary>
 	/// 登録済みオブジェクト名を一覧で返す
 	/// </summary>
 	/// <returns></returns>
-	std::vector<std::string> ListTypes() const;
-	std::vector<SceneObjectClassDesc const*> ListPlaceableTypes() const;
-	std::vector<SceneObjectClassDesc const*> ListPrefabEditableTypes() const;
-	std::vector<SceneObjectClassDesc const*> ListPrefabRootTypes() const;
-	const SceneObjectClassDesc* Find(std::string_view typeName) const;
+	CALYX_API std::vector<std::string> ListTypes() const;
+	CALYX_API std::vector<SceneObjectClassDesc const*> ListPlaceableTypes() const;
+	CALYX_API std::vector<SceneObjectClassDesc const*> ListPrefabEditableTypes() const;
+	CALYX_API std::vector<SceneObjectClassDesc const*> ListPrefabRootTypes() const;
+	CALYX_API const SceneObjectClassDesc* Find(std::string_view typeName) const;
 
 private:
 	/// <summary>
@@ -79,5 +79,5 @@ private:
 // 登録マクロ
 #define REGISTER_SCENE_OBJECT(T) \
 	namespace { const bool _rg_##T = []{ \
-		SceneObjectRegistry::Get().Register(#T, std::make_unique<SceneCtor<T>>()); \
+		SceneObjectRegistry::Get().Register(#T, &CreateSceneObject<T>); \
 		return true; }(); }

@@ -1,6 +1,5 @@
 #include "SplineDeformObject.h"
 
-#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/Objects/3D/Geometory/Spline/SplineRegistry.h>
 
 #include <externals/imgui/imgui.h>
@@ -143,4 +142,3 @@ void SplineDeformObject::ExtractDerivedConfigToJson(nlohmann::json&, nlohmann::j
 	derived["autoRebuild"] = autoRebuild_;
 }
 
-REGISTER_SCENE_OBJECT(SplineDeformObject)

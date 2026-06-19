@@ -4,46 +4,78 @@ SceneObjectRegistry& SceneObjectRegistry::Get(){
 	static SceneObjectRegistry inst;
 	return inst;
 }
-void SceneObjectRegistry::Register(std::string_view name, std::unique_ptr<ISceneCtor>&& c){
+void SceneObjectRegistry::Register(std::string_view name, SceneObjectFactory factory){
 	SceneObjectClassDesc desc;
 	desc.typeName	 = std::string(name);
 	desc.displayName = desc.typeName;
-	desc.ctor		 = std::move(c);
-	Register(std::move(desc));
+	desc.factory	 = factory;
+	Register(desc);
 }
 
-void SceneObjectRegistry::Register(SceneObjectClassDesc&& desc){
+void SceneObjectRegistry::Register(
+	const char* typeName,
+	const char* displayName,
+	ObjectType objectType,
+	const char* iconPath,
+	bool placeable,
+	bool prefabEditable,
+	bool prefabRoot,
+	SceneObjectFactory factory){
+
+	SceneObjectClassDesc desc;
+	desc.typeName = typeName ? typeName : "";
+	desc.displayName = displayName ? displayName : desc.typeName;
+	desc.objectType = objectType;
+	desc.iconPath = iconPath ? iconPath : "";
+	desc.placeable = placeable;
+	desc.prefabEditable = prefabEditable;
+	desc.prefabRoot = prefabRoot;
+	desc.factory = factory;
+	Register(desc);
+}
+
+void SceneObjectRegistry::Register(const SceneObjectClassDesc& desc){
 	if(desc.typeName.empty()) {
 		return;
 	}
 
-	if(desc.displayName.empty()) {
-		desc.displayName = desc.typeName;
-	}
+	SceneObjectClassDesc stored;
+	stored.typeName = desc.typeName;
+	stored.displayName = desc.displayName.empty() ? desc.typeName : desc.displayName;
+	stored.objectType = desc.objectType;
+	stored.iconPath = desc.iconPath;
+	stored.placeable = desc.placeable;
+	stored.prefabEditable = desc.prefabEditable;
+	stored.prefabRoot = desc.prefabRoot;
+	stored.factory = desc.factory;
 
-	const std::string key = desc.typeName;
+	const std::string key = stored.typeName;
 	auto			  it  = table_.find(key);
 	if(it == table_.end()) {
-		table_.emplace(key, std::move(desc));
+		table_.emplace(key, std::move(stored));
 		return;
 	}
 
 	auto& current = it->second;
-	current.displayName = std::move(desc.displayName);
-	current.objectType	= desc.objectType;
-	current.iconPath	= std::move(desc.iconPath);
-	current.placeable	= desc.placeable;
-	current.prefabEditable = desc.prefabEditable;
-	current.prefabRoot = desc.prefabRoot;
-	if(desc.ctor) {
-		current.ctor = std::move(desc.ctor);
+	current.displayName = std::move(stored.displayName);
+	current.objectType	= stored.objectType;
+	current.iconPath	= std::move(stored.iconPath);
+	current.placeable	= stored.placeable;
+	current.prefabEditable = stored.prefabEditable;
+	current.prefabRoot = stored.prefabRoot;
+	if(stored.factory) {
+		current.factory = stored.factory;
 	}
 }
 std::shared_ptr<SceneObject> SceneObjectRegistry::Create(std::string_view name) const{
 	auto it = table_.find(std::string(name));
-	if (it == table_.end() || !it->second.ctor)
+	if (it == table_.end() || !it->second.factory)
 		throw std::runtime_error("Unknown SceneObject type: " + std::string(name));
-	return it->second.ctor->New();
+	auto object = it->second.factory();
+	if(object) {
+		object->SetTypeName(it->second.typeName);
+	}
+	return object;
 }
 std::vector<std::string> SceneObjectRegistry::ListTypes() const{
 	std::vector<std::string> out;
@@ -54,7 +86,7 @@ std::vector<std::string> SceneObjectRegistry::ListTypes() const{
 std::vector<SceneObjectClassDesc const*> SceneObjectRegistry::ListPlaceableTypes() const{
 	std::vector<SceneObjectClassDesc const*> out;
 	for(const auto& [_, desc] : table_) {
-		if(desc.placeable && desc.ctor) {
+		if(desc.placeable && desc.factory) {
 			out.push_back(&desc);
 		}
 	}
@@ -64,7 +96,7 @@ std::vector<SceneObjectClassDesc const*> SceneObjectRegistry::ListPlaceableTypes
 std::vector<SceneObjectClassDesc const*> SceneObjectRegistry::ListPrefabEditableTypes() const{
 	std::vector<SceneObjectClassDesc const*> out;
 	for(const auto& [_, desc] : table_) {
-		if(desc.prefabEditable && desc.ctor) {
+		if(desc.prefabEditable && desc.factory) {
 			out.push_back(&desc);
 		}
 	}
@@ -74,7 +106,7 @@ std::vector<SceneObjectClassDesc const*> SceneObjectRegistry::ListPrefabEditable
 std::vector<SceneObjectClassDesc const*> SceneObjectRegistry::ListPrefabRootTypes() const{
 	std::vector<SceneObjectClassDesc const*> out;
 	for(const auto& [_, desc] : table_) {
-		if(desc.prefabRoot && desc.ctor) {
+		if(desc.prefabRoot && desc.factory) {
 			out.push_back(&desc);
 		}
 	}

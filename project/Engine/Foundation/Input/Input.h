@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Engine/Foundation/Export/CalyxAPI.h>
+
 #define DIRECTINPUT_VERSION 0x0800
 
 #include <Engine/Foundation/Math/Vector2.h>
@@ -58,7 +60,7 @@ namespace CalyxFoundation {
 	 * - 入力管理クラス
 	 * - キーボード、マウス、ゲームパッド（XInput）の入力を統合管理するシングルトン
 	 *---------------------------------------------------------------------------------------*/
-	class Input {
+	class CALYX_API Input {
 	public:
 		/**
 		 * \brief インスタンスを取得

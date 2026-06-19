@@ -1,4 +1,6 @@
 #pragma once
+
+#include <Engine/Foundation/Export/CalyxAPI.h>
 /* ========================================================================
 /*  include space
 /* ===================================================================== */
@@ -46,7 +48,7 @@ struct DescriptorHeapSettings {
  * Descriptor Allocator
  *	- ディスクリプタヒープの管理・割り当てを行うクラス
  *--------------------------------------------------------------*/
-class DescriptorAllocator {
+class CALYX_API DescriptorAllocator {
 public:
 	/**
 	 * \brief 初期化

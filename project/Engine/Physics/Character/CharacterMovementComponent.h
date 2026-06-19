@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Engine/Foundation/Export/CalyxAPI.h>
+
 #include "Engine/Foundation/Serialization/SerializableObject.h"
 
 #include <Engine/Foundation/Math/Vector3.h>
@@ -22,7 +24,7 @@ enum class CharacterMovementMode {
  * - CharacterMovementComponent が床探索で得た結果
  * - Unreal の FFindFloorResult に寄せ、床として使えるかと距離を分けて持つ
  *---------------------------------------------------------------------------------------*/
-struct FindFloorResult {
+struct CALYX_API FindFloorResult {
 	bool blockingHit = false;		   //< 何らかの地形に当たったか
 	bool walkableFloor = false;		   //< 歩行可能な床として扱えるか
 	float floorDistance = 0.0f;		   //< カプセル底面から床までの距離
@@ -36,7 +38,7 @@ struct FindFloorResult {
  * - キャラクター専用の移動補助コンポーネント
  * - 床探索、接地状態、重力、床へのスナップを担当する
  *---------------------------------------------------------------------------------------*/
-class CharacterMovementComponent {
+class CALYX_API CharacterMovementComponent {
 public:
 	CharacterMovementComponent();
 	/**

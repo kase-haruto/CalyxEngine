@@ -8,12 +8,9 @@
 #include <Engine/Scene/Context/SceneContext.h>
 #include "Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h"
 #include "UI/Panels/InspectorPanel.h"
-#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 
 #include <algorithm>
 #include <cmath>
-
-REGISTER_SCENE_OBJECT(DemoCameraPivot)
 
 DemoCameraPivot::DemoCameraPivot() {
 	SceneObject::SetName("DemoCameraPivot", ObjectType::GameObject);
@@ -22,7 +19,7 @@ DemoCameraPivot::DemoCameraPivot() {
 void DemoCameraPivot::ApplyConfigFromJson(const nlohmann::json& j) {
 	ApplyConfig(j.get<SceneObjectConfig>());
 
-	const std::string typeKey(GetObjectClassName());
+	const std::string typeKey(GetTypeName());
 	if(j.contains(typeKey)) {
 		ApplyCameraPivotConfig(j.at(typeKey));
 	}
@@ -34,7 +31,7 @@ void DemoCameraPivot::ExtractConfigToJson(nlohmann::json& j) const {
 	nlohmann::json derived;
 	ExtractCameraPivotConfig(derived);
 	if(!derived.empty()) {
-		j[std::string(GetObjectClassName())] = std::move(derived);
+		j[std::string(GetTypeName())] = std::move(derived);
 	}
 }
 

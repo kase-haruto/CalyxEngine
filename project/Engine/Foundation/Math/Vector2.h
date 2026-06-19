@@ -1,9 +1,11 @@
 #pragma once
 
+#include <Engine/Foundation/Export/CalyxAPI.h>
+
 #include <externals/nlohmann/json.hpp>
 
 namespace CalyxEngine {
-	struct Vector2{
+	struct CALYX_API Vector2{
 		float x;
 		float y;
 
