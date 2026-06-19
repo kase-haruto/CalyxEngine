@@ -9,6 +9,18 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+$mutexName = "Global\CalyxReflectionGenerator_" + [Convert]::ToBase64String(
+    [System.Text.Encoding]::UTF8.GetBytes((Resolve-Path $Root).Path)
+).Replace("+", "-").Replace("/", "_").TrimEnd("=")
+$mutex = [System.Threading.Mutex]::new($false, $mutexName)
+$hasLock = $false
+
+try {
+$hasLock = $mutex.WaitOne([TimeSpan]::FromMinutes(5))
+if (!$hasLock) {
+    throw "Timed out waiting for reflection generator lock: $mutexName"
+}
+
 $generatedDir = Join-Path $Root $OutputDir
 $outHeader = Join-Path $generatedDir "$OutputName.h"
 $outSource = Join-Path $generatedDir "$OutputName.cpp"
@@ -144,3 +156,10 @@ $registrationBlocks
 
 Write-IfChanged $outHeader $header
 Write-IfChanged $outSource $source
+}
+finally {
+    if ($hasLock) {
+        $mutex.ReleaseMutex()
+    }
+    $mutex.Dispose()
+}
