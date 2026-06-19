@@ -11,7 +11,7 @@
  * - CALYX_OBJECTを使用してエディタ上で配置可能にする
  *---------------------------------------------------------------------------------------*/
 CALYX_OBJECT(Category = GameObject, DisplayName = "Demo Player", Icon = "UI/Tool/cube.dds")
-class DemoPlayer 
+class DemoPlayer
 	:public Actor{
 public:
 	//===================================================================*/
@@ -25,12 +25,6 @@ public:
 
 	void Initialize() override;
 	void Update(float dt) override;
-
-	/**
-	 * \brief シーン保存・復元で使用するクラス名を取得
-	 * \return DemoPlayerの型名
-	 */
-	std::string_view GetObjectClassName() const override { return "DemoPlayer"; }
 
 private:
 	//===================================================================*/

@@ -94,7 +94,7 @@ nlohmann::json SceneSerializer::DumpJson(const SceneContext& context) {
 			nlohmann::json jOne;
 
 			// ---- 基本メタ ----
-			jOne["type"] = sp->GetObjectClassName();
+			jOne["type"] = std::string(sp->GetTypeName());
 			jOne["guid"] = sp->GetGuid();
 			if(sp->GetPrefabAssetGuid().isValid()) {
 				jOne["prefabAssetGuid"] = sp->GetPrefabAssetGuid();

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Engine/Foundation/Export/CalyxAPI.h>
+
 #include <Engine/Graphics/Buffer/DxConstantBuffer.h>
 
 #include <Data/Engine/Configs/Scene/Objects/Transform/UvTransformConfig.h>
@@ -106,7 +108,7 @@ struct QuaternionTransform {
  * - トランスフォーム基底クラス
  * - 定数バッファとの同期、親子関係の管理、行列計算を行う
  *---------------------------------------------------------------------------------------*/
-class BaseTransform : public DxConstantBuffer<TransformationMatrix> {
+class CALYX_API BaseTransform : public DxConstantBuffer<TransformationMatrix> {
 public:
 	//========================================================================*/
 	//	public functions
@@ -182,7 +184,7 @@ protected:
  * WorldTransform
  * - ワールド空間のトランスフォームクラス
  *---------------------------------------------------------------------------------------*/
-class WorldTransform : public BaseTransform {
+class CALYX_API WorldTransform : public BaseTransform {
 public:
 	//========================================================================*/
 	//	public functions

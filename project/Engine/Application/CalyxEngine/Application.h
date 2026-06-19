@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <Engine/Foundation/Export/CalyxAPI.h>
+
 namespace Calyx {
 
 	struct ProjectInfo;
@@ -13,7 +15,7 @@ namespace CalyxEngine {
 
 namespace Calyx {
 
-	class Application {
+	class CALYX_API Application {
 	public:
 		virtual ~Application() = default;
 

@@ -7,6 +7,11 @@ ClockManager::ClockManager() {
 	lastFrameTime_	= firstFrameTime_;
 }
 
+ClockManager* ClockManager::GetInstance() {
+	static ClockManager instance;
+	return &instance;
+}
+
 void ClockManager::Update() {
 	auto now = std::chrono::high_resolution_clock::now();
 

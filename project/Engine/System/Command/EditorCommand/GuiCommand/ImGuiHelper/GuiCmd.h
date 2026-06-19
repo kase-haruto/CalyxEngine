@@ -1,4 +1,6 @@
 #pragma once
+
+#include <Engine/Foundation/Export/CalyxAPI.h>
 /* ========================================================================
 /*		include space
 /* ===================================================================== */
@@ -40,16 +42,16 @@ namespace GuiCmd{
 	//===================================================================*/
 	//		dragInt
 	//===================================================================*/
-	bool DragInt(const char* label, int& value, float speed = 0.01f, float min = 0.0f, float max = 0.0f);
+	CALYX_API bool DragInt(const char* label, int& value, float speed = 0.01f, float min = 0.0f, float max = 0.0f);
 
 	//===================================================================*/
 	//		dragFloat
 	//===================================================================*/
-	bool DragFloat(const char* label, float& value, float speed = 0.01f, float min = 0.0f, float max = 0.0f);
-	bool DragFloat2(const char* label, CalyxEngine::Vector2& value, float speed = 0.01f, float min = 0.0f, float max = 0.0f);
-	bool DragFloat3(const char* label,CalyxEngine::Vector3& value,float speed = 0.01f,float min = 0.0f,float max = 0.0f);
-	bool DragFloat4(const char* label, CalyxEngine::Vector4& value, float speed = 0.01f, float min = 0.0f, float max = 0.0f);
-	bool ColoredDragFloat3(const char* label,
+	CALYX_API bool DragFloat(const char* label, float& value, float speed = 0.01f, float min = 0.0f, float max = 0.0f);
+	CALYX_API bool DragFloat2(const char* label, CalyxEngine::Vector2& value, float speed = 0.01f, float min = 0.0f, float max = 0.0f);
+	CALYX_API bool DragFloat3(const char* label,CalyxEngine::Vector3& value,float speed = 0.01f,float min = 0.0f,float max = 0.0f);
+	CALYX_API bool DragFloat4(const char* label, CalyxEngine::Vector4& value, float speed = 0.01f, float min = 0.0f, float max = 0.0f);
+	CALYX_API bool ColoredDragFloat3(const char* label,
 						   CalyxEngine::Vector3& value,
 						   float speed = 0.1f,
 						   float min = 0.0f,
@@ -60,46 +62,46 @@ namespace GuiCmd{
 	//===================================================================*/
 	//		sliderFloat
 	//===================================================================*/
-	bool SliderFloat(const char* label, float& value, float min = 0.0f, float max = 1.0f);
-	bool SliderFloat2(const char* label, CalyxEngine::Vector2& value, float min = 0.0f, float max = 1.0f);
-	bool SliderFloat3(const char* label, CalyxEngine::Vector3& value, float min = 0.0f, float max = 1.0f);
-	bool SliderFloat4(const char* label, CalyxEngine::Vector4& value, float min = 0.0f, float max = 1.0f);
+	CALYX_API bool SliderFloat(const char* label, float& value, float min = 0.0f, float max = 1.0f);
+	CALYX_API bool SliderFloat2(const char* label, CalyxEngine::Vector2& value, float min = 0.0f, float max = 1.0f);
+	CALYX_API bool SliderFloat3(const char* label, CalyxEngine::Vector3& value, float min = 0.0f, float max = 1.0f);
+	CALYX_API bool SliderFloat4(const char* label, CalyxEngine::Vector4& value, float min = 0.0f, float max = 1.0f);
 
 	//===================================================================*/
 	//		colorEdit
 	//===================================================================*/
-	bool ColorEdit4(const char* label, CalyxEngine::Vector4& value, ImGuiColorEditFlags flags = 0);
+	CALYX_API bool ColorEdit4(const char* label, CalyxEngine::Vector4& value, ImGuiColorEditFlags flags = 0);
 
 	//===================================================================*/
 	//		combo
 	//===================================================================*/
-	bool Combo(const char* label, int& current_item, const char* const items[], int items_count, int popup_max_height_in_items = -1);
+	CALYX_API bool Combo(const char* label, int& current_item, const char* const items[], int items_count, int popup_max_height_in_items = -1);
 
 	//===================================================================*/
 	//		checkbox
 	//===================================================================*/
-	bool CheckBox(const char* label, bool& value);
+	CALYX_API bool CheckBox(const char* label, bool& value);
 	
 	//===================================================================*/
 	//		CollapsingHeader
 	//===================================================================*/
-	bool CollapsingHeader(const char* label, ImGuiTreeNodeFlags flags = 0);
+	CALYX_API bool CollapsingHeader(const char* label, ImGuiTreeNodeFlags flags = 0);
 
 	//===================================================================*/
 	//		Layout Helpers
 	//===================================================================*/
-	void BeginTableLayout(const char* id = "InspectorTable");
-	void EndTableLayout();
-	void PropertyText(const char* label, const char* fmt, ...);
+	CALYX_API void BeginTableLayout(const char* id = "InspectorTable");
+	CALYX_API void EndTableLayout();
+	CALYX_API void PropertyText(const char* label, const char* fmt, ...);
 
 	//===================================================================*/
 	//		Section Filter Helpers (For Tab View)
 	//===================================================================*/
-	void SetSectionFilter(CalyxEngine::ParamFilterSection sectionType);
+	CALYX_API void SetSectionFilter(CalyxEngine::ParamFilterSection sectionType);
 	
-	bool BeginSection(CalyxEngine::ParamFilterSection sectionType);
+	CALYX_API bool BeginSection(CalyxEngine::ParamFilterSection sectionType);
 	
 	// Ends the current section.
-	void EndSection();
+	CALYX_API void EndSection();
 
 }

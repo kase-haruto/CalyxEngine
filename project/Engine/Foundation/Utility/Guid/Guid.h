@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Engine/Foundation/Export/CalyxAPI.h>
+
 // engine
 #include <Engine/Foundation/Utility/Random/Random.h>
 
@@ -15,7 +17,7 @@
  *		識別id
  *		- 16バイトのユニークIDを表す構造体
  * =----------------------------------------------------------------- */
-struct Guid {
+struct CALYX_API Guid {
 	Guid() = default;
 	Guid(const std::string& s);
 	std::array<std::uint8_t, 16> bytes{};

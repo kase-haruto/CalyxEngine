@@ -1,5 +1,6 @@
 #pragma once
 
+
 #include "Engine/Foundation/Reflection/CalyxReflection.h"
 
 #include <Data/Engine/Configs/Scene/Objects/SceneObject/SceneObjectConfig.h>
@@ -28,7 +29,6 @@ public:
 	void ApplyConfigFromJson(const nlohmann::json& j) override;
 	void ExtractConfigToJson(nlohmann::json& j) const override;
 
-	std::string_view GetObjectClassName() const override { return "DemoCameraPivot"; }
 private:
 	//==================================================================*//
 	//          private functions

@@ -2,6 +2,7 @@
 /* ========================================================================
 	include space
 ===================================================================== */
+#include <Engine/Foundation/Export/CalyxAPI.h>
 #ifdef LIVEPP
 #include <LivePP/API/x64/LPP_API_x64_CPP.h>
 #endif // LIVEPP
@@ -27,22 +28,22 @@ namespace CalyxEngine {
 	 *---------------------------------------------------------------------------------------*/
 	class LivePPService {
 	public:
-		static LivePPService* GetInstance();
+		static CALYX_API LivePPService* GetInstance();
 
 		using HookCallback = std::function<void()>;
 
-		LivePPService();
+		CALYX_API LivePPService();
 		~LivePPService() = default;
 
 		void AddPrePatchListener(HookCallback cb) { prePatchListeners_.push_back(std::move(cb)); }
 		void AddPostPatchListener(HookCallback cb) { postPatchListeners_.push_back(std::move(cb)); }
 
-		void Initialize();
-		void Update();
-		void Finalize();
+		CALYX_API void Initialize();
+		CALYX_API void Update();
+		CALYX_API void Finalize();
 
 		// Trigger hot reload manually
-		void TriggerReload();
+		CALYX_API void TriggerReload();
 
 		// Status access
 		LivePPStatus		GetStatus() const { return status_; }
@@ -51,14 +52,14 @@ namespace CalyxEngine {
 		const std::wstring& GetLastRecompiledSource() const { return lastRecompiledSource_; }
 
 		// internal: used by hooks
-		void OnPrePatch();
-		void OnCompileStart(const wchar_t* modulePath, const wchar_t* sourcePath);
-		void OnCompileSuccess(const wchar_t* modulePath, const wchar_t* sourcePath);
-		void OnCompileError(const wchar_t* modulePath, const wchar_t* sourcePath, const wchar_t* compilerOutput);
-		void OnPostPatch(const wchar_t* modulePath);
+		CALYX_API void OnPrePatch();
+		CALYX_API void OnCompileStart(const wchar_t* modulePath, const wchar_t* sourcePath);
+		CALYX_API void OnCompileSuccess(const wchar_t* modulePath, const wchar_t* sourcePath);
+		CALYX_API void OnCompileError(const wchar_t* modulePath, const wchar_t* sourcePath, const wchar_t* compilerOutput);
+		CALYX_API void OnPostPatch(const wchar_t* modulePath);
 
 	private:
-		inline static LivePPService* instance_ = nullptr;
+		static LivePPService* instance_;
 
 #ifdef LIVEPP
 		lpp::LppSynchronizedAgent agent_{};

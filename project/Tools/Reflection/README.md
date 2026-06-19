@@ -1,11 +1,12 @@
 # Calyx Reflection / Object Collection
 
-このフォルダには、エディタに配置できる `SceneObject` 系クラスをビルド時に自動収集する仕組みが入っています。
+このフォルダには、`SceneObject` 系クラスをビルド時に自動収集する仕組みが入っています。
 C++ の実行時リフレクションではなく、ヘッダに書いたマーカーをビルド前スクリプトが読み取り、C++ の登録コードを生成する方式です。
 
 ## 目的
 
-クラス定義の直前に `CALYX_OBJECT(...)` を書くだけで、エディタの配置パネルに自動で表示されるようにします。
+クラス定義の直前に `CALYX_OBJECT(...)` を書くだけで、`SceneObjectRegistry` へ型登録できるようにします。
+登録された型は、エディタ配置、シーン保存、シーンロード、Prefab生成で使われます。
 
 ```cpp
 #include <Engine/Foundation/Reflection/CalyxReflection.h>
@@ -17,7 +18,8 @@ public:
 };
 ```
 
-次回ビルド時にこのクラスが `SceneObjectRegistry` に登録され、エディタの Events カテゴリから配置できるようになります。
+次回ビルド時にこのクラスが `SceneObjectRegistry` に登録されます。
+`Placeable = true` の場合は、エディタの配置パネルにも表示されます。
 
 ## 全体の流れ
 
@@ -27,7 +29,7 @@ public:
 4. 検出結果から以下の生成ファイルを書き出します。
    - `Engine/Foundation/Reflection/CalyxObjectRegistry.generated.h`
    - `Engine/Foundation/Reflection/CalyxObjectRegistry.generated.cpp`
-5. `main.cpp` で `CalyxEngine::RegisterGeneratedSceneObjects()` が呼ばれます。
+5. Engine側は `CalyxEngine::RegisterGeneratedSceneObjects()`、Game側は `CalyxEngine::RegisterGeneratedGameSceneObjects()` が呼ばれます。
 6. 生成された登録コードが `SceneObjectRegistry` にクラス情報を登録します。
 7. `PlaceToolPanel` が `SceneObjectRegistry` から配置可能オブジェクト一覧を取得し、Events に表示します。
 
@@ -92,10 +94,12 @@ CALYX_OBJECT(
 - `Placeable`
   - `true` の場合、エディタの配置パネルに表示されます。
   - デフォルトは `true` です。
+  - 保存やロードには必要だが配置パネルに出したくない型は `false` にします。
 
 - `TypeName`
   - 保存データや Registry で使う型名です。
   - 未指定の場合は C++ のクラス名が使われます。
+  - シーン保存時の JSON `type` にはこの名前が書かれます。
 
 通常の Event では、まずはこの形で十分です。
 
@@ -108,6 +112,9 @@ CALYX_OBJECT(Category = Event, DisplayName = "Tutorial Event")
 ```cpp
 CALYX_OBJECT(Category = Event, DisplayName = "Internal Event", Placeable = false)
 ```
+
+この場合も `SceneObjectRegistry` には登録されるため、シーンロードやPrefab生成には利用できます。
+配置パネルに表示されないだけです。
 
 専用アイコンを使いたい場合だけ `Icon` を指定します。
 
@@ -165,6 +172,29 @@ float triggerRadius_ = 1.0f;
 現在の実装は、意図的に「オブジェクト自動収集」までに留めています。
 プロパティ自動収集は、既存の `IConfigurable` と JSON 保存/読み込みの流れに合わせて次の段階で設計するのが安全です。
 
+## 型名とシーン保存
+
+生成された登録コードは `SceneObjectClassDesc::typeName` と factory を `SceneObjectRegistry` に登録します。
+`SceneObjectRegistry::Create(typeName)` で生成されたオブジェクトには、生成時に `SceneObject::SetTypeName(typeName)` が呼ばれます。
+
+シーン保存時は `SceneSerializer` が `SceneObject::GetTypeName()` を読み、JSONの `type` に保存します。
+
+```json
+{
+  "type": "TutorialEvent"
+}
+```
+
+`CALYX_OBJECT(TypeName = "Tutorial")` のように明示した場合は、`"Tutorial"` が保存されます。
+
+このため、`CALYX_OBJECT` を使う通常のゲームオブジェクトでは、毎回 `GetObjectClassName()` をoverrideする必要はありません。
+
+注意点:
+
+- 保存対象のオブジェクトは `SceneObjectRegistry::Create()` 経由で生成するのが基本です。
+- `std::make_shared<T>()` で直接生成した場合、Registry由来の `typeName` は自動設定されません。
+- cpp側に `REGISTER_SCENE_OBJECT(T)` を追加で書く必要はありません。
+
 ## 新しい配置可能 Event の追加手順
 
 1. 通常通り Event クラスを作成します。
@@ -184,7 +214,6 @@ CALYX_OBJECT(Category = Event, DisplayName = "Tutorial Event")
 class TutorialEvent : public BaseEventObject {
 public:
 	TutorialEvent();
-	std::string_view GetObjectClassName() const override { return "TutorialEvent"; }
 };
 ```
 

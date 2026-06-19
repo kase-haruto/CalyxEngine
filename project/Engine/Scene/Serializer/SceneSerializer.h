@@ -1,4 +1,6 @@
 #pragma once
+
+#include <Engine/Foundation/Export/CalyxAPI.h>
 /* ========================================================================
 /*  include space
 /* ===================================================================== */
@@ -10,7 +12,7 @@ class SceneContext;
 /// <summary>
 /// シーンシリアライズ
 /// </summary>
-class SceneSerializer {
+class CALYX_API SceneSerializer {
 public:
 	// save
 	static bool			  Save(const SceneContext& context, const std::string& path);

@@ -13,7 +13,7 @@ OUT_SOURCE = GENERATED_DIR / "CalyxObjectRegistry.generated.cpp"
 
 OBJECT_RE = re.compile(
     r"CALYX_OBJECT\s*\((?P<meta>.*?)\)\s*"
-    r"class\s+(?P<class>[A-Za-z_][A-Za-z0-9_]*)(?:\s+(?:final|abstract))*\s*:",
+    r"class\s+(?:(?:[A-Z_][A-Z0-9_]*|__declspec\s*\([^)]*\))\s+)*(?P<class>[A-Za-z_][A-Za-z0-9_]*)(?:\s+(?:final|abstract))*\s*:",
     re.DOTALL,
 )
 
@@ -87,18 +87,15 @@ namespace CalyxEngine {
     registrations = []
     for entry in entries:
         registrations.append(
-            f"""\t\t{{
-\t\t\tSceneObjectClassDesc desc;
-\t\t\tdesc.typeName = "{cpp_string(entry["type_name"])}";
-\t\t\tdesc.displayName = "{cpp_string(entry["display_name"])}";
-\t\t\tdesc.objectType = ObjectType::{entry["category"]};
-\t\t\tdesc.iconPath = "{cpp_string(entry["icon"])}";
-\t\t\tdesc.placeable = {entry["placeable"]};
-\t\t\tdesc.prefabEditable = {entry["prefab_editable"]};
-\t\t\tdesc.prefabRoot = {entry["prefab_root"]};
-\t\t\tdesc.ctor = std::make_unique<SceneCtor<{entry["class"]}>>();
-\t\t\tSceneObjectRegistry::Get().Register(std::move(desc));
-\t\t}}"""
+            f"""\t\tSceneObjectRegistry::Get().Register(
+\t\t\t"{cpp_string(entry["type_name"])}",
+\t\t\t"{cpp_string(entry["display_name"])}",
+\t\t\tObjectType::{entry["category"]},
+\t\t\t"{cpp_string(entry["icon"])}",
+\t\t\t{entry["placeable"]},
+\t\t\t{entry["prefab_editable"]},
+\t\t\t{entry["prefab_root"]},
+\t\t\t&CreateSceneObject<{entry["class"]}>);"""
         )
 
     body = "\n\n".join(registrations)
@@ -108,9 +105,6 @@ namespace CalyxEngine {
 #include <Engine/Foundation/Reflection/CalyxObjectRegistry.generated.h>
 
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
-
-#include <memory>
-#include <utility>
 
 {includes}
 

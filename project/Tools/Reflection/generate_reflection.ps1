@@ -4,7 +4,8 @@ param(
     [string]$OutputDir = "Engine\Foundation\Reflection",
     [string]$OutputName = "CalyxObjectRegistry.generated",
     [string]$Namespace = "CalyxEngine",
-    [string]$FunctionName = "RegisterGeneratedSceneObjects"
+    [string]$FunctionName = "RegisterGeneratedSceneObjects",
+    [string]$ApiMacro = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -52,7 +53,7 @@ function Get-RelativePathCompat([string]$basePath, [string]$targetPath) {
 }
 
 $objectRegex = [regex]::new(
-    'CALYX_OBJECT\s*\((?<meta>.*?)\)\s*class\s+(?<class>[A-Za-z_][A-Za-z0-9_]*)(?:\s+(?:final|abstract))*\s*:',
+    'CALYX_OBJECT\s*\((?<meta>.*?)\)\s*class\s+(?:(?:[A-Z_][A-Z0-9_]*|__declspec\s*\([^)]*\))\s+)*(?<class>[A-Za-z_][A-Za-z0-9_]*)(?:\s+(?:final|abstract))*\s*:',
     [System.Text.RegularExpressions.RegexOptions]::Singleline
 )
 
@@ -104,11 +105,15 @@ foreach ($scanRoot in $ScanRoots) {
 
 $entries = $entries | Sort-Object TypeName
 
+$apiInclude = if ([string]::IsNullOrWhiteSpace($ApiMacro)) { "" } else { "#include <Engine/Foundation/Export/CalyxAPI.h>`n`n" }
+$apiPrefix = if ([string]::IsNullOrWhiteSpace($ApiMacro)) { "" } else { "$ApiMacro " }
+
 $header = @"
 #pragma once
 
+$apiInclude
 namespace CalyxEngine {
-	void RegisterGeneratedSceneObjects();
+	${apiPrefix}void RegisterGeneratedSceneObjects();
 }
 "@
 $header = $header.Replace("namespace CalyxEngine", "namespace $Namespace").Replace("RegisterGeneratedSceneObjects", $FunctionName)
@@ -119,18 +124,15 @@ $registrationBlocks = ($entries | ForEach-Object {
     $displayName = Convert-ToCppString $_.DisplayName
     $icon = Convert-ToCppString $_.Icon
 @"
-		{
-			SceneObjectClassDesc desc;
-			desc.typeName = "$typeName";
-			desc.displayName = "$displayName";
-			desc.objectType = ObjectType::$($_.Category);
-			desc.iconPath = "$icon";
-			desc.placeable = $($_.Placeable);
-			desc.prefabEditable = $($_.PrefabEditable);
-			desc.prefabRoot = $($_.PrefabRoot);
-			desc.ctor = std::make_unique<SceneCtor<$($_.ClassName)>>();
-			SceneObjectRegistry::Get().Register(std::move(desc));
-		}
+		SceneObjectRegistry::Get().Register(
+			"$typeName",
+			"$displayName",
+			ObjectType::$($_.Category),
+			"$icon",
+			$($_.Placeable),
+			$($_.PrefabEditable),
+			$($_.PrefabRoot),
+			&CreateSceneObject<$($_.ClassName)>);
 "@
 }) -join "`n`n"
 
@@ -141,9 +143,6 @@ $source = @"
 #include <$($OutputDir.Replace('\', '/'))/$OutputName.h>
 
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
-
-#include <memory>
-#include <utility>
 
 $includeLines
 

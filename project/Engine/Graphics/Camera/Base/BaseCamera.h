@@ -21,7 +21,7 @@ struct CalyxEngine::Vector3;
  * - カメラ基底クラス
  * - ビュー・プロジェクション行列の計算、カメラシェイク、定数バッファ管理を提供
  *---------------------------------------------------------------------------------------*/
-class BaseCamera :
+class CALYX_API BaseCamera :
 	public ICamera,
 	public IConfigurable {
 public:

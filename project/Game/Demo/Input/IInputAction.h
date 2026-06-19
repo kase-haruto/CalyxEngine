@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <Engine/Foundation/Input/Input.h>
 #include <unordered_map>

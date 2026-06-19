@@ -3,6 +3,7 @@
 #include <Engine/Assets/Model/ModelManager.h>
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Assets/DataAsset/DataAssetManager.h>
+#include <Engine/Foundation/Export/CalyxAPI.h>
 
 namespace CalyxEngine {
 
@@ -22,7 +23,7 @@ namespace CalyxEngine {
 		 * \brief シングルトンインスタンスを取得
 		 * \return AssetManagerのインスタンスへのポインタ
 		 */
-		static AssetManager* GetInstance();
+		CALYX_API static AssetManager* GetInstance();
 
 		/**
 		 * \brief 初期化処理

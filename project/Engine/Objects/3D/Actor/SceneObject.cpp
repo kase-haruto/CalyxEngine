@@ -105,6 +105,17 @@ std::string SceneObject::GetObjectTypeName() const {
 	return ObjectTypeToString(objectType_);
 }
 
+std::string_view SceneObject::GetTypeName() const {
+	if(!typeName_.empty()) {
+		return typeName_;
+	}
+	return GetObjectClassName();
+}
+
+void SceneObject::SetTypeName(std::string typeName) {
+	typeName_ = std::move(typeName);
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //		名前の設定
 /////////////////////////////////////////////////////////////////////////////////////////

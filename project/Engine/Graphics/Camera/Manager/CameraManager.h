@@ -1,4 +1,6 @@
 #pragma once
+
+#include <Engine/Foundation/Export/CalyxAPI.h>
 /* ========================================================================
 /*	include space
 /* ===================================================================== */
@@ -24,7 +26,7 @@ enum class CameraType{ Default, Debug };
  * - カメラ管理クラス
  * - メインカメラ・デバッグカメラの切り替えとビューポートサイズの管理を担当
  *---------------------------------------------------------------------------------------*/
-class CameraManager{
+class CALYX_API CameraManager{
 public:
 	//――― Scene‑side lifecycle ―――――――――――――――――――――――――――――
 	void Initialize(SceneContext* owner);

@@ -1,7 +1,7 @@
 #pragma once
+#include <Engine/Foundation/Export/CalyxAPI.h>
 #include <Engine/Foundation/Math/Vector2.h>
 #include <externals/imgui/imgui.h>
-#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -38,86 +38,38 @@ namespace CalyxEngine {
 		};
 
 		// メッセージの追加
-		static void AddMessage(const std::string& title, const std::string& body, const ImVec4& color = ImVec4(1, 1, 1, 1)) {
-			GetInstance().messages_.push_back({title, body, color});
-		}
+		static CALYX_API void AddMessage(const std::string& title, const std::string& body, const ImVec4& color = ImVec4(1, 1, 1, 1));
 
 		// ビューポート左上基準の座標へ、寿命付きのポップテキストを追加
-		static void AddPopupText(const CalyxEngine::Vector2& position,
-								 const ImVec4&			   color,
-								 const std::string&		   text,
-								 float					   lifetime = 2.0f,
-								 float					   rise = 24.0f) {
-			if(text.empty()) return;
-			GetInstance().popupTexts_.push_back({position, color, text, lifetime, 0.0f, rise});
-		}
+		static CALYX_API void AddPopupText(const CalyxEngine::Vector2& position,
+										   const ImVec4&				 color,
+										   const std::string&			 text,
+										   float						 lifetime = 2.0f,
+										   float						 rise = 24.0f);
 
 		// メッセージの取得
-		static const std::vector<Message>& GetMessages() {
-			return GetInstance().messages_;
-		}
+		static CALYX_API const std::vector<Message>& GetMessages();
 
-		static const std::vector<PopupText>& GetPopupTexts() {
-			return GetInstance().popupTexts_;
-		}
+		static CALYX_API const std::vector<PopupText>& GetPopupTexts();
 
-		static void SetFatalAssert(const FatalAssert& fatal) {
-			auto& instance = GetInstance();
-			if(instance.hasFatalAssert_) return;
-			instance.fatalAssert_ = fatal;
-			instance.hasFatalAssert_ = true;
-			instance.breakRequested_ = false;
-		}
+		static CALYX_API void SetFatalAssert(const FatalAssert& fatal);
 
-		static bool HasFatalAssert() {
-			return GetInstance().hasFatalAssert_;
-		}
+		static CALYX_API bool HasFatalAssert();
 
-		static const FatalAssert& GetFatalAssert() {
-			return GetInstance().fatalAssert_;
-		}
+		static CALYX_API const FatalAssert& GetFatalAssert();
 
-		static void RequestBreak() {
-			GetInstance().breakRequested_ = true;
-		}
+		static CALYX_API void RequestBreak();
 
-		static bool ConsumeBreakRequest() {
-			auto& instance = GetInstance();
-			const bool requested = instance.breakRequested_;
-			instance.breakRequested_ = false;
-			if(requested) {
-				instance.hasFatalAssert_ = false;
-			}
-			return requested;
-		}
+		static CALYX_API bool ConsumeBreakRequest();
 
-		static void UpdatePopupTexts(float dt) {
-			auto& popups = GetInstance().popupTexts_;
-			for(auto& popup : popups) {
-				popup.age += dt;
-			}
-
-			popups.erase(
-				std::remove_if(
-					popups.begin(),
-					popups.end(),
-					[](const PopupText& popup) {
-						return popup.age >= popup.lifetime;
-					}),
-				popups.end());
-		}
+		static CALYX_API void UpdatePopupTexts(float dt);
 
 		// クリア（毎フレームの最初または最後に呼ぶ）
-		static void Clear() {
-			GetInstance().messages_.clear();
-		}
+		static CALYX_API void Clear();
 
 	private:
 		DebugTextManager() = default;
-		static DebugTextManager& GetInstance() {
-			static DebugTextManager instance;
-			return instance;
-		}
+		static CALYX_API DebugTextManager& GetInstance();
 
 		std::vector<Message> messages_;
 		std::vector<PopupText> popupTexts_;

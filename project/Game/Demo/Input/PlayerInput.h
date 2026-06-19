@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "IInputAction.h"
 #include <Demo/3D/Actor/DemoPlayer/Details/DemoPlayerActionConfig.h>

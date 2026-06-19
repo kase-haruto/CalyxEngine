@@ -13,7 +13,7 @@
 namespace CalyxEngine {
 	namespace {
 		void WriteMetadata(const std::shared_ptr<SceneObject>& object, nlohmann::json& j) {
-			j["type"] = object->GetObjectClassName();
+			j["type"] = std::string(object->GetTypeName());
 			j["name"] = object->GetName();
 			j["objectType"] = static_cast<int>(object->GetObjectType());
 			j["drawEnable"] = object->IsDrawEnable();

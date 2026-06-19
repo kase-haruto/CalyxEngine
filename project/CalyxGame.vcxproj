@@ -72,16 +72,16 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PreBuildEvent>
-      <Command>powershell -NoProfile -ExecutionPolicy Bypass -File "$(CalyxReflectionTool)" -ScanRoots Demo -OutputName CalyxGameObjectRegistry.generated -FunctionName RegisterGeneratedGameSceneObjects</Command>
+      <Command>powershell -NoProfile -ExecutionPolicy Bypass -File "$(CalyxReflectionTool)" -ScanRoots Game\Demo -OutputName CalyxGameObjectRegistry.generated -FunctionName RegisterGeneratedGameSceneObjects</Command>
     </PreBuildEvent>
     <ClCompile>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;IMGUI_API=__declspec(dllimport);IGFD_API=__declspec(dllimport);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(CalyxEngineIncludeDirs);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Game;$(ProjectDir);$(CalyxEngineIncludeDirs);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -100,16 +100,16 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PreBuildEvent>
-      <Command>powershell -NoProfile -ExecutionPolicy Bypass -File "$(CalyxReflectionTool)" -ScanRoots Demo -OutputName CalyxGameObjectRegistry.generated -FunctionName RegisterGeneratedGameSceneObjects</Command>
+      <Command>powershell -NoProfile -ExecutionPolicy Bypass -File "$(CalyxReflectionTool)" -ScanRoots Game\Demo -OutputName CalyxGameObjectRegistry.generated -FunctionName RegisterGeneratedGameSceneObjects</Command>
     </PreBuildEvent>
     <ClCompile>
-      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;IMGUI_API=__declspec(dllimport);IGFD_API=__declspec(dllimport);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(CalyxEngineIncludeDirs);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Game;$(ProjectDir);$(CalyxEngineIncludeDirs);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
     </ClCompile>
@@ -129,16 +129,16 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">
     <PreBuildEvent>
-      <Command>powershell -NoProfile -ExecutionPolicy Bypass -File "$(CalyxReflectionTool)" -ScanRoots Demo -OutputName CalyxGameObjectRegistry.generated -FunctionName RegisterGeneratedGameSceneObjects</Command>
+      <Command>powershell -NoProfile -ExecutionPolicy Bypass -File "$(CalyxReflectionTool)" -ScanRoots Game\Demo -OutputName CalyxGameObjectRegistry.generated -FunctionName RegisterGeneratedGameSceneObjects</Command>
     </PreBuildEvent>
     <ClCompile>
-      <PreprocessorDefinitions>DEVELOP;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEVELOP;_WINDOWS;IMGUI_API=__declspec(dllimport);IGFD_API=__declspec(dllimport);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(CalyxEngineIncludeDirs);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Game;$(ProjectDir);$(CalyxEngineIncludeDirs);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
     </ClCompile>
@@ -157,40 +157,41 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Demo\3D\Actor\DemoCamera\DemoCameraPivot.cpp" />
-    <ClCompile Include="Demo\3D\Actor\DemoPlayer\DemoPlayer.cpp" />
-    <ClCompile Include="Demo\3D\Actor\DemoPlayer\DemoPlayerMotor.cpp" />
-    <ClCompile Include="Demo\3D\Actor\DemoPlayer\Weapon\Weapon.cpp" />
-    <ClCompile Include="Demo\Input\PlayerInput.cpp" />
-    <ClCompile Include="Demo\Scene\DemoScene\DemoScene.cpp" />
-    <ClCompile Include="Demo\Scene\Utility\SceneTypeUtil.cpp" />
+    <ClCompile Include="Game\Demo\3D\Actor\DemoCamera\DemoCameraPivot.cpp" />
+    <ClCompile Include="Game\Demo\3D\Actor\DemoPlayer\DemoPlayer.cpp" />
+    <ClCompile Include="Game\Demo\3D\Actor\DemoPlayer\DemoPlayerMotor.cpp" />
+    <ClCompile Include="Game\Demo\3D\Actor\DemoPlayer\Weapon\Weapon.cpp" />
+    <ClCompile Include="Game\Demo\Input\PlayerInput.cpp" />
+    <ClCompile Include="Game\Demo\Scene\DemoScene\DemoScene.cpp" />
+    <ClCompile Include="Game\Demo\Scene\Utility\SceneTypeUtil.cpp" />
     <ClCompile Include="Engine\Foundation\Reflection\CalyxGameObjectRegistry.generated.cpp" />
-    <ClCompile Include="GameApplication.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Game\GameApplication.cpp" />
+    <ClCompile Include="Game\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Demo\3D\Actor\DemoCamera\DemoCameraPivot.h" />
-    <ClInclude Include="Demo\3D\Actor\DemoPlayer\DemoPlayer.h" />
-    <ClInclude Include="Demo\3D\Actor\DemoPlayer\DemoPlayerMotor.h" />
-    <ClInclude Include="Demo\3D\Actor\DemoPlayer\Details\DemoPlayerActionConfig.h" />
-    <ClInclude Include="Demo\3D\Actor\DemoPlayer\Weapon\Weapon.h" />
-    <ClInclude Include="Demo\Input\IInputAction.h" />
-    <ClInclude Include="Demo\Input\InputConfig.h" />
-    <ClInclude Include="Demo\Input\PlayerInput.h" />
-    <ClInclude Include="Demo\Scene\DemoScene\DemoScene.h" />
-    <ClInclude Include="Demo\Scene\Details\SceneType.h" />
-    <ClInclude Include="Demo\Scene\Utility\SceneTypeUtil.h" />
+    <ClInclude Include="Game\Demo\3D\Actor\DemoCamera\DemoCameraPivot.h" />
+    <ClInclude Include="Game\Demo\3D\Actor\DemoPlayer\DemoPlayer.h" />
+    <ClInclude Include="Game\Demo\3D\Actor\DemoPlayer\DemoPlayerMotor.h" />
+    <ClInclude Include="Game\Demo\3D\Actor\DemoPlayer\Details\DemoPlayerActionConfig.h" />
+    <ClInclude Include="Game\Demo\3D\Actor\DemoPlayer\Weapon\Weapon.h" />
+    <ClInclude Include="Game\Demo\Input\IInputAction.h" />
+    <ClInclude Include="Game\Demo\Input\InputConfig.h" />
+    <ClInclude Include="Game\Demo\Input\PlayerInput.h" />
+    <ClInclude Include="Game\Demo\Scene\DemoScene\DemoScene.h" />
+    <ClInclude Include="Game\Demo\Scene\Details\SceneType.h" />
+    <ClInclude Include="Game\Demo\Scene\Utility\SceneTypeUtil.h" />
     <ClInclude Include="Engine\Foundation\Reflection\CalyxGameObjectRegistry.generated.h" />
-    <ClInclude Include="GameApplication.h" />
+    <ClInclude Include="Game\GameApplication.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="$(CalyxEngineLibProject)">
+    <ProjectReference Include="$(CalyxEngineProject)">
       <Project>{a12f6624-6c62-41e3-9cb7-02e3f5dfbb7e}</Project>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
     </ProjectReference>
     <ProjectReference Include="$(CalyxDirectXTexProject)">
       <Project>{371b9fa9-4c90-4ac6-a123-aced756d6c77}</Project>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
+      <Properties Condition="'$(Configuration)'=='Develop'">Configuration=Release;Platform=$(Platform)</Properties>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Engine/Foundation/Export/CalyxAPI.h>
+
 #include "Engine/Foundation/Math/Vector2.h"
 #include "Engine/Foundation/Math/Vector4.h"
 #include "SerializableField.h"
@@ -29,7 +31,7 @@ namespace CalyxEngine {
 	 * - シリアライズ可能オブジェクト基底クラス
 	 * - メンバ変数を保存対象として登録し、外部ファイルとの同期を管理するクラス
 	 *---------------------------------------------------------------------------------------*/
-	class SerializableObject {
+	class CALYX_API SerializableObject {
 	public:
 		/**
 		 * \brief デストラクタ

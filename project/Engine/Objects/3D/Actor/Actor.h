@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Engine/Foundation/Export/CalyxAPI.h>
+
 // engine
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
 #include <Engine/Physics/Character/CharacterMovementComponent.h>
@@ -13,7 +15,7 @@
  * - ゲーム上の行動するキャラクター基底クラス
  * - 位置、速度、生存フラグ、ライフなどの共通パラメータを保持
  *---------------------------------------------------------------------------------------*/
-class Actor
+class CALYX_API Actor
 	: public BaseGameObject {
 public:
 	//===================================================================*/

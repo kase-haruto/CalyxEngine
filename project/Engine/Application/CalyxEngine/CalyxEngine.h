@@ -4,3 +4,7 @@
 #include <CalyxEngine/Engine.h>
 #include <CalyxEngine/Project.h>
 #include <CalyxEngine/SceneRegistry.h>
+
+namespace CalyxEngine {
+	CALYX_API void RegisterGeneratedSceneObjects();
+}

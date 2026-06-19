@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Engine/Foundation/Export/CalyxAPI.h>
+
 // engine
 #include <Engine/Foundation/Utility/Guid/Guid.h>
 #include <Engine/System/Event/EventBus.h>
@@ -22,7 +24,7 @@ class SceneContext;
  * - シーンオブジェクト管理クラス
  * - シーン上の全オブジェクトの登録・削除・検索・一覧取得を担当
  *---------------------------------------------------------------------------------------*/
-class SceneObjectLibrary {
+class CALYX_API SceneObjectLibrary {
 public:
     //====================================================================*//
     //      public functions

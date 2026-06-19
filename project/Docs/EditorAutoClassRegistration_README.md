@@ -5,7 +5,8 @@
 
 ## 1. 概要
 
-エディタに配置できる `SceneObject` 系クラスを、ビルド前に自動収集して `SceneObjectRegistry` へ登録する仕組みです。
+`SceneObject` 系クラスを、ビルド前に自動収集して `SceneObjectRegistry` へ登録する仕組みです。
+登録された型は、エディタ配置だけでなくシーン保存・ロードにも使われます。
 
 新しいオブジェクトクラスを作成したとき、従来のように登録用cppへ手動で追記するのではなく、クラス定義の直前に `CALYX_OBJECT(...)` を書くだけで、ビルド時に登録コードが生成されます。
 
@@ -50,10 +51,10 @@ public:
 | `Tools/Reflection/generate_reflection.py` | Python版Generator。現在のPreBuildEventでは未使用 |
 | `Engine/Foundation/Reflection/CalyxObjectRegistry.generated.h` | 自動生成される登録関数の宣言 |
 | `Engine/Foundation/Reflection/CalyxObjectRegistry.generated.cpp` | 自動生成される登録処理 |
-| `main.cpp` | 起動直後に `RegisterGeneratedSceneObjects()` を呼び、Registryへ反映 |
+| `Game/main.cpp` | 起動直後に `RegisterGeneratedSceneObjects()` と `RegisterGeneratedGameSceneObjects()` を呼び、Registryへ反映 |
 | `Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.*` | 型名からSceneObjectを生成するRegistry |
 | `Engine/Application/UI/Panels/PlaceToolPanel.cpp` | Registryから配置可能クラスを取得し、配置UIに表示 |
-| `CalyxEngineLib.vcxproj` | PreBuildEventでGeneratorを実行 |
+| `CalyxEngine.vcxproj` | PreBuildEventでGeneratorを実行 |
 
 ## 4. 全体の流れ
 
@@ -77,7 +78,7 @@ flowchart TD
 
 ## 5. MSBuild PreBuildEvent
 
-`CalyxEngineLib.vcxproj` では、各構成のPreBuildEventで以下のスクリプトを実行しています。
+`CalyxEngine.vcxproj` では、各構成のPreBuildEventで以下のスクリプトを実行しています。
 
 ```text
 powershell -NoProfile -ExecutionPolicy Bypass -File "$(ProjectDir)Tools\Reflection\generate_reflection.ps1"
@@ -141,8 +142,8 @@ CALYX_OBJECT(...) の直後にある class ClassName :
     desc.placeable = true;
     desc.prefabEditable = false;
     desc.prefabRoot = false;
-    desc.ctor = std::make_unique<SceneCtor<CameraEventObject>>();
-    SceneObjectRegistry::Get().Register(std::move(desc));
+    desc.factory = &CreateSceneObject<CameraEventObject>;
+    SceneObjectRegistry::Get().Register(desc);
 }
 ```
 
@@ -157,12 +158,12 @@ CALYX_OBJECT(...) の直後にある class ClassName :
 std::shared_ptr<SceneObject> SceneObjectRegistry::Create(std::string_view name) const;
 ```
 
-登録時には、型名、表示名、カテゴリ、アイコン、配置可能フラグ、生成用ctorを `SceneObjectClassDesc` として保持します。
+登録時には、型名、表示名、カテゴリ、アイコン、配置可能フラグ、生成用factoryを `SceneObjectClassDesc` として保持します。
 
 ```mermaid
 flowchart LR
     A[typeName] --> B[SceneObjectRegistry]
-    B --> C[SceneCtor<T>]
+    B --> C[CreateSceneObject<T>]
     C --> D[std::make_shared<T>()]
     D --> E[SceneObject生成]
 ```
@@ -173,6 +174,7 @@ flowchart LR
 ## 9. PlaceToolPanelへの表示
 
 `PlaceToolPanel` は `SceneObjectRegistry::ListPlaceableTypes()` を呼び出し、配置可能なクラス一覧を取得します。
+`Placeable = false` の型はRegistryには登録されますが、配置パネルには表示されません。
 
 `ObjectType::Event` のものはEventカテゴリへ、`ObjectType::GameObject` のものはActorカテゴリへ追加されます。
 
@@ -227,8 +229,10 @@ flowchart TD
 
 ```cpp
 #include <Engine/Foundation/Reflection/CalyxObjectRegistry.generated.h>
+#include <Engine/Foundation/Reflection/CalyxGameObjectRegistry.generated.h>
 
 CalyxEngine::RegisterGeneratedSceneObjects();
+CalyxEngine::RegisterGeneratedGameSceneObjects();
 ```
 
 ## 13. 資料用スライド案
@@ -376,7 +380,7 @@ SceneObjectRegistryへ登録するC++コードを出力します。
 flowchart LR
     A[ClassName] --> B[SceneObjectClassDesc]
     B --> C[typeName / displayName / icon]
-    C --> D[SceneCtor<T>]
+    C --> D[CreateSceneObject<T>]
     D --> E[SceneObjectRegistry]
 ```
 

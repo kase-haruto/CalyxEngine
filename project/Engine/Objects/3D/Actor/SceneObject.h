@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Engine/Foundation/Export/CalyxAPI.h>
+
 // engine
 #include <Engine/Foundation/Math/Vector4.h>
 #include <Engine/Foundation/Utility/Guid/Guid.h>
@@ -51,7 +53,7 @@ struct DrawConfig {
  * - シーンオブジェクト基底クラス
  * - シーン上に配置可能な全オブジェクトの基盤となるクラス
  *---------------------------------------------------------------------------------------*/
-class SceneObject
+class CALYX_API SceneObject
 	: public std::enable_shared_from_this<SceneObject> {
 public:
 	// =======================
@@ -141,6 +143,7 @@ public:
 	const CalyxEngine::TransformKeyframeAnimation2d& Get2DTransformAnimation() const { return transformAnimation2d_; }
 	std::shared_ptr<SceneObject>					 GetParent() const { return parent_.lock(); }
 	virtual std::string_view						 GetObjectClassName() const { return "SceneObject"; }
+	std::string_view								 GetTypeName() const;
 	ObjectType										 GetObjectType() const { return objectType_; }
 	const Guid&										 GetGuid() const { return id_; }
 	const std::string&								 GetName() const { return name_; }
@@ -161,6 +164,7 @@ public:
 	bool											 IsPrefabInstanceObject() const { return prefabAssetGuid_.isValid() && prefabSourceGuid_.isValid(); }
 
 	void		 SetGuid(const Guid& g) { id_ = g; }
+	void		 SetTypeName(std::string typeName);
 	void		 SetDuplicateNameIndex(uint32_t index) { duplicateNameIndex_ = index; }
 	void		 SetPrefabLink(const Guid& assetGuid, const Guid& sourceGuid) {
 		prefabAssetGuid_ = assetGuid;
@@ -198,6 +202,7 @@ protected:
 	// Identification
 	// =======================
 	std::string				   name_	   = "";		   //< オブジェクト名
+	std::string				   typeName_   = "";		   //< Registry登録名
 	std::optional<std::string> configPath_ = std::nullopt; //< コンフィグファイルパス
 	Guid					   id_;						   //< 識別子
 	Guid					   parentId_;				   //< 親識別子
