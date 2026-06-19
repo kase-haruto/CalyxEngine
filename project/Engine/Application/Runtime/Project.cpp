@@ -247,6 +247,16 @@ namespace Calyx {
 				continue;
 			}
 
+			ProjectInfo project;
+			if(LoadProjectFile(entry.projectFile, project)) {
+				if(entry.name != project.name || entry.engineVersion != project.engineVersion) {
+					removedMissingProjects = true;
+				}
+				entry.name			 = project.name;
+				entry.engineVersion	 = project.engineVersion;
+				entry.projectFile	 = project.projectFile;
+			}
+
 			outProjects.push_back(std::move(entry));
 		}
 

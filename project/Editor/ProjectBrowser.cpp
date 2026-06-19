@@ -823,7 +823,7 @@ namespace CalyxEditor {
 		ImGui::SetCursorScreenPos(ImVec2(cardMin.x + param_.cardPadding_, cardMin.y + param_.cardNameOffsetY_));
 		ImGui::TextWrapped("%s", label.c_str());
 		ImGui::SetCursorScreenPos(ImVec2(cardMin.x + param_.cardPadding_, cardMin.y + param_.cardVersionOffsetY_));
-		ImGui::TextDisabled("%s", entry.engineVersion.empty() ? kDefaultEngineVersion : entry.engineVersion.c_str());
+		ImGui::TextDisabled("%s", entry.engineVersion.empty() ? "Unknown" : entry.engineVersion.c_str());
 
 		ImGui::SetCursorScreenPos(cardMax);
 	}
