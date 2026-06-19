@@ -116,5 +116,5 @@ public:
 	 * \brief 衝突形状を取得
 	 * \return 衝突形状
 	 */
-	const std::variant<Sphere, OBB>& GetCollisionShape() override;
+	const CollisionShape& GetCollisionShape() override;
 };

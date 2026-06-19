@@ -14,11 +14,16 @@ namespace CalyxEngine{
 		bool isManipulatorSnap = false;
 	};
 
+	struct GraphicsSettings {
+		bool enablePointLightShadows = true;
+	};
+
 	/////////////////////////////////////////////////////////////////////////////////////////
 	//		エンジン全体の設定
 	/////////////////////////////////////////////////////////////////////////////////////////
 	struct EngineSettingsData {
 		EditorSettings editor;
+		GraphicsSettings graphics;
 		ManipulatorSettings manipulator;
 	};
 
@@ -36,9 +41,20 @@ namespace CalyxEngine{
 		settings.isManipulatorSnap = j.value("isManipulatorSnap", settings.isManipulatorSnap);
 	}
 
+	inline void to_json(nlohmann::json& j, const GraphicsSettings& settings) {
+		j = nlohmann::json{
+			{"enablePointLightShadows", settings.enablePointLightShadows},
+		};
+	}
+
+	inline void from_json(const nlohmann::json& j, GraphicsSettings& settings) {
+		settings.enablePointLightShadows = j.value("enablePointLightShadows", settings.enablePointLightShadows);
+	}
+
 	inline void to_json(nlohmann::json& j, const EngineSettingsData& data) {
 		j = nlohmann::json{
 			{"editor", data.editor},
+			{"graphics", data.graphics},
 			{"manipulator", data.manipulator},
 		};
 	}
@@ -49,6 +65,11 @@ namespace CalyxEngine{
 			data.editor = editor->get<EditorSettings>();
 		} else {
 			data.editor = defaults.editor;
+		}
+		if(const auto graphics = j.find("graphics"); graphics != j.end() && graphics->is_object()) {
+			data.graphics = graphics->get<GraphicsSettings>();
+		} else {
+			data.graphics = defaults.graphics;
 		}
 		if(const auto manipulator = j.find("manipulator"); manipulator != j.end() && manipulator->is_object()) {
 			data.manipulator = manipulator->get<ManipulatorSettings>();

@@ -7,6 +7,7 @@
 #include <Data/Engine/Configs/Scene/Objects/Particle/Module/ModuleConfigFactory.h>
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Foundation/Math/Vector4.h>
+#include <Engine/Foundation/Math/Quaternion.h>
 #include <Engine/Objects/3D/Details/BillboardParams.h>
 #include <engine/Foundation/Utility/Guid/Guid.h>
 #include <externals/nlohmann/json.hpp>
@@ -14,11 +15,87 @@
 #include <vector>
 
 namespace CalyxEngine {
+	struct DirectionConfig {
+		bool enabled = false;
+		Vector3ParamConfig vector;
+		FxFloatParamConfig speed;
+		bool rotateToDirection = false;
+
+		DirectionConfig() {
+			vector.constant = CalyxEngine::Vector3(0.0f,1.0f,0.0f);
+			vector.min = CalyxEngine::Vector3(-1.0f,0.0f,-1.0f);
+			vector.max = CalyxEngine::Vector3(1.0f,0.0f,1.0f);
+			speed.constant = 1.0f;
+			speed.min = 0.0f;
+			speed.max = 1.0f;
+		}
+	};
+
+	inline void to_json(nlohmann::json& j,const DirectionConfig& c) {
+		j = nlohmann::json{
+			{"enabled",c.enabled},
+			{"vector",c.vector},
+			{"speed",c.speed},
+			{"rotateToDirection",c.rotateToDirection}};
+	}
+
+	inline void from_json(const nlohmann::json& j,DirectionConfig& c) {
+		c.enabled = j.value("enabled",false);
+		if(auto it = j.find("vector"); it != j.end() && !it->is_null()) {
+			c.vector = it->get<Vector3ParamConfig>();
+		}
+		if(auto it = j.find("speed"); it != j.end() && !it->is_null()) {
+			c.speed = it->get<FxFloatParamConfig>();
+		}
+		c.rotateToDirection = j.value("rotateToDirection",false);
+	}
+
+	inline Vector3ParamConfig ReadSpinConfig(const nlohmann::json& j,const Vector3ParamConfig& fallback) {
+		Vector3ParamConfig result = fallback;
+
+		auto readSpinValue = [](const nlohmann::json& value,CalyxEngine::Vector3& out) {
+			if(value.is_number()) {
+				out = CalyxEngine::Vector3(0.0f,0.0f,value.get<float>());
+			} else {
+				out = value.get<CalyxEngine::Vector3>();
+			}
+		};
+
+		if(j.is_null()) return result;
+		if(j.is_number()) {
+			result.mode = FxValueMode::Constant;
+			result.constant = CalyxEngine::Vector3(0.0f,0.0f,j.get<float>());
+			return result;
+		}
+
+		if(!j.is_object()) return j.get<Vector3ParamConfig>();
+
+		if(auto it = j.find("mode"); it != j.end() && !it->is_null()) {
+			result.mode = it->get<FxValueMode>();
+		}
+		if(auto it = j.find("constant"); it != j.end() && !it->is_null()) {
+			readSpinValue(*it,result.constant);
+		}
+		if(auto it = j.find("min"); it != j.end() && !it->is_null()) {
+			readSpinValue(*it,result.min);
+		}
+		if(auto it = j.find("max"); it != j.end() && !it->is_null()) {
+			readSpinValue(*it,result.max);
+		}
+
+		return result;
+	}
+
 	struct EmitterConfig {
+		Vector3 offset;
 		CalyxEngine::Vector3 position{};
+		CalyxEngine::Quaternion rotation = CalyxEngine::Quaternion::MakeIdentity();
+		CalyxEngine::Vector3 worldScale{1.0f, 1.0f, 1.0f};
 		CalyxEngine::Vector4 color{1.0f, 1.0f, 1.0f, 1.0f};
 		Vector3ParamConfig scale;
 		Vector3ParamConfig velocity;
+		DirectionConfig direction;
+		Vector3ParamConfig spin;
 		FxFloatParamConfig lifetime;
 
 		float		emitRate	= 0.1f;
@@ -52,15 +129,28 @@ namespace CalyxEngine {
 
 		std::vector<std::unique_ptr<BaseModuleConfig>> modules;
 
+		EmitterConfig() {
+			spin.constant = CalyxEngine::Vector3(0.0f,0.0f,0.0f);
+			spin.min = CalyxEngine::Vector3(0.0f,0.0f,0.0f);
+			spin.max = CalyxEngine::Vector3(0.0f,0.0f,0.0f);
+		}
+
 		void		   FromJson(const nlohmann::json& j);
 		nlohmann::json ToJson() const;
 	};
 
 	inline void EmitterConfig::FromJson(const nlohmann::json& j) {
+		offset = j.value("offset", Vector3(0.0f,0.0f,0.0f));
 		position	   = j.value("position", CalyxEngine::Vector3{0, 0, 0});
+		rotation	   = j.value("rotation", j.value("worldRotation", CalyxEngine::Quaternion::MakeIdentity()));
+		worldScale	   = j.value("worldScale", CalyxEngine::Vector3{1.0f, 1.0f, 1.0f});
 		scale		   = j.value("scale", Vector3ParamConfig{});
 		color		   = j.value("color", CalyxEngine::Vector4{1, 1, 1, 1});
 		velocity	   = j.value("velocity", Vector3ParamConfig{});
+		direction	   = j.value("direction", DirectionConfig{});
+		if(auto it = j.find("spin"); it != j.end() && !it->is_null()) {
+			spin = ReadSpinConfig(*it,spin);
+		}
 		lifetime	   = j.value("lifetime", FxFloatParamConfig{});
 		emitRate	   = j.value("emitRate", 1.0f);
 		modelPath	   = j.value("modelPath", "plane.obj");
@@ -117,9 +207,14 @@ namespace CalyxEngine {
 
 	inline nlohmann::json EmitterConfig::ToJson() const {
 		nlohmann::json j;
+		j["offset"]			= offset;
 		j["position"]		= position;
+		j["rotation"]		= rotation;
+		j["worldScale"]		= worldScale;
 		j["color"]			= color;
 		j["velocity"]		= velocity;
+		j["direction"]		= direction;
+		j["spin"]			= spin;
 		j["scale"]			= scale;
 		j["lifetime"]		= lifetime;
 		j["emitRate"]		= emitRate;

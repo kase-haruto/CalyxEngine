@@ -1,6 +1,7 @@
 #include "DxCore.h"
 
 #include <Engine/Application/System/Environment.h>
+#include <Engine/Editor/AssetPreviewManager.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
 #include <Engine/Graphics/RenderTarget/OffscreenRT/OffscreenRenderTarget.h>
 #include <Engine/Graphics/RenderTarget/SwapChainRT/SwapChainRenderTarget.h>
@@ -17,12 +18,16 @@
 #pragma comment(lib, "dxcompiler.lib")
 
 namespace CalyxEngine {
-	
+
 	DxCore::~DxCore() {
 		ReleaseResources();
 	}
 
 	void DxCore::ReleaseResources() {
+		if(auto* previews = AssetPreviewManager::GetInstance()) {
+			previews->Shutdown();
+		}
+		renderTargetCollection_.reset();
 		dxSwapChain_.reset();
 		dxFence_.reset();
 		dxCommand_.reset();
@@ -57,9 +62,14 @@ namespace CalyxEngine {
 		swapchainRT->SetRenderTargetType(RenderTargetType::BackBuffer);
 		renderTargetCollection_->Add("BackBuffer", std::move(swapchainRT));
 
-		// Offscreen
+		// Offscreen (MRT: SceneColor + EmissiveBloomMask)
 		auto offscreenRT = std::make_unique<OffscreenRenderTarget>();
-		offscreenRT->Initialize(device.Get(), width, height, format_, DescriptorAllocator::Allocate(DescriptorUsage::Rtv), DescriptorAllocator::Allocate(DescriptorUsage::Dsv));
+		std::vector<DXGI_FORMAT> offscreenFormats = {DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_R16G16B16A16_FLOAT};
+		std::vector<DescriptorHandle> offscreenRtvHandles = {
+			DescriptorAllocator::Allocate(DescriptorUsage::Rtv),
+			DescriptorAllocator::Allocate(DescriptorUsage::Rtv)
+		};
+		offscreenRT->InitializeMRT(device.Get(), width, height, offscreenFormats, offscreenRtvHandles, DescriptorAllocator::Allocate(DescriptorUsage::Dsv));
 		offscreenRT->SetRenderTargetType(RenderTargetType::Offscreen);
 		renderTargetCollection_->Add("Offscreen", std::move(offscreenRT));
 
@@ -74,6 +84,11 @@ namespace CalyxEngine {
 		debugRT->Initialize(device.Get(), width, height, format_, DescriptorAllocator::Allocate(DescriptorUsage::Rtv), DescriptorAllocator::Allocate(DescriptorUsage::Dsv));
 		debugRT->SetRenderTargetType(RenderTargetType::DebugView);
 		renderTargetCollection_->Add("DebugView", std::move(debugRT));
+
+		auto assetPreviewRT = std::make_unique<OffscreenRenderTarget>();
+		assetPreviewRT->Initialize(device.Get(), 256, 256, format_, DescriptorAllocator::Allocate(DescriptorUsage::Rtv), DescriptorAllocator::Allocate(DescriptorUsage::Dsv));
+		assetPreviewRT->SetRenderTargetType(RenderTargetType::Offscreen);
+		renderTargetCollection_->Add("AssetPreview", std::move(assetPreviewRT));
 
 		// Ping-Pong Buffers
 		auto postBuffer1 = std::make_unique<OffscreenRenderTarget>();
@@ -140,14 +155,17 @@ namespace CalyxEngine {
 		dxSwapChain_->Present();
 		dxFence_->Signal(dxCommand_->GetCommandQueue());
 		dxFence_->Wait();
+		if(auto* previews = AssetPreviewManager::GetInstance()) {
+			previews->ReleaseFrameResources();
+		}
 		dxCommand_->Reset();
 	}
 
 	void DxCore::Resize(uint32_t width, uint32_t height) {
-		if (width == 0 || height == 0) return;
-		if (width == clientWidth_ && height == clientHeight_) return;
+		if(width == 0 || height == 0) return;
+		if(width == clientWidth_ && height == clientHeight_) return;
 
-		clientWidth_ = width;
+		clientWidth_  = width;
 		clientHeight_ = height;
 
 		// GPUの完了を待つ
@@ -163,8 +181,12 @@ namespace CalyxEngine {
 		// スワップチェーンをリサイズ (内部で古いバックバッファを解放する)
 		dxSwapChain_->Resize(width, height);
 
-		// 全てのレンダーターゲットをリサイズ
-		for (auto& pair : renderTargetCollection_->GetMap()) {
+		// SwapChain に直結する BackBuffer だけをウィンドウサイズへ追従する。
+		// Offscreen / PostEffect / DebugView は各 Viewport の実描画サイズへ描画直前に追従する。
+		for(auto& pair : renderTargetCollection_->GetMap()) {
+			if(pair.first != "BackBuffer") {
+				continue;
+			}
 			pair.second->Resize(width, height);
 		}
 	}
@@ -175,5 +197,5 @@ namespace CalyxEngine {
 		// ImGui::End();
 #endif // _DEBUG
 	}
-	
+
 } // namespace CalyxEngine

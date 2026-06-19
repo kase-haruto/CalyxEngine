@@ -40,7 +40,7 @@ public:
 	//===================================================================*/
 	//			public methods
 	//===================================================================*/
-	virtual ~BaseModel() = default;
+	virtual ~BaseModel();
 
 	virtual void Initialize() = 0;
 	virtual void Update(float deltaTime);
@@ -86,6 +86,8 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetInstanceSrv()const;  //< VS:t0 (gTransMat)
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTexSrv()const;       //< PS:t0 (gTexture)
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTexSrv(size_t materialIndex)const;
+	D3D12_GPU_DESCRIPTOR_HANDLE GetNormalMapSrv() const;
+	D3D12_GPU_DESCRIPTOR_HANDLE GetNormalMapSrv(size_t materialIndex) const;
 	D3D12_GPU_DESCRIPTOR_HANDLE GetMaterialGraphTextureSrvTable(size_t materialIndex) const;
 	D3D12_GPU_DESCRIPTOR_HANDLE GetEnvMapSrv()const;    //< PS:t1 (gEnvironmentMap)
 	const Material& GetMaterialForBatch() const { return currentMaterial_; }
@@ -111,11 +113,12 @@ protected:
 
 	std::optional<D3D12_GPU_DESCRIPTOR_HANDLE> handle_{};
 	std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> materialTextureHandles_;
+	std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> materialNormalTextureHandles_;
 	mutable std::vector<DescriptorHandle> materialGraphTextureTables_;
 
 	std::string fileName_;
 	std::string textureName_ = "textures/white1x1.dds"; // デフォルトのテクスチャ名
-	ModelData* modelData_;
+	ModelData* modelData_ = nullptr;
 	Guid materialGuid_;
 	std::optional<CalyxEngine::Vector4> colorOverride_;
 public:

@@ -28,14 +28,18 @@ namespace {
 /////////////////////////////////////////////////////////////////////////////////////////
 //	コンストラクタ
 /////////////////////////////////////////////////////////////////////////////////////////
-void EulerTransform::ShowImGui(const std::string& label) {
-	ImGui::SeparatorText(label.c_str());
+void EulerTransform::ShowImGui(const std::string& label, bool defaultOpen) {
+	const ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth | (defaultOpen ? ImGuiTreeNodeFlags_DefaultOpen : 0);
+	if(!ImGui::TreeNodeEx(label.c_str(), flags)) {
+		return;
+	}
 	std::string scaleLabel		 = label + "_scale";
 	std::string rotationLabel	 = label + "_rotation";
 	std::string translationLabel = label + "_translate";
 	GuiCmd::DragFloat3(scaleLabel.c_str(), scale);
 	GuiCmd::DragFloat3(rotationLabel.c_str(), rotate);
 	GuiCmd::DragFloat3(translationLabel.c_str(), translate);
+	ImGui::TreePop();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -59,7 +63,7 @@ void BaseTransform::Initialize() {
 void BaseTransform::ShowImGui(const std::string& label) {
 	std::string nodeLabel = label + "##node";
 	// 小さめの折りたたみ見出しとして TreeNodeEx を使用
-	if(ImGui::TreeNodeEx(nodeLabel.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
+	if(ImGui::TreeNodeEx(nodeLabel.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth)) {
 		if(GuiCmd::ColoredDragFloat3("Scale", scale, 0.01f)) {}
 
 		if(GuiCmd::ColoredDragFloat3("Rotation", eulerRotation, 0.1f, -360.0f, 360.0f, "%.1f", "°")) {
@@ -564,10 +568,11 @@ CalyxEngine::Matrix4x4 Transform2D::GetMatrix() const {
 /* ========================================================================
 /* Transform2D class
 /* ===================================================================== */
-void Transform2D::ShowImGui(const std::string& lavel) {
+void Transform2D::ShowImGui(const std::string& lavel, bool defaultOpen) {
 	std::string nodeLabel = lavel + "_tabbar";
 
-	if(ImGui::TreeNodeEx(nodeLabel.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
+	const ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth | (defaultOpen ? ImGuiTreeNodeFlags_DefaultOpen : 0);
+	if(ImGui::TreeNodeEx(nodeLabel.c_str(), flags)) {
 		if(GuiCmd::DragFloat2("scale", scale, 0.01f)) {}
 
 		if(GuiCmd::DragFloat("rotation", rotate, 0.01f)) {}
@@ -586,8 +591,9 @@ Transform2DConfig Transform2D::ExtractConfig() const {
 	return config;
 }
 
-void Transform2D::ShowImGui(Transform2DConfig& config, const std::string& lavel) {
-	if(ImGui::TreeNodeEx(lavel.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
+void Transform2D::ShowImGui(Transform2DConfig& config, const std::string& lavel, bool defaultOpen) {
+	const ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth | (defaultOpen ? ImGuiTreeNodeFlags_DefaultOpen : 0);
+	if(ImGui::TreeNodeEx(lavel.c_str(), flags)) {
 		if(GuiCmd::DragFloat2("scale", config.scale, 0.01f)) {}
 
 		if(GuiCmd::DragFloat("rotation", config.rotation, 0.01f)) {}

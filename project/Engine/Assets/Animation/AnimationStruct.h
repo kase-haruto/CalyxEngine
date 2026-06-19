@@ -5,6 +5,7 @@
 // engine
 #include <Engine/Objects/Transform/Transform.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
+#include <Engine/Graphics/Descriptor/DescriptorAllocator.h>
 
 // math
 #include <Engine/Foundation/Math/Quaternion.h>
@@ -137,6 +138,7 @@ struct SkinCluster {
 	Microsoft::WRL::ComPtr<ID3D12Resource>paletteResource;
 	std::span<WellForGPU>mappedPalette;
 	std::pair<D3D12_CPU_DESCRIPTOR_HANDLE, D3D12_GPU_DESCRIPTOR_HANDLE> paletteSrvHandle;
+	DescriptorHandle paletteSrvDescriptor;
 };
 
 struct AnimationState {

@@ -1,4 +1,5 @@
 #include "PostEffectManager.h"
+#include <CalyxEngine/Project.h>
 #include <Engine/Foundation/Debug/CxAssert.h>
 
 // engine
@@ -251,7 +252,7 @@ bool PostEffectManager::SavePreset(const std::string& filePath, const std::strin
 	}
 
 	try{
-		std::filesystem::path path(filePath);
+		std::filesystem::path path(Calyx::ResolveAssetPath(filePath));
 		FileSystemHelper::CreateDirectoryPath(path.parent_path().string());
 		std::ofstream ofs(path);
 		if(!ofs) return false;
@@ -267,7 +268,7 @@ bool PostEffectManager::LoadPreset(const std::string& filePath){
 
 	nlohmann::json root;
 	try{
-		std::ifstream ifs(filePath);
+		std::ifstream ifs(Calyx::ResolveAssetPath(filePath));
 		if(!ifs) return false;
 		ifs >> root;
 	}catch(...){
@@ -505,7 +506,7 @@ void PostEffectManager::DrawImGui(){
 	if (!initialized_) return;
 	auto& slots = collection_.GetSlots();
 
-	static char presetPath[256] = "Resources/Assets/PostEffects/Default.postfx";
+	static char presetPath[256] = "PostEffects/Default.postfx";
 	ImGui::SetNextItemWidth(360.0f);
 	ImGui::InputText("Preset Path", presetPath, sizeof(presetPath));
 	if(ImGui::Button("Save Preset")){ SavePreset(presetPath, "PostEffectPreset"); }
@@ -568,7 +569,7 @@ void PostEffectManager::DrawImGui(){
 			ImGui::Checkbox("Auto Disable", &s.autoDisable);
 
 			if(s.pass && ImGui::TreeNode("Float Animations")){
-				const char* candidates[] = {"width", "intensity", "strength", "radius", "center.x", "center.y"};
+				const char* candidates[] = {"width", "intensity", "threshold", "softKnee", "strength", "radius", "center.x", "center.y", "tint.r", "tint.g", "tint.b"};
 				if(ImGui::BeginCombo("Add Parameter", "select")){
 					for(const char* param : candidates){
 						float tmp = 0.0f;

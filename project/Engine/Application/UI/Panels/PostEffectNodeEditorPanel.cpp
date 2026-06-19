@@ -1,5 +1,6 @@
 #include "PostEffectNodeEditorPanel.h"
 
+#include <CalyxEngine/Project.h>
 #include <Engine/PostProcess/Manager/PostEffectManager.h>
 #include <Engine/PostProcess/Slot/PostEffectSlot.h>
 #include <Engine/Foundation/Utility/FileSystem/FileSystemHelper.h>
@@ -13,21 +14,27 @@
 
 namespace CalyxEngine {
 	namespace {
-		constexpr const char* kDefaultPath = "Resources/Assets/PostEffects/Default.postfx";
+		constexpr const char* kDefaultPath = "PostEffects/Default.postfx";
 		constexpr const char* kEffectTypes[] = {
 			"RadialBlur",
 			"ChromaticAberration",
 			"Vignette",
 			"CRTEffect",
+			"Bloom",
 			"Blend"
 		};
 		constexpr const char* kFloatParams[] = {
 			"width",
 			"intensity",
+			"threshold",
+			"softKnee",
 			"strength",
 			"radius",
 			"center.x",
 			"center.y",
+			"tint.r",
+			"tint.g",
+			"tint.b",
 			"opacity",
 			"mode"
 		};
@@ -37,6 +44,7 @@ namespace CalyxEngine {
 			if(type == "ChromaticAberration") return {{"intensity", 0.0f}};
 			if(type == "Vignette") return {{"strength", 1.0f}, {"radius", 0.0f}};
 			if(type == "CRTEffect") return {{"screenSize", {1280.0f, 720.0f}}};
+			if(type == "Bloom") return {{"intensity", 0.7f}, {"threshold", 0.8f}, {"softKnee", 0.5f}, {"radius", 1.0f}, {"tint", {1.0f, 1.0f, 1.0f}}};
 			if(type == "Blend") return {{"opacity", 0.5f}, {"mode", 0}};
 			return nlohmann::json::object();
 		}
@@ -70,6 +78,16 @@ namespace CalyxEngine {
 				return std::string(parameter) == "strength" ||
 					   std::string(parameter) == "radius";
 			}
+			if(nodeType == "Bloom") {
+				const std::string name(parameter);
+				return name == "intensity" ||
+					   name == "threshold" ||
+					   name == "softKnee" ||
+					   name == "radius" ||
+					   name == "tint.r" ||
+					   name == "tint.g" ||
+					   name == "tint.b";
+			}
 			if(nodeType == "Blend") {
 				return std::string(parameter) == "opacity";
 			}
@@ -80,7 +98,8 @@ namespace CalyxEngine {
 	PostEffectNodeEditorPanel::PostEffectNodeEditorPanel()
 		: IEngineUI("Post Effect Graph"), canvas_("PostEffectGraphCanvas") {
 		isShow_ = false;
-		std::copy_n(kDefaultPath, (std::min)(strlen(kDefaultPath), pathBuffer_.size() - 1), pathBuffer_.data());
+		const std::string defaultPath = Calyx::ResolveAssetPath(kDefaultPath).generic_string();
+		std::copy_n(defaultPath.c_str(), (std::min)(defaultPath.size(), pathBuffer_.size() - 1), pathBuffer_.data());
 		EnsureIoNodes();
 	}
 
@@ -236,6 +255,8 @@ namespace CalyxEngine {
 			ImGui::TextDisabled("intensity %.2f", params.value("intensity", 0.0f));
 		} else if(node.type == "Vignette") {
 			ImGui::TextDisabled("strength %.2f", params.value("strength", 1.0f));
+		} else if(node.type == "Bloom") {
+			ImGui::TextDisabled("intensity %.2f", params.value("intensity", 0.7f));
 		} else if(node.type == "Blend") {
 			ImGui::TextDisabled("opacity %.2f", params.value("opacity", 0.5f));
 		}
@@ -360,6 +381,42 @@ namespace CalyxEngine {
 				changed = true;
 			}
 			HelpTooltip("Area before the vignette starts. Larger values keep more of the center unaffected.");
+		} else if(node.type == "Bloom") {
+			float intensity = params.value("intensity", 0.7f);
+			float threshold = params.value("threshold", 0.8f);
+			float softKnee = params.value("softKnee", 0.5f);
+			float radius = params.value("radius", 1.0f);
+			float tint[3] = {1.0f, 1.0f, 1.0f};
+			if(params.contains("tint") && params["tint"].is_array() && params["tint"].size() == 3) {
+				tint[0] = params["tint"][0].get<float>();
+				tint[1] = params["tint"][1].get<float>();
+				tint[2] = params["tint"][2].get<float>();
+			}
+			if(ImGui::DragFloat("Intensity", &intensity, 0.01f, 0.0f, 5.0f)) {
+				params["intensity"] = intensity;
+				changed = true;
+			}
+			HelpTooltip("Brightness added by the bloom pass.");
+			if(ImGui::DragFloat("Threshold", &threshold, 0.01f, -1.0f, 5.0f)) {
+				params["threshold"] = threshold;
+				changed = true;
+			}
+			HelpTooltip("Minimum source brightness that starts blooming. Lower values bloom more pixels.");
+			if(ImGui::DragFloat("Soft Knee", &softKnee, 0.01f, 0.0f, 2.0f)) {
+				params["softKnee"] = softKnee;
+				changed = true;
+			}
+			HelpTooltip("Soft transition around the threshold.");
+			if(ImGui::DragFloat("Radius", &radius, 0.01f, 0.0f, 4.0f)) {
+				params["radius"] = radius;
+				changed = true;
+			}
+			HelpTooltip("Spread of the bloom blur.");
+			if(ImGui::ColorEdit3("Tint", tint)) {
+				params["tint"] = {tint[0], tint[1], tint[2]};
+				changed = true;
+			}
+			HelpTooltip("Color multiplier for the bloom contribution.");
 		} else if(node.type == "Blend") {
 			float opacity = params.value("opacity", 0.5f);
 			int blendMode = params.value("mode", 0);
@@ -604,7 +661,7 @@ namespace CalyxEngine {
 
 	void PostEffectNodeEditorPanel::Save() {
 		try {
-			std::filesystem::path path(pathBuffer_.data());
+			std::filesystem::path path = Calyx::ResolveAssetPath(pathBuffer_.data());
 			FileSystemHelper::CreateDirectoryPath(path.parent_path().string());
 			std::ofstream ofs(path);
 			if(!ofs) return;
@@ -615,7 +672,7 @@ namespace CalyxEngine {
 
 	void PostEffectNodeEditorPanel::Load() {
 		try {
-			std::ifstream ifs(pathBuffer_.data());
+			std::ifstream ifs(Calyx::ResolveAssetPath(pathBuffer_.data()));
 			if(!ifs) return;
 			nlohmann::json root;
 			ifs >> root;
@@ -626,6 +683,6 @@ namespace CalyxEngine {
 
 	void PostEffectNodeEditorPanel::Apply() {
 		Save();
-		PostEffectManager::Get()->LoadPreset(pathBuffer_.data());
+		PostEffectManager::Get()->LoadPreset(Calyx::ResolveAssetPath(pathBuffer_.data()).generic_string());
 	}
 }

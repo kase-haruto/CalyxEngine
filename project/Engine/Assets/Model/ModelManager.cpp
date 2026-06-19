@@ -1,6 +1,7 @@
 #include "ModelManager.h"
 
 // engine
+#include <CalyxEngine/Project.h>
 #include "Engine/Foundation/Math/MathUtil.h"
 #include "Engine/Graphics/Context/GraphicsGroup.h"
 #include <Engine/Graphics/Buffer/DxIndexBuffer.h>
@@ -12,6 +13,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
+#include <cmath>
 #include <filesystem>
 #include <sstream>
 
@@ -86,7 +88,7 @@ void ModelManager::WorkerMain() {
 		}
 
 		// CPUロード
-		ModelData model = LoadModelFile(directoryPath_, currentRequest.fileName);
+		ModelData model = LoadModelFile(GetModelDirectoryPath().generic_string(), currentRequest.fileName);
 
 		// unique_ptr に包む
 		auto modelPtr = std::make_unique<ModelData>(std::move(model));
@@ -200,9 +202,11 @@ std::vector<std::string> ModelManager::GetLoadedModelNames() const {
 //	ファイルを走破してすべてのモデルファイルをload
 //=============================================================================
 void ModelManager::LoadAllModels() {
+	const auto modelDirectory = GetModelDirectoryPath();
+
 	// ファイルを走破してモデルをロードする なければエラーをはく
-	if(!CalyxEngine::FileScanner::EnsureDirectoryExists(directoryPath_)) {
-		throw std::runtime_error("Model directory does not exist: " + directoryPath_);
+	if(!CalyxEngine::FileScanner::EnsureDirectoryExists(modelDirectory.generic_string())) {
+		throw std::runtime_error("Model directory does not exist: " + modelDirectory.generic_string());
 	}
 	
 	// Assimでサポートされているモデル形式の拡張子
@@ -213,7 +217,7 @@ void ModelManager::LoadAllModels() {
 	};
 	
 	// ディレクトリ内のすべてのファイルをスキャン
-	auto allFiles = CalyxEngine::FileScanner::ScanFiles(directoryPath_, "");
+	auto allFiles = CalyxEngine::FileScanner::ScanFiles(modelDirectory.generic_string(), "");
 	
 	for(const auto& filePath : allFiles) {
 		std::string ext = filePath.extension().string();
@@ -238,6 +242,13 @@ void ModelManager::LoadAllModels() {
 			LoadModel(fileName);
 		}
 	}
+}
+
+//=============================================================================
+//	現在プロジェクトのモデルディレクトリを取得
+//=============================================================================
+std::filesystem::path ModelManager::GetModelDirectoryPath() const {
+	return Calyx::ResolveAssetPath("models");
 }
 
 //=============================================================================
@@ -276,6 +287,7 @@ ModelData ModelManager::LoadModelFile(const std::string& directoryPath, const st
 	// メッシュデータを格納
 	for(unsigned int meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
 		const aiMesh* mesh = scene->mMeshes[meshIndex];
+		uint32_t	  baseVertex = static_cast<uint32_t>(modelData.meshResource.Vertices().size());
 		LoadMesh(mesh, modelData);
 
 		// ボーンごとの影響を集約
@@ -294,7 +306,7 @@ ModelData ModelManager::LoadModelFile(const std::string& directoryPath, const st
 			jointWeightData.inverseBindPoseMatrix = CalyxEngine::Matrix4x4::Inverse(bindPoseMatrix);
 
 			for(uint32_t weightIndex = 0; weightIndex < bone->mNumWeights; ++weightIndex) {
-				jointWeightData.vertexWeights.push_back({bone->mWeights[weightIndex].mWeight, bone->mWeights[weightIndex].mVertexId});
+				jointWeightData.vertexWeights.push_back({bone->mWeights[weightIndex].mWeight,baseVertex+ bone->mWeights[weightIndex].mVertexId});
 			}
 		}
 	}
@@ -386,6 +398,14 @@ void ModelManager::LoadMesh(const aiMesh* mesh, ModelData& modelData) {
 		if(mesh->HasNormals()) {
 			vertex.normal = {-mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z};
 		}
+		if(mesh->HasTangentsAndBitangents()) {
+			CalyxEngine::Vector3 tangent{-mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z};
+			const CalyxEngine::Vector3 bitangent{-mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z};
+			const float handedness = CalyxEngine::Vector3::Dot(
+				CalyxEngine::Vector3::Cross(vertex.normal, tangent), bitangent) < 0.0f ? -1.0f : 1.0f;
+			tangent = (tangent - vertex.normal * CalyxEngine::Vector3::Dot(vertex.normal, tangent)).Normalize();
+			vertex.tangent = {tangent.x, tangent.y, tangent.z, handedness};
+		}
 		if(mesh->HasTextureCoords(0)) {
 			vertex.texcoord.x = mesh->mTextureCoords[0][i].x;
 			vertex.texcoord.y = mesh->mTextureCoords[0][i].y;
@@ -403,6 +423,54 @@ void ModelManager::LoadMesh(const aiMesh* mesh, ModelData& modelData) {
 		modelData.meshResource.data.indices.push_back(baseVertex + face.mIndices[0]);
 		modelData.meshResource.data.indices.push_back(baseVertex + face.mIndices[2]);
 		modelData.meshResource.data.indices.push_back(baseVertex + face.mIndices[1]);
+	}
+
+	std::vector<CalyxEngine::Vector3> tangentAccum(mesh->mNumVertices, CalyxEngine::Vector3::Zero());
+	std::vector<CalyxEngine::Vector3> bitangentAccum(mesh->mNumVertices, CalyxEngine::Vector3::Zero());
+	for(uint32_t i = indexStart; i + 2 < modelData.meshResource.Indices().size(); i += 3) {
+		const uint32_t i0 = modelData.meshResource.Indices()[i + 0] - baseVertex;
+		const uint32_t i1 = modelData.meshResource.Indices()[i + 1] - baseVertex;
+		const uint32_t i2 = modelData.meshResource.Indices()[i + 2] - baseVertex;
+		if(i0 >= mesh->mNumVertices || i1 >= mesh->mNumVertices || i2 >= mesh->mNumVertices) continue;
+
+		auto& v0 = modelData.meshResource.data.vertices[baseVertex + i0];
+		auto& v1 = modelData.meshResource.data.vertices[baseVertex + i1];
+		auto& v2 = modelData.meshResource.data.vertices[baseVertex + i2];
+
+		const CalyxEngine::Vector3 p0{v0.position.x, v0.position.y, v0.position.z};
+		const CalyxEngine::Vector3 p1{v1.position.x, v1.position.y, v1.position.z};
+		const CalyxEngine::Vector3 p2{v2.position.x, v2.position.y, v2.position.z};
+
+		const CalyxEngine::Vector3 e1 = p1 - p0;
+		const CalyxEngine::Vector3 e2 = p2 - p0;
+		const float du1 = v1.texcoord.x - v0.texcoord.x;
+		const float dv1 = v1.texcoord.y - v0.texcoord.y;
+		const float du2 = v2.texcoord.x - v0.texcoord.x;
+		const float dv2 = v2.texcoord.y - v0.texcoord.y;
+		const float det = du1 * dv2 - du2 * dv1;
+		if(std::abs(det) < 1.0e-8f) continue;
+
+		const float invDet = 1.0f / det;
+		const CalyxEngine::Vector3 tangent = (e1 * dv2 - e2 * dv1) * invDet;
+		const CalyxEngine::Vector3 bitangent = (e2 * du1 - e1 * du2) * invDet;
+		tangentAccum[i0] += tangent;
+		tangentAccum[i1] += tangent;
+		tangentAccum[i2] += tangent;
+		bitangentAccum[i0] += bitangent;
+		bitangentAccum[i1] += bitangent;
+		bitangentAccum[i2] += bitangent;
+	}
+
+	for(unsigned int i = 0; i < mesh->mNumVertices; ++i) {
+		auto& vertex = modelData.meshResource.data.vertices[baseVertex + i];
+		if(tangentAccum[i].LengthSquared() <= 1.0e-8f) continue;
+
+		const CalyxEngine::Vector3 n = vertex.normal.Normalize();
+		CalyxEngine::Vector3 tangent = tangentAccum[i];
+		tangent = (tangent - n * CalyxEngine::Vector3::Dot(n, tangent)).Normalize();
+		const float handedness = CalyxEngine::Vector3::Dot(
+			CalyxEngine::Vector3::Cross(n, tangent), bitangentAccum[i]) < 0.0f ? -1.0f : 1.0f;
+		vertex.tangent = {tangent.x, tangent.y, tangent.z, handedness};
 	}
 
 	const uint32_t indexCount = static_cast<uint32_t>(modelData.meshResource.Indices().size()) - indexStart;
@@ -445,9 +513,9 @@ void ModelManager::LoadMaterials(const aiScene* scene, const std::filesystem::pa
 
 	auto resolveTexturePath = [&](const aiString& texPath) -> std::string {
 		std::error_code ec;
-		std::filesystem::path assetRoot = std::filesystem::weakly_canonical("Resources/Assets", ec);
+		std::filesystem::path assetRoot = std::filesystem::weakly_canonical(Calyx::GetAssetRoot(), ec);
 		if(ec) {
-			assetRoot = std::filesystem::path("Resources/Assets");
+			assetRoot = Calyx::GetAssetRoot();
 			ec.clear();
 		}
 		std::filesystem::path path(normalizeTexturePath(texPath));
@@ -486,6 +554,11 @@ void ModelManager::LoadMaterials(const aiScene* scene, const std::filesystem::pa
 			aiString texPath;
 			if(material->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) == AI_SUCCESS) {
 				materialData.textureFilePath = resolveTexturePath(texPath);
+			}
+			aiString normalTexPath;
+			if(material->GetTexture(aiTextureType_NORMALS, 0, &normalTexPath) == AI_SUCCESS ||
+			   material->GetTexture(aiTextureType_HEIGHT, 0, &normalTexPath) == AI_SUCCESS) {
+				materialData.normalTextureFilePath = resolveTexturePath(normalTexPath);
 			}
 			LoadUVTransform(material, materialData);
 		}

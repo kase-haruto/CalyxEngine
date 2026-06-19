@@ -20,6 +20,7 @@ BaseScene::BaseScene() {
 	spriteRenderer_	 = std::make_unique<SpriteRenderer>();
 	modelRenderer_	 = std::make_unique<ModelRenderer>();
 	outlineRenderer_ = std::make_unique<OutlineRenderer>();
+	debugOutlineRenderer_ = std::make_unique<OutlineRenderer>();
 }
 
 void BaseScene::Initialize() {}
@@ -52,11 +53,11 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 			switch(go->GetModelType()) {
 			case ObjectModelType::ModelType_Static:
 				if(auto* m = go->GetStaticModel())
-					modelRenderer_->RegisterStatic(m, go->GetWorldTransform(), go->GetBillboardMode(), go);
+					modelRenderer_->RegisterStatic(m, go->GetRenderWorldTransform(), go->GetBillboardMode(), go);
 				break;
 			case ObjectModelType::ModelType_Animation:
 				if(auto* m = go->AnimationModel())
-					modelRenderer_->RegisterSkinned(m, go->GetWorldTransform(), go);
+					modelRenderer_->RegisterSkinned(m, go->GetRenderWorldTransform(), go);
 				break;
 			default:
 				break;
@@ -75,7 +76,7 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 #endif
 	}
 
-	const Camera3d* renderCam = dynamic_cast<Camera3d*>(CameraManager::GetActive());
+	Camera3d* renderCam = dynamic_cast<Camera3d*>(CameraManager::GetActive());
 	if(!renderCam) {
 		renderCam = CameraManager::GetMain3d();
 	}
@@ -94,6 +95,8 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 	// =========================================================
 	// MainPass
 	// =========================================================
+	const bool cameraDitherEnabled = rt->GetRenderTargetType() != RenderTargetType::DebugView;
+	renderCam->SetCameraDitherEnabled(cameraDitherEnabled);
 	rt->SetRenderTarget(cmd);
 	modelRenderer_->DrawAll(cmd,
 							GraphicsGroup::GetInstance()->GetDevice().Get(),
@@ -105,26 +108,28 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 	sceneContext_->GetFxSystem()->Render(pso, cmd);
 
 	const bool outlineEnabled = PostEffectManager::Get()->IsOutlineEnabled();
+	OutlineRenderer* outlineRenderer =
+		rt->GetRenderTargetType() == RenderTargetType::DebugView ? debugOutlineRenderer_.get() : outlineRenderer_.get();
 
 	// OutlinePass
-	if(outlineEnabled) {
-		outlineRenderer_->Render(cmd,
-								 GraphicsGroup::GetInstance()->GetDevice().Get(),
-								 rt,
-								 pso,
-								 renderCam,
-								 *modelRenderer_);
+	if(outlineEnabled && outlineRenderer) {
+		outlineRenderer->Render(cmd,
+								GraphicsGroup::GetInstance()->GetDevice().Get(),
+								rt,
+								pso,
+								renderCam,
+								*modelRenderer_);
 	}
 
 #if defined(_DEBUG) || defined(DEVELOP)
-	if(outlineEnabled && rt->GetRenderTargetType() == RenderTargetType::DebugView) {
-		outlineRenderer_->RenderSelectionHighlight(cmd,
-												   GraphicsGroup::GetInstance()->GetDevice().Get(),
-												   rt,
-												   pso,
-												   renderCam,
-												   *modelRenderer_,
-												   sceneContext_->GetDebugSelectedObjects());
+	if(outlineEnabled && outlineRenderer && rt->GetRenderTargetType() == RenderTargetType::DebugView) {
+		outlineRenderer->RenderSelectionHighlight(cmd,
+												  GraphicsGroup::GetInstance()->GetDevice().Get(),
+												  rt,
+												  pso,
+												  renderCam,
+												  *modelRenderer_,
+												  sceneContext_->GetDebugSelectedObjects());
 	}
 #endif
 

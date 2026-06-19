@@ -4,8 +4,9 @@
 /* ===================================================================== */
 
 /* engine */
+#include <CalyxEngine/Project.h>
 #include <Engine/Graphics/Descriptor/DescriptorAllocator.h>
-#include <Engine/Foundation/Utility/Func/MyFunc.h>
+#include <Engine/Foundation/Utility/Func/CxUtils.h>
 
 /* lib */
 #include <Engine/Foundation/Utility/Converter/ConvertString.h>
@@ -14,7 +15,7 @@
 #include <Engine/Foundation/Debug/CxAssert.h>
 #include <d3dx12.h>
 
-Texture::Texture(const std::string& filePath) : filePath_(filePath) {}
+Texture::Texture(const std::string& filePath, bool forceSrgb) : filePath_(filePath), forceSrgb_(forceSrgb) {}
 
 Texture::~Texture() {
 	// リソースの解放処理
@@ -23,6 +24,7 @@ Texture::~Texture() {
 
 Texture::Texture(Texture&& other) noexcept
 	: filePath_(std::move(other.filePath_)),
+	forceSrgb_(other.forceSrgb_),
 	image_(std::move(other.image_)),
 	metadata_(std::move(other.metadata_)),
 	resource_(std::move(other.resource_)),
@@ -35,6 +37,7 @@ Texture::Texture(Texture&& other) noexcept
 Texture& Texture::operator=(Texture&& other) noexcept {
 	if (this != &other) {
 		filePath_ = std::move(other.filePath_);
+		forceSrgb_ = other.forceSrgb_;
 		image_ = std::move(other.image_);
 		metadata_ = std::move(other.metadata_);
 		resource_ = std::move(other.resource_);
@@ -48,8 +51,7 @@ Texture& Texture::operator=(Texture&& other) noexcept {
 }
 
 void Texture::Load([[maybe_unused]] ID3D12Device* device) {
-	std::string fullPath = "Resources/Assets/" + filePath_;
-	image_ = LoadTextureImage(fullPath);
+	image_ = Cx::IO::LoadTextureImage(Calyx::ResolveAssetPath(filePath_).generic_string(), forceSrgb_);
 	metadata_ = image_.GetMetadata();
 }
 

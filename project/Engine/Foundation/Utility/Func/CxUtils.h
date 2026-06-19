@@ -57,7 +57,7 @@ namespace Cx {
 		[[nodiscard]] ModelData				LoadObjFile(const std::string& directory, const std::string& filename);
 		[[nodiscard]] MaterialData			LoadMaterialTemplateFile(const std::string& directory, const std::string& filename);
 		[[nodiscard]] Animation				LoadAnimationFile(const std::string& directory, const std::string& filename);
-		[[nodiscard]] DirectX::ScratchImage LoadTextureImage(const std::string& filePath);
+		[[nodiscard]] DirectX::ScratchImage LoadTextureImage(const std::string& filePath, bool forceSrgb = true);
 	} // namespace IO
 
 	namespace Anim {

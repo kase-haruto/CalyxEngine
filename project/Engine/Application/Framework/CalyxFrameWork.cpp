@@ -6,14 +6,19 @@
 #include <Engine/Application/Effects/FxSystem.h>
 #include <Engine/Application/System/Environment.h>
 #include <Engine/Application/UI/EngineUI/Core/EngineUICore.h>
+#include <Engine/Editor/AssetPreviewManager.h>
 #include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Foundation/Input/Input.h>
 #include <Engine/Scene/System/SceneManager.h>
+
+#include <CalyxEngine/Application.h>
+#include <CalyxEngine/SceneRegistry.h>
+
 namespace CalyxEngine {
 	////////////////////////////////////////////////////////////////////////////////
 	//  engine 初期化
 	////////////////////////////////////////////////////////////////////////////////
-	void CalyxFrameWork::Initialize(HINSTANCE hInstance) {
+	void CalyxFrameWork::Initialize(HINSTANCE hInstance, Calyx::Application* application) {
 		/* COM */
 		CoInitializeEx(0, COINIT_MULTITHREADED);
 
@@ -26,17 +31,22 @@ namespace CalyxEngine {
 		system_->InitializePostProcess(graphicsSystem_->GetPipelineService());
 
 		/* SceneManager */
-		sceneManager_ = std::make_unique<CalyxEngine::SceneManager>(system_->GetDxCore());
+		sceneManager_ = std::make_unique<SceneManager>(system_->GetDxCore());
 		sceneManager_->Initialize();
+		if(application) {
+			Calyx::SceneRegistry registry(*sceneManager_);
+			application->RegisterScenes(registry);
+			application->OnSceneManagerReady(*sceneManager_);
+		}
 
 		/* PlaySession  (EditorCtx は SceneManager が作ったシーン 0 のものを使う) */
-		playSession_ = std::make_unique<CalyxEngine::PlaySession>();
+		playSession_ = std::make_unique<PlaySession>();
 		playSession_->Initialize(sceneManager_->GetCurrentSceneContext());
 
 		sceneManager_->BindPlaySession(playSession_.get());
 
 		/* UI / Editor */
-		engineUICore_ = std::make_unique<CalyxEngine::EngineUICore>();
+		engineUICore_ = std::make_unique<EngineUICore>();
 		engineUICore_->Initialize();
 		system_->SetEngineUICore(engineUICore_.get());
 
@@ -45,44 +55,46 @@ namespace CalyxEngine {
 			lvl->SetSceneManager(sceneManager_.get());
 		}
 
-		editorCollection_ = std::make_unique<CalyxEngine::EditorCollection>();
+		editorCollection_ = std::make_unique<EditorCollection>();
 		editorCollection_->InitializeEditors();
 
 #if defined(_DEBUG) || defined(DEVELOP)
 		engineUICore_->SetCameraForViewport(CameraManager::GetMain3d(), CameraManager::GetDebug());
 #endif
-
-		livePPService_.Initialize();
 	}
 
 	////////////////////////////////////////////////////////////////////////////////
 	//  メインループ
 	////////////////////////////////////////////////////////////////////////////////
-	void CalyxFrameWork::Run() {
+	void CalyxFrameWork::Run(Calyx::Application* application) {
 		while(!system_->ProcessMessage()) {
-			if(!Update()) break;
-			Render();
-
+			if(!Update(application)) break;
+			Render(application);
+			if(CalyxFoundation::Input::TriggerKey(DIK_ESCAPE) ||
+			   sceneManager_->GetIsEndGame()) break;
 		}
 	}
 
 	////////////////////////////////////////////////////////////////////////////////
 	void CalyxFrameWork::Finalize() {
-		livePPService_.Finalize();
 		system_->Finalize();
 		CoUninitialize();
 	}
 
 	////////////////////////////////////////////////////////////////////////////////
-	bool CalyxFrameWork::Update() {
+	bool CalyxFrameWork::Update(Calyx::Application* application) {
 		float dt	   = ClockManager::GetInstance()->GetPlayerDeltaTime();
 		float alwaysDt = ClockManager::GetInstance()->GetDeltaTime();
 
 		BeginUpdate();
 
 		playSession_->Update();
+		if(application) {
+			application->OnUpdate();
+		}
 
 		sceneManager_->Update(dt, alwaysDt);
+		engineUICore_->SetEditorUiEnabled(application ? application->ShouldRenderEngineUi() : true);
 
 		EndUpdate();
 		return true;
@@ -99,13 +111,24 @@ namespace CalyxEngine {
 		sceneManager_->PostUpdate(graphicsSystem_->GetCommandList(), graphicsSystem_->GetPipelineService());
 
 		engineUICore_->Render();
-
-		livePPService_.Update();
 	}
 
 	////////////////////////////////////////////////////////////////////////////////
-	void CalyxFrameWork::Render() {
+	void CalyxFrameWork::Render(Calyx::Application* application) {
 		sceneManager_->Draw(graphicsSystem_->GetCommandList(), graphicsSystem_->GetPipelineService());
+		if(application) {
+			application->OnRender();
+		}
+
+		if(auto* previewTarget = system_->GetDxCore()->GetRenderTargetCollection().Get("AssetPreview")) {
+			if(auto* previews = AssetPreviewManager::GetInstance()) {
+				previews->ProcessRenderQueue(
+					graphicsSystem_->GetCommandList(),
+					graphicsSystem_->GetPipelineService(),
+					previewTarget,
+					1);
+			}
+		}
 
 		system_->ExecutePostEffect(graphicsSystem_->GetPipelineService());
 

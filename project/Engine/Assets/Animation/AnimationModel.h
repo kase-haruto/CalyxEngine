@@ -21,7 +21,7 @@ namespace CalyxEngine {
 		//===================================================================*/
 		AnimationModel() = default;
 		AnimationModel(const std::string& fileName);
-		~AnimationModel() override = default;
+		~AnimationModel() override;
 
 		void Initialize() override;
 		void Update(float dt) override;

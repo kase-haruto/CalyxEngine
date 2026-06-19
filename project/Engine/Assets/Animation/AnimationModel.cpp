@@ -1,4 +1,5 @@
 #include "AnimationModel.h"
+#include <CalyxEngine/Project.h>
 #include <Engine/Foundation/Debug/CxAssert.h>
 
 #include <Engine/Assets/Model/ModelData.h>
@@ -35,13 +36,19 @@ namespace CalyxEngine {
 		Map();
 
 		// メインアニメをロード
-		animationData_ = LoadAnimationFile("Resources/Assets/models", fileName_);
+		animationData_ = LoadAnimationFile(Calyx::ResolveAssetPath("models").generic_string(), fileName_);
 
 		// 初期ステートを登録
 		std::string	   base = std::filesystem::path(fileName).stem().string();
 		AnimationState st{base, animationData_};
 		animationStates_.emplace(base, st);
 		currentAnimation_ = &animationStates_.at(base);
+	}
+
+	AnimationModel::~AnimationModel() {
+		DescriptorAllocator::Free(DescriptorUsage::CbvSrvUav, sourceVertexSrv_);
+		DescriptorAllocator::Free(DescriptorUsage::CbvSrvUav, influenceSrv_);
+		DescriptorAllocator::Free(DescriptorUsage::CbvSrvUav, skinCluster_.paletteSrvDescriptor);
 	}
 
 	/* =====================================================================
@@ -115,7 +122,7 @@ namespace CalyxEngine {
 	void AnimationModel::AddAnimation(const std::string& name, const std::string& file) {
 		AnimationState st;
 		st.name		 = name;
-		st.animation = LoadAnimationFile("Resources/Assets/models", file);
+		st.animation = LoadAnimationFile(Calyx::ResolveAssetPath("models").generic_string(), file);
 		if(modelData_) BuildFastChannels(st.animation);
 		animationStates_.emplace(name, st);
 	}
@@ -571,6 +578,7 @@ namespace CalyxEngine {
 		cmdList->SetGraphicsRootDescriptorTable(2, GetTexSrv());
 		cmdList->SetGraphicsRootDescriptorTable(6, GetEnvMapSrv());
 		SetCommandPalletSrv(7, cmdList);
+		cmdList->SetGraphicsRootDescriptorTable(14, GetNormalMapSrv());
 
 		// 頂点バッファ/インデックスバッファをセット
 		BindVertexIndexBuffers(cmdList);
@@ -582,6 +590,7 @@ namespace CalyxEngine {
 		} else {
 			for(const auto& subMesh : subMeshes) {
 				cmdList->SetGraphicsRootDescriptorTable(2, GetTexSrv(subMesh.materialIndex));
+				cmdList->SetGraphicsRootDescriptorTable(14, GetNormalMapSrv(subMesh.materialIndex));
 				cmdList->DrawIndexedInstanced(subMesh.indexCount, 1, subMesh.indexStart, 0, 0);
 			}
 		}

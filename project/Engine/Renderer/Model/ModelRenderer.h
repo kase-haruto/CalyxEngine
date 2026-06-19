@@ -70,13 +70,20 @@ private:
 
 	struct StaticBatchItem {
 		BaseModel*							   model = nullptr; //< モデルデータ
+		bool								   cameraDitherEnabled = true;
 		std::vector<WorldTransform>			   transforms;		//< インスタンス用変換リスト
 		std::vector<GpuBillboardParams>		   billboards;		//< インスタンス用ビルボードパラメータ
 		DxStructuredBuffer<GpuBillboardParams> billboardSrv;	//< ビルボード用構造化バッファ
 	};
 
+	struct SkinnedBatchItem {
+		CalyxEngine::AnimationModel* model = nullptr;
+		bool cameraDitherEnabled = true;
+		std::vector<WorldTransform> transforms;
+	};
+
 	using StaticBatch  = std::vector<StaticBatchItem>;
-	using SkinnedBatch = std::vector<std::pair<CalyxEngine::AnimationModel*, std::vector<WorldTransform>>>;
+	using SkinnedBatch = std::vector<SkinnedBatchItem>;
 
 public:
 	//===================================================================*/
@@ -190,7 +197,7 @@ private:
 	 * \brief スタティックモデルのバッチ構築
 	 */
 	void BuildStaticBatches();
-	StaticBatchItem* FindCompatibleStaticBatch(StaticBatch& batch, BaseModel* model);
+	StaticBatchItem* FindCompatibleStaticBatch(StaticBatch& batch, BaseModel* model, bool cameraDitherEnabled);
 	/**
 	 * \brief スキンメッシュモデルのバッチ構築
 	 */

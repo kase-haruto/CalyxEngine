@@ -29,7 +29,7 @@ using ObjectAddedCallback	= std::function<void(SceneObject*)>;
 class SceneContext {
 public:
 	SceneContext()	= default;
-	~SceneContext() = default;
+	~SceneContext();
 
 	void Initialize(bool createDefaultLights = true);
 	void Update(float dt, float alwaysDt, bool runtimePass);

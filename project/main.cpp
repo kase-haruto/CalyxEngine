@@ -1,17 +1,13 @@
-#include <Engine/Application/Framework/CalyxFrameWork.h>
+#include <CalyxEngine/CalyxEngine.h>
+#include <Engine/Foundation/Reflection/CalyxGameObjectRegistry.generated.h>
 #include <Engine/Foundation/Reflection/CalyxObjectRegistry.generated.h>
-#include <Engine/Foundation/Utility/LeakChecker/LeakChecker.h>
 
+#include "GameApplication.h"
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int){
-	LeakChecker leakChecker_;
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR commandLine, int){
 	CalyxEngine::RegisterGeneratedSceneObjects();
+	CalyxEngine::RegisterGeneratedGameSceneObjects();
 
-	CalyxEngine::CalyxFrameWork CalyxFrameWork;
-
-	CalyxFrameWork.Initialize(hInstance);
-	CalyxFrameWork.Run();
-	CalyxFrameWork.Finalize();
-
-	return 0;
+	GameApplication application;
+	return Calyx::Run(hInstance, application, commandLine);
 }

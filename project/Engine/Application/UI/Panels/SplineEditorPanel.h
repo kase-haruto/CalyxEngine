@@ -1,9 +1,9 @@
 #pragma once
 #include <Engine/Application/UI/EngineUI/IEngineUI.h>
+#include <Engine/Application/UI/EngineUI/IOnViewportTool.h>
 #include <Engine/Objects/3D/Geometory/Spline/SplineData.h>
 #include <Engine/Objects/3D/Geometory/Spline/SplineRegistry.h>
 #include <Engine/Foundation/Math/Vector2.h>
-#include <Engine/Application/UI/EngineUI/Manipulator.h>
 #include <Engine/Objects/Transform/Transform.h>
 
 #include <string>
@@ -19,7 +19,8 @@ namespace CalyxEngine {
 	 * - スプラインの制御点編集・プレビュー描画を提供
 	 *---------------------------------------------------------------------------------------*/
 	class SplineEditorPanel
-		: public IEngineUI {
+		: public IEngineUI
+		, public BaseOnViewportTool {
 	public:
 		SplineEditorPanel() : IEngineUI("SplineEditor") {
 			IEngineUI::SetShow(false);
@@ -28,6 +29,8 @@ namespace CalyxEngine {
 		~SplineEditorPanel() override = default;
 
 		void Render() override;
+		void RenderOverlay(const ImVec2& basePos) override;
+		ImVec2 GetOverlayOffset() const override { return BaseOnViewportTool::GetOverlayOffset(); }
 
 		void SyncViewportRect(const CalyxEngine::Vector2& pos, const CalyxEngine::Vector2& size) {
 			vpPos_	= pos;
@@ -45,6 +48,7 @@ namespace CalyxEngine {
 		void DrawPreviewXZ();
 
 		void HandleGizmoUpdateAndDraw3D();
+		void DrawSelectedPointGizmo();
 		Ray	 MakeMouseRay() const;
 		int	 PickPointByRayAABB(const Ray& ray, float halfSize, float& outT) const;
 		bool IntersectPlane(const Ray& ray, const CalyxEngine::Vector3& n, float d, CalyxEngine::Vector3& out) const;
@@ -63,7 +67,6 @@ namespace CalyxEngine {
 		CalyxEngine::Vector3 dragPlaneN_{0, 1, 0};
 		float			   dragPlaneD_ = 0.0f;
 
-		std::unique_ptr<Manipulator> manipulator_;
 		WorldTransform				 gizmoTf_;
 	};
 } // namespace CalyxEngine

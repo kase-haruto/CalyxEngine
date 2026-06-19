@@ -6,6 +6,8 @@
 #include <mutex>
 #include <stack>
 #include <unordered_map>
+#include <utility>
+#include <vector>
 #include <wrl.h>
 
 /*----------------------------------------------------------------
@@ -73,6 +75,7 @@ public:
 	 * \param handle
 	 */
 	static void Free(DescriptorUsage usage, const DescriptorHandle& handle);
+	static void FreeRange(DescriptorUsage usage, const DescriptorHandle& handle, UINT count);
 
 	//--------- accessor -----------------------------------------------------
 	static ID3D12DescriptorHeap*	   GetHeap(DescriptorUsage usage);
@@ -86,10 +89,14 @@ private:
 		UINT										 descriptorSize = 0;
 		UINT										 currentOffset	= 1; // reserve 0 for ImGui
 		std::stack<UINT>							 freeList;
+		std::vector<std::pair<UINT, UINT>>			 freeRanges;
 		std::mutex									 mutex;
 		UINT										 maxDescriptors = 0;
 		bool shaderVisible = false;
 	};
+
+	static DescriptorHandle MakeHandle(const HeapInfo& info, UINT offset);
+	static void AddFreeRange(HeapInfo& info, UINT offset, UINT count);
 
 	static ID3D12Device*								 device_;
 	static std::unordered_map<DescriptorUsage, HeapInfo> heaps_;

@@ -120,5 +120,5 @@ private:
 
 	const std::string kCopyImageName = "CopyImage";
 	const std::string kBlendName = "Blend";
-	const std::string kDefaultPaht = "Resources/Assets/PostEffects/Default.postfx";
+	const std::string kDefaultPaht = "PostEffects/Default.postfx";
 };

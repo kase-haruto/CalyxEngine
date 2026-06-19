@@ -61,11 +61,38 @@ namespace CalyxEngine {
 	// -------------------------
 	// JSON対応
 	// -------------------------
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(FxFloatParamConfig,
-									   mode,
-									   constant,
-									   min,
-									   max)
+	inline void to_json(nlohmann::json& j, const FxFloatParamConfig& p) {
+		j = nlohmann::json{
+			{"mode", p.mode},
+			{"constant", p.constant},
+			{"min", p.min},
+			{"max", p.max}};
+	}
+
+	inline void from_json(const nlohmann::json& j, FxFloatParamConfig& p) {
+		if(j.is_number()) {
+			p.mode = FxValueMode::Constant;
+			p.constant = j.get<float>();
+			p.min = p.constant;
+			p.max = p.constant;
+			return;
+		}
+
+		if(!j.is_object()) return;
+
+		if(auto it = j.find("mode"); it != j.end() && !it->is_null()) {
+			p.mode = it->get<FxValueMode>();
+		}
+		if(auto it = j.find("constant"); it != j.end() && !it->is_null()) {
+			p.constant = it->get<float>();
+		}
+		if(auto it = j.find("min"); it != j.end() && !it->is_null()) {
+			p.min = it->get<float>();
+		}
+		if(auto it = j.find("max"); it != j.end() && !it->is_null()) {
+			p.max = it->get<float>();
+		}
+	}
 
 	inline void to_json(nlohmann::json& j, const Vector3ParamConfig& p) {
 		j = nlohmann::json{
@@ -76,10 +103,52 @@ namespace CalyxEngine {
 	}
 
 	inline void from_json(const nlohmann::json& j, Vector3ParamConfig& p) {
-		j.at("mode").get_to(p.mode);
-		j.at("constant").get_to(p.constant);
-		j.at("min").get_to(p.min);
-		j.at("max").get_to(p.max);
+		if(j.is_number()) {
+			const float value = j.get<float>();
+			p.mode = FxValueMode::Constant;
+			p.constant = CalyxEngine::Vector3(value,value,value);
+			p.min = p.constant;
+			p.max = p.constant;
+			return;
+		}
+
+		if(j.is_array()) {
+			p.mode = FxValueMode::Constant;
+			p.constant = j.get<CalyxEngine::Vector3>();
+			p.min = p.constant;
+			p.max = p.constant;
+			return;
+		}
+
+		if(!j.is_object()) return;
+
+		if(auto it = j.find("mode"); it != j.end() && !it->is_null()) {
+			p.mode = it->get<FxValueMode>();
+		}
+		if(auto it = j.find("constant"); it != j.end() && !it->is_null()) {
+			if(it->is_number()) {
+				const float value = it->get<float>();
+				p.constant = CalyxEngine::Vector3(value,value,value);
+			} else {
+				p.constant = it->get<CalyxEngine::Vector3>();
+			}
+		}
+		if(auto it = j.find("min"); it != j.end() && !it->is_null()) {
+			if(it->is_number()) {
+				const float value = it->get<float>();
+				p.min = CalyxEngine::Vector3(value,value,value);
+			} else {
+				p.min = it->get<CalyxEngine::Vector3>();
+			}
+		}
+		if(auto it = j.find("max"); it != j.end() && !it->is_null()) {
+			if(it->is_number()) {
+				const float value = it->get<float>();
+				p.max = CalyxEngine::Vector3(value,value,value);
+			} else {
+				p.max = it->get<CalyxEngine::Vector3>();
+			}
+		}
 	}
 
 } // namespace CalyxEngine

@@ -1,0 +1,108 @@
+name: ReleasePackage
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version, for example 1.2.0 or v1.2.0"
+        required: true
+        type: string
+      prerelease:
+        description: "Create the GitHub Release as a prerelease"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+env:
+  CONFIGURATION: Release
+  PLATFORM: x64
+
+jobs:
+  package:
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
+        with:
+          msbuild-architecture: x64
+
+      - name: Build DirectXTex
+        run: |
+          msbuild project/externals/DirectXTex/DirectXTex_Desktop_2022_Win10.vcxproj /p:Configuration=${{ env.CONFIGURATION }} /p:Platform=${{ env.PLATFORM }} /m
+
+      - name: Resolve release metadata
+        id: release
+        shell: pwsh
+        run: |
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $version = "${{ inputs.version }}"
+            $tagName = if ($version.StartsWith("v")) { $version } else { "v$version" }
+            $version = $tagName.TrimStart("v")
+          } else {
+            $tagName = "${{ github.ref_name }}"
+            $version = $tagName.TrimStart("v")
+          }
+
+          if ([string]::IsNullOrWhiteSpace($version)) {
+            throw "Release version could not be resolved."
+          }
+
+          if ($version -notmatch '^\d+\.\d+\.\d+([-.][0-9A-Za-z.-]+)?$') {
+            throw "Release version must look like 1.2.0, 1.2.0-beta.1, or v1.2.0."
+          }
+
+          $packageFile = "CalyxEngine-$version.zip"
+          $downloadUrl = "https://github.com/${{ github.repository }}/releases/download/$tagName/$packageFile"
+
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "tag_name=$tagName" >> $env:GITHUB_OUTPUT
+          "package_file=$packageFile" >> $env:GITHUB_OUTPUT
+          "download_url=$downloadUrl" >> $env:GITHUB_OUTPUT
+
+      - name: Create release package
+        shell: pwsh
+        run: |
+          .\Tool\Release\PackageRelease.cmd `
+            -Version "${{ steps.release.outputs.version }}" `
+            -Configuration "${{ env.CONFIGURATION }}" `
+            -Platform "${{ env.PLATFORM }}" `
+            -DownloadUrl "${{ steps.release.outputs.download_url }}"
+
+      - name: Create and push release tag
+        if: github.event_name == 'workflow_dispatch'
+        shell: pwsh
+        run: |
+          $tagName = "${{ steps.release.outputs.tag_name }}"
+
+          git fetch --tags --force
+          if (git rev-parse -q --verify "refs/tags/$tagName") {
+            throw "Tag already exists: $tagName"
+          }
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a $tagName -m "CalyxEngine ${{ steps.release.outputs.version }}"
+          git push origin $tagName
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release.outputs.tag_name }}
+          name: CalyxEngine ${{ steps.release.outputs.version }}
+          prerelease: ${{ github.event_name == 'workflow_dispatch' && inputs.prerelease || false }}
+          generate_release_notes: true
+          files: |
+            generated/packages/${{ steps.release.outputs.package_file }}
+            generated/packages/latest.json

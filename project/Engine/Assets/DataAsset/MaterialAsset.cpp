@@ -3,18 +3,23 @@
 namespace CalyxEngine {
 
 	MaterialAsset::MaterialAsset() {
+		// 新規マテリアル作成時のデフォルトの名前
 		name_ = "New Material";
+		// シリアライズ可能なフィールド群の初期登録
 		RegisterFields();
 	}
 
 	void MaterialAsset::RegisterFields() {
-		// SerializableObject の AddField を使用してパラメータを登録
+		// SerializableObject (基底クラス) の AddField を用いて各パラメータをシリアライズ対象としてマッピング
+		// これにより、DataAssetManager による JSON 形式での自動保存およびロードが可能になります。
 		AddField("color", color);
 		AddField("lightingMode", lightingMode);
 		AddField("shininess", shininess);
 		AddField("isReflect", isReflect);
 		AddField("envirometCoefficient", envirometCoefficient);
 		AddField("roughness", roughness);
+		
+		// トゥーンシェーディング用パラメータ
 		AddField("toonHighlightColor", toonHighlightColor);
 		AddField("toonBaseColor", toonBaseColor);
 		AddField("toonMidShadowColor", toonMidShadowColor);
@@ -30,8 +35,19 @@ namespace CalyxEngine {
 		AddField("toonSpecularThreshold", toonSpecularThreshold);
 		AddField("toonSpecularSoftness", toonSpecularSoftness);
 		AddField("toonSpecularIntensity", toonSpecularIntensity);
+		
+		// エミッシブ（自己発光）パラメータ
+		AddField("emissiveColor", emissiveColor);
+		AddField("emissiveIntensity", emissiveIntensity);
+		
+		// テクスチャ参照および法線マップ用パラメータ
 		AddField("objectTextureGuid", objectTextureGuid);
-		// uvTransform のシリアライズは必要に応じて追加
+		AddField("normalMapGuid", normalMapGuid);
+		AddField("useNormalMap", useNormalMap);
+		AddField("normalMapStrength", normalMapStrength);
+		AddField("normalMapFlipY", normalMapFlipY);
+		
+		// ※ uvTransform (マトリクス) はカスタム処理またはノードグラフ経由で更新・シリアライズするためここでの単純登録は除外
 	}
 
 }

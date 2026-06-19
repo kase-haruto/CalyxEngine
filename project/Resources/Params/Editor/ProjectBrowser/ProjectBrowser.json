@@ -1,0 +1,49 @@
+{
+    "fields": {
+        "BrowseSize": 32.79999923706055,
+        "ButtonWidth": 104.4000015258789,
+        "CardBorderColor": [
+            0.27000001072883606,
+            0.27000001072883606,
+            0.27000001072883606,
+            1.0
+        ],
+        "CardImageHeight": 64.0,
+        "CardImageWidthOffset": 20.0,
+        "CardNameOffsetY": 78.0,
+        "CardPadding": 10.0,
+        "CardSize": [
+            142.0,
+            126.0
+        ],
+        "CardVersionOffsetY": 102.0,
+        "CreateButtonHeight": 22.200000762939453,
+        "DetailsColumnWeight": 0.3199999928474426,
+        "FallbackBrowseButtonSize": [
+            48.0,
+            24.0
+        ],
+        "FolderIconSize": 15.800000190734863,
+        "FooterHeight": 84.80000305175781,
+        "InputSpacingCount": 2.200000047683716,
+        "LabelWidth": 119.19999694824219,
+        "MinInputWidth": 180.0,
+        "OpenButtonSize": [
+            97.4000015258789,
+            28.0
+        ],
+        "RecentColumnWeight": 0.6800000071525574,
+        "RefreshButtonSize": [
+            66.0,
+            28.0
+        ],
+        "TableColumnCount": 2,
+        "TemplateCardSize": [
+            142.0,
+            126.0
+        ],
+        "TemplatePreviewAspect": 0.5199999809265137,
+        "TemplatePreviewMaxHeight": 120.0,
+        "TemplateValueOffsetX": 120.0
+    }
+}

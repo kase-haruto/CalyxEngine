@@ -39,11 +39,27 @@ namespace CalyxEngine {
 		dirty_ = true;
 	}
 
+	void HierarchyTreeCache::InvalidateIfLibraryChanged(const SceneObjectLibrary& library) {
+		const uint64_t revision = library.GetRevision();
+		if(cachedLibrary_ == &library && cachedRevision_ == revision) {
+			return;
+		}
+
+		sortedChildren_.clear();
+		cachedLibrary_ = &library;
+		cachedRevision_ = revision;
+		dirty_ = false;
+	}
+
 	const std::vector<std::shared_ptr<SceneObject>>& HierarchyTreeCache::GetRoots(
 		const SceneObjectLibrary& library) {
+		InvalidateIfLibraryChanged(library);
+
 		if(dirty_) {
 			sortedChildren_.clear();
 			dirty_ = false;
+			cachedLibrary_ = &library;
+			cachedRevision_ = library.GetRevision();
 		}
 
 		auto it = sortedChildren_.find(nullptr);

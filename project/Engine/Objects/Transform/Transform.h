@@ -47,7 +47,7 @@ struct EulerTransform {
 	 * \brief ImGui表示
 	 * \param lavel ラベル名
 	 */
-	void ShowImGui(const std::string& lavel = "Transform");
+	void ShowImGui(const std::string& lavel = "Transform", bool defaultOpen = true);
 };
 
 /*-----------------------------------------------------------------------------------------
@@ -76,7 +76,7 @@ struct Transform2D {
 	 * \brief ImGui表示
 	 * \param lavel ラベル名
 	 */
-	void ShowImGui(const std::string& lavel = "Transform");
+	void ShowImGui(const std::string& lavel = "Transform", bool defaultOpen = true);
 	/**
 	 * \brief コンフィグを抽出
 	 * \return コンフィグ
@@ -87,7 +87,7 @@ struct Transform2D {
 	 * \param config コンフィグ
 	 * \param lavel ラベル名
 	 */
-	void ShowImGui(Transform2DConfig& config, const std::string& lavel = "Transform");
+	void ShowImGui(Transform2DConfig& config, const std::string& lavel = "Transform", bool defaultOpen = true);
 	/**
 	 * \brief コンフィグを適用
 	 * \param config コンフィグ

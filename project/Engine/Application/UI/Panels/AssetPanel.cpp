@@ -4,8 +4,9 @@
 #include "Engine/Assets/Manager/AssetManager.h"
 
 #include <Data/Engine/Prefab/Serializer/PrefabSerializer.h>
-#include <Engine/Assets/Database/AssetDatabase.h>
 #include <Engine/Assets/DataAsset/MaterialAsset.h>
+#include <Engine/Assets/Database/AssetDatabase.h>
+#include <Engine/Editor/AssetPreviewManager.h>
 #include <Engine/Foundation/Debug/CxAssert.h>
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 
@@ -54,8 +55,8 @@ namespace CalyxEngine {
 		}
 
 		std::filesystem::path MakeUniquePrefabPath(const std::filesystem::path& folder,
-												   const std::string& preferredStem) {
-			const std::string stem = SanitizeAssetFileStem(preferredStem);
+												   const std::string&			preferredStem) {
+			const std::string	  stem = SanitizeAssetFileStem(preferredStem);
 			std::filesystem::path path = folder / (stem + ".prefab");
 			for(int i = 1; std::filesystem::exists(path); ++i) {
 				path = folder / (stem + " " + std::to_string(i) + ".prefab");
@@ -73,14 +74,22 @@ namespace CalyxEngine {
 
 		const char* AssetTypeName(AssetType type) {
 			switch(type) {
-			case AssetType::Texture: return "Texture";
-			case AssetType::Model: return "Model";
-			case AssetType::Shader: return "Shader";
-			case AssetType::Material: return "Material";
-			case AssetType::Audio: return "Audio";
-			case AssetType::Prefab: return "Prefab";
-			case AssetType::Effect: return "Effect";
-			case AssetType::SpriteAnimation: return "Sprite Animation";
+			case AssetType::Texture:
+				return "Texture";
+			case AssetType::Model:
+				return "Model";
+			case AssetType::Shader:
+				return "Shader";
+			case AssetType::Material:
+				return "Material";
+			case AssetType::Audio:
+				return "Audio";
+			case AssetType::Prefab:
+				return "Prefab";
+			case AssetType::Effect:
+				return "Effect";
+			case AssetType::SpriteAnimation:
+				return "Sprite Animation";
 			case AssetType::Unknown:
 			default:
 				return "Unknown";
@@ -122,6 +131,14 @@ namespace CalyxEngine {
 	}
 
 	void AssetPanel::Render() {
+		if(auto* db = AssetDatabase::GetInstance()) {
+			std::error_code ec;
+			const auto dbRoot = std::filesystem::weakly_canonical(db->GetRoot(), ec);
+			if(!ec && dbRoot != assetsRootAbs_) {
+				Initialize(dbRoot);
+			}
+		}
+
 		bool isopen = true;
 		ImGui::Begin(panelName_.c_str(), &isopen, ImGuiWindowFlags_MenuBar);
 		DrawMenuBar();
@@ -255,7 +272,7 @@ namespace CalyxEngine {
 			if(!ofs) return;
 		}
 
-		auto* db = AssetDatabase::GetInstance();
+		auto*	   db	= AssetDatabase::GetInstance();
 		const Guid guid = db->RegisterOrUpdate(path, AssetType::Material);
 		if(auto* dataAssets = AssetManager::GetInstance()->GetDataAssetManager()) {
 			auto asset = dataAssets->GetAsset<MaterialAsset>(guid);
@@ -266,11 +283,11 @@ namespace CalyxEngine {
 		}
 
 		db->Scan();
-		cacheValid_ = false;
+		cacheValid_		  = false;
 		needsRebuildTree_ = true;
 	}
 
-	void AssetPanel::CreatePrefabFromSceneObject(SceneObject* object,
+	void AssetPanel::CreatePrefabFromSceneObject(SceneObject*				  object,
 												 const std::filesystem::path& folder) {
 		if(!object) return;
 
@@ -284,20 +301,20 @@ namespace CalyxEngine {
 			   path.string(),
 			   PrefabSerializer::SaveOptions{true})) return;
 
-		auto* db = AssetDatabase::GetInstance();
+		auto*	   db		  = AssetDatabase::GetInstance();
 		const Guid prefabGuid = db->RegisterOrUpdate(path, AssetType::Prefab);
 		if(prefabGuid.isValid()) {
 			SetPrefabLinkRecursive(object, prefabGuid);
 		}
 		db->Scan();
 
-		cacheValid_ = false;
+		cacheValid_		  = false;
 		needsRebuildTree_ = true;
 	}
 
 	void AssetPanel::BeginRenameAsset(const std::filesystem::path& path) {
-		renamingAsset_ = true;
-		renameAssetPath_ = path;
+		renamingAsset_		   = true;
+		renameAssetPath_	   = path;
 		const std::string stem = path.stem().string();
 		snprintf(renameAssetBuf_, sizeof(renameAssetBuf_), "%s", stem.c_str());
 	}
@@ -306,12 +323,12 @@ namespace CalyxEngine {
 		if(!renamingAsset_ || renameAssetPath_.empty()) return;
 
 		std::string newStem = renameAssetBuf_;
-		const auto first = newStem.find_first_not_of(" \t\r\n");
+		const auto	first	= newStem.find_first_not_of(" \t\r\n");
 		if(first == std::string::npos) {
 			newStem.clear();
 		} else {
 			const auto last = newStem.find_last_not_of(" \t\r\n");
-			newStem = newStem.substr(first, last - first + 1);
+			newStem			= newStem.substr(first, last - first + 1);
 		}
 		if(newStem.empty()) {
 			renamingAsset_ = false;
@@ -320,7 +337,7 @@ namespace CalyxEngine {
 		}
 
 		const std::filesystem::path oldPath = renameAssetPath_;
-		std::filesystem::path newPath = oldPath.parent_path() / (newStem + oldPath.extension().string());
+		std::filesystem::path		newPath = oldPath.parent_path() / (newStem + oldPath.extension().string());
 		if(newPath != oldPath && !std::filesystem::exists(newPath)) {
 			std::error_code ec;
 			std::filesystem::rename(oldPath, newPath, ec);
@@ -340,7 +357,7 @@ namespace CalyxEngine {
 		if(auto* db = AssetDatabase::GetInstance()) {
 			db->Scan();
 		}
-		cacheValid_ = false;
+		cacheValid_		  = false;
 		needsRebuildTree_ = true;
 	}
 
@@ -364,8 +381,8 @@ namespace CalyxEngine {
 		if(!window || window->SkipItems) return false;
 
 		const ImVec2 windowPos = ImGui::GetWindowPos();
-		const ImVec2 minRel = ImGui::GetWindowContentRegionMin();
-		const ImVec2 maxRel = ImGui::GetWindowContentRegionMax();
+		const ImVec2 minRel	   = ImGui::GetWindowContentRegionMin();
+		const ImVec2 maxRel	   = ImGui::GetWindowContentRegionMax();
 		const ImRect dropRect(
 			ImVec2(windowPos.x + minRel.x, windowPos.y + minRel.y),
 			ImVec2(windowPos.x + maxRel.x, windowPos.y + maxRel.y));
@@ -402,7 +419,7 @@ namespace CalyxEngine {
 		ddsPath.replace_extension(".dds");
 		return std::filesystem::exists(ddsPath);
 	}
-	
+
 	void AssetPanel::DrawRightView() {
 		auto&		db	  = *AssetDatabase::GetInstance();
 		const auto& items = db.GetView();
@@ -513,10 +530,12 @@ namespace CalyxEngine {
 					ImGui::PushID(&rec->guid);
 					ImGui::BeginGroup();
 
-					ImTextureID thumb =
-						((rec->type == AssetType::Texture) && rec->previewTex)
-							? rec->previewTex
-							: (iconGeneric_ ? iconGeneric_ : nullptr);
+					ImTextureID thumb = iconGeneric_ ? iconGeneric_ : nullptr;
+					if(auto* previews = AssetPreviewManager::GetInstance()) {
+						thumb = previews->GetPreview(*rec, thumb).texture;
+					} else if((rec->type == AssetType::Texture) && rec->previewTex) {
+						thumb = rec->previewTex;
+					}
 
 					if(thumb)
 						ImGui::ImageButton("##thumb", thumb, ImVec2(20, 20));
@@ -602,9 +621,12 @@ namespace CalyxEngine {
 				ImGui::BeginGroup();
 
 				ImVec2		sz(thumbSize_, thumbSize_);
-				ImTextureID thumb = ((rec->type == AssetType::Texture) && rec->previewTex)
-										 ? rec->previewTex
-										 : (iconGeneric_ ? iconGeneric_ : nullptr);
+				ImTextureID thumb = iconGeneric_ ? iconGeneric_ : nullptr;
+				if(auto* previews = AssetPreviewManager::GetInstance()) {
+					thumb = previews->GetPreview(*rec, thumb).texture;
+				} else if((rec->type == AssetType::Texture) && rec->previewTex) {
+					thumb = rec->previewTex;
+				}
 
 				if(thumb)
 					ImGui::ImageButton("##thumb", thumb, sz);
@@ -715,9 +737,9 @@ namespace CalyxEngine {
 		ImVec2 dropSize(ImGui::GetContentRegionAvail().x, height);
 		ImGui::InvisibleButton("##AssetDropTarget", dropSize);
 
-		const bool hovered = ImGui::IsItemHovered();
-		const ImVec2 rmin = ImGui::GetItemRectMin();
-		const ImVec2 rmax = ImGui::GetItemRectMax();
+		const bool	 hovered = ImGui::IsItemHovered();
+		const ImVec2 rmin	 = ImGui::GetItemRectMin();
+		const ImVec2 rmax	 = ImGui::GetItemRectMax();
 		ImGui::GetWindowDrawList()->AddRect(
 			rmin, rmax,
 			hovered ? IM_COL32(120, 180, 255, 220) : IM_COL32(90, 90, 90, 160),
@@ -725,12 +747,23 @@ namespace CalyxEngine {
 
 		const char* label = "Drop Asset here";
 		switch(expect) {
-		case AssetType::Texture: label = "Drop Texture here"; break;
-		case AssetType::Material: label = "Drop Material here"; break;
-		case AssetType::Model: label = "Drop Model here"; break;
-		case AssetType::Prefab: label = "Drop Prefab here"; break;
-		case AssetType::SpriteAnimation: label = "Drop Sprite Animation here"; break;
-		default: break;
+		case AssetType::Texture:
+			label = "Drop Texture here";
+			break;
+		case AssetType::Material:
+			label = "Drop Material here";
+			break;
+		case AssetType::Model:
+			label = "Drop Model here";
+			break;
+		case AssetType::Prefab:
+			label = "Drop Prefab here";
+			break;
+		case AssetType::SpriteAnimation:
+			label = "Drop Sprite Animation here";
+			break;
+		default:
+			break;
 		}
 		ImGui::GetWindowDrawList()->AddText(
 			ImVec2(rmin.x + 8.0f, rmin.y + 8.0f),
@@ -744,7 +777,7 @@ namespace CalyxEngine {
 					*reinterpret_cast<const AssetDragPayload*>(p->Data);
 				if(payload.type == expect) {
 					*inoutGuid = payload.guid;
-					changed = true;
+					changed	   = true;
 				} else {
 					WarnRejectedAssetDrop(expect, payload);
 				}

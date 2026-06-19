@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="CalyxEngineReference">
+    <CalyxEngineRoot Condition="'$(CalyxEngineRoot)'==''">$(MSBuildThisFileDirectory)</CalyxEngineRoot>
+    <CalyxEngineProjectDir Condition="'$(CalyxEngineProjectDir)'==''">$(CalyxEngineRoot)</CalyxEngineProjectDir>
+    <CalyxEngineGeneratedDir Condition="'$(CalyxEngineGeneratedDir)'==''">$(CalyxEngineRoot)..\generated\</CalyxEngineGeneratedDir>
+    <CalyxEngineLibProject Condition="'$(CalyxEngineLibProject)'==''">$(CalyxEngineProjectDir)CalyxEngineLib.vcxproj</CalyxEngineLibProject>
+    <CalyxDirectXTexProject Condition="'$(CalyxDirectXTexProject)'==''">$(CalyxEngineProjectDir)externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj</CalyxDirectXTexProject>
+    <CalyxEngineIncludeDirs>$(CalyxEngineProjectDir);$(CalyxEngineProjectDir)Engine\Application;$(CalyxEngineProjectDir)externals;$(CalyxEngineProjectDir)externals\DirectXTex;$(CalyxEngineProjectDir)externals\assimp\include</CalyxEngineIncludeDirs>
+    <CalyxReflectionTool>$(CalyxEngineProjectDir)Tools\Reflection\generate_reflection.ps1</CalyxReflectionTool>
+  </PropertyGroup>
+</Project>

@@ -28,6 +28,8 @@ namespace PipelineTag {
 		OutlineSkinnedObject3D,
 		OutlineNormalObject3D,
 		OutlineNormalSkinnedObject3D,
+		OutlineDitherDepthObject3D,
+		OutlineDitherDepthSkinnedObject3D,
 		ShadowStatic,
 		ShadowSkinned,
 		PickingObject3D,
@@ -52,6 +54,7 @@ namespace PipelineTag {
 		CRT,
 		OutlineComposite,
 		Blend,
+		Bloom,
 
 		Count
 	};

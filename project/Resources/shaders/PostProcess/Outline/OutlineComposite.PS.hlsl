@@ -21,13 +21,39 @@ float MaskFromDepth(float objectDepth) {
 	return step(1e-6f, objectDepth);
 }
 
-float NormalEdge(float3 centerNormal, float centerMask, float3 sampleNormal, float sampleMask) {
+float NormalEdge(
+	float3 centerNormal,
+	float centerObjectDepth,
+	float centerMask,
+	float centerSceneDepth,
+	float3 sampleNormal,
+	float sampleObjectDepth,
+	float sampleMask,
+	float sampleSceneDepth) {
+	const float depthEps = 0.0005f;
+	float centerOccludesSample = (1.0f - centerMask) * step(centerSceneDepth + depthEps, sampleObjectDepth);
+	float sampleOccludesCenter = (1.0f - sampleMask) * step(sampleSceneDepth + depthEps, centerObjectDepth);
+	if(centerOccludesSample > 0.5f || sampleOccludesCenter > 0.5f) {
+		return 0.0f;
+	}
 	float valid = saturate(centerMask + sampleMask);
 	float d = length(centerNormal - sampleNormal) * normalScale;
 	return smoothstep(normalThreshold, 1.0f, d) * valid;
 }
 
-float DepthEdge(float centerObjectDepth, float centerMask, float sampleObjectDepth, float sampleMask) {
+float DepthEdge(
+	float centerObjectDepth,
+	float centerMask,
+	float centerSceneDepth,
+	float sampleObjectDepth,
+	float sampleMask,
+	float sampleSceneDepth) {
+	const float depthEps = 0.0005f;
+	float centerOccludesSample = (1.0f - centerMask) * step(centerSceneDepth + depthEps, sampleObjectDepth);
+	float sampleOccludesCenter = (1.0f - sampleMask) * step(sampleSceneDepth + depthEps, centerObjectDepth);
+	if(centerOccludesSample > 0.5f || sampleOccludesCenter > 0.5f) {
+		return 0.0f;
+	}
 	float valid = saturate(centerMask + sampleMask);
 	if(centerMask < 0.5f || sampleMask < 0.5f) {
 		return valid;
@@ -56,11 +82,12 @@ float4 main(VertexShaderOutput input) : SV_TARGET {
 			if(x == 0 && y == 0) continue;
 			float2 o = float2((float)x, (float)y) * texelSize;
 			float4 snTex = gNormal.Sample(gSampler, uv + o);
+			float sampleDepth = gDepth.Sample(gSampler, uv + o);
 			float3 sn = snTex.xyz * 2.0f - 1.0f;
 			float sod = snTex.a;
 			float sm = MaskFromDepth(sod);
-			edge = max(edge, DepthEdge(centerObjectDepth, centerMask, sod, sm));
-			edge = max(edge, NormalEdge(centerNormal, centerMask, sn, sm));
+			edge = max(edge, DepthEdge(centerObjectDepth, centerMask, centerDepth, sod, sm, sampleDepth));
+			edge = max(edge, NormalEdge(centerNormal, centerObjectDepth, centerMask, centerDepth, sn, sod, sm, sampleDepth));
 		}
 	}
 

@@ -4,6 +4,7 @@
 #include <Engine/Application/Effects/Particle/Parm/FxParm.h>
 #include <Engine/Graphics/Buffer/DxConstantBuffer.h>
 #include <Engine/Graphics/Buffer/DxStructuredBuffer.h>
+#include <Engine/Foundation/Math/Vector4.h>
 
 struct CalyxEngine::Vector3;
 namespace CalyxEngine {
@@ -42,6 +43,7 @@ namespace CalyxEngine {
 			CalyxEngine::Vector4 color;
 			CalyxEngine::Vector3 shapeSize;
 			uint32_t shape;
+			CalyxEngine::Vector4 rotation;
 			CalyxEngine::Vector3 gravity;
 			uint32_t gravityEnabled;
 			CalyxEngine::Vector4 overLifeStart;
@@ -68,6 +70,8 @@ namespace CalyxEngine {
 		void Initialize();
 		void Update(float dt) override;
 		void ShowGui() override;
+		void DrawEmitterShape(const WorldTransform& tf) override;
+		void DrawEmitterShapePreview(const WorldTransform& tf) override;
 
 		void ApplyConfigFrom(const EmitterConfig& config) override;
 		void ExtractConfigTo(EmitterConfig& config) const override;
@@ -102,6 +106,9 @@ namespace CalyxEngine {
 		void SetPosition(const CalyxEngine::Vector3& pos) override;
 
 	private:
+		void SyncEmitterDataFromBase();
+		void DrawEmitterShapeInternal(bool effectPreview);
+
 		CalyxEngine::Vector3 position_{0, 0, 0};
 		bool	isInitialized = false;
 		bool	hasInitializedOnce_ = false;

@@ -1,0 +1,22 @@
+{
+  "clips": [
+    {
+      "frameCount": 49,
+      "frameDuration": 0.10000000149011612,
+      "loop": true,
+      "name": "New Clip",
+      "startFrame": 0
+    }
+  ],
+  "fields": {
+    "division": [
+      8.0,
+      8.0
+    ],
+    "textureGuid": "872b65b5-4991-45b2-9d66-d39017e4385e"
+  },
+  "guid": "0fb6aea5-7b49-4708-bf21-26882dc1e8ca",
+  "name": "New Sprite Animation",
+  "texturePath": "Textures/CustomUVChecker.png",
+  "type": "SpriteAnimationAsset"
+}

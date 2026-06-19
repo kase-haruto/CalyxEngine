@@ -54,6 +54,8 @@ namespace CalyxEngine {
 
 			RequireCBufferVariable(*materialConstants, result, "color");
 			RequireCBufferVariable(*materialConstants, result, "enableLighting");
+			RequireCBufferVariable(*materialConstants, result, "emissiveColor");
+			RequireCBufferVariable(*materialConstants, result, "emissiveIntensity");
 			RequireCBufferVariable(*materialConstants, result, "toonBaseStep");
 			RequireCBufferVariable(*materialConstants, result, "toonShadeStep");
 			RequireCBufferVariable(*materialConstants, result, "toonSpecularIntensity");

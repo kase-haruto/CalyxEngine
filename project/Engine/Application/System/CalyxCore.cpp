@@ -17,6 +17,7 @@
 #include <Engine/System/Command/Manager/CommandManager.h>
 
 // manager
+#include <CalyxEngine/Project.h>
 #include <Engine/Assets/Database/AssetDatabase.h>
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Foundation/Clock/ClockManager.h>
@@ -27,9 +28,35 @@
 // lib
 #include "Engine/Assets/Manager/AssetManager.h"
 #include "Engine/Scene/System/SceneManager.h"
+#include <Engine/Editor/AssetPreviewManager.h>
 #include <Engine/Editor/PickingPass.h>
 
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
+
+#include <algorithm>
+
+namespace {
+	void ResizePostEffectTarget(CalyxEngine::DxCore* dxCore, const std::string& name, uint32_t width, uint32_t height) {
+		if(auto* rt = dxCore->GetRenderTargetCollection().Get(name)) {
+			rt->Resize(width, height);
+		}
+	}
+
+	void ResizePostEffectTargetsToInput(CalyxEngine::DxCore* dxCore, DxGpuResource* input) {
+		if(!dxCore || !input || !input->Get()) return;
+
+		const auto desc = input->Get()->GetDesc();
+		const uint32_t width = static_cast<uint32_t>((std::max)(UINT64{1}, desc.Width));
+		const uint32_t height = (std::max)(1u, desc.Height);
+
+		ResizePostEffectTarget(dxCore, "PostEffectOutput", width, height);
+		ResizePostEffectTarget(dxCore, "PostEffectBuffer1", width, height);
+		ResizePostEffectTarget(dxCore, "PostEffectBuffer2", width, height);
+		for(int i = 0; i < 8; ++i) {
+			ResizePostEffectTarget(dxCore, "PostEffectNodeBuffer" + std::to_string(i), width, height);
+		}
+	}
+}
 
 namespace CalyxEngine {
 
@@ -60,8 +87,6 @@ namespace CalyxEngine {
 		// インプットの初期化
 		CalyxFoundation::Input::Initialize();
 
-		// audioの初期化
-		Audio::Initialize();
 
 		DescriptorAllocator::Initialize(dxCore_->GetDevice().Get());
 		DescriptorAllocator::CreateHeap(DescriptorUsage::CbvSrvUav, {});
@@ -94,10 +119,8 @@ namespace CalyxEngine {
 		AssetManager::GetInstance()->Initialize(imguiManager_.get());
 
 		auto* db = AssetDatabase::GetInstance();
-		// 実行ファイルの場所からプロジェクトルートを解決して Assets へ
-		const auto exe		  = std::filesystem::current_path();
-		const auto assetsRoot = exe / "Resources" / "Assets";
-		db->Initialize(assetsRoot);
+		// 現在開いているプロジェクトを基準に、編集対象のAssetsを決める。
+		db->Initialize(Calyx::GetAssetRoot());
 	}
 
 	void CalyxCore::InitializePostProcess(PipelineService* service) {
@@ -128,8 +151,6 @@ namespace CalyxEngine {
 		imguiManager_->Begin();
 
 		AssetManager::GetInstance()->GetModelManager()->ProcessLoadingTasks();
-		// オフスクリーンレンダーターゲットの開始
-		dxCore_->PreDrawOffscreen();
 
 		EditorUpdate();
 	}
@@ -150,6 +171,9 @@ namespace CalyxEngine {
 		auto* offscreenRes = dxCore_->GetRenderTargetCollection().Get("Offscreen")->GetResource();
 		auto* postOutput   = dxCore_->GetRenderTargetCollection().Get("PostEffectOutput");
 		auto* debugRT	   = dxCore_->GetRenderTargetCollection().Get("DebugView");
+
+		ResizePostEffectTargetsToInput(dxCore_.get(), offscreenRes);
+		postOutput = dxCore_->GetRenderTargetCollection().Get("PostEffectOutput");
 
 		if(auto* scTarget = dynamic_cast<SwapChainRenderTarget*>(backBuffer)) {
 			scTarget->SetBufferIndex(dxCore_->GetSwapChain().GetCurrentBackBufferIndex());
@@ -203,6 +227,10 @@ namespace CalyxEngine {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	void CalyxCore::Finalize() {
 
+		if(auto* previews = AssetPreviewManager::GetInstance()) {
+			previews->Shutdown();
+		}
+
 		// imgui終了処理
 		imguiManager_->Finalize();
 		// textureの終了処理
@@ -215,7 +243,6 @@ namespace CalyxEngine {
 		pipelineStateManager_->Finalize();
 		DescriptorAllocator::Finalize();
 		CalyxFoundation::Input::Finalize();
-		Audio::Finalize();
 		// ウィンドウの破棄
 		winApp_->TerminateGameWindow();
 	}

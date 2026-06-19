@@ -3,6 +3,7 @@
 /* ========================================================================
    include space
    ===================================================================== */
+#include <CalyxEngine/Project.h>
 #include <Engine/Application/Effects/FxSystem.h>
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 #include <Engine/Foundation/Json/JsonUtils.h>
@@ -63,7 +64,7 @@ namespace {
 // -----------------------------------------------------------------------------
 bool SceneSerializer::Save(const SceneContext& context, const std::string& path) {
 	auto root = DumpJson(context);
-	return JsonUtils::Save(path, root);
+	return JsonUtils::Save(Calyx::ResolveAssetPath(path).generic_string(), root);
 }
 
 // -----------------------------------------------------------------------------
@@ -71,7 +72,7 @@ bool SceneSerializer::Save(const SceneContext& context, const std::string& path)
 // -----------------------------------------------------------------------------
 bool SceneSerializer::Load(SceneContext& context, const std::string& path) {
 	nlohmann::json root;
-	if(!JsonUtils::Load(path, root)) return false;
+	if(!JsonUtils::Load(Calyx::ResolveAssetPath(path).generic_string(), root)) return false;
 	return LoadJson(context, root);
 }
 
@@ -211,12 +212,19 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 			}
 		}
 
+		Guid guid = j.value("guid", Guid{});
+		if(!guid.isValid()) {
+			guid = sp->GetGuid();
+		}
+		sp->SetGuid(guid);
+
 		// ライブラリへ登録
 		context.GetObjectLibrary()->AddObject(sp);
 		sp->BeginSerializableParamCapture(paramOverrides);
 		sp->Initialize();
 		sp->EndSerializableParamCapture();
 		ApplySceneConfig(*sp, j);
+		sp->SetGuid(guid);
 		if(false) {
 			auto* cfg = dynamic_cast<IConfigurable*>(sp.get());
 			if(j.contains("configPath")) {
@@ -244,7 +252,7 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 		if(auto dir = std::dynamic_pointer_cast<DirectionalLight>(sp)) {
 			context.GetLightLibrary()->SetDirectionalLight(dir);
 		} else if(auto pt = std::dynamic_pointer_cast<PointLight>(sp)) {
-			context.GetLightLibrary()->SetPointLight(pt);
+			context.GetLightLibrary()->AddPointLight(pt);
 		} else if(auto camDbg = std::dynamic_pointer_cast<DebugCamera>(sp)) {
 			context.GetCameraMgr()->SetDebugCamera(camDbg);
 		} else if(auto camMain = std::dynamic_pointer_cast<Camera3d>(sp)) {
@@ -252,7 +260,6 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 		}
 
 		// GUID
-		Guid guid	  = j.value("guid", Guid{});
 		guidMap[guid] = sp;
 	}
 

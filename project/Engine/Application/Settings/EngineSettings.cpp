@@ -16,6 +16,8 @@ namespace CalyxEngine {
 			switch(category) {
 			case EngineSettings::Category::Editor:
 				return "Editor";
+			case EngineSettings::Category::Graphics:
+				return "Graphics";
 			default:
 				return "Unknown";
 			}
@@ -82,6 +84,7 @@ namespace CalyxEngine {
 		ImGui::BeginChild("SettingsCategories", ImVec2(leftWidth, contentSize.y - footerHeight), true);
 		const Category categories[] = {
 			Category::Editor,
+			Category::Graphics,
 		};
 		for(const Category category : categories) {
 			const bool selected = selectedCategory_ == category;
@@ -103,6 +106,9 @@ namespace CalyxEngine {
 				ImGui::Checkbox("Fullscreen game view on play", &data.editor.fullscreenGameViewOnPlay);
 				ImGui::Checkbox("Debug camera rotate inverse", &data.editor.DebugCameraRotateInverse);
 				ManipulatorSettingsUI::Render(data.manipulator);
+			}},
+			{Category::Graphics, [](EngineSettingsData& data) {
+				ImGui::Checkbox("Point light shadows", &data.graphics.enablePointLightShadows);
 			}},
 		};
 

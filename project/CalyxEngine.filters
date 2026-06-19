@@ -231,6 +231,9 @@
     <ClCompile Include="Engine\Objects\LightObject\PointLight.cpp">
       <Filter>Engine\project\3d\light\pointLight</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Objects\LightObject\PointLightActor.cpp">
+      <Filter>Engine\project\3d\light\pointLight</Filter>
+    </ClCompile>
     <ClCompile Include="Engine\Scene\Game\GameScene.cpp">
       <Filter>Engine\project\scene\game_scene</Filter>
     </ClCompile>
@@ -352,8 +355,12 @@
     <ClCompile Include="Engine\Objects\3D\Geometory\Shape.cpp" />
     <ClCompile Include="Engine\Objects\Collider\Collider.cpp" />
     <ClCompile Include="Engine\Objects\Collider\BoxCollider.cpp" />
+    <ClCompile Include="Engine\Objects\Collider\CapsuleCollider.cpp" />
     <ClCompile Include="Engine\Collision\CollisionManager.cpp" />
     <ClCompile Include="Engine\Objects\Collider\SphereCollider.cpp" />
+    <ClCompile Include="Engine\Physics\Character\CharacterMovementComponent.cpp" />
+    <ClCompile Include="Engine\Physics\PhysicsBody.cpp" />
+    <ClCompile Include="Engine\Physics\PhysicsSystem.cpp" />
     <ClCompile Include="Engine\Objects\Particle\ParticleEmitShape.cpp" />
     <ClCompile Include="Engine\Graphics\ResourceStateTracker\ResourceStateTracker.cpp" />
     <ClCompile Include="Engine\Application\UI\EngineUI\Core\EngineUICore.cpp" />
@@ -396,6 +403,7 @@
     <ClCompile Include="Engine\Graphics\RenderTarget\Collection\RenderTargetCollection.cpp" />
     <ClCompile Include="Engine\PostProcess\Interface\IPostEffectPass.cpp" />
     <ClCompile Include="Engine\PostProcess\GrayScale\GrayScale.cpp" />
+    <ClCompile Include="Engine\PostProcess\Bloom\BloomEffect.cpp" />
     <ClCompile Include="Engine\PostProcess\Collection\PostProcessCollection.cpp" />
     <ClCompile Include="Engine\PostProcess\Graph\PostEffectGraph.cpp" />
     <ClCompile Include="Engine\PostProcess\FullscreenDrawer.cpp" />
@@ -462,6 +470,9 @@
       <Filter>Engine\project\3d\light\directionalLight</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Objects\LightObject\PointLight.h">
+      <Filter>Engine\project\3d\light\pointLight</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Objects\LightObject\PointLightActor.h">
       <Filter>Engine\project\3d\light\pointLight</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Scene\Game\GameScene.h">
@@ -639,8 +650,12 @@
     <ClInclude Include="Engine\Objects\3D\Geometory\Shape.h" />
     <ClInclude Include="Engine\Objects\Collider\Collider.h" />
     <ClInclude Include="Engine\Objects\Collider\BoxCollider.h" />
+    <ClInclude Include="Engine\Objects\Collider\CapsuleCollider.h" />
     <ClInclude Include="Engine\Collision\CollisionManager.h" />
     <ClInclude Include="Engine\Objects\Collider\SphereCollider.h" />
+    <ClInclude Include="Engine\Physics\Character\CharacterMovementComponent.h" />
+    <ClInclude Include="Engine\Physics\PhysicsBody.h" />
+    <ClInclude Include="Engine\Physics\PhysicsSystem.h" />
     <ClInclude Include="Engine\Objects\Particle\ParticleEmitShape.h" />
     <ClInclude Include="Engine\Graphics\ResourceStateTracker\ResourceStateTracker.h" />
     <ClInclude Include="Engine\Application\UI\EngineUI\Core\EngineUICore.h" />
@@ -693,6 +708,7 @@
     <ClInclude Include="Engine\Graphics\RenderTarget\Collection\RenderTargetCollection.h" />
     <ClInclude Include="Engine\PostProcess\Interface\IPostEffectPass.h" />
     <ClInclude Include="Engine\PostProcess\GrayScale\GrayScale.h" />
+    <ClInclude Include="Engine\PostProcess\Bloom\BloomEffect.h" />
     <ClInclude Include="Engine\PostProcess\Collection\PostProcessCollection.h" />
     <ClInclude Include="Engine\PostProcess\Graph\PostEffectGraph.h" />
     <ClInclude Include="Engine\PostProcess\FullscreenDrawer.h" />
@@ -727,6 +743,7 @@
     <ClInclude Include="Engine\Foundation\Utility\FileSystem\FileSystemHelper.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\BaseGameObject\BaseGameObjectConfig.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Collider\ColliderConfig.h" />
+    <ClInclude Include="Data\Engine\Configs\Scene\Objects\Physics\PhysicsBodyConfig.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Transform\WorldTransformConfig.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Transform\UvTransformConfig.h" />
     <ClInclude Include="Data\Engine\Macros\ConfigMacros\ConfigMacros.h" />

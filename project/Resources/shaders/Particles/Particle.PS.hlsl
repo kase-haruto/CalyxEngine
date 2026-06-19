@@ -67,7 +67,7 @@ PixelShaderOutput main(VertexShaderOutput input) {
 
 	// カメラ近傍フェード値(0.0〜1.0)に基づいてピクセルを破棄
 	// 無効時は VS 側で常に 1.0 にしているため破棄されない
-	if(input.fade < ditherThreshold) {
+	if(input.fade <= ditherThreshold) {
 		discard;
 	}
 

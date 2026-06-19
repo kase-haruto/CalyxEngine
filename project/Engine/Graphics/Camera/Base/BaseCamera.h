@@ -42,6 +42,7 @@ public:
 					PipelineType                                      pipelineType);
 	void SetCommand(ID3D12GraphicsCommandList* command, PipelineType pipelineType);
 	void SetRootCommand(ID3D12GraphicsCommandList* command, uint32_t rootIndex) const;
+	void SetCameraDitherEnabled(bool enabled);
 
 	void StartShake(float duration,float intensity) override; // カメラシェイク開始
 
@@ -91,7 +92,7 @@ protected:
 
 	float aspectRatio_ = 16.0f / 9.0f;                                          // アスペクト比
 	float nearZ_       = 0.1f;                                                  // 近クリップ面
-	float farZ_        = 9000.0f;                                               // 遠クリップ面
+	float farZ_        = 500.0f;                                               // 遠クリップ面
 	float fovAngleY_   = 75.0f * static_cast<float>(std::numbers::pi) / 180.0f; // 垂直視野角
 
 protected:

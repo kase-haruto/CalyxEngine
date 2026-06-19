@@ -28,6 +28,7 @@ struct EmitterData {
 	float4 color;
 	float3 shapeSize;
 	uint shape;
+	float4 rotation;
 	float3 gravity;
 	uint gravityEnabled;
 	float4 overLifeStart;

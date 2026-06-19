@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Game">
+      <UniqueIdentifier>{B4B01E65-E93E-4F51-B55B-F59AF60AF872}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\3D">
+      <UniqueIdentifier>{5D4C4668-2923-421B-A0EC-1F71E44CF07C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\3D\Actor">
+      <UniqueIdentifier>{1BE4D62C-6897-46C4-AB01-05D57E189508}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\3D\Actor\DemoPlayer">
+      <UniqueIdentifier>{938A90B7-04E1-44C2-B525-F67CDDF86819}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\3D\Actor\DemoPlayer\Details">
+      <UniqueIdentifier>{967A8462-7615-4F9A-9F30-F6737DB7336A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\3D\Actor\DemoPlayer\Weapon">
+      <UniqueIdentifier>{1096B4B5-0E4A-451D-AB78-F82563499512}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Input">
+      <UniqueIdentifier>{11F08A8A-4C0C-40D9-9302-74E8E373ACB3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Scene">
+      <UniqueIdentifier>{B6509ACD-7477-41CB-888C-36FD5A15E6FC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Scene\Details">
+      <UniqueIdentifier>{259D78C0-B2F9-4E7C-BE89-2EC969BB497C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Scene\Utility">
+      <UniqueIdentifier>{C597BD57-C118-4779-AE1B-5DD472D9B513}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Game\3D\Actor\DemoPlayer\DemoPlayer.cpp">
+      <Filter>Game\3D\Actor\DemoPlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="Demo\3D\Actor\DemoPlayer\DemoPlayerMotor.cpp">
+      <Filter>Game\3D\Actor\DemoPlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\3D\Actor\DemoPlayer\Weapon\Weapon.cpp">
+      <Filter>Game\3D\Actor\DemoPlayer\Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Input\PlayerInput.cpp">
+      <Filter>Game\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Scene\Utility\SceneTypeUtil.cpp">
+      <Filter>Game\Scene\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="GameApplication.cpp" />
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Game\3D\Actor\DemoPlayer\DemoPlayer.h">
+      <Filter>Game\3D\Actor\DemoPlayer</Filter>
+    </ClInclude>
+    <ClInclude Include="Demo\3D\Actor\DemoPlayer\DemoPlayerMotor.h">
+      <Filter>Game\3D\Actor\DemoPlayer</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\3D\Actor\DemoPlayer\Details\DemoPlayerActionConfig.h">
+      <Filter>Game\3D\Actor\DemoPlayer\Details</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\3D\Actor\DemoPlayer\Weapon\Weapon.h">
+      <Filter>Game\3D\Actor\DemoPlayer\Weapon</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Input\IInputAction.h">
+      <Filter>Game\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Input\InputConfig.h">
+      <Filter>Game\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Input\PlayerInput.h">
+      <Filter>Game\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Scene\Details\SceneType.h">
+      <Filter>Game\Scene\Details</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Scene\Utility\SceneTypeUtil.h">
+      <Filter>Game\Scene\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="GameApplication.h" />
+  </ItemGroup>
+</Project>

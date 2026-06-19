@@ -1,0 +1,56 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build Debug",
+      "type": "process",
+      "command": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\MSBuild.exe",
+      "args": [
+        ".\\CalyxEngine.sln",
+        "/m",
+        "/p:Configuration=Debug",
+        "/p:Platform=x64"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}\\project"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build Develop",
+      "type": "process",
+      "command": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\MSBuild.exe",
+      "args": [
+        ".\\CalyxEngine.sln",
+        "/m",
+        "/p:Configuration=Develop",
+        "/p:Platform=x64"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}\\project"
+      },
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build Release",
+      "type": "process",
+      "command": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\MSBuild.exe",
+      "args": [
+        ".\\CalyxEngine.sln",
+        "/m",
+        "/p:Configuration=Release",
+        "/p:Platform=x64"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}\\project"
+      },
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    }
+  ]
+}

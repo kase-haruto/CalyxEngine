@@ -42,6 +42,7 @@ namespace CalyxEngine {
 
 		enum class PlaceItemCategory {
 			Shape,			 //< 単純図形オブジェクト
+			Actor,			 //< ゲームオブジェクト
 			Light,			 //< ライト
 			Particle,		 //< パーティクル
 			Event,			 //< イベント

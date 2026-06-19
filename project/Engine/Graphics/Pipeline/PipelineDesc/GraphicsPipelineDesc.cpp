@@ -122,5 +122,3 @@ size_t GraphicsPipelineDesc::Hash() const noexcept {
 
 	return h;
 }
-
-

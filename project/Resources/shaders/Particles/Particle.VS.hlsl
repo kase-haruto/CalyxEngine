@@ -22,8 +22,16 @@ struct ParticleData {
 	float3 position;
 	float3 scale;
 	float4 color;
-	float rotation; // Z軸スピン角
+	float3 rotation; // XYZ spin angles
+	float3 alignDirection;
+	uint alignToDirection;
 };
+
+float3 RotateAroundAxis(float3 v, float3 axis, float angle) {
+	float s = sin(angle);
+	float c = cos(angle);
+	return v * c + cross(axis, v) * s + axis * dot(axis, v) * (1.0f - c);
+}
 
 struct Camera {
 	float4x4 view;
@@ -97,16 +105,29 @@ VertexShaderOutput main(VertexShaderInput input,
 		forward = float3(0, 0, 1);
 	}
 
-	// ==========================================================
-	//  Z軸スピン回転（ローカル平面上で right/up を回転）
-	// ==========================================================
-	float s = sin(p.rotation);
-	float c = cos(p.rotation);
+	float3 rotatedRight = right;
+	float3 rotatedUp = up;
+	float3 rotatedForward = forward;
 
-	// 回転後の基底ベクトルを計算
-	float3 rotatedRight = right * c + up * s;
-	float3 rotatedUp = up * c - right * s;
-	float3 rotatedForward = normalize(cross(rotatedRight, rotatedUp)); // Z軸回転なのでForwardは原則変わらないが、直交性を維持
+	if(p.alignToDirection != 0) {
+		float3 dir = normalize(p.alignDirection);
+		float2 projectedDir = float2(dot(dir, right), dot(dir, up));
+		if(length(projectedDir) > 0.001f) {
+			projectedDir = normalize(projectedDir);
+			rotatedUp = right * projectedDir.x + up * projectedDir.y;
+			rotatedRight = normalize(cross(rotatedUp, forward));
+			rotatedForward = normalize(cross(rotatedRight, rotatedUp));
+		}
+	}
+
+	rotatedUp = normalize(RotateAroundAxis(rotatedUp, rotatedRight, p.rotation.x));
+	rotatedForward = normalize(RotateAroundAxis(rotatedForward, rotatedRight, p.rotation.x));
+
+	rotatedRight = normalize(RotateAroundAxis(rotatedRight, rotatedUp, p.rotation.y));
+	rotatedForward = normalize(RotateAroundAxis(rotatedForward, rotatedUp, p.rotation.y));
+
+	rotatedRight = normalize(RotateAroundAxis(rotatedRight, rotatedForward, p.rotation.z));
+	rotatedUp = normalize(RotateAroundAxis(rotatedUp, rotatedForward, p.rotation.z));
 
 	// ==========================================================
 	//  頂点計算

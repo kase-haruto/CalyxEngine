@@ -1,5 +1,6 @@
 #include "EffectAsset.h"
 
+#include <CalyxEngine/Project.h>
 #include <Engine/Foundation/Utility/FileSystem/FileSystemHelper.h>
 #include <externals/nlohmann/json.hpp>
 
@@ -32,7 +33,7 @@ namespace CalyxEngine {
 
 	bool EffectAsset::Load(const std::filesystem::path& path) {
 		const std::string name = path.stem().string();
-		const std::filesystem::path& fullPath = "Resources/Assets/Effects/" + name + ".effect";
+		const std::filesystem::path fullPath = Calyx::ResolveAssetPath(std::filesystem::path("Effects") / (name + ".effect"));
 		nlohmann::json root;
 		if(!ReadJson(fullPath, root)) return false;
 		data_ = root.get<EffectAssetData>();
@@ -55,9 +56,13 @@ namespace CalyxEngine {
 			EffectEmitterAssetData emitter{};
 			emitter.name		   = node.name;
 			emitter.transform	   = node.transform;
+			emitter.transform.translation = {};
 			emitter.isDrawEnable = node.isDrawEnable;
 			emitter.isGpu		   = node.isGpu;
 			emitter.emitter	   = nlohmann::json(node.emitter).get<EmitterConfig>();
+			emitter.emitter.position = {};
+			emitter.emitter.rotation = emitter.transform.rotation;
+			emitter.emitter.worldScale = emitter.transform.scale;
 			data.emitters.push_back(std::move(emitter));
 		}
 
@@ -72,9 +77,13 @@ namespace CalyxEngine {
 			EffectEmitterNodeConfig node{};
 			node.name		  = emitterData.name;
 			node.transform	  = emitterData.transform;
+			node.transform.translation = {};
 			node.isDrawEnable = emitterData.isDrawEnable;
 			node.isGpu		  = emitterData.isGpu;
 			node.emitter	  = nlohmann::json(emitterData.emitter).get<EmitterConfig>();
+			node.emitter.position = {};
+			node.emitter.rotation = node.transform.rotation;
+			node.emitter.worldScale = node.transform.scale;
 			config.emitters.push_back(std::move(node));
 		}
 

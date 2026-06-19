@@ -12,6 +12,8 @@ public:
 	//===================================================================*/
 	//                   public functions
 	//===================================================================*/
+	~DxStructuredBuffer() override { Reset(); }
+
 	void Initialize(Microsoft::WRL::ComPtr<ID3D12Device> device, UINT elementCount = 1) override;
 	void InitializeAsRW(Microsoft::WRL::ComPtr<ID3D12Device> device, UINT elementCount);
 

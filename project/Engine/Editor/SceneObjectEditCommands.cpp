@@ -88,7 +88,7 @@ namespace CalyxEngine {
 			if(auto dir = std::dynamic_pointer_cast<DirectionalLight>(object)) {
 				ctx->GetLightLibrary()->SetDirectionalLight(dir);
 			} else if(auto point = std::dynamic_pointer_cast<PointLight>(object)) {
-				ctx->GetLightLibrary()->SetPointLight(point);
+				ctx->GetLightLibrary()->AddPointLight(point);
 			} else if(auto debugCamera = std::dynamic_pointer_cast<DebugCamera>(object)) {
 				ctx->GetCameraMgr()->SetDebugCamera(debugCamera);
 			} else if(auto camera = std::dynamic_pointer_cast<Camera3d>(object)) {

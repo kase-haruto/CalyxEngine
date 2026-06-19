@@ -59,20 +59,24 @@ float3 RandomInCone(RandomGenerator generator, float angleDeg) {
 	return float3(cos(theta) * r, height, sin(theta) * r);
 }
 
+float3 RotateByQuaternion(float3 v, float4 q) {
+	return v + 2.0f * cross(q.xyz, cross(q.xyz, v) + q.w * v);
+}
+
 float3 GenerateSpawnOffset(RandomGenerator generator) {
+	float3 offset;
 	if(gEmitter.shape == 0) {
-		return float3(0.0f, 0.0f, 0.0f);
+		offset = float3(0.0f, 0.0f, 0.0f);
+	} else if(gEmitter.shape == 2) {
+		offset = RandomInCone(generator, gEmitter.angle) * gEmitter.radius;
+	} else if(gEmitter.shape == 3) {
+		offset = RandomInCircle(generator) * gEmitter.radius;
+	} else if(gEmitter.shape == 4) {
+		offset = RandomInBox(generator) * gEmitter.shapeSize;
+	} else {
+		offset = RandomInSphere(generator) * gEmitter.radius;
 	}
-	if(gEmitter.shape == 2) {
-		return RandomInCone(generator, gEmitter.angle) * gEmitter.radius;
-	}
-	if(gEmitter.shape == 3) {
-		return RandomInCircle(generator) * gEmitter.radius;
-	}
-	if(gEmitter.shape == 4) {
-		return RandomInBox(generator) * gEmitter.shapeSize;
-	}
-	return RandomInSphere(generator) * gEmitter.radius;
+	return RotateByQuaternion(offset, gEmitter.rotation);
 }
 
 [numthreads(1024, 1, 1)]

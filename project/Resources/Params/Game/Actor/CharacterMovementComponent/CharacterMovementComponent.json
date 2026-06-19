@@ -1,0 +1,12 @@
+{
+    "fields": {
+        "floorProbeDistance": 0.3499999940395355,
+        "floorSnapDistance": 0.30000001192092896,
+        "gravity": 22.100000381469727,
+        "jumpVelocity": 5.900000095367432,
+        "maxFallSpeed": 50.0,
+        "maxWalkSpeed": 5.900000095367432,
+        "skinWidth": 0.009999999776482582,
+        "walkableFloorAngle": 61.0
+    }
+}

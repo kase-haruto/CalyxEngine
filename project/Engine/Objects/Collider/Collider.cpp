@@ -6,6 +6,7 @@
 #include <Engine/Collision/CollisionManager.h>
 
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
+#include <Engine/Foundation/Utility/Converter/EnumConverter.h>
 #include <externals/imgui/imgui.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -19,9 +20,7 @@ Collider::Collider(bool isEnuble) {
 }
 
 Collider::~Collider() {
-	if(isCollisionEnabled_) {
-		CollisionManager::GetInstance()->Unregister(this);
-	}
+	CollisionManager::GetInstance()->Unregister(this);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -35,7 +34,13 @@ void Collider::ShowGui() {
 
 	if(!isCollisionEnabled_) return;
 
+	// コライダーのタイプを作成
+	CalyxEngine::EnumConverter<ColliderType>::Combo("Collider Type", type_);
+	//コライダーのtargetタイプ設定
+	CalyxEngine::EnumConverter<ColliderType>::Combo("Target Type", targetType_);
+
 	GuiCmd::CheckBox("Draw Collider", isDraw_);
+	GuiCmd::CheckBox("Is Trigger", isTrigger_);
 	GuiCmd::ColorEdit4("Collider Color", color_);
 	GuiCmd::DragFloat3("Offset", offset_);
 	GuiCmd::DragFloat3("Rotate Offset", rotateOffset_);
@@ -85,12 +90,13 @@ void Collider::NotifyCollisionExit(Collider* other) {
 //		config適用
 /////////////////////////////////////////////////////////////////////////////////////////
 void Collider::ApplyConfig(const ColliderConfig& config) {
-	isCollisionEnabled_ = config.isCollisionEnabled;
 	isDraw_				= config.isDraw;
+	isTrigger_			= config.isTrigger;
 	type_				= static_cast<ColliderType>(config.colliderType);
 	targetType_			= static_cast<ColliderType>(config.targetType);
 	offset_				= config.offset;
 	rotateOffset_		= config.rotate;
+	SetCollisionEnabled(config.isCollisionEnabled);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -100,6 +106,7 @@ ColliderConfig Collider::ExtractConfig() const {
 	ColliderConfig config;
 	config.isCollisionEnabled = isCollisionEnabled_;
 	config.isDraw			  = isDraw_;
+	config.isTrigger		  = isTrigger_;
 	config.colliderType		  = static_cast<int>(type_);
 	config.targetType		  = static_cast<int>(targetType_);
 	config.offset			  = offset_;
