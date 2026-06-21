@@ -92,7 +92,9 @@ namespace {
 	}
 
 	bool IsSdkDirectory(const std::filesystem::path& path) {
-		return std::filesystem::exists(path / L"Include" / L"CalyxEngine" / L"Application.h");
+		return std::filesystem::exists(path / L"Include" / L"CalyxEngine" / L"Application.h") &&
+			   std::filesystem::exists(path / L"Include" / L"Data" / L"Engine") &&
+			   std::filesystem::exists(path / L"Include" / L"externals" / L"nlohmann" / L"json.hpp");
 	}
 
 	bool IsEnginePackageDirectory(const std::filesystem::path& path) {

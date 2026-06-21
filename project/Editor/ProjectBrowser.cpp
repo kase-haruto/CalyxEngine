@@ -362,7 +362,9 @@ $ErrorActionPreference = 'Stop'
 
 $versionDir = Join-Path $InstallRoot $VersionValue
 $sdkHeader = Join-Path $versionDir 'SDK\Include\CalyxEngine\Application.h'
-if (Test-Path $sdkHeader) {
+$sdkData = Join-Path $versionDir 'SDK\Include\Data\Engine'
+$sdkNlohmann = Join-Path $versionDir 'SDK\Include\externals\nlohmann\json.hpp'
+if ((Test-Path $sdkHeader) -and (Test-Path $sdkData) -and (Test-Path $sdkNlohmann)) {
 	exit 0
 }
 
@@ -515,13 +517,15 @@ try {
 			}
 			stream << "  </ItemGroup>\n";
 			stream << "  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />\n";
-			stream << "  <Target Name=\"EnsureCalyxEngineSdk\" BeforeTargets=\"PrepareForBuild\" Condition=\"!Exists('$(CalyxEngineSdkDir)\\Include\\CalyxEngine\\Application.h')\">\n";
+			stream << "  <Target Name=\"EnsureCalyxEngineSdk\" BeforeTargets=\"PrepareForBuild\" Condition=\"!Exists('$(CalyxEngineSdkDir)\\Include\\CalyxEngine\\Application.h') or !Exists('$(CalyxEngineSdkDir)\\Include\\Data\\Engine') or !Exists('$(CalyxEngineSdkDir)\\Include\\externals\\nlohmann\\json.hpp')\">\n";
 			stream << "    <Message Importance=\"high\" Text=\"Installing Calyx SDK $(CalyxEngineVersion) from GitHub Releases...\" />\n";
 			stream << "    <Exec Command=\"powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)Tools\\InstallCalyxSdk.ps1&quot; -VersionValue &quot;$(CalyxEngineVersion)&quot; -InstallRoot &quot;$(LOCALAPPDATA)\\CalyxEngine\\Engines&quot;\" />\n";
 			stream << "  </Target>\n";
 			stream << "  <Target Name=\"ValidateCalyxEngineSdkDir\" BeforeTargets=\"PrepareForBuild\" DependsOnTargets=\"EnsureCalyxEngineSdk\">\n";
 			stream << "    <Error Condition=\"'$(CalyxEngineSdkDir)'==''\" Text=\"CalyxEngineSdkDir is empty. Set CALYX_ENGINE_SDK_DIR or install the SDK under %LOCALAPPDATA%\\CalyxEngine\\Engines\\$(CalyxEngineVersion)\\SDK.\" />\n";
 			stream << "    <Error Condition=\"'$(CalyxEngineSdkDir)'!='' and !Exists('$(CalyxEngineSdkDir)\\Include\\CalyxEngine\\Application.h')\" Text=\"CalyxEngineSdkDir does not point to a Calyx SDK directory: $(CalyxEngineSdkDir)\" />\n";
+			stream << "    <Error Condition=\"'$(CalyxEngineSdkDir)'!='' and !Exists('$(CalyxEngineSdkDir)\\Include\\Data\\Engine')\" Text=\"CalyxEngineSdkDir is missing Data headers. Update or reinstall the Calyx engine SDK: $(CalyxEngineSdkDir)\" />\n";
+			stream << "    <Error Condition=\"'$(CalyxEngineSdkDir)'!='' and !Exists('$(CalyxEngineSdkDir)\\Include\\externals\\nlohmann\\json.hpp')\" Text=\"CalyxEngineSdkDir is missing external headers. Update or reinstall the Calyx engine SDK: $(CalyxEngineSdkDir)\" />\n";
 			stream << "    <Error Condition=\"'$(CalyxEngineSdkDir)'!='' and !Exists('$(CalyxEngineSdkDir)\\Lib\\$(Configuration)\\CalyxEngine.lib')\" Text=\"CalyxEngine.lib was not found for $(Configuration). Update or reinstall the Calyx engine SDK: $(CalyxEngineSdkDir)\" />\n";
 			stream << "  </Target>\n";
 			stream << "  <ImportGroup Label=\"ExtensionTargets\" />\n";
