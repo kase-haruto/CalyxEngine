@@ -25,7 +25,7 @@ namespace CalyxEditor {
 			{ProjectTemplateType::Blank, "Blank", "空のプロジェクト", "Source", ""},
 			{ProjectTemplateType::Demo, "Demo", "デモプロジェクト", "Source", "Resources/Assets/Scenes/DemoScene.scene"},
 		};
-		constexpr const char* kDefaultEngineVersion = "v1.0.1";
+		constexpr const char* kDefaultEngineVersion = "v1.0.8";
 
 		// 新規プロジェクトの初期作成先のディレクトリパスを取得（ユーザーのドキュメントフォルダを指す）
 		std::filesystem::path DefaultUserProjectDirectory() {
@@ -333,18 +333,95 @@ namespace CalyxEditor {
 			std::stringstream stream;
 			stream << "# " << project.name << "\n\n";
 			stream << "## ビルドとデバッグ\n\n";
-			stream << "このプロジェクトはゲームコードを EXE としてビルドし、Visual Studio から直接実行します。\n\n";
-			stream << "1. `CALYX_ENGINE_SDK_DIR` に、チームで固定した Calyx SDK のパスを設定します。\n";
-			stream << "2. `" << project.name << ".sln` を Visual Studio で開きます。\n";
-			stream << "3. `" << project.name << "` をスタートアッププロジェクトにします。\n";
-			stream << "4. Debug/Develop/Release を選んで F5 実行します。\n\n";
-			stream << "PowerShell の設定例:\n\n";
+			stream << "このプロジェクトはゲームコードを EXE としてビルドし、CalyxLauncher 経由で実行します。\n\n";
+			stream << "1. `" << project.name << ".sln` を Visual Studio で開きます。\n";
+			stream << "2. `" << project.name << "` をスタートアッププロジェクトにします。\n";
+			stream << "3. Debug/Develop/Release を選んで F5 実行します。\n\n";
+			stream << "既定では `.calyxproj` の `engineVersion` に対応する SDK を `%LOCALAPPDATA%\\\\CalyxEngine\\\\Engines\\\\" << project.engineVersion << "\\\\SDK` から参照します。\n";
+			stream << "初回ビルド時にローカルに対応バージョンが無い場合、`Tools\\\\InstallCalyxSdk.ps1` が CalyxEngine の GitHub Releases から同じ tag の zip を取得します。\n";
+			stream << "CalyxLauncher も起動時に同じバージョン解決を行います。\n";
+			stream << "別の SDK を使いたい場合だけ `CALYX_ENGINE_SDK_DIR` を設定してください。\n\n";
+			stream << "PowerShell の override 設定例:\n\n";
 			stream << "```powershell\n";
 			stream << "[Environment]::SetEnvironmentVariable(\"CALYX_ENGINE_SDK_DIR\", \"C:\\\\Calyx\\\\Engines\\\\" << project.engineVersion << "\\\\SDK\", \"User\")\n";
 			stream << "```\n\n";
 			stream << "ブレークポイントはゲーム側の `.cpp` に置けます。\n\n";
 			stream << "Engine の更新はリードが検証後に `.calyxproj` の `engineVersion` を更新し、チームへ共有してください。\n";
 			return stream.str();
+		}
+
+		std::string MakeGameInstallCalyxSdkScript() {
+			return R"ps1(param(
+	[Parameter(Mandatory = $true)]
+	[string]$VersionValue,
+	[Parameter(Mandatory = $true)]
+	[string]$InstallRoot
+)
+
+$ErrorActionPreference = 'Stop'
+
+$versionDir = Join-Path $InstallRoot $VersionValue
+$sdkHeader = Join-Path $versionDir 'SDK\Include\CalyxEngine\Application.h'
+if (Test-Path $sdkHeader) {
+	exit 0
+}
+
+$headers = @{ 'User-Agent' = 'CalyxGameBuild' }
+$tags = @($VersionValue)
+if (-not $VersionValue.StartsWith('v')) {
+	$tags += "v$VersionValue"
+}
+
+$release = $null
+foreach ($tag in $tags) {
+	try {
+		$release = Invoke-RestMethod -Headers $headers -Uri "https://api.github.com/repos/kase-haruto/CalyxEngine/releases/tags/$tag"
+		break
+	} catch {
+	}
+}
+
+if ($null -eq $release) {
+	throw "CalyxEngine release was not found for engineVersion: $VersionValue"
+}
+
+$asset = $release.assets | Where-Object { $_.name -match '\.zip$' } | Select-Object -First 1
+if ($null -eq $asset) {
+	throw "No zip asset was found in release: $($release.tag_name)"
+}
+
+$tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("CalyxEngine-" + [System.Guid]::NewGuid().ToString("N"))
+$extractDir = Join-Path $tempRoot "extract"
+New-Item -ItemType Directory -Force -Path $extractDir | Out-Null
+
+try {
+	$zipPath = Join-Path $tempRoot $asset.name
+	Invoke-WebRequest -Headers $headers -Uri $asset.browser_download_url -OutFile $zipPath
+	Expand-Archive -Path $zipPath -DestinationPath $extractDir -Force
+
+	$candidates = @((Get-Item $extractDir)) + @(Get-ChildItem $extractDir -Directory -Recurse)
+	$package = $candidates |
+		Where-Object {
+			(Test-Path (Join-Path $_.FullName 'CalyxEditor.exe')) -and
+			(Test-Path (Join-Path $_.FullName 'SDK\Include\CalyxEngine\Application.h'))
+		} |
+		Select-Object -First 1
+
+	if ($null -eq $package) {
+		throw "Downloaded package does not contain CalyxEditor.exe and SDK\Include\CalyxEngine\Application.h"
+	}
+
+	New-Item -ItemType Directory -Force -Path $InstallRoot | Out-Null
+	if (Test-Path $versionDir) {
+		Remove-Item -LiteralPath $versionDir -Recurse -Force
+	}
+	Move-Item -LiteralPath $package.FullName -Destination $versionDir
+} finally {
+	if (Test-Path $tempRoot) {
+		Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+	}
+}
+)ps1";
 		}
 
 		// ゲーム用vcxprojを生成
@@ -355,7 +432,7 @@ namespace CalyxEditor {
 
 			const std::string projectName = EscapeXml(project.name);
 			const std::string sourceDir = project.sourceDirectory.generic_string();
-			const std::string sdk = "$(CALYX_ENGINE_SDK_DIR)";
+			const std::string sdk = "$(CalyxEngineSdkDir)";
 
 			std::stringstream stream;
 			stream << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
@@ -384,12 +461,17 @@ namespace CalyxEditor {
 			stream << "  <ImportGroup Label=\"PropertySheets\" Condition=\"'$(Configuration)|$(Platform)'=='Release|x64'\"><Import Project=\"$(UserRootDir)\\Microsoft.Cpp.$(Platform).user.props\" Condition=\"exists('$(UserRootDir)\\Microsoft.Cpp.$(Platform).user.props')\" Label=\"LocalAppDataPlatform\" /></ImportGroup>\n";
 			stream << "  <ImportGroup Label=\"PropertySheets\" Condition=\"'$(Configuration)|$(Platform)'=='Develop|x64'\"><Import Project=\"$(UserRootDir)\\Microsoft.Cpp.$(Platform).user.props\" Condition=\"exists('$(UserRootDir)\\Microsoft.Cpp.$(Platform).user.props')\" Label=\"LocalAppDataPlatform\" /></ImportGroup>\n";
 			stream << "  <PropertyGroup Label=\"UserMacros\" />\n";
+			stream << "  <PropertyGroup Label=\"CalyxEngineSdk\">\n";
+			stream << "    <CalyxEngineVersion>" << EscapeXml(project.engineVersion) << "</CalyxEngineVersion>\n";
+			stream << "    <CalyxEngineSdkDir Condition=\"'$(CalyxEngineSdkDir)'=='' and '$(CALYX_ENGINE_SDK_DIR)'!=''\">$(CALYX_ENGINE_SDK_DIR)</CalyxEngineSdkDir>\n";
+			stream << "    <CalyxEngineSdkDir Condition=\"'$(CalyxEngineSdkDir)'==''\">$(LOCALAPPDATA)\\CalyxEngine\\Engines\\$(CalyxEngineVersion)\\SDK</CalyxEngineSdkDir>\n";
+			stream << "  </PropertyGroup>\n";
 			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Debug|x64'\"><IntDir>Generated\\Obj\\$(ProjectName)\\$(Configuration)\\</IntDir><OutDir>Generated\\Outputs\\$(Configuration)\\</OutDir><LinkIncremental>true</LinkIncremental></PropertyGroup>\n";
 			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Release|x64'\"><IntDir>Generated\\Obj\\$(ProjectName)\\$(Configuration)\\</IntDir><OutDir>Generated\\Outputs\\$(Configuration)\\</OutDir></PropertyGroup>\n";
 			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Develop|x64'\"><IntDir>Generated\\Obj\\$(ProjectName)\\$(Configuration)\\</IntDir><OutDir>Generated\\Outputs\\$(Configuration)\\</OutDir></PropertyGroup>\n";
-			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Debug|x64'\"><LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory><LocalDebuggerCommandArguments>&quot;$(ProjectDir)" << EscapeXml(project.name) << ".calyxproj&quot; --config &quot;$(Configuration)&quot;</LocalDebuggerCommandArguments></PropertyGroup>\n";
-			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Release|x64'\"><LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory><LocalDebuggerCommandArguments>&quot;$(ProjectDir)" << EscapeXml(project.name) << ".calyxproj&quot; --config &quot;$(Configuration)&quot;</LocalDebuggerCommandArguments></PropertyGroup>\n";
-			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Develop|x64'\"><LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory><LocalDebuggerCommandArguments>&quot;$(ProjectDir)" << EscapeXml(project.name) << ".calyxproj&quot; --config &quot;$(Configuration)&quot;</LocalDebuggerCommandArguments></PropertyGroup>\n";
+			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Debug|x64'\"><LocalDebuggerCommand>$(CalyxEngineSdkDir)\\..\\CalyxLauncher.exe</LocalDebuggerCommand><LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory><LocalDebuggerCommandArguments>&quot;$(ProjectDir)" << EscapeXml(project.name) << ".calyxproj&quot; --config &quot;$(Configuration)&quot; --target game --skip-build</LocalDebuggerCommandArguments></PropertyGroup>\n";
+			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Release|x64'\"><LocalDebuggerCommand>$(CalyxEngineSdkDir)\\..\\CalyxLauncher.exe</LocalDebuggerCommand><LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory><LocalDebuggerCommandArguments>&quot;$(ProjectDir)" << EscapeXml(project.name) << ".calyxproj&quot; --config &quot;$(Configuration)&quot; --target game --skip-build</LocalDebuggerCommandArguments></PropertyGroup>\n";
+			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Develop|x64'\"><LocalDebuggerCommand>$(CalyxEngineSdkDir)\\..\\CalyxLauncher.exe</LocalDebuggerCommand><LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory><LocalDebuggerCommandArguments>&quot;$(ProjectDir)" << EscapeXml(project.name) << ".calyxproj&quot; --config &quot;$(Configuration)&quot; --target game --skip-build</LocalDebuggerCommandArguments></PropertyGroup>\n";
 
 			const char* configs[] = {"Debug", "Release", "Develop"};
 			for(const char* config : configs) {
@@ -417,11 +499,11 @@ namespace CalyxEditor {
 				}
 				stream << "      <GenerateDebugInformation>true</GenerateDebugInformation>\n";
 				stream << "      <AdditionalDependencies>CalyxEngine.lib;DirectXTex.lib;" << (debug ? "assimp-vc143-mtd.lib" : "assimp-vc143-mt.lib") << ";%(AdditionalDependencies)</AdditionalDependencies>\n";
-				stream << "      <AdditionalLibraryDirectories>$(CALYX_ENGINE_SDK_DIR)\\Lib\\$(Configuration);$(CALYX_ENGINE_SDK_DIR)\\Lib\\DirectXTex\\x64\\" << (debug ? "Debug" : "Release") << ";$(CALYX_ENGINE_SDK_DIR)\\Lib\\assimp\\" << (debug ? "Debug" : "Release") << ";%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>\n";
+				stream << "      <AdditionalLibraryDirectories>$(CalyxEngineSdkDir)\\Lib\\$(Configuration);$(CalyxEngineSdkDir)\\Lib\\DirectXTex\\x64\\" << (debug ? "Debug" : "Release") << ";$(CalyxEngineSdkDir)\\Lib\\assimp\\" << (debug ? "Debug" : "Release") << ";%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>\n";
 				stream << "      <AdditionalOptions>/IGNORE:4099 /FORCE:MULTIPLE %(AdditionalOptions)</AdditionalOptions>\n";
 				stream << "    </Link>\n";
-				stream << "    <PostBuildEvent><Command>if exist \"$(CALYX_ENGINE_SDK_DIR)\\Bin\\$(Configuration)\\CalyxEngine.dll\" copy \"$(CALYX_ENGINE_SDK_DIR)\\Bin\\$(Configuration)\\CalyxEngine.dll\" \"$(TargetDir)CalyxEngine.dll\"\n";
-				stream << "if not exist \"$(TargetDir)CalyxEngine.dll\" if exist \"$(CALYX_ENGINE_SDK_DIR)\\..\\CalyxEngine.dll\" copy \"$(CALYX_ENGINE_SDK_DIR)\\..\\CalyxEngine.dll\" \"$(TargetDir)CalyxEngine.dll\"\n";
+				stream << "    <PostBuildEvent><Command>if exist \"$(CalyxEngineSdkDir)\\Bin\\$(Configuration)\\CalyxEngine.dll\" copy \"$(CalyxEngineSdkDir)\\Bin\\$(Configuration)\\CalyxEngine.dll\" \"$(TargetDir)CalyxEngine.dll\"\n";
+				stream << "if not exist \"$(TargetDir)CalyxEngine.dll\" if exist \"$(CalyxEngineSdkDir)\\..\\CalyxEngine.dll\" copy \"$(CalyxEngineSdkDir)\\..\\CalyxEngine.dll\" \"$(TargetDir)CalyxEngine.dll\"\n";
 				stream << "if exist \"$(WindowsSdkDir)bin\\$(TargetPlatformVersion)\\x64\\dxcompiler.dll\" copy \"$(WindowsSdkDir)bin\\$(TargetPlatformVersion)\\x64\\dxcompiler.dll\" \"$(TargetDir)dxcompiler.dll\"\n";
 				stream << "if exist \"$(WindowsSdkDir)bin\\$(TargetPlatformVersion)\\x64\\dxil.dll\" copy \"$(WindowsSdkDir)bin\\$(TargetPlatformVersion)\\x64\\dxil.dll\" \"$(TargetDir)dxil.dll\"</Command></PostBuildEvent>\n";
 				stream << "  </ItemDefinitionGroup>\n";
@@ -433,10 +515,14 @@ namespace CalyxEditor {
 			}
 			stream << "  </ItemGroup>\n";
 			stream << "  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />\n";
-			stream << "  <Target Name=\"ValidateCalyxEngineSdkDir\" BeforeTargets=\"PrepareForBuild\">\n";
-			stream << "    <Error Condition=\"'$(CALYX_ENGINE_SDK_DIR)'==''\" Text=\"CALYX_ENGINE_SDK_DIR is not set. Set it to the installed Calyx engine SDK directory and reopen Visual Studio.\" />\n";
-			stream << "    <Error Condition=\"'$(CALYX_ENGINE_SDK_DIR)'!='' and !Exists('$(CALYX_ENGINE_SDK_DIR)\\Include\\CalyxEngine\\Application.h')\" Text=\"CALYX_ENGINE_SDK_DIR does not point to a Calyx SDK directory: $(CALYX_ENGINE_SDK_DIR)\" />\n";
-			stream << "    <Error Condition=\"'$(CALYX_ENGINE_SDK_DIR)'!='' and !Exists('$(CALYX_ENGINE_SDK_DIR)\\Lib\\$(Configuration)\\CalyxEngine.lib')\" Text=\"CalyxEngine.lib was not found for $(Configuration). Update or reinstall the Calyx engine SDK: $(CALYX_ENGINE_SDK_DIR)\" />\n";
+			stream << "  <Target Name=\"EnsureCalyxEngineSdk\" BeforeTargets=\"PrepareForBuild\" Condition=\"!Exists('$(CalyxEngineSdkDir)\\Include\\CalyxEngine\\Application.h')\">\n";
+			stream << "    <Message Importance=\"high\" Text=\"Installing Calyx SDK $(CalyxEngineVersion) from GitHub Releases...\" />\n";
+			stream << "    <Exec Command=\"powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)Tools\\InstallCalyxSdk.ps1&quot; -VersionValue &quot;$(CalyxEngineVersion)&quot; -InstallRoot &quot;$(LOCALAPPDATA)\\CalyxEngine\\Engines&quot;\" />\n";
+			stream << "  </Target>\n";
+			stream << "  <Target Name=\"ValidateCalyxEngineSdkDir\" BeforeTargets=\"PrepareForBuild\" DependsOnTargets=\"EnsureCalyxEngineSdk\">\n";
+			stream << "    <Error Condition=\"'$(CalyxEngineSdkDir)'==''\" Text=\"CalyxEngineSdkDir is empty. Set CALYX_ENGINE_SDK_DIR or install the SDK under %LOCALAPPDATA%\\CalyxEngine\\Engines\\$(CalyxEngineVersion)\\SDK.\" />\n";
+			stream << "    <Error Condition=\"'$(CalyxEngineSdkDir)'!='' and !Exists('$(CalyxEngineSdkDir)\\Include\\CalyxEngine\\Application.h')\" Text=\"CalyxEngineSdkDir does not point to a Calyx SDK directory: $(CalyxEngineSdkDir)\" />\n";
+			stream << "    <Error Condition=\"'$(CalyxEngineSdkDir)'!='' and !Exists('$(CalyxEngineSdkDir)\\Lib\\$(Configuration)\\CalyxEngine.lib')\" Text=\"CalyxEngine.lib was not found for $(Configuration). Update or reinstall the Calyx engine SDK: $(CalyxEngineSdkDir)\" />\n";
 			stream << "  </Target>\n";
 			stream << "  <ImportGroup Label=\"ExtensionTargets\" />\n";
 			stream << "</Project>\n";
@@ -568,6 +654,9 @@ namespace CalyxEditor {
 				return false;
 			}
 			if(!WriteTextFile(project.rootDirectory / (project.name + ".sln"), MakeGameSolution(project, projectGuid, solutionGuid))) {
+				return false;
+			}
+			if(!WriteTextFile(project.rootDirectory / "Tools" / "InstallCalyxSdk.ps1", MakeGameInstallCalyxSdkScript())) {
 				return false;
 			}
 			if(!WriteTextFile(project.rootDirectory / ".gitignore", MakeGameGitIgnore())) {
