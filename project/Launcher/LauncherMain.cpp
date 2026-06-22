@@ -14,7 +14,6 @@
 namespace {
 
 	struct ProjectInfo {
-		std::filesystem::path directory;
 		std::string name;
 		std::string engineVersion;
 	};
@@ -47,6 +46,15 @@ namespace {
 		return result;
 	}
 
+	bool HasFlag(const std::vector<std::wstring>& args, const std::wstring& flagName) {
+		for(const auto& arg : args) {
+			if(arg == flagName) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	std::filesystem::path DefaultEngineInstallRoot() {
 		wchar_t* localAppData = nullptr;
 		size_t length = 0;
@@ -59,49 +67,67 @@ namespace {
 		return std::filesystem::path(L"CalyxEngine") / L"Engines";
 	}
 
-	std::filesystem::path TemporaryScriptPath() {
-		wchar_t tempPath[MAX_PATH]{};
-		if(::GetTempPathW(MAX_PATH, tempPath) == 0) {
-			return std::filesystem::temp_directory_path() / L"CalyxEngineDownload.ps1";
+	std::filesystem::path DefaultDownloadDirectory() {
+		wchar_t* localAppData = nullptr;
+		size_t length = 0;
+		if(_wdupenv_s(&localAppData, &length, L"LOCALAPPDATA") == 0 && localAppData) {
+			std::filesystem::path path = std::filesystem::path(localAppData) / L"CalyxEngine" / L"Downloads";
+			std::free(localAppData);
+			return path;
 		}
 
-		std::wstringstream name;
-		name << L"CalyxEngineDownload-" << ::GetCurrentProcessId() << L".ps1";
-		return std::filesystem::path(tempPath) / name.str();
+		return std::filesystem::path(L"CalyxEngine") / L"Downloads";
 	}
 
-	std::filesystem::path ReadProjectInfo(const std::filesystem::path& projectFile, ProjectInfo& outProject) {
+	bool ReadProjectInfo(const std::filesystem::path& projectFile, ProjectInfo& outProject) {
 		std::ifstream file(projectFile);
 		if(!file) {
-			return {};
+			return false;
 		}
 
 		nlohmann::json root;
 		try {
 			file >> root;
 		} catch(const nlohmann::json::exception&) {
-			return {};
+			return false;
 		}
 
-		// .calyxproj に保存された engineVersion を使用する。
-		// チームではリードがこの値を更新することで、全員が同じ Editor/SDK を使う。
-		outProject.directory = projectFile.parent_path();
+		// The launcher is intentionally driven by .calyxproj only. This keeps the
+		// game repository independent from the engine repository and lets the
+		// project pin the exact engine package it needs.
 		outProject.name = root.value("name", projectFile.stem().string());
 		outProject.engineVersion = root.value("engineVersion", std::string{});
-		return outProject.directory;
+		return !outProject.engineVersion.empty();
 	}
 
 	bool IsSdkDirectory(const std::filesystem::path& path) {
+		// These files are the minimum SDK surface a generated game project needs
+		// before MSBuild can compile user code.
 		return std::filesystem::exists(path / L"Include" / L"CalyxEngine" / L"Application.h") &&
 			   std::filesystem::exists(path / L"Include" / L"Data" / L"Engine") &&
-			   std::filesystem::exists(path / L"Include" / L"externals" / L"nlohmann" / L"json.hpp");
+			   std::filesystem::exists(path / L"Include" / L"externals" / L"nlohmann" / L"json.hpp") &&
+			   std::filesystem::exists(path / L"Lib");
 	}
 
 	bool IsEnginePackageDirectory(const std::filesystem::path& path) {
-		return std::filesystem::exists(path / L"CalyxEditor.exe") && IsSdkDirectory(path / L"SDK");
+		// CalyxLauncher updates packages only. CalyxGame.exe is the game host that
+		// developers run from the generated solution, while SDK is used by the
+		// generated game DLL project.
+		return std::filesystem::exists(path / L"CalyxGame.exe") && IsSdkDirectory(path / L"SDK");
 	}
 
 	std::filesystem::path ResolveEnginePackageDirectory(const std::string& engineVersion) {
+		if(engineVersion.empty()) {
+			return {};
+		}
+
+		const auto cachedPackage = DefaultEngineInstallRoot() / std::filesystem::path(engineVersion);
+		if(IsEnginePackageDirectory(cachedPackage)) {
+			return cachedPackage;
+		}
+
+		// CALYX_ENGINE_SDK_DIR remains a developer override for local package
+		// testing. It may point either at SDK itself or at the package root.
 		wchar_t* sdkDir = nullptr;
 		size_t length = 0;
 		if(_wdupenv_s(&sdkDir, &length, L"CALYX_ENGINE_SDK_DIR") == 0 && sdkDir) {
@@ -115,45 +141,17 @@ namespace {
 			}
 		}
 
-		// 環境変数が未設定の場合は、ユーザーごとのエンジンキャッシュから version 固定で探す。
-		// 例: %LOCALAPPDATA%\CalyxEngine\Engines\v1.0.1\CalyxEditor.exe
-		if(!engineVersion.empty()) {
-			const auto cachedPackage = DefaultEngineInstallRoot() / std::filesystem::path(engineVersion);
-			if(IsEnginePackageDirectory(cachedPackage)) {
-				return cachedPackage;
-			}
-		}
-
 		return {};
 	}
 
-	bool SetSdkDirectoryForChildProcesses(const std::filesystem::path& enginePackageDirectory) {
-		const auto sdkDirectory = enginePackageDirectory / L"SDK";
-		if(!IsSdkDirectory(sdkDirectory)) {
-			return false;
-		}
-
-		return ::SetEnvironmentVariableW(L"CALYX_ENGINE_SDK_DIR", sdkDirectory.c_str()) != FALSE;
-	}
-
-	int RunProcessAndWait(const std::wstring& commandLine, const std::filesystem::path& workingDirectory) {
+	int RunProcessAndWait(const std::wstring& commandLine) {
 		std::wstring mutableCommandLine = commandLine;
 
 		STARTUPINFOW startupInfo{};
 		startupInfo.cb = sizeof(startupInfo);
 		PROCESS_INFORMATION processInfo{};
 
-		if(!::CreateProcessW(
-			   nullptr,
-			   mutableCommandLine.data(),
-			   nullptr,
-			   nullptr,
-			   TRUE,
-			   0,
-			   nullptr,
-			   workingDirectory.empty() ? nullptr : workingDirectory.c_str(),
-			   &startupInfo,
-			   &processInfo)) {
+		if(!::CreateProcessW(nullptr, mutableCommandLine.data(), nullptr, nullptr, TRUE, 0, nullptr, nullptr, &startupInfo, &processInfo)) {
 			return static_cast<int>(::GetLastError());
 		}
 
@@ -173,19 +171,31 @@ namespace {
 		}
 
 		stream << R"ps1(param(
+	[Parameter(Mandatory = $true)]
 	[string]$VersionValue,
+	[Parameter(Mandatory = $true)]
 	[string]$InstallRoot
 )
 
 $ErrorActionPreference = 'Stop'
+
+# The release is expected at:
+# https://github.com/kase-haruto/CalyxEngine/releases/tag/<engineVersion>
+# If CALYX_ENGINE_GITHUB_TOKEN is present, private release assets can also be used.
 $headers = @{ 'User-Agent' = 'CalyxLauncher' }
+if ($env:CALYX_ENGINE_GITHUB_TOKEN) {
+	$headers['Authorization'] = "Bearer $env:CALYX_ENGINE_GITHUB_TOKEN"
+}
+
 $tags = @($VersionValue)
-if (-not $VersionValue.StartsWith('v')) {
+if ($VersionValue.StartsWith('v')) {
+	$tags += $VersionValue.Substring(1)
+} else {
 	$tags += "v$VersionValue"
 }
 
 $release = $null
-foreach ($tag in $tags) {
+foreach ($tag in $tags | Select-Object -Unique) {
 	try {
 		$release = Invoke-RestMethod -Headers $headers -Uri "https://api.github.com/repos/kase-haruto/CalyxEngine/releases/tags/$tag"
 		break
@@ -197,38 +207,83 @@ if ($null -eq $release) {
 	throw "CalyxEngine release was not found for engineVersion: $VersionValue"
 }
 
-$asset = $release.assets | Where-Object { $_.name -match '\.zip$' } | Select-Object -First 1
-if ($null -eq $asset) {
+# Prefer package-like zip names, but keep the rule flexible so release assets can
+# be named CalyxGamePackage-<version>.zip, CalyxSDK-<version>.zip, etc.
+# Do not stop at the first zip. A GitHub Release can contain source archives or
+# other support zips, so each candidate is downloaded and validated before it is
+# accepted as the engine package used by generated game projects.
+$assets = @($release.assets |
+	Where-Object { $_.name -match '\.zip$' } |
+	Sort-Object @{
+		Expression = {
+			$score = 0
+			if ($_.name -match 'Calyx') { $score -= 10 }
+			if ($_.name -match 'Game|Package|SDK|Runtime|Engine') { $score -= 5 }
+			if ($_.name -match 'Source|src') { $score += 20 }
+			if ($_.name -match [regex]::Escape($VersionValue)) { $score -= 2 }
+			$score
+		}
+	}, name)
+
+if ($assets.Count -eq 0) {
 	throw "No zip asset was found in release: $($release.tag_name)"
 }
 
 $versionDir = Join-Path $InstallRoot $VersionValue
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("CalyxEngine-" + [System.Guid]::NewGuid().ToString("N"))
-$extractDir = Join-Path $tempRoot "extract"
-New-Item -ItemType Directory -Force -Path $extractDir | Out-Null
 
 try {
-	$zipPath = Join-Path $tempRoot $asset.name
-	Invoke-WebRequest -Headers $headers -Uri $asset.browser_download_url -OutFile $zipPath
-	Expand-Archive -Path $zipPath -DestinationPath $extractDir -Force
+	Write-Host "CalyxLauncher: release '$($release.tag_name)' was found."
+	Add-Type -AssemblyName System.IO.Compression.FileSystem
 
-	$candidates = @((Get-Item $extractDir)) + @(Get-ChildItem $extractDir -Directory -Recurse)
-	$package = $candidates |
-		Where-Object {
-			(Test-Path (Join-Path $_.FullName 'CalyxEditor.exe')) -and
-			(Test-Path (Join-Path $_.FullName 'SDK\Include\CalyxEngine\Application.h'))
-		} |
-		Select-Object -First 1
+	$package = $null
+	foreach ($asset in $assets) {
+		# Use a separate extraction directory per asset so a failed candidate
+		# cannot leave files that make the next candidate look valid.
+		$assetRoot = Join-Path $tempRoot ([System.IO.Path]::GetFileNameWithoutExtension($asset.name))
+		$extractDir = Join-Path $assetRoot "extract"
+		New-Item -ItemType Directory -Force -Path $extractDir | Out-Null
+
+		$zipPath = Join-Path $assetRoot $asset.name
+		Write-Host "CalyxLauncher: downloading '$($asset.name)'..."
+		Invoke-WebRequest -Headers $headers -Uri $asset.browser_download_url -OutFile $zipPath
+		Write-Host "CalyxLauncher: download completed: $zipPath"
+
+		Write-Host "CalyxLauncher: extracting package..."
+		[System.IO.Compression.ZipFile]::ExtractToDirectory($zipPath, $extractDir)
+		Write-Host "CalyxLauncher: extraction completed: $extractDir"
+
+		# A valid game-development package must contain the runtime host exe and
+		# the SDK headers/libs that the generated game DLL links against.
+		$candidates = @((Get-Item $extractDir)) + @(Get-ChildItem $extractDir -Directory -Recurse)
+		$package = $candidates |
+			Where-Object {
+				(Test-Path (Join-Path $_.FullName 'CalyxGame.exe')) -and
+				(Test-Path (Join-Path $_.FullName 'SDK\Include\CalyxEngine\Application.h')) -and
+				(Test-Path (Join-Path $_.FullName 'SDK\Lib'))
+			} |
+			Select-Object -First 1
+
+		if ($null -ne $package) {
+			Write-Host "CalyxLauncher: valid engine package found in '$($asset.name)'."
+			break
+		}
+
+		Write-Host "CalyxLauncher: '$($asset.name)' is not a game runtime SDK package. Trying next zip asset."
+	}
 
 	if ($null -eq $package) {
-		throw "Downloaded package does not contain CalyxEditor.exe and SDK\Include\CalyxEngine\Application.h"
+		throw "No valid CalyxEngine game runtime SDK package was found in release '$($release.tag_name)'. The package must contain CalyxGame.exe, SDK\Include\CalyxEngine\Application.h, and SDK\Lib."
 	}
 
 	New-Item -ItemType Directory -Force -Path $InstallRoot | Out-Null
 	if (Test-Path $versionDir) {
+		Write-Host "CalyxLauncher: removing existing package: $versionDir"
 		Remove-Item -LiteralPath $versionDir -Recurse -Force
 	}
+	Write-Host "CalyxLauncher: installing package to: $versionDir"
 	Move-Item -LiteralPath $package.FullName -Destination $versionDir
+	Write-Host "CalyxLauncher: package installation completed."
 } finally {
 	if (Test-Path $tempRoot) {
 		Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
@@ -239,13 +294,18 @@ try {
 	}
 
 	bool DownloadEnginePackageFromGitHub(const std::string& engineVersion) {
-		if(engineVersion.empty()) {
+		const auto downloadDirectory = DefaultDownloadDirectory();
+		std::error_code ec;
+		std::filesystem::create_directories(downloadDirectory, ec);
+		if(ec) {
+			std::wcerr << L"Failed to create download directory: " << downloadDirectory.wstring() << L"\n";
 			return false;
 		}
 
-		const auto scriptPath = TemporaryScriptPath();
+		const std::wstring scriptName = std::wstring(engineVersion.begin(), engineVersion.end()) + L"-install.ps1";
+		const auto scriptPath = downloadDirectory / scriptName;
 		if(!WriteDownloadScript(scriptPath)) {
-			std::wcerr << L"Failed to write temporary download script: " << scriptPath.wstring() << L"\n";
+			std::wcerr << L"Failed to write download script: " << scriptPath.wstring() << L"\n";
 			return false;
 		}
 
@@ -258,128 +318,14 @@ try {
 		commandLine += L" -InstallRoot ";
 		commandLine += QuoteArgument(installRoot.wstring());
 
-		std::wcerr << L"Calyx SDK is not installed. Downloading engineVersion " << version << L" from GitHub Releases...\n";
-		const int exitCode = RunProcessAndWait(commandLine, {});
-		std::error_code ec;
-		std::filesystem::remove(scriptPath, ec);
-
+		std::wcerr << L"Installing CalyxEngine " << version << L" from GitHub Releases...\n";
+		const int exitCode = RunProcessAndWait(commandLine);
 		if(exitCode != 0) {
-			std::wcerr << L"Failed to download Calyx SDK. PowerShell exit code: " << exitCode << L"\n";
+			std::wcerr << L"CalyxEngine package installation failed. PowerShell exit code: " << exitCode << L"\n";
 			return false;
 		}
 
 		return true;
-	}
-
-	std::wstring GetOptionValue(const std::vector<std::wstring>& args, const std::wstring& name, const std::wstring& fallback) {
-		for(size_t i = 0; i + 1 < args.size(); ++i) {
-			if(args[i] == name) {
-				return args[i + 1];
-			}
-		}
-		return fallback;
-	}
-
-	bool HasTarget(const std::vector<std::wstring>& args, const std::wstring& targetName) {
-		for(size_t i = 0; i + 1 < args.size(); ++i) {
-			if(args[i] == L"--target" && args[i + 1] == targetName) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	bool HasFlag(const std::vector<std::wstring>& args, const std::wstring& flagName) {
-		for(const auto& arg : args) {
-			if(arg == flagName) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	std::filesystem::path FindMSBuild() {
-		const std::filesystem::path candidates[] = {
-			L"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\MSBuild.exe",
-			L"C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\MSBuild\\Current\\Bin\\amd64\\MSBuild.exe",
-			L"C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\MSBuild\\Current\\Bin\\amd64\\MSBuild.exe",
-			L"C:\\Program Files\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin\\amd64\\MSBuild.exe",
-		};
-
-		for(const auto& candidate : candidates) {
-			if(std::filesystem::exists(candidate)) {
-				return candidate;
-			}
-		}
-
-		return L"MSBuild.exe";
-	}
-
-	int BuildGameProject(const ProjectInfo& project, const std::wstring& config) {
-		const std::filesystem::path solutionPath = project.directory / (project.name + ".sln");
-		if(!std::filesystem::exists(solutionPath)) {
-			std::wcerr << L"Game solution was not found: " << solutionPath.wstring() << L"\n";
-			return 5;
-		}
-
-		std::wstring commandLine = QuoteArgument(FindMSBuild().wstring());
-		commandLine += L" ";
-		commandLine += QuoteArgument(solutionPath.wstring());
-		commandLine += L" /p:Configuration=";
-		commandLine += QuoteArgument(config);
-		commandLine += L" /p:Platform=x64 /m /v:minimal";
-
-		return RunProcessAndWait(commandLine, project.directory);
-	}
-
-	int LaunchEditor(const std::filesystem::path& editorExe, const std::vector<std::wstring>& forwardedArgs);
-
-	int LaunchGameExecutable(const ProjectInfo& project, const std::wstring& config) {
-		const std::wstring projectName(project.name.begin(), project.name.end());
-		const std::filesystem::path gameExe = project.directory / L"Generated" / L"Outputs" / config / (projectName + L".exe");
-		if(!std::filesystem::exists(gameExe)) {
-			std::wcerr << L"Game executable was not found: " << gameExe.wstring() << L"\n";
-			return 6;
-		}
-
-		std::vector<std::wstring> gameArgs;
-		gameArgs.push_back((project.directory / (projectName + L".calyxproj")).wstring());
-		gameArgs.push_back(L"--config");
-		gameArgs.push_back(config);
-		return LaunchEditor(gameExe, gameArgs);
-	}
-
-	int LaunchEditor(const std::filesystem::path& editorExe, const std::vector<std::wstring>& forwardedArgs) {
-		std::wstring commandLine = QuoteArgument(editorExe.wstring());
-		for(const auto& arg : forwardedArgs) {
-			commandLine += L" ";
-			commandLine += QuoteArgument(arg);
-		}
-
-		STARTUPINFOW startupInfo{};
-		startupInfo.cb = sizeof(startupInfo);
-		PROCESS_INFORMATION processInfo{};
-
-		// Launcher は Editor を子プロセスとして起動する。
-		// Visual Studio から Launcher を F5 実行した場合でも、Editor プロセスへデバッグが継続される。
-		const std::wstring workingDirectory = editorExe.parent_path().wstring();
-		if(!::CreateProcessW(
-			   editorExe.c_str(),
-			   commandLine.data(),
-			   nullptr,
-			   nullptr,
-			   FALSE,
-			   0,
-			   nullptr,
-			   workingDirectory.c_str(),
-			   &startupInfo,
-			   &processInfo)) {
-			return static_cast<int>(::GetLastError());
-		}
-
-		::CloseHandle(processInfo.hThread);
-		::CloseHandle(processInfo.hProcess);
-		return 0;
 	}
 
 } // namespace
@@ -387,44 +333,35 @@ try {
 int wmain() {
 	const auto args = SplitCommandLineArguments();
 	if(args.empty()) {
-		std::wcerr << L"Usage: CalyxLauncher.exe <project.calyxproj> [--config Debug|Develop|Release]\n";
+		std::wcerr << L"Usage: CalyxLauncher.exe <project.calyxproj> [--force]\n";
 		return 1;
 	}
 
 	const std::filesystem::path projectFile = args.front();
+	const bool forceUpdate = HasFlag(args, L"--force") || HasFlag(args, L"--force-update");
+
 	ProjectInfo project;
-	if(ReadProjectInfo(projectFile, project).empty()) {
-		std::wcerr << L"Failed to read project file: " << projectFile.wstring() << L"\n";
+	if(!ReadProjectInfo(projectFile, project)) {
+		std::wcerr << L"Failed to read project file or engineVersion: " << projectFile.wstring() << L"\n";
 		return 2;
 	}
 
 	auto enginePackageDirectory = ResolveEnginePackageDirectory(project.engineVersion);
-	if(enginePackageDirectory.empty() && DownloadEnginePackageFromGitHub(project.engineVersion)) {
+	if(enginePackageDirectory.empty() || forceUpdate) {
+		if(!DownloadEnginePackageFromGitHub(project.engineVersion)) {
+			return 3;
+		}
 		enginePackageDirectory = ResolveEnginePackageDirectory(project.engineVersion);
 	}
 
 	if(enginePackageDirectory.empty()) {
-		std::wcerr << L"Calyx SDK was not found for engineVersion: " << std::wstring(project.engineVersion.begin(), project.engineVersion.end()) << L"\n";
-		std::wcerr << L"Set CALYX_ENGINE_SDK_DIR, install the SDK under %LOCALAPPDATA%\\CalyxEngine\\Engines\\<version>, or publish a matching GitHub Release zip.\n";
-		return 3;
-	}
-
-	if(!SetSdkDirectoryForChildProcesses(enginePackageDirectory)) {
-		std::wcerr << L"Calyx SDK is invalid: " << (enginePackageDirectory / L"SDK").wstring() << L"\n";
+		std::wcerr << L"CalyxEngine package is invalid after installation: "
+				   << (DefaultEngineInstallRoot() / std::filesystem::path(project.engineVersion)).wstring() << L"\n";
 		return 4;
 	}
 
-	if(HasTarget(args, L"game")) {
-		const std::wstring config = GetOptionValue(args, L"--config", L"Debug");
-		if(!HasFlag(args, L"--skip-build")) {
-			const int buildExitCode = BuildGameProject(project, config);
-			if(buildExitCode != 0) {
-				std::wcerr << L"Game build failed. MSBuild exit code: " << buildExitCode << L"\n";
-				return buildExitCode;
-			}
-		}
-		return LaunchGameExecutable(project, config);
-	}
-
-	return LaunchEditor(enginePackageDirectory / L"CalyxEditor.exe", args);
+	std::wcout << L"CalyxEngine package is ready.\n";
+	std::wcout << L"Package: " << enginePackageDirectory.wstring() << L"\n";
+	std::wcout << L"SDK: " << (enginePackageDirectory / L"SDK").wstring() << L"\n";
+	return 0;
 }
