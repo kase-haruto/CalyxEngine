@@ -617,6 +617,9 @@ try {
 			stream << "    <NMakeReBuildCommandLine>&quot;$(ProjectLauncher)&quot; &quot;$(ProjectDir)" << gameName << ".calyxproj&quot; --force</NMakeReBuildCommandLine>\n";
 			stream << "    <NMakeCleanCommandLine>echo CalyxLauncher has no generated build outputs to clean.</NMakeCleanCommandLine>\n";
 			stream << "    <NMakeOutput>$(CalyxEnginePackageDir)SDK\\Include\\CalyxEngine\\Application.h</NMakeOutput>\n";
+			stream << "    <LocalDebuggerCommand>$(ProjectLauncher)</LocalDebuggerCommand>\n";
+			stream << "    <LocalDebuggerCommandArguments>&quot;$(ProjectDir)" << gameName << ".calyxproj&quot;</LocalDebuggerCommandArguments>\n";
+			stream << "    <LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory>\n";
 			stream << "  </PropertyGroup>\n";
 			stream << "  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />\n";
 			stream << "  <Target Name=\"ValidateProjectLauncher\" BeforeTargets=\"Build;ReBuild\"><Error Condition=\"!Exists('$(ProjectLauncher)')\" Text=\"CalyxLauncher was not found: $(ProjectLauncher)\" /></Target>\n";

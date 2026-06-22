@@ -1,4 +1,4 @@
-param(
+﻿param(
 	# 作成するパッケージのバージョン。
 	# 例: 1.0.8 または v1.0.8
 	[Parameter(Mandatory = $true)]
@@ -14,6 +14,11 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+
+$validConfigurations = @('Debug', 'Develop', 'Release')
+if ($Configuration -notin $validConfigurations) {
+	throw "Configuration must be one of: $($validConfigurations -join ', ')"
+}
 
 # このスクリプトは、生成されたゲームプロジェクトが利用する
 # CalyxEngine のランタイム SDK パッケージを作成する。
@@ -42,7 +47,8 @@ if (-not $normalizedVersion.StartsWith('v')) {
 $outputsRoot = Join-Path $repoRoot 'generated\outputs'
 $stagingRoot = Join-Path $repoRoot 'generated\package-staging'
 $packageName = "CalyxGamePackage-$normalizedVersion"
-$packageRoot = Join-Path $stagingRoot $packageName
+$stagingRunRoot = Join-Path $stagingRoot ($packageName + '-' + [System.Guid]::NewGuid().ToString('N'))
+$packageRoot = Join-Path $stagingRunRoot $packageName
 $zipPath = Join-Path $OutputRoot "$packageName.zip"
 
 function Copy-DirectoryClean {
@@ -64,6 +70,26 @@ function Copy-DirectoryClean {
 
 	New-Item -ItemType Directory -Force -Path (Split-Path $Destination -Parent) | Out-Null
 	Copy-Item -LiteralPath $Source -Destination $Destination -Recurse -Force
+}
+
+function Remove-DirectoryClean {
+	param(
+		[Parameter(Mandatory = $true)][string]$Path
+	)
+
+	if (-not (Test-Path $Path)) {
+		return
+	}
+
+	Get-ChildItem -LiteralPath $Path -Recurse -Force -ErrorAction SilentlyContinue |
+		ForEach-Object {
+			try {
+				$_.Attributes = 'Normal'
+			} catch {
+			}
+		}
+
+	Remove-Item -LiteralPath $Path -Recurse -Force
 }
 
 function Copy-FileRequired {
@@ -114,11 +140,6 @@ function Copy-HeadersOnly {
 			$relativePath = $_.FullName.Substring($Source.Length).TrimStart('\', '/')
 			Copy-FileRequired $_.FullName (Join-Path $Destination $relativePath)
 		}
-}
-
-# 前回のステージング結果が残っている場合は削除する。
-if (Test-Path $packageRoot) {
-	Remove-Item -LiteralPath $packageRoot -Recurse -Force
 }
 
 # パッケージ作成に必要なディレクトリを用意する。
@@ -202,9 +223,13 @@ $manifest = [ordered]@{
 	createdAtUtc = (Get-Date).ToUniversalTime().ToString('o')
 	requiredFiles = @(
 		'CalyxGame.exe',
+		'CalyxEngine.dll',
 		'SDK\Bin\Debug\CalyxGame.exe',
+		'SDK\Bin\Debug\CalyxEngine.dll',
 		'SDK\Bin\Develop\CalyxGame.exe',
+		'SDK\Bin\Develop\CalyxEngine.dll',
 		'SDK\Bin\Release\CalyxGame.exe',
+		'SDK\Bin\Release\CalyxEngine.dll',
 		'SDK\Include\CalyxEngine\Application.h',
 		'SDK\Lib\Debug\CalyxEngine.lib',
 		'SDK\Lib\Develop\CalyxEngine.lib',
@@ -218,9 +243,13 @@ $manifest | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $packa
 # 不完全な SDK を受け取ってしまうことを防ぐ。
 $requiredPackageFiles = @(
 	'CalyxGame.exe',
+	'CalyxEngine.dll',
 	'SDK\Bin\Debug\CalyxGame.exe',
+	'SDK\Bin\Debug\CalyxEngine.dll',
 	'SDK\Bin\Develop\CalyxGame.exe',
+	'SDK\Bin\Develop\CalyxEngine.dll',
 	'SDK\Bin\Release\CalyxGame.exe',
+	'SDK\Bin\Release\CalyxEngine.dll',
 	'SDK\Include\CalyxEngine\Application.h',
 	'SDK\Include\Data\Engine',
 	'SDK\Include\externals\nlohmann\json.hpp',
@@ -243,5 +272,7 @@ if (Test-Path $zipPath) {
 
 # ステージングしたパッケージを zip に圧縮する。
 Compress-Archive -Path $packageRoot -DestinationPath $zipPath -CompressionLevel Optimal
+
+Remove-Item -LiteralPath $stagingRunRoot -Recurse -Force -ErrorAction SilentlyContinue
 
 Write-Host "CalyxEngine game runtime SDK package created: $zipPath"

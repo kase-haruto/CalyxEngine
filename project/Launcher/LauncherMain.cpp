@@ -178,6 +178,7 @@ namespace {
 )
 
 $ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'
 
 # The release is expected at:
 # https://github.com/kase-haruto/CalyxEngine/releases/tag/<engineVersion>
@@ -204,7 +205,7 @@ foreach ($tag in $tags | Select-Object -Unique) {
 }
 
 if ($null -eq $release) {
-	throw "CalyxEngine release was not found for engineVersion: $VersionValue"
+	throw "CalyxEngine GitHub Release was not found for engineVersion: $VersionValue. A git tag alone is not enough; create a GitHub Release for this tag and attach the CalyxGamePackage zip asset."
 }
 
 # Prefer package-like zip names, but keep the rule flexible so release assets can
@@ -229,6 +230,26 @@ if ($assets.Count -eq 0) {
 	throw "No zip asset was found in release: $($release.tag_name)"
 }
 
+function Download-ReleaseAsset {
+	param(
+		[Parameter(Mandatory = $true)]
+		$Asset,
+		[Parameter(Mandatory = $true)]
+		[string]$DestinationPath
+	)
+
+	if (Test-Path $DestinationPath) {
+		Remove-Item -LiteralPath $DestinationPath -Force
+	}
+
+	Invoke-WebRequest -UseBasicParsing -Headers $headers -Uri $Asset.browser_download_url -OutFile $DestinationPath -TimeoutSec 600
+
+	$file = Get-Item -LiteralPath $DestinationPath
+	if ($null -ne $Asset.size -and [int64]$Asset.size -gt 0 -and $file.Length -ne [int64]$Asset.size) {
+		throw "Downloaded asset size mismatch for '$($Asset.name)'. Expected $($Asset.size) bytes, got $($file.Length) bytes."
+	}
+}
+
 $versionDir = Join-Path $InstallRoot $VersionValue
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("CalyxEngine-" + [System.Guid]::NewGuid().ToString("N"))
 
@@ -246,7 +267,7 @@ try {
 
 		$zipPath = Join-Path $assetRoot $asset.name
 		Write-Host "CalyxLauncher: downloading '$($asset.name)'..."
-		Invoke-WebRequest -Headers $headers -Uri $asset.browser_download_url -OutFile $zipPath
+		Download-ReleaseAsset -Asset $asset -DestinationPath $zipPath
 		Write-Host "CalyxLauncher: download completed: $zipPath"
 
 		Write-Host "CalyxLauncher: extracting package..."

@@ -6,8 +6,8 @@ on:
       - "v*"
   workflow_dispatch:
     inputs:
-      version:
-        description: "Release version, for example 1.2.0 or v1.2.0"
+      tag:
+        description: "Existing release tag, for example v1.0.9"
         required: true
         type: string
       prerelease:
@@ -22,25 +22,31 @@ permissions:
 jobs:
   release:
     runs-on: windows-2022
+    env:
+      SOLUTION_FILE_PATH: project/CalyxEngine.sln
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
 
       - name: Resolve release metadata
         id: release
         shell: pwsh
         run: |
           if ("${{ github.event_name }}" -eq "workflow_dispatch") {
-            $version = "${{ inputs.version }}"
-            $tagName = if ($version.StartsWith("v")) { $version } else { "v$version" }
-            $version = $tagName.TrimStart("v")
+            $tagName = "${{ inputs.tag }}"
           } else {
             $tagName = "${{ github.ref_name }}"
-            $version = $tagName.TrimStart("v")
           }
+
+          if (-not $tagName.StartsWith("v")) {
+            throw "Release tag must start with v, for example v1.0.9."
+          }
+
+          $version = $tagName.TrimStart("v")
 
           if ([string]::IsNullOrWhiteSpace($version)) {
             throw "Release version could not be resolved."
@@ -52,22 +58,29 @@ jobs:
 
           "version=$version" >> $env:GITHUB_OUTPUT
           "tag_name=$tagName" >> $env:GITHUB_OUTPUT
+          "package_name=CalyxGamePackage-$tagName.zip" >> $env:GITHUB_OUTPUT
 
-      - name: Create and push release tag
-        if: github.event_name == 'workflow_dispatch'
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
+        with:
+          msbuild-architecture: x64
+
+      - name: Build Debug
+        run: msbuild $env:SOLUTION_FILE_PATH /m /p:Platform=x64 /p:Configuration=Debug
+
+      - name: Build Develop
+        run: msbuild $env:SOLUTION_FILE_PATH /m /p:Platform=x64 /p:Configuration=Develop
+
+      - name: Build Release
+        run: msbuild $env:SOLUTION_FILE_PATH /m /p:Platform=x64 /p:Configuration=Release
+
+      - name: Create package
         shell: pwsh
         run: |
-          $tagName = "${{ steps.release.outputs.tag_name }}"
-
-          git fetch --tags --force
-          if (git rev-parse -q --verify "refs/tags/$tagName") {
-            throw "Tag already exists: $tagName"
-          }
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -a $tagName -m "CalyxEngine ${{ steps.release.outputs.version }}"
-          git push origin $tagName
+          ./project/Tools/PackageCalyxEngine.ps1 `
+            -Version "${{ steps.release.outputs.tag_name }}" `
+            -Configuration Develop `
+            -OutputRoot "$env:GITHUB_WORKSPACE/generated/packages"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -76,3 +89,4 @@ jobs:
           name: CalyxEngine ${{ steps.release.outputs.version }}
           prerelease: ${{ github.event_name == 'workflow_dispatch' && inputs.prerelease || false }}
           generate_release_notes: true
+          files: generated/packages/${{ steps.release.outputs.package_name }}
