@@ -121,6 +121,22 @@ function Copy-FileIfExists {
 	}
 }
 
+function Copy-FirstExistingFileRequired {
+	param(
+		[Parameter(Mandatory = $true)][string[]]$Sources,
+		[Parameter(Mandatory = $true)][string]$Destination
+	)
+
+	foreach ($source in $Sources) {
+		if (Test-Path $source) {
+			Copy-FileRequired $source $Destination
+			return
+		}
+	}
+
+	throw "Required file was not found. Tried: $($Sources -join '; ')"
+}
+
 function Copy-HeadersOnly {
 	param(
 		[Parameter(Mandatory = $true)][string]$Source,
@@ -221,8 +237,14 @@ foreach ($config in @('Debug', 'Develop', 'Release')) {
 }
 
 # 生成されたゲーム vcxproj が参照するサードパーティ static library をコピーする。
-Copy-FileRequired (Join-Path $projectRoot 'externals\DirectXTex\generated\bin\DirectXTex\x64\Debug\DirectXTex.lib') (Join-Path $sdkLib 'DirectXTex\x64\Debug\DirectXTex.lib')
-Copy-FileRequired (Join-Path $projectRoot 'externals\DirectXTex\generated\bin\DirectXTex\x64\Release\DirectXTex.lib') (Join-Path $sdkLib 'DirectXTex\x64\Release\DirectXTex.lib')
+Copy-FirstExistingFileRequired @(
+	(Join-Path $projectRoot 'generated\bin\DirectXTex\x64\Debug\DirectXTex.lib'),
+	(Join-Path $projectRoot 'externals\DirectXTex\generated\bin\DirectXTex\x64\Debug\DirectXTex.lib')
+) (Join-Path $sdkLib 'DirectXTex\x64\Debug\DirectXTex.lib')
+Copy-FirstExistingFileRequired @(
+	(Join-Path $projectRoot 'generated\bin\DirectXTex\x64\Release\DirectXTex.lib'),
+	(Join-Path $projectRoot 'externals\DirectXTex\generated\bin\DirectXTex\x64\Release\DirectXTex.lib')
+) (Join-Path $sdkLib 'DirectXTex\x64\Release\DirectXTex.lib')
 Copy-DirectoryClean (Join-Path $projectRoot 'externals\assimp\lib\Debug') (Join-Path $sdkLib 'assimp\Debug')
 Copy-DirectoryClean (Join-Path $projectRoot 'externals\assimp\lib\Release') (Join-Path $sdkLib 'assimp\Release')
 
