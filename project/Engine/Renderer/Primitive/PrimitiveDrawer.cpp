@@ -416,7 +416,7 @@ void PrimitiveDrawer::DrawEffectPreviewSphere(const CalyxEngine::Vector3& center
 	}
 }
 
-void PrimitiveDrawer::Render(bool includeDebugViewOnly, LineDepthMode depthMode){
+void PrimitiveDrawer::Render([[maybe_unused]]bool includeDebugViewOnly,[[maybe_unused]] LineDepthMode depthMode){
 #if defined(_DEBUG) || defined(DEVELOP)
 	if(depthMode == LineDepthMode::DepthTest && lineDrawer_) {
 		lineDrawer_->Render();
