@@ -142,6 +142,19 @@ function Copy-HeadersOnly {
 		}
 }
 
+function Copy-HeadersIfExists {
+	param(
+		[Parameter(Mandatory = $true)][string]$Source,
+		[Parameter(Mandatory = $true)][string]$Destination
+	)
+
+	# 任意のヘッダーディレクトリは、存在する場合のみ SDK に含める。
+	# 例: Runtime はプロジェクト構成によって存在しないことがある。
+	if (Test-Path $Source) {
+		Copy-HeadersOnly $Source $Destination
+	}
+}
+
 # パッケージ作成に必要なディレクトリを用意する。
 New-Item -ItemType Directory -Force -Path $packageRoot | Out-Null
 New-Item -ItemType Directory -Force -Path $OutputRoot | Out-Null
@@ -176,7 +189,7 @@ $sdkThirdParty = Join-Path $sdkRoot 'ThirdParty'
 # 既存の include パスを壊さないように Engine / Data / Runtime の構造を維持する。
 Copy-HeadersOnly (Join-Path $projectRoot 'Engine') (Join-Path $sdkInclude 'Engine')
 Copy-HeadersOnly (Join-Path $projectRoot 'Data') (Join-Path $sdkInclude 'Data')
-Copy-HeadersOnly (Join-Path $projectRoot 'Runtime') (Join-Path $sdkInclude 'Runtime')
+Copy-HeadersIfExists (Join-Path $projectRoot 'Runtime') (Join-Path $sdkInclude 'Runtime')
 
 # 安定した公開 API として使う CalyxEngine ラッパーヘッダーを、
 # SDK\Include\CalyxEngine に配置する。
