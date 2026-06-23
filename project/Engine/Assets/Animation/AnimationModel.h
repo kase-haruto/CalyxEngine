@@ -54,6 +54,7 @@ namespace CalyxEngine {
 		void SkeletonUpdate();
 		void SkinClusterUpdate();
 		void DrawSkeleton();
+		void DrawSkeleton(const WorldTransform& transform);
 
 		// アニメーションを追加（名前ベース・従来 API）
 		void AddAnimation(const std::string& animName,const std::string& fileName);

@@ -145,6 +145,7 @@ void ModelRenderer::PreCullAndBatch(const Camera3d* camera, bool enableFrustumCu
 	for(auto& [model, insts] : skinnedModels_) {
 		if(!model) continue;
 		if(!model->GetModelData()) continue;
+		if(!model->GetIsDrawEnable()) continue;
 
 		const AABB& localAABB = model->GetModelData()->localAABB;
 
@@ -186,7 +187,7 @@ void ModelRenderer::BuildAllVisibleBatches() {
 	}
 
 	for(auto& [model, insts] : skinnedModels_) {
-		if(!model || !model->GetModelData()) continue;
+		if(!model || !model->GetModelData() || !model->GetIsDrawEnable()) continue;
 		for(auto& inst : insts) {
 			inst.visible = true;
 			if(inst.dirty) {
@@ -697,6 +698,12 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 						cmdList->SetGraphicsRootDescriptorTable(12, model->GetMaterialGraphTextureSrvTable(subMesh.materialIndex));
 						cmdList->SetGraphicsRootDescriptorTable(14, model->GetNormalMapSrv(subMesh.materialIndex));
 						cmdList->DrawIndexedInstanced(subMesh.indexCount, need, subMesh.indexStart, 0, 0);
+					}
+				}
+
+				if(model->isDrawSkeleton_) {
+					for(const auto& transform : visible) {
+						model->DrawSkeleton(transform);
 					}
 				}
 			}

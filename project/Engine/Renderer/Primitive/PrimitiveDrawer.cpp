@@ -21,6 +21,15 @@ void PrimitiveDrawer::Initialize(){
 	lineDrawer_ = std::make_unique<LineDrawer>();
 	lineDrawer_->Initialize();
 
+	lineNoDepthDrawer_ = std::make_unique<LineDrawer>();
+	lineNoDepthDrawer_->Initialize();
+
+	debugViewLineDrawer_ = std::make_unique<LineDrawer>();
+	debugViewLineDrawer_->Initialize();
+
+	debugViewLineNoDepthDrawer_ = std::make_unique<LineDrawer>();
+	debugViewLineNoDepthDrawer_->Initialize();
+
 	boxDrawer_ = std::make_unique<BoxDrawer>();
 	boxDrawer_->Initialize();
 
@@ -36,6 +45,21 @@ void PrimitiveDrawer::Finalize(){
 		lineDrawer_->Clear();
 	}
 	lineDrawer_.reset();
+
+	if(lineNoDepthDrawer_) {
+		lineNoDepthDrawer_->Clear();
+	}
+	lineNoDepthDrawer_.reset();
+
+	if(debugViewLineDrawer_) {
+		debugViewLineDrawer_->Clear();
+	}
+	debugViewLineDrawer_.reset();
+
+	if(debugViewLineNoDepthDrawer_) {
+		debugViewLineNoDepthDrawer_->Clear();
+	}
+	debugViewLineNoDepthDrawer_.reset();
 
 	if (boxDrawer_) {
 		boxDrawer_->Clear();
@@ -54,9 +78,17 @@ void PrimitiveDrawer::Finalize(){
 }
 
 
-void PrimitiveDrawer::DrawLine3d(const CalyxEngine::Vector3& start, const CalyxEngine::Vector3& end, const CalyxEngine::Vector4& color){
-	if (lineDrawer_){
-		lineDrawer_->DrawLine(start, end, color);
+void PrimitiveDrawer::DrawLine3d(const CalyxEngine::Vector3& start, const CalyxEngine::Vector3& end, const CalyxEngine::Vector4& color, LineDepthMode depthMode){
+	LineDrawer* drawer = depthMode == LineDepthMode::NoDepthTest ? lineNoDepthDrawer_.get() : lineDrawer_.get();
+	if(drawer) {
+		drawer->DrawLine(start, end, color);
+	}
+}
+
+void PrimitiveDrawer::DrawDebugViewLine3d(const CalyxEngine::Vector3& start, const CalyxEngine::Vector3& end, const CalyxEngine::Vector4& color, LineDepthMode depthMode) {
+	LineDrawer* drawer = depthMode == LineDepthMode::NoDepthTest ? debugViewLineNoDepthDrawer_.get() : debugViewLineDrawer_.get();
+	if(drawer) {
+		drawer->DrawLine(start, end, color);
 	}
 }
 
@@ -384,13 +416,25 @@ void PrimitiveDrawer::DrawEffectPreviewSphere(const CalyxEngine::Vector3& center
 	}
 }
 
-void PrimitiveDrawer::Render(){
+void PrimitiveDrawer::Render(bool includeDebugViewOnly, LineDepthMode depthMode){
 #if defined(_DEBUG) || defined(DEVELOP)
-	if (lineDrawer_) {
+	if(depthMode == LineDepthMode::DepthTest && lineDrawer_) {
 		lineDrawer_->Render();
 	}
 
-	if (boxDrawer_) {
+	if(depthMode == LineDepthMode::DepthTest && includeDebugViewOnly && debugViewLineDrawer_) {
+		debugViewLineDrawer_->Render();
+	}
+
+	if(depthMode == LineDepthMode::NoDepthTest && lineNoDepthDrawer_) {
+		lineNoDepthDrawer_->Render();
+	}
+
+	if(depthMode == LineDepthMode::NoDepthTest && includeDebugViewOnly && debugViewLineNoDepthDrawer_) {
+		debugViewLineNoDepthDrawer_->Render();
+	}
+
+	if(depthMode == LineDepthMode::DepthTest && boxDrawer_) {
 		boxDrawer_->Render();
 	}
 #endif // _DEBUG
@@ -414,6 +458,18 @@ void PrimitiveDrawer::RenderEffectPreview() {
 void PrimitiveDrawer::ClearMesh(){
 	if (lineDrawer_){
 		lineDrawer_->Clear();
+	}
+
+	if(lineNoDepthDrawer_) {
+		lineNoDepthDrawer_->Clear();
+	}
+
+	if(debugViewLineDrawer_) {
+		debugViewLineDrawer_->Clear();
+	}
+
+	if(debugViewLineNoDepthDrawer_) {
+		debugViewLineNoDepthDrawer_->Clear();
 	}
 
 	if (boxDrawer_) {

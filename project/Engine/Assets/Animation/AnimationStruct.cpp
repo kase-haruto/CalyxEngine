@@ -18,16 +18,16 @@ void Skeleton::JointDraw(const CalyxEngine::Matrix4x4& m, const CalyxEngine::Vec
 	// 上面
 	for (int i = 0; i < 4; ++i) {
 		int p1 = i, p2 = (i + 1) % 4;
-		PrimitiveDrawer::GetInstance()->DrawLine3d(jointCube[p1], jointCube[p2], color);
+		PrimitiveDrawer::GetInstance()->DrawLine3d(jointCube[p1], jointCube[p2], color, LineDepthMode::NoDepthTest);
 	}
 	// 下面
 	for (int i = 0; i < 4; ++i) {
 		int p1 = 4 + i, p2 = 4 + (i + 1) % 4;
-		PrimitiveDrawer::GetInstance()->DrawLine3d(jointCube[p1], jointCube[p2], color);
+		PrimitiveDrawer::GetInstance()->DrawLine3d(jointCube[p1], jointCube[p2], color, LineDepthMode::NoDepthTest);
 	}
 	// 側面
 	for (int i = 0; i < 4; ++i) {
-		PrimitiveDrawer::GetInstance()->DrawLine3d(jointCube[i], jointCube[4 + i], color);
+		PrimitiveDrawer::GetInstance()->DrawLine3d(jointCube[i], jointCube[4 + i], color, LineDepthMode::NoDepthTest);
 	}
 }
 
@@ -50,7 +50,7 @@ void Skeleton::Draw(const CalyxEngine::Matrix4x4& world,
 			CalyxEngine::Matrix4x4 pws = joints[*joint.parent].skeletonSpaceMatrix * world;
 			CalyxEngine::Vector3 parentPos{ pws.m[3][0], pws.m[3][1], pws.m[3][2] };
 			PrimitiveDrawer::GetInstance()->DrawLine3d(
-				jointPos, parentPos, cubeCol); // ラインも同色に
+				jointPos, parentPos, cubeCol, LineDepthMode::NoDepthTest); // ラインも同色に
 		}
 
 	}

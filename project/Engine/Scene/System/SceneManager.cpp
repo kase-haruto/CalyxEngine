@@ -1,6 +1,7 @@
 #include "SceneManager.h"
 
 // engine
+#include <Engine/Application/Settings/EngineSettings.h>
 #include <Engine/Application/System/PlaySession.h>
 #include <Engine/Editor/AssetPreviewManager.h>
 #include <Engine/Graphics/Camera/3d/Camera3d.h>
@@ -236,6 +237,19 @@ namespace CalyxEngine {
 		auto* offscreen = dx_->GetRenderTargetCollection().Get("Offscreen");
 		ResizeTargetToViewport(offscreen, CameraManager::GetViewportSizeStatic(ViewportType::VIEWPORT_MAIN));
 		DrawForRenderTarget(offscreen, cmd, pso);
+		const bool renderDebugLines = EngineSettings::GetInstance()->GetData().editor.renderDebugLinesInViewports;
+		if(renderDebugLines) {
+			CameraManager::SetTypeStatic(CameraType::Default);
+			if(EngineSettings::GetInstance()->GetData().editor.showEditorGrid && offscreen) {
+				offscreen->SetRenderTarget(cmd);
+				if(auto* cam = CameraManager::GetActive()) {
+					if(editorGridRenderer_) {
+						editorGridRenderer_->Render(cmd, pso, cam);
+					}
+				}
+			}
+			RenderDebugPrimitivesToRenderTarget(offscreen, cmd, false);
+		}
 
 #if defined(_DEBUG) || defined(DEVELOP)
 		auto* debugRT = dx_->GetRenderTargetCollection().Get("DebugView");
@@ -256,18 +270,22 @@ namespace CalyxEngine {
 					}
 					debugRT->SetRenderTarget(cmd);
 				}
+				if(EngineSettings::GetInstance()->GetData().editor.showEditorGrid && debugRT) {
+					debugRT->SetRenderTarget(cmd);
+					if(auto* cam = CameraManager::GetActive()) {
+						if(editorGridRenderer_) {
+							editorGridRenderer_->Render(cmd, pso, cam);
+						}
+					}
+				}
+				if(renderDebugLines) {
+					CameraManager::SetTypeStatic(CameraType::Debug);
+					RenderDebugPrimitivesToRenderTarget(debugRT, cmd, true);
+				}
 			}
 		}
 
 #endif
-
-		if(!editorPreviewCtx_) {
-			if(auto* cam = CameraManager::GetActive()) {
-				GraphicsGroup::GetInstance()->SetCommand(cmd, PipelineType::Line, BlendMode::NORMAL);
-				cam->SetCommand(cmd, PipelineType::Line);
-				PrimitiveDrawer::GetInstance()->Render();
-			}
-		}
 
 		if(auto* previewRT = dx_->GetRenderTargetCollection().Get("AssetPreview")) {
 			if(auto* previews = AssetPreviewManager::GetInstance()) {
@@ -340,6 +358,23 @@ namespace CalyxEngine {
 		}
 
 		editorPreviewCtx_->GetFxSystem()->Render(pso, cmd);
+	}
+
+	void SceneManager::RenderDebugPrimitivesToRenderTarget(IRenderTarget* rt,
+														   ID3D12GraphicsCommandList* cmd,
+														   bool includeDebugViewOnly) {
+		if(!rt || !cmd || editorPreviewCtx_) return;
+
+		rt->SetRenderTarget(cmd);
+		if(auto* cam = CameraManager::GetActive()) {
+			GraphicsGroup::GetInstance()->SetCommand(cmd, PipelineType::Line, BlendMode::NORMAL);
+			cam->SetCommand(cmd, PipelineType::Line);
+			PrimitiveDrawer::GetInstance()->Render(includeDebugViewOnly, LineDepthMode::DepthTest);
+
+			GraphicsGroup::GetInstance()->SetCommand(cmd, PipelineType::LineNoDepth, BlendMode::NORMAL);
+			cam->SetCommand(cmd, PipelineType::LineNoDepth);
+			PrimitiveDrawer::GetInstance()->Render(includeDebugViewOnly, LineDepthMode::NoDepthTest);
+		}
 	}
 
 	void SceneManager::DrawSpritesToRenderTarget(IRenderTarget* rt, ID3D12GraphicsCommandList* cmd, PipelineService* pso, bool transitionToShaderResource) {

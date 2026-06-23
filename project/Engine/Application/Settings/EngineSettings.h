@@ -29,6 +29,7 @@ namespace CalyxEngine {
 		}
 
 		void SetManipulatorSettings(const ManipulatorSettings& settings);
+		void SetEditorSettings(const EditorSettings& settings);
 
 	private:
 		EngineSettings() = default;

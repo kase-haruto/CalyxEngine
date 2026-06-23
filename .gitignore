@@ -4,6 +4,7 @@
 .vs/
 .idea/
 .ai/
+.vscode/
 
 # Local release packaging tools are maintained outside this repository.
 Tool/Release/
