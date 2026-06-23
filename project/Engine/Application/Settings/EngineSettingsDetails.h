@@ -12,6 +12,8 @@ namespace CalyxEngine{
 		bool fullscreenGameViewOnPlay = false;
 		bool DebugCameraRotateInverse = false;
 		bool isManipulatorSnap = false;
+		bool renderDebugLinesInViewports = true;
+		bool showEditorGrid = false;
 	};
 
 	struct GraphicsSettings {
@@ -32,6 +34,8 @@ namespace CalyxEngine{
 			{"fullscreenGameViewOnPlay", settings.fullscreenGameViewOnPlay},
 			{"DebugCameraRotateInverse", settings.DebugCameraRotateInverse},
 			{"isManipulatorSnap", settings.isManipulatorSnap},
+			{"renderDebugLinesInViewports", settings.renderDebugLinesInViewports},
+			{"showEditorGrid", settings.showEditorGrid},
 		};
 	}
 
@@ -39,6 +43,8 @@ namespace CalyxEngine{
 		settings.fullscreenGameViewOnPlay = j.value("fullscreenGameViewOnPlay", settings.fullscreenGameViewOnPlay);
 		settings.DebugCameraRotateInverse = j.value("DebugCameraRotateInverse", settings.DebugCameraRotateInverse);
 		settings.isManipulatorSnap = j.value("isManipulatorSnap", settings.isManipulatorSnap);
+		settings.renderDebugLinesInViewports = j.value("renderDebugLinesInViewports", settings.renderDebugLinesInViewports);
+		settings.showEditorGrid = j.value("showEditorGrid", settings.showEditorGrid);
 	}
 
 	inline void to_json(nlohmann::json& j, const GraphicsSettings& settings) {

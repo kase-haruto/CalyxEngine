@@ -45,20 +45,20 @@ void Frustum::Draw(const CalyxEngine::Vector4& color, float farPlaneRatio) const
 	// ---------- 描画 ----------
 	auto draw = PrimitiveDrawer::GetInstance();
 	// near
-	draw->DrawLine3d(corners[0], corners[1], color);
-	draw->DrawLine3d(corners[1], corners[2], color);
-	draw->DrawLine3d(corners[2], corners[3], color);
-	draw->DrawLine3d(corners[3], corners[0], color);
+	draw->DrawDebugViewLine3d(corners[0], corners[1], color, LineDepthMode::NoDepthTest);
+	draw->DrawDebugViewLine3d(corners[1], corners[2], color, LineDepthMode::NoDepthTest);
+	draw->DrawDebugViewLine3d(corners[2], corners[3], color, LineDepthMode::NoDepthTest);
+	draw->DrawDebugViewLine3d(corners[3], corners[0], color, LineDepthMode::NoDepthTest);
 	// far
-	draw->DrawLine3d(corners[4], corners[5], color);
-	draw->DrawLine3d(corners[5], corners[6], color);
-	draw->DrawLine3d(corners[6], corners[7], color);
-	draw->DrawLine3d(corners[7], corners[4], color);
+	draw->DrawDebugViewLine3d(corners[4], corners[5], color, LineDepthMode::NoDepthTest);
+	draw->DrawDebugViewLine3d(corners[5], corners[6], color, LineDepthMode::NoDepthTest);
+	draw->DrawDebugViewLine3d(corners[6], corners[7], color, LineDepthMode::NoDepthTest);
+	draw->DrawDebugViewLine3d(corners[7], corners[4], color, LineDepthMode::NoDepthTest);
 	// sides
-	draw->DrawLine3d(corners[0], corners[4], color);
-	draw->DrawLine3d(corners[1], corners[5], color);
-	draw->DrawLine3d(corners[2], corners[6], color);
-	draw->DrawLine3d(corners[3], corners[7], color);
+	draw->DrawDebugViewLine3d(corners[0], corners[4], color, LineDepthMode::NoDepthTest);
+	draw->DrawDebugViewLine3d(corners[1], corners[5], color, LineDepthMode::NoDepthTest);
+	draw->DrawDebugViewLine3d(corners[2], corners[6], color, LineDepthMode::NoDepthTest);
+	draw->DrawDebugViewLine3d(corners[3], corners[7], color, LineDepthMode::NoDepthTest);
 }
 
 void Frustum::CalculateCorners(CalyxEngine::Vector3 outCorners[8]) const{

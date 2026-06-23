@@ -205,6 +205,7 @@ void BaseGameObject::ShowGui() {
 
 		if(model_) {
 			model_->ShowImGui(config_.GetConfig().modelConfig);
+			model_->ShowImGuiInterface();
 		}
 		if(ImGui::TreeNodeEx("Visual Offset", ImGuiTreeNodeFlags_SpanAvailWidth)) {
 			GuiCmd::DragFloat3("Offset", visualOffset_, 0.01f, -1000.0f, 1000.0f);

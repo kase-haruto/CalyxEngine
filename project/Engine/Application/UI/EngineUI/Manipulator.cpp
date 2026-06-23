@@ -599,24 +599,25 @@ namespace CalyxEngine {
 		}
 
 		{
-			static bool showGrid = false;
+			EditorSettings editorSettings = EngineSettings::GetInstance()->GetData().editor;
 			spacing += 15.0f;
 			ImVec2 btnPos = ImVec2(basePos.x,nextY + iconSize.y + spacing);
 			ImGui::SetCursorScreenPos(btnPos);
 
 			bool pushStyle = false;
-			if(showGrid) {
+			if(editorSettings.showEditorGrid) {
 				ImGui::PushStyleColor(ImGuiCol_Button,ImVec4(1.00f,0.45f,0.25f,1.00f));
 				pushStyle = true;
 			}
 
-			if(ImGui::ImageButton(iconDrawGrid_.texture,iconSize)) { showGrid = !showGrid; }
+			if(ImGui::ImageButton(iconDrawGrid_.texture,iconSize)) {
+				editorSettings.showEditorGrid = !editorSettings.showEditorGrid;
+				EngineSettings::GetInstance()->SetEditorSettings(editorSettings);
+			}
 
 			if(pushStyle) {
 				ImGui::PopStyleColor(); // Push したときだけ Pop する
 			}
-
-			if(showGrid) { PrimitiveDrawer::GetInstance()->DrawGrid(); }
 		}
 
 		{

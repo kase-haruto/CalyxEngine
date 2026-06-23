@@ -325,7 +325,16 @@ namespace CalyxEngine {
 		}
 	}
 
-	void AnimationModel::DrawSkeleton() { modelData_->skeleton.Draw(); }
+	void AnimationModel::DrawSkeleton() {
+		modelData_->skeleton.Draw();
+	}
+
+	void AnimationModel::DrawSkeleton(const WorldTransform& transform) {
+		if(!modelData_) return;
+		CalyxEngine::Vector4 col = {jointHighlightCol_.x, jointHighlightCol_.y,
+									jointHighlightCol_.z, jointHighlightCol_.w};
+		modelData_->skeleton.Draw(transform.matrix.world, selectedJoint_, col);
+	}
 
 	std::string AnimationModel::GetCurrentAnimationName() const {
 		if(currentAnimation_) {
@@ -596,10 +605,7 @@ namespace CalyxEngine {
 		}
 
 		if(isDrawSkeleton_) {
-			CalyxEngine::Vector4 col = {jointHighlightCol_.x, jointHighlightCol_.y,
-									  jointHighlightCol_.z, jointHighlightCol_.w};
-
-			modelData_->skeleton.Draw(transform.matrix.world, selectedJoint_, col);
+			DrawSkeleton(transform);
 		}
 	}
 

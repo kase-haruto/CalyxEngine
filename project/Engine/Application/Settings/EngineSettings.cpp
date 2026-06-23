@@ -105,6 +105,8 @@ namespace CalyxEngine {
 			{Category::Editor, [](EngineSettingsData& data) {
 				ImGui::Checkbox("Fullscreen game view on play", &data.editor.fullscreenGameViewOnPlay);
 				ImGui::Checkbox("Debug camera rotate inverse", &data.editor.DebugCameraRotateInverse);
+				ImGui::Checkbox("Debug line rendering", &data.editor.renderDebugLinesInViewports);
+				ImGui::Checkbox("Editor grid", &data.editor.showEditorGrid);
 				ManipulatorSettingsUI::Render(data.manipulator);
 			}},
 			{Category::Graphics, [](EngineSettingsData& data) {
@@ -142,6 +144,11 @@ namespace CalyxEngine {
 
 	void EngineSettings::SetManipulatorSettings(const ManipulatorSettings& settings) {
 		data_.manipulator = settings;
+		Save();
+	}
+
+	void EngineSettings::SetEditorSettings(const EditorSettings& settings) {
+		data_.editor = settings;
 		Save();
 	}
 
