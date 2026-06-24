@@ -5,6 +5,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 
 // engine
+#include <CalyxEngine/Project.h>
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
 
@@ -33,6 +34,10 @@ void DemoScene::Initialize(){
 	BaseScene::Initialize();
 
 	std::string scenePath = "Resources/Assets/Scenes/DemoScene.scene";
+	if(Calyx::HasCurrentProject() && !Calyx::GetCurrentProject().startupScene.empty()) {
+		scenePath = Calyx::GetCurrentProject().startupScene.generic_string();
+	}
+
 	SceneSerializer::Load(*sceneContext_, scenePath);
 	sceneContext_->SetScenePath(scenePath);
 

@@ -8,6 +8,7 @@
 #include <Engine/Application/UI/EngineUI/IEngineUI.h>
 #include <Engine/Application/UI/Panels/Controller/PanelController.h>
 #include <Engine/Editor/LevelEditor.h>
+#include <Engine/Foundation/Export/CalyxAPI.h>
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 
 // c++
@@ -45,7 +46,7 @@ namespace CalyxEngine {
 		Panel*			GetPanel();
 		HierarchyPanel* GetHierarchyPanel() const;
 		EditorPanel*	GetEditorPanel() const;
-		PlaceToolPanel* GetPlaceToolPanel() const;
+		CALYX_API PlaceToolPanel* GetPlaceToolPanel() const;
 		LevelEditor*	GetLevelEditor() const { return levelEditor_.get(); }
 		void			SetCameraForViewport(BaseCamera* mainCamera, BaseCamera* debugCamera);
 		void			SetEditorUiEnabled(bool enabled) { editorUiEnabled_ = enabled; }

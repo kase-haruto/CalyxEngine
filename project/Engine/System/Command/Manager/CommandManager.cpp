@@ -44,3 +44,13 @@ void CommandManager::Redo(){
 	commandLogs_.emplace_back(std::string("Redo: ") + cmd->GetName());
 	undoStack_.push(std::move(cmd));
 }
+
+void CommandManager::ClearHistory() {
+	while(!undoStack_.empty()) {
+		undoStack_.pop();
+	}
+	while(!redoStack_.empty()) {
+		redoStack_.pop();
+	}
+	commandLogs_.clear();
+}

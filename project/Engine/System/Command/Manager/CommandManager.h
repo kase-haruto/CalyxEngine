@@ -19,6 +19,7 @@ public:
 	void Execute(std::unique_ptr<ICommand> cmd);
 	void Undo();
 	void Redo();
+	void ClearHistory();
 
 	bool CanUndo() const { return !undoStack_.empty(); }
 	bool CanRedo() const { return !redoStack_.empty(); }

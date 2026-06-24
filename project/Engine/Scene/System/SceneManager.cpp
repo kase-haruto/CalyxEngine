@@ -17,6 +17,7 @@
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 #include <Engine/Scene/Base/IScene.h>
 #include <Engine/Scene/Context/SceneContext.h>
+#include <Engine/System/Command/Manager/CommandManager.h>
 
 #include <Engine/Editor/PickingPass.h>
 
@@ -142,6 +143,27 @@ namespace CalyxEngine {
 
 	void SceneManager::SetEditorPreviewContext(SceneContext* ctx) {
 		editorPreviewCtx_ = ctx;
+	}
+
+	void SceneManager::ClearAllContexts() {
+		editorPreviewCtx_ = nullptr;
+		lastBoundCtx_	 = nullptr;
+		lastRuntimeGen_	 = 0;
+
+		CommandManager::GetInstance()->ClearHistory();
+
+		if(pPlaySession_) {
+			pPlaySession_->ClearRuntimeContext();
+		}
+
+		for(auto& slot : slots_) {
+			if(slot.scene) {
+				slot.scene->OnExit();
+			}
+			if(slot.ctx) {
+				slot.ctx->Clear();
+			}
+		}
 	}
 
 	bool SceneManager::GetIsEndGame() const { return slots_[currentIdx_].scene->GetIsEndGame(); }

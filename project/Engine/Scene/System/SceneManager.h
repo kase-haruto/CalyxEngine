@@ -69,6 +69,7 @@ namespace CalyxEngine {
 		size_t		  GetSceneCount() const { return slots_.size(); }
 		void		  SetEditorPreviewContext(SceneContext* ctx);
 		void		  SetEditorViewportRenderState(bool renderDebugView, bool renderPicking);
+		void		  ClearAllContexts();
 		SceneContext* GetCurrentSceneContext() const;
 		size_t		  GetCurrentIndex() const { return currentIdx_; }
 

@@ -35,6 +35,7 @@ namespace CalyxEngine {
 		bool ExitRequested() const;
 		// 終了クリーンナップ
 		void FinalizeExitCleanup();
+		void ClearRuntimeContext();
 		// 再接続
 		void RebuildRuntimeFromEditor(SceneContext* newEditorCtx);
 		// SceneManager からの接続API

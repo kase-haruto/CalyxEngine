@@ -204,6 +204,19 @@ namespace CalyxEngine {
 		mode_		   = EngineMode::Editor;
 	}
 
+	void PlaySession::ClearRuntimeContext() {
+		if(runtimeContext_) {
+			runtimeContext_->Clear();
+			runtimeContext_.reset();
+		}
+		exitRequested_ = false;
+		mode_		   = EngineMode::Editor;
+		if(editorContext_) {
+			editorContext_->MakeCurrent();
+			editorContext_->SetRuntime(false);
+		}
+	}
+
 	void PlaySession::ApplyPendingDebugCameraState(SceneContext* context) {
 		if(!pendingDebugCameraState_ || !context || !context->GetCameraMgr()) return;
 

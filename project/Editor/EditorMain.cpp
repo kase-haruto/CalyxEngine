@@ -76,7 +76,7 @@ namespace {
 	};
 
 	std::filesystem::path SelectGameModulePath(const Calyx::ProjectInfo& project) {
-		// Project Browser から直接開いた場合は構成名が渡らないため、エディタ向けの Develop DLL を既定にする。
+		// Project Browser から直接開いた場合は構成名が渡らないため、デバッグしやすい Debug DLL を既定にする。
 		const std::string config = project.launchConfiguration.empty() ? "Develop" : project.launchConfiguration;
 		if(config == "Debug" && !project.gameModuleDebug.empty()) return Calyx::ResolveProjectPath(project, project.gameModuleDebug);
 		if(config == "Develop" && !project.gameModuleDevelop.empty()) return Calyx::ResolveProjectPath(project, project.gameModuleDevelop);
@@ -221,6 +221,9 @@ private:
 	void FinalizeGameApplication() {
 		if(gameApplication_) {
 			gameApplication_->OnFinalize();
+			if(sceneManager_) {
+				sceneManager_->ClearAllContexts();
+			}
 			gameModule_.Destroy(gameApplication_);
 			gameApplication_ = nullptr;
 		}
