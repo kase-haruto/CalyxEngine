@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Engine/Foundation/Export/CalyxAPI.h>
+#include <cstddef>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -68,12 +69,14 @@ public:
 	CALYX_API std::vector<SceneObjectClassDesc const*> ListPrefabEditableTypes() const;
 	CALYX_API std::vector<SceneObjectClassDesc const*> ListPrefabRootTypes() const;
 	CALYX_API const SceneObjectClassDesc* Find(std::string_view typeName) const;
+	CALYX_API std::size_t GetRevision() const;
 
 private:
 	/// <summary>
 	/// オブジェクト登録テーブル
 	/// </summary>
 	std::unordered_map<std::string, SceneObjectClassDesc> table_;
+	std::size_t revision_ = 0;
 };
 
 // 登録マクロ

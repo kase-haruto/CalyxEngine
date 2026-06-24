@@ -11,6 +11,7 @@
 // c++
 #include "imgui/imgui.h"
 
+#include <cstddef>
 #include <d3d12.h>
 #include <functional>
 #include <memory>
@@ -73,9 +74,11 @@ namespace CalyxEngine {
 		void RegisterPlaceItems();
 		void RenderSidebar();
 		void RenderContent();
+		void RefreshPlaceItemsIfRegistryChanged();
 
 		std::unordered_map<PlaceItemCategory, std::vector<PlaceItem>> categoryItems_;
 		std::string													  panelName_ = "Place Actors";
+		std::size_t													  observedRegistryRevision_ = 0;
 
 		// Selection & Filter
 		PlaceItemCategory selectedCategory_ = PlaceItemCategory::Shape;

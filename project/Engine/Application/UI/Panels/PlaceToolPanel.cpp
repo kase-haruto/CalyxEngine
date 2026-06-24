@@ -67,6 +67,13 @@ namespace CalyxEngine {
 	void PlaceToolPanel::RefreshPlaceItems() {
 		categoryItems_.clear();
 		RegisterPlaceItems();
+		observedRegistryRevision_ = SceneObjectRegistry::Get().GetRevision();
+	}
+
+	void PlaceToolPanel::RefreshPlaceItemsIfRegistryChanged() {
+		if(observedRegistryRevision_ != SceneObjectRegistry::Get().GetRevision()) {
+			RefreshPlaceItems();
+		}
 	}
 
 	// ============================================================================
@@ -339,6 +346,7 @@ namespace CalyxEngine {
 	// ============================================================================
 	void PlaceToolPanel::Render() {
 		if(!IsShow()) return;
+		RefreshPlaceItemsIfRegistryChanged();
 
 		bool open = true;
 		// 少しパディングを入れて見やすく

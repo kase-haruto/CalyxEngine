@@ -657,6 +657,7 @@ try {
 			stream << "  <PropertyGroup Label=\"UserMacros\" />\n";
 			stream << "  <PropertyGroup Label=\"CalyxEngineSdk\">\n";
 			stream << "    <CalyxEngineVersion>" << EscapeXml(project.engineVersion) << "</CalyxEngineVersion>\n";
+			stream << "    <CalyxEngineSdkDir Condition=\"'$(CalyxEngineSdkDir)'=='' and Exists('$(LOCALAPPDATA)\\CalyxEngine\\Engines\\$(CalyxEngineVersion)\\SDK\\Include\\CalyxEngine\\Application.h') and Exists('$(LOCALAPPDATA)\\CalyxEngine\\Engines\\$(CalyxEngineVersion)\\SDK\\Include\\Data\\Engine') and Exists('$(LOCALAPPDATA)\\CalyxEngine\\Engines\\$(CalyxEngineVersion)\\SDK\\Include\\externals\\nlohmann\\json.hpp')\">$(LOCALAPPDATA)\\CalyxEngine\\Engines\\$(CalyxEngineVersion)\\SDK</CalyxEngineSdkDir>\n";
 			stream << "    <CalyxEngineSdkDir Condition=\"'$(CalyxEngineSdkDir)'=='' and '$(CALYX_ENGINE_SDK_DIR)'!='' and Exists('$(CALYX_ENGINE_SDK_DIR)\\Include\\CalyxEngine\\Application.h') and Exists('$(CALYX_ENGINE_SDK_DIR)\\Include\\Data\\Engine') and Exists('$(CALYX_ENGINE_SDK_DIR)\\Include\\externals\\nlohmann\\json.hpp')\">$(CALYX_ENGINE_SDK_DIR)</CalyxEngineSdkDir>\n";
 			stream << "    <CalyxEngineSdkDir Condition=\"'$(CalyxEngineSdkDir)'==''\">$(LOCALAPPDATA)\\CalyxEngine\\Engines\\$(CalyxEngineVersion)\\SDK</CalyxEngineSdkDir>\n";
 			stream << "    <CalyxReflectionTool>$(CalyxEngineSdkDir)\\Tools\\Reflection\\generate_reflection.ps1</CalyxReflectionTool>\n";
