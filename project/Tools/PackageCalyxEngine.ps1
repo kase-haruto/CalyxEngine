@@ -121,6 +121,22 @@ function Copy-FileIfExists {
 	}
 }
 
+function Copy-FirstExistingFileRequired {
+	param(
+		[Parameter(Mandatory = $true)][string[]]$Sources,
+		[Parameter(Mandatory = $true)][string]$Destination
+	)
+
+	foreach ($source in $Sources) {
+		if (Test-Path $source) {
+			Copy-FileRequired $source $Destination
+			return
+		}
+	}
+
+	throw "Required file was not found. Tried: $($Sources -join '; ')"
+}
+
 function Copy-HeadersOnly {
 	param(
 		[Parameter(Mandatory = $true)][string]$Source,
@@ -184,7 +200,6 @@ $sdkInclude = Join-Path $sdkRoot 'Include'
 $sdkLib = Join-Path $sdkRoot 'Lib'
 $sdkBin = Join-Path $sdkRoot 'Bin'
 $sdkThirdParty = Join-Path $sdkRoot 'ThirdParty'
-$sdkTools = Join-Path $sdkRoot 'Tools'
 
 # ゲーム側が include するためのエンジン公開ヘッダーをコピーする。
 # 既存の include パスを壊さないように Engine / Data / Runtime の構造を維持する。
@@ -206,10 +221,6 @@ Copy-HeadersOnly (Join-Path $projectRoot 'externals\nlohmann') (Join-Path $sdkTh
 Copy-HeadersOnly (Join-Path $projectRoot 'externals\DirectXTex') (Join-Path $sdkThirdParty 'DirectXTex')
 Copy-DirectoryClean (Join-Path $projectRoot 'externals\assimp\include') (Join-Path $sdkThirdParty 'assimp\include')
 
-# 生成されるゲーム DLL プロジェクトが CALYX_OBJECT をビルド時に収集できるように、
-# reflection generator を SDK に同梱する。
-Copy-DirectoryClean (Join-Path $projectRoot 'Tools\Reflection') (Join-Path $sdkTools 'Reflection')
-
 # ゲームプロジェクトが各構成でリンク・実行できるように、
 # Debug / Develop / Release それぞれの lib / dll / exe を SDK に含める。
 foreach ($config in @('Debug', 'Develop', 'Release')) {
@@ -226,8 +237,14 @@ foreach ($config in @('Debug', 'Develop', 'Release')) {
 }
 
 # 生成されたゲーム vcxproj が参照するサードパーティ static library をコピーする。
-Copy-FileRequired (Join-Path $projectRoot 'externals\DirectXTex\generated\bin\DirectXTex\x64\Debug\DirectXTex.lib') (Join-Path $sdkLib 'DirectXTex\x64\Debug\DirectXTex.lib')
-Copy-FileRequired (Join-Path $projectRoot 'externals\DirectXTex\generated\bin\DirectXTex\x64\Release\DirectXTex.lib') (Join-Path $sdkLib 'DirectXTex\x64\Release\DirectXTex.lib')
+Copy-FirstExistingFileRequired @(
+	(Join-Path $projectRoot 'generated\bin\DirectXTex\x64\Debug\DirectXTex.lib'),
+	(Join-Path $projectRoot 'externals\DirectXTex\generated\bin\DirectXTex\x64\Debug\DirectXTex.lib')
+) (Join-Path $sdkLib 'DirectXTex\x64\Debug\DirectXTex.lib')
+Copy-FirstExistingFileRequired @(
+	(Join-Path $projectRoot 'generated\bin\DirectXTex\x64\Release\DirectXTex.lib'),
+	(Join-Path $projectRoot 'externals\DirectXTex\generated\bin\DirectXTex\x64\Release\DirectXTex.lib')
+) (Join-Path $sdkLib 'DirectXTex\x64\Release\DirectXTex.lib')
 Copy-DirectoryClean (Join-Path $projectRoot 'externals\assimp\lib\Debug') (Join-Path $sdkLib 'assimp\Debug')
 Copy-DirectoryClean (Join-Path $projectRoot 'externals\assimp\lib\Release') (Join-Path $sdkLib 'assimp\Release')
 
@@ -249,7 +266,6 @@ $manifest = [ordered]@{
 		'SDK\Bin\Release\CalyxGame.exe',
 		'SDK\Bin\Release\CalyxEngine.dll',
 		'SDK\Include\CalyxEngine\Application.h',
-		'SDK\Tools\Reflection\generate_reflection.ps1',
 		'SDK\Lib\Debug\CalyxEngine.lib',
 		'SDK\Lib\Develop\CalyxEngine.lib',
 		'SDK\Lib\Release\CalyxEngine.lib'
@@ -272,7 +288,6 @@ $requiredPackageFiles = @(
 	'SDK\Include\CalyxEngine\Application.h',
 	'SDK\Include\Data\Engine',
 	'SDK\Include\externals\nlohmann\json.hpp',
-	'SDK\Tools\Reflection\generate_reflection.ps1',
 	'SDK\Lib\Debug\CalyxEngine.lib',
 	'SDK\Lib\Develop\CalyxEngine.lib',
 	'SDK\Lib\Release\CalyxEngine.lib'
