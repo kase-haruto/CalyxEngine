@@ -289,46 +289,22 @@ namespace CalyxEditor {
 		}
 
 		// 生成されたゲームが最初に持つエントリポイント
-		std::string MakeGameMainSource(const ProjectBrowser::TemplateInfo& selectedTemplate) {
+		std::string MakeGameMainSource() {
 			std::stringstream stream;
 			stream << "#include <CalyxEngine/CalyxEngine.h>\n";
 			stream << "\n";
 			stream << "#include \"GameApplication.h\"\n\n";
-			if(selectedTemplate.type == ProjectTemplateType::Demo) {
-				stream << "namespace CalyxEngine {\n";
-				stream << "\tvoid RegisterGeneratedGameSceneObjects();\n";
-				stream << "}\n\n";
-			}
+			stream << "namespace CalyxEngine {\n";
+			stream << "\tvoid RegisterGeneratedGameSceneObjects();\n";
+			stream << "}\n\n";
 			stream << "extern \"C\" __declspec(dllexport) Calyx::Application* CreateCalyxApplication() {\n";
 			stream << "\tCalyxEngine::RegisterGeneratedSceneObjects();\n";
-			if(selectedTemplate.type == ProjectTemplateType::Demo) {
-				stream << "\tCalyxEngine::RegisterGeneratedGameSceneObjects();\n";
-			}
+			stream << "\tCalyxEngine::RegisterGeneratedGameSceneObjects();\n";
 			stream << "\n";
 			stream << "\treturn new GameApplication();\n";
 			stream << "}\n\n";
 			stream << "extern \"C\" __declspec(dllexport) void DestroyCalyxApplication(Calyx::Application* application) {\n";
 			stream << "\tdelete application;\n";
-			stream << "}\n";
-			return stream.str();
-		}
-
-		std::string MakeGameObjectRegistrySource(const ProjectBrowser::TemplateInfo& selectedTemplate) {
-			if(selectedTemplate.type != ProjectTemplateType::Demo) {
-				return {};
-			}
-
-			std::stringstream stream;
-			stream << "#include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>\n\n";
-			stream << "#include <Demo/3D/Actor/DemoCamera/DemoCameraPivot.h>\n";
-			stream << "#include <Demo/3D/Actor/DemoPlayer/DemoPlayer.h>\n";
-			stream << "#include <Demo/3D/Actor/DemoPlayer/Weapon/Weapon.h>\n\n";
-			stream << "namespace CalyxEngine {\n";
-			stream << "\tvoid RegisterGeneratedGameSceneObjects() {\n";
-			stream << "\t\tSceneObjectRegistry::Get().Register(\"DemoCameraPivot\", \"Demo Camera Pivot\", ObjectType::GameObject, \"UI/Tool/AssetPanel/generic.png\", true, false, false, &CreateSceneObject<DemoCameraPivot>);\n";
-			stream << "\t\tSceneObjectRegistry::Get().Register(\"DemoPlayer\", \"Demo Player\", ObjectType::GameObject, \"UI/Tool/AssetPanel/generic.png\", true, false, false, &CreateSceneObject<DemoPlayer>);\n";
-			stream << "\t\tSceneObjectRegistry::Get().Register(\"Weapon\", \"Weapon\", ObjectType::GameObject, \"UI/Tool/AssetPanel/generic.png\", true, false, false, &CreateSceneObject<Weapon>);\n";
-			stream << "\t}\n";
 			stream << "}\n";
 			return stream.str();
 		}
@@ -501,6 +477,7 @@ try {
 			stream << "    <CalyxEngineVersion>" << EscapeXml(project.engineVersion) << "</CalyxEngineVersion>\n";
 			stream << "    <CalyxEngineSdkDir Condition=\"'$(CalyxEngineSdkDir)'=='' and '$(CALYX_ENGINE_SDK_DIR)'!='' and Exists('$(CALYX_ENGINE_SDK_DIR)\\Include\\CalyxEngine\\Application.h') and Exists('$(CALYX_ENGINE_SDK_DIR)\\Include\\Data\\Engine') and Exists('$(CALYX_ENGINE_SDK_DIR)\\Include\\externals\\nlohmann\\json.hpp')\">$(CALYX_ENGINE_SDK_DIR)</CalyxEngineSdkDir>\n";
 			stream << "    <CalyxEngineSdkDir Condition=\"'$(CalyxEngineSdkDir)'==''\">$(LOCALAPPDATA)\\CalyxEngine\\Engines\\$(CalyxEngineVersion)\\SDK</CalyxEngineSdkDir>\n";
+			stream << "    <CalyxReflectionTool>$(CalyxEngineSdkDir)\\Tools\\Reflection\\generate_reflection.ps1</CalyxReflectionTool>\n";
 			stream << "  </PropertyGroup>\n";
 			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Debug|x64'\"><IntDir>Generated\\Obj\\$(ProjectName)\\$(Configuration)\\</IntDir><OutDir>Generated\\Outputs\\$(Configuration)\\</OutDir><LinkIncremental>true</LinkIncremental></PropertyGroup>\n";
 			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Release|x64'\"><IntDir>Generated\\Obj\\$(ProjectName)\\$(Configuration)\\</IntDir><OutDir>Generated\\Outputs\\$(Configuration)\\</OutDir></PropertyGroup>\n";
@@ -549,9 +526,10 @@ try {
 			for(const auto& sourceFile : sourceFiles) {
 				stream << "    <ClCompile Include=\"" << EscapeXml(ToVisualStudioPath(project.rootDirectory, sourceFile)) << "\" />\n";
 			}
+			stream << "    <ClCompile Include=\"Generated\\Foundation\\Reflection\\CalyxGameObjectRegistry.generated.cpp\" />\n";
 			stream << "  </ItemGroup>\n";
 			stream << "  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />\n";
-			stream << "  <Target Name=\"EnsureCalyxEngineSdk\" BeforeTargets=\"PrepareForBuild\" Condition=\"!Exists('$(CalyxEngineSdkDir)\\Include\\CalyxEngine\\Application.h') or !Exists('$(CalyxEngineSdkDir)\\Include\\Data\\Engine') or !Exists('$(CalyxEngineSdkDir)\\Include\\externals\\nlohmann\\json.hpp')\">\n";
+			stream << "  <Target Name=\"EnsureCalyxEngineSdk\" BeforeTargets=\"PrepareForBuild\" Condition=\"!Exists('$(CalyxEngineSdkDir)\\Include\\CalyxEngine\\Application.h') or !Exists('$(CalyxEngineSdkDir)\\Include\\Data\\Engine') or !Exists('$(CalyxEngineSdkDir)\\Include\\externals\\nlohmann\\json.hpp') or !Exists('$(CalyxReflectionTool)')\">\n";
 			stream << "    <Message Importance=\"high\" Text=\"Installing Calyx SDK $(CalyxEngineVersion) from GitHub Releases...\" />\n";
 			stream << "    <Exec Command=\"&quot;$(ProjectDir)Tools\\CalyxLauncher.exe&quot; &quot;$(ProjectDir)" << projectName << ".calyxproj&quot;\" />\n";
 			stream << "  </Target>\n";
@@ -560,8 +538,12 @@ try {
 			stream << "    <Error Condition=\"'$(CalyxEngineSdkDir)'!='' and !Exists('$(CalyxEngineSdkDir)\\Include\\CalyxEngine\\Application.h')\" Text=\"CalyxEngineSdkDir does not point to a Calyx SDK directory: $(CalyxEngineSdkDir)\" />\n";
 			stream << "    <Error Condition=\"'$(CalyxEngineSdkDir)'!='' and !Exists('$(CalyxEngineSdkDir)\\Include\\Data\\Engine')\" Text=\"CalyxEngineSdkDir is missing Data headers. Update or reinstall the Calyx engine SDK: $(CalyxEngineSdkDir)\" />\n";
 			stream << "    <Error Condition=\"'$(CalyxEngineSdkDir)'!='' and !Exists('$(CalyxEngineSdkDir)\\Include\\externals\\nlohmann\\json.hpp')\" Text=\"CalyxEngineSdkDir is missing external headers. Update or reinstall the Calyx engine SDK: $(CalyxEngineSdkDir)\" />\n";
+			stream << "    <Error Condition=\"'$(CalyxEngineSdkDir)'!='' and !Exists('$(CalyxReflectionTool)')\" Text=\"Calyx reflection generator was not found. Update or reinstall the Calyx engine SDK: $(CalyxReflectionTool)\" />\n";
 			stream << "    <Error Condition=\"'$(CalyxEngineSdkDir)'!='' and !Exists('$(CalyxEngineSdkDir)\\Lib\\$(Configuration)\\CalyxEngine.lib')\" Text=\"CalyxEngine.lib was not found for $(Configuration). Update or reinstall the Calyx engine SDK: $(CalyxEngineSdkDir)\" />\n";
 			stream << "    <Error Condition=\"'$(CalyxEngineSdkDir)'!='' and !Exists('$(CalyxEngineSdkDir)\\Bin\\$(Configuration)\\CalyxGame.exe')\" Text=\"CalyxGame.exe was not found for $(Configuration). Update or reinstall the Calyx engine SDK: $(CalyxEngineSdkDir)\" />\n";
+			stream << "  </Target>\n";
+			stream << "  <Target Name=\"GenerateCalyxGameReflection\" BeforeTargets=\"ClCompile\" DependsOnTargets=\"ValidateCalyxEngineSdkDir\">\n";
+			stream << "    <Exec Command=\"powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(CalyxReflectionTool)&quot; -Root &quot;$(ProjectDir)&quot; -ScanRoots &quot;" << EscapeXml(sourceDir) << "&quot; -OutputDir &quot;Generated\\Foundation\\Reflection&quot; -OutputName CalyxGameObjectRegistry.generated -FunctionName RegisterGeneratedGameSceneObjects\" />\n";
 			stream << "  </Target>\n";
 			stream << "  <ImportGroup Label=\"ExtensionTargets\" />\n";
 			stream << "</Project>\n";
@@ -580,6 +562,7 @@ try {
 			for(const auto& sourceFile : sourceFiles) {
 				stream << "    <ClCompile Include=\"" << EscapeXml(ToVisualStudioPath(project.rootDirectory, sourceFile)) << "\"><Filter>Game</Filter></ClCompile>\n";
 			}
+			stream << "    <ClCompile Include=\"Generated\\Foundation\\Reflection\\CalyxGameObjectRegistry.generated.cpp\"><Filter>Game</Filter></ClCompile>\n";
 			stream << "  </ItemGroup>\n";
 			stream << "</Project>\n";
 			return stream.str();
@@ -737,7 +720,7 @@ try {
 
 			// アプリのエントリポイントとなる初期「GameMain.cpp」ファイルを生成してSource下に書き出し
 			const auto sourceDirectory = Calyx::ResolveProjectPath(project, project.sourceDirectory);
-			if(!WriteTextFile(sourceDirectory / "GameMain.cpp", MakeGameMainSource(selectedTemplate))) {
+			if(!WriteTextFile(sourceDirectory / "GameMain.cpp", MakeGameMainSource())) {
 				return false;
 			}
 			if(!WriteTextFile(sourceDirectory / "GameApplication.h", MakeGameApplicationHeader())) {
@@ -746,12 +729,6 @@ try {
 			if(!WriteTextFile(sourceDirectory / "GameApplication.cpp", MakeGameApplicationSource(selectedTemplate))) {
 				return false;
 			}
-			if(selectedTemplate.type == ProjectTemplateType::Demo) {
-				if(!WriteTextFile(sourceDirectory / "GameObjectRegistry.generated.cpp", MakeGameObjectRegistrySource(selectedTemplate))) {
-					return false;
-				}
-			}
-
 			// フォルダ内からソースファイル一覧を収集
 			const auto sourceFiles = CollectSourceFiles(project);
 

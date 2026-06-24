@@ -171,6 +171,7 @@ $sdkInclude = Join-Path $sdkRoot 'Include'
 $sdkLib = Join-Path $sdkRoot 'Lib'
 $sdkBin = Join-Path $sdkRoot 'Bin'
 $sdkThirdParty = Join-Path $sdkRoot 'ThirdParty'
+$sdkTools = Join-Path $sdkRoot 'Tools'
 
 # ゲーム側が include するためのエンジン公開ヘッダーをコピーする。
 # 既存の include パスを壊さないように Engine / Data / Runtime の構造を維持する。
@@ -191,6 +192,10 @@ Copy-HeadersOnly (Join-Path $projectRoot 'externals') (Join-Path $sdkInclude 'ex
 Copy-HeadersOnly (Join-Path $projectRoot 'externals\nlohmann') (Join-Path $sdkThirdParty 'nlohmann')
 Copy-HeadersOnly (Join-Path $projectRoot 'externals\DirectXTex') (Join-Path $sdkThirdParty 'DirectXTex')
 Copy-DirectoryClean (Join-Path $projectRoot 'externals\assimp\include') (Join-Path $sdkThirdParty 'assimp\include')
+
+# 生成されるゲーム DLL プロジェクトが CALYX_OBJECT をビルド時に収集できるように、
+# reflection generator を SDK に同梱する。
+Copy-DirectoryClean (Join-Path $projectRoot 'Tools\Reflection') (Join-Path $sdkTools 'Reflection')
 
 # ゲームプロジェクトが各構成でリンク・実行できるように、
 # Debug / Develop / Release それぞれの lib / dll / exe を SDK に含める。
@@ -231,6 +236,7 @@ $manifest = [ordered]@{
 		'SDK\Bin\Release\CalyxGame.exe',
 		'SDK\Bin\Release\CalyxEngine.dll',
 		'SDK\Include\CalyxEngine\Application.h',
+		'SDK\Tools\Reflection\generate_reflection.ps1',
 		'SDK\Lib\Debug\CalyxEngine.lib',
 		'SDK\Lib\Develop\CalyxEngine.lib',
 		'SDK\Lib\Release\CalyxEngine.lib'
@@ -253,6 +259,7 @@ $requiredPackageFiles = @(
 	'SDK\Include\CalyxEngine\Application.h',
 	'SDK\Include\Data\Engine',
 	'SDK\Include\externals\nlohmann\json.hpp',
+	'SDK\Tools\Reflection\generate_reflection.ps1',
 	'SDK\Lib\Debug\CalyxEngine.lib',
 	'SDK\Lib\Develop\CalyxEngine.lib',
 	'SDK\Lib\Release\CalyxEngine.lib'
