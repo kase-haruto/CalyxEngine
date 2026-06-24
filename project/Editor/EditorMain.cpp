@@ -75,7 +75,7 @@ namespace {
 
 	std::filesystem::path SelectGameModulePath(const Calyx::ProjectInfo& project) {
 		// Project Browser から直接開いた場合は構成名が渡らないため、デバッグしやすい Debug DLL を既定にする。
-		const std::string config = project.launchConfiguration.empty() ? "Decelop" : project.launchConfiguration;
+		const std::string config = project.launchConfiguration.empty() ? "Develop" : project.launchConfiguration;
 		if(config == "Debug" && !project.gameModuleDebug.empty()) return Calyx::ResolveProjectPath(project, project.gameModuleDebug);
 		if(config == "Develop" && !project.gameModuleDevelop.empty()) return Calyx::ResolveProjectPath(project, project.gameModuleDevelop);
 		if(config == "Release" && !project.gameModuleRelease.empty()) return Calyx::ResolveProjectPath(project, project.gameModuleRelease);
