@@ -63,6 +63,7 @@ namespace CalyxEngine {
 		PlaceToolPanel();
 		~PlaceToolPanel() override = default;
 
+		void RefreshPlaceItems();
 		void Render() override;
 
 		const std::string& GetPanelName() const override { return panelName_; }

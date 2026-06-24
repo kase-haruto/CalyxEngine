@@ -120,6 +120,7 @@ void PipelineService::RegisterAllPipelines() {
 	regPP(PipelineTag::PostProcess::OutlineComposite, PipelinePresets::MakeOutlineComposite);
 	regPP(PipelineTag::PostProcess::Blend, PipelinePresets::MakeBlend);
 	regPP(PipelineTag::PostProcess::Bloom, PipelinePresets::MakeBloom);
+	regPP(PipelineTag::PostProcess::DepthVisualize, PipelinePresets::MakeDepthVisualize);
 	regPP(PipelineTag::PostProcess::CopyImage, PipelinePresets::MakeCopyImage);
 
 }

@@ -31,6 +31,9 @@ void PickingPass::Initialize(int32_t width, int32_t height) {
 	rtv_ = DescriptorAllocator::Allocate(DescriptorUsage::Rtv);
 	dsv_ = DescriptorAllocator::Allocate(DescriptorUsage::Dsv);
 	srv_ = DescriptorAllocator::Allocate(DescriptorUsage::CbvSrvUav);
+	depthSrv_ = DescriptorAllocator::Allocate(DescriptorUsage::CbvSrvUav);
+	depthPreviewRtv_ = DescriptorAllocator::Allocate(DescriptorUsage::Rtv);
+	depthPreviewSrv_ = DescriptorAllocator::Allocate(DescriptorUsage::CbvSrvUav);
 
 	CreateResources(static_cast<uint32_t>(width),
 					static_cast<uint32_t>(height));
@@ -45,10 +48,16 @@ void PickingPass::Finalize() {
 	DescriptorAllocator::Free(DescriptorUsage::Rtv, rtv_);
 	DescriptorAllocator::Free(DescriptorUsage::Dsv, dsv_);
 	DescriptorAllocator::Free(DescriptorUsage::CbvSrvUav, srv_);
+	DescriptorAllocator::Free(DescriptorUsage::CbvSrvUav, depthSrv_);
+	DescriptorAllocator::Free(DescriptorUsage::Rtv, depthPreviewRtv_);
+	DescriptorAllocator::Free(DescriptorUsage::CbvSrvUav, depthPreviewSrv_);
 
 	rtv_ = {};
 	dsv_ = {};
 	srv_ = {};
+	depthSrv_ = {};
+	depthPreviewRtv_ = {};
+	depthPreviewSrv_ = {};
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -159,18 +168,19 @@ void PickingPass::CreateResources(uint32_t w, uint32_t h) {
 	// Depth
 	// =========================================================
 	{
-		const DXGI_FORMAT depthFormat = DXGI_FORMAT_D32_FLOAT;
+		const DXGI_FORMAT depthResourceFormat = DXGI_FORMAT_R32_TYPELESS;
+		const DXGI_FORMAT depthViewFormat	 = DXGI_FORMAT_D32_FLOAT;
 
 		D3D12_RESOURCE_DESC desc =
 			CD3DX12_RESOURCE_DESC::Tex2D(
-				depthFormat,
+				depthResourceFormat,
 				width_,
 				height_,
 				1, 1, 1, 0,
 				D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
 
 		D3D12_CLEAR_VALUE clear{};
-		clear.Format			   = depthFormat;
+		clear.Format			   = depthViewFormat;
 		clear.DepthStencil.Depth   = 1.0f;
 		clear.DepthStencil.Stencil = 0;
 
@@ -185,10 +195,60 @@ void PickingPass::CreateResources(uint32_t w, uint32_t h) {
 				IID_PPV_ARGS(&depth_)));
 
 		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
-		dsvDesc.Format		  = depthFormat;
+		dsvDesc.Format		  = depthViewFormat;
 		dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 
 		device->CreateDepthStencilView(depth_.Get(), &dsvDesc, dsv_.cpu);
+
+		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+		srvDesc.Format						  = DXGI_FORMAT_R32_FLOAT;
+		srvDesc.ViewDimension				  = D3D12_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Shader4ComponentMapping		  = D3D12_ENCODE_SHADER_4_COMPONENT_MAPPING(
+			D3D12_SHADER_COMPONENT_MAPPING_FROM_MEMORY_COMPONENT_0,
+			D3D12_SHADER_COMPONENT_MAPPING_FROM_MEMORY_COMPONENT_0,
+			D3D12_SHADER_COMPONENT_MAPPING_FROM_MEMORY_COMPONENT_0,
+			D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_1);
+		srvDesc.Texture2D.MipLevels			  = 1;
+		srvDesc.Texture2D.MostDetailedMip	  = 0;
+		srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+		device->CreateShaderResourceView(depth_.Get(), &srvDesc, depthSrv_.cpu);
+		depthState_ = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+	}
+
+	// =========================================================
+	// Depth Preview RT
+	// =========================================================
+	{
+		const DXGI_FORMAT previewFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+
+		D3D12_RESOURCE_DESC desc =
+			CD3DX12_RESOURCE_DESC::Tex2D(
+				previewFormat,
+				width_,
+				height_,
+				1, 1, 1, 0,
+				D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
+
+		D3D12_CLEAR_VALUE clear{};
+		clear.Format   = previewFormat;
+		clear.Color[0] = 0.0f;
+		clear.Color[1] = 0.0f;
+		clear.Color[2] = 0.0f;
+		clear.Color[3] = 1.0f;
+
+		auto heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+		ThrowIfFailed(
+			device->CreateCommittedResource(
+				&heapProps,
+				D3D12_HEAP_FLAG_NONE,
+				&desc,
+				D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+				&clear,
+				IID_PPV_ARGS(&depthPreview_)));
+
+		device->CreateRenderTargetView(depthPreview_.Get(), nullptr, depthPreviewRtv_.cpu);
+		device->CreateShaderResourceView(depthPreview_.Get(), nullptr, depthPreviewSrv_.cpu);
+		depthPreviewState_ = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 	}
 
 	// =========================================================
@@ -243,10 +303,13 @@ void PickingPass::CreateReadback(uint32_t w, uint32_t h) {
 void PickingPass::DestroyResources() {
 	color_.Reset();
 	depth_.Reset();
+	depthPreview_.Reset();
 	readback_.Reset();
 	readbackDepth_.Reset();
 	width_ = height_ = 0;
 	colorState_ = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+	depthState_ = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+	depthPreviewState_ = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 }
 
 void PickingPass::TransitionColorTo(ID3D12GraphicsCommandList* cmd, D3D12_RESOURCE_STATES newState) {
@@ -258,6 +321,65 @@ void PickingPass::TransitionColorTo(ID3D12GraphicsCommandList* cmd, D3D12_RESOUR
 		newState);
 	cmd->ResourceBarrier(1, &barrier);
 	colorState_ = newState;
+}
+
+void PickingPass::TransitionDepthTo(ID3D12GraphicsCommandList* cmd, D3D12_RESOURCE_STATES newState) {
+	if(!cmd || !depth_ || depthState_ == newState) return;
+
+	D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		depth_.Get(),
+		depthState_,
+		newState);
+	cmd->ResourceBarrier(1, &barrier);
+	depthState_ = newState;
+}
+
+void PickingPass::TransitionDepthPreviewTo(ID3D12GraphicsCommandList* cmd, D3D12_RESOURCE_STATES newState) {
+	if(!cmd || !depthPreview_ || depthPreviewState_ == newState) return;
+
+	D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		depthPreview_.Get(),
+		depthPreviewState_,
+		newState);
+	cmd->ResourceBarrier(1, &barrier);
+	depthPreviewState_ = newState;
+}
+
+void PickingPass::RenderDepthPreview(ID3D12GraphicsCommandList* cmd, const PipelineService* psoService) {
+	if(!cmd || !psoService || !depth_ || !depthPreview_) return;
+
+	TransitionDepthTo(cmd, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	TransitionDepthPreviewTo(cmd, D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+	cmd->OMSetRenderTargets(1, &depthPreviewRtv_.cpu, FALSE, nullptr);
+
+	const float clearColor[4] = {0, 0, 0, 1};
+	cmd->ClearRenderTargetView(depthPreviewRtv_.cpu, clearColor, 0, nullptr);
+
+	D3D12_VIEWPORT vp{};
+	vp.TopLeftX = 0;
+	vp.TopLeftY = 0;
+	vp.Width	= static_cast<float>(width_);
+	vp.Height	= static_cast<float>(height_);
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
+
+	D3D12_RECT sc{};
+	sc.left	  = 0;
+	sc.top	  = 0;
+	sc.right  = static_cast<LONG>(width_);
+	sc.bottom = static_cast<LONG>(height_);
+
+	cmd->RSSetViewports(1, &vp);
+	cmd->RSSetScissorRects(1, &sc);
+
+	const auto ps = psoService->GetPipelineSet(PipelineTag::PostProcess::DepthVisualize);
+	psoService->SetCommand(ps, cmd);
+	cmd->SetGraphicsRootDescriptorTable(0, depthSrv_.gpu);
+	cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	cmd->DrawInstanced(3, 1, 0, 0);
+
+	TransitionDepthPreviewTo(cmd, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -279,6 +401,7 @@ void PickingPass::Render(
 	// State Transition
 	// =========================================================
 	TransitionColorTo(cmd, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	TransitionDepthTo(cmd, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
 	// =========================================================
 	// OM 設定
@@ -413,11 +536,7 @@ void PickingPass::Render(
 	// Depth Readback Copy
 	// =========================================================
 	if(readbackDepth_) {
-		D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-			depth_.Get(),
-			D3D12_RESOURCE_STATE_DEPTH_WRITE,
-			D3D12_RESOURCE_STATE_COPY_SOURCE);
-		cmd->ResourceBarrier(1, &barrier);
+		TransitionDepthTo(cmd, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 		D3D12_RESOURCE_DESC				   desc = CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_D32_FLOAT, width_, height_);
 		D3D12_PLACED_SUBRESOURCE_FOOTPRINT layout;
@@ -427,10 +546,6 @@ void PickingPass::Render(
 		CD3DX12_TEXTURE_COPY_LOCATION src(depth_.Get(), 0);
 		cmd->CopyTextureRegion(&dst, 0, 0, 0, &src, nullptr);
 
-		barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-			depth_.Get(),
-			D3D12_RESOURCE_STATE_COPY_SOURCE,
-			D3D12_RESOURCE_STATE_DEPTH_WRITE);
-		cmd->ResourceBarrier(1, &barrier);
+		TransitionDepthTo(cmd, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 	}
 }

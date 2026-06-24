@@ -155,7 +155,9 @@ namespace CalyxEngine {
 		mainViewport_	 = std::make_unique<Viewport>(ViewportType::VIEWPORT_MAIN, "Game Viewport");
 		debugViewport_	 = std::make_unique<Viewport>(ViewportType::VIEWPORT_DEBUG, "Debug Viewport");
 		pickingViewport_ = std::make_unique<Viewport>(ViewportType::VIEWPORT_PICKING, "Picking Viewport");
+		pickingDepthViewport_ = std::make_unique<Viewport>(ViewportType::VIEWPORT_PICKING_DEPTH, "Picking Depth Viewport");
 		pickingViewport_->SetShow(false);
+		pickingDepthViewport_->SetShow(false);
 		viewportSelection_->SetViewport(debugViewport_.get());
 		viewportSelection_->SetCallbacks(ViewportSelectionCallbacks{
 			[this]() { return GetSelectedObjects(); },
@@ -351,6 +353,16 @@ namespace CalyxEngine {
 					[this] {
 						if(pickingViewport_) {
 							pickingViewport_->SetShow(!pickingViewport_->IsShow());
+						}
+					},
+					true});
+
+		menu_->Add(MenuCategory::View,
+				   {"Picking Depth Viewport",
+					"",
+					[this] {
+						if(pickingDepthViewport_) {
+							pickingDepthViewport_->SetShow(!pickingDepthViewport_->IsShow());
 						}
 					},
 					true});
@@ -1211,6 +1223,10 @@ namespace CalyxEngine {
 			if(pickingViewport_ && pickingViewport_->IsShow()) {
 				pickingViewport_->Render(tex);
 			}
+		} else if(type == ViewportType::VIEWPORT_PICKING_DEPTH) {
+			if(pickingDepthViewport_ && pickingDepthViewport_->IsShow()) {
+				pickingDepthViewport_->Render(tex);
+			}
 		}
 
 		restoreContext();
@@ -1297,6 +1313,7 @@ namespace CalyxEngine {
 			if(mainViewport_) mainViewport_->SetPickingPass(pickingPass);
 			if(debugViewport_) debugViewport_->SetPickingPass(pickingPass);
 			if(pickingViewport_) pickingViewport_->SetPickingPass(pickingPass);
+			if(pickingDepthViewport_) pickingDepthViewport_->SetPickingPass(pickingPass);
 		}
 		if(viewportSelection_) viewportSelection_->SetSceneManager(manager);
 		if(manager && editToolMode_ == EngineEdit::EditToolMode::ParticleEffect) {

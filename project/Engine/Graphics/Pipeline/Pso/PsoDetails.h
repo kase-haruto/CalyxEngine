@@ -55,6 +55,7 @@ namespace PipelineTag {
 		OutlineComposite,
 		Blend,
 		Bloom,
+		DepthVisualize,
 
 		Count
 	};

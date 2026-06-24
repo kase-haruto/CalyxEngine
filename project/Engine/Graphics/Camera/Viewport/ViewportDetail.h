@@ -5,4 +5,5 @@ enum class ViewportType {
 	VIEWPORT_MAIN,	  // gameView
 	VIEWPORT_DEBUG,	  // debugView
 	VIEWPORT_PICKING, // pickingView
+	VIEWPORT_PICKING_DEPTH, // pickingDepthView
 };

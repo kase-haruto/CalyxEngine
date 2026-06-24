@@ -40,6 +40,7 @@ namespace CalyxEngine {
 		void SetMainViewportTexture(UINT64 textureID);	  //< メインビューポート用のテクスチャを設定
 		void SetDebugViewportTexture(UINT64 textureID);	  //< デバッグビューポート用のテクスチャを設定
 		void SetPickingViewportTexture(UINT64 textureID); //< ピッキングビューポート用のテクスチャを設定
+		void SetPickingDepthViewportTexture(UINT64 textureID); //< ピッキング深度ビューポート用のテクスチャを設定
 		template <class Panel>
 		Panel*			GetPanel();
 		HierarchyPanel* GetHierarchyPanel() const;
@@ -63,6 +64,7 @@ namespace CalyxEngine {
 		UINT64							 mainViewportTextureID_	   = 0;
 		UINT64							 debugViewportTextureID_   = 0;
 		UINT64							 pickingViewportTextureID_ = 0;
+		UINT64							 pickingDepthViewportTextureID_ = 0;
 		bool							 editorUiEnabled_		   = true; //< 通常エディタUIを描画するか
 	};
 

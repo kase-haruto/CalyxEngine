@@ -43,14 +43,19 @@ namespace CalyxEngine {
 		void Render(ID3D12GraphicsCommandList* cmd,
 					ModelRenderer*			   modelRenderer,
 					PipelineService*		   psoService);
+		void RenderDepthPreview(ID3D12GraphicsCommandList* cmd, const PipelineService* psoService);
 
 		void TransitionColorTo(ID3D12GraphicsCommandList* cmd, D3D12_RESOURCE_STATES newState);
+		void TransitionDepthTo(ID3D12GraphicsCommandList* cmd, D3D12_RESOURCE_STATES newState);
+		void TransitionDepthPreviewTo(ID3D12GraphicsCommandList* cmd, D3D12_RESOURCE_STATES newState);
 
 		// RT / Depth 取得（Readback用に後で使う）
 		ID3D12Resource*				GetColor() const { return color_.Get(); }
 		D3D12_CPU_DESCRIPTOR_HANDLE GetRtv() const { return rtv_.cpu; }
 		D3D12_CPU_DESCRIPTOR_HANDLE GetDsv() const { return dsv_.cpu; }
 		D3D12_GPU_DESCRIPTOR_HANDLE GetSrv() const { return srv_.gpu; }
+		D3D12_GPU_DESCRIPTOR_HANDLE GetDepthSrv() const { return depthSrv_.gpu; }
+		D3D12_GPU_DESCRIPTOR_HANDLE GetDepthPreviewSrv() const { return depthPreviewSrv_.gpu; }
 
 		uint32_t GetWidth() const { return width_; }
 		uint32_t GetHeight() const { return height_; }
@@ -79,17 +84,23 @@ namespace CalyxEngine {
 	private:
 		Microsoft::WRL::ComPtr<ID3D12Resource> color_;
 		Microsoft::WRL::ComPtr<ID3D12Resource> depth_;
+		Microsoft::WRL::ComPtr<ID3D12Resource> depthPreview_;
 		Microsoft::WRL::ComPtr<ID3D12Resource> readback_;
 		Microsoft::WRL::ComPtr<ID3D12Resource> readbackDepth_;
 
 		DescriptorHandle rtv_{};
 		DescriptorHandle dsv_{};
 		DescriptorHandle srv_{};
+		DescriptorHandle depthSrv_{};
+		DescriptorHandle depthPreviewRtv_{};
+		DescriptorHandle depthPreviewSrv_{};
 
 		uint32_t width_			= 0;
 		uint32_t height_		= 0;
 		uint32_t rowPitch_		= 0;
 		uint32_t rowPitchDepth_ = 0;
 		D3D12_RESOURCE_STATES colorState_ = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+		D3D12_RESOURCE_STATES depthState_ = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+		D3D12_RESOURCE_STATES depthPreviewState_ = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 	};
 } // namespace CalyxEngine
