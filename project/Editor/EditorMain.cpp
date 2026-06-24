@@ -4,6 +4,8 @@
 
 #include <Demo/Scene/DemoScene/DemoScene.h>
 #include <Engine/Assets/Database/AssetDatabase.h>
+#include <Engine/Application/UI/EngineUI/Core/EngineUICore.h>
+#include <Engine/Application/UI/Panels/PlaceToolPanel.h>
 #include <Engine/Foundation/Reflection/CalyxGameObjectRegistry.generated.h>
 #include <Engine/Foundation/Reflection/CalyxObjectRegistry.generated.h>
 #include <Engine/Scene/Base/BaseScene.h>
@@ -107,6 +109,7 @@ public:
 		if(gameApplication_) {
 			gameApplication_->OnProjectLoaded(project_);
 		}
+		RefreshPlaceToolPanel();
 		RegisterGameScenesIfReady();
 		ApplyProjectTemplateScene();
 	}
@@ -129,6 +132,11 @@ public:
 		}
 		RegisterGameScenesIfReady();
 		ApplyProjectTemplateScene();
+	}
+
+	void OnEngineUiReady(CalyxEngine::EngineUICore& engineUi) override {
+		engineUi_ = &engineUi;
+		RefreshPlaceToolPanel();
 	}
 
 	void OnUpdate() override {
@@ -189,6 +197,15 @@ private:
 		gameScenesRegistered_ = false;
 	}
 
+	void RefreshPlaceToolPanel() {
+		if(!engineUi_ || !gameApplication_) {
+			return;
+		}
+		if(auto* panel = engineUi_->GetPlaceToolPanel()) {
+			panel->RefreshPlaceItems();
+		}
+	}
+
 	void RegisterGameScenesIfReady() {
 		if(!sceneManager_ || !gameApplication_ || gameScenesRegistered_) {
 			return;
@@ -204,6 +221,9 @@ private:
 	void FinalizeGameApplication() {
 		if(gameApplication_) {
 			gameApplication_->OnFinalize();
+			if(sceneManager_) {
+				sceneManager_->ClearAllContexts();
+			}
 			gameModule_.Destroy(gameApplication_);
 			gameApplication_ = nullptr;
 		}
@@ -217,6 +237,7 @@ private:
 	Calyx::ProjectInfo project_;
 	CalyxEditor::ProjectBrowser projectBrowser_;
 	CalyxEngine::SceneManager* sceneManager_ = nullptr;
+	CalyxEngine::EngineUICore* engineUi_ = nullptr;
 	GameModule gameModule_;
 	Calyx::Application* gameApplication_ = nullptr;
 	bool hasProject_ = false;

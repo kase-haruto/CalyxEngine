@@ -55,6 +55,10 @@ namespace CalyxEngine {
 			lvl->SetSceneManager(sceneManager_.get());
 		}
 
+		if(application) {
+			application->OnEngineUiReady(*engineUICore_);
+		}
+
 		editorCollection_ = std::make_unique<EditorCollection>();
 		editorCollection_->InitializeEditors();
 

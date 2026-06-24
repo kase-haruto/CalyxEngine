@@ -64,6 +64,11 @@ namespace CalyxEngine {
 	PlaceToolPanel::PlaceToolPanel()
 		: IEngineUI("PlaceToolPanel") { RegisterPlaceItems(); }
 
+	void PlaceToolPanel::RefreshPlaceItems() {
+		categoryItems_.clear();
+		RegisterPlaceItems();
+	}
+
 	// ============================================================================
 	//  アイテム登録
 	// ============================================================================

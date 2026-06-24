@@ -468,7 +468,8 @@ void Viewport::Render(const ImTextureID& tex) {
         break;
     }
     case ViewportType::VIEWPORT_DEBUG:
-    case ViewportType::VIEWPORT_PICKING: {
+    case ViewportType::VIEWPORT_PICKING:
+    case ViewportType::VIEWPORT_PICKING_DEPTH: {
         auto* debugCam = CameraManager::GetDebug();
         if(debugCam && camera_ != debugCam) camera_ = debugCam;
         break;
@@ -538,7 +539,9 @@ void Viewport::Render(const ImTextureID& tex) {
 
     viewOrigin_ = CalyxEngine::Vector2(imagePos.x, imagePos.y);
 
-    if(size_.y > 0.0f && type_ != ViewportType::VIEWPORT_PICKING) {
+    if(size_.y > 0.0f &&
+       type_ != ViewportType::VIEWPORT_PICKING &&
+       type_ != ViewportType::VIEWPORT_PICKING_DEPTH) {
         const CalyxEngine::Vector2 renderSize = usePlacementCanvas2D
             ? CalyxEngine::Vector2(contentSize.x, contentSize.y)
             : size_;

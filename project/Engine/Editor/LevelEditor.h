@@ -181,6 +181,7 @@ namespace CalyxEngine {
 		std::unique_ptr<Viewport>			mainViewport_;		 //< メインビューポート
 		std::unique_ptr<Viewport>			debugViewport_;		 //< デバッグビューポート
 		std::unique_ptr<Viewport>			pickingViewport_;	 //< ピッキングビューポート
+		std::unique_ptr<Viewport>			pickingDepthViewport_; //< ピッキング深度ビューポート
 		int									startupDebugViewportFocusFrames_ = 3;
 		std::unique_ptr<PerformanceOverlay> performanceOverlay_; //< パフォーマンスオーバーレイ
 		std::unique_ptr<DebugOverlay>		debugOverlay_;		 //< デバッグオーバーレイ

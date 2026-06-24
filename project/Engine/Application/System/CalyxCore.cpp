@@ -193,6 +193,8 @@ namespace CalyxEngine {
 					if(pickingColor) {
 						pickingPass->TransitionColorTo(cmd, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 						pEngineUICore_->SetPickingViewportTexture(pickingPass->GetSrv().ptr);
+						pickingPass->RenderDepthPreview(cmd, service);
+						pEngineUICore_->SetPickingDepthViewportTexture(pickingPass->GetDepthPreviewSrv().ptr);
 					}
 				}
 			}

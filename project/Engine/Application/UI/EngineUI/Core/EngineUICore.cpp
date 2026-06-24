@@ -88,6 +88,7 @@ namespace CalyxEngine {
 		levelEditor_->RenderViewport(ViewportType::VIEWPORT_MAIN, reinterpret_cast<ImTextureID>(mainViewportTextureID_));
 		levelEditor_->RenderViewport(ViewportType::VIEWPORT_DEBUG, reinterpret_cast<ImTextureID>(debugViewportTextureID_));
 		levelEditor_->RenderViewport(ViewportType::VIEWPORT_PICKING, reinterpret_cast<ImTextureID>(pickingViewportTextureID_));
+		levelEditor_->RenderViewport(ViewportType::VIEWPORT_PICKING_DEPTH, reinterpret_cast<ImTextureID>(pickingDepthViewportTextureID_));
 
 		if(levelEditor_) {
 			levelEditor_->Render();
@@ -151,5 +152,12 @@ namespace CalyxEngine {
 			return;
 		}
 		pickingViewportTextureID_ = textureID;
+	}
+
+	void EngineUICore::SetPickingDepthViewportTexture(UINT64 textureID) {
+		if(pickingDepthViewportTextureID_) {
+			return;
+		}
+		pickingDepthViewportTextureID_ = textureID;
 	}
 } // namespace CalyxEngine

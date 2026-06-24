@@ -4,6 +4,7 @@
 /* ===================================================================== */
 // engine
 #include <Engine/Application/UI/EngineUI/IEngineUI.h>
+#include <Engine/Foundation/Export/CalyxAPI.h>
 #include <Engine/Foundation/Math/Vector2.h>
 #include <Engine/Foundation/Math/Vector3.h>
 
@@ -63,6 +64,7 @@ namespace CalyxEngine {
 		PlaceToolPanel();
 		~PlaceToolPanel() override = default;
 
+		CALYX_API void RefreshPlaceItems();
 		void Render() override;
 
 		const std::string& GetPanelName() const override { return panelName_; }
