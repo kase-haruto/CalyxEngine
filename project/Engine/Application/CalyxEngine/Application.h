@@ -10,6 +10,7 @@ namespace Calyx {
 } // namespace Calyx
 
 namespace CalyxEngine {
+	class EngineUICore;
 	class SceneManager;
 }
 
@@ -29,6 +30,10 @@ namespace Calyx {
 
 		virtual void OnSceneManagerReady(CalyxEngine::SceneManager& sceneManager) {
 			(void)sceneManager;
+		}
+
+		virtual void OnEngineUiReady(CalyxEngine::EngineUICore& engineUi) {
+			(void)engineUi;
 		}
 
 		virtual void OnInitialize() {}

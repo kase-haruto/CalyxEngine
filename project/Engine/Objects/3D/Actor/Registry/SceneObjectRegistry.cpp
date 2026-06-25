@@ -53,6 +53,7 @@ void SceneObjectRegistry::Register(const SceneObjectClassDesc& desc){
 	auto			  it  = table_.find(key);
 	if(it == table_.end()) {
 		table_.emplace(key, std::move(stored));
+		++revision_;
 		return;
 	}
 
@@ -66,6 +67,7 @@ void SceneObjectRegistry::Register(const SceneObjectClassDesc& desc){
 	if(stored.factory) {
 		current.factory = stored.factory;
 	}
+	++revision_;
 }
 std::shared_ptr<SceneObject> SceneObjectRegistry::Create(std::string_view name) const{
 	auto it = table_.find(std::string(name));
@@ -119,4 +121,8 @@ const SceneObjectClassDesc* SceneObjectRegistry::Find(std::string_view typeName)
 		return nullptr;
 	}
 	return &it->second;
+}
+
+std::size_t SceneObjectRegistry::GetRevision() const {
+	return revision_;
 }

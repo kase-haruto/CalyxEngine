@@ -4,12 +4,14 @@
 /* ===================================================================== */
 // engine
 #include <Engine/Application/UI/EngineUI/IEngineUI.h>
+#include <Engine/Foundation/Export/CalyxAPI.h>
 #include <Engine/Foundation/Math/Vector2.h>
 #include <Engine/Foundation/Math/Vector3.h>
 
 // c++
 #include "imgui/imgui.h"
 
+#include <cstddef>
 #include <d3d12.h>
 #include <functional>
 #include <memory>
@@ -63,6 +65,7 @@ namespace CalyxEngine {
 		PlaceToolPanel();
 		~PlaceToolPanel() override = default;
 
+		CALYX_API void RefreshPlaceItems();
 		void Render() override;
 
 		const std::string& GetPanelName() const override { return panelName_; }
@@ -71,9 +74,11 @@ namespace CalyxEngine {
 		void RegisterPlaceItems();
 		void RenderSidebar();
 		void RenderContent();
+		void RefreshPlaceItemsIfRegistryChanged();
 
 		std::unordered_map<PlaceItemCategory, std::vector<PlaceItem>> categoryItems_;
 		std::string													  panelName_ = "Place Actors";
+		std::size_t													  observedRegistryRevision_ = 0;
 
 		// Selection & Filter
 		PlaceItemCategory selectedCategory_ = PlaceItemCategory::Shape;

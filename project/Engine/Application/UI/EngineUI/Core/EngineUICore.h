@@ -8,6 +8,7 @@
 #include <Engine/Application/UI/EngineUI/IEngineUI.h>
 #include <Engine/Application/UI/Panels/Controller/PanelController.h>
 #include <Engine/Editor/LevelEditor.h>
+#include <Engine/Foundation/Export/CalyxAPI.h>
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 
 // c++
@@ -40,11 +41,12 @@ namespace CalyxEngine {
 		void SetMainViewportTexture(UINT64 textureID);	  //< メインビューポート用のテクスチャを設定
 		void SetDebugViewportTexture(UINT64 textureID);	  //< デバッグビューポート用のテクスチャを設定
 		void SetPickingViewportTexture(UINT64 textureID); //< ピッキングビューポート用のテクスチャを設定
+		void SetPickingDepthViewportTexture(UINT64 textureID); //< ピッキング深度ビューポート用のテクスチャを設定
 		template <class Panel>
 		Panel*			GetPanel();
 		HierarchyPanel* GetHierarchyPanel() const;
 		EditorPanel*	GetEditorPanel() const;
-		PlaceToolPanel* GetPlaceToolPanel() const;
+		CALYX_API PlaceToolPanel* GetPlaceToolPanel() const;
 		LevelEditor*	GetLevelEditor() const { return levelEditor_.get(); }
 		void			SetCameraForViewport(BaseCamera* mainCamera, BaseCamera* debugCamera);
 		void			SetEditorUiEnabled(bool enabled) { editorUiEnabled_ = enabled; }
@@ -63,6 +65,7 @@ namespace CalyxEngine {
 		UINT64							 mainViewportTextureID_	   = 0;
 		UINT64							 debugViewportTextureID_   = 0;
 		UINT64							 pickingViewportTextureID_ = 0;
+		UINT64							 pickingDepthViewportTextureID_ = 0;
 		bool							 editorUiEnabled_		   = true; //< 通常エディタUIを描画するか
 	};
 

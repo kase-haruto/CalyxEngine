@@ -64,6 +64,18 @@ namespace CalyxEngine {
 	PlaceToolPanel::PlaceToolPanel()
 		: IEngineUI("PlaceToolPanel") { RegisterPlaceItems(); }
 
+	void PlaceToolPanel::RefreshPlaceItems() {
+		categoryItems_.clear();
+		RegisterPlaceItems();
+		observedRegistryRevision_ = SceneObjectRegistry::Get().GetRevision();
+	}
+
+	void PlaceToolPanel::RefreshPlaceItemsIfRegistryChanged() {
+		if(observedRegistryRevision_ != SceneObjectRegistry::Get().GetRevision()) {
+			RefreshPlaceItems();
+		}
+	}
+
 	// ============================================================================
 	//  アイテム登録
 	// ============================================================================
@@ -334,6 +346,7 @@ namespace CalyxEngine {
 	// ============================================================================
 	void PlaceToolPanel::Render() {
 		if(!IsShow()) return;
+		RefreshPlaceItemsIfRegistryChanged();
 
 		bool open = true;
 		// 少しパディングを入れて見やすく
