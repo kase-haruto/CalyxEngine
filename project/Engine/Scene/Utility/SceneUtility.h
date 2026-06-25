@@ -70,9 +70,7 @@ namespace SceneAPI{
 					  "T must derive from SceneObject");
 		// InstantiatePrefabを呼び出して、ルートオブジェクトを取得する
 		// pathはResources/Assets/Prefabs/以下のパスで指定する
-		std::string fullPath = "Resources/Assets/Prefabs/" + path;
-
-		auto objects = InstantiatePrefab(fullPath, spawnOffset, prefabAssetGuid);
+	auto objects = InstantiatePrefab(path, spawnOffset, prefabAssetGuid);
 
 		std::unordered_set<SceneObject*> loaded;
 		loaded.reserve(objects.size());
