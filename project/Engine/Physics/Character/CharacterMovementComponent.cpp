@@ -7,6 +7,7 @@
 #include <Engine/Objects/Collider/Collider.h>
 #include <Engine/Objects/Collider/SphereCollider.h>
 #include <Engine/Physics/PhysicsBody.h>
+#include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 
 #include <algorithm>
@@ -156,6 +157,7 @@ void CharacterMovementComponent::Tick(float dt) {
 		transform.Update();
 		// 床との微小な隙間や段差を安定させるため、床へ吸着する。
 		SnapToFloor();
+		DrawMovementDebugLine(moveInput);
 		return;
 	}
 
@@ -172,6 +174,7 @@ void CharacterMovementComponent::Tick(float dt) {
 	transform.translation += moveInput * param_.maxWalkSpeed_ * dt;
 	transform.translation.y += velocity_.y * dt;
 	transform.Update();
+	DrawMovementDebugLine(moveInput);
 }
 
 void CharacterMovementComponent::AddMovementInput(const CalyxEngine::Vector3& worldDirection, float scale) {
@@ -315,4 +318,25 @@ void CharacterMovementComponent::SnapToFloor() {
 	if(Collider* collider = owner_->GetCollider()) {
 		collider->Update(owner_->GetCenterPos(), transform.rotation);
 	}
+}
+
+void CharacterMovementComponent::DrawMovementDebugLine(const CalyxEngine::Vector3& moveInput) const {
+	if(!owner_) return;
+	if(!param_.showMovementDebugLine_) return;
+	if(param_.movementDebugLineScale_ <= 0.0f) return;
+
+	const CalyxEngine::Vector3 start = owner_->GetCenterPos();
+	CalyxEngine::Vector3 move = moveInput;
+	move.y = 0.0f;
+	const float inputMagnitude = (std::min)(move.Length(), 1.0f);
+	if(inputMagnitude <= 1.0e-5f) return;
+
+	const CalyxEngine::Vector3 direction = move.Normalize();
+	const float lineLength = inputMagnitude * param_.movementDebugLineScale_;
+
+	PrimitiveDrawer::GetInstance()->DrawLine3d(
+		start,
+		start + direction * lineLength,
+		{1.0f, 0.9f, 0.1f, 1.0f},
+		LineDepthMode::NoDepthTest);
 }

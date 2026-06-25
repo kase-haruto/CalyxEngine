@@ -30,6 +30,9 @@ void PrimitiveDrawer::Initialize(){
 	debugViewLineNoDepthDrawer_ = std::make_unique<LineDrawer>();
 	debugViewLineNoDepthDrawer_->Initialize();
 
+	viewportLineNoDepthDrawer_ = std::make_unique<LineDrawer>();
+	viewportLineNoDepthDrawer_->Initialize();
+
 	boxDrawer_ = std::make_unique<BoxDrawer>();
 	boxDrawer_->Initialize();
 
@@ -61,6 +64,11 @@ void PrimitiveDrawer::Finalize(){
 	}
 	debugViewLineNoDepthDrawer_.reset();
 
+	if(viewportLineNoDepthDrawer_) {
+		viewportLineNoDepthDrawer_->Clear();
+	}
+	viewportLineNoDepthDrawer_.reset();
+
 	if (boxDrawer_) {
 		boxDrawer_->Clear();
 	}
@@ -89,6 +97,12 @@ void PrimitiveDrawer::DrawDebugViewLine3d(const CalyxEngine::Vector3& start, con
 	LineDrawer* drawer = depthMode == LineDepthMode::NoDepthTest ? debugViewLineNoDepthDrawer_.get() : debugViewLineDrawer_.get();
 	if(drawer) {
 		drawer->DrawLine(start, end, color);
+	}
+}
+
+void PrimitiveDrawer::DrawViewportLine3d(const CalyxEngine::Vector3& start, const CalyxEngine::Vector3& end, const CalyxEngine::Vector4& color) {
+	if(viewportLineNoDepthDrawer_) {
+		viewportLineNoDepthDrawer_->DrawLine(start, end, color);
 	}
 }
 
@@ -443,6 +457,14 @@ void PrimitiveDrawer::Render([[maybe_unused]]bool includeDebugViewOnly,[[maybe_u
 	
 }
 
+void PrimitiveDrawer::RenderViewportLines() {
+#if defined(_DEBUG) || defined(DEVELOP)
+	if(viewportLineNoDepthDrawer_) {
+		viewportLineNoDepthDrawer_->Render();
+	}
+#endif
+}
+
 void PrimitiveDrawer::RenderEffectPreview() {
 #if defined(_DEBUG) || defined(DEVELOP)
 	if(effectPreviewLineDrawer_) {
@@ -472,11 +494,19 @@ void PrimitiveDrawer::ClearMesh(){
 		debugViewLineNoDepthDrawer_->Clear();
 	}
 
+	ClearViewportLines();
+
 	if (boxDrawer_) {
 		boxDrawer_->Clear();
 	}
 
 	ClearEffectPreview();
+}
+
+void PrimitiveDrawer::ClearViewportLines() {
+	if(viewportLineNoDepthDrawer_) {
+		viewportLineNoDepthDrawer_->Clear();
+	}
 }
 
 void PrimitiveDrawer::ClearEffectPreview() {

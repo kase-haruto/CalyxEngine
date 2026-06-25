@@ -89,6 +89,8 @@ namespace CalyxEngine {
 		void RenderDebugPrimitivesToRenderTarget(IRenderTarget* rt,
 												 ID3D12GraphicsCommandList* cmd,
 												 bool includeDebugViewOnly);
+		void RenderViewportAxisToRenderTarget(IRenderTarget* rt,
+											   ID3D12GraphicsCommandList* cmd);
 		void DrawSpritesToRenderTarget(IRenderTarget* rt,
 									   ID3D12GraphicsCommandList* cmd,
 									   PipelineService* pso,

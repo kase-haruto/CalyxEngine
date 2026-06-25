@@ -6,6 +6,8 @@
         "jumpVelocity": 5.900000095367432,
         "maxFallSpeed": 50.0,
         "maxWalkSpeed": 5.900000095367432,
+        "movementDebugLineScale": 0.800000011920929,
+        "showMovementDebugLine": true,
         "skinWidth": 0.009999999776482582,
         "walkableFloorAngle": 61.0
     }

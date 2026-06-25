@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <Engine/Foundation/Export/CalyxAPI.h>
 #include <Engine/Foundation/Utility/Guid/Guid.h>
 #include <externals/nlohmann/json.hpp>
 
@@ -12,7 +13,7 @@ class SceneObject;
  * - プレファブシリアライザークラス
  * - シーンオブジェクトのJSON形式での保存・読み込みを担当
  *---------------------------------------------------------------------------------------*/
-class PrefabSerializer{
+class CALYX_API PrefabSerializer{
 public:
 	struct SaveOptions {
 		bool resetRootTransform = false;

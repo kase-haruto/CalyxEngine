@@ -48,6 +48,47 @@ namespace {
 
 		rt->Resize(width, height);
 	}
+
+	CalyxEngine::Vector3 SafeNormalize(
+		const CalyxEngine::Vector3& value,
+		const CalyxEngine::Vector3& fallback) {
+		if(value.LengthSquared() <= 1.0e-8f) {
+			return fallback;
+		}
+		return value.Normalize();
+	}
+
+	void DrawCameraViewAxis(BaseCamera* camera) {
+		if(!camera) return;
+
+		const WorldTransform& transform = camera->GetWorldTransform();
+		const CalyxEngine::Matrix4x4& world = transform.matrix.world;
+		const CalyxEngine::Vector3 cameraPos = transform.GetWorldPosition();
+		const CalyxEngine::Vector3 right = SafeNormalize(
+			{world.m[0][0], world.m[0][1], world.m[0][2]},
+			CalyxEngine::Vector3::Right());
+		const CalyxEngine::Vector3 up = SafeNormalize(
+			{world.m[1][0], world.m[1][1], world.m[1][2]},
+			CalyxEngine::Vector3::Up());
+		const CalyxEngine::Vector3 forward = SafeNormalize(
+			{world.m[2][0], world.m[2][1], world.m[2][2]},
+			CalyxEngine::Vector3::Forward());
+
+		const float distance = 2.0f;
+		const float halfHeight = std::tan(camera->GetFovY() * 0.5f) * distance;
+		const float halfWidth = halfHeight * camera->GetAspectRatio();
+		const float axisLength = halfHeight * 0.18f;
+		const CalyxEngine::Vector3 origin =
+			cameraPos +
+			forward * distance -
+			right * (halfWidth * 0.78f) -
+			up * (halfHeight * 0.70f);
+
+		auto* drawer = PrimitiveDrawer::GetInstance();
+		drawer->DrawViewportLine3d(origin, origin + CalyxEngine::Vector3::Right() * axisLength, {1.0f, 0.15f, 0.12f, 1.0f});
+		drawer->DrawViewportLine3d(origin, origin + CalyxEngine::Vector3::Up() * axisLength, {0.15f, 0.35f, 1.0f, 1.0f});
+		drawer->DrawViewportLine3d(origin, origin + CalyxEngine::Vector3::Forward() * axisLength, {0.20f, 0.90f, 0.30f, 1.0f});
+	}
 }
 
 namespace CalyxEngine {
@@ -272,6 +313,7 @@ namespace CalyxEngine {
 			}
 			RenderDebugPrimitivesToRenderTarget(offscreen, cmd, false);
 		}
+		RenderViewportAxisToRenderTarget(offscreen, cmd);
 
 #if defined(_DEBUG) || defined(DEVELOP)
 		auto* debugRT = dx_->GetRenderTargetCollection().Get("DebugView");
@@ -304,6 +346,8 @@ namespace CalyxEngine {
 					CameraManager::SetTypeStatic(CameraType::Debug);
 					RenderDebugPrimitivesToRenderTarget(debugRT, cmd, true);
 				}
+				CameraManager::SetTypeStatic(CameraType::Debug);
+				RenderViewportAxisToRenderTarget(debugRT, cmd);
 			}
 		}
 
@@ -396,6 +440,20 @@ namespace CalyxEngine {
 			GraphicsGroup::GetInstance()->SetCommand(cmd, PipelineType::LineNoDepth, BlendMode::NORMAL);
 			cam->SetCommand(cmd, PipelineType::LineNoDepth);
 			PrimitiveDrawer::GetInstance()->Render(includeDebugViewOnly, LineDepthMode::NoDepthTest);
+		}
+	}
+
+	void SceneManager::RenderViewportAxisToRenderTarget(IRenderTarget* rt,
+														ID3D12GraphicsCommandList* cmd) {
+		if(!rt || !cmd || editorPreviewCtx_) return;
+
+		rt->SetRenderTarget(cmd);
+		if(auto* cam = CameraManager::GetActive()) {
+			DrawCameraViewAxis(cam);
+			GraphicsGroup::GetInstance()->SetCommand(cmd, PipelineType::LineNoDepth, BlendMode::NORMAL);
+			cam->SetCommand(cmd, PipelineType::LineNoDepth);
+			PrimitiveDrawer::GetInstance()->RenderViewportLines();
+			PrimitiveDrawer::GetInstance()->ClearViewportLines();
 		}
 	}
 

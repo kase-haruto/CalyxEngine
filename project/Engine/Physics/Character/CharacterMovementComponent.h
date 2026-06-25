@@ -94,6 +94,43 @@ public:
 	 */
 	const FindFloorResult& GetCurrentFloor() const { return currentFloor_; }
 
+
+	//パラメータをセットする
+	
+	/**
+	 * \brief 重力を設定
+	 */
+	void SetGravity(float gravity) { param_.gravity_ = gravity; }
+	/**
+	 * \brief 最大落下速度を設定
+	 */
+	void SetMaxFallSpeed(float maxFallSpeed) { param_.maxFallSpeed_ = maxFallSpeed; }
+	/**
+	 * \brief 歩行可能な最大斜面角度を設定
+	 */
+	void SetWalkableFloorAngle(float walkableFloorAngle) { param_.walkableFloorAngle_ = walkableFloorAngle; }
+	/**
+	 * \brief カプセル底面から床を探す距離を設定
+	 */
+	void SetFloorProbeDistance(float floorProbeDistance) { param_.floorProbeDistance_ = floorProbeDistance; }
+	/**
+	 * \brief 歩行中に床へ吸着する距離を設定
+	 */
+	void SetFloorSnapDistance(float floorSnapDistance) { param_.floorSnapDistance_ = floorSnapDistance; }
+	/**
+	 * \brief 床から少し浮かせる安全幅を設定
+	 */
+	void SetSkinWidth(float skinWidth) { param_.skinWidth_ = skinWidth; }
+	/**
+	 * \brief 最大歩行速度を設定
+	 */
+	void SetMaxWalkSpeed(float maxWalkSpeed) { param_.maxWalkSpeed_ = maxWalkSpeed; }
+	/**
+	 * \brief ジャンプ初速を設定
+	 */
+	void SetJumpVelocity(float jumpVelocity) { param_.jumpVelocity_ = jumpVelocity; }
+
+
 private:
 	/**
 	 * \brief 所有者のカプセル寸法を取得する
@@ -115,6 +152,11 @@ private:
 	 */
 	void SnapToFloor();
 
+	/**
+	 * \brief このフレームの水平移動入力をデバッグラインで表示する
+	 */
+	void DrawMovementDebugLine(const CalyxEngine::Vector3& moveInput) const;
+
 private:
 	BaseGameObject* owner_ = nullptr;							 //< 所有者
 	CharacterMovementMode movementMode_ = CharacterMovementMode::Falling; //< 現在の移動モード
@@ -134,6 +176,8 @@ private:
 			AddField("skinWidth", skinWidth_).Category("Movement").Tooltip("床から少し浮かせる安全幅");
 			AddField("maxWalkSpeed", maxWalkSpeed_).Category("Movement").Tooltip("最大歩行速度");
 			AddField("jumpVelocity", jumpVelocity_).Category("Movement").Tooltip("ジャンプ初速");
+			AddField("showMovementDebugLine", showMovementDebugLine_).Category("Debug").Tooltip("水平移動入力をデバッグラインで表示する");
+			AddField("movementDebugLineScale", movementDebugLineScale_).Category("Debug").Tooltip("移動入力デバッグラインの最大長");
 		}
 		CalyxEngine::ParamPath GetParamPath() const{
 			return {CalyxEngine::ParamDomain::Game,"CharacterMovementComponent","Actor"};
@@ -147,5 +191,7 @@ private:
 		float skinWidth_ = 0.01f;			  //< 床から少し浮かせる安全幅
 		float maxWalkSpeed_ = 6.0f;			  //< 最大歩行速度
 		float jumpVelocity_ = 6.5f;			  //< ジャンプ初速
+		bool showMovementDebugLine_ = true;	 //< 移動入力デバッグラインを表示するか
+		float movementDebugLineScale_ = 1.0f; //< 移動入力デバッグラインの最大長
 	}param_;
 };
