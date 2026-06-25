@@ -26,8 +26,10 @@ public:
 	void Initialize();
 	void Finalize();
 	void Render(bool includeDebugViewOnly = true, LineDepthMode depthMode = LineDepthMode::DepthTest);
+	void RenderViewportLines();
 	void RenderEffectPreview();
 	void ClearMesh();
+	void ClearViewportLines();
 	void ClearEffectPreview();
 
 	void DrawGrid();
@@ -37,6 +39,7 @@ public:
 	void DrawCapsule(const CalyxEngine::Vector3& center, const CalyxEngine::Quaternion& rotate, float radius, float height, const CalyxEngine::Vector4& color, int subdivision = 16);
 	void DrawLine3d(const CalyxEngine::Vector3& start, const CalyxEngine::Vector3& end, const CalyxEngine::Vector4& color, LineDepthMode depthMode = LineDepthMode::DepthTest);
 	void DrawDebugViewLine3d(const CalyxEngine::Vector3& start, const CalyxEngine::Vector3& end, const CalyxEngine::Vector4& color, LineDepthMode depthMode = LineDepthMode::DepthTest);
+	void DrawViewportLine3d(const CalyxEngine::Vector3& start, const CalyxEngine::Vector3& end, const CalyxEngine::Vector4& color);
 	void DrawBox(const CalyxEngine::Vector3& center, const CalyxEngine::Quaternion& rotate, const CalyxEngine::Vector3& size, const CalyxEngine::Vector4& color);
 	void DrawCircle(const CalyxEngine::Vector3& center, const CalyxEngine::Quaternion& rotate, float radiusX, float radiusZ, const CalyxEngine::Vector4& color, int subdivision = 32);
 	void DrawCone(const CalyxEngine::Vector3& apex, const CalyxEngine::Quaternion& rotate, float height, float radiusX, float radiusZ, const CalyxEngine::Vector4& color, int subdivision = 32);
@@ -52,6 +55,7 @@ private:
 	std::unique_ptr<LineDrawer> lineNoDepthDrawer_;
 	std::unique_ptr<LineDrawer> debugViewLineDrawer_;
 	std::unique_ptr<LineDrawer> debugViewLineNoDepthDrawer_;
+	std::unique_ptr<LineDrawer> viewportLineNoDepthDrawer_;
 	std::unique_ptr<BoxDrawer> boxDrawer_;
 	std::unique_ptr<LineDrawer> effectPreviewLineDrawer_;
 	std::unique_ptr<BoxDrawer> effectPreviewBoxDrawer_;
