@@ -64,7 +64,7 @@ void Actor::EnsureActorPhysicsBody() {
 }
 
 void Actor::DerivativeGui() {
-	BaseGameObject::DerivativeGui();
+	/*BaseGameObject::DerivativeGui();
 	if(ImGui::TreeNodeEx("CharacterMovement", ImGuiTreeNodeFlags_SpanAvailWidth)) {
 		characterMovement_.ShowGui();
 		const FindFloorResult& floor = characterMovement_.GetCurrentFloor();
@@ -73,7 +73,7 @@ void Actor::DerivativeGui() {
 		ImGui::Text("Walkable: %s", floor.walkableFloor ? "true" : "false");
 		ImGui::Text("Floor Distance: %.3f", floor.floorDistance);
 		ImGui::TreePop();
-	}
+	}*/
 }
 
 float Actor::GetCollisionRadius() const {
