@@ -9,6 +9,9 @@
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 #include <Engine/Scene/SceneRuntime/IRuntimeBehaviour.h>
+#include <functional>
+#include <unordered_map>
+#include <unordered_set>
 
 SceneContext* SceneContext::current_ = nullptr;
 
@@ -87,17 +90,68 @@ void SceneContext::Update(float dt, float alwaysDt, bool runtimePass) {
 
 	// 毎フレーム一度だけロックして使い回す
 	auto objects = objectLibrary_->GetAllObjectsShared();
+	std::unordered_map<SceneObject*, std::shared_ptr<SceneObject>> objectByRaw;
+	objectByRaw.reserve(objects.size());
+	for(auto& sp : objects) {
+		if(sp) objectByRaw[sp.get()] = sp;
+	}
 
-	// Runtime パス（ゲーム実行中のみ）
-	if(runtimePass) {
-		for(auto& sp : objects) {
-			if(sp) sp->Update(dt);
+	std::unordered_map<SceneObject*, std::vector<SceneObject*>> updateChildren;
+	updateChildren.reserve(objects.size());
+	for(auto& sp : objects) {
+		if(!sp) continue;
+		if(auto parent = sp->GetParent()) {
+			if(objectByRaw.contains(parent.get())) {
+				updateChildren[parent.get()].push_back(sp.get());
+			}
 		}
 	}
 
-	// Always パス（エディタ / ランタイム共通）
+	for(auto& ownerSp : objects) {
+		auto* owner = dynamic_cast<BaseGameObject*>(ownerSp.get());
+		if(!owner) continue;
+		for(auto& targetSp : objects) {
+			if(!targetSp || targetSp.get() == owner) continue;
+			if(owner->HasBoneParentTarget(&targetSp->GetWorldTransform())) {
+				updateChildren[owner].push_back(targetSp.get());
+			}
+		}
+	}
+
+	std::vector<std::shared_ptr<SceneObject>> orderedObjects;
+	orderedObjects.reserve(objects.size());
+	std::unordered_set<SceneObject*> visiting;
+	std::unordered_set<SceneObject*> visited;
+	std::function<void(SceneObject*)> visit = [&](SceneObject* object) {
+		if(!object || visited.contains(object) || visiting.contains(object)) return;
+		visiting.insert(object);
+		if(auto it = objectByRaw.find(object); it != objectByRaw.end()) {
+			orderedObjects.push_back(it->second);
+		}
+		for(SceneObject* child : updateChildren[object]) {
+			visit(child);
+		}
+		visiting.erase(object);
+		visited.insert(object);
+	};
 	for(auto& sp : objects) {
-		if(sp) sp->AlwaysUpdate(alwaysDt);
+		if(!sp) continue;
+		if(auto parent = sp->GetParent(); parent && objectByRaw.contains(parent.get())) {
+			continue;
+		}
+		visit(sp.get());
+	}
+	for(auto& sp : objects) {
+		if(sp) visit(sp.get());
+	}
+
+	for(auto& sp : orderedObjects) {
+		if(!sp) continue;
+
+		if(runtimePass) {
+			sp->Update(dt);
+		}
+		sp->AlwaysUpdate(alwaysDt);
 	}
 
 	if(effectPlayer_) {

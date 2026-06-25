@@ -671,8 +671,20 @@ namespace CalyxEngine {
 	//-----------------------------------------------------------------------------
 	std::vector<std::string> AnimationModel::GetAnimationNodeNames() const {
 		std::vector<std::string> names;
+		if(!modelData_) return names;
 		for(auto& pair : modelData_->animation.nodeAnimations) {
 			names.push_back(pair.first);
+		}
+		return names;
+	}
+
+	std::vector<std::string> AnimationModel::GetJointNames() const {
+		std::vector<std::string> names;
+		if(!modelData_) return names;
+
+		names.reserve(modelData_->skeleton.joints.size());
+		for(const auto& joint : modelData_->skeleton.joints) {
+			names.push_back(joint.name);
 		}
 		return names;
 	}
@@ -688,6 +700,16 @@ namespace CalyxEngine {
 
 		const Joint& j = modelData_->skeleton.joints[it->second];
 		return j.skeletonSpaceMatrix;
+	}
+
+	bool AnimationModel::SetSelectedJointByName(const std::string& name) {
+		if(!modelData_) return false;
+
+		auto it = modelData_->skeleton.jointMap.find(name);
+		if(it == modelData_->skeleton.jointMap.end()) return false;
+
+		selectedJoint_ = it->second;
+		return true;
 	}
 
 	D3D12_GPU_DESCRIPTOR_HANDLE AnimationModel::GetJointMatrixSrv() const { return skinCluster_.paletteSrvHandle.second; }

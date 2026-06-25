@@ -612,6 +612,7 @@ void BaseGameObject::SetBoneParent(WorldTransform& target, const std::string& bo
 	target.inheritScale = inheritScale;
 
 	boneParentBindings_.push_back(std::move(binding));
+	worldTransform_.Update();
 	UpdateBoneParents();
 }
 
@@ -628,6 +629,61 @@ void BaseGameObject::ClearBoneParent(WorldTransform& target) {
 				return false;
 			}),
 		boneParentBindings_.end());
+}
+
+bool BaseGameObject::HasBoneParentTarget(const WorldTransform* target) const {
+	if(!target) return false;
+	return std::any_of(
+		boneParentBindings_.begin(),
+		boneParentBindings_.end(),
+		[target](const BoneParentBinding& binding) {
+			return binding.target == target;
+		});
+}
+
+std::optional<std::string> BaseGameObject::GetBoneParentNameForTarget(const WorldTransform* target) const {
+	if(!target) return std::nullopt;
+	for(const auto& binding : boneParentBindings_) {
+		if(binding.target == target) {
+			return binding.boneName;
+		}
+	}
+	return std::nullopt;
+}
+
+std::vector<std::string> BaseGameObject::GetBoneNamesForEditor() const {
+	auto* animModel = AnimationModel();
+	if(!animModel) return {};
+	return animModel->GetJointNames();
+}
+
+bool BaseGameObject::IsSkeletonDrawEnabledForEditor() const {
+	auto* animModel = AnimationModel();
+	return animModel && animModel->IsDrawSkeletonEnabled();
+}
+
+void BaseGameObject::SetSkeletonDrawEnabledForEditor(bool enabled) {
+	auto* animModel = AnimationModel();
+	if(!animModel) return;
+	animModel->SetDrawSkeletonEnabled(enabled);
+}
+
+bool BaseGameObject::SelectBoneForEditor(const std::string& boneName) {
+	auto* animModel = AnimationModel();
+	if(!animModel) return false;
+	return animModel->SetSelectedJointByName(boneName);
+}
+
+std::vector<BaseGameObject::BoneParentBindingInfo> BaseGameObject::GetBoneParentBindings() const {
+	std::vector<BoneParentBindingInfo> result;
+	result.reserve(boneParentBindings_.size());
+	for(const auto& binding : boneParentBindings_) {
+		result.push_back(BoneParentBindingInfo{
+			binding.target,
+			binding.boneName,
+			binding.inheritScale});
+	}
+	return result;
 }
 
 void BaseGameObject::UpdateBoneParents() {

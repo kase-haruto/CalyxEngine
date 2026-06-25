@@ -8,6 +8,7 @@
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 #include <Engine/Foundation/Json/JsonUtils.h>
 #include <Engine/Foundation/Serialization/SerializableObject.h>
+#include <Engine/Objects/3D/Actor/BaseGameObject.h>
 #include <Engine/Objects/3D/Actor/Library/SceneObjectLibrary.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/Scene/Context/SceneContext.h>
@@ -29,6 +30,7 @@ namespace {
 			"parentGuid",
 			"configPath",
 			"serializableParams",
+			"boneParentBindings",
 		};
 
 		for(auto it = j.begin(); it != j.end(); ++it) {
@@ -56,6 +58,29 @@ namespace {
 		if(!j.contains("configPath") || HasInlineConfigData(j)) {
 			cfg->ApplyConfigFromJson(j);
 		}
+	}
+
+	nlohmann::json BuildBoneParentBindingsJson(
+		const BaseGameObject& owner,
+		const std::vector<std::shared_ptr<SceneObject>>& objects) {
+		nlohmann::json bindings = nlohmann::json::array();
+
+		for(const auto& binding : owner.GetBoneParentBindings()) {
+			if(!binding.target || binding.boneName.empty()) continue;
+
+			for(const auto& target : objects) {
+				if(!target) continue;
+				if(&target->GetWorldTransform() != binding.target) continue;
+
+				bindings.push_back(nlohmann::json{
+					{"targetGuid", target->GetGuid()},
+					{"boneName", binding.boneName},
+					{"inheritScale", binding.inheritScale}});
+				break;
+			}
+		}
+
+		return bindings;
 	}
 }
 
@@ -132,6 +157,12 @@ nlohmann::json SceneSerializer::DumpJson(const SceneContext& context) {
 			sp->ExtractSerializableParamsToJson(serializableParams);
 			if(!serializableParams.empty()) {
 				jOne["serializableParams"] = std::move(serializableParams);
+			}
+			if(auto* owner = dynamic_cast<const BaseGameObject*>(sp.get())) {
+				auto bindings = BuildBoneParentBindingsJson(*owner, objects);
+				if(!bindings.empty()) {
+					jOne["boneParentBindings"] = std::move(bindings);
+				}
 			}
 
 			jObjects.push_back(std::move(jOne));
@@ -274,6 +305,29 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 		if(cIt != guidMap.end() && pIt != guidMap.end()) {
 			auto& childTransform = cIt->second->GetWorldTransform();
 			cIt->second->SetParent(pIt->second, childTransform.inheritScale);
+		}
+	}
+
+	for(const auto& j : jArray) {
+		Guid ownerGuid = j.value("guid", Guid{});
+		if(!ownerGuid.isValid() || !j.contains("boneParentBindings")) continue;
+
+		auto ownerIt = guidMap.find(ownerGuid);
+		if(ownerIt == guidMap.end()) continue;
+		auto* owner = dynamic_cast<BaseGameObject*>(ownerIt->second.get());
+		if(!owner) continue;
+
+		for(const auto& bindingJson : j.at("boneParentBindings")) {
+			Guid targetGuid = bindingJson.value("targetGuid", Guid{});
+			std::string boneName = bindingJson.value("boneName", std::string{});
+			if(!targetGuid.isValid() || boneName.empty()) continue;
+
+			auto targetIt = guidMap.find(targetGuid);
+			if(targetIt == guidMap.end() || !targetIt->second) continue;
+			owner->SetBoneParent(
+				targetIt->second->GetWorldTransform(),
+				boneName,
+				bindingJson.value("inheritScale", true));
 		}
 	}
 	return true;

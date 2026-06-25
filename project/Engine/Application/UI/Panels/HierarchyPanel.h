@@ -11,11 +11,14 @@
 // c++
 #include <memory>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include <externals/imgui/imgui.h>
 
 // forward
+class BaseGameObject;
 class SceneObject;
 class SceneObjectLibrary;
 enum class ObjectType;
@@ -39,7 +42,7 @@ namespace CalyxEngine {
 		~HierarchyPanel() override = default;
 
 		void Render() override;
-		void ShowObjectRecursive(SceneObject* obj);
+		void ShowObjectRecursive(SceneObject* obj, bool forceShow = false, bool highlightBoneChild = false);
 		bool IsDescendantOf(SceneObject* parent, SceneObject* child);
 
 		void RefreshCache() { treeCache_.MarkDirty(); }
@@ -79,12 +82,20 @@ namespace CalyxEngine {
 		void CancelRename();
 		void CommitRename();
 		// render helper
-		bool DrawNode(SceneObject* obj);
+		bool DrawNode(SceneObject* obj, bool highlightBoneChild = false);
+		bool DrawBoneRootNode(BaseGameObject* owner, const std::vector<std::string>& boneNames);
+		void DrawBoneNode(BaseGameObject* owner, const std::string& boneName);
+		std::vector<SceneObject*> GetBoneAttachedObjects(BaseGameObject* owner, const std::string& boneName) const;
+		bool IsBoneParentedObject(SceneObject* object) const;
 		void HandleNodeSelectionClick(SceneObject* obj);
 		ImTextureID GetTypeIcon(ObjectType type) const;
 		const char* GetTypeLabel(ObjectType type) const;
 		bool PassFilterRecursive(SceneObject* obj) const;
 		bool IsSelected(SceneObject* obj) const;
+		void ClearBoneParentBindings(SceneObject& target);
+		void MarkBoneOwnerExpanded(BaseGameObject* owner);
+		void RestoreCollapsedBoneDrawStates();
+		void ForgetBoneDrawState(SceneObject* object);
 
 	private:
 		// runtime state
@@ -96,6 +107,8 @@ namespace CalyxEngine {
 		std::weak_ptr<SceneObject> selected_;
 		std::vector<std::weak_ptr<SceneObject>> selectedObjects_;
 		std::weak_ptr<SceneObject> renameTarget_;
+		std::unordered_map<BaseGameObject*, bool> autoSkeletonDrawPrevious_;
+		std::unordered_set<BaseGameObject*> expandedBoneOwnersThisFrame_;
 
 		CallbackHierarchyActions callbackActions_;
 		IHierarchyActions*		actions_ = &callbackActions_;

@@ -130,6 +130,42 @@ namespace {
 		}
 	}
 
+	void CollectObjectsRecursive(SceneObject* obj, std::vector<SceneObject*>& out) {
+		if(!obj || !obj->IsSerializable()) return;
+		out.push_back(obj);
+		for(const auto& child : obj->GetChildren()) {
+			CollectObjectsRecursive(child.get(), out);
+		}
+	}
+
+	nlohmann::json BuildBoneParentBindingsJson(
+		const BaseGameObject& owner,
+		const std::vector<SceneObject*>& objects,
+		bool usePrefabSourceGuids) {
+		nlohmann::json bindings = nlohmann::json::array();
+
+		for(const auto& binding : owner.GetBoneParentBindings()) {
+			if(!binding.target || binding.boneName.empty()) continue;
+
+			for(const auto* target : objects) {
+				if(!target) continue;
+				if(&target->GetWorldTransform() != binding.target) continue;
+
+				const Guid targetGuid =
+					(usePrefabSourceGuids && target->GetPrefabSourceGuid().isValid())
+						? target->GetPrefabSourceGuid()
+						: target->GetGuid();
+				bindings.push_back(nlohmann::json{
+					{"targetGuid", targetGuid},
+					{"boneName", binding.boneName},
+					{"inheritScale", binding.inheritScale}});
+				break;
+			}
+		}
+
+		return bindings;
+	}
+
 } // namespace
 
 bool PrefabSerializer::Save(const std::vector<SceneObject*>& roots,
@@ -143,9 +179,11 @@ bool PrefabSerializer::Save(const std::vector<SceneObject*>& roots,
 	nlohmann::json					 jArray = nlohmann::json::array();
 	std::unordered_set<SceneObject*> prefabRoots;
 	std::unordered_map<Guid, Guid>	 prefabSourceGuidMap;
+	std::vector<SceneObject*>		 prefabObjects;
 	for(auto* root : roots) {
 		if(!root) continue;
 		prefabRoots.insert(root);
+		CollectObjectsRecursive(root, prefabObjects);
 		if(options.usePrefabSourceGuids) {
 			CollectPrefabSourceGuidMap(root, prefabSourceGuidMap);
 		}
@@ -160,6 +198,12 @@ bool PrefabSerializer::Save(const std::vector<SceneObject*>& roots,
 			cfg->ExtractConfigToJson(j);
 		}
 		WriteSceneObjectMetadata(*obj, j, prefabRoots, options.resetRootTransform, options.usePrefabSourceGuids);
+		if(auto* owner = dynamic_cast<BaseGameObject*>(obj)) {
+			auto bindings = BuildBoneParentBindingsJson(*owner, prefabObjects, options.usePrefabSourceGuids);
+			if(!bindings.empty()) {
+				j["boneParentBindings"] = std::move(bindings);
+			}
+		}
 		nlohmann::json serializableParams;
 		obj->ExtractSerializableParamsToJson(serializableParams);
 		if(!serializableParams.empty()) {
@@ -309,14 +353,13 @@ std::vector<std::shared_ptr<SceneObject>> PrefabSerializer::Load(const std::stri
 
 			auto targetMapIt = guidMap.find(newTargetIt->second);
 			if(targetMapIt == guidMap.end()) continue;
-			auto  targetSp = targetMapIt->second;
-			auto* target   = dynamic_cast<BaseGameObject*>(targetSp.get());
-			if(!target) continue;
+			auto targetSp = targetMapIt->second;
+			if(!targetSp) continue;
 
-		/*	owner->SetBoneParent(
-				*target,
+			owner->SetBoneParent(
+				targetSp->GetWorldTransform(),
 				boneName,
-				bindingJson.value("inheritScale", true));*/
+				bindingJson.value("inheritScale", true));
 		}
 	}
 

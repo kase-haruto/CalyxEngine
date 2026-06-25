@@ -90,6 +90,7 @@ namespace CalyxEngine {
 			});
 			ctx->AddOnObjectRemovedListener([this](SceneObject* removed) {
 				RefreshCache();
+				ForgetBoneDrawState(removed);
 				// 選択が削除対象ならクリア
 				if(IsSelected(removed)) {
 					selected_.reset();
@@ -105,8 +106,10 @@ namespace CalyxEngine {
 	/* ===================================================================== */
 	void HierarchyPanel::Render() {
 		// ProcessShortcuts(ImGui::GetIO());
+		expandedBoneOwnersThisFrame_.clear();
 
 		if(!ImGui::Begin(panelName_.c_str(), nullptr, ImGuiWindowFlags_NoDecoration)) {
+			RestoreCollapsedBoneDrawStates();
 			ImGui::End();
 			return;
 		}
@@ -124,6 +127,7 @@ namespace CalyxEngine {
 
 		if(!lib_) {
 			ImGui::TextUnformatted("SceneObjectLibrary not set.");
+			RestoreCollapsedBoneDrawStates();
 			ImGui::End();
 			return;
 		}
@@ -227,6 +231,7 @@ namespace CalyxEngine {
 
 			ImGui::EndTable();
 		}
+		RestoreCollapsedBoneDrawStates();
 
 		// --- Prefab Dialog ---
 		if(showLoadPrefabDlg_) {
@@ -284,8 +289,9 @@ namespace CalyxEngine {
 	/* ========================================================================
 	/*  recursive UI
 	/* ===================================================================== */
-	void HierarchyPanel::ShowObjectRecursive(SceneObject* obj) {
+	void HierarchyPanel::ShowObjectRecursive(SceneObject* obj, bool forceShow, bool highlightBoneChild) {
 		if(!obj || obj->IsTransient()) return;
+		if(!forceShow && IsBoneParentedObject(obj)) return;
 
 		if(searchFilter_.IsActive()) {
 			if(!PassFilterRecursive(obj)) return;
@@ -294,7 +300,7 @@ namespace CalyxEngine {
 
 		ImGui::PushID(obj);
 
-		const bool open = DrawNode(obj);
+		const bool open = DrawNode(obj, highlightBoneChild);
 
 		if(open) {
 			auto	   renameSP		  = renameTarget_.lock();
@@ -304,6 +310,15 @@ namespace CalyxEngine {
 				for(auto& child : treeCache_.GetChildren(*obj)) {
 					ShowObjectRecursive(child.get());
 				}
+				if(auto* gameObject = dynamic_cast<BaseGameObject*>(obj)) {
+					auto boneNames = gameObject->GetBoneNamesForEditor();
+					if(!boneNames.empty() && DrawBoneRootNode(gameObject, boneNames)) {
+						for(const auto& boneName : boneNames) {
+							DrawBoneNode(gameObject, boneName);
+						}
+						ImGui::TreePop();
+					}
+				}
 			}
 
 			ImGui::TreePop();
@@ -312,7 +327,7 @@ namespace CalyxEngine {
 		ImGui::PopID();
 	}
 
-	bool HierarchyPanel::DrawNode(SceneObject* obj) {
+	bool HierarchyPanel::DrawNode(SceneObject* obj, bool highlightBoneChild) {
 
 		ImGui::TableNextRow();
 
@@ -330,13 +345,15 @@ namespace CalyxEngine {
 
 		// 16px アイコンを使用
 		float iconSize = 16.0f;
+		auto* gameObject = dynamic_cast<BaseGameObject*>(obj);
+		const bool hasBoneNodes = gameObject && !gameObject->GetBoneNamesForEditor().empty();
 
 		ImGuiTreeNodeFlags flags =
 			ImGuiTreeNodeFlags_OpenOnArrow |
 			ImGuiTreeNodeFlags_SpanAvailWidth |
 			ImGuiTreeNodeFlags_SpanFullWidth |
 			(isSelected ? ImGuiTreeNodeFlags_Selected : 0) |
-			(obj->GetChildren().empty() ? ImGuiTreeNodeFlags_Leaf : 0);
+			(obj->GetChildren().empty() && !hasBoneNodes ? ImGuiTreeNodeFlags_Leaf : 0);
 
 		bool open = false;
 
@@ -390,6 +407,7 @@ namespace CalyxEngine {
 						auto dragSP = drag->shared_from_this();
 						auto objSP	= obj->shared_from_this();
 						if(lib_->Contains(dragSP) && lib_->Contains(objSP) && !IsDescendantOf(obj, drag)) {
+							ClearBoneParentBindings(*drag);
 							drag->SetParent(objSP);
 							RefreshCache();
 						}
@@ -488,7 +506,11 @@ namespace CalyxEngine {
 				ImGui::SameLine();
 			}
 			const std::string displayName = obj->GetDisplayName();
-			ImGui::TextUnformatted(displayName.c_str());
+			if(highlightBoneChild) {
+				ImGui::TextColored(ImVec4(0.35f, 0.9f, 0.45f, 1.0f), "%s", displayName.c_str());
+			} else {
+				ImGui::TextUnformatted(displayName.c_str());
+			}
 			if(prefabInstance) {
 				ImGui::PopStyleColor();
 			}
@@ -513,13 +535,100 @@ namespace CalyxEngine {
 		// カラム 2: タイプ情報
 		// ---------------------------------------------------------------------
 		ImGui::TableSetColumnIndex(2);
-		if(obj->IsPrefabInstanceObject()) {
+		if(highlightBoneChild) {
+			ImGui::TextColored(ImVec4(0.35f, 0.9f, 0.45f, 1.0f), "%s", GetTypeLabel(obj->GetObjectType()));
+		} else if(obj->IsPrefabInstanceObject()) {
 			ImGui::TextColored(ImVec4(0.35f, 0.62f, 1.0f, 1.0f), "%s", GetTypeLabel(obj->GetObjectType()));
 		} else {
 			ImGui::TextDisabled("%s", GetTypeLabel(obj->GetObjectType()));
 		}
 
 		return open;
+	}
+
+	bool HierarchyPanel::DrawBoneRootNode(BaseGameObject* owner, const std::vector<std::string>& boneNames) {
+		if(!owner || boneNames.empty()) return false;
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::PushID("Bones");
+		bool open = ImGui::TreeNodeEx(
+			"Bones",
+			ImGuiTreeNodeFlags_OpenOnArrow |
+				ImGuiTreeNodeFlags_SpanAvailWidth |
+				ImGuiTreeNodeFlags_SpanFullWidth);
+		if(open) {
+			MarkBoneOwnerExpanded(owner);
+		}
+		ImGui::TableSetColumnIndex(1);
+		ImGui::TextDisabled("-");
+		ImGui::TableSetColumnIndex(2);
+		ImGui::TextDisabled("Bones");
+		ImGui::PopID();
+		return open;
+	}
+
+	void HierarchyPanel::DrawBoneNode(BaseGameObject* owner, const std::string& boneName) {
+		if(!owner) return;
+
+		auto attachedObjects = GetBoneAttachedObjects(owner, boneName);
+		const bool hasAttachedObjects = !attachedObjects.empty();
+
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+		ImGui::PushID(boneName.c_str());
+		if(hasAttachedObjects) {
+			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.35f, 0.9f, 0.45f, 1.0f));
+		}
+		const bool open = ImGui::TreeNodeEx(
+			boneName.c_str(),
+			(hasAttachedObjects ? ImGuiTreeNodeFlags_OpenOnArrow : ImGuiTreeNodeFlags_Leaf) |
+				ImGuiTreeNodeFlags_SpanAvailWidth |
+				ImGuiTreeNodeFlags_SpanFullWidth |
+				(hasAttachedObjects ? 0 : ImGuiTreeNodeFlags_NoTreePushOnOpen));
+		if(hasAttachedObjects) {
+			ImGui::PopStyleColor();
+		}
+		if(ImGui::IsItemHovered()) {
+			owner->SelectBoneForEditor(boneName);
+		}
+
+		if(ImGui::BeginDragDropTarget()) {
+			if(const ImGuiPayload* pl = ImGui::AcceptDragDropPayload("SceneObjectPtr")) {
+				SceneObject* drag = *reinterpret_cast<SceneObject**>(pl->Data);
+				if(drag && drag != owner && lib_) {
+					auto dragSP  = drag->shared_from_this();
+					auto ownerSP = owner->shared_from_this();
+					if(lib_->Contains(dragSP) &&
+					   lib_->Contains(ownerSP) &&
+					   !IsDescendantOf(drag, owner)) {
+						auto& targetTransform = drag->GetWorldTransform();
+						const bool inheritScale = targetTransform.inheritScale;
+						ClearBoneParentBindings(*drag);
+						drag->SetParent(ownerSP, inheritScale);
+						owner->SetBoneParent(targetTransform, boneName, inheritScale);
+						RefreshCache();
+					}
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		ImGui::TableSetColumnIndex(1);
+		ImGui::TextDisabled("-");
+		ImGui::TableSetColumnIndex(2);
+		if(hasAttachedObjects) {
+			ImGui::TextColored(ImVec4(0.35f, 0.9f, 0.45f, 1.0f), "Bone");
+		} else {
+			ImGui::TextDisabled("Bone");
+		}
+		if(hasAttachedObjects && open) {
+			for(SceneObject* object : attachedObjects) {
+				ShowObjectRecursive(object, true, true);
+			}
+			ImGui::TreePop();
+		}
+		ImGui::PopID();
 	}
 
 	/* ========================================================================
@@ -634,6 +743,81 @@ namespace CalyxEngine {
 			}
 		}
 		return false;
+	}
+
+	void HierarchyPanel::ClearBoneParentBindings(SceneObject& target) {
+		if(!lib_) return;
+
+		for(auto& sp : lib_->GetAllObjectsShared()) {
+			auto* owner = dynamic_cast<BaseGameObject*>(sp.get());
+			if(!owner) continue;
+			owner->ClearBoneParent(target.GetWorldTransform());
+		}
+	}
+
+	std::vector<SceneObject*> HierarchyPanel::GetBoneAttachedObjects(BaseGameObject* owner, const std::string& boneName) const {
+		std::vector<SceneObject*> result;
+		if(!lib_ || !owner) return result;
+
+		for(const auto& binding : owner->GetBoneParentBindings()) {
+			if(binding.boneName != boneName || !binding.target) continue;
+
+			for(auto& sp : lib_->GetAllObjectsShared()) {
+				if(!sp || sp.get() == owner) continue;
+				if(&sp->GetWorldTransform() == binding.target) {
+					result.push_back(sp.get());
+					break;
+				}
+			}
+		}
+
+		return result;
+	}
+
+	bool HierarchyPanel::IsBoneParentedObject(SceneObject* object) const {
+		if(!lib_ || !object) return false;
+
+		for(auto& sp : lib_->GetAllObjectsShared()) {
+			auto* owner = dynamic_cast<BaseGameObject*>(sp.get());
+			if(!owner || owner == object) continue;
+			if(owner->HasBoneParentTarget(&object->GetWorldTransform())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	void HierarchyPanel::MarkBoneOwnerExpanded(BaseGameObject* owner) {
+		if(!owner) return;
+
+		expandedBoneOwnersThisFrame_.insert(owner);
+		if(!autoSkeletonDrawPrevious_.contains(owner)) {
+			autoSkeletonDrawPrevious_[owner] = owner->IsSkeletonDrawEnabledForEditor();
+		}
+		owner->SetSkeletonDrawEnabledForEditor(true);
+	}
+
+	void HierarchyPanel::RestoreCollapsedBoneDrawStates() {
+		for(auto it = autoSkeletonDrawPrevious_.begin(); it != autoSkeletonDrawPrevious_.end();) {
+			BaseGameObject* owner = it->first;
+			if(expandedBoneOwnersThisFrame_.contains(owner)) {
+				++it;
+				continue;
+			}
+
+			if(owner) {
+				owner->SetSkeletonDrawEnabledForEditor(it->second);
+			}
+			it = autoSkeletonDrawPrevious_.erase(it);
+		}
+	}
+
+	void HierarchyPanel::ForgetBoneDrawState(SceneObject* object) {
+		auto* owner = dynamic_cast<BaseGameObject*>(object);
+		if(!owner) return;
+
+		autoSkeletonDrawPrevious_.erase(owner);
+		expandedBoneOwnersThisFrame_.erase(owner);
 	}
 
 	/* ========================================================================

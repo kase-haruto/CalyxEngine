@@ -17,6 +17,7 @@
 
 //* c++ *//
 #include <memory>
+#include <optional>
 #include <string>
 
 /*-----------------------------------------------------------------------------------------
@@ -289,6 +290,18 @@ public:
 	 * \param target
 	 */
 	void ClearBoneParent(WorldTransform& target);
+	bool HasBoneParentTarget(const WorldTransform* target) const;
+	std::optional<std::string> GetBoneParentNameForTarget(const WorldTransform* target) const;
+	std::vector<std::string> GetBoneNamesForEditor() const;
+	bool IsSkeletonDrawEnabledForEditor() const;
+	void SetSkeletonDrawEnabledForEditor(bool enabled);
+	bool SelectBoneForEditor(const std::string& boneName);
+	struct BoneParentBindingInfo {
+		const WorldTransform* target = nullptr;
+		std::string boneName;
+		bool inheritScale = true;
+	};
+	std::vector<BoneParentBindingInfo> GetBoneParentBindings() const;
 
 
 	//--------- save / load ------------------------------------------------
