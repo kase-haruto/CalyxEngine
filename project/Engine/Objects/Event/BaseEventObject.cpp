@@ -3,6 +3,7 @@
 /*		include space
 /* ===================================================================== */
 // engine
+#include <Engine/Application/UI/Panels/InspectorPanel.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/Objects/Collider/BoxCollider.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
@@ -124,9 +125,25 @@ void BaseEventObject::AlwaysUpdate([[maybe_unused]] float dt) {
 //		debugGui
 /////////////////////////////////////////////////////////////////////////////////////////
 void BaseEventObject::ShowGui() {
-	ConfigGUi();
-	worldTransform_.ShowImGui();
-	DerivativeGui();
+	if(GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::Object)) {
+		ConfigGUi();
+		worldTransform_.ShowImGui();
+		GuiCmd::EndSection();
+	}
+
+	if(GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::Collider)) {
+		if(collider_) {
+			collider_->ShowGui();
+		} else {
+			ImGui::TextDisabled("No collider");
+		}
+		GuiCmd::EndSection();
+	}
+
+	if(GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::ParameterData)) {
+		DerivativeGui();
+		GuiCmd::EndSection();
+	}
 }
 
 void BaseEventObject::DerivativeGui() {

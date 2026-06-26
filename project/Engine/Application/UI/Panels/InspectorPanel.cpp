@@ -161,8 +161,13 @@ namespace CalyxEngine {
 				add(ParamFilterSection::ParameterData);
 				break;
 
-			case ObjectType::Light:
 			case ObjectType::Event:
+				add(ParamFilterSection::Object);
+				add(ParamFilterSection::Collider);
+				add(ParamFilterSection::ParameterData);
+				break;
+
+			case ObjectType::Light:
 			default:
 				break;
 			}

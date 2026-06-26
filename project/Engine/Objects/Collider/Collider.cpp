@@ -6,8 +6,141 @@
 #include <Engine/Collision/CollisionManager.h>
 
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
-#include <Engine/Foundation/Utility/Converter/EnumConverter.h>
+#include <Engine/System/Command/EditorCommand/ValueEditCommand.h>
 #include <externals/imgui/imgui.h>
+
+#include <array>
+#include <cstdint>
+#include <functional>
+#include <string>
+
+namespace {
+	struct ColliderTypeItem {
+		ColliderType type;
+		const char*	 label;
+	};
+
+	constexpr std::array<ColliderTypeItem, 8> kColliderTypeItems = {{
+		{ColliderType::Type_Player, "Player"},
+		{ColliderType::Type_PlayerAttack, "Player Attack"},
+		{ColliderType::Type_Enemy, "Enemy"},
+		{ColliderType::Type_EnemySpawner, "Enemy Spawner"},
+		{ColliderType::Type_EnemyAttack, "Enemy Attack"},
+		{ColliderType::Type_EventObject, "Event Object"},
+		{ColliderType::Type_StageGimmick, "Stage Gimmick"},
+		{ColliderType::Type_Impediment, "Impediment"},
+	}};
+
+	uint32_t ToBits(ColliderType type) {
+		return static_cast<uint32_t>(type);
+	}
+
+	ColliderType FromBits(uint32_t bits) {
+		return static_cast<ColliderType>(bits);
+	}
+
+	const char* ToLabel(ColliderType type) {
+		if(type == ColliderType::Type_None) return "None";
+		for(const auto& item : kColliderTypeItems) {
+			if(item.type == type) return item.label;
+		}
+		return "Custom";
+	}
+
+	std::string BuildMaskLabel(ColliderType mask) {
+		const uint32_t bits = ToBits(mask);
+		if(bits == 0u) return "None";
+
+		std::string label;
+		for(const auto& item : kColliderTypeItems) {
+			if((bits & ToBits(item.type)) == 0u) continue;
+			if(!label.empty()) label += ", ";
+			label += item.label;
+		}
+		return label.empty() ? "Custom" : label;
+	}
+
+	void ExecuteColliderTypeEdit(
+		const char* commandName,
+		ColliderType before,
+		ColliderType after,
+		const std::function<void(ColliderType)>& setter) {
+		if(before == after) return;
+		auto intSetter = [setter](const int& value) {
+			setter(static_cast<ColliderType>(value));
+		};
+		CommandManager::GetInstance()->Execute(
+			std::make_unique<ValueEditCommand<int>>(commandName, static_cast<int>(before), static_cast<int>(after), intSetter));
+	}
+
+	void DrawColliderObjectTypeEditor(Collider* collider) {
+		ColliderType current = collider->GetType();
+		const char*	 preview = ToLabel(current);
+
+		if(ImGui::BeginCombo("Object Type", preview)) {
+			auto setter = [collider](ColliderType type) {
+				if(collider) collider->SetType(type);
+			};
+
+			const bool noneSelected = current == ColliderType::Type_None;
+			if(ImGui::Selectable("None", noneSelected)) {
+				ExecuteColliderTypeEdit("Change Collider Object Type", current, ColliderType::Type_None, setter);
+			}
+			if(noneSelected) ImGui::SetItemDefaultFocus();
+
+			for(const auto& item : kColliderTypeItems) {
+				const bool selected = current == item.type;
+				if(ImGui::Selectable(item.label, selected)) {
+					ExecuteColliderTypeEdit("Change Collider Object Type", current, item.type, setter);
+				}
+				if(selected) ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
+	}
+
+	void DrawColliderTargetMaskEditor(Collider* collider) {
+		const ColliderType current = collider->GetTargetType();
+		const std::string	 preview = BuildMaskLabel(current);
+
+		if(!ImGui::BeginCombo("Collision Targets", preview.c_str())) {
+			return;
+		}
+
+		auto setter = [collider](ColliderType targetType) {
+			if(collider) collider->SetTargetType(targetType);
+		};
+
+		if(ImGui::SmallButton("All")) {
+			uint32_t allBits = 0u;
+			for(const auto& item : kColliderTypeItems) {
+				allBits |= ToBits(item.type);
+			}
+			ExecuteColliderTypeEdit("Change Collision Targets", current, FromBits(allBits), setter);
+		}
+		ImGui::SameLine();
+		if(ImGui::SmallButton("None")) {
+			ExecuteColliderTypeEdit("Change Collision Targets", current, ColliderType::Type_None, setter);
+		}
+		ImGui::Separator();
+
+		const uint32_t currentBits = ToBits(collider->GetTargetType());
+		for(const auto& item : kColliderTypeItems) {
+			bool enabled = (currentBits & ToBits(item.type)) != 0u;
+			if(ImGui::Checkbox(item.label, &enabled)) {
+				uint32_t afterBits = currentBits;
+				if(enabled) {
+					afterBits |= ToBits(item.type);
+				} else {
+					afterBits &= ~ToBits(item.type);
+				}
+				ExecuteColliderTypeEdit("Change Collision Targets", current, FromBits(afterBits), setter);
+			}
+		}
+
+		ImGui::EndCombo();
+	}
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		ctor / dtor
@@ -34,10 +167,8 @@ void Collider::ShowGui() {
 
 	if(!isCollisionEnabled_) return;
 
-	// コライダーのタイプを作成
-	CalyxEngine::EnumConverter<ColliderType>::Combo("Collider Type", type_);
-	//コライダーのtargetタイプ設定
-	CalyxEngine::EnumConverter<ColliderType>::Combo("Target Type", targetType_);
+	DrawColliderObjectTypeEditor(this);
+	DrawColliderTargetMaskEditor(this);
 
 	GuiCmd::CheckBox("Draw Collider", isDraw_);
 	GuiCmd::CheckBox("Is Trigger", isTrigger_);
