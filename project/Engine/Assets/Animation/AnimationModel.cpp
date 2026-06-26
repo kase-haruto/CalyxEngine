@@ -615,7 +615,6 @@ namespace CalyxEngine {
 	void AnimationModel::ShowImGuiInterface() {
 #if defined(_DEBUG) || defined(DEVELOP)
 		GuiCmd::CheckBox("Draw Skeleton", isDrawSkeleton_);
-		BaseModel::ShowImGuiInterface();
 
 		// ------ ジョイントリスト ---------------------------------
 		if(ImGui::CollapsingHeader("Skeleton##header")) {

@@ -6,6 +6,7 @@
 // engine
 #include <Engine/Assets/Database/AssetDatabase.h>
 #include <Engine/Application/UI/Panels/AssetPanel.h>
+#include <Engine/Application/UI/Panels/InspectorPanel.h>
 #include <Engine/Assets/Model/ModelManager.h>
 #include <Engine/Assets/System/AssetDragPayload.h>
 #include <Engine/Assets/Texture/TextureManager.h>
@@ -279,8 +280,7 @@ BaseModelConfig BaseModel::ExtractConfig() const {
 }
 
 void BaseModel::ShowImGui(BaseModelConfig& config) {
-	uvTransform.ShowImGui("uvTransform");
-
+	if(GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::Material)) {
 	if(ImGui::TreeNodeEx("Material Asset (Drag & Drop from Assets)", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
 		auto labelFromGuid = [](const Guid& g) -> std::string {
 			if(!g.isValid()) return "(none)";
@@ -306,9 +306,11 @@ void BaseModel::ShowImGui(BaseModelConfig& config) {
 			}
 		}
 
-		ImGui::SameLine();
-		if(materialGuid_.isValid() && ImGui::SmallButton("Copy GUID##material")) {
-			ImGui::SetClipboardText(materialGuid_.ToString().c_str());
+		if(materialGuid_.isValid()) {
+			ImGui::SameLine();
+			if(ImGui::SmallButton("Copy GUID##material")) {
+				ImGui::SetClipboardText(materialGuid_.ToString().c_str());
+			}
 		}
 
 		if(auto ma = CalyxEngine::AssetManager::GetInstance()->GetDataAssetManager()->GetAsset<CalyxEngine::MaterialAsset>(materialGuid_)) {
@@ -411,17 +413,24 @@ void BaseModel::ShowImGui(BaseModelConfig& config) {
 			}
 			return "(missing)";
 		};
-		ImGui::SameLine();
-		if(textureGuid_.isValid() && ImGui::SmallButton("Copy GUID")) {
-			ImGui::SetClipboardText(textureGuid_.ToString().c_str());
+		if(textureGuid_.isValid()) {
+			ImGui::SameLine();
+			if(ImGui::SmallButton("Copy GUID")) {
+				ImGui::SetClipboardText(textureGuid_.ToString().c_str());
+			}
 		}
 
 		ImGui::TreePop();
 	}
 
 	// materialData_.ShowImGui(config.materialConfig); // TODO: マテリアルアセットの切り替えUIをここに実装
+	GuiCmd::EndSection();
+	}
 
 	// ブレンドモード
+	if(GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::ParameterData)) {
+	uvTransform.ShowImGui("uvTransform");
+
 	if(ImGui::TreeNodeEx("BlendMode", ImGuiTreeNodeFlags_SpanAvailWidth)) {
 		static const char* blendModeNames[] = {
 			"NONE", "ALPHA", "ADD", "SUB", "MUL", "NORMAL", "SCREEN"};
@@ -432,6 +441,8 @@ void BaseModel::ShowImGui(BaseModelConfig& config) {
 			config.blendMode = currentBlendMode;
 		}
 		ImGui::TreePop();
+	}
+	GuiCmd::EndSection();
 	}
 }
 

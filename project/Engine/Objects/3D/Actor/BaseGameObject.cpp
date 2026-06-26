@@ -203,15 +203,11 @@ void BaseGameObject::ShowGui() {
 			ImGui::TreePop();
 		}
 
-		if(model_) {
-			model_->ShowImGui(config_.GetConfig().modelConfig);
-			model_->ShowImGuiInterface();
-		}
-		if(ImGui::TreeNodeEx("Visual Offset", ImGuiTreeNodeFlags_SpanAvailWidth)) {
-			GuiCmd::DragFloat3("Offset", visualOffset_, 0.01f, -1000.0f, 1000.0f);
-			ImGui::TreePop();
-		}
 		GuiCmd::EndSection();
+	}
+
+	if(model_) {
+		model_->ShowImGui(config_.GetConfig().modelConfig);
 	}
 
 	// --- コライダー ---
@@ -295,6 +291,10 @@ void BaseGameObject::ShowGui() {
 
 	// --- 描画設定 ---
 	if(GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::Object)) {
+		if(ImGui::TreeNodeEx("Visual Offset", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+			GuiCmd::DragFloat3("Offset", visualOffset_, 0.01f, -1000.0f, 1000.0f);
+			ImGui::TreePop();
+		}
 		if(ImGui::TreeNodeEx("Draw Config", ImGuiTreeNodeFlags_SpanAvailWidth)) {
 			GuiCmd::CheckBox("Camera Dither", drawConfig_.cameraDitherEnabled);
 			GuiCmd::CheckBox("Cast Shadow", drawConfig_.castShadow);
@@ -316,6 +316,9 @@ void BaseGameObject::ShowGui() {
 
 	// --- パラメータデータ ---
 	if(GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::ParameterData)) {
+		if(auto* animationModel = AnimationModel()) {
+			animationModel->ShowImGuiInterface();
+		}
 		HeaderGui();
 		GuiCmd::EndSection();
 	}
