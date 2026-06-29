@@ -1,151 +1,82 @@
 #include "Collider.h"
 
-#include "Engine/Objects/3D/Actor/BaseGameObject.h"
-
 #include <Data/Engine/Configs/Scene/Objects/Collider/ColliderConfig.h>
+#include <Engine/Collision/CollisionLayerSettings.h>
 #include <Engine/Collision/CollisionManager.h>
-
+#include <Engine/Objects/3D/Actor/BaseGameObject.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 #include <Engine/System/Command/EditorCommand/ValueEditCommand.h>
 #include <externals/imgui/imgui.h>
 
-#include <array>
 #include <cstdint>
 #include <functional>
-#include <string>
+#include <memory>
 
 namespace {
-	struct ColliderTypeItem {
-		ColliderType type;
-		const char*	 label;
-	};
-
-	constexpr std::array<ColliderTypeItem, 8> kColliderTypeItems = {{
-		{ColliderType::Type_Player, "Player"},
-		{ColliderType::Type_PlayerAttack, "Player Attack"},
-		{ColliderType::Type_Enemy, "Enemy"},
-		{ColliderType::Type_EnemySpawner, "Enemy Spawner"},
-		{ColliderType::Type_EnemyAttack, "Enemy Attack"},
-		{ColliderType::Type_EventObject, "Event Object"},
-		{ColliderType::Type_StageGimmick, "Stage Gimmick"},
-		{ColliderType::Type_Impediment, "Impediment"},
-	}};
-
-	uint32_t ToBits(ColliderType type) {
-		return static_cast<uint32_t>(type);
-	}
-
-	ColliderType FromBits(uint32_t bits) {
-		return static_cast<ColliderType>(bits);
-	}
-
-	const char* ToLabel(ColliderType type) {
-		if(type == ColliderType::Type_None) return "None";
-		for(const auto& item : kColliderTypeItems) {
-			if(item.type == type) return item.label;
+	void ExecuteColliderLayerEdit(Collider* collider, CollisionLayerId before, CollisionLayerId after) {
+		if(!collider || before == after) {
+			return;
 		}
-		return "Custom";
-	}
 
-	std::string BuildMaskLabel(ColliderType mask) {
-		const uint32_t bits = ToBits(mask);
-		if(bits == 0u) return "None";
-
-		std::string label;
-		for(const auto& item : kColliderTypeItems) {
-			if((bits & ToBits(item.type)) == 0u) continue;
-			if(!label.empty()) label += ", ";
-			label += item.label;
-		}
-		return label.empty() ? "Custom" : label;
-	}
-
-	void ExecuteColliderTypeEdit(
-		const char* commandName,
-		ColliderType before,
-		ColliderType after,
-		const std::function<void(ColliderType)>& setter) {
-		if(before == after) return;
-		auto intSetter = [setter](const int& value) {
-			setter(static_cast<ColliderType>(value));
+		// Layer変更も他のInspector編集と同じCommandへ載せ、Undo/Redoで同じIDを復元できるようにする。
+		// ValueEditCommandがintを扱うため境界で変換し、Collider内部ではCollisionLayerIdを維持する。
+		auto setter = [collider](const int& value) {
+			if(collider) {
+				collider->SetLayerId(static_cast<CollisionLayerId>(value));
+			}
 		};
 		CommandManager::GetInstance()->Execute(
-			std::make_unique<ValueEditCommand<int>>(commandName, static_cast<int>(before), static_cast<int>(after), intSetter));
+			std::make_unique<ValueEditCommand<int>>(
+				"Change Collision Layer", static_cast<int>(before), static_cast<int>(after), setter));
 	}
 
-	void DrawColliderObjectTypeEditor(Collider* collider) {
-		ColliderType current = collider->GetType();
-		const char*	 preview = ToLabel(current);
+	void DrawColliderLayerEditor(Collider* collider) {
+		if(!collider) {
+			return;
+		}
 
-		if(ImGui::BeginCombo("Object Type", preview)) {
-			auto setter = [collider](ColliderType type) {
-				if(collider) collider->SetType(type);
-			};
-
-			const bool noneSelected = current == ColliderType::Type_None;
-			if(ImGui::Selectable("None", noneSelected)) {
-				ExecuteColliderTypeEdit("Change Collider Object Type", current, ColliderType::Type_None, setter);
-			}
-			if(noneSelected) ImGui::SetItemDefaultFocus();
-
-			for(const auto& item : kColliderTypeItems) {
-				const bool selected = current == item.type;
-				if(ImGui::Selectable(item.label, selected)) {
-					ExecuteColliderTypeEdit("Change Collider Object Type", current, item.type, setter);
+		// 固定配列を使わずSettingsの現在の一覧を参照するため、追加・削除・リネームが即座に反映される。
+		auto* settings = CollisionLayerSettings::GetInstance();
+		const CollisionLayerId current = collider->GetLayerId();
+		const std::string& preview = settings->GetLayerName(current);
+		if(ImGui::BeginCombo("Collision Layer", preview.c_str())) {
+			for(const auto& layer : settings->GetLayers()) {
+				const bool selected = layer.id == current;
+				if(ImGui::Selectable(layer.name.c_str(), selected)) {
+					ExecuteColliderLayerEdit(collider, current, layer.id);
 				}
-				if(selected) ImGui::SetItemDefaultFocus();
+				if(selected) {
+					ImGui::SetItemDefaultFocus();
+				}
 			}
 			ImGui::EndCombo();
 		}
 	}
 
-	void DrawColliderTargetMaskEditor(Collider* collider) {
-		const ColliderType current = collider->GetTargetType();
-		const std::string	 preview = BuildMaskLabel(current);
-
-		if(!ImGui::BeginCombo("Collision Targets", preview.c_str())) {
-			return;
-		}
-
-		auto setter = [collider](ColliderType targetType) {
-			if(collider) collider->SetTargetType(targetType);
-		};
-
-		if(ImGui::SmallButton("All")) {
-			uint32_t allBits = 0u;
-			for(const auto& item : kColliderTypeItems) {
-				allBits |= ToBits(item.type);
-			}
-			ExecuteColliderTypeEdit("Change Collision Targets", current, FromBits(allBits), setter);
-		}
-		ImGui::SameLine();
-		if(ImGui::SmallButton("None")) {
-			ExecuteColliderTypeEdit("Change Collision Targets", current, ColliderType::Type_None, setter);
-		}
-		ImGui::Separator();
-
-		const uint32_t currentBits = ToBits(collider->GetTargetType());
-		for(const auto& item : kColliderTypeItems) {
-			bool enabled = (currentBits & ToBits(item.type)) != 0u;
-			if(ImGui::Checkbox(item.label, &enabled)) {
-				uint32_t afterBits = currentBits;
-				if(enabled) {
-					afterBits |= ToBits(item.type);
-				} else {
-					afterBits &= ~ToBits(item.type);
+	void DrawConfigLayerEditor(ColliderConfig& config) {
+		auto* settings = CollisionLayerSettings::GetInstance();
+		// JSON上は将来の型拡張を考慮してuint32_tだが、実行時IDは0～31だけを許可する。
+		const CollisionLayerId current = config.layerId < kMaxCollisionLayerCount
+			? static_cast<CollisionLayerId>(config.layerId)
+			: kDefaultCollisionLayerId;
+		const std::string& preview = settings->GetLayerName(current);
+		if(ImGui::BeginCombo("Collision Layer", preview.c_str())) {
+			for(const auto& layer : settings->GetLayers()) {
+				const bool selected = layer.id == current;
+				if(ImGui::Selectable(layer.name.c_str(), selected)) {
+					config.layerId = layer.id;
 				}
-				ExecuteColliderTypeEdit("Change Collision Targets", current, FromBits(afterBits), setter);
+				if(selected) {
+					ImGui::SetItemDefaultFocus();
+				}
 			}
+			ImGui::EndCombo();
 		}
-
-		ImGui::EndCombo();
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//		ctor / dtor
-/////////////////////////////////////////////////////////////////////////////////////////
 Collider::Collider(bool isEnuble) {
+	// 従来のライフサイクルを維持し、有効状態で生成されたColliderだけをManagerへ登録する。
 	isCollisionEnabled_ = isEnuble;
 	if(isCollisionEnabled_) {
 		CollisionManager::GetInstance()->Register(this);
@@ -153,23 +84,22 @@ Collider::Collider(bool isEnuble) {
 }
 
 Collider::~Collider() {
+	// 無効Colliderや登録済みでないColliderでもUnregisterは安全に無視される。
+	// 破棄後ポインタがCollisionPairへ残らないよう、必ず登録解除を要求する。
 	CollisionManager::GetInstance()->Unregister(this);
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//		デバッグ用ui
-/////////////////////////////////////////////////////////////////////////////////////////
 void Collider::ShowGui() {
 	bool enabled = isCollisionEnabled_;
 	if(GuiCmd::CheckBox("Enable Collision", enabled)) {
 		SetCollisionEnabled(enabled);
 	}
 
-	if(!isCollisionEnabled_) return;
+	if(!isCollisionEnabled_) {
+		return;
+	}
 
-	DrawColliderObjectTypeEditor(this);
-	DrawColliderTargetMaskEditor(this);
-
+	DrawColliderLayerEditor(this);
 	GuiCmd::CheckBox("Draw Collider", isDraw_);
 	GuiCmd::CheckBox("Is Trigger", isTrigger_);
 	GuiCmd::ColorEdit4("Collider Color", color_);
@@ -178,70 +108,68 @@ void Collider::ShowGui() {
 }
 
 void Collider::ShowGui(ColliderConfig& config) {
+	if(!ImGui::CollapsingHeader("Collider")) {
+		return;
+	}
 
-	if(ImGui::CollapsingHeader("Collider")) {
+	GuiCmd::DragFloat3("offset", config.offset);
+	GuiCmd::DragFloat3("rotate", config.rotate);
 
-		GuiCmd::DragFloat3("offset", config.offset);
-		GuiCmd::DragFloat3("rotate", config.rotate);
+	bool enabled = config.isCollisionEnabled;
+	if(GuiCmd::CheckBox("Enable Collision", enabled)) {
+		config.isCollisionEnabled = enabled;
+		SetCollisionEnabled(enabled);
+	}
 
-		bool enabled = config.isCollisionEnabled;
-		if(GuiCmd::CheckBox("Enable Collision", enabled)) {
-			SetCollisionEnabled(enabled);
-		}
+	if(!config.isCollisionEnabled) {
+		return;
+	}
 
-		if(!config.isCollisionEnabled) return;
+	DrawConfigLayerEditor(config);
+	GuiCmd::CheckBox("Draw Collider", config.isDraw);
+	GuiCmd::CheckBox("Is Trigger", config.isTrigger);
+	GuiCmd::ColorEdit4("Collider Color", color_);
+}
 
-		GuiCmd::CheckBox("Draw Collider", config.isDraw);
-		GuiCmd::ColorEdit4("Collider Color", color_);
+void Collider::NotifyCollisionEnter(Collider* other) {
+	if(onEnter_) {
+		onEnter_(other);
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//		衝突通知(衝突フレーム
-/////////////////////////////////////////////////////////////////////////////////////////
-void Collider::NotifyCollisionEnter(Collider* other) {
-	if(onEnter_) onEnter_(other);
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////
-//		衝突通知(衝突中
-/////////////////////////////////////////////////////////////////////////////////////////
 void Collider::NotifyCollisionStay(Collider* other) {
-	if(onStay_) onStay_(other);
+	if(onStay_) {
+		onStay_(other);
+	}
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//		衝突通知(離れた
-/////////////////////////////////////////////////////////////////////////////////////////
 void Collider::NotifyCollisionExit(Collider* other) {
-	if(onExit_) onExit_(other);
+	if(onExit_) {
+		onExit_(other);
+	}
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//		config適用
-/////////////////////////////////////////////////////////////////////////////////////////
 void Collider::ApplyConfig(const ColliderConfig& config) {
-	isDraw_				= config.isDraw;
-	isTrigger_			= config.isTrigger;
-	type_				= static_cast<ColliderType>(config.colliderType);
-	targetType_			= static_cast<ColliderType>(config.targetType);
-	offset_				= config.offset;
-	rotateOffset_		= config.rotate;
+	// Layer名は保存せずIDだけを復元する。名前変更はSettings側だけで完結する。
+	isDraw_ = config.isDraw;
+	isTrigger_ = config.isTrigger;
+	SetLayerId(config.layerId < kMaxCollisionLayerCount
+		? static_cast<CollisionLayerId>(config.layerId)
+		: kDefaultCollisionLayerId);
+	offset_ = config.offset;
+	rotateOffset_ = config.rotate;
 	SetCollisionEnabled(config.isCollisionEnabled);
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//		config吐き出し
-/////////////////////////////////////////////////////////////////////////////////////////
 ColliderConfig Collider::ExtractConfig() const {
+	// ゲーム固有分類や相手Maskは書き出さず、Matrix参照に必要なLayer IDだけを永続化する。
 	ColliderConfig config;
 	config.isCollisionEnabled = isCollisionEnabled_;
-	config.isDraw			  = isDraw_;
-	config.isTrigger		  = isTrigger_;
-	config.colliderType		  = static_cast<int>(type_);
-	config.targetType		  = static_cast<int>(targetType_);
-	config.offset			  = offset_;
-	config.rotate			  = rotateOffset_;
+	config.isDraw = isDraw_;
+	config.isTrigger = isTrigger_;
+	config.layerId = layerId_;
+	config.offset = offset_;
+	config.rotate = rotateOffset_;
 	return config;
 }
 
@@ -249,17 +177,16 @@ CalyxEngine::Vector3 Collider::GetWorldPos() const {
 	if(owner_) {
 		return owner_->GetWorldPosition();
 	}
-	// オーナーがいない場合はゼロベクトルを返す
 	return CalyxEngine::Vector3::Zero();
 }
-/////////////////////////////////////////////////////////////////////////////////////////
-//		Collisionするか
-/////////////////////////////////////////////////////////////////////////////////////////
+
 void Collider::SetCollisionEnabled(bool enable) {
-	if(isCollisionEnabled_ == enable) return; // 状態が変わらないなら何もしない
+	// 同じ値の再設定ではRegister/Unregisterを発行せず、Managerの遅延キューを増やさない。
+	if(isCollisionEnabled_ == enable) {
+		return;
+	}
 
 	isCollisionEnabled_ = enable;
-
 	if(enable) {
 		CollisionManager::GetInstance()->Register(this);
 	} else {

@@ -136,6 +136,9 @@
     <ClCompile Include="Engine\Application\UI\Panels\ConsolePanel.cpp" />
     <ClCompile Include="Engine\Application\UI\EngineUI\Core\EngineUICore.cpp" />
     <ClCompile Include="Engine\Collision\CollisionManager.cpp" />
+    <ClCompile Include="Engine\Collision\CollisionLayerSettings.cpp" />
+    <ClCompile Include="Engine\Collision\CollisionLayerTableUI.cpp" />
+    <ClCompile Include="Engine\Collision\CollisionMatrix.cpp" />
     <ClCompile Include="Engine\Objects\Collider\BoxCollider.cpp" />
     <ClCompile Include="Engine\Objects\Collider\CapsuleCollider.cpp" />
     <ClCompile Include="Engine\Objects\Collider\Collider.cpp" />
@@ -246,6 +249,8 @@
     <ClCompile Include="Engine\Physics\Ray\Raycastor.cpp" />
     <ClCompile Include="Engine\Application\UI\Panels\PlaceToolPanel.cpp" />
     <ClCompile Include="Engine\Scene\Serializer\SceneSerializer.cpp" />
+    <ClCompile Include="Engine\Scene\Settings\SceneSettings.cpp" />
+    <ClCompile Include="Engine\Scene\Settings\SceneSettingsWindow.cpp" />
     <ClCompile Include="Engine\Objects\3D\Actor\Factory\SceneObjectFactory.cpp" />
     <ClCompile Include="Engine\Renderer\Particle\ParticleRenderer.cpp" />
     <ClCompile Include="Engine\Application\Effects\Particle\Object\ParticleSystemObject.cpp" />
@@ -454,6 +459,10 @@
     <ClInclude Include="Engine\Application\UI\Panels\ConsolePanel.h" />
     <ClInclude Include="Engine\Application\UI\EngineUI\Core\EngineUICore.h" />
     <ClInclude Include="Engine\Collision\CollisionManager.h" />
+    <ClInclude Include="Engine\Collision\CollisionLayerSettings.h" />
+    <ClInclude Include="Engine\Collision\CollisionLayerTableUI.h" />
+    <ClInclude Include="Engine\Collision\CollisionMatrix.h" />
+    <ClInclude Include="Engine\Collision\CollisionTypes.h" />
     <ClInclude Include="Engine\Objects\Collider\BoxCollider.h" />
     <ClInclude Include="Engine\Objects\Collider\CapsuleCollider.h" />
     <ClInclude Include="Engine\Objects\Collider\Collider.h" />
@@ -588,6 +597,8 @@
     <ClInclude Include="Engine\Physics\Ray\Raycastor.h" />
     <ClInclude Include="Engine\Application\UI\Panels\PlaceToolPanel.h" />
     <ClInclude Include="Engine\Scene\Serializer\SceneSerializer.h" />
+    <ClInclude Include="Engine\Scene\Settings\SceneSettings.h" />
+    <ClInclude Include="Engine\Scene\Settings\SceneSettingsWindow.h" />
     <ClInclude Include="Engine\Objects\3D\Actor\Factory\SceneObjectFactory.h" />
     <ClInclude Include="Engine\Renderer\Particle\ParticleRenderer.h" />
     <ClInclude Include="Engine\Application\Effects\Particle\Object\ParticleSystemObject.h" />

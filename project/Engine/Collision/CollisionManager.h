@@ -59,6 +59,7 @@ private:
 	~CollisionManager() = default;
 
 	bool CheckCollisionPair(Collider* colliderA, Collider* colliderB);
+	bool CanCollideByLayer(const Collider* colliderA, const Collider* colliderB) const;
 
 	void  ComputeOBBAxes(const OBB& obb, CalyxEngine::Vector3 outAxis[3]);
 	float ProjectOBB(const OBB& obb, const CalyxEngine::Vector3 obbAxes[3], const CalyxEngine::Vector3& axisCandidate);

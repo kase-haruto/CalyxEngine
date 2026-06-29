@@ -21,6 +21,7 @@
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 #include <Engine/Scene/Context/SceneContext.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
+#include <Engine/Scene/Settings/SceneSettingsWindow.h>
 #include <Engine/Scene/System/SceneManager.h>
 #include <Engine/System/Command/Manager/CommandManager.h>
 
@@ -74,6 +75,7 @@ namespace CalyxEngine {
 		spriteAnimationEditorPanel_ = std::make_unique<SpriteAnimationEditorPanel>();
 		livePPPanel_		= std::make_unique<LivePPPanel>();
 		sceneSwitchOverlay_ = std::make_unique<SceneSwitchOverlay>();
+		sceneSettingsWindow_ = std::make_unique<SceneSettingsWindow>();
 		debugCameraFocus_	= std::make_unique<DebugCameraFocusController>();
 		particlePreview_ = std::make_unique<ParticlePreviewSession>();
 		prefabEdit_		= std::make_unique<PrefabEditSession>();
@@ -328,6 +330,16 @@ namespace CalyxEngine {
 				   {"Engine Settings",
 					"",
 					[] { EngineSettings::GetInstance()->OpenSettingsWindow(); },
+					true});
+
+		menu_->Add(MenuCategory::Settings,
+				   {"Scene Settings",
+					"",
+					[this] {
+						if(sceneSettingsWindow_) {
+							sceneSettingsWindow_->Open();
+						}
+					},
 					true});
 
 		// Viewport 表示トグル
@@ -638,6 +650,10 @@ namespace CalyxEngine {
 	void LevelEditor::RenderSettingsWindow() {
 		auto* settings = EngineSettings::GetInstance();
 		settings->RenderSettingsWindow();
+		if(sceneSettingsWindow_) {
+			// SceneContext::CurrentはEditor mode切替時にも更新されるため、常に現在編集中のシーンを渡す。
+			sceneSettingsWindow_->Render(SceneContext::Current());
+		}
 		if(settings->ConsumeApplied()) {
 			if(auto* manipulator = sceneEditor_->GetManipulator()) {
 				manipulator->ApplySettings(settings->GetData().manipulator);
