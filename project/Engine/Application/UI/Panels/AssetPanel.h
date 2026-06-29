@@ -45,6 +45,9 @@ namespace CalyxEngine {
 		void SetOnPrefabEditRequested(std::function<void(const std::filesystem::path&)> callback) {
 			onPrefabEditRequested_ = std::move(callback);
 		}
+		void SetOnSceneOpenRequested(std::function<void(const std::filesystem::path&)> callback) {
+			onSceneOpenRequested_ = std::move(callback);
+		}
 
 		// Inspector 側で使える：期待タイプを指定したドロップターゲット
 		static bool DrawAssetDropTarget(AssetType expect, Guid* inoutGuid, float height = 56.0f);
@@ -105,6 +108,7 @@ namespace CalyxEngine {
 		std::unique_ptr<DirNode> rootNode_;
 		bool					 needsRebuildTree_ = true;
 		std::function<void(const std::filesystem::path&)> onPrefabEditRequested_;
+		std::function<void(const std::filesystem::path&)> onSceneOpenRequested_;
 
 		// ---- View cache ----
 		std::vector<std::filesystem::path> cacheSubDirs_;

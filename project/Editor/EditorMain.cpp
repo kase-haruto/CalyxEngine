@@ -2,7 +2,6 @@
 
 #include <CalyxEngine/CalyxEngine.h>
 
-#include <Demo/Scene/DemoScene/DemoScene.h>
 #include <Engine/Assets/Database/AssetDatabase.h>
 #include <Engine/Application/UI/EngineUI/Core/EngineUICore.h>
 #include <Engine/Application/UI/Panels/PlaceToolPanel.h>
@@ -116,7 +115,6 @@ public:
 
 	void RegisterScenes(Calyx::SceneRegistry& registry) override {
 		registry.AddScene<BaseScene>(kBlankSceneId);
-		registry.AddScene<DemoScene>(kDemoSceneId);
 		registry.SetStartupScene(kBlankSceneId);
 
 		if(gameApplication_) {
@@ -172,17 +170,11 @@ private:
 		if(!sceneManager_ || !hasProject_) {
 			return;
 		}
-
-		if(gameApplication_ && gameScenesRegistered_) {
-			return;
+		if(!project_.startupScene.empty()) {
+			sceneManager_->OpenScene(Calyx::ResolveProjectPath(project_, project_.startupScene));
+		} else {
+			sceneManager_->SetCurrent(kBlankSceneId);
 		}
-
-		if(project_.templateName == "Demo") {
-			sceneManager_->SetCurrent(kDemoSceneId);
-			return;
-		}
-
-		sceneManager_->SetCurrent(kBlankSceneId);
 	}
 
 	void LoadGameApplication() {
@@ -232,7 +224,6 @@ private:
 
 private:
 	static constexpr CalyxEngine::SceneId kBlankSceneId = 0;
-	static constexpr CalyxEngine::SceneId kDemoSceneId = 1;
 
 	Calyx::ProjectInfo project_;
 	CalyxEditor::ProjectBrowser projectBrowser_;

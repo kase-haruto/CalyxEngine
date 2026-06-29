@@ -121,6 +121,7 @@ namespace CalyxEngine {
 	private:
 		// シーン管理 --------------------------------------------------------------
 		void SaveScene();
+		bool OpenScene(const std::filesystem::path& path);
 		void NotifySceneContextChanged();
 		void DrawSceneSelector();
 

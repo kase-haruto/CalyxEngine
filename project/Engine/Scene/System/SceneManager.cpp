@@ -17,6 +17,7 @@
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 #include <Engine/Scene/Base/IScene.h>
 #include <Engine/Scene/Context/SceneContext.h>
+#include <Engine/Scene/Serializer/SceneSerializer.h>
 #include <Engine/System/Command/Manager/CommandManager.h>
 
 #include <Engine/Editor/PickingPass.h>
@@ -114,6 +115,40 @@ namespace CalyxEngine {
 #endif
 	}
 
+	bool SceneManager::OpenScene(const std::filesystem::path& scenePath) {
+		if(scenePath.empty() || slots_.empty()) return false;
+		if(pPlaySession_ && pPlaySession_->GetContext() != GetCurrentSceneContext()) return false;
+
+		SceneContext* previousContext = SceneContext::Current();
+		auto nextContext = std::make_unique<SceneContext>();
+		nextContext->Initialize(false);
+		if(!SceneSerializer::Load(*nextContext, scenePath.generic_string())) {
+			if(previousContext) previousContext->MakeCurrent();
+			return false;
+		}
+		nextContext->SetScenePath(scenePath.generic_string());
+
+		auto& slot = slots_[currentIdx_];
+		if(slot.scene) slot.scene->OnExit();
+
+		// Files opened by the editor use the common scene runtime. Scene-specific
+		// behaviour belongs to serialized SceneObjects, not a BaseScene subclass.
+		slot.scene = std::make_unique<BaseScene>();
+		slot.scene->SetSceneName(nextContext->GetSceneName());
+		slot.scene->SetTransitionRequestor(&GetTransitionRequestor());
+		slot.ctx = std::move(nextContext);
+		slot.assetsLoaded = false;
+
+		CommandManager::GetInstance()->ClearHistory();
+		if(pPlaySession_) {
+			pPlaySession_->BindEditorContext(slot.ctx.get());
+		}
+		lastBoundCtx_ = nullptr;
+		lastRuntimeGen_ = 0;
+		RebindIfContextChanged();
+		return true;
+	}
+
 	//------------------------------------------------------------
 	size_t SceneManager::AddScene(SceneId id, std::unique_ptr<BaseScene> scene) {
 		SceneSlot slot;
@@ -166,6 +201,11 @@ namespace CalyxEngine {
 	SceneContext* SceneManager::GetCurrentSceneContext() const {
 		if(slots_.empty()) return nullptr;
 		return slots_[currentIdx_].ctx.get();
+	}
+
+	std::filesystem::path SceneManager::GetCurrentScenePath() const {
+		auto* context = GetCurrentSceneContext();
+		return context ? std::filesystem::path(context->GetScenePath()) : std::filesystem::path{};
 	}
 
 	//------------------------------------------------------------

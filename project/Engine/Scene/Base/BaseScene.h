@@ -97,7 +97,12 @@ public:
 	 * \brief コンテキストを注入
 	 * \param ctx シーンコンテキスト
 	 */
-	void InjectContext(SceneContext* ctx) override { sceneContext_ = ctx; }
+	void InjectContext(SceneContext* ctx) override {
+		if(sceneContext_ != ctx) {
+			skyBox_.reset();
+		}
+		sceneContext_ = ctx;
+	}
 	/**
 	 * \brief シーンコンテキストを取得
 	 * \return シーンコンテキスト

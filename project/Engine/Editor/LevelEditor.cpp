@@ -101,6 +101,10 @@ namespace CalyxEngine {
 			[this](const std::filesystem::path& path) {
 				OpenPrefabForEdit(path.string());
 			});
+		assetPanel_->SetOnSceneOpenRequested(
+			[this](const std::filesystem::path& path) {
+				OpenScene(path);
+			});
 
 		// Panel に LevelEditor 自体を渡す（コールバック通知や setter） ----------
 		editor_->SetOnEditorSelected(
@@ -484,8 +488,7 @@ namespace CalyxEngine {
 		if(ImGuiFileDialog::Instance()->Display("SceneOpenDialog")) {
 			if(ImGuiFileDialog::Instance()->IsOk()) {
 				std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
-				ClearSelection();
-				SceneSerializer::Load(*ctx, filePath);
+				OpenScene(filePath);
 			}
 			ImGuiFileDialog::Instance()->Close();
 		}
@@ -1298,8 +1301,21 @@ namespace CalyxEngine {
 		SceneContext* ctx = SceneContext::Current();
 		if(!ctx) return;
 
-		std::string scenePath = Calyx::ResolveAssetPath(std::filesystem::path("Scenes") / (ctx->GetSceneName() + ".scene")).generic_string();
+		std::string scenePath = ctx->GetScenePath();
+		if(scenePath.empty()) {
+			scenePath = Calyx::ResolveAssetPath(std::filesystem::path("Scenes") / (ctx->GetSceneName() + ".scene")).generic_string();
+		}
 		SceneSerializer::Save(*ctx, scenePath);
+	}
+
+	bool LevelEditor::OpenScene(const std::filesystem::path& path) {
+		if(!sceneManager_) return false;
+		if(!sceneManager_->OpenScene(path)) return false;
+
+		ClearSelection();
+		prevCtx_ = nullptr;
+		NotifySceneContextChanged();
+		return true;
 	}
 
 	//=============================================================================

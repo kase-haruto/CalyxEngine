@@ -16,4 +16,5 @@ enum class AssetType
 	Prefab,
 	Effect,
 	SpriteAnimation,
+	Scene,
 };

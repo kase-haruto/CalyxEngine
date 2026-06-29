@@ -10,6 +10,7 @@
 #include <d3d12.h>
 #include <memory>
 #include <optional>
+#include <filesystem>
 #include <unordered_map>
 #include <vector>
 
@@ -37,6 +38,8 @@ namespace CalyxEngine {
 		~SceneManager();
 
 		void Initialize();
+		/// Loads a data-driven scene into a fresh context and swaps it in only on success.
+		bool OpenScene(const std::filesystem::path& scenePath);
 		void Update(float dt, float alwaysDt);
 		void PostUpdate(ID3D12GraphicsCommandList* cmd, PipelineService* pso);
 		void Draw(ID3D12GraphicsCommandList* cmd, PipelineService* pso);
@@ -71,6 +74,7 @@ namespace CalyxEngine {
 		void		  SetEditorViewportRenderState(bool renderDebugView, bool renderPicking);
 		void		  ClearAllContexts();
 		SceneContext* GetCurrentSceneContext() const;
+		std::filesystem::path GetCurrentScenePath() const;
 		size_t		  GetCurrentIndex() const { return currentIdx_; }
 
 		ISceneTransitionRequestor& GetTransitionRequestor();
