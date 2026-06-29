@@ -142,6 +142,46 @@ Layerを削除すると、一覧から取り除くだけでなくMatrixの対応
 
 リネームではIDを変更しない。SceneとPrefabが保存しているのはIDなので、表示名だけを変更してもColliderConfigの再保存は不要である。
 
+### ゲームコードからのLayer検索
+
+ゲーム側で衝突相手を分類するときは、旧方式の`ColliderType`やオブジェクト名ではなく、`Collider::GetLayerId()`を使用する。ゲームコードにシーン固有の数値IDを直接書かず、`FindLayerId()`で設定名からIDを取得する。
+
+`FindLayerId()`は該当するLayerが存在しない場合に`std::nullopt`を返す。設定漏れをDefault Layerへ暗黙変換しないため、意図しない相手を同じ分類として扱わない。
+
+例えばWall、Impediment、対象のStageGimmickを同じ挙動にする場合は、各Colliderへ`Obstacle` Layerを設定し、次のように判定する。
+
+```cpp
+void PlayerClone::OnCollisionEnter(Collider* other) {
+	if(isGhost_ || !other) {
+		return;
+	}
+
+	SceneContext* context = SceneContext::Current();
+	if(!context) {
+		return;
+	}
+
+	const auto& collisionSettings =
+		context->GetSettings().GetCollisionSettings();
+	const auto obstacleLayer = collisionSettings.FindLayerId("Obstacle");
+
+	if(!obstacleLayer || other->GetLayerId() != *obstacleLayer) {
+		return;
+	}
+
+	context->RemoveObject(
+		std::static_pointer_cast<SceneObject>(shared_from_this()));
+}
+```
+
+Editorでは次の設定を行う。
+
+1. Collision Settingsへ`Obstacle` Layerを追加する。
+2. Wall、Impediment、対象のStageGimmickのColliderへ`Obstacle` Layerを割り当てる。
+3. Collision Matrixで`PlayerClone`と`Obstacle`の組み合わせを有効にする。
+
+Collision Matrixで組み合わせが無効な場合は、形状判定より前に除外されるため`OnCollisionEnter()`自体が呼ばれない。ゲーム側のLayer ID判定は、Matrixを通過した衝突相手のうち、どのゲーム処理を実行するかを選ぶために使用する。
+
 ## 7. CollisionManagerの判定順序
 
 `CheckCollisionPair`は次の順番で処理する。
