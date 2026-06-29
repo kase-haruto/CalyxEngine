@@ -65,6 +65,15 @@ jobs:
         with:
           msbuild-architecture: x64
 
+      - name: Build Debug
+        run: msbuild $env:SOLUTION_FILE_PATH /m /p:Platform=x64 /p:Configuration=Debug
+
+      - name: Build Develop
+        run: msbuild $env:SOLUTION_FILE_PATH /m /p:Platform=x64 /p:Configuration=Develop
+
+      - name: Build Release
+        run: msbuild $env:SOLUTION_FILE_PATH /m /p:Platform=x64 /p:Configuration=Release
+
       - name: Create package
         shell: pwsh
         run: |
