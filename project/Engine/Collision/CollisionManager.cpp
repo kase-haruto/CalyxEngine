@@ -1,6 +1,7 @@
 #include "CollisionManager.h"
 
 // engine
+#include <Engine/Collision/CollisionLayerSettings.h>
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 
 // lib
@@ -20,13 +21,7 @@ CollisionManager* CollisionManager::GetInstance() {
 
 // ヘルパー関数: 衝突ペアがログを記録すべきかを判定
 bool CollisionManager::ShouldLogCollision(const Collider* a, const Collider* b) {
-	// aのターゲットタイプにbのタイプが含まれているか
-	bool aWantsToCollideWithB = (a->GetTargetType() & b->GetType()) != ColliderType::Type_None;
-
-	// bのターゲットタイプにaのタイプが含まれているか
-	bool bWantsToCollideWithA = (b->GetTargetType() & a->GetType()) != ColliderType::Type_None;
-
-	return aWantsToCollideWithB || bWantsToCollideWithA;
+	return CanCollideByLayer(a, b);
 }
 
 void CollisionManager::UpdateCollisionAllCollider() {
@@ -37,22 +32,13 @@ void CollisionManager::UpdateCollisionAllCollider() {
 
 	for(auto itA = colliders_.begin(); itA != colliders_.end(); ++itA) {
 		Collider* a = *itA;
+		// 無効Colliderは形状取得もLayer参照も不要なので、外側ループの時点で除外する。
 		if(!a->IsCollisionEnubled()) continue;
 
 		for(auto itB = std::next(itA); itB != colliders_.end(); ++itB) {
 			Collider* b = *itB;
+			// CheckCollisionPair内にも防御を置くが、総当たりループでも早期除外して呼び出しを減らす。
 			if(!b->IsCollisionEnubled()) continue;
-
-			//------------------------------------------------------------
-			// 衝突対象タイプのフィルタリング（ビット安全比較）
-			//------------------------------------------------------------
-			bool aWantsB = (static_cast<uint32_t>(a->GetTargetType()) &
-							static_cast<uint32_t>(b->GetType())) != 0u;
-			bool bWantsA = (static_cast<uint32_t>(b->GetTargetType()) &
-							static_cast<uint32_t>(a->GetType())) != 0u;
-
-			// どちらも相手を対象にしていない場合 → 無視
-			if(!(aWantsB || bWantsA)) continue;
 
 			//------------------------------------------------------------
 			// 実際の衝突判定
@@ -184,6 +170,18 @@ std::vector<Collider*> CollisionManager::GetCollidersSnapshot() const {
 }
 
 bool CollisionManager::CheckCollisionPair(Collider* colliderA, Collider* colliderB) {
+	if(!colliderA || !colliderB) {
+		return false;
+	}
+
+	if(!colliderA->IsCollisionEnubled() || !colliderB->IsCollisionEnubled()) {
+		return false;
+	}
+
+	// 安価な Layer 判定を形状判定より先に行い、OBB / Capsule 等の計算を不要な組み合わせで実行しない。
+	if(!CanCollideByLayer(colliderA, colliderB)) {
+		return false;
+	}
 
 	auto shapeA = colliderA->GetCollisionShape();
 	auto shapeB = colliderB->GetCollisionShape();
@@ -245,6 +243,23 @@ bool CollisionManager::CheckCollisionPair(Collider* colliderA, Collider* collide
 			}
 		},
 		shapeA, shapeB);
+}
+
+bool CollisionManager::CanCollideByLayer(const Collider* colliderA, const Collider* colliderB) const {
+	if(!colliderA || !colliderB) {
+		return false;
+	}
+
+	// Layer名には依存せず、Colliderが保持するIDとプロジェクト共通Matrixだけで判定する。
+	const auto* settings = CollisionLayerSettings::GetInstance();
+	const CollisionLayerId layerA = colliderA->GetLayerId();
+	const CollisionLayerId layerB = colliderB->GetLayerId();
+	// 削除済み Layer ID を持つ Collider が残っていても、無効 ID は衝突なしとして安全に扱う。
+	if(!settings->IsValidLayerId(layerA) || !settings->IsValidLayerId(layerB)) {
+		return false;
+	}
+
+	return settings->GetMatrix().CanCollide(layerA, layerB);
 }
 
 bool CollisionManager::SphereToSphere(const Sphere& sphereA, const Sphere& sphereB) {

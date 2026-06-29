@@ -62,6 +62,7 @@ namespace CalyxEngine {
 
 	class PlaySession;
 	class SceneSwitchOverlay;
+	class SceneSettingsWindow;
 	class ImGuiLayoutSwitcher;
 	class ParticlePreviewSession;
 	class PrefabEditSession;
@@ -168,6 +169,7 @@ namespace CalyxEngine {
 		std::unique_ptr<SpriteAnimationEditorPanel> spriteAnimationEditorPanel_;
 		std::unique_ptr<LivePPPanel>		 livePPPanel_;
 		std::unique_ptr<SceneSwitchOverlay>	 sceneSwitchOverlay_;
+		std::unique_ptr<SceneSettingsWindow> sceneSettingsWindow_;
 		std::unique_ptr<ImGuiLayoutSwitcher> layoutSwitcher_;
 		std::unique_ptr<DebugCameraFocusController> debugCameraFocus_;
 		PlaySession*						 pPlaySesseion_ = nullptr;

@@ -24,8 +24,6 @@ BaseEventObject::BaseEventObject() {
 	box->SetName(GetName() + "BoxCollider");   //< コライダー名前設定
 	box->Initialize(CalyxEngine::Vector3(1.0f)); //< サイズ設定
 	collider_ = std::move(box);
-	collider_->SetType(ColliderType::Type_EventObject);
-	collider_->SetTargetType(ColliderType::Type_Player);
 
 	collider_->SetOnEnter([this](Collider* other) { this->OnCollisionEnter(other); });
 	collider_->SetOnStay([this](Collider* other) { this->OnCollisionStay(other); });
@@ -53,8 +51,6 @@ BaseEventObject::BaseEventObject(const std::string& name) {
 	box->SetName(name + "BoxCollider");		   //< コライダー名前設定
 	box->Initialize(CalyxEngine::Vector3(1.0f)); //< サイズ設定
 	collider_ = std::move(box);
-	collider_->SetType(ColliderType::Type_EventObject);
-	collider_->SetTargetType(ColliderType::Type_Player);
 
 	collider_->SetOnEnter([this](Collider* other) { this->OnCollisionEnter(other); });
 	collider_->SetOnStay([this](Collider* other) { this->OnCollisionStay(other); });

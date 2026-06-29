@@ -5,13 +5,16 @@
 #include <Engine/Foundation/Math/Vector3.h>
 #include <externals/nlohmann/json.hpp>
 
+#include <cstdint>
+
 struct ColliderConfig {
 	//========================= variable =========================
 	bool			   isCollisionEnabled = true;				//< コリジョン有効フラグ
 	bool			   isDraw			  = true;				//< 描画有効フラグ
 	bool			   isTrigger		  = false;				//< 物理応答を行わない検出専用フラグ
-	int				   colliderType		  = 0;					//< コリジョンの種類
-	int				   targetType		  = 0;					//< 衝突相手の種類
+	// 表示名ではなくIDを保存するため、LayerをリネームしてもSceneやPrefabの更新は不要。
+	// JSONとの変換を安定させるためuint32_tで保持し、Collider適用時に0～31へ検証する。
+	uint32_t		   layerId			  = 0;					//< Collision Layer ID
 	CalyxEngine::Vector3 offset			  = {0.0f, 0.0f, 0.0f}; //< オフセット
 	CalyxEngine::Vector3 rotate			  = {0.0f, 0.0f, 0.0f}; //< 回転 (Euler)
 	CalyxEngine::Vector3 size				  = {1.0f, 1.0f, 1.0f}; //< サイズ (Box)
@@ -21,12 +24,12 @@ struct ColliderConfig {
 };
 
 inline void to_json(nlohmann::json& j, const ColliderConfig& c) {
+	// 旧分類enumやColliderごとの対象Maskは出力せず、Layer IDだけを永続化する。
 	j = nlohmann::json{
 		{"isCollisionEnabled", c.isCollisionEnabled},
 		{"isDraw", c.isDraw},
 		{"isTrigger", c.isTrigger},
-		{"colliderType", c.colliderType},
-		{"targetType", c.targetType},
+		{"layerId", c.layerId},
 		{"offset", c.offset},
 		{"rotate", c.rotate},
 		{"size", c.size},
@@ -39,8 +42,9 @@ inline void from_json(const nlohmann::json& j, ColliderConfig& c) {
 	c.isCollisionEnabled = j.value("isCollisionEnabled", true);
 	c.isDraw			 = j.value("isDraw", true);
 	c.isTrigger			 = j.value("isTrigger", false);
-	c.colliderType		 = j.value("colliderType", 0);
-	c.targetType		 = j.value("targetType", 0);
+	// Layer IDのない旧データは汎用のDefault Layerとして安全に読み込む。
+	// 範囲検証はCollider::ApplyConfigでも行い、外部編集されたJSONに対しても安全性を保つ。
+	c.layerId			 = j.value("layerId", 0u);
 
 	if(j.contains("offset")) {
 		j.at("offset").get_to(c.offset);

@@ -1,48 +1,14 @@
 #pragma once
 
 //* engine
+#include <Engine/Collision/CollisionTypes.h>
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Objects/3D/Geometory/Shape.h>
 
+#include <functional>
 #include <string>
 
-//===================================================================*/
-//							  ColliderType
-//===================================================================*/
-enum class ColliderType {
-	Type_None		  = 0,
-	Type_Player		  = 1 << 0, // 0b00000001
-	Type_PlayerAttack = 1 << 1, // 0b00000010
-	Type_Enemy		  = 1 << 2, // 0b00000100
-	Type_EnemySpawner = 1 << 3, // 0b00001000
-	Type_EnemyAttack  = 1 << 4, // 0b00010000
-	Type_EventObject  = 1 << 5, // 0b00100000
-	Type_StageGimmick = 1 << 6, // 0b01000000
-	Type_Impediment	  = 1 << 7, // 0b10000000
-};
-
-// ビット演算のオーバーロード
-inline ColliderType operator|(ColliderType lhs, ColliderType rhs) {
-	using T = std::underlying_type_t<ColliderType>;
-	return static_cast<ColliderType>(static_cast<T>(lhs) | static_cast<T>(rhs));
-}
-
-inline ColliderType& operator|=(ColliderType& lhs, ColliderType rhs) {
-	lhs = lhs | rhs;
-	return lhs;
-}
-
-// ビットAND演算のオーバーロード
-inline ColliderType operator&(ColliderType lhs, ColliderType rhs) {
-	using T = std::underlying_type_t<ColliderType>;
-	return static_cast<ColliderType>(static_cast<T>(lhs) & static_cast<T>(rhs));
-}
-
-// ビットAND代入演算のオーバーロード
-inline ColliderType& operator&=(ColliderType& lhs, ColliderType rhs) {
-	lhs = lhs & rhs;
-	return lhs;
-}
+// Collision Layer の名前はプロジェクト設定が管理し、Collider は ID のみを扱う。
 
 class BaseGameObject; // 前方宣言
 
@@ -180,8 +146,9 @@ protected:
 	CollisionShape collisionShape_; //< 衝突形状
 	std::string				  name_;		   //< コライダー名
 
-	ColliderType	   type_ = ColliderType::Type_None;	//< 自身のタイプ
-	ColliderType	   targetType_ = ColliderType::Type_None; //< 衝突相手のタイプ
+	// Player / Enemy などのゲーム固有分類はプロジェクト設定側に置き、エンジンの Collider は知らない。
+	// ID のみを保存することで、Layer 名を変更してもシーン内の全 Collider を更新せずに済む。
+	CollisionLayerId layerId_ = kDefaultCollisionLayerId;
 	CalyxEngine::Vector4 color_ = {1.0, 0.0, 0.0, 1.0};	//< 描画色
 	CalyxEngine::Vector3 offset_{0.0f, 0.0f, 0.0f};		//< オフセット座標
 	CalyxEngine::Vector3 rotateOffset_{0.0f, 0.0f, 0.0f}; //< 回転オフセット (Euler)
@@ -246,28 +213,18 @@ public:
 	void SetName(const std::string& name) { name_ = name; }
 
 	/**
-	 * \brief タイプを取得
-	 * \return タイプ
+	 * \brief Collision Layer ID を取得
 	 */
-	ColliderType GetType() const { return type_; }
+	CollisionLayerId GetLayerId() const { return layerId_; }
 
 	/**
-	 * \brief ターゲットタイプを取得
-	 * \return ターゲットタイプ
+	 * \brief Collision Layer ID を設定
 	 */
-	ColliderType GetTargetType() const { return targetType_; }
-
-	/**
-	 * \brief タイプを設定
-	 * \param type タイプ
-	 */
-	void SetType(ColliderType type) { type_ = type; }
-
-	/**
-	 * \brief ターゲットタイプを設定
-	 * \param targetType ターゲットタイプ
-	 */
-	void SetTargetType(ColliderType targetType) { targetType_ = targetType; }
+	void SetLayerId(CollisionLayerId layerId) {
+		// 範囲外 ID は配列アクセスに使えないため Default へ正規化する。
+		// 範囲内でも削除済みなら、CollisionManager が安全に「衝突なし」と判定する。
+		layerId_ = layerId < kMaxCollisionLayerCount ? layerId : kDefaultCollisionLayerId;
+	}
 
 	/**
 	 * \brief 描画色を設定

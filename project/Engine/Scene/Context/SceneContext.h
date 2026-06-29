@@ -10,6 +10,7 @@
 #include <Engine/Application/Effects/FxSystem.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Lighting/LightLibrary.h>
+#include <Engine/Scene/Settings/SceneSettings.h>
 #include <Engine/System/Event/EventBus.h>
 #include <Engine/objects/3D/Actor/Library/SceneObjectLibrary.h>
 
@@ -84,6 +85,8 @@ public:
 
 	const std::string& GetScenePath() const { return scenePath; }
 	void SetScenePath(const std::string& path) { scenePath = path; }
+	SceneSettings& GetSettings() { return settings_; }
+	const SceneSettings& GetSettings() const { return settings_; }
 
 	// setter
 	void SetSceneName(const std::string& n) { sceneName_ = n; }
@@ -120,7 +123,7 @@ public:
 
 	/* ---------- Current ------------- */
 	static SceneContext* Current() { return current_; }
-	void				 MakeCurrent() { current_ = this; }
+	void				 MakeCurrent();
 
 private:
 	std::unique_ptr<SceneObjectLibrary>	   objectLibrary_;
@@ -128,6 +131,9 @@ private:
 	std::unique_ptr<CalyxEngine::FxSystem> fxSystem_;
 	std::unique_ptr<CalyxEngine::EffectPlayer> effectPlayer_;
 	std::unique_ptr<CameraManager>		   cameraMgr_;
+
+	// SceneObjectとは独立した、シーン全体へ作用する拡張可能な設定コンテナ。
+	SceneSettings settings_;
 
 	ObjectRemovedCallback			   onEditorObjectRemoved_;
 	std::vector<ObjectRemovedCallback> objectRemovedCallbacks_;

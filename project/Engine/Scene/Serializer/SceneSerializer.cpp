@@ -170,8 +170,11 @@ nlohmann::json SceneSerializer::DumpJson(const SceneContext& context) {
 	}
 
 	nlohmann::json root;
-	root["version"]	  = 1;
+	root["version"]	  = 2;
 	root["sceneName"] = context.GetSceneName();
+	// SceneObjectへ属さない設定は独立したsettingsセクションへ保存する。
+	// これによりCollision以外のシーン設定も同じ形式で追加できる。
+	root["settings"] = context.GetSettings().ToJson();
 	root["objects"]	  = std::move(jObjects);
 	return root;
 }
@@ -193,6 +196,15 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 
 	// ---------- 既存クリア ----------
 	context.Clear();
+
+	// Object生成より先にシーン共通設定を復元する。
+	// Collider::ApplyConfigやCollisionManagerは、生成時点から現在シーンのLayer定義を参照できる。
+	if(root.is_object() && root.contains("settings")) {
+		context.GetSettings().ApplyJson(root.at("settings"));
+	} else {
+		// settingsを持たないversion 1以前のシーンはDefault設定として扱う。
+		context.GetSettings().ResetToDefault();
+	}
 
 	// Light & Camera を一旦無効化
 	if(auto* ll = context.GetLightLibrary()) {
