@@ -561,22 +561,38 @@ if ((Test-Path $sdkHeader) -and (Test-Path $sdkData) -and (Test-Path $sdkNlohman
 }
 
 $headers = @{ 'User-Agent' = 'CalyxGameBuild' }
+if ($env:CALYX_ENGINE_GITHUB_TOKEN) {
+	$headers['Authorization'] = "Bearer $env:CALYX_ENGINE_GITHUB_TOKEN"
+}
+
 $tags = @($VersionValue)
-if (-not $VersionValue.StartsWith('v')) {
+if ($VersionValue.StartsWith('v')) {
+	$tags += $VersionValue.Substring(1)
+} else {
 	$tags += "v$VersionValue"
 }
 
 $release = $null
-foreach ($tag in $tags) {
+$releaseErrors = @()
+foreach ($tag in $tags | Select-Object -Unique) {
 	try {
 		$release = Invoke-RestMethod -Headers $headers -Uri "https://api.github.com/repos/kase-haruto/CalyxEngine/releases/tags/$tag"
 		break
 	} catch {
+		$statusCode = $null
+		if ($null -ne $_.Exception.Response) {
+			$statusCode = [int]$_.Exception.Response.StatusCode
+		}
+
+		$releaseErrors += "tag '$tag': $($_.Exception.Message)"
+		if ($statusCode -ne 404) {
+			throw "GitHub Releases API request failed while looking for CalyxEngine $VersionValue ($($releaseErrors -join '; ')). If this is an API rate limit or the release is private, set CALYX_ENGINE_GITHUB_TOKEN and retry."
+		}
 	}
 }
 
 if ($null -eq $release) {
-	throw "CalyxEngine release was not found for engineVersion: $VersionValue"
+	throw "CalyxEngine release was not found for engineVersion: $VersionValue. Checked tags: $($tags -join ', ')"
 }
 
 $asset = $release.assets | Where-Object { $_.name -match '\.zip$' } | Select-Object -First 1
