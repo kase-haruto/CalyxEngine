@@ -196,16 +196,26 @@ if ($VersionValue.StartsWith('v')) {
 }
 
 $release = $null
+$releaseErrors = @()
 foreach ($tag in $tags | Select-Object -Unique) {
 	try {
 		$release = Invoke-RestMethod -Headers $headers -Uri "https://api.github.com/repos/kase-haruto/CalyxEngine/releases/tags/$tag"
 		break
 	} catch {
+		$statusCode = $null
+		if ($null -ne $_.Exception.Response) {
+			$statusCode = [int]$_.Exception.Response.StatusCode
+		}
+
+		$releaseErrors += "tag '$tag': $($_.Exception.Message)"
+		if ($statusCode -ne 404) {
+			throw "GitHub Releases API request failed while looking for CalyxEngine $VersionValue ($($releaseErrors -join '; ')). If this is an API rate limit or the release is private, set CALYX_ENGINE_GITHUB_TOKEN and retry."
+		}
 	}
 }
 
 if ($null -eq $release) {
-	throw "CalyxEngine GitHub Release was not found for engineVersion: $VersionValue. A git tag alone is not enough; create a GitHub Release for this tag and attach the CalyxGamePackage zip asset."
+	throw "CalyxEngine GitHub Release was not found for engineVersion: $VersionValue. Checked tags: $($tags -join ', '). A git tag alone is not enough; create a GitHub Release for this tag and attach the CalyxGamePackage zip asset."
 }
 
 # Prefer package-like zip names, but keep the rule flexible so release assets can
