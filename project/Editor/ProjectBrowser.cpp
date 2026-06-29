@@ -25,7 +25,7 @@ namespace CalyxEditor {
 			{ProjectTemplateType::Blank, "Blank", "空のプロジェクト", "Game", ""},
 			{ProjectTemplateType::Demo, "Demo", "デモプロジェクト", "Game", "Resources/Assets/Scenes/DemoScene.scene"},
 		};
-		constexpr const char* kDefaultEngineVersion = "v1.0.8";
+		constexpr const char* kDefaultEngineVersion = "v1.1.6";
 
 		// 新規プロジェクトの初期作成先のディレクトリパスを取得（ユーザーのドキュメントフォルダを指す）
 		std::filesystem::path DefaultUserProjectDirectory() {
