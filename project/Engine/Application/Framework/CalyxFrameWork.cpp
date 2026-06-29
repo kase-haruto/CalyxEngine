@@ -12,6 +12,7 @@
 #include <Engine/Scene/System/SceneManager.h>
 
 #include <CalyxEngine/Application.h>
+#include <CalyxEngine/Project.h>
 #include <CalyxEngine/SceneRegistry.h>
 
 namespace CalyxEngine {
@@ -37,6 +38,13 @@ namespace CalyxEngine {
 			Calyx::SceneRegistry registry(*sceneManager_);
 			application->RegisterScenes(registry);
 			application->OnSceneManagerReady(*sceneManager_);
+		}
+		if(sceneManager_->GetSceneCount() == 0) {
+			sceneManager_->AddScene(0, std::make_unique<BaseScene>());
+		}
+		if(Calyx::HasCurrentProject() && !Calyx::GetCurrentProject().startupScene.empty()) {
+			const auto& project = Calyx::GetCurrentProject();
+			sceneManager_->OpenScene(Calyx::ResolveProjectPath(project, project.startupScene));
 		}
 
 		/* PlaySession  (EditorCtx は SceneManager が作ったシーン 0 のものを使う) */

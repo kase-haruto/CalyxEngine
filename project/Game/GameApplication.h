@@ -4,8 +4,6 @@
 
 class GameApplication : public Calyx::Application {
 public:
-	void RegisterScenes(Calyx::SceneRegistry& registry) override;
-
 	void OnInitialize() override;
 	void OnUpdate() override;
 	void OnRender() override;

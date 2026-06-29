@@ -253,7 +253,6 @@ namespace CalyxEditor {
 			stream << "#include <CalyxEngine/Application.h>\n\n";
 			stream << "class GameApplication : public Calyx::Application {\n";
 			stream << "public:\n";
-			stream << "\tvoid RegisterScenes(Calyx::SceneRegistry& registry) override;\n";
 			stream << "\tvoid OnInitialize() override;\n";
 			stream << "\tvoid OnUpdate() override;\n";
 			stream << "\tvoid OnRender() override;\n";
@@ -262,25 +261,9 @@ namespace CalyxEditor {
 			return stream.str();
 		}
 
-		std::string MakeGameApplicationSource(const ProjectBrowser::TemplateInfo& selectedTemplate) {
+		std::string MakeGameApplicationSource(const ProjectBrowser::TemplateInfo&) {
 			std::stringstream stream;
 			stream << "#include \"GameApplication.h\"\n\n";
-			stream << "#include <CalyxEngine/SceneRegistry.h>\n";
-
-			if(selectedTemplate.type == ProjectTemplateType::Demo) {
-				stream << "#include <Demo/Scene/DemoScene/DemoScene.h>\n\n";
-				stream << "void GameApplication::RegisterScenes(Calyx::SceneRegistry& registry) {\n";
-				stream << "\tregistry.AddScene<DemoScene>(0);\n";
-				stream << "\tregistry.SetStartupScene(0);\n";
-				stream << "}\n\n";
-			} else {
-				stream << "#include <Engine/Scene/Base/BaseScene.h>\n\n";
-				stream << "void GameApplication::RegisterScenes(Calyx::SceneRegistry& registry) {\n";
-				stream << "\tregistry.AddScene<BaseScene>(0);\n";
-				stream << "\tregistry.SetStartupScene(0);\n";
-				stream << "}\n\n";
-			}
-
 			stream << "void GameApplication::OnInitialize() {}\n\n";
 			stream << "void GameApplication::OnUpdate() {}\n\n";
 			stream << "void GameApplication::OnRender() {}\n\n";

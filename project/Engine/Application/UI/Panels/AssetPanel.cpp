@@ -234,6 +234,9 @@ namespace CalyxEngine {
 			case AssetType::SpriteAnimation:
 				tname = "SpriteAnimation";
 				break;
+			case AssetType::Scene:
+				tname = "Scene";
+				break;
 			default:
 				break;
 			}
@@ -577,10 +580,15 @@ namespace CalyxEngine {
 					}
 					if(rec->type == AssetType::Prefab && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
 						if(onPrefabEditRequested_) onPrefabEditRequested_(rec->sourcePath);
+					} else if(rec->type == AssetType::Scene && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
+						if(onSceneOpenRequested_) onSceneOpenRequested_(rec->sourcePath);
 					}
 					if(ImGui::BeginPopupContextItem("AssetContext")) {
 						if(rec->type == AssetType::Prefab && ImGui::MenuItem("Edit Prefab")) {
 							if(onPrefabEditRequested_) onPrefabEditRequested_(rec->sourcePath);
+						}
+						if(rec->type == AssetType::Scene && ImGui::MenuItem("Open Scene")) {
+							if(onSceneOpenRequested_) onSceneOpenRequested_(rec->sourcePath);
 						}
 						if(ImGui::MenuItem("Rename")) {
 							BeginRenameAsset(rec->sourcePath);
@@ -667,10 +675,15 @@ namespace CalyxEngine {
 				}
 				if(rec->type == AssetType::Prefab && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
 					if(onPrefabEditRequested_) onPrefabEditRequested_(rec->sourcePath);
+				} else if(rec->type == AssetType::Scene && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
+					if(onSceneOpenRequested_) onSceneOpenRequested_(rec->sourcePath);
 				}
 				if(ImGui::BeginPopupContextItem("AssetContext")) {
 					if(rec->type == AssetType::Prefab && ImGui::MenuItem("Edit Prefab")) {
 						if(onPrefabEditRequested_) onPrefabEditRequested_(rec->sourcePath);
+					}
+					if(rec->type == AssetType::Scene && ImGui::MenuItem("Open Scene")) {
+						if(onSceneOpenRequested_) onSceneOpenRequested_(rec->sourcePath);
 					}
 					if(ImGui::MenuItem("Rename")) {
 						BeginRenameAsset(rec->sourcePath);
@@ -724,6 +737,10 @@ namespace CalyxEngine {
 			}
 			if(ImGui::Selectable("All Sprite Animations")) {
 				typeFilter_ = AssetType::SpriteAnimation;
+				scope_		= Scope::All;
+			}
+			if(ImGui::Selectable("All Scenes")) {
+				typeFilter_ = AssetType::Scene;
 				scope_		= Scope::All;
 			}
 			ImGui::TreePop();
