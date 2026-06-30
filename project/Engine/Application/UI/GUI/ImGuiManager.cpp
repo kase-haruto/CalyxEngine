@@ -6,6 +6,7 @@
 #include <CalyxEngine/Project.h>
 #include <Engine/Application/Platform/WinApp.h>
 #include <Engine/Foundation/Utility/Func/DxFunc.h>
+#include <Engine/Foundation/Log/EngineLogger.h>
 #include <Engine/Graphics/Descriptor/DescriptorAllocator.h>
 #include <Engine/Graphics/Device/DxCore.h>
 
@@ -22,6 +23,11 @@
 
 
 void ImGuiManager::Initialize(WinApp* winApp, const CalyxEngine::DxCore* dxCore){
+	CalyxEngine::EngineLogger::GetInstance().Add(
+		CalyxEngine::LogLevel::Info,
+		CalyxEngine::LogCategory::Editor,
+		"ImGui initialization started.",
+		"ImGuiManager");
 	pDxCore_ =dxCore;
 
 	ID3D12DescriptorHeap* heap = DescriptorAllocator::GetHeap(DescriptorUsage::CbvSrvUav);
@@ -48,6 +54,13 @@ void ImGuiManager::Initialize(WinApp* winApp, const CalyxEngine::DxCore* dxCore)
 		const std::string defaultFontPathText = defaultFontPath.string();
 		defaultFont = io.Fonts->AddFontFromFileTTF(defaultFontPathText.c_str(), fontSize, nullptr, io.Fonts->GetGlyphRangesDefault());
 	}
+	else {
+		CalyxEngine::EngineLogger::GetInstance().Add(
+			CalyxEngine::LogLevel::Warning,
+			CalyxEngine::LogCategory::Editor,
+			"Default editor font not found: " + defaultFontPath.generic_string(),
+			"ImGuiManager");
+	}
 	if(defaultFont != nullptr) {
 		ImFontConfig mergeConfig;
 		mergeConfig.MergeMode = true;
@@ -57,6 +70,13 @@ void ImGuiManager::Initialize(WinApp* winApp, const CalyxEngine::DxCore* dxCore)
 			const std::string japaneseFontPathText = japaneseFontPath.string();
 			io.Fonts->AddFontFromFileTTF(japaneseFontPathText.c_str(), fontSize, &mergeConfig, io.Fonts->GetGlyphRangesJapanese());
 		}
+		else {
+			CalyxEngine::EngineLogger::GetInstance().Add(
+				CalyxEngine::LogLevel::Warning,
+				CalyxEngine::LogCategory::Editor,
+				"Japanese editor font not found: " + japaneseFontPath.generic_string(),
+				"ImGuiManager");
+		}
 	}
 	if(defaultFont == nullptr) {
 		defaultFont = io.Fonts->AddFontDefault();
@@ -65,10 +85,20 @@ void ImGuiManager::Initialize(WinApp* winApp, const CalyxEngine::DxCore* dxCore)
 		io.FontDefault = defaultFont;
 	}
 	CustomizeImGuiStyle();
+	CalyxEngine::EngineLogger::GetInstance().Add(
+		CalyxEngine::LogLevel::Info,
+		CalyxEngine::LogCategory::Editor,
+		"ImGui initialization completed.",
+		"ImGuiManager");
 }
 
 
 void ImGuiManager::Finalize(){
+	CalyxEngine::EngineLogger::GetInstance().Add(
+		CalyxEngine::LogLevel::Info,
+		CalyxEngine::LogCategory::Editor,
+		"ImGui shutdown started.",
+		"ImGuiManager");
 	//後始末
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();

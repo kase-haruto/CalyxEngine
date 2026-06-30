@@ -13,6 +13,7 @@
 #include <Engine/Assets/DataAsset/MaterialAsset.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Foundation/Clock/ClockManager.h>
+#include <Engine/Foundation/Log/EngineLogger.h>
 #include <Engine/System/Command/EditorCommand/ValueEditCommand.h>
 #include <Engine/System/Command/Manager/CommandManager.h>
 
@@ -458,18 +459,28 @@ bool BaseModel::LoadTextureByGuid(const Guid& g) {
 }
 
 void BaseModel::SetTextureGuid(const Guid& g) {
+	const Guid previousGuid = textureGuid_;
 	if(!g.isValid()) {
 		handle_.reset();
 		textureGuid_ = Guid::Empty();
+		if(previousGuid.isValid()) {
+			CalyxEngine::EngineLogger::GetInstance().Add(CalyxEngine::LogLevel::Info, CalyxEngine::LogCategory::Asset, "Model texture assignment cleared.", "BaseModel");
+		}
 		return;
 	}
 
-	LoadTextureByGuid(g);
+	if(LoadTextureByGuid(g) && previousGuid != g) {
+		CalyxEngine::EngineLogger::GetInstance().Add(CalyxEngine::LogLevel::Info, CalyxEngine::LogCategory::Asset, "Model texture changed: " + previousGuid.ToString() + " -> " + g.ToString(), "BaseModel");
+	}
 }
 
 void BaseModel::SetMaterialGuid(const Guid& g) {
+	const Guid previousGuid = materialGuid_;
 	materialGuid_ = g;
 	TransferMaterial();
+	if(previousGuid != g) {
+		CalyxEngine::EngineLogger::GetInstance().Add(CalyxEngine::LogLevel::Info, CalyxEngine::LogCategory::Asset, "Model material changed: " + previousGuid.ToString() + " -> " + g.ToString(), "BaseModel");
+	}
 }
 
 ModelData* BaseModel::GetModelData() const { return modelData_; }

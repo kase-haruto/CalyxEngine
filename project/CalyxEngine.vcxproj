@@ -487,6 +487,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Application\UI\Panels\SplineEditorPanel.cpp" />
     <ClCompile Include="Engine\Objects\2D\NumbersSprite\NumbersSprite.cpp" />
     <ClCompile Include="Engine\Application\UI\Panels\LivePPPanel.cpp" />
+    <ClCompile Include="Engine\Application\UI\Panels\LogPanel.cpp" />
+    <ClCompile Include="Engine\Application\UI\Panels\TerminalPanel.cpp" />
+    <ClCompile Include="Engine\Foundation\Log\EngineLogger.cpp" />
+    <ClCompile Include="Engine\System\Command\ConsoleCommandDispatcher.cpp" />
+    <ClCompile Include="Engine\System\Command\ConsoleCommandRegistry.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Application\CalyxEngine\Application.h" />
@@ -854,6 +859,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Assets\DataAsset\SpriteAnimationAsset.h" />
     <ClInclude Include="Engine\Application\UI\Panels\SpriteAnimationEditorPanel.h" />
     <ClInclude Include="Engine\Application\UI\Panels\LivePPPanel.h" />
+    <ClInclude Include="Engine\Application\UI\Panels\LogPanel.h" />
+    <ClInclude Include="Engine\Application\UI\Panels\TerminalPanel.h" />
+    <ClInclude Include="Engine\Foundation\Log\EngineLogger.h" />
+    <ClInclude Include="Engine\Foundation\Log\LogTypes.h" />
+    <ClInclude Include="Engine\System\Command\ConsoleCommandDispatcher.h" />
+    <ClInclude Include="Engine\System\Command\ConsoleCommandRegistry.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">

@@ -8,6 +8,7 @@
 #include <Engine/Assets/Model/BaseModel.h>
 #include <Engine/Foundation/Audio/Audio.h>
 #include <Engine/Foundation/Input/Input.h>
+#include <Engine/Foundation/Log/EngineLogger.h>
 #include <Engine/Foundation/Utility/Func/DxFunc.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
 #include <Engine/Graphics/Descriptor/DescriptorAllocator.h>
@@ -75,6 +76,12 @@ namespace CalyxEngine {
 	//  初期化処理
 	/////////////////////////////////////////////////////////////////////////////////////////
 	void CalyxCore::Initialize(HINSTANCE hInstance, int32_t clientWidth, int32_t clientHeight, const std::string _windowTitle) {
+		EngineLogger::GetInstance().Add(
+			LogLevel::Info,
+			LogCategory::Engine,
+			"CalyxEngine initialization started. Window=" + std::to_string(clientWidth) + "x" + std::to_string(clientHeight),
+			"CalyxCore");
+
 		winApp_	   = std::make_unique<WinApp>(clientWidth, clientHeight, _windowTitle);
 		hInstance_ = hInstance;
 		hwnd_	   = winApp_->GetHWND();
@@ -121,6 +128,12 @@ namespace CalyxEngine {
 		auto* db = AssetDatabase::GetInstance();
 		// 現在開いているプロジェクトを基準に、編集対象のAssetsを決める。
 		db->Initialize(Calyx::GetAssetRoot());
+
+		EngineLogger::GetInstance().Add(
+			LogLevel::Info,
+			LogCategory::Engine,
+			"CalyxEngine initialization completed.",
+			"CalyxCore");
 	}
 
 	void CalyxCore::InitializePostProcess(PipelineService* service) {
@@ -228,6 +241,11 @@ namespace CalyxEngine {
 	//  終了処理
 	/////////////////////////////////////////////////////////////////////////////////////////
 	void CalyxCore::Finalize() {
+		EngineLogger::GetInstance().Add(
+			LogLevel::Info,
+			LogCategory::Engine,
+			"CalyxEngine shutdown started.",
+			"CalyxCore");
 
 		if(auto* previews = AssetPreviewManager::GetInstance()) {
 			previews->Shutdown();
@@ -247,6 +265,12 @@ namespace CalyxEngine {
 		CalyxFoundation::Input::Finalize();
 		// ウィンドウの破棄
 		winApp_->TerminateGameWindow();
+
+		EngineLogger::GetInstance().Add(
+			LogLevel::Info,
+			LogCategory::Engine,
+			"CalyxEngine shutdown completed.",
+			"CalyxCore");
 	}
 
 	void CalyxCore::InitializeEditor() {

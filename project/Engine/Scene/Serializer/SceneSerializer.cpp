@@ -7,6 +7,7 @@
 #include <Engine/Application/Effects/FxSystem.h>
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 #include <Engine/Foundation/Json/JsonUtils.h>
+#include <Engine/Foundation/Log/EngineLogger.h>
 #include <Engine/Foundation/Serialization/SerializableObject.h>
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
 #include <Engine/Objects/3D/Actor/Library/SceneObjectLibrary.h>
@@ -52,6 +53,12 @@ namespace {
 			nlohmann::json jCfg;
 			if(JsonUtils::Load(cfgPath, jCfg)) {
 				cfg->ApplyConfigFromJson(jCfg);
+			} else {
+				EngineLogger::GetInstance().Add(
+					LogLevel::Warning,
+					LogCategory::Asset,
+					"Scene object config could not be loaded: " + cfgPath,
+					"SceneSerializer");
 			}
 		}
 
@@ -89,7 +96,14 @@ namespace {
 // -----------------------------------------------------------------------------
 bool SceneSerializer::Save(const SceneContext& context, const std::string& path) {
 	auto root = DumpJson(context);
-	return JsonUtils::Save(Calyx::ResolveAssetPath(path).generic_string(), root);
+	const std::string resolvedPath = Calyx::ResolveAssetPath(path).generic_string();
+	const bool succeeded = JsonUtils::Save(resolvedPath, root);
+	EngineLogger::GetInstance().Add(
+		succeeded ? LogLevel::Trace : LogLevel::Error,
+		LogCategory::Editor,
+		(succeeded ? "Scene serialized: " : "Scene serialization failed: ") + resolvedPath,
+		"SceneSerializer");
+	return succeeded;
 }
 
 // -----------------------------------------------------------------------------
@@ -97,8 +111,18 @@ bool SceneSerializer::Save(const SceneContext& context, const std::string& path)
 // -----------------------------------------------------------------------------
 bool SceneSerializer::Load(SceneContext& context, const std::string& path) {
 	nlohmann::json root;
-	if(!JsonUtils::Load(Calyx::ResolveAssetPath(path).generic_string(), root)) return false;
-	return LoadJson(context, root);
+	const std::string resolvedPath = Calyx::ResolveAssetPath(path).generic_string();
+	if(!JsonUtils::Load(resolvedPath, root)) {
+		EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Editor, "Scene file could not be read: " + resolvedPath, "SceneSerializer");
+		return false;
+	}
+	const bool succeeded = LoadJson(context, root);
+	EngineLogger::GetInstance().Add(
+		succeeded ? LogLevel::Trace : LogLevel::Error,
+		LogCategory::Editor,
+		(succeeded ? "Scene deserialized: " : "Scene deserialization failed: ") + resolvedPath,
+		"SceneSerializer");
+	return succeeded;
 }
 
 // -----------------------------------------------------------------------------
@@ -184,6 +208,8 @@ nlohmann::json SceneSerializer::DumpJson(const SceneContext& context) {
 // -----------------------------------------------------------------------------
 bool SceneSerializer::LoadJson(SceneContext&		 context,
 							   const nlohmann::json& root) {
+	std::size_t loadedObjectCount = 0;
+	std::size_t skippedObjectCount = 0;
 	// ---------- 配列取得（旧形式配慮） ----------
 	nlohmann::json jArray;
 	if(root.is_array()) {
@@ -230,6 +256,12 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 		auto sp = SceneObjectRegistry::Get().Create(typeName);
 		if(!sp) {
 			SerializableObject::EndPendingCapture(nullptr, nullptr);
+			++skippedObjectCount;
+			EngineLogger::GetInstance().Add(
+				LogLevel::Warning,
+				LogCategory::Editor,
+				"Scene object type is not registered and was skipped: " + typeName,
+				"SceneSerializer");
 			continue;
 		}
 		sp->AdoptPendingSerializableParamCapture(paramOverrides);
@@ -304,6 +336,7 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 
 		// GUID
 		guidMap[guid] = sp;
+		++loadedObjectCount;
 	}
 
 	// ---------- 親子リンク ----------
@@ -342,5 +375,10 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 				bindingJson.value("inheritScale", true));
 		}
 	}
+	EngineLogger::GetInstance().Add(
+		LogLevel::Trace,
+		LogCategory::Editor,
+		"Scene JSON loaded. Objects=" + std::to_string(loadedObjectCount) + ", Skipped=" + std::to_string(skippedObjectCount),
+		"SceneSerializer");
 	return true;
 }

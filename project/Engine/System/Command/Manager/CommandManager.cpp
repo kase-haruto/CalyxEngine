@@ -1,5 +1,7 @@
 #include "CommandManager.h"
 
+#include <Engine/Foundation/Log/EngineLogger.h>
+
 #include <string>
 
 CommandManager* CommandManager::GetInstance() {
@@ -15,6 +17,11 @@ void CommandManager::Execute(std::unique_ptr<ICommand> cmd){
 	// ログ追加
 	if (const char* name = cmd->GetName(); name && *name){
 		commandLogs_.emplace_back(name);
+		CalyxEngine::EngineLogger::GetInstance().Add(
+			CalyxEngine::LogLevel::Info,
+			CalyxEngine::LogCategory::Editor,
+			std::string("Command executed: ") + name,
+			"CommandManager");
 	}
 
 	undoStack_.push(std::move(cmd));
@@ -30,6 +37,11 @@ void CommandManager::Undo(){
 	cmd->Undo();
 
 	commandLogs_.emplace_back(std::string("Undo: ") + cmd->GetName());
+	CalyxEngine::EngineLogger::GetInstance().Add(
+		CalyxEngine::LogLevel::Info,
+		CalyxEngine::LogCategory::Editor,
+		std::string("Command undone: ") + cmd->GetName(),
+		"CommandManager");
 	redoStack_.push(std::move(cmd));
 }
 
@@ -42,6 +54,11 @@ void CommandManager::Redo(){
 	cmd->Redo();
 
 	commandLogs_.emplace_back(std::string("Redo: ") + cmd->GetName());
+	CalyxEngine::EngineLogger::GetInstance().Add(
+		CalyxEngine::LogLevel::Info,
+		CalyxEngine::LogCategory::Editor,
+		std::string("Command redone: ") + cmd->GetName(),
+		"CommandManager");
 	undoStack_.push(std::move(cmd));
 }
 

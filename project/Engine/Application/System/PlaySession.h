@@ -43,6 +43,7 @@ namespace CalyxEngine {
 
 		//--------- accessor -----------------------------------------------------
 		bool		  IsRuntime() const;
+		EngineMode GetMode() const { return mode_; }
 		SceneContext* GetContext() const;
 		uint64_t	  RuntimeGeneration() const { return runtimeGen_; }
 		void		  ApplyPendingDebugCameraState(SceneContext* context);

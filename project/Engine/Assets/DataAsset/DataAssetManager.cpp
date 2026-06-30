@@ -3,6 +3,7 @@
 #include "MaterialAsset.h"
 #include "SpriteAnimationAsset.h"
 
+#include <Engine/Foundation/Log/EngineLogger.h>
 #include <Engine\Foundation\Serialization\SerializableField.h>
 #include <Engine\Foundation\Utility\FileSystem\FileSystemHelper.h>
 #include <externals\nlohmann\json.hpp>
@@ -128,7 +129,10 @@ namespace CalyxEngine {
 	}
 
 	std::shared_ptr<MaterialAsset> DataAssetManager::LoadMaterialAsset(const std::filesystem::path& path, const Guid& guid) {
-		if(!guid.isValid()) return nullptr;
+		if(!guid.isValid()) {
+			EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Asset, "Material load failed because its GUID is invalid: " + path.generic_string(), "DataAssetManager");
+			return nullptr;
+		}
 
 		// マテリアルアセットの初期オブジェクトを生成して基本情報を設定
 		auto material = std::make_shared<MaterialAsset>();
@@ -151,6 +155,7 @@ namespace CalyxEngine {
 
 		// キャッシュに登録して返す
 		RegisterAsset(material);
+		EngineLogger::GetInstance().Add(LogLevel::Trace, LogCategory::Asset, "Material loaded: " + path.generic_string(), "DataAssetManager");
 		return material;
 	}
 
@@ -216,7 +221,13 @@ namespace CalyxEngine {
 			}
 		}
 		// JSONファイルとして書き込み
-		return WriteJsonFile(path, root);
+		const bool succeeded = WriteJsonFile(path, root);
+		EngineLogger::GetInstance().Add(
+			succeeded ? LogLevel::Info : LogLevel::Error,
+			LogCategory::Asset,
+			(succeeded ? "Data asset saved: " : "Data asset save failed: ") + path.generic_string(),
+			"DataAssetManager");
+		return succeeded;
 	}
 
 	std::shared_ptr<MaterialAsset> DataAssetManager::CreateMaterialAsset(const std::filesystem::path& path, const Guid& guid, const std::string& name) {
@@ -229,6 +240,7 @@ namespace CalyxEngine {
 		if(!SaveAsset(*material, path)) return nullptr;
 		// キャッシュに登録
 		RegisterAsset(material);
+		EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Asset, "Material created: " + path.generic_string(), "DataAssetManager");
 		return material;
 	}
 
