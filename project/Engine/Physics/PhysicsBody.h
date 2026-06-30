@@ -60,7 +60,7 @@ public:
 	 * \brief Body種別を設定する
 	 * \param type Body種別
 	 */
-	void SetBodyType(PhysicsBodyType type) { bodyType_ = type; }
+	void SetBodyType(PhysicsBodyType type);
 
 	/**
 	 * \brief 押し戻し反映率を取得する

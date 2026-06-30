@@ -5,6 +5,16 @@
 
 #include <algorithm>
 
+void PhysicsBody::SetBodyType(PhysicsBodyType type) {
+	// Dynamic以外へ変更したBodyは物理積分の対象外になるため、以前の速度を持ち越さない。
+	// 再びDynamicへ戻した際に、古い速度で突然移動することを防ぐ。
+	if(bodyType_ == PhysicsBodyType::Dynamic && type != PhysicsBodyType::Dynamic) {
+		linearVelocity_ = CalyxEngine::Vector3::Zero();
+	}
+
+	bodyType_ = type;
+}
+
 void PhysicsBody::ShowGui() {
 	if(ImGui::TreeNodeEx("PhysicsBody", ImGuiTreeNodeFlags_SpanAvailWidth)) {
 		GuiCmd::CheckBox("Enable Physics Response", enabled_);
@@ -12,7 +22,7 @@ void PhysicsBody::ShowGui() {
 		int bodyType = static_cast<int>(bodyType_);
 		const char* items[] = {"Static", "Kinematic", "Dynamic"};
 		if(GuiCmd::Combo("Body Type", bodyType, items, 3)) {
-			bodyType_ = static_cast<PhysicsBodyType>(bodyType);
+			SetBodyType(static_cast<PhysicsBodyType>(bodyType));
 		}
 
 		GuiCmd::DragFloat("Pushback Ratio", pushbackRatio_, 0.01f, 0.0f, 1.0f);
@@ -33,7 +43,7 @@ void PhysicsBody::ShowGui() {
 
 void PhysicsBody::ApplyConfig(const PhysicsBodyConfig& config) {
 	enabled_ = config.enabled;
-	bodyType_ = static_cast<PhysicsBodyType>(std::clamp(config.bodyType, 0, 2));
+	SetBodyType(static_cast<PhysicsBodyType>(std::clamp(config.bodyType, 0, 2)));
 	pushbackRatio_ = std::clamp(config.pushbackRatio, 0.0f, 1.0f);
 	useGravity_ = config.useGravity;
 	gravityScale_ = std::clamp(config.gravityScale, 0.0f, 10.0f);
