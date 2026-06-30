@@ -166,15 +166,21 @@ void SceneContext::Update(float dt, float alwaysDt, bool runtimePass) {
 		effectPlayer_->Update(alwaysDt);
 	}
 
-	PhysicsSystem::GetInstance()->ResolveAll();
+	// Runtimeでは固定時間ステップでDynamicの積分と物理応答を行う。
+	// Editorでは時間を進めず、配置操作で発生しためり込みだけを解消する。
+	if(runtimePass) {
+		PhysicsSystem::GetInstance()->Update(dt);
+	} else {
+		// 押し戻し前の接触状態からEditor上のEnter/Stay/Exitを確定する。
+		CollisionManager::GetInstance()->UpdateCollisionAllCollider();
+		PhysicsSystem::GetInstance()->ResolveAll();
+	}
 
 	for(auto& sp : objects) {
 		if(auto* object = dynamic_cast<BaseGameObject*>(sp.get())) {
 			object->DrawCollider();
 		}
 	}
-
-	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
 
 	lightLibrary_->CyncGpu();
 	fxSystem_->SyncEmitters();
