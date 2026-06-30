@@ -1,6 +1,7 @@
 #include "PhysicsSystem.h"
 
 #include <Engine/Collision/CollisionManager.h>
+#include <Engine/Objects/3D/Actor/Actor.h>
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
 #include <Engine/Objects/Collider/Collider.h>
 #include <Engine/Physics/PhysicsBody.h>
@@ -13,7 +14,7 @@
 namespace {
 	constexpr int kPositionSolverIterations = 4;       //< 複数接触を安定させる位置Solverの反復回数
 	constexpr float kPenetrationSlop = 0.001f;        //< 浮動小数点誤差として許容する微小な侵入量
-	constexpr float kCorrectionPercent = 0.8f;        //< 1反復で解消する侵入量の割合
+	constexpr float kDynamicCorrectionPercent = 0.8f; //< Dynamicを含む接触で1反復に解消する侵入量の割合
 
 	struct ContactManifold {
 		CalyxEngine::Vector3 normal{0.0f, 1.0f, 0.0f}; //< AをBから離す方向
@@ -335,54 +336,55 @@ namespace {
 		ComputeOBBAxes(obb, axes);
 		const CalyxEngine::Vector3 halfSize = obb.size * 0.5f;
 
-		float bestPenetration = (std::numeric_limits<float>::max)();
-		CalyxEngine::Vector3 bestNormal = CalyxEngine::Vector3::Up();
-		bool hasContact = false;
+		// 点からOBBまでの距離は、線分パラメータに対して凸になる。
+		// 固定個数のサンプリングでは薄いBoxがサンプル間に入るため、線分全体から最近点を求める。
+		auto distanceSquaredAt = [&](float t) {
+			const CalyxEngine::Vector3 point = start + (end - start) * t;
+			const CalyxEngine::Vector3 closest = ClosestPointOnOBB(obb, point);
+			return (point - closest).LengthSquared();
+		};
 
-		for(int i = 0; i <= 8; ++i) {
-			const float t = static_cast<float>(i) / 8.0f;
-			const CalyxEngine::Vector3 p = start + (end - start) * t;
-			const CalyxEngine::Vector3 q = ClosestPointOnOBB(obb, p);
-			const float distSq = (p - q).LengthSquared();
-
-			float penetration = 0.0f;
-			CalyxEngine::Vector3 normal = CalyxEngine::Vector3::Up();
-
-			if(distSq > 1.0e-8f) {
-				if(distSq > capsule.radius * capsule.radius) continue;
-
-				const float dist = std::sqrt((std::max)(distSq, 0.0f));
-				normal = (p - q) / dist;
-				penetration = capsule.radius - dist;
+		float left = 0.0f;
+		float right = 1.0f;
+		for(int iteration = 0; iteration < 40; ++iteration) {
+			const float t0 = left + (right - left) / 3.0f;
+			const float t1 = right - (right - left) / 3.0f;
+			if(distanceSquaredAt(t0) < distanceSquaredAt(t1)) {
+				right = t1;
 			} else {
-				const CalyxEngine::Vector3 local = p - obb.center;
-				float minExit = (std::numeric_limits<float>::max)();
-
-				for(int axisIndex = 0; axisIndex < 3; ++axisIndex) {
-					const float halfExtent = (axisIndex == 0) ? halfSize.x : (axisIndex == 1) ? halfSize.y : halfSize.z;
-					const float projected = CalyxEngine::Vector3::Dot(local, axes[axisIndex]);
-					const float exitDistance = halfExtent - std::abs(projected);
-
-					if(exitDistance < minExit) {
-						minExit = exitDistance;
-						normal = axes[axisIndex] * (projected >= 0.0f ? 1.0f : -1.0f);
-					}
-				}
-
-				penetration = capsule.radius + minExit;
+				left = t0;
 			}
-
-			if(penetration <= 0.0f || penetration >= bestPenetration) continue;
-
-			bestPenetration = penetration;
-			bestNormal = normal;
-			hasContact = true;
 		}
 
-		if(!hasContact) return false;
+		const float closestT = (left + right) * 0.5f;
+		const CalyxEngine::Vector3 p = start + (end - start) * closestT;
+		const CalyxEngine::Vector3 q = ClosestPointOnOBB(obb, p);
+		const float distSq = (p - q).LengthSquared();
+		if(distSq > capsule.radius * capsule.radius) return false;
 
-		out.normal = SafeNormalize(bestNormal, CalyxEngine::Vector3::Up());
-		out.penetration = bestPenetration;
+		if(distSq > 1.0e-8f) {
+			const float dist = std::sqrt(distSq);
+			out.normal = (p - q) / dist;
+			out.penetration = capsule.radius - dist;
+			return out.penetration > 0.0f;
+		}
+
+		// 中心線がOBB内部を通る場合は、最も近い面の外向き法線を使う。
+		const CalyxEngine::Vector3 local = p - obb.center;
+		float minExit = (std::numeric_limits<float>::max)();
+		CalyxEngine::Vector3 normal = CalyxEngine::Vector3::Up();
+		for(int axisIndex = 0; axisIndex < 3; ++axisIndex) {
+			const float halfExtent = (axisIndex == 0) ? halfSize.x : (axisIndex == 1) ? halfSize.y : halfSize.z;
+			const float projected = CalyxEngine::Vector3::Dot(local, axes[axisIndex]);
+			const float exitDistance = halfExtent - std::abs(projected);
+			if(exitDistance < minExit) {
+				minExit = exitDistance;
+				normal = axes[axisIndex] * (projected >= 0.0f ? 1.0f : -1.0f);
+			}
+		}
+
+		out.normal = SafeNormalize(normal, CalyxEngine::Vector3::Up());
+		out.penetration = capsule.radius + minExit;
 		return out.penetration > 0.0f;
 	}
 
@@ -488,6 +490,18 @@ namespace {
 		// コライダー形状も即座に同期する。
 		collider->Update(owner->GetCenterPos(), transform.rotation);
 	}
+
+	void ResolveKinematicCharacterVelocity(BaseGameObject* owner, const CalyxEngine::Vector3& normal) {
+		if(auto* actor = dynamic_cast<Actor*>(owner)) {
+			actor->GetCharacterMovement().ResolveBlockingVelocity(normal);
+			CalyxEngine::Vector3 velocity = actor->GetVelocity();
+			const float velocityAlongNormal = CalyxEngine::Vector3::Dot(velocity, normal);
+			if(velocityAlongNormal < 0.0f) {
+				velocity -= normal * velocityAlongNormal;
+				actor->SetVelocity(velocity);
+			}
+		}
+	}
 }
 
 PhysicsSystem* PhysicsSystem::GetInstance() {
@@ -514,6 +528,7 @@ void PhysicsSystem::Update(float deltaTime) {
 	if(stepCount == maxSubSteps_ && accumulator_ >= fixedDeltaTime_) {
 		accumulator_ = 0.0f;
 	}
+
 }
 
 void PhysicsSystem::Step(float fixedDeltaTime) {
@@ -608,11 +623,24 @@ void PhysicsSystem::ResolveAll() {
 			// 速度補正は位置Solverの反復ごとに重複適用せず、最初の接触時だけ行う。
 			if(iteration == 0) {
 				ResolveDynamicVelocity(bodyA, bodyB, contact.normal);
+				if(bodyA.GetBodyType() == PhysicsBodyType::Kinematic) {
+					ResolveKinematicCharacterVelocity(ownerA, contact.normal);
+				}
+				if(bodyB.GetBodyType() == PhysicsBodyType::Kinematic) {
+					ResolveKinematicCharacterVelocity(ownerB, -contact.normal);
+				}
 			}
 
 			// 微小な侵入は許容し、接触面付近での補正振動を抑える。
-			const float correctionDepth =
-				(std::max)(contact.penetration - kPenetrationSlop, 0.0f) * kCorrectionPercent;
+			// 入力で直接移動するKinematicは次フレームにも壁へ押し込まれる。
+			// Staticとの接触にDynamic用の緩和を掛けると残留侵入量が毎フレーム変動し、表示が振動するため、
+			// この組み合わせだけは現在Step内で貫通量を全て解消する。
+			const bool isKinematicStaticPair =
+				(bodyA.GetBodyType() == PhysicsBodyType::Kinematic && bodyB.GetBodyType() == PhysicsBodyType::Static) ||
+				(bodyA.GetBodyType() == PhysicsBodyType::Static && bodyB.GetBodyType() == PhysicsBodyType::Kinematic);
+			const float correctionDepth = isKinematicStaticPair
+				? contact.penetration + kPenetrationSlop
+				: (std::max)(contact.penetration - kPenetrationSlop, 0.0f) * kDynamicCorrectionPercent;
 			if(correctionDepth <= 0.0f) continue;
 
 			// 法線は A を B から離す方向なので、Aへは +normal、Bへは -normal を適用する。

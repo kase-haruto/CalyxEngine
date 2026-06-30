@@ -66,6 +66,12 @@ public:
 	void Jump();
 
 	/**
+	 * \brief 接触面へ食い込むCharacterMovementの速度成分を除去する
+	 * \param normal キャラクターを接触相手から離す向きの法線
+	 */
+	void ResolveBlockingVelocity(const CalyxEngine::Vector3& normal);
+
+	/**
 	 * \brief 現在位置から床を探索する
 	 * \param outFloor 探索結果
 	 */

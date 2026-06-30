@@ -222,6 +222,19 @@ void CharacterMovementComponent::Jump() {
 	currentFloor_ = {};
 }
 
+void CharacterMovementComponent::ResolveBlockingVelocity(const CalyxEngine::Vector3& normal) {
+	const CalyxEngine::Vector3 safeNormal = SafeNormalize(normal, CalyxEngine::Vector3::Up());
+	const float velocityAlongNormal = CalyxEngine::Vector3::Dot(velocity_, safeNormal);
+	if(velocityAlongNormal < 0.0f) {
+		velocity_ -= safeNormal * velocityAlongNormal;
+	}
+
+	// 上向き面に接触している間は落下を終了し、次フレームに重力で同じ面へ再侵入させない。
+	if(safeNormal.y > 0.6f) {
+		velocity_.y = (std::max)(velocity_.y, 0.0f);
+	}
+}
+
 void CharacterMovementComponent::FindFloor(FindFloorResult& outFloor) const {
 	outFloor = {};
 	if(!owner_) return;
@@ -230,10 +243,15 @@ void CharacterMovementComponent::FindFloor(FindFloorResult& outFloor) const {
 	float capsuleHalfHeight = 0.0f;
 	if(!GetOwnerCapsule(capsuleRadius, capsuleHalfHeight)) return;
 
-	// UnrealのFindFloorに寄せ、キャラクターの衝突中心から下方向へ床を探す。
-	// BaseGameObjectはコライダー更新時にGetCenterPos()を使うため、
-	// 床探索も同じ基準点を使わないと、表示されているカプセル底面とFloorDistanceがずれる。
-	const CalyxEngine::Vector3 collisionCenter = owner_->GetCenterPos();
+	// Collider::Update と同じ計算で、ローカルオフセットを含む実際の衝突中心を求める。
+	// GetCenterPos() だけを使うと offset.y を設定したカプセルの底面と floorDistance がずれ、
+	// SnapToFloor と PhysicsSystem が異なる接地位置へ交互に補正して振動する。
+	Collider* ownerCollider = owner_->GetCollider();
+	if(!ownerCollider) return;
+	const CalyxEngine::Quaternion& ownerRotation = owner_->GetWorldTransform().rotation;
+	const CalyxEngine::Vector3 worldOffset =
+		CalyxEngine::Quaternion::RotateVector(ownerCollider->GetOffset(), ownerRotation);
+	const CalyxEngine::Vector3 collisionCenter = owner_->GetCenterPos() + worldOffset;
 	const CalyxEngine::Vector3 rayStart = collisionCenter;
 	const float rayLength = capsuleHalfHeight + param_.floorProbeDistance_;
 
