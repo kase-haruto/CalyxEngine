@@ -7,6 +7,7 @@
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 #include <Engine/Scene/Context/SceneContext.h>
+#include <Engine/Scene/Settings/SceneSettings.h>
 
 #include <filesystem>
 #include <memory>
@@ -100,6 +101,12 @@ namespace SceneAPI{
 		const Guid& prefabAssetGuid = Guid::Empty()) {
 		auto roots = InstantiatePrefabRoots<T>(path, spawnOffset, prefabAssetGuid);
 		return roots.empty() ? nullptr : roots.front();
+	}
+
+	const SceneSettings& GetSceneSettings(){
+		auto ctx = SceneContext::Current();
+		CX_CHECK(ctx && "No active SceneContext!", "Assertion failed");
+		return ctx->GetSceneSettings();
 	}
 }
 
