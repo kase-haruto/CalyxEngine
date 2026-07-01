@@ -103,10 +103,10 @@ namespace SceneAPI{
 		return roots.empty() ? nullptr : roots.front();
 	}
 
-	const SceneSettings& GetSceneSettings(){
+	inline const CollisionLayerSettings& GetCollisionLayerSettings() {
 		auto ctx = SceneContext::Current();
 		CX_CHECK(ctx && "No active SceneContext!", "Assertion failed");
-		return ctx->GetSceneSettings();
+		return ctx->GetSettings().GetCollisionSettings();
 	}
 }
 
