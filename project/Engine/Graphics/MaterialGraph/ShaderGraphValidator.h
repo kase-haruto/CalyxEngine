@@ -1,13 +1,12 @@
 #pragma once
 
 #include <Engine/Editor/NodeEditor/NodeGraph.h>
+#include <Engine/Editor/NodeEditor/NodeGraphValidator.h>
+#include <Engine/Graphics/MaterialGraph/ShaderGraphSchema.h>
 #include <Engine/Graphics/MaterialGraph/ShaderReflectionInfo.h>
 
 #include <algorithm>
-#include <functional>
 #include <string>
-#include <unordered_map>
-#include <unordered_set>
 #include <vector>
 
 namespace CalyxEngine {
@@ -29,11 +28,16 @@ namespace CalyxEngine {
 	public:
 		static ShaderGraphValidationResult ValidateMaterialGraph(const NodeGraph& graph) {
 			ShaderGraphValidationResult result;
-			ValidateLinks(graph, result);
-			ValidateSingleInputLinks(graph, result);
+
+			// 全用途共通のNode Graph構造を先に検証する。
+			const NodeGraphValidationResult common = NodeGraphValidator::Validate(graph);
+			if(!common.ok) result.ok = false;
+			result.messages.insert(result.messages.end(), common.messages.begin(), common.messages.end());
+
+			// Shader Graph固有のノード定義と出力規則を検証する。
+			ValidateSchema(graph, result);
 			ValidateTextureSamples(graph, result);
 			ValidateOutputSurface(graph, result);
-			ValidateNoCycles(graph, result);
 			if(result.ok && result.messages.empty()) {
 				result.messages.push_back("Material graph is valid.");
 			}
@@ -63,6 +67,32 @@ namespace CalyxEngine {
 		}
 
 	private:
+		static void ValidateSchema(const NodeGraph& graph, ShaderGraphValidationResult& result) {
+			const ShaderGraphSchema& schema = ShaderGraphNodeRegistry::Get();
+			for(const Node& node : graph.nodes) {
+				const ShaderGraphNodeSchema* definition = schema.Find(node.type);
+				if(!definition) {
+					result.Error("Unknown material node type: " + node.type);
+					continue;
+				}
+
+				auto validatePins = [&result, &node, definition](const std::vector<NodePin>& pins, NodePinKind kind) {
+					for(const NodePin& pin : pins) {
+						const auto expected = std::find_if(definition->pins.begin(), definition->pins.end(), [&pin, kind](const ShaderGraphPinSchema& candidate) {
+							return candidate.kind == kind && candidate.name == pin.name;
+						});
+						// Legacy Output pins are intentionally accepted until old assets are migrated.
+						if(expected == definition->pins.end()) continue;
+						if(expected->type != pin.type) {
+							result.Error("Schema type mismatch: " + node.type + "." + pin.name);
+						}
+					}
+				};
+				validatePins(node.inputs, NodePinKind::Input);
+				validatePins(node.outputs, NodePinKind::Output);
+			}
+		}
+
 		static bool IsMasterNode(const std::string& type) {
 			return type == "ToonMaster" || type == "LitMaster" || type == "UnlitMaster";
 		}
@@ -78,46 +108,6 @@ namespace CalyxEngine {
 			const Node* node = nullptr;
 			const NodePin* pin = graph.FindPin(outputPinId, &node);
 			return pin && pin->kind == NodePinKind::Output ? node : nullptr;
-		}
-
-		static void ValidateLinks(const NodeGraph& graph, ShaderGraphValidationResult& result) {
-			for(const NodeLink& link : graph.links) {
-				const Node* fromNode = nullptr;
-				const Node* toNode = nullptr;
-				const NodePin* fromPin = graph.FindPin(link.fromPinId, &fromNode);
-				const NodePin* toPin = graph.FindPin(link.toPinId, &toNode);
-				if(!fromPin || !toPin) {
-					result.Error("Broken link: missing pin.");
-					continue;
-				}
-				if(!fromNode || !toNode) {
-					result.Error("Broken link: missing node.");
-					continue;
-				}
-				if(fromPin->kind != NodePinKind::Output || toPin->kind != NodePinKind::Input) {
-					result.Error("Invalid link direction: " + fromNode->title + "." + fromPin->name + " -> " + toNode->title + "." + toPin->name);
-				}
-				if(fromPin->valueType != toPin->valueType) {
-					result.Error("Type mismatch: " + fromNode->title + "." + fromPin->name + " -> " + toNode->title + "." + toPin->name);
-				}
-			}
-		}
-
-		static void ValidateSingleInputLinks(const NodeGraph& graph, ShaderGraphValidationResult& result) {
-			std::unordered_map<int32_t, int32_t> incomingCount;
-			for(const NodeLink& link : graph.links) {
-				incomingCount[link.toPinId]++;
-			}
-			for(const auto& [pinId, count] : incomingCount) {
-				if(count <= 1) continue;
-				const Node* node = nullptr;
-				const NodePin* pin = graph.FindPin(pinId, &node);
-				if(node && pin) {
-					result.Error("Input has multiple links: " + node->title + "." + pin->name);
-				} else {
-					result.Error("Input has multiple links: missing pin.");
-				}
-			}
 		}
 
 		static void ValidateTextureSamples(const NodeGraph& graph, ShaderGraphValidationResult& result) {
@@ -174,39 +164,6 @@ namespace CalyxEngine {
 			}
 			if(!master || !IsMasterNode(master->type)) {
 				result.Error("Output.Surface must be connected to Toon/Lit/Unlit Master.");
-			}
-		}
-
-		static void ValidateNoCycles(const NodeGraph& graph, ShaderGraphValidationResult& result) {
-			std::unordered_map<int32_t, std::vector<int32_t>> edges;
-			for(const NodeLink& link : graph.links) {
-				const Node* fromNode = nullptr;
-				const Node* toNode = nullptr;
-				const NodePin* fromPin = graph.FindPin(link.fromPinId, &fromNode);
-				const NodePin* toPin = graph.FindPin(link.toPinId, &toNode);
-				if(!fromPin || !toPin || !fromNode || !toNode) continue;
-				edges[fromNode->id].push_back(toNode->id);
-			}
-
-			std::unordered_set<int32_t> visiting;
-			std::unordered_set<int32_t> visited;
-			std::function<bool(int32_t)> dfs = [&](int32_t nodeId) {
-				if(visiting.contains(nodeId)) return true;
-				if(visited.contains(nodeId)) return false;
-				visiting.insert(nodeId);
-				for(int32_t next : edges[nodeId]) {
-					if(dfs(next)) return true;
-				}
-				visiting.erase(nodeId);
-				visited.insert(nodeId);
-				return false;
-			};
-
-			for(const Node& node : graph.nodes) {
-				if(dfs(node.id)) {
-					result.Error("Graph contains a cycle.");
-					return;
-				}
 			}
 		}
 

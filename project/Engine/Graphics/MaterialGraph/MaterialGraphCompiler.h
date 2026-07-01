@@ -132,8 +132,8 @@ namespace CalyxEngine {
 				if(link.toPinId != inputPinId) continue;
 				const Node* fromNode = nullptr;
 				const NodePin* fromPin = material.graph.FindPin(link.fromPinId, &fromNode);
-				if(!fromNode || !fromPin || fromPin->valueType != NodeValueType::Color) return fallback;
-				if(fromNode->type == "Color") return fromNode->colorValue;
+				if(!fromNode || !fromPin || fromPin->type != NodePinTypes::Color) return fallback;
+				if(fromNode->type == "Color") return GetColorProperty(*fromNode, "value", fallback);
 				if(fromNode->type == "TextureSample") {
 					return {1, 1, 1, 1};
 				}
@@ -163,8 +163,8 @@ namespace CalyxEngine {
 				if(link.toPinId != inputPinId) continue;
 				const Node* fromNode = nullptr;
 				const NodePin* fromPin = material.graph.FindPin(link.fromPinId, &fromNode);
-				if(!fromNode || !fromPin || fromPin->valueType != NodeValueType::Float) return fallback;
-				if(fromNode->type == "Float" || fromNode->type == "Shininess" || fromNode->type == "Roughness") return fromNode->floatValue;
+				if(!fromNode || !fromPin || fromPin->type != NodePinTypes::Float) return fallback;
+				if(fromNode->type == "Float" || fromNode->type == "Shininess" || fromNode->type == "Roughness") return fromNode->GetProperty<float>("value", fallback);
 				if(fromNode->type == "TextureSample") return 0.5f;
 				if(fromNode->type == "NoiseTexture") return 0.5f;
 				if(fromNode->type == "UVX" || fromNode->type == "UVY" || fromNode->type == "Time" ||
@@ -243,8 +243,8 @@ namespace CalyxEngine {
 				if(link.toPinId != inputPinId) continue;
 				const Node* fromNode = nullptr;
 				const NodePin* fromPin = material.graph.FindPin(link.fromPinId, &fromNode);
-				if(!fromNode || !fromPin || fromPin->valueType != NodeValueType::Bool) return fallback;
-				if(fromNode->type == "Reflect") return fromNode->boolValue;
+				if(!fromNode || !fromPin || fromPin->type != NodePinTypes::Bool) return fallback;
+				if(fromNode->type == "Reflect") return fromNode->GetProperty<bool>("value", fallback);
 			}
 			return fallback;
 		}
@@ -272,32 +272,13 @@ namespace CalyxEngine {
 			return {EvaluateColor(material, inputPinId, fallback), UsesObjectTexture(material, inputPinId)};
 		}
 
-		static int32_t EvaluateLightingMode(MaterialAsset& material, int32_t inputPinId, int32_t fallback) {
-			for(const auto& link : material.graph.links) {
-				if(link.toPinId != inputPinId) continue;
-				const Node* fromNode = nullptr;
-				const NodePin* fromPin = material.graph.FindPin(link.fromPinId, &fromNode);
-				if(!fromNode || !fromPin || fromPin->valueType != NodeValueType::Int) return fallback;
-				if(fromNode->type == "LightingMode") return std::clamp(fromNode->intValue, 0, 4);
-				if(fromNode->type == "HalfLambertLighting") return 0;
-				if(fromNode->type == "LambertLighting") return 1;
-				if(fromNode->type == "ToonLighting") {
-					CompileToonLightingNode(material, *fromNode);
-					return 2;
-				}
-				if(fromNode->type == "NoLighting") return 3;
-				if(fromNode->type == "UnlitColorLighting") return 4;
-			}
-			return fallback;
-		}
-
 		static int32_t EvaluateLightingModeIR(const MaterialAsset& material, int32_t inputPinId, int32_t fallback, CompiledMaterialGraph& compiled) {
 			for(const auto& link : material.graph.links) {
 				if(link.toPinId != inputPinId) continue;
 				const Node* fromNode = nullptr;
 				const NodePin* fromPin = material.graph.FindPin(link.fromPinId, &fromNode);
-				if(!fromNode || !fromPin || fromPin->valueType != NodeValueType::Int) return fallback;
-				if(fromNode->type == "LightingMode") return std::clamp(fromNode->intValue, 0, 4);
+				if(!fromNode || !fromPin || fromPin->type != NodePinTypes::Int) return fallback;
+				if(fromNode->type == "LightingMode") return std::clamp(fromNode->GetProperty<int32_t>("value", fallback), 0, 4);
 				if(fromNode->type == "HalfLambertLighting") return 0;
 				if(fromNode->type == "LambertLighting") return 1;
 				if(fromNode->type == "ToonLighting") {
@@ -407,99 +388,5 @@ namespace CalyxEngine {
 			compiled.toonSpecularIntensity = GetFloatProperty(node, "toonSpecularIntensity", material.toonSpecularIntensity);
 		}
 
-		static void CompileLegacyOutput(MaterialAsset& material, const Node& output) {
-			for(const auto& pin : output.inputs) {
-				if(pin.name == "BaseColor") material.color = EvaluateColor(material, pin.id, material.color);
-				if(pin.name == "Emissive") material.emissiveColor = EvaluateColor(material, pin.id, material.emissiveColor);
-				if(pin.name == "Emissive Intensity") material.emissiveIntensity = EvaluateFloat(material, pin.id, material.emissiveIntensity);
-				if(pin.name == "Shininess") material.shininess = EvaluateFloat(material, pin.id, material.shininess);
-				if(pin.name == "Roughness") material.roughness = EvaluateFloat(material, pin.id, material.roughness);
-				if(pin.name == "Reflect") material.isReflect = EvaluateBool(material, pin.id, material.isReflect);
-				if(pin.name == "Lighting Mode") material.lightingMode = EvaluateLightingMode(material, pin.id, material.lightingMode);
-			}
-		}
-
-		static void CompileLitMaster(MaterialAsset& material, const Node& node) {
-			material.lightingMode = static_cast<int32_t>(GetFloatProperty(node, "lightingMode", 0.0f));
-			if(const NodePin* pin = FindInput(node, "Base Color")) material.color = EvaluateColor(material, pin->id, GetColorProperty(node, "baseColor", material.color));
-			if(const NodePin* pin = FindInput(node, "Emissive")) material.emissiveColor = EvaluateColor(material, pin->id, GetColorProperty(node, "emissiveColor", material.emissiveColor));
-			if(const NodePin* pin = FindInput(node, "Emissive Intensity")) material.emissiveIntensity = EvaluateFloat(material, pin->id, GetFloatProperty(node, "emissiveIntensity", material.emissiveIntensity));
-			if(const NodePin* pin = FindInput(node, "Shininess")) material.shininess = EvaluateFloat(material, pin->id, GetFloatProperty(node, "shininess", material.shininess));
-			if(const NodePin* pin = FindInput(node, "Roughness")) material.roughness = EvaluateFloat(material, pin->id, GetFloatProperty(node, "roughness", material.roughness));
-			if(const NodePin* pin = FindInput(node, "Reflect")) material.isReflect = EvaluateBool(material, pin->id, material.isReflect);
-		}
-
-		static void CompileUnlitMaster(MaterialAsset& material, const Node& node) {
-			material.lightingMode = 4;
-			if(const NodePin* pin = FindInput(node, "Base Color")) material.color = EvaluateColor(material, pin->id, GetColorProperty(node, "baseColor", material.color));
-			if(const NodePin* pin = FindInput(node, "Emissive")) material.emissiveColor = EvaluateColor(material, pin->id, GetColorProperty(node, "emissiveColor", material.emissiveColor));
-			if(const NodePin* pin = FindInput(node, "Emissive Intensity")) material.emissiveIntensity = EvaluateFloat(material, pin->id, GetFloatProperty(node, "emissiveIntensity", material.emissiveIntensity));
-		}
-
-		static void CompileToonMaster(MaterialAsset& material, const Node& node) {
-			material.lightingMode = 2;
-
-			const Vector4 baseColor = GetColorProperty(node, "baseColor", {1, 1, 1, 1});
-			const Vector4 highlightColor = GetColorProperty(node, "highlightColor", {1.08f, 1.06f, 1.02f, 1.0f});
-			const Vector4 firstShade = GetColorProperty(node, "firstShadeColor", {0.72f, 0.76f, 0.86f, 1.0f});
-			const Vector4 secondShade = GetColorProperty(node, "secondShadeColor", {0.42f, 0.46f, 0.58f, 1.0f});
-			const Vector4 emissiveColor = GetColorProperty(node, "emissiveColor", material.emissiveColor);
-
-			if(const NodePin* pin = FindInput(node, "Base Color")) material.color = EvaluateColor(material, pin->id, baseColor);
-			else material.color = baseColor;
-			if(const NodePin* pin = FindInput(node, "Emissive")) material.emissiveColor = EvaluateColor(material, pin->id, emissiveColor);
-			if(const NodePin* pin = FindInput(node, "Emissive Intensity")) material.emissiveIntensity = EvaluateFloat(material, pin->id, GetFloatProperty(node, "emissiveIntensity", material.emissiveIntensity));
-
-			material.toonBaseColor = {1, 1, 1, 1};
-			material.toonHighlightColor = highlightColor;
-			material.toonMidShadowColor = firstShade;
-			material.toonShadowColor = secondShade;
-
-			float shadeStep = GetFloatProperty(node, "shadeStep", -0.15f);
-			float baseStep = GetFloatProperty(node, "baseStep", 0.25f);
-			float shadeFeather = GetFloatProperty(node, "shadeFeather", 0.03f);
-			float baseFeather = GetFloatProperty(node, "baseFeather", 0.03f);
-
-			float specularThreshold = GetFloatProperty(node, "specularThreshold", 0.96f);
-			float specularSoftness = GetFloatProperty(node, "specularSoftness", 0.02f);
-			float specularIntensity = GetFloatProperty(node, "specularIntensity", 0.35f);
-
-			if(const NodePin* pin = FindInput(node, "Highlight")) material.toonHighlightColor = EvaluateColor(material, pin->id, highlightColor);
-			if(const NodePin* pin = FindInput(node, "1st Shade")) material.toonMidShadowColor = EvaluateColor(material, pin->id, firstShade);
-			if(const NodePin* pin = FindInput(node, "2nd Shade")) material.toonShadowColor = EvaluateColor(material, pin->id, secondShade);
-			if(const NodePin* pin = FindInput(node, "Shade Step")) shadeStep = EvaluateFloat(material, pin->id, shadeStep);
-			if(const NodePin* pin = FindInput(node, "Base Step")) baseStep = EvaluateFloat(material, pin->id, baseStep);
-			if(const NodePin* pin = FindInput(node, "Shade Feather")) shadeFeather = EvaluateFloat(material, pin->id, shadeFeather);
-			if(const NodePin* pin = FindInput(node, "Base Feather")) baseFeather = EvaluateFloat(material, pin->id, baseFeather);
-			if(const NodePin* pin = FindInput(node, "Spec Threshold")) specularThreshold = EvaluateFloat(material, pin->id, specularThreshold);
-			if(const NodePin* pin = FindInput(node, "Spec Softness")) specularSoftness = EvaluateFloat(material, pin->id, specularSoftness);
-			if(const NodePin* pin = FindInput(node, "Spec Intensity")) specularIntensity = EvaluateFloat(material, pin->id, specularIntensity);
-
-			material.toonShadeStep = shadeStep;
-			material.toonShadeFeather = shadeFeather;
-			material.toonBaseStep = baseStep;
-			material.toonBaseFeather = baseFeather;
-			material.toonSpecularThreshold = specularThreshold;
-			material.toonSpecularSoftness = specularSoftness;
-			material.toonSpecularIntensity = specularIntensity;
-		}
-
-		static void CompileToonLightingNode(MaterialAsset& material, const Node& node) {
-			material.toonHighlightColor = GetColorProperty(node, "toonHighlightColor", material.toonHighlightColor);
-			material.toonBaseColor = GetColorProperty(node, "toonBaseColor", material.toonBaseColor);
-			material.toonMidShadowColor = GetColorProperty(node, "toonMidShadowColor", material.toonMidShadowColor);
-			material.toonShadowColor = GetColorProperty(node, "toonShadowColor", material.toonShadowColor);
-			material.toonThreshold1 = GetFloatProperty(node, "toonThreshold1", material.toonThreshold1);
-			material.toonThreshold2 = GetFloatProperty(node, "toonThreshold2", material.toonThreshold2);
-			material.toonThreshold3 = GetFloatProperty(node, "toonThreshold3", material.toonThreshold3);
-			material.toonEdgeSoftness = GetFloatProperty(node, "toonEdgeSoftness", material.toonEdgeSoftness);
-			material.toonShadeStep = material.toonThreshold1;
-			material.toonShadeFeather = material.toonEdgeSoftness;
-			material.toonBaseStep = material.toonThreshold2;
-			material.toonBaseFeather = material.toonEdgeSoftness;
-			material.toonSpecularThreshold = GetFloatProperty(node, "toonSpecularThreshold", material.toonSpecularThreshold);
-			material.toonSpecularSoftness = GetFloatProperty(node, "toonSpecularSoftness", material.toonSpecularSoftness);
-			material.toonSpecularIntensity = GetFloatProperty(node, "toonSpecularIntensity", material.toonSpecularIntensity);
-		}
 	};
 }

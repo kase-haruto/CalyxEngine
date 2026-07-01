@@ -2,6 +2,7 @@
 
 #include <Engine/Assets/DataAsset/MaterialAsset.h>
 #include <Engine/Graphics/MaterialGraph/ShaderGraphCodeGenerator.h>
+#include <Engine/Graphics/MaterialGraph/ShaderGraphValidator.h>
 #include <Engine/Graphics/Pipeline/Shader/ShaderCompiler.h>
 
 #include <dxcapi.h>
@@ -25,6 +26,9 @@ namespace CalyxEngine {
 	class MaterialGraphRuntimeShaderCache {
 	public:
 		MaterialGraphRuntimeShader GetOrCompileObject3DPixelShader(MaterialAsset& material) {
+			// 不正なGraphからHLSLを生成せず、診断内容を呼び出し元へ返す。
+			if(MaterialGraphRuntimeShader invalid = ValidateGraph(material, "object3d"); !invalid.compileMessage.empty()) return invalid;
+
 			const GeneratedShaderGraphCode generated = ShaderGraphCodeGenerator::GenerateObject3DRuntimePixelShaderSource(material);
 			const std::size_t hash = HashGeneratedShader(generated.hlsl);
 			const std::string key = material.GetGuid().ToString() + ":object3d:" + std::to_string(hash);
@@ -58,6 +62,9 @@ namespace CalyxEngine {
 		}
 
 		MaterialGraphRuntimeShader GetOrCompilePreviewPixelShader(MaterialAsset& material) {
+			// 不正なGraphからHLSLを生成せず、診断内容を呼び出し元へ返す。
+			if(MaterialGraphRuntimeShader invalid = ValidateGraph(material, "preview"); !invalid.compileMessage.empty()) return invalid;
+
 			const GeneratedShaderGraphCode generated = ShaderGraphCodeGenerator::GeneratePreviewPixelShaderSource(material);
 			const std::size_t hash = HashGeneratedShader(generated.hlsl);
 			const std::string key = material.GetGuid().ToString() + ":" + std::to_string(hash);
@@ -100,6 +107,21 @@ namespace CalyxEngine {
 		}
 
 	private:
+		/////////////////////////////////////////////////////////////////////////////////////////
+		//		Shader生成前にGraphを検証
+		/////////////////////////////////////////////////////////////////////////////////////////
+		MaterialGraphRuntimeShader ValidateGraph(const MaterialAsset& material, const std::string& target) const {
+			const ShaderGraphValidationResult validation = ShaderGraphValidator::ValidateMaterialGraph(material.graph);
+			if(validation.ok) return {};
+
+			MaterialGraphRuntimeShader failed;
+			failed.compileSucceeded = false;
+			failed.fallbackUsed = false;
+			failed.compileMessage = "Material Graph validation failed (" + target + "):";
+			for(const std::string& message : validation.messages) failed.compileMessage += "\n- " + message;
+			return failed;
+		}
+
 		MaterialGraphRuntimeShader FallbackOrFailedShader(const std::string& fallbackKey, MaterialGraphRuntimeShader failedShader) const {
 			auto fallback = latestSuccessfulShaders_.find(fallbackKey);
 			if(fallback == latestSuccessfulShaders_.end()) return failedShader;

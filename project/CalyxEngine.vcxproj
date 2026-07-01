@@ -583,6 +583,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Application\UI\Panels\PostEffectNodeEditorPanel.h" />
     <ClInclude Include="Engine\Editor\NodeEditor\NodeEditorCanvas.h" />
     <ClInclude Include="Engine\Editor\NodeEditor\NodeGraph.h" />
+    <ClInclude Include="Engine\Editor\NodeEditor\NodeGraphValidator.h" />
+    <ClInclude Include="Engine\Editor\NodeEditor\NodeTypeRegistry.h" />
     <ClInclude Include="Engine\Assets\System\AssetDragPayload.h" />
     <ClInclude Include="Engine\Assets\System\AssetRecord.h" />
     <ClInclude Include="Engine\Assets\System\AssetType.h" />
@@ -718,6 +720,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Graphics\MaterialGraph\MaterialGraphCompiler.h" />
     <ClInclude Include="Engine\Graphics\MaterialGraph\MaterialGraphRuntimeShaderCache.h" />
     <ClInclude Include="Engine\Graphics\MaterialGraph\ShaderGraphCodeGenerator.h" />
+    <ClInclude Include="Engine\Graphics\MaterialGraph\ShaderGraphExpressionCompiler.h" />
+    <ClInclude Include="Engine\Graphics\MaterialGraph\ShaderGraphHlslEmitter.h" />
     <ClInclude Include="Engine\Graphics\MaterialGraph\ShaderGraphSchema.h" />
     <ClInclude Include="Engine\Graphics\MaterialGraph\ShaderGraphValidator.h" />
     <ClInclude Include="Engine\Graphics\MaterialGraph\ShaderReflectionInfo.h" />

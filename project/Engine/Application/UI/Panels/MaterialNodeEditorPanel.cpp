@@ -111,16 +111,9 @@ namespace CalyxEngine {
 			return nullptr;
 		}
 
-		const ShaderGraphNodeSchema* FindSchemaNode(const ShaderGraphSchema& schema, const std::string& type) {
-			for(const auto& node : schema.nodes) {
-				if(node.type == type) return &node;
-			}
-			return nullptr;
-		}
-
 		void EnsureSchemaPins(MaterialAsset& material, Node& node, const ShaderGraphNodeSchema& schemaNode) {
 			for(const auto& pinSchema : schemaNode.pins) {
-				auto& pins = pinSchema.role == ShaderGraphPinRole::Input ? node.inputs : node.outputs;
+				auto& pins = pinSchema.kind == NodePinKind::Input ? node.inputs : node.outputs;
 				const auto exists = std::any_of(pins.begin(), pins.end(), [&pinSchema](const NodePin& pin) {
 					return pin.name == pinSchema.name;
 				});
@@ -128,8 +121,8 @@ namespace CalyxEngine {
 				pins.push_back({
 					material.graph.AllocateId(),
 					pinSchema.name,
-					pinSchema.role == ShaderGraphPinRole::Input ? NodePinKind::Input : NodePinKind::Output,
-					pinSchema.valueType});
+					pinSchema.kind,
+					pinSchema.type});
 			}
 		}
 
@@ -378,6 +371,20 @@ namespace CalyxEngine {
 
 	MaterialNodeEditorPanel::MaterialNodeEditorPanel()
 		: IEngineUI("Material Graph"), canvas_("MaterialGraphCanvas") {
+		// Shader Graph固有の外観を汎用CanvasへPolicyとして注入する。
+		NodeEditorCanvas::Policy policy;
+		policy.nodeHeaderColor = [](const Node& node) {
+			const NodeTypeDefinition* definition = ShaderGraphNodeRegistry::Get().Find(node.type);
+			if(!definition) return ImVec4(0.20f, 0.24f, 0.30f, 1.0f);
+			const auto& color = definition->headerColor;
+			return ImVec4(color[0], color[1], color[2], color[3]);
+		};
+		policy.pinColor = [](std::string_view type) {
+			if(type == ShaderGraphPinTypes::Material) return ImVec4(0.84f, 0.46f, 1.0f, 1.0f);
+			if(type == ShaderGraphPinTypes::Texture2D) return ImVec4(0.22f, 0.76f, 0.82f, 1.0f);
+			return ImVec4(0.82f, 0.86f, 0.90f, 1.0f);
+		};
+		canvas_.SetPolicy(std::move(policy));
 		isShow_ = false;
 	}
 
@@ -688,230 +695,24 @@ namespace CalyxEngine {
 	bool MaterialNodeEditorPanel::DrawAddNodeMenu(MaterialAsset& material, Vector2 position) {
 		const NodeGraph before = material.graph;
 		bool changed = false;
-		if(ImGui::BeginMenu("Material Parameters")) {
-			if(ImGui::MenuItem("Color")) {
-				AddColorNode(material, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Float")) {
-				AddFloatNode(material, "Float", "Float", position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Float2")) {
-				AddFloat2Node(material, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Shininess")) {
-				AddFloatNode(material, "Shininess", "Shininess", position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Roughness")) {
-				AddFloatNode(material, "Roughness", "Roughness", position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Reflect")) {
-				AddBoolNode(material, "Reflect", "Reflect", position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Emissive Color")) {
-				AddColorNode(material, position);
-				if(!material.graph.nodes.empty()) {
-					Node& node = material.graph.nodes.back();
-					node.title = "Emissive Color";
-					node.colorValue = material.emissiveColor;
+		const ShaderGraphSchema& registry = ShaderGraphNodeRegistry::Get();
+		constexpr std::string_view categories[] = {
+			"Material Parameters", "Lighting", "Master", "Textures", "Inputs", "Operators"};
+
+		// RegistryのCategory単位で追加メニューを自動構築する。
+		for(const std::string_view category : categories) {
+			if(!ImGui::BeginMenu(category.data())) continue;
+			for(const NodeTypeDefinition& definition : registry.Definitions()) {
+				if(definition.category != category || definition.type == "Output") continue;
+				if(ImGui::MenuItem(definition.title.c_str())) {
+					changed |= AddRegisteredNode(material, definition.type, position);
 				}
-				changed = true;
-			}
-			if(ImGui::MenuItem("Emissive Intensity")) {
-				AddFloatNode(material, "Float", "Emissive Intensity", position);
-				if(!material.graph.nodes.empty()) {
-					material.graph.nodes.back().floatValue = material.emissiveIntensity;
-				}
-				changed = true;
 			}
 			ImGui::EndMenu();
 		}
-		if(ImGui::BeginMenu("Lighting")) {
-			if(ImGui::MenuItem("Half-Lambert")) {
-				AddLightingNode(material, "HalfLambertLighting", "Half-Lambert", 0, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Lambert")) {
-				AddLightingNode(material, "LambertLighting", "Lambert", 1, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Toon Lighting")) {
-				AddLightingNode(material, "ToonLighting", "Toon Lighting", 2, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("No Lighting")) {
-				AddLightingNode(material, "NoLighting", "No Lighting", 3, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Unlit Color")) {
-				AddLightingNode(material, "UnlitColorLighting", "Unlit Color", 4, position);
-				changed = true;
-			}
-			ImGui::EndMenu();
-		}
-		if(ImGui::BeginMenu("Master")) {
-			if(ImGui::MenuItem("Toon Master")) {
-				AddToonMasterNode(material, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Lit Master")) {
-				AddLitMasterNode(material, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Unlit Master")) {
-				AddUnlitMasterNode(material, position);
-				changed = true;
-			}
-			ImGui::EndMenu();
-		}
-		if(ImGui::BeginMenu("Textures")) {
-			if(ImGui::MenuItem("Object Texture")) {
-				AddObjectTextureNode(material, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Texture2D")) {
-				AddTexture2DNode(material, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Texture Sample")) {
-				AddTextureSampleNode(material, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Noise Texture")) {
-				AddNoiseTextureNode(material, position);
-				changed = true;
-			}
-			ImGui::EndMenu();
-		}
-		if(ImGui::BeginMenu("Inputs")) {
-			if(ImGui::MenuItem("UV")) { AddShaderInputFloat2Node(material, "UV", "UV", position); changed = true; }
-			if(ImGui::MenuItem("UV Transform")) { AddUVTransformNode(material, position); changed = true; }
-			if(ImGui::MenuItem("UV X")) { AddShaderInputFloatNode(material, "UVX", "UV X", position); changed = true; }
-			if(ImGui::MenuItem("UV Y")) { AddShaderInputFloatNode(material, "UVY", "UV Y", position); changed = true; }
-			if(ImGui::MenuItem("Time")) { AddShaderInputFloatNode(material, "Time", "Time", position); changed = true; }
-			ImGui::Separator();
-			if(ImGui::MenuItem("World Position X")) { AddShaderInputFloatNode(material, "WorldPositionX", "World Position X", position); changed = true; }
-			if(ImGui::MenuItem("World Position Y")) { AddShaderInputFloatNode(material, "WorldPositionY", "World Position Y", position); changed = true; }
-			if(ImGui::MenuItem("World Position Z")) { AddShaderInputFloatNode(material, "WorldPositionZ", "World Position Z", position); changed = true; }
-			ImGui::Separator();
-			if(ImGui::MenuItem("World Normal X")) { AddShaderInputFloatNode(material, "WorldNormalX", "World Normal X", position); changed = true; }
-			if(ImGui::MenuItem("World Normal Y")) { AddShaderInputFloatNode(material, "WorldNormalY", "World Normal Y", position); changed = true; }
-			if(ImGui::MenuItem("World Normal Z")) { AddShaderInputFloatNode(material, "WorldNormalZ", "World Normal Z", position); changed = true; }
-			ImGui::Separator();
-			if(ImGui::MenuItem("View Direction X")) { AddShaderInputFloatNode(material, "ViewDirectionX", "View Direction X", position); changed = true; }
-			if(ImGui::MenuItem("View Direction Y")) { AddShaderInputFloatNode(material, "ViewDirectionY", "View Direction Y", position); changed = true; }
-			if(ImGui::MenuItem("View Direction Z")) { AddShaderInputFloatNode(material, "ViewDirectionZ", "View Direction Z", position); changed = true; }
-			ImGui::EndMenu();
-		}
-		if(ImGui::BeginMenu("Operators")) {
-			if(ImGui::MenuItem("Add Float")) {
-				AddBinaryNode(material, "AddFloat", "Add Float", NodeValueType::Float, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Add Float2")) {
-				AddBinaryNode(material, "AddFloat2", "Add Float2", NodeValueType::Float2, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Subtract Float")) {
-				AddBinaryNode(material, "SubtractFloat", "Subtract Float", NodeValueType::Float, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Subtract Float2")) {
-				AddBinaryNode(material, "SubtractFloat2", "Subtract Float2", NodeValueType::Float2, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Multiply Color")) {
-				AddBinaryNode(material, "MultiplyColor", "Multiply Color", NodeValueType::Color, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Multiply Float")) {
-				AddBinaryNode(material, "MultiplyFloat", "Multiply Float", NodeValueType::Float, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Multiply Float2")) {
-				AddBinaryNode(material, "MultiplyFloat2", "Multiply Float2", NodeValueType::Float2, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Divide Float")) {
-				AddBinaryNode(material, "DivideFloat", "Divide Float", NodeValueType::Float, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Divide Float2")) {
-				AddBinaryNode(material, "DivideFloat2", "Divide Float2", NodeValueType::Float2, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Power Float")) {
-				AddBinaryNode(material, "PowerFloat", "Power Float", NodeValueType::Float, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Min Float")) {
-				AddBinaryNode(material, "MinFloat", "Min Float", NodeValueType::Float, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Max Float")) {
-				AddBinaryNode(material, "MaxFloat", "Max Float", NodeValueType::Float, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Lerp Color")) {
-				AddLerpNode(material, "LerpColor", "Lerp Color", NodeValueType::Color, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Lerp Float")) {
-				AddLerpNode(material, "LerpFloat", "Lerp Float", NodeValueType::Float, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Saturate Float")) {
-				AddUnaryFloatNode(material, "SaturateFloat", "Saturate Float", position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Frac Float")) {
-				AddUnaryFloatNode(material, "FracFloat", "Frac Float", position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("One Minus Float")) {
-				AddUnaryFloatNode(material, "OneMinusFloat", "One Minus Float", position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Step Float")) {
-				AddStepFloatNode(material, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Smoothstep Float")) {
-				AddSmoothstepFloatNode(material, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Combine Float2")) {
-				AddCombineFloat2Node(material, position);
-				changed = true;
-			}
-			if(ImGui::MenuItem("Split Float2")) {
-				AddSplitFloat2Node(material, position);
-				changed = true;
-			}
-			ImGui::EndMenu();
-		}
-		ImGui::Separator();
-		if(ImGui::MenuItem("Color##quick")) {
-			AddColorNode(material, position);
-			changed = true;
-		}
-		if(ImGui::MenuItem("Toon Lighting##quick")) {
-			AddToonMasterNode(material, position);
-			changed = true;
-		}
-		if(ImGui::MenuItem("Texture Sample##quick")) {
-			AddTexture2DNode(material, {position.x - 240.0f, position.y});
-			AddTextureSampleNode(material, position);
-			changed = true;
-		}
-		if(changed) {
-			ExecuteGraphCommand(material, "Add Material Node", before, material.graph);
-		}
+
+		// 変更内容を一つのUndo Commandとして登録する。
+		if(changed) ExecuteGraphCommand(material, "Create Material Node", before, material.graph);
 		return changed;
 	}
 
@@ -962,9 +763,9 @@ namespace CalyxEngine {
 
 			if(target && target->type == "LightingMode") {
 				for(int32_t i = 0; i < kLightingModeCount; ++i) {
-					const bool selected = target->intValue == i;
+					const bool selected = target->GetProperty<int32_t>("value", 0) == i;
 					if(ImGui::Selectable(kLightingModes[i], selected)) {
-						target->intValue	  = i;
+						target->SetProperty("value", i);
 						material.lightingMode = i;
 						changed				  = true;
 						ImGui::CloseCurrentPopup();
@@ -1068,8 +869,12 @@ namespace CalyxEngine {
 		bool changed = false;
 		ImGui::PushID(node.id);
 		if(node.type == "Color") {
+			Vector4 value = GetColorProperty(node, "value", {1, 1, 1, 1});
 			ImGui::SetNextItemWidth(188.0f);
-			changed |= ImGui::ColorEdit4("Color", &node.colorValue.x);
+			if(ImGui::ColorEdit4("Color", &value.x)) {
+				SetColorProperty(node, "value", value);
+				changed = true;
+			}
 		} else if(node.type == "Float2") {
 			float x = GetFloatProperty(node, "x", 0.0f);
 			float y = GetFloatProperty(node, "y", 0.0f);
@@ -1088,12 +893,21 @@ namespace CalyxEngine {
 			ImGui::SetNextItemWidth(178.0f);
 			const float minValue = node.type == "Float" ? -1000.0f : 0.0f;
 			const float maxValue = node.type == "Float" ? 1000.0f : 256.0f;
-			changed |= ImGui::DragFloat("Value", &node.floatValue, 0.01f, minValue, maxValue);
+			float value = node.GetProperty<float>("value", 0.0f);
+			if(ImGui::DragFloat("Value", &value, 0.01f, minValue, maxValue)) {
+				node.SetProperty("value", value);
+				changed = true;
+			}
 		} else if(node.type == "Reflect") {
-			changed |= ImGui::Checkbox("Value", &node.boolValue);
+			bool value = node.GetProperty<bool>("value", false);
+			if(ImGui::Checkbox("Value", &value)) {
+				node.SetProperty("value", value);
+				changed = true;
+			}
 		} else if(node.type == "LightingMode") {
-			node.intValue		= std::clamp(node.intValue, 0, kLightingModeCount - 1);
-			const char* current = kLightingModes[node.intValue];
+			const int32_t value = std::clamp(node.GetProperty<int32_t>("value", 0), 0, kLightingModeCount - 1);
+			node.SetProperty("value", value);
+			const char* current = kLightingModes[value];
 			ImGui::SetNextItemWidth(178.0f);
 			if(ImGui::Button(current, ImVec2(178.0f, 0.0f))) {
 				lightingModePopupRequested_ = true;
@@ -1400,329 +1214,64 @@ namespace CalyxEngine {
 		return changed;
 	}
 
-	void MaterialNodeEditorPanel::AddColorNode(MaterialAsset& material, Vector2 position) {
-		Node node;
-		node.id			= material.graph.AllocateId();
-		node.type		= "Color";
-		node.title		= "Color";
-		node.position	= position;
-		node.colorValue = material.color;
-		node.outputs.push_back({material.graph.AllocateId(), "Color", NodePinKind::Output, NodeValueType::Color});
-		material.graph.nodes.push_back(std::move(node));
-	}
+	/////////////////////////////////////////////////////////////////////////////////////////
+	//		Registry定義からMaterial Nodeを生成
+	/////////////////////////////////////////////////////////////////////////////////////////
+	bool MaterialNodeEditorPanel::AddRegisteredNode(MaterialAsset& material, std::string_view type, Vector2 position) {
+		const ShaderGraphSchema& registry = ShaderGraphNodeRegistry::Get();
+		Node node = registry.CreateNode(material.graph, type, position);
+		if(node.id == 0) return false;
 
-	void MaterialNodeEditorPanel::AddFloatNode(MaterialAsset& material, const char* type, const char* title, Vector2 position) {
-		Node node;
-		node.id			= material.graph.AllocateId();
-		node.type		= type;
-		node.title		= title;
-		node.position	= position;
-		if(node.type == "Float") node.floatValue = 0.0f;
-		else node.floatValue = node.type == "Roughness" ? material.roughness : material.shininess;
-		node.outputs.push_back({material.graph.AllocateId(), "Value", NodePinKind::Output, NodeValueType::Float});
-		material.graph.nodes.push_back(std::move(node));
-	}
-
-	void MaterialNodeEditorPanel::AddFloat2Node(MaterialAsset& material, Vector2 position) {
-		Node node;
-		node.id = material.graph.AllocateId();
-		node.type = "Float2";
-		node.title = "Float2";
-		node.position = position;
-		node.properties["x"] = 0.0f;
-		node.properties["y"] = 0.0f;
-		node.outputs.push_back({material.graph.AllocateId(), "Value", NodePinKind::Output, NodeValueType::Float2});
-		material.graph.nodes.push_back(std::move(node));
-	}
-
-	void MaterialNodeEditorPanel::AddBoolNode(MaterialAsset& material, const char* type, const char* title, Vector2 position) {
-		Node node;
-		node.id		   = material.graph.AllocateId();
-		node.type	   = type;
-		node.title	   = title;
-		node.position  = position;
-		node.boolValue = material.isReflect;
-		node.outputs.push_back({material.graph.AllocateId(), "Value", NodePinKind::Output, NodeValueType::Bool});
-		material.graph.nodes.push_back(std::move(node));
-	}
-
-	void MaterialNodeEditorPanel::AddLightingModeNode(MaterialAsset& material, Vector2 position) {
-		Node node;
-		node.id		  = material.graph.AllocateId();
-		node.type	  = "LightingMode";
-		node.title	  = "Lighting Mode";
-		node.position = position;
-		node.intValue = std::clamp(material.lightingMode, 0, kLightingModeCount - 1);
-		node.inputs.push_back({material.graph.AllocateId(), "Value", NodePinKind::Input, NodeValueType::Int});
-		node.outputs.push_back({material.graph.AllocateId(), "Mode", NodePinKind::Output, NodeValueType::Int});
-		material.graph.nodes.push_back(std::move(node));
-	}
-
-	void MaterialNodeEditorPanel::AddLightingNode(MaterialAsset& material, const char* type, const char* title, int32_t mode, Vector2 position) {
-		Node node;
-		node.id		  = material.graph.AllocateId();
-		node.type	  = type;
-		node.title	  = title;
-		node.position = position;
-		node.intValue = mode;
-		node.outputs.push_back({material.graph.AllocateId(), "Lighting", NodePinKind::Output, NodeValueType::Int});
+		// Material依存の初期値だけを生成後に上書きする。
+		if(node.type == "Color") SetColorProperty(node, "value", material.color);
+		if(node.type == "Shininess") node.SetProperty("value", material.shininess);
+		if(node.type == "Roughness") node.SetProperty("value", material.roughness);
+		if(node.type == "Reflect") node.SetProperty("value", material.isReflect);
+		if(node.type == "LightingMode") node.SetProperty("value", std::clamp(material.lightingMode, 0, kLightingModeCount - 1));
+		if(node.type == "HalfLambertLighting") node.SetProperty("value", 0);
+		if(node.type == "LambertLighting") node.SetProperty("value", 1);
 		if(node.type == "ToonLighting") {
+			node.SetProperty("value", 2);
 			SetDefaultToonProperties(node);
 		}
+		if(node.type == "NoLighting") node.SetProperty("value", 3);
+		if(node.type == "UnlitColorLighting") node.SetProperty("value", 4);
+		if(node.type == "ToonMaster") SetDefaultToonMasterProperties(node);
+		if(node.type == "LitMaster") {
+			node.SetProperty("lightingMode", 0.0f);
+			SetColorProperty(node, "emissiveColor", material.emissiveColor);
+			node.SetProperty("emissiveIntensity", material.emissiveIntensity);
+			SetFloatProperty(node, "shininess", material.shininess);
+			SetFloatProperty(node, "roughness", material.roughness);
+		}
+		if(node.type == "UnlitMaster") {
+			SetColorProperty(node, "emissiveColor", material.emissiveColor);
+			node.SetProperty("emissiveIntensity", material.emissiveIntensity);
+		}
+
 		material.graph.nodes.push_back(std::move(node));
+		return true;
 	}
 
-	void MaterialNodeEditorPanel::AddToonMasterNode(MaterialAsset& material, Vector2 position) {
-		Node node;
-		node.id		  = material.graph.AllocateId();
-		node.type	  = "ToonMaster";
-		node.title	  = "Toon Master";
-		node.position = position;
-		SetDefaultToonMasterProperties(node);
-		node.inputs.push_back({material.graph.AllocateId(), "Base Color", NodePinKind::Input, NodeValueType::Color});
-		node.inputs.push_back({material.graph.AllocateId(), "Emissive", NodePinKind::Input, NodeValueType::Color});
-		node.inputs.push_back({material.graph.AllocateId(), "Emissive Intensity", NodePinKind::Input, NodeValueType::Float});
-		node.inputs.push_back({material.graph.AllocateId(), "Highlight", NodePinKind::Input, NodeValueType::Color});
-		node.inputs.push_back({material.graph.AllocateId(), "1st Shade", NodePinKind::Input, NodeValueType::Color});
-		node.inputs.push_back({material.graph.AllocateId(), "2nd Shade", NodePinKind::Input, NodeValueType::Color});
-		node.inputs.push_back({material.graph.AllocateId(), "Base Step", NodePinKind::Input, NodeValueType::Float});
-		node.inputs.push_back({material.graph.AllocateId(), "Base Feather", NodePinKind::Input, NodeValueType::Float});
-		node.inputs.push_back({material.graph.AllocateId(), "Shade Step", NodePinKind::Input, NodeValueType::Float});
-		node.inputs.push_back({material.graph.AllocateId(), "Shade Feather", NodePinKind::Input, NodeValueType::Float});
-		node.inputs.push_back({material.graph.AllocateId(), "Spec Threshold", NodePinKind::Input, NodeValueType::Float});
-		node.inputs.push_back({material.graph.AllocateId(), "Spec Softness", NodePinKind::Input, NodeValueType::Float});
-		node.inputs.push_back({material.graph.AllocateId(), "Spec Intensity", NodePinKind::Input, NodeValueType::Float});
-		node.inputs.push_back({material.graph.AllocateId(), "Normal Map", NodePinKind::Input, NodeValueType::Color});
-		node.inputs.push_back({material.graph.AllocateId(), "Normal Strength", NodePinKind::Input, NodeValueType::Float});
-		node.outputs.push_back({material.graph.AllocateId(), "Surface", NodePinKind::Output, NodeValueType::Material});
-		material.graph.nodes.push_back(std::move(node));
-	}
-
-	void MaterialNodeEditorPanel::AddLitMasterNode(MaterialAsset& material, Vector2 position) {
-		Node node;
-		node.id		  = material.graph.AllocateId();
-		node.type	  = "LitMaster";
-		node.title	  = "Lit Master";
-		node.position = position;
-		node.properties["lightingMode"] = 0.0f;
-		node.properties["shininess"] = material.shininess;
-		node.properties["roughness"] = material.roughness;
-		SetColorProperty(node, "emissiveColor", material.emissiveColor);
-		node.properties["emissiveIntensity"] = material.emissiveIntensity;
-		node.inputs.push_back({material.graph.AllocateId(), "Base Color", NodePinKind::Input, NodeValueType::Color});
-		node.inputs.push_back({material.graph.AllocateId(), "Emissive", NodePinKind::Input, NodeValueType::Color});
-		node.inputs.push_back({material.graph.AllocateId(), "Emissive Intensity", NodePinKind::Input, NodeValueType::Float});
-		node.inputs.push_back({material.graph.AllocateId(), "Shininess", NodePinKind::Input, NodeValueType::Float});
-		node.inputs.push_back({material.graph.AllocateId(), "Roughness", NodePinKind::Input, NodeValueType::Float});
-		node.inputs.push_back({material.graph.AllocateId(), "Reflect", NodePinKind::Input, NodeValueType::Bool});
-		node.inputs.push_back({material.graph.AllocateId(), "Normal Map", NodePinKind::Input, NodeValueType::Color});
-		node.inputs.push_back({material.graph.AllocateId(), "Normal Strength", NodePinKind::Input, NodeValueType::Float});
-		node.outputs.push_back({material.graph.AllocateId(), "Surface", NodePinKind::Output, NodeValueType::Material});
-		material.graph.nodes.push_back(std::move(node));
-	}
-
-	void MaterialNodeEditorPanel::AddUnlitMasterNode(MaterialAsset& material, Vector2 position) {
-		Node node;
-		node.id		  = material.graph.AllocateId();
-		node.type	  = "UnlitMaster";
-		node.title	  = "Unlit Master";
-		node.position = position;
-		SetColorProperty(node, "emissiveColor", material.emissiveColor);
-		node.properties["emissiveIntensity"] = material.emissiveIntensity;
-		node.inputs.push_back({material.graph.AllocateId(), "Base Color", NodePinKind::Input, NodeValueType::Color});
-		node.inputs.push_back({material.graph.AllocateId(), "Emissive", NodePinKind::Input, NodeValueType::Color});
-		node.inputs.push_back({material.graph.AllocateId(), "Emissive Intensity", NodePinKind::Input, NodeValueType::Float});
-		node.outputs.push_back({material.graph.AllocateId(), "Surface", NodePinKind::Output, NodeValueType::Material});
-		material.graph.nodes.push_back(std::move(node));
-	}
-
-	void MaterialNodeEditorPanel::AddObjectTextureNode(MaterialAsset& material, Vector2 position) {
-		Node node;
-		node.id		  = material.graph.AllocateId();
-		node.type	  = "ObjectTexture";
-		node.title	  = "Object Texture";
-		node.position = position;
-		node.outputs.push_back({material.graph.AllocateId(), "Texture", NodePinKind::Output, NodeValueType::Texture2D});
-		material.graph.nodes.push_back(std::move(node));
-	}
-
-	void MaterialNodeEditorPanel::AddTexture2DNode(MaterialAsset& material, Vector2 position) {
-		Node node;
-		node.id		  = material.graph.AllocateId();
-		node.type	  = "Texture2D";
-		node.title	  = "Texture2D";
-		node.position = position;
-		node.outputs.push_back({material.graph.AllocateId(), "Texture", NodePinKind::Output, NodeValueType::Texture2D});
-		material.graph.nodes.push_back(std::move(node));
-	}
-
-	void MaterialNodeEditorPanel::AddTextureSampleNode(MaterialAsset& material, Vector2 position) {
-		Node node;
-		node.id		  = material.graph.AllocateId();
-		node.type	  = "TextureSample";
-		node.title	  = "Texture Sample";
-		node.position = position;
-		node.inputs.push_back({material.graph.AllocateId(), "Texture", NodePinKind::Input, NodeValueType::Texture2D});
-		node.inputs.push_back({material.graph.AllocateId(), "UV", NodePinKind::Input, NodeValueType::Float2});
-		node.outputs.push_back({material.graph.AllocateId(), "Color", NodePinKind::Output, NodeValueType::Color});
-		node.outputs.push_back({material.graph.AllocateId(), "Value", NodePinKind::Output, NodeValueType::Float});
-		material.graph.nodes.push_back(std::move(node));
-	}
-
-	void MaterialNodeEditorPanel::AddNoiseTextureNode(MaterialAsset& material, Vector2 position) {
-		Node node;
-		node.id		  = material.graph.AllocateId();
-		node.type	  = "NoiseTexture";
-		node.title	  = "Noise Texture";
-		node.position = position;
-		node.properties["scale"] = 8.0f;
-		node.inputs.push_back({material.graph.AllocateId(), "UV", NodePinKind::Input, NodeValueType::Float2});
-		node.inputs.push_back({material.graph.AllocateId(), "Scale", NodePinKind::Input, NodeValueType::Float});
-		node.outputs.push_back({material.graph.AllocateId(), "Color", NodePinKind::Output, NodeValueType::Color});
-		node.outputs.push_back({material.graph.AllocateId(), "Value", NodePinKind::Output, NodeValueType::Float});
-		material.graph.nodes.push_back(std::move(node));
-	}
-
-	void MaterialNodeEditorPanel::AddShaderInputFloatNode(MaterialAsset& material, const char* type, const char* title, Vector2 position) {
-		Node node;
-		node.id = material.graph.AllocateId();
-		node.type = type;
-		node.title = title;
-		node.position = position;
-		node.outputs.push_back({material.graph.AllocateId(), "Value", NodePinKind::Output, NodeValueType::Float});
-		material.graph.nodes.push_back(std::move(node));
-	}
-
-	void MaterialNodeEditorPanel::AddShaderInputFloat2Node(MaterialAsset& material, const char* type, const char* title, Vector2 position) {
-		Node node;
-		node.id = material.graph.AllocateId();
-		node.type = type;
-		node.title = title;
-		node.position = position;
-		node.outputs.push_back({material.graph.AllocateId(), "Value", NodePinKind::Output, NodeValueType::Float2});
-		material.graph.nodes.push_back(std::move(node));
-	}
-
-	void MaterialNodeEditorPanel::AddUVTransformNode(MaterialAsset& material, Vector2 position) {
-		Node node;
-		node.id = material.graph.AllocateId();
-		node.type = "UVTransform";
-		node.title = "UV Transform";
-		node.position = position;
-		node.properties["scaleX"] = 1.0f;
-		node.properties["scaleY"] = 1.0f;
-		node.properties["offsetX"] = 0.0f;
-		node.properties["offsetY"] = 0.0f;
-		node.inputs.push_back({material.graph.AllocateId(), "UV", NodePinKind::Input, NodeValueType::Float2});
-		node.inputs.push_back({material.graph.AllocateId(), "Scale", NodePinKind::Input, NodeValueType::Float2});
-		node.inputs.push_back({material.graph.AllocateId(), "Offset", NodePinKind::Input, NodeValueType::Float2});
-		node.outputs.push_back({material.graph.AllocateId(), "UV", NodePinKind::Output, NodeValueType::Float2});
-		material.graph.nodes.push_back(std::move(node));
-	}
-
-	void MaterialNodeEditorPanel::AddCombineFloat2Node(MaterialAsset& material, Vector2 position) {
-		Node node;
-		node.id = material.graph.AllocateId();
-		node.type = "CombineFloat2";
-		node.title = "Combine Float2";
-		node.position = position;
-		node.inputs.push_back({material.graph.AllocateId(), "X", NodePinKind::Input, NodeValueType::Float});
-		node.inputs.push_back({material.graph.AllocateId(), "Y", NodePinKind::Input, NodeValueType::Float});
-		node.outputs.push_back({material.graph.AllocateId(), "Value", NodePinKind::Output, NodeValueType::Float2});
-		material.graph.nodes.push_back(std::move(node));
-	}
-
-	void MaterialNodeEditorPanel::AddSplitFloat2Node(MaterialAsset& material, Vector2 position) {
-		Node node;
-		node.id = material.graph.AllocateId();
-		node.type = "SplitFloat2";
-		node.title = "Split Float2";
-		node.position = position;
-		node.inputs.push_back({material.graph.AllocateId(), "Value", NodePinKind::Input, NodeValueType::Float2});
-		node.outputs.push_back({material.graph.AllocateId(), "X", NodePinKind::Output, NodeValueType::Float});
-		node.outputs.push_back({material.graph.AllocateId(), "Y", NodePinKind::Output, NodeValueType::Float});
-		material.graph.nodes.push_back(std::move(node));
-	}
-
-	void MaterialNodeEditorPanel::AddBinaryNode(MaterialAsset& material, const char* type, const char* title, NodeValueType valueType, Vector2 position) {
-		Node node;
-		node.id		  = material.graph.AllocateId();
-		node.type	  = type;
-		node.title	  = title;
-		node.position = position;
-		node.inputs.push_back({material.graph.AllocateId(), "A", NodePinKind::Input, valueType});
-		node.inputs.push_back({material.graph.AllocateId(), "B", NodePinKind::Input, valueType});
-		node.outputs.push_back({material.graph.AllocateId(), "Result", NodePinKind::Output, valueType});
-		material.graph.nodes.push_back(std::move(node));
-	}
-
-	void MaterialNodeEditorPanel::AddLerpNode(MaterialAsset& material, const char* type, const char* title, NodeValueType valueType, Vector2 position) {
-		Node node;
-		node.id		  = material.graph.AllocateId();
-		node.type	  = type;
-		node.title	  = title;
-		node.position = position;
-		node.inputs.push_back({material.graph.AllocateId(), "A", NodePinKind::Input, valueType});
-		node.inputs.push_back({material.graph.AllocateId(), "B", NodePinKind::Input, valueType});
-		node.inputs.push_back({material.graph.AllocateId(), "T", NodePinKind::Input, NodeValueType::Float});
-		node.outputs.push_back({material.graph.AllocateId(), "Result", NodePinKind::Output, valueType});
-		material.graph.nodes.push_back(std::move(node));
-	}
-
-	void MaterialNodeEditorPanel::AddUnaryFloatNode(MaterialAsset& material, const char* type, const char* title, Vector2 position) {
-		Node node;
-		node.id		  = material.graph.AllocateId();
-		node.type	  = type;
-		node.title	  = title;
-		node.position = position;
-		node.inputs.push_back({material.graph.AllocateId(), "Value", NodePinKind::Input, NodeValueType::Float});
-		node.outputs.push_back({material.graph.AllocateId(), "Result", NodePinKind::Output, NodeValueType::Float});
-		material.graph.nodes.push_back(std::move(node));
-	}
-
-	void MaterialNodeEditorPanel::AddStepFloatNode(MaterialAsset& material, Vector2 position) {
-		Node node;
-		node.id		  = material.graph.AllocateId();
-		node.type	  = "StepFloat";
-		node.title	  = "Step Float";
-		node.position = position;
-		node.inputs.push_back({material.graph.AllocateId(), "Edge", NodePinKind::Input, NodeValueType::Float});
-		node.inputs.push_back({material.graph.AllocateId(), "Value", NodePinKind::Input, NodeValueType::Float});
-		node.outputs.push_back({material.graph.AllocateId(), "Result", NodePinKind::Output, NodeValueType::Float});
-		material.graph.nodes.push_back(std::move(node));
-	}
-
-	void MaterialNodeEditorPanel::AddSmoothstepFloatNode(MaterialAsset& material, Vector2 position) {
-		Node node;
-		node.id		  = material.graph.AllocateId();
-		node.type	  = "SmoothstepFloat";
-		node.title	  = "Smoothstep Float";
-		node.position = position;
-		node.inputs.push_back({material.graph.AllocateId(), "Edge 0", NodePinKind::Input, NodeValueType::Float});
-		node.inputs.push_back({material.graph.AllocateId(), "Edge 1", NodePinKind::Input, NodeValueType::Float});
-		node.inputs.push_back({material.graph.AllocateId(), "Value", NodePinKind::Input, NodeValueType::Float});
-		node.outputs.push_back({material.graph.AllocateId(), "Result", NodePinKind::Output, NodeValueType::Float});
-		material.graph.nodes.push_back(std::move(node));
-	}
 
 	void MaterialNodeEditorPanel::EnsureOutputNode(MaterialAsset& material) {
-		const ShaderGraphSchema schema = ShaderGraphSchemas::Object3DMaterial();
+		const ShaderGraphSchema& schema = ShaderGraphNodeRegistry::Get();
 
 		for(auto& node : material.graph.nodes) {
-			if(const ShaderGraphNodeSchema* schemaNode = FindSchemaNode(schema, node.type)) {
+			if(const ShaderGraphNodeSchema* schemaNode = schema.Find(node.type)) {
 				EnsureSchemaPins(material, node, *schemaNode);
 			}
 		}
 
 		for(auto& node : material.graph.nodes) {
 			if(node.type != "Output") continue;
-			auto ensureInput = [&material, &node](const char* name, NodeValueType type) {
+			auto ensureInput = [&material, &node](const char* name, std::string_view pinType) {
 				const auto exists = std::any_of(node.inputs.begin(), node.inputs.end(), [name](const NodePin& pin) {
 					return pin.name == name;
 				});
-				if(!exists) node.inputs.push_back({material.graph.AllocateId(), name, NodePinKind::Input, type});
+				if(!exists) node.inputs.push_back({material.graph.AllocateId(), name, NodePinKind::Input, std::string(pinType)});
 			};
-			ensureInput("Surface", NodeValueType::Material);
+			ensureInput("Surface", ShaderGraphPinTypes::Material);
 
 			const auto surfaceIt = std::find_if(node.inputs.begin(), node.inputs.end(), [](const NodePin& pin) {
 				return pin.name == "Surface";
@@ -1753,10 +1302,10 @@ namespace CalyxEngine {
 				return;
 			}
 
-			ensureInput("Lighting Mode", NodeValueType::Int);
-			ensureInput("BaseColor", NodeValueType::Color);
-			ensureInput("Emissive", NodeValueType::Color);
-			ensureInput("Emissive Intensity", NodeValueType::Float);
+			ensureInput("Lighting Mode", NodePinTypes::Int);
+			ensureInput("BaseColor", NodePinTypes::Color);
+			ensureInput("Emissive", NodePinTypes::Color);
+			ensureInput("Emissive Intensity", NodePinTypes::Float);
 			return;
 		}
 		Node node;
@@ -1764,7 +1313,7 @@ namespace CalyxEngine {
 		node.type	  = "Output";
 		node.title	  = "Output";
 		node.position = {420.0f, 120.0f};
-		node.inputs.push_back({material.graph.AllocateId(), "Surface", NodePinKind::Input, NodeValueType::Material});
+		node.inputs.push_back({material.graph.AllocateId(), "Surface", NodePinKind::Input, ShaderGraphPinTypes::Material});
 		material.graph.nodes.push_back(std::move(node));
 	}
 
@@ -1789,10 +1338,10 @@ namespace CalyxEngine {
 			if(node.type != "TextureSample") continue;
 
 			const bool hasValueOutput = std::any_of(node.outputs.begin(), node.outputs.end(), [](const NodePin& pin) {
-				return pin.name == "Value" && pin.valueType == NodeValueType::Float;
+				return pin.name == "Value" && pin.type == NodePinTypes::Float;
 			});
 			if(!hasValueOutput) {
-				node.outputs.push_back({material.graph.AllocateId(), "Value", NodePinKind::Output, NodeValueType::Float});
+				node.outputs.push_back({material.graph.AllocateId(), "Value", NodePinKind::Output, NodePinTypes::Float});
 				changed = true;
 			}
 		}
@@ -1804,8 +1353,8 @@ namespace CalyxEngine {
 			if(link.toPinId != inputPinId) continue;
 			const Node*	   fromNode = nullptr;
 			const NodePin* fromPin	= material.graph.FindPin(link.fromPinId, &fromNode);
-			if(!fromNode || !fromPin || fromPin->valueType != NodeValueType::Color) return fallback;
-			if(fromNode->type == "Color") return fromNode->colorValue;
+			if(!fromNode || !fromPin || fromPin->type != NodePinTypes::Color) return fallback;
+			if(fromNode->type == "Color") return GetColorProperty(*fromNode, "value", fallback);
 			if(fromNode->type == "TextureSample") return {1, 1, 1, 1};
 			if(fromNode->type == "NoiseTexture") return {0.5f, 0.5f, 0.5f, 1.0f};
 			if(fromNode->type == "MultiplyColor") {
@@ -1821,8 +1370,8 @@ namespace CalyxEngine {
 			if(link.toPinId != inputPinId) continue;
 			const Node*	   fromNode = nullptr;
 			const NodePin* fromPin	= material.graph.FindPin(link.fromPinId, &fromNode);
-			if(!fromNode || !fromPin || fromPin->valueType != NodeValueType::Float) return fallback;
-			if(fromNode->type == "Float" || fromNode->type == "Shininess" || fromNode->type == "Roughness") return fromNode->floatValue;
+			if(!fromNode || !fromPin || fromPin->type != NodePinTypes::Float) return fallback;
+			if(fromNode->type == "Float" || fromNode->type == "Shininess" || fromNode->type == "Roughness") return fromNode->GetProperty<float>("value", fallback);
 			if(fromNode->type == "TextureSample") return 0.5f;
 			if(fromNode->type == "NoiseTexture") return 0.5f;
 			if(fromNode->type == "UVX" || fromNode->type == "UVY" || fromNode->type == "Time" ||
@@ -1901,8 +1450,8 @@ namespace CalyxEngine {
 			if(link.toPinId != inputPinId) continue;
 			const Node*	   fromNode = nullptr;
 			const NodePin* fromPin	= material.graph.FindPin(link.fromPinId, &fromNode);
-			if(!fromNode || !fromPin || fromPin->valueType != NodeValueType::Bool) return fallback;
-			if(fromNode->type == "Reflect") return fromNode->boolValue;
+			if(!fromNode || !fromPin || fromPin->type != NodePinTypes::Bool) return fallback;
+			if(fromNode->type == "Reflect") return fromNode->GetProperty<bool>("value", fallback);
 		}
 		return fallback;
 	}
@@ -1912,9 +1461,9 @@ namespace CalyxEngine {
 			if(link.toPinId != inputPinId) continue;
 			const Node*	   fromNode = nullptr;
 			const NodePin* fromPin	= material.graph.FindPin(link.fromPinId, &fromNode);
-			if(!fromNode || !fromPin || fromPin->valueType != NodeValueType::Int) return fallback;
+			if(!fromNode || !fromPin || fromPin->type != NodePinTypes::Int) return fallback;
 			if(fromNode->type == "LightingMode") {
-				const int32_t base = std::clamp(fromNode->intValue, 0, kLightingModeCount - 1);
+				const int32_t base = std::clamp(fromNode->GetProperty<int32_t>("value", fallback), 0, kLightingModeCount - 1);
 				if(!fromNode->inputs.empty()) {
 					return EvaluateInt(material, fromNode->inputs[0].id, base);
 				}

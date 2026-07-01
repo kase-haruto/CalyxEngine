@@ -15,23 +15,14 @@
     "nextId": 10,
     "nodes": [
       {
-        "boolValue": false,
-        "colorValue": [
-          1.0,
-          1.0,
-          1.0,
-          1.0
-        ],
-        "floatValue": 0.0,
         "id": 1,
         "inputs": [],
-        "intValue": 0,
         "outputs": [
           {
             "id": 2,
             "kind": 1,
             "name": "Color",
-            "valueType": 2
+            "type": "core.color"
           }
         ],
         "position": [
@@ -43,24 +34,15 @@
         "type": "Input"
       },
       {
-        "boolValue": false,
-        "colorValue": [
-          1.0,
-          1.0,
-          1.0,
-          1.0
-        ],
-        "floatValue": 0.0,
         "id": 3,
         "inputs": [
           {
             "id": 4,
             "kind": 0,
             "name": "Color",
-            "valueType": 2
+            "type": "core.color"
           }
         ],
-        "intValue": 0,
         "outputs": [],
         "position": [
           720.0,
@@ -71,35 +53,26 @@
         "type": "Output"
       },
       {
-        "boolValue": false,
-        "colorValue": [
-          1.0,
-          1.0,
-          1.0,
-          1.0
-        ],
-        "floatValue": 0.0,
         "id": 5,
         "inputs": [
           {
             "id": 6,
             "kind": 0,
             "name": "In",
-            "valueType": 2
+            "type": "core.color"
           }
         ],
-        "intValue": 0,
         "outputs": [
           {
             "id": 7,
             "kind": 1,
             "name": "Out",
-            "valueType": 2
+            "type": "core.color"
           }
         ],
         "position": [
-          321.0,
-          -26.0
+          396.0,
+          171.0
         ],
         "properties": {
           "applyMode": "Always",

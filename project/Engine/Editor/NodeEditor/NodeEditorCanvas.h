@@ -11,6 +11,15 @@
 namespace CalyxEngine {
 	class NodeEditorCanvas {
 	public:
+		/////////////////////////////////////////////////////////////////////////////////////////
+		//		用途別の接続規則と表示を注入するPolicy
+		/////////////////////////////////////////////////////////////////////////////////////////
+		struct Policy {
+			std::function<bool(const NodePin&, const NodePin&)> canConnect;
+			std::function<ImVec4(const Node&)> nodeHeaderColor;
+			std::function<ImVec4(std::string_view)> pinColor;
+		};
+
 		using DrawNodeBody = std::function<bool(Node&)>;
 		enum class ContextMenuType {
 			Background,
@@ -35,6 +44,7 @@ namespace CalyxEngine {
 		bool ConsumeNodeContextRequest(int32_t& outNodeId);
 		Vector2 GetLastViewCenter() const { return lastViewCenter_; }
 		int32_t GetSelectedNodeId() const { return selectedNodeId_; }
+		void SetPolicy(Policy policy) { policy_ = std::move(policy); }
 
 	private:
 		bool CanCreateLink(const NodeGraph& graph, int32_t a, int32_t b, int32_t& from, int32_t& to) const;
@@ -42,8 +52,8 @@ namespace CalyxEngine {
 		void DrawPin(const NodePin& pin, float rowWidth);
 		void DrawNodeHeader(const Node& node);
 		ImVec4 GetNodeHeaderColor(const Node& node) const;
-		ImVec4 GetPinColor(NodeValueType type) const;
-		float GetLinkThickness(NodeValueType type) const;
+		ImVec4 GetPinColor(std::string_view pinType) const;
+		float GetLinkThickness(std::string_view pinType) const;
 
 	private:
 		std::string id_;
@@ -58,5 +68,6 @@ namespace CalyxEngine {
 		bool hasActiveContextMenu_ = false;
 		Vector2 lastViewCenter_{};
 		int32_t selectedNodeId_ = 0;
+		Policy policy_{};
 	};
 }
