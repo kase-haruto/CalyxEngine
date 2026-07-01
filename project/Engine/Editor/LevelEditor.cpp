@@ -64,7 +64,6 @@ namespace CalyxEngine {
 #if defined(_DEBUG) || defined(DEVELOP)
 		// 各パネルの初期化 ----------------------------------------------------
 		hierarchy_			= std::make_unique<HierarchyPanel>();
-		editor_				= std::make_unique<EditorPanel>();
 		inspector_			= std::make_unique<InspectorPanel>();
 		keyframePanel_		= std::make_unique<KeyframePanel>();
 		sceneEditor_		= std::make_unique<SceneObjectEditor>();
@@ -110,10 +109,6 @@ namespace CalyxEngine {
 			[this](const std::filesystem::path& path) {
 				OpenScene(path);
 			});
-
-		// Panel に LevelEditor 自体を渡す（コールバック通知や setter） ----------
-		editor_->SetOnEditorSelected(
-			[this](BaseEditor* ed) { SetSelectedEditor(ed); });
 
 		// Hierarchy から来るコールバックは shared_ptr で受けて、
 		// LevelEditor 内で weak_ptr に変換して管理する
@@ -304,7 +299,6 @@ namespace CalyxEngine {
 
 		// パネル群を登録（Editors メニューに並べる） --------------------------
 		editorPanels_.push_back(hierarchy_.get());
-		editorPanels_.push_back(editor_.get());
 		editorPanels_.push_back(inspector_.get());
 		editorPanels_.push_back(keyframePanel_.get());
 		editorPanels_.push_back(placeToolPanel_.get());
@@ -946,7 +940,6 @@ namespace CalyxEngine {
 		switch(mode) {
 		case EngineEdit::EditToolMode::Object:
 			setShow(hierarchy_.get(), true);
-			setShow(editor_.get(), true);
 			setShow(inspector_.get(), true);
 			setShow(keyframePanel_.get(), false);
 			setShow(placeToolPanel_.get(), true);
@@ -962,7 +955,6 @@ namespace CalyxEngine {
 			if(mainViewport_) mainViewport_->SetOverlayToolsEnabled(true);
 			if(mainViewport_) mainViewport_->Set2DPlacementCanvasEnabled(true);
 			setShow(hierarchy_.get(), true);
-			setShow(editor_.get(), true);
 			setShow(inspector_.get(), true);
 			setShow(keyframePanel_.get(), true);
 			setShow(placeToolPanel_.get(), false);
@@ -976,7 +968,6 @@ namespace CalyxEngine {
 			if(mainViewport_) mainViewport_->SetShow(false);
 			if(debugViewport_) debugViewport_->SetShow(false);
 			setShow(hierarchy_.get(), false);
-			setShow(editor_.get(), false);
 			setShow(inspector_.get(), false);
 			setShow(keyframePanel_.get(), false);
 			setShow(placeToolPanel_.get(), false);
@@ -992,7 +983,6 @@ namespace CalyxEngine {
 			if(debugViewport_) debugViewport_->SetShow(true);
 			if(debugViewport_) debugViewport_->SetOverlayToolsEnabled(true);
 			setShow(hierarchy_.get(), true);
-			setShow(editor_.get(), true);
 			setShow(inspector_.get(), true);
 			setShow(keyframePanel_.get(), false);
 			setShow(placeToolPanel_.get(), false);
@@ -1008,7 +998,6 @@ namespace CalyxEngine {
 			if(debugViewport_) debugViewport_->SetShow(true);
 			if(debugViewport_) debugViewport_->SetOverlayToolsEnabled(true);
 			setShow(hierarchy_.get(), true);
-			setShow(editor_.get(), true);
 			setShow(inspector_.get(), true);
 			setShow(keyframePanel_.get(), false);
 			setShow(placeToolPanel_.get(), true);
@@ -1020,7 +1009,6 @@ namespace CalyxEngine {
 			break;
 		case EngineEdit::EditToolMode::PostEffect:
 			setShow(hierarchy_.get(), false);
-			setShow(editor_.get(), false);
 			setShow(inspector_.get(), false);
 			setShow(keyframePanel_.get(), false);
 			setShow(placeToolPanel_.get(), false);
@@ -1028,30 +1016,6 @@ namespace CalyxEngine {
 			setShow(assetPanel_.get(), true);
 			setShow(materialNodeEditorPanel_.get(), false);
 			setShow(postEffectNodeEditorPanel_.get(), true);
-			setShow(spriteAnimationEditorPanel_.get(), false);
-			break;
-		case EngineEdit::EditToolMode::Material:
-			setShow(hierarchy_.get(), false);
-			setShow(editor_.get(), false);
-			setShow(inspector_.get(), true);
-			setShow(keyframePanel_.get(), false);
-			setShow(placeToolPanel_.get(), false);
-			setShow(splineEditor_.get(), false);
-			setShow(assetPanel_.get(), true);
-			setShow(materialNodeEditorPanel_.get(), true);
-			setShow(postEffectNodeEditorPanel_.get(), false);
-			setShow(spriteAnimationEditorPanel_.get(), false);
-			break;
-		case EngineEdit::EditToolMode::Animation:
-			setShow(hierarchy_.get(), true);
-			setShow(editor_.get(), false);
-			setShow(inspector_.get(), true);
-			setShow(keyframePanel_.get(), false);
-			setShow(placeToolPanel_.get(), false);
-			setShow(splineEditor_.get(), true);
-			setShow(assetPanel_.get(), true);
-			setShow(materialNodeEditorPanel_.get(), false);
-			setShow(postEffectNodeEditorPanel_.get(), false);
 			setShow(spriteAnimationEditorPanel_.get(), false);
 			break;
 		default:
