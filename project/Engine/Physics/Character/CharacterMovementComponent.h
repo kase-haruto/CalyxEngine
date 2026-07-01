@@ -66,6 +66,12 @@ public:
 	void Jump();
 
 	/**
+	 * \brief 接触面へ食い込むCharacterMovementの速度成分を除去する
+	 * \param normal キャラクターを接触相手から離す向きの法線
+	 */
+	void ResolveBlockingVelocity(const CalyxEngine::Vector3& normal);
+
+	/**
 	 * \brief 現在位置から床を探索する
 	 * \param outFloor 探索結果
 	 */
@@ -153,9 +159,10 @@ private:
 	void SnapToFloor();
 
 	/**
-	 * \brief このフレームの水平移動入力をデバッグラインで表示する
+	 * \brief このフレームに適用したCharacter速度をデバッグラインで表示する
+	 * \param characterVelocity 水平移動とジャンプ／落下を合成した速度
 	 */
-	void DrawMovementDebugLine(const CalyxEngine::Vector3& moveInput) const;
+	void DrawMovementDebugLine(const CalyxEngine::Vector3& characterVelocity) const;
 
 private:
 	BaseGameObject* owner_ = nullptr;							 //< 所有者
@@ -176,8 +183,8 @@ private:
 			AddField("skinWidth", skinWidth_).Category("Movement").Tooltip("床から少し浮かせる安全幅");
 			AddField("maxWalkSpeed", maxWalkSpeed_).Category("Movement").Tooltip("最大歩行速度");
 			AddField("jumpVelocity", jumpVelocity_).Category("Movement").Tooltip("ジャンプ初速");
-			AddField("showMovementDebugLine", showMovementDebugLine_).Category("Debug").Tooltip("水平移動入力をデバッグラインで表示する");
-			AddField("movementDebugLineScale", movementDebugLineScale_).Category("Debug").Tooltip("移動入力デバッグラインの最大長");
+			AddField("showMovementDebugLine", showMovementDebugLine_).Category("Debug").Tooltip("坂、ジャンプ、落下を含むCharacter速度をデバッグラインで表示する");
+			AddField("movementDebugLineScale", movementDebugLineScale_).Category("Debug").Tooltip("Character速度をデバッグライン長へ変換する倍率");
 		}
 		CalyxEngine::ParamPath GetParamPath() const{
 			return {CalyxEngine::ParamDomain::Game,"CharacterMovementComponent","Actor"};
@@ -191,7 +198,7 @@ private:
 		float skinWidth_ = 0.01f;			  //< 床から少し浮かせる安全幅
 		float maxWalkSpeed_ = 6.0f;			  //< 最大歩行速度
 		float jumpVelocity_ = 6.5f;			  //< ジャンプ初速
-		bool showMovementDebugLine_ = true;	 //< 移動入力デバッグラインを表示するか
-		float movementDebugLineScale_ = 1.0f; //< 移動入力デバッグラインの最大長
+		bool showMovementDebugLine_ = true;	 //< Character速度デバッグラインを表示するか
+		float movementDebugLineScale_ = 1.0f; //< Character速度をデバッグライン長へ変換する倍率
 	}param_;
 };

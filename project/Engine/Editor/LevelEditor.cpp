@@ -16,6 +16,7 @@
 #include <Engine/Editor/SceneSwitchOverlay.h>
 #include <Engine/Editor/ViewportSelectionController.h>
 #include <Engine/Foundation/Input/Input.h>
+#include <Engine/Foundation/Log/EngineLogger.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Objects/3D/Actor/Library/SceneObjectLibrary.h>
 #include <Engine/Objects/3D/Actor/SceneObject.h>
@@ -74,6 +75,8 @@ namespace CalyxEngine {
 		postEffectNodeEditorPanel_ = std::make_unique<PostEffectNodeEditorPanel>();
 		spriteAnimationEditorPanel_ = std::make_unique<SpriteAnimationEditorPanel>();
 		livePPPanel_		= std::make_unique<LivePPPanel>();
+		logPanel_			= std::make_unique<LogPanel>();
+		logPanel_->SetCommandContext({this, sceneManager_, pPlaySesseion_});
 		sceneSwitchOverlay_ = std::make_unique<SceneSwitchOverlay>();
 		sceneSettingsWindow_ = std::make_unique<SceneSettingsWindow>();
 		debugCameraFocus_	= std::make_unique<DebugCameraFocusController>();
@@ -310,6 +313,7 @@ namespace CalyxEngine {
 		editorPanels_.push_back(materialNodeEditorPanel_.get());
 		editorPanels_.push_back(postEffectNodeEditorPanel_.get());
 		editorPanels_.push_back(spriteAnimationEditorPanel_.get());
+		editorPanels_.push_back(logPanel_.get());
 		editorPanels_.push_back(livePPPanel_.get());
 
 		ApplyEditToolMode(editToolMode_, true);
@@ -325,6 +329,13 @@ namespace CalyxEngine {
 						[p, this]() { TogglePanel(p); },
 						true});
 		}
+
+		// ログパネルまで登録されたことを、動作確認用の初期ログとして記録する。
+		EngineLogger::GetInstance().Add(
+			LogLevel::Info,
+			LogCategory::Editor,
+			"LogPanel initialized.",
+			"LevelEditor");
 
 		menu_->Add(MenuCategory::Settings,
 				   {"Engine Settings",
@@ -443,6 +454,11 @@ namespace CalyxEngine {
 			sceneSavedPopupPath_ = path;
 			sceneSavedPopupTimer_ = 1.5f;
 			ImGui::OpenPopup("SceneSavedPopup");
+			EngineLogger::GetInstance().Add(
+				LogLevel::Info,
+				LogCategory::Editor,
+				"Scene saved: " + path,
+				"LevelEditor");
 		};
 
 		if(editToolMode_ == EngineEdit::EditToolMode::ParticleEffect) {
@@ -511,8 +527,15 @@ namespace CalyxEngine {
 		if(ImGuiFileDialog::Instance()->Display("SceneSaveDialog")) {
 			if(ImGuiFileDialog::Instance()->IsOk()) {
 				std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
-				SceneSerializer::Save(*ctx, filePath);
-				notifySceneSaved(filePath);
+				if(ctx && SceneSerializer::Save(*ctx, filePath)) {
+					notifySceneSaved(filePath);
+				} else {
+					EngineLogger::GetInstance().Add(
+						LogLevel::Error,
+						LogCategory::Editor,
+						"Failed to save scene: " + filePath,
+						"LevelEditor");
+				}
 			}
 			ImGuiFileDialog::Instance()->Close();
 		}
@@ -560,8 +583,16 @@ namespace CalyxEngine {
 		if(CalyxFoundation::Input::PushKey(DIK_LCONTROL)) {
 			if(CalyxFoundation::Input::TriggerKey(DIK_S)) {
 				if(SceneContext* scene = SceneContext::Current()) {
-					SceneSerializer::Save(*scene, scene->GetScenePath());
-					notifySceneSaved(scene->GetScenePath());
+					const std::string scenePath = scene->GetScenePath();
+					if(SceneSerializer::Save(*scene, scenePath)) {
+						notifySceneSaved(scenePath);
+					} else {
+						EngineLogger::GetInstance().Add(
+							LogLevel::Error,
+							LogCategory::Editor,
+							"Failed to save scene: " + scenePath,
+							"LevelEditor");
+					}
 				}
 			}
 		}
@@ -1115,6 +1146,11 @@ namespace CalyxEngine {
 
 		// SceneContext 経由で登録（内部で SceneObjectLibrary::AddObject を呼ぶ）
 		ctx->AddObject(obj);
+		EngineLogger::GetInstance().Add(
+			LogLevel::Info,
+			LogCategory::Editor,
+			"Object created: " + obj->GetName(),
+			"LevelEditor");
 
 		if(hierarchy_) hierarchy_->RefreshCache();
 	}
@@ -1141,6 +1177,12 @@ namespace CalyxEngine {
 					[this]() { ClearSelection(); },
 					{}},
 				"Delete Object"));
+
+		EngineLogger::GetInstance().Add(
+			LogLevel::Info,
+			LogCategory::Editor,
+			"Object deleted: " + sp->GetName(),
+			"LevelEditor");
 	}
 
 	void LevelEditor::DeleteSelectedObjects() {
@@ -1321,11 +1363,27 @@ namespace CalyxEngine {
 		if(scenePath.empty()) {
 			scenePath = Calyx::ResolveAssetPath(std::filesystem::path("Scenes") / (ctx->GetSceneName() + ".scene")).generic_string();
 		}
-		SceneSerializer::Save(*ctx, scenePath);
+		if(SceneSerializer::Save(*ctx, scenePath)) {
+			EngineLogger::GetInstance().Add(
+				LogLevel::Info,
+				LogCategory::Editor,
+				"Scene saved: " + scenePath,
+				"LevelEditor");
+		} else {
+			EngineLogger::GetInstance().Add(
+				LogLevel::Error,
+				LogCategory::Editor,
+				"Failed to save scene: " + scenePath,
+				"LevelEditor");
+		}
 	}
 
 	bool LevelEditor::OpenScene(const std::filesystem::path& path) {
-		if(!sceneManager_) return false;
+		// SceneManagerとSceneSerializer側で成功・失敗理由を記録するため、ここでは処理を委譲する。
+		if(!sceneManager_) {
+			EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Editor, "Scene open failed because SceneManager is unavailable.", "LevelEditor");
+			return false;
+		}
 		if(!sceneManager_->OpenScene(path)) return false;
 
 		ClearSelection();
@@ -1334,11 +1392,16 @@ namespace CalyxEngine {
 		return true;
 	}
 
+	bool LevelEditor::OpenSceneFromEditor(const std::filesystem::path& path) {
+		return OpenScene(path);
+	}
+
 	//=============================================================================
 	// SceneContext の変更検出
 	//=============================================================================
 	void LevelEditor::SetSceneManager(CalyxEngine::SceneManager* manager) {
 		sceneManager_ = manager;
+		if(logPanel_) logPanel_->SetCommandContext({this, sceneManager_, pPlaySesseion_});
 
 		if(manager) {
 			auto* pickingPass = manager->GetPickingPass();
@@ -1355,6 +1418,11 @@ namespace CalyxEngine {
 		if(sceneSwitchOverlay_) {
 			sceneSwitchOverlay_->SetSceneManager(manager);
 		}
+	}
+
+	void LevelEditor::SetPlaySession(PlaySession* session) {
+		pPlaySesseion_ = session;
+		if(logPanel_) logPanel_->SetCommandContext({this, sceneManager_, pPlaySesseion_});
 	}
 	void LevelEditor::NotifySceneContextChanged() {
 		SceneContext* current = SceneContext::Current();

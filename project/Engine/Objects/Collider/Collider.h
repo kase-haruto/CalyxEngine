@@ -269,7 +269,7 @@ public:
 	/**
 	 * \brief オフセットを取得
 	 * \return オフセット
-	 * /
+	 */
 	const CalyxEngine::Vector3& GetOffset() const { return offset_; }
 
 	/**

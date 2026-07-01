@@ -1,8 +1,43 @@
 #include "ScopedGizmoCommand.h"
+#include <Engine/Objects/3D/Actor/Library/SceneObjectLibrary.h>
+#include <Engine/Objects/3D/Actor/SceneObject.h>
 #include <Engine/Objects/Transform/Transform.h>
+#include <Engine/Scene/Context/SceneContext.h>
 
 #include <algorithm>
 
+namespace {
+	std::string GetTransformTargetSummary(const std::vector<WorldTransform*>& transforms) {
+		auto* context = SceneContext::Current();
+		if(!context || !context->GetObjectLibrary()) return {};
+
+		std::string summary;
+		std::size_t matchedCount = 0;
+		for(const auto& object : context->GetObjectLibrary()->GetAllObjectsShared()) {
+			if(!object) continue;
+			if(std::find(transforms.begin(), transforms.end(), &object->GetWorldTransform()) == transforms.end()) continue;
+
+			if(matchedCount < 3) {
+				if(!summary.empty()) summary += ", ";
+				summary += object->GetName();
+			}
+			++matchedCount;
+		}
+		if(matchedCount > 3) summary += ", ...";
+		return summary;
+	}
+
+	std::string GetGizmoCommandName(ImGuizmo::OPERATION operation, const std::vector<WorldTransform*>& transforms) {
+		const char* operationName = "Transform";
+		if(operation & ImGuizmo::TRANSLATE) operationName = "Move";
+		else if(operation & ImGuizmo::ROTATE) operationName = "Rotate";
+		else if(operation & ImGuizmo::SCALE) operationName = "Scale";
+		std::string name = std::string(operationName) + (transforms.size() > 1 ? " Objects" : " Object");
+		const std::string targets = GetTransformTargetSummary(transforms);
+		if(!targets.empty()) name += ": " + targets;
+		return name;
+	}
+}
 
 
 ScopedGizmoCommand::ScopedGizmoCommand(WorldTransform* transform, ImGuizmo::OPERATION op)
@@ -12,6 +47,7 @@ ScopedGizmoCommand::ScopedGizmoCommand(WorldTransform* transform, ImGuizmo::OPER
 		befores_.push_back(TransformSnapshot::FromTransform(transform_));
 		before_ = befores_.front();
 	}
+	name_ = GetGizmoCommandName(op_, transforms_);
 }
 
 ScopedGizmoCommand::ScopedGizmoCommand(const std::vector<WorldTransform*>& transforms, ImGuizmo::OPERATION op)
@@ -25,6 +61,7 @@ ScopedGizmoCommand::ScopedGizmoCommand(const std::vector<WorldTransform*>& trans
 	if(!befores_.empty()) {
 		before_ = befores_.front();
 	}
+	name_ = GetGizmoCommandName(op_, transforms_);
 }
 
 void ScopedGizmoCommand::CaptureAfter(){

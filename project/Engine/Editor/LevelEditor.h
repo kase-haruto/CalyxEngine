@@ -12,6 +12,7 @@
 #include <Engine/Application/UI/Panels/InspectorPanel.h>
 #include <Engine/Application/UI/Panels/KeyframePanel.h>
 #include <Engine/Application/UI/Panels/LivePPPanel.h>
+#include <Engine/Application/UI/Panels/LogPanel.h>
 #include <Engine/Application/UI/Panels/MaterialNodeEditorPanel.h>
 #include <Engine/Application/UI/Panels/PlaceToolPanel.h>
 #include <Engine/Application/UI/Panels/PostEffectNodeEditorPanel.h>
@@ -101,6 +102,8 @@ namespace CalyxEngine {
 		void CreateObject(const std::shared_ptr<SceneObject>& obj);
 		/// シーンからオブジェクト削除（階層パネルなどから呼ばれる）
 		void DeleteObject(const std::shared_ptr<SceneObject>& sp);
+		/// Terminal等のエディタ操作からシーンファイルを開く。
+		bool OpenSceneFromEditor(const std::filesystem::path& path);
 		void DeleteSelectedObjects();
 		std::vector<WorldTransform*> DuplicateSelectedObjects();
 
@@ -114,7 +117,7 @@ namespace CalyxEngine {
 		PlaceToolPanel* GetPlaceToolPanel() const { return placeToolPanel_.get(); }
 
 		EngineEdit::EditorMode GetMode() const { return mode_; }
-		void				   SetPlaySession(PlaySession* session) { pPlaySesseion_ = session; }
+		void				   SetPlaySession(PlaySession* session);
 		bool				   ShouldRenderRuntimeFullscreen() const;
 		bool				   ShouldHideEditorUiInGameMode() const;
 		bool IsDebugViewportVisible()const;
@@ -168,6 +171,7 @@ namespace CalyxEngine {
 		std::unique_ptr<PostEffectNodeEditorPanel> postEffectNodeEditorPanel_;
 		std::unique_ptr<SpriteAnimationEditorPanel> spriteAnimationEditorPanel_;
 		std::unique_ptr<LivePPPanel>		 livePPPanel_;
+		std::unique_ptr<LogPanel>			 logPanel_;
 		std::unique_ptr<SceneSwitchOverlay>	 sceneSwitchOverlay_;
 		std::unique_ptr<SceneSettingsWindow> sceneSettingsWindow_;
 		std::unique_ptr<ImGuiLayoutSwitcher> layoutSwitcher_;

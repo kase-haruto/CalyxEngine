@@ -123,6 +123,18 @@ const std::string& CollisionLayerSettings::GetLayerName(CollisionLayerId layerId
 	return invalidLayerName;
 }
 
+std::optional<CollisionLayerId> CollisionLayerSettings::FindLayerId(std::string_view name) const {
+	const auto it = std::find_if(layers_.begin(), layers_.end(), [name](const CollisionLayer& layer) {
+		return layer.name == name;
+	});
+	if(it == layers_.end()) {
+		// 設定漏れをDefault Layerとして扱うとゲーム側の分類ミスを隠すため、未発見を明示する。
+		return std::nullopt;
+	}
+
+	return it->id;
+}
+
 bool CollisionLayerSettings::IsValidLayerId(CollisionLayerId layerId) const {
 	return std::any_of(layers_.begin(), layers_.end(), [layerId](const CollisionLayer& layer) {
 		return layer.id == layerId;

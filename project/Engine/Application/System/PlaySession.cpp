@@ -3,6 +3,7 @@
 #include "Engine/Assets/Manager/AssetManager.h"
 
 #include <Engine/Assets/Texture/TextureManager.h>
+#include <Engine/Foundation/Log/EngineLogger.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
 
 namespace CalyxEngine {
@@ -21,6 +22,7 @@ namespace CalyxEngine {
 		editorContext_ = editorContext;
 		editorContext_->SetRuntime(false);
 		LoadIcons();
+		EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Editor, "Play session initialized.", "PlaySession");
 
 #if defined(_DEBUG) || defined(DEVELOP)
 		// DebugビルドではEditorモード
@@ -140,7 +142,10 @@ namespace CalyxEngine {
 	}
 
 	void PlaySession::Enter() {
-		if(mode_ != EngineMode::Editor || !editorContext_) return;
+		if(mode_ != EngineMode::Editor || !editorContext_) {
+			EngineLogger::GetInstance().Add(LogLevel::Warning, LogCategory::Editor, "Play request ignored because the editor context is unavailable or already playing.", "PlaySession");
+			return;
+		}
 
 		pendingDebugCameraState_ = CaptureDebugCameraState(editorContext_);
 		auto json		= SceneSerializer::DumpJson(*editorContext_);
@@ -152,6 +157,7 @@ namespace CalyxEngine {
 
 		mode_ = EngineMode::Playing;
 		++runtimeGen_;
+		EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Game, "Play mode entered.", "PlaySession");
 	}
 
 	void PlaySession::Restart() {
@@ -165,6 +171,7 @@ namespace CalyxEngine {
 			runtimeContext_->SetRuntime(true);
 			mode_ = EngineMode::Playing;
 			++runtimeGen_;
+			EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Game, "Play session restarted.", "PlaySession");
 		}
 	}
 
@@ -172,6 +179,7 @@ namespace CalyxEngine {
 		if(mode_ == EngineMode::Editor) return;
 		exitRequested_ = true;
 		mode_		   = EngineMode::Editor;
+		EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Game, "Play mode exit requested.", "PlaySession");
 	}
 
 	void PlaySession::RebuildRuntimeFromEditor(SceneContext* newEditorCtx) {
@@ -202,6 +210,7 @@ namespace CalyxEngine {
 		runtimeContext_.reset();
 		exitRequested_ = false;
 		mode_		   = EngineMode::Editor;
+		EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Game, "Play mode exited and runtime context was released.", "PlaySession");
 	}
 
 	void PlaySession::ClearRuntimeContext() {
@@ -229,14 +238,17 @@ namespace CalyxEngine {
 	void PlaySession::TogglePause() {
 		if(mode_ == EngineMode::Playing) {
 			mode_ = EngineMode::Paused;
+			EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Game, "Play session paused.", "PlaySession");
 		} else if(mode_ == EngineMode::Paused) {
 			mode_ = EngineMode::Playing;
+			EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Game, "Play session resumed.", "PlaySession");
 		}
 	}
 
 	void PlaySession::StepOnce() {
 		if(mode_ == EngineMode::Paused) {
 			mode_ = EngineMode::Step;
+			EngineLogger::GetInstance().Add(LogLevel::Trace, LogCategory::Game, "Single frame step requested.", "PlaySession");
 		}
 	}
 

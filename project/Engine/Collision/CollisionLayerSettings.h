@@ -3,7 +3,9 @@
 #include <Engine/Collision/CollisionMatrix.h>
 #include <externals/nlohmann/json.hpp>
 
+#include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 struct CollisionLayer {
@@ -22,8 +24,11 @@ class CollisionLayerSettings {
 public:
 	CollisionLayerSettings();
 
-	// 現在のSceneContextが所有する設定を、既存Collider/UIから参照するための窓口。
-	// Sceneが存在しない場合は内部のDefault設定を返す。
+	/**
+	 * 現在のSceneContextが所有するCollisionLayerSettingsのインスタンスを取得する。
+	 * sceneが存在しない場合は内部のdefault	設定を返す。
+	 * @return CollisionLayerSettingsのインスタンスへのポインタ
+	 */
 	static CollisionLayerSettings* GetInstance();
 	static void SetActiveSettings(CollisionLayerSettings* settings);
 
@@ -44,6 +49,10 @@ public:
 
 	// 未登録IDでは参照切れを明示する固定文字列を返す。
 	const std::string& GetLayerName(CollisionLayerId layerId) const;
+
+	// 表示名から現在のSceneContextで有効なLayer IDを検索する。
+	// 見つからない場合は、Defaultへ暗黙変換せずstd::nulloptを返す。
+	std::optional<CollisionLayerId> FindLayerId(std::string_view name) const;
 
 	// 数値範囲だけでなく、現在Layer一覧に登録されていることまで確認する。
 	bool IsValidLayerId(CollisionLayerId layerId) const;

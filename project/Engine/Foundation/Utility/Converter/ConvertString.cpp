@@ -1,10 +1,40 @@
 #include"ConvertString.h"
+#include <Engine/Foundation/Log/EngineLogger.h>
 #include <windows.h>
+#include <algorithm>
+#include <cctype>
 #include <string>
 
 void Log(const std::string& message){
 	ConvertString(message);
 	OutputDebugStringA(message.c_str());
+
+	// 既存のDirectX・シェーダーデバッグ出力もエディタのログ画面へ集約する。
+	std::string displayMessage = message;
+	while(!displayMessage.empty() && (displayMessage.back() == '\n' || displayMessage.back() == '\r')) {
+		displayMessage.pop_back();
+	}
+	if(displayMessage.empty()) return;
+
+	std::string lowerMessage = displayMessage;
+	std::transform(lowerMessage.begin(), lowerMessage.end(), lowerMessage.begin(), [](unsigned char character) {
+		return static_cast<char>(std::tolower(character));
+	});
+
+	CalyxEngine::LogLevel level = CalyxEngine::LogLevel::Trace;
+	if(lowerMessage.find("error") != std::string::npos ||
+	   lowerMessage.find("failed") != std::string::npos ||
+	   lowerMessage.find("failure") != std::string::npos) {
+		level = CalyxEngine::LogLevel::Error;
+	} else if(lowerMessage.find("warning") != std::string::npos) {
+		level = CalyxEngine::LogLevel::Warning;
+	}
+
+	CalyxEngine::EngineLogger::GetInstance().Add(
+		level,
+		CalyxEngine::LogCategory::Rendering,
+		displayMessage,
+		"GraphicsDebugOutput");
 }
 
 std::wstring ConvertString(const std::string& str){

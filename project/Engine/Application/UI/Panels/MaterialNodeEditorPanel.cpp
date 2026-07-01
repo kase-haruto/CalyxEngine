@@ -6,6 +6,7 @@
 #include <Engine\Assets\Texture\TextureManager.h>
 #include <Engine\Application\UI\Panels\AssetPanel.h>
 #include <Engine\Foundation\Clock\ClockManager.h>
+#include <Engine/Foundation/Log/EngineLogger.h>
 #include <Engine\Graphics\Context\GraphicsGroup.h>
 #include <Engine\Graphics\Descriptor\DescriptorAllocator.h>
 #include <Engine\Graphics\MaterialGraph\MaterialGraphCompiler.h>
@@ -924,6 +925,11 @@ namespace CalyxEngine {
 		};
 		CommandManager::GetInstance()->Execute(
 			std::make_unique<ValueEditCommand<NodeGraph>>(name, before, after, apply));
+		EngineLogger::GetInstance().Add(
+			LogLevel::Info,
+			LogCategory::Asset,
+			"Material graph changed: " + material.GetName() + " (" + name + ")",
+			"MaterialNodeEditorPanel");
 	}
 
 	bool MaterialNodeEditorPanel::DrawContextMenu(MaterialAsset& material, const NodeEditorCanvas::ContextMenu& menu) {
@@ -1952,6 +1958,11 @@ namespace CalyxEngine {
 				return;
 			}
 		}
+		EngineLogger::GetInstance().Add(
+			LogLevel::Error,
+			LogCategory::Asset,
+			"Material save failed because its asset record was not found: " + material.GetName(),
+			"MaterialNodeEditorPanel");
 	}
 
 	bool MaterialNodeEditorPanel::EnsurePreviewResources() {

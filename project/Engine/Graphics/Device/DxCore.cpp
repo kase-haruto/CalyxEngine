@@ -8,6 +8,7 @@
 #include <Engine/PostProcess/FullscreenDrawer.h>
 
 #include <Engine/Foundation/Debug/CxAssert.h>
+#include <Engine/Foundation/Log/EngineLogger.h>
 #include <d3dx12.h>
 #include <dxgidebug.h>
 #include <externals/imgui/imgui.h>
@@ -24,6 +25,7 @@ namespace CalyxEngine {
 	}
 
 	void DxCore::ReleaseResources() {
+		EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Rendering, "DirectX resources are being released.", "DxCore");
 		if(auto* previews = AssetPreviewManager::GetInstance()) {
 			previews->Shutdown();
 		}
@@ -35,6 +37,7 @@ namespace CalyxEngine {
 	}
 
 	void DxCore::Initialize(WinApp* winApp, uint32_t width, uint32_t height) {
+		EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Rendering, "DirectX initialization started. Back buffer=" + std::to_string(width) + "x" + std::to_string(height), "DxCore");
 		winApp_		  = winApp;
 		clientWidth_  = width;
 		clientHeight_ = height;
@@ -50,9 +53,11 @@ namespace CalyxEngine {
 		dxCommand_->Initialize(dxDevice_->GetDevice());
 		dxSwapChain_->Initialize(dxDevice_->GetDXGIFactory(), dxCommand_->GetCommandQueue(), winApp_->GetHWND(), width, height);
 		dxFence_->Initialize(dxDevice_->GetDevice());
+		EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Rendering, "DirectX device, command queue, swap chain, and fence initialized.", "DxCore");
 	}
 
 	void DxCore::RendererInitialize(uint32_t width, uint32_t height) {
+		EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Rendering, "Render target initialization started.", "DxCore");
 		renderTargetCollection_ = std::make_unique<RenderTargetCollection>();
 		auto device				= dxDevice_->GetDevice();
 
@@ -107,6 +112,7 @@ namespace CalyxEngine {
 			nodeBuffer->SetRenderTargetType(RenderTargetType::PostEffectBuffer1);
 			renderTargetCollection_->Add("PostEffectNodeBuffer" + std::to_string(i), std::move(nodeBuffer));
 		}
+		EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Rendering, "Render target initialization completed.", "DxCore");
 	}
 
 	void DxCore::PreDraw() {
@@ -144,6 +150,7 @@ namespace CalyxEngine {
 		if(FAILED(hr)) {
 			// ログを出力するか、デバッグ用にブレークポイントを設定
 			OutputDebugStringA("commandList->Close() failed.\n");
+			EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Rendering, "Failed to close the DirectX command list.", "DxCore");
 
 			// エラーハンドリング
 			throw std::runtime_error("Failed to close command list.");
@@ -167,6 +174,7 @@ namespace CalyxEngine {
 
 		clientWidth_  = width;
 		clientHeight_ = height;
+		EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Rendering, "Swap chain resized to " + std::to_string(width) + "x" + std::to_string(height) + ".", "DxCore");
 
 		// GPUの完了を待つ
 		dxFence_->Signal(dxCommand_->GetCommandQueue());

@@ -5,6 +5,7 @@
 #include <Engine/Application/System/PlaySession.h>
 #include <Engine/Editor/AssetPreviewManager.h>
 #include <Engine/Graphics/Camera/3d/Camera3d.h>
+#include <Engine/Foundation/Log/EngineLogger.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
 #include <Engine/Graphics/Device/DxCore.h>
@@ -106,6 +107,7 @@ namespace CalyxEngine {
 
 	//------------------------------------------------------------
 	void SceneManager::Initialize() {
+		EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Engine, "Scene manager initialization started.", "SceneManager");
 #if defined(_DEBUG) || defined(DEVELOP)
 		pickingPass_ = std::make_unique<PickingPass>();
 		pickingPass_->Initialize(1280, 720);
@@ -113,17 +115,25 @@ namespace CalyxEngine {
 		editorGridRenderer_->Initialize();
 		editorPreviewModelRenderer_ = std::make_unique<ModelRenderer>();
 #endif
+		EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Engine, "Scene manager initialization completed.", "SceneManager");
 	}
 
 	bool SceneManager::OpenScene(const std::filesystem::path& scenePath) {
-		if(scenePath.empty() || slots_.empty()) return false;
-		if(pPlaySession_ && pPlaySession_->GetContext() != GetCurrentSceneContext()) return false;
+		if(scenePath.empty() || slots_.empty()) {
+			EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Editor, "Scene open failed because the path is empty or no scene slot exists.", "SceneManager");
+			return false;
+		}
+		if(pPlaySession_ && pPlaySession_->GetContext() != GetCurrentSceneContext()) {
+			EngineLogger::GetInstance().Add(LogLevel::Warning, LogCategory::Editor, "Scene open was blocked while a runtime or preview context is active: " + scenePath.generic_string(), "SceneManager");
+			return false;
+		}
 
 		SceneContext* previousContext = SceneContext::Current();
 		auto nextContext = std::make_unique<SceneContext>();
 		nextContext->Initialize(false);
 		if(!SceneSerializer::Load(*nextContext, scenePath.generic_string())) {
 			if(previousContext) previousContext->MakeCurrent();
+			EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Editor, "Scene deserialization failed: " + scenePath.generic_string(), "SceneManager");
 			return false;
 		}
 		nextContext->SetScenePath(scenePath.generic_string());
@@ -146,11 +156,13 @@ namespace CalyxEngine {
 		lastBoundCtx_ = nullptr;
 		lastRuntimeGen_ = 0;
 		RebindIfContextChanged();
+		EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Editor, "Scene opened successfully: " + scenePath.generic_string(), "SceneManager");
 		return true;
 	}
 
 	//------------------------------------------------------------
 	size_t SceneManager::AddScene(SceneId id, std::unique_ptr<BaseScene> scene) {
+		const std::string sceneName = scene ? scene->GetSceneName() : "Unnamed";
 		SceneSlot slot;
 		slot.scene = std::move(scene);
 		slot.ctx   = std::make_unique<SceneContext>();
@@ -162,12 +174,16 @@ namespace CalyxEngine {
 		size_t index   = slots_.size() - 1;
 		idToIndex_[id] = index;
 		registeredSceneIds_.push_back(id);
+		EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Engine, "Scene registered: " + sceneName + " (slot=" + std::to_string(index) + ")", "SceneManager");
 		return index;
 	}
 
 	//------------------------------------------------------------
 	void SceneManager::SetCurrent(size_t index) {
-		if(index >= slots_.size()) return;
+		if(index >= slots_.size()) {
+			EngineLogger::GetInstance().Add(LogLevel::Warning, LogCategory::Engine, "Scene switch ignored because the slot index is invalid: " + std::to_string(index), "SceneManager");
+			return;
+		}
 
 		if(pPlaySession_ && pPlaySession_->ExitRequested()) {
 			pPlaySession_->FinalizeExitCleanup();
@@ -189,6 +205,7 @@ namespace CalyxEngine {
 		}
 
 		RebindIfContextChanged();
+		EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Game, "Current scene changed to slot " + std::to_string(index) + ".", "SceneManager");
 	}
 
 	void SceneManager::SetCurrent(SceneId id) {
@@ -227,6 +244,7 @@ namespace CalyxEngine {
 	}
 
 	void SceneManager::ClearAllContexts() {
+		EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Engine, "Clearing all scene contexts.", "SceneManager");
 		editorPreviewCtx_ = nullptr;
 		lastBoundCtx_	 = nullptr;
 		lastRuntimeGen_	 = 0;
@@ -535,8 +553,12 @@ namespace CalyxEngine {
 
 	void SceneManager::RequestSceneChangeInternal(SceneId next) {
 		auto it = idToIndex_.find(next);
-		if(it == idToIndex_.end()) return;
+		if(it == idToIndex_.end()) {
+			EngineLogger::GetInstance().Add(LogLevel::Warning, LogCategory::Game, "Scene change request ignored because the scene ID is not registered.", "SceneManager");
+			return;
+		}
 		pendingSwitchIndex_ = it->second;
+		EngineLogger::GetInstance().Add(LogLevel::Trace, LogCategory::Game, "Scene change queued for slot " + std::to_string(it->second) + ".", "SceneManager");
 	}
 
 	void SceneManager::RequestSceneChangeInternal(

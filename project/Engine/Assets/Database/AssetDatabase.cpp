@@ -5,6 +5,7 @@
 #include <Engine/Assets/DataAsset/DataAssetManager.h>
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Editor/AssetPreviewManager.h>
+#include <Engine/Foundation/Log/EngineLogger.h>
 #include <externals/nlohmann/json.hpp>
 
 #include <algorithm>
@@ -26,6 +27,11 @@ AssetDatabase* AssetDatabase::GetInstance() {
 //		初期化
 /////////////////////////////////////////////////////////////////////////////////////////
 void AssetDatabase::Initialize(const std::filesystem::path& assetsRoot) {
+	CalyxEngine::EngineLogger::GetInstance().Add(
+		CalyxEngine::LogLevel::Info,
+		CalyxEngine::LogCategory::Asset,
+		"Asset database initialization started: " + assetsRoot.generic_string(),
+		"AssetDatabase");
 	// 既存の管理データを初期化（再初期化に対応するため）
 	records_.clear();
 	normPathToGuid_.clear();
@@ -39,15 +45,32 @@ void AssetDatabase::Initialize(const std::filesystem::path& assetsRoot) {
 		// パス解決に失敗した場合は、文字列レベルでの正規化フォールバックを行う
 		assetsRoot_ = assetsRoot.lexically_normal();
 		ec.clear();
+		CalyxEngine::EngineLogger::GetInstance().Add(
+			CalyxEngine::LogLevel::Warning,
+			CalyxEngine::LogCategory::Asset,
+			"Asset root canonicalization failed; using normalized path: " + assetsRoot_.generic_string(),
+			"AssetDatabase");
 	}
 
 	// アセットルートフォルダが物理的に存在しない場合は自動で新規作成する
 	if(!std::filesystem::exists(assetsRoot_)) {
 		std::filesystem::create_directories(assetsRoot_, ec);
+		if(ec) {
+			CalyxEngine::EngineLogger::GetInstance().Add(
+				CalyxEngine::LogLevel::Error,
+				CalyxEngine::LogCategory::Asset,
+				"Failed to create asset root: " + assetsRoot_.generic_string() + " (" + ec.message() + ")",
+				"AssetDatabase");
+		}
 	}
 
 	// 初期化時にアセットフォルダ全体を走査してデータベースに登録
 	Scan();
+	CalyxEngine::EngineLogger::GetInstance().Add(
+		CalyxEngine::LogLevel::Info,
+		CalyxEngine::LogCategory::Asset,
+		"Asset database initialized. Records=" + std::to_string(records_.size()),
+		"AssetDatabase");
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -135,6 +158,11 @@ AssetGUID AssetDatabase::LoadOrCreateMeta(const std::filesystem::path& absPath, 
 		} catch(...) {
 			// ディスク書き込みエラー等の例外を処理
 			std::cerr << "[AssetDB] meta write failed: " << metaPath << std::endl;
+			CalyxEngine::EngineLogger::GetInstance().Add(
+				CalyxEngine::LogLevel::Error,
+				CalyxEngine::LogCategory::Asset,
+				"Failed to write asset metadata: " + metaPath.generic_string(),
+				"AssetDatabase");
 		}
 	}
 	return guid;
@@ -314,7 +342,16 @@ AssetGUID AssetDatabase::RegisterOrUpdate(const std::filesystem::path& absOrRelP
 /////////////////////////////////////////////////////////////////////////////////////////
 void AssetDatabase::Scan() {
 	// アセットルートディレクトリが物理的に存在しない場合は処理を中断
-	if(!std::filesystem::exists(assetsRoot_)) return;
+	if(!std::filesystem::exists(assetsRoot_)) {
+		CalyxEngine::EngineLogger::GetInstance().Add(
+			CalyxEngine::LogLevel::Warning,
+			CalyxEngine::LogCategory::Asset,
+			"Asset scan skipped because the root does not exist: " + assetsRoot_.generic_string(),
+			"AssetDatabase");
+		return;
+	}
+
+	const std::size_t recordsBeforeScan = records_.size();
 
 	// --- 削除されたアセットのクリーンアップ (ガーベジコレクション) ---
 	// 登録されているレコードのうち、ファイルが物理的に削除されたレコードを取り除く
@@ -347,4 +384,9 @@ void AssetDatabase::Scan() {
 
 	// 走査結果を反映した表示用キャッシュを再構築
 	RebuildViewCache();
+	CalyxEngine::EngineLogger::GetInstance().Add(
+		CalyxEngine::LogLevel::Trace,
+		CalyxEngine::LogCategory::Asset,
+		"Asset scan completed. Before=" + std::to_string(recordsBeforeScan) + ", After=" + std::to_string(records_.size()),
+		"AssetDatabase");
 }

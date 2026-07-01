@@ -1,4 +1,5 @@
 #include <CalyxEngine/Project.h>
+#include <Engine/Foundation/Log/EngineLogger.h>
 
 #include <externals/nlohmann/json.hpp>
 
@@ -65,13 +66,23 @@ namespace Calyx {
 	bool LoadProjectFile(const std::filesystem::path& path, ProjectInfo& outProject) {
 		std::ifstream file(path);
 		if(!file) {
+			CalyxEngine::EngineLogger::GetInstance().Add(
+				CalyxEngine::LogLevel::Error,
+				CalyxEngine::LogCategory::Engine,
+				"Project file could not be opened: " + path.generic_string(),
+				"Project");
 			return false;
 		}
 
 		nlohmann::json root;
 		try {
 			file >> root;
-		} catch(const nlohmann::json::exception&) {
+		} catch(const nlohmann::json::exception& exception) {
+			CalyxEngine::EngineLogger::GetInstance().Add(
+				CalyxEngine::LogLevel::Error,
+				CalyxEngine::LogCategory::Engine,
+				"Project file JSON is invalid: " + path.generic_string() + " (" + exception.what() + ")",
+				"Project");
 			return false;
 		}
 
@@ -102,6 +113,11 @@ namespace Calyx {
 		project.templateName		= root.value("template", std::string{"Blank"});
 
 		outProject = std::move(project);
+		CalyxEngine::EngineLogger::GetInstance().Add(
+			CalyxEngine::LogLevel::Info,
+			CalyxEngine::LogCategory::Engine,
+			"Project loaded: " + outProject.name + " (" + outProject.projectFile.generic_string() + ")",
+			"Project");
 		return true;
 	}
 
@@ -110,6 +126,7 @@ namespace Calyx {
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 	bool SaveProjectFile(const ProjectInfo& project) {
 		if(project.projectFile.empty()) {
+			CalyxEngine::EngineLogger::GetInstance().Add(CalyxEngine::LogLevel::Error, CalyxEngine::LogCategory::Engine, "Project save failed because the project file path is empty.", "Project");
 			return false;
 		}
 
@@ -120,6 +137,7 @@ namespace Calyx {
 			std::filesystem::create_directories(projectFileParent, ec);
 		}
 		if(ec) {
+			CalyxEngine::EngineLogger::GetInstance().Add(CalyxEngine::LogLevel::Error, CalyxEngine::LogCategory::Engine, "Project directory could not be created: " + projectFileParent.generic_string() + " (" + ec.message() + ")", "Project");
 			return false;
 		}
 
@@ -143,11 +161,13 @@ namespace Calyx {
 
 		std::ofstream file(project.projectFile);
 		if(!file) {
+			CalyxEngine::EngineLogger::GetInstance().Add(CalyxEngine::LogLevel::Error, CalyxEngine::LogCategory::Engine, "Project file could not be written: " + project.projectFile.generic_string(), "Project");
 			return false;
 		}
 
 		// インデント付きで保存し、人が読める形式にする
 		file << root.dump(2);
+		CalyxEngine::EngineLogger::GetInstance().Add(CalyxEngine::LogLevel::Info, CalyxEngine::LogCategory::Engine, "Project saved: " + project.projectFile.generic_string(), "Project");
 		return true;
 	}
 
@@ -156,6 +176,7 @@ namespace Calyx {
 	//////////////////////////////////////////////////////////////////////////////////////////////////////
 	bool CreateProject(const ProjectInfo& project) {
 		if(project.projectFile.empty() || project.rootDirectory.empty()) {
+			CalyxEngine::EngineLogger::GetInstance().Add(CalyxEngine::LogLevel::Error, CalyxEngine::LogCategory::Engine, "Project creation failed because required paths are empty.", "Project");
 			return false;
 		}
 
@@ -163,15 +184,24 @@ namespace Calyx {
 
 		// プロジェクトルートを作成する
 		std::filesystem::create_directories(project.rootDirectory, ec);
-		if(ec) return false;
+		if(ec) {
+			CalyxEngine::EngineLogger::GetInstance().Add(CalyxEngine::LogLevel::Error, CalyxEngine::LogCategory::Engine, "Project root could not be created: " + project.rootDirectory.generic_string() + " (" + ec.message() + ")", "Project");
+			return false;
+		}
 
 		// アセット用ディレクトリを作成する
 		std::filesystem::create_directories(ResolveProjectPath(project, project.assetDirectory), ec);
-		if(ec) return false;
+		if(ec) {
+			CalyxEngine::EngineLogger::GetInstance().Add(CalyxEngine::LogLevel::Error, CalyxEngine::LogCategory::Asset, "Project asset directory could not be created: " + ResolveProjectPath(project, project.assetDirectory).generic_string() + " (" + ec.message() + ")", "Project");
+			return false;
+		}
 
 		// ソースコード用ディレクトリを作成する
 		std::filesystem::create_directories(ResolveProjectPath(project, project.sourceDirectory), ec);
-		if(ec) return false;
+		if(ec) {
+			CalyxEngine::EngineLogger::GetInstance().Add(CalyxEngine::LogLevel::Error, CalyxEngine::LogCategory::Engine, "Project source directory could not be created: " + ResolveProjectPath(project, project.sourceDirectory).generic_string() + " (" + ec.message() + ")", "Project");
+			return false;
+		}
 
 		// 最後にプロジェクトファイルを保存する
 		return SaveProjectFile(project);

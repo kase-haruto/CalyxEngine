@@ -4,6 +4,7 @@
 
 #include <Engine/Application/UI/Panels/AssetPanel.h>
 #include <Engine/Assets/Database/AssetDatabase.h>
+#include <Engine/Foundation/Log/EngineLogger.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/foundation/Utility/FileSystem/ConfigPathResolver/ConfigPathResolver.h>
 #include <Engine/objects/Collider/BoxCollider.h>
@@ -502,11 +503,26 @@ bool BaseGameObject::SetModelByGuid(const Guid& guid) {
 
 bool BaseGameObject::SetModelFileNameForEditor(const std::string& modelName) {
 	BaseModelConfig& modelConfig = config_.GetConfig().modelConfig;
+	const std::string previousModelName = modelConfig.modelName;
 	modelConfig.modelName = modelName;
 
-	if(!SetModelFromFileName(modelConfig.modelName)) return false;
+	if(!SetModelFromFileName(modelConfig.modelName)) {
+		CalyxEngine::EngineLogger::GetInstance().Add(
+			CalyxEngine::LogLevel::Error,
+			CalyxEngine::LogCategory::Asset,
+			"Model assignment failed for object '" + GetName() + "': " + modelName,
+			"BaseGameObject");
+		return false;
+	}
 	if(model_) {
 		model_->ApplyConfig(modelConfig);
+	}
+	if(previousModelName != modelName) {
+		CalyxEngine::EngineLogger::GetInstance().Add(
+			CalyxEngine::LogLevel::Info,
+			CalyxEngine::LogCategory::Asset,
+			"Model changed for object '" + GetName() + "': " + previousModelName + " -> " + modelName,
+			"BaseGameObject");
 	}
 
 	return true;

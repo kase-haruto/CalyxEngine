@@ -12,6 +12,10 @@
 #include <type_traits>
 
 namespace {
+	constexpr int kPositionSolverIterations = 4;       //< 複数接触を安定させる位置Solverの反復回数
+	constexpr float kPenetrationSlop = 0.001f;        //< 浮動小数点誤差として許容する微小な侵入量
+	constexpr float kDynamicCorrectionPercent = 0.8f; //< Dynamicを含む接触で1反復に解消する侵入量の割合
+
 	struct ContactManifold {
 		CalyxEngine::Vector3 normal{0.0f, 1.0f, 0.0f}; //< AをBから離す方向
 		float penetration = 0.0f;						 //< 侵入量
@@ -62,6 +66,77 @@ namespace {
 		const float t = std::clamp(CalyxEngine::Vector3::Dot(point - segmentStart, segment) / segmentLengthSq, 0.0f, 1.0f);
 		// 丸めた t から線分上の最近点を復元する。
 		return segmentStart + segment * t;
+	}
+
+	/**
+	 * \brief 2本の線分上にある最近点の組を求める
+	 * \param startA 線分Aの始点
+	 * \param endA 線分Aの終点
+	 * \param startB 線分Bの始点
+	 * \param endB 線分Bの終点
+	 * \param outPointA 線分A上の最近点
+	 * \param outPointB 線分B上の最近点
+	 */
+	void ClosestPointsOnSegments(
+		const CalyxEngine::Vector3& startA,
+		const CalyxEngine::Vector3& endA,
+		const CalyxEngine::Vector3& startB,
+		const CalyxEngine::Vector3& endB,
+		CalyxEngine::Vector3& outPointA,
+		CalyxEngine::Vector3& outPointB) {
+		// 各線分の方向と、始点同士を結ぶベクトルを求める。
+		const CalyxEngine::Vector3 directionA = endA - startA;
+		const CalyxEngine::Vector3 directionB = endB - startB;
+		const CalyxEngine::Vector3 startDifference = startA - startB;
+		const float lengthSqA = directionA.LengthSquared();
+		const float lengthSqB = directionB.LengthSquared();
+		const float directionBDotDifference = CalyxEngine::Vector3::Dot(directionB, startDifference);
+
+		float parameterA = 0.0f;
+		float parameterB = 0.0f;
+
+		// 両方の線分が点まで縮退している場合は、各始点を最近点として返す。
+		if(lengthSqA <= 1.0e-8f && lengthSqB <= 1.0e-8f) {
+			outPointA = startA;
+			outPointB = startB;
+			return;
+		}
+
+		// Aだけが点の場合は、Aの点からB線分への射影位置を求める。
+		if(lengthSqA <= 1.0e-8f) {
+			parameterB = std::clamp(directionBDotDifference / lengthSqB, 0.0f, 1.0f);
+		} else {
+			const float directionADotDifference = CalyxEngine::Vector3::Dot(directionA, startDifference);
+
+			// Bだけが点の場合は、Bの点からA線分への射影位置を求める。
+			if(lengthSqB <= 1.0e-8f) {
+				parameterA = std::clamp(-directionADotDifference / lengthSqA, 0.0f, 1.0f);
+			} else {
+				// 一般ケースでは、無限直線同士の最近点パラメータを求める。
+				const float directionDot = CalyxEngine::Vector3::Dot(directionA, directionB);
+				const float denominator = lengthSqA * lengthSqB - directionDot * directionDot;
+				if(std::abs(denominator) > 1.0e-8f) {
+					parameterA = std::clamp(
+						(directionDot * directionBDotDifference - directionADotDifference * lengthSqB) / denominator,
+						0.0f,
+						1.0f);
+				}
+
+				// B側のパラメータを求め、端点を越えた場合はA側も計算し直す。
+				parameterB = (directionDot * parameterA + directionBDotDifference) / lengthSqB;
+				if(parameterB < 0.0f) {
+					parameterB = 0.0f;
+					parameterA = std::clamp(-directionADotDifference / lengthSqA, 0.0f, 1.0f);
+				} else if(parameterB > 1.0f) {
+					parameterB = 1.0f;
+					parameterA = std::clamp((directionDot - directionADotDifference) / lengthSqA, 0.0f, 1.0f);
+				}
+			}
+		}
+
+		// 求めたパラメータから、各線分上の最近点を復元する。
+		outPointA = startA + directionA * parameterA;
+		outPointB = startB + directionB * parameterB;
 	}
 
 	void GetCapsuleSegment(const Capsule& capsule, CalyxEngine::Vector3& outStart, CalyxEngine::Vector3& outEnd) {
@@ -237,26 +312,11 @@ namespace {
 		GetCapsuleSegment(a, a0, a1);
 		GetCapsuleSegment(b, b0, b1);
 
-		// 反復回数を固定した近似で、2本の中心線の最近点を安定して求める。
-		// A線分上を均等サンプルし、それぞれからB線分への最近点を調べる。
-		float bestT = 0.0f;
-		float bestU = 0.0f;
-		float bestDistSq = (std::numeric_limits<float>::max)();
-		for(int i = 0; i <= 8; ++i) {
-			const float t = static_cast<float>(i) / 8.0f;
-			const CalyxEngine::Vector3 p = a0 + (a1 - a0) * t;
-			const CalyxEngine::Vector3 q = ClosestPointOnSegment(p, b0, b1);
-			const float distSq = (p - q).LengthSquared();
-			if(distSq < bestDistSq) {
-				// 現時点で最も近いA線分上の位置を保存する。
-				bestDistSq = distSq;
-				bestT = t;
-			}
-		}
-		// 保存したA線分上の位置から、B線分上の最近点を再取得する。
-		const CalyxEngine::Vector3 p = a0 + (a1 - a0) * bestT;
-		const CalyxEngine::Vector3 q = ClosestPointOnSegment(p, b0, b1);
-		(void)bestU;
+		// 線分同士の最近点を解析的に求め、サンプル間隔による判定漏れを防ぐ。
+		CalyxEngine::Vector3 p;
+		CalyxEngine::Vector3 q;
+		ClosestPointsOnSegments(a0, a1, b0, b1, p, q);
+		const float bestDistSq = (p - q).LengthSquared();
 
 		const float radiusSum = a.radius + b.radius;
 		// 中心線分間の距離が半径和より大きいなら接触していない。
@@ -276,54 +336,55 @@ namespace {
 		ComputeOBBAxes(obb, axes);
 		const CalyxEngine::Vector3 halfSize = obb.size * 0.5f;
 
-		float bestPenetration = (std::numeric_limits<float>::max)();
-		CalyxEngine::Vector3 bestNormal = CalyxEngine::Vector3::Up();
-		bool hasContact = false;
+		// 点からOBBまでの距離は、線分パラメータに対して凸になる。
+		// 固定個数のサンプリングでは薄いBoxがサンプル間に入るため、線分全体から最近点を求める。
+		auto distanceSquaredAt = [&](float t) {
+			const CalyxEngine::Vector3 point = start + (end - start) * t;
+			const CalyxEngine::Vector3 closest = ClosestPointOnOBB(obb, point);
+			return (point - closest).LengthSquared();
+		};
 
-		for(int i = 0; i <= 8; ++i) {
-			const float t = static_cast<float>(i) / 8.0f;
-			const CalyxEngine::Vector3 p = start + (end - start) * t;
-			const CalyxEngine::Vector3 q = ClosestPointOnOBB(obb, p);
-			const float distSq = (p - q).LengthSquared();
-
-			float penetration = 0.0f;
-			CalyxEngine::Vector3 normal = CalyxEngine::Vector3::Up();
-
-			if(distSq > 1.0e-8f) {
-				if(distSq > capsule.radius * capsule.radius) continue;
-
-				const float dist = std::sqrt((std::max)(distSq, 0.0f));
-				normal = (p - q) / dist;
-				penetration = capsule.radius - dist;
+		float left = 0.0f;
+		float right = 1.0f;
+		for(int iteration = 0; iteration < 40; ++iteration) {
+			const float t0 = left + (right - left) / 3.0f;
+			const float t1 = right - (right - left) / 3.0f;
+			if(distanceSquaredAt(t0) < distanceSquaredAt(t1)) {
+				right = t1;
 			} else {
-				const CalyxEngine::Vector3 local = p - obb.center;
-				float minExit = (std::numeric_limits<float>::max)();
-
-				for(int axisIndex = 0; axisIndex < 3; ++axisIndex) {
-					const float halfExtent = (axisIndex == 0) ? halfSize.x : (axisIndex == 1) ? halfSize.y : halfSize.z;
-					const float projected = CalyxEngine::Vector3::Dot(local, axes[axisIndex]);
-					const float exitDistance = halfExtent - std::abs(projected);
-
-					if(exitDistance < minExit) {
-						minExit = exitDistance;
-						normal = axes[axisIndex] * (projected >= 0.0f ? 1.0f : -1.0f);
-					}
-				}
-
-				penetration = capsule.radius + minExit;
+				left = t0;
 			}
-
-			if(penetration <= 0.0f || penetration >= bestPenetration) continue;
-
-			bestPenetration = penetration;
-			bestNormal = normal;
-			hasContact = true;
 		}
 
-		if(!hasContact) return false;
+		const float closestT = (left + right) * 0.5f;
+		const CalyxEngine::Vector3 p = start + (end - start) * closestT;
+		const CalyxEngine::Vector3 q = ClosestPointOnOBB(obb, p);
+		const float distSq = (p - q).LengthSquared();
+		if(distSq > capsule.radius * capsule.radius) return false;
 
-		out.normal = SafeNormalize(bestNormal, CalyxEngine::Vector3::Up());
-		out.penetration = bestPenetration;
+		if(distSq > 1.0e-8f) {
+			const float dist = std::sqrt(distSq);
+			out.normal = (p - q) / dist;
+			out.penetration = capsule.radius - dist;
+			return out.penetration > 0.0f;
+		}
+
+		// 中心線がOBB内部を通る場合は、最も近い面の外向き法線を使う。
+		const CalyxEngine::Vector3 local = p - obb.center;
+		float minExit = (std::numeric_limits<float>::max)();
+		CalyxEngine::Vector3 normal = CalyxEngine::Vector3::Up();
+		for(int axisIndex = 0; axisIndex < 3; ++axisIndex) {
+			const float halfExtent = (axisIndex == 0) ? halfSize.x : (axisIndex == 1) ? halfSize.y : halfSize.z;
+			const float projected = CalyxEngine::Vector3::Dot(local, axes[axisIndex]);
+			const float exitDistance = halfExtent - std::abs(projected);
+			if(exitDistance < minExit) {
+				minExit = exitDistance;
+				normal = axes[axisIndex] * (projected >= 0.0f ? 1.0f : -1.0f);
+			}
+		}
+
+		out.normal = SafeNormalize(normal, CalyxEngine::Vector3::Up());
+		out.penetration = capsule.radius + minExit;
 		return out.penetration > 0.0f;
 	}
 
@@ -373,27 +434,73 @@ namespace {
 	float MovableWeight(const PhysicsBody& body) {
 		// Static は壁・床として扱い、押し戻しで動かさない。
 		// Kinematic はキャラクターや移動オブジェクトとして、位置補正を受ける。
-		return body.GetBodyType() == PhysicsBodyType::Kinematic ? 1.0f : 0.0f;
+		if(body.GetBodyType() == PhysicsBodyType::Kinematic) return 1.0f;
+		// Dynamic同士では質量が軽いBodyほど大きく補正する。
+		if(body.GetBodyType() == PhysicsBodyType::Dynamic) return body.GetInverseMass();
+		return 0.0f;
+	}
+
+	/**
+	 * \brief Dynamic Bodyの接近する法線速度をImpulseで打ち消す
+	 * \param bodyA 接触Body A
+	 * \param bodyB 接触Body B
+	 * \param normal Body AをBody Bから離す接触法線
+	 */
+	void ResolveDynamicVelocity(
+		PhysicsBody& bodyA,
+		PhysicsBody& bodyB,
+		const CalyxEngine::Vector3& normal) {
+		// Dynamic以外は無限質量として扱い、速度補正の分母へ加えない。
+		const float inverseMassA = bodyA.GetInverseMass();
+		const float inverseMassB = bodyB.GetInverseMass();
+		const float inverseMassSum = inverseMassA + inverseMassB;
+		if(IsNearlyZero(inverseMassSum)) return;
+
+		// Bから見たAの相対速度を接触法線へ射影する。
+		const CalyxEngine::Vector3 relativeVelocity =
+			bodyA.GetLinearVelocity() - bodyB.GetLinearVelocity();
+		const float velocityAlongNormal = CalyxEngine::Vector3::Dot(relativeVelocity, normal);
+
+		// 法線方向へ離れているBodyへImpulseを与えると引き戻してしまうため補正しない。
+		if(velocityAlongNormal >= 0.0f) return;
+
+		// 反発係数0の非弾性衝突として、接近する法線速度だけを打ち消す。
+		const float impulseMagnitude = -velocityAlongNormal / inverseMassSum;
+		const CalyxEngine::Vector3 impulse = normal * impulseMagnitude;
+
+		// 逆質量に比例して、各Dynamic Bodyへ反対向きの速度変化を適用する。
+		if(inverseMassA > 0.0f) bodyA.AddLinearVelocity(impulse * inverseMassA);
+		if(inverseMassB > 0.0f) bodyB.AddLinearVelocity(-impulse * inverseMassB);
 	}
 
 	void ApplyCorrection(BaseGameObject* owner, Collider* collider, const CalyxEngine::Vector3& correction) {
 		if(!owner || !collider) return;
 
-		CalyxEngine::Vector3 adjustedCorrection = correction;
-		if(dynamic_cast<Actor*>(owner) && adjustedCorrection.y > 0.0f) {
-			adjustedCorrection.y = 0.0f;
-		}
-		if(adjustedCorrection.LengthSquared() <= 1.0e-10f) return;
+		// オブジェクト種別によって補正軸を欠落させず、接触法線に沿った補正をそのまま適用する。
+		// Character固有の床吸着はCharacterMovementComponent側で別途処理する。
+		if(correction.LengthSquared() <= 1.0e-10f) return;
 
 		// Transform の座標を直接補正する。
 		// この時点では各オブジェクトの更新後なので、次の描画に反映させるため行列も更新する。
 		WorldTransform& transform = owner->GetWorldTransform();
-		transform.translation += adjustedCorrection;
+		transform.translation += correction;
 		transform.Update();
 
 		// Transform を動かしたので、同じフレーム内の後続ペア判定が古い形状を使わないように
 		// コライダー形状も即座に同期する。
 		collider->Update(owner->GetCenterPos(), transform.rotation);
+	}
+
+	void ResolveKinematicCharacterVelocity(BaseGameObject* owner, const CalyxEngine::Vector3& normal) {
+		if(auto* actor = dynamic_cast<Actor*>(owner)) {
+			actor->GetCharacterMovement().ResolveBlockingVelocity(normal);
+			CalyxEngine::Vector3 velocity = actor->GetVelocity();
+			const float velocityAlongNormal = CalyxEngine::Vector3::Dot(velocity, normal);
+			if(velocityAlongNormal < 0.0f) {
+				velocity -= normal * velocityAlongNormal;
+				actor->SetVelocity(velocity);
+			}
+		}
 	}
 }
 
@@ -402,22 +509,86 @@ PhysicsSystem* PhysicsSystem::GetInstance() {
 	return &instance;
 }
 
+void PhysicsSystem::Update(float deltaTime) {
+	// 一時停止や不正な時間では物理時間を進めない。
+	if(deltaTime <= 0.0f) return;
+
+	// 大きなフレーム時間をそのまま蓄積すると復帰後に大量Stepが走るため上限を設ける。
+	accumulator_ += (std::min)(deltaTime, 0.25f);
+
+	int stepCount = 0;
+	while(accumulator_ >= fixedDeltaTime_ && stepCount < maxSubSteps_) {
+		// 固定幅だけ物理シミュレーションを進める。
+		Step(fixedDeltaTime_);
+		accumulator_ -= fixedDeltaTime_;
+		++stepCount;
+	}
+
+	// 最大Step数を超えた古い時間は破棄し、処理落ちが連鎖するSpiral of Deathを防ぐ。
+	if(stepCount == maxSubSteps_ && accumulator_ >= fixedDeltaTime_) {
+		accumulator_ = 0.0f;
+	}
+
+}
+
+void PhysicsSystem::Step(float fixedDeltaTime) {
+	// 先に重力と速度からDynamicの予測位置を更新する。
+	IntegrateDynamicBodies(fixedDeltaTime);
+
+	// 押し戻し前の接触状態を保存し、この固定Stepの衝突イベントを通知する。
+	CollisionManager::GetInstance()->UpdateCollisionAllCollider();
+
+	// イベント確定後に、移動で発生しためり込みと法線方向速度を解決する。
+	ResolveAll();
+}
+
+void PhysicsSystem::IntegrateDynamicBodies(float fixedDeltaTime) {
+	const CalyxEngine::Vector3 gravity{0.0f, -9.8f, 0.0f};
+	const auto colliders = CollisionManager::GetInstance()->GetCollidersSnapshot();
+
+	for(Collider* collider : colliders) {
+		// Colliderを持たないBodyは現在の登録方式では列挙されないため対象外とする。
+		if(!collider || !collider->IsCollisionEnubled()) continue;
+
+		BaseGameObject* owner = collider->GetOwner();
+		if(!owner) continue;
+
+		PhysicsBody& body = owner->GetPhysicsBody();
+		if(!body.IsEnabled() || body.GetBodyType() != PhysicsBodyType::Dynamic) continue;
+
+		// 重力を固定時間ぶん速度へ積分する。
+		body.IntegrateForces(gravity, fixedDeltaTime);
+
+		// 現在速度から固定時間ぶんの移動量を求めてTransformへ反映する。
+		WorldTransform& transform = owner->GetWorldTransform();
+		transform.translation += body.GetLinearVelocity() * fixedDeltaTime;
+		transform.Update();
+
+		// 後続の衝突判定が移動後の形状を使うようColliderを即座に同期する。
+		collider->Update(owner->GetCenterPos(), transform.rotation);
+	}
+}
+
 void PhysicsSystem::ResolveAll() {
 	// CollisionManager の内部 list を直接走査すると、処理中の登録解除で iterator が崩れる。
 	// ここではポインタ一覧をコピーして、現在フレームの固定スナップショットとして扱う。
 	const auto colliders = CollisionManager::GetInstance()->GetCollidersSnapshot();
 
-	for(size_t i = 0; i < colliders.size(); ++i) {
-		Collider* a = colliders[i];
-		// 無効コライダー、Trigger、nullptr は物理応答の対象外にする。
-		if(!a || !a->IsCollisionEnubled() || a->IsTrigger()) continue;
+	// 1回の補正で別のColliderへ侵入する場合があるため、同じ一覧を複数回解決する。
+	for(int iteration = 0; iteration < kPositionSolverIterations; ++iteration) {
+		bool appliedAnyCorrection = false;
 
-		BaseGameObject* ownerA = a->GetOwner();
+		for(size_t i = 0; i < colliders.size(); ++i) {
+			Collider* a = colliders[i];
+		// 無効コライダー、Trigger、nullptr は物理応答の対象外にする。
+			if(!a || !a->IsCollisionEnubled() || a->IsTrigger()) continue;
+
+			BaseGameObject* ownerA = a->GetOwner();
 		// owner がないコライダーは Transform を補正できないため対象外。
 		// PhysicsBody が無効なら、接触イベントだけを使うオブジェクトとして扱う。
-		if(!ownerA || !ownerA->GetPhysicsBody().IsEnabled()) continue;
+			if(!ownerA || !ownerA->GetPhysicsBody().IsEnabled()) continue;
 
-		for(size_t j = i + 1; j < colliders.size(); ++j) {
+			for(size_t j = i + 1; j < colliders.size(); ++j) {
 			Collider* b = colliders[j];
 			// B側もA側と同じ基準で物理応答対象かを確認する。
 			if(!b || !b->IsCollisionEnubled() || b->IsTrigger()) continue;
@@ -429,8 +600,18 @@ void PhysicsSystem::ResolveAll() {
 			PhysicsBody& bodyB = ownerB->GetPhysicsBody();
 			// Body種別を「補正を受ける重み」に変換する。
 			// Static/Static は合計0になり、壁同士のように動かす必要がない。
-			const float weightA = MovableWeight(bodyA);
-			const float weightB = MovableWeight(bodyB);
+			float weightA = MovableWeight(bodyA);
+			float weightB = MovableWeight(bodyB);
+
+			// DynamicとKinematicの組み合わせでは、ゲーム制御のKinematicをSolverから動かさない。
+			// Kinematic対StaticとKinematic対Kinematicは既存互換の位置補正を維持する。
+			if(bodyA.GetBodyType() == PhysicsBodyType::Dynamic &&
+			   bodyB.GetBodyType() == PhysicsBodyType::Kinematic) {
+				weightB = 0.0f;
+			} else if(bodyA.GetBodyType() == PhysicsBodyType::Kinematic &&
+					  bodyB.GetBodyType() == PhysicsBodyType::Dynamic) {
+				weightA = 0.0f;
+			}
 			const float totalWeight = weightA + weightB;
 			if(IsNearlyZero(totalWeight)) continue;
 
@@ -438,10 +619,32 @@ void PhysicsSystem::ResolveAll() {
 			// 非接触なら補正せず次のペアへ進む。
 			ContactManifold contact;
 			if(!BuildContact(a->GetCollisionShape(), b->GetCollisionShape(), contact)) continue;
-			if(contact.penetration <= 0.0f) continue;
+
+			// 速度補正は位置Solverの反復ごとに重複適用せず、最初の接触時だけ行う。
+			if(iteration == 0) {
+				ResolveDynamicVelocity(bodyA, bodyB, contact.normal);
+				if(bodyA.GetBodyType() == PhysicsBodyType::Kinematic) {
+					ResolveKinematicCharacterVelocity(ownerA, contact.normal);
+				}
+				if(bodyB.GetBodyType() == PhysicsBodyType::Kinematic) {
+					ResolveKinematicCharacterVelocity(ownerB, -contact.normal);
+				}
+			}
+
+			// 微小な侵入は許容し、接触面付近での補正振動を抑える。
+			// 入力で直接移動するKinematicは次フレームにも壁へ押し込まれる。
+			// Staticとの接触にDynamic用の緩和を掛けると残留侵入量が毎フレーム変動し、表示が振動するため、
+			// この組み合わせだけは現在Step内で貫通量を全て解消する。
+			const bool isKinematicStaticPair =
+				(bodyA.GetBodyType() == PhysicsBodyType::Kinematic && bodyB.GetBodyType() == PhysicsBodyType::Static) ||
+				(bodyA.GetBodyType() == PhysicsBodyType::Static && bodyB.GetBodyType() == PhysicsBodyType::Kinematic);
+			const float correctionDepth = isKinematicStaticPair
+				? contact.penetration + kPenetrationSlop
+				: (std::max)(contact.penetration - kPenetrationSlop, 0.0f) * kDynamicCorrectionPercent;
+			if(correctionDepth <= 0.0f) continue;
 
 			// 法線は A を B から離す方向なので、Aへは +normal、Bへは -normal を適用する。
-			const CalyxEngine::Vector3 correction = contact.normal * contact.penetration;
+			const CalyxEngine::Vector3 correction = contact.normal * correctionDepth;
 			// 動ける重みの比率で補正量を分配する。
 			// Kinematic vs Static は Kinematic が100%、Kinematic vs Kinematic は半分ずつになる。
 			const float shareA = weightA / totalWeight;
@@ -450,6 +653,11 @@ void PhysicsSystem::ResolveAll() {
 			// PushbackRatio を最後に掛け、オブジェクトごとの補正の強さを調整できるようにする。
 			ApplyCorrection(ownerA, a, correction * shareA * bodyA.GetPushbackRatio());
 			ApplyCorrection(ownerB, b, -correction * shareB * bodyB.GetPushbackRatio());
+			appliedAnyCorrection = true;
+			}
 		}
+
+		// すべての接触が許容侵入量以内なら、残りの反復を省略する。
+		if(!appliedAnyCorrection) break;
 	}
 }

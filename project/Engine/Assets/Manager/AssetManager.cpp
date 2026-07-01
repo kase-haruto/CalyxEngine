@@ -1,5 +1,6 @@
 #include "AssetManager.h"
 #include <Engine/Foundation/Audio/Audio.h>
+#include <Engine/Foundation/Log/EngineLogger.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		インスタンス取得（シングルトン）
@@ -14,6 +15,7 @@ CalyxEngine::AssetManager* CalyxEngine::AssetManager::GetInstance()  {
 //		初期化
 /////////////////////////////////////////////////////////////////////////////////////////
 void CalyxEngine::AssetManager::Initialize(ImGuiManager* imgui) {
+	EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Asset, "Asset managers initialization started.", "AssetManager");
 	// --- モデルマネージャーの生成と初期化 ---
 	modelManager_ = std::make_unique<ModelManager>();
 	modelManager_->Initialize();
@@ -32,12 +34,14 @@ void CalyxEngine::AssetManager::Initialize(ImGuiManager* imgui) {
 	
 	// --- オーディオエンジンの初期化 ---
 	Audio::Initialize();
+	EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Asset, "Asset managers initialization completed.", "AssetManager");
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		終了処理
 /////////////////////////////////////////////////////////////////////////////////////////
 void CalyxEngine::AssetManager::Finalize() {
+	EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Asset, "Asset managers shutdown started.", "AssetManager");
 	// 各スマートポインタのリセットを行い、マネージャーのデストラクタを呼び出す
 	modelManager_.reset();
 	textureManager_.reset();
@@ -45,4 +49,5 @@ void CalyxEngine::AssetManager::Finalize() {
 	
 	// オーディオエンジンの解放
 	Audio::Finalize();
+	EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Asset, "Asset managers shutdown completed.", "AssetManager");
 }

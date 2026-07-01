@@ -8,6 +8,7 @@
 #include <Engine/Graphics/Buffer/DxVertexBuffer.h>
 #include <Engine/Graphics/Pipeline/PipelineDesc/Input/VertexLayout.h>
 #include <Engine/Foundation/Utility/FileSystem/FileScanner.h>
+#include <Engine/Foundation/Log/EngineLogger.h>
 
 // externals
 #include <assimp/Importer.hpp>
@@ -37,7 +38,9 @@ ModelManager::~ModelManager() {
 }
 
 void ModelManager::Initialize() {
+	CalyxEngine::EngineLogger::GetInstance().Add(CalyxEngine::LogLevel::Info, CalyxEngine::LogCategory::Asset, "Model manager scan started.", "ModelManager");
 	LoadAllModels();
+	CalyxEngine::EngineLogger::GetInstance().Add(CalyxEngine::LogLevel::Info, CalyxEngine::LogCategory::Asset, "Model manager scan completed.", "ModelManager");
 }
 
 
@@ -49,6 +52,7 @@ std::future<ModelData*> ModelManager::LoadModel(const std::string& fileName) {
 		std::lock_guard<std::mutex> lock(modelDataMutex_);
 		auto						it = modelDatas_.find(fileName);
 		if(it != modelDatas_.end()) {
+			CalyxEngine::EngineLogger::GetInstance().Add(CalyxEngine::LogLevel::Trace, CalyxEngine::LogCategory::Asset, "Model request served from cache: " + fileName, "ModelManager");
 			std::promise<ModelData*> promise;
 			promise.set_value(it->second.get());
 			return promise.get_future();
@@ -61,9 +65,10 @@ std::future<ModelData*> ModelManager::LoadModel(const std::string& fileName) {
 
 	{
 		std::lock_guard<std::mutex> lock(taskQueueMutex_);
-		requestQueue_.push(std::move(request));
+	requestQueue_.push(std::move(request));
 	}
 	taskQueueCv_.notify_one();
+	CalyxEngine::EngineLogger::GetInstance().Add(CalyxEngine::LogLevel::Trace, CalyxEngine::LogCategory::Asset, "Model load queued: " + fileName, "ModelManager");
 
 	return fut;
 }
@@ -117,6 +122,7 @@ void ModelManager::ProcessLoadingTasks() {
 	}
 
 	for(auto& t : tasks) {
+		const std::string loadedFileName = t.fileName;
 		// 必ず GPU リソースを作成
 		CreateGpuResources(t.fileName, *t.model);
 
@@ -129,6 +135,7 @@ void ModelManager::ProcessLoadingTasks() {
 		if(onModelLoadedCallback_) {
 			onModelLoadedCallback_(t.fileName);
 		}
+		CalyxEngine::EngineLogger::GetInstance().Add(CalyxEngine::LogLevel::Info, CalyxEngine::LogCategory::Asset, "Model CPU/GPU load completed: " + loadedFileName, "ModelManager");
 	}
 }
 

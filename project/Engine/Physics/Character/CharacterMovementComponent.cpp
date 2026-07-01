@@ -150,14 +150,30 @@ void CharacterMovementComponent::Tick(float dt) {
 		movementMode_ = CharacterMovementMode::Walking;
 		// 接地中は下向き速度を残すと毎フレーム床へ押し込み続けるため0に戻す。
 		velocity_.y = 0.0f;
-		// 入力を速度へ変換し、水平移動だけを先に反映する。
-		// 縦方向は床吸着が担当するため、ここではYを動かさない。
+		// 水平入力を床面へ射影し、坂へ水平にめり込まず面に沿って移動させる。
+		CalyxEngine::Vector3 movementDirection = moveInput;
+		if(movementDirection.LengthSquared() > 1.0e-8f) {
+			const CalyxEngine::Vector3 floorNormal =
+				SafeNormalize(currentFloor_.hitNormal, CalyxEngine::Vector3::Up());
+			movementDirection -= floorNormal * CalyxEngine::Vector3::Dot(movementDirection, floorNormal);
+
+			// 射影後も入力時と同じ歩行速度になるよう、方向だけを正規化する。
+			if(movementDirection.LengthSquared() > 1.0e-8f) {
+				movementDirection = movementDirection.Normalize() * moveInput.Length();
+			}
+		}
+
+		// 床面に沿った歩行速度から、このフレームの移動量をTransformへ反映する。
+		const CalyxEngine::Vector3 characterVelocity = movementDirection * param_.maxWalkSpeed_;
 		WorldTransform& transform = owner_->GetWorldTransform();
-		transform.translation += moveInput * param_.maxWalkSpeed_ * dt;
+		transform.translation += characterVelocity * dt;
 		transform.Update();
+
+		// 移動前の床距離を再利用すると坂の終端や段差で誤った位置へSnapするため、移動後に再検索する。
+		FindFloor(currentFloor_);
 		// 床との微小な隙間や段差を安定させるため、床へ吸着する。
 		SnapToFloor();
-		DrawMovementDebugLine(moveInput);
+		DrawMovementDebugLine(characterVelocity);
 		return;
 	}
 
@@ -171,10 +187,13 @@ void CharacterMovementComponent::Tick(float dt) {
 	WorldTransform& transform = owner_->GetWorldTransform();
 	// 空中でも水平入力は受け付ける。
 	// まず水平移動を反映し、その後に重力でY方向を動かす。
-	transform.translation += moveInput * param_.maxWalkSpeed_ * dt;
+	const CalyxEngine::Vector3 horizontalVelocity = moveInput * param_.maxWalkSpeed_;
+	transform.translation += horizontalVelocity * dt;
 	transform.translation.y += velocity_.y * dt;
 	transform.Update();
-	DrawMovementDebugLine(moveInput);
+
+	// 水平速度とジャンプ／落下速度を合成し、実際に適用したCharacter速度を表示する。
+	DrawMovementDebugLine(horizontalVelocity + CalyxEngine::Vector3{0.0f, velocity_.y, 0.0f});
 }
 
 void CharacterMovementComponent::AddMovementInput(const CalyxEngine::Vector3& worldDirection, float scale) {
@@ -203,6 +222,19 @@ void CharacterMovementComponent::Jump() {
 	currentFloor_ = {};
 }
 
+void CharacterMovementComponent::ResolveBlockingVelocity(const CalyxEngine::Vector3& normal) {
+	const CalyxEngine::Vector3 safeNormal = SafeNormalize(normal, CalyxEngine::Vector3::Up());
+	const float velocityAlongNormal = CalyxEngine::Vector3::Dot(velocity_, safeNormal);
+	if(velocityAlongNormal < 0.0f) {
+		velocity_ -= safeNormal * velocityAlongNormal;
+	}
+
+	// 上向き面に接触している間は落下を終了し、次フレームに重力で同じ面へ再侵入させない。
+	if(safeNormal.y > 0.6f) {
+		velocity_.y = (std::max)(velocity_.y, 0.0f);
+	}
+}
+
 void CharacterMovementComponent::FindFloor(FindFloorResult& outFloor) const {
 	outFloor = {};
 	if(!owner_) return;
@@ -211,10 +243,15 @@ void CharacterMovementComponent::FindFloor(FindFloorResult& outFloor) const {
 	float capsuleHalfHeight = 0.0f;
 	if(!GetOwnerCapsule(capsuleRadius, capsuleHalfHeight)) return;
 
-	// UnrealのFindFloorに寄せ、キャラクターの衝突中心から下方向へ床を探す。
-	// BaseGameObjectはコライダー更新時にGetCenterPos()を使うため、
-	// 床探索も同じ基準点を使わないと、表示されているカプセル底面とFloorDistanceがずれる。
-	const CalyxEngine::Vector3 collisionCenter = owner_->GetCenterPos();
+	// Collider::Update と同じ計算で、ローカルオフセットを含む実際の衝突中心を求める。
+	// GetCenterPos() だけを使うと offset.y を設定したカプセルの底面と floorDistance がずれ、
+	// SnapToFloor と PhysicsSystem が異なる接地位置へ交互に補正して振動する。
+	Collider* ownerCollider = owner_->GetCollider();
+	if(!ownerCollider) return;
+	const CalyxEngine::Quaternion& ownerRotation = owner_->GetWorldTransform().rotation;
+	const CalyxEngine::Vector3 worldOffset =
+		CalyxEngine::Quaternion::RotateVector(ownerCollider->GetOffset(), ownerRotation);
+	const CalyxEngine::Vector3 collisionCenter = owner_->GetCenterPos() + worldOffset;
 	const CalyxEngine::Vector3 rayStart = collisionCenter;
 	const float rayLength = capsuleHalfHeight + param_.floorProbeDistance_;
 
@@ -320,19 +357,18 @@ void CharacterMovementComponent::SnapToFloor() {
 	}
 }
 
-void CharacterMovementComponent::DrawMovementDebugLine(const CalyxEngine::Vector3& moveInput) const {
+void CharacterMovementComponent::DrawMovementDebugLine(const CalyxEngine::Vector3& characterVelocity) const {
 	if(!owner_) return;
 	if(!param_.showMovementDebugLine_) return;
 	if(param_.movementDebugLineScale_ <= 0.0f) return;
 
 	const CalyxEngine::Vector3 start = owner_->GetCenterPos();
-	CalyxEngine::Vector3 move = moveInput;
-	move.y = 0.0f;
-	const float inputMagnitude = (std::min)(move.Length(), 1.0f);
-	if(inputMagnitude <= 1.0e-5f) return;
+	// 入力方向ではなく実速度を使い、坂、ジャンプ、落下のY成分も線へ反映する。
+	const float speed = characterVelocity.Length();
+	if(speed <= 1.0e-5f) return;
 
-	const CalyxEngine::Vector3 direction = move.Normalize();
-	const float lineLength = inputMagnitude * param_.movementDebugLineScale_;
+	const CalyxEngine::Vector3 direction = characterVelocity / speed;
+	const float lineLength = speed * param_.movementDebugLineScale_;
 
 	PrimitiveDrawer::GetInstance()->DrawLine3d(
 		start,
