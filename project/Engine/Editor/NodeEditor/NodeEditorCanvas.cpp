@@ -41,25 +41,21 @@ namespace CalyxEngine {
 			return ImGui::ColorConvertFloat4ToU32(color);
 		}
 
-		void DrawPinShape(ImDrawList* drawList, const ImVec2& center, NodeValueType type, const ImVec4& fill, const ImVec4& outline) {
+		void DrawPinShape(ImDrawList* drawList, const ImVec2& center, std::string_view pinType, const ImVec4& fill, const ImVec4& outline) {
 			const float r = kStyle.pinRadius;
 			drawList->AddCircleFilled(ImVec2(center.x + 1.0f, center.y + 1.0f), r + 2.0f, ToU32(kStyle.pinShadow), 18);
-			switch(type) {
-			case NodeValueType::Color:
+			if(pinType == NodePinTypes::Color) {
 				drawList->AddCircleFilled(center, r, ToU32(fill), 20);
 				drawList->AddCircle(center, r + 1.5f, ToU32(outline), 20, 1.8f);
 				drawList->AddCircle(ImVec2(center.x - 1.5f, center.y - 1.5f), r * 0.45f, ToU32(kStyle.pinHighlight), 12, 1.0f);
-				break;
-			case NodeValueType::Bool: {
+			} else if(pinType == NodePinTypes::Bool) {
 				const ImVec2 pts[] = {
 					ImVec2(center.x, center.y - r - 1.0f),
 					ImVec2(center.x + r + 1.0f, center.y + r),
 					ImVec2(center.x - r - 1.0f, center.y + r)};
 				drawList->AddTriangleFilled(pts[0], pts[1], pts[2], ToU32(fill));
 				drawList->AddTriangle(pts[0], pts[1], pts[2], ToU32(outline), 1.2f);
-				break;
-			}
-			case NodeValueType::Int: {
+			} else if(pinType == NodePinTypes::Int) {
 				const ImVec2 pts[] = {
 					ImVec2(center.x, center.y - r - 1.0f),
 					ImVec2(center.x + r + 1.0f, center.y),
@@ -67,20 +63,10 @@ namespace CalyxEngine {
 					ImVec2(center.x - r - 1.0f, center.y)};
 				drawList->AddConvexPolyFilled(pts, 4, ToU32(fill));
 				drawList->AddPolyline(pts, 4, ToU32(outline), ImDrawFlags_Closed, 1.2f);
-				break;
-			}
-			case NodeValueType::Texture2D: {
-				const ImVec2 min(center.x - r - 1.0f, center.y - r - 1.0f);
-				const ImVec2 max(center.x + r + 1.0f, center.y + r + 1.0f);
-				drawList->AddRectFilled(min, max, ToU32(fill), 2.0f);
-				drawList->AddRect(min, max, ToU32(outline), 2.0f, 0, 1.4f);
-				break;
-			}
-			default:
+			} else {
 				drawList->AddCircleFilled(center, r, ToU32(fill), 18);
 				drawList->AddCircle(center, r + 1.5f, ToU32(outline), 18, 1.8f);
 				drawList->AddCircle(ImVec2(center.x - 1.5f, center.y - 1.5f), r * 0.42f, ToU32(kStyle.pinHighlight), 12, 1.0f);
-				break;
 			}
 		}
 	}
@@ -101,7 +87,7 @@ namespace CalyxEngine {
 
 	void NodeEditorCanvas::DrawPin(const NodePin& pin, float rowWidth) {
 		const auto kind = pin.kind == NodePinKind::Input ? ed::PinKind::Input : ed::PinKind::Output;
-		const ImVec4 pinColor = GetPinColor(pin.valueType);
+		const ImVec4 pinColor = GetPinColor(pin.type);
 		ed::BeginPin(ed::PinId(pin.id), kind);
 		ImGui::PushID(pin.id);
 		ImDrawList* drawList = ImGui::GetWindowDrawList();
@@ -109,7 +95,7 @@ namespace CalyxEngine {
 			ImVec2 cursor = ImGui::GetCursorScreenPos();
 			ImVec2 center(cursor.x + kStyle.pinHitSize * 0.5f, cursor.y + kStyle.rowHeight * 0.5f);
 			ImGui::InvisibleButton("pin", ImVec2(kStyle.pinHitSize, kStyle.rowHeight));
-			DrawPinShape(drawList, center, pin.valueType, pinColor, kStyle.pinOutline);
+			DrawPinShape(drawList, center, pin.type, pinColor, kStyle.pinOutline);
 			ImGui::SameLine(0.0f, kStyle.pinLabelSpacing);
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3.0f);
 			ImGui::TextColored(kStyle.textMuted, "%s", pin.name.c_str());
@@ -123,7 +109,7 @@ namespace CalyxEngine {
 			ImVec2 cursor = ImGui::GetCursorScreenPos();
 			ImVec2 center(cursor.x + kStyle.pinHitSize * 0.5f, cursor.y + kStyle.rowHeight * 0.5f);
 			ImGui::InvisibleButton("pin", ImVec2(kStyle.pinHitSize, kStyle.rowHeight));
-			DrawPinShape(drawList, center, pin.valueType, pinColor, kStyle.pinOutline);
+			DrawPinShape(drawList, center, pin.type, pinColor, kStyle.pinOutline);
 		}
 		ImGui::PopID();
 		ed::EndPin();
@@ -163,43 +149,30 @@ namespace CalyxEngine {
 	}
 
 	ImVec4 NodeEditorCanvas::GetNodeHeaderColor(const Node& node) const {
-		if(node.type == "Output") return ImVec4(0.16f, 0.31f, 0.47f, 1.0f);
-		if(node.type == "ToonMaster" || node.type == "LitMaster" || node.type == "UnlitMaster") return ImVec4(0.30f, 0.24f, 0.40f, 1.0f);
-		if(node.type == "Color" || node.type == "MultiplyColor" || node.type == "LerpColor" || node.type == "TextureSample" || node.type == "NoiseTexture") return ImVec4(0.38f, 0.30f, 0.13f, 1.0f);
-		if(node.type == "ObjectTexture") return ImVec4(0.20f, 0.32f, 0.36f, 1.0f);
-		if(node.type == "LightingMode") return ImVec4(0.17f, 0.34f, 0.52f, 1.0f);
-		if(node.type == "Reflect") return ImVec4(0.20f, 0.38f, 0.35f, 1.0f);
-		if(node.type == "Shininess" || node.type == "Roughness" || node.type == "MultiplyFloat") return ImVec4(0.18f, 0.28f, 0.46f, 1.0f);
+		// 用途側が外観を指定している場合はPolicyへ委譲する。
+		if(policy_.nodeHeaderColor) return policy_.nodeHeaderColor(node);
+
+		// CanvasはNode種別を解釈せず、全ドメイン共通の外観を使用する。
+		(void)node;
 		return ImVec4(0.20f, 0.24f, 0.30f, 1.0f);
 	}
 
-	ImVec4 NodeEditorCanvas::GetPinColor(NodeValueType type) const {
-		switch(type) {
-		case NodeValueType::Float:
-			return ImVec4(0.25f, 0.58f, 1.0f, 1.0f);
-		case NodeValueType::Float2:
-			return ImVec4(0.20f, 0.72f, 0.95f, 1.0f);
-		case NodeValueType::Float3:
-			return ImVec4(0.20f, 0.82f, 0.72f, 1.0f);
-		case NodeValueType::Float4:
-			return ImVec4(0.55f, 0.72f, 1.0f, 1.0f);
-		case NodeValueType::Color:
-			return ImVec4(0.95f, 0.28f, 0.24f, 1.0f);
-		case NodeValueType::Bool:
-			return ImVec4(0.88f, 0.20f, 0.18f, 1.0f);
-		case NodeValueType::Int:
-			return ImVec4(0.34f, 0.86f, 0.42f, 1.0f);
-		case NodeValueType::Material:
-			return ImVec4(0.84f, 0.46f, 1.0f, 1.0f);
-		case NodeValueType::Texture2D:
-			return ImVec4(0.22f, 0.76f, 0.82f, 1.0f);
-		default:
-			return ImVec4(0.82f, 0.86f, 0.90f, 1.0f);
-		}
+	ImVec4 NodeEditorCanvas::GetPinColor(std::string_view pinType) const {
+		// 用途側が型の外観を指定している場合はPolicyへ委譲する。
+		if(policy_.pinColor) return policy_.pinColor(pinType);
+
+		if(pinType == NodePinTypes::Float) return ImVec4(0.25f, 0.58f, 1.0f, 1.0f);
+		if(pinType == NodePinTypes::Float2) return ImVec4(0.20f, 0.72f, 0.95f, 1.0f);
+		if(pinType == NodePinTypes::Float3) return ImVec4(0.20f, 0.82f, 0.72f, 1.0f);
+		if(pinType == NodePinTypes::Float4) return ImVec4(0.55f, 0.72f, 1.0f, 1.0f);
+		if(pinType == NodePinTypes::Color) return ImVec4(0.95f, 0.28f, 0.24f, 1.0f);
+		if(pinType == NodePinTypes::Bool) return ImVec4(0.88f, 0.20f, 0.18f, 1.0f);
+		if(pinType == NodePinTypes::Int) return ImVec4(0.34f, 0.86f, 0.42f, 1.0f);
+		return ImVec4(0.82f, 0.86f, 0.90f, 1.0f);
 	}
 
-	float NodeEditorCanvas::GetLinkThickness(NodeValueType type) const {
-		return type == NodeValueType::Color ? kStyle.linkThickness + 0.4f : kStyle.linkThickness;
+	float NodeEditorCanvas::GetLinkThickness(std::string_view pinType) const {
+		return pinType == NodePinTypes::Color ? kStyle.linkThickness + 0.4f : kStyle.linkThickness;
 	}
 
 	bool NodeEditorCanvas::CanCreateLink(const NodeGraph& graph, int32_t a, int32_t b, int32_t& from, int32_t& to) const {
@@ -208,7 +181,17 @@ namespace CalyxEngine {
 		const NodePin* pinA = graph.FindPin(a, &nodeA);
 		const NodePin* pinB = graph.FindPin(b, &nodeB);
 		if(!pinA || !pinB || !nodeA || !nodeB || nodeA == nodeB) return false;
-		if(pinA->kind == pinB->kind || pinA->valueType != pinB->valueType) return false;
+		if(pinA->kind == pinB->kind) return false;
+
+		// Policyがある場合は用途固有の型変換規則を使用する。
+		if(policy_.canConnect) {
+			const NodePin& output = pinA->kind == NodePinKind::Output ? *pinA : *pinB;
+			const NodePin& input = pinA->kind == NodePinKind::Input ? *pinA : *pinB;
+			if(!policy_.canConnect(output, input)) return false;
+		} else if(pinA->type != pinB->type) {
+			// Policyがない用途では同一型だけを接続可能にする。
+			return false;
+		}
 		from = pinA->kind == NodePinKind::Output ? pinA->id : pinB->id;
 		to = pinA->kind == NodePinKind::Input ? pinA->id : pinB->id;
 		return true;
@@ -271,8 +254,8 @@ namespace CalyxEngine {
 
 		for(const auto& link : graph.links) {
 			const NodePin* pin = graph.FindPin(link.fromPinId);
-			const NodeValueType type = pin ? pin->valueType : NodeValueType::None;
-			ed::Link(ed::LinkId(link.id), ed::PinId(link.fromPinId), ed::PinId(link.toPinId), GetPinColor(type), GetLinkThickness(type));
+			const std::string_view pinType = pin ? pin->type : NodePinTypes::None;
+			ed::Link(ed::LinkId(link.id), ed::PinId(link.fromPinId), ed::PinId(link.toPinId), GetPinColor(pinType), GetLinkThickness(pinType));
 		}
 
 		ed::NodeId selectedNodes[1];
@@ -285,7 +268,7 @@ namespace CalyxEngine {
 				int32_t to = 0;
 				if(CanCreateLink(graph, static_cast<int32_t>(a.Get()), static_cast<int32_t>(b.Get()), from, to)) {
 					const NodePin* fromPin = graph.FindPin(from);
-					const ImVec4 previewColor = fromPin ? GetPinColor(fromPin->valueType) : ImVec4(0.70f, 0.76f, 0.84f, 1.0f);
+					const ImVec4 previewColor = fromPin ? GetPinColor(fromPin->type) : ImVec4(0.70f, 0.76f, 0.84f, 1.0f);
 					if(ed::AcceptNewItem(previewColor, kStyle.validPreviewThickness)) {
 						const NodeGraph before = graph;
 						graph.links.push_back({graph.AllocateId(), from, to});

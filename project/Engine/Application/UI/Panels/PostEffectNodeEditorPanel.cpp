@@ -497,7 +497,7 @@ namespace CalyxEngine {
 		if(ImGui::Button("+ Input", ImVec2(92.0f, 0.0f))) {
 			const int32_t index = static_cast<int32_t>(node.inputs.size());
 			const char label = static_cast<char>('A' + (std::min)(index, 25));
-			node.inputs.push_back({graph_.AllocateId(), std::string(1, label), NodePinKind::Input, NodeValueType::Color});
+			node.inputs.push_back({graph_.AllocateId(), std::string(1, label), NodePinKind::Input, NodePinTypes::Color});
 			node.properties["inputCount"] = static_cast<int>(node.inputs.size());
 			changed = true;
 		}
@@ -534,7 +534,7 @@ namespace CalyxEngine {
 		node.type = "Input";
 		node.title = "Scene Color";
 		node.position = position;
-		node.outputs.push_back({graph_.AllocateId(), "Color", NodePinKind::Output, NodeValueType::Color});
+		node.outputs.push_back({graph_.AllocateId(), "Color", NodePinKind::Output, NodePinTypes::Color});
 		graph_.nodes.push_back(std::move(node));
 	}
 
@@ -544,7 +544,7 @@ namespace CalyxEngine {
 		node.type = "Output";
 		node.title = "Output";
 		node.position = position;
-		node.inputs.push_back({graph_.AllocateId(), "Color", NodePinKind::Input, NodeValueType::Color});
+		node.inputs.push_back({graph_.AllocateId(), "Color", NodePinKind::Input, NodePinTypes::Color});
 		graph_.nodes.push_back(std::move(node));
 	}
 
@@ -555,12 +555,12 @@ namespace CalyxEngine {
 		node.title = type;
 		node.position = position;
 		if(type == "Blend") {
-			node.inputs.push_back({graph_.AllocateId(), "A", NodePinKind::Input, NodeValueType::Color});
-			node.inputs.push_back({graph_.AllocateId(), "B", NodePinKind::Input, NodeValueType::Color});
+			node.inputs.push_back({graph_.AllocateId(), "A", NodePinKind::Input, NodePinTypes::Color});
+			node.inputs.push_back({graph_.AllocateId(), "B", NodePinKind::Input, NodePinTypes::Color});
 		}else{
-			node.inputs.push_back({graph_.AllocateId(), "In", NodePinKind::Input, NodeValueType::Color});
+			node.inputs.push_back({graph_.AllocateId(), "In", NodePinKind::Input, NodePinTypes::Color});
 		}
-		node.outputs.push_back({graph_.AllocateId(), "Out", NodePinKind::Output, NodeValueType::Color});
+		node.outputs.push_back({graph_.AllocateId(), "Out", NodePinKind::Output, NodePinTypes::Color});
 		node.properties = {
 			{"enabled", true},
 			{"applyMode", "Always"},

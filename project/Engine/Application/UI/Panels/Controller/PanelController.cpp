@@ -4,7 +4,6 @@
 /* ===================================================================== */
 // uiPanel
 #include <Engine/Application/UI/Panels/ConsolePanel.h>
-#include <Engine/Application/UI/Panels/EditorPanel.h>
 
 namespace CalyxEngine {
 	/////////////////////////////////////////////////////////////////////////////////////////
