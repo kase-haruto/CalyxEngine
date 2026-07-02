@@ -5,6 +5,7 @@
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Foundation/Math/Vector4.h>
 #include <Engine/Foundation/Utility/Guid/Guid.h>
+#include <Engine/Scene/Reference/SceneObjectReference.h>
 #include <externals/nlohmann/json.hpp>
 
 
@@ -30,6 +31,7 @@ namespace CalyxEngine {
 		CalyxEngine::Vector4*,
 		CalyxEngine::Quaternion*,
 		Guid*,
+		CalyxEngine::ISceneObjectReference*,
 		const int32_t*,
 		const size_t*,
 		const float*,
@@ -38,7 +40,8 @@ namespace CalyxEngine {
 		const CalyxEngine::Vector3*,
 		const CalyxEngine::Vector4*,
 		const CalyxEngine::Quaternion*,
-		const Guid*>;
+		const Guid*,
+		const CalyxEngine::ISceneObjectReference*>;
 
 	/* =========================================================================
 	   シリアライズ可能なフィールド情報
@@ -85,6 +88,10 @@ namespace CalyxEngine {
 				out = Json::array({p->x, p->y, p->z, p->w});
 			} else if constexpr(std::is_same_v<T, Guid> || std::is_same_v<T, const Guid>) {
 				out = p->ToString();
+			} else if constexpr(std::is_same_v<T, CalyxEngine::ISceneObjectReference> ||
+							std::is_same_v<T, const CalyxEngine::ISceneObjectReference>) {
+				// SceneObject参照は実行時ポインタではなく、再解決可能なGUIDだけを保存する。
+				out = p->GetGuid();
 			} else {
 				out = *p;
 			}
@@ -143,6 +150,11 @@ namespace CalyxEngine {
 					} else if constexpr(std::is_same_v<T, Guid>) {
 						if(!in.is_string()) return false;
 						*p = Guid::FromString(in.get<std::string>());
+						return true;
+					} else if constexpr(std::is_same_v<T, CalyxEngine::ISceneObjectReference>) {
+						// 読み込み時にはGUIDのみ復元し、ポインタ解決は初回利用時まで遅延する。
+						if(!in.is_string()) return false;
+						p->SetGuid(Guid::FromString(in.get<std::string>()));
 						return true;
 					} else {
 						return false;

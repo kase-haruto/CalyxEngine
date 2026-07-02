@@ -95,7 +95,7 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>CALYX_ENGINE_EXPORTS;IMGUI_API=__declspec(dllexport);IGFD_API=__declspec(dllexport);_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CALYX_ENGINE_EXPORTS;IMGUI_API=__declspec(dllexport);IGFD_API=__declspec(dllexport);NOMINMAX;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -127,7 +127,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>CALYX_ENGINE_EXPORTS;IMGUI_API=__declspec(dllexport);IGFD_API=__declspec(dllexport);NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CALYX_ENGINE_EXPORTS;IMGUI_API=__declspec(dllexport);IGFD_API=__declspec(dllexport);NOMINMAX;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -158,7 +158,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>CALYX_ENGINE_EXPORTS;IMGUI_API=__declspec(dllexport);IGFD_API=__declspec(dllexport);DEVELOP;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CALYX_ENGINE_EXPORTS;IMGUI_API=__declspec(dllexport);IGFD_API=__declspec(dllexport);NOMINMAX;DEVELOP;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -188,7 +188,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>CALYX_ENGINE_EXPORTS;IMGUI_API=__declspec(dllexport);IGFD_API=__declspec(dllexport);LIVEPP;DEVELOP;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CALYX_ENGINE_EXPORTS;IMGUI_API=__declspec(dllexport);IGFD_API=__declspec(dllexport);NOMINMAX;LIVEPP;DEVELOP;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -442,6 +442,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Scene\System\SceneManager.cpp" />
     <ClCompile Include="Engine\Foundation\Math\Quaternion.cpp" />
     <ClCompile Include="Engine\Scene\Context\SceneContext.cpp" />
+    <ClCompile Include="Engine\Scene\Reference\SceneObjectReference.cpp" />
+    <ClCompile Include="Engine\Scene\Reference\TransformReference.cpp" />
     <ClCompile Include="Engine\Graphics\RenderTarget\SwapChainRT\SwapChainRenderTarget.cpp" />
     <ClCompile Include="Engine\Graphics\RenderTarget\OffscreenRT\OffscreenRenderTarget.cpp" />
     <ClCompile Include="Engine\Graphics\RenderTarget\Collection\RenderTargetCollection.cpp" />
@@ -608,6 +610,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Graphics\RenderTarget\Detail\RenderTargetDetail.h" />
     <ClInclude Include="Engine\Graphics\Camera\Frustum\Frustum.h" />
     <ClInclude Include="Engine\Scene\Utility\SceneUtility.h" />
+    <ClInclude Include="Engine\Scene\Reference\SceneObjectReference.h" />
+    <ClInclude Include="Engine\Scene\Reference\TransformReference.h" />
     <ClInclude Include="Engine\System\Event\EventBus.h" />
     <ClInclude Include="Engine\System\Command\EditorCommand\LevelEditorCommand\CreateObjectCommand\CreateParticleSystemCommand.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\SceneObject\SceneObjectConfig.h" />

@@ -68,6 +68,8 @@ bool CalyxEngine::DrawField(const SerializableField& f) {
 				GuiCmd::PropertyText(label, "(%.2f, %.2f, %.2f, %.2f)", p->x, p->y, p->z, p->w);
 			else if constexpr(std::is_same_v<T, CalyxEngine::Quaternion>)
 				GuiCmd::PropertyText(label, "(%.2f, %.2f, %.2f, %.2f)", p->x, p->y, p->z, p->w);
+			else if constexpr(std::is_same_v<T, CalyxEngine::ISceneObjectReference>)
+				GuiCmd::PropertyText(label, "%s", p->GetGuid().isValid() ? p->GetGuid().ToString().c_str() : "None");
 		};
 
 		if constexpr(std::is_const_v<RawT>) {
@@ -101,6 +103,8 @@ bool CalyxEngine::DrawField(const SerializableField& f) {
 					changed |= GuiCmd::DragFloat4(label, *p, f.speed);
 				else if constexpr(std::is_same_v<T, CalyxEngine::Quaternion>)
 					changed |= GuiCmd::DragFloat4(label, reinterpret_cast<CalyxEngine::Vector4&>(*p), f.speed);
+				else if constexpr(std::is_same_v<T, CalyxEngine::ISceneObjectReference>)
+					changed |= GuiCmd::SceneObjectReferenceField(label, *p);
 			}
 		}
 

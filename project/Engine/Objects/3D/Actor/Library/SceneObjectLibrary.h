@@ -5,6 +5,7 @@
 // engine
 #include <Engine/Foundation/Utility/Guid/Guid.h>
 #include <Engine/System/Event/EventBus.h>
+#include <Engine/Scene/Reference/SceneObjectReference.h>
 
 // std
 #include <algorithm>
@@ -24,7 +25,7 @@ class SceneContext;
  * - シーンオブジェクト管理クラス
  * - シーン上の全オブジェクトの登録・削除・検索・一覧取得を担当
  *---------------------------------------------------------------------------------------*/
-class CALYX_API SceneObjectLibrary {
+class CALYX_API SceneObjectLibrary : public ISceneObjectResolver {
 public:
     //====================================================================*//
     //      public functions
@@ -82,6 +83,7 @@ public:
      * @return 検索結果のオブジェクト（見つからなければ nullptr）
      */
     std::shared_ptr<SceneObject> Find(Guid id) const;
+	std::shared_ptr<SceneObject> ResolveSceneObject(const Guid& guid) const override { return Find(guid); }
 
     /**
      * @brief 名前からオブジェクトを検索（最初に見つかったものを返す）

@@ -150,6 +150,73 @@ public:
 
 ## CALYX_PROPERTY
 
+> 現在の方針（2026-07）
+>
+> `CALYX_PROPERTY` は実装しません。数値、真偽値、ベクトルなどの編集・保存には、
+> 既存の `SerializableObject` と `AddField()` を使用します。
+> オブジェクト同士の関係は Property Reflection へ混在させず、
+> `SceneObjectRef<T>` による型付きGUID参照として独立して扱います。
+
+### 現在使用するAPI
+
+通常の設定値は `SerializableObject` へ登録します。
+
+```cpp
+struct EnemyParams final : CalyxEngine::SerializableObject {
+	EnemyParams() {
+		AddField("moveSpeed", moveSpeed)
+			.Category("Movement")
+			.Tooltip("Enemyの移動速度")
+			.Range(0.0f, 100.0f);
+	}
+
+	float moveSpeed = 5.0f;
+};
+```
+
+特定のSceneObjectとの関係は `SceneObjectRef<T>` で宣言します。
+
+```cpp
+CalyxEngine::SceneObjectRef<Player> targetPlayer_;
+```
+
+InspectorではHierarchyから対象を割り当てます。
+
+```cpp
+GuiCmd::SceneObjectReferenceField("Target Player", targetPlayer_);
+```
+
+実行時には型付きポインタとして解決します。
+
+```cpp
+if(auto player = targetPlayer_.Resolve()) {
+	const auto position = player->GetWorldTransform().GetWorldPosition();
+}
+```
+
+詳細は `Docs/SceneObjectReference_README.md` を参照してください。
+
+### 将来Property Reflectionを導入する場合の責務
+
+将来 `CALYX_PROPERTY` を実装する場合も、次の責務だけを自動化対象とします。
+
+- `SerializableObject::AddField()` 相当のフィールド登録
+- Inspector用メタデータの宣言
+- 保存キー、表示名、Category、Tooltip、Min、Maxの指定
+
+`SceneObjectRef<T>` の参照保持、GUID解決、型検証、Prefabリマップは
+Property Reflectionへ移さず、独立した参照システムの責務として維持します。
+
+想定構文は次の通りですが、現時点では使用できません。
+
+```cpp
+CALYX_PROPERTY(Edit, Save, Category = "Movement", Min = 0.0f)
+float moveSpeed_ = 5.0f;
+```
+
+この分離により、Property Reflectionを将来追加または廃止しても、
+シーン内のオブジェクト参照形式と保存済みGUIDへ影響を与えません。
+
 `CALYX_PROPERTY(...)` も現在はプレースホルダーです。
 
 現在の役割:

@@ -23,8 +23,6 @@
     <ClCompile Include="Game\Demo\3D\Actor\DemoPlayer\DemoPlayerMotor.cpp"><Filter>Game\Demo\3D\Actor\DemoPlayer</Filter></ClCompile>
     <ClCompile Include="Game\Demo\3D\Actor\DemoPlayer\Weapon\Weapon.cpp"><Filter>Game\Demo\3D\Actor\DemoPlayer\Weapon</Filter></ClCompile>
     <ClCompile Include="Game\Demo\Input\PlayerInput.cpp"><Filter>Game\Demo\Input</Filter></ClCompile>
-    <ClCompile Include="Game\Demo\Scene\DemoScene\DemoScene.cpp"><Filter>Game\Demo\Scene\DemoScene</Filter></ClCompile>
-    <ClCompile Include="Game\Demo\Scene\Utility\SceneTypeUtil.cpp"><Filter>Game\Demo\Scene\Utility</Filter></ClCompile>
     <ClCompile Include="Engine\Foundation\Reflection\CalyxGameObjectRegistry.generated.cpp"><Filter>Generated</Filter></ClCompile>
     <ClCompile Include="Game\GameApplication.cpp"><Filter>Game</Filter></ClCompile>
     <ClCompile Include="Game\main.cpp"><Filter>Game</Filter></ClCompile>
