@@ -1,156 +1,96 @@
 #pragma once
+
+#include <Engine/Foundation/Export/CalyxAPI.h>
+#include <Engine/Foundation/Utility/Guid/Guid.h>
 #include <Engine/Graphics/Device/DxCore.h>
 #include <Engine/Scene/Base/BaseScene.h>
-#include <Engine/Foundation/Export/CalyxAPI.h>
 #include <Engine/Scene/Transitioner/IScenePayload.h>
 #include <Engine/Scene/Transitioner/SceneTransitionRequestor.h>
-#include <Engine/Scene/Utility/SceneUtility.h>
-
 
 #include <d3d12.h>
+#include <filesystem>
 #include <memory>
 #include <optional>
-#include <filesystem>
-#include <unordered_map>
-#include <vector>
 
 class SceneContext;
 class PipelineService;
+class ModelRenderer;
 
 namespace CalyxEngine {
 	class PlaySession;
 	class PickingPass;
 	class GridRenderer;
-} // namespace CalyxEngine
 
-class ModelRenderer;
-
-namespace CalyxEngine {
-
-	/*-----------------------------------------------------------------------------------------
-	 * SceneManager
-	 * - シーン管理クラス
-	 * - 複数のシーンの登録、切り替え、更新、描画処理を管理
-	 *---------------------------------------------------------------------------------------*/
 	class CALYX_API SceneManager {
 	public:
 		explicit SceneManager(DxCore* dx);
 		~SceneManager();
 
 		void Initialize();
-		/// Loads a data-driven scene into a fresh context and swaps it in only on success.
 		bool OpenScene(const std::filesystem::path& scenePath);
+		bool OpenScene(const Guid& sceneAssetGuid);
+		void RequestSceneChange(const std::filesystem::path& scenePath);
+		void RequestSceneChange(const Guid& sceneAssetGuid);
+
 		void Update(float dt, float alwaysDt);
 		void PostUpdate(ID3D12GraphicsCommandList* cmd, PipelineService* pso);
 		void Draw(ID3D12GraphicsCommandList* cmd, PipelineService* pso);
-
-		void DrawForRenderTarget(class IRenderTarget*		rt,
-								 ID3D12GraphicsCommandList* cmd,
-								 PipelineService*			pso);
-
-		void DrawNotAffectedFromPE(ID3D12GraphicsCommandList* cmd,
-								   PipelineService*			  pso);
+		void DrawForRenderTarget(class IRenderTarget* rt, ID3D12GraphicsCommandList* cmd, PipelineService* pso);
+		void DrawNotAffectedFromPE(ID3D12GraphicsCommandList* cmd, PipelineService* pso);
 
 		void BindPlaySession(PlaySession* ps) { pPlaySession_ = ps; }
-
 		SceneContext* ActiveCtx() const;
-		bool		  ActiveRuntimeFlag() const;
-		bool		  GetIsEndGame() const;
-		void		  RebindIfContextChanged();
+		bool ActiveRuntimeFlag() const;
+		bool GetIsEndGame() const;
+		void RebindIfContextChanged();
+		bool HasScene() const { return activeScene_.scene != nullptr; }
 
-		/// Scene 登録（SceneId で管理）
-		size_t AddScene(SceneId id, std::unique_ptr<BaseScene> scene);
-
-		/// 登録済みシーンID一覧取得
-		const std::vector<SceneId>& GetRegisteredSceneIds() const { return registeredSceneIds_; }
-
-		/// 指定IDのシーン名取得
-		std::string GetSceneName(SceneId id) const;
-
-		void		  SetCurrent(size_t index);
-		void		  SetCurrent(SceneId id);
-		size_t		  GetSceneCount() const { return slots_.size(); }
-		void		  SetEditorPreviewContext(SceneContext* ctx);
-		void		  SetEditorViewportRenderState(bool renderDebugView, bool renderPicking);
-		void		  ClearAllContexts();
+		void SetEditorPreviewContext(SceneContext* ctx);
+		void SetEditorViewportRenderState(bool renderDebugView, bool renderPicking);
+		void ClearAllContexts();
 		SceneContext* GetCurrentSceneContext() const;
 		std::filesystem::path GetCurrentScenePath() const;
-		size_t		  GetCurrentIndex() const { return currentIdx_; }
-
 		ISceneTransitionRequestor& GetTransitionRequestor();
-
 		PickingPass* GetPickingPass() const { return pickingPass_.get(); }
 
 	private:
-		// ---- internal transition entry ----
-		void RequestSceneChangeInternal(SceneId next);
-		void RequestSceneChangeInternal(
-			SceneId						   next,
-			std::unique_ptr<IScenePayload> payload);
-		void DrawEditorPreview(IRenderTarget* rt,
-							   ID3D12GraphicsCommandList* cmd,
-							   PipelineService* pso);
-		void RenderDebugPrimitivesToRenderTarget(IRenderTarget* rt,
-												 ID3D12GraphicsCommandList* cmd,
-												 bool includeDebugViewOnly);
-		void RenderViewportAxisToRenderTarget(IRenderTarget* rt,
-											   ID3D12GraphicsCommandList* cmd);
-		void DrawSpritesToRenderTarget(IRenderTarget* rt,
-									   ID3D12GraphicsCommandList* cmd,
-									   PipelineService* pso,
-									   bool transitionToShaderResource);
+		void RequestSceneChangeInternal(const std::filesystem::path& scenePath, std::unique_ptr<IScenePayload> payload = nullptr);
+		void RequestSceneChangeInternal(const Guid& sceneAssetGuid, std::unique_ptr<IScenePayload> payload = nullptr);
+		void DrawEditorPreview(IRenderTarget* rt, ID3D12GraphicsCommandList* cmd, PipelineService* pso);
+		void RenderDebugPrimitivesToRenderTarget(IRenderTarget* rt, ID3D12GraphicsCommandList* cmd, bool includeDebugViewOnly);
+		void RenderViewportAxisToRenderTarget(IRenderTarget* rt, ID3D12GraphicsCommandList* cmd);
+		void DrawSpritesToRenderTarget(IRenderTarget* rt, ID3D12GraphicsCommandList* cmd, PipelineService* pso, bool transitionToShaderResource);
 
-	private:
-		struct SceneSlot {
-			std::unique_ptr<BaseScene>	  scene;
+		struct RuntimeScene {
+			std::unique_ptr<BaseScene> scene;
 			std::unique_ptr<SceneContext> ctx;
-			bool						  assetsLoaded = false;
+			bool assetsLoaded = false;
 		};
 
-		// ---- transition service ----
 		class SceneTransitionService final : public ISceneTransitionRequestor {
 		public:
-			explicit SceneTransitionService(SceneManager& mgr)
-				: manager_(mgr) {}
-
-			void RequestSceneChange(SceneId id) override {
-				manager_.RequestSceneChangeInternal(id);
-			}
-
-			void RequestSceneChange(
-				SceneId						   id,
-				std::unique_ptr<IScenePayload> payload) override {
-				manager_.RequestSceneChangeInternal(id, std::move(payload));
-			}
-
+			explicit SceneTransitionService(SceneManager& manager) : manager_(manager) {}
+			void RequestSceneChange(const std::filesystem::path& path) override { manager_.RequestSceneChangeInternal(path); }
+			void RequestSceneChange(const std::filesystem::path& path, std::unique_ptr<IScenePayload> payload) override { manager_.RequestSceneChangeInternal(path, std::move(payload)); }
+			void RequestSceneChange(const Guid& guid) override { manager_.RequestSceneChangeInternal(guid); }
+			void RequestSceneChange(const Guid& guid, std::unique_ptr<IScenePayload> payload) override { manager_.RequestSceneChangeInternal(guid, std::move(payload)); }
 		private:
 			SceneManager& manager_;
 		};
 
-	private:
-		std::vector<SceneSlot>				slots_;
-		std::unordered_map<SceneId, size_t> idToIndex_;
-		size_t								currentIdx_ = 0;
-
-		std::optional<size_t>		   pendingSwitchIndex_;
+		RuntimeScene activeScene_;
+		std::optional<std::filesystem::path> pendingScenePath_;
 		std::unique_ptr<IScenePayload> pendingPayload_;
-
-		DxCore*		 dx_		   = nullptr;
+		DxCore* dx_ = nullptr;
 		PlaySession* pPlaySession_ = nullptr;
-
-		SceneContext* lastBoundCtx_	  = nullptr;
-		uint64_t	  lastRuntimeGen_ = 0;
+		SceneContext* lastBoundCtx_ = nullptr;
+		uint64_t lastRuntimeGen_ = 0;
 		SceneContext* editorPreviewCtx_ = nullptr;
-		bool		  renderDebugView_ = true;
-		bool		  renderPicking_	= true;
-
+		bool renderDebugView_ = true;
+		bool renderPicking_ = true;
 		std::unique_ptr<SceneTransitionService> transitionService_;
-
-		std::vector<SceneId> registeredSceneIds_;
-
-		std::unique_ptr<PickingPass>	  pickingPass_;
-		std::unique_ptr<GridRenderer>  editorGridRenderer_;
+		std::unique_ptr<PickingPass> pickingPass_;
+		std::unique_ptr<GridRenderer> editorGridRenderer_;
 		std::unique_ptr<ModelRenderer> editorPreviewModelRenderer_;
 	};
-
-} // namespace CalyxEngine
+}

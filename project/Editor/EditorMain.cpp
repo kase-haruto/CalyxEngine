@@ -7,7 +7,6 @@
 #include <Engine/Application/UI/Panels/PlaceToolPanel.h>
 #include <Engine/Foundation/Reflection/CalyxGameObjectRegistry.generated.h>
 #include <Engine/Foundation/Reflection/CalyxObjectRegistry.generated.h>
-#include <Engine/Scene/Base/BaseScene.h>
 #include <Engine/Scene/System/SceneManager.h>
 
 #include <filesystem>
@@ -109,18 +108,7 @@ public:
 			gameApplication_->OnProjectLoaded(project_);
 		}
 		RefreshPlaceToolPanel();
-		RegisterGameScenesIfReady();
 		ApplyProjectTemplateScene();
-	}
-
-	void RegisterScenes(Calyx::SceneRegistry& registry) override {
-		registry.AddScene<BaseScene>(kBlankSceneId);
-		registry.SetStartupScene(kBlankSceneId);
-
-		if(gameApplication_) {
-			gameApplication_->RegisterScenes(registry);
-			gameScenesRegistered_ = true;
-		}
 	}
 
 	void OnSceneManagerReady(CalyxEngine::SceneManager& sceneManager) override {
@@ -128,7 +116,6 @@ public:
 		if(gameApplication_) {
 			gameApplication_->OnSceneManagerReady(sceneManager);
 		}
-		RegisterGameScenesIfReady();
 		ApplyProjectTemplateScene();
 	}
 
@@ -170,10 +157,11 @@ private:
 		if(!sceneManager_ || !hasProject_) {
 			return;
 		}
+		if(sceneManager_->HasScene() && sceneManager_->GetCurrentScenePath() == Calyx::ResolveProjectPath(project_, project_.startupScene)) {
+			return;
+		}
 		if(!project_.startupScene.empty()) {
 			sceneManager_->OpenScene(Calyx::ResolveProjectPath(project_, project_.startupScene));
-		} else {
-			sceneManager_->SetCurrent(kBlankSceneId);
 		}
 	}
 
@@ -181,12 +169,10 @@ private:
 		const auto modulePath = SelectGameModulePath(project_);
 		if(!gameModule_.Load(modulePath)) {
 			gameApplication_ = nullptr;
-			gameScenesRegistered_ = false;
 			return;
 		}
 
 		gameApplication_ = gameModule_.Create();
-		gameScenesRegistered_ = false;
 	}
 
 	void RefreshPlaceToolPanel() {
@@ -198,33 +184,18 @@ private:
 		}
 	}
 
-	void RegisterGameScenesIfReady() {
-		if(!sceneManager_ || !gameApplication_ || gameScenesRegistered_) {
-			return;
-		}
-
-		// Project Browser 経由でプロジェクトを後から開いた場合は、FrameWork 側の RegisterScenes 呼び出しが既に終わっている。
-		// そのため SceneManager が利用可能になった後でも、ゲーム DLL のシーンを明示的に登録する。
-		Calyx::SceneRegistry registry(*sceneManager_);
-		gameApplication_->RegisterScenes(registry);
-		gameScenesRegistered_ = true;
-	}
-
 	void FinalizeGameApplication() {
+		if(sceneManager_) {
+			sceneManager_->ClearAllContexts();
+		}
 		if(gameApplication_) {
 			gameApplication_->OnFinalize();
-			if(sceneManager_) {
-				sceneManager_->ClearAllContexts();
-			}
 			gameModule_.Destroy(gameApplication_);
 			gameApplication_ = nullptr;
 		}
-		gameScenesRegistered_ = false;
 	}
 
 private:
-	static constexpr CalyxEngine::SceneId kBlankSceneId = 0;
-
 	Calyx::ProjectInfo project_;
 	CalyxEditor::ProjectBrowser projectBrowser_;
 	CalyxEngine::SceneManager* sceneManager_ = nullptr;
@@ -232,7 +203,6 @@ private:
 	GameModule gameModule_;
 	Calyx::Application* gameApplication_ = nullptr;
 	bool hasProject_ = false;
-	bool gameScenesRegistered_ = false;
 };
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR commandLine, int) {

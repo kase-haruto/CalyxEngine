@@ -1,16 +1,10 @@
-﻿#include <CalyxEngine/SceneRegistry.h>
+#include <CalyxEngine/SceneRegistry.h>
+#include <Engine/Scene/System/SceneManager.h>
 
 namespace Calyx {
-
-	SceneRegistry::SceneRegistry(CalyxEngine::SceneManager& sceneManager)
-		: sceneManager_(sceneManager) {}
-
-	size_t SceneRegistry::AddScene(CalyxEngine::SceneId id, std::unique_ptr<BaseScene> scene) {
-		return sceneManager_.AddScene(id, std::move(scene));
-	}
-
-	void SceneRegistry::SetStartupScene(CalyxEngine::SceneId id) {
-		sceneManager_.SetCurrent(id);
-	}
-
-} // namespace Calyx
+	SceneRegistry::SceneRegistry(CalyxEngine::SceneManager& sceneManager) : sceneManager_(sceneManager) {}
+	bool SceneRegistry::OpenScene(const std::filesystem::path& path) { return sceneManager_.OpenScene(path); }
+	bool SceneRegistry::OpenScene(const Guid& guid) { return sceneManager_.OpenScene(guid); }
+	void SceneRegistry::RequestSceneChange(const std::filesystem::path& path) { sceneManager_.RequestSceneChange(path); }
+	void SceneRegistry::RequestSceneChange(const Guid& guid) { sceneManager_.RequestSceneChange(guid); }
+}

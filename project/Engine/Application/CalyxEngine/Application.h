@@ -5,8 +5,6 @@
 namespace Calyx {
 
 	struct ProjectInfo;
-	class SceneRegistry;
-
 } // namespace Calyx
 
 namespace CalyxEngine {
@@ -19,10 +17,6 @@ namespace Calyx {
 	class CALYX_API Application {
 	public:
 		virtual ~Application() = default;
-
-		virtual void RegisterScenes(SceneRegistry& registry) {
-			(void)registry;
-		}
 
 		virtual void OnProjectLoaded(const ProjectInfo& project) {
 			(void)project;

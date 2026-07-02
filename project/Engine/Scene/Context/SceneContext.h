@@ -13,6 +13,7 @@
 #include <Engine/Scene/Settings/SceneSettings.h>
 #include <Engine/System/Event/EventBus.h>
 #include <Engine/objects/3D/Actor/Library/SceneObjectLibrary.h>
+#include <Engine/Scene/Transitioner/SceneTransitionRequestor.h>
 
 
 // c++
@@ -85,6 +86,8 @@ public:
 
 	const std::string& GetScenePath() const { return scenePath; }
 	void SetScenePath(const std::string& path) { scenePath = path; }
+	void SetSceneTransitionRequestor(CalyxEngine::ISceneTransitionRequestor* requestor) { sceneTransitionRequestor_ = requestor; }
+	CalyxEngine::ISceneTransitionRequestor* GetSceneTransitionRequestor() const { return sceneTransitionRequestor_; }
 	SceneSettings& GetSettings() { return settings_; }
 	const SceneSettings& GetSettings() const { return settings_; }
 
@@ -142,6 +145,7 @@ private:
 	std::string scenePath = "";
 	std::string sceneName_ = "scene";
 	bool		isRuntime_ = false;
+	CalyxEngine::ISceneTransitionRequestor* sceneTransitionRequestor_ = nullptr;
 
 	SceneObject*			   debugSelectedObject_ = nullptr;
 	std::vector<SceneObject*> debugSelectedObjects_;

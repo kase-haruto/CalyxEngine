@@ -15,6 +15,7 @@ namespace Calyx {
 		std::filesystem::path rootDirectory;
 		std::filesystem::path assetDirectory;
 		std::filesystem::path sourceDirectory;
+		std::filesystem::path generatedDirectory = "Generated";
 		std::filesystem::path startupScene;
 		std::filesystem::path gameModule;
 		std::filesystem::path gameModuleDebug;

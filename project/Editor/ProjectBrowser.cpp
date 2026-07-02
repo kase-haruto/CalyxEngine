@@ -276,10 +276,9 @@ namespace CalyxEditor {
 			std::stringstream stream;
 			stream << "#include <CalyxEngine/CalyxEngine.h>\n";
 			stream << "\n";
-			stream << "#include \"GameObjectRegistry.generated.h\"\n";
+			stream << "#include <Generated/Foundation/Reflection/CalyxGameObjectRegistry.generated.h>\n";
 			stream << "#include \"GameApplication.h\"\n\n";
 			stream << "extern \"C\" __declspec(dllexport) Calyx::Application* CreateCalyxApplication() {\n";
-			stream << "\tCalyxEngine::RegisterGeneratedSceneObjects();\n";
 			stream << "\tCalyxEngine::RegisterGeneratedGameSceneObjects();\n";
 			stream << "\n";
 			stream << "\treturn new GameApplication();\n";
@@ -711,13 +710,9 @@ try {
 			stream << "    <ClCompile Include=\"Generated\\Foundation\\Reflection\\CalyxGameObjectRegistry.generated.cpp\" />\n";
 			stream << "  </ItemGroup>\n";
 			stream << "  <ItemGroup>\n";
-			stream << "    <ClInclude Include=\"" << EscapeXml(sourceDir) << "\\GameObjectRegistry.generated.h\" />\n";
+			stream << "    <ClInclude Include=\"Generated\\Foundation\\Reflection\\CalyxGameObjectRegistry.generated.h\" />\n";
 			stream << "  </ItemGroup>\n";
 			stream << "  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />\n";
-			stream << "  <Target Name=\"GenerateCalyxGameObjectRegistry\" BeforeTargets=\"ClCompile\" DependsOnTargets=\"ValidateCalyxEngineSdkDir\">\n";
-			stream << "    <Message Importance=\"high\" Text=\"Generating Calyx game object registry from $(ProjectDir)" << EscapeXml(sourceDir) << "...\" />\n";
-			stream << "    <Exec Command=\"powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)Tools\\Reflection\\generate_reflection.ps1&quot; -Root &quot;$(ProjectDir).&quot; -ScanRoots " << EscapeXml(sourceDir) << " -OutputDir " << EscapeXml(sourceDir) << " -OutputName GameObjectRegistry.generated -FunctionName RegisterGeneratedGameSceneObjects\" />\n";
-			stream << "  </Target>\n";
 			stream << "  <Target Name=\"EnsureCalyxEngineSdk\" BeforeTargets=\"PrepareForBuild\" Condition=\"!Exists('$(CalyxEngineSdkDir)\\Include\\CalyxEngine\\Application.h') or !Exists('$(CalyxEngineSdkDir)\\Include\\Data\\Engine') or !Exists('$(CalyxEngineSdkDir)\\Include\\externals\\nlohmann\\json.hpp')\">\n";
 			stream << "    <Message Importance=\"high\" Text=\"Installing Calyx SDK $(CalyxEngineVersion) from GitHub Releases...\" />\n";
 			stream << "    <Exec Command=\"&quot;$(ProjectDir)Tools\\CalyxLauncher.exe&quot; &quot;$(ProjectDir)" << projectName << ".calyxproj&quot;\" />\n";
@@ -732,7 +727,8 @@ try {
 			stream << "    <Error Condition=\"'$(CalyxEngineSdkDir)'!='' and !Exists('$(CalyxEngineSdkDir)\\Bin\\$(Configuration)\\CalyxGame.exe')\" Text=\"CalyxGame.exe was not found for $(Configuration). Update or reinstall the Calyx engine SDK: $(CalyxEngineSdkDir)\" />\n";
 			stream << "  </Target>\n";
 			stream << "  <Target Name=\"GenerateCalyxGameReflection\" BeforeTargets=\"ClCompile\" DependsOnTargets=\"ValidateCalyxEngineSdkDir\">\n";
-			stream << "    <Exec Command=\"powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(CalyxReflectionTool)&quot; -Root &quot;$(ProjectDir)&quot; -ScanRoots &quot;" << EscapeXml(sourceDir) << "&quot; -OutputDir &quot;Generated\\Foundation\\Reflection&quot; -OutputName CalyxGameObjectRegistry.generated -FunctionName RegisterGeneratedGameSceneObjects\" />\n";
+			stream << "    <Message Importance=\"high\" Text=\"Generating Calyx game object registry from " << EscapeXml(project.name) << ".calyxproj...\" />\n";
+			stream << "    <Exec Command=\"powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(CalyxReflectionTool)&quot; -ProjectFile &quot;$(ProjectDir)" << projectName << ".calyxproj&quot; -OutputName CalyxGameObjectRegistry.generated -FunctionName RegisterGeneratedGameSceneObjects\" />\n";
 			stream << "  </Target>\n";
 			stream << "  <ImportGroup Label=\"ExtensionTargets\" />\n";
 			stream << "</Project>\n";
@@ -754,7 +750,7 @@ try {
 			stream << "    <ClCompile Include=\"Generated\\Foundation\\Reflection\\CalyxGameObjectRegistry.generated.cpp\"><Filter>Game</Filter></ClCompile>\n";
 			stream << "  </ItemGroup>\n";
 			stream << "  <ItemGroup>\n";
-			stream << "    <ClInclude Include=\"" << EscapeXml(project.sourceDirectory.generic_string()) << "\\GameObjectRegistry.generated.h\"><Filter>Game</Filter></ClInclude>\n";
+			stream << "    <ClInclude Include=\"Generated\\Foundation\\Reflection\\CalyxGameObjectRegistry.generated.h\"><Filter>Game</Filter></ClInclude>\n";
 			stream << "  </ItemGroup>\n";
 			stream << "</Project>\n";
 			return stream.str();
@@ -883,9 +879,6 @@ try {
 					return false;
 				}
 			}
-			if(!WriteTextFile(project.rootDirectory / "Tools" / "Reflection" / "generate_reflection.ps1", MakeGameReflectionScript())) {
-				return false;
-			}
 			// Demo projects use the engine's live Demo source and scene as the single source of truth.
 			if(selectedTemplate.type == ProjectTemplateType::Demo) {
 				const auto demoSourceDirectory = FindDemoSourceDirectory(engineDirectory);
@@ -922,12 +915,6 @@ try {
 				return false;
 			}
 			if(!WriteTextFile(sourceDirectory / "GameApplication.cpp", MakeGameApplicationSource(selectedTemplate))) {
-				return false;
-			}
-			if(!WriteTextFile(sourceDirectory / "GameObjectRegistry.generated.h", MakeGameObjectRegistryHeader())) {
-				return false;
-			}
-			if(!WriteTextFile(sourceDirectory / "GameObjectRegistry.generated.cpp", MakeGameObjectRegistrySource())) {
 				return false;
 			}
 
@@ -1365,6 +1352,7 @@ try {
 		project.projectFile		 = project.rootDirectory / (project.name + ".calyxproj");
 		project.assetDirectory	 = "Resources/Assets";
 		project.sourceDirectory	 = selectedTemplate.sourceDirectory;
+		project.generatedDirectory = "Generated";
 		project.startupScene		 = selectedTemplate.startupScene;
 		project.gameModule		 = std::filesystem::path("Generated") / "Outputs" / "Debug" / (project.name + ".dll");
 		project.gameModuleDebug	 = std::filesystem::path("Generated") / "Outputs" / "Debug" / (project.name + ".dll");
