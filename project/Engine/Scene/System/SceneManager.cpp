@@ -139,8 +139,7 @@ namespace CalyxEngine {
 
 		if(activeScene_.scene) activeScene_.scene->OnExit();
 
-		// Files opened by the editor use the common scene runtime. Scene-specific
-		// behaviour belongs to serialized SceneObjects, not a BaseScene subclass.
+		// 各派生シーンクラスを作成せずにbasesceneで.sceneファイルを使用してシーンを作成する
 		activeScene_.scene = std::make_unique<BaseScene>();
 		activeScene_.scene->SetSceneName(nextContext->GetSceneName());
 		activeScene_.scene->SetTransitionRequestor(&GetTransitionRequestor());
