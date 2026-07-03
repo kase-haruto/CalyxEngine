@@ -22,6 +22,7 @@ namespace Calyx {
 }
 
 namespace CalyxEngine {
+	class LivePPService;
 
 	/*-----------------------------------------------------------------------------------------
 	 * CalyxFrameWork
@@ -30,8 +31,8 @@ namespace CalyxEngine {
 	 *---------------------------------------------------------------------------------------*/
 	class CalyxFrameWork {
 	public:
-		CalyxFrameWork()  = default;
-		~CalyxFrameWork() = default;
+		CalyxFrameWork();
+		~CalyxFrameWork();
 
 		void Initialize(HINSTANCE hInstance, Calyx::Application* application = nullptr);
 		void BeginUpdate();
@@ -53,6 +54,9 @@ namespace CalyxEngine {
 		std::unique_ptr<SceneManager>	  sceneManager_;
 		std::unique_ptr<EditorCollection> editorCollection_;
 		std::unique_ptr<PlaySession> playSession_;
+
+		// Hot reload (created in Debug and Develop configurations).
+		std::unique_ptr<LivePPService> livePPService_;
 
 		// ポストエフェクトの適用と管理
 		PostEffectGraph*	   postEffectGraph_;

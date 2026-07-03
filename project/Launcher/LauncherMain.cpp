@@ -180,131 +180,43 @@ namespace {
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 
-# The release is expected at:
-# https://github.com/kase-haruto/CalyxEngine/releases/tag/<engineVersion>
-# If CALYX_ENGINE_GITHUB_TOKEN is present, private release assets can also be used.
+# VersionValue comes directly from the opened .calyxproj. ReleasePackage.yml
+# publishes CalyxGamePackage-<tag>.zip, so the asset URL is deterministic and
+# does not require a GitHub REST API request.
 $headers = @{ 'User-Agent' = 'CalyxLauncher' }
 if ($env:CALYX_ENGINE_GITHUB_TOKEN) {
 	$headers['Authorization'] = "Bearer $env:CALYX_ENGINE_GITHUB_TOKEN"
 }
 
-$tags = @($VersionValue)
-if ($VersionValue.StartsWith('v')) {
-	$tags += $VersionValue.Substring(1)
-} else {
-	$tags += "v$VersionValue"
-}
-
-$release = $null
-$releaseErrors = @()
-foreach ($tag in $tags | Select-Object -Unique) {
-	try {
-		$release = Invoke-RestMethod -Headers $headers -Uri "https://api.github.com/repos/kase-haruto/CalyxEngine/releases/tags/$tag"
-		break
-	} catch {
-		$statusCode = $null
-		if ($null -ne $_.Exception.Response) {
-			$statusCode = [int]$_.Exception.Response.StatusCode
-		}
-
-		$releaseErrors += "tag '$tag': $($_.Exception.Message)"
-		if ($statusCode -ne 404) {
-			throw "GitHub Releases API request failed while looking for CalyxEngine $VersionValue ($($releaseErrors -join '; ')). If this is an API rate limit or the release is private, set CALYX_ENGINE_GITHUB_TOKEN and retry."
-		}
-	}
-}
-
-if ($null -eq $release) {
-	throw "CalyxEngine GitHub Release was not found for engineVersion: $VersionValue. Checked tags: $($tags -join ', '). A git tag alone is not enough; create a GitHub Release for this tag and attach the CalyxGamePackage zip asset."
-}
-
-# Prefer package-like zip names, but keep the rule flexible so release assets can
-# be named CalyxGamePackage-<version>.zip, CalyxSDK-<version>.zip, etc.
-# Do not stop at the first zip. A GitHub Release can contain source archives or
-# other support zips, so each candidate is downloaded and validated before it is
-# accepted as the engine package used by generated game projects.
-$assets = @($release.assets |
-	Where-Object { $_.name -match '\.zip$' } |
-	Sort-Object @{
-		Expression = {
-			$score = 0
-			if ($_.name -match 'Calyx') { $score -= 10 }
-			if ($_.name -match 'Game|Package|SDK|Runtime|Engine') { $score -= 5 }
-			if ($_.name -match 'Source|src') { $score += 20 }
-			if ($_.name -match [regex]::Escape($VersionValue)) { $score -= 2 }
-			$score
-		}
-	}, name)
-
-if ($assets.Count -eq 0) {
-	throw "No zip asset was found in release: $($release.tag_name)"
-}
-
-function Download-ReleaseAsset {
-	param(
-		[Parameter(Mandatory = $true)]
-		$Asset,
-		[Parameter(Mandatory = $true)]
-		[string]$DestinationPath
-	)
-
-	if (Test-Path $DestinationPath) {
-		Remove-Item -LiteralPath $DestinationPath -Force
-	}
-
-	Invoke-WebRequest -UseBasicParsing -Headers $headers -Uri $Asset.browser_download_url -OutFile $DestinationPath -TimeoutSec 600
-
-	$file = Get-Item -LiteralPath $DestinationPath
-	if ($null -ne $Asset.size -and [int64]$Asset.size -gt 0 -and $file.Length -ne [int64]$Asset.size) {
-		throw "Downloaded asset size mismatch for '$($Asset.name)'. Expected $($Asset.size) bytes, got $($file.Length) bytes."
-	}
-}
+$releaseTag = if ($VersionValue.StartsWith('v')) { $VersionValue } else { "v$VersionValue" }
+$assetName = "CalyxGamePackage-$releaseTag.zip"
+$downloadUrl = "https://github.com/kase-haruto/CalyxEngine/releases/download/$releaseTag/$assetName"
 
 $versionDir = Join-Path $InstallRoot $VersionValue
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("CalyxEngine-" + [System.Guid]::NewGuid().ToString("N"))
 
 try {
-	Write-Host "CalyxLauncher: release '$($release.tag_name)' was found."
+	Write-Host "CalyxLauncher: installing the version requested by .calyxproj: '$VersionValue'."
 	Add-Type -AssemblyName System.IO.Compression.FileSystem
 
-	$package = $null
-	foreach ($asset in $assets) {
-		# Use a separate extraction directory per asset so a failed candidate
-		# cannot leave files that make the next candidate look valid.
-		$assetRoot = Join-Path $tempRoot ([System.IO.Path]::GetFileNameWithoutExtension($asset.name))
-		$extractDir = Join-Path $assetRoot "extract"
-		New-Item -ItemType Directory -Force -Path $extractDir | Out-Null
+	$extractDir = Join-Path $tempRoot "extract"
+	New-Item -ItemType Directory -Force -Path $extractDir | Out-Null
+	$zipPath = Join-Path $tempRoot $assetName
+	Write-Host "CalyxLauncher: downloading '$downloadUrl'..."
+	Invoke-WebRequest -UseBasicParsing -Headers $headers -Uri $downloadUrl -OutFile $zipPath -TimeoutSec 600
+	[System.IO.Compression.ZipFile]::ExtractToDirectory($zipPath, $extractDir)
 
-		$zipPath = Join-Path $assetRoot $asset.name
-		Write-Host "CalyxLauncher: downloading '$($asset.name)'..."
-		Download-ReleaseAsset -Asset $asset -DestinationPath $zipPath
-		Write-Host "CalyxLauncher: download completed: $zipPath"
-
-		Write-Host "CalyxLauncher: extracting package..."
-		[System.IO.Compression.ZipFile]::ExtractToDirectory($zipPath, $extractDir)
-		Write-Host "CalyxLauncher: extraction completed: $extractDir"
-
-		# A valid game-development package must contain the runtime host exe and
-		# the SDK headers/libs that the generated game DLL links against.
-		$candidates = @((Get-Item $extractDir)) + @(Get-ChildItem $extractDir -Directory -Recurse)
-		$package = $candidates |
-			Where-Object {
-				(Test-Path (Join-Path $_.FullName 'CalyxGame.exe')) -and
-				(Test-Path (Join-Path $_.FullName 'SDK\Include\CalyxEngine\Application.h')) -and
-				(Test-Path (Join-Path $_.FullName 'SDK\Lib'))
-			} |
-			Select-Object -First 1
-
-		if ($null -ne $package) {
-			Write-Host "CalyxLauncher: valid engine package found in '$($asset.name)'."
-			break
-		}
-
-		Write-Host "CalyxLauncher: '$($asset.name)' is not a game runtime SDK package. Trying next zip asset."
-	}
+	$candidates = @((Get-Item $extractDir)) + @(Get-ChildItem $extractDir -Directory -Recurse)
+	$package = $candidates |
+		Where-Object {
+			(Test-Path (Join-Path $_.FullName 'CalyxGame.exe')) -and
+			(Test-Path (Join-Path $_.FullName 'SDK\Include\CalyxEngine\Application.h')) -and
+			(Test-Path (Join-Path $_.FullName 'SDK\Lib'))
+		} |
+		Select-Object -First 1
 
 	if ($null -eq $package) {
-		throw "No valid CalyxEngine game runtime SDK package was found in release '$($release.tag_name)'. The package must contain CalyxGame.exe, SDK\Include\CalyxEngine\Application.h, and SDK\Lib."
+		throw "CalyxEngine package '$assetName' is invalid. It must contain CalyxGame.exe, SDK\Include\CalyxEngine\Application.h, and SDK\Lib."
 	}
 
 	New-Item -ItemType Directory -Force -Path $InstallRoot | Out-Null
