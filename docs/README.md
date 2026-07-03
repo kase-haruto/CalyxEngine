@@ -1,5 +1,9 @@
 # Calyx Engine Documentation
 
+## Editor Extension
+
+- [ゲーム固有 Editor Tool 拡張](GameEditorExtensionREADME.md)
+
 ## Collision と Physics の責務
 
 Calyx では、衝突検出と押し戻し処理を分けて扱います。
