@@ -10,6 +10,7 @@
 #include <Engine/Editor/AssetPreviewManager.h>
 #include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Foundation/Input/Input.h>
+#include <Engine/Foundation/HotReload/LivePP/LivePPService.h>
 #include <Engine/Scene/System/SceneManager.h>
 
 #include <CalyxEngine/Application.h>
@@ -17,6 +18,9 @@
 #include <stdexcept>
 
 namespace CalyxEngine {
+	CalyxFrameWork::CalyxFrameWork() = default;
+	CalyxFrameWork::~CalyxFrameWork() = default;
+
 	////////////////////////////////////////////////////////////////////////////////
 	//  engine 初期化
 	////////////////////////////////////////////////////////////////////////////////
@@ -27,6 +31,11 @@ namespace CalyxEngine {
 		/* System & Graphics */
 		system_ = std::make_unique<CalyxCore>();
 		system_->Initialize(hInstance, kWindowWidth, kWindowHeight, windowTitle);
+
+#if defined(_DEBUG) || defined(DEVELOP)
+		livePPService_ = std::make_unique<LivePPService>();
+		livePPService_->Initialize();
+#endif
 
 		graphicsSystem_ = std::make_unique<GraphicsSystem>();
 		graphicsSystem_->Initialize();
@@ -89,6 +98,12 @@ namespace CalyxEngine {
 
 	////////////////////////////////////////////////////////////////////////////////
 	void CalyxFrameWork::Finalize() {
+#if defined(_DEBUG) || defined(DEVELOP)
+		if(livePPService_) {
+			livePPService_->Finalize();
+			livePPService_.reset();
+		}
+#endif
 		system_->Finalize();
 		CoUninitialize();
 	}
@@ -115,6 +130,9 @@ namespace CalyxEngine {
 	////////////////////////////////////////////////////////////////////////////////
 	void CalyxFrameWork::BeginUpdate() {
 		system_->BeginFrame();
+#if defined(_DEBUG) || defined(DEVELOP)
+		if(livePPService_) livePPService_->Update();
+#endif
 		engineUICore_->Update();
 	}
 

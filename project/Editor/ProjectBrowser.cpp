@@ -594,48 +594,17 @@ if ($env:CALYX_ENGINE_GITHUB_TOKEN) {
 	$headers['Authorization'] = "Bearer $env:CALYX_ENGINE_GITHUB_TOKEN"
 }
 
-$tags = @($VersionValue)
-if ($VersionValue.StartsWith('v')) {
-	$tags += $VersionValue.Substring(1)
-} else {
-	$tags += "v$VersionValue"
-}
-
-$release = $null
-$releaseErrors = @()
-foreach ($tag in $tags | Select-Object -Unique) {
-	try {
-		$release = Invoke-RestMethod -Headers $headers -Uri "https://api.github.com/repos/kase-haruto/CalyxEngine/releases/tags/$tag"
-		break
-	} catch {
-		$statusCode = $null
-		if ($null -ne $_.Exception.Response) {
-			$statusCode = [int]$_.Exception.Response.StatusCode
-		}
-
-		$releaseErrors += "tag '$tag': $($_.Exception.Message)"
-		if ($statusCode -ne 404) {
-			throw "GitHub Releases API request failed while looking for CalyxEngine $VersionValue ($($releaseErrors -join '; ')). If this is an API rate limit or the release is private, set CALYX_ENGINE_GITHUB_TOKEN and retry."
-		}
-	}
-}
-
-if ($null -eq $release) {
-	throw "CalyxEngine release was not found for engineVersion: $VersionValue. Checked tags: $($tags -join ', ')"
-}
-
-$asset = $release.assets | Where-Object { $_.name -match '\.zip$' } | Select-Object -First 1
-if ($null -eq $asset) {
-	throw "No zip asset was found in release: $($release.tag_name)"
-}
+$releaseTag = if ($VersionValue.StartsWith('v')) { $VersionValue } else { "v$VersionValue" }
+$assetName = "CalyxGamePackage-$releaseTag.zip"
+$downloadUrl = "https://github.com/kase-haruto/CalyxEngine/releases/download/$releaseTag/$assetName"
 
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("CalyxEngine-" + [System.Guid]::NewGuid().ToString("N"))
 $extractDir = Join-Path $tempRoot "extract"
 New-Item -ItemType Directory -Force -Path $extractDir | Out-Null
 
 try {
-	$zipPath = Join-Path $tempRoot $asset.name
-	Invoke-WebRequest -Headers $headers -Uri $asset.browser_download_url -OutFile $zipPath
+	$zipPath = Join-Path $tempRoot $assetName
+	Invoke-WebRequest -UseBasicParsing -Headers $headers -Uri $downloadUrl -OutFile $zipPath -TimeoutSec 600
 	Expand-Archive -Path $zipPath -DestinationPath $extractDir -Force
 
 	$candidates = @((Get-Item $extractDir)) + @(Get-ChildItem $extractDir -Directory -Recurse)
