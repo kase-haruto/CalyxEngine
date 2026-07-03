@@ -1,0 +1,34 @@
+{
+  "version": 2,
+  "sceneName": "DefaultScene",
+  "objects": [
+    {
+      "type": "DirectionalLight",
+      "guid": "be92da98-e152-4e97-aabc-2d62f0950a1a",
+      "name": "DirectionalLight",
+      "color": { "x": 1.0, "y": 1.0, "z": 1.0, "w": 1.0 },
+      "direction": { "x": -0.35, "y": -1.0, "z": -0.45 },
+      "intensity": 1.0
+    },
+    {
+      "type": "Camera3d",
+      "guid": "78510d31-22be-43aa-9fc6-bb0a5a590f41",
+      "name": "MainCamera",
+      "transform": {
+        "translation": { "x": 0.0, "y": 2.0, "z": -8.0 },
+        "rotation": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 },
+        "scale": { "x": 1.0, "y": 1.0, "z": 1.0 }
+      }
+    },
+    {
+      "type": "DebugCamera",
+      "guid": "aad42f4c-b033-4cc4-8a30-b6bf176fa265",
+      "name": "DebugCamera",
+      "transform": {
+        "translation": { "x": 5.0, "y": 5.0, "z": -10.0 },
+        "rotation": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 },
+        "scale": { "x": 1.0, "y": 1.0, "z": 1.0 }
+      }
+    }
+  ]
+}

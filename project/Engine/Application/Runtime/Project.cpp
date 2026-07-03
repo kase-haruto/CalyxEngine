@@ -99,6 +99,7 @@ namespace Calyx {
 		project.rootDirectory	= projectRoot;
 		project.assetDirectory	= ReadPath(root, "assetDirectory", "Resources/Assets");
 		project.sourceDirectory	= ReadPath(root, "sourceDirectory", "Game");
+		project.generatedDirectory = ReadPath(root, "generatedDirectory", "Generated");
 		project.startupScene		= ReadPath(root, "startupScene", std::filesystem::path{});
 		project.gameModule		= ReadPath(root, "gameModule", std::filesystem::path{});
 
@@ -149,6 +150,7 @@ namespace Calyx {
 		root["engineVersion"]	 = project.engineVersion;
 		root["assetDirectory"]	 = WritePath(RelativeProjectPath(project, project.assetDirectory));
 		root["sourceDirectory"]	 = WritePath(RelativeProjectPath(project, project.sourceDirectory));
+		root["generatedDirectory"] = WritePath(RelativeProjectPath(project, project.generatedDirectory));
 		root["startupScene"]		 = WritePath(RelativeProjectPath(project, project.startupScene));
 		root["gameModule"]		 = WritePath(RelativeProjectPath(project, project.gameModule));
 		root["gameModules"]		 = nlohmann::json::object();
@@ -200,6 +202,12 @@ namespace Calyx {
 		std::filesystem::create_directories(ResolveProjectPath(project, project.sourceDirectory), ec);
 		if(ec) {
 			CalyxEngine::EngineLogger::GetInstance().Add(CalyxEngine::LogLevel::Error, CalyxEngine::LogCategory::Engine, "Project source directory could not be created: " + ResolveProjectPath(project, project.sourceDirectory).generic_string() + " (" + ec.message() + ")", "Project");
+			return false;
+		}
+
+		std::filesystem::create_directories(ResolveProjectPath(project, project.generatedDirectory), ec);
+		if(ec) {
+			CalyxEngine::EngineLogger::GetInstance().Add(CalyxEngine::LogLevel::Error, CalyxEngine::LogCategory::Engine, "Project generated directory could not be created: " + ResolveProjectPath(project, project.generatedDirectory).generic_string() + " (" + ec.message() + ")", "Project");
 			return false;
 		}
 

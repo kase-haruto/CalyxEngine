@@ -106,6 +106,9 @@ namespace CalyxEngine {
 
 		std::weak_ptr<SceneObject> selected_;
 		std::vector<std::weak_ptr<SceneObject>> selectedObjects_;
+		// A hierarchy press becomes a selection only when released without starting a drag.
+		std::weak_ptr<SceneObject> pendingSelection_;
+		bool pendingSelectionDragged_ = false;
 		std::weak_ptr<SceneObject> renameTarget_;
 		std::unordered_map<BaseGameObject*, bool> autoSkeletonDrawPrevious_;
 		std::unordered_set<BaseGameObject*> expandedBoneOwnersThisFrame_;

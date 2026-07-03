@@ -5,13 +5,31 @@ param(
     [string]$OutputName = "CalyxObjectRegistry.generated",
     [string]$Namespace = "CalyxEngine",
     [string]$FunctionName = "RegisterGeneratedSceneObjects",
-    [string]$ApiMacro = ""
+    [string]$ApiMacro = "",
+    [string]$ProjectFile = ""
 )
 
 $ErrorActionPreference = "Stop"
 
+$Root = [System.IO.Path]::GetFullPath($Root)
+
+# A game build can derive all paths from its .calyxproj. Explicit command-line
+# values remain supported for engine builds and older generated projects.
+if (![string]::IsNullOrWhiteSpace($ProjectFile)) {
+    $projectPath = [System.IO.Path]::GetFullPath($ProjectFile)
+    if (!(Test-Path -LiteralPath $projectPath)) {
+        throw "Calyx project file was not found: $projectPath"
+    }
+    $project = Get-Content -LiteralPath $projectPath -Raw | ConvertFrom-Json
+    $Root = Split-Path -Parent $projectPath
+    $sourceRoot = if ($project.sourceDirectory) { $project.sourceDirectory } elseif ($project.SourceRoot) { $project.SourceRoot } else { "Game" }
+    $generatedRoot = if ($project.generatedDirectory) { $project.generatedDirectory } elseif ($project.GeneratedRoot) { $project.GeneratedRoot } else { "Generated" }
+    $ScanRoots = @([string]$sourceRoot)
+    $OutputDir = Join-Path ([string]$generatedRoot) "Foundation\Reflection"
+}
+
 $mutexName = "Global\CalyxReflectionGenerator_" + [Convert]::ToBase64String(
-    [System.Text.Encoding]::UTF8.GetBytes((Resolve-Path $Root).Path)
+    [System.Text.Encoding]::UTF8.GetBytes($Root)
 ).Replace("+", "-").Replace("/", "_").TrimEnd("=")
 $mutex = [System.Threading.Mutex]::new($false, $mutexName)
 $hasLock = $false

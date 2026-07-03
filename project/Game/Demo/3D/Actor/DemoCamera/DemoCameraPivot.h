@@ -7,6 +7,7 @@
 #include <Engine/Foundation/Math/MathUtil.h>
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 #include <Engine/Objects/ConfigurableObject/IConfigurable.h>
+#include <Engine/Scene/Reference/TransformReference.h>
 
 /*-----------------------------------------------------------------------------------------
  * DemoCameraPivot
@@ -28,6 +29,7 @@ public:
 	void ShowGui() override;
 	void ApplyConfigFromJson(const nlohmann::json& j) override;
 	void ExtractConfigToJson(nlohmann::json& j) const override;
+	void RemapSceneObjectReferences(const std::unordered_map<Guid, Guid>& guidMap) override;
 
 private:
 	//==================================================================*//
@@ -37,7 +39,7 @@ private:
 	SceneObjectConfig ExtractConfig() const;
 	void ApplyCameraPivotConfig(const nlohmann::json& j);
 	void ExtractCameraPivotConfig(nlohmann::json& j) const;
-	std::shared_ptr<SceneObject> ResolveTargetObject();
+	const BaseTransform* ResolveTargetTransform();
 	void UpdateRotationInput(float dt);
 	std::shared_ptr<SceneObject> ResolveMainCamera();
 	void ApplyPivotTransform(float dt);
@@ -46,7 +48,7 @@ private:
 	//==================================================================*//
 	//          private variable
 	//==================================================================*//
-	std::weak_ptr<SceneObject> targetObject_;       //< 追従対象
+	CalyxEngine::TransformRef targetTransform_;     //< Inspectorで明示的に割り当てる読み取り専用Transform
 	std::weak_ptr<SceneObject> mainCamera_;         //< 操作対象メインカメラ
 	const BaseTransform* target_ = nullptr;         //< 追従対象Transform
 

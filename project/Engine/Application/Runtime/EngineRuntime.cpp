@@ -3,6 +3,7 @@
 #include <CalyxEngine/Project.h>
 
 #include <Engine/Application/Framework/CalyxFrameWork.h>
+#include <Engine/Foundation/Log/EngineLogger.h>
 #include <Engine/Foundation/Utility/LeakChecker/LeakChecker.h>
 
 #include <string>
@@ -74,11 +75,20 @@ namespace Calyx {
 
 		LoadProjectFromCommandLine(commandLine, application);
 
-		frameWork.Initialize(hInstance, &application);
-		application.OnInitialize();
-		frameWork.Run(&application);
-		application.OnFinalize();
-		frameWork.Finalize();
+		try {
+			frameWork.Initialize(hInstance, &application);
+			application.OnInitialize();
+			frameWork.Run(&application);
+			application.OnFinalize();
+			frameWork.Finalize();
+		} catch(const std::exception& exception) {
+			CalyxEngine::EngineLogger::GetInstance().Add(
+				CalyxEngine::LogLevel::Error,
+				CalyxEngine::LogCategory::Engine,
+				std::string("Engine startup failed: ") + exception.what(),
+				"EngineRuntime");
+			return -1;
+		}
 
 		return 0;
 	}

@@ -87,6 +87,15 @@ void SceneObject::ExtractSerializableParamsToJson(nlohmann::json& j) const {
 	}
 }
 
+void SceneObject::RemapSceneObjectReferences(const std::unordered_map<Guid, Guid>& guidMap) {
+	// SceneObjectが捕捉した設定オブジェクトへ、Prefab複製時のGUID対応表を伝播する。
+	for(auto* param : serializableParamObjects_) {
+		if(!param) continue;
+		if(!CalyxEngine::SerializableObject::IsAlive(param)) continue;
+		param->RemapSceneObjectReferences(guidMap);
+	}
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //		トランスフォームからaabbを構築して返す
 /////////////////////////////////////////////////////////////////////////////////////////

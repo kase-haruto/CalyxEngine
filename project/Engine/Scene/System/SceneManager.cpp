@@ -3,6 +3,7 @@
 // engine
 #include <Engine/Application/Settings/EngineSettings.h>
 #include <Engine/Application/System/PlaySession.h>
+#include <Engine/Assets/Database/AssetDatabase.h>
 #include <Engine/Editor/AssetPreviewManager.h>
 #include <Engine/Graphics/Camera/3d/Camera3d.h>
 #include <Engine/Foundation/Log/EngineLogger.h>
@@ -119,14 +120,11 @@ namespace CalyxEngine {
 	}
 
 	bool SceneManager::OpenScene(const std::filesystem::path& scenePath) {
-		if(scenePath.empty() || slots_.empty()) {
-			EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Editor, "Scene open failed because the path is empty or no scene slot exists.", "SceneManager");
+		if(scenePath.empty()) {
+			EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Editor, "Scene open failed because the path is empty.", "SceneManager");
 			return false;
 		}
-		if(pPlaySession_ && pPlaySession_->GetContext() != GetCurrentSceneContext()) {
-			EngineLogger::GetInstance().Add(LogLevel::Warning, LogCategory::Editor, "Scene open was blocked while a runtime or preview context is active: " + scenePath.generic_string(), "SceneManager");
-			return false;
-		}
+		const bool rebuildRuntime = pPlaySession_ && pPlaySession_->IsRuntime();
 
 		SceneContext* previousContext = SceneContext::Current();
 		auto nextContext = std::make_unique<SceneContext>();
@@ -137,21 +135,21 @@ namespace CalyxEngine {
 			return false;
 		}
 		nextContext->SetScenePath(scenePath.generic_string());
+		nextContext->SetSceneTransitionRequestor(&GetTransitionRequestor());
 
-		auto& slot = slots_[currentIdx_];
-		if(slot.scene) slot.scene->OnExit();
+		if(activeScene_.scene) activeScene_.scene->OnExit();
 
-		// Files opened by the editor use the common scene runtime. Scene-specific
-		// behaviour belongs to serialized SceneObjects, not a BaseScene subclass.
-		slot.scene = std::make_unique<BaseScene>();
-		slot.scene->SetSceneName(nextContext->GetSceneName());
-		slot.scene->SetTransitionRequestor(&GetTransitionRequestor());
-		slot.ctx = std::move(nextContext);
-		slot.assetsLoaded = false;
+		// 各派生シーンクラスを作成せずにbasesceneで.sceneファイルを使用してシーンを作成する
+		activeScene_.scene = std::make_unique<BaseScene>();
+		activeScene_.scene->SetSceneName(nextContext->GetSceneName());
+		activeScene_.scene->SetTransitionRequestor(&GetTransitionRequestor());
+		activeScene_.ctx = std::move(nextContext);
+		activeScene_.assetsLoaded = false;
 
 		CommandManager::GetInstance()->ClearHistory();
 		if(pPlaySession_) {
-			pPlaySession_->BindEditorContext(slot.ctx.get());
+			pPlaySession_->BindEditorContext(activeScene_.ctx.get());
+			if(rebuildRuntime) pPlaySession_->RebuildRuntimeFromEditor(activeScene_.ctx.get());
 		}
 		lastBoundCtx_ = nullptr;
 		lastRuntimeGen_ = 0;
@@ -161,63 +159,30 @@ namespace CalyxEngine {
 	}
 
 	//------------------------------------------------------------
-	size_t SceneManager::AddScene(SceneId id, std::unique_ptr<BaseScene> scene) {
-		const std::string sceneName = scene ? scene->GetSceneName() : "Unnamed";
-		SceneSlot slot;
-		slot.scene = std::move(scene);
-		slot.ctx   = std::make_unique<SceneContext>();
-		slot.ctx->Initialize(false);
-
-		slot.scene->SetTransitionRequestor(&GetTransitionRequestor());
-
-		slots_.push_back(std::move(slot));
-		size_t index   = slots_.size() - 1;
-		idToIndex_[id] = index;
-		registeredSceneIds_.push_back(id);
-		EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Engine, "Scene registered: " + sceneName + " (slot=" + std::to_string(index) + ")", "SceneManager");
-		return index;
+	bool SceneManager::OpenScene(const Guid& sceneAssetGuid) {
+		const AssetRecord* record = AssetDatabase::GetInstance()->Get(sceneAssetGuid);
+		if(!record || record->type != AssetType::Scene) {
+			EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Asset, "Scene asset GUID could not be resolved: " + sceneAssetGuid.ToString(), "SceneManager");
+			return false;
+		}
+		return OpenScene(record->sourcePath);
 	}
+
+	void SceneManager::RequestSceneChange(const std::filesystem::path& scenePath) { RequestSceneChangeInternal(scenePath); }
+	void SceneManager::RequestSceneChange(const Guid& sceneAssetGuid) { RequestSceneChangeInternal(sceneAssetGuid); }
 
 	//------------------------------------------------------------
-	void SceneManager::SetCurrent(size_t index) {
-		if(index >= slots_.size()) {
-			EngineLogger::GetInstance().Add(LogLevel::Warning, LogCategory::Engine, "Scene switch ignored because the slot index is invalid: " + std::to_string(index), "SceneManager");
-			return;
-		}
 
-		if(pPlaySession_ && pPlaySession_->ExitRequested()) {
-			pPlaySession_->FinalizeExitCleanup();
-		}
-
-		if(!slots_.empty()) {
-			slots_[currentIdx_].scene->OnExit();
-		}
-
-		currentIdx_ = index;
-		auto& s		= slots_[currentIdx_];
 
 		// 新しい Editor ctx を PlaySession に通知
-		if(pPlaySession_) pPlaySession_->BindEditorContext(s.ctx.get());
+
 
 		// 再生中なら新しい Editor 内容から Runtime を再構築
-		if(pPlaySession_ && pPlaySession_->IsRuntime()) {
-			pPlaySession_->RebuildRuntimeFromEditor(s.ctx.get());
-		}
 
-		RebindIfContextChanged();
-		EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Game, "Current scene changed to slot " + std::to_string(index) + ".", "SceneManager");
-	}
-
-	void SceneManager::SetCurrent(SceneId id) {
-		auto it = idToIndex_.find(id);
-		if(it == idToIndex_.end()) return;
-		SetCurrent(it->second);
-	}
 
 	//------------------------------------------------------------
 	SceneContext* SceneManager::GetCurrentSceneContext() const {
-		if(slots_.empty()) return nullptr;
-		return slots_[currentIdx_].ctx.get();
+		return activeScene_.ctx.get();
 	}
 
 	std::filesystem::path SceneManager::GetCurrentScenePath() const {
@@ -229,14 +194,12 @@ namespace CalyxEngine {
 	SceneContext* SceneManager::ActiveCtx() const {
 		if(pPlaySession_ && pPlaySession_->IsRuntime()) return pPlaySession_->GetContext();
 		if(pPlaySession_) return pPlaySession_->GetContext();
-		if(slots_.empty()) return nullptr;
-		return slots_[currentIdx_].ctx.get();
+		return activeScene_.ctx.get();
 	}
 
 	bool SceneManager::ActiveRuntimeFlag() const {
 		if(pPlaySession_) return pPlaySession_->IsRuntime();
-		if(slots_.empty()) return false;
-		return slots_[currentIdx_].ctx->IsRuntime();
+		return activeScene_.ctx ? activeScene_.ctx->IsRuntime() : false;
 	}
 
 	void SceneManager::SetEditorPreviewContext(SceneContext* ctx) {
@@ -255,17 +218,12 @@ namespace CalyxEngine {
 			pPlaySession_->ClearRuntimeContext();
 		}
 
-		for(auto& slot : slots_) {
-			if(slot.scene) {
-				slot.scene->OnExit();
-			}
-			if(slot.ctx) {
-				slot.ctx->Clear();
-			}
-		}
+		if(activeScene_.scene) activeScene_.scene->OnExit();
+		if(activeScene_.ctx) activeScene_.ctx->Clear();
+		activeScene_ = {};
 	}
 
-	bool SceneManager::GetIsEndGame() const { return slots_[currentIdx_].scene->GetIsEndGame(); }
+	bool SceneManager::GetIsEndGame() const { return activeScene_.scene && activeScene_.scene->GetIsEndGame(); }
 
 	void SceneManager::RebindIfContextChanged() {
 		SceneContext* ctx = ActiveCtx();
@@ -274,7 +232,7 @@ namespace CalyxEngine {
 		const uint64_t gen = pPlaySession_ ? pPlaySession_->RuntimeGeneration() : 0;
 
 		if(ctx != lastBoundCtx_ || gen != lastRuntimeGen_) {
-			auto& slot = slots_[currentIdx_];
+			auto& slot = activeScene_;
 
 			// 前回のctxにぶら下がるキャッシュを捨てる
 			slot.scene->OnExit();
@@ -305,7 +263,7 @@ namespace CalyxEngine {
 	}
 
 	void SceneManager::Update(float dt, float alwaysDt) {
-		if(slots_.empty()) return;
+		if(!activeScene_.scene) return;
 
 		if(pPlaySession_ && pPlaySession_->ExitRequested()) {
 			pPlaySession_->FinalizeExitCleanup();
@@ -321,19 +279,20 @@ namespace CalyxEngine {
 		ctx->MakeCurrent();
 		ctx->Update(dt, alwaysDt, ActiveRuntimeFlag());
 
-		auto& slot = slots_[currentIdx_];
+		auto& slot = activeScene_;
 		slot.scene->InjectContext(ctx);
 		slot.scene->Update(dt);
 
-		if(pendingSwitchIndex_.has_value()) {
-			SetCurrent(*pendingSwitchIndex_);
-			pendingSwitchIndex_.reset();
+		if(pendingScenePath_.has_value()) {
+			auto nextPath = std::move(*pendingScenePath_);
+			pendingScenePath_.reset();
+			OpenScene(nextPath);
 		}
 	}
 
 	//------------------------------------------------------------
 	void SceneManager::PostUpdate(ID3D12GraphicsCommandList* cmd, PipelineService* pso) {
-		if(slots_.empty()) return;
+		if(!activeScene_.scene) return;
 
 		if(editorPreviewCtx_) {
 			editorPreviewCtx_->MakeCurrent();
@@ -344,12 +303,12 @@ namespace CalyxEngine {
 		if(auto* ctx = ActiveCtx()) {
 			ctx->MakeCurrent();
 		}
-		slots_[currentIdx_].scene->PostUpdate(cmd, pso);
+		activeScene_.scene->PostUpdate(cmd, pso);
 	}
 
 	//------------------------------------------------------------
 	void SceneManager::Draw(ID3D12GraphicsCommandList* cmd, PipelineService* pso) {
-		if(slots_.empty()) return;
+		if(!activeScene_.scene) return;
 		RebindIfContextChanged();
 
 		if(auto* ctx = ActiveCtx()) ctx->MakeCurrent();
@@ -387,7 +346,7 @@ namespace CalyxEngine {
 				if(renderPicking_ && pickingPass_ && debugRT) {
 					auto vp = debugRT->GetViewport();
 					pickingPass_->Resize(static_cast<int32_t>(vp.Width), static_cast<int32_t>(vp.Height));
-					if(auto* renderer = slots_[currentIdx_].scene->GetModelRenderer()) {
+					if(auto* renderer = activeScene_.scene->GetModelRenderer()) {
 						pickingPass_->Render(cmd, renderer, pso);
 					}
 					debugRT->SetRenderTarget(cmd);
@@ -521,7 +480,7 @@ namespace CalyxEngine {
 		rt->TransitionTo(cmd, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		rt->SetRenderTarget(cmd);
 
-		slots_[currentIdx_].scene->DrawSpritesOnly(cmd, pso);
+		activeScene_.scene->DrawSpritesOnly(cmd, pso);
 
 		if(transitionToShaderResource) {
 			rt->TransitionTo(cmd, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
@@ -537,13 +496,13 @@ namespace CalyxEngine {
 		rt->SetRenderTarget(cmd);
 		rt->Clear(cmd);
 
-		auto& slot = slots_[currentIdx_];
+		auto& slot = activeScene_;
 		slot.scene->Draw(cmd, pso, rt);
 	}
 
 	//------------------------------------------------------------
 	void SceneManager::DrawNotAffectedFromPE(ID3D12GraphicsCommandList* cmd, PipelineService* pso) {
-		if(slots_.empty()) return;
+		if(!activeScene_.scene) return;
 		auto* postOutput = dx_->GetRenderTargetCollection().Get("PostEffectOutput");
 		DrawSpritesToRenderTarget(postOutput, cmd, pso, true);
 
@@ -551,32 +510,23 @@ namespace CalyxEngine {
 		DrawSpritesToRenderTarget(backBuffer, cmd, pso, false);
 	}
 
-	void SceneManager::RequestSceneChangeInternal(SceneId next) {
-		auto it = idToIndex_.find(next);
-		if(it == idToIndex_.end()) {
-			EngineLogger::GetInstance().Add(LogLevel::Warning, LogCategory::Game, "Scene change request ignored because the scene ID is not registered.", "SceneManager");
+	void SceneManager::RequestSceneChangeInternal(const std::filesystem::path& scenePath, std::unique_ptr<IScenePayload> payload) {
+		if(scenePath.empty()) {
+			EngineLogger::GetInstance().Add(LogLevel::Warning, LogCategory::Game, "Scene change request ignored because the scene path is empty.", "SceneManager");
 			return;
 		}
-		pendingSwitchIndex_ = it->second;
-		EngineLogger::GetInstance().Add(LogLevel::Trace, LogCategory::Game, "Scene change queued for slot " + std::to_string(it->second) + ".", "SceneManager");
-	}
-
-	void SceneManager::RequestSceneChangeInternal(
-		SceneId						   next,
-		std::unique_ptr<IScenePayload> payload) {
-
 		pendingPayload_ = std::move(payload);
-		RequestSceneChangeInternal(next);
+		pendingScenePath_ = scenePath;
+		EngineLogger::GetInstance().Add(LogLevel::Trace, LogCategory::Game, "Scene change queued: " + scenePath.generic_string(), "SceneManager");
 	}
 
-	std::string SceneManager::GetSceneName(SceneId id) const {
-		auto it = idToIndex_.find(id);
-		if(it == idToIndex_.end()) return "Unknown Scene";
-
-		size_t index = it->second;
-		if(index >= slots_.size()) return "Invalid Index";
-
-		return slots_[index].scene->GetSceneName();
+	void SceneManager::RequestSceneChangeInternal(const Guid& sceneAssetGuid, std::unique_ptr<IScenePayload> payload) {
+		const AssetRecord* record = AssetDatabase::GetInstance()->Get(sceneAssetGuid);
+		if(!record || record->type != AssetType::Scene) {
+			EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Asset, "Scene transition GUID could not be resolved: " + sceneAssetGuid.ToString(), "SceneManager");
+			return;
+		}
+		RequestSceneChangeInternal(record->sourcePath, std::move(payload));
 	}
 
 } // namespace CalyxEngine

@@ -5,6 +5,7 @@
 // engine
 #include <Engine/Application/Effects/FxSystem.h>
 #include <Engine/Application/System/Environment.h>
+#include <Engine/Assets/Database/AssetDatabase.h>
 #include <Engine/Application/UI/EngineUI/Core/EngineUICore.h>
 #include <Engine/Editor/AssetPreviewManager.h>
 #include <Engine/Foundation/Clock/ClockManager.h>
@@ -13,7 +14,7 @@
 
 #include <CalyxEngine/Application.h>
 #include <CalyxEngine/Project.h>
-#include <CalyxEngine/SceneRegistry.h>
+#include <stdexcept>
 
 namespace CalyxEngine {
 	////////////////////////////////////////////////////////////////////////////////
@@ -34,17 +35,16 @@ namespace CalyxEngine {
 		/* SceneManager */
 		sceneManager_ = std::make_unique<SceneManager>(system_->GetDxCore());
 		sceneManager_->Initialize();
-		if(application) {
-			Calyx::SceneRegistry registry(*sceneManager_);
-			application->RegisterScenes(registry);
-			application->OnSceneManagerReady(*sceneManager_);
-		}
-		if(sceneManager_->GetSceneCount() == 0) {
-			sceneManager_->AddScene(0, std::make_unique<BaseScene>());
-		}
 		if(Calyx::HasCurrentProject() && !Calyx::GetCurrentProject().startupScene.empty()) {
 			const auto& project = Calyx::GetCurrentProject();
-			sceneManager_->OpenScene(Calyx::ResolveProjectPath(project, project.startupScene));
+			AssetDatabase::GetInstance()->Initialize(Calyx::GetAssetRoot());
+			const auto startupScene = Calyx::ResolveProjectPath(project, project.startupScene);
+			if(!sceneManager_->OpenScene(startupScene)) {
+				throw std::runtime_error("Calyx startupScene could not be loaded: " + startupScene.generic_string());
+			}
+		}
+		if(application) {
+			application->OnSceneManagerReady(*sceneManager_);
 		}
 
 		/* PlaySession  (EditorCtx は SceneManager が作ったシーン 0 のものを使う) */

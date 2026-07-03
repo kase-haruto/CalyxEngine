@@ -112,7 +112,7 @@ public:
 	 */
 	virtual void ExtractDerivedConfigToJson([[maybe_unused]] nlohmann::json& root,
 											[[maybe_unused]] nlohmann::json& derived) const {}
-	virtual void RemapSceneObjectReferences([[maybe_unused]] const std::unordered_map<Guid, Guid>& guidMap) {}
+	virtual void RemapSceneObjectReferences(const std::unordered_map<Guid, Guid>& guidMap);
 	void BeginSerializableParamCapture(const nlohmann::json* overrides);
 	void EndSerializableParamCapture();
 	void AdoptPendingSerializableParamCapture(const nlohmann::json* overrides);

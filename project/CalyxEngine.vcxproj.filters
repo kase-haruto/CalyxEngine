@@ -225,6 +225,8 @@
     <ClCompile Include="Engine\Scene\System\SceneManager.cpp" />
     <ClCompile Include="Engine\Foundation\Math\Quaternion.cpp" />
     <ClCompile Include="Engine\Scene\Context\SceneContext.cpp" />
+    <ClCompile Include="Engine\Scene\Reference\SceneObjectReference.cpp" />
+    <ClCompile Include="Engine\Scene\Reference\TransformReference.cpp" />
     <ClCompile Include="Engine\Graphics\RenderTarget\SwapChainRT\SwapChainRenderTarget.cpp" />
     <ClCompile Include="Engine\Graphics\RenderTarget\OffscreenRT\OffscreenRenderTarget.cpp" />
     <ClCompile Include="Engine\Graphics\RenderTarget\Collection\RenderTargetCollection.cpp" />
@@ -391,6 +393,8 @@
     <ClInclude Include="Engine\Graphics\RenderTarget\Detail\RenderTargetDetail.h" />
     <ClInclude Include="Engine\Graphics\Camera\Frustum\Frustum.h" />
     <ClInclude Include="Engine\Scene\Utility\SceneUtility.h" />
+    <ClInclude Include="Engine\Scene\Reference\SceneObjectReference.h" />
+    <ClInclude Include="Engine\Scene\Reference\TransformReference.h" />
     <ClInclude Include="Engine\System\Event\EventBus.h" />
     <ClInclude Include="Engine\System\Command\EditorCommand\LevelEditorCommand\CreateObjectCommand\CreateParticleSystemCommand.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\SceneObject\SceneObjectConfig.h" />

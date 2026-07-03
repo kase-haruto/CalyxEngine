@@ -11,6 +11,8 @@
 #include <Engine/Foundation/Math/Vector2.h>
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Foundation/Math/Vector4.h>
+#include <Engine/Objects/3D/Actor/SceneObject.h>
+#include <Engine/Scene/Reference/SceneObjectReference.h>
 
 // external
 #include "Engine/Application/UI/Panels/InspectorPanel.h"
@@ -21,6 +23,7 @@
 
 #include <string>
 #include <cstdio>
+#include <algorithm>
 
 /* ==========================================================================================================
 /*		Internal Helpers (Custom Rendering)
@@ -701,6 +704,62 @@ namespace GuiCmd {
 		va_start(args, fmt);
 		ImGui::TextV(fmt, args);
 		va_end(args);
+	}
+
+	bool SceneObjectReferenceField(const char* label, CalyxEngine::ISceneObjectReference& reference) {
+		BeginPropertyRow(label);
+
+		// 現在のGUIDを解決し、利用者が識別しやすいオブジェクト名を表示する。
+		std::optional<std::string> resolvedName;
+		if(const auto* resolver = CalyxEngine::GetCurrentSceneObjectResolver()) {
+			resolvedName = reference.ResolveDisplayName(*resolver);
+		}
+
+		const std::string buttonId = GetWidgetLabel(label);
+		const std::string kindName(reference.GetReferenceKindName());
+		const std::string displayText = resolvedName
+			? *resolvedName + " (" + kindName + ")"
+			: (reference.GetGuid().isValid()
+				? "Missing / Type mismatch (" + kindName + ")"
+				: "None (" + kindName + ")");
+
+		// フィールド本体をHierarchyからのドロップ先として描画する。
+		const float clearButtonWidth = reference.GetGuid().isValid() ? 28.0f : 0.0f;
+		ImGui::SetNextItemWidth((std::max)(1.0f, ImGui::GetContentRegionAvail().x - clearButtonWidth));
+		ImGui::Button((displayText + buttonId).c_str(),
+			ImVec2((std::max)(1.0f, ImGui::GetContentRegionAvail().x - clearButtonWidth), 0.0f));
+
+		bool changed = false;
+		if(ImGui::BeginDragDropTarget()) {
+			if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SceneObjectPtr")) {
+				// Payloadのサイズを検証してからポインタを読み取り、不正データを参照しない。
+				if(payload->Data && payload->DataSize == sizeof(SceneObject*)) {
+					SceneObject* candidate = *static_cast<SceneObject**>(payload->Data);
+					// 型付き参照が受理できるオブジェクトだけをGUIDへ変換して保存する。
+					if(candidate && reference.CanAssign(*candidate)) {
+						reference.SetGuid(candidate->GetGuid());
+						changed = true;
+					}
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		// 設定済み参照には明示的な解除操作を用意する。
+		if(reference.GetGuid().isValid()) {
+			ImGui::SameLine();
+			if(ImGui::SmallButton((std::string("x##Clear") + label).c_str())) {
+				reference.Clear();
+				changed = true;
+			}
+		}
+
+		// 解決不能な参照ではGUIDをTooltipへ残し、壊れた参照を調査可能にする。
+		if(!resolvedName && reference.GetGuid().isValid() && ImGui::IsItemHovered()) {
+			ImGui::SetTooltip("%s reference\nGUID: %s", kindName.c_str(), reference.GetGuid().ToString().c_str());
+		}
+
+		return changed;
 	}
 
 	//===================================================================*/

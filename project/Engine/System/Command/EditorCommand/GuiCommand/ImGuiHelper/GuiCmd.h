@@ -9,6 +9,7 @@
 #include <Engine/System/Command/Interface/ICommand.h>
 #include <Engine/System/Command/Manager/CommandManager.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/SetValueCommand/SetValueCommand.h>
+#include <Engine/Scene/Reference/SceneObjectReference.h>
 
 // c++
 #include <functional>
@@ -93,6 +94,7 @@ namespace GuiCmd{
 	CALYX_API void BeginTableLayout(const char* id = "InspectorTable");
 	CALYX_API void EndTableLayout();
 	CALYX_API void PropertyText(const char* label, const char* fmt, ...);
+	CALYX_API bool SceneObjectReferenceField(const char* label, CalyxEngine::ISceneObjectReference& reference);
 
 	//===================================================================*/
 	//		Section Filter Helpers (For Tab View)

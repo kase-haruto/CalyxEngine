@@ -80,10 +80,6 @@ namespace {
 			UnloadGameApplication();
 		}
 
-		void RegisterScenes(Calyx::SceneRegistry& registry) override {
-			ActiveApplication().RegisterScenes(registry);
-		}
-
 		void OnProjectLoaded(const Calyx::ProjectInfo& project) override {
 			project_ = project;
 			LoadGameApplication();

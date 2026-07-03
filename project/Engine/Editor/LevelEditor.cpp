@@ -37,6 +37,8 @@
 #include <algorithm>
 #include <filesystem>
 #include <functional>
+#include <system_error>
+#include <Windows.h>
 
 using namespace EngineEdit;
 
@@ -48,6 +50,24 @@ namespace {
 						 const std::shared_ptr<SceneObject>& sp) {
 		if(!lib || !sp) return false;
 		return lib->Contains(sp->GetGuid());
+	}
+
+	std::filesystem::path FindDefaultSceneTemplate() {
+		std::vector<std::filesystem::path> candidates{Calyx::ResolveAssetPath("Scenes/DefaultScene.scene")};
+		wchar_t executablePath[MAX_PATH]{};
+		if(::GetModuleFileNameW(nullptr, executablePath, MAX_PATH) > 0) {
+			const auto executableDirectory = std::filesystem::path(executablePath).parent_path();
+			candidates.push_back(executableDirectory / "Resources" / "Assets" / "Scenes" / "DefaultScene.scene");
+			candidates.push_back(executableDirectory.parent_path().parent_path() / "project" / "Resources" / "Assets" / "Scenes" / "DefaultScene.scene");
+		}
+		candidates.push_back(std::filesystem::current_path() / "Resources" / "Assets" / "Scenes" / "DefaultScene.scene");
+		candidates.push_back(std::filesystem::current_path() / "project" / "Resources" / "Assets" / "Scenes" / "DefaultScene.scene");
+
+		for(const auto& candidate : candidates) {
+			std::error_code ec;
+			if(std::filesystem::is_regular_file(candidate, ec)) return std::filesystem::weakly_canonical(candidate, ec);
+		}
+		return {};
 	}
 
 } // namespace
@@ -214,6 +234,21 @@ namespace CalyxEngine {
 				}
 			});
 		}
+
+		menu_->Add(MenuCategory::File,
+				   {"Create Scene",
+					"Ctrl+N",
+					[] {
+						IGFD::FileDialogConfig config;
+						config.path = Calyx::ResolveAssetPath("Scenes").generic_string();
+						config.fileName = "NewScene.scene";
+						ImGuiFileDialog::Instance()->OpenDialog(
+							"SceneCreateDialog",
+							"create scene from DefaultScene.scene",
+							".scene",
+							config);
+					},
+					true});
 
 		// File: Save Scene
 		menu_->Add(MenuCategory::File,
@@ -515,6 +550,13 @@ namespace CalyxEngine {
 			ImGuiFileDialog::Instance()->Close();
 		}
 
+		if(ImGuiFileDialog::Instance()->Display("SceneCreateDialog")) {
+			if(ImGuiFileDialog::Instance()->IsOk()) {
+				CreateSceneFromTemplate(ImGuiFileDialog::Instance()->GetFilePathName());
+			}
+			ImGuiFileDialog::Instance()->Close();
+		}
+
 		// ----------------------------
 		// Save Scene ダイアログ処理
 		// ----------------------------
@@ -522,6 +564,7 @@ namespace CalyxEngine {
 			if(ImGuiFileDialog::Instance()->IsOk()) {
 				std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
 				if(ctx && SceneSerializer::Save(*ctx, filePath)) {
+					ctx->SetScenePath(filePath);
 					notifySceneSaved(filePath);
 				} else {
 					EngineLogger::GetInstance().Add(
@@ -1328,6 +1371,7 @@ namespace CalyxEngine {
 			scenePath = Calyx::ResolveAssetPath(std::filesystem::path("Scenes") / (ctx->GetSceneName() + ".scene")).generic_string();
 		}
 		if(SceneSerializer::Save(*ctx, scenePath)) {
+			ctx->SetScenePath(scenePath);
 			EngineLogger::GetInstance().Add(
 				LogLevel::Info,
 				LogCategory::Editor,
@@ -1340,6 +1384,47 @@ namespace CalyxEngine {
 				"Failed to save scene: " + scenePath,
 				"LevelEditor");
 		}
+	}
+
+	bool LevelEditor::CreateSceneFromTemplate(const std::filesystem::path& requestedDestination) {
+		if(!sceneManager_) {
+			EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Editor, "Scene creation failed because SceneManager is unavailable.", "LevelEditor");
+			return false;
+		}
+
+		auto destination = requestedDestination;
+		if(destination.extension() != ".scene") destination += ".scene";
+		const auto templatePath = FindDefaultSceneTemplate();
+		if(templatePath.empty()) {
+			EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Editor, "Scene creation failed because DefaultScene.scene was not found.", "LevelEditor");
+			return false;
+		}
+
+		std::error_code ec;
+		std::filesystem::create_directories(destination.parent_path(), ec);
+		if(ec) {
+			EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Editor, "Scene directory could not be created: " + destination.parent_path().generic_string() + " (" + ec.message() + ")", "LevelEditor");
+			return false;
+		}
+		if(std::filesystem::equivalent(templatePath, destination, ec)) {
+			EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Editor, "DefaultScene.scene cannot overwrite itself.", "LevelEditor");
+			return false;
+		}
+
+		std::filesystem::copy_file(templatePath, destination, std::filesystem::copy_options::overwrite_existing, ec);
+		if(ec) {
+			EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Editor, "DefaultScene.scene could not be copied to " + destination.generic_string() + " (" + ec.message() + ")", "LevelEditor");
+			return false;
+		}
+
+		AssetDatabase::GetInstance()->RegisterOrUpdate(destination, AssetType::Scene);
+		if(!OpenScene(destination)) return false;
+		if(auto* context = sceneManager_->GetCurrentSceneContext()) {
+			context->SetSceneName(destination.stem().string());
+			if(!SceneSerializer::Save(*context, destination.generic_string())) return false;
+		}
+		EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Editor, "Scene created from DefaultScene.scene: " + destination.generic_string(), "LevelEditor");
+		return true;
 	}
 
 	bool LevelEditor::OpenScene(const std::filesystem::path& path) {

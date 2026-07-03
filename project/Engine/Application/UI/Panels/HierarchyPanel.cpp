@@ -384,8 +384,11 @@ namespace CalyxEngine {
 			open = ImGui::TreeNodeEx(obj, flags, "");
 
 			// インタラクション
+			// Selection is committed on release. This keeps the current Inspector visible
+			// while an object is dragged from the Hierarchy into one of its fields.
 			if(ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
-				HandleNodeSelectionClick(obj);
+				pendingSelection_ = obj->shared_from_this();
+				pendingSelectionDragged_ = false;
 			}
 			if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && actions_) {
 				actions_->FocusObject(obj->shared_from_this());
@@ -393,11 +396,24 @@ namespace CalyxEngine {
 
 			// ドラッグ＆ドロップ
 			if(ImGui::BeginDragDropSource()) {
+				if(pendingSelection_.lock().get() == obj) {
+					pendingSelectionDragged_ = true;
+				}
 				SceneObject* drag = obj;
 				ImGui::SetDragDropPayload("SceneObjectPtr", &drag, sizeof(SceneObject*));
 				const std::string displayName = obj->GetDisplayName();
 				ImGui::Text("%s", displayName.c_str());
 				ImGui::EndDragDropSource();
+			}
+
+			if(ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+				if(pendingSelection_.lock().get() == obj) {
+					if(!pendingSelectionDragged_ && ImGui::IsItemHovered()) {
+						HandleNodeSelectionClick(obj);
+					}
+					pendingSelection_.reset();
+					pendingSelectionDragged_ = false;
+				}
 			}
 
 			if(ImGui::BeginDragDropTarget()) {

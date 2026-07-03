@@ -80,6 +80,18 @@ namespace CalyxEngine {
 		}
 	}
 
+	void SerializableObject::RemapSceneObjectReferences(const std::unordered_map<Guid, Guid>& guidMap) {
+		// フィールド型を走査し、SceneObject参照だけへGUID対応表を適用する。
+		for(auto& field : fields_) {
+			std::visit([&](auto* value) {
+				using Value = std::remove_pointer_t<decltype(value)>;
+				if constexpr(std::is_same_v<Value, ISceneObjectReference>) {
+					value->Remap(guidMap);
+				}
+			}, field.ptr);
+		}
+	}
+
 	std::string SerializableObject::GetParamStorageKey() const {
 		const ParamPath path = GetParamPath();
 		std::string key = ToString(path.domain);

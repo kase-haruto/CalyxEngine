@@ -24,8 +24,6 @@
     <ClCompile Include="Game\Demo\3D\Actor\DemoPlayer\DemoPlayerMotor.cpp"><Filter>Game\Demo\3D\Actor\DemoPlayer</Filter></ClCompile>
     <ClCompile Include="Game\Demo\3D\Actor\DemoPlayer\Weapon\Weapon.cpp"><Filter>Game\Demo\3D\Actor\DemoPlayer\Weapon</Filter></ClCompile>
     <ClCompile Include="Game\Demo\Input\PlayerInput.cpp"><Filter>Game\Demo\Input</Filter></ClCompile>
-    <ClCompile Include="Game\Demo\Scene\DemoScene\DemoScene.cpp"><Filter>Game\Demo\Scene\DemoScene</Filter></ClCompile>
-    <ClCompile Include="Game\Demo\Scene\Utility\SceneTypeUtil.cpp"><Filter>Game\Demo\Scene\Utility</Filter></ClCompile>
     <ClCompile Include="Engine\Foundation\Reflection\CalyxGameObjectRegistry.generated.cpp"><Filter>Generated</Filter></ClCompile>
     <ClCompile Include="Editor\EditorMain.cpp"><Filter>Editor</Filter></ClCompile>
     <ClCompile Include="Editor\ProjectBrowser.cpp"><Filter>Editor</Filter></ClCompile>
@@ -39,9 +37,6 @@
     <ClInclude Include="Game\Demo\Input\IInputAction.h"><Filter>Game\Demo\Input</Filter></ClInclude>
     <ClInclude Include="Game\Demo\Input\InputConfig.h"><Filter>Game\Demo\Input</Filter></ClInclude>
     <ClInclude Include="Game\Demo\Input\PlayerInput.h"><Filter>Game\Demo\Input</Filter></ClInclude>
-    <ClInclude Include="Game\Demo\Scene\DemoScene\DemoScene.h"><Filter>Game\Demo\Scene\DemoScene</Filter></ClInclude>
-    <ClInclude Include="Game\Demo\Scene\Details\SceneType.h"><Filter>Game\Demo\Scene\Details</Filter></ClInclude>
-    <ClInclude Include="Game\Demo\Scene\Utility\SceneTypeUtil.h"><Filter>Game\Demo\Scene\Utility</Filter></ClInclude>
     <ClInclude Include="Engine\Foundation\Reflection\CalyxGameObjectRegistry.generated.h"><Filter>Generated</Filter></ClInclude>
     <ClInclude Include="Editor\ProjectBrowser.h"><Filter>Editor</Filter></ClInclude>
   </ItemGroup>

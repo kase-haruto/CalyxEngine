@@ -162,8 +162,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Game\Demo\3D\Actor\DemoPlayer\DemoPlayerMotor.cpp" />
     <ClCompile Include="Game\Demo\3D\Actor\DemoPlayer\Weapon\Weapon.cpp" />
     <ClCompile Include="Game\Demo\Input\PlayerInput.cpp" />
-    <ClCompile Include="Game\Demo\Scene\DemoScene\DemoScene.cpp" />
-    <ClCompile Include="Game\Demo\Scene\Utility\SceneTypeUtil.cpp" />
     <ClCompile Include="Engine\Foundation\Reflection\CalyxGameObjectRegistry.generated.cpp" />
     <ClCompile Include="Editor\EditorMain.cpp" />
     <ClCompile Include="Editor\ProjectBrowser.cpp" />
@@ -177,9 +175,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Game\Demo\Input\IInputAction.h" />
     <ClInclude Include="Game\Demo\Input\InputConfig.h" />
     <ClInclude Include="Game\Demo\Input\PlayerInput.h" />
-    <ClInclude Include="Game\Demo\Scene\DemoScene\DemoScene.h" />
-    <ClInclude Include="Game\Demo\Scene\Details\SceneType.h" />
-    <ClInclude Include="Game\Demo\Scene\Utility\SceneTypeUtil.h" />
     <ClInclude Include="Engine\Foundation\Reflection\CalyxGameObjectRegistry.generated.h" />
     <ClInclude Include="Editor\ProjectBrowser.h" />
   </ItemGroup>

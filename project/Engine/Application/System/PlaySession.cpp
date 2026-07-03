@@ -20,7 +20,7 @@ namespace CalyxEngine {
 
 	void PlaySession::Initialize(SceneContext* editorContext) {
 		editorContext_ = editorContext;
-		editorContext_->SetRuntime(false);
+		if(editorContext_) editorContext_->SetRuntime(false);
 		LoadIcons();
 		EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Editor, "Play session initialized.", "PlaySession");
 
@@ -29,7 +29,7 @@ namespace CalyxEngine {
 		mode_ = EngineMode::Editor;
 #else
 		// Releaseビルドでは即実行
-		Enter();
+		if(editorContext_) Enter();
 #endif
 	}
 
@@ -153,6 +153,8 @@ namespace CalyxEngine {
 		runtimeContext_->Initialize(false);
 		runtimeContext_->MakeCurrent();
 		SceneSerializer::LoadJson(*runtimeContext_, json);
+		runtimeContext_->SetScenePath(editorContext_->GetScenePath());
+		runtimeContext_->SetSceneTransitionRequestor(editorContext_->GetSceneTransitionRequestor());
 		runtimeContext_->SetRuntime(true);
 
 		mode_ = EngineMode::Playing;
@@ -168,6 +170,8 @@ namespace CalyxEngine {
 			runtimeContext_->Initialize(false);
 			runtimeContext_->MakeCurrent();
 			SceneSerializer::LoadJson(*runtimeContext_, json);
+			runtimeContext_->SetScenePath(editorContext_->GetScenePath());
+			runtimeContext_->SetSceneTransitionRequestor(editorContext_->GetSceneTransitionRequestor());
 			runtimeContext_->SetRuntime(true);
 			mode_ = EngineMode::Playing;
 			++runtimeGen_;
@@ -192,6 +196,8 @@ namespace CalyxEngine {
 		runtimeContext_->Initialize(false);
 		runtimeContext_->MakeCurrent();
 		SceneSerializer::LoadJson(*runtimeContext_, json);
+		runtimeContext_->SetScenePath(editorContext_->GetScenePath());
+		runtimeContext_->SetSceneTransitionRequestor(editorContext_->GetSceneTransitionRequestor());
 		runtimeContext_->SetRuntime(true);
 		++runtimeGen_;
 	}

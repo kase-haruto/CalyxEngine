@@ -18,6 +18,18 @@
 #include <vector>
 
 namespace SceneAPI{
+	inline void RequestSceneChange(const std::filesystem::path& scenePath) {
+		auto* ctx = SceneContext::Current();
+		CX_CHECK(ctx && ctx->GetSceneTransitionRequestor(), "Scene transition service is unavailable");
+		ctx->GetSceneTransitionRequestor()->RequestSceneChange(scenePath);
+	}
+
+	inline void RequestSceneChange(const Guid& sceneAssetGuid) {
+		auto* ctx = SceneContext::Current();
+		CX_CHECK(ctx && ctx->GetSceneTransitionRequestor(), "Scene transition service is unavailable");
+		ctx->GetSceneTransitionRequestor()->RequestSceneChange(sceneAssetGuid);
+	}
+
 	template<class T, class... Args>
 	std::shared_ptr<T> Instantiate(Args&&... args){
 		auto ctx = SceneContext::Current();
@@ -145,5 +157,4 @@ namespace EffectAPI {
 
 namespace CalyxEngine {
 	// scene識別id
-	using SceneId = uint8_t;
 }

@@ -1,29 +1,22 @@
-﻿#pragma once
+#pragma once
 
 #include <Engine/Foundation/Export/CalyxAPI.h>
+#include <Engine/Foundation/Utility/Guid/Guid.h>
+#include <filesystem>
 
-#include <Engine/Scene/Base/BaseScene.h>
-#include <Engine/Scene/System/SceneManager.h>
-#include <Engine/Scene/Utility/SceneUtility.h>
-
-#include <memory>
+namespace CalyxEngine { class SceneManager; }
 
 namespace Calyx {
-
+	// Compatibility facade for code that receives a registry service. Scene
+	// classes are intentionally unsupported; scenes are assets addressed by path/GUID.
 	class CALYX_API SceneRegistry {
 	public:
 		explicit SceneRegistry(CalyxEngine::SceneManager& sceneManager);
-
-		size_t AddScene(CalyxEngine::SceneId id, std::unique_ptr<BaseScene> scene);
-		void SetStartupScene(CalyxEngine::SceneId id);
-
-		template <class TScene, class... Args>
-		size_t AddScene(CalyxEngine::SceneId id, Args&&... args) {
-			return AddScene(id, std::make_unique<TScene>(std::forward<Args>(args)...));
-		}
-
+		bool OpenScene(const std::filesystem::path& scenePath);
+		bool OpenScene(const Guid& sceneAssetGuid);
+		void RequestSceneChange(const std::filesystem::path& scenePath);
+		void RequestSceneChange(const Guid& sceneAssetGuid);
 	private:
 		CalyxEngine::SceneManager& sceneManager_;
 	};
-
-} // namespace Calyx
+}

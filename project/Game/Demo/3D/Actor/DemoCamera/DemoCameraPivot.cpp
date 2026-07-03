@@ -54,6 +54,13 @@ SceneObjectConfig DemoCameraPivot::ExtractConfig() const {
 }
 
 void DemoCameraPivot::ApplyCameraPivotConfig(const nlohmann::json& j) {
+	// TransformRefには所有元GUIDだけを復元し、WorldTransformの解決は利用時まで遅延する。
+	if(j.contains("targetTransform")) {
+		targetTransform_ = j.at("targetTransform").get<CalyxEngine::TransformRef>();
+	} else if(j.contains("targetPlayer")) {
+		// 旧データのtargetPlayerも同じ所有元GUIDなので、後方互換として読み込める。
+		targetTransform_.SetGuid(j.at("targetPlayer").get<Guid>());
+	}
 	autoFindTarget_ = j.value("autoFindTarget", autoFindTarget_);
 	pivotLocalOffset_ = j.value("pivotLocalOffset", pivotLocalOffset_);
 	cameraLocalOffset_ = j.value("cameraLocalOffset", cameraLocalOffset_);
@@ -67,6 +74,8 @@ void DemoCameraPivot::ApplyCameraPivotConfig(const nlohmann::json& j) {
 }
 
 void DemoCameraPivot::ExtractCameraPivotConfig(nlohmann::json& j) const {
+	// WorldTransform*は保存せず、所有元SceneObjectのGUIDだけをシーンデータへ保存する。
+	j["targetTransform"] = targetTransform_;
 	j["autoFindTarget"] = autoFindTarget_;
 	j["pivotLocalOffset"] = pivotLocalOffset_;
 	j["cameraLocalOffset"] = cameraLocalOffset_;
@@ -82,12 +91,11 @@ void DemoCameraPivot::ExtractCameraPivotConfig(nlohmann::json& j) const {
 void DemoCameraPivot::AlwaysUpdate(float dt) {
 	UpdateRotationInput(dt);
 
-	auto target = ResolveTargetObject();
-	if(target) {
-		target_ = &target->GetWorldTransform();
+	// 参照先は削除され得るため、Transformポインタをフレームを越えて信用せず毎フレーム解決する。
+	target_ = ResolveTargetTransform();
+	if(target_) {
 		ApplyPivotTransform(dt);
 	} else {
-		target_ = nullptr;
 		worldTransform_.Update();
 	}
 
@@ -95,14 +103,16 @@ void DemoCameraPivot::AlwaysUpdate(float dt) {
 	ApplyCameraTransform();
 }
 
-std::shared_ptr<SceneObject> DemoCameraPivot::ResolveTargetObject() {
-	if(auto target = targetObject_.lock()) {
-		return target;
+const BaseTransform* DemoCameraPivot::ResolveTargetTransform() {
+	// 明示参照がある場合、利用側にはSceneObjectを公開せず読み取り専用Transformだけを返す。
+	if(targetTransform_.IsAssigned()) {
+		// 未設定、別シーン、または削除済みならResolveはnullptrを返す。
+		// 壊れた明示参照を別オブジェクトへ勝手に置き換えないことで設定ミスを可視化する。
+		return targetTransform_.Resolve();
 	}
 
 	if(auto parent = GetParent()) {
-		targetObject_ = parent;
-		return parent;
+		return &parent->GetWorldTransform();
 	}
 
 	if(!autoFindTarget_) {
@@ -116,17 +126,23 @@ std::shared_ptr<SceneObject> DemoCameraPivot::ResolveTargetObject() {
 	}
 
 	if(auto player = lib->FindByName("DemoPlayer")) {
-		targetObject_ = player;
-		return player;
+		return &player->GetWorldTransform();
 	}
 
 	auto players = lib->FindByClassName("DemoPlayer");
 	if(!players.empty()) {
-		targetObject_ = players.front();
-		return players.front();
+		return &players.front()->GetWorldTransform();
 	}
 
 	return nullptr;
+}
+
+void DemoCameraPivot::RemapSceneObjectReferences(const std::unordered_map<Guid, Guid>& guidMap) {
+	// 基底クラスが管理するSerializableObject内の参照を先に更新する。
+	SceneObject::RemapSceneObjectReferences(guidMap);
+	// このクラスが直接保持する参照も、Prefab複製先のGUIDへ付け替える。
+	// Transform自体にはGUIDがないため、所有元SceneObjectのGUIDを複製先へ付け替える。
+	targetTransform_.Remap(guidMap);
 }
 
 void DemoCameraPivot::UpdateRotationInput(float dt) {
@@ -204,6 +220,8 @@ void DemoCameraPivot::ShowGui() {
 	// --- トランスフォーム ---
 	if(GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::Object)) {
 		worldTransform_.ShowImGui("world");
+		// Hierarchyから任意のSceneObjectを割り当てるが、利用側へ公開されるのはTransformだけである。
+		GuiCmd::SceneObjectReferenceField("Target Transform", targetTransform_);
 		GuiCmd::CheckBox("Auto Find Target", autoFindTarget_);
 		GuiCmd::DragFloat3("Pivot Local Offset", pivotLocalOffset_, 0.01f, -100.0f, 100.0f);
 		GuiCmd::DragFloat3("Camera Local Offset", cameraLocalOffset_, 0.01f, -100.0f, 100.0f);

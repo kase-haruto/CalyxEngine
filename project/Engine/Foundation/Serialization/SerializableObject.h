@@ -9,6 +9,7 @@
 
 #include <string>
 #include <type_traits>
+#include <unordered_map>
 #include <vector>
 
 namespace CalyxEngine {
@@ -83,6 +84,9 @@ namespace CalyxEngine {
 		 * \return フィールドリスト
 		 */
 		const std::vector<SerializableField>& Fields() const { return fields_; }
+
+		/** Prefab複製時に、この設定オブジェクトが保持する全SceneObject参照を付け替える。 */
+		void RemapSceneObjectReferences(const std::unordered_map<Guid, Guid>& guidMap);
 
 	public:
 		bool ShowGui();
