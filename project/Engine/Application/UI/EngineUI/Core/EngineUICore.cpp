@@ -120,6 +120,21 @@ namespace CalyxEngine {
 		levelEditor_->SetCameraForViewport(mainCamera, debugCamera);
 	}
 
+	bool EngineUICore::RegisterEditorModule(void* owner,
+		CalyxEditor::RegisterEditorToolsFn entryPoint,
+		const Calyx::ProjectInfo* project) {
+		if(!levelEditor_) return false;
+		auto& registry = levelEditor_->GetEditorToolRegistry();
+		auto context = registry.GetContext();
+		context.project = project;
+		registry.SetContext(context);
+		return registry.RegisterModule(owner, entryPoint);
+	}
+
+	void EngineUICore::UnregisterEditorModule(void* owner) {
+		if(levelEditor_) levelEditor_->GetEditorToolRegistry().UnregisterModule(owner);
+	}
+
 	////////////////////////////////////////////////////////////////////////////////////////////
 	//						パネル追加
 	////////////////////////////////////////////////////////////////////////////////////////////

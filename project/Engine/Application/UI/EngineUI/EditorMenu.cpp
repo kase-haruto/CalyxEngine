@@ -23,6 +23,10 @@ namespace CalyxEngine {
 					item.action();
 				}
 			}
+			if(category == MenuCategory::Tools && toolExtensionRenderer_) {
+				if(!Get(category).empty()) ImGui::Separator();
+				toolExtensionRenderer_();
+			}
 			ImGui::EndMenu();
 		}
 	}

@@ -20,6 +20,7 @@ namespace {
 	public:
 		using CreateApplication = Calyx::Application* (*)();
 		using DestroyApplication = void (*)(Calyx::Application*);
+		using RegisterEditorTools = CalyxEditor::RegisterEditorToolsFn;
 
 		~GameModule() {
 			Unload();
@@ -56,6 +57,12 @@ namespace {
 			if(destroy_ && application) {
 				destroy_(application);
 			}
+		}
+
+		void* GetHandle() const { return handle_; }
+		RegisterEditorTools GetEditorRegistration() const {
+			return handle_ ? reinterpret_cast<RegisterEditorTools>(
+				::GetProcAddress(handle_, "RegisterCalyxEditorTools")) : nullptr;
 		}
 
 	private:
@@ -121,6 +128,7 @@ public:
 
 	void OnEngineUiReady(CalyxEngine::EngineUICore& engineUi) override {
 		engineUi_ = &engineUi;
+		RegisterGameEditorTools();
 		RefreshPlaceToolPanel();
 	}
 
@@ -173,6 +181,14 @@ private:
 		}
 
 		gameApplication_ = gameModule_.Create();
+		RegisterGameEditorTools();
+	}
+
+	void RegisterGameEditorTools() {
+		if(gameEditorRegistered_ || !engineUi_ || !gameModule_.GetHandle()) return;
+		if(auto entryPoint = gameModule_.GetEditorRegistration()) {
+			gameEditorRegistered_ = engineUi_->RegisterEditorModule(gameModule_.GetHandle(), entryPoint, &project_);
+		}
 	}
 
 	void RefreshPlaceToolPanel() {
@@ -185,6 +201,10 @@ private:
 	}
 
 	void FinalizeGameApplication() {
+		if(engineUi_ && gameModule_.GetHandle()) {
+			engineUi_->UnregisterEditorModule(gameModule_.GetHandle());
+		}
+		gameEditorRegistered_ = false;
 		if(sceneManager_) {
 			sceneManager_->ClearAllContexts();
 		}
@@ -203,6 +223,7 @@ private:
 	GameModule gameModule_;
 	Calyx::Application* gameApplication_ = nullptr;
 	bool hasProject_ = false;
+	bool gameEditorRegistered_ = false;
 };
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR commandLine, int) {
