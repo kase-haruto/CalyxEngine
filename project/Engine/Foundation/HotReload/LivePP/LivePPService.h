@@ -3,9 +3,9 @@
 	include space
 ===================================================================== */
 #include <Engine/Foundation/Export/CalyxAPI.h>
-#ifdef LIVEPP
-#include <LivePP/API/x64/LPP_API_x64_CPP.h>
-#endif // LIVEPP
+#if defined(_DEBUG) || defined(DEVELOP)
+#include <Externals/LivePP/API/x64/LPP_API_x64_CPP.h>
+#endif // defined(_DEBUG) || defined(DEVELOP)
 
 #include <functional>
 #include <string>
@@ -61,9 +61,9 @@ namespace CalyxEngine {
 	private:
 		static LivePPService* instance_;
 
-#ifdef LIVEPP
+#if defined(_DEBUG) || defined(DEVELOP)
 		lpp::LppSynchronizedAgent agent_{};
-#endif // LIVEPP
+#endif // defined(_DEBUG) || defined(DEVELOP)
 
 		float lastPollTime_ = 0.0f;
 

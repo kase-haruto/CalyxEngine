@@ -2,7 +2,7 @@
 /* ========================================================================
 	include space
 ===================================================================== */
-#ifdef LIVEPP
+#if defined(_DEBUG) || defined(DEVELOP)
 #include <filesystem>
 #include <string>
 #endif // LIVEPP
@@ -14,7 +14,7 @@ namespace CalyxEngine {
 
 LivePPService* LivePPService::instance_ = nullptr;
 
-#ifdef LIVEPP
+#if defined(_DEBUG) || defined(DEVELOP)
 	LivePPService* LivePPService::GetInstance() {
 		return instance_;
 	}
@@ -76,7 +76,33 @@ LivePPService* LivePPService::instance_ = nullptr;
 
 		if(lpp::LppIsValidSynchronizedAgent(&agent_)) {
 			OutputDebugStringW(L"[LivePP] Synchronized Agent loaded successfully.\n");
-			agent_.EnableModule(lpp::LppGetCurrentModulePath(), lpp::LPP_MODULES_OPTION_ALL_IMPORT_MODULES, nullptr, nullptr);
+
+			// Register the host executable as the root module. CalyxGame/CalyxEditor
+			// compile project-side game code into the EXE, while CalyxEngine lives in
+			// an imported DLL. ALL_IMPORT_MODULES enables both in one operation.
+			std::wstring hostModulePath(32768, L'\0');
+			const DWORD pathLength = GetModuleFileNameW(
+				nullptr,
+				hostModulePath.data(),
+				static_cast<DWORD>(hostModulePath.size()));
+
+			if(pathLength > 0 && pathLength < hostModulePath.size()) {
+				hostModulePath.resize(pathLength);
+				agent_.EnableModule(
+					hostModulePath.c_str(),
+					lpp::LPP_MODULES_OPTION_ALL_IMPORT_MODULES,
+					nullptr,
+					nullptr);
+				OutputDebugStringW(L"[LivePP] Host executable and imported modules enabled.\n");
+			} else {
+				// Keep engine hot reload available even if resolving the host path fails.
+				agent_.EnableModule(
+					lpp::LppGetCurrentModulePath(),
+					lpp::LPP_MODULES_OPTION_ALL_IMPORT_MODULES,
+					nullptr,
+					nullptr);
+				OutputDebugStringW(L"[LivePP] Failed to resolve host executable; enabled engine module only.\n");
+			}
 		}
 	}
 
@@ -114,7 +140,7 @@ LivePPService* LivePPService::instance_ = nullptr;
 	}
 
 	void LivePPService::TriggerReload() {
-#ifdef LIVEPP
+#if defined(_DEBUG) || defined(DEVELOP)
 		if(lpp::LppIsValidSynchronizedAgent(&agent_)) {
 			OutputDebugStringW(L"[LivePP] Scheduling reload...\n");
 			agent_.ScheduleReload();
