@@ -289,6 +289,53 @@ namespace CalyxEditor {
 			return stream.str();
 		}
 
+		std::string MakeGameEditorExtensionSource() {
+			std::stringstream stream;
+			stream << "#include <CalyxEngine/EditorExtension.h>\n";
+			stream << "#include <externals/imgui/imgui.h>\n\n";
+			stream << "namespace {\n";
+			stream << "\tclass GameCameraEditor final : public CalyxEditor::IEditorTool {\n";
+			stream << "\tpublic:\n";
+			stream << "\t\texplicit GameCameraEditor(const CalyxEditor::EditorToolContext& context) : context_(context) {}\n";
+			stream << "\t\tvoid OnOpen() override { open_ = true; }\n";
+			stream << "\t\tvoid Draw() override {\n";
+			stream << "\t\t\tif(!open_) return;\n";
+			stream << "\t\t\tImGui::Begin(\"Game Camera Editor###Game.CameraEditor\", &open_);\n";
+			stream << "\t\t\tImGui::InputText(\"Event ID\", eventId_, sizeof(eventId_));\n";
+			stream << "\t\t\tImGui::DragFloat3(\"Position\", position_, 0.1f);\n";
+			stream << "\t\t\tImGui::DragFloat3(\"Rotation\", rotation_, 0.1f);\n";
+			stream << "\t\t\tImGui::DragFloat(\"Field of View\", &fieldOfView_, 0.1f, 1.0f, 179.0f);\n";
+			stream << "\t\t\tImGui::End();\n";
+			stream << "\t\t}\n";
+			stream << "\tprivate:\n";
+			stream << "\t\tCalyxEditor::EditorToolContext context_;\n";
+			stream << "\t\tbool open_ = true;\n";
+			stream << "\t\tchar eventId_[128]{};\n";
+			stream << "\t\tfloat position_[3]{};\n";
+			stream << "\t\tfloat rotation_[3]{};\n";
+			stream << "\t\tfloat fieldOfView_ = 60.0f;\n";
+			stream << "\t};\n\n";
+			stream << "\tCalyxEditor::IEditorTool* CreateGameCameraEditor(const CalyxEditor::EditorToolContext& context) {\n";
+			stream << "\t\treturn new GameCameraEditor(context);\n";
+			stream << "\t}\n";
+			stream << "\tvoid DestroyGameCameraEditor(CalyxEditor::IEditorTool* tool) { delete tool; }\n";
+			stream << "}\n\n";
+			stream << "extern \"C\" __declspec(dllexport) bool RegisterCalyxEditorTools(\n";
+			stream << "\tstd::uint32_t apiVersion, CalyxEditor::IEditorHost* host) {\n";
+			stream << "\tif(!host || apiVersion != CalyxEditor::kEditorToolApiVersion) return false;\n";
+			stream << "\tCalyxEditor::EditorToolDescriptor descriptor;\n";
+			stream << "\tdescriptor.id = \"Game.CameraEditor\";\n";
+			stream << "\tdescriptor.displayName = \"Game Camera Editor\";\n";
+			stream << "\tdescriptor.menuPath = \"Game/Camera\";\n";
+			stream << "\tdescriptor.workspaceId = \"Game.Camera\";\n";
+			stream << "\tdescriptor.layoutPath = \"GameCameraEditor.ini\";\n";
+			stream << "\tdescriptor.create = &CreateGameCameraEditor;\n";
+			stream << "\tdescriptor.destroy = &DestroyGameCameraEditor;\n";
+			stream << "\treturn host->RegisterTool(descriptor);\n";
+			stream << "}\n";
+			return stream.str();
+		}
+
 		std::string MakeGameObjectRegistryHeader() {
 			std::stringstream stream;
 			stream << "#pragma once\n\n";
@@ -915,6 +962,9 @@ try {
 				return false;
 			}
 			if(!WriteTextFile(sourceDirectory / "GameApplication.cpp", MakeGameApplicationSource(selectedTemplate))) {
+				return false;
+			}
+			if(!WriteTextFile(sourceDirectory / "GameEditorExtension.cpp", MakeGameEditorExtensionSource())) {
 				return false;
 			}
 

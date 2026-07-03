@@ -36,6 +36,7 @@ namespace CalyxEngine {
 	 *---------------------------------------------------------------------------------------*/
 	class EditorMenu {
 	public:
+		using ToolExtensionRenderer = std::function<void()>;
 		/// <summary>
 		/// 追加
 		/// </summary>
@@ -52,6 +53,7 @@ namespace CalyxEngine {
 		/// 描画
 		/// </summary>
 		void Render();
+		void SetToolExtensionRenderer(ToolExtensionRenderer renderer) { toolExtensionRenderer_ = std::move(renderer); }
 
 		//--------- accessor -----------------------------------------------------
 		const std::vector<MenuItem>& Get(MenuCategory category) const;
@@ -66,6 +68,7 @@ namespace CalyxEngine {
 
 	private:
 		std::unordered_map<MenuCategory, std::vector<MenuItem>> items_;
+		ToolExtensionRenderer toolExtensionRenderer_;
 	};
 
 } // namespace CalyxEngine

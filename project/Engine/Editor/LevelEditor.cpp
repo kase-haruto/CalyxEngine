@@ -117,6 +117,9 @@ namespace CalyxEngine {
 		}
 
 		layoutSwitcher_ = std::make_unique<ImGuiLayoutSwitcher>(std::move(layouts), "imgui.ini");
+		editorToolRegistry_.SetWorkspaceRequest([this](const std::string& layoutPath) {
+			if(layoutSwitcher_) layoutSwitcher_->Apply(layoutPath);
+		});
 
 		if(auto* db = AssetDatabase::GetInstance()) {
 			assetPanel_->Initialize(db->GetRoot());
@@ -208,6 +211,7 @@ namespace CalyxEngine {
 
 		// エディターメニューの初期化 ------------------------------------------
 		menu_ = std::make_unique<EditorMenu>();
+		menu_->SetToolExtensionRenderer([this]() { editorToolRegistry_.DrawToolsMenu(); });
 		EngineSettings::GetInstance()->Initialize();
 		if(auto* manipulator = sceneEditor_->GetManipulator()) {
 			manipulator->ApplySettings(EngineSettings::GetInstance()->GetData().manipulator);
@@ -477,6 +481,7 @@ namespace CalyxEngine {
 		if(layoutSwitcher_) {
 			layoutSwitcher_->ApplyPending();
 		}
+		editorToolRegistry_.Update();
 		const float dt = ClockManager::GetInstance()->GetDeltaTime();
 
 		auto notifySceneSaved = [this](const std::string& path) {
@@ -676,6 +681,7 @@ namespace CalyxEngine {
 				p->Render();
 			}
 		}
+		editorToolRegistry_.Draw();
 
 		// Play セッション用ツールバー
 		if(pPlaySesseion_) {
@@ -1450,6 +1456,9 @@ namespace CalyxEngine {
 	//=============================================================================
 	void LevelEditor::SetSceneManager(CalyxEngine::SceneManager* manager) {
 		sceneManager_ = manager;
+		auto context = editorToolRegistry_.GetContext();
+		context.sceneManager = manager;
+		editorToolRegistry_.SetContext(context);
 		if(logPanel_) logPanel_->SetCommandContext({this, sceneManager_, pPlaySesseion_});
 
 		if(manager) {

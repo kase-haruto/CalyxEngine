@@ -71,9 +71,14 @@ namespace CalyxEngine {
 	void ImGuiLayoutSwitcher::ApplyPending() {
 		if(!hasPendingApply_) return;
 
+		if(!currentIniPath_.empty()) {
+			ImGui::SaveIniSettingsToDisk(currentIniPath_.c_str());
+		}
 		// DockSpace/TabBar の描画中に ini を読み替えると ImGui の assertion に当たるため、
 		// LevelEditor::Update() の先頭からここを呼び、UI 描画前にだけロードする。
 		ImGui::LoadIniSettingsFromDisk(pendingIniPath_.c_str());
+		autoSavePath_ = pendingIniPath_;
+		ImGui::GetIO().IniFilename = autoSavePath_.c_str();
 
 		hasPendingApply_ = false;
 		pendingIniPath_.clear();

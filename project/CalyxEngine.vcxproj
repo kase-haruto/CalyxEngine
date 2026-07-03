@@ -237,6 +237,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Assets\Manager\AssetManager.cpp" />
     <ClCompile Include="Engine\Editor\ImguiLayoutService.cpp" />
     <ClCompile Include="Engine\Editor\ImGuiLayoutSwitcher.cpp" />
+    <ClCompile Include="Engine\Editor\Extension\EditorToolRegistry.cpp" />
     <ClCompile Include="Engine\Editor\PickingPass.cpp" />
     <ClCompile Include="Engine\Editor\SceneSwitchOverlay.cpp" />
     <ClCompile Include="Engine\Foundation\Clock\StateTimer.cpp" />
@@ -522,6 +523,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Assets\Manager\AssetManager.h" />
     <ClInclude Include="Engine\Editor\ImguiLayoutService.h" />
     <ClInclude Include="Engine\Editor\ImGuiLayoutSwitcher.h" />
+    <ClInclude Include="Engine\Editor\Extension\EditorToolAPI.h" />
+    <ClInclude Include="Engine\Editor\Extension\EditorToolRegistry.h" />
+    <ClInclude Include="Engine\Application\CalyxEngine\EditorExtension.h" />
     <ClInclude Include="Engine\Editor\PickingPass.h" />
     <ClInclude Include="Engine\Editor\SceneSwitchOverlay.h" />
     <ClInclude Include="Engine\Foundation\Clock\StateTimer.h" />

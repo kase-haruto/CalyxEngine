@@ -20,6 +20,7 @@
 #include <Engine/Application/UI/Panels/SplineEditorPanel.h>
 #include <Engine/Editor/DebugCameraFocusController.h>
 #include <Engine/Editor/EditorSelectionCoordinator.h>
+#include <Engine/Editor/Extension/EditorToolRegistry.h>
 #include <Engine/Editor/ImGuiLayoutSwitcher.h>
 #include <Engine/Editor/SceneObjectEditor.h>
 #include <externals/nlohmann/json.hpp>
@@ -121,6 +122,7 @@ namespace CalyxEngine {
 		bool				   ShouldRenderRuntimeFullscreen() const;
 		bool				   ShouldHideEditorUiInGameMode() const;
 		bool IsDebugViewportVisible()const;
+		CalyxEditor::EditorToolRegistry& GetEditorToolRegistry() { return editorToolRegistry_; }
 
 	private:
 		// シーン管理 --------------------------------------------------------------
@@ -210,6 +212,7 @@ namespace CalyxEngine {
 
 		// Editors メニューに並べるパネル群
 		std::vector<IEngineUI*> editorPanels_;
+		CalyxEditor::EditorToolRegistry editorToolRegistry_;
 	};
 
 } // namespace CalyxEngine

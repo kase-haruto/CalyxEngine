@@ -16,6 +16,7 @@
 #include <functional>
 #include <memory>
 #include <vector>
+namespace Calyx { struct ProjectInfo; }
 namespace CalyxEngine {
 
 	/*-----------------------------------------------------------------------------------------
@@ -50,6 +51,10 @@ namespace CalyxEngine {
 		LevelEditor*	GetLevelEditor() const { return levelEditor_.get(); }
 		void			SetCameraForViewport(BaseCamera* mainCamera, BaseCamera* debugCamera);
 		void			SetEditorUiEnabled(bool enabled) { editorUiEnabled_ = enabled; }
+		CALYX_API bool RegisterEditorModule(void* owner,
+			CalyxEditor::RegisterEditorToolsFn entryPoint,
+			const Calyx::ProjectInfo* project);
+		CALYX_API void UnregisterEditorModule(void* owner);
 
 	private:
 		//===================================================================*/
