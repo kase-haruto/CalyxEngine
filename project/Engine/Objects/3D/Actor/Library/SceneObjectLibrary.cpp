@@ -3,7 +3,6 @@
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 #include <Engine/Objects/Event/Destroying/ObjectDestroying.h>
 #include <Engine/System/Event/EventBus.h>
-#include <iostream>
 #include <map>
 
 uint32_t SceneObjectLibrary::nextPickingID_ = 1;
@@ -13,9 +12,9 @@ SceneObjectLibrary::SceneObjectLibrary() {
 		[this](const ObjectDestroying& ev) {
 			if(suppressDestroySync_ || !ev.object) return;
 
-			const Guid id = ev.object->GetGuid();
-			auto	   it = objects_.find(id);
-			if(it == objects_.end()) return;
+			const auto it = objects_.find(ev.object->GetGuid());
+			// EditorとRuntimeの複製は同じGUIDを持つため、所有する実体の通知だけを処理する。
+			if(it == objects_.end() || it->second.get() != ev.object.get()) return;
 
 			EventBus::Publish(ObjectRemoved{ev.object, owner_});
 			objects_.erase(it);
@@ -122,11 +121,8 @@ std::string SceneObjectLibrary::MakeUniqueName(const std::string& requestedName,
 ///     オブジェクトの削除(shared_ptr指定)
 //////////////////////////////////////////////////////////////////////////////////
 bool SceneObjectLibrary::RemoveObject(const std::shared_ptr<SceneObject>& object) {
-	if(!object) return false;
+	if(!Contains(object)) return false;
 	Guid id = object->GetGuid();
-	std::cout << "[REMOVE] " << object->GetName()
-			  << " GUID=" << id.ToString()
-			  << " use_count=" << object.use_count() << std::endl;
 
 	// 子を完全に削除（再帰）
 	auto children = object->GetChildren();
@@ -148,9 +144,6 @@ bool SceneObjectLibrary::RemoveObject(const std::shared_ptr<SceneObject>& object
 	objects_.erase(id);
 	RefreshDuplicateNameIndices();
 	Touch();
-	std::cout << "[AFTER ERASE]"
-			  << " use_count=" << object.use_count()
-			  << std::endl;
 	return true;
 }
 
@@ -268,7 +261,9 @@ std::vector<std::shared_ptr<SceneObject>> SceneObjectLibrary::GetAllObjectsShare
 //////////////////////////////////////////////////////////////////////////////////
 bool SceneObjectLibrary::Contains(const std::shared_ptr<SceneObject>& obj) const {
 	if(!obj) return false;
-	return objects_.contains(obj->GetGuid());
+
+	const auto it = objects_.find(obj->GetGuid());
+	return it != objects_.end() && it->second.get() == obj.get();
 }
 
 namespace {

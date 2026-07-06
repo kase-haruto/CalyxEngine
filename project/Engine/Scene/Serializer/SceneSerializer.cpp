@@ -243,6 +243,8 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 	}
 
 	std::unordered_map<Guid, std::shared_ptr<SceneObject>> guidMap;
+	std::vector<std::pair<Guid, const nlohmann::json*>> loadRecords;
+	loadRecords.reserve(jArray.size());
 
 	// ---------- 生成 & 設定適用 & サブシステム登録 ----------
 	for(const auto& j : jArray) {
@@ -266,7 +268,6 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 		}
 		sp->AdoptPendingSerializableParamCapture(paramOverrides);
 
-		ApplySceneConfig(*sp, j);
 		if(false) {
 			auto* cfg = dynamic_cast<IConfigurable*>(sp.get());
 			// onfigPath があるなら外部JSONを優先
@@ -295,10 +296,6 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 
 		// ライブラリへ登録
 		context.GetObjectLibrary()->AddObject(sp);
-		sp->BeginSerializableParamCapture(paramOverrides);
-		sp->Initialize();
-		sp->EndSerializableParamCapture();
-		ApplySceneConfig(*sp, j);
 		sp->SetGuid(guid);
 		if(false) {
 			auto* cfg = dynamic_cast<IConfigurable*>(sp.get());
@@ -336,7 +333,15 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 
 		// GUID
 		guidMap[guid] = sp;
+		loadRecords.emplace_back(guid, &j);
 		++loadedObjectCount;
+	}
+
+	// 全オブジェクトの登録後、コードの既定値に永続データを一度だけ適用する。
+	for(const auto& [guid, data] : loadRecords) {
+		auto it = guidMap.find(guid);
+		if(it == guidMap.end() || !it->second || !data) continue;
+		ApplySceneConfig(*it->second, *data);
 	}
 
 	// ---------- 親子リンク ----------
@@ -375,6 +380,19 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 				bindingJson.value("inheritScale", true));
 		}
 	}
+	// 永続データとオブジェクト間の関係が確定してから、実行時状態を初期化する。
+	for(const auto& [guid, data] : loadRecords) {
+		auto it = guidMap.find(guid);
+		if(it == guidMap.end() || !it->second || !data) continue;
+
+		const nlohmann::json* paramOverrides = data->contains("serializableParams")
+			? &data->at("serializableParams")
+			: nullptr;
+		it->second->BeginSerializableParamCapture(paramOverrides);
+		it->second->Initialize();
+		it->second->EndSerializableParamCapture();
+	}
+
 	EngineLogger::GetInstance().Add(
 		LogLevel::Trace,
 		LogCategory::Editor,

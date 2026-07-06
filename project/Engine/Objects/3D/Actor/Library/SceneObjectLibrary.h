@@ -117,8 +117,8 @@ public:
 
     /**
      * @brief オブジェクトが含まれているか
-     * @param obj
-     * @return
+     * @param obj 判定対象のオブジェクト
+     * @return GUIDと実体がともに一致する場合はtrue
      */
     bool Contains(const std::shared_ptr<SceneObject>& obj) const;
 

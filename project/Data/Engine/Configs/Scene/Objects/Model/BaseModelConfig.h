@@ -4,6 +4,7 @@
 /* ===================================================================== */
 #include <Data/Engine/Configs/Scene/Objects/Material/MaterialConfig.h>
 #include <Data/Engine/Configs/Scene/Objects/Transform/UvTransformConfig.h>
+#include <Engine/Foundation/Math/Vector4.h>
 #include <Engine/Foundation/Utility/Guid/Guid.h>
 
 #include <optional>
@@ -16,6 +17,7 @@ struct BaseModelConfig {
 	std::string		  modelName;	  // モデル名/パス
 	Guid			  textureGuid{};  // テクスチャ GUID
 
+	std::optional<CalyxEngine::Vector4> colorOverride;
 	std::optional<std::string> legacyTextureName;
 };
 
@@ -27,6 +29,9 @@ inline void to_json(nlohmann::json& j, const BaseModelConfig& c) {
 		{"modelName", c.modelName},
 		{"textureGuid", c.textureGuid},
 	};
+	if(c.colorOverride) {
+		j["colorOverride"] = *c.colorOverride;
+	}
 	// legacyTextureName は保存しない
 }
 
@@ -44,6 +49,12 @@ inline void from_json(const nlohmann::json& j, BaseModelConfig& c) {
 		c.textureGuid = it->get<Guid>();
 	} else {
 		c.textureGuid = Guid::Empty();
+	}
+
+	if(auto it = j.find("colorOverride"); it != j.end() && !it->is_null()) {
+		c.colorOverride = it->get<CalyxEngine::Vector4>();
+	} else {
+		c.colorOverride.reset();
 	}
 
 	if(auto it2 = j.find("textureName"); it2 != j.end() && it2->is_string()) {

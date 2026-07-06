@@ -260,6 +260,11 @@ void BaseModel::ApplyConfig(const BaseModelConfig& config) {
 		}
 	}
 
+	// 保存値がない場合は、コードまたはマテリアルで設定した既定色を維持する。
+	if(config.colorOverride) {
+		SetColor(*config.colorOverride);
+	}
+
 	if(!ok) {
 		handle_.reset();
 		textureGuid_ = Guid{}; // 未設定
@@ -275,6 +280,7 @@ BaseModelConfig BaseModel::ExtractConfig() const {
 
 	// 保存は GUID のみ
 	config.textureGuid = textureGuid_;
+	config.colorOverride = colorOverride_;
 	// config.legacyTextureName は保存しない（後方互換用の読取専用）
 
 	return config;
