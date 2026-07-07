@@ -3,6 +3,8 @@
 #include <externals/imgui/imgui.h>
 
 #include <algorithm>
+#include <map>
+#include <sstream>
 
 namespace CalyxEditor {
 
@@ -52,9 +54,44 @@ namespace CalyxEditor {
 	}
 
 	void EditorToolRegistry::DrawToolsMenu() {
+		struct MenuNode {
+			std::map<std::string, MenuNode> children;
+			Entry* command = nullptr;
+		};
+
+		MenuNode root;
 		for(auto& entry : entries_) {
-			if(ImGui::MenuItem(entry.displayName.c_str())) Open(entry.id);
+			if(entry.menuPath.empty()) {
+				root.children[entry.displayName].command = &entry;
+				continue;
+			}
+
+			MenuNode* node = &root;
+			std::istringstream path(entry.menuPath);
+			std::string segment;
+			while(std::getline(path, segment, '/')) {
+				if(!segment.empty()) node = &node->children[segment];
+			}
+			if(node == &root || node->command) {
+				node = &node->children[entry.displayName];
+			}
+			node->command = &entry;
 		}
+
+		auto drawNode = [this](auto&& self, MenuNode& node) -> void {
+			for(auto& [label, child] : node.children) {
+				if(child.command && child.children.empty()) {
+					if(ImGui::MenuItem(label.c_str())) Open(child.command->id);
+				} else if(ImGui::BeginMenu(label.c_str())) {
+					if(child.command && ImGui::MenuItem(child.command->displayName.c_str())) {
+						Open(child.command->id);
+					}
+					self(self, child);
+					ImGui::EndMenu();
+				}
+			}
+		};
+		drawNode(drawNode, root);
 	}
 
 	void EditorToolRegistry::Update() {
@@ -65,7 +102,9 @@ namespace CalyxEditor {
 
 	void EditorToolRegistry::Draw() {
 		for(auto& entry : entries_) {
-			if(entry.instance) entry.instance->Draw();
+			if(!entry.instance) continue;
+			entry.instance->Draw();
+			if(!entry.instance->IsOpen()) Destroy(entry);
 		}
 	}
 
