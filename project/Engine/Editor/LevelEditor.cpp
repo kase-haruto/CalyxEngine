@@ -1140,6 +1140,10 @@ namespace CalyxEngine {
 		return selection_.GetSelectedObjects();
 	}
 
+	bool LevelEditor::IsPlaying() const {
+		return pPlaySesseion_ && pPlaySesseion_->IsRuntime();
+	}
+
 	//=============================================================================
 	// Create / Delete Object
 	//=============================================================================

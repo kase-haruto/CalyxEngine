@@ -98,6 +98,8 @@ namespace CalyxEngine {
 		bool IsSelectedObject(const SceneObject* object) const;
 		std::shared_ptr<SceneObject> GetPrimarySelectedObject() const;
 		std::vector<std::shared_ptr<SceneObject>> GetSelectedObjects() const;
+		void SaveSceneFromEditorTool() { SaveScene(); }
+		bool IsPlaying() const;
 
 		/// シーンへのオブジェクト追加（Prefab / PlaceTool などから呼ばれる）
 		void CreateObject(const std::shared_ptr<SceneObject>& obj);

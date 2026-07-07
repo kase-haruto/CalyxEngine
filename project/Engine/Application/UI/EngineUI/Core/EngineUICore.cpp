@@ -7,6 +7,7 @@
 #include <Engine/Application/UI/EngineUI/DebugTextOverlay.h>
 #include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
+#include <Engine/Objects/3D/Actor/SceneObject.h>
 
 // uiPanel
 #include <Engine/Application/UI/Panels/ConsolePanel.h>
@@ -30,6 +31,16 @@ namespace CalyxEngine {
 
 		levelEditor_ = std::make_unique<LevelEditor>();
 		levelEditor_->Initialize();
+		auto context = levelEditor_->GetEditorToolRegistry().GetContext();
+		context.editorUserData = levelEditor_.get();
+		context.getPrimarySelection = [](void* userData) -> SceneObject* {
+			auto selected = static_cast<LevelEditor*>(userData)->GetPrimarySelectedObject();
+			return selected.get();
+		};
+		context.getMainCamera = [](void*) -> BaseCamera* { return CameraManager::GetMain3d(); };
+		context.isPlaying = [](void* userData) { return static_cast<LevelEditor*>(userData)->IsPlaying(); };
+		context.requestSaveScene = [](void* userData) { static_cast<LevelEditor*>(userData)->SaveSceneFromEditorTool(); };
+		levelEditor_->GetEditorToolRegistry().SetContext(context);
 #endif
 	}
 

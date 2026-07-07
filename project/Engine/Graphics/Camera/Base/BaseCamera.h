@@ -76,6 +76,7 @@ public:
 	const CalyxEngine::Vector3&   GetRotate() const;
 	const CalyxEngine::Vector3&   GetTranslate() const;
 	float                       GetFovY() const { return fovAngleY_; }
+	void                        SetFovY(float radians) { fovAngleY_ = radians; }
 	float                       GetAspectRatio() const { return aspectRatio_; }
 	bool                        IsActive() const { return isActive_; }
 	void                        SetActive(bool isActive) { isActive_ = isActive; }
