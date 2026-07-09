@@ -716,6 +716,7 @@ namespace CalyxEngine {
 			menu_->Render();
 		}
 		if(layoutSwitcher_ && ImGui::BeginMainMenuBar()) {
+			layoutSwitcher_->DrawMenu();
 			DrawEditModeCombo();
 			ImGui::EndMainMenuBar();
 		}
