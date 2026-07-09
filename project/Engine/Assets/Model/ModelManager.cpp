@@ -15,6 +15,7 @@
 #include <assimp/postprocess.h>
 
 #include <cmath>
+#include <exception>
 #include <filesystem>
 #include <sstream>
 
@@ -93,7 +94,18 @@ void ModelManager::WorkerMain() {
 		}
 
 		// CPUロード
-		ModelData model = LoadModelFile(GetModelDirectoryPath().generic_string(), currentRequest.fileName);
+		ModelData model;
+		try {
+			model = LoadModelFile(GetModelDirectoryPath().generic_string(), currentRequest.fileName);
+		} catch(const std::exception& exception) {
+			CalyxEngine::EngineLogger::GetInstance().Add(
+				CalyxEngine::LogLevel::Error,
+				CalyxEngine::LogCategory::Asset,
+				"Model load failed: " + currentRequest.fileName + " (" + exception.what() + ")",
+				"ModelManager");
+			currentRequest.promise.set_value(nullptr);
+			continue;
+		}
 
 		// unique_ptr に包む
 		auto modelPtr = std::make_unique<ModelData>(std::move(model));
@@ -193,6 +205,29 @@ void ModelManager::StartUpLoad() {
 	
 }
 
+void ModelManager::RefreshProjectAssets() {
+	{
+		std::lock_guard<std::mutex> lock(modelDataMutex_);
+		modelDatas_.clear();
+	}
+	{
+		std::lock_guard<std::mutex> lock(pendingTasksMutex_);
+		pendingTasks_.clear();
+	}
+
+	CalyxEngine::EngineLogger::GetInstance().Add(
+		CalyxEngine::LogLevel::Info,
+		CalyxEngine::LogCategory::Asset,
+		"Model manager refresh started. AssetRoot=" + Calyx::GetAssetRoot().generic_string(),
+		"ModelManager");
+	LoadAllModels();
+	CalyxEngine::EngineLogger::GetInstance().Add(
+		CalyxEngine::LogLevel::Info,
+		CalyxEngine::LogCategory::Asset,
+		"Model manager refresh completed.",
+		"ModelManager");
+}
+
 //----------------------------------------------------------------------------
 // ロード済みモデル名の一覧を返す
 //----------------------------------------------------------------------------
@@ -213,7 +248,12 @@ void ModelManager::LoadAllModels() {
 
 	// ファイルを走破してモデルをロードする なければエラーをはく
 	if(!CalyxEngine::FileScanner::EnsureDirectoryExists(modelDirectory.generic_string())) {
-		throw std::runtime_error("Model directory does not exist: " + modelDirectory.generic_string());
+		CalyxEngine::EngineLogger::GetInstance().Add(
+			CalyxEngine::LogLevel::Warning,
+			CalyxEngine::LogCategory::Asset,
+			"Model directory does not exist: " + modelDirectory.generic_string(),
+			"ModelManager");
+		return;
 	}
 	
 	// Assimでサポートされているモデル形式の拡張子
@@ -275,6 +315,14 @@ ModelData ModelManager::LoadModelFile(const std::string& directoryPath, const st
 	// パスを組み立て
 	std::string filePath = directoryPath + "/" + modelNameLower + "/" + fileNameWithExt;
 	std::filesystem::path modelDirectory = std::filesystem::path(filePath).parent_path();
+	if(!std::filesystem::exists(filePath)) {
+		CalyxEngine::EngineLogger::GetInstance().Add(
+			CalyxEngine::LogLevel::Error,
+			CalyxEngine::LogCategory::Asset,
+			"Model file not found: request=" + fileNameWithExt + ", resolved=" + filePath,
+			"ModelManager");
+		throw std::runtime_error("Model file not found: " + filePath);
+	}
 
 	const aiScene* scene = importer.ReadFile(
 		filePath.c_str(),

@@ -34,7 +34,9 @@ D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::LoadTexture(const std::string& fileP
 
 	// 新規ロード
 	Texture texture(filePath);
-	texture.Load(device_.Get());
+	if(!texture.Load(device_.Get())) {
+		return {};
+	}
 	texture.Upload(device_.Get());
 	texture.CreateShaderResourceView(device_.Get());
 
@@ -67,7 +69,9 @@ D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::LoadTextureLinear(const std::string&
 	}
 
 	Texture texture(filePath, false);
-	texture.Load(device_.Get());
+	if(!texture.Load(device_.Get())) {
+		return {};
+	}
 	texture.Upload(device_.Get());
 	texture.CreateShaderResourceView(device_.Get());
 
@@ -218,7 +222,9 @@ void TextureManager::SetEnvironmentTexture(const std::string& filePath) {
 	environmentTextureName_ = filePath;
 	if (textures_.find(filePath) == textures_.end()) {
 		Texture texture(filePath);
-		texture.Load(device_.Get());
+		if(!texture.Load(device_.Get())) {
+			return;
+		}
 		texture.Upload(device_.Get());
 		texture.CreateShaderResourceView(device_.Get());
 		textures_[filePath] = std::move(texture);

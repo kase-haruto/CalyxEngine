@@ -60,8 +60,6 @@ namespace {
 			candidates.push_back(executableDirectory / "Resources" / "Assets" / "Scenes" / "DefaultScene.scene");
 			candidates.push_back(executableDirectory.parent_path().parent_path() / "project" / "Resources" / "Assets" / "Scenes" / "DefaultScene.scene");
 		}
-		candidates.push_back(std::filesystem::current_path() / "Resources" / "Assets" / "Scenes" / "DefaultScene.scene");
-		candidates.push_back(std::filesystem::current_path() / "project" / "Resources" / "Assets" / "Scenes" / "DefaultScene.scene");
 
 		for(const auto& candidate : candidates) {
 			std::error_code ec;

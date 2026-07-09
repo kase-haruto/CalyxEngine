@@ -3,6 +3,7 @@
 /* engine */
 #include <Engine/Assets/Animation/AnimationStruct.h>
 #include <Engine/Assets/Model/ModelData.h>
+#include <Engine/Foundation/Export/CalyxAPI.h>
 #include <Engine/Foundation/Math/Quaternion.h>
 #include <Engine/Foundation/Utility/Func/MyFunc.h>
 
@@ -78,6 +79,12 @@ public:
 	 * \brief サンプル: 複数モデルを一括でロード
 	 */
 	void StartUpLoad();
+
+	/**
+	 * \brief 現在プロジェクトの AssetRoot を基準にモデル一覧を再読み込みする。
+	 * \details Editor 起動後に .calyxproj が選択され、AssetRoot が変わった場合に使用する。
+	 */
+	CALYX_API void RefreshProjectAssets();
 
 	/**
 	 * \brief ロード済みモデル名の一覧を取得
