@@ -1,70 +1,102 @@
 #pragma once
+
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace CalyxEngine {
 
 	/// <summary>
-	/// レイアウトエントリ
-	/// - レイアウト名とファイルパスのペア
+	/// レイアウトプリセット情報
 	/// </summary>
 	struct LayoutEntry {
-		std::string name;
-		std::string path;
+		std::string name; //< メニュー表示名
+		std::string path; //< ini ファイルパス
 	};
 
 	/*-----------------------------------------------------------------------------------------
 	 * ImGuiLayoutSwitcher
-	 * - ImGuiレイアウト切り替えクラス
-	 * - 複数のレイアウトプリセットを管理し、.iniファイルの切り替えを可能にする
-	 * - メニューからレイアウトの選択、保存、リロードが可能
+	 * - ImGui の Docking / Window レイアウトを ini ファイル単位で管理する
+	 * - レイアウト適用時は現在レイアウトを保存し、既存設定をクリアしてから専用 ini を読み込む
+	 * - ゲーム側エディタ拡張の layoutPath も同じ仕組みで専用レイアウトとして扱う
 	 *---------------------------------------------------------------------------------------*/
 	class ImGuiLayoutSwitcher {
 	public:
-		/// <summary>
-		/// コンストラクタ
-		/// </summary>
-		/// <param name="presets">プリセットレイアウトのリスト</param>
-		/// <param name="defaultPath">デフォルトの.iniファイルパス</param>
+		/**
+		 * @brief コンストラクタ
+		 * @param presets メニューに表示するレイアウトプリセット
+		 * @param defaultPath 自動保存に使う初期 ini ファイルパス
+		 */
 		ImGuiLayoutSwitcher(std::vector<LayoutEntry> presets,
 							std::string				 defaultPath = "imgui.ini");
 
-		/// <summary>
-		/// レイアウトメニューを描画
-		/// - プリセット選択
-		/// - リロード、保存、名前を付けて保存
-		/// </summary>
+		/**
+		 * @brief レイアウトメニューを描画する
+		 */
 		void DrawMenu();
 
-		/// <summary>
-		/// 指定されたレイアウトを適用
-		/// </summary>
-		/// <param name="iniPath">適用する.iniファイルのパス</param>
+		/**
+		 * @brief 指定レイアウトの適用を予約する
+		 * @param iniPath 適用する ini ファイルパス
+		 */
 		void Apply(const std::string& iniPath);
 
-		/// <summary>
-		/// 予約されたレイアウト適用を安全なタイミングで処理
-		/// </summary>
+		/**
+		 * @brief 予約されたレイアウト適用を UI 描画前の安全なタイミングで実行する
+		 */
 		void ApplyPending();
 
-		/// <summary>
-		/// 現在のレイアウトを指定されたパスへ保存
-		/// </summary>
-		/// <param name="iniPath">保存先の.iniファイルパス</param>
+		/**
+		 * @brief 現在の ImGui レイアウトを指定 ini ファイルへ保存する
+		 * @param iniPath 保存先 ini ファイルパス
+		 */
 		void Save(const std::string& iniPath);
 
-		/// <summary>
-		/// 現在のレイアウトパスを取得
-		/// </summary>
+		/**
+		 * @brief 現在選択中の ini ファイルへ保存する
+		 */
+		void SaveCurrent();
+
+		/**
+		 * @brief 現在選択中の ini ファイルを専用レイアウトとして再読み込みする
+		 */
+		void ReloadCurrent();
+
+		/**
+		 * @brief 現在選択中の ini ファイルパスを取得する
+		 */
 		const std::string& GetCurrentPath() const { return currentIniPath_; }
+
+		/**
+		 * @brief 登録済みレイアウトプリセットを取得する
+		 */
 		const std::vector<LayoutEntry>& GetPresets() const { return presets_; }
 
 	private:
-		std::vector<LayoutEntry> presets_;		  ///< プリセットレイアウトのリスト
-		std::string				 currentIniPath_; ///< 現在の.iniファイルパス (プリセットとしてロードされたパス)
-		std::string				 autoSavePath_;	  ///< 自動保存用の.iniファイルパス
-		std::string				 pendingIniPath_; ///< 次フレームで適用する.iniファイルパス
-		bool					 hasPendingApply_ = false;
+		/**
+		 * @brief ini ファイルパスを実ファイルパスへ解決する
+		 * @param path 解決対象パス
+		 */
+		std::string ResolveLayoutPath(std::string_view path) const;
+
+		/**
+		 * @brief ImGui の現在レイアウトを指定 ini ファイルへ保存する
+		 * @param iniPath 保存先 ini ファイルパス
+		 */
+		void SaveToDisk(const std::string& iniPath) const;
+
+		/**
+		 * @brief 指定 ini ファイルを専用レイアウトとして読み込む
+		 * @param iniPath 読み込み元 ini ファイルパス
+		 */
+		void LoadExclusiveFromDisk(const std::string& iniPath);
+
+		std::vector<LayoutEntry> presets_;			  //< レイアウトプリセット一覧
+		std::string				 currentIniPath_;	  //< 現在選択中の ini ファイルパス
+		std::string				 autoSavePath_;		  //< ImGui の自動保存先パス
+		std::string				 pendingIniPath_;	  //< 次フレームで適用する ini ファイルパス
+		std::string				 saveBeforeApplyPath_; //< 切り替え前に保存する ini ファイルパス
+		bool					 hasPendingApply_ = false; //< レイアウト適用予約があるか
 	};
 
 } // namespace CalyxEngine
