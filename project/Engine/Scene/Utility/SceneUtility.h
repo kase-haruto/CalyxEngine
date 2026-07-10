@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Engine/Application/Effects/EffectAsset.h>
+#include <CalyxEngine/Project.h>
 #include <Engine/Foundation/Debug/CxAssert.h>
 #include <Engine/Application/Effects/EffectPlayer.h>
 #include <Data/Engine/Prefab/Serializer/PrefabSerializer.h>
@@ -43,7 +44,7 @@ namespace SceneAPI{
 		const Guid& prefabAssetGuid = Guid::Empty()) {
 		auto ctx = SceneContext::Current();
 		CX_CHECK(ctx && "No active SceneContext!", "Assertion failed");
-		std::string fullPath = "Resources/Assets/Prefabs/"+path;
+		std::string fullPath = Calyx::ResolveAssetPath(std::filesystem::path("Prefabs") / path).generic_string();
 
 		auto objects = PrefabSerializer::Load(
 			fullPath,
@@ -82,7 +83,7 @@ namespace SceneAPI{
 		static_assert(std::is_base_of_v<SceneObject, T>,
 					  "T must derive from SceneObject");
 		// InstantiatePrefabを呼び出して、ルートオブジェクトを取得する
-		// pathはResources/Assets/Prefabs/以下のパスで指定する
+		// path は現在プロジェクトの AssetRoot/Prefabs 以下からの相対パスで指定する。
 	auto objects = InstantiatePrefab(path, spawnOffset, prefabAssetGuid);
 
 		std::unordered_set<SceneObject*> loaded;

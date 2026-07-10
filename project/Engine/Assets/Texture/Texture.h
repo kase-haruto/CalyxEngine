@@ -22,7 +22,7 @@ public:
 	/// ロード
 	/// </summary>
 	/// <param name="device"></param>
-	void Load(ID3D12Device* device);
+	bool Load(ID3D12Device* device);
 
 	/// <summary>
 	/// アップロード
@@ -42,10 +42,12 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSrvHandle() const { return srvHandleGPU_; }
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCpuSrvHandle() const { return srvHandleCPU_; }
 	const DirectX::TexMetadata& GetMetaData();
+	bool IsLoaded() const { return loaded_; }
 
 private:
 	std::string							   filePath_;
 	bool								   forceSrgb_ = true;
+	bool								   loaded_ = false; //< テクスチャ画像の読み込みに成功したか。
 	DirectX::ScratchImage				   image_;
 	DirectX::TexMetadata				   metadata_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> resource_;

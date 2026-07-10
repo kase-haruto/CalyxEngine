@@ -133,7 +133,7 @@ nlohmann::json SceneSerializer::DumpJson(const SceneContext& context) {
 
 	const auto& objects = context.GetObjectLibrary()->GetAllObjectsShared();
 	for(const auto& sp : objects) {
-		if(!sp || !sp->IsSerializable()) continue;
+		if(!sp || !sp->IsSceneSerializable()) continue;
 
 		// FX系のオブジェクトは保存対象から除外（ロード時に再生成されるため）
 		if(sp->GetObjectType() == ObjectType::Effect) continue;
@@ -267,6 +267,7 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 			continue;
 		}
 		sp->AdoptPendingSerializableParamCapture(paramOverrides);
+		sp->SetInstanceLifetime(ObjectInstanceLifetime::SceneOwned);
 
 		if(false) {
 			auto* cfg = dynamic_cast<IConfigurable*>(sp.get());

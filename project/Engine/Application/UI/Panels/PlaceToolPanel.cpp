@@ -7,6 +7,7 @@
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/Objects/3D/Actor/SplineDeformObject.h>
+#include <Engine/Objects/3D/Actor/StaticModelObject.h>
 #include <Engine/Objects/LightObject/DirectionalLight.h>
 #include <Engine/Objects/LightObject/PointLight.h>
 #include <Engine/Objects/LightObject/PointLightActor.h>
@@ -51,6 +52,9 @@ namespace CalyxEngine {
 
 			obj->SetName(displayName.empty() ? typeName : displayName, objectType);
 			obj->SetTransient(transient);
+			if(!transient) {
+				obj->SetInstanceLifetime(ObjectInstanceLifetime::SceneOwned);
+			}
 			ctx->AddObject(obj);
 			obj->Initialize();
 			obj->GetWorldTransform().translation = pos;
@@ -104,18 +108,19 @@ namespace CalyxEngine {
 								  {64, 64},
 								  [modelName, objName](const CalyxEngine::Vector3& pos) {
 									  auto factory = [modelName, objName, pos]() {
-										  auto obj = SceneAPI::Instantiate<BaseGameObject>(modelName, objName);
+										  auto obj = SceneAPI::Instantiate<StaticModelObject>(modelName, objName);
 										  obj->Initialize();
 										  obj->GetCollider()->SetCollisionEnabled(false);
 										  obj->GetWorldTransform().translation = pos;
+										  obj->SetInstanceLifetime(ObjectInstanceLifetime::SceneOwned);
 										  return obj;
 									  };
 									  CommandManager::GetInstance()->Execute(
-										  std::make_unique<CreateObjectCommand<BaseGameObject>>(
+										  std::make_unique<CreateObjectCommand<StaticModelObject>>(
 											  SceneContext::Current(), factory, "Create Shape"));
 								  },
 								  [modelName, objName]() {
-									  auto obj = SceneAPI::Instantiate<BaseGameObject>(modelName, objName);
+									  auto obj = SceneAPI::Instantiate<StaticModelObject>(modelName, objName);
 									  obj->Initialize();
 									  obj->GetCollider()->SetCollisionEnabled(false);
 									  obj->SetTransient(true);
@@ -131,6 +136,7 @@ namespace CalyxEngine {
 								  auto factory = []() {
 									  auto obj = SceneAPI::Instantiate<SplineDeformObject>();
 									  obj->Initialize();
+									  obj->SetInstanceLifetime(ObjectInstanceLifetime::SceneOwned);
 									  return obj;
 								  };
 								  CommandManager::GetInstance()->Execute(
@@ -159,6 +165,7 @@ namespace CalyxEngine {
 										  obj->Initialize();
 										  obj->GetWorldTransform().translation = pos;
 										  obj->GetWorldTransform().Update();
+										  obj->SetInstanceLifetime(ObjectInstanceLifetime::SceneOwned);
 										  return obj;
 									  };
 									  CommandManager::GetInstance()->Execute(
@@ -183,6 +190,7 @@ namespace CalyxEngine {
 										  obj->GetWorldTransform().translation = pos;
 										  obj->GetWorldTransform().Update();
 										  obj->SyncPositionFromTransform();
+										  obj->SetInstanceLifetime(ObjectInstanceLifetime::SceneOwned);
 										  return obj;
 									  };
 									  CommandManager::GetInstance()->Execute(
@@ -206,6 +214,7 @@ namespace CalyxEngine {
 										  obj->Initialize();
 										  obj->GetWorldTransform().translation = pos;
 										  obj->GetWorldTransform().Update();
+										  obj->SetInstanceLifetime(ObjectInstanceLifetime::SceneOwned);
 										  return obj;
 									  };
 									  CommandManager::GetInstance()->Execute(
@@ -233,6 +242,7 @@ namespace CalyxEngine {
 											  auto obj = SceneAPI::Instantiate<CalyxEngine::ParticleSystemObject>(name);
 											  obj->Initialize();
 											  obj->GetWorldTransform().translation = pos;
+											  obj->SetInstanceLifetime(ObjectInstanceLifetime::SceneOwned);
 											  return obj;
 										 };
 										 CommandManager::GetInstance()->Execute(
@@ -259,6 +269,7 @@ namespace CalyxEngine {
 											  auto obj = SceneAPI::Instantiate<CalyxEngine::FxObject>(name);
 											  obj->Initialize();
 											  obj->GetWorldTransform().translation = pos;
+											  obj->SetInstanceLifetime(ObjectInstanceLifetime::SceneOwned);
 											  return obj;
 										 };
 										 CommandManager::GetInstance()->Execute(

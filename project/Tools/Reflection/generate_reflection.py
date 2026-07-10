@@ -52,6 +52,8 @@ def discover() -> list[dict[str, str]]:
                 placeable = meta.get("Placeable", "true").lower() != "false"
                 prefab_editable = meta.get("PrefabEditable", "false").lower() == "true"
                 prefab_root = meta.get("PrefabRoot", "false").lower() == "true"
+                scene_serializable = meta.get("SceneSerializable", "true" if placeable else "false").lower() != "false"
+                prefab_serializable = meta.get("PrefabSerializable", "true").lower() != "false"
                 entries.append(
                     {
                         "class": match.group("class"),
@@ -62,6 +64,8 @@ def discover() -> list[dict[str, str]]:
                         "placeable": "true" if placeable else "false",
                         "prefab_editable": "true" if prefab_editable else "false",
                         "prefab_root": "true" if prefab_root else "false",
+                        "scene_serializable": "true" if scene_serializable else "false",
+                        "prefab_serializable": "true" if prefab_serializable else "false",
                         "include": rel_include(path),
                     }
                 )
@@ -95,6 +99,8 @@ namespace CalyxEngine {
 \t\t\t{entry["placeable"]},
 \t\t\t{entry["prefab_editable"]},
 \t\t\t{entry["prefab_root"]},
+\t\t\t{entry["scene_serializable"]},
+\t\t\t{entry["prefab_serializable"]},
 \t\t\t&CreateSceneObject<{entry["class"]}>);"""
         )
 

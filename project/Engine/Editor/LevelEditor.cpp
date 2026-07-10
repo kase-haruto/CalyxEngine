@@ -60,8 +60,6 @@ namespace {
 			candidates.push_back(executableDirectory / "Resources" / "Assets" / "Scenes" / "DefaultScene.scene");
 			candidates.push_back(executableDirectory.parent_path().parent_path() / "project" / "Resources" / "Assets" / "Scenes" / "DefaultScene.scene");
 		}
-		candidates.push_back(std::filesystem::current_path() / "Resources" / "Assets" / "Scenes" / "DefaultScene.scene");
-		candidates.push_back(std::filesystem::current_path() / "project" / "Resources" / "Assets" / "Scenes" / "DefaultScene.scene");
 
 		for(const auto& candidate : candidates) {
 			std::error_code ec;
@@ -1163,6 +1161,7 @@ namespace CalyxEngine {
 		}
 
 		// SceneContext 経由で登録（内部で SceneObjectLibrary::AddObject を呼ぶ）
+		obj->SetInstanceLifetime(ObjectInstanceLifetime::SceneOwned);
 		ctx->AddObject(obj);
 		EngineLogger::GetInstance().Add(
 			LogLevel::Info,

@@ -3,6 +3,7 @@
 #include <CalyxEngine/CalyxEngine.h>
 
 #include <Engine/Assets/Database/AssetDatabase.h>
+#include <Engine/Assets/Manager/AssetManager.h>
 #include <Engine/Application/UI/EngineUI/Core/EngineUICore.h>
 #include <Engine/Application/UI/Panels/PlaceToolPanel.h>
 #include <Engine/Foundation/Reflection/CalyxGameObjectRegistry.generated.h>
@@ -103,6 +104,11 @@ public:
 		hasProject_ = true;
 		Calyx::SetCurrentProject(project_);
 		AssetDatabase::GetInstance()->Initialize(Calyx::GetAssetRoot());
+		if(auto* assetManager = CalyxEngine::AssetManager::GetInstance()) {
+			if(auto* modelManager = assetManager->GetModelManager()) {
+				modelManager->RefreshProjectAssets();
+			}
+		}
 
 		std::vector<Calyx::RecentProjectEntry> recentProjects;
 		const auto							  registryPath = Calyx::DefaultProjectRegistryPath();

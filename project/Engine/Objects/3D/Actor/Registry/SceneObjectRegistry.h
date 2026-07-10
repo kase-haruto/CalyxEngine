@@ -7,6 +7,7 @@
 #include <vector>
 #include <stdexcept>
 #include <memory>
+#include <cstdint>
 
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 
@@ -25,6 +26,8 @@ struct SceneObjectClassDesc {
 	bool		 placeable = false;
 	bool		 prefabEditable = false;
 	bool		 prefabRoot = false;
+	bool		 sceneSerializable = false;
+	bool		 prefabSerializable = false;
 	SceneObjectFactory factory = nullptr;
 };
 
@@ -51,7 +54,19 @@ public:
 		bool prefabEditable,
 		bool prefabRoot,
 		SceneObjectFactory factory);
+	CALYX_API void Register(
+		const char* typeName,
+		const char* displayName,
+		ObjectType objectType,
+		const char* iconPath,
+		bool placeable,
+		bool prefabEditable,
+		bool prefabRoot,
+		bool sceneSerializable,
+		bool prefabSerializable,
+		SceneObjectFactory factory);
 	CALYX_API void Register(const SceneObjectClassDesc& desc);
+	CALYX_API void RegisterAlias(std::string_view aliasTypeName, std::string_view canonicalTypeName);
 
 	/// <summary>
 	/// 登録済みの名前に対応するオブジェクトを生成
@@ -69,6 +84,8 @@ public:
 	CALYX_API std::vector<SceneObjectClassDesc const*> ListPrefabEditableTypes() const;
 	CALYX_API std::vector<SceneObjectClassDesc const*> ListPrefabRootTypes() const;
 	CALYX_API const SceneObjectClassDesc* Find(std::string_view typeName) const;
+	CALYX_API bool IsSceneSerializable(std::string_view typeName) const;
+	CALYX_API bool IsPrefabSerializable(std::string_view typeName) const;
 	CALYX_API std::size_t GetRevision() const;
 
 private:
@@ -76,6 +93,7 @@ private:
 	/// オブジェクト登録テーブル
 	/// </summary>
 	std::unordered_map<std::string, SceneObjectClassDesc> table_;
+	std::unordered_map<std::string, std::string> aliases_;
 	std::size_t revision_ = 0;
 };
 

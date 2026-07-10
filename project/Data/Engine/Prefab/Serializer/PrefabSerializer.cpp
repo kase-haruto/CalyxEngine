@@ -85,7 +85,7 @@ namespace {
 								  const std::unordered_set<SceneObject*>& prefabRoots,
 								  bool									  resetRootTransform,
 								  bool									  usePrefabSourceGuids) {
-		j["type"]			  = obj.GetObjectClassName();
+		j["type"]			  = std::string(obj.GetTypeName());
 		const Guid guid		  = (usePrefabSourceGuids && obj.GetPrefabSourceGuid().isValid())
 									? obj.GetPrefabSourceGuid()
 									: obj.GetGuid();
@@ -131,7 +131,7 @@ namespace {
 	}
 
 	void CollectObjectsRecursive(SceneObject* obj, std::vector<SceneObject*>& out) {
-		if(!obj || !obj->IsSerializable()) return;
+		if(!obj || obj->IsTransient() || !SceneObjectRegistry::Get().IsPrefabSerializable(obj->GetTypeName())) return;
 		out.push_back(obj);
 		for(const auto& child : obj->GetChildren()) {
 			CollectObjectsRecursive(child.get(), out);
@@ -191,7 +191,7 @@ bool PrefabSerializer::Save(const std::vector<SceneObject*>& roots,
 
 	std::function<void(SceneObject*)> serializeRec;
 	serializeRec = [&](SceneObject* obj) {
-		if(!obj || !obj->IsSerializable()) return;
+		if(!obj || obj->IsTransient() || !SceneObjectRegistry::Get().IsPrefabSerializable(obj->GetTypeName())) return;
 
 		nlohmann::json j;
 		if(auto* cfg = dynamic_cast<IConfigurable*>(obj)) {

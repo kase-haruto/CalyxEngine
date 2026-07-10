@@ -309,7 +309,7 @@
                     "z": 5.0
                 }
             },
-            "type": "BaseGameObject",
+            "type": "StaticModelObject",
             "visualOffset": {
                 "x": 0.0,
                 "y": 0.0,
@@ -395,7 +395,7 @@
                     "z": -9.5
                 }
             },
-            "type": "BaseGameObject",
+            "type": "StaticModelObject",
             "visualOffset": {
                 "x": 0.0,
                 "y": 0.0,
@@ -481,7 +481,7 @@
                     "z": 19.5
                 }
             },
-            "type": "BaseGameObject",
+            "type": "StaticModelObject",
             "visualOffset": {
                 "x": 0.0,
                 "y": 0.0,
@@ -567,7 +567,7 @@
                     "z": 5.0
                 }
             },
-            "type": "BaseGameObject",
+            "type": "StaticModelObject",
             "visualOffset": {
                 "x": 0.0,
                 "y": 0.0,
@@ -653,7 +653,7 @@
                     "z": 5.0
                 }
             },
-            "type": "BaseGameObject",
+            "type": "StaticModelObject",
             "visualOffset": {
                 "x": 0.0,
                 "y": 0.0,
@@ -947,7 +947,7 @@
                     "z": 3.784273862838745
                 }
             },
-            "type": "BaseGameObject",
+            "type": "StaticModelObject",
             "visualOffset": {
                 "x": 0.0,
                 "y": 0.0,

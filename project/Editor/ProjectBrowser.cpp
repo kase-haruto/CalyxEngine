@@ -464,6 +464,8 @@ try {
                 $placeable = if ($meta.ContainsKey("Placeable")) { $meta["Placeable"].ToLower() -ne "false" } else { $true }
                 $prefabEditable = if ($meta.ContainsKey("PrefabEditable")) { $meta["PrefabEditable"].ToLower() -eq "true" } else { $false }
                 $prefabRoot = if ($meta.ContainsKey("PrefabRoot")) { $meta["PrefabRoot"].ToLower() -eq "true" } else { $false }
+                $sceneSerializable = if ($meta.ContainsKey("SceneSerializable")) { $meta["SceneSerializable"].ToLower() -ne "false" } else { $placeable }
+                $prefabSerializable = if ($meta.ContainsKey("PrefabSerializable")) { $meta["PrefabSerializable"].ToLower() -ne "false" } else { $true }
                 $include = (Get-RelativePathCompat $Root $path).Replace('\', '/')
 
                 $entries.Add([pscustomobject]@{
@@ -475,6 +477,8 @@ try {
                     Placeable = if ($placeable) { "true" } else { "false" }
                     PrefabEditable = if ($prefabEditable) { "true" } else { "false" }
                     PrefabRoot = if ($prefabRoot) { "true" } else { "false" }
+                    SceneSerializable = if ($sceneSerializable) { "true" } else { "false" }
+                    PrefabSerializable = if ($prefabSerializable) { "true" } else { "false" }
                     Include = $include
                 })
             }
@@ -505,6 +509,8 @@ namespace $Namespace {
 			$($_.Placeable),
 			$($_.PrefabEditable),
 			$($_.PrefabRoot),
+			$($_.SceneSerializable),
+			$($_.PrefabSerializable),
 			&CreateSceneObject<$($_.ClassName)>);
 "@
     }) -join "`n`n"

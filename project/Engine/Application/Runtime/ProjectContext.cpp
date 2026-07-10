@@ -1,4 +1,5 @@
 #include <CalyxEngine/Project.h>
+#include <Engine/Foundation/Log/EngineLogger.h>
 
 #include <cctype>
 
@@ -103,6 +104,122 @@ namespace Calyx {
 	}
 
 	///////////////////////////////////////////////////////////////////////////////
+	// .calyxproj から読み込んだプロジェクト情報を ProjectContext に保持する。
+	///////////////////////////////////////////////////////////////////////////////
+	bool ProjectContext::SetProjectFilePath(const std::filesystem::path& projectFilePath) {
+		ProjectInfo loadedProject;
+		if(!LoadProjectFile(projectFilePath, loadedProject)) {
+			return false;
+		}
+		SetProject(loadedProject);
+		return true;
+	}
+
+	///////////////////////////////////////////////////////////////////////////////
+	// 既に読み込み済みの ProjectInfo を ProjectContext に保持する。
+	///////////////////////////////////////////////////////////////////////////////
+	void ProjectContext::SetProject(const ProjectInfo& project) {
+		project_ = project;
+	}
+
+	///////////////////////////////////////////////////////////////////////////////
+	// ProjectContext が有効なプロジェクト情報を保持しているか確認する。
+	///////////////////////////////////////////////////////////////////////////////
+	bool ProjectContext::IsValid() const {
+		return project_.IsValid();
+	}
+
+	///////////////////////////////////////////////////////////////////////////////
+	// ProjectContext が保持している ProjectInfo を取得する。
+	///////////////////////////////////////////////////////////////////////////////
+	const ProjectInfo& ProjectContext::GetProject() const {
+		return project_;
+	}
+
+	///////////////////////////////////////////////////////////////////////////////
+	// ProjectRoot を取得する。無効な context の場合は空パスを返す。
+	///////////////////////////////////////////////////////////////////////////////
+	const std::filesystem::path& ProjectContext::GetProjectRoot() const {
+		static const std::filesystem::path emptyPath;
+		return IsValid() ? project_.rootDirectory : emptyPath;
+	}
+
+	///////////////////////////////////////////////////////////////////////////////
+	// ProjectRoot/Resources を取得する。
+	///////////////////////////////////////////////////////////////////////////////
+	std::filesystem::path ProjectContext::GetResourcesRoot() const {
+		return IsValid() ? NormalizeContextPath(project_.rootDirectory / "Resources") : std::filesystem::path{};
+	}
+
+	///////////////////////////////////////////////////////////////////////////////
+	// ProjectRoot を基準に assetDirectory を解決して AssetRoot を取得する。
+	///////////////////////////////////////////////////////////////////////////////
+	std::filesystem::path ProjectContext::GetAssetRoot() const {
+		return IsValid() ? ResolveProjectPath(project_, project_.assetDirectory) : std::filesystem::path{};
+	}
+
+	///////////////////////////////////////////////////////////////////////////////
+	// AssetRoot/Scenes を取得する。
+	///////////////////////////////////////////////////////////////////////////////
+	std::filesystem::path ProjectContext::GetSceneRoot() const {
+		const auto assetRoot = GetAssetRoot();
+		return assetRoot.empty() ? std::filesystem::path{} : NormalizeContextPath(assetRoot / "Scenes");
+	}
+
+	///////////////////////////////////////////////////////////////////////////////
+	// グローバルな現在プロジェクトを使う AssetPathResolver を生成する。
+	///////////////////////////////////////////////////////////////////////////////
+	AssetPathResolver::AssetPathResolver() = default;
+
+	///////////////////////////////////////////////////////////////////////////////
+	// 明示的な ProjectContext を使う AssetPathResolver を生成する。
+	///////////////////////////////////////////////////////////////////////////////
+	AssetPathResolver::AssetPathResolver(const ProjectContext* projectContext)
+		: projectContext_(projectContext) {}
+
+	///////////////////////////////////////////////////////////////////////////////
+	// AssetRoot を基準にアセット相対パスを絶対パスへ解決する。
+	///////////////////////////////////////////////////////////////////////////////
+	std::filesystem::path AssetPathResolver::ResolveAssetPath(const std::filesystem::path& assetRelativePath) const {
+		if(assetRelativePath.empty()) {
+			return {};
+		}
+		if(assetRelativePath.is_absolute()) {
+			return NormalizeContextPath(assetRelativePath);
+		}
+
+		const std::filesystem::path assetRoot =
+			projectContext_ && projectContext_->IsValid()
+				? projectContext_->GetAssetRoot()
+				: GetAssetRoot();
+		const std::filesystem::path normalizedRelative =
+			IsResourcesAssetsPath(assetRelativePath)
+				? StripResourcesAssetsPrefix(assetRelativePath)
+				: assetRelativePath;
+
+		return NormalizeContextPath(assetRoot / normalizedRelative);
+	}
+
+	///////////////////////////////////////////////////////////////////////////////
+	// アセットの存在を確認し、見つからない場合は解決後パスをログへ出す。
+	///////////////////////////////////////////////////////////////////////////////
+	bool AssetPathResolver::ExistsAsset(const std::filesystem::path& assetRelativePath) const {
+		const auto resolvedPath = ResolveAssetPath(assetRelativePath);
+		std::error_code ec;
+		const bool exists = std::filesystem::exists(resolvedPath, ec);
+		if(!exists || ec) {
+			CalyxEngine::EngineLogger::GetInstance().Add(
+				CalyxEngine::LogLevel::Warning,
+				CalyxEngine::LogCategory::Asset,
+				"Asset file not found: request=" + assetRelativePath.generic_string() +
+					", resolved=" + resolvedPath.generic_string() +
+					(ec ? ", error=" + ec.message() : std::string{}),
+				"AssetPathResolver");
+		}
+		return exists && !ec;
+	}
+
+	///////////////////////////////////////////////////////////////////////////////
 	// 現在のプロジェクトルートを取得する
 	// プロジェクトが設定されていない場合は、現在の作業ディレクトリを使用する
 	///////////////////////////////////////////////////////////////////////////////
@@ -111,6 +228,16 @@ namespace Calyx {
 			return NormalizeContextPath(CurrentProjectStorage().rootDirectory);
 		}
 		return NormalizeContextPath(std::filesystem::current_path());
+	}
+
+	///////////////////////////////////////////////////////////////////////////////
+	// 現在プロジェクトの ResourcesRoot を取得する。
+	///////////////////////////////////////////////////////////////////////////////
+	std::filesystem::path GetResourcesRoot() {
+		if(HasCurrentProject()) {
+			return NormalizeContextPath(CurrentProjectStorage().rootDirectory / "Resources");
+		}
+		return NormalizeContextPath(std::filesystem::current_path() / "Resources");
 	}
 
 	///////////////////////////////////////////////////////////////////////////////
@@ -126,20 +253,34 @@ namespace Calyx {
 	}
 
 	///////////////////////////////////////////////////////////////////////////////
+	// 現在プロジェクトの SceneRoot を取得する。
+	///////////////////////////////////////////////////////////////////////////////
+	std::filesystem::path GetSceneRoot() {
+		return NormalizeContextPath(GetAssetRoot() / "Scenes");
+	}
+
+	///////////////////////////////////////////////////////////////////////////////
 	// アセットパスを実際に参照可能なパスへ解決する
 	// 相対パスはアセットルートからの相対パスとして扱う
 	///////////////////////////////////////////////////////////////////////////////
 	std::filesystem::path ResolveAssetPath(const std::filesystem::path& path) {
 		if(path.empty() || path.is_absolute()) {
-			return path;
+			return AssetPathResolver().ResolveAssetPath(path);
 		}
 
 		// Resources/Assets から始まるパスは、アセットルートとの二重結合を防ぐため先頭を取り除く
 		if(IsResourcesAssetsPath(path)) {
-			return NormalizeContextPath(GetAssetRoot() / StripResourcesAssetsPrefix(path));
+			return AssetPathResolver().ResolveAssetPath(path);
 		}
 
-		return NormalizeContextPath(GetAssetRoot() / path);
+		return AssetPathResolver().ResolveAssetPath(path);
+	}
+
+	///////////////////////////////////////////////////////////////////////////////
+	// 現在プロジェクトの AssetRoot を基準にアセットの存在を確認する。
+	///////////////////////////////////////////////////////////////////////////////
+	bool ExistsAsset(const std::filesystem::path& path) {
+		return AssetPathResolver().ExistsAsset(path);
 	}
 
 	///////////////////////////////////////////////////////////////////////////////

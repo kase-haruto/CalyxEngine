@@ -121,6 +121,13 @@ std::string_view SceneObject::GetTypeName() const {
 	return GetObjectClassName();
 }
 
+bool SceneObject::IsSceneSerializable() const {
+	if(isTransient_ || instanceLifetime_ != ObjectInstanceLifetime::SceneOwned) {
+		return false;
+	}
+	return SceneObjectRegistry::Get().IsSceneSerializable(GetTypeName());
+}
+
 void SceneObject::SetTypeName(std::string typeName) {
 	typeName_ = std::move(typeName);
 }

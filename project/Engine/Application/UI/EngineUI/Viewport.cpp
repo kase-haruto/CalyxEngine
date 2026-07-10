@@ -26,6 +26,7 @@
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
 #include <Engine/Objects/3D/Actor/Library/SceneObjectLibrary.h>
 #include <Engine/Objects/3D/Actor/SceneObject.h>
+#include <Engine/Objects/3D/Actor/StaticModelObject.h>
 #include <Engine/Physics/Ray/RayDetail.h>
 #include <Engine/Physics/Ray/Raycastor.h>
 #include <Engine/Scene/Context/SceneContext.h>
@@ -209,14 +210,14 @@ namespace {
         }
     }
 
-    inline std::shared_ptr<BaseGameObject> CreateModelObjectFromAsset(
+    inline std::shared_ptr<StaticModelObject> CreateModelObjectFromAsset(
         const AssetRecord& record,
         const CalyxEngine::Vector3& pos,
         bool isGhost) {
         const std::string modelName = record.sourcePath.filename().string();
         const std::string objectName = record.sourcePath.stem().string();
 
-        auto obj = SceneAPI::Instantiate<BaseGameObject>(modelName, objectName);
+        auto obj = SceneAPI::Instantiate<StaticModelObject>(modelName, objectName);
         obj->Initialize();
         if(auto* collider = obj->GetCollider()) {
             collider->SetCollisionEnabled(false);
@@ -227,6 +228,8 @@ namespace {
             obj->SetTransient(true);
             obj->SetBlendMode(BlendMode::ALPHA);
             obj->SetColor({1.0f, 1.0f, 1.0f, 0.5f});
+        } else {
+            obj->SetInstanceLifetime(ObjectInstanceLifetime::SceneOwned);
         }
 
         return obj;
@@ -250,6 +253,7 @@ namespace {
             if(prefabAssetGuid.isValid() && !sp->GetPrefabAssetGuid().isValid()) {
                 sp->SetPrefabLink(prefabAssetGuid, sp->GetGuid());
             }
+            sp->SetInstanceLifetime(ObjectInstanceLifetime::SceneOwned);
 
             auto parent = sp->GetParent();
             if(!parent || !loaded.contains(parent.get())) {
@@ -609,13 +613,13 @@ void Viewport::Render(const ImTextureID& tex) {
                     auto factory = [guid, spawnPos]() {
                         const AssetRecord* freshRecord = AssetDatabase::GetInstance()->Get(guid);
                         if(!freshRecord) {
-                            return std::shared_ptr<BaseGameObject>{};
+                            return std::shared_ptr<StaticModelObject>{};
                         }
                         return CreateModelObjectFromAsset(*freshRecord, spawnPos, false);
                     };
 
                     CommandManager::GetInstance()->Execute(
-                        std::make_unique<CreateObjectCommand<BaseGameObject>>(
+                        std::make_unique<CreateObjectCommand<StaticModelObject>>(
                             SceneContext::Current(), factory, "Create Model Asset"));
 
                     ClearGhosts();

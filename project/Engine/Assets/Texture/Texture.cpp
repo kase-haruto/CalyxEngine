@@ -5,6 +5,7 @@
 
 /* engine */
 #include <CalyxEngine/Project.h>
+#include <Engine/Foundation/Log/EngineLogger.h>
 #include <Engine/Graphics/Descriptor/DescriptorAllocator.h>
 #include <Engine/Foundation/Utility/Func/CxUtils.h>
 
@@ -14,6 +15,7 @@
 /* c++ */
 #include <Engine/Foundation/Debug/CxAssert.h>
 #include <d3dx12.h>
+#include <filesystem>
 
 Texture::Texture(const std::string& filePath, bool forceSrgb) : filePath_(filePath), forceSrgb_(forceSrgb) {}
 
@@ -25,6 +27,7 @@ Texture::~Texture() {
 Texture::Texture(Texture&& other) noexcept
 	: filePath_(std::move(other.filePath_)),
 	forceSrgb_(other.forceSrgb_),
+	loaded_(other.loaded_),
 	image_(std::move(other.image_)),
 	metadata_(std::move(other.metadata_)),
 	resource_(std::move(other.resource_)),
@@ -38,6 +41,7 @@ Texture& Texture::operator=(Texture&& other) noexcept {
 	if (this != &other) {
 		filePath_ = std::move(other.filePath_);
 		forceSrgb_ = other.forceSrgb_;
+		loaded_ = other.loaded_;
 		image_ = std::move(other.image_);
 		metadata_ = std::move(other.metadata_);
 		resource_ = std::move(other.resource_);
@@ -50,12 +54,38 @@ Texture& Texture::operator=(Texture&& other) noexcept {
 	return *this;
 }
 
-void Texture::Load([[maybe_unused]] ID3D12Device* device) {
-	image_ = Cx::IO::LoadTextureImage(Calyx::ResolveAssetPath(filePath_).generic_string(), forceSrgb_);
+bool Texture::Load([[maybe_unused]] ID3D12Device* device) {
+	std::filesystem::path resolvedPath = Calyx::ResolveAssetPath(filePath_);
+	if(!std::filesystem::exists(resolvedPath)) {
+		CalyxEngine::EngineLogger::GetInstance().Add(
+			CalyxEngine::LogLevel::Warning,
+			CalyxEngine::LogCategory::Asset,
+			"Texture file not found: request=" + filePath_ + ", resolved=" + resolvedPath.generic_string(),
+			"Texture");
+		resolvedPath = Calyx::ResolveAssetPath("Textures/white1x1.dds");
+	}
+
+	if(!std::filesystem::exists(resolvedPath)) {
+		CalyxEngine::EngineLogger::GetInstance().Add(
+			CalyxEngine::LogLevel::Error,
+			CalyxEngine::LogCategory::Asset,
+			"Fallback texture file not found: " + resolvedPath.generic_string(),
+			"Texture");
+		loaded_ = false;
+		return false;
+	}
+
+	image_ = Cx::IO::LoadTextureImage(resolvedPath.generic_string(), forceSrgb_);
 	metadata_ = image_.GetMetadata();
+	loaded_ = true;
+	return true;
 }
 
 void Texture::Upload(ID3D12Device* device) {
+	if(!loaded_) {
+		return;
+	}
+
 	D3D12_RESOURCE_DESC resourceDesc = {};
 	resourceDesc.Width = UINT(metadata_.width);
 	resourceDesc.Height = UINT(metadata_.height);
@@ -144,6 +174,10 @@ D3D12_SHADER_RESOURCE_VIEW_DESC BuildTextureSrvDesc(const DirectX::TexMetadata& 
 }
 
 void Texture::CreateShaderResourceView(ID3D12Device* device){
+	if(!loaded_ || !resource_) {
+		return;
+	}
+
 	DescriptorHandle handle = DescriptorAllocator::Allocate(DescriptorUsage::CbvSrvUav);
 	srvHandleCPU_ = handle.cpu;
 	srvHandleGPU_ = handle.gpu;
@@ -153,6 +187,10 @@ void Texture::CreateShaderResourceView(ID3D12Device* device){
 }
 
 void Texture::CreateShaderResourceView(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE destination) const {
+	if(!loaded_ || !resource_ || !destination.ptr) {
+		return;
+	}
+
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = BuildTextureSrvDesc(metadata_);
 	device->CreateShaderResourceView(resource_.Get(), &srvDesc, destination);
 }
