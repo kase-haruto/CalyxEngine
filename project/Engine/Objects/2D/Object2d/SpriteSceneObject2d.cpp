@@ -487,12 +487,32 @@ namespace CalyxEngine {
 
 namespace {
 	const bool registerSpriteSceneObject2d = [] {
-		SceneObjectRegistry::Get().Register("SpriteSceneObject2d", &CreateSceneObject<CalyxEngine::SpriteSceneObject2d>);
+		SceneObjectRegistry::Get().Register(
+			"SpriteSceneObject2d",
+			"SpriteSceneObject2d",
+			ObjectType::Object2D,
+			"",
+			false,
+			false,
+			false,
+			true,
+			true,
+			&CreateSceneObject<CalyxEngine::SpriteSceneObject2d>);
 		return true;
 	}();
 
 	const bool registerAnimatedSpriteSceneObject2d = [] {
-		SceneObjectRegistry::Get().Register("AnimatedSpriteSceneObject2d", &CreateSceneObject<CalyxEngine::AnimatedSpriteSceneObject2d>);
+		SceneObjectRegistry::Get().Register(
+			"AnimatedSpriteSceneObject2d",
+			"AnimatedSpriteSceneObject2d",
+			ObjectType::Object2D,
+			"",
+			false,
+			false,
+			false,
+			true,
+			true,
+			&CreateSceneObject<CalyxEngine::AnimatedSpriteSceneObject2d>);
 		return true;
 	}();
 }

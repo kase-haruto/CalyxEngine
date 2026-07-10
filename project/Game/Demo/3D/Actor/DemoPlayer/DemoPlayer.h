@@ -8,9 +8,9 @@
 /*-----------------------------------------------------------------------------------------
  * DemoPlayer
  * - 本エンジンのデモ用操作可能キャラクター
- * - CALYX_OBJECTを使用してエディタ上で配置可能にする
+ * - CALYX_PLACEABLE_OBJECTを使用してエディタ上で配置可能にする
  *---------------------------------------------------------------------------------------*/
-CALYX_OBJECT(Category = GameObject, DisplayName = "Demo Player", Icon = "UI/Tool/cube.dds")
+CALYX_PLACEABLE_OBJECT(Category = GameObject, DisplayName = "Demo Player", Icon = "UI/Tool/cube.dds")
 class DemoPlayer
 	:public Actor{
 public:

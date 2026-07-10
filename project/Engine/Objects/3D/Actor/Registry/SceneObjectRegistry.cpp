@@ -9,8 +9,7 @@ void SceneObjectRegistry::Register(std::string_view name, SceneObjectFactory fac
 	desc.typeName	 = std::string(name);
 	desc.displayName = desc.typeName;
 	desc.factory	 = factory;
-	desc.sceneSerializable = true;
-	desc.prefabSerializable = true;
+	desc.flags = ObjectRegistrationFlags::RuntimeType;
 	Register(desc);
 }
 
@@ -58,6 +57,16 @@ void SceneObjectRegistry::Register(
 	desc.prefabRoot = prefabRoot;
 	desc.sceneSerializable = sceneSerializable;
 	desc.prefabSerializable = prefabSerializable;
+	desc.flags = ObjectRegistrationFlags::RuntimeType;
+	if(sceneSerializable) {
+		desc.flags |= ObjectRegistrationFlags::SceneObject;
+	}
+	if(placeable) {
+		desc.flags |= ObjectRegistrationFlags::EditorSpawn;
+	}
+	if(prefabSerializable || prefabEditable || prefabRoot) {
+		desc.flags |= ObjectRegistrationFlags::Prefab;
+	}
 	desc.factory = factory;
 	Register(desc);
 }
@@ -70,6 +79,19 @@ void SceneObjectRegistry::Register(const SceneObjectClassDesc& desc){
 	SceneObjectClassDesc stored;
 	stored.typeName = desc.typeName;
 	stored.displayName = desc.displayName.empty() ? desc.typeName : desc.displayName;
+	stored.flags = desc.flags;
+	if(desc.factory) {
+		stored.flags |= ObjectRegistrationFlags::RuntimeType;
+	}
+	if(desc.sceneSerializable) {
+		stored.flags |= ObjectRegistrationFlags::SceneObject;
+	}
+	if(desc.placeable) {
+		stored.flags |= ObjectRegistrationFlags::EditorSpawn;
+	}
+	if(desc.prefabSerializable || desc.prefabEditable || desc.prefabRoot) {
+		stored.flags |= ObjectRegistrationFlags::Prefab;
+	}
 	stored.objectType = desc.objectType;
 	stored.iconPath = desc.iconPath;
 	stored.placeable = desc.placeable;
@@ -89,6 +111,7 @@ void SceneObjectRegistry::Register(const SceneObjectClassDesc& desc){
 
 	auto& current = it->second;
 	current.displayName = std::move(stored.displayName);
+	current.flags = stored.flags;
 	current.objectType	= stored.objectType;
 	current.iconPath	= std::move(stored.iconPath);
 	current.placeable	= stored.placeable;
@@ -172,14 +195,28 @@ const SceneObjectClassDesc* SceneObjectRegistry::Find(std::string_view typeName)
 	return &it->second;
 }
 
+const SceneObjectClassDesc* SceneObjectRegistry::FindExact(std::string_view typeName) const {
+	auto it = table_.find(std::string(typeName));
+	if(it == table_.end()) {
+		return nullptr;
+	}
+	return &it->second;
+}
+
 bool SceneObjectRegistry::IsSceneSerializable(std::string_view typeName) const {
-	const SceneObjectClassDesc* desc = Find(typeName);
-	return desc && desc->sceneSerializable;
+	////////////////////////////////////////////////////////////////////////////////
+	// シーン保存対象として登録された型だけを出力する
+	////////////////////////////////////////////////////////////////////////////////
+	const SceneObjectClassDesc* desc = FindExact(typeName);
+	return desc && HasObjectRegistrationFlag(desc->flags, ObjectRegistrationFlags::SceneObject);
 }
 
 bool SceneObjectRegistry::IsPrefabSerializable(std::string_view typeName) const {
-	const SceneObjectClassDesc* desc = Find(typeName);
-	return desc && desc->prefabSerializable;
+	////////////////////////////////////////////////////////////////////////////////
+	// Prefab保存対象として登録された型だけを出力する
+	////////////////////////////////////////////////////////////////////////////////
+	const SceneObjectClassDesc* desc = FindExact(typeName);
+	return desc && HasObjectRegistrationFlag(desc->flags, ObjectRegistrationFlags::Prefab);
 }
 
 std::size_t SceneObjectRegistry::GetRevision() const {

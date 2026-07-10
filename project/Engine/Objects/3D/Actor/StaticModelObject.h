@@ -9,7 +9,7 @@
  * - モデル表示に必要なComponent構成を管理する
  * - ゲーム固有のAIやスポーン処理は管理しない
  *---------------------------------------------------------------------------------------*/
-CALYX_OBJECT(Category = GameObject, DisplayName = "Mesh Object", Icon = "UI/Tool/cube.dds")
+CALYX_PLACEABLE_OBJECT(Category = GameObject, DisplayName = "Mesh Object", Icon = "UI/Tool/cube.dds")
 class CALYX_API StaticModelObject : public BaseGameObject {
 public:
 	StaticModelObject();
