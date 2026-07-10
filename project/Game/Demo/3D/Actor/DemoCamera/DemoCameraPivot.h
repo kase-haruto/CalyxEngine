@@ -14,7 +14,7 @@
  * - デモ用カメラのピボットクラス
  * - メインカメラの親となり、追従機能を持つ
  *---------------------------------------------------------------------------------------*/
-CALYX_OBJECT(Category = GameObject, DisplayName = "DemoCameraPivot")
+CALYX_PLACEABLE_OBJECT(Category = GameObject, DisplayName = "DemoCameraPivot")
 class DemoCameraPivot final :
 	public SceneObject,
 	public IConfigurable {

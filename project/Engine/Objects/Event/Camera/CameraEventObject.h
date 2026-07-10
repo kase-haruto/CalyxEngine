@@ -11,7 +11,7 @@ class Camera3d;
 /* ========================================================================
 /*		カメラのアクションを行うイベント
 /* ===================================================================== */
-CALYX_OBJECT(Category = Event, DisplayName = "Camera Event")
+CALYX_PLACEABLE_OBJECT(Category = Event, DisplayName = "Camera Event")
 class CameraEventObject :
 	public BaseEventObject {
 public:

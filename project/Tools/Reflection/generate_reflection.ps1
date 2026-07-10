@@ -71,7 +71,7 @@ function Get-RelativePathCompat([string]$basePath, [string]$targetPath) {
 }
 
 $objectRegex = [regex]::new(
-    'CALYX_OBJECT\s*\((?<meta>.*?)\)\s*class\s+(?:(?:[A-Z_][A-Z0-9_]*|__declspec\s*\([^)]*\))\s+)*(?<class>[A-Za-z_][A-Za-z0-9_]*)(?:\s+(?:final|abstract))*\s*:',
+    'CALYX_(?<kind>OBJECT|PLACEABLE_OBJECT)\s*\((?<meta>.*?)\)\s*class\s+(?:(?:[A-Z_][A-Z0-9_]*|__declspec\s*\([^)]*\))\s+)*(?<class>[A-Za-z_][A-Za-z0-9_]*)(?:\s+(?:final|abstract))*\s*:',
     [System.Text.RegularExpressions.RegexOptions]::Singleline
 )
 
@@ -97,15 +97,21 @@ foreach ($scanRoot in $ScanRoots) {
             }
 
             $className = $match.Groups["class"].Value
+            $markerKind = $match.Groups["kind"].Value
             $typeName = if ($meta.ContainsKey("TypeName")) { $meta["TypeName"] } else { $className }
             $displayName = if ($meta.ContainsKey("DisplayName")) { $meta["DisplayName"] } else { $typeName }
             $category = if ($meta.ContainsKey("Category")) { $meta["Category"] } else { "None" }
             $icon = if ($meta.ContainsKey("Icon")) { $meta["Icon"] } else { "UI/Tool/event.png" }
-            $placeable = if ($meta.ContainsKey("Placeable")) { $meta["Placeable"].ToLower() -ne "false" } else { $true }
-            $prefabEditable = if ($meta.ContainsKey("PrefabEditable")) { $meta["PrefabEditable"].ToLower() -eq "true" } else { $false }
-            $prefabRoot = if ($meta.ContainsKey("PrefabRoot")) { $meta["PrefabRoot"].ToLower() -eq "true" } else { $false }
-            $sceneSerializable = if ($meta.ContainsKey("SceneSerializable")) { $meta["SceneSerializable"].ToLower() -ne "false" } else { $placeable }
-            $prefabSerializable = if ($meta.ContainsKey("PrefabSerializable")) { $meta["PrefabSerializable"].ToLower() -ne "false" } else { $true }
+            $defaultPlaceable = $true
+            $defaultSceneSerializable = $true
+            $defaultPrefabSerializable = $true
+            $defaultPrefabEditable = $false
+            $defaultPrefabRoot = $false
+            $placeable = if ($meta.ContainsKey("Placeable")) { $meta["Placeable"].ToLower() -ne "false" } else { $defaultPlaceable }
+            $prefabEditable = if ($meta.ContainsKey("PrefabEditable")) { $meta["PrefabEditable"].ToLower() -eq "true" } else { $defaultPrefabEditable }
+            $prefabRoot = if ($meta.ContainsKey("PrefabRoot")) { $meta["PrefabRoot"].ToLower() -eq "true" } else { $defaultPrefabRoot }
+            $sceneSerializable = if ($meta.ContainsKey("SceneSerializable")) { $meta["SceneSerializable"].ToLower() -ne "false" } else { $defaultSceneSerializable }
+            $prefabSerializable = if ($meta.ContainsKey("PrefabSerializable")) { $meta["PrefabSerializable"].ToLower() -ne "false" } else { $defaultPrefabSerializable }
             $include = (Get-RelativePathCompat $Root $path).Replace('\', '/')
 
             $entries.Add([pscustomobject]@{

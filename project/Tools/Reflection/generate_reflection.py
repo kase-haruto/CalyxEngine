@@ -12,7 +12,7 @@ OUT_SOURCE = GENERATED_DIR / "CalyxObjectRegistry.generated.cpp"
 
 
 OBJECT_RE = re.compile(
-    r"CALYX_OBJECT\s*\((?P<meta>.*?)\)\s*"
+    r"CALYX_(?P<kind>OBJECT|PLACEABLE_OBJECT)\s*\((?P<meta>.*?)\)\s*"
     r"class\s+(?:(?:[A-Z_][A-Z0-9_]*|__declspec\s*\([^)]*\))\s+)*(?P<class>[A-Za-z_][A-Za-z0-9_]*)(?:\s+(?:final|abstract))*\s*:",
     re.DOTALL,
 )
@@ -45,15 +45,21 @@ def discover() -> list[dict[str, str]]:
             text = path.read_text(encoding="utf-8", errors="ignore")
             for match in OBJECT_RE.finditer(text):
                 meta = parse_meta(match.group("meta"))
+                marker_kind = match.group("kind")
                 type_name = meta.get("TypeName", match.group("class"))
                 display_name = meta.get("DisplayName", type_name)
                 category = meta.get("Category", "None")
                 icon = meta.get("Icon", "UI/Tool/event.png")
-                placeable = meta.get("Placeable", "true").lower() != "false"
-                prefab_editable = meta.get("PrefabEditable", "false").lower() == "true"
-                prefab_root = meta.get("PrefabRoot", "false").lower() == "true"
-                scene_serializable = meta.get("SceneSerializable", "true" if placeable else "false").lower() != "false"
-                prefab_serializable = meta.get("PrefabSerializable", "true").lower() != "false"
+                default_placeable = True
+                default_scene_serializable = True
+                default_prefab_serializable = True
+                default_prefab_editable = False
+                default_prefab_root = False
+                placeable = meta.get("Placeable", "true" if default_placeable else "false").lower() != "false"
+                prefab_editable = meta.get("PrefabEditable", "true" if default_prefab_editable else "false").lower() == "true"
+                prefab_root = meta.get("PrefabRoot", "true" if default_prefab_root else "false").lower() == "true"
+                scene_serializable = meta.get("SceneSerializable", "true" if default_scene_serializable else "false").lower() != "false"
+                prefab_serializable = meta.get("PrefabSerializable", "true" if default_prefab_serializable else "false").lower() != "false"
                 entries.append(
                     {
                         "class": match.group("class"),
