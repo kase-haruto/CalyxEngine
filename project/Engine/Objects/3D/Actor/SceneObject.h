@@ -29,6 +29,12 @@ enum class ObjectType {
 	None,		// なし
 };
 
+enum class ObjectInstanceLifetime {
+	SceneOwned,
+	RuntimeOwned,
+	Transient,
+};
+
 class IConfigurable; // 前方宣言
 namespace CalyxEngine {
 	class SerializableObject;
@@ -122,6 +128,12 @@ public:
 	// Config I/O virtuals
 	// =======================
 	virtual std::string GetObjectTypeName() const;
+	/**
+	 * \brief オブジェクトがシーン保存対象であるかを判定する
+	 * \return 保存対象の場合はtrue
+	 * \note 型メタデータとインスタンスのライフタイムを考慮する
+	 */
+	virtual bool		IsSceneSerializable() const;
 	virtual bool		IsSerializable() const { return !isTransient_; }
 	virtual bool		HasConfigInterface() const;
 	virtual AABB		GetWorldAABB() const { return FallbackAABBFromTransform(); }
@@ -153,6 +165,7 @@ public:
 	bool											 IsDrawEnable() const { return drawConfig_.drawEnable; }
 	bool											 IsPickable() const { return drawConfig_.pickable; }
 	bool											 IsTransient() const { return isTransient_; }
+	ObjectInstanceLifetime							 GetInstanceLifetime() const { return instanceLifetime_; }
 	bool											 IsCastShadow() const { return drawConfig_.castShadow; }
 	bool											 IsCameraDitherEnabled() const { return drawConfig_.cameraDitherEnabled; }
 	const DrawConfig&								 GetDrawConfig() const { return drawConfig_; }
@@ -176,7 +189,13 @@ public:
 	}
 	virtual void SetDrawEnable(bool enable) { drawConfig_.drawEnable = enable; }
 	void		 SetEnablePicking(bool enable) { drawConfig_.pickable = enable; }
-	void		 SetTransient(bool enable) { isTransient_ = enable; }
+	void		 SetTransient(bool enable) {
+		isTransient_ = enable;
+		if(enable) {
+			instanceLifetime_ = ObjectInstanceLifetime::Transient;
+		}
+	}
+	void		 SetInstanceLifetime(ObjectInstanceLifetime lifetime) { instanceLifetime_ = lifetime; }
 	void		 SetCastShadow(bool enable) { drawConfig_.castShadow = enable; }
 	void		 SetCameraDitherEnabled(bool enable) { drawConfig_.cameraDitherEnabled = enable; }
 	void		 SetOutlineEnabled(bool enable) { drawConfig_.outline.enabled = enable; }
@@ -222,6 +241,7 @@ protected:
 	// =======================
 	bool	 isEnableRaycast_ = false; // レイキャスト有効/無効
 	bool	 isTransient_	  = false; // 一時的（保存・階層除外）
+	ObjectInstanceLifetime instanceLifetime_ = ObjectInstanceLifetime::RuntimeOwned; //< インスタンスの所有・生存区分
 	DrawConfig drawConfig_{};
 	uint32_t pickingID_		  = 0;
 	uint32_t duplicateNameIndex_ = 0; //< 表示用の同名識別番号。保存名には含めない

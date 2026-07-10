@@ -146,6 +146,7 @@
     <ClCompile Include="Engine\Objects\3D\Geometory\Shape.cpp" />
     <ClCompile Include="Engine\Objects\3D\Actor\BaseGameObject.cpp" />
     <ClCompile Include="Engine\Objects\3D\Actor\SplineDeformObject.cpp" />
+    <ClCompile Include="Engine\Objects\3D\Actor\StaticModelObject.cpp" />
     <ClCompile Include="Engine\Objects\Particle\DemoParticle.cpp" />
     <ClCompile Include="Engine\Graphics\Camera\Manager\CameraManager.cpp" />
     <ClCompile Include="Engine\Graphics\Context\DxCommand.cpp" />
@@ -484,6 +485,7 @@
     <ClInclude Include="Engine\Objects\3D\Geometory\Shape.h" />
     <ClInclude Include="Engine\Objects\3D\Actor\BaseGameObject.h" />
     <ClInclude Include="Engine\Objects\3D\Actor\SplineDeformObject.h" />
+    <ClInclude Include="Engine\Objects\3D\Actor\StaticModelObject.h" />
     <ClInclude Include="Engine\Objects\Particle\DemoParticle.h" />
     <ClInclude Include="Engine\Graphics\Camera\Manager\CameraManager.h" />
     <ClInclude Include="Engine\Graphics\Context\DxCommand.h" />

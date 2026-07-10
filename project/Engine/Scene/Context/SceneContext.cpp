@@ -42,9 +42,11 @@ void SceneContext::Initialize(bool createDefaultLights) {
 	if(createDefaultLights) {
 		auto dir = Instantiate<DirectionalLight>("DirectionalLight");
 		dir->SetEnableRaycast(false);
+		dir->SetInstanceLifetime(ObjectInstanceLifetime::SceneOwned);
 
 		auto pt = Instantiate<PointLight>("PointLight");
 		pt->SetEnableRaycast(false);
+		pt->SetInstanceLifetime(ObjectInstanceLifetime::SceneOwned);
 
 		lightLibrary_->SetDirectionalLight(dir);
 		lightLibrary_->SetPointLight(pt);

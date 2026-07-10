@@ -1161,6 +1161,7 @@ namespace CalyxEngine {
 		}
 
 		// SceneContext 経由で登録（内部で SceneObjectLibrary::AddObject を呼ぶ）
+		obj->SetInstanceLifetime(ObjectInstanceLifetime::SceneOwned);
 		ctx->AddObject(obj);
 		EngineLogger::GetInstance().Add(
 			LogLevel::Info,
