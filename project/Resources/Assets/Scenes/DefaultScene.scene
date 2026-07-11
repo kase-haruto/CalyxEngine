@@ -1,22 +1,35 @@
 {
   "version": 2,
   "sceneName": "DefaultScene",
+  "settings": {
+    "version": 1,
+    "collision": {
+      "version": 1
+    }
+  },
   "objects": [
     {
       "type": "DirectionalLight",
       "guid": "be92da98-e152-4e97-aabc-2d62f0950a1a",
       "name": "DirectionalLight",
+      "objectType": 1,
+      "parentGuid": "00000000-0000-0000-0000-000000000000",
       "color": { "x": 1.0, "y": 1.0, "z": 1.0, "w": 1.0 },
       "direction": { "x": -0.35, "y": -1.0, "z": -0.45 },
-      "intensity": 1.0
+      "intensity": 0.75
     },
     {
       "type": "Camera3d",
       "guid": "78510d31-22be-43aa-9fc6-bb0a5a590f41",
       "name": "MainCamera",
+      "objectType": 0,
+      "parentGuid": "00000000-0000-0000-0000-000000000000",
       "transform": {
-        "translation": { "x": 0.0, "y": 2.0, "z": -8.0 },
-        "rotation": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 },
+        "inheritTranslate": true,
+        "inheritRotate": true,
+        "inheritScale": true,
+        "translation": { "x": 0.0, "y": 3.0, "z": -8.0 },
+        "rotation": { "x": 0.1305262, "y": 0.0, "z": 0.0, "w": 0.9914449 },
         "scale": { "x": 1.0, "y": 1.0, "z": 1.0 }
       }
     },
@@ -24,11 +37,87 @@
       "type": "DebugCamera",
       "guid": "aad42f4c-b033-4cc4-8a30-b6bf176fa265",
       "name": "DebugCamera",
+      "objectType": 0,
+      "parentGuid": "00000000-0000-0000-0000-000000000000",
       "transform": {
-        "translation": { "x": 5.0, "y": 5.0, "z": -10.0 },
+        "inheritTranslate": true,
+        "inheritRotate": true,
+        "inheritScale": true,
+        "translation": { "x": 6.0, "y": 5.0, "z": -10.0 },
         "rotation": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 },
         "scale": { "x": 1.0, "y": 1.0, "z": 1.0 }
       }
+    },
+    {
+      "type": "PointLight",
+      "guid": "f3ee0f42-7708-45ff-bf27-9d3c7a0eb45e",
+      "name": "PointLight",
+      "objectType": 1,
+      "parentGuid": "00000000-0000-0000-0000-000000000000",
+      "color": { "x": 0.78, "y": 0.88, "z": 1.0, "w": 1.0 },
+      "position": { "x": 0.0, "y": 3.0, "z": -2.0 },
+      "intensity": 0.35,
+      "radius": 18.0,
+      "decay": 1.0,
+      "transform": {
+        "inheritTranslate": true,
+        "inheritRotate": true,
+        "inheritScale": true,
+        "translation": { "x": 0.0, "y": 3.0, "z": -2.0 },
+        "rotation": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 },
+        "scale": { "x": 1.0, "y": 1.0, "z": 1.0 }
+      }
+    },
+    {
+      "type": "StaticModelObject",
+      "guid": "cd465dc9-04d6-4b2c-8abf-2acfe762d040",
+      "name": "Ground",
+      "objectType": 2,
+      "parentGuid": "00000000-0000-0000-0000-000000000000",
+      "drawEnable": true,
+      "castShadow": true,
+      "cameraDitherEnabled": false,
+      "outlineEnabled": false,
+      "outlineThickness": 0.035,
+      "outlineColor": { "x": 0.02, "y": 0.02, "z": 0.025, "w": 1.0 },
+      "modelConfig": {
+        "modelName": "plane.obj",
+        "textureGuid": "00000000-0000-0000-0000-000000000000",
+        "materialGuid": "00000000-0000-0000-0000-000000000000",
+        "blendMode": 5,
+        "uvTransConfig": {
+          "rotation": 0.0,
+          "scale": { "x": 4.0, "y": 4.0 }
+        }
+      },
+      "colliderKind": 1,
+      "colliderConfig": {
+        "colliderType": 0,
+        "targetType": 0,
+        "isCollisionEnabled": true,
+        "isTrigger": false,
+        "isDraw": true,
+        "offset": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "size": { "x": 8.0, "y": 1.0, "z": 8.0 },
+        "radius": 1.0,
+        "capsuleRadius": 0.5,
+        "capsuleHeight": 2.0,
+        "rotate": { "x": 0.0, "y": 0.0, "z": 0.0 }
+      },
+      "physicsBodyConfig": {
+        "enabled": true,
+        "bodyType": 0,
+        "pushbackRatio": 1.0
+      },
+      "transform": {
+        "inheritTranslate": true,
+        "inheritRotate": true,
+        "inheritScale": true,
+        "translation": { "x": 0.0, "y": 0.0, "z": 0.0 },
+        "rotation": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 },
+        "scale": { "x": 8.0, "y": 1.0, "z": 8.0 }
+      },
+      "visualOffset": { "x": 0.0, "y": 0.0, "z": 0.0 }
     }
   ]
 }

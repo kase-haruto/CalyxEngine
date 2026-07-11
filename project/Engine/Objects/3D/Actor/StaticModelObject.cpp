@@ -16,3 +16,5 @@ StaticModelObject::StaticModelObject()
 
 StaticModelObject::StaticModelObject(const std::string& modelName, std::optional<std::string> objectName)
 	: BaseGameObject(modelName, std::move(objectName)) {}
+
+REGISTER_SCENE_OBJECT(StaticModelObject)
