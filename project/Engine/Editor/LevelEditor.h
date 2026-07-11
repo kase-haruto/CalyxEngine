@@ -129,7 +129,20 @@ namespace CalyxEngine {
 	private:
 		// シーン管理 --------------------------------------------------------------
 		void SaveScene();
-		bool CreateSceneFromTemplate(const std::filesystem::path& destination);
+		/**
+		 * @brief 指定された保存先へ空のシーンファイルを作成し、Editorの編集対象として開く
+		 * @param destination 作成する.sceneファイルのパス
+		 * @return ファイル作成、保存、読込、切り替えに成功した場合はtrue
+		 * @note 読込に失敗した場合、現在編集中のシーンはSceneManager側で維持される
+		 */
+		bool CreateNewScene(const std::filesystem::path& destination);
+
+		/**
+		 * @brief 指定されたシーンファイルをEditorの編集対象として開く
+		 * @param path 読み込む.sceneファイルのパス
+		 * @return 読込とEditor UI更新に成功した場合はtrue
+		 * @note 読込に失敗した場合、現在編集中のシーンは維持される
+		 */
 		bool OpenScene(const std::filesystem::path& path);
 		void NotifySceneContextChanged();
 		void DrawSceneSelector();

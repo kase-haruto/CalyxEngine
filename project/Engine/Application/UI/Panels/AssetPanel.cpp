@@ -505,15 +505,17 @@ namespace CalyxEngine {
 		if(!hasSearch && scope_ == Scope::SelectedFolder) {
 			if(gridMode_) ImGui::Columns(columns, nullptr, false);
 			for(auto& dir : cacheSubDirs_) {
+				ImGui::PushID(dir.generic_string().c_str());
 				ImGui::BeginGroup();
 				ImGui::Image(iconFolder_ ? iconFolder_ : iconGeneric_, ImVec2(thumbSize_, thumbSize_));
 				AcceptSceneObjectPrefabDrop(dir);
 				ImGui::TextWrapped("%s", dir.filename().string().c_str());
+				ImGui::EndGroup();
 				if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
 					currentFolderAbs_ = dir;
 					cacheValid_		  = false; // 次フレームで再構築
 				}
-				ImGui::EndGroup();
+				ImGui::PopID();
 				if(gridMode_) ImGui::NextColumn();
 			}
 			if(gridMode_) ImGui::Columns(1);
@@ -529,8 +531,8 @@ namespace CalyxEngine {
 				for(int i = clip.DisplayStart; i < clip.DisplayEnd; ++i) {
 					const AssetRecord* rec = cacheFilesHere_[i];
 
-					// サムネボタン（20x20）
-					ImGui::PushID(&rec->guid);
+					const std::string itemId = rec->guid.isValid() ? rec->guid.ToString() : rec->sourcePath.generic_string();
+					ImGui::PushID(itemId.c_str());
 					ImGui::BeginGroup();
 
 					ImTextureID thumb = iconGeneric_ ? iconGeneric_ : nullptr;
@@ -545,13 +547,6 @@ namespace CalyxEngine {
 					else
 						ImGui::Button("No Preview", ImVec2(20, 20));
 					AcceptSceneObjectPrefabDrop(currentFolderAbs_);
-
-					if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
-						AssetDragPayload payload{rec->type, rec->guid};
-						ImGui::SetDragDropPayload("CALYX_ASSET", &payload, sizeof(payload));
-						ImGui::TextUnformatted(rec->sourcePath.filename().string().c_str());
-						ImGui::EndDragDropSource();
-					}
 
 					ImGui::SameLine();
 					if(renamingAsset_ && renameAssetPath_ == rec->sourcePath) {
@@ -572,16 +567,45 @@ namespace CalyxEngine {
 					} else {
 						ImGui::TextUnformatted(rec->sourcePath.filename().string().c_str());
 					}
+					ImGui::EndGroup();
+
+					const bool isSelected = selectedAssetPath_ == rec->sourcePath;
+					const bool isRenamingCurrent = renamingAsset_ && renameAssetPath_ == rec->sourcePath;
+					const bool itemHovered = ImGui::IsItemHovered();
+					const bool itemClicked = ImGui::IsItemClicked(ImGuiMouseButton_Left);
+					const ImVec2 itemMin = ImGui::GetItemRectMin();
+					const ImVec2 itemMax = ImGui::GetItemRectMax();
+					if(isSelected) {
+						ImGui::GetWindowDrawList()->AddRect(
+							itemMin,
+							itemMax,
+							IM_COL32(120, 180, 255, 220),
+							3.0f,
+							0,
+							2.0f);
+					}
+					if(itemClicked && !isRenamingCurrent) {
+						// アイコンとテキストの選択状態を共有し、項目全体を同じアセットとして扱う。
+						selectedAssetPath_ = rec->sourcePath;
+					}
+					if(itemHovered && ImGui::IsMouseClicked(ImGuiMouseButton_Right) && !isRenamingCurrent) {
+						// コンテキストメニューも項目全体の選択状態と同期する。
+						selectedAssetPath_ = rec->sourcePath;
+					}
 					if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+						// ImGui標準のドラッグ判定に任せ、クリック選択とドラッグ開始を同じ項目上で両立する。
 						AssetDragPayload payload{rec->type, rec->guid};
 						ImGui::SetDragDropPayload("CALYX_ASSET", &payload, sizeof(payload));
 						ImGui::TextUnformatted(rec->sourcePath.filename().string().c_str());
 						ImGui::EndDragDropSource();
 					}
-					if(rec->type == AssetType::Prefab && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
-						if(onPrefabEditRequested_) onPrefabEditRequested_(rec->sourcePath);
-					} else if(rec->type == AssetType::Scene && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
-						if(onSceneOpenRequested_) onSceneOpenRequested_(rec->sourcePath);
+					if(itemHovered && ImGui::IsMouseDoubleClicked(0) && !isRenamingCurrent) {
+						if(rec->type == AssetType::Prefab) {
+							if(onPrefabEditRequested_) onPrefabEditRequested_(rec->sourcePath);
+						} else if(rec->type == AssetType::Scene) {
+							// AssetPanelは要求通知だけを行い、実際のシーン切り替えはLevelEditor/SceneManagerへ委譲する。
+							if(onSceneOpenRequested_) onSceneOpenRequested_(rec->sourcePath);
+						}
 					}
 					if(ImGui::BeginPopupContextItem("AssetContext")) {
 						if(rec->type == AssetType::Prefab && ImGui::MenuItem("Edit Prefab")) {
@@ -596,7 +620,6 @@ namespace CalyxEngine {
 						ImGui::EndPopup();
 					}
 
-					ImGui::EndGroup();
 					ImGui::PopID();
 				}
 			}
@@ -625,7 +648,8 @@ namespace CalyxEngine {
 
 			for(int i = startIdx; i < endIdx; ++i) {
 				const AssetRecord* rec = cacheFilesHere_[i];
-				ImGui::PushID(&rec->guid);
+				const std::string itemId = rec->guid.isValid() ? rec->guid.ToString() : rec->sourcePath.generic_string();
+				ImGui::PushID(itemId.c_str());
 				ImGui::BeginGroup();
 
 				ImVec2		sz(thumbSize_, thumbSize_);
@@ -641,13 +665,6 @@ namespace CalyxEngine {
 				else
 					ImGui::Button("No Preview", sz);
 				AcceptSceneObjectPrefabDrop(currentFolderAbs_);
-
-				if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
-					AssetDragPayload payload{rec->type, rec->guid};
-					ImGui::SetDragDropPayload("CALYX_ASSET", &payload, sizeof(payload));
-					ImGui::TextUnformatted(rec->sourcePath.filename().string().c_str());
-					ImGui::EndDragDropSource();
-				}
 
 				if(renamingAsset_ && renameAssetPath_ == rec->sourcePath) {
 					ImGui::SetKeyboardFocusHere();
@@ -667,16 +684,45 @@ namespace CalyxEngine {
 				} else {
 					ImGui::TextWrapped("%s", rec->sourcePath.filename().string().c_str());
 				}
+				ImGui::EndGroup();
+
+				const bool isSelected = selectedAssetPath_ == rec->sourcePath;
+				const bool isRenamingCurrent = renamingAsset_ && renameAssetPath_ == rec->sourcePath;
+				const bool itemHovered = ImGui::IsItemHovered();
+				const bool itemClicked = ImGui::IsItemClicked(ImGuiMouseButton_Left);
+				const ImVec2 itemMin = ImGui::GetItemRectMin();
+				const ImVec2 itemMax = ImGui::GetItemRectMax();
+				if(isSelected) {
+					ImGui::GetWindowDrawList()->AddRect(
+						itemMin,
+						itemMax,
+						IM_COL32(120, 180, 255, 220),
+						3.0f,
+						0,
+						2.0f);
+				}
+				if(itemClicked && !isRenamingCurrent) {
+					// アイコンとテキストの選択状態を共有し、項目全体を同じアセットとして扱う。
+					selectedAssetPath_ = rec->sourcePath;
+				}
+				if(itemHovered && ImGui::IsMouseClicked(ImGuiMouseButton_Right) && !isRenamingCurrent) {
+					// コンテキストメニューも項目全体の選択状態と同期する。
+					selectedAssetPath_ = rec->sourcePath;
+				}
 				if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+					// ImGui標準のドラッグ判定に任せ、クリック選択とドラッグ開始を同じ項目上で両立する。
 					AssetDragPayload payload{rec->type, rec->guid};
 					ImGui::SetDragDropPayload("CALYX_ASSET", &payload, sizeof(payload));
 					ImGui::TextUnformatted(rec->sourcePath.filename().string().c_str());
 					ImGui::EndDragDropSource();
 				}
-				if(rec->type == AssetType::Prefab && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
-					if(onPrefabEditRequested_) onPrefabEditRequested_(rec->sourcePath);
-				} else if(rec->type == AssetType::Scene && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
-					if(onSceneOpenRequested_) onSceneOpenRequested_(rec->sourcePath);
+				if(itemHovered && ImGui::IsMouseDoubleClicked(0) && !isRenamingCurrent) {
+					if(rec->type == AssetType::Prefab) {
+						if(onPrefabEditRequested_) onPrefabEditRequested_(rec->sourcePath);
+					} else if(rec->type == AssetType::Scene) {
+						// AssetPanelは要求通知だけを行い、実際のシーン切り替えはLevelEditor/SceneManagerへ委譲する。
+						if(onSceneOpenRequested_) onSceneOpenRequested_(rec->sourcePath);
+					}
 				}
 				if(ImGui::BeginPopupContextItem("AssetContext")) {
 					if(rec->type == AssetType::Prefab && ImGui::MenuItem("Edit Prefab")) {
@@ -691,7 +737,6 @@ namespace CalyxEngine {
 					ImGui::EndPopup();
 				}
 
-				ImGui::EndGroup();
 				ImGui::PopID();
 
 				ImGui::NextColumn();

@@ -44,6 +44,14 @@ namespace CalyxEngine {
 			const std::string key = GetParamStorageKey();
 			if(gOverrides->contains(key)) {
 				ApplyParamsFromJson(gOverrides->at(key));
+			} else if(gOverrides->contains("param") && gOverrides->at("param").is_object()) {
+				const Json& legacyParam = gOverrides->at("param");
+				// 旧param形式のシーンを読み込むため、保存時の正規キーが無い場合だけ互換適用する。
+				if(legacyParam.contains(key)) {
+					ApplyParamsFromJson(legacyParam.at(key));
+				} else if(legacyParam.contains("fields")) {
+					ApplyParamsFromJson(legacyParam);
+				}
 			}
 		}
 
@@ -133,6 +141,14 @@ namespace CalyxEngine {
 					const std::string key = param->GetParamStorageKey();
 					if(overrides->contains(key)) {
 						param->ApplyParamsFromJson(overrides->at(key));
+					} else if(overrides->contains("param") && overrides->at("param").is_object()) {
+						const Json& legacyParam = overrides->at("param");
+						// 旧param形式のシーンを読み込むため、保存時の正規キーが無い場合だけ互換適用する。
+						if(legacyParam.contains(key)) {
+							param->ApplyParamsFromJson(legacyParam.at(key));
+						} else if(legacyParam.contains("fields")) {
+							param->ApplyParamsFromJson(legacyParam);
+						}
 					}
 				}
 			}

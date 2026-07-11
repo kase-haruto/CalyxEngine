@@ -100,6 +100,7 @@ namespace CalyxEngine {
 		bool				  renamingAsset_ = false;
 		std::filesystem::path renameAssetPath_;
 		char				  renameAssetBuf_[256] = {};
+		std::filesystem::path selectedAssetPath_;
 
 		// アイコン
 		ImTextureID iconFolder_	 = nullptr;

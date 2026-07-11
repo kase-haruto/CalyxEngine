@@ -35,10 +35,11 @@
 
 #include <Engine/Foundation/Utility/FileSystem/FileScanner.h>
 #include <algorithm>
+#include <cctype>
 #include <filesystem>
 #include <functional>
 #include <system_error>
-#include <Windows.h>
+#include <unordered_map>
 
 using namespace EngineEdit;
 
@@ -52,20 +53,57 @@ namespace {
 		return lib->Contains(sp->GetGuid());
 	}
 
-	std::filesystem::path FindDefaultSceneTemplate() {
-		std::vector<std::filesystem::path> candidates{Calyx::ResolveAssetPath("Scenes/DefaultScene.scene")};
-		wchar_t executablePath[MAX_PATH]{};
-		if(::GetModuleFileNameW(nullptr, executablePath, MAX_PATH) > 0) {
-			const auto executableDirectory = std::filesystem::path(executablePath).parent_path();
-			candidates.push_back(executableDirectory / "Resources" / "Assets" / "Scenes" / "DefaultScene.scene");
-			candidates.push_back(executableDirectory.parent_path().parent_path() / "project" / "Resources" / "Assets" / "Scenes" / "DefaultScene.scene");
+	bool IsSceneFilePath(std::filesystem::path path) {
+		auto ext = path.extension().string();
+		std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c) {
+			return static_cast<char>(std::tolower(c));
+		});
+		return ext == ".scene";
+	}
+
+	std::filesystem::path NormalizeSceneCreatePath(std::filesystem::path requestedDestination) {
+		if(!IsSceneFilePath(requestedDestination)) {
+			requestedDestination += ".scene";
 		}
 
-		for(const auto& candidate : candidates) {
-			std::error_code ec;
-			if(std::filesystem::is_regular_file(candidate, ec)) return std::filesystem::weakly_canonical(candidate, ec);
+		std::error_code ec;
+		auto parent = requestedDestination.parent_path();
+		if(!parent.empty()) {
+			parent = std::filesystem::weakly_canonical(parent, ec);
+			if(!ec) {
+				requestedDestination = parent / requestedDestination.filename();
+			}
+		}
+		return requestedDestination.lexically_normal();
+	}
+
+	std::filesystem::path FindDefaultSceneTemplate() {
+		const auto templatePath = Calyx::ResolveAssetPath("Scenes/DefaultScene.scene");
+		std::error_code ec;
+		if(std::filesystem::is_regular_file(templatePath, ec)) {
+			return std::filesystem::weakly_canonical(templatePath, ec);
 		}
 		return {};
+	}
+
+	void RegenerateTemplateSceneGuids(SceneContext& context) {
+		auto* library = context.GetObjectLibrary();
+		if(!library) return;
+
+		std::unordered_map<Guid, Guid> guidMap;
+		for(const auto& object : library->GetAllObjectsShared()) {
+			if(!object) continue;
+			guidMap[object->GetGuid()] = Guid::New();
+		}
+
+		// テンプレートから作成したシーンがDefaultSceneと同じGUIDを共有しないようにする。
+		for(const auto& object : library->GetAllObjectsShared()) {
+			if(!object) continue;
+			const auto it = guidMap.find(object->GetGuid());
+			if(it != guidMap.end()) {
+				object->SetGuid(it->second);
+			}
+		}
 	}
 
 } // namespace
@@ -238,7 +276,7 @@ namespace CalyxEngine {
 		}
 
 		menu_->Add(MenuCategory::File,
-				   {"Create Scene",
+				   {"New Scene",
 					"Ctrl+N",
 					[] {
 						IGFD::FileDialogConfig config;
@@ -246,7 +284,7 @@ namespace CalyxEngine {
 						config.fileName = "NewScene.scene";
 						ImGuiFileDialog::Instance()->OpenDialog(
 							"SceneCreateDialog",
-							"create scene from DefaultScene.scene",
+							"new scene",
 							".scene",
 							config);
 					},
@@ -555,7 +593,7 @@ namespace CalyxEngine {
 
 		if(ImGuiFileDialog::Instance()->Display("SceneCreateDialog")) {
 			if(ImGuiFileDialog::Instance()->IsOk()) {
-				CreateSceneFromTemplate(ImGuiFileDialog::Instance()->GetFilePathName());
+				CreateNewScene(ImGuiFileDialog::Instance()->GetFilePathName());
 			}
 			ImGuiFileDialog::Instance()->Close();
 		}
@@ -1396,55 +1434,85 @@ namespace CalyxEngine {
 		}
 	}
 
-	bool LevelEditor::CreateSceneFromTemplate(const std::filesystem::path& requestedDestination) {
+	//////////////////////////////////////////////////////////////////////////
+	// CreateNewScene
+	//////////////////////////////////////////////////////////////////////////
+	bool LevelEditor::CreateNewScene(const std::filesystem::path& requestedDestination) {
 		if(!sceneManager_) {
 			EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Editor, "Scene creation failed because SceneManager is unavailable.", "LevelEditor");
 			return false;
 		}
 
-		auto destination = requestedDestination;
-		if(destination.extension() != ".scene") destination += ".scene";
+		// 保存前に拡張子と親ディレクトリを正規化し、AssetDatabaseへ同じパスで登録できる形にする。
+		auto destination = NormalizeSceneCreatePath(requestedDestination);
+		if(destination.empty() || !IsSceneFilePath(destination)) {
+			EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Editor, "Scene creation failed because the destination is not a .scene file.", "LevelEditor");
+			return false;
+		}
+
+		std::error_code ec;
+		const auto parentPath = destination.parent_path();
+		if(!parentPath.empty()) {
+			std::filesystem::create_directories(parentPath, ec);
+			if(ec) {
+				EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Editor, "Scene directory could not be created: " + parentPath.generic_string() + " (" + ec.message() + ")", "LevelEditor");
+				return false;
+			}
+		}
+
 		const auto templatePath = FindDefaultSceneTemplate();
 		if(templatePath.empty()) {
 			EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Editor, "Scene creation failed because DefaultScene.scene was not found.", "LevelEditor");
 			return false;
 		}
 
-		std::error_code ec;
-		std::filesystem::create_directories(destination.parent_path(), ec);
-		if(ec) {
-			EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Editor, "Scene directory could not be created: " + destination.parent_path().generic_string() + " (" + ec.message() + ")", "LevelEditor");
+		// 既存のDirtyフラグ管理は未確認のため、現在シーンの保存確認はここでは行わない。
+		// 新規シーンの初期データはDefaultSceneを正規読込し、テンプレート依存をSceneSerializer経由へ閉じ込める。
+		SceneContext newSceneContext;
+		newSceneContext.Initialize(false);
+		if(!SceneSerializer::Load(newSceneContext, templatePath.generic_string())) {
+			EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Editor, "Scene creation failed because DefaultScene.scene could not be loaded: " + templatePath.generic_string(), "LevelEditor");
 			return false;
 		}
-		if(std::filesystem::equivalent(templatePath, destination, ec)) {
-			EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Editor, "DefaultScene.scene cannot overwrite itself.", "LevelEditor");
+		RegenerateTemplateSceneGuids(newSceneContext);
+		newSceneContext.SetSceneName(destination.stem().string());
+		newSceneContext.SetScenePath(destination.generic_string());
+		newSceneContext.SetSceneTransitionRequestor(&sceneManager_->GetTransitionRequestor());
+
+		if(!SceneSerializer::Save(newSceneContext, destination.generic_string())) {
+			EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Editor, "Scene creation failed because the empty scene could not be saved: " + destination.generic_string(), "LevelEditor");
 			return false;
 		}
 
-		std::filesystem::copy_file(templatePath, destination, std::filesystem::copy_options::overwrite_existing, ec);
-		if(ec) {
-			EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Editor, "DefaultScene.scene could not be copied to " + destination.generic_string() + " (" + ec.message() + ")", "LevelEditor");
-			return false;
+		if(auto* db = AssetDatabase::GetInstance()) {
+			db->RegisterOrUpdate(destination, AssetType::Scene);
+			db->Scan();
 		}
 
-		AssetDatabase::GetInstance()->RegisterOrUpdate(destination, AssetType::Scene);
+		// 保存済みファイルを通常のシーン読込経路で開き、Hierarchy/Inspector/Viewport更新を同じ責務へ集約する。
 		if(!OpenScene(destination)) return false;
-		if(auto* context = sceneManager_->GetCurrentSceneContext()) {
-			context->SetSceneName(destination.stem().string());
-			if(!SceneSerializer::Save(*context, destination.generic_string())) return false;
-		}
-		EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Editor, "Scene created from DefaultScene.scene: " + destination.generic_string(), "LevelEditor");
+		EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Editor, "Scene created: " + destination.generic_string(), "LevelEditor");
 		return true;
 	}
 
+	//////////////////////////////////////////////////////////////////////////
+	// OpenScene
+	//////////////////////////////////////////////////////////////////////////
 	bool LevelEditor::OpenScene(const std::filesystem::path& path) {
-		// SceneManagerとSceneSerializer側で成功・失敗理由を記録するため、ここでは処理を委譲する。
 		if(!sceneManager_) {
 			EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Editor, "Scene open failed because SceneManager is unavailable.", "LevelEditor");
 			return false;
 		}
+		if(!IsSceneFilePath(path)) {
+			EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Editor, "Scene open failed because the path is not a .scene file: " + path.generic_string(), "LevelEditor");
+			return false;
+		}
+
+		// 既存のDirtyフラグ管理は未確認のため、現在シーンの保存確認はここでは行わない。
+		// 読込失敗時に現在のシーンを維持する処理はSceneManager::OpenSceneへ委譲する。
 		if(!sceneManager_->OpenScene(path)) return false;
 
+		// 読込成功後にEditor側の選択と各パネルのContext依存キャッシュを差し替える。
 		ClearSelection();
 		prevCtx_ = nullptr;
 		NotifySceneContextChanged();

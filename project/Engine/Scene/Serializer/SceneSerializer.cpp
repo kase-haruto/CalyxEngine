@@ -16,6 +16,7 @@
 #include <Engine/objects/LightObject/DirectionalLight.h>
 #include <Engine/objects/LightObject/PointLight.h>
 #include <memory>
+#include <exception>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -177,11 +178,8 @@ nlohmann::json SceneSerializer::DumpJson(const SceneContext& context) {
 				}
 			}
 
-			nlohmann::json serializableParams;
-			sp->ExtractSerializableParamsToJson(serializableParams);
-			if(!serializableParams.empty()) {
-				jOne["serializableParams"] = std::move(serializableParams);
-			}
+			// SerializableObjectの値は個別Paramファイルを正とするため、Scene保存には含めない。
+			// 読込側だけ旧sceneのserializableParams互換を残し、次回保存時にSceneから除去する。
 			if(auto* owner = dynamic_cast<const BaseGameObject*>(sp.get())) {
 				auto bindings = BuildBoneParentBindingsJson(*owner, objects);
 				if(!bindings.empty()) {
@@ -255,7 +253,20 @@ bool SceneSerializer::LoadJson(SceneContext&		 context,
 			? &j.at("serializableParams")
 			: nullptr;
 		SerializableObject::BeginPendingCapture();
-		auto sp = SceneObjectRegistry::Get().Create(typeName);
+		std::shared_ptr<SceneObject> sp;
+		try {
+			sp = SceneObjectRegistry::Get().Create(typeName);
+		} catch(const std::exception& e) {
+			SerializableObject::EndPendingCapture(nullptr, nullptr);
+			++skippedObjectCount;
+			// 未登録型を含む旧シーンでも、他のオブジェクトを読み込めるようにする。
+			EngineLogger::GetInstance().Add(
+				LogLevel::Warning,
+				LogCategory::Editor,
+				"Scene object type could not be created and was skipped: " + typeName + " (" + e.what() + ")",
+				"SceneSerializer");
+			continue;
+		}
 		if(!sp) {
 			SerializableObject::EndPendingCapture(nullptr, nullptr);
 			++skippedObjectCount;
