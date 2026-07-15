@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Data/Engine/Configs/Scene/Objects/Particle/EffectConfig.h>
+#include <Engine/Foundation/Export/CalyxAPI.h>
 #include <Engine\Foundation\Math\Quaternion.h>
 #include <Engine\Foundation\Math\Vector3.h>
 #include <Engine\Foundation\Utility\Guid\Guid.h>
@@ -26,27 +27,27 @@ namespace CalyxEngine {
 	 *---------------------------------------------------------------------------------------*/
 	class EffectPlayer {
 	public:
-		void Initialize(FxSystem* fxSystem);
-		void Update(float dt);
-		void Clear();
+		CALYX_API void Initialize(FxSystem* fxSystem);
+		CALYX_API void Update(float dt);
+		CALYX_API void Clear();
 
-		EffectHandle Play(const EffectAsset& asset,
+		CALYX_API EffectHandle Play(const EffectAsset& asset,
 						  const Vector3&	 position,
 						  const Quaternion& rotation = Quaternion::MakeIdentity(),
 						  const Vector3&	 scale	  = {1.0f, 1.0f, 1.0f});
 
-		EffectHandle Play(const EffectAssetData& data,
+		CALYX_API EffectHandle Play(const EffectAssetData& data,
 						  const Vector3&		  position,
 						  const Quaternion&	  rotation = Quaternion::MakeIdentity(),
 						  const Vector3&		  scale	   = {1.0f, 1.0f, 1.0f});
 
-		EffectHandle PlayFromName(const std::string& name,
+		CALYX_API EffectHandle PlayFromName(const std::string& name,
 								  const Vector3&			 position,
 								  const Quaternion&			 rotation = Quaternion::MakeIdentity(),
 								  const Vector3&			 scale	  = {1.0f, 1.0f, 1.0f});
 
-		void Stop(EffectHandle handle);
-		void SetTransform(EffectHandle handle,
+		CALYX_API void Stop(EffectHandle handle);
+		CALYX_API void SetTransform(EffectHandle handle,
 						  const Vector3&	 position,
 						  const Quaternion& rotation,
 						  const Vector3&	 scale);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Data/Engine/Configs/Scene/Objects/Particle/EffectConfig.h>
+#include <Engine/Foundation/Export/CalyxAPI.h>
 #include <filesystem>
 #include <string>
 
@@ -14,7 +15,7 @@ namespace CalyxEngine {
 	class EffectAsset {
 	public:
 		EffectAsset() = default;
-		explicit EffectAsset(EffectAssetData data);
+		CALYX_API explicit EffectAsset(EffectAssetData data);
 
 		const EffectAssetData& GetData() const { return data_; }
 		EffectAssetData&		  GetData() { return data_; }
@@ -22,11 +23,11 @@ namespace CalyxEngine {
 		const std::string& GetName() const { return data_.name; }
 		void			   SetName(const std::string& name) { data_.name = name; }
 
-		bool Load(const std::filesystem::path& path);
-		bool Save(const std::filesystem::path& path) const;
+		CALYX_API bool Load(const std::filesystem::path& path);
+		CALYX_API bool Save(const std::filesystem::path& path) const;
 
-		static EffectAsset FromObjectConfig(const EffectObjectConfig& config);
-		EffectObjectConfig ToObjectConfig() const;
+		CALYX_API static EffectAsset FromObjectConfig(const EffectObjectConfig& config);
+		CALYX_API EffectObjectConfig ToObjectConfig() const;
 
 	private:
 		EffectAssetData data_;

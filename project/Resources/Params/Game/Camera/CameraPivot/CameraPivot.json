@@ -1,0 +1,26 @@
+{
+    "fields": {
+        "baseDistance": 11.0,
+        "baseHeight": 9.0,
+        "baseOffset": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "focusFollowSpeed": 10.0,
+        "horizontalAngleDegrees": -150.0,
+        "interpolationDeltaTimeMax": 0.10000000149011612,
+        "lockOnHeightOffset": 1.600000023841858,
+        "lockOnTransitionSpeed": 7.0,
+        "lockOnZoomOffset": 2.0,
+        "lockedTargetFocusWeight": 0.44999998807907104,
+        "lookAtHeight": 1.399999976158142,
+        "maxFocusEnemyCount": 4,
+        "maxHorizontalFocusOffset": 3.0,
+        "maxVerticalFocusOffset": 1.5,
+        "playerFocusWeight": 1.0,
+        "playerRef": "7cf4af54-848a-4332-a62a-2b36e4c02dd8",
+        "positionFollowSpeed": 3.0,
+        "visibleEnemyFocusWeight": 0.25
+    }
+}
