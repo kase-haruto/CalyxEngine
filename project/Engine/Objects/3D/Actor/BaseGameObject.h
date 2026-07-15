@@ -16,6 +16,7 @@
 #include <Engine/Physics/PhysicsBody.h>
 
 //* c++ *//
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <string>
@@ -261,6 +262,8 @@ public:
 	bool SetModelByGuid(const Guid& guid);
 	bool SetModelFileNameForEditor(const std::string& modelName);
 	const std::string& GetModelFileName() const { return config_.GetConfig().modelConfig.modelName; }
+	bool RegisterAnimationClip(int16_t animId, const std::string& animName, const std::optional<std::string>& fileName = std::nullopt);
+	void PlayRegisteredAnimation(int16_t animId, float blendDuration = 0.2f);
 	/**
 	 * \brief UVスケールを設定
 	 * \param scale スケール
