@@ -547,6 +547,24 @@ bool BaseGameObject::SetModelFromFileName(const std::string& modelName) {
 	return true;
 }
 
+bool BaseGameObject::RegisterAnimationClip(
+	int16_t animId,
+	const std::string& animName,
+	const std::optional<std::string>& fileName) {
+	auto* animModel = AnimationModel();
+	if(!animModel) return false;
+
+	animModel->RegisterAnimation(animId, animName, fileName);
+	return true;
+}
+
+void BaseGameObject::PlayRegisteredAnimation(int16_t animId, float blendDuration) {
+	auto* animModel = AnimationModel();
+	if(!animModel) return;
+
+	animModel->Play(animId, blendDuration);
+}
+
 Model* BaseGameObject::GetStaticModel() {
 	return (objectModelType_ == ObjectModelType::ModelType_Static)
 			   ? static_cast<Model*>(model_.get())
