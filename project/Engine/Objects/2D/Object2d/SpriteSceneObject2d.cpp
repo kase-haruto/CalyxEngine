@@ -64,8 +64,12 @@ namespace CalyxEngine {
 	}
 
 	void SpriteSceneObject2d::DrawSprite(SpriteRenderer* renderer) const {
-		if(sprite_ && renderer && IsDrawEnable()) {
-			sprite_->Draw(renderer);
+		if(renderer) SubmitSprites(*renderer);
+	}
+
+	void SpriteSceneObject2d::SubmitSprites(SpriteRenderer& renderer) const {
+		if(sprite_ && IsDrawEnable()) {
+			sprite_->Draw(&renderer);
 		}
 	}
 

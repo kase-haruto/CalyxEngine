@@ -214,6 +214,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Scene\Fade\BaseSceneTransitionEffect.cpp" />
     <ClCompile Include="Engine\Application\Runtime\EngineRuntime.cpp" />
     <ClCompile Include="Engine\Application\Runtime\Project.cpp" />
     <ClCompile Include="Engine\Application\Runtime\ProjectContext.cpp" />
@@ -499,8 +500,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Foundation\Log\EngineLogger.cpp" />
     <ClCompile Include="Engine\System\Command\ConsoleCommandDispatcher.cpp" />
     <ClCompile Include="Engine\System\Command\ConsoleCommandRegistry.cpp" />
+    <ClCompile Include="Engine\Scene\Fade\FadeBlackOutEffect.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Scene\Fade\BaseSceneTransitionEffect.h" />
     <ClInclude Include="Engine\Application\CalyxEngine\Application.h" />
     <ClInclude Include="Engine\Application\CalyxEngine\CalyxEngine.h" />
     <ClInclude Include="Engine\Application\CalyxEngine\Engine.h" />
@@ -567,6 +570,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Objects\2D\Hud\HudMotionDesc.h" />
     <ClInclude Include="Engine\Objects\2D\Hud\HudMotionSet.h" />
     <ClInclude Include="Engine\Objects\2D\Object2d\GameObject2d.h" />
+    <ClInclude Include="Engine\Objects\2D\Object2d\ISpriteRenderable.h" />
     <ClInclude Include="Engine\Objects\2D\Object2d\SpriteObject2d.h" />
     <ClInclude Include="Engine\Objects\2D\Renderer\Renderer2d.h" />
     <ClInclude Include="Engine\Objects\2D\Renderer\SpriteDrawData.h" />
@@ -862,6 +866,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\PostProcess\Vignette\Vignette.h" />
     <ClInclude Include="Engine\Application\Effects\Particle\Emitter\GpuFxEmitter.h" />
     <ClInclude Include="Engine\Application\System\PlaySession.h" />
+    <ClInclude Include="Engine\Scene\Fade\FadeBlackOutEffect.h" />
     <ClInclude Include="Resources\shaders\CRT.PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
