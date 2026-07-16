@@ -279,6 +279,8 @@
     <ClCompile Include="Engine\Foundation\Log\EngineLogger.cpp" />
     <ClCompile Include="Engine\System\Command\ConsoleCommandDispatcher.cpp" />
     <ClCompile Include="Engine\System\Command\ConsoleCommandRegistry.cpp" />
+    <ClCompile Include="Engine\Scene\Fade\BaseSceneTransitionEffect.cpp" />
+    <ClCompile Include="Engine\Scene\Fade\FadeBlackOutEffect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Application\CalyxEngine\Application.h" />
@@ -652,5 +654,8 @@
     <ClInclude Include="Engine\Foundation\Log\LogTypes.h" />
     <ClInclude Include="Engine\System\Command\ConsoleCommandDispatcher.h" />
     <ClInclude Include="Engine\System\Command\ConsoleCommandRegistry.h" />
+    <ClInclude Include="Engine\Objects\2D\Object2d\ISpriteRenderable.h" />
+    <ClInclude Include="Engine\Scene\Fade\BaseSceneTransitionEffect.h" />
+    <ClInclude Include="Engine\Scene\Fade\FadeBlackOutEffect.h" />
   </ItemGroup>
 </Project>
