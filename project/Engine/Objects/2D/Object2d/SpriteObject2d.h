@@ -2,6 +2,8 @@
 
 // engine
 #include <Engine/Foundation/Math/Vector2.h>
+#include <Engine/Objects/2D/Object2d/ISpriteRenderable.h>
+#include <Engine/Objects/3D/Actor/SceneObject.h>
 
 // stde
 #include "Engine/Foundation/Math/Vector4.h"
@@ -19,11 +21,21 @@ namespace CalyxEngine {
 	 * - 2Dスプライトオブジェクトクラス
 	 * - spriteクラスを使いやすくしたラッパ
 	 *---------------------------------------------------------------------------------------*/
-	class SpriteObject2d {
+	/**
+	 * @brief 1つのSpriteを所有するRuntime向け2Dシーンオブジェクト。
+	 *
+	 * Instantiateで生成したインスタンスはSceneObjectLibraryが所有する。
+	 * このクラスはSpriteの更新とフレーム単位の描画登録を担当するが、Rendererの
+	 * 所有やシリアライズ対象の管理は行わない。SceneObjectRegistryへ別途登録されない
+	 * RuntimeOwnedインスタンスは、シーン保存対象にならない。
+	 */
+	class SpriteObject2d : public SceneObject, public ISpriteRenderable {
 	public:
 		/** \brief コンストラクタ・デストラクタ */
 		SpriteObject2d();
-		~SpriteObject2d();
+		~SpriteObject2d() override;
+
+		void Initialize() override;
 
 		/**
 		 * \brief 初期化処理
@@ -34,7 +46,7 @@ namespace CalyxEngine {
 		 * \brief 更新処理
 		 * \param dt デルタタイム
 		 */
-		void Update(float dt);
+		void Update(float dt) override;
 		/**
 		 * \brief 描画処理
 		 * \param renderer レンダラー
@@ -44,7 +56,9 @@ namespace CalyxEngine {
 		/**
 		 * \brief デバッグGui
 		 */
-		void ShowGui();
+		void ShowGui() override;
+		void SubmitSprites(SpriteRenderer& renderer) const override;
+		std::string_view GetObjectClassName() const override { return "SpriteObject2d"; }
 
 	public:
 		// getter

@@ -5,6 +5,7 @@
 #include <Engine\Foundation\Math\Vector4.h>
 #include <Engine\Objects\2D\Animation\SpriteAnimator2d.h>
 #include <Engine\Objects\2D\Object2d\SpriteObject2d.h>
+#include <Engine\Objects\2D\Object2d\ISpriteRenderable.h>
 #include <Engine\Objects\3D\Actor\SceneObject.h>
 #include <Engine\Objects\ConfigurableObject\IConfigurable.h>
 
@@ -17,7 +18,8 @@ namespace CalyxEngine {
 
 	class SpriteSceneObject2d
 		: public SceneObject,
-		  public IConfigurable {
+		  public IConfigurable,
+		  public ISpriteRenderable {
 	public:
 		SpriteSceneObject2d();
 		~SpriteSceneObject2d() override = default;
@@ -26,6 +28,7 @@ namespace CalyxEngine {
 		void AlwaysUpdate(float dt) override;
 		void ShowGui() override;
 		void DrawSprite(SpriteRenderer* renderer) const;
+		void SubmitSprites(SpriteRenderer& renderer) const override;
 		void ApplyConfigFromJson(const nlohmann::json& j) override;
 		void ExtractConfigToJson(nlohmann::json& j) const override;
 

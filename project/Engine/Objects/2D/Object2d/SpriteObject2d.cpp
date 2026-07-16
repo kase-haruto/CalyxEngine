@@ -6,8 +6,19 @@
 
 using namespace CalyxEngine;
 
-SpriteObject2d::SpriteObject2d()  = default;
+SpriteObject2d::SpriteObject2d() {
+	SetName("Sprite2D", ObjectType::Object2D);
+	SetCastShadow(false);
+	// Instantiateの戻り値から直ちに設定できるよう、既定Spriteを生成しておく。
+	Initialize();
+}
 SpriteObject2d::~SpriteObject2d() = default;
+
+void SpriteObject2d::Initialize() {
+	if(!sprite_) {
+		Initialize("Textures/white1x1.dds");
+	}
+}
 
 void SpriteObject2d::Initialize(const std::string& filePath) {
 	sprite_ = std::make_unique<Sprite>(filePath);
@@ -20,11 +31,19 @@ void SpriteObject2d::Update(float dt) {
 }
 
 void SpriteObject2d::Draw(SpriteRenderer* renderer) const {
-	renderer->Register(sprite_.get());
+	if(renderer) {
+		SubmitSprites(*renderer);
+	}
+}
+
+void SpriteObject2d::SubmitSprites(SpriteRenderer& renderer) const {
+	if(sprite_ && IsDrawEnable()) {
+		renderer.Register(sprite_.get());
+	}
 }
 
 void SpriteObject2d::ShowGui() {
-	sprite_->ShowGui();
+	if(sprite_) sprite_->ShowGui();
 }
 
 //====================================================

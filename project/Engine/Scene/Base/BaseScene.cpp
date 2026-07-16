@@ -11,7 +11,7 @@
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
-#include <Engine/Objects/2D/Object2d/SpriteSceneObject2d.h>
+#include <Engine/Objects/2D/Object2d/ISpriteRenderable.h>
 #include <Engine/PostProcess/Manager/PostEffectManager.h>
 #include <Engine/Objects/Event/BaseEventObject.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
@@ -145,8 +145,9 @@ void BaseScene::DrawSpritesOnly(ID3D12GraphicsCommandList* cmd,
 								PipelineService*		   pso) {
 	if(sceneContext_) {
 		for(auto* object : sceneContext_->GetObjectLibrary()->GetAllObjectsRaw()) {
-			if(auto* spriteObject = dynamic_cast<CalyxEngine::SpriteSceneObject2d*>(object)) {
-				spriteObject->DrawSprite(spriteRenderer_.get());
+			if(auto* spriteObject = dynamic_cast<CalyxEngine::ISpriteRenderable*>(object)) {
+				// 描画登録は2Dパスごとに再構築し、SpriteRendererには所有権を渡さない。
+				spriteObject->SubmitSprites(*spriteRenderer_);
 			}
 		}
 	}
