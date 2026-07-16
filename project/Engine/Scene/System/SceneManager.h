@@ -4,6 +4,7 @@
 #include <Engine/Foundation/Utility/Guid/Guid.h>
 #include <Engine/Graphics/Device/DxCore.h>
 #include <Engine/Scene/Base/BaseScene.h>
+#include <Engine/Scene/Fade/BaseSceneTransitionEffect.h>
 #include <Engine/Scene/Transitioner/IScenePayload.h>
 #include <Engine/Scene/Transitioner/SceneTransitionRequestor.h>
 
@@ -71,6 +72,8 @@ namespace CalyxEngine {
 		 * \param sceneAssetGuid 遷移先となるシーンアセットのGUID
 		 */
 		void RequestSceneChange(const Guid& sceneAssetGuid);
+		void RequestSceneChange(const std::filesystem::path& scenePath, std::unique_ptr<BaseSceneTransitionEffect> effect);
+		void RequestSceneChange(const Guid& sceneAssetGuid, std::unique_ptr<BaseSceneTransitionEffect> effect);
 
 		/**
 		 * \brief 現在のシーンを更新し、保留中のシーン遷移を処理する
@@ -207,6 +210,10 @@ namespace CalyxEngine {
 		void RequestSceneChangeInternal(
 			const std::filesystem::path&   scenePath,
 			std::unique_ptr<IScenePayload> payload = nullptr);
+		void RequestSceneChangeInternal(
+			const std::filesystem::path& scenePath,
+			std::unique_ptr<IScenePayload> payload,
+			std::unique_ptr<BaseSceneTransitionEffect> effect);
 
 		/**
 		 * \brief ペイロードを伴うGUID指定のシーン遷移要求を登録する
@@ -216,6 +223,10 @@ namespace CalyxEngine {
 		void RequestSceneChangeInternal(
 			const Guid&					   sceneAssetGuid,
 			std::unique_ptr<IScenePayload> payload = nullptr);
+		void RequestSceneChangeInternal(
+			const Guid& sceneAssetGuid,
+			std::unique_ptr<IScenePayload> payload,
+			std::unique_ptr<BaseSceneTransitionEffect> effect);
 
 		/**
 		 * \brief エディタプレビュー対象のシーンをレンダーターゲットへ描画する
@@ -335,6 +346,16 @@ namespace CalyxEngine {
 					std::move(payload));
 			}
 
+			void RequestSceneChange(const std::filesystem::path& path,
+				std::unique_ptr<BaseSceneTransitionEffect> effect) override {
+				manager_.RequestSceneChangeInternal(path, nullptr, std::move(effect));
+			}
+
+			void RequestSceneChange(const Guid& guid,
+				std::unique_ptr<BaseSceneTransitionEffect> effect) override {
+				manager_.RequestSceneChangeInternal(guid, nullptr, std::move(effect));
+			}
+
 		private:
 			/// シーン遷移要求の転送先となるSceneManager
 			SceneManager& manager_;
@@ -360,5 +381,9 @@ namespace CalyxEngine {
 		bool		  renderPicking_	= true;	   //< エディタ上でピッキング用描画を実行するか
 
 		DxCore* dx_ = nullptr; //< DirectX 12のデバイスや描画環境を管理するDxCore
+		std::unique_ptr<BaseSceneTransitionEffect> pendingTransitionEffect_;
+		std::unique_ptr<BaseSceneTransitionEffect> activeTransitionEffect_;
+		enum class TransitionPhase { None, FadeOut, FadeIn };
+		TransitionPhase transitionPhase_ = TransitionPhase::None;
 	};
 } // namespace CalyxEngine

@@ -2,35 +2,48 @@
 
 namespace CalyxEngine {
 
-	/////////////////////////////////////////////////////////////////////////////////////////
-	//		パラメータ登録
-	/////////////////////////////////////////////////////////////////////////////////////////
-	BaseTransitionEffectParam::BaseTransitionEffectParam() {
-		AddField("time", time_).Tooltip("遷移効果の持続時間（秒）");
-		AddField("textureName", textureName_).Tooltip("遷移効果に使用するテクスチャの名前(拡張子なし)");
+	BaseSceneTransitionEffect::BaseSceneTransitionEffect(float duration)
+		: duration_(duration < 0.0f ? 0.0f : duration) {}
+
+	void BaseSceneTransitionEffect::StartFadeOut() {
+		elapsed_ = 0.0f;
+		progress_ = 0.0f;
+		fadeOutFinished_ = false;
+		fadeInFinished_ = false;
+		OnStartFadeOut();
+		OnFadeOut(progress_);
 	}
 
-	/////////////////////////////////////////////////////////////////////////////////////////
-	//		パラメータパスを返す
-	/////////////////////////////////////////////////////////////////////////////////////////
-	ParamPath BaseTransitionEffectParam::GetParamPath() const {
-		return {ParamDomain::Engine, "BaseTransitionEffect", "Scene"};
+	void BaseSceneTransitionEffect::FadeOutUpdate(float dt) {
+		if(fadeOutFinished_) return;
+		elapsed_ += dt < 0.0f ? 0.0f : dt;
+		progress_ = duration_ <= 0.0f ? 1.0f : elapsed_ / duration_;
+		if(progress_ > 1.0f) progress_ = 1.0f;
+		OnFadeOut(progress_);
+		if(progress_ >= 1.0f) {
+			fadeOutFinished_ = true;
+			OnEndFadeOut();
+		}
 	}
 
-	/////////////////////////////////////////////////////////////////////////////////////////
-	//		フェードイン発生時の処理
-	/////////////////////////////////////////////////////////////////////////////////////////
-	void BaseSceneTransitionEffect::OnEndFadeIn() {
-		isFadingIn_ = true;
-		isFadingOut_ = false;
+	void BaseSceneTransitionEffect::StartFadeIn() {
+		elapsed_ = 0.0f;
+		progress_ = 0.0f;
+		fadeInFinished_ = false;
+		OnStartFadeIn();
+		OnFadeIn(progress_);
 	}
 
-	/////////////////////////////////////////////////////////////////////////////////////////
-	//		フェードアウト発生時の処理
-	/////////////////////////////////////////////////////////////////////////////////////////
-	void BaseSceneTransitionEffect::OnEndFadeOut() {
-		isFadingOut_ = true;
-		isFadingIn_	 = false;
+	void BaseSceneTransitionEffect::FadeInUpdate(float dt) {
+		if(fadeInFinished_) return;
+		elapsed_ += dt < 0.0f ? 0.0f : dt;
+		progress_ = duration_ <= 0.0f ? 1.0f : elapsed_ / duration_;
+		if(progress_ > 1.0f) progress_ = 1.0f;
+		OnFadeIn(progress_);
+		if(progress_ >= 1.0f) {
+			fadeInFinished_ = true;
+			OnEndFadeIn();
+		}
 	}
 
 } // namespace CalyxEngine

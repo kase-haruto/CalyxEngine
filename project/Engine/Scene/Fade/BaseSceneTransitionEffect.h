@@ -1,89 +1,49 @@
 #pragma once
 
-// engine
 #include <Engine/Foundation/Export/CalyxAPI.h>
-#include <Engine/Foundation/Serialization/SerializableObject.h>
+
+#include <string>
+
+class PipelineService;
+struct ID3D12GraphicsCommandList;
 
 namespace CalyxEngine {
 
-	/*-----------------------------------------------------------------------------------------
-	 * BaseTransitionEffectParam
-	 * - シーン遷移効果のパラメータを管理する構造体
-	 * - 遷移効果の持続時間や使用するテクスチャなどを定義する
-	 *---------------------------------------------------------------------------------------*/
-	struct BaseTransitionEffectParam
-		: SerializableObject {
-
-		BaseTransitionEffectParam();
-		ParamPath GetParamPath() const override;
-
-		float		time_		 = 1.0f;		   //< 遷移効果の持続時間（秒）
-		std::string textureName_ = "white1x1.png"; //< 遷移効果に使用するテクスチャのパス
-	};
-
-	/*-----------------------------------------------------------------------------------------
-	 * BaseSceneTransitionEffect
-	 * - シーン遷移効果を管理するクラス
-	 * - シーン遷移時に適用されるエフェクトやアニメーションを定義する
-	 *---------------------------------------------------------------------------------------*/
+	// Base class for effects that cover the old scene, then reveal the new scene.
+	// Game projects can derive from this class and supply their own Update/Draw hooks.
 	class CALYX_API BaseSceneTransitionEffect {
 	public:
-		//===================================================================*/
-		//                    public methods
-		//===================================================================*/
-		BaseSceneTransitionEffect()	 = default;
-		~BaseSceneTransitionEffect() = default;
+		explicit BaseSceneTransitionEffect(float duration = 0.5f);
+		virtual ~BaseSceneTransitionEffect() = default;
 
-		// フェードイン処理 =====================================================//
-		/**
-		 * \brief フェードイン更新
-		 * \param dt デルタタイム
-		 */
+		void StartFadeOut();
+		void FadeOutUpdate(float dt);
+		void StartFadeIn();
 		void FadeInUpdate(float dt);
 
-		/**
-		 * \brief フェードイン開始
-		 */
-		virtual void StartFadeIn();
+		bool IsFadeOutFinished() const { return fadeOutFinished_; }
+		bool IsFadeInFinished() const { return fadeInFinished_; }
+		float GetProgress() const { return progress_; }
 
-		/**
-		 * \brief フェードイン終了
-		 */
-		virtual void OnEndFadeIn();
+		virtual void Draw(ID3D12GraphicsCommandList* cmd, PipelineService* pso) = 0;
 
-		// フェードアウト処理 =====================================================//
-		/**
-		 * \brief フェードアウト更新
-		 * \param dt デルタタイム
-		 */
-		void FadeOutUpdate(float dt);
+		void SetTime(float duration) { duration_ = duration < 0.0f ? 0.0f : duration; }
+		float GetTime() const { return duration_; }
 
-		/**
-		 * \brief フェードアウト開始
-		 */
-		virtual void StartFadeOut();
-
-		/**
-		 * \brief フェードアウト終了
-		 */
-		virtual void OnEndFadeOut();
-
-		// accessors =====================================================//
-		// getter
-		const BaseTransitionEffectParam& GetParam() const { return param_; }
-
-		// setter
-		void SetTextureName(const std::string& textureName) { param_.textureName_ = textureName; }
-		void SetTime(float time) { param_.time_ = time; }
+	protected:
+		virtual void OnStartFadeOut() {}
+		virtual void OnFadeOut(float normalizedTime) { (void)normalizedTime; }
+		virtual void OnEndFadeOut() {}
+		virtual void OnStartFadeIn() {}
+		virtual void OnFadeIn(float normalizedTime) { (void)normalizedTime; }
+		virtual void OnEndFadeIn() {}
 
 	private:
-		//===================================================================*/
-		//                    private methods
-		//===================================================================*/
-		BaseTransitionEffectParam param_; //< 遷移効果のパラメータ
-
-		bool isFadingIn_  = false; //< フェードイン中か
-		bool isFadingOut_ = false; //< フェードアウト中か
+		float duration_ = 0.5f;
+		float elapsed_ = 0.0f;
+		float progress_ = 0.0f;
+		bool fadeOutFinished_ = false;
+		bool fadeInFinished_ = false;
 	};
 
 } // namespace CalyxEngine

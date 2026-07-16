@@ -9,6 +9,7 @@
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 #include <Engine/Scene/Context/SceneContext.h>
 #include <Engine/Scene/Settings/SceneSettings.h>
+#include <Engine/Scene/Fade/BaseSceneTransitionEffect.h>
 
 #include <filesystem>
 #include <memory>
@@ -29,6 +30,20 @@ namespace SceneAPI{
 		auto* ctx = SceneContext::Current();
 		CX_CHECK(ctx && ctx->GetSceneTransitionRequestor(), "Scene transition service is unavailable");
 		ctx->GetSceneTransitionRequestor()->RequestSceneChange(sceneAssetGuid);
+	}
+
+	inline void RequestSceneChange(const std::filesystem::path& scenePath,
+		std::unique_ptr<CalyxEngine::BaseSceneTransitionEffect> effect) {
+		auto* ctx = SceneContext::Current();
+		CX_CHECK(ctx && ctx->GetSceneTransitionRequestor(), "Scene transition service is unavailable");
+		ctx->GetSceneTransitionRequestor()->RequestSceneChange(scenePath, std::move(effect));
+	}
+
+	inline void RequestSceneChange(const Guid& sceneAssetGuid,
+		std::unique_ptr<CalyxEngine::BaseSceneTransitionEffect> effect) {
+		auto* ctx = SceneContext::Current();
+		CX_CHECK(ctx && ctx->GetSceneTransitionRequestor(), "Scene transition service is unavailable");
+		ctx->GetSceneTransitionRequestor()->RequestSceneChange(sceneAssetGuid, std::move(effect));
 	}
 
 	template<class T, class... Args>

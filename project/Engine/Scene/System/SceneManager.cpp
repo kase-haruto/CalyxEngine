@@ -19,6 +19,7 @@
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 #include <Engine/Scene/Base/IScene.h>
 #include <Engine/Scene/Context/SceneContext.h>
+#include <Engine/Scene/Fade/FadeBlackOutEffect.h>
 #include <Engine/Scene/Serializer/SceneSerializer.h>
 #include <Engine/System/Command/Manager/CommandManager.h>
 
@@ -230,6 +231,14 @@ namespace CalyxEngine {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::RequestSceneChange(const Guid& sceneAssetGuid) { RequestSceneChangeInternal(sceneAssetGuid); }
 
+	void SceneManager::RequestSceneChange(const std::filesystem::path& scenePath, std::unique_ptr<BaseSceneTransitionEffect> effect) {
+		RequestSceneChangeInternal(scenePath, nullptr, std::move(effect));
+	}
+
+	void SceneManager::RequestSceneChange(const Guid& sceneAssetGuid, std::unique_ptr<BaseSceneTransitionEffect> effect) {
+		RequestSceneChangeInternal(sceneAssetGuid, nullptr, std::move(effect));
+	}
+
 	/////////////////////////////////////////////////////////////////////////////////////////
 	//    現在編集対象として保持しているSceneContextを取得する
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -378,10 +387,30 @@ namespace CalyxEngine {
 		slot.scene->Update(dt);
 
 		// 更新中に登録された遷移要求をフレーム末尾で安全に反映する
-		if(pendingScenePath_.has_value()) {
-			auto nextPath = std::move(*pendingScenePath_);
-			pendingScenePath_.reset();
-			OpenScene(nextPath);
+		if(pendingScenePath_.has_value() && transitionPhase_ == TransitionPhase::None) {
+			activeTransitionEffect_ = std::move(pendingTransitionEffect_);
+			if(!activeTransitionEffect_) {
+				activeTransitionEffect_ = std::make_unique<FadeBlackOutEffect>();
+			}
+			transitionPhase_ = TransitionPhase::FadeOut;
+			activeTransitionEffect_->StartFadeOut();
+		}
+
+		if(transitionPhase_ == TransitionPhase::FadeOut) {
+			activeTransitionEffect_->FadeOutUpdate(alwaysDt);
+			if(activeTransitionEffect_->IsFadeOutFinished()) {
+				auto nextPath = std::move(*pendingScenePath_);
+				pendingScenePath_.reset();
+				OpenScene(nextPath);
+				activeTransitionEffect_->StartFadeIn();
+				transitionPhase_ = TransitionPhase::FadeIn;
+			}
+		} else if(transitionPhase_ == TransitionPhase::FadeIn) {
+			activeTransitionEffect_->FadeInUpdate(alwaysDt);
+			if(activeTransitionEffect_->IsFadeInFinished()) {
+				activeTransitionEffect_.reset();
+				transitionPhase_ = TransitionPhase::None;
+			}
 		}
 	}
 
@@ -665,11 +694,23 @@ namespace CalyxEngine {
 
 		// ポストエフェクト完了後の出力へUIスプライトを合成する
 		auto* postOutput = dx_->GetRenderTargetCollection().Get("PostEffectOutput");
-		DrawSpritesToRenderTarget(postOutput, cmd, pso, true);
+		DrawSpritesToRenderTarget(postOutput, cmd, pso, false);
+		if(activeTransitionEffect_ && postOutput) {
+			// The editor game viewport displays PostEffectOutput as an ImGui texture.
+			// Draw the transition here as well as on the final back buffer so it is
+			// visible in both editor play mode and standalone builds.
+			activeTransitionEffect_->Draw(cmd, pso);
+		}
+		if(postOutput) {
+			postOutput->TransitionTo(cmd, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		}
 
 		// 最終バックバッファにも同じスプライトを描画し、画面へ出力する
 		auto* backBuffer = dx_->GetRenderTargetCollection().Get("BackBuffer");
 		DrawSpritesToRenderTarget(backBuffer, cmd, pso, false);
+		if(activeTransitionEffect_) {
+			activeTransitionEffect_->Draw(cmd, pso);
+		}
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -684,7 +725,17 @@ namespace CalyxEngine {
 		// 更新中のシーンを即座に破棄しないよう、ペイロードと遷移先を保留領域へ保存する
 		pendingPayload_	  = std::move(payload);
 		pendingScenePath_ = scenePath;
+		pendingTransitionEffect_.reset();
 		EngineLogger::GetInstance().Add(LogLevel::Trace, LogCategory::Game, "Scene change queued: " + scenePath.generic_string(), "SceneManager");
+	}
+
+	void SceneManager::RequestSceneChangeInternal(const std::filesystem::path& scenePath,
+		std::unique_ptr<IScenePayload> payload,
+		std::unique_ptr<BaseSceneTransitionEffect> effect) {
+		RequestSceneChangeInternal(scenePath, std::move(payload));
+		if(pendingScenePath_.has_value()) {
+			pendingTransitionEffect_ = std::move(effect);
+		}
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -699,6 +750,17 @@ namespace CalyxEngine {
 		}
 		// 解決したパスを使用して共通の遷移キュー登録処理へ委譲する
 		RequestSceneChangeInternal(record->sourcePath, std::move(payload));
+	}
+
+	void SceneManager::RequestSceneChangeInternal(const Guid& sceneAssetGuid,
+		std::unique_ptr<IScenePayload> payload,
+		std::unique_ptr<BaseSceneTransitionEffect> effect) {
+		const AssetRecord* record = AssetDatabase::GetInstance()->Get(sceneAssetGuid);
+		if(!record || record->type != AssetType::Scene) {
+			EngineLogger::GetInstance().Add(LogLevel::Error, LogCategory::Asset, "Scene transition GUID could not be resolved: " + sceneAssetGuid.ToString(), "SceneManager");
+			return;
+		}
+		RequestSceneChangeInternal(record->sourcePath, std::move(payload), std::move(effect));
 	}
 
 } // namespace CalyxEngine
