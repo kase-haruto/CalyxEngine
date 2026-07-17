@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Engine\Foundation\Export\CalyxAPI.h>
 #include <Engine\Assets\DataAsset\SpriteAnimationAsset.h>
 #include <Engine\Foundation\Math\Vector2.h>
 #include <Engine\Foundation\Math\Vector4.h>
@@ -15,7 +16,7 @@ class SpriteRenderer;
 
 namespace CalyxEngine {
 
-	class SpriteSceneObject2d
+	class CALYX_API SpriteSceneObject2d
 		: public SceneObject,
 		  public IConfigurable {
 	public:
@@ -48,7 +49,7 @@ namespace CalyxEngine {
 		Vector4 color_ = {1.0f, 1.0f, 1.0f, 1.0f};
 	};
 
-	class AnimatedSpriteSceneObject2d
+	class CALYX_API AnimatedSpriteSceneObject2d
 		: public SpriteSceneObject2d {
 	public:
 		AnimatedSpriteSceneObject2d();
