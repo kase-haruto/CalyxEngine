@@ -125,7 +125,7 @@ namespace CalyxEngine {
 					float              dist     = static_cast<float>(i) * spawnInterval;
 					float              t        = dist / distance;
 					CalyxEngine::Vector3 spawnPos = CalyxEngine::Vector3::Lerp(prevPostion_,position_,t);
-					Emit(GenerateSpawnPosition(spawnPos) + offset_);
+					Emit(GenerateSpawnPosition(spawnPos, randomStream_) + offset_);
 				}
 			} else {
 				emitTimer_ += deltaTime;
@@ -147,7 +147,9 @@ namespace CalyxEngine {
 				fx.lifeT = std::clamp(t,0.0f,1.0f);
 			} else { fx.lifeT = 1.0f; }
 
-			for(auto& m : moduleContainer_->GetModules()) { if(m->IsEnabled()) m->OnUpdate(fx,deltaTime); }
+			for(auto* module : moduleContainer_->GetUpdateModules()) {
+				if(module->IsEnabled()) module->OnUpdate(fx,deltaTime);
+			}
 
 			// 追従フラグが立っている場合はエミッタ位置+オフセットに常に合わせる（速度適用は行わない）
 			if(fx.followEmitter) { fx.position = position_ + fx.followOffset; } else { fx.position += fx.velocity * deltaTime; }
@@ -220,7 +222,7 @@ namespace CalyxEngine {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	void FxEmitter::Emit() {
 		// 形状が点の時はエミッタの位置、そうでない時は形状に応じた位置を生成して発生させる
-		Emit(GenerateSpawnPosition() + offset_);
+		Emit(GenerateSpawnPosition(randomStream_) + offset_);
 	}
 
 	void FxEmitter::Emit(const CalyxEngine::Vector3& pos) {
@@ -242,36 +244,43 @@ namespace CalyxEngine {
 		SetFlag(FirstFrame,true);
 		hasEmitted_         = false;
 		isFinishedNotified_ = false;
+		particleSequence_ = 0;
+		randomStream_.Reset(randomSeed_);
 		SetFlag(Playing,true);
 	}
 
 	void FxEmitter::ResetFxUnit(FxUnit& fx) {
+		// Random値は生成時に確定し、Update中は同じSeedを使用する。
+		fx.randomSeed = HashParticleSeed(randomSeed_ + particleSequence_++);
 		fx.position     = position_;
-		fx.scale        = scale_.Get();
-		fx.velocity     = velocity_.Get();
-		fx.lifetime     = lifetime_.Get();
+		fx.scale        = scale_.Get(randomStream_);
+		fx.velocity     = velocity_.Get(randomStream_);
+		fx.lifetime     = lifetime_.Get(randomStream_);
 		fx.age          = 0.0f;
 		fx.initialScale = fx.scale;
 		fx.color        = CalyxEngine::Vector4(1,1,1,1);
 		fx.alive        = true;
 		fx.uvTransform.Initialize();
-		fx.spinSpeed = spin_.Get();
+		fx.spinSpeed = spin_.Get(randomStream_);
 		fx.alignDirection = CalyxEngine::Vector3(0.0f,0.0f,0.0f);
 		fx.alignToDirection = false;
 		fx.rotationEuler = CalyxEngine::Vector3(0.0f,0.0f,0.0f);
-		if(HasFlag(RandomSpinEmit)) { fx.rotationEuler.z = Random::Generate<float>(-CalyxEngine::kPi,CalyxEngine::kPi); }
+		if(HasFlag(RandomSpinEmit)) { fx.rotationEuler.z = randomStream_.NextFloat(-CalyxEngine::kPi,CalyxEngine::kPi); }
 		if(useDirection_) ApplyDirectionVelocity(fx);
+		for(auto* module : moduleContainer_->GetInitializeModules()) {
+			if(module->IsEnabled()) module->OnEmit(fx);
+		}
 	}
 
 	void FxEmitter::ApplyDirectionVelocity(FxUnit& fx) {
-		CalyxEngine::Vector3 dir = direction_.Get();
+		CalyxEngine::Vector3 dir = direction_.Get(randomStream_);
 		if(dir.Length() <= 0.0001f) {
 			fx.velocity = CalyxEngine::Vector3(0.0f,0.0f,0.0f);
 			return;
 		}
 
 		dir = dir.Normalize();
-		fx.velocity = dir * directionSpeed_.Get();
+		fx.velocity = dir * directionSpeed_.Get(randomStream_);
 		fx.alignDirection = dir;
 		fx.alignToDirection = rotateToDirection_;
 	}
@@ -461,6 +470,14 @@ namespace CalyxEngine {
 				{
 					bool rse = HasFlag(RandomSpinEmit);
 					if(GuiCmd::CheckBox("##randspin",rse)) SetFlag(RandomSpinEmit,rse);
+				}
+
+				FxGui::RowLabel("Fixed Random Seed");
+				GuiCmd::CheckBox("##fixedRandomSeed",fixedRandomSeed_);
+				if(fixedRandomSeed_) {
+					FxGui::RowLabel("Random Seed");
+					int seed = static_cast<int>(randomSeed_);
+					if(ImGui::DragInt("##randomSeed",&seed,1,0)) randomSeed_ = static_cast<uint32_t>((std::max)(seed,0));
 				}
 			}
 
@@ -710,6 +727,10 @@ namespace CalyxEngine {
 		emitDuration_    = config.emitDuration;
 		billboardMode_   = config.billboardMode;
 		SetFlag(RandomSpinEmit,config.randomSpinEmit);
+		fixedRandomSeed_ = config.fixedRandomSeed;
+		randomSeed_ = fixedRandomSeed_ ? config.randomSeed : HashParticleSeed(config.randomSeed ^ static_cast<uint32_t>(reinterpret_cast<uintptr_t>(this)));
+		particleSequence_ = 0;
+		randomStream_.Reset(randomSeed_);
 		SetFlag(FollowOneShot,config.followOneShot);
 		fadeParams_.enabled = config.cameraDitherEnabled ? 1u : 0u;
 		fadeParams_.fadeNear = config.cameraDitherNear;
@@ -750,6 +771,8 @@ namespace CalyxEngine {
 		config.isDrawEnable   = HasFlag(DrawEnable);
 		config.isComplement   = HasFlag(Complement);
 		config.randomSpinEmit = HasFlag(RandomSpinEmit);
+		config.fixedRandomSeed = fixedRandomSeed_;
+		config.randomSeed = fixedRandomSeed_ ? randomSeed_ : 1u;
 		config.followOneShot  = HasFlag(FollowOneShot);
 		if(moduleContainer_)
 			config.modules = moduleContainer_->ExtractConfigs();
@@ -780,6 +803,8 @@ namespace CalyxEngine {
 			hasEmitted_   = false;
 			elapsedTime_  = 0.0f;
 			previewTimer_ = 0.0f;
+			particleSequence_ = 0;
+			randomStream_.Reset(randomSeed_);
 		}
 	}
 
@@ -792,6 +817,8 @@ namespace CalyxEngine {
 		SetFlag(FirstFrame,true);
 		hasEmitted_   = false;
 		previewTimer_ = 0.0f;
+		particleSequence_ = 0;
+		randomStream_.Reset(randomSeed_);
 	}
 
 	bool FxEmitter::LoadTextureByGuid(const Guid& g) {

@@ -49,10 +49,15 @@ namespace CalyxEngine {
 
 		//--------- accessor -----------------------------------------------------
 		const std::vector<std::unique_ptr<BaseFxModule>>& GetModules() const{ return modules_; }
+		const std::vector<BaseFxModule*>& GetUpdateModules() const { return updateModules_; }
+		const std::vector<BaseFxModule*>& GetInitializeModules() const { return initializeModules_; }
 		bool HasModule(const std::string& name) const;
 		void SetModuleEnabled(const std::string& name, bool enabled);
 
 	private:
+		void RebuildExecutionPlan();
 		std::vector<std::unique_ptr<BaseFxModule>> modules_;
+		std::vector<BaseFxModule*> initializeModules_; //< 所有しない。modules_変更時に再構築する
+		std::vector<BaseFxModule*> updateModules_;     //< 所有しない。modules_変更時に再構築する
 	};
 }

@@ -6,6 +6,7 @@
 // engine
 #include <Data/Engine/Configs/Scene/Objects/Particle/FxParmConfig.h>
 #include <Engine/Foundation/Utility/Random/Random.h>
+#include <Engine/Foundation/Utility/Random/DeterministicRandomStream.h>
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 #include <type_traits>
 #include <Engine/Application/Effects/FxGuiHelpers.h>
@@ -30,6 +31,7 @@ namespace CalyxEngine {
 
 		//--------- getter ------------------------------------------------------
 		T			Get() const;
+		T               Get(DeterministicRandomStream& random) const;
 		FxValueMode GetMode() const { return mode_; }
 		const T&	GetMin() const { return min_; }
 		const T&	GetMax() const { return max_; }
@@ -119,6 +121,30 @@ namespace CalyxEngine {
 			return constant_;
 		} else {
 			return Random::Generate<T>(min_, max_);
+		}
+	}
+
+	template <typename T>
+	inline T FxParam<T>::Get(DeterministicRandomStream& random) const {
+		if(mode_ == FxValueMode::Constant) return constant_;
+		if constexpr(std::is_arithmetic_v<T>) {
+			return static_cast<T>(random.NextFloat(static_cast<float>(min_), static_cast<float>(max_)));
+		} else {
+			return constant_;
+		}
+	}
+
+	template <>
+	inline CalyxEngine::Vector3 FxParam<CalyxEngine::Vector3>::Get(DeterministicRandomStream& random) const {
+		switch(mode_) {
+		case FxValueMode::Constant: return constant_;
+		case FxValueMode::Random: return random.NextVector3(min_, max_);
+		case FxValueMode::RandomSphere: {
+			const Vector3 center = (min_ + max_) * 0.5f;
+			const float radius = ((max_ - min_).Length()) * 0.5f;
+			return center + random.NextUnitVector3() * random.NextFloat(0.0f, radius);
+		}
+		default: return constant_;
 		}
 	}
 

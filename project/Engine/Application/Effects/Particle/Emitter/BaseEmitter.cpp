@@ -44,6 +44,15 @@ namespace CalyxEngine {
 	}
 
 	CalyxEngine::Vector3 BaseEmitter::GenerateSpawnPosition(const CalyxEngine::Vector3& basePos) {
+		DeterministicRandomStream random(Random::Generate<uint32_t>(1u, UINT32_MAX));
+		return GenerateSpawnPosition(basePos, random);
+	}
+
+	CalyxEngine::Vector3 BaseEmitter::GenerateSpawnPosition(DeterministicRandomStream& random) {
+		return GenerateSpawnPosition(position_, random);
+	}
+
+	CalyxEngine::Vector3 BaseEmitter::GenerateSpawnPosition(const CalyxEngine::Vector3& basePos, DeterministicRandomStream& random) {
 		using namespace CalyxEngine;
 
 		const Vector3 absScale{
@@ -61,8 +70,8 @@ namespace CalyxEngine {
 
 		case EmitterShape::Sphere: {
 			const float radius = (std::max)(shapeRadius_, 0.0f);
-			Vector3 dir = Random::GenerateUnitVector3();
-			const float t = Random::Generate<float>(0.0f, 1.0f);
+			Vector3 dir = random.NextUnitVector3();
+			const float t = random.NextFloat();
 			const float r = radius * std::cbrt(t);
 			Vector3 localOffset{dir.x * r * absScale.x, dir.y * r * absScale.y, dir.z * r * absScale.z};
 			return rotateLocal(localOffset);
@@ -74,16 +83,16 @@ namespace CalyxEngine {
 				(std::max)(std::abs(shapeSize_.y), 0.0f) * absScale.y,
 				(std::max)(std::abs(shapeSize_.z), 0.0f) * absScale.z};
 			Vector3 localOffset(
-				Random::Generate<float>(-halfSize.x, halfSize.x),
-				Random::Generate<float>(-halfSize.y, halfSize.y),
-				Random::Generate<float>(-halfSize.z, halfSize.z));
+				random.NextFloat(-halfSize.x, halfSize.x),
+				random.NextFloat(-halfSize.y, halfSize.y),
+				random.NextFloat(-halfSize.z, halfSize.z));
 			return rotateLocal(localOffset);
 		}
 
 		case EmitterShape::Circle: {
 			const float radius = (std::max)(shapeRadius_, 0.0f);
-			const float theta = Random::Generate<float>(0.0f, kTwoPi);
-			const float r = radius * std::sqrt(Random::Generate<float>(0.0f, 1.0f));
+			const float theta = random.NextFloat(0.0f, kTwoPi);
+			const float r = radius * std::sqrt(random.NextFloat());
 			Vector3 localOffset{std::cos(theta) * r * absScale.x, 0.0f, std::sin(theta) * r * absScale.z};
 			return rotateLocal(localOffset);
 		}
@@ -91,10 +100,10 @@ namespace CalyxEngine {
 		case EmitterShape::Cone: {
 			const float height = (std::max)(shapeRadius_, 0.0f) * absScale.y;
 			const float angleRad = std::clamp(ToRadians(shapeAngle_), 0.0f, kPi * 0.5f);
-			const float h = Random::Generate<float>(0.0f, height);
+			const float h = random.NextFloat(0.0f, height);
 			const float maxR = h * std::tan(angleRad);
-			const float theta = Random::Generate<float>(0.0f, kTwoPi);
-			const float radial = maxR * std::sqrt(Random::Generate<float>(0.0f, 1.0f));
+			const float theta = random.NextFloat(0.0f, kTwoPi);
+			const float radial = maxR * std::sqrt(random.NextFloat());
 			Vector3 localOffset{
 				std::cos(theta) * radial * absScale.x,
 				h,
