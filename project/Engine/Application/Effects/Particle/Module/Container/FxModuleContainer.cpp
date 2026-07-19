@@ -45,6 +45,18 @@ namespace CalyxEngine {
 			return false;
 		}
 
+		const char* GetModuleDescription(const std::string& typeName) {
+			if(typeName == "GravityModule")
+				return "重力（加速度）を毎フレーム速度へ加算します。\nStrengthでXYZ方向の強さを設定できます。";
+			if(typeName == "SizeOverLifetimeModule")
+				return "寿命の進行度に合わせてパーティクルを拡大または縮小します。\n成長方向とイージングを設定できます。";
+			if(typeName == "TextureSheetAnimationModule")
+				return "テクスチャを行・列のグリッドに分割し、フレームアニメーションさせます。\nループと再生速度（fps）を設定できます。";
+			if(typeName == "OverLifetimeModule")
+				return "寿命の進行度に合わせてScale・Rotation・Color・Alphaを補間します。\n対象、合成方法、イージング、開始値・終了値を設定できます。";
+			return "";
+		}
+
 	} // namespace
 
 	// =============================================================
@@ -182,6 +194,10 @@ namespace CalyxEngine {
 
 			if(ImGui::Button(typeName.c_str()))
 				AddModule(typeName);
+
+			if(ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort)) {
+				ImGui::SetTooltip("%s", GetModuleDescription(typeName));
+			}
 		}
 	}
 } // namespace CalyxEngine
