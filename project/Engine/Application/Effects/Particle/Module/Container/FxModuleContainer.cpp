@@ -85,6 +85,7 @@ namespace CalyxEngine {
 		module->SetName(MakeUniqueName(modules_, typeName));
 
 		modules_.emplace_back(std::move(module));
+		RebuildExecutionPlan();
 	}
 
 	// =============================================================
@@ -95,6 +96,7 @@ namespace CalyxEngine {
 			std::remove_if(modules_.begin(), modules_.end(),
 						   [&](const std::unique_ptr<BaseFxModule>& m) { return m->GetName() == displayName; }),
 			modules_.end());
+		RebuildExecutionPlan();
 	}
 
 	// =============================================================
@@ -115,6 +117,21 @@ namespace CalyxEngine {
 			mod->SetName(MakeUniqueName(modules_, cfg->name));
 
 			modules_.emplace_back(std::move(mod));
+		}
+		RebuildExecutionPlan();
+	}
+
+	void FxModuleContainer::RebuildExecutionPlan() {
+		initializeModules_.clear();
+		updateModules_.clear();
+		initializeModules_.reserve(modules_.size());
+		updateModules_.reserve(modules_.size());
+		for(const auto& module : modules_) {
+			const ParticleModuleStage stage = module->GetStage();
+			if(stage == ParticleModuleStage::Spawn || stage == ParticleModuleStage::Initialize)
+				initializeModules_.push_back(module.get());
+			else if(stage == ParticleModuleStage::Update)
+				updateModules_.push_back(module.get());
 		}
 	}
 
@@ -165,6 +182,7 @@ namespace CalyxEngine {
 
 			if(remove) {
 				it = modules_.erase(it);
+				RebuildExecutionPlan();
 				ImGui::PopID();
 				continue;
 			}
@@ -183,9 +201,17 @@ namespace CalyxEngine {
 
 		static const std::vector<std::string> allModules = {
 			"GravityModule",
+			"AccelerationModule",
+			"DragModule",
 			"SizeOverLifetimeModule",
 			"TextureSheetAnimationModule",
 			"OverLifetimeModule",
+			"ColorOverLifetimeModule",
+			"AlphaOverLifetimeModule",
+			"SizeCurveOverLifetimeModule",
+			"RotationOverLifetimeModule",
+			"VelocityOverLifetimeModule",
+			"EmissiveOverLifetimeModule",
 		};
 
 		for(const auto& typeName : allModules) {

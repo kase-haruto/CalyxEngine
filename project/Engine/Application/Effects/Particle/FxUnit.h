@@ -26,6 +26,9 @@ namespace CalyxEngine {
 		float              lifetime = 1.0f;                 //< 寿命
 		float              age;                             //< 経過時間
 		Vector4 color;                           //< 色
+		Vector4 emissiveColor{1.0f,1.0f,1.0f,1.0f}; //< 発光色
+		float emissiveIntensity = 0.0f;             //< 発光強度
+		uint32_t randomSeed = 0;                    //< 生成時に確定するRandom Seed
 		bool               alive = true;                    //< 生存フラグ
 		float              lifeT = 0.0f;                    //< 補完の01
 		//UVオフセット・スケール

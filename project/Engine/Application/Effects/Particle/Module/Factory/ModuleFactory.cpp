@@ -2,9 +2,11 @@
 
 // module
 #include <Engine/Application/Effects/Particle/Module/Velocity/GravityModule.h>
+#include <Engine/Application/Effects/Particle/Module/Velocity/MovementModules.h>
 #include <Engine/Application/Effects/Particle/Module/Size/SizeOverLiftimeModule.h>
 #include <Engine/Application/Effects/Particle/Module/Uv/TextureSheetAnimModule.h>
 #include <Engine/Application/Effects/Particle/Module/OverLifetime/OverLifetimeModule.h>
+#include <Engine/Application/Effects/Particle/Module/OverLifetime/LifetimeModule.h>
 
 namespace CalyxEngine {
 	namespace FxModuleFactory {
@@ -44,6 +46,21 @@ namespace CalyxEngine {
 				auto m = std::make_unique<CalyxEngine::OverLifetimeModule>(c->name);
 				c->ApplyTo(*m);
 				return m;
+			}
+			if(auto* c = dynamic_cast<const AccelerationModuleConfig*>(&config)) {
+				auto module = std::make_unique<AccelerationModule>(c->name);
+				module->SetEnabled(c->enabled);
+				module->SetAcceleration(c->acceleration);
+				return module;
+			}
+			if(auto* c = dynamic_cast<const DragModuleConfig*>(&config)) {
+				auto module = std::make_unique<DragModule>(c->name);
+				module->SetEnabled(c->enabled);
+				module->SetDrag(c->drag);
+				return module;
+			}
+			if(auto* c = dynamic_cast<const CalyxEngine::LifetimeModuleConfig*>(&config)) {
+				return std::make_unique<CalyxEngine::LifetimeModule>(*c);
 			}
 
 			// 未知のConfig
@@ -90,6 +107,24 @@ namespace CalyxEngine {
 				cfg->ExtractFrom(*m);
 				return cfg;
 			}
+			if(auto* m = dynamic_cast<const AccelerationModule*>(&module)) {
+				auto cfg = std::make_unique<AccelerationModuleConfig>();
+				cfg->enabled = m->IsEnabled();
+				cfg->acceleration = m->GetAcceleration();
+				return cfg;
+			}
+			if(auto* m = dynamic_cast<const DragModule*>(&module)) {
+				auto cfg = std::make_unique<DragModuleConfig>();
+				cfg->enabled = m->IsEnabled();
+				cfg->drag = m->GetDrag();
+				return cfg;
+			}
+			if(auto* m = dynamic_cast<const CalyxEngine::LifetimeModule*>(&module)) {
+				auto cfg = std::make_unique<CalyxEngine::LifetimeModuleConfig>(m->GetConfig());
+				cfg->enabled = m->IsEnabled();
+				cfg->guid = m->GetGuid();
+				return cfg;
+			}
 
 			// 未知のModule
 			return nullptr;
@@ -111,6 +146,14 @@ namespace CalyxEngine {
 			if (typeName == "OverLifetimeModule") { 
 				return std::make_unique<CalyxEngine::OverLifetimeModule>("OverLifetimeModule");
 			}
+			if(typeName == "AccelerationModule") return std::make_unique<AccelerationModule>();
+			if(typeName == "DragModule") return std::make_unique<DragModule>();
+			if(typeName == "ColorOverLifetimeModule") return std::make_unique<CalyxEngine::LifetimeModule>(CalyxEngine::LifetimeModuleConfig(typeName, CalyxEngine::LifetimeModuleTarget::Color));
+			if(typeName == "AlphaOverLifetimeModule") return std::make_unique<CalyxEngine::LifetimeModule>(CalyxEngine::LifetimeModuleConfig(typeName, CalyxEngine::LifetimeModuleTarget::Alpha));
+			if(typeName == "SizeCurveOverLifetimeModule") return std::make_unique<CalyxEngine::LifetimeModule>(CalyxEngine::LifetimeModuleConfig(typeName, CalyxEngine::LifetimeModuleTarget::Size));
+			if(typeName == "RotationOverLifetimeModule") return std::make_unique<CalyxEngine::LifetimeModule>(CalyxEngine::LifetimeModuleConfig(typeName, CalyxEngine::LifetimeModuleTarget::Rotation));
+			if(typeName == "VelocityOverLifetimeModule") return std::make_unique<CalyxEngine::LifetimeModule>(CalyxEngine::LifetimeModuleConfig(typeName, CalyxEngine::LifetimeModuleTarget::Velocity));
+			if(typeName == "EmissiveOverLifetimeModule") return std::make_unique<CalyxEngine::LifetimeModule>(CalyxEngine::LifetimeModuleConfig(typeName, CalyxEngine::LifetimeModuleTarget::Emissive));
 			return nullptr;
 		}
 

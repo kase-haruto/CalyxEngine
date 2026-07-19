@@ -12,6 +12,7 @@
     <ClCompile Include="Engine\Application\Effects\FxGuiHelpers.cpp" />
     <ClCompile Include="Engine\Application\Effects\FxObject.cpp" />
     <ClCompile Include="Engine\Application\Effects\Particle\Module\OverLifetime\OverLifetimeModule.cpp" />
+    <ClCompile Include="Engine\Application\Effects\Particle\Module\OverLifetime\LifetimeModule.cpp" />
     <ClCompile Include="Engine\Physics\Character\CharacterMovementComponent.cpp" />
     <ClCompile Include="Engine\Physics\PhysicsBody.cpp" />
     <ClCompile Include="Engine\Physics\PhysicsSystem.cpp" />
@@ -221,6 +222,7 @@
     <ClCompile Include="Engine\Editor\SceneObjectDuplicator.cpp" />
     <ClCompile Include="Engine\Editor\ViewportSelectionController.cpp" />
     <ClCompile Include="Engine\Application\Effects\Particle\Module\Velocity\GravityModule.cpp" />
+    <ClCompile Include="Engine\Application\Effects\Particle\Module\Velocity\MovementModules.cpp" />
     <ClCompile Include="Engine\Application\Effects\Particle\Emitter\GpuFxEmitter.cpp" />
     <ClCompile Include="Engine\Objects\Collider\SphereCollider.cpp" />
     <ClCompile Include="Engine\Graphics\ResourceStateTracker\ResourceStateTracker.cpp" />

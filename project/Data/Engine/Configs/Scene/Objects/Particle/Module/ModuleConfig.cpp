@@ -3,6 +3,22 @@
 #include <Engine/Application/Effects/Particle/Module/OverLifetime/OverLifetimeModule.h>
 
 namespace CalyxEngine {
+	nlohmann::json LifetimeModuleConfig::ToJson() const {
+		return {{"guid", guid}, {"name", name}, {"enabled", enabled}, {"stage", stage},
+			{"target", target}, {"floatCurve", floatCurve}, {"vectorCurve", vectorCurve}, {"gradient", gradient}};
+	}
+
+	void LifetimeModuleConfig::FromJson(const nlohmann::json& j) {
+		guid = j.value("guid", Guid::Empty());
+		name = j.value("name", name);
+		enabled = j.value("enabled", true);
+		stage = j.value("stage", ParticleModuleStage::Update);
+		target = j.value("target", target);
+		floatCurve = j.value("floatCurve", FloatCurve{});
+		vectorCurve = j.value("vectorCurve", Vector3Curve{});
+		gradient = j.value("gradient", ColorGradient{});
+	}
+
 	nlohmann::json OverLifetimeModuleConfig::ToJson() const {
 		return {
 				{"guid",guid},
