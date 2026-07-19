@@ -90,6 +90,7 @@ namespace CalyxEngine {
 
 		material_.texturePath = kFallbackTexturePath;
 		textureHandle_ = AssetManager::GetInstance()->GetTextureManager()->LoadTexture(material_.texturePath);
+		noiseMaskTextureHandle_ = AssetManager::GetInstance()->GetTextureManager()->LoadTexture(kFallbackTexturePath);
 
 		emitterParamBuf_.Initialize(dev);
 		perFrameBuffer_.Initialize(dev);
@@ -116,6 +117,8 @@ namespace CalyxEngine {
 			materialBuffer_.TransferData(material_);
 			return;
 		}
+		material_.noiseMaskUv.x += noiseMaskScrollSpeed_.x * dt;
+		material_.noiseMaskUv.y += noiseMaskScrollSpeed_.y * dt;
 
 		emitParam_.deltaTime = dt;
 		perFrame_.deltaTime = dt;
@@ -199,6 +202,48 @@ namespace CalyxEngine {
 					ImGui::TextUnformatted("このテクスチャは適用できません。");
 					ImGui::EndPopup();
 				}
+				ImGui::EndGroup();
+
+				FxGui::RowLabel("Noise Mask Texture");
+				ImGui::BeginGroup();
+				ImGui::TextUnformatted(material_.noiseMaskParams.x > 0.5f ? "Noise mask attached" : "Drop a noise texture here");
+				ImGui::InvisibleButton("##GpuNoiseMaskTextureDrop", ImVec2(ImGui::GetContentRegionAvail().x,40.0f));
+				const ImVec2 noiseMin = ImGui::GetItemRectMin();
+				const ImVec2 noiseMax = ImGui::GetItemRectMax();
+				ImGui::GetWindowDrawList()->AddRect(noiseMin,noiseMax,ImGui::IsItemHovered() ? IM_COL32(120,180,255,220) : IM_COL32(90,90,90,160),8.0f,0,2.0f);
+				if(ImGui::BeginDragDropTarget()) {
+					if(const ImGuiPayload* p = ImGui::AcceptDragDropPayload("CALYX_ASSET")) {
+						const AssetDragPayload payload = *reinterpret_cast<const AssetDragPayload*>(p->Data);
+						if(payload.type == AssetType::Texture) {
+							auto handle = AssetManager::GetInstance()->GetTextureManager()->LoadTexture(payload.guid);
+							if(handle.ptr) {
+								const bool wasAttached = material_.noiseMaskParams.x > 0.5f;
+								noiseMaskTextureHandle_ = handle;
+								noiseMaskTextureGuid_ = payload.guid;
+								noiseMaskTexturePath_.clear();
+								if(auto* rec = AssetDatabase::GetInstance()->Get(payload.guid)) noiseMaskTexturePath_ = rec->sourcePath.generic_string();
+								material_.noiseMaskParams.x = 1.0f;
+								if(!wasAttached) material_.noiseMaskParams.y = 1.0f;
+							}
+						}
+					}
+					ImGui::EndDragDropTarget();
+				}
+				if(material_.noiseMaskParams.x > 0.5f && ImGui::SmallButton("Clear Noise Mask")) {
+					noiseMaskTextureGuid_ = Guid::Empty();
+					noiseMaskTexturePath_.clear();
+					noiseMaskTextureHandle_ = AssetManager::GetInstance()->GetTextureManager()->LoadTexture(kFallbackTexturePath);
+					material_.noiseMaskParams.x = 0.0f;
+				}
+				ImGui::BeginDisabled(material_.noiseMaskParams.x <= 0.5f);
+				ImGui::DragFloat("Tiling##gpu_noise_mask", &material_.noiseMaskParams.y, 0.05f, 0.01f, 32.0f);
+				ImGui::SliderFloat("Strength##gpu_noise_mask", &material_.noiseMaskParams.z, 0.0f, 1.0f);
+				ImGui::SliderFloat("Threshold##gpu_noise_mask", &material_.noiseMaskParams.w, 0.0f, 1.0f);
+				ImGui::SliderFloat("Softness##gpu_noise_mask", &material_.noiseMaskUv.z, 0.0001f, 1.0f);
+				ImGui::DragFloat2("Scroll Speed##gpu_noise_mask", &noiseMaskScrollSpeed_.x, 0.01f);
+				ImGui::EndDisabled();
+				if(ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+					ImGui::SetTooltip("アタッチしたNoise TextureのRチャンネルでAlphaをマスクします。\nThresholdで表示範囲、Softnessで境界、Scroll Speedで流れを調整します。");
 				ImGui::EndGroup();
 			}
 			GuiCmd::EndSection();
@@ -309,6 +354,24 @@ namespace CalyxEngine {
 		worldScale_ = config.worldScale;
 		emitterData_.translate = config.position;
 		material_.color = config.color;
+		noiseMaskTextureGuid_ = config.noiseMaskTextureGuid;
+		noiseMaskTexturePath_ = config.noiseMaskTexturePath;
+		noiseMaskTextureHandle_ = AssetManager::GetInstance()->GetTextureManager()->LoadTexture(kFallbackTexturePath);
+		bool hasNoiseMask = false;
+		if(noiseMaskTextureGuid_.isValid()) {
+			auto handle = AssetManager::GetInstance()->GetTextureManager()->LoadTexture(noiseMaskTextureGuid_);
+			if(handle.ptr) { noiseMaskTextureHandle_ = handle; hasNoiseMask = true; }
+		} else if(!noiseMaskTexturePath_.empty()) {
+			auto handle = AssetManager::GetInstance()->GetTextureManager()->LoadTexture(noiseMaskTexturePath_);
+			if(handle.ptr) { noiseMaskTextureHandle_ = handle; hasNoiseMask = true; }
+		}
+		material_.noiseMaskParams = {
+			hasNoiseMask ? 1.0f : 0.0f,
+			config.noiseMaskScale,
+			config.noiseMaskStrength,
+			config.noiseMaskThreshold};
+		material_.noiseMaskUv = {0.0f,0.0f,config.noiseMaskSoftness,0.0f};
+		noiseMaskScrollSpeed_ = config.noiseMaskScrollSpeed;
 		material_.texturePath = ResolveTexturePath(config.texturePath);
 		textureGuid_ = config.textureGuid;
 		if(textureGuid_.isValid()) {
@@ -384,6 +447,13 @@ namespace CalyxEngine {
 		config.color = material_.color;
 		config.texturePath = material_.texturePath;
 		config.textureGuid = textureGuid_;
+		config.noiseMaskTextureGuid = noiseMaskTextureGuid_;
+		config.noiseMaskTexturePath = noiseMaskTexturePath_;
+		config.noiseMaskScale = material_.noiseMaskParams.y;
+		config.noiseMaskStrength = material_.noiseMaskParams.z;
+		config.noiseMaskThreshold = material_.noiseMaskParams.w;
+		config.noiseMaskSoftness = material_.noiseMaskUv.z;
+		config.noiseMaskScrollSpeed = noiseMaskScrollSpeed_;
 		config.modelPath = modelPath;
 		config.modelGuid = modelGuid_;
 		config.isDrawEnable = isDrawEnable_;
@@ -519,6 +589,8 @@ namespace CalyxEngine {
 		isInitialized = false;
 		emitterData_.frequencyTime = 0.0f;
 		perFrame_ = {};
+		material_.noiseMaskUv.x = 0.0f;
+		material_.noiseMaskUv.y = 0.0f;
 	}
 
 	bool GpuFxEmitter::LoadTextureByGuid(const Guid& g) {

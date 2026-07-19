@@ -6,11 +6,13 @@
 #include <Data/Engine/Configs/Scene/Objects/Particle/Module/ModuleConfig.h>
 #include <Data/Engine/Configs/Scene/Objects/Particle/Module/ModuleConfigFactory.h>
 #include <Engine/Foundation/Math/Vector3.h>
+#include <Engine/Foundation/Math/Vector2.h>
 #include <Engine/Foundation/Math/Vector4.h>
 #include <Engine/Foundation/Math/Quaternion.h>
 #include <Engine/Objects/3D/Details/BillboardParams.h>
 #include <engine/Foundation/Utility/Guid/Guid.h>
 #include <externals/nlohmann/json.hpp>
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -101,6 +103,13 @@ namespace CalyxEngine {
 		float		emitRate	= 0.1f;
 		std::string modelPath	= "plane.obj";
 		std::string texturePath = "Textures/white1x1.dds";
+		std::string noiseMaskTexturePath;
+		Guid noiseMaskTextureGuid{Guid::Empty()};
+		float noiseMaskScale = 1.0f;
+		float noiseMaskStrength = 1.0f;
+		float noiseMaskThreshold = 0.5f;
+		float noiseMaskSoftness = 0.1f;
+		CalyxEngine::Vector2 noiseMaskScrollSpeed{0.0f,0.0f};
 
 		Guid textureGuid{Guid::Empty()};
 		Guid modelGuid{Guid::Empty()};
@@ -136,6 +145,14 @@ namespace CalyxEngine {
 			spin.min = CalyxEngine::Vector3(0.0f,0.0f,0.0f);
 			spin.max = CalyxEngine::Vector3(0.0f,0.0f,0.0f);
 		}
+		EmitterConfig(const EmitterConfig& other)
+			: EmitterConfig() { FromJson(other.ToJson()); }
+		EmitterConfig& operator=(const EmitterConfig& other) {
+			if(this != &other) FromJson(other.ToJson());
+			return *this;
+		}
+		EmitterConfig(EmitterConfig&&) noexcept = default;
+		EmitterConfig& operator=(EmitterConfig&&) noexcept = default;
 
 		void		   FromJson(const nlohmann::json& j);
 		nlohmann::json ToJson() const;
@@ -157,6 +174,13 @@ namespace CalyxEngine {
 		emitRate	   = j.value("emitRate", 1.0f);
 		modelPath	   = j.value("modelPath", "plane.obj");
 		texturePath	   = j.value("texturePath", "Textures/white1x1.dds");
+		noiseMaskTexturePath = j.value("noiseMaskTexturePath", std::string{});
+		noiseMaskTextureGuid = j.value("noiseMaskTextureGuid", Guid::Empty());
+		noiseMaskScale = (std::max)(j.value("noiseMaskScale", 1.0f), 0.01f);
+		noiseMaskStrength = std::clamp(j.value("noiseMaskStrength", 1.0f), 0.0f, 1.0f);
+		noiseMaskThreshold = std::clamp(j.value("noiseMaskThreshold", 0.5f), 0.0f, 1.0f);
+		noiseMaskSoftness = std::clamp(j.value("noiseMaskSoftness", 0.1f), 0.0001f, 1.0f);
+		noiseMaskScrollSpeed = j.value("noiseMaskScrollSpeed", CalyxEngine::Vector2{0.0f,0.0f});
 		isDrawEnable   = j.value("isDrawEnable", true);
 		isComplement   = j.value("isComplement", true);
 		randomSpinEmit = j.value("randomSpinEmit", false);
@@ -224,6 +248,13 @@ namespace CalyxEngine {
 		j["emitRate"]		= emitRate;
 		j["modelPath"]		= modelPath;
 		j["texturePath"]	= texturePath;
+		j["noiseMaskTexturePath"] = noiseMaskTexturePath;
+		j["noiseMaskTextureGuid"] = noiseMaskTextureGuid;
+		j["noiseMaskScale"] = noiseMaskScale;
+		j["noiseMaskStrength"] = noiseMaskStrength;
+		j["noiseMaskThreshold"] = noiseMaskThreshold;
+		j["noiseMaskSoftness"] = noiseMaskSoftness;
+		j["noiseMaskScrollSpeed"] = noiseMaskScrollSpeed;
 		j["isDrawEnable"]	= isDrawEnable;
 		j["isComplement"]	= isComplement;
 		j["randomSpinEmit"] = randomSpinEmit;

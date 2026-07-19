@@ -7,6 +7,8 @@
 struct Material {
 	float4 color;
 	float4x4 uvTransform;
+	float4 noiseMaskParams; // x: mask texture attached, y: scale, z: strength, w: threshold
+	float4 noiseMaskUv;     // xy: offset, z: softness
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -25,6 +27,7 @@ ConstantBuffer<Material> gMaterial : register(b1);
 //                            tables
 ///////////////////////////////////////////////////////////////////////////////
 Texture2D<float4> gTexture : register(t1);
+Texture2D<float4> gNoiseMaskTexture : register(t2);
 
 ///////////////////////////////////////////////////////////////////////////////
 //                            samplers
@@ -53,6 +56,15 @@ PixelShaderOutput main(VertexShaderOutput input) {
 	float4 texColor = gTexture.Sample(gSampler, transformedUV.xy);
 	// 合成
 	float4 baseColor = gMaterial.color * texColor * input.color;
+	if(gMaterial.noiseMaskParams.x > 0.5f) {
+		float2 noiseUv = transformedUV.xy * max(gMaterial.noiseMaskParams.y, 0.0001f)
+			+ gMaterial.noiseMaskUv.xy;
+		float noiseValue = gNoiseMaskTexture.Sample(gSampler, noiseUv).r;
+		float threshold = saturate(gMaterial.noiseMaskParams.w);
+		float softness = max(gMaterial.noiseMaskUv.z, 0.0001f);
+		float mask = smoothstep(threshold - softness, threshold + softness, noiseValue);
+		baseColor.a *= lerp(1.0f, mask, saturate(gMaterial.noiseMaskParams.z));
+	}
 	// トーンマッピング
 	float exposure = 1.0f;
 	float3 toneMapped = baseColor.rgb * exposure / (baseColor.rgb * exposure + 1.0f);

@@ -45,6 +45,34 @@ namespace CalyxEngine {
 			return false;
 		}
 
+		const char* GetModuleDescription(const std::string& typeName) {
+			if(typeName == "GravityModule")
+				return "重力（加速度）を毎フレーム速度へ加算します。\nStrengthでXYZ方向の強さを設定できます。";
+			if(typeName == "AccelerationModule")
+				return "一定の加速度を毎フレーム速度へ加算します。\nXYZ方向ごとに加速量を設定できます。";
+			if(typeName == "DragModule")
+				return "速度を時間に応じて滑らかに減衰させます。\nDragが大きいほど素早く減速します。";
+			if(typeName == "SizeOverLifetimeModule")
+				return "寿命の進行度に合わせてパーティクルを拡大または縮小します。\n成長方向とイージングを設定できます。";
+			if(typeName == "TextureSheetAnimationModule")
+				return "テクスチャを行・列のグリッドに分割し、フレームアニメーションさせます。\nループと再生速度（fps）を設定できます。";
+			if(typeName == "OverLifetimeModule")
+				return "寿命の進行度に合わせてScale・Rotation・Color・Alphaを補間します。\n対象、合成方法、イージング、開始値・終了値を設定できます。";
+			if(typeName == "ColorOverLifetimeModule")
+				return "寿命に合わせてRGBAカラーをグラデーション変化させます。\n開始色と終了色を設定できます。";
+			if(typeName == "AlphaOverLifetimeModule")
+				return "寿命に合わせて透明度を変化させます。\n定数、カーブ、ランダム範囲を選択できます。";
+			if(typeName == "SizeCurveOverLifetimeModule")
+				return "寿命に合わせてXYZサイズを個別に変化させます。\n各軸でカーブやランダム範囲を設定できます。";
+			if(typeName == "RotationOverLifetimeModule")
+				return "寿命に合わせてXYZ回転値を変化させます。\n各軸でカーブやランダム範囲を設定できます。";
+			if(typeName == "VelocityOverLifetimeModule")
+				return "寿命に合わせてXYZ速度を変化させます。\n現在速度をカーブの評価値で置き換えます。";
+			if(typeName == "EmissiveOverLifetimeModule")
+				return "寿命に合わせて発光強度と発光色を変化させます。\n強度カーブと開始・終了色を設定できます。";
+			return "";
+		}
+
 	} // namespace
 
 	// =============================================================
@@ -208,6 +236,10 @@ namespace CalyxEngine {
 
 			if(ImGui::Button(typeName.c_str()))
 				AddModule(typeName);
+
+			if(ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort)) {
+				ImGui::SetTooltip("%s", GetModuleDescription(typeName));
+			}
 		}
 	}
 } // namespace CalyxEngine
