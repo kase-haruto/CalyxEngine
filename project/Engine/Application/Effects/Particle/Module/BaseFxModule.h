@@ -1,5 +1,6 @@
 #pragma once
 #include "Engine/Foundation/Utility/Guid/Guid.h"
+#include <Engine/Application/Effects/Particle/Module/ParticleModuleStage.h>
 
 #include <string>
 
@@ -21,6 +22,7 @@ namespace CalyxEngine {
 		virtual void ShowGuiContent() = 0;
 		virtual void OnEmit(struct FxUnit&) {}
 		virtual void OnUpdate(struct FxUnit&, float) {}
+		virtual ParticleModuleStage GetStage() const { return ParticleModuleStage::Update; }
 
 		bool IsEnabled() const { return isEnabled_; }
 		void SetEnabled(bool v) { isEnabled_ = v; }

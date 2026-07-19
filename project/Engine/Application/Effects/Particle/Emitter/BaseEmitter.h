@@ -9,6 +9,7 @@
 #include <Engine/Graphics/Material.h>
 #include "EmitterDetails.h"
 #include <Engine/Foundation/Math/Quaternion.h>
+#include <Engine/Foundation/Utility/Random/DeterministicRandomStream.h>
 
 class WorldTransform;
 
@@ -53,6 +54,8 @@ namespace CalyxEngine {
 		 */
 		CalyxEngine::Vector3 GenerateSpawnPosition();
 		CalyxEngine::Vector3 GenerateSpawnPosition(const CalyxEngine::Vector3& basePos);
+		CalyxEngine::Vector3 GenerateSpawnPosition(DeterministicRandomStream& random);
+		CalyxEngine::Vector3 GenerateSpawnPosition(const CalyxEngine::Vector3& basePos, DeterministicRandomStream& random);
 
 		/**
 		 * \brief 再生

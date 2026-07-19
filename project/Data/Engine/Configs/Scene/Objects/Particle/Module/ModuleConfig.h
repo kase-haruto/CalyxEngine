@@ -5,8 +5,11 @@
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Foundation/Math/Vector4.h>
 #include <Engine/Foundation/Utility/Ease/CxEase.h>
+#include <Engine/Foundation/Curve/ParticleCurve.h>
+#include <Engine/Application/Effects/Particle/Module/ParticleModuleStage.h>
 #include <externals/nlohmann/json.hpp>
 #include <string>
+#include <algorithm>
 
 namespace CalyxEngine {
 	class OverLifetimeModule;
@@ -15,6 +18,7 @@ namespace CalyxEngine {
 		Guid		guid;
 		std::string name;
 		bool		enabled = true;
+		ParticleModuleStage stage = ParticleModuleStage::Update;
 
 		BaseModuleConfig() = default;
 
@@ -25,6 +29,30 @@ namespace CalyxEngine {
 
 		virtual nlohmann::json ToJson() const					 = 0;
 		virtual void		   FromJson(const nlohmann::json& j) = 0;
+	};
+
+	enum class LifetimeModuleTarget : uint8_t {
+		Color,
+		Alpha,
+		Size,
+		Rotation,
+		Velocity,
+		Emissive,
+	};
+
+	// Lifetime Moduleの編集・保存データ。Runtime ParticleやGPUリソースは所有しない。
+	struct LifetimeModuleConfig : public BaseModuleConfig {
+		LifetimeModuleTarget target = LifetimeModuleTarget::Alpha;
+		FloatCurve floatCurve{};
+		Vector3Curve vectorCurve{};
+		ColorGradient gradient{};
+
+		LifetimeModuleConfig() { name = "AlphaOverLifetimeModule"; }
+		explicit LifetimeModuleConfig(const std::string& typeName, LifetimeModuleTarget valueTarget)
+			: target(valueTarget) { name = typeName; }
+
+		nlohmann::json ToJson() const override;
+		void FromJson(const nlohmann::json& j) override;
 	};
 
 	//============================================================
@@ -69,6 +97,32 @@ namespace CalyxEngine {
 		void FromJson(const nlohmann::json& j) override {
 			if(j.contains("enabled")) j.at("enabled").get_to(enabled);
 			if(j.contains("gravity")) j.at("gravity").get_to(gravity);
+		}
+	};
+
+	struct AccelerationModuleConfig : public BaseModuleConfig {
+		Vector3 acceleration{0.0f, 0.0f, 0.0f};
+		AccelerationModuleConfig() { name = "AccelerationModule"; }
+		nlohmann::json ToJson() const override {
+			return {{"guid", guid}, {"name", name}, {"enabled", enabled}, {"acceleration", acceleration}};
+		}
+		void FromJson(const nlohmann::json& j) override {
+			guid = j.value("guid", Guid::Empty());
+			enabled = j.value("enabled", true);
+			acceleration = j.value("acceleration", Vector3{});
+		}
+	};
+
+	struct DragModuleConfig : public BaseModuleConfig {
+		float drag = 0.0f;
+		DragModuleConfig() { name = "DragModule"; }
+		nlohmann::json ToJson() const override {
+			return {{"guid", guid}, {"name", name}, {"enabled", enabled}, {"drag", drag}};
+		}
+		void FromJson(const nlohmann::json& j) override {
+			guid = j.value("guid", Guid::Empty());
+			enabled = j.value("enabled", true);
+			drag = (std::max)(j.value("drag", 0.0f), 0.0f);
 		}
 	};
 

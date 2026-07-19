@@ -147,6 +147,10 @@ namespace CalyxEngine {
 
 		// 旧bool群を統合したビットフラグ
 		uint32_t flags_ = FollowOneShot | FirstFrame | Complement | DrawEnable;
+		bool fixedRandomSeed_ = false;
+		uint32_t randomSeed_ = 1;
+		uint32_t particleSequence_ = 0;
+		DeterministicRandomStream randomStream_{};
 
 	protected:
 		Vector3 offset_;

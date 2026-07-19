@@ -109,6 +109,8 @@ namespace CalyxEngine {
 		bool		  followOneShot	 = false;
 		bool		  isComplement	 = true;
 		bool		  randomSpinEmit = false;
+		bool          fixedRandomSeed = false;
+		uint32_t      randomSeed = 1;
 		bool          cameraDitherEnabled = false;
 		BillboardMode billboardMode	 = BillboardMode::Full;
 		BlendMode	  blendMode		 = BlendMode::ADD;
@@ -158,6 +160,8 @@ namespace CalyxEngine {
 		isDrawEnable   = j.value("isDrawEnable", true);
 		isComplement   = j.value("isComplement", true);
 		randomSpinEmit = j.value("randomSpinEmit", false);
+		fixedRandomSeed = j.value("fixedRandomSeed", false);
+		randomSeed = j.value("randomSeed", 1u);
 		followOneShot  = j.value("followOneShot", false);
 		cameraDitherEnabled = j.value("cameraDitherEnabled", false);
 		cameraDitherNear = j.value("cameraDitherNear", 0.0f);
@@ -223,6 +227,8 @@ namespace CalyxEngine {
 		j["isDrawEnable"]	= isDrawEnable;
 		j["isComplement"]	= isComplement;
 		j["randomSpinEmit"] = randomSpinEmit;
+		j["fixedRandomSeed"] = fixedRandomSeed;
+		j["randomSeed"] = randomSeed;
 		j["followOneShot"]	= followOneShot;
 		j["cameraDitherEnabled"] = cameraDitherEnabled;
 		j["cameraDitherNear"] = cameraDitherNear;
