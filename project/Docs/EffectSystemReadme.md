@@ -379,7 +379,7 @@ Moduleは設定値とParticle処理だけを担当し、Textureのロード、De
 
 - CPU ModuleとGPU Particleの機能差がある
 - Particle Bloom Mask出力は未実装
-- Procedural Noise MaskはCPU/GPU Particleで実装済み。Noise Texture Asset MaskとNoise Distortionは未実装
+- Noise Texture MaskはCPU/GPU Particleで実装済み。Noise Distortionは未実装
 - UV ScrollとUV Rotationは未実装
 - FlipbookのFrame Blendingは未実装
 - Soft ParticleとDepth Fadeは未実装
@@ -394,7 +394,7 @@ Moduleは設定値とParticle処理だけを担当し、Textureのロード、De
 1. Particle Render ParameterをParticle Dataへ追加
 2. Particle PipelineをOffscreen MRT形式へ統一
 3. EmissiveとBloom Mask出力
-4. Noise Texture Asset Mask、Noise Distortion
+4. Noise Distortion
 5. Flipbook、UV Scroll、UV Rotation
 6. Scene DepthをRendererからParticle ShaderへBind
 7. Soft Particle、Depth Fade、Near Camera Fade共通化

@@ -60,6 +60,7 @@ void ParticleRenderer::Render(
 
 			em->GetMaterialBuffer().SetCommand(cmdList,1);
 			cmdList->SetGraphicsRootDescriptorTable(3,em->GetTextureHandle());
+			cmdList->SetGraphicsRootDescriptorTable(4,em->GetNoiseMaskTextureHandle());
 			DrawGpuBillboards(cmdList,
 							  em->GetDrawInstanceCount(),
 							  em->GetParticleSrv());

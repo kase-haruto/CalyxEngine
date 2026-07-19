@@ -103,8 +103,9 @@ namespace CalyxEngine {
 		float		emitRate	= 0.1f;
 		std::string modelPath	= "plane.obj";
 		std::string texturePath = "Textures/white1x1.dds";
-		bool noiseMaskEnabled = false;
-		float noiseMaskScale = 8.0f;
+		std::string noiseMaskTexturePath;
+		Guid noiseMaskTextureGuid{Guid::Empty()};
+		float noiseMaskScale = 1.0f;
 		float noiseMaskStrength = 1.0f;
 		float noiseMaskThreshold = 0.5f;
 		float noiseMaskSoftness = 0.1f;
@@ -144,6 +145,14 @@ namespace CalyxEngine {
 			spin.min = CalyxEngine::Vector3(0.0f,0.0f,0.0f);
 			spin.max = CalyxEngine::Vector3(0.0f,0.0f,0.0f);
 		}
+		EmitterConfig(const EmitterConfig& other)
+			: EmitterConfig() { FromJson(other.ToJson()); }
+		EmitterConfig& operator=(const EmitterConfig& other) {
+			if(this != &other) FromJson(other.ToJson());
+			return *this;
+		}
+		EmitterConfig(EmitterConfig&&) noexcept = default;
+		EmitterConfig& operator=(EmitterConfig&&) noexcept = default;
 
 		void		   FromJson(const nlohmann::json& j);
 		nlohmann::json ToJson() const;
@@ -165,8 +174,9 @@ namespace CalyxEngine {
 		emitRate	   = j.value("emitRate", 1.0f);
 		modelPath	   = j.value("modelPath", "plane.obj");
 		texturePath	   = j.value("texturePath", "Textures/white1x1.dds");
-		noiseMaskEnabled = j.value("noiseMaskEnabled", false);
-		noiseMaskScale = (std::max)(j.value("noiseMaskScale", 8.0f), 0.0001f);
+		noiseMaskTexturePath = j.value("noiseMaskTexturePath", std::string{});
+		noiseMaskTextureGuid = j.value("noiseMaskTextureGuid", Guid::Empty());
+		noiseMaskScale = (std::max)(j.value("noiseMaskScale", 1.0f), 0.01f);
 		noiseMaskStrength = std::clamp(j.value("noiseMaskStrength", 1.0f), 0.0f, 1.0f);
 		noiseMaskThreshold = std::clamp(j.value("noiseMaskThreshold", 0.5f), 0.0f, 1.0f);
 		noiseMaskSoftness = std::clamp(j.value("noiseMaskSoftness", 0.1f), 0.0001f, 1.0f);
@@ -238,7 +248,8 @@ namespace CalyxEngine {
 		j["emitRate"]		= emitRate;
 		j["modelPath"]		= modelPath;
 		j["texturePath"]	= texturePath;
-		j["noiseMaskEnabled"] = noiseMaskEnabled;
+		j["noiseMaskTexturePath"] = noiseMaskTexturePath;
+		j["noiseMaskTextureGuid"] = noiseMaskTextureGuid;
 		j["noiseMaskScale"] = noiseMaskScale;
 		j["noiseMaskStrength"] = noiseMaskStrength;
 		j["noiseMaskThreshold"] = noiseMaskThreshold;

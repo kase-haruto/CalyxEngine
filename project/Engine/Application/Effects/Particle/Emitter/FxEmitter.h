@@ -65,6 +65,7 @@ namespace CalyxEngine {
 		void                               SetDrawEnable(bool isEnable) override { SetFlag(DrawEnable,isEnable); }
 		bool                               IsPlaying() const override { return HasFlag(Playing); }
 		const D3D12_GPU_DESCRIPTOR_HANDLE& GetTextureHandle() const { return textureHandle_; }
+		const D3D12_GPU_DESCRIPTOR_HANDLE& GetNoiseMaskTextureHandle() const { return noiseMaskTextureHandle_; }
 		const Guid&                        GetTextureGuid() const override { return textureGuid_; }
 
 		//--------- Timed Preview（一定間隔での自動再生） ---------------//
@@ -142,6 +143,9 @@ namespace CalyxEngine {
 		const int                   kMaxUnits_ = 4096;           //< 最大パーティクル数
 		D3D12_GPU_DESCRIPTOR_HANDLE textureHandle_{};            // 初期化
 		Guid                        textureGuid_{};
+		D3D12_GPU_DESCRIPTOR_HANDLE noiseMaskTextureHandle_{};
+		Guid                        noiseMaskTextureGuid_{};
+		std::string                 noiseMaskTexturePath_;
 		Vector2                     noiseMaskScrollSpeed_{};
 
 		std::unique_ptr<FxModuleContainer> moduleContainer_; // モジュールコンテナ

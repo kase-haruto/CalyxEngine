@@ -7,7 +7,7 @@
 struct Material {
 	float4 color;
 	float4x4 uvTransform;
-	float4 noiseMaskParams; // x: enabled, y: scale, z: strength, w: threshold
+	float4 noiseMaskParams; // x: mask texture attached, y: scale, z: strength, w: threshold
 	float4 noiseMaskUv;     // xy: offset, z: softness
 };
 
@@ -27,28 +27,12 @@ ConstantBuffer<Material> gMaterial : register(b1);
 //                            tables
 ///////////////////////////////////////////////////////////////////////////////
 Texture2D<float4> gTexture : register(t1);
+Texture2D<float4> gNoiseMaskTexture : register(t2);
 
 ///////////////////////////////////////////////////////////////////////////////
 //                            samplers
 ///////////////////////////////////////////////////////////////////////////////
 SamplerState gSampler : register(s0);
-
-float ParticleNoiseHash21(float2 p) {
-	p = frac(p * float2(123.34f, 456.21f));
-	p += dot(p, p + 45.32f);
-	return frac(p.x * p.y);
-}
-
-float ParticleValueNoise(float2 p) {
-	float2 i = floor(p);
-	float2 f = frac(p);
-	f = f * f * (3.0f - 2.0f * f);
-	float a = ParticleNoiseHash21(i);
-	float b = ParticleNoiseHash21(i + float2(1.0f, 0.0f));
-	float c = ParticleNoiseHash21(i + float2(0.0f, 1.0f));
-	float d = ParticleNoiseHash21(i + float2(1.0f, 1.0f));
-	return lerp(lerp(a, b, f.x), lerp(c, d, f.x), f.y);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 //                            dither
@@ -75,7 +59,7 @@ PixelShaderOutput main(VertexShaderOutput input) {
 	if(gMaterial.noiseMaskParams.x > 0.5f) {
 		float2 noiseUv = transformedUV.xy * max(gMaterial.noiseMaskParams.y, 0.0001f)
 			+ gMaterial.noiseMaskUv.xy;
-		float noiseValue = ParticleValueNoise(noiseUv);
+		float noiseValue = gNoiseMaskTexture.Sample(gSampler, noiseUv).r;
 		float threshold = saturate(gMaterial.noiseMaskParams.w);
 		float softness = max(gMaterial.noiseMaskUv.z, 0.0001f);
 		float mask = smoothstep(threshold - softness, threshold + softness, noiseValue);

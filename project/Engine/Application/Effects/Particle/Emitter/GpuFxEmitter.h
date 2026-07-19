@@ -100,6 +100,7 @@ namespace CalyxEngine {
 		D3D12_GPU_DESCRIPTOR_HANDLE GetParticleSrv() const;
 		uint32_t GetDrawInstanceCount() const;
 		const D3D12_GPU_DESCRIPTOR_HANDLE& GetTextureHandle() const { return textureHandle_; }
+		const D3D12_GPU_DESCRIPTOR_HANDLE& GetNoiseMaskTextureHandle() const { return noiseMaskTextureHandle_; }
 		BlendMode GetBlendMode() const { return blendMode_; }
 
 		// setter
@@ -116,6 +117,9 @@ namespace CalyxEngine {
 		bool	isDrawEnable_ = true;
 		Guid	textureGuid_{Guid::Empty()};
 		D3D12_GPU_DESCRIPTOR_HANDLE textureHandle_{};
+		D3D12_GPU_DESCRIPTOR_HANDLE noiseMaskTextureHandle_{};
+		Guid noiseMaskTextureGuid_{Guid::Empty()};
+		std::string noiseMaskTexturePath_;
 		BlendMode blendMode_ = BlendMode::ADD;
 		Vector2 noiseMaskScrollSpeed_{};
 

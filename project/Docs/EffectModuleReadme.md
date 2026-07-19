@@ -180,12 +180,12 @@ CPUとGPUの両方で同じEffect設定を使う場合は、上表の共通機�
 
 ## Noiseの使用について
 
-Particle EmitterのMaterialセクションにある `Noise Mask` を有効にすると、Proceduralな2D value noiseでパーティクルのAlphaをマスクできます。CPU EffectとGPU Effectの両方で利用でき、Effect JSONへ設定が保存されます。追加のNoise Textureアセットは必要ありません。
+Particle EmitterのMaterialセクションにNoise Textureをアタッチすると、そのテクスチャのRチャンネルでパーティクルのAlphaをマスクできます。CPU EffectとGPU Effectの両方で利用でき、TextureのGUIDとパス、マスク設定がEffect JSONへ保存されます。トグルはなく、Noise Mask Textureがアタッチされている場合だけ自動的に有効になります。
 
 | パラメータ | 内容 | 初期値 |
 | --- | --- | --- |
-| `Enabled` | Noise Maskの有効・無効を切り替えます。 | `false` |
-| `Scale` | ノイズ模様の細かさです。小さいほど大きな模様、大きいほど細かな模様になります。 | `8.0` |
+| `Noise Mask Texture` | マスクに使用するTextureです。Rチャンネルを0～1のマスク値として使用します。未設定ならNoise Maskは無効です。 | 未設定 |
+| `Tiling` | Noise TextureのUV倍率です。`1.0`でTextureを等倍使用し、1より大きいと繰り返しが増えて細かく、1未満では模様が大きく見えます。 | `1.0` |
 | `Strength` | 元のAlphaへマスクを混ぜる強さです。0では変化せず、1で完全にマスクします。 | `1.0` |
 | `Threshold` | 表示されるノイズ領域の境界です。値を上げるほど表示領域が減ります。 | `0.5` |
 | `Softness` | Threshold境界のぼかし幅です。小さいほど輪郭が硬く、大きいほど滑らかになります。 | `0.1` |
@@ -194,19 +194,20 @@ Particle EmitterのMaterialセクションにある `Noise Mask` を有効にす
 基本的な作成手順:
 
 1. EmitterのMaterialで通常のParticle TextureとColorを設定します。
-2. `Noise Mask > Enabled` を有効にします。
-3. `Scale` で模様の大きさを決めます。
+2. AssetsからNoise Textureを `Noise Mask Texture` のドロップ領域へドラッグ＆ドロップします。
+3. まず `Tiling = 1.0` でTexture本来の粒度を確認し、必要な場合だけTilingを調整します。
 4. `Threshold` を動かして残す領域を調整します。
 5. 輪郭が硬すぎる場合は `Softness` を上げます。
 6. 煙、炎、魔法など動く模様には `Scroll Speed` を設定します。
+7. マスクを無効にする場合は `Clear Noise Mask` を押してTextureを解除します。
 
 構成例:
 
-- ちぎれた煙: Scale `5`、Threshold `0.45`、Softness `0.2`、Scroll Speed `(0, -0.15)`
-- 荒い炎: Scale `10`、Threshold `0.55`、Softness `0.08`、Scroll Speed `(0, -0.5)`
+- ちぎれた煙: Tiling `1`、Threshold `0.45`、Softness `0.2`、Scroll Speed `(0, -0.15)`
+- 荒い炎: Tiling `2`、Threshold `0.55`、Softness `0.08`、Scroll Speed `(0, -0.5)`
 - ノイズ状の点滅: Strengthを低めにして、元のテクスチャ形状を残しながらAlphaへむらを加える
 
-Noise Maskは変換後のParticle UVを使用するため、`TextureSheetAnimationModule` と併用した場合は現在のフリップブックフレーム内のUVへノイズが適用されます。マスクはTexture、Emitter Color、Lifetime Color/Alphaを合成した後のAlphaへ乗算されます。
+Noise Maskは変換後のParticle UVを使用するため、`TextureSheetAnimationModule` と併用した場合は現在のフリップブックフレーム内のUVへ適用されます。Noise TextureはWrap + Linear Samplerで読み取られ、RチャンネルがTexture、Emitter Color、Lifetime Color/Alphaを合成した後のAlphaへ乗算されます。カラーNoiseを使う場合もRチャンネルだけが参照されます。
 
 現在、位置や速度へノイズを加える `NoiseModule`、`Turbulence`、`Curl Noise` と、UVを歪ませるNoise Distortionは未実装です。Noise Maskは見た目のAlphaだけを変更し、パーティクルの移動には影響しません。
 
