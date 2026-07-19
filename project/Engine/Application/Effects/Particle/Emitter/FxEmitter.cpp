@@ -93,6 +93,8 @@ namespace CalyxEngine {
 		}
 
 		if(!HasFlag(Playing)) return;
+		material_.noiseMaskUv.x += noiseMaskScrollSpeed_.x * deltaTime;
+		material_.noiseMaskUv.y += noiseMaskScrollSpeed_.y * deltaTime;
 
 		position_ = GetWorldPosition();
 		elapsedTime_ += deltaTime;
@@ -246,6 +248,8 @@ namespace CalyxEngine {
 		isFinishedNotified_ = false;
 		particleSequence_ = 0;
 		randomStream_.Reset(randomSeed_);
+		material_.noiseMaskUv.x = 0.0f;
+		material_.noiseMaskUv.y = 0.0f;
 		SetFlag(Playing,true);
 	}
 
@@ -366,6 +370,22 @@ namespace CalyxEngine {
 				}; */
 
 				ImGui::EndGroup(); // Texture BeginGroup の対応
+
+				FxGui::RowLabel("Noise Mask");
+				ImGui::BeginGroup();
+				bool noiseEnabled = material_.noiseMaskParams.x > 0.5f;
+				if(ImGui::Checkbox("Enabled##noise_mask", &noiseEnabled))
+					material_.noiseMaskParams.x = noiseEnabled ? 1.0f : 0.0f;
+				ImGui::BeginDisabled(!noiseEnabled);
+				ImGui::DragFloat("Scale##noise_mask", &material_.noiseMaskParams.y, 0.1f, 0.0001f, 128.0f);
+				ImGui::SliderFloat("Strength##noise_mask", &material_.noiseMaskParams.z, 0.0f, 1.0f);
+				ImGui::SliderFloat("Threshold##noise_mask", &material_.noiseMaskParams.w, 0.0f, 1.0f);
+				ImGui::SliderFloat("Softness##noise_mask", &material_.noiseMaskUv.z, 0.0001f, 1.0f);
+				ImGui::DragFloat2("Scroll Speed##noise_mask", &noiseMaskScrollSpeed_.x, 0.01f);
+				ImGui::EndDisabled();
+				if(ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+					ImGui::SetTooltip("Procedural NoiseでParticleのAlphaをマスクします。\nThresholdで表示範囲、Softnessで境界、Scroll Speedで流れを調整します。");
+				ImGui::EndGroup();
 
 				// メッシュ
 				FxGui::RowLabel("mesh");
@@ -701,6 +721,13 @@ namespace CalyxEngine {
 		worldRotation_  = config.rotation;
 		worldScale_     = config.worldScale;
 		material_.color = config.color;
+		material_.noiseMaskParams = {
+			config.noiseMaskEnabled ? 1.0f : 0.0f,
+			config.noiseMaskScale,
+			config.noiseMaskStrength,
+			config.noiseMaskThreshold};
+		material_.noiseMaskUv = {0.0f,0.0f,config.noiseMaskSoftness,0.0f};
+		noiseMaskScrollSpeed_ = config.noiseMaskScrollSpeed;
 		velocity_.FromConfig(config.velocity);
 		direction_.FromConfig(config.direction.vector);
 		directionSpeed_.FromConfig(config.direction.speed);
@@ -768,6 +795,12 @@ namespace CalyxEngine {
 		config.modelGuid      = modelGuid_;
 		config.texturePath    = material_.texturePath;
 		config.textureGuid    = textureGuid_;
+		config.noiseMaskEnabled = material_.noiseMaskParams.x > 0.5f;
+		config.noiseMaskScale = material_.noiseMaskParams.y;
+		config.noiseMaskStrength = material_.noiseMaskParams.z;
+		config.noiseMaskThreshold = material_.noiseMaskParams.w;
+		config.noiseMaskSoftness = material_.noiseMaskUv.z;
+		config.noiseMaskScrollSpeed = noiseMaskScrollSpeed_;
 		config.isDrawEnable   = HasFlag(DrawEnable);
 		config.isComplement   = HasFlag(Complement);
 		config.randomSpinEmit = HasFlag(RandomSpinEmit);

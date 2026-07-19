@@ -117,6 +117,7 @@ namespace CalyxEngine {
 		Guid	textureGuid_{Guid::Empty()};
 		D3D12_GPU_DESCRIPTOR_HANDLE textureHandle_{};
 		BlendMode blendMode_ = BlendMode::ADD;
+		Vector2 noiseMaskScrollSpeed_{};
 
 		// SBuff
 		DxStructuredBuffer<ParticleCS> particleBuffer_; // UAV+SRV

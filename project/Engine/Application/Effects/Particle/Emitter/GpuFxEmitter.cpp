@@ -116,6 +116,8 @@ namespace CalyxEngine {
 			materialBuffer_.TransferData(material_);
 			return;
 		}
+		material_.noiseMaskUv.x += noiseMaskScrollSpeed_.x * dt;
+		material_.noiseMaskUv.y += noiseMaskScrollSpeed_.y * dt;
 
 		emitParam_.deltaTime = dt;
 		perFrame_.deltaTime = dt;
@@ -199,6 +201,22 @@ namespace CalyxEngine {
 					ImGui::TextUnformatted("このテクスチャは適用できません。");
 					ImGui::EndPopup();
 				}
+				ImGui::EndGroup();
+
+				FxGui::RowLabel("Noise Mask");
+				ImGui::BeginGroup();
+				bool noiseEnabled = material_.noiseMaskParams.x > 0.5f;
+				if(ImGui::Checkbox("Enabled##gpu_noise_mask", &noiseEnabled))
+					material_.noiseMaskParams.x = noiseEnabled ? 1.0f : 0.0f;
+				ImGui::BeginDisabled(!noiseEnabled);
+				ImGui::DragFloat("Scale##gpu_noise_mask", &material_.noiseMaskParams.y, 0.1f, 0.0001f, 128.0f);
+				ImGui::SliderFloat("Strength##gpu_noise_mask", &material_.noiseMaskParams.z, 0.0f, 1.0f);
+				ImGui::SliderFloat("Threshold##gpu_noise_mask", &material_.noiseMaskParams.w, 0.0f, 1.0f);
+				ImGui::SliderFloat("Softness##gpu_noise_mask", &material_.noiseMaskUv.z, 0.0001f, 1.0f);
+				ImGui::DragFloat2("Scroll Speed##gpu_noise_mask", &noiseMaskScrollSpeed_.x, 0.01f);
+				ImGui::EndDisabled();
+				if(ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+					ImGui::SetTooltip("Procedural NoiseでParticleのAlphaをマスクします。\nThresholdで表示範囲、Softnessで境界、Scroll Speedで流れを調整します。");
 				ImGui::EndGroup();
 			}
 			GuiCmd::EndSection();
@@ -309,6 +327,13 @@ namespace CalyxEngine {
 		worldScale_ = config.worldScale;
 		emitterData_.translate = config.position;
 		material_.color = config.color;
+		material_.noiseMaskParams = {
+			config.noiseMaskEnabled ? 1.0f : 0.0f,
+			config.noiseMaskScale,
+			config.noiseMaskStrength,
+			config.noiseMaskThreshold};
+		material_.noiseMaskUv = {0.0f,0.0f,config.noiseMaskSoftness,0.0f};
+		noiseMaskScrollSpeed_ = config.noiseMaskScrollSpeed;
 		material_.texturePath = ResolveTexturePath(config.texturePath);
 		textureGuid_ = config.textureGuid;
 		if(textureGuid_.isValid()) {
@@ -384,6 +409,12 @@ namespace CalyxEngine {
 		config.color = material_.color;
 		config.texturePath = material_.texturePath;
 		config.textureGuid = textureGuid_;
+		config.noiseMaskEnabled = material_.noiseMaskParams.x > 0.5f;
+		config.noiseMaskScale = material_.noiseMaskParams.y;
+		config.noiseMaskStrength = material_.noiseMaskParams.z;
+		config.noiseMaskThreshold = material_.noiseMaskParams.w;
+		config.noiseMaskSoftness = material_.noiseMaskUv.z;
+		config.noiseMaskScrollSpeed = noiseMaskScrollSpeed_;
 		config.modelPath = modelPath;
 		config.modelGuid = modelGuid_;
 		config.isDrawEnable = isDrawEnable_;
@@ -519,6 +550,8 @@ namespace CalyxEngine {
 		isInitialized = false;
 		emitterData_.frequencyTime = 0.0f;
 		perFrame_ = {};
+		material_.noiseMaskUv.x = 0.0f;
+		material_.noiseMaskUv.y = 0.0f;
 	}
 
 	bool GpuFxEmitter::LoadTextureByGuid(const Guid& g) {

@@ -142,6 +142,7 @@ namespace CalyxEngine {
 		const int                   kMaxUnits_ = 4096;           //< 最大パーティクル数
 		D3D12_GPU_DESCRIPTOR_HANDLE textureHandle_{};            // 初期化
 		Guid                        textureGuid_{};
+		Vector2                     noiseMaskScrollSpeed_{};
 
 		std::unique_ptr<FxModuleContainer> moduleContainer_; // モジュールコンテナ
 
