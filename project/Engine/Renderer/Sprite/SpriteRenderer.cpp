@@ -1,35 +1,55 @@
 #include "SpriteRenderer.h"
-#include <Engine/Renderer/Sprite/Sprite.h>
+
 #include <Engine/Graphics/Pipeline/Presets/PipelinePresets.h>
 #include <Engine/Graphics/Pipeline/Service/PipelineService.h>
+#include <Engine/Renderer/Sprite/Sprite.h>
 
-void SpriteRenderer::Register(Sprite* sprite){
-	if (sprite){
-		sprites_.push_back(sprite);
-	}
+#include <algorithm>
+
+void SpriteRenderer::Register(Sprite* sprite) {
+	Register(sprite, kDefaultSortingLayerId, 0, nextSubmissionOrder_);
+}
+
+void SpriteRenderer::Register(Sprite* sprite, SortingLayerId layerId, int32_t orderInLayer, uint64_t stableOrder) {
+	if(!sprite) return;
+	sprites_.push_back({
+		sprite,
+		SortingLayerSettings::GetInstance()->GetLayerOrder(layerId),
+		orderInLayer,
+		stableOrder,
+		nextSubmissionOrder_++});
 }
 
 void SpriteRenderer::Draw(ID3D12GraphicsCommandList* cmdList,
-						  PipelineService* psoService,
-						  RenderTargetType renderTarget){
-	if (sprites_.empty()) return;
+	PipelineService* psoService,
+	RenderTargetType renderTarget) {
+	if(sprites_.empty()) return;
 
 	sprites_.erase(
-		std::remove_if(sprites_.begin(), sprites_.end(),
-		[renderTarget] (Sprite* s){ return s->GetTargetRt() != renderTarget; }),
+		std::remove_if(sprites_.begin(), sprites_.end(), [renderTarget](const DrawEntry& entry) {
+			return entry.sprite->GetTargetRt() != renderTarget;
+		}),
 		sprites_.end());
 
-	if (sprites_.empty()){ Clear(); return; }
+	if(sprites_.empty()) {
+		Clear();
+		return;
+	}
+
+	std::sort(sprites_.begin(), sprites_.end(), [](const DrawEntry& lhs, const DrawEntry& rhs) {
+		if(lhs.sortingLayerOrder != rhs.sortingLayerOrder) return lhs.sortingLayerOrder < rhs.sortingLayerOrder;
+		if(lhs.orderInLayer != rhs.orderInLayer) return lhs.orderInLayer < rhs.orderInLayer;
+		if(lhs.stableOrder != rhs.stableOrder) return lhs.stableOrder < rhs.stableOrder;
+		return lhs.submissionOrder < rhs.submissionOrder;
+	});
 
 	auto desc = PipelinePresets::MakeObject2D();
 	psoService->SetCommand(desc, cmdList);
-
-	for (Sprite* sprite : sprites_) sprite->Draw(cmdList);
-
+	for(const DrawEntry& entry : sprites_) entry.sprite->Draw(cmdList);
 	Clear();
 }
 
-
-void SpriteRenderer::Clear(){
+void SpriteRenderer::Clear() {
 	sprites_.clear();
+	nextSubmissionOrder_ = 0;
 }

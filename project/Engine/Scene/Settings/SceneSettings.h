@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Engine/Collision/CollisionLayerSettings.h>
+#include <Engine/Renderer/Sprite/SortingLayerSettings.h>
 #include <externals/nlohmann/json.hpp>
 
 /*-----------------------------------------------------------------------------------------
@@ -12,6 +13,8 @@ class SceneSettings {
 public:
 	CollisionLayerSettings& GetCollisionSettings() { return collisionSettings_; }
 	const CollisionLayerSettings& GetCollisionSettings() const { return collisionSettings_; }
+	SortingLayerSettings& GetSortingLayerSettings() { return sortingLayerSettings_; }
+	const SortingLayerSettings& GetSortingLayerSettings() const { return sortingLayerSettings_; }
 
 	// SceneSerializerがシーンJSONのsettingsセクションを保存・復元するための境界。
 	nlohmann::json ToJson() const;
@@ -21,4 +24,5 @@ public:
 private:
 	// Collision設定はColliderインスタンスではなく、同じシーン内で共有されるルールとして所有する。
 	CollisionLayerSettings collisionSettings_;
+	SortingLayerSettings sortingLayerSettings_;
 };
