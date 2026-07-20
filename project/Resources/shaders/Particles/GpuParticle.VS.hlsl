@@ -27,6 +27,9 @@ VertexShaderOutput main(uint vid : SV_VertexID, uint iid : SV_InstanceID) {
 		o.texcoord = 0;
 		o.color = 0;
 		o.fade = 0;
+		o.flipbookScaleOffset = float4(1, 1, 0, 0);
+		o.emissiveColor = 0;
+		o.emissiveIntensity = 0;
 		return o;
 	}
 
@@ -52,6 +55,10 @@ VertexShaderOutput main(uint vid : SV_VertexID, uint iid : SV_InstanceID) {
 	}
 
 	float2 offset = corner * p.scale.xy;
+	float rotationSin = sin(p.rotation.z);
+	float rotationCos = cos(p.rotation.z);
+	offset = float2(offset.x * rotationCos - offset.y * rotationSin,
+		offset.x * rotationSin + offset.y * rotationCos);
 
 	float3 worldPos =
 		  p.translate
@@ -64,9 +71,11 @@ VertexShaderOutput main(uint vid : SV_VertexID, uint iid : SV_InstanceID) {
 	o.texcoord = uv;
 
 	// フェードアウト（寿命に応じ α 減衰）
-	float lifeFade = saturate(1.0f - p.currentTime / max(p.lifeTime, 0.01f));
-	o.color = float4(p.color.rgb, p.color.a * lifeFade);
+	o.color = p.color;
 	o.fade = 1.0f; // GPU パーティクルはカメラ距離ディザなし
 
+	o.flipbookScaleOffset = float4(1, 1, 0, 0);
+	o.emissiveColor = 0;
+	o.emissiveIntensity = 0;
 	return o;
 }

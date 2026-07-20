@@ -207,11 +207,34 @@ Particle EmitterのMaterialセクションにNoise Textureをアタッチする�
 - 荒い炎: Tiling `2`、Threshold `0.55`、Softness `0.08`、Scroll Speed `(0, -0.5)`
 - ノイズ状の点滅: Strengthを低めにして、元のテクスチャ形状を残しながらAlphaへむらを加える
 
-Noise Maskは変換後のParticle UVを使用するため、`TextureSheetAnimationModule` と併用した場合は現在のフリップブックフレーム内のUVへ適用されます。Noise TextureはWrap + Linear Samplerで読み取られ、RチャンネルがTexture、Emitter Color、Lifetime Color/Alphaを合成した後のAlphaへ乗算されます。カラーNoiseを使う場合もRチャンネルだけが参照されます。
+Noise MaskはFlipbook適用前のMaterial UVを使用します。そのため粗いNoise Textureを設定しても、Texture Sheetのフレーム数によって模様が細かく分割されません。Noise TextureはWrap + Linear Samplerで読み取られ、RチャンネルがTexture、Emitter Color、Vertex Color、Lifetime Color/Alphaを合成した後のAlphaへ乗算されます。カラーNoiseを使う場合もRチャンネルだけが参照されます。
 
 現在、位置や速度へノイズを加える `NoiseModule`、`Turbulence`、`Curl Noise` と、UVを歪ませるNoise Distortionは未実装です。Noise Maskは見た目のAlphaだけを変更し、パーティクルの移動には影響しません。
 
 通常の3D Materialで見た目にノイズを使用する場合はMaterial Node Editorの `Noise Texture` も利用できます。具体的な接続方法は [Material README](../Resources/Assets/Materials/README.md#noise-textureの使用方法) を参照してください。
+
+## Particle MaterialのUVと頂点カラー
+
+EmitterのMaterialセクションでは、`UV Offset`、`UV Tiling`、`UV Scroll Speed`、`UV Rotation`、HDR対応の`Vertex Color`を編集できます。設定値はEmitter Configへ保存され、Runtime側のParticle MaterialからRendererへ渡されます。
+
+UVは次の順序で計算します。
+
+1. 元のMesh/Sprite UVへTilingを適用する
+2. UV中心 `(0.5, 0.5)` を基準にRotationを適用する
+3. 固定Offsetと `Scroll Speed * 経過秒` を加える
+4. `TextureSheetAnimationModule`のFrame Scale/Offsetを最後に適用する
+
+この順序により、Tiling・Rotation・Scrollは選択中のFlipbookフレーム内で動作し、隣のフレームを直接参照しません。`Vertex Color`はMaterial ColorやColor Over Lifetimeとは別の値として保持され、Pixel Shaderで一度だけ乗算されます。
+
+## Particle EmissiveとBloom
+
+CPU Particleでは`EmissiveOverLifetimeModule`の色と強度をParticle Instanceへ保持し、Particle Pixel ShaderがScene ColorとBloom Maskの両方へ出力します。強度を`1.0`より大きくするとHDR発光としてBloomへ寄与させやすくなります。
+
+Bloom Effectの`Threshold`はScene Colorの輝度にも適用されます。したがってEmissive Material専用の物体だけでなく、一定以上明るい通常描画もBloom対象になります。`Soft Knee`は閾値周辺を滑らかに抽出し、`Intensity`は合成するBloomの強さを調整します。
+
+## Ribbon Trail
+
+CPU Emitterには独立した板Particleとは別に、移動履歴を連続Ribbonへ変換する`Ribbon Trail`を設定できます。距離補間、Distance/Stretch UV、Spline、Camera/Axis/Cross Facing、Noise、UV Distortion、Dissolve、Width/Color/Alpha/Emissive Over Lifetime、Bloomへ対応します。詳細は[Trail README](TrailEffectReadme.md)を参照してください。
 
 ## 新しいモジュールを追加する場合
 

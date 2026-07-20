@@ -100,14 +100,21 @@ void main(uint3 DTid : SV_DispatchThreadID) {
 		p.scale = gEmitter.scale;
 		p.initialScale = gEmitter.scale;
 		
-		p.translate = gEmitter.translate + GenerateSpawnOffset(generator);
+		float3 spawnBase = gEmitter.translate;
+		if(gEmitter.complementEnabled != 0) {
+			float distanceMoved = length(gEmitter.translate - gEmitter.previousTranslate);
+			float t = distanceMoved > 0.000001f
+				? saturate((gEmitter.complementStartDistance + float(globalIndex) * gEmitter.complementSpacing) / distanceMoved)
+				: 0.0f;
+			spawnBase = lerp(gEmitter.previousTranslate, gEmitter.translate, t);
+		}
+		p.translate = spawnBase + GenerateSpawnOffset(generator);
 
 		p.color = gEmitter.color;
-		p.color.rgb *= (generator.Generate3d()+1)*0.5;
-		p.color.a = gEmitter.color.a;
 		p.lifeTime = max(gEmitter.lifeTime, 0.01f);
 		p.currentTime = 0.0f;
 		p.isAlive = 1;
+		p.rotation = gEmitter.initialRotation;
 
 		p.velocity = gEmitter.velocity;
         

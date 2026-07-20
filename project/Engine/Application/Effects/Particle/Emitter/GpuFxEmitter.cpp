@@ -13,6 +13,7 @@
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
 
 #include <algorithm>
+#include <cstddef>
 #include <cmath>
 #include <filesystem>
 
@@ -47,6 +48,9 @@ namespace CalyxEngine {
 	//  リソース生成
 	// ────────────────────────────────────────────────────────────────
 	void GpuFxEmitter::Initialize(){
+		static_assert(sizeof(EmitterSphere) == 256);
+		static_assert(offsetof(EmitterSphere,initialRotation) == 208);
+		static_assert(offsetof(EmitterSphere,previousTranslate) == 224);
 		ID3D12Device* dev = GraphicsGroup::GetInstance()->GetDevice().Get();
 
 		// StructuredBuffer を DEFAULT + UAV で確保
@@ -87,6 +91,11 @@ namespace CalyxEngine {
 		emitterData_.sizeLifeEnabled = 0;
 		emitterData_.sizeLifeGrowing = 1;
 		emitterData_.sizeLifeEase = 0;
+		emitterData_.initialRotation = {};
+		emitterData_.previousTranslate = emitterData_.translate;
+		emitterData_.complementEnabled = 0;
+		emitterData_.complementSpacing = 0.02f;
+		emitterData_.complementStartDistance = 0.0f;
 
 		material_.texturePath = kFallbackTexturePath;
 		textureHandle_ = AssetManager::GetInstance()->GetTextureManager()->LoadTexture(material_.texturePath);
@@ -107,9 +116,16 @@ namespace CalyxEngine {
 	// ────────────────────────────────────────────────────────────────
 	void GpuFxEmitter::Update(float dt){
 		SyncEmitterDataFromBase();
+		emitterData_.color = vertexColor_;
+		uvElapsedTime_ += isPlaying_ ? dt : 0.0f;
+		material_.uvOffsetTiling = {uvSettings_.offset.x,uvSettings_.offset.y,uvSettings_.tiling.x,uvSettings_.tiling.y};
+		material_.uvScrollRotationTime = {uvSettings_.scrollSpeed.x,uvSettings_.scrollSpeed.y,uvSettings_.rotation,uvElapsedTime_};
 
 		if(!isPlaying_) {
 			emitterData_.emit = 0;
+			emitterData_.complementEnabled = 0;
+			hasPreviousPosition_ = false;
+			complementDistanceRemainder_ = 0.0f;
 			perFrame_.deltaTime = dt;
 			perFrame_.time += dt;
 			perFrameBuffer_.TransferData(perFrame_);
@@ -125,13 +141,32 @@ namespace CalyxEngine {
 		perFrame_.time += dt;
 		emitterData_.frequencyTime += dt;
 
-		const float frequency = (std::max)(emitterData_.frequency, 0.0001f);
-		if (frequency <= emitterData_.frequencyTime){
-			emitterData_.frequencyTime -= frequency;
-			emitterData_.emit = 1;
-		} else{
-			emitterData_.emit = 0;
+		if(complementEnabled_) {
+			emitterData_.previousTranslate = previousPosition_;
+			emitterData_.complementEnabled = 1;
+			emitterData_.complementSpacing = 0.02f / (std::max)(alphaMultiplier_,0.01f);
+			const float distance = hasPreviousPosition_ ? (position_ - previousPosition_).Length() : 0.0f;
+			const float distanceToFirst = emitterData_.complementSpacing - complementDistanceRemainder_;
+			emitterData_.complementStartDistance = distanceToFirst;
+			const float accumulatedDistance = complementDistanceRemainder_ + distance;
+			const uint32_t requestedCount = static_cast<uint32_t>(accumulatedDistance / emitterData_.complementSpacing);
+			emitterData_.count = (std::min)(requestedCount,kMaxParticles);
+			emitterData_.emit = emitterData_.count > 0 ? 1u : 0u;
+			complementDistanceRemainder_ = std::fmod(accumulatedDistance,emitterData_.complementSpacing);
+		} else {
+			emitterData_.complementEnabled = 0;
+			complementDistanceRemainder_ = 0.0f;
+			emitterData_.count = burstEmitCount_;
+			const float frequency = (std::max)(emitterData_.frequency, 0.0001f);
+			if(frequency <= emitterData_.frequencyTime) {
+				emitterData_.frequencyTime -= frequency;
+				emitterData_.emit = 1;
+			} else {
+				emitterData_.emit = 0;
+			}
 		}
+		previousPosition_ = position_;
+		hasPreviousPosition_ = true;
 
 		if (perFrame_.time >= 50) {
 			perFrame_.time = 0;
@@ -166,9 +201,19 @@ namespace CalyxEngine {
 		if(GuiCmd::BeginSection(CalyxEngine::ParamFilterSection::Material)) {
 			if(FxGui::GridScope sec{"Material"}; sec.open) {
 				FxGui::RowLabel("Color");
-				if(ImGui::ColorEdit4("##gpu_color", &emitterData_.color.x)) {
-					material_.color = emitterData_.color;
-				}
+				ImGui::ColorEdit4("##gpu_color", &material_.color.x,ImGuiColorEditFlags_Float | ImGuiColorEditFlags_HDR);
+				FxGui::RowLabel("Vertex Color");
+				ImGui::ColorEdit4("##gpu_vertex_color",&vertexColor_.x,ImGuiColorEditFlags_Float | ImGuiColorEditFlags_HDR);
+				FxGui::RowLabel("UV Offset");
+				ImGui::DragFloat2("##gpu_uv_offset",&uvSettings_.offset.x,0.01f);
+				FxGui::RowLabel("UV Tiling");
+				ImGui::DragFloat2("##gpu_uv_tiling",&uvSettings_.tiling.x,0.01f,0.001f,100.0f);
+				FxGui::RowLabel("UV Scroll Speed");
+				ImGui::DragFloat2("##gpu_uv_scroll",&uvSettings_.scrollSpeed.x,0.01f);
+				FxGui::RowLabel("UV Rotation");
+				float uvRotationDegrees = uvSettings_.rotation * 180.0f / CalyxEngine::kPi;
+				if(ImGui::DragFloat("##gpu_uv_rotation",&uvRotationDegrees,0.25f,-360.0f,360.0f,"%.1f deg"))
+					uvSettings_.rotation = CalyxEngine::ToRadians(uvRotationDegrees);
 
 				FxGui::RowLabel("Texture");
 				ImGui::BeginGroup();
@@ -281,10 +326,13 @@ namespace CalyxEngine {
 				}
 
 				FxGui::RowLabel("Emit Count");
-				int count = static_cast<int>(emitterData_.count);
+				int count = static_cast<int>(burstEmitCount_);
 				if(ImGui::DragInt("##gpu_emit_count", &count, 1, 0, static_cast<int>(kMaxParticles))) {
-					emitterData_.count = static_cast<uint32_t>(std::clamp(count, 0, static_cast<int>(kMaxParticles)));
+					burstEmitCount_ = static_cast<uint32_t>(std::clamp(count, 0, static_cast<int>(kMaxParticles)));
 				}
+
+				FxGui::RowLabel("Complement Trail");
+				ImGui::Checkbox("##gpu_complement_trail",&complementEnabled_);
 
 				FxGui::RowLabel("Frequency");
 				ImGui::DragFloat("##gpu_frequency", &emitterData_.frequency, 0.01f, 0.01f, 100.0f);
@@ -302,6 +350,11 @@ namespace CalyxEngine {
 
 				FxGui::RowLabel("Life Time");
 				ImGui::DragFloat("##gpu_lifetime", &emitterData_.lifeTime, 0.01f, 0.01f, 100.0f);
+
+				FxGui::RowLabel("Initial Rotation");
+				Vector3 initialRotationDegrees = initialRotation_ * (180.0f / CalyxEngine::kPi);
+				if(ImGui::DragFloat3("##gpu_initial_rotation",&initialRotationDegrees.x,0.25f,-360.0f,360.0f,"%.1f deg"))
+					initialRotation_ = initialRotationDegrees * (CalyxEngine::kPi / 180.0f);
 			}
 			GuiCmd::EndSection();
 		}
@@ -354,6 +407,11 @@ namespace CalyxEngine {
 		worldScale_ = config.worldScale;
 		emitterData_.translate = config.position;
 		material_.color = config.color;
+		vertexColor_ = config.vertexColor;
+		uvSettings_ = config.uvSettings;
+		uvElapsedTime_ = 0.0f;
+		material_.uvOffsetTiling = {uvSettings_.offset.x,uvSettings_.offset.y,uvSettings_.tiling.x,uvSettings_.tiling.y};
+		material_.uvScrollRotationTime = {uvSettings_.scrollSpeed.x,uvSettings_.scrollSpeed.y,uvSettings_.rotation,0.0f};
 		noiseMaskTextureGuid_ = config.noiseMaskTextureGuid;
 		noiseMaskTexturePath_ = config.noiseMaskTexturePath;
 		noiseMaskTextureHandle_ = AssetManager::GetInstance()->GetTextureManager()->LoadTexture(kFallbackTexturePath);
@@ -395,17 +453,23 @@ namespace CalyxEngine {
 		shapeSize_ = config.shapeSize;
 		shapeRadius_ = config.shapeRadius;
 		shapeAngle_ = config.shapeAngle;
-		emitterData_.count = static_cast<uint32_t>((std::max)(config.emitCount, 0));
+		burstEmitCount_ = static_cast<uint32_t>((std::max)(config.emitCount, 0));
+		emitterData_.count = burstEmitCount_;
+		complementEnabled_ = config.isComplement;
+		hasPreviousPosition_ = false;
+		complementDistanceRemainder_ = 0.0f;
 		emitterData_.frequency = (std::max)(config.emitRate, 0.0001f);
 		emitterData_.radius = shapeRadius_;
 		emitterData_.scale = config.scale.constant;
 		emitterData_.velocity = config.velocity.constant;
 		emitterData_.lifeTime = (std::max)(config.lifetime.constant, 0.01f);
-		emitterData_.color = config.color;
+		emitterData_.color = vertexColor_;
 		emitterData_.shapeSize = shapeSize_;
 		emitterData_.angle = shapeAngle_;
 		emitterData_.shape = static_cast<uint32_t>(shape_);
 		emitterData_.rotation = {worldRotation_.x, worldRotation_.y, worldRotation_.z, worldRotation_.w};
+		initialRotation_ = config.initialRotation;
+		emitterData_.initialRotation = initialRotation_;
 		emitterData_.gravityEnabled = 0;
 		emitterData_.overLifeEnabled = 0;
 		emitterData_.sizeLifeEnabled = 0;
@@ -445,6 +509,8 @@ namespace CalyxEngine {
 		config.rotation = worldRotation_;
 		config.worldScale = worldScale_;
 		config.color = material_.color;
+		config.vertexColor = vertexColor_;
+		config.uvSettings = uvSettings_;
 		config.texturePath = material_.texturePath;
 		config.textureGuid = textureGuid_;
 		config.noiseMaskTextureGuid = noiseMaskTextureGuid_;
@@ -462,14 +528,16 @@ namespace CalyxEngine {
 		config.shapeSize = emitterData_.shapeSize;
 		config.shapeRadius = emitterData_.radius;
 		config.shapeAngle = emitterData_.angle;
-		config.emitCount = static_cast<int>(emitterData_.count);
+		config.emitCount = static_cast<int>(burstEmitCount_);
 		config.emitRate = emitterData_.frequency;
+		config.isComplement = complementEnabled_;
 		config.scale.mode = FxValueMode::Constant;
 		config.scale.constant = emitterData_.scale;
 		config.velocity.mode = FxValueMode::Constant;
 		config.velocity.constant = emitterData_.velocity;
 		config.lifetime.mode = FxValueMode::Constant;
 		config.lifetime.constant = emitterData_.lifeTime;
+		config.initialRotation = initialRotation_;
 
 		config.modules.clear();
 		if(emitterData_.gravityEnabled != 0) {
@@ -502,6 +570,7 @@ namespace CalyxEngine {
 	void GpuFxEmitter::SyncEmitterDataFromBase() {
 		emitterData_.translate = position_;
 		emitterData_.rotation = {worldRotation_.x, worldRotation_.y, worldRotation_.z, worldRotation_.w};
+		emitterData_.initialRotation = initialRotation_;
 	}
 
 	void GpuFxEmitter::DrawEmitterShape(const WorldTransform&) {
@@ -579,6 +648,8 @@ namespace CalyxEngine {
 
 	void GpuFxEmitter::Play() {
 		isPlaying_ = true;
+		hasPreviousPosition_ = false;
+		complementDistanceRemainder_ = 0.0f;
 	}
 
 	void GpuFxEmitter::Stop() {
@@ -589,8 +660,11 @@ namespace CalyxEngine {
 		isInitialized = false;
 		emitterData_.frequencyTime = 0.0f;
 		perFrame_ = {};
+		uvElapsedTime_ = 0.0f;
 		material_.noiseMaskUv.x = 0.0f;
 		material_.noiseMaskUv.y = 0.0f;
+		hasPreviousPosition_ = false;
+		complementDistanceRemainder_ = 0.0f;
 	}
 
 	bool GpuFxEmitter::LoadTextureByGuid(const Guid& g) {
@@ -811,6 +885,10 @@ namespace CalyxEngine {
 	}
 
 	uint32_t GpuFxEmitter::GetDrawInstanceCount() const {
+		// Complement emission can allocate an arbitrary number of particles per frame.
+		// Until the renderer uses an alive-count indirect argument, the full pool is
+		// required so particles outside the normal rate-based estimate stay visible.
+		if(complementEnabled_) return kMaxParticles;
 		const float frequency = (std::max)(emitterData_.frequency, 0.0001f);
 		const float lifeTime = (std::max)(emitterData_.lifeTime, 0.01f);
 		const uint64_t burstCount = (std::max)(emitterData_.count, 1u);

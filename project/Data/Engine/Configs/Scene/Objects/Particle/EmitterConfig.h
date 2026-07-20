@@ -5,6 +5,7 @@
 #include <Data/Engine/Configs/Scene/Objects/Particle/FxParmConfig.h>
 #include <Data/Engine/Configs/Scene/Objects/Particle/Module/ModuleConfig.h>
 #include <Data/Engine/Configs/Scene/Objects/Particle/Module/ModuleConfigFactory.h>
+#include <Data/Engine/Configs/Scene/Objects/Particle/TrailConfig.h>
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Foundation/Math/Vector2.h>
 #include <Engine/Foundation/Math/Vector4.h>
@@ -17,6 +18,19 @@
 #include <vector>
 
 namespace CalyxEngine {
+	/*------------------------------------------------------------
+	    パーティクル描画で使用するUV変換設定を保持する。
+	    エディタUIやGPUリソースそのものは管理しない。
+	------------------------------------------------------------*/
+	struct ParticleUVSettings {
+		Vector2 offset{0.0f,0.0f};       //< UVの固定オフセット
+		Vector2 tiling{1.0f,1.0f};       //< UVの拡大率
+		Vector2 scrollSpeed{0.0f,0.0f};  //< 1秒あたりのUV移動量
+		float rotation = 0.0f;            //< UV中心を基準とした回転角度（radian）
+	};
+
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ParticleUVSettings, offset, tiling, scrollSpeed, rotation)
+
 	struct DirectionConfig {
 		bool enabled = false;
 		Vector3ParamConfig vector;
@@ -94,9 +108,13 @@ namespace CalyxEngine {
 		CalyxEngine::Quaternion rotation = CalyxEngine::Quaternion::MakeIdentity();
 		CalyxEngine::Vector3 worldScale{1.0f, 1.0f, 1.0f};
 		CalyxEngine::Vector4 color{1.0f, 1.0f, 1.0f, 1.0f};
+		CalyxEngine::Vector4 vertexColor{1.0f,1.0f,1.0f,1.0f};
+		ParticleUVSettings uvSettings{};
+		TrailSettingsConfig trail{};
 		Vector3ParamConfig scale;
 		Vector3ParamConfig velocity;
 		DirectionConfig direction;
+		CalyxEngine::Vector3 initialRotation{0.0f,0.0f,0.0f}; //< 生成時に適用する固定回転（radian）
 		Vector3ParamConfig spin;
 		FxFloatParamConfig lifetime;
 
@@ -165,8 +183,12 @@ namespace CalyxEngine {
 		worldScale	   = j.value("worldScale", CalyxEngine::Vector3{1.0f, 1.0f, 1.0f});
 		scale		   = j.value("scale", Vector3ParamConfig{});
 		color		   = j.value("color", CalyxEngine::Vector4{1, 1, 1, 1});
+		vertexColor  = j.value("vertexColor", CalyxEngine::Vector4{1,1,1,1});
+		uvSettings   = j.value("uvSettings", ParticleUVSettings{});
+		trail        = j.value("trail", TrailSettingsConfig{});
 		velocity	   = j.value("velocity", Vector3ParamConfig{});
 		direction	   = j.value("direction", DirectionConfig{});
+		initialRotation = j.value("initialRotation", CalyxEngine::Vector3{0.0f,0.0f,0.0f});
 		if(auto it = j.find("spin"); it != j.end() && !it->is_null()) {
 			spin = ReadSpinConfig(*it,spin);
 		}
@@ -240,8 +262,12 @@ namespace CalyxEngine {
 		j["rotation"]		= rotation;
 		j["worldScale"]		= worldScale;
 		j["color"]			= color;
+		j["vertexColor"] = vertexColor;
+		j["uvSettings"] = uvSettings;
+		j["trail"] = trail;
 		j["velocity"]		= velocity;
 		j["direction"]		= direction;
+		j["initialRotation"] = initialRotation;
 		j["spin"]			= spin;
 		j["scale"]			= scale;
 		j["lifetime"]		= lifetime;

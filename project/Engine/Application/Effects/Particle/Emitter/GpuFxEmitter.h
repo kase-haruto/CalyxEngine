@@ -57,7 +57,14 @@ namespace CalyxEngine {
 			uint32_t sizeLifeEnabled;
 			uint32_t sizeLifeGrowing;
 			uint32_t sizeLifeEase;
-			float _pad1;
+			float _pad1[3];
+			CalyxEngine::Vector3 initialRotation;
+			float _pad2;
+			CalyxEngine::Vector3 previousTranslate;
+			uint32_t complementEnabled;
+			float complementSpacing;
+			float complementStartDistance;
+			float _pad3[2];
 		};
 
 	public:
@@ -116,6 +123,15 @@ namespace CalyxEngine {
 		bool	isPlaying_ = false;
 		bool	isDrawEnable_ = true;
 		Guid	textureGuid_{Guid::Empty()};
+		Vector4 vertexColor_{1.0f,1.0f,1.0f,1.0f};
+		ParticleUVSettings uvSettings_{};
+		float uvElapsedTime_ = 0.0f;
+		Vector3 initialRotation_{0.0f,0.0f,0.0f}; //< 生成時の固定回転（radian）
+		Vector3 previousPosition_{};
+		uint32_t burstEmitCount_ = 1024;
+		bool complementEnabled_ = false;
+		bool hasPreviousPosition_ = false;
+		float complementDistanceRemainder_ = 0.0f;
 		D3D12_GPU_DESCRIPTOR_HANDLE textureHandle_{};
 		D3D12_GPU_DESCRIPTOR_HANDLE noiseMaskTextureHandle_{};
 		Guid noiseMaskTextureGuid_{Guid::Empty()};
@@ -135,7 +151,7 @@ namespace CalyxEngine {
 
 		// parm
 		EmitterParam  emitParam_{};
-		EmitterSphere emitterData_;
+		EmitterSphere emitterData_{};
 		PerFrame	  perFrame_;
 	};
 }

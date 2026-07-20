@@ -329,7 +329,7 @@ Depth: R32_TYPELESS        DSV + SRV
 Sample Count: 1
 ```
 
-通常Object ShaderはMRTへ対応しているが、Particle Shaderは現段階では`SV_TARGET0`のみである。`EmissiveOverLifetimeModule`はCPU Particle内の発光値を更新するが、Bloom MaskへのParticle出力は未実装である。
+通常Object ShaderとParticle ShaderはMRTへ対応している。CPU Particleの`EmissiveOverLifetimeModule`は発光色と強度をParticle InstanceとしてGPUへ送り、Particle ShaderがScene ColorとBloom Maskへ出力する。Bloom EffectはBloom Maskに加えてScene Colorも輝度Thresholdで抽出する。
 
 ### Scene Depth
 
@@ -378,9 +378,10 @@ Moduleは設定値とParticle処理だけを担当し、Textureのロード、De
 ## 14. 現在の制限
 
 - CPU ModuleとGPU Particleの機能差がある
-- Particle Bloom Mask出力は未実装
+- CPU ParticleのBloom Mask出力は実装済み。GPU Particle固有のEmissive Over Lifetime評価は未対応
 - Noise Texture MaskはCPU/GPU Particleで実装済み。Noise Distortionは未実装
-- UV ScrollとUV Rotationは未実装
+- UV Offset、Tiling、Scroll、RotationはCPU/GPU Particle Materialで実装済み
+- Initial Rotationは生成時の固定回転、Spinは毎秒の回転速度として別々に保存される。CPUはXYZ、GPU BillboardはZ軸回転を使用する
 - FlipbookのFrame Blendingは未実装
 - Soft ParticleとDepth Fadeは未実装
 - Orbit、Attractor、Vortex、Turbulence、Curl Noiseは未実装
@@ -393,9 +394,9 @@ Moduleは設定値とParticle処理だけを担当し、Textureのロード、De
 
 1. Particle Render ParameterをParticle Dataへ追加
 2. Particle PipelineをOffscreen MRT形式へ統一
-3. EmissiveとBloom Mask出力
+3. GPU ParticleのEmissive Over Lifetime評価
 4. Noise Distortion
-5. Flipbook、UV Scroll、UV Rotation
+5. GPU ParticleのFlipbook対応
 6. Scene DepthをRendererからParticle ShaderへBind
 7. Soft Particle、Depth Fade、Near Camera Fade共通化
 8. 残りの移動Module

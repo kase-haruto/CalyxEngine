@@ -25,9 +25,6 @@ void main(uint3 DTid : SV_DispatchThreadID) {
 		}
 		gParticles[particleIndex].translate += gParticles[particleIndex].velocity * gPerFrame.deltaTime;
 		gParticles[particleIndex].currentTime += gPerFrame.deltaTime;
-		float alpha = 1.0f - (gParticles[particleIndex].currentTime / max(gParticles[particleIndex].lifeTime, 0.01f));
-		gParticles[particleIndex].color.a = saturate(alpha);
-
 		float lifeT = gParticles[particleIndex].currentTime / max(gParticles[particleIndex].lifeTime, 0.01f);
 		if(gEmitter.overLifeClamp != 0) {
 			lifeT = saturate(lifeT);

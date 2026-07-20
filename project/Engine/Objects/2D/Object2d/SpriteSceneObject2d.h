@@ -37,6 +37,24 @@ namespace CalyxEngine {
 		const Vector2& GetAnchor() const { return anchor_; }
 		void SetAnchor(const Vector2& anchor);
 
+		/**
+		 * \brief 塗りつぶし量を設定 (0.0〜1.0)
+		 * \param amt 塗りつぶし量
+		 */
+		void SetFillAmount(float amt);
+		/**
+		 * \brief 塗りつぶしの原点を設定
+		 * \param x X座標 (0.0〜1.0)
+		 * \param y Y座標 (0.0〜1.0)
+		 */
+		void SetFillOrigin(float x, float y);
+		/**
+		 * \brief 塗りつぶし手法を設定
+		 * \param method 手法
+		 */
+		void SetFillMethod(int method);
+
+
 	protected:
 		void EnsureSprite();
 		void SyncSpriteFromTransform();

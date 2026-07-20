@@ -617,6 +617,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Scene\SceneRuntime\IRuntimeBehaviour.h" />
     <ClInclude Include="Engine\Objects\3D\Actor\TestObject\CalyxHuman.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Particle\EmitterConfig.h" />
+    <ClInclude Include="Data\Engine\Configs\Scene\Objects\Particle\TrailConfig.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Particle\FxParmConfig.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Particle\Module\ModuleConfig.h" />
     <ClInclude Include="Data\Engine\Configs\Scene\Objects\Particle\Module\ModuleConfigFactory.h" />
@@ -633,6 +634,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Application\Effects\Particle\Detail\ParticleDetail.h" />
     <ClInclude Include="Engine\Application\Effects\Particle\Emitter\FxEmitter.h" />
     <ClInclude Include="Engine\Application\Effects\Particle\FxUnit.h" />
+    <ClInclude Include="Engine\Application\Effects\Trail\TrailRuntime.h" />
     <ClInclude Include="Engine\Application\Effects\Particle\Parm\FxParm.h" />
     <ClInclude Include="Engine\Application\UI\EngineUI\EditorMenu.h" />
     <ClInclude Include="Engine\Foundation\Utility\Guid\Guid.h" />
