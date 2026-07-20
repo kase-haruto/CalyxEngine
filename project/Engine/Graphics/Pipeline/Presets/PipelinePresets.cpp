@@ -1,6 +1,7 @@
 #include "PipelinePresets.h"
 
 #include <Engine/Graphics/Pipeline/PipelineDesc/Input/VertexLayout.h>
+#include <Engine/Application/Effects/Trail/TrailRuntime.h>
 
 /* ================================================================================================
 /*							Objects
@@ -501,8 +502,9 @@ GraphicsPipelineDesc PipelinePresets::MakeParticle(BlendMode mode) {
 		.Blend(mode)
 		.CullBack()
 		.DepthState(depthDesc)
-		.RTV(DXGI_FORMAT_R8G8B8A8_UNORM)
+		.RTV(DXGI_FORMAT_R16G16B16A16_FLOAT)
 		.Samples(1);
+	desc.rtvFormats_ = {DXGI_FORMAT_R16G16B16A16_FLOAT,DXGI_FORMAT_R16G16B16A16_FLOAT};
 
 	desc.root_
 		.AllowIA()
@@ -532,8 +534,9 @@ GraphicsPipelineDesc PipelinePresets::MakeGpuParticle(BlendMode mode) {
 		.Blend(mode)
 		.CullNone()
 		.DepthState(depthDesc)
-		.RTV(DXGI_FORMAT_R8G8B8A8_UNORM)
+		.RTV(DXGI_FORMAT_R16G16B16A16_FLOAT)
 		.Samples(1);
+	desc.rtvFormats_ = {DXGI_FORMAT_R16G16B16A16_FLOAT,DXGI_FORMAT_R16G16B16A16_FLOAT};
 
 	desc.root_
 		.AllowIA()
@@ -544,6 +547,28 @@ GraphicsPipelineDesc PipelinePresets::MakeGpuParticle(BlendMode mode) {
 		.SRVTable(2, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)	 // gNoiseMaskTexture (t2)
 		.SamplerWrapLinear(0);															 // gSampler (s0)
 
+	return desc;
+}
+
+GraphicsPipelineDesc PipelinePresets::MakeTrail(BlendMode mode) {
+	D3D12_DEPTH_STENCIL_DESC depthDesc{};
+	depthDesc.DepthEnable = TRUE;
+	depthDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+	depthDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	depthDesc.StencilEnable = FALSE;
+
+	GraphicsPipelineDesc desc;
+	desc.VS(L"Trail.VS.hlsl")
+		.PS(L"Trail.PS.hlsl")
+		.Input(VertexInputLayout<CalyxEngine::TrailVertex>::Get())
+		.Blend(mode).CullNone().DepthState(depthDesc).Samples(1);
+	desc.rtvFormats_ = {DXGI_FORMAT_R16G16B16A16_FLOAT,DXGI_FORMAT_R16G16B16A16_FLOAT};
+	desc.root_.AllowIA()
+		.CBV(0,D3D12_SHADER_VISIBILITY_VERTEX)
+		.CBV(1,D3D12_SHADER_VISIBILITY_PIXEL)
+		.SRVTable(0,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_PIXEL)
+		.SRVTable(1,1,D3D12_DESCRIPTOR_RANGE_TYPE_SRV,D3D12_SHADER_VISIBILITY_PIXEL)
+		.SamplerWrapLinear(0);
 	return desc;
 }
 

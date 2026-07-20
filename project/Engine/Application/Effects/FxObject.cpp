@@ -484,6 +484,9 @@ namespace CalyxEngine {
 		child->GetEmitter()->ApplyConfigFrom(node.emitter);
 		child->SetDrawEnable(node.isDrawEnable);
 		child->SetParent(shared_from_this());
+		// 親設定後のローカルTransformからEmitterのRuntime Transformを即時更新する。
+		child->GetWorldTransform().Update();
+		child->SyncEmitterFromWorldTransform();
 
 		emitters_.push_back(child);
 		++emitterRevision_;

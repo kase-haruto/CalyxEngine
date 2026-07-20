@@ -222,6 +222,7 @@ namespace CalyxEngine {
 	void FxSystem::Clear() {
 		cpuEmitters_.clear();
 		gpuEmitters_.clear();
+		if(particleRenderer_) particleRenderer_->ClearTrailResources();
 	}
 
 } // namespace CalyxEngine

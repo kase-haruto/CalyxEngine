@@ -26,6 +26,7 @@ namespace CalyxEngine {
 		float              lifetime = 1.0f;                 //< 寿命
 		float              age;                             //< 経過時間
 		Vector4 color;                           //< 色
+		Vector4 vertexColor{1.0f,1.0f,1.0f,1.0f}; //< エディタから設定する頂点色
 		Vector4 emissiveColor{1.0f,1.0f,1.0f,1.0f}; //< 発光色
 		float emissiveIntensity = 0.0f;             //< 発光強度
 		uint32_t randomSeed = 0;                    //< 生成時に確定するRandom Seed
@@ -52,5 +53,6 @@ namespace CalyxEngine {
 		Vector4 color;
 		uint32_t           isAlive = 0;
 		Vector3 initialScale{1.0f, 1.0f, 1.0f};
+		Vector3 rotation{0.0f,0.0f,0.0f}; //< 生成時の固定回転（GPU描画ではZ軸を使用）
 	};
 }

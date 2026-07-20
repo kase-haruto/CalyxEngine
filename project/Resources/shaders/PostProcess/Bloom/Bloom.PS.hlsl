@@ -43,14 +43,20 @@ float Luminance(float3 color) {
 
 // ブルームとして扱う色を抽出する
 float3 ExtractBloom(float3 color) {
-	// BloomMask にはすでに Emissive 成分のみが入っている想定のため、
-	// ここでは輝度による追加の threshold 判定は行わない
-	return color;
+	// Scene ColorとEmissive Maskの双方を、Soft Knee付きの輝度閾値で抽出する。
+	float brightness = Luminance(max(color, 0.0f));
+	float knee = max(threshold * saturate(softKnee), 0.00001f);
+	float soft = clamp(brightness - threshold + knee, 0.0f, 2.0f * knee);
+	soft = soft * soft / (4.0f * knee + 0.00001f);
+	float contribution = max(brightness - threshold, soft) / max(brightness, 0.00001f);
+	return color * max(contribution, 0.0f);
 }
 
 // BloomMask からブルーム用の色をサンプリングする
 float3 SampleMask(float2 uv) {
-	return ExtractBloom(gBloomMask.Sample(gSampler, uv).rgb);
+	float3 sceneColor = gSceneColor.Sample(gSampler, uv).rgb;
+	float3 emissiveMask = gBloomMask.Sample(gSampler, uv).rgb;
+	return ExtractBloom(max(sceneColor, emissiveMask));
 }
 
 // 上下左右方向からサンプリングする

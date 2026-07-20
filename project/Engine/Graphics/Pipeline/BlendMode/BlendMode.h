@@ -105,6 +105,9 @@ inline D3D12_BLEND_DESC CreateBlendDesc(BlendMode mode){
 			CX_CHECK(false && "Unsupported BlendMode!", "Assertion failed");
 			break;
 	}
+	// Scene ColorとBloom Maskで同じ合成規則を使用し、後続DrawによるMask上書きを防ぐ。
+	blendDesc.IndependentBlendEnable = TRUE;
+	blendDesc.RenderTarget[1] = rt0;
 
 	return blendDesc;
 }

@@ -157,7 +157,7 @@ namespace CalyxEngine {
 	bool EffectPlayer::IsFinished(const EffectInstance& instance) const {
 		for(const auto& runtimeEmitter : instance.emitters) {
 			if(auto cpu = std::dynamic_pointer_cast<FxEmitter>(runtimeEmitter.emitter)) {
-				if(cpu->IsPlaying() || !cpu->GetUnits().empty()) {
+				if(cpu->IsPlaying() || !cpu->GetUnits().empty() || !cpu->GetTrailEmitter().History().Empty()) {
 					return false;
 				}
 				continue;
