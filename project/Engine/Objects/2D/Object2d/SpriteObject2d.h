@@ -82,6 +82,10 @@ namespace CalyxEngine {
 		void SetUvScale(const CalyxEngine::Vector2& scale) const;
 		void SetUvOffset(const CalyxEngine::Vector2& offset) const; // 加算したいなら
 
+		void SetFillAmount(float fillAmount) const;
+		void SetFillOrigin(float x,float y);
+		void SetFillMethod(int method);
+
 	private:
 		std::unique_ptr<Sprite> sprite_ = nullptr;
 	};

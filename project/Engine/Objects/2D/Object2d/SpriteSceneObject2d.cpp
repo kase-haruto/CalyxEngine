@@ -82,6 +82,16 @@ namespace CalyxEngine {
 		}
 	}
 
+	void SpriteSceneObject2d::SetFillAmount(float amt) {
+		sprite_->SetFillAmount(amt);
+	}
+
+	void SpriteSceneObject2d::SetFillOrigin(float x, float y) {
+		sprite_->SetFillOrigin(x, y);
+	}
+
+
+
 	void SpriteSceneObject2d::ApplyConfigFromJson(const nlohmann::json& j) {
 		id_ = j.value("guid", id_);
 		name_ = j.value("name", name_);
@@ -114,6 +124,10 @@ namespace CalyxEngine {
 			transformAnimation2d_.ExtractConfigToJson(animationJson);
 			j["transformAnimation2d"] = animationJson;
 		}
+	}
+
+	void SpriteSceneObject2d::SetFillMethod(int method) {
+		sprite_->SetFillMethod(method);
 	}
 
 	void SpriteSceneObject2d::EnsureSprite() {
