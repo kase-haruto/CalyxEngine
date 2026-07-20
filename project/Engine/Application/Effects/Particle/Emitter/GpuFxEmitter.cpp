@@ -51,10 +51,9 @@ namespace CalyxEngine {
 		static_assert(sizeof(EmitterSphere) == 320);
 		static_assert(offsetof(EmitterSphere,initialRotation) == 208);
 		static_assert(offsetof(EmitterSphere,previousTranslate) == 224);
-		static_assert(offsetof(EmitterSphere,noiseMotionEnabled) == 256);
-		static_assert(offsetof(EmitterSphere,unitTrailEnabled) == 288);
-		static_assert(sizeof(ParticleCS) == 96);
-		static_assert(offsetof(ParticleCS,trailSource) == 88);
+		static_assert(offsetof(EmitterSphere,curlNoiseEnabled) == 256);
+		static_assert(offsetof(EmitterSphere,curlNoiseOffset) == 288);
+		static_assert(sizeof(ParticleCS) == 88);
 		ID3D12Device* dev = GraphicsGroup::GetInstance()->GetDevice().Get();
 
 		// StructuredBuffer を DEFAULT + UAV で確保
@@ -100,15 +99,14 @@ namespace CalyxEngine {
 		emitterData_.complementEnabled = 0;
 		emitterData_.complementSpacing = 0.02f;
 		emitterData_.complementStartDistance = 0.0f;
-		emitterData_.noiseMotionEnabled = 0;
-		emitterData_.noiseMotionStrength = 1.0f;
-		emitterData_.noiseMotionFrequency = 1.0f;
-		emitterData_.noiseMotionScrollSpeed = {};
-		emitterData_.unitTrailEnabled = 0;
-		emitterData_.unitTrailSpacing = 0.05f;
-		emitterData_.unitTrailLifetime = 0.3f;
-		emitterData_.unitTrailMaxSamplesPerFrame = 8;
-		emitterData_.unitTrailScale = 1.0f;
+		emitterData_.curlNoiseEnabled = 0;
+		emitterData_.curlNoiseFrequency = 1.0f;
+		emitterData_.curlNoiseOctaves = 1;
+		emitterData_.curlNoiseRoughness = 0.5f;
+		emitterData_.curlNoiseLacunarity = 2.0f;
+		emitterData_.curlNoiseAmplitude = 1.0f;
+		emitterData_.curlNoiseOffset = {};
+		emitterData_.curlNoiseScrollSpeed = {};
 
 		material_.texturePath = kFallbackTexturePath;
 		textureHandle_ = AssetManager::GetInstance()->GetTextureManager()->LoadTexture(material_.texturePath);
@@ -130,7 +128,6 @@ namespace CalyxEngine {
 	void GpuFxEmitter::Update(float dt){
 		SyncEmitterDataFromBase();
 		emitterData_.color = vertexColor_;
-		emitterData_.noiseMotionEnabled = noiseMotionEnabled_ && material_.noiseMaskParams.x > 0.5f ? 1u : 0u;
 		uvElapsedTime_ += isPlaying_ ? dt : 0.0f;
 		material_.uvOffsetTiling = {uvSettings_.offset.x,uvSettings_.offset.y,uvSettings_.tiling.x,uvSettings_.tiling.y};
 		material_.uvScrollRotationTime = {uvSettings_.scrollSpeed.x,uvSettings_.scrollSpeed.y,uvSettings_.rotation,uvElapsedTime_};
@@ -302,32 +299,27 @@ namespace CalyxEngine {
 				ImGui::DragFloat2("Scroll Speed##gpu_noise_mask", &noiseMaskScrollSpeed_.x, 0.01f);
 				ImGui::EndDisabled();
 
-				FxGui::RowLabel("Noise Motion");
-				ImGui::Checkbox("##gpu_noise_motion_enabled",&noiseMotionEnabled_);
-				ImGui::BeginDisabled(!noiseMotionEnabled_ || material_.noiseMaskParams.x <= 0.5f);
-				FxGui::RowLabel("Motion Strength");
-				ImGui::DragFloat("##gpu_noise_motion_strength",&emitterData_.noiseMotionStrength,0.01f,0.0f,100.0f);
-				FxGui::RowLabel("Motion Frequency");
-				ImGui::DragFloat("##gpu_noise_motion_frequency",&emitterData_.noiseMotionFrequency,0.01f,0.0001f,100.0f);
-				FxGui::RowLabel("Motion Scroll");
-				ImGui::DragFloat2("##gpu_noise_motion_scroll",&emitterData_.noiseMotionScrollSpeed.x,0.01f);
-				ImGui::EndDisabled();
-
-				bool unitTrailEnabled = emitterData_.unitTrailEnabled != 0;
-				FxGui::RowLabel("Unit Trail");
-				if(ImGui::Checkbox("##gpu_unit_trail_enabled",&unitTrailEnabled))
-					emitterData_.unitTrailEnabled = unitTrailEnabled ? 1u : 0u;
-				ImGui::BeginDisabled(!unitTrailEnabled);
-				FxGui::RowLabel("Trail Spacing");
-				ImGui::DragFloat("##gpu_unit_trail_spacing",&emitterData_.unitTrailSpacing,0.005f,0.001f,10.0f);
-				FxGui::RowLabel("Trail Lifetime");
-				ImGui::DragFloat("##gpu_unit_trail_lifetime",&emitterData_.unitTrailLifetime,0.01f,0.01f,30.0f);
-				FxGui::RowLabel("Trail Scale");
-				ImGui::DragFloat("##gpu_unit_trail_scale",&emitterData_.unitTrailScale,0.01f,0.0f,10.0f);
-				FxGui::RowLabel("Max Samples / Frame");
-				int maxTrailSamples = static_cast<int>(emitterData_.unitTrailMaxSamplesPerFrame);
-				if(ImGui::DragInt("##gpu_unit_trail_max_samples",&maxTrailSamples,1,1,32))
-					emitterData_.unitTrailMaxSamplesPerFrame = static_cast<uint32_t>(std::clamp(maxTrailSamples,1,32));
+				bool curlNoiseEnabled = emitterData_.curlNoiseEnabled != 0;
+				FxGui::RowLabel("Perlin Curl Noise");
+				if(ImGui::Checkbox("##gpu_curl_noise_enabled",&curlNoiseEnabled))
+					emitterData_.curlNoiseEnabled = curlNoiseEnabled ? 1u : 0u;
+				ImGui::BeginDisabled(!curlNoiseEnabled);
+				FxGui::RowLabel("Frequency");
+				ImGui::DragFloat("##gpu_curl_frequency",&emitterData_.curlNoiseFrequency,0.01f,0.0001f,100.0f);
+				FxGui::RowLabel("Octaves");
+				int curlOctaves = static_cast<int>(emitterData_.curlNoiseOctaves);
+				if(ImGui::DragInt("##gpu_curl_octaves",&curlOctaves,1,1,4))
+					emitterData_.curlNoiseOctaves = static_cast<uint32_t>(std::clamp(curlOctaves,1,4));
+				FxGui::RowLabel("Roughness");
+				ImGui::SliderFloat("##gpu_curl_roughness",&emitterData_.curlNoiseRoughness,0.0f,1.0f);
+				FxGui::RowLabel("Lacunarity");
+				ImGui::DragFloat("##gpu_curl_lacunarity",&emitterData_.curlNoiseLacunarity,0.01f,1.0f,8.0f);
+				FxGui::RowLabel("Amplitude");
+				ImGui::DragFloat("##gpu_curl_amplitude",&emitterData_.curlNoiseAmplitude,0.01f,0.0f,100.0f);
+				FxGui::RowLabel("Coordinate Offset");
+				ImGui::DragFloat3("##gpu_curl_offset",&emitterData_.curlNoiseOffset.x,0.01f);
+				FxGui::RowLabel("Scroll Speed");
+				ImGui::DragFloat3("##gpu_curl_scroll",&emitterData_.curlNoiseScrollSpeed.x,0.01f);
 				ImGui::EndDisabled();
 				if(ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
 					ImGui::SetTooltip("アタッチしたNoise TextureのRチャンネルでAlphaをマスクします。\nThresholdで表示範囲、Softnessで境界、Scroll Speedで流れを調整します。");
@@ -472,15 +464,14 @@ namespace CalyxEngine {
 			config.noiseMaskThreshold};
 		material_.noiseMaskUv = {0.0f,0.0f,config.noiseMaskSoftness,0.0f};
 		noiseMaskScrollSpeed_ = config.noiseMaskScrollSpeed;
-		noiseMotionEnabled_ = config.gpuNoiseMotionEnabled;
-		emitterData_.noiseMotionStrength = config.gpuNoiseMotionStrength;
-		emitterData_.noiseMotionFrequency = config.gpuNoiseMotionFrequency;
-		emitterData_.noiseMotionScrollSpeed = config.gpuNoiseMotionScrollSpeed;
-		emitterData_.unitTrailEnabled = config.gpuUnitTrailEnabled ? 1u : 0u;
-		emitterData_.unitTrailSpacing = config.gpuUnitTrailSpacing;
-		emitterData_.unitTrailLifetime = config.gpuUnitTrailLifetime;
-		emitterData_.unitTrailMaxSamplesPerFrame = std::clamp(config.gpuUnitTrailMaxSamplesPerFrame,1u,32u);
-		emitterData_.unitTrailScale = config.gpuUnitTrailScale;
+		emitterData_.curlNoiseEnabled = config.gpuCurlNoiseEnabled ? 1u : 0u;
+		emitterData_.curlNoiseFrequency = config.gpuCurlNoiseFrequency;
+		emitterData_.curlNoiseOctaves = std::clamp(config.gpuCurlNoiseOctaves,1u,4u);
+		emitterData_.curlNoiseRoughness = config.gpuCurlNoiseRoughness;
+		emitterData_.curlNoiseLacunarity = config.gpuCurlNoiseLacunarity;
+		emitterData_.curlNoiseAmplitude = config.gpuCurlNoiseAmplitude;
+		emitterData_.curlNoiseOffset = config.gpuCurlNoiseOffset;
+		emitterData_.curlNoiseScrollSpeed = config.gpuCurlNoiseScrollSpeed;
 		material_.texturePath = ResolveTexturePath(config.texturePath);
 		textureGuid_ = config.textureGuid;
 		if(textureGuid_.isValid()) {
@@ -571,15 +562,14 @@ namespace CalyxEngine {
 		config.noiseMaskThreshold = material_.noiseMaskParams.w;
 		config.noiseMaskSoftness = material_.noiseMaskUv.z;
 		config.noiseMaskScrollSpeed = noiseMaskScrollSpeed_;
-		config.gpuNoiseMotionEnabled = noiseMotionEnabled_;
-		config.gpuNoiseMotionStrength = emitterData_.noiseMotionStrength;
-		config.gpuNoiseMotionFrequency = emitterData_.noiseMotionFrequency;
-		config.gpuNoiseMotionScrollSpeed = emitterData_.noiseMotionScrollSpeed;
-		config.gpuUnitTrailEnabled = emitterData_.unitTrailEnabled != 0;
-		config.gpuUnitTrailSpacing = emitterData_.unitTrailSpacing;
-		config.gpuUnitTrailLifetime = emitterData_.unitTrailLifetime;
-		config.gpuUnitTrailMaxSamplesPerFrame = emitterData_.unitTrailMaxSamplesPerFrame;
-		config.gpuUnitTrailScale = emitterData_.unitTrailScale;
+		config.gpuCurlNoiseEnabled = emitterData_.curlNoiseEnabled != 0;
+		config.gpuCurlNoiseFrequency = emitterData_.curlNoiseFrequency;
+		config.gpuCurlNoiseOctaves = emitterData_.curlNoiseOctaves;
+		config.gpuCurlNoiseRoughness = emitterData_.curlNoiseRoughness;
+		config.gpuCurlNoiseLacunarity = emitterData_.curlNoiseLacunarity;
+		config.gpuCurlNoiseAmplitude = emitterData_.curlNoiseAmplitude;
+		config.gpuCurlNoiseOffset = emitterData_.curlNoiseOffset;
+		config.gpuCurlNoiseScrollSpeed = emitterData_.curlNoiseScrollSpeed;
 		config.modelPath = modelPath;
 		config.modelGuid = modelGuid_;
 		config.isDrawEnable = isDrawEnable_;
@@ -913,7 +903,6 @@ namespace CalyxEngine {
 		cmd->SetComputeRootDescriptorTable(2, particleBuffer_.GetGpuUavHandle());		// u0: Particles
 		cmd->SetComputeRootDescriptorTable(3, freeListIndexBuffer_.GetGpuUavHandle());	// u1: listIndex
 		cmd->SetComputeRootDescriptorTable(4, freeListBuffer_.GetGpuUavHandle());		// u2: list
-		cmd->SetComputeRootDescriptorTable(5, noiseMaskTextureHandle_);                 // t0: motion noise
 
 		// ── Dispatch ────────────────────
 		cmd->Dispatch(CeilDiv(kMaxParticles, 1024u), 1, 1);
@@ -949,7 +938,7 @@ namespace CalyxEngine {
 		// Complement emission can allocate an arbitrary number of particles per frame.
 		// Until the renderer uses an alive-count indirect argument, the full pool is
 		// required so particles outside the normal rate-based estimate stay visible.
-		if(complementEnabled_ || emitterData_.unitTrailEnabled != 0) return kMaxParticles;
+		if(complementEnabled_) return kMaxParticles;
 		const float frequency = (std::max)(emitterData_.frequency, 0.0001f);
 		const float lifeTime = (std::max)(emitterData_.lifeTime, 0.01f);
 		const uint64_t burstCount = (std::max)(emitterData_.count, 1u);

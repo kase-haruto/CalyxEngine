@@ -5,8 +5,6 @@ ConstantBuffer<EmitterData> gEmitter : register(b1);
 RWStructuredBuffer<Particle> gParticles : register(u0);
 RWStructuredBuffer<int> gFreeListIndex : register(u1);
 RWStructuredBuffer<int> gFreeList : register(u2);
-Texture2D<float4> gNoiseMotionTexture : register(t0);
-SamplerState gNoiseMotionSampler : register(s0);
 
 float4 ApplyBlend4(float4 currentValue, float4 moduleValue, uint blend) {
 	if(blend == 1) return currentValue + moduleValue;
@@ -14,25 +12,79 @@ float4 ApplyBlend4(float4 currentValue, float4 moduleValue, uint blend) {
 	return moduleValue;
 }
 
-void SpawnUnitTrailSample(Particle source,float3 position) {
-	int freeListIndex;
-	InterlockedAdd(gFreeListIndex[0],-1,freeListIndex);
-	if(0 <= freeListIndex && freeListIndex < kMaxParticles) {
-		Particle trail = source;
-		trail.translate = position;
-		trail.scale = source.scale * gEmitter.unitTrailScale;
-		trail.initialScale = trail.scale;
-		trail.velocity = 0.0f;
-		trail.lifeTime = max(gEmitter.unitTrailLifetime,0.01f);
-		trail.currentTime = 0.0f;
-		trail.isAlive = 1;
-		trail.trailSource = 0;
-		trail.trailRemainder = 0.0f;
-		uint trailIndex = gFreeList[freeListIndex];
-		gParticles[trailIndex] = trail;
-	} else {
-		InterlockedAdd(gFreeListIndex[0],1);
+float3 PerlinFade(float3 t) {
+	return t * t * t * (t * (t * 6.0f - 15.0f) + 10.0f);
+}
+
+uint PerlinHash(int3 cell) {
+	uint3 p = asuint(cell);
+	uint h = p.x * 374761393u + p.y * 668265263u + p.z * 2246822519u;
+	h = (h ^ (h >> 13u)) * 1274126177u;
+	return h ^ (h >> 16u);
+}
+
+float PerlinGradientDot(int3 cell,float3 delta) {
+	uint h = PerlinHash(cell) & 15u;
+	float u = h < 8u ? delta.x : delta.y;
+	float v = h < 4u ? delta.y : ((h == 12u || h == 14u) ? delta.x : delta.z);
+	return ((h & 1u) == 0u ? u : -u) + ((h & 2u) == 0u ? v : -v);
+}
+
+float PerlinNoise3D(float3 coordinate) {
+	int3 cell = (int3)floor(coordinate);
+	float3 local = coordinate - (float3)cell;
+	float3 fade = PerlinFade(local);
+	float n000 = PerlinGradientDot(cell + int3(0,0,0),local - float3(0,0,0));
+	float n100 = PerlinGradientDot(cell + int3(1,0,0),local - float3(1,0,0));
+	float n010 = PerlinGradientDot(cell + int3(0,1,0),local - float3(0,1,0));
+	float n110 = PerlinGradientDot(cell + int3(1,1,0),local - float3(1,1,0));
+	float n001 = PerlinGradientDot(cell + int3(0,0,1),local - float3(0,0,1));
+	float n101 = PerlinGradientDot(cell + int3(1,0,1),local - float3(1,0,1));
+	float n011 = PerlinGradientDot(cell + int3(0,1,1),local - float3(0,1,1));
+	float n111 = PerlinGradientDot(cell + int3(1,1,1),local - float3(1,1,1));
+	float4 nx = lerp(float4(n000,n010,n001,n011),float4(n100,n110,n101,n111),fade.x);
+	float2 nxy = lerp(nx.xz,nx.yw,fade.y);
+	return lerp(nxy.x,nxy.y,fade.z);
+}
+
+float PerlinFbm(float3 coordinate) {
+	float value = 0.0f;
+	float weight = 1.0f;
+	float frequency = max(gEmitter.curlNoiseFrequency,0.0001f);
+	float weightSum = 0.0f;
+	uint octaves = clamp(gEmitter.curlNoiseOctaves,1u,4u);
+	for(uint octave = 0; octave < octaves; ++octave) {
+		value += PerlinNoise3D(coordinate * frequency) * weight;
+		weightSum += weight;
+		weight *= gEmitter.curlNoiseRoughness;
+		frequency *= max(gEmitter.curlNoiseLacunarity,1.0f);
 	}
+	return value / max(weightSum,0.0001f);
+}
+
+float3 PerlinVectorPotential(float3 coordinate) {
+	return float3(
+		PerlinFbm(coordinate + float3(19.1f,33.4f,47.2f)),
+		PerlinFbm(coordinate + float3(74.2f,12.8f,29.6f)),
+		PerlinFbm(coordinate + float3(41.7f,91.3f,15.5f)));
+}
+
+float3 PerlinCurlNoise(float3 coordinate) {
+	float epsilon = 0.01f / max(gEmitter.curlNoiseFrequency,0.0001f);
+	float3 dx = float3(epsilon,0.0f,0.0f);
+	float3 dy = float3(0.0f,epsilon,0.0f);
+	float3 dz = float3(0.0f,0.0f,epsilon);
+	float3 potentialXp = PerlinVectorPotential(coordinate + dx);
+	float3 potentialXm = PerlinVectorPotential(coordinate - dx);
+	float3 potentialYp = PerlinVectorPotential(coordinate + dy);
+	float3 potentialYm = PerlinVectorPotential(coordinate - dy);
+	float3 potentialZp = PerlinVectorPotential(coordinate + dz);
+	float3 potentialZm = PerlinVectorPotential(coordinate - dz);
+	float inverseDoubleEpsilon = 0.5f / epsilon;
+	return float3(
+		(potentialYp.z - potentialYm.z) - (potentialZp.y - potentialZm.y),
+		(potentialZp.x - potentialZm.x) - (potentialXp.z - potentialXm.z),
+		(potentialXp.y - potentialXm.y) - (potentialYp.x - potentialYm.x)) * inverseDoubleEpsilon;
 }
 
 [numthreads(1024, 1, 1)]
@@ -43,39 +95,15 @@ void main(uint3 DTid : SV_DispatchThreadID) {
 			return;
 		}
 
-		if(gParticles[particleIndex].trailSource != 0) {
-			float3 previousPosition = gParticles[particleIndex].translate;
-			if(gEmitter.gravityEnabled != 0) {
-				gParticles[particleIndex].velocity += gEmitter.gravity * gPerFrame.deltaTime;
-			}
-			gParticles[particleIndex].translate += gParticles[particleIndex].velocity * gPerFrame.deltaTime;
-			if(gEmitter.noiseMotionEnabled != 0) {
-				float3 noisePosition = gParticles[particleIndex].translate * gEmitter.noiseMotionFrequency;
-				float2 noiseScroll = gEmitter.noiseMotionScrollSpeed * gPerFrame.time;
-				float noiseX = gNoiseMotionTexture.SampleLevel(gNoiseMotionSampler,noisePosition.yz + noiseScroll,0.0f).r;
-				float noiseY = gNoiseMotionTexture.SampleLevel(gNoiseMotionSampler,noisePosition.zx + noiseScroll,0.0f).g;
-				float noiseZ = gNoiseMotionTexture.SampleLevel(gNoiseMotionSampler,noisePosition.xy + noiseScroll,0.0f).b;
-				float3 noiseDirection = float3(noiseX,noiseY,noiseZ) * 2.0f - 1.0f;
-				gParticles[particleIndex].translate += noiseDirection * gEmitter.noiseMotionStrength * gPerFrame.deltaTime;
-			}
-
-			if(gEmitter.unitTrailEnabled != 0) {
-				float spacing = max(gEmitter.unitTrailSpacing,0.001f);
-				float distanceMoved = length(gParticles[particleIndex].translate - previousPosition);
-				float accumulated = gParticles[particleIndex].trailRemainder + distanceMoved;
-				uint requestedCount = (uint)(accumulated / spacing);
-				uint sampleCount = min(requestedCount,min(gEmitter.unitTrailMaxSamplesPerFrame,32u));
-				float firstDistance = spacing - gParticles[particleIndex].trailRemainder
-					+ float(requestedCount - sampleCount) * spacing;
-				for(uint sampleIndex = 0; sampleIndex < sampleCount; ++sampleIndex) {
-					float sampleDistance = firstDistance + float(sampleIndex) * spacing;
-					float t = distanceMoved > 0.000001f ? saturate(sampleDistance / distanceMoved) : 0.0f;
-					SpawnUnitTrailSample(gParticles[particleIndex],lerp(previousPosition,gParticles[particleIndex].translate,t));
-				}
-				gParticles[particleIndex].trailRemainder = fmod(accumulated,spacing);
-			} else {
-				gParticles[particleIndex].trailRemainder = 0.0f;
-			}
+		if(gEmitter.gravityEnabled != 0) {
+			gParticles[particleIndex].velocity += gEmitter.gravity * gPerFrame.deltaTime;
+		}
+		gParticles[particleIndex].translate += gParticles[particleIndex].velocity * gPerFrame.deltaTime;
+		if(gEmitter.curlNoiseEnabled != 0) {
+			float3 noiseCoordinate = gParticles[particleIndex].translate + gEmitter.curlNoiseOffset
+				+ gEmitter.curlNoiseScrollSpeed * gPerFrame.time;
+			float3 curlVelocity = PerlinCurlNoise(noiseCoordinate) * gEmitter.curlNoiseAmplitude;
+			gParticles[particleIndex].translate += curlVelocity * gPerFrame.deltaTime;
 		}
 		gParticles[particleIndex].currentTime += gPerFrame.deltaTime;
 		float lifeT = gParticles[particleIndex].currentTime / max(gParticles[particleIndex].lifeTime, 0.01f);

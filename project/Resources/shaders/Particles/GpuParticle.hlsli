@@ -8,8 +8,6 @@ struct Particle {
 	uint isAlive;
 	float3 initialScale;
 	float3 rotation;
-	uint trailSource;
-	float trailRemainder;
 };
 
 struct PerFrame {
@@ -53,18 +51,17 @@ struct EmitterData {
 	float complementSpacing;
 	float complementStartDistance;
 	float2 _pad3;
-	uint noiseMotionEnabled;
-	float noiseMotionStrength;
-	float noiseMotionFrequency;
-	float _pad4;
-	float2 noiseMotionScrollSpeed;
-	float2 _pad5;
-	uint unitTrailEnabled;
-	float unitTrailSpacing;
-	float unitTrailLifetime;
-	uint unitTrailMaxSamplesPerFrame;
-	float unitTrailScale;
-	float3 _pad6;
+	uint curlNoiseEnabled;
+	float curlNoiseFrequency;
+	uint curlNoiseOctaves;
+	float curlNoiseRoughness;
+	float curlNoiseLacunarity;
+	float curlNoiseAmplitude;
+	float2 _pad4;
+	float3 curlNoiseOffset;
+	float _pad5;
+	float3 curlNoiseScrollSpeed;
+	float _pad6;
 };
 
 float ApplyGpuEase(uint ease, float t) {

@@ -54,7 +54,5 @@ namespace CalyxEngine {
 		uint32_t           isAlive = 0;
 		Vector3 initialScale{1.0f, 1.0f, 1.0f};
 		Vector3 rotation{0.0f,0.0f,0.0f}; //< 生成時の固定回転（GPU描画ではZ軸を使用）
-		uint32_t trailSource = 0;
-		float trailRemainder = 0.0f;
 	};
 }

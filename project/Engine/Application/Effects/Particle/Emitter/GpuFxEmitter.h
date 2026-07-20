@@ -65,18 +65,17 @@ namespace CalyxEngine {
 			float complementSpacing;
 			float complementStartDistance;
 			float _pad3[2];
-			uint32_t noiseMotionEnabled;
-			float noiseMotionStrength;
-			float noiseMotionFrequency;
-			float _pad4;
-			CalyxEngine::Vector2 noiseMotionScrollSpeed;
-			float _pad5[2];
-			uint32_t unitTrailEnabled;
-			float unitTrailSpacing;
-			float unitTrailLifetime;
-			uint32_t unitTrailMaxSamplesPerFrame;
-			float unitTrailScale;
-			float _pad6[3];
+			uint32_t curlNoiseEnabled;
+			float curlNoiseFrequency;
+			uint32_t curlNoiseOctaves;
+			float curlNoiseRoughness;
+			float curlNoiseLacunarity;
+			float curlNoiseAmplitude;
+			float _pad4[2];
+			CalyxEngine::Vector3 curlNoiseOffset;
+			float _pad5;
+			CalyxEngine::Vector3 curlNoiseScrollSpeed;
+			float _pad6;
 		};
 
 	public:
@@ -150,7 +149,6 @@ namespace CalyxEngine {
 		std::string noiseMaskTexturePath_;
 		BlendMode blendMode_ = BlendMode::ADD;
 		Vector2 noiseMaskScrollSpeed_{};
-		bool noiseMotionEnabled_ = false;
 
 		// SBuff
 		DxStructuredBuffer<ParticleCS> particleBuffer_; // UAV+SRV

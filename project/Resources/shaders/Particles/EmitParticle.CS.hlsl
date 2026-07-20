@@ -115,8 +115,6 @@ void main(uint3 DTid : SV_DispatchThreadID) {
 		p.currentTime = 0.0f;
 		p.isAlive = 1;
 		p.rotation = gEmitter.initialRotation;
-		p.trailSource = 1;
-		p.trailRemainder = 0.0f;
 
 		p.velocity = gEmitter.velocity;
         
