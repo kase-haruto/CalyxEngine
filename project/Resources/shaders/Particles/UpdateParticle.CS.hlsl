@@ -5,11 +5,34 @@ ConstantBuffer<EmitterData> gEmitter : register(b1);
 RWStructuredBuffer<Particle> gParticles : register(u0);
 RWStructuredBuffer<int> gFreeListIndex : register(u1);
 RWStructuredBuffer<int> gFreeList : register(u2);
+Texture2D<float4> gNoiseMotionTexture : register(t0);
+SamplerState gNoiseMotionSampler : register(s0);
 
 float4 ApplyBlend4(float4 currentValue, float4 moduleValue, uint blend) {
 	if(blend == 1) return currentValue + moduleValue;
 	if(blend == 2) return currentValue * moduleValue;
 	return moduleValue;
+}
+
+void SpawnUnitTrailSample(Particle source,float3 position) {
+	int freeListIndex;
+	InterlockedAdd(gFreeListIndex[0],-1,freeListIndex);
+	if(0 <= freeListIndex && freeListIndex < kMaxParticles) {
+		Particle trail = source;
+		trail.translate = position;
+		trail.scale = source.scale * gEmitter.unitTrailScale;
+		trail.initialScale = trail.scale;
+		trail.velocity = 0.0f;
+		trail.lifeTime = max(gEmitter.unitTrailLifetime,0.01f);
+		trail.currentTime = 0.0f;
+		trail.isAlive = 1;
+		trail.trailSource = 0;
+		trail.trailRemainder = 0.0f;
+		uint trailIndex = gFreeList[freeListIndex];
+		gParticles[trailIndex] = trail;
+	} else {
+		InterlockedAdd(gFreeListIndex[0],1);
+	}
 }
 
 [numthreads(1024, 1, 1)]
@@ -20,10 +43,40 @@ void main(uint3 DTid : SV_DispatchThreadID) {
 			return;
 		}
 
-		if(gEmitter.gravityEnabled != 0) {
-			gParticles[particleIndex].velocity += gEmitter.gravity * gPerFrame.deltaTime;
+		if(gParticles[particleIndex].trailSource != 0) {
+			float3 previousPosition = gParticles[particleIndex].translate;
+			if(gEmitter.gravityEnabled != 0) {
+				gParticles[particleIndex].velocity += gEmitter.gravity * gPerFrame.deltaTime;
+			}
+			gParticles[particleIndex].translate += gParticles[particleIndex].velocity * gPerFrame.deltaTime;
+			if(gEmitter.noiseMotionEnabled != 0) {
+				float3 noisePosition = gParticles[particleIndex].translate * gEmitter.noiseMotionFrequency;
+				float2 noiseScroll = gEmitter.noiseMotionScrollSpeed * gPerFrame.time;
+				float noiseX = gNoiseMotionTexture.SampleLevel(gNoiseMotionSampler,noisePosition.yz + noiseScroll,0.0f).r;
+				float noiseY = gNoiseMotionTexture.SampleLevel(gNoiseMotionSampler,noisePosition.zx + noiseScroll,0.0f).g;
+				float noiseZ = gNoiseMotionTexture.SampleLevel(gNoiseMotionSampler,noisePosition.xy + noiseScroll,0.0f).b;
+				float3 noiseDirection = float3(noiseX,noiseY,noiseZ) * 2.0f - 1.0f;
+				gParticles[particleIndex].translate += noiseDirection * gEmitter.noiseMotionStrength * gPerFrame.deltaTime;
+			}
+
+			if(gEmitter.unitTrailEnabled != 0) {
+				float spacing = max(gEmitter.unitTrailSpacing,0.001f);
+				float distanceMoved = length(gParticles[particleIndex].translate - previousPosition);
+				float accumulated = gParticles[particleIndex].trailRemainder + distanceMoved;
+				uint requestedCount = (uint)(accumulated / spacing);
+				uint sampleCount = min(requestedCount,min(gEmitter.unitTrailMaxSamplesPerFrame,32u));
+				float firstDistance = spacing - gParticles[particleIndex].trailRemainder
+					+ float(requestedCount - sampleCount) * spacing;
+				for(uint sampleIndex = 0; sampleIndex < sampleCount; ++sampleIndex) {
+					float sampleDistance = firstDistance + float(sampleIndex) * spacing;
+					float t = distanceMoved > 0.000001f ? saturate(sampleDistance / distanceMoved) : 0.0f;
+					SpawnUnitTrailSample(gParticles[particleIndex],lerp(previousPosition,gParticles[particleIndex].translate,t));
+				}
+				gParticles[particleIndex].trailRemainder = fmod(accumulated,spacing);
+			} else {
+				gParticles[particleIndex].trailRemainder = 0.0f;
+			}
 		}
-		gParticles[particleIndex].translate += gParticles[particleIndex].velocity * gPerFrame.deltaTime;
 		gParticles[particleIndex].currentTime += gPerFrame.deltaTime;
 		float lifeT = gParticles[particleIndex].currentTime / max(gParticles[particleIndex].lifeTime, 0.01f);
 		if(gEmitter.overLifeClamp != 0) {
@@ -60,12 +113,13 @@ void main(uint3 DTid : SV_DispatchThreadID) {
 			gParticles[particleIndex].color.a = 0.0f;
 			gParticles[particleIndex].isAlive = 0;
 
-			int freeListIndex;
-			InterlockedAdd(gFreeListIndex[0], 1, freeListIndex);
+			int previousFreeListIndex;
+			InterlockedAdd(gFreeListIndex[0],1,previousFreeListIndex);
+			int returnedFreeListIndex = previousFreeListIndex + 1;
 
-			if(freeListIndex < kMaxParticles) {
+			if(0 <= returnedFreeListIndex && returnedFreeListIndex < kMaxParticles) {
 				// 正しく死んだparticleIndexを格納
-				gFreeList[freeListIndex] = particleIndex;
+				gFreeList[returnedFreeListIndex] = particleIndex;
 			}
 			else {
 				InterlockedAdd(gFreeListIndex[0], -1);

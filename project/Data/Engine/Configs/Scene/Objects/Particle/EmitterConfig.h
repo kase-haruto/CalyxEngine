@@ -128,6 +128,15 @@ namespace CalyxEngine {
 		float noiseMaskThreshold = 0.5f;
 		float noiseMaskSoftness = 0.1f;
 		CalyxEngine::Vector2 noiseMaskScrollSpeed{0.0f,0.0f};
+		bool gpuNoiseMotionEnabled = false;
+		float gpuNoiseMotionStrength = 1.0f;
+		float gpuNoiseMotionFrequency = 1.0f;
+		CalyxEngine::Vector2 gpuNoiseMotionScrollSpeed{0.0f,0.0f};
+		bool gpuUnitTrailEnabled = false;
+		float gpuUnitTrailSpacing = 0.05f;
+		float gpuUnitTrailLifetime = 0.3f;
+		uint32_t gpuUnitTrailMaxSamplesPerFrame = 8;
+		float gpuUnitTrailScale = 1.0f;
 
 		Guid textureGuid{Guid::Empty()};
 		Guid modelGuid{Guid::Empty()};
@@ -203,6 +212,15 @@ namespace CalyxEngine {
 		noiseMaskThreshold = std::clamp(j.value("noiseMaskThreshold", 0.5f), 0.0f, 1.0f);
 		noiseMaskSoftness = std::clamp(j.value("noiseMaskSoftness", 0.1f), 0.0001f, 1.0f);
 		noiseMaskScrollSpeed = j.value("noiseMaskScrollSpeed", CalyxEngine::Vector2{0.0f,0.0f});
+		gpuNoiseMotionEnabled = j.value("gpuNoiseMotionEnabled",false);
+		gpuNoiseMotionStrength = (std::max)(j.value("gpuNoiseMotionStrength",1.0f),0.0f);
+		gpuNoiseMotionFrequency = (std::max)(j.value("gpuNoiseMotionFrequency",1.0f),0.0001f);
+		gpuNoiseMotionScrollSpeed = j.value("gpuNoiseMotionScrollSpeed",CalyxEngine::Vector2{0.0f,0.0f});
+		gpuUnitTrailEnabled = j.value("gpuUnitTrailEnabled",false);
+		gpuUnitTrailSpacing = (std::max)(j.value("gpuUnitTrailSpacing",0.05f),0.001f);
+		gpuUnitTrailLifetime = (std::max)(j.value("gpuUnitTrailLifetime",0.3f),0.01f);
+		gpuUnitTrailMaxSamplesPerFrame = std::clamp(j.value("gpuUnitTrailMaxSamplesPerFrame",8u),1u,32u);
+		gpuUnitTrailScale = (std::max)(j.value("gpuUnitTrailScale",1.0f),0.0f);
 		isDrawEnable   = j.value("isDrawEnable", true);
 		isComplement   = j.value("isComplement", true);
 		randomSpinEmit = j.value("randomSpinEmit", false);
@@ -281,6 +299,15 @@ namespace CalyxEngine {
 		j["noiseMaskThreshold"] = noiseMaskThreshold;
 		j["noiseMaskSoftness"] = noiseMaskSoftness;
 		j["noiseMaskScrollSpeed"] = noiseMaskScrollSpeed;
+		j["gpuNoiseMotionEnabled"] = gpuNoiseMotionEnabled;
+		j["gpuNoiseMotionStrength"] = gpuNoiseMotionStrength;
+		j["gpuNoiseMotionFrequency"] = gpuNoiseMotionFrequency;
+		j["gpuNoiseMotionScrollSpeed"] = gpuNoiseMotionScrollSpeed;
+		j["gpuUnitTrailEnabled"] = gpuUnitTrailEnabled;
+		j["gpuUnitTrailSpacing"] = gpuUnitTrailSpacing;
+		j["gpuUnitTrailLifetime"] = gpuUnitTrailLifetime;
+		j["gpuUnitTrailMaxSamplesPerFrame"] = gpuUnitTrailMaxSamplesPerFrame;
+		j["gpuUnitTrailScale"] = gpuUnitTrailScale;
 		j["isDrawEnable"]	= isDrawEnable;
 		j["isComplement"]	= isComplement;
 		j["randomSpinEmit"] = randomSpinEmit;
