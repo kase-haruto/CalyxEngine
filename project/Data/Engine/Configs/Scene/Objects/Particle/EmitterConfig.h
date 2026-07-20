@@ -128,6 +128,14 @@ namespace CalyxEngine {
 		float noiseMaskThreshold = 0.5f;
 		float noiseMaskSoftness = 0.1f;
 		CalyxEngine::Vector2 noiseMaskScrollSpeed{0.0f,0.0f};
+		bool gpuCurlNoiseEnabled = false;
+		float gpuCurlNoiseFrequency = 1.0f;
+		uint32_t gpuCurlNoiseOctaves = 1;
+		float gpuCurlNoiseRoughness = 0.5f;
+		float gpuCurlNoiseLacunarity = 2.0f;
+		float gpuCurlNoiseAmplitude = 1.0f;
+		CalyxEngine::Vector3 gpuCurlNoiseOffset{};
+		CalyxEngine::Vector3 gpuCurlNoiseScrollSpeed{};
 
 		Guid textureGuid{Guid::Empty()};
 		Guid modelGuid{Guid::Empty()};
@@ -203,6 +211,14 @@ namespace CalyxEngine {
 		noiseMaskThreshold = std::clamp(j.value("noiseMaskThreshold", 0.5f), 0.0f, 1.0f);
 		noiseMaskSoftness = std::clamp(j.value("noiseMaskSoftness", 0.1f), 0.0001f, 1.0f);
 		noiseMaskScrollSpeed = j.value("noiseMaskScrollSpeed", CalyxEngine::Vector2{0.0f,0.0f});
+		gpuCurlNoiseEnabled = j.value("gpuCurlNoiseEnabled",false);
+		gpuCurlNoiseFrequency = (std::max)(j.value("gpuCurlNoiseFrequency",1.0f),0.0001f);
+		gpuCurlNoiseOctaves = std::clamp(j.value("gpuCurlNoiseOctaves",1u),1u,4u);
+		gpuCurlNoiseRoughness = std::clamp(j.value("gpuCurlNoiseRoughness",0.5f),0.0f,1.0f);
+		gpuCurlNoiseLacunarity = (std::max)(j.value("gpuCurlNoiseLacunarity",2.0f),1.0f);
+		gpuCurlNoiseAmplitude = (std::max)(j.value("gpuCurlNoiseAmplitude",1.0f),0.0f);
+		gpuCurlNoiseOffset = j.value("gpuCurlNoiseOffset",CalyxEngine::Vector3{});
+		gpuCurlNoiseScrollSpeed = j.value("gpuCurlNoiseScrollSpeed",CalyxEngine::Vector3{});
 		isDrawEnable   = j.value("isDrawEnable", true);
 		isComplement   = j.value("isComplement", true);
 		randomSpinEmit = j.value("randomSpinEmit", false);
@@ -281,6 +297,14 @@ namespace CalyxEngine {
 		j["noiseMaskThreshold"] = noiseMaskThreshold;
 		j["noiseMaskSoftness"] = noiseMaskSoftness;
 		j["noiseMaskScrollSpeed"] = noiseMaskScrollSpeed;
+		j["gpuCurlNoiseEnabled"] = gpuCurlNoiseEnabled;
+		j["gpuCurlNoiseFrequency"] = gpuCurlNoiseFrequency;
+		j["gpuCurlNoiseOctaves"] = gpuCurlNoiseOctaves;
+		j["gpuCurlNoiseRoughness"] = gpuCurlNoiseRoughness;
+		j["gpuCurlNoiseLacunarity"] = gpuCurlNoiseLacunarity;
+		j["gpuCurlNoiseAmplitude"] = gpuCurlNoiseAmplitude;
+		j["gpuCurlNoiseOffset"] = gpuCurlNoiseOffset;
+		j["gpuCurlNoiseScrollSpeed"] = gpuCurlNoiseScrollSpeed;
 		j["isDrawEnable"]	= isDrawEnable;
 		j["isComplement"]	= isComplement;
 		j["randomSpinEmit"] = randomSpinEmit;

@@ -51,6 +51,17 @@ struct EmitterData {
 	float complementSpacing;
 	float complementStartDistance;
 	float2 _pad3;
+	uint curlNoiseEnabled;
+	float curlNoiseFrequency;
+	uint curlNoiseOctaves;
+	float curlNoiseRoughness;
+	float curlNoiseLacunarity;
+	float curlNoiseAmplitude;
+	float2 _pad4;
+	float3 curlNoiseOffset;
+	float _pad5;
+	float3 curlNoiseScrollSpeed;
+	float _pad6;
 };
 
 float ApplyGpuEase(uint ease, float t) {

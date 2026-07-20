@@ -48,9 +48,12 @@ namespace CalyxEngine {
 	//  リソース生成
 	// ────────────────────────────────────────────────────────────────
 	void GpuFxEmitter::Initialize(){
-		static_assert(sizeof(EmitterSphere) == 256);
+		static_assert(sizeof(EmitterSphere) == 320);
 		static_assert(offsetof(EmitterSphere,initialRotation) == 208);
 		static_assert(offsetof(EmitterSphere,previousTranslate) == 224);
+		static_assert(offsetof(EmitterSphere,curlNoiseEnabled) == 256);
+		static_assert(offsetof(EmitterSphere,curlNoiseOffset) == 288);
+		static_assert(sizeof(ParticleCS) == 88);
 		ID3D12Device* dev = GraphicsGroup::GetInstance()->GetDevice().Get();
 
 		// StructuredBuffer を DEFAULT + UAV で確保
@@ -96,6 +99,14 @@ namespace CalyxEngine {
 		emitterData_.complementEnabled = 0;
 		emitterData_.complementSpacing = 0.02f;
 		emitterData_.complementStartDistance = 0.0f;
+		emitterData_.curlNoiseEnabled = 0;
+		emitterData_.curlNoiseFrequency = 1.0f;
+		emitterData_.curlNoiseOctaves = 1;
+		emitterData_.curlNoiseRoughness = 0.5f;
+		emitterData_.curlNoiseLacunarity = 2.0f;
+		emitterData_.curlNoiseAmplitude = 1.0f;
+		emitterData_.curlNoiseOffset = {};
+		emitterData_.curlNoiseScrollSpeed = {};
 
 		material_.texturePath = kFallbackTexturePath;
 		textureHandle_ = AssetManager::GetInstance()->GetTextureManager()->LoadTexture(material_.texturePath);
@@ -287,6 +298,29 @@ namespace CalyxEngine {
 				ImGui::SliderFloat("Softness##gpu_noise_mask", &material_.noiseMaskUv.z, 0.0001f, 1.0f);
 				ImGui::DragFloat2("Scroll Speed##gpu_noise_mask", &noiseMaskScrollSpeed_.x, 0.01f);
 				ImGui::EndDisabled();
+
+				bool curlNoiseEnabled = emitterData_.curlNoiseEnabled != 0;
+				FxGui::RowLabel("Perlin Curl Noise");
+				if(ImGui::Checkbox("##gpu_curl_noise_enabled",&curlNoiseEnabled))
+					emitterData_.curlNoiseEnabled = curlNoiseEnabled ? 1u : 0u;
+				ImGui::BeginDisabled(!curlNoiseEnabled);
+				FxGui::RowLabel("Frequency");
+				ImGui::DragFloat("##gpu_curl_frequency",&emitterData_.curlNoiseFrequency,0.01f,0.0001f,100.0f);
+				FxGui::RowLabel("Octaves");
+				int curlOctaves = static_cast<int>(emitterData_.curlNoiseOctaves);
+				if(ImGui::DragInt("##gpu_curl_octaves",&curlOctaves,1,1,4))
+					emitterData_.curlNoiseOctaves = static_cast<uint32_t>(std::clamp(curlOctaves,1,4));
+				FxGui::RowLabel("Roughness");
+				ImGui::SliderFloat("##gpu_curl_roughness",&emitterData_.curlNoiseRoughness,0.0f,1.0f);
+				FxGui::RowLabel("Lacunarity");
+				ImGui::DragFloat("##gpu_curl_lacunarity",&emitterData_.curlNoiseLacunarity,0.01f,1.0f,8.0f);
+				FxGui::RowLabel("Amplitude");
+				ImGui::DragFloat("##gpu_curl_amplitude",&emitterData_.curlNoiseAmplitude,0.01f,0.0f,100.0f);
+				FxGui::RowLabel("Coordinate Offset");
+				ImGui::DragFloat3("##gpu_curl_offset",&emitterData_.curlNoiseOffset.x,0.01f);
+				FxGui::RowLabel("Scroll Speed");
+				ImGui::DragFloat3("##gpu_curl_scroll",&emitterData_.curlNoiseScrollSpeed.x,0.01f);
+				ImGui::EndDisabled();
 				if(ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
 					ImGui::SetTooltip("アタッチしたNoise TextureのRチャンネルでAlphaをマスクします。\nThresholdで表示範囲、Softnessで境界、Scroll Speedで流れを調整します。");
 				ImGui::EndGroup();
@@ -430,6 +464,14 @@ namespace CalyxEngine {
 			config.noiseMaskThreshold};
 		material_.noiseMaskUv = {0.0f,0.0f,config.noiseMaskSoftness,0.0f};
 		noiseMaskScrollSpeed_ = config.noiseMaskScrollSpeed;
+		emitterData_.curlNoiseEnabled = config.gpuCurlNoiseEnabled ? 1u : 0u;
+		emitterData_.curlNoiseFrequency = config.gpuCurlNoiseFrequency;
+		emitterData_.curlNoiseOctaves = std::clamp(config.gpuCurlNoiseOctaves,1u,4u);
+		emitterData_.curlNoiseRoughness = config.gpuCurlNoiseRoughness;
+		emitterData_.curlNoiseLacunarity = config.gpuCurlNoiseLacunarity;
+		emitterData_.curlNoiseAmplitude = config.gpuCurlNoiseAmplitude;
+		emitterData_.curlNoiseOffset = config.gpuCurlNoiseOffset;
+		emitterData_.curlNoiseScrollSpeed = config.gpuCurlNoiseScrollSpeed;
 		material_.texturePath = ResolveTexturePath(config.texturePath);
 		textureGuid_ = config.textureGuid;
 		if(textureGuid_.isValid()) {
@@ -520,6 +562,14 @@ namespace CalyxEngine {
 		config.noiseMaskThreshold = material_.noiseMaskParams.w;
 		config.noiseMaskSoftness = material_.noiseMaskUv.z;
 		config.noiseMaskScrollSpeed = noiseMaskScrollSpeed_;
+		config.gpuCurlNoiseEnabled = emitterData_.curlNoiseEnabled != 0;
+		config.gpuCurlNoiseFrequency = emitterData_.curlNoiseFrequency;
+		config.gpuCurlNoiseOctaves = emitterData_.curlNoiseOctaves;
+		config.gpuCurlNoiseRoughness = emitterData_.curlNoiseRoughness;
+		config.gpuCurlNoiseLacunarity = emitterData_.curlNoiseLacunarity;
+		config.gpuCurlNoiseAmplitude = emitterData_.curlNoiseAmplitude;
+		config.gpuCurlNoiseOffset = emitterData_.curlNoiseOffset;
+		config.gpuCurlNoiseScrollSpeed = emitterData_.curlNoiseScrollSpeed;
 		config.modelPath = modelPath;
 		config.modelGuid = modelGuid_;
 		config.isDrawEnable = isDrawEnable_;

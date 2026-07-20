@@ -680,7 +680,7 @@ GraphicsPipelineDesc PipelinePresets::MakeGpuParticleUpdate() {
 		.CBV(1, D3D12_SHADER_VISIBILITY_ALL) // b1 emitter params/modules
 		.UAVTable(0, 1)						 // u0 : RWStructuredBuffer<Particle>
 		.UAVTable(1, 1)						 // u1 : RWStructuredBuffer<uint> (freeListIndex)
-		.UAVTable(2, 1);					 // u2 : RWStructuredBuffer<uint> (freeList)
+		.UAVTable(2, 1);                      // u2 : RWStructuredBuffer<uint> (freeList)
 
 	return desc;
 }
