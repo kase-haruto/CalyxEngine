@@ -69,8 +69,22 @@ namespace CalyxEngine {
 
 	void SpriteSceneObject2d::SubmitSprites(SpriteRenderer& renderer) const {
 		if(sprite_ && IsDrawEnable()) {
-			sprite_->Draw(&renderer);
+			const uint64_t stableOrder = static_cast<uint64_t>(std::hash<Guid>{}(GetGuid()));
+			renderer.Register(sprite_->GetSprite(), sortingLayerId_, orderInLayer_, stableOrder);
 		}
+	}
+
+	void SpriteSceneObject2d::SetSortingLayer(SortingLayerId layerId) {
+		sortingLayerId_ = SortingLayerSettings::GetInstance()->IsValidLayerId(layerId)
+			? layerId
+			: kDefaultSortingLayerId;
+	}
+
+	bool SpriteSceneObject2d::SetSortingLayer(std::string_view layerName) {
+		const auto layerId = SortingLayerSettings::GetInstance()->FindLayerId(layerName);
+		if(!layerId) return false;
+		SetSortingLayer(*layerId);
+		return true;
 	}
 
 	void SpriteSceneObject2d::SetAnchor(const Vector2& anchor) {
@@ -100,6 +114,8 @@ namespace CalyxEngine {
 		texturePath_ = j.value("texturePath", texturePath_);
 		anchor_ = j.value("anchor", anchor_);
 		color_ = j.value("color", color_);
+		SetSortingLayer(j.value("sortingLayerId", kDefaultSortingLayerId));
+		orderInLayer_ = j.value("orderInLayer", 0);
 		if(j.contains("transformAnimation2d")) {
 			transformAnimation2d_.ApplyConfigFromJson(j.at("transformAnimation2d"));
 		}
@@ -119,6 +135,8 @@ namespace CalyxEngine {
 		j["texturePath"] = texturePath_;
 		j["anchor"] = anchor_;
 		j["color"] = color_;
+		j["sortingLayerId"] = sortingLayerId_;
+		j["orderInLayer"] = orderInLayer_;
 		if(!transformAnimation2d_.IsEmpty()) {
 			nlohmann::json animationJson;
 			transformAnimation2d_.ExtractConfigToJson(animationJson);
@@ -150,6 +168,21 @@ namespace CalyxEngine {
 	void SpriteSceneObject2d::DrawBaseGui() {
 		if(GuiCmd::BeginSection(ParamFilterSection::Object)) {
 			worldTransform_.ShowImGui("2D Transform");
+			if(ImGui::TreeNodeEx("Rendering", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
+				auto* settings = SortingLayerSettings::GetInstance();
+				const SortingLayer* current = settings->FindLayer(sortingLayerId_);
+				const char* preview = current ? current->name.c_str() : "Default";
+				if(ImGui::BeginCombo("Sorting Layer", preview)) {
+					for(const auto& layer : settings->GetLayers()) {
+						const bool selected = layer.id == sortingLayerId_;
+						if(ImGui::Selectable(layer.name.c_str(), selected)) SetSortingLayer(layer.id);
+						if(selected) ImGui::SetItemDefaultFocus();
+					}
+					ImGui::EndCombo();
+				}
+				ImGui::InputInt("Order in Layer", &orderInLayer_);
+				ImGui::TreePop();
+			}
 			if(ImGui::TreeNodeEx("2D Layout", ImGuiTreeNodeFlags_SpanAvailWidth)) {
 				struct AnchorPreset {
 					const char* name;

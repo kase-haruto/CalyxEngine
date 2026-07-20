@@ -16,6 +16,7 @@ namespace CalyxEngine {
 	private:
 		enum class Category {
 			Collision,
+			Rendering,
 		};
 
 		static const char* GetCategoryLabel(Category category);

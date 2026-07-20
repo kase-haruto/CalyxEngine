@@ -20,6 +20,7 @@ SceneContext::~SceneContext() {
 		current_ = nullptr;
 		// 破棄されるSceneSettingsへの非所有ポインタを残さず、Default fallbackへ戻す。
 		CollisionLayerSettings::SetActiveSettings(nullptr);
+		SortingLayerSettings::SetActiveSettings(nullptr);
 	}
 }
 
@@ -27,6 +28,7 @@ void SceneContext::MakeCurrent() {
 	current_ = this;
 	// ColliderとCollisionManagerが、このSceneContext固有のLayer一覧とMatrixを参照するよう切り替える。
 	CollisionLayerSettings::SetActiveSettings(&settings_.GetCollisionSettings());
+	SortingLayerSettings::SetActiveSettings(&settings_.GetSortingLayerSettings());
 }
 
 void SceneContext::Initialize(bool createDefaultLights) {
