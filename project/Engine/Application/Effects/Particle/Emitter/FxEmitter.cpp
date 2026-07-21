@@ -64,6 +64,7 @@ namespace CalyxEngine {
 		billboardCB_.Initialize(device);
 		billboardCB_.TransferData(billboardParams_);
 		fadeCB_.TransferData(fadeParams_);
+		noiseMaskTextureHandle_ = AssetManager::GetInstance()->GetTextureManager()->LoadTexture("Textures/white1x1.dds");
 
 		// 各種パラメータ
 		velocity_ = FxParam<CalyxEngine::Vector3>::MakeRandom(CalyxEngine::Vector3(-1.0f,0.0f,-1.0f),
@@ -92,7 +93,13 @@ namespace CalyxEngine {
 			}
 		}
 
+		trailEmitter_.Update(position_,worldRotation_,deltaTime,HasFlag(Playing));
 		if(!HasFlag(Playing)) return;
+		uvElapsedTime_ += deltaTime;
+		material_.uvOffsetTiling = {uvSettings_.offset.x,uvSettings_.offset.y,uvSettings_.tiling.x,uvSettings_.tiling.y};
+		material_.uvScrollRotationTime = {uvSettings_.scrollSpeed.x,uvSettings_.scrollSpeed.y,uvSettings_.rotation,uvElapsedTime_};
+		material_.noiseMaskUv.x += noiseMaskScrollSpeed_.x * deltaTime;
+		material_.noiseMaskUv.y += noiseMaskScrollSpeed_.y * deltaTime;
 
 		position_ = GetWorldPosition();
 		elapsedTime_ += deltaTime;
@@ -160,24 +167,18 @@ namespace CalyxEngine {
 			fx.age += deltaTime;
 			if(fx.age >= fx.lifetime) fx.alive = false;
 
-			CalyxEngine::Matrix4x4 uvTransformMatrix =
-				CalyxEngine::MakeScaleMatrix(CalyxEngine::Vector3(fx.uvTransform.scale.x,fx.uvTransform.scale.y,1.0f));
-			uvTransformMatrix = CalyxEngine::Matrix4x4::Multiply(uvTransformMatrix,CalyxEngine::MakeRotateZMatrix(fx.uvTransform.rotate));
-			uvTransformMatrix = CalyxEngine::Matrix4x4::Multiply(uvTransformMatrix,
-															   CalyxEngine::MakeTranslateMatrix(CalyxEngine::Vector3(fx.uvTransform.translate.x,fx.uvTransform.translate.y,0.0f)));
-			material_.uvTransform = uvTransformMatrix;
 		}
 
 		ParticleMaterial renderMat = material_;
 		renderMat.color.w *= alphaMultiplier_;
-		materialBuffer_.TransferData(material_);
+		materialBuffer_.TransferData(renderMat);
 		billboardCB_.TransferData(billboardParams_);
 		fadeCB_.TransferData(fadeParams_);
 		std::erase_if(units_,[](const FxUnit& fx) { return !fx.alive; });
 
 		bool shouldNotify =
-			(isOneShot_ && hasEmitted_ && units_.empty()) ||
-			(emitDuration_ >= 0.0f && elapsedTime_ > emitDelay_ + emitDuration_ && units_.empty());
+			(isOneShot_ && hasEmitted_ && units_.empty() && trailEmitter_.History().Empty()) ||
+			(emitDuration_ >= 0.0f && elapsedTime_ > emitDelay_ + emitDuration_ && units_.empty() && trailEmitter_.History().Empty());
 
 		if(shouldNotify && !isFinishedNotified_) {
 			isFinishedNotified_ = true;
@@ -207,6 +208,10 @@ namespace CalyxEngine {
 			data.position = fx.position;
 			data.scale    = fx.scale;
 			data.color    = fx.color;
+			data.vertexColor = fx.vertexColor;
+			data.flipbookScaleOffset = {fx.uvTransform.scale.x,fx.uvTransform.scale.y,fx.uvTransform.translate.x,fx.uvTransform.translate.y};
+			data.emissiveColor = fx.emissiveColor;
+			data.emissiveIntensity = fx.emissiveIntensity;
 			data.rotation = fx.rotationEuler;
 			data.alignDirection = fx.alignDirection;
 			data.alignToDirection = fx.alignToDirection ? 1u : 0u;
@@ -241,11 +246,15 @@ namespace CalyxEngine {
 		units_.clear();
 		emitTimer_   = 0.0f;
 		elapsedTime_ = 0.0f;
+		uvElapsedTime_ = 0.0f;
 		SetFlag(FirstFrame,true);
 		hasEmitted_         = false;
 		isFinishedNotified_ = false;
 		particleSequence_ = 0;
 		randomStream_.Reset(randomSeed_);
+		material_.noiseMaskUv.x = 0.0f;
+		material_.noiseMaskUv.y = 0.0f;
+		uvElapsedTime_ = 0.0f;
 		SetFlag(Playing,true);
 	}
 
@@ -259,12 +268,15 @@ namespace CalyxEngine {
 		fx.age          = 0.0f;
 		fx.initialScale = fx.scale;
 		fx.color        = CalyxEngine::Vector4(1,1,1,1);
+		fx.vertexColor  = vertexColor_;
+		fx.emissiveColor = CalyxEngine::Vector4(1,1,1,1);
+		fx.emissiveIntensity = 0.0f;
 		fx.alive        = true;
 		fx.uvTransform.Initialize();
 		fx.spinSpeed = spin_.Get(randomStream_);
 		fx.alignDirection = CalyxEngine::Vector3(0.0f,0.0f,0.0f);
 		fx.alignToDirection = false;
-		fx.rotationEuler = CalyxEngine::Vector3(0.0f,0.0f,0.0f);
+		fx.rotationEuler = initialRotation_;
 		if(HasFlag(RandomSpinEmit)) { fx.rotationEuler.z = randomStream_.NextFloat(-CalyxEngine::kPi,CalyxEngine::kPi); }
 		if(useDirection_) ApplyDirectionVelocity(fx);
 		for(auto* module : moduleContainer_->GetInitializeModules()) {
@@ -295,6 +307,104 @@ namespace CalyxEngine {
 		ImGui::AlignTextToFramePadding();
 		ImGui::TextUnformatted("Quick Controls");
 		ImGui::SameLine();
+		ImGui::NewLine();
+		if(ImGui::CollapsingHeader("Ribbon Trail")) {
+			auto& trail = trailEmitter_.Settings();
+			ImGui::Checkbox("Enabled##trail",&trail.enabled);
+			ImGui::BeginDisabled(!trail.enabled);
+			ImGui::DragFloat("Lifetime##trail",&trail.lifetime,0.01f,0.01f,30.0f);
+			ImGui::DragFloat("Base Width##trail",&trail.baseWidth,0.01f,0.0f,100.0f);
+			ImGui::DragFloat("Min Sample Distance##trail",&trail.minSampleDistance,0.005f,0.001f,10.0f);
+			ImGui::DragFloat("Max Sample Interval##trail",&trail.maxSampleInterval,0.005f,0.001f,1.0f);
+			int maxPoints = static_cast<int>(trail.maxPointCount);
+			if(ImGui::DragInt("Max Point Count##trail",&maxPoints,1,2,4096)) trail.maxPointCount=static_cast<uint32_t>(std::clamp(maxPoints,2,4096));
+			int geometryMode=static_cast<int>(trail.geometryMode);
+			if(ImGui::Combo("Geometry Mode##trail",&geometryMode,"Ribbon\0Mesh Extrusion\0Mesh Instances\0")) trail.geometryMode=static_cast<TrailGeometryMode>(geometryMode);
+			if(trail.geometryMode!=TrailGeometryMode::Ribbon) {
+				ImGui::TextUnformatted("Geometry Model (Drop Model Asset)");
+				ImGui::TextDisabled("%s",trail.geometryModelPath.empty()?"Not assigned":trail.geometryModelPath.c_str());
+				ImGui::InvisibleButton("##trail_geometry_model",ImVec2(ImGui::GetContentRegionAvail().x,32.0f));
+				if(ImGui::BeginDragDropTarget()) {
+					if(const ImGuiPayload* p=ImGui::AcceptDragDropPayload("CALYX_ASSET")) {
+						const auto payload=*reinterpret_cast<const AssetDragPayload*>(p->Data);
+						if(payload.type==AssetType::Model) { trail.geometryModelGuid=payload.guid; if(auto* rec=AssetDatabase::GetInstance()->Get(payload.guid)) trail.geometryModelPath=rec->sourcePath.filename().string(); }
+					}
+					ImGui::EndDragDropTarget();
+				}
+				ImGui::DragFloat3("Geometry Scale##trail",&trail.geometryScale.x,0.01f,0.001f,100.0f);
+				if(trail.geometryMode==TrailGeometryMode::MeshExtrusion) ImGui::Checkbox("Close Cross Section##trail",&trail.closeCrossSection);
+				if(trail.geometryMode==TrailGeometryMode::MeshInstances) ImGui::Checkbox("Align To Tangent##trail",&trail.alignInstancesToTangent);
+			}
+			int facingMode=static_cast<int>(trail.facingMode);
+			if(ImGui::Combo("Facing Mode##trail",&facingMode,"Camera Facing\0Local Axis\0World Axis\0Cross\0")) trail.facingMode=static_cast<TrailFacingMode>(facingMode);
+			if(trail.facingMode==TrailFacingMode::LocalAxis) ImGui::DragFloat3("Local Axis##trail",&trail.localAxis.x,0.01f,-1.0f,1.0f);
+			if(trail.facingMode==TrailFacingMode::WorldAxis) ImGui::DragFloat3("World Axis##trail",&trail.worldAxis.x,0.01f,-1.0f,1.0f);
+			int uvMode=static_cast<int>(trail.uvMode);
+			if(ImGui::Combo("UV Mode##trail",&uvMode,"Distance\0Stretch\0")) trail.uvMode=static_cast<TrailUVMode>(uvMode);
+			ImGui::DragFloat("UV Tiling##trail",&trail.uvTiling,0.01f);
+			ImGui::Checkbox("Use Spline##trail",&trail.useSpline);
+			int subdivisions=static_cast<int>(trail.splineSubdivision);
+			if(ImGui::DragInt("Spline Subdivision##trail",&subdivisions,1,1,8)) trail.splineSubdivision=static_cast<uint32_t>(std::clamp(subdivisions,1,8));
+			CalyxEngine::EnumConverter<BlendMode>::Combo("Trail Blend Mode",trail.blendMode);
+
+			auto textureDrop = [&](const char* label,const char* id,Guid& guid,std::string& path) {
+				ImGui::TextUnformatted(label);
+				ImGui::InvisibleButton(id,ImVec2(ImGui::GetContentRegionAvail().x,32.0f));
+				if(ImGui::BeginDragDropTarget()) {
+					if(const ImGuiPayload* p=ImGui::AcceptDragDropPayload("CALYX_ASSET")) {
+						const auto payload=*reinterpret_cast<const AssetDragPayload*>(p->Data);
+						if(payload.type==AssetType::Texture) { guid=payload.guid; if(auto* rec=AssetDatabase::GetInstance()->Get(guid)) path=rec->sourcePath.generic_string(); }
+					}
+					ImGui::EndDragDropTarget();
+				}
+			};
+			textureDrop("Base Texture (Drop Asset)","##trail_base_texture",trail.baseTextureGuid,trail.baseTexturePath);
+			textureDrop("Noise Texture (Drop Asset)","##trail_noise_texture",trail.noiseTextureGuid,trail.noiseTexturePath);
+			ImGui::DragFloat2("Base Tiling##trail",&trail.material.baseTiling.x,0.01f);
+			ImGui::DragFloat2("Base Scroll##trail",&trail.material.baseScrollSpeed.x,0.01f);
+			ImGui::DragFloat2("Noise Tiling##trail",&trail.material.noiseTiling.x,0.01f);
+			ImGui::DragFloat2("Noise Scroll##trail",&trail.material.noiseScrollSpeed.x,0.01f);
+			ImGui::ColorEdit4("Color##trail",&trail.material.color.x,ImGuiColorEditFlags_Float|ImGuiColorEditFlags_HDR);
+			if(trail.colorOverLifetime.keys.size()<2) trail.colorOverLifetime.keys={{0,{1,1,1,1}},{1,{1,1,1,1}}};
+			ImGui::ColorEdit4("Color Start##trail",&trail.colorOverLifetime.keys.front().color.x);
+			ImGui::ColorEdit4("Color End##trail",&trail.colorOverLifetime.keys.back().color.x);
+			auto drawLifetimeCurve=[&](const char* label,FloatCurve& curve,float minValue,float maxValue) {
+				ImGui::PushID(label);
+				int mode=static_cast<int>(curve.mode);
+				ImGui::Combo("Mode",&mode,"Constant\0Linear\0Curve\0Random Constants\0Random Curves\0");
+				curve.mode=static_cast<CurveValueMode>(std::clamp(mode,0,4));
+				if(curve.mode==CurveValueMode::Constant) ImGui::DragFloat(label,&curve.constant,0.01f,minValue,maxValue);
+				else if(curve.mode==CurveValueMode::Linear || curve.mode==CurveValueMode::Curve) {
+					if(curve.keys.size()<2) curve.keys={{0,curve.constant},{1,curve.constant}};
+					ImGui::DragFloat("Start",&curve.keys.front().value,0.01f,minValue,maxValue);
+					ImGui::DragFloat("End",&curve.keys.back().value,0.01f,minValue,maxValue);
+				} else {
+					ImGui::DragFloat("Min",&curve.constantMin,0.01f,minValue,maxValue);
+					ImGui::DragFloat("Max",&curve.constantMax,0.01f,minValue,maxValue);
+				}
+				ImGui::PopID();
+			};
+			drawLifetimeCurve("Width Over Lifetime",trail.widthOverLifetime,0.0f,10.0f);
+			drawLifetimeCurve("Alpha Over Lifetime",trail.alphaOverLifetime,0.0f,1.0f);
+			drawLifetimeCurve("Emissive Over Lifetime",trail.emissiveOverLifetime,0.0f,10.0f);
+			ImGui::DragFloat("Noise Strength##trail",&trail.material.noiseStrength,0.01f,0.0f,1.0f);
+			ImGui::DragFloat("Distortion Strength##trail",&trail.material.distortionStrength,0.001f,0.0f,1.0f);
+			ImGui::Checkbox("Dissolve##trail",&trail.material.dissolveEnabled);
+			ImGui::DragFloat("Dissolve Start##trail",&trail.material.dissolveStart,0.01f,0.0f,1.0f);
+			ImGui::DragFloat("Dissolve End##trail",&trail.material.dissolveEnd,0.01f,0.0f,1.0f);
+			ImGui::DragFloat("Dissolve Softness##trail",&trail.material.dissolveSoftness,0.01f,0.001f,1.0f);
+			ImGui::DragFloat("Dissolve Edge Width##trail",&trail.material.dissolveEdgeWidth,0.01f,0.0f,1.0f);
+			ImGui::ColorEdit3("Dissolve Edge Color##trail",&trail.material.dissolveEdgeColor.x,ImGuiColorEditFlags_Float|ImGuiColorEditFlags_HDR);
+			ImGui::DragFloat("Dissolve Edge Emissive##trail",&trail.material.dissolveEdgeEmissive,0.01f,0.0f,100.0f);
+			ImGui::DragFloat("Head Fade##trail",&trail.material.headFade,0.01f,0.0f,1.0f);
+			ImGui::DragFloat("Tail Fade##trail",&trail.material.tailFade,0.01f,0.0f,1.0f);
+			ImGui::ColorEdit3("Emissive Color##trail",&trail.material.emissiveColor.x,ImGuiColorEditFlags_Float|ImGuiColorEditFlags_HDR);
+			ImGui::DragFloat("Emissive Intensity##trail",&trail.material.emissiveIntensity,0.01f,0.0f,100.0f);
+			ImGui::DragFloat("Alpha Clip##trail",&trail.material.alphaClipThreshold,0.001f,0.0f,1.0f);
+			ImGui::EndDisabled();
+		}
+		ImGui::NewLine();
+
 		ImGui::Spacing();
 		ImGui::SameLine();
 
@@ -314,6 +424,19 @@ namespace CalyxEngine {
 				// Color
 				FxGui::RowLabel("Color");
 				ImGui::ColorEdit4("##color",&material_.color.x);
+
+				FxGui::RowLabel("Vertex Color");
+				ImGui::ColorEdit4("##vertex_color",&vertexColor_.x,ImGuiColorEditFlags_Float | ImGuiColorEditFlags_HDR);
+				FxGui::RowLabel("UV Offset");
+				ImGui::DragFloat2("##uv_offset",&uvSettings_.offset.x,0.01f);
+				FxGui::RowLabel("UV Tiling");
+				ImGui::DragFloat2("##uv_tiling",&uvSettings_.tiling.x,0.01f,0.001f,100.0f);
+				FxGui::RowLabel("UV Scroll Speed");
+				ImGui::DragFloat2("##uv_scroll",&uvSettings_.scrollSpeed.x,0.01f);
+				FxGui::RowLabel("UV Rotation");
+				float uvRotationDegrees = uvSettings_.rotation * 180.0f / CalyxEngine::kPi;
+				if(ImGui::DragFloat("##uv_rotation",&uvRotationDegrees,0.25f,-360.0f,360.0f,"%.1f deg"))
+					uvSettings_.rotation = CalyxEngine::ToRadians(uvRotationDegrees);
 
 				// Texture (path表示 + 選択ボタン)
 				FxGui::RowLabel("Texture");
@@ -366,6 +489,48 @@ namespace CalyxEngine {
 				}; */
 
 				ImGui::EndGroup(); // Texture BeginGroup の対応
+
+				FxGui::RowLabel("Noise Mask Texture");
+				ImGui::BeginGroup();
+				ImGui::TextUnformatted(material_.noiseMaskParams.x > 0.5f ? "Noise mask attached" : "Drop a noise texture here");
+				ImGui::InvisibleButton("##NoiseMaskTextureDrop", ImVec2(ImGui::GetContentRegionAvail().x,40.0f));
+				const ImVec2 noiseMin = ImGui::GetItemRectMin();
+				const ImVec2 noiseMax = ImGui::GetItemRectMax();
+				ImGui::GetWindowDrawList()->AddRect(noiseMin,noiseMax,ImGui::IsItemHovered() ? IM_COL32(120,180,255,220) : IM_COL32(90,90,90,160),8.0f,0,2.0f);
+				if(ImGui::BeginDragDropTarget()) {
+					if(const ImGuiPayload* p = ImGui::AcceptDragDropPayload("CALYX_ASSET")) {
+						const AssetDragPayload payload = *reinterpret_cast<const AssetDragPayload*>(p->Data);
+						if(payload.type == AssetType::Texture) {
+							auto handle = AssetManager::GetInstance()->GetTextureManager()->LoadTexture(payload.guid);
+							if(handle.ptr) {
+								const bool wasAttached = material_.noiseMaskParams.x > 0.5f;
+								noiseMaskTextureHandle_ = handle;
+								noiseMaskTextureGuid_ = payload.guid;
+								noiseMaskTexturePath_.clear();
+								if(auto* rec = AssetDatabase::GetInstance()->Get(payload.guid)) noiseMaskTexturePath_ = rec->sourcePath.generic_string();
+								material_.noiseMaskParams.x = 1.0f;
+								if(!wasAttached) material_.noiseMaskParams.y = 1.0f;
+							}
+						}
+					}
+					ImGui::EndDragDropTarget();
+				}
+				if(material_.noiseMaskParams.x > 0.5f && ImGui::SmallButton("Clear Noise Mask")) {
+					noiseMaskTextureGuid_ = Guid::Empty();
+					noiseMaskTexturePath_.clear();
+					noiseMaskTextureHandle_ = AssetManager::GetInstance()->GetTextureManager()->LoadTexture("Textures/white1x1.dds");
+					material_.noiseMaskParams.x = 0.0f;
+				}
+				ImGui::BeginDisabled(material_.noiseMaskParams.x <= 0.5f);
+				ImGui::DragFloat("Tiling##noise_mask", &material_.noiseMaskParams.y, 0.05f, 0.01f, 32.0f);
+				ImGui::SliderFloat("Strength##noise_mask", &material_.noiseMaskParams.z, 0.0f, 1.0f);
+				ImGui::SliderFloat("Threshold##noise_mask", &material_.noiseMaskParams.w, 0.0f, 1.0f);
+				ImGui::SliderFloat("Softness##noise_mask", &material_.noiseMaskUv.z, 0.0001f, 1.0f);
+				ImGui::DragFloat2("Scroll Speed##noise_mask", &noiseMaskScrollSpeed_.x, 0.01f);
+				ImGui::EndDisabled();
+				if(ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+					ImGui::SetTooltip("アタッチしたNoise TextureのRチャンネルでAlphaをマスクします。\nThresholdで表示範囲、Softnessで境界、Scroll Speedで流れを調整します。");
+				ImGui::EndGroup();
 
 				// メッシュ
 				FxGui::RowLabel("mesh");
@@ -522,6 +687,10 @@ namespace CalyxEngine {
 				ImGui::EndDisabled();
 
 				FxGui::DrawParam("Lifetime",lifetime_);
+				FxGui::RowLabel("Initial Rotation");
+				Vector3 initialRotationDegrees = initialRotation_ * (180.0f / CalyxEngine::kPi);
+				if(GuiCmd::DragFloat3("##initialRotation",initialRotationDegrees,0.25f,-360.0f,360.0f))
+					initialRotation_ = initialRotationDegrees * (CalyxEngine::kPi / 180.0f);
 				FxGui::DrawParam("Spin",spin_);
 			}
 
@@ -690,6 +859,7 @@ namespace CalyxEngine {
 		cmdList->SetGraphicsRootDescriptorTable(3,GetTextureHandle());                                       // [3] gTexture  (t1)
 		cmdList->SetGraphicsRootConstantBufferView(4,billboardCB_.GetResource()->GetGPUVirtualAddress());    // [4] gBillboard (b2)
 		cmdList->SetGraphicsRootConstantBufferView(5,fadeCB_.GetResource()->GetGPUVirtualAddress());         // [5] gFade      (b3)
+		cmdList->SetGraphicsRootDescriptorTable(6,noiseMaskTextureHandle_);                                  // [6] gNoiseMaskTexture (t2)
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////
@@ -701,12 +871,37 @@ namespace CalyxEngine {
 		worldRotation_  = config.rotation;
 		worldScale_     = config.worldScale;
 		material_.color = config.color;
+		trailEmitter_.ApplySettings(config.trail);
+		vertexColor_ = config.vertexColor;
+		uvSettings_ = config.uvSettings;
+		uvElapsedTime_ = 0.0f;
+		material_.uvOffsetTiling = {uvSettings_.offset.x,uvSettings_.offset.y,uvSettings_.tiling.x,uvSettings_.tiling.y};
+		material_.uvScrollRotationTime = {uvSettings_.scrollSpeed.x,uvSettings_.scrollSpeed.y,uvSettings_.rotation,0.0f};
+		noiseMaskTextureGuid_ = config.noiseMaskTextureGuid;
+		noiseMaskTexturePath_ = config.noiseMaskTexturePath;
+		noiseMaskTextureHandle_ = AssetManager::GetInstance()->GetTextureManager()->LoadTexture("Textures/white1x1.dds");
+		bool hasNoiseMask = false;
+		if(noiseMaskTextureGuid_.isValid()) {
+			auto handle = AssetManager::GetInstance()->GetTextureManager()->LoadTexture(noiseMaskTextureGuid_);
+			if(handle.ptr) { noiseMaskTextureHandle_ = handle; hasNoiseMask = true; }
+		} else if(!noiseMaskTexturePath_.empty()) {
+			auto handle = AssetManager::GetInstance()->GetTextureManager()->LoadTexture(noiseMaskTexturePath_);
+			if(handle.ptr) { noiseMaskTextureHandle_ = handle; hasNoiseMask = true; }
+		}
+		material_.noiseMaskParams = {
+			hasNoiseMask ? 1.0f : 0.0f,
+			config.noiseMaskScale,
+			config.noiseMaskStrength,
+			config.noiseMaskThreshold};
+		material_.noiseMaskUv = {0.0f,0.0f,config.noiseMaskSoftness,0.0f};
+		noiseMaskScrollSpeed_ = config.noiseMaskScrollSpeed;
 		velocity_.FromConfig(config.velocity);
 		direction_.FromConfig(config.direction.vector);
 		directionSpeed_.FromConfig(config.direction.speed);
 		useDirection_       = config.direction.enabled;
 		rotateToDirection_  = config.direction.rotateToDirection;
 		spin_.FromConfig(config.spin);
+		initialRotation_ = config.initialRotation;
 		lifetime_.FromConfig(config.lifetime);
 		scale_.FromConfig(config.scale);
 		emitRate_  = config.emitRate;
@@ -755,12 +950,16 @@ namespace CalyxEngine {
 		config.rotation       = worldRotation_;
 		config.worldScale     = worldScale_;
 		config.color          = material_.color;
+		config.trail          = trailEmitter_.Settings();
+		config.vertexColor    = vertexColor_;
+		config.uvSettings     = uvSettings_;
 		config.velocity       = Vector3ParamConfig{velocity_.ToConfig()};
 		config.direction.enabled = useDirection_;
 		config.direction.vector = Vector3ParamConfig{direction_.ToConfig()};
 		config.direction.speed = FxFloatParamConfig{directionSpeed_.ToConfig()};
 		config.direction.rotateToDirection = rotateToDirection_;
 		config.spin           = Vector3ParamConfig{spin_.ToConfig()};
+		config.initialRotation = initialRotation_;
 		config.lifetime       = FxFloatParamConfig{lifetime_.ToConfig()};
 		config.scale          = Vector3ParamConfig{scale_.ToConfig()};
 		config.emitRate       = emitRate_;
@@ -768,6 +967,13 @@ namespace CalyxEngine {
 		config.modelGuid      = modelGuid_;
 		config.texturePath    = material_.texturePath;
 		config.textureGuid    = textureGuid_;
+		config.noiseMaskTextureGuid = noiseMaskTextureGuid_;
+		config.noiseMaskTexturePath = noiseMaskTexturePath_;
+		config.noiseMaskScale = material_.noiseMaskParams.y;
+		config.noiseMaskStrength = material_.noiseMaskParams.z;
+		config.noiseMaskThreshold = material_.noiseMaskParams.w;
+		config.noiseMaskSoftness = material_.noiseMaskUv.z;
+		config.noiseMaskScrollSpeed = noiseMaskScrollSpeed_;
 		config.isDrawEnable   = HasFlag(DrawEnable);
 		config.isComplement   = HasFlag(Complement);
 		config.randomSpinEmit = HasFlag(RandomSpinEmit);
@@ -811,9 +1017,11 @@ namespace CalyxEngine {
 	void FxEmitter::Stop() { SetFlag(Playing,false); }
 
 	void FxEmitter::Reset() {
+		trailEmitter_.Reset();
 		units_.clear();
 		emitTimer_   = 0.0f;
 		elapsedTime_ = 0.0f;
+		uvElapsedTime_ = 0.0f;
 		SetFlag(FirstFrame,true);
 		hasEmitted_   = false;
 		previewTimer_ = 0.0f;

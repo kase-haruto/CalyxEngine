@@ -22,6 +22,11 @@ struct ParticleData {
 	float3 position;
 	float3 scale;
 	float4 color;
+	float4 vertexColor;
+	float4 flipbookScaleOffset;
+	float4 emissiveColor;
+	float emissiveIntensity;
+	float3 emissivePadding;
 	float3 rotation; // XYZ spin angles
 	float3 alignDirection;
 	uint alignToDirection;
@@ -156,7 +161,10 @@ VertexShaderOutput main(VertexShaderInput input,
 		cameraFade = saturate((dist - gFadeParm.fadeNear) / (gFadeParm.fadeFar - gFadeParm.fadeNear));
 	}
 
-	o.color = p.color;
+	o.color = p.color * p.vertexColor;
 	o.fade = cameraFade;
+	o.flipbookScaleOffset = p.flipbookScaleOffset;
+	o.emissiveColor = p.emissiveColor;
+	o.emissiveIntensity = p.emissiveIntensity;
 	return o;
 }

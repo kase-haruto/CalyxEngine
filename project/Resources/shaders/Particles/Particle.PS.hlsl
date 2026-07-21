@@ -6,7 +6,10 @@
 //マテリアル
 struct Material {
 	float4 color;
-	float4x4 uvTransform;
+	float4 uvOffsetTiling;
+	float4 uvScrollRotationTime;
+	float4 noiseMaskParams; // x: mask texture attached, y: scale, z: strength, w: threshold
+	float4 noiseMaskUv;     // xy: offset, z: softness
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,6 +17,7 @@ struct Material {
 ///////////////////////////////////////////////////////////////////////////////
 struct PixelShaderOutput {
 	float4 color : SV_TARGET0;
+	float4 bloomMask : SV_TARGET1;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -25,6 +29,7 @@ ConstantBuffer<Material> gMaterial : register(b1);
 //                            tables
 ///////////////////////////////////////////////////////////////////////////////
 Texture2D<float4> gTexture : register(t1);
+Texture2D<float4> gNoiseMaskTexture : register(t2);
 
 ///////////////////////////////////////////////////////////////////////////////
 //                            samplers
@@ -48,18 +53,37 @@ PixelShaderOutput main(VertexShaderOutput input) {
 	PixelShaderOutput output;
 
 	// UV座標を変換
-	float4 transformedUV = mul(float4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform);
+	float2 materialUv = (input.texcoord - 0.5f) * gMaterial.uvOffsetTiling.zw;
+	float sineValue = sin(gMaterial.uvScrollRotationTime.z);
+	float cosineValue = cos(gMaterial.uvScrollRotationTime.z);
+	materialUv = float2(materialUv.x * cosineValue - materialUv.y * sineValue,
+		materialUv.x * sineValue + materialUv.y * cosineValue);
+	materialUv += 0.5f + gMaterial.uvOffsetTiling.xy
+		+ gMaterial.uvScrollRotationTime.xy * gMaterial.uvScrollRotationTime.w;
+	// Material変換後にFlipbookを適用し、隣接フレームへのUV越境を防ぐ。
+	float2 transformedUV = materialUv * input.flipbookScaleOffset.xy + input.flipbookScaleOffset.zw;
 	// テクスチャサンプル
-	float4 texColor = gTexture.Sample(gSampler, transformedUV.xy);
+	float4 texColor = gTexture.Sample(gSampler, transformedUV);
 	// 合成
 	float4 baseColor = gMaterial.color * texColor * input.color;
+	if(gMaterial.noiseMaskParams.x > 0.5f) {
+		float2 noiseUv = materialUv * max(gMaterial.noiseMaskParams.y, 0.0001f)
+			+ gMaterial.noiseMaskUv.xy;
+		float noiseValue = gNoiseMaskTexture.Sample(gSampler, noiseUv).r;
+		float threshold = saturate(gMaterial.noiseMaskParams.w);
+		float softness = max(gMaterial.noiseMaskUv.z, 0.0001f);
+		float mask = smoothstep(threshold - softness, threshold + softness, noiseValue);
+		baseColor.a *= lerp(1.0f, mask, saturate(gMaterial.noiseMaskParams.z));
+	}
 	// トーンマッピング
 	float exposure = 1.0f;
 	float3 toneMapped = baseColor.rgb * exposure / (baseColor.rgb * exposure + 1.0f);
 	// ガンマ補正
 	float3 gammaCorrected = pow(toneMapped, 1.0 / 2.2);
 
-	output.color = float4(gammaCorrected, baseColor.a);
+	float3 emissive = input.emissiveColor.rgb * max(input.emissiveIntensity, 0.0f) * baseColor.a;
+	output.color = float4(gammaCorrected + emissive, baseColor.a);
+	output.bloomMask = float4(emissive, baseColor.a);
 
 	// ---- ディザ抜き (Dithered Clipping) ----
 	uint2 pixelPos = uint2(input.position.xy) % 4;

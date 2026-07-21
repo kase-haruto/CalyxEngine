@@ -1,46 +1,34 @@
 #pragma once
 
 #include <Engine/Graphics/RenderTarget/Detail/RenderTargetDetail.h>
+#include <Engine/Renderer/Sprite/SortingLayerSettings.h>
 
-#include <vector>
+#include <cstdint>
 #include <d3d12.h>
+#include <vector>
 
 class Sprite;
 
-/*-----------------------------------------------------------------------------------------
- * SpriteRenderer
- * - スプライト描画管理クラス
- * - 登録されたスプライトの一括描画制御を担当
- *---------------------------------------------------------------------------------------*/
 class SpriteRenderer {
 public:
-	//===================================================================*/
-	//                   public methods
-	//===================================================================*/
-	/**
-	 * \brief スプライトを登録
-	 * \param sprite 登録するスプライト
-	 */
+	// Compatibility entry point for sprites without explicit sorting settings.
 	void Register(Sprite* sprite);
+	void Register(Sprite* sprite, SortingLayerId layerId, int32_t orderInLayer, uint64_t stableOrder);
 
-	/**
-	 * \brief 描画処理
-	 * \param cmdList コマンドリスト
-	 * \param psoService パイプラインサービス
-	 * \param renderTargetType 描画ターゲットタイプ
-	 */
 	void Draw(ID3D12GraphicsCommandList* cmdList,
-			  class PipelineService* psoService,
-			  RenderTargetType renderTargetType);
-
-	/**
-	 * \brief 登録解除（クリア）
-	 */
+		class PipelineService* psoService,
+		RenderTargetType renderTargetType);
 	void Clear();
 
 private:
-	//===================================================================*/
-	//                    private member variables
-	//===================================================================*/
-	std::vector<Sprite*> sprites_; //< 描画対象のスプライトリスト
+	struct DrawEntry {
+		Sprite* sprite = nullptr;
+		int32_t sortingLayerOrder = 0;
+		int32_t orderInLayer = 0;
+		uint64_t stableOrder = 0;
+		uint64_t submissionOrder = 0;
+	};
+
+	std::vector<DrawEntry> sprites_;
+	uint64_t nextSubmissionOrder_ = 0;
 };

@@ -56,7 +56,14 @@ struct Material {
 
 struct ParticleMaterial {
 	CalyxEngine::Vector4     color       = {1,1,1,1};     // 基本色（tint）
-	CalyxEngine::Matrix4x4   uvTransform = CalyxEngine::Matrix4x4::MakeIdentity(); // UVアニメ用
+	// xy: 固定Offset, zw: Tiling。GPU Constant Bufferの16-byte境界を維持する。
+	CalyxEngine::Vector4     uvOffsetTiling = {0.0f,0.0f,1.0f,1.0f};
+	// xy: Scroll Speed, z: Rotation(radian), w: Runtime elapsed time。
+	CalyxEngine::Vector4     uvScrollRotationTime = {0.0f,0.0f,0.0f,0.0f};
+	// x: mask texture attached, y: scale, z: strength, w: threshold
+	CalyxEngine::Vector4     noiseMaskParams = {0.0f,1.0f,1.0f,0.5f};
+	// xy: runtime UV offset, z: edge softness, w: padding
+	CalyxEngine::Vector4     noiseMaskUv = {0.0f,0.0f,0.1f,0.0f};
 	std::string texturePath = "Textures/white1x1.dds";  // テクスチャパス
 };
 

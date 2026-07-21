@@ -81,3 +81,16 @@ void SpriteObject2d::SetUvScale(const CalyxEngine::Vector2& scale) const {
 void SpriteObject2d::SetUvOffset(const CalyxEngine::Vector2& offset) const {
 	sprite_->SetUvOffset(offset);
 }
+
+void CalyxEngine::SpriteObject2d::SetFillAmount(float fillAmount) const {
+	sprite_->SetFillAmount(fillAmount);
+}
+
+void CalyxEngine::SpriteObject2d::SetFillOrigin(float x, float y) {
+	sprite_->SetFillOrigin(x, y);
+}
+
+void CalyxEngine::SpriteObject2d::SetFillMethod(int method) {
+	sprite_->SetFillMethod(method);
+}
+	

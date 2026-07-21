@@ -6,6 +6,7 @@
 #include <Engine/Application/Effects/Particle/Emitter/BaseEmitter.h>
 #include <Engine/Application/Effects/Particle/Module/Container/FxModuleContainer.h>
 #include <Engine/Application/Effects/Particle/Parm/FxParm.h>
+#include <Engine/Application/Effects/Trail/TrailRuntime.h>
 #include <Engine/Objects/3D/Details/BillboardParams.h>
 // c++
 #include "Engine/Graphics/Pipeline/BlendMode/BlendMode.h"
@@ -60,11 +61,14 @@ namespace CalyxEngine {
 
 		//--------- accessor -----------------------------------------------//
 		const std::vector<FxUnit>& GetUnits() const { return units_; }
+		const TrailEmitter& GetTrailEmitter() const { return trailEmitter_; }
+		TrailEmitter& GetTrailEmitter() { return trailEmitter_; }
 		const Vector3& GetOffset() const { return offset_; }
 		bool                               IsDrawEnable() const override { return HasFlag(DrawEnable); }
 		void                               SetDrawEnable(bool isEnable) override { SetFlag(DrawEnable,isEnable); }
 		bool                               IsPlaying() const override { return HasFlag(Playing); }
 		const D3D12_GPU_DESCRIPTOR_HANDLE& GetTextureHandle() const { return textureHandle_; }
+		const D3D12_GPU_DESCRIPTOR_HANDLE& GetNoiseMaskTextureHandle() const { return noiseMaskTextureHandle_; }
 		const Guid&                        GetTextureGuid() const override { return textureGuid_; }
 
 		//--------- Timed Preview（一定間隔での自動再生） ---------------//
@@ -133,6 +137,7 @@ namespace CalyxEngine {
 		FxParam<float>                directionSpeed_; //< direction使用時の速度
 		FxParam<float>                lifetime_;  //< パーティクルの寿命（定数またはランダム）
 		FxParam<CalyxEngine::Vector3> spin_;      //< パーティクルのスピン（定数またはランダム）
+		CalyxEngine::Vector3 initialRotation_{0.0f,0.0f,0.0f}; //< 生成時の固定回転（radian）
 
 	protected:
 		//===================================================================*/
@@ -142,6 +147,14 @@ namespace CalyxEngine {
 		const int                   kMaxUnits_ = 4096;           //< 最大パーティクル数
 		D3D12_GPU_DESCRIPTOR_HANDLE textureHandle_{};            // 初期化
 		Guid                        textureGuid_{};
+		Vector4                     vertexColor_{1.0f,1.0f,1.0f,1.0f};
+		ParticleUVSettings          uvSettings_{};
+		float                       uvElapsedTime_ = 0.0f;
+		TrailEmitter                trailEmitter_{};
+		D3D12_GPU_DESCRIPTOR_HANDLE noiseMaskTextureHandle_{};
+		Guid                        noiseMaskTextureGuid_{};
+		std::string                 noiseMaskTexturePath_;
+		Vector2                     noiseMaskScrollSpeed_{};
 
 		std::unique_ptr<FxModuleContainer> moduleContainer_; // モジュールコンテナ
 

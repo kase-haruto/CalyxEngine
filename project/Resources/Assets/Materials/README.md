@@ -143,6 +143,42 @@ Toon Master / Surface -> Output / Surface
   - `UV` 入力が未接続の場合は Object3D の標準 UV を使います。
   - `Scale` 入力が未接続の場合はノード内の Scale 値を使います。
 
+#### Noise Textureの使用方法
+
+1. Material Node Editorで右クリックし、Texturesカテゴリから `Noise Texture` を追加します。
+2. ノード内のプレビューを見ながら `Scale` を調整します。小さい値では大きく緩やかな模様、大きい値では細かい模様になります。初期値は `8.0`、Editorでの設定範囲は `0.1`～`128.0` です。
+3. 色として使う場合は `Color` 出力をMasterノードの `Base Color` や `Emissive Color` へ接続します。
+4. 数値として使う場合は `Value` 出力を `Lerp Float`、`Multiply Float`、`One Minus Float` などへ接続し、Roughness、Shininess、Emissive Intensityなどを変化させます。
+5. `UV` を未接続にするとモデル標準UVを使用します。任意のUVを使う場合は `UV` または `Combine Float2` の出力を接続します。
+
+`Scale` 入力へFloat系ノードを接続した場合、ノード内のScaleスライダーは無効になり、接続元の値が優先されます。Scaleは0除算を避けるため、生成Shader内で最小 `0.0001` に制限されます。
+
+代表的な構成:
+
+- 白黒のノイズ模様: `Noise Texture.Color` → `Unlit Master.Base Color`
+- 2色のノイズ: 2つのColorを `Lerp Color` のA/Bへ、`Noise Texture.Value` をTへ接続し、結果をMasterのBase Colorへ接続
+- 発光のむら: `Noise Texture.Value` → `Multiply Float` → MasterのEmissive Intensity
+- 粗さのむら: `Noise Texture.Value` → `Lerp Float` のTへ接続し、滑らかな値と粗い値を補間してRoughnessへ接続
+- 反転した模様: `Noise Texture.Value` → `One Minus Float`
+- コントラスト調整: `Noise Texture.Value` → `Power Float`。指数を大きくすると明るい領域が絞られます
+
+ノイズを流す場合はUV座標へTimeを加算します。たとえば横方向へ流す構成は次の通りです。
+
+1. `Time` と速度用 `Float` を `Multiply Float` へ接続します。
+2. `UV X` と乗算結果を `Add Float` へ接続します。
+3. 必要なら `Frac Float` を通して0～1へ戻します。
+4. その結果を `Combine Float2.X`、`UV Y` を `Combine Float2.Y` へ接続します。
+5. `Combine Float2` を `Noise Texture.UV` へ接続します。
+
+縦方向へ流す場合はXとYを入れ替えます。斜め方向ではX/Yの両方へ、別々の速度を掛けたTimeを加算します。
+
+注意事項:
+
+- 現在のNoise Textureは2D value noiseです。3D Noise、Perlin Noise、Simplex Noise、Curl Noiseではありません。
+- 同じUVとScaleからは同じ模様が生成され、Seedを指定する入力はありません。模様をずらす場合はUVへ定数オフセットを加えます。
+- Noise Texture単体は0～1の値を返すだけです。色、発光、粗さなど、どこへ接続するかで用途が決まります。
+- static modelの生成Shader経路が主な対応対象です。skinned modelやParticle専用描画経路では同じ結果にならない場合があります。
+
 ### Vector ノード
 
 - `Float2`

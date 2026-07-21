@@ -7,6 +7,7 @@
 #include <Engine\Objects\2D\Animation\SpriteAnimator2d.h>
 #include <Engine\Objects\2D\Object2d\SpriteObject2d.h>
 #include <Engine\Objects\2D\Object2d\ISpriteRenderable.h>
+#include <Engine/Renderer/Sprite/SortingLayerSettings.h>
 #include <Engine\Objects\3D\Actor\SceneObject.h>
 #include <Engine\Objects\ConfigurableObject\IConfigurable.h>
 
@@ -36,6 +37,29 @@ namespace CalyxEngine {
 		std::string_view GetObjectClassName() const override { return "SpriteSceneObject2d"; }
 		const Vector2& GetAnchor() const { return anchor_; }
 		void SetAnchor(const Vector2& anchor);
+		SortingLayerId GetSortingLayer() const { return sortingLayerId_; }
+		int32_t GetOrderInLayer() const { return orderInLayer_; }
+		void SetSortingLayer(SortingLayerId layerId);
+		bool SetSortingLayer(std::string_view layerName);
+		void SetOrderInLayer(int32_t order) { orderInLayer_ = order; }
+
+		/**
+		 * \brief 塗りつぶし量を設定 (0.0〜1.0)
+		 * \param amt 塗りつぶし量
+		 */
+		void SetFillAmount(float amt);
+		/**
+		 * \brief 塗りつぶしの原点を設定
+		 * \param x X座標 (0.0〜1.0)
+		 * \param y Y座標 (0.0〜1.0)
+		 */
+		void SetFillOrigin(float x, float y);
+		/**
+		 * \brief 塗りつぶし手法を設定
+		 * \param method 手法
+		 */
+		void SetFillMethod(int method);
+
 
 	protected:
 		void EnsureSprite();
@@ -50,6 +74,8 @@ namespace CalyxEngine {
 		std::string texturePath_ = "Textures/white1x1.dds";
 		Vector2 anchor_ = {0.0f, 0.0f};
 		Vector4 color_ = {1.0f, 1.0f, 1.0f, 1.0f};
+		SortingLayerId sortingLayerId_ = kDefaultSortingLayerId;
+		int32_t orderInLayer_ = 0;
 	};
 
 	class CALYX_API AnimatedSpriteSceneObject2d

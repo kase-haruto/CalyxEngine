@@ -7,6 +7,7 @@ struct Particle {
 	float4 color;
 	uint isAlive;
 	float3 initialScale;
+	float3 rotation;
 };
 
 struct PerFrame {
@@ -42,7 +43,25 @@ struct EmitterData {
 	uint sizeLifeEnabled;
 	uint sizeLifeGrowing;
 	uint sizeLifeEase;
-	float _pad1;
+	float3 _pad1;
+	float3 initialRotation;
+	float _pad2;
+	float3 previousTranslate;
+	uint complementEnabled;
+	float complementSpacing;
+	float complementStartDistance;
+	float2 _pad3;
+	uint curlNoiseEnabled;
+	float curlNoiseFrequency;
+	uint curlNoiseOctaves;
+	float curlNoiseRoughness;
+	float curlNoiseLacunarity;
+	float curlNoiseAmplitude;
+	float2 _pad4;
+	float3 curlNoiseOffset;
+	float _pad5;
+	float3 curlNoiseScrollSpeed;
+	float _pad6;
 };
 
 float ApplyGpuEase(uint ease, float t) {

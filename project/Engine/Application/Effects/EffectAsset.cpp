@@ -56,13 +56,9 @@ namespace CalyxEngine {
 			EffectEmitterAssetData emitter{};
 			emitter.name		   = node.name;
 			emitter.transform	   = node.transform;
-			emitter.transform.translation = {};
 			emitter.isDrawEnable = node.isDrawEnable;
 			emitter.isGpu		   = node.isGpu;
 			emitter.emitter	   = nlohmann::json(node.emitter).get<EmitterConfig>();
-			emitter.emitter.position = {};
-			emitter.emitter.rotation = emitter.transform.rotation;
-			emitter.emitter.worldScale = emitter.transform.scale;
 			data.emitters.push_back(std::move(emitter));
 		}
 
@@ -77,13 +73,9 @@ namespace CalyxEngine {
 			EffectEmitterNodeConfig node{};
 			node.name		  = emitterData.name;
 			node.transform	  = emitterData.transform;
-			node.transform.translation = {};
 			node.isDrawEnable = emitterData.isDrawEnable;
 			node.isGpu		  = emitterData.isGpu;
 			node.emitter	  = nlohmann::json(emitterData.emitter).get<EmitterConfig>();
-			node.emitter.position = {};
-			node.emitter.rotation = node.transform.rotation;
-			node.emitter.worldScale = node.transform.scale;
 			config.emitters.push_back(std::move(node));
 		}
 

@@ -57,7 +57,25 @@ namespace CalyxEngine {
 			uint32_t sizeLifeEnabled;
 			uint32_t sizeLifeGrowing;
 			uint32_t sizeLifeEase;
-			float _pad1;
+			float _pad1[3];
+			CalyxEngine::Vector3 initialRotation;
+			float _pad2;
+			CalyxEngine::Vector3 previousTranslate;
+			uint32_t complementEnabled;
+			float complementSpacing;
+			float complementStartDistance;
+			float _pad3[2];
+			uint32_t curlNoiseEnabled;
+			float curlNoiseFrequency;
+			uint32_t curlNoiseOctaves;
+			float curlNoiseRoughness;
+			float curlNoiseLacunarity;
+			float curlNoiseAmplitude;
+			float _pad4[2];
+			CalyxEngine::Vector3 curlNoiseOffset;
+			float _pad5;
+			CalyxEngine::Vector3 curlNoiseScrollSpeed;
+			float _pad6;
 		};
 
 	public:
@@ -100,6 +118,7 @@ namespace CalyxEngine {
 		D3D12_GPU_DESCRIPTOR_HANDLE GetParticleSrv() const;
 		uint32_t GetDrawInstanceCount() const;
 		const D3D12_GPU_DESCRIPTOR_HANDLE& GetTextureHandle() const { return textureHandle_; }
+		const D3D12_GPU_DESCRIPTOR_HANDLE& GetNoiseMaskTextureHandle() const { return noiseMaskTextureHandle_; }
 		BlendMode GetBlendMode() const { return blendMode_; }
 
 		// setter
@@ -115,8 +134,21 @@ namespace CalyxEngine {
 		bool	isPlaying_ = false;
 		bool	isDrawEnable_ = true;
 		Guid	textureGuid_{Guid::Empty()};
+		Vector4 vertexColor_{1.0f,1.0f,1.0f,1.0f};
+		ParticleUVSettings uvSettings_{};
+		float uvElapsedTime_ = 0.0f;
+		Vector3 initialRotation_{0.0f,0.0f,0.0f}; //< 生成時の固定回転（radian）
+		Vector3 previousPosition_{};
+		uint32_t burstEmitCount_ = 1024;
+		bool complementEnabled_ = false;
+		bool hasPreviousPosition_ = false;
+		float complementDistanceRemainder_ = 0.0f;
 		D3D12_GPU_DESCRIPTOR_HANDLE textureHandle_{};
+		D3D12_GPU_DESCRIPTOR_HANDLE noiseMaskTextureHandle_{};
+		Guid noiseMaskTextureGuid_{Guid::Empty()};
+		std::string noiseMaskTexturePath_;
 		BlendMode blendMode_ = BlendMode::ADD;
+		Vector2 noiseMaskScrollSpeed_{};
 
 		// SBuff
 		DxStructuredBuffer<ParticleCS> particleBuffer_; // UAV+SRV
@@ -130,7 +162,7 @@ namespace CalyxEngine {
 
 		// parm
 		EmitterParam  emitParam_{};
-		EmitterSphere emitterData_;
+		EmitterSphere emitterData_{};
 		PerFrame	  perFrame_;
 	};
 }
