@@ -279,6 +279,17 @@ public:
 	 * \param mode モード
 	 */
 	void SetLightingMode(LightingMode mode) { model_->SetLightingMode(mode); }
+	/** Applies a per-actor rim-light override without modifying the shared material asset. */
+	void SetRimLight(const CalyxEngine::Vector4& color, float intensity, float power = 3.0f) {
+		if(model_) model_->SetRimLight(color, intensity, power);
+	}
+	/** Restores the rim-light values from the shared material asset. */
+	void ClearRimLight() {
+		if(model_) model_->ClearRimLight();
+	}
+	bool HasRimLightOverride() const {
+		return model_ && model_->HasRimLightOverride();
+	}
 
 	/**
 	 * \brief ボーン親子家計を設定

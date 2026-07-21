@@ -39,6 +39,9 @@ namespace CalyxEngine {
 		// エミッシブ（自己発光）パラメータ
 		AddField("emissiveColor", emissiveColor);
 		AddField("emissiveIntensity", emissiveIntensity);
+		AddField("rimColor", rimColor);
+		AddField("rimIntensity", rimIntensity);
+		AddField("rimPower", rimPower);
 		
 		// テクスチャ参照および法線マップ用パラメータ
 		AddField("objectTextureGuid", objectTextureGuid);

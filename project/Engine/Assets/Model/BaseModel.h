@@ -70,6 +70,9 @@ public:
 	void SetTex(const std::string& name);
 	void SetLightingMode(LightingMode mode);
 	LightingMode GetLightingMode() const;
+	void SetRimLight(const CalyxEngine::Vector4& color, float intensity, float power = 3.0f);
+	void ClearRimLight();
+	bool HasRimLightOverride() const { return rimLightOverride_.has_value(); }
 	void TransferMaterial();
 
 	// 参照用（TLAS インスタンス登録で使う）
@@ -121,6 +124,12 @@ protected:
 	ModelData* modelData_ = nullptr;
 	Guid materialGuid_;
 	std::optional<CalyxEngine::Vector4> colorOverride_;
+	struct RimLightOverride {
+		CalyxEngine::Vector4 color;
+		float intensity;
+		float power;
+	};
+	std::optional<RimLightOverride> rimLightOverride_;
 public:
 	BlendMode blendMode_ = BlendMode::NORMAL;
 	Transform2D  uvTransform{ {1.0f, 1.0f},

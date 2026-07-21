@@ -36,6 +36,9 @@ struct MaterialConfig final{
 	bool useNormalMap = false;
 	float normalMapStrength = 1.0f;
 	bool normalMapFlipY = false;
+	CalyxEngine::Vector4 rimColor = {1.0f, 1.0f, 1.0f, 1.0f};
+	float rimIntensity = 0.0f;
+	float rimPower = 3.0f;
 	Guid normalMapGuid;
 };
 
@@ -68,6 +71,9 @@ inline void to_json(nlohmann::json& j, const MaterialConfig& c) {
 		{"useNormalMap", c.useNormalMap},
 		{"normalMapStrength", c.normalMapStrength},
 		{"normalMapFlipY", c.normalMapFlipY},
+		{"rimColor", c.rimColor},
+		{"rimIntensity", c.rimIntensity},
+		{"rimPower", c.rimPower},
 		{"normalMapGuid", c.normalMapGuid}
 	};
 }
@@ -104,5 +110,8 @@ inline void from_json(const nlohmann::json& j, MaterialConfig& c) {
 	if(j.contains("useNormalMap")) j.at("useNormalMap").get_to(c.useNormalMap);
 	if(j.contains("normalMapStrength")) j.at("normalMapStrength").get_to(c.normalMapStrength);
 	if(j.contains("normalMapFlipY")) j.at("normalMapFlipY").get_to(c.normalMapFlipY);
+	if(j.contains("rimColor")) j.at("rimColor").get_to(c.rimColor);
+	if(j.contains("rimIntensity")) j.at("rimIntensity").get_to(c.rimIntensity);
+	if(j.contains("rimPower")) j.at("rimPower").get_to(c.rimPower);
 	if(j.contains("normalMapGuid")) j.at("normalMapGuid").get_to(c.normalMapGuid);
 }

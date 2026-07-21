@@ -44,6 +44,10 @@ struct Material {
 	int32_t   useNormalMap = 0;
 	float     normalMapStrength = 1.0f;
 	int32_t   normalMapFlipY = 0;
+	CalyxEngine::Vector4 rimColor = {1.0f, 1.0f, 1.0f, 1.0f};
+	float rimIntensity = 0.0f;
+	float rimPower = 3.0f;
+	float rimPadding[2] = {};
 
 	//config
 	void           ApplyConfig(const MaterialConfig& config);

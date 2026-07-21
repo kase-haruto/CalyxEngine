@@ -752,6 +752,9 @@ void BaseModel::TransferMaterial() {
 		data.toonSpecularIntensity = ma->toonSpecularIntensity;
 		data.emissiveColor = ma->emissiveColor;
 		data.emissiveIntensity = ma->emissiveIntensity;
+		data.rimColor = ma->rimColor;
+		data.rimIntensity = ma->rimIntensity;
+		data.rimPower = ma->rimPower;
 		data.useNormalMap = (ma->useNormalMap || ma->normalMapGuid.isValid()) ? 1 : 0;
 		data.normalMapStrength = ma->normalMapStrength;
 		data.normalMapFlipY = ma->normalMapFlipY ? 1 : 0;
@@ -771,6 +774,11 @@ void BaseModel::TransferMaterial() {
 	}
 	if(colorOverride_) {
 		data.color = *colorOverride_;
+	}
+	if(rimLightOverride_) {
+		data.rimColor = rimLightOverride_->color;
+		data.rimIntensity = rimLightOverride_->intensity;
+		data.rimPower = rimLightOverride_->power;
 	}
 
 	// UV transform を適用
@@ -794,6 +802,20 @@ const CalyxEngine::Vector4& BaseModel::GetColor() const {
 
 void BaseModel::SetColor(const CalyxEngine::Vector4& color) {
 	colorOverride_ = color;
+	TransferMaterial();
+}
+
+void BaseModel::SetRimLight(const CalyxEngine::Vector4& color, float intensity, float power) {
+	rimLightOverride_ = RimLightOverride{
+		color,
+		std::max(intensity, 0.0f),
+		std::max(power, 0.1f),
+	};
+	TransferMaterial();
+}
+
+void BaseModel::ClearRimLight() {
+	rimLightOverride_.reset();
 	TransferMaterial();
 }
 

@@ -30,6 +30,9 @@ void Material::ApplyConfig(const MaterialConfig& config) {
 	useNormalMap          = config.useNormalMap ? 1 : 0;
 	normalMapStrength     = config.normalMapStrength;
 	normalMapFlipY        = config.normalMapFlipY ? 1 : 0;
+	rimColor              = config.rimColor;
+	rimIntensity          = config.rimIntensity;
+	rimPower              = config.rimPower;
 
 }
 
@@ -61,6 +64,9 @@ MaterialConfig Material::ExtractConfig() const {
 	config.useNormalMap          = useNormalMap != 0;
 	config.normalMapStrength     = normalMapStrength;
 	config.normalMapFlipY        = normalMapFlipY != 0;
+	config.rimColor              = rimColor;
+	config.rimIntensity          = rimIntensity;
+	config.rimPower              = rimPower;
 	return config;
 }
 
@@ -102,6 +108,10 @@ void Material::ShowImGui() {
     ImGui::SeparatorText("Emissive");
     GuiCmd::ColorEdit4("emissive color", emissiveColor);
     GuiCmd::SliderFloat("emissive intensity", emissiveIntensity, 0.0f, 20.0f);
+	ImGui::SeparatorText("Rim Light");
+	GuiCmd::ColorEdit4("rim color", rimColor);
+	GuiCmd::SliderFloat("rim intensity", rimIntensity, 0.0f, 10.0f);
+	GuiCmd::SliderFloat("rim power", rimPower, 0.1f, 16.0f);
 
 	ImGui::SeparatorText("Normal Map");
 	bool normalMapEnabled = useNormalMap != 0;
@@ -155,6 +165,12 @@ void Material::ShowImGui(MaterialConfig& config) {
         GuiCmd::SliderFloat("emissive intensity", config.emissiveIntensity, 0.0f, 20.0f);
         ImGui::TreePop();
     }
+	if(ImGui::TreeNodeEx("Rim Light", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+		GuiCmd::ColorEdit4("rim color", config.rimColor);
+		GuiCmd::SliderFloat("rim intensity", config.rimIntensity, 0.0f, 10.0f);
+		GuiCmd::SliderFloat("rim power", config.rimPower, 0.1f, 16.0f);
+		ImGui::TreePop();
+	}
 
 	if(ImGui::TreeNodeEx("Normal Map", ImGuiTreeNodeFlags_SpanAvailWidth)) {
 		GuiCmd::CheckBox("use normal map", config.useNormalMap);

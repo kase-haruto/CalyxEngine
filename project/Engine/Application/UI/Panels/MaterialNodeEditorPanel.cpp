@@ -1635,6 +1635,9 @@ namespace CalyxEngine {
 		data.toonSpecularIntensity = material.toonSpecularIntensity;
 		data.emissiveColor = material.emissiveColor;
 		data.emissiveIntensity = material.emissiveIntensity;
+		data.rimColor = material.rimColor;
+		data.rimIntensity = material.rimIntensity;
+		data.rimPower = material.rimPower;
 		data.useNormalMap = material.useNormalMap ? 1 : 0;
 		data.normalMapStrength = material.normalMapStrength;
 		data.normalMapFlipY = material.normalMapFlipY ? 1 : 0;

@@ -165,6 +165,10 @@ namespace CalyxEngine {
 			out << "    int useNormalMap;\n";
 			out << "    float normalMapStrength;\n";
 			out << "    int normalMapFlipY;\n";
+			out << "    float4 rimColor;\n";
+			out << "    float rimIntensity;\n";
+			out << "    float rimPower;\n";
+			out << "    float2 rimPadding;\n";
 			out << "};\n";
 			out << "cbuffer MaterialConstants : register(b0) { Material gMaterial; }\n\n";
 			out << "struct VertexShaderOutput {\n";
@@ -245,6 +249,10 @@ namespace CalyxEngine {
 			out << "    int useNormalMap;\n";
 			out << "    float normalMapStrength;\n";
 			out << "    int normalMapFlipY;\n";
+			out << "    float4 rimColor;\n";
+			out << "    float rimIntensity;\n";
+			out << "    float rimPower;\n";
+			out << "    float2 rimPadding;\n";
 			out << "};\n\n";
 			out << "struct DirectionalLight { float4 color; float3 direction; float intensity; };\n";
 			out << "struct PointLight { float4 color; float3 position; float intensity; float radius; float decay; float2 pad; };\n\n";
@@ -635,6 +643,8 @@ PixelShaderOutput main(VertexShaderOutput input) {
     directionalSpecular *= shadow;
 
     float3 litColor = directionalDiffuse + directionalSpecular + pointDiffuse + pointSpecular;
+    float rimFactor = pow(saturate(1.0f - dot(normal, toEye)), max(gMaterial.rimPower, 0.0001f));
+    litColor += gMaterial.rimColor.rgb * rimFactor * max(gMaterial.rimIntensity, 0.0f);
     litColor += emissive;
     litColor += albedo * 0.07f;
 

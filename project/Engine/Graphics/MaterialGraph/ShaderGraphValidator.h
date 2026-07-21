@@ -60,6 +60,9 @@ namespace CalyxEngine {
 			RequireCBufferVariable(*materialConstants, result, "enableLighting");
 			RequireCBufferVariable(*materialConstants, result, "emissiveColor");
 			RequireCBufferVariable(*materialConstants, result, "emissiveIntensity");
+			RequireCBufferVariable(*materialConstants, result, "rimColor");
+			RequireCBufferVariable(*materialConstants, result, "rimIntensity");
+			RequireCBufferVariable(*materialConstants, result, "rimPower");
 			RequireCBufferVariable(*materialConstants, result, "toonBaseStep");
 			RequireCBufferVariable(*materialConstants, result, "toonShadeStep");
 			RequireCBufferVariable(*materialConstants, result, "toonSpecularIntensity");

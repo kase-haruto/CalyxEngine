@@ -30,6 +30,10 @@ struct Material {
     int useNormalMap;
     float normalMapStrength;
     int normalMapFlipY;
+    float4 rimColor;
+    float rimIntensity;
+    float rimPower;
+    float2 rimPadding;
 };
 
 struct DirectionalLight {
@@ -410,6 +414,10 @@ PixelShaderOutput main(Object3dVertexOutput input) {
     directionalSpecular *= shadow;
 
     float3 litColor = directionalDiffuse + directionalSpecular + pointDiffuse + pointSpecular;
+
+    // View-dependent rim lighting. Higher power produces a thinner rim.
+    float rimFactor = pow(saturate(1.0f - dot(normal, toEye)), max(gMaterial.rimPower, 0.0001f));
+    litColor += gMaterial.rimColor.rgb * rimFactor * max(gMaterial.rimIntensity, 0.0f);
 
     // AOではない（定数アンビエント）
     float3 ambient = albedo * 0.07f;

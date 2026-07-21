@@ -59,6 +59,10 @@ namespace CalyxEngine {
 		float   emissiveIntensity = 0.0f;                        //< 発光強度係数
 
 		// --- テクスチャリソースの参照 ---
+		Vector4 rimColor = {1.0f, 1.0f, 1.0f, 1.0f};
+		float rimIntensity = 0.0f;
+		float rimPower = 3.0f;
+
 		Guid    objectTextureGuid;                               //< アルベド（ディフューズ）テクスチャアセットのGUID
 		Guid    normalMapGuid;                                   //< 法線マップ（ノーマルマップ）テクスチャアセットのGUID
 		bool    useNormalMap = false;                            //< 法線マップの適用フラグ
