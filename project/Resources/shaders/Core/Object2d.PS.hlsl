@@ -38,6 +38,14 @@ PSOutput main(VSOutput input) {
 		} else {
 			if (baseUV.x < 1.0f - gMaterial.fillAmount) discard;
 		}
+	} else if (gMaterial.fillMethod == 2) {
+		// Texture UV has 0 at the top and 1 at the bottom.
+		// fillOrigin.y == 0 means fill upward from the bottom.
+		if (gMaterial.fillOrigin.y < 0.5f) {
+			if (baseUV.y < 1.0f - gMaterial.fillAmount) discard;
+		} else {
+			if (baseUV.y > gMaterial.fillAmount) discard;
+		}
 	}
 
 	//--------------------------------
