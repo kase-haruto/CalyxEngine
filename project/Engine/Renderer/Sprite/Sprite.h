@@ -13,6 +13,7 @@
 /* c++ */
 #include <d3d12.h>
 #include <wrl.h>
+#include <algorithm>
 
 class DirectXCommon;
 
@@ -201,6 +202,7 @@ public:
 	 * \param tex テクスチャ名
 	 */
 	void	   SetTexture(const std::string& tex);
+	void SetFillMaskTexture(const std::string& tex);
 	/**
 	 * \brief GPUハンドルからテクスチャを設定
 	 * \param newHandle ハンドル
@@ -221,18 +223,18 @@ public:
 	 * \brief 塗りつぶし量を設定 (0.0〜1.0)
 	 * \param amt 塗りつぶし量
 	 */
-	void SetFillAmount(float amt) { materialData_.fillAmount = amt; }
+	void SetFillAmount(float amt) { materialData_.fillAmount = std::clamp(amt, 0.0f, 1.0f); }
 	/**
 	 * \brief 塗りつぶしの原点を設定
 	 * \param x X座標 (0.0〜1.0)
 	 * \param y Y座標 (0.0〜1.0)
 	 */
-	void SetFillOrigin(float x, float y) { materialData_.fillOrigin = {x, y}; }
+	void SetFillOrigin(float x, float y) { materialData_.fillOrigin = {std::clamp(x, 0.0f, 1.0f), std::clamp(y, 0.0f, 1.0f)}; }
 	/**
 	 * \brief 塗りつぶし手法を設定
 	 * \param method 手法
 	 */
-	void SetFillMethod(int method) { materialData_.fillMethod = method; }
+	void SetFillMethod(int method) { materialData_.fillMethod = std::clamp(method, 0, 3); }
 
 private:
 	//===================================================================*/
@@ -294,6 +296,7 @@ private:
 	DxConstantBuffer<Material2D> materialCB_; //< マテリアル用定数バッファ
 	Material2D					 materialData_; //< マテリアルデータ
 	RenderTargetType			 targetRT_ = RenderTargetType::BackBuffer; //< 描画先ターゲット
+	D3D12_GPU_DESCRIPTOR_HANDLE fillMaskHandle{};
 #pragma endregion
 
 private:

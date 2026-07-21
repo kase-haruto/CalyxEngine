@@ -85,6 +85,7 @@ namespace CalyxEngine {
 		void SetFillAmount(float fillAmount) const;
 		void SetFillOrigin(float x,float y);
 		void SetFillMethod(int method);
+		void SetFillMaskTexture(const std::string& texturePath) const;
 
 	private:
 		std::unique_ptr<Sprite> sprite_ = nullptr;

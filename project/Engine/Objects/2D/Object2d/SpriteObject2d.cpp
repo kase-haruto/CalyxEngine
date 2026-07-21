@@ -93,4 +93,7 @@ void CalyxEngine::SpriteObject2d::SetFillOrigin(float x, float y) {
 void CalyxEngine::SpriteObject2d::SetFillMethod(int method) {
 	sprite_->SetFillMethod(method);
 }
-	
+
+void CalyxEngine::SpriteObject2d::SetFillMaskTexture(const std::string& texturePath) const {
+	sprite_->SetFillMaskTexture(texturePath);
+}

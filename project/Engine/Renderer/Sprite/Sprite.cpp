@@ -25,6 +25,7 @@
 Sprite::Sprite(const std::string& filePath) {
 
 	handle = CalyxEngine::AssetManager::GetInstance()->GetTextureManager()->LoadTexture(filePath);
+	fillMaskHandle = CalyxEngine::AssetManager::GetInstance()->GetTextureManager()->LoadTexture("Textures/white1x1.dds");
 
 	transform_ = {{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}};
 
@@ -118,6 +119,7 @@ void Sprite::Draw(ID3D12GraphicsCommandList* cmdList) {
 	if(!isVisible) return;
 	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	cmdList->SetGraphicsRootDescriptorTable(2, handle);
+	cmdList->SetGraphicsRootDescriptorTable(3, fillMaskHandle);
 	cmdList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
 	cmdList->IASetIndexBuffer(&indexBufferView);
 	materialCB_.SetCommand(cmdList, 0);
@@ -219,5 +221,9 @@ void Sprite::SetUvScale(const CalyxEngine::Vector2& scale) {
 }
 
 void Sprite::SetTexture(const std::string& tex) { handle = CalyxEngine::AssetManager::GetInstance()->GetTextureManager()->LoadTexture(tex); }
+
+void Sprite::SetFillMaskTexture(const std::string& tex) {
+	fillMaskHandle = CalyxEngine::AssetManager::GetInstance()->GetTextureManager()->LoadTexture(tex);
+}
 
 const void Sprite::SetTextureHandle(D3D12_GPU_DESCRIPTOR_HANDLE newHandle) { handle = newHandle; }

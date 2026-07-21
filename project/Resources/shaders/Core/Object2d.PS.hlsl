@@ -19,6 +19,7 @@ struct Material {
 ConstantBuffer<Material> gMaterial : register(b0);
 
 Texture2D<float4> gTexture : register(t0);
+Texture2D<float4> gFillMaskTexture : register(t1);
 SamplerState      gSampler : register(s0);
 
 PSOutput main(VSOutput input) {
@@ -32,12 +33,22 @@ PSOutput main(VSOutput input) {
 	//--------------------------------
 	// フィル判定
 	//--------------------------------
+	float fillAmount = saturate(gMaterial.fillAmount);
 	if (gMaterial.fillMethod == 1) {
 		if (gMaterial.fillOrigin.x < 0.5f) {
-			if (baseUV.x > gMaterial.fillAmount) discard;
+			if (baseUV.x > fillAmount) discard;
 		} else {
-			if (baseUV.x < 1.0f - gMaterial.fillAmount) discard;
+			if (baseUV.x < 1.0f - fillAmount) discard;
 		}
+	} else if (gMaterial.fillMethod == 2) {
+		if (gMaterial.fillOrigin.y < 0.5f) {
+			if (baseUV.y < 1.0f - fillAmount) discard;
+		} else {
+			if (baseUV.y > fillAmount) discard;
+		}
+	} else if (gMaterial.fillMethod == 3) {
+		float maskValue = gFillMaskTexture.Sample(gSampler, baseUV).r;
+		if (maskValue > fillAmount) discard;
 	}
 
 	//--------------------------------

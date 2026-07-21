@@ -59,6 +59,7 @@ namespace CalyxEngine {
 		 * \param method 手法
 		 */
 		void SetFillMethod(int method);
+		void SetFillMaskTexture(const std::string& texturePath);
 
 
 	protected:

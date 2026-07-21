@@ -148,6 +148,10 @@ namespace CalyxEngine {
 		sprite_->SetFillMethod(method);
 	}
 
+	void SpriteSceneObject2d::SetFillMaskTexture(const std::string& texturePath) {
+		sprite_->SetFillMaskTexture(texturePath);
+	}
+
 	void SpriteSceneObject2d::EnsureSprite() {
 		if(sprite_) return;
 		sprite_ = std::make_unique<SpriteObject2d>();
