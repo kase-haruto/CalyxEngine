@@ -157,6 +157,17 @@ namespace PostEffectAPI {
 	}
 	inline void PlayTriggered(const std::string& name) { PostEffectManager::Get()->PlayTriggeredEffect(name); }
 	inline void PlayTriggeredAll() { PostEffectManager::Get()->PlayTriggeredEffects(); }
+	inline bool SetVignetteColor(const CalyxEngine::Vector3& color) {
+		auto* pass = PostEffectManager::Get()->GetPass("Vignette");
+		if(!pass) return false;
+		const bool r = pass->SetFloatParameter("color.r", color.x);
+		const bool g = pass->SetFloatParameter("color.g", color.y);
+		const bool b = pass->SetFloatParameter("color.b", color.z);
+		return r && g && b;
+	}
+	inline bool SetVignetteColor(float r, float g, float b) {
+		return SetVignetteColor(CalyxEngine::Vector3{r, g, b});
+	}
 	inline void SetOutlineEnabled(bool enabled) { PostEffectManager::Get()->SetOutlineEnabled(enabled); }
 	inline bool IsOutlineEnabled() { return PostEffectManager::Get()->IsOutlineEnabled(); }
 }
