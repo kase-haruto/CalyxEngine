@@ -20,7 +20,7 @@ namespace {
 			}
 		}
 
-		// Compatibility with projects that still keep audio outside Assets.
+		// オーディオをAssets外に置いている既存プロジェクトとの互換性を維持する。
 		return std::filesystem::path("Resources/sounds") / requested.filename();
 	}
 }

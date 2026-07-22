@@ -59,7 +59,7 @@ namespace CalyxEngine {
 		 */
 		DataAssetManager* GetDataAssetManager() const { return dataAssetManager_.get(); }
 
-		/** \brief Audio manager used by the public game-side audio API. */
+		/** \brief ゲーム側の公開オーディオAPIが使用するオーディオマネージャー。 */
 		CALYX_API Audio* GetAudioManager() const { return audioManager_.get(); }
 
 	private:

@@ -22,31 +22,14 @@
 #include <vector>
 
 namespace SceneAPI{
-	inline void RequestSceneChange(const std::filesystem::path& scenePath) {
-		auto* ctx = SceneContext::Current();
-		CX_CHECK(ctx && ctx->GetSceneTransitionRequestor(), "Scene transition service is unavailable");
-		ctx->GetSceneTransitionRequestor()->RequestSceneChange(scenePath);
-	}
-
-	inline void RequestSceneChange(const Guid& sceneAssetGuid) {
-		auto* ctx = SceneContext::Current();
-		CX_CHECK(ctx && ctx->GetSceneTransitionRequestor(), "Scene transition service is unavailable");
-		ctx->GetSceneTransitionRequestor()->RequestSceneChange(sceneAssetGuid);
-	}
-
-	inline void RequestSceneChange(const std::filesystem::path& scenePath,
-		std::unique_ptr<CalyxEngine::BaseSceneTransitionEffect> effect) {
-		auto* ctx = SceneContext::Current();
-		CX_CHECK(ctx && ctx->GetSceneTransitionRequestor(), "Scene transition service is unavailable");
-		ctx->GetSceneTransitionRequestor()->RequestSceneChange(scenePath, std::move(effect));
-	}
-
-	inline void RequestSceneChange(const Guid& sceneAssetGuid,
-		std::unique_ptr<CalyxEngine::BaseSceneTransitionEffect> effect) {
-		auto* ctx = SceneContext::Current();
-		CX_CHECK(ctx && ctx->GetSceneTransitionRequestor(), "Scene transition service is unavailable");
-		ctx->GetSceneTransitionRequestor()->RequestSceneChange(sceneAssetGuid, std::move(effect));
-	}
+	CALYX_API void RequestSceneChange(const std::filesystem::path& scenePath);
+	CALYX_API void RequestSceneChange(const Guid& sceneAssetGuid);
+	CALYX_API void RequestSceneChange(
+		const std::filesystem::path& scenePath,
+		std::unique_ptr<CalyxEngine::BaseSceneTransitionEffect> effect);
+	CALYX_API void RequestSceneChange(
+		const Guid& sceneAssetGuid,
+		std::unique_ptr<CalyxEngine::BaseSceneTransitionEffect> effect);
 
 	template<class T, class... Args>
 	std::shared_ptr<T> Instantiate(Args&&... args){
@@ -55,42 +38,10 @@ namespace SceneAPI{
 		return ctx->Instantiate<T>(std::forward<Args>(args)...);
 	}
 
-	inline std::vector<std::shared_ptr<SceneObject>> InstantiatePrefab(
+	CALYX_API std::vector<std::shared_ptr<SceneObject>> InstantiatePrefab(
 		const std::string& path,
 		const CalyxEngine::Vector3& spawnOffset = CalyxEngine::Vector3::Zero(),
-		const Guid& prefabAssetGuid = Guid::Empty()) {
-		auto ctx = SceneContext::Current();
-		CX_CHECK(ctx && "No active SceneContext!", "Assertion failed");
-		std::string fullPath = Calyx::ResolveAssetPath(std::filesystem::path("Prefabs") / path).generic_string();
-
-		auto objects = PrefabSerializer::Load(
-			fullPath,
-			PrefabSerializer::LoadOptions{false, prefabAssetGuid});
-
-		std::unordered_set<SceneObject*> loaded;
-		loaded.reserve(objects.size());
-		for(const auto& sp : objects) {
-			if(sp) loaded.insert(sp.get());
-		}
-
-		for(const auto& sp : objects) {
-			if(!sp) continue;
-
-			if(prefabAssetGuid.isValid() && !sp->GetPrefabAssetGuid().isValid()) {
-				sp->SetPrefabLink(prefabAssetGuid, sp->GetGuid());
-			}
-
-			auto parent = sp->GetParent();
-			if(!parent || !loaded.contains(parent.get())) {
-				sp->GetWorldTransform().translation =
-					sp->GetWorldTransform().translation + spawnOffset;
-			}
-
-			ctx->AddObject(sp);
-		}
-
-		return objects;
-	}
+		const Guid& prefabAssetGuid = Guid::Empty());
 
 	template<class T>
 	std::vector<std::shared_ptr<T>> InstantiatePrefabRoots(
@@ -133,11 +84,7 @@ namespace SceneAPI{
 		return roots.empty() ? nullptr : roots.front();
 	}
 
-	inline const CollisionLayerSettings& GetCollisionLayerSettings() {
-		auto ctx = SceneContext::Current();
-		CX_CHECK(ctx && "No active SceneContext!", "Assertion failed");
-		return ctx->GetSettings().GetCollisionSettings();
-	}
+	CALYX_API const CollisionLayerSettings& GetCollisionLayerSettings();
 }
 
 namespace EffectAPI {
@@ -173,8 +120,8 @@ namespace EffectAPI {
 	}
 }
 
-// Game-side audio facade. All functions use the asset's file name (including extension)
-// as the stable key, regardless of where the audio asset is stored under Assets.
+// ゲーム側のオーディオ用API。Assets以下の保存場所にかかわらず、
+// 拡張子を含むファイル名を共通のキーとして使用する。
 namespace AudioAPI {
 	inline Audio* Manager() {
 		auto* manager = CalyxEngine::AssetManager::GetInstance()->GetAudioManager();
@@ -195,7 +142,7 @@ namespace AudioAPI {
 	inline void Unload(const std::string& filename) { Manager()->UnloadAudio(filename); }
 }
 
-// Game-side post-effect facade. The manager itself is also exported for advanced use.
+// ゲーム側のポストエフェクト用API。高度な用途向けにManager本体も公開している。
 namespace PostEffectAPI {
 	inline void Enable(const std::string& name, bool enabled = true) { PostEffectManager::Get()->Enable(name, enabled); }
 	inline void Disable(const std::string& name) { PostEffectManager::Get()->Disable(name); }
