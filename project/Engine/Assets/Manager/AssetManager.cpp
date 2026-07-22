@@ -33,7 +33,8 @@ void CalyxEngine::AssetManager::Initialize(ImGuiManager* imgui) {
 	dataAssetManager_ = std::make_unique<DataAssetManager>();
 	
 	// --- オーディオエンジンの初期化 ---
-	Audio::Initialize();
+	audioManager_ = std::make_unique<Audio>();
+	audioManager_->Initialize();
 	EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Asset, "Asset managers initialization completed.", "AssetManager");
 }
 
@@ -48,6 +49,9 @@ void CalyxEngine::AssetManager::Finalize() {
 	dataAssetManager_.reset();
 	
 	// オーディオエンジンの解放
-	Audio::Finalize();
+	if(audioManager_) {
+		audioManager_->Finalize();
+		audioManager_.reset();
+	}
 	EngineLogger::GetInstance().Add(LogLevel::Info, LogCategory::Asset, "Asset managers shutdown completed.", "AssetManager");
 }

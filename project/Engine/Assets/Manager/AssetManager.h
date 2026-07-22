@@ -4,6 +4,7 @@
 #include <Engine/Assets/Texture/TextureManager.h>
 #include <Engine/Assets/DataAsset/DataAssetManager.h>
 #include <Engine/Foundation/Export/CalyxAPI.h>
+#include <Engine/Foundation/Audio/Audio.h>
 
 namespace CalyxEngine {
 
@@ -58,6 +59,9 @@ namespace CalyxEngine {
 		 */
 		DataAssetManager* GetDataAssetManager() const { return dataAssetManager_.get(); }
 
+		/** \brief ゲーム側の公開オーディオAPIが使用するオーディオマネージャー。 */
+		CALYX_API Audio* GetAudioManager() const { return audioManager_.get(); }
+
 	private:
 		//===================================================================*/
 		//					private function
@@ -75,7 +79,7 @@ namespace CalyxEngine {
 		std::unique_ptr<ModelManager>     modelManager_;     //< 3Dモデルデータのロード・管理担当
 		std::unique_ptr<TextureManager>   textureManager_;   //< テクスチャ画像のロード・GPUリソース管理担当
 		std::unique_ptr<DataAssetManager> dataAssetManager_; //< マテリアルやアニメーション等のカスタムアセット管理担当
-
+		std::unique_ptr<Audio>			  audioManager_;	 //< 音声データのロード・再生担当
 	};
 
 }

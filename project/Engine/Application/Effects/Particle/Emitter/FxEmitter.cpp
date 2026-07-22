@@ -276,11 +276,26 @@ namespace CalyxEngine {
 		fx.spinSpeed = spin_.Get(randomStream_);
 		fx.alignDirection = CalyxEngine::Vector3(0.0f,0.0f,0.0f);
 		fx.alignToDirection = false;
-		fx.rotationEuler = initialRotation_;
-		if(HasFlag(RandomSpinEmit)) { fx.rotationEuler.z = randomStream_.NextFloat(-CalyxEngine::kPi,CalyxEngine::kPi); }
+		// initialRotation_ is authored in emitter-local space.  Compose it with the
+		// SceneObject world rotation so non-billboard particles (for example slash
+		// meshes) inherit the emitter/parent orientation at spawn time.
+		Vector3 localRotationEuler = initialRotation_;
+		if(HasFlag(RandomSpinEmit)) {
+			localRotationEuler.z = randomStream_.NextFloat(-CalyxEngine::kPi,CalyxEngine::kPi);
+		}
+		const Quaternion localRotation = Quaternion::EulerToQuaternion(localRotationEuler);
+		fx.rotationEuler = Quaternion::ToEuler(
+			Quaternion::Normalize(worldRotation_ * localRotation));
 		if(useDirection_) ApplyDirectionVelocity(fx);
 		for(auto* module : moduleContainer_->GetInitializeModules()) {
 			if(module->IsEnabled()) module->OnEmit(fx);
+		}
+
+		// 速度や方向指定はエミッターのローカル空間で設定される。
+		// FxObjectを含む親子階層のワールド回転を反映してから粒子を放出する。
+		fx.velocity = CalyxEngine::Quaternion::RotateVector(fx.velocity, worldRotation_);
+		if(fx.alignToDirection) {
+			fx.alignDirection = CalyxEngine::Quaternion::RotateVector(fx.alignDirection, worldRotation_);
 		}
 	}
 

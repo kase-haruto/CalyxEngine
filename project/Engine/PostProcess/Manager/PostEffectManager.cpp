@@ -276,6 +276,10 @@ bool PostEffectManager::LoadPreset(const std::string& filePath){
 	}
 
 	if(!root.contains("nodes") || !root["nodes"].is_array()) return false;
+
+	// 別プリセットの再生状態を新しいシーンへ持ち越さない。
+	// 古いTweenが完了して、新しく読み込んだ同名パスを無効化する競合も防ぐ。
+	floatTweens_.clear();
 	loadedPreset_ = root;
 	hasLoadedGraph_ = root.contains("graph") && root["graph"].is_object();
 	if(root.contains("outline") && root["outline"].is_object()){
@@ -354,6 +358,12 @@ void PostEffectManager::PlayTriggeredEffect(const std::string& name){
 	if(idx < 0) return;
 	auto& slot = collection_.GetSlots()[idx];
 	if(slot.name == kCopyImageName || slot.applyMode != PostEffectApplyMode::Triggered || !slot.pass) return;
+
+	// 同じエフェクトが連続発生した場合、前回の完了処理で今回の再生が
+	// 途中停止しないよう、対象パスのTweenを今回の再生へ置き換える。
+	std::erase_if(floatTweens_, [&name](const FloatTween& tween) {
+		return tween.passName == name;
+	});
 
 	Enable(slot.name, true);
 
