@@ -10,6 +10,8 @@
 #include <Engine/Scene/Context/SceneContext.h>
 #include <Engine/Scene/Settings/SceneSettings.h>
 #include <Engine/Scene/Fade/BaseSceneTransitionEffect.h>
+#include <Engine/Assets/Manager/AssetManager.h>
+#include <Engine/PostProcess/Manager/PostEffectManager.h>
 
 #include <filesystem>
 #include <memory>
@@ -169,6 +171,47 @@ namespace EffectAPI {
 	inline void Stop(CalyxEngine::EffectHandle handle) {
 		Player()->Stop(handle);
 	}
+}
+
+// Game-side audio facade. All functions use the asset's file name (including extension)
+// as the stable key, regardless of where the audio asset is stored under Assets.
+namespace AudioAPI {
+	inline Audio* Manager() {
+		auto* manager = CalyxEngine::AssetManager::GetInstance()->GetAudioManager();
+		CX_CHECK(manager, "Audio manager is unavailable");
+		return manager;
+	}
+
+	inline void Load(const std::string& filename) { Manager()->Load(filename); }
+	inline void Play(const std::string& filename, bool loop = false, float volume = 1.0f) {
+		Manager()->Load(filename);
+		Manager()->Play(filename, loop, volume);
+	}
+	inline void Stop(const std::string& filename) { Manager()->EndAudio(filename); }
+	inline void Pause(const std::string& filename) { Manager()->PauseAudio(filename); }
+	inline void Restart(const std::string& filename) { Manager()->RestartAudio(filename); }
+	inline void SetVolume(const std::string& filename, float volume) { Manager()->SetAudioVolume(filename, volume); }
+	inline bool IsPlaying(const std::string& filename) { return Manager()->IsPlayingAudio(filename); }
+	inline void Unload(const std::string& filename) { Manager()->UnloadAudio(filename); }
+}
+
+// Game-side post-effect facade. The manager itself is also exported for advanced use.
+namespace PostEffectAPI {
+	inline void Enable(const std::string& name, bool enabled = true) { PostEffectManager::Get()->Enable(name, enabled); }
+	inline void Disable(const std::string& name) { PostEffectManager::Get()->Disable(name); }
+	inline void Toggle(const std::string& name) { PostEffectManager::Get()->Toggle(name); }
+	inline bool IsEnabled(const std::string& name) { return PostEffectManager::Get()->IsEnabled(name); }
+	inline void EnableOnly(std::initializer_list<std::string> names) { PostEffectManager::Get()->EnableOnly(names); }
+	inline void EnableAll() { PostEffectManager::Get()->EnableAll(); }
+	inline void DisableAll() { PostEffectManager::Get()->DisableAll(); }
+	inline bool LoadPreset(const std::string& filename) {
+		return PostEffectManager::Get()->LoadPreset(
+			Calyx::ResolveAssetPath(std::filesystem::path("PostEffects") / filename).generic_string());
+	}
+	inline void PlayTriggered(const std::string& name) { PostEffectManager::Get()->PlayTriggeredEffect(name); }
+	inline void PlayTriggeredAll() { PostEffectManager::Get()->PlayTriggeredEffects(); }
+	inline void SetOutlineEnabled(bool enabled) { PostEffectManager::Get()->SetOutlineEnabled(enabled); }
+	inline bool IsOutlineEnabled() { return PostEffectManager::Get()->IsOutlineEnabled(); }
 }
 
 namespace CalyxEngine {

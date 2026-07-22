@@ -10,6 +10,7 @@
 #include <Engine/Graphics/GpuResource/DxGpuResource.h>
 #include <Engine/Graphics/RenderTarget/Interface/IRenderTarget.h>
 #include <Engine/Foundation/Utility/Ease/CxEase.h>
+#include <Engine/Foundation/Export/CalyxAPI.h>
 
 // local
 #include "../Graph/PostEffectGraph.h"
@@ -28,31 +29,31 @@ class IPostEffectPass;
 
 class PostEffectManager{
 public:
-	static PostEffectManager* Get();
+	CALYX_API static PostEffectManager* Get();
 
 	void Initialize(PipelineService* service, bool enableAll = false);
 
 	bool IsInitialized() const{ return initialized_; }
 
 	// ---------- トグルAPI ----------
-	void Enable(const std::string& name, bool enabled = true);
+	CALYX_API void Enable(const std::string& name, bool enabled = true);
 	void Disable(const std::string& name){ Enable(name,false); }
-	void Toggle(const std::string& name);
-	bool IsEnabled(const std::string& name) const;
+	CALYX_API void Toggle(const std::string& name);
+	CALYX_API bool IsEnabled(const std::string& name) const;
 
-	void EnableOnly(std::initializer_list<std::string> names);
-	void EnableAll(); // CopyImage は常にOFF
-	void DisableAll();
+	CALYX_API void EnableOnly(std::initializer_list<std::string> names);
+	CALYX_API void EnableAll(); // CopyImage は常にOFF
+	CALYX_API void DisableAll();
 
 	// ---------- 並び順 ----------
-	bool MoveUp(const std::string& name);
-	bool MoveDown(const std::string& name);
-	void SetOrder(const std::vector<std::string>& orderedNames);
+	CALYX_API bool MoveUp(const std::string& name);
+	CALYX_API bool MoveDown(const std::string& name);
+	CALYX_API void SetOrder(const std::vector<std::string>& orderedNames);
 
-	bool SavePreset(const std::string& filePath, const std::string& presetName = "PostEffectPreset") const;
-	bool LoadPreset(const std::string& filePath);
-	void PlayTriggeredEffects();
-	void PlayTriggeredEffect(const std::string& name);
+	CALYX_API bool SavePreset(const std::string& filePath, const std::string& presetName = "PostEffectPreset") const;
+	CALYX_API bool LoadPreset(const std::string& filePath);
+	CALYX_API void PlayTriggeredEffects();
+	CALYX_API void PlayTriggeredEffect(const std::string& name);
 
 	void SetOutlineEnabled(bool enabled) { outlineEnabled_ = enabled; }
 	bool IsOutlineEnabled() const { return outlineEnabled_; }
@@ -76,7 +77,7 @@ public:
 					std::function<void()> onComplete = nullptr);
 
 	// 直接パスを触りたい場合
-	IPostEffectPass* GetPass(const std::string& name);
+	CALYX_API IPostEffectPass* GetPass(const std::string& name);
 
 	void DrawImGui();
 

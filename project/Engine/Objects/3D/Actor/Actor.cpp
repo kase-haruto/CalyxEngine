@@ -26,6 +26,7 @@ void Actor::Update(float dt) {
 	// BaseGameObject 側で Transform / Collider / Model を通常更新する。
 	characterMovement_.Tick(dt);
 	BaseGameObject::Update(dt);
+
 }
 
 void Actor::ApplyConfig() {

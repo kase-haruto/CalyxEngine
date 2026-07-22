@@ -1,11 +1,29 @@
 #include "Audio.h"
 #include <Engine/Foundation/Debug/CxAssert.h>
+#include <Engine/Assets/Database/AssetDatabase.h>
 #include <stdexcept>
 #include <iostream>   // デバッグ用などに
+#include <algorithm>
+#include <cctype>
+#include <filesystem>
 
-// 静的メンバ変数の定義
-std::unique_ptr<Audio> Audio::instance_ = nullptr;
-const std::string Audio::directoryPath_ = "Resources/sounds/";
+namespace {
+	std::filesystem::path ResolveAudioFile(const std::string& filename) {
+		const std::filesystem::path requested(filename);
+		if(requested.has_parent_path() && std::filesystem::exists(requested)) return requested;
+
+		auto* database = AssetDatabase::GetInstance();
+		for(const AssetRecord* record : database->GetView()) {
+			if(record && record->type == AssetType::Audio &&
+			   record->sourcePath.filename().generic_string() == requested.filename().generic_string()) {
+				return record->sourcePath;
+			}
+		}
+
+		// Compatibility with projects that still keep audio outside Assets.
+		return std::filesystem::path("Resources/sounds") / requested.filename();
+	}
+}
 
 /////////////////////////////////////////////////////////////////////////////////////
 // デストラクタ
@@ -15,31 +33,18 @@ Audio::~Audio(){
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
-// インスタンス取得関数
-/////////////////////////////////////////////////////////////////////////////////////
-const Audio* Audio::GetInstance(){
-	if (!instance_){
-		instance_ = std::unique_ptr<Audio>(new Audio());
-	}
-	return instance_.get();
-}
-
-/////////////////////////////////////////////////////////////////////////////////////
 // 初期化
 /////////////////////////////////////////////////////////////////////////////////////
 void Audio::Initialize(){
-	// インスタンスを生成しておく
-	GetInstance();
-
 	// XAudio2初期化
-	HRESULT hr = XAudio2Create(&instance_->xAudio2_, 0, XAUDIO2_DEFAULT_PROCESSOR);
+	HRESULT hr = XAudio2Create(&xAudio2_, 0, XAUDIO2_DEFAULT_PROCESSOR);
 	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
-	hr = instance_->xAudio2_->CreateMasteringVoice(&instance_->masteringVoice_);
+	hr = xAudio2_->CreateMasteringVoice(&masteringVoice_);
 	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
 	// Media Foundation初期化
-	hr = instance_->InitializeMediaFoundation();
+	hr = InitializeMediaFoundation();
 	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
 	// 起動時にまとめて読み込む音声の処理
@@ -53,7 +58,13 @@ void Audio::StartUpLoad(){
 }
 
 void Audio::Finalize(){
-	instance_.reset();
+	UnloadAllAudio();
+	if(masteringVoice_) {
+		masteringVoice_->DestroyVoice();
+		masteringVoice_ = nullptr;
+	}
+	xAudio2_.Reset();
+	MFShutdown();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -129,19 +140,19 @@ void Audio::PlayAudio(
 /////////////////////////////////////////////////////////////////////////////////////
 void Audio::Play(const std::string& filename, bool loop, float volume){
 	// ロード済みか確認
-	CX_CHECK(instance_->audios_.find(filename) != instance_->audios_.end(), "Assertion failed");
+	CX_CHECK(audios_.find(filename) != audios_.end(), "Assertion failed");
 
 	// 実際の再生を呼び出し
-	instance_->PlayAudio(
-		instance_->xAudio2_.Get(),
-		instance_->audios_[filename],
+	PlayAudio(
+		xAudio2_.Get(),
+		audios_[filename],
 		filename,
 		loop,
 		volume
 	);
 
 	// 再生フラグを立てる
-	instance_->isPlaying_[filename] = true;
+	isPlaying_[filename] = true;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -149,20 +160,20 @@ void Audio::Play(const std::string& filename, bool loop, float volume){
 /////////////////////////////////////////////////////////////////////////////////////
 void Audio::EndAudio(const std::string& filename){
 	// SourceVoiceがなければエラー
-	CX_CHECK(instance_->sourceVoices_.find(filename) != instance_->sourceVoices_.end(), "Assertion failed");
+	CX_CHECK(sourceVoices_.find(filename) != sourceVoices_.end(), "Assertion failed");
 
 	HRESULT hr;
-	hr = instance_->sourceVoices_[filename]->Stop();
+	hr = sourceVoices_[filename]->Stop();
 	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
-	hr = instance_->sourceVoices_[filename]->FlushSourceBuffers();
+	hr = sourceVoices_[filename]->FlushSourceBuffers();
 	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
 	// ボイス解放
-	instance_->sourceVoices_[filename].reset();
+	sourceVoices_[filename].reset();
 
 	// 再生フラグをおろす
-	instance_->isPlaying_[filename] = false;
+	isPlaying_[filename] = false;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -170,28 +181,28 @@ void Audio::EndAudio(const std::string& filename){
 /////////////////////////////////////////////////////////////////////////////////////
 void Audio::PauseAudio(const std::string& filename){
 	// SourceVoiceがなければエラー
-	CX_CHECK(instance_->sourceVoices_.find(filename) != instance_->sourceVoices_.end(), "Assertion failed");
+	CX_CHECK(sourceVoices_.find(filename) != sourceVoices_.end(), "Assertion failed");
 
 	HRESULT hr = S_OK;
-	hr = instance_->sourceVoices_[filename]->Stop();
+	hr = sourceVoices_[filename]->Stop();
 	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
 	// 再生フラグをおろす
-	instance_->isPlaying_[filename] = false;
+	isPlaying_[filename] = false;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
 // 一時停止中の音声を再開する
 /////////////////////////////////////////////////////////////////////////////////////
-void Audio::RestertAudio(const std::string& filename){
+void Audio::RestartAudio(const std::string& filename){
 	// SourceVoiceがなければエラー
-	CX_CHECK(instance_->sourceVoices_.find(filename) != instance_->sourceVoices_.end(), "Assertion failed");
+	CX_CHECK(sourceVoices_.find(filename) != sourceVoices_.end(), "Assertion failed");
 	HRESULT hr = S_OK;
-	if (instance_->sourceVoices_[filename] != nullptr){
-		hr = instance_->sourceVoices_[filename]->Start();
+	if (sourceVoices_[filename] != nullptr){
+		hr = sourceVoices_[filename]->Start();
 		CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
-		instance_->isPlaying_[filename] = true;
+		isPlaying_[filename] = true;
 	}
 }
 
@@ -200,9 +211,9 @@ void Audio::RestertAudio(const std::string& filename){
 /////////////////////////////////////////////////////////////////////////////////////
 void Audio::SetAudioVolume(const std::string& filename, float volume){
 	// SourceVoiceがなければエラー
-	CX_CHECK(instance_->sourceVoices_.find(filename) != instance_->sourceVoices_.end(), "Assertion failed");
+	CX_CHECK(sourceVoices_.find(filename) != sourceVoices_.end(), "Assertion failed");
 
-	instance_->sourceVoices_[filename]->SetVolume(volume);
+	sourceVoices_[filename]->SetVolume(volume);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -210,8 +221,8 @@ void Audio::SetAudioVolume(const std::string& filename, float volume){
 /////////////////////////////////////////////////////////////////////////////////////
 bool Audio::IsPlayingAudio(const std::string& filename){
 	// フラグがなければエラー
-	CX_CHECK(instance_->isPlaying_.find(filename) != instance_->isPlaying_.end(), "Assertion failed");
-	return instance_->isPlaying_[filename];
+	CX_CHECK(isPlaying_.find(filename) != isPlaying_.end(), "Assertion failed");
+	return isPlaying_[filename];
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -219,9 +230,10 @@ bool Audio::IsPlayingAudio(const std::string& filename){
 /////////////////////////////////////////////////////////////////////////////////////
 void Audio::Load(const std::string& filename){
 	// 未ロードならロードを実施
-	if (instance_->audios_.find(filename) == instance_->audios_.end()){
+	if (audios_.find(filename) == audios_.end()){
 		// 実際のパス
-		std::string correctPath = directoryPath_ + filename;
+		const std::filesystem::path correctPath = ResolveAudioFile(filename);
+		CX_CHECK(std::filesystem::exists(correctPath), "Audio file was not found");
 
 		// 拡張子を取得
 		size_t pos = filename.find_last_of('.');
@@ -229,20 +241,21 @@ void Audio::Load(const std::string& filename){
 			CX_CHECK(false && "No valid extension found.", "Assertion failed");
 		}
 		std::string extension = filename.substr(pos + 1);
+		std::transform(extension.begin(), extension.end(), extension.begin(),
+			[](unsigned char c) { return static_cast<char>(std::tolower(c)); });
 
 		// 拡張子で振り分け
 		if (extension == "wav"){
-			instance_->audios_[filename] = instance_->LoadWave(correctPath.c_str());
+			audios_[filename] = LoadWave(correctPath.string().c_str());
 		} else if (extension == "mp3" || extension == "m4a"){
-			std::wstring wpath(correctPath.begin(), correctPath.end());
-			instance_->audios_[filename] = instance_->LoadMP3(wpath.c_str());
+			audios_[filename] = LoadMP3(correctPath.wstring().c_str());
 		} else{
 			// 未対応フォーマット
 			CX_CHECK(false && "Unsupported audio format.", "Assertion failed");
 		}
 
 		// 再生フラグ初期化
-		instance_->isPlaying_[filename] = false;
+		isPlaying_[filename] = false;
 	}
 }
 
@@ -429,32 +442,27 @@ SoundData Audio::LoadMP3(const wchar_t* filename){
 /////////////////////////////////////////////////////////////////////////////////////
 void Audio::UnloadAudio(const std::string& filename){
 	// まだロードされていなければエラー
-	CX_CHECK(instance_->audios_.find(filename) != instance_->audios_.end(), "Assertion failed");
+	CX_CHECK(audios_.find(filename) != audios_.end(), "Assertion failed");
 
 	// SoundData破棄 (vectorなので自動的に解放される)
-	instance_->audios_.erase(filename);
+	audios_.erase(filename);
 
 	// SourceVoice破棄 (unique_ptrなので自動的に解放される)
-	instance_->sourceVoices_.erase(filename);
-	instance_->isPlaying_.erase(filename);
+	sourceVoices_.erase(filename);
+	isPlaying_.erase(filename);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
 // すべての音声をアンロード
 /////////////////////////////////////////////////////////////////////////////////////
 void Audio::UnloadAllAudio(){
-	for (auto& pair : instance_->audios_){
-		instance_->UnloadAudio(&pair.second);
+	for (auto& pair : audios_){
+		UnloadAudio(&pair.second);
 	}
-	instance_->audios_.clear();
+	audios_.clear();
 
-	for (auto& voicePair : instance_->sourceVoices_){
-		if (voicePair.second){
-			voicePair.second->DestroyVoice();
-		}
-	}
-	instance_->sourceVoices_.clear();
-	instance_->isPlaying_.clear();
+	sourceVoices_.clear();
+	isPlaying_.clear();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
