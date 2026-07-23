@@ -2,6 +2,7 @@
 #include "../Model/BaseModel.h"
 #include "AnimationStruct.h"
 #include <Engine/Graphics/Descriptor/DescriptorAllocator.h>
+#include <Engine/Foundation/Export/CalyxAPI.h>
 #include <externals/imgui/imgui.h>
 
 class PipelineService;
@@ -37,13 +38,13 @@ namespace CalyxEngine {
 		// アニメーションの登録 (ゲーム側は enum を int16_t にキャストして渡す想定)
 		void RegisterAnimation(int16_t animID,const std::string& animName,const std::optional<std::string>& fileName = std::nullopt);
 		// アニメーション再生 (ID ベース)
-		void Play(int16_t id,float blend = 0.2f);
+		CALYX_API void Play(int16_t id, float blend = 0.2f);
 		// ワンショット再生（再生終了後に returnAnim へ戻す）
-		void PlayOneShot(int16_t id,int16_t returnAnim,float blend = 0.1f);
+		CALYX_API void PlayOneShot(int16_t id, int16_t returnAnim, float blend = 0.1f);
 		// ループ設定
-		void SetLoop(int16_t id,bool isLoop);
+		CALYX_API void SetLoop(int16_t id,bool isLoop);
 		// アニメーション終了判定
-		bool IsAnimationFinished() const;
+		CALYX_API bool IsAnimationFinished() const;
 
 		/**
 		 * \brief スキニング用のジョイント行列 SRV をコマンドにセット
@@ -62,7 +63,7 @@ namespace CalyxEngine {
 		void PlayAnimation(const std::string& animName,float blendDuration);
 
 		//--------- accessor ------------------------------------------------------//
-		std::string                         GetCurrentAnimationName() const;
+		CALYX_API std::string				  GetCurrentAnimationName() const;
 		float                               GetAnimationSpeed() const { return animationSpeed_; }
 		std::vector<std::string>            GetAnimationNodeNames() const;
 		std::vector<std::string>            GetJointNames() const;

@@ -276,7 +276,10 @@ namespace CalyxEngine {
 		fx.spinSpeed = spin_.Get(randomStream_);
 		fx.alignDirection = CalyxEngine::Vector3(0.0f,0.0f,0.0f);
 		fx.alignToDirection = false;
-		fx.rotationEuler = initialRotation_;
+		const CalyxEngine::Quaternion initialParticleRotation =
+			CalyxEngine::Quaternion::EulerToQuaternion(initialRotation_);
+		fx.rotationEuler = CalyxEngine::Quaternion::ToEuler(
+			CalyxEngine::Quaternion::Multiply(worldRotation_, initialParticleRotation));
 		if(HasFlag(RandomSpinEmit)) { fx.rotationEuler.z = randomStream_.NextFloat(-CalyxEngine::kPi,CalyxEngine::kPi); }
 		if(useDirection_) ApplyDirectionVelocity(fx);
 		for(auto* module : moduleContainer_->GetInitializeModules()) {

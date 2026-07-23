@@ -6,6 +6,7 @@
 #include <Engine/Application/Effects/Particle/Object/ParticleSystemObject.h>
 #include <Engine/Objects/3D/Actor/SceneObject.h>
 #include <Engine/Objects/ConfigurableObject/ConfigurableObject.h>
+#include <Engine/Foundation/Export/CalyxAPI.h>
 
 // config
 #include <Data/Engine/Configs/Scene/Objects/Particle/EffectConfig.h>
@@ -17,7 +18,7 @@ namespace CalyxEngine {
 	 * - エフェクトをシーン上にオブジェクトとして配置するクラス
 	 * - 複数のエミッターノードを管理し、再生・停止・設定の保存/読込を提供
 	 *---------------------------------------------------------------------------------------*/
-	class FxObject final
+	class CALYX_API FxObject final
 		: public SceneObject,
 		  public IConfigurable {
 	public:

@@ -1,0 +1,35 @@
+{
+    "fields": {
+        "attack1Rotation_": [
+            -52.400001525878906,
+            0.0,
+            0.0,
+            1.0
+        ],
+        "attack2Rotation_": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+        ],
+        "attackDuration1": 0.4000000059604645,
+        "attackDuration2": 0.44999998807907104,
+        "attackDuration3": 0.6000000238418579,
+        "comboAcceptEnd": 0.3499999940395355,
+        "comboAcceptStart": 0.18000000715255737,
+        "comboCount": 3,
+        "damage": 10.0,
+        "drawHitbox": true,
+        "hitboxActiveEnd": 0.25,
+        "hitboxActiveStart": 0.05000000074505806,
+        "hitboxForwardOffset": 1.350000023841858,
+        "hitboxHeightOffset": 1.0,
+        "hitboxSize": [
+            0.800000011920929,
+            0.699999988079071,
+            0.8999999761581421
+        ],
+        "movementBlockEnd": 0.3499999940395355,
+        "movementBlockStart": 0.0
+    }
+}

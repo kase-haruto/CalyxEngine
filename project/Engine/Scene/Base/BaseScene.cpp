@@ -43,7 +43,7 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 		skyBox_->Initialize();
 	}
 
-	skyBox_->Draw(cmd);
+	//skyBox_->Draw(cmd);
 
 	modelRenderer_->BeginFrame();
 
