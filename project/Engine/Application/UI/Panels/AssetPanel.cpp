@@ -90,6 +90,10 @@ namespace CalyxEngine {
 				return "Effect";
 			case AssetType::SpriteAnimation:
 				return "Sprite Animation";
+			case AssetType::Scene:
+				return "Scene";
+			case AssetType::PostEffect:
+				return "Post Effect";
 			case AssetType::Unknown:
 			default:
 				return "Unknown";
@@ -236,6 +240,9 @@ namespace CalyxEngine {
 				break;
 			case AssetType::Scene:
 				tname = "Scene";
+				break;
+			case AssetType::PostEffect:
+				tname = "Post Effect";
 				break;
 			default:
 				break;
@@ -823,6 +830,9 @@ namespace CalyxEngine {
 			break;
 		case AssetType::SpriteAnimation:
 			label = "Drop Sprite Animation here";
+			break;
+		case AssetType::PostEffect:
+			label = "Drop Post Effect here";
 			break;
 		default:
 			break;

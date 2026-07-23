@@ -42,7 +42,9 @@ void PostEffectGraph::SetGraphFromJson(const nlohmann::json& root, const std::ve
 
 	auto findPass = [&](const std::string& type) -> IPostEffectPass* {
 		for(const auto& slot : slots){
-			if(slot.name == type && slot.enabled && slot.pass) return slot.pass;
+			// Disabled/Triggered nodes must remain in the graph. Their enabled state is
+			// evaluated at execution time so a trigger can activate them later.
+			if(slot.name == type && slot.pass) return slot.pass;
 		}
 		return nullptr;
 	};
@@ -164,6 +166,21 @@ D3D12_GPU_DESCRIPTOR_HANDLE PostEffectGraph::ExecuteGraphNode(ID3D12GraphicsComm
 	if(!node.pass){
 		visiting[nodeId] = false;
 		return sceneSRV;
+	}
+
+	const auto& slots = postProcessCollection_->GetSlots();
+	const auto slotIt = std::find_if(slots.begin(), slots.end(), [&](const PostEffectSlot& slot) {
+		return slot.name == node.type;
+	});
+	if(slotIt == slots.end() || !slotIt->enabled) {
+		D3D12_GPU_DESCRIPTOR_HANDLE bypass = sceneSRV;
+		if(!node.inputPins.empty()) {
+			bypass = ExecuteGraphNode(cmd, FindInputSourceNode(node.inputPins[0]), sceneSRV,
+								  dxCore, cache, visiting, tempIndex);
+		}
+		cache[nodeId] = bypass;
+		visiting[nodeId] = false;
+		return bypass;
 	}
 
 	IRenderTarget* output = AcquireTempTarget(dxCore, tempIndex);

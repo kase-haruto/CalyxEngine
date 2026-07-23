@@ -265,6 +265,11 @@ bool PostEffectManager::SavePreset(const std::string& filePath, const std::strin
 
 bool PostEffectManager::LoadPreset(const std::string& filePath){
 	if(!initialized_) return false;
+	if(!mergingPreset_) {
+		floatTweens_.clear();
+		overlaySnapshots_.clear();
+		overlayGenerations_.clear();
+	}
 
 	nlohmann::json root;
 	try{
@@ -339,6 +344,102 @@ bool PostEffectManager::LoadPreset(const std::string& filePath){
 	return true;
 }
 
+bool PostEffectManager::MergePreset(const std::string& filePath) {
+	mergingPreset_ = true;
+	const bool loaded = LoadPreset(filePath);
+	mergingPreset_ = false;
+	if(!loaded) return false;
+
+	// A graph JSON describes only one preset. The slot collection already
+	// preserves effects absent from the new file, so execute that collection
+	// for a composition assembled from multiple PostEffectEvents.
+	hasLoadedGraph_ = false;
+	MarkDirty();
+	return true;
+}
+
+bool PostEffectManager::PlayTriggeredPreset(const std::string& filePath) {
+	nlohmann::json triggerRoot;
+	try {
+		std::ifstream ifs(Calyx::ResolveAssetPath(filePath));
+		if(!ifs) return false;
+		ifs >> triggerRoot;
+	} catch(...) {
+		return false;
+	}
+	if(!triggerRoot.contains("nodes") || !triggerRoot["nodes"].is_array()) return false;
+
+	// Capture the scene/base state once per effect type. Re-triggering refreshes
+	// the overlay timer without replacing the state that must eventually return.
+	for(const auto& node : triggerRoot["nodes"]) {
+		if(ApplyModeFromString(node.value("applyMode", std::string(kApplyAlways))) !=
+			PostEffectApplyMode::Triggered) continue;
+		const std::string type = node.value("type", "");
+		if(type.empty() || overlaySnapshots_.contains(type)) continue;
+		const int idx = IndexOf(type);
+		if(idx < 0) continue;
+		const auto& slot = collection_.GetSlots()[idx];
+		OverlaySlotSnapshot snapshot;
+		snapshot.enabled = slot.enabled;
+		snapshot.applyMode = slot.applyMode;
+		snapshot.duration = slot.duration;
+		snapshot.ease = slot.ease;
+		snapshot.autoDisable = slot.autoDisable;
+		snapshot.floatAnimations = slot.floatAnimations;
+		if(slot.pass) snapshot.parameters = slot.pass->SaveParameters();
+		overlaySnapshots_[type] = std::move(snapshot);
+	}
+
+	if(!MergePreset(filePath)) return false;
+
+	bool played = false;
+	for(const auto& node : triggerRoot["nodes"]) {
+		if(ApplyModeFromString(node.value("applyMode", std::string(kApplyAlways))) !=
+			PostEffectApplyMode::Triggered) {
+			continue;
+		}
+		const std::string type = node.value("type", "");
+		if(type.empty()) continue;
+		PlayTriggeredEffect(type);
+
+		const int idx = IndexOf(type);
+		if(idx >= 0) {
+			const float restoreDelay = collection_.GetSlots()[idx].duration;
+			const uint64_t generation = ++overlayGenerations_[type];
+			TweenFloat(type,
+				[]() { return 1.0f; },
+				[](float) {},
+				1.0f,
+				0.0f,
+				restoreDelay,
+				CalyxEngine::EaseType::Linear,
+				false,
+				[this, type, generation]() {
+					const auto genIt = overlayGenerations_.find(type);
+					if(genIt == overlayGenerations_.end() || genIt->second != generation) return;
+					const auto snapshotIt = overlaySnapshots_.find(type);
+					const int restoreIdx = IndexOf(type);
+					if(snapshotIt != overlaySnapshots_.end() && restoreIdx >= 0) {
+						auto& slot = collection_.GetSlots()[restoreIdx];
+						const auto& snapshot = snapshotIt->second;
+						slot.enabled = snapshot.enabled;
+						slot.applyMode = snapshot.applyMode;
+						slot.duration = snapshot.duration;
+						slot.ease = snapshot.ease;
+						slot.autoDisable = snapshot.autoDisable;
+						slot.floatAnimations = snapshot.floatAnimations;
+						if(slot.pass) slot.pass->LoadParameters(snapshot.parameters);
+						MarkDirty();
+					}
+					overlaySnapshots_.erase(type);
+					overlayGenerations_.erase(type);
+				});
+		}
+		played = true;
+	}
+	return played;
+}
+
 void PostEffectManager::PlayTriggeredEffects(){
 	if(!initialized_) return;
 	for(const auto& slot : collection_.GetSlots()){
@@ -354,6 +455,7 @@ void PostEffectManager::PlayTriggeredEffect(const std::string& name){
 	if(idx < 0) return;
 	auto& slot = collection_.GetSlots()[idx];
 	if(slot.name == kCopyImageName || slot.applyMode != PostEffectApplyMode::Triggered || !slot.pass) return;
+	std::erase_if(floatTweens_, [&](const FloatTween& tween) { return tween.passName == name; });
 
 	Enable(slot.name, true);
 

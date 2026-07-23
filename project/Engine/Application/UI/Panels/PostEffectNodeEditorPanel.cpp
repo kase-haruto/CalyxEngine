@@ -42,7 +42,7 @@ namespace CalyxEngine {
 		nlohmann::json DefaultParameters(const std::string& type) {
 			if(type == "RadialBlur") return {{"center", {0.5f, 0.5f}}, {"width", 0.0f}};
 			if(type == "ChromaticAberration") return {{"intensity", 0.0f}};
-			if(type == "Vignette") return {{"strength", 1.0f}, {"radius", 0.0f}};
+			if(type == "Vignette") return {{"strength", 1.0f}, {"radius", 0.0f}, {"color", {0.0f, 0.0f, 0.0f}}};
 			if(type == "CRTEffect") return {{"screenSize", {1280.0f, 720.0f}}};
 			if(type == "Bloom") return {{"intensity", 0.7f}, {"threshold", 0.8f}, {"softKnee", 0.5f}, {"radius", 1.0f}, {"tint", {1.0f, 1.0f, 1.0f}}};
 			if(type == "Blend") return {{"opacity", 0.5f}, {"mode", 0}};
@@ -371,6 +371,12 @@ namespace CalyxEngine {
 		} else if(node.type == "Vignette") {
 			float strength = params.value("strength", 1.0f);
 			float radius = params.value("radius", 0.0f);
+			float color[3] = {0.0f, 0.0f, 0.0f};
+			if(params.contains("color") && params["color"].is_array() && params["color"].size() >= 3) {
+				color[0] = params["color"][0].get<float>();
+				color[1] = params["color"][1].get<float>();
+				color[2] = params["color"][2].get<float>();
+			}
 			if(ImGui::DragFloat("Strength", &strength, 0.01f, 0.0f, 1.0f)) {
 				params["strength"] = strength;
 				changed = true;
@@ -381,6 +387,11 @@ namespace CalyxEngine {
 				changed = true;
 			}
 			HelpTooltip("Area before the vignette starts. Larger values keep more of the center unaffected.");
+			if(ImGui::ColorEdit3("Color", color)) {
+				params["color"] = {color[0], color[1], color[2]};
+				changed = true;
+			}
+			HelpTooltip("Color blended into the screen edges.");
 		} else if(node.type == "Bloom") {
 			float intensity = params.value("intensity", 0.7f);
 			float threshold = params.value("threshold", 0.8f);

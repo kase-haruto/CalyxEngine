@@ -4,6 +4,7 @@
 /* include space
 /* ===================================================================== */
 #include <Engine/Foundation/Math/Vector2.h>
+#include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Graphics/Buffer/DxConstantBuffer.h>
 #include <Engine/Graphics/Pipeline/Pso/PsoDetails.h>
 #include <Engine/PostProcess/Interface/IPostEffectPass.h>
@@ -18,6 +19,9 @@ private:
 	struct VignetteParameter {
 		float strength = 0.8f;  // 暗くする強さ (0.0 ～ 1.0)
 		float radius = 0.85f;   // 暗くなり始める位置 (0.0 ～ 1.0)
+		float padding[2]{};     // HLSL cbuffer の16バイト境界に合わせる
+		CalyxEngine::Vector3 color{0.0f, 0.0f, 0.0f};
+		float colorPadding = 0.0f;
 	};
 public:
 	void Initialize(const PipelineSet& psoSet);

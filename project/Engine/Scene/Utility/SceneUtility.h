@@ -7,6 +7,7 @@
 #include <Data/Engine/Prefab/Serializer/PrefabSerializer.h>
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Objects/3D/Actor/SceneObject.h>
+#include <Engine/PostProcess/Manager/PostEffectManager.h>
 #include <Engine/Scene/Context/SceneContext.h>
 #include <Engine/Scene/Settings/SceneSettings.h>
 #include <Engine/Scene/Fade/BaseSceneTransitionEffect.h>
@@ -168,6 +169,34 @@ namespace EffectAPI {
 
 	inline void Stop(CalyxEngine::EffectHandle handle) {
 		Player()->Stop(handle);
+	}
+}
+
+// Game-facing post-effect API. Preset filenames are resolved below Assets/PostEffects.
+namespace PostEffectAPI {
+	inline void Enable(const std::string& name, bool enabled = true) { PostEffectManager::Get()->Enable(name, enabled); }
+	inline void Disable(const std::string& name) { PostEffectManager::Get()->Disable(name); }
+	inline bool IsEnabled(const std::string& name) { return PostEffectManager::Get()->IsEnabled(name); }
+	inline bool LoadPreset(const std::string& filename) {
+		return PostEffectManager::Get()->LoadPreset(
+			Calyx::ResolveAssetPath(std::filesystem::path("PostEffects") / filename).generic_string());
+	}
+	inline void PlayTriggered(const std::string& name) { PostEffectManager::Get()->PlayTriggeredEffect(name); }
+	inline void PlayTriggeredAll() { PostEffectManager::Get()->PlayTriggeredEffects(); }
+	inline bool PlayTriggeredPreset(const std::string& filename) {
+		return PostEffectManager::Get()->PlayTriggeredPreset(
+			Calyx::ResolveAssetPath(std::filesystem::path("PostEffects") / filename).generic_string());
+	}
+	inline bool SetVignetteColor(const CalyxEngine::Vector3& color) {
+		auto* pass = PostEffectManager::Get()->GetPass("Vignette");
+		if(!pass) return false;
+		const bool r = pass->SetFloatParameter("color.r", color.x);
+		const bool g = pass->SetFloatParameter("color.g", color.y);
+		const bool b = pass->SetFloatParameter("color.b", color.z);
+		return r && g && b;
+	}
+	inline bool SetVignetteColor(float r, float g, float b) {
+		return SetVignetteColor(CalyxEngine::Vector3{r, g, b});
 	}
 }
 

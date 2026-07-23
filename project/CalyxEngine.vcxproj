@@ -288,6 +288,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Graphics\Camera\Action\BaseCameraAction.cpp" />
     <ClCompile Include="Engine\Objects\Event\BaseEventObject.cpp" />
     <ClCompile Include="Engine\Objects\Event\Camera\CameraEventObject.cpp" />
+    <ClCompile Include="Engine\Objects\Event\PostEffect\PostEffectEvent.cpp" />
     <ClCompile Include="Engine\PostProcess\Blend\BlendEffect.cpp" />
     <ClCompile Include="Engine\PostProcess\Manager\PostEffectManager.cpp" />
     <ClCompile Include="Engine\Renderer\Grid\GridRenderer.cpp" />
@@ -585,6 +586,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Objects\base\BaseObject.h" />
     <ClInclude Include="Engine\Objects\Event\BaseEventObject.h" />
     <ClInclude Include="Engine\Objects\Event\Camera\CameraEventObject.h" />
+    <ClInclude Include="Engine\Objects\Event\PostEffect\PostEffectEvent.h" />
     <ClInclude Include="Engine\PostProcess\Blend\BlendEffect.h" />
     <ClInclude Include="Engine\PostProcess\Manager\PostEffectManager.h" />
     <ClInclude Include="Engine\Scene\Transitioner\IScenePayload.h" />
