@@ -176,8 +176,11 @@ float farClip
 			clipPos.z / clipPos.w};
 
 		// NDC → スクリーン座標
-		float screenWidth  = kGameWidth;
-		float screenHeight = kGameHeight;
+		const CalyxEngine::Vector2& viewportSize = CameraManager::GetViewportSizeStatic(ViewportType::VIEWPORT_MAIN);
+		const float screenWidth =
+			viewportSize.x > 0.0f ? viewportSize.x : static_cast<float>(kGameWidth);
+		const float screenHeight =
+			viewportSize.y > 0.0f ? viewportSize.y : static_cast<float>(kGameHeight);
 
 		float screenX = (ndcPos.x * 0.5f + 0.5f) * screenWidth;
 		float screenY = (1.0f - (ndcPos.y * 0.5f + 0.5f)) * screenHeight;
@@ -186,8 +189,11 @@ float farClip
 	}
 
 	Vector3 ScreenToWorld(const CalyxEngine::Vector2& screenPos, float depthZ) {
-		float screenWidth  = kGameWidth;
-		float screenHeight = kGameHeight;
+		const CalyxEngine::Vector2& viewportSize = CameraManager::GetViewportSizeStatic(ViewportType::VIEWPORT_MAIN);
+		const float screenWidth =
+			viewportSize.x > 0.0f ? viewportSize.x : static_cast<float>(kGameWidth);
+		const float screenHeight =
+			viewportSize.y > 0.0f ? viewportSize.y : static_cast<float>(kGameHeight);
 
 		// スクリーン座標 → NDC座標に変換
 		float ndcX = (screenPos.x / screenWidth) * 2.0f - 1.0f;
