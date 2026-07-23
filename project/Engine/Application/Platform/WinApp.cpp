@@ -41,10 +41,11 @@ void WinApp::CreateWnd() {
 
 	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
 
+	const std::wstring wideWindowName = ConvertString(windowName_);
 	hwnd = CreateWindow(
 		wc.lpszClassName,
-		// マルチバイト→ワイド文字変換が必要な場合は適宜対応する
-		_T("MyGameWindow"),
+		// ゲーム側から渡されたUTF-8タイトルをWin32のワイド文字列として使用する
+		wideWindowName.c_str(),
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,

@@ -3,13 +3,23 @@
 #include <CalyxEngine/Project.h>
 
 #include <Engine/Application/Framework/CalyxFrameWork.h>
+#include <Engine/Application/System/CalyxCore.h>
 #include <Engine/Foundation/Log/EngineLogger.h>
+#include <Engine/Foundation/Utility/Converter/ConvertString.h>
 #include <Engine/Foundation/Utility/LeakChecker/LeakChecker.h>
 
 #include <string>
 #include <vector>
 
 namespace Calyx {
+
+	void SetWindowTitle(const char* title) {
+		const HWND window = CalyxEngine::CalyxCore::GetHWND();
+		if(!window) return;
+
+		const std::wstring wideTitle = ConvertString(title ? title : "");
+		::SetWindowTextW(window, wideTitle.c_str());
+	}
 
 	namespace {
 
