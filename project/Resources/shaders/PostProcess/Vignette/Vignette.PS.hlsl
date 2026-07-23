@@ -3,6 +3,9 @@
 cbuffer VignetteParam : register(b0) {
 	float strength;
 	float radius;
+	float2 padding0;
+	float3 vignetteColor;
+	float padding1;
 };
 
 Texture2D<float4> gTexture : register(t0);
@@ -30,7 +33,7 @@ PixelShaderOutput main(VertexShaderOutput input) {
 	vignetteFactor = lerp(1.0f, vignetteFactor, strength); // strength=1で完全に暗くなる
 
     // ビネット乗算
-	output.color.rgb *= vignetteFactor;
+	output.color.rgb = lerp(vignetteColor, output.color.rgb, vignetteFactor);
 
 	return output;
 }
