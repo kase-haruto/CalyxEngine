@@ -9,6 +9,8 @@
 #include <Engine/Foundation/Utility/LeakChecker/LeakChecker.h>
 
 #include <string>
+#include <filesystem>
+#include <optional>
 #include <vector>
 
 namespace Calyx {
@@ -22,6 +24,50 @@ namespace Calyx {
 	}
 
 	namespace {
+
+		std::optional<std::filesystem::path> FindSingleProjectFile(
+			const std::filesystem::path& directory) {
+			std::error_code ec;
+			if(directory.empty() || !std::filesystem::is_directory(directory, ec)) {
+				return std::nullopt;
+			}
+
+			std::optional<std::filesystem::path> result;
+			for(std::filesystem::directory_iterator it(directory, ec), end; !ec && it != end; it.increment(ec)) {
+				if(!it->is_regular_file(ec) || it->path().extension() != ".calyxproj") {
+					continue;
+				}
+				if(result) {
+					return std::nullopt;
+				}
+				result = it->path();
+			}
+			return result;
+		}
+
+		std::optional<std::filesystem::path> DiscoverProjectFile() {
+			std::vector<std::filesystem::path> searchDirectories;
+
+			std::error_code ec;
+			searchDirectories.push_back(std::filesystem::current_path(ec));
+
+			wchar_t executablePath[MAX_PATH]{};
+			if(::GetModuleFileNameW(nullptr, executablePath, MAX_PATH) > 0) {
+				auto directory = std::filesystem::path(executablePath).parent_path();
+				for(size_t depth = 0; depth < 5 && !directory.empty(); ++depth) {
+					searchDirectories.push_back(directory);
+					searchDirectories.push_back(directory / "project");
+					directory = directory.parent_path();
+				}
+			}
+
+			for(const auto& directory : searchDirectories) {
+				if(auto projectFile = FindSingleProjectFile(directory)) {
+					return projectFile;
+				}
+			}
+			return std::nullopt;
+		}
 
 		std::vector<std::string> SplitCommandLineArguments(const char* commandLine) {
 			std::vector<std::string> args;
@@ -54,9 +100,21 @@ namespace Calyx {
 			return args;
 		}
 
-		void LoadProjectFromCommandLine(const char* commandLine, Application& application) {
-			const auto args = SplitCommandLineArguments(commandLine);
-			if(args.empty()) return;
+		bool LoadProjectFromCommandLine(const char* commandLine, Application& application) {
+			auto args = SplitCommandLineArguments(commandLine);
+			if(args.empty()) {
+				if(auto projectFile = DiscoverProjectFile()) {
+					args.push_back(projectFile->string());
+				} else {
+					::MessageBoxW(
+						nullptr,
+						L"起動する .calyxproj を特定できませんでした。\n"
+						L"プロジェクトファイルを引数に指定して起動してください。",
+						L"CalyxGame",
+						MB_OK | MB_ICONERROR);
+					return false;
+				}
+			}
 
 			ProjectInfo project;
 			if(LoadProjectFile(args.front(), project)) {
@@ -70,7 +128,9 @@ namespace Calyx {
 				}
 				SetCurrentProject(project);
 				application.OnProjectLoaded(project);
+				return true;
 			}
+			return false;
 		}
 
 	} // namespace
@@ -83,7 +143,9 @@ namespace Calyx {
 		LeakChecker leakChecker_;
 		CalyxEngine::CalyxFrameWork frameWork;
 
-		LoadProjectFromCommandLine(commandLine, application);
+		if(!LoadProjectFromCommandLine(commandLine, application)) {
+			return -1;
+		}
 
 		try {
 			frameWork.Initialize(hInstance, &application);
