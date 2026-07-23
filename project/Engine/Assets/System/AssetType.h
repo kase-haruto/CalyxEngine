@@ -17,4 +17,5 @@ enum class AssetType
 	Effect,
 	SpriteAnimation,
 	Scene,
+	PostEffect,
 };

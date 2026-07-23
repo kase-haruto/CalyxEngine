@@ -7,6 +7,7 @@
 #include <Data/Engine/Prefab/Serializer/PrefabSerializer.h>
 #include <Engine/Foundation/Math/Vector3.h>
 #include <Engine/Objects/3D/Actor/SceneObject.h>
+#include <Engine/PostProcess/Manager/PostEffectManager.h>
 #include <Engine/Scene/Context/SceneContext.h>
 #include <Engine/Scene/Settings/SceneSettings.h>
 #include <Engine/Scene/Fade/BaseSceneTransitionEffect.h>
@@ -157,6 +158,10 @@ namespace PostEffectAPI {
 	}
 	inline void PlayTriggered(const std::string& name) { PostEffectManager::Get()->PlayTriggeredEffect(name); }
 	inline void PlayTriggeredAll() { PostEffectManager::Get()->PlayTriggeredEffects(); }
+	inline bool PlayTriggeredPreset(const std::string& filename) {
+		return PostEffectManager::Get()->PlayTriggeredPreset(
+			Calyx::ResolveAssetPath(std::filesystem::path("PostEffects") / filename).generic_string());
+	}
 	inline bool SetVignetteColor(const CalyxEngine::Vector3& color) {
 		auto* pass = PostEffectManager::Get()->GetPass("Vignette");
 		if(!pass) return false;

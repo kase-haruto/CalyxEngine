@@ -1,13 +1,11 @@
 #include "PostEffectEvent.h"
 
 #include <CalyxEngine/Project.h>
+#include <Engine/Application/UI/Panels/AssetPanel.h>
+#include <Engine/Assets/Database/AssetDatabase.h>
 #include <Engine/Objects/3D/Actor/Registry/SceneObjectRegistry.h>
 #include <Engine/PostProcess/Manager/PostEffectManager.h>
-
-#include <array>
-#include <algorithm>
 #include <filesystem>
-
 #include <externals/imgui/imgui.h>
 
 REGISTER_SCENE_OBJECT(PostEffectEvent)
@@ -22,34 +20,50 @@ void PostEffectEvent::Initialize() {
 	ApplyPreset();
 }
 
-void PostEffectEvent::DerivativeGui() {
-	std::array<char, 512> pathBuffer{};
-	const size_t copyLength = (std::min)(presetPath_.size(), pathBuffer.size() - 1);
-	std::copy_n(presetPath_.data(), copyLength, pathBuffer.data());
-	if(ImGui::InputText("Post Effect Preset", pathBuffer.data(), pathBuffer.size())) {
-		presetPath_ = pathBuffer.data();
-	}
-	ImGui::TextDisabled("Assetsからの相対パス（例: PostEffects/Default.postfx）");
+bool PostEffectEvent::SetPresetAsset(const Guid& guid) {
+	const AssetRecord* record = AssetDatabase::GetInstance()->Get(guid);
+	if(!record || record->type != AssetType::PostEffect) return false;
 
-	if(ImGui::Button("Apply Post Effect") && initialized_) {
-		ApplyPreset();
-	}
+	presetGuid_ = guid;
+	presetPath_ = record->sourcePath.generic_string();
+	return !initialized_ || ApplyPreset();
 }
 
-void PostEffectEvent::ApplyDerivedConfigFromJson([[maybe_unused]] const nlohmann::json& root,
-											 const nlohmann::json* derived) {
+bool PostEffectEvent::ApplyPreset() {
+	if(presetGuid_.isValid()) {
+		if(const AssetRecord* record = AssetDatabase::GetInstance()->Get(presetGuid_)) {
+			presetPath_ = record->sourcePath.generic_string();
+		}
+	}
+	if(presetPath_.empty()) return false;
+	return PostEffectManager::Get()->LoadPreset(
+		Calyx::ResolveAssetPath(presetPath_).generic_string());
+}
+
+void PostEffectEvent::DerivativeGui() {
+	BaseEventObject::DerivativeGui();
+	ImGui::SeparatorText("Post Effect Preset");
+
+	Guid dropped = presetGuid_;
+	if(CalyxEngine::AssetPanel::DrawAssetDropTarget(AssetType::PostEffect, &dropped)) {
+		SetPresetAsset(dropped);
+	}
+	ImGui::TextWrapped("%s", presetPath_.c_str());
+	if(ImGui::Button("Apply Post Effect Preset")) ApplyPreset();
+}
+
+void PostEffectEvent::ApplyDerivedConfigFromJson(
+	const nlohmann::json& root, const nlohmann::json* derived) {
+	(void)root;
 	if(!derived) return;
+	if(derived->contains("presetGuid")) presetGuid_ = derived->at("presetGuid").get<Guid>();
 	presetPath_ = derived->value("presetPath", presetPath_);
 	if(initialized_) ApplyPreset();
 }
 
-void PostEffectEvent::ExtractDerivedConfigToJson([[maybe_unused]] nlohmann::json& root,
-											 nlohmann::json& derived) const {
+void PostEffectEvent::ExtractDerivedConfigToJson(
+	nlohmann::json& root, nlohmann::json& derived) const {
+	(void)root;
+	derived["presetGuid"] = presetGuid_;
 	derived["presetPath"] = presetPath_;
-}
-
-bool PostEffectEvent::ApplyPreset() {
-	if(presetPath_.empty()) return false;
-	const std::filesystem::path path = Calyx::ResolveAssetPath(presetPath_);
-	return PostEffectManager::Get()->LoadPreset(path.generic_string());
 }

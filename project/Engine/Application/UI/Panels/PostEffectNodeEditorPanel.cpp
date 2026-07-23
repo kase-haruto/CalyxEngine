@@ -378,7 +378,7 @@ namespace CalyxEngine {
 			float strength = params.value("strength", 1.0f);
 			float radius = params.value("radius", 0.0f);
 			float color[3] = {0.0f, 0.0f, 0.0f};
-			if(params.contains("color") && params["color"].is_array() && params["color"].size() == 3) {
+			if(params.contains("color") && params["color"].is_array() && params["color"].size() >= 3) {
 				color[0] = params["color"][0].get<float>();
 				color[1] = params["color"][1].get<float>();
 				color[2] = params["color"][2].get<float>();

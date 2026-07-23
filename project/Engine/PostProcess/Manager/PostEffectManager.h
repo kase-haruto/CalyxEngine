@@ -22,6 +22,8 @@
 #include <optional>
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
+#include <unordered_map>
 #include <externals/nlohmann/json.hpp>
 
 class PipelineService;
@@ -52,6 +54,10 @@ public:
 
 	CALYX_API bool SavePreset(const std::string& filePath, const std::string& presetName = "PostEffectPreset") const;
 	CALYX_API bool LoadPreset(const std::string& filePath);
+	// Adds a preset to the current scene composition. Unmentioned effects are
+	// preserved and all slots are executed as one linear post-effect chain.
+	CALYX_API bool MergePreset(const std::string& filePath);
+	CALYX_API bool PlayTriggeredPreset(const std::string& filePath);
 	CALYX_API void PlayTriggeredEffects();
 	CALYX_API void PlayTriggeredEffect(const std::string& name);
 
@@ -93,6 +99,16 @@ private:
 	void RebuildGraphIfDirty();
 
 private:
+	struct OverlaySlotSnapshot {
+		bool enabled = false;
+		PostEffectApplyMode applyMode = PostEffectApplyMode::Always;
+		float duration = 0.25f;
+		CalyxEngine::EaseType ease = CalyxEngine::EaseType::Linear;
+		bool autoDisable = true;
+		std::vector<PostEffectFloatAnimation> floatAnimations;
+		nlohmann::json parameters = nlohmann::json::object();
+	};
+
 	struct FloatTween{
 		std::string passName;
 		std::function<float()> getter;
@@ -107,6 +123,9 @@ private:
 	};
 
 	std::vector<FloatTween> floatTweens_;
+	std::unordered_map<std::string, OverlaySlotSnapshot> overlaySnapshots_;
+	std::unordered_map<std::string, uint64_t> overlayGenerations_;
+	bool mergingPreset_ = false;
 
 	bool initialized_ = false;
 	bool dirty_ = true;
