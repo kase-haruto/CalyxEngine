@@ -338,20 +338,33 @@ void BaseGameObject::DerivativeGui() { ImGui::SeparatorText("derivative"); }
 void BaseGameObject::ApplyConfig() {
 	const BaseGameObjectConfig& cfg = config_.GetConfig();
 
+	// シーン保存時のモデル名からRuntime描画モデルを復元し、共有Asset設定を適用する。
 	SetModelFromFileName(cfg.modelConfig.modelName);
 
+	// モデル生成に失敗した旧シーンでも、残りのオブジェクト設定は復元を継続する。
 	if(model_)
 		model_->ApplyConfig(cfg.modelConfig);
+
+	// 保存された形状種別に合わせて所有コライダーを再構築してから形状設定を反映する。
 	InitializeCollider(static_cast<ColliderKind>(NormalizeColliderKind(cfg.colliderKind)));
 	if(collider_)
 		collider_->ApplyConfig(cfg.colliderConfig);
+
+	// Colliderとは独立して保存された物理応答パラメータを復元する。
 	physicsBody_.ApplyConfig(cfg.physicsBodyConfig);
+
+	// 保存済みの配置を再現するため、ConfigからRuntime Transformを復元する。
 	worldTransform_.ApplyConfig(cfg.transform);
+
+	// モデル原点と見た目の中心が異なるAsset向けの描画補正を復元する。
 	visualOffset_ = cfg.visualOffset;
+
+	// Rendererへ渡すカメラディザーとOutline設定を復元する。
 	drawConfig_.cameraDitherEnabled = cfg.cameraDitherEnabled;
 	drawConfig_.outline.enabled	 = cfg.outlineEnabled;
 	drawConfig_.outline.thickness = cfg.outlineThickness;
 	drawConfig_.outline.color	 = cfg.outlineColor;
+	// Scene参照と親子関係を再接続できるよう永続GUIDを最後に復元する。
 	id_		  = cfg.guid;
 	parentId_ = cfg.parentGuid;
 	name_	  = cfg.name;
@@ -360,18 +373,28 @@ void BaseGameObject::ApplyConfig() {
 void BaseGameObject::ExtractConfig() {
 	BaseGameObjectConfig& cfg = config_.GetConfig();
 
+	// EditorまたはRuntimeで変更された所有コンポーネントの状態をシーン保存形式へ戻す。
 	if(model_)
 		cfg.modelConfig = model_->ExtractConfig();
+
+	// Collider未設定時は既存Configを保持し、None形状として種別だけを保存する。
 	if(collider_)
 		cfg.colliderConfig = collider_->ExtractConfig();
+
+	// 物理応答設定をCollider形状とは独立したConfigへ抽出する。
 	cfg.physicsBodyConfig = physicsBody_.ExtractConfig();
 	cfg.colliderKind = static_cast<int>(currentColliderKind_);
+
+	// 公開Transform APIの名前は維持しつつ、安定したConfig/JSONキーへ変換して互換性を保つ。
 	cfg.transform  = worldTransform_.ExtractConfig();
+
+	// Editor固有の描画補正もRuntimeで同じ外観を再現できるよう永続化する。
 	cfg.visualOffset = visualOffset_;
 	cfg.objectType = static_cast<int>(objectType_);
 	cfg.name	   = name_;
 	cfg.guid	   = id_;
 	cfg.parentGuid = parentId_;
+	// Renderer設定をScene保存用のPOD値へ展開する。
 	cfg.cameraDitherEnabled = drawConfig_.cameraDitherEnabled;
 	cfg.outlineEnabled	 = drawConfig_.outline.enabled;
 	cfg.outlineThickness = drawConfig_.outline.thickness;
@@ -379,20 +402,22 @@ void BaseGameObject::ExtractConfig() {
 }
 
 void BaseGameObject::ApplyConfigFromJson(const nlohmann::json& j) {
+	// 共通設定を先に復元し、派生設定が利用するモデルやコライダーを準備する。
 	config_.ApplyConfigFromJson(j);
 	ApplyConfig();
 
-	// 派生
+	// 旧データに派生型キーがない場合も、共通JSONを渡して派生側の互換読込を許可する。
 	const std::string	  typeKey(GetTypeName());
 	const nlohmann::json* derived = j.contains(typeKey) ? &j.at(typeKey) : nullptr;
 	ApplyDerivedConfigFromJson(j, derived);
 }
 
 void BaseGameObject::ExtractConfigToJson(nlohmann::json& j) const {
+	// 現在値をConfigへ同期してから、SceneSerializerが扱う共通JSONへ書き出す。
 	const_cast<BaseGameObject*>(this)->ExtractConfig();
 	config_.ExtractConfigToJson(j);
 
-	// 派生部分
+	// 派生固有設定は型名キーへ隔離し、共通設定とのキー衝突を避ける。
 	const std::string typeKey(GetTypeName());
 	nlohmann::json	  derived;
 	ExtractDerivedConfigToJson(j, derived);
@@ -400,7 +425,7 @@ void BaseGameObject::ExtractConfigToJson(nlohmann::json& j) const {
 		j[typeKey] = std::move(derived);
 	}
 
-	// シーン側で利用できるように
+	// 外部Configを参照する既存シーンとの互換性のため、設定元パスも保存する。
 	if(!GetConfigPath().empty()) {
 		j["configPath"] = GetConfigPath();
 	}

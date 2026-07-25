@@ -21,8 +21,6 @@ void ParticleRenderer::Render(
 	ID3D12GraphicsCommandList*                                     cmdList) {
 	if(cpuEmitters.empty() && gpuEmitters.empty()) return;
 
-	//ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
-
 	// ───────────── CPU パーティクル ─────────────
 	if(!cpuEmitters.empty()) {
 		for(auto& em : cpuEmitters) {
@@ -39,7 +37,6 @@ void ParticleRenderer::Render(
 
 			MeshResource& mesh = em->GetMeshResource();
 			if(mesh.Indices().empty()) continue;
-			//EnsureMeshIsReady(mesh,device);
 
 			DrawMeshInstanced(mesh,cmdList,
 							  static_cast<UINT>(em->GetUnits().size()),

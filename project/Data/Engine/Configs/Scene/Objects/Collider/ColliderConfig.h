@@ -7,6 +7,12 @@
 
 #include <cstdint>
 
+/*-----------------------------------------------------------------------------------------
+ * ColliderConfig
+ * - シーンとPrefabへ保存するコライダー設定を保持するデータ構造
+ * - 有効状態、レイヤー、形状ごとの寸法とローカル補正を管理
+ * - Runtimeのコライダー本体や衝突相手への参照は管理しない
+ *---------------------------------------------------------------------------------------*/
 struct ColliderConfig {
 	//========================= variable =========================
 	bool			   isCollisionEnabled = true;				//< コリジョン有効フラグ
@@ -23,6 +29,11 @@ struct ColliderConfig {
 	float			   capsuleHeight	  = 2.0f;				//< 全体高さ (Capsule)
 };
 
+/**
+ * \brief コライダー設定を互換性のあるJSON形式へ変換する
+ * \param j 変換結果を書き込むJSON
+ * \param c 保存するコライダー設定
+ */
 inline void to_json(nlohmann::json& j, const ColliderConfig& c) {
 	// 旧分類enumやColliderごとの対象Maskは出力せず、Layer IDだけを永続化する。
 	j = nlohmann::json{
@@ -38,6 +49,11 @@ inline void to_json(nlohmann::json& j, const ColliderConfig& c) {
 		{"capsuleHeight", c.capsuleHeight}};
 }
 
+/**
+ * \brief JSONからコライダー設定を復元する
+ * \param j 読み込むJSON
+ * \param c 復元先のコライダー設定
+ */
 inline void from_json(const nlohmann::json& j, ColliderConfig& c) {
 	c.isCollisionEnabled = j.value("isCollisionEnabled", true);
 	c.isDraw			 = j.value("isDraw", true);
