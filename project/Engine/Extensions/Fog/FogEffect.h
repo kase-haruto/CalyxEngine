@@ -12,6 +12,9 @@ namespace CalyxEngine {
 }
 
 //霧のパラメータを表す構造体
+/**
+ * @brief FogParametersに関するデータを保持する構造体です。
+ */
 struct FogParameters{
 	float fogStart;
 	float fogEnd;
@@ -19,6 +22,9 @@ struct FogParameters{
 	XMFLOAT4 fogColor;
 };
 
+/**
+ * @brief FogEffectの機能を提供するクラスです。
+ */
 class FogEffect{
 private:
 	//霧のパラメータ

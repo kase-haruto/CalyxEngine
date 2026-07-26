@@ -5,9 +5,9 @@
 #include <externals/nlohmann/json.hpp>
 
 namespace CalyxEngine {
-	/// <summary>
-	/// Represents a two-dimensional vector with x and y components.
-	/// </summary>
+	/**
+	 * @brief x成分とy成分からなる2次元ベクトルを表す構造体です。
+	 */
 	struct CALYX_API Vector2{
 		float x;
 		float y;

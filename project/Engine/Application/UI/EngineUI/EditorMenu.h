@@ -22,6 +22,9 @@ namespace CalyxEngine {
 	/* ========================================================================
 	/*		メニューアイテム
 	/* ===================================================================== */
+	/**
+	 * @brief MenuItemに関するデータを保持する構造体です。
+	 */
 	struct MenuItem {
 		std::string			  label;
 		std::string			  shortcut;
@@ -34,6 +37,9 @@ namespace CalyxEngine {
 	 * - エディタメニュークラス
 	 * - ファイル・編集・ビュー・ツールなどのメニュー項目を管理・描画
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief EditorMenuの機能を提供するクラスです。
+	 */
 	class EditorMenu {
 	public:
 		using ToolExtensionRenderer = std::function<void()>;

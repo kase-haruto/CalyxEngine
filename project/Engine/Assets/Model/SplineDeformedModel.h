@@ -9,6 +9,9 @@
 #include <string>
 #include <vector>
 
+/**
+ * @brief SplineDeformedModelの機能を提供するクラスです。
+ */
 class SplineDeformedModel final : public Model {
 public:
 	enum class Axis {

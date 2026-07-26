@@ -18,6 +18,9 @@ namespace CalyxEngine {
 	 * - エフェクトをシーン上にオブジェクトとして配置するクラス
 	 * - 複数のエミッターノードを管理し、再生・停止・設定の保存/読込を提供
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief FxObjectの機能を提供するクラスです。
+	 */
 	class CALYX_API FxObject final
 		: public SceneObject,
 		  public IConfigurable {

@@ -7,6 +7,9 @@
 #include "DxBuffer.h"
 
 template<typename T>
+/**
+ * @brief DxConstantBufferの機能を提供するクラスです。
+ */
 class DxConstantBuffer 
 	: public DxBuffer<T>{
 public:

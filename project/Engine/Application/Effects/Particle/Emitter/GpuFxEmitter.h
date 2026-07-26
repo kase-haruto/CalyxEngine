@@ -14,21 +14,33 @@ namespace CalyxEngine {
 	 * - GPUベースのパーティクルエミッタクラス
 	 * - ComputeShaderを使用した大量パーティクルのシミュレーションを担当
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief GpuFxEmitterの機能を提供するクラスです。
+	 */
 	class GpuFxEmitter
 		: public BaseEmitter {
 		/* ========================================================================
 		/*		sutructs
 		/* ===================================================================== */
+		/**
+		 * @brief EmitterParamに関するデータを保持する構造体です。
+		 */
 		struct EmitterParam {
 			float	deltaTime	 = 0.f;
 			CalyxEngine::Vector3 acceleration = CalyxEngine::Vector3(0, 0, 0);
 		};
 
+		/**
+		 * @brief PerFrameに関するデータを保持する構造体です。
+		 */
 		struct PerFrame {
 			float time;
 			float deltaTime;
 		};
 
+		/**
+		 * @brief EmitterSphereに関するデータを保持する構造体です。
+		 */
 		struct EmitterSphere {
 			CalyxEngine::Vector3	 translate;
 			float	 radius;

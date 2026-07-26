@@ -8,6 +8,9 @@
 #include <Engine/Foundation/Debug/CxAssert.h>
 
 template<typename T>
+/**
+ * @brief DxIndexBufferの機能を提供するクラスです。
+ */
 class DxIndexBuffer
 	: public DxBuffer<T>{
 public:

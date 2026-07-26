@@ -12,6 +12,9 @@
 #include <unordered_map>
 #include <memory>
 
+/**
+ * @brief RenderTargetCollectionの機能を提供するクラスです。
+ */
 class RenderTargetCollection{
 public:
 	RenderTargetCollection() = default;

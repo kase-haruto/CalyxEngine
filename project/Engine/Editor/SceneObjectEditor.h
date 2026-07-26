@@ -17,6 +17,9 @@ namespace CalyxEngine {
 	 * - シーンオブジェクト編集クラス
 	 * - 選択されたSceneObjectのトランスフォーム編集・ギズモ操作を担当
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief SceneObjectEditorの機能を提供するクラスです。
+	 */
 	class SceneObjectEditor 
 		: public BaseEditor {
 	public:

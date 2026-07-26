@@ -9,6 +9,9 @@ namespace CalyxEngine {
 	/* ========================================================================
 	/*		重力適用モジュール
 	/* ===================================================================== */
+	/**
+	 * @brief GravityModuleの機能を提供するクラスです。
+	 */
 	class GravityModule
 		: public CalyxEngine::BaseFxModule {
 	public:

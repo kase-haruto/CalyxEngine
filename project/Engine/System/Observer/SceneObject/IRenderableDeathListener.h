@@ -6,6 +6,9 @@
  * - Rendererが保持する非所有参照を安全に解除するための通知契約を定義する
  * - 通知対象となるRenderableの所有権は持たない
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief IRenderableDeathListenerの機能を提供するクラスです。
+ */
 class IRenderableDeathListener {
 public:
 	virtual void OnRenderableDestroyed(class IMeshRenderable* renderable) = 0;

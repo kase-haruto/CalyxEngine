@@ -14,6 +14,9 @@
  * - ゲームオブジェクト設定構造体
  * - SceneObjectConfig・Collider・Modelの設定を統合した基底設定
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief BaseGameObjectConfigに関するデータを保持する構造体です。
+ */
 struct BaseGameObjectConfig
 	: public SceneObjectConfig {
 	ColliderConfig	colliderConfig;

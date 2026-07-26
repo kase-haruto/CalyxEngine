@@ -50,6 +50,9 @@ namespace CalyxFoundation {
 	using Microsoft::WRL::ComPtr;
 
 	// スティック状態構造体
+	/**
+	 * @brief StickStateに関するデータを保持する構造体です。
+	 */
 	struct StickState {
 		CalyxEngine::Vector2 leftStick;
 		CalyxEngine::Vector2 rightStick;
@@ -60,6 +63,9 @@ namespace CalyxFoundation {
 	 * - 入力管理クラス
 	 * - キーボード、マウス、ゲームパッド（XInput）の入力を統合管理するシングルトン
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief Inputの機能を提供するクラスです。
+	 */
 	class CALYX_API Input {
 	public:
 		/**

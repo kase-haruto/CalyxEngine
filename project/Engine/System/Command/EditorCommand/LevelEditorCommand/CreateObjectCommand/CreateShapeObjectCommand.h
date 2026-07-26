@@ -9,6 +9,9 @@
 class SceneContext;
 
 
+/**
+ * @brief CreateShapeObjectCommandの機能を提供するクラスです。
+ */
 class CreateShapeObjectCommand
 	: public ICommand{
 public:

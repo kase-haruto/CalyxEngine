@@ -16,6 +16,9 @@
  * - Point Light群をGPUへ転送するConstant Buffer用データ構造
  * - 有効Light数、Shadow設定、固定上限分のLightデータを保持する
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief PointLightConstantsに関するデータを保持する構造体です。
+ */
 struct PointLightConstants {
 	uint32_t count = 0;
 	uint32_t pointLightShadowsEnabled = 1;
@@ -29,6 +32,9 @@ struct PointLightConstants {
  * - ライト管理クラス
  * - シーン内のディレクショナルライト・ポイントライトの登録とGPUへのコマンド送信を管理
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief LightLibraryの機能を提供するクラスです。
+ */
 class LightLibrary {
 public:
 	LightLibrary()  = default;

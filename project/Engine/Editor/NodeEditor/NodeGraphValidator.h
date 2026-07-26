@@ -16,6 +16,9 @@ namespace CalyxEngine {
 	 * - 汎用Node Graphの検証結果を保持するデータ構造
 	 * - 成否と複数の診断メッセージを呼び出し側へ返す
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief NodeGraphValidationResultに関するデータを保持する構造体です。
+	 */
 	struct NodeGraphValidationResult {
 		bool ok = true;
 		std::vector<std::string> messages;
@@ -32,6 +35,9 @@ namespace CalyxEngine {
 	 * - Link参照、入力多重接続、循環参照の検出を担当する
 	 * - 用途固有のNode型や実行意味は検証しない
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief NodeGraphValidatorの機能を提供するクラスです。
+	 */
 	class NodeGraphValidator {
 	public:
 		/////////////////////////////////////////////////////////////////////////////////////////

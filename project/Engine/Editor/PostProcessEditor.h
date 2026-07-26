@@ -11,6 +11,9 @@ namespace CalyxEngine {
 	 * - Passの有効状態、種別、実行順を編集してGraphへ反映する
 	 * - CollectionとGraphの所有権およびGPUリソース管理は担当しない
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief PostProcessEditorの機能を提供するクラスです。
+	 */
 	class PostProcessEditor
 		: public BaseEditor {
 	public:

@@ -5,6 +5,9 @@
 //* c++
 #include <memory>
 
+/**
+ * @brief DemoParticleの機能を提供するクラスです。
+ */
 class DemoParticle
 	: public Particle{
 

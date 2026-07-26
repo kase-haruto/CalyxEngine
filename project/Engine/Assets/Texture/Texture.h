@@ -13,6 +13,9 @@
  * - CPU画像のロード、GPUリソースへの転送、SRVの生成を担当する
  * - Descriptor Heap自体のライフタイムはDescriptorAllocatorへ委譲する
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief Textureの機能を提供するクラスです。
+ */
 class Texture {
 public:
 	Texture() = default;

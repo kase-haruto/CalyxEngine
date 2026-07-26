@@ -7,6 +7,9 @@
  * - 物理応答用の保存設定
  * - コライダーの検出設定とは分け、押し戻し対象かどうかを明示的に管理する
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief PhysicsBodyConfigに関するデータを保持する構造体です。
+ */
 struct PhysicsBodyConfig {
 	bool enabled = true;		 //< 物理応答を行うか
 	int	 bodyType = 0;			 //< 0:Static, 1:Kinematic, 2:Dynamic

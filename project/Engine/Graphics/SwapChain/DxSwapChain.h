@@ -10,6 +10,9 @@
  * - DirectX12スワップチェーン管理クラス
  * - バックバッファの管理、画面への表示（Present）を担当
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief DxSwapChainの機能を提供するクラスです。
+ */
 class DxSwapChain{
     template<class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
 

@@ -1,6 +1,9 @@
 #pragma once
 #include <Engine\Objects\3D\Actor\BaseGameObject.h>
 
+/**
+ * @brief Weaponの機能を提供するクラスです。
+ */
 class Weapon
 	: public BaseGameObject{
 public:

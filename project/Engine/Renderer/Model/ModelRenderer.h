@@ -35,8 +35,14 @@ namespace CalyxEngine {
  * - 3Dモデル描画管理クラス
  * - スタティック/スキンメッシュモデルのバッチング、カリング、描画制御を担当
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief ModelRendererの機能を提供するクラスです。
+ */
 class ModelRenderer {
 public:
+	/**
+	 * @brief RenderInstanceに関するデータを保持する構造体です。
+	 */
 	struct RenderInstance {
 		BaseModel*			  model;
 		const WorldTransform* transform;
@@ -48,6 +54,9 @@ private:
 	//===================================================================*/
 	//                    private types
 	//===================================================================*/
+	/**
+	 * @brief InstanceStaticに関するデータを保持する構造体です。
+	 */
 	struct InstanceStatic {
 		WorldTransform tf;							  //< ワールド変換
 		AABB		   worldAABB{};					  //< ワールドAABB
@@ -57,6 +66,9 @@ private:
 		SceneObject*   owner   = nullptr;			  //< 所有オブジェクト
 	};
 
+	/**
+	 * @brief InstanceSkinnedに関するデータを保持する構造体です。
+	 */
 	struct InstanceSkinned {
 		WorldTransform tf;				  //< ワールド変換
 		AABB		   worldAABB{};		  //< ワールドAABB
@@ -68,6 +80,9 @@ private:
 	using PipelineKey		= PipelineService::PipelineKey;
 	using PipelineKeyHasher = PipelineService::PipelineKeyHasher;
 
+	/**
+	 * @brief StaticBatchItemに関するデータを保持する構造体です。
+	 */
 	struct StaticBatchItem {
 		BaseModel*							   model = nullptr; //< モデルデータ
 		bool								   cameraDitherEnabled = true;
@@ -76,6 +91,9 @@ private:
 		DxStructuredBuffer<GpuBillboardParams> billboardSrv;	//< ビルボード用構造化バッファ
 	};
 
+	/**
+	 * @brief SkinnedBatchItemに関するデータを保持する構造体です。
+	 */
 	struct SkinnedBatchItem {
 		CalyxEngine::AnimationModel* model = nullptr;
 		bool cameraDitherEnabled = true;

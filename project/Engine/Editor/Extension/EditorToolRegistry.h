@@ -9,6 +9,9 @@
 
 namespace CalyxEditor {
 
+	/**
+	 * @brief EditorToolRegistryの機能を提供するクラスです。
+	 */
 	class CALYX_API EditorToolRegistry final : public IEditorHost {
 	public:
 		using WorkspaceRequest = std::function<void(const std::string& layoutPath)>;
@@ -32,6 +35,9 @@ namespace CalyxEditor {
 		bool Close(std::string_view id);
 
 	private:
+		/**
+		 * @brief Entryに関するデータを保持する構造体です。
+		 */
 		struct Entry {
 			std::string id;
 			std::string displayName;

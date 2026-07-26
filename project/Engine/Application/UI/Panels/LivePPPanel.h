@@ -3,6 +3,9 @@
 
 namespace CalyxEngine {
 
+	/**
+	 * @brief LivePPPanelの機能を提供するクラスです。
+	 */
 	class LivePPPanel : public IEngineUI {
 	public:
 		LivePPPanel();

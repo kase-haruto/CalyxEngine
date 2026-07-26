@@ -7,6 +7,9 @@
 
 
 namespace CalyxEngine {
+	/**
+	 * @brief EditorContextの機能を提供するクラスです。
+	 */
 	class EditorContext {
 	public:
 		//===================================================================*/

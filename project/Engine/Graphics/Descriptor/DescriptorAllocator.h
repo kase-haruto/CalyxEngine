@@ -16,6 +16,9 @@
  * Descriptor Handle
  *	- ディスクリプタハンドル
  *--------------------------------------------------------------*/
+/**
+ * @brief DescriptorHandleに関するデータを保持する構造体です。
+ */
 struct DescriptorHandle {
 	D3D12_CPU_DESCRIPTOR_HANDLE cpu{};
 	D3D12_GPU_DESCRIPTOR_HANDLE gpu{};
@@ -39,6 +42,9 @@ enum class DescriptorUsage {
  * Descriptor Heap Settings
  *	- ディスクリプタヒープ生成時の設定
  *--------------------------------------------------------------*/
+/**
+ * @brief DescriptorHeapSettingsに関するデータを保持する構造体です。
+ */
 struct DescriptorHeapSettings {
 	UINT maxDescriptors = 60000;
 	bool shaderVisible	= true;
@@ -48,6 +54,9 @@ struct DescriptorHeapSettings {
  * Descriptor Allocator
  *	- ディスクリプタヒープの管理・割り当てを行うクラス
  *--------------------------------------------------------------*/
+/**
+ * @brief DescriptorAllocatorの機能を提供するクラスです。
+ */
 class CALYX_API DescriptorAllocator {
 public:
 	/**
@@ -86,6 +95,9 @@ public:
 	static D3D12_GPU_DESCRIPTOR_HANDLE GetGpuHandleStart(DescriptorUsage usage);
 
 private:
+	/**
+	 * @brief HeapInfoに関するデータを保持する構造体です。
+	 */
 	struct HeapInfo {
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> heap;
 		UINT										 descriptorSize = 0;

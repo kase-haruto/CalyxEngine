@@ -16,6 +16,9 @@ namespace CalyxEngine{
 		bool showEditorGrid = false;
 	};
 
+	/**
+	 * @brief GraphicsSettingsに関するデータを保持する構造体です。
+	 */
 	struct GraphicsSettings {
 		bool enablePointLightShadows = true;
 	};

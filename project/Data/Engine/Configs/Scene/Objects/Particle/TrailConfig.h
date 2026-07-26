@@ -22,6 +22,9 @@ namespace CalyxEngine {
 	    TrailのTexture、Noise、Dissolve、発光設定を保持する。
 	    GPUリソースやRuntimeの経過時間は管理しない。
 	------------------------------------------------------------*/
+	/**
+	 * @brief TrailMaterialConfigに関するデータを保持する構造体です。
+	 */
 	struct TrailMaterialConfig {
 		Vector4 color{1.0f,1.0f,1.0f,1.0f};
 		Vector2 baseTiling{1.0f,1.0f};
@@ -54,6 +57,9 @@ namespace CalyxEngine {
 	    Emitterに付随する連続Ribbon Trailの保存設定。
 	    TrailPointやDynamic Bufferはシリアライズしない。
 	------------------------------------------------------------*/
+	/**
+	 * @brief TrailSettingsConfigに関するデータを保持する構造体です。
+	 */
 	struct TrailSettingsConfig {
 		bool enabled = false;
 		float lifetime = 0.4f;

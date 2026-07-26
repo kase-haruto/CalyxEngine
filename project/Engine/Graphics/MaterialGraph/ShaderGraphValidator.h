@@ -15,6 +15,9 @@ namespace CalyxEngine {
 	 * - Material Shader Graphの検証結果を保持するデータ構造
 	 * - 成否とErrorまたはWarningの診断メッセージを管理する
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief ShaderGraphValidationResultに関するデータを保持する構造体です。
+	 */
 	struct ShaderGraphValidationResult {
 		bool ok = true;
 		std::vector<std::string> messages;
@@ -35,6 +38,9 @@ namespace CalyxEngine {
 	 * - Node Schema、Texture接続、Output構成、Reflection Bindingの検査を担当する
 	 * - Graphの修復やShaderコンパイルは担当しない
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief ShaderGraphValidatorの機能を提供するクラスです。
+	 */
 	class ShaderGraphValidator {
 	public:
 		static ShaderGraphValidationResult ValidateMaterialGraph(const NodeGraph& graph) {

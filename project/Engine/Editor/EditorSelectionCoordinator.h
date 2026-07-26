@@ -13,8 +13,14 @@ namespace CalyxEngine {
 	class InspectorPanel;
 	class SceneObjectEditor;
 
+	/**
+	 * @brief EditorSelectionCoordinatorの機能を提供するクラスです。
+	 */
 	class EditorSelectionCoordinator {
 	public:
+		/**
+		 * @brief Snapshotに関するデータを保持する構造体です。
+		 */
 		struct Snapshot {
 			BaseEditor* selectedEditor = nullptr;
 			std::vector<std::weak_ptr<SceneObject>> selectedObjects;

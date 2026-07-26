@@ -8,6 +8,9 @@
 
 namespace CalyxEngine {
 
+	/**
+	 * @brief EditorCollectionの機能を提供するクラスです。
+	 */
 	class EditorCollection {
 	public:
 		enum class EditorType {

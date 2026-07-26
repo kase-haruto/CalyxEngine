@@ -8,6 +8,9 @@
 
 #include <memory>
 
+/**
+ * @brief OffscreenRenderTargetの機能を提供するクラスです。
+ */
 class OffscreenRenderTarget
 	: public IRenderTarget {
 public:

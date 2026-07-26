@@ -11,6 +11,9 @@
 #include <string>
 
 namespace CalyxEngine {
+	/**
+	 * @brief PanelControllerの機能を提供するクラスです。
+	 */
 	class PanelController {
 	public:
 		//===================================================================*/

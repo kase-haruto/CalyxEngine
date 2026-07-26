@@ -12,6 +12,9 @@ namespace CalyxEngine {
    - JsonUtils/JsonFileIO を使って保存・読込する裏方
    - 外部（ゲームコード）から直接呼ばず、SerializableObject経由で使う想定
    ========================================================================= */
+	/**
+	 * @brief ParamStoreの機能を提供するクラスです。
+	 */
 	class ParamStore {
 	public:
 		static bool Save(const SerializableObject& obj);

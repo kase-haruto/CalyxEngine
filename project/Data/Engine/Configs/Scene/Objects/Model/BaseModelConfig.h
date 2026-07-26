@@ -10,6 +10,9 @@
 #include <optional>
 #include <string>
 
+/**
+ * @brief BaseModelConfigに関するデータを保持する構造体です。
+ */
 struct BaseModelConfig {
 	Guid			  materialGuid{}; // マテリアル GUID
 	Transform2DConfig uvTransConfig;  // UV 2D 変換

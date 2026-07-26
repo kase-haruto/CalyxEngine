@@ -30,6 +30,9 @@ namespace CalyxEngine {
 	 * - ヒエラルキーパネルクラス
 	 * - シーン上のオブジェクト階層をツリー表示し、選択・削除・作成を管理
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief HierarchyPanelの機能を提供するクラスです。
+	 */
 	class HierarchyPanel
 		: public IEngineUI {
 	private:
@@ -129,6 +132,9 @@ namespace CalyxEngine {
 		ImGuiTextFilter searchFilter_;
 
 		// icons
+		/**
+		 * @brief Iconに関するデータを保持する構造体です。
+		 */
 		struct Icon {
 			ImTextureID tex{};
 			ImVec2		size{24, 24};

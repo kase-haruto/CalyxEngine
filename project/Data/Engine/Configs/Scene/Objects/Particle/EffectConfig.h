@@ -8,6 +8,9 @@ namespace CalyxEngine {
 	 * - Scene上のEffectに含まれる一つのEmitter Node設定を保持するデータ構造
 	 * - SceneObject情報、Emitter設定、描画状態、GPU実行状態を管理する
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief EffectEmitterNodeConfigに関するデータを保持する構造体です。
+	 */
 	struct EffectEmitterNodeConfig : public SceneObjectConfig {
 		EmitterConfig emitter{};
 		bool		  isDrawEnable = true;
@@ -29,6 +32,9 @@ namespace CalyxEngine {
 	 * - Sceneへ配置するEffect全体の保存設定を保持するデータ構造
 	 * - 親SceneObject情報と子Emitter Nodeの配列を管理する
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief EffectObjectConfigに関するデータを保持する構造体です。
+	 */
 	struct EffectObjectConfig : public SceneObjectConfig {
 		std::vector<EffectEmitterNodeConfig> emitters;
 	};
@@ -47,6 +53,9 @@ namespace CalyxEngine {
 	 * - ローカルTransform、Emitter設定、描画方式を管理する
 	 * - Scene固有GUIDや親子関係は保持しない
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief EffectEmitterAssetDataに関するデータを保持する構造体です。
+	 */
 	struct EffectEmitterAssetData {
 		std::string			 name;
 		WorldTransformConfig transform;
@@ -84,6 +93,9 @@ namespace CalyxEngine {
 	 * - Asset名と複数のEmitter定義を管理する
 	 * - Runtime EmitterおよびGPUリソースは所有しない
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief EffectAssetDataに関するデータを保持する構造体です。
+	 */
 	struct EffectAssetData {
 		static constexpr uint32_t kCurrentVersion = 1;
 		uint32_t version = kCurrentVersion;

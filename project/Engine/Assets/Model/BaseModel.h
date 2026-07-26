@@ -35,6 +35,9 @@ namespace CalyxEngine {
  * - モデル基底クラス
  * - メッシュデータ・マテリアル・テクスチャの管理と描画の共通処理を提供
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief BaseModelの機能を提供するクラスです。
+ */
 class BaseModel {
 public:
 	//===================================================================*/
@@ -124,6 +127,9 @@ protected:
 	ModelData* modelData_ = nullptr;
 	Guid materialGuid_;
 	std::optional<CalyxEngine::Vector4> colorOverride_;
+	/**
+	 * @brief RimLightOverrideに関するデータを保持する構造体です。
+	 */
 	struct RimLightOverride {
 		CalyxEngine::Vector4 color;
 		float intensity;

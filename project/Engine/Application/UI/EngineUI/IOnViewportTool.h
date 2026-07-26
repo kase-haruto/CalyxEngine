@@ -22,6 +22,9 @@ namespace CalyxEngine {
 	 * - ビューポートツールインターフェース
 	 * - ビューポート上に配置されるオーバーレイ・ツールバーの描画を定義
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief IOnViewportToolの機能を提供するクラスです。
+	 */
 	class IOnViewportTool {
 	public:
 		virtual ~IOnViewportTool() = default;
@@ -37,6 +40,9 @@ namespace CalyxEngine {
 	 * - ビューポートツール基底クラス
 	 * - オーバーレイの配置位置・オフセット計算の共通機能を提供
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief BaseOnViewportToolの機能を提供するクラスです。
+	 */
 	class BaseOnViewportTool
 		: public IOnViewportTool {
 	public:

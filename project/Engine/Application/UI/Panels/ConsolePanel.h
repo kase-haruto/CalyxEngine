@@ -16,6 +16,9 @@ namespace CalyxEngine {
 	 * - コンソールパネルクラス
 	 * - エンジンのログメッセージを表示するパネル
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief ConsolePanelの機能を提供するクラスです。
+	 */
 	class ConsolePanel
 		: public IEngineUI {
 	public:

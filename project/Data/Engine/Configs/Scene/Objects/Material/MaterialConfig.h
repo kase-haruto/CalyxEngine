@@ -7,9 +7,9 @@
 #include <externals/nlohmann/json.hpp>
 #include <cstdint>
 #include <string>
-/// <summary>
-/// Holds the rendering and shading parameters used to configure a material.
-/// </summary>
+/**
+ * @brief マテリアルの描画およびシェーディング設定を保持する構造体です。
+ */
 struct MaterialConfig final{
 	 //========================= variable =========================
 	CalyxEngine::Vector4 color = { 1.0f, 1.0f, 1.0f, 1.0f };	//< 色

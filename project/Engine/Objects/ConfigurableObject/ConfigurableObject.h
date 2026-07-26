@@ -17,6 +17,9 @@
  * - JSON形式での設定の保存/読込とImGuiによる編集機能を提供
  *---------------------------------------------------------------------------------------*/
 template <typename TConfig>
+/**
+ * @brief ConfigurableObjectの機能を提供するクラスです。
+ */
 class ConfigurableObject
 	: public IConfigurable {
 public:

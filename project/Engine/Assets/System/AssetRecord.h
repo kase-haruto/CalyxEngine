@@ -21,6 +21,9 @@ using AssetGUID = Guid;
  * - GUID、種別、パス、更新日時、Preview、Import設定、Tagを管理する
  * - Asset本体とPreview Texture Resourceの所有は担当しない
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief AssetRecordに関するデータを保持する構造体です。
+ */
 struct AssetRecord {
 	AssetGUID guid{};
 	AssetType type = AssetType::Unknown;

@@ -13,6 +13,9 @@
  * - 全SceneObjectに共通するシリアライズ設定を保持するデータ構造
  * - GUID、親子関係、型、名前、TransformをScene保存形式として管理する
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief SceneObjectConfigに関するデータを保持する構造体です。
+ */
 struct SceneObjectConfig{
 	Guid guid {};						//< ID
 	Guid parentGuid {};					//< 親ID

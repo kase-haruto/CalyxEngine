@@ -8,6 +8,9 @@ namespace CalyxEngine {
 	 * - 現在シーン固有の設定カテゴリを選択・編集するEditorウィンドウ。
 	 * - カテゴリ列と詳細領域を分離し、Collision以外の項目を後から追加しやすくする。
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief SceneSettingsWindowの機能を提供するクラスです。
+	 */
 	class SceneSettingsWindow {
 	public:
 		void Open();

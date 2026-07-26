@@ -21,6 +21,9 @@ class PostEffectGraph;
  * - PostEffectGraphの実行方式を定義するStateインターフェース
  * - GPUリソースを所有せず、線形実行とノード実行の振る舞いを派生Stateへ委譲
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief IPostEffectExecutionStateの機能を提供するクラスです。
+ */
 class IPostEffectExecutionState {
 public:
 	/** \brief ポストエフェクト実行Stateの基底デストラクタ */
@@ -50,6 +53,9 @@ class NodePostEffectExecutionState;
  * - ポストエフェクトグラフクラス
  * - 複数のポストエフェクトパスを連結して実行するパイプラインを管理
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief PostEffectGraphの機能を提供するクラスです。
+ */
 class PostEffectGraph {
 public:
 	/**
@@ -91,6 +97,9 @@ private:
 	 * - JSONから復元した1個のポストエフェクトノードを保持する内部データ構造
 	 * - ピン接続と非所有のEffect Pass参照を管理し、GPUリソースは所有しない
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief GraphNodeに関するデータを保持する構造体です。
+	 */
 	struct GraphNode {
 		int32_t id = 0;                    //< JSON内でノードを識別するID。0は無効値
 		std::string type;                  //< Effect Passとの関連付けに使用するノード型名

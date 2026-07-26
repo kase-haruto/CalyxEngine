@@ -2,6 +2,9 @@
 #include <Engine/PostProcess/Interface/IPostEffectPass.h>
 #include <Engine/Graphics/Pipeline/Pso/PsoDetails.h>
 
+/**
+ * @brief CopyImageEffectの機能を提供するクラスです。
+ */
 class CopyImageEffect :
 	public IPostEffectPass {
 public:

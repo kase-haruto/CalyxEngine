@@ -16,6 +16,9 @@ namespace CalyxEngine {
 	 * - Node型に含まれる一つのPin定義を保持するデータ構造
 	 * - 表示名、入出力方向、接続型をNode生成処理へ提供する
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief NodePinDefinitionに関するデータを保持する構造体です。
+	 */
 	struct NodePinDefinition {
 		std::string name;
 		NodePinKind kind = NodePinKind::Input;
@@ -31,6 +34,9 @@ namespace CalyxEngine {
 	 * - Node生成とEditor表示に使用するNode型定義を保持するデータ構造
 	 * - 型ID、分類、Pin構成、既定プロパティ、Header色を管理する
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief NodeTypeDefinitionに関するデータを保持する構造体です。
+	 */
 	struct NodeTypeDefinition {
 		std::string type;
 		std::string title;
@@ -50,6 +56,9 @@ namespace CalyxEngine {
 	 * - 型IDによる検索と定義に基づくNode生成を担当する
 	 * - 生成したNodeやNodeGraphのライフタイムは管理しない
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief NodeTypeRegistryの機能を提供するクラスです。
+	 */
 	class NodeTypeRegistry {
 	public:
 		/////////////////////////////////////////////////////////////////////////////////////////

@@ -10,6 +10,9 @@
  * - エンジン画面右下にデバッグトーストを表示するためのクラス
  *---------------------------------------------------------------------------------------*/
 namespace CalyxEngine {
+	/**
+	 * @brief DebugTextOverlayの機能を提供するクラスです。
+	 */
 	class DebugTextOverlay final
 		: public BaseOnViewportTool {
 	public:

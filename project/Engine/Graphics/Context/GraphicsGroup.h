@@ -5,6 +5,9 @@
 #include <Engine/Graphics/Device/DxCore.h>
 #include <Engine/Graphics/Pipeline/Manager/PipelineStateManager.h>
 
+/**
+ * @brief GraphicsGroupの機能を提供するクラスです。
+ */
 class GraphicsGroup {
 private:
 	template <class T>

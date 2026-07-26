@@ -4,6 +4,9 @@
 #include <optional>
 #include <unordered_map>
 
+/**
+ * @brief FileSystemHelperの機能を提供するクラスです。
+ */
 class FileSystemHelper {
 public:
 	static bool CreateDirectoryPath(const std::string& path);

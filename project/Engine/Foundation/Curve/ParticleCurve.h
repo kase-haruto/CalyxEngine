@@ -19,12 +19,18 @@ namespace CalyxEngine {
 		RandomBetweenCurves,
 	};
 
+	/**
+	 * @brief FloatCurveKeyに関するデータを保持する構造体です。
+	 */
 	struct FloatCurveKey {
 		float time = 0.0f;
 		float value = 0.0f;
 	};
 
 	// 汎用のfloatカーブデータ。GPUリソースやParticle状態は管理しない。
+	/**
+	 * @brief FloatCurveに関するデータを保持する構造体です。
+	 */
 	struct FloatCurve {
 		CurveValueMode mode = CurveValueMode::Constant;
 		float constant = 1.0f;
@@ -62,6 +68,9 @@ namespace CalyxEngine {
 		}
 	};
 
+	/**
+	 * @brief Vector3Curveに関するデータを保持する構造体です。
+	 */
 	struct Vector3Curve {
 		FloatCurve x;
 		FloatCurve y;
@@ -71,12 +80,18 @@ namespace CalyxEngine {
 		}
 	};
 
+	/**
+	 * @brief ColorGradientKeyに関するデータを保持する構造体です。
+	 */
 	struct ColorGradientKey {
 		float time = 0.0f;
 		Vector4 color{1.0f, 1.0f, 1.0f, 1.0f};
 	};
 
 	// 色補間のみを管理する汎用Gradient。TextureやDescriptorは管理しない。
+	/**
+	 * @brief ColorGradientに関するデータを保持する構造体です。
+	 */
 	struct ColorGradient {
 		std::vector<ColorGradientKey> keys{{0.0f, {1, 1, 1, 1}}, {1.0f, {1, 1, 1, 1}}};
 		Vector4 Evaluate(float time) const {

@@ -9,6 +9,9 @@ namespace CalyxEngine { class SceneManager; }
 namespace Calyx {
 	// Compatibility facade for code that receives a registry service. Scene
 	// classes are intentionally unsupported; scenes are assets addressed by path/GUID.
+	/**
+	 * @brief SceneRegistryの機能を提供するクラスです。
+	 */
 	class CALYX_API SceneRegistry {
 	public:
 		explicit SceneRegistry(CalyxEngine::SceneManager& sceneManager);

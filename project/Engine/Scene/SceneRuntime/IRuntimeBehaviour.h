@@ -1,4 +1,7 @@
 #pragma once
+/**
+ * @brief IRuntimeBehaviourの機能を提供するクラスです。
+ */
 class IRuntimeBehaviour {
 public:
 	virtual ~IRuntimeBehaviour() = default;

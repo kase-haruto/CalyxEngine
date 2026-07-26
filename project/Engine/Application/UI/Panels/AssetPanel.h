@@ -25,10 +25,16 @@ namespace CalyxEngine {
 	 * - アセットブラウザパネルクラス
 	 * - プロジェクト内アセットのツリー表示・サムネイル表示・ドラッグドロップを提供
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief AssetPanelの機能を提供するクラスです。
+	 */
 	class AssetPanel
 		: public IEngineUI {
 	private:
 		// --- フォルダツリー ---
+		/**
+		 * @brief DirNodeに関するデータを保持する構造体です。
+		 */
 		struct DirNode {
 			std::string										name;
 			std::filesystem::path							absPath;

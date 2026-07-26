@@ -13,9 +13,15 @@ struct CalyxEngine::Quaternion;
 /* ========================================================================
 /*			デバッグ用カメラ
 /* ===================================================================== */
+/**
+ * @brief DebugCameraの機能を提供するクラスです。
+ */
 class DebugCamera
 	: public Camera3d {
 public:
+	/**
+	 * @brief Stateに関するデータを保持する構造体です。
+	 */
 	struct State {
 		CalyxEngine::Vector3 target{0.0f, 0.0f, 0.0f};
 		float distance = 10.0f;

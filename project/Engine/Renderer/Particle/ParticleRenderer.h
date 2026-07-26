@@ -16,6 +16,9 @@
 class PipelineService;
 struct MeshResource;
 
+/**
+ * @brief ParticleRendererの機能を提供するクラスです。
+ */
 class ParticleRenderer{
 public:
 	// ── CPU と GPU を一緒に描画 ─────────────────────
@@ -31,6 +34,9 @@ public:
 					   ID3D12GraphicsCommandList* cmdList);
 
 private:
+	/**
+	 * @brief TrailGpuMaterialに関するデータを保持する構造体です。
+	 */
 	struct alignas(16) TrailGpuMaterial {
 		CalyxEngine::Vector4 color{1,1,1,1};
 		CalyxEngine::Vector4 baseTilingScroll{};   //< xy tiling, zw scroll
@@ -43,6 +49,9 @@ private:
 		CalyxEngine::Vector4 emissiveColorIntensity{1,1,1,0};
 	};
 
+	/**
+	 * @brief TrailRenderStateに関するデータを保持する構造体です。
+	 */
 	struct TrailRenderState {
 		DxVertexBuffer<CalyxEngine::TrailVertex> vertexBuffer;
 		DxIndexBuffer<uint32_t> indexBuffer;

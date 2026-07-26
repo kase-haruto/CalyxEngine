@@ -13,22 +13,34 @@
 template<typename T>
 struct VertexInputLayout;
 
+/**
+ * @brief VertexPosUvに関するデータを保持する構造体です。
+ */
 struct VertexPosUv {
 	CalyxEngine::Vector3 pos;
 	CalyxEngine::Vector2 uv;
 };
 
+/**
+ * @brief VertexPosColorに関するデータを保持する構造体です。
+ */
 struct VertexPosColor {
 	CalyxEngine::Vector3 pos;
 	CalyxEngine::Vector4 color;
 };
 
+/**
+ * @brief VertexPosUvColorに関するデータを保持する構造体です。
+ */
 struct VertexPosUvColor {
 	CalyxEngine::Vector4 pos;
 	CalyxEngine::Vector2 uv;
 	CalyxEngine::Vector4 color;
 };
 
+/**
+ * @brief VertexPosUvNに関するデータを保持する構造体です。
+ */
 struct VertexPosUvN {
 	CalyxEngine::Vector4 position;	// 16 B
 	CalyxEngine::Vector2 texcoord;	// 24 B
@@ -36,6 +48,9 @@ struct VertexPosUvN {
 	CalyxEngine::Vector4 tangent = {1.0f, 0.0f, 0.0f, 1.0f};
 };
 
+/**
+ * @brief VertexPosUvNSkinningに関するデータを保持する構造体です。
+ */
 struct VertexPosUvNSkinning {
 	CalyxEngine::Vector4 pos;		// 16 B
 	CalyxEngine::Vector2 uv;			// 24 B
@@ -44,6 +59,9 @@ struct VertexPosUvNSkinning {
 };
 
 template<>
+/**
+ * @brief VertexInputLayoutに関するデータを保持する構造体です。
+ */
 struct VertexInputLayout<VertexPosUvN> {
 	static std::vector<D3D12_INPUT_ELEMENT_DESC> Get() {
 		return {
@@ -64,6 +82,9 @@ struct VertexInputLayout<VertexPosUvN> {
 };
 
 template<>
+/**
+ * @brief VertexInputLayoutに関するデータを保持する構造体です。
+ */
 struct VertexInputLayout<VertexPosUv> {
 	static std::vector<D3D12_INPUT_ELEMENT_DESC> Get() {
 		return {
@@ -76,6 +97,9 @@ struct VertexInputLayout<VertexPosUv> {
 };
 
 template<>
+/**
+ * @brief VertexInputLayoutに関するデータを保持する構造体です。
+ */
 struct VertexInputLayout<VertexPosUvNSkinning>{
 	static std::vector<D3D12_INPUT_ELEMENT_DESC> Get(){
 		return {
@@ -102,6 +126,9 @@ struct VertexInputLayout<VertexPosUvNSkinning>{
 };
 
 template<>
+/**
+ * @brief VertexInputLayoutに関するデータを保持する構造体です。
+ */
 struct VertexInputLayout<VertexData> {
 	static std::vector<D3D12_INPUT_ELEMENT_DESC> Get() {
 		return {

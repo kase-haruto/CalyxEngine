@@ -14,6 +14,9 @@ class SceneObject;
 
 namespace CalyxEngine {
 
+	/**
+	 * @brief SceneObjectEditCommandCallbacksに関するデータを保持する構造体です。
+	 */
 	struct SceneObjectEditCommandCallbacks {
 		std::function<void()> refreshHierarchy;
 		std::function<void()> clearSelection;
@@ -26,6 +29,9 @@ namespace CalyxEngine {
 		SceneObjectEditCommandCallbacks callbacks,
 		std::string name);
 
+	/**
+	 * @brief DuplicateSceneObjectsCommandの機能を提供するクラスです。
+	 */
 	class DuplicateSceneObjectsCommand final
 		: public BaseLevelEditorCommand {
 	public:

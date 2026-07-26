@@ -18,6 +18,9 @@ namespace CalyxEngine {
 	 * - エンジン全体から利用できるログ蓄積サービス
 	 * - ImGuiに依存せず、出力先の追加をこのクラス側へ集約できる構成とする
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief EngineLoggerの機能を提供するクラスです。
+	 */
 	class CALYX_API EngineLogger {
 	public:
 		static EngineLogger& GetInstance();

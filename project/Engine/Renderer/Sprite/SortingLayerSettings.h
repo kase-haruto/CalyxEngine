@@ -13,12 +13,18 @@ using SortingLayerId = uint16_t;
 constexpr SortingLayerId kDefaultSortingLayerId = 0;
 constexpr uint32_t kMaxSortingLayerCount = 256;
 
+/**
+ * @brief SortingLayerに関するデータを保持する構造体です。
+ */
 struct SortingLayer {
 	SortingLayerId id = kDefaultSortingLayerId;
 	std::string name;
 	int32_t order = 0;
 };
 
+/**
+ * @brief SortingLayerSettingsの機能を提供するクラスです。
+ */
 class SortingLayerSettings {
 public:
 	SortingLayerSettings();

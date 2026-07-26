@@ -24,8 +24,14 @@ struct ID3D12GraphicsCommandList;
 
 namespace CalyxEngine {
 
+	/**
+	 * @brief AssetPreviewManagerの機能を提供するクラスです。
+	 */
 	class AssetPreviewManager {
 	public:
+		/**
+		 * @brief PreviewResultに関するデータを保持する構造体です。
+		 */
 		struct PreviewResult {
 			ImTextureID texture = nullptr;
 			bool		ready	= false;
@@ -55,6 +61,9 @@ namespace CalyxEngine {
 			Failed
 		};
 
+		/**
+		 * @brief Entryに関するデータを保持する構造体です。
+		 */
 		struct Entry {
 			State							state	  = State::None;
 			ImTextureID						texture	  = nullptr;

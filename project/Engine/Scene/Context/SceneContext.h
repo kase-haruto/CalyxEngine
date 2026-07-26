@@ -30,6 +30,9 @@ using ObjectAddedCallback	= std::function<void(SceneObject*)>;
  * - シーンコンテキストクラス
  * - シーン内のオブジェクト・ライト・カメラ・エフェクトシステムを統合管理
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief SceneContextの機能を提供するクラスです。
+ */
 class CALYX_API SceneContext {
 public:
 	SceneContext()	= default;

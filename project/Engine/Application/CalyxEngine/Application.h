@@ -23,6 +23,9 @@ namespace Calyx {
 	 * - プロジェクト読込、初期化、更新、描画、終了のライフサイクル通知を提供
 	 * - Engine、SceneManager、Editor UIの所有権は管理しない
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief Applicationの機能を提供するクラスです。
+	 */
 	class CALYX_API Application {
 	public:
 		/**

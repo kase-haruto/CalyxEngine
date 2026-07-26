@@ -6,6 +6,9 @@
 #include <Engine/Foundation/Math/Quaternion.h>
 #include <Engine/Foundation/Math/Vector3.h>
 
+/**
+ * @brief WorldTransformConfigに関するデータを保持する構造体です。
+ */
 struct WorldTransformConfig final {
 	//========================= variable =========================
 	CalyxEngine::Vector3	  translation = {0.0f, 0.0f, 0.0f};					   //< 位置

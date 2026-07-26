@@ -25,6 +25,9 @@
 //          keyframe
 /////////////////////////////////////////////////////////////////////////////////////////
 template <typename tValue>
+/**
+ * @brief Keyframeに関するデータを保持する構造体です。
+ */
 struct Keyframe {
 	float time;     // アニメーション時間(秒)
 	tValue value;   // 補間対象の値 (CalyxEngine::Vector3 or CalyxEngine::Quaternion)
@@ -36,6 +39,9 @@ using KeyframeVector3 = Keyframe<CalyxEngine::Vector3>;
 //          AnimationCurve
 /////////////////////////////////////////////////////////////////////////////////////////
 template<typename tValue>
+/**
+ * @brief AnimationCurveに関するデータを保持する構造体です。
+ */
 struct AnimationCurve {
 	std::vector<Keyframe<tValue>> keyframes;
 };
@@ -49,6 +55,9 @@ struct NodeAnimation {
 	AnimationCurve<CalyxEngine::Vector3>     scale;		// スケーリング
 };
 
+/**
+ * @brief Nodeに関するデータを保持する構造体です。
+ */
 struct Node {
 	QuaternionTransform transform;
 	CalyxEngine::Matrix4x4 localMatrix;
@@ -79,6 +88,9 @@ struct Joint {
 	std::optional<int32_t> parent;	//< 親ボーンのインデックス
 };
 
+/**
+ * @brief Skeletonに関するデータを保持する構造体です。
+ */
 struct Skeleton {
 	int32_t root;
 	std::map<std::string, int32_t> jointMap;
@@ -99,6 +111,9 @@ struct VertexWeightData {
 	uint32_t vertexIndex;
 };
 
+/**
+ * @brief JointWeightDataに関するデータを保持する構造体です。
+ */
 struct JointWeightData {
 	CalyxEngine::Matrix4x4 inverseBindPoseMatrix;
 	std::vector<VertexWeightData> vertexWeights;
@@ -111,16 +126,25 @@ struct JointWeightData {
 頂点に対して影響を与える(受ける)パラメータ群のこと
 ============================================================== */
 const uint32_t kNumMaxInfluence = 4; // 最大のジョイント影響数
+/**
+ * @brief VertexInfluenceに関するデータを保持する構造体です。
+ */
 struct VertexInfluence {
 	std::array<float, kNumMaxInfluence> weights;			// ウェイト
 	std::array<int32_t, kNumMaxInfluence> jointIndices;		// ジョイントインデックス
 };
 
+/**
+ * @brief WellForGPUに関するデータを保持する構造体です。
+ */
 struct WellForGPU {
 	CalyxEngine::Matrix4x4 skeletonSpaceMatrix;							//位置用
 	CalyxEngine::Matrix4x4 skeletonSpaceInverseTransposeMatrix;			//法線用
 };
 
+/**
+ * @brief SkinClusterに関するデータを保持する構造体です。
+ */
 struct SkinCluster {
 	std::vector<CalyxEngine::Matrix4x4> inverseBindPoseMatrices;
 
@@ -141,6 +165,9 @@ struct SkinCluster {
 	DescriptorHandle paletteSrvDescriptor;
 };
 
+/**
+ * @brief AnimationStateに関するデータを保持する構造体です。
+ */
 struct AnimationState {
 	std::string name;
 	Animation animation;

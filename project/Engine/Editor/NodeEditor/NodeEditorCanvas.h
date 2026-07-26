@@ -15,6 +15,9 @@ namespace CalyxEngine {
 	 * - Node、Pin、Linkの描画と編集イベントの収集を担当する
 	 * - 用途固有の評価処理やGraphリソースの所有は担当しない
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief NodeEditorCanvasの機能を提供するクラスです。
+	 */
 	class NodeEditorCanvas {
 public:
 		/*-----------------------------------------------------------------------------------------
@@ -22,6 +25,9 @@ public:
 		 * - NodeEditorCanvasへ用途固有の接続規則と外観を注入するデータ構造
 		 * - Callbackの呼び出し先とそのライフタイムは所有しない
 		 *---------------------------------------------------------------------------------------*/
+		/**
+		 * @brief Policyに関するデータを保持する構造体です。
+		 */
 		struct Policy {
 			std::function<bool(const NodePin&, const NodePin&)> canConnect;
 			std::function<ImVec4(const Node&)> nodeHeaderColor;
@@ -38,6 +44,9 @@ public:
 		 * - Node Editorから要求されたContext Menuの情報を保持するデータ構造
 		 * - Menu種別、Canvas座標、対象Node IDを呼び出し側へ通知する
 		 *---------------------------------------------------------------------------------------*/
+		/**
+		 * @brief ContextMenuに関するデータを保持する構造体です。
+		 */
 		struct ContextMenu {
 			ContextMenuType type = ContextMenuType::Background;
 			Vector2 canvasPosition{};

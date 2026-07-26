@@ -1,6 +1,9 @@
 #pragma once
 #include <Engine/Objects/3D/Actor/Actor.h>
 
+/**
+ * @brief CalyxHumanの機能を提供するクラスです。
+ */
 class CalyxHuman :
 	public Actor{
 public:

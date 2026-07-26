@@ -40,12 +40,18 @@ namespace CalyxEngine {
 	class SerializableObject;
 }
 
+/**
+ * @brief OutlineSettingsに関するデータを保持する構造体です。
+ */
 struct OutlineSettings {
 	bool				   enabled	 = false;
 	float				   thickness = 0.035f;
 	CalyxEngine::Vector4 color	 = {0.02f, 0.02f, 0.025f, 1.0f};
 };
 
+/**
+ * @brief DrawConfigに関するデータを保持する構造体です。
+ */
 struct DrawConfig {
 	bool drawEnable = true;
 	bool pickable = true;
@@ -59,6 +65,9 @@ struct DrawConfig {
  * - シーンオブジェクト基底クラス
  * - シーン上に配置可能な全オブジェクトの基盤となるクラス
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief SceneObjectの機能を提供するクラスです。
+ */
 class CALYX_API SceneObject
 	: public std::enable_shared_from_this<SceneObject> {
 public:

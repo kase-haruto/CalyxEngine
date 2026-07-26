@@ -6,6 +6,9 @@
 
 namespace CalyxEngine {
 	
+	/**
+	 * @brief SpriteComponentの機能を提供するクラスです。
+	 */
 	class SpriteComponent final
 		: public IComponent {
 	public:

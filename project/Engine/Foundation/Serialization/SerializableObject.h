@@ -20,6 +20,9 @@ namespace CalyxEngine {
 		Editor,
 	};
 
+	/**
+	 * @brief ParamPathに関するデータを保持する構造体です。
+	 */
 	struct ParamPath {
 		ParamDomain domain;
 		std::string name;
@@ -32,6 +35,9 @@ namespace CalyxEngine {
 	 * - シリアライズ可能オブジェクト基底クラス
 	 * - メンバ変数を保存対象として登録し、外部ファイルとの同期を管理するクラス
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief SerializableObjectの機能を提供するクラスです。
+	 */
 	class CALYX_API SerializableObject {
 	public:
 		/**

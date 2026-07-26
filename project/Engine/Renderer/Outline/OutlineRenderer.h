@@ -14,6 +14,9 @@ class IRenderTarget;
 class PipelineService;
 class SceneObject;
 
+/**
+ * @brief OutlineRendererの機能を提供するクラスです。
+ */
 class OutlineRenderer {
 public:
 	void Render(ID3D12GraphicsCommandList* cmdList,
@@ -38,6 +41,9 @@ public:
 								  const std::vector<SceneObject*>& selectedObjects);
 
 private:
+	/**
+	 * @brief CompositeConstantsに関するデータを保持する構造体です。
+	 */
 	struct CompositeConstants {
 		CalyxEngine::Vector4 color = {0.02f, 0.02f, 0.025f, 1.0f};
 		CalyxEngine::Vector2 texelSize = {1.0f, 1.0f};
@@ -50,6 +56,9 @@ private:
 		CalyxEngine::Vector4 padding = {0.0f, 0.0f, 0.0f, 0.0f};
 	};
 
+	/**
+	 * @brief StaticBatchに関するデータを保持する構造体です。
+	 */
 	struct StaticBatch {
 		BaseModel*						   model = nullptr;
 		std::vector<WorldTransform>		   transforms;

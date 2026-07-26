@@ -11,6 +11,9 @@ namespace CalyxEngine {
 
 	// Base class for effects that cover the old scene, then reveal the new scene.
 	// Game projects can derive from this class and supply their own Update/Draw hooks.
+	/**
+	 * @brief BaseSceneTransitionEffectの機能を提供するクラスです。
+	 */
 	class CALYX_API BaseSceneTransitionEffect {
 	public:
 		explicit BaseSceneTransitionEffect(float duration = 0.5f);

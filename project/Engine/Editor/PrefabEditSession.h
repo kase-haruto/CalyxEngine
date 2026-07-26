@@ -13,6 +13,9 @@ namespace CalyxEngine {
 
 	class SceneManager;
 
+	/**
+	 * @brief PrefabEditSessionの機能を提供するクラスです。
+	 */
 	class PrefabEditSession {
 	public:
 		void Ensure();

@@ -27,6 +27,9 @@ namespace CalyxEngine {
 	 *	ShadowCBData
 	 *	- シャドウマップ用定数バッファデータ
 	 *---------------------------------------------------------------------*/
+	/**
+	 * @brief ShadowCBDataに関するデータを保持する構造体です。
+	 */
 	struct ShadowCBData {
 		CalyxEngine::Matrix4x4 lightVP;
 		float shadowBias = 0.001f;
@@ -37,6 +40,9 @@ namespace CalyxEngine {
 	 *	shadowMapSystem
 	 *	- シャドウマップシステム
 	 *---------------------------------------------------------------------*/
+	/**
+	 * @brief ShadowMapSystemの機能を提供するクラスです。
+	 */
 	class ShadowMapSystem {
 	public:
 		//===================================================================*/

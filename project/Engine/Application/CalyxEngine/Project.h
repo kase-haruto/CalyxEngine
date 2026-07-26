@@ -14,6 +14,9 @@ namespace Calyx {
 	 * - プロジェクトルート、アセット配置、ゲームモジュールと起動構成を管理する
 	 * - ファイルの読み書きやアセットのロード処理は担当しない
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief ProjectInfoに関するデータを保持する構造体です。
+	 */
 	struct CALYX_API ProjectInfo {
 		std::string			  name;
 		std::string			  engineVersion;
@@ -38,6 +41,9 @@ namespace Calyx {
 	 * - 最近使用したプロジェクト一覧へ保存する軽量データ構造
 	 * - 表示名、Engineバージョン、プロジェクトファイルの場所を保持する
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief RecentProjectEntryに関するデータを保持する構造体です。
+	 */
 	struct CALYX_API RecentProjectEntry {
 		std::string			  name;
 		std::string			  engineVersion;
@@ -50,6 +56,9 @@ namespace Calyx {
 	 * - ProjectRoot / ResourcesRoot / AssetRoot / SceneRoot を提供する。
 	 * - ゲーム固有アセットの中身やロード処理は管理しない。
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief ProjectContextの機能を提供するクラスです。
+	 */
 	class CALYX_API ProjectContext {
 	public:
 		/**
@@ -112,6 +121,9 @@ namespace Calyx {
 	 * - 旧形式の "Resources/Assets/..." 入力も受け取り、AssetRoot 相対へ正規化する。
 	 * - アセット種別の判定やファイル内容のロードは行わない。
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief AssetPathResolverの機能を提供するクラスです。
+	 */
 	class CALYX_API AssetPathResolver {
 	public:
 		/**

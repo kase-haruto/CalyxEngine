@@ -6,6 +6,9 @@
 namespace CalyxEngine {
 
 	// 一定加速度を速度へ積分するUpdate Module。Particle位置や描画資源は管理しない。
+	/**
+	 * @brief AccelerationModuleの機能を提供するクラスです。
+	 */
 	class AccelerationModule final : public BaseFxModule {
 	public:
 		explicit AccelerationModule(const std::string& name = "AccelerationModule") : BaseFxModule(name) {}
@@ -19,6 +22,9 @@ namespace CalyxEngine {
 	};
 
 	// 指数減衰で速度を減衰するUpdate Module。フレーム単位の係数は保持しない。
+	/**
+	 * @brief DragModuleの機能を提供するクラスです。
+	 */
 	class DragModule final : public BaseFxModule {
 	public:
 		explicit DragModule(const std::string& name = "DragModule") : BaseFxModule(name) {}

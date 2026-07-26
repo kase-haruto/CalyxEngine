@@ -14,6 +14,9 @@ namespace CalyxEngine {
 	 * - CPUパーティクル1個分のデータ構造体
 	 * - 位置・速度・寿命・色・スケール等のパーティクル情報を保持
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief FxUnitに関するデータを保持する構造体です。
+	 */
 	struct FxUnit {
 		Vector3 position;                        //< 座標
 		Vector3 rotationEuler;                   //< オイラー回転
@@ -44,6 +47,9 @@ namespace CalyxEngine {
 	 * - GPUパーティクル用のデータ構造体
 	 * - ComputeShader向けにアライメントされたパーティクル情報
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief ParticleCSに関するデータを保持する構造体です。
+	 */
 	struct ParticleCS {
 		Vector3 translate;
 		Vector3 scale;

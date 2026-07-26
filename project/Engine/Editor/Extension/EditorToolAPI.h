@@ -19,6 +19,9 @@ namespace CalyxEditor {
 
 	inline constexpr std::uint32_t kEditorToolApiVersion = 2;
 
+	/**
+	 * @brief EditorToolContextに関するデータを保持する構造体です。
+	 */
 	struct EditorToolContext {
 		const Calyx::ProjectInfo* project = nullptr;
 		CalyxEngine::SceneManager* sceneManager = nullptr;
@@ -40,6 +43,9 @@ namespace CalyxEditor {
 		}
 	};
 
+	/**
+	 * @brief IEditorToolの機能を提供するクラスです。
+	 */
 	class IEditorTool {
 	public:
 		virtual ~IEditorTool() = default;
@@ -57,6 +63,9 @@ namespace CalyxEditor {
 
 	// DLL boundary descriptor. Strings are copied by the engine during registration.
 	// create and destroy must both point to functions in the registering module.
+	/**
+	 * @brief EditorToolDescriptorに関するデータを保持する構造体です。
+	 */
 	struct EditorToolDescriptor {
 		const char* id = nullptr;
 		const char* displayName = nullptr;
@@ -67,6 +76,9 @@ namespace CalyxEditor {
 		DestroyEditorToolFn destroy = nullptr;
 	};
 
+	/**
+	 * @brief IEditorHostの機能を提供するクラスです。
+	 */
 	class IEditorHost {
 	public:
 		virtual ~IEditorHost() = default;

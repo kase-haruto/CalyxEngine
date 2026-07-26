@@ -6,6 +6,9 @@
 namespace CalyxEngine {
 
 	// Lifetime CurveをCPU Particleへ適用するRuntime Module。編集データや描画リソースは所有しない。
+	/**
+	 * @brief LifetimeModuleの機能を提供するクラスです。
+	 */
 	class LifetimeModule final : public BaseFxModule {
 	public:
 		explicit LifetimeModule(const LifetimeModuleConfig& config);

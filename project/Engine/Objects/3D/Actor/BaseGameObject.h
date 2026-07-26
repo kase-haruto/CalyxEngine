@@ -26,6 +26,9 @@
  * - Transform、モデル参照、Collider、描画設定などの共通機能を管理する
  * - シーン保存対象、Editor配置一覧、Prefab対象かどうかは管理しない
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief BaseGameObjectの機能を提供するクラスです。
+ */
 class CALYX_API BaseGameObject
 	: public SceneObject,
 	  public IConfigurable {
@@ -319,6 +322,9 @@ public:
 	 * - Editorへ公開するボーン親子付け情報の読み取り専用スナップショット
 	 * - 対象Transformを所有せず、ボーン名と拡大率継承設定を保持
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief BoneParentBindingInfoに関するデータを保持する構造体です。
+	 */
 	struct BoneParentBindingInfo {
 		const WorldTransform* target = nullptr; //< 所有権を持たない親子付け対象Transform
 		std::string boneName;                   //< 親として使用するスケルトンのボーン名
@@ -358,6 +364,9 @@ protected:
 	 * - ボーン行列をWorldTransformの親として公開する内部Transform
 	 * - GPUリソースを所有せず、BaseGameObjectが計算した行列を保持
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief BoneParentTransformの機能を提供するクラスです。
+	 */
 	class BoneParentTransform : public BaseTransform {
 	public:
 		/** \brief ボーンから計算したワールド行列を設定する \param world 設定するワールド行列 */

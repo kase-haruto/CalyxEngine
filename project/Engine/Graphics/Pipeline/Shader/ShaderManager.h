@@ -13,6 +13,9 @@
 #include <unordered_map>
 #include <wrl.h>
 
+/**
+ * @brief ShaderManagerの機能を提供するクラスです。
+ */
 class ShaderManager {
 public:
 	//===================================================================*/

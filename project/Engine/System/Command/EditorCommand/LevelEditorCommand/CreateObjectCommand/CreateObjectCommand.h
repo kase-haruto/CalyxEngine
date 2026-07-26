@@ -5,6 +5,9 @@
 #include <memory>
 
 template <class TObject>
+/**
+ * @brief CreateObjectCommandの機能を提供するクラスです。
+ */
 class CreateObjectCommand final
 	: public BaseLevelEditorCommand {
 public:

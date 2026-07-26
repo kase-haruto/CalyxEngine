@@ -9,6 +9,9 @@
 namespace CalyxEngine {
 
 	// Emitter単位の決定論的乱数列。グローバル乱数状態やGPUリソースは管理しない。
+	/**
+	 * @brief DeterministicRandomStreamの機能を提供するクラスです。
+	 */
 	class DeterministicRandomStream {
 	public:
 		explicit DeterministicRandomStream(uint32_t seed = 1u) { Reset(seed); }

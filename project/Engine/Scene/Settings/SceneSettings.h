@@ -9,6 +9,9 @@
  * - SceneObjectではなくシーン全体に作用する設定を所有するルートコンテナ。
  * - 今後Rendering、Audio、Navigation等を追加する場合も、このクラスへカテゴリを追加する。
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief SceneSettingsの機能を提供するクラスです。
+ */
 class SceneSettings {
 public:
 	CollisionLayerSettings& GetCollisionSettings() { return collisionSettings_; }

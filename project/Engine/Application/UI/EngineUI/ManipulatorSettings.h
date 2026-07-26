@@ -4,6 +4,9 @@
 
 namespace CalyxEngine {
 
+	/**
+	 * @brief ManipulatorSettingsに関するデータを保持する構造体です。
+	 */
 	struct ManipulatorSettings {
 		bool  useSnap = false;
 		float snapTranslate[3] = {1.0f, 1.0f, 1.0f};

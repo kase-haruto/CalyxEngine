@@ -12,6 +12,9 @@ namespace CalyxEngine {
 	 * - SceneObjectではない、再利用可能なエフェクト定義データ
 	 * - FxObjectなどの編集用オブジェクトから書き出し、EffectPlayerが実行時に読む
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief EffectAssetの機能を提供するクラスです。
+	 */
 	class EffectAsset {
 	public:
 		EffectAsset() = default;

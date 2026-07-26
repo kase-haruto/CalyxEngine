@@ -14,6 +14,9 @@
  * - Effect設定の保持、定数バッファ転送、Fullscreen描画を担当する
  * - PipelineとRenderTargetの生成および所有は担当しない
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief Vignetteの機能を提供するクラスです。
+ */
 class Vignette :
 	public IPostEffectPass {
 private:
@@ -26,6 +29,9 @@ private:
 	 * - Vignette Shaderへ転送する定数バッファ用データ構造
 	 * - 強度、効果半径、周辺色とGPUアラインメント用領域を保持する
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief VignetteParameterに関するデータを保持する構造体です。
+	 */
 	struct VignetteParameter {
 		float strength = 0.8f;  // 暗くする強さ (0.0 ～ 1.0)
 		float radius = 0.85f;   // 暗くなり始める位置 (0.0 ～ 1.0)

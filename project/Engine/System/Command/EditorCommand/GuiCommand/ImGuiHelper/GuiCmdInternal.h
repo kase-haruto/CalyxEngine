@@ -15,6 +15,9 @@
 namespace GuiCmdInternal{
 
 	template<typename T>
+	/**
+	 * @brief GuiCmdSetValueComputerの機能を提供するクラスです。
+	 */
 	class GuiCmdSetValueComputer{
 	public:
 		void Begin(const T& initial);

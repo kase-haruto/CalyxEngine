@@ -18,6 +18,9 @@ enum class LineDepthMode {
 	NoDepthTest,
 };
 
+/**
+ * @brief PrimitiveDrawerの機能を提供するクラスです。
+ */
 class PrimitiveDrawer{
 public:
 	static PrimitiveDrawer* GetInstance();

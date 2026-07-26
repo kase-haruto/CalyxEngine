@@ -10,6 +10,9 @@ namespace CalyxEngine{
 	/* ========================================================================
 	/*	ライフタイムに応じてパーティクルのサイズを変化させるモジュール
 	/* ===================================================================== */
+	/**
+	 * @brief SizeOverLiftimeModuleの機能を提供するクラスです。
+	 */
 	class SizeOverLiftimeModule
 		: public CalyxEngine::BaseFxModule {
 	public:

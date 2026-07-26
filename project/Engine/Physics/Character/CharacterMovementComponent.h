@@ -24,6 +24,9 @@ enum class CharacterMovementMode {
  * - CharacterMovementComponent が床探索で得た結果
  * - Unreal の FFindFloorResult に寄せ、床として使えるかと距離を分けて持つ
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief FindFloorResultに関するデータを保持する構造体です。
+ */
 struct CALYX_API FindFloorResult {
 	bool blockingHit = false;		   //< 何らかの地形に当たったか
 	bool walkableFloor = false;		   //< 歩行可能な床として扱えるか
@@ -38,6 +41,9 @@ struct CALYX_API FindFloorResult {
  * - キャラクター専用の移動補助コンポーネント
  * - 床探索、接地状態、重力、床へのスナップを担当する
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief CharacterMovementComponentの機能を提供するクラスです。
+ */
 class CALYX_API CharacterMovementComponent {
 public:
 	CharacterMovementComponent();
@@ -173,6 +179,9 @@ private:
 
 	CalyxEngine::Vector3 pendingInput_{};  //< 次のTickで消費する水平移動入力
 
+	/**
+	 * @brief CharacterMovementDefautlParamに関するデータを保持する構造体です。
+	 */
 	struct CharacterMovementDefautlParam :CalyxEngine::SerializableObject{
 		CharacterMovementDefautlParam() {
 			AddField("gravity", gravity_).Category("Movement").Tooltip("落下時の重力加速度");

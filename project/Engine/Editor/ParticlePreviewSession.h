@@ -11,6 +11,9 @@ namespace CalyxEngine {
 
 	class FxObject;
 
+	/**
+	 * @brief ParticlePreviewSessionの機能を提供するクラスです。
+	 */
 	class ParticlePreviewSession {
 	public:
 		void Ensure();

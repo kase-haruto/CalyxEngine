@@ -10,6 +10,9 @@
  * - Scale、Rotation、Translationの取得、比較、復元を担当する
  * - Transform本体の所有権は持たない
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief TransformSnapshotに関するデータを保持する構造体です。
+ */
 struct TransformSnapshot {
 public:
 	static TransformSnapshot FromTransform(const WorldTransform* tf);

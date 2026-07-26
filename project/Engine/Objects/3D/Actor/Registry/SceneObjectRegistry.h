@@ -40,6 +40,9 @@ std::shared_ptr<SceneObject> CreateSceneObject() {
 	return std::make_shared<T>();
 }
 
+/**
+ * @brief SceneObjectClassDescに関するデータを保持する構造体です。
+ */
 struct SceneObjectClassDesc {
 	std::string typeName;
 	std::string displayName;
@@ -60,6 +63,9 @@ struct SceneObjectClassDesc {
  * - オブジェクト型の生成関数と登録属性を管理する
  * - 各オブジェクトのライフタイムやシーンインスタンスは管理しない
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief SceneObjectRegistryの機能を提供するクラスです。
+ */
 class SceneObjectRegistry{
 public:
 	CALYX_API static SceneObjectRegistry& Get();

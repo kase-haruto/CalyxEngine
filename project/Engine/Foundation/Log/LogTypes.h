@@ -31,6 +31,9 @@ namespace CalyxEngine {
 	 * - EngineLogger が保持するログ一件分のデータ
 	 * - UIに依存せず、将来のファイル出力や外部出力でも共用する
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief LogEntryに関するデータを保持する構造体です。
+	 */
 	struct LogEntry {
 		std::uint64_t id = 0;
 		LogLevel level = LogLevel::Info;

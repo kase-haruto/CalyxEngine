@@ -8,6 +8,9 @@
 #include <array>
 #include <variant>
 
+/**
+ * @brief OBBに関するデータを保持する構造体です。
+ */
 struct OBB{
 	CalyxEngine::Vector3 size;
 	CalyxEngine::Quaternion rotate;
@@ -19,6 +22,9 @@ struct OBB{
 	void Draw();
 };
 
+/**
+ * @brief Sphereに関するデータを保持する構造体です。
+ */
 struct Sphere{
 	CalyxEngine::Vector3 center;
 	float radius;
@@ -31,6 +37,9 @@ struct Sphere{
  * - ローカルY軸を中心軸とするカプセル形状
  * - height は半球を含めた全体高さとして扱う
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief Capsuleに関するデータを保持する構造体です。
+ */
 struct Capsule {
 	CalyxEngine::Vector3 center;
 	CalyxEngine::Quaternion rotate;

@@ -12,6 +12,9 @@
  * - コマンドマネージャークラス
  * - Undo/Redoスタックの管理とコマンドの実行・履歴管理を担当
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief CommandManagerの機能を提供するクラスです。
+ */
 class CommandManager {
 public:
 	static CommandManager* GetInstance();

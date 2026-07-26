@@ -12,12 +12,18 @@ namespace CalyxEngine {
 	/* ========================================================================
 	/*		uvアニメーションを行うモジュール
 	/* ===================================================================== */
+	/**
+	 * @brief TextureSheetAnimationModuleの機能を提供するクラスです。
+	 */
 	class TextureSheetAnimationModule
 		: public BaseFxModule {
 	public:
 		//===================================================================*/
 		//					structs
 		//===================================================================*/
+		/**
+		 * @brief FrameUVに関するデータを保持する構造体です。
+		 */
 		struct FrameUV {
 			CalyxEngine::Vector2 offset;
 			CalyxEngine::Vector2 scale;

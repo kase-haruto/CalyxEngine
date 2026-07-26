@@ -3,6 +3,9 @@
 #include <string>
 
 namespace CalyxEngine {
+	/**
+	 * @brief SpriteAssetの機能を提供するクラスです。
+	 */
 	class SpriteAsset {
 	public:
 		//===================================================================*/

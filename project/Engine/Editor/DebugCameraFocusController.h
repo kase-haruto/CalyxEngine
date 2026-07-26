@@ -8,6 +8,9 @@ class SceneObject;
 
 namespace CalyxEngine {
 
+	/**
+	 * @brief DebugCameraFocusControllerの機能を提供するクラスです。
+	 */
 	class DebugCameraFocusController {
 	public:
 		void StartFocus(DebugCamera* camera, const std::shared_ptr<SceneObject>& object);

@@ -10,6 +10,9 @@ class SceneObjectLibrary;
 
 namespace CalyxEngine {
 
+	/**
+	 * @brief HierarchyTreeCacheの機能を提供するクラスです。
+	 */
 	class HierarchyTreeCache {
 	public:
 		void MarkDirty() { dirty_ = true; }

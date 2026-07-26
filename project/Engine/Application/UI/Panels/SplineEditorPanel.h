@@ -18,6 +18,9 @@ namespace CalyxEngine {
 	 * - スプラインエディタパネルクラス
 	 * - スプラインの制御点編集・プレビュー描画を提供
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief SplineEditorPanelの機能を提供するクラスです。
+	 */
 	class SplineEditorPanel
 		: public IEngineUI
 		, public BaseOnViewportTool {

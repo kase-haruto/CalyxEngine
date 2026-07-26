@@ -7,6 +7,9 @@
 /*		include space
 /* ===================================================================== */
 
+/**
+ * @brief CameraTurnAroundActionの機能を提供するクラスです。
+ */
 class CameraTurnAroundAction
 	: public BaseCameraAction {
 public:

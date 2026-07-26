@@ -8,6 +8,9 @@ namespace CalyxEngine {
 	 * - HUDのモーション開始・終了値、時間、イージングをまとめた構造体
 	 *---------------------------------------------------------------------------------------*/
 	template<typename T>
+	/**
+	 * @brief HudMotionDescに関するデータを保持する構造体です。
+	 */
 	struct HudMotionDesc {
 		T start{};
 		T end{};

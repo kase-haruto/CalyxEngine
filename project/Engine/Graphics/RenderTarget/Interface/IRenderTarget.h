@@ -6,6 +6,9 @@
 #include <d3d12.h>
 
 
+/**
+ * @brief IRenderTargetの機能を提供するクラスです。
+ */
 class IRenderTarget {
 public:
 	virtual ~IRenderTarget()																	= default;

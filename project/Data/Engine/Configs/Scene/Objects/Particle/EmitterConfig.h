@@ -24,6 +24,9 @@ namespace CalyxEngine {
 	 * - Offset、Tiling、Scroll速度、回転角を保存する
 	 * - Editor UIやGPUリソースそのものは管理しない
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief ParticleUVSettingsに関するデータを保持する構造体です。
+	 */
 	struct ParticleUVSettings {
 		Vector2 offset{0.0f,0.0f};       //< UVの固定オフセット
 		Vector2 tiling{1.0f,1.0f};       //< UVの拡大率
@@ -38,6 +41,9 @@ namespace CalyxEngine {
 	 * - Particle生成時の射出方向と速度を保持する設定データ構造
 	 * - 方向への姿勢追従を行うかどうかも管理する
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief DirectionConfigに関するデータを保持する構造体です。
+	 */
 	struct DirectionConfig {
 		bool enabled = false;
 		Vector3ParamConfig vector;
@@ -115,6 +121,9 @@ namespace CalyxEngine {
 	 * - Transform、生成属性、描画Asset、Noise、Trail、Module設定を管理する
 	 * - Runtime Particle、Descriptor、GPU Bufferの所有は担当しない
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief EmitterConfigに関するデータを保持する構造体です。
+	 */
 	struct EmitterConfig {
 		Vector3 offset;
 		CalyxEngine::Vector3 position{};

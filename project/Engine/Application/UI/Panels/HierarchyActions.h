@@ -8,6 +8,9 @@ class SceneObject;
 
 namespace CalyxEngine {
 
+	/**
+	 * @brief IHierarchyActionsの機能を提供するクラスです。
+	 */
 	class IHierarchyActions {
 	public:
 		virtual ~IHierarchyActions() = default;
@@ -20,6 +23,9 @@ namespace CalyxEngine {
 		virtual void FocusObject(std::shared_ptr<SceneObject> object) = 0;
 	};
 
+	/**
+	 * @brief CallbackHierarchyActionsの機能を提供するクラスです。
+	 */
 	class CallbackHierarchyActions final
 		: public IHierarchyActions {
 	public:

@@ -10,11 +10,17 @@ class SceneObject;
 
 namespace CalyxEngine {
 
+	/**
+	 * @brief SceneObjectDuplicateResultに関するデータを保持する構造体です。
+	 */
 	struct SceneObjectDuplicateResult {
 		std::vector<std::shared_ptr<SceneObject>> selectedRoots;
 		std::vector<Guid> rootGuids;
 	};
 
+	/**
+	 * @brief SceneObjectDuplicatorの機能を提供するクラスです。
+	 */
 	class SceneObjectDuplicator {
 	public:
 		static bool IsDuplicatable(const SceneObject* object);

@@ -12,6 +12,9 @@
  * PostEffectManager::PlayTriggeredEffect/PostEffectAPI::PlayTriggered.
  */
 CALYX_PLACEABLE_OBJECT(Category = Event, DisplayName = "Post Effect Event")
+/**
+ * @brief PostEffectEventの機能を提供するクラスです。
+ */
 class PostEffectEvent : public BaseEventObject {
 public:
 	PostEffectEvent();

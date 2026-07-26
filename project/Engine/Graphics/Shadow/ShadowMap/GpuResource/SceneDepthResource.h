@@ -10,6 +10,9 @@ namespace CalyxEngine {
 	 * - Depth Resource生成、Resource State遷移、書込み時のBindingを担当する
 	 * - Command ListとDeviceの所有権は持たない
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief SceneDepthResourceの機能を提供するクラスです。
+	 */
 	class SceneDepthResource {
 	public:
 		void Initialize(ID3D12Device* device, uint32_t w, uint32_t h) ;

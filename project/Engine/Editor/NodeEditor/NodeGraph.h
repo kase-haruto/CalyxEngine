@@ -31,6 +31,9 @@ namespace CalyxEngine {
 	 * - 汎用Node Graphの入出力端子を表すデータ構造
 	 * - 一意ID、表示名、入出力方向、接続互換性を判定する型IDを保持する
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief NodePinに関するデータを保持する構造体です。
+	 */
 	struct NodePin {
 		int32_t id = 0;
 		std::string name;
@@ -48,6 +51,9 @@ namespace CalyxEngine {
 	 * - 入出力ピン、Canvas座標、用途固有プロパティを保持する
 	 * - Node固有の評価処理やEditor描画は管理しない
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief Nodeに関するデータを保持する構造体です。
+	 */
 	struct Node {
 		int32_t id = 0;
 		std::string type;
@@ -79,6 +85,9 @@ namespace CalyxEngine {
 	 * - 出力ピンから入力ピンへの接続を表すデータ構造
 	 * - Link自身のIDと接続先ピンIDを保持する
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief NodeLinkに関するデータを保持する構造体です。
+	 */
 	struct NodeLink {
 		int32_t id = 0;
 		int32_t fromPinId = 0;
@@ -91,6 +100,9 @@ namespace CalyxEngine {
 	 * - 要素検索とNode、Pin、Linkで共有する一意IDの発行を担当する
 	 * - 用途固有の接続規則や実行順序は管理しない
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief NodeGraphに関するデータを保持する構造体です。
+	 */
 	struct NodeGraph {
 		std::vector<Node> nodes;
 		std::vector<NodeLink> links;

@@ -12,10 +12,16 @@
  * - イベントバスクラス
  * - 型安全なイベントの発行・購読機能とRAII形式の接続管理を提供
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief EventBusの機能を提供するクラスです。
+ */
 class EventBus{
 private:
 	// 消去型ハンドラ
 	using ErasedFn = std::function<void(const void*)>;
+	/**
+	 * @brief HandlerEntryに関するデータを保持する構造体です。
+	 */
 	struct HandlerEntry{
 		size_t   id;
 		ErasedFn fn;
@@ -29,6 +35,9 @@ public:
 	 * - 破棄時に対応するHandler登録を解除する
 	 * - EventBus本体や購読先オブジェクトの所有権は持たない
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief Connectionの機能を提供するクラスです。
+	 */
 	class Connection{
 	public:
 		Connection() = default;
@@ -108,6 +117,9 @@ class SceneContext;
  * - SceneへObjectが追加されたことを通知するEventデータ構造
  * - 追加Objectの共有参照と所有Sceneへの非所有参照を保持する
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief ObjectAddedに関するデータを保持する構造体です。
+ */
 struct ObjectAdded{
 	std::shared_ptr<class SceneObject> sp;
 	SceneContext* owner = nullptr;
@@ -117,6 +129,9 @@ struct ObjectAdded{
  * - SceneからObjectが削除されたことを通知するEventデータ構造
  * - 削除Objectの共有参照と元の所有Sceneへの非所有参照を保持する
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief ObjectRemovedに関するデータを保持する構造体です。
+ */
 struct ObjectRemoved{
 	std::shared_ptr<class SceneObject> sp;
 	SceneContext* owner = nullptr;

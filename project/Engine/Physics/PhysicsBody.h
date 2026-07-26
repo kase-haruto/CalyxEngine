@@ -19,6 +19,9 @@ enum class PhysicsBodyType {
  * - SceneObject に付与する軽量な物理応答設定
  * - Collider は形状と検出、PhysicsBody は押し戻し可否と移動種別を担当する
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief PhysicsBodyの機能を提供するクラスです。
+ */
 class PhysicsBody {
 public:
 	/**

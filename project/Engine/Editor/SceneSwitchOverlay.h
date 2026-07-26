@@ -8,6 +8,9 @@ namespace CalyxEngine {
 	 * - シーン切り替えオーバーレイ
 	 * - 登録されたシーンをツールバー形式で表示し、即座に切り替えを可能にする
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief SceneSwitchOverlayの機能を提供するクラスです。
+	 */
 	class SceneSwitchOverlay {
 	public:
 		void SetSceneManager(CalyxEngine::SceneManager* manager) { sceneManager_ = manager; }

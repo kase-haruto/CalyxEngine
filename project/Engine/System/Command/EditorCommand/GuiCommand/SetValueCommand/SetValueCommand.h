@@ -7,6 +7,9 @@
 
 
 template<typename T>
+/**
+ * @brief SetValueCommandの機能を提供するクラスです。
+ */
 class SetValueCommand 
 	: public ICommand{
 public:

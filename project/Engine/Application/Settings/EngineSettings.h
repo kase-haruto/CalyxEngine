@@ -5,6 +5,9 @@
 
 namespace CalyxEngine {
 
+	/**
+	 * @brief EngineSettingsの機能を提供するクラスです。
+	 */
 	class EngineSettings {
 	public:
 		enum class Category {

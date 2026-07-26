@@ -10,6 +10,9 @@
 #include <wrl.h>
 #include <memory>
 
+/**
+ * @brief PipelineStateObjectの機能を提供するクラスです。
+ */
 class PipelineStateObject {
 public:
 	PipelineStateObject() = default;

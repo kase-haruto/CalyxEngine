@@ -3,6 +3,9 @@
 #include <d3d12.h>
 #include <cstdint>
 
+/**
+ * @brief PipelineSetに関するデータを保持する構造体です。
+ */
 struct PipelineSet {
 	ID3D12PipelineState* pipelineState;
 	ID3D12RootSignature* rootSignature;

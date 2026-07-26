@@ -10,6 +10,9 @@ class SceneObject;
 
 namespace CalyxEngine {
 
+	/**
+	 * @brief KeyframePanelの機能を提供するクラスです。
+	 */
 	class KeyframePanel : public IEngineUI {
 	public:
 		KeyframePanel();

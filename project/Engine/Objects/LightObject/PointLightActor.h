@@ -16,6 +16,9 @@ class PointLight;
  * - pointLightを所有しているオブジェクト
  * - meshを持つオブジェクトがポイントライトを使用したいときに使う
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief PointLightActorの機能を提供するクラスです。
+ */
 class PointLightActor
 	: public Actor {
 public:

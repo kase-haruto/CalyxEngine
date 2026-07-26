@@ -32,6 +32,9 @@ enum class RotationSource {
  * - TransformからGPUへ転送する行列を保持する定数バッファ用データ構造
  * - ワールド行列と法線変換用の逆転置行列を管理
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief TransformationMatrixに関するデータを保持する構造体です。
+ */
 struct TransformationMatrix {
 	CalyxEngine::Matrix4x4 world				   = CalyxEngine::Matrix4x4::MakeIdentity(); //< ワールド行列
 	CalyxEngine::Matrix4x4 WorldInverseTranspose = CalyxEngine::Matrix4x4::MakeIdentity(); //< ワールド逆転置行列
@@ -41,6 +44,9 @@ struct TransformationMatrix {
  * EulerTransform
  * - オイラー角ベースのトランスフォーム構造体
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief EulerTransformに関するデータを保持する構造体です。
+ */
 struct EulerTransform {
 	CalyxEngine::Vector3 scale;	  //< スケール
 	CalyxEngine::Vector3 rotate;	  //< 回転(オイラー角)
@@ -66,6 +72,9 @@ struct EulerTransform {
  * Transform2D
  * - 2D空間のトランスフォーム構造体
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief Transform2Dに関するデータを保持する構造体です。
+ */
 struct Transform2D {
 	CalyxEngine::Vector2 scale;	  //< スケール
 	float			   rotate;	  //< 回転
@@ -112,6 +121,9 @@ struct Transform2D {
  * - Quaternion回転を使用する基本的な3D配置を保持するデータ構造
  * - 拡大率、回転、座標をまとめて管理
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief QuaternionTransformに関するデータを保持する構造体です。
+ */
 struct QuaternionTransform {
 	CalyxEngine::Vector3	  scale;	 //< スケール
 	CalyxEngine::Quaternion rotate;	 //< 回転(クォータニオン)
@@ -123,6 +135,9 @@ struct QuaternionTransform {
  * - トランスフォーム基底クラス
  * - 定数バッファとの同期、親子関係の管理、行列計算を行う
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief BaseTransformの機能を提供するクラスです。
+ */
 class CALYX_API BaseTransform : public DxConstantBuffer<TransformationMatrix> {
 public:
 	//========================================================================*/
@@ -203,6 +218,9 @@ protected:
  * WorldTransform
  * - ワールド空間のトランスフォームクラス
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief WorldTransformの機能を提供するクラスです。
+ */
 class CALYX_API WorldTransform : public BaseTransform {
 public:
 	//========================================================================*/

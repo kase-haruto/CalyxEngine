@@ -17,6 +17,9 @@ namespace CalyxEngine {
 	 * - エディタ一覧パネルクラス
 	 * - 登録されたエディタの表示・選択機能を提供
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief EditorPanelの機能を提供するクラスです。
+	 */
 	class EditorPanel
 		: public IEngineUI {
 		using OnEditorSelectedCallback = std::function<void(BaseEditor*)>;

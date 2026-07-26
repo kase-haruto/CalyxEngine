@@ -49,6 +49,9 @@ using Microsoft::WRL::ComPtr;
  * ChunkHeader
  * - RIFFチャンクの識別子とデータサイズを保持するファイル読込用構造体
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief ChunkHeaderに関するデータを保持する構造体です。
+ */
 struct ChunkHeader {
 	char id[4];  //< 4文字のRIFFチャンク識別子
 	int32_t size; //< 後続チャンクデータのバイト数
@@ -58,6 +61,9 @@ struct ChunkHeader {
  * RiffHeader
  * - WAVファイル先頭のRIFFヘッダーを保持するファイル読込用構造体
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief RiffHeaderに関するデータを保持する構造体です。
+ */
 struct RiffHeader {
 	ChunkHeader chunk; //< RIFF全体のチャンク情報
 	char type[4];      //< 4文字のファイル形式識別子
@@ -67,6 +73,9 @@ struct RiffHeader {
  * FormatChunk
  * - WAVの波形フォーマットチャンクを保持するファイル読込用構造体
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief FormatChunkに関するデータを保持する構造体です。
+ */
 struct FormatChunk {
 	ChunkHeader chunk; //< fmtチャンク情報
 	WAVEFORMATEX fmt;  //< XAudio2へ渡す波形フォーマット
@@ -80,6 +89,9 @@ struct FormatChunk {
  * - デコード済み音声の波形形式とPCMバイト列を保持するデータ構造
  * - SourceVoice自体の所有権は管理しない
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief SoundDataに関するデータを保持する構造体です。
+ */
 struct SoundData {
 	WAVEFORMATEX wfex{};       //< XAudio2 SourceVoice生成用の波形フォーマット
 	std::vector<BYTE> buffer; //< SourceVoiceへ送信するPCMデータ
@@ -89,6 +101,9 @@ struct SoundData {
  * SourceVoiceDeleter
  * - IXAudio2SourceVoiceをDestroyVoiceで解放するunique_ptr用デリータ
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief SourceVoiceDeleterに関するデータを保持する構造体です。
+ */
 struct SourceVoiceDeleter {
 	/** \brief SourceVoiceをXAudio2の規約に従って破棄する \param voice 所有権を解放するSourceVoice */
 	void operator()(IXAudio2SourceVoice* voice) const {

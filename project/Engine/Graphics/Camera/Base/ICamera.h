@@ -13,6 +13,9 @@
 //c++
 #include <wrl.h>
 
+/**
+ * @brief ICameraの機能を提供するクラスです。
+ */
 class ICamera
 	:public SceneObject{
 public:

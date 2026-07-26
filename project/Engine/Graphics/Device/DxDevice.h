@@ -13,6 +13,9 @@ namespace CalyxEngine {
 	 * - DirectX12デバイス管理クラス
 	 * - デバイスの生成、アダプターの選択、機能情報の管理を担当
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief DxDeviceの機能を提供するクラスです。
+	 */
 	class DxDevice {
 		template <class T>
 		using ComPtr = Microsoft::WRL::ComPtr<T>;
@@ -21,6 +24,9 @@ namespace CalyxEngine {
 		 * Capabilities
 		 * - デバイスの機能情報構造体
 		 *---------------------------------------------------------------------------------------*/
+		/**
+		 * @brief Capabilitiesに関するデータを保持する構造体です。
+		 */
 		struct Capabilities {
 			D3D12_RAYTRACING_TIER raytracingTier = D3D12_RAYTRACING_TIER_NOT_SUPPORTED; //< レイトレーシングティア
 			bool shaderModel6_5 = false; //< シェーダーモデル6.5のサポートフラグ

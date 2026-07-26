@@ -12,6 +12,9 @@
 // c++
 #include <unordered_map>
 
+/**
+ * @brief PsoLibraryの機能を提供するクラスです。
+ */
 class PsoLibrary {
 public:
 	//===================================================================*/

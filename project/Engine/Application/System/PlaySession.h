@@ -18,6 +18,9 @@ namespace CalyxEngine {
 	 * - プレイセッション管理クラス
 	 * - ランタイムの実行・停止・再実行・ワンステップ実行を制御
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief PlaySessionの機能を提供するクラスです。
+	 */
 	class PlaySession {
 	public:
 		void Initialize(SceneContext* editorContext);
@@ -56,6 +59,9 @@ namespace CalyxEngine {
 		bool						  exitRequested_ = false;
 		uint64_t					  runtimeGen_	 = 0;
 
+		/**
+		 * @brief IconDataに関するデータを保持する構造体です。
+		 */
 		struct IconData {
 			ImTextureID tex	 = nullptr;
 			ImVec2		size = ImVec2(30, 30);

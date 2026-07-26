@@ -13,6 +13,9 @@ class SceneContext;
 namespace CalyxEngine {
 	class ParticleSystemObject;
 
+	/**
+	 * @brief CreateParticleSystemObjectCommandの機能を提供するクラスです。
+	 */
 	class CreateParticleSystemObjectCommand 
 		: public ICommand {
 	public:

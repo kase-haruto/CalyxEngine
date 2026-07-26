@@ -9,9 +9,15 @@
 
 #include <externals/imgui/imgui.h>
 
+/**
+ * @brief RadialBlurEffectの機能を提供するクラスです。
+ */
 class RadialBlurEffect
 	: public IPostEffectPass {
 private:
+	/**
+	 * @brief BlurParameterに関するデータを保持する構造体です。
+	 */
 	struct BlurParameter {
 		CalyxEngine::Vector2 center; // [0,1] normalized
 		float   width;  // 強度（シェーダー側の扱いに合わせて "width" 名）

@@ -6,10 +6,16 @@
 #include <vector>
 
 
+/**
+ * @brief SplinePointに関するデータを保持する構造体です。
+ */
 struct SplinePoint {
 	CalyxEngine::Vector3 pos{};
 };
 
+/**
+ * @brief SplineSampleに関するデータを保持する構造体です。
+ */
 struct SplineSample {
 	CalyxEngine::Vector3 position{};
 	CalyxEngine::Vector3 tangent{0.0f, 0.0f, 1.0f};
@@ -17,6 +23,9 @@ struct SplineSample {
 	float				 distance = 0.0f;
 };
 
+/**
+ * @brief SplineDataの機能を提供するクラスです。
+ */
 class SplineData {
 public:
 	// 基本データ

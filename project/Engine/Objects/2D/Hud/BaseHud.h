@@ -11,6 +11,9 @@ namespace CalyxEngine {
 	 * - HUD状態の開始、更新、終了処理を定義するインターフェース
 	 * - HUDの描画リソースとモーションの所有権は管理しない
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief IHudStateの機能を提供するクラスです。
+	 */
 	class IHudState {
 	public:
 		/** \brief HUD状態の基底デストラクタ */
@@ -44,6 +47,9 @@ namespace CalyxEngine {
 	 * - HUDの状態遷移、モーション適用、スプライト描画を担当する基底クラス
 	 * - 状態固有処理はIHudState、補間処理はHudMotionへ委譲
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief BaseHudの機能を提供するクラスです。
+	 */
 	class BaseHud {
 	public:
 		enum class HudPhase { Enter, Stay, Exit, End };

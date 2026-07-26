@@ -14,6 +14,9 @@ namespace CalyxEngine {
 	 * 2Dゲームオブジェクト基底クラス
 	 * - コンポーネントを持てるようにする
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief GameObject2Dの機能を提供するクラスです。
+	 */
 	class GameObject2D
 		: public BaseObject {
 	public:

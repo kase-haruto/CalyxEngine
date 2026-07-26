@@ -9,6 +9,9 @@
 namespace CalyxEngine {
 	struct Matrix4x4;
 
+	/**
+	 * @brief Quaternionに関するデータを保持する構造体です。
+	 */
 	struct CALYX_API Quaternion {
 		float x = 0.0f; //< X成分
 		float y = 0.0f; //< Y成分

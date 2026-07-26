@@ -12,6 +12,9 @@ struct CalyxEngine::Vector3;
 struct CalyxEngine::Vector4;
 struct Matrix4x4;
 
+/**
+ * @brief LineDrawerの機能を提供するクラスです。
+ */
 class LineDrawer{
 public:
 	void Initialize();
