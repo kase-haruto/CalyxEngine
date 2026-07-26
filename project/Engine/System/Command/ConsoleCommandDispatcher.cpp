@@ -34,6 +34,7 @@ namespace CalyxEngine {
 			const ConsoleCommandContext& context,
 			const std::string& identifier,
 			std::string& outError) {
+			// Scene依存コマンドの共通前提をここで検証し、各Commandのエラー表現を統一する。
 			outError.clear();
 			if(!context.sceneManager) {
 				outError = "SceneManager is unavailable.";
@@ -47,10 +48,12 @@ namespace CalyxEngine {
 
 			const Guid guid = Guid::FromString(identifier);
 			if(guid.isValid()) {
+				// GUID指定は名前重複の影響を受けないため、先に高速な直接検索を試す。
 				auto object = scene->GetObjectLibrary()->Find(guid);
 				if(object) return object;
 			}
 
+			// 名前指定は一意の場合だけ許可し、同名オブジェクトへの誤操作を防ぐ。
 			std::shared_ptr<SceneObject> match;
 			for(const auto& object : scene->GetObjectLibrary()->GetAllObjectsShared()) {
 				if(!object || object->GetName() != identifier) continue;
@@ -89,6 +92,7 @@ namespace CalyxEngine {
 
 		const std::string commandName = tokens.front();
 		std::vector<std::string> arguments(tokens.begin() + 1, tokens.end());
+		// 実行履歴をTraceへ残してから、登録済みCommandへ処理を委譲する。
 		EngineLogger::GetInstance().Add(LogLevel::Trace, LogCategory::Command, "Terminal command: " + commandLine, "ConsoleCommandDispatcher");
 		return ConsoleCommandRegistry::GetInstance().Execute(commandName, arguments, context);
 	}
@@ -109,6 +113,7 @@ namespace CalyxEngine {
 	void ConsoleCommandDispatcher::RegisterBuiltInCommands() {
 		auto& registry = ConsoleCommandRegistry::GetInstance();
 
+		// UI、Scene、Asset、PlaySessionの基本操作を同一Registryへ登録し、補完と実行経路を共有する。
 		registry.Register({
 			"clear",
 			"Clear the terminal history.",
@@ -170,6 +175,7 @@ namespace CalyxEngine {
 
 				std::string path = scene->GetScenePath();
 				if(path.empty()) {
+					// 未保存SceneはプロジェクトのScenes配下へ既定パスを生成する。
 					path = Calyx::ResolveAssetPath(std::filesystem::path("Scenes") / (scene->GetSceneName() + ".scene")).generic_string();
 				}
 				if(!SceneSerializer::Save(*scene, path)) return ErrorResult("Scene save failed: " + path);
@@ -299,6 +305,7 @@ namespace CalyxEngine {
 		std::string current;
 		char quote = '\0';
 
+		// 引用符内の空白を保持し、SceneパスやObject名を単一引数として扱う。
 		for(std::size_t index = 0; index < commandLine.size(); ++index) {
 			const char character = commandLine[index];
 			if(quote != '\0') {
@@ -306,6 +313,7 @@ namespace CalyxEngine {
 					quote = '\0';
 				} else if(character == '\\' && index + 1 < commandLine.size() &&
 						  (commandLine[index + 1] == quote || commandLine[index + 1] == '\\')) {
+					// 引用符とバックスラッシュだけをEscape対象とし、Windowsパスを壊さない。
 					current.push_back(commandLine[++index]);
 				} else {
 					current.push_back(character);
