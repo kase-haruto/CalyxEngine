@@ -1,6 +1,6 @@
 # CalyxEngine
 
 ## BuildState
-[![DebugBuild](https://github.com/kase-haruto/CG2/actions/workflows/DebugBuild.yml/badge.svg)](https://github.com/kase-haruto/CG2/actions/workflows/DebugBuild.yml)
+[![Debug Build](https://github.com/kase-haruto/CalyxEngine/actions/workflows/DebugBuild.yml/badge.svg?branch=master)](https://github.com/kase-haruto/CalyxEngine/actions/workflows/DebugBuild.yml)
 
-[![DebugBuild](https://github.com/kase-haruto/CG2/actions/workflows/ReleaseBuild.yml/badge.svg)](https://github.com/kase-haruto/CG2/actions/workflows/ReleaseBuild.yml)
+[![Release Build](https://github.com/kase-haruto/CalyxEngine/actions/workflows/ReleaseBuild.yml/badge.svg?branch=master)](https://github.com/kase-haruto/CalyxEngine/actions/workflows/ReleaseBuild.yml)

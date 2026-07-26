@@ -8,6 +8,12 @@
 
 namespace Calyx {
 
+	/*-----------------------------------------------------------------------------------------
+	 * ProjectInfo
+	 * - Calyxプロジェクトの構成情報を保持するデータ構造
+	 * - プロジェクトルート、アセット配置、ゲームモジュールと起動構成を管理する
+	 * - ファイルの読み書きやアセットのロード処理は担当しない
+	 *---------------------------------------------------------------------------------------*/
 	struct CALYX_API ProjectInfo {
 		std::string			  name;
 		std::string			  engineVersion;
@@ -27,6 +33,11 @@ namespace Calyx {
 		bool IsValid() const { return !projectFile.empty() && !rootDirectory.empty(); }
 	};
 
+	/*-----------------------------------------------------------------------------------------
+	 * RecentProjectEntry
+	 * - 最近使用したプロジェクト一覧へ保存する軽量データ構造
+	 * - 表示名、Engineバージョン、プロジェクトファイルの場所を保持する
+	 *---------------------------------------------------------------------------------------*/
 	struct CALYX_API RecentProjectEntry {
 		std::string			  name;
 		std::string			  engineVersion;

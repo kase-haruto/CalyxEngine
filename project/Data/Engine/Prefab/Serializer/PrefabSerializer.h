@@ -15,11 +15,21 @@ class SceneObject;
  *---------------------------------------------------------------------------------------*/
 class CALYX_API PrefabSerializer{
 public:
+	/*-----------------------------------------------------------------------------------------
+	 * SaveOptions
+	 * - Prefab保存時の変換方針を指定するデータ構造
+	 * - Root Transformの初期化とPrefab由来GUIDの利用有無を管理する
+	 *---------------------------------------------------------------------------------------*/
 	struct SaveOptions {
 		bool resetRootTransform = false;
 		bool usePrefabSourceGuids = false;
 	};
 
+	/*-----------------------------------------------------------------------------------------
+	 * LoadOptions
+	 * - Prefab読込時の互換性とGUID再生成方針を指定するデータ構造
+	 * - GUID維持、Prefab Asset識別子、未知型の扱いを管理する
+	 *---------------------------------------------------------------------------------------*/
 	struct LoadOptions {
 		bool preserveGuids = false;
 		Guid prefabAssetGuid = Guid::Empty();

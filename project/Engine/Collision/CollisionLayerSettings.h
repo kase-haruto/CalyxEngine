@@ -8,6 +8,11 @@
 #include <string_view>
 #include <vector>
 
+/*-----------------------------------------------------------------------------------------
+ * CollisionLayer
+ * - Scene内で利用する一つのCollision Layer定義を保持するデータ構造
+ * - シリアライズ用の安定IDとEditor表示名を管理する
+ *---------------------------------------------------------------------------------------*/
 struct CollisionLayer {
 	// シーンやPrefabに保存される安定した参照値。
 	CollisionLayerId id = kDefaultCollisionLayerId;

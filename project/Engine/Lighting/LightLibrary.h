@@ -11,6 +11,11 @@
 #include <memory>
 #include <vector>
 
+/*-----------------------------------------------------------------------------------------
+ * PointLightConstants
+ * - Point Light群をGPUへ転送するConstant Buffer用データ構造
+ * - 有効Light数、Shadow設定、固定上限分のLightデータを保持する
+ *---------------------------------------------------------------------------------------*/
 struct PointLightConstants {
 	uint32_t count = 0;
 	uint32_t pointLightShadowsEnabled = 1;
