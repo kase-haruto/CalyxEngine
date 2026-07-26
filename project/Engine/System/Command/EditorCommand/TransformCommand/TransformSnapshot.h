@@ -4,7 +4,12 @@
 #include <Engine/Foundation/Math/Quaternion.h>
 #include <Engine/Objects/Transform/Transform.h>
 
-
+/*-----------------------------------------------------------------------------------------
+ * TransformSnapshot
+ * - Editor CommandがWorldTransformの変更前後を保持するデータ構造
+ * - Scale、Rotation、Translationの取得、比較、復元を担当する
+ * - Transform本体の所有権は持たない
+ *---------------------------------------------------------------------------------------*/
 struct TransformSnapshot {
 public:
 	static TransformSnapshot FromTransform(const WorldTransform* tf);

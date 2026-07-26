@@ -113,6 +113,7 @@ namespace CalyxEngine {
 		if(!IsShow()) return;
 
 		bool open = true;
+		// CanvasとInspectorを別領域に固定し、Node操作中にPanel全体がScrollするのを防ぐ。
 		if(ImGui::Begin(panelName_.c_str(), &open, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
 			DrawToolbar();
 			EnsureIoNodes();
@@ -121,12 +122,14 @@ namespace CalyxEngine {
 			std::string pendingGraphCommandName;
 			NodeGraph pendingGraphBefore;
 			NodeGraph pendingGraphAfter;
+			// Canvasから返る変更前後のSnapshotを集約し、一操作を一つのUndo Commandとして記録する。
 			const bool graphChanged = canvas_.Draw(
 				graph_,
 				[this, &pendingGraphCommand, &pendingGraphCommandName, &pendingGraphBefore, &pendingGraphAfter](Node& node) {
 					const NodeGraph before = graph_;
 					const bool changed = DrawNodeBody(node);
 					if(changed) {
+						// Drag中は開始時Snapshotだけを保持し、毎フレームUndo履歴を増やさない。
 						if(ImGui::IsAnyItemActive()) {
 							if(!nodeEditCommandActive_) {
 								nodeEditCommandActive_ = true;
@@ -157,6 +160,7 @@ namespace CalyxEngine {
 
 			if(graphChanged) {
 			}
+			// ImGui Itemが非Activeになった時点を編集確定としてCommandを発行する。
 			if(nodeEditCommandActive_ && !ImGui::IsAnyItemActive()) {
 				ExecuteGraphCommand("Edit Post Effect Node", nodeEditBefore_, graph_);
 				nodeEditCommandActive_ = false;
@@ -170,6 +174,7 @@ namespace CalyxEngine {
 	}
 
 	void PostEffectNodeEditorPanel::DrawToolbar() {
+		// 保存・読込・Runtime適用を同じAsset Pathに対して実行し、PreviewとDisk内容を一致させる。
 		ImGui::SetNextItemWidth(360.0f);
 		ImGui::InputText("Path", pathBuffer_.data(), pathBuffer_.size());
 		ImGui::SameLine();
@@ -186,6 +191,7 @@ namespace CalyxEngine {
 		if(ImGui::Button("Apply", ImVec2(70.0f, 0.0f))) Apply();
 		ImGui::SameLine();
 		if(ImGui::Button("Play", ImVec2(70.0f, 0.0f))) {
+			// 編集中Graphを先にRuntimeへ適用してからTriggered Effectを開始する。
 			Apply();
 			PostEffectManager::Get()->PlayTriggeredEffects();
 		}
@@ -222,6 +228,7 @@ namespace CalyxEngine {
 
 	void PostEffectNodeEditorPanel::ExecuteGraphCommand(const char* name, const NodeGraph& before, const NodeGraph& after) {
 		auto apply = [this](const NodeGraph& graph) {
+			// Undo/Redo後にID採番と必須IO Nodeを再検証し、次の編集でID衝突を起こさない。
 			graph_ = graph;
 			graph_.EnsureNextId();
 			EnsureIoNodes();
@@ -596,6 +603,7 @@ namespace CalyxEngine {
 	void PostEffectNodeEditorPanel::EnsureIoNodes() {
 		const bool hasInput = std::any_of(graph_.nodes.begin(), graph_.nodes.end(), [](const Node& node) { return node.type == "Input"; });
 		const bool hasOutput = std::any_of(graph_.nodes.begin(), graph_.nodes.end(), [](const Node& node) { return node.type == "Output"; });
+		// Runtime Graphが必ず入口と出口を持つよう、不足している場合だけ補完する。
 		if(!hasInput) AddInputNode({20.0f, 120.0f});
 		if(!hasOutput) AddOutputNode({720.0f, 120.0f});
 	}
@@ -606,6 +614,7 @@ namespace CalyxEngine {
 			if(node.type == "Input" || node.type == "Output") continue;
 			ordered.push_back(&node);
 		}
+		// 旧Linear Presetとの互換用に、Canvas上の左から右を実行順として安定化する。
 		std::sort(ordered.begin(), ordered.end(), [](const Node* a, const Node* b) {
 			if(a->position.x == b->position.x) return a->id < b->id;
 			return a->position.x < b->position.x;
@@ -614,6 +623,7 @@ namespace CalyxEngine {
 	}
 
 	nlohmann::json PostEffectNodeEditorPanel::BuildPresetJson() const {
+		// Editor用Graph表現と、旧Runtimeが読む平坦なnodes配列の両方を保存する。
 		nlohmann::json root;
 		root["type"] = "PostEffectPreset";
 		root["name"] = std::filesystem::path(pathBuffer_.data()).stem().string();
@@ -649,11 +659,13 @@ namespace CalyxEngine {
 		}
 
 		if(root.contains("graph")) {
+			// 新形式はPinとLinkを含むGraphをそのまま復元する。
 			graph_ = root.at("graph").get<NodeGraph>();
 			EnsureIoNodes();
 			return;
 		}
 
+		// 旧形式はnodes配列しか持たないため、直列配置のGraphへ変換して読み込む。
 		graph_ = {};
 		AddInputNode({20.0f, 120.0f});
 		float x = 220.0f;
@@ -678,6 +690,7 @@ namespace CalyxEngine {
 
 	void PostEffectNodeEditorPanel::Save() {
 		try {
+			// Asset root基準へ解決し、初回保存でも書き込めるよう親Directoryを準備する。
 			std::filesystem::path path = Calyx::ResolveAssetPath(pathBuffer_.data());
 			FileSystemHelper::CreateDirectoryPath(path.parent_path().string());
 			std::ofstream ofs(path);
@@ -689,6 +702,7 @@ namespace CalyxEngine {
 
 	void PostEffectNodeEditorPanel::Load() {
 		try {
+			// JSON解析に成功した場合だけ現在Graphを置換し、破損Assetで編集内容を失わない。
 			std::ifstream ifs(Calyx::ResolveAssetPath(pathBuffer_.data()));
 			if(!ifs) return;
 			nlohmann::json root;
@@ -699,6 +713,7 @@ namespace CalyxEngine {
 	}
 
 	void PostEffectNodeEditorPanel::Apply() {
+		// 保存したPresetをManagerへ再読込させ、Editor表示とRuntime描画を同期する。
 		Save();
 		PostEffectManager::Get()->LoadPreset(Calyx::ResolveAssetPath(pathBuffer_.data()).generic_string());
 	}

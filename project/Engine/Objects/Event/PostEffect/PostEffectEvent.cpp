@@ -15,12 +15,14 @@ PostEffectEvent::PostEffectEvent() {
 }
 
 void PostEffectEvent::Initialize() {
+	// Base Event初期化後にPresetを適用し、PostEffectManagerが利用可能な順序を保証する。
 	BaseEventObject::Initialize();
 	initialized_ = true;
 	ApplyPreset();
 }
 
 bool PostEffectEvent::SetPresetAsset(const Guid& guid) {
+	// PostEffect種別のAssetだけを受理し、別種別GUIDによる読込失敗を防ぐ。
 	const AssetRecord* record = AssetDatabase::GetInstance()->Get(guid);
 	if(!record || record->type != AssetType::PostEffect) return false;
 
@@ -31,10 +33,12 @@ bool PostEffectEvent::SetPresetAsset(const Guid& guid) {
 
 bool PostEffectEvent::ApplyPreset() {
 	if(presetGuid_.isValid()) {
+		// GUIDから最新Pathを再解決し、Asset移動後も保存済みEventから追従できるようにする。
 		if(const AssetRecord* record = AssetDatabase::GetInstance()->Get(presetGuid_)) {
 			presetPath_ = record->sourcePath.generic_string();
 		}
 	}
+	// GUID未解決時は旧Sceneに保存されたPathを互換Fallbackとして利用する。
 	if(presetPath_.empty()) return false;
 	return PostEffectManager::Get()->LoadPreset(
 		Calyx::ResolveAssetPath(presetPath_).generic_string());
@@ -56,6 +60,7 @@ void PostEffectEvent::ApplyDerivedConfigFromJson(
 	const nlohmann::json& root, const nlohmann::json* derived) {
 	(void)root;
 	if(!derived) return;
+	// 初期化前のDeserializeでは値だけ保持し、Manager準備後にInitializeから適用する。
 	if(derived->contains("presetGuid")) presetGuid_ = derived->at("presetGuid").get<Guid>();
 	presetPath_ = derived->value("presetPath", presetPath_);
 	if(initialized_) ApplyPreset();

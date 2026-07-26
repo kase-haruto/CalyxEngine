@@ -12,6 +12,7 @@ namespace CalyxEngine {
 	void PostProcessEditor::ShowImGuiInterface() {
 		if(!pCollection_) return;
 
+		// Collectionの並び順を直接編集し、表示順と実行Pass順を一致させる。
 		auto& slots = pCollection_->GetSlots();
 
 		for(int i = 0; i < slots.size(); ++i) {
@@ -35,8 +36,9 @@ namespace CalyxEngine {
 				for(int n = 0; n < effectNames.size(); ++n) {
 					bool isSelected = (slot.name == effectNames[n]);
 					if(ImGui::Selectable(effectNames[n].c_str(), isSelected)) {
+						// 種別名の変更と同時に実行実体を再解決し、名前とPassの不一致を残さない。
 						slot.name = effectNames[n];
-						slot.pass = pCollection_->GetEffectByName(effectNames[n]); // pass 更新
+						slot.pass = pCollection_->GetEffectByName(effectNames[n]);
 					}
 					if(isSelected) ImGui::SetItemDefaultFocus();
 				}
@@ -57,10 +59,11 @@ namespace CalyxEngine {
 	void PostProcessEditor::ApplyToGraph(PostEffectGraph* graph) {
 		if(!graph || !pCollection_) return;
 
-		// 名前とpassを再マッピング
+		// Asset再読込後の古いPass参照を、現在のCollectionが所有する実体へ再マッピングする。
 		for(auto& slot : pCollection_->GetSlots()) {
 			slot.pass = pCollection_->GetEffectByName(slot.name);
 		}
+		// Editorの順序・有効状態をGraphのRuntime実行列へ反映する。
 		graph->SetPassesFromList(pCollection_->GetSlots());
 	}
 } // namespace CalyxEngine

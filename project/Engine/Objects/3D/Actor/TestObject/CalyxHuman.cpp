@@ -10,14 +10,12 @@ CalyxHuman::CalyxHuman(const std::string& modelName,
 	Actor::Actor(modelName, objectName){
 	moveSpeed_ = 10.0f;
 	//animationを追加
-	//GetAnimationModel()->AddAnimation("idle", "idle.gltf");
 
 }
 
 CalyxHuman::CalyxHuman(){
 	moveSpeed_ = 10.0f;
 	//animationを追加
-//	GetCalyxEngine::AnimationModel()->AddAnimation("idle", "idle.gltf");
 
 }
 

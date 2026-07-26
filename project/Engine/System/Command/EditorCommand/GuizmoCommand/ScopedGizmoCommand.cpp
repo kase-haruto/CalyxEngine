@@ -11,6 +11,7 @@ namespace {
 		auto* context = SceneContext::Current();
 		if(!context || !context->GetObjectLibrary()) return {};
 
+		// Undo履歴を読みやすく保つため、対象名は最大3件まで表示する。
 		std::string summary;
 		std::size_t matchedCount = 0;
 		for(const auto& object : context->GetObjectLibrary()->GetAllObjectsShared()) {
@@ -42,6 +43,7 @@ namespace {
 
 ScopedGizmoCommand::ScopedGizmoCommand(WorldTransform* transform, ImGuizmo::OPERATION op)
 	: transform_(transform), op_(op){
+	// 操作開始時点のTransformをSnapshot化し、Gizmo更新中の変更から独立させる。
 	if(transform_) {
 		transforms_.push_back(transform_);
 		befores_.push_back(TransformSnapshot::FromTransform(transform_));
@@ -52,6 +54,7 @@ ScopedGizmoCommand::ScopedGizmoCommand(WorldTransform* transform, ImGuizmo::OPER
 
 ScopedGizmoCommand::ScopedGizmoCommand(const std::vector<WorldTransform*>& transforms, ImGuizmo::OPERATION op)
 	: transform_(transforms.empty() ? nullptr : transforms.front()), transforms_(transforms), op_(op) {
+	// 複数選択時も入力順でSnapshotを保持し、各Transformとの対応を維持する。
 	befores_.reserve(transforms_.size());
 	for(auto* transform : transforms_) {
 		if(transform) {
@@ -65,6 +68,7 @@ ScopedGizmoCommand::ScopedGizmoCommand(const std::vector<WorldTransform*>& trans
 }
 
 void ScopedGizmoCommand::CaptureAfter(){
+	// Mouse Release時の最終状態を取得し、一連のDragを一つのCommandへまとめる。
 	afters_.clear();
 	afters_.reserve(transforms_.size());
 	for(auto* transform : transforms_) {
@@ -79,6 +83,7 @@ void ScopedGizmoCommand::CaptureAfter(){
 }
 
 bool ScopedGizmoCommand::IsTrivial(float epsilon) const{
+	// 数値誤差範囲内で変化がない操作は履歴へ登録しない。
 	if(!captured_ || befores_.size() != afters_.size()) return true;
 	for(size_t i = 0; i < befores_.size(); ++i) {
 		if(!befores_[i].Equals(afters_[i], epsilon)) {
@@ -90,6 +95,7 @@ bool ScopedGizmoCommand::IsTrivial(float epsilon) const{
 
 void ScopedGizmoCommand::Execute(){
 	if(!captured_) return;
+	// 破損した対応数でも範囲外参照しないよう、少ない側の件数だけ適用する。
 	const size_t count = (std::min)(transforms_.size(), afters_.size());
 	for(size_t i = 0; i < count; ++i) {
 		if(transforms_[i]) afters_[i].ApplyToTransform(transforms_[i]);
@@ -98,6 +104,7 @@ void ScopedGizmoCommand::Execute(){
 
 void ScopedGizmoCommand::Undo(){
 	if(!captured_) return;
+	// 操作開始時Snapshotを同じ対象順で復元し、親子Transformの個別値を戻す。
 	const size_t count = (std::min)(transforms_.size(), befores_.size());
 	for(size_t i = 0; i < count; ++i) {
 		if(transforms_[i]) befores_[i].ApplyToTransform(transforms_[i]);

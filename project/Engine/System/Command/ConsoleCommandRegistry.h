@@ -24,17 +24,31 @@ namespace CalyxEngine {
 		Error
 	};
 
+	/*-----------------------------------------------------------------------------------------
+	 * ConsoleOutputLine
+	 * - Consoleへ表示する一行分の実行結果を保持するデータ構造
+	 * - 出力レベルと表示メッセージを管理する
+	 *---------------------------------------------------------------------------------------*/
 	struct ConsoleOutputLine {
 		ConsoleOutputLevel level = ConsoleOutputLevel::Info;
 		std::string message;
 	};
 
+	/*-----------------------------------------------------------------------------------------
+	 * ConsoleCommandResult
+	 * - Console Commandの実行結果を呼び出し側へ返すデータ構造
+	 * - 履歴消去要求と複数行の出力内容を保持する
+	 *---------------------------------------------------------------------------------------*/
 	struct ConsoleCommandResult {
 		bool clearRequested = false;
 		std::vector<ConsoleOutputLine> output;
 	};
 
-	// コマンドが参照可能なエンジンサービスを明示的に渡す。
+	/*-----------------------------------------------------------------------------------------
+	 * ConsoleCommandContext
+	 * - Console Commandが参照可能なEngineサービスを明示するデータ構造
+	 * - 各ポインタは所有権を持たず、Command実行中だけ利用する
+	 *---------------------------------------------------------------------------------------*/
 	struct ConsoleCommandContext {
 		LevelEditor* levelEditor = nullptr;
 		SceneManager* sceneManager = nullptr;
@@ -45,6 +59,11 @@ namespace CalyxEngine {
 		const ConsoleCommandContext&,
 		const std::vector<std::string>&)>;
 
+	/*-----------------------------------------------------------------------------------------
+	 * ConsoleCommandDefinition
+	 * - Registryへ登録するConsole Commandの定義を保持するデータ構造
+	 * - コマンド名、説明、利用形式、実行Callbackを管理する
+	 *---------------------------------------------------------------------------------------*/
 	struct ConsoleCommandDefinition {
 		std::string name;
 		std::string description;

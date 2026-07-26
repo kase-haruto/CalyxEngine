@@ -12,11 +12,22 @@ namespace CalyxEngine {
 		Unlit,
 	};
 
+	/*-----------------------------------------------------------------------------------------
+	 * CompiledColorInput
+	 * - コンパイル済みMaterialの色入力を表すデータ構造
+	 * - 乗算係数とObject Texture参照の有無をRuntimeへ渡す
+	 *---------------------------------------------------------------------------------------*/
 	struct CompiledColorInput {
 		Vector4 factor = {1, 1, 1, 1};
 		bool usesObjectTexture = false;
 	};
 
+	/*-----------------------------------------------------------------------------------------
+	 * CompiledMaterialGraph
+	 * - Material Node GraphをRuntime描画用に平坦化したデータ構造
+	 * - Surface種別、Lighting設定、各Materialパラメータを保持する
+	 * - 元のNode、LinkおよびEditorレイアウトは管理しない
+	 *---------------------------------------------------------------------------------------*/
 	struct CompiledMaterialGraph {
 		CompiledSurfaceModel surfaceModel = CompiledSurfaceModel::Legacy;
 		int32_t lightingMode = 0;

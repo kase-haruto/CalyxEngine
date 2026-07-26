@@ -10,11 +10,13 @@ SortingLayerSettings::SortingLayerSettings() {
 }
 
 SortingLayerSettings* SortingLayerSettings::GetInstance() {
+	// Scene固有設定が未登録の期間はFallbackを返し、Editor起動直後の参照を安全にする。
 	static SortingLayerSettings fallback;
 	return activeSettings_ ? activeSettings_ : &fallback;
 }
 
 void SortingLayerSettings::SetActiveSettings(SortingLayerSettings* settings) {
+	// 所有権はScene側に残し、現在SceneのLayer設定だけを非所有参照として切り替える。
 	activeSettings_ = settings;
 }
 
@@ -29,6 +31,7 @@ bool SortingLayerSettings::AddLayer(const std::string& name, SortingLayerId* out
 		return false;
 	}
 
+	// 保存済みObjectが参照するIDを再利用しないよう、現在未使用の最小IDを割り当てる。
 	SortingLayerId newId = kDefaultSortingLayerId;
 	for(uint32_t candidate = 1; candidate <= std::numeric_limits<SortingLayerId>::max(); ++candidate) {
 		const auto id = static_cast<SortingLayerId>(candidate);
@@ -39,6 +42,7 @@ bool SortingLayerSettings::AddLayer(const std::string& name, SortingLayerId* out
 	}
 	if(newId == kDefaultSortingLayerId) return false;
 
+	// 配列順を描画優先順へ変換するため、追加後に全Orderを再構築する。
 	layers_.push_back({newId, name, 0});
 	RebuildOrders();
 	if(outLayerId) *outLayerId = newId;
@@ -46,6 +50,7 @@ bool SortingLayerSettings::AddLayer(const std::string& name, SortingLayerId* out
 }
 
 bool SortingLayerSettings::RemoveLayer(SortingLayerId layerId) {
+	// 既存ObjectのFallback先を保証するため、Default Layerは削除させない。
 	if(layerId == kDefaultSortingLayerId) return false;
 	const auto it = std::find_if(layers_.begin(), layers_.end(), [layerId](const SortingLayer& layer) {
 		return layer.id == layerId;
@@ -72,6 +77,7 @@ bool SortingLayerSettings::MoveLayer(SortingLayerId layerId, int direction) {
 	if(it == layers_.end()) return false;
 	const auto index = static_cast<size_t>(std::distance(layers_.begin(), it));
 	if((direction < 0 && index == 0) || (direction > 0 && index + 1 >= layers_.size())) return false;
+	// IDはScene互換性のため固定し、配列位置と描画Orderだけを入れ替える。
 	const size_t target = direction < 0 ? index - 1 : index + 1;
 	std::iter_swap(layers_.begin() + index, layers_.begin() + target);
 	RebuildOrders();
@@ -103,6 +109,7 @@ int32_t SortingLayerSettings::GetLayerOrder(SortingLayerId layerId) const {
 }
 
 nlohmann::json SortingLayerSettings::ToJson() const {
+	// ID・名前・順序を明示保存し、Scene再読込後もSpriteのLayer参照を維持する。
 	nlohmann::json layers = nlohmann::json::array();
 	for(const auto& layer : layers_) {
 		layers.push_back({{"id", layer.id}, {"name", layer.name}, {"order", layer.order}});
@@ -111,10 +118,12 @@ nlohmann::json SortingLayerSettings::ToJson() const {
 }
 
 void SortingLayerSettings::ApplyJson(const nlohmann::json& json) {
+	// 破損または旧形式データでも最低限Default Layerを残せる状態から読込を開始する。
 	ResetToDefault();
 	const auto it = json.find("layers");
 	if(!json.is_object() || it == json.end() || !it->is_array()) return;
 
+	// 型、ID範囲、空名称、ID/名称重複を検証し、不正なLayerを設定へ混入させない。
 	std::vector<SortingLayer> loaded;
 	for(const auto& value : *it) {
 		if(!value.is_object() || !value.contains("id") || !value.contains("name")) continue;
@@ -129,12 +138,14 @@ void SortingLayerSettings::ApplyJson(const nlohmann::json& json) {
 		loaded.push_back({id, name, value.value("order", 0)});
 	}
 
+	// 保存Orderを優先し、同値の場合はIDで安定した並びへ正規化する。
 	std::sort(loaded.begin(), loaded.end(), [](const SortingLayer& lhs, const SortingLayer& rhs) {
 		if(lhs.order != rhs.order) return lhs.order < rhs.order;
 		return lhs.id < rhs.id;
 	});
 	if(loaded.size() > kMaxSortingLayerCount) loaded.resize(kMaxSortingLayerCount);
 	layers_ = std::move(loaded);
+	// JSONにDefaultがない場合は補完し、名称も予約名へ強制してFallback契約を守る。
 	if(!IsValidLayerId(kDefaultSortingLayerId)) {
 		layers_.insert(layers_.begin(), {kDefaultSortingLayerId, "Default", 0});
 	}
@@ -152,6 +163,7 @@ bool SortingLayerSettings::IsLayerNameAvailable(const std::string& name, Sorting
 }
 
 void SortingLayerSettings::RebuildOrders() {
+	// Layer間に間隔を持たせ、同Layer内のorderInLayerを合成できる基準値を生成する。
 	for(size_t i = 0; i < layers_.size(); ++i) {
 		layers_[i].order = static_cast<int32_t>(i) * 100;
 	}

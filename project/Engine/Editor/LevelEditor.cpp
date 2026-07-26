@@ -32,6 +32,7 @@
 
 // c++
 #include "Engine/Foundation/HotReload/LivePP/LivePPService.h"
+#include <array>
 
 #include <Engine/Foundation/Utility/FileSystem/FileScanner.h>
 #include <algorithm>
@@ -109,6 +110,206 @@ namespace {
 } // namespace
 
 namespace CalyxEngine {
+
+	/*-----------------------------------------------------------------------------------------
+	 * EditToolPresentation
+	 * - 編集モードで表示するViewportとPanelの構成を保持するデータ構造
+	 * - UIの所有権やSceneContextのライフタイムは管理しない
+	 *---------------------------------------------------------------------------------------*/
+	struct EditToolPresentation {
+		bool mainViewport = true;       //< メインViewportを表示するか
+		bool debugViewport = true;      //< デバッグViewportを表示するか
+		bool mainOverlay = true;        //< メインViewportの操作Overlayを有効にするか
+		bool debugOverlay = true;       //< デバッグViewportの操作Overlayを有効にするか
+		bool placement2D = false;       //< 2D配置Canvasを有効にするか
+		bool hierarchy = false;         //< Hierarchy Panelを表示するか
+		bool inspector = false;         //< Inspector Panelを表示するか
+		bool keyframe = false;          //< Keyframe Panelを表示するか
+		bool placeTool = false;         //< Place Tool Panelを表示するか
+		bool spline = false;            //< Spline Editorを表示するか
+		bool asset = true;              //< Asset Panelを表示するか
+		bool material = false;          //< Material Node Editorを表示するか
+		bool postEffect = false;        //< PostEffect Node Editorを表示するか
+		bool spriteAnimation = false;   //< Sprite Animation Editorを表示するか
+	};
+
+	/*-----------------------------------------------------------------------------------------
+	 * EditToolStateContext
+	 * - 編集モードStateへ必要最小限の準備操作を公開する遷移コンテキスト
+	 * - LevelEditor本体やEditor UIの所有権は公開しない
+	 *---------------------------------------------------------------------------------------*/
+	struct EditToolStateContext {
+		std::function<void()> ensurePrefabContext;   //< Prefab編集Contextを準備する操作
+		std::function<void()> ensureParticleContext; //< ParticleプレビューContextを準備する操作
+	};
+
+	/*-----------------------------------------------------------------------------------------
+	 * IEditToolState
+	 * - LevelEditorの編集モード固有動作を定義するStateインターフェース
+	 * - Context準備とUI構成を派生Stateへ委譲
+	 *---------------------------------------------------------------------------------------*/
+	class IEditToolState {
+	public:
+		/** \brief 編集モードStateの基底デストラクタ */
+		virtual ~IEditToolState() = default;
+		/** \brief State開始時に必要なEditor Contextを準備する \param context 許可された準備操作 */
+		virtual void Enter(EditToolStateContext& context) const { (void)context; }
+		/** \brief State固有のUI表示構成を取得する \return 適用するUI表示構成 */
+		virtual const EditToolPresentation& Presentation() const = 0;
+	};
+
+	/*-----------------------------------------------------------------------------------------
+	 * ObjectEditToolState
+	 * - 3D SceneObjectの配置とInspector編集を行うState
+	 *---------------------------------------------------------------------------------------*/
+	class ObjectEditToolState final : public IEditToolState {
+	public:
+		/** \brief 3Dオブジェクト編集用のUI表示構成を取得する \return 3D編集用UI表示構成 */
+		const EditToolPresentation& Presentation() const override {
+			static const EditToolPresentation value{
+				.mainViewport = true, .debugViewport = true, .mainOverlay = true, .debugOverlay = true,
+				.placement2D = false, .hierarchy = true, .inspector = true, .keyframe = false,
+				.placeTool = true, .spline = false, .asset = true};
+			return value;
+		}
+	};
+
+	/*-----------------------------------------------------------------------------------------
+	 * Object2DEditToolState
+	 * - 2D SceneObjectの配置とKeyframe編集を行うState
+	 *---------------------------------------------------------------------------------------*/
+	class Object2DEditToolState final : public IEditToolState {
+	public:
+		/** \brief 2Dオブジェクト編集用のUI表示構成を取得する \return 2D編集用UI表示構成 */
+		const EditToolPresentation& Presentation() const override {
+			static const EditToolPresentation value{
+				.mainViewport = true, .debugViewport = false, .mainOverlay = true, .debugOverlay = false,
+				.placement2D = true, .hierarchy = true, .inspector = true, .keyframe = true,
+				.placeTool = false, .spline = false, .asset = true};
+			return value;
+		}
+	};
+
+	/*-----------------------------------------------------------------------------------------
+	 * SpriteAnimationEditToolState
+	 * - Sprite Animation Assetの編集画面を表示するState
+	 *---------------------------------------------------------------------------------------*/
+	class SpriteAnimationEditToolState final : public IEditToolState {
+	public:
+		/** \brief Sprite Animation編集用のUI表示構成を取得する \return Animation Asset編集用UI表示構成 */
+		const EditToolPresentation& Presentation() const override {
+			static const EditToolPresentation value{
+				.mainViewport = false, .debugViewport = false, .mainOverlay = false, .debugOverlay = false,
+				.asset = true, .spriteAnimation = true};
+			return value;
+		}
+	};
+
+	/*-----------------------------------------------------------------------------------------
+	 * PrefabEditToolState
+	 * - 分離されたPrefab編集ContextとデバッグViewportを使用するState
+	 *---------------------------------------------------------------------------------------*/
+	class PrefabEditToolState final : public IEditToolState {
+	public:
+		/** \brief Prefab編集Contextを遷移前に準備する \param context Prefab準備操作を保持するContext */
+		void Enter(EditToolStateContext& context) const override { context.ensurePrefabContext(); }
+		/** \brief Prefab編集用のUI表示構成を取得する \return Prefab編集用UI表示構成 */
+		const EditToolPresentation& Presentation() const override {
+			static const EditToolPresentation value{
+				.mainViewport = false, .debugViewport = true, .mainOverlay = false, .debugOverlay = true,
+				.hierarchy = true, .inspector = true, .asset = true};
+			return value;
+		}
+	};
+
+	/*-----------------------------------------------------------------------------------------
+	 * ParticleEffectEditToolState
+	 * - ParticleプレビューContext上でEmitterを編集するState
+	 *---------------------------------------------------------------------------------------*/
+	class ParticleEffectEditToolState final : public IEditToolState {
+	public:
+		/** \brief ParticleプレビューContextを遷移前に準備する \param context Preview準備操作を保持するContext */
+		void Enter(EditToolStateContext& context) const override { context.ensureParticleContext(); }
+		/** \brief Particle編集用のUI表示構成を取得する \return Particle編集用UI表示構成 */
+		const EditToolPresentation& Presentation() const override {
+			static const EditToolPresentation value{
+				.mainViewport = false, .debugViewport = true, .mainOverlay = false, .debugOverlay = true,
+				.hierarchy = true, .inspector = true, .placeTool = true, .asset = true};
+			return value;
+		}
+	};
+
+	/*-----------------------------------------------------------------------------------------
+	 * PostEffectEditToolState
+	 * - PostEffect Node Graph編集画面を表示するState
+	 *---------------------------------------------------------------------------------------*/
+	class PostEffectEditToolState final : public IEditToolState {
+	public:
+		/** \brief PostEffect Graph編集用のUI表示構成を取得する \return PostEffect編集用UI表示構成 */
+		const EditToolPresentation& Presentation() const override {
+			static const EditToolPresentation value{
+				.mainViewport = true, .debugViewport = true, .mainOverlay = true, .debugOverlay = true,
+				.asset = true, .postEffect = true};
+			return value;
+		}
+	};
+
+	/*-----------------------------------------------------------------------------------------
+	 * MaterialEditToolState
+	 * - Material Node Graph編集画面を表示するState
+	 *---------------------------------------------------------------------------------------*/
+	class MaterialEditToolState final : public IEditToolState {
+	public:
+		/** \brief Material Graph編集用のUI表示構成を取得する \return Material編集用UI表示構成 */
+		const EditToolPresentation& Presentation() const override {
+			static const EditToolPresentation value{
+				.mainViewport = false, .debugViewport = false, .mainOverlay = false, .debugOverlay = false,
+				.asset = true, .material = true};
+			return value;
+		}
+	};
+
+	/*-----------------------------------------------------------------------------------------
+	 * AnimationEditToolState
+	 * - SceneObjectとKeyframeを同時に編集するAnimation State
+	 *---------------------------------------------------------------------------------------*/
+	class AnimationEditToolState final : public IEditToolState {
+	public:
+		/** \brief Keyframe Animation編集用のUI表示構成を取得する \return Animation編集用UI表示構成 */
+		const EditToolPresentation& Presentation() const override {
+			static const EditToolPresentation value{
+				.mainViewport = true, .debugViewport = true, .mainOverlay = true, .debugOverlay = true,
+				.hierarchy = true, .inspector = true, .keyframe = true, .asset = true};
+			return value;
+		}
+	};
+
+	namespace {
+		const ObjectEditToolState kObjectEditToolState;
+		const Object2DEditToolState kObject2DEditToolState;
+		const SpriteAnimationEditToolState kSpriteAnimationEditToolState;
+		const PrefabEditToolState kPrefabEditToolState;
+		const ParticleEffectEditToolState kParticleEffectEditToolState;
+		const PostEffectEditToolState kPostEffectEditToolState;
+		const MaterialEditToolState kMaterialEditToolState;
+		const AnimationEditToolState kAnimationEditToolState;
+
+		const std::array<const IEditToolState*, 8> kEditToolStates{
+			&kObjectEditToolState,
+			&kObject2DEditToolState,
+			&kSpriteAnimationEditToolState,
+			&kPrefabEditToolState,
+			&kParticleEffectEditToolState,
+			&kPostEffectEditToolState,
+			&kMaterialEditToolState,
+			&kAnimationEditToolState};
+
+		/** \brief enum値に対応する静的編集モードStateを取得する */
+		const IEditToolState& GetEditToolState(EngineEdit::EditToolMode mode) {
+			const size_t index = static_cast<size_t>(mode);
+			return *kEditToolStates[(std::min)(index, kEditToolStates.size() - 1)];
+		}
+	}
 
 	//=============================================================================
 	// Initialize
@@ -1010,7 +1211,16 @@ namespace CalyxEngine {
 			SaveActiveModeSelection();
 		}
 
+		// enumは保存形式との互換性のため維持し、振る舞いは対応するStateへ委譲する。
 		editToolMode_ = mode;
+		editToolState_ = &GetEditToolState(mode);
+
+		// StateへLevelEditor全体を公開せず、遷移時に必要なContext準備操作だけを渡す。
+		EditToolStateContext stateContext{
+			.ensurePrefabContext = [this]() { EnsurePrefabEditContext(); },
+			.ensureParticleContext = [this]() { EnsureParticlePreviewContext(); }};
+		editToolState_->Enter(stateContext);
+		const EditToolPresentation& presentation = editToolState_->Presentation();
 
 		auto setShow = [](IEngineUI* panel, bool show) {
 			if(panel) {
@@ -1018,96 +1228,27 @@ namespace CalyxEngine {
 			}
 		};
 
-		if(mainViewport_) mainViewport_->SetShow(true);
-		if(debugViewport_) debugViewport_->SetShow(true);
-		if(debugViewport_) debugViewport_->SetOverlayToolsEnabled(true);
-		if(mainViewport_) mainViewport_->Set2DPlacementCanvasEnabled(false);
-
-		switch(mode) {
-		case EngineEdit::EditToolMode::Object:
-			setShow(hierarchy_.get(), true);
-			setShow(inspector_.get(), true);
-			setShow(keyframePanel_.get(), false);
-			setShow(placeToolPanel_.get(), true);
-			setShow(splineEditor_.get(), false);
-			setShow(assetPanel_.get(), true);
-			setShow(materialNodeEditorPanel_.get(), false);
-			setShow(postEffectNodeEditorPanel_.get(), false);
-			setShow(spriteAnimationEditorPanel_.get(), false);
-			break;
-		case EngineEdit::EditToolMode::Object2D:
-			if(mainViewport_) mainViewport_->SetShow(true);
-			if(debugViewport_) debugViewport_->SetShow(false);
-			if(mainViewport_) mainViewport_->SetOverlayToolsEnabled(true);
-			if(mainViewport_) mainViewport_->Set2DPlacementCanvasEnabled(true);
-			setShow(hierarchy_.get(), true);
-			setShow(inspector_.get(), true);
-			setShow(keyframePanel_.get(), true);
-			setShow(placeToolPanel_.get(), false);
-			setShow(splineEditor_.get(), false);
-			setShow(assetPanel_.get(), true);
-			setShow(materialNodeEditorPanel_.get(), false);
-			setShow(postEffectNodeEditorPanel_.get(), false);
-			setShow(spriteAnimationEditorPanel_.get(), false);
-			break;
-		case EngineEdit::EditToolMode::SpriteAnimation:
-			if(mainViewport_) mainViewport_->SetShow(false);
-			if(debugViewport_) debugViewport_->SetShow(false);
-			setShow(hierarchy_.get(), false);
-			setShow(inspector_.get(), false);
-			setShow(keyframePanel_.get(), false);
-			setShow(placeToolPanel_.get(), false);
-			setShow(splineEditor_.get(), false);
-			setShow(assetPanel_.get(), true);
-			setShow(materialNodeEditorPanel_.get(), false);
-			setShow(postEffectNodeEditorPanel_.get(), false);
-			setShow(spriteAnimationEditorPanel_.get(), true);
-			break;
-		case EngineEdit::EditToolMode::Prefab:
-			EnsurePrefabEditContext();
-			if(mainViewport_) mainViewport_->SetShow(false);
-			if(debugViewport_) debugViewport_->SetShow(true);
-			if(debugViewport_) debugViewport_->SetOverlayToolsEnabled(true);
-			setShow(hierarchy_.get(), true);
-			setShow(inspector_.get(), true);
-			setShow(keyframePanel_.get(), false);
-			setShow(placeToolPanel_.get(), false);
-			setShow(splineEditor_.get(), false);
-			setShow(assetPanel_.get(), true);
-			setShow(materialNodeEditorPanel_.get(), false);
-			setShow(postEffectNodeEditorPanel_.get(), false);
-			setShow(spriteAnimationEditorPanel_.get(), false);
-			break;
-		case EngineEdit::EditToolMode::ParticleEffect:
-			EnsureParticlePreviewContext();
-			if(mainViewport_) mainViewport_->SetShow(false);
-			if(debugViewport_) debugViewport_->SetShow(true);
-			if(debugViewport_) debugViewport_->SetOverlayToolsEnabled(true);
-			setShow(hierarchy_.get(), true);
-			setShow(inspector_.get(), true);
-			setShow(keyframePanel_.get(), false);
-			setShow(placeToolPanel_.get(), true);
-			setShow(splineEditor_.get(), false);
-			setShow(assetPanel_.get(), true);
-			setShow(materialNodeEditorPanel_.get(), false);
-			setShow(postEffectNodeEditorPanel_.get(), false);
-			setShow(spriteAnimationEditorPanel_.get(), false);
-			break;
-		case EngineEdit::EditToolMode::PostEffect:
-			setShow(hierarchy_.get(), false);
-			setShow(inspector_.get(), false);
-			setShow(keyframePanel_.get(), false);
-			setShow(placeToolPanel_.get(), false);
-			setShow(splineEditor_.get(), false);
-			setShow(assetPanel_.get(), true);
-			setShow(materialNodeEditorPanel_.get(), false);
-			setShow(postEffectNodeEditorPanel_.get(), true);
-			setShow(spriteAnimationEditorPanel_.get(), false);
-			break;
-		default:
-			break;
+		// Stateが宣言した表示構成を一括適用し、モード追加時の分岐増加を防ぐ。
+		if(mainViewport_) {
+			mainViewport_->SetShow(presentation.mainViewport);
+			mainViewport_->SetOverlayToolsEnabled(presentation.mainOverlay);
+			mainViewport_->Set2DPlacementCanvasEnabled(presentation.placement2D);
 		}
+		if(debugViewport_) {
+			debugViewport_->SetShow(presentation.debugViewport);
+			debugViewport_->SetOverlayToolsEnabled(presentation.debugOverlay);
+		}
+		setShow(hierarchy_.get(), presentation.hierarchy);
+		setShow(inspector_.get(), presentation.inspector);
+		setShow(keyframePanel_.get(), presentation.keyframe);
+		setShow(placeToolPanel_.get(), presentation.placeTool);
+		setShow(splineEditor_.get(), presentation.spline);
+		setShow(assetPanel_.get(), presentation.asset);
+		setShow(materialNodeEditorPanel_.get(), presentation.material);
+		setShow(postEffectNodeEditorPanel_.get(), presentation.postEffect);
+		setShow(spriteAnimationEditorPanel_.get(), presentation.spriteAnimation);
 
+		// UI構成の適用後に対象SceneContextを有効化し、選択復元先を一致させる。
 		ActivateModeContext(mode);
 		if(modeChanged) {
 			activeSelectionMode_ = mode;

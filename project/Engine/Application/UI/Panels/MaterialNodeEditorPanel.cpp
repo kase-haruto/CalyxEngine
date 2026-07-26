@@ -392,6 +392,7 @@ namespace CalyxEngine {
 		if(!IsShow()) return;
 		bool open = true;
 		if(ImGui::Begin(panelName_.c_str(), &open, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
+			// 初回表示時は編集対象を確保するため、登録済みMaterialの先頭を既定選択する。
 			if(!selectedMaterial_.isValid()) {
 				for(auto* rec : AssetDatabase::GetInstance()->GetView()) {
 					if(rec && rec->type == AssetType::Material) {
@@ -401,6 +402,7 @@ namespace CalyxEngine {
 				}
 			}
 
+			// Asset選択とGraph編集を独立したChildへ分け、Canvas操作で一覧がスクロールしないようにする。
 			const float sidebarWidth = 260.0f;
 			ImGui::BeginChild("##material-sidebar", ImVec2(sidebarWidth, 0.0f), true);
 			DrawMaterialList();
@@ -410,12 +412,14 @@ namespace CalyxEngine {
 			ImGui::BeginChild("##material-workspace", ImVec2(0.0f, 0.0f), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 			auto material = AssetManager::GetInstance()->GetDataAssetManager()->GetAsset<MaterialAsset>(selectedMaterial_);
 			if(material) {
+				// 旧Graphの不足ピンを補正してから評価・保存し、次回ロード以降は現行Schemaへ統一する。
 				if(EnsureTextureSampleNodePins(*material)) {
 					Evaluate(*material);
 					Save(*material);
 				}
 				EnsureOutputNode(*material);
 				DrawToolbar(*material);
+				// Canvas内で発生した複数種の変更を、描画終了後に一つのUndo Commandとして確定する。
 				bool pendingGraphCommand = false;
 				std::string pendingGraphCommandName;
 				NodeGraph pendingGraphBefore;
@@ -426,6 +430,7 @@ namespace CalyxEngine {
 						   const NodeGraph before = material->graph;
 						   const bool changed = DrawNodeBody(*material, node);
 						   if(changed) {
+							   // Drag中は開始時のSnapshotを保持し、連続値編集を一回のUndoへまとめる。
 							   if(ImGui::IsAnyItemActive()) {
 								   if(!nodeEditCommandActive_) {
 									   nodeEditCommandActive_ = true;
@@ -451,6 +456,7 @@ namespace CalyxEngine {
 					Evaluate(*material);
 				}
 				if(nodeEditCommandActive_ && !ImGui::IsAnyItemActive()) {
+					// Widgetの操作終了時に最終Graphとの差分をCommandへ登録する。
 					if(nodeEditMaterial_ == material->GetGuid()) {
 						ExecuteGraphCommand(*material, "Edit Material Node", nodeEditBefore_, material->graph);
 					}
@@ -533,6 +539,7 @@ namespace CalyxEngine {
 		ImGui::SameLine();
 		ImGui::TextDisabled("Base Color");
 
+		// Graph内容のHashに対応するPreview Shaderを取得し、失敗時はGPU命令を記録しない。
 		const MaterialGraphRuntimeShader shader = runtimeShaderCache_.GetOrCompilePreviewPixelShader(material);
 		if(!shader.pixelShader || !shader.compileSucceeded) {
 			ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.25f, 1.0f), "Preview shader compile failed.");
@@ -543,6 +550,7 @@ namespace CalyxEngine {
 			return;
 		}
 
+		// RenderTargetとShader依存PSOの両方が揃った場合だけPreview描画へ進む。
 		if(!EnsurePreviewResources() || !EnsurePreviewPipeline(shader)) {
 			ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.25f, 1.0f), "Preview renderer is not available.");
 			if(framed) ImGui::EndChild();
@@ -551,10 +559,12 @@ namespace CalyxEngine {
 
 		ID3D12GraphicsCommandList* cmd = GraphicsGroup::GetInstance()->GetCommandList().Get();
 		if(cmd && previewTarget_) {
+			// SRVを参照するRoot Tableが有効になるよう、Engine共通Descriptor Heapを設定する。
 			if(ID3D12DescriptorHeap* heap = DescriptorAllocator::GetHeap(DescriptorUsage::CbvSrvUav)) {
 				cmd->SetDescriptorHeaps(1, &heap);
 			}
 
+			// Editor上のMaterial値をPreview用定数へ変換し、オフスクリーン描画へ反映する。
 			previewMaterialBuffer_.TransferData(BuildPreviewMaterial(material));
 			previewTarget_->Clear(cmd);
 			previewTarget_->SetRenderTarget(cmd);
@@ -565,8 +575,10 @@ namespace CalyxEngine {
 			cmd->SetGraphicsRootDescriptorTable(1, ResolvePreviewTexture(material));
 			cmd->SetGraphicsRootDescriptorTable(2, ResolvePreviewTextureTable(material));
 			cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			// 頂点バッファを持たないFullscreen TriangleでMaterialの出力色を確認する。
 			cmd->DrawInstanced(3, 1, 0, 0);
 
+			// ImGuiがSRVとして参照できる状態へ遷移してからPreview画像を公開する。
 			previewTarget_->TransitionTo(cmd, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		}
 
@@ -1257,6 +1269,7 @@ namespace CalyxEngine {
 	void MaterialNodeEditorPanel::EnsureOutputNode(MaterialAsset& material) {
 		const ShaderGraphSchema& schema = ShaderGraphNodeRegistry::Get();
 
+		// Registryの現行Schemaを既存ノードへ適用し、追加されたピンを互換補完する。
 		for(auto& node : material.graph.nodes) {
 			if(const ShaderGraphNodeSchema* schemaNode = schema.Find(node.type)) {
 				EnsureSchemaPins(material, node, *schemaNode);
@@ -1282,6 +1295,7 @@ namespace CalyxEngine {
 				});
 
 			if(hasSurfaceLink) {
+				// 新しいSurface接続が成立したGraphでは旧Outputピンと関連リンクを除去する。
 				std::vector<int32_t> removedPinIds;
 				for(const auto& pin : node.inputs) {
 					if(IsLegacyOutputPin(pin.name)) {
@@ -1308,6 +1322,7 @@ namespace CalyxEngine {
 			ensureInput("Emissive Intensity", NodePinTypes::Float);
 			return;
 		}
+		// Outputが存在しない旧Assetには、Graph評価の終端となる最小Outputを追加する。
 		Node node;
 		node.id		  = material.graph.AllocateId();
 		node.type	  = "Output";
@@ -1322,6 +1337,7 @@ namespace CalyxEngine {
 		bool hasObjectTexture = false;
 		for(Node& node : material.graph.nodes) {
 			if(node.type == "ObjectTexture") {
+				// ObjectTextureはMaterialごとに一つだけ許可し、重複ノードは通常Textureへ移行する。
 				if(!hasObjectTexture) {
 					hasObjectTexture = true;
 				} else if(GetGuidProperty(node, "textureGuid").isValid()) {
@@ -1341,6 +1357,7 @@ namespace CalyxEngine {
 				return pin.name == "Value" && pin.type == NodePinTypes::Float;
 			});
 			if(!hasValueOutput) {
+				// 旧TextureSampleへ輝度値出力を補い、新しいFloat接続を利用可能にする。
 				node.outputs.push_back({material.graph.AllocateId(), "Value", NodePinKind::Output, NodePinTypes::Float});
 				changed = true;
 			}
@@ -1349,6 +1366,7 @@ namespace CalyxEngine {
 	}
 
 	Vector4 MaterialNodeEditorPanel::EvaluateColor(const MaterialAsset& material, int32_t inputPinId, const Vector4& fallback) const {
+		// 対象入力へ接続された上流ノードを再帰評価し、Editor Preview用の代表色を求める。
 		for(const auto& link : material.graph.links) {
 			if(link.toPinId != inputPinId) continue;
 			const Node*	   fromNode = nullptr;
@@ -1366,6 +1384,7 @@ namespace CalyxEngine {
 	}
 
 	float MaterialNodeEditorPanel::EvaluateFloat(const MaterialAsset& material, int32_t inputPinId, float fallback) const {
+		// Float演算ノードを上流へ辿り、リンクがない入力にはノード種別ごとの既定値を使用する。
 		for(const auto& link : material.graph.links) {
 			if(link.toPinId != inputPinId) continue;
 			const Node*	   fromNode = nullptr;
@@ -1393,6 +1412,7 @@ namespace CalyxEngine {
 					   EvaluateFloat(material, fromNode->inputs[1].id, 1.0f);
 			}
 			if(fromNode->type == "DivideFloat") {
+				// Preview評価でNaNや無限大を発生させないよう、ゼロ除算だけを微小値へ補正する。
 				const float b = EvaluateFloat(material, fromNode->inputs[1].id, 1.0f);
 				const float denominator = std::abs(b) < 0.0001f ? (b < 0.0f ? -0.0001f : 0.0001f) : b;
 				return EvaluateFloat(material, fromNode->inputs[0].id, fallback) / denominator;

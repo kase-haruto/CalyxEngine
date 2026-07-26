@@ -8,6 +8,12 @@
 #include <vector>
 
 namespace CalyxEngine {
+	/*-----------------------------------------------------------------------------------------
+	 * PostEffectNodeEditorPanel
+	 * - PostEffect Graphの構築とPreset編集を行うEditor専用パネルクラス
+	 * - Node編集、実行順抽出、保存読込、Runtime Graphへの反映を担当する
+	 * - PostEffect用GPUリソースの生成と所有は各Passへ委譲する
+	 *---------------------------------------------------------------------------------------*/
 	class PostEffectNodeEditorPanel : public IEngineUI {
 	public:
 		PostEffectNodeEditorPanel();

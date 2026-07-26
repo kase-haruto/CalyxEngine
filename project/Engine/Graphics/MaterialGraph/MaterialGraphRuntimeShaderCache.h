@@ -12,6 +12,11 @@
 #include <wrl.h>
 
 namespace CalyxEngine {
+	/*-----------------------------------------------------------------------------------------
+	 * MaterialGraphRuntimeShader
+	 * - Material Graphから生成したRuntime Shaderとコンパイル結果を保持するデータ構造
+	 * - DXC Bytecode、HLSL、Hash、診断情報、Fallback状態を管理する
+	 *---------------------------------------------------------------------------------------*/
 	struct MaterialGraphRuntimeShader {
 		Microsoft::WRL::ComPtr<IDxcBlob> pixelShader;
 		std::string hlsl;
@@ -23,6 +28,12 @@ namespace CalyxEngine {
 		bool fallbackUsed = false;
 	};
 
+	/*-----------------------------------------------------------------------------------------
+	 * MaterialGraphRuntimeShaderCache
+	 * - Material Graphから生成したPixel ShaderをHash単位で再利用するCacheクラス
+	 * - Graph検証、DXCコンパイル、直近成功ShaderへのFallbackを担当する
+	 * - Material Assetおよび描画Pipelineの所有は担当しない
+	 *---------------------------------------------------------------------------------------*/
 	class MaterialGraphRuntimeShaderCache {
 	public:
 		MaterialGraphRuntimeShader GetOrCompileObject3DPixelShader(MaterialAsset& material) {

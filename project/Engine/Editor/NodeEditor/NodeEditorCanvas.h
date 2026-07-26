@@ -9,11 +9,19 @@
 #include <unordered_set>
 
 namespace CalyxEngine {
+	/*-----------------------------------------------------------------------------------------
+	 * NodeEditorCanvas
+	 * - 汎用NodeGraphをImGui Node Editor上で編集するEditor専用クラス
+	 * - Node、Pin、Linkの描画と編集イベントの収集を担当する
+	 * - 用途固有の評価処理やGraphリソースの所有は担当しない
+	 *---------------------------------------------------------------------------------------*/
 	class NodeEditorCanvas {
-	public:
-		/////////////////////////////////////////////////////////////////////////////////////////
-		//		用途別の接続規則と表示を注入するPolicy
-		/////////////////////////////////////////////////////////////////////////////////////////
+public:
+		/*-----------------------------------------------------------------------------------------
+		 * Policy
+		 * - NodeEditorCanvasへ用途固有の接続規則と外観を注入するデータ構造
+		 * - Callbackの呼び出し先とそのライフタイムは所有しない
+		 *---------------------------------------------------------------------------------------*/
 		struct Policy {
 			std::function<bool(const NodePin&, const NodePin&)> canConnect;
 			std::function<ImVec4(const Node&)> nodeHeaderColor;
@@ -25,6 +33,11 @@ namespace CalyxEngine {
 			Background,
 			Node
 		};
+		/*-----------------------------------------------------------------------------------------
+		 * ContextMenu
+		 * - Node Editorから要求されたContext Menuの情報を保持するデータ構造
+		 * - Menu種別、Canvas座標、対象Node IDを呼び出し側へ通知する
+		 *---------------------------------------------------------------------------------------*/
 		struct ContextMenu {
 			ContextMenuType type = ContextMenuType::Background;
 			Vector2 canvasPosition{};

@@ -8,6 +8,11 @@
 #include <string>
 #include <externals/nlohmann/json.hpp>
 
+/*-----------------------------------------------------------------------------------------
+ * DirectionalLightConfig
+ * - Directional Lightのシーン保存設定を保持するデータ構造
+ * - 光色、照射方向、強度と共通SceneObject設定を保持する
+ *---------------------------------------------------------------------------------------*/
 struct DirectionalLightConfig : public SceneObjectConfig {
 	CalyxEngine::Vector4 color;     //< 光の色
 	CalyxEngine::Vector3 direction; //< 光の方向

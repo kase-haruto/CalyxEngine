@@ -29,6 +29,7 @@ PointLightActor::~PointLightActor() {
 }
 
 void PointLightActor::Initialize() {
+	// Actor本体とLightデータを分離したまま、現在SceneのLightLibraryへ描画用Lightを登録する。
 	EnsurePointLight();
 	if(pointLight_) {
 		pointLight_->Initialize();
@@ -43,6 +44,7 @@ void PointLightActor::AlwaysUpdate(float dt) {
 }
 
 void PointLightActor::Destroy() {
+	// Actor破棄より先にLibraryの非所有参照を外し、次フレームのLighting参照を無効化する。
 	UnregisterPointLight();
 	Actor::Destroy();
 }
@@ -77,6 +79,7 @@ void PointLightActor::ApplyDerivedConfigFromJson([[maybe_unused]] const nlohmann
 	EnsurePointLight();
 	if(!pointLight_) return;
 
+	// 欠落項目は既定値を維持し、旧Scene/Presetとの後方互換性を保つ。
 	if(derived->contains("lightLocalPosition")) {
 		derived->at("lightLocalPosition").get_to(lightLocalPosition_);
 	}
@@ -94,6 +97,7 @@ void PointLightActor::ApplyDerivedConfigFromJson([[maybe_unused]] const nlohmann
 		SetLightDecay(derived->at("decay").get<float>());
 	}
 
+	// 読込後のActor配置とLocal Offsetから、実際に描画されるLight座標を再計算する。
 	SyncLightTransform();
 }
 
@@ -101,6 +105,7 @@ void PointLightActor::ExtractDerivedConfigToJson([[maybe_unused]] nlohmann::json
 												 nlohmann::json& derived) const {
 	if(!pointLight_) return;
 
+	// TransientなPointLight Object自体は保存せず、Actorから再構築できる設定だけを抽出する。
 	const PointLightData& data = pointLight_->GetLightData();
 	derived["lightLocalPosition"] = lightLocalPosition_;
 	derived["color"]			  = data.color;
@@ -137,6 +142,7 @@ void PointLightActor::SetLightDecay(float decay) {
 void PointLightActor::EnsurePointLight() {
 	if(pointLight_) return;
 
+	// 補助LightはActorが共有所有し、Sceneの通常Object一覧やPicking対象には含めない。
 	pointLight_ = std::make_shared<PointLight>("PointLight");
 	pointLight_->SetTransient(true);
 	pointLight_->SetEnablePicking(false);
@@ -145,6 +151,7 @@ void PointLightActor::EnsurePointLight() {
 
 void PointLightActor::RegisterPointLight() {
 	if(!pointLight_) return;
+	// 現在ContextのLibraryへshared_ptrを渡し、Actorの生存中だけLighting対象にする。
 	if(auto* ctx = SceneContext::Current()) {
 		if(auto* lightLibrary = ctx->GetLightLibrary()) {
 			lightLibrary->AddPointLight(pointLight_);
@@ -164,6 +171,7 @@ void PointLightActor::UnregisterPointLight() {
 void PointLightActor::SyncLightTransform() {
 	if(!pointLight_) return;
 
+	// ActorのWorld座標へLocal Offsetを加算し、親Transformを持つ場合も正しい位置へ配置する。
 	worldTransform_.Update();
 	auto& lightTransform = pointLight_->GetWorldTransform();
 	lightTransform.translation = worldTransform_.GetWorldPosition() + lightLocalPosition_;

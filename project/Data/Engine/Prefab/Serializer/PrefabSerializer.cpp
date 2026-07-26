@@ -131,6 +131,7 @@ namespace {
 	}
 
 	void CollectObjectsRecursive(SceneObject* obj, std::vector<SceneObject*>& out) {
+		// TransientまたはRegistryで非対応の型を除外し、Prefabへ保存可能なHierarchyだけを収集する。
 		if(!obj || obj->IsTransient() || !SceneObjectRegistry::Get().IsPrefabSerializable(obj->GetTypeName())) return;
 		out.push_back(obj);
 		for(const auto& child : obj->GetChildren()) {
@@ -144,6 +145,7 @@ namespace {
 		bool usePrefabSourceGuids) {
 		nlohmann::json bindings = nlohmann::json::array();
 
+		// WorldTransform pointerを保存可能なGUIDへ解決し、Bone追従関係をAssetへ変換する。
 		for(const auto& binding : owner.GetBoneParentBindings()) {
 			if(!binding.target || binding.boneName.empty()) continue;
 
@@ -180,6 +182,7 @@ bool PrefabSerializer::Save(const std::vector<SceneObject*>& roots,
 	std::unordered_set<SceneObject*> prefabRoots;
 	std::unordered_map<Guid, Guid>	 prefabSourceGuidMap;
 	std::vector<SceneObject*>		 prefabObjects;
+	// 保存Rootと配下Objectを先に収集し、GUID RemapやBone参照解決の対象集合を確定する。
 	for(auto* root : roots) {
 		if(!root) continue;
 		prefabRoots.insert(root);
@@ -189,6 +192,7 @@ bool PrefabSerializer::Save(const std::vector<SceneObject*>& roots,
 		}
 	}
 
+	// 親を先に出力する深さ優先順で、Config・Metadata・Serializable Paramを統合する。
 	std::function<void(SceneObject*)> serializeRec;
 	serializeRec = [&](SceneObject* obj) {
 		if(!obj || obj->IsTransient() || !SceneObjectRegistry::Get().IsPrefabSerializable(obj->GetTypeName())) return;
@@ -198,6 +202,7 @@ bool PrefabSerializer::Save(const std::vector<SceneObject*>& roots,
 			cfg->ExtractConfigToJson(j);
 		}
 		WriteSceneObjectMetadata(*obj, j, prefabRoots, options.resetRootTransform, options.usePrefabSourceGuids);
+		// BaseGameObject固有のBone Bindingは対象GUIDへ変換して別項目として保存する。
 		if(auto* owner = dynamic_cast<BaseGameObject*>(obj)) {
 			auto bindings = BuildBoneParentBindingsJson(*owner, prefabObjects, options.usePrefabSourceGuids);
 			if(!bindings.empty()) {
@@ -209,6 +214,7 @@ bool PrefabSerializer::Save(const std::vector<SceneObject*>& roots,
 		if(!serializableParams.empty()) {
 			j["serializableParams"] = std::move(serializableParams);
 		}
+		// InstanceからApplyする場合はScene GUIDをSource GUIDへ戻し、Asset内部参照を安定化する。
 		if(options.usePrefabSourceGuids && !prefabSourceGuidMap.empty()) {
 			RemapJsonGuidStrings(j, prefabSourceGuidMap);
 		}
@@ -233,11 +239,12 @@ std::vector<std::shared_ptr<SceneObject>> PrefabSerializer::Load(const std::stri
 	nlohmann::json jArray;
 	if(!CalyxEngine::JsonUtils::Load(path, jArray)) return {};
 
+	// 保存GUID、新規GUID、生成Objectの対応を保持し、内部参照とHierarchyを後段で復元する。
 	std::unordered_map<Guid, std::shared_ptr<SceneObject>> oldToObject;
 	std::unordered_map<Guid, Guid>						   oldToNewGuid;
 	std::unordered_map<Guid, std::shared_ptr<SceneObject>> guidMap;
 
-	// 1. インスタンス生成と設定適用 + 新 GUID 割り当て
+	// 第一段階で全Instanceを生成し、設定適用と新GUID割当まで完了させる。
 	for(const auto& j : jArray) {
 		std::string typeName = j.value("type", "");
 		if(typeName.empty()) continue;
@@ -245,6 +252,7 @@ std::vector<std::shared_ptr<SceneObject>> PrefabSerializer::Load(const std::stri
 		const nlohmann::json* paramOverrides = j.contains("serializableParams")
 												   ? &j.at("serializableParams")
 												   : nullptr;
+		// Constructor登録Fieldへ保存値を渡すため、Registry生成前にPending Captureを開始する。
 		CalyxEngine::SerializableObject::BeginPendingCapture();
 		std::shared_ptr<SceneObject> sp;
 		try {
@@ -262,6 +270,7 @@ std::vector<std::shared_ptr<SceneObject>> PrefabSerializer::Load(const std::stri
 		}
 		sp->AdoptPendingSerializableParamCapture(paramOverrides);
 
+		// Resource生成前にConfigを適用し、Initializeが保存状態を基準に動作できるようにする。
 		if(auto* cfg = dynamic_cast<IConfigurable*>(sp.get())) {
 			cfg->ApplyConfigFromJson(j);
 		}
@@ -278,6 +287,7 @@ std::vector<std::shared_ptr<SceneObject>> PrefabSerializer::Load(const std::stri
 		} else if(options.preserveGuids) {
 			sp->ClearPrefabLink();
 		}
+		// Initialize中に読み出されるSerializable ParamをCapture範囲内で供給する。
 		sp->BeginSerializableParamCapture(paramOverrides);
 		sp->Initialize();
 		sp->EndSerializableParamCapture();
@@ -297,6 +307,7 @@ std::vector<std::shared_ptr<SceneObject>> PrefabSerializer::Load(const std::stri
 		guidMap[newGuid]	  = sp;
 	}
 
+	// 全Object生成後にSceneObject参照GUIDを新GUIDへ一括変換する。
 	for(auto& [oldGuid, sp] : oldToObject) {
 		(void)oldGuid;
 		if(sp) {
@@ -304,7 +315,7 @@ std::vector<std::shared_ptr<SceneObject>> PrefabSerializer::Load(const std::stri
 		}
 	}
 
-	// 親子リンク復元
+	// 第二段階で新GUID Mapを使って親子関係を復元し、生成順への依存をなくす。
 	for(const auto& j : jArray) {
 		Guid oldChild  = j.value("guid", Guid{});
 		Guid oldParent = j.value("parentGuid", Guid{});
@@ -323,13 +334,14 @@ std::vector<std::shared_ptr<SceneObject>> PrefabSerializer::Load(const std::stri
 			if(parentMapIt == guidMap.end()) continue;
 			auto parentSp = parentMapIt->second;
 			if(parentSp) {
-				// SetParent のみ（children_ は内部で処理される想定）
+				// children一覧はSetParent内部で更新されるため、片側だけを直接変更しない。
 				auto& childTransform = childSp->GetWorldTransform();
 				childSp->SetParent(parentSp, childTransform.inheritScale);
 			}
 		}
 	}
 
+	// 第三段階でBone Bindingを復元し、対象Transformがすべて生成済みであることを保証する。
 	for(const auto& j : jArray) {
 		Guid oldOwner = j.value("guid", Guid{});
 		if(!oldOwner.isValid() || !j.contains("boneParentBindings")) continue;
@@ -363,7 +375,7 @@ std::vector<std::shared_ptr<SceneObject>> PrefabSerializer::Load(const std::stri
 		}
 	}
 
-	// ルートだけでなく、すべてのオブジェクトを返す
+	// 呼び出し側がSceneContextへ全Hierarchyを登録できるよう、Root以外も返却する。
 	std::vector<std::shared_ptr<SceneObject>> allObjects;
 	allObjects.reserve(guidMap.size());
 	for(auto& [g, sp] : guidMap) {

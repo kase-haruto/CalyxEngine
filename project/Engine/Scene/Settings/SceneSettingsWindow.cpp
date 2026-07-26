@@ -10,6 +10,7 @@
 
 namespace {
 	void DrawSortingLayerSettings(SortingLayerSettings& settings) {
+		// 選択状態と入力途中の文字列をWindow再描画間で維持する。
 		static SortingLayerId selectedId = kDefaultSortingLayerId;
 		static std::array<char, 64> newName{};
 		static std::array<char, 64> renameName{};
@@ -22,6 +23,7 @@ namespace {
 			const bool selected = selectedId == layer.id;
 			const std::string label = layer.name + "##SortingLayer" + std::to_string(layer.id);
 			if(ImGui::Selectable(label.c_str(), selected)) {
+				// 選択時に現在名を編集Bufferへ複製し、未確定入力で設定値を変更しない。
 				selectedId = layer.id;
 				renameName.fill('\0');
 				const size_t length = std::min(layer.name.size(), renameName.size() - 1);
@@ -42,6 +44,7 @@ namespace {
 
 		const SortingLayer* selected = settings.FindLayer(selectedId);
 		if(!selected) {
+			// 削除済みIDを保持していた場合は、常に存在する既定Layerへ戻す。
 			selectedId = kDefaultSortingLayerId;
 			selected = settings.FindLayer(selectedId);
 		}
@@ -50,6 +53,7 @@ namespace {
 		ImGui::Separator();
 		ImGui::Text("Selected ID: %u", static_cast<unsigned>(selected->id));
 		const bool isDefault = selected->id == kDefaultSortingLayerId;
+		// 互換描画順の基準となる既定Layerは、名前変更と削除を禁止する。
 		ImGui::BeginDisabled(isDefault);
 		ImGui::InputText("Name", renameName.data(), renameName.size());
 		if(ImGui::Button("Rename") && renameName[0] != '\0') {
@@ -91,6 +95,7 @@ namespace CalyxEngine {
 		}
 
 		ImGui::Text("Scene: %s", context->GetSceneName().c_str());
+		// 設定はSceneContextが所有し、ここでは保存を行わずScene保存処理へ委ねる。
 		ImGui::TextDisabled("Changes are stored when the scene is saved.");
 		ImGui::Separator();
 

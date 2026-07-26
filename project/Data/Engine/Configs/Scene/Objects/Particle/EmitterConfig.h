@@ -18,10 +18,12 @@
 #include <vector>
 
 namespace CalyxEngine {
-	/*------------------------------------------------------------
-	    パーティクル描画で使用するUV変換設定を保持する。
-	    エディタUIやGPUリソースそのものは管理しない。
-	------------------------------------------------------------*/
+	/*-----------------------------------------------------------------------------------------
+	 * ParticleUVSettings
+	 * - Particle描画で使用するUV変換設定を保持するデータ構造
+	 * - Offset、Tiling、Scroll速度、回転角を保存する
+	 * - Editor UIやGPUリソースそのものは管理しない
+	 *---------------------------------------------------------------------------------------*/
 	struct ParticleUVSettings {
 		Vector2 offset{0.0f,0.0f};       //< UVの固定オフセット
 		Vector2 tiling{1.0f,1.0f};       //< UVの拡大率
@@ -31,6 +33,11 @@ namespace CalyxEngine {
 
 	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ParticleUVSettings, offset, tiling, scrollSpeed, rotation)
 
+	/*-----------------------------------------------------------------------------------------
+	 * DirectionConfig
+	 * - Particle生成時の射出方向と速度を保持する設定データ構造
+	 * - 方向への姿勢追従を行うかどうかも管理する
+	 *---------------------------------------------------------------------------------------*/
 	struct DirectionConfig {
 		bool enabled = false;
 		Vector3ParamConfig vector;
@@ -102,6 +109,12 @@ namespace CalyxEngine {
 		return result;
 	}
 
+	/*-----------------------------------------------------------------------------------------
+	 * EmitterConfig
+	 * - Particle Emitterのシリアライズ可能な全設定を保持するデータ構造
+	 * - Transform、生成属性、描画Asset、Noise、Trail、Module設定を管理する
+	 * - Runtime Particle、Descriptor、GPU Bufferの所有は担当しない
+	 *---------------------------------------------------------------------------------------*/
 	struct EmitterConfig {
 		Vector3 offset;
 		CalyxEngine::Vector3 position{};

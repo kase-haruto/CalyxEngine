@@ -8,12 +8,15 @@
 #include <stdexcept>
 
 void OffscreenRenderTarget::Initialize(ID3D12Device* device, uint32_t width, uint32_t height, DXGI_FORMAT format, DescriptorHandle rtvHandle, DescriptorHandle dsvHandle) {
+	// Descriptorは外部Allocatorが所有するため、再生成時にも同じスロットへViewを書き戻す。
 	rtvHandle_ = rtvHandle;
 	dsvHandle_ = dsvHandle;
 
+	// RenderTargetとRasterizerの描画範囲を同じ解像度へ同期する。
 	viewport_ = {0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f};
 	scissorRect_ = {0, 0, static_cast<LONG>(width), static_cast<LONG>(height)};
 
+	// 初回だけWrapperとSRV Descriptorを確保し、Resize時はDescriptor参照を維持して中身を更新する。
 	if(!resource_) {
 		resource_ = std::make_unique<DxGpuResource>();
 		resource_->InitializeAsRenderTarget(device, width, height, format);
@@ -25,8 +28,10 @@ void OffscreenRenderTarget::Initialize(ID3D12Device* device, uint32_t width, uin
 		resource_->UpdateSRV(device);
 	}
 
+	// 作成APIの初期状態とTrackerの認識を一致させ、最初のBarrierを正しく生成する。
 	resource_->SetCurrentState(D3D12_RESOURCE_STATE_RENDER_TARGET);
 
+	// DepthもColorと同じライフタイムで再生成し、Viewportとの解像度不一致を防ぐ。
 	if(!depthResource_) {
 		depthResource_ = std::make_unique<DxGpuResource>();
 		depthResource_->InitializeAsDepthStencil(device, width, height, DXGI_FORMAT_R32_TYPELESS);
@@ -82,6 +87,7 @@ void OffscreenRenderTarget::Clear(ID3D12GraphicsCommandList* commandList) {
 	const float maskClearColor[] = {0.0f, 0.0f, 0.0f, 0.0f};
 
 	if(!mrtResources_.empty()) {
+		// Scene Colorは背景色、補助Targetはマスク用途の透明値で個別に初期化する。
 		mrtResources_[0]->Transition(commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		commandList->ClearRenderTargetView(mrtRtvHandles_[0].cpu, sceneClearColor, 0, nullptr);
 
@@ -90,15 +96,18 @@ void OffscreenRenderTarget::Clear(ID3D12GraphicsCommandList* commandList) {
 			commandList->ClearRenderTargetView(mrtRtvHandles_[i].cpu, maskClearColor, 0, nullptr);
 		}
 	} else {
+		// 単一Targetの場合もClear前に書き込み可能状態へ遷移させる。
 		resource_->Transition(commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		commandList->ClearRenderTargetView(rtvHandle_.cpu, sceneClearColor, 0, nullptr);
 	}
 
+	// 前フレームの深度を持ち越さないよう、Depth Write状態へ戻して最大深度で消去する。
 	depthResource_->Transition(commandList, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 	commandList->ClearDepthStencilView(dsvHandle_.cpu, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 }
 
 void OffscreenRenderTarget::SetRenderTarget(ID3D12GraphicsCommandList* commandList) {
+	// CommandListへ出力領域を記録してから、単一/MRTに応じたDescriptorを設定する。
 	commandList->RSSetViewports(1, &viewport_);
 	commandList->RSSetScissorRects(1, &scissorRect_);
 
@@ -114,6 +123,7 @@ void OffscreenRenderTarget::SetRenderTargetMRT(ID3D12GraphicsCommandList* comman
 	commandList->RSSetViewports(1, &viewport_);
 	commandList->RSSetScissorRects(1, &scissorRect_);
 
+	// OMSetRenderTargetsは連続したCPU Handle配列を要求するため、管理Handleから一時配列を構築する。
 	std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> rtvHandles;
 	rtvHandles.reserve(mrtRtvHandles_.size());
 	for(const auto& handle : mrtRtvHandles_) {
@@ -142,9 +152,11 @@ void OffscreenRenderTarget::TransitionDepthTo(ID3D12GraphicsCommandList* cmdList
 void OffscreenRenderTarget::Resize(uint32_t width, uint32_t height) {
 	auto device = GraphicsGroup::GetInstance()->GetDevice();
 	if(!mrtResources_.empty()) {
+		// 同一解像度ならGPUリソースを作り直さず、不要なDescriptor更新とGPUメモリ確保を避ける。
 		auto desc = mrtResources_[0]->Get()->GetDesc();
 		if(desc.Width == width && desc.Height == height) return;
 
+		// MRTごとのFormatを保存して再初期化し、Attachment構成をResize前後で維持する。
 		std::vector<DXGI_FORMAT> formats;
 		formats.reserve(mrtResources_.size());
 		for(const auto& resource : mrtResources_) {
@@ -170,6 +182,7 @@ void OffscreenRenderTarget::InitializeMRT(ID3D12Device* device, uint32_t width, 
 		throw std::invalid_argument("MRT formats and rtvHandles must have same non-zero size");
 	}
 
+	// Descriptorの所有権は移さず、各Attachmentと対応するHandleの組だけを保持する。
 	mrtRtvHandles_ = rtvHandles;
 	dsvHandle_ = dsvHandle;
 
@@ -178,6 +191,7 @@ void OffscreenRenderTarget::InitializeMRT(ID3D12Device* device, uint32_t width, 
 
 	rtvHandle_ = rtvHandles[0];
 
+	// Formatごとに独立したColor ResourceとRTV/SRVを生成する。
 	mrtResources_.clear();
 	for(size_t i = 0; i < formats.size(); ++i) {
 		auto resource = std::make_unique<DxGpuResource>();
@@ -189,9 +203,11 @@ void OffscreenRenderTarget::InitializeMRT(ID3D12Device* device, uint32_t width, 
 	}
 
 	if(!mrtResources_.empty()) {
+		// 既存の単一Target APIから先頭Attachmentを参照できる互換経路を維持する。
 		resource_ = std::make_unique<DxGpuResource>(*mrtResources_[0]);
 	}
 
+	// 全Color Attachmentで共有するDepth Bufferを同じ解像度へ揃える。
 	if(!depthResource_) {
 		depthResource_ = std::make_unique<DxGpuResource>();
 		depthResource_->InitializeAsDepthStencil(device, width, height, DXGI_FORMAT_R32_TYPELESS);

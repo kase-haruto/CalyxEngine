@@ -8,6 +8,7 @@
 #include <algorithm>
 
 void BloomEffect::Initialize(const PipelineSet& psoSet) {
+	// Pipelineは外部Serviceが管理し、Effectは描画時に利用するSetと定数Bufferだけを保持する。
 	psoSet_ = psoSet;
 	buffer_.Initialize(GraphicsGroup::GetInstance()->GetDevice().Get());
 	ResetParameters();
@@ -16,9 +17,11 @@ void BloomEffect::Initialize(const PipelineSet& psoSet) {
 void BloomEffect::Apply(ID3D12GraphicsCommandList* cmd,
 						D3D12_GPU_DESCRIPTOR_HANDLE inputSRV,
 						IRenderTarget* outputRT) {
+	// 出力TextureをRenderTarget状態へ遷移してからViewport/RTVをCommandListへ設定する。
 	outputRT->GetResource()->Transition(cmd, D3D12_RESOURCE_STATE_RENDER_TARGET);
 	outputRT->SetRenderTarget(cmd);
 
+	// EditorまたはAnimationで変更されたParameterをDraw直前にGPUへ転送する。
 	buffer_.TransferData(param_);
 	psoSet_.SetCommand(cmd);
 
@@ -27,16 +30,18 @@ void BloomEffect::Apply(ID3D12GraphicsCommandList* cmd,
 	auto* offscreenRT = dynamic_cast<OffscreenRenderTarget*>(offscreen);
 
 	if(offscreenRT) {
+		// Bloom MaskをPixel Shaderから読むため、MRT Attachment 1をSRV状態へ遷移する。
 		offscreenRT->TransitionMRTTo(cmd, 1, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	}
 
 	auto* maskResource = offscreenRT ? offscreenRT->GetMRTResource(1) : nullptr;
+	// Maskを提供しないRender構成では不正DescriptorをBindingせず処理を中断する。
 	if(!maskResource) {
 		return;
 	}
 	D3D12_GPU_DESCRIPTOR_HANDLE maskSRV = maskResource->GetSRVGpuHandle();
 
-	// Bind t0: SceneColor, t1: BloomMask
+	// Scene ColorとBloom Maskを所定のRoot ParameterへBindingしてFullscreen描画する。
 	cmd->SetGraphicsRootDescriptorTable(0, inputSRV);
 	cmd->SetGraphicsRootDescriptorTable(1, maskSRV);
 	buffer_.SetCommand(cmd, 2);
@@ -78,6 +83,7 @@ nlohmann::json BloomEffect::SaveParameters() const {
 }
 
 void BloomEffect::LoadParameters(const nlohmann::json& params) {
+	// 各Keyの型を検証し、欠落値は現在Parameterを維持して旧Presetを読み込む。
 	if(params.contains("intensity") && params["intensity"].is_number()) {
 		SetIntensity(params["intensity"].get<float>());
 	}
@@ -90,6 +96,7 @@ void BloomEffect::LoadParameters(const nlohmann::json& params) {
 	if(params.contains("radius") && params["radius"].is_number()) {
 		SetRadius(params["radius"].get<float>());
 	}
+	// Tintは3要素配列だけを受理し、Shaderで安全なHDR色範囲へClampする。
 	if(auto it = params.find("tint"); it != params.end() && it->is_array() && it->size() == 3) {
 		param_.tint.x = std::clamp(it->at(0).get<float>(), 0.0f, 8.0f);
 		param_.tint.y = std::clamp(it->at(1).get<float>(), 0.0f, 8.0f);
