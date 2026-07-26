@@ -13,6 +13,7 @@ namespace CalyxEngine {
 		auto* library = context.GetObjectLibrary();
 		if(!library) return;
 
+		// Preview用Camera/LightをTransient化し、Prefab Assetへの混入とRaycast選択を防ぐ。
 		for(auto* object : library->GetAllObjectsRaw()) {
 			if(!object) continue;
 
@@ -32,6 +33,7 @@ namespace CalyxEngine {
 		auto* library = context.GetObjectLibrary();
 		if(!library) return roots;
 
+		// 保存可能かつ親を持たないObjectだけをSerializerのRootとして収集する。
 		for(auto* object : library->GetAllObjectsRaw()) {
 			if(!object || !object->IsSerializable()) continue;
 			if(object->GetParent()) continue;
@@ -41,10 +43,12 @@ namespace CalyxEngine {
 	}
 
 	void PrefabEditContextUtils::NormalizeRoots(SceneContext& context) {
+		// 保存前にUtility属性を再確認し、Prefab RootをAsset原点へ揃える。
 		MarkEditorUtilityObjects(context);
 		for(auto* root : GetSerializableRoots(context)) {
 			if(!root) continue;
 			auto& transform = root->GetWorldTransform();
+			// Scene上の配置はInstance側が持つため、Prefab AssetにはRootの移動量を保存しない。
 			transform.translation = CalyxEngine::Vector3::Zero();
 			transform.Update();
 		}

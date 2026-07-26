@@ -45,12 +45,14 @@ namespace CalyxEngine {
 	void ViewportSelectionController::UpdateInput() {
 		if(!viewport_ || !viewport_->IsShow()) return;
 
+		// ImGuiのScreen座標をViewport内のLocal座標へ変換し、Render解像度とUI配置を分離する。
 		const CalyxEngine::Vector2 origin = viewport_->GetPosition();
 		const CalyxEngine::Vector2 size = viewport_->GetSize();
 		const ImVec2 mouse = ImGui::GetMousePos();
 		const CalyxEngine::Vector2 local{mouse.x - origin.x, mouse.y - origin.y};
 		const bool inViewport = local.x >= 0.0f && local.y >= 0.0f && local.x <= size.x && local.y <= size.y;
 
+		// Click時点では単一選択と矩形選択を確定せず、Drag距離で後から判定する。
 		if(ImGui::IsMouseClicked(ImGuiMouseButton_Left) && inViewport) {
 			rangeSelectCandidate_ = true;
 			rangeSelecting_ = false;
@@ -61,6 +63,7 @@ namespace CalyxEngine {
 		if(rangeSelectCandidate_ && ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
 			rangeSelectEnd_ = local;
 			const CalyxEngine::Vector2 delta = rangeSelectEnd_ - rangeSelectStart_;
+			// 小さな手振れをClickとして扱うため、6pxを超えた場合だけ矩形選択へ遷移する。
 			if(delta.LengthSquared() > 36.0f) {
 				rangeSelecting_ = true;
 			}
@@ -82,6 +85,7 @@ namespace CalyxEngine {
 		const CalyxEngine::Vector2 origin = viewport_->GetPosition();
 		const ImVec2 a{origin.x + rangeSelectStart_.x, origin.y + rangeSelectStart_.y};
 		const ImVec2 b{origin.x + rangeSelectEnd_.x, origin.y + rangeSelectEnd_.y};
+		// Panel内容にClipされないForegroundへ描画し、Drag中の選択範囲を常に可視化する。
 		auto* drawList = ImGui::GetForegroundDrawList();
 		drawList->AddRectFilled(a, b, IM_COL32(255, 160, 40, 45));
 		drawList->AddRect(a, b, IM_COL32(255, 160, 40, 220), 0.0f, 0, 1.5f);
@@ -95,6 +99,7 @@ namespace CalyxEngine {
 		SceneContext* ctx = SceneContext::Current();
 		if(!ctx || !viewport_) return;
 
+		// Camera行列とViewport Local座標からWorld Rayを復元し、Physics形状で選択対象を判定する。
 		CalyxEngine::Vector2 mouseLocal = mouse - viewport_->GetPosition();
 		Ray ray = Raycastor::ConvertMouseToRay(mouseLocal, view, proj, viewportSize);
 
@@ -110,6 +115,7 @@ namespace CalyxEngine {
 		const auto* lib = current ? current->GetObjectLibrary() : nullptr;
 		if(!lib) return nullptr;
 
+		// TransientやEditor上で選択禁止のObjectをPhysics Raycastへ渡さない。
 		const auto& allObjects = lib->GetAllObjectsRaw();
 		std::vector<SceneObject*> pickableObjects;
 		pickableObjects.reserve(allObjects.size());
@@ -131,17 +137,20 @@ namespace CalyxEngine {
 		auto* camera = CameraManager::GetDebug();
 		if(!camera) return false;
 
+		// World座標をClip空間へ変換し、矩形選択とEditor Icon判定で共通利用する。
 		const CalyxEngine::Vector3 worldPos = object->GetWorldTransform().GetWorldPosition();
 		const CalyxEngine::Matrix4x4 viewProj = camera->GetViewProjectionMatrix();
 		const CalyxEngine::Vector4 clip = CalyxEngine::Vector4::Transform(CalyxEngine::Vector4(worldPos, 1.0f), viewProj);
 		if(std::abs(clip.w) <= 0.0001f) return false;
 
+		// Perspective divide後、深度範囲外のObjectは画面外として除外する。
 		const float ndcX = clip.x / clip.w;
 		const float ndcY = clip.y / clip.w;
 		const float ndcZ = clip.z / clip.w;
 		if(ndcZ < 0.0f || ndcZ > 1.0f) return false;
 
 		const CalyxEngine::Vector2 size = viewport_->GetSize();
+		// DirectXのNDCを左上原点のViewport Local座標へ変換するため、Y軸を反転する。
 		outLocal.x = (ndcX * 0.5f + 0.5f) * size.x;
 		outLocal.y = (0.5f - ndcY * 0.5f) * size.y;
 		return outLocal.x >= 0.0f && outLocal.y >= 0.0f && outLocal.x <= size.x && outLocal.y <= size.y;
@@ -159,6 +168,7 @@ namespace CalyxEngine {
 		const float maxX = (std::max)(startLocal.x, endLocal.x);
 		const float maxY = (std::max)(startLocal.y, endLocal.y);
 
+		// Ctrl追加選択時だけ既存集合を引き継ぎ、通常Dragでは新しい集合へ置換する。
 		std::vector<std::shared_ptr<SceneObject>> selected;
 		if(append && callbacks_.getSelectedObjects) {
 			selected = callbacks_.getSelectedObjects();
@@ -192,6 +202,7 @@ namespace CalyxEngine {
 
 		if(relativeX < 0 || relativeY < 0 || relativeX > size.x || relativeY > size.y) return;
 
+		// Geometryを持たないCamera/Lightは、画面上のEditor Iconとの距離で最初に判定する。
 		if(sceneManager_) {
 			SceneObject* iconHit = nullptr;
 			float bestIconDistanceSq = kEditorIconPickRadius * kEditorIconPickRadius;
@@ -216,7 +227,9 @@ namespace CalyxEngine {
 				}
 			}
 
+			// 通常描画ObjectはPicking BufferのIDを読み、複雑なMeshでも正確かつ高速に選択する。
 			if(auto* pickingPass = sceneManager_->GetPickingPass()) {
+				// UI表示SizeとPicking Texture解像度が異なるため、Pixel座標へScale変換する。
 				float scaleX = static_cast<float>(pickingPass->GetWidth()) / size.x;
 				float scaleY = static_cast<float>(pickingPass->GetHeight()) / size.y;
 
@@ -235,6 +248,7 @@ namespace CalyxEngine {
 			}
 		}
 
+		// Picking Passで特定できない場合のみPhysics RaycastへFallbackする。
 		auto* debugCamera = CameraManager::GetDebug();
 		if(!debugCamera) return;
 

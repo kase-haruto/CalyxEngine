@@ -57,9 +57,11 @@ void OutlineRenderer::Render(ID3D12GraphicsCommandList* cmdList,
 							 const ModelRenderer&		modelRenderer) {
 	if(!cmdList || !device || !rt || !psoService || !camera) return;
 
+	// 出力Viewportと内部Bufferの解像度を揃え、輪郭Sample位置のずれを防ぐ。
 	const auto viewport = rt->GetViewport();
 	EnsureResources(device, viewport);
 	compositeConstants_ = CompositeConstants{};
+	// 対象が存在する場合だけCompositeし、空の場合は呼び出し元のRenderTargetを復元する。
 	if(RenderNormalBuffer(cmdList, device, rt, psoService, camera, modelRenderer)) {
 		Composite(cmdList, rt, psoService);
 	} else {
@@ -78,6 +80,7 @@ void OutlineRenderer::RenderSelectionHighlight(ID3D12GraphicsCommandList* cmdLis
 
 	const auto viewport = rt->GetViewport();
 	EnsureResources(device, viewport);
+	// Editor選択表示はObject固有設定より優先し、一定の橙色と太さで識別可能にする。
 	compositeConstants_ = CompositeConstants{};
 	compositeConstants_.color = {1.0f, 0.5f, 0.0f, 1.0f};
 	compositeConstants_.thickness = 2.0f;
@@ -105,11 +108,13 @@ void OutlineRenderer::EnsureResources(ID3D12Device* device, const D3D12_VIEWPORT
 	const uint32_t width = static_cast<uint32_t>(viewport.Width);
 	const uint32_t height = static_cast<uint32_t>(viewport.Height);
 	if(width == 0 || height == 0) return;
+	// 解像度とResourceが有効なら再確保せず、毎フレームのGPUメモリ再生成を避ける。
 	if(width_ == width && height_ == height && normalResource_.Get() && compositeResource_.Get()) return;
 
 	width_ = width;
 	height_ = height;
 
+	// Descriptor HandleはResizeを跨いで保持し、Heap上の参照位置を安定させる。
 	if(!normalRtv_.IsValid()) {
 		normalRtv_ = DescriptorAllocator::Allocate(DescriptorUsage::Rtv);
 	}
@@ -120,9 +125,11 @@ void OutlineRenderer::EnsureResources(ID3D12Device* device, const D3D12_VIEWPORT
 		selectionDepthDsv_ = DescriptorAllocator::Allocate(DescriptorUsage::Dsv);
 	}
 
+	// Normal Bufferは符号付き法線を0～1へEncodeするため、無効領域を中央値で初期化する。
 	const float clearNormal[] = {0.5f, 0.5f, 0.5f, 0.0f};
 	normalResource_.InitializeAsRenderTarget(device, width_, height_, kNormalFormat, L"OutlineNormal", clearNormal);
 	normalResource_.CreateRTV(device, normalRtv_.cpu);
+	// SRVは初回のみ確保し、Resize時は同一Descriptorを新Resourceへ差し替える。
 	if(!normalResource_.GetSRVGpuHandle().ptr) {
 		normalResource_.CreateSRV(device);
 	} else {
@@ -130,6 +137,7 @@ void OutlineRenderer::EnsureResources(ID3D12Device* device, const D3D12_VIEWPORT
 	}
 	normalResource_.SetCurrentState(D3D12_RESOURCE_STATE_RENDER_TARGET);
 
+	// Composite結果は最終ColorへAlpha合成できる標準UNORM形式で保持する。
 	compositeResource_.InitializeAsRenderTarget(device, width_, height_, DXGI_FORMAT_R8G8B8A8_UNORM, L"OutlineComposite");
 	compositeResource_.CreateRTV(device, compositeRtv_.cpu);
 	if(!compositeResource_.GetSRVGpuHandle().ptr) {
@@ -139,6 +147,7 @@ void OutlineRenderer::EnsureResources(ID3D12Device* device, const D3D12_VIEWPORT
 	}
 	compositeResource_.SetCurrentState(D3D12_RESOURCE_STATE_RENDER_TARGET);
 
+	// Editor選択輪郭はScene Depthから独立させ、遮蔽状態にかかわらず選択対象全体を抽出する。
 	selectionDepthResource_.InitializeAsDepthStencil(device, width_, height_, DXGI_FORMAT_D32_FLOAT, L"OutlineSelectionDepth");
 	selectionDepthResource_.CreateDSV(device, selectionDepthDsv_.cpu);
 	selectionDepthResource_.SetCurrentState(D3D12_RESOURCE_STATE_DEPTH_WRITE);
@@ -151,6 +160,7 @@ bool OutlineRenderer::RenderNormalBuffer(ID3D12GraphicsCommandList* cmdList,
 										 const Camera3d*			 camera,
 										 const ModelRenderer&		 modelRenderer,
 										 const SceneObject*			 targetOwner) {
+	// 前回CompositeでSRV利用したNormal Bufferを書き込み状態へ戻す。
 	normalResource_.Transition(cmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	const float clearNormal[] = {0.5f, 0.5f, 0.5f, 0.0f};
@@ -161,14 +171,17 @@ bool OutlineRenderer::RenderNormalBuffer(ID3D12GraphicsCommandList* cmdList,
 	cmdList->RSSetViewports(1, &viewport);
 	cmdList->RSSetScissorRects(1, &scissor);
 	if(targetOwner) {
+		// 単一選択表示では専用Depthを消去し、対象自身の前後関係だけを反映する。
 		selectionDepthResource_.Transition(cmdList, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		cmdList->ClearDepthStencilView(selectionDepthDsv_.cpu, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 	} else if(IsDitherEnabledForTarget(*rt)) {
+		// Camera近傍Dither対象をDepthへ先行描画し、Fade中に輪郭だけが残ることを防ぐ。
 		RenderDitherDepthOccluders(cmdList, device, rt, psoService, camera, modelRenderer);
 	}
 	auto dsv = targetOwner ? selectionDepthDsv_.cpu : rt->GetDSV();
 	cmdList->OMSetRenderTargets(1, &normalRtv_.cpu, FALSE, &dsv);
 
+	// Rendererが収集済みの可視Instanceを再利用し、Scene全体の再走査を避ける。
 	std::vector<ModelRenderer::RenderInstance> staticInstances;
 	std::vector<ModelRenderer::RenderInstance> skinnedInstances;
 	modelRenderer.CollectVisibleStatic(staticInstances);
@@ -176,6 +189,7 @@ bool OutlineRenderer::RenderNormalBuffer(ID3D12GraphicsCommandList* cmdList,
 	bool hasOutlineSettings = false;
 	bool drewAny = false;
 
+	// 複数対象を同時描画する場合は最大Thicknessを採用し、細い輪郭による欠落を防ぐ。
 	auto applyOwnerSettings = [&](const SceneObject& owner) {
 		const auto& settings = owner.GetOutlineSettings();
 		if(!hasOutlineSettings) {
@@ -187,6 +201,7 @@ bool OutlineRenderer::RenderNormalBuffer(ID3D12GraphicsCommandList* cmdList,
 		}
 	};
 
+	// 同じModelを共有するStatic InstanceをBatch化し、Outline PassのDraw Callを抑える。
 	std::vector<StaticBatch> staticBatches;
 	for(const auto& inst : staticInstances) {
 		if(!inst.model || !inst.transform || !inst.owner) continue;

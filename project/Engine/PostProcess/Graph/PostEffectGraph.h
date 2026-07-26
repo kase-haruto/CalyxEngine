@@ -14,6 +14,36 @@ namespace CalyxEngine {
 }
 class PostProcessCollection;
 class IRenderTarget;
+class PostEffectGraph;
+
+/*-----------------------------------------------------------------------------------------
+ * IPostEffectExecutionState
+ * - PostEffectGraphの実行方式を定義するStateインターフェース
+ * - GPUリソースを所有せず、線形実行とノード実行の振る舞いを派生Stateへ委譲
+ *---------------------------------------------------------------------------------------*/
+class IPostEffectExecutionState {
+public:
+	/** \brief ポストエフェクト実行Stateの基底デストラクタ */
+	virtual ~IPostEffectExecutionState() = default;
+
+	/**
+	 * \brief State固有の手順でポストエフェクトを実行する
+	 * \param graph 実行データとGPUリソース参照を保持するGraph
+	 * \param cmd 描画命令を記録するコマンドリスト
+	 * \param input Scene描画結果を保持する入力リソース
+	 * \param finalTarget 最終結果を書き込むRenderTarget
+	 * \param dxCore 一時RenderTargetを提供するDirectX12基盤
+	 */
+	virtual void Execute(
+		PostEffectGraph& graph,
+		ID3D12GraphicsCommandList* cmd,
+		DxGpuResource* input,
+		IRenderTarget* finalTarget,
+		CalyxEngine::DxCore* dxCore) const = 0;
+};
+
+class LinearPostEffectExecutionState;
+class NodePostEffectExecutionState;
 
 /*-----------------------------------------------------------------------------------------
  * PostEffectGraph
@@ -26,8 +56,7 @@ public:
 	 * \brief ポストエフェクトの登録先を参照して実行グラフを構築する
 	 * \param postProcessCollection 所有権を持たないポストエフェクト管理機能
 	 */
-	PostEffectGraph(PostProcessCollection* postProcessCollection)
-		: postProcessCollection_(postProcessCollection){}
+	explicit PostEffectGraph(PostProcessCollection* postProcessCollection);
 
 	/**
 	 * \brief 有効なパス一覧から従来互換の線形実行順を設定する
@@ -55,6 +84,8 @@ public:
 				 CalyxEngine::DxCore* dxCore);
 
 private:
+	friend class LinearPostEffectExecutionState;
+	friend class NodePostEffectExecutionState;
 	/*-----------------------------------------------------------------------------------------
 	 * GraphNode
 	 * - JSONから復元した1個のポストエフェクトノードを保持する内部データ構造
@@ -100,7 +131,7 @@ private:
 
 	std::vector<IPostEffectPass*> passes_;                         //< 所有権を持たない線形実行用Effect Pass一覧
 	PostProcessCollection* postProcessCollection_ = nullptr;       //< 所有権を持たないEffect Pass登録先
-	bool useNodeGraph_ = false;                                    //< ノードグラフ方式で実行するか
+	const IPostEffectExecutionState* executionState_ = nullptr;    //< 所有権を持たない現在の静的実行State
 	std::unordered_map<int32_t, GraphNode> graphNodes_;            //< ノードIDから復元済みノードへの対応表
 	std::unordered_map<int32_t, int32_t> pinOwner_;                //< ピンIDから所有ノードIDへの対応表
 	std::unordered_map<int32_t, int32_t> inputPinToSourceNode_;    //< 入力ピンIDから接続元ノードIDへの対応表

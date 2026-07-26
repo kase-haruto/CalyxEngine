@@ -7,10 +7,43 @@
 #include <algorithm>
 #include <vector>
 
+/*-----------------------------------------------------------------------------------------
+ * LinearPostEffectExecutionState
+ * - 従来互換の線形ポストエフェクト実行を担当するState
+ * - 一時RenderTargetを交互に使用し、GPUリソース自体は所有しない
+ *---------------------------------------------------------------------------------------*/
+class LinearPostEffectExecutionState final : public IPostEffectExecutionState {
+public:
+	/** \brief 登録順にPassを実行して最終Targetへコピーする */
+	void Execute(PostEffectGraph& graph, ID3D12GraphicsCommandList* cmd, DxGpuResource* input,
+				 IRenderTarget* finalTarget, CalyxEngine::DxCore* dxCore) const override;
+};
+
+/*-----------------------------------------------------------------------------------------
+ * NodePostEffectExecutionState
+ * - ノード依存関係を評価するポストエフェクト実行State
+ * - 評価キャッシュと循環検出を実行単位で管理し、GPUリソース自体は所有しない
+ *---------------------------------------------------------------------------------------*/
+class NodePostEffectExecutionState final : public IPostEffectExecutionState {
+public:
+	/** \brief Outputノードから依存関係を評価して最終Targetへコピーする */
+	void Execute(PostEffectGraph& graph, ID3D12GraphicsCommandList* cmd, DxGpuResource* input,
+				 IRenderTarget* finalTarget, CalyxEngine::DxCore* dxCore) const override;
+};
+
+namespace {
+	const LinearPostEffectExecutionState kLinearExecutionState;
+	const NodePostEffectExecutionState kNodeExecutionState;
+}
+
+PostEffectGraph::PostEffectGraph(PostProcessCollection* postProcessCollection)
+	: postProcessCollection_(postProcessCollection),
+	  executionState_(&kLinearExecutionState) {}
+
 void PostEffectGraph::SetPassesFromList(const std::vector<PostEffectSlot>& slots){
 	// 旧形式の線形実行順を再構築するため、前回のPassとノード接続を全て破棄する。
 	passes_.clear();
-	useNodeGraph_ = false;
+	executionState_ = &kLinearExecutionState;
 	graphNodes_.clear();
 	pinOwner_.clear();
 	inputPinToSourceNode_.clear();
@@ -89,33 +122,52 @@ void PostEffectGraph::SetGraphFromJson(const nlohmann::json& root, const std::ve
 		}
 	}
 
-	// Outputノードまで復元できた場合だけノード実行へ切り替える。
-	useNodeGraph_ = outputNodeId_ != 0;
+	// Outputノードまで復元できた場合だけ実行Stateをノード方式へ切り替える。
+	if(outputNodeId_ != 0) executionState_ = &kNodeExecutionState;
 }
 
 void PostEffectGraph::Execute(ID3D12GraphicsCommandList* cmd,
 							  DxGpuResource* input,
 							  IRenderTarget* finalTarget,
 							  CalyxEngine::DxCore* dxCore){
+	// 現在Stateへ実行手順を委譲し、Graph本体は実行方式による条件分岐を持たない。
+	executionState_->Execute(*this, cmd, input, finalTarget, dxCore);
+}
+
+void NodePostEffectExecutionState::Execute(
+	PostEffectGraph& graph,
+	ID3D12GraphicsCommandList* cmd,
+	DxGpuResource* input,
+	IRenderTarget* finalTarget,
+	CalyxEngine::DxCore* dxCore) const {
 	// 全PassがScene入力をSRVとして参照できる状態へ遷移する。
 	input->Transition(cmd, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
-	if(useNodeGraph_){
-		// キャッシュと訪問状態は1回の実行内だけ保持し、フレーム間でDescriptorを使い回さない。
-		std::unordered_map<int32_t, D3D12_GPU_DESCRIPTOR_HANDLE> cache;
-		std::unordered_map<int32_t, bool> visiting;
-		int tempIndex = 0;
-		D3D12_GPU_DESCRIPTOR_HANDLE currentSRV = input->GetSRVGpuHandle();
-		const int32_t sourceNode = FindOutputSourceNode();
-		// Output未接続時はScene入力をそのまま最終コピーへ渡す。
-		if(sourceNode != 0){
-			currentSRV = ExecuteGraphNode(cmd, sourceNode, currentSRV, dxCore, cache, visiting, tempIndex);
-		}
-		// CopyImageの書込先として使用する直前に最終TargetをRender Target状態へ遷移する。
-		finalTarget->GetResource()->Transition(cmd, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		postProcessCollection_->GetEffectByName("CopyImage")->Apply(cmd, currentSRV, finalTarget);
-		return;
+	// キャッシュと訪問状態は1回の実行内だけ保持し、フレーム間でDescriptorを使い回さない。
+	std::unordered_map<int32_t, D3D12_GPU_DESCRIPTOR_HANDLE> cache;
+	std::unordered_map<int32_t, bool> visiting;
+	int tempIndex = 0;
+	D3D12_GPU_DESCRIPTOR_HANDLE currentSRV = input->GetSRVGpuHandle();
+	const int32_t sourceNode = graph.FindOutputSourceNode();
+
+	// Output未接続時はScene入力をそのまま最終コピーへ渡す。
+	if(sourceNode != 0){
+		currentSRV = graph.ExecuteGraphNode(cmd, sourceNode, currentSRV, dxCore, cache, visiting, tempIndex);
 	}
+
+	// CopyImageの書込先として使用する直前に最終TargetをRender Target状態へ遷移する。
+	finalTarget->GetResource()->Transition(cmd, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	graph.postProcessCollection_->GetEffectByName("CopyImage")->Apply(cmd, currentSRV, finalTarget);
+}
+
+void LinearPostEffectExecutionState::Execute(
+	PostEffectGraph& graph,
+	ID3D12GraphicsCommandList* cmd,
+	DxGpuResource* input,
+	IRenderTarget* finalTarget,
+	CalyxEngine::DxCore* dxCore) const {
+	// 全PassがScene入力をSRVとして参照できる状態へ遷移する。
+	input->Transition(cmd, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 	// 線形Passでは入出力Resourceの競合を避けるため、2枚の一時Targetを交互に使用する。
 	auto rt1 = dxCore->GetRenderTargetCollection().Get("PostEffectBuffer1");
@@ -125,10 +177,10 @@ void PostEffectGraph::Execute(ID3D12GraphicsCommandList* cmd,
 	bool useFirstRT = true;
 	D3D12_GPU_DESCRIPTOR_HANDLE currentSRV = input->GetSRVGpuHandle();
 
-	for (size_t i = 0; i < passes_.size(); ++i){
+	for (size_t i = 0; i < graph.passes_.size(); ++i){
 		// 現在の一時TargetをPassの書込先として使用可能にする。
 		currentOutput->GetResource()->Transition(cmd, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		passes_[i]->Apply(cmd, currentSRV, currentOutput);
+		graph.passes_[i]->Apply(cmd, currentSRV, currentOutput);
 
 		// 次のPassが直前の結果をSRVとして読める状態へ戻す。
 		currentOutput->GetResource()->Transition(cmd, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
@@ -142,7 +194,7 @@ void PostEffectGraph::Execute(ID3D12GraphicsCommandList* cmd,
 
 	// 最後に生成されたSRVをViewportまたはSwapChain側の最終Targetへコピーする。
 	finalTarget->GetResource()->Transition(cmd, D3D12_RESOURCE_STATE_RENDER_TARGET);
-	postProcessCollection_->GetEffectByName("CopyImage")->Apply(cmd, currentSRV, finalTarget);
+	graph.postProcessCollection_->GetEffectByName("CopyImage")->Apply(cmd, currentSRV, finalTarget);
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE PostEffectGraph::ExecuteGraphNode(ID3D12GraphicsCommandList* cmd,

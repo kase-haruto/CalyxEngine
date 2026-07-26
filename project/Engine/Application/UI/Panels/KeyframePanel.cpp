@@ -51,6 +51,7 @@ namespace CalyxEngine {
 	void KeyframePanel::Render() {
 		if(!isShow_) return;
 
+		// Scene切替やObject削除で失効したweak_ptrを描画前に除去する。
 		RemoveExpiredTargets();
 
 		if(ImGui::Begin(panelName_.c_str(), &isShow_)) {
@@ -65,6 +66,7 @@ namespace CalyxEngine {
 
 	void KeyframePanel::DrawToolbar() {
 		ImGui::SetNextItemWidth(110.0f);
+		// Toolbar Scrubを全Targetへ適用し、複数ObjectのPreview時刻を揃える。
 		if(ImGui::DragFloat("Time", &timelineTime_, 0.01f, 0.0f, 999.0f, "%.2f")) {
 			for(auto& weak : targets_) {
 				if(auto object = weak.lock()) {
@@ -83,6 +85,7 @@ namespace CalyxEngine {
 		ImGui::DragInt("Samples", &samples_, 1.0f, 1, 240);
 
 		ImGui::SameLine();
+		// 現在のTransformを同一時刻へ記録し、複数TargetのAnimation開始点を同期する。
 		if(ImGui::Button("Add Key To All")) {
 			for(auto& weak : targets_) {
 				if(auto object = weak.lock()) {
@@ -149,6 +152,7 @@ namespace CalyxEngine {
 		ImGui::BeginChild("KeyframeDropTarget", ImVec2(-FLT_MIN, 32.0f), true);
 		ImGui::TextUnformatted("Object2D Tracks");
 
+		// Object2D専用Payloadだけを受理し、3D Objectを誤ってTrackへ登録しない。
 		if(ImGui::BeginDragDropTarget()) {
 			if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(Object2dDropPayloadName)) {
 				if(payload->DataSize == sizeof(SceneObject*)) {
@@ -231,6 +235,7 @@ namespace CalyxEngine {
 			{"Z", TransformKeyframe2dChannel_RotationZ},
 		};
 
+		// Tab選択に応じて表示Channelだけを絞り、Animationデータ自体は変更しない。
 		const TrackRow* rows = allRows;
 		int rowCount = static_cast<int>(sizeof(allRows) / sizeof(allRows[0]));
 		if(ImGui::BeginTabBar("KeyframeTrackTabs")) {
@@ -269,6 +274,7 @@ namespace CalyxEngine {
 			break;
 		}
 
+		// Label領域と時間領域を分離し、横Scroll時も座標変換の基準を一定にする。
 		const float leftWidth = 150.0f;
 		const float rulerHeight = 30.0f;
 		const float objectHeight = 24.0f;
@@ -290,6 +296,7 @@ namespace CalyxEngine {
 		const float duration = (std::max)(0.1f, timelineDuration_);
 		const int safeSamples = (std::max)(1, samples_);
 
+		// Timeline時刻とScreen Xの相互変換を一か所へ集約し、Ruler・Key・Playheadで共有する。
 		auto timeToX = [&](float time) {
 			const float t = (std::max)(0.0f, (std::min)(time / duration, 1.0f));
 			return timelineX + timelineWidth * t;
@@ -312,6 +319,7 @@ namespace CalyxEngine {
 		drawList->AddRectFilled({origin.x, origin.y}, {timelineX, origin.y + rulerHeight}, IM_COL32(45, 45, 45, 255));
 		drawList->AddText({origin.x + 6.0f, origin.y + 8.0f}, IM_COL32(220, 220, 220, 255), "Object");
 
+		// Sample数から補助Gridを生成し、主要目盛だけに時刻Labelを表示する。
 		const float frameStep = duration / static_cast<float>(safeSamples);
 		for(int frame = 0; frame <= safeSamples; ++frame) {
 			const float time = frameStep * static_cast<float>(frame);
@@ -325,6 +333,7 @@ namespace CalyxEngine {
 			}
 		}
 
+		// 描画したRuler上へ透明な操作領域を重ね、Click/DragでScrub可能にする。
 		ImGui::SetCursorScreenPos({timelineX, origin.y});
 		ImGui::InvisibleButton("##timelineRuler", ImVec2(timelineWidth, rulerHeight));
 		if((ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) ||
@@ -343,6 +352,7 @@ namespace CalyxEngine {
 			drawList->AddText({origin.x + 6.0f, objectY + 5.0f}, IM_COL32(235, 235, 235, 255), object->GetDisplayName().c_str());
 			y += objectHeight;
 
+			// ObjectごとにChannel Rowを展開し、各Keyが保持するChannel maskに応じて表示する。
 			for(int row = 0; row < rowCount; ++row) {
 				const float rowY = y;
 				const ImU32 bg = (row % 2 == 0) ? IM_COL32(31, 31, 31, 255) : IM_COL32(36, 36, 36, 255);
@@ -364,6 +374,7 @@ namespace CalyxEngine {
 					timelineTime_ = xToTime(ImGui::GetIO().MousePos.x);
 					applyTimeToAll();
 				}
+				// RowのDouble Clickは該当Channelだけを現在TransformからCaptureする。
 				if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 					timelineTime_ = xToTime(ImGui::GetIO().MousePos.x);
 					auto& animation = object->Get2DTransformAnimation();
@@ -393,6 +404,7 @@ namespace CalyxEngine {
 						timelineTime_ = key.time;
 						applyTimeToAll();
 					}
+					// 右ClickではKey全体でなく表示中Channelのみを削除する。
 					if(ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
 						object->Get2DTransformAnimation().RemoveKeyChannel(key.time, rows[row].channel);
 						ImGui::PopID();
@@ -409,6 +421,7 @@ namespace CalyxEngine {
 			}
 		}
 
+		// 全Trackを貫くPlayheadを最後に描き、KeyやGridより前面へ表示する。
 		const float playheadX = timeToX(timelineTime_);
 		drawList->AddLine({playheadX, origin.y}, {playheadX, y}, IM_COL32(230, 45, 48, 255), 2.0f);
 		drawList->AddTriangleFilled(

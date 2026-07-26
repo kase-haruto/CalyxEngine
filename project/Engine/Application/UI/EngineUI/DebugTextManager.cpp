@@ -14,6 +14,7 @@ void DebugTextManager::AddPopupText(const CalyxEngine::Vector2& position,
 									float					   lifetime,
 									float					   rise) {
 	if(text.empty()) return;
+	// Popupは秒単位の寿命と上昇量を保持し、描画側が現在ageから位置・透明度を計算する。
 	GetInstance().popupTexts_.push_back({position, color, text, lifetime, 0.0f, rise});
 }
 
@@ -27,6 +28,7 @@ const std::vector<DebugTextManager::PopupText>& DebugTextManager::GetPopupTexts(
 
 void DebugTextManager::SetFatalAssert(const FatalAssert& fatal) {
 	auto& instance = GetInstance();
+	// 最初のFatal Assertを保持し、連鎖Assertで原因情報が上書きされるのを防ぐ。
 	if(instance.hasFatalAssert_) return;
 	instance.fatalAssert_ = fatal;
 	instance.hasFatalAssert_ = true;
@@ -48,6 +50,7 @@ void DebugTextManager::RequestBreak() {
 bool DebugTextManager::ConsumeBreakRequest() {
 	auto&	   instance  = GetInstance();
 	const bool requested = instance.breakRequested_;
+	// 要求は一度だけ消費し、Debugger Break後に同じFrameで再発火しないようResetする。
 	instance.breakRequested_ = false;
 	if(requested) {
 		instance.hasFatalAssert_ = false;
@@ -57,6 +60,7 @@ bool DebugTextManager::ConsumeBreakRequest() {
 
 void DebugTextManager::UpdatePopupTexts(float dt) {
 	auto& popups = GetInstance().popupTexts_;
+	// 各Popupの経過秒を進めてから、寿命へ到達した要素をまとめて除去する。
 	for(auto& popup : popups) {
 		popup.age += dt;
 	}
@@ -72,6 +76,7 @@ void DebugTextManager::UpdatePopupTexts(float dt) {
 }
 
 void DebugTextManager::Clear() {
+	// 常設MessageだけをFrame末尾に消去し、寿命管理されるPopupは保持する。
 	GetInstance().messages_.clear();
 }
 

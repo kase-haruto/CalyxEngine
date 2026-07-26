@@ -15,12 +15,14 @@ namespace CalyxEngine {
 	void EditorSelectionCoordinator::Bind(HierarchyPanel* hierarchy,
 										  InspectorPanel* inspector,
 										  SceneObjectEditor* sceneEditor) {
+		// UIとSceneEditorの所有権は各管理層に残し、選択同期先としてのみ参照する。
 		hierarchy_ = hierarchy;
 		inspector_ = inspector;
 		sceneEditor_ = sceneEditor;
 	}
 
 	void EditorSelectionCoordinator::SetSelectedEditor(BaseEditor* editor) {
+		// 専用Editor選択とSceneObject選択は排他的にし、Inspectorの表示責務を曖昧にしない。
 		selectedEditor_ = editor;
 		selectedObjects_.clear();
 
@@ -50,6 +52,7 @@ namespace CalyxEngine {
 			return;
 		}
 
+		// 失効weak_ptrと重複を除いた現在集合を基準に、Ctrl選択相当の追加・解除を行う。
 		auto objects = GetSelectedObjects();
 		auto it = std::find(objects.begin(), objects.end(), object);
 		if(it != objects.end()) {
@@ -64,6 +67,7 @@ namespace CalyxEngine {
 		selectedObjects_.clear();
 		selectedEditor_ = nullptr;
 
+		// nullと重複を除去し、内部はLifetimeを延長しないweak_ptrとして保持する。
 		std::vector<std::shared_ptr<SceneObject>> validObjects;
 		validObjects.reserve(objects.size());
 		for(const auto& object : objects) {
@@ -73,6 +77,7 @@ namespace CalyxEngine {
 			selectedObjects_.push_back(object);
 		}
 
+		// 正規化した同一集合を全Consumerへ渡し、Hierarchy・Inspector・Gizmo間の不一致を防ぐ。
 		SyncPanels(validObjects);
 		SyncSceneContext(validObjects);
 	}
@@ -93,6 +98,7 @@ namespace CalyxEngine {
 			return;
 		}
 
+		// Editor Mode切替後のContextに存在しないObjectを選択から外し、旧Scene参照を残さない。
 		std::vector<std::shared_ptr<SceneObject>> validObjects;
 		for(const auto& object : GetSelectedObjects()) {
 			if(object && context->GetObjectLibrary()->Contains(object)) {
@@ -115,6 +121,7 @@ namespace CalyxEngine {
 			return;
 		}
 
+		// Snapshot中に削除されたObjectはweak_ptrのlock失敗として無視する。
 		std::vector<std::shared_ptr<SceneObject>> validObjects;
 		validObjects.reserve(snapshot.selectedObjects.size());
 		for(const auto& weak : snapshot.selectedObjects) {
@@ -142,6 +149,7 @@ namespace CalyxEngine {
 	}
 
 	std::shared_ptr<SceneObject> EditorSelectionCoordinator::GetPrimarySelectedObject() const {
+		// 最後に追加された有効ObjectをPrimaryとし、InspectorやGizmoの代表Targetへ利用する。
 		for(auto it = selectedObjects_.rbegin(); it != selectedObjects_.rend(); ++it) {
 			if(auto selected = it->lock()) {
 				return selected;
@@ -171,6 +179,7 @@ namespace CalyxEngine {
 			inspector_->SetSelectedObjects(selectedObjects_);
 		}
 		if(sceneEditor_) {
+			// SceneEditorは非所有raw pointer APIのため、Coordinator側の有効shared_ptrから都度構築する。
 			std::vector<SceneObject*> rawObjects;
 			rawObjects.reserve(validObjects.size());
 			for(const auto& object : validObjects) {
@@ -182,6 +191,7 @@ namespace CalyxEngine {
 
 	void EditorSelectionCoordinator::SyncSceneContext(const std::vector<std::shared_ptr<SceneObject>>& validObjects) {
 		if(auto* ctx = SceneContext::Current()) {
+			// RendererのDebug選択表示へ同じ非所有Target集合を反映する。
 			std::vector<SceneObject*> rawObjects;
 			rawObjects.reserve(validObjects.size());
 			for(const auto& object : validObjects) {

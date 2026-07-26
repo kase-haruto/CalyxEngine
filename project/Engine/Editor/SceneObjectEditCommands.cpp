@@ -27,6 +27,7 @@ namespace CalyxEngine {
 			nlohmann::json j;
 			if(!object) return j;
 
+			// Registryから同じ派生型を再生成できる識別子と、Hierarchy復元に必要な共通情報を保存する。
 			j["type"] = std::string(object->GetTypeName());
 			j["guid"] = object->GetGuid();
 			j["name"] = object->GetName();
@@ -39,6 +40,7 @@ namespace CalyxEngine {
 				j["configPath"] = configPath;
 			}
 
+			// 型固有Configを同じSnapshotへ展開し、Undo時に外部Configファイルへ依存しないようにする。
 			if(auto* cfg = dynamic_cast<const IConfigurable*>(object.get())) {
 				nlohmann::json inlineConfig;
 				cfg->ExtractConfigToJson(inlineConfig);
@@ -46,6 +48,7 @@ namespace CalyxEngine {
 					j[it.key()] = it.value();
 				}
 			}
+			// Constructor/Initialize前に必要なSerializable Paramは通常Configと分離して保持する。
 			nlohmann::json serializableParams;
 			object->ExtractSerializableParamsToJson(serializableParams);
 			if(!serializableParams.empty()) {
@@ -62,6 +65,7 @@ namespace CalyxEngine {
 				return;
 			}
 
+			// 親を先に格納する順序を維持し、復元時に全Object生成後の親子接続を可能にする。
 			captured.push_back(object->GetGuid());
 			snapshots.push_back(CaptureObjectJson(object));
 			for(const auto& child : object->GetChildren()) {
@@ -85,6 +89,7 @@ namespace CalyxEngine {
 		void RegisterRestoredObject(SceneContext* ctx, const std::shared_ptr<SceneObject>& object) {
 			if(!ctx || !object) return;
 
+			// SceneContext::AddObjectだけでは更新されない専用Managerの代表参照も復元する。
 			if(auto dir = std::dynamic_pointer_cast<DirectionalLight>(object)) {
 				ctx->GetLightLibrary()->SetDirectionalLight(dir);
 			} else if(auto point = std::dynamic_pointer_cast<PointLight>(object)) {
@@ -106,6 +111,7 @@ namespace CalyxEngine {
 				: ctx_(ctx),
 				  callbacks_(std::move(callbacks)),
 				  name_(std::move(name)) {
+				// 親子同時選択時は親HierarchyだけをSnapshot化し、子の二重保存を防ぐ。
 				std::vector<Guid> selectedGuids;
 				selectedGuids.reserve(targets.size());
 				for(const auto& target : targets) {
@@ -147,6 +153,7 @@ namespace CalyxEngine {
 
 			void DeleteRoots() {
 				if(!ctx_ || !ctx_->GetObjectLibrary()) return;
+				// Root削除へ委譲し、SceneContext側の子Object解放とManager通知を利用する。
 				for(const auto& guid : rootGuids_) {
 					auto object = ctx_->GetObjectLibrary()->Find(guid);
 					if(object) {
@@ -158,6 +165,7 @@ namespace CalyxEngine {
 			void RestoreSnapshots() {
 				if(!ctx_ || !ctx_->GetObjectLibrary()) return;
 
+				// 第一段階では全Objectを生成・初期化し、GUIDから復元ObjectへのMapを構築する。
 				std::unordered_map<Guid, std::shared_ptr<SceneObject>> guidMap;
 				for(const auto& j : snapshots_) {
 					std::string typeName = j.value("type", "");
@@ -166,6 +174,7 @@ namespace CalyxEngine {
 					const nlohmann::json* paramOverrides = j.contains("serializableParams")
 						? &j.at("serializableParams")
 						: nullptr;
+					// Registry生成中に登録されるFieldへ保存値を渡せるようPending Captureを開始する。
 					SerializableObject::BeginPendingCapture();
 					auto object = SceneObjectRegistry::Get().Create(typeName);
 					if(!object) {
@@ -177,6 +186,7 @@ namespace CalyxEngine {
 					if(j.contains("configPath")) {
 						object->SetConfigPath(j.at("configPath").get<std::string>());
 					}
+					// Resource生成を伴うInitializeより前にConfigを適用し、保存状態から初期化させる。
 					if(auto* cfg = dynamic_cast<IConfigurable*>(object.get())) {
 						cfg->ApplyConfigFromJson(j);
 					}
@@ -186,6 +196,7 @@ namespace CalyxEngine {
 						object->SetGuid(guid);
 					}
 
+					// Context登録後にInitializeし、初期化処理からScene内サービスへアクセス可能にする。
 					ctx_->AddObject(object);
 					object->BeginSerializableParamCapture(paramOverrides);
 					object->Initialize();
@@ -196,6 +207,7 @@ namespace CalyxEngine {
 					guidMap[object->GetGuid()] = object;
 				}
 
+				// 第二段階で親子関係を接続し、Snapshot順や外部親の存在にも対応する。
 				for(const auto& j : snapshots_) {
 					const Guid childGuid = j.value("guid", Guid{});
 					const Guid parentGuid = j.value("parentGuid", Guid{});
@@ -253,6 +265,7 @@ namespace CalyxEngine {
 	}
 
 	void DuplicateSceneObjectsCommand::Execute() {
+		// 作成結果のRootだけを選択し、複製直後にEditor操作を継続できる状態へする。
 		result_ = CreateDuplicates();
 		if(callbacks_.selectObjects) callbacks_.selectObjects(result_.selectedRoots);
 		if(callbacks_.refreshHierarchy) callbacks_.refreshHierarchy();
@@ -260,6 +273,7 @@ namespace CalyxEngine {
 
 	void DuplicateSceneObjectsCommand::Undo() {
 		if(!ctx_ || !ctx_->GetObjectLibrary()) return;
+		// 複製Rootを削除すれば子HierarchyもSceneContext経由で一括除去される。
 		for(const auto& guid : result_.rootGuids) {
 			auto object = ctx_->GetObjectLibrary()->Find(guid);
 			if(object) {
@@ -283,6 +297,7 @@ namespace CalyxEngine {
 		if(!ctx_) return {};
 
 		if(auto* lib = ctx_->GetObjectLibrary()) {
+			// shared_ptrをCommandへ保持せずGUIDから再解決し、Undo後の不要なLifetime延長を避ける。
 			std::vector<std::shared_ptr<SceneObject>> sources;
 			sources.reserve(sourceGuids_.size());
 			for(const auto& guid : sourceGuids_) {

@@ -26,6 +26,7 @@ void SplineDeformedModel::Initialize() {
 }
 
 bool SplineDeformedModel::SetSourceModel(const std::string& sourceFile) {
+	// 同じAssetが既に利用可能ならCPU/GPUデータの再構築を避ける。
 	if(fileName_ == sourceFile && sourceReady_) {
 		return true;
 	}
@@ -33,6 +34,7 @@ bool SplineDeformedModel::SetSourceModel(const std::string& sourceFile) {
 		return LoadSourceIfReady();
 	}
 
+	// Source変更時は旧Modelへの非所有参照を先に無効化し、非同期ロード完了まで描画させない。
 	fileName_ = sourceFile;
 	sourceReady_ = false;
 	buffersReady_ = false;
@@ -52,6 +54,7 @@ bool SplineDeformedModel::LoadSourceIfReady() {
 
 	auto* modelManager = assetManager->GetModelManager();
 	if(!modelManager->IsModelLoaded(fileName_)) {
+		// AssetロードはManagerへ依頼し、このフレームでは未準備として呼び出し側へ通知する。
 		modelManager->LoadModel(fileName_);
 		return false;
 	}
@@ -61,6 +64,7 @@ bool SplineDeformedModel::LoadSourceIfReady() {
 		return false;
 	}
 
+	// 共有Assetを直接変形しないよう、変形対象のMesh情報を専用ModelDataへ複製する。
 	ownedModelData_ = std::make_unique<ModelData>();
 	ownedModelData_->meshResource.data.vertices = source.meshResource.Vertices();
 	ownedModelData_->meshResource.data.indices = source.meshResource.Indices();
@@ -70,9 +74,11 @@ bool SplineDeformedModel::LoadSourceIfReady() {
 	ownedModelData_->meshResource.topology = source.meshResource.topology;
 	ownedModelData_->localAABB = source.localAABB;
 
+	// Rebuildを繰り返しても変形誤差を累積させないため、常に元頂点から計算する。
 	originalVertices_ = ownedModelData_->meshResource.Vertices();
 	modelData_ = ownedModelData_.get();
 
+	// 複製した頂点・Indexは共有ModelのBufferを参照できないため、専用GPU Bufferへ転送する。
 	ID3D12Device* device = GraphicsGroup::GetInstance()->GetDevice().Get();
 	modelData_->meshResource.VertexBuffer().Initialize(device, UINT(modelData_->meshResource.Vertices().size()));
 	modelData_->meshResource.VertexBuffer().TransferVectorData(modelData_->meshResource.Vertices());
@@ -91,10 +97,12 @@ bool SplineDeformedModel::Rebuild(const SplineData& spline, Axis axis, float rad
 		return false;
 	}
 
+	// 指定軸をSpline進行方向、残り2軸を断面方向として扱う。
 	const int along = AxisIndex(axis);
 	const int perpA = PerpIndexA(axis);
 	const int perpB = PerpIndexB(axis);
 
+	// Meshの軸方向範囲と断面中心を求め、頂点位置をSpline距離へ正規化できるようにする。
 	float minAlong = FLT_MAX;
 	float maxAlong = -FLT_MAX;
 	float centerA = 0.0f;
@@ -109,6 +117,7 @@ bool SplineDeformedModel::Rebuild(const SplineData& spline, Axis axis, float rad
 	centerA /= static_cast<float>(originalVertices_.size());
 	centerB /= static_cast<float>(originalVertices_.size());
 
+	// ゼロ長Meshでも除算が破綻しない下限を設け、毎回未変形頂点へ戻してから再構築する。
 	const float length = (std::max)(0.0001f, maxAlong - minAlong);
 	auto& vertices = modelData_->meshResource.Vertices();
 	vertices = originalVertices_;
@@ -118,6 +127,7 @@ bool SplineDeformedModel::Rebuild(const SplineData& spline, Axis axis, float rad
 		const VertexPosUvN& src = originalVertices_[i];
 		const CalyxEngine::Vector3 local{src.position.x, src.position.y, src.position.z};
 
+		// 元Mesh上の軸位置をSpline上の弧長へ変換し、均一な距離基準で配置する。
 		const float normalized = (local[along] - minAlong) / length;
 		const float distance = normalized * spline.TotalLength() + distanceOffset;
 		const float t = spline.DistanceToT(distance);
@@ -127,11 +137,13 @@ bool SplineDeformedModel::Rebuild(const SplineData& spline, Axis axis, float rad
 			forward = CalyxEngine::Vector3::Forward();
 		}
 
+		// 接線とUpが平行な場合は外積が退化するため、代替軸を選んで局所Basisを安定化する。
 		CalyxEngine::Vector3 upSeed = CalyxEngine::Vector3::Up();
 		if(std::abs(CalyxEngine::Vector3::Dot(forward, upSeed)) > 0.95f) {
 			upSeed = {1.0f, 0.0f, 0.0f};
 		}
 
+		// 隣接頂点でRightの符号を揃え、断面が突然反転するTwistを抑制する。
 		CalyxEngine::Vector3 right = CalyxEngine::Vector3::Cross(upSeed, forward).Normalize();
 		if(prevRight.LengthSquared() > 1e-8f && CalyxEngine::Vector3::Dot(prevRight, right) < 0.0f) {
 			right = -right;
@@ -141,16 +153,19 @@ bool SplineDeformedModel::Rebuild(const SplineData& spline, Axis axis, float rad
 		CalyxEngine::Vector3 up = CalyxEngine::Vector3::Cross(forward, right).Normalize();
 		const CalyxEngine::Vector3 center = spline.Evaluate(t);
 
+		// 元断面の中心からの距離だけを局所Basisへ再配置し、Mesh断面形状を維持する。
 		const float offsetA = (local[perpA] - centerA) * radiusScale;
 		const float offsetB = (local[perpB] - centerB) * radiusScale;
 		const CalyxEngine::Vector3 deformed = center + right * offsetA + up * offsetB;
 		vertices[i].position = {deformed.x, deformed.y, deformed.z, src.position.w};
 
+		// 法線にも同じBasis変換を適用し、変形後のLighting方向を頂点位置と一致させる。
 		const CalyxEngine::Vector3 nLocal = src.normal;
 		const CalyxEngine::Vector3 n = (forward * nLocal[along] + right * nLocal[perpA] + up * nLocal[perpB]);
 		vertices[i].normal = n.LengthSquared() > 1e-8f ? n.Normalize() : src.normal;
 	}
 
+	// CPU頂点変更後にCulling境界とGPU Bufferを同期し、旧形状のBLASは再構築対象にする。
 	RecalculateLocalAABB();
 	UploadDeformedVertices();
 	blasBuilt_ = false;
@@ -165,6 +180,7 @@ void SplineDeformedModel::UploadDeformedVertices() {
 void SplineDeformedModel::RecalculateLocalAABB() {
 	if(!modelData_ || modelData_->meshResource.Vertices().empty()) return;
 
+	// 変形後の全頂点から境界を再計算し、旧Source ModelのBoundsによる誤Cullingを防ぐ。
 	CalyxEngine::Vector3 minPos{FLT_MAX, FLT_MAX, FLT_MAX};
 	CalyxEngine::Vector3 maxPos{-FLT_MAX, -FLT_MAX, -FLT_MAX};
 	for(const auto& vertex : modelData_->meshResource.Vertices()) {

@@ -9,6 +9,7 @@
 
 namespace {
 	void CopyToBuffer(const std::string& value, std::array<char, 260>& buffer) {
+		// ImGui編集用Bufferを必ずnull終端し、長いAsset Pathは容量内へ安全に切り詰める。
 		buffer.fill('\0');
 		const size_t count = (std::min)(value.size(), buffer.size() - 1);
 		std::copy_n(value.data(), count, buffer.data());
@@ -30,10 +31,12 @@ void SplineDeformObject::Initialize() {
 void SplineDeformObject::EnsureDeformModel() {
 	auto* deformModel = dynamic_cast<SplineDeformedModel*>(model_.get());
 	if(deformModel) {
+		// 既存の変形Modelを再利用し、Source変更時もModel所有権を不要に入れ替えない。
 		deformModel->SetSourceModel(sourceModelFile_);
 		return;
 	}
 
+	// 通常Modelが設定されている場合はSpline専用Modelへ置換し、変形頂点をObject単位で所有する。
 	model_ = std::make_unique<SplineDeformedModel>(sourceModelFile_);
 	objectModelType_ = ObjectModelType::ModelType_Static;
 }
@@ -41,6 +44,7 @@ void SplineDeformObject::EnsureDeformModel() {
 void SplineDeformObject::AlwaysUpdate(float dt) {
 	EnsureDeformModel();
 	if(auto spline = SplineRegistry::GetOrLoad(splinePath_)) {
+		// EditorでSplineが変更された場合だけDirty化し、毎フレームのMesh再構築を避ける。
 		if(spline->Revision() != lastSplineRevision_) {
 			MarkDirty();
 		}
@@ -59,10 +63,12 @@ bool SplineDeformObject::Rebuild() {
 		return false;
 	}
 
+	// Registry経由でSplineを共有し、複数Objectによる同一Assetの重複読込を防ぐ。
 	auto spline = SplineRegistry::GetOrLoad(splinePath_);
 	if(!spline) {
 		return false;
 	}
+	// 頂点を距離基準で配置するため、変形前に弧長Tableを最新状態へ更新する。
 	spline->BuildArcTable();
 
 	const bool rebuilt = deformModel->Rebuild(
@@ -70,6 +76,7 @@ bool SplineDeformObject::Rebuild() {
 		static_cast<SplineDeformedModel::Axis>(deformAxis_),
 		radiusScale_,
 		distanceOffset_);
+	// 成功時だけRevisionを確定し、未ロード時は次フレームに再試行できるようDirtyを残す。
 	if(rebuilt) {
 		lastSplineRevision_ = spline->Revision();
 		dirty_ = false;
@@ -119,6 +126,7 @@ void SplineDeformObject::DerivativeGui() {
 }
 
 void SplineDeformObject::ApplyDerivedConfigFromJson(const nlohmann::json& root, const nlohmann::json* derived) {
+	// 新形式のderivedを優先し、旧Sceneではroot直下から読み込んで互換性を維持する。
 	const nlohmann::json* src = derived ? derived : &root;
 	sourceModelFile_ = src->value("sourceModelFile", sourceModelFile_);
 	splinePath_ = src->value("splinePath", splinePath_);
@@ -127,6 +135,7 @@ void SplineDeformObject::ApplyDerivedConfigFromJson(const nlohmann::json& root, 
 	distanceOffset_ = src->value("distanceOffset", distanceOffset_);
 	autoRebuild_ = src->value("autoRebuild", autoRebuild_);
 
+	// 不正な保存値を有効Axisへ補正し、次回Updateで必ず再構築する。
 	deformAxis_ = std::clamp(deformAxis_, 0, 2);
 	lastSplineRevision_ = static_cast<uint64_t>(-1);
 	EnsureDeformModel();

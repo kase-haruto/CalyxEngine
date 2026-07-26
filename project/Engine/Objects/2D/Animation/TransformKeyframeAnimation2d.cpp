@@ -93,6 +93,7 @@ namespace CalyxEngine {
 
 	void TransformKeyframeAnimation2d::Update(WorldTransform& target, float dt) {
 		if(!playing_ || keys_.empty()) return;
+		// 秒単位の経過時間を進め、終端到達時はLoop設定に応じて巻き戻すか停止する。
 		currentTime_ += dt;
 		if(duration_ > 0.0f && currentTime_ > duration_) {
 			if(loop_) {
@@ -107,11 +108,13 @@ namespace CalyxEngine {
 
 	void TransformKeyframeAnimation2d::ApplyAt(WorldTransform& target, float time) const {
 		if(keys_.empty()) return;
+		// ChannelごとにKeyの有無が異なるため、各成分を独立補間して未記録成分を保持する。
 		target.translation.x = InterpolateVectorChannel(keys_, time, TransformKeyframe2dChannel_PositionX, target.translation.x, &TransformKeyframe2d::translation, &Vector3::x);
 		target.translation.y = InterpolateVectorChannel(keys_, time, TransformKeyframe2dChannel_PositionY, target.translation.y, &TransformKeyframe2d::translation, &Vector3::y);
 		target.scale.x = InterpolateVectorChannel(keys_, time, TransformKeyframe2dChannel_ScaleX, target.scale.x, &TransformKeyframe2d::scale, &Vector3::x);
 		target.scale.y = InterpolateVectorChannel(keys_, time, TransformKeyframe2dChannel_ScaleY, target.scale.y, &TransformKeyframe2d::scale, &Vector3::y);
 		target.eulerRotation = {0.0f, 0.0f, InterpolateChannel(keys_, time, TransformKeyframe2dChannel_RotationZ, target.eulerRotation.z, &TransformKeyframe2d::rotationZ)};
+		// 2D回転はZ Eulerとして保存するため、Quaternion由来値よりEulerを優先させる。
 		target.rotationSource = RotationSource::Euler;
 		target.Update();
 	}
@@ -121,6 +124,7 @@ namespace CalyxEngine {
 	}
 
 	void TransformKeyframeAnimation2d::CaptureKey(WorldTransform& target, float time, uint32_t channels) {
+		// 同一時刻のKeyは追加せず、指定Channelだけを上書きしてTrackを統合する。
 		for(auto& key : keys_) {
 			if(std::abs(key.time - time) <= 0.0001f) {
 				const TransformKeyframe2d captured = CaptureTransform(target, time);
@@ -135,6 +139,7 @@ namespace CalyxEngine {
 				return;
 			}
 		}
+		// 該当時刻がなければ新規Keyを作成し、時間順とDurationを直ちに更新する。
 		auto key = CaptureTransform(target, time);
 		key.channels = channels;
 		keys_.push_back(key);
@@ -148,6 +153,7 @@ namespace CalyxEngine {
 			auto& key = keys_[i];
 			if(std::abs(key.time - time) > epsilon) continue;
 
+			// 一部Channelだけを解除し、最後のChannelを失ったKeyのみContainerから削除する。
 			key.channels &= ~channels;
 			if(key.channels == 0) {
 				keys_.erase(keys_.begin() + static_cast<std::ptrdiff_t>(i));
@@ -204,6 +210,7 @@ namespace CalyxEngine {
 			}
 
 			ImGui::SetNextItemWidth(160.0f);
+			// Scrub中は再生状態に関係なく即時適用し、Editor PreviewをTimeline位置へ同期する。
 			if(ImGui::DragFloat("Time", &currentTime_, 0.01f, 0.0f, (std::max)(duration_, 0.01f), "%.2f")) {
 				ApplyAt(target, currentTime_);
 			}
@@ -218,6 +225,7 @@ namespace CalyxEngine {
 				changed = true;
 			}
 
+			// Keyの全Channelを同じ行で編集し、時刻変更後は下段でまとめて再Sortする。
 			if(ImGui::BeginTable("TransformKeyframe2dTable", 5, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable)) {
 				ImGui::TableSetupColumn("Time", ImGuiTableColumnFlags_WidthFixed, 54.0f);
 				ImGui::TableSetupColumn("Pos");
@@ -270,6 +278,7 @@ namespace CalyxEngine {
 				}
 			}
 
+			// GUI編集後にのみ並べ替えとDuration計算を行い、描画中の反復子無効化を避ける。
 			if(changed) {
 				SortKeys();
 				RecalculateDuration();
@@ -280,6 +289,7 @@ namespace CalyxEngine {
 	}
 
 	void TransformKeyframeAnimation2d::ApplyConfigFromJson(const nlohmann::json& j) {
+		// 保存データを一度空のTrackへ復元し、Key順序やDurationは読込値を信用せず再計算する。
 		keys_.clear();
 		loop_ = j.value("loop", loop_);
 		autoPlay_ = j.value("autoPlay", autoPlay_);
@@ -289,6 +299,7 @@ namespace CalyxEngine {
 		}
 		SortKeys();
 		RecalculateDuration();
+		// AutoPlayはKeyが存在する場合だけ有効化し、空Trackの再生状態を残さない。
 		playing_ = autoPlay_ && !keys_.empty();
 		if(playing_) {
 			currentTime_ = 0.0f;
@@ -297,6 +308,7 @@ namespace CalyxEngine {
 	}
 
 	void TransformKeyframeAnimation2d::ExtractConfigToJson(nlohmann::json& j) const {
+		// Editor再開時に同じPreview状態を再現できるよう、設定と現在時刻を保存する。
 		j["loop"] = loop_;
 		j["autoPlay"] = autoPlay_;
 		j["currentTime"] = currentTime_;
