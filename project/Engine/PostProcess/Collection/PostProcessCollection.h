@@ -12,6 +12,9 @@
 #include <memory>
 #include <vector>
 
+/// <summary>
+/// Owns and manages the collection of post-processing effects and their slots.
+/// </summary>
 class PostProcessCollection {
 public:
 	void Initialize(class PipelineService* service);

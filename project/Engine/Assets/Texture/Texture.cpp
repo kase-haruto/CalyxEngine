@@ -75,7 +75,17 @@ bool Texture::Load([[maybe_unused]] ID3D12Device* device) {
 		return false;
 	}
 
-	image_ = Cx::IO::LoadTextureImage(resolvedPath.generic_string(), forceSrgb_);
+	// DirectXTex へ渡す既存 API は UTF-8 文字列を受け取るため、Windows の日本語を含む
+	// 絶対パスを narrow path に変換すると失われる。実行基準からの相対パスにして、
+	// 配置先のフォルダー名に依存せず読み込めるようにする。
+	std::error_code relativeError;
+	const auto loadPath = std::filesystem::relative(
+		resolvedPath,
+		std::filesystem::current_path(relativeError),
+		relativeError);
+	image_ = Cx::IO::LoadTextureImage(
+		(relativeError ? resolvedPath : loadPath).generic_string(),
+		forceSrgb_);
 	metadata_ = image_.GetMetadata();
 	loaded_ = true;
 	return true;

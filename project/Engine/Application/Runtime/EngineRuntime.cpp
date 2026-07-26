@@ -8,6 +8,7 @@
 #include <Engine/Foundation/Utility/Converter/ConvertString.h>
 #include <Engine/Foundation/Utility/LeakChecker/LeakChecker.h>
 
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -22,6 +23,40 @@ namespace Calyx {
 	}
 
 	namespace {
+
+		std::string DefaultLaunchConfiguration() {
+#if defined(_DEBUG)
+			return "Debug";
+#elif defined(DEVELOP)
+			return "Develop";
+#else
+			return "Release";
+#endif
+		}
+
+		std::filesystem::path FindAdjacentProjectFile() {
+			std::wstring executablePath(MAX_PATH, L'\0');
+			const DWORD pathLength = ::GetModuleFileNameW(
+				nullptr,
+				executablePath.data(),
+				static_cast<DWORD>(executablePath.size()));
+			if(pathLength == 0 || pathLength >= executablePath.size()) return {};
+			executablePath.resize(pathLength);
+
+			const auto executableDirectory = std::filesystem::path(executablePath).parent_path();
+
+			std::filesystem::path projectFile;
+			std::error_code error;
+			for(const auto& entry : std::filesystem::directory_iterator(executableDirectory, error)) {
+				if(error) return {};
+				if(!entry.is_regular_file(error) || error) continue;
+				if(entry.path().extension() != ".calyxproj") continue;
+
+				if(!projectFile.empty()) return {};
+				projectFile = entry.path();
+			}
+			return projectFile;
+		}
 
 		std::vector<std::string> SplitCommandLineArguments(const char* commandLine) {
 			std::vector<std::string> args;
@@ -56,10 +91,20 @@ namespace Calyx {
 
 		void LoadProjectFromCommandLine(const char* commandLine, Application& application) {
 			const auto args = SplitCommandLineArguments(commandLine);
-			if(args.empty()) return;
+			const auto projectFile = args.empty()
+				? FindAdjacentProjectFile()
+				: std::filesystem::path(args.front());
+			if(projectFile.empty()) return;
+
+			if(args.empty()) {
+				std::error_code error;
+				std::filesystem::current_path(projectFile.parent_path(), error);
+				if(error) return;
+			}
 
 			ProjectInfo project;
-			if(LoadProjectFile(args.front(), project)) {
+			if(LoadProjectFile(projectFile, project)) {
+				project.launchConfiguration = DefaultLaunchConfiguration();
 				// Visual Studio/Launcher から渡された構成名を保持する。
 				// Editor はこの値を見て Debug/Develop/Release のどのゲーム DLL をロードするか決める。
 				for(size_t i = 1; i + 1 < args.size(); ++i) {

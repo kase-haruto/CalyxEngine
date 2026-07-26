@@ -36,6 +36,9 @@ namespace CalyxEngine {
 	 * - インスペクターパネルクラス
 	 * - 選択されたオブジェクト・エディタのプロパティ調整を表示
 	 *---------------------------------------------------------------------------------------*/
+	/// <summary>
+	/// Displays and edits the properties of the objects selected in the editor.
+	/// </summary>
 	class InspectorPanel
 		: public IEngineUI {
 	public:

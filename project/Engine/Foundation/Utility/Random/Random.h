@@ -6,6 +6,9 @@
 /* ========================================================================
 /*		ランダム生成
 /* ===================================================================== */
+/// <summary>
+/// Provides random value and random vector generation utilities.
+/// </summary>
 class Random{
 public:
 	Random(){}
