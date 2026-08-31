@@ -8,7 +8,6 @@
 #include <Engine/Foundation/Utility/Converter/ConvertString.h>
 #include <Engine/Foundation/Utility/LeakChecker/LeakChecker.h>
 
-#include <filesystem>
 #include <string>
 #include <filesystem>
 #include <optional>
@@ -125,8 +124,7 @@ namespace Calyx {
 			}
 
 			ProjectInfo project;
-			if(LoadProjectFile(projectFile, project)) {
-				project.launchConfiguration = DefaultLaunchConfiguration();
+			if(LoadProjectFile(args.front(), project)) {
 				// Visual Studio/Launcher から渡された構成名を保持する。
 				// Editor はこの値を見て Debug/Develop/Release のどのゲーム DLL をロードするか決める。
 				for(size_t i = 1; i + 1 < args.size(); ++i) {

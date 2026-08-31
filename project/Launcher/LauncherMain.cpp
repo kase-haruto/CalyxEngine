@@ -107,7 +107,12 @@ namespace {
 			   std::filesystem::exists(path / L"Include" / L"Data" / L"Engine") &&
 			   std::filesystem::exists(path / L"Include" / L"externals" / L"nlohmann" / L"json.hpp") &&
 			   std::filesystem::exists(path / L"Tools" / L"Reflection" / L"generate_reflection.ps1") &&
-			   std::filesystem::exists(path / L"Lib");
+			   std::filesystem::exists(path / L"Lib" / L"Debug" / L"CalyxEngine.lib") &&
+			   std::filesystem::exists(path / L"Lib" / L"Develop" / L"CalyxEngine.lib") &&
+			   std::filesystem::exists(path / L"Lib" / L"Release" / L"CalyxEngine.lib") &&
+			   std::filesystem::exists(path / L"Bin" / L"Debug" / L"CalyxGame.exe") &&
+			   std::filesystem::exists(path / L"Bin" / L"Develop" / L"CalyxGame.exe") &&
+			   std::filesystem::exists(path / L"Bin" / L"Release" / L"CalyxGame.exe");
 	}
 
 	bool IsEnginePackageDirectory(const std::filesystem::path& path) {
@@ -213,7 +218,12 @@ try {
 			(Test-Path (Join-Path $_.FullName 'CalyxGame.exe')) -and
 			(Test-Path (Join-Path $_.FullName 'SDK\Include\CalyxEngine\Application.h')) -and
 			(Test-Path (Join-Path $_.FullName 'SDK\Tools\Reflection\generate_reflection.ps1')) -and
-			(Test-Path (Join-Path $_.FullName 'SDK\Lib'))
+			(Test-Path (Join-Path $_.FullName 'SDK\Lib\Debug\CalyxEngine.lib')) -and
+			(Test-Path (Join-Path $_.FullName 'SDK\Lib\Develop\CalyxEngine.lib')) -and
+			(Test-Path (Join-Path $_.FullName 'SDK\Lib\Release\CalyxEngine.lib')) -and
+			(Test-Path (Join-Path $_.FullName 'SDK\Bin\Debug\CalyxGame.exe')) -and
+			(Test-Path (Join-Path $_.FullName 'SDK\Bin\Develop\CalyxGame.exe')) -and
+			(Test-Path (Join-Path $_.FullName 'SDK\Bin\Release\CalyxGame.exe'))
 		} |
 		Select-Object -First 1
 

@@ -25,7 +25,7 @@ namespace CalyxEditor {
 			{ProjectTemplateType::Blank, "Blank", "空のプロジェクト", "Game", ""},
 			{ProjectTemplateType::Demo, "Demo", "デモプロジェクト", "Game", "Resources/Assets/Scenes/DemoScene.scene"},
 		};
-		constexpr const char* kDefaultEngineVersion = "v1.1.6";
+		constexpr const char* kDefaultEngineVersion = "v1.2.21";
 
 		// 新規プロジェクトの初期作成先のディレクトリパスを取得（ユーザーのドキュメントフォルダを指す）
 		std::filesystem::path DefaultUserProjectDirectory() {
@@ -589,7 +589,7 @@ finally {
 			stream << "2. `" << project.name << "` をスタートアッププロジェクトにします。\n";
 			stream << "3. Debug/Develop/Release を選んで F5 実行します。\n\n";
 			stream << "既定では `.calyxproj` の `engineVersion` に対応する SDK を `%LOCALAPPDATA%\\\\CalyxEngine\\\\Engines\\\\" << project.engineVersion << "\\\\SDK` から参照します。\n";
-			stream << "初回ビルド時にローカルに対応バージョンが無い場合、`Tools\\\\InstallCalyxSdk.ps1` が CalyxEngine の GitHub Releases から同じ tag の zip を取得します。\n";
+			stream << "初回ビルド時にローカルに対応バージョンが無い場合、`Tools\\\\CalyxLauncher.exe` が CalyxEngine の GitHub Releases から同じ tag の zip を取得します。\n";
 			stream << "CalyxLauncher も起動時に同じバージョン解決を行います。\n";
 			stream << "別の SDK を使いたい場合だけ `CALYX_ENGINE_SDK_DIR` を設定してください。\n\n";
 			stream << "PowerShell の override 設定例:\n\n";
@@ -706,7 +706,9 @@ try {
 			stream << "    <CalyxEngineSdkDir Condition=\"'$(CalyxEngineSdkDir)'=='' and Exists('$(LOCALAPPDATA)\\CalyxEngine\\Engines\\$(CalyxEngineVersion)\\SDK\\Include\\CalyxEngine\\Application.h') and Exists('$(LOCALAPPDATA)\\CalyxEngine\\Engines\\$(CalyxEngineVersion)\\SDK\\Include\\Data\\Engine') and Exists('$(LOCALAPPDATA)\\CalyxEngine\\Engines\\$(CalyxEngineVersion)\\SDK\\Include\\externals\\nlohmann\\json.hpp')\">$(LOCALAPPDATA)\\CalyxEngine\\Engines\\$(CalyxEngineVersion)\\SDK</CalyxEngineSdkDir>\n";
 			stream << "    <CalyxEngineSdkDir Condition=\"'$(CalyxEngineSdkDir)'=='' and '$(CALYX_ENGINE_SDK_DIR)'!='' and Exists('$(CALYX_ENGINE_SDK_DIR)\\Include\\CalyxEngine\\Application.h') and Exists('$(CALYX_ENGINE_SDK_DIR)\\Include\\Data\\Engine') and Exists('$(CALYX_ENGINE_SDK_DIR)\\Include\\externals\\nlohmann\\json.hpp')\">$(CALYX_ENGINE_SDK_DIR)</CalyxEngineSdkDir>\n";
 			stream << "    <CalyxEngineSdkDir Condition=\"'$(CalyxEngineSdkDir)'==''\">$(LOCALAPPDATA)\\CalyxEngine\\Engines\\$(CalyxEngineVersion)\\SDK</CalyxEngineSdkDir>\n";
-			stream << "    <CalyxReflectionTool>$(CalyxEngineSdkDir)\\Tools\\Reflection\\generate_reflection.ps1</CalyxReflectionTool>\n";
+			stream << "    <CalyxProjectReflectionTool>$(ProjectDir)Tools\\Reflection\\generate_reflection.ps1</CalyxProjectReflectionTool>\n";
+			stream << "    <CalyxReflectionTool Condition=\"Exists('$(CalyxProjectReflectionTool)')\">$(CalyxProjectReflectionTool)</CalyxReflectionTool>\n";
+			stream << "    <CalyxReflectionTool Condition=\"'$(CalyxReflectionTool)'==''\">$(CalyxEngineSdkDir)\\Tools\\Reflection\\generate_reflection.ps1</CalyxReflectionTool>\n";
 			stream << "  </PropertyGroup>\n";
 			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Debug|x64'\"><IntDir>Generated\\Obj\\$(ProjectName)\\$(Configuration)\\</IntDir><OutDir>Generated\\Outputs\\$(Configuration)\\</OutDir><LinkIncremental>true</LinkIncremental></PropertyGroup>\n";
 			stream << "  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Release|x64'\"><IntDir>Generated\\Obj\\$(ProjectName)\\$(Configuration)\\</IntDir><OutDir>Generated\\Outputs\\$(Configuration)\\</OutDir></PropertyGroup>\n";
@@ -761,7 +763,7 @@ try {
 			stream << "    <ClInclude Include=\"Generated\\Foundation\\Reflection\\CalyxGameObjectRegistry.generated.h\" />\n";
 			stream << "  </ItemGroup>\n";
 			stream << "  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />\n";
-			stream << "  <Target Name=\"EnsureCalyxEngineSdk\" BeforeTargets=\"PrepareForBuild\" Condition=\"!Exists('$(CalyxEngineSdkDir)\\Include\\CalyxEngine\\Application.h') or !Exists('$(CalyxEngineSdkDir)\\Include\\Data\\Engine') or !Exists('$(CalyxEngineSdkDir)\\Include\\externals\\nlohmann\\json.hpp') or !Exists('$(CalyxReflectionTool)')\">\n";
+			stream << "  <Target Name=\"EnsureCalyxEngineSdk\" BeforeTargets=\"PrepareForBuild\" Condition=\"!Exists('$(CalyxEngineSdkDir)\\Include\\CalyxEngine\\Application.h') or !Exists('$(CalyxEngineSdkDir)\\Include\\Data\\Engine') or !Exists('$(CalyxEngineSdkDir)\\Include\\externals\\nlohmann\\json.hpp') or !Exists('$(CalyxReflectionTool)') or !Exists('$(CalyxEngineSdkDir)\\Lib\\$(Configuration)\\CalyxEngine.lib') or !Exists('$(CalyxEngineSdkDir)\\Bin\\$(Configuration)\\CalyxGame.exe')\">\n";
 			stream << "    <Message Importance=\"high\" Text=\"Installing Calyx SDK $(CalyxEngineVersion) from GitHub Releases...\" />\n";
 			stream << "    <Exec Command=\"&quot;$(ProjectDir)Tools\\CalyxLauncher.exe&quot; &quot;$(ProjectDir)" << projectName << ".calyxproj&quot;\" />\n";
 			stream << "  </Target>\n";
@@ -835,7 +837,8 @@ try {
 			stream << "    <NMakeBuildCommandLine>&quot;$(ProjectLauncher)&quot; &quot;$(ProjectDir)" << gameName << ".calyxproj&quot;</NMakeBuildCommandLine>\n";
 			stream << "    <NMakeReBuildCommandLine>&quot;$(ProjectLauncher)&quot; &quot;$(ProjectDir)" << gameName << ".calyxproj&quot; --force</NMakeReBuildCommandLine>\n";
 			stream << "    <NMakeCleanCommandLine>echo CalyxLauncher has no generated build outputs to clean.</NMakeCleanCommandLine>\n";
-			stream << "    <NMakeOutput>$(CalyxEnginePackageDir)SDK\\Include\\CalyxEngine\\Application.h</NMakeOutput>\n";
+			// Intentionally omit NMakeOutput: every explicit launcher build validates
+			// the complete cached package, while an already valid package exits quickly.
 			stream << "    <LocalDebuggerCommand>$(ProjectLauncher)</LocalDebuggerCommand>\n";
 			stream << "    <LocalDebuggerCommandArguments>&quot;$(ProjectDir)" << gameName << ".calyxproj&quot;</LocalDebuggerCommandArguments>\n";
 			stream << "    <LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory>\n";
@@ -924,6 +927,24 @@ try {
 				}
 				std::filesystem::copy_file(launcherExecutable, generatedLauncher, std::filesystem::copy_options::overwrite_existing, ec);
 				if(ec) {
+					return false;
+				}
+			}
+			{
+				// Keep the code generator in the game repository so a fresh clone can
+				// bootstrap even when an older engine package omitted SDK/Tools.
+				const std::filesystem::path reflectionCandidates[] = {
+					engineDirectory / "Tools" / "Reflection",
+					engineDirectory / "SDK" / "Tools" / "Reflection"};
+				bool copiedReflectionTools = false;
+				for(const auto& candidate : reflectionCandidates) {
+					if(std::filesystem::exists(candidate / "generate_reflection.ps1") &&
+					   CopyDirectoryTree(candidate, project.rootDirectory / "Tools" / "Reflection")) {
+						copiedReflectionTools = true;
+						break;
+					}
+				}
+				if(!copiedReflectionTools) {
 					return false;
 				}
 			}
