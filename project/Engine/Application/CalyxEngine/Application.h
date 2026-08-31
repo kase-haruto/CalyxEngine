@@ -36,6 +36,10 @@ namespace Calyx {
 		virtual void OnFinalize() {}
 
 		virtual bool ShouldRenderEngineUi() const { return true; }
+
+		// Game applications normally discover a nearby project when launched
+		// without arguments. Editors can opt out to show their project browser.
+		virtual bool ShouldAutoDiscoverProject() const { return true; }
 	};
 
 } // namespace Calyx

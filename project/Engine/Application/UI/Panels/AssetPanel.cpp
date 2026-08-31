@@ -126,8 +126,8 @@ namespace CalyxEngine {
 
 		// アイコン（存在しなければ任意の代替に差し替え）
 		auto& tm	 = *AssetManager::GetInstance()->GetTextureManager();
-		iconFolder_	 = (ImTextureID)tm.LoadTexture("UI/Tool/AssetPanel/folder.dds").ptr;
-		iconGeneric_ = (ImTextureID)tm.LoadTexture("UI/Tool/AssetPanel/generic.dds").ptr;
+		iconFolder_	 = (ImTextureID)tm.LoadTexture("UI/Tool/AssetPanel/folder.png").ptr;
+		iconGeneric_ = (ImTextureID)tm.LoadTexture("UI/Tool/AssetPanel/generic.png").ptr;
 
 		needsRebuildTree_ = true;
 		search_[0]		  = '\0';

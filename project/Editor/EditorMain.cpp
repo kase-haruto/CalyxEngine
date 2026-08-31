@@ -103,10 +103,15 @@ public:
 		project_ = project;
 		hasProject_ = true;
 		Calyx::SetCurrentProject(project_);
-		AssetDatabase::GetInstance()->Initialize(Calyx::GetAssetRoot());
 		if(auto* assetManager = CalyxEngine::AssetManager::GetInstance()) {
-			if(auto* modelManager = assetManager->GetModelManager()) {
-				modelManager->RefreshProjectAssets();
+			// This callback also runs before framework initialization. CalyxCore
+			// performs the first database scan after the texture manager is ready.
+			// Rescan here only when switching projects after startup.
+			if(assetManager->GetTextureManager()) {
+				AssetDatabase::GetInstance()->Initialize(Calyx::GetAssetRoot());
+				if(auto* modelManager = assetManager->GetModelManager()) {
+					modelManager->RefreshProjectAssets();
+				}
 			}
 		}
 
@@ -164,6 +169,10 @@ public:
 
 	bool ShouldRenderEngineUi() const override {
 		return hasProject_;
+	}
+
+	bool ShouldAutoDiscoverProject() const override {
+		return false;
 	}
 
 private:

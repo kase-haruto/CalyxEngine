@@ -174,7 +174,13 @@ AssetGUID AssetDatabase::LoadOrCreateMeta(const std::filesystem::path& absPath, 
 /////////////////////////////////////////////////////////////////////////////////////////
 void AssetDatabase::BuildPreview(AssetRecord& rec) {
 	// プレビュー表示用テクスチャのロードのため、TextureManagerを取得
-	auto& tm = *CalyxEngine::AssetManager::GetInstance()->GetTextureManager();
+	auto* assetManager = CalyxEngine::AssetManager::GetInstance();
+	auto* textureManager = assetManager ? assetManager->GetTextureManager() : nullptr;
+	if(!textureManager) {
+		rec.previewTex = nullptr;
+		return;
+	}
+	auto& tm = *textureManager;
 	try {
 		if(rec.type == AssetType::Texture) {
 			// モデルフォルダ配下にあるテクスチャは、アセットパネルでの個別プレビュー時にロード失敗する可能性があるためスキップする
@@ -182,7 +188,7 @@ void AssetDatabase::BuildPreview(AssetRecord& rec) {
 			std::string			  relStr = rel.generic_string();
 			if(relStr.find("models/") == 0 || relStr.find("Models/") == 0) {
 				// モデル内のテクスチャは汎用の共通アイコンで代用
-				auto icon	   = tm.LoadTexture("UI/Tool/AssetPanel/generic.dds");
+				auto icon	   = tm.LoadTexture("UI/Tool/AssetPanel/generic.png");
 				rec.previewTex = (ImTextureID)icon.ptr;
 			} else {
 				// プレビュー表示用の画像パスと拡張子を取得
@@ -203,13 +209,13 @@ void AssetDatabase::BuildPreview(AssetRecord& rec) {
 					rec.previewTex	= (ImTextureID)texHandle.ptr;
 				} else {
 					// プレビュー用画像が見つからない場合は、汎用の共通アイコンを使用
-					auto icon	   = tm.LoadTexture("UI/Tool/AssetPanel/generic.dds");
+					auto icon	   = tm.LoadTexture("UI/Tool/AssetPanel/generic.png");
 					rec.previewTex = (ImTextureID)icon.ptr;
 				}
 			}
 		} else {
 			// テクスチャ以外のアセットタイプは、すべて一律で汎用の共通アイコンを使用
-			auto icon	   = tm.LoadTexture("UI/Tool/AssetPanel/generic.dds");
+			auto icon	   = tm.LoadTexture("UI/Tool/AssetPanel/generic.png");
 			rec.previewTex = (ImTextureID)icon.ptr;
 		}
 	} catch(...) {

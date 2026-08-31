@@ -615,7 +615,8 @@ $versionDir = Join-Path $InstallRoot $VersionValue
 $sdkHeader = Join-Path $versionDir 'SDK\Include\CalyxEngine\Application.h'
 $sdkData = Join-Path $versionDir 'SDK\Include\Data\Engine'
 $sdkNlohmann = Join-Path $versionDir 'SDK\Include\externals\nlohmann\json.hpp'
-if ((Test-Path $sdkHeader) -and (Test-Path $sdkData) -and (Test-Path $sdkNlohmann)) {
+$sdkReflectionTool = Join-Path $versionDir 'SDK\Tools\Reflection\generate_reflection.ps1'
+if ((Test-Path $sdkHeader) -and (Test-Path $sdkData) -and (Test-Path $sdkNlohmann) -and (Test-Path $sdkReflectionTool)) {
 	exit 0
 }
 
@@ -641,7 +642,8 @@ try {
 	$package = $candidates |
 		Where-Object {
 			(Test-Path (Join-Path $_.FullName 'CalyxEditor.exe')) -and
-			(Test-Path (Join-Path $_.FullName 'SDK\Include\CalyxEngine\Application.h'))
+			(Test-Path (Join-Path $_.FullName 'SDK\Include\CalyxEngine\Application.h')) -and
+			(Test-Path (Join-Path $_.FullName 'SDK\Tools\Reflection\generate_reflection.ps1'))
 		} |
 		Select-Object -First 1
 
@@ -759,7 +761,7 @@ try {
 			stream << "    <ClInclude Include=\"Generated\\Foundation\\Reflection\\CalyxGameObjectRegistry.generated.h\" />\n";
 			stream << "  </ItemGroup>\n";
 			stream << "  <Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />\n";
-			stream << "  <Target Name=\"EnsureCalyxEngineSdk\" BeforeTargets=\"PrepareForBuild\" Condition=\"!Exists('$(CalyxEngineSdkDir)\\Include\\CalyxEngine\\Application.h') or !Exists('$(CalyxEngineSdkDir)\\Include\\Data\\Engine') or !Exists('$(CalyxEngineSdkDir)\\Include\\externals\\nlohmann\\json.hpp')\">\n";
+			stream << "  <Target Name=\"EnsureCalyxEngineSdk\" BeforeTargets=\"PrepareForBuild\" Condition=\"!Exists('$(CalyxEngineSdkDir)\\Include\\CalyxEngine\\Application.h') or !Exists('$(CalyxEngineSdkDir)\\Include\\Data\\Engine') or !Exists('$(CalyxEngineSdkDir)\\Include\\externals\\nlohmann\\json.hpp') or !Exists('$(CalyxReflectionTool)')\">\n";
 			stream << "    <Message Importance=\"high\" Text=\"Installing Calyx SDK $(CalyxEngineVersion) from GitHub Releases...\" />\n";
 			stream << "    <Exec Command=\"&quot;$(ProjectDir)Tools\\CalyxLauncher.exe&quot; &quot;$(ProjectDir)" << projectName << ".calyxproj&quot;\" />\n";
 			stream << "  </Target>\n";

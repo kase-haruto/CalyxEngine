@@ -103,6 +103,9 @@ namespace Calyx {
 		bool LoadProjectFromCommandLine(const char* commandLine, Application& application) {
 			auto args = SplitCommandLineArguments(commandLine);
 			if(args.empty()) {
+				if(!application.ShouldAutoDiscoverProject()) {
+					return true;
+				}
 				if(auto projectFile = DiscoverProjectFile()) {
 					args.push_back(projectFile->string());
 				} else {

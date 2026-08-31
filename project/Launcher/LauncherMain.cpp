@@ -106,6 +106,7 @@ namespace {
 		return std::filesystem::exists(path / L"Include" / L"CalyxEngine" / L"Application.h") &&
 			   std::filesystem::exists(path / L"Include" / L"Data" / L"Engine") &&
 			   std::filesystem::exists(path / L"Include" / L"externals" / L"nlohmann" / L"json.hpp") &&
+			   std::filesystem::exists(path / L"Tools" / L"Reflection" / L"generate_reflection.ps1") &&
 			   std::filesystem::exists(path / L"Lib");
 	}
 
@@ -211,6 +212,7 @@ try {
 		Where-Object {
 			(Test-Path (Join-Path $_.FullName 'CalyxGame.exe')) -and
 			(Test-Path (Join-Path $_.FullName 'SDK\Include\CalyxEngine\Application.h')) -and
+			(Test-Path (Join-Path $_.FullName 'SDK\Tools\Reflection\generate_reflection.ps1')) -and
 			(Test-Path (Join-Path $_.FullName 'SDK\Lib'))
 		} |
 		Select-Object -First 1
