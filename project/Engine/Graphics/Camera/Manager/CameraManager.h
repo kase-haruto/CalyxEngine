@@ -26,6 +26,9 @@ enum class CameraType{ Default, Debug };
  * - カメラ管理クラス
  * - メインカメラ・デバッグカメラの切り替えとビューポートサイズの管理を担当
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief CameraManagerの機能を提供するクラスです。
+ */
 class CALYX_API CameraManager{
 public:
 	//――― Scene‑side lifecycle ―――――――――――――――――――――――――――――

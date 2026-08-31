@@ -21,7 +21,7 @@ permissions:
 
 jobs:
   release:
-    runs-on: windows-2025-vs2026
+    runs-on: windows-latest
     env:
       SOLUTION_FILE_PATH: project/CalyxEngine.sln
 
@@ -66,13 +66,13 @@ jobs:
           msbuild-architecture: x64
 
       - name: Build Debug
-        run: msbuild $env:SOLUTION_FILE_PATH /m /p:Platform=x64 /p:Configuration=Debug
+        run: msbuild $env:SOLUTION_FILE_PATH /m /p:Platform=x64 /p:Configuration=Debug /p:PlatformToolset=v143
 
       - name: Build Develop
-        run: msbuild $env:SOLUTION_FILE_PATH /m /p:Platform=x64 /p:Configuration=Develop
+        run: msbuild $env:SOLUTION_FILE_PATH /m /p:Platform=x64 /p:Configuration=Develop /p:PlatformToolset=v143
 
       - name: Build Release
-        run: msbuild $env:SOLUTION_FILE_PATH /m /p:Platform=x64 /p:Configuration=Release
+        run: msbuild $env:SOLUTION_FILE_PATH /m /p:Platform=x64 /p:Configuration=Release /p:PlatformToolset=v143
 
       - name: Create package
         shell: pwsh

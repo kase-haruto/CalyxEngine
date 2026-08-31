@@ -20,6 +20,9 @@ public:
  * 派生クラスで特定のアクションEnumを指定して使用する
  */
 template<typename EnumType>
+/**
+ * @brief BaseInputActionの機能を提供するクラスです。
+ */
 class BaseInputAction : public IInputAction {
 	static_assert(std::is_enum_v<EnumType>, "EnumType must be an enum");
 public:

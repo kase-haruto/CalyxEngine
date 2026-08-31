@@ -26,6 +26,9 @@ namespace CalyxEngine {
 	 * - Live++ ホットリロードの管理サービス
 	 * - LIVEPP マクロが定義されているビルドのみで有効化される
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief LivePPServiceの機能を提供するクラスです。
+	 */
 	class LivePPService {
 	public:
 		static CALYX_API LivePPService* GetInstance();

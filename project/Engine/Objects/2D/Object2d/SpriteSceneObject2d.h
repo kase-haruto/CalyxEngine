@@ -18,6 +18,9 @@ class SpriteRenderer;
 
 namespace CalyxEngine {
 
+	/**
+	 * @brief SpriteSceneObject2dの機能を提供するクラスです。
+	 */
 	class CALYX_API SpriteSceneObject2d
 		: public SceneObject,
 		  public IConfigurable,
@@ -78,6 +81,9 @@ namespace CalyxEngine {
 		int32_t orderInLayer_ = 0;
 	};
 
+	/**
+	 * @brief AnimatedSpriteSceneObject2dの機能を提供するクラスです。
+	 */
 	class CALYX_API AnimatedSpriteSceneObject2d
 		: public SpriteSceneObject2d {
 	public:

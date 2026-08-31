@@ -3,6 +3,9 @@
 #include <externals\nlohmann\json.hpp>
 
 // 書き
+/**
+ * @brief JsonWriterに関するデータを保持する構造体です。
+ */
 struct JsonWriter {
 	nlohmann::json& j;
 	template <class U>
@@ -10,6 +13,9 @@ struct JsonWriter {
 };
 
 // 読み
+/**
+ * @brief JsonReaderに関するデータを保持する構造体です。
+ */
 struct JsonReader {
 	const nlohmann::json& j;
 	template <class U>

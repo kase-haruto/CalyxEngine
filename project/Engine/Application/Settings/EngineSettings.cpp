@@ -30,6 +30,7 @@ namespace CalyxEngine {
 	}
 
 	void EngineSettings::Initialize() {
+		// 初回起動時は既定値を保存し、次回以降の設定ファイル形式を確立する。
 		if(!Load()) {
 			Save();
 		}
@@ -42,12 +43,14 @@ namespace CalyxEngine {
 			return false;
 		}
 
+		// 読込前に既定値へ戻し、旧ファイルで欠落した項目を安全な値で補完する。
 		data_ = EngineSettingsData{};
 		ApplyJson(json);
 		return true;
 	}
 
 	bool EngineSettings::Save() const {
+		// ユーザー設定Directoryが未作成でも保存できるよう、親Directoryを先に生成する。
 		std::error_code ec;
 		std::filesystem::create_directories(std::filesystem::path(kSettingsPath).parent_path(), ec);
 		if(ec) {
@@ -57,6 +60,7 @@ namespace CalyxEngine {
 	}
 
 	void EngineSettings::OpenSettingsWindow() {
+		// Cancel可能な編集用Copyを作り、操作途中の値をRuntime設定へ直接反映しない。
 		showSettingsWindow_ = true;
 		editingData_ = data_;
 		editingInitialized_ = true;
@@ -77,6 +81,7 @@ namespace CalyxEngine {
 			return;
 		}
 
+		// Category一覧、詳細、確定Buttonを固定領域に分け、項目追加時もFooterを隠さない。
 		const float footerHeight = ImGui::GetFrameHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y;
 		const ImVec2 contentSize = ImGui::GetContentRegionAvail();
 		const float leftWidth = 160.0f;
@@ -100,6 +105,7 @@ namespace CalyxEngine {
 		ImGui::TextUnformatted(GetCategoryLabel(selectedCategory_));
 		ImGui::Separator();
 
+		// Categoryごとの描画処理をMapへ分離し、switchの肥大化を避ける。
 		using RenderFn = std::function<void(EngineSettingsData&)>;
 		static const std::unordered_map<Category, RenderFn> renderers = {
 			{Category::Editor, [](EngineSettingsData& data) {
@@ -126,6 +132,7 @@ namespace CalyxEngine {
 		ImGui::SetCursorPosX((std::max)(ImGui::GetCursorPosX(), ImGui::GetWindowContentRegionMax().x - totalWidth));
 
 		if(ImGui::Button("Apply", ImVec2(buttonWidth, 0.0f))) {
+			// Apply時だけ編集Copyを正式設定へ反映し、利用側へ変更通知Flagを立てる。
 			data_ = editingData_;
 			Save();
 			showSettingsWindow_ = false;
@@ -134,6 +141,7 @@ namespace CalyxEngine {
 		}
 		ImGui::SameLine();
 		if(ImGui::Button("Cancel", ImVec2(buttonWidth, 0.0f))) {
+			// Cancelでは保存済み設定へ戻し、編集中の一時値を破棄する。
 			editingData_ = data_;
 			showSettingsWindow_ = false;
 			editingInitialized_ = false;
@@ -157,6 +165,7 @@ namespace CalyxEngine {
 	}
 
 	void EngineSettings::ApplyJson(const nlohmann::json& json) {
+		// Root型が不正な場合は例外的な部分読込を行わず、全設定を既定値へ戻す。
 		if(!json.is_object()) {
 			data_ = EngineSettingsData{};
 			return;

@@ -10,6 +10,9 @@
  * - ゲーム固有のAIやスポーン処理は管理しない
  *---------------------------------------------------------------------------------------*/
 CALYX_PLACEABLE_OBJECT(Category = GameObject, DisplayName = "Mesh Object", Icon = "UI/Tool/cube.dds")
+/**
+ * @brief StaticModelObjectの機能を提供するクラスです。
+ */
 class CALYX_API StaticModelObject : public BaseGameObject {
 public:
 	StaticModelObject();

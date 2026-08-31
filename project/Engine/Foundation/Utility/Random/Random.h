@@ -6,6 +6,9 @@
 /* ========================================================================
 /*		ランダム生成
 /* ===================================================================== */
+/**
+ * @brief 乱数値およびランダムなベクトルを生成する機能を提供するクラスです。
+ */
 class Random{
 public:
 	Random(){}
@@ -38,10 +41,10 @@ public:
 		);
 	}
 
-	/// <summary>
-	/// -1から1の範囲
-	/// </summary>
-	/// <returns></returns>
+	/**
+	 * @brief Generates a normalized three-dimensional vector from random components.
+	 * @return A randomly oriented unit vector.
+	 */
 	static CalyxEngine::Vector3 GenerateUnitVector3(){
 		float x = Generate<float>(-1.0f, 1.0f);
 		float y = Generate<float>(-1.0f, 1.0f);
@@ -52,12 +55,12 @@ public:
 		return v.Normalize();
 	}
 
-	/// <summary>
-	/// vector3のランダム生成
-	/// </summary>
-	/// <param name="min"></param>
-	/// <param name="max"></param>
-	/// <returns></returns>
+	/**
+	 * @brief Generates a three-dimensional vector within component-wise bounds.
+	 * @param min Lower bound for each component.
+	 * @param max Upper bound for each component.
+	 * @return A vector whose components are generated within the supplied bounds.
+	 */
 	static CalyxEngine::Vector3 GenerateVector3(const CalyxEngine::Vector3& min, const CalyxEngine::Vector3& max){
 		auto safeMinX = ( std::min ) (min.x, max.x);
 		auto safeMaxX = (std::max)(min.x, max.x);

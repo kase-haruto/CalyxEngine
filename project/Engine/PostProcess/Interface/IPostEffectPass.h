@@ -11,6 +11,9 @@
 #include <externals/nlohmann/json.hpp>
 #include <string>
 
+/**
+ * @brief IPostEffectPassの機能を提供するクラスです。
+ */
 class IPostEffectPass{
 public:
 	virtual ~IPostEffectPass() = default;

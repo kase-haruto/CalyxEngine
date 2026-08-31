@@ -12,13 +12,22 @@
  * - コリジョンマネージャークラス
  * - シーン内の全コライダーの登録・総当たり判定・衝突イベント発行を担当
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief CollisionManagerの機能を提供するクラスです。
+ */
 class CollisionManager {
 public:
 	//===================================================================*/
 	//                   singleton
 	//===================================================================*/
+	/**
+	 * \brief 衝突管理の共有インスタンスを取得する
+	 * \return 関数ローカルstaticで所有する共有インスタンスへのポインタ
+	 */
 	static CollisionManager* GetInstance();
+	/** \brief CollisionManagerのコピー構築を禁止する */
 	CollisionManager(const CollisionManager&)			 = delete;
+	/** \brief CollisionManagerのコピー代入を禁止する \return 代入結果は生成されない */
 	CollisionManager& operator=(const CollisionManager&) = delete;
 
 public:
@@ -34,16 +43,30 @@ public:
 	void ClearColliders();
 	std::vector<Collider*> GetCollidersSnapshot() const;
 
+	/*-----------------------------------------------------------------------------------------
+	 * CollisionPair
+	 * - 1フレームで接触している2個のColliderを順序非依存で保持するデータ構造
+	 * - Colliderの所有権は管理しない
+	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief CollisionPairに関するデータを保持する構造体です。
+	 */
 	struct CollisionPair {
-		Collider* a;
-		Collider* b;
+		Collider* a; //< 所有権を持たない衝突ペアの一方
+		Collider* b; //< 所有権を持たない衝突ペアの他方
 
+		/** \brief Colliderの並び順を無視してペアが等しいか判定する \param other 比較対象のペア \return 同じ2個のColliderを参照する場合はtrue */
 		bool operator==(const CollisionPair& other) const {
 			return (a == other.a && b == other.b) || (a == other.b && b == other.a);
 		}
 	};
 
+	/*-----------------------------------------------------------------------------------------
+	 * CollisionPairHash
+	 * - CollisionPairを順序非依存コンテナで使用するためのハッシュ関数オブジェクト
+	 *---------------------------------------------------------------------------------------*/
 	struct CollisionPairHash {
+		/** \brief 衝突ペアのハッシュ値を計算する \param pair 計算対象のペア \return 2個のColliderアドレスから生成したハッシュ値 */
 		size_t operator()(const CollisionPair& pair) const {
 			auto h1 = std::hash<const Collider*>{}(pair.a);
 			auto h2 = std::hash<const Collider*>{}(pair.b);
@@ -99,11 +122,11 @@ private:
 	//===================================================================*/
 	//                   private variable
 	//===================================================================*/
-	std::list<Collider*>								 colliders_;
-	std::vector<Collider*>								 pendingRegisters_;
-	std::vector<Collider*>								 pendingUnregisters_;
-	std::vector<std::string>							 collisionLogs_;	  // 衝突ログ
-	std::unordered_set<CollisionPair, CollisionPairHash> currentCollisions_;  // 現在のフレームの衝突ペア
-	std::unordered_set<CollisionPair, CollisionPairHash> previousCollisions_; // 前のフレームの衝突ペア
-	bool												 isUpdatingCollisions_ = false;
+	std::list<Collider*> colliders_;                              //< 所有権を持たない判定対象Colliderの一覧
+	std::vector<Collider*> pendingRegisters_;                     //< 判定中に要求された次回反映用の登録一覧
+	std::vector<Collider*> pendingUnregisters_;                   //< 判定中に要求された次回反映用の登録解除一覧
+	std::vector<std::string> collisionLogs_;                      //< Editorデバッグ表示用の衝突ログ
+	std::unordered_set<CollisionPair, CollisionPairHash> currentCollisions_;  //< 現在フレームで接触中のペア
+	std::unordered_set<CollisionPair, CollisionPairHash> previousCollisions_; //< 前フレームで接触していたペア
+	bool isUpdatingCollisions_ = false;                           //< 判定一覧の走査中で遅延登録が必要か
 };

@@ -29,6 +29,9 @@ namespace CalyxEngine {
 	 * - オブジェクト配置ツールパネルクラス
 	 * - Shape・Light・Particle等のオブジェクトをシーンに配置する機能を提供
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief PlaceToolPanelの機能を提供するクラスです。
+	 */
 	class PlaceToolPanel
 		: public IEngineUI {
 	public:
@@ -52,6 +55,9 @@ namespace CalyxEngine {
 		};
 
 	public:
+		/**
+		 * @brief PlaceItemに関するデータを保持する構造体です。
+		 */
 		struct PlaceItem {
 			PlaceItemCategory							   category;
 			std::string									   name;

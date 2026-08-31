@@ -10,6 +10,9 @@ enum class PostEffectApplyMode {
 	Triggered
 };
 
+/**
+ * @brief PostEffectFloatAnimationに関するデータを保持する構造体です。
+ */
 struct PostEffectFloatAnimation {
 	std::string parameter;
 	float from = 0.0f;
@@ -17,6 +20,9 @@ struct PostEffectFloatAnimation {
 	bool useCurrentAsFrom = false;
 };
 
+/**
+ * @brief PostEffectSlotに関するデータを保持する構造体です。
+ */
 struct PostEffectSlot {
 	std::string name;
 	bool enabled = true;

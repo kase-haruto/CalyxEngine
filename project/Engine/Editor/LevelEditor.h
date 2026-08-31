@@ -69,12 +69,16 @@ namespace CalyxEngine {
 	class ParticlePreviewSession;
 	class PrefabEditSession;
 	class ViewportSelectionController;
+	class IEditToolState;
 
 	/*-----------------------------------------------------------------------------------------
 	 * LevelEditor
 	 * - レベルエディタクラス
 	 * - シーンオブジェクトの選択・配置・削除、ビューポート操作、シーン保存を統合管理
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief LevelEditorの機能を提供するクラスです。
+	 */
 	class LevelEditor {
 	public:
 		LevelEditor();
@@ -201,6 +205,7 @@ namespace CalyxEngine {
 		std::unique_ptr<EditorMenu> menu_; //< エディターメニュー
 		EngineEdit::EditorMode		mode_ = EngineEdit::EditorMode::Edit;
 		EngineEdit::EditToolMode	editToolMode_ = EngineEdit::EditToolMode::Object;
+		const IEditToolState* editToolState_ = nullptr; //< 所有権を持たない現在の静的編集モードState
 
 		// ビューポート
 		std::unique_ptr<Viewport>			mainViewport_;		 //< メインビューポート

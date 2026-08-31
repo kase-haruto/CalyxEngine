@@ -17,6 +17,9 @@ class BaseGameObject; // 前方宣言
  * - 衝突判定用コライダー基底クラス
  * - 各種衝突形状（球、OBB等）の管理、衝突イベント通知を担当
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief Colliderの機能を提供するクラスです。
+ */
 class Collider {
 public:
 	using CollisionCallback = std::function<void(Collider* other)>;

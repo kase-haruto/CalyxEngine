@@ -26,11 +26,19 @@
  * - Transform、モデル参照、Collider、描画設定などの共通機能を管理する
  * - シーン保存対象、Editor配置一覧、Prefab対象かどうかは管理しない
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief BaseGameObjectの機能を提供するクラスです。
+ */
 class CALYX_API BaseGameObject
 	: public SceneObject,
 	  public IConfigurable {
 
 protected:
+	/*-----------------------------------------------------------------------------------------
+	 * ColliderKind
+	 * - BaseGameObjectが所有するColliderの具体的な形状を識別する列挙型
+	 * - Config保存値からRuntime Colliderを再構築する際に使用
+	 *---------------------------------------------------------------------------------------*/
 	enum class ColliderKind {
 		None,
 		Box,
@@ -309,11 +317,20 @@ public:
 	bool IsSkeletonDrawEnabledForEditor() const;
 	void SetSkeletonDrawEnabledForEditor(bool enabled);
 	bool SelectBoneForEditor(const std::string& boneName);
+	/*-----------------------------------------------------------------------------------------
+	 * BoneParentBindingInfo
+	 * - Editorへ公開するボーン親子付け情報の読み取り専用スナップショット
+	 * - 対象Transformを所有せず、ボーン名と拡大率継承設定を保持
+	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief BoneParentBindingInfoに関するデータを保持する構造体です。
+	 */
 	struct BoneParentBindingInfo {
-		const WorldTransform* target = nullptr;
-		std::string boneName;
-		bool inheritScale = true;
+		const WorldTransform* target = nullptr; //< 所有権を持たない親子付け対象Transform
+		std::string boneName;                   //< 親として使用するスケルトンのボーン名
+		bool inheritScale = true;               //< ボーンの拡大率を対象へ継承するか
 	};
+	/** \brief 登録中のボーン親子付け情報を取得する \return Editor表示用の非所有参照情報 */
 	std::vector<BoneParentBindingInfo> GetBoneParentBindings() const;
 
 
@@ -342,18 +359,34 @@ protected:
 	void UpdateBoneParents();
 
 protected:
+	/*-----------------------------------------------------------------------------------------
+	 * BoneParentTransform
+	 * - ボーン行列をWorldTransformの親として公開する内部Transform
+	 * - GPUリソースを所有せず、BaseGameObjectが計算した行列を保持
+	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief BoneParentTransformの機能を提供するクラスです。
+	 */
 	class BoneParentTransform : public BaseTransform {
 	public:
+		/** \brief ボーンから計算したワールド行列を設定する \param world 設定するワールド行列 */
 		void SetWorldMatrix(const CalyxEngine::Matrix4x4& world);
+		/** \brief 外部設定済み行列を維持するため通常更新を行わない */
 		void Update() override {}
+		/** \brief 外部設定済み行列を維持するためビュー付き更新を行わない \param viewProMatrix 未使用のビュープロジェクション行列 */
 		void Update([[maybe_unused]] const CalyxEngine::Matrix4x4& viewProMatrix) override {}
 	};
 
+	/*-----------------------------------------------------------------------------------------
+	 * BoneParentBinding
+	 * - ボーンと子TransformのRuntime親子関係を保持する内部データ構造
+	 * - 中継Transformを所有し、対象WorldTransformは所有しない
+	 *---------------------------------------------------------------------------------------*/
 	struct BoneParentBinding {
-		WorldTransform* target = nullptr;
-		std::string boneName;
-		std::unique_ptr<BoneParentTransform> parentTransform;
-		bool inheritScale = true;
+		WorldTransform* target = nullptr;                         //< 所有権を持たない親子付け対象Transform
+		std::string boneName;                                    //< 親として参照するボーン名
+		std::unique_ptr<BoneParentTransform> parentTransform;    //< ボーン行列を公開する中継Transform
+		bool inheritScale = true;                                //< ボーンの拡大率を継承するか
 	};
 
 protected:
@@ -373,5 +406,5 @@ protected:
 
 	ConfigurableObject<BaseGameObjectConfig> config_; //< コンフィグ管理
 	const std::string configRoot_ = "BaseGameObject/"; //< コンフィグルートパス
-	std::vector<BoneParentBinding> boneParentBindings_;
+	std::vector<BoneParentBinding> boneParentBindings_; //< 所有するボーン親子付けのRuntime情報
 };

@@ -6,6 +6,7 @@
 
 template<typename T>
 void SetValueCommand<T>::UpdateName(){
+	// 特殊化されていない型でもUndo履歴へ表示可能なFallback名を設定する。
 	name_ = "Set Value"; // fallback
 }
 
@@ -16,6 +17,7 @@ template<>
 
 template<>
  void SetValueCommand<CalyxEngine::Vector2>::UpdateName(){
+	// 変更前後の各成分を履歴名へ含め、Inspector操作の内容を識別可能にする。
 	auto toStr = [] (const CalyxEngine::Vector2& v){
 		return "(" + std::to_string(v.x) + "," + std::to_string(v.y) + ")";
 		};
@@ -24,6 +26,7 @@ template<>
 
 template<>
  void SetValueCommand<CalyxEngine::Vector3>::UpdateName(){
+	// Vector値は一つのCommandとして表現し、軸ごとの変更履歴へ分割しない。
 	auto toStr = [] (const CalyxEngine::Vector3& v){
 		return "(" + std::to_string(v.x) + "," + std::to_string(v.y) + "," + std::to_string(v.z) + ")";
 		};
@@ -32,6 +35,7 @@ template<>
 
 template<>
  void SetValueCommand<CalyxEngine::Vector4>::UpdateName(){
+	// ColorなどVector4用途でも全成分の変更前後をUndo履歴へ残す。
 	auto toStr = [] (const CalyxEngine::Vector4& v){
 		return "(" + std::to_string(v.x) + "," + std::to_string(v.y) + "," + std::to_string(v.z) + "," + std::to_string(v.w) + ")";
 		};

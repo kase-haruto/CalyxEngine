@@ -12,6 +12,9 @@ namespace CalyxEngine {
 	/* SimpleAnimator class
 	/* -複数のSimpleAnimChannelを管理するアニメーター
 	/* ----------------------------------------------------------------------------*/
+	/**
+	 * @brief SimpleAnimatorの機能を提供するクラスです。
+	 */
 	class SimpleAnimator {
 	public:
 		//===================================================================*/

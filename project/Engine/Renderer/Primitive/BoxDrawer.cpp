@@ -11,16 +11,21 @@
 #include <Engine/Foundation/Math/Quaternion.h>
 
 void BoxDrawer::Initialize() {
+	// 1フレームの最大Box数を上限として、36頂点/BoxのGPUバッファを一度だけ確保する。
 	vertexBuffer_.Initialize(GraphicsGroup::GetInstance()->GetDevice(), kMaxBoxes * 36); // 1 box = 12 triangles = 36 vertices
+
+	// 全Boxで共有するワールド行列を転送する定数バッファを確保する。
 	transformBuffer_.Initialize(GraphicsGroup::GetInstance()->GetDevice(), 1);
 }
 
 void BoxDrawer::DrawBox(const CalyxEngine::Vector3& center, const CalyxEngine::Quaternion& rotate, const CalyxEngine::Vector3& size, const CalyxEngine::Vector4& color){
+	// 確保済みGPUバッファを越えるBoxは登録せず、転送時の範囲外書込を防ぐ。
 	if (vertices_.size() + 36 > kMaxBoxes * 36) return;
 
+	// 中心原点のBoxを各軸の半サイズで構築する。
 	CalyxEngine::Vector3 half = size * 0.5f;
 
-	// ローカル座標の頂点
+	// 回転前の8頂点をローカル空間に配置する。
 	CalyxEngine::Vector3 localVertices[8] = {
 		{-half.x, -half.y, -half.z}, // 0
 		{+half.x, -half.y, -half.z}, // 1
@@ -32,7 +37,7 @@ void BoxDrawer::DrawBox(const CalyxEngine::Vector3& center, const CalyxEngine::Q
 		{-half.x, +half.y, +half.z}  // 7
 	};
 
-	// 回転と平行移動を適用
+	// Quaternion回転後に中心座標を加算し、ワールド空間の8頂点へ変換する。
 	CalyxEngine::Vector3 worldVertices[8];
 	for (int i = 0; i < 8; ++i){
 		CalyxEngine::Vector3 rotated = CalyxEngine::Vector3::Transform(localVertices[i], rotate);
@@ -48,6 +53,7 @@ void BoxDrawer::DrawBox(const CalyxEngine::Vector3& center, const CalyxEngine::Q
 		{4, 5, 1, 4, 1, 0}  // -Y
 	};
 
+	// 各面を2三角形へ分割し、面ごとの頂点順を維持して描画キューへ追加する。
 	for (const auto& face : faceIndices){
 		for (int i = 0; i < 6; ++i){
 			vertices_.emplace_back(VertexPosColor {worldVertices[face[i]], color});
@@ -57,20 +63,23 @@ void BoxDrawer::DrawBox(const CalyxEngine::Vector3& center, const CalyxEngine::Q
 
 
 void BoxDrawer::Render() {
+	// 描画要求がないフレームはGPU転送とDraw命令を省略する。
 	if (vertices_.empty()) return;
 
+	// 現在のPrimitive描画Pipeline契約に従い、登録頂点をLineListとして解釈させる。
 	auto cmdList = GraphicsGroup::GetInstance()->GetCommandList();
 	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 
-	// 頂点バッファ更新
+	// CPUで蓄積した現在フレームの頂点をGPUバッファへまとめて転送する。
 	vertexBuffer_.TransferVectorData(vertices_);
 	vertexBuffer_.SetCommand(cmdList);
 
-	// WVP行列
+	// 頂点は既にワールド空間へ変換済みのため、追加のモデル変換には単位行列を使用する。
 	CalyxEngine::Matrix4x4 identity = CalyxEngine::Matrix4x4::MakeIdentity();
 	TransformationMatrix wvpData;
 	wvpData.world = identity;
 	wvpData.WorldInverseTranspose = CalyxEngine::Matrix4x4::Transpose(CalyxEngine::Matrix4x4::Inverse(identity));
+	// 転送済み行列をRoot Parameter 0へ設定してから全登録頂点を一括描画する。
 	transformBuffer_.TransferData(wvpData);
 	transformBuffer_.SetCommand(cmdList, 0);
 
@@ -78,5 +87,6 @@ void BoxDrawer::Render() {
 }
 
 void BoxDrawer::Clear() {
+	// GPUバッファは再利用し、フレーム単位のCPU描画要求だけを破棄する。
 	vertices_.clear();
 }

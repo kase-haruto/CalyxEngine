@@ -12,6 +12,9 @@ class Camera3d;
 /*		カメラのアクションを行うイベント
 /* ===================================================================== */
 CALYX_PLACEABLE_OBJECT(Category = Event, DisplayName = "Camera Event")
+/**
+ * @brief CameraEventObjectの機能を提供するクラスです。
+ */
 class CameraEventObject :
 	public BaseEventObject {
 public:

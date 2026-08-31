@@ -36,6 +36,9 @@ namespace CalyxEngine {
 	 * - インスペクターパネルクラス
 	 * - 選択されたオブジェクト・エディタのプロパティ調整を表示
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief エディターで選択したオブジェクトのプロパティを表示・編集するクラスです。
+	 */
 	class InspectorPanel
 		: public IEngineUI {
 	public:
@@ -70,6 +73,9 @@ namespace CalyxEngine {
 
 	private:
 		// Tabs
+		/**
+		 * @brief インスペクターのタブに対応するアイコンとパラメーターフィルターを保持する構造体です。
+		 */
 		struct InspectorTab {
 			std::string        iconPath;          // Texture path
 			ParamFilterSection filterSection;     // フィルターセクション

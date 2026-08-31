@@ -16,6 +16,9 @@ namespace CalyxEngine {
 	 * - エフェクト管理システムクラス
 	 * - 各種エミッタ（CPU/GPU）のライフサイクル管理、シミュレーション、描画制御を担当
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief FxSystemの機能を提供するクラスです。
+	 */
 	class FxSystem {
 	public:
 		//===================================================================*/
@@ -95,11 +98,17 @@ namespace CalyxEngine {
 		//===================================================================*/
 		//                    private types
 		//===================================================================*/
+		/**
+		 * @brief CpuEmitterEntryに関するデータを保持する構造体です。
+		 */
 		struct CpuEmitterEntry {
 			Guid ownerGuid; //< 所有者GUID
 			std::weak_ptr<FxEmitter> emitter; //< CPUエミッタ
 		};
 
+		/**
+		 * @brief GpuEmitterEntryに関するデータを保持する構造体です。
+		 */
 		struct GpuEmitterEntry {
 			Guid ownerGuid; //< 所有者GUID
 			std::weak_ptr<GpuFxEmitter> emitter; //< GPUエミッタ

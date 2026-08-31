@@ -29,6 +29,9 @@
 class PipelineService;
 class IPostEffectPass;
 
+/**
+ * @brief PostEffectManagerの機能を提供するクラスです。
+ */
 class PostEffectManager{
 public:
 	CALYX_API static PostEffectManager* Get();
@@ -99,6 +102,9 @@ private:
 	void RebuildGraphIfDirty();
 
 private:
+	/**
+	 * @brief OverlaySlotSnapshotに関するデータを保持する構造体です。
+	 */
 	struct OverlaySlotSnapshot {
 		bool enabled = false;
 		PostEffectApplyMode applyMode = PostEffectApplyMode::Always;
@@ -109,6 +115,9 @@ private:
 		nlohmann::json parameters = nlohmann::json::object();
 	};
 
+	/**
+	 * @brief FloatTweenに関するデータを保持する構造体です。
+	 */
 	struct FloatTween{
 		std::string passName;
 		std::function<float()> getter;

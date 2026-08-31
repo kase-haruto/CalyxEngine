@@ -8,11 +8,28 @@
 
 #include <externals/imgui/imgui.h>
 
+/*-----------------------------------------------------------------------------------------
+ * ChromaticAberrationSettings
+ * - 色収差Shaderへ転送する定数バッファ用データ構造
+ * - 効果強度と16バイトアラインメント用領域を保持する
+ *---------------------------------------------------------------------------------------*/
+/**
+ * @brief ChromaticAberrationSettingsに関するデータを保持する構造体です。
+ */
 struct ChromaticAberrationSettings{
 	float intensity = 0.0f; // 0で効果なし
 	float _pad[3] = {};   // 16byteアラインのためのパディング（安全）
 };
 
+/*-----------------------------------------------------------------------------------------
+ * ChromaticAberrationEffect
+ * - 入力画像へ色収差を適用するポストエフェクトクラス
+ * - 効果強度の管理、定数転送、Fullscreen描画を担当する
+ * - Pipelineと出力RenderTargetのライフタイムは管理しない
+ *---------------------------------------------------------------------------------------*/
+/**
+ * @brief ChromaticAberrationEffectの機能を提供するクラスです。
+ */
 class ChromaticAberrationEffect : public IPostEffectPass{
 public:
 	// ---- IPostEffectPass ----

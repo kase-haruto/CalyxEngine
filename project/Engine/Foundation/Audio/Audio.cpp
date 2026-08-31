@@ -25,29 +25,25 @@ namespace {
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////////////
-// デストラクタ
-/////////////////////////////////////////////////////////////////////////////////////
-Audio::~Audio(){
-
-}
+Audio::~Audio() = default;
 
 /////////////////////////////////////////////////////////////////////////////////////
 // 初期化
 /////////////////////////////////////////////////////////////////////////////////////
 void Audio::Initialize(){
-	// XAudio2初期化
+	// SourceVoiceとMasteringVoiceの基盤となるXAudio2インターフェースを先に生成する。
 	HRESULT hr = XAudio2Create(&xAudio2_, 0, XAUDIO2_DEFAULT_PROCESSOR);
 	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
+	// 全再生Voiceの最終出力先となるMasteringVoiceをXAudio2より後に生成する。
 	hr = xAudio2_->CreateMasteringVoice(&masteringVoice_);
 	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
-	// Media Foundation初期化
+	// MP3/M4Aデコードを利用可能にするためMedia Foundationを起動する。
 	hr = InitializeMediaFoundation();
 	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
-	// 起動時にまとめて読み込む音声の処理
+	// 起動時常駐対象が追加された場合も初期化順序を統一できるよう専用処理へ委譲する。
 	StartUpLoad();
 }
 
@@ -58,12 +54,16 @@ void Audio::StartUpLoad(){
 }
 
 void Audio::Finalize(){
+	// SourceVoiceをMasteringVoiceとXAudio2本体より先に破棄し、参照先の解放順序を守る。
 	UnloadAllAudio();
+	// SourceVoiceを全て破棄した後で、出力先となるMasteringVoiceを解放する。
 	if(masteringVoice_) {
 		masteringVoice_->DestroyVoice();
 		masteringVoice_ = nullptr;
 	}
+	// MasteringVoiceが参照しなくなってからXAudio2本体を解放する。
 	xAudio2_.Reset();
+	// Media Foundationで保持されるデコーダー基盤を最後に終了する。
 	MFShutdown();
 }
 
@@ -91,19 +91,19 @@ void Audio::PlayAudio(
 	HRESULT hr;
 	std::string tmpFilename = filename;
 
-	// 既にSourceVoiceがあれば解放
+	// 同じキーのLoop再生を置換できるよう、既存SourceVoiceを先に破棄する。
 	if (sourceVoices_[filename] != nullptr){
 		sourceVoices_[filename].reset();
 	}
 
-	// ソースボイスの生成
+	// XAudio2から受け取る生VoiceをDestroyVoiceデリータ付きunique_ptrへ直ちに移す。
 	IXAudio2SourceVoice* pSourceVoice = nullptr;
 	if (loop){
 		hr = xAudio2->CreateSourceVoice(&pSourceVoice, &soundData.wfex);
 		CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 		sourceVoices_[filename] = std::unique_ptr<IXAudio2SourceVoice, SourceVoiceDeleter>(pSourceVoice);
 	} else{
-		// 同じfilenameがあった場合、連番をつける等の処理
+		// One-shotの同時再生を許可するため、既存キーと重ならない連番キーを生成する。
 		int count = 0;
 		while (sourceVoices_.find(tmpFilename) != sourceVoices_.end()){
 			count++;
@@ -114,23 +114,24 @@ void Audio::PlayAudio(
 		sourceVoices_[tmpFilename] = std::unique_ptr<IXAudio2SourceVoice, SourceVoiceDeleter>(pSourceVoice);
 	}
 
-	// バッファ設定
+	// SoundDataのPCM領域を再生完了まで保持したままXAudio2バッファへ関連付ける。
 	XAUDIO2_BUFFER buf {};
 	buf.pAudioData = soundData.buffer.data();
 	buf.AudioBytes = static_cast<UINT32>(soundData.buffer.size());
 	buf.Flags = XAUDIO2_END_OF_STREAM;
 	if (loop){
+		// Loop再生はXAudio2側で繰り返し、毎周回の再投入を不要にする。
 		buf.LoopCount = XAUDIO2_LOOP_INFINITE;
 	}
 
 	hr = sourceVoices_[tmpFilename]->SubmitSourceBuffer(&buf);
 	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
-	// 音量セット
+	// 再生開始前に音量を設定し、先頭サンプルだけ既定音量で鳴ることを防ぐ。
 	hr = sourceVoices_[tmpFilename]->SetVolume(volume);
 	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 
-	// 再生開始
+	// Buffer投入と音量設定が成功したVoiceだけを再生開始する。
 	hr = sourceVoices_[tmpFilename]->Start();
 	CX_CHECK(SUCCEEDED(hr), "Assertion failed");
 }
@@ -229,13 +230,13 @@ bool Audio::IsPlayingAudio(const std::string& filename){
 // 音声をロードする
 /////////////////////////////////////////////////////////////////////////////////////
 void Audio::Load(const std::string& filename){
-	// 未ロードならロードを実施
+	// 同じ論理名のPCMデータを共有し、重複デコードとメモリ消費を避ける。
 	if (audios_.find(filename) == audios_.end()){
-		// 実際のパス
+		// AssetDatabaseを優先し、旧Resources/sounds配置へもフォールバックして互換性を維持する。
 		const std::filesystem::path correctPath = ResolveAudioFile(filename);
 		CX_CHECK(std::filesystem::exists(correctPath), "Audio file was not found");
 
-		// 拡張子を取得
+		// 大文字小文字を正規化した拡張子だけでデコーダーを選択する。
 		size_t pos = filename.find_last_of('.');
 		if (pos == std::string::npos || pos == filename.length() - 1){
 			CX_CHECK(false && "No valid extension found.", "Assertion failed");
@@ -244,7 +245,7 @@ void Audio::Load(const std::string& filename){
 		std::transform(extension.begin(), extension.end(), extension.begin(),
 			[](unsigned char c) { return static_cast<char>(std::tolower(c)); });
 
-		// 拡張子で振り分け
+		// WAVは直接RIFF解析し、圧縮形式はMedia FoundationでPCMへ展開する。
 		if (extension == "wav"){
 			audios_[filename] = LoadWave(correctPath.string().c_str());
 		} else if (extension == "mp3" || extension == "m4a"){
@@ -254,7 +255,7 @@ void Audio::Load(const std::string& filename){
 			CX_CHECK(false && "Unsupported audio format.", "Assertion failed");
 		}
 
-		// 再生フラグ初期化
+		// Load直後はVoice未生成のため、外部照会用の再生状態をfalseで登録する。
 		isPlaying_[filename] = false;
 	}
 }
@@ -269,14 +270,14 @@ SoundData Audio::LoadWave(const char* filename){
 	file.open(filename, std::ios_base::binary);
 	CX_CHECK(file.is_open(), "Assertion failed");
 
-	// RIFFヘッダ
+	// RIFF/WAVE識別子を検証し、別形式をWAVとして読み進めないようにする。
 	RiffHeader riff;
 	file.read(( char* ) &riff, sizeof(riff));
 	// チェック
 	CX_CHECK(strncmp(riff.chunk.id, "RIFF", 4) == 0, "Assertion failed");
 	CX_CHECK(strncmp(riff.type, "WAVE", 4) == 0, "Assertion failed");
 
-	// フォーマットチャンク
+	// 可変順序のRIFFチャンクを走査し、SourceVoice生成に必要なfmtチャンクを探す。
 	FormatChunk format = {};
 	while (true){
 		ChunkHeader chunkHeader;
@@ -296,7 +297,7 @@ SoundData Audio::LoadWave(const char* filename){
 		}
 	}
 
-	// データチャンク
+	// fmt以外の任意チャンクを読み飛ばし、PCM本体を持つdataチャンクを探す。
 	ChunkHeader data;
 	while (true){
 		file.read(( char* ) &data, sizeof(data));
@@ -312,14 +313,14 @@ SoundData Audio::LoadWave(const char* filename){
 		}
 	}
 
-	// データ部読み込み
+	// dataチャンクの宣言サイズだけPCM領域を確保して一括読込する。
 	std::vector<BYTE> buffer(data.size);
 	file.read(reinterpret_cast<char*>(buffer.data()), data.size);
 
 	// 閉じる
 	file.close();
 
-	// SoundDataへ格納
+	// XAudio2へ渡すFormatとPCM領域を同じSoundDataへまとめて返す。
 	SoundData soundData {};
 	soundData.wfex = format.fmt;
 	soundData.buffer = std::move(buffer);
@@ -331,7 +332,7 @@ SoundData Audio::LoadWave(const char* filename){
 // MP3/M4Aファイルの読み込み (MediaFoundation)
 /////////////////////////////////////////////////////////////////////////////////////
 SoundData Audio::LoadMP3(const wchar_t* filename){
-	// 初期化(呼び直してもOK)
+	// 圧縮音声を単独ロードする経路でも利用できるようMedia Foundationの起動を確認する。
 	HRESULT hr = InitializeMediaFoundation();
 	if (FAILED(hr)){
 		throw std::runtime_error("Media Foundation initialization failed.");
@@ -347,7 +348,7 @@ SoundData Audio::LoadMP3(const wchar_t* filename){
 		throw std::runtime_error("Failed to create Source Reader.");
 	}
 
-	// 出力タイプをPCM(WAV)に設定
+	// XAudio2へ直接投入できるようSource Readerの出力を非圧縮PCMへ固定する。
 	hr = MFCreateMediaType(&pOutputType);
 	if (FAILED(hr)){
 		pReader->Release();
@@ -375,7 +376,7 @@ SoundData Audio::LoadMP3(const wchar_t* filename){
 	// 実際に設定されたMediaTypeを取得
 	pReader->GetCurrentMediaType(( DWORD ) MF_SOURCE_READER_FIRST_AUDIO_STREAM, &pOutputType);
 
-	// サンプルを読み取って音声データを展開
+	// Media Foundationが返す複数Sampleを連続PCMバイト列へ結合する。
 	std::vector<BYTE> audioData;
 	while (true){
 		IMFSample* pMFSample {nullptr};
@@ -393,7 +394,7 @@ SoundData Audio::LoadMP3(const wchar_t* filename){
 			break;
 		}
 
-		// バッファ取得
+		// Sample内の分割Bufferを連続Bufferへ変換してからCPUメモリへコピーする。
 		if (pMFSample){
 			IMFMediaBuffer* pMFMediaBuffer {nullptr};
 			pMFSample->ConvertToContiguousBuffer(&pMFMediaBuffer);
@@ -429,7 +430,7 @@ SoundData Audio::LoadMP3(const wchar_t* filename){
 	soundData.wfex.nAvgBytesPerSec = soundData.wfex.nSamplesPerSec * soundData.wfex.nBlockAlign;
 	soundData.wfex.cbSize = 0;
 
-	// 後始末
+	// 取得時と逆順にCOMオブジェクトをReleaseし、SoundDataだけを呼出し側へ返す。
 	pOutputType->Release();
 	pReader->Release();
 	MFShutdown();
@@ -444,11 +445,12 @@ void Audio::UnloadAudio(const std::string& filename){
 	// まだロードされていなければエラー
 	CX_CHECK(audios_.find(filename) != audios_.end(), "Assertion failed");
 
-	// SoundData破棄 (vectorなので自動的に解放される)
+	// PCMデータを消す前に対象名の登録を外し、以後のPlayで参照されないようにする。
 	audios_.erase(filename);
 
-	// SourceVoice破棄 (unique_ptrなので自動的に解放される)
+	// unique_ptrのカスタムデリータを通してSourceVoiceをDestroyVoiceする。
 	sourceVoices_.erase(filename);
+	// 外部照会用の再生フラグも同時に破棄し、3個のMapを同じキー集合に保つ。
 	isPlaying_.erase(filename);
 }
 

@@ -12,14 +12,23 @@ namespace CalyxEngine {
 	 * - デバッグテキスト管理クラス
 	 * - 各フレームで表示したい情報を保持・提供する
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief DebugTextManagerの機能を提供するクラスです。
+	 */
 	class DebugTextManager {
 	public:
+		/**
+		 * @brief Messageに関するデータを保持する構造体です。
+		 */
 		struct Message {
 			std::string title;
 			std::string body;
 			ImVec4		color;
 		};
 
+		/**
+		 * @brief PopupTextに関するデータを保持する構造体です。
+		 */
 		struct PopupText {
 			CalyxEngine::Vector2 position;
 			ImVec4				  color;
@@ -29,6 +38,9 @@ namespace CalyxEngine {
 			float				  rise	   = 24.0f;
 		};
 
+		/**
+		 * @brief FatalAssertに関するデータを保持する構造体です。
+		 */
 		struct FatalAssert {
 			std::string expression;
 			std::string message;

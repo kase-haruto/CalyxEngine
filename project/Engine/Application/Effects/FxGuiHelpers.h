@@ -13,6 +13,9 @@ namespace CalyxEngine {
 	namespace FxGui {
 
 		//---------------------- 2列グリッド ----------------------
+		/**
+		 * @brief GridScopeに関するデータを保持する構造体です。
+		 */
 		struct GridScope {
 			bool open		 = false; // セクションが開いていて、かつテーブル生成に成功したか
 			bool began_table = false; // BeginTable できたか（EndTable の判定用）
@@ -20,6 +23,9 @@ namespace CalyxEngine {
 			~GridScope();
 		};
 
+		/**
+		 * @brief FullWidthScopeに関するデータを保持する構造体です。
+		 */
 		struct FullWidthScope {
 			FullWidthScope() { ImGui::PushItemWidth(-FLT_MIN); }
 			~FullWidthScope() { ImGui::PopItemWidth(); }

@@ -13,7 +13,13 @@
  * MeshData
  * - メッシュデータ構造体
  *--------------------------------------------------------*/
+/**
+ * @brief MeshDataに関するデータを保持する構造体です。
+ */
 struct MeshData {
+	/**
+	 * @brief SubMeshに関するデータを保持する構造体です。
+	 */
 	struct SubMesh {
 		uint32_t indexStart = 0;
 		uint32_t indexCount = 0;
@@ -46,6 +52,9 @@ struct MeshData {
  * MeshBuffers
  * - メッシュ用 GPU バッファ構造体
  *--------------------------------------------------------*/
+/**
+ * @brief MeshBuffersに関するデータを保持する構造体です。
+ */
 struct MeshBuffers {
 	DxVertexBuffer<VertexPosUvN> vertexBuffer;
 	DxIndexBuffer<uint32_t>      indexBuffer;
@@ -63,6 +72,9 @@ struct MeshBuffers {
  * MeshResource
  * - メッシュリソース構造体
  *--------------------------------------------------------*/
+/**
+ * @brief MeshResourceに関するデータを保持する構造体です。
+ */
 struct MeshResource {
 	//===================================================================*/
 	//			コピー禁止

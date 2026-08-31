@@ -54,6 +54,9 @@ namespace CalyxEngine {
 	 * そのため参照先の寿命を延長せず、削除後も安全にnullptrへ解決される。
 	 */
 	template<class T>
+	/**
+	 * @brief SceneObjectRefの機能を提供するクラスです。
+	 */
 	class SceneObjectRef final : public ISceneObjectReference {
 		static_assert(std::is_base_of_v<SceneObject, T>, "T must derive from SceneObject");
 

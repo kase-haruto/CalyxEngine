@@ -17,6 +17,15 @@
 #include<stdint.h>
 #include<string>
 
+/*-----------------------------------------------------------------------------------------
+ * Material
+ * - Object3D描画用のGPU定数とMaterial設定を保持するデータ構造
+ * - Lighting、UV、Toon、Emissive、Normal Map、Rim Light設定を管理する
+ * - Texture ResourceとDescriptorの所有は担当しない
+ *---------------------------------------------------------------------------------------*/
+/**
+ * @brief Materialに関するデータを保持する構造体です。
+ */
 struct Material {
 
 	CalyxEngine::Vector4   color        = {1,1,1,1};;
@@ -58,6 +67,14 @@ struct Material {
 
 };
 
+/*-----------------------------------------------------------------------------------------
+ * ParticleMaterial
+ * - Particle描画へ渡すMaterial定数とTexture参照情報を保持するデータ構造
+ * - UV Animation、Noise Mask、Runtime経過時間をGPU配置に合わせて管理する
+ *---------------------------------------------------------------------------------------*/
+/**
+ * @brief ParticleMaterialに関するデータを保持する構造体です。
+ */
 struct ParticleMaterial {
 	CalyxEngine::Vector4     color       = {1,1,1,1};     // 基本色（tint）
 	// xy: 固定Offset, zw: Tiling。GPU Constant Bufferの16-byte境界を維持する。
@@ -71,6 +88,14 @@ struct ParticleMaterial {
 	std::string texturePath = "Textures/white1x1.dds";  // テクスチャパス
 };
 
+/*-----------------------------------------------------------------------------------------
+ * Material2D
+ * - Spriteなど2D描画用のMaterial定数を保持するデータ構造
+ * - 色、UV変換、Fill表現とGPUアラインメント用領域を管理する
+ *---------------------------------------------------------------------------------------*/
+/**
+ * @brief Material2Dに関するデータを保持する構造体です。
+ */
 struct Material2D {
 	CalyxEngine::Vector4   color;
 	CalyxEngine::Matrix4x4 uvTransform;
@@ -85,6 +110,14 @@ struct Material2D {
 	float padding; // 16バイト境界を合わせる
 };
 
+/*-----------------------------------------------------------------------------------------
+ * MaterialData
+ * - Model Assetから読み込んだMaterial参照情報を保持するデータ構造
+ * - TextureパスとUV変換値をCPU側の中間データとして管理する
+ *---------------------------------------------------------------------------------------*/
+/**
+ * @brief MaterialDataに関するデータを保持する構造体です。
+ */
 struct MaterialData {
 	std::string textureFilePath;
 	std::string normalTextureFilePath;

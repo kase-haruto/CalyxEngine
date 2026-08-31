@@ -7,6 +7,9 @@
 
 namespace CalyxEngine {
 
+	/**
+	 * @brief SpriteDrawDataに関するデータを保持する構造体です。
+	 */
 	struct SpriteDrawData {
 		D3D12_GPU_DESCRIPTOR_HANDLE texture{};
 		CalyxEngine::Matrix4x4        wvp;

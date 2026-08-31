@@ -5,8 +5,14 @@
 #include <Engine/PostProcess/Interface/IPostEffectPass.h>
 #include <Engine/Foundation/Math/Vector2.h>
 
+/**
+ * @brief CRTEffectの機能を提供するクラスです。
+ */
 class CRTEffect : public IPostEffectPass {
 private:
+	/**
+	 * @brief CRTParameterに関するデータを保持する構造体です。
+	 */
 	struct CRTParameter {
 		CalyxEngine::Vector2 screenSize;
 		float time;

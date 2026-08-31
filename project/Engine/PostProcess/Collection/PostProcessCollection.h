@@ -12,6 +12,9 @@
 #include <memory>
 #include <vector>
 
+/**
+ * @brief ポストエフェクトとそのスロットのコレクションを所有・管理するクラスです。
+ */
 class PostProcessCollection {
 public:
 	void Initialize(class PipelineService* service);

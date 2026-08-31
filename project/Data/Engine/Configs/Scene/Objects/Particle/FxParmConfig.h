@@ -26,6 +26,9 @@ namespace CalyxEngine {
 	// テンプレート基底
 	// -------------------------
 	template <typename T>
+	/**
+	 * @brief FxParamConfigに関するデータを保持する構造体です。
+	 */
 	struct FxParamConfig {
 		FxValueMode mode = FxValueMode::Constant;
 		T			constant{};
@@ -36,6 +39,9 @@ namespace CalyxEngine {
 	// -------------------------
 	// 型別特殊構造体
 	// -------------------------
+	/**
+	 * @brief FxFloatParamConfigに関するデータを保持する構造体です。
+	 */
 	struct FxFloatParamConfig : public FxParamConfig<float> {
 		using FxParamConfig<float>::FxParamConfig;
 		FxFloatParamConfig() {
@@ -47,6 +53,9 @@ namespace CalyxEngine {
 			: FxParamConfig<float>(base) {}
 	};
 
+	/**
+	 * @brief Vector3ParamConfigに関するデータを保持する構造体です。
+	 */
 	struct Vector3ParamConfig : public FxParamConfig<CalyxEngine::Vector3> {
 		using FxParamConfig<CalyxEngine::Vector3>::FxParamConfig;
 		Vector3ParamConfig() {

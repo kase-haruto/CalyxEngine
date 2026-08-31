@@ -6,6 +6,9 @@
  * - 設定可能インターフェース
  * - JSON形式での設定の適用/抽出を定義
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief IConfigurableの機能を提供するクラスです。
+ */
 class IConfigurable {
 public:
 	virtual ~IConfigurable() = default;

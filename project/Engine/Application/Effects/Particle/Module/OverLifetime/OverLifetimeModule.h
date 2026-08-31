@@ -9,6 +9,9 @@
 #include <string>
 
 namespace CalyxEngine {
+	/**
+	 * @brief OverLifetimeModuleの機能を提供するクラスです。
+	 */
 	class OverLifetimeModule final
 		: public BaseFxModule {
 	public:

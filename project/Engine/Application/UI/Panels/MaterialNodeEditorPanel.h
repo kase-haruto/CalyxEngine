@@ -17,6 +17,15 @@
 namespace CalyxEngine {
 	class MaterialAsset;
 
+	/*-----------------------------------------------------------------------------------------
+	 * MaterialNodeEditorPanel
+	 * - Material Node Graphを編集しPreview表示するEditor専用パネルクラス
+	 * - Asset選択、Node編集、Undo登録、Shader検証とPreview描画を担当する
+	 * - Runtime Rendererが所有する共通GPUサービスのライフタイムは管理しない
+	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief MaterialNodeEditorPanelの機能を提供するクラスです。
+	 */
 	class MaterialNodeEditorPanel : public IEngineUI {
 	public:
 		MaterialNodeEditorPanel();

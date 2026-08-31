@@ -10,6 +10,9 @@ namespace CalyxEngine {
 	/* - 現在の値を保持し、アニメーションの更新を行う
 	/*----------------------------------------------------------------------------*/
 	template <typename T>
+	/**
+	 * @brief SimpleAnimChannelの機能を提供するクラスです。
+	 */
 	class SimpleAnimChannel {
 	public:
 		SimpleAnimation<T>&       Animation() { return animation_; }

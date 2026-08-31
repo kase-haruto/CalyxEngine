@@ -27,6 +27,9 @@
  * - モデル管理クラス
  * - 3Dモデルファイルの非同期ロード、GPUリソースの生成、ロード済みデータの管理を担当
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief ModelManagerの機能を提供するクラスです。
+ */
 class ModelManager {
 public:
 
@@ -140,6 +143,9 @@ private:
 	//-------------------------------
 	// リクエスト構造体
 	//-------------------------------
+	/**
+	 * @brief LoadRequestに関するデータを保持する構造体です。
+	 */
 	struct LoadRequest {
 		std::string fileName;              //< ファイル名
 		std::promise<ModelData*> promise;  //< CPUロード完了後 future に値を返す
@@ -150,6 +156,9 @@ private:
 	//-------------------------------
 	// GPUリソース化待ちタスク
 	//-------------------------------
+	/**
+	 * @brief LoadingTaskに関するデータを保持する構造体です。
+	 */
 	struct LoadingTask {
 		std::string                 fileName; //< ファイル名
 		std::unique_ptr<ModelData> model;     //< move-only

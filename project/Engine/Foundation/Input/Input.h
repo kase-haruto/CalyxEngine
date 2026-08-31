@@ -50,6 +50,9 @@ namespace CalyxFoundation {
 	using Microsoft::WRL::ComPtr;
 
 	// スティック状態構造体
+	/**
+	 * @brief StickStateに関するデータを保持する構造体です。
+	 */
 	struct StickState {
 		CalyxEngine::Vector2 leftStick;
 		CalyxEngine::Vector2 rightStick;
@@ -60,6 +63,9 @@ namespace CalyxFoundation {
 	 * - 入力管理クラス
 	 * - キーボード、マウス、ゲームパッド（XInput）の入力を統合管理するシングルトン
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief Inputの機能を提供するクラスです。
+	 */
 	class CALYX_API Input {
 	public:
 		/**
@@ -191,27 +197,39 @@ namespace CalyxFoundation {
 		static bool				  IsLeftStickMoved();
 
 	private:
+		/** \brief Input共有インスタンスを構築する */
 		Input() = default;
+		/** \brief 終了時に保持中の入力デバイスを解放する */
 		~Input();
 
+		/** \brief 明示終了時にDirectInputデバイスを安全に解放する */
+		void  Shutdown();
+		/** \brief DirectInputとキーボード・マウスデバイスを初期化する */
 		void  DirectInputInitialize();
+		/** \brief キーボード入力を前フレーム状態とともに更新する */
 		void  KeyboardUpdate();
+		/** \brief マウス入力とクライアント座標を更新する */
 		void  MouseUpdate();
+		/** \brief XInputゲームパッド状態を更新する */
 		void  GamepadUpdate();
+		/**
+		 * \brief デッドゾーンを除外して軸入力を正規化する
+		 * \param value XInputから取得した軸入力
+		 * \param deadZone 無入力として扱う範囲
+		 * \return -1.0～1.0へ正規化した軸入力
+		 */
 		float NormalizeAxisInput(short value, short deadZone);
 
 	private:
 		//===================================================================*/
 		//                    private member variables
 		//===================================================================*/
-		static std::unique_ptr<Input> instance_; //< インスタンス
+		ComPtr<IDirectInput8> directInput_ = nullptr; //< 所有するDirectInputインターフェース
+		ComPtr<IDirectInputDevice8> keyboard_ = nullptr; //< 所有するキーボード入力デバイス
+		std::array<BYTE, 256> key_ = {}; //< 現在フレームのキー状態
+		std::array<BYTE, 256> keyPre_ = {}; //< 前フレームのキー状態
 
-		ComPtr<IDirectInput8> directInput_ = nullptr; //< DirectInputインスタンス
-		ComPtr<IDirectInputDevice8> keyboard_ = nullptr; //< キーボードデバイス
-		std::array<BYTE, 256> key_ = {}; //< 現在のキー状態
-		std::array<BYTE, 256> keyPre_ = {}; //< 前回のキー状態
-
-		ComPtr<IDirectInputDevice8> mouse_ = nullptr; //< マウスデバイス
+		ComPtr<IDirectInputDevice8> mouse_ = nullptr; //< 所有するマウス入力デバイス
 		DIMOUSESTATE mouseState_ = {}; //< 現在のマウス状態
 		DIMOUSESTATE mouseStatePre_ = {}; //< 前回のマウス状態
 		CalyxEngine::Vector2 mousePos_ = {}; //< マウス座標

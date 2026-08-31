@@ -18,6 +18,9 @@ namespace CalyxEngine {
 	 * - コマンド入力とコマンド応答だけを表示するエディタパネル
 	 * - エンジンログの表示責務はLogPanelへ残し、両者を独立して利用可能にする
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief TerminalPanelの機能を提供するクラスです。
+	 */
 	class TerminalPanel : public IEngineUI {
 	public:
 		TerminalPanel();
@@ -37,6 +40,9 @@ namespace CalyxEngine {
 		Error
 		};
 
+		/**
+		 * @brief TerminalLineに関するデータを保持する構造体です。
+		 */
 		struct TerminalLine {
 			LineType type = LineType::Info;
 			std::string text;

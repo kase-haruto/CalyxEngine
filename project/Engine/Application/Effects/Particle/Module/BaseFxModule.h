@@ -11,6 +11,9 @@ namespace CalyxEngine {
 	 * - パーティクルモジュール基底クラス
 	 * - パーティクルの発生時・更新時に適用される処理を定義
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief BaseFxModuleの機能を提供するクラスです。
+	 */
 	class BaseFxModule {
 	public:
 		BaseFxModule(const std::string& name)

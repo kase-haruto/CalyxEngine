@@ -11,12 +11,14 @@
 // externals
 #include <externals/imgui/imgui.h>
 namespace CalyxFoundation {
-	std::unique_ptr<Input> Input::instance_ = nullptr;
+	Input::~Input() {
+		Shutdown();
+	}
 
 	//-----------------------------------------------------------------------------
 
-	Input::~Input() {
-		// DirectInputで作成したキーボード・マウスのみ解放
+	void Input::Shutdown() {
+		// 明示終了と静的デストラクタの両方から呼べるよう、保持中のデバイスだけを解放する。
 		if(keyboard_) {
 			keyboard_->Unacquire();
 			keyboard_.Reset();
@@ -33,50 +35,52 @@ namespace CalyxFoundation {
 	//-----------------------------------------------------------------------------
 
 	Input* Input::GetInstance() {
-		if(!instance_) {
-			instance_ = std::unique_ptr<Input>(new Input());
-		}
-		return instance_.get();
+		// C++11以降の静的ローカル初期化により、初回アクセスをスレッドセーフにする。
+		static Input instance;
+		return &instance;
 	}
 
 	//-----------------------------------------------------------------------------
 
 	void Input::Initialize() {
-		GetInstance();
-		instance_->DirectInputInitialize();
+		Input* instance = GetInstance();
+		instance->DirectInputInitialize();
 
 		POINT pt;
 		if(GetCursorPos(&pt)) {
 			ScreenToClient(CalyxEngine::CalyxCore::GetHWND(), &pt);
-			instance_->mousePos_ = {static_cast<float>(pt.x), static_cast<float>(pt.y)};
+			instance->mousePos_ = {static_cast<float>(pt.x), static_cast<float>(pt.y)};
 		}
 	}
 
 	//-----------------------------------------------------------------------------
 
 	void Input::Update() {
-		instance_->mouseStatePre_ = instance_->mouseState_;
-		instance_->KeyboardUpdate();
-		instance_->MouseUpdate();
-		instance_->GamepadUpdate();
+		Input* instance = GetInstance();
+		instance->mouseStatePre_ = instance->mouseState_;
+		instance->KeyboardUpdate();
+		instance->MouseUpdate();
+		instance->GamepadUpdate();
 	}
 
 	//-----------------------------------------------------------------------------
 
 	void Input::Finalize() {
-		instance_.reset();
+		// Meyers Singleton自体は終了時まで存続させ、OSリソースだけを所定の終了順で解放する。
+		GetInstance()->Shutdown();
 	}
 
 	//-----------------------------------------------------------------------------
 
 	void Input::ShowImGui() {
+		const Input* instance = GetInstance();
 		ImGui::Begin("Input Debug");
-		ImGui::Text("Mouse Pos: %.1f, %.1f", instance_->mousePos_.x, instance_->mousePos_.y);
-		ImGui::Text("Mouse Wheel: %.2f", instance_->mouseWheel_);
-		ImGui::Text("Left Trigger: %.2f", instance_->leftTrigger_);
-		ImGui::Text("Right Trigger: %.2f", instance_->rightTrigger_);
-		ImGui::Text("Left Stick: (%.2f, %.2f)", instance_->leftThumbX_, instance_->leftThumbY_);
-		ImGui::Text("Right Stick: (%.2f, %.2f)", instance_->rightThumbX_, instance_->rightThumbY_);
+		ImGui::Text("Mouse Pos: %.1f, %.1f", instance->mousePos_.x, instance->mousePos_.y);
+		ImGui::Text("Mouse Wheel: %.2f", instance->mouseWheel_);
+		ImGui::Text("Left Trigger: %.2f", instance->leftTrigger_);
+		ImGui::Text("Right Trigger: %.2f", instance->rightTrigger_);
+		ImGui::Text("Left Stick: (%.2f, %.2f)", instance->leftThumbX_, instance->leftThumbY_);
+		ImGui::Text("Right Stick: (%.2f, %.2f)", instance->rightThumbX_, instance->rightThumbY_);
 		ImGui::End();
 	}
 
@@ -134,12 +138,13 @@ namespace CalyxFoundation {
 
 	bool Input::PushKey(uint32_t keyNum) {
 		CX_CHECK(keyNum < 256, "Assertion failed");
-		return instance_->key_[keyNum] & 0x80;
+		return GetInstance()->key_[keyNum] & 0x80;
 	}
 
 	bool Input::TriggerKey(uint32_t keyNum) {
 		CX_CHECK(keyNum < 256, "Assertion failed");
-		return (instance_->key_[keyNum] & 0x80) && !(instance_->keyPre_[keyNum] & 0x80);
+		const Input* instance = GetInstance();
+		return (instance->key_[keyNum] & 0x80) && !(instance->keyPre_[keyNum] & 0x80);
 	}
 
 	//-----------------------------------------------------------------------------
@@ -165,19 +170,19 @@ namespace CalyxFoundation {
 	}
 
 	bool Input::PushMouseButton(MouseButton button) {
-		return (instance_->mouseState_.rgbButtons[static_cast<int>(button)] & 0x80) != 0;
+		return (GetInstance()->mouseState_.rgbButtons[static_cast<int>(button)] & 0x80) != 0;
 	}
 
 	bool Input::TriggerMouseButton(MouseButton button) {
-		return PushMouseButton(button) && !((instance_->mouseStatePre_.rgbButtons[static_cast<int>(button)] & 0x80) != 0);
+		return PushMouseButton(button) && !((GetInstance()->mouseStatePre_.rgbButtons[static_cast<int>(button)] & 0x80) != 0);
 	}
 
 	bool Input::ReleaseMouseButton(MouseButton button) {
-		return !PushMouseButton(button) && ((instance_->mouseStatePre_.rgbButtons[static_cast<int>(button)] & 0x80) != 0);
+		return !PushMouseButton(button) && ((GetInstance()->mouseStatePre_.rgbButtons[static_cast<int>(button)] & 0x80) != 0);
 	}
 
 	CalyxEngine::Vector2 Input::GetMousePosition() {
-		return instance_->mousePos_;
+		return GetInstance()->mousePos_;
 	}
 
 	CalyxEngine::Vector2 Input::GetMousePosInDebugWindow() {
@@ -196,13 +201,14 @@ namespace CalyxFoundation {
 	}
 
 	float Input::GetMouseWheel() {
-		return instance_->mouseWheel_;
+		return GetInstance()->mouseWheel_;
 	}
 
 	CalyxEngine::Vector2 Input::GetMouseDelta() {
+		const Input* instance = GetInstance();
 		return CalyxEngine::Vector2(
-			static_cast<float>(instance_->mouseState_.lX),
-			static_cast<float>(instance_->mouseState_.lY));
+			static_cast<float>(instance->mouseState_.lX),
+			static_cast<float>(instance->mouseState_.lY));
 	}
 
 	//-----------------------------------------------------------------------------
@@ -240,25 +246,26 @@ namespace CalyxFoundation {
 	}
 
 	bool Input::PushGamepadButton(PadButton button) {
-		return (instance_->gamepadState_.wButtons & static_cast<WORD>(button)) != 0;
+		return (GetInstance()->gamepadState_.wButtons & static_cast<WORD>(button)) != 0;
 	}
 
 	bool Input::TriggerGamepadButton(PadButton button) {
-		return PushGamepadButton(button) && !((instance_->gamepadStatePre_.wButtons & static_cast<WORD>(button)) != 0);
+		return PushGamepadButton(button) && !((GetInstance()->gamepadStatePre_.wButtons & static_cast<WORD>(button)) != 0);
 	}
 
-	float Input::GetLeftTrigger() { return instance_->leftTrigger_; }
-	float Input::GetRightTrigger() { return instance_->rightTrigger_; }
+	float Input::GetLeftTrigger() { return GetInstance()->leftTrigger_; }
+	float Input::GetRightTrigger() { return GetInstance()->rightTrigger_; }
 
-	CalyxEngine::Vector2 Input::GetLeftStick() { return {instance_->leftThumbX_, instance_->leftThumbY_}; }
-	CalyxEngine::Vector2 Input::GetRightStick() { return {instance_->rightThumbX_, instance_->rightThumbY_}; }
+	CalyxEngine::Vector2 Input::GetLeftStick() { return {GetInstance()->leftThumbX_, GetInstance()->leftThumbY_}; }
+	CalyxEngine::Vector2 Input::GetRightStick() { return {GetInstance()->rightThumbX_, GetInstance()->rightThumbY_}; }
 
 	StickState Input::GetStickState() {
 		return {GetLeftStick(), GetRightStick()};
 	}
 
 	bool Input::IsLeftStickMoved() {
-		return std::sqrt(instance_->leftThumbX_ * instance_->leftThumbX_ + instance_->leftThumbY_ * instance_->leftThumbY_) > DEFAULT_DEAD_ZONE;
+		const Input* instance = GetInstance();
+		return std::sqrt(instance->leftThumbX_ * instance->leftThumbX_ + instance->leftThumbY_ * instance->leftThumbY_) > DEFAULT_DEAD_ZONE;
 	}
 
 } // namespace CalyxFoundation

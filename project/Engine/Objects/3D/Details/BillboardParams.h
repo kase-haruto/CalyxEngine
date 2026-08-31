@@ -7,12 +7,18 @@ enum class BillboardMode : uint32_t {
 	AxisY = 2,
 };
 
+/**
+ * @brief GpuBillboardParamsに関するデータを保持する構造体です。
+ */
 struct GpuBillboardParams {
 	uint32_t mode; // 0=None, 1=Full, 2=AxisY
 	float	 pad[3];
 };
 static_assert(sizeof(GpuBillboardParams) == 16, "GpuBillboardParams must be 16 bytes");
 
+/**
+ * @brief GpuFadeParamsに関するデータを保持する構造体です。
+ */
 struct GpuFadeParams {
 	float fadeNear = 0.0f;
 	float fadeFar  = 20.0f;

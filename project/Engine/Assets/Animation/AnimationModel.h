@@ -14,6 +14,9 @@ namespace CalyxEngine {
 	 * - アニメーションモデルクラス
 	 * - スケルタルアニメーション付きモデルの再生・スキニング処理を担当
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief AnimationModelの機能を提供するクラスです。
+	 */
 	class AnimationModel
 		: public BaseModel {
 	public:

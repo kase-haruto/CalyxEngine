@@ -25,6 +25,9 @@ namespace CalyxEngine {
 			TransformKeyframe2dChannel_RotationZ,
 	};
 
+	/**
+	 * @brief TransformKeyframe2dに関するデータを保持する構造体です。
+	 */
 	struct TransformKeyframe2d {
 		float time = 0.0f;
 		Vector3 translation{};
@@ -34,6 +37,9 @@ namespace CalyxEngine {
 		uint32_t channels = TransformKeyframe2dChannel_All;
 	};
 
+	/**
+	 * @brief TransformKeyframeAnimation2dの機能を提供するクラスです。
+	 */
 	class TransformKeyframeAnimation2d {
 	public:
 		void Update(WorldTransform& target, float dt);

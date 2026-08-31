@@ -5,6 +5,14 @@
 
 #include <externals/nlohmann/json.hpp>
 
+/*-----------------------------------------------------------------------------------------
+ * EventConfig
+ * - Eventオブジェクトのシーン保存設定を保持するデータ構造
+ * - 共通SceneObject設定に加えて、イベント判定に使用するCollider設定を保持する
+ *---------------------------------------------------------------------------------------*/
+/**
+ * @brief EventConfigに関するデータを保持する構造体です。
+ */
 struct EventConfig
 	: public SceneObjectConfig {
 	ColliderConfig colliderConfig;

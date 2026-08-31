@@ -12,6 +12,9 @@
 
 namespace CalyxEngine {
 
+	/**
+	 * @brief TrailPointに関するデータを保持する構造体です。
+	 */
 	struct TrailPoint {
 		Vector3 position{};
 		Quaternion rotation = Quaternion::MakeIdentity();
@@ -20,6 +23,9 @@ namespace CalyxEngine {
 		uint32_t randomSeed = 0;
 	};
 
+	/**
+	 * @brief TrailVertexに関するデータを保持する構造体です。
+	 */
 	struct TrailVertex {
 		Vector3 position{};
 		Vector2 uv{};
@@ -30,6 +36,9 @@ namespace CalyxEngine {
 		float emissiveIntensity = 0.0f;
 	};
 
+	/**
+	 * @brief TrailMeshDataに関するデータを保持する構造体です。
+	 */
 	struct TrailMeshData {
 		std::vector<TrailVertex> vertices;
 		std::vector<uint32_t> indices;
@@ -40,6 +49,9 @@ namespace CalyxEngine {
 	    TrailPointの寿命、点数上限、累積距離を管理する。
 	    Transform参照およびGPUリソースは保持しない。
 	------------------------------------------------------------*/
+	/**
+	 * @brief TrailHistoryの機能を提供するクラスです。
+	 */
 	class TrailHistory {
 	public:
 		void Clear() { points_.clear(); }
@@ -73,6 +85,9 @@ namespace CalyxEngine {
 	    追従位置を距離・時間条件でサンプリングしてTrailHistoryへ記録する。
 	    描画処理やTransformの生ポインタは保持しない。
 	------------------------------------------------------------*/
+	/**
+	 * @brief TrailEmitterの機能を提供するクラスです。
+	 */
 	class TrailEmitter {
 	public:
 		TrailSettingsConfig& Settings() { return settings_; }
@@ -145,6 +160,9 @@ namespace CalyxEngine {
 	    TrailPoint列からCamera Facing等の連続Ribbon頂点を生成する。
 	    生成結果は一時CPUデータでありGPUリソースを所有しない。
 	------------------------------------------------------------*/
+	/**
+	 * @brief TrailMeshBuilderの機能を提供するクラスです。
+	 */
 	class TrailMeshBuilder {
 	public:
 		static void Build(const TrailEmitter& emitter,const Vector3& cameraPosition,TrailMeshData& output,const MeshResource* geometryMesh=nullptr) {
@@ -327,6 +345,9 @@ namespace CalyxEngine {
 }
 
 template<>
+/**
+ * @brief VertexInputLayoutに関するデータを保持する構造体です。
+ */
 struct VertexInputLayout<CalyxEngine::TrailVertex> {
 	static std::vector<D3D12_INPUT_ELEMENT_DESC> Get() {
 		return {

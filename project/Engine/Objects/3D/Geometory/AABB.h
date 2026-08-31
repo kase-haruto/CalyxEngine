@@ -12,6 +12,9 @@ struct CalyxEngine::Vector3;
 /* ========================================================================
 /*		aabb
 /* ===================================================================== */
+/**
+ * @brief AABBの機能を提供するクラスです。
+ */
 class AABB{
 public:
 	AABB(const CalyxEngine::Vector3& min, const CalyxEngine::Vector3& max, uint32_t color = 0xFFFFFFFF);

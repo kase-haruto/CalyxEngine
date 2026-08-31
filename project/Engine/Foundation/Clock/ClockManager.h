@@ -3,6 +3,9 @@
 #include <algorithm>
 #include <chrono>
 
+/**
+ * @brief ClockManagerの機能を提供するクラスです。
+ */
 class ClockManager {
 public:
 	// シングルトン取得メソッド

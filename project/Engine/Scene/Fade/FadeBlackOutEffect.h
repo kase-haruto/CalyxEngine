@@ -7,6 +7,9 @@ class Sprite;
 
 namespace CalyxEngine {
 
+	/**
+	 * @brief FadeBlackOutEffectの機能を提供するクラスです。
+	 */
 	class CALYX_API FadeBlackOutEffect final : public BaseSceneTransitionEffect {
 	public:
 		explicit FadeBlackOutEffect(float duration = 0.5f);

@@ -10,6 +10,9 @@
  * - DirectXフェンス同期を管理するクラス
  * - シグナル/待機によるGPU同期を提供する
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief DxFenceの機能を提供するクラスです。
+ */
 class DxFence {
 	template <class T>
 	using ComPtr = Microsoft::WRL::ComPtr<T>;

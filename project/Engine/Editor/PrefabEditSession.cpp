@@ -24,12 +24,15 @@ namespace CalyxEngine {
 	void PrefabEditSession::Ensure() {
 		if(context_) return;
 
+		// Prefab専用Contextの初期化中にCurrentが切り替わるため、呼び出し元の編集Contextを退避する。
 		SceneContext* previous = SceneContext::Current();
 
+		// Runtime SceneへPreview用CameraやLightを混入させないよう、独立Contextを作成する。
 		context_ = std::make_unique<SceneContext>();
 		context_->Initialize(false);
 		context_->SetSceneName("PrefabEdit");
 
+		// Preview補助ObjectはTransientにし、Prefab保存対象から確実に除外する。
 		if(auto* debugCamera = context_->GetCameraMgr()->GetDebug()) {
 			debugCamera->SetTransient(true);
 			debugCamera->GetWorldTransform().translation = {0.0f, 4.0f, -10.0f};
@@ -53,6 +56,7 @@ namespace CalyxEngine {
 			context_->GetLightLibrary()->SetPointLight(previewPointLight);
 		}
 
+		// Context内の構造変更を監視し、未保存状態をUIへ反映する。
 		context_->AddOnObjectAddedListener([this](SceneObject*) {
 			dirty_ = true;
 		});
@@ -60,6 +64,7 @@ namespace CalyxEngine {
 			dirty_ = true;
 		});
 
+		// 初期化前のCurrent Contextを復元し、他Editor処理の参照先を変更しない。
 		if(previous) {
 			previous->MakeCurrent();
 		}
@@ -74,12 +79,14 @@ namespace CalyxEngine {
 	std::shared_ptr<SceneObject> PrefabEditSession::New(
 		const std::string& rootTypeName,
 		SceneManager* sceneManager) {
+		// 以前のPrefab編集データを破棄して、空のPreview Contextから新規Rootを構築する。
 		Reset();
 		Ensure();
 
 		if(sceneManager) sceneManager->SetEditorPreviewContext(context_.get());
 		if(!context_) return nullptr;
 
+		// Registry生成やInitializeがPrefab用Manager群を参照するよう、生成中だけ専用ContextをCurrentにする。
 		context_->MakeCurrent();
 		std::shared_ptr<SceneObject> root;
 		if(!rootTypeName.empty()) {
@@ -106,6 +113,7 @@ namespace CalyxEngine {
 
 		context_->MakeCurrent();
 
+		// Editor補助Objectを含めず、保存時のSource GUIDを保持した編集用Hierarchyとして読み込む。
 		auto objects = PrefabSerializer::Load(path, PrefabSerializer::LoadOptions{true, Guid::Empty()});
 		for(auto& object : objects) {
 			if(object) {
@@ -113,6 +121,7 @@ namespace CalyxEngine {
 				context_->AddObject(object);
 			}
 		}
+		// Serializerの結果へPreview属性を適用し、複数RootのTransformを編集原点へ正規化する。
 		MarkUtilityObjects();
 		NormalizeRoots();
 
@@ -132,6 +141,7 @@ namespace CalyxEngine {
 	void PrefabEditSession::Update(float dt) {
 		if(!context_) return;
 
+		// Prefab ObjectのUpdateだけを専用Contextで実行し、終了後は元のSceneへ必ず戻す。
 		SceneContext* previous = SceneContext::Current();
 		context_->MakeCurrent();
 		NormalizeRoots();
@@ -163,10 +173,12 @@ namespace CalyxEngine {
 	bool PrefabEditSession::SaveAs(const std::string& path, SceneManager* sceneManager) {
 		if(!context_) return false;
 
+		// TransientなPreview Camera/Lightを除いたRootだけをPrefabデータとして抽出する。
 		const auto roots = GetRoots();
 		if(roots.empty()) return false;
 		NormalizeRoots();
 
+		// 初回保存先でもSerializerが失敗しないよう、親Directoryを先に用意する。
 		const std::filesystem::path savePath(path);
 		if(savePath.has_parent_path()) {
 			std::error_code ec;
@@ -177,6 +189,7 @@ namespace CalyxEngine {
 			return false;
 		}
 
+		// 保存成功後にAssetDatabaseを更新し、開いているScene内の同一Prefab Instanceへ反映する。
 		path_ = path;
 		dirty_ = false;
 		if(auto* db = AssetDatabase::GetInstance()) {
@@ -194,6 +207,7 @@ namespace CalyxEngine {
 		SceneManager* sceneManager) {
 		if(!object || !object->IsPrefabInstanceObject()) return false;
 
+		// 子Objectが選択されていても、同一Prefab GUIDが連続する最上位Rootまで遡る。
 		const Guid prefabGuid = object->GetPrefabAssetGuid();
 		auto prefabRoot = object;
 		while(auto parent = prefabRoot->GetParent()) {
@@ -207,6 +221,7 @@ namespace CalyxEngine {
 		if(!record || record->type != AssetType::Prefab) return false;
 
 		const std::string path = record->sourcePath.string();
+		// Instance固有の配置はAssetへ書き戻さず、Source GUIDは既存Instance同期の照合用に保持する。
 		PrefabSerializer::SaveOptions saveOptions;
 		saveOptions.resetRootTransform = true;
 		saveOptions.usePrefabSourceGuids = true;
@@ -231,6 +246,7 @@ namespace CalyxEngine {
 		auto* sceneLib = sceneCtx->GetObjectLibrary();
 		if(!sceneLib) return;
 
+		// Prefab子要素を除外し、置換単位となるInstance Rootだけを収集する。
 		std::vector<std::shared_ptr<SceneObject>> instanceRoots;
 		for(auto& object : sceneLib->GetAllObjectsShared()) {
 			if(!object || object->GetPrefabAssetGuid() != prefabAssetGuid) continue;
@@ -242,12 +258,14 @@ namespace CalyxEngine {
 
 		if(instanceRoots.empty()) return;
 
+		// Deserialize時に正しいScene Manager群を参照させるため、同期対象SceneをCurrentへ切り替える。
 		SceneContext* previous = SceneContext::Current();
 		sceneCtx->MakeCurrent();
 
 		for(auto& oldRoot : instanceRoots) {
 			if(!oldRoot || !sceneLib->Contains(oldRoot)) continue;
 
+			// Scene内参照と配置を壊さないよう、置換前Rootの識別情報とTransformを退避する。
 			const Guid oldRootGuid = oldRoot->GetGuid();
 			const Guid oldSourceGuid = oldRoot->GetPrefabSourceGuid();
 			const std::string oldName = oldRoot->GetName();
@@ -255,6 +273,7 @@ namespace CalyxEngine {
 			auto oldParent = oldRoot->GetParent();
 			const bool inheritScale = oldRoot->GetWorldTransform().inheritScale;
 
+			// 更新済みAssetから新Hierarchyを生成し、Source GUIDが一致するRootを優先して選ぶ。
 			auto loadedObjects = PrefabSerializer::Load(
 				prefabPath,
 				PrefabSerializer::LoadOptions{false, prefabAssetGuid});
@@ -277,8 +296,10 @@ namespace CalyxEngine {
 			}
 			if(!newRoot) continue;
 
+			// 旧Hierarchyを除去してから新Hierarchyを登録し、GUID重複期間を作らない。
 			sceneCtx->RemoveObject(oldRoot);
 
+			// 外部参照・Scene上の名前・配置を維持しつつ、Prefab内部構造だけを最新版へ交換する。
 			newRoot->SetGuid(oldRootGuid);
 			newRoot->SetName(oldName, newRoot->GetObjectType());
 			newRoot->GetWorldTransform() = oldTransform;
@@ -295,6 +316,7 @@ namespace CalyxEngine {
 			}
 		}
 
+		// 同期処理後は元のEditor/Runtime Contextへ戻し、後続処理の対象Sceneを維持する。
 		if(previous && previous != sceneCtx) {
 			previous->MakeCurrent();
 		}

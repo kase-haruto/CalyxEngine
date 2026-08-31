@@ -11,6 +11,9 @@
 
 #pragma comment(lib,"dxcompiler.lib")
 
+/**
+ * @brief ShaderCompileResultに関するデータを保持する構造体です。
+ */
 struct ShaderCompileResult {
 	Microsoft::WRL::ComPtr<IDxcBlob> bytecode;
 	std::string errors;
@@ -18,6 +21,9 @@ struct ShaderCompileResult {
 	bool hasWarnings = false;
 };
 
+/**
+ * @brief ShaderCompilerの機能を提供するクラスです。
+ */
 class ShaderCompiler{
 public://メンバ関数
 	ShaderCompiler() = default;

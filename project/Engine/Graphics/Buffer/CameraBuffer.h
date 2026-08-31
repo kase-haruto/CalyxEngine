@@ -13,6 +13,9 @@
 #include <cstdint>
 
 // 定数バッファ用データ構造体
+/**
+ * @brief Camera3DForGPUに関するデータを保持する構造体です。
+ */
 struct Camera3DForGPU {
 	CalyxEngine::Matrix4x4 view;
 	CalyxEngine::Matrix4x4 projection;
@@ -32,6 +35,9 @@ struct Camera3DForGPU {
 	float			   padding5;  // 16B アライン
 };
 
+/**
+ * @brief Camera3DBufferの機能を提供するクラスです。
+ */
 class Camera3DBuffer {
 public:
 	//===================================================================*/

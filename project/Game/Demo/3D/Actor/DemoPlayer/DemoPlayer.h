@@ -11,6 +11,9 @@
  * - CALYX_PLACEABLE_OBJECTを使用してエディタ上で配置可能にする
  *---------------------------------------------------------------------------------------*/
 CALYX_PLACEABLE_OBJECT(Category = GameObject, DisplayName = "Demo Player", Icon = "UI/Tool/cube.dds")
+/**
+ * @brief DemoPlayerの機能を提供するクラスです。
+ */
 class DemoPlayer
 	:public Actor{
 public:

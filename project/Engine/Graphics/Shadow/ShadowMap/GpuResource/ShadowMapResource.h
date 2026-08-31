@@ -9,6 +9,9 @@ namespace CalyxEngine {
 	 *	shadowMapResource
 	 *	- シャドウマップ用のGPUリソース
 	 *--------------------------------------------------------------------*/
+	/**
+	 * @brief ShadowMapResourceの機能を提供するクラスです。
+	 */
 	class ShadowMapResource {
 	public:
 		//===================================================================*/

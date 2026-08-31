@@ -7,6 +7,9 @@ namespace CalyxEngine {
 	 *	Matrix3x4
 	 *	- 3x4行列
 	 *----------------------------------------------------------*/
+	/**
+	 * @brief Matrix3x4に関するデータを保持する構造体です。
+	 */
 	struct Matrix3x4 final {
 		float m[3][4];
 

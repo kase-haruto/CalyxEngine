@@ -9,6 +9,14 @@
 #include <string>
 #include <externals/nlohmann/json.hpp>
 
+/*-----------------------------------------------------------------------------------------
+ * PointLightConfig
+ * - Point Lightのシーン保存設定を保持するデータ構造
+ * - 光色、位置、強度、到達半径、減衰率を保持する
+ *---------------------------------------------------------------------------------------*/
+/**
+ * @brief PointLightConfigに関するデータを保持する構造体です。
+ */
 struct PointLightConfig : public SceneObjectConfig{
 	//========================= variable =========================
 	CalyxEngine::Vector4 color = {1.0f, 1.0f, 1.0f, 1.0f};	//< 光の色

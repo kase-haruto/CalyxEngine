@@ -18,6 +18,9 @@
 #include <d3d12.h>
 #include <wrl.h>
 
+/**
+ * @brief PointLightDataに関するデータを保持する構造体です。
+ */
 struct PointLightData{
 	CalyxEngine::Vector4 color; //< ライトの色
 	CalyxEngine::Vector3 position; //< ライトの位置
@@ -36,6 +39,9 @@ namespace CalyxEngine {
  * - ポイントライト（点光源）クラス
  * - 指定座標を中心に全方位へ光を放つ光源のパラメータ管理を担当
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief PointLightの機能を提供するクラスです。
+ */
 class PointLight
 	: public SceneObject,
 	public IConfigurable{

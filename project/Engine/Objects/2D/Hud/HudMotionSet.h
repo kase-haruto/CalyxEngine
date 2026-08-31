@@ -8,6 +8,9 @@ namespace CalyxEngine {
 	 * HUDモーションセット構造体
 	 * - HUDの各種モーション設定をまとめた構造体
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief HudMotionSetに関するデータを保持する構造体です。
+	 */
 	struct HudMotionSet {
 		std::optional<HudMotionDesc<CalyxEngine::Vector2>> position;
 		std::optional<HudMotionDesc<CalyxEngine::Vector2>> scale;

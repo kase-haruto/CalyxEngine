@@ -27,6 +27,18 @@
 #include <filesystem>
 
 namespace CalyxEngine {
+	namespace {
+		std::string PortableModelDirectory() {
+			const auto modelDirectory = Calyx::ResolveAssetPath("models");
+			std::error_code relativeError;
+			const auto relativeDirectory = std::filesystem::relative(
+				modelDirectory,
+				std::filesystem::current_path(relativeError),
+				relativeError);
+			return (relativeError ? modelDirectory : relativeDirectory).generic_string();
+		}
+	}
+
 	/* =====================================================================
 	   ctor – 最初に読み込んだファイルを初期アニメとして登録
 	   ===================================================================*/
@@ -36,7 +48,7 @@ namespace CalyxEngine {
 		Map();
 
 		// メインアニメをロード
-		animationData_ = LoadAnimationFile(Calyx::ResolveAssetPath("models").generic_string(), fileName_);
+		animationData_ = LoadAnimationFile(PortableModelDirectory(), fileName_);
 
 		// 初期ステートを登録
 		std::string	   base = std::filesystem::path(fileName).stem().string();
@@ -122,7 +134,7 @@ namespace CalyxEngine {
 	void AnimationModel::AddAnimation(const std::string& name, const std::string& file) {
 		AnimationState st;
 		st.name		 = name;
-		st.animation = LoadAnimationFile(Calyx::ResolveAssetPath("models").generic_string(), file);
+		st.animation = LoadAnimationFile(PortableModelDirectory(), file);
 		if(modelData_) BuildFastChannels(st.animation);
 		animationStates_.emplace(name, st);
 	}

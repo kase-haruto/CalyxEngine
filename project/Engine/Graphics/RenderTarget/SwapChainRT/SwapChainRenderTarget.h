@@ -7,6 +7,9 @@
 #include <Engine/Graphics/SwapChain/DxSwapChain.h>
 
 
+/**
+ * @brief SwapChainRenderTargetの機能を提供するクラスです。
+ */
 class SwapChainRenderTarget
 	: public IRenderTarget {
 public:

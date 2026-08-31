@@ -5,6 +5,9 @@
 /* ===================================================================== */
 #include <Engine/Foundation/Math/Vector2.h>
 
+/**
+ * @brief Transform2DConfigに関するデータを保持する構造体です。
+ */
 struct Transform2DConfig final {
     //========================= variable =========================
 	CalyxEngine::Vector2 scale {1.0f,1.0f};		//<scale

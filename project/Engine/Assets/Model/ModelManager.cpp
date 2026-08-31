@@ -96,7 +96,14 @@ void ModelManager::WorkerMain() {
 		// CPUロード
 		ModelData model;
 		try {
-			model = LoadModelFile(GetModelDirectoryPath().generic_string(), currentRequest.fileName);
+			std::error_code relativeError;
+			const auto modelDirectory = std::filesystem::relative(
+				GetModelDirectoryPath(),
+				std::filesystem::current_path(relativeError),
+				relativeError);
+			model = LoadModelFile(
+				(relativeError ? GetModelDirectoryPath() : modelDirectory).generic_string(),
+				currentRequest.fileName);
 		} catch(const std::exception& exception) {
 			CalyxEngine::EngineLogger::GetInstance().Add(
 				CalyxEngine::LogLevel::Error,

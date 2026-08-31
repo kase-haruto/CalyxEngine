@@ -7,6 +7,9 @@ namespace CalyxEngine {
 	struct Matrix4x4;
 	struct Vector3;
 
+	/**
+	 * @brief Vector4に関するデータを保持する構造体です。
+	 */
 	struct Vector4 final {
 		float x;
 		float y;

@@ -9,6 +9,9 @@ namespace CalyxEngine {
 	/* ========================================================================
 	/* シーン遷移リクエスト
 	/* ===================================================================== */
+	/**
+	 * @brief ISceneTransitionRequestorの機能を提供するクラスです。
+	 */
 	class ISceneTransitionRequestor {
 	public:
 		virtual ~ISceneTransitionRequestor()												= default;

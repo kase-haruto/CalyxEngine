@@ -10,8 +10,14 @@ class PipelineService;
 
 namespace CalyxEngine {
 
+	/**
+	 * @brief GridRendererの機能を提供するクラスです。
+	 */
 	class GridRenderer {
 	public:
+		/**
+		 * @brief Settingsに関するデータを保持する構造体です。
+		 */
 		struct Settings {
 			float minorSpacing = 0.1f;
 			float majorSpacing = 1.0f;

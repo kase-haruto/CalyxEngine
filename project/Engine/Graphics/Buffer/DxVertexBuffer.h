@@ -8,6 +8,9 @@
 #include <Engine/Foundation/Debug/CxAssert.h>
 
 template <typename T>
+/**
+ * @brief DxVertexBufferの機能を提供するクラスです。
+ */
 class DxVertexBuffer
 	: public DxBuffer<T> {
 public:

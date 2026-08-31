@@ -25,6 +25,9 @@ namespace CalyxEditor {
 	 * - ImGuiを用いてUIを描画し、新規作成時には対応するVisual Studioのソリューション（.sln）や
 	 *   プロジェクトファイル（.vcxproj）、ソースファイルを自動生成します。
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief ProjectBrowserの機能を提供するクラスです。
+	 */
 	class ProjectBrowser {
 	public:
 		/**
@@ -137,6 +140,9 @@ namespace CalyxEditor {
 		void* folderIcon_ = nullptr;  //< フォルダアイコン (ImTextureID)
 
 		// --- レイアウト・調整用パラメータ構造体 ---
+		/**
+		 * @brief ProjectBrowserParamに関するデータを保持する構造体です。
+		 */
 		struct ProjectBrowserParam : CalyxEngine::SerializableObject {
 			ProjectBrowserParam() {
 				AddField("OpenButtonSize", openButtonSize_).Category("top");

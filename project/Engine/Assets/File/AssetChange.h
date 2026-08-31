@@ -28,6 +28,9 @@ namespace CalyxEngine {
 	/*------------------------
 	 *	変更イベント
 	 *-----------------------*/
+	/**
+	 * @brief AssetChangeEventに関するデータを保持する構造体です。
+	 */
 	struct AssetChangeEvent {
 		AssetChangeType assetType;          // Model/Texture...
 		AssetDeltaKind  deltaKind;          // どう変わったか

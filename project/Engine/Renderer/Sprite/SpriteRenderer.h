@@ -9,6 +9,9 @@
 
 class Sprite;
 
+/**
+ * @brief SpriteRendererの機能を提供するクラスです。
+ */
 class SpriteRenderer {
 public:
 	// Compatibility entry point for sprites without explicit sorting settings.
@@ -21,6 +24,9 @@ public:
 	void Clear();
 
 private:
+	/**
+	 * @brief DrawEntryに関するデータを保持する構造体です。
+	 */
 	struct DrawEntry {
 		Sprite* sprite = nullptr;
 		int32_t sortingLayerOrder = 0;

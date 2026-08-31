@@ -14,6 +14,15 @@
 namespace CalyxEngine {
 	class OverLifetimeModule;
 
+	/*-----------------------------------------------------------------------------------------
+	 * BaseModuleConfig
+	 * - Particle Module設定の共通インターフェースとなる基底データ構造
+	 * - GUID、表示名、有効状態、実行StageとJSON変換契約を管理する
+	 * - Runtime ParticleとGPUリソースは所有しない
+	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief BaseModuleConfigに関するデータを保持する構造体です。
+	 */
 	struct BaseModuleConfig {
 		Guid		guid;
 		std::string name;
@@ -40,7 +49,15 @@ namespace CalyxEngine {
 		Emissive,
 	};
 
-	// Lifetime Moduleの編集・保存データ。Runtime ParticleやGPUリソースは所有しない。
+	/*-----------------------------------------------------------------------------------------
+	 * LifetimeModuleConfig
+	 * - Particle Lifetime Moduleの編集・保存設定を保持するデータ構造
+	 * - 対象属性とFloat、Vector、Colorの時間変化カーブを管理する
+	 * - Runtime ParticleとGPUリソースは所有しない
+	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief LifetimeModuleConfigに関するデータを保持する構造体です。
+	 */
 	struct LifetimeModuleConfig : public BaseModuleConfig {
 		LifetimeModuleTarget target = LifetimeModuleTarget::Alpha;
 		FloatCurve floatCurve{};
@@ -55,9 +72,14 @@ namespace CalyxEngine {
 		void FromJson(const nlohmann::json& j) override;
 	};
 
-	//============================================================
-	// シンプルな名前と有効フラグのみ保持する Config
-	//============================================================
+	/*-----------------------------------------------------------------------------------------
+	 * SimpleModuleConfig
+	 * - 追加パラメータを持たないParticle Moduleの設定データ構造
+	 * - 共通の名前と有効状態だけをJSONへ保存する
+	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief SimpleModuleConfigに関するデータを保持する構造体です。
+	 */
 	struct SimpleModuleConfig : public BaseModuleConfig {
 		SimpleModuleConfig(const std::string& name_, bool enabled_)
 			: BaseModuleConfig(name_, enabled_) {}
@@ -74,9 +96,14 @@ namespace CalyxEngine {
 		}
 	};
 
-	/////////////////////////////////////////////////////////////////////////////////////////
-	// 重力適用モジュール
-	/////////////////////////////////////////////////////////////////////////////////////////
+	/*-----------------------------------------------------------------------------------------
+	 * GravityModuleConfig
+	 * - Particleへ適用する重力加速度を保持するModule設定データ構造
+	 * - 1秒ごとの速度変化に使用する三次元加速度を管理する
+	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief GravityModuleConfigに関するデータを保持する構造体です。
+	 */
 	struct GravityModuleConfig : public BaseModuleConfig {
 		CalyxEngine::Vector3 gravity{0.0f, -9.8f, 0.0f};
 
@@ -100,6 +127,14 @@ namespace CalyxEngine {
 		}
 	};
 
+	/*-----------------------------------------------------------------------------------------
+	 * AccelerationModuleConfig
+	 * - Particleへ一定加速度を適用するModule設定データ構造
+	 * - 三次元加速度と共通Module設定を保存する
+	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief AccelerationModuleConfigに関するデータを保持する構造体です。
+	 */
 	struct AccelerationModuleConfig : public BaseModuleConfig {
 		Vector3 acceleration{0.0f, 0.0f, 0.0f};
 		AccelerationModuleConfig() { name = "AccelerationModule"; }
@@ -113,6 +148,14 @@ namespace CalyxEngine {
 		}
 	};
 
+	/*-----------------------------------------------------------------------------------------
+	 * DragModuleConfig
+	 * - Particle速度へ抵抗を適用するModule設定データ構造
+	 * - 0以上のDrag係数と共通Module設定を保存する
+	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief DragModuleConfigに関するデータを保持する構造体です。
+	 */
 	struct DragModuleConfig : public BaseModuleConfig {
 		float drag = 0.0f;
 		DragModuleConfig() { name = "DragModule"; }
@@ -126,9 +169,14 @@ namespace CalyxEngine {
 		}
 	};
 
-	/////////////////////////////////////////////////////////////////////////////////////////
-	// lifeTimeでサイズ変更
-	/////////////////////////////////////////////////////////////////////////////////////////
+	/*-----------------------------------------------------------------------------------------
+	 * SizeOverLifetimeConfig
+	 * - Particle寿命に応じたSize変化を保持するModule設定データ構造
+	 * - 拡大縮小方向と補間Easeを管理する
+	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief SizeOverLifetimeConfigに関するデータを保持する構造体です。
+	 */
 	struct SizeOverLifetimeConfig
 		: public BaseModuleConfig {
 		bool			   isGrowing = true;
@@ -160,9 +208,14 @@ namespace CalyxEngine {
 		}
 	};
 
-	/////////////////////////////////////////////////////////////////////////////////////////
-	// lifeTimeに応じてパラメータの調整
-	/////////////////////////////////////////////////////////////////////////////////////////
+	/*-----------------------------------------------------------------------------------------
+	 * OverLifetimeModuleConfig
+	 * - Particle寿命に応じた汎用属性変化を保持するModule設定データ構造
+	 * - 対象、合成方式、補間、開始値と終了値を管理する
+	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief OverLifetimeModuleConfigに関するデータを保持する構造体です。
+	 */
 	struct OverLifetimeModuleConfig
 		: public BaseModuleConfig {
 		OverLifetimeModuleConfig() { name = "OverLifetimeModule"; }
@@ -188,9 +241,14 @@ namespace CalyxEngine {
 		void ExtractFrom(const OverLifetimeModule& m);
 	};
 
-	/////////////////////////////////////////////////////////////////////////////////////////
-	// uvAnimation
-	/////////////////////////////////////////////////////////////////////////////////////////
+	/*-----------------------------------------------------------------------------------------
+	 * TextureSheetAnimationConfig
+	 * - Particle Texture Sheet Animationの保存設定を保持するデータ構造
+	 * - 行列数、Loop、再生速度、Custom Frame利用状態を管理する
+	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief TextureSheetAnimationConfigに関するデータを保持する構造体です。
+	 */
 	struct TextureSheetAnimationConfig
 		: public BaseModuleConfig {
 		int	  rows			  = 4;

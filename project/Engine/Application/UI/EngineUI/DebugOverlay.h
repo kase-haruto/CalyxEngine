@@ -8,6 +8,9 @@ namespace CalyxEngine {
 	 * - デバッグ用オーバーレイ表示
 	 * - DebugTextManager に登録されたメッセージをビューポート上に描画する
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief DebugOverlayの機能を提供するクラスです。
+	 */
 	class DebugOverlay : public BaseOnViewportTool {
 	public:
 		DebugOverlay();

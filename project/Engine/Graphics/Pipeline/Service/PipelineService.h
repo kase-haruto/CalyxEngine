@@ -15,11 +15,17 @@
 /* ========================================================================
 /*		パイプライン配膳サービス
 /* ===================================================================== */
+/**
+ * @brief PipelineServiceの機能を提供するクラスです。
+ */
 class PipelineService {
 public:
 	//===================================================================*/
 	//		structs
 	//===================================================================*/
+	/**
+	 * @brief PipelineKeyに関するデータを保持する構造体です。
+	 */
 	struct PipelineKey {
 		PipelineTag::Object tag;
 		BlendMode			blend;
@@ -44,6 +50,9 @@ public:
 		}
 	};
 
+	/**
+	 * @brief PipelineKeyHasherに関するデータを保持する構造体です。
+	 */
 	struct PipelineKeyHasher {
 		std::size_t operator()(const PipelineKey& k) const {
 			return std::hash<int>()(static_cast<int>(k.tag)) ^ (std::hash<int>()(static_cast<int>(k.blend)) << 1);
@@ -104,6 +113,9 @@ public:
 	}
 
 private:
+	/**
+	 * @brief GeneratedMaterialPipelineKeyに関するデータを保持する構造体です。
+	 */
 	struct GeneratedMaterialPipelineKey {
 		PipelineTag::Object tag = PipelineTag::Object::Object3d;
 		BlendMode blend = BlendMode::NORMAL;
@@ -114,6 +126,9 @@ private:
 		}
 	};
 
+	/**
+	 * @brief GeneratedMaterialPipelineKeyHasherに関するデータを保持する構造体です。
+	 */
 	struct GeneratedMaterialPipelineKeyHasher {
 		std::size_t operator()(const GeneratedMaterialPipelineKey& key) const {
 			std::size_t hash = std::hash<int>()(static_cast<int>(key.tag));

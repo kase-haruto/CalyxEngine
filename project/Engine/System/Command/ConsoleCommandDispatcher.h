@@ -14,6 +14,9 @@ namespace CalyxEngine {
 	 * - TerminalPanelから入力分割とコマンド実行の責務を分離するディスパッチャー
 	 * - 引用符を含む引数を解析し、ConsoleCommandRegistryへ実行を委譲する
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief ConsoleCommandDispatcherの機能を提供するクラスです。
+	 */
 	class ConsoleCommandDispatcher {
 	public:
 		ConsoleCommandDispatcher();

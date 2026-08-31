@@ -6,6 +6,9 @@
 #include <functional>
 #include <optional>
 
+/**
+ * @brief PipelineKeyに関するデータを保持する構造体です。
+ */
 struct PipelineKey{
 	PipelineType pipelineType{};
 	std::optional<BlendMode> blendMode{}; // nullopt = blend 無関係

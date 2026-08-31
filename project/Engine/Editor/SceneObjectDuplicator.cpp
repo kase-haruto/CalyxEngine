@@ -13,6 +13,7 @@
 namespace CalyxEngine {
 	namespace {
 		void WriteMetadata(const std::shared_ptr<SceneObject>& object, nlohmann::json& j) {
+			// IConfigurable外で管理される共通SceneObject状態も複製Snapshotへ保存する。
 			j["type"] = std::string(object->GetTypeName());
 			j["name"] = object->GetName();
 			j["objectType"] = static_cast<int>(object->GetObjectType());
@@ -29,6 +30,7 @@ namespace CalyxEngine {
 		void ApplyMetadata(const std::shared_ptr<SceneObject>& object, const nlohmann::json& j) {
 			if(!object) return;
 
+			// 古いSnapshotに項目がない場合はClone側の既定値を残して後方互換性を維持する。
 			const int objectType = j.value("objectType", static_cast<int>(object->GetObjectType()));
 			object->SetName(j.value("name", object->GetName()), static_cast<ObjectType>(objectType));
 			object->SetDrawEnable(j.value("drawEnable", object->IsDrawEnable()));
@@ -46,6 +48,7 @@ namespace CalyxEngine {
 		std::shared_ptr<SceneObject> CloneWithoutHierarchy(const std::shared_ptr<SceneObject>& source) {
 			if(!SceneObjectDuplicator::IsDuplicatable(source.get())) return nullptr;
 
+			// Config、共通Metadata、Serializable Paramを単一Snapshotへまとめ、型固有値も失わないようにする。
 			nlohmann::json snapshot;
 			WriteMetadata(source, snapshot);
 			if(auto* cfg = dynamic_cast<const IConfigurable*>(source.get())) {
@@ -61,6 +64,7 @@ namespace CalyxEngine {
 				snapshot["serializableParams"] = std::move(serializableParams);
 			}
 
+			// Registry生成中のSerializable値を一時Captureし、Initializeより前に複製値を注入する。
 			std::shared_ptr<SceneObject> clone;
 			const nlohmann::json* paramOverrides = snapshot.contains("serializableParams")
 				? &snapshot.at("serializableParams")
@@ -69,6 +73,7 @@ namespace CalyxEngine {
 				SerializableObject::BeginPendingCapture();
 				clone = SceneObjectRegistry::Get().Create(snapshot.value("type", ""));
 			} catch(...) {
+				// 生成失敗時にもthread-localのCapture状態を残さず、次の生成へ影響させない。
 				SerializableObject::EndPendingCapture(nullptr, nullptr);
 				return nullptr;
 			}
@@ -78,10 +83,12 @@ namespace CalyxEngine {
 			}
 			clone->AdoptPendingSerializableParamCapture(paramOverrides);
 
+			// Runtime初期化前に保存値を適用し、Initializeが正しい設定からResourceを構築できるようにする。
 			if(auto* cfg = dynamic_cast<IConfigurable*>(clone.get())) {
 				cfg->ApplyConfigFromJson(snapshot);
 			}
 			ApplyMetadata(clone, snapshot);
+			// 複製物は独立Objectとして扱い、GUID・Prefab由来情報・Picking IDを引き継がない。
 			clone->SetGuid(Guid::New());
 			clone->ClearPrefabLink();
 			clone->SetPickingID(0);
@@ -93,6 +100,7 @@ namespace CalyxEngine {
 
 		void CollectDuplicateRoots(const std::vector<std::shared_ptr<SceneObject>>& selected,
 								   std::vector<std::shared_ptr<SceneObject>>& roots) {
+			// 親子が同時選択された場合は親だけをRootにし、子が二重複製されるのを防ぐ。
 			for(const auto& object : selected) {
 				if(!SceneObjectDuplicator::IsDuplicatable(object.get())) continue;
 
@@ -120,12 +128,14 @@ namespace CalyxEngine {
 			auto clone = CloneWithoutHierarchy(source);
 			if(!clone) return nullptr;
 
+			// 子は複製された親へ、選択Rootは元の親へ接続してHierarchy上の位置を維持する。
 			if(duplicateParent) {
 				clone->SetParent(duplicateParent, source->GetWorldTransform().inheritScale);
 			} else if(auto parent = source->GetParent()) {
 				clone->SetParent(parent, source->GetWorldTransform().inheritScale);
 			}
 
+			// SceneContextへ登録してから再帰し、子が有効な親を参照できる状態にする。
 			ctx->AddObject(clone);
 			created.push_back(clone);
 
@@ -162,6 +172,7 @@ namespace CalyxEngine {
 		SceneObjectDuplicateResult result;
 		if(!ctx) return result;
 
+		// 選択集合を重複しないRootへ縮約してから、各Hierarchyを深さ優先で複製する。
 		std::vector<std::shared_ptr<SceneObject>> roots;
 		std::vector<std::shared_ptr<SceneObject>> allCreated;
 		CollectDuplicateRoots(sources, roots);

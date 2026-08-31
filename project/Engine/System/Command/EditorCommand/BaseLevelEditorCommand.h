@@ -8,6 +8,9 @@
  * - レベルエディタコマンド基底クラス
  * - エディタ操作のUndo/Redo対応コマンドの共通基底
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief BaseLevelEditorCommandの機能を提供するクラスです。
+ */
 class BaseLevelEditorCommand 
 	: public ICommand {
 public:

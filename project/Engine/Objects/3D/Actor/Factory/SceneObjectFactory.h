@@ -12,6 +12,9 @@
 /* ========================================================================
 /*		シーンオブジェクト作成
 /* ===================================================================== */
+/**
+ * @brief ObjectFactoryの機能を提供するクラスです。
+ */
 class ObjectFactory {
 public:
 	using CreatorFunc = std::function<std::unique_ptr<SceneObject>(const nlohmann::json&)>;

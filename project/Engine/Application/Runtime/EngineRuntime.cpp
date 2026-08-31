@@ -8,6 +8,7 @@
 #include <Engine/Foundation/Utility/Converter/ConvertString.h>
 #include <Engine/Foundation/Utility/LeakChecker/LeakChecker.h>
 
+#include <filesystem>
 #include <string>
 #include <filesystem>
 #include <optional>
@@ -27,6 +28,7 @@ namespace Calyx {
 
 		std::optional<std::filesystem::path> FindSingleProjectFile(
 			const std::filesystem::path& directory) {
+			// 存在しない探索候補は例外にせず無視し、次の候補ディレクトリを試せるようにする。
 			std::error_code ec;
 			if(directory.empty() || !std::filesystem::is_directory(directory, ec)) {
 				return std::nullopt;
@@ -38,6 +40,7 @@ namespace Calyx {
 					continue;
 				}
 				if(result) {
+					// 複数プロジェクトがある場所は自動選択せず、誤ったゲームを起動しない。
 					return std::nullopt;
 				}
 				result = it->path();
@@ -48,12 +51,14 @@ namespace Calyx {
 		std::optional<std::filesystem::path> DiscoverProjectFile() {
 			std::vector<std::filesystem::path> searchDirectories;
 
+			// IDE実行と配布物実行の両方を支えるため、作業ディレクトリと実行ファイル周辺を探索する。
 			std::error_code ec;
 			searchDirectories.push_back(std::filesystem::current_path(ec));
 
 			wchar_t executablePath[MAX_PATH]{};
 			if(::GetModuleFileNameW(nullptr, executablePath, MAX_PATH) > 0) {
 				auto directory = std::filesystem::path(executablePath).parent_path();
+				// Launcherやビルド出力から上位のprojectフォルダへ到達できる範囲に探索深度を制限する。
 				for(size_t depth = 0; depth < 5 && !directory.empty(); ++depth) {
 					searchDirectories.push_back(directory);
 					searchDirectories.push_back(directory / "project");
@@ -120,7 +125,8 @@ namespace Calyx {
 			}
 
 			ProjectInfo project;
-			if(LoadProjectFile(args.front(), project)) {
+			if(LoadProjectFile(projectFile, project)) {
+				project.launchConfiguration = DefaultLaunchConfiguration();
 				// Visual Studio/Launcher から渡された構成名を保持する。
 				// Editor はこの値を見て Debug/Develop/Release のどのゲーム DLL をロードするか決める。
 				for(size_t i = 1; i + 1 < args.size(); ++i) {
@@ -130,6 +136,7 @@ namespace Calyx {
 					}
 				}
 				SetCurrentProject(project);
+				// Engine初期化より前に通知し、Applicationがプロジェクト依存設定を準備できるようにする。
 				application.OnProjectLoaded(project);
 				return true;
 			}
@@ -143,20 +150,24 @@ namespace Calyx {
 	}
 
 	int Run(HINSTANCE hInstance, Application& application, const char* commandLine) {
+		// LeakCheckerをFrameworkより先に生成し、Engineリソース解放後まで監視を継続する。
 		LeakChecker leakChecker_;
 		CalyxEngine::CalyxFrameWork frameWork;
 
+		// プロジェクトが確定しない状態ではRendererやゲームDLLを初期化しない。
 		if(!LoadProjectFromCommandLine(commandLine, application)) {
 			return -1;
 		}
 
 		try {
+			// 初期化と終了処理を同じスコープへまとめ、通常終了時のライフタイム順序を明示する。
 			frameWork.Initialize(hInstance, &application);
 			application.OnInitialize();
 			frameWork.Run(&application);
 			application.OnFinalize();
 			frameWork.Finalize();
 		} catch(const std::exception& exception) {
+			// 起動失敗を境界で捕捉し、例外をWinMainの外へ伝播させずログへ残す。
 			CalyxEngine::EngineLogger::GetInstance().Add(
 				CalyxEngine::LogLevel::Error,
 				CalyxEngine::LogCategory::Engine,

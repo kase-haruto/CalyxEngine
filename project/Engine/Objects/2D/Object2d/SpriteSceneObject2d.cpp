@@ -51,6 +51,7 @@ namespace CalyxEngine {
 	}
 
 	void SpriteSceneObject2d::AlwaysUpdate(float dt) {
+		// EditorとRuntimeの両方でTransform Animationを反映し、描画用Spriteへ最新状態を転送する。
 		EnsureSprite();
 		transformAnimation2d_.Update(worldTransform_, dt);
 		worldTransform_.Update();
@@ -69,12 +70,14 @@ namespace CalyxEngine {
 
 	void SpriteSceneObject2d::SubmitSprites(SpriteRenderer& renderer) const {
 		if(sprite_ && IsDrawEnable()) {
+			// 同一Layer・Orderでも描画順がフレームごとに揺れないようGUID由来の安定キーを渡す。
 			const uint64_t stableOrder = static_cast<uint64_t>(std::hash<Guid>{}(GetGuid()));
 			renderer.Register(sprite_->GetSprite(), sortingLayerId_, orderInLayer_, stableOrder);
 		}
 	}
 
 	void SpriteSceneObject2d::SetSortingLayer(SortingLayerId layerId) {
+		// Sceneに存在しないLayer IDは既定Layerへ退避し、古い設定の読込後も描画対象を失わない。
 		sortingLayerId_ = SortingLayerSettings::GetInstance()->IsValidLayerId(layerId)
 			? layerId
 			: kDefaultSortingLayerId;
@@ -107,6 +110,7 @@ namespace CalyxEngine {
 
 
 	void SpriteSceneObject2d::ApplyConfigFromJson(const nlohmann::json& j) {
+		// JSON Keyは既存Sceneとの互換性を維持し、不足項目には現在値を利用する。
 		id_ = j.value("guid", id_);
 		name_ = j.value("name", name_);
 		parentId_ = j.value("parentGuid", parentId_);
@@ -116,17 +120,20 @@ namespace CalyxEngine {
 		color_ = j.value("color", color_);
 		SetSortingLayer(j.value("sortingLayerId", kDefaultSortingLayerId));
 		orderInLayer_ = j.value("orderInLayer", 0);
+		// AnimationとTransformをSprite生成前に復元し、初期GPU表示へ正しい値を反映する。
 		if(j.contains("transformAnimation2d")) {
 			transformAnimation2d_.ApplyConfigFromJson(j.at("transformAnimation2d"));
 		}
 		if(j.contains("transform")) {
 			worldTransform_.ApplyConfig(j.at("transform").get<WorldTransformConfig>());
 		}
+		// Asset GUIDを優先してTextureを解決し、旧SceneのPathはFallbackとして利用する。
 		EnsureSprite();
 		sprite_->SetTexture(ResolveTexturePath());
 	}
 
 	void SpriteSceneObject2d::ExtractConfigToJson(nlohmann::json& j) const {
+		// Runtime用Sprite内部値ではなく、SceneObject側の正規化済み設定を保存する。
 		j["name"] = name_;
 		j["guid"] = id_;
 		j["parentGuid"] = parentId_;
@@ -137,6 +144,7 @@ namespace CalyxEngine {
 		j["color"] = color_;
 		j["sortingLayerId"] = sortingLayerId_;
 		j["orderInLayer"] = orderInLayer_;
+		// 空Animationは出力せず、既存Sceneファイルの不要な肥大化を避ける。
 		if(!transformAnimation2d_.IsEmpty()) {
 			nlohmann::json animationJson;
 			transformAnimation2d_.ExtractConfigToJson(animationJson);
@@ -150,6 +158,7 @@ namespace CalyxEngine {
 
 	void SpriteSceneObject2d::EnsureSprite() {
 		if(sprite_) return;
+		// SceneObjectがSpriteの所有権を持ち、初回利用時にだけ描画Resourceを初期化する。
 		sprite_ = std::make_unique<SpriteObject2d>();
 		sprite_->Initialize(ResolveTexturePath());
 		SyncSpriteFromTransform();
@@ -158,6 +167,7 @@ namespace CalyxEngine {
 
 	void SpriteSceneObject2d::SyncSpriteFromTransform() {
 		if(!sprite_) return;
+		// WorldTransformの2D成分を描画Objectへ変換し、Scene編集値とRenderer入力を同期する。
 		sprite_->SetPosition({worldTransform_.translation.x, worldTransform_.translation.y});
 		sprite_->SetScale({worldTransform_.scale.x, worldTransform_.scale.y});
 		sprite_->SetRotation(worldTransform_.eulerRotation.z);
@@ -245,6 +255,7 @@ namespace CalyxEngine {
 
 	void SpriteSceneObject2d::ApplyTextureByGuid(const Guid& guid) {
 		if(!guid.isValid()) return;
+		// Asset種別を検証してからGUIDと相対Pathを同時更新し、移動追従と旧形式互換を両立する。
 		if(const AssetRecord* record = AssetDatabase::GetInstance()->Get(guid); record && record->type == AssetType::Texture) {
 			textureGuid_ = guid;
 			texturePath_ = RelativeAssetPath(record->sourcePath);
@@ -254,6 +265,7 @@ namespace CalyxEngine {
 	}
 
 	std::string SpriteSceneObject2d::ResolveTexturePath() const {
+		// GUID解決を優先することでAsset移動へ追従し、未登録Assetだけ保存済みPathへFallbackする。
 		if(textureGuid_.isValid()) {
 			if(const AssetRecord* record = AssetDatabase::GetInstance()->Get(textureGuid_); record && record->type == AssetType::Texture) {
 				return RelativeAssetPath(record->sourcePath);
@@ -278,16 +290,19 @@ namespace CalyxEngine {
 
 	void AnimatedSpriteSceneObject2d::AlwaysUpdate(float dt) {
 		const SceneContext* context = SceneContext::Current();
+		// Runtimeでは通常Updateが進めるため、AlwaysUpdateとの二重更新を避ける。
 		if(context && context->IsRuntime()) return;
 		UpdateAnimatedSprite(dt, true);
 	}
 
 	void AnimatedSpriteSceneObject2d::UpdateAnimatedSprite(float dt, bool updateAnimation) {
+		// Transform Animationを先に適用し、その配置でUV Animation付きSpriteを更新する。
 		EnsureSprite();
 		transformAnimation2d_.Update(worldTransform_, dt);
 		worldTransform_.Update();
 		SyncSpriteFromTransform();
 		sprite_->SetColor(color_);
+		// Hot Reloadや遅延Assetロード完了を検出してAnimatorの参照を更新する。
 		RefreshAnimationAsset();
 		if(updateAnimation) {
 			if(autoPlay_ && !clipName_.empty() && animator_.GetCurrentClipName() != clipName_ && !animator_.IsFinished()) {
@@ -351,6 +366,7 @@ namespace CalyxEngine {
 	}
 
 	void AnimatedSpriteSceneObject2d::ApplyConfigFromJson(const nlohmann::json& j) {
+		// 基底Sprite設定を復元してからAnimation AssetをBindingし、Texture依存を解決する。
 		SpriteSceneObject2d::ApplyConfigFromJson(j);
 		animationGuid_ = j.value("animationGuid", animationGuid_);
 		clipName_ = j.value("clipName", clipName_);
@@ -377,6 +393,7 @@ namespace CalyxEngine {
 	}
 
 	void AnimatedSpriteSceneObject2d::RefreshAnimationAsset() {
+		// 同じGUIDを既にBinding済みなら再設定せず、再生時刻の不要なResetを防ぐ。
 		if(!animationGuid_.isValid() || animationGuid_ == boundAnimationGuid_) return;
 		auto* manager = AssetManager::GetInstance()->GetDataAssetManager();
 		auto asset = manager ? manager->GetAsset<SpriteAnimationAsset>(animationGuid_) : nullptr;
@@ -384,6 +401,7 @@ namespace CalyxEngine {
 		if(clipName_.empty() && !asset->clips.empty()) {
 			clipName_ = asset->clips.front().name;
 		}
+		// Animation Assetが指定するTextureをSpriteへ同期し、Frame UVと画像を一致させる。
 		if(textureGuid_ != asset->textureGuid && asset->textureGuid.isValid()) {
 			ApplyTextureByGuid(asset->textureGuid);
 		} else if(!asset->texturePath.empty()) {
@@ -391,6 +409,7 @@ namespace CalyxEngine {
 			EnsureSprite();
 			sprite_->SetTexture(texturePath_);
 		}
+		// SpriteはSceneObjectが所有し、Animatorには非所有参照としてBindingする。
 		animator_.Bind(sprite_.get());
 		animator_.SetAnimationAsset(asset);
 		ApplyLoopSettings();
@@ -405,6 +424,7 @@ namespace CalyxEngine {
 	}
 
 	void AnimatedSpriteSceneObject2d::ApplyLoopSettings() {
+		// Object側Overrideが無効ならClip Asset本来のLoop設定へ戻す。
 		if(useLoopOverride_) {
 			animator_.SetLoopOverride(loopOverride_);
 		} else {

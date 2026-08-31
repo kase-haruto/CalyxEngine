@@ -26,6 +26,7 @@ void DxGpuResource::InitializeAsRenderTarget(ID3D12Device*				 device,
 											 DXGI_FORMAT				 format,
 											 std::optional<std::wstring> name,
 											 const float*				 clearColor) {
+	// Shader出力先として利用する2D TextureのResource記述を構築する。
 	D3D12_RESOURCE_DESC texDesc = {};
 	texDesc.Dimension			= D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	texDesc.Width				= width;
@@ -40,6 +41,7 @@ void DxGpuResource::InitializeAsRenderTarget(ID3D12Device*				 device,
 	D3D12_HEAP_PROPERTIES heapProps = {};
 	heapProps.Type					= D3D12_HEAP_TYPE_DEFAULT;
 
+	// Optimized Clear ValueをResource作成時に指定し、RenderTarget Clearを効率化する。
 	D3D12_CLEAR_VALUE clearValue = {};
 	clearValue.Format			 = format;
 	if(clearColor) {
@@ -54,6 +56,7 @@ void DxGpuResource::InitializeAsRenderTarget(ID3D12Device*				 device,
 		clearValue.Color[3] = 1.0f;
 	}
 
+	// Resize時は旧COM Resourceを解放してから同じWrapperへ新Resourceを格納する。
 	resource_.Reset();
 	HRESULT hr = device->CreateCommittedResource(
 		&heapProps,
@@ -91,6 +94,7 @@ void DxGpuResource::InitializeAsDepthStencil(ID3D12Device*				 device,
 	D3D12_HEAP_PROPERTIES heapProps = {};
 	heapProps.Type					= D3D12_HEAP_TYPE_DEFAULT;
 
+	// Typeless Resourceには対応するDSV FormatをClear Valueとして指定する。
 	D3D12_CLEAR_VALUE clearValue = {};
 	if(format == DXGI_FORMAT_R24G8_TYPELESS) {
 		clearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -102,6 +106,7 @@ void DxGpuResource::InitializeAsDepthStencil(ID3D12Device*				 device,
 	clearValue.DepthStencil.Depth	= 1.0f;
 	clearValue.DepthStencil.Stencil = 0;
 
+	// Depth Textureを初期状態DEPTH_WRITEで生成し、直後のDepth PassでBarrierを不要にする。
 	resource_.Reset();
 	HRESULT hr = device->CreateCommittedResource(
 		&heapProps,
@@ -130,6 +135,7 @@ D3D12_RESOURCE_STATES DxGpuResource::GetCurrentState() const {
 }
 
 void DxGpuResource::Transition(ID3D12GraphicsCommandList* cmdList, D3D12_RESOURCE_STATES newState) {
+	// Resource未生成または同一状態の場合は冗長なBarrierを記録しない。
 	if(!resource_ || currentState_ == newState) return;
 
 	D3D12_RESOURCE_BARRIER barrier{};
@@ -139,11 +145,13 @@ void DxGpuResource::Transition(ID3D12GraphicsCommandList* cmdList, D3D12_RESOURC
 	barrier.Transition.StateAfter  = newState;
 	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
+	// 全Subresourceを遷移させ、Command記録後に追跡状態を新Stateへ同期する。
 	cmdList->ResourceBarrier(1, &barrier);
 	currentState_ = newState;
 }
 
 void DxGpuResource::CreateSRV(ID3D12Device* device) {
+	// Descriptorの所有権はAllocatorへ残し、CPU/GPU HandleだけをResourceと関連付ける。
 	DescriptorHandle handle = DescriptorAllocator::Allocate(DescriptorUsage::CbvSrvUav);
 	cpuSrvHandle_			= handle.cpu;
 	gpuSrvHandle_			= handle.gpu;
@@ -152,6 +160,7 @@ void DxGpuResource::CreateSRV(ID3D12Device* device) {
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping			= D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
+	// Typeless Depth TextureはShaderから読める型付きFormatへ変換してSRVを作成する。
 	DXGI_FORMAT format = resource_->GetDesc().Format;
 	if(format == DXGI_FORMAT_R24G8_TYPELESS) {
 		srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
@@ -171,6 +180,7 @@ void DxGpuResource::CreateSRV(ID3D12Device* device) {
 }
 
 void DxGpuResource::CreateRTV(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE handle) {
+	// 外部Allocatorが確保したRTV Slotへ現在ResourceのViewを書き込む。
 	cpuRtvHandle_ = handle;
 
 	device->CreateRenderTargetView(resource_.Get(), nullptr, handle);
@@ -179,6 +189,7 @@ void DxGpuResource::CreateRTV(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE 
 void DxGpuResource::CreateDSV(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE handle) {
 	cpuDsvHandle_ = handle;
 
+	// Typeless ResourceをDepth書込み用の型付きFormatとして公開する。
 	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
 	DXGI_FORMAT					  format  = resource_->GetDesc().Format;
 	if(format == DXGI_FORMAT_R24G8_TYPELESS) {
@@ -195,6 +206,7 @@ void DxGpuResource::CreateDSV(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE 
 }
 
 void DxGpuResource::UpdateSRV(ID3D12Device* device) {
+	// Resize前から保持するDescriptor Slotがある場合だけ、新ResourceへViewを差し替える。
 	if(!cpuSrvHandle_.ptr) return;
 
 	// SRV 設定

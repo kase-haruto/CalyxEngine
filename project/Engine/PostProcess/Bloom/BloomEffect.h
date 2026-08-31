@@ -5,8 +5,14 @@
 #include <Engine/Graphics/Pipeline/Pso/PsoDetails.h>
 #include <Engine/PostProcess/Interface/IPostEffectPass.h>
 
+/**
+ * @brief BloomEffectの機能を提供するクラスです。
+ */
 class BloomEffect : public IPostEffectPass {
 private:
+	/**
+	 * @brief BloomParameterに関するデータを保持する構造体です。
+	 */
 	struct BloomParameter {
 		float intensity = 0.7f;
 		float threshold = 0.8f;

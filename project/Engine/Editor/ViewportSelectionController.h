@@ -18,6 +18,9 @@ struct Ray;
 
 namespace CalyxEngine {
 
+	/**
+	 * @brief ViewportSelectionCallbacksに関するデータを保持する構造体です。
+	 */
 	struct ViewportSelectionCallbacks {
 		std::function<std::vector<std::shared_ptr<SceneObject>>()> getSelectedObjects;
 		std::function<void(const std::shared_ptr<SceneObject>&)> setSelectedObject;
@@ -25,6 +28,9 @@ namespace CalyxEngine {
 		std::function<void(const std::vector<std::shared_ptr<SceneObject>>&)> setSelectedObjects;
 	};
 
+	/**
+	 * @brief ViewportSelectionControllerの機能を提供するクラスです。
+	 */
 	class ViewportSelectionController {
 	public:
 		void SetViewport(Viewport* viewport) { viewport_ = viewport; }

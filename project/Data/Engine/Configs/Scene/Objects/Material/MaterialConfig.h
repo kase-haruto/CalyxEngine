@@ -7,6 +7,9 @@
 #include <externals/nlohmann/json.hpp>
 #include <cstdint>
 #include <string>
+/**
+ * @brief マテリアルの描画およびシェーディング設定を保持する構造体です。
+ */
 struct MaterialConfig final{
 	 //========================= variable =========================
 	CalyxEngine::Vector4 color = { 1.0f, 1.0f, 1.0f, 1.0f };	//< 色

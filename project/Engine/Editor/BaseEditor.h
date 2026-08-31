@@ -9,6 +9,9 @@ namespace CalyxEngine {
 	 * - エディタ基底クラス
 	 * - ImGuiを使用したエディタUIの共通インターフェースを提供
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief BaseEditorの機能を提供するクラスです。
+	 */
 	class BaseEditor {
 	public:
 		BaseEditor(const std::string& name) : editorName_(name) {}

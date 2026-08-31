@@ -18,6 +18,9 @@ class PipelineService;
 namespace CalyxEngine {
 	class GameObject2D;
 
+	/**
+	 * @brief Renderer2Dの機能を提供するクラスです。
+	 */
 	class Renderer2D {
     public:
         void Initialize(Microsoft::WRL::ComPtr<ID3D12Device> device);

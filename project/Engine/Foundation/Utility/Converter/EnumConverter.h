@@ -24,6 +24,9 @@
 namespace CalyxEngine {
 
 	template <typename T>
+	/**
+	 * @brief EnumConverterの機能を提供するクラスです。
+	 */
 	class EnumConverter {
 		static_assert(std::is_enum_v<T>, "EnumConverter requires enum type");
 

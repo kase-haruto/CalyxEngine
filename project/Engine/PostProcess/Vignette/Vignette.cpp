@@ -6,6 +6,7 @@
 #include <algorithm>
 
 void Vignette::Initialize(const PipelineSet& psoSet) {
+	// PipelineはRenderer側の所有物を参照し、Effectは設定用定数バッファだけを初期化する。
 	psoSet_ = psoSet;
 	buffer_.Initialize(GraphicsGroup::GetInstance()->GetDevice().Get());
 
@@ -15,17 +16,20 @@ void Vignette::Initialize(const PipelineSet& psoSet) {
 void Vignette::Apply(ID3D12GraphicsCommandList* cmd,
 					 D3D12_GPU_DESCRIPTOR_HANDLE inputSRV,
 					 IRenderTarget* outputRT) {
+	// 出力先を描画可能状態へ遷移してから、Fullscreen Passの命令を記録する。
 	outputRT->GetResource()->Transition(cmd, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-	// 定数バッファ転送
+	// Editorまたは保存データで変更された値を、この描画Pass用の定数へ転送する。
 	buffer_.TransferData(param_);
 
 	outputRT->SetRenderTarget(cmd);
 	psoSet_.SetCommand(cmd);
 
+	// 入力画像と設定定数をRoot Signatureで定めたスロットへ関連付ける。
 	cmd->SetGraphicsRootDescriptorTable(0, inputSRV); // t0
 	buffer_.SetCommand(cmd, 1); // b0
 
+	// 頂点バッファ不要のFullscreen Triangleで画面全体へVignetteを適用する。
 	cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	cmd->DrawInstanced(3, 1, 0, 0);
 }
@@ -46,6 +50,7 @@ void Vignette::ResetParameters() {
 }
 
 nlohmann::json Vignette::SaveParameters() const {
+	// Effect種別に依存しないGraph保存へ渡せるよう、公開パラメータだけをJSON化する。
 	return nlohmann::json{
 		{"strength", param_.strength},
 		{"radius", param_.radius},
@@ -54,6 +59,7 @@ nlohmann::json Vignette::SaveParameters() const {
 }
 
 void Vignette::LoadParameters(const nlohmann::json& params) {
+	// 欠損キーは既定値を維持し、数値はShaderが想定する範囲へ制限する。
 	if(params.contains("strength") && params["strength"].is_number()) {
 		param_.strength = std::clamp(params["strength"].get<float>(), 0.0f, 1.0f);
 	}

@@ -1,6 +1,9 @@
 #pragma once
 #include <d3d12.h>
 
+/**
+ * @brief FullscreenDrawerの機能を提供するクラスです。
+ */
 class FullscreenDrawer{
 public:
 	// 一度だけ呼んで初期化

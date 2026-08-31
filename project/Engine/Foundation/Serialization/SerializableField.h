@@ -46,6 +46,9 @@ namespace CalyxEngine {
 	/* =========================================================================
 	   シリアライズ可能なフィールド情報
 	   ========================================================================= */
+	/**
+	 * @brief SerializableFieldに関するデータを保持する構造体です。
+	 */
 	struct SerializableField {
 		std::string key;
 		ValuePtr	ptr;
@@ -66,6 +69,9 @@ namespace CalyxEngine {
 	/* =========================================================================
 	   変数カテゴリノード
 	   ========================================================================= */
+	/**
+	 * @brief VariableCategoryNodeに関するデータを保持する構造体です。
+	 */
 	struct VariableCategoryNode {
 		std::string											  name;
 		std::vector<const SerializableField*>				  fields;

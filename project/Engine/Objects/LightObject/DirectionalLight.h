@@ -22,6 +22,9 @@
 #include <wrl.h>
 #include <cstdint>
 
+/**
+ * @brief DirectionalLightDataに関するデータを保持する構造体です。
+ */
 struct DirectionalLightData {
 	CalyxEngine::Vector4 color;	  //< ライトの色
 	CalyxEngine::Vector3 direction; //< ライトの向き
@@ -29,6 +32,9 @@ struct DirectionalLightData {
 };
 
 // GPU転送用のPOD構造体（シェーダーのcbuffer RaytracingShadowParamConstantsと一致）
+/**
+ * @brief ShadowParamGpuに関するデータを保持する構造体です。
+ */
 struct ShadowParamGpu {
 	float shadowRayEps;
 	float baseAngularRadius;
@@ -45,10 +51,16 @@ namespace CalyxEngine {
  * - 方向性ライトクラス
  * - 平行光源の色、向き、輝度の管理、およびシャドウマップ用の行列計算を担当
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief DirectionalLightの機能を提供するクラスです。
+ */
 class DirectionalLight
 	: public SceneObject,
 	  public IConfigurable {
 public:
+	/**
+	 * @brief ShadowParamに関するデータを保持する構造体です。
+	 */
 	struct ShadowParam
 		: public CalyxEngine::SerializableObject {
 		ShadowParam();

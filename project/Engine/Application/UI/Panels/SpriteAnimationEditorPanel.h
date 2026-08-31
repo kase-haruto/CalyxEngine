@@ -8,6 +8,9 @@
 namespace CalyxEngine {
 	class SpriteAnimationAsset;
 
+	/**
+	 * @brief SpriteAnimationEditorPanelの機能を提供するクラスです。
+	 */
 	class SpriteAnimationEditorPanel : public IEngineUI {
 	public:
 		SpriteAnimationEditorPanel();

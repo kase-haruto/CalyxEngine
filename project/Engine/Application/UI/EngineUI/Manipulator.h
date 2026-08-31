@@ -28,6 +28,9 @@ namespace CalyxEngine {
 	 * - トランスフォームマニピュレータクラス
 	 * - ImGuizmoを使用した移動・回転・スケールのギズモ操作を提供
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief Manipulatorの機能を提供するクラスです。
+	 */
 	class Manipulator
 		: public BaseOnViewportTool {
 	public:
@@ -115,6 +118,9 @@ namespace CalyxEngine {
 
 	private:
 		// アイコン
+		/**
+		 * @brief Iconに関するデータを保持する構造体です。
+		 */
 		struct Icon {
 			ImTextureID texture = nullptr;
 			ImVec2      size{24.0f,24.0f};

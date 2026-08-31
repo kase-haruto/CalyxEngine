@@ -24,17 +24,40 @@ namespace CalyxEngine {
 		Error
 	};
 
+	/*-----------------------------------------------------------------------------------------
+	 * ConsoleOutputLine
+	 * - Consoleへ表示する一行分の実行結果を保持するデータ構造
+	 * - 出力レベルと表示メッセージを管理する
+	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief ConsoleOutputLineに関するデータを保持する構造体です。
+	 */
 	struct ConsoleOutputLine {
 		ConsoleOutputLevel level = ConsoleOutputLevel::Info;
 		std::string message;
 	};
 
+	/*-----------------------------------------------------------------------------------------
+	 * ConsoleCommandResult
+	 * - Console Commandの実行結果を呼び出し側へ返すデータ構造
+	 * - 履歴消去要求と複数行の出力内容を保持する
+	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief ConsoleCommandResultに関するデータを保持する構造体です。
+	 */
 	struct ConsoleCommandResult {
 		bool clearRequested = false;
 		std::vector<ConsoleOutputLine> output;
 	};
 
-	// コマンドが参照可能なエンジンサービスを明示的に渡す。
+	/*-----------------------------------------------------------------------------------------
+	 * ConsoleCommandContext
+	 * - Console Commandが参照可能なEngineサービスを明示するデータ構造
+	 * - 各ポインタは所有権を持たず、Command実行中だけ利用する
+	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief ConsoleCommandContextに関するデータを保持する構造体です。
+	 */
 	struct ConsoleCommandContext {
 		LevelEditor* levelEditor = nullptr;
 		SceneManager* sceneManager = nullptr;
@@ -45,6 +68,14 @@ namespace CalyxEngine {
 		const ConsoleCommandContext&,
 		const std::vector<std::string>&)>;
 
+	/*-----------------------------------------------------------------------------------------
+	 * ConsoleCommandDefinition
+	 * - Registryへ登録するConsole Commandの定義を保持するデータ構造
+	 * - コマンド名、説明、利用形式、実行Callbackを管理する
+	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief ConsoleCommandDefinitionに関するデータを保持する構造体です。
+	 */
 	struct ConsoleCommandDefinition {
 		std::string name;
 		std::string description;
@@ -57,6 +88,9 @@ namespace CalyxEngine {
 	 * - Engine/Gameからコマンド名とコールバックを登録する共通レジストリ
 	 * - UIへ依存せず、コマンド検索と実行だけを担当する
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief ConsoleCommandRegistryの機能を提供するクラスです。
+	 */
 	class CALYX_API ConsoleCommandRegistry {
 	public:
 		static ConsoleCommandRegistry& GetInstance();

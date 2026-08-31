@@ -4,6 +4,9 @@
 #include <Engine/PostProcess/FullscreenDrawer.h>
 #include <Engine/PostProcess/Interface/IPostEffectPass.h>
 
+/**
+ * @brief GrayScaleEffectの機能を提供するクラスです。
+ */
 class GrayScaleEffect
 	: public IPostEffectPass{
 public:

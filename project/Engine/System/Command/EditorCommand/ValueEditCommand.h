@@ -7,6 +7,9 @@
 #include <utility>
 
 template<typename T>
+/**
+ * @brief ValueEditCommandの機能を提供するクラスです。
+ */
 class ValueEditCommand final
 	: public ICommand {
 public:

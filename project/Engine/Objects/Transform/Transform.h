@@ -17,11 +17,24 @@
 #include <cstdint>
 #include <string>
 
+/*-----------------------------------------------------------------------------------------
+ * RotationSource
+ * - Transformの回転計算に使用する入力表現を示す列挙型
+ * - Editorで編集されたEuler角とRuntimeのQuaternionの優先関係を管理
+ *---------------------------------------------------------------------------------------*/
 enum class RotationSource {
 	Euler,
 	Quaternion
 };
 
+/*-----------------------------------------------------------------------------------------
+ * TransformationMatrix
+ * - TransformからGPUへ転送する行列を保持する定数バッファ用データ構造
+ * - ワールド行列と法線変換用の逆転置行列を管理
+ *---------------------------------------------------------------------------------------*/
+/**
+ * @brief TransformationMatrixに関するデータを保持する構造体です。
+ */
 struct TransformationMatrix {
 	CalyxEngine::Matrix4x4 world				   = CalyxEngine::Matrix4x4::MakeIdentity(); //< ワールド行列
 	CalyxEngine::Matrix4x4 WorldInverseTranspose = CalyxEngine::Matrix4x4::MakeIdentity(); //< ワールド逆転置行列
@@ -31,6 +44,9 @@ struct TransformationMatrix {
  * EulerTransform
  * - オイラー角ベースのトランスフォーム構造体
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief EulerTransformに関するデータを保持する構造体です。
+ */
 struct EulerTransform {
 	CalyxEngine::Vector3 scale;	  //< スケール
 	CalyxEngine::Vector3 rotate;	  //< 回転(オイラー角)
@@ -56,6 +72,9 @@ struct EulerTransform {
  * Transform2D
  * - 2D空間のトランスフォーム構造体
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief Transform2Dに関するデータを保持する構造体です。
+ */
 struct Transform2D {
 	CalyxEngine::Vector2 scale;	  //< スケール
 	float			   rotate;	  //< 回転
@@ -97,6 +116,14 @@ struct Transform2D {
 	void ApplyConfig(const Transform2DConfig& config);
 };
 
+/*-----------------------------------------------------------------------------------------
+ * QuaternionTransform
+ * - Quaternion回転を使用する基本的な3D配置を保持するデータ構造
+ * - 拡大率、回転、座標をまとめて管理
+ *---------------------------------------------------------------------------------------*/
+/**
+ * @brief QuaternionTransformに関するデータを保持する構造体です。
+ */
 struct QuaternionTransform {
 	CalyxEngine::Vector3	  scale;	 //< スケール
 	CalyxEngine::Quaternion rotate;	 //< 回転(クォータニオン)
@@ -108,6 +135,9 @@ struct QuaternionTransform {
  * - トランスフォーム基底クラス
  * - 定数バッファとの同期、親子関係の管理、行列計算を行う
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief BaseTransformの機能を提供するクラスです。
+ */
 class CALYX_API BaseTransform : public DxConstantBuffer<TransformationMatrix> {
 public:
 	//========================================================================*/
@@ -159,6 +189,10 @@ public:
 	 * \return ワールド座標
 	 */
 	virtual CalyxEngine::Vector3 GetWorldPosition() const;
+	/**
+	 * \brief 行列が最後に更新された世代番号を取得する
+	 * \return Transform変更時に増加する世代番号
+	 */
 	uint64_t GetRevision() const { return revision_; }
 
 public:
@@ -184,6 +218,9 @@ protected:
  * WorldTransform
  * - ワールド空間のトランスフォームクラス
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief WorldTransformの機能を提供するクラスです。
+ */
 class CALYX_API WorldTransform : public BaseTransform {
 public:
 	//========================================================================*/
@@ -244,20 +281,29 @@ public:
 	bool inheritScale	  = true; //< 親のスケールを継承するか
 
 private:
+	/**
+	 * \brief 現在値と親Transformの世代がキャッシュと一致するか判定する
+	 * \param parentRevision 親Transformの現在の世代番号
+	 * \return 行列の再計算が不要な場合はtrue
+	 */
 	bool IsCacheValid(uint64_t parentRevision) const;
+	/**
+	 * \brief 行列計算に使用した入力値をキャッシュへ保存する
+	 * \param parentRevision 親Transformの現在の世代番号
+	 */
 	void StoreCache(uint64_t parentRevision);
 
-	CalyxEngine::Vector3	  cachedScale_ {};
-	CalyxEngine::Quaternion cachedRotation_ {};
-	CalyxEngine::Vector3	  cachedEulerRotation_ {};
-	CalyxEngine::Vector3	  cachedTranslation_ {};
-	BaseTransform*		  cachedParent_ = nullptr;
-	uint64_t			  cachedParentRevision_ = 0;
-	RotationSource		  cachedRotationSource_ = RotationSource::Quaternion;
-	bool				  cachedInheritTranslate_ = true;
-	bool				  cachedInheritRotate_	   = true;
-	bool				  cachedInheritScale_	   = true;
-	bool				  cacheValid_			   = false;
+	CalyxEngine::Vector3 cachedScale_{};                  //< 前回行列計算時の拡大率
+	CalyxEngine::Quaternion cachedRotation_{};            //< 前回行列計算時のQuaternion回転
+	CalyxEngine::Vector3 cachedEulerRotation_{};          //< 前回行列計算時のEuler回転
+	CalyxEngine::Vector3 cachedTranslation_{};            //< 前回行列計算時の座標
+	BaseTransform* cachedParent_ = nullptr;               //< 所有権を持たない前回計算時の親Transform
+	uint64_t cachedParentRevision_ = 0;                   //< 前回計算時の親Transform世代番号
+	RotationSource cachedRotationSource_ = RotationSource::Quaternion; //< 前回計算時の回転入力表現
+	bool cachedInheritTranslate_ = true;                  //< 前回計算時の座標継承設定
+	bool cachedInheritRotate_ = true;                     //< 前回計算時の回転継承設定
+	bool cachedInheritScale_ = true;                      //< 前回計算時の拡大率継承設定
+	bool cacheValid_ = false;                             //< キャッシュが一度以上構築されているか
 };
 
 //============================================================================*/

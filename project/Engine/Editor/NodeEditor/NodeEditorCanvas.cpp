@@ -198,13 +198,18 @@ namespace CalyxEngine {
 	}
 
 	bool NodeEditorCanvas::Draw(NodeGraph& graph, const DrawNodeBody& drawBody, const DrawContextMenu& drawContextMenu, const GraphMutationCommand& graphMutationCommand) {
+		// コンテキストメニュー要求はフレーム単位のイベントなので、前フレームの状態を持ち越さない。
 		bool changed = false;
 		backgroundContextRequested_ = false;
 		nodeContextRequested_ = false;
+
+		// 編集対象が切り替わった場合は、別グラフの配置済みIDを再利用しない。
 		if(lastGraph_ != &graph) {
 			lastGraph_ = &graph;
 			positionedNodes_.clear();
 		}
+
+		// NodeEditor固有のスタイルはこのCanvasの描画中だけ有効にする。
 		ed::SetCurrentEditor(context_);
 		ed::PushStyleColor(ed::StyleColor_Bg, kStyle.bg);
 		ed::PushStyleColor(ed::StyleColor_Grid, kStyle.grid);
@@ -230,6 +235,7 @@ namespace CalyxEngine {
 		}
 
 		for(auto& node : graph.nodes) {
+			// ノード固有UIと入出力ピンを同じNodeEditorノード内へ登録する。
 			ed::BeginNode(ed::NodeId(node.id));
 			DrawNodeHeader(node);
 			ImGui::Dummy(ImVec2(kStyle.bodyPaddingX, 0.0f));
@@ -242,9 +248,12 @@ namespace CalyxEngine {
 			ed::EndNode();
 
 			if(!positionedNodes_.contains(node.id)) {
+				// 保存済み座標は初回だけ反映し、以降はユーザーのドラッグ操作を優先する。
 				ed::SetNodePosition(ed::NodeId(node.id), ImVec2(node.position.x, node.position.y));
 				positionedNodes_.insert(node.id);
 			}
+
+			// Editor上の最新座標をモデルへ戻し、次回保存時にレイアウトを再現できるようにする。
 			ImVec2 pos = ed::GetNodePosition(ed::NodeId(node.id));
 			if(pos.x != node.position.x || pos.y != node.position.y) {
 				node.position = {pos.x, pos.y};
@@ -253,6 +262,7 @@ namespace CalyxEngine {
 		}
 
 		for(const auto& link : graph.links) {
+			// 接続元ピンの型を使い、リンクの色と太さをデータ型に対応させる。
 			const NodePin* pin = graph.FindPin(link.fromPinId);
 			const std::string_view pinType = pin ? pin->type : NodePinTypes::None;
 			ed::Link(ed::LinkId(link.id), ed::PinId(link.fromPinId), ed::PinId(link.toPinId), GetPinColor(pinType), GetLinkThickness(pinType));
@@ -264,12 +274,14 @@ namespace CalyxEngine {
 		if(ed::BeginCreate()) {
 			ed::PinId a, b;
 			if(ed::QueryNewLink(&a, &b, ImVec4(0.70f, 0.76f, 0.84f, 1.0f), kStyle.validPreviewThickness)) {
+				// 向きと型の接続規則を満たしたリンクだけを確定候補として表示する。
 				int32_t from = 0;
 				int32_t to = 0;
 				if(CanCreateLink(graph, static_cast<int32_t>(a.Get()), static_cast<int32_t>(b.Get()), from, to)) {
 					const NodePin* fromPin = graph.FindPin(from);
 					const ImVec4 previewColor = fromPin ? GetPinColor(fromPin->type) : ImVec4(0.70f, 0.76f, 0.84f, 1.0f);
 					if(ed::AcceptNewItem(previewColor, kStyle.validPreviewThickness)) {
+						// Undoでグラフ全体を復元できるよう、変更前の値をリンク追加前に保存する。
 						const NodeGraph before = graph;
 						graph.links.push_back({graph.AllocateId(), from, to});
 						if(graphMutationCommand) graphMutationCommand("Create Node Link", before, graph);
@@ -283,6 +295,7 @@ namespace CalyxEngine {
 			ed::PinId sourcePin;
 			if(ed::QueryNewNode(&sourcePin, ImVec4(0.70f, 0.76f, 0.84f, 1.0f), kStyle.validPreviewThickness)) {
 				if(ed::AcceptNewItem(ImVec4(0.70f, 0.76f, 0.84f, 1.0f), kStyle.validPreviewThickness)) {
+					// ピンから空白へドラッグした位置でノード追加メニューを開けるよう、Canvas座標を保持する。
 					backgroundContextRequested_ = true;
 					ImVec2 pos = ed::ScreenToCanvas(ImGui::GetMousePos());
 					contextCanvasPos_ = {pos.x, pos.y};
@@ -297,6 +310,7 @@ namespace CalyxEngine {
 			ed::NodeId deletedNode;
 			while(ed::QueryDeletedNode(&deletedNode)) {
 				if(ed::AcceptDeletedItem()) {
+					// ノード削除と同時に孤立リンクも除去し、参照不能なピンIDをグラフへ残さない。
 					const NodeGraph before = graph;
 					const int32_t nodeId = static_cast<int32_t>(deletedNode.Get());
 					std::erase_if(graph.nodes, [nodeId](const Node& n) { return n.id == nodeId; });
@@ -312,6 +326,7 @@ namespace CalyxEngine {
 			ed::LinkId deletedLink;
 			while(ed::QueryDeletedLink(&deletedLink)) {
 				if(ed::AcceptDeletedItem()) {
+					// リンク単体の削除も独立したUndo操作として記録する。
 					const NodeGraph before = graph;
 					const int32_t id = static_cast<int32_t>(deletedLink.Get());
 					std::erase_if(graph.links, [id](const NodeLink& l) { return l.id == id; });
@@ -330,6 +345,7 @@ namespace CalyxEngine {
 			hasActiveContextMenu_ = true;
 		}
 		if(ed::ShowBackgroundContextMenu()) {
+			// PopupはNodeEditorコンテキスト終了後に描くため、ここでは要求と座標だけを退避する。
 			backgroundContextRequested_ = true;
 			ImVec2 pos = ed::ScreenToCanvas(ImGui::GetMousePos());
 			contextCanvasPos_ = {pos.x, pos.y};
@@ -340,6 +356,7 @@ namespace CalyxEngine {
 		ed::End();
 
 		if(drawContextMenu) {
+			// ImGui Popupを通常のWindowコンテキストで開き、NodeEditor内部状態との競合を避ける。
 			if(hasActiveContextMenu_) {
 				ImGui::OpenPopup(activeContextMenu_.type == ContextMenuType::Background ? "NodeEditorBackgroundContextMenu" : "NodeEditorNodeContextMenu");
 				hasActiveContextMenu_ = false;
@@ -356,6 +373,7 @@ namespace CalyxEngine {
 			}
 		}
 
+		// Pushしたスタイルと編集コンテキストを必ず対で戻し、後続パネルへの漏れを防ぐ。
 		ed::PopStyleVar(6);
 		ed::PopStyleColor(8);
 		ed::SetCurrentEditor(nullptr);

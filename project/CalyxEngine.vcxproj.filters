@@ -285,7 +285,6 @@
     <ClCompile Include="Engine\Scene\Fade\BaseSceneTransitionEffect.cpp" />
     <ClCompile Include="Engine\Scene\Fade\FadeBlackOutEffect.cpp" />
     <ClCompile Include="Engine\Renderer\Sprite\SortingLayerSettings.cpp" />
-    <ClCompile Include="Engine\Assets\Audio\Audio.cpp" />
     <ClCompile Include="Engine\Scene\Utility\SceneUtility.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -667,6 +666,5 @@
     <ClInclude Include="Engine\Scene\Fade\BaseSceneTransitionEffect.h" />
     <ClInclude Include="Engine\Scene\Fade\FadeBlackOutEffect.h" />
     <ClInclude Include="Engine\Renderer\Sprite\SortingLayerSettings.h" />
-    <ClInclude Include="Engine\Assets\Audio\Audio.h" />
   </ItemGroup>
 </Project>

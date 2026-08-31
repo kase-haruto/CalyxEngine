@@ -11,6 +11,9 @@ namespace CalyxEngine {
  	*		SerializableFieldBuilder class
  	*		- シリアライズ可能フィールドビルダークラス
  	*------------------------------------------------------*/
+	/**
+	 * @brief FieldBuilderの機能を提供するクラスです。
+	 */
 	class CALYX_API FieldBuilder {
 	public:
 		//=========================================================

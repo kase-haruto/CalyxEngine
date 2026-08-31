@@ -9,6 +9,7 @@
 namespace CalyxEngine {
 	namespace {
 		bool ReadJson(const std::filesystem::path& path, nlohmann::json& out) {
+			// ファイルOpenまたはJSON解析に失敗した場合は、呼び出し側のAssetを変更せず失敗を返す。
 			std::ifstream ifs(path);
 			if(!ifs) return false;
 			try {
@@ -20,6 +21,7 @@ namespace CalyxEngine {
 		}
 
 		bool WriteJson(const std::filesystem::path& path, const nlohmann::json& j) {
+			// 新規Effect Assetでも保存できるよう、書込み前に親Directoryを作成する。
 			FileSystemHelper::CreateDirectoryPath(path.parent_path().string());
 			std::ofstream ofs(path);
 			if(!ofs) return false;
@@ -32,10 +34,12 @@ namespace CalyxEngine {
 		: data_(std::move(data)) {}
 
 	bool EffectAsset::Load(const std::filesystem::path& path) {
+		// 呼び出しPathからAsset名だけを採用し、ProjectのEffects Directoryへ正規化する。
 		const std::string name = path.stem().string();
 		const std::filesystem::path fullPath = Calyx::ResolveAssetPath(std::filesystem::path("Effects") / (name + ".effect"));
 		nlohmann::json root;
 		if(!ReadJson(fullPath, root)) return false;
+		// 解析成功後に保持データを置換し、空名称だけをファイル名で補完する。
 		data_ = root.get<EffectAssetData>();
 		if(data_.name.empty()) {
 			data_.name = fullPath.stem().string();
@@ -52,6 +56,7 @@ namespace CalyxEngine {
 		EffectAssetData data{};
 		data.name = config.name.empty() ? "Effect" : config.name;
 
+		// Scene Object形式からAsset形式へEmitterごとに値Copyし、Runtime Objectへの参照を持ち込まない。
 		for(const auto& node : config.emitters) {
 			EffectEmitterAssetData emitter{};
 			emitter.name		   = node.name;
@@ -69,6 +74,7 @@ namespace CalyxEngine {
 		EffectObjectConfig config{};
 		config.name = data_.name;
 
+		// AssetデータをScene生成用Configへ変換し、各Emitterを独立Nodeとして復元する。
 		for(const auto& emitterData : data_.emitters) {
 			EffectEmitterNodeConfig node{};
 			node.name		  = emitterData.name;

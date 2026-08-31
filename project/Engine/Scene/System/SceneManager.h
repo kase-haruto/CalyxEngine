@@ -29,6 +29,9 @@ namespace CalyxEngine {
 	 * - ランタイム用シーンとエディタプレビュー用コンテキストを管理する
 	 * - シーン遷移要求を受け取り、適切なタイミングでシーンを切り替える
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief SceneManagerの機能を提供するクラスです。
+	 */
 	class CALYX_API SceneManager {
 	public:
 		/**
@@ -277,6 +280,9 @@ namespace CalyxEngine {
 		 * - 現在実行しているシーンとSceneContextをまとめて保持する構造体
 		 * - シーンに必要なアセットの読み込み状態を管理する
 		 *---------------------------------------------------------------------------------------*/
+		/**
+		 * @brief RuntimeSceneに関するデータを保持する構造体です。
+		 */
 		struct RuntimeScene {
 			/// 現在実行しているシーン
 			std::unique_ptr<BaseScene> scene;
@@ -293,6 +299,9 @@ namespace CalyxEngine {
 		 * - ISceneTransitionRequestorを実装し、外部からのシーン遷移要求を受け付けるクラス
 		 * - 受け取った遷移要求をSceneManagerの内部処理へ転送する
 		 *---------------------------------------------------------------------------------------*/
+		/**
+		 * @brief SceneTransitionServiceの機能を提供するクラスです。
+		 */
 		class SceneTransitionService final : public ISceneTransitionRequestor {
 		public:
 			/**

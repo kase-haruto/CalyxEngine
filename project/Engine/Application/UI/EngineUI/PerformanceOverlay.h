@@ -12,6 +12,9 @@ namespace CalyxEngine {
 	 * - パフォーマンスオーバーレイクラス
 	 * - FPS・描画時間などのパフォーマンス情報をビューポート上に表示
 	 *---------------------------------------------------------------------------------------*/
+	/**
+	 * @brief PerformanceOverlayの機能を提供するクラスです。
+	 */
 	class PerformanceOverlay
 		: public BaseOnViewportTool {
 	public:

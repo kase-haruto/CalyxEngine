@@ -7,6 +7,9 @@
 #include <d3dx12.h>
 
 template <typename T>
+/**
+ * @brief DxStructuredBufferの機能を提供するクラスです。
+ */
 class DxStructuredBuffer : public DxBuffer<T> {
 public:
 	//===================================================================*/

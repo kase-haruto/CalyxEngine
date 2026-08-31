@@ -9,6 +9,9 @@
 namespace CalyxEngine {
 	class SpriteObject2d;
 
+	/**
+	 * @brief SpriteAnimator2dの機能を提供するクラスです。
+	 */
 	class SpriteAnimator2d {
 	public:
 		void Bind(SpriteObject2d* target);

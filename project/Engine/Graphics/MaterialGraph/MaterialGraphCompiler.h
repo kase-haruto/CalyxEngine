@@ -8,6 +8,9 @@
 #include <string>
 
 namespace CalyxEngine {
+	/**
+	 * @brief MaterialGraphCompilerの機能を提供するクラスです。
+	 */
 	class MaterialGraphCompiler {
 	public:
 		static void Compile(MaterialAsset& material) {

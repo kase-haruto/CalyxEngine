@@ -9,6 +9,9 @@
 #include <string>
 
 CALYX_PLACEABLE_OBJECT(Category = GameObject, DisplayName = "Spline Wall Deform", Icon = "UI/Tool/cylinder.dds")
+/**
+ * @brief SplineDeformObjectの機能を提供するクラスです。
+ */
 class SplineDeformObject final : public BaseGameObject {
 public:
 	SplineDeformObject();

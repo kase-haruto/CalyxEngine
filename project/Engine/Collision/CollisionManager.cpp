@@ -10,13 +10,14 @@
 #include <externals/imgui/imgui.h>
 
 
+/**
+ * \brief コリジョン管理の共有インスタンスを取得する
+ * \return コリジョン管理の共有インスタンスへのポインタ
+ * \note 初回呼出し時の生成はC++ランタイムによりスレッドセーフに行われる
+ */
 CollisionManager* CollisionManager::GetInstance() {
-	// アプリ終了時は SceneObject / Collider / EventBus などの破棄順が固定できない。
-	// static ローカル変数として持つと、CollisionManager 破棄後に Collider::~Collider から
-	// Unregister が呼ばれるケースで破棄済み list に触れてクラッシュする。
-	// そのためプロセス終了まで生存させ、終了時の登録解除を常に安全に受けられるようにする。
-	static CollisionManager* instance = new CollisionManager();
-	return instance;
+	static CollisionManager instance;
+	return &instance;
 }
 
 // ヘルパー関数: 衝突ペアがログを記録すべきかを判定
@@ -25,9 +26,11 @@ bool CollisionManager::ShouldLogCollision(const Collider* a, const Collider* b) 
 }
 
 void CollisionManager::UpdateCollisionAllCollider() {
-	// 前フレームの衝突を保存
+	// Enter/Stay/Exitを比較できるよう、現在の接触集合を前フレーム集合へ移す。
 	previousCollisions_ = std::move(currentCollisions_);
 	currentCollisions_.clear();
+
+	// 判定中の登録解除はIteratorを壊すため、以降の要求を遅延キューへ送る。
 	isUpdatingCollisions_ = true;
 
 	for(auto itA = colliders_.begin(); itA != colliders_.end(); ++itA) {
@@ -40,18 +43,18 @@ void CollisionManager::UpdateCollisionAllCollider() {
 			// CheckCollisionPair内にも防御を置くが、総当たりループでも早期除外して呼び出しを減らす。
 			if(!b->IsCollisionEnubled()) continue;
 
-			//------------------------------------------------------------
-			// 実際の衝突判定
-			//------------------------------------------------------------
+			// Layerと形状の組み合わせを確認し、実際に接触しているペアだけを記録する。
 			if(CheckCollisionPair(a, b)) {
 				CollisionPair pair{a, b};
 				currentCollisions_.insert(pair);
 
 				if(previousCollisions_.find(pair) == previousCollisions_.end()) {
+					// 前フレームになかったペアへEnterを双方通知する。
 					a->NotifyCollisionEnter(b);
 					b->NotifyCollisionEnter(a);
 					collisionLogs_.emplace_back("Enter: " + a->GetName() + " VS " + b->GetName());
 				} else {
+					// 継続接触中のペアへStayを双方通知する。
 					a->NotifyCollisionStay(b);
 					b->NotifyCollisionStay(a);
 				}
@@ -59,27 +62,29 @@ void CollisionManager::UpdateCollisionAllCollider() {
 		}
 	}
 
-	//------------------------------------------------------------
-	// Exit判定
-	//------------------------------------------------------------
+	// 前フレームに存在し、現在フレームから消えたペアへExitを通知する。
 	for(const auto& pair : previousCollisions_) {
 		if(currentCollisions_.find(pair) == currentCollisions_.end()) {
-			// 片方向でも対象ならExitを通知
+			// 双方が接触終了時の状態を解除できるよう、両Colliderへ通知する。
 			pair.a->NotifyCollisionExit(pair.b);
 			pair.b->NotifyCollisionExit(pair.a);
 			collisionLogs_.emplace_back("Exit: " + pair.a->GetName() + " VS " + pair.b->GetName());
 		}
 	}
 
+	// 総当たり走査完了後に遅延要求を反映し、次フレームの一覧を確定する。
 	isUpdatingCollisions_ = false;
 	FlushPendingColliderChanges();
 }
 
 void CollisionManager::Register(Collider* collider) {
+	// nullptrは判定一覧へ登録しない。
 	if(!collider) return;
 
 	if(isUpdatingCollisions_) {
+		// 同一フレームの解除要求を相殺し、最終要求を登録として扱う。
 		std::erase(pendingUnregisters_, collider);
+		// 判定中はlistを変更せず、走査終了後に一度だけ追加する。
 		if(std::find(pendingRegisters_.begin(), pendingRegisters_.end(), collider) == pendingRegisters_.end()) {
 			pendingRegisters_.push_back(collider);
 		}
@@ -90,9 +95,11 @@ void CollisionManager::Register(Collider* collider) {
 }
 
 void CollisionManager::Unregister(Collider* collider) {
+	// nullptrの解除要求は何も変更しない。
 	if(!collider) return;
 
 	if(isUpdatingCollisions_) {
+		// 未反映の登録要求を消してから、既存一覧からの解除を予約する。
 		std::erase(pendingRegisters_, collider);
 		if(std::find(pendingUnregisters_.begin(), pendingUnregisters_.end(), collider) == pendingUnregisters_.end()) {
 			pendingUnregisters_.push_back(collider);
@@ -106,6 +113,7 @@ void CollisionManager::Unregister(Collider* collider) {
 void CollisionManager::RegisterImmediate(Collider* collider) {
 	if(!collider) return;
 
+	// 同じColliderが複数回判定されないよう、未登録の場合だけlistへ追加する。
 	if(std::find(colliders_.begin(), colliders_.end(), collider) == colliders_.end()) {
 		colliders_.push_back(collider);
 	}
@@ -118,23 +126,25 @@ void CollisionManager::UnregisterImmediate(Collider* collider) {
 	// Collider 本体はデストラクタ中の可能性があるため、ここでは絶対に dereference しない。
 	colliders_.remove(collider);
 
-	// 削除されるコライダーに関連する衝突ペアを現在のリストから削除
+	// 削除されるColliderを次のExit判定で参照しないよう、現在の接触集合から外す。
 	std::erase_if(currentCollisions_, [collider](const CollisionPair& pair) {
 		return pair.a == collider || pair.b == collider;
 	});
 
-	// 前フレームの衝突からも削除
+	// 破棄済みポインタへExit通知しないよう、前フレームの接触集合からも外す。
 	std::erase_if(previousCollisions_, [collider](const CollisionPair& pair) {
 		return pair.a == collider || pair.b == collider;
 	});
 }
 
 void CollisionManager::FlushPendingColliderChanges() {
+	// 解除を先に反映し、接触履歴から破棄予定ポインタを除去する。
 	for(Collider* collider : pendingUnregisters_) {
 		UnregisterImmediate(collider);
 	}
 	pendingUnregisters_.clear();
 
+	// 接触履歴の掃除後に、新しいColliderを次フレームの判定一覧へ追加する。
 	for(Collider* collider : pendingRegisters_) {
 		RegisterImmediate(collider);
 	}
@@ -156,6 +166,7 @@ void CollisionManager::DebugLog() {
 }
 
 void CollisionManager::ClearColliders() {
+	// Scene破棄時はCollider本体を所有せず、全ての非所有参照と接触履歴だけを破棄する。
 	colliders_.clear();
 	pendingRegisters_.clear();
 	pendingUnregisters_.clear();

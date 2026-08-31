@@ -8,6 +8,14 @@
 #include <string_view>
 #include <vector>
 
+/*-----------------------------------------------------------------------------------------
+ * CollisionLayer
+ * - Scene内で利用する一つのCollision Layer定義を保持するデータ構造
+ * - シリアライズ用の安定IDとEditor表示名を管理する
+ *---------------------------------------------------------------------------------------*/
+/**
+ * @brief CollisionLayerに関するデータを保持する構造体です。
+ */
 struct CollisionLayer {
 	// シーンやPrefabに保存される安定した参照値。
 	CollisionLayerId id = kDefaultCollisionLayerId;
@@ -20,6 +28,9 @@ struct CollisionLayer {
  * - 1シーンで利用可能なLayerのID、表示名、CollisionMatrixを一元管理する。
  * - SceneContextが所有し、Colliderは名前を保存せず、この設定が名前変更や削除を吸収する。
  *---------------------------------------------------------------------------------------*/
+/**
+ * @brief CollisionLayerSettingsの機能を提供するクラスです。
+ */
 class CollisionLayerSettings {
 public:
 	CollisionLayerSettings();

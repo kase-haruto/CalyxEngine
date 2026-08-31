@@ -13,6 +13,7 @@ namespace CalyxEngine {
 
 	void LifetimeModule::ShowGuiContent() {
 		if(config_.target == LifetimeModuleTarget::Color) {
+			// Gradient編集には始点・終点が必要なため、不足時は白色Keyを補完する。
 			if(config_.gradient.keys.size() < 2) {
 				config_.gradient.keys = {{0.0f, {1, 1, 1, 1}}, {1.0f, {1, 1, 1, 1}}};
 			}
@@ -24,6 +25,7 @@ namespace CalyxEngine {
 		if(config_.target == LifetimeModuleTarget::Size ||
 		   config_.target == LifetimeModuleTarget::Rotation ||
 		   config_.target == LifetimeModuleTarget::Velocity) {
+			// Vector対象はXYZそれぞれ独立したCurveとして編集し、軸ごとの変化を許可する。
 			FloatCurve* curves[] = {&config_.vectorCurve.x, &config_.vectorCurve.y, &config_.vectorCurve.z};
 			const char* labels[] = {"X", "Y", "Z"};
 			for(int i = 0; i < 3; ++i) {
@@ -39,6 +41,7 @@ namespace CalyxEngine {
 			return;
 		}
 
+		// Scalar対象は単一Curveを編集し、保存可能なMode範囲へClampする。
 		int mode = static_cast<int>(config_.floatCurve.mode);
 		ImGui::Combo("Mode", &mode, "Constant\0Linear\0Curve\0Random Constants\0Random Curves\0");
 		config_.floatCurve.mode = static_cast<CurveValueMode>(std::clamp(mode, 0, 4));
@@ -53,7 +56,9 @@ namespace CalyxEngine {
 	}
 
 	void LifetimeModule::OnUpdate(FxUnit& particle, float) {
+		// ParticleとTargetから決定的な乱数を生成し、フレームごとの値揺れを防ぐ。
 		const float random01 = ParticleRandom01(particle.randomSeed, HashParticleSeed(static_cast<uint32_t>(config_.target)));
+		// 正規化寿命lifeTを各Curveへ渡し、対象Propertyだけを更新する。
 		switch(config_.target) {
 		case LifetimeModuleTarget::Color: particle.color = config_.gradient.Evaluate(particle.lifeT); break;
 		case LifetimeModuleTarget::Alpha: particle.color.w = config_.floatCurve.Evaluate(particle.lifeT, random01); break;

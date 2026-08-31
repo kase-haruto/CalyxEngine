@@ -9,6 +9,7 @@ namespace CalyxEngine {
 
 	namespace {
 		int TypePriority(ObjectType type) {
+			// Hierarchyの表示順をObject種別で固定し、登録順によるUIの揺れを防ぐ。
 			switch(type) {
 			case ObjectType::Camera:
 				return 0;
@@ -35,6 +36,7 @@ namespace CalyxEngine {
 	} // namespace
 
 	void HierarchyTreeCache::Clear() {
+		// Scene切替時はObject raw pointerをKeyに持つCacheを即座に破棄する。
 		sortedChildren_.clear();
 		dirty_ = true;
 	}
@@ -45,6 +47,7 @@ namespace CalyxEngine {
 			return;
 		}
 
+		// Library本体またはRevisionが変化した場合だけ再構築し、通常描画のSortを省略する。
 		sortedChildren_.clear();
 		cachedLibrary_ = &library;
 		cachedRevision_ = revision;
@@ -71,6 +74,7 @@ namespace CalyxEngine {
 		const auto& objects = library.GetObjects();
 		roots.reserve(objects.size());
 
+		// Transientを除外し、親が現在LibraryにいないObjectも表示可能なRootとして扱う。
 		for(const auto& [id, object] : objects) {
 			(void)id;
 			if(!object || object->IsTransient()) continue;
@@ -80,6 +84,7 @@ namespace CalyxEngine {
 			}
 		}
 
+		// 種別と名前で決定的に並べ、同じSceneを常に同じHierarchy順で表示する。
 		std::sort(roots.begin(), roots.end(), LessByTypeThenName);
 		auto [insertedIt, inserted] = sortedChildren_.emplace(nullptr, std::move(roots));
 		(void)inserted;
@@ -93,6 +98,7 @@ namespace CalyxEngine {
 			return it->second;
 		}
 
+		// 子一覧も初回要求時だけ構築し、展開されていないNodeの処理を避ける。
 		std::vector<std::shared_ptr<SceneObject>> children;
 		for(auto& child : object.GetChildren()) {
 			if(child && !child->IsTransient()) {

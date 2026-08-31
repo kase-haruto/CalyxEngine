@@ -12,6 +12,9 @@ namespace CalyxEngine {
 	/* ========================================================================
 	/*		エフェクトモジュールコンテナ
 	/* ===================================================================== */
+	/**
+	 * @brief FxModuleContainerの機能を提供するクラスです。
+	 */
 	class FxModuleContainer{
 	public:
 		FxModuleContainer() = default;
