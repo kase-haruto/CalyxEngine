@@ -55,8 +55,12 @@ namespace CalyxEngine {
 			if(!transient) {
 				obj->SetInstanceLifetime(ObjectInstanceLifetime::SceneOwned);
 			}
-			ctx->AddObject(obj);
-			obj->Initialize();
+			if(transient) {
+				ctx->AddPreviewObject(obj);
+			} else {
+				ctx->AddObject(obj);
+				obj->Initialize();
+			}
 			obj->GetWorldTransform().translation = pos;
 			return obj;
 		}
@@ -120,7 +124,7 @@ namespace CalyxEngine {
 											  SceneContext::Current(), factory, "Create Shape"));
 								  },
 								  [modelName, objName]() {
-									  auto obj = SceneAPI::Instantiate<StaticModelObject>(modelName, objName);
+									  auto obj = SceneContext::Current()->InstantiatePreview<StaticModelObject>(modelName, objName);
 									  obj->Initialize();
 									  obj->GetCollider()->SetCollisionEnabled(false);
 									  obj->SetTransient(true);
@@ -144,7 +148,7 @@ namespace CalyxEngine {
 										  SceneContext::Current(), factory, "Create Spline Wall Deform"));
 							  },
 							  []() {
-								  auto obj = SceneAPI::Instantiate<SplineDeformObject>();
+								  auto obj = SceneContext::Current()->InstantiatePreview<SplineDeformObject>();
 								  obj->Initialize();
 								  obj->SetTransient(true);
 								  return obj;
@@ -173,7 +177,7 @@ namespace CalyxEngine {
 											  SceneContext::Current(), factory, "Create Directional Light"));
 								  },
 								  []() {
-									  auto obj = SceneAPI::Instantiate<DirectionalLight>("DirectionalLight");
+									  auto obj = SceneContext::Current()->InstantiatePreview<DirectionalLight>("DirectionalLight");
 									  obj->Initialize();
 									  obj->SetTransient(true);
 									  return obj;
@@ -198,7 +202,7 @@ namespace CalyxEngine {
 											  SceneContext::Current(), factory, "Create Point Light"));
 								  },
 								  []() {
-									  auto obj = SceneAPI::Instantiate<PointLight>("PointLight");
+									  auto obj = SceneContext::Current()->InstantiatePreview<PointLight>("PointLight");
 									  obj->Initialize();
 									  obj->SetTransient(true);
 									  return obj;
@@ -222,7 +226,7 @@ namespace CalyxEngine {
 											  SceneContext::Current(), factory, "Create Point Light Actor"));
 								  },
 								  []() {
-									  auto obj = SceneAPI::Instantiate<PointLightActor>();
+									  auto obj = SceneContext::Current()->InstantiatePreview<PointLightActor>();
 									  obj->Initialize();
 									  obj->SetTransient(true);
 									  return obj;
@@ -250,7 +254,7 @@ namespace CalyxEngine {
 												 SceneContext::Current(), factory, "Create ParticleSystem"));
 									 },
 									 []() {
-										 auto obj = SceneAPI::Instantiate<CalyxEngine::ParticleSystemObject>("ParticleSystem");
+									 auto obj = SceneContext::Current()->InstantiatePreview<CalyxEngine::ParticleSystemObject>("ParticleSystem");
 										 obj->Initialize();
 										 obj->SetTransient(true);
 										 return obj;
@@ -277,7 +281,7 @@ namespace CalyxEngine {
 												 SceneContext::Current(), factory, "Create EffectObject"));
 									 },
 									 []() {
-										 auto obj = SceneAPI::Instantiate<CalyxEngine::FxObject>("EffectObject");
+									 auto obj = SceneContext::Current()->InstantiatePreview<CalyxEngine::FxObject>("EffectObject");
 										 obj->Initialize();
 										 obj->SetTransient(true);
 										 return obj;
@@ -450,7 +454,6 @@ namespace CalyxEngine {
 					ImGui::BeginGroup();
 
 					// アイコン（画像がなければボタン）
-					bool  clicked  = false;
 					float iconSize = 64.0f;
 
 					// 中央寄せのためのカーソル操作
@@ -459,11 +462,11 @@ namespace CalyxEngine {
 					if(offX > 0.0f) ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offX);
 
 					if(item.texture.ptr) {
-						clicked = ImGui::ImageButton(
+						ImGui::ImageButton(
 							(ImTextureID)item.texture.ptr,
 							ImVec2(iconSize, iconSize));
 					} else {
-						clicked = ImGui::Button(item.name.c_str(), ImVec2(iconSize, iconSize));
+						ImGui::Button(item.name.c_str(), ImVec2(iconSize, iconSize));
 					}
 
 					// テキストも中央寄せ
@@ -489,10 +492,6 @@ namespace CalyxEngine {
 						ImGui::Text("%s", item.name.c_str());
 
 						ImGui::EndDragDropSource();
-					}
-
-					if(clicked) {
-						item.createFunc(CalyxEngine::Vector3::Zero());
 					}
 
 					ImGui::PopID();

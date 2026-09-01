@@ -305,7 +305,7 @@ void Viewport::Update() {}
 void Viewport::ClearGhosts() {
     if(auto* ctx = SceneContext::Current()) {
         if(ghost_) {
-            ctx->RemoveObject(ghost_);
+            ctx->RemovePreviewObject(ghost_);
         }
         for(auto& prefabGhost : prefabGhosts_) {
             if(prefabGhost && ctx->GetObjectLibrary() && ctx->GetObjectLibrary()->Contains(prefabGhost)) {
@@ -675,6 +675,11 @@ void Viewport::Render(const ImTextureID& tex) {
 
                     if(ghost_) {
                         ghost_->GetWorldTransform().translation = spawnPos;
+                        if(auto go = std::dynamic_pointer_cast<BaseGameObject>(ghost_)) {
+                            go->AlwaysUpdate(0.0f);
+                        } else {
+                            ghost_->GetWorldTransform().Update();
+                        }
                     }
                 }
             } else if(draggingModelAsset) {

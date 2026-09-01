@@ -59,6 +59,8 @@ public:
 	 */
 	template <class TObject, class... Args>
 	std::shared_ptr<TObject> Instantiate(Args&&... args);
+	template <class TObject, class... Args>
+	std::shared_ptr<TObject> InstantiatePreview(Args&&... args);
 
 	/**
 	 * 最初に見つかった型Tのオブジェクトを返す
@@ -126,6 +128,9 @@ public:
 	std::shared_ptr<SceneObject> FindSharedObject(SceneObject* raw);
 	void						 AddObject(const std::shared_ptr<SceneObject>& obj);
 	void						 RemoveObject(const std::shared_ptr<SceneObject>& obj);
+	void AddPreviewObject(const std::shared_ptr<SceneObject>& obj);
+	void RemovePreviewObject(const std::shared_ptr<SceneObject>& obj);
+	const std::vector<std::shared_ptr<SceneObject>>& GetPreviewObjects() const { return previewObjects_; }
 
 	/* ---------- Current ------------- */
 	static SceneContext* Current() { return current_; }
@@ -133,6 +138,7 @@ public:
 
 private:
 	std::unique_ptr<SceneObjectLibrary>	   objectLibrary_;
+	std::vector<std::shared_ptr<SceneObject>> previewObjects_;
 	std::unique_ptr<LightLibrary>		   lightLibrary_;
 	std::unique_ptr<CalyxEngine::FxSystem> fxSystem_;
 	std::unique_ptr<CalyxEngine::EffectPlayer> effectPlayer_;
@@ -168,6 +174,17 @@ std::shared_ptr<TObject> SceneContext::Instantiate(Args&&... args) {
 
 	auto obj = std::make_shared<TObject>(std::forward<Args>(args)...);
 	objectLibrary_->AddObject(obj);
+	return obj;
+}
+
+template <class TObject, class... Args>
+std::shared_ptr<TObject> SceneContext::InstantiatePreview(Args&&... args) {
+	static_assert(std::is_base_of_v<SceneObject, TObject>,
+				  "TObject must derive from SceneObject");
+
+	auto obj = std::make_shared<TObject>(std::forward<Args>(args)...);
+	obj->SetTransient(true);
+	previewObjects_.push_back(obj);
 	return obj;
 }
 

@@ -248,3 +248,15 @@ void SceneContext::RemoveObject(const std::shared_ptr<SceneObject>& obj) {
 		if(cb) cb(obj.get());
 	}
 }
+
+void SceneContext::AddPreviewObject(const std::shared_ptr<SceneObject>& obj) {
+	if(!obj) return;
+	obj->SetTransient(true);
+	if(std::find(previewObjects_.begin(), previewObjects_.end(), obj) == previewObjects_.end()) {
+		previewObjects_.push_back(obj);
+	}
+}
+
+void SceneContext::RemovePreviewObject(const std::shared_ptr<SceneObject>& obj) {
+	std::erase(previewObjects_, obj);
+}

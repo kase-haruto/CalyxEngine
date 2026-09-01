@@ -34,7 +34,9 @@ void PointLightActor::Initialize() {
 	if(pointLight_) {
 		pointLight_->Initialize();
 	}
-	RegisterPointLight();
+	if(!IsTransient()) {
+		RegisterPointLight();
+	}
 	SyncLightTransform();
 }
 

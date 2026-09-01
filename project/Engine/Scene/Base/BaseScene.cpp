@@ -48,7 +48,7 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 	modelRenderer_->BeginFrame();
 
 	// モデル登録
-	for(auto* e : sceneContext_->GetObjectLibrary()->GetAllObjectsRaw()) {
+	auto registerObject = [&](SceneObject* e) {
 		if(auto* go = dynamic_cast<BaseGameObject*>(e)) {
 			switch(go->GetModelType()) {
 			case ObjectModelType::ModelType_Static:
@@ -74,6 +74,13 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 			}
 		}
 #endif
+	};
+
+	for(auto* e : sceneContext_->GetObjectLibrary()->GetAllObjectsRaw()) {
+		registerObject(e);
+	}
+	for(const auto& preview : sceneContext_->GetPreviewObjects()) {
+		registerObject(preview.get());
 	}
 
 	Camera3d* renderCam = dynamic_cast<Camera3d*>(CameraManager::GetActive());
