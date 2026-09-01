@@ -37,11 +37,11 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 	if(!sceneContext_) return;
 
 	// Skybox
-	if(!skyBox_) {
-		// SceneContext 経由で生成（Current に依存しない）
-		skyBox_ = sceneContext_->Instantiate<SkyBox>("sky.dds", "skyBox");
-		skyBox_->Initialize();
-	}
+	//if(!skyBox_) {
+	//	// SceneContext 経由で生成（Current に依存しない）
+	//	skyBox_ = sceneContext_->Instantiate<SkyBox>("sky.dds", "skyBox");
+	//	skyBox_->Initialize();
+	//}
 
 	//skyBox_->Draw(cmd);
 
