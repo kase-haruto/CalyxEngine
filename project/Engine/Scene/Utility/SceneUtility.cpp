@@ -1,5 +1,7 @@
 #include "SceneUtility.h"
 
+#include <Engine/Assets/Database/AssetDatabase.h>
+
 ////////////////////////////////////////////////////////////////////////
 //		シーン変更をRequest
 ////////////////////////////////////////////////////////////////////////
@@ -53,11 +55,19 @@ bool SceneAPI::RemoveObject(SceneObject* object) {
 std::vector<std::shared_ptr<SceneObject>> SceneAPI::InstantiatePrefab(const std::string& path, const CalyxEngine::Vector3& spawnOffset, const Guid& prefabAssetGuid) {
 	auto ctx = SceneContext::Current();
 	CX_CHECK(ctx && "No active SceneContext!", "Assertion failed");
-	std::string fullPath = Calyx::ResolveAssetPath(std::filesystem::path("Prefabs") / path).generic_string();
+	const std::filesystem::path fullPath = Calyx::ResolveAssetPath(std::filesystem::path("Prefabs") / path);
+
+	Guid resolvedPrefabAssetGuid = prefabAssetGuid;
+	if(!resolvedPrefabAssetGuid.isValid()) {
+		if(const AssetRecord* record = AssetDatabase::GetInstance()->FindByPath(fullPath);
+		   record && record->type == AssetType::Prefab) {
+			resolvedPrefabAssetGuid = record->guid;
+		}
+	}
 
 	auto objects = PrefabSerializer::Load(
-		fullPath,
-		PrefabSerializer::LoadOptions{false, prefabAssetGuid});
+		fullPath.generic_string(),
+		PrefabSerializer::LoadOptions{false, resolvedPrefabAssetGuid});
 
 	std::unordered_set<SceneObject*> loaded;
 	loaded.reserve(objects.size());
@@ -68,8 +78,8 @@ std::vector<std::shared_ptr<SceneObject>> SceneAPI::InstantiatePrefab(const std:
 	for(const auto& sp : objects) {
 		if(!sp) continue;
 
-		if(prefabAssetGuid.isValid() && !sp->GetPrefabAssetGuid().isValid()) {
-			sp->SetPrefabLink(prefabAssetGuid, sp->GetGuid());
+		if(resolvedPrefabAssetGuid.isValid() && !sp->GetPrefabAssetGuid().isValid()) {
+			sp->SetPrefabLink(resolvedPrefabAssetGuid, sp->GetGuid());
 		}
 
 		auto parent = sp->GetParent();
