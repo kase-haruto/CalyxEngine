@@ -48,20 +48,15 @@ void Actor::ExtractConfig() {
 
 	// Base側の抽出後にも念のため保存用ConfigをActor向けに固定する。
 	// 将来Base側の抽出順が変わっても、Actorの保存値がStaticへ戻らないようにする。
-	config_.GetConfig().physicsBodyConfig.enabled = true;
 	config_.GetConfig().physicsBodyConfig.bodyType = static_cast<int>(PhysicsBodyType::Kinematic);
-	config_.GetConfig().physicsBodyConfig.pushbackRatio = 1.0f;
 }
 
 void Actor::EnsureActorPhysicsBody() {
 	// Actorは床探索、ジャンプ、押し戻しによってTransformを変更する可動オブジェクトとして扱う。
-	physicsBody_.SetEnabled(true);
 	physicsBody_.SetBodyType(PhysicsBodyType::Kinematic);
 
 	// Config側も同時に更新して、Inspector表示とシーン保存値を実体のPhysicsBodyに揃える。
-	config_.GetConfig().physicsBodyConfig.enabled = true;
 	config_.GetConfig().physicsBodyConfig.bodyType = static_cast<int>(PhysicsBodyType::Kinematic);
-	config_.GetConfig().physicsBodyConfig.pushbackRatio = 1.0f;
 }
 
 void Actor::DerivativeGui() {

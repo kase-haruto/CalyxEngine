@@ -27,6 +27,26 @@ void SceneAPI::RequestSceneChange(const Guid& sceneAssetGuid, std::unique_ptr<Ca
 	ctx->GetSceneTransitionRequestor()->RequestSceneChange(sceneAssetGuid, std::move(effect));
 }
 
+bool SceneAPI::RemoveObject(const std::shared_ptr<SceneObject>& object) {
+	auto* ctx = SceneContext::Current();
+	if(!ctx || !object || !ctx->GetObjectLibrary() ||
+	   !ctx->GetObjectLibrary()->Contains(object)) {
+		return false;
+	}
+
+	ctx->RemoveObject(object);
+	return true;
+}
+
+bool SceneAPI::RemoveObject(SceneObject* object) {
+	auto* ctx = SceneContext::Current();
+	if(!ctx || !object) {
+		return false;
+	}
+
+	return RemoveObject(ctx->FindSharedObject(object));
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //  prefabをインスタンス化
 /////////////////////////////////////////////////////////////////////////////////////////

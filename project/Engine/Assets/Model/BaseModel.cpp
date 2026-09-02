@@ -32,6 +32,7 @@
 #include "Engine/Graphics/Context/GraphicsGroup.h"
 
 #include <array>
+#include <cctype>
 
 const std::string BaseModel::directoryPath_ = "Resource/models";
 
@@ -494,7 +495,21 @@ ModelData* BaseModel::GetModelData() const { return modelData_; }
 // ======================================= renderer 専用 ==========================================
 
 void BaseModel::SetTex(const std::string& name) {
-	textureName_ = "textures/" + name;
+	std::filesystem::path texturePath = std::filesystem::path(name).lexically_normal();
+	std::string normalized = texturePath.generic_string();
+
+	// Both legacy names ("foo.png") and Assets-relative paths
+	// ("Textures/foo.png") are accepted. Do not prepend the texture directory
+	// when the caller already supplied it.
+	const std::string texturePrefix = "textures/";
+	std::string lower = normalized;
+	std::transform(lower.begin(), lower.end(), lower.begin(),
+		[](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+	if(!lower.starts_with(texturePrefix)) {
+		normalized = texturePrefix + normalized;
+	}
+
+	textureName_ = normalized;
 	handle_ = CalyxEngine::AssetManager::GetInstance()->GetTextureManager()->LoadTexture(textureName_);
 }
 

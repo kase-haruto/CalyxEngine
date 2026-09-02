@@ -39,6 +39,10 @@ namespace SceneAPI{
 		return ctx->Instantiate<T>(std::forward<Args>(args)...);
 	}
 
+	/// 現在のシーンが所有するオブジェクトを削除する。
+	CALYX_API bool RemoveObject(const std::shared_ptr<SceneObject>& object);
+	CALYX_API bool RemoveObject(SceneObject* object);
+
 	CALYX_API std::vector<std::shared_ptr<SceneObject>> InstantiatePrefab(
 		const std::string& path,
 		const CalyxEngine::Vector3& spawnOffset = CalyxEngine::Vector3::Zero(),
