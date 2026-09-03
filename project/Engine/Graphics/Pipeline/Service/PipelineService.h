@@ -100,6 +100,7 @@ public:
 		Microsoft::WRL::ComPtr<IDxcBlob> pixelShader,
 		std::size_t shaderHash);
 	PipelineSet		   GetPipelineSet(PipelineTag::PostProcess tag) const;
+	PipelineSet		   GetPipelineSet(PipelineTag::Background tag) const;
 	const PipelineSet& GetComputePipelineSet(PipelineTag::Compute tag) const {
 		return csCache_[static_cast<size_t>(tag)];
 	}
@@ -151,5 +152,6 @@ private:
 	std::unordered_map<PipelineKey, PipelineSet, PipelineKeyHasher>					  objCache_;
 	std::unordered_map<GeneratedMaterialPipelineKey, std::unique_ptr<PipelineStateObject>, GeneratedMaterialPipelineKeyHasher> generatedMaterialPipelines_;
 	std::array<PipelineSet, static_cast<size_t>(PipelineTag::PostProcess::Count)>	  ppCache_{};
+	std::array<PipelineSet, static_cast<size_t>(PipelineTag::Background::Count)> backgroundCache_{};
 	std::array<PipelineSet, static_cast<size_t>(PipelineTag::Compute::kComputeCount)> csCache_{};
 };

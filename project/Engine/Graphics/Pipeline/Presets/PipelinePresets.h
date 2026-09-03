@@ -4,6 +4,10 @@
 #include <Engine/Graphics/Pipeline/RootSig/RootSignatureBuilder.h>
 
 namespace PipelinePresets {
+	GraphicsPipelineDesc MakeNebulaBackground();
+	GraphicsPipelineDesc MakeStarField();
+	GraphicsPipelineDesc MakeForegroundGlow();
+	GraphicsPipelineDesc MakeSpaceDust();
 
 	// 3dObjects
 	GraphicsPipelineDesc MakeObject3D(BlendMode mode);

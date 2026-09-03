@@ -214,6 +214,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+	<ClCompile Include="Engine\Renderer\Background\SpaceBackgroundSystem.cpp" />
+	<ClCompile Include="Engine\Application\Effects\Gameplay\ThrusterEffect.cpp" />
     <ClCompile Include="Engine\Scene\Fade\BaseSceneTransitionEffect.cpp" />
     <ClCompile Include="Engine\Application\Runtime\EngineRuntime.cpp" />
     <ClCompile Include="Engine\Application\Runtime\Project.cpp" />
@@ -508,6 +510,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Scene\Fade\FadeBlackOutEffect.cpp" />
   </ItemGroup>
   <ItemGroup>
+	<ClInclude Include="Engine\Renderer\Background\SpaceBackgroundSystem.h" />
+	<ClInclude Include="Engine\Application\Effects\Gameplay\ShieldEffect.h" />
+	<ClInclude Include="Engine\Application\Effects\Gameplay\ThrusterEffect.h" />
     <ClInclude Include="Engine\Scene\Fade\BaseSceneTransitionEffect.h" />
     <ClInclude Include="Engine\Application\CalyxEngine\Application.h" />
     <ClInclude Include="Engine\Application\CalyxEngine\CalyxEngine.h" />

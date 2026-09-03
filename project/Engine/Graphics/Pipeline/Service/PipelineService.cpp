@@ -44,6 +44,10 @@ void PipelineService::RegisterAllPipelines() {
 		auto root = library_->GetRoot(desc);
 		ppCache_[static_cast<size_t>(tag)] = { pso, root };
 	};
+	auto regBackground = [&](PipelineTag::Background tag, auto makeFn) {
+		GraphicsPipelineDesc desc = makeFn();
+		backgroundCache_[static_cast<size_t>(tag)] = {library_->GetOrCreate(desc), library_->GetRoot(desc)};
+	};
 
 	auto regCS = [&](PipelineTag::Compute tag, auto makeFn) {
 		GraphicsPipelineDesc desc = makeFn(); 
@@ -123,6 +127,11 @@ void PipelineService::RegisterAllPipelines() {
 	regPP(PipelineTag::PostProcess::Bloom, PipelinePresets::MakeBloom);
 	regPP(PipelineTag::PostProcess::DepthVisualize, PipelinePresets::MakeDepthVisualize);
 	regPP(PipelineTag::PostProcess::CopyImage, PipelinePresets::MakeCopyImage);
+
+	regBackground(PipelineTag::Background::Nebula, PipelinePresets::MakeNebulaBackground);
+	regBackground(PipelineTag::Background::StarField, PipelinePresets::MakeStarField);
+	regBackground(PipelineTag::Background::ForegroundGlow, PipelinePresets::MakeForegroundGlow);
+	regBackground(PipelineTag::Background::SpaceDust, PipelinePresets::MakeSpaceDust);
 
 }
 
@@ -208,4 +217,8 @@ PipelineSet PipelineService::GetGeneratedMaterialSkinnedPipelineSet(
 /////////////////////////////////////////////////////////////////////////////////////////
 PipelineSet PipelineService::GetPipelineSet(PipelineTag::PostProcess tag) const{
 	return ppCache_[static_cast< size_t >(tag)];
+}
+
+PipelineSet PipelineService::GetPipelineSet(PipelineTag::Background tag) const {
+	return backgroundCache_[static_cast<size_t>(tag)];
 }

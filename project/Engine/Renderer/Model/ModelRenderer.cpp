@@ -366,14 +366,15 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 							IRenderTarget*					rt,
 							PipelineService*				psoService,
 							LightLibrary*					lightLibrary,
-							CalyxEngine::ShadowMapSystem* shadowMapSystem) {
+							CalyxEngine::ShadowMapSystem* shadowMapSystem,
+							ModelRenderPhase phase) {
 	(void)rt;
 
 	// ============================================================
 	// Phase 1: スキニング Compute Dispatch
 	// スキンメッシュの頂点変換をGPUのコンピュートシェーダーで実行する
 	// ============================================================
-	{
+	if(phase != ModelRenderPhase::Transparent) {
 		bool computeSet = false;
 		for(auto& [model, insts] : skinnedModels_) {
 			if(!model || !model->GetModelData() || insts.empty()) continue;
@@ -392,7 +393,7 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 	// Phase 2: Raytracing TLAS の構築
 	// DXR対応時のみ実行。影判定用のTop Level Acceleration Structureを再構築する
 	// ============================================================
-	if(raytracingSystem_) {
+	if(phase != ModelRenderPhase::Transparent && raytracingSystem_) {
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> cmd4;
 		Microsoft::WRL::ComPtr<ID3D12Device5>			   device5;
 
@@ -481,6 +482,9 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 		};
 
 		for(auto& [key, batch] : staticBatches_) {
+			const bool opaque = key.blend == BlendMode::NONE || key.blend == BlendMode::NORMAL;
+			if((phase == ModelRenderPhase::Opaque && !opaque) ||
+			   (phase == ModelRenderPhase::Transparent && opaque)) continue;
 			if(batch.empty()) continue;
 
 			// パイプラインキーが変わった場合のみパイプラインを切り替える（不要な切り替えを省く）
@@ -587,6 +591,9 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 		bool		usingGeneratedPipeline = false;
 
 		for(auto& [key, batch] : skinnedBatches_) {
+			const bool opaque = key.blend == BlendMode::NONE || key.blend == BlendMode::NORMAL;
+			if((phase == ModelRenderPhase::Opaque && !opaque) ||
+			   (phase == ModelRenderPhase::Transparent && opaque)) continue;
 			if(batch.empty()) continue;
 
 			if(!hasLast || !(key == lastKey)) {

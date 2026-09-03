@@ -34,6 +34,9 @@ struct Material {
     float rimIntensity;
     float rimPower;
     float2 rimPadding;
+    float4 shieldColor;
+    float4 shieldParams;
+    float4 shieldRipple;
 };
 
 struct DirectionalLight {
@@ -419,6 +422,23 @@ PixelShaderOutput main(Object3dVertexOutput input) {
     float rimFactor = pow(saturate(1.0f - dot(normal, toEye)), max(gMaterial.rimPower, 0.0001f));
     litColor += gMaterial.rimColor.rgb * rimFactor * max(gMaterial.rimIntensity, 0.0f);
 
+    float3 shieldEmission = 0.0f;
+    if(gMaterial.shieldParams.x > 0.5f) {
+        float shieldFresnel = pow(saturate(1.0f - dot(normal, toEye)), max(gMaterial.shieldParams.y, 0.01f));
+        float spatialNoise = sin(input.worldPosition.x * 1.37f * gMaterial.shieldParams.w
+                               + sin(input.worldPosition.y * 1.91f * gMaterial.shieldParams.w)
+                               + input.worldPosition.z * 1.13f * gMaterial.shieldParams.w);
+        spatialNoise = 0.78f + 0.22f * spatialNoise;
+        float rippleCoordinate = length(input.worldPosition - cameraPosition) * 0.32f
+                               - gMaterial.shieldRipple.z * gMaterial.shieldRipple.x
+                               + gMaterial.shieldRipple.w;
+        float rippleDistance = abs(frac(rippleCoordinate) - 0.5f) * 2.0f;
+        float ripple = 1.0f - smoothstep(gMaterial.shieldRipple.y, gMaterial.shieldRipple.y * 2.2f, rippleDistance);
+        shieldEmission = gMaterial.shieldColor.rgb * (shieldFresnel * spatialNoise + ripple * 0.32f)
+                       * max(gMaterial.shieldParams.z, 0.0f);
+        litColor += shieldEmission;
+    }
+
     // AOではない（定数アンビエント）
     float3 ambient = albedo * 0.07f;
     litColor += ambient;
@@ -458,7 +478,8 @@ PixelShaderOutput main(Object3dVertexOutput input) {
 
     if(alpha <= 0.01f) discard;
 
-    float3 emissiveOut = gMaterial.emissiveColor.rgb * max(gMaterial.emissiveIntensity, 0.0f);
+    float3 rimEmission = gMaterial.rimColor.rgb * rimFactor * max(gMaterial.rimIntensity, 0.0f);
+    float3 emissiveOut = gMaterial.emissiveColor.rgb * max(gMaterial.emissiveIntensity, 0.0f) + rimEmission + shieldEmission;
     output.color     = float4(finalColor, alpha);
     output.bloomMask = float4(emissiveOut, 1.0f);
     return output;
