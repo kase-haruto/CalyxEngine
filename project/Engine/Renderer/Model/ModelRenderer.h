@@ -38,6 +38,12 @@ namespace CalyxEngine {
 /**
  * @brief ModelRendererの機能を提供するクラスです。
  */
+enum class ModelRenderPhase {
+	All,
+	Opaque,
+	Transparent
+};
+
 class ModelRenderer {
 public:
 	/**
@@ -158,7 +164,8 @@ public:
 				 class IRenderTarget* rt,
 				 class PipelineService*			 psoService,
 				 class LightLibrary*			 lightLibrary,
-				 CalyxEngine::ShadowMapSystem* shadowMapSystem);
+				 CalyxEngine::ShadowMapSystem* shadowMapSystem,
+				 ModelRenderPhase phase = ModelRenderPhase::All);
 
 	// Picking / Outline / IDPass 用
 	/**

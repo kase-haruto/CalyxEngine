@@ -33,6 +33,7 @@
 #include <Engine/Editor/PickingPass.h>
 
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
+#include <Engine/Renderer/Background/SpaceBackgroundSystem.h>
 
 #include <algorithm>
 
@@ -159,6 +160,7 @@ namespace CalyxEngine {
 		clock->Update();
 
 		PostEffectManager::Get()->Update(clock->GetDeltaTime());
+		SpaceBackgroundSystem::Get()->Update(clock->GetDeltaTime());
 
 		// ImGui受付開始
 		imguiManager_->Begin();

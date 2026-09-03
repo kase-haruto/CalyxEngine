@@ -3,6 +3,41 @@
 #include <Engine/Graphics/Pipeline/PipelineDesc/Input/VertexLayout.h>
 #include <Engine/Application/Effects/Trail/TrailRuntime.h>
 
+namespace {
+	D3D12_DEPTH_STENCIL_DESC BackgroundDepth(bool enabled) {
+		D3D12_DEPTH_STENCIL_DESC depth{};
+		depth.DepthEnable = enabled;
+		depth.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+		depth.DepthFunc = enabled ? D3D12_COMPARISON_FUNC_EQUAL : D3D12_COMPARISON_FUNC_ALWAYS;
+		return depth;
+	}
+
+	GraphicsPipelineDesc MakeBackgroundPipeline(const wchar_t* ps, bool depthTest, BlendMode blend) {
+		GraphicsPipelineDesc desc;
+		desc.VS(L"Background/BackgroundFullscreen.VS.hlsl")
+			.PS(ps).Blend(blend).CullNone().DepthState(BackgroundDepth(depthTest)).Samples(1);
+		desc.inputElems_.clear();
+		desc.rtvFormats_ = {DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_R16G16B16A16_FLOAT};
+		desc.root_.AllowIA()
+			.CBV(0, D3D12_SHADER_VISIBILITY_ALL)
+			.CBV(1, D3D12_SHADER_VISIBILITY_PIXEL);
+		return desc;
+	}
+}
+
+GraphicsPipelineDesc PipelinePresets::MakeNebulaBackground() {
+	return MakeBackgroundPipeline(L"Background/Nebula/NebulaBackground.PS.hlsl", true, BlendMode::NONE);
+}
+GraphicsPipelineDesc PipelinePresets::MakeStarField() {
+	return MakeBackgroundPipeline(L"Background/Stars/StarField.PS.hlsl", true, BlendMode::ADD);
+}
+GraphicsPipelineDesc PipelinePresets::MakeForegroundGlow() {
+	return MakeBackgroundPipeline(L"Background/ForegroundGlow/ForegroundGlow.PS.hlsl", false, BlendMode::ADD);
+}
+GraphicsPipelineDesc PipelinePresets::MakeSpaceDust() {
+	return MakeBackgroundPipeline(L"Background/SpaceDust/SpaceDust.PS.hlsl", false, BlendMode::ADD);
+}
+
 /* ================================================================================================
 /*							Objects
 /* ================================================================================================ */

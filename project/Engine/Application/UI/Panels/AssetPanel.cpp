@@ -191,6 +191,9 @@ namespace CalyxEngine {
 				ImGui::EndMenu();
 			}
 			if(ImGui::BeginMenu("Assets")) {
+				if(ImGui::MenuItem("New Scene")) {
+					if(onSceneCreateRequested_) onSceneCreateRequested_(currentFolderAbs_);
+				}
 				if(ImGui::MenuItem("New Material")) {
 					CreateMaterialAssetInCurrentFolder();
 				}
@@ -824,6 +827,9 @@ namespace CalyxEngine {
 			break;
 		case AssetType::Model:
 			label = "Drop Model here";
+			break;
+		case AssetType::Scene:
+			label = "Scene File here";
 			break;
 		case AssetType::Prefab:
 			label = "Drop Prefab here";

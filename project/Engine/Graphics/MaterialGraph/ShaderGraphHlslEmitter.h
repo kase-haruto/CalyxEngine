@@ -169,6 +169,9 @@ namespace CalyxEngine {
 			out << "    float rimIntensity;\n";
 			out << "    float rimPower;\n";
 			out << "    float2 rimPadding;\n";
+			out << "    float4 shieldColor;\n";
+			out << "    float4 shieldParams;\n";
+			out << "    float4 shieldRipple;\n";
 			out << "};\n";
 			out << "cbuffer MaterialConstants : register(b0) { Material gMaterial; }\n\n";
 			out << "struct VertexShaderOutput {\n";
@@ -253,6 +256,9 @@ namespace CalyxEngine {
 			out << "    float rimIntensity;\n";
 			out << "    float rimPower;\n";
 			out << "    float2 rimPadding;\n";
+			out << "    float4 shieldColor;\n";
+			out << "    float4 shieldParams;\n";
+			out << "    float4 shieldRipple;\n";
 			out << "};\n\n";
 			out << "struct DirectionalLight { float4 color; float3 direction; float intensity; };\n";
 			out << "struct PointLight { float4 color; float3 position; float intensity; float radius; float decay; float2 pad; };\n\n";
@@ -676,7 +682,8 @@ PixelShaderOutput main(VertexShaderOutput input) {
 
 if(alpha <= 0.01f) discard;
     output.color = float4(finalColor, alpha);
-    output.bloomMask = float4(emissive, 1.0f);
+    float3 rimEmission = gMaterial.rimColor.rgb * rimFactor * max(gMaterial.rimIntensity, 0.0f);
+    output.bloomMask = float4(emissive + rimEmission, 1.0f);
     return output;
 }
 )";

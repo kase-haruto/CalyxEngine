@@ -54,9 +54,12 @@ namespace CalyxEngine {
 		void SetOnSceneOpenRequested(std::function<void(const std::filesystem::path&)> callback) {
 			onSceneOpenRequested_ = std::move(callback);
 		}
+		void SetOnSceneCreateRequested(std::function<void(const std::filesystem::path&)> callback) {
+			onSceneCreateRequested_ = std::move(callback);
+		}
 
 		// Inspector 側で使える：期待タイプを指定したドロップターゲット
-		static bool DrawAssetDropTarget(AssetType expect, Guid* inoutGuid, float height = 56.0f);
+		CALYX_API static bool DrawAssetDropTarget(AssetType expect, Guid* inoutGuid, float height = 56.0f);
 
 	private:
 		// --- 描画 ---
@@ -116,6 +119,7 @@ namespace CalyxEngine {
 		bool					 needsRebuildTree_ = true;
 		std::function<void(const std::filesystem::path&)> onPrefabEditRequested_;
 		std::function<void(const std::filesystem::path&)> onSceneOpenRequested_;
+		std::function<void(const std::filesystem::path&)> onSceneCreateRequested_;
 
 		// ---- View cache ----
 		std::vector<std::filesystem::path> cacheSubDirs_;
