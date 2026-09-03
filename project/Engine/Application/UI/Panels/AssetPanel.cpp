@@ -828,6 +828,9 @@ namespace CalyxEngine {
 		case AssetType::Model:
 			label = "Drop Model here";
 			break;
+		case AssetType::Scene:
+			label = "Scene File here";
+			break;
 		case AssetType::Prefab:
 			label = "Drop Prefab here";
 			break;

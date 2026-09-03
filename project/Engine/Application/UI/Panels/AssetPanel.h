@@ -59,7 +59,7 @@ namespace CalyxEngine {
 		}
 
 		// Inspector 側で使える：期待タイプを指定したドロップターゲット
-		static bool DrawAssetDropTarget(AssetType expect, Guid* inoutGuid, float height = 56.0f);
+		CALYX_API static bool DrawAssetDropTarget(AssetType expect, Guid* inoutGuid, float height = 56.0f);
 
 	private:
 		// --- 描画 ---
