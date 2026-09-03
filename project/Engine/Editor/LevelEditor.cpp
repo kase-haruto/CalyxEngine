@@ -369,6 +369,17 @@ namespace CalyxEngine {
 			[this](const std::filesystem::path& path) {
 				OpenScene(path);
 			});
+		assetPanel_->SetOnSceneCreateRequested(
+			[](const std::filesystem::path& folder) {
+				IGFD::FileDialogConfig config;
+				config.path = folder.generic_string();
+				config.fileName = "NewScene.scene";
+				ImGuiFileDialog::Instance()->OpenDialog(
+					"SceneCreateDialog",
+					"new scene",
+					".scene",
+					config);
+			});
 
 		// Hierarchy から来るコールバックは shared_ptr で受けて、
 		// LevelEditor 内で weak_ptr に変換して管理する
@@ -770,6 +781,18 @@ namespace CalyxEngine {
 
 		if(selection_.HasSelection() && !io.WantTextInput && ImGui::IsKeyPressed(ImGuiKey_Delete)) {
 			DeleteSelectedObjects();
+		}
+
+		if(!io.WantTextInput && io.KeyCtrl && !io.KeyAlt && !io.KeyShift &&
+		   ImGui::IsKeyPressed(ImGuiKey_N, false)) {
+			IGFD::FileDialogConfig config;
+			config.path = Calyx::ResolveAssetPath("Scenes").generic_string();
+			config.fileName = "NewScene.scene";
+			ImGuiFileDialog::Instance()->OpenDialog(
+				"SceneCreateDialog",
+				"new scene",
+				".scene",
+				config);
 		}
 
 		if(selection_.HasSelection() &&

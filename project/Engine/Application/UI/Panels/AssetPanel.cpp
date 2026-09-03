@@ -191,6 +191,9 @@ namespace CalyxEngine {
 				ImGui::EndMenu();
 			}
 			if(ImGui::BeginMenu("Assets")) {
+				if(ImGui::MenuItem("New Scene")) {
+					if(onSceneCreateRequested_) onSceneCreateRequested_(currentFolderAbs_);
+				}
 				if(ImGui::MenuItem("New Material")) {
 					CreateMaterialAssetInCurrentFolder();
 				}
