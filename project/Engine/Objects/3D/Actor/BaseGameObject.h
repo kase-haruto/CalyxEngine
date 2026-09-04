@@ -1,4 +1,5 @@
 #pragma once
+#include <Engine/Objects/2D/Animation/SpriteAnimator2d.h>
 
 #include <Engine/Foundation/Export/CalyxAPI.h>
 /* ========================================================================
@@ -267,6 +268,11 @@ public:
 	 * \param texName テクスチャ名
 	 */
 	void SetTexture(const std::string& texName);
+	// モデルのUV連番再生を操作する。再生時刻はAlwaysUpdate(dt)で自動更新する。
+	CalyxEngine::SpriteAnimator2d& GetTextureAnimator() {
+		textureAnimator_.BindModel(this);
+		return textureAnimator_;
+	}
 	bool SetModelByGuid(const Guid& guid);
 	bool SetModelFileNameForEditor(const std::string& modelName);
 	const std::string& GetModelFileName() const { return config_.GetConfig().modelConfig.modelName; }
@@ -393,6 +399,7 @@ protected:
 	//===================================================================*/
 	//                    protected member variables
 	//===================================================================*/
+	CalyxEngine::SpriteAnimator2d textureAnimator_;
 	std::unique_ptr<BaseModel>		model_			= nullptr; //< 描画用モデル
 	std::unique_ptr<CalyxEngine::AnimationModel> animationModel_ = nullptr; //< アニメーションモデル
 

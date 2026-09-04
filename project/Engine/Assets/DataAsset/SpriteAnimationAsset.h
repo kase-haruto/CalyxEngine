@@ -1,4 +1,5 @@
 #pragma once
+#include <Engine/Foundation/Export/CalyxAPI.h>
 
 #include "DataAsset.h"
 
@@ -24,7 +25,7 @@ namespace CalyxEngine {
 	/**
 	 * @brief 2Dスプライトシート分割アニメーションパラメータを保持するデータアセットクラス
 	 */
-	class SpriteAnimationAsset : public DataAsset {
+	class CALYX_API SpriteAnimationAsset : public DataAsset {
 	public:
 		/**
 		 * @brief コンストラクタ。デフォルト設定とフィールド登録を行います。

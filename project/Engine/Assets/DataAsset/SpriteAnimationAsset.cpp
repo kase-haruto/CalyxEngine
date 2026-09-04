@@ -1,6 +1,7 @@
 #include "SpriteAnimationAsset.h"
 
 #include <algorithm>
+#include <cmath>
 
 namespace CalyxEngine {
 
@@ -28,13 +29,13 @@ namespace CalyxEngine {
 	}
 
 	int32_t SpriteAnimationAsset::GetDivisionX() const {
-		// 横分割数が 0 以下にならないように、最大値(1, division.x) を取得
-		return std::max(1, static_cast<int32_t>(division.x));
+		// 非有限値は1に戻し、整数化前に範囲を制限する。上限は縦横の積がint32_tに収まる値。
+		return std::isfinite(division.x) ? static_cast<int32_t>(std::clamp(static_cast<double>(division.x), 1.0, 46340.0)) : 1;
 	}
 
 	int32_t SpriteAnimationAsset::GetDivisionY() const {
-		// 縦分割数が 0 以下にならないように、最大値(1, division.y) を取得
-		return std::max(1, static_cast<int32_t>(division.y));
+		// 横と同じ制限でゼロ除算・整数変換の未定義動作・総区画数のオーバーフローを防ぐ。
+		return std::isfinite(division.y) ? static_cast<int32_t>(std::clamp(static_cast<double>(division.y), 1.0, 46340.0)) : 1;
 	}
 
 	int32_t SpriteAnimationAsset::GetFrameCapacity() const {

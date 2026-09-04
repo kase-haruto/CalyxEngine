@@ -91,6 +91,7 @@ BaseGameObject::~BaseGameObject() {
 }
 
 void BaseGameObject::AlwaysUpdate(float dt) {
+	textureAnimator_.Update(dt);
 	if(objectModelType_ != ObjectModelType::ModelType_Unknown && model_) {
 		model_->Update(dt);
 	}

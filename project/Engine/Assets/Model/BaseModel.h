@@ -136,6 +136,7 @@ protected:
 		float power;
 	};
 	std::optional<RimLightOverride> rimLightOverride_;
+	bool runtimeTextureOverride_ = false;
 public:
 	BlendMode blendMode_ = BlendMode::NORMAL;
 	Transform2D  uvTransform{ {1.0f, 1.0f},
