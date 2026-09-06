@@ -99,6 +99,13 @@ GraphicsPipelineDesc PipelinePresets::MakeObject3D(BlendMode mode) {
 	return desc;
 }
 
+GraphicsPipelineDesc PipelinePresets::MakeObject3DOverlay(BlendMode mode) {
+	GraphicsPipelineDesc desc = MakeObject3D(mode);
+	desc.DepthEnable(false).DepthFunc(D3D12_COMPARISON_FUNC_ALWAYS);
+	desc.rtvFormats_ = {DXGI_FORMAT_R8G8B8A8_UNORM};
+	return desc;
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //		wireframe object3D
 /////////////////////////////////////////////////////////////////////////////////////////

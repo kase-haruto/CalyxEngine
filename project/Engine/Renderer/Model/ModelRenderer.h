@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Engine/Foundation/Export/CalyxAPI.h>
+
 #include "Engine/Objects/3D/Actor/SceneObject.h"
 
 #include <Engine/Graphics/Buffer/DxStructuredBuffer.h>
@@ -44,7 +46,7 @@ enum class ModelRenderPhase {
 	Transparent
 };
 
-class ModelRenderer {
+class CALYX_API ModelRenderer {
 public:
 	/**
 	 * @brief RenderInstanceに関するデータを保持する構造体です。
@@ -149,6 +151,7 @@ public:
 	 */
 	void PreCullAndBatch(const class Camera3d* camera, bool enableFrustumCulling = true);
 	void BuildAllVisibleBatches();
+	void SetOverlayMode(bool enabled) { overlayMode_ = enabled; }
 
 	/**
 	 * \brief 一括描画処理
@@ -165,7 +168,8 @@ public:
 				 class PipelineService*			 psoService,
 				 class LightLibrary*			 lightLibrary,
 				 CalyxEngine::ShadowMapSystem* shadowMapSystem,
-				 ModelRenderPhase phase = ModelRenderPhase::All);
+				 ModelRenderPhase phase = ModelRenderPhase::All,
+				 class BaseCamera* cameraOverride = nullptr);
 
 	// Picking / Outline / IDPass 用
 	/**
@@ -248,6 +252,7 @@ private:
 	std::unordered_map<BaseModel*, std::vector<WorldTransform>>					  staticVisibleForShadow_;	//< シャドウ用可視スタティックリスト
 	std::unordered_map<CalyxEngine::AnimationModel*, std::vector<WorldTransform>> skinnedVisibleForShadow_; //< シャドウ用可視スキンメッシュリスト
 	CalyxEngine::MaterialGraphRuntimeShaderCache runtimeMaterialShaderCache_;
+	bool overlayMode_ = false;
 
 	// Raytracing
 	std::unique_ptr<CalyxEngine::RaytracingSystem> raytracingSystem_; //< レイトレーシングシステム

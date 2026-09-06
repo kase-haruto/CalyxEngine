@@ -279,7 +279,8 @@ void ModelRenderer::BuildStaticBatches() {
 	for(auto& [model, insts] : staticModels_) {
 		if(!model->GetModelData() || !model->GetIsDrawEnable()) continue;
 
-		PipelineKey key{PipelineTag::Object::Object3d, model->GetBlendMode()};
+		PipelineKey key{overlayMode_ ? PipelineTag::Object::Object3dOverlay : PipelineTag::Object::Object3d,
+			model->GetBlendMode()};
 		auto&		batch = staticBatches_[key];
 
 		for(auto& inst : insts) {
@@ -367,8 +368,10 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 							PipelineService*				psoService,
 							LightLibrary*					lightLibrary,
 							CalyxEngine::ShadowMapSystem* shadowMapSystem,
-							ModelRenderPhase phase) {
+							ModelRenderPhase phase,
+							BaseCamera* cameraOverride) {
 	(void)rt;
+	BaseCamera* renderCamera = cameraOverride ? cameraOverride : CameraManager::GetActive();
 
 	// ============================================================
 	// Phase 1: スキニング Compute Dispatch
@@ -470,7 +473,7 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 			BindRaytracingScene(cmdList);
 
 			// アクティブカメラの定数バッファをバインド（VP行列等）
-			if(auto* cam = CameraManager::GetActive()) {
+			if(auto* cam = renderCamera) {
 				cam->SetCommand(cmdList, PipelineType::Object3D);
 			} else {
 				return false; // カメラが存在しない場合はこのバッチをスキップ
@@ -606,7 +609,7 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 
 				BindRaytracingScene(cmdList);
 
-				if(auto* cam = CameraManager::GetActive()) {
+				if(auto* cam = renderCamera) {
 					cam->SetCommand(cmdList, PipelineType::SkinningObject3D);
 				} else {
 					// 判定漏れ防止
@@ -635,7 +638,7 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 								shadowMapSystem->BindForMainPass(cmdList);
 							}
 							BindRaytracingScene(cmdList);
-							if(auto* cam = CameraManager::GetActive()) {
+							if(auto* cam = renderCamera) {
 								cam->SetCommand(cmdList, PipelineType::SkinningObject3D);
 							} else {
 								continue;
@@ -649,7 +652,7 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 								shadowMapSystem->BindForMainPass(cmdList);
 							}
 							BindRaytracingScene(cmdList);
-							if(auto* cam = CameraManager::GetActive()) {
+							if(auto* cam = renderCamera) {
 								cam->SetCommand(cmdList, PipelineType::SkinningObject3D);
 							} else {
 								continue;
@@ -665,7 +668,7 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 						shadowMapSystem->BindForMainPass(cmdList);
 					}
 					BindRaytracingScene(cmdList);
-					if(auto* cam = CameraManager::GetActive()) {
+					if(auto* cam = renderCamera) {
 						cam->SetCommand(cmdList, PipelineType::SkinningObject3D);
 					} else {
 						continue;

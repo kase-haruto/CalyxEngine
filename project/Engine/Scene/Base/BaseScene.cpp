@@ -173,4 +173,11 @@ void BaseScene::DrawSpritesOnly(ID3D12GraphicsCommandList* cmd,
 		}
 	}
 	spriteRenderer_->Draw(cmd, pso, RenderTargetType::BackBuffer);
+	if(sceneContext_) {
+		for(auto* object : sceneContext_->GetObjectLibrary()->GetAllObjectsRaw()) {
+			if(auto* spriteObject = dynamic_cast<CalyxEngine::ISpriteRenderable*>(object)) {
+				spriteObject->DrawOverlay3D(cmd, pso, sceneContext_->GetLightLibrary());
+			}
+		}
+	}
 }
