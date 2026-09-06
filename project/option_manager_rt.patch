@@ -1,0 +1,177 @@
+diff --git a/Game/Option/OptionManager.h b/Game/Option/OptionManager.h
+index 6699856..148d759 100644
+--- a/Game/Option/OptionManager.h
++++ b/Game/Option/OptionManager.h
+@@ -4,6 +4,7 @@
+ #include <Engine/Objects/3D/Actor/Actor.h>
+ #include <Engine/Objects/ConfigurableObject/IConfigurable.h>
+ #include <Engine/Foundation/Serialization/SerializableObject.h>
++#include <Engine/Objects/2D/Object2d/ISpriteRenderable.h>
+ 
+ // std
+ #include <array>
+@@ -12,13 +13,19 @@
+ #include <memory>
+ 
+ class UiSprite;
++class RenderTextureSprite;
++class ModelRenderer;
++class Camera3d;
++class SpriteRenderer;
++class PipelineService;
++class WorldTransform;
+ 
+ CALYX_OBJECT(
+     Category = GameObject,
+     DisplayName = "OptionManager",
+     Icon = "Textures/white1x1.png"
+ )
+-class OptionManager : public Actor {
++class OptionManager : public Actor, public CalyxEngine::ISpriteRenderable {
+ 
+ public:
+ 
+@@ -27,6 +34,8 @@ public:
+ 
+     void Initialize() override;
+     void Update(float dt) override;
++    void PrepareSpriteRender(ID3D12GraphicsCommandList* cmd, PipelineService* pso) override;
++    void SubmitSprites(SpriteRenderer& renderer) const override;
+ 
+     void Open();
+     void Close();
+@@ -210,6 +219,12 @@ private:
+     std::shared_ptr<UiSprite> rightArrow_;
+     std::array<SpriteMotion, static_cast<size_t>(CornerIndex::Count)> corners_{};
+ 
++    std::unique_ptr<RenderTextureSprite> modelPreview_;
++    std::unique_ptr<ModelRenderer> previewRenderer_;
++    std::unique_ptr<Camera3d> previewCamera_;
++    std::unique_ptr<WorldTransform> previewTransform_;
++    bool previewVisible_ = false;
++
+     AnimationState animationState_ = AnimationState::Closed;
+ 
+     float animationTimer_ = 0.0f;
+diff --git a/Game/Option/OptionManager.cpp b/Game/Option/OptionManager.cpp
+index 7b22bad..ea2fce8 100644
+--- a/Game/Option/OptionManager.cpp
++++ b/Game/Option/OptionManager.cpp
+@@ -7,6 +7,15 @@
+ #include "Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h"
+ #include "UI/Panels/InspectorPanel.h"
++#include <Engine/Graphics/Camera/3d/Camera3d.h>
++#include <Engine/Graphics/Context/GraphicsGroup.h>
++#include <Engine/Objects/Transform/Transform.h>
++#include <Engine/Renderer/Model/ModelRenderer.h>
++#include <Engine/Renderer/Sprite/RenderTextureSprite.h>
++#include <Engine/Renderer/Sprite/SpriteRenderer.h>
++#include <Engine/Scene/Context/SceneContext.h>
+ 
+ // game
+ #include <Game/UI/UiSprite.h>
+@@ -55,6 +64,22 @@ void OptionManager::Initialize() {
+     DisableGravity();
+     Actor::SetDrawEnable(false);
+ 
++    modelPreview_ = std::make_unique<RenderTextureSprite>();
++    if (modelPreview_->Initialize(256, 256)) {
++        auto* sprite = modelPreview_->GetSprite();
++        sprite->SetAnchorPoint({ 0.5f, 0.5f });
++        sprite->SetPosition({ param_.panelCenterX, param_.panelCenterY });
++        sprite->SetSize({ 190.0f, 190.0f });
++        sprite->SetTargetRt(RenderTargetType::BackBuffer);
++    }
++
++    previewRenderer_ = std::make_unique<ModelRenderer>();
++    previewCamera_ = std::make_unique<Camera3d>("OptionPreviewCamera");
++    previewCamera_->SetCamera({ 0.0f, 0.0f, -4.0f }, { 0.0f, 0.0f, 0.0f });
++    previewCamera_->SetAspectRatio(1.0f);
++    previewCamera_->AlwaysUpdate(0.0f);
++    previewTransform_ = std::make_unique<WorldTransform>();
++    previewTransform_->scale = { 1.25f, 1.25f, 1.25f };
++    previewTransform_->Update();
++
+     InitializeSprites();
+     SetAllVisible(false);
+@@ -87,6 +112,10 @@ void OptionManager::Update(float dt) {
+     UpdateArrowFeedback(uiDt);
+     UpdateAnimation(uiDt);
+ 
++    if (modelPreview_ && modelPreview_->GetSprite()) {
++        modelPreview_->GetSprite()->Update();
++    }
++
+     // Opened荳ｭ縺ｯ繝代Λ繝｡繝ｼ繧ｿ螟画峩繧・款荳玖牡繧呈ｯ弱ヵ繝ｬ繝ｼ繝蜿肴丐縺吶ｋ縲・
+     if (animationState_ == AnimationState::Opened) {
+         ApplyAnimation(1.0f);
+@@ -94,6 +123,43 @@ void OptionManager::Update(float dt) {
+     }
+ }
+ 
++void OptionManager::PrepareSpriteRender(ID3D12GraphicsCommandList* cmd, PipelineService* pso) {
++    if (!previewVisible_ || !modelPreview_ || !previewRenderer_ ||
++        !previewCamera_ || !previewTransform_ || !GetStaticModel()) {
++        return;
++    }
++
++    auto* context = SceneContext::Current();
++    if (!context || !context->GetLightLibrary()) {
++        return;
++    }
++
++    previewCamera_->AlwaysUpdate(0.0f);
++    previewTransform_->Update();
++    previewRenderer_->BeginFrame();
++    previewRenderer_->RegisterStatic(
++        GetStaticModel(), *previewTransform_, BillboardMode::None, nullptr);
++    previewRenderer_->PreCullAndBatch(previewCamera_.get(), false);
++
++    modelPreview_->Begin3D(cmd);
++    previewRenderer_->DrawAll(
++        cmd,
++        GraphicsGroup::GetInstance()->GetDevice().Get(),
++        modelPreview_->GetRenderTarget(),
++        pso,
++        context->GetLightLibrary(),
++        nullptr,
++        ModelRenderPhase::All,
++        previewCamera_.get());
++    modelPreview_->End3D(cmd);
++}
++
++void OptionManager::SubmitSprites(SpriteRenderer& renderer) const {
++    if (!previewVisible_ || !modelPreview_ || !modelPreview_->GetSprite()) {
++        return;
++    }
++    renderer.Register(modelPreview_->GetSprite(), kDefaultSortingLayerId,
++        param_.panelOrderInLayer + 5, 0);
++}
++
+ void OptionManager::Open() {
+@@ -438,6 +504,10 @@ void OptionManager::SetAllVisible(bool visible) {
+         optionPanel_->SetVisible(visible);
+     }
+ 
++    previewVisible_ = visible;
++    if (modelPreview_ && modelPreview_->GetSprite()) {
++        modelPreview_->GetSprite()->SetIsVisible(visible);
++    }
++
+     if (leftArrow_) {
+         leftArrow_->SetVisible(visible);
+@@ -476,6 +546,14 @@ void OptionManager::ApplyAnimation(float t) {
+         );
+     }
+ 
++    if (modelPreview_ && modelPreview_->GetSprite()) {
++        auto* sprite = modelPreview_->GetSprite();
++        sprite->SetPosition({ param_.panelCenterX, param_.panelCenterY });
++        sprite->SetSize({ 190.0f * scale, 190.0f * scale });
++        sprite->SetAlpha(panelT);
++        sprite->Update();
++    }
++
+     // 荳芽ｧ偵ｂ荳ｭ螟ｮ繝代ロ繝ｫ縺ｨ荳邱偵↓諡｡螟ｧ繝ｻ繝輔ぉ繝ｼ繝峨＆縺帙ｋ縲・
+     const float pressedBrightness =
+         std::clamp(param_.arrowPressedBrightness, 0.0f, 1.0f);
