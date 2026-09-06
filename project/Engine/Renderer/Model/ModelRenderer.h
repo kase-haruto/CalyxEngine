@@ -165,7 +165,8 @@ public:
 				 class PipelineService*			 psoService,
 				 class LightLibrary*			 lightLibrary,
 				 CalyxEngine::ShadowMapSystem* shadowMapSystem,
-				 ModelRenderPhase phase = ModelRenderPhase::All);
+				 ModelRenderPhase phase = ModelRenderPhase::All,
+				 class BaseCamera* cameraOverride = nullptr);
 
 	// Picking / Outline / IDPass 用
 	/**

@@ -34,6 +34,8 @@ public:
 	 * \param filePath テクスチャファイルのパス
 	 */
 	Sprite(const std::string& filePath);
+	/** Construct a sprite backed by an existing shader-resource view. */
+	explicit Sprite(D3D12_GPU_DESCRIPTOR_HANDLE textureHandle);
 	/**
 	 * \brief デストラクタ
 	 */

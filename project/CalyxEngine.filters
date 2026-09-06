@@ -267,6 +267,7 @@
     <ClCompile Include="Engine\Renderer\Sprite\Sprite.cpp">
       <Filter>Engine\project\2d\sprite</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Renderer\Sprite\RenderTextureSprite.cpp" />
     <ClCompile Include="Engine\Application\UI\ImGuiManager.cpp">
       <Filter>Engine\project\manager\imgui</Filter>
     </ClCompile>
@@ -512,6 +513,7 @@
     <ClInclude Include="Engine\Renderer\Sprite\Sprite.h">
       <Filter>Engine\project\2d\sprite</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Renderer\Sprite\RenderTextureSprite.h" />
     <ClInclude Include="Engine\Application\UI\ImGuiManager.h">
       <Filter>Engine\project\manager\imgui</Filter>
     </ClInclude>

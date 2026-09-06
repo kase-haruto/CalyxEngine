@@ -1,6 +1,8 @@
 #pragma once
 
 class SpriteRenderer;
+class PipelineService;
+struct ID3D12GraphicsCommandList;
 
 namespace CalyxEngine {
 
@@ -14,6 +16,10 @@ namespace CalyxEngine {
 	class ISpriteRenderable {
 	public:
 		virtual ~ISpriteRenderable() = default;
+
+		/** Called once immediately before sprites are collected. RT-backed sprites
+		 * can record their offscreen pass here. */
+		virtual void PrepareSpriteRender(ID3D12GraphicsCommandList*, PipelineService*) {}
 
 		/**
 		 * @brief このオブジェクトが所有するSpriteを現在フレームの描画対象へ登録する。

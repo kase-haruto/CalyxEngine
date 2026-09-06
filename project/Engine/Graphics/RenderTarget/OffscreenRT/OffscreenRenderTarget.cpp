@@ -83,13 +83,12 @@ D3D12_RECT OffscreenRenderTarget::GetScissorRect() const {
 }
 
 void OffscreenRenderTarget::Clear(ID3D12GraphicsCommandList* commandList) {
-	const float sceneClearColor[] = {0.1f, 0.1f, 0.1f, 1.0f};
 	const float maskClearColor[] = {0.0f, 0.0f, 0.0f, 0.0f};
 
 	if(!mrtResources_.empty()) {
 		// Scene Colorは背景色、補助Targetはマスク用途の透明値で個別に初期化する。
 		mrtResources_[0]->Transition(commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		commandList->ClearRenderTargetView(mrtRtvHandles_[0].cpu, sceneClearColor, 0, nullptr);
+		commandList->ClearRenderTargetView(mrtRtvHandles_[0].cpu, clearColor_.data(), 0, nullptr);
 
 		for(size_t i = 1; i < mrtResources_.size(); ++i) {
 			mrtResources_[i]->Transition(commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
@@ -98,7 +97,7 @@ void OffscreenRenderTarget::Clear(ID3D12GraphicsCommandList* commandList) {
 	} else {
 		// 単一Targetの場合もClear前に書き込み可能状態へ遷移させる。
 		resource_->Transition(commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		commandList->ClearRenderTargetView(rtvHandle_.cpu, sceneClearColor, 0, nullptr);
+		commandList->ClearRenderTargetView(rtvHandle_.cpu, clearColor_.data(), 0, nullptr);
 	}
 
 	// 前フレームの深度を持ち越さないよう、Depth Write状態へ戻して最大深度で消去する。

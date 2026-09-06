@@ -173,6 +173,7 @@
     <ClCompile Include="Engine\Assets\Model\SplineDeformedModel.cpp" />
     <ClCompile Include="Engine\Assets\Model\ModelManager.cpp" />
     <ClCompile Include="Engine\Renderer\Sprite\Sprite.cpp" />
+    <ClCompile Include="Engine\Renderer\Sprite\RenderTextureSprite.cpp" />
     <ClCompile Include="Engine\Assets\Texture\Texture.cpp" />
     <ClCompile Include="Engine\Assets\Texture\TextureManager.cpp" />
     <ClCompile Include="Engine\Objects\3D\Geometory\AABB.cpp" />
@@ -534,6 +535,7 @@
     <ClInclude Include="Engine\Assets\Model\ModelData.h" />
     <ClInclude Include="Engine\Assets\Model\ModelManager.h" />
     <ClInclude Include="Engine\Renderer\Sprite\Sprite.h" />
+    <ClInclude Include="Engine\Renderer\Sprite\RenderTextureSprite.h" />
     <ClInclude Include="Engine\Assets\Texture\Texture.h" />
     <ClInclude Include="Engine\Assets\Texture\TextureManager.h" />
     <ClInclude Include="Engine\Objects\Transform\Transform.h" />

@@ -7,6 +7,7 @@
 #include <Engine/Graphics/RenderTarget/Interface/IRenderTarget.h>
 
 #include <memory>
+#include <array>
 
 /**
  * @brief OffscreenRenderTargetの機能を提供するクラスです。
@@ -34,6 +35,8 @@ public:
 	void						SetDepthDSV(DescriptorHandle dsv) override;
 	D3D12_RECT					GetScissorRect() const override;
 	void Clear(ID3D12GraphicsCommandList* cmdList) override;
+	void SetClearColor(float r, float g, float b, float a) { clearColor_ = {r, g, b, a}; }
+	const std::array<float, 4>& GetClearColor() const { return clearColor_; }
 	void SetRenderTarget(ID3D12GraphicsCommandList* commandList) override;
 	void SetRenderTargetMRT(ID3D12GraphicsCommandList* commandList);
 	void TransitionMRTTo(ID3D12GraphicsCommandList* cmdList, size_t index, D3D12_RESOURCE_STATES newState);
@@ -63,4 +66,5 @@ private:
 
 	D3D12_VIEWPORT viewport_{};
 	D3D12_RECT	   scissorRect_{};
+	std::array<float, 4> clearColor_{0.1f, 0.1f, 0.1f, 1.0f};
 };

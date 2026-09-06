@@ -225,6 +225,15 @@ void Sprite::SetTexture(const std::string& tex) {
 	path = tex;
 }
 
+Sprite::Sprite(D3D12_GPU_DESCRIPTOR_HANDLE textureHandle)
+	: handle(textureHandle) {
+	transform_ = {{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}};
+	CreateBuffer();
+	Map();
+	UpdateMatrix();
+	UpdateTransform();
+}
+
 bool Sprite::SetTextureSheet(const std::string& texturePath, int32_t columns, int32_t rows) {
 	// 入力エラーでは既存画像とUVを維持するため、読み込み前に分割数を検証する。
 	if(texturePath.empty() || columns < 1 || rows < 1 || columns > 46340 || rows > 46340) return false;

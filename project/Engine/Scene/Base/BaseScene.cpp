@@ -165,6 +165,18 @@ void BaseScene::Draw(ID3D12GraphicsCommandList* cmd,
 void BaseScene::DrawSpritesOnly(ID3D12GraphicsCommandList* cmd,
 								PipelineService*		   pso) {
 	if(sceneContext_) {
+		// RT-backed sprites must finish writing before their SRV is submitted.
+		for(auto* object : sceneContext_->GetObjectLibrary()->GetAllObjectsRaw()) {
+			if(auto* spriteObject = dynamic_cast<CalyxEngine::ISpriteRenderable*>(object)) {
+				spriteObject->PrepareSpriteRender(cmd, pso);
+			}
+		}
+		// A preparation hook may bind its private RT. Restore the UI destination.
+		if(auto* dxCore = GraphicsGroup::GetInstance()->GetDxCore()) {
+			if(auto* backBuffer = dxCore->GetRenderTargetCollection().Get("BackBuffer")) {
+				backBuffer->SetRenderTarget(cmd);
+			}
+		}
 		for(auto* object : sceneContext_->GetObjectLibrary()->GetAllObjectsRaw()) {
 			if(auto* spriteObject = dynamic_cast<CalyxEngine::ISpriteRenderable*>(object)) {
 				// 描画登録は2Dパスごとに再構築し、SpriteRendererには所有権を渡さない。
