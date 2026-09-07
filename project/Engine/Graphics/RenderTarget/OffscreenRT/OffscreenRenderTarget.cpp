@@ -102,6 +102,11 @@ void OffscreenRenderTarget::Clear(ID3D12GraphicsCommandList* commandList) {
 	}
 
 	// 前フレームの深度を持ち越さないよう、Depth Write状態へ戻して最大深度で消去する。
+	ClearDepth(commandList);
+}
+
+void OffscreenRenderTarget::ClearDepth(ID3D12GraphicsCommandList* commandList) {
+	if(!commandList || !depthResource_ || dsvHandle_.cpu.ptr == 0) return;
 	depthResource_->Transition(commandList, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 	commandList->ClearDepthStencilView(dsvHandle_.cpu, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 }

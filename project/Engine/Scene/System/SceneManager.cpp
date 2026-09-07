@@ -6,6 +6,7 @@
 #include <Engine/Assets/Database/AssetDatabase.h>
 #include <Engine/Editor/AssetPreviewManager.h>
 #include <Engine/Foundation/Log/EngineLogger.h>
+#include <Engine/Foundation/Utility/Func/DxFunc.h>
 #include <Engine/Graphics/Camera/3d/Camera3d.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
 #include <Engine/Graphics/Context/GraphicsGroup.h>
@@ -695,21 +696,27 @@ namespace CalyxEngine {
 		// ポストエフェクト完了後の出力へUIスプライトを合成する
 		auto* postOutput = dx_->GetRenderTargetCollection().Get("PostEffectOutput");
 		DrawSpritesToRenderTarget(postOutput, cmd, pso, false);
+
+		// 通常シーンのDepthを破棄し、前面3D同士だけで正しい前後関係を構築する。
+		if(postOutput) {
+			CameraManager::SetTypeStatic(CameraType::Default);
+			postOutput->ClearDepth(cmd);
+			activeScene_.scene->DrawForeground3D(cmd, pso, postOutput);
+		}
 		if(activeTransitionEffect_ && postOutput) {
-			// The editor game viewport displays PostEffectOutput as an ImGui texture.
-			// Draw the transition here as well as on the final back buffer so it is
-			// visible in both editor play mode and standalone builds.
+			// 画面遷移は前面3Dよりさらに手前へ合成する。
 			activeTransitionEffect_->Draw(cmd, pso);
 		}
 		if(postOutput) {
 			postOutput->TransitionTo(cmd, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		}
 
-		// 最終バックバッファにも同じスプライトを描画し、画面へ出力する
+		// 最終合成済みの一枚をBackBufferへコピーし、Editor表示とStandalone表示を一致させる。
 		auto* backBuffer = dx_->GetRenderTargetCollection().Get("BackBuffer");
-		DrawSpritesToRenderTarget(backBuffer, cmd, pso, false);
-		if(activeTransitionEffect_) {
-			activeTransitionEffect_->Draw(cmd, pso);
+		if(postOutput && backBuffer) {
+			const PipelineSet copy = pso->GetPipelineSet(PipelineTag::PostProcess::CopyImage);
+			DrawTextureToRenderTarget(cmd, postOutput->GetSRV(), backBuffer,
+				copy.pipelineState, copy.rootSignature);
 		}
 	}
 

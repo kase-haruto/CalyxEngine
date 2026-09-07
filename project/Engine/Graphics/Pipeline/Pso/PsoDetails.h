@@ -33,6 +33,8 @@ namespace PipelineTag {
 	enum class Object :std::uint16_t {
 		Object3d,
 		SkinningObject3D,
+		ForegroundObject3D,
+		ForegroundSkinnedObject3D,
 		WireframeObject3D,
 		WireframeSkinnedObject3D,
 		OutlineObject3D,

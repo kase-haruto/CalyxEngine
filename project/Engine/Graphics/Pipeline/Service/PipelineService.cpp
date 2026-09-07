@@ -72,6 +72,8 @@ void PipelineService::RegisterAllPipelines() {
 		//						SkinObject3D Pipelines
 		//===================================================================*/
 		regObj(PipelineTag::Object::SkinningObject3D, mode, PipelinePresets::MakeSkinningObject3D);
+		regObj(PipelineTag::Object::ForegroundObject3D, mode, PipelinePresets::MakeForegroundObject3D);
+		regObj(PipelineTag::Object::ForegroundSkinnedObject3D, mode, PipelinePresets::MakeForegroundSkinnedObject3D);
 
 		//===================================================================*/
 		//						Wireframe Pipelines
@@ -208,6 +210,30 @@ PipelineSet PipelineService::GetGeneratedMaterialSkinnedPipelineSet(
 	PipelineSet set{
 		pipeline->GetPipelineState().Get(),
 		pipeline->GetRootSignature().Get()};
+	generatedMaterialPipelines_[key] = std::move(pipeline);
+	return set;
+}
+
+PipelineSet PipelineService::GetGeneratedMaterialForegroundObjectPipelineSet(
+	BlendMode blend, Microsoft::WRL::ComPtr<IDxcBlob> pixelShader, std::size_t shaderHash) {
+	GeneratedMaterialPipelineKey key{PipelineTag::Object::ForegroundObject3D, blend, shaderHash};
+	if(auto it = generatedMaterialPipelines_.find(key); it != generatedMaterialPipelines_.end()) {
+		return {it->second->GetPipelineState().Get(), it->second->GetRootSignature().Get()};
+	}
+	auto pipeline = factory_->CreateWithPixelShaderBlob(PipelinePresets::MakeForegroundObject3D(blend), pixelShader);
+	PipelineSet set{pipeline->GetPipelineState().Get(), pipeline->GetRootSignature().Get()};
+	generatedMaterialPipelines_[key] = std::move(pipeline);
+	return set;
+}
+
+PipelineSet PipelineService::GetGeneratedMaterialForegroundSkinnedPipelineSet(
+	BlendMode blend, Microsoft::WRL::ComPtr<IDxcBlob> pixelShader, std::size_t shaderHash) {
+	GeneratedMaterialPipelineKey key{PipelineTag::Object::ForegroundSkinnedObject3D, blend, shaderHash};
+	if(auto it = generatedMaterialPipelines_.find(key); it != generatedMaterialPipelines_.end()) {
+		return {it->second->GetPipelineState().Get(), it->second->GetRootSignature().Get()};
+	}
+	auto pipeline = factory_->CreateWithPixelShaderBlob(PipelinePresets::MakeForegroundSkinnedObject3D(blend), pixelShader);
+	PipelineSet set{pipeline->GetPipelineState().Get(), pipeline->GetRootSignature().Get()};
 	generatedMaterialPipelines_[key] = std::move(pipeline);
 	return set;
 }

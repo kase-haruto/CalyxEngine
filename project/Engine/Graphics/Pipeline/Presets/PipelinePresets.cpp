@@ -99,6 +99,13 @@ GraphicsPipelineDesc PipelinePresets::MakeObject3D(BlendMode mode) {
 	return desc;
 }
 
+GraphicsPipelineDesc PipelinePresets::MakeForegroundObject3D(BlendMode mode) {
+	GraphicsPipelineDesc desc = MakeObject3D(mode);
+	// 最終合成先は単一のR8G8B8A8 target。Depthは前面パス直前にクリアして利用する。
+	desc.rtvFormats_ = {DXGI_FORMAT_R8G8B8A8_UNORM};
+	return desc;
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //		wireframe object3D
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -207,6 +214,12 @@ GraphicsPipelineDesc PipelinePresets::MakeSkinningObject3D(BlendMode mode) {
 
 		.SamplerWrapLinear(0);
 
+	return desc;
+}
+
+GraphicsPipelineDesc PipelinePresets::MakeForegroundSkinnedObject3D(BlendMode mode) {
+	GraphicsPipelineDesc desc = MakeSkinningObject3D(mode);
+	desc.rtvFormats_ = {DXGI_FORMAT_R8G8B8A8_UNORM};
 	return desc;
 }
 

@@ -299,6 +299,7 @@ void BaseGameObject::ShowGui() {
 		}
 		if(ImGui::TreeNodeEx("Draw Config", ImGuiTreeNodeFlags_SpanAvailWidth)) {
 			GuiCmd::CheckBox("Camera Dither", drawConfig_.cameraDitherEnabled);
+			GuiCmd::CheckBox("Draw In Foreground", drawConfig_.drawInForeground);
 			GuiCmd::CheckBox("Cast Shadow", drawConfig_.castShadow);
 			GuiCmd::CheckBox("Enable Outline", drawConfig_.outline.enabled);
 			GuiCmd::DragFloat("Outline Thickness", drawConfig_.outline.thickness, 0.001f, 0.0f, 1.0f);
@@ -362,6 +363,7 @@ void BaseGameObject::ApplyConfig() {
 
 	// Rendererへ渡すカメラディザーとOutline設定を復元する。
 	drawConfig_.cameraDitherEnabled = cfg.cameraDitherEnabled;
+	drawConfig_.drawInForeground = cfg.drawInForeground;
 	drawConfig_.outline.enabled	 = cfg.outlineEnabled;
 	drawConfig_.outline.thickness = cfg.outlineThickness;
 	drawConfig_.outline.color	 = cfg.outlineColor;
@@ -397,6 +399,7 @@ void BaseGameObject::ExtractConfig() {
 	cfg.parentGuid = parentId_;
 	// Renderer設定をScene保存用のPOD値へ展開する。
 	cfg.cameraDitherEnabled = drawConfig_.cameraDitherEnabled;
+	cfg.drawInForeground = drawConfig_.drawInForeground;
 	cfg.outlineEnabled	 = drawConfig_.outline.enabled;
 	cfg.outlineThickness = drawConfig_.outline.thickness;
 	cfg.outlineColor	 = drawConfig_.outline.color;

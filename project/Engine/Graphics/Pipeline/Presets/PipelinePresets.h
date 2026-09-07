@@ -12,6 +12,8 @@ namespace PipelinePresets {
 	// 3dObjects
 	GraphicsPipelineDesc MakeObject3D(BlendMode mode);
 	GraphicsPipelineDesc MakeSkinningObject3D(BlendMode mode);
+	GraphicsPipelineDesc MakeForegroundObject3D(BlendMode mode);
+	GraphicsPipelineDesc MakeForegroundSkinnedObject3D(BlendMode mode);
 	GraphicsPipelineDesc MakeParticle(BlendMode mode);
 	GraphicsPipelineDesc MakeGpuParticle(BlendMode mode);
 	GraphicsPipelineDesc MakeTrail(BlendMode mode);

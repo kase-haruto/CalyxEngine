@@ -99,6 +99,10 @@ public:
 		BlendMode blend,
 		Microsoft::WRL::ComPtr<IDxcBlob> pixelShader,
 		std::size_t shaderHash);
+	PipelineSet GetGeneratedMaterialForegroundObjectPipelineSet(
+		BlendMode blend, Microsoft::WRL::ComPtr<IDxcBlob> pixelShader, std::size_t shaderHash);
+	PipelineSet GetGeneratedMaterialForegroundSkinnedPipelineSet(
+		BlendMode blend, Microsoft::WRL::ComPtr<IDxcBlob> pixelShader, std::size_t shaderHash);
 	PipelineSet		   GetPipelineSet(PipelineTag::PostProcess tag) const;
 	PipelineSet		   GetPipelineSet(PipelineTag::Background tag) const;
 	const PipelineSet& GetComputePipelineSet(PipelineTag::Compute tag) const {

@@ -215,9 +215,10 @@ namespace CalyxEngine {
 			}
 		}
 
-		PipelineSet pipelineSet = service->GetPipelineSet(PipelineTag::PostProcess::CopyImage);
-		DrawTextureToRenderTarget(cmd, postOutput->GetSRV(), backBuffer,
-								  pipelineSet.pipelineState, pipelineSet.rootSignature);
+		// UIと前面3Dはこの後PostEffectOutputへ合成される。BackBufferへのコピーは最終合成後に行う。
+		// Scene未読込のProject Browserでは最終合成処理が実行されないため、
+		// ImGuiの描画先だけはここで必ずBackBufferへ戻しておく。
+		backBuffer->SetRenderTarget(cmd);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////

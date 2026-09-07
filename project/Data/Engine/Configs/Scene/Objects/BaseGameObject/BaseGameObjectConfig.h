@@ -25,6 +25,7 @@ struct BaseGameObjectConfig
 	int				colliderKind = 0;	//< 0:None, 1:Box, 2:Sphere, 3:Capsule
 	CalyxEngine::Vector3 visualOffset = {0.0f, 0.0f, 0.0f}; //< 描画モデルだけに適用するローカルオフセット
 	bool cameraDitherEnabled = true;
+	bool drawInForeground = false;
 	bool outlineEnabled = true;
 	float outlineThickness = 0.035f;
 	CalyxEngine::Vector4 outlineColor = {0.02f, 0.02f, 0.025f, 1.0f};
@@ -43,6 +44,7 @@ inline void to_json(nlohmann::json& j, const BaseGameObjectConfig& c) {
 		{"colliderKind", c.colliderKind},
 		{"visualOffset", c.visualOffset},
 		{"cameraDitherEnabled", c.cameraDitherEnabled},
+		{"drawInForeground", c.drawInForeground},
 		{"outlineEnabled", c.outlineEnabled},
 		{"outlineThickness", c.outlineThickness},
 		{"outlineColor", c.outlineColor}};
@@ -60,6 +62,7 @@ inline void from_json(const nlohmann::json& j, BaseGameObjectConfig& c) {
 	if(j.contains("colliderKind")) j.at("colliderKind").get_to(c.colliderKind);
 	if(j.contains("visualOffset")) j.at("visualOffset").get_to(c.visualOffset);
 	if(j.contains("cameraDitherEnabled")) j.at("cameraDitherEnabled").get_to(c.cameraDitherEnabled);
+	if(j.contains("drawInForeground")) j.at("drawInForeground").get_to(c.drawInForeground);
 	if(j.contains("outlineEnabled")) j.at("outlineEnabled").get_to(c.outlineEnabled);
 	if(j.contains("outlineThickness")) j.at("outlineThickness").get_to(c.outlineThickness);
 	if(j.contains("outlineColor")) j.at("outlineColor").get_to(c.outlineColor);

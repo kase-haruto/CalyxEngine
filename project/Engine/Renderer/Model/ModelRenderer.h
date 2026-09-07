@@ -41,7 +41,8 @@ namespace CalyxEngine {
 enum class ModelRenderPhase {
 	All,
 	Opaque,
-	Transparent
+	Transparent,
+	Foreground
 };
 
 class ModelRenderer {
@@ -92,6 +93,7 @@ private:
 	struct StaticBatchItem {
 		BaseModel*							   model = nullptr; //< モデルデータ
 		bool								   cameraDitherEnabled = true;
+		bool                                   foreground = false;
 		std::vector<WorldTransform>			   transforms;		//< インスタンス用変換リスト
 		std::vector<GpuBillboardParams>		   billboards;		//< インスタンス用ビルボードパラメータ
 		DxStructuredBuffer<GpuBillboardParams> billboardSrv;	//< ビルボード用構造化バッファ
@@ -103,6 +105,7 @@ private:
 	struct SkinnedBatchItem {
 		CalyxEngine::AnimationModel* model = nullptr;
 		bool cameraDitherEnabled = true;
+		bool foreground = false;
 		std::vector<WorldTransform> transforms;
 	};
 
@@ -222,7 +225,7 @@ private:
 	 * \brief スタティックモデルのバッチ構築
 	 */
 	void BuildStaticBatches();
-	StaticBatchItem* FindCompatibleStaticBatch(StaticBatch& batch, BaseModel* model, bool cameraDitherEnabled);
+	StaticBatchItem* FindCompatibleStaticBatch(StaticBatch& batch, BaseModel* model, bool cameraDitherEnabled, bool foreground);
 	/**
 	 * \brief スキンメッシュモデルのバッチ構築
 	 */

@@ -174,3 +174,17 @@ void BaseScene::DrawSpritesOnly(ID3D12GraphicsCommandList* cmd,
 	}
 	spriteRenderer_->Draw(cmd, pso, RenderTargetType::BackBuffer);
 }
+
+void BaseScene::DrawForeground3D(ID3D12GraphicsCommandList* cmd,
+								 PipelineService* pso,
+								 IRenderTarget* rt) {
+	if(!sceneContext_ || !modelRenderer_ || !rt) return;
+	rt->SetRenderTarget(cmd);
+	modelRenderer_->DrawAll(cmd,
+		GraphicsGroup::GetInstance()->GetDevice().Get(),
+		rt,
+		pso,
+		sceneContext_->GetLightLibrary(),
+		nullptr,
+		ModelRenderPhase::Foreground);
+}

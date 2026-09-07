@@ -20,6 +20,7 @@ namespace CalyxEngine {
 			j["drawEnable"] = object->IsDrawEnable();
 			j["castShadow"] = object->IsCastShadow();
 			j["cameraDitherEnabled"] = object->IsCameraDitherEnabled();
+			j["drawInForeground"] = object->IsDrawInForeground();
 			j["outlineEnabled"] = object->IsOutlineEnabled();
 			j["outlineThickness"] = object->GetOutlineSettings().thickness;
 			j["outlineColor"] = object->GetOutlineSettings().color;
@@ -36,6 +37,7 @@ namespace CalyxEngine {
 			object->SetDrawEnable(j.value("drawEnable", object->IsDrawEnable()));
 			object->SetCastShadow(j.value("castShadow", object->IsCastShadow()));
 			object->SetCameraDitherEnabled(j.value("cameraDitherEnabled", object->IsCameraDitherEnabled()));
+			object->SetDrawInForeground(j.value("drawInForeground", object->IsDrawInForeground()));
 			object->SetOutlineEnabled(j.value("outlineEnabled", object->IsOutlineEnabled()));
 			object->SetOutlineThickness(j.value("outlineThickness", object->GetOutlineSettings().thickness));
 			object->SetOutlineColor(j.value("outlineColor", object->GetOutlineSettings().color));

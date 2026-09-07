@@ -286,11 +286,13 @@ void ModelRenderer::BuildStaticBatches() {
 			if(!inst.visible) continue;
 
 			const bool cameraDitherEnabled = !inst.owner || inst.owner->IsCameraDitherEnabled();
-			auto* item = FindCompatibleStaticBatch(batch, model, cameraDitherEnabled);
+			const bool foreground = inst.owner && inst.owner->IsDrawInForeground();
+			auto* item = FindCompatibleStaticBatch(batch, model, cameraDitherEnabled, foreground);
 			if(!item) {
 				StaticBatchItem newItem;
 				newItem.model = model;
 				newItem.cameraDitherEnabled = cameraDitherEnabled;
+				newItem.foreground = foreground;
 				batch.emplace_back(std::move(newItem));
 				item = &batch.back();
 			}
@@ -306,13 +308,14 @@ void ModelRenderer::BuildStaticBatches() {
 
 // 同一のモデル・テクスチャ・マテリアル・ディザ設定を持つ互換バッチを検索して返す
 // インスタンシング描画（DrawIndexedInstanced）のために同じ設定のインスタンスをひとつのバッチにまとめる
-ModelRenderer::StaticBatchItem* ModelRenderer::FindCompatibleStaticBatch(StaticBatch& batch, BaseModel* model, bool cameraDitherEnabled) {
+ModelRenderer::StaticBatchItem* ModelRenderer::FindCompatibleStaticBatch(StaticBatch& batch, BaseModel* model, bool cameraDitherEnabled, bool foreground) {
 	if(!model || !model->GetModelData()) return nullptr;
 
 	for(auto& item : batch) {
 		BaseModel* base = item.model;
 		if(!base || !base->GetModelData()) continue;
 		if(item.cameraDitherEnabled != cameraDitherEnabled) continue; // カメラディザ設定が異なる場合は別バッチ
+		if(item.foreground != foreground) continue;
 		if(base->GetModelData() != model->GetModelData()) continue;   // 異なるメッシュデータは別バッチ
 		if(base->GetTexSrv().ptr != model->GetTexSrv().ptr) continue; // テクスチャSRVが異なれば別バッチ
 		if(base->GetNormalMapSrv().ptr != model->GetNormalMapSrv().ptr) continue; // 法線マップが異なれば別バッチ
@@ -340,10 +343,23 @@ void ModelRenderer::BuildSkinnedBatches() {
 		SkinnedBatchItem ditherOff;
 		ditherOff.model = model;
 		ditherOff.cameraDitherEnabled = false;
+		SkinnedBatchItem foregroundDitherOn;
+		foregroundDitherOn.model = model;
+		foregroundDitherOn.cameraDitherEnabled = true;
+		foregroundDitherOn.foreground = true;
+		SkinnedBatchItem foregroundDitherOff;
+		foregroundDitherOff.model = model;
+		foregroundDitherOff.cameraDitherEnabled = false;
+		foregroundDitherOff.foreground = true;
 		for(auto& inst : insts) {
 			if(inst.visible) {
 				const bool cameraDitherEnabled = !inst.owner || inst.owner->IsCameraDitherEnabled();
-				(cameraDitherEnabled ? ditherOn.transforms : ditherOff.transforms).push_back(inst.tf);
+				const bool foreground = inst.owner && inst.owner->IsDrawInForeground();
+				if(foreground) {
+					(cameraDitherEnabled ? foregroundDitherOn.transforms : foregroundDitherOff.transforms).push_back(inst.tf);
+				} else {
+					(cameraDitherEnabled ? ditherOn.transforms : ditherOff.transforms).push_back(inst.tf);
+				}
 			}
 		}
 
@@ -355,6 +371,8 @@ void ModelRenderer::BuildSkinnedBatches() {
 		if(!ditherOff.transforms.empty()) {
 			batch.emplace_back(std::move(ditherOff));
 		}
+		if(!foregroundDitherOn.transforms.empty()) batch.emplace_back(std::move(foregroundDitherOn));
+		if(!foregroundDitherOff.transforms.empty()) batch.emplace_back(std::move(foregroundDitherOff));
 	}
 }
 
@@ -374,7 +392,7 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 	// Phase 1: スキニング Compute Dispatch
 	// スキンメッシュの頂点変換をGPUのコンピュートシェーダーで実行する
 	// ============================================================
-	if(phase != ModelRenderPhase::Transparent) {
+	if(phase == ModelRenderPhase::All || phase == ModelRenderPhase::Opaque) {
 		bool computeSet = false;
 		for(auto& [model, insts] : skinnedModels_) {
 			if(!model || !model->GetModelData() || insts.empty()) continue;
@@ -393,7 +411,7 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 	// Phase 2: Raytracing TLAS の構築
 	// DXR対応時のみ実行。影判定用のTop Level Acceleration Structureを再構築する
 	// ============================================================
-	if(phase != ModelRenderPhase::Transparent && raytracingSystem_) {
+	if((phase == ModelRenderPhase::All || phase == ModelRenderPhase::Opaque) && raytracingSystem_) {
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> cmd4;
 		Microsoft::WRL::ComPtr<ID3D12Device5>			   device5;
 
@@ -483,13 +501,15 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 
 		for(auto& [key, batch] : staticBatches_) {
 			const bool opaque = key.blend == BlendMode::NONE || key.blend == BlendMode::NORMAL;
-			if((phase == ModelRenderPhase::Opaque && !opaque) ||
-			   (phase == ModelRenderPhase::Transparent && opaque)) continue;
+			if(phase != ModelRenderPhase::Foreground &&
+			   ((phase == ModelRenderPhase::Opaque && !opaque) ||
+			   (phase == ModelRenderPhase::Transparent && opaque))) continue;
 			if(batch.empty()) continue;
 
 			// パイプラインキーが変わった場合のみパイプラインを切り替える（不要な切り替えを省く）
 			if(!hasLast || !(key == lastKey)) {
-				const auto ps = psoService->GetPipelineSet(key.tag, key.blend);
+				const auto tag = phase == ModelRenderPhase::Foreground ? PipelineTag::Object::ForegroundObject3D : key.tag;
+				const auto ps = psoService->GetPipelineSet(tag, key.blend);
 				psoService->SetCommand(ps, cmdList);
 
 				if(!bindObject3DPassResources()) continue;
@@ -500,6 +520,7 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 			}
 
 			for(auto& item : batch) {
+				if(item.foreground != (phase == ModelRenderPhase::Foreground)) continue;
 				BaseModel* model   = item.model;
 				auto&	   visible = item.transforms;
 				if(!model || visible.empty()) continue;
@@ -510,13 +531,16 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 						CalyxEngine::MaterialGraphRuntimeShader shader = runtimeMaterialShaderCache_.GetOrCompileObject3DPixelShader(*material);
 						if(shader.pixelShader) {
 							// 動的コンパイル済みシェーダーを使うカスタムパイプラインを設定
-							const auto generatedSet = psoService->GetGeneratedMaterialObjectPipelineSet(model->GetBlendMode(), shader.pixelShader, shader.hash);
+							const auto generatedSet = phase == ModelRenderPhase::Foreground
+								? psoService->GetGeneratedMaterialForegroundObjectPipelineSet(model->GetBlendMode(), shader.pixelShader, shader.hash)
+								: psoService->GetGeneratedMaterialObjectPipelineSet(model->GetBlendMode(), shader.pixelShader, shader.hash);
 							psoService->SetCommand(generatedSet, cmdList);
 							if(!bindObject3DPassResources()) continue;
 							usingGeneratedPipeline = true;
 						} else if(usingGeneratedPipeline) {
 							// シェーダーコンパイル未完了の場合は標準パイプラインに戻す
-							const auto ps = psoService->GetPipelineSet(key.tag, key.blend);
+							const auto tag = phase == ModelRenderPhase::Foreground ? PipelineTag::Object::ForegroundObject3D : key.tag;
+							const auto ps = psoService->GetPipelineSet(tag, key.blend);
 							psoService->SetCommand(ps, cmdList);
 							if(!bindObject3DPassResources()) continue;
 							usingGeneratedPipeline = false;
@@ -524,7 +548,8 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 					}
 				} else if(usingGeneratedPipeline) {
 					// 直前が動的パイプラインで、今回は通常モデル → 標準パイプラインに戻す
-					const auto ps = psoService->GetPipelineSet(key.tag, key.blend);
+					const auto tag = phase == ModelRenderPhase::Foreground ? PipelineTag::Object::ForegroundObject3D : key.tag;
+					const auto ps = psoService->GetPipelineSet(tag, key.blend);
 					psoService->SetCommand(ps, cmdList);
 					if(!bindObject3DPassResources()) continue;
 					usingGeneratedPipeline = false;
@@ -592,12 +617,14 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 
 		for(auto& [key, batch] : skinnedBatches_) {
 			const bool opaque = key.blend == BlendMode::NONE || key.blend == BlendMode::NORMAL;
-			if((phase == ModelRenderPhase::Opaque && !opaque) ||
-			   (phase == ModelRenderPhase::Transparent && opaque)) continue;
+			if(phase != ModelRenderPhase::Foreground &&
+			   ((phase == ModelRenderPhase::Opaque && !opaque) ||
+			   (phase == ModelRenderPhase::Transparent && opaque))) continue;
 			if(batch.empty()) continue;
 
 			if(!hasLast || !(key == lastKey)) {
-				const auto ps = psoService->GetPipelineSet(key.tag, key.blend);
+				const auto tag = phase == ModelRenderPhase::Foreground ? PipelineTag::Object::ForegroundSkinnedObject3D : key.tag;
+				const auto ps = psoService->GetPipelineSet(tag, key.blend);
 				psoService->SetCommand(ps, cmdList);
 
 				if(shadowMapSystem) {
@@ -621,6 +648,7 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 			}
 
 			for(auto& item : batch) {
+				if(item.foreground != (phase == ModelRenderPhase::Foreground)) continue;
 				auto* model = item.model;
 				auto& visible = item.transforms;
 				if(!model || visible.empty()) continue;
@@ -629,7 +657,9 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 					if(auto material = model->GetMaterialAsset()) {
 						CalyxEngine::MaterialGraphRuntimeShader shader = runtimeMaterialShaderCache_.GetOrCompileObject3DPixelShader(*material);
 						if(shader.pixelShader) {
-							const auto generatedSet = psoService->GetGeneratedMaterialSkinnedPipelineSet(model->GetBlendMode(), shader.pixelShader, shader.hash);
+							const auto generatedSet = phase == ModelRenderPhase::Foreground
+								? psoService->GetGeneratedMaterialForegroundSkinnedPipelineSet(model->GetBlendMode(), shader.pixelShader, shader.hash)
+								: psoService->GetGeneratedMaterialSkinnedPipelineSet(model->GetBlendMode(), shader.pixelShader, shader.hash);
 							psoService->SetCommand(generatedSet, cmdList);
 							if(shadowMapSystem) {
 								shadowMapSystem->BindForMainPass(cmdList);
@@ -643,7 +673,8 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 							lightLibrary->SetCommand(cmdList, PipelineType::SkinningObject3D);
 							usingGeneratedPipeline = true;
 						} else if(usingGeneratedPipeline) {
-							const auto ps = psoService->GetPipelineSet(key.tag, key.blend);
+							const auto tag = phase == ModelRenderPhase::Foreground ? PipelineTag::Object::ForegroundSkinnedObject3D : key.tag;
+							const auto ps = psoService->GetPipelineSet(tag, key.blend);
 							psoService->SetCommand(ps, cmdList);
 							if(shadowMapSystem) {
 								shadowMapSystem->BindForMainPass(cmdList);
@@ -659,7 +690,8 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 						}
 					}
 				} else if(usingGeneratedPipeline) {
-					const auto ps = psoService->GetPipelineSet(key.tag, key.blend);
+					const auto tag = phase == ModelRenderPhase::Foreground ? PipelineTag::Object::ForegroundSkinnedObject3D : key.tag;
+					const auto ps = psoService->GetPipelineSet(tag, key.blend);
 					psoService->SetCommand(ps, cmdList);
 					if(shadowMapSystem) {
 						shadowMapSystem->BindForMainPass(cmdList);
