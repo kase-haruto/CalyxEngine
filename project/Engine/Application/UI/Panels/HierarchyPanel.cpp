@@ -21,6 +21,7 @@
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
 #include <Engine/Objects/3D/Actor/StaticModelObject.h>
 #include <Engine/Objects/2D/Object2d/SpriteSceneObject2d.h>
+#include <Engine/Objects/2D/Object2d/TextSceneObject2d.h>
 #include <Engine/Objects/LightObject/DirectionalLight.h>
 #include <Engine/Objects/LightObject/PointLight.h>
 
@@ -216,6 +217,7 @@ namespace CalyxEngine {
 					if(ImGui::BeginMenu("2D")) {
 						if(ImGui::MenuItem("Sprite 2D")) createRoot(std::make_shared<CalyxEngine::SpriteSceneObject2d>());
 						if(ImGui::MenuItem("Animated Sprite 2D")) createRoot(std::make_shared<CalyxEngine::AnimatedSpriteSceneObject2d>());
+						if(ImGui::MenuItem("Text 2D")) createRoot(std::make_shared<CalyxEngine::TextSceneObject2d>());
 						ImGui::EndMenu();
 					}
 					if(ImGui::BeginMenu("Effect")) {
@@ -479,6 +481,7 @@ namespace CalyxEngine {
 					if(ImGui::BeginMenu("2D")) {
 						if(ImGui::MenuItem("Sprite 2D")) createChild(std::make_shared<CalyxEngine::SpriteSceneObject2d>());
 						if(ImGui::MenuItem("Animated Sprite 2D")) createChild(std::make_shared<CalyxEngine::AnimatedSpriteSceneObject2d>());
+						if(ImGui::MenuItem("Text 2D")) createChild(std::make_shared<CalyxEngine::TextSceneObject2d>());
 						ImGui::EndMenu();
 					}
 					if(ImGui::BeginMenu("Effect")) {

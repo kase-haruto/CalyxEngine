@@ -13,6 +13,8 @@
 #include <Engine/Renderer/Background/SpaceBackgroundSystem.h>
 #include <Engine/Objects/3D/Actor/BaseGameObject.h>
 #include <Engine/Objects/2D/Object2d/ISpriteRenderable.h>
+#include <Engine/Objects/2D/Object2d/ITextRenderable.h>
+#include <Engine/Renderer/Text/TextService.h>
 #include <Engine/PostProcess/Manager/PostEffectManager.h>
 #include <Engine/Objects/Event/BaseEventObject.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
@@ -173,6 +175,14 @@ void BaseScene::DrawSpritesOnly(ID3D12GraphicsCommandList* cmd,
 		}
 	}
 	spriteRenderer_->Draw(cmd, pso, RenderTargetType::BackBuffer);
+	if(sceneContext_) {
+		auto* textService = CalyxEngine::TextService::GetInstance();
+		for(auto* object : sceneContext_->GetObjectLibrary()->GetAllObjectsRaw()) {
+			if(auto* textObject = dynamic_cast<CalyxEngine::ITextRenderable*>(object)) {
+				textObject->SubmitText(*textService);
+			}
+		}
+	}
 	if(sceneContext_) {
 		for(auto* object : sceneContext_->GetObjectLibrary()->GetAllObjectsRaw()) {
 			if(auto* spriteObject = dynamic_cast<CalyxEngine::ISpriteRenderable*>(object)) {

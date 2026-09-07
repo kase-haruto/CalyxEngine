@@ -288,6 +288,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Objects\2D\Animation\TransformKeyframeAnimation2d.cpp" />
     <ClCompile Include="Engine\Objects\2D\Object2d\GameObject2d.cpp" />
     <ClCompile Include="Engine\Objects\2D\Object2d\SpriteSceneObject2d.cpp" />
+    <ClCompile Include="Engine\Objects\2D\Object2d\TextSceneObject2d.cpp" />
     <ClCompile Include="Engine\Objects\2D\Object2d\SpriteObject2d.cpp" />
     <ClCompile Include="Engine\Objects\2D\Renderer\Renderer2d.cpp" />
     <ClCompile Include="Engine\Objects\2D\Sprite\Component\SpriteComponent.cpp" />
@@ -917,6 +918,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Objects\2D\Animation\SpriteAnimator2d.h" />
     <ClInclude Include="Engine\Objects\2D\Animation\TransformKeyframeAnimation2d.h" />
     <ClInclude Include="Engine\Objects\2D\Object2d\SpriteSceneObject2d.h" />
+    <ClInclude Include="Engine\Objects\2D\Object2d\ITextRenderable.h" />
+    <ClInclude Include="Engine\Objects\2D\Object2d\TextSceneObject2d.h" />
     <ClInclude Include="Engine\Assets\DataAsset\SpriteAnimationAsset.h" />
     <ClInclude Include="Engine\Application\UI\Panels\SpriteAnimationEditorPanel.h" />
     <ClInclude Include="Engine\Application\UI\Panels\LivePPPanel.h" />

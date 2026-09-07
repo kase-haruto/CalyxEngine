@@ -32,11 +32,19 @@ namespace CalyxEngine {
 
 			const GlyphInfo* glyph = glyphProvider.GetGlyph(font, codePoint, pixelSize);
 			if(!glyph) continue;
+			const float advance = glyph->advance_ + style.letterSpacing_;
+			if(style.wordWrap_ && style.maxWidth_ > 0.0f && penX > origin.x &&
+			   penX + advance > origin.x + style.maxWidth_) {
+				maxX = (std::max)(maxX, penX);
+				penX = origin.x;
+				baseline += lineHeight;
+				++lineCount;
+			}
 			if(glyph->size_.x > 0.0f && glyph->size_.y > 0.0f) {
 				result.glyphs_.push_back({*glyph,
 					{penX + glyph->bearing_.x, baseline - glyph->bearing_.y}, index});
 			}
-			penX += glyph->advance_ + style.letterSpacing_;
+			penX += advance;
 		}
 		maxX = (std::max)(maxX, penX);
 		result.size_ = {(std::max)(0.0f, maxX - origin.x), lineHeight * lineCount};

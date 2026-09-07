@@ -54,9 +54,11 @@ namespace CalyxEngine {
 
 		for(const TextDrawData& draw : draws) {
 			if(!draw.layout_) continue;
-			const size_t count = (std::min)(draw.visibleGlyphCount_, draw.layout_->glyphs_.size());
-			for(size_t i = 0; i < count; ++i) {
+			for(size_t i = 0; i < draw.layout_->glyphs_.size(); ++i) {
 				const PositionedGlyph& positioned = draw.layout_->glyphs_[i];
+				// sourceIndex includes spaces and line breaks, allowing typewriter timing to
+				// advance by Unicode code point rather than only by drawable glyph count.
+				if(static_cast<size_t>(positioned.sourceIndex_) >= draw.visibleGlyphCount_) break;
 				const GlyphInfo& glyph = positioned.glyph_;
 				if(glyph.atlasPage_ >= batches_.size()) continue;
 				const float left = positioned.position_.x;
