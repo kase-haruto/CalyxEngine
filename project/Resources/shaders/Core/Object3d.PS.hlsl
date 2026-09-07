@@ -113,14 +113,6 @@ struct PixelShaderOutput {
     float4 bloomMask : SV_TARGET1; // Emissive bloom mask (MRT RT1)
 };
 
-///////////////////////////////////////////////////////////////////////////////
-//                    関数: トーンマッピング + ガンマ補正
-///////////////////////////////////////////////////////////////////////////////
-float3 ApplyToneMappingAndGamma(float3 color, float exposure) {
-    float3 toneMapped = color * exposure / (color * exposure + 1.0f);
-    return pow(toneMapped, 1.0 / 2.2);
-}
-
 bool CheckVisibility(float3 origin, float3 dir, float tMax);
 float ComputePointHardShadow_RT(float3 worldPos, float3 normal, float3 lightPos, float lightDistance);
 
@@ -380,7 +372,7 @@ PixelShaderOutput main(Object3dVertexOutput input) {
     if(gMaterial.enableLighting == 4) {
         if(alpha <= 0.01f) discard;
         float3 emissive = gMaterial.emissiveColor.rgb * max(gMaterial.emissiveIntensity, 0.0f);
-        output.color     = float4(ApplyToneMappingAndGamma(albedo, 1.0f) + emissive, alpha);
+        output.color     = float4(albedo + emissive, alpha);
         output.bloomMask = float4(emissive, 1.0f);
         return output;
     }
@@ -456,9 +448,9 @@ PixelShaderOutput main(Object3dVertexOutput input) {
         litColor += envColor * reflectionWeight;
     }
 
-    float3 finalColor = ApplyToneMappingAndGamma(litColor, 1.0f);
+    float3 finalColor = litColor;
 
-    // トーンマッピング後にEmissiveを加算し、閾値越えのHDR値として出力させる
+    // Emissiveを加算し、閾値越えのHDR値として出力させる
     finalColor += gMaterial.emissiveColor.rgb * max(gMaterial.emissiveIntensity, 0.0f);
 
 	// ---- ディザ抜き (Dithered Clipping) ----
