@@ -67,6 +67,7 @@ void PipelineService::RegisterAllPipelines() {
 		//						Object3D Pipelines
 		//===================================================================*/
 		regObj(PipelineTag::Object::Object3d, mode, PipelinePresets::MakeObject3D);
+		regObj(PipelineTag::Object::Object3dOverlay, mode, PipelinePresets::MakeObject3DOverlay);
 		
 		//===================================================================*/
 		//						SkinObject3D Pipelines

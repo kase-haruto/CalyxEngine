@@ -1,4 +1,5 @@
 #pragma once
+#include <Engine/Foundation/Export/CalyxAPI.h>
 /* ========================================================================
 /* include space
 /* ===================================================================== */
@@ -8,7 +9,7 @@
 /**
  * @brief GraphicsGroupの機能を提供するクラスです。
  */
-class GraphicsGroup {
+class CALYX_API GraphicsGroup {
 private:
 	template <class T>
 	using ComPtr = Microsoft::WRL::ComPtr<T>;
