@@ -310,6 +310,7 @@ namespace CalyxEngine {
 		static void CompileLitMasterIR(const MaterialAsset& material, const Node& node, CompiledMaterialGraph& compiled) {
 			compiled.surfaceModel = CompiledSurfaceModel::Lit;
 			compiled.lightingMode = static_cast<int32_t>(GetFloatProperty(node, "lightingMode", 0.0f));
+			if(const NodePin* pin = FindInput(node, "Lighting Mode")) compiled.lightingMode = EvaluateLightingModeIR(material, pin->id, compiled.lightingMode, compiled);
 			if(const NodePin* pin = FindInput(node, "Base Color")) compiled.baseColor = EvaluateColorInput(material, pin->id, GetColorProperty(node, "baseColor", compiled.baseColor.factor));
 			if(const NodePin* pin = FindInput(node, "Emissive")) compiled.emissiveColor = EvaluateColorInput(material, pin->id, GetColorProperty(node, "emissiveColor", compiled.emissiveColor.factor));
 			if(const NodePin* pin = FindInput(node, "Emissive Intensity")) compiled.emissiveIntensity = EvaluateFloat(material, pin->id, GetFloatProperty(node, "emissiveIntensity", compiled.emissiveIntensity));

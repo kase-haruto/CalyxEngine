@@ -16,6 +16,7 @@
 #include "externals/imgui/imgui.h"
 #include "externals/nlohmann/json.hpp"
 #include <Engine/System/Command/EditorCommand/GuiCommand/ImGuiHelper/GuiCmd.h>
+#include <Engine/Foundation/Utility/Converter/EnumConverter.h>
 
 namespace {
 	int NormalizeColliderKind(int kind) {
@@ -69,6 +70,7 @@ BaseGameObject::BaseGameObject(const std::string&		  modelName,
 	config_.SetOnApplied([this](const BaseGameObjectConfig&) { this->ApplyConfig(); });
 	config_.GetConfig().colliderKind = 0;
 	InitializeCollider(ColliderKind::None);
+
 }
 
 BaseGameObject::BaseGameObject() {
@@ -334,7 +336,11 @@ void BaseGameObject::ShowGui() {
 
 void BaseGameObject::HeaderGui() {}
 
-void BaseGameObject::DerivativeGui() { ImGui::SeparatorText("derivative"); }
+void BaseGameObject::DerivativeGui() {
+	ImGui::SeparatorText("derivative");
+	model_->LightingModeCombo();
+	
+}
 
 void BaseGameObject::ApplyConfig() {
 	const BaseGameObjectConfig& cfg = config_.GetConfig();

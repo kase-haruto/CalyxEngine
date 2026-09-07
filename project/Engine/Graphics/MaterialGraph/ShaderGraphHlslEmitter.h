@@ -287,17 +287,19 @@ namespace CalyxEngine {
 ///////////////////////////////////////////////////////////////////////////////
 //                    繝・ぅ繧ｶ繝槭ャ繝・
 ///////////////////////////////////////////////////////////////////////////////
+float3 ApplyToneMappingAndGamma(float3 color) {
+    float3 linearColor = max(color, 0.0f);
+    float luminance = dot(linearColor, float3(0.2126f, 0.7152f, 0.0722f));
+    float3 toneMapped = linearColor / (1.0f + luminance);
+    return pow(toneMapped, 1.0f / 2.2f);
+}
+
 static const float4x4 kBayerMatrix = float4x4(
 	0.0 / 16.0, 8.0 / 16.0, 2.0 / 16.0, 10.0 / 16.0,
 	12.0 / 16.0, 4.0 / 16.0, 14.0 / 16.0, 6.0 / 16.0,
 	3.0 / 16.0, 11.0 / 16.0, 1.0 / 16.0, 9.0 / 16.0,
 	15.0 / 16.0, 7.0 / 16.0, 13.0 / 16.0, 5.0 / 16.0
 );
-
-float3 ApplyToneMappingAndGamma(float3 color, float exposure) {
-    float3 toneMapped = color * exposure / (color * exposure + 1.0f);
-    return pow(toneMapped, 1.0 / 2.2);
-}
 
 float ToonBandGenerated(float value, float threshold, float softness) {
     float width = max(softness, 0.0001f);
@@ -622,7 +624,8 @@ PixelShaderOutput main(VertexShaderOutput input) {
 
     if(surface.lightingMode == 4) {
         if(alpha <= 0.01f) discard;
-        output.color = float4(ApplyToneMappingAndGamma(albedo, 1.0f) + emissive, alpha);
+        // Match Sprite rendering for Unlit: no lighting, tone mapping, or extra gamma.
+        output.color = float4(albedo + emissive, alpha);
         output.bloomMask = float4(emissive, 1.0f);
         return output;
     }
@@ -665,7 +668,7 @@ PixelShaderOutput main(VertexShaderOutput input) {
         litColor += envColor * reflectionWeight;
     }
 
-    float3 finalColor = ApplyToneMappingAndGamma(litColor, 1.0f);
+    float3 finalColor = ApplyToneMappingAndGamma(litColor);
 
 	// Dithered clipping
 	uint2 pixelPos = uint2(input.position.xy) % 4;

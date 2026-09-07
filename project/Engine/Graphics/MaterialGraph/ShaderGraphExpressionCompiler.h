@@ -508,7 +508,9 @@ namespace CalyxEngine {
 			ShaderGraphExpressionIR surface;
 			surface.textureSlotCount = (std::min)(TextureSlotCount(material.graph), kMaxGraphTextures);
 			surface.lightingMode = material.lightingMode;
-			surface.baseColor = useMaterialCBufferDefaults ? ShaderGraphExpression{"gMaterial.color", false} : ColorExpression(material.color);
+			surface.baseColor = useMaterialCBufferDefaults
+				? ShaderGraphExpression{"gMaterial.color * gTexture.Sample(gSampler, uv)", true}
+				: ColorExpression(material.color);
 			surface.emissiveColor = useMaterialCBufferDefaults ? ShaderGraphExpression{"gMaterial.emissiveColor", false} : ColorExpression(material.emissiveColor);
 			surface.emissiveIntensity = useMaterialCBufferDefaults ? ShaderGraphExpression{"gMaterial.emissiveIntensity", false} : FloatExpression(material.emissiveIntensity);
 			surface.shininess = useMaterialCBufferDefaults ? ShaderGraphExpression{"gMaterial.shiniess", false} : FloatExpression(material.shininess);
@@ -605,6 +607,16 @@ namespace CalyxEngine {
 			if(master->type == "LitMaster") {
 				// 標準ライティングに必要な入力を式IRへ設定する。
 				surface.lightingMode = static_cast<int32_t>(GetFloatProperty(*master, "lightingMode", 0.0f));
+				if(const NodePin* lightingPin = FindInput(*master, "Lighting Mode")) {
+					if(const Node* linked = FindLinkedNode(material.graph, lightingPin->id)) {
+						if(linked->type == "LightingMode") surface.lightingMode = std::clamp(linked->GetProperty<int32_t>("value", surface.lightingMode), 0, 4);
+						else if(linked->type == "LambertLighting") surface.lightingMode = 1;
+						else if(linked->type == "ToonLighting") surface.lightingMode = 2;
+						else if(linked->type == "NoLighting") surface.lightingMode = 3;
+						else if(linked->type == "UnlitColorLighting") surface.lightingMode = 4;
+						else if(linked->type == "HalfLambertLighting") surface.lightingMode = 0;
+					}
+				}
 				surface.baseColor = ColorInputExpression(material, *master, "Base Color", useMaterialCBufferDefaults ? surface.baseColor : ColorExpression(material.color));
 				surface.emissiveColor = ColorInputExpression(material, *master, "Emissive", useMaterialCBufferDefaults ? surface.emissiveColor : ColorExpression(GetColorProperty(*master, "emissiveColor", material.emissiveColor)));
 				surface.emissiveIntensity = FloatInputExpression(material, *master, "Emissive Intensity", useMaterialCBufferDefaults ? surface.emissiveIntensity : FloatExpression(GetFloatProperty(*master, "emissiveIntensity", material.emissiveIntensity)));

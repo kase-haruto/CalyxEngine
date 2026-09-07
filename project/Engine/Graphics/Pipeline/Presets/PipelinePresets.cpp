@@ -101,6 +101,7 @@ GraphicsPipelineDesc PipelinePresets::MakeObject3D(BlendMode mode) {
 
 GraphicsPipelineDesc PipelinePresets::MakeObject3DOverlay(BlendMode mode) {
 	GraphicsPipelineDesc desc = MakeObject3D(mode);
+	desc.PS(L"Object3dOverlay.PS.hlsl");
 	desc.DepthEnable(false).DepthFunc(D3D12_COMPARISON_FUNC_ALWAYS);
 	desc.rtvFormats_ = {DXGI_FORMAT_R8G8B8A8_UNORM};
 	return desc;
@@ -677,6 +678,32 @@ GraphicsPipelineDesc PipelinePresets::MakeObject2D() {
 		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)
 		.SamplerWrapLinear(0);
 
+	return desc;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		Text
+/////////////////////////////////////////////////////////////////////////////////////////
+GraphicsPipelineDesc PipelinePresets::MakeText() {
+	GraphicsPipelineDesc desc;
+	std::vector<D3D12_INPUT_ELEMENT_DESC> input = {
+		{"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 8, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}};
+	desc.VS(L"Core/Text/Text.VS.hlsl")
+		.PS(L"Core/Text/Text.PS.hlsl")
+		.Input(input)
+		.Blend(BlendMode::ALPHA)
+		.CullNone()
+		.DepthEnable(false)
+		.DepthFunc(D3D12_COMPARISON_FUNC_ALWAYS)
+		.RTV(DXGI_FORMAT_R8G8B8A8_UNORM)
+		.Samples(1);
+	desc.root_
+		.AllowIA()
+		.Constants(0, 2, D3D12_SHADER_VISIBILITY_VERTEX)
+		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)
+		.SampleClampLinear(0);
 	return desc;
 }
 

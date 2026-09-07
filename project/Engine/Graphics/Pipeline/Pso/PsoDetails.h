@@ -47,6 +47,7 @@ namespace PipelineTag {
 		PickingObject3D,
 		PickingSkinned,
 		Object2d,
+		Text,
 		Particle,
 		GpuParticle,
 		Trail,

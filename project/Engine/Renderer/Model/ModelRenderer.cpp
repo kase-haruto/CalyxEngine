@@ -553,9 +553,9 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 				cmdList->SetGraphicsRootDescriptorTable(1, model->GetInstanceSrv());
 
 				// マテリアルパラメータをGPUへ転送・バインド
-				if(model->UsesRuntimeMaterialGraph()) {
-					model->TransferMaterial();
-				}
+				// MaterialAsset is editable at runtime. Refresh the mapped constant buffer for
+				// both legacy and Surface graphs so lighting-mode edits take effect immediately.
+				model->TransferMaterial();
 				model->BindMaterialCB(cmdList);
 				cmdList->SetGraphicsRootDescriptorTable(2, model->GetTexSrv());            // アルベドテクスチャ
 				cmdList->SetGraphicsRootDescriptorTable(12, model->GetMaterialGraphTextureSrvTable(0)); // マテリアルグラフ用テクスチャ
@@ -684,9 +684,8 @@ void ModelRenderer::DrawAll(ID3D12GraphicsCommandList*		cmdList,
 				model->UploadInstanceMatrices(visible);
 				cmdList->SetGraphicsRootDescriptorTable(1, model->GetInstanceSrv());
 
-				if(model->UsesRuntimeMaterialGraph()) {
-					model->TransferMaterial();
-				}
+				// Keep skinned models in sync with runtime MaterialAsset edits as well.
+				model->TransferMaterial();
 				model->BindMaterialCB(cmdList);
 				cmdList->SetGraphicsRootDescriptorTable(2, model->GetTexSrv());
 				cmdList->SetGraphicsRootDescriptorTable(12, model->GetMaterialGraphTextureSrvTable(0));

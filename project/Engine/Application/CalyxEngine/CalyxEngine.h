@@ -5,6 +5,7 @@
 #include <CalyxEngine/Project.h>
 #include <CalyxEngine/SceneRegistry.h>
 #include <Engine/Scene/Utility/SceneUtility.h>
+#include <Engine/Renderer/Text/TextService.h>
 
 namespace CalyxEngine {
 	CALYX_API void RegisterGeneratedSceneObjects();

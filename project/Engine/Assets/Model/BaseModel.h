@@ -54,6 +54,8 @@ public:
 	virtual void Draw(const WorldTransform& transform);
 	static void BeginUploadFrame();
 
+	void LightingModeCombo();
+
 	//--------- config -----------------------------------------------------
 	void ApplyConfig(const BaseModelConfig& config);
 	BaseModelConfig ExtractConfig() const;
@@ -138,7 +140,7 @@ protected:
 	std::optional<RimLightOverride> rimLightOverride_;
 	bool runtimeTextureOverride_ = false;
 public:
-	BlendMode blendMode_ = BlendMode::NORMAL;
+	BlendMode blendMode_ = BlendMode::NONE;
 	Transform2D  uvTransform{ {1.0f, 1.0f},
 							  0.0f,
 							  {0.0f, 0.0f} };

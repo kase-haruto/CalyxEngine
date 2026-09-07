@@ -16,7 +16,7 @@
 struct BaseModelConfig {
 	Guid			  materialGuid{}; // マテリアル GUID
 	Transform2DConfig uvTransConfig;  // UV 2D 変換
-	int				  blendMode = 5;  // 初期値は通常ブレンド
+	int				  blendMode = 0;  // 不透明モデルはブレンドしない
 	std::string		  modelName;	  // モデル名/パス
 	Guid			  textureGuid{};  // テクスチャ GUID
 

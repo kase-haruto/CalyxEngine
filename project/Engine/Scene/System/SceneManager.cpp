@@ -17,6 +17,7 @@
 #include <Engine/Renderer/Grid/GridRenderer.h>
 #include <Engine/Renderer/Model/ModelRenderer.h>
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
+#include <Engine/Renderer/Text/TextService.h>
 #include <Engine/Scene/Base/IScene.h>
 #include <Engine/Scene/Context/SceneContext.h>
 #include <Engine/Scene/Fade/FadeBlackOutEffect.h>
@@ -659,6 +660,9 @@ namespace CalyxEngine {
 
 		// 3Dシーンやポストエフェクトを通さず、スプライトのみを描画する
 		activeScene_.scene->DrawSpritesOnly(cmd, pso);
+		const D3D12_VIEWPORT viewport = rt->GetViewport();
+		CalyxEngine::TextService::GetInstance()->Render(
+			cmd, pso, static_cast<uint32_t>(viewport.Width), static_cast<uint32_t>(viewport.Height));
 
 		// 後続処理からテクスチャとして参照する出力だけShaderResource状態へ戻す
 		if(transitionToShaderResource) {

@@ -33,6 +33,7 @@
 
 #include <array>
 #include <cctype>
+#include <Engine\Foundation\Utility\Converter\EnumConverter.h>
 
 const std::string BaseModel::directoryPath_ = "Resource/models";
 
@@ -49,6 +50,14 @@ BaseModel::~BaseModel() {
 
 void BaseModel::BeginUploadFrame() {
 	++gBaseModelUploadFrameGeneration;
+}
+
+void BaseModel::LightingModeCombo() {
+	LightingMode mode = static_cast<LightingMode>(currentMaterial_.lightingMode);
+
+	if(CalyxEngine::EnumConverter<LightingMode>::Combo("lightingMode", mode)) {
+		currentMaterial_.lightingMode = static_cast<decltype(currentMaterial_.lightingMode)>(mode);
+	}
 }
 
 void BaseModel::Update(float deltaTime) {

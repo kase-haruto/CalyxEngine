@@ -34,6 +34,7 @@
 
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 #include <Engine/Renderer/Background/SpaceBackgroundSystem.h>
+#include <Engine/Renderer/Text/TextService.h>
 
 #include <algorithm>
 
@@ -152,6 +153,7 @@ namespace CalyxEngine {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	void CalyxCore::BeginFrame() {
 		BaseModel::BeginUploadFrame();
+		TextService::GetInstance()->BeginFrame();
 
 		// インプットの更新
 		CalyxFoundation::Input::Update();
@@ -253,6 +255,8 @@ namespace CalyxEngine {
 			previews->Shutdown();
 		}
 
+		// Text AtlasのDescriptorを共通Heap破棄前に返却する。
+		TextService::GetInstance()->Finalize();
 		// imgui終了処理
 		imguiManager_->Finalize();
 		// textureの終了処理

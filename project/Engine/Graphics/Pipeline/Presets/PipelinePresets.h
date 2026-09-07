@@ -39,6 +39,7 @@ namespace PipelinePresets {
 
 	// 2dObjects
 	GraphicsPipelineDesc MakeObject2D();
+	GraphicsPipelineDesc MakeText();
 
 	// cs
 	GraphicsPipelineDesc MakeGpuParticleCS();

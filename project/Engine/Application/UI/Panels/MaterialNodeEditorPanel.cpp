@@ -1012,6 +1012,20 @@ namespace CalyxEngine {
 			drawFloatFallback("Spec Intensity", "Spec Intensity", "specularIntensity", specIntensity, 0.0f, 4.0f);
 		} else if(node.type == "LitMaster") {
 			ImGui::TextDisabled("Standard Lit Surface");
+			const bool lightingModeLinked = IsInputLinked(material, node, "Lighting Mode");
+			int32_t lightingMode = std::clamp(
+				static_cast<int32_t>(GetFloatProperty(node, "lightingMode", static_cast<float>(material.lightingMode))),
+				0,
+				kLightingModeCount - 1);
+			ImGui::BeginDisabled(lightingModeLinked);
+			ImGui::SetNextItemWidth(188.0f);
+			if(ImGui::Combo("Lighting Mode", &lightingMode, kLightingModes, kLightingModeCount)) {
+				node.SetProperty("lightingMode", lightingMode);
+				material.lightingMode = lightingMode;
+				changed = true;
+			}
+			ImGui::EndDisabled();
+			if(lightingModeLinked) ImGui::TextDisabled("Controlled by input pin");
 			Vector4 emissive = GetColorProperty(node, "emissiveColor", material.emissiveColor);
 			float emissiveIntensity = GetFloatProperty(node, "emissiveIntensity", material.emissiveIntensity);
 			const bool emissiveLinked = IsInputLinked(material, node, "Emissive");
@@ -1250,7 +1264,7 @@ namespace CalyxEngine {
 		if(node.type == "UnlitColorLighting") node.SetProperty("value", 4);
 		if(node.type == "ToonMaster") SetDefaultToonMasterProperties(node);
 		if(node.type == "LitMaster") {
-			node.SetProperty("lightingMode", 0.0f);
+			node.SetProperty("lightingMode", std::clamp(material.lightingMode, 0, kLightingModeCount - 1));
 			SetColorProperty(node, "emissiveColor", material.emissiveColor);
 			node.SetProperty("emissiveIntensity", material.emissiveIntensity);
 			SetFloatProperty(node, "shininess", material.shininess);

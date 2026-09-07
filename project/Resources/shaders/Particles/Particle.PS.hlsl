@@ -76,13 +76,11 @@ PixelShaderOutput main(VertexShaderOutput input) {
 		baseColor.a *= lerp(1.0f, mask, saturate(gMaterial.noiseMaskParams.z));
 	}
 	// トーンマッピング
-	float exposure = 1.0f;
-	float3 toneMapped = baseColor.rgb * exposure / (baseColor.rgb * exposure + 1.0f);
-	// ガンマ補正
-	float3 gammaCorrected = pow(toneMapped, 1.0 / 2.2);
-
 	float3 emissive = input.emissiveColor.rgb * max(input.emissiveIntensity, 0.0f) * baseColor.a;
-	output.color = float4(gammaCorrected + emissive, baseColor.a);
+	float3 linearColor = max(baseColor.rgb, 0.0f);
+	float luminance = dot(linearColor, float3(0.2126f, 0.7152f, 0.0722f));
+	float3 toneMapped = linearColor / (1.0f + luminance);
+	output.color = float4(pow(toneMapped, 1.0f / 2.2f) + emissive, baseColor.a);
 	output.bloomMask = float4(emissive, baseColor.a);
 
 	// ---- ディザ抜き (Dithered Clipping) ----

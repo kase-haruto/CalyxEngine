@@ -88,6 +88,7 @@ void PipelineService::RegisterAllPipelines() {
 		regObj(PipelineTag::Object::Trail, mode, PipelinePresets::MakeTrail);
 	}
 	regObjNoBlend(PipelineTag::Object::EditorInfiniteGrid, PipelinePresets::MakeEditorInfiniteGrid);
+	regObjNoBlend(PipelineTag::Object::Text, PipelinePresets::MakeText);
 
 	//========================= Shadow ===================================
 	regObjNoBlend(PipelineTag::Object::OutlineObject3D, PipelinePresets::MakeOutlineObject3D);

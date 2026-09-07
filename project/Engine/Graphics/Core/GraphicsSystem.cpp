@@ -1,5 +1,6 @@
 #include "GraphicsSystem.h"
 #include <Engine/Graphics/Context/GraphicsGroup.h>
+#include <Engine/Renderer/Text/TextService.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //		graphics関連初期化
@@ -13,6 +14,7 @@ void GraphicsSystem::Initialize() {
 
 	//いったんコマンドリストをもらってくる
 	commandList_ = GraphicsGroup::GetInstance()->GetCommandList();
+	CalyxEngine::TextService::GetInstance()->Initialize(GraphicsGroup::GetInstance()->GetDevice().Get());
 
 }
 
