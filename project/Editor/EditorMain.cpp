@@ -216,6 +216,12 @@ private:
 	}
 
 	void FinalizeGameApplication() {
+		// OnFinalize is followed by destruction of EditorApplication after the
+		// framework has already gone away. Avoid touching the cached framework
+		// pointers a second time in that destructor.
+		if(!gameApplication_ && !gameEditorRegistered_) {
+			return;
+		}
 		if(engineUi_ && gameModule_.GetHandle()) {
 			engineUi_->UnregisterEditorModule(gameModule_.GetHandle());
 		}

@@ -104,7 +104,22 @@ namespace CalyxEngine {
 			livePPService_.reset();
 		}
 #endif
-		system_->Finalize();
+		// Scene/UI objects own audio voices, particle emitters, descriptors, and
+		// pipeline resources. Release all of them while CalyxCore (and therefore
+		// XAudio2/D3D12) is still alive.
+		editorCollection_.reset();
+		engineUICore_.reset();
+		if(sceneManager_) {
+			sceneManager_->ClearAllContexts();
+			sceneManager_.reset();
+		}
+		playSession_.reset();
+		graphicsSystem_.reset();
+
+		if(system_) {
+			system_->Finalize();
+			system_.reset();
+		}
 		CoUninitialize();
 	}
 
