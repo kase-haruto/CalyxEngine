@@ -94,6 +94,8 @@ namespace CalyxEngine {
 				return "Scene";
 			case AssetType::PostEffect:
 				return "Post Effect";
+			case AssetType::Font:
+				return "Font";
 			case AssetType::Unknown:
 			default:
 				return "Unknown";
@@ -246,6 +248,9 @@ namespace CalyxEngine {
 				break;
 			case AssetType::PostEffect:
 				tname = "Post Effect";
+				break;
+			case AssetType::Font:
+				tname = "Font";
 				break;
 			default:
 				break;
@@ -782,6 +787,10 @@ namespace CalyxEngine {
 				typeFilter_ = AssetType::Audio;
 				scope_		= Scope::All;
 			}
+			if(ImGui::Selectable("All Fonts")) {
+				typeFilter_ = AssetType::Font;
+				scope_ = Scope::All;
+			}
 			if(ImGui::Selectable("All Materials")) {
 				typeFilter_ = AssetType::Material;
 				scope_		= Scope::All;
@@ -839,6 +848,9 @@ namespace CalyxEngine {
 			break;
 		case AssetType::PostEffect:
 			label = "Drop Post Effect here";
+			break;
+		case AssetType::Font:
+			label = "Drop Font here";
 			break;
 		default:
 			break;

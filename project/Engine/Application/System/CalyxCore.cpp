@@ -34,6 +34,7 @@
 
 #include <Engine/Renderer/Primitive/PrimitiveDrawer.h>
 #include <Engine/Renderer/Background/SpaceBackgroundSystem.h>
+#include <Engine/Renderer/Text/TextService.h>
 
 #include <algorithm>
 
@@ -152,6 +153,7 @@ namespace CalyxEngine {
 	/////////////////////////////////////////////////////////////////////////////////////////
 	void CalyxCore::BeginFrame() {
 		BaseModel::BeginUploadFrame();
+		TextService::GetInstance()->BeginFrame();
 
 		// インプットの更新
 		CalyxFoundation::Input::Update();
@@ -261,6 +263,7 @@ namespace CalyxEngine {
 		// モデルマネージャーの開放
 		AssetManager::GetInstance()->Finalize();
 		PrimitiveDrawer::GetInstance()->Finalize();
+		TextService::GetInstance()->Finalize();
 		// カメラの開放
 		// pipelineの終了処理
 		pipelineStateManager_->Finalize();

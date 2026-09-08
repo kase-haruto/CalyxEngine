@@ -102,7 +102,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DisableSpecificWarnings>4251;4275;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine\Application;$(ProjectDir)externals;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine\Application;$(ProjectDir)externals;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\assimp\include;$(ProjectDir)externals\freetype-2.14.3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -135,7 +135,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DisableSpecificWarnings>4251;4275;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine\Application;$(ProjectDir)externals;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine\Application;$(ProjectDir)externals;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\assimp\include;$(ProjectDir)externals\freetype-2.14.3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
     </ClCompile>
@@ -166,7 +166,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DisableSpecificWarnings>4251;4275;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine\Application;$(ProjectDir)externals;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine\Application;$(ProjectDir)externals;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\assimp\include;$(ProjectDir)externals\freetype-2.14.3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -198,7 +198,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DisableSpecificWarnings>4251;4275;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine\Application;$(ProjectDir)externals;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine\Application;$(ProjectDir)externals;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\assimp\include;$(ProjectDir)externals\freetype-2.14.3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <WholeProgramOptimization>false</WholeProgramOptimization>
@@ -214,6 +214,18 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+	<ClCompile Include="Engine\Foundation\Utility\Text\Utf8Decoder.cpp" />
+	<ClCompile Include="Engine\Assets\Font\FontAsset.cpp" />
+	<ClCompile Include="Engine\Assets\Font\FreeTypeLibrary.cpp" />
+	<ClCompile Include="Engine\Assets\Font\FontLoader.cpp" />
+	<ClCompile Include="Engine\Assets\Font\FreeTypeBitmapRasterizer.cpp" />
+	<ClCompile Include="Engine\Assets\Font\FontRepository.cpp" />
+	<ClCompile Include="Engine\Renderer\Text\GlyphAtlas.cpp" />
+	<ClCompile Include="Engine\Renderer\Text\GlyphCache.cpp" />
+	<ClCompile Include="Engine\Renderer\Text\TextLayout.cpp" />
+	<ClCompile Include="Engine\Renderer\Text\TextRenderer.cpp" />
+	<ClCompile Include="Engine\Renderer\Text\TextService.cpp" />
+	<ClCompile Include="Engine\Objects\2D\Object2d\TextSceneObject2d.cpp" />
 	<ClCompile Include="Engine\Renderer\Background\SpaceBackgroundSystem.cpp" />
 	<ClCompile Include="Engine\Application\Effects\Gameplay\ThrusterEffect.cpp" />
     <ClCompile Include="Engine\Scene\Fade\BaseSceneTransitionEffect.cpp" />
@@ -510,6 +522,22 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Scene\Fade\FadeBlackOutEffect.cpp" />
   </ItemGroup>
   <ItemGroup>
+	<ClInclude Include="Engine\Foundation\Utility\Text\Utf8Decoder.h" />
+	<ClInclude Include="Engine\Assets\Font\FontTypes.h" />
+	<ClInclude Include="Engine\Assets\Font\FontAsset.h" />
+	<ClInclude Include="Engine\Assets\Font\FreeTypeLibrary.h" />
+	<ClInclude Include="Engine\Assets\Font\FontLoader.h" />
+	<ClInclude Include="Engine\Assets\Font\FreeTypeBitmapRasterizer.h" />
+	<ClInclude Include="Engine\Assets\Font\FontRepository.h" />
+	<ClInclude Include="Engine\Renderer\Text\IGlyphProvider.h" />
+	<ClInclude Include="Engine\Renderer\Text\GlyphAtlas.h" />
+	<ClInclude Include="Engine\Renderer\Text\GlyphCache.h" />
+	<ClInclude Include="Engine\Renderer\Text\TextStyle.h" />
+	<ClInclude Include="Engine\Renderer\Text\TextLayout.h" />
+	<ClInclude Include="Engine\Renderer\Text\TextRenderer.h" />
+	<ClInclude Include="Engine\Renderer\Text\TextService.h" />
+	<ClInclude Include="Engine\Objects\2D\Object2d\ITextRenderable.h" />
+	<ClInclude Include="Engine\Objects\2D\Object2d\TextSceneObject2d.h" />
 	<ClInclude Include="Engine\Renderer\Background\SpaceBackgroundSystem.h" />
 	<ClInclude Include="Engine\Application\Effects\Gameplay\ShieldEffect.h" />
 	<ClInclude Include="Engine\Application\Effects\Gameplay\ThrusterEffect.h" />
@@ -903,6 +931,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\System\Command\ConsoleCommandRegistry.h" />
   </ItemGroup>
   <ItemGroup>
+	<ProjectReference Include="externals\freetype-2.14.3\builds\windows\vc2010\freetype.vcxproj">
+	  <Project>{78B079BD-9FC7-4B9E-B4A6-96DA0F00248B}</Project>
+	  <Properties Condition="'$(Configuration)'=='Debug'">Configuration=Debug Static;Platform=$(Platform)</Properties>
+	  <Properties Condition="'$(Configuration)'=='Release'">Configuration=Release Static;Platform=$(Platform)</Properties>
+	  <Properties Condition="'$(Configuration)'=='Develop'">Configuration=Release Static;Platform=$(Platform)</Properties>
+	  <Properties Condition="'$(Configuration)'=='Develop_LivePP'">Configuration=Release Static;Platform=$(Platform)</Properties>
+	</ProjectReference>
     <ProjectReference Include="externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
       <Project>{371b9fa9-4c90-4ac6-a123-aced756d6c77}</Project>
       <Properties Condition="'$(Configuration)'=='Develop'">Configuration=Release;Platform=$(Platform)</Properties>

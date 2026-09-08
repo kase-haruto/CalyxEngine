@@ -53,6 +53,7 @@ namespace PipelineTag {
 		GpuParticle,
 		Trail,
 		EditorInfiniteGrid,
+		Text,
 		Line,
 		Effect,
 		Skybox,
