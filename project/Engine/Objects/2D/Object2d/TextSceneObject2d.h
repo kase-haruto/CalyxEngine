@@ -17,7 +17,7 @@ namespace CalyxEngine {
 	 * - Scene上に配置可能なスクリーンスペースText Box
 	 * - Text内容、レイアウト、簡易Typewriter再生設定を保持する
 	 *---------------------------------------------------------------------------------------*/
-	class CALYX_API TextSceneObject2d final
+	class CALYX_API TextSceneObject2d
 		: public SceneObject,
 		  public IConfigurable,
 		  public ITextRenderable {
@@ -38,9 +38,13 @@ namespace CalyxEngine {
 		void Restart();
 		void Stop();
 		void SetText(std::string text);
+		void			   SetIsTypewriter(bool flag) { typewriter_ = flag; }
+		void			   SetIsAutoPlay(bool flag) { autoPlay_ = flag; }
+		void			   SetCharacterPerSecond(float second) { charactersPerSecond_ = second; }
+		void			   SetFontPath(const std::string& path) { fontPath_ = path; }
 		void SetVisibleCharacterCount(size_t count) { visibleCharacterCount_ = count; }
 		[[nodiscard]] bool IsComplete() const { return completed_; }
-
+		[[nodiscard]] bool IsTypewriter() const { return typewriter_; }
 	private:
 		void SyncEditBuffer();
 		void UpdatePlayback(float dt);
