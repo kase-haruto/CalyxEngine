@@ -96,6 +96,10 @@ namespace CalyxEngine {
 				return "Post Effect";
 			case AssetType::Font:
 				return "Font";
+			case AssetType::Dialogue:
+				return "Dialogue";
+			case AssetType::NovelScene:
+				return "Novel Scene";
 			case AssetType::Unknown:
 			default:
 				return "Unknown";
@@ -251,6 +255,12 @@ namespace CalyxEngine {
 				break;
 			case AssetType::Font:
 				tname = "Font";
+				break;
+			case AssetType::Dialogue:
+				tname = "Dialogue";
+				break;
+			case AssetType::NovelScene:
+				tname = "Novel Scene";
 				break;
 			default:
 				break;
@@ -791,6 +801,8 @@ namespace CalyxEngine {
 				typeFilter_ = AssetType::Font;
 				scope_ = Scope::All;
 			}
+			if(ImGui::Selectable("All Dialogues")) { typeFilter_ = AssetType::Dialogue; scope_ = Scope::All; }
+			if(ImGui::Selectable("All Novel Scenes")) { typeFilter_ = AssetType::NovelScene; scope_ = Scope::All; }
 			if(ImGui::Selectable("All Materials")) {
 				typeFilter_ = AssetType::Material;
 				scope_		= Scope::All;
@@ -851,6 +863,12 @@ namespace CalyxEngine {
 			break;
 		case AssetType::Font:
 			label = "Drop Font here";
+			break;
+		case AssetType::Dialogue:
+			label = "Drop Dialogue here";
+			break;
+		case AssetType::NovelScene:
+			label = "Drop Novel Scene here";
 			break;
 		default:
 			break;

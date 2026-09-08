@@ -226,6 +226,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
 	<ClCompile Include="Engine\Renderer\Text\TextRenderer.cpp" />
 	<ClCompile Include="Engine\Renderer\Text\TextService.cpp" />
 	<ClCompile Include="Engine\Objects\2D\Object2d\TextSceneObject2d.cpp" />
+	<ClCompile Include="Engine\Novel\Asset\DialogueAsset.cpp" />
+	<ClCompile Include="Engine\Novel\Asset\NovelSceneAsset.cpp" />
+	<ClCompile Include="Engine\Novel\Runtime\NovelPlayer.cpp" />
 	<ClCompile Include="Engine\Renderer\Background\SpaceBackgroundSystem.cpp" />
 	<ClCompile Include="Engine\Application\Effects\Gameplay\ThrusterEffect.cpp" />
     <ClCompile Include="Engine\Scene\Fade\BaseSceneTransitionEffect.cpp" />

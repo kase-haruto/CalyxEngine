@@ -38,6 +38,11 @@ namespace CalyxEngine {
 		void Restart();
 		void Stop();
 		void SetText(std::string text);
+		void SetCharactersPerSecond(float value) noexcept;
+		[[nodiscard]] float GetCharactersPerSecond() const noexcept { return charactersPerSecond_; }
+		void SetTypewriter(bool value) noexcept;
+		[[nodiscard]] bool IsCompleted() const noexcept { return completed_; }
+		void Complete() noexcept;
 		void			   SetIsTypewriter(bool flag) { typewriter_ = flag; }
 		void			   SetIsAutoPlay(bool flag) { autoPlay_ = flag; }
 		void			   SetCharacterPerSecond(float second) { charactersPerSecond_ = second; }
