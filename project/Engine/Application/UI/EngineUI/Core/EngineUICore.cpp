@@ -31,15 +31,18 @@ namespace CalyxEngine {
 
 		levelEditor_ = std::make_unique<LevelEditor>();
 		levelEditor_->Initialize();
-		auto context = levelEditor_->GetEditorToolRegistry().GetContext();
-		context.editorUserData = levelEditor_.get();
+		auto context				= levelEditor_->GetEditorToolRegistry().GetContext();
+		context.editorUserData		= levelEditor_.get();
 		context.getPrimarySelection = [](void* userData) -> SceneObject* {
 			auto selected = static_cast<LevelEditor*>(userData)->GetPrimarySelectedObject();
 			return selected.get();
 		};
-		context.getMainCamera = [](void*) -> BaseCamera* { return CameraManager::GetMain3d(); };
-		context.isPlaying = [](void* userData) { return static_cast<LevelEditor*>(userData)->IsPlaying(); };
-		context.requestSaveScene = [](void* userData) { static_cast<LevelEditor*>(userData)->SaveSceneFromEditorTool(); };
+		context.getMainCamera			 = [](void*) -> BaseCamera* { return CameraManager::GetMain3d(); };
+		context.isPlaying				 = [](void* userData) { return static_cast<LevelEditor*>(userData)->IsPlaying(); };
+		context.requestSaveScene		 = [](void* userData) { static_cast<LevelEditor*>(userData)->SaveSceneFromEditorTool(); };
+		context.requestSelectSceneObject = [](void* userData, const Guid& guid) {
+			static_cast<LevelEditor*>(userData)->SelectSceneObjectFromEditorTool(guid);
+		};
 		levelEditor_->GetEditorToolRegistry().SetContext(context);
 #endif
 	}
@@ -131,12 +134,12 @@ namespace CalyxEngine {
 		levelEditor_->SetCameraForViewport(mainCamera, debugCamera);
 	}
 
-	bool EngineUICore::RegisterEditorModule(void* owner,
-		CalyxEditor::RegisterEditorToolsFn entryPoint,
-		const Calyx::ProjectInfo* project) {
+	bool EngineUICore::RegisterEditorModule(void*							   owner,
+											CalyxEditor::RegisterEditorToolsFn entryPoint,
+											const Calyx::ProjectInfo*		   project) {
 		if(!levelEditor_) return false;
-		auto& registry = levelEditor_->GetEditorToolRegistry();
-		auto context = registry.GetContext();
+		auto& registry	= levelEditor_->GetEditorToolRegistry();
+		auto  context	= registry.GetContext();
 		context.project = project;
 		registry.SetContext(context);
 		return registry.RegisterModule(owner, entryPoint);

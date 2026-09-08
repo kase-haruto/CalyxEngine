@@ -1,1 +1,1 @@
-C:\MyProject\CalyxEngine\project\externals\freetype-2.14.3\objs\x64\Debug Static\freetype.lib
+C:\MyProject\CalyxEngine\project\externals\freetype-2.14.3\objs\x64\Release Static\freetype.lib

@@ -43,6 +43,18 @@ namespace CalyxEngine {
 		void SetTypewriter(bool value) noexcept;
 		[[nodiscard]] bool IsCompleted() const noexcept { return completed_; }
 		void Complete() noexcept;
+		void SetFontGuid(const Guid& guid) noexcept {
+			fontGuid_ = guid;
+		}
+		[[nodiscard]] const Guid& GetFontGuid() const noexcept {
+			return fontGuid_;
+		}
+		void SetTextStyle(const TextStyle& style) noexcept {
+			style_ = style;
+		}
+		[[nodiscard]] const TextStyle& GetTextStyle() const noexcept {
+			return style_;
+		}
 		void			   SetIsTypewriter(bool flag) { typewriter_ = flag; }
 		void			   SetIsAutoPlay(bool flag) { autoPlay_ = flag; }
 		void			   SetCharacterPerSecond(float second) { charactersPerSecond_ = second; }

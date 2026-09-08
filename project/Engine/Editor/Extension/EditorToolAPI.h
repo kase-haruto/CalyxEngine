@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Engine/Foundation/Export/CalyxAPI.h>
+#include <Engine/Foundation/Utility/Guid/Guid.h>
 
 #include <cstdint>
 
@@ -17,19 +18,20 @@ class SceneObject;
 
 namespace CalyxEditor {
 
-	inline constexpr std::uint32_t kEditorToolApiVersion = 2;
+	inline constexpr std::uint32_t kEditorToolApiVersion = 3;
 
 	/**
 	 * @brief EditorToolContextに関するデータを保持する構造体です。
 	 */
 	struct EditorToolContext {
-		const Calyx::ProjectInfo* project = nullptr;
-		CalyxEngine::SceneManager* sceneManager = nullptr;
-		void* editorUserData = nullptr;
-		SceneObject* (*getPrimarySelection)(void* userData) = nullptr;
-		BaseCamera* (*getMainCamera)(void* userData) = nullptr;
-		bool (*isPlaying)(void* userData) = nullptr;
-		void (*requestSaveScene)(void* userData) = nullptr;
+		const Calyx::ProjectInfo*  project								   = nullptr;
+		CalyxEngine::SceneManager* sceneManager							   = nullptr;
+		void*					   editorUserData						   = nullptr;
+		SceneObject* (*getPrimarySelection)(void* userData)				   = nullptr;
+		BaseCamera* (*getMainCamera)(void* userData)					   = nullptr;
+		bool (*isPlaying)(void* userData)								   = nullptr;
+		void (*requestSaveScene)(void* userData)						   = nullptr;
+		void (*requestSelectSceneObject)(void* userData, const Guid& guid) = nullptr;
 
 		SceneObject* GetPrimarySelection() const {
 			return getPrimarySelection ? getPrimarySelection(editorUserData) : nullptr;
@@ -40,6 +42,11 @@ namespace CalyxEditor {
 		bool IsPlaying() const { return isPlaying && isPlaying(editorUserData); }
 		void RequestSaveScene() const {
 			if(requestSaveScene) requestSaveScene(editorUserData);
+		}
+		void RequestSelectSceneObject(const Guid& guid) const {
+			if(requestSelectSceneObject) {
+				requestSelectSceneObject(editorUserData, guid);
+			}
 		}
 	};
 
@@ -58,7 +65,7 @@ namespace CalyxEditor {
 		virtual bool IsOpen() const { return true; }
 	};
 
-	using CreateEditorToolFn = IEditorTool* (*)(const EditorToolContext& context);
+	using CreateEditorToolFn  = IEditorTool* (*)(const EditorToolContext& context);
 	using DestroyEditorToolFn = void (*)(IEditorTool* tool);
 
 	// DLL boundary descriptor. Strings are copied by the engine during registration.
@@ -67,13 +74,13 @@ namespace CalyxEditor {
 	 * @brief EditorToolDescriptorに関するデータを保持する構造体です。
 	 */
 	struct EditorToolDescriptor {
-		const char* id = nullptr;
-		const char* displayName = nullptr;
-		const char* menuPath = nullptr;
-		const char* workspaceId = nullptr;
-		const char* layoutPath = nullptr;
-		CreateEditorToolFn create = nullptr;
-		DestroyEditorToolFn destroy = nullptr;
+		const char*			id			= nullptr;
+		const char*			displayName = nullptr;
+		const char*			menuPath	= nullptr;
+		const char*			workspaceId = nullptr;
+		const char*			layoutPath	= nullptr;
+		CreateEditorToolFn	create		= nullptr;
+		DestroyEditorToolFn destroy		= nullptr;
 	};
 
 	/**
@@ -81,12 +88,11 @@ namespace CalyxEditor {
 	 */
 	class IEditorHost {
 	public:
-		virtual ~IEditorHost() = default;
-		virtual bool RegisterTool(const EditorToolDescriptor& descriptor) = 0;
-		virtual const EditorToolContext& GetContext() const = 0;
+		virtual ~IEditorHost()																  = default;
+		virtual bool					 RegisterTool(const EditorToolDescriptor& descriptor) = 0;
+		virtual const EditorToolContext& GetContext() const									  = 0;
 	};
 
 	using RegisterEditorToolsFn = bool (*)(std::uint32_t apiVersion, IEditorHost* host);
 
 } // namespace CalyxEditor
-

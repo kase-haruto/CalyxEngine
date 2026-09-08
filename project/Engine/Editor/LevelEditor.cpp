@@ -2,19 +2,18 @@
 
 // engine
 #include <CalyxEngine/Project.h>
-#include <externals/nlohmann/json.hpp>
 #include <Engine/Application/Effects/FxObject.h>
 #include <Engine/Application/Settings/EngineSettings.h>
-#include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Application/System/PlaySession.h>
 #include <Engine/Application/UI/EngineUI/Context/EditorContext.h>
 #include <Engine/Assets/Database/AssetDatabase.h>
 #include <Engine/Editor/ParticlePreviewSession.h>
 #include <Engine/Editor/PrefabEditSession.h>
-#include <Engine/Editor/SceneObjectEditCommands.h>
 #include <Engine/Editor/SceneObjectDuplicator.h>
+#include <Engine/Editor/SceneObjectEditCommands.h>
 #include <Engine/Editor/SceneSwitchOverlay.h>
 #include <Engine/Editor/ViewportSelectionController.h>
+#include <Engine/Foundation/Clock/ClockManager.h>
 #include <Engine/Foundation/Input/Input.h>
 #include <Engine/Foundation/Log/EngineLogger.h>
 #include <Engine/Graphics/Camera/Manager/CameraManager.h>
@@ -25,6 +24,7 @@
 #include <Engine/Scene/Settings/SceneSettingsWindow.h>
 #include <Engine/Scene/System/SceneManager.h>
 #include <Engine/System/Command/Manager/CommandManager.h>
+#include <externals/nlohmann/json.hpp>
 
 // imgui
 #include <externals/imgui/ImGuiFileDialog.h>
@@ -68,7 +68,7 @@ namespace {
 		}
 
 		std::error_code ec;
-		auto parent = requestedDestination.parent_path();
+		auto			parent = requestedDestination.parent_path();
 		if(!parent.empty()) {
 			parent = std::filesystem::weakly_canonical(parent, ec);
 			if(!ec) {
@@ -79,7 +79,7 @@ namespace {
 	}
 
 	std::filesystem::path FindDefaultSceneTemplate() {
-		const auto templatePath = Calyx::ResolveAssetPath("Scenes/DefaultScene.scene");
+		const auto		templatePath = Calyx::ResolveAssetPath("Scenes/DefaultScene.scene");
 		std::error_code ec;
 		if(std::filesystem::is_regular_file(templatePath, ec)) {
 			return std::filesystem::weakly_canonical(templatePath, ec);
@@ -117,20 +117,20 @@ namespace CalyxEngine {
 	 * - UIの所有権やSceneContextのライフタイムは管理しない
 	 *---------------------------------------------------------------------------------------*/
 	struct EditToolPresentation {
-		bool mainViewport = true;       //< メインViewportを表示するか
-		bool debugViewport = true;      //< デバッグViewportを表示するか
-		bool mainOverlay = true;        //< メインViewportの操作Overlayを有効にするか
-		bool debugOverlay = true;       //< デバッグViewportの操作Overlayを有効にするか
-		bool placement2D = false;       //< 2D配置Canvasを有効にするか
-		bool hierarchy = false;         //< Hierarchy Panelを表示するか
-		bool inspector = false;         //< Inspector Panelを表示するか
-		bool keyframe = false;          //< Keyframe Panelを表示するか
-		bool placeTool = false;         //< Place Tool Panelを表示するか
-		bool spline = false;            //< Spline Editorを表示するか
-		bool asset = true;              //< Asset Panelを表示するか
-		bool material = false;          //< Material Node Editorを表示するか
-		bool postEffect = false;        //< PostEffect Node Editorを表示するか
-		bool spriteAnimation = false;   //< Sprite Animation Editorを表示するか
+		bool mainViewport	 = true;  //< メインViewportを表示するか
+		bool debugViewport	 = true;  //< デバッグViewportを表示するか
+		bool mainOverlay	 = true;  //< メインViewportの操作Overlayを有効にするか
+		bool debugOverlay	 = true;  //< デバッグViewportの操作Overlayを有効にするか
+		bool placement2D	 = false; //< 2D配置Canvasを有効にするか
+		bool hierarchy		 = false; //< Hierarchy Panelを表示するか
+		bool inspector		 = false; //< Inspector Panelを表示するか
+		bool keyframe		 = false; //< Keyframe Panelを表示するか
+		bool placeTool		 = false; //< Place Tool Panelを表示するか
+		bool spline			 = false; //< Spline Editorを表示するか
+		bool asset			 = true;  //< Asset Panelを表示するか
+		bool material		 = false; //< Material Node Editorを表示するか
+		bool postEffect		 = false; //< PostEffect Node Editorを表示するか
+		bool spriteAnimation = false; //< Sprite Animation Editorを表示するか
 	};
 
 	/*-----------------------------------------------------------------------------------------
@@ -139,7 +139,7 @@ namespace CalyxEngine {
 	 * - LevelEditor本体やEditor UIの所有権は公開しない
 	 *---------------------------------------------------------------------------------------*/
 	struct EditToolStateContext {
-		std::function<void()> ensurePrefabContext;   //< Prefab編集Contextを準備する操作
+		std::function<void()> ensurePrefabContext;	 //< Prefab編集Contextを準備する操作
 		std::function<void()> ensureParticleContext; //< ParticleプレビューContextを準備する操作
 	};
 
@@ -167,9 +167,7 @@ namespace CalyxEngine {
 		/** \brief 3Dオブジェクト編集用のUI表示構成を取得する \return 3D編集用UI表示構成 */
 		const EditToolPresentation& Presentation() const override {
 			static const EditToolPresentation value{
-				.mainViewport = true, .debugViewport = true, .mainOverlay = true, .debugOverlay = true,
-				.placement2D = false, .hierarchy = true, .inspector = true, .keyframe = false,
-				.placeTool = true, .spline = false, .asset = true};
+				.mainViewport = true, .debugViewport = true, .mainOverlay = true, .debugOverlay = true, .placement2D = false, .hierarchy = true, .inspector = true, .keyframe = false, .placeTool = true, .spline = false, .asset = true};
 			return value;
 		}
 	};
@@ -183,9 +181,7 @@ namespace CalyxEngine {
 		/** \brief 2Dオブジェクト編集用のUI表示構成を取得する \return 2D編集用UI表示構成 */
 		const EditToolPresentation& Presentation() const override {
 			static const EditToolPresentation value{
-				.mainViewport = true, .debugViewport = false, .mainOverlay = true, .debugOverlay = false,
-				.placement2D = true, .hierarchy = true, .inspector = true, .keyframe = true,
-				.placeTool = false, .spline = false, .asset = true};
+				.mainViewport = true, .debugViewport = false, .mainOverlay = true, .debugOverlay = false, .placement2D = true, .hierarchy = true, .inspector = true, .keyframe = true, .placeTool = false, .spline = false, .asset = true};
 			return value;
 		}
 	};
@@ -199,8 +195,7 @@ namespace CalyxEngine {
 		/** \brief Sprite Animation編集用のUI表示構成を取得する \return Animation Asset編集用UI表示構成 */
 		const EditToolPresentation& Presentation() const override {
 			static const EditToolPresentation value{
-				.mainViewport = false, .debugViewport = false, .mainOverlay = false, .debugOverlay = false,
-				.asset = true, .spriteAnimation = true};
+				.mainViewport = false, .debugViewport = false, .mainOverlay = false, .debugOverlay = false, .asset = true, .spriteAnimation = true};
 			return value;
 		}
 	};
@@ -216,8 +211,7 @@ namespace CalyxEngine {
 		/** \brief Prefab編集用のUI表示構成を取得する \return Prefab編集用UI表示構成 */
 		const EditToolPresentation& Presentation() const override {
 			static const EditToolPresentation value{
-				.mainViewport = false, .debugViewport = true, .mainOverlay = false, .debugOverlay = true,
-				.hierarchy = true, .inspector = true, .asset = true};
+				.mainViewport = false, .debugViewport = true, .mainOverlay = false, .debugOverlay = true, .hierarchy = true, .inspector = true, .asset = true};
 			return value;
 		}
 	};
@@ -233,8 +227,7 @@ namespace CalyxEngine {
 		/** \brief Particle編集用のUI表示構成を取得する \return Particle編集用UI表示構成 */
 		const EditToolPresentation& Presentation() const override {
 			static const EditToolPresentation value{
-				.mainViewport = false, .debugViewport = true, .mainOverlay = false, .debugOverlay = true,
-				.hierarchy = true, .inspector = true, .placeTool = true, .asset = true};
+				.mainViewport = false, .debugViewport = true, .mainOverlay = false, .debugOverlay = true, .hierarchy = true, .inspector = true, .placeTool = true, .asset = true};
 			return value;
 		}
 	};
@@ -248,8 +241,7 @@ namespace CalyxEngine {
 		/** \brief PostEffect Graph編集用のUI表示構成を取得する \return PostEffect編集用UI表示構成 */
 		const EditToolPresentation& Presentation() const override {
 			static const EditToolPresentation value{
-				.mainViewport = true, .debugViewport = true, .mainOverlay = true, .debugOverlay = true,
-				.asset = true, .postEffect = true};
+				.mainViewport = true, .debugViewport = true, .mainOverlay = true, .debugOverlay = true, .asset = true, .postEffect = true};
 			return value;
 		}
 	};
@@ -263,8 +255,7 @@ namespace CalyxEngine {
 		/** \brief Material Graph編集用のUI表示構成を取得する \return Material編集用UI表示構成 */
 		const EditToolPresentation& Presentation() const override {
 			static const EditToolPresentation value{
-				.mainViewport = false, .debugViewport = false, .mainOverlay = false, .debugOverlay = false,
-				.asset = true, .material = true};
+				.mainViewport = false, .debugViewport = false, .mainOverlay = false, .debugOverlay = false, .asset = true, .material = true};
 			return value;
 		}
 	};
@@ -278,21 +269,20 @@ namespace CalyxEngine {
 		/** \brief Keyframe Animation編集用のUI表示構成を取得する \return Animation編集用UI表示構成 */
 		const EditToolPresentation& Presentation() const override {
 			static const EditToolPresentation value{
-				.mainViewport = true, .debugViewport = true, .mainOverlay = true, .debugOverlay = true,
-				.hierarchy = true, .inspector = true, .keyframe = true, .asset = true};
+				.mainViewport = true, .debugViewport = true, .mainOverlay = true, .debugOverlay = true, .hierarchy = true, .inspector = true, .keyframe = true, .asset = true};
 			return value;
 		}
 	};
 
 	namespace {
-		const ObjectEditToolState kObjectEditToolState;
-		const Object2DEditToolState kObject2DEditToolState;
+		const ObjectEditToolState		   kObjectEditToolState;
+		const Object2DEditToolState		   kObject2DEditToolState;
 		const SpriteAnimationEditToolState kSpriteAnimationEditToolState;
-		const PrefabEditToolState kPrefabEditToolState;
-		const ParticleEffectEditToolState kParticleEffectEditToolState;
-		const PostEffectEditToolState kPostEffectEditToolState;
-		const MaterialEditToolState kMaterialEditToolState;
-		const AnimationEditToolState kAnimationEditToolState;
+		const PrefabEditToolState		   kPrefabEditToolState;
+		const ParticleEffectEditToolState  kParticleEffectEditToolState;
+		const PostEffectEditToolState	   kPostEffectEditToolState;
+		const MaterialEditToolState		   kMaterialEditToolState;
+		const AnimationEditToolState	   kAnimationEditToolState;
 
 		const std::array<const IEditToolState*, 8> kEditToolStates{
 			&kObjectEditToolState,
@@ -309,36 +299,36 @@ namespace CalyxEngine {
 			const size_t index = static_cast<size_t>(mode);
 			return *kEditToolStates[(std::min)(index, kEditToolStates.size() - 1)];
 		}
-	}
+	} // namespace
 
 	//=============================================================================
 	// Initialize
 	//=============================================================================
-	LevelEditor::LevelEditor() = default;
+	LevelEditor::LevelEditor()	= default;
 	LevelEditor::~LevelEditor() = default;
 
 	void LevelEditor::Initialize() {
 #if defined(_DEBUG) || defined(DEVELOP)
 		// 各パネルの初期化 ----------------------------------------------------
-		hierarchy_			= std::make_unique<HierarchyPanel>();
-		inspector_			= std::make_unique<InspectorPanel>();
-		keyframePanel_		= std::make_unique<KeyframePanel>();
-		sceneEditor_		= std::make_unique<SceneObjectEditor>();
-		placeToolPanel_		= std::make_unique<PlaceToolPanel>();
-		splineEditor_		= std::make_unique<SplineEditorPanel>();
-		assetPanel_			= std::make_unique<AssetPanel>();
-		materialNodeEditorPanel_ = std::make_unique<MaterialNodeEditorPanel>();
-		postEffectNodeEditorPanel_ = std::make_unique<PostEffectNodeEditorPanel>();
+		hierarchy_					= std::make_unique<HierarchyPanel>();
+		inspector_					= std::make_unique<InspectorPanel>();
+		keyframePanel_				= std::make_unique<KeyframePanel>();
+		sceneEditor_				= std::make_unique<SceneObjectEditor>();
+		placeToolPanel_				= std::make_unique<PlaceToolPanel>();
+		splineEditor_				= std::make_unique<SplineEditorPanel>();
+		assetPanel_					= std::make_unique<AssetPanel>();
+		materialNodeEditorPanel_	= std::make_unique<MaterialNodeEditorPanel>();
+		postEffectNodeEditorPanel_	= std::make_unique<PostEffectNodeEditorPanel>();
 		spriteAnimationEditorPanel_ = std::make_unique<SpriteAnimationEditorPanel>();
-		livePPPanel_		= std::make_unique<LivePPPanel>();
-		logPanel_			= std::make_unique<LogPanel>();
+		livePPPanel_				= std::make_unique<LivePPPanel>();
+		logPanel_					= std::make_unique<LogPanel>();
 		logPanel_->SetCommandContext({this, sceneManager_, pPlaySesseion_});
-		sceneSwitchOverlay_ = std::make_unique<SceneSwitchOverlay>();
+		sceneSwitchOverlay_	 = std::make_unique<SceneSwitchOverlay>();
 		sceneSettingsWindow_ = std::make_unique<SceneSettingsWindow>();
-		debugCameraFocus_	= std::make_unique<DebugCameraFocusController>();
-		particlePreview_ = std::make_unique<ParticlePreviewSession>();
-		prefabEdit_		= std::make_unique<PrefabEditSession>();
-		viewportSelection_ = std::make_unique<ViewportSelectionController>();
+		debugCameraFocus_	 = std::make_unique<DebugCameraFocusController>();
+		particlePreview_	 = std::make_unique<ParticlePreviewSession>();
+		prefabEdit_			 = std::make_unique<PrefabEditSession>();
+		viewportSelection_	 = std::make_unique<ViewportSelectionController>();
 
 		// レイアウトスイッチャーの初期化 --------------------------------------
 		std::string				 layoutDir = Calyx::ResolveAssetPath("Configs/Editor/Layout").generic_string();
@@ -372,7 +362,7 @@ namespace CalyxEngine {
 		assetPanel_->SetOnSceneCreateRequested(
 			[](const std::filesystem::path& folder) {
 				IGFD::FileDialogConfig config;
-				config.path = folder.generic_string();
+				config.path		= folder.generic_string();
 				config.fileName = "NewScene.scene";
 				ImGuiFileDialog::Instance()->OpenDialog(
 					"SceneCreateDialog",
@@ -427,9 +417,9 @@ namespace CalyxEngine {
 		selection_.Bind(hierarchy_.get(), inspector_.get(), sceneEditor_.get());
 
 		// ビューポートの初期化 ------------------------------------------------
-		mainViewport_	 = std::make_unique<Viewport>(ViewportType::VIEWPORT_MAIN, "Game Viewport");
-		debugViewport_	 = std::make_unique<Viewport>(ViewportType::VIEWPORT_DEBUG, "Debug Viewport");
-		pickingViewport_ = std::make_unique<Viewport>(ViewportType::VIEWPORT_PICKING, "Picking Viewport");
+		mainViewport_		  = std::make_unique<Viewport>(ViewportType::VIEWPORT_MAIN, "Game Viewport");
+		debugViewport_		  = std::make_unique<Viewport>(ViewportType::VIEWPORT_DEBUG, "Debug Viewport");
+		pickingViewport_	  = std::make_unique<Viewport>(ViewportType::VIEWPORT_PICKING, "Picking Viewport");
 		pickingDepthViewport_ = std::make_unique<Viewport>(ViewportType::VIEWPORT_PICKING_DEPTH, "Picking Depth Viewport");
 		pickingViewport_->SetShow(false);
 		pickingDepthViewport_->SetShow(false);
@@ -492,7 +482,7 @@ namespace CalyxEngine {
 					"Ctrl+N",
 					[] {
 						IGFD::FileDialogConfig config;
-						config.path = Calyx::ResolveAssetPath("Scenes").generic_string();
+						config.path		= Calyx::ResolveAssetPath("Scenes").generic_string();
 						config.fileName = "NewScene.scene";
 						ImGuiFileDialog::Instance()->OpenDialog(
 							"SceneCreateDialog",
@@ -733,7 +723,7 @@ namespace CalyxEngine {
 		const float dt = ClockManager::GetInstance()->GetDeltaTime();
 
 		auto notifySceneSaved = [this](const std::string& path) {
-			sceneSavedPopupPath_ = path;
+			sceneSavedPopupPath_  = path;
 			sceneSavedPopupTimer_ = 1.5f;
 			ImGui::OpenPopup("SceneSavedPopup");
 			EngineLogger::GetInstance().Add(
@@ -786,7 +776,7 @@ namespace CalyxEngine {
 		if(!io.WantTextInput && io.KeyCtrl && !io.KeyAlt && !io.KeyShift &&
 		   ImGui::IsKeyPressed(ImGuiKey_N, false)) {
 			IGFD::FileDialogConfig config;
-			config.path = Calyx::ResolveAssetPath("Scenes").generic_string();
+			config.path		= Calyx::ResolveAssetPath("Scenes").generic_string();
 			config.fileName = "NewScene.scene";
 			ImGuiFileDialog::Instance()->OpenDialog(
 				"SceneCreateDialog",
@@ -1235,12 +1225,12 @@ namespace CalyxEngine {
 		}
 
 		// enumは保存形式との互換性のため維持し、振る舞いは対応するStateへ委譲する。
-		editToolMode_ = mode;
+		editToolMode_  = mode;
 		editToolState_ = &GetEditToolState(mode);
 
 		// StateへLevelEditor全体を公開せず、遷移時に必要なContext準備操作だけを渡す。
 		EditToolStateContext stateContext{
-			.ensurePrefabContext = [this]() { EnsurePrefabEditContext(); },
+			.ensurePrefabContext   = [this]() { EnsurePrefabEditContext(); },
 			.ensureParticleContext = [this]() { EnsureParticlePreviewContext(); }};
 		editToolState_->Enter(stateContext);
 		const EditToolPresentation& presentation = editToolState_->Presentation();
@@ -1339,6 +1329,17 @@ namespace CalyxEngine {
 
 	std::vector<std::shared_ptr<SceneObject>> LevelEditor::GetSelectedObjects() const {
 		return selection_.GetSelectedObjects();
+	}
+
+	void LevelEditor::SelectSceneObjectFromEditorTool(const Guid& guid) {
+		auto* context = SceneContext::Current();
+		if(!context || !context->GetObjectLibrary()) {
+			return;
+		}
+
+		// Route extension selection through the same coordinator used by
+		// Hierarchy and Viewport so Inspector and Guizmo remain synchronized.
+		selection_.SetSelectedObject(context->GetObjectLibrary()->Find(guid));
 	}
 
 	bool LevelEditor::IsPlaying() const {
@@ -1514,8 +1515,8 @@ namespace CalyxEngine {
 
 	void LevelEditor::RenderRuntimeFullscreenViewport(const ImTextureID& tex) {
 		const ImGuiViewport* viewport = ImGui::GetMainViewport();
-		const ImVec2 pos = viewport->WorkPos;
-		const ImVec2 size = viewport->WorkSize;
+		const ImVec2		 pos	  = viewport->WorkPos;
+		const ImVec2		 size	  = viewport->WorkSize;
 
 		if(size.x <= 0.0f || size.y <= 0.0f) {
 			return;
@@ -1615,7 +1616,7 @@ namespace CalyxEngine {
 		}
 
 		std::error_code ec;
-		const auto parentPath = destination.parent_path();
+		const auto		parentPath = destination.parent_path();
 		if(!parentPath.empty()) {
 			std::filesystem::create_directories(parentPath, ec);
 			if(ec) {
@@ -1691,8 +1692,8 @@ namespace CalyxEngine {
 	// SceneContext の変更検出
 	//=============================================================================
 	void LevelEditor::SetSceneManager(CalyxEngine::SceneManager* manager) {
-		sceneManager_ = manager;
-		auto context = editorToolRegistry_.GetContext();
+		sceneManager_		 = manager;
+		auto context		 = editorToolRegistry_.GetContext();
 		context.sceneManager = manager;
 		editorToolRegistry_.SetContext(context);
 		if(logPanel_) logPanel_->SetCommandContext({this, sceneManager_, pPlaySesseion_});
