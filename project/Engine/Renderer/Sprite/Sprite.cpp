@@ -14,6 +14,7 @@
 
 /* c++ */
 #include <stdint.h>
+#include <algorithm>
 /* externals */
 #include "Engine/Application/UI/Panels/InspectorPanel.h"
 #include "Engine/Assets/Manager/AssetManager.h"
@@ -218,6 +219,39 @@ void Sprite::SetUvScale(const CalyxEngine::Vector2& scale) {
 	materialData_.uvScale = scale;
 }
 
-void Sprite::SetTexture(const std::string& tex) { handle = CalyxEngine::AssetManager::GetInstance()->GetTextureManager()->LoadTexture(tex); }
+void Sprite::SetTexture(const std::string& tex) {
+	// 切り替え後にGetTextureName()が古い画像を返さないよう、参照パスも同期する。
+	handle = CalyxEngine::AssetManager::GetInstance()->GetTextureManager()->LoadTexture(tex);
+	path = tex;
+}
+
+bool Sprite::SetTextureSheet(const std::string& texturePath, int32_t columns, int32_t rows) {
+	// 入力エラーでは既存画像とUVを維持するため、読み込み前に分割数を検証する。
+	if(texturePath.empty() || columns < 1 || rows < 1 || columns > 46340 || rows > 46340) return false;
+	SetTexture(texturePath);
+	return SetTextureGrid(columns, rows);
+}
+
+bool Sprite::SetTextureGrid(int32_t columns, int32_t rows) {
+	// 各軸を制限して区画総数のint32_tオーバーフローとゼロ除算を防ぐ。
+	if(columns < 1 || rows < 1 || columns > 46340 || rows > 46340) return false;
+	textureColumns_ = columns;
+	textureRows_ = rows;
+	// 分割数の変更後は前の番号を持ち越さず、画像左上の区画に揃える。
+	SetTextureFrame(0);
+	return true;
+}
+
+void Sprite::SetTextureFrame(int32_t frame) {
+	// 数字の範囲外指定でも画像外を参照しないよう、最初または最後の区画に丸める。
+	const int32_t capacity = textureColumns_ * textureRows_;
+	const int32_t index = std::clamp(frame, 0, capacity - 1);
+	const float width = 1.0f / static_cast<float>(textureColumns_);
+	const float height = 1.0f / static_cast<float>(textureRows_);
+	// 余りを列、商を行として、正規化UV上の区画の大きさと左上位置を求める。
+	// 描画サイズには触れず、シェーダーに渡すUVの範囲だけを更新する。
+	SetUvScale({width, height});
+	SetUvOffset({(index % textureColumns_) * width, (index / textureColumns_) * height});
+}
 
 const void Sprite::SetTextureHandle(D3D12_GPU_DESCRIPTOR_HANDLE newHandle) { handle = newHandle; }

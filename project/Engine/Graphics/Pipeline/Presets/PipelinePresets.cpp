@@ -3,6 +3,41 @@
 #include <Engine/Graphics/Pipeline/PipelineDesc/Input/VertexLayout.h>
 #include <Engine/Application/Effects/Trail/TrailRuntime.h>
 
+namespace {
+	D3D12_DEPTH_STENCIL_DESC BackgroundDepth(bool enabled) {
+		D3D12_DEPTH_STENCIL_DESC depth{};
+		depth.DepthEnable = enabled;
+		depth.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+		depth.DepthFunc = enabled ? D3D12_COMPARISON_FUNC_EQUAL : D3D12_COMPARISON_FUNC_ALWAYS;
+		return depth;
+	}
+
+	GraphicsPipelineDesc MakeBackgroundPipeline(const wchar_t* ps, bool depthTest, BlendMode blend) {
+		GraphicsPipelineDesc desc;
+		desc.VS(L"Background/BackgroundFullscreen.VS.hlsl")
+			.PS(ps).Blend(blend).CullNone().DepthState(BackgroundDepth(depthTest)).Samples(1);
+		desc.inputElems_.clear();
+		desc.rtvFormats_ = {DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_R16G16B16A16_FLOAT};
+		desc.root_.AllowIA()
+			.CBV(0, D3D12_SHADER_VISIBILITY_ALL)
+			.CBV(1, D3D12_SHADER_VISIBILITY_PIXEL);
+		return desc;
+	}
+}
+
+GraphicsPipelineDesc PipelinePresets::MakeNebulaBackground() {
+	return MakeBackgroundPipeline(L"Background/Nebula/NebulaBackground.PS.hlsl", true, BlendMode::NONE);
+}
+GraphicsPipelineDesc PipelinePresets::MakeStarField() {
+	return MakeBackgroundPipeline(L"Background/Stars/StarField.PS.hlsl", true, BlendMode::ADD);
+}
+GraphicsPipelineDesc PipelinePresets::MakeForegroundGlow() {
+	return MakeBackgroundPipeline(L"Background/ForegroundGlow/ForegroundGlow.PS.hlsl", false, BlendMode::ADD);
+}
+GraphicsPipelineDesc PipelinePresets::MakeSpaceDust() {
+	return MakeBackgroundPipeline(L"Background/SpaceDust/SpaceDust.PS.hlsl", false, BlendMode::ADD);
+}
+
 /* ================================================================================================
 /*							Objects
 /* ================================================================================================ */
@@ -61,6 +96,13 @@ GraphicsPipelineDesc PipelinePresets::MakeObject3D(BlendMode mode) {
 
 		.SamplerWrapLinear(0);
 
+	return desc;
+}
+
+GraphicsPipelineDesc PipelinePresets::MakeForegroundObject3D(BlendMode mode) {
+	GraphicsPipelineDesc desc = MakeObject3D(mode);
+	// 最終合成先は単一のR8G8B8A8 target。Depthは前面パス直前にクリアして利用する。
+	desc.rtvFormats_ = {DXGI_FORMAT_R8G8B8A8_UNORM};
 	return desc;
 }
 
@@ -172,6 +214,12 @@ GraphicsPipelineDesc PipelinePresets::MakeSkinningObject3D(BlendMode mode) {
 
 		.SamplerWrapLinear(0);
 
+	return desc;
+}
+
+GraphicsPipelineDesc PipelinePresets::MakeForegroundSkinnedObject3D(BlendMode mode) {
+	GraphicsPipelineDesc desc = MakeSkinningObject3D(mode);
+	desc.rtvFormats_ = {DXGI_FORMAT_R8G8B8A8_UNORM};
 	return desc;
 }
 
@@ -635,6 +683,32 @@ GraphicsPipelineDesc PipelinePresets::MakeObject2D() {
 		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)
 		.SamplerWrapLinear(0);
 
+	return desc;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//		Text
+/////////////////////////////////////////////////////////////////////////////////////////
+GraphicsPipelineDesc PipelinePresets::MakeText() {
+	GraphicsPipelineDesc desc;
+	std::vector<D3D12_INPUT_ELEMENT_DESC> input = {
+		{"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 8, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}};
+	desc.VS(L"Core/Text/Text.VS.hlsl")
+		.PS(L"Core/Text/Text.PS.hlsl")
+		.Input(input)
+		.Blend(BlendMode::ALPHA)
+		.CullNone()
+		.DepthEnable(false)
+		.DepthFunc(D3D12_COMPARISON_FUNC_ALWAYS)
+		.RTV(DXGI_FORMAT_R8G8B8A8_UNORM)
+		.Samples(1);
+	desc.root_
+		.AllowIA()
+		.Constants(0, 2, D3D12_SHADER_VISIBILITY_VERTEX)
+		.SRVTable(0, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, D3D12_SHADER_VISIBILITY_PIXEL)
+		.SamplerWrapLinear(0);
 	return desc;
 }
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Engine/Foundation/Export/CalyxAPI.h>
+
 #include "Engine/Objects/3D/Actor/SceneObject.h"
 
 #include <Engine/Graphics/Buffer/DxStructuredBuffer.h>
@@ -38,7 +40,14 @@ namespace CalyxEngine {
 /**
  * @brief ModelRendererの機能を提供するクラスです。
  */
-class ModelRenderer {
+enum class ModelRenderPhase {
+	All,
+	Opaque,
+	Transparent,
+	Foreground
+};
+
+class CALYX_API ModelRenderer {
 public:
 	/**
 	 * @brief RenderInstanceに関するデータを保持する構造体です。
@@ -86,6 +95,7 @@ private:
 	struct StaticBatchItem {
 		BaseModel*							   model = nullptr; //< モデルデータ
 		bool								   cameraDitherEnabled = true;
+		bool                                   foreground = false;
 		std::vector<WorldTransform>			   transforms;		//< インスタンス用変換リスト
 		std::vector<GpuBillboardParams>		   billboards;		//< インスタンス用ビルボードパラメータ
 		DxStructuredBuffer<GpuBillboardParams> billboardSrv;	//< ビルボード用構造化バッファ
@@ -97,6 +107,7 @@ private:
 	struct SkinnedBatchItem {
 		CalyxEngine::AnimationModel* model = nullptr;
 		bool cameraDitherEnabled = true;
+		bool foreground = false;
 		std::vector<WorldTransform> transforms;
 	};
 
@@ -143,6 +154,7 @@ public:
 	 */
 	void PreCullAndBatch(const class Camera3d* camera, bool enableFrustumCulling = true);
 	void BuildAllVisibleBatches();
+	void SetOverlayMode(bool enabled) { overlayMode_ = enabled; }
 
 	/**
 	 * \brief 一括描画処理
@@ -158,7 +170,9 @@ public:
 				 class IRenderTarget* rt,
 				 class PipelineService*			 psoService,
 				 class LightLibrary*			 lightLibrary,
-				 CalyxEngine::ShadowMapSystem* shadowMapSystem);
+				 CalyxEngine::ShadowMapSystem* shadowMapSystem,
+				 ModelRenderPhase phase = ModelRenderPhase::All,
+				 class BaseCamera* cameraOverride = nullptr);
 
 	// Picking / Outline / IDPass 用
 	/**
@@ -215,7 +229,7 @@ private:
 	 * \brief スタティックモデルのバッチ構築
 	 */
 	void BuildStaticBatches();
-	StaticBatchItem* FindCompatibleStaticBatch(StaticBatch& batch, BaseModel* model, bool cameraDitherEnabled);
+	StaticBatchItem* FindCompatibleStaticBatch(StaticBatch& batch, BaseModel* model, bool cameraDitherEnabled, bool foreground);
 	/**
 	 * \brief スキンメッシュモデルのバッチ構築
 	 */
@@ -241,6 +255,7 @@ private:
 	std::unordered_map<BaseModel*, std::vector<WorldTransform>>					  staticVisibleForShadow_;	//< シャドウ用可視スタティックリスト
 	std::unordered_map<CalyxEngine::AnimationModel*, std::vector<WorldTransform>> skinnedVisibleForShadow_; //< シャドウ用可視スキンメッシュリスト
 	CalyxEngine::MaterialGraphRuntimeShaderCache runtimeMaterialShaderCache_;
+	bool overlayMode_ = false;
 
 	// Raytracing
 	std::unique_ptr<CalyxEngine::RaytracingSystem> raytracingSystem_; //< レイトレーシングシステム

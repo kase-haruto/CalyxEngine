@@ -26,6 +26,7 @@ public:
 	virtual void						TransitionTo([[maybe_unused]] ID3D12GraphicsCommandList* cmdList, [[maybe_unused]] D3D12_RESOURCE_STATES newState) {};
 	virtual void						TransitionDepthTo([[maybe_unused]] ID3D12GraphicsCommandList* cmdList, [[maybe_unused]] D3D12_RESOURCE_STATES newState) {};
 	virtual void						Clear(ID3D12GraphicsCommandList* cmdList) = 0;
+	virtual void ClearDepth([[maybe_unused]] ID3D12GraphicsCommandList* cmdList) {}
 
 	/**
 	 * \brief リサイズ処理

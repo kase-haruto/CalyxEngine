@@ -4,10 +4,16 @@
 #include <Engine/Graphics/Pipeline/RootSig/RootSignatureBuilder.h>
 
 namespace PipelinePresets {
+	GraphicsPipelineDesc MakeNebulaBackground();
+	GraphicsPipelineDesc MakeStarField();
+	GraphicsPipelineDesc MakeForegroundGlow();
+	GraphicsPipelineDesc MakeSpaceDust();
 
 	// 3dObjects
 	GraphicsPipelineDesc MakeObject3D(BlendMode mode);
 	GraphicsPipelineDesc MakeSkinningObject3D(BlendMode mode);
+	GraphicsPipelineDesc MakeForegroundObject3D(BlendMode mode);
+	GraphicsPipelineDesc MakeForegroundSkinnedObject3D(BlendMode mode);
 	GraphicsPipelineDesc MakeParticle(BlendMode mode);
 	GraphicsPipelineDesc MakeGpuParticle(BlendMode mode);
 	GraphicsPipelineDesc MakeTrail(BlendMode mode);
@@ -34,6 +40,7 @@ namespace PipelinePresets {
 
 	// 2dObjects
 	GraphicsPipelineDesc MakeObject2D();
+	GraphicsPipelineDesc MakeText();
 
 	// cs
 	GraphicsPipelineDesc MakeGpuParticleCS();

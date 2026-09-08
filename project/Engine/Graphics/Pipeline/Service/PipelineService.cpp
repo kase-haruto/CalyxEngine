@@ -44,6 +44,10 @@ void PipelineService::RegisterAllPipelines() {
 		auto root = library_->GetRoot(desc);
 		ppCache_[static_cast<size_t>(tag)] = { pso, root };
 	};
+	auto regBackground = [&](PipelineTag::Background tag, auto makeFn) {
+		GraphicsPipelineDesc desc = makeFn();
+		backgroundCache_[static_cast<size_t>(tag)] = {library_->GetOrCreate(desc), library_->GetRoot(desc)};
+	};
 
 	auto regCS = [&](PipelineTag::Compute tag, auto makeFn) {
 		GraphicsPipelineDesc desc = makeFn(); 
@@ -68,6 +72,8 @@ void PipelineService::RegisterAllPipelines() {
 		//						SkinObject3D Pipelines
 		//===================================================================*/
 		regObj(PipelineTag::Object::SkinningObject3D, mode, PipelinePresets::MakeSkinningObject3D);
+		regObj(PipelineTag::Object::ForegroundObject3D, mode, PipelinePresets::MakeForegroundObject3D);
+		regObj(PipelineTag::Object::ForegroundSkinnedObject3D, mode, PipelinePresets::MakeForegroundSkinnedObject3D);
 
 		//===================================================================*/
 		//						Wireframe Pipelines
@@ -83,6 +89,7 @@ void PipelineService::RegisterAllPipelines() {
 		regObj(PipelineTag::Object::Trail, mode, PipelinePresets::MakeTrail);
 	}
 	regObjNoBlend(PipelineTag::Object::EditorInfiniteGrid, PipelinePresets::MakeEditorInfiniteGrid);
+	regObjNoBlend(PipelineTag::Object::Text, PipelinePresets::MakeText);
 
 	//========================= Shadow ===================================
 	regObjNoBlend(PipelineTag::Object::OutlineObject3D, PipelinePresets::MakeOutlineObject3D);
@@ -123,6 +130,11 @@ void PipelineService::RegisterAllPipelines() {
 	regPP(PipelineTag::PostProcess::Bloom, PipelinePresets::MakeBloom);
 	regPP(PipelineTag::PostProcess::DepthVisualize, PipelinePresets::MakeDepthVisualize);
 	regPP(PipelineTag::PostProcess::CopyImage, PipelinePresets::MakeCopyImage);
+
+	regBackground(PipelineTag::Background::Nebula, PipelinePresets::MakeNebulaBackground);
+	regBackground(PipelineTag::Background::StarField, PipelinePresets::MakeStarField);
+	regBackground(PipelineTag::Background::ForegroundGlow, PipelinePresets::MakeForegroundGlow);
+	regBackground(PipelineTag::Background::SpaceDust, PipelinePresets::MakeSpaceDust);
 
 }
 
@@ -203,9 +215,37 @@ PipelineSet PipelineService::GetGeneratedMaterialSkinnedPipelineSet(
 	return set;
 }
 
+PipelineSet PipelineService::GetGeneratedMaterialForegroundObjectPipelineSet(
+	BlendMode blend, Microsoft::WRL::ComPtr<IDxcBlob> pixelShader, std::size_t shaderHash) {
+	GeneratedMaterialPipelineKey key{PipelineTag::Object::ForegroundObject3D, blend, shaderHash};
+	if(auto it = generatedMaterialPipelines_.find(key); it != generatedMaterialPipelines_.end()) {
+		return {it->second->GetPipelineState().Get(), it->second->GetRootSignature().Get()};
+	}
+	auto pipeline = factory_->CreateWithPixelShaderBlob(PipelinePresets::MakeForegroundObject3D(blend), pixelShader);
+	PipelineSet set{pipeline->GetPipelineState().Get(), pipeline->GetRootSignature().Get()};
+	generatedMaterialPipelines_[key] = std::move(pipeline);
+	return set;
+}
+
+PipelineSet PipelineService::GetGeneratedMaterialForegroundSkinnedPipelineSet(
+	BlendMode blend, Microsoft::WRL::ComPtr<IDxcBlob> pixelShader, std::size_t shaderHash) {
+	GeneratedMaterialPipelineKey key{PipelineTag::Object::ForegroundSkinnedObject3D, blend, shaderHash};
+	if(auto it = generatedMaterialPipelines_.find(key); it != generatedMaterialPipelines_.end()) {
+		return {it->second->GetPipelineState().Get(), it->second->GetRootSignature().Get()};
+	}
+	auto pipeline = factory_->CreateWithPixelShaderBlob(PipelinePresets::MakeForegroundSkinnedObject3D(blend), pixelShader);
+	PipelineSet set{pipeline->GetPipelineState().Get(), pipeline->GetRootSignature().Get()};
+	generatedMaterialPipelines_[key] = std::move(pipeline);
+	return set;
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //		pso取得(ポストプロセス
 /////////////////////////////////////////////////////////////////////////////////////////
 PipelineSet PipelineService::GetPipelineSet(PipelineTag::PostProcess tag) const{
 	return ppCache_[static_cast< size_t >(tag)];
+}
+
+PipelineSet PipelineService::GetPipelineSet(PipelineTag::Background tag) const {
+	return backgroundCache_[static_cast<size_t>(tag)];
 }

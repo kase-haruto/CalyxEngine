@@ -34,6 +34,9 @@ struct Material {
     float rimIntensity;
     float rimPower;
     float2 rimPadding;
+    float4 shieldColor;
+    float4 shieldParams;
+    float4 shieldRipple;
 };
 
 struct DirectionalLight {
@@ -109,14 +112,6 @@ struct PixelShaderOutput {
     float4 color     : SV_TARGET0;
     float4 bloomMask : SV_TARGET1; // Emissive bloom mask (MRT RT1)
 };
-
-///////////////////////////////////////////////////////////////////////////////
-//                    関数: トーンマッピング + ガンマ補正
-///////////////////////////////////////////////////////////////////////////////
-float3 ApplyToneMappingAndGamma(float3 color, float exposure) {
-    float3 toneMapped = color * exposure / (color * exposure + 1.0f);
-    return pow(toneMapped, 1.0 / 2.2);
-}
 
 bool CheckVisibility(float3 origin, float3 dir, float tMax);
 float ComputePointHardShadow_RT(float3 worldPos, float3 normal, float3 lightPos, float lightDistance);
@@ -377,7 +372,7 @@ PixelShaderOutput main(Object3dVertexOutput input) {
     if(gMaterial.enableLighting == 4) {
         if(alpha <= 0.01f) discard;
         float3 emissive = gMaterial.emissiveColor.rgb * max(gMaterial.emissiveIntensity, 0.0f);
-        output.color     = float4(ApplyToneMappingAndGamma(albedo, 1.0f) + emissive, alpha);
+        output.color     = float4(albedo + emissive, alpha);
         output.bloomMask = float4(emissive, 1.0f);
         return output;
     }
@@ -419,6 +414,23 @@ PixelShaderOutput main(Object3dVertexOutput input) {
     float rimFactor = pow(saturate(1.0f - dot(normal, toEye)), max(gMaterial.rimPower, 0.0001f));
     litColor += gMaterial.rimColor.rgb * rimFactor * max(gMaterial.rimIntensity, 0.0f);
 
+    float3 shieldEmission = 0.0f;
+    if(gMaterial.shieldParams.x > 0.5f) {
+        float shieldFresnel = pow(saturate(1.0f - dot(normal, toEye)), max(gMaterial.shieldParams.y, 0.01f));
+        float spatialNoise = sin(input.worldPosition.x * 1.37f * gMaterial.shieldParams.w
+                               + sin(input.worldPosition.y * 1.91f * gMaterial.shieldParams.w)
+                               + input.worldPosition.z * 1.13f * gMaterial.shieldParams.w);
+        spatialNoise = 0.78f + 0.22f * spatialNoise;
+        float rippleCoordinate = length(input.worldPosition - cameraPosition) * 0.32f
+                               - gMaterial.shieldRipple.z * gMaterial.shieldRipple.x
+                               + gMaterial.shieldRipple.w;
+        float rippleDistance = abs(frac(rippleCoordinate) - 0.5f) * 2.0f;
+        float ripple = 1.0f - smoothstep(gMaterial.shieldRipple.y, gMaterial.shieldRipple.y * 2.2f, rippleDistance);
+        shieldEmission = gMaterial.shieldColor.rgb * (shieldFresnel * spatialNoise + ripple * 0.32f)
+                       * max(gMaterial.shieldParams.z, 0.0f);
+        litColor += shieldEmission;
+    }
+
     // AOではない（定数アンビエント）
     float3 ambient = albedo * 0.07f;
     litColor += ambient;
@@ -436,9 +448,9 @@ PixelShaderOutput main(Object3dVertexOutput input) {
         litColor += envColor * reflectionWeight;
     }
 
-    float3 finalColor = ApplyToneMappingAndGamma(litColor, 1.0f);
+    float3 finalColor = litColor;
 
-    // トーンマッピング後にEmissiveを加算し、閾値越えのHDR値として出力させる
+    // Emissiveを加算し、閾値越えのHDR値として出力させる
     finalColor += gMaterial.emissiveColor.rgb * max(gMaterial.emissiveIntensity, 0.0f);
 
 	// ---- ディザ抜き (Dithered Clipping) ----
@@ -458,7 +470,8 @@ PixelShaderOutput main(Object3dVertexOutput input) {
 
     if(alpha <= 0.01f) discard;
 
-    float3 emissiveOut = gMaterial.emissiveColor.rgb * max(gMaterial.emissiveIntensity, 0.0f);
+    float3 rimEmission = gMaterial.rimColor.rgb * rimFactor * max(gMaterial.rimIntensity, 0.0f);
+    float3 emissiveOut = gMaterial.emissiveColor.rgb * max(gMaterial.emissiveIntensity, 0.0f) + rimEmission + shieldEmission;
     output.color     = float4(finalColor, alpha);
     output.bloomMask = float4(emissiveOut, 1.0f);
     return output;

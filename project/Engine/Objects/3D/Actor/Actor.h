@@ -33,7 +33,8 @@ public:
 	 * \param modelName モデル名
 	 * \param objectName オブジェクト名
 	 */
-	Actor(const std::string&		 modelName,
+	Actor
+	(const std::string&		 modelName,
 		  std::optional<std::string> objectName);
 	/**
 	 * \brief デストラクタ

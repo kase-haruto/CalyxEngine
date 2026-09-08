@@ -33,6 +33,10 @@ void Material::ApplyConfig(const MaterialConfig& config) {
 	rimColor              = config.rimColor;
 	rimIntensity          = config.rimIntensity;
 	rimPower              = config.rimPower;
+	shieldColor           = config.shieldColor;
+	shieldParams          = {config.shieldEnabled ? 1.0f : 0.0f, config.shieldFresnelPower, config.shieldEmission, config.shieldNoiseScale};
+	shieldRipple.x        = config.shieldRippleSpeed;
+	shieldRipple.y        = config.shieldRippleWidth;
 
 }
 
@@ -67,6 +71,13 @@ MaterialConfig Material::ExtractConfig() const {
 	config.rimColor              = rimColor;
 	config.rimIntensity          = rimIntensity;
 	config.rimPower              = rimPower;
+	config.shieldEnabled         = shieldParams.x > 0.5f;
+	config.shieldColor           = shieldColor;
+	config.shieldFresnelPower    = shieldParams.y;
+	config.shieldEmission        = shieldParams.z;
+	config.shieldNoiseScale      = shieldParams.w;
+	config.shieldRippleSpeed     = shieldRipple.x;
+	config.shieldRippleWidth     = shieldRipple.y;
 	return config;
 }
 
@@ -112,6 +123,15 @@ void Material::ShowImGui() {
 	GuiCmd::ColorEdit4("rim color", rimColor);
 	GuiCmd::SliderFloat("rim intensity", rimIntensity, 0.0f, 10.0f);
 	GuiCmd::SliderFloat("rim power", rimPower, 0.1f, 16.0f);
+	ImGui::SeparatorText("Shield");
+	bool shieldEnabled = shieldParams.x > 0.5f;
+	if(GuiCmd::CheckBox("shield enabled", shieldEnabled)) shieldParams.x = shieldEnabled ? 1.0f : 0.0f;
+	GuiCmd::ColorEdit4("shield color", shieldColor);
+	GuiCmd::SliderFloat("shield fresnel power", shieldParams.y, 0.25f, 16.0f);
+	GuiCmd::SliderFloat("shield emission", shieldParams.z, 0.0f, 12.0f);
+	GuiCmd::SliderFloat("shield noise scale", shieldParams.w, 0.1f, 16.0f);
+	GuiCmd::SliderFloat("shield ripple speed", shieldRipple.x, 0.0f, 8.0f);
+	GuiCmd::SliderFloat("shield ripple width", shieldRipple.y, 0.01f, 0.5f);
 
 	ImGui::SeparatorText("Normal Map");
 	bool normalMapEnabled = useNormalMap != 0;
@@ -169,6 +189,16 @@ void Material::ShowImGui(MaterialConfig& config) {
 		GuiCmd::ColorEdit4("rim color", config.rimColor);
 		GuiCmd::SliderFloat("rim intensity", config.rimIntensity, 0.0f, 10.0f);
 		GuiCmd::SliderFloat("rim power", config.rimPower, 0.1f, 16.0f);
+		ImGui::TreePop();
+	}
+	if(ImGui::TreeNodeEx("Shield", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+		GuiCmd::CheckBox("enabled", config.shieldEnabled);
+		GuiCmd::ColorEdit4("color", config.shieldColor);
+		GuiCmd::SliderFloat("fresnel power", config.shieldFresnelPower, 0.25f, 16.0f);
+		GuiCmd::SliderFloat("emission", config.shieldEmission, 0.0f, 12.0f);
+		GuiCmd::SliderFloat("noise scale", config.shieldNoiseScale, 0.1f, 16.0f);
+		GuiCmd::SliderFloat("ripple speed", config.shieldRippleSpeed, 0.0f, 8.0f);
+		GuiCmd::SliderFloat("ripple width", config.shieldRippleWidth, 0.01f, 0.5f);
 		ImGui::TreePop();
 	}
 

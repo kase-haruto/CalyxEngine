@@ -217,7 +217,12 @@ namespace {
         const std::string modelName = record.sourcePath.filename().string();
         const std::string objectName = record.sourcePath.stem().string();
 
-        auto obj = SceneAPI::Instantiate<StaticModelObject>(modelName, objectName);
+        auto* ctx = SceneContext::Current();
+        if(!ctx) return nullptr;
+
+        auto obj = isGhost
+            ? ctx->InstantiatePreview<StaticModelObject>(modelName, objectName)
+            : ctx->Instantiate<StaticModelObject>(modelName, objectName);
         obj->Initialize();
         if(auto* collider = obj->GetCollider()) {
             collider->SetCollisionEnabled(false);
@@ -305,7 +310,13 @@ void Viewport::Update() {}
 void Viewport::ClearGhosts() {
     if(auto* ctx = SceneContext::Current()) {
         if(ghost_) {
-            ctx->RemovePreviewObject(ghost_);
+            // Asset配置ゴーストはPreview専用だが、旧経路などで通常Libraryへ
+            // 登録されていても確実に除去し、確定モデルとの二重描画を防ぐ。
+            if(ctx->GetObjectLibrary() && ctx->GetObjectLibrary()->Contains(ghost_)) {
+                ctx->RemoveObject(ghost_);
+            } else {
+                ctx->RemovePreviewObject(ghost_);
+            }
         }
         for(auto& prefabGhost : prefabGhosts_) {
             if(prefabGhost && ctx->GetObjectLibrary() && ctx->GetObjectLibrary()->Contains(prefabGhost)) {
@@ -698,6 +709,13 @@ void Viewport::Render(const ImTextureID& tex) {
 
                     if(ghost_) {
                         ghost_->GetWorldTransform().translation = spawnPos;
+                        if(auto go = std::dynamic_pointer_cast<BaseGameObject>(ghost_)) {
+                            // PreviewObjectはSceneContextの通常更新対象外なので、
+                            // 描画前にWorld行列とModel状態を明示的に更新する。
+                            go->AlwaysUpdate(0.0f);
+                        } else {
+                            ghost_->GetWorldTransform().Update();
+                        }
                     }
                 }
             } else if(draggingPrefabAsset) {

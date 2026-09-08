@@ -169,6 +169,9 @@ namespace CalyxEngine {
 			out << "    float rimIntensity;\n";
 			out << "    float rimPower;\n";
 			out << "    float2 rimPadding;\n";
+			out << "    float4 shieldColor;\n";
+			out << "    float4 shieldParams;\n";
+			out << "    float4 shieldRipple;\n";
 			out << "};\n";
 			out << "cbuffer MaterialConstants : register(b0) { Material gMaterial; }\n\n";
 			out << "struct VertexShaderOutput {\n";
@@ -253,6 +256,9 @@ namespace CalyxEngine {
 			out << "    float rimIntensity;\n";
 			out << "    float rimPower;\n";
 			out << "    float2 rimPadding;\n";
+			out << "    float4 shieldColor;\n";
+			out << "    float4 shieldParams;\n";
+			out << "    float4 shieldRipple;\n";
 			out << "};\n\n";
 			out << "struct DirectionalLight { float4 color; float3 direction; float intensity; };\n";
 			out << "struct PointLight { float4 color; float3 position; float intensity; float radius; float decay; float2 pad; };\n\n";
@@ -287,11 +293,6 @@ static const float4x4 kBayerMatrix = float4x4(
 	3.0 / 16.0, 11.0 / 16.0, 1.0 / 16.0, 9.0 / 16.0,
 	15.0 / 16.0, 7.0 / 16.0, 13.0 / 16.0, 5.0 / 16.0
 );
-
-float3 ApplyToneMappingAndGamma(float3 color, float exposure) {
-    float3 toneMapped = color * exposure / (color * exposure + 1.0f);
-    return pow(toneMapped, 1.0 / 2.2);
-}
 
 float ToonBandGenerated(float value, float threshold, float softness) {
     float width = max(softness, 0.0001f);
@@ -616,7 +617,9 @@ PixelShaderOutput main(VertexShaderOutput input) {
 
     if(surface.lightingMode == 4) {
         if(alpha <= 0.01f) discard;
-        output.color = float4(ApplyToneMappingAndGamma(albedo, 1.0f) + emissive, alpha);
+        // Keep SceneColor linear. Per-object tone mapping changes the material's
+        // authored color and makes Object3D inconsistent with Object2D.
+        output.color = float4(albedo + emissive, alpha);
         output.bloomMask = float4(emissive, 1.0f);
         return output;
     }
@@ -659,7 +662,8 @@ PixelShaderOutput main(VertexShaderOutput input) {
         litColor += envColor * reflectionWeight;
     }
 
-    float3 finalColor = ApplyToneMappingAndGamma(litColor, 1.0f);
+    // Preserve the linear HDR lighting result in the floating-point scene target.
+    float3 finalColor = litColor;
 
 	// Dithered clipping
 	uint2 pixelPos = uint2(input.position.xy) % 4;
@@ -676,7 +680,8 @@ PixelShaderOutput main(VertexShaderOutput input) {
 
 if(alpha <= 0.01f) discard;
     output.color = float4(finalColor, alpha);
-    output.bloomMask = float4(emissive, 1.0f);
+    float3 rimEmission = gMaterial.rimColor.rgb * rimFactor * max(gMaterial.rimIntensity, 0.0f);
+    output.bloomMask = float4(emissive + rimEmission, 1.0f);
     return output;
 }
 )";

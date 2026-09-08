@@ -42,6 +42,13 @@ struct MaterialConfig final{
 	CalyxEngine::Vector4 rimColor = {1.0f, 1.0f, 1.0f, 1.0f};
 	float rimIntensity = 0.0f;
 	float rimPower = 3.0f;
+	bool shieldEnabled = false;
+	CalyxEngine::Vector4 shieldColor = {0.1f, 0.7f, 1.0f, 1.0f};
+	float shieldFresnelPower = 4.0f;
+	float shieldEmission = 2.5f;
+	float shieldNoiseScale = 3.0f;
+	float shieldRippleSpeed = 1.0f;
+	float shieldRippleWidth = 0.12f;
 	Guid normalMapGuid;
 };
 
@@ -77,6 +84,13 @@ inline void to_json(nlohmann::json& j, const MaterialConfig& c) {
 		{"rimColor", c.rimColor},
 		{"rimIntensity", c.rimIntensity},
 		{"rimPower", c.rimPower},
+		{"shieldEnabled", c.shieldEnabled},
+		{"shieldColor", c.shieldColor},
+		{"shieldFresnelPower", c.shieldFresnelPower},
+		{"shieldEmission", c.shieldEmission},
+		{"shieldNoiseScale", c.shieldNoiseScale},
+		{"shieldRippleSpeed", c.shieldRippleSpeed},
+		{"shieldRippleWidth", c.shieldRippleWidth},
 		{"normalMapGuid", c.normalMapGuid}
 	};
 }
@@ -116,5 +130,12 @@ inline void from_json(const nlohmann::json& j, MaterialConfig& c) {
 	if(j.contains("rimColor")) j.at("rimColor").get_to(c.rimColor);
 	if(j.contains("rimIntensity")) j.at("rimIntensity").get_to(c.rimIntensity);
 	if(j.contains("rimPower")) j.at("rimPower").get_to(c.rimPower);
+	if(j.contains("shieldEnabled")) j.at("shieldEnabled").get_to(c.shieldEnabled);
+	if(j.contains("shieldColor")) j.at("shieldColor").get_to(c.shieldColor);
+	if(j.contains("shieldFresnelPower")) j.at("shieldFresnelPower").get_to(c.shieldFresnelPower);
+	if(j.contains("shieldEmission")) j.at("shieldEmission").get_to(c.shieldEmission);
+	if(j.contains("shieldNoiseScale")) j.at("shieldNoiseScale").get_to(c.shieldNoiseScale);
+	if(j.contains("shieldRippleSpeed")) j.at("shieldRippleSpeed").get_to(c.shieldRippleSpeed);
+	if(j.contains("shieldRippleWidth")) j.at("shieldRippleWidth").get_to(c.shieldRippleWidth);
 	if(j.contains("normalMapGuid")) j.at("normalMapGuid").get_to(c.normalMapGuid);
 }

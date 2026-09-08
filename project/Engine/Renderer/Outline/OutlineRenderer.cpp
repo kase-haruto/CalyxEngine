@@ -205,6 +205,7 @@ bool OutlineRenderer::RenderNormalBuffer(ID3D12GraphicsCommandList* cmdList,
 	std::vector<StaticBatch> staticBatches;
 	for(const auto& inst : staticInstances) {
 		if(!inst.model || !inst.transform || !inst.owner) continue;
+		if(!targetOwner && inst.owner->IsDrawInForeground()) continue;
 		if(targetOwner) {
 			if(inst.owner != targetOwner) continue;
 		} else if(IsDitherEnabledForTarget(*rt) ? !IsOutlineEnabledForCameraDither(*inst.owner, *camera) : !inst.owner->IsOutlineEnabled()) {
@@ -266,6 +267,7 @@ bool OutlineRenderer::RenderNormalBuffer(ID3D12GraphicsCommandList* cmdList,
 	bool skinnedPipelineSet = false;
 	for(const auto& inst : skinnedInstances) {
 		if(!inst.model || !inst.transform || !inst.owner) continue;
+		if(!targetOwner && inst.owner->IsDrawInForeground()) continue;
 		if(targetOwner) {
 			if(inst.owner != targetOwner) continue;
 		} else if(IsDitherEnabledForTarget(*rt) ? !IsOutlineEnabledForCameraDither(*inst.owner, *camera) : !inst.owner->IsOutlineEnabled()) {
@@ -317,6 +319,7 @@ void OutlineRenderer::RenderDitherDepthOccluders(ID3D12GraphicsCommandList* cmdL
 	std::vector<StaticBatch> staticBatches;
 	for(const auto& inst : staticInstances) {
 		if(!inst.model || !inst.transform || !inst.owner) continue;
+		if(inst.owner->IsDrawInForeground()) continue;
 		if(!IsDitherFadeActiveForOutline(*inst.owner, *camera)) continue;
 		if(!inst.model->GetModelData() || !inst.model->GetIsDrawEnable()) continue;
 
@@ -370,6 +373,7 @@ void OutlineRenderer::RenderDitherDepthOccluders(ID3D12GraphicsCommandList* cmdL
 	bool skinnedPipelineSet = false;
 	for(const auto& inst : skinnedInstances) {
 		if(!inst.model || !inst.transform || !inst.owner) continue;
+		if(inst.owner->IsDrawInForeground()) continue;
 		if(!IsDitherFadeActiveForOutline(*inst.owner, *camera)) continue;
 		if(!inst.model->GetModelData() || !inst.model->GetIsDrawEnable()) continue;
 

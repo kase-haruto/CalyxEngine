@@ -95,6 +95,7 @@ namespace {
 		j["drawEnable"]		  = obj.IsDrawEnable();
 		j["castShadow"]		  = obj.IsCastShadow();
 		j["cameraDitherEnabled"] = obj.IsCameraDitherEnabled();
+		j["drawInForeground"] = obj.IsDrawInForeground();
 		j["outlineEnabled"]	  = obj.IsOutlineEnabled();
 		j["outlineThickness"] = obj.GetOutlineSettings().thickness;
 		j["outlineColor"]	  = obj.GetOutlineSettings().color;
@@ -122,6 +123,7 @@ namespace {
 		}
 		obj.SetCastShadow(j.value("castShadow", obj.IsCastShadow()));
 		obj.SetCameraDitherEnabled(j.value("cameraDitherEnabled", obj.IsCameraDitherEnabled()));
+		obj.SetDrawInForeground(j.value("drawInForeground", obj.IsDrawInForeground()));
 		obj.SetOutlineEnabled(j.value("outlineEnabled", obj.IsOutlineEnabled()));
 		obj.SetOutlineThickness(j.value("outlineThickness", obj.GetOutlineSettings().thickness));
 		obj.SetOutlineColor(j.value("outlineColor", obj.GetOutlineSettings().color));

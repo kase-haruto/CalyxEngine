@@ -115,6 +115,7 @@ AssetType AssetDatabase::GuessTypeFromExtension(const std::string& extIn) {
 	if(ext == ".scene") return AssetType::Scene;
 	if(ext == ".postfx") return AssetType::PostEffect;
 	if(ext == ".wav" || ext == ".mp3" || ext == ".ogg") return AssetType::Audio;
+	if(ext == ".ttf" || ext == ".otf") return AssetType::Font;
 	
 	// 未知の拡張子の場合
 	return AssetType::Unknown;

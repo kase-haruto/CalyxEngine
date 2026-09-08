@@ -35,12 +35,6 @@ float2 ApplyBarrelDistortion(float2 uv) {
 	return coord * 0.5f + 0.5f;
 }
 
-float CalcScanline(float2 uv) {
-	float freq = 240.0f; // 線の密度
-	float speed = 8.0f; // 動く速度
-	return 0.9f + 0.1f * sin((uv.y * freq) + gCRTParam.time * speed);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 //                            main
 ///////////////////////////////////////////////////////////////////////////////
@@ -50,9 +44,6 @@ float4 main(VertexShaderOutput input) : SV_TARGET{
 
 	// 元画像の色を取得
 	float3 color = gTexture.Sample(gSampler, distortedUV).rgb;
-
-	// 走査線効果を乗算
-	color *= CalcScanline(distortedUV);
 
 	return float4(color, 1.0f);
 }

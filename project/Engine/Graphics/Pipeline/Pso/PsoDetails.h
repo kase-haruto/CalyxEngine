@@ -22,9 +22,20 @@ struct PipelineSet {
 };
 
 namespace PipelineTag {
+	enum class Background :std::uint16_t {
+		Nebula,
+		StarField,
+		ForegroundGlow,
+		SpaceDust,
+		Count
+	};
+
 	enum class Object :std::uint16_t {
 		Object3d,
+		Object3dOverlay,
 		SkinningObject3D,
+		ForegroundObject3D,
+		ForegroundSkinnedObject3D,
 		WireframeObject3D,
 		WireframeSkinnedObject3D,
 		OutlineObject3D,
@@ -42,6 +53,7 @@ namespace PipelineTag {
 		GpuParticle,
 		Trail,
 		EditorInfiniteGrid,
+		Text,
 		Line,
 		Effect,
 		Skybox,

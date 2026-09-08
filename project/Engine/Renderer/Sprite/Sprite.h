@@ -24,7 +24,7 @@ class DirectXCommon;
 /**
  * @brief Spriteの機能を提供するクラスです。
  */
-class Sprite {
+class CALYX_API Sprite {
 public:
 	//===================================================================*/
 	//                    public methods
@@ -204,6 +204,12 @@ public:
 	 * \param tex テクスチャ名
 	 */
 	void	   SetTexture(const std::string& tex);
+	/** 分割画像を設定し、区画0を固定表示する。画像のロード成否は戻り値に含めない。 */
+	bool SetTextureSheet(const std::string& texturePath, int32_t columns, int32_t rows = 1);
+	/** 画像を等間隔の列・行に分割する。各軸1〜46340。表示サイズは変更しない。 */
+	bool SetTextureGrid(int32_t columns, int32_t rows = 1);
+	/** 0始まりの区画番号からuvScaleとuvOffsetを設定する。時間経過では切り替わらない。 */
+	void SetTextureFrame(int32_t frame);
 	/**
 	 * \brief GPUハンドルからテクスチャを設定
 	 * \param newHandle ハンドル
@@ -238,6 +244,9 @@ public:
 	void SetFillMethod(int method) { materialData_.fillMethod = method; }
 
 private:
+	// 区画選択用の分割数。再生時刻や再生状態は持たず、番号指定時のみUVを変更する。
+	int32_t textureColumns_ = 1;
+	int32_t textureRows_ = 1;
 	//===================================================================*/
 	//                    private methods
 	//===================================================================*/

@@ -2,6 +2,7 @@
 
 #include <Engine/Collision/CollisionLayerTableUI.h>
 #include <Engine/Scene/Context/SceneContext.h>
+#include <Engine/Renderer/Background/SpaceBackgroundSystem.h>
 #include <externals/imgui/imgui.h>
 
 #include <array>
@@ -143,6 +144,7 @@ namespace CalyxEngine {
 			break;
 		case Category::Rendering:
 			DrawSortingLayerSettings(context.GetSettings().GetSortingLayerSettings());
+			SpaceBackgroundSystem::Get()->ShowImGui();
 			break;
 		default:
 			break;

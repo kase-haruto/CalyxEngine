@@ -60,6 +60,15 @@ float SpriteObject2d::GetUvRotate() const {
 }
 
 void SpriteObject2d::SetTexture(const std::string& texturePath) const { sprite_->SetTexture(texturePath); }
+bool SpriteObject2d::SetTextureSheet(const std::string& texturePath, int32_t columns, int32_t rows) const {
+	return sprite_->SetTextureSheet(texturePath, columns, rows);
+}
+bool SpriteObject2d::SetTextureGrid(int32_t columns, int32_t rows) const {
+	return sprite_->SetTextureGrid(columns, rows);
+}
+void SpriteObject2d::SetTextureFrame(int32_t frame) const {
+	sprite_->SetTextureFrame(frame);
+}
 void SpriteObject2d::SetPosition(const CalyxEngine::Vector2& position) const { sprite_->SetPosition(position); }
 void SpriteObject2d::SetScale(const CalyxEngine::Vector2& scale) const { sprite_->SetSize(scale); }
 void SpriteObject2d::SetRotation(float rotation) const {sprite_->SetRotation(rotation); }
@@ -93,4 +102,3 @@ void CalyxEngine::SpriteObject2d::SetFillOrigin(float x, float y) {
 void CalyxEngine::SpriteObject2d::SetFillMethod(int method) {
 	sprite_->SetFillMethod(method);
 }
-	

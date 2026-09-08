@@ -16,7 +16,7 @@
 /**
  * @brief BaseEventObjectの機能を提供するクラスです。
  */
-class BaseEventObject : public SceneObject,
+class CALYX_API BaseEventObject : public SceneObject,
 						public IConfigurable {
 public:
 	//===================================================================*/

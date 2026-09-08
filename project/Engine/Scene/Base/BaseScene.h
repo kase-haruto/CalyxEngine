@@ -76,6 +76,9 @@ public:
 	 */
 	void DrawSpritesOnly(ID3D12GraphicsCommandList* cmdList,
 					class PipelineService* psoService)override;
+	void DrawForeground3D(ID3D12GraphicsCommandList* cmdList,
+					  class PipelineService* psoService,
+					  IRenderTarget* rt);
 	/**
 	 * \brief 終了処理
 	 */

@@ -129,6 +129,8 @@ void BaseModel::OnModelLoaded() {
 }
 
 void BaseModel::UpdateTexture(float deltaTime) {
+	// コードで指定したシートが、旧来の複数画像再生によって上書きされることを防ぐ。
+	if(runtimeTextureOverride_) return;
 	if(textureHandles_.size() <= 1) return; // アニメーション不要
 	elapsedTime_ += deltaTime;
 	if(elapsedTime_ >= animationSpeed_) {
@@ -229,6 +231,8 @@ void BaseModel::Draw(const WorldTransform& transform) {
 }
 
 void BaseModel::ApplyConfig(const BaseModelConfig& config) {
+	// 設定の読み直しでは、実行時の優先指定を解除して保存済みマテリアルへ戻す。
+	runtimeTextureOverride_ = false;
 	materialGuid_ = config.materialGuid;
 	uvTransform.ApplyConfig(config.uvTransConfig);
 	blendMode_ = static_cast<BlendMode>(config.blendMode);
@@ -466,6 +470,8 @@ bool BaseModel::LoadTextureByGuid(const Guid& g) {
 }
 
 void BaseModel::SetTextureGuid(const Guid& g) {
+	// エディターなどからGUIDで指定し直した場合は、直前のコード指定を持ち越さない。
+	runtimeTextureOverride_ = false;
 	const Guid previousGuid = textureGuid_;
 	if(!g.isValid()) {
 		handle_.reset();
@@ -511,6 +517,8 @@ void BaseModel::SetTex(const std::string& name) {
 
 	textureName_ = normalized;
 	handle_ = CalyxEngine::AssetManager::GetInstance()->GetTextureManager()->LoadTexture(textureName_);
+	runtimeTextureOverride_ = true;
+	// 描画時はこのハンドルを共有マテリアルより優先し、他のモデルの設定は変更しない。
 }
 
 void BaseModel::EnsureInstanceCapacity(ID3D12Device* device, UINT needCount) {
@@ -558,6 +566,8 @@ D3D12_GPU_DESCRIPTOR_HANDLE BaseModel::GetInstanceSrv() const {
 	return currentInstanceBuffer_ ? currentInstanceBuffer_->GetGpuSrvHandle() : instanceBuffer_.GetGpuSrvHandle();
 }
 D3D12_GPU_DESCRIPTOR_HANDLE BaseModel::GetTexSrv() const {
+	// 明示的な切り替えを最優先にする。未指定なら従来どおりマテリアルから解決する。
+	if(runtimeTextureOverride_ && handle_ && handle_->ptr) return *handle_;
 	if(auto material = GetMaterialAsset()) {
 		if(material->objectTextureGuid.isValid()) {
 			auto h = CalyxEngine::AssetManager::GetInstance()->GetTextureManager()->LoadTexture(material->objectTextureGuid);
@@ -573,6 +583,8 @@ D3D12_GPU_DESCRIPTOR_HANDLE BaseModel::GetTexSrv() const {
 	return CalyxEngine::AssetManager::GetInstance()->GetTextureManager()->LoadTexture("textures/white1x1.dds");
 }
 D3D12_GPU_DESCRIPTOR_HANDLE BaseModel::GetTexSrv(size_t materialIndex) const {
+	// サブメッシュを持つモデルでも、オブジェクト全体への指定を同じ優先順位で適用する。
+	if(runtimeTextureOverride_ && handle_ && handle_->ptr) return *handle_;
 	if(auto material = GetMaterialAsset()) {
 		if(material->objectTextureGuid.isValid()) {
 			auto h = CalyxEngine::AssetManager::GetInstance()->GetTextureManager()->LoadTexture(material->objectTextureGuid);
@@ -631,6 +643,8 @@ D3D12_GPU_DESCRIPTOR_HANDLE BaseModel::GetMaterialGraphTextureSrvTable(size_t ma
 
 	const UINT descriptorSize = DescriptorAllocator::GetDescriptorSize(DescriptorUsage::CbvSrvUav);
 	auto writeFallback = [this, textureManager, materialIndex](D3D12_CPU_DESCRIPTOR_HANDLE dest) {
+		// 通常描画とMaterial Graphで異なる画像にならないよう、ここでも実行時指定を優先する。
+		if(runtimeTextureOverride_ && textureManager->WriteSrvTo(textureName_, dest)) return;
 		if(textureGuid_.isValid() && textureManager->WriteSrvTo(textureGuid_, dest)) return;
 		if(handle_ && !textureName_.empty() && textureManager->WriteSrvTo(textureName_, dest)) return;
 		if(modelData_) {
@@ -657,7 +671,8 @@ D3D12_GPU_DESCRIPTOR_HANDLE BaseModel::GetMaterialGraphTextureSrvTable(size_t ma
 			D3D12_CPU_DESCRIPTOR_HANDLE dest = textureTable.cpu;
 			dest.ptr += static_cast<SIZE_T>(slot) * descriptorSize;
 			if(node.type == "ObjectTexture") {
-				if(material->objectTextureGuid.isValid()) {
+				// ObjectTextureだけがオブジェクトの画像差し替え対象。個別Texture2Dノードは維持する。
+				if(!runtimeTextureOverride_ && material->objectTextureGuid.isValid()) {
 					textureManager->WriteSrvTo(material->objectTextureGuid, dest);
 				}
 			} else if(auto it = node.properties.find("textureGuid"); it != node.properties.end() && it->is_string()) {

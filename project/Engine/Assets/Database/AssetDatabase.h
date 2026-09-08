@@ -47,7 +47,7 @@ public:
 	 * \param guid アセットGUID
 	 * \return レコードポインタ
 	 */
-	const AssetRecord* Get(const AssetGUID& guid) const;
+	CALYX_API const AssetRecord* Get(const AssetGUID& guid) const;
 
 	/**
 	 * \brief パスからアセットレコードを検索

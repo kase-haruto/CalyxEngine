@@ -1,6 +1,9 @@
 #pragma once
 
 class SpriteRenderer;
+class PipelineService;
+class LightLibrary;
+struct ID3D12GraphicsCommandList;
 
 namespace CalyxEngine {
 
@@ -23,6 +26,9 @@ namespace CalyxEngine {
 		 *       クリアされるため、描画中にSpriteを即時破棄してはならない。
 		 */
 		virtual void SubmitSprites(SpriteRenderer& renderer) const = 0;
+
+		/** Draw a depth-independent 3D pass after regular UI sprites. */
+		virtual void DrawOverlay3D(ID3D12GraphicsCommandList*, PipelineService*, LightLibrary*) {}
 	};
 
 } // namespace CalyxEngine

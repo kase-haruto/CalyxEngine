@@ -57,6 +57,11 @@ struct Material {
 	float rimIntensity = 0.0f;
 	float rimPower = 3.0f;
 	float rimPadding[2] = {};
+	CalyxEngine::Vector4 shieldColor = {0.1f, 0.7f, 1.0f, 1.0f};
+	// x: 有効フラグ、y: フレネル指数、z: 発光強度、w: ノイズスケール
+	CalyxEngine::Vector4 shieldParams = {0.0f, 4.0f, 2.5f, 3.0f};
+	// x: 波紋速度、y: 波紋幅、z: 経過時間、w: ヒット位相
+	CalyxEngine::Vector4 shieldRipple = {1.0f, 0.12f, 0.0f, 0.0f};
 
 	//config
 	void           ApplyConfig(const MaterialConfig& config);

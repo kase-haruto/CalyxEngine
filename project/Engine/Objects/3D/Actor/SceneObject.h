@@ -57,6 +57,7 @@ struct DrawConfig {
 	bool pickable = true;
 	bool castShadow = true;
 	bool cameraDitherEnabled = false;
+	bool drawInForeground = false;
 	OutlineSettings outline{};
 };
 
@@ -177,6 +178,7 @@ public:
 	ObjectInstanceLifetime							 GetInstanceLifetime() const { return instanceLifetime_; }
 	bool											 IsCastShadow() const { return drawConfig_.castShadow; }
 	bool											 IsCameraDitherEnabled() const { return drawConfig_.cameraDitherEnabled; }
+	bool                                             IsDrawInForeground() const { return drawConfig_.drawInForeground; }
 	const DrawConfig&								 GetDrawConfig() const { return drawConfig_; }
 	bool											 IsOutlineEnabled() const { return drawConfig_.outline.enabled; }
 	const OutlineSettings&							 GetOutlineSettings() const { return drawConfig_.outline; }
@@ -207,6 +209,7 @@ public:
 	void		 SetInstanceLifetime(ObjectInstanceLifetime lifetime) { instanceLifetime_ = lifetime; }
 	void		 SetCastShadow(bool enable) { drawConfig_.castShadow = enable; }
 	void		 SetCameraDitherEnabled(bool enable) { drawConfig_.cameraDitherEnabled = enable; }
+	void         SetDrawInForeground(bool enable) { drawConfig_.drawInForeground = enable; }
 	void		 SetOutlineEnabled(bool enable) { drawConfig_.outline.enabled = enable; }
 	void		 SetOutlineThickness(float thickness) { drawConfig_.outline.thickness = thickness; }
 	void		 SetOutlineColor(const CalyxEngine::Vector4& color) { drawConfig_.outline.color = color; }

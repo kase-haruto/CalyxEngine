@@ -1,6 +1,5 @@
 #include "CRTEffect.h"
 #include <Engine/Graphics/Context/GraphicsGroup.h>
-#include <Engine/Foundation/Clock/ClockManager.h>
 
 void CRTEffect::Initialize(const PipelineSet& psoSet) {
 	psoSet_ = psoSet;
@@ -10,8 +9,6 @@ void CRTEffect::Initialize(const PipelineSet& psoSet) {
 void CRTEffect::Apply(ID3D12GraphicsCommandList* cmd,
 					  D3D12_GPU_DESCRIPTOR_HANDLE inputSRV,
 					  IRenderTarget* outputRT) {
-	param_.time = ClockManager::GetInstance()->GetTotalTime(); // 秒単位
-
 	// 描画リソース設定
 	outputRT->GetResource()->Transition(cmd, D3D12_RESOURCE_STATE_RENDER_TARGET);
 	crtBuffer_.TransferData(param_);
