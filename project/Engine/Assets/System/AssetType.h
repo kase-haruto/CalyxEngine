@@ -19,4 +19,6 @@ enum class AssetType
 	Scene,
 	PostEffect,
 	Font,
+	Dialogue,
+	NovelScene,
 };

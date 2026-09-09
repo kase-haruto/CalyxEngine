@@ -55,6 +55,23 @@ namespace CalyxEngine {
 		completed_ = !typewriter_;
 	}
 
+	void TextSceneObject2d::SetCharactersPerSecond(float value) noexcept {
+		charactersPerSecond_ = (std::max)(0.01f, value);
+		useDuration_ = false;
+	}
+
+	void TextSceneObject2d::SetTypewriter(bool value) noexcept {
+		if(typewriter_ == value) return;
+		typewriter_ = value;
+		Stop();
+	}
+
+	void TextSceneObject2d::Complete() noexcept {
+		visibleCharacterCount_ = CharacterCount();
+		completed_ = true;
+		playing_ = false;
+	}
+
 	void TextSceneObject2d::SyncEditBuffer() {
 		editBuffer_.fill('\0');
 		const size_t count = (std::min)(text_.size(), editBuffer_.size() - 1);
