@@ -71,10 +71,6 @@ void DebugCamera::Initialize() {
 //							メイン処理
 //////////////////////////////////////////////////////////////////////////////
 void DebugCamera::AlwaysUpdate(float dt) {
-	if(!isActive_) {
-		return;
-	}
-
 	// 入力に基づいてカメラ操作
 	if(isInputEnabled_ || isDraggingRotate_ || isDraggingMove_) {
 		Rotate();

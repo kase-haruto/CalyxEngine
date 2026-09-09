@@ -405,6 +405,7 @@
     <ClCompile Include="Engine\PostProcess\Interface\IPostEffectPass.cpp" />
     <ClCompile Include="Engine\PostProcess\GrayScale\GrayScale.cpp" />
     <ClCompile Include="Engine\PostProcess\Bloom\BloomEffect.cpp" />
+    <ClCompile Include="Engine\PostProcess\FilmGrain\FilmGrainEffect.cpp" />
     <ClCompile Include="Engine\PostProcess\Collection\PostProcessCollection.cpp" />
     <ClCompile Include="Engine\PostProcess\Graph\PostEffectGraph.cpp" />
     <ClCompile Include="Engine\PostProcess\FullscreenDrawer.cpp" />
@@ -711,6 +712,7 @@
     <ClInclude Include="Engine\PostProcess\Interface\IPostEffectPass.h" />
     <ClInclude Include="Engine\PostProcess\GrayScale\GrayScale.h" />
     <ClInclude Include="Engine\PostProcess\Bloom\BloomEffect.h" />
+    <ClInclude Include="Engine\PostProcess\FilmGrain\FilmGrainEffect.h" />
     <ClInclude Include="Engine\PostProcess\Collection\PostProcessCollection.h" />
     <ClInclude Include="Engine\PostProcess\Graph\PostEffectGraph.h" />
     <ClInclude Include="Engine\PostProcess\FullscreenDrawer.h" />

@@ -71,6 +71,7 @@ namespace PipelineTag {
 		OutlineComposite,
 		Blend,
 		Bloom,
+		FilmGrain,
 		DepthVisualize,
 
 		Count

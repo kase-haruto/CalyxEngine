@@ -16,7 +16,7 @@ private:
 	struct CRTParameter {
 		CalyxEngine::Vector2 screenSize;
 		float time;
-		float padding; // align 16
+		float length; // align 16
 	};
 
 public:
@@ -37,7 +37,7 @@ public:
 	}
 
 private:
-	CRTParameter param_{ {1280, 720}, 0.0f, 0.0f };
+	CRTParameter				   param_{{1280, 720}, 0.0f, 0.01f};
 	DxConstantBuffer<CRTParameter> crtBuffer_;
 	PipelineSet psoSet_;
 };

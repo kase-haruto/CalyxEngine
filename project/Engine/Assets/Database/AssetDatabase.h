@@ -60,7 +60,7 @@ public:
 	 * \brief アセットルートディレクトリを取得
 	 * \return ルートパス
 	 */
-	const std::filesystem::path& GetRoot() const noexcept;
+	CALYX_API const std::filesystem::path& GetRoot() const noexcept;
 
 	/**
 	 * \brief パネル表示用のアセットリストを取得
@@ -74,7 +74,7 @@ public:
 	 * \param type アセットタイプ
 	 * \return 生成または更新されたGUID
 	 */
-	AssetGUID RegisterOrUpdate(const std::filesystem::path& absOrRelPath, AssetType type);
+	CALYX_API AssetGUID RegisterOrUpdate(const std::filesystem::path& absOrRelPath, AssetType type);
 
 	/**
 	 * \brief 拡張子からアセットタイプを推測

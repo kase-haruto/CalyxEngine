@@ -16,8 +16,8 @@
 #include <Engine/Application/UI/Panels/MaterialNodeEditorPanel.h>
 #include <Engine/Application/UI/Panels/PlaceToolPanel.h>
 #include <Engine/Application/UI/Panels/PostEffectNodeEditorPanel.h>
-#include <Engine/Application/UI/Panels/SpriteAnimationEditorPanel.h>
 #include <Engine/Application/UI/Panels/SplineEditorPanel.h>
+#include <Engine/Application/UI/Panels/SpriteAnimationEditorPanel.h>
 #include <Engine/Editor/DebugCameraFocusController.h>
 #include <Engine/Editor/EditorSelectionCoordinator.h>
 #include <Engine/Editor/Extension/EditorToolRegistry.h>
@@ -91,27 +91,28 @@ namespace CalyxEngine {
 		void ClearSelection();
 		~LevelEditor();
 		CalyxEngine::SceneManager* GetSceneManager() const { return sceneManager_; }
-		void					  SetSceneManager(CalyxEngine::SceneManager* sceneManager);
+		void					   SetSceneManager(CalyxEngine::SceneManager* sceneManager);
 
 		// 編集対象 ----------------------------------------------------------------
 		void SetSelectedEditor(BaseEditor* editor);
 		/// SceneObject の選択（shared_ptr で受けて内部では weak_ptr で保持）
-		void SetSelectedObject(const std::shared_ptr<SceneObject>& sp);
-		void ToggleSelectedObject(const std::shared_ptr<SceneObject>& sp);
-		void SetSelectedObjects(const std::vector<std::shared_ptr<SceneObject>>& objects);
-		bool IsSelectedObject(const SceneObject* object) const;
-		std::shared_ptr<SceneObject> GetPrimarySelectedObject() const;
+		void									  SetSelectedObject(const std::shared_ptr<SceneObject>& sp);
+		void									  ToggleSelectedObject(const std::shared_ptr<SceneObject>& sp);
+		void									  SetSelectedObjects(const std::vector<std::shared_ptr<SceneObject>>& objects);
+		bool									  IsSelectedObject(const SceneObject* object) const;
+		std::shared_ptr<SceneObject>			  GetPrimarySelectedObject() const;
 		std::vector<std::shared_ptr<SceneObject>> GetSelectedObjects() const;
-		void SaveSceneFromEditorTool() { SaveScene(); }
-		bool IsPlaying() const;
+		void									  SaveSceneFromEditorTool() { SaveScene(); }
+		void									  SelectSceneObjectFromEditorTool(const Guid& guid);
+		bool									  IsPlaying() const;
 
 		/// シーンへのオブジェクト追加（Prefab / PlaceTool などから呼ばれる）
 		void CreateObject(const std::shared_ptr<SceneObject>& obj);
 		/// シーンからオブジェクト削除（階層パネルなどから呼ばれる）
 		void DeleteObject(const std::shared_ptr<SceneObject>& sp);
 		/// Terminal等のエディタ操作からシーンファイルを開く。
-		bool OpenSceneFromEditor(const std::filesystem::path& path);
-		void DeleteSelectedObjects();
+		bool						 OpenSceneFromEditor(const std::filesystem::path& path);
+		void						 DeleteSelectedObjects();
 		std::vector<WorldTransform*> DuplicateSelectedObjects();
 
 		// ビューポート関連 --------------------------------------------------------
@@ -123,11 +124,11 @@ namespace CalyxEngine {
 		EditorPanel*	GetEditorPanel() const { return editor_.get(); }
 		PlaceToolPanel* GetPlaceToolPanel() const { return placeToolPanel_.get(); }
 
-		EngineEdit::EditorMode GetMode() const { return mode_; }
-		void				   SetPlaySession(PlaySession* session);
-		bool				   ShouldRenderRuntimeFullscreen() const;
-		bool				   ShouldHideEditorUiInGameMode() const;
-		bool IsDebugViewportVisible()const;
+		EngineEdit::EditorMode			 GetMode() const { return mode_; }
+		void							 SetPlaySession(PlaySession* session);
+		bool							 ShouldRenderRuntimeFullscreen() const;
+		bool							 ShouldHideEditorUiInGameMode() const;
+		bool							 IsDebugViewportVisible() const;
 		CalyxEditor::EditorToolRegistry& GetEditorToolRegistry() { return editorToolRegistry_; }
 
 	private:
@@ -152,28 +153,28 @@ namespace CalyxEngine {
 		void DrawSceneSelector();
 
 		// モード切り替え ----------------------------------------------------------
-		void EnterGameMode();
-		void ExitGameMode();
-		void ToggleMode();
-		void DrawEditModeCombo();
-		void ApplyEditToolMode(EngineEdit::EditToolMode mode, bool applyLayout);
-		void SaveActiveModeSelection();
-		void RestoreModeSelection(EngineEdit::EditToolMode mode);
+		void		  EnterGameMode();
+		void		  ExitGameMode();
+		void		  ToggleMode();
+		void		  DrawEditModeCombo();
+		void		  ApplyEditToolMode(EngineEdit::EditToolMode mode, bool applyLayout);
+		void		  SaveActiveModeSelection();
+		void		  RestoreModeSelection(EngineEdit::EditToolMode mode);
 		SceneContext* ResolveModeContext(EngineEdit::EditToolMode mode) const;
 		SceneContext* ResolvePreviewContext(EngineEdit::EditToolMode mode) const;
-		void ActivateModeContext(EngineEdit::EditToolMode mode);
-		const char* GetEditToolModeName(EngineEdit::EditToolMode mode) const;
-		std::string GetEditToolModeLayoutPath(EngineEdit::EditToolMode mode) const;
-		std::string GetEditToolModeLoadLayoutPath(EngineEdit::EditToolMode mode) const;
-		void EnsureParticlePreviewContext();
-		void UpdateParticlePreviewContext(float dt);
-		void EnsurePrefabEditContext();
-		void NewPrefabEditContext(const std::string& rootTypeName = {});
-		void OpenPrefabForEdit(const std::string& path);
-		void SavePrefabEdit();
-		void SavePrefabEditAs(const std::string& path);
-		void ApplyPrefabOverridesFromInstance(const std::shared_ptr<SceneObject>& object);
-		void UpdatePrefabEditContext(float dt);
+		void		  ActivateModeContext(EngineEdit::EditToolMode mode);
+		const char*	  GetEditToolModeName(EngineEdit::EditToolMode mode) const;
+		std::string	  GetEditToolModeLayoutPath(EngineEdit::EditToolMode mode) const;
+		std::string	  GetEditToolModeLoadLayoutPath(EngineEdit::EditToolMode mode) const;
+		void		  EnsureParticlePreviewContext();
+		void		  UpdateParticlePreviewContext(float dt);
+		void		  EnsurePrefabEditContext();
+		void		  NewPrefabEditContext(const std::string& rootTypeName = {});
+		void		  OpenPrefabForEdit(const std::string& path);
+		void		  SavePrefabEdit();
+		void		  SavePrefabEditAs(const std::string& path);
+		void		  ApplyPrefabOverridesFromInstance(const std::shared_ptr<SceneObject>& object);
+		void		  UpdatePrefabEditContext(float dt);
 
 		void TogglePanel(IEngineUI* p) {
 			if(p) p->SetShow(!p->IsShow());
@@ -181,57 +182,57 @@ namespace CalyxEngine {
 
 	private:
 		// 管理UI
-		std::unique_ptr<HierarchyPanel>		 hierarchy_;
-		std::unique_ptr<EditorPanel>		 editor_;
-		std::unique_ptr<InspectorPanel>		 inspector_;
-		std::unique_ptr<KeyframePanel>		 keyframePanel_;
-		std::unique_ptr<SceneObjectEditor>	 sceneEditor_;
-		std::unique_ptr<PlaceToolPanel>		 placeToolPanel_;
-		std::unique_ptr<SplineEditorPanel>	 splineEditor_;
-		std::unique_ptr<AssetPanel>			 assetPanel_;
-		std::unique_ptr<MaterialNodeEditorPanel> materialNodeEditorPanel_;
-		std::unique_ptr<PostEffectNodeEditorPanel> postEffectNodeEditorPanel_;
+		std::unique_ptr<HierarchyPanel>				hierarchy_;
+		std::unique_ptr<EditorPanel>				editor_;
+		std::unique_ptr<InspectorPanel>				inspector_;
+		std::unique_ptr<KeyframePanel>				keyframePanel_;
+		std::unique_ptr<SceneObjectEditor>			sceneEditor_;
+		std::unique_ptr<PlaceToolPanel>				placeToolPanel_;
+		std::unique_ptr<SplineEditorPanel>			splineEditor_;
+		std::unique_ptr<AssetPanel>					assetPanel_;
+		std::unique_ptr<MaterialNodeEditorPanel>	materialNodeEditorPanel_;
+		std::unique_ptr<PostEffectNodeEditorPanel>	postEffectNodeEditorPanel_;
 		std::unique_ptr<SpriteAnimationEditorPanel> spriteAnimationEditorPanel_;
-		std::unique_ptr<LivePPPanel>		 livePPPanel_;
-		std::unique_ptr<LogPanel>			 logPanel_;
-		std::unique_ptr<SceneSwitchOverlay>	 sceneSwitchOverlay_;
-		std::unique_ptr<SceneSettingsWindow> sceneSettingsWindow_;
-		std::unique_ptr<ImGuiLayoutSwitcher> layoutSwitcher_;
+		std::unique_ptr<LivePPPanel>				livePPPanel_;
+		std::unique_ptr<LogPanel>					logPanel_;
+		std::unique_ptr<SceneSwitchOverlay>			sceneSwitchOverlay_;
+		std::unique_ptr<SceneSettingsWindow>		sceneSettingsWindow_;
+		std::unique_ptr<ImGuiLayoutSwitcher>		layoutSwitcher_;
 		std::unique_ptr<DebugCameraFocusController> debugCameraFocus_;
-		PlaySession*						 pPlaySesseion_ = nullptr;
-		CalyxEngine::SceneManager*			 sceneManager_	= nullptr;
+		PlaySession*								pPlaySesseion_ = nullptr;
+		CalyxEngine::SceneManager*					sceneManager_  = nullptr;
 
 		// メニュー
 		std::unique_ptr<EditorMenu> menu_; //< エディターメニュー
-		EngineEdit::EditorMode		mode_ = EngineEdit::EditorMode::Edit;
-		EngineEdit::EditToolMode	editToolMode_ = EngineEdit::EditToolMode::Object;
-		const IEditToolState* editToolState_ = nullptr; //< 所有権を持たない現在の静的編集モードState
+		EngineEdit::EditorMode		mode_		   = EngineEdit::EditorMode::Edit;
+		EngineEdit::EditToolMode	editToolMode_  = EngineEdit::EditToolMode::Object;
+		const IEditToolState*		editToolState_ = nullptr; //< 所有権を持たない現在の静的編集モードState
 
 		// ビューポート
-		std::unique_ptr<Viewport>			mainViewport_;		 //< メインビューポート
-		std::unique_ptr<Viewport>			debugViewport_;		 //< デバッグビューポート
-		std::unique_ptr<Viewport>			pickingViewport_;	 //< ピッキングビューポート
-		std::unique_ptr<Viewport>			pickingDepthViewport_; //< ピッキング深度ビューポート
-		int									startupDebugViewportFocusFrames_ = 3;
-		std::unique_ptr<PerformanceOverlay> performanceOverlay_; //< パフォーマンスオーバーレイ
-		std::unique_ptr<DebugOverlay>		debugOverlay_;		 //< デバッグオーバーレイ
-		std::unique_ptr<ParticlePreviewSession> particlePreview_;
-		std::unique_ptr<PrefabEditSession> prefabEdit_;
+		std::unique_ptr<Viewport>					 mainViewport_;			//< メインビューポート
+		std::unique_ptr<Viewport>					 debugViewport_;		//< デバッグビューポート
+		std::unique_ptr<Viewport>					 pickingViewport_;		//< ピッキングビューポート
+		std::unique_ptr<Viewport>					 pickingDepthViewport_; //< ピッキング深度ビューポート
+		int											 startupDebugViewportFocusFrames_ = 3;
+		std::unique_ptr<PerformanceOverlay>			 performanceOverlay_; //< パフォーマンスオーバーレイ
+		std::unique_ptr<DebugOverlay>				 debugOverlay_;		  //< デバッグオーバーレイ
+		std::unique_ptr<ParticlePreviewSession>		 particlePreview_;
+		std::unique_ptr<PrefabEditSession>			 prefabEdit_;
 		std::unique_ptr<ViewportSelectionController> viewportSelection_;
 
 		// 状態
-		bool		  lastPlaying_	  = false;
-		SceneContext* prevCtx_		  = nullptr;
-		EditorSelectionCoordinator selection_;
+		bool																			   lastPlaying_ = false;
+		SceneContext*																	   prevCtx_		= nullptr;
+		EditorSelectionCoordinator														   selection_;
 		std::unordered_map<EngineEdit::EditToolMode, EditorSelectionCoordinator::Snapshot> modeSelections_;
-		EngineEdit::EditToolMode activeSelectionMode_ = EngineEdit::EditToolMode::Object;
-		nlohmann::json			   livePPSnapshot_;
+		EngineEdit::EditToolMode														   activeSelectionMode_ = EngineEdit::EditToolMode::Object;
+		nlohmann::json																	   livePPSnapshot_;
 		// シーン保存のポップアップ表示
-		float		  sceneSavedPopupTimer_ = 0.0f;
-		std::string   sceneSavedPopupPath_;
+		float		sceneSavedPopupTimer_ = 0.0f;
+		std::string sceneSavedPopupPath_;
 
 		// Editors メニューに並べるパネル群
-		std::vector<IEngineUI*> editorPanels_;
+		std::vector<IEngineUI*>			editorPanels_;
 		CalyxEditor::EditorToolRegistry editorToolRegistry_;
 	};
 
