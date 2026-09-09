@@ -75,6 +75,17 @@ void PostProcessCollection::Initialize(PipelineService* service){
 	}
 
 	//===================================================================*/
+	//		Film Grain
+	//===================================================================*/
+	{
+		PipelineSet set = service->GetPipelineSet(PipelineTag::PostProcess::FilmGrain);
+		auto effect = std::make_unique<FilmGrainEffect>();
+		effect->Initialize(set);
+		effectNames_.push_back(effect->GetName());
+		effects_.push_back(std::move(effect));
+	}
+
+	//===================================================================*/
 	//		Blend
 	//===================================================================*/
 	{

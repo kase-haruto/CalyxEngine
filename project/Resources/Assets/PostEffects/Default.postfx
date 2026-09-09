@@ -12,12 +12,32 @@
         "toPinId": 11
       },
       {
-        "fromPinId": 12,
-        "id": 14,
+        "fromPinId": 22,
+        "id": 23,
         "toPinId": 4
+      },
+      {
+        "fromPinId": 12,
+        "id": 28,
+        "toPinId": 26
+      },
+      {
+        "fromPinId": 27,
+        "id": 29,
+        "toPinId": 16
+      },
+      {
+        "fromPinId": 17,
+        "id": 33,
+        "toPinId": 31
+      },
+      {
+        "fromPinId": 32,
+        "id": 34,
+        "toPinId": 21
       }
     ],
-    "nextId": 15,
+    "nextId": 35,
     "nodes": [
       {
         "id": 1,
@@ -116,8 +136,8 @@
           }
         ],
         "position": [
-          361.0,
-          95.0
+          249.0,
+          350.0
         ],
         "properties": {
           "applyMode": "Always",
@@ -140,11 +160,206 @@
         },
         "title": "Bloom",
         "type": "Bloom"
+      },
+      {
+        "id": 15,
+        "inputs": [
+          {
+            "id": 16,
+            "kind": 0,
+            "name": "In",
+            "type": "core.color"
+          }
+        ],
+        "outputs": [
+          {
+            "id": 17,
+            "kind": 1,
+            "name": "Out",
+            "type": "core.color"
+          }
+        ],
+        "position": [
+          275.0,
+          690.0
+        ],
+        "properties": {
+          "applyMode": "Always",
+          "autoDisable": true,
+          "duration": 0.25,
+          "easeIndex": 8,
+          "enabled": true,
+          "floatAnimations": [],
+          "parameters": {
+            "screenSize": [
+              1280.0,
+              720.0
+            ]
+          }
+        },
+        "title": "CRTEffect",
+        "type": "CRTEffect"
+      },
+      {
+        "id": 20,
+        "inputs": [
+          {
+            "id": 21,
+            "kind": 0,
+            "name": "In",
+            "type": "core.color"
+          }
+        ],
+        "outputs": [
+          {
+            "id": 22,
+            "kind": 1,
+            "name": "Out",
+            "type": "core.color"
+          }
+        ],
+        "position": [
+          521.0,
+          815.0
+        ],
+        "properties": {
+          "applyMode": "Always",
+          "autoDisable": true,
+          "duration": 0.25,
+          "easeIndex": 8,
+          "enabled": true,
+          "floatAnimations": [],
+          "parameters": {
+            "color": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "radius": 0.0,
+            "strength": 0.7200000286102295
+          }
+        },
+        "title": "Vignette",
+        "type": "Vignette"
+      },
+      {
+        "id": 25,
+        "inputs": [
+          {
+            "id": 26,
+            "kind": 0,
+            "name": "In",
+            "type": "core.color"
+          }
+        ],
+        "outputs": [
+          {
+            "id": 27,
+            "kind": 1,
+            "name": "Out",
+            "type": "core.color"
+          }
+        ],
+        "position": [
+          259.0,
+          510.0
+        ],
+        "properties": {
+          "applyMode": "Always",
+          "autoDisable": true,
+          "duration": 0.25,
+          "easeIndex": 8,
+          "enabled": true,
+          "floatAnimations": [],
+          "parameters": {
+            "intensity": 0.029999999329447746
+          }
+        },
+        "title": "ChromaticAberration",
+        "type": "ChromaticAberration"
+      },
+      {
+        "id": 30,
+        "inputs": [
+          {
+            "id": 31,
+            "kind": 0,
+            "name": "In",
+            "type": "core.color"
+          }
+        ],
+        "outputs": [
+          {
+            "id": 32,
+            "kind": 1,
+            "name": "Out",
+            "type": "core.color"
+          }
+        ],
+        "position": [
+          233.0,
+          847.0
+        ],
+        "properties": {
+          "applyMode": "Always",
+          "autoDisable": true,
+          "duration": 0.25,
+          "easeIndex": 8,
+          "enabled": true,
+          "floatAnimations": [],
+          "parameters": {
+            "grainSize": 1.0499999523162842,
+            "intensity": 0.029999999329447746,
+            "speed": 0.6499999761581421
+          }
+        },
+        "title": "FilmGrain",
+        "type": "FilmGrain"
       }
     ]
   },
   "name": "Default",
   "nodes": [
+    {
+      "applyMode": "Always",
+      "autoDisable": true,
+      "duration": 0.25,
+      "ease": "",
+      "easeIndex": 8,
+      "enabled": true,
+      "floatAnimations": [],
+      "id": 30,
+      "parameters": {
+        "grainSize": 1.0499999523162842,
+        "intensity": 0.029999999329447746,
+        "speed": 0.6499999761581421
+      },
+      "title": "FilmGrain",
+      "type": "FilmGrain"
+    },
+    {
+      "applyMode": "Always",
+      "autoDisable": true,
+      "duration": 0.25,
+      "ease": "",
+      "easeIndex": 8,
+      "enabled": true,
+      "floatAnimations": [],
+      "id": 10,
+      "parameters": {
+        "intensity": 0.699999988079071,
+        "radius": 1.0,
+        "softKnee": 0.5,
+        "threshold": 0.800000011920929,
+        "tint": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "title": "Bloom",
+      "type": "Bloom"
+    },
     {
       "applyMode": "Always",
       "autoDisable": true,
@@ -172,20 +387,51 @@
       "easeIndex": 8,
       "enabled": true,
       "floatAnimations": [],
-      "id": 10,
+      "id": 25,
       "parameters": {
-        "intensity": 0.699999988079071,
-        "radius": 1.0,
-        "softKnee": 0.5,
-        "threshold": 0.800000011920929,
-        "tint": [
-          1.0,
-          1.0,
-          1.0
+        "intensity": 0.029999999329447746
+      },
+      "title": "ChromaticAberration",
+      "type": "ChromaticAberration"
+    },
+    {
+      "applyMode": "Always",
+      "autoDisable": true,
+      "duration": 0.25,
+      "ease": "",
+      "easeIndex": 8,
+      "enabled": true,
+      "floatAnimations": [],
+      "id": 15,
+      "parameters": {
+        "screenSize": [
+          1280.0,
+          720.0
         ]
       },
-      "title": "Bloom",
-      "type": "Bloom"
+      "title": "CRTEffect",
+      "type": "CRTEffect"
+    },
+    {
+      "applyMode": "Always",
+      "autoDisable": true,
+      "duration": 0.25,
+      "ease": "",
+      "easeIndex": 8,
+      "enabled": true,
+      "floatAnimations": [],
+      "id": 20,
+      "parameters": {
+        "color": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.0,
+        "strength": 0.7200000286102295
+      },
+      "title": "Vignette",
+      "type": "Vignette"
     }
   ],
   "outline": {

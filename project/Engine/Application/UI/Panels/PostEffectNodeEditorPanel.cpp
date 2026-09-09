@@ -21,6 +21,7 @@ namespace CalyxEngine {
 			"Vignette",
 			"CRTEffect",
 			"Bloom",
+			"FilmGrain",
 			"Blend"
 		};
 		constexpr const char* kFloatParams[] = {
@@ -39,7 +40,9 @@ namespace CalyxEngine {
 			"tint.g",
 			"tint.b",
 			"opacity",
-			"mode"
+			"mode",
+			"grainSize",
+			"speed"
 		};
 
 		nlohmann::json DefaultParameters(const std::string& type) {
@@ -48,6 +51,7 @@ namespace CalyxEngine {
 			if(type == "Vignette") return {{"strength", 1.0f}, {"radius", 0.0f}, {"color", {0.0f, 0.0f, 0.0f}}};
 			if(type == "CRTEffect") return {{"screenSize", {1280.0f, 720.0f}}};
 			if(type == "Bloom") return {{"intensity", 0.7f}, {"threshold", 0.8f}, {"softKnee", 0.5f}, {"radius", 1.0f}, {"tint", {1.0f, 1.0f, 1.0f}}};
+			if(type == "FilmGrain") return {{"intensity", 0.08f}, {"grainSize", 1.5f}, {"speed", 1.0f}};
 			if(type == "Blend") return {{"opacity", 0.5f}, {"mode", 0}};
 			return nlohmann::json::object();
 		}
@@ -96,6 +100,10 @@ namespace CalyxEngine {
 			}
 			if(nodeType == "Blend") {
 				return std::string(parameter) == "opacity";
+			}
+			if(nodeType == "FilmGrain") {
+				const std::string name(parameter);
+				return name == "intensity" || name == "grainSize" || name == "speed";
 			}
 			return false;
 		}
@@ -270,6 +278,8 @@ namespace CalyxEngine {
 			ImGui::TextDisabled("strength %.2f", params.value("strength", 1.0f));
 		} else if(node.type == "Bloom") {
 			ImGui::TextDisabled("intensity %.2f", params.value("intensity", 0.7f));
+		} else if(node.type == "FilmGrain") {
+			ImGui::TextDisabled("intensity %.2f", params.value("intensity", 0.08f));
 		} else if(node.type == "Blend") {
 			ImGui::TextDisabled("opacity %.2f", params.value("opacity", 0.5f));
 		}
@@ -458,6 +468,16 @@ namespace CalyxEngine {
 				ImGui::TextColored(ImVec4(1.0f, 0.72f, 0.30f, 1.0f), "Lerp opacity 1.0 shows only the later input.");
 			}
 			changed |= DrawBlendInputControls(node);
+		} else if(node.type == "FilmGrain") {
+			float intensity = params.value("intensity", 0.08f);
+			float grainSize = params.value("grainSize", 1.5f);
+			float speed = params.value("speed", 1.0f);
+			if(ImGui::DragFloat("Intensity", &intensity, 0.005f, 0.0f, 0.5f)) { params["intensity"] = intensity; changed = true; }
+			HelpTooltip("Strength of the luminance noise. 0 disables visible grain.");
+			if(ImGui::DragFloat("Grain Size", &grainSize, 0.05f, 0.5f, 8.0f)) { params["grainSize"] = grainSize; changed = true; }
+			HelpTooltip("Size of each grain cell in screen pixels.");
+			if(ImGui::DragFloat("Speed", &speed, 0.05f, 0.0f, 10.0f)) { params["speed"] = speed; changed = true; }
+			HelpTooltip("Rate at which the grain pattern changes. 0 freezes the pattern.");
 		}
 
 		if(isTriggered) {

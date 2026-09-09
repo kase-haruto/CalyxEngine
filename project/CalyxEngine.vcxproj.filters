@@ -200,6 +200,7 @@
     <ClCompile Include="Engine\PostProcess\Interface\IPostEffectPass.cpp" />
     <ClCompile Include="Engine\PostProcess\GrayScale\GrayScale.cpp" />
     <ClCompile Include="Engine\PostProcess\Bloom\BloomEffect.cpp" />
+    <ClCompile Include="Engine\PostProcess\FilmGrain\FilmGrainEffect.cpp" />
     <ClCompile Include="Engine\Application\UI\GUI\ImGuiManager.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Func\DxFunc.cpp" />
     <ClCompile Include="Engine\Foundation\Utility\Func\MyFunc.cpp" />
@@ -569,6 +570,7 @@
     <ClInclude Include="Engine\PostProcess\Interface\IPostEffectPass.h" />
     <ClInclude Include="Engine\PostProcess\GrayScale\GrayScale.h" />
     <ClInclude Include="Engine\PostProcess\Bloom\BloomEffect.h" />
+    <ClInclude Include="Engine\PostProcess\FilmGrain\FilmGrainEffect.h" />
     <ClInclude Include="Engine\Editor\EditorSelectionCoordinator.h" />
     <ClInclude Include="Engine\Editor\SceneObjectDuplicator.h" />
     <ClInclude Include="Engine\Renderer\Grid\GridRenderer.h" />

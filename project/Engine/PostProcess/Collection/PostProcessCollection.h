@@ -7,6 +7,7 @@
 #include <Engine/PostProcess/ChromaticAberration/ChromaticAberrationEffect.h>
 #include <Engine/PostProcess/Blend/BlendEffect.h>
 #include <Engine/PostProcess/Bloom/BloomEffect.h>
+#include <Engine/PostProcess/FilmGrain/FilmGrainEffect.h>
 #include <Engine/PostProcess/Slot/PostEffectSlot.h>
 // c++
 #include <memory>
